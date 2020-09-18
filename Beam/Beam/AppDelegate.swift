@@ -8,16 +8,27 @@
 import Cocoa
 import SwiftUI
 
+enum Mode {
+    case history
+    case note
+    case web
+}
+
+class BeamState: ObservableObject {
+    @Published var mode: Mode = .note
+    @Published var webViewStore: WebViewStore = WebViewStore()
+}
+
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
 
-    var window: NSWindow!
-
+    @IBOutlet var window: NSWindow!
+    var state: BeamState = BeamState()
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         // Create the SwiftUI view and set the context as the value for the managedObjectContext environment keyPath.
         // Add `@Environment(\.managedObjectContext)` in the views that will need the context.
-        let contentView = ContentView().environment(\.managedObjectContext, persistentContainer.viewContext)
+        let contentView = ContentView().environment(\.managedObjectContext, persistentContainer.viewContext).environmentObject(state)
 
         // Create the window and set the content view.
         window = NSWindow(
@@ -27,6 +38,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         window.center()
         window.setFrameAutosaveName("Main Window")
         window.contentView = NSHostingView(rootView: contentView)
+        
+        // Create the titlebar accessory
+        let titlebarAccessoryView = SearchBar(searchText: "http://www.apple.com").padding([.top, .leading, .trailing], 16.0).padding(.bottom,-8.0).edgesIgnoringSafeArea(.top).environmentObject(state)
+        
+        let accessoryHostingView = NSHostingView(rootView:titlebarAccessoryView)
+        accessoryHostingView.frame.size = accessoryHostingView.fittingSize
+        
+        let titlebarAccessory = NSTitlebarAccessoryViewController()
+        titlebarAccessory.layoutAttribute = .top
+        titlebarAccessory.view = accessoryHostingView
+        
+        // Add the titlebar accessory
+        window.addTitlebarAccessoryViewController(titlebarAccessory)
+
         window.makeKeyAndOrderFront(nil)
     }
 
@@ -62,6 +87,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         })
         return container
     }()
+    
 
     // MARK: - Core Data Saving and Undo support
 
