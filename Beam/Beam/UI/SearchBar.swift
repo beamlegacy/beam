@@ -23,8 +23,11 @@ struct SearchBar: View {
             }.disabled(!state.webViewStore.webView.canGoForward).frame(alignment: .center)
             TextField("Search or create note...", text: $searchText,
                       onEditingChanged: { b in
-                        let ac = autoComplete(query: searchText)
-                        print("AutoComplete '\(searchText): \(ac)")
+                        autoComplete(query: searchText, complete: { r in
+                            state.autoComplete = r
+                            print("AutoComplete '\(searchText): \(r)")
+                        })
+                        
                       },
                       onCommit:  {
                         state.mode = .web

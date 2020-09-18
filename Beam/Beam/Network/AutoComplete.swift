@@ -7,29 +7,26 @@
 
 import Foundation
 
-struct AutoCompleteData: Codable {
-    var query: String
-    var results: [String]
-}
-
-public func autoComplete(query: String) -> [String] {
-    var result: [String] = []
-        if let url = URL(string: "https://suggestqueries.google.com/complete/search?client=firefox&q=\(query)") {
-            URLSession.shared.dataTask(with: url) { data, response, error in
-                if let data = data {
-                    if let jsonString = String(data: data, encoding: .utf8) {
-                        print("Autocomplete results: \(jsonString)")
-                    }
-                    do {
-                        let res = try JSONDecoder().decode(AutoCompleteData.self, from: data)
-                        print("res: \(res.results)")
-                        result = res.results
-                    } catch {
-                        print("AutoComplete call error")
-                    }
-                    
+public func autoComplete(query: String, complete: @escaping ([String]) -> Void) {
+    if let url = URL(string: "https://suggestqueries.google.com/complete/search?client=firefox&q=\(query)") {
+        URLSession.shared.dataTask(with: url) { data, response, error in
+            if let data = data {
+                if let jsonString = String(data: data, encoding: .utf8) {
+                    print("Autocomplete results: \(jsonString)")
                 }
-            }.resume()
-        }
-    return result
+                do {
+                    let obj = try JSONSerialization.jsonObject(with: data)
+                    if let array = obj as? [Any] {
+                        if let results = array[1] as? [String] {
+//                            print("res: \(results)")
+                            complete(results)
+                        }
+                    }
+                } catch {
+                    print("AutoComplete call error")
+                }
+                
+            }
+        }.resume()
+    }
 }

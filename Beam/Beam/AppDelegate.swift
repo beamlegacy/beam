@@ -17,6 +17,7 @@ enum Mode {
 class BeamState: ObservableObject {
     @Published var mode: Mode = .note
     @Published var webViewStore: WebViewStore = WebViewStore()
+    @Published var autoComplete: [String] = []
 }
 
 @NSApplicationMain
