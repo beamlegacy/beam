@@ -21,10 +21,15 @@ struct SearchBar: View {
                 Text(">")
                     .aspectRatio(contentMode: .fit)
             }.disabled(!state.webViewStore.webView.canGoForward).frame(alignment: .center)
-            TextField("Search or create note...", text: $searchText, onCommit:  {
-                state.mode = .web
-                state.webViewStore.webView.load(URLRequest(url: URL(string: searchText)!))
-            }).frame(idealWidth: 600, maxWidth: .infinity).font(.title)
+            TextField("Search or create note...", text: $searchText,
+                      onEditingChanged: { b in
+                        let ac = autoComplete(query: searchText)
+                        print("AutoComplete '\(searchText): \(ac)")
+                      },
+                      onCommit:  {
+                        state.mode = .web
+                        state.webViewStore.webView.load(URLRequest(url: URL(string: searchText)!))
+                      }).frame(idealWidth: 600, maxWidth: .infinity).font(.title)
         }
     }
     
