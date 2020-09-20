@@ -7,15 +7,20 @@
 
 import SwiftUI
 
-struct AutoCompleteView: View {
-    @EnvironmentObject var state: BeamState
+struct AutoCompleteLine: View {
+    var line: String
+
     var body: some View {
-        if state.autoComplete.count != 0 {
-            let elements = state.autoComplete
-            return AnyView(List {
-                ForEach(0..<elements.count) { index in
-                    Text(elements[index])
-                }
+        Text(line)
+    }
+}
+
+struct AutoCompleteView: View {
+    @Binding var autoComplete: [AutoCompleteResult]
+    var body: some View {
+        if autoComplete.count != 0 {
+            return AnyView(List(autoComplete) { line in
+                AutoCompleteLine(line: line.string)
             })
         }
         return AnyView(Text("Search for something or create a card"))
@@ -30,7 +35,7 @@ struct ModeView: View {
             return AnyView(WebView(webView: state.webViewStore.webView))
         case .note:
             return AnyView(ScrollView([.vertical]) {
-                AutoCompleteView()
+                AutoCompleteView(autoComplete: $state.completedQueries)
                     .frame(minWidth: 640, idealWidth: 800, maxWidth: .infinity, minHeight: 480, idealHeight: 600, maxHeight: .infinity, alignment: .center)
                 
             })

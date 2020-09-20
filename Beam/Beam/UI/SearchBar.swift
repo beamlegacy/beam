@@ -8,9 +8,27 @@
 import Foundation
 import SwiftUI
 
+//class QueryFormater : Formatter {
+//    override func string(for string: Any?) -> String? {
+//        return string as? String
+//    }
+//    override func getObjectValue(_ obj: AutoreleasingUnsafeMutablePointer<AnyObject?>?,
+//                                 for string: String,
+//                                 errorDescription error: AutoreleasingUnsafeMutablePointer<NSString?>?) -> Bool {
+//
+//    }
+
+struct MainBar: View {
+    @EnvironmentObject var state: BeamState
+    var body: some View {
+        SearchBar(searchText: $state.searchQuery)
+    }
+}
+
 struct SearchBar: View {
     @EnvironmentObject var state: BeamState
-    @State var searchText: String
+    @Binding var searchText: String
+    
     var body: some View {
         HStack {
             Button(action: goBack) {
@@ -22,17 +40,17 @@ struct SearchBar: View {
                     .aspectRatio(contentMode: .fit)
             }.disabled(!state.webViewStore.webView.canGoForward).frame(alignment: .center)
             TextField("Search or create note...", text: $searchText,
-                      onEditingChanged: { b in
-                        autoComplete(query: searchText, complete: { r in
-                            state.autoComplete = r
-                            print("AutoComplete '\(searchText): \(r)")
-                        })
-                        
-                      },
+//                      onEditingChanged: { b in
+//                        print("searchText changed: \(searchText)")
+//                        state.completer.complete(query: searchText)
+//                      },
                       onCommit:  {
+                        print("searchText activated: \(searchText)")
                         state.mode = .web
                         state.webViewStore.webView.load(URLRequest(url: URL(string: searchText)!))
-                      }).frame(idealWidth: 600, maxWidth: .infinity).font(.title)
+                      }).textFieldStyle(RoundedBorderTextFieldStyle())
+                .frame(idealWidth: 600, maxWidth: .infinity)
+                .font(.title)
         }
     }
     

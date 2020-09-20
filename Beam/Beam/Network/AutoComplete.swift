@@ -6,27 +6,42 @@
 //
 
 import Foundation
+import Combine
 
-public func autoComplete(query: String, complete: @escaping ([String]) -> Void) {
-    if let url = URL(string: "https://suggestqueries.google.com/complete/search?client=firefox&q=\(query)") {
-        URLSession.shared.dataTask(with: url) { data, response, error in
-            if let data = data {
-                if let jsonString = String(data: data, encoding: .utf8) {
-                    print("Autocomplete results: \(jsonString)")
-                }
-                do {
-                    let obj = try JSONSerialization.jsonObject(with: data)
-                    if let array = obj as? [Any] {
-                        if let results = array[1] as? [String] {
-//                            print("res: \(results)")
-                            complete(results)
+struct AutoCompleteResult: Identifiable {
+    var id = UUID()
+    var string: String
+}
+
+class Completer: ObservableObject {
+    @Published var results: [AutoCompleteResult] = []
+    
+    public func complete(query: String) {
+        let query = query.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)!
+        if let url = URL(string: "https://suggestqueries.google.com/complete/search?client=firefox&q=\(query)") {
+            URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
+                guard let self = self else { return }
+                if let data = data {
+//                    if let jsonString = String(data: data, encoding: .utf8) {
+//                        print("Autocomplete results from server: \(jsonString)")
+//                    }
+                    do {
+                        let obj = try JSONSerialization.jsonObject(with: data)
+                        if let array = obj as? [Any] {
+                            var res = [AutoCompleteResult]()
+                            if let r = array[1] as? [String] {
+                                for str in r {
+                                    res.append(AutoCompleteResult(string: str))
+                                }
+                                self.results = res
+                            }
                         }
+                    } catch {
+//                        print("AutoComplete call error")
                     }
-                } catch {
-                    print("AutoComplete call error")
+                    
                 }
-                
-            }
-        }.resume()
+            }.resume()
+        }
     }
 }

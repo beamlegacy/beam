@@ -7,6 +7,7 @@
 
 import Cocoa
 import SwiftUI
+import Combine
 
 enum Mode {
     case history
@@ -15,21 +16,37 @@ enum Mode {
 }
 
 class BeamState: ObservableObject {
+    static var shared: BeamState = BeamState()
     @Published var mode: Mode = .note
     @Published var webViewStore: WebViewStore = WebViewStore()
-    @Published var autoComplete: [String] = []
+    @Published var searchQuery: String = ""
+    private let completer = Completer()
+    @Published var completedQueries = [AutoCompleteResult]()
+
+    private var cancellables = [Cancellable]()
+    init() {
+        cancellables.append($searchQuery.sink { [weak self] query in
+            guard let self = self else { return }
+//            print("received auto complete query: \(query)")
+            self.completer.complete(query: query)
+        })
+        cancellables.append(completer.$results.receive(on: RunLoop.main).sink { [weak self] results in
+            guard let self = self else { return }
+//            print("received auto complete results: \(results)")
+            self.completedQueries = results
+        })
+    }
 }
 
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
 
     @IBOutlet var window: NSWindow!
-    var state: BeamState = BeamState()
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         // Create the SwiftUI view and set the context as the value for the managedObjectContext environment keyPath.
         // Add `@Environment(\.managedObjectContext)` in the views that will need the context.
-        let contentView = ContentView().environment(\.managedObjectContext, persistentContainer.viewContext).environmentObject(state)
+        let contentView = ContentView().environment(\.managedObjectContext, persistentContainer.viewContext).environmentObject(BeamState.shared)
 
         // Create the window and set the content view.
         window = NSWindow(
@@ -41,7 +58,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         window.contentView = NSHostingView(rootView: contentView)
         
         // Create the titlebar accessory
-        let titlebarAccessoryView = SearchBar(searchText: "http://www.apple.com").padding([.top, .leading, .trailing], 16.0).padding(.bottom,-8.0).edgesIgnoringSafeArea(.top).environmentObject(state)
+        let titlebarAccessoryView = MainBar().padding([.top, .leading, .trailing], 16.0).padding(.bottom,-8.0).edgesIgnoringSafeArea(.top).environmentObject(BeamState.shared)
         
         let accessoryHostingView = NSHostingView(rootView:titlebarAccessoryView)
         accessoryHostingView.frame.size = accessoryHostingView.fittingSize
