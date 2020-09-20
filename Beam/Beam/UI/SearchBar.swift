@@ -36,7 +36,18 @@ struct SearchBar: View {
                         state.webViewStore.webView.load(URLRequest(url: URL(string: searchText)!))
                       }).textFieldStyle(RoundedBorderTextFieldStyle())
                 .frame(idealWidth: 600, maxWidth: .infinity)
-                .font(.title)
+                .font(.system(size: CGFloat(13)))
+                .onMoveCommand { direction in
+                    print("onMoveCommand \(direction)")
+                    switch direction {
+                    case .down:
+                        print("Go down")
+                    case .up:
+                        print("Go up")
+                    default:
+                        break
+                    }
+                }
         }
     }
     
