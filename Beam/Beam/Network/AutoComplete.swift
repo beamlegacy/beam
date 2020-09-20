@@ -22,9 +22,6 @@ class Completer: ObservableObject {
             URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
                 guard let self = self else { return }
                 if let data = data {
-//                    if let jsonString = String(data: data, encoding: .utf8) {
-//                        print("Autocomplete results from server: \(jsonString)")
-//                    }
                     do {
                         let obj = try JSONSerialization.jsonObject(with: data)
                         if let array = obj as? [Any] {
@@ -37,7 +34,7 @@ class Completer: ObservableObject {
                             }
                         }
                     } catch {
-//                        print("AutoComplete call error")
+                        //                        print("AutoComplete call error")
                     }
                     
                 }

@@ -9,7 +9,7 @@ import SwiftUI
 
 struct AutoCompleteLine: View {
     var line: String
-
+    
     var body: some View {
         Text(line)
     }
@@ -21,7 +21,10 @@ struct AutoCompleteView: View {
         if autoComplete.count != 0 {
             return AnyView(List(autoComplete) { line in
                 AutoCompleteLine(line: line.string)
-            })
+            }
+            .padding([.leading, .trailing], CGFloat(150))
+            .padding([.top], CGFloat(50))
+            )
         }
         return AnyView(Text("Search for something or create a card"))
     }
@@ -29,6 +32,7 @@ struct AutoCompleteView: View {
 
 struct ModeView: View {
     @EnvironmentObject var state: BeamState
+    @State var t: String = "xzcsdf"
     var body: some View {
         switch state.mode {
         case .web:

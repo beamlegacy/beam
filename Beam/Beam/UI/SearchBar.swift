@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import AppKit
 
 struct MainBar: View {
     @EnvironmentObject var state: BeamState
@@ -29,25 +30,27 @@ struct SearchBar: View {
                 Text(">")
                     .aspectRatio(contentMode: .fit)
             }.disabled(!state.webViewStore.webView.canGoForward).frame(alignment: .center)
-            TextField("Search or create note...", text: $searchText,
-                      onCommit:  {
+            BTextField("Search or create note...", text: $searchText,
+                       onCommit:  {
                         print("searchText activated: \(searchText)")
                         state.mode = .web
                         state.webViewStore.webView.load(URLRequest(url: URL(string: searchText)!))
-                      }).textFieldStyle(RoundedBorderTextFieldStyle())
+                       },
+                       onCursorMovement: { cursorMovement in
+                            switch cursorMovement {
+                            case .up:
+                                print("choose previous")
+                                return true
+                            case .down:
+                                print("choose next")
+                                return true
+                            default:
+                                break
+                            }
+                            return false
+                       }
+            )
                 .frame(idealWidth: 600, maxWidth: .infinity)
-                .font(.system(size: CGFloat(13)))
-                .onMoveCommand { direction in
-                    print("onMoveCommand \(direction)")
-                    switch direction {
-                    case .down:
-                        print("Go down")
-                    case .up:
-                        print("Go up")
-                    default:
-                        break
-                    }
-                }
         }
     }
     

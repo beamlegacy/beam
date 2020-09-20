@@ -20,6 +20,10 @@
 		965A78602514F1AF009980D4 /* Note.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965A785D2514F1AF009980D4 /* Note.swift */; };
 		965A78632514F57E009980D4 /* SearchBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965A78622514F57E009980D4 /* SearchBar.swift */; };
 		9694F77925155F8700399E6A /* AutoComplete.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9694F77825155F8700399E6A /* AutoComplete.swift */; };
+		96F5DB0D25179F030080E3EE /* String+Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F5DB0C25179F030080E3EE /* String+Localization.swift */; };
+		96F5DB162517A0F10080E3EE /* NSContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F5DB152517A0F10080E3EE /* NSContainerView.swift */; };
+		96F5DB1E2517A1E60080E3EE /* BNSTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F5DB1D2517A1E60080E3EE /* BNSTextField.swift */; };
+		96F5DB232517A2020080E3EE /* BTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F5DB222517A2020080E3EE /* BTextField.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -60,6 +64,10 @@
 		965A785D2514F1AF009980D4 /* Note.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Note.swift; sourceTree = "<group>"; };
 		965A78622514F57E009980D4 /* SearchBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchBar.swift; sourceTree = "<group>"; };
 		9694F77825155F8700399E6A /* AutoComplete.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoComplete.swift; sourceTree = "<group>"; };
+		96F5DB0C25179F030080E3EE /* String+Localization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Localization.swift"; sourceTree = "<group>"; };
+		96F5DB152517A0F10080E3EE /* NSContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSContainerView.swift; sourceTree = "<group>"; };
+		96F5DB1D2517A1E60080E3EE /* BNSTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BNSTextField.swift; sourceTree = "<group>"; };
+		96F5DB222517A2020080E3EE /* BTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BTextField.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -110,11 +118,12 @@
 		965A78272514F147009980D4 /* Beam */ = {
 			isa = PBXGroup;
 			children = (
+				96F5DB142517A0D80080E3EE /* AppKitCrap */,
+				96F5DB0B25179EE40080E3EE /* Swift+Beam */,
 				9694F77725155F7200399E6A /* Network */,
+				965A785C2514F1AF009980D4 /* DataModel */,
 				965A78612514F570009980D4 /* UI */,
 				965A78282514F147009980D4 /* AppDelegate.swift */,
-				965A785C2514F1AF009980D4 /* DataModel */,
-				965A785B2514F1AF009980D4 /* NavigationContext.swift */,
 				965A782F2514F148009980D4 /* Assets.xcassets */,
 				965A78342514F148009980D4 /* Main.storyboard */,
 				965A78372514F148009980D4 /* Info.plist */,
@@ -154,6 +163,7 @@
 		965A785C2514F1AF009980D4 /* DataModel */ = {
 			isa = PBXGroup;
 			children = (
+				965A785B2514F1AF009980D4 /* NavigationContext.swift */,
 				965A785D2514F1AF009980D4 /* Note.swift */,
 			);
 			path = DataModel;
@@ -165,6 +175,7 @@
 				965A782A2514F147009980D4 /* ContentView.swift */,
 				965A78622514F57E009980D4 /* SearchBar.swift */,
 				965A785A2514F1AF009980D4 /* WebView.swift */,
+				96F5DB222517A2020080E3EE /* BTextField.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -175,6 +186,23 @@
 				9694F77825155F8700399E6A /* AutoComplete.swift */,
 			);
 			path = Network;
+			sourceTree = "<group>";
+		};
+		96F5DB0B25179EE40080E3EE /* Swift+Beam */ = {
+			isa = PBXGroup;
+			children = (
+				96F5DB0C25179F030080E3EE /* String+Localization.swift */,
+			);
+			path = "Swift+Beam";
+			sourceTree = "<group>";
+		};
+		96F5DB142517A0D80080E3EE /* AppKitCrap */ = {
+			isa = PBXGroup;
+			children = (
+				96F5DB152517A0F10080E3EE /* NSContainerView.swift */,
+				96F5DB1D2517A1E60080E3EE /* BNSTextField.swift */,
+			);
+			path = AppKitCrap;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -309,8 +337,12 @@
 			files = (
 				965A78632514F57E009980D4 /* SearchBar.swift in Sources */,
 				965A782B2514F147009980D4 /* ContentView.swift in Sources */,
+				96F5DB232517A2020080E3EE /* BTextField.swift in Sources */,
 				965A785F2514F1AF009980D4 /* NavigationContext.swift in Sources */,
+				96F5DB0D25179F030080E3EE /* String+Localization.swift in Sources */,
 				965A785E2514F1AF009980D4 /* WebView.swift in Sources */,
+				96F5DB1E2517A1E60080E3EE /* BNSTextField.swift in Sources */,
+				96F5DB162517A0F10080E3EE /* NSContainerView.swift in Sources */,
 				965A78292514F147009980D4 /* AppDelegate.swift in Sources */,
 				965A782E2514F147009980D4 /* Beam.xcdatamodeld in Sources */,
 				965A78602514F1AF009980D4 /* Note.swift in Sources */,
