@@ -28,6 +28,10 @@ class BeamState: ObservableObject {
         cancellables.append($searchQuery.sink { [weak self] query in
             guard let self = self else { return }
 //            print("received auto complete query: \(query)")
+            if !(query.hasPrefix("http://") || query.hasPrefix("https://")) {
+                print("force note mode")
+                self.mode = .note
+            }
             self.completer.complete(query: query)
         })
         cancellables.append(completer.$results.receive(on: RunLoop.main).sink { [weak self] results in
