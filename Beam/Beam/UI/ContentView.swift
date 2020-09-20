@@ -23,7 +23,6 @@ struct AutoCompleteView: View {
 
 struct ModeView: View {
     @EnvironmentObject var state: BeamState
-    @State var t: String = "xzcsdf"
     var body: some View {
         switch state.mode {
         case .web:
