@@ -24,6 +24,8 @@
 		96F5DB162517A0F10080E3EE /* NSContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F5DB152517A0F10080E3EE /* NSContainerView.swift */; };
 		96F5DB1E2517A1E60080E3EE /* BNSTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F5DB1D2517A1E60080E3EE /* BNSTextField.swift */; };
 		96F5DB232517A2020080E3EE /* BTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F5DB222517A2020080E3EE /* BTextField.swift */; };
+		96F5DB2B251811060080E3EE /* AutoCompleteList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F5DB2A251811060080E3EE /* AutoCompleteList.swift */; };
+		96F5DB33251817DB0080E3EE /* AutoCompleteItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F5DB32251817DB0080E3EE /* AutoCompleteItem.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -68,6 +70,8 @@
 		96F5DB152517A0F10080E3EE /* NSContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSContainerView.swift; sourceTree = "<group>"; };
 		96F5DB1D2517A1E60080E3EE /* BNSTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BNSTextField.swift; sourceTree = "<group>"; };
 		96F5DB222517A2020080E3EE /* BTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BTextField.swift; sourceTree = "<group>"; };
+		96F5DB2A251811060080E3EE /* AutoCompleteList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoCompleteList.swift; sourceTree = "<group>"; };
+		96F5DB32251817DB0080E3EE /* AutoCompleteItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoCompleteItem.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -176,6 +180,8 @@
 				965A78622514F57E009980D4 /* SearchBar.swift */,
 				965A785A2514F1AF009980D4 /* WebView.swift */,
 				96F5DB222517A2020080E3EE /* BTextField.swift */,
+				96F5DB2A251811060080E3EE /* AutoCompleteList.swift */,
+				96F5DB32251817DB0080E3EE /* AutoCompleteItem.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -337,7 +343,9 @@
 			files = (
 				965A78632514F57E009980D4 /* SearchBar.swift in Sources */,
 				965A782B2514F147009980D4 /* ContentView.swift in Sources */,
+				96F5DB33251817DB0080E3EE /* AutoCompleteItem.swift in Sources */,
 				96F5DB232517A2020080E3EE /* BTextField.swift in Sources */,
+				96F5DB2B251811060080E3EE /* AutoCompleteList.swift in Sources */,
 				965A785F2514F1AF009980D4 /* NavigationContext.swift in Sources */,
 				96F5DB0D25179F030080E3EE /* String+Localization.swift in Sources */,
 				965A785E2514F1AF009980D4 /* WebView.swift in Sources */,

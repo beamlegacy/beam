@@ -7,21 +7,12 @@
 
 import SwiftUI
 
-struct AutoCompleteLine: View {
-    var line: String
-    
-    var body: some View {
-        Text(line)
-    }
-}
-
 struct AutoCompleteView: View {
     @Binding var autoComplete: [AutoCompleteResult]
     var body: some View {
         if autoComplete.count != 0 {
-            return AnyView(List(autoComplete) { line in
-                AutoCompleteLine(line: line.string)
-            }
+            return AnyView(
+                AutoCompleteList(selectedIndex: .constant(0), elements: $autoComplete)
             .padding([.leading, .trailing], CGFloat(150))
             .padding([.top], CGFloat(50))
             )
@@ -65,3 +56,9 @@ struct ContentView: View {
 //        }
 //    }
 //}
+
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
+    }
+}
