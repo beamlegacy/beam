@@ -50,7 +50,7 @@ struct ModeView: View {
 
 struct ContentView: View {
     var body: some View {
-        ModeView()
+        ModeView().background(Color(.white))
     }
 }
 
