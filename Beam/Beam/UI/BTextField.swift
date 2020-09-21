@@ -72,10 +72,10 @@ struct BTextField: NSViewRepresentable {
         }
         
         textField.onPerformKeyEquivalent = { event in
-            if event.keyCode == 125 {
+            if event.keyCode == 126 {
                 // up!
                 return onCursorMovement(.up)
-            } else if event.keyCode == 126 {
+            } else if event.keyCode == 125 {
                 // down!
                 return onCursorMovement(.down)
             }

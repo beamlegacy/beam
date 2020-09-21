@@ -26,6 +26,8 @@
 		96F5DB232517A2020080E3EE /* BTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F5DB222517A2020080E3EE /* BTextField.swift */; };
 		96F5DB2B251811060080E3EE /* AutoCompleteList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F5DB2A251811060080E3EE /* AutoCompleteList.swift */; };
 		96F5DB33251817DB0080E3EE /* AutoCompleteItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F5DB32251817DB0080E3EE /* AutoCompleteItem.swift */; };
+		96F5DB38251820960080E3EE /* ClosedRange+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F5DB37251820960080E3EE /* ClosedRange+Beam.swift */; };
+		96F5DB452518238C0080E3EE /* BeamState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F5DB442518238C0080E3EE /* BeamState.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -72,6 +74,8 @@
 		96F5DB222517A2020080E3EE /* BTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BTextField.swift; sourceTree = "<group>"; };
 		96F5DB2A251811060080E3EE /* AutoCompleteList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoCompleteList.swift; sourceTree = "<group>"; };
 		96F5DB32251817DB0080E3EE /* AutoCompleteItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoCompleteItem.swift; sourceTree = "<group>"; };
+		96F5DB37251820960080E3EE /* ClosedRange+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ClosedRange+Beam.swift"; sourceTree = "<group>"; };
+		96F5DB442518238C0080E3EE /* BeamState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamState.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -169,6 +173,7 @@
 			children = (
 				965A785B2514F1AF009980D4 /* NavigationContext.swift */,
 				965A785D2514F1AF009980D4 /* Note.swift */,
+				96F5DB442518238C0080E3EE /* BeamState.swift */,
 			);
 			path = DataModel;
 			sourceTree = "<group>";
@@ -198,6 +203,7 @@
 			isa = PBXGroup;
 			children = (
 				96F5DB0C25179F030080E3EE /* String+Localization.swift */,
+				96F5DB37251820960080E3EE /* ClosedRange+Beam.swift */,
 			);
 			path = "Swift+Beam";
 			sourceTree = "<group>";
@@ -341,6 +347,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				96F5DB452518238C0080E3EE /* BeamState.swift in Sources */,
 				965A78632514F57E009980D4 /* SearchBar.swift in Sources */,
 				965A782B2514F147009980D4 /* ContentView.swift in Sources */,
 				96F5DB33251817DB0080E3EE /* AutoCompleteItem.swift in Sources */,
@@ -354,6 +361,7 @@
 				965A78292514F147009980D4 /* AppDelegate.swift in Sources */,
 				965A782E2514F147009980D4 /* Beam.xcdatamodeld in Sources */,
 				965A78602514F1AF009980D4 /* Note.swift in Sources */,
+				96F5DB38251820960080E3EE /* ClosedRange+Beam.swift in Sources */,
 				9694F77925155F8700399E6A /* AutoComplete.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

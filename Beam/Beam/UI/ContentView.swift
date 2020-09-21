@@ -9,10 +9,11 @@ import SwiftUI
 
 struct AutoCompleteView: View {
     @Binding var autoComplete: [AutoCompleteResult]
+    @Binding var selectionIndex: Int
     var body: some View {
         if autoComplete.count != 0 {
             return AnyView(
-                AutoCompleteList(selectedIndex: .constant(0), elements: $autoComplete)
+                AutoCompleteList(selectedIndex: selectionIndex, elements: autoComplete)
             .padding([.leading, .trailing], CGFloat(150))
             .padding([.top], CGFloat(50))
             )
@@ -29,7 +30,7 @@ struct ModeView: View {
             return AnyView(WebView(webView: state.webViewStore.webView))
         case .note:
             return AnyView(ScrollView([.vertical]) {
-                AutoCompleteView(autoComplete: $state.completedQueries)
+                AutoCompleteView(autoComplete: $state.completedQueries, selectionIndex: $state.selectionIndex)
                     .frame(minWidth: 640, idealWidth: 800, maxWidth: .infinity, minHeight: 480, idealHeight: 600, maxHeight: .infinity, alignment: .center)
                 
             })

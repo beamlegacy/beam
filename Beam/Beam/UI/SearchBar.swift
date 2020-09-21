@@ -12,13 +12,14 @@ import AppKit
 struct MainBar: View {
     @EnvironmentObject var state: BeamState
     var body: some View {
-        SearchBar(searchText: $state.searchQuery)
+        SearchBar(searchText: $state.searchQuery, selectionIndex: $state.selectionIndex)
     }
 }
 
 struct SearchBar: View {
     @EnvironmentObject var state: BeamState
     @Binding var searchText: String
+    @Binding var selectionIndex: Int
     
     var body: some View {
         HStack {
@@ -37,12 +38,15 @@ struct SearchBar: View {
                         state.webViewStore.webView.load(URLRequest(url: URL(string: searchText)!))
                        },
                        onCursorMovement: { cursorMovement in
+                        let range = 0...max(state.completedQueries.count - 1, 0)
                             switch cursorMovement {
                             case .up:
-                                print("choose previous")
+                                selectionIndex = range.clamp(selectionIndex - 1)
+                                print("choose prev \(selectionIndex) [\(state.completedQueries.count)]")
                                 return true
                             case .down:
-                                print("choose next")
+                                selectionIndex = range.clamp(selectionIndex + 1)
+                                print("choose next \(selectionIndex) [\(state.completedQueries.count)]")
                                 return true
                             default:
                                 break

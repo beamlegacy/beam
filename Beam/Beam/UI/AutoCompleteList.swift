@@ -9,8 +9,8 @@ import SwiftUI
 import AppKit
 
 struct AutoCompleteList: View {
-    @Binding var selectedIndex: Int
-    @Binding var elements: [AutoCompleteResult]
+    @State var selectedIndex: Int
+    @State var elements: [AutoCompleteResult]
 
     var body: some View {
         List(elements) { i in
@@ -22,6 +22,6 @@ struct AutoCompleteList: View {
 struct AutoCompleteList_Previews: PreviewProvider {
     static var elements = [AutoCompleteResult(string: "prout"), AutoCompleteResult(string: "asldkfjh sadlkfjh"), AutoCompleteResult(id: UUID(), string: "bleh blehbleh")]
     static var previews: some View {
-        AutoCompleteList(selectedIndex: .constant(0), elements: .constant(Self.elements))
+        AutoCompleteList(selectedIndex: 1, elements: Self.elements)
     }
 }
