@@ -9,7 +9,7 @@ import Foundation
 import Combine
 
 struct AutoCompleteResult: Identifiable {
-    var id = UUID()
+    var id: UUID
     var string: String
 }
 
@@ -28,7 +28,7 @@ class Completer: ObservableObject {
                             var res = [AutoCompleteResult]()
                             if let r = array[1] as? [String] {
                                 for str in r {
-                                    res.append(AutoCompleteResult(string: str))
+                                    res.append(AutoCompleteResult(id: UUID(), string: str))
                                 }
                                 self.results = res
                             }

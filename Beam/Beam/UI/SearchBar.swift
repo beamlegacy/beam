@@ -33,20 +33,28 @@ struct SearchBar: View {
             }.disabled(!state.webViewStore.webView.canGoForward).frame(alignment: .center)
             BTextField("Search or create note...", text: $searchText,
                        onCommit:  {
-                        print("searchText activated: \(searchText)")
+//                        print("searchText activated: \(searchText)")
                         state.mode = .web
-                        state.webViewStore.webView.load(URLRequest(url: URL(string: searchText)!))
+                        let index = state.selectionIndex
+                        if index != 0 {
+                            state.webViewStore.webView.load(URLRequest(url: URL(string: searchText)!))
+                        } else {
+                            let q = state.completedQueries[index].string
+                            let query = q .addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)!
+
+                            let t = "http://www.google.com/search?q=\(query)"
+                            state.searchQuery = t
+                            state.webViewStore.webView.load(URLRequest(url: URL(string: t)!))
+                        }
                        },
                        onCursorMovement: { cursorMovement in
                         let range = 0...max(state.completedQueries.count - 1, 0)
                             switch cursorMovement {
                             case .up:
                                 selectionIndex = range.clamp(selectionIndex - 1)
-                                print("choose prev \(selectionIndex) [\(state.completedQueries.count)]")
                                 return true
                             case .down:
                                 selectionIndex = range.clamp(selectionIndex + 1)
-                                print("choose next \(selectionIndex) [\(state.completedQueries.count)]")
                                 return true
                             default:
                                 break

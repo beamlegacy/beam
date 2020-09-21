@@ -9,7 +9,7 @@ import SwiftUI
 
 struct AutoCompleteItem: View {
     @State var item: AutoCompleteResult
-    @State var selected: Bool
+    var selected: Bool
     
     var body: some View {
         HStack {

@@ -13,7 +13,7 @@ struct AutoCompleteView: View {
     var body: some View {
         if autoComplete.count != 0 {
             return AnyView(
-                AutoCompleteList(selectedIndex: selectionIndex, elements: autoComplete)
+                AutoCompleteList(selectedIndex: $selectionIndex, elements: autoComplete)
             .padding([.leading, .trailing], CGFloat(150))
             .padding([.top], CGFloat(50))
             )
