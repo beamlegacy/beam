@@ -31,19 +31,21 @@ struct SearchBar: View {
             BTextField("Search or create note...", text: $searchText,
                        onCommit:  {
 //                        print("searchText activated: \(searchText)")
-                        state.mode = .web
                         let queries = state.completedQueries
                         let index = state.selectionIndex
-                        if index != 0 {
+                        if index != 0 || searchText.hasPrefix("http://") || searchText.hasPrefix("https://") {
                             state.webViewStore.webView.load(URLRequest(url: URL(string: searchText)!))
+                            print("Start website query: \(searchText)")
                         } else {
                             let q = queries[index].string
                             let query = q .addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)!
 
                             let t = "http://www.google.com/search?q=\(query)"
+                            print("Start search query: \(t)")
                             state.searchQuery = t
                             state.webViewStore.webView.load(URLRequest(url: URL(string: t)!))
                         }
+                        state.mode = .web
                        },
                        onCursorMovement: { cursorMovement in
                         let range = 0...max(state.completedQueries.count - 1, 0)
