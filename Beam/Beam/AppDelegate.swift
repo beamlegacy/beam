@@ -30,7 +30,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         window.contentView = NSHostingView(rootView: contentView)
         
         // Create the titlebar accessory
-        let titlebarAccessoryView = MainBar()
+        let titlebarAccessoryView = MainToolBar()
             .environmentObject(BeamState.shared)
         
         let accessoryHostingView = NSHostingView(rootView:titlebarAccessoryView)

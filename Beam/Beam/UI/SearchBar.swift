@@ -9,37 +9,35 @@ import Foundation
 import SwiftUI
 import AppKit
 
-struct MainBar: View {
-    @EnvironmentObject var state: BeamState
-    var body: some View {
-        SearchBar(searchText: $state.searchQuery, selectionIndex: $state.selectionIndex)
-    }
-}
-
 struct SearchBar: View {
     @EnvironmentObject var state: BeamState
     @Binding var searchText: String
     @Binding var selectionIndex: Int
-    
+    @State var canGoBack: Bool
+    @State var canGoForward: Bool
+    @State var goBack: () -> Void
+    @State var goForward: () -> Void
+
     var body: some View {
         HStack {
             Button(action: goBack) {
                 Text("<")
                     .aspectRatio(contentMode: .fit)
-            }.disabled(!state.webViewStore.webView.canGoBack).frame(alignment: .center)
+            }.disabled(!canGoBack).frame(alignment: .center)
             Button(action: goForward) {
                 Text(">")
                     .aspectRatio(contentMode: .fit)
-            }.disabled(!state.webViewStore.webView.canGoForward).frame(alignment: .center)
+            }.disabled(!canGoForward).frame(alignment: .center)
             BTextField("Search or create note...", text: $searchText,
                        onCommit:  {
 //                        print("searchText activated: \(searchText)")
                         state.mode = .web
+                        let queries = state.completedQueries
                         let index = state.selectionIndex
                         if index != 0 {
                             state.webViewStore.webView.load(URLRequest(url: URL(string: searchText)!))
                         } else {
-                            let q = state.completedQueries[index].string
+                            let q = queries[index].string
                             let query = q .addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)!
 
                             let t = "http://www.google.com/search?q=\(query)"
@@ -64,14 +62,6 @@ struct SearchBar: View {
             )
                 .frame(idealWidth: 600, maxWidth: .infinity)
         }
-    }
-    
-    func goBack() {
-        state.webViewStore.webView.goBack()
-    }
-    
-    func goForward() {
-        state.webViewStore.webView.goForward()
     }
 }
 
