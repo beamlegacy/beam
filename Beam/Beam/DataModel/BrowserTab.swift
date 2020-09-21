@@ -6,3 +6,9 @@
 //
 
 import Foundation
+
+struct BrowserTab: Identifiable {
+    var id: UUID = UUID()
+    var title: String
+}
+
