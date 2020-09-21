@@ -23,6 +23,8 @@ class BeamState: ObservableObject {
     @Published var completedQueries = [AutoCompleteResult]()
     @Published var selectionIndex: Int? = nil
     
+    public var searchEngine: SearchEngine = DuckDuckGoSearch()
+    
     func selectPreviousAutoComplete() {
         if let i = selectionIndex {
             let newIndex = i - 1

@@ -28,10 +28,8 @@ struct SearchBar: View {
                         let queries = state.completedQueries
                         var searchText = state.searchQuery
                         if let i = state.selectionIndex {
-                            let q = queries[i].string
-                            let query = q .addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)!
-                            
-                            searchText = "https://www.google.com/search?q=\(query)"
+                            state.searchEngine.query = queries[i].string
+                            searchText = state.searchEngine.searchUrl
                             print("Start search query: \(searchText)")
                             //state.searchQuery = t
                         }
@@ -39,7 +37,8 @@ struct SearchBar: View {
                         if searchText.hasPrefix("http://") || searchText.hasPrefix("https://") {
                             print("Start website query: \(searchText)")
                         } else {
-                            searchText = "https://www.google.com/search?q=\(searchText)"
+                            state.searchEngine.query = searchText
+                            searchText = state.searchEngine.searchUrl
                             print("Start search query: \(searchText)")
                         }
 
