@@ -12,7 +12,7 @@ struct ModeView: View {
     var body: some View {
         switch state.mode {
         case .web:
-            return AnyView(WebView(webView: state.webViewStore.webView))
+            return AnyView(WebView(webView: state.webView))
         case .note:
             return AnyView(ScrollView([.vertical]) {
                 AutoCompleteView(autoComplete: $state.completedQueries, selectionIndex: $state.selectionIndex)

@@ -11,59 +11,62 @@ import AppKit
 
 struct SearchBar: View {
     @EnvironmentObject var state: BeamState
-    @Binding var searchText: String
-    @Binding var selectionIndex: Int
-    @State var canGoBack: Bool
-    @State var canGoForward: Bool
-    @State var goBack: () -> Void
-    @State var goForward: () -> Void
 
     var body: some View {
         HStack {
             Button(action: goBack) {
                 Text("<")
                     .aspectRatio(contentMode: .fit)
-            }.disabled(!canGoBack).frame(alignment: .center)
+            }.disabled(!state.canGoBack).frame(alignment: .center)
             Button(action: goForward) {
                 Text(">")
                     .aspectRatio(contentMode: .fit)
-            }.disabled(!canGoForward).frame(alignment: .center)
-            BTextField("Search or create note...", text: $searchText,
+            }.disabled(!state.canGoForward).frame(alignment: .center)
+            BTextField("Search or create note...", text: $state.searchQuery,
                        onCommit:  {
-//                        print("searchText activated: \(searchText)")
+                        //print("searchText activated: \(searchText)")
                         let queries = state.completedQueries
                         let index = state.selectionIndex
+                        let searchText = state.searchQuery
                         if index != 0 || searchText.hasPrefix("http://") || searchText.hasPrefix("https://") {
-                            state.webViewStore.webView.load(URLRequest(url: URL(string: searchText)!))
+                            state.webView.load(URLRequest(url: URL(string: searchText)!))
                             print("Start website query: \(searchText)")
                         } else {
                             let q = queries[index].string
                             let query = q .addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)!
-
+                            
                             let t = "http://www.google.com/search?q=\(query)"
                             print("Start search query: \(t)")
                             state.searchQuery = t
-                            state.webViewStore.webView.load(URLRequest(url: URL(string: t)!))
+                            state.webView.load(URLRequest(url: URL(string: t)!))
                         }
                         state.mode = .web
                        },
                        onCursorMovement: { cursorMovement in
-                        let range = 0...max(state.completedQueries.count - 1, 0)
-                            switch cursorMovement {
-                            case .up:
-                                selectionIndex = range.clamp(selectionIndex - 1)
-                                return true
-                            case .down:
-                                selectionIndex = range.clamp(selectionIndex + 1)
-                                return true
-                            default:
-                                break
-                            }
-                            return false
+                        switch cursorMovement {
+                        case .up:
+                            state.selectPreviousAutoComplete()
+                            return true
+                        case .down:
+                            state.selectNextAutoComplete()
+                            return true
+                        default:
+                            break
+                        }
+                        return false
                        }
             )
                 .frame(idealWidth: 600, maxWidth: .infinity)
         }
     }
+    
+    func goBack() {
+        state.webView.goBack()
+    }
+    
+    func goForward() {
+        state.webView.goForward()
+    }
+
 }
 

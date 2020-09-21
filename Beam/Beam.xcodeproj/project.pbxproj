@@ -29,7 +29,6 @@
 		96F5DB38251820960080E3EE /* ClosedRange+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F5DB37251820960080E3EE /* ClosedRange+Beam.swift */; };
 		96F5DB452518238C0080E3EE /* BeamState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F5DB442518238C0080E3EE /* BeamState.swift */; };
 		96F5DB4A25189DDF0080E3EE /* AutoCompleteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F5DB4925189DDF0080E3EE /* AutoCompleteView.swift */; };
-		96F5DB4F2518A2310080E3EE /* MainToolBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F5DB4E2518A2310080E3EE /* MainToolBar.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -79,7 +78,6 @@
 		96F5DB37251820960080E3EE /* ClosedRange+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ClosedRange+Beam.swift"; sourceTree = "<group>"; };
 		96F5DB442518238C0080E3EE /* BeamState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamState.swift; sourceTree = "<group>"; };
 		96F5DB4925189DDF0080E3EE /* AutoCompleteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoCompleteView.swift; sourceTree = "<group>"; };
-		96F5DB4E2518A2310080E3EE /* MainToolBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainToolBar.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -192,7 +190,6 @@
 				96F5DB2A251811060080E3EE /* AutoCompleteList.swift */,
 				96F5DB32251817DB0080E3EE /* AutoCompleteItem.swift */,
 				96F5DB4925189DDF0080E3EE /* AutoCompleteView.swift */,
-				96F5DB4E2518A2310080E3EE /* MainToolBar.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -359,7 +356,6 @@
 				96F5DB33251817DB0080E3EE /* AutoCompleteItem.swift in Sources */,
 				96F5DB232517A2020080E3EE /* BTextField.swift in Sources */,
 				96F5DB2B251811060080E3EE /* AutoCompleteList.swift in Sources */,
-				96F5DB4F2518A2310080E3EE /* MainToolBar.swift in Sources */,
 				965A785F2514F1AF009980D4 /* NavigationContext.swift in Sources */,
 				96F5DB0D25179F030080E3EE /* String+Localization.swift in Sources */,
 				965A785E2514F1AF009980D4 /* WebView.swift in Sources */,

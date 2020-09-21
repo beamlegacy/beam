@@ -30,8 +30,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         window.contentView = NSHostingView(rootView: contentView)
         
         // Create the titlebar accessory
-        let titlebarAccessoryView = MainToolBar()
-            .environmentObject(BeamState.shared)
+//        let titlebarAccessoryView = MainToolBar()
+//            .environmentObject(BeamState.shared)
+
+        let titlebarAccessoryView = SearchBar().environmentObject(BeamState.shared)
+
         
         let accessoryHostingView = NSHostingView(rootView:titlebarAccessoryView)
         accessoryHostingView.frame.size = accessoryHostingView.fittingSize
