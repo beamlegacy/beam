@@ -9,21 +9,25 @@ import SwiftUI
 
 struct ModeView: View {
     @EnvironmentObject var state: BeamState
+    @ViewBuilder
     var body: some View {
         switch state.mode {
         case .web:
-            return AnyView(WebView(webView: state.webView))
+                VStack {
+                    BrowserTabBar(tabs: $state.tabs, currentTab: $state.currentTab)
+                    WebView(webView: state.webView)
+                }
         case .note:
-            return AnyView(ScrollView([.vertical]) {
+            ScrollView([.vertical]) {
                 AutoCompleteView(autoComplete: $state.completedQueries, selectionIndex: $state.selectionIndex)
                     .frame(minWidth: 640, idealWidth: 800, maxWidth: .infinity, minHeight: 480, idealHeight: 600, maxHeight: .infinity, alignment: .center)
                 
-            })
+            }
             
         case .history:
-            return AnyView(ScrollView([.vertical]) {
+            ScrollView([.vertical]) {
                 Text("Bleh\nSome History\nFoo\nBar").frame(minWidth: 640, idealWidth: 800, maxWidth: .infinity, minHeight: 480, idealHeight: 600, maxHeight: .infinity, alignment: .center)
-            })
+            }
         }
     }
 }

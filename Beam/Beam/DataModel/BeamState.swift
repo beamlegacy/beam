@@ -23,7 +23,10 @@ class BeamState: ObservableObject {
     @Published var completedQueries = [AutoCompleteResult]()
     @Published var selectionIndex: Int? = nil
     
-    public var searchEngine: SearchEngine = DuckDuckGoSearch()
+    @Published var tabs: [BrowserTab] = []
+    @Published var currentTab = UUID() // Fake UUID for the initial current tab
+    
+    public var searchEngine: SearchEngine = GoogleSearch()
     
     func selectPreviousAutoComplete() {
         if let i = selectionIndex {
@@ -55,7 +58,6 @@ class BeamState: ObservableObject {
         webView.load(URLRequest(url: url))
     }
     
-
     @Published public var webView: WKWebView {
         didSet {
             setupObservers()
