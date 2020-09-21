@@ -26,20 +26,24 @@ struct SearchBar: View {
                        onCommit:  {
                         //print("searchText activated: \(searchText)")
                         let queries = state.completedQueries
-                        let index = state.selectionIndex
-                        let searchText = state.searchQuery
-                        if index != 0 || searchText.hasPrefix("http://") || searchText.hasPrefix("https://") {
-                            state.webView.load(URLRequest(url: URL(string: searchText)!))
-                            print("Start website query: \(searchText)")
-                        } else {
-                            let q = queries[index].string
+                        var searchText = state.searchQuery
+                        if let i = state.selectionIndex {
+                            let q = queries[i].string
                             let query = q .addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)!
                             
-                            let t = "http://www.google.com/search?q=\(query)"
-                            print("Start search query: \(t)")
-                            state.searchQuery = t
-                            state.webView.load(URLRequest(url: URL(string: t)!))
+                            searchText = "https://www.google.com/search?q=\(query)"
+                            print("Start search query: \(searchText)")
+                            //state.searchQuery = t
                         }
+                        
+                        if searchText.hasPrefix("http://") || searchText.hasPrefix("https://") {
+                            print("Start website query: \(searchText)")
+                        } else {
+                            searchText = "https://www.google.com/search?q=\(searchText)"
+                            print("Start search query: \(searchText)")
+                        }
+
+                        state.webView.load(URLRequest(url: URL(string: searchText)!))
                         state.mode = .web
                        },
                        onCursorMovement: { cursorMovement in

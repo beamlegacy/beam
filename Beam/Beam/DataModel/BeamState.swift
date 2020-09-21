@@ -21,14 +21,32 @@ class BeamState: ObservableObject {
     @Published var searchQuery: String = ""
     private let completer = Completer()
     @Published var completedQueries = [AutoCompleteResult]()
-    @Published var selectionIndex = 0
+    @Published var selectionIndex: Int? = nil
     
     func selectPreviousAutoComplete() {
-        selectionIndex = max(selectionIndex - 1, -1)
+        if let i = selectionIndex {
+            let newIndex = i - 1
+            if newIndex >= 0 {
+                selectionIndex = newIndex
+            } else {
+                selectionIndex = nil
+            }
+        } else {
+            let newIndex = completedQueries.count - 1
+            if newIndex >= 0 {
+                selectionIndex = newIndex
+            } else {
+                selectionIndex = nil
+            }
+        }
     }
 
     func selectNextAutoComplete() {
-        selectionIndex = min(selectionIndex + 1, completedQueries.count)
+        if let i = selectionIndex {
+            selectionIndex = min(i + 1, completedQueries.count - 1)
+        } else {
+            selectionIndex = 0
+        }
     }
     
     public func load(url: URL) {
@@ -50,18 +68,21 @@ class BeamState: ObservableObject {
     @Published var serverTrust: SecTrust? = nil
     @Published var canGoBack: Bool = false
     @Published var canGoForward: Bool = false
+    @Published var backForwardList: WKBackForwardList
+
 
     private var scope = Set<AnyCancellable>()
     
     public init(webView: WKWebView = WKWebView()) {
         self.webView = webView
+        backForwardList = webView.backForwardList
         setupObservers()
 
         $searchQuery.sink { [weak self] query in
             guard let self = self else { return }
-//            print("received auto complete query: \(query)")
+            //print("received auto complete query: \(query)")
 
-            self.selectionIndex = 0
+            self.selectionIndex = nil
             if !(query.hasPrefix("http://") || query.hasPrefix("https://")) {
                 self.mode = .note
             }
@@ -69,7 +90,7 @@ class BeamState: ObservableObject {
         }.store(in: &scope)
         completer.$results.receive(on: RunLoop.main).sink { [weak self] results in
             guard let self = self else { return }
-//            print("received auto complete results: \(results)")
+            //print("received auto complete results: \(results)")
             self.completedQueries = results
         }.store(in: &scope)
 
@@ -82,15 +103,9 @@ class BeamState: ObservableObject {
         webView.publisher(for: \.estimatedProgress).sink() { v in self.estimatedProgress = v }.store(in: &scope)
         webView.publisher(for: \.hasOnlySecureContent).sink() { v in self.hasOnlySecureContent = v }.store(in: &scope)
         webView.publisher(for: \.serverTrust).sink() { v in self.serverTrust = v }.store(in: &scope)
-        webView.publisher(for: \.canGoBack).sink() { v in
-            self.canGoBack = v
-        }.store(in: &scope)
-        
-        webView.publisher(for: \.canGoForward).sink() { v in
-            self.canGoForward = v
-        }.store(in: &scope)
-        
-        webView.publisher(for: \.backForwardList).sink() { list in print("backForwardList changed to \(list)")}.store(in: &scope)
+        webView.publisher(for: \.canGoBack).sink() { v in self.canGoBack = v }.store(in: &scope)
+        webView.publisher(for: \.canGoForward).sink() { v in self.canGoForward = v }.store(in: &scope)
+        webView.publisher(for: \.backForwardList).sink() { v in self.backForwardList = v }.store(in: &scope)
     }
 
 }
