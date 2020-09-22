@@ -8,54 +8,13 @@
 import Foundation
 import AppKit
 
-struct BID : Codable, Hashable {
-    var id: UInt64
-    static var baseTime = Double(1420070400000)
-    static let timeBits = 41
-    static let nodeBits = 10
-    static let seqBits = 12
-    static var sequence = 0
-    static var nodeId: Int {
-        var uuidRef:        CFUUID?
-        var uuidBytes:      [CUnsignedChar] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        
-        var ts = timespec(tv_sec: 0,tv_nsec: 0)
-        
-        gethostuuid(&uuidBytes, &ts)
-        
-        uuidRef = CFUUIDCreateWithBytes(
-            kCFAllocatorDefault,
-            uuidBytes[0],
-            uuidBytes[1],
-            uuidBytes[2],
-            uuidBytes[3],
-            uuidBytes[4],
-            uuidBytes[5],
-            uuidBytes[6],
-            uuidBytes[7],
-            uuidBytes[8],
-            uuidBytes[9],
-            uuidBytes[10],
-            uuidBytes[11],
-            uuidBytes[12],
-            uuidBytes[13],
-            uuidBytes[14],
-            uuidBytes[15]
-        )
-        
-        return uuidRef!.hashValue
-    }
-    
-    func mask(_ value: Int, _ bits: Int) -> Int {
-        return (value & ((1 << bits) - 1))
-    }
-    
-    init() {
-        let t = mask(Int(CACurrentMediaTime() * 1000 - Self.baseTime), Self.timeBits)
-        Self.sequence += 1
-        id = UInt64(t << (Self.nodeBits + Self.seqBits) | (mask(Self.nodeId, Self.nodeBits) << Self.seqBits) | mask(Self.sequence, Self.seqBits))
-    }
-}
+/*
+ 
+ Beam contains Notes
+ A Note contains a tree of blocks. A Note has a title that has to be unique.
+ A Block contains a list of text blocks. An element can be of different type (Bullet point, Numbered bullet point, Quote, Code, Header (1-6?)...). A Block can be referenced by any note
+ A text block contains text. It contains the format of the text (Bold, Italic, Underline). There are different text block types to represent different attributes (Code, URL, Link...)
+ */
 
 protocol BeamObject: Codable {
     var id: BID { get set }
@@ -67,18 +26,49 @@ struct BeamNotes {
     public var notesByName: [String:BID] = [:]
 }
 
-struct BeamNote: BeamObject {
-    public var id: BID
-    public var title: String
-    public var elements: [BeamElement]
-    
-    public var outLinks: [String] {
-        return []
-    }
+protocol BeamBlock: BeamObject {
+    var elements: [BID] { get set }
+    var outLinks: [String] { get }
 }
 
-struct BeamElement: BeamObject {
-    public var id: BID
-    var text:
-    
+struct BeamNote: BeamBlock {
+    var id: BID
+    public var title: String
+
+    var elements: [BID] = []
+    var outLinks: [String] = []
+}
+
+protocol BeamTextBlock: BeamObject {
+    var text: String { get set }
+}
+
+struct TextFormat: OptionSet, Codable {
+    let rawValue: Int8
+
+    static let regular      = TextFormat([])
+    static let bold         = TextFormat(rawValue: 1 << 0)
+    static let italic       = TextFormat(rawValue: 1 << 1)
+    static let underline    = TextFormat(rawValue: 1 << 2)
+}
+
+struct BeamText: BeamTextBlock {
+    var id: BID
+    var format: TextFormat = .regular
+    var text: String = ""
+}
+
+struct BeamTextURL: BeamTextBlock {
+    var id: BID
+    var text: String = ""
+}
+
+struct BeamTextCode: BeamTextBlock {
+    var id: BID
+    var text: String = ""
+}
+
+struct BeamLinkCode: BeamTextBlock {
+    var id: BID
+    var text: String = ""
 }

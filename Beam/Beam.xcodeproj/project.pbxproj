@@ -24,6 +24,7 @@
 		965B19692518F4F000BCF01C /* BrowserTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965B19682518F4F000BCF01C /* BrowserTabView.swift */; };
 		965B19712518F59D00BCF01C /* BrowserTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965B19702518F59D00BCF01C /* BrowserTab.swift */; };
 		9694F77925155F8700399E6A /* AutoComplete.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9694F77825155F8700399E6A /* AutoComplete.swift */; };
+		96D5F1752519F75600A19BBC /* BID.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96D5F1742519F75600A19BBC /* BID.swift */; };
 		96F5DB0D25179F030080E3EE /* String+Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F5DB0C25179F030080E3EE /* String+Localization.swift */; };
 		96F5DB162517A0F10080E3EE /* NSContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F5DB152517A0F10080E3EE /* NSContainerView.swift */; };
 		96F5DB1E2517A1E60080E3EE /* BNSTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F5DB1D2517A1E60080E3EE /* BNSTextField.swift */; };
@@ -77,6 +78,7 @@
 		965B19682518F4F000BCF01C /* BrowserTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserTabView.swift; sourceTree = "<group>"; };
 		965B19702518F59D00BCF01C /* BrowserTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserTab.swift; sourceTree = "<group>"; };
 		9694F77825155F8700399E6A /* AutoComplete.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoComplete.swift; sourceTree = "<group>"; };
+		96D5F1742519F75600A19BBC /* BID.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BID.swift; sourceTree = "<group>"; };
 		96F5DB0C25179F030080E3EE /* String+Localization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Localization.swift"; sourceTree = "<group>"; };
 		96F5DB152517A0F10080E3EE /* NSContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSContainerView.swift; sourceTree = "<group>"; };
 		96F5DB1D2517A1E60080E3EE /* BNSTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BNSTextField.swift; sourceTree = "<group>"; };
@@ -186,6 +188,7 @@
 				96F5DB442518238C0080E3EE /* BeamState.swift */,
 				965B195E2518EEFC00BCF01C /* SearchEngine.swift */,
 				965B19702518F59D00BCF01C /* BrowserTab.swift */,
+				96D5F1742519F75600A19BBC /* BID.swift */,
 			);
 			path = DataModel;
 			sourceTree = "<group>";
@@ -367,6 +370,7 @@
 				965A782B2514F147009980D4 /* ContentView.swift in Sources */,
 				96F5DB33251817DB0080E3EE /* AutoCompleteItem.swift in Sources */,
 				96F5DB232517A2020080E3EE /* BTextField.swift in Sources */,
+				96D5F1752519F75600A19BBC /* BID.swift in Sources */,
 				96F5DB2B251811060080E3EE /* AutoCompleteList.swift in Sources */,
 				965A785F2514F1AF009980D4 /* NavigationContext.swift in Sources */,
 				96F5DB0D25179F030080E3EE /* String+Localization.swift in Sources */,
