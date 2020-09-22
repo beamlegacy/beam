@@ -77,9 +77,17 @@ class BeamState: ObservableObject {
 
     private var scope = Set<AnyCancellable>()
     
-    public init(webView: WKWebView = WKWebView()) {
-        self.webView = webView
-        backForwardList = webView.backForwardList
+    public init() {
+        let configuration = WKWebViewConfiguration()
+        configuration.applicationNameForUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_0) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Safari/605.1.15"
+        configuration.preferences.javaScriptEnabled = true
+        configuration.preferences.javaScriptCanOpenWindowsAutomatically = false
+        configuration.preferences.tabFocusesLinks = true
+        configuration.defaultWebpagePreferences.preferredContentMode = .desktop
+
+        let web = WKWebView(frame: NSRect(), configuration: configuration)
+        self.webView = web
+        backForwardList = web.backForwardList
         setupObservers()
 
         $searchQuery.sink { [weak self] query in
