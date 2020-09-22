@@ -20,7 +20,7 @@ struct ModeView: View {
             
             if state.mode == .web {
                     VStack {
-                        BrowserTabBar(tabs: state.tabs, currentTab: $state.currentTab)
+                        BrowserTabBar(tabs: $state.tabs, currentTab: $state.currentTab)
                         WebView(webView: state.currentTab.webView)
                     }
                     .transition(.move(edge: .bottom))

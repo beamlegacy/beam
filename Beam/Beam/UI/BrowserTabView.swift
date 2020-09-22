@@ -9,6 +9,7 @@ import Foundation
 import SwiftUI
 
 struct BrowserTabView: View {
+    @EnvironmentObject var state: BeamState
     @ObservedObject var tab: BrowserTab
     var selected: Bool
     
@@ -29,11 +30,23 @@ struct BrowserTabView: View {
                 }
                 .stroke(selected ? Self.selectedTabFrameColor : Self.tabFrameColor)
             }
-            Text(tab.title)
-                .padding(.top, 2)
-                .padding([.leading, .trailing], 10)
-                .frame(minWidth: 50, maxWidth: .infinity, minHeight: 20, maxHeight: 20, alignment: .leading)
-                .font(selected ? .system(size: 12, weight: .bold) : .system(size: 12, weight: .regular))
+            HStack {
+                Button("x") {
+                    var tabsCopy = state.tabs
+                    tabsCopy.removeAll(where: { t -> Bool in
+                        t.id == tab.id
+                    })
+                    state.tabs = tabsCopy
+                }
+                .buttonStyle(BorderlessButtonStyle())
+                .padding(.leading, 4)
+                
+                Text(tab.title)
+                    .padding(.top, 2)
+                    .padding([.leading, .trailing], 10)
+                    .frame(minWidth: 50, maxWidth: .infinity, minHeight: 20, maxHeight: 20, alignment: .leading)
+                    .font(selected ? .system(size: 12, weight: .bold) : .system(size: 12, weight: .regular))
+            }
         }.frame(minWidth: 50, maxWidth: .infinity, minHeight: 20, maxHeight: 20, alignment: .leading)
         .padding([.trailing], 1)
         .padding([.top], 2)

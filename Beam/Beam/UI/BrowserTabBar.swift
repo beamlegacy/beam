@@ -27,7 +27,7 @@ fileprivate struct Background: View {
 }
 
 struct BrowserTabBar: View {
-    @State var tabs: [BrowserTab]
+    @Binding var tabs: [BrowserTab]
     @Binding var currentTab: BrowserTab
     var body: some View {
         ZStack {
@@ -56,6 +56,6 @@ struct BrowserTabBar_Previews: PreviewProvider {
     @State static var tabs: [BrowserTab] = [BrowserTab(id: UUID(uuidString: "123e4567-e89b-12d3-a456-426614174000")!, title: "test1"), BrowserTab(title: "test2"), BrowserTab(title: "test3")]
     @State static var currentTab = BrowserTab(id: UUID(uuidString: "123e4567-e89b-12d3-a456-426614174000")!, title: "test1")
     static var previews: some View {
-        BrowserTabBar(tabs: Self.tabs, currentTab: Self.$currentTab)
+        BrowserTabBar(tabs: Self.$tabs, currentTab: Self.$currentTab)
     }
 }
