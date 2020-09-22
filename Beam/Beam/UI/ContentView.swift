@@ -14,7 +14,7 @@ struct ModeView: View {
         switch state.mode {
         case .web:
                 VStack {
-                    BrowserTabBar(tabs: $state.tabs, currentTab: $state.currentTab)
+                    BrowserTabBar(tabs: state.tabs, currentTab: $state.currentTab)
                     WebView(webView: state.currentTab.webView)
                 }
         case .note:

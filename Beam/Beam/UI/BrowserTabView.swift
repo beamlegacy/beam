@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 
 struct BrowserTabView: View {
-    var tab: BrowserTab
+    @ObservedObject var tab: BrowserTab
     var selected: Bool
     
     static var tabColor = Color(NSColor.lightGray).opacity(0.25)

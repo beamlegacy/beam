@@ -10,7 +10,7 @@ import SwiftUI
 import Combine
 import WebKit
 
-class BrowserTab: Identifiable {
+class BrowserTab: ObservableObject, Identifiable {
     var id: UUID
     
     public func load(url: URL) {
