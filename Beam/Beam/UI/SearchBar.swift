@@ -42,7 +42,10 @@ struct SearchBar: View {
                             print("Start search query: \(searchText)")
                         }
 
-                        state.webView.load(URLRequest(url: URL(string: searchText)!))
+                        let tab = BrowserTab()
+                        tab.webView.load(URLRequest(url: URL(string: searchText)!))
+                        state.currentTab = tab
+                        state.tabs.append(tab)
                         state.mode = .web
                        },
                        onCursorMovement: { cursorMovement in
@@ -64,11 +67,11 @@ struct SearchBar: View {
     }
     
     func goBack() {
-        state.webView.goBack()
+        state.currentTab.webView.goBack()
     }
     
     func goForward() {
-        state.webView.goForward()
+        state.currentTab.webView.goForward()
     }
 
 }

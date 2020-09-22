@@ -15,7 +15,7 @@ struct ModeView: View {
         case .web:
                 VStack {
                     BrowserTabBar(tabs: $state.tabs, currentTab: $state.currentTab)
-                    WebView(webView: state.webView)
+                    WebView(webView: state.currentTab.webView)
                 }
         case .note:
             ScrollView([.vertical]) {
