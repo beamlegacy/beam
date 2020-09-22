@@ -10,7 +10,6 @@ import Combine
 import WebKit
 
 enum Mode {
-    case history
     case note
     case web
 }

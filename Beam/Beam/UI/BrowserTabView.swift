@@ -31,10 +31,10 @@ struct BrowserTabView: View {
             }
             Text(tab.title)
                 .padding(.top, 2)
-                .padding(.leading, 10)
-                .frame(minWidth: 50, idealWidth: 100, maxWidth: 200, minHeight: 20, maxHeight: 20, alignment: .leading)
+                .padding([.leading, .trailing], 10)
+                .frame(minWidth: 50, maxWidth: .infinity, minHeight: 20, maxHeight: 20, alignment: .leading)
                 .font(selected ? .system(size: 12, weight: .bold) : .system(size: 12, weight: .regular))
-        }.frame(minWidth: 50, idealWidth: 100, maxWidth: 200, minHeight: 20, maxHeight: 20, alignment: .leading)
+        }.frame(minWidth: 50, maxWidth: .infinity, minHeight: 20, maxHeight: 20, alignment: .leading)
         .padding([.trailing], 1)
         .padding([.top], 2)
 

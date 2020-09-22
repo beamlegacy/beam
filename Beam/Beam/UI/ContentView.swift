@@ -11,23 +11,22 @@ struct ModeView: View {
     @EnvironmentObject var state: BeamState
     @ViewBuilder
     var body: some View {
-        switch state.mode {
-        case .web:
-                VStack {
-                    BrowserTabBar(tabs: state.tabs, currentTab: $state.currentTab)
-                    WebView(webView: state.currentTab.webView)
-                }
-        case .note:
+        ZStack {
             ScrollView([.vertical]) {
                 AutoCompleteView(autoComplete: $state.completedQueries, selectionIndex: $state.selectionIndex)
                     .frame(minWidth: 640, idealWidth: 800, maxWidth: .infinity, minHeight: 480, idealHeight: 600, maxHeight: .infinity, alignment: .center)
                 
             }
             
-        case .history:
-            ScrollView([.vertical]) {
-                Text("Bleh\nSome History\nFoo\nBar").frame(minWidth: 640, idealWidth: 800, maxWidth: .infinity, minHeight: 480, idealHeight: 600, maxHeight: .infinity, alignment: .center)
+            if state.mode == .web {
+                    VStack {
+                        BrowserTabBar(tabs: state.tabs, currentTab: $state.currentTab)
+                        WebView(webView: state.currentTab.webView)
+                    }
+                    .transition(.move(edge: .bottom))
+                    .animation(.easeInOut(duration: 0.3))
             }
+
         }
     }
 }

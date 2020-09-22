@@ -24,29 +24,31 @@ struct SearchBar: View {
             }.disabled(!state.canGoForward).frame(alignment: .center)
             BTextField("Search or create note...", text: $state.searchQuery,
                        onCommit:  {
-                        //print("searchText activated: \(searchText)")
-                        let queries = state.completedQueries
-                        var searchText = state.searchQuery
-                        if let i = state.selectionIndex {
-                            state.searchEngine.query = queries[i].string
-                            searchText = state.searchEngine.searchUrl
-                            print("Start search query: \(searchText)")
-                            //state.searchQuery = t
+                        withAnimation {
+                            //print("searchText activated: \(searchText)")
+                            let queries = state.completedQueries
+                            var searchText = state.searchQuery
+                            if let i = state.selectionIndex {
+                                state.searchEngine.query = queries[i].string
+                                searchText = state.searchEngine.searchUrl
+                                print("Start search query: \(searchText)")
+                                //state.searchQuery = t
+                            }
+                            
+                            if searchText.hasPrefix("http://") || searchText.hasPrefix("https://") {
+                                print("Start website query: \(searchText)")
+                            } else {
+                                state.searchEngine.query = searchText
+                                searchText = state.searchEngine.searchUrl
+                                print("Start search query: \(searchText)")
+                            }
+                            
+                            let tab = BrowserTab()
+                            tab.webView.load(URLRequest(url: URL(string: searchText)!))
+                            state.currentTab = tab
+                            state.tabs.append(tab)
+                            state.mode = .web
                         }
-                        
-                        if searchText.hasPrefix("http://") || searchText.hasPrefix("https://") {
-                            print("Start website query: \(searchText)")
-                        } else {
-                            state.searchEngine.query = searchText
-                            searchText = state.searchEngine.searchUrl
-                            print("Start search query: \(searchText)")
-                        }
-
-                        let tab = BrowserTab()
-                        tab.webView.load(URLRequest(url: URL(string: searchText)!))
-                        state.currentTab = tab
-                        state.tabs.append(tab)
-                        state.mode = .web
                        },
                        onCursorMovement: { cursorMovement in
                         switch cursorMovement {
