@@ -17,7 +17,7 @@
 		965A784D2514F149009980D4 /* BeamUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965A784C2514F149009980D4 /* BeamUITests.swift */; };
 		965A785E2514F1AF009980D4 /* WebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965A785A2514F1AF009980D4 /* WebView.swift */; };
 		965A785F2514F1AF009980D4 /* NavigationContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965A785B2514F1AF009980D4 /* NavigationContext.swift */; };
-		965A78602514F1AF009980D4 /* Note.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965A785D2514F1AF009980D4 /* Note.swift */; };
+		965A78602514F1AF009980D4 /* BeamNote.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965A785D2514F1AF009980D4 /* BeamNote.swift */; };
 		965A78632514F57E009980D4 /* SearchBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965A78622514F57E009980D4 /* SearchBar.swift */; };
 		965B195F2518EEFC00BCF01C /* SearchEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965B195E2518EEFC00BCF01C /* SearchEngine.swift */; };
 		965B19642518F3BA00BCF01C /* BrowserTabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965B19632518F3BA00BCF01C /* BrowserTabBar.swift */; };
@@ -70,7 +70,7 @@
 		965A784E2514F149009980D4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		965A785A2514F1AF009980D4 /* WebView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebView.swift; sourceTree = "<group>"; };
 		965A785B2514F1AF009980D4 /* NavigationContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NavigationContext.swift; sourceTree = "<group>"; };
-		965A785D2514F1AF009980D4 /* Note.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Note.swift; sourceTree = "<group>"; };
+		965A785D2514F1AF009980D4 /* BeamNote.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BeamNote.swift; sourceTree = "<group>"; };
 		965A78622514F57E009980D4 /* SearchBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchBar.swift; sourceTree = "<group>"; };
 		965B195E2518EEFC00BCF01C /* SearchEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchEngine.swift; sourceTree = "<group>"; };
 		965B19632518F3BA00BCF01C /* BrowserTabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserTabBar.swift; sourceTree = "<group>"; };
@@ -182,7 +182,7 @@
 			isa = PBXGroup;
 			children = (
 				965A785B2514F1AF009980D4 /* NavigationContext.swift */,
-				965A785D2514F1AF009980D4 /* Note.swift */,
+				965A785D2514F1AF009980D4 /* BeamNote.swift */,
 				96F5DB442518238C0080E3EE /* BeamState.swift */,
 				965B195E2518EEFC00BCF01C /* SearchEngine.swift */,
 				965B19702518F59D00BCF01C /* BrowserTab.swift */,
@@ -378,7 +378,7 @@
 				96F5DB162517A0F10080E3EE /* NSContainerView.swift in Sources */,
 				965A78292514F147009980D4 /* AppDelegate.swift in Sources */,
 				965A782E2514F147009980D4 /* Beam.xcdatamodeld in Sources */,
-				965A78602514F1AF009980D4 /* Note.swift in Sources */,
+				965A78602514F1AF009980D4 /* BeamNote.swift in Sources */,
 				965B195F2518EEFC00BCF01C /* SearchEngine.swift in Sources */,
 				96F5DB38251820960080E3EE /* ClosedRange+Beam.swift in Sources */,
 				9694F77925155F8700399E6A /* AutoComplete.swift in Sources */,
