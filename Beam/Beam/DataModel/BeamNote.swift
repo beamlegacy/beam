@@ -68,7 +68,8 @@ struct BeamTextCode: BeamTextBlock {
     var text: String = ""
 }
 
-struct BeamLinkCode: BeamTextBlock {
+struct BeamTextLink: BeamTextBlock {
     var id: BID
     var text: String = ""
+    var target: BID
 }
