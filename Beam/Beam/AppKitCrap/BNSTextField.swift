@@ -15,9 +15,11 @@ class BNSTextField : NSTextField, ObservableObject {
     public var onEditingChanged: (Bool) -> Void = { _ in }
     public var onCommit: () -> Void = { }
     public var onPerformKeyEquivalent: (NSEvent) -> Bool = { _ in return false }
+    public var focusOnCreation: Bool
 
-    public init(string stringValue: Binding<String>) {
+    public init(string stringValue: Binding<String>, focusOnCreation: Bool = false) {
         value = stringValue
+        self.focusOnCreation = focusOnCreation
         super.init(frame: NSRect())
         self.target = self
         self.action = #selector(commit)
@@ -68,6 +70,12 @@ class BNSTextField : NSTextField, ObservableObject {
         return super.performKeyEquivalent(with: event)
     }
 
+    override func viewDidMoveToWindow() {
+        if focusOnCreation {
+            self.window?.makeFirstResponder(self)
+        }
+    }
+    
     @objc func commit(_ sender: AnyObject) {
         onCommit()
     }
