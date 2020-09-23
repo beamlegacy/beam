@@ -85,10 +85,28 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         decisionHandler(.allow)
     }
-    
+
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, preferences: WKWebpagePreferences, decisionHandler: @escaping (WKNavigationActionPolicy, WKWebpagePreferences) -> Void) {
-        if let url = navigationAction.request.url {
-            visitedURLs.insert(url)
+        var isSearchResult = false
+        if let targetURL = navigationAction.request.url {
+            if let currentHost = self.webView.url?.host {
+                if let targetHost = targetURL.host {
+                    let startsWithURL = targetURL.path.hasPrefix("/url")
+                    isSearchResult = currentHost.hasSuffix("google.com") && targetHost.hasSuffix("google.com") && startsWithURL && !visitedURLs.isEmpty
+                }
+            }
+
+            if navigationAction.modifierFlags.contains(.command) || isSearchResult {
+                // Create new tab
+                let newWebView = WKWebView(frame: NSRect(), configuration: webView.configuration)
+                let newTab = BrowserTab(originalQuery: originalQuery, webView: newWebView)
+                newTab.load(url: targetURL)
+                onNewTabCreated(newTab)
+                decisionHandler(.cancel, preferences)
+                return
+            }
+
+            visitedURLs.insert(targetURL)
         }
         decisionHandler(.allow, preferences)
     }
