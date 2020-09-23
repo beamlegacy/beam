@@ -32,11 +32,12 @@ struct BTextField: NSViewRepresentable {
     init<S>(_ title: S, text: Binding<String>,
             onEditingChanged: @escaping (Bool) -> Void = { _ in },
             onCommit: @escaping () -> Void = {},
-            onCursorMovement: @escaping (CursorMovement) -> Bool = { _ in return false }
+            onCursorMovement: @escaping (CursorMovement) -> Bool = { _ in return false },
+            focusOnCreation: Bool = false
     ) where S : StringProtocol
     {
         self.text = text
-        self.textField  = BNSTextField(string: self.text)
+        self.textField  = BNSTextField(string: self.text, focusOnCreation: focusOnCreation)
         self.textField.placeholderString = title as? String
         self.onEditingChanged = onEditingChanged
         self.onCommit = onCommit
@@ -90,5 +91,4 @@ struct BTextField: NSViewRepresentable {
 
     func updateNSView(_ nsView: Self.NSViewType, context: Self.Context) {
     }
-
 }
