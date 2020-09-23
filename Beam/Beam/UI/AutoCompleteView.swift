@@ -19,7 +19,7 @@ struct AutoCompleteView: View {
             .padding([.top], CGFloat(50))
             )
         }
-        return AnyView(Text("Search for something or create a card"))
+        return AnyView(Text("Search for something or create a note"))
     }
 }
 
