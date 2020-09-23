@@ -53,8 +53,8 @@ struct BrowserTabBar: View {
 
 
 struct BrowserTabBar_Previews: PreviewProvider {
-    @State static var tabs: [BrowserTab] = [BrowserTab(id: UUID(uuidString: "123e4567-e89b-12d3-a456-426614174000")!, title: "test1"), BrowserTab(title: "test2"), BrowserTab(title: "test3")]
-    @State static var currentTab = BrowserTab(id: UUID(uuidString: "123e4567-e89b-12d3-a456-426614174000")!, title: "test1")
+    @State static var tabs: [BrowserTab] = [BrowserTab(originalQuery: "test1", id: UUID(uuidString: "123e4567-e89b-12d3-a456-426614174000")!), BrowserTab(originalQuery: "test2"), BrowserTab(originalQuery: "test3")]
+    @State static var currentTab = BrowserTab(originalQuery: "test1", id: UUID(uuidString: "123e4567-e89b-12d3-a456-426614174000")!)
     static var previews: some View {
         BrowserTabBar(tabs: Self.$tabs, currentTab: Self.$currentTab)
     }

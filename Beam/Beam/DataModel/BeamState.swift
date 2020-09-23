@@ -21,9 +21,18 @@ class BeamState: ObservableObject {
     private let completer = Completer()
     @Published var completedQueries = [AutoCompleteResult]()
     @Published var selectionIndex: Int? = nil
-    
-    @Published var tabs: [BrowserTab] = []
-    @Published var currentTab = BrowserTab() // Fake empty tab by default
+
+    @Published public var tabs: [BrowserTab] = [] {
+        didSet {
+            for tab in tabs {
+                tab.onNewTabCreated = { [weak self] newTab in
+                    guard let self = self else { return }
+                    self.tabs.append(newTab)
+                }
+            }
+        }
+    }
+    @Published var currentTab = BrowserTab(originalQuery: "") // Fake empty tab by default
     {
         didSet {
             tabScope.removeAll()
@@ -38,11 +47,11 @@ class BeamState: ObservableObject {
 
     @Published var canGoBack: Bool = false
     @Published var canGoForward: Bool = false
-    
+
     private var tabScope = Set<AnyCancellable>()
 
     public var searchEngine: SearchEngine = GoogleSearch()
-    
+
     func selectPreviousAutoComplete() {
         if let i = selectionIndex {
             let newIndex = i - 1
@@ -68,9 +77,9 @@ class BeamState: ObservableObject {
             selectionIndex = 0
         }
     }
-    
+
     private var scope = Set<AnyCancellable>()
-    
+
     public init() {
         $searchQuery.sink { [weak self] query in
             guard let self = self else { return }
@@ -89,5 +98,4 @@ class BeamState: ObservableObject {
         }.store(in: &scope)
 
     }
-    
 }

@@ -22,14 +22,19 @@ struct BrowserTabView: View {
     var body: some View {
         ZStack {
             GeometryReader { geometry in
+//                Path { path in
+//                    buildTabDecoration(&path, width: Int(geometry.size.width), height: Int(geometry.size.height))
+//                }
+//                .fill(selected ? Self.selectedTabColor : Self.tabColor)
+//                Path { path in
+//                    buildTabDecoration(&path, width: Int(geometry.size.width), height: Int(geometry.size.height))
+//                }
+//                .stroke(selected ? Self.selectedTabFrameColor : Self.tabFrameColor)
                 Path { path in
-                    buildTabDecoration(&path, width: Int(geometry.size.width), height: Int(geometry.size.height))
+                    path.move(to: CGPoint(x: geometry.size.width - 1, y: geometry.size.height * 0.25))
+                    path.addLine(to: CGPoint(x: geometry.size.width - 1, y: geometry.size.height * 0.75))
                 }
-                .fill(selected ? Self.selectedTabColor : Self.tabColor)
-                Path { path in
-                    buildTabDecoration(&path, width: Int(geometry.size.width), height: Int(geometry.size.height))
-                }
-                .stroke(selected ? Self.selectedTabFrameColor : Self.tabFrameColor)
+                .stroke(Self.tabFrameColor)
             }
             HStack {
                 Button("X") {
@@ -40,7 +45,7 @@ struct BrowserTabView: View {
                             } else if state.tabs.count > 1 {
                                 state.currentTab = state.tabs[i + 1]
                             } else {
-                                state.currentTab = BrowserTab()
+                                state.currentTab = BrowserTab(originalQuery: "")
                                 state.mode = .note
                             }
                             state.tabs.remove(at: i)
@@ -85,7 +90,7 @@ func buildTabDecoration(_ path: inout Path, width: Int, height: Int) {
 }
 
 struct BrowserTabView_Previews: PreviewProvider {
-    static var tab = BrowserTab(title: "test tab1")
+    static var tab = BrowserTab(originalQuery: "test tab1")
     static var previews: some View {
         Group {
             HStack {
