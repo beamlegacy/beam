@@ -96,7 +96,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
                 }
             }
 
-            if navigationAction.modifierFlags.contains(.command) || isSearchResult {
+            if navigationAction.modifierFlags.contains(.command) != isSearchResult {
                 // Create new tab
                 let newWebView = WKWebView(frame: NSRect(), configuration: webView.configuration)
                 let newTab = BrowserTab(originalQuery: originalQuery, webView: newWebView)
