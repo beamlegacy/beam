@@ -37,7 +37,6 @@ struct BrowserTabBar: View {
                     ForEach(tabs, id: \.id) { tab in
                         BrowserTabView(tab: tab, selected: isSelected(tab))
                             .onTapGesture {
-                                print("selected tab \(tab.title)")
                                 currentTab = tab
                             }
                     }
