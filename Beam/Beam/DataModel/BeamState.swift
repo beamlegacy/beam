@@ -15,7 +15,6 @@ enum Mode {
 }
 
 class BeamState: ObservableObject {
-    static var shared: BeamState = BeamState()
     @Published var mode: Mode = .note
     @Published var searchQuery: String = ""
     private let completer = Completer()

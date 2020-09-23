@@ -13,39 +13,12 @@ import Combine
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
 
-    @IBOutlet var window: NSWindow!
+    @IBOutlet var window: BeamWindow!
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        // Create the SwiftUI view and set the context as the value for the managedObjectContext environment keyPath.
-        // Add `@Environment(\.managedObjectContext)` in the views that will need the context.
-        let contentView = ContentView().environment(\.managedObjectContext, persistentContainer.viewContext).environmentObject(BeamState.shared)
-
         // Create the window and set the content view.
-        window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 480, height: 300),
-            styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
-            backing: .buffered, defer: false)
+        window = BeamWindow(contentRect: NSRect(x: 0, y: 0, width: 480, height: 300), cloudKitContainer: persistentContainer)
         window.center()
-        window.setFrameAutosaveName("Main Window")
-        window.contentView = NSHostingView(rootView: contentView)
-        
-        // Create the titlebar accessory
-//        let titlebarAccessoryView = MainToolBar()
-//            .environmentObject(BeamState.shared)
-
-        let titlebarAccessoryView = SearchBar().environmentObject(BeamState.shared)
-
-        
-        let accessoryHostingView = NSHostingView(rootView:titlebarAccessoryView)
-        accessoryHostingView.frame.size = accessoryHostingView.fittingSize
-        
-        let titlebarAccessory = NSTitlebarAccessoryViewController()
-        titlebarAccessory.layoutAttribute = .top
-        titlebarAccessory.view = accessoryHostingView
-        
-        // Add the titlebar accessory
-        window.addTitlebarAccessoryViewController(titlebarAccessory)
-
         window.makeKeyAndOrderFront(nil)
     }
 
