@@ -17,11 +17,11 @@ struct SearchBar: View {
             Button(action: goBack) {
                 Text("<")
                     .aspectRatio(contentMode: .fit)
-            }.disabled(!state.canGoBack).frame(alignment: .center)
+            }.buttonStyle(BorderlessButtonStyle()).disabled(!state.canGoBack).frame(alignment: .center)
             Button(action: goForward) {
                 Text(">")
                     .aspectRatio(contentMode: .fit)
-            }.disabled(!state.canGoForward).frame(alignment: .center)
+            }.buttonStyle(BorderlessButtonStyle()).disabled(!state.canGoForward).frame(alignment: .center)
             BTextField("Search or create note...", text: $state.searchQuery,
                        onCommit:  {
                         withAnimation {

@@ -24,9 +24,22 @@ class BeamState: ObservableObject {
     
     @Published var tabs: [BrowserTab] = []
     @Published var currentTab = BrowserTab() // Fake empty tab by default
+    {
+        didSet {
+            tabScope.removeAll()
+            currentTab.$canGoBack.sink { v in
+                self.canGoBack = v
+            }.store(in: &tabScope)
+            currentTab.$canGoForward.sink { v in
+                self.canGoForward = v
+            }.store(in: &tabScope)
+        }
+    }
 
     @Published var canGoBack: Bool = false
     @Published var canGoForward: Bool = false
+    
+    private var tabScope = Set<AnyCancellable>()
 
     public var searchEngine: SearchEngine = GoogleSearch()
     
