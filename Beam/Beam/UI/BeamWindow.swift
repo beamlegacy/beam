@@ -11,11 +11,12 @@ import SwiftUI
 
 class BeamWindow: NSWindow {
     var state: BeamState!
+    var cloudKitContainer: NSPersistentCloudKitContainer
 
     init(contentRect: NSRect, cloudKitContainer: NSPersistentCloudKitContainer) {
         let state = BeamState()
         self.state = state
-        
+        self.cloudKitContainer = cloudKitContainer
         super.init(contentRect: contentRect, styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
                    backing: .buffered, defer: false)
         // Create the SwiftUI view and set the context as the value for the managedObjectContext environment keyPath.
@@ -85,4 +86,11 @@ class BeamWindow: NSWindow {
         
         return super.performKeyEquivalent(with: event)
     }
+    
+    @IBAction func newDocument(_ sender: Any?) {
+        let window = BeamWindow(contentRect: NSRect(x: 0, y: 0, width: 480, height: 300), cloudKitContainer: cloudKitContainer)
+        window.center()
+        window.makeKeyAndOrderFront(nil)
+    }
+
 }
