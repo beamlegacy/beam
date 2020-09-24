@@ -11,17 +11,39 @@ import Combine
 
 
 @NSApplicationMain
-class AppDelegate: NSObject, NSApplicationDelegate {
+class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     @IBOutlet var window: BeamWindow!
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
+        NSApp.mainMenu?.item(withTitle: "Window")?.submenu?.delegate = self
+        NSApp.mainMenu?.item(withTitle: "Window")?.submenu?.delegate = self
+
         // Create the window and set the content view.
         window = BeamWindow(contentRect: NSRect(x: 0, y: 0, width: 480, height: 300), cloudKitContainer: persistentContainer)
         window.center()
         window.makeKeyAndOrderFront(nil)
     }
 
+    func toggleVisibility(_ visible: Bool, ofAlternatesKeyEquivalentsItems items: [NSMenuItem]) {
+        for item in items.filter({ $0.tag == 2 }) {
+            item.isHidden = !visible
+        }
+    }
+
+    func menuWillOpen(_ menu: NSMenu) {
+        if menu.title == "Window" {
+            toggleVisibility(false, ofAlternatesKeyEquivalentsItems: menu.items)
+        }
+    }
+
+    func menuDidClose(_ menu: NSMenu) {
+        if menu.title == "Window" {
+            toggleVisibility(true, ofAlternatesKeyEquivalentsItems: menu.items)
+        }
+    }
+
+    
     func applicationWillTerminate(_ aNotification: Notification) {
         // Insert code here to tear down your application
     }

@@ -19,6 +19,7 @@ class BeamWindow: NSWindow {
         self.cloudKitContainer = cloudKitContainer
         super.init(contentRect: contentRect, styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
                    backing: .buffered, defer: false)
+        self.tabbingMode = .disallowed
         // Create the SwiftUI view and set the context as the value for the managedObjectContext environment keyPath.
         // Add `@Environment(\.managedObjectContext)` in the views that will need the context.
         let contentView = ContentView().environment(\.managedObjectContext, cloudKitContainer.viewContext).environmentObject(state)
@@ -44,53 +45,44 @@ class BeamWindow: NSWindow {
 
     }
     
-    override func keyDown(with event: NSEvent) {
-        if event.modifierFlags.contains(.command) {
-            if event.modifierFlags.contains(.shift) {
-                if state.mode == .web { // Only cycle through tabs if we can see the tab bar
-                    if event.characters == "[" {
-                        // Activate previous tab
-                        if let i = state.tabs.firstIndex(of: state.currentTab) {
-                            let i = i - 1 < 0 ? state.tabs.count - 1 : i - 1
-                            state.currentTab = state.tabs[i]
-                        }
-                    } else if event.characters == "]" {
-                        // Activate next tab
-                        if let i = state.tabs.firstIndex(of: state.currentTab) {
-                            let i = (i + 1) % state.tabs.count
-                            state.currentTab = state.tabs[i]
-                        }
-                    }
-                }
-            }
-            
-        }
-    }
-    
-    override func performKeyEquivalent(with event: NSEvent) -> Bool {
-        if event.charactersIgnoringModifiers == "w" && event.modifierFlags.contains(.command) {
-            // Close current tab
-            if state.mode == .web {
-                state.tabs.removeAll { tab -> Bool in
-                    state.currentTab.id == tab.id
-                }
-                return true
-            }
-        }
-        
-        if event.charactersIgnoringModifiers == "t" && event.modifierFlags.contains(.command) {
-            state.mode = .note
-            state.searchQuery = ""
-            return true
-        }
-        
-        return super.performKeyEquivalent(with: event)
-    }
-    
     @IBAction func newDocument(_ sender: Any?) {
         let window = BeamWindow(contentRect: NSRect(x: 0, y: 0, width: 480, height: 300), cloudKitContainer: cloudKitContainer)
         window.center()
         window.makeKeyAndOrderFront(nil)
     }
 
+    @IBAction func showPreviousTab(_ sender: Any?) {
+        if let i = state.tabs.firstIndex(of: state.currentTab) {
+            let i = i - 1 < 0 ? state.tabs.count - 1 : i - 1
+            state.currentTab = state.tabs[i]
+        }
+    }
+    
+    @IBAction func showNextTab(_ sender: Any?) {
+        // Activate next tab
+        if let i = state.tabs.firstIndex(of: state.currentTab) {
+            let i = (i + 1) % state.tabs.count
+            state.currentTab = state.tabs[i]
+        }
+    }
+    
+    @IBAction func newSearch(_ sender: Any?) {
+        state.mode = .note
+        state.searchQuery = ""
+    }
+    
+    override func performClose(_ sender: Any?) {
+        if state.mode == .web {
+            if let i = state.tabs.firstIndex(of: state.currentTab) {
+                state.tabs.remove(at: i)
+                let nextTabIndex = min(i, state.tabs.count - 1)
+                if nextTabIndex >= 0 {
+                    state.currentTab = state.tabs[nextTabIndex]
+                }
+                return
+            }
+        }
+        
+        super.performClose(sender)
+    }
 }
