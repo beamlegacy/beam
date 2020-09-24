@@ -29,6 +29,10 @@ class BeamState: ObservableObject {
                     self.tabs.append(newTab)
                 }
             }
+            
+            if tabs.isEmpty {
+                mode = .note
+            }
         }
     }
     @Published var currentTab = BrowserTab(originalQuery: "") // Fake empty tab by default

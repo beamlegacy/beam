@@ -42,4 +42,43 @@ class BeamWindow: NSWindow {
         self.addTitlebarAccessoryViewController(titlebarAccessory)
 
     }
+    
+    override func keyDown(with event: NSEvent) {
+        if event.modifierFlags.contains(.command) {
+            if event.modifierFlags.contains(.shift) {
+                if event.characters == "[" {
+                    // Activate previous tab
+                    if let i = state.tabs.firstIndex(of: state.currentTab) {
+                        let i = i - 1 < 0 ? state.tabs.count - 1 : i - 1
+                        state.currentTab = state.tabs[i]
+                    }
+                } else if event.characters == "]" {
+                    // Activate next tab
+                    if let i = state.tabs.firstIndex(of: state.currentTab) {
+                        let i = (i + 1) % state.tabs.count
+                        state.currentTab = state.tabs[i]
+                    }
+                }
+            }
+            
+        }
+    }
+    
+    override func performKeyEquivalent(with event: NSEvent) -> Bool {
+        if event.charactersIgnoringModifiers == "w" && event.modifierFlags.contains(.command) {
+            // Close current tab
+            state.tabs.removeAll { tab -> Bool in
+                state.currentTab.id == tab.id
+            }
+            return true
+        }
+        
+        if event.charactersIgnoringModifiers == "t" && event.modifierFlags.contains(.command) {
+            state.mode = .note
+            state.searchQuery = ""
+            return true
+        }
+        
+        return super.performKeyEquivalent(with: event)
+    }
 }
