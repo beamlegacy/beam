@@ -68,6 +68,7 @@ struct BrowserTabView: View {
     }.frame(minWidth: 50, maxWidth: .infinity, minHeight: 20, maxHeight: 20, alignment: .leading)
     .padding([.trailing], 1)
     .padding([.top], 2)
+    .animation(nil)
     
 }
 
