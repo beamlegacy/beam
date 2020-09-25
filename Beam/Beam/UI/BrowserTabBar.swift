@@ -11,7 +11,7 @@ import SwiftUI
 fileprivate struct Background: View {
     var body: some View {
         ZStack {
-            Rectangle().fill(Color(hue: 0, saturation: 0, brightness: 0.97))
+            Rectangle().fill(Color("TabBarBg"))
             GeometryReader { geometry in
                 Path { path in
 //                    path.move(to: CGPoint(x: 0, y: h))
@@ -20,7 +20,7 @@ fileprivate struct Background: View {
                     path.move(to: CGPoint(x: 0, y: h))
                     path.addLine(to: CGPoint(x: 3000, y: h))
                 }
-                .stroke(Color(hue: 0, saturation: 0, brightness: 0.4))
+                .stroke(Color(NSColor.separatorColor))
             }
         }
     }
@@ -40,7 +40,7 @@ struct BrowserTabBar: View {
                                 currentTab = tab
                             }
                     }
-                }.padding([.leading, .trailing], 5)
+                }.padding([.leading, .trailing], 2)
             }
         }.frame(height: 25)
     }

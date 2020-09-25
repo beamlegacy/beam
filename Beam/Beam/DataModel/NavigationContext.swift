@@ -14,5 +14,4 @@ struct NavigationContext {
 }
 
 struct NavigationContextStack {
-    
 }

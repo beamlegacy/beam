@@ -33,7 +33,7 @@ struct ModeView: View {
 
 struct ContentView: View {
     var body: some View {
-        ModeView().background(Color(.white))
+        ModeView().background(Color("NotesBg"))
     }
 }
 

@@ -22,4 +22,3 @@ struct AutoCompleteView: View {
         return AnyView(Text("Search for something or create a note"))
     }
 }
-

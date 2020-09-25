@@ -10,6 +10,41 @@ import AppKit
 import Combine
 import SwiftUI
 
+class VerticallyCenteredTextFieldCell: NSTextFieldCell {
+    override func titleRect(forBounds rect: NSRect) -> NSRect {
+        var titleRect = super.titleRect(forBounds: rect)
+
+        let minimumHeight = self.cellSize(forBounds: rect).height
+        titleRect.origin.y += (titleRect.height - minimumHeight) / 2
+        titleRect.size.height = minimumHeight
+
+        return titleRect
+    }
+
+    override func drawInterior(withFrame cellFrame: NSRect, in controlView: NSView) {
+        super.drawInterior(withFrame: titleRect(forBounds: cellFrame), in: controlView)
+    }
+
+    override func draw(withFrame cellFrame: NSRect, in controlView: NSView) {
+        super.draw(withFrame: titleRect(forBounds: cellFrame), in: controlView)
+    }
+
+    override func highlight(_ flag: Bool, withFrame cellFrame: NSRect, in controlView: NSView) {
+        super.highlight(flag, withFrame: titleRect(forBounds: cellFrame), in: controlView)
+    }
+
+    override func edit(withFrame rect: NSRect, in controlView: NSView, editor textObj: NSText, delegate: Any?, event: NSEvent?) {
+        super.edit(withFrame: titleRect(forBounds: rect), in: controlView, editor: textObj, delegate: delegate, event: event)
+    }
+
+
+
+    override func select(withFrame aRect: NSRect, in controlView: NSView, editor textObj: NSText, delegate anObject: Any?, start selStart: Int, length selLength: Int) {
+        super.select(withFrame: titleRect(forBounds: aRect), in: controlView, editor: textObj, delegate: anObject, start: selStart, length: selLength)
+    }
+}
+
+
 class BNSTextField : NSTextField, ObservableObject {
     var value: Binding<String>
     public var onEditingChanged: (Bool) -> Void = { _ in }
@@ -21,10 +56,12 @@ class BNSTextField : NSTextField, ObservableObject {
         value = stringValue
         self.focusOnCreation = focusOnCreation
         super.init(frame: NSRect())
+        self.cell = VerticallyCenteredTextFieldCell()
         self.target = self
         self.action = #selector(commit)
         self.isEditable = true
         self.isSelectable = true
+        self.usesSingleLineMode = true
         self.stringValue = value.wrappedValue
     }
     
@@ -38,7 +75,7 @@ class BNSTextField : NSTextField, ObservableObject {
 
     public override func becomeFirstResponder() -> Bool {
         onEditingChanged(true)
-        return super.becomeFirstResponder()
+        return true
     }
     
     public override func resignFirstResponder() -> Bool {
@@ -70,11 +107,29 @@ class BNSTextField : NSTextField, ObservableObject {
         return super.performKeyEquivalent(with: event)
     }
 
-    override func viewDidMoveToWindow() {
+    #if false
+    override func viewDidMoveToSuperview() {
         if focusOnCreation {
-            self.window?.makeFirstResponder(self)
+//            self.window?.initialFirstResponder = self
+//            self.window?.makeFirstResponder(self)
+            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: DispatchTimeInterval.milliseconds(10)), execute: { [weak self] in
+                guard let self = self else { return }
+                let down = NSEvent.mouseEvent(with: .leftMouseDown, location: self.convert(NSPoint(), to: nil), modifierFlags: [], timestamp: CACurrentMediaTime(), windowNumber: self.window!.windowNumber, context: nil, eventNumber: 0, clickCount: 1, pressure: 1)
+//                NSApplication.shared.sendEvent(down!)
+//                self.mouseDown(with: down!)
+                self.window?.sendEvent(down!)
+
+//                DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: DispatchTimeInterval.milliseconds(10)), execute: { [weak self] in
+//                    guard let self = self else { return }
+                    let up = NSEvent.mouseEvent(with: .leftMouseUp, location: self.convert(NSPoint(), to: nil), modifierFlags: [], timestamp: CACurrentMediaTime(), windowNumber: self.window!.windowNumber, context: nil, eventNumber: 0, clickCount: 1, pressure: 1)
+//                    self.mouseUp(with: up!)
+                self.window?.sendEvent(up!)
+//                NSApplication.shared.sendEvent(up!)
+//                })
+            })
         }
     }
+    #endif
     
     @objc func commit(_ sender: AnyObject) {
         onCommit()
@@ -83,6 +138,13 @@ class BNSTextField : NSTextField, ObservableObject {
     public override var acceptsFirstResponder: Bool {
         return true
     }
+    
+    public override var intrinsicContentSize: NSSize {
+        var i = super.intrinsicContentSize
+        i.height = 21
+        return i
+    }
+    
 }
 
 

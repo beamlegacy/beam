@@ -9,6 +9,7 @@ import Foundation
 import SwiftUI
 import Combine
 import WebKit
+import SwiftSoup
 
 class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate, WKUIDelegate {
     var id: UUID
@@ -127,7 +128,84 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
     func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
     }
 
+    class textNodeVisitor: SwiftSoup.NodeVisitor {
+        init() {
+        }
+        public func head(_ node: Node, _ depth: Int) {
+            if let textNode = (node as? TextNode) {
+                let string = textNode.getWholeText()
+                print("Node[\(depth)]: \(string)\n")
+            } else if let element = (node as? Element) {
+//                if !accum.isEmpty &&
+//                    (element.isBlock() || element.nodeName() == "br") &&
+//                    !TextNode.lastCharIsWhitespace(accum) {
+////                    accum.append(" ")
+//                }
+            }
+        }
+
+        public func tail(_ node: Node, _ depth: Int) {
+        }
+    }
+    
+    class NodeTraversor {
+        private let visitor: NodeVisitor
+
+        /**
+         * Create a new traversor.
+         * @param visitor a class implementing the {@link NodeVisitor} interface, to be called when visiting each node.
+         */
+        public init(_ visitor: NodeVisitor) {
+            self.visitor = visitor
+        }
+
+        /**
+         * Start a depth-first traverse of the root and all of its descendants.
+         * @param root the root node point to traverse.
+         */
+        open func traverse(_ root: Node?)throws {
+            var node: Node? = root
+            var depth: Int = 0
+
+            while (node != nil) {
+                try visitor.head(node!, depth)
+                if (node!.childNodeSize() > 0) {
+                    node = node!.childNode(0)
+                    depth+=1
+                } else {
+                    while (node!.nextSibling() == nil && depth > 0) {
+                        try visitor.tail(node!, depth)
+                        node = node!.parent()
+                        depth-=1
+                    }
+                    try visitor.tail(node!, depth)
+                    if (node === root) {
+                        break
+                    }
+                    node = node!.nextSibling()
+                }
+            }
+        }
+
+    }
+
+
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        webView.evaluateJavaScript("document.body.innerHTML") { (string, error) in
+            if let html = string as? String {
+                do {
+                    let doc: Document = try SwiftSoup.parse(html)
+//                    let text = try doc.text()
+                    try NodeTraversor(textNodeVisitor()).traverse(doc)
+                    
+//                    print("==============================\nAll the text in the document:\n\(text)")
+                } catch Exception.Error(let type, let message) {
+                    print("SwiftSoup Error(\(type)): \(message)")
+                } catch {
+                    print("error")
+                }
+            }
+        }
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {

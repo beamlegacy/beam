@@ -13,9 +13,12 @@ struct AutoCompleteList: View {
     @Binding var elements: [AutoCompleteResult]
     
     var body: some View {
-        List(self.elements) { i in
-                AutoCompleteItem(item: i, selected: isSelectedItem(i))
-        }.frame(maxWidth: .infinity)
+        VStack() {
+            ForEach(elements) { i in
+                return AutoCompleteItem(item: i, selected: isSelectedItem(i))
+                    .padding()
+            }
+        }.frame(maxWidth: .infinity).background(Color("transparent"))
     }
     
     func isSelectedItem(_ item: AutoCompleteResult) -> Bool {

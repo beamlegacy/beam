@@ -28,4 +28,3 @@ public class NSViewContainerView<ContentView: NSView>: NSView {
         }
     }
 }
-

@@ -14,12 +14,12 @@ struct AutoCompleteItem: View {
     var body: some View {
         HStack {
             Text(item.string)
-                .foregroundColor(selected ? .white :  .black)
+                .foregroundColor(selected ? Color("AutoCompleteTextSelected") :  Color("AutoCompleteText"))
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal)
         .padding([.top, .bottom], 3)
-        .background(selected ? Color.accentColor : Color.white)
+        .background(selected ? Color.accentColor : Color("transparent"))
         .clipShape(RoundedRectangle(cornerRadius: 8.0), style: FillStyle())
 
             
