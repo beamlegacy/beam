@@ -11,29 +11,32 @@ struct ModeView: View {
     @EnvironmentObject var state: BeamState
     @ViewBuilder
     var body: some View {
-        ZStack {
-            ScrollView([.vertical]) {
-                AutoCompleteView(autoComplete: $state.completedQueries, selectionIndex: $state.selectionIndex)
-                    .frame(idealWidth: 800, maxWidth: .infinity, idealHeight: 600, maxHeight: .infinity, alignment: .center)
+        VStack {
+            SearchBar().padding(.leading, 80).padding(.trailing, 20)
+            ZStack {
+                ScrollView([.vertical]) {
+                    AutoCompleteView(autoComplete: $state.completedQueries, selectionIndex: $state.selectionIndex)
+                        .frame(idealWidth: 800, maxWidth: .infinity, idealHeight: 600, maxHeight: .infinity, alignment: .center)
+                    
+                }
                 
-            }
-            
-            if state.mode == .web {
-                    VStack {
-                        BrowserTabBar(tabs: $state.tabs, currentTab: $state.currentTab)
-                        WebView(webView: state.currentTab.webView)
-                    }
-                    .transition(.move(edge: .bottom))
-                    .animation(.easeInOut(duration: 0.3))
-            }
+                if state.mode == .web {
+                        VStack {
+                            BrowserTabBar(tabs: $state.tabs, currentTab: $state.currentTab)
+                            WebView(webView: state.currentTab.webView)
+                        }
+                        .transition(.move(edge: .bottom))
+                        .animation(.easeInOut(duration: 0.3))
+                }
 
+            }
         }
     }
 }
 
 struct ContentView: View {
     var body: some View {
-        ModeView().background(Color("NotesBg"))
+        ModeView().background(Color("NotesBg")).edgesIgnoringSafeArea(.top)
     }
 }
 

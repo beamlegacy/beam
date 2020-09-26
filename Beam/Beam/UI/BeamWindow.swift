@@ -21,6 +21,21 @@ class BeamToolBar: NSToolbar {
     }
 }
 
+class BeamHostingView<Content> : NSHostingView<Content> where Content : View {
+    required public init(rootView: Content) {
+        super.init(rootView: rootView)
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+        assert(false)
+    }
+    
+    public override var allowsVibrancy: Bool { false }
+}
+    
+
+
 
 class BeamWindow: NSWindow, NSToolbarDelegate {
     var state: BeamState!
@@ -31,21 +46,36 @@ class BeamWindow: NSWindow, NSToolbarDelegate {
         let state = BeamState()
         self.state = state
         self.cloudKitContainer = cloudKitContainer
-        super.init(contentRect: contentRect, styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
+        
+        super.init(contentRect: contentRect, styleMask: [.titled, .closable, .miniaturizable, .texturedBackground, .resizable, .fullSizeContentView],
                    backing: .buffered, defer: false)
-        self.titleVisibility = .hidden
+
         self.titlebarAppearsTransparent = true
-        self.toolbar = BeamToolBar(self)
-        self.toolbar?.isVisible = true
- 
+        self.titleVisibility = .hidden
+
+        let version = ProcessInfo.processInfo.operatingSystemVersion
+        let BigSur = version.majorVersion >= 11 || (version.majorVersion == 10 && version.minorVersion >= 16)
+        
+        titleVisibility = .hidden
+        titlebarAppearsTransparent = true
+        
         self.tabbingMode = .disallowed
         // Create the SwiftUI view and set the context as the value for the managedObjectContext environment keyPath.
         // Add `@Environment(\.managedObjectContext)` in the views that will need the context.
         let contentView = ContentView().environment(\.managedObjectContext, cloudKitContainer.viewContext).environmentObject(state)
         setFrameAutosaveName("BeamWindow")
-        self.contentView = NSHostingView(rootView: contentView)
+        if let b = self.standardWindowButton(.closeButton) {
+//                b.frame = b.frame.offsetBy(dx: 0, dy: -6)
+            if var f = b.superview?.superview?.frame {
+                let v = CGFloat(BigSur ? 7: 13)
+                f.size.height += v
+                f.origin.y -= v
+                b.superview?.superview?.frame = f
+            }
+        }
+        self.contentView = BeamHostingView(rootView: contentView)
     }
-        
+
     @IBAction func newDocument(_ sender: Any?) {
         let window = BeamWindow(contentRect: NSRect(x: 0, y: 0, width: 480, height: 300), cloudKitContainer: cloudKitContainer)
         window.center()
@@ -99,11 +129,15 @@ class BeamWindow: NSWindow, NSToolbarDelegate {
     func toolbar(_ toolbar: NSToolbar, itemForItemIdentifier itemIdentifier: NSToolbarItem.Identifier, willBeInsertedIntoToolbar flag: Bool) -> NSToolbarItem? {
         switch itemIdentifier {
         case NSToolbarItem.Identifier.searchBar:
-            let titlebarAccessoryView = SearchBar()
-                .environmentObject(state)
-            let accessoryHostingView = NSHostingView(rootView:titlebarAccessoryView)
-            accessoryHostingView.frame.size = accessoryHostingView.fittingSize
-            return customToolbarItem(itemIdentifier: .searchBar, label: "Omni Bar", paletteLabel: "Omni Bar", toolTip: "Search and navigate", itemContent: accessoryHostingView)
+//            let titlebarAccessoryView = SearchBar()
+//                .environmentObject(state)
+//            let accessoryHostingView = BeamHostingView(rootView:titlebarAccessoryView)
+//            accessoryHostingView.frame.size = accessoryHostingView.fittingSize
+//            return customToolbarItem(itemIdentifier: .searchBar, label: "Omni Bar", paletteLabel: "Omni Bar", toolTip: "Search and navigate", itemContent: accessoryHostingView)
+            // Fake tool bar:
+            let v = NSView(frame: NSRect(origin: CGPoint(), size: CGSize(width: 10, height: 25)))
+            return customToolbarItem(itemIdentifier: .searchBar, label: "Omni Bar", paletteLabel: "Omni Bar", toolTip: "Search and navigate", itemContent: v)
+
         default:
             return nil
         }

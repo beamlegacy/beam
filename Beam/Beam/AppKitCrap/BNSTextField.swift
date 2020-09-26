@@ -107,29 +107,14 @@ class BNSTextField : NSTextField, ObservableObject {
         return super.performKeyEquivalent(with: event)
     }
 
-    #if false
-    override func viewDidMoveToSuperview() {
+    override func viewDidMoveToWindow() {
         if focusOnCreation {
 //            self.window?.initialFirstResponder = self
-//            self.window?.makeFirstResponder(self)
-            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: DispatchTimeInterval.milliseconds(10)), execute: { [weak self] in
-                guard let self = self else { return }
-                let down = NSEvent.mouseEvent(with: .leftMouseDown, location: self.convert(NSPoint(), to: nil), modifierFlags: [], timestamp: CACurrentMediaTime(), windowNumber: self.window!.windowNumber, context: nil, eventNumber: 0, clickCount: 1, pressure: 1)
-//                NSApplication.shared.sendEvent(down!)
-//                self.mouseDown(with: down!)
-                self.window?.sendEvent(down!)
-
-//                DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: DispatchTimeInterval.milliseconds(10)), execute: { [weak self] in
-//                    guard let self = self else { return }
-                    let up = NSEvent.mouseEvent(with: .leftMouseUp, location: self.convert(NSPoint(), to: nil), modifierFlags: [], timestamp: CACurrentMediaTime(), windowNumber: self.window!.windowNumber, context: nil, eventNumber: 0, clickCount: 1, pressure: 1)
-//                    self.mouseUp(with: up!)
-                self.window?.sendEvent(up!)
-//                NSApplication.shared.sendEvent(up!)
-//                })
-            })
+            DispatchQueue.main.async {
+                self.window?.makeFirstResponder(self)
+            }
         }
     }
-    #endif
     
     @objc func commit(_ sender: AnyObject) {
         onCommit()
