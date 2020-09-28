@@ -29,10 +29,12 @@ struct BeamNotes {
 protocol BeamBlock: BeamObject {
     var elements: [BID] { get set }
     var outLinks: [String] { get }
+
+//    mutating func addElement(_ element: BeamElement)
 }
 
 struct BeamNote: BeamBlock {
-    var id: BID
+    var id: BID = BID()
     public var title: String
 
     var elements: [BID] = []
@@ -53,23 +55,23 @@ struct TextFormat: OptionSet, Codable {
 }
 
 struct BeamText: BeamTextBlock {
-    var id: BID
+    var id: BID = BID()
     var format: TextFormat = .regular
     var text: String = ""
 }
 
 struct BeamTextURL: BeamTextBlock {
-    var id: BID
+    var id: BID = BID()
     var text: String = ""
 }
 
 struct BeamTextCode: BeamTextBlock {
-    var id: BID
+    var id: BID = BID()
     var text: String = ""
 }
 
 struct BeamTextLink: BeamTextBlock {
-    var id: BID
+    var id: BID = BID()
     var text: String = ""
     var target: BID
 }

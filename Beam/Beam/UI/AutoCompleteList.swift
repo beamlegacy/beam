@@ -16,9 +16,8 @@ struct AutoCompleteList: View {
         VStack() {
             ForEach(elements) { i in
                 return AutoCompleteItem(item: i, selected: isSelectedItem(i))
-                    .padding()
             }
-        }.frame(maxWidth: .infinity).background(Color("transparent"))
+        }.frame(maxWidth: .infinity, alignment: .top).background(Color("transparent"))
     }
     
     func isSelectedItem(_ item: AutoCompleteResult) -> Bool {

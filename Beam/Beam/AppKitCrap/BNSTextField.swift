@@ -101,21 +101,14 @@ class BNSTextField : NSTextField, ObservableObject {
     }
 
     override func performKeyEquivalent(with event: NSEvent) -> Bool {
-        if onPerformKeyEquivalent(event) {
-            return true
+        if window?.firstResponder === self {
+            if onPerformKeyEquivalent(event) {
+                return true
+            }
         }
         return super.performKeyEquivalent(with: event)
     }
 
-    override func viewDidMoveToWindow() {
-        if focusOnCreation {
-//            self.window?.initialFirstResponder = self
-            DispatchQueue.main.async {
-                self.window?.makeFirstResponder(self)
-            }
-        }
-    }
-    
     @objc func commit(_ sender: AnyObject) {
         onCommit()
     }

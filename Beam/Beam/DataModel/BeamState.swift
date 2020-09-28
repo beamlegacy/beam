@@ -14,13 +14,31 @@ enum Mode {
     case web
 }
 
+class BeamData {
+    @Published var notes: BeamNotes = BeamNotes()
+    @Published var todaysNote: BeamNote
+    
+    init() {
+        let fmt = DateFormatter()
+        let today = Date()
+        fmt.dateStyle = .long
+        fmt.doesRelativeDateFormatting = false
+        fmt.timeStyle = .none
+        let todayStr = fmt.string(from: today)
+        todaysNote = BeamNote(title: todayStr)
+    }
+}
+
 class BeamState: ObservableObject {
     @Published var mode: Mode = .note
     @Published var searchQuery: String = ""
     private let completer = Completer()
     @Published var completedQueries = [AutoCompleteResult]()
     @Published var selectionIndex: Int? = nil
-
+    
+    var data: BeamData
+    @Published var currentNote: BeamNote? = nil
+    
     @Published public var tabs: [BrowserTab] = [] {
         didSet {
             for tab in tabs {
@@ -83,7 +101,9 @@ class BeamState: ObservableObject {
 
     private var scope = Set<AnyCancellable>()
 
-    public init() {
+    public init(data: BeamData) {
+        self.data = data
+        self.currentNote = data.todaysNote
         $searchQuery.sink { [weak self] query in
             guard let self = self else { return }
             //print("received auto complete query: \(query)")

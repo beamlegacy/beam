@@ -16,9 +16,9 @@ struct AutoCompleteView: View {
             return AnyView(
                 AutoCompleteList(selectedIndex: $selectionIndex, elements: $autoComplete)
             .padding([.leading, .trailing], CGFloat(150))
-            .padding([.top], CGFloat(50))
             )
         }
-        return AnyView(Text("Search for something or create a note"))
+//        return AnyView(Text("Search for something or create a note"))
+        return AnyView(BTextEdit())
     }
 }

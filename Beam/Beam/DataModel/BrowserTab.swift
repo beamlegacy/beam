@@ -36,6 +36,10 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
     @Published var backForwardList: WKBackForwardList
     @Published var visitedURLs = Set<URL>()
 
+    var creationDate: Date = Date()
+    var lastViewDate: Date = Date()
+    var accumulatedViewDuration: TimeInterval = 0
+    
     public var onNewTabCreated: (BrowserTab) -> Void = { _ in }
     
     private var scope = Set<AnyCancellable>()
@@ -250,7 +254,12 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
         print("webView runOpenPanel")
     }
     
+    func startViewing() {
+        lastViewDate = Date()
+    }
 
-
+    func stopViewing() {
+        accumulatedViewDuration += lastViewDate.distance(to: Date())
+    }
 }
 

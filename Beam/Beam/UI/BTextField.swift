@@ -84,7 +84,6 @@ struct BTextField: NSViewRepresentable {
                 // down!
                 return onCursorMovement(.down)
             }
-            print("pressed \(event)")
             return false
         }
     }

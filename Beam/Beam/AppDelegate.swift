@@ -9,18 +9,30 @@ import Cocoa
 import SwiftUI
 import Combine
 
+@objc(BeamApplication)
+public class BeamApplication: NSApplication {
+    
+    override init() {
+        super.init()
+    }
+    
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+    }    
+}
 
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     @IBOutlet var window: BeamWindow!
+    var data: BeamData = BeamData()
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         NSApp.mainMenu?.item(withTitle: "Window")?.submenu?.delegate = self
         NSApp.mainMenu?.item(withTitle: "Window")?.submenu?.delegate = self
 
         // Create the window and set the content view.
-        window = BeamWindow(contentRect: NSRect(x: 0, y: 0, width: 480, height: 300), cloudKitContainer: persistentContainer)
+        window = BeamWindow(contentRect: NSRect(x: 0, y: 0, width: 480, height: 300), cloudKitContainer: persistentContainer, data: data)
         window.center()
         window.makeKeyAndOrderFront(nil)
     }

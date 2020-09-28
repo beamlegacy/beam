@@ -47,3 +47,5 @@ Thumbs.db
 *.flv
 *.mov
 *.wmv
+*.xcbkptlist
+Beam/Podfile.lock
