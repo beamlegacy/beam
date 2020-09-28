@@ -72,6 +72,7 @@ class BNSTextField : NSTextField, ObservableObject {
         self.isSelectable = true
         self.usesSingleLineMode = true
         self.stringValue = value.wrappedValue
+        self.font = NSFont(name: "SF Text", size: 16)
     }
     
     required init?(coder: NSCoder) {

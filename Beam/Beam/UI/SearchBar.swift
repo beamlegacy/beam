@@ -9,6 +9,9 @@ import Foundation
 import SwiftUI
 import AppKit
 
+fileprivate var _cornerRadius = CGFloat(6)
+fileprivate var buttonFont = SwiftUI.Font.custom("SF Symbols", size: 16)
+
 struct GlobalTabTitle: View {
     @EnvironmentObject var state: BeamState
     @ObservedObject var tab: BrowserTab
@@ -20,7 +23,29 @@ struct GlobalTabTitle: View {
                 state.mode = .note
                 state.searchQuery = tab.originalQuery
             })
-            .font(.system(size: 16, weight: .semibold))
+            .font(SwiftUI.Font.custom("SF Text", size: 16).weight(.heavy))
+    }
+}
+
+struct RoundRectButtonStyle : PrimitiveButtonStyle {
+    public func makeBody(configuration: BorderedButtonStyle.Configuration) -> some View {
+        return ZStack {
+            RoundedRectangle(cornerRadius: _cornerRadius).foregroundColor(Color("ButtonBackgroundOnColor")).frame(width: 33, height: 28, alignment: .center)
+            configuration.label.foregroundColor(Color("ButtonIconColor"))
+        }
+        .onTapGesture(count: 1) {
+            configuration.trigger()
+        }
+
+    }
+}
+
+struct Symbol: View {
+    var name: String
+    var size: Float = 16
+    
+    var body: some View {
+        Image(name).font(.system(size: CGFloat(size))).frame(height: CGFloat(size), alignment: .center)
     }
 }
 
@@ -30,70 +55,67 @@ struct SearchBar: View {
     var body: some View {
         HStack {
             Button(action: goBack) {
-                Text("<")
-                    .aspectRatio(contentMode: .fit)
-            }.buttonStyle(BorderlessButtonStyle()).disabled(!state.canGoBack).frame(alignment: .center)
+                Symbol(name: "chevron.left")
+            }.buttonStyle(BorderlessButtonStyle()).disabled(!state.canGoBack).padding(.leading, 10)
             Button(action: goForward) {
-                Text(">")
-                    .aspectRatio(contentMode: .fit)
-            }.buttonStyle(BorderlessButtonStyle()).disabled(!state.canGoForward).frame(alignment: .center)
+                Symbol(name: "chevron.right")
+            }.buttonStyle(BorderlessButtonStyle()).disabled(!state.canGoForward).padding(.leading, 10)
             
             if state.mode == .note {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 4).foregroundColor(Color("SearchBarBg")).frame(height: 20)
-//                    TextField("Search or create note...", text: $state.searchQuery,
-                    BTextField("Search or create note...", text: $state.searchQuery,
-                               onCommit:  {
-                                withAnimation {
-                                    //print("searchText activated: \(searchText)")
-                                    let query = state.searchQuery
-                                    let queries = state.completedQueries
-                                    var searchText = query
-                                    if let i = state.selectionIndex {
-                                        state.searchEngine.query = queries[i].string
-                                        searchText = state.searchEngine.searchUrl
-                                        print("Start search query: \(searchText)")
-                                        //state.searchQuery = t
-                                    }
-                                    
-                                    if searchText.hasPrefix("http://") || searchText.hasPrefix("https://") {
-                                        print("Start website query: \(searchText)")
-                                    } else {
-                                        state.searchEngine.query = searchText
-                                        searchText = state.searchEngine.searchUrl
-                                        print("Start search query: \(searchText)")
-                                    }
-                                    
-                                    let tab = BrowserTab(originalQuery: query)
-                                    tab.webView.load(URLRequest(url: URL(string: searchText)!))
-                                    state.currentTab = tab
-                                    state.tabs.append(tab)
-                                    state.mode = .web
-                                }
-                               }
-                               ,
-                               onCursorMovement: { cursorMovement in
-                                switch cursorMovement {
-                                case .up:
-                                    state.selectPreviousAutoComplete()
-                                    return true
-                                case .down:
-                                    state.selectNextAutoComplete()
-                                    return true
-                                default:
-                                    break
-                                }
-                                return false
-                               },
-                               focusOnCreation: true
-                    )
-                    .padding([.leading, .trailing], 8)
-                    .frame(idealWidth: 600, maxWidth: .infinity)
-                }
+                HStack {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: _cornerRadius).foregroundColor(Color("ButtonBackgroundOnColor")) .frame(height: 28)
+                        //                    TextField("Search or create note...", text: $state.searchQuery,
+                        
+                        HStack {
+                            BTextField("Search or create note...", text: $state.searchQuery,
+                                       onCommit:  {
+                                        startQuery()
+                                       },
+                                       onCursorMovement: { cursorMovement in
+                                        switch cursorMovement {
+                                        case .up:
+                                            state.selectPreviousAutoComplete()
+                                            return true
+                                        case .down:
+                                            state.selectNextAutoComplete()
+                                            return true
+                                        default:
+                                            break
+                                        }
+                                        return false
+                                       },
+                                       focusOnCreation: true
+                            )
+                            .padding([.leading, .trailing], 8)
+                            .frame(idealWidth: 600, maxWidth: .infinity)
+                            
+                            Button(action: resetSearchQuery) {
+                                Symbol(name: "xmark.circle.fill", size: 12)
+                            }.buttonStyle(BorderlessButtonStyle()).disabled(state.searchQuery.isEmpty).padding([.leading, .trailing], 6)
+                            
+                        }
+                    }
+                    
+                    Button(action: startQuery) {
+                        Symbol(name: "magnifyingglass")
+                    }.disabled(state.searchQuery.isEmpty).buttonStyle(RoundRectButtonStyle())
+
+                    Button(action: startQuery) {
+                        Text("􀅼").font(buttonFont)
+                    }.buttonStyle(BorderlessButtonStyle())
+
+                }.padding(.leading, 10)
+
             } else {
                 GlobalTabTitle(tab: state.currentTab)
-                    .frame(idealWidth: 600, maxWidth: .infinity)
+                    .frame(idealWidth: 600, maxWidth: .infinity, minHeight: 28, alignment: .center)
             }
+
+            Button(action: toggleMode) {
+                Symbol(name: state.mode == .web ? "note.text" : "network")
+            }.buttonStyle(RoundRectButtonStyle()).disabled(state.tabs.isEmpty)
+
         }.padding(.top, 10).padding(.bottom, 10)
     }
     
@@ -103,6 +125,48 @@ struct SearchBar: View {
     
     func goForward() {
         state.currentTab.webView.goForward()
+    }
+
+    func resetSearchQuery() {
+        state.searchQuery = ""
+    }
+    
+    func startQuery() {
+        withAnimation {
+            //print("searchText activated: \(searchText)")
+            let query = state.searchQuery
+            let queries = state.completedQueries
+            var searchText = query
+            if let i = state.selectionIndex {
+                state.searchEngine.query = queries[i].string
+                searchText = state.searchEngine.searchUrl
+                print("Start search query: \(searchText)")
+                //state.searchQuery = t
+            }
+            
+            if searchText.hasPrefix("http://") || searchText.hasPrefix("https://") {
+                print("Start website query: \(searchText)")
+            } else {
+                state.searchEngine.query = searchText
+                searchText = state.searchEngine.searchUrl
+                print("Start search query: \(searchText)")
+            }
+            
+            let tab = BrowserTab(originalQuery: query)
+            tab.webView.load(URLRequest(url: URL(string: searchText)!))
+            state.currentTab = tab
+            state.tabs.append(tab)
+            state.mode = .web
+        }
+
+    }
+    
+    func toggleMode() {
+        if state.mode == .web {
+            state.mode = .note
+        } else {
+            state.mode = .web
+        }
     }
 }
 

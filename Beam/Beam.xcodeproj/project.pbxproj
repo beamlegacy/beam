@@ -9,12 +9,12 @@
 /* Begin PBXBuildFile section */
 		20E1B667EDD2C5D590410B9F /* Pods_Beam.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2BE96DC9A7278563E5878CCD /* Pods_Beam.framework */; };
 		9631C747251CE997009B40C4 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = 9631C746251CE997009B40C4 /* SwiftSoup */; };
+		9631C76B251E3648009B40C4 /* NSView+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9631C76A251E3648009B40C4 /* NSView+Beam.swift */; };
 		964547AD2520CF3E0064D062 /* Font.swift in Sources */ = {isa = PBXBuildFile; fileRef = 964547AC2520CF3E0064D062 /* Font.swift */; };
 		964547B22520D19F0064D062 /* NSRect+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 964547B12520D19F0064D062 /* NSRect+Beam.swift */; };
 		964547B725212D760064D062 /* String+Ranges.swift in Sources */ = {isa = PBXBuildFile; fileRef = 964547B625212D760064D062 /* String+Ranges.swift */; };
 		9645481E25220EC90064D062 /* String+LoremIpsum.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9645481D25220EC90064D062 /* String+LoremIpsum.swift */; };
 		96454823252216570064D062 /* NSRange+CFRange.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96454822252216570064D062 /* NSRange+CFRange.swift */; };
-		9631C76B251E3648009B40C4 /* NSView+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9631C76A251E3648009B40C4 /* NSView+Beam.swift */; };
 		965A78292514F147009980D4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965A78282514F147009980D4 /* AppDelegate.swift */; };
 		965A782B2514F147009980D4 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965A782A2514F147009980D4 /* ContentView.swift */; };
 		965A782E2514F147009980D4 /* Beam.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 965A782C2514F147009980D4 /* Beam.xcdatamodeld */; };
@@ -70,12 +70,12 @@
 /* Begin PBXFileReference section */
 		23F7A69644D041FDF4D3466B /* Pods-Beam.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Beam.release.xcconfig"; path = "Target Support Files/Pods-Beam/Pods-Beam.release.xcconfig"; sourceTree = "<group>"; };
 		2BE96DC9A7278563E5878CCD /* Pods_Beam.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Beam.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		9631C76A251E3648009B40C4 /* NSView+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSView+Beam.swift"; sourceTree = "<group>"; };
 		964547AC2520CF3E0064D062 /* Font.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Font.swift; sourceTree = "<group>"; };
 		964547B12520D19F0064D062 /* NSRect+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSRect+Beam.swift"; sourceTree = "<group>"; };
 		964547B625212D760064D062 /* String+Ranges.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Ranges.swift"; sourceTree = "<group>"; };
 		9645481D25220EC90064D062 /* String+LoremIpsum.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+LoremIpsum.swift"; sourceTree = "<group>"; };
 		96454822252216570064D062 /* NSRange+CFRange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSRange+CFRange.swift"; sourceTree = "<group>"; };
-		9631C76A251E3648009B40C4 /* NSView+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSView+Beam.swift"; sourceTree = "<group>"; };
 		965A78252514F147009980D4 /* Beam.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Beam.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		965A78282514F147009980D4 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		965A782A2514F147009980D4 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -163,6 +163,13 @@
 			path = Pods;
 			sourceTree = "<group>";
 		};
+		9645485C25228FBC0064D062 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
 		965A781C2514F147009980D4 = {
 			isa = PBXGroup;
 			children = (
@@ -188,6 +195,7 @@
 		965A78272514F147009980D4 /* Beam */ = {
 			isa = PBXGroup;
 			children = (
+				9645485C25228FBC0064D062 /* Resources */,
 				96F5DB142517A0D80080E3EE /* AppKitCrap */,
 				96F5DB0B25179EE40080E3EE /* Swift+Beam */,
 				9694F77725155F7200399E6A /* Network */,

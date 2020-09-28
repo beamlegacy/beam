@@ -29,8 +29,14 @@ public struct BTextEdit: NSViewRepresentable {
 
 public class BeamTextEdit : TextInputHandler {
     var font: Font
-    var minimumWidth: Float = 600
+    var minimumWidth: Float = 400
     var maximumWidth: Float = 1024
+    
+    public override var frame: NSRect {
+        didSet {
+            updateRendering()
+        }
+    }
     
     public init(text: String = "", font: Font = Font.main) {
         self.font = font
@@ -80,15 +86,15 @@ public class BeamTextEdit : TextInputHandler {
     private var layouts: [TextLineLayout] = []
     private var cursorRect = NSRect()
 
-    override public var intrinsicContentSize: NSSize {
-        updateTextRendering()
-        var r = NSRect()
-        for l in layouts {
-            r.size.width = max(r.width, l.rect.width)
-            r.size.height += l.rect.height
-        }
-        return r.size
-    }
+//    override public var intrinsicContentSize: NSSize {
+//        updateTextRendering()
+//        var r = NSRect()
+//        for l in layouts {
+//            r.size.width = max(r.width, l.rect.width)
+//            r.size.height += l.rect.height
+//        }
+//        return r.size
+//    }
     
     public func drawMarking(_ context: CGContext, _ start: Int, _ end: Int, _ color: NSColor) {
         context.beginPath()
@@ -198,10 +204,10 @@ public class BeamTextEdit : TextInputHandler {
         invalidateLayout()
     }
 
-    func updateTextRendering() {
+    func updateTextRendering(forceWidth: Float? = nil) {
         if invalidatedTextRendering {
             layouts = []
-            let textWidth = (minimumWidth ... maximumWidth).clamp(Float(frame.size.width))
+            let textWidth = forceWidth ?? (minimumWidth ... maximumWidth).clamp(Float(frame.size.width))
             
             for lrange in lines {
                 let layoutedLines = font.draw(string: text.substring(range: lrange), textWidth: textWidth)

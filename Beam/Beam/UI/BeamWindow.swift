@@ -24,7 +24,7 @@ class BeamHostingView<Content> : NSHostingView<Content> where Content : View {
     
 
 
-class BeamWindow: NSWindow, NSToolbarDelegate {
+class BeamWindow: NSWindow, NSWindowDelegate {
     var state: BeamState!
     var cloudKitContainer: NSPersistentCloudKitContainer
     var data: BeamData
@@ -38,11 +38,9 @@ class BeamWindow: NSWindow, NSToolbarDelegate {
         super.init(contentRect: contentRect, styleMask: [.titled, .closable, .miniaturizable, .texturedBackground, .resizable, .fullSizeContentView],
                    backing: .buffered, defer: false)
 
+        self.delegate = self
         self.titlebarAppearsTransparent = true
         self.titleVisibility = .hidden
-
-        let version = ProcessInfo.processInfo.operatingSystemVersion
-        let RunningOnBigSur = version.majorVersion >= 11 || (version.majorVersion == 10 && version.minorVersion >= 16)
         
         titleVisibility = .hidden
         titlebarAppearsTransparent = true
@@ -55,20 +53,25 @@ class BeamWindow: NSWindow, NSToolbarDelegate {
         let contentView = ContentView().environment(\.managedObjectContext, cloudKitContainer.viewContext).environmentObject(state)
         self.contentView = BeamHostingView(rootView: contentView)
 
+        self.contentView = BeamHostingView(rootView: contentView)
+        self.isMovableByWindowBackground = false
+    }
+
+    public func windowDidResize(_ notification: Notification) {
+        let version = ProcessInfo.processInfo.operatingSystemVersion
+        let RunningOnBigSur = version.majorVersion >= 11 || (version.majorVersion == 10 && version.minorVersion >= 16)
+        
         // THIS HACK IS HORRIBLE But AppKit leaves us little choice to have a similar look on Catalina and Future OSes
         if let b = self.standardWindowButton(.closeButton) {
             if var f = b.superview?.superview?.frame {
-                let v = CGFloat(RunningOnBigSur ? 7: 13)
+                let v = CGFloat(RunningOnBigSur ? 10.5 : 12)
                 f.size.height += v
                 f.origin.y -= v
                 b.superview?.superview?.frame = f
             }
         }
-
-        self.contentView = BeamHostingView(rootView: contentView)
-        self.isMovableByWindowBackground = false
     }
-
+    
     @IBAction func newDocument(_ sender: Any?) {
         let window = BeamWindow(contentRect: NSRect(x: 0, y: 0, width: 480, height: 300), cloudKitContainer: cloudKitContainer, data: data)
         window.center()

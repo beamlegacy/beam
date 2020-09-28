@@ -12,13 +12,16 @@ struct ModeView: View {
     @ViewBuilder
     var body: some View {
         VStack {
-            SearchBar().padding(.leading, 80).padding(.trailing, 20)
+            SearchBar()
+                .padding(.leading, 73)
+                .padding(.trailing, 20)
+                .padding(.top, 2)
             ZStack {
                 ScrollView([.vertical]) {
                     AutoCompleteView(autoComplete: $state.completedQueries, selectionIndex: $state.selectionIndex)
                         .frame(idealWidth: 800, maxWidth: .infinity, idealHeight: 600, maxHeight: .infinity, alignment: .center)
                     
-                }
+                }.edgesIgnoringSafeArea(.top)
                 
                 if state.mode == .web {
                         VStack {
@@ -36,7 +39,7 @@ struct ModeView: View {
 
 struct ContentView: View {
     var body: some View {
-        ModeView().background(Color("NotesBg")).edgesIgnoringSafeArea(.top)
+        ModeView().background(Color("EditorBackgroundColor"))
     }
 }
 

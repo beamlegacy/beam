@@ -2,11 +2,8 @@
   "colors" : [
     {
       "color" : {
-        "color-space" : "gray-gamma-22",
-        "components" : {
-          "alpha" : "0.000",
-          "white" : "0.843"
-        }
+        "platform" : "osx",
+        "reference" : "textBackgroundColor"
       },
       "idiom" : "universal"
     },
@@ -18,11 +15,8 @@
         }
       ],
       "color" : {
-        "color-space" : "gray-gamma-22",
-        "components" : {
-          "alpha" : "0.000",
-          "white" : "0.196"
-        }
+        "platform" : "osx",
+        "reference" : "underPageBackgroundColor"
       },
       "idiom" : "universal"
     }
