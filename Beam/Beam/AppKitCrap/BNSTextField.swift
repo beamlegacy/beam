@@ -11,6 +11,7 @@ import Combine
 import SwiftUI
 
 class VerticallyCenteredTextFieldCell: NSTextFieldCell {
+    
     override func titleRect(forBounds rect: NSRect) -> NSRect {
         var titleRect = super.titleRect(forBounds: rect)
 
@@ -34,6 +35,7 @@ class VerticallyCenteredTextFieldCell: NSTextFieldCell {
     }
 
     override func edit(withFrame rect: NSRect, in controlView: NSView, editor textObj: NSText, delegate: Any?, event: NSEvent?) {
+        isEditing = true
         super.edit(withFrame: titleRect(forBounds: rect), in: controlView, editor: textObj, delegate: delegate, event: event)
     }
 
@@ -42,6 +44,13 @@ class VerticallyCenteredTextFieldCell: NSTextFieldCell {
     override func select(withFrame aRect: NSRect, in controlView: NSView, editor textObj: NSText, delegate anObject: Any?, start selStart: Int, length selLength: Int) {
         super.select(withFrame: titleRect(forBounds: aRect), in: controlView, editor: textObj, delegate: anObject, start: selStart, length: selLength)
     }
+    
+    override func endEditing(_ textObj: NSText) {
+        super.endEditing(textObj)
+        isEditing = false
+    }
+
+    var isEditing = false
 }
 
 
@@ -101,7 +110,7 @@ class BNSTextField : NSTextField, ObservableObject {
     }
 
     override func performKeyEquivalent(with event: NSEvent) -> Bool {
-        if window?.firstResponder === self {
+        if let c = cell as? VerticallyCenteredTextFieldCell, c.isEditing  {
             if onPerformKeyEquivalent(event) {
                 return true
             }
@@ -109,6 +118,15 @@ class BNSTextField : NSTextField, ObservableObject {
         return super.performKeyEquivalent(with: event)
     }
 
+//    override func viewDidMoveToWindow() {
+//        if focusOnCreation {
+////            self.window?.initialFirstResponder = self
+//            DispatchQueue.main.async {
+//                self.window?.makeFirstResponder(self)
+//            }
+//        }
+//    }
+    
     @objc func commit(_ sender: AnyObject) {
         onCommit()
     }
