@@ -9,18 +9,6 @@ import Cocoa
 import Combine
 import SwiftUI
 
-extension NSToolbarItem.Identifier {
-    static let searchBar = NSToolbarItem.Identifier(rawValue: "SearchBar")
-}
-
-class BeamToolBar: NSToolbar {
-    init(_ window: BeamWindow) {
-        super.init(identifier: "BeamToolBar")
-        self.delegate = window
-        displayMode = .iconAndLabel
-    }
-}
-
 class BeamHostingView<Content> : NSHostingView<Content> where Content : View {
     required public init(rootView: Content) {
         super.init(rootView: rootView)

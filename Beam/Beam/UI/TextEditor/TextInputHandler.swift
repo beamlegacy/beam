@@ -196,125 +196,112 @@ public class TextInputHandler: NSView, NSTextInputClient {
         return true
     }
 
-    func _keyDown(with event: NSEvent) -> Bool {
-//        print("keyDown \(info)")
+    override open func keyDown(with event: NSEvent) {
         let shift = event.modifierFlags.contains(.shift)
         let option = event.modifierFlags.contains(.option)
         let command = event.modifierFlags.contains(.command)
 
-        if self.hasFocus == false {
-            return false
-        }
-//        for i in NSEvent.SpecialKey.allCases {
-//            print("key  \(i)")
-//        }
-        if let k = event.specialKey {
-            switch k {
-            case .enter: fallthrough
-            case .carriageReturn:
-                if activateOnEnter {
-                    if command && multiline {
+        if self.hasFocus {
+            if let k = event.specialKey {
+                switch k {
+                case .enter: fallthrough
+                case .carriageReturn:
+                    if activateOnEnter {
+                        if command && multiline {
+                            doCommand(.insertNewline)
+                        } else {
+                            activated()
+                        }
+                    } else if multiline {
                         doCommand(.insertNewline)
-                    } else {
-                        activated()
                     }
-                } else if multiline {
-                    doCommand(.insertNewline)
-                }
-                return true
-            case .leftArrow:
-                if shift {
-                    if option {
-                        doCommand(.moveWordLeftAndModifySelection)
-                    } else if command {
-                        doCommand(.moveToBeginningOfLineAndModifySelection)
+                    return
+                case .leftArrow:
+                    if shift {
+                        if option {
+                            doCommand(.moveWordLeftAndModifySelection)
+                        } else if command {
+                            doCommand(.moveToBeginningOfLineAndModifySelection)
+                        } else {
+                            doCommand(.moveLeftAndModifySelection)
+                        }
+                        return
                     } else {
-                        doCommand(.moveLeftAndModifySelection)
+                        if option {
+                            doCommand(.moveWordLeft)
+                        } else if command {
+                            doCommand(.moveToBeginningOfLine)
+                        } else {
+                            doCommand(.moveLeft)
+                        }
+                        return
                     }
-                    return true
-                } else {
-                    if option {
-                        doCommand(.moveWordLeft)
-                    } else if command {
-                        doCommand(.moveToBeginningOfLine)
+                case .rightArrow:
+                    if shift {
+                        if option {
+                            doCommand(.moveWordRightAndModifySelection)
+                        } else if command {
+                            doCommand(.moveToEndOfLineAndModifySelection)
+                        } else {
+                            doCommand(.moveRightAndModifySelection)
+                        }
+                        return
                     } else {
-                        doCommand(.moveLeft)
+                        if option {
+                            doCommand(.moveWordRight)
+                        } else if command {
+                            doCommand(.moveToEndOfLine)
+                        } else {
+                            doCommand(.moveRight)
+                        }
+                        return
                     }
-                    return true
-                }
-            case .rightArrow:
-                if shift {
-                    if option {
-                        doCommand(.moveWordRightAndModifySelection)
-                    } else if command {
-                        doCommand(.moveToEndOfLineAndModifySelection)
+                case .upArrow:
+                    if shift {
+                        doCommand(.moveUpAndModifySelection)
+                        return
                     } else {
-                        doCommand(.moveRightAndModifySelection)
+                        doCommand(.moveUp)
+                        return
                     }
-                    return true
-                } else {
-                    if option {
-                        doCommand(.moveWordRight)
-                    } else if command {
-                        doCommand(.moveToEndOfLine)
+                case .downArrow:
+                    if shift {
+                        doCommand(.moveDownAndModifySelection)
+                        return
                     } else {
-                        doCommand(.moveRight)
+                        doCommand(.moveDown)
+                        return
                     }
-                    return true
-                }
-            case .upArrow:
-                if shift {
-                    doCommand(.moveUpAndModifySelection)
-                    return true
-                } else {
-                    doCommand(.moveUp)
-                    return true
-                }
-            case .downArrow:
-                if shift {
-                    doCommand(.moveDownAndModifySelection)
-                    return true
-                } else {
-                    doCommand(.moveDown)
-                    return true
-                }
-            case .delete:
-                doCommand(.deleteBackward)
-                return true
-            default:
-                print("Special Key \(k)")
-                break
-            }
-        }
-
-        if event.keyCode == 117 { // delete
-            doCommand(.deleteForward)
-            return true
-        }
-
-        if event.keyCode == 53 { // escape
-            cancelSelection()
-            return true
-        }
-        
-
-        if let ch = event.charactersIgnoringModifiers {
-            if ch == "a" {
-                if command {
-                    doCommand(.selectAll)
-                    return true
+                case .delete:
+                    doCommand(.deleteBackward)
+                    return
+                default:
+                    print("Special Key \(k)")
+                    break
                 }
             }
+
+            if event.keyCode == 117 { // delete
+                doCommand(.deleteForward)
+                return
+            }
+
+            if event.keyCode == 53 { // escape
+                cancelSelection()
+                return
+            }
+            
+
+            if let ch = event.charactersIgnoringModifiers {
+                if ch == "a" {
+                    if command {
+                        doCommand(.selectAll)
+                        return
+                    }
+                }
+            }
+
         }
-        return false
-    }
-       
-    
-    override open func keyDown(with event: NSEvent) {
-        if _keyDown(with: event) {
-            return
-        }
-        
         inputContext?.handleEvent(event)
         super.keyDown(with: event)
     }

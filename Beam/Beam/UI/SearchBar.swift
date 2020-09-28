@@ -55,7 +55,7 @@ struct SearchBar: View {
                                         print("Start search query: \(searchText)")
                                         //state.searchQuery = t
                                     }
-
+                                    
                                     if searchText.hasPrefix("http://") || searchText.hasPrefix("https://") {
                                         print("Start website query: \(searchText)")
                                     } else {
@@ -63,7 +63,7 @@ struct SearchBar: View {
                                         searchText = state.searchEngine.searchUrl
                                         print("Start search query: \(searchText)")
                                     }
-
+                                    
                                     let tab = BrowserTab(originalQuery: query)
                                     tab.webView.load(URLRequest(url: URL(string: searchText)!))
                                     state.currentTab = tab
@@ -71,7 +71,7 @@ struct SearchBar: View {
                                     state.mode = .web
                                 }
                                }
-                    ,
+                               ,
                                onCursorMovement: { cursorMovement in
                                 switch cursorMovement {
                                 case .up:
@@ -104,6 +104,5 @@ struct SearchBar: View {
     func goForward() {
         state.currentTab.webView.goForward()
     }
-
 }
 
