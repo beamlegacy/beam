@@ -34,7 +34,13 @@ class BeamState: ObservableObject {
     @Published var searchQuery: String = ""
     private let completer = Completer()
     @Published var completedQueries = [AutoCompleteResult]()
-    @Published var selectionIndex: Int? = nil
+    @Published var selectionIndex: Int? = nil {
+        didSet {
+            if let i = selectionIndex {
+                searchQuery = completedQueries[i].string
+            }
+        }
+    }
     
     var data: BeamData
     @Published var currentNote: BeamNote? = nil
@@ -117,7 +123,6 @@ class BeamState: ObservableObject {
             guard let self = self else { return }
             //print("received auto complete query: \(query)")
 
-            self.selectionIndex = nil
             if !(query.hasPrefix("http://") || query.hasPrefix("https://")) {
                 self.mode = .note
             }
@@ -126,6 +131,7 @@ class BeamState: ObservableObject {
         completer.$results.receive(on: RunLoop.main).sink { [weak self] results in
             guard let self = self else { return }
             //print("received auto complete results: \(results)")
+            self.selectionIndex = nil
             self.completedQueries = results
         }.store(in: &scope)
 

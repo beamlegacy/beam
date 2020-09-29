@@ -15,7 +15,9 @@ struct AutoCompleteList: View {
     var body: some View {
         VStack() {
             ForEach(elements) { i in
-                return AutoCompleteItem(item: i, selected: isSelectedItem(i))
+                return AutoCompleteItem(item: i, selected: isSelectedItem(i)).onTapGesture {
+                    selectedIndex = indexFor(item: i)
+                }
             }
         }.frame(maxWidth: .infinity, alignment: .top).background(Color("transparent"))
     }
@@ -26,6 +28,16 @@ struct AutoCompleteList: View {
         }
         return false
     }
+
+    func indexFor(item: AutoCompleteResult) -> Int? {
+        for (i, _) in elements.enumerated() {
+            if elements[i].id == item.id {
+                return i
+            }
+        }
+        return nil
+    }
+
 }
 
 struct AutoCompleteList_Previews: PreviewProvider {
