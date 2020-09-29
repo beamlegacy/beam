@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 import AppKit
+import VisualEffects
 
 fileprivate var _cornerRadius = CGFloat(6)
 fileprivate var buttonFont = SwiftUI.Font.custom("SF Symbols", size: 16)
@@ -58,70 +59,73 @@ struct SearchBar: View {
     @EnvironmentObject var state: BeamState
 
     var body: some View {
-        HStack {
-            Button(action: goBack) {
-                Symbol(name: "chevron.left").offset(x: 0, y: -0.5)
-            }.buttonStyle(BorderlessButtonStyle()).disabled(!state.canGoBack).padding(.leading, 18)
-            Button(action: goForward) {
-                Symbol(name: "chevron.right").offset(x: 0, y: -0.5)
-            }.buttonStyle(BorderlessButtonStyle()).disabled(!state.canGoForward).padding(.leading, 9)
-            
-            if state.mode == .note {
-                HStack {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: _cornerRadius).foregroundColor(Color("ButtonBackgroundOnColor")) .frame(height: 28)
-                        //                    TextField("Search or create note...", text: $state.searchQuery,
-                        
-                        HStack {
-                            BTextField("Search or create note...", text: $state.searchQuery,
-                                       onCommit:  {
-                                        startQuery()
-                                       },
-                                       onCursorMovement: { cursorMovement in
-                                        switch cursorMovement {
-                                        case .up:
-                                            state.selectPreviousAutoComplete()
-                                            return true
-                                        case .down:
-                                            state.selectNextAutoComplete()
-                                            return true
-                                        default:
-                                            break
-                                        }
-                                        return false
-                                       },
-                                       focusOnCreation: true
-                            )
-                            .padding([.leading, .trailing], 9)
-                            .frame(idealWidth: 600, maxWidth: .infinity)
+        ZStack {
+            VisualEffectBlur(material: .headerView, blendingMode: .withinWindow, state: .active)
+
+            HStack {
+                Button(action: goBack) {
+                    Symbol(name: "chevron.left").offset(x: 0, y: -0.5)
+                }.buttonStyle(BorderlessButtonStyle()).disabled(!state.canGoBack).padding(.leading, 18)
+                Button(action: goForward) {
+                    Symbol(name: "chevron.right").offset(x: 0, y: -0.5)
+                }.buttonStyle(BorderlessButtonStyle()).disabled(!state.canGoForward).padding(.leading, 9)
+                
+                if state.mode == .note {
+                    HStack {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: _cornerRadius).foregroundColor(Color("ButtonBackgroundOnColor")) .frame(height: 28)
+                            //                    TextField("Search or create note...", text: $state.searchQuery,
                             
-                            Button(action: resetSearchQuery) {
-                                Symbol(name: "xmark.circle.fill", size: 12)
-                            }.buttonStyle(BorderlessButtonStyle()).disabled(state.searchQuery.isEmpty).padding([.leading, .trailing], 9)
-                            
+                            HStack {
+                                BTextField("Search or create note...", text: $state.searchQuery,
+                                           onCommit:  {
+                                            startQuery()
+                                           },
+                                           onCursorMovement: { cursorMovement in
+                                            switch cursorMovement {
+                                            case .up:
+                                                state.selectPreviousAutoComplete()
+                                                return true
+                                            case .down:
+                                                state.selectNextAutoComplete()
+                                                return true
+                                            default:
+                                                break
+                                            }
+                                            return false
+                                           },
+                                           focusOnCreation: true
+                                )
+                                .padding([.leading, .trailing], 9)
+                                .frame(idealWidth: 600, maxWidth: .infinity)
+                                
+                                Button(action: resetSearchQuery) {
+                                    Symbol(name: "xmark.circle.fill", size: 12)
+                                }.buttonStyle(BorderlessButtonStyle()).disabled(state.searchQuery.isEmpty).padding([.leading, .trailing], 9)
+                                
+                            }
                         }
-                    }
-                    
-                    Button(action: startQuery) {
-                        Symbol(name: "magnifyingglass")
-                    }.disabled(state.searchQuery.isEmpty).buttonStyle(RoundRectButtonStyle()).padding(.leading, 1)
+                        
+                        Button(action: startQuery) {
+                            Symbol(name: "magnifyingglass")
+                        }.disabled(state.searchQuery.isEmpty).buttonStyle(RoundRectButtonStyle()).padding(.leading, 1)
 
-                    Button(action: startQuery) {
-                        Symbol(name: "plus")
-                    }.buttonStyle(BorderlessButtonStyle())
+                        Button(action: startQuery) {
+                            Symbol(name: "plus")
+                        }.buttonStyle(BorderlessButtonStyle())
 
-                }.padding(.leading, 9)
+                    }.padding(.leading, 9)
 
-            } else {
-                GlobalTabTitle(tab: state.currentTab)
-                    .frame(idealWidth: 600, maxWidth: .infinity, minHeight: 28, alignment: .center)
+                } else {
+                    GlobalTabTitle(tab: state.currentTab)
+                        .frame(idealWidth: 600, maxWidth: .infinity, minHeight: 28, alignment: .center)
+                }
+
+                Button(action: toggleMode) {
+                    Symbol(name: state.mode == .web ? "note.text" : "network")
+                }.buttonStyle(RoundRectButtonStyle()).disabled(state.tabs.isEmpty)
             }
-
-            Button(action: toggleMode) {
-                Symbol(name: state.mode == .web ? "note.text" : "network")
-            }.buttonStyle(RoundRectButtonStyle()).disabled(state.tabs.isEmpty)
-
-        }.padding(.top, 10).padding(.bottom, 10)
+        }.padding(.top, 10).padding(.bottom, 10).frame(height: 54, alignment: .topLeading)
     }
     
     func goBack() {

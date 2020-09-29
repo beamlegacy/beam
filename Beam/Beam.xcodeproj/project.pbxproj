@@ -16,6 +16,7 @@
 		9645481E25220EC90064D062 /* String+LoremIpsum.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9645481D25220EC90064D062 /* String+LoremIpsum.swift */; };
 		96454823252216570064D062 /* NSRange+CFRange.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96454822252216570064D062 /* NSRange+CFRange.swift */; };
 		964548752522AD770064D062 /* NoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 964548742522AD770064D062 /* NoteView.swift */; };
+		9645488125237C310064D062 /* VisualEffects in Frameworks */ = {isa = PBXBuildFile; productRef = 9645488025237C310064D062 /* VisualEffects */; };
 		965A78292514F147009980D4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965A78282514F147009980D4 /* AppDelegate.swift */; };
 		965A782B2514F147009980D4 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965A782A2514F147009980D4 /* ContentView.swift */; };
 		965A782E2514F147009980D4 /* Beam.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 965A782C2514F147009980D4 /* Beam.xcdatamodeld */; };
@@ -128,6 +129,7 @@
 			files = (
 				9631C747251CE997009B40C4 /* SwiftSoup in Frameworks */,
 				20E1B667EDD2C5D590410B9F /* Pods_Beam.framework in Frameworks */,
+				9645488125237C310064D062 /* VisualEffects in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -336,6 +338,7 @@
 			name = Beam;
 			packageProductDependencies = (
 				9631C746251CE997009B40C4 /* SwiftSoup */,
+				9645488025237C310064D062 /* VisualEffects */,
 			);
 			productName = Beam;
 			productReference = 965A78252514F147009980D4 /* Beam.app */;
@@ -410,6 +413,7 @@
 			mainGroup = 965A781C2514F147009980D4;
 			packageReferences = (
 				9631C745251CE997009B40C4 /* XCRemoteSwiftPackageReference "SwiftSoup" */,
+				9645487F25237C310064D062 /* XCRemoteSwiftPackageReference "VisualEffects" */,
 			);
 			productRefGroup = 965A78262514F147009980D4 /* Products */;
 			projectDirPath = "";
@@ -875,6 +879,14 @@
 				minimumVersion = 2.3.2;
 			};
 		};
+		9645487F25237C310064D062 /* XCRemoteSwiftPackageReference "VisualEffects" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/twostraws/VisualEffects.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.3;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -882,6 +894,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 9631C745251CE997009B40C4 /* XCRemoteSwiftPackageReference "SwiftSoup" */;
 			productName = SwiftSoup;
+		};
+		9645488025237C310064D062 /* VisualEffects */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9645487F25237C310064D062 /* XCRemoteSwiftPackageReference "VisualEffects" */;
+			productName = VisualEffects;
 		};
 /* End XCSwiftPackageProductDependency section */
 
