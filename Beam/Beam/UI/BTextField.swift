@@ -39,7 +39,7 @@ struct BTextField: NSViewRepresentable {
         self.text = text
         self.textField  = BNSTextField(string: self.text, focusOnCreation: focusOnCreation)
         self.textField.placeholderString = title as? String
-        self.textField.textColor = NSColor(named: "HeaderTextColor")
+        self.textField.textColor = NSColor(named: "TextColor")
 //        self.textField.backgroundColor = NSColor(named: "SearchBarBackgroundColor")
         self.textField.focusRingType = .none
         self.textField.isBordered = false

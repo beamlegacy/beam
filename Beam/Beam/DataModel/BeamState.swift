@@ -45,6 +45,15 @@ class BeamState: ObservableObject {
                 tab.onNewTabCreated = { [weak self] newTab in
                     guard let self = self else { return }
                     self.tabs.append(newTab)
+                    
+                    if var note = self.currentNote {
+                        if note.searchQueries.contains(newTab.originalQuery) {
+                            if let url = newTab.url {
+                                note.visitedSearchResults.append(VisitedPage(originalSearchQuery: newTab.originalQuery, url: url, date: Date(), duration: 0))
+                                self.currentNote = note
+                            }
+                        }
+                    }
                 }
             }
             

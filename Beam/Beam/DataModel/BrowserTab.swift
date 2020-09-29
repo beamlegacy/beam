@@ -138,7 +138,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
         public func head(_ node: Node, _ depth: Int) {
             if let textNode = (node as? TextNode) {
                 let string = textNode.getWholeText()
-                print("Node[\(depth)]: \(string)\n")
+//                print("Node[\(depth)]: \(string)\n")
             } else if let element = (node as? Element) {
 //                if !accum.isEmpty &&
 //                    (element.isBlock() || element.nodeName() == "br") &&

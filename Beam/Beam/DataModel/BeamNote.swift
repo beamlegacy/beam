@@ -33,12 +33,25 @@ protocol BeamBlock: BeamObject {
 //    mutating func addElement(_ element: BeamElement)
 }
 
+struct VisitedPage: Codable, Identifiable {
+    var id: UUID = UUID()
+    
+    var originalSearchQuery: String
+    var url: URL
+    var date: Date
+    var duration: TimeInterval
+}
+
 struct BeamNote: BeamBlock {
     var id: BID = BID()
     public var title: String
-
+    var score: Float = 0
+    
     var elements: [BID] = []
     var outLinks: [String] = []
+    
+    var searchQueries: [String] = []
+    var visitedSearchResults: [VisitedPage] = []
 }
 
 protocol BeamTextBlock: BeamObject {

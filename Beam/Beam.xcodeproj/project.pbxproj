@@ -15,6 +15,7 @@
 		964547B725212D760064D062 /* String+Ranges.swift in Sources */ = {isa = PBXBuildFile; fileRef = 964547B625212D760064D062 /* String+Ranges.swift */; };
 		9645481E25220EC90064D062 /* String+LoremIpsum.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9645481D25220EC90064D062 /* String+LoremIpsum.swift */; };
 		96454823252216570064D062 /* NSRange+CFRange.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96454822252216570064D062 /* NSRange+CFRange.swift */; };
+		964548752522AD770064D062 /* NoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 964548742522AD770064D062 /* NoteView.swift */; };
 		965A78292514F147009980D4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965A78282514F147009980D4 /* AppDelegate.swift */; };
 		965A782B2514F147009980D4 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965A782A2514F147009980D4 /* ContentView.swift */; };
 		965A782E2514F147009980D4 /* Beam.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 965A782C2514F147009980D4 /* Beam.xcdatamodeld */; };
@@ -76,6 +77,7 @@
 		964547B625212D760064D062 /* String+Ranges.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Ranges.swift"; sourceTree = "<group>"; };
 		9645481D25220EC90064D062 /* String+LoremIpsum.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+LoremIpsum.swift"; sourceTree = "<group>"; };
 		96454822252216570064D062 /* NSRange+CFRange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSRange+CFRange.swift"; sourceTree = "<group>"; };
+		964548742522AD770064D062 /* NoteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteView.swift; sourceTree = "<group>"; };
 		965A78252514F147009980D4 /* Beam.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Beam.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		965A78282514F147009980D4 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		965A782A2514F147009980D4 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -267,6 +269,7 @@
 				966B3540251BB2A800751322 /* BeamWindow.swift */,
 				96758984251F3A7E0014F604 /* NoteEditor.swift */,
 				96758986251F3B210014F604 /* BeamNoteEditor.swift */,
+				964548742522AD770064D062 /* NoteView.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -520,6 +523,7 @@
 				965A78292514F147009980D4 /* AppDelegate.swift in Sources */,
 				96758985251F3A7E0014F604 /* NoteEditor.swift in Sources */,
 				965A782E2514F147009980D4 /* Beam.xcdatamodeld in Sources */,
+				964548752522AD770064D062 /* NoteView.swift in Sources */,
 				965A78602514F1AF009980D4 /* BeamNote.swift in Sources */,
 				965B195F2518EEFC00BCF01C /* SearchEngine.swift in Sources */,
 				96F5DB38251820960080E3EE /* ClosedRange+Beam.swift in Sources */,

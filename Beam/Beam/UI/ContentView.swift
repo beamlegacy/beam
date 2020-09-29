@@ -18,6 +18,9 @@ struct ModeView: View {
                 .padding(.top, 2)
             ZStack {
                 ScrollView([.vertical]) {
+                    NoteView()
+                }
+                ScrollView([.vertical]) {
                     AutoCompleteView(autoComplete: $state.completedQueries, selectionIndex: $state.selectionIndex)
                         .frame(idealWidth: 800, maxWidth: .infinity, idealHeight: 600, maxHeight: .infinity, alignment: .center)
                     

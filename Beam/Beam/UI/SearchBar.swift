@@ -28,13 +28,18 @@ struct GlobalTabTitle: View {
 }
 
 struct RoundRectButtonStyle : PrimitiveButtonStyle {
+    @Environment(\.isEnabled) private var isEnabled: Bool
+    @State var isHover = false
     public func makeBody(configuration: BorderedButtonStyle.Configuration) -> some View {
         return ZStack {
-            RoundedRectangle(cornerRadius: _cornerRadius).foregroundColor(Color("ButtonBackgroundOnColor")).frame(width: 33, height: 28, alignment: .center)
-            configuration.label.foregroundColor(Color("ButtonIconColor"))
+            RoundedRectangle(cornerRadius: _cornerRadius).foregroundColor(Color(isHover ? "ButtonBackgroundOnColor" : "ButtonBackgroundHoverColor")).frame(width: 33, height: 28, alignment: .center)
+            configuration.label.foregroundColor(Color(isEnabled ? "ButtonIconColor" : "ButtonIconDisabledColor"))
         }
         .onTapGesture(count: 1) {
             configuration.trigger()
+        }
+        .onHover { h in
+            isHover = h && isEnabled
         }
 
     }
@@ -55,11 +60,11 @@ struct SearchBar: View {
     var body: some View {
         HStack {
             Button(action: goBack) {
-                Symbol(name: "chevron.left")
-            }.buttonStyle(BorderlessButtonStyle()).disabled(!state.canGoBack).padding(.leading, 10)
+                Symbol(name: "chevron.left").offset(x: 0, y: -0.5)
+            }.buttonStyle(BorderlessButtonStyle()).disabled(!state.canGoBack).padding(.leading, 18)
             Button(action: goForward) {
-                Symbol(name: "chevron.right")
-            }.buttonStyle(BorderlessButtonStyle()).disabled(!state.canGoForward).padding(.leading, 10)
+                Symbol(name: "chevron.right").offset(x: 0, y: -0.5)
+            }.buttonStyle(BorderlessButtonStyle()).disabled(!state.canGoForward).padding(.leading, 9)
             
             if state.mode == .note {
                 HStack {
@@ -87,25 +92,25 @@ struct SearchBar: View {
                                        },
                                        focusOnCreation: true
                             )
-                            .padding([.leading, .trailing], 8)
+                            .padding([.leading, .trailing], 9)
                             .frame(idealWidth: 600, maxWidth: .infinity)
                             
                             Button(action: resetSearchQuery) {
                                 Symbol(name: "xmark.circle.fill", size: 12)
-                            }.buttonStyle(BorderlessButtonStyle()).disabled(state.searchQuery.isEmpty).padding([.leading, .trailing], 6)
+                            }.buttonStyle(BorderlessButtonStyle()).disabled(state.searchQuery.isEmpty).padding([.leading, .trailing], 9)
                             
                         }
                     }
                     
                     Button(action: startQuery) {
                         Symbol(name: "magnifyingglass")
-                    }.disabled(state.searchQuery.isEmpty).buttonStyle(RoundRectButtonStyle())
+                    }.disabled(state.searchQuery.isEmpty).buttonStyle(RoundRectButtonStyle()).padding(.leading, 1)
 
                     Button(action: startQuery) {
-                        Text("􀅼").font(buttonFont)
+                        Symbol(name: "plus")
                     }.buttonStyle(BorderlessButtonStyle())
 
-                }.padding(.leading, 10)
+                }.padding(.leading, 9)
 
             } else {
                 GlobalTabTitle(tab: state.currentTab)
@@ -156,6 +161,7 @@ struct SearchBar: View {
             tab.webView.load(URLRequest(url: URL(string: searchText)!))
             state.currentTab = tab
             state.tabs.append(tab)
+            state.currentNote = BeamNote(title: query, searchQueries: [query])
             state.mode = .web
         }
 
