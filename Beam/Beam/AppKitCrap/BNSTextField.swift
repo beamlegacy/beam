@@ -54,86 +54,80 @@ class VerticallyCenteredTextFieldCell: NSTextFieldCell {
 }
 
 
-class BNSTextField : NSTextField, ObservableObject {
-    var value: Binding<String>
+class BNSTextField : NSTextView, ObservableObject, NSTextViewDelegate {
+    var value: Binding<String> = .constant("")
+    var selectionRange: Binding<Range<Int>> = .constant(0..<0)
     public var onEditingChanged: (Bool) -> Void = { _ in }
+    public var isEditing = false {
+        didSet {
+            onEditingChanged(isEditing)
+        }
+    }
     public var onCommit: () -> Void = { }
     public var onPerformKeyEquivalent: (NSEvent) -> Bool = { _ in return false }
-    public var focusOnCreation: Bool
-    
-    public init(string stringValue: Binding<String>, focusOnCreation: Bool = false) {
-        value = stringValue
+    public var focusOnCreation: Bool = false
+
+    override public init(frame frameRect: NSRect, textContainer container: NSTextContainer?) {
+        super.init(frame: frameRect, textContainer: container)
+    }
+
+    public init(string stringValue: Binding<String>, focusOnCreation: Bool = false, selectionRange: Binding<Range<Int>>) {
+        self.selectionRange = selectionRange
         self.focusOnCreation = focusOnCreation
         super.init(frame: NSRect())
-        self.cell = VerticallyCenteredTextFieldCell()
-        self.target = self
-        self.action = #selector(commit)
+        self.value = stringValue
         self.isEditable = true
         self.isSelectable = true
-        self.usesSingleLineMode = true
-        self.stringValue = value.wrappedValue
-        self.font = NSFont(name: "SF Text", size: 16)
+        self.string = value.wrappedValue
+        self.font = NSFont.systemFont(ofSize: 16)
+        self.backgroundColor = NSColor(named: "transparent")!
+        self.delegate = self
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
-    public override func textShouldBeginEditing(_ textObject: NSText) -> Bool {
-        return true
-    }
-    
+
     public override func becomeFirstResponder() -> Bool {
-        onEditingChanged(true)
+        needsDisplay = true
+        isEditing = true
         return true
     }
     
     public override func resignFirstResponder() -> Bool {
-        onEditingChanged(true)
+        isEditing = false
         return super.resignFirstResponder()
     }
-    
-    public override func textDidBeginEditing(_ notification: Notification) {
-        super.textDidBeginEditing(notification)
+
+    public func textDidChange(_ notification: Notification) {
+        value.wrappedValue = self.string
     }
-    
-    public override func textDidChange(_ notification: Notification) {
-        value.wrappedValue = self.stringValue
+
+    override func insertNewline(_ sender: Any?) {
+        onCommit()
     }
-    
-    public override func textShouldEndEditing(_ textObject: NSText) -> Bool {
-        return true
-    }
-    
-    public override func textDidEndEditing(_ notification: Notification) {
-        //        onEditingChanged(false)
-        super.textDidEndEditing(notification)
-    }
-    
+
     override func performKeyEquivalent(with event: NSEvent) -> Bool {
-        if let c = cell as? VerticallyCenteredTextFieldCell, c.isEditing  {
+        if isEditing  {
             if onPerformKeyEquivalent(event) {
                 return true
             }
         }
         return super.performKeyEquivalent(with: event)
     }
-    
-    //    override func viewDidMoveToWindow() {
-    //        if focusOnCreation {
-    ////            self.window?.initialFirstResponder = self
-    //            DispatchQueue.main.async {
-    //                self.window?.makeFirstResponder(self)
-    //            }
-    //        }
-    //    }
+
+
+//    override func viewDidMoveToWindow() {
+//        if focusOnCreation {
+//            //self.window?.initialFirstResponder = self
+//            DispatchQueue.main.async {
+//                self.window?.makeFirstResponder(self)
+//            }
+//        }
+//    }
     
     @objc func commit(_ sender: AnyObject) {
         onCommit()
-    }
-    
-    public override var acceptsFirstResponder: Bool {
-        return true
     }
     
     public override var intrinsicContentSize: NSSize {
@@ -141,7 +135,26 @@ class BNSTextField : NSTextField, ObservableObject {
         i.height = 21
         return i
     }
-    
+
+    public var placeholderString: String? = nil
+    private var placeholderInsets = NSEdgeInsets(top: 0.0, left: 4.0, bottom: 0.0, right: 4.0)
+
+    override func draw(_ dirtyRect: NSRect) {
+        super.draw(dirtyRect)
+
+        guard string.isEmpty else { return }
+        if let s = placeholderString {
+            let attribs = [NSAttributedString.Key.font: font!, .foregroundColor: NSColor(named: "PlaceholderTextColor")]
+            NSAttributedString(string: s, attributes: attribs as [NSAttributedString.Key : Any]).draw(in: dirtyRect.insetBy(placeholderInsets))
+        }
+    }
+}
+
+extension NSRect {
+    func insetBy(_ insets: NSEdgeInsets) -> NSRect {
+        return insetBy(dx: insets.left + insets.right, dy: insets.top + insets.bottom)
+        .applying(CGAffineTransform(translationX: insets.left - insets.right, y: insets.top - insets.bottom))
+    }
 }
 
 

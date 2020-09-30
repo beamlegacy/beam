@@ -33,16 +33,16 @@ struct BTextField: NSViewRepresentable {
             onEditingChanged: @escaping (Bool) -> Void = { _ in },
             onCommit: @escaping () -> Void = {},
             onCursorMovement: @escaping (CursorMovement) -> Bool = { _ in return false },
-            focusOnCreation: Bool = false
+            focusOnCreation: Bool = false,
+            selectedRange: Binding<Range<Int>> = .constant(0..<0)
     ) where S : StringProtocol
     {
         self.text = text
-        self.textField  = BNSTextField(string: self.text, focusOnCreation: focusOnCreation)
+        self.textField  = BNSTextField(string: self.text, focusOnCreation: focusOnCreation, selectionRange: selectedRange)
         self.textField.placeholderString = title as? String
         self.textField.textColor = NSColor(named: "TextColor")
 //        self.textField.backgroundColor = NSColor(named: "SearchBarBackgroundColor")
         self.textField.focusRingType = .none
-        self.textField.isBordered = false
         self.onEditingChanged = onEditingChanged
         self.onCommit = onCommit
         self.onCursorMovement = onCursorMovement
@@ -55,11 +55,12 @@ struct BTextField: NSViewRepresentable {
     init(_ titleKey: LocalizedStringKey, text: Binding<String>,
          onEditingChanged: @escaping (Bool) -> Void = { _ in },
          onCommit: @escaping () -> Void = {},
-         onCursorMovement: @escaping (CursorMovement) -> Bool = { _ in return false }
+         onCursorMovement: @escaping (CursorMovement) -> Bool = { _ in return false },
+         selectedRange: Binding<Range<Int>> = .constant(0..<0)
     )
     {
         self.text = text
-        self.textField  = BNSTextField(string: self.text)
+        self.textField  = BNSTextField(string: self.text, selectionRange: selectedRange)
         self.textField.placeholderString = titleKey.stringValue()
         self.onEditingChanged = onEditingChanged
         self.onCommit = onCommit
