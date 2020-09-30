@@ -39,23 +39,23 @@ class SearchKit {
         var urls: [Unmanaged<CFURL>?] = Array(repeating: nil, count: countLimit)
         var scores: [Float] = Array(repeating: 0, count: countLimit)
         var foundCount = 0
-
+        
         SKIndexFlush(index)
-        let hasMoreResults = SKSearchFindMatches(search, countLimit, &documentIDs, &scores, timeLimit, &foundCount)
-
+        _ = SKSearchFindMatches(search, countLimit, &documentIDs, &scores, timeLimit, &foundCount)
+        
         SKIndexCopyDocumentURLsForDocumentIDs(index, foundCount, &documentIDs, &urls)
-
+        
         let results: [URL] = zip(urls[0 ..< foundCount], scores).compactMap({
             (cfurl, score) -> URL? in
             guard let url = cfurl?.takeRetainedValue() as URL?
-                else { return nil }
-
+            else { return nil }
+            
             print("- \(url): \(score)")
             return url
         })
-
+        
         print("search \(query) in index:\(results)")
-
+        
         return results
     }
     

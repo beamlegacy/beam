@@ -27,14 +27,14 @@ struct ModeView: View {
                 }.edgesIgnoringSafeArea(.top)
                 
                 if state.mode == .web {
-                        VStack {
-                            BrowserTabBar(tabs: $state.tabs, currentTab: $state.currentTab)
-                            WebView(webView: state.currentTab.webView)
-                        }
-                        .transition(.move(edge: .bottom))
-                        .animation(.easeInOut(duration: 0.3))
+                    VStack {
+                        BrowserTabBar(tabs: $state.tabs, currentTab: $state.currentTab)
+                        WebView(webView: state.currentTab.webView)
+                    }
+                    .transition(.move(edge: .bottom))
+                    .animation(.easeInOut(duration: 0.3))
                 }
-
+                
             }
         }
     }

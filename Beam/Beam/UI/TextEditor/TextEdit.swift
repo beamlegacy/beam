@@ -45,7 +45,7 @@ public class BeamTextEdit : TextInputHandler {
         
         initBlinking()
     }
-
+    
     public init(text: String = "", font: Font = Font.main, color: NSColor) {
         self.font = font
         self.color = color
@@ -60,8 +60,8 @@ public class BeamTextEdit : TextInputHandler {
     }
     
     var animate = false { didSet {
-            // TODO: implement animating the cursor
-        }
+        // TODO: implement animating the cursor
+    }
     }
     
     func initBlinking() {
@@ -72,29 +72,29 @@ public class BeamTextEdit : TextInputHandler {
         offBlinkTime = voff == 0 ? offBlinkTime : voff * 1000
         self.animate = true
     }
-
+    
     var color = NSColor.textColor
     var disabledColor = NSColor.disabledControlTextColor
     var selectionColor = NSColor.selectedControlColor
     var markedColor = NSColor.unemphasizedSelectedTextColor
     var alpha: Float = 1.0
     var blendMode: CGBlendMode = .normal
-
+    
     var hMargin: Float = 2 { didSet { invalidateLayout() } }
     var vMargin: Float = 0 { didSet { invalidateLayout() } }
     
     private var layouts: [TextLineLayout] = []
     private var cursorRect = NSRect()
-
-//    override public var intrinsicContentSize: NSSize {
-//        updateTextRendering()
-//        var r = NSRect()
-//        for l in layouts {
-//            r.size.width = max(r.width, l.rect.width)
-//            r.size.height += l.rect.height
-//        }
-//        return r.size
-//    }
+    
+    //    override public var intrinsicContentSize: NSSize {
+    //        updateTextRendering()
+    //        var r = NSRect()
+    //        for l in layouts {
+    //            r.size.width = max(r.width, l.rect.width)
+    //            r.size.height += l.rect.height
+    //        }
+    //        return r.size
+    //    }
     
     public func drawMarking(_ context: CGContext, _ start: Int, _ end: Int, _ color: NSColor) {
         context.beginPath()
@@ -105,9 +105,9 @@ public class BeamTextEdit : TextInputHandler {
         var _x2 = CGFloat(0)
         let xStart = CTLineGetOffsetForStringIndex(line1.line, CFIndex(start - lines[startLine].lowerBound), &_x2)
         let xEnd = CTLineGetOffsetForStringIndex(line2.line, CFIndex(end - lines[endLine].lowerBound), &_x2)
-
-//        let fill =  Fill()
-//        fill.setColor(resolve(color))
+        
+        //        let fill =  Fill()
+        //        fill.setColor(resolve(color))
         context.setFillColor(color.cgColor)
         
         var e = xEnd
@@ -116,21 +116,21 @@ public class BeamTextEdit : TextInputHandler {
         }
         
         let markRect = NSRect(x: hMargin + Float(xStart), y: Float(line1.rect.minY) + fHeight * Float(startLine), width: Float(e - xStart), height: fHeight )
-//        var markShape = CGPath(rect: markRect, transform: nil)
-//        list.draw(shape: markShape, fill: fill, alpha: 1.0, blendMode: .normal)
+        //        var markShape = CGPath(rect: markRect, transform: nil)
+        //        list.draw(shape: markShape, fill: fill, alpha: 1.0, blendMode: .normal)
         context.addRect(markRect)
-
+        
         if startLine + 1 <= endLine {
             let markRect = NSRect(x: hMargin + Float(0), y: Float(line1.rect.maxY) + fHeight * Float(startLine), width: Float(frame.width), height: fHeight * Float(endLine - startLine - 1) )
-//            markShape.setRect(markRect.cgRect)
+            //            markShape.setRect(markRect.cgRect)
             context.addRect(markRect)
-//            list.draw(shape: markShape, fill: fill, alpha: 1.0, blendMode: .normal)
+            //            list.draw(shape: markShape, fill: fill, alpha: 1.0, blendMode: .normal)
         }
-
+        
         if startLine + 1 <= endLine {
             let markRect = NSRect(x: hMargin + Float(0), y: Float(line1.rect.maxY) + fHeight * Float(endLine - 1), width: Float(xEnd), height: fHeight)
-//            markShape.setRect(markRect.cgRect)
-//            list.draw(shape: markShape, fill: fill, alpha: 1.0, blendMode: .normal)
+            //            markShape.setRect(markRect.cgRect)
+            //            list.draw(shape: markShape, fill: fill, alpha: 1.0, blendMode: .normal)
             context.addRect(markRect)
         }
         
@@ -139,51 +139,51 @@ public class BeamTextEdit : TextInputHandler {
     
     public func draw(in context: CGContext) {
         updateTextRendering()
-
+        
         let cursorLine = lineAt(cursorPosition)
-
+        
         //Draw Selection:
         if !markedTextRange.isEmpty {
             drawMarking(context, markedTextRange.lowerBound, markedTextRange.upperBound, markedColor)
         } else if !selectedTextRange.isEmpty {
             drawMarking(context, selectedTextRange.lowerBound, selectedTextRange.upperBound, selectionColor)
         }
-
+        
         var Y = Float(0)
-//        let y = Y + ((rect.height - vMargin * 2) - fHeight * Float(lines.count)) / 2
-
-        for (i,l) in layouts.enumerated()  {
-            let pos = cursorPosition
-            var x2 = CGFloat(0)
-            let x1 = cursorLine == i ? CTLineGetOffsetForStringIndex(l.line, CFIndex(pos - lines[i].lowerBound), &x2) : 0
-                        
+        //        let y = Y + ((rect.height - vMargin * 2) - fHeight * Float(lines.count)) / 2
+        
+        for l in layouts  {
+            //let pos = cursorPosition
+            //var x2 = CGFloat(0)
+            //let x1 = cursorLine == i ? CTLineGetOffsetForStringIndex(l.line, CFIndex(pos - lines[i].lowerBound), &x2) : 0
+            
             context.saveGState()
             
-//            print("rect \(rect.size)\n\ty \(y) - height \(height) - ascent \(font.ascent) - descent \(font.descent) - capHeight \(font.capHeight)\n\tBBox \(font.fontBBox)\n\tleading \(font.leading) - size \(font.size) - unitsPerEM \(font.unitsPerEm) - stemV \(font.stemV) - xHeight \(font.xHeight)\n")
-                    
+            //            print("rect \(rect.size)\n\ty \(y) - height \(height) - ascent \(font.ascent) - descent \(font.descent) - capHeight \(font.capHeight)\n\tBBox \(font.fontBBox)\n\tleading \(font.leading) - size \(font.size) - unitsPerEM \(font.unitsPerEm) - stemV \(font.stemV) - xHeight \(font.xHeight)\n")
+            
             context.translateBy(x: CGFloat(hMargin), y: CGFloat(Y + fHeight + font.descent))
             context.scaleBy(x: 1, y: -1)
             
             for run in CTLineGetGlyphRuns(l.line) as! [CTRun] {
                 CTRunDraw(run, context, CFRange())
             }
-//            context.addPath(l.shape)
-//            let s = CGFloat(font.size)
-//            context.scaleBy(x: s, y: s)
-//            context.drawPath(using: .eoFill)
-//            list.draw(displayList: self.lists[i])
-
+            //            context.addPath(l.shape)
+            //            let s = CGFloat(font.size)
+            //            context.scaleBy(x: s, y: s)
+            //            context.drawPath(using: .eoFill)
+            //            list.draw(displayList: self.lists[i])
+            
             context.restoreGState()
             
             Y += fHeight
         }
-
+        
         // Draw cursor
         if let cursorLine = cursorLine, hasFocus && blinkPhase  {
             var x2 = CGFloat(0)
             let x1 = CTLineGetOffsetForStringIndex(layouts[cursorLine].line, CFIndex(cursorPosition - lines[cursorLine].lowerBound), &x2)
             cursorRect = NSRect(x: hMargin + Float(x1), y: Float(cursorLine) * fHeight, width: 1.5, height: fHeight )
-
+            
             context.beginPath()
             context.addRect(cursorRect)
             //let fill = RBFill()
@@ -197,13 +197,13 @@ public class BeamTextEdit : TextInputHandler {
             context.drawPath(using: .fill)
         }
     }
-
+    
     var invalidatedTextRendering = true
     func invalidateTextRendering() {
         invalidatedTextRendering = true
         invalidateLayout()
     }
-
+    
     func updateTextRendering(forceWidth: Float? = nil) {
         if invalidatedTextRendering {
             layouts = []
@@ -224,14 +224,14 @@ public class BeamTextEdit : TextInputHandler {
                     let attrs: [String:CTFont] = [kCTFontAttributeName as String : font.ctFont]
                     let attrString = CFAttributedStringCreate(nil, "" as CFString, attrs as CFDictionary)
                     let line = CTLineCreateWithAttributedString(attrString!)
-
+                    
                     layouts.append(TextLineLayout(rect: NSRect(x: 0, y: 0, width: Float(1), height: Float(font.ascent - font.descent)), line: line, range: lrange))
                 }
             }
         }
         invalidatedTextRendering = false
     }
-
+    
     public override func draw(_ dirtyRect: NSRect) {
         if let context = NSGraphicsContext.current?.cgContext {
             self.draw(in: context)
@@ -257,14 +257,14 @@ public class BeamTextEdit : TextInputHandler {
     public func positionAt(_ point: simd_float2) -> Int {
         let x = point.x
         let y = point.y
-
+        
         if y >= Float(frame.height) {
             return text.count
         }
         if y < 0 {
             return 0
         }
-
+        
         let i = lineAt(point)
         let l = layouts[i]
         let fHeight = Float(font.ascent - font.descent)
@@ -274,7 +274,7 @@ public class BeamTextEdit : TextInputHandler {
         }
         return lines[i].lowerBound + p
     }
-
+    
     var fHeight: Float { Float(font.ascent - font.descent) }
     
     public func lineAt(_ point: simd_float2) -> Int {
@@ -286,12 +286,12 @@ public class BeamTextEdit : TextInputHandler {
         else if y < 0 {
             return 0
         }
-
+        
         return min(Int(y / fHeight), lines.count - 1)
     }
     
     override public func mouseDown(with event: NSEvent) {
- //       window?.makeFirstResponder(self)
+        //       window?.makeFirstResponder(self)
         if event.clickCount == 1 {
             reBlink()
             
@@ -305,7 +305,7 @@ public class BeamTextEdit : TextInputHandler {
             doCommand(.selectAll)
         }
     }
-
+    
     public func rectAt(_ position: Int) -> NSRect {
         updateTextRendering()
         if let line = lineAt(position)  {
@@ -313,22 +313,22 @@ public class BeamTextEdit : TextInputHandler {
             let x1 = CTLineGetOffsetForStringIndex(layouts[line].line, CFIndex(cursorPosition - lines[line].lowerBound), &x2)
             return NSRect(x: hMargin + Float(x1), y: Float(line) * fHeight, width: 1.5, height: fHeight )
         }
-
+        
         return NSRect()
     }
     
     public override func mouseMoved(with event: NSEvent) {
-//        print("mouseMoved \(event)")
+        //        print("mouseMoved \(event)")
         super.mouseMoved(with: event)
     }
-
+    
     override public func setHotSpotToCursorPosition() {
         setHotSpot(rectAt(cursorPosition))
     }
-
+    
     override public func mouseDragged(with event: NSEvent) {
-//        window?.makeFirstResponder(self)
-
+        //        window?.makeFirstResponder(self)
+        
         let point = self.convert(event.locationInWindow, from: nil)
         let p = positionAt(simd_float2(x: Float(point.x), y: Float(point.y)))
         cursorPosition = p
@@ -356,13 +356,13 @@ public class BeamTextEdit : TextInputHandler {
     public override func acceptsFirstMouse(for event: NSEvent?) -> Bool {
         return true
     }
-
+    
     public override func viewWillMove(toWindow newWindow: NSWindow?) {
         if let w = newWindow {
             w.acceptsMouseMovedEvents = true
         }
     }
-
+    
     public override func becomeFirstResponder() -> Bool {
         blinkPhase = true
         invalidate()
@@ -374,20 +374,20 @@ public class BeamTextEdit : TextInputHandler {
         invalidate()
         return super.resignFirstResponder()
     }
-
+    
     var onBlinkTime: Double = 0.7
     var offBlinkTime: Double = 0.5
     var blinkTime: Double = CFAbsoluteTimeGetCurrent()
     var blinkPhase = true
     
-//    func animate(_ tick: Tick) {
-//        let now = CFAbsoluteTimeGetCurrent()
-//        if blinkTime < now && hasFocus {
-//            blinkPhase.toggle()
-//            blinkTime = now + (blinkPhase ? onBlinkTime : offBlinkTime)
-//            invalidate()
-//        }
-//    }
+    //    func animate(_ tick: Tick) {
+    //        let now = CFAbsoluteTimeGetCurrent()
+    //        if blinkTime < now && hasFocus {
+    //            blinkPhase.toggle()
+    //            blinkTime = now + (blinkPhase ? onBlinkTime : offBlinkTime)
+    //            invalidate()
+    //        }
+    //    }
     
     public override var isFlipped: Bool { true }
 }

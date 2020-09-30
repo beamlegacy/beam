@@ -14,18 +14,18 @@ struct BrowserTabView: View {
     @State var showButton = false
     @State var isHovering = false
     var selected: Bool
-    
+
     static var tabFrameColor = Color("TabFrame")
-    
+
     var body: some View {
         ZStack {
             if isHovering {
                 RoundedRectangle(cornerRadius: 5)
                     .padding(.all, 2)
                     .foregroundColor(Color("TabHover"))
-                
+
             }
-            
+
             GeometryReader { geometry in
                 Path { path in
                     path.move(to: CGPoint(x: geometry.size.width - 1, y: geometry.size.height * 0.25))
@@ -55,7 +55,7 @@ struct BrowserTabView: View {
                 })
                 .buttonStyle(BorderlessButtonStyle())
                 .padding(.leading, 2)
-                
+
                 Text(tab.title)
                     .padding(.top, 2)
                     .padding([.leading, .trailing], 3)
@@ -69,10 +69,10 @@ struct BrowserTabView: View {
         .padding([.top], 2)
         .animation(nil)
     }
-    
+
     func buildTabDecoration(_ path: inout Path, width: Int, height: Int) {
         let radius = Int(2)
-        
+
         path.move(to: CGPoint(x: 0, y: height))
         path.addLine(to: CGPoint(x: 0, y: radius))
         path.addArc(center: CGPoint(x: radius, y: radius),
@@ -84,7 +84,7 @@ struct BrowserTabView: View {
                     startAngle: Angle(degrees: -90), endAngle: Angle(degrees: 0), clockwise: false)
         path.addLine(to: CGPoint(x: width, y: height))
         path.closeSubpath()
-        
+
     }
 }
 

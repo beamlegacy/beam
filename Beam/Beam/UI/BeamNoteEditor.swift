@@ -16,11 +16,11 @@ struct BeamNoteEditorHost: NSViewRepresentable {
     var state: BeamState
     var note: BeamNote
     private var cancellables = [Cancellable]()
-    
+
     init(_ state: BeamState, _ note: BeamNote) {
         self.state = state
         self.note = note
-        
+
         editor = BeamNoteEditor(state, note)
     }
 
@@ -36,13 +36,13 @@ struct BeamNoteEditorHost: NSViewRepresentable {
 class BeamNoteEditor: NSView {
     var state: BeamState
     var note: BeamNote
-    
+
     init(_ state: BeamState, _ note: BeamNote) {
         self.state = state
         self.note = note
         super.init(frame: NSRect())
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }

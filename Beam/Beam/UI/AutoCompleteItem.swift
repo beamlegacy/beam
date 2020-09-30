@@ -10,7 +10,7 @@ import SwiftUI
 struct AutoCompleteItem: View {
     @State var item: AutoCompleteResult
     var selected: Bool
-    
+
     var body: some View {
         HStack {
             item.source == .history ? Image("clock") : Image("magnifyingglass")
@@ -23,8 +23,8 @@ struct AutoCompleteItem: View {
         .background(selected ? Color.accentColor : Color("transparent"))
         .clipShape(RoundedRectangle(cornerRadius: 8.0), style: FillStyle())
 
-            
-            
+
+
     }
 }
 

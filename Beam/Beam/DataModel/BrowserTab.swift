@@ -23,7 +23,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
             setupObservers()
         }
     }
-
+    
     @Published var title: String = ""
     @Published var originalQuery: String = ""
     @Published var url: URL? = nil
@@ -35,7 +35,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
     @Published var canGoForward: Bool = false
     @Published var backForwardList: WKBackForwardList
     @Published var visitedURLs = Set<URL>()
-
+    
     var appendToIndexer: (URL, Readability) -> Void = { _, _ in }
     
     var creationDate: Date = Date()
@@ -45,7 +45,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
     public var onNewTabCreated: (BrowserTab) -> Void = { _ in }
     
     private var scope = Set<AnyCancellable>()
-
+    
     init(originalQuery: String, id: UUID = UUID(), webView: WKWebView? = nil ) {
         self.id = id
         self.originalQuery = originalQuery
@@ -60,7 +60,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
             configuration.preferences.javaScriptCanOpenWindowsAutomatically = false
             configuration.preferences.tabFocusesLinks = true
             configuration.defaultWebpagePreferences.preferredContentMode = .desktop
-
+            
             let web = WKWebView(frame: NSRect(), configuration: configuration)
             backForwardList = web.backForwardList
             self.webView = web
@@ -69,7 +69,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
         super.init()
         setupObservers()
     }
-
+    
     private func setupObservers() {
         webView.publisher(for: \.title).sink() { v in self.title = v ?? "loading..." }.store(in: &scope)
         webView.publisher(for: \.url).sink() { v in self.url = v }.store(in: &scope)
@@ -80,19 +80,19 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
         webView.publisher(for: \.canGoBack).sink() { v in self.canGoBack = v }.store(in: &scope)
         webView.publisher(for: \.canGoForward).sink() { v in self.canGoForward = v }.store(in: &scope)
         webView.publisher(for: \.backForwardList).sink() { v in self.backForwardList = v }.store(in: &scope)
-
+        
         webView.navigationDelegate = self
         webView.uiDelegate = self
     }
-
+    
     func injectJSInPage() {
     }
-
+    
     // WKNavigationDelegate:
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         decisionHandler(.allow)
     }
-
+    
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, preferences: WKWebpagePreferences, decisionHandler: @escaping (WKNavigationActionPolicy, WKWebpagePreferences) -> Void) {
         var isSearchResult = false
         if let targetURL = navigationAction.request.url {
@@ -102,7 +102,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
                     isSearchResult = currentHost.hasSuffix("google.com") && targetHost.hasSuffix("google.com") && startsWithURL && !visitedURLs.isEmpty
                 }
             }
-
+            
             if navigationAction.modifierFlags.contains(.command) != isSearchResult {
                 // Create new tab
                 let newWebView = WKWebView(frame: NSRect(), configuration: webView.configuration)
@@ -112,7 +112,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
                 decisionHandler(.cancel, preferences)
                 return
             }
-
+            
             visitedURLs.insert(targetURL)
         }
         decisionHandler(.allow, preferences)
@@ -124,39 +124,41 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
     
     func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
     }
-
+    
     func webView(_ webView: WKWebView, didReceiveServerRedirectForProvisionalNavigation navigation: WKNavigation!) {
     }
-
+    
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
     }
-
+    
     func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
     }
 
+    #if false
     class textNodeVisitor: SwiftSoup.NodeVisitor {
         init() {
         }
         public func head(_ node: Node, _ depth: Int) {
             if let textNode = (node as? TextNode) {
                 let string = textNode.getWholeText()
-//                print("Node[\(depth)]: \(string)\n")
+                //                print("Node[\(depth)]: \(string)\n")
             } else if let element = (node as? Element) {
-//                if !accum.isEmpty &&
-//                    (element.isBlock() || element.nodeName() == "br") &&
-//                    !TextNode.lastCharIsWhitespace(accum) {
-////                    accum.append(" ")
-//                }
+                //                if !accum.isEmpty &&
+                //                    (element.isBlock() || element.nodeName() == "br") &&
+                //                    !TextNode.lastCharIsWhitespace(accum) {
+                ////                    accum.append(" ")
+                //                }
             }
         }
-
+        
+        
         public func tail(_ node: Node, _ depth: Int) {
         }
     }
     
     class NodeTraversor {
         private let visitor: NodeVisitor
-
+        
         /**
          * Create a new traversor.
          * @param visitor a class implementing the {@link NodeVisitor} interface, to be called when visiting each node.
@@ -164,7 +166,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
         public init(_ visitor: NodeVisitor) {
             self.visitor = visitor
         }
-
+        
         /**
          * Start a depth-first traverse of the root and all of its descendants.
          * @param root the root node point to traverse.
@@ -172,7 +174,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
         open func traverse(_ root: Node?)throws {
             var node: Node? = root
             var depth: Int = 0
-
+            
             while (node != nil) {
                 try visitor.head(node!, depth)
                 if (node!.childNodeSize() > 0) {
@@ -192,10 +194,10 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
                 }
             }
         }
-
+        
     }
-
-
+    #endif
+    
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         if let url = webView.url {
             Readability.read(webView) { [weak self] result in
@@ -214,10 +216,10 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
             if let html = string as? String {
                 do {
                     let doc: Document = try SwiftSoup.parse(html)
-//                    let text = try doc.text()
+                    //                    let text = try doc.text()
                     try NodeTraversor(textNodeVisitor()).traverse(doc)
                     
-//                    print("==============================\nAll the text in the document:\n\(text)")
+                    //                    print("==============================\nAll the text in the document:\n\(text)")
                 } catch Exception.Error(let type, let message) {
                     print("SwiftSoup Error(\(type)): \(message)")
                 } catch {
@@ -227,18 +229,18 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
         }
         #endif
     }
-
+    
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
     }
-
+    
     func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
         completionHandler(.performDefaultHandling, challenge.proposedCredential)
     }
-
+    
     func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
     }
-
-
+    
+    
     // WKUIDelegate
     func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
         let newWebView = WKWebView(frame: NSRect(), configuration: configuration)
@@ -255,17 +257,17 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
         print("webView runJavaScriptAlertPanelWithMessage")
     }
     
-
+    
     func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (Bool) -> Void) {
         print("webView runJavaScriptConfirmPanelWithMessage")
     }
     
-
+    
     func webView(_ webView: WKWebView, runJavaScriptTextInputPanelWithPrompt prompt: String, defaultText: String?, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (String?) -> Void) {
         print("webView runJavaScriptTextInputPanelWithPrompt")
     }
     
-
+    
     func webView(_ webView: WKWebView, runOpenPanelWith parameters: WKOpenPanelParameters, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping ([URL]?) -> Void) {
         print("webView runOpenPanel")
     }
@@ -273,7 +275,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
     func startViewing() {
         lastViewDate = Date()
     }
-
+    
     func stopViewing() {
         accumulatedViewDuration += lastViewDate.distance(to: Date())
     }

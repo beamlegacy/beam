@@ -13,17 +13,17 @@ import WebKit
 public struct WebView: View, NSViewRepresentable {
     /// The WKWebView to display
     public let webView: WKWebView
-    
+
     public typealias NSViewType = NSViewContainerView<WKWebView>
-    
+
     public init(webView: WKWebView) {
         self.webView = webView
     }
-    
+
     public func makeNSView(context: NSViewRepresentableContext<WebView>) -> WebView.NSViewType {
         return NSViewContainerView()
     }
-    
+
     public func updateNSView(_ nsView: WebView.NSViewType, context: NSViewRepresentableContext<WebView>) {
         // If its the same content view we don't need to update.
         if nsView.contentView !== webView {

@@ -11,7 +11,7 @@ import AppKit
 struct AutoCompleteList: View {
     @Binding var selectedIndex: Int?
     @Binding var elements: [AutoCompleteResult]
-    
+
     var body: some View {
         VStack() {
             ForEach(elements) { i in
@@ -21,7 +21,7 @@ struct AutoCompleteList: View {
             }
         }.frame(maxWidth: .infinity, alignment: .top).background(Color("transparent"))
     }
-    
+
     func isSelectedItem(_ item: AutoCompleteResult) -> Bool {
         if let i = selectedIndex {
             return elements[i].id == item.id

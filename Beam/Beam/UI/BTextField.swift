@@ -25,8 +25,8 @@ struct BTextField: NSViewRepresentable {
     private var formatter: Formatter = Formatter()
     var text: Binding<String>
     private var cancellables = [Cancellable]()
-    
-    
+
+
     //    Creates a text field with a text label generated from a title string.
     //    Available when Label is Text.
     init<S>(_ title: S, text: Binding<String>,
@@ -49,7 +49,7 @@ struct BTextField: NSViewRepresentable {
 
         configure()
     }
-    
+
     //    Creates a text field with a text label generated from a localized title string.
     //    Available when Label is Text.
     init(_ titleKey: LocalizedStringKey, text: Binding<String>,
@@ -75,7 +75,7 @@ struct BTextField: NSViewRepresentable {
         textField.onEditingChanged = { v in
             onEditingChanged(v)
         }
-        
+
         textField.onPerformKeyEquivalent = { event in
             if event.keyCode == 126 {
                 // up!
@@ -87,7 +87,7 @@ struct BTextField: NSViewRepresentable {
             return false
         }
     }
-    
+
     func makeNSView(context: Self.Context) -> Self.NSViewType {
         return textField
     }

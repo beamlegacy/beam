@@ -44,7 +44,7 @@ struct BrowserTabBar: View {
             }
         }.frame(height: 25)
     }
-    
+
     func isSelected(_ tab: BrowserTab) -> Bool {
         return tab.id == currentTab.id
     }

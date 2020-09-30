@@ -14,33 +14,33 @@ class VerticallyCenteredTextFieldCell: NSTextFieldCell {
     
     override func titleRect(forBounds rect: NSRect) -> NSRect {
         var titleRect = super.titleRect(forBounds: rect)
-
+        
         let minimumHeight = self.cellSize(forBounds: rect).height
         titleRect.origin.y += (titleRect.height - minimumHeight) / 2
         titleRect.size.height = minimumHeight
-
+        
         return titleRect
     }
-
+    
     override func drawInterior(withFrame cellFrame: NSRect, in controlView: NSView) {
         super.drawInterior(withFrame: titleRect(forBounds: cellFrame), in: controlView)
     }
-
+    
     override func draw(withFrame cellFrame: NSRect, in controlView: NSView) {
         super.draw(withFrame: titleRect(forBounds: cellFrame), in: controlView)
     }
-
+    
     override func highlight(_ flag: Bool, withFrame cellFrame: NSRect, in controlView: NSView) {
         super.highlight(flag, withFrame: titleRect(forBounds: cellFrame), in: controlView)
     }
-
+    
     override func edit(withFrame rect: NSRect, in controlView: NSView, editor textObj: NSText, delegate: Any?, event: NSEvent?) {
         isEditing = true
         super.edit(withFrame: titleRect(forBounds: rect), in: controlView, editor: textObj, delegate: delegate, event: event)
     }
-
-
-
+    
+    
+    
     override func select(withFrame aRect: NSRect, in controlView: NSView, editor textObj: NSText, delegate anObject: Any?, start selStart: Int, length selLength: Int) {
         super.select(withFrame: titleRect(forBounds: aRect), in: controlView, editor: textObj, delegate: anObject, start: selStart, length: selLength)
     }
@@ -49,7 +49,7 @@ class VerticallyCenteredTextFieldCell: NSTextFieldCell {
         super.endEditing(textObj)
         isEditing = false
     }
-
+    
     var isEditing = false
 }
 
@@ -60,7 +60,7 @@ class BNSTextField : NSTextField, ObservableObject {
     public var onCommit: () -> Void = { }
     public var onPerformKeyEquivalent: (NSEvent) -> Bool = { _ in return false }
     public var focusOnCreation: Bool
-
+    
     public init(string stringValue: Binding<String>, focusOnCreation: Bool = false) {
         value = stringValue
         self.focusOnCreation = focusOnCreation
@@ -82,7 +82,7 @@ class BNSTextField : NSTextField, ObservableObject {
     public override func textShouldBeginEditing(_ textObject: NSText) -> Bool {
         return true
     }
-
+    
     public override func becomeFirstResponder() -> Bool {
         onEditingChanged(true)
         return true
@@ -96,7 +96,7 @@ class BNSTextField : NSTextField, ObservableObject {
     public override func textDidBeginEditing(_ notification: Notification) {
         super.textDidBeginEditing(notification)
     }
-
+    
     public override func textDidChange(_ notification: Notification) {
         value.wrappedValue = self.stringValue
     }
@@ -104,12 +104,12 @@ class BNSTextField : NSTextField, ObservableObject {
     public override func textShouldEndEditing(_ textObject: NSText) -> Bool {
         return true
     }
-
+    
     public override func textDidEndEditing(_ notification: Notification) {
-//        onEditingChanged(false)
+        //        onEditingChanged(false)
         super.textDidEndEditing(notification)
     }
-
+    
     override func performKeyEquivalent(with event: NSEvent) -> Bool {
         if let c = cell as? VerticallyCenteredTextFieldCell, c.isEditing  {
             if onPerformKeyEquivalent(event) {
@@ -118,15 +118,15 @@ class BNSTextField : NSTextField, ObservableObject {
         }
         return super.performKeyEquivalent(with: event)
     }
-
-//    override func viewDidMoveToWindow() {
-//        if focusOnCreation {
-////            self.window?.initialFirstResponder = self
-//            DispatchQueue.main.async {
-//                self.window?.makeFirstResponder(self)
-//            }
-//        }
-//    }
+    
+    //    override func viewDidMoveToWindow() {
+    //        if focusOnCreation {
+    ////            self.window?.initialFirstResponder = self
+    //            DispatchQueue.main.async {
+    //                self.window?.makeFirstResponder(self)
+    //            }
+    //        }
+    //    }
     
     @objc func commit(_ sender: AnyObject) {
         onCommit()

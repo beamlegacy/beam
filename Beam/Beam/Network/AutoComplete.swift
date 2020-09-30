@@ -14,7 +14,7 @@ struct AutoCompleteResult: Identifiable {
         case note
         case autoComplete
     }
-
+    
     var id: UUID
     var string: String
     var source: Source

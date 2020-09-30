@@ -35,7 +35,7 @@ class BeamData {
             searchKit = SearchKit(indexPath)
         } else {
             searchKit = SearchKit(URL(fileURLWithPath: "~/Application Data/BeamApp/index.sk"))
-
+            
         }
     }
 }
@@ -96,14 +96,14 @@ class BeamState: ObservableObject {
             }.store(in: &tabScope)
         }
     }
-
+    
     @Published var canGoBack: Bool = false
     @Published var canGoForward: Bool = false
-
+    
     private var tabScope = Set<AnyCancellable>()
-
+    
     public var searchEngine: SearchEngine = GoogleSearch()
-
+    
     func selectPreviousAutoComplete() {
         if let i = selectionIndex {
             let newIndex = i - 1
@@ -121,7 +121,7 @@ class BeamState: ObservableObject {
             }
         }
     }
-
+    
     func selectNextAutoComplete() {
         if let i = selectionIndex {
             selectionIndex = min(i + 1, completedQueries.count - 1)
@@ -129,16 +129,16 @@ class BeamState: ObservableObject {
             selectionIndex = 0
         }
     }
-
+    
     private var scope = Set<AnyCancellable>()
-
+    
     public init(data: BeamData) {
         self.data = data
         self.currentNote = data.todaysNote
         $searchQuery.sink { [weak self] query in
             guard let self = self else { return }
             //print("received auto complete query: \(query)")
-
+            
             if !(query.hasPrefix("http://") || query.hasPrefix("https://")) {
                 self.mode = .note
             }
@@ -155,6 +155,6 @@ class BeamState: ObservableObject {
             self.selectionIndex = nil
             self.completedQueries.append(contentsOf: results)
         }.store(in: &scope)
-
+        
     }
 }

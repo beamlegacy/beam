@@ -13,15 +13,15 @@ class BeamHostingView<Content> : NSHostingView<Content> where Content : View {
     required public init(rootView: Content) {
         super.init(rootView: rootView)
     }
-    
+
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         assert(false)
     }
-    
+
     public override var allowsVibrancy: Bool { false }
 }
-    
+
 
 
 class BeamWindow: NSWindow, NSWindowDelegate {
@@ -34,17 +34,17 @@ class BeamWindow: NSWindow, NSWindowDelegate {
         let state = BeamState(data: data)
         self.state = state
         self.cloudKitContainer = cloudKitContainer
-        
+
         super.init(contentRect: contentRect, styleMask: [.titled, .closable, .miniaturizable, .texturedBackground, .resizable, .fullSizeContentView],
                    backing: .buffered, defer: false)
 
         self.delegate = self
         self.titlebarAppearsTransparent = true
         self.titleVisibility = .hidden
-        
+
         titleVisibility = .hidden
         titlebarAppearsTransparent = true
-        
+
         self.tabbingMode = .disallowed
         setFrameAutosaveName("BeamWindow")
 
@@ -60,7 +60,7 @@ class BeamWindow: NSWindow, NSWindowDelegate {
     public func windowDidResize(_ notification: Notification) {
         let version = ProcessInfo.processInfo.operatingSystemVersion
         let RunningOnBigSur = version.majorVersion >= 11 || (version.majorVersion == 10 && version.minorVersion >= 16)
-        
+
         // THIS HACK IS HORRIBLE But AppKit leaves us little choice to have a similar look on Catalina and Future OSes
         if let b = self.standardWindowButton(.closeButton) {
             if var f = b.superview?.superview?.frame {
@@ -72,7 +72,7 @@ class BeamWindow: NSWindow, NSWindowDelegate {
             }
         }
     }
-    
+
     @IBAction func newDocument(_ sender: Any?) {
         let window = BeamWindow(contentRect: NSRect(x: 0, y: 0, width: 480, height: 300), cloudKitContainer: cloudKitContainer, data: data)
         window.center()
@@ -85,7 +85,7 @@ class BeamWindow: NSWindow, NSWindowDelegate {
             state.currentTab = state.tabs[i]
         }
     }
-    
+
     @IBAction func showNextTab(_ sender: Any?) {
         // Activate next tab
         if let i = state.tabs.firstIndex(of: state.currentTab) {
@@ -93,12 +93,12 @@ class BeamWindow: NSWindow, NSWindowDelegate {
             state.currentTab = state.tabs[i]
         }
     }
-    
+
     @IBAction func newSearch(_ sender: Any?) {
         state.mode = .note
         state.searchQuery = ""
     }
-    
+
     override func performClose(_ sender: Any?) {
         if state.mode == .web {
             if let i = state.tabs.firstIndex(of: state.currentTab) {
@@ -110,7 +110,7 @@ class BeamWindow: NSWindow, NSWindowDelegate {
                 return
             }
         }
-        
+
         super.performClose(sender)
     }
 }

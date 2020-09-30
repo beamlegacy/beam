@@ -42,7 +42,7 @@ struct RoundRectButtonStyle : PrimitiveButtonStyle {
         .onHover { h in
             isHover = h && isEnabled
         }
-
+        
     }
 }
 
@@ -57,11 +57,11 @@ struct Symbol: View {
 
 struct SearchBar: View {
     @EnvironmentObject var state: BeamState
-
+    
     var body: some View {
         ZStack {
             VisualEffectBlur(material: .headerView, blendingMode: .withinWindow, state: .active)
-
+            
             HStack {
                 Button(action: goBack) {
                     Symbol(name: "chevron.left").offset(x: 0, y: -0.5)
@@ -109,18 +109,18 @@ struct SearchBar: View {
                         Button(action: startQuery) {
                             Symbol(name: "magnifyingglass")
                         }.disabled(state.searchQuery.isEmpty).buttonStyle(RoundRectButtonStyle()).padding(.leading, 1)
-
+                        
                         Button(action: startQuery) {
                             Symbol(name: "plus")
                         }.buttonStyle(BorderlessButtonStyle())
-
+                        
                     }.padding(.leading, 9)
-
+                    
                 } else {
                     GlobalTabTitle(tab: state.currentTab)
                         .frame(idealWidth: 600, maxWidth: .infinity, minHeight: 28, alignment: .center)
                 }
-
+                
                 Button(action: toggleMode) {
                     Symbol(name: state.mode == .web ? "note.text" : "network")
                 }.buttonStyle(RoundRectButtonStyle()).disabled(state.tabs.isEmpty)
@@ -135,7 +135,7 @@ struct SearchBar: View {
     func goForward() {
         state.currentTab.webView.goForward()
     }
-
+    
     func resetSearchQuery() {
         state.searchQuery = ""
     }
@@ -168,7 +168,7 @@ struct SearchBar: View {
             state.currentNote = BeamNote(title: query, searchQueries: [query])
             state.mode = .web
         }
-
+        
     }
     
     func toggleMode() {

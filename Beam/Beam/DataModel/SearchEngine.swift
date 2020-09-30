@@ -20,7 +20,6 @@ extension SearchEngine {
         q = q.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)!
         return q
     }
-
 }
 
 struct GoogleSearch: SearchEngine {

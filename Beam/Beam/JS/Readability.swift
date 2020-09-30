@@ -23,7 +23,7 @@ struct Readability {
     var byLine: String = ""
 
     static func read(_ webView: WKWebView, _ getResults: @escaping (Result<Readability, Error>) -> Void) {
-        let now = Date()
+        //let now = Date()
         webView.evaluateJavaScript(readabilitySource) { (res, err) in
             if let r = res as? [String:Any] {
                 var read = Readability()
@@ -36,10 +36,10 @@ struct Readability {
                 read.excerpt = str(r["excerpt"])
                 read.byLine = str(r["byLine"])
                 
-                let t0 = now.distance(to: Date())
+                //let t0 = now.distance(to: Date())
                 getResults(.success(read))
                 
-                let t1 = now.distance(to: Date()) - t0
+                //let t1 = now.distance(to: Date()) - t0
                 //print("Extraction time: \(t0)s / indexing \(t1)s")
             } else if let e = err {
                 getResults(.failure(e))

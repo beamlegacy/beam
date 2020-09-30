@@ -11,7 +11,7 @@ extension String {
     func range(_ start: Int, _ end: Int) -> Range<String.Index> {
         return Range<String.Index>(uncheckedBounds: (lower: index(at: start), upper: index(at: end)))
     }
-
+    
     func range(from r: Range<Int>) -> Range<String.Index> {
         return index(at: r.lowerBound)..<index(at: r.upperBound)
     }
@@ -23,7 +23,7 @@ extension String {
         if low == NSNotFound {
             low = c
         }
-
+        
         if up == NSNotFound {
             up = c
         }
@@ -32,7 +32,7 @@ extension String {
         up  = min(max(up, low), count)
         return low..<up
     }
-
+    
     func index(at position: Int) -> String.Index {
         if position == NSNotFound {
             return endIndex
@@ -48,15 +48,15 @@ extension String {
         }
         return startIndex
     }
-
+    
     var wholeRange: Range<Int> {
         return Int(0)..<Int(count)
     }
-
+    
     func position(at index: String.Index) -> Int {
         return distance(from: startIndex, to: index)
     }
-
+    
     func position(after pos: Int) -> Int {
         if pos < count {
             let i = index(at: pos)
@@ -65,7 +65,7 @@ extension String {
         }
         return count
     }
-
+    
     func position(before pos: Int) -> Int {
         if pos > 0 {
             let i = index(at: pos)
@@ -74,7 +74,7 @@ extension String {
         }
         return 0
     }
-
+    
     public func description(_ range: Range<Index>) -> String {
         return "Range from \(position(at: range.lowerBound)) to \(position(at: range.upperBound)) [\(position(at: range.upperBound) - position(at: range.lowerBound))]"
     }
@@ -84,11 +84,11 @@ extension String {
         let end = index(start, offsetBy: to - from)
         return String(self[start ..< end])
     }
-
+    
     func substring(range: Range<Int>) -> String {
         return substring(from: range.lowerBound, to: range.upperBound)
     }
-
-
+    
+    
 }
 

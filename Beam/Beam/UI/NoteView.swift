@@ -10,7 +10,7 @@ import SwiftUI
 
 struct NoteView: View {
     @EnvironmentObject var state: BeamState
-    
+
     var body: some View {
         ScrollView(.vertical, showsIndicators: true) {
             VStack {
@@ -23,7 +23,7 @@ struct NoteView: View {
                     }
                 }
             }
-            
+
         }
     }
 }

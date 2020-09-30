@@ -40,7 +40,7 @@ public class TextInputHandler: NSView, NSTextInputClient {
             return text.substring(range: selectedTextRange)
         }
     }
-
+    
     public func setHotSpot(_ spot: NSRect) {
         if let sv = superview as? NSScrollView {
             sv.scrollToVisible(spot)
@@ -50,14 +50,14 @@ public class TextInputHandler: NSView, NSTextInputClient {
     public func setHotSpotToCursorPosition() {
         assert(false) // Should be implemented in a subclass
     }
-
+    
     
     public var activated: () -> Void = { }
     public var activateOnEnter = true
     public var activateOnLostFocus = true
     public var multiline = true { didSet { updateLines(); invalidateLayout() } }
     public var useFocusRing = false
-
+    
     public func invalidateLayout() {
         invalidateIntrinsicContentSize()
         //assert(false) // implement whatever is needed to relayout this view
@@ -103,11 +103,11 @@ public class TextInputHandler: NSView, NSTextInputClient {
         if !markedTextRange.isEmpty {
             range = markedTextRange
         }
-
+        
         if !self.selectedTextRange.isEmpty {
             range = self.selectedTextRange
         }
-
+        
         text.replaceSubrange(text.range(from:range), with: string)
         cursorPosition = range.upperBound
         cancelSelection()
@@ -121,11 +121,11 @@ public class TextInputHandler: NSView, NSTextInputClient {
         updateLines()
         updateRendering()
     }
-
+    
     public func unmarkText() {
         markedTextRange = 0..<0
     }
-
+    
     public func insertText(string: String, replacementRange: Range<Int>) {
         let c = string.count
         var range = cursorPosition..<cursorPosition
@@ -149,7 +149,7 @@ public class TextInputHandler: NSView, NSTextInputClient {
         //TODO compute the actual rect and resulting range with Font/RBFont
         return 0
     }
-
+    
     public func firstRect(forCharacterRange range: Range<Int>) -> (NSRect, Range<Int>) {
         //TODO compute the actual rect and resulting range with Font/RBFont
         return (NSRect(), range)
@@ -165,19 +165,19 @@ public class TextInputHandler: NSView, NSTextInputClient {
         } else {
             lines.append(text.position(at: text.startIndex) ..< text.position(at: text.endIndex))
         }
-//        if lines.count > 1 {
-//            //print("text: \(text)\nlines: \(lines)")
-//            for (i,l) in lines.enumerated() {
-//                let str = text.substring(from: l.startIndex, to: l.endIndex)
-//                //print("str[\(i)]: \(str)")
-//            }
-//        }
+        //        if lines.count > 1 {
+        //            //print("text: \(text)\nlines: \(lines)")
+        //            for (i,l) in lines.enumerated() {
+        //                let str = text.substring(from: l.startIndex, to: l.endIndex)
+        //                //print("str[\(i)]: \(str)")
+        //            }
+        //        }
     }
     
     public func updateRendering() {
         assert(false) // To be implemented in the sub classes
     }
-
+    
     public func reBlink() {
     }
     
@@ -195,12 +195,12 @@ public class TextInputHandler: NSView, NSTextInputClient {
         hasFocus = false
         return true
     }
-
+    
     override open func keyDown(with event: NSEvent) {
         let shift = event.modifierFlags.contains(.shift)
         let option = event.modifierFlags.contains(.option)
         let command = event.modifierFlags.contains(.command)
-
+        
         if self.hasFocus {
             if let k = event.specialKey {
                 switch k {
@@ -280,18 +280,18 @@ public class TextInputHandler: NSView, NSTextInputClient {
                     break
                 }
             }
-
+            
             if event.keyCode == 117 { // delete
                 doCommand(.deleteForward)
                 return
             }
-
+            
             if event.keyCode == 53 { // escape
                 cancelSelection()
                 return
             }
             
-
+            
             if let ch = event.charactersIgnoringModifiers {
                 if ch == "a" {
                     if command {
@@ -300,13 +300,13 @@ public class TextInputHandler: NSView, NSTextInputClient {
                     }
                 }
             }
-
+            
         }
         inputContext?.handleEvent(event)
         super.keyDown(with: event)
     }
     
-
+    
 }
 
 // Command system
@@ -368,7 +368,7 @@ extension TextInputHandler {
         markedTextRange = selectedTextRange
         invalidate()
     }
-
+    
     public func selectAll() {
         selectedTextRange = text.wholeRange
         cursorPosition = selectedTextRange.upperBound
@@ -387,7 +387,7 @@ extension TextInputHandler {
             updateRendering()
         }
     }
-
+    
     
     public func doCommand(_ command: Command) {
         reBlink()
@@ -400,21 +400,21 @@ extension TextInputHandler {
             }
             cancelSelection()
             invalidate()
-
+            
         case .moveLeft:
             if selectedTextRange.isEmpty {
                 cursorPosition = text.position(before: cursorPosition)
             }
             cancelSelection()
             invalidate()
-
+            
         case .moveBackward:
             if selectedTextRange.isEmpty {
                 cursorPosition = text.position(before: cursorPosition)
             }
             cancelSelection()
             invalidate()
-
+            
         case .moveRight:
             if selectedTextRange.isEmpty {
                 cursorPosition = text.position(after: cursorPosition)
@@ -422,7 +422,7 @@ extension TextInputHandler {
             cancelSelection()
             invalidate()
             break
-
+            
         case .moveLeftAndModifySelection:
             if cursorPosition != 0 {
                 let newCursorPosition = text.position(before: cursorPosition)
@@ -435,7 +435,7 @@ extension TextInputHandler {
                 cursorPosition = newCursorPosition
                 invalidate()
             }
-
+            
         case .moveWordRight:
             text.enumerateSubstrings(in: text.index(at: cursorPosition)..<text.endIndex, options: .byWords) { (str, r1, r2, stop) in
                 self.cursorPosition = self.text.position(at: r1.upperBound)
@@ -444,25 +444,25 @@ extension TextInputHandler {
             
             cancelSelection()
             invalidate()
-
+            
         case .moveWordLeft:
             var range = text.startIndex ..< text.endIndex
             text.enumerateSubstrings(in: text.startIndex..<text.index(at: cursorPosition), options: .byWords) { (str, r1, r2, stop) in
                 range = r1
             }
-
+            
             let pos = text.position(at: range.lowerBound)
-
+            
             if pos == cursorPosition {
                 cursorPosition = 0
             } else {
                 cursorPosition = pos
             }
-
+            
             cancelSelection()
             invalidate()
-
-
+            
+            
         case .moveWordRightAndModifySelection:
             var newCursorPosition = cursorPosition
             text.enumerateSubstrings(in: text.index(at: cursorPosition)..<text.endIndex, options: .byWords) { (str, r1, r2, stop) in
@@ -471,73 +471,73 @@ extension TextInputHandler {
             }
             
             extendSelection(to: newCursorPosition)
-
+            
         case .moveWordLeftAndModifySelection:
             var range = text.startIndex ..< text.endIndex
             var newCursorPosition = cursorPosition
             text.enumerateSubstrings(in: text.startIndex..<text.index(at: cursorPosition), options: .byWords) { (str, r1, r2, stop) in
                 range = r1
             }
-
+            
             let pos = text.position(at: range.lowerBound)
-
+            
             if pos == cursorPosition {
                 newCursorPosition = 0
             } else {
                 newCursorPosition = pos
             }
-
+            
             extendSelection(to: newCursorPosition)
-
+            
         case .moveRightAndModifySelection:
             if cursorPosition != text.count {
                 extendSelection(to: text.position(after: cursorPosition))
             }
-
+            
         case .moveToBeginningOfLine:
             if let l = lineAt(cursorPosition) {
                 cursorPosition = lines[l].lowerBound
                 cancelSelection()
                 invalidate()
             }
-
+            
         case .moveToEndOfLine:
             if let l = lineAt(cursorPosition) {
                 cursorPosition = lines[l].upperBound
                 cancelSelection()
                 invalidate()
             }
-
+            
         case .moveToBeginningOfLineAndModifySelection:
             if let l = lineAt(cursorPosition) {
                 extendSelection(to: lines[l].lowerBound)
             }
-
+            
         case .moveToEndOfLineAndModifySelection:
             if let l = lineAt(cursorPosition) {
                 extendSelection(to: lines[l].upperBound)
             }
-
+            
         case .moveUp:
             cursorPosition = positionAbove(cursorPosition)
             cancelSelection()
             invalidate()
-
+            
         case .moveDown:
             cursorPosition = positionBelow(cursorPosition)
             cancelSelection()
             invalidate()
-
+            
         case .moveUpAndModifySelection:
             extendSelection(to: positionAbove(cursorPosition))
-
+            
         case .moveDownAndModifySelection:
             extendSelection(to: positionBelow(cursorPosition))
-
-
+            
+            
         case .selectAll:
             selectAll()
-
+            
         case .deleteForward:
             if !selectedTextRange.isEmpty {
                 text.removeSubrange(text.range(from:selectedTextRange))
@@ -552,7 +552,7 @@ extension TextInputHandler {
             cancelSelection()
             updateLines()
             updateRendering()
-
+            
         case .deleteBackward:
             if !selectedTextRange.isEmpty {
                 text.removeSubrange(text.range(from:selectedTextRange))
@@ -569,7 +569,7 @@ extension TextInputHandler {
             cancelSelection()
             updateLines()
             updateRendering()
-
+            
         case .insertNewline:
             if !multiline {
                 return
@@ -590,7 +590,7 @@ extension TextInputHandler {
             cancelSelection()
             updateLines()
             updateRendering()
-
+            
         default:
             break
         }
@@ -607,7 +607,7 @@ extension TextInputHandler {
         
         return 0
     }
-
+    
     public func positionBelow(_ position: Int) -> Int {
         if let l = lineAt(position) {
             if l + 1 < lines.count {
@@ -619,7 +619,7 @@ extension TextInputHandler {
         
         return text.count
     }
-
+    
     public func lineAt(_ index: Int) -> Int? {
         for (i, l) in lines.enumerated() {
             if index < l.lowerBound {
@@ -631,7 +631,7 @@ extension TextInputHandler {
         }
         return nil
     }
-
+    
     func extendSelection(to newCursorPosition: Int) {
         var r1 = selectedTextRange.lowerBound
         var r2 = selectedTextRange.upperBound
@@ -652,7 +652,7 @@ extension TextInputHandler {
     // NSTextInputHandler:
     // NSTextInputClient:
     public func insertText(_ string: Any, replacementRange: NSRange) {
-//        print("insertText \(string) at \(replacementRange)")
+        //        print("insertText \(string) at \(replacementRange)")
         unmarkText()
         let range = replacementRange.lowerBound..<replacementRange.upperBound
         insertText(string: string as! String, replacementRange: range)
@@ -662,7 +662,7 @@ extension TextInputHandler {
     /* The receiver inserts string replacing the content specified by replacementRange. string can be either an NSString or NSAttributedString instance. selectedRange specifies the selection inside the string being inserted; hence, the location is relative to the beginning of string. When string is an NSString, the receiver is expected to render the marked text with distinguishing appearance (i.e. NSTextView renders with -markedTextAttributes).
      */
     public func setMarkedText(_ string: Any, selectedRange: NSRange, replacementRange: NSRange) {
-//        print("setMarkedText \(string) at \(replacementRange) with selection \(selectedRange)")
+        //        print("setMarkedText \(string) at \(replacementRange) with selection \(selectedRange)")
         let str = string as! String
         setMarkedText(string: str, selectedRange: selectedTextRange.lowerBound..<selectedTextRange.upperBound, replacementRange:replacementRange.lowerBound..<replacementRange.upperBound)
     }
@@ -676,7 +676,7 @@ extension TextInputHandler {
         } else {
             r = NSRange(location: selectedTextRange.lowerBound, length: selectedTextRange.upperBound - selectedTextRange.lowerBound)
         }
-//        print("selectedRange \(r)")
+        //        print("selectedRange \(r)")
         return r
     }
     
@@ -690,7 +690,7 @@ extension TextInputHandler {
         } else {
             r = NSRange(location: markedTextRange.lowerBound, length: markedTextRange.upperBound - markedTextRange.lowerBound)
         }
-//        print("markedRange \(r)")
+        //        print("markedRange \(r)")
         return r
     }
     
@@ -698,7 +698,7 @@ extension TextInputHandler {
     /* Returns attributed string specified by range. It may return nil. If non-nil return value and actualRange is non-NULL, it contains the actual range for the return value. The range can be adjusted from various reasons (i.e. adjust to grapheme cluster boundary, performance optimization, etc).
      */
     public func attributedSubstring(forProposedRange range: NSRange, actualRange: NSRangePointer?) -> NSAttributedString? {
-//        print("attributedSubstring for \(range)")
+        //        print("attributedSubstring for \(range)")
         var r = range
         var rr = Range(range, in: text)
         if rr == nil {
@@ -706,12 +706,12 @@ extension TextInputHandler {
                 rr = Range<String.Index>(uncheckedBounds: (lower: text.endIndex, upper: text.endIndex))
             }
         }
-
+        
         actualRange?.assign(from: &r, count: 1)
         if let rrr = rr {
             return NSAttributedString(string: String(text[rrr]))
         }
-
+        
         return nil
     }
     
@@ -722,7 +722,7 @@ extension TextInputHandler {
     /* Returns an array of attribute names recognized by the receiver.
      */
     public func validAttributesForMarkedText() -> [NSAttributedString.Key] {
-//        print("validAttributesForMarkedText")
+        //        print("validAttributesForMarkedText")
         return []
     }
     
@@ -730,7 +730,7 @@ extension TextInputHandler {
     /* Returns the first logical rectangular area for range. The return value is in the screen coordinate. The size value can be negative if the text flows to the left. If non-NULL, actuallRange contains the character range corresponding to the returned area.
      */
     public func firstRect(forCharacterRange range: NSRange, actualRange: NSRangePointer?) -> NSRect {
-//        print("firstRect for \(range)")
+        //        print("firstRect for \(range)")
         let (rect, _) = firstRect(forCharacterRange: range.lowerBound..<range.upperBound)
         let p = convert(rect.origin, to: nil)
         let x = Float(p.x)
@@ -745,7 +745,7 @@ extension TextInputHandler {
     /* Returns the index for character that is nearest to point. point is in the screen coordinate system.
      */
     public func characterIndex(for point: NSPoint) -> Int {
-//        print("characterIndex for \(point)")
+        //        print("characterIndex for \(point)")
         return characterIndexAt(Float(point.x), Float(point.y))
     }
     
@@ -756,7 +756,7 @@ extension TextInputHandler {
         pasteboard.declareTypes([.string], owner: nil)
         pasteboard.setString(s, forType: .string)
     }
-
+    
     @IBAction func cut(_ sender: Any) {
         let s = selectedText
         let pasteboard = NSPasteboard.general
@@ -765,8 +765,8 @@ extension TextInputHandler {
         pasteboard.setString(s, forType: .string)
         eraseSelection()
     }
-
-
+    
+    
     @IBAction func paste(_ sender: Any) {
         if let s = NSPasteboard.general.string(forType: .string) {
             insertText(string: s, replacementRange: selectedTextRange)

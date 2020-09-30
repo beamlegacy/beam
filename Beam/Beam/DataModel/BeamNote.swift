@@ -29,8 +29,8 @@ struct BeamNotes {
 protocol BeamBlock: BeamObject {
     var elements: [BID] { get set }
     var outLinks: [String] { get }
-
-//    mutating func addElement(_ element: BeamElement)
+    
+    //    mutating func addElement(_ element: BeamElement)
 }
 
 struct VisitedPage: Codable, Identifiable {
@@ -60,7 +60,7 @@ protocol BeamTextBlock: BeamObject {
 
 struct TextFormat: OptionSet, Codable {
     let rawValue: Int8
-
+    
     static let regular      = TextFormat([])
     static let bold         = TextFormat(rawValue: 1 << 0)
     static let italic       = TextFormat(rawValue: 1 << 1)
