@@ -13,6 +13,7 @@ struct AutoCompleteItem: View {
     
     var body: some View {
         HStack {
+            item.source == .history ? Image("clock") : Image("magnifyingglass")
             Text(item.string)
                 .foregroundColor(selected ? Color("AutoCompleteTextSelected") :  Color("AutoCompleteText"))
         }
@@ -31,8 +32,8 @@ struct AutoCompleteItem: View {
 struct AutoCompleteItem_Previews: PreviewProvider {
     static var previews: some View {
         Group {
-        AutoCompleteItem(item: AutoCompleteResult(id: UUID(), string: "bleh qweerty"), selected: true)
-        AutoCompleteItem(item: AutoCompleteResult(id: UUID(), string: "bleh qweerty"), selected: false)
+            AutoCompleteItem(item: AutoCompleteResult(id: UUID(), string: "bleh qweerty", source: .autoComplete), selected: true)
+        AutoCompleteItem(item: AutoCompleteResult(id: UUID(), string: "bleh qweerty", source: .autoComplete), selected: false)
         }
     }
 }

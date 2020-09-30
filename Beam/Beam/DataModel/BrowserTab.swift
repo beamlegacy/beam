@@ -36,6 +36,8 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
     @Published var backForwardList: WKBackForwardList
     @Published var visitedURLs = Set<URL>()
 
+    var appendToIndexer: (URL, Readability) -> Void = { _, _ in }
+    
     var creationDate: Date = Date()
     var lastViewDate: Date = Date()
     var accumulatedViewDuration: TimeInterval = 0
@@ -195,6 +197,19 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
 
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        if let url = webView.url {
+            Readability.read(webView) { [weak self] result in
+                guard let self = self else { return }
+                
+                switch result {
+                case let .success(read):
+                    self.appendToIndexer(url, read)
+                case let .failure(error):
+                    print("Error while indexing web page: \(error)")
+                }
+            }
+        }
+        #if false
         webView.evaluateJavaScript("document.body.innerHTML") { (string, error) in
             if let html = string as? String {
                 do {
@@ -210,6 +225,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
                 }
             }
         }
+        #endif
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {

@@ -42,9 +42,9 @@ struct AutoCompleteList: View {
 
 struct AutoCompleteList_Previews: PreviewProvider {
     static var elements = [
-        AutoCompleteResult(id: UUID(), string: "prout"),
-        AutoCompleteResult(id: UUID(), string: "asldkfjh sadlkfjh"),
-        AutoCompleteResult(id: UUID(), string: "bleh blehbleh")]
+        AutoCompleteResult(id: UUID(), string: "prout", source: .autoComplete),
+        AutoCompleteResult(id: UUID(), string: "asldkfjh sadlkfjh", source: .autoComplete),
+        AutoCompleteResult(id: UUID(), string: "bleh blehbleh", source: .autoComplete)]
     static var previews: some View {
         AutoCompleteList(selectedIndex: .constant(1), elements: .constant(Self.elements))
     }

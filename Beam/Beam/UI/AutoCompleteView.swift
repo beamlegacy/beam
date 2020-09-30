@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import VisualEffects
 
 struct AutoCompleteView: View {
     @Binding var autoComplete: [AutoCompleteResult]
@@ -14,8 +15,12 @@ struct AutoCompleteView: View {
     var body: some View {
         if autoComplete.count != 0 {
             return AnyView(
-                AutoCompleteList(selectedIndex: $selectionIndex, elements: $autoComplete)
-            .padding([.leading, .trailing], CGFloat(150))
+                ZStack {
+                    VisualEffectBlur(material: .headerView, blendingMode: .withinWindow, state: .active)
+                    Rectangle().fill(Color("EditorBackgroundColor").opacity(0.5))
+                    AutoCompleteList(selectedIndex: $selectionIndex, elements: $autoComplete)
+                        .padding([.leading, .trailing], CGFloat(150))
+                }
             )
         } else {
             return AnyView(Text(""))

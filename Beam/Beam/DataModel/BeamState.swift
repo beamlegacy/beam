@@ -18,6 +18,8 @@ class BeamData {
     @Published var notes: BeamNotes = BeamNotes()
     @Published var todaysNote: BeamNote
     
+    var searchKit: SearchKit
+    
     init() {
         let fmt = DateFormatter()
         let today = Date()
@@ -26,6 +28,15 @@ class BeamData {
         fmt.timeStyle = .none
         let todayStr = fmt.string(from: today)
         todaysNote = BeamNote(title: todayStr)
+        
+        let paths = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true)
+        if let applicationSupportDirectory = paths.first {
+            let indexPath = URL(fileURLWithPath: applicationSupportDirectory + "/index.sk")
+            searchKit = SearchKit(indexPath)
+        } else {
+            searchKit = SearchKit(URL(fileURLWithPath: "~/Application Data/BeamApp/index.sk"))
+
+        }
     }
 }
 
@@ -60,6 +71,11 @@ class BeamState: ObservableObject {
                             }
                         }
                     }
+                }
+                
+                tab.appendToIndexer = { [weak self] url, read in
+                    guard let self = self else { return }
+                    self.data.searchKit.append(url: url, contents: read.title + "\n" + read.siteName + "\n" + read.textContent)
                 }
             }
             
@@ -126,13 +142,18 @@ class BeamState: ObservableObject {
             if !(query.hasPrefix("http://") || query.hasPrefix("https://")) {
                 self.mode = .note
             }
+            self.completedQueries = []
             self.completer.complete(query: query)
+            let urls = self.data.searchKit.search(query)
+            for u in urls {
+                self.completedQueries.append(AutoCompleteResult(id: UUID(), string: u.description, source: .history))
+            }
         }.store(in: &scope)
         completer.$results.receive(on: RunLoop.main).sink { [weak self] results in
             guard let self = self else { return }
             //print("received auto complete results: \(results)")
             self.selectionIndex = nil
-            self.completedQueries = results
+            self.completedQueries.append(contentsOf: results)
         }.store(in: &scope)
 
     }

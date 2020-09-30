@@ -17,6 +17,9 @@
 		96454823252216570064D062 /* NSRange+CFRange.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96454822252216570064D062 /* NSRange+CFRange.swift */; };
 		964548752522AD770064D062 /* NoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 964548742522AD770064D062 /* NoteView.swift */; };
 		9645488125237C310064D062 /* VisualEffects in Frameworks */ = {isa = PBXBuildFile; productRef = 9645488025237C310064D062 /* VisualEffects */; };
+		9645488D252382DB0064D062 /* Readability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9645488C252382DB0064D062 /* Readability.swift */; };
+		964548952523A9F50064D062 /* SearchKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 964548942523A9F50064D062 /* SearchKit.swift */; };
+		964548A02523B3550064D062 /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9645489F2523B3550064D062 /* CloudKit.framework */; };
 		965A78292514F147009980D4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965A78282514F147009980D4 /* AppDelegate.swift */; };
 		965A782B2514F147009980D4 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965A782A2514F147009980D4 /* ContentView.swift */; };
 		965A782E2514F147009980D4 /* Beam.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 965A782C2514F147009980D4 /* Beam.xcdatamodeld */; };
@@ -79,6 +82,9 @@
 		9645481D25220EC90064D062 /* String+LoremIpsum.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+LoremIpsum.swift"; sourceTree = "<group>"; };
 		96454822252216570064D062 /* NSRange+CFRange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSRange+CFRange.swift"; sourceTree = "<group>"; };
 		964548742522AD770064D062 /* NoteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteView.swift; sourceTree = "<group>"; };
+		9645488C252382DB0064D062 /* Readability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Readability.swift; sourceTree = "<group>"; };
+		964548942523A9F50064D062 /* SearchKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchKit.swift; sourceTree = "<group>"; };
+		9645489F2523B3550064D062 /* CloudKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CloudKit.framework; path = System/Library/Frameworks/CloudKit.framework; sourceTree = SDKROOT; };
 		965A78252514F147009980D4 /* Beam.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Beam.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		965A78282514F147009980D4 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		965A782A2514F147009980D4 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -128,6 +134,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9631C747251CE997009B40C4 /* SwiftSoup in Frameworks */,
+				964548A02523B3550064D062 /* CloudKit.framework in Frameworks */,
 				20E1B667EDD2C5D590410B9F /* Pods_Beam.framework in Frameworks */,
 				9645488125237C310064D062 /* VisualEffects in Frameworks */,
 			);
@@ -153,6 +160,7 @@
 		24EFBA757ACC5310A2D800B2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				9645489F2523B3550064D062 /* CloudKit.framework */,
 				2BE96DC9A7278563E5878CCD /* Pods_Beam.framework */,
 			);
 			name = Frameworks;
@@ -172,6 +180,14 @@
 			children = (
 			);
 			path = Resources;
+			sourceTree = "<group>";
+		};
+		9645488B252382AE0064D062 /* JS */ = {
+			isa = PBXGroup;
+			children = (
+				9645488C252382DB0064D062 /* Readability.swift */,
+			);
+			path = JS;
 			sourceTree = "<group>";
 		};
 		965A781C2514F147009980D4 = {
@@ -199,6 +215,7 @@
 		965A78272514F147009980D4 /* Beam */ = {
 			isa = PBXGroup;
 			children = (
+				9645488B252382AE0064D062 /* JS */,
 				9645485C25228FBC0064D062 /* Resources */,
 				96F5DB142517A0D80080E3EE /* AppKitCrap */,
 				96F5DB0B25179EE40080E3EE /* Swift+Beam */,
@@ -251,6 +268,7 @@
 				965B195E2518EEFC00BCF01C /* SearchEngine.swift */,
 				965B19702518F59D00BCF01C /* BrowserTab.swift */,
 				96D5F1742519F75600A19BBC /* BID.swift */,
+				964548942523A9F50064D062 /* SearchKit.swift */,
 			);
 			path = DataModel;
 			sourceTree = "<group>";
@@ -524,6 +542,7 @@
 				96F5DB4A25189DDF0080E3EE /* AutoCompleteView.swift in Sources */,
 				96F5DB162517A0F10080E3EE /* NSContainerView.swift in Sources */,
 				96C039932520C67C00A2EDC7 /* TextInputHandler.swift in Sources */,
+				964548952523A9F50064D062 /* SearchKit.swift in Sources */,
 				965A78292514F147009980D4 /* AppDelegate.swift in Sources */,
 				96758985251F3A7E0014F604 /* NoteEditor.swift in Sources */,
 				965A782E2514F147009980D4 /* Beam.xcdatamodeld in Sources */,
@@ -535,6 +554,7 @@
 				9694F77925155F8700399E6A /* AutoComplete.swift in Sources */,
 				965B19642518F3BA00BCF01C /* BrowserTabBar.swift in Sources */,
 				966B3541251BB2A800751322 /* BeamWindow.swift in Sources */,
+				9645488D252382DB0064D062 /* Readability.swift in Sources */,
 				964547B725212D760064D062 /* String+Ranges.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -704,10 +724,11 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Beam/Beam.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"Beam/Preview Content\"";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = X87W5M786F;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = Beam/Info.plist;
@@ -715,7 +736,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.beam.Beam;
+				PRODUCT_BUNDLE_IDENTIFIER = com.beamApp.BeamApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 			};
@@ -728,10 +749,11 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Beam/Beam.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"Beam/Preview Content\"";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = X87W5M786F;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = Beam/Info.plist;
@@ -739,7 +761,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.beam.Beam;
+				PRODUCT_BUNDLE_IDENTIFIER = com.beamApp.BeamApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 			};
