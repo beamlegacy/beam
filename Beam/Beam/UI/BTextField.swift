@@ -18,65 +18,25 @@ enum CursorMovement {
 
 struct BTextField: NSViewRepresentable {
     typealias NSViewType = BNSTextField
-    private var textField: BNSTextField
-    private var onEditingChanged: (Bool) -> Void
-    private var onCommit: () -> Void
-    private var onCursorMovement: (CursorMovement) -> Bool
-    private var formatter: Formatter = Formatter()
-    var text: Binding<String>
-    private var cancellables = [Cancellable]()
+
+    @Binding var text: String
+    @State var placeholderText: String
+    var selectedRanges: [Range<Int>]?
+    var onEditingChanged: (Bool) -> Void = { _ in }
+    var onTextChanged: (String) -> Void = { _ in }
+    var onCommit: () -> Void = { }
+    var onCursorMovement: (CursorMovement) -> Bool = { _ in false }
+    @State var focusOnCreation: Bool
+    @State var textColor: NSColor?
+    @State var placeholderTextColor: NSColor?
 
 
-    //    Creates a text field with a text label generated from a title string.
-    //    Available when Label is Text.
-    init<S>(_ title: S, text: Binding<String>,
-            onEditingChanged: @escaping (Bool) -> Void = { _ in },
-            onCommit: @escaping () -> Void = {},
-            onCursorMovement: @escaping (CursorMovement) -> Bool = { _ in return false },
-            focusOnCreation: Bool = false,
-            selectedRange: Binding<Range<Int>> = .constant(0..<0)
-    ) where S : StringProtocol
-    {
-        self.text = text
-        self.textField  = BNSTextField(string: self.text, focusOnCreation: focusOnCreation, selectionRange: selectedRange)
-        self.textField.placeholderString = title as? String
-        self.textField.textColor = NSColor(named: "TextColor")
-//        self.textField.backgroundColor = NSColor(named: "SearchBarBackgroundColor")
-        self.textField.focusRingType = .none
-        self.onEditingChanged = onEditingChanged
-        self.onCommit = onCommit
-        self.onCursorMovement = onCursorMovement
+    func makeNSView(context: Self.Context) -> Self.NSViewType {
+        let textField = BNSTextField(string: $text, focusOnCreation: focusOnCreation)
 
-        configure()
-    }
-
-    //    Creates a text field with a text label generated from a localized title string.
-    //    Available when Label is Text.
-    init(_ titleKey: LocalizedStringKey, text: Binding<String>,
-         onEditingChanged: @escaping (Bool) -> Void = { _ in },
-         onCommit: @escaping () -> Void = {},
-         onCursorMovement: @escaping (CursorMovement) -> Bool = { _ in return false },
-         selectedRange: Binding<Range<Int>> = .constant(0..<0)
-    )
-    {
-        self.text = text
-        self.textField  = BNSTextField(string: self.text, selectionRange: selectedRange)
-        self.textField.placeholderString = titleKey.stringValue()
-        self.onEditingChanged = onEditingChanged
-        self.onCommit = onCommit
-        self.onCursorMovement = onCursorMovement
-
-        configure()
-    }
-
-    private func configure() {
-        textField.onCommit = {
-            self.onCommit()
-        }
-        textField.onEditingChanged = { v in
-            onEditingChanged(v)
-        }
-
+        textField.onCommit = self.onCommit
+        textField.onTextChanged = self.onTextChanged
+        textField.onEditingChanged = self.onEditingChanged
         textField.onPerformKeyEquivalent = { event in
             if event.keyCode == 126 {
                 // up!
@@ -87,12 +47,32 @@ struct BTextField: NSViewRepresentable {
             }
             return false
         }
-    }
 
-    func makeNSView(context: Self.Context) -> Self.NSViewType {
         return textField
     }
 
     func updateNSView(_ nsView: Self.NSViewType, context: Self.Context) {
+        nsView.string = text
+        nsView.placeholderText = placeholderText
+        if let c = textColor {
+            nsView.textColor = c
+        }
+        if let c = placeholderTextColor {
+            nsView.placeholderTextColor = c
+        }
+        nsView.focusRingType = .none
+
+        if let selectedRanges = self.selectedRanges {
+            nsView.inSelectionUpdate = true
+            let ranges = selectedRanges.map({ range -> NSValue in
+                let pos = Int(range.startIndex)
+                let len = Int(range.endIndex - range.startIndex)
+                return NSValue(range: NSRange(location: pos, length: len))
+            })
+            nsView.selectedRanges = ranges
+            nsView.inSelectionUpdate = false
+        }
     }
 }
+
+

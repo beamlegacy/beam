@@ -43,12 +43,20 @@ class BeamData {
 class BeamState: ObservableObject {
     @Published var mode: Mode = .note
     @Published var searchQuery: String = ""
+    @Published var searchQuerySelection: [Range<Int>]? = nil
     private let completer = Completer()
     @Published var completedQueries = [AutoCompleteResult]()
     @Published var selectionIndex: Int? = nil {
         didSet {
             if let i = selectionIndex {
-                searchQuery = completedQueries[i].string
+                let completedQuery = completedQueries[i].string
+                let oldSize = searchQuerySelection?.first?.startIndex ?? searchQuery.count
+                let newSize = completedQuery.count
+                // If the completion shares a common root with the original query, select the portion that is different
+                // otherwise select the whole string so that the next keystroke replaces everything
+                let newSelection = [(completedQuery.hasPrefix(searchQuery.substring(from: 0, to: oldSize)) ? oldSize : 0) ..< newSize]
+                searchQuery = completedQuery
+                searchQuerySelection = newSelection
             }
         }
     }
@@ -137,8 +145,10 @@ class BeamState: ObservableObject {
         self.currentNote = data.todaysNote
         $searchQuery.sink { [weak self] query in
             guard let self = self else { return }
+            guard self.searchQuerySelection == nil else { return }
+            guard self.selectionIndex == nil else { return }
             //print("received auto complete query: \(query)")
-            
+
             if !(query.hasPrefix("http://") || query.hasPrefix("https://")) {
                 self.mode = .note
             }

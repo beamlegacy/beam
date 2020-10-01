@@ -54,7 +54,7 @@ class SearchKit {
             return url
         })
         
-        print("search \(query) in index:\(results)")
+//        print("search \(query) in index:\(results)")
         
         return results
     }

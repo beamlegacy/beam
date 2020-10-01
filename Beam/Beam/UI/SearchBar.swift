@@ -73,11 +73,18 @@ struct SearchBar: View {
                 if state.mode == .note {
                     HStack {
                         ZStack {
-                            RoundedRectangle(cornerRadius: _cornerRadius).foregroundColor(Color("ButtonBackgroundOnColor")) .frame(height: 28)
+                            RoundedRectangle(cornerRadius: _cornerRadius).foregroundColor(Color("SearchBarBackgroundColor")) .frame(height: 28)
                             //                    TextField("Search or create note...", text: $state.searchQuery,
                             
                             HStack {
-                                BTextField("Search or create note...", text: $state.searchQuery,
+                                BTextField(text: $state.searchQuery,
+                                           placeholderText: "Search or create note...",
+                                           selectedRanges: state.searchQuerySelection,
+                                           onEditingChanged: { _ in
+                                           },
+                                           onTextChanged: { _ in
+                                            cancelAutocomplete()
+                                           },
                                            onCommit:  {
                                             startQuery()
                                            },
@@ -94,7 +101,10 @@ struct SearchBar: View {
                                             }
                                             return false
                                            },
-                                           focusOnCreation: true
+                                           focusOnCreation: true,
+                                           textColor: NSColor(named: "TextColor"),
+                                           placeholderTextColor: NSColor(named: "PlaceholderTextColor")
+                                           
                                 )
                                 .padding(.top, 8)
                                 .padding([.leading, .trailing], 9)
@@ -136,8 +146,14 @@ struct SearchBar: View {
     func goForward() {
         state.currentTab.webView.goForward()
     }
-    
+
+    func cancelAutocomplete() {
+        state.searchQuerySelection = nil
+        state.selectionIndex = nil
+    }
+
     func resetSearchQuery() {
+        cancelAutocomplete()
         state.searchQuery = ""
     }
     
