@@ -8,6 +8,9 @@
 import Foundation
 import Combine
 
+// To improve the auto complete results we get, look at how chromium does it:
+// https://chromium.googlesource.com/chromium/src/+/master/components/omnibox/browser/search_suggestion_parser.cc
+
 struct AutoCompleteResult: Identifiable {
     enum Source {
         case history
@@ -25,7 +28,7 @@ class Completer: ObservableObject {
     
     public func complete(query: String) {
         let query = query.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)!
-        if let url = URL(string: "https://suggestqueries.google.com/complete/search?client=firefox&q=\(query)") {
+        if let url = URL(string: "https://suggestqueries.google.com/complete/search?client=firefox&output=toolbar&q=\(query)") {
             URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
                 guard let self = self else { return }
                 if let data = data {
