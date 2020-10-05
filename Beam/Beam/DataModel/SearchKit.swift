@@ -11,6 +11,11 @@ import CoreServices
 class SearchKit {
     var index: SKIndex
     
+    init() {
+        let data = CFDataCreateMutable(nil, 0)
+        index = SKIndexCreateWithMutableData(data, "beam" as CFString, SKIndexType(kSKIndexInverted.rawValue), nil).takeRetainedValue()
+    }
+
     init(_ pathUrl: URL) {
         let url = pathUrl as CFURL
         let ndx = SKIndexOpenWithURL(url, "beam" as CFString, true)
