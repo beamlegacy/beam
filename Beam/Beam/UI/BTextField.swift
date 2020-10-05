@@ -20,9 +20,9 @@ struct BTextField: NSViewRepresentable {
     typealias NSViewType = BNSTextField
 
     @Binding var text: String
+    @Binding var isEditing: Bool
     @State var placeholderText: String
     var selectedRanges: [Range<Int>]?
-    var onEditingChanged: (Bool) -> Void = { _ in }
     var onTextChanged: (String) -> Void = { _ in }
     var onCommit: () -> Void = { }
     var onCursorMovement: (CursorMovement) -> Bool = { _ in false }
@@ -34,9 +34,14 @@ struct BTextField: NSViewRepresentable {
     func makeNSView(context: Self.Context) -> Self.NSViewType {
         let textField = BNSTextField(string: $text, focusOnCreation: focusOnCreation)
 
+        textField.focusRingType = .none
         textField.onCommit = self.onCommit
         textField.onTextChanged = self.onTextChanged
-        textField.onEditingChanged = self.onEditingChanged
+        textField.onEditingChanged = { v in
+            withAnimation(.spring(response: 0.55, dampingFraction: 0.3, blendDuration: 0.5)) {
+                self.isEditing = v
+            }
+        }
         textField.onPerformKeyEquivalent = { event in
             if event.keyCode == 126 {
                 // up!
@@ -60,7 +65,7 @@ struct BTextField: NSViewRepresentable {
         if let c = placeholderTextColor {
             nsView.placeholderTextColor = c
         }
-        nsView.focusRingType = .none
+        nsView.focusOnCreation = self.focusOnCreation
 
         if let selectedRanges = self.selectedRanges {
             nsView.inSelectionUpdate = true

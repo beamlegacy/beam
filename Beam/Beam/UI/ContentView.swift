@@ -6,16 +6,24 @@
 //
 
 import SwiftUI
+import VisualEffects
 
 struct ModeView: View {
     @EnvironmentObject var state: BeamState
     @ViewBuilder
     var body: some View {
         VStack {
-            SearchBar()
-                .padding(.leading, 73)
-                .padding(.trailing, 20)
-                .padding(.top, 2)
+            ZStack {
+                VisualEffectBlur(material: .headerView, blendingMode: .withinWindow, state: .active)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+
+                OmniBar(tab: state.currentTab)
+                    .padding(.leading, 73)
+                    .padding(.trailing, 20)
+                    .frame(alignment: .center)
+            }.frame(height: 52)
+
             ZStack {
                 ScrollView([.vertical]) {
                     NoteView()
@@ -42,7 +50,7 @@ struct ModeView: View {
 
 struct ContentView: View {
     var body: some View {
-        ModeView().background(Color("EditorBackgroundColor"))
+        ModeView().background(Color("EditorBackgroundColor").opacity(0.8))
     }
 }
 

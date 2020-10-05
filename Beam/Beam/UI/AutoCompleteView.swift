@@ -17,7 +17,7 @@ struct AutoCompleteView: View {
             return AnyView(
                 ZStack {
                     VisualEffectBlur(material: .headerView, blendingMode: .withinWindow, state: .active)
-                    Rectangle().fill(Color("EditorBackgroundColor").opacity(0.5))
+                    Rectangle().fill(Color("EditorBackgroundColor").opacity(0.8))
                     AutoCompleteList(selectedIndex: $selectionIndex, elements: $autoComplete)
                         .padding([.leading, .trailing], CGFloat(150))
                 }

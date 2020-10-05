@@ -73,8 +73,8 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
     private func setupObservers() {
         webView.publisher(for: \.title).sink() { v in self.title = v ?? "loading..." }.store(in: &scope)
         webView.publisher(for: \.url).sink() { v in self.url = v }.store(in: &scope)
-        webView.publisher(for: \.isLoading).sink() { v in self.isLoading = v }.store(in: &scope)
-        webView.publisher(for: \.estimatedProgress).sink() { v in self.estimatedProgress = v }.store(in: &scope)
+        webView.publisher(for: \.isLoading).sink() { v in withAnimation { self.isLoading = v } }.store(in: &scope)
+        webView.publisher(for: \.estimatedProgress).sink() { v in withAnimation { self.estimatedProgress = v } }.store(in: &scope)
         webView.publisher(for: \.hasOnlySecureContent).sink() { v in self.hasOnlySecureContent = v }.store(in: &scope)
         webView.publisher(for: \.serverTrust).sink() { v in self.serverTrust = v }.store(in: &scope)
         webView.publisher(for: \.canGoBack).sink() { v in self.canGoBack = v }.store(in: &scope)

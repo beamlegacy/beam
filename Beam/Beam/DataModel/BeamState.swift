@@ -138,6 +138,25 @@ class BeamState: ObservableObject {
         }
     }
     
+    func startQuery() {
+        let query = searchQuery
+        var searchText = query
+        let url = URL(string: searchText)
+        
+        if url?.scheme == nil {
+            searchEngine.query = searchText
+            searchText = searchEngine.searchUrl
+            print("Start search query: \(searchText)")
+        }
+        
+        let tab = BrowserTab(originalQuery: query)
+        tab.webView.load(URLRequest(url: URL(string: searchText)!))
+        currentTab = tab
+        tabs.append(tab)
+        currentNote = BeamNote(title: query, searchQueries: [query])
+        mode = .web
+    }
+    
     private var scope = Set<AnyCancellable>()
     
     public init(data: BeamData) {

@@ -22,15 +22,15 @@ class BNSTextField : NSTextView, ObservableObject, NSTextViewDelegate {
     public var onTextChanged: (String) -> Void = { _ in }
     public var onCommit: () -> Void = { }
     public var onPerformKeyEquivalent: (NSEvent) -> Bool = { _ in return false }
-    public var focusOnCreation: Bool = false
+    public var focusOnCreation: Bool!
 
     override public init(frame frameRect: NSRect, textContainer container: NSTextContainer?) {
         super.init(frame: frameRect, textContainer: container)
     }
 
     public init(string stringValue: Binding<String>, focusOnCreation: Bool = false) {
-        self.focusOnCreation = focusOnCreation
         super.init(frame: NSRect())
+        self.focusOnCreation = focusOnCreation
         self.value = stringValue
         self.isEditable = true
         self.isSelectable = true
@@ -90,7 +90,8 @@ class BNSTextField : NSTextView, ObservableObject, NSTextViewDelegate {
     override func viewDidMoveToWindow() {
         if focusOnCreation {
             //self.window?.initialFirstResponder = self
-            DispatchQueue.main.async {
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
                 self.window?.makeFirstResponder(self)
             }
         }
