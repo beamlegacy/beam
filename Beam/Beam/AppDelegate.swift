@@ -25,6 +25,7 @@ public class BeamApplication: NSApplication {
 class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     @IBOutlet var window: BeamWindow!
+    var windows: [BeamWindow] = []
     var data: BeamData = BeamData()
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
@@ -33,10 +34,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         CoreDataManager.shared.setup()
 
+        createWindow()
+    }
+
+    func createWindow() {
         // Create the window and set the content view.
         window = BeamWindow(contentRect: NSRect(x: 0, y: 0, width: 480, height: 300), cloudKitContainer: CoreDataManager.shared.persistentContainer, data: data)
         window.center()
         window.makeKeyAndOrderFront(nil)
+        windows.append(window)
     }
 
     func toggleVisibility(_ visible: Bool, ofAlternatesKeyEquivalentsItems items: [NSMenuItem]) {

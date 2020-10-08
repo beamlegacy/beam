@@ -57,6 +57,13 @@ class BeamWindow: NSWindow, NSWindowDelegate {
         self.isMovableByWindowBackground = false
     }
 
+    deinit {
+        guard let delegate = NSApplication.shared.delegate as? AppDelegate else { return }
+        delegate.windows.removeAll { window in
+            window === self
+        }
+    }
+
     public func windowDidResize(_ notification: Notification) {
         let version = ProcessInfo.processInfo.operatingSystemVersion
         let RunningOnBigSur = version.majorVersion >= 11 || (version.majorVersion == 10 && version.minorVersion >= 16)
@@ -74,9 +81,8 @@ class BeamWindow: NSWindow, NSWindowDelegate {
     }
 
     @IBAction func newDocument(_ sender: Any?) {
-        let window = BeamWindow(contentRect: NSRect(x: 0, y: 0, width: 480, height: 300), cloudKitContainer: cloudKitContainer, data: data)
-        window.center()
-        window.makeKeyAndOrderFront(nil)
+        guard let delegate = NSApplication.shared.delegate as? AppDelegate else { return }
+        delegate.createWindow()
     }
 
     @IBAction func showPreviousTab(_ sender: Any?) {
