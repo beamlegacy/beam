@@ -13,7 +13,7 @@ struct AutoCompleteView: View {
     @Binding var autoComplete: [AutoCompleteResult]
     @Binding var selectionIndex: Int?
     var body: some View {
-        if autoComplete.count != 0 {
+        if !autoComplete.isEmpty {
             return AnyView(
                 ZStack {
                     VisualEffectBlur(material: .headerView, blendingMode: .withinWindow, state: .active)

@@ -87,6 +87,25 @@
                                                 </items>
                                             </menu>
                                         </menuItem>
+                                        <menuItem title="Import" id="AOL-7q-9yo">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <menu key="submenu" title="Import" id="4nL-wI-84W">
+                                                <items>
+                                                    <menuItem title="Import Roam JSON" id="rHG-BR-6jc">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="importRoam:" target="Voe-Tx-rLC" id="8Ni-tq-Xk9"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                    <menuItem title="Reset Database" id="4e7-0u-pUE">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="resetDatabase:" target="Voe-Tx-rLC" id="BZD-93-Qp0"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                </items>
+                                            </menu>
+                                        </menuItem>
                                         <menuItem isSeparatorItem="YES" id="m54-Is-iLE"/>
                                         <menuItem title="Close" keyEquivalent="w" id="DVo-aG-piG">
                                             <connections>

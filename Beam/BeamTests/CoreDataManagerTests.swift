@@ -1,6 +1,7 @@
 import Foundation
 import XCTest
 
+@testable import Beam
 class CoreDataManagerTests: XCTestCase {
 
     // MARK: Properties
@@ -13,6 +14,10 @@ class CoreDataManagerTests: XCTestCase {
         super.setUp()
 
         sut = CoreDataManager()
+    }
+
+    override func tearDownWithError() throws {
+//        sut.destroyPersistentStore()
     }
 
     // MARK: - Tests

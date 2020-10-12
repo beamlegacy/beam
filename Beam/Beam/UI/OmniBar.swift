@@ -16,7 +16,7 @@ fileprivate var buttonFont = SwiftUI.Font.custom("SF Symbols", size: 16)
 struct GlobalTabTitle: View {
     @EnvironmentObject var state: BeamState
     @ObservedObject var tab: BrowserTab
-    
+
     var body: some View {
         Text(tab.originalQuery)
             .onTapGesture(count: 1, perform: {
@@ -50,7 +50,7 @@ struct RoundRectButtonStyle : PrimitiveButtonStyle {
 struct Symbol: View {
     var name: String
     var size: Float = 16
-    
+
     var body: some View {
         Image(name).font(.system(size: CGFloat(size))).frame(height: CGFloat(size), alignment: .center)
     }
@@ -60,12 +60,13 @@ struct OmniBar: View {
     @EnvironmentObject var state: BeamState
     @ObservedObject var tab: BrowserTab
     @State var isEditing: Bool = false
-    
+
     var body: some View {
         HStack {
             Button(action: goBack) {
                 Symbol(name: "chevron.left").offset(x: 0, y: -0.5)
             }.buttonStyle(BorderlessButtonStyle()).disabled(!state.canGoBack).padding(.leading, 18)
+
             Button(action: goForward) {
                 Symbol(name: "chevron.right").offset(x: 0, y: -0.5)
             }.buttonStyle(BorderlessButtonStyle()).disabled(!state.canGoForward).padding(.leading, 9)
@@ -80,12 +81,12 @@ struct OmniBar: View {
                         HStack {
                             BTextField(text: $state.searchQuery,
                                        isEditing: $isEditing,
-                                       placeholderText: "Search or create note...",
+                                       placeholderText: "Search or create note... \(Note.countWithPredicate(CoreDataManager.shared.mainContext)) notes",
                                        selectedRanges: state.searchQuerySelection,
                                        onTextChanged: { _ in
                                         cancelAutocomplete()
                                        },
-                                       onCommit:  {
+                                       onCommit: {
                                         startQuery()
                                        },
                                        onCursorMovement: { cursorMovement in
@@ -113,7 +114,6 @@ struct OmniBar: View {
                             Button(action: resetSearchQuery) {
                                 Symbol(name: "xmark.circle.fill", size: 12)
                             }.buttonStyle(BorderlessButtonStyle()).disabled(state.searchQuery.isEmpty).padding([.leading, .trailing], 9)
-
                         }
                     }
 
@@ -152,11 +152,11 @@ struct OmniBar: View {
             }.buttonStyle(RoundRectButtonStyle()).disabled(state.tabs.isEmpty)
         }.padding(.top, 10).padding(.bottom, 10).frame(height: 54, alignment: .topLeading)
     }
-    
+
     func goBack() {
         state.currentTab.webView.goBack()
     }
-    
+
     func goForward() {
         state.currentTab.webView.goForward()
     }
@@ -176,7 +176,7 @@ struct OmniBar: View {
         state.searchQuery = ""
         state.mode = .note
     }
-    
+
     func startQuery() {
         if state.searchQuery.isEmpty {
             return
@@ -185,9 +185,8 @@ struct OmniBar: View {
             //print("searchText activated: \(searchText)")
             state.startQuery()
         }
-        
     }
-    
+
     func toggleMode() {
         if state.mode == .web {
             state.mode = .note
@@ -196,4 +195,3 @@ struct OmniBar: View {
         }
     }
 }
-

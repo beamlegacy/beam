@@ -13,7 +13,7 @@ struct AutoCompleteList: View {
     @Binding var elements: [AutoCompleteResult]
 
     var body: some View {
-        VStack() {
+        VStack {
             ForEach(elements) { i in
                 return AutoCompleteItem(item: i, selected: isSelectedItem(i)).onTapGesture {
                     selectedIndex = indexFor(item: i)

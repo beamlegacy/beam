@@ -17,7 +17,6 @@ struct ModeView: View {
                 VisualEffectBlur(material: .headerView, blendingMode: .withinWindow, state: .active)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-
                 OmniBar(tab: state.currentTab)
                     .padding(.leading, 73)
                     .padding(.trailing, 20)
@@ -28,12 +27,12 @@ struct ModeView: View {
                 ScrollView([.vertical]) {
                     NoteView()
                 }
+
                 ScrollView([.vertical]) {
                     AutoCompleteView(autoComplete: $state.completedQueries, selectionIndex: $state.selectionIndex)
                         .frame(idealWidth: 800, maxWidth: .infinity, idealHeight: 600, maxHeight: .infinity, alignment: .center)
-                    
                 }.edgesIgnoringSafeArea(.top)
-                
+
                 if state.mode == .web {
                     VStack {
                         BrowserTabBar(tabs: $state.tabs, currentTab: $state.currentTab)
@@ -42,7 +41,6 @@ struct ModeView: View {
                     .transition(.move(edge: .bottom))
                     .animation(.easeInOut(duration: 0.3))
                 }
-                
             }
         }
     }

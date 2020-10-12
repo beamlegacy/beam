@@ -39,8 +39,8 @@ class CoreDataManager {
         return context
     }()
 
-    func setup(storeType: String = NSSQLiteStoreType, completion: (() -> Void)? = nil) {
-        self.storeType = storeType
+    func setup(storeType: String? = nil, completion: (() -> Void)? = nil) {
+        self.storeType = storeType ?? self.storeType
 
         loadPersistentStore {
             completion?()
@@ -83,13 +83,29 @@ class CoreDataManager {
                 try persistentStoreCoordinator.remove(store)
             }
 
-//            try persistentStoreCoordinator.destroyPersistentStore(at: storeURL,
-//                                                                  ofType: storeType,
-//                                                                  options: nil)
+            try persistentStoreCoordinator.destroyPersistentStore(at: storeURL,
+                                                                  ofType: storeType,
+                                                                  options: nil)
 
         } catch {
             fatalError("Can't run destroyPersistentStore")
             // Error Handling
+        }
+
+        completion?()
+    }
+
+    func save() {
+        let context = mainContext
+
+        if !context.commitEditing() {
+            NSLog("\(NSStringFromClass(type(of: self))) unable to commit editing before saving")
+        }
+        if context.hasChanges {
+            do {
+                try context.save()
+            } catch {
+            }
         }
     }
 

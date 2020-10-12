@@ -9,18 +9,17 @@
 /* Begin PBXBuildFile section */
 		20E1B667EDD2C5D590410B9F /* Pods_Beam.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2BE96DC9A7278563E5878CCD /* Pods_Beam.framework */; };
 		521812B62524C354007E4B47 /* Note.swift in Sources */ = {isa = PBXBuildFile; fileRef = 521812B52524C354007E4B47 /* Note.swift */; };
-		521812B72524C354007E4B47 /* Note.swift in Sources */ = {isa = PBXBuildFile; fileRef = 521812B52524C354007E4B47 /* Note.swift */; };
-		521812B82524C354007E4B47 /* Note.swift in Sources */ = {isa = PBXBuildFile; fileRef = 521812B52524C354007E4B47 /* Note.swift */; };
 		521812BD2524C368007E4B47 /* Bullet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 521812BC2524C368007E4B47 /* Bullet.swift */; };
-		521812BE2524C368007E4B47 /* Bullet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 521812BC2524C368007E4B47 /* Bullet.swift */; };
-		521812BF2524C368007E4B47 /* Bullet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 521812BC2524C368007E4B47 /* Bullet.swift */; };
 		521812CF2524C597007E4B47 /* NoteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 521812CE2524C597007E4B47 /* NoteTests.swift */; };
-		521812D92524C679007E4B47 /* Beam.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 965A782C2514F147009980D4 /* Beam.xcdatamodeld */; };
-		521812DD2524C67A007E4B47 /* Beam.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 965A782C2514F147009980D4 /* Beam.xcdatamodeld */; };
+		52326F8C252F1A8E00A40F1E /* NSManagedObject+initExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52326F8B252F1A8E00A40F1E /* NSManagedObject+initExtension.swift */; };
+		52326F8D252F1A8E00A40F1E /* NSManagedObject+initExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52326F8B252F1A8E00A40F1E /* NSManagedObject+initExtension.swift */; };
+		52326F8E252F1A8E00A40F1E /* NSManagedObject+initExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52326F8B252F1A8E00A40F1E /* NSManagedObject+initExtension.swift */; };
 		528E44272525BD4600B7C54E /* CoreDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 528E44262525BD4600B7C54E /* CoreDataManager.swift */; };
-		528E44282525BD4600B7C54E /* CoreDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 528E44262525BD4600B7C54E /* CoreDataManager.swift */; };
-		528E44292525BD4600B7C54E /* CoreDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 528E44262525BD4600B7C54E /* CoreDataManager.swift */; };
+		52B5EF78252F520100914D52 /* CoreDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52B5EF77252F520100914D52 /* CoreDataTests.swift */; };
 		52DEF1CA252B259700561493 /* CoreDataManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52DEF1C9252B259700561493 /* CoreDataManagerTests.swift */; };
+		52E04FD6252C7A4600AD9F56 /* writing_space.json in Resources */ = {isa = PBXBuildFile; fileRef = 52E04FD5252C7A4600AD9F56 /* writing_space.json */; };
+		52E04FE7252C7B9E00AD9F56 /* RoamImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52E04FE6252C7B9E00AD9F56 /* RoamImporter.swift */; };
+		52E04FED252C814D00AD9F56 /* RoamImporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52E04FEC252C814D00AD9F56 /* RoamImporterTests.swift */; };
 		7D40159D41DDD593BDFDF664 /* Pods_BeamTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C8379DEE387FB86FA7817188 /* Pods_BeamTests.framework */; };
 		9631C747251CE997009B40C4 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = 9631C746251CE997009B40C4 /* SwiftSoup */; };
 		9631C76B251E3648009B40C4 /* NSView+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9631C76A251E3648009B40C4 /* NSView+Beam.swift */; };
@@ -94,8 +93,13 @@
 		521812CE2524C597007E4B47 /* NoteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteTests.swift; sourceTree = "<group>"; };
 		521813082524CEC6007E4B47 /* Fakery.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Fakery.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		5218130E2524CEDC007E4B47 /* Fakery.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Fakery.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		52326F8B252F1A8E00A40F1E /* NSManagedObject+initExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSManagedObject+initExtension.swift"; sourceTree = "<group>"; };
 		528E44262525BD4600B7C54E /* CoreDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataManager.swift; sourceTree = "<group>"; };
+		52B5EF77252F520100914D52 /* CoreDataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataTests.swift; sourceTree = "<group>"; };
 		52DEF1C9252B259700561493 /* CoreDataManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataManagerTests.swift; sourceTree = "<group>"; };
+		52E04FD5252C7A4600AD9F56 /* writing_space.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = writing_space.json; sourceTree = "<group>"; };
+		52E04FE6252C7B9E00AD9F56 /* RoamImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoamImporter.swift; sourceTree = "<group>"; };
+		52E04FEC252C814D00AD9F56 /* RoamImporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoamImporterTests.swift; sourceTree = "<group>"; };
 		9631C76A251E3648009B40C4 /* NSView+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSView+Beam.swift"; sourceTree = "<group>"; };
 		964547AC2520CF3E0064D062 /* Font.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Font.swift; sourceTree = "<group>"; };
 		964547B12520D19F0064D062 /* NSRect+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSRect+Beam.swift"; sourceTree = "<group>"; };
@@ -200,8 +204,51 @@
 				521812B52524C354007E4B47 /* Note.swift */,
 				521812BC2524C368007E4B47 /* Bullet.swift */,
 				528E44262525BD4600B7C54E /* CoreDataManager.swift */,
+				52326F8B252F1A8E00A40F1E /* NSManagedObject+initExtension.swift */,
 			);
 			path = CoreData;
+			sourceTree = "<group>";
+		};
+		52A43D90252C78E700178F3B /* Importers */ = {
+			isa = PBXGroup;
+			children = (
+				52A43D91252C78F100178F3B /* Roam */,
+			);
+			path = Importers;
+			sourceTree = "<group>";
+		};
+		52A43D91252C78F100178F3B /* Roam */ = {
+			isa = PBXGroup;
+			children = (
+				52E04FE6252C7B9E00AD9F56 /* RoamImporter.swift */,
+			);
+			path = Roam;
+			sourceTree = "<group>";
+		};
+		52A43D92252C790200178F3B /* DataModel */ = {
+			isa = PBXGroup;
+			children = (
+				52A43D93252C790A00178F3B /* Importers */,
+				52B5EF77252F520100914D52 /* CoreDataTests.swift */,
+			);
+			path = DataModel;
+			sourceTree = "<group>";
+		};
+		52A43D93252C790A00178F3B /* Importers */ = {
+			isa = PBXGroup;
+			children = (
+				52A43D94252C791600178F3B /* Fixtures */,
+				52E04FEC252C814D00AD9F56 /* RoamImporterTests.swift */,
+			);
+			path = Importers;
+			sourceTree = "<group>";
+		};
+		52A43D94252C791600178F3B /* Fixtures */ = {
+			isa = PBXGroup;
+			children = (
+				52E04FD5252C7A4600AD9F56 /* writing_space.json */,
+			);
+			path = Fixtures;
 			sourceTree = "<group>";
 		};
 		713DD2F4C2EE4FDED57ACC99 /* Pods */ = {
@@ -284,6 +331,7 @@
 		965A78402514F149009980D4 /* BeamTests */ = {
 			isa = PBXGroup;
 			children = (
+				52A43D92252C790200178F3B /* DataModel */,
 				965A78412514F149009980D4 /* BeamTests.swift */,
 				521812CE2524C597007E4B47 /* NoteTests.swift */,
 				52DEF1C9252B259700561493 /* CoreDataManagerTests.swift */,
@@ -304,6 +352,7 @@
 		965A785C2514F1AF009980D4 /* DataModel */ = {
 			isa = PBXGroup;
 			children = (
+				52A43D90252C78E700178F3B /* Importers */,
 				521812AA2524C254007E4B47 /* CoreData */,
 				965A785B2514F1AF009980D4 /* NavigationContext.swift */,
 				965A785D2514F1AF009980D4 /* BeamNote.swift */,
@@ -504,6 +553,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				52E04FD6252C7A4600AD9F56 /* writing_space.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -615,12 +665,14 @@
 				96F5DB2B251811060080E3EE /* AutoCompleteList.swift in Sources */,
 				965A785F2514F1AF009980D4 /* NavigationContext.swift in Sources */,
 				964547AD2520CF3E0064D062 /* Font.swift in Sources */,
+				52E04FE7252C7B9E00AD9F56 /* RoamImporter.swift in Sources */,
 				96F5DB0D25179F030080E3EE /* String+Localization.swift in Sources */,
 				965A785E2514F1AF009980D4 /* WebView.swift in Sources */,
 				965B19692518F4F000BCF01C /* BrowserTabView.swift in Sources */,
 				96C039982520CB9D00A2EDC7 /* Maths.swift in Sources */,
 				96758987251F3B210014F604 /* BeamNoteEditor.swift in Sources */,
 				96F5DB1E2517A1E60080E3EE /* BNSTextField.swift in Sources */,
+				52326F8C252F1A8E00A40F1E /* NSManagedObject+initExtension.swift in Sources */,
 				965B19712518F59D00BCF01C /* BrowserTab.swift in Sources */,
 				96C039922520C67C00A2EDC7 /* TextEdit.swift in Sources */,
 				964547B22520D19F0064D062 /* NSRect+Beam.swift in Sources */,
@@ -651,12 +703,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				965A78422514F149009980D4 /* BeamTests.swift in Sources */,
-				521812D92524C679007E4B47 /* Beam.xcdatamodeld in Sources */,
-				521812B72524C354007E4B47 /* Note.swift in Sources */,
-				521812BE2524C368007E4B47 /* Bullet.swift in Sources */,
-				528E44282525BD4600B7C54E /* CoreDataManager.swift in Sources */,
+				52E04FED252C814D00AD9F56 /* RoamImporterTests.swift in Sources */,
+				52B5EF78252F520100914D52 /* CoreDataTests.swift in Sources */,
 				52DEF1CA252B259700561493 /* CoreDataManagerTests.swift in Sources */,
 				521812CF2524C597007E4B47 /* NoteTests.swift in Sources */,
+				52326F8D252F1A8E00A40F1E /* NSManagedObject+initExtension.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -664,11 +715,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				528E44292525BD4600B7C54E /* CoreDataManager.swift in Sources */,
+				52326F8E252F1A8E00A40F1E /* NSManagedObject+initExtension.swift in Sources */,
 				965A784D2514F149009980D4 /* BeamUITests.swift in Sources */,
-				521812DD2524C67A007E4B47 /* Beam.xcdatamodeld in Sources */,
-				521812B82524C354007E4B47 /* Note.swift in Sources */,
-				521812BF2524C368007E4B47 /* Bullet.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -27,6 +27,10 @@ class Completer: ObservableObject {
     @Published var results: [AutoCompleteResult] = []
     
     public func complete(query: String) {
+        guard query.count > 0 else {
+            self.results = []
+            return
+        }
         let query = query.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)!
         if let url = URL(string: "https://suggestqueries.google.com/complete/search?client=firefox&output=toolbar&q=\(query)") {
             URLSession.shared.dataTask(with: url) { [weak self] data, response, error in

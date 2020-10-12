@@ -17,9 +17,9 @@ enum Mode {
 class BeamData {
     @Published var notes: BeamNotes = BeamNotes()
     @Published var todaysNote: BeamNote
-    
+
     var searchKit: SearchKit
-    
+
     init() {
         let fmt = DateFormatter()
         let today = Date()
@@ -28,14 +28,13 @@ class BeamData {
         fmt.timeStyle = .none
         let todayStr = fmt.string(from: today)
         todaysNote = BeamNote(title: todayStr)
-        
+
         let paths = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true)
         if let applicationSupportDirectory = paths.first {
             let indexPath = URL(fileURLWithPath: applicationSupportDirectory + "/index.sk")
             searchKit = SearchKit(indexPath)
         } else {
             searchKit = SearchKit(URL(fileURLWithPath: "~/Application Data/BeamApp/index.sk"))
-            
         }
     }
 }
@@ -43,7 +42,7 @@ class BeamData {
 class BeamState: ObservableObject {
     @Published var mode: Mode = .note
     @Published var searchQuery: String = ""
-    @Published var searchQuerySelection: [Range<Int>]? = nil
+    @Published var searchQuerySelection: [Range<Int>]?
     private let completer = Completer()
     @Published var completedQueries = [AutoCompleteResult]()
     @Published var selectionIndex: Int? = nil {
@@ -60,17 +59,17 @@ class BeamState: ObservableObject {
             }
         }
     }
-    
+
     var data: BeamData
-    @Published var currentNote: BeamNote? = nil
-    
+    @Published var currentNote: BeamNote?
+
     @Published public var tabs: [BrowserTab] = [] {
         didSet {
             for tab in tabs {
                 tab.onNewTabCreated = { [weak self] newTab in
                     guard let self = self else { return }
                     self.tabs.append(newTab)
-                    
+
                     if var note = self.currentNote {
                         if note.searchQueries.contains(newTab.originalQuery) {
                             if let url = newTab.url {
@@ -107,7 +106,7 @@ class BeamState: ObservableObject {
     
     @Published var canGoBack: Bool = false
     @Published var canGoForward: Bool = false
-    
+
     private var tabScope = Set<AnyCancellable>()
     
     public var searchEngine: SearchEngine = GoogleSearch()
@@ -129,7 +128,7 @@ class BeamState: ObservableObject {
             }
         }
     }
-    
+
     func selectNextAutoComplete() {
         if let i = selectionIndex {
             selectionIndex = min(i + 1, completedQueries.count - 1)
@@ -148,7 +147,7 @@ class BeamState: ObservableObject {
             searchText = searchEngine.searchUrl
             print("Start search query: \(searchText)")
         }
-        
+
         let tab = BrowserTab(originalQuery: query)
         tab.webView.load(URLRequest(url: URL(string: searchText)!))
         currentTab = tab
@@ -156,9 +155,9 @@ class BeamState: ObservableObject {
         currentNote = BeamNote(title: query, searchQueries: [query])
         mode = .web
     }
-    
+
     private var scope = Set<AnyCancellable>()
-    
+
     public init(data: BeamData) {
         self.data = data
         self.currentNote = data.todaysNote
@@ -166,16 +165,26 @@ class BeamState: ObservableObject {
             guard let self = self else { return }
             guard self.searchQuerySelection == nil else { return }
             guard self.selectionIndex == nil else { return }
-            //print("received auto complete query: \(query)")
+            print("received auto complete query: \(query)")
 
             if !(query.hasPrefix("http://") || query.hasPrefix("https://")) {
                 self.mode = .note
             }
             self.completedQueries = []
-            self.completer.complete(query: query)
-            let urls = self.data.searchKit.search(query)
-            for u in urls {
-                self.completedQueries.append(AutoCompleteResult(id: UUID(), string: u.description, source: .history))
+
+            if !query.isEmpty {
+                let notes = Note.fetchAllWithTitleMatch(CoreDataManager.shared.mainContext, query)
+                notes.forEach {
+                    let autocompleteResult = AutoCompleteResult(id: $0.id ?? UUID(), string: $0.title ?? "no title", source: .note)
+                    self.completedQueries.append(autocompleteResult)
+                    print("Found note \($0)")
+                }
+
+                self.completer.complete(query: query)
+                let urls = self.data.searchKit.search(query)
+                for url in urls {
+                    self.completedQueries.append(AutoCompleteResult(id: UUID(), string: url.description, source: .history))
+                }
             }
         }.store(in: &scope)
         completer.$results.receive(on: RunLoop.main).sink { [weak self] results in
@@ -184,6 +193,6 @@ class BeamState: ObservableObject {
             self.selectionIndex = nil
             self.completedQueries.append(contentsOf: results)
         }.store(in: &scope)
-        
+
     }
 }

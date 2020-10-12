@@ -4,44 +4,27 @@ import Fakery
 import XCTest
 @testable import Beam
 
-class NoteTests: XCTestCase {
-    lazy var context = {
-        CoreDataManager.shared.mainContext
-    }()
+class NoteTests: CoreDataTests {
     let faker = Faker(locale: "en-US")
-
-    override func setUp() {
-        super.setUp()
-
-        CoreDataManager.shared.setup(storeType: NSInMemoryStoreType)
-    }
-
-    override func setUpWithError() throws {
-//        CoreDataManager.shared.deletePersistentStore()
-    }
-
-    override func tearDownWithError() throws {
-        CoreDataManager.shared.destroyPersistentStore()
-    }
 
     func testNoteCreation() throws {
         let title = faker.lorem.words()
 
-        let oldCount = Beam.Note.countWithPredicate(context)
+        let oldCount = Note.countWithPredicate(context)
 
-        let note = Beam.Note.createNote(context, title)
+        let note = Note.createNote(context, title)
 
         XCTAssertNotNil(note)
 
         XCTAssertNoThrow(try context.save())
 
-        let newCount = Beam.Note.countWithPredicate(context)
+        let newCount = Note.countWithPredicate(context)
         XCTAssertEqual(newCount, oldCount + 1)
     }
 
     func testNoteWithBulletsCreation() throws {
         let title = faker.lorem.words()
-        let note = Beam.Note.createNote(context, title)
+        let note = Note.createNote(context, title)
 
         let bullet1 = note.createBullet(context, content: "bullet 1")
 
@@ -54,12 +37,12 @@ class NoteTests: XCTestCase {
         let bullet3 = note.createBullet(context, content: "bullet 3")
         XCTAssertEqual(bullet3.orderIndex, 3)
 
-        XCTAssertEqual(note.sortedRootBullets(context), [bullet1, bullet2, bullet3])
+        XCTAssertEqual(note.sortedBullets(context), [bullet1, bullet2, bullet3])
 
         let bullet4 = note.createBullet(context, content: "bullet 4", afterBullet: bullet1)
         XCTAssertEqual(bullet4.orderIndex, 2)
 
-        XCTAssertEqual(note.sortedRootBullets(context), [bullet1, bullet4, bullet2, bullet3])
+        XCTAssertEqual(note.sortedBullets(context), [bullet1, bullet4, bullet2, bullet3])
 
         let bullet5 = note.createBullet(context, content: "bullet 5", afterBullet: bullet1)
         XCTAssertEqual(bullet5.orderIndex, 2)
@@ -69,12 +52,12 @@ class NoteTests: XCTestCase {
         XCTAssertEqual(bullet2.orderIndex, 4)
         XCTAssertEqual(bullet3.orderIndex, 5)
 
-        XCTAssertEqual(note.sortedRootBullets(context), [bullet1, bullet5, bullet4, bullet2, bullet3])
+        XCTAssertEqual(note.sortedBullets(context), [bullet1, bullet5, bullet4, bullet2, bullet3])
     }
 
     func testNoteWithBulletsAndChildrenCreation() throws {
         let title = faker.lorem.words()
-        let note = Beam.Note.createNote(context, title)
+        let note = Note.createNote(context, title)
 
         let bullet1 = note.createBullet(context, content: "bullet 1")
 
@@ -84,15 +67,15 @@ class NoteTests: XCTestCase {
         let bullet2 = note.createBullet(context, content: "bullet 2")
         XCTAssertEqual(bullet2.orderIndex, 2)
 
-        XCTAssertEqual(note.sortedRootBullets(context), [bullet1, bullet2])
+        XCTAssertEqual(note.sortedBullets(context), [bullet1, bullet2])
 
         let bullet11 = note.createBullet(context, content: "bullet 11", parentBullet: bullet1)
-        let bullet12 = note.createBullet(context, content: "bullet 12", afterBullet: bullet11)
+        _ = note.createBullet(context, content: "bullet 12", afterBullet: bullet11)
 
         let bullet111 = note.createBullet(context, content: "bullet 111", parentBullet: bullet11)
         let bullet112 = note.createBullet(context, content: "bullet 112", afterBullet: bullet111)
-        let bullet113 = note.createBullet(context, content: "bullet 113", afterBullet: bullet111)
-        let bullet114 = note.createBullet(context, content: "bullet 114", afterBullet: bullet112)
+        _ = note.createBullet(context, content: "bullet 113", afterBullet: bullet111)
+        _ = note.createBullet(context, content: "bullet 114", afterBullet: bullet112)
 
         note.debugNote()
         XCTAssertEqual(bullet11.orderIndex, 1)
@@ -106,14 +89,21 @@ class NoteTests: XCTestCase {
 
         for _ in 1...count {
             let title = faker.lorem.words()
-            Beam.Note.createNote(context, title)
+            Note.createNote(context, title)
         }
-
-        XCTAssertNoThrow(try context.save())
 
         let countAfter = Note.countWithPredicate(context)
 
         XCTAssertEqual(countAfter, countBefore + count)
+    }
+
+    func testNoteFetchWithTitle() throws {
+        Note.createNote(context, "foobar 1")
+        Note.createNote(context, "foobar 2")
+        Note.createNote(context, "foobar 3")
+        Note.createNote(context, "another title")
+
+        XCTAssertEqual(Note.fetchAllWithTitleMatch(context, "foobar").count, 3)
     }
 
     func testPerformanceFetch() throws {
@@ -122,7 +112,7 @@ class NoteTests: XCTestCase {
         let count = 100
 
         for _ in 1...count {
-            let note = Beam.Note.createNote(context, title)
+            let note = Note.createNote(context, title)
 
             if let id = note.id {
                 ids.append(id)
@@ -134,7 +124,7 @@ class NoteTests: XCTestCase {
 
         self.measure {
             if let randomId = ids.randomElement() {
-                let note = Beam.Note.fetchWithId(context, randomId)
+                let note = Note.fetchWithId(context, randomId)
 
                 XCTAssertNotNil( note )
                 XCTAssertEqual(note?.title, title)
@@ -150,7 +140,7 @@ class NoteTests: XCTestCase {
 
         self.measure {
             for _ in 1...count {
-                let note = Beam.Note.createNote(context, title)
+                let note = Note.createNote(context, title)
 
                 if let id = note.id {
                     ids.append(id)

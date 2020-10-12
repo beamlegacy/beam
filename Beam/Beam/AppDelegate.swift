@@ -69,22 +69,57 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     // MARK: - Core Data Saving and Undo support
 
-    @IBAction func saveAction(_ sender: AnyObject?) {
-        // Performs the save action for the application, which is to send the save: message to the application's managed object context. Any encountered errors are presented to the user.
-        let context = CoreDataManager.shared.mainContext
+    @IBAction func resetDatabase(_ sender: Any) {
+        CoreDataManager.shared.destroyPersistentStore {
+            CoreDataManager.shared.setup()
 
-        if !context.commitEditing() {
-            NSLog("\(NSStringFromClass(type(of: self))) unable to commit editing before saving")
+            let alert = NSAlert()
+            alert.alertStyle = .critical
+            alert.messageText = "Database deleted"
+            alert.informativeText = "All coredata has been deleted"
+            alert.runModal()
         }
-        if context.hasChanges {
+    }
+
+    @IBAction func importRoam(_ sender: Any) {
+        print("importing roam")
+
+        let openPanel = NSOpenPanel()
+        openPanel.allowsMultipleSelection = false
+        openPanel.canChooseDirectories = false
+        openPanel.canCreateDirectories = false
+        openPanel.canChooseFiles = true
+        openPanel.title = "Choose your ROAM JSON Export"
+        openPanel.begin { [weak openPanel] result in
+            guard result == .OK, let selectedPath = openPanel?.url?.path else { openPanel?.close(); return }
+
+            let beforeNotesCount = Note.countWithPredicate(CoreDataManager.shared.mainContext)
+            let beforeBulletsCount = Bullet.countWithPredicate(CoreDataManager.shared.mainContext)
+
+            let roamImporter = RoamImporter()
             do {
-                try context.save()
+                try roamImporter.parseAndCreate(CoreDataManager.shared.mainContext, selectedPath)
+                CoreDataManager.shared.save()
             } catch {
-                // Customize this code block to include application-specific recovery steps.
-                let nserror = error as NSError
-                NSApplication.shared.presentError(nserror)
+                // TODO: show error
+                fatalError("Aie")
             }
+
+            let afterNotesCount = Note.countWithPredicate(CoreDataManager.shared.mainContext)
+            let afterBulletsCount = Bullet.countWithPredicate(CoreDataManager.shared.mainContext)
+
+            let alert = NSAlert()
+            alert.alertStyle = .informational
+            alert.messageText = "Roam file has been imported"
+            alert.informativeText = "\(afterNotesCount - beforeNotesCount) notes and \(afterBulletsCount - beforeBulletsCount) bullets have been imported"
+            alert.runModal()
+
+            openPanel?.close()
         }
+    }
+
+    @IBAction func saveAction(_ sender: AnyObject?) {
+        CoreDataManager.shared.save()
     }
 
     func windowWillReturnUndoManager(window: NSWindow) -> UndoManager? {

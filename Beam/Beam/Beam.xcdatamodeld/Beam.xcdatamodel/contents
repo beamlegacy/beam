@@ -5,9 +5,12 @@
         <attribute name="created_at" attributeType="Date" defaultDateTimeInterval="623165820" usesScalarValueType="NO"/>
         <attribute name="id" attributeType="UUID" defaultValueString="6A275532-F5C5-4FA1-8EF5-4D8BE0DAAD71" usesScalarValueType="NO"/>
         <attribute name="orderIndex" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="updated_at" attributeType="Date" defaultDateTimeInterval="623680920" usesScalarValueType="NO"/>
         <relationship name="children" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Bullet" inverseName="parent" inverseEntity="Bullet"/>
+        <relationship name="linkedNotes" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Note" inverseName="linkedReferences" inverseEntity="Note"/>
         <relationship name="note" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Note" inverseName="bullets" inverseEntity="Note"/>
         <relationship name="parent" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Bullet" inverseName="children" inverseEntity="Bullet"/>
+        <relationship name="unlinkedNotes" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Note" inverseName="unlinkedReferences" inverseEntity="Note"/>
         <uniquenessConstraints>
             <uniquenessConstraint>
                 <constraint value="id"/>
@@ -18,7 +21,10 @@
         <attribute name="created_at" attributeType="Date" defaultDateTimeInterval="623165880" usesScalarValueType="NO"/>
         <attribute name="id" attributeType="UUID" defaultValueString="6A275532-F5C5-4FA1-8EF5-4D8BE0DAAD71" usesScalarValueType="NO"/>
         <attribute name="title" optional="YES" attributeType="String"/>
+        <attribute name="updated_at" attributeType="Date" defaultDateTimeInterval="623680920" usesScalarValueType="NO"/>
         <relationship name="bullets" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Bullet" inverseName="note" inverseEntity="Bullet"/>
+        <relationship name="linkedReferences" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Bullet" inverseName="linkedNotes" inverseEntity="Bullet"/>
+        <relationship name="unlinkedReferences" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Bullet" inverseName="unlinkedNotes" inverseEntity="Bullet"/>
         <fetchIndex name="byPropertyId">
             <fetchIndexElement property="id" type="Binary" order="ascending"/>
         </fetchIndex>
@@ -32,7 +38,7 @@
         </uniquenessConstraints>
     </entity>
     <elements>
-        <element name="Bullet" positionX="-54" positionY="18" width="128" height="148"/>
-        <element name="Note" positionX="-489.015625" positionY="-17.69921875" width="128" height="103"/>
+        <element name="Bullet" positionX="-54" positionY="18" width="128" height="193"/>
+        <element name="Note" positionX="-489.015625" positionY="-17.69921875" width="128" height="148"/>
     </elements>
 </model>
