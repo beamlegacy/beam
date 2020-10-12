@@ -22,12 +22,8 @@ struct AutoCompleteItem: View {
         .padding([.top, .bottom], 3)
         .background(selected ? Color.accentColor : Color("transparent"))
         .clipShape(RoundedRectangle(cornerRadius: 8.0), style: FillStyle())
-
-
-
     }
 }
-
 
 struct AutoCompleteItem_Previews: PreviewProvider {
     static var previews: some View {

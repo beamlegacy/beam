@@ -13,17 +13,18 @@ struct NoteView: View {
 
     var body: some View {
         ScrollView(.vertical, showsIndicators: true) {
-            VStack {
-                if let note = state.currentNote {
-                    Text("Original search query: \(note.title)")
-                    VStack {
-                        ForEach(note.visitedSearchResults) { i in
-                            Text("visited: \(i.url.absoluteString)")
-                        }
-                    }
-                }
-            }
+//            VStack {
+//                if let note = state.currentNote {
+//                    Text("Original search query: \(note.title)")
+//                    VStack {
+//                        ForEach(note.visitedSearchResults) { i in
+//                            Text("visited: \(i.url.absoluteString)")
+//                        }
+//                    }
+//                }
+//            }
 
+            BTextEdit()
         }
     }
 }

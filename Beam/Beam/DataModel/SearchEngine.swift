@@ -42,5 +42,3 @@ struct DuckDuckGoSearch: SearchEngine {
         return "https://duckduckgo.com/?q=\(formatedQuery)&kp=-1&kl=us-en"
     }
 }
-
-

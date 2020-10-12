@@ -17,7 +17,7 @@ struct AutoCompleteResult: Identifiable {
         case note
         case autoComplete
     }
-    
+
     var id: UUID
     var string: String
     var source: Source
@@ -25,7 +25,7 @@ struct AutoCompleteResult: Identifiable {
 
 class Completer: ObservableObject {
     @Published var results: [AutoCompleteResult] = []
-    
+
     public func complete(query: String) {
         guard query.count > 0 else {
             self.results = []
@@ -33,7 +33,7 @@ class Completer: ObservableObject {
         }
         let query = query.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)!
         if let url = URL(string: "https://suggestqueries.google.com/complete/search?client=firefox&output=toolbar&q=\(query)") {
-            URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
+            URLSession.shared.dataTask(with: url) { [weak self] data, _, _ in
                 guard let self = self else { return }
                 if let data = data {
                     do {
@@ -50,7 +50,6 @@ class Completer: ObservableObject {
                     } catch {
                         //                        print("AutoComplete call error")
                     }
-                    
                 }
             }.resume()
         }

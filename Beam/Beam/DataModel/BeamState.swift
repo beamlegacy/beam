@@ -62,7 +62,6 @@ class BeamState: ObservableObject {
 
     var data: BeamData
     @Published var currentNote: BeamNote?
-
     @Published public var tabs: [BrowserTab] = [] {
         didSet {
             for tab in tabs {
@@ -79,13 +78,12 @@ class BeamState: ObservableObject {
                         }
                     }
                 }
-                
                 tab.appendToIndexer = { [weak self] url, read in
                     guard let self = self else { return }
                     self.data.searchKit.append(url: url, contents: read.title + "\n" + read.siteName + "\n" + read.textContent)
                 }
             }
-            
+
             if tabs.isEmpty {
                 mode = .note
             }
@@ -103,14 +101,14 @@ class BeamState: ObservableObject {
             }.store(in: &tabScope)
         }
     }
-    
+
     @Published var canGoBack: Bool = false
     @Published var canGoForward: Bool = false
 
     private var tabScope = Set<AnyCancellable>()
-    
+
     public var searchEngine: SearchEngine = GoogleSearch()
-    
+
     func selectPreviousAutoComplete() {
         if let i = selectionIndex {
             let newIndex = i - 1
@@ -136,12 +134,12 @@ class BeamState: ObservableObject {
             selectionIndex = 0
         }
     }
-    
+
     func startQuery() {
         let query = searchQuery
         var searchText = query
         let url = URL(string: searchText)
-        
+
         if url?.scheme == nil {
             searchEngine.query = searchText
             searchText = searchEngine.searchUrl
@@ -193,6 +191,5 @@ class BeamState: ObservableObject {
             self.selectionIndex = nil
             self.completedQueries.append(contentsOf: results)
         }.store(in: &scope)
-
     }
 }

@@ -27,7 +27,7 @@ class Note: NSManagedObject {
     ///   - afterBullet: <#afterBullet description#>
     /// - Returns: thre created `Bullet`
     func createBullet(_ context: NSManagedObjectContext, content: String, afterBullet: Bullet? = nil, parentBullet: Bullet? = nil) -> Bullet {
-        let newBullet = Bullet(context:context)
+        let newBullet = Bullet(context: context)
 
         newBullet.content = content
         newBullet.note = self

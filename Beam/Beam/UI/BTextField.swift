@@ -30,7 +30,6 @@ struct BTextField: NSViewRepresentable {
     @State var textColor: NSColor?
     @State var placeholderTextColor: NSColor?
 
-
     func makeNSView(context: Self.Context) -> Self.NSViewType {
         let textField = BNSTextField(string: $text, focusOnCreation: focusOnCreation)
 
@@ -79,5 +78,3 @@ struct BTextField: NSViewRepresentable {
         }
     }
 }
-
-

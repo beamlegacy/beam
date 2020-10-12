@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 
-fileprivate struct Background: View {
+private struct Background: View {
     var body: some View {
         ZStack {
             Rectangle().fill(Color("TabBarBg"))
@@ -49,7 +49,6 @@ struct BrowserTabBar: View {
         return tab.id == currentTab.id
     }
 }
-
 
 struct BrowserTabBar_Previews: PreviewProvider {
     @State static var tabs: [BrowserTab] = [BrowserTab(originalQuery: "test1", id: UUID(uuidString: "123e4567-e89b-12d3-a456-426614174000")!), BrowserTab(originalQuery: "test2"), BrowserTab(originalQuery: "test3")]

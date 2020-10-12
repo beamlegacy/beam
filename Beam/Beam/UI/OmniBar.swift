@@ -10,8 +10,8 @@ import SwiftUI
 import AppKit
 import VisualEffects
 
-fileprivate var _cornerRadius = CGFloat(7)
-fileprivate var buttonFont = SwiftUI.Font.custom("SF Symbols", size: 16)
+private var _cornerRadius = CGFloat(7)
+private var buttonFont = SwiftUI.Font.custom("SF Symbols", size: 16)
 
 struct GlobalTabTitle: View {
     @EnvironmentObject var state: BeamState
@@ -29,7 +29,7 @@ struct GlobalTabTitle: View {
     }
 }
 
-struct RoundRectButtonStyle : PrimitiveButtonStyle {
+struct RoundRectButtonStyle: PrimitiveButtonStyle {
     @Environment(\.isEnabled) private var isEnabled: Bool
     @State var isHover = false
     public func makeBody(configuration: BorderedButtonStyle.Configuration) -> some View {
@@ -43,7 +43,6 @@ struct RoundRectButtonStyle : PrimitiveButtonStyle {
         .onHover { h in
             isHover = h && isEnabled
         }
-        
     }
 }
 

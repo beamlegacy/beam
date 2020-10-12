@@ -9,7 +9,7 @@ import Foundation
 
 extension NSRange {
     init(range: CFRange) {
+        //swiftlint:disable legacy_constructor
         self = NSMakeRange(range.location == kCFNotFound ? NSNotFound : range.location, range.length)
     }
 }
-

@@ -23,8 +23,8 @@ struct AutoCompleteView: View {
                 }
             )
         } else {
-            return AnyView(Text(""))
-//            return AnyView(BTextEdit())
+//            return AnyView(Text(""))
+            return AnyView(BTextEdit().frame(alignment: .center))
         }
     }
 }

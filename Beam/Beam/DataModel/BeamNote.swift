@@ -21,21 +21,20 @@ protocol BeamObject: Codable {
 }
 
 struct BeamNotes {
-    public var notes: [BID:BeamNote] = [:]
-    public var objects: [BID:BeamObject] = [:]
-    public var notesByName: [String:BID] = [:]
+    public var notes: [BID: BeamNote] = [:]
+    public var objects: [BID: BeamNote] = [:]
+    public var notesByName: [String: BID] = [:]
 }
 
 protocol BeamBlock: BeamObject {
     var elements: [BID] { get set }
     var outLinks: [String] { get }
-    
     //    mutating func addElement(_ element: BeamElement)
 }
 
 struct VisitedPage: Codable, Identifiable {
     var id: UUID = UUID()
-    
+
     var originalSearchQuery: String
     var url: URL
     var date: Date
@@ -46,10 +45,10 @@ struct BeamNote: BeamBlock {
     var id: BID = BID()
     public var title: String
     var score: Float = 0
-    
+
     var elements: [BID] = []
     var outLinks: [String] = []
-    
+
     var searchQueries: [String] = []
     var visitedSearchResults: [VisitedPage] = []
 }
@@ -60,11 +59,11 @@ protocol BeamTextBlock: BeamObject {
 
 struct TextFormat: OptionSet, Codable {
     let rawValue: Int8
-    
-    static let regular      = TextFormat([])
-    static let bold         = TextFormat(rawValue: 1 << 0)
-    static let italic       = TextFormat(rawValue: 1 << 1)
-    static let underline    = TextFormat(rawValue: 1 << 2)
+
+    static let regular = TextFormat([])
+    static let bold = TextFormat(rawValue: 1 << 0)
+    static let italic = TextFormat(rawValue: 1 << 1)
+    static let underline = TextFormat(rawValue: 1 << 2)
 }
 
 struct BeamText: BeamTextBlock {

@@ -35,19 +35,16 @@ struct BrowserTabView: View {
             }
             HStack {
                 Button("X") {
-                    for (i,t) in state.tabs.enumerated() {
-                        if t.id == tab.id {
-                            if i > 0 {
-                                state.currentTab = state.tabs[i - 1]
-                            } else if state.tabs.count > 1 {
-                                state.currentTab = state.tabs[i + 1]
-                            } else {
-                                state.currentTab = BrowserTab(originalQuery: "")
-                                state.mode = .note
-                            }
-                            state.tabs.remove(at: i)
-                            break
+                    for (i, t) in state.tabs.enumerated() where t.id == tab.id {
+                        if i > 0 {
+                            state.currentTab = state.tabs[i - 1]
+                        } else if state.tabs.count > 1 {
+                            state.currentTab = state.tabs[i + 1]
+                        } else {
+                            state.currentTab = BrowserTab(originalQuery: "")
+                            state.mode = .note
                         }
+                        state.tabs.remove(at: i)
                     }
                 }.opacity(showButton ? 1 : 0)
                 .onHover(perform: { v in

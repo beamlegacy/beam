@@ -31,7 +31,7 @@ struct ModeView: View {
                 ScrollView([.vertical]) {
                     AutoCompleteView(autoComplete: $state.completedQueries, selectionIndex: $state.selectionIndex)
                         .frame(idealWidth: 800, maxWidth: .infinity, idealHeight: 600, maxHeight: .infinity, alignment: .center)
-                }.edgesIgnoringSafeArea(.top)
+                }
 
                 if state.mode == .web {
                     VStack {
@@ -48,7 +48,9 @@ struct ModeView: View {
 
 struct ContentView: View {
     var body: some View {
-        ModeView().background(Color("EditorBackgroundColor").opacity(0.8))
+        ModeView()
+            .background(Color("EditorBackgroundColor").opacity(0.8))
+            .edgesIgnoringSafeArea(.top)
     }
 }
 

@@ -9,7 +9,7 @@ import Cocoa
 import Combine
 import SwiftUI
 
-class BeamHostingView<Content>: NSHostingView<Content> where Content : View {
+class BeamHostingView<Content>: NSHostingView<Content> where Content: View {
     required public init(rootView: Content) {
         super.init(rootView: rootView)
     }
@@ -27,20 +27,28 @@ class BeamWindow: NSWindow, NSWindowDelegate {
     var cloudKitContainer: NSPersistentCloudKitContainer
     var data: BeamData
 
+    // This is a hack to prevent a crash with swiftUI being dumb about the initialFirstResponder
+    override var initialFirstResponder: NSView? {
+        get {
+            nil
+        }
+
+        set {
+        }
+    }
+
     init(contentRect: NSRect, cloudKitContainer: NSPersistentCloudKitContainer, data: BeamData) {
         self.data = data
         self.state = BeamState(data: data)
         self.cloudKitContainer = cloudKitContainer
 
-        super.init(contentRect: contentRect, styleMask: [.titled, .closable, .miniaturizable, .texturedBackground, .resizable, .fullSizeContentView],
+        super.init(contentRect: contentRect, styleMask: [.titled, .closable, .miniaturizable, .texturedBackground, .resizable, .unifiedTitleAndToolbar, .fullSizeContentView],
                    backing: .buffered, defer: false)
 
         self.delegate = self
+        self.toolbar?.isVisible = false
         self.titlebarAppearsTransparent = true
         self.titleVisibility = .hidden
-
-        titleVisibility = .hidden
-        titlebarAppearsTransparent = true
 
         self.tabbingMode = .disallowed
         setFrameAutosaveName("BeamWindow")
@@ -48,8 +56,6 @@ class BeamWindow: NSWindow, NSWindowDelegate {
         // Create the SwiftUI view and set the context as the value for the managedObjectContext environment keyPath.
         // Add `@Environment(\.managedObjectContext)` in the views that will need the context.
         let contentView = ContentView().environment(\.managedObjectContext, cloudKitContainer.viewContext).environmentObject(state)
-        self.contentView = BeamHostingView(rootView: contentView)
-
         self.contentView = BeamHostingView(rootView: contentView)
         self.isMovableByWindowBackground = false
     }
@@ -63,12 +69,12 @@ class BeamWindow: NSWindow, NSWindowDelegate {
 
     public func windowDidResize(_ notification: Notification) {
         let version = ProcessInfo.processInfo.operatingSystemVersion
-        let RunningOnBigSur = version.majorVersion >= 11 || (version.majorVersion == 10 && version.minorVersion >= 16)
+        let runningOnBigSur = version.majorVersion >= 11 || (version.majorVersion == 10 && version.minorVersion >= 16)
 
         // THIS HACK IS HORRIBLE But AppKit leaves us little choice to have a similar look on Catalina and Future OSes
         if let b = self.standardWindowButton(.closeButton) {
             if var f = b.superview?.superview?.frame {
-                let v = CGFloat(RunningOnBigSur ? 12 : 12)
+                let v = CGFloat(runningOnBigSur ? 12 : 12)
                 f.size.height += v
                 f.origin.x += 13
                 f.origin.y -= v

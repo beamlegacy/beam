@@ -5,6 +5,7 @@
 //  Created by Sebastien Metrot on 29/09/2020.
 //
 
+// swiftlint:disable file_length
 import Foundation
 import WebKit
 
@@ -25,7 +26,7 @@ struct Readability {
     static func read(_ webView: WKWebView, _ getResults: @escaping (Result<Readability, Error>) -> Void) {
         //let now = Date()
         webView.evaluateJavaScript(readabilitySource) { (res, err) in
-            if let r = res as? [String:Any] {
+            if let r = res as? [String: Any] {
                 var read = Readability()
                 read.siteName = str(r["siteName"])
                 read.textContent = str(r["textContent"])
@@ -35,10 +36,10 @@ struct Readability {
                 read.content = str(r["content"])
                 read.excerpt = str(r["excerpt"])
                 read.byLine = str(r["byLine"])
-                
+
                 //let t0 = now.distance(to: Date())
                 getResults(.success(read))
-                
+
                 //let t1 = now.distance(to: Date()) - t0
                 //print("Extraction time: \(t0)s / indexing \(t1)s")
             } else if let e = err {
@@ -48,15 +49,15 @@ struct Readability {
     }
 }
 
-fileprivate func str(_ k:Any?) -> String {
+private func str(_ k: Any?) -> String {
     return k as? String ?? ""
 }
 
-fileprivate func num(_ k:Any?) -> Int {
+private func num(_ k: Any?) -> Int {
     return k as? Int ?? 0
 }
 
-fileprivate var readabilitySource = """
+private var readabilitySource = """
 /*eslint-env es6:false*/
 /*
  * Copyright (c) 2010 Arc90 Inc
@@ -2266,4 +2267,4 @@ if (typeof module === "object") {
 var documentClone = document.cloneNode(true);
 new Readability(documentClone).parse()
 """
-
+// swiftlint:enable file_length

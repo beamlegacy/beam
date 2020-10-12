@@ -2,6 +2,15 @@
   "object": {
     "pins": [
       {
+        "package": "Down",
+        "repositoryURL": "https://github.com/5sw/Down.git",
+        "state": {
+          "branch": "sequence",
+          "revision": "f51fe29372080d3a4b569d92eac623d7284a7017",
+          "version": null
+        }
+      },
+      {
         "package": "SwiftSoup",
         "repositoryURL": "https://github.com/scinfu/SwiftSoup.git",
         "state": {

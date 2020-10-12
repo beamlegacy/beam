@@ -8,7 +8,7 @@
 import Foundation
 import AppKit
 
-struct BID : Codable, Hashable {
+struct BID: Codable, Hashable {
     var id: UInt64
     static var baseTime = Double(1420070400000)
     static let timeBits = 41
@@ -16,13 +16,12 @@ struct BID : Codable, Hashable {
     static let seqBits = 12
     static var sequence = 0
     static var nodeId: Int {
-        var uuidRef:        CFUUID?
-        var uuidBytes:      [CUnsignedChar] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        
-        var ts = timespec(tv_sec: 0,tv_nsec: 0)
-        
+        var uuidRef: CFUUID?
+        var uuidBytes: [CUnsignedChar] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        var ts = timespec(tv_sec: 0, tv_nsec: 0)
+
         gethostuuid(&uuidBytes, &ts)
-        
+
         uuidRef = CFUUIDCreateWithBytes(
             kCFAllocatorDefault,
             uuidBytes[0],
@@ -42,14 +41,14 @@ struct BID : Codable, Hashable {
             uuidBytes[14],
             uuidBytes[15]
         )
-        
+
         return uuidRef!.hashValue
     }
-    
+
     func mask(_ value: Int, _ bits: Int) -> Int {
         return (value & ((1 << bits) - 1))
     }
-    
+
     init() {
         id = 0
         Self.sequence += 1
@@ -57,4 +56,3 @@ struct BID : Codable, Hashable {
         id = UInt64(t << (Self.nodeBits + Self.seqBits) | (mask(Self.nodeId, Self.nodeBits) << Self.seqBits) | mask(Self.sequence, Self.seqBits))
     }
 }
-

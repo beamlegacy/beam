@@ -35,12 +35,10 @@ class SearchKit {
     func search(_ query: String, _ options: SKSearchOptions = UInt32(kSKSearchOptionDefault), countLimit: Int = 10, timeLimit: TimeInterval = 0.05) -> [URL] {
         let options = SKSearchOptions(options)
         let search = SKSearchCreate(index, query.lowercased() as CFString, options).takeRetainedValue()
-
         var documentIDs: [SKDocumentID] = Array(repeating: 0, count: countLimit)
         var urls: [Unmanaged<CFURL>?] = Array(repeating: nil, count: countLimit)
         var scores: [Float] = Array(repeating: 0, count: countLimit)
         var foundCount = 0
-
         SKIndexFlush(index)
         _ = SKSearchFindMatches(search, countLimit, &documentIDs, &scores, timeLimit, &foundCount)
 

@@ -18,10 +18,9 @@ public extension NSView {
                 return false
             }
         }
-        
         return true
     }
-    
+
     func subviewsWith<ViewType>(type: ViewType.Type) -> [ViewType] {
         var views = [ViewType]()
         visitSubViews { view in

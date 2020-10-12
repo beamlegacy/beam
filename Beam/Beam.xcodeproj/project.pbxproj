@@ -50,11 +50,12 @@
 		965B19692518F4F000BCF01C /* BrowserTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965B19682518F4F000BCF01C /* BrowserTabView.swift */; };
 		965B19712518F59D00BCF01C /* BrowserTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965B19702518F59D00BCF01C /* BrowserTab.swift */; };
 		966B3541251BB2A800751322 /* BeamWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 966B3540251BB2A800751322 /* BeamWindow.swift */; };
-		96758985251F3A7E0014F604 /* NoteEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96758984251F3A7E0014F604 /* NoteEditor.swift */; };
-		96758987251F3B210014F604 /* BeamNoteEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96758986251F3B210014F604 /* BeamNoteEditor.swift */; };
 		9694F77925155F8700399E6A /* AutoComplete.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9694F77825155F8700399E6A /* AutoComplete.swift */; };
+		96A49B57252FAFBC003B4767 /* DownBeamVisitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96A49B56252FAFBC003B4767 /* DownBeamVisitor.swift */; };
+		96A49B62252FD6CB003B4767 /* Down in Frameworks */ = {isa = PBXBuildFile; productRef = 96A49B61252FD6CB003B4767 /* Down */; };
+		96A49B6A253115C5003B4767 /* String+Regex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96A49B69253115C5003B4767 /* String+Regex.swift */; };
+		96A49B6F2533ABC9003B4767 /* NSMutableAttributedString+Ranges.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96A49B6E2533ABC9003B4767 /* NSMutableAttributedString+Ranges.swift */; };
 		96C039922520C67C00A2EDC7 /* TextEdit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C039902520C67C00A2EDC7 /* TextEdit.swift */; };
-		96C039932520C67C00A2EDC7 /* TextInputHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C039912520C67C00A2EDC7 /* TextInputHandler.swift */; };
 		96C039982520CB9D00A2EDC7 /* Maths.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C039972520CB9D00A2EDC7 /* Maths.swift */; };
 		96D5F1752519F75600A19BBC /* BID.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96D5F1742519F75600A19BBC /* BID.swift */; };
 		96F5DB0D25179F030080E3EE /* String+Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F5DB0C25179F030080E3EE /* String+Localization.swift */; };
@@ -66,6 +67,7 @@
 		96F5DB38251820960080E3EE /* ClosedRange+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F5DB37251820960080E3EE /* ClosedRange+Beam.swift */; };
 		96F5DB452518238C0080E3EE /* BeamState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F5DB442518238C0080E3EE /* BeamState.swift */; };
 		96F5DB4A25189DDF0080E3EE /* AutoCompleteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F5DB4925189DDF0080E3EE /* AutoCompleteView.swift */; };
+		96F6DCEB252DCF230054AF3B /* TextNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F6DCEA252DCF230054AF3B /* TextNode.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -134,12 +136,13 @@
 		965B19682518F4F000BCF01C /* BrowserTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserTabView.swift; sourceTree = "<group>"; };
 		965B19702518F59D00BCF01C /* BrowserTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserTab.swift; sourceTree = "<group>"; };
 		966B3540251BB2A800751322 /* BeamWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamWindow.swift; sourceTree = "<group>"; };
-		96758984251F3A7E0014F604 /* NoteEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteEditor.swift; sourceTree = "<group>"; };
-		96758986251F3B210014F604 /* BeamNoteEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamNoteEditor.swift; sourceTree = "<group>"; };
 		9694F77825155F8700399E6A /* AutoComplete.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoComplete.swift; sourceTree = "<group>"; };
+		96A49B56252FAFBC003B4767 /* DownBeamVisitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownBeamVisitor.swift; sourceTree = "<group>"; };
+		96A49B69253115C5003B4767 /* String+Regex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Regex.swift"; sourceTree = "<group>"; };
+		96A49B6E2533ABC9003B4767 /* NSMutableAttributedString+Ranges.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSMutableAttributedString+Ranges.swift"; sourceTree = "<group>"; };
 		96C039902520C67C00A2EDC7 /* TextEdit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextEdit.swift; sourceTree = "<group>"; };
-		96C039912520C67C00A2EDC7 /* TextInputHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextInputHandler.swift; sourceTree = "<group>"; };
 		96C039972520CB9D00A2EDC7 /* Maths.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Maths.swift; sourceTree = "<group>"; };
+		96C9CBE225348F0900D70AA6 /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = SOURCE_ROOT; };
 		96D5F1742519F75600A19BBC /* BID.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BID.swift; sourceTree = "<group>"; };
 		96F5DB0C25179F030080E3EE /* String+Localization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Localization.swift"; sourceTree = "<group>"; };
 		96F5DB152517A0F10080E3EE /* NSContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSContainerView.swift; sourceTree = "<group>"; };
@@ -150,6 +153,7 @@
 		96F5DB37251820960080E3EE /* ClosedRange+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ClosedRange+Beam.swift"; sourceTree = "<group>"; };
 		96F5DB442518238C0080E3EE /* BeamState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamState.swift; sourceTree = "<group>"; };
 		96F5DB4925189DDF0080E3EE /* AutoCompleteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoCompleteView.swift; sourceTree = "<group>"; };
+		96F6DCEA252DCF230054AF3B /* TextNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextNode.swift; sourceTree = "<group>"; };
 		9B355D858C3216B61BF461D9 /* Pods-BeamTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BeamTests.release.xcconfig"; path = "Target Support Files/Pods-BeamTests/Pods-BeamTests.release.xcconfig"; sourceTree = "<group>"; };
 		A3DE910688789AFBA4487533 /* Pods-Beam.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Beam.debug.xcconfig"; path = "Target Support Files/Pods-Beam/Pods-Beam.debug.xcconfig"; sourceTree = "<group>"; };
 		C8379DEE387FB86FA7817188 /* Pods_BeamTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_BeamTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -163,6 +167,7 @@
 			files = (
 				9631C747251CE997009B40C4 /* SwiftSoup in Frameworks */,
 				964548A02523B3550064D062 /* CloudKit.framework in Frameworks */,
+				96A49B62252FD6CB003B4767 /* Down in Frameworks */,
 				20E1B667EDD2C5D590410B9F /* Pods_Beam.framework in Frameworks */,
 				9645488125237C310064D062 /* VisualEffects in Frameworks */,
 			);
@@ -262,13 +267,6 @@
 			path = Pods;
 			sourceTree = "<group>";
 		};
-		9645485C25228FBC0064D062 /* Resources */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Resources;
-			sourceTree = "<group>";
-		};
 		9645488B252382AE0064D062 /* JS */ = {
 			isa = PBXGroup;
 			children = (
@@ -303,7 +301,6 @@
 			isa = PBXGroup;
 			children = (
 				9645488B252382AE0064D062 /* JS */,
-				9645485C25228FBC0064D062 /* Resources */,
 				96F5DB142517A0D80080E3EE /* AppKitCrap */,
 				96F5DB0B25179EE40080E3EE /* Swift+Beam */,
 				9694F77725155F7200399E6A /* Network */,
@@ -315,6 +312,7 @@
 				965A78372514F148009980D4 /* Info.plist */,
 				965A78382514F148009980D4 /* Beam.entitlements */,
 				965A782C2514F147009980D4 /* Beam.xcdatamodeld */,
+				96C9CBE225348F0900D70AA6 /* .swiftlint.yml */,
 				965A78312514F148009980D4 /* Preview Content */,
 			);
 			path = Beam;
@@ -379,8 +377,6 @@
 				965B19632518F3BA00BCF01C /* BrowserTabBar.swift */,
 				965B19682518F4F000BCF01C /* BrowserTabView.swift */,
 				966B3540251BB2A800751322 /* BeamWindow.swift */,
-				96758984251F3A7E0014F604 /* NoteEditor.swift */,
-				96758986251F3B210014F604 /* BeamNoteEditor.swift */,
 				964548742522AD770064D062 /* NoteView.swift */,
 			);
 			path = UI;
@@ -398,8 +394,9 @@
 			isa = PBXGroup;
 			children = (
 				96C039902520C67C00A2EDC7 /* TextEdit.swift */,
-				96C039912520C67C00A2EDC7 /* TextInputHandler.swift */,
 				964547AC2520CF3E0064D062 /* Font.swift */,
+				96F6DCEA252DCF230054AF3B /* TextNode.swift */,
+				96A49B56252FAFBC003B4767 /* DownBeamVisitor.swift */,
 			);
 			path = TextEditor;
 			sourceTree = "<group>";
@@ -413,6 +410,8 @@
 				96C039972520CB9D00A2EDC7 /* Maths.swift */,
 				9645481D25220EC90064D062 /* String+LoremIpsum.swift */,
 				96454822252216570064D062 /* NSRange+CFRange.swift */,
+				96A49B69253115C5003B4767 /* String+Regex.swift */,
+				96A49B6E2533ABC9003B4767 /* NSMutableAttributedString+Ranges.swift */,
 			);
 			path = "Swift+Beam";
 			sourceTree = "<group>";
@@ -449,6 +448,7 @@
 			packageProductDependencies = (
 				9631C746251CE997009B40C4 /* SwiftSoup */,
 				9645488025237C310064D062 /* VisualEffects */,
+				96A49B61252FD6CB003B4767 /* Down */,
 			);
 			productName = Beam;
 			productReference = 965A78252514F147009980D4 /* Beam.app */;
@@ -526,6 +526,7 @@
 			packageReferences = (
 				9631C745251CE997009B40C4 /* XCRemoteSwiftPackageReference "SwiftSoup" */,
 				9645487F25237C310064D062 /* XCRemoteSwiftPackageReference "VisualEffects" */,
+				96A49B60252FD6CB003B4767 /* XCRemoteSwiftPackageReference "Down" */,
 			);
 			productRefGroup = 965A78262514F147009980D4 /* Products */;
 			projectDirPath = "";
@@ -656,6 +657,7 @@
 				9631C76B251E3648009B40C4 /* NSView+Beam.swift in Sources */,
 				521812BD2524C368007E4B47 /* Bullet.swift in Sources */,
 				96F5DB452518238C0080E3EE /* BeamState.swift in Sources */,
+				96F6DCEB252DCF230054AF3B /* TextNode.swift in Sources */,
 				9645481E25220EC90064D062 /* String+LoremIpsum.swift in Sources */,
 				965A78632514F57E009980D4 /* OmniBar.swift in Sources */,
 				965A782B2514F147009980D4 /* ContentView.swift in Sources */,
@@ -667,24 +669,24 @@
 				964547AD2520CF3E0064D062 /* Font.swift in Sources */,
 				52E04FE7252C7B9E00AD9F56 /* RoamImporter.swift in Sources */,
 				96F5DB0D25179F030080E3EE /* String+Localization.swift in Sources */,
+				96A49B57252FAFBC003B4767 /* DownBeamVisitor.swift in Sources */,
 				965A785E2514F1AF009980D4 /* WebView.swift in Sources */,
 				965B19692518F4F000BCF01C /* BrowserTabView.swift in Sources */,
 				96C039982520CB9D00A2EDC7 /* Maths.swift in Sources */,
-				96758987251F3B210014F604 /* BeamNoteEditor.swift in Sources */,
 				96F5DB1E2517A1E60080E3EE /* BNSTextField.swift in Sources */,
 				52326F8C252F1A8E00A40F1E /* NSManagedObject+initExtension.swift in Sources */,
 				965B19712518F59D00BCF01C /* BrowserTab.swift in Sources */,
 				96C039922520C67C00A2EDC7 /* TextEdit.swift in Sources */,
 				964547B22520D19F0064D062 /* NSRect+Beam.swift in Sources */,
 				96F5DB4A25189DDF0080E3EE /* AutoCompleteView.swift in Sources */,
+				96A49B6F2533ABC9003B4767 /* NSMutableAttributedString+Ranges.swift in Sources */,
 				96F5DB162517A0F10080E3EE /* NSContainerView.swift in Sources */,
-				96C039932520C67C00A2EDC7 /* TextInputHandler.swift in Sources */,
 				964548952523A9F50064D062 /* SearchKit.swift in Sources */,
 				965A78292514F147009980D4 /* AppDelegate.swift in Sources */,
-				96758985251F3A7E0014F604 /* NoteEditor.swift in Sources */,
 				965A782E2514F147009980D4 /* Beam.xcdatamodeld in Sources */,
 				964548752522AD770064D062 /* NoteView.swift in Sources */,
 				965A78602514F1AF009980D4 /* BeamNote.swift in Sources */,
+				96A49B6A253115C5003B4767 /* String+Regex.swift in Sources */,
 				965B195F2518EEFC00BCF01C /* SearchEngine.swift in Sources */,
 				96F5DB38251820960080E3EE /* ClosedRange+Beam.swift in Sources */,
 				96454823252216570064D062 /* NSRange+CFRange.swift in Sources */,
@@ -881,6 +883,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beamApp.BeamApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -906,6 +909,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beamApp.BeamApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -1056,6 +1060,14 @@
 				minimumVersion = 1.0.3;
 			};
 		};
+		96A49B60252FD6CB003B4767 /* XCRemoteSwiftPackageReference "Down" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/5sw/Down.git";
+			requirement = {
+				branch = sequence;
+				kind = branch;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1068,6 +1080,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 9645487F25237C310064D062 /* XCRemoteSwiftPackageReference "VisualEffects" */;
 			productName = VisualEffects;
+		};
+		96A49B61252FD6CB003B4767 /* Down */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 96A49B60252FD6CB003B4767 /* XCRemoteSwiftPackageReference "Down" */;
+			productName = Down;
 		};
 /* End XCSwiftPackageProductDependency section */
 

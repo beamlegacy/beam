@@ -10,7 +10,7 @@ import AppKit
 import Combine
 import SwiftUI
 
-class BNSTextField : NSTextView, ObservableObject, NSTextViewDelegate {
+class BNSTextField: NSTextView, ObservableObject, NSTextViewDelegate {
     var value: Binding<String> = .constant("")
     public var onEditingChanged: (Bool) -> Void = { _ in }
     public var inSelectionUpdate: Bool = false
@@ -39,11 +39,11 @@ class BNSTextField : NSTextView, ObservableObject, NSTextViewDelegate {
         self.backgroundColor = NSColor(named: "transparent")!
         self.delegate = self
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     override func mouseDown(with event: NSEvent) {
         window?.makeFirstResponder(self)
         super.mouseDown(with: event)
@@ -54,7 +54,7 @@ class BNSTextField : NSTextView, ObservableObject, NSTextViewDelegate {
         isEditing = true
         return true
     }
-    
+
     public override func resignFirstResponder() -> Bool {
         isEditing = false
         return super.resignFirstResponder()
@@ -78,14 +78,13 @@ class BNSTextField : NSTextView, ObservableObject, NSTextViewDelegate {
     }
 
     override func performKeyEquivalent(with event: NSEvent) -> Bool {
-        if isEditing  {
+        if isEditing {
             if onPerformKeyEquivalent(event) {
                 return true
             }
         }
         return super.performKeyEquivalent(with: event)
     }
-
 
     override func viewDidMoveToWindow() {
         if focusOnCreation {
@@ -96,12 +95,12 @@ class BNSTextField : NSTextView, ObservableObject, NSTextViewDelegate {
             }
         }
     }
-    
+
     @objc func commit(_ sender: AnyObject) {
         onCommit()
     }
-    
-    public var placeholderText: String? = nil
+
+    public var placeholderText: String?
     public var placeholderTextColor: NSColor = NSColor.lightGray
 
     private var placeholderInsets = NSEdgeInsets(top: 0.0, left: 4.0, bottom: 0.0, right: 4.0)
@@ -112,7 +111,7 @@ class BNSTextField : NSTextView, ObservableObject, NSTextViewDelegate {
         guard string.isEmpty else { return }
         if let s = placeholderText {
             let attribs = [NSAttributedString.Key.font: font!, .foregroundColor: placeholderTextColor]
-            NSAttributedString(string: s, attributes: attribs as [NSAttributedString.Key : Any]).draw(in: dirtyRect.insetBy(placeholderInsets))
+            NSAttributedString(string: s, attributes: attribs as [NSAttributedString.Key: Any]).draw(in: dirtyRect.insetBy(placeholderInsets))
         }
     }
 }
@@ -123,5 +122,3 @@ extension NSRect {
         .applying(CGAffineTransform(translationX: insets.left - insets.right, y: insets.top - insets.bottom))
     }
 }
-
-

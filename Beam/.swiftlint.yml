@@ -80,6 +80,10 @@ identifier_name:
   excluded:
     - id
     - me
+identifier_name:
+    min_length: 1
+    allowed_symbols: [_]
+    validates_start_with_lowercase: false
 
 # paths to ignore during linting. Takes precedence over `included`.
 excluded:

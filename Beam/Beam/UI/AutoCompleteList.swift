@@ -30,10 +30,8 @@ struct AutoCompleteList: View {
     }
 
     func indexFor(item: AutoCompleteResult) -> Int? {
-        for (i, _) in elements.enumerated() {
-            if elements[i].id == item.id {
-                return i
-            }
+        for i in elements.indices where elements[i].id == item.id {
+            return i
         }
         return nil
     }
