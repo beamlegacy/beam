@@ -27,19 +27,30 @@ class TextNode: TextNodeBase {
         if let s = _attributedString {
             return s
         }
-        let down = Down(markdownString: text)
-        do {
-            let options = DownOptions.sourcePos
-            let styler = DownStyler(configuration: DownStylerConfiguration())
-            let visitor = BeamAttributedStringVisitor(sourceString: text, styler: styler, options: options, cursorPosition: cursorPosition)
-            visitor.contextualSyntax = editor.contextualSyntax
-            let res = try down.toAttributedStringBeam(visitor: visitor)
-            _attributedString = res
-            return res
-        } catch {
+        let parser = Parser(inputString: text)
+        let AST = parser.parseAST()
 
-        }
-        return NSAttributedString()
+//        print("AST:\n\(AST.treeString)")
+
+        let config = AttributedStringVisitor.Configuration()
+        let visitor = AttributedStringVisitor(configuration: config)
+        let str = visitor.visit(AST)
+
+        _attributedString = str
+        return str
+//        let down = Down(markdownString: text)
+//        do {
+//            let options = DownOptions.sourcePos
+//            let styler = DownStyler(configuration: DownStylerConfiguration())
+//            let visitor = BeamAttributedStringVisitor(sourceString: text, styler: styler, options: options, cursorPosition: cursorPosition)
+//            visitor.contextualSyntax = editor.contextualSyntax
+//            let res = try down.toAttributedStringBeam(visitor: visitor)
+//            _attributedString = res
+//            return res
+//        } catch {
+//
+//        }
+//        return NSAttributedString()
 }
 
     var font: Font { editor.font }
@@ -105,10 +116,15 @@ class TextNode: TextNodeBase {
     }
 
     var offsetInDocument: NSPoint { // the position in the global document
-        guard let p = parent else { return NSPoint() }
-        let o1 = offsetInParent
-        let o2 = p.offsetInParent
-        return NSPoint(x: o1.x + o2.x, y: o1.y + o2.y)
+        var point = offsetInParent
+        var p = parent
+        while let validparent = p {
+            let offset = validparent.offsetInParent
+            point.x += offset.x
+            point.y += offset.y
+            p = validparent.parent
+        }
+        return point
     }
 
     var frameInDocument: NSRect {
@@ -167,7 +183,7 @@ class TextNode: TextNodeBase {
 
             //            print("rect \(rect.size)\n\ty \(y) - height \(height) - ascent \(font.ascent) - descent \(font.descent) - capHeight \(font.capHeight)\n\tBBox \(font.fontBBox)\n\tleading \(font.leading) - size \(font.size) - unitsPerEM \(font.unitsPerEm) - stemV \(font.stemV) - xHeight \(font.xHeight)\n")
 
-            context.translateBy(x: l.rect.origin.x + CGFloat(hMargin), y: CGFloat(font.ascent) + l.rect.origin.y)
+            context.translateBy(x: l.rect.origin.x + CGFloat(hMargin), y: CGFloat(font.ascent) - l.rect.origin.y)
             context.scaleBy(x: 1, y: -1)
 
             //swiftlint:disable:next force_cast
@@ -290,9 +306,10 @@ class TextNode: TextNodeBase {
             return self
         }
 
+        let x = point.x + CGFloat(childInset)
         var y = point.y - textFrame.height
         for c in children {
-            let p = CGPoint(x: point.x - CGFloat(childInset), y: y)
+            let p = CGPoint(x: x, y: y)
             if let res = c.nodeAt(point: p) {
                 return res
             }
@@ -360,7 +377,7 @@ class TextNode: TextNodeBase {
     func sourceIndexFor(displayIndex: Int) -> Int {
         var range = NSRange()
         let attributes = attributedString.attributes(at: displayIndex, effectiveRange: &range)
-        let ranges = attributes.filter({ $0.key == .sourceRange })
+        let ranges = attributes.filter({ $0.key == .sourcePos })
         guard let position = ranges.first else { return 0 }
         guard let number = position.value as? NSNumber else { return 0 }
         return displayIndex - range.location + number.intValue
@@ -369,7 +386,7 @@ class TextNode: TextNodeBase {
     func displayIndexFor(sourceIndex: Int) -> Int {
         var found_range = NSRange()
         var found_position = 0
-        attributedString.enumerateAttribute(.sourceRange, in: NSRange(location: 0, length: attributedString.length), options: .longestEffectiveRangeNotRequired) { value, range, stop in
+        attributedString.enumerateAttribute(.sourcePos, in: NSRange(location: 0, length: attributedString.length), options: .longestEffectiveRangeNotRequired) { value, range, stop in
             //swiftlint:disable:next force_cast
             let position = value as! NSNumber
             let p = position.intValue

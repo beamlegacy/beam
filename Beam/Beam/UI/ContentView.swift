@@ -25,12 +25,13 @@ struct ModeView: View {
 
             ZStack {
                 ScrollView([.vertical]) {
-                    NoteView()
-                }
-
-                ScrollView([.vertical]) {
-                    AutoCompleteView(autoComplete: $state.completedQueries, selectionIndex: $state.selectionIndex)
-                        .frame(idealWidth: 800, maxWidth: .infinity, idealHeight: 600, maxHeight: .infinity, alignment: .center)
+                    ZStack {
+                        if let note = state.currentNote {
+                            BTextEdit(note: note)
+                        }
+                        AutoCompleteView(autoComplete: $state.completedQueries, selectionIndex: $state.selectionIndex)
+                            .frame(idealWidth: 800, maxWidth: .infinity, idealHeight: 600, maxHeight: .infinity, alignment: .center)
+                    }
                 }
 
                 if state.mode == .web {

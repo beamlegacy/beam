@@ -110,8 +110,12 @@ public class Font {
         for line in lines {
             let range = CTLineGetStringRange(line)
             var rect = CTLineGetBoundsWithOptions(line, [.includeLanguageExtents, .useHangingPunctuation])
+            var lascent = CGFloat(0)
+            var ldescent = CGFloat(0)
+            var lleading = CGFloat(0)
+            var lineWidth = CTLineGetTypographicBounds(line, &lascent, &ldescent, &lleading)
 
-            rect.origin.y = y
+            rect.origin.y += y
             y += rect.height
             let r = NSRange(range: range)
             layoutedLines.append(TextLineLayout(rect: rect, line: line, range: r.location ..< r.location + r.length))

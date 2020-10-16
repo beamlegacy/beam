@@ -50,13 +50,18 @@
 		965B19692518F4F000BCF01C /* BrowserTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965B19682518F4F000BCF01C /* BrowserTabView.swift */; };
 		965B19712518F59D00BCF01C /* BrowserTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965B19702518F59D00BCF01C /* BrowserTab.swift */; };
 		966B3541251BB2A800751322 /* BeamWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 966B3540251BB2A800751322 /* BeamWindow.swift */; };
+		969084CC25365AAE009D3C96 /* ParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 969084CB25365AAE009D3C96 /* ParserTests.swift */; };
 		9694F77925155F8700399E6A /* AutoComplete.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9694F77825155F8700399E6A /* AutoComplete.swift */; };
 		96A49B57252FAFBC003B4767 /* DownBeamVisitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96A49B56252FAFBC003B4767 /* DownBeamVisitor.swift */; };
 		96A49B62252FD6CB003B4767 /* Down in Frameworks */ = {isa = PBXBuildFile; productRef = 96A49B61252FD6CB003B4767 /* Down */; };
 		96A49B6A253115C5003B4767 /* String+Regex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96A49B69253115C5003B4767 /* String+Regex.swift */; };
 		96A49B6F2533ABC9003B4767 /* NSMutableAttributedString+Ranges.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96A49B6E2533ABC9003B4767 /* NSMutableAttributedString+Ranges.swift */; };
+		96AF5CB62537611300A7988C /* AttributedStringVisitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96AF5CB52537611300A7988C /* AttributedStringVisitor.swift */; };
 		96C039922520C67C00A2EDC7 /* TextEdit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C039902520C67C00A2EDC7 /* TextEdit.swift */; };
 		96C039982520CB9D00A2EDC7 /* Maths.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C039972520CB9D00A2EDC7 /* Maths.swift */; };
+		96C9CC392535C16800D70AA6 /* Lexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C9CC382535C16800D70AA6 /* Lexer.swift */; };
+		96C9CC3E2535CE2C00D70AA6 /* LexerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C9CC3D2535CE2C00D70AA6 /* LexerTests.swift */; };
+		96C9CC432535FA4900D70AA6 /* Parser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C9CC422535FA4900D70AA6 /* Parser.swift */; };
 		96D5F1752519F75600A19BBC /* BID.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96D5F1742519F75600A19BBC /* BID.swift */; };
 		96F5DB0D25179F030080E3EE /* String+Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F5DB0C25179F030080E3EE /* String+Localization.swift */; };
 		96F5DB162517A0F10080E3EE /* NSContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F5DB152517A0F10080E3EE /* NSContainerView.swift */; };
@@ -136,13 +141,18 @@
 		965B19682518F4F000BCF01C /* BrowserTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserTabView.swift; sourceTree = "<group>"; };
 		965B19702518F59D00BCF01C /* BrowserTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserTab.swift; sourceTree = "<group>"; };
 		966B3540251BB2A800751322 /* BeamWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamWindow.swift; sourceTree = "<group>"; };
+		969084CB25365AAE009D3C96 /* ParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParserTests.swift; sourceTree = "<group>"; };
 		9694F77825155F8700399E6A /* AutoComplete.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoComplete.swift; sourceTree = "<group>"; };
 		96A49B56252FAFBC003B4767 /* DownBeamVisitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownBeamVisitor.swift; sourceTree = "<group>"; };
 		96A49B69253115C5003B4767 /* String+Regex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Regex.swift"; sourceTree = "<group>"; };
 		96A49B6E2533ABC9003B4767 /* NSMutableAttributedString+Ranges.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSMutableAttributedString+Ranges.swift"; sourceTree = "<group>"; };
+		96AF5CB52537611300A7988C /* AttributedStringVisitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttributedStringVisitor.swift; sourceTree = "<group>"; };
 		96C039902520C67C00A2EDC7 /* TextEdit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextEdit.swift; sourceTree = "<group>"; };
 		96C039972520CB9D00A2EDC7 /* Maths.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Maths.swift; sourceTree = "<group>"; };
 		96C9CBE225348F0900D70AA6 /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = SOURCE_ROOT; };
+		96C9CC382535C16800D70AA6 /* Lexer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Lexer.swift; sourceTree = "<group>"; };
+		96C9CC3D2535CE2C00D70AA6 /* LexerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LexerTests.swift; sourceTree = "<group>"; };
+		96C9CC422535FA4900D70AA6 /* Parser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Parser.swift; sourceTree = "<group>"; };
 		96D5F1742519F75600A19BBC /* BID.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BID.swift; sourceTree = "<group>"; };
 		96F5DB0C25179F030080E3EE /* String+Localization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Localization.swift"; sourceTree = "<group>"; };
 		96F5DB152517A0F10080E3EE /* NSContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSContainerView.swift; sourceTree = "<group>"; };
@@ -334,6 +344,8 @@
 				521812CE2524C597007E4B47 /* NoteTests.swift */,
 				52DEF1C9252B259700561493 /* CoreDataManagerTests.swift */,
 				965A78432514F149009980D4 /* Info.plist */,
+				96C9CC3D2535CE2C00D70AA6 /* LexerTests.swift */,
+				969084CB25365AAE009D3C96 /* ParserTests.swift */,
 			);
 			path = BeamTests;
 			sourceTree = "<group>";
@@ -393,12 +405,23 @@
 		96C0398F2520C67C00A2EDC7 /* TextEditor */ = {
 			isa = PBXGroup;
 			children = (
+				96C9CC372535C16800D70AA6 /* Markdown */,
 				96C039902520C67C00A2EDC7 /* TextEdit.swift */,
 				964547AC2520CF3E0064D062 /* Font.swift */,
 				96F6DCEA252DCF230054AF3B /* TextNode.swift */,
 				96A49B56252FAFBC003B4767 /* DownBeamVisitor.swift */,
 			);
 			path = TextEditor;
+			sourceTree = "<group>";
+		};
+		96C9CC372535C16800D70AA6 /* Markdown */ = {
+			isa = PBXGroup;
+			children = (
+				96C9CC382535C16800D70AA6 /* Lexer.swift */,
+				96C9CC422535FA4900D70AA6 /* Parser.swift */,
+				96AF5CB52537611300A7988C /* AttributedStringVisitor.swift */,
+			);
+			path = Markdown;
 			sourceTree = "<group>";
 		};
 		96F5DB0B25179EE40080E3EE /* Swift+Beam */ = {
@@ -655,6 +678,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9631C76B251E3648009B40C4 /* NSView+Beam.swift in Sources */,
+				96AF5CB62537611300A7988C /* AttributedStringVisitor.swift in Sources */,
 				521812BD2524C368007E4B47 /* Bullet.swift in Sources */,
 				96F5DB452518238C0080E3EE /* BeamState.swift in Sources */,
 				96F6DCEB252DCF230054AF3B /* TextNode.swift in Sources */,
@@ -686,12 +710,14 @@
 				965A782E2514F147009980D4 /* Beam.xcdatamodeld in Sources */,
 				964548752522AD770064D062 /* NoteView.swift in Sources */,
 				965A78602514F1AF009980D4 /* BeamNote.swift in Sources */,
+				96C9CC432535FA4900D70AA6 /* Parser.swift in Sources */,
 				96A49B6A253115C5003B4767 /* String+Regex.swift in Sources */,
 				965B195F2518EEFC00BCF01C /* SearchEngine.swift in Sources */,
 				96F5DB38251820960080E3EE /* ClosedRange+Beam.swift in Sources */,
 				96454823252216570064D062 /* NSRange+CFRange.swift in Sources */,
 				528E44272525BD4600B7C54E /* CoreDataManager.swift in Sources */,
 				9694F77925155F8700399E6A /* AutoComplete.swift in Sources */,
+				96C9CC392535C16800D70AA6 /* Lexer.swift in Sources */,
 				965B19642518F3BA00BCF01C /* BrowserTabBar.swift in Sources */,
 				966B3541251BB2A800751322 /* BeamWindow.swift in Sources */,
 				521812B62524C354007E4B47 /* Note.swift in Sources */,
@@ -708,7 +734,9 @@
 				52E04FED252C814D00AD9F56 /* RoamImporterTests.swift in Sources */,
 				52B5EF78252F520100914D52 /* CoreDataTests.swift in Sources */,
 				52DEF1CA252B259700561493 /* CoreDataManagerTests.swift in Sources */,
+				969084CC25365AAE009D3C96 /* ParserTests.swift in Sources */,
 				521812CF2524C597007E4B47 /* NoteTests.swift in Sources */,
+				96C9CC3E2535CE2C00D70AA6 /* LexerTests.swift in Sources */,
 				52326F8D252F1A8E00A40F1E /* NSManagedObject+initExtension.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -922,6 +950,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = X87W5M786F;
@@ -944,6 +973,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = X87W5M786F;

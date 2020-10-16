@@ -16,7 +16,7 @@ public extension NSMutableAttributedString {
     var positionAttribs: [PositionAttribute] {
         get {
             var attribs = [PositionAttribute]()
-            enumerateAttribute(.sourceRange, in: NSRange(location: 0, length: length), options: .longestEffectiveRangeNotRequired) { value, range, _ in
+            enumerateAttribute(.sourcePos, in: NSRange(location: 0, length: length), options: .longestEffectiveRangeNotRequired) { value, range, _ in
                 //swiftlint:disable:next force_cast
                 attribs.append(PositionAttribute(range: range, position: value as! NSNumber))
             }
@@ -25,11 +25,15 @@ public extension NSMutableAttributedString {
 
         set {
             for v in newValue {
-                addAttribute(.sourceRange, value: v.position, range: v.range)
+                addAttribute(.sourcePos, value: v.position, range: v.range)
             }
         }
     }
 
+    func addAttributes(_ attribs: [NSAttributedString.Key: Any]) -> Self {
+        self.addAttributes(attribs, range: wholeRange)
+        return self
+    }
 }
 
 extension NSMutableAttributedString {
@@ -44,6 +48,11 @@ extension NSAttributedString {
     static var paragraphSeparator: NSAttributedString {
         return String.paragraphSeparator.attributed
     }
+
+    var wholeRange: NSRange {
+        return NSRange(location: 0, length: self.length)
+    }
+
 }
 
 extension String {

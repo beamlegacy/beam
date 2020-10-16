@@ -13,12 +13,49 @@ import SwiftUI
 import Combine
 
 public struct BTextEdit: NSViewRepresentable {
+    var note: Note
+
+    func createBullet(bullet: Bullet) -> TextNode {
+        let node = TextNode()
+        node.text = bullet.content?.filter({ (char) -> Bool in
+            !char.isNewline
+        }) ?? "<empty debug>"
+
+//        print("MD: \(bullet.orderIndex) \(node.text)")
+        for child in bullet.sortedChildren() {
+            node.children.append(createBullet(bullet: child))
+        }
+
+        return node
+    }
+
+    func createNodeTree(editor: BeamTextEdit, note: Note) -> TextRoot {
+        let root = TextRoot(editor: editor)
+        let mainNode = TextNode()
+
+        mainNode.text = note.title!
+        root.children.append(mainNode)
+
+        for child in note.rootBullets() {
+            mainNode.children.append(createBullet(bullet: child))
+        }
+
+        return root
+    }
+
     public func makeNSView(context: Context) -> BeamTextEdit {
-        let v = BeamTextEdit(text: String.loremIpsumMD, font: Font.main)
+        let v = BeamTextEdit(text: "", font: Font.main)
+
+//        guard let note = Note.fetchWithTitle(CoreDataManager.shared.mainContext, "Beam App v1") else { return v }
+        v.rootNode = createNodeTree(editor: v, note: note)
+
         return v
     }
 
     public func updateNSView(_ nsView: BeamTextEdit, context: Context) {
+        print("display note: \(note)")
+        nsView.rootNode = createNodeTree(editor: nsView, note: note)
+        nsView.node = nsView.rootNode.children.first!
     }
 
     public typealias NSViewType = BeamTextEdit
@@ -39,7 +76,7 @@ class TextRoot: TextNode {
         }
     }
 
-    private var _editor: BeamTextEdit?
+    var _editor: BeamTextEdit?
     override var editor: BeamTextEdit {
         return _editor!
     }
@@ -114,7 +151,7 @@ public class BeamTextEdit: NSView, NSTextInputClient {
     }
 
     var font: Font
-    var minimumWidth: Float? = 400
+    var minimumWidth: Float? = 1024
     var maximumWidth: Float?
     public var activated: () -> Void = { }
     public var activateOnLostFocus = true
@@ -176,7 +213,13 @@ public class BeamTextEdit: NSView, NSTextInputClient {
     var vMargin: Float = 0 { didSet { invalidateLayout() } }
 
     // This is the root node of what we are editing:
-    var rootNode: TextRoot
+    var rootNode: TextRoot {
+        didSet {
+            rootNode._editor = self
+            invalidateLayout()
+            invalidate()
+        }
+    }
 
     // This is the node that the user is currently editing. It can be any node in the rootNode tree
     var node: TextNode {
@@ -185,16 +228,11 @@ public class BeamTextEdit: NSView, NSTextInputClient {
             cancelSelection()
         }
     }
-//    override public var intrinsicContentSize: NSSize {
-//        updateTextRendering()
-//        var r = NSRect()
-//        for l in layouts {
-//            r.size.width = max(r.width, l.rect.width)
-//            r.size.height += l.rect.height
-//        }
-//        return r.size
-//    }
-//
+
+    override public var intrinsicContentSize: NSSize {
+        rootNode.updateTextRendering()
+        return NSSize(width: CGFloat(minimumWidth!), height: rootNode.frame.size.height)
+    }
 
     public func setHotSpot(_ spot: NSRect) {
         if let sv = superview as? NSScrollView {

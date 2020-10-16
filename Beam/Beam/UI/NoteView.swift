@@ -24,7 +24,7 @@ struct NoteView: View {
 //                }
 //            }
 
-            BTextEdit()
+//            BTextEdit()
         }
     }
 }

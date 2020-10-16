@@ -61,7 +61,7 @@ class BeamState: ObservableObject {
     }
 
     var data: BeamData
-    @Published var currentNote: BeamNote?
+    @Published var currentNote: Note?
     @Published public var tabs: [BrowserTab] = [] {
         didSet {
             for tab in tabs {
@@ -70,12 +70,13 @@ class BeamState: ObservableObject {
                     self.tabs.append(newTab)
 
                     if var note = self.currentNote {
-                        if note.searchQueries.contains(newTab.originalQuery) {
-                            if let url = newTab.url {
-                                note.visitedSearchResults.append(VisitedPage(originalSearchQuery: newTab.originalQuery, url: url, date: Date(), duration: 0))
-                                self.currentNote = note
-                            }
-                        }
+                        // TODO bind visited sites with note contents:
+//                        if note.searchQueries.contains(newTab.originalQuery) {
+//                            if let url = newTab.url {
+//                                note.visitedSearchResults.append(VisitedPage(originalSearchQuery: newTab.originalQuery, url: url, date: Date(), duration: 0))
+//                                self.currentNote = note
+//                            }
+//                        }
                     }
                 }
                 tab.appendToIndexer = { [weak self] url, read in
@@ -141,16 +142,27 @@ class BeamState: ObservableObject {
         let url = URL(string: searchText)
 
         if url?.scheme == nil {
-            searchEngine.query = searchText
-            searchText = searchEngine.searchUrl
-            print("Start search query: \(searchText)")
+            if let note = Note.fetchWithTitle(CoreDataManager.shared.mainContext, searchQuery) {
+//                print("fetched note named \(searchQuery) -> \(note)")
+                completedQueries = []
+                selectionIndex = nil
+                searchQuery = ""
+                mode = .note
+
+                self.currentNote = note
+                return
+            } else {
+                searchEngine.query = searchText
+                searchText = searchEngine.searchUrl
+                print("Start search query: \(searchText)")
+            }
         }
 
         let tab = BrowserTab(originalQuery: query)
         tab.webView.load(URLRequest(url: URL(string: searchText)!))
         currentTab = tab
         tabs.append(tab)
-        currentNote = BeamNote(title: query, searchQueries: [query])
+        currentNote = Note.createNote(CoreDataManager.shared.mainContext, query) //BeamNote(title: query, searchQueries: [query])
         mode = .web
     }
 
@@ -158,7 +170,7 @@ class BeamState: ObservableObject {
 
     public init(data: BeamData) {
         self.data = data
-        self.currentNote = data.todaysNote
+//        self.currentNote = data.todaysNote
         $searchQuery.sink { [weak self] query in
             guard let self = self else { return }
             guard self.searchQuerySelection == nil else { return }

@@ -13,18 +13,13 @@ struct AutoCompleteView: View {
     @Binding var autoComplete: [AutoCompleteResult]
     @Binding var selectionIndex: Int?
     var body: some View {
-        if !autoComplete.isEmpty {
-            return AnyView(
-                ZStack {
-                    VisualEffectBlur(material: .headerView, blendingMode: .withinWindow, state: .active)
-                    Rectangle().fill(Color("EditorBackgroundColor").opacity(0.8))
-                    AutoCompleteList(selectedIndex: $selectionIndex, elements: $autoComplete)
-                        .padding([.leading, .trailing], CGFloat(150))
-                }
-            )
-        } else {
-//            return AnyView(Text(""))
-            return AnyView(BTextEdit().frame(alignment: .center))
+        ZStack {
+            if !autoComplete.isEmpty {
+                VisualEffectBlur(material: .headerView, blendingMode: .withinWindow, state: .active)
+                Rectangle().fill(Color("EditorBackgroundColor").opacity(0.8))
+                AutoCompleteList(selectedIndex: $selectionIndex, elements: $autoComplete)
+                    .padding([.leading, .trailing], CGFloat(150))
+            }
         }
     }
 }

@@ -12,7 +12,7 @@ import libcmark
 import AppKit
 
 extension NSAttributedString.Key {
-    static let sourceRange = NSAttributedString.Key(rawValue: "beamSourceRange")
+    static let sourcePos = NSAttributedString.Key(rawValue: "beamSourcePos")
 }
 
 class BeamListItemPrefixGenerator {
@@ -142,7 +142,7 @@ extension BeamAttributedStringVisitor: Visitor {
 
         if node.children.isEmpty {
             let pos = info.source_start as NSNumber
-            string.addAttribute(.sourceRange, value: pos, range: NSRange(location: 0, length: count))
+            string.addAttribute(.sourcePos, value: pos, range: NSRange(location: 0, length: count))
             return string
         }
 
@@ -161,9 +161,9 @@ extension BeamAttributedStringVisitor: Visitor {
         let postfix = sourceString.substring(range: lastInfo.source_end..<info.source_end).attributed
 
         prefix.addAttributes(preAttribs, range: NSRange(location: 0, length: prefix.length))
-        prefix.addAttribute(.sourceRange, value: info.source_start as NSNumber, range: NSRange(location: 0, length: prefix.length))
+        prefix.addAttribute(.sourcePos, value: info.source_start as NSNumber, range: NSRange(location: 0, length: prefix.length))
         postfix.addAttributes(postAttribs, range: NSRange(location: 0, length: postfix.length))
-        postfix.addAttribute(.sourceRange, value: lastInfo.source_end as NSNumber, range: NSRange(location: 0, length: postfix.length))
+        postfix.addAttribute(.sourcePos, value: lastInfo.source_end as NSNumber, range: NSRange(location: 0, length: postfix.length))
 
         string.insert(postfix, at: count)
         string.insert(prefix, at: 0)
