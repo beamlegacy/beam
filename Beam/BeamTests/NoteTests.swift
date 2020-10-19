@@ -106,6 +106,18 @@ class NoteTests: CoreDataTests {
         XCTAssertEqual(Note.fetchAllWithTitleMatch(context, "foobar").count, 3)
     }
 
+    func testNoteTitleLinkReplacements() throws {
+        let newNote = Note.createNote(context, "[[foobar]] and [[another card]] and #another")
+
+        XCTAssertEqual(newNote.parsedTitle(), "[[[foobar](beam://beamapp.co/note?title=foobar)]] and [[[another card](beam://beamapp.co/note?title=another%20card)]] and #[another](beam://beamapp.co/note?title=another)")
+    }
+
+    func testNoteFetchFirst() throws {
+        let note = Note.createNote(context, "foobar 1")
+
+        XCTAssertEqual(Note.fetchFirst(context: context), note)
+    }
+
     func testPerformanceFetch() throws {
         let title = faker.lorem.words()
         var ids: [UUID] = []
@@ -114,9 +126,7 @@ class NoteTests: CoreDataTests {
         for _ in 1...count {
             let note = Note.createNote(context, title)
 
-            if let id = note.id {
-                ids.append(id)
-            }
+            ids.append(note.id)
         }
 
         XCTAssertNoThrow(try context.save())
@@ -142,9 +152,7 @@ class NoteTests: CoreDataTests {
             for _ in 1...count {
                 let note = Note.createNote(context, title)
 
-                if let id = note.id {
-                    ids.append(id)
-                }
+                ids.append(note.id)
             }
 
             do {

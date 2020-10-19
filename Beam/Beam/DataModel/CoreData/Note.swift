@@ -1,5 +1,6 @@
 import Foundation
 import CoreData
+import Down
 
 class Note: NSManagedObject {
     override func awakeFromInsert() {
@@ -10,14 +11,43 @@ class Note: NSManagedObject {
     }
 
     @discardableResult
-    class func createNote(_ context: NSManagedObjectContext, _ title: String) -> Note {
+    class func createNote(_ context: NSManagedObjectContext, _ title: String, createdAt: Date? = nil) -> Note {
         let existingNote = fetchWithTitle(context, title)
 
         let note = existingNote ?? Note(context: context)
 
         note.title = title
+        note.created_at = createdAt ?? Date()
 
         return note
+    }
+
+    func internalLink() -> String {
+        var result = Self.components()
+        result.queryItems = [ URLQueryItem(name: "id", value: id.uuidString) ]
+
+        return result.url?.absoluteString ?? "beam://"
+    }
+
+    class func internalLink(_ title: String) -> String {
+        var result = components()
+        result.queryItems = [ URLQueryItem(name: "title", value: title) ]
+
+        return result.url?.absoluteString ?? "beam://"
+    }
+
+    class func components() -> URLComponents {
+        var components = URLComponents()
+
+        components.scheme = "beam"
+        components.host = Config.hostname
+        components.path = "/note"
+
+        return components
+    }
+
+    func parsedTitle() -> String {
+        return BeamTextFormatter.parseForInternalLinks(title)
     }
 
     /// Will set the `orderIndex` properly, based on `afterBullet`
@@ -26,12 +56,13 @@ class Note: NSManagedObject {
     ///   - content: <#content description#>
     ///   - afterBullet: <#afterBullet description#>
     /// - Returns: thre created `Bullet`
-    func createBullet(_ context: NSManagedObjectContext, content: String, afterBullet: Bullet? = nil, parentBullet: Bullet? = nil) -> Bullet {
+    func createBullet(_ context: NSManagedObjectContext, content: String, createdAt: Date? = nil, afterBullet: Bullet? = nil, parentBullet: Bullet? = nil) -> Bullet {
         let newBullet = Bullet(context: context)
 
         newBullet.content = content
         newBullet.note = self
         newBullet.parent = parentBullet ?? afterBullet?.parent
+        newBullet.created_at = createdAt ?? Date()
 
         let atIndex = afterBullet?.orderIndex ?? Bullet.maxOrderIndex(context, newBullet.parent, note: self)
 
@@ -40,12 +71,8 @@ class Note: NSManagedObject {
         // Move all bullets lower
         if let bullets = bullets {
             // TODO: ugly, refactor
-            for bullet in bullets where ((bullet as? Bullet)?.orderIndex ?? 0) > atIndex && ((bullet as? Bullet)?.id != newBullet.id) {
-                guard let bullet = (bullet as? Bullet) else { continue }
-
-                if bullet.parent == newBullet.parent {
-                    bullet.orderIndex += 1
-                }
+            for bullet in bullets where (bullet.orderIndex > atIndex) && (bullet.id != newBullet.id) && bullet.parent == newBullet.parent {
+                bullet.orderIndex += 1
             }
         }
 
@@ -53,14 +80,12 @@ class Note: NSManagedObject {
     }
 
     class func detectUnlinkedNotes(_ context: NSManagedObjectContext) {
-        for note in Note.fetchAll(context: context) {
+        for note in Note.fetchAllWithPredicate(context: context) {
             note.detectUnlinkedNotes(context)
         }
     }
 
     func detectUnlinkedNotes(_ context: NSManagedObjectContext) {
-        guard let title = title else { return }
-
         let predicate = NSPredicate(format: "content CONTAINS[cd] %@", title)
 
         for bullet in Bullet.fetchAllWithPredicate(context, predicate) {
@@ -71,46 +96,151 @@ class Note: NSManagedObject {
     }
 
     func debugNote() {
-        print("> \(title ?? "Not note title")")
+        print("> \(title)")
 
         let tree = treeBullets()
 
-        displayBullets(tree)
-        displayLinkedReferences()
-        displayUnlinkedReferences()
+        print(displayBullets(tree))
+        print(displayLinkedReferences())
+        print(displayUnlinkedReferences())
         print("")
     }
 
-    private func displayBullets(_ tree: [Any], _ tabCount: Int = 0) {
+    func fullContent() -> String {
+        var result = ""
+
+        result.append("\(title) \(updated_at)\n")
+        let tree = treeBullets()
+
+        result.append(displayBullets(tree))
+        result.append(displayLinkedReferences())
+        result.append(displayUnlinkedReferences())
+        result.append("\n")
+
+        return result
+    }
+
+    func attributedString(_ parsedInternalLink: Bool = true) -> NSAttributedString? {
+        var content = ""
+
+        content.append("\(parsedInternalLink ? parsedTitle() : title)\n\n")
+        let tree = treeBullets()
+
+        content.append(displayBullets(tree, 0, parsedInternalLink))
+        content.append(displayLinkedReferences(parsedInternalLink))
+        content.append(displayUnlinkedReferences(parsedInternalLink))
+        content.append("\n")
+
+        let down = Down(markdownString: content)
+        let result = try? down.toAttributedString(.default, styler: DownStyler())
+
+        return result
+    }
+
+    private func displayBullets(_ tree: [Any], _ tabCount: Int = 0, _ parsedInternalLink: Bool = false) -> String {
+        var result = ""
+
         for elements in tree {
             if let elements = elements as? [Any] {
-                displayBullets(elements, tabCount + 1)
+                result.append(displayBullets(elements, tabCount + 1, parsedInternalLink))
+                result.append("\n")
             } else if let element = elements as? Bullet {
                 for _ in 0...tabCount {
-                    print(" ", terminator: "")
+                    result.append(" ")
                 }
-                print("[\(element.orderIndex)] \(element.content ?? "-")")
+                if parsedInternalLink {
+                    result.append("- [@](\(element.internalLink())) \(element.parsedContent(parsedInternalLink))\n")
+                } else {
+                    result.append("- \(element.parsedContent(parsedInternalLink))\n")
+                }
             } else {
-                print("Not Found for \(elements)")
+                result.append("- Not Found for \(elements)\n")
             }
         }
+
+        return result
     }
 
-    private func displayLinkedReferences() {
-        guard let linkedReferences = linkedReferences, linkedReferences.count > 0 else { return }
-        print("")
-        print("  \(linkedReferences.count) Linked References")
-        print("")
+    private func displayLinkedReferences(_ parsedInternalLink: Bool = false) -> String {
+        guard let linkedReferences = linkedReferences, linkedReferences.count > 0 else { return "" }
 
-        displayReferences(linkedReferences)
+        var result = ""
+
+        result.append("\n  \(linkedReferences.count) Linked References\n")
+
+        result.append(displayReferences(linkedReferences, parsedInternalLink))
+
+        return result
     }
 
-    private func displayUnlinkedReferences() {
-        guard let unlinkedReferences = unlinkedReferences, unlinkedReferences.count > 0 else { return }
-        print("")
-        print("  \(unlinkedReferences.count) Unlinked References")
-        print("")
-        displayReferences(unlinkedReferences)
+    private func displayUnlinkedReferences(_ parsedInternalLink: Bool = false) -> String {
+        guard let unlinkedReferences = unlinkedReferences, unlinkedReferences.count > 0 else { return "" }
+
+        var result = ""
+
+        result.append("\n  \(unlinkedReferences.count) Unlinked References\n")
+
+        result.append(displayReferences(unlinkedReferences, parsedInternalLink))
+
+        return result
+    }
+
+    private func displayReferences(_ bullets: Set<Bullet>, _ parsedInternalLink: Bool = false) -> String {
+        var result = ""
+
+        // We want to join bullets by note to list them all together
+        var notes: [Note: [Bullet]] = [:]
+        bullets.forEach { bullet in
+            guard let note = bullet.note else { return }
+            notes[note] = notes[note] ?? []
+            notes[note]?.append(bullet)
+        }
+
+        // We want to sort notes based on bullet last update time
+        let sortedNotes = notes.sorted {
+            guard let first = $0.value.sorted(by: { $0.updated_at > $1.updated_at }).first?.updated_at,
+                  let second = $1.value.sorted(by: { $0.updated_at > $1.updated_at }).first?.updated_at
+            else { return false }
+
+            return first > second
+        }
+
+        print(notes)
+
+        for note in sortedNotes {
+            guard let bullets = notes[note.key] else { continue }
+
+            if parsedInternalLink {
+                result.append("  - [@](\(note.key.internalLink())) \(note.key.parsedTitle())\n")
+            } else {
+                result.append("  - \(note.key.title)\n")
+            }
+
+            for bullet in bullets {
+                var currentBullet = bullet
+                var bullets: [Bullet] = [currentBullet]
+                while let parentBullet = currentBullet.parent {
+                    bullets.insert(parentBullet, at: 0)
+                    currentBullet = parentBullet
+                }
+
+                for (index, bullet) in bullets.enumerated() {
+                    result.append("    ")
+
+                    for _ in 0...index {
+                        result.append("   ")
+                    }
+
+                    if parsedInternalLink {
+                        result.append("- [@](\(bullet.internalLink())) \(bullet.parsedContent(parsedInternalLink))\n")
+                    } else {
+                        result.append("- \(bullet.content)\n")
+                    }
+                }
+            }
+        }
+
+        return result
     }
 
     private func displayReferences(_ bullets: NSSet) {
@@ -133,7 +263,7 @@ class Note: NSManagedObject {
                     print(" ", terminator: "")
                 }
 
-                print("[\(bullet.orderIndex)] \(bullet.content ?? "no content")")
+                print("[\(bullet.orderIndex)] \(bullet.content)")
             }
         }
     }
@@ -145,7 +275,7 @@ class Note: NSManagedObject {
     }
 
     override var debugDescription: String {
-        return title ?? "No title"
+        return title
     }
 
     /// To only be used to get the max orderIndex of the children bullets
@@ -163,11 +293,9 @@ class Note: NSManagedObject {
     }
 
     func rootBullets() -> [Bullet] {
-        guard let bullets = bullets, bullets.count > 0 else { return [] }
+        guard let bullets = bullets, !bullets.isEmpty else { return [] }
 
-        let predicate = NSPredicate(format: "parent == nil")
-
-        let rootBullets = Array(bullets.filtered(using: predicate)).compactMap { $0 as? Bullet }
+        let rootBullets = bullets.filter { $0.parent == nil }
 
         return rootBullets.sorted(by: { $0.orderIndex < $1.orderIndex })
     }
@@ -187,9 +315,11 @@ class Note: NSManagedObject {
         return []
     }
 
-    class func fetchAll(context: NSManagedObjectContext, _ predicate: NSPredicate? = nil) -> [Note] {
+    // MARK: - CoreData Helpers
+    class func fetchAllWithPredicate(context: NSManagedObjectContext, _ predicate: NSPredicate? = nil, _ sortDescriptors: [NSSortDescriptor]? = nil) -> [Note] {
         let fetchRequest: NSFetchRequest<Note> = Note.fetchRequest()
         fetchRequest.predicate = predicate
+        fetchRequest.sortDescriptors = sortDescriptors
 
         do {
             let fetchedNotes = try context.fetch(fetchRequest)
@@ -201,15 +331,15 @@ class Note: NSManagedObject {
         return []
     }
 
-    class func fetchWithId(_ context: NSManagedObjectContext, _ id: UUID) -> Note? {
+    class func fetchFirst(context: NSManagedObjectContext, _ predicate: NSPredicate? = nil, _ sortDescriptors: [NSSortDescriptor]? = nil) -> Note? {
         let fetchRequest: NSFetchRequest<Note> = Note.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: "id = %@", id as CVarArg)
+        fetchRequest.predicate = predicate
+        fetchRequest.fetchLimit = 1
+        fetchRequest.sortDescriptors = sortDescriptors
 
         do {
-            let fetchedNotes = try context.fetch(fetchRequest)
-            if fetchedNotes.count > 0 {
-                return fetchedNotes[0]
-            }
+            let fetchedNote = try context.fetch(fetchRequest)
+            return fetchedNote.first
         } catch {
             // TODO: raise error?
         }
@@ -217,25 +347,17 @@ class Note: NSManagedObject {
         return nil
     }
 
+    class func fetchWithId(_ context: NSManagedObjectContext, _ id: UUID) -> Note? {
+        return fetchFirst(context: context, NSPredicate(format: "id = %@", id as CVarArg))
+    }
+
     class func fetchWithTitle(_ context: NSManagedObjectContext, _ title: String) -> Note? {
-        let fetchRequest: NSFetchRequest<Note> = Note.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: "title = %@", title as CVarArg)
-
-        do {
-            let fetchedNotes = try context.fetch(fetchRequest)
-            if fetchedNotes.count > 0 {
-                return fetchedNotes[0]
-            }
-        } catch {
-            // TODO: raise error?
-        }
-
-        return nil
+        return fetchFirst(context: context, NSPredicate(format: "title = %@", title as CVarArg))
     }
 
     class func fetchAllWithTitleMatch(_ context: NSManagedObjectContext, _ title: String) -> [Note] {
         let predicate = NSPredicate(format: "title CONTAINS[cd] %@", title as CVarArg)
-        return fetchAll(context: context, predicate)
+        return fetchAllWithPredicate(context: context, predicate)
     }
 
     class func countWithPredicate(_ context: NSManagedObjectContext, _ predicate: NSPredicate? = nil) -> Int {

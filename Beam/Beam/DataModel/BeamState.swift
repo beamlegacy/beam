@@ -185,7 +185,7 @@ class BeamState: ObservableObject {
             if !query.isEmpty {
                 let notes = Note.fetchAllWithTitleMatch(CoreDataManager.shared.mainContext, query)
                 notes.forEach {
-                    let autocompleteResult = AutoCompleteResult(id: $0.id ?? UUID(), string: $0.title ?? "no title", source: .note)
+                    let autocompleteResult = AutoCompleteResult(id: $0.id, string: $0.title, source: .note)
                     self.completedQueries.append(autocompleteResult)
                     print("Found note \($0)")
                 }

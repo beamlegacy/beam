@@ -24,7 +24,6 @@ class BeamHostingView<Content>: NSHostingView<Content> where Content: View {
 
 class BeamWindow: NSWindow, NSWindowDelegate {
     var state: BeamState!
-    var cloudKitContainer: NSPersistentCloudKitContainer
     var data: BeamData
 
     // This is a hack to prevent a crash with swiftUI being dumb about the initialFirstResponder
@@ -37,10 +36,9 @@ class BeamWindow: NSWindow, NSWindowDelegate {
         }
     }
 
-    init(contentRect: NSRect, cloudKitContainer: NSPersistentCloudKitContainer, data: BeamData) {
+    init(contentRect: NSRect, data: BeamData) {
         self.data = data
         self.state = BeamState(data: data)
-        self.cloudKitContainer = cloudKitContainer
 
         super.init(contentRect: contentRect, styleMask: [.titled, .closable, .miniaturizable, .texturedBackground, .resizable, .unifiedTitleAndToolbar, .fullSizeContentView],
                    backing: .buffered, defer: false)
@@ -55,7 +53,7 @@ class BeamWindow: NSWindow, NSWindowDelegate {
 
         // Create the SwiftUI view and set the context as the value for the managedObjectContext environment keyPath.
         // Add `@Environment(\.managedObjectContext)` in the views that will need the context.
-        let contentView = ContentView().environment(\.managedObjectContext, cloudKitContainer.viewContext).environmentObject(state)
+        let contentView = ContentView().environmentObject(state)
         self.contentView = BeamHostingView(rootView: contentView)
         self.isMovableByWindowBackground = false
     }

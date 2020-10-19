@@ -55,7 +55,8 @@ class RoamImporter {
         let roamNotes = try parseData(data)
 
         for roamNote in roamNotes {
-            let newNote = Note.createNote(context, roamNote.title)
+            let newNote = Note.createNote(context, roamNote.title, createdAt: roamNote.createTime ?? roamNote.editTime)
+            newNote.updated_at = roamNote.editTime ?? roamNote.createTime ?? Date()
 
             if let children = roamNote.children {
                 createLocalBullets(context, newNote, children)
@@ -78,11 +79,39 @@ class RoamImporter {
                                     _ roamBullets: [RoamBullet],
                                     _ parentBullet: Bullet? = nil) {
         for bullet in roamBullets {
-            let newBullet = note.createBullet(context, content: bullet.string, parentBullet: parentBullet)
-            newBullet.detectLinkedNotes(context)
+            let newBullet = note.createBullet(context,
+                                              content: bullet.string,
+                                              createdAt: bullet.createTime ?? bullet.editTime,
+                                              parentBullet: parentBullet)
+            newBullet.updated_at = bullet.editTime ?? bullet.createTime ?? Date()
+            detectLinkedNotes(context, bullet: newBullet)
 
             if let children = bullet.children {
                 createLocalBullets(context, note, children, newBullet)
+            }
+        }
+    }
+
+    private func detectLinkedNotes(_ context: NSManagedObjectContext, bullet: Bullet) {
+        guard bullet.content.count > 2 else { return }
+
+        for pattern in BeamTextFormatter.linkPatterns {
+            var regex: NSRegularExpression
+            do {
+                regex = try NSRegularExpression(pattern: pattern, options: [])
+            } catch {
+                // TODO: manage errors
+                fatalError("Error")
+            }
+
+            let matches = regex.matches(in: bullet.content, options: [], range: NSRange(location: 0, length: bullet.content.utf16.count))
+
+            for match in matches {
+                guard let linkRange = Range(match.range(at: 1), in: bullet.content) else { continue }
+
+                let linkTitle = String(bullet.content[linkRange])
+                let note = Note.createNote(context, linkTitle)
+                note.addToLinkedReferences(bullet)
             }
         }
     }

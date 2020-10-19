@@ -87,6 +87,7 @@ class CoreDataManager {
                                                                   ofType: storeType,
                                                                   options: nil)
 
+            NotificationCenter.default.post(name: .coredataDestroyed, object: self)
         } catch {
             fatalError("Can't run destroyPersistentStore")
             // Error Handling

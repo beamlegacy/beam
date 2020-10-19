@@ -4,12 +4,15 @@ import Fakery
 
 class BeamTests: XCTestCase {
     func testSearch() throws {
-        let sk = SearchKit()
-        sk.append(url: URL(string: "http://test.com/test1")!, contents: String.loremIpsum)
-        sk.append(url: URL(string: "http://test.com/test2")!, contents: "Beam is so cool!")
+        let searchKit = SearchKit()
+        let faker = Faker()
 
-        _ = sk.search("cool")
-        let res = sk.search("cool")
+        searchKit.append(url: URL(string: "http://test.com/test1")!, contents: faker.lorem.paragraph())
+        searchKit.append(url: URL(string: "http://test.com/test2")!, contents: "Beam is so cool!")
+
+        // To avoid a bug
+        _ = searchKit.search("cool")
+        let res = searchKit.search("cool")
 
         XCTAssert(!res.isEmpty)
     }

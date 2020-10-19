@@ -34,12 +34,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         CoreDataManager.shared.setup()
 
+        NSApp.dockTile.badgeLabel = String(Note.countWithPredicate(CoreDataManager.shared.mainContext))
+
         createWindow()
     }
 
     func createWindow() {
         // Create the window and set the content view.
-        window = BeamWindow(contentRect: NSRect(x: 0, y: 0, width: 480, height: 300), cloudKitContainer: CoreDataManager.shared.persistentContainer, data: data)
+        window = BeamWindow(contentRect: NSRect(x: 0, y: 0, width: 480, height: 300), data: data)
         window.center()
         window.makeKeyAndOrderFront(nil)
         windows.append(window)
@@ -81,9 +83,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
     }
 
+    // MARK: - Roam import
     @IBAction func importRoam(_ sender: Any) {
-        print("importing roam")
-
         let openPanel = NSOpenPanel()
         openPanel.allowsMultipleSelection = false
         openPanel.canChooseDirectories = false
@@ -126,6 +127,125 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         // Returns the NSUndoManager for the application. In this case, the manager returned is that of the managed object context for the application.
         return CoreDataManager.shared.mainContext.undoManager
     }
+
+    func application(_ application: NSApplication,
+                     continue userActivity: NSUserActivity,
+                     restorationHandler: @escaping ([NSUserActivityRestoring]) -> Void) -> Bool {
+        print(userActivity)
+
+        // Get URL components from the incoming user activity.
+        guard userActivity.activityType == NSUserActivityTypeBrowsingWeb,
+            let incomingURL = userActivity.webpageURL,
+            let components = NSURLComponents(url: incomingURL, resolvingAgainstBaseURL: true) else {
+            return false
+        }
+
+        return parseBeamURL(components: components)
+    }
+
+    func applicationWillFinishLaunching(_ notification: Notification) {
+        NSAppleEventManager
+            .shared()
+            .setEventHandler(
+                self,
+                andSelector: #selector(handleURL(event:reply:)),
+                forEventClass: AEEventClass(kInternetEventClass),
+                andEventID: AEEventID(kAEGetURL)
+            )
+    }
+
+    @objc func handleURL(event: NSAppleEventDescriptor, reply: NSAppleEventDescriptor) {
+        guard let path = event.paramDescriptor(forKeyword: keyDirectObject)?.stringValue,
+              let url = URL(string: path) else {
+
+            print("Could not parse \(String(describing: event.paramDescriptor(forKeyword: keyDirectObject)?.stringValue)) \(reply)")
+            return
+        }
+
+        // Process the URL.
+        guard let components = NSURLComponents(url: url, resolvingAgainstBaseURL: true) else {
+            print("Invalid URL or path missing")
+            return
+        }
+
+        parseBeamURL(components: components)
+    }
+
+    @discardableResult
+    private func parseBeamURL(components: NSURLComponents) -> Bool {
+        // Process the URL.
+        guard let urlPath = components.path else {
+            print("Invalid URL or path missing")
+            return false
+        }
+
+        guard components.host == Config.hostname else { return false }
+
+        switch urlPath.dropFirst() {
+        case "note":
+            if let params = components.queryItems {
+                if let noteId = params.first(where: { $0.name == "id" })?.value {
+                    showNoteID(id: noteId)
+                    return true
+                } else if let noteTitle = params.first(where: { $0.name == "title" })?.value {
+                    showNoteTitle(title: noteTitle)
+                    return true
+                }
+            }
+        case "bullet":
+            if let params = components.queryItems,
+               let bulletId = params.first(where: { $0.name == "id" })?.value {
+                showBullet(id: bulletId)
+                return true
+            }
+        default: break
+        }
+
+        print("Didn't detect link \(components)")
+
+        return false
+    }
+
+    // MARK: - Note Windows
+    var notesWindow: NotesWindow?
+    @IBAction func showAllNotes(_ sender: Any) {
+        notesWindow = notesWindow ?? NotesWindow(
+            contentRect: window.frame)
+        notesWindow?.title = "All Notes"
+        notesWindow?.center()
+        notesWindow?.makeKeyAndOrderFront(window)
+    }
+
+    var noteWindows: [NoteWindow] = []
+
+    private func showNote(_ note: Note) {
+        let noteWindow = NoteWindow(note: note, contentRect: window.frame)
+        noteWindow.center()
+        noteWindow.makeKeyAndOrderFront(window)
+    }
+
+    private func showNoteID(id: String) {
+        guard let uuid = UUID(uuidString: id),
+              let note = Note.fetchWithId(CoreDataManager.shared.mainContext, uuid) else { return }
+
+        showNote(note)
+    }
+
+    private func showNoteTitle(title: String) {
+        guard let note = Note.fetchWithTitle(CoreDataManager.shared.mainContext, title) else { return }
+
+        showNote(note)
+    }
+
+    private func showBullet(id: String) {
+        guard let uuid = UUID(uuidString: id),
+              let bullet = Bullet.fetchWithId(CoreDataManager.shared.mainContext, uuid),
+              let note = bullet.note else { return }
+
+        showNote(note)
+    }
+
+    // MARK: -
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
         // Save changes in the application's managed object context before the application terminates.

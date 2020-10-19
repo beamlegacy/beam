@@ -688,6 +688,12 @@ CQ
                                                 <action selector="arrangeInFront:" target="Ady-hI-5gd" id="DRN-fu-gQh"/>
                                             </connections>
                                         </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="8CZ-9R-gka"/>
+                                        <menuItem title="Show all notes" keyEquivalent="s" id="KUY-Ll-jZL">
+                                            <connections>
+                                                <action selector="showAllNotes:" target="Voe-Tx-rLC" id="SdS-fS-6SG"/>
+                                            </connections>
+                                        </menuItem>
                                     </items>
                                 </menu>
                             </menuItem>

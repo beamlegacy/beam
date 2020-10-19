@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="17156" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+    <dependencies>
+        <deployment identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17156"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <customObject id="-2" userLabel="File's Owner" customClass="ScrollableTextView" customModule="Beam" customModuleProvider="target"/>
+        <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
+        <customObject id="-3" userLabel="Application" customClass="NSObject"/>
+        <scrollView borderType="none" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" id="a2E-Ll-oFm" customClass="ScrollableTextView" customModule="Beam" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="240" height="135"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <clipView key="contentView" drawsBackground="NO" copiesOnScroll="NO" id="A17-mj-R0R">
+                <rect key="frame" x="0.0" y="0.0" width="225" height="135"/>
+                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                <subviews>
+                    <textView importsGraphics="NO" richText="NO" verticallyResizable="YES" smartInsertDelete="YES" id="d9Y-bG-e9d">
+                        <rect key="frame" x="0.0" y="0.0" width="225" height="135"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                        <size key="minSize" width="225" height="135"/>
+                        <size key="maxSize" width="225" height="10000000"/>
+                        <color key="insertionPointColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                    </textView>
+                </subviews>
+            </clipView>
+            <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="nw3-WZ-wvL">
+                <rect key="frame" x="-100" y="-100" width="225" height="15"/>
+                <autoresizingMask key="autoresizingMask"/>
+            </scroller>
+            <scroller key="verticalScroller" verticalHuggingPriority="750" horizontal="NO" id="mPT-Ap-kbN">
+                <rect key="frame" x="225" y="0.0" width="15" height="135"/>
+                <autoresizingMask key="autoresizingMask"/>
+            </scroller>
+            <connections>
+                <outlet property="textView" destination="d9Y-bG-e9d" id="NFI-dk-DE4"/>
+            </connections>
+            <point key="canvasLocation" x="-141" y="-33"/>
+        </scrollView>
+    </objects>
+</document>

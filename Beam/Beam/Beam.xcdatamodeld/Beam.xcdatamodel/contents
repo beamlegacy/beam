@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="17192" systemVersion="19H2" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithCloudKit="YES" userDefinedModelVersionIdentifier="">
-    <entity name="Bullet" representedClassName=".Bullet" syncable="YES" codeGenerationType="category">
+    <entity name="Bullet" representedClassName=".Bullet" syncable="YES">
         <attribute name="content" attributeType="String" defaultValueString=""/>
         <attribute name="created_at" attributeType="Date" defaultDateTimeInterval="623165820" usesScalarValueType="NO"/>
         <attribute name="id" attributeType="UUID" defaultValueString="6A275532-F5C5-4FA1-8EF5-4D8BE0DAAD71" usesScalarValueType="NO"/>
@@ -17,10 +17,10 @@
             </uniquenessConstraint>
         </uniquenessConstraints>
     </entity>
-    <entity name="Note" representedClassName=".Note" syncable="YES" codeGenerationType="category">
+    <entity name="Note" representedClassName=".Note" syncable="YES">
         <attribute name="created_at" attributeType="Date" defaultDateTimeInterval="623165880" usesScalarValueType="NO"/>
         <attribute name="id" attributeType="UUID" defaultValueString="6A275532-F5C5-4FA1-8EF5-4D8BE0DAAD71" usesScalarValueType="NO"/>
-        <attribute name="title" optional="YES" attributeType="String"/>
+        <attribute name="title" attributeType="String" defaultValueString=""/>
         <attribute name="updated_at" attributeType="Date" defaultDateTimeInterval="623680920" usesScalarValueType="NO"/>
         <relationship name="bullets" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Bullet" inverseName="note" inverseEntity="Bullet"/>
         <relationship name="linkedReferences" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Bullet" inverseName="linkedNotes" inverseEntity="Bullet"/>

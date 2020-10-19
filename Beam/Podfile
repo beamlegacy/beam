@@ -5,6 +5,7 @@ inhibit_all_warnings!
 
 target 'Beam' do
   pod 'SwiftLint'
+  pod 'Down'
 end
 
 target 'BeamTests' do

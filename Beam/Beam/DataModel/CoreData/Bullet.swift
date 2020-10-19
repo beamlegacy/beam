@@ -9,12 +9,28 @@ class Bullet: NSManagedObject {
         id = UUID()
     }
 
+    func parsedContent(_ parsedInternalLink: Bool = false) -> String {
+        return parsedInternalLink ? BeamTextFormatter.parseForInternalLinks(content) : content
+    }
+
+    func internalLink() -> String {
+        Self.internalLink(id)
+    }
+
+    class func internalLink(_ id: UUID) -> String {
+        var components = Note.components()
+        components.path = "/bullet"
+        components.queryItems = [ URLQueryItem(name: "id", value: id.uuidString) ]
+
+        return components.url?.absoluteString ?? "beam://"
+    }
+
     func debugBullet(_ tabCount: Int = 0) {
         for _ in 0...tabCount {
             print("\t", terminator: "")
         }
 
-        print("[\(orderIndex)] \(content ?? "-")")
+        print("[\(orderIndex)] \(content)")
 
         for bullet in sortedChildren() {
             bullet.debugBullet(tabCount + 1)
@@ -24,39 +40,13 @@ class Bullet: NSManagedObject {
     func sortedChildren() -> [Bullet] {
         guard let children = children else { return [] }
 
-        let results = Array(children).compactMap { $0 as? Bullet }
+        let results = Array(children)
 
         return results.sorted(by: { $0.orderIndex < $1.orderIndex })
     }
 
     override var debugDescription: String {
-        return content ?? "No title"
-    }
-
-    func detectLinkedNotes(_ context: NSManagedObjectContext) {
-        guard let content = content, content.count > 2 else { return }
-
-        let patterns: [String] = ["\\[\\[(.+?)\\]\\]", "\\#([^\\#]+)"]
-
-        for pattern in patterns {
-            var regex: NSRegularExpression
-            do {
-                regex = try NSRegularExpression(pattern: pattern, options: [])
-            } catch {
-                // TODO: manage errors
-                fatalError("Error")
-            }
-
-            let matches = regex.matches(in: content, options: [], range: NSRange(location: 0, length: content.utf16.count))
-
-            for match in matches {
-                guard let linkRange = Range(match.range(at: 1), in: content) else { continue }
-
-                let linkTitle = String(content[linkRange])
-                let note = Note.createNote(context, linkTitle)
-                note.addToLinkedReferences(self)
-            }
-        }
+        return content
     }
 
     func treeBullets(_ tabCount: Int = 0) -> [Any]? {
@@ -83,6 +73,7 @@ class Bullet: NSManagedObject {
         return orderIndex ?? 0
     }
 
+    // MARK: - CoreData Helpers
     class func countWithPredicate(_ context: NSManagedObjectContext, _ predicate: NSPredicate? = nil) -> Int {
         // Fetch existing if any
         let fetchRequest: NSFetchRequest<Bullet> = Bullet.fetchRequest()
@@ -98,6 +89,26 @@ class Bullet: NSManagedObject {
         return 0
     }
 
+    class func fetchFirst(context: NSManagedObjectContext, _ predicate: NSPredicate? = nil, _ sortDescriptors: [NSSortDescriptor]? = nil) -> Bullet? {
+        let fetchRequest: NSFetchRequest<Bullet> = Bullet.fetchRequest()
+        fetchRequest.predicate = predicate
+        fetchRequest.fetchLimit = 1
+        fetchRequest.sortDescriptors = sortDescriptors
+
+        do {
+            let fetchedNote = try context.fetch(fetchRequest)
+            return fetchedNote.first
+        } catch {
+            // TODO: raise error?
+        }
+
+        return nil
+    }
+
+    class func fetchWithId(_ context: NSManagedObjectContext, _ id: UUID) -> Bullet? {
+        return fetchFirst(context: context, NSPredicate(format: "id = %@", id as CVarArg))
+    }
+
     class func fetchAllWithPredicate(_ context: NSManagedObjectContext, _ predicate: NSPredicate? = nil) -> [Bullet] {
         let fetchRequest: NSFetchRequest<Bullet> = Bullet.fetchRequest()
         fetchRequest.predicate = predicate
@@ -105,19 +116,6 @@ class Bullet: NSManagedObject {
         do {
             let fetchedBullets = try context.fetch(fetchRequest)
             return fetchedBullets
-        } catch {
-            // TODO: raise error?
-        }
-
-        return []
-    }
-
-    class func fetchAll(_ context: NSManagedObjectContext) -> [Bullet] {
-        let fetchRequest: NSFetchRequest<Bullet> = Bullet.fetchRequest()
-
-        do {
-            let fetchedNotes = try context.fetch(fetchRequest)
-            return fetchedNotes
         } catch {
             // TODO: raise error?
         }
