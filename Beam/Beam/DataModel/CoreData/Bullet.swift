@@ -122,4 +122,42 @@ class Bullet: NSManagedObject {
 
         return []
     }
+
+    func delete(_ context: NSManagedObjectContext = CoreDataManager.shared.mainContext) {
+        context.delete(self)
+        do {
+            try context.save()
+        } catch {
+            // TODO: raise error?
+        }
+    }
+
+    class func deleteForPredicate(_ predicate: NSPredicate, _ context: NSManagedObjectContext) -> NSPersistentStoreResult? {
+        let fetch: NSFetchRequest<Bullet> = Bullet.fetchRequest()
+        fetch.predicate = predicate
+        fetch.includesSubentities = false
+        fetch.includesPropertyValues = false
+
+        let request = NSBatchDeleteRequest(fetchRequest: fetch)
+        request.resultType = .resultTypeObjectIDs
+        do {
+            #if DEBUG
+            let count = try context.count(for: fetch)
+            if count > 0 {
+                NSLog("Deleted \(count) bullets")
+            }
+            #endif
+            let result = try context.execute(request) as? NSBatchDeleteResult
+
+            // To propagate changes
+            let objectIDArray = result?.result as? [NSManagedObjectID]
+            let changes: [AnyHashable: Any] = [NSDeletedObjectsKey: objectIDArray as Any]
+            NSManagedObjectContext.mergeChanges(fromRemoteContextSave: changes, into: [context, CoreDataManager.shared.managedContext])
+
+            return result
+        } catch {
+            // TODO: raise error?
+            return nil
+        }
+    }
 }
