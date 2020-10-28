@@ -54,7 +54,6 @@ class Lexer {
     var tokenLine: Int = 0
     var tokenColumn: Int = 0
 
-
     var blanks: Set<Character> = []
 
     init(inputString: String) {

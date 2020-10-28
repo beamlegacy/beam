@@ -2,6 +2,7 @@ import Foundation
 import CoreData
 import Down
 
+//swiftlint:disable file_length
 class Note: NSManagedObject {
     override func awakeFromInsert() {
         super.awakeFromInsert()
@@ -385,7 +386,7 @@ class Note: NSManagedObject {
     }
 
     class func deleteForPredicate(_ predicate: NSPredicate, _ context: NSManagedObjectContext) -> NSPersistentStoreResult? {
-        let fetch: NSFetchRequest<Note> = Note.fetchRequest()
+        let fetch = NSFetchRequest<NSFetchRequestResult>(entityName: "Note")
         fetch.predicate = predicate
         fetch.includesSubentities = false
         fetch.includesPropertyValues = false
@@ -404,7 +405,7 @@ class Note: NSManagedObject {
             // To propagate changes
             let objectIDArray = result?.result as? [NSManagedObjectID]
             let changes: [AnyHashable: Any] = [NSDeletedObjectsKey: objectIDArray as Any]
-            NSManagedObjectContext.mergeChanges(fromRemoteContextSave: changes, into: [context, CoreDataManager.shared.managedContext])
+            NSManagedObjectContext.mergeChanges(fromRemoteContextSave: changes, into: [context, CoreDataManager.shared.mainContext])
 
             return result
         } catch {
@@ -413,3 +414,4 @@ class Note: NSManagedObject {
         }
     }
 }
+//swiftlint:enable file_length

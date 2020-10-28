@@ -17,9 +17,9 @@ public struct BTextEdit: NSViewRepresentable {
 
     func createBullet(bullet: Bullet) -> TextNode {
         let node = TextNode()
-        node.text = bullet.content?.filter({ (char) -> Bool in
+        node.text = bullet.content.filter({ (char) -> Bool in
             !char.isNewline
-        }) ?? "<empty debug>"
+        })
 
 //        print("MD: \(bullet.orderIndex) \(node.text)")
         for child in bullet.sortedChildren() {
@@ -33,7 +33,7 @@ public struct BTextEdit: NSViewRepresentable {
         let root = TextRoot(editor: editor)
         let mainNode = TextNode()
 
-        mainNode.text = note.title!
+        mainNode.text = note.title
         root.children.append(mainNode)
 
         for child in note.rootBullets() {

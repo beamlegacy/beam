@@ -133,7 +133,7 @@ class Bullet: NSManagedObject {
     }
 
     class func deleteForPredicate(_ predicate: NSPredicate, _ context: NSManagedObjectContext) -> NSPersistentStoreResult? {
-        let fetch: NSFetchRequest<Bullet> = Bullet.fetchRequest()
+        let fetch = NSFetchRequest<NSFetchRequestResult>(entityName: "Bullet")
         fetch.predicate = predicate
         fetch.includesSubentities = false
         fetch.includesPropertyValues = false
@@ -152,7 +152,7 @@ class Bullet: NSManagedObject {
             // To propagate changes
             let objectIDArray = result?.result as? [NSManagedObjectID]
             let changes: [AnyHashable: Any] = [NSDeletedObjectsKey: objectIDArray as Any]
-            NSManagedObjectContext.mergeChanges(fromRemoteContextSave: changes, into: [context, CoreDataManager.shared.managedContext])
+            NSManagedObjectContext.mergeChanges(fromRemoteContextSave: changes, into: [context, CoreDataManager.shared.mainContext])
 
             return result
         } catch {
