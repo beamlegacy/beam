@@ -25,6 +25,13 @@ public class TextNode: Equatable {
         }
     }
 
+    var placeholder: String = "" {
+        didSet {
+            guard oldValue != text else { return }
+            invalidateTextRendering()
+        }
+    }
+
     var strippedText: String {
         attributedString.string
     }
@@ -59,6 +66,14 @@ public class TextNode: Equatable {
     var attributedString: NSAttributedString {
         if let s = _attributedString {
             return s
+        }
+
+        if text.isEmpty {
+            let attributed = placeholder.attributed
+
+            attributed.setAttributes([.font: NSFont.systemFont(ofSize: CGFloat(14)), .foregroundColor: disabledColor], range: attributed.wholeRange)
+            _attributedString = attributed
+            return attributed
         }
         let parser = Parser(inputString: text)
         let AST = parser.parseAST()
