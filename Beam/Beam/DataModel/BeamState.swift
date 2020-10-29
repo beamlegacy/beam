@@ -55,7 +55,7 @@ class BeamData: ObservableObject {
         } else {
             let note = Note.createNote(CoreDataManager.shared.mainContext, todaysName)
             note.type = NoteType.journal.rawValue
-            let bullet = note.createBullet(CoreDataManager.shared.mainContext, content: "This is the journal, you can type anything here!")
+            let bullet = note.createBullet(CoreDataManager.shared.mainContext, content: "")
             note.addToBullets(bullet)
             _todaysNote = note
             print("Today's note created:\n\(note)\n")
