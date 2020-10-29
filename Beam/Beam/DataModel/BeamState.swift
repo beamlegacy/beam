@@ -144,7 +144,7 @@ class BeamState: ObservableObject {
             }
         }
     }
-    @Published var currentTab = BrowserTab(originalQuery: "") // Fake empty tab by default
+    @Published var currentTab = BrowserTab(originalQuery: "", note: nil) // Fake empty tab by default
     {
         didSet {
             tabScope.removeAll()
@@ -231,11 +231,32 @@ class BeamState: ObservableObject {
     }
 
     func createTab(withURL url: URL, originalQuery: String) {
-        let tab = BrowserTab(originalQuery: originalQuery)
+        let note = originalQuery.isEmpty ? nil : createNoteForQuery(originalQuery)
+        let tab = BrowserTab(originalQuery: originalQuery, note: note)
         tab.load(url: url)
         currentTab = tab
         tabs.append(tab)
         mode = .web
+    }
+
+    func createNoteForQuery(_ query: String) -> Note {
+        let context = CoreDataManager.shared.mainContext
+        if let n = Note.fetchWithTitle(context, query) {
+            return n
+        }
+
+        let n = Note.createNote(context, query)
+        n.score = Float(0) as NSNumber
+
+        let bulletStr = "Created [[\(query)]]"
+        if let bullet = self.data.todaysNote.rootBullets().first, bullet.content.isEmpty {
+            bullet.content = bulletStr
+        } else {
+            let bullet = self.data.todaysNote.createBullet(context, content: bulletStr)
+            bullet.score = Float(0) as NSNumber
+        }
+
+        return n
     }
 
     func startQuery() {

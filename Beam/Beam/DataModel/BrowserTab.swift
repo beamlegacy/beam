@@ -48,20 +48,12 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
 
     private var scope = Set<AnyCancellable>()
 
-    init(originalQuery: String, id: UUID = UUID(), webView: WKWebView? = nil ) {
+    init(originalQuery: String, note: Note?, id: UUID = UUID(), webView: WKWebView? = nil ) {
         self.id = id
+        self.note = note
         self.originalQuery = originalQuery
 
-        if !originalQuery.isEmpty {
-            self.note = {
-                if let n = Note.fetchWithTitle(CoreDataManager.shared.mainContext, originalQuery) {
-                    return n
-                }
-
-                let n = Note.createNote(CoreDataManager.shared.mainContext, originalQuery)
-                n.score = Float(0) as NSNumber
-                return n
-            }()
+        if !originalQuery.isEmpty, note != nil {
             bullet = self.note?.createBullet(CoreDataManager.shared.mainContext, content: "visiting...")
         }
 
@@ -87,7 +79,8 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
 
     private func updateBullet() {
         if let url = url {
-            self.bullet?.content = "visit [\(self.title)](\(url.absoluteString))"
+            let name = title.isEmpty ? url.absoluteString : title
+            self.bullet?.content = "visit [\(name)](\(url.absoluteString))"
         }
     }
     private func setupObservers() {
@@ -132,7 +125,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
             if navigationAction.modifierFlags.contains(.command) != isSearchResult {
                 // Create new tab
                 let newWebView = WKWebView(frame: NSRect(), configuration: webView.configuration)
-                let newTab = BrowserTab(originalQuery: originalQuery, webView: newWebView)
+                let newTab = BrowserTab(originalQuery: originalQuery, note: note, webView: newWebView)
                 newTab.load(url: targetURL)
                 onNewTabCreated(newTab)
                 decisionHandler(.cancel, preferences)
@@ -267,7 +260,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
     // WKUIDelegate
     func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
         let newWebView = WKWebView(frame: NSRect(), configuration: configuration)
-        let newTab = BrowserTab(originalQuery: originalQuery, webView: newWebView)
+        let newTab = BrowserTab(originalQuery: originalQuery, note: self.note, webView: newWebView)
         onNewTabCreated(newTab)
 
         return newTab.webView
