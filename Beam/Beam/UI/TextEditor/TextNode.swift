@@ -424,14 +424,13 @@ public class TextNode: Equatable {
             }
         }
 
-        if !text.isEmpty {
+        if !text.isEmpty || !placeholder.isEmpty {
             if showDisclosureButton {
                 drawDisclosure(at: NSPoint(x: indent - 42, y: 3), in: context)
             }
 
             drawBulletPoint(at: NSPoint(x: indent - 20, y: 3), in: context)
         }
-//        context.textPosition = NSPoint()
         context.textMatrix = CGAffineTransform.identity
         context.translateBy(x: 0, y: CGFloat(fHeight))
 
