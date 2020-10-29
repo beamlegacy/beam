@@ -1,6 +1,10 @@
 import Foundation
 import CoreData
 
+enum NoteType: String {
+    case journal
+    case note
+}
 extension Note {
     @nonobjc public class func fetchRequest() -> NSFetchRequest<Note> {
         return NSFetchRequest<Note>(entityName: "Note")
@@ -14,6 +18,8 @@ extension Note {
     @NSManaged public var bullets: Set<Bullet>?
     @NSManaged public var linkedReferences: Set<Bullet>?
     @NSManaged public var unlinkedReferences: Set<Bullet>?
+    @NSManaged public var type: String
+    @NSManaged public var score: NSNumber?
     //swiftlint:enable identifier_name
 }
 

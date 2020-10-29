@@ -12,13 +12,14 @@ class Note: NSManagedObject {
     }
 
     @discardableResult
-    class func createNote(_ context: NSManagedObjectContext, _ title: String, createdAt: Date? = nil) -> Note {
+    class func createNote(_ context: NSManagedObjectContext, _ title: String, createdAt: Date? = nil, type: NoteType = .note) -> Note {
         let existingNote = fetchWithTitle(context, title)
 
         let note = existingNote ?? Note(context: context)
 
         note.title = title
         note.created_at = createdAt ?? Date()
+        note.type = type.rawValue
 
         return note
     }
@@ -354,6 +355,11 @@ class Note: NSManagedObject {
 
     class func fetchWithTitle(_ context: NSManagedObjectContext, _ title: String) -> Note? {
         return fetchFirst(context: context, NSPredicate(format: "title = %@", title as CVarArg))
+    }
+
+    class func fetchAllWithType(_ context: NSManagedObjectContext, _ type: NoteType) -> [Note] {
+        let predicate = NSPredicate(format: "type == %@", type.rawValue as CVarArg)
+        return fetchAllWithPredicate(context: context, predicate, [NSSortDescriptor(keyPath: \Note.created_at, ascending: false)])
     }
 
     class func fetchAllWithTitleMatch(_ context: NSManagedObjectContext, _ title: String) -> [Note] {

@@ -8,13 +8,170 @@
 import Foundation
 import AppKit
 
-public struct TextLineLayout {
-    public var rect: NSRect
-    public var line: CTLine
-    public var range: Range<Int>
-}
-
 public typealias FontWeight = NSFont.Weight
+
+public class TextLine {
+    init(ctLine: CTLine) {
+        self.ctLine = ctLine
+    }
+
+    var ctLine: CTLine
+    var range: Range<Int> {
+        let r = CTLineGetStringRange(ctLine)
+        return r.location ..< r.location + r.length
+    }
+    var glyphCount: Int {
+        CTLineGetGlyphCount(ctLine)
+    }
+
+    struct Bounds {
+        var ascent: Float
+        var descent: Float
+        var leading: Float
+        var width: Float
+    }
+    var typographicBounds: Bounds {
+        var ascent: CGFloat = 0
+        var descent: CGFloat = 0
+        var leading: CGFloat = 0
+        let w = CTLineGetTypographicBounds(ctLine, &ascent, &descent, &leading)
+        return Bounds(ascent: Float(ascent), descent: Float(descent), leading: Float(leading), width: Float(w))
+    }
+
+    var frame = NSRect()
+
+    var bounds: NSRect { bounds() }
+    func bounds(options: CTLineBoundsOptions = []) -> NSRect {
+        return CTLineGetBoundsWithOptions(ctLine, options)
+    }
+
+    var traillingWhiteSpaceWidth: Float {
+        Float(CTLineGetTrailingWhitespaceWidth(ctLine))
+    }
+
+    var imageBounds: NSRect {
+        CTLineGetImageBounds(ctLine, nil)
+    }
+
+    func stringIndexFor(position: NSPoint) -> Int {
+        CTLineGetStringIndexForPosition(ctLine, position)
+    }
+
+    func offsetFor(index: Int) -> Float {
+        Float(CTLineGetOffsetForStringIndex(ctLine, index, nil))
+    }
+
+    struct Caret {
+        var offset: Float
+        var index: Int
+        var isLeadingEdge: Bool
+    }
+    var carets: [Caret] {
+        var c = [Caret]()
+        CTLineEnumerateCaretOffsets(ctLine) { (offset, index, leading, _) in
+            c.append(Caret(offset: Float(offset), index: index, isLeadingEdge: leading))
+        }
+
+        return c
+    }
+
+    func draw(_ context: CGContext) {
+        CTLineDraw(ctLine, context)
+    }
+
+}
+public class TextFrame {
+    init(ctFrame: CTFrame, position: NSPoint) {
+        self.ctFrame = ctFrame
+        self.position = position
+        layout()
+    }
+
+    var debug: Bool { lines.count > 1 }
+    var ctFrame: CTFrame
+    var position: NSPoint
+    var lines = [TextLine]()
+
+    var range: Range<Int> {
+        let r = CTFrameGetStringRange(ctFrame)
+        return r.location ..< r.location + r.length
+    }
+
+    var visibleRange: Range<Int> {
+        let r = CTFrameGetVisibleStringRange(ctFrame)
+        return r.location ..< r.location + r.length
+    }
+
+    var path: CGPath {
+        CTFrameGetPath(ctFrame)
+    }
+
+    var frame: NSRect {
+        var minX = CGFloat(0)
+        var maxX = CGFloat(0)
+        var minY = CGFloat(0)
+        var maxY = CGFloat(0)
+        for l in lines {
+            let r = l.frame
+            minX = min(minX, r.minX)
+            maxX = max(maxX, r.maxX)
+            minY = min(minY, r.minY)
+            maxY = max(maxY, r.maxY)
+        }
+        return NSRect(x: position.x + minX, y: position.y + minY, width: maxX - minX, height: maxY - minY)
+    }
+
+    func layout() {
+        if lines.isEmpty {
+            // swiftlint:disable:next force_cast
+            lines = (CTFrameGetLines(ctFrame) as! [CTLine]).map { TextLine(ctLine: $0) }
+        }
+        if debug {
+            //            print("start layout for \(lines.count) lines")
+        }
+        var lineOrigins = [CGPoint](repeating: CGPoint(), count: lines.count)
+        CTFrameGetLineOrigins(ctFrame, CFRangeMake(0, 0), &lineOrigins)
+
+        var Y = CGFloat(0)
+        for i in lines.indices {
+            let line = lines[i]
+            let textPos = lineOrigins[i]
+            let x = textPos.x
+            //            let y = f.maxY - textPos.y + CGFloat(line.bounds.descent)
+            let y = Y// + CGFloat(line.bounds.ascent)
+            line.frame = NSRect(x: x, y: y, width: line.bounds.width, height: line.bounds.height)
+
+            Y += line.frame.height
+            //            if debug {
+            //                print("     line[\(i)] frame \(line.frame) (textPos \(textPos)")
+            //            }
+        }
+        if debug {
+            //            print("layout frame \(frame)")
+        }
+    }
+
+    func draw(_ context: CGContext) {
+        if debug {
+            //            print("draw frame \(ctFrame)")
+        }
+
+        #if false
+        CTFrameDraw(ctFrame, context)
+        return
+        #else
+        for line in lines {
+            context.saveGState()
+            context.textPosition = NSPoint()//line.frame.origin
+            context.translateBy(x: position.x + line.frame.origin.x, y: position.y + line.frame.origin.y)
+            context.scaleBy(x: 1, y: -1)
+
+            line.draw(context)
+            context.restoreGState()
+        }
+        #endif
+    }
+}
 
 public class Font {
     public var size: Float { return Float(font.pointSize) }
@@ -44,17 +201,17 @@ public class Font {
     public var capHeight: Float { cgFont != nil ? size * Float(cgFont!.capHeight) / unitsPerEm : 0 }
     public var descent: Float { cgFont != nil ? size * Float(cgFont!.descent) / unitsPerEm : 0 }
     public var fontBBox: NSRect {
-            if let f = cgFont {
-                let em = size / unitsPerEm
-                var r = f.fontBBox
-                r.origin.x *= CGFloat(em)
-                r.origin.y *= CGFloat(em)
-                r.size.width *= CGFloat(em)
-                r.size.height *= CGFloat(em)
-                return r
-            } else {
-                return NSRect()
-            }
+        if let f = cgFont {
+            let em = size / unitsPerEm
+            var r = f.fontBBox
+            r.origin.x *= CGFloat(em)
+            r.origin.y *= CGFloat(em)
+            r.size.width *= CGFloat(em)
+            r.size.height *= CGFloat(em)
+            return r
+        } else {
+            return NSRect()
+        }
     }
     public var italicAngle: Float { return cgFont != nil ? size * Float(cgFont!.italicAngle) : 0 }
     public var leading: Float { return cgFont != nil ? size * Float(cgFont!.leading) / unitsPerEm : 0 }
@@ -77,7 +234,7 @@ public class Font {
         attributes[NSFontDescriptor.AttributeName.name] = name
 
         attributes[NSFontDescriptor.AttributeName.traits] = [
-          NSFontDescriptor.TraitKey.weight: weight
+            NSFontDescriptor.TraitKey.weight: weight
         ]
 
         let desc = NSFontDescriptor(fontAttributes: attributes)
@@ -85,43 +242,38 @@ public class Font {
         self.init(f!)
     }
 
-    public func draw(string: String, textWidth: Float) -> [TextLineLayout] {
-        guard string != "" else { return [] }
+    public func draw(string: String, textWidth: CGFloat) -> TextFrame {
         let attrs: [String: CTFont] = [kCTFontAttributeName as String: ctFont]
-        guard let attrString = CFAttributedStringCreate(nil, string as CFString, attrs as CFDictionary) else { return [] }
-        return draw(string: attrString, textWidth: textWidth)
+        let attrString = CFAttributedStringCreate(nil, string as CFString, attrs as CFDictionary)!
+        return Self.draw(string: attrString, atPosition: NSPoint(), textWidth: textWidth)
     }
 
-    public func draw(string: NSAttributedString, textWidth: Float) -> [TextLineLayout] {
-        guard !string.string.isEmpty else { return [] }
-        var layoutedLines = [TextLineLayout]()
-
-        let path = CGPath(rect: CGRect(x: 0, y: 0, width: textWidth, height: 100000), transform: nil)
+    class func draw(string: NSAttributedString, atPosition position: NSPoint, textWidth: CGFloat) -> TextFrame {
+        assert(textWidth != 0)
+        //        print("Font create frame with width \(textWidth) for string '\(string)'")
         let framesetter = CTFramesetterCreateWithAttributedString(string)
-        let frameAttributes: [String: String] = [:]
+        let frameSize = CTFramesetterSuggestFrameSizeWithConstraints(
+            framesetter,
+            CFRangeMake (0, 0),
+            nil,
+            CGSize(width: CGFloat(textWidth), height: CGFloat.greatestFiniteMagnitude),
+            nil)
+        //        print("TextFrame suggested size \(frameSize)")
+        let path = CGPath(rect: CGRect(origin: position, size: frameSize), transform: nil)
+
+        let frameAttributes: [String: Any] = [:]
         let frame = CTFramesetterCreateFrame(framesetter,
-                                    CFRange(),
-                                    path,
-                                    frameAttributes as CFDictionary)
+                                             CFRange(),
+                                             path,
+                                             frameAttributes as CFDictionary)
 
-        //swiftlint:disable:next force_cast
-        let lines = CTFrameGetLines(frame) as! [CTLine]
-        var y = CGFloat(0)
-        for line in lines {
-            let range = CTLineGetStringRange(line)
-            var rect = CTLineGetBoundsWithOptions(line, [.includeLanguageExtents, .useHangingPunctuation])
-            var lascent = CGFloat(0)
-            var ldescent = CGFloat(0)
-            var lleading = CGFloat(0)
-            var lineWidth = CTLineGetTypographicBounds(line, &lascent, &ldescent, &lleading)
+        //        print("TextFrame: \(frame)")
 
-            rect.origin.y += y
-            y += rect.height
-            let r = NSRange(range: range)
-            layoutedLines.append(TextLineLayout(rect: rect, line: line, range: r.location ..< r.location + r.length))
+        let f = TextFrame(ctFrame: frame, position: position)
+        if f.debug {
+            //            print("Font created frame \(f)")
         }
-
-        return layoutedLines
+        return f
     }
 
     public static var main = Font.system(size: 12)
@@ -134,6 +286,6 @@ public class Font {
 
     public static func == (lhs: Font, rhs: Font) -> Bool {
         return lhs.size == rhs.size &&
-                lhs.name == rhs.name
+            lhs.name == rhs.name
     }
 }

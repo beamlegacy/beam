@@ -10,21 +10,23 @@ import SwiftUI
 
 struct NoteView: View {
     @EnvironmentObject var state: BeamState
+    var note: Note
+    var onStartEditing: () -> Void = {}
 
     var body: some View {
-        ScrollView(.vertical, showsIndicators: true) {
-//            VStack {
-//                if let note = state.currentNote {
-//                    Text("Original search query: \(note.title)")
-//                    VStack {
-//                        ForEach(note.visitedSearchResults) { i in
-//                            Text("visited: \(i.url.absoluteString)")
-//                        }
-//                    }
-//                }
-//            }
-
-//            BTextEdit()
-        }
+        BTextEdit(note: note, openURL: { url in
+            if ["http", "https"].contains(url.scheme) {
+                state.createTab(withURL: url, originalQuery: state.currentNote?.title ?? "")
+            } else {
+                if let noteName = url.absoluteString.removingPercentEncoding {
+                    _ = state.navigateToNote(named: noteName)
+                }
+            }
+        },
+        openCard: { cardName in
+                _ = state.navigateToNote(named: cardName)
+        },
+        onStartEditing: { onStartEditing() }
+        )
     }
 }

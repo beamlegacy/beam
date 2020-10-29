@@ -12,210 +12,178 @@ import AppKit
 import SwiftUI
 import Combine
 
+public struct MouseInfo {
+    var position: NSPoint
+    var event: NSEvent
+
+    init(_ node: TextNode, _ position: NSPoint, _ event: NSEvent) {
+        self.position = NSPoint(x: position.x - node.frameInDocument.minX, y: position.y - node.frameInDocument.minY)
+        self.event = event
+    }
+}
+
 public struct BTextEdit: NSViewRepresentable {
     var note: Note
-
-    func createBullet(bullet: Bullet) -> TextNode {
-        let node = TextNode()
-        node.text = bullet.content.filter({ (char) -> Bool in
-            !char.isNewline
-        })
-
-//        print("MD: \(bullet.orderIndex) \(node.text)")
-        for child in bullet.sortedChildren() {
-            node.children.append(createBullet(bullet: child))
-        }
-
-        return node
-    }
-
-    func createNodeTree(editor: BeamTextEdit, note: Note) -> TextRoot {
-        let root = TextRoot(editor: editor)
-        let mainNode = TextNode()
-
-        mainNode.text = note.title
-        root.children.append(mainNode)
-
-        for child in note.rootBullets() {
-            mainNode.children.append(createBullet(bullet: child))
-        }
-
-        return root
-    }
+    var openURL: (URL) -> Void
+    var openCard: (String) -> Void
+    var onStartEditing: () -> Void = { }
+    var onEndEditing: () -> Void = { }
 
     public func makeNSView(context: Context) -> BeamTextEdit {
-        let v = BeamTextEdit(text: "", font: Font.main)
-
-//        guard let note = Note.fetchWithTitle(CoreDataManager.shared.mainContext, "Beam App v1") else { return v }
-        v.rootNode = createNodeTree(editor: v, note: note)
-
-        return v
+        let root = TextRoot(CoreDataManager.shared, note: note)
+        let nsView = BeamTextEdit(root: root, font: Font.main)
+        nsView.openURL = openURL
+        nsView.openCard = openCard
+        nsView.onStartEditing = onStartEditing
+        nsView.onEndEditing = onEndEditing
+        return nsView
     }
 
     public func updateNSView(_ nsView: BeamTextEdit, context: Context) {
         print("display note: \(note)")
-        nsView.rootNode = createNodeTree(editor: nsView, note: note)
-        nsView.node = nsView.rootNode.children.first!
+        if nsView.rootNode.note !== note {
+            nsView.rootNode = TextRoot(CoreDataManager.shared, note: note)
+            if let note = nsView.rootNode.children.first {
+                nsView.node = note
+            }
+        }
+        nsView.openURL = openURL
+        nsView.openCard = openCard
+        nsView.onStartEditing = onStartEditing
+        nsView.onEndEditing = onEndEditing
     }
 
     public typealias NSViewType = BeamTextEdit
 }
 
-struct TextState {
-    let text: String
-    let selectedTextRange: Range<Int>
-    let markedTextRange: Range<Int>
-    let cursorPosition: Int
-}
-
-class TextRoot: TextNode {
-    override var text: String {
-        get { "" }
-        set {
-            assert(false) // the rootNode can't have text contents, it's just a placeholder for the note's children
-        }
-    }
-
-    var _editor: BeamTextEdit?
-    override var editor: BeamTextEdit {
-        return _editor!
-    }
-
-    override func invalidateLayout() {
-        editor.invalidateLayout()
-    }
-
-    override init() {
-    }
-
-    init(editor: BeamTextEdit) {
-        self._editor = editor
-    }
-}
-
 // swiftlint:disable type_body_length
 public class BeamTextEdit: NSView, NSTextInputClient {
-    public init(text: String = "", font: Font = Font.main) {
-        self.font = font
-        selectedTextRange = 0..<0
-        markedTextRange = 0..<0
-        cursorPosition = 0
-        rootNode = TextRoot()
-        node = TextNode()
+    public init(root: TextRoot, font: Font = Font.main) {
+        self.config.font = font
+        rootNode = root
         super.init(frame: NSRect())
-        createRoot(text: text)
+
+        root._editor = self
+        timer = Timer.init(timeInterval: 1.0 / 60.0, repeats: true) { [unowned self] _ in
+            let now = CFAbsoluteTimeGetCurrent()
+            if self.blinkTime < now && self.hasFocus {
+                self.blinkPhase.toggle()
+                self.blinkTime = now + (self.blinkPhase ? self.onBlinkTime : self.offBlinkTime)
+                self.invalidate()
+            }
+        }
+        RunLoop.main.add(timer, forMode: .default)
+
         _inputContext = NSTextInputContext(client: self)
 
         initBlinking()
     }
 
-    public init(text: String = "", font: Font = Font.main, color: NSColor) {
-        self.font = font
-        self.color = color
-        selectedTextRange = 0..<0
-        markedTextRange = 0..<0
-        cursorPosition = 0
-        rootNode = TextRoot()
-        node = TextNode()
-        super.init(frame: NSRect())
-        createRoot(text: text)
-        _inputContext = NSTextInputContext(client: self)
-
-        initBlinking()
+    deinit {
+        timer.invalidate()
     }
-
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
-    private func createRoot(text: String) {
-        rootNode = TextRoot(editor: self)
+    var timer: Timer!
 
-        let node1 = TextNode()
-        node1.text = text
-        rootNode.children.append(node1)
+    var minimumWidth: CGFloat = 800
+    var maximumWidth: CGFloat = 1024
 
-//        let node2 = TextNode()
-//        node2.text = "text 2"
-//        node1.children.append(node2)
-//
-//        let node3 = TextNode()
-//        node3.text = "text 3"
-//        node1.children.append(node3)
-//
-//        let node4 = TextNode()
-//        node4.text = text
-//        rootNode.children.append(node4)
+    var leadingAlignment = CGFloat(160)
+    var traillingPadding = CGFloat(80)
 
-        node = rootNode.children.first!
-    }
-
-    var font: Font
-    var minimumWidth: Float? = 1024
-    var maximumWidth: Float?
     public var activated: () -> Void = { }
     public var activateOnLostFocus = true
     public var useFocusRing = false
+    public var openURL: (URL) -> Void = { _ in }
+    public var openCard: (String) -> Void = { _ in }
+    public var onStartEditing: () -> Void = { }
+    public var onEndEditing: () -> Void = { }
 
-    public var contextualSyntax = true
+    public var config = TextConfig()
 
-    let _undoManager = UndoManager()
-    public override var undoManager: UndoManager? { _undoManager }
+    public override var undoManager: UndoManager { rootNode.undoManager }
 
     var selectedTextRange: Range<Int> {
-        didSet {
-            assert(selectedTextRange.lowerBound != NSNotFound)
-            assert(selectedTextRange.upperBound != NSNotFound)
+        set {
+            assert(newValue.lowerBound != NSNotFound)
+            assert(newValue.upperBound != NSNotFound)
+            rootNode.state.selectedTextRange = newValue
             reBlink()
+        }
+        get {
+            rootNode.state.selectedTextRange
         }
     }
     var markedTextRange: Range<Int> {
-        didSet {
-            assert(selectedTextRange.lowerBound != NSNotFound)
-            assert(selectedTextRange.upperBound != NSNotFound)
+        set {
+            assert(newValue.lowerBound != NSNotFound)
+            assert(newValue.upperBound != NSNotFound)
+            rootNode.state.markedTextRange = newValue
             reBlink()
         }
+        get {
+            rootNode.state.markedTextRange
+        }
+
     }
     var cursorPosition: Int {
-        didSet {
-            assert(cursorPosition != NSNotFound)
+        set {
+            assert(newValue != NSNotFound)
+            rootNode.state.cursorPosition = newValue
             reBlink()
             setHotSpotToCursorPosition()
-            if contextualSyntax {
+            if config.contextualSyntax {
                 node.invalidateTextRendering()
             }
+        }
+
+        get {
+            rootNode.state.cursorPosition
         }
     }
 
     var selectedText: String {
-        return node.text.substring(range: selectedTextRange)
+        return rootNode.selectedText
     }
 
     public override var frame: NSRect {
         didSet {
-            rootNode.width = Float(frame.width)
+//            print("editor[\(rootNode.note.title)] frame changed to \(frame)")
+            relayoutRoot()
         }
     }
 
-    var animate = false { didSet {
-        // TODO: implement animating the cursor
+    func relayoutRoot() {
+//        print("editor[\(rootNode.note.title)] relayout root to \(frame)")
+        let r = bounds
+        let width = min(max(minimumWidth, r.width - (leadingAlignment + traillingPadding)), maximumWidth)
+        let rect = NSRect(x: leadingAlignment, y: topOffset, width: width, height: r.height)
+        //print("relayoutRoot -> \(rect)")
+        rootNode.setLayout(rect)
     }
-    }
-
-    var color = NSColor.textColor
-    var disabledColor = NSColor.disabledControlTextColor
-    var selectionColor = NSColor.selectedControlColor
-    var markedColor = NSColor.unemphasizedSelectedTextColor
-    var alpha: Float = 1.0
-    var blendMode: CGBlendMode = .normal
-
-    var hMargin: Float = 2 { didSet { invalidateLayout() } }
-    var vMargin: Float = 0 { didSet { invalidateLayout() } }
 
     // This is the root node of what we are editing:
     var rootNode: TextRoot {
         didSet {
+            guard oldValue !== rootNode else { return }
             rootNode._editor = self
+            if let firstNode = rootNode.children.first {
+                node = firstNode
+            } else {
+                guard let newBullet = rootNode.note?.createBullet(CoreDataManager.shared.mainContext, content: "", afterBullet: nil) else { return }
+                let newNode = TextNode(bullet: newBullet, recurse: false)
+                var children = rootNode.children
+                children.append(newNode)
+                cursorPosition = 0
+                node = newNode
+            }
+            // put a fake layout as an init
+            rootNode.setLayout(NSRect(x: 0, y: 0, width: max(minimumWidth, frame.width), height: max(100, frame.height)))
+
+            // and invalidate the layout so that everything is recalculated again
             invalidateLayout()
             invalidate()
         }
@@ -223,15 +191,23 @@ public class BeamTextEdit: NSView, NSTextInputClient {
 
     // This is the node that the user is currently editing. It can be any node in the rootNode tree
     var node: TextNode {
-        didSet {
+        set {
+            rootNode.node = newValue
             invalidate()
-            cancelSelection()
+        }
+        get {
+            rootNode.node
         }
     }
 
+    var topOffset: CGFloat {
+        config.keepCursorMidScreen ? visibleRect.height / 2 : 0
+    }
+
     override public var intrinsicContentSize: NSSize {
-        rootNode.updateTextRendering()
-        return NSSize(width: CGFloat(minimumWidth!), height: rootNode.frame.size.height)
+        let s = NSSize(width: minimumWidth + leadingAlignment + traillingPadding, height: rootNode.idealSize.height + topOffset)
+//        print("editor[\(rootNode.note.title)] new intrinsic content size \(s)")
+        return s
     }
 
     public func setHotSpot(_ spot: NSRect) {
@@ -242,10 +218,13 @@ public class BeamTextEdit: NSView, NSTextInputClient {
 
     public func invalidateLayout() {
         invalidateIntrinsicContentSize()
+        needsLayout = true
+        invalidate()
     }
 
     public override func layout() {
-        invalidateLayout()
+//        print("editor[\(rootNode.note.title)] layout \(frame)")
+        relayoutRoot()
         super.layout()
     }
 
@@ -260,31 +239,11 @@ public class BeamTextEdit: NSView, NSTextInputClient {
     }
 
     public func hasMarkedText() -> Bool {
-        return !markedTextRange.isEmpty
+        return rootNode.hasMarkedText()
     }
 
     public func setMarkedText(string: String, selectedRange: Range<Int>, replacementRange: Range<Int>) {
-        var range = cursorPosition..<cursorPosition
-        if !replacementRange.isEmpty {
-            range = replacementRange
-        }
-        if !markedTextRange.isEmpty {
-            range = markedTextRange
-        }
-
-        if !self.selectedTextRange.isEmpty {
-            range = self.selectedTextRange
-        }
-
-        node.text.replaceSubrange(node.text.range(from: range), with: string)
-        cursorPosition = range.upperBound
-        cancelSelection()
-        markedTextRange = range
-        if markedTextRange.isEmpty {
-            markedTextRange = node.text.clamp(markedTextRange.lowerBound ..< (markedTextRange.upperBound + string.count))
-        }
-        self.selectedTextRange = markedTextRange
-        cursorPosition = self.selectedTextRange.upperBound
+        rootNode.setMarkedText(string: string, selectedRange: selectedRange, replacementRange: replacementRange)
         reBlink()
     }
 
@@ -293,28 +252,12 @@ public class BeamTextEdit: NSView, NSTextInputClient {
     }
 
     public func insertText(string: String, replacementRange: Range<Int>) {
-        pushUndoState(.insertText)
-
-        let c = string.count
-        var range = cursorPosition..<cursorPosition
-        if !replacementRange.isEmpty {
-            range = replacementRange
-        }
-        if !selectedTextRange.isEmpty {
-            range = selectedTextRange
-        }
-
-        let r = node.text.range(from: range)
-        node.text.replaceSubrange(r, with: string)
-        cursorPosition = range.lowerBound + c
-        cancelSelection()
+        rootNode.insertText(string: string, replacementRange: replacementRange)
         reBlink()
     }
 
     public func firstRect(forCharacterRange range: Range<Int>) -> (NSRect, Range<Int>) {
-        let r1 = rectAt(range.lowerBound)
-        let r2 = rectAt(range.upperBound)
-        return (r1.union(r2), range)
+        return rootNode.firstRect(forCharacterRange: range)
     }
 
     public var enabled = true
@@ -325,40 +268,48 @@ public class BeamTextEdit: NSView, NSTextInputClient {
         blinkPhase = true
         hasFocus = true
         invalidate()
+        onStartEditing()
         return super.becomeFirstResponder()
     }
 
     public override func resignFirstResponder() -> Bool {
         blinkPhase = true
-        cancelSelection()
+        rootNode.cancelSelection()
         invalidate()
         if activateOnLostFocus {
             activated()
         }
         hasFocus = false
+        onEndEditing()
         return super.resignFirstResponder()
     }
 
     func pressEnter(_ option: Bool) {
         if option {
-            doCommand(.insertNewline)
+            rootNode.doCommand(.insertNewline)
         } else {
             node.text.removeSubrange(node.text.range(from: selectedTextRange))
             cursorPosition = selectedTextRange.startIndex
             let splitText = node.text.substring(from: cursorPosition, to: node.text.count)
             node.text.removeLast(node.text.count - cursorPosition)
-            let newNode = TextNode()
-            newNode.text = splitText
-            newNode.children = node.children
-            node.parent?.insert(node: newNode, after: node)
+            guard let newBullet = node.bullet?.note?.createBullet(CoreDataManager.shared.mainContext, content: splitText, afterBullet: node.bullet) else { return }
+            let newNode = TextNode(bullet: newBullet, recurse: false)
+            let nodes = node.children
+            for c in nodes {
+                newNode.addChild(c)
+                if let b = c.bullet {
+                    newNode.bullet?.addToChildren(b)
+                }
+            }
+
+            _ = node.parent?.insert(node: newNode, after: node)
             cursorPosition = 0
             node = newNode
-            cancelSelection()
+            rootNode.cancelSelection()
         }
     }
 
-    //swiftlint:disable cyclomatic_complexity
-    //swiftlint:disable function_body_length
+    //swiftlint:disable cyclomatic_complexity function_body_length
     override open func keyDown(with event: NSEvent) {
         let shift = event.modifierFlags.contains(.shift)
         let option = event.modifierFlags.contains(.option)
@@ -375,61 +326,61 @@ public class BeamTextEdit: NSView, NSTextInputClient {
                 case .leftArrow:
                     if shift {
                         if option {
-                            doCommand(.moveWordLeftAndModifySelection)
+                            rootNode.doCommand(.moveWordLeftAndModifySelection)
                         } else if command {
-                            doCommand(.moveToBeginningOfLineAndModifySelection)
+                            rootNode.doCommand(.moveToBeginningOfLineAndModifySelection)
                         } else {
-                            doCommand(.moveLeftAndModifySelection)
+                            rootNode.doCommand(.moveLeftAndModifySelection)
                         }
                         return
                     } else {
                         if option {
-                            doCommand(.moveWordLeft)
+                            rootNode.doCommand(.moveWordLeft)
                         } else if command {
-                            doCommand(.moveToBeginningOfLine)
+                            rootNode.doCommand(.moveToBeginningOfLine)
                         } else {
-                            doCommand(.moveLeft)
+                            rootNode.doCommand(.moveLeft)
                         }
                         return
                     }
                 case .rightArrow:
                     if shift {
                         if option {
-                            doCommand(.moveWordRightAndModifySelection)
+                            rootNode.doCommand(.moveWordRightAndModifySelection)
                         } else if command {
-                            doCommand(.moveToEndOfLineAndModifySelection)
+                            rootNode.doCommand(.moveToEndOfLineAndModifySelection)
                         } else {
-                            doCommand(.moveRightAndModifySelection)
+                            rootNode.doCommand(.moveRightAndModifySelection)
                         }
                         return
                     } else {
                         if option {
-                            doCommand(.moveWordRight)
+                            rootNode.doCommand(.moveWordRight)
                         } else if command {
-                            doCommand(.moveToEndOfLine)
+                            rootNode.doCommand(.moveToEndOfLine)
                         } else {
-                            doCommand(.moveRight)
+                            rootNode.doCommand(.moveRight)
                         }
                         return
                     }
                 case .upArrow:
                     if shift {
-                        doCommand(.moveUpAndModifySelection)
+                        rootNode.doCommand(.moveUpAndModifySelection)
                         return
                     } else {
-                        doCommand(.moveUp)
+                        rootNode.doCommand(.moveUp)
                         return
                     }
                 case .downArrow:
                     if shift {
-                        doCommand(.moveDownAndModifySelection)
+                        rootNode.doCommand(.moveDownAndModifySelection)
                         return
                     } else {
-                        doCommand(.moveDown)
+                        rootNode.doCommand(.moveDown)
                         return
                     }
                 case .delete:
-                    doCommand(.deleteBackward)
+                    rootNode.doCommand(.deleteBackward)
                     return
                 default:
                     print("Special Key \(k)")
@@ -438,10 +389,10 @@ public class BeamTextEdit: NSView, NSTextInputClient {
 
             switch event.keyCode {
             case 117: // delete
-                doCommand(.deleteForward)
+                rootNode.doCommand(.deleteForward)
                 return
             case 53: // escape
-                cancelSelection()
+                rootNode.cancelSelection()
                 return
             default:
                 break
@@ -451,17 +402,17 @@ public class BeamTextEdit: NSView, NSTextInputClient {
                 switch ch {
                 case "a":
                     if command {
-                        doCommand(.selectAll)
+                        rootNode.doCommand(.selectAll)
                         return
                     }
                 case "[":
                     if command {
-                        doCommand(.decreaseIndentation)
+                        rootNode.doCommand(.decreaseIndentation)
                         return
                     }
                 case "]":
                     if command {
-                        doCommand(.increaseIndentation)
+                        rootNode.doCommand(.increaseIndentation)
                         return
                     }
                 default: break
@@ -472,378 +423,11 @@ public class BeamTextEdit: NSView, NSTextInputClient {
         inputContext?.handleEvent(event)
         //super.keyDown(with: event)
     }
-    //swiftlint:enable cyclomatic_complexity
-    //swiftlint:enable function_body_length
+    //swiftlint:enable cyclomatic_complexity function_body_length
 
     func nodeAt(point: CGPoint) -> TextNode? {
-        return rootNode.nodeAt(point: point)
-    }
-
-    func pushUndoState(_ command: Command) {
-        guard let undoManager = undoManager else { return }
-        defer {
-            if !undoManager.isRedoing {
-                lastCommand = command
-            }
-        }
-
-        guard let commandDef = commands[command] else { return }
-        guard commandDef.undo else { return }
-        guard !(commandDef.coalesce && lastCommand == command) else { return }
-
-        let state = TextState(text: self.node.text, selectedTextRange: selectedTextRange, markedTextRange: markedTextRange, cursorPosition: cursorPosition)
-        undoManager.registerUndo(withTarget: self, handler: { (selfTarget) in
-            if commandDef.redo {
-                selfTarget.lastCommand = .none
-                selfTarget.pushUndoState(command) // push the redo!
-            }
-
-            selfTarget.node.text = state.text
-            selfTarget.selectedTextRange = state.selectedTextRange
-            selfTarget.markedTextRange = state.markedTextRange
-            selfTarget.cursorPosition = state.cursorPosition
-        })
-        undoManager.setActionName(commandDef.name)
-    }
-
-    var lastCommand: Command = .none
-    struct CommandDefinition {
-        var undo: Bool
-        var redo: Bool
-        var coalesce: Bool
-        var name: String
-    }
-
-    let commands: [Command: CommandDefinition] = [
-        .none: CommandDefinition(undo: false, redo: false, coalesce: false, name: ""),
-        .insertText: CommandDefinition(undo: true, redo: true, coalesce: true, name: "Insert Text"),
-        .moveForward: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move Forward"),
-        .moveRight: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move Right"),
-        .moveBackward: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move Right"),
-        .moveLeft: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move Left"),
-        .moveUp: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move Up"),
-        .moveDown: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move Down"),
-        .moveWordForward: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move Word Forward"),
-        .moveWordBackward: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move Word Backward"),
-        .moveToBeginningOfLine: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move To Beginning Of Line"),
-        .moveToEndOfLine: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move To End Of Line"),
-        .centerSelectionInVisibleArea: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Center Selection In Visible Area"),
-        .moveBackwardAndModifySelection: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move Backward And Modify Selection"),
-        .moveForwardAndModifySelection: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move Forward And Modify Selection"),
-        .moveWordForwardAndModifySelection: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move Word Forward And Modify Selection"),
-        .moveWordBackwardAndModifySelection: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move Word Backward And Modify Selection"),
-        .moveUpAndModifySelection: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move Up And Modify Selection"),
-        .moveDownAndModifySelection: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move Down And Modify Selection"),
-        .moveToBeginningOfLineAndModifySelection: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move To Beginning Of Line And Modify Selection"),
-        .moveToEndOfLineAndModifySelection: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move To End Of Line And Modify Selection"),
-        .moveWordRight: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move Word Right"),
-        .moveWordLeft: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move Word Left"),
-        .moveRightAndModifySelection: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move Right And Modify Selection"),
-        .moveLeftAndModifySelection: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move Left And Modify Selection"),
-        .moveWordRightAndModifySelection: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move Word Right And Modify Selection"),
-        .moveWordLeftAndModifySelection: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move Word Left And Modify Selection"),
-        .selectAll: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Select All"),
-        .selectLine: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Select Line"),
-        .selectWord: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Select Word"),
-        .insertTab: CommandDefinition(undo: true, redo: true, coalesce: true, name: "Insert Tab"),
-        .insertNewline: CommandDefinition(undo: true, redo: true, coalesce: true, name: "Insert New Line"),
-        .deleteForward: CommandDefinition(undo: true, redo: true, coalesce: true, name: "Delete Forward"),
-        .deleteBackward: CommandDefinition(undo: true, redo: true, coalesce: true, name: "Delete Backward"),
-        .deleteWordForward: CommandDefinition(undo: true, redo: true, coalesce: true, name: "Delete Word Forward"),
-        .deleteWordBackward: CommandDefinition(undo: true, redo: true, coalesce: true, name: "Delete Word Backward"),
-        .deleteToBeginningOfLine: CommandDefinition(undo: true, redo: true, coalesce: true, name: "Delete To Begining Of Line"),
-        .deleteToEndOfLine: CommandDefinition(undo: true, redo: true, coalesce: true, name: "Delete To End Of Line"),
-        .complete: CommandDefinition(undo: true, redo: true, coalesce: true, name: "Complete"),
-        .cancelOperation: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Cancel Operation")
-    ]
-
-//    public var lineCount: Int { paragraphs.count }
-
-    // Command system
-    public enum Command {
-        case none
-
-        case insertText
-
-        case moveForward
-        case moveRight
-        case moveBackward
-        case moveLeft
-        case moveUp
-        case moveDown
-        case moveWordForward
-        case moveWordBackward
-        case moveToBeginningOfLine
-        case moveToEndOfLine
-
-        case centerSelectionInVisibleArea
-
-        case moveBackwardAndModifySelection
-        case moveForwardAndModifySelection
-        case moveWordForwardAndModifySelection
-        case moveWordBackwardAndModifySelection
-        case moveUpAndModifySelection
-        case moveDownAndModifySelection
-
-        case moveToBeginningOfLineAndModifySelection
-        case moveToEndOfLineAndModifySelection
-
-        case moveWordRight
-        case moveWordLeft
-        case moveRightAndModifySelection
-        case moveLeftAndModifySelection
-        case moveWordRightAndModifySelection
-        case moveWordLeftAndModifySelection
-
-        case selectAll
-        case selectLine
-        case selectWord
-
-        case insertTab
-        case insertNewline
-
-        case increaseIndentation
-        case decreaseIndentation
-
-        case deleteForward
-        case deleteBackward
-        case deleteWordForward
-        case deleteWordBackward
-        case deleteToBeginningOfLine
-        case deleteToEndOfLine
-
-        case complete
-
-        case cancelOperation
-    }
-
-    public func cancelSelection() {
-        selectedTextRange = cursorPosition..<cursorPosition
-        markedTextRange = selectedTextRange
-        invalidate()
-    }
-
-    public func selectAll() {
-        selectedTextRange = node.text.wholeRange
-        cursorPosition = selectedTextRange.upperBound
-        invalidate()
-    }
-
-    func eraseSelection() {
-        if !selectedTextRange.isEmpty {
-            node.text.removeSubrange(node.text.range(from: selectedTextRange))
-            cursorPosition = selectedTextRange.lowerBound
-            if cursorPosition == NSNotFound {
-                cursorPosition = node.text.count
-            }
-            cancelSelection()
-        }
-    }
-
-    //swiftlint:disable cyclomatic_complexity
-    //swiftlint:disable function_body_length
-    public func doCommand(_ command: Command) {
-        pushUndoState(command)
-        reBlink()
-        switch command {
-        case .moveForward:
-            if selectedTextRange.isEmpty {
-                cursorPosition = node.position(after: cursorPosition)
-            }
-            cancelSelection()
-
-        case .moveLeft:
-            if selectedTextRange.isEmpty {
-                cursorPosition = node.position(before: cursorPosition)
-            }
-            cancelSelection()
-
-        case .moveBackward:
-            if selectedTextRange.isEmpty {
-                cursorPosition = node.position(before: cursorPosition)
-            }
-            cancelSelection()
-
-        case .moveRight:
-            if selectedTextRange.isEmpty {
-                cursorPosition = node.position(after: cursorPosition)
-            }
-            cancelSelection()
-
-        case .moveLeftAndModifySelection:
-            if cursorPosition != 0 {
-                let newCursorPosition = node.position(before: cursorPosition)
-                if cursorPosition == selectedTextRange.lowerBound {
-                    selectedTextRange = node.text.clamp(newCursorPosition..<selectedTextRange.upperBound)
-                } else {
-                    selectedTextRange = node.text.clamp(selectedTextRange.lowerBound..<newCursorPosition)
-                }
-                cursorPosition = newCursorPosition
-                invalidate()
-            }
-
-        case .moveWordRight:
-            node.text.enumerateSubstrings(in: node.text.index(at: cursorPosition)..<node.text.endIndex, options: .byWords) { (_, r1, _, stop) in
-                self.cursorPosition = self.node.position(at: r1.upperBound)
-                stop = true
-            }
-
-            cancelSelection()
-
-        case .moveWordLeft:
-            var range = node.text.startIndex ..< node.text.endIndex
-            node.text.enumerateSubstrings(in: node.text.startIndex..<node.text.index(at: cursorPosition), options: .byWords) { (_, r1, _, _) in
-                range = r1
-            }
-
-            let pos = node.position(at: range.lowerBound)
-            cursorPosition = pos == cursorPosition ? 0 : pos
-            cancelSelection()
-
-        case .moveWordRightAndModifySelection:
-            var newCursorPosition = cursorPosition
-            node.text.enumerateSubstrings(in: node.text.index(at: cursorPosition)..<node.text.endIndex, options: .byWords) { (_, r1, _, stop) in
-                newCursorPosition = self.node.position(at: r1.upperBound)
-                stop = true
-            }
-
-            extendSelection(to: newCursorPosition)
-
-        case .moveWordLeftAndModifySelection:
-            var range = node.text.startIndex ..< node.text.endIndex
-            let newCursorPosition = cursorPosition
-            node.text.enumerateSubstrings(in: node.text.startIndex..<node.text.index(at: cursorPosition), options: .byWords) { (_, r1, _, _) in
-                range = r1
-            }
-
-            let pos = node.position(at: range.lowerBound)
-            cursorPosition = pos == cursorPosition ? 0 : pos
-            extendSelection(to: newCursorPosition)
-
-        case .moveRightAndModifySelection:
-            if cursorPosition != node.text.count {
-                extendSelection(to: node.position(after: cursorPosition))
-            }
-
-        case .moveToBeginningOfLine:
-            if let l = node.lineAt(index: cursorPosition) {
-                cursorPosition = node.layouts[l].range.lowerBound
-                cancelSelection()
-            }
-
-        case .moveToEndOfLine:
-            if let l = node.lineAt(index: cursorPosition) {
-                cursorPosition = node.layouts[l].range.upperBound - 1
-                cancelSelection()
-            }
-
-        case .moveToBeginningOfLineAndModifySelection:
-            if let l = node.lineAt(index: cursorPosition) {
-                extendSelection(to: node.layouts[l].range.lowerBound)
-            }
-
-        case .moveToEndOfLineAndModifySelection:
-            if let l = node.lineAt(index: cursorPosition) {
-                extendSelection(to: node.layouts[l].range.upperBound - 1)
-            }
-
-        // TODO: Reimplement cursor movements in the tree
-//        case .moveUp:
-//            cursorPosition = positionAbove(cursorPosition)
-//            cancelSelection()
-//
-//        case .moveDown:
-//            cursorPosition = positionBelow(cursorPosition)
-//            cancelSelection()
-//
-//        case .moveUpAndModifySelection:
-//            extendSelection(to: positionAbove(cursorPosition))
-//
-//        case .moveDownAndModifySelection:
-//            extendSelection(to: positionBelow(cursorPosition))
-
-        case .increaseIndentation:
-            if let p = node.parent {
-                let replacementPos = node.indexInParent
-                let newParent = TextNode()
-                p.children[replacementPos] = newParent
-                newParent.children.append(node)
-            }
-
-        case .decreaseIndentation:
-            if let p = node.parent, p.parent != nil, p.children.count == 1, p.text.isEmpty {
-                let replacementPos = p.indexInParent
-                p.parent!.children[replacementPos] = node
-            }
-
-        case .selectAll:
-            selectAll()
-
-        case .deleteForward:
-            if !selectedTextRange.isEmpty {
-                node.text.removeSubrange(node.text.range(from: selectedTextRange))
-                cursorPosition = selectedTextRange.lowerBound
-                if cursorPosition == NSNotFound {
-                    cursorPosition = node.text.count
-                }
-            } else if cursorPosition != node.text.count {
-                node.text.remove(at: node.text.index(at: cursorPosition))
-            }
-            cancelSelection()
-
-        case .deleteBackward:
-            if !selectedTextRange.isEmpty {
-                node.text.removeSubrange(node.text.range(from: selectedTextRange))
-                cursorPosition = selectedTextRange.lowerBound
-                if cursorPosition == NSNotFound {
-                    cursorPosition = node.text.count
-                }
-                cancelSelection()
-            } else if cursorPosition != 0 && node.text.count != 0 {
-                cursorPosition = node.position(before: cursorPosition)
-                node.text.remove(at: node.text.index(at: cursorPosition))
-            }
-            cancelSelection()
-
-        case .insertNewline:
-            if !selectedTextRange.isEmpty {
-                node.text.removeSubrange(node.text.range(from: selectedTextRange))
-                node.text.insert("\n", at: node.text.index(at: selectedTextRange.startIndex))
-                cursorPosition = node.position(after: selectedTextRange.startIndex)
-                if cursorPosition == NSNotFound {
-                    cursorPosition = node.text.count
-                }
-                cancelSelection()
-            } else if cursorPosition != 0 && node.text.count != 0 {
-                node.text.insert("\n", at: node.text.index(at: cursorPosition))
-                cursorPosition = node.position(after: cursorPosition)
-            }
-            cancelSelection()
-
-        default:
-            break
-        }
-
-        lastCommand = command
-    }
-    //swiftlint:enable cyclomatic_complexity
-    //swiftlint:enable function_body_length
-
-    func extendSelection(to newCursorPosition: Int) {
-        var r1 = selectedTextRange.lowerBound
-        var r2 = selectedTextRange.upperBound
-        if cursorPosition == r2 {
-            r2 = newCursorPosition
-        } else {
-            r1 = newCursorPosition
-        }
-        if r1 < r2 {
-            selectedTextRange = node.text.clamp(r1..<r2)
-        } else {
-            selectedTextRange = node.text.clamp(r2..<r1)
-        }
-        cursorPosition = newCursorPosition
-        invalidate()
+        let p = NSPoint(x: point.x - rootNode.frame.origin.x, y: point.y - rootNode.frame.origin.y)
+        return rootNode.nodeAt(point: p)
     }
 
     // NSTextInputHandler:
@@ -947,15 +531,15 @@ public class BeamTextEdit: NSView, NSTextInputClient {
         pasteboard.clearContents()
         pasteboard.declareTypes([.string], owner: nil)
         pasteboard.setString(s, forType: .string)
-        eraseSelection()
+        rootNode.eraseSelection()
     }
 
     @IBAction func undo(_ sender: Any) {
-        undoManager?.undo()
+        undoManager.undo()
     }
 
     @IBAction func redo(_ sender: Any) {
-        undoManager?.redo()
+        undoManager.redo()
     }
 
     @IBAction func paste(_ sender: Any) {
@@ -970,15 +554,26 @@ public class BeamTextEdit: NSView, NSTextInputClient {
         onBlinkTime = von == 0 ? onBlinkTime : von * 1000
         let voff = defaults.double(forKey: "NSTextInsertionPointBlinkPeriodOff")
         offBlinkTime = voff == 0 ? offBlinkTime : voff * 1000
-        self.animate = true
     }
 
     public func draw(in context: CGContext) {
-        rootNode.width = Float(frame.width)
-        rootNode.draw(in: context, width: Float(frame.width))
+//        print("\n\ndraw visibleRect: \(visibleRect)")
+        // Draw the background
+        context.setFillColor(NSColor(named: "EditorBackgroundColor")!.cgColor)
+        context.addRect(bounds)
+        context.drawPath(using: .eoFill)
+
+        context.saveGState(); defer { context.restoreGState() }
+        context.translateBy(x: rootNode.frame.origin.x, y: rootNode.frame.origin.y)
+//        var vis = visibleRect
+//        vis.origin.x -= rootNode.frame.origin.x
+//        vis.origin.y -= rootNode.frame.origin.y
+        let vis = bounds
+        rootNode.draw(in: context, visibleRect: vis)
     }
 
     public override func draw(_ dirtyRect: NSRect) {
+//        print("\n\n\n\ndraw dirtyRect: \(dirtyRect)")
         if let context = NSGraphicsContext.current?.cgContext {
             self.draw(in: context)
         }
@@ -996,8 +591,6 @@ public class BeamTextEdit: NSView, NSTextInputClient {
         invalidate()
     }
 
-    var fHeight: Float { Float(font.ascent - font.descent) }
-
     public func lineAt(point: NSPoint) -> Int {
         let fid = node.frameInDocument
         return node.lineAt(point: NSPoint(x: point.x - fid.minX, y: point.y - fid.minY))
@@ -1008,21 +601,44 @@ public class BeamTextEdit: NSView, NSTextInputClient {
         return node.positionAt(point: NSPoint(x: point.x - fid.minX, y: point.y - fid.minY))
     }
 
+    public func linkAt(point: NSPoint) -> URL? {
+        let fid = node.frameInDocument
+        return node.linkAt(point: NSPoint(x: point.x - fid.minX, y: point.y - fid.minY))
+    }
+
+    public func internalLinkAt(point: NSPoint) -> String? {
+        let fid = node.frameInDocument
+        return node.internalLinkAt(point: NSPoint(x: point.x - fid.minX, y: point.y - fid.minY))
+    }
+
     override public func mouseDown(with event: NSEvent) {
         //       window?.makeFirstResponder(self)
         if event.clickCount == 1 {
             reBlink()
-            let point = self.convert(event.locationInWindow, from: nil)
+            let point = convert(event.locationInWindow)
             guard let newNode = nodeAt(point: point) else { return }
-            if newNode !== node {
+            if newNode.mouseDown(mouseInfo: MouseInfo(newNode, point, event)) {
+                return
+            }
+
+            if newNode !== node && !newNode.readOnly {
                 node = newNode
             }
+
+            if let link = linkAt(point: point) {
+                openURL(link)
+                return
+            }
+            if let link = internalLinkAt(point: point) {
+                openCard(link)
+                return
+            }
             cursorPosition = positionAt(point: point)
-            cancelSelection()
+            rootNode.cancelSelection()
             dragMode = .select(cursorPosition)
 
         } else {
-            doCommand(.selectAll)
+            rootNode.doCommand(.selectAll)
         }
     }
 
@@ -1036,7 +652,12 @@ public class BeamTextEdit: NSView, NSTextInputClient {
 
     override public func mouseDragged(with event: NSEvent) {
         //        window?.makeFirstResponder(self)
-        let point = self.convert(event.locationInWindow, from: nil)
+        let point = convert(event.locationInWindow)
+
+        if node.mouseDragged(mouseInfo: MouseInfo(node, point, event)) {
+            return
+        }
+
         let p = positionAt(point: point)
         cursorPosition = p
         switch dragMode {
@@ -1048,8 +669,47 @@ public class BeamTextEdit: NSView, NSTextInputClient {
         invalidate()
     }
 
+    var hoveredNode: TextNode? {
+        didSet {
+            if let old = oldValue {
+                if old !== hoveredNode {
+                    old.hover = false
+                }
+            }
+
+            if let new = hoveredNode {
+                new.hover = true
+            }
+        }
+    }
+
+    func convert(_ point: NSPoint) -> NSPoint {
+        return self.convert(point, from: nil)
+    }
+
+    override public func mouseMoved(with event: NSEvent) {
+        if !(window?.contentView?.frame.contains(event.locationInWindow) ?? false) {
+            super.mouseMoved(with: event)
+            return
+        }
+        let point = convert(event.locationInWindow)
+        guard let newNode = nodeAt(point: point) else { return }
+        if newNode !== hoveredNode {
+            hoveredNode = newNode
+        }
+
+        _ = node.mouseMoved(mouseInfo: MouseInfo(node, point, event))
+        _ = hoveredNode?.mouseMoved(mouseInfo: MouseInfo(hoveredNode!, point, event))
+
+        invalidate()
+    }
+
     override public func mouseUp(with event: NSEvent) {
+        let point = convert(event.locationInWindow)
         dragMode = .none
+        if node.mouseUp(mouseInfo: MouseInfo(node, point, event)) {
+            return
+        }
         super.mouseUp(with: event)
     }
 
@@ -1069,14 +729,47 @@ public class BeamTextEdit: NSView, NSTextInputClient {
     var blinkTime: Double = CFAbsoluteTimeGetCurrent()
     var blinkPhase = true
 
-    //    func animate(_ tick: Tick) {
-    //        let now = CFAbsoluteTimeGetCurrent()
-    //        if blinkTime < now && hasFocus {
-    //            blinkPhase.toggle()
-    //            blinkTime = now + (blinkPhase ? onBlinkTime : offBlinkTime)
-    //            invalidate()
-    //        }
-    //    }
-
     public override var isFlipped: Bool { true }
+
+    public override func viewDidMoveToWindow() {
+        setupNotificationListeners()
+    }
+
+    func setupNotificationListeners() {
+        let nc = NotificationCenter.default
+
+        guard let scrollView = enclosingScrollView else {
+            print("ScrollView not found")
+            return
+        }
+
+        nc.addObserver(
+            self,
+            selector: #selector(scrollViewWillStartLiveScroll(notification:)),
+            name: NSScrollView.willStartLiveScrollNotification,
+            object: scrollView
+        )
+
+        nc.addObserver(
+            self,
+            selector: #selector(scrollViewDidEndLiveScroll(notification:)),
+            name: NSScrollView.didEndLiveScrollNotification,
+            object: scrollView
+        )
+    }
+
+    @objc func scrollViewWillStartLiveScroll(notification: Notification) {
+        #if DEBUG
+        print("\(#function) ")
+        #endif
+        invalidate()
+    }
+
+    @objc func scrollViewDidEndLiveScroll(notification: Notification) {
+        #if DEBUG
+        print("\(#function) ")
+        #endif
+        invalidate()
+    }
+
 }

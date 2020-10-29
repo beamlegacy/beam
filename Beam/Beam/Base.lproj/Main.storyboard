@@ -69,6 +69,11 @@
                                                 <action selector="newSearch:" target="Ady-hI-5gd" id="A5z-dM-XS8"/>
                                             </connections>
                                         </menuItem>
+                                        <menuItem title="New Search..." tag="2" keyEquivalent="F" id="7bQ-0P-W15" userLabel="New Search...">
+                                            <connections>
+                                                <action selector="newSearch:" target="Ady-hI-5gd" id="AAg-12-xc0"/>
+                                            </connections>
+                                        </menuItem>
                                         <menuItem title="Open…" keyEquivalent="o" id="IAo-SY-fd9">
                                             <connections>
                                                 <action selector="openDocument:" target="Ady-hI-5gd" id="bVn-NM-KNZ"/>

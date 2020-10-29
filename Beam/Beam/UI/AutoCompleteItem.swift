@@ -13,7 +13,15 @@ struct AutoCompleteItem: View {
 
     var body: some View {
         HStack {
-            item.source == .history ? Image("clock") : Image("magnifyingglass")
+            switch item.source {
+            case .history:
+                Symbol(name: "􀐫")
+            case .autoComplete:
+                Symbol(name: "􀊫").foregroundColor(Color("EditorLinkColor"))
+            case .note:
+                Symbol(name: "􀓕")
+            }
+
             Text(item.string)
                 .foregroundColor(selected ? Color("AutoCompleteTextSelected") :  Color("AutoCompleteText"))
         }

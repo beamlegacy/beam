@@ -16,7 +16,7 @@ class LexerTests: XCTestCase {
 
     func testLexer1() {
         let string1 = "Test of _a_ **simple** [[lexer]]"
-        var lexer = Lexer(inputString: string1)
+        let lexer = Lexer(inputString: string1)
 
         let results: [(String, Lexer.TokenType)] = [
             ("Test", .Text),
@@ -47,7 +47,7 @@ class LexerTests: XCTestCase {
 
     func testLexer2() {
         let string1 = "Test of _a_\n**simple** [[lexer]]"
-        var lexer = Lexer(inputString: string1)
+        let lexer = Lexer(inputString: string1)
 
         let results: [(String, Lexer.TokenType)] = [
             ("Test", .Text),
@@ -78,7 +78,7 @@ class LexerTests: XCTestCase {
 
     func testLexer3() {
         let string1 = "Test of **a**\n**simple** [[lexer]]"
-        var lexer = Lexer(inputString: string1)
+        let lexer = Lexer(inputString: string1)
 
         let results: [(String, Lexer.TokenType)] = [
             ("Test", .Text),
@@ -109,7 +109,7 @@ class LexerTests: XCTestCase {
 
     func testLexer4() {
         let string1 = "]]yy"
-        var lexer = Lexer(inputString: string1)
+        let lexer = Lexer(inputString: string1)
 
         let results: [(String, Lexer.TokenType)] = [
             ("]]", .LinkEnd),
@@ -127,7 +127,7 @@ class LexerTests: XCTestCase {
 
     func testLexer5() {
         let string1 = "y"
-        var lexer = Lexer(inputString: string1)
+        let lexer = Lexer(inputString: string1)
 
         let results: [(String, Lexer.TokenType)] = [
             ("y", .Text),
@@ -144,7 +144,7 @@ class LexerTests: XCTestCase {
 
     func testLexer6() {
         let string1 = "y\n"
-        var lexer = Lexer(inputString: string1)
+        let lexer = Lexer(inputString: string1)
 
         let results: [(String, Lexer.TokenType)] = [
             ("y", .Text),

@@ -34,6 +34,14 @@ public extension NSMutableAttributedString {
         self.addAttributes(attribs, range: wholeRange)
         return self
     }
+
+    func replaceAttributes(_ attribs: [NSAttributedString.Key: Any]) -> Self {
+        for attrib in attribs {
+            self.removeAttribute(attrib.key, range: self.wholeRange)
+        }
+        self.addAttributes(attribs, range: wholeRange)
+        return self
+    }
 }
 
 extension NSMutableAttributedString {

@@ -17,6 +17,7 @@ extension Bullet {
     @NSManaged public var note: Note?
     @NSManaged public var parent: Bullet?
     @NSManaged public var unlinkedNotes: Set<Note>?
+    @NSManaged public var score: NSNumber?
 
 }
 

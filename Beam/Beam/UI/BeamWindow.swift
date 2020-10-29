@@ -39,8 +39,8 @@ class BeamWindow: NSWindow, NSWindowDelegate {
     init(contentRect: NSRect, data: BeamData) {
         self.data = data
         self.state = BeamState(data: data)
-
-        super.init(contentRect: contentRect, styleMask: [.titled, .closable, .miniaturizable, .texturedBackground, .resizable, .unifiedTitleAndToolbar, .fullSizeContentView],
+        self.state.data.setupJournal()
+        super.init(contentRect: contentRect, styleMask: [.titled, .closable, .miniaturizable, .resizable, .unifiedTitleAndToolbar, .fullSizeContentView],
                    backing: .buffered, defer: false)
 
         self.delegate = self

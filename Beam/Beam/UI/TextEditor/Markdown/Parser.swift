@@ -4,8 +4,18 @@
 //
 //  Created by Sebastien Metrot on 13/10/2020.
 //
+// swiftlint:disable file_length
 
 import Foundation
+import AppKit
+
+extension Lexer.Token {
+    var attributedString: NSMutableAttributedString {
+        let str = string.attributed
+        str.addAttribute(.sourcePos, value: start as NSNumber, range: str.wholeRange)
+        return str
+    }
+}
 
 class Parser {
     enum NodeType: Equatable, Hashable {
@@ -20,15 +30,40 @@ class Parser {
         case newLine
     }
 
+    enum DecorationType: Equatable {
+        case prefix
+        case suffix
+        case infix
+    }
+
     class Node {
         var type: NodeType
         var positionInSource: Int
+        var length: Int
 
         var children: [Node] = []
+
+        var decorations = [DecorationType: Lexer.Token]()
+        var prefix: NSMutableAttributedString {
+            let str = decorations[.prefix]!.attributedString
+            str.addAttributes([NSAttributedString.Key.foregroundColor: NSColor(named: "EditorSyntaxColor")!], range: str.wholeRange)
+            return str
+        }
+        var infix: NSMutableAttributedString {
+            let str = decorations[.infix]!.attributedString
+            str.addAttributes([NSAttributedString.Key.foregroundColor: NSColor(named: "EditorSyntaxColor")!], range: str.wholeRange)
+            return str
+        }
+        var suffix: NSMutableAttributedString {
+            let str = decorations[.suffix]!.attributedString
+            str.addAttributes([NSAttributedString.Key.foregroundColor: NSColor(named: "EditorSyntaxColor")!], range: str.wholeRange)
+            return str
+        }
 
         init(type: NodeType, _ positionInSource: Int) {
             self.type = type
             self.positionInSource = positionInSource
+            self.length = 0
         }
 
         var treeString: String {
@@ -42,8 +77,19 @@ class Parser {
             for c in children {
                 val += c.buildTreeString(depth: depth + 1)
             }
-
             return val
+        }
+
+        /// Return the child that is the last in the tree of children of self
+        func lastNode() -> Node {
+            if let lastChild = children.last {
+                return lastChild.lastNode()
+            }
+            return self
+        }
+
+        func contains(position: Int) -> Bool {
+            position >= positionInSource && position <= positionInSource + length
         }
     }
 
@@ -81,7 +127,6 @@ class Parser {
             isDone = lexer.isFinished
             token = lexer.nextToken()
             atStartOfLine = token.column == 0
-//            print("next token \(token)" )
             return token
         }
 
@@ -105,10 +150,12 @@ class Parser {
         if let base = context.node.children.last, let str = extractTextFromType(base.type), base.positionInSource + str.count == context.token.start {
             // Concatenate the text...
             base.type = .text(str + context.token.string)
+            base.length += context.token.string.count
             context.nextToken()
             return
         }
         let newNode = Node(type: .text(context.token.string), context.token.start)
+        newNode.length = context.token.string.count
         context.append(node: newNode)
         context.nextToken()
     }
@@ -117,57 +164,62 @@ class Parser {
         if let base = context.node.children.last, let str = extractTextFromType(base.type), base.positionInSource + str.count == start {
             // Concatenate the text...
             base.type = .text(str + string)
+            base.length += string.count
             return
         }
         let newNode = Node(type: .text(string), start)
+        newNode.length = string.count
         context.append(node: newNode)
     }
 
     private func parseTokensAsText(_ context: ASTContext, _ tokens: [Lexer.Token]) {
         for token in tokens {
             let newNode = Node(type: .text(token.string), token.start)
+            newNode.length = token.string.count
             context.append(node: newNode)
         }
     }
 
-    private func parseStrong(_ context: ASTContext) {
+    private func parseCouple(_ context: ASTContext, type: NodeType) {
         let startToken = context.token
         context.nextToken()
-        let newNode = Node(type: .strong, startToken.start)
-        context.append(node: newNode)
-        context.push(node: newNode); defer { context.pop() }
+        let newNode = Node(type: type, startToken.start)
+        newNode.decorations[.prefix] = startToken
+        context.push(node: newNode)
         while !context.isDone
-                && context.token.type != .Strong
+                && startToken.type != context.token.type
                 && startToken.string != context.token.string {
-            parseTokenAsText(context)
+            parseToken(context)
         }
 
         if context.isDone {
+            context.pop()
+            appendTextNode(context, startToken.string, startToken.start)
+            for c in newNode.children {
+                context.append(node: c)
+            }
+            parseTokenAsText(context) // Skip the end of the emphasis
             return
         }
+
+        newNode.decorations[.suffix] = context.token
+        newNode.length = context.token.end - newNode.positionInSource
         context.nextToken() // Skip the end of the emphasis
+        context.pop()
+        context.append(node: newNode)
+    }
+
+    private func parseStrong(_ context: ASTContext) {
+        parseCouple(context, type: .strong)
     }
 
     private func parseEmphasis(_ context: ASTContext) {
-        let startToken = context.token
-        context.nextToken()
-        let newNode = Node(type: .emphasis, startToken.start)
-        context.append(node: newNode)
-        context.push(node: newNode); defer { context.pop() }
-        while !context.isDone
-                && context.token.type != .Emphasis
-                && startToken.string != context.token.string {
-            parseTokenAsText(context)
-        }
-
-        if context.isDone {
-            return
-        }
-        context.nextToken() // Skip the end of the emphasis
+        parseCouple(context, type: .emphasis)
     }
 
     private func parseLink(_ context: ASTContext) {
         let linkNode = Node(type: .link(""), context.token.start)
+        linkNode.decorations[.prefix] = context.token
         context.append(node: linkNode)
         context.push(node: linkNode); defer { context.pop() }
         context.nextToken()
@@ -179,30 +231,40 @@ class Parser {
             return
         }
 
+        var infix = context.token
+
         let openParent = context.nextToken()
         guard openParent.type == .OpenParent else { return }
+
+        infix.string += openParent.string
 
         context.nextToken() // skip the open parenthesis
         var url = ""
         while context.token.type != .CloseParent && !context.isDone {
             url += context.token.string
             context.nextToken()
-//            parseToken(context)
         }
 
         if context.isDone {
             return
         }
 
+        infix.string += url
+        infix.string += context.token.string
+        context.node.decorations[.suffix] = infix
+        linkNode.length = context.token.end - linkNode.positionInSource
+
         context.node.type = .link(url)
         context.nextToken()
     }
 
     private func parseInternalLink(_ context: ASTContext) {
+        let prefix = context.token
+        context.nextToken()
         let linkNode = Node(type: .internalLink(""), context.token.start)
+        linkNode.decorations[.prefix] = prefix
         context.append(node: linkNode)
         context.push(node: linkNode); defer { context.pop() }
-        context.nextToken()
         while context.token.type != .LinkEnd && !context.isDone {
             parseTokenAsText(context)
         }
@@ -210,6 +272,9 @@ class Parser {
         if context.isDone {
             return
         }
+
+        linkNode.decorations[.suffix] = context.token
+        linkNode.length = context.token.end - linkNode.positionInSource
 
         var url = ""
         for c in linkNode.children {
@@ -221,32 +286,8 @@ class Parser {
             }
         }
 
-        context.node.type = .link(url)
+        context.node.type = .internalLink(url)
         context.nextToken()
-    }
-
-    // TODO Factorise this code with parseQuote
-    private func parseHeading(_ context: ASTContext) {
-        let start = context.token.start
-        var level = 1
-        context.nextToken()
-        while context.token.type == .Hash && level <= 7 {
-            level += 1
-            context.nextToken()
-        }
-        if context.token.type != .Blank {
-            let string: String = { var str = ""; for _ in 0..<level { str += "#" }; return str }()
-            appendTextNode(context, string, start)
-            return
-        }
-        let heading = Node(type: .heading(level), start)
-        context.append(node: heading)
-        context.push(node: heading); defer { context.pop() }
-
-        // accumulate nodes until the end of the line:
-        while context.token.type != .NewLine && !context.isDone {
-            parseToken(context)
-        }
     }
 
     private func parseEmbed(_ context: ASTContext) {
@@ -255,25 +296,34 @@ class Parser {
         guard context.token.type == .OpenSBracket else { parseTokensAsText(context, [embedToken]); return }
 
         let embed = Node(type: .embed, embedToken.start)
+        embed.decorations[.prefix] = embedToken
+        embed.length = embedToken.end - embed.positionInSource
+
         context.append(node: embed)
         context.push(node: embed); defer { context.pop() }
         parseLink(context)
     }
 
-    private func parseQuote(_ context: ASTContext) {
+    private func parseLineStarter(_ context: ASTContext, tokenType: Lexer.TokenType, limit: Int?, nodeType: @escaping (Int) -> NodeType) {
         let start = context.token.start
         var level = 1
         context.nextToken()
-        while context.token.type == .Quote {
+        while context.token.type == tokenType, level < limit ?? 1000 {
             level += 1
             context.nextToken()
         }
+        var prefixString: String = ""
         if context.token.type != .Blank {
-            let string: String = { var str = ""; for _ in 0..<level { str += ">" }; return str }()
-            appendTextNode(context, string, start)
+            appendTextNode(context, prefixString, start)
             return
         }
-        let heading = Node(type: .quote(level), start)
+        let heading = Node(type: nodeType(level), start)
+        prefixString.append(context.token.string)
+        var prefix = Lexer.Token(type: .Text, string: prefixString)
+        prefix.start = start
+        heading.decorations[.prefix] = prefix
+        heading.length = context.token.end - heading.positionInSource
+
         context.append(node: heading)
         context.push(node: heading); defer { context.pop() }
 
@@ -283,8 +333,22 @@ class Parser {
         }
     }
 
+    private func parseHeading(_ context: ASTContext) {
+        parseLineStarter(context, tokenType: .Hash, limit: 7) { level in
+            return .heading(level)
+        }
+    }
+
+    private func parseQuote(_ context: ASTContext) {
+        parseLineStarter(context, tokenType: .Quote, limit: nil) { level in
+            return .quote(level)
+        }
+    }
+
     private func parseNewLine(_ context: ASTContext) {
-        context.append(node: Node(type: .newLine, context.token.start))
+        let node = Node(type: .newLine, context.token.start)
+        node.length = context.token.end
+        context.append(node: node)
         context.nextToken()
     }
 

@@ -35,6 +35,8 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
     @Published var canGoForward: Bool = false
     @Published var backForwardList: WKBackForwardList
     @Published var visitedURLs = Set<URL>()
+    var note: Note?
+    var bullet: Bullet?
 
     var appendToIndexer: (URL, Readability) -> Void = { _, _ in }
 
@@ -49,6 +51,19 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
     init(originalQuery: String, id: UUID = UUID(), webView: WKWebView? = nil ) {
         self.id = id
         self.originalQuery = originalQuery
+
+        if !originalQuery.isEmpty {
+            self.note = {
+                if let n = Note.fetchWithTitle(CoreDataManager.shared.mainContext, originalQuery) {
+                    return n
+                }
+
+                let n = Note.createNote(CoreDataManager.shared.mainContext, originalQuery)
+                n.score = Float(0) as NSNumber
+                return n
+            }()
+            bullet = self.note?.createBullet(CoreDataManager.shared.mainContext, content: "visiting...")
+        }
 
         if let w = webView {
             self.webView = w
@@ -70,9 +85,20 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
         setupObservers()
     }
 
+    private func updateBullet() {
+        if let url = url {
+            self.bullet?.content = "visit [\(self.title)](\(url.absoluteString))"
+        }
+    }
     private func setupObservers() {
-        webView.publisher(for: \.title).sink { v in self.title = v ?? "loading..." }.store(in: &scope)
-        webView.publisher(for: \.url).sink { v in self.url = v }.store(in: &scope)
+        webView.publisher(for: \.title).sink { v in
+            self.title = v ?? "loading..."
+            self.updateBullet()
+        }.store(in: &scope)
+        webView.publisher(for: \.url).sink { v in
+            self.url = v
+            self.updateBullet()
+        }.store(in: &scope)
         webView.publisher(for: \.isLoading).sink { v in withAnimation { self.isLoading = v } }.store(in: &scope)
         webView.publisher(for: \.estimatedProgress).sink { v in withAnimation { self.estimatedProgress = v } }.store(in: &scope)
         webView.publisher(for: \.hasOnlySecureContent).sink { v in self.hasOnlySecureContent = v }.store(in: &scope)
@@ -243,6 +269,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
         let newWebView = WKWebView(frame: NSRect(), configuration: configuration)
         let newTab = BrowserTab(originalQuery: originalQuery, webView: newWebView)
         onNewTabCreated(newTab)
+
         return newTab.webView
     }
 

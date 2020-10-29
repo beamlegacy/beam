@@ -32,6 +32,10 @@ class Lexer {
         var line: Int = 0
         var column: Int = 0
 
+        var end: Int {
+            start + string.count
+        }
+
         var typeName: String {
             return type.rawValue
         }
@@ -61,6 +65,9 @@ class Lexer {
         start = input.startIndex
         end = start
         createTokenPatterns()
+        if input.isEmpty {
+            isFinished = true
+        }
         // Start streaming chars:
         _ = nextChar()
 

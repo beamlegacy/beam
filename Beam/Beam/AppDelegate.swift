@@ -29,7 +29,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     var data: BeamData = BeamData()
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        NSApp.mainMenu?.item(withTitle: "Window")?.submenu?.delegate = self
+        registerFonts()
+        NSApp.mainMenu?.item(withTitle: "File")?.submenu?.delegate = self
         NSApp.mainMenu?.item(withTitle: "Window")?.submenu?.delegate = self
 
         CoreDataManager.shared.setup()
@@ -37,6 +38,25 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         NSApp.dockTile.badgeLabel = String(Note.countWithPredicate(CoreDataManager.shared.mainContext))
 
         createWindow()
+    }
+
+    func registerFonts() {
+        registerFont(fontName: "SFSymbolsFallback.ttf")
+    }
+
+    func registerFont(fontName: String) {
+        let availableFonts = NSFontManager.shared.availableFonts
+
+        guard availableFonts.contains(fontName) else { return }
+        let bundle = Bundle.main
+        guard let resourcePath = bundle.resourcePath else {
+            print("unable to find resourcePath")
+            return }
+        let fontURL = URL(fileURLWithPath: resourcePath + "/" + fontName)
+        print("Font URL \(fontURL)")
+        if !CTFontManagerRegisterFontsForURL(fontURL as CFURL, .process, nil) {
+            print("unable to register font \(fontName)")
+        }
     }
 
     func createWindow() {
@@ -54,15 +74,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     func menuWillOpen(_ menu: NSMenu) {
-        if menu.title == "Window" {
-            toggleVisibility(false, ofAlternatesKeyEquivalentsItems: menu.items)
-        }
+        toggleVisibility(false, ofAlternatesKeyEquivalentsItems: menu.items)
     }
 
     func menuDidClose(_ menu: NSMenu) {
-        if menu.title == "Window" {
-            toggleVisibility(true, ofAlternatesKeyEquivalentsItems: menu.items)
-        }
+        toggleVisibility(true, ofAlternatesKeyEquivalentsItems: menu.items)
     }
 
     func applicationWillTerminate(_ aNotification: Notification) {

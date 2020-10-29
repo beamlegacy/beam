@@ -5,6 +5,7 @@
         <attribute name="created_at" attributeType="Date" defaultDateTimeInterval="623165820" usesScalarValueType="NO"/>
         <attribute name="id" attributeType="UUID" defaultValueString="6A275532-F5C5-4FA1-8EF5-4D8BE0DAAD71" usesScalarValueType="NO"/>
         <attribute name="orderIndex" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="score" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="updated_at" attributeType="Date" defaultDateTimeInterval="623680920" usesScalarValueType="NO"/>
         <relationship name="children" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Bullet" inverseName="parent" inverseEntity="Bullet"/>
         <relationship name="linkedNotes" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Note" inverseName="linkedReferences" inverseEntity="Note"/>
@@ -20,7 +21,9 @@
     <entity name="Note" representedClassName=".Note" syncable="YES">
         <attribute name="created_at" attributeType="Date" defaultDateTimeInterval="623165880" usesScalarValueType="NO"/>
         <attribute name="id" attributeType="UUID" defaultValueString="6A275532-F5C5-4FA1-8EF5-4D8BE0DAAD71" usesScalarValueType="NO"/>
+        <attribute name="score" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="title" attributeType="String" defaultValueString=""/>
+        <attribute name="type" attributeType="String" defaultValueString="note"/>
         <attribute name="updated_at" attributeType="Date" defaultDateTimeInterval="623680920" usesScalarValueType="NO"/>
         <relationship name="bullets" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Bullet" inverseName="note" inverseEntity="Bullet"/>
         <relationship name="linkedReferences" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Bullet" inverseName="linkedNotes" inverseEntity="Bullet"/>
@@ -38,7 +41,7 @@
         </uniquenessConstraints>
     </entity>
     <elements>
-        <element name="Bullet" positionX="-54" positionY="18" width="128" height="193"/>
-        <element name="Note" positionX="-489.015625" positionY="-17.69921875" width="128" height="148"/>
+        <element name="Bullet" positionX="-54" positionY="18" width="128" height="208"/>
+        <element name="Note" positionX="-489.015625" positionY="-17.69921875" width="128" height="178"/>
     </elements>
 </model>

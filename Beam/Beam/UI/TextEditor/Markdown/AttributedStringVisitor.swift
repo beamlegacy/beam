@@ -8,6 +8,10 @@
 import Foundation
 import AppKit
 
+extension NSAttributedString.Key {
+    static let sourcePos = NSAttributedString.Key(rawValue: "beamSourcePos")
+}
+
 extension String {
     func attributed(_ node: Parser.Node, _ showMD: Bool, _ attribs: [NSAttributedString.Key: Any]) -> NSMutableAttributedString {
         let v = NSMutableAttributedString(string: self)
@@ -31,24 +35,25 @@ extension String {
     }
 }
 
+enum LinkType {
+    case off
+    case bidirectionalLink
+    case hyperLink
+}
+
 class AttributedStringVisitor {
     struct Context {
         var bold = false
         var italic = false
-        var link = false
+        var link = LinkType.off
         var color: NSColor?
-        var showMD = false
+        var showMD = true
         var quoteLevel = 0
         var headingLevel = 0
     }
 
     struct Configuration {
-        var attribs: [Parser.NodeType: [NSAttributedString.Key: Any]] = [:]
-
         init() {
-//            attribs[.text("")] = [.font: NSFont.systemFont(ofSize: 14, weight: .regular)]
-//            attribs[.strong] = [.font: NSFont.systemFont(ofSize: 14, weight: .bold)]
-//            attribs[.emphasis] = [.font: NSFontManager.shared.convert(NSFont.systemFont(ofSize: 14, weight: .regular), toHaveTrait: .italicFontMask)]
         }
     }
 
@@ -56,6 +61,8 @@ class AttributedStringVisitor {
 //    var context: Context {
 //        return contextStack.last!
 //    }
+
+    var cursorPosition: Int = -1
 
     var configuration: Configuration
     private func attribs(for node: Parser.Node, context: Context) -> [NSAttributedString.Key: Any] {
@@ -66,21 +73,37 @@ class AttributedStringVisitor {
         var font = NSFont.systemFont(ofSize: CGFloat(14 + h), weight: bold ? .bold : .regular)
         var attr = [NSAttributedString.Key: Any]()
 
+        var foregroundColor = NSColor(named: "EditorTextColor")!
+
         if context.quoteLevel != 0 {
-            attr[.foregroundColor] = NSColor.gray
+            foregroundColor = .gray
         }
 
-        if context.link {
-            attr[.foregroundColor] = NSColor.linkColor
+        if context.link != .off {
+            switch context.link {
+            case .bidirectionalLink:
+                foregroundColor = NSColor(named: "EditorBidirectionalLinkColor")!
+            case .hyperLink:
+                foregroundColor = NSColor(named: "EditorLinkColor")!
+            default:
+                break
+            }
             attr[.underlineStyle] = NSNumber(value: NSUnderlineStyle.single.rawValue)
         } else if let color = context.color {
-            attr[.foregroundColor] = color
+            foregroundColor = color
+        }
+
+        if context.headingLevel == 1 {
+            attr[.baselineOffset] = -10
+        } else if context.headingLevel == 2 {
+            attr[.baselineOffset] = -15
         }
 
         if context.italic || context.quoteLevel != 0 {
             font = NSFontManager.shared.convert(font, toHaveTrait: .italicFontMask)
         }
 
+        attr[.foregroundColor] = foregroundColor
         attr[.font] = font
 
         return attr
@@ -90,12 +113,55 @@ class AttributedStringVisitor {
         self.configuration = configuration
     }
 
-    func visitChildren(_ node: Parser.Node) -> NSMutableAttributedString {
-        let attributed = "".attributed
+    // swiftlint:disable:next cyclomatic_complexity
+    func visitChildren(_ node: Parser.Node, _ applyAttributes: Bool) -> NSMutableAttributedString {
+        let decorate: Bool = {
+            guard context.showMD else { return false }
+            switch node.type {
+            case .text:
+                return false
+            case .newLine:
+                return false
+            default:
+                return true
+            }
+        }()
+        var attributed = "".attributed
 
         for c in node.children {
             let str = visit(c)
             attributed.append(str)
+        }
+
+        if applyAttributes {
+            attributed = attributed.replaceAttributes(attribs(for: node, context: context))
+        }
+
+        if decorate {
+            switch node.type {
+            case .embed:
+                attributed.insert(node.prefix, at: 0)
+            case .emphasis:
+                attributed.append(node.suffix)
+                attributed.insert(node.prefix, at: 0)
+            case .heading:
+                attributed.insert(node.prefix, at: 0)
+            case .internalLink:
+                attributed.insert(node.prefix, at: 0)
+                attributed.append(node.suffix)
+            case .link:
+                attributed.insert(node.prefix, at: 0)
+                attributed.append(node.suffix)
+            case .quote:
+                attributed.insert(node.prefix, at: 0)
+            case .strong:
+                attributed.insert(node.prefix, at: 0)
+                attributed.append(node.suffix)
+            case .newLine:
+                break
+            case .text:
+                break
+            }
         }
         return attributed
     }
@@ -114,10 +180,16 @@ class AttributedStringVisitor {
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
     func visit(_ node: Parser.Node) -> NSMutableAttributedString {
+        let showMD = context.showMD
+        defer {
+            context.showMD = showMD
+        }
+
+        context.showMD = node.contains(position: cursorPosition)
         switch node.type {
         case let .text(str):
             if str.isEmpty {
-                return visitChildren(node)
+                return visitChildren(node, false)
             } else {
                 return str.attributed(node, context.showMD, attribs(for: node, context: context))
             }
@@ -125,16 +197,16 @@ class AttributedStringVisitor {
         case .strong:
             pushContext(); defer { popContext() }
             context.bold = true
-            return visitChildren(node).addAttributes(attribs(for: node, context: context))
+            return visitChildren(node, true)
         case .emphasis:
             pushContext(); defer { popContext() }
             context.italic = true
-            return visitChildren(node).addAttributes(attribs(for: node, context: context))
+            return visitChildren(node, true)
 
         case let .link(link):
             pushContext(); defer { popContext() }
-            context.link = true
-            let str = visitChildren(node).addAttributes(attribs(for: node, context: context))
+            context.link = .hyperLink
+            let str = visitChildren(node, false)
             if let url = URL(string: link) {
                 str.addAttribute(.link, value: url as NSURL, range: str.wholeRange)
             } else if let url = URL(string: link.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)!) {
@@ -144,15 +216,15 @@ class AttributedStringVisitor {
 
         case let .internalLink(link):
             pushContext(); defer { popContext() }
-            context.link = true
+            context.link = .bidirectionalLink
             let str = link.attributed.addAttributes(attribs(for: node, context: context))
-            str.addAttribute(.link, value: URL(string: link)! as NSURL, range: str.wholeRange)
+            str.addAttribute(.link, value: link, range: str.wholeRange)
             return str
 
         case let .heading(depth):
             pushContext(); defer { popContext() }
             context.headingLevel = depth
-            return visitChildren(node).addAttributes(attribs(for: node, context: context))
+            return visitChildren(node, true)
 
         case .embed:
             return "<IMG>".attributed
@@ -160,7 +232,7 @@ class AttributedStringVisitor {
         case let .quote(depth):
             pushContext(); defer { popContext() }
             context.quoteLevel = depth
-            return visitChildren(node).addAttributes(attribs(for: node, context: context))
+            return visitChildren(node, true)
 
         case .newLine:
             return "\n".attributed

@@ -34,7 +34,7 @@ struct BrowserTabView: View {
                 .stroke(Self.tabFrameColor)
             }
             HStack {
-                Button("X") {
+                Button("􀆄") {
                     for (i, t) in state.tabs.enumerated() where t.id == tab.id {
                         if i > 0 {
                             state.currentTab = state.tabs[i - 1]
