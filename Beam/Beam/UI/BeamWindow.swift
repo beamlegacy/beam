@@ -72,7 +72,7 @@ class BeamWindow: NSWindow, NSWindowDelegate {
         // THIS HACK IS HORRIBLE But AppKit leaves us little choice to have a similar look on Catalina and Future OSes
         if let b = self.standardWindowButton(.closeButton) {
             if var f = b.superview?.superview?.frame {
-                let v = CGFloat(runningOnBigSur ? 12 : 12)
+                let v = CGFloat(runningOnBigSur ? 12 : 14)
                 f.size.height += v
                 f.origin.x += 13
                 f.origin.y -= v
