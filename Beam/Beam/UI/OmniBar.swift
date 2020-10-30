@@ -107,10 +107,13 @@ struct RoundRectButtonStyle: PrimitiveButtonStyle {
 struct Symbol: View {
     var name: String
     var size: Float = 16
+    @Environment(\.isEnabled) var isEnabled
 
     var body: some View {
-//        Text(name).font(.system(size: CGFloat(size))).frame(height: CGFloat(size), alignment: .center)
-        Text(name).font(.custom(".SFSymbolsFallback", size: CGFloat(size))).frame(height: CGFloat(size), alignment: .center).offset(y: 2)
+        Image(name).renderingMode(.template)
+            .resizable()
+            .scaledToFill() // add if you need
+            .frame(width: CGFloat(size / 2), height: CGFloat(size), alignment: .center)
     }
 }
 
@@ -157,7 +160,7 @@ struct OmniBarSearchBox: View {
                 .frame(idealWidth: 600, maxWidth: .infinity)
 
                 Button(action: resetSearchQuery) {
-                    Symbol(name: "􀁡", size: 12)
+                    Symbol(name: "xmark.circle.fill", size: 12)
                 }.buttonStyle(BorderlessButtonStyle()).disabled(state.searchQuery.isEmpty).padding([.leading, .trailing], 9)
             }
         }
@@ -191,11 +194,11 @@ struct OmniBar: View {
     var body: some View {
         HStack {
             Button(action: goBack) {
-                Symbol(name: "􀆉").offset(x: 0, y: -0.5)
+                Symbol(name: "chevron.left").offset(x: 0, y: -0.5)
             }.buttonStyle(BorderlessButtonStyle()).disabled(!state.canGoBack).padding(.leading, 18)
 
             Button(action: goForward) {
-                Symbol(name: "􀆊").offset(x: 0, y: -0.5)
+                Symbol(name: "chevron.right").offset(x: 0, y: -0.5)
             }.buttonStyle(BorderlessButtonStyle()).disabled(!state.canGoForward).padding(.leading, 9)
 
             if state.mode == .note {
@@ -208,11 +211,11 @@ struct OmniBar: View {
                     }
 
                     Button(action: startQuery) {
-                        Symbol(name: "􀊫")
+                        Symbol(name: "magnifyingglass")
                     }.disabled(state.searchQuery.isEmpty && state.currentNote == nil ).buttonStyle(RoundRectButtonStyle()).padding(.leading, 1)
 
                     Button(action: startNewSearch) {
-                        Symbol(name: "􀅼")
+                        Symbol(name: "plus")
                     }.buttonStyle(RoundRectButtonStyle())
                 }.padding(.leading, 9)
 
@@ -237,7 +240,7 @@ struct OmniBar: View {
             }
 
             Button(action: toggleMode) {
-                Symbol(name: state.mode == .web ? "􀓕" : "􀤆")
+                Symbol(name: state.mode == .web ? "note.text" : "network")
             }.buttonStyle(RoundRectButtonStyle()).disabled(state.tabs.isEmpty)
         }.padding(.top, 10).padding(.bottom, 10).frame(height: 54, alignment: .topLeading)
     }

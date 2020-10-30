@@ -38,6 +38,7 @@
 		52E04FED252C814D00AD9F56 /* RoamImporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52E04FEC252C814D00AD9F56 /* RoamImporterTests.swift */; };
 		7D40159D41DDD593BDFDF664 /* Pods_BeamTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C8379DEE387FB86FA7817188 /* Pods_BeamTests.framework */; };
 		9601BA75254236730003BCFE /* JournalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9601BA74254236730003BCFE /* JournalView.swift */; };
+		96062E3E254C5ECD00AAB78D /* DumpEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96062E3D254C5ECD00AAB78D /* DumpEnvironment.swift */; };
 		9631C747251CE997009B40C4 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = 9631C746251CE997009B40C4 /* SwiftSoup */; };
 		9631C76B251E3648009B40C4 /* NSView+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9631C76A251E3648009B40C4 /* NSView+Beam.swift */; };
 		96354BD22543136000E40788 /* SymbolView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96354BD12543136000E40788 /* SymbolView.swift */; };
@@ -149,6 +150,7 @@
 		52E04FE6252C7B9E00AD9F56 /* RoamImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoamImporter.swift; sourceTree = "<group>"; };
 		52E04FEC252C814D00AD9F56 /* RoamImporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoamImporterTests.swift; sourceTree = "<group>"; };
 		9601BA74254236730003BCFE /* JournalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalView.swift; sourceTree = "<group>"; };
+		96062E3D254C5ECD00AAB78D /* DumpEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DumpEnvironment.swift; sourceTree = "<group>"; };
 		9631C76A251E3648009B40C4 /* NSView+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSView+Beam.swift"; sourceTree = "<group>"; };
 		96354BD12543136000E40788 /* SymbolView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymbolView.swift; sourceTree = "<group>"; };
 		964547AC2520CF3E0064D062 /* Font.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Font.swift; sourceTree = "<group>"; };
@@ -364,6 +366,14 @@
 			path = Pods;
 			sourceTree = "<group>";
 		};
+		96062E3C254C5EBB00AAB78D /* SwiftUI+Beam */ = {
+			isa = PBXGroup;
+			children = (
+				96062E3D254C5ECD00AAB78D /* DumpEnvironment.swift */,
+			);
+			path = "SwiftUI+Beam";
+			sourceTree = "<group>";
+		};
 		9645488B252382AE0064D062 /* JS */ = {
 			isa = PBXGroup;
 			children = (
@@ -397,6 +407,7 @@
 		965A78272514F147009980D4 /* Beam */ = {
 			isa = PBXGroup;
 			children = (
+				96062E3C254C5EBB00AAB78D /* SwiftUI+Beam */,
 				52DC106C2539D5C300F2D594 /* Configuration */,
 				52DC10632539D1C300F2D594 /* Text */,
 				9645488B252382AE0064D062 /* JS */,
@@ -861,6 +872,7 @@
 				96354BD22543136000E40788 /* SymbolView.swift in Sources */,
 				96E1356A2546DE4900133A24 /* TextEditOperations.swift in Sources */,
 				96B99AA1253F43DD008E3686 /* NSImage+CGImage.swift in Sources */,
+				96062E3E254C5ECD00AAB78D /* DumpEnvironment.swift in Sources */,
 				52A66A172535E77D00CE247C /* ScrollableTextView.swift in Sources */,
 				528E44272525BD4600B7C54E /* CoreDataManager.swift in Sources */,
 				9694F77925155F8700399E6A /* AutoComplete.swift in Sources */,

@@ -15,11 +15,11 @@ struct AutoCompleteItem: View {
         HStack {
             switch item.source {
             case .history:
-                Symbol(name: "􀐫")
+                Symbol(name: "clock")
             case .autoComplete:
-                Symbol(name: "􀊫").foregroundColor(Color("EditorLinkColor"))
+                Symbol(name: "magnifyingglass").foregroundColor(Color("EditorLinkColor"))
             case .note:
-                Symbol(name: "􀓕")
+                Symbol(name: "note.text")
             }
 
             Text(item.string)
