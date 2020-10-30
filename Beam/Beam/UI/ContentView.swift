@@ -13,15 +13,10 @@ struct ModeView: View {
     @ViewBuilder
     var body: some View {
         VStack {
-            ZStack {
-                VisualEffectBlur(material: .headerView, blendingMode: .withinWindow, state: .active)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-
-                OmniBar(tab: state.currentTab)
-                    .padding(.leading, 73)
-                    .padding(.trailing, 20)
-                    .frame(alignment: .center)
-            }.frame(height: 52)
+            OmniBar(tab: state.currentTab)
+                .padding(.leading, 73)
+                .padding(.trailing, 20)
+                .frame(height: 52, alignment: .center)
 
             ZStack {
                 if state.mode == .web {

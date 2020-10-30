@@ -39,9 +39,15 @@
 		7D40159D41DDD593BDFDF664 /* Pods_BeamTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C8379DEE387FB86FA7817188 /* Pods_BeamTests.framework */; };
 		9601BA75254236730003BCFE /* JournalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9601BA74254236730003BCFE /* JournalView.swift */; };
 		96062E3E254C5ECD00AAB78D /* DumpEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96062E3D254C5ECD00AAB78D /* DumpEnvironment.swift */; };
+		96062E46254C67C100AAB78D /* RoundRectButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96062E45254C67C100AAB78D /* RoundRectButtonStyle.swift */; };
+		96062E4B254C67E600AAB78D /* GlobalNoteTitle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96062E4A254C67E600AAB78D /* GlobalNoteTitle.swift */; };
+		96062E59254C690000AAB78D /* GlobalTabTitle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96062E58254C690000AAB78D /* GlobalTabTitle.swift */; };
+		96062E5E254C692B00AAB78D /* OmniBarSearchBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96062E5D254C692B00AAB78D /* OmniBarSearchBox.swift */; };
+		96062E6E254C6D4C00AAB78D /* Frame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96062E6D254C6D4C00AAB78D /* Frame.swift */; };
+		96062E73254C74F200AAB78D /* Chevrons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96062E72254C74F200AAB78D /* Chevrons.swift */; };
 		9631C747251CE997009B40C4 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = 9631C746251CE997009B40C4 /* SwiftSoup */; };
 		9631C76B251E3648009B40C4 /* NSView+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9631C76A251E3648009B40C4 /* NSView+Beam.swift */; };
-		96354BD22543136000E40788 /* SymbolView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96354BD12543136000E40788 /* SymbolView.swift */; };
+		96354BD22543136000E40788 /* Symbol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96354BD12543136000E40788 /* Symbol.swift */; };
 		964547AD2520CF3E0064D062 /* Font.swift in Sources */ = {isa = PBXBuildFile; fileRef = 964547AC2520CF3E0064D062 /* Font.swift */; };
 		964547B22520D19F0064D062 /* NSRect+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 964547B12520D19F0064D062 /* NSRect+Beam.swift */; };
 		964547B725212D760064D062 /* String+Ranges.swift in Sources */ = {isa = PBXBuildFile; fileRef = 964547B625212D760064D062 /* String+Ranges.swift */; };
@@ -151,8 +157,14 @@
 		52E04FEC252C814D00AD9F56 /* RoamImporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoamImporterTests.swift; sourceTree = "<group>"; };
 		9601BA74254236730003BCFE /* JournalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalView.swift; sourceTree = "<group>"; };
 		96062E3D254C5ECD00AAB78D /* DumpEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DumpEnvironment.swift; sourceTree = "<group>"; };
+		96062E45254C67C100AAB78D /* RoundRectButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundRectButtonStyle.swift; sourceTree = "<group>"; };
+		96062E4A254C67E600AAB78D /* GlobalNoteTitle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalNoteTitle.swift; sourceTree = "<group>"; };
+		96062E58254C690000AAB78D /* GlobalTabTitle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalTabTitle.swift; sourceTree = "<group>"; };
+		96062E5D254C692B00AAB78D /* OmniBarSearchBox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniBarSearchBox.swift; sourceTree = "<group>"; };
+		96062E6D254C6D4C00AAB78D /* Frame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Frame.swift; sourceTree = "<group>"; };
+		96062E72254C74F200AAB78D /* Chevrons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Chevrons.swift; sourceTree = "<group>"; };
 		9631C76A251E3648009B40C4 /* NSView+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSView+Beam.swift"; sourceTree = "<group>"; };
-		96354BD12543136000E40788 /* SymbolView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymbolView.swift; sourceTree = "<group>"; };
+		96354BD12543136000E40788 /* Symbol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Symbol.swift; sourceTree = "<group>"; };
 		964547AC2520CF3E0064D062 /* Font.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Font.swift; sourceTree = "<group>"; };
 		964547B12520D19F0064D062 /* NSRect+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSRect+Beam.swift"; sourceTree = "<group>"; };
 		964547B625212D760064D062 /* String+Ranges.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Ranges.swift"; sourceTree = "<group>"; };
@@ -366,12 +378,57 @@
 			path = Pods;
 			sourceTree = "<group>";
 		};
-		96062E3C254C5EBB00AAB78D /* SwiftUI+Beam */ = {
+		96062E62254C698300AAB78D /* OmniBar */ = {
+			isa = PBXGroup;
+			children = (
+				965A78622514F57E009980D4 /* OmniBar.swift */,
+				96062E4A254C67E600AAB78D /* GlobalNoteTitle.swift */,
+				96062E58254C690000AAB78D /* GlobalTabTitle.swift */,
+				96062E5D254C692B00AAB78D /* OmniBarSearchBox.swift */,
+				96062E72254C74F200AAB78D /* Chevrons.swift */,
+			);
+			path = OmniBar;
+			sourceTree = "<group>";
+		};
+		96062E63254C69B100AAB78D /* Browser */ = {
+			isa = PBXGroup;
+			children = (
+				965A785A2514F1AF009980D4 /* WebView.swift */,
+				965B19632518F3BA00BCF01C /* BrowserTabBar.swift */,
+				965B19682518F4F000BCF01C /* BrowserTabView.swift */,
+			);
+			path = Browser;
+			sourceTree = "<group>";
+		};
+		96062E64254C69CF00AAB78D /* Notes */ = {
+			isa = PBXGroup;
+			children = (
+				964548742522AD770064D062 /* NoteView.swift */,
+				9601BA74254236730003BCFE /* JournalView.swift */,
+			);
+			path = Notes;
+			sourceTree = "<group>";
+		};
+		96062E65254C69F200AAB78D /* Utils */ = {
 			isa = PBXGroup;
 			children = (
 				96062E3D254C5ECD00AAB78D /* DumpEnvironment.swift */,
+				96F5DB222517A2020080E3EE /* BTextField.swift */,
+				96354BD12543136000E40788 /* Symbol.swift */,
+				96062E45254C67C100AAB78D /* RoundRectButtonStyle.swift */,
+				96062E6D254C6D4C00AAB78D /* Frame.swift */,
 			);
-			path = "SwiftUI+Beam";
+			path = Utils;
+			sourceTree = "<group>";
+		};
+		96062E66254C6A0200AAB78D /* AutoComplete */ = {
+			isa = PBXGroup;
+			children = (
+				96F5DB2A251811060080E3EE /* AutoCompleteList.swift */,
+				96F5DB32251817DB0080E3EE /* AutoCompleteItem.swift */,
+				96F5DB4925189DDF0080E3EE /* AutoCompleteView.swift */,
+			);
+			path = AutoComplete;
 			sourceTree = "<group>";
 		};
 		9645488B252382AE0064D062 /* JS */ = {
@@ -407,7 +464,6 @@
 		965A78272514F147009980D4 /* Beam */ = {
 			isa = PBXGroup;
 			children = (
-				96062E3C254C5EBB00AAB78D /* SwiftUI+Beam */,
 				52DC106C2539D5C300F2D594 /* Configuration */,
 				52DC10632539D1C300F2D594 /* Text */,
 				9645488B252382AE0064D062 /* JS */,
@@ -481,21 +537,15 @@
 		965A78612514F570009980D4 /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				96062E66254C6A0200AAB78D /* AutoComplete */,
+				96062E65254C69F200AAB78D /* Utils */,
+				96062E64254C69CF00AAB78D /* Notes */,
+				96062E63254C69B100AAB78D /* Browser */,
+				96062E62254C698300AAB78D /* OmniBar */,
 				52C82C6A25305984006C188C /* NotesList */,
 				96C0398F2520C67C00A2EDC7 /* TextEditor */,
 				965A782A2514F147009980D4 /* ContentView.swift */,
-				965A78622514F57E009980D4 /* OmniBar.swift */,
-				965A785A2514F1AF009980D4 /* WebView.swift */,
-				96F5DB222517A2020080E3EE /* BTextField.swift */,
-				96F5DB2A251811060080E3EE /* AutoCompleteList.swift */,
-				96F5DB32251817DB0080E3EE /* AutoCompleteItem.swift */,
-				96F5DB4925189DDF0080E3EE /* AutoCompleteView.swift */,
-				965B19632518F3BA00BCF01C /* BrowserTabBar.swift */,
-				965B19682518F4F000BCF01C /* BrowserTabView.swift */,
 				966B3540251BB2A800751322 /* BeamWindow.swift */,
-				964548742522AD770064D062 /* NoteView.swift */,
-				9601BA74254236730003BCFE /* JournalView.swift */,
-				96354BD12543136000E40788 /* SymbolView.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -830,6 +880,8 @@
 				96F5DB232517A2020080E3EE /* BTextField.swift in Sources */,
 				96D5F1752519F75600A19BBC /* BID.swift in Sources */,
 				96B3A5EE253B99E000E8C366 /* NoteBackForwardList.swift in Sources */,
+				96062E5E254C692B00AAB78D /* OmniBarSearchBox.swift in Sources */,
+				96062E6E254C6D4C00AAB78D /* Frame.swift in Sources */,
 				96F5DB2B251811060080E3EE /* AutoCompleteList.swift in Sources */,
 				965A785F2514F1AF009980D4 /* NavigationContext.swift in Sources */,
 				964547AD2520CF3E0064D062 /* Font.swift in Sources */,
@@ -839,15 +891,18 @@
 				965A785E2514F1AF009980D4 /* WebView.swift in Sources */,
 				965B19692518F4F000BCF01C /* BrowserTabView.swift in Sources */,
 				52D4C63A2535A4D800A00457 /* NotificationName.swift in Sources */,
+				96062E73254C74F200AAB78D /* Chevrons.swift in Sources */,
 				96C039982520CB9D00A2EDC7 /* Maths.swift in Sources */,
 				96F5DB1E2517A1E60080E3EE /* BNSTextField.swift in Sources */,
 				52DC0F5825384F3400F2D594 /* NoteWindow.swift in Sources */,
+				96062E46254C67C100AAB78D /* RoundRectButtonStyle.swift in Sources */,
 				96E13582254727A000133A24 /* TextRoot.swift in Sources */,
 				52326F8C252F1A8E00A40F1E /* NSManagedObject+initExtension.swift in Sources */,
 				965B19712518F59D00BCF01C /* BrowserTab.swift in Sources */,
 				96C039922520C67C00A2EDC7 /* TextEdit.swift in Sources */,
 				52C82C74253059BC006C188C /* NotesWindow.swift in Sources */,
 				964547B22520D19F0064D062 /* NSRect+Beam.swift in Sources */,
+				96062E59254C690000AAB78D /* GlobalTabTitle.swift in Sources */,
 				520BFE8B2534B3E4009DF633 /* Note+CoreDataProperties.swift in Sources */,
 				96F5DB4A25189DDF0080E3EE /* AutoCompleteView.swift in Sources */,
 				96E1357D254723C500133A24 /* TextEditMovements.swift in Sources */,
@@ -858,6 +913,7 @@
 				52A66A242535E8FB00CE247C /* TextView.swift in Sources */,
 				523586462534BF4E006748E4 /* Bullet+CoreDataProperties.swift in Sources */,
 				964548952523A9F50064D062 /* SearchKit.swift in Sources */,
+				96062E4B254C67E600AAB78D /* GlobalNoteTitle.swift in Sources */,
 				965A78292514F147009980D4 /* AppDelegate.swift in Sources */,
 				52DC10652539D23D00F2D594 /* BeamTextFormatter.swift in Sources */,
 				965A782E2514F147009980D4 /* Beam.xcdatamodeld in Sources */,
@@ -869,7 +925,7 @@
 				96F5DB38251820960080E3EE /* ClosedRange+Beam.swift in Sources */,
 				9671E872253F126400809436 /* TextEditCommands.swift in Sources */,
 				96454823252216570064D062 /* NSRange+CFRange.swift in Sources */,
-				96354BD22543136000E40788 /* SymbolView.swift in Sources */,
+				96354BD22543136000E40788 /* Symbol.swift in Sources */,
 				96E1356A2546DE4900133A24 /* TextEditOperations.swift in Sources */,
 				96B99AA1253F43DD008E3686 /* NSImage+CGImage.swift in Sources */,
 				96062E3E254C5ECD00AAB78D /* DumpEnvironment.swift in Sources */,
