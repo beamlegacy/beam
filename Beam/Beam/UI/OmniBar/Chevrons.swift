@@ -13,7 +13,7 @@ struct ChevronButtonStyle: PrimitiveButtonStyle {
 
     @Environment(\.isEnabled) private var isEnabled: Bool
     @State var isHover = false
-    var foregroundColor = Color(.displayP3, white: 0, opacity: 0)
+    var foregroundColor = Color(.displayP3, white: 1, opacity: 0)
     public func makeBody(configuration: BorderedButtonStyle.Configuration) -> some View {
         return ZStack {
             RoundedRectangle(cornerRadius: _cornerRadius).foregroundColor(foregroundColor).frame(width: 33, height: 28, alignment: .center)
