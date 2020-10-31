@@ -41,7 +41,7 @@ struct BrowserTabView: View {
                         } else if state.tabs.count > 1 {
                             state.currentTab = state.tabs[i + 1]
                         } else {
-                            state.currentTab = BrowserTab(originalQuery: "", note: nil)
+                            state.currentTab = BrowserTab(state: state, originalQuery: "", note: nil)
                             state.mode = .note
                         }
                         state.tabs.remove(at: i)
@@ -94,7 +94,8 @@ struct BrowserTabView: View {
 }
 
 struct BrowserTabView_Previews: PreviewProvider {
-    static var tab = BrowserTab(originalQuery: "test tab1", note: nil)
+    static var state = BeamState(data: BeamData())
+    static var tab = BrowserTab(state: state, originalQuery: "test tab1", note: nil)
     static var previews: some View {
         Group {
             HStack {

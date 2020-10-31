@@ -51,8 +51,9 @@ struct BrowserTabBar: View {
 }
 
 struct BrowserTabBar_Previews: PreviewProvider {
-    @State static var tabs: [BrowserTab] = [BrowserTab(originalQuery: "test1", note: nil, id: UUID(uuidString: "123e4567-e89b-12d3-a456-426614174000")!), BrowserTab(originalQuery: "test2", note: nil), BrowserTab(originalQuery: "test3", note: nil)]
-    @State static var currentTab = BrowserTab(originalQuery: "test1", note: nil, id: UUID(uuidString: "123e4567-e89b-12d3-a456-426614174000")!)
+    static var state = BeamState(data: BeamData())
+    @State static var tabs: [BrowserTab] = [BrowserTab(state: state, originalQuery: "test1", note: nil, id: UUID(uuidString: "123e4567-e89b-12d3-a456-426614174000")!), BrowserTab(state: state, originalQuery: "test2", note: nil), BrowserTab(state: state, originalQuery: "test3", note: nil)]
+    @State static var currentTab = BrowserTab(state: state, originalQuery: "test1", note: nil, id: UUID(uuidString: "123e4567-e89b-12d3-a456-426614174000")!)
     static var previews: some View {
         BrowserTabBar(tabs: Self.$tabs, currentTab: Self.$currentTab)
     }

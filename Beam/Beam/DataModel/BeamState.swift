@@ -15,7 +15,7 @@ enum Mode {
     case web
 }
 
-class BeamState: ObservableObject {
+@objc class BeamState: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     @Published var mode: Mode = .note {
         didSet {
             switch oldValue {
@@ -98,8 +98,7 @@ class BeamState: ObservableObject {
             }
         }
     }
-    @Published var currentTab = BrowserTab(originalQuery: "", note: nil) // Fake empty tab by default
-    {
+    @Published var currentTab: BrowserTab {
         didSet {
             if self.mode == .web {
                 oldValue.stopViewing()
@@ -191,7 +190,7 @@ class BeamState: ObservableObject {
 
     func createTab(withURL url: URL, originalQuery: String) {
         let note = originalQuery.isEmpty ? nil : createNoteForQuery(originalQuery)
-        let tab = BrowserTab(originalQuery: originalQuery, note: note)
+        let tab = BrowserTab(state: self, originalQuery: originalQuery, note: note)
         tab.load(url: url)
         currentTab = tab
         tabs.append(tab)
@@ -244,7 +243,8 @@ class BeamState: ObservableObject {
         self.data = data
 //        self.currentNote = data.todaysNote
         backForwardList = NoteBackForwardList()
-
+        currentTab = BrowserTab()
+        super.init()
         $searchQuery.sink { [weak self] query in
             guard let self = self else { return }
             guard self.searchQuerySelection == nil else { return }
@@ -282,5 +282,21 @@ class BeamState: ObservableObject {
     func resetQuery() {
         searchQuery = ""
         completedQueries = []
+    }
+
+    func cookiesDidChange(in cookieStore: WKHTTPCookieStore) {
+        cookieStore.getAllCookies({ [weak self] cookies in
+            guard let self = self else { return }
+            for cookie in cookies {
+                self.data.cookies.setCookie(cookie)
+            }
+        })
+    }
+
+    func setup(webView: WKWebView) {
+        for cookie in self.data.cookies.cookies ?? [] {
+           webView.configuration.websiteDataStore.httpCookieStore.setCookie(cookie)
+        }
+        webView.configuration.websiteDataStore.httpCookieStore.add(self)
     }
 }

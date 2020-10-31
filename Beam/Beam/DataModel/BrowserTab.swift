@@ -19,7 +19,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
         webView.load(URLRequest(url: url))
     }
 
-    @Published public var webView: WKWebView {
+    @Published public var webView: WKWebView! {
         didSet {
             setupObservers()
         }
@@ -34,9 +34,13 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
     @Published var serverTrust: SecTrust?
     @Published var canGoBack: Bool = false
     @Published var canGoForward: Bool = false
-    @Published var backForwardList: WKBackForwardList
+    @Published var backForwardList: WKBackForwardList!
     @Published var visitedURLs = Set<URL>()
     @Published var favIcon: NSImage?
+
+    @Published var privateMode = false
+
+    var state: BeamState!
 
     var note: Note?
     var bullet: Bullet?
@@ -51,7 +55,13 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
 
     private var scope = Set<AnyCancellable>()
 
-    init(originalQuery: String, note: Note?, id: UUID = UUID(), webView: WKWebView? = nil ) {
+    override init() {
+        self.id = UUID()
+        super.init()
+    }
+
+    init(state: BeamState, originalQuery: String, note: Note?, id: UUID = UUID(), webView: WKWebView? = nil ) {
+        self.state = state
         self.id = id
         self.note = note
         self.originalQuery = originalQuery
@@ -72,6 +82,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
             configuration.defaultWebpagePreferences.preferredContentMode = .desktop
 
             let web = WKWebView(frame: NSRect(), configuration: configuration)
+            state.setup(webView: web)
             backForwardList = web.backForwardList
             self.webView = web
         }
@@ -149,7 +160,8 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
             if navigationAction.modifierFlags.contains(.command) != isSearchResult {
                 // Create new tab
                 let newWebView = WKWebView(frame: NSRect(), configuration: webView.configuration)
-                let newTab = BrowserTab(originalQuery: originalQuery, note: note, webView: newWebView)
+                state.setup(webView: newWebView)
+                let newTab = BrowserTab(state: state, originalQuery: originalQuery, note: note, webView: newWebView)
                 newTab.load(url: targetURL)
                 onNewTabCreated(newTab)
                 decisionHandler(.cancel, preferences)
@@ -284,7 +296,8 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
     // WKUIDelegate
     func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
         let newWebView = WKWebView(frame: NSRect(), configuration: configuration)
-        let newTab = BrowserTab(originalQuery: originalQuery, note: self.note, webView: newWebView)
+        state.setup(webView: newWebView)
+        let newTab = BrowserTab(state: state, originalQuery: originalQuery, note: self.note, webView: newWebView)
         onNewTabCreated(newTab)
 
         return newTab.webView

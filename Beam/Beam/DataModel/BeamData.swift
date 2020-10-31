@@ -21,6 +21,8 @@ class BeamData: ObservableObject {
 
     var searchKit: SearchKit
 
+    var cookies: HTTPCookieStorage
+
     init() {
         let paths = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true)
         if let applicationSupportDirectory = paths.first {
@@ -29,6 +31,8 @@ class BeamData: ObservableObject {
         } else {
             searchKit = SearchKit(URL(fileURLWithPath: "~/Application Data/BeamApp/index.sk"))
         }
+
+        cookies = HTTPCookieStorage()
     }
 
     var todaysName: String {
@@ -63,4 +67,3 @@ class BeamData: ObservableObject {
         print("Journal updated:\n\(journal)\n")
     }
 }
-
