@@ -18,6 +18,17 @@ enum Mode {
 class BeamState: ObservableObject {
     @Published var mode: Mode = .note {
         didSet {
+            switch oldValue {
+            // swiftlint:disable:next fallthrough no_fallthrough_only
+            case .note: fallthrough
+            case .today:
+                if mode == .web {
+                    currentTab.startViewing()
+                }
+
+            case .web:
+                currentTab.stopViewing()
+            }
             updateCanGoBackForward()
         }
     }
@@ -90,6 +101,11 @@ class BeamState: ObservableObject {
     @Published var currentTab = BrowserTab(originalQuery: "", note: nil) // Fake empty tab by default
     {
         didSet {
+            if self.mode == .web {
+                oldValue.stopViewing()
+                currentTab.startViewing()
+            }
+
             tabScope.removeAll()
             currentTab.$canGoBack.sink { v in
                 self.canGoBack = v
