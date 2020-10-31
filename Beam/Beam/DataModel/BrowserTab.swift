@@ -10,6 +10,7 @@ import SwiftUI
 import Combine
 import WebKit
 import SwiftSoup
+import FavIcon
 
 class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate, WKUIDelegate {
     var id: UUID
@@ -35,6 +36,8 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
     @Published var canGoForward: Bool = false
     @Published var backForwardList: WKBackForwardList
     @Published var visitedURLs = Set<URL>()
+    @Published var favIcon: NSImage?
+
     var note: Note?
     var bullet: Bullet?
 
@@ -83,6 +86,26 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
             self.bullet?.content = "visit [\(name)](\(url.absoluteString))"
         }
     }
+
+    private func updateFavIcon() {
+        guard let url = url else { favIcon = nil; return }
+        do {
+            try FavIcon.downloadPreferred(url) { [weak self] result in
+                guard let self = self else { return }
+
+                if case let .success(image) = result {
+                  // On iOS, this is a UIImage, do something with it here.
+                  // This closure will be executed on the main queue, so it's safe to touch
+                  // the UI here.
+                    self.favIcon = image
+                } else {
+                    self.favIcon = nil
+                }
+            }
+        } catch {
+            self.favIcon = nil
+        }
+    }
     private func setupObservers() {
         webView.publisher(for: \.title).sink { v in
             self.title = v ?? "loading..."
@@ -91,6 +114,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
         webView.publisher(for: \.url).sink { v in
             self.url = v
             self.updateBullet()
+            self.updateFavIcon()
         }.store(in: &scope)
         webView.publisher(for: \.isLoading).sink { v in withAnimation { self.isLoading = v } }.store(in: &scope)
         webView.publisher(for: \.estimatedProgress).sink { v in withAnimation { self.estimatedProgress = v } }.store(in: &scope)

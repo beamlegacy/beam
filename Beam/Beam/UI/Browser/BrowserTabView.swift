@@ -53,6 +53,14 @@ struct BrowserTabView: View {
                 .buttonStyle(BorderlessButtonStyle())
                 .padding(.leading, 2)
 
+                // fav icon:
+                if let icon = tab.favIcon {
+                    Image(nsImage: icon)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(maxWidth: 16, maxHeight: 16, alignment: .center)
+                }
+
                 Text(tab.title)
                     .padding(.top, 2)
                     .padding([.leading, .trailing], 3)
