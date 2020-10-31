@@ -59,6 +59,7 @@
 		964548952523A9F50064D062 /* SearchKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 964548942523A9F50064D062 /* SearchKit.swift */; };
 		964548A02523B3550064D062 /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9645489F2523B3550064D062 /* CloudKit.framework */; };
 		96474E39254D977E00A920B3 /* BeamData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96474E38254D977E00A920B3 /* BeamData.swift */; };
+		96474E3F254D9ADB00A920B3 /* FavIcon in Frameworks */ = {isa = PBXBuildFile; productRef = 96474E3E254D9ADB00A920B3 /* FavIcon */; };
 		965A78292514F147009980D4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965A78282514F147009980D4 /* AppDelegate.swift */; };
 		965A782B2514F147009980D4 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965A782A2514F147009980D4 /* ContentView.swift */; };
 		965A782E2514F147009980D4 /* Beam.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 965A782C2514F147009980D4 /* Beam.xcdatamodeld */; };
@@ -244,6 +245,7 @@
 				9631C747251CE997009B40C4 /* SwiftSoup in Frameworks */,
 				964548A02523B3550064D062 /* CloudKit.framework in Frameworks */,
 				96A49B62252FD6CB003B4767 /* Down in Frameworks */,
+				96474E3F254D9ADB00A920B3 /* FavIcon in Frameworks */,
 				20E1B667EDD2C5D590410B9F /* Pods_Beam.framework in Frameworks */,
 				9645488125237C310064D062 /* VisualEffects in Frameworks */,
 			);
@@ -645,6 +647,7 @@
 				9631C746251CE997009B40C4 /* SwiftSoup */,
 				9645488025237C310064D062 /* VisualEffects */,
 				96A49B61252FD6CB003B4767 /* Down */,
+				96474E3E254D9ADB00A920B3 /* FavIcon */,
 			);
 			productName = Beam;
 			productReference = 965A78252514F147009980D4 /* Beam.app */;
@@ -723,6 +726,7 @@
 				9631C745251CE997009B40C4 /* XCRemoteSwiftPackageReference "SwiftSoup" */,
 				9645487F25237C310064D062 /* XCRemoteSwiftPackageReference "VisualEffects" */,
 				96A49B60252FD6CB003B4767 /* XCRemoteSwiftPackageReference "Down" */,
+				96474E3D254D9ADB00A920B3 /* XCRemoteSwiftPackageReference "FavIcon" */,
 			);
 			productRefGroup = 965A78262514F147009980D4 /* Products */;
 			projectDirPath = "";
@@ -1314,6 +1318,14 @@
 				minimumVersion = 1.0.3;
 			};
 		};
+		96474E3D254D9ADB00A920B3 /* XCRemoteSwiftPackageReference "FavIcon" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/leonbreedt/FavIcon.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.1.0;
+			};
+		};
 		96A49B60252FD6CB003B4767 /* XCRemoteSwiftPackageReference "Down" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/5sw/Down.git";
@@ -1334,6 +1346,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 9645487F25237C310064D062 /* XCRemoteSwiftPackageReference "VisualEffects" */;
 			productName = VisualEffects;
+		};
+		96474E3E254D9ADB00A920B3 /* FavIcon */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 96474E3D254D9ADB00A920B3 /* XCRemoteSwiftPackageReference "FavIcon" */;
+			productName = FavIcon;
 		};
 		96A49B61252FD6CB003B4767 /* Down */ = {
 			isa = XCSwiftPackageProductDependency;
