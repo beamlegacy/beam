@@ -286,7 +286,7 @@ class Parser {
             }
         }
 
-        context.node.type = .internalLink(url)
+        linkNode.type = .internalLink(url)
         context.nextToken()
     }
 
