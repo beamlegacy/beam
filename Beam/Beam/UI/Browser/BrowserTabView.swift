@@ -42,7 +42,11 @@ struct BrowserTabView: View {
                             state.currentTab = state.tabs[i + 1]
                         } else {
                             state.currentTab = BrowserTab(state: state, originalQuery: "", note: nil)
-                            state.mode = .note
+                            if state.currentNote != nil {
+                                state.mode = .note
+                            } else {
+                                state.mode = .today
+                            }
                         }
                         state.tabs.remove(at: i)
                     }

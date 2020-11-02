@@ -18,13 +18,10 @@ struct OmniBar: View {
         HStack {
             Chevrons()
 
-            if state.mode == .note {
+            switch state.mode {
+            case .today:
                 HStack {
-                    if let note = state.currentNote {
-                        GlobalNoteTitle(note: note)
-                    } else {
-                        OmniBarSearchBox()
-                    }
+                    OmniBarSearchBox()
 
                     Button(action: startQuery) {
                         Symbol(name: "magnifyingglass")
@@ -38,24 +35,40 @@ struct OmniBar: View {
                     }
                     .buttonStyle(RoundRectButtonStyle())
                 }.padding(.leading, 9)
+            case .note:
+                HStack {
+                    GlobalNoteTitle(note: state.currentNote!)
 
-            } else {
-                VStack {
-                    GlobalTabTitle(tab: state.currentTab)
-                        .frame(idealWidth: 600, maxWidth: .infinity, minHeight: 28, alignment: .center)
-                    GeometryReader { geometry in
-                        Path { path in
-                            let f = CGFloat(tab.estimatedProgress)
-                            path.move(to: CGPoint(x: 0, y: 0))
-                            path.addLine(to: CGPoint(x: geometry.size.width * f, y: 0))
-                            path.addLine(to: CGPoint(x: geometry.size.width * f, y: geometry.size.height))
-                            path.addLine(to: CGPoint(x: 0, y: geometry.size.height))
-                            path.move(to: CGPoint(x: 0, y: 0))
-                        }
-                        .fill(tab.isLoading ? Color.accentColor.opacity(0.5): Color.accentColor.opacity(0))
+                    Button(action: startNewSearch) {
+                        Symbol(name: "plus")
                     }
-                    .frame(idealWidth: 600, maxWidth: .infinity, minHeight: 2, alignment: .center)
-                    .animation(.easeIn(duration: 0.5))
+                    .buttonStyle(RoundRectButtonStyle())
+                }.padding(.leading, 9)
+
+            case .web:
+                HStack {
+                    VStack {
+                        GlobalTabTitle(tab: state.currentTab)
+                            .frame(idealWidth: 600, maxWidth: .infinity, minHeight: 28, alignment: .center)
+                        GeometryReader { geometry in
+                            Path { path in
+                                let f = CGFloat(tab.estimatedProgress)
+                                path.move(to: CGPoint(x: 0, y: 0))
+                                path.addLine(to: CGPoint(x: geometry.size.width * f, y: 0))
+                                path.addLine(to: CGPoint(x: geometry.size.width * f, y: geometry.size.height))
+                                path.addLine(to: CGPoint(x: 0, y: geometry.size.height))
+                                path.move(to: CGPoint(x: 0, y: 0))
+                            }
+                            .fill(tab.isLoading ? Color.accentColor.opacity(0.5): Color.accentColor.opacity(0))
+                        }
+                        .frame(idealWidth: 600, maxWidth: .infinity, minHeight: 2, alignment: .center)
+                        .animation(.easeIn(duration: 0.5))
+                    }
+
+                    Button(action: startNewSearch) {
+                        Symbol(name: "plus")
+                    }
+                    .buttonStyle(RoundRectButtonStyle())
                 }
             }
 
@@ -93,7 +106,11 @@ struct OmniBar: View {
             if let note = state.currentTab.note {
                 state.currentNote = note
             }
-            state.mode = .note
+            if state.currentNote != nil {
+                state.mode = .note
+            } else {
+                state.mode = .today
+            }
             state.resetQuery()
         } else {
             state.mode = .web

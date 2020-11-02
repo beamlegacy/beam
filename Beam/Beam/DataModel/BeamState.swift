@@ -16,7 +16,7 @@ enum Mode {
 }
 
 @objc class BeamState: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
-    @Published var mode: Mode = .note {
+    @Published var mode: Mode = .today {
         didSet {
             switch oldValue {
             // swiftlint:disable:next fallthrough no_fallthrough_only
@@ -174,7 +174,7 @@ enum Mode {
         }
     }
 
-    func navigateToNote(named: String) -> Bool {
+    @discardableResult func navigateToNote(named: String) -> Bool {
         print("load note named \(named)")
         guard let note = Note.fetchWithTitle(CoreDataManager.shared.mainContext, named) else { return false }
         completedQueries = []
@@ -218,22 +218,31 @@ enum Mode {
     }
 
     func startQuery() {
-        let query = searchQuery
-        var searchText = query
-        let url = URL(string: searchText)
+        if let index = selectionIndex {
+            let query = completedQueries[index]
+            switch query.source {
+            case .autoComplete:
+                searchEngine.query = query.string
+                print("Start search query: \(searchEngine.searchUrl)")
+                createTab(withURL: URL(string: searchEngine.searchUrl)!, originalQuery: query.string)
+                mode = .web
 
-        if url?.scheme == nil {
-            if navigateToNote(named: searchQuery) {
-                return
+            case .history:
+                createTab(withURL: URL(string: query.string)!, originalQuery: "")
+                mode = .web
+
+            case .note:
+                navigateToNote(named: searchQuery)
             }
 
-            searchEngine.query = searchText
-            searchText = searchEngine.searchUrl
-            print("Start search query: \(searchText)")
+            return
         }
 
-        createTab(withURL: URL(string: searchText)!, originalQuery: query)
-//        currentNote = Note.createNote(CoreDataManager.shared.mainContext, query)
+        searchEngine.query = searchQuery
+        let searchText = searchEngine.searchUrl
+        print("Start search query: \(searchText)")
+
+        createTab(withURL: URL(string: searchText)!, originalQuery: searchQuery)
         mode = .web
     }
 
@@ -252,7 +261,7 @@ enum Mode {
             print("received auto complete query: \(query)")
 
             if !(query.hasPrefix("http://") || query.hasPrefix("https://")) {
-                self.mode = .note
+//                self.mode = .note
             }
             self.completedQueries = []
 
@@ -298,5 +307,44 @@ enum Mode {
            webView.configuration.websiteDataStore.httpCookieStore.setCookie(cookie)
         }
         webView.configuration.websiteDataStore.httpCookieStore.add(self)
+    }
+
+    func startNewSearch() {
+        currentNote = nil
+        searchQuery = ""
+        mode = .today
+    }
+
+    func showNextTab() {
+        if let i = tabs.firstIndex(of: currentTab) {
+            let i = (i + 1) % tabs.count
+            currentTab = tabs[i]
+        }
+    }
+
+    func showPreviousTab() {
+        if let i = tabs.firstIndex(of: currentTab) {
+            let i = i - 1 < 0 ? tabs.count - 1 : i - 1
+            currentTab = tabs[i]
+        }
+    }
+
+    func closeCurrentTab() -> Bool {
+        if mode == .web {
+            if let i = tabs.firstIndex(of: currentTab) {
+                tabs.remove(at: i)
+                let nextTabIndex = min(i, tabs.count - 1)
+                if nextTabIndex >= 0 {
+                    currentTab = tabs[nextTabIndex]
+                }
+
+                if tabs.isEmpty {
+                    mode = currentNote == nil ? .today : .note
+                }
+                return true
+            }
+        }
+
+        return false
     }
 }

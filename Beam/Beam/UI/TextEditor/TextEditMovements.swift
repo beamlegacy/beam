@@ -113,6 +113,10 @@ extension TextRoot {
     }
 
     func moveToEndOfLine() {
+        guard node.layout?.lines.count != 1 else {
+            cursorPosition = node.text.count
+            return
+        }
         if let l = node.lineAt(index: cursorPosition) {
             let off = l < node.layout!.lines.count - 1 ? -1 : 0
             cursorPosition = node.layout!.lines[l].range.upperBound + off

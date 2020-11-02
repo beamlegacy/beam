@@ -87,37 +87,25 @@ class BeamWindow: NSWindow, NSWindowDelegate {
     }
 
     @IBAction func showPreviousTab(_ sender: Any?) {
-        if let i = state.tabs.firstIndex(of: state.currentTab) {
-            let i = i - 1 < 0 ? state.tabs.count - 1 : i - 1
-            state.currentTab = state.tabs[i]
-        }
+        state.showPreviousTab()
     }
 
     @IBAction func showNextTab(_ sender: Any?) {
-        // Activate next tab
-        if let i = state.tabs.firstIndex(of: state.currentTab) {
-            let i = (i + 1) % state.tabs.count
-            state.currentTab = state.tabs[i]
-        }
+        state.showNextTab()
+    }
+
+    @IBAction func showJournal(_ sender: Any?) {
+        state.startNewSearch()
     }
 
     @IBAction func newSearch(_ sender: Any?) {
-        state.mode = .note
-        state.searchQuery = ""
+        state.startNewSearch()
     }
 
     override func performClose(_ sender: Any?) {
-        if state.mode == .web {
-            if let i = state.tabs.firstIndex(of: state.currentTab) {
-                state.tabs.remove(at: i)
-                let nextTabIndex = min(i, state.tabs.count - 1)
-                if nextTabIndex >= 0 {
-                    state.currentTab = state.tabs[nextTabIndex]
-                }
-                return
-            }
+        if state.closeCurrentTab() {
+            return
         }
-
         super.performClose(sender)
     }
 }

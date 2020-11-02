@@ -19,22 +19,26 @@ struct ModeView: View {
                 .frame(height: 52, alignment: .center)
 
             ZStack {
-                if state.mode == .web {
+                switch state.mode {
+                case .web:
                     VStack {
                         BrowserTabBar(tabs: $state.tabs, currentTab: $state.currentTab)
                         WebView(webView: state.currentTab.webView)
                     }
                     .transition(.move(edge: .bottom))
                     .animation(.easeInOut(duration: 0.3))
-                } else {
+                case .note:
+                    ScrollView([.vertical]) {
+                        ZStack {
+                            NoteView(note: state.currentNote!)
+                        }
+                    }
+                case .today:
                     GeometryReader { geometry in
                         ScrollView([.vertical]) {
                             ZStack {
-                                if let note = state.currentNote {
-                                    NoteView(note: note)
-                                } else {
-                                    JournalView(journal: state.data.journal, offset: geometry.size.height * 0.4)
-                                }
+                                JournalView(journal: state.data.journal, offset: geometry.size.height * 0.4)
+
                                 AutoCompleteView(autoComplete: $state.completedQueries, selectionIndex: $state.selectionIndex)
                                     .frame(idealWidth: 800, maxWidth: .infinity, idealHeight: 600, maxHeight: .infinity, alignment: .center)
                             }
