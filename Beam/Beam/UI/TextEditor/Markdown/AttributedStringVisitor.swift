@@ -122,8 +122,13 @@ class AttributedStringVisitor {
         self.configuration = configuration
     }
 
+    enum Order {
+        case pre
+        case post
+    }
+
     // swiftlint:disable:next cyclomatic_complexity
-    func visitChildren(_ node: Parser.Node, _ applyAttributes: Bool) -> NSMutableAttributedString {
+    func visitChildren(_ node: Parser.Node, _ applyAttributes: Bool, order: Order = .pre) -> NSMutableAttributedString {
         let decorate: Bool = {
             guard context.showMD else { return false }
             switch node.type {
@@ -142,7 +147,7 @@ class AttributedStringVisitor {
             attributed.append(str)
         }
 
-        if applyAttributes {
+        if applyAttributes && order == .pre {
             attributed = attributed.replaceAttributes(attribs(for: node, context: context))
         }
 
@@ -171,6 +176,11 @@ class AttributedStringVisitor {
         case .text:
             break
         }
+
+        if applyAttributes && order == .post {
+            attributed = attributed.replaceAttributes(attribs(for: node, context: context))
+        }
+
         return attributed
     }
 
@@ -232,18 +242,18 @@ class AttributedStringVisitor {
             attributedLink.append(node.suffix(context.showMD, f))
             return attributedLink
 
+        case .embed:
+            return "<IMG>".attributed
+
         case let .heading(depth):
             pushContext(); defer { popContext() }
             context.headingLevel = depth
-            return visitChildren(node, true)
-
-        case .embed:
-            return "<IMG>".attributed
+            return visitChildren(node, true, order: .post)
 
         case let .quote(depth):
             pushContext(); defer { popContext() }
             context.quoteLevel = depth
-            return visitChildren(node, true)
+            return visitChildren(node, true, order: .post)
 
         case .newLine:
             return "\n".attributed
