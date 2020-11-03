@@ -370,14 +370,14 @@ public class TextNode: Equatable {
     func drawDisclosure(at point: NSPoint, in context: CGContext) {
         let symbol = open ? disclosureOpenFrame : disclosureClosedFrame
         context.saveGState()
-        context.translateBy(x: point.x + 2, y: point.y)
+        context.translateBy(x: point.x + 2, y: point.y - 2)
         symbol.draw(context)
         context.restoreGState()
     }
 
     func drawBulletPoint(at point: NSPoint, in context: CGContext) {
         context.saveGState()
-        context.translateBy(x: point.x + 2, y: point.y)
+        context.translateBy(x: point.x + 2, y: point.y - 2)
         bulletPointFrame.draw(context)
         context.restoreGState()
     }
@@ -438,7 +438,7 @@ public class TextNode: Equatable {
             drawBulletPoint(at: NSPoint(x: indent - 20 + offset.x, y: offset.y), in: context)
         }
         context.textMatrix = CGAffineTransform.identity
-        context.translateBy(x: 0, y: firstLineHeight)
+        context.translateBy(x: 0, y: firstLineBaseline)
 
         layout?.draw(context)
         context.restoreGState()
@@ -557,7 +557,7 @@ public class TextNode: Equatable {
         let line = layout!.lines[cursorLine]
         let pos = cursorPosition
         let x1 = offsetAt(index: pos)
-        let cursorRect = NSRect(x: x1, y: line.frame.minY, width: cursorPosition == text.count ? 7 : 2, height: line.frame.height)
+        let cursorRect = NSRect(x: x1, y: line.frame.minY, width: cursorPosition == text.count ? 7 : 2, height: line.bounds.height)
 
         context.beginPath()
         context.addRect(cursorRect)
