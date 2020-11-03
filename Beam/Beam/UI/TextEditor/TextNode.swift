@@ -68,10 +68,12 @@ public class TextNode: Equatable {
             return s
         }
 
+        let config = AttributedStringVisitor.Configuration()
+        let visitor = AttributedStringVisitor(configuration: config)
         if text.isEmpty {
             let attributed = placeholder.attributed
 
-            attributed.setAttributes([.font: NSFont.systemFont(ofSize: CGFloat(14)), .foregroundColor: disabledColor], range: attributed.wholeRange)
+            attributed.setAttributes([.font: visitor.font(for: visitor.context), .foregroundColor: disabledColor], range: attributed.wholeRange)
             _attributedString = attributed
             return attributed
         }
@@ -80,8 +82,6 @@ public class TextNode: Equatable {
 
 //        print("AST:\n\(AST.treeString)")
 
-        let config = AttributedStringVisitor.Configuration()
-        let visitor = AttributedStringVisitor(configuration: config)
         if root.node === self {
             visitor.cursorPosition = cursorPosition
         }
@@ -432,7 +432,7 @@ public class TextNode: Equatable {
             drawBulletPoint(at: NSPoint(x: indent - 20, y: 3), in: context)
         }
         context.textMatrix = CGAffineTransform.identity
-        context.translateBy(x: 0, y: CGFloat(fHeight))
+        context.translateBy(x: 0, y: layout?.lines.first?.bounds.height ?? CGFloat(fHeight))
 
         layout?.draw(context)
         context.restoreGState()
@@ -529,7 +529,8 @@ public class TextNode: Equatable {
         if text.isEmpty {
             guard editor?.hasFocus ?? false, editor?.blinkPhase ?? false else { return }
 
-            let cursorRect = NSRect(x: 0, y: 0, width: 7, height: fHeight )
+            let f = AttributedStringVisitor.font()
+            let cursorRect = NSRect(x: 0, y: 0, width: 7, height: f.ascender - f.descender)
 
             context.beginPath()
             context.addRect(cursorRect)
@@ -566,10 +567,8 @@ public class TextNode: Equatable {
         if invalidatedTextRendering {
             textFrame = NSRect()
 
-//            if !text.isEmpty {
-                layout = Font.draw(string: attributedString, atPosition: NSPoint(x: indent, y: 0), textWidth: frame.width - indent)
-                textFrame = layout!.frame
-//            }
+            layout = Font.draw(string: attributedString, atPosition: NSPoint(x: indent, y: 0), textWidth: frame.width - indent)
+            textFrame = layout!.frame
             invalidatedTextRendering = false
         }
 

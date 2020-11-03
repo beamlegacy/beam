@@ -66,12 +66,16 @@ class AttributedStringVisitor {
 
     var configuration: Configuration
 
+    class func font(_ size: CGFloat? = nil, weight: NSFont.Weight = .regular) -> NSFont {
+        return NSFont.systemFont(ofSize: size ?? CGFloat(14), weight: weight)
+    }
+
     func font(for context: Context) -> NSFont {
         let h = context.headingLevel != 0 ?
             (14 - context.headingLevel * 4)
             : 0
         let bold = context.bold || h != 0
-        var f = NSFont.systemFont(ofSize: CGFloat(14 + h), weight: bold ? .bold : .regular)
+        var f = Self.font(CGFloat(14 + h), weight: bold ? .bold : .regular)
         if context.italic || context.quoteLevel != 0 {
             f = NSFontManager.shared.convert(f, toHaveTrait: .italicFontMask)
         }
