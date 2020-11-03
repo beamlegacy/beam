@@ -9,15 +9,21 @@ import SwiftUI
 import AppKit
 
 struct AutoCompleteList: View {
+    @EnvironmentObject var state: BeamState
     @Binding var selectedIndex: Int?
     @Binding var elements: [AutoCompleteResult]
 
     var body: some View {
         VStack {
             ForEach(elements) { i in
-                return AutoCompleteItem(item: i, selected: isSelectedItem(i)).onTapGesture {
-                    selectedIndex = indexFor(item: i)
-                }
+                return AutoCompleteItem(item: i, selected: isSelectedItem(i))
+                    .onTapGesture(count: 2) {
+                        selectedIndex = indexFor(item: i)
+                        state.startQuery()
+                    }
+                    .onTapGesture(count: 1) {
+                        selectedIndex = indexFor(item: i)
+                    }
             }
         }.frame(maxWidth: .infinity, alignment: .top).background(Color("transparent"))
     }
