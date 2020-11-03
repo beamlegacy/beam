@@ -217,9 +217,10 @@ class AttributedStringVisitor {
         case let .internalLink(link):
             pushContext(); defer { popContext() }
             context.link = .bidirectionalLink
-            let str = link.attributed.addAttributes(attribs(for: node, context: context))
-            str.addAttribute(.link, value: link, range: str.wholeRange)
-            return str
+            let attributedLink = link.attributed(node, context.showMD, attribs(for: node, context: context))
+            attributedLink.insert(node.prefix(context.showMD), at: 0)
+            attributedLink.append(node.suffix(context.showMD))
+            return attributedLink
 
         case let .heading(depth):
             pushContext(); defer { popContext() }
