@@ -29,9 +29,10 @@ struct BTextField: NSViewRepresentable {
     @State var focusOnCreation: Bool
     @State var textColor: NSColor?
     @State var placeholderTextColor: NSColor?
+    var name: String?
 
     func makeNSView(context: Self.Context) -> Self.NSViewType {
-        let textField = BNSTextField(string: $text, focusOnCreation: focusOnCreation)
+        let textField = BNSTextField(string: $text, focusOnCreation: focusOnCreation, name: name)
 
         textField.focusRingType = .none
         textField.onCommit = self.onCommit

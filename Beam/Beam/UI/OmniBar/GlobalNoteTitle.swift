@@ -39,8 +39,8 @@ struct GlobalNoteTitle: View {
                            },
                            focusOnCreation: true,
                            textColor: NSColor(named: "OmniboxTextColor"),
-                           placeholderTextColor: NSColor(named: "OmniboxPlaceholderTextColor")
-
+                           placeholderTextColor: NSColor(named: "OmniboxPlaceholderTextColor"),
+                           name: "NoteRenamer"
                 )
                 .padding(.top, 8)
                 .padding([.leading, .trailing], 9)

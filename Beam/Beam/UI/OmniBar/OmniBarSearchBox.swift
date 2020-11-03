@@ -44,7 +44,8 @@ struct OmniBarSearchBox: View {
                            },
                            focusOnCreation: true,
                            textColor: NSColor(named: "OmniboxTextColor"),
-                           placeholderTextColor: NSColor(named: "OmniboxPlaceholderTextColor")
+                           placeholderTextColor: NSColor(named: "OmniboxPlaceholderTextColor"),
+                           name: "OmniBarSearchBox"
 
                 )
                 .padding(.top, 8)
@@ -59,13 +60,11 @@ struct OmniBarSearchBox: View {
     }
 
     func cancelAutocomplete() {
-        state.searchQuerySelection = nil
-        state.selectionIndex = nil
+        state.cancelAutocomplete()
     }
 
     func resetSearchQuery() {
-        cancelAutocomplete()
-        state.searchQuery = ""
+        state.startNewSearch()
     }
 
     func startQuery() {

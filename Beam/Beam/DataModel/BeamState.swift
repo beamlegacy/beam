@@ -310,9 +310,11 @@ enum Mode {
     }
 
     func startNewSearch() {
+        cancelAutocomplete()
         currentNote = nil
         searchQuery = ""
         mode = .today
+        BNSTextField.focusField(named: "OmniBarSearchBox")
     }
 
     func showNextTab() {
@@ -346,5 +348,11 @@ enum Mode {
         }
 
         return false
+    }
+
+    func cancelAutocomplete() {
+        searchQuerySelection = nil
+        selectionIndex = nil
+        BNSTextField.focusField(named: "OmniBarSearchBox")
     }
 }
