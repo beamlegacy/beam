@@ -349,32 +349,34 @@ class Parser {
     }
 
     private func parseLineStarter(_ context: ASTContext, tokenType: Lexer.TokenType, limit: Int?, nodeType: @escaping (Int) -> NodeType) {
-        let startToken = context.token
+        var startToken = context.token
         var level = 1
         context.nextToken()
         while context.token.type == tokenType, level < limit ?? 1000 {
             level += 1
+            startToken.string += context.token.string
             context.nextToken()
         }
-        var prefixString: String = ""
-        if context.token.type != .Blank {
+        if context.token.type != .Blank && context.token.type != .EndOfFile && context.token.type != .NewLine {
             appendTextNode(context, startToken.string, startToken.start)
             return
         }
+        if context.token.type == .Blank {
+            startToken.string += context.token.string
+        }
         let heading = Node(type: nodeType(level), startToken.start)
-        prefixString.append(context.token.string)
-        var prefix = Lexer.Token(type: .Text, string: prefixString)
-        prefix.start = startToken.start
-        heading.decorations[.prefix] = prefix
-        heading.length = context.token.end - heading.positionInSource
+        heading.decorations[.prefix] = startToken
 
         context.append(node: heading)
         context.push(node: heading); defer { context.pop() }
+
+        context.nextToken()
 
         // accumulate nodes until the end of the line:
         while context.token.type != .NewLine && !context.isDone {
             parseToken(context)
         }
+        heading.length = context.token.start - heading.positionInSource
     }
 
     private func parseHeading(_ context: ASTContext) {
