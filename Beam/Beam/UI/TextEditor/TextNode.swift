@@ -370,14 +370,14 @@ public class TextNode: Equatable {
     func drawDisclosure(at point: NSPoint, in context: CGContext) {
         let symbol = open ? disclosureOpenFrame : disclosureClosedFrame
         context.saveGState()
-        context.translateBy(x: point.x + 2, y: point.y + 9)
+        context.translateBy(x: point.x + 2, y: point.y)
         symbol.draw(context)
         context.restoreGState()
     }
 
     func drawBulletPoint(at point: NSPoint, in context: CGContext) {
         context.saveGState()
-        context.translateBy(x: point.x + 2, y: point.y + 9)
+        context.translateBy(x: point.x + 2, y: point.y)
         bulletPointFrame.draw(context)
         context.restoreGState()
     }
@@ -406,6 +406,9 @@ public class TextNode: Equatable {
         }
     }
 
+    var firstLineHeight: CGFloat { layout?.lines.first?.bounds.height ?? CGFloat(fHeight) }
+    var firstLineBaseline: CGFloat { CGFloat(layout?.lines.first?.typographicBounds.ascent ?? fHeight * 2.0 / 3.0) }
+
     func drawText(in context: CGContext) {
         // Draw the text:
         context.saveGState()
@@ -424,15 +427,18 @@ public class TextNode: Equatable {
             }
         }
 
-        if !text.isEmpty || !placeholder.isEmpty {
+        if !text.isEmpty || isEditing || !placeholder.isEmpty {
+            let offset: NSPoint = {
+                return NSPoint(x: 0, y: firstLineBaseline)
+            }()
             if showDisclosureButton {
-                drawDisclosure(at: NSPoint(x: indent - 42, y: 3), in: context)
+                drawDisclosure(at: NSPoint(x: indent - 42 + offset.x, y: offset.y), in: context)
             }
 
-            drawBulletPoint(at: NSPoint(x: indent - 20, y: 3), in: context)
+            drawBulletPoint(at: NSPoint(x: indent - 20 + offset.x, y: offset.y), in: context)
         }
         context.textMatrix = CGAffineTransform.identity
-        context.translateBy(x: 0, y: layout?.lines.first?.bounds.height ?? CGFloat(fHeight))
+        context.translateBy(x: 0, y: firstLineHeight)
 
         layout?.draw(context)
         context.restoreGState()
@@ -551,7 +557,7 @@ public class TextNode: Equatable {
         let line = layout!.lines[cursorLine]
         let pos = cursorPosition
         let x1 = offsetAt(index: pos)
-        let cursorRect = NSRect(x: x1, y: line.frame.minY, width: cursorPosition == text.count ? 7 : 2, height: line.frame.height )
+        let cursorRect = NSRect(x: x1, y: line.frame.minY, width: cursorPosition == text.count ? 7 : 2, height: line.frame.height)
 
         context.beginPath()
         context.addRect(cursorRect)
