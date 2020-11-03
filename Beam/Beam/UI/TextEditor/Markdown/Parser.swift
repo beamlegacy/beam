@@ -45,6 +45,7 @@ class Parser {
 
         var decorations = [DecorationType: Lexer.Token]()
         func decoration(_ decorationType: DecorationType, _ decorate: Bool) -> NSMutableAttributedString {
+            if !decorate { return "".attributed }
             let deco = decorations[decorationType]!
             let str = deco.attributedString
             if !decorate {
@@ -93,7 +94,19 @@ class Parser {
         }
 
         func contains(position: Int) -> Bool {
-            position >= positionInSource && position <= positionInSource + length
+            let start: Int = {
+                if let prefix = decorations[.prefix] {
+                    return prefix.start
+                }
+                return positionInSource
+            }()
+            let end: Int = {
+                if let suffix = decorations[.suffix] {
+                    return suffix.start + suffix.string.count
+                }
+                return positionInSource + length
+            }()
+            return position >= start && position <= end
         }
     }
 
@@ -339,7 +352,7 @@ class Parser {
     }
 
     private func parseLineStarter(_ context: ASTContext, tokenType: Lexer.TokenType, limit: Int?, nodeType: @escaping (Int) -> NodeType) {
-        let start = context.token.start
+        let startToken = context.token
         var level = 1
         context.nextToken()
         while context.token.type == tokenType, level < limit ?? 1000 {
@@ -348,13 +361,13 @@ class Parser {
         }
         var prefixString: String = ""
         if context.token.type != .Blank {
-            appendTextNode(context, prefixString, start)
+            appendTextNode(context, startToken.string, startToken.start)
             return
         }
-        let heading = Node(type: nodeType(level), start)
+        let heading = Node(type: nodeType(level), startToken.start)
         prefixString.append(context.token.string)
         var prefix = Lexer.Token(type: .Text, string: prefixString)
-        prefix.start = start
+        prefix.start = startToken.start
         heading.decorations[.prefix] = prefix
         heading.length = context.token.end - heading.positionInSource
 
