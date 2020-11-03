@@ -45,7 +45,6 @@ struct GlobalNoteTitle: View {
                 .padding(.top, 8)
                 .padding([.leading, .trailing], 9)
                 .frame(idealWidth: 600, maxWidth: .infinity)
-
             }
         }
         .onTapGesture(count: 1, perform: {

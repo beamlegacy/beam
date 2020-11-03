@@ -14,11 +14,6 @@ struct GlobalTabTitle: View {
 
     var body: some View {
         Text(tab.originalQuery)
-            .onTapGesture(count: 1, perform: {
-                // We should rename the note
-//                state.mode = .note
-//                state.searchQuery = tab.originalQuery
-            })
             .font(.custom("SF-Pro-Text-Heavy", size: 16))
             .offset(x: 0, y: 7)
     }
