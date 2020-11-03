@@ -12,7 +12,7 @@ public struct TextState {
     var text: String = ""
     var selectedTextRange: Range<Int> = 0..<0
     var markedTextRange: Range<Int> = 0..<0
-    var cursorPosition: Int = 0
+    var cursorPosition: Int = -1
 }
 
 public struct TextConfig {
