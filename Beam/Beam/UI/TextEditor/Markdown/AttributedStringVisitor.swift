@@ -137,32 +137,32 @@ class AttributedStringVisitor {
             attributed = attributed.replaceAttributes(attribs(for: node, context: context))
         }
 
-        if decorate {
+//        if decorate {
             switch node.type {
             case .embed:
-                attributed.insert(node.prefix, at: 0)
+                attributed.insert(node.prefix(decorate), at: 0)
             case .emphasis:
-                attributed.append(node.suffix)
-                attributed.insert(node.prefix, at: 0)
+                attributed.append(node.suffix(decorate))
+                attributed.insert(node.prefix(decorate), at: 0)
             case .heading:
-                attributed.insert(node.prefix, at: 0)
+                attributed.insert(node.prefix(decorate), at: 0)
             case .internalLink:
-                attributed.insert(node.prefix, at: 0)
-                attributed.append(node.suffix)
+                attributed.insert(node.prefix(decorate), at: 0)
+                attributed.append(node.suffix(decorate))
             case .link:
-                attributed.insert(node.prefix, at: 0)
-                attributed.append(node.suffix)
+                attributed.insert(node.prefix(decorate), at: 0)
+                attributed.append(node.suffix(decorate))
             case .quote:
-                attributed.insert(node.prefix, at: 0)
+                attributed.insert(node.prefix(decorate), at: 0)
             case .strong:
-                attributed.insert(node.prefix, at: 0)
-                attributed.append(node.suffix)
+                attributed.insert(node.prefix(decorate), at: 0)
+                attributed.append(node.suffix(decorate))
             case .newLine:
                 break
             case .text:
                 break
             }
-        }
+  //      }
         return attributed
     }
 

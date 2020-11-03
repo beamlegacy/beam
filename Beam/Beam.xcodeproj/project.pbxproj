@@ -617,11 +617,11 @@
 			children = (
 				96F5DB0C25179F030080E3EE /* String+Localization.swift */,
 				964547B625212D760064D062 /* String+Ranges.swift */,
+				96A49B69253115C5003B4767 /* String+Regex.swift */,
 				96F5DB37251820960080E3EE /* ClosedRange+Beam.swift */,
 				96C039972520CB9D00A2EDC7 /* Maths.swift */,
 				9645481D25220EC90064D062 /* String+LoremIpsum.swift */,
 				96454822252216570064D062 /* NSRange+CFRange.swift */,
-				96A49B69253115C5003B4767 /* String+Regex.swift */,
 				96A49B6E2533ABC9003B4767 /* NSMutableAttributedString+Ranges.swift */,
 			);
 			path = "Swift+Beam";
