@@ -306,4 +306,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         return .terminateNow
     }
 
+    @IBAction func newDocument(_ sender: Any?) {
+        createWindow()
+    }
 }
