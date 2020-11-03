@@ -9,9 +9,9 @@ import Foundation
 import SwiftUI
 
 struct OmniBarSearchBox: View {
-    private var _cornerRadius = CGFloat(7)
+    var _cornerRadius = CGFloat(7)
     @EnvironmentObject var state: BeamState
-    @State var isEditing: Bool = false
+    @Binding var isEditing: Bool
 
     var body: some View {
         ZStack {

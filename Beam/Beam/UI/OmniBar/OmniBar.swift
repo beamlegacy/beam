@@ -12,7 +12,10 @@ import AppKit
 struct OmniBar: View {
     @EnvironmentObject var state: BeamState
     @ObservedObject var tab: BrowserTab
-    var canSearch: Bool { state.searchQuery.isEmpty && state.currentNote == nil }
+    var canSearch: Bool {
+        return !state.searchQuery.isEmpty || !isEditing
+    }
+    @State var isEditing: Bool = false
 
     var body: some View {
         HStack {
@@ -21,12 +24,12 @@ struct OmniBar: View {
             switch state.mode {
             case .today:
                 HStack {
-                    OmniBarSearchBox()
+                    OmniBarSearchBox(isEditing: $isEditing)
 
-                    Button(action: startQuery) {
+                    Button(action: isEditing ? startQuery : startNewSearch) {
                         Symbol(name: "magnifyingglass")
                     }
-                    .disabled(canSearch)
+                    .disabled(!canSearch)
                     .buttonStyle(RoundRectButtonStyle())
                     .padding(.leading, 1)
 
