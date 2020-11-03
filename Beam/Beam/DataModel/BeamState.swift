@@ -350,9 +350,15 @@ enum Mode {
         return false
     }
 
-    func cancelAutocomplete() {
+    func resetAutocompleteSelection() {
         searchQuerySelection = nil
         selectionIndex = nil
+        BNSTextField.focusField(named: "OmniBarSearchBox")
+    }
+
+    func cancelAutocomplete() {
+        resetAutocompleteSelection()
+        completedQueries = []
         BNSTextField.focusField(named: "OmniBarSearchBox")
     }
 }

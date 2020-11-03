@@ -25,6 +25,7 @@ struct BTextField: NSViewRepresentable {
     var selectedRanges: [Range<Int>]?
     var onTextChanged: (String) -> Void = { _ in }
     var onCommit: () -> Void = { }
+    var onEscape: () -> Void = { }
     var onCursorMovement: (CursorMovement) -> Bool = { _ in false }
     @State var focusOnCreation: Bool
     @State var textColor: NSColor?
@@ -49,7 +50,12 @@ struct BTextField: NSViewRepresentable {
             } else if event.keyCode == 125 {
                 // down!
                 return onCursorMovement(.down)
+            } else if event.keyCode == 53 {
+                onEscape()
+                return true
             }
+//            print("key \(event.keyCode)")
+
             return false
         }
 

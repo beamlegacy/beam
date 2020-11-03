@@ -79,14 +79,12 @@ struct OmniBar: View {
         }.padding(.top, 10).padding(.bottom, 10).frame(height: 54, alignment: .topLeading)
     }
 
-    func cancelAutocomplete() {
-        state.searchQuerySelection = nil
-        state.selectionIndex = nil
+    func resetAutoCompleteSelection() {
+        state.resetAutocompleteSelection()
     }
 
     func startNewSearch() {
-        cancelAutocomplete()
-        state.searchQuery = ""
+        state.cancelAutocomplete()
         state.mode = .today
     }
 

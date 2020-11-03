@@ -24,10 +24,13 @@ struct OmniBarSearchBox: View {
                            placeholderText: "Search or create note... \(Note.countWithPredicate(CoreDataManager.shared.mainContext)) notes",
                            selectedRanges: state.searchQuerySelection,
                            onTextChanged: { _ in
-                            cancelAutocomplete()
+                            state.resetAutocompleteSelection()
                            },
                            onCommit: {
                             startQuery()
+                           },
+                           onEscape: {
+                            state.cancelAutocomplete()
                            },
                            onCursorMovement: { cursorMovement in
                             switch cursorMovement {
@@ -59,12 +62,10 @@ struct OmniBarSearchBox: View {
         }
     }
 
-    func cancelAutocomplete() {
-        state.cancelAutocomplete()
-    }
-
     func resetSearchQuery() {
-        state.startNewSearch()
+        withAnimation {
+            state.startNewSearch()
+        }
     }
 
     func startQuery() {
