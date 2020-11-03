@@ -65,12 +65,21 @@ class AttributedStringVisitor {
     var cursorPosition: Int = -1
 
     var configuration: Configuration
-    private func attribs(for node: Parser.Node, context: Context) -> [NSAttributedString.Key: Any] {
+
+    func font(for context: Context) -> NSFont {
         let h = context.headingLevel != 0 ?
             (14 - context.headingLevel * 4)
             : 0
         let bold = context.bold || h != 0
-        var font = NSFont.systemFont(ofSize: CGFloat(14 + h), weight: bold ? .bold : .regular)
+        var f = NSFont.systemFont(ofSize: CGFloat(14 + h), weight: bold ? .bold : .regular)
+        if context.italic || context.quoteLevel != 0 {
+            f = NSFontManager.shared.convert(f, toHaveTrait: .italicFontMask)
+        }
+
+        return f
+    }
+
+    private func attribs(for node: Parser.Node, context: Context) -> [NSAttributedString.Key: Any] {
         var attr = [NSAttributedString.Key: Any]()
 
         var foregroundColor = NSColor(named: "EditorTextColor")!
@@ -99,12 +108,8 @@ class AttributedStringVisitor {
             attr[.baselineOffset] = -15
         }
 
-        if context.italic || context.quoteLevel != 0 {
-            font = NSFontManager.shared.convert(font, toHaveTrait: .italicFontMask)
-        }
-
         attr[.foregroundColor] = foregroundColor
-        attr[.font] = font
+        attr[.font] = font(for: context)
 
         return attr
     }
@@ -137,32 +142,31 @@ class AttributedStringVisitor {
             attributed = attributed.replaceAttributes(attribs(for: node, context: context))
         }
 
-//        if decorate {
-            switch node.type {
-            case .embed:
-                attributed.insert(node.prefix(decorate), at: 0)
-            case .emphasis:
-                attributed.append(node.suffix(decorate))
-                attributed.insert(node.prefix(decorate), at: 0)
-            case .heading:
-                attributed.insert(node.prefix(decorate), at: 0)
-            case .internalLink:
-                attributed.insert(node.prefix(decorate), at: 0)
-                attributed.append(node.suffix(decorate))
-            case .link:
-                attributed.insert(node.prefix(decorate), at: 0)
-                attributed.append(node.suffix(decorate))
-            case .quote:
-                attributed.insert(node.prefix(decorate), at: 0)
-            case .strong:
-                attributed.insert(node.prefix(decorate), at: 0)
-                attributed.append(node.suffix(decorate))
-            case .newLine:
-                break
-            case .text:
-                break
-            }
-  //      }
+        let f = font(for: context)
+        switch node.type {
+        case .embed:
+            attributed.insert(node.prefix(decorate, f), at: 0)
+        case .emphasis:
+            attributed.append(node.suffix(decorate, f))
+            attributed.insert(node.prefix(decorate, f), at: 0)
+        case .heading:
+            attributed.insert(node.prefix(decorate, f), at: 0)
+        case .internalLink:
+            attributed.insert(node.prefix(decorate, f), at: 0)
+            attributed.append(node.suffix(decorate, f))
+        case .link:
+            attributed.insert(node.prefix(decorate, f), at: 0)
+            attributed.append(node.suffix(decorate, f))
+        case .quote:
+            attributed.insert(node.prefix(decorate, f), at: 0)
+        case .strong:
+            attributed.insert(node.prefix(decorate, f), at: 0)
+            attributed.append(node.suffix(decorate, f))
+        case .newLine:
+            break
+        case .text:
+            break
+        }
         return attributed
     }
 
@@ -218,8 +222,9 @@ class AttributedStringVisitor {
             pushContext(); defer { popContext() }
             context.link = .bidirectionalLink
             let attributedLink = link.attributed(node, context.showMD, attribs(for: node, context: context))
-            attributedLink.insert(node.prefix(context.showMD), at: 0)
-            attributedLink.append(node.suffix(context.showMD))
+            let f = font(for: context)
+            attributedLink.insert(node.prefix(context.showMD, f), at: 0)
+            attributedLink.append(node.suffix(context.showMD, f))
             return attributedLink
 
         case let .heading(depth):

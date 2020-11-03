@@ -44,25 +44,22 @@ class Parser {
         var children: [Node] = []
 
         var decorations = [DecorationType: Lexer.Token]()
-        func decoration(_ decorationType: DecorationType, _ decorate: Bool) -> NSMutableAttributedString {
+        func decoration(_ decorationType: DecorationType, _ decorate: Bool, _ font: NSFont) -> NSMutableAttributedString {
             if !decorate { return "".attributed }
             let deco = decorations[decorationType]!
             let str = deco.attributedString
-            if !decorate {
-                str.replaceCharacters(in: str.wholeRange, with: String.zeroWidthSpace)
-            }
             str.addAttributes([NSAttributedString.Key.foregroundColor: NSColor(named: "EditorSyntaxColor")!], range: str.wholeRange)
 
             return str
         }
-        func prefix(_ decorate: Bool) -> NSMutableAttributedString {
-            return decoration(.prefix, decorate)
+        func prefix(_ decorate: Bool, _ font: NSFont) -> NSMutableAttributedString {
+            return decoration(.prefix, decorate, font)
         }
-        func infix(_ decorate: Bool) -> NSMutableAttributedString {
-            return decoration(.infix, decorate)
+        func infix(_ decorate: Bool, _ font: NSFont) -> NSMutableAttributedString {
+            return decoration(.infix, decorate, font)
         }
-        func suffix(_ decorate: Bool) -> NSMutableAttributedString {
-            return decoration(.suffix, decorate)
+        func suffix(_ decorate: Bool, _ font: NSFont) -> NSMutableAttributedString {
+            return decoration(.suffix, decorate, font)
         }
 
         init(type: NodeType, _ positionInSource: Int) {
