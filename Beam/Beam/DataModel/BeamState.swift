@@ -35,15 +35,14 @@ enum Mode {
 
     func updateCanGoBackForward() {
         switch mode {
+        // swiftlint:disable:next fallthrough no_fallthrough_only
+        case .today: fallthrough
         case .note:
             canGoBack = !backForwardList.backList.isEmpty
             canGoForward = !backForwardList.forwardList.isEmpty
         case .web:
             canGoBack = currentTab.canGoBack
             canGoForward = currentTab.canGoForward
-        case .today:
-            canGoBack = false
-            canGoForward = false
         }
     }
 
@@ -94,7 +93,11 @@ enum Mode {
             }
 
             if tabs.isEmpty {
-                mode = .note
+                if let note = currentNote {
+                    navigateToNote(note)
+                } else {
+                    navigateToJournal()
+                }
             }
         }
     }
@@ -121,12 +124,21 @@ enum Mode {
     func goBack() {
         guard canGoBack else { return }
         switch mode {
-        case .note:
-            currentNote = backForwardList.goBack()
+        // swiftlint:disable:next fallthrough no_fallthrough_only
+        case .note: fallthrough
+        case .today:
+            if let back = backForwardList.goBack() {
+                switch back {
+                case .journal:
+                    mode = .today
+                    currentNote = nil
+                case let .note(note):
+                    currentNote = note
+                    mode = .note
+                }
+            }
         case .web:
             currentTab.webView.goBack()
-        case .today:
-            break
         }
         updateCanGoBackForward()
     }
@@ -134,12 +146,21 @@ enum Mode {
     func goForward() {
         guard canGoForward else { return }
         switch mode {
-        case .note:
-            currentNote = backForwardList.goForward()
+        // swiftlint:disable:next fallthrough no_fallthrough_only
+        case .note: fallthrough
+        case .today:
+            if let forward = backForwardList.goForward() {
+                switch forward {
+                case .journal:
+                    mode = .today
+                    currentNote = nil
+                case let .note(note):
+                    currentNote = note
+                    mode = .note
+                }
+            }
         case .web:
             currentTab.webView.goForward()
-        case .today:
-            break
         }
         updateCanGoBackForward()
     }
@@ -177,13 +198,31 @@ enum Mode {
     @discardableResult func navigateToNote(named: String) -> Bool {
         print("load note named \(named)")
         guard let note = Note.fetchWithTitle(CoreDataManager.shared.mainContext, named) else { return false }
+        return navigateToNote(note)
+    }
+
+    @discardableResult func navigateToNote(_ note: Note) -> Bool {
         completedQueries = []
         selectionIndex = nil
         searchQuery = ""
         mode = .note
 
         self.currentNote = note
-        backForwardList.push(note: note)
+
+        backForwardList.push(.note(note))
+        updateCanGoBackForward()
+        return true
+    }
+
+    @discardableResult func navigateToJournal() -> Bool {
+        completedQueries = []
+        selectionIndex = nil
+        searchQuery = ""
+        mode = .today
+
+        self.currentNote = nil
+
+        backForwardList.push(.journal)
         updateCanGoBackForward()
         return true
     }
@@ -261,7 +300,6 @@ enum Mode {
             print("received auto complete query: \(query)")
 
             if !(query.hasPrefix("http://") || query.hasPrefix("https://")) {
-//                self.mode = .note
             }
             self.completedQueries = []
 
@@ -286,6 +324,9 @@ enum Mode {
             self.selectionIndex = nil
             self.completedQueries.append(contentsOf: results)
         }.store(in: &scope)
+
+        backForwardList.push(.journal)
+
     }
 
     func resetQuery() {
@@ -313,7 +354,7 @@ enum Mode {
         cancelAutocomplete()
         currentNote = nil
         searchQuery = ""
-        mode = .today
+        navigateToJournal()
         BNSTextField.focusField(named: "OmniBarSearchBox")
     }
 
@@ -341,7 +382,11 @@ enum Mode {
                 }
 
                 if tabs.isEmpty {
-                    mode = currentNote == nil ? .today : .note
+                    if let note = currentNote {
+                        navigateToNote(note)
+                    } else {
+                        navigateToJournal()
+                    }
                 }
                 return true
             }

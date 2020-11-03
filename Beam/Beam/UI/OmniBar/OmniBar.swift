@@ -107,10 +107,10 @@ struct OmniBar: View {
             if let note = state.currentTab.note {
                 state.currentNote = note
             }
-            if state.currentNote != nil {
-                state.mode = .note
+            if let note = state.currentNote {
+                state.navigateToNote(note)
             } else {
-                state.mode = .today
+                state.navigateToJournal()
             }
             state.resetQuery()
         } else {

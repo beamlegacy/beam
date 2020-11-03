@@ -8,44 +8,48 @@
 import Foundation
 
 class NoteBackForwardList {
-    func push(note: Note) {
-        if let n = currentNote {
+    enum Element {
+        case note(Note)
+        case journal
+    }
+
+    func push(_ element: Element) {
+        if let n = current {
             backList.append(n)
         }
 
-        currentNote = note
+        current = element
         forwardList = []
+
     }
 
-    func goBack() -> Note? {
+    func goBack() -> Element? {
         guard let back = backList.popLast() else { return nil }
-        if let n = currentNote {
+        if let n = current {
             forwardList.append(n)
         }
 
-        currentNote = back
+        current = back
 
         return back
     }
 
-    func goForward() -> Note? {
+    func goForward() -> Element? {
         guard let forward = forwardList.popLast() else { return nil }
-        if let n = currentNote {
+        if let n = current {
             backList.append(n)
         }
 
-        currentNote = forward
+        current = forward
 
         return forward
     }
 
-    private(set) var currentNote: Note?
-    var backNote: Note? { backList.last }
-    var forwardNote: Note? { forwardList.last }
+    private(set) var current: Element?
 
-    func note(at index: Int) -> Note? {
+    func note(at index: Int) -> Element? {
         if index == 0 {
-            return currentNote
+            return current
         }
 
         if index < 0 {
@@ -65,6 +69,6 @@ class NoteBackForwardList {
 
     }
 
-    private(set) var backList: [Note] = []
-    private(set) var forwardList: [Note] = []
+    private(set) var backList: [Element] = []
+    private(set) var forwardList: [Element] = []
 }

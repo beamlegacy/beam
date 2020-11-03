@@ -42,10 +42,10 @@ struct BrowserTabView: View {
                             state.currentTab = state.tabs[i + 1]
                         } else {
                             state.currentTab = BrowserTab(state: state, originalQuery: "", note: nil)
-                            if state.currentNote != nil {
-                                state.mode = .note
+                            if let note = state.currentNote {
+                                state.navigateToNote(note)
                             } else {
-                                state.mode = .today
+                                state.navigateToJournal()
                             }
                         }
                         state.tabs.remove(at: i)
