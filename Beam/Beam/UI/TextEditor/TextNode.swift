@@ -680,7 +680,7 @@ public class TextNode: Equatable {
         let _point = NSPoint(x: point.x - indent, y: point.y)
         let line = lineAt(point: _point)
         let l = layout!.lines[line]
-        guard l.frame.minX < _point.x && l.frame.maxX > _point.x else { return nil } // don't find links outside the line
+        guard l.frame.minX <= _point.x && l.frame.maxX >= _point.x else { return nil } // don't find links outside the line
         let displayIndex = l.stringIndexFor(position: _point)
         let pos = min(displayIndex, attributedString.length - 1)
         return attributedString.attribute(.link, at: pos, effectiveRange: nil) as? String

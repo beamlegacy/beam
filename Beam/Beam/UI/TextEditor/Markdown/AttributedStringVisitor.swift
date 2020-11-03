@@ -227,6 +227,7 @@ class AttributedStringVisitor {
             context.link = .bidirectionalLink
             let attributedLink = link.attributed(node, context.showMD, attribs(for: node, context: context))
             let f = font(for: context)
+            attributedLink.addAttribute(.link, value: link, range: attributedLink.wholeRange)
             attributedLink.insert(node.prefix(context.showMD, f), at: 0)
             attributedLink.append(node.suffix(context.showMD, f))
             return attributedLink
