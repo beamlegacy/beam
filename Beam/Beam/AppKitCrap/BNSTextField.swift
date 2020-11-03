@@ -56,7 +56,9 @@ class BNSTextField: NSTextView, ObservableObject, NSTextViewDelegate {
 
     deinit {
         guard let n = name else { return }
-        Self.fields.removeValue(forKey: n)
+        DispatchQueue.main.async {
+            Self.fields.removeValue(forKey: n)
+        }
     }
 
     override func mouseDown(with event: NSEvent) {
