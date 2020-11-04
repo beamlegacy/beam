@@ -82,7 +82,7 @@ public class TextNode: Equatable {
 
 //        print("AST:\n\(AST.treeString)")
 
-        if root.node === self {
+        if root.node === self && editor?.hasFocus ?? true {
             visitor.cursorPosition = cursorPosition
         }
         let str = visitor.visit(AST)

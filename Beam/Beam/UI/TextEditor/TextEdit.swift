@@ -276,6 +276,7 @@ public class BeamTextEdit: NSView, NSTextInputClient {
         blinkPhase = true
         rootNode.cancelSelection()
         invalidate()
+        node.invalidateTextRendering() // force removing the syntax highlighting
         if activateOnLostFocus {
             activated()
         }

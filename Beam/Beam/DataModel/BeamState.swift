@@ -404,6 +404,5 @@ enum Mode {
     func cancelAutocomplete() {
         resetAutocompleteSelection()
         completedQueries = []
-        BNSTextField.focusField(named: "OmniBarSearchBox")
     }
 }
