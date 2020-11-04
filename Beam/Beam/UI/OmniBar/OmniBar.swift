@@ -87,8 +87,7 @@ struct OmniBar: View {
     }
 
     func startNewSearch() {
-        state.cancelAutocomplete()
-        state.mode = .today
+        state.startNewSearch()
     }
 
     func startQuery() {

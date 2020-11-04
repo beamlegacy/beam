@@ -353,7 +353,7 @@ enum Mode {
     func startNewSearch() {
         cancelAutocomplete()
         currentNote = nil
-        searchQuery = ""
+        resetQuery()
         navigateToJournal()
         BNSTextField.focusField(named: "OmniBarSearchBox")
     }
