@@ -70,7 +70,7 @@ public class TextNode: Equatable {
 
         let config = AttributedStringVisitor.Configuration()
         let visitor = AttributedStringVisitor(configuration: config)
-        if text.isEmpty {
+        if text.isEmpty && cursorPosition < 0 {
             let attributed = placeholder.attributed
 
             attributed.setAttributes([.font: visitor.font(for: visitor.context), .foregroundColor: disabledColor], range: attributed.wholeRange)
