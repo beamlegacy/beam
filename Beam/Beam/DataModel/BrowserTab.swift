@@ -12,7 +12,7 @@ import WebKit
 import SwiftSoup
 import FavIcon
 
-class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate, WKUIDelegate {
+class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler {
     var id: UUID
 
     public func load(url: URL) {
@@ -60,6 +60,16 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
         super.init()
     }
 
+    class var webViewConfiguration: WKWebViewConfiguration {
+        let config = WKWebViewConfiguration()
+        config.applicationNameForUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_0) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Safari/605.1.15"
+        config.preferences.javaScriptEnabled = true
+        config.preferences.javaScriptCanOpenWindowsAutomatically = false
+        config.preferences.tabFocusesLinks = true
+        config.defaultWebpagePreferences.preferredContentMode = .desktop
+        return config
+    }
+
     init(state: BeamState, originalQuery: String, note: Note?, id: UUID = UUID(), webView: WKWebView? = nil ) {
         self.state = state
         self.id = id
@@ -74,14 +84,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
             self.webView = w
             backForwardList = w.backForwardList
         } else {
-            let configuration = WKWebViewConfiguration()
-            configuration.applicationNameForUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_0) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Safari/605.1.15"
-            configuration.preferences.javaScriptEnabled = true
-            configuration.preferences.javaScriptCanOpenWindowsAutomatically = false
-            configuration.preferences.tabFocusesLinks = true
-            configuration.defaultWebpagePreferences.preferredContentMode = .desktop
-
-            let web = WKWebView(frame: NSRect(), configuration: configuration)
+            let web = WKWebView(frame: NSRect(), configuration: Self.webViewConfiguration)
             state.setup(webView: web)
             backForwardList = web.backForwardList
             self.webView = web
@@ -117,6 +120,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
             self.favIcon = nil
         }
     }
+
     private func setupObservers() {
         webView.publisher(for: \.title).sink { v in
             self.title = v ?? "loading..."
@@ -137,6 +141,8 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
 
         webView.navigationDelegate = self
         webView.uiDelegate = self
+
+        self.webView.configuration.userContentController.add(self, name: TextSelectedMessage)
     }
 
     func injectJSInPage() {
@@ -159,7 +165,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
 
             if navigationAction.modifierFlags.contains(.command) != isSearchResult {
                 // Create new tab
-                let newWebView = WKWebView(frame: NSRect(), configuration: webView.configuration)
+                let newWebView = WKWebView(frame: NSRect(), configuration: Self.webViewConfiguration)
                 state.setup(webView: newWebView)
                 let newTab = BrowserTab(state: state, originalQuery: originalQuery, note: note, webView: newWebView)
                 newTab.load(url: targetURL)
@@ -251,6 +257,66 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
     }
     #endif
 
+    let TextSelectedMessage = "beam_textSelected"
+    func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+        switch message.name {
+        case TextSelectedMessage:
+            guard let dict = message.body as? [String: AnyObject],
+                  let selectedText = dict["selectedText"] as? String
+            else { return }
+            print("Text selected: \(selectedText)")
+
+            // now add a bullet point with the quoted text:
+            if let urlString = webView.url?.absoluteString, let title = webView.title {
+                guard let url = urlString.addingPercentEncoding(withAllowedCharacters: CharacterSet(charactersIn: "()").inverted) else { return }
+                let quote = "> \(selectedText) - from [\(title)](\(url))"
+
+                DispatchQueue.main.async {
+                    _ = self.note?.createBullet(CoreDataManager.shared.mainContext, content: quote, createdAt: Date(), afterBullet: nil, parentBullet: nil)
+                }
+            }
+        default:
+            break
+        }
+    }
+
+    let jsSelectionObserver = """
+    function beam_getSelectedText() {
+        if (window.getSelection) {
+            return window.getSelection().toString();
+        } else if (document.selection) {
+            return document.selection.createRange().text;
+        }
+        return '';
+    }
+
+    var beam_currentSelectedText = "";
+    function beam_textSelected() {
+        window.webkit.messageHandlers.beam_textSelected.postMessage({ selectedText: beam_currentSelectedText });
+    }
+
+    document.addEventListener('selectionchange', () => {
+        var text = beam_getSelectedText();
+        beam_currentSelectedText = text;
+    });
+
+    document.addEventListener('select', () => {
+        var text = beam_getSelectedText();
+        beam_currentSelectedText = text;
+    });
+
+    document.addEventListener('keyup', function(e) {
+        var key = e.keyCode || e.which;
+        if (key == 16) {
+            beam_textSelected();
+        }
+    });
+
+    document.addEventListener('mouseup', function() {
+        beam_textSelected();
+    });
+    """
+
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         if let url = webView.url {
             Readability.read(webView) { [weak self] result in
@@ -264,6 +330,11 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
                 }
             }
         }
+
+        webView.evaluateJavaScript(jsSelectionObserver) { (any, err) in
+            return
+        }
+
         #if false
         webView.evaluateJavaScript("document.body.innerHTML") { (string, _) in
             if let html = string as? String {
@@ -308,19 +379,23 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
     }
 
     func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping () -> Void) {
-        print("webView runJavaScriptAlertPanelWithMessage")
+        print("webView runJavaScriptAlertPanelWithMessage \(message)")
+        completionHandler()
     }
 
     func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (Bool) -> Void) {
-        print("webView runJavaScriptConfirmPanelWithMessage")
+        print("webView runJavaScriptConfirmPanelWithMessage \(message)")
+        completionHandler(true)
     }
 
     func webView(_ webView: WKWebView, runJavaScriptTextInputPanelWithPrompt prompt: String, defaultText: String?, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (String?) -> Void) {
-        print("webView runJavaScriptTextInputPanelWithPrompt")
+        print("webView runJavaScriptTextInputPanelWithPrompt \(prompt) default: \(defaultText ?? "")")
+        completionHandler(nil)
     }
 
     func webView(_ webView: WKWebView, runOpenPanelWith parameters: WKOpenPanelParameters, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping ([URL]?) -> Void) {
         print("webView runOpenPanel")
+        completionHandler(nil)
     }
 
     func startViewing() {
