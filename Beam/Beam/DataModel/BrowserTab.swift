@@ -143,6 +143,11 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
         webView.uiDelegate = self
 
         self.webView.configuration.userContentController.add(self, name: TextSelectedMessage)
+
+        let messageHandler = LoggingMessageHandler()
+        messageHandler.tab = self
+        self.webView.configuration.userContentController.add(messageHandler, name: "logging")
+        self.webView.configuration.userContentController.addUserScript(WKUserScript(source: overrideConsole, injectionTime: .atDocumentStart, forMainFrameOnly: true))
     }
 
     func injectJSInPage() {
@@ -257,6 +262,30 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
     }
     #endif
 
+    lazy var overrideConsole: String = { loadJS(from: "OverrideConsole") }()
+
+    let enableJavascriptLogs = true
+
+    class LoggingMessageHandler: NSObject, WKScriptMessageHandler {
+        weak var tab: BrowserTab?
+
+        func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+            if tab?.enableJavascriptLogs ?? false {
+                print(message.body)
+            }
+        }
+    }
+
+    func loadJS(from fileName: String) -> String {
+        do {
+            let path = Bundle.main.path(forResource: fileName, ofType: "js")
+            return try String(contentsOfFile: path!, encoding: String.Encoding.utf8)
+        } catch {
+            //
+            fatalError("Error, couldnt' load '\(fileName)'")
+        }
+    }
+
     let TextSelectedMessage = "beam_textSelected"
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         switch message.name {
@@ -280,42 +309,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
         }
     }
 
-    let jsSelectionObserver = """
-    function beam_getSelectedText() {
-        if (window.getSelection) {
-            return window.getSelection().toString();
-        } else if (document.selection) {
-            return document.selection.createRange().text;
-        }
-        return '';
-    }
-
-    var beam_currentSelectedText = "";
-    function beam_textSelected() {
-        window.webkit.messageHandlers.beam_textSelected.postMessage({ selectedText: beam_currentSelectedText });
-    }
-
-    document.addEventListener('selectionchange', () => {
-        var text = beam_getSelectedText();
-        beam_currentSelectedText = text;
-    });
-
-    document.addEventListener('select', () => {
-        var text = beam_getSelectedText();
-        beam_currentSelectedText = text;
-    });
-
-    document.addEventListener('keyup', function(e) {
-        var key = e.keyCode || e.which;
-        if (key == 16) {
-            beam_textSelected();
-        }
-    });
-
-    document.addEventListener('mouseup', function() {
-        beam_textSelected();
-    });
-    """
+    lazy var jsSelectionObserver: String = { loadJS(from: "SelectionObserver") }()
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         if let url = webView.url {
@@ -332,6 +326,9 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
         }
 
         webView.evaluateJavaScript(jsSelectionObserver) { (any, err) in
+            if let err = err {
+                print("Error installing JS selection observer \(err)")
+            }
             return
         }
 
