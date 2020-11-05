@@ -276,16 +276,6 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
         }
     }
 
-    func loadJS(from fileName: String) -> String {
-        do {
-            let path = Bundle.main.path(forResource: fileName, ofType: "js")
-            return try String(contentsOfFile: path!, encoding: String.Encoding.utf8)
-        } catch {
-            //
-            fatalError("Error, couldnt' load '\(fileName)'")
-        }
-    }
-
     let TextSelectedMessage = "beam_textSelected"
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         switch message.name {

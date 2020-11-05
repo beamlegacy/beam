@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import VisualEffects
 
 struct ModeView: View {
     @EnvironmentObject var state: BeamState
