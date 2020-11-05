@@ -9,92 +9,13 @@ import Foundation
 import SwiftUI
 import Combine
 import WebKit
-import SwiftSoup
 import FavIcon
-
-class HtmlVisitor {
-    var text = ""
-    var depth = 0
-    var tabs: String { String.tabs(depth) }
-
-    func visit(_ node: SwiftSoup.Node) {
-        if let element = node as? SwiftSoup.Element {
-            do {
-                switch element.tagName() {
-                case "a":
-                    let href = try element.attr("href")
-    //                                let t = try node.text()
-                    print(tabs + "a href = '\(href)'")
-
-                    text += "["
-
-                    visitChildren(element)
-
-                    guard let url = href.markdownizedURL else { return }
-                    text += "](\(url))"
-                case "span":
-//                    let t = try element.text()
-//                    print(tabs + "span = '\(t)'")
-//                    text += t
-                    print(tabs + "span...")
-                    visitChildren(element)
-
-                default:
-                    visitChildren(node)
-                    break
-                }
-            } catch Exception.Error(let type, let message) {
-                print(tabs + "\(type): \(message)")
-            } catch {
-                print("error")
-            }
-        } else {
-            if let textNode = node as? SwiftSoup.TextNode {
-                let t = textNode.text()
-                print(tabs + "textNode = '\(t)'")
-
-                text += t
-            } else {
-                print(tabs + "??? node ??? = '\(node)'")
-            }
-
-            visitChildren(node)
-        }
-    }
-
-    func visitChildren(_ node: SwiftSoup.Node) {
-        guard node.childNodeSize() != 0 else { return }
-        depth += 1
-        for c in node.getChildNodes() {
-            visit(c)
-        }
-        depth -= 1
-    }
-}
-
-func html2Md(_ html: String) -> String {
-    var text = ""
-    do {
-        let doc = try SwiftSoup.parseBodyFragment(html)
-
-        let visitor = HtmlVisitor()
-
-        visitor.visit(doc)
-
-        text = visitor.text
-    } catch Exception.Error(let type, let message) {
-        print("\(type): \(message)")
-    } catch {
-        print("error")
-    }
-
-    return text
-}
 
 class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler {
     var id: UUID
 
     public func load(url: URL) {
+        self.url = url
         webView.load(URLRequest(url: url))
     }
 
@@ -276,68 +197,6 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
     func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
     }
 
-    #if false
-    class textNodeVisitor: SwiftSoup.NodeVisitor {
-        init() {
-        }
-        public func head(_ node: Node, _ depth: Int) {
-            if let textNode = (node as? TextNode) {
-                let string = textNode.getWholeText()
-                //                print("Node[\(depth)]: \(string)\n")
-            } else if let element = (node as? Element) {
-                //                if !accum.isEmpty &&
-                //                    (element.isBlock() || element.nodeName() == "br") &&
-                //                    !TextNode.lastCharIsWhitespace(accum) {
-                ////                    accum.append(" ")
-                //                }
-            }
-        }
-
-        public func tail(_ node: Node, _ depth: Int) {
-        }
-    }
-
-    class NodeTraversor {
-        private let visitor: NodeVisitor
-
-        /**
-         * Create a new traversor.
-         * @param visitor a class implementing the {@link NodeVisitor} interface, to be called when visiting each node.
-         */
-        public init(_ visitor: NodeVisitor) {
-            self.visitor = visitor
-        }
-
-        /**
-         * Start a depth-first traverse of the root and all of its descendants.
-         * @param root the root node point to traverse.
-         */
-        open func traverse(_ root: Node?)throws {
-            var node: Node? = root
-            var depth: Int = 0
-
-            while node != nil {
-                try visitor.head(node!, depth)
-                if node!.childNodeSize() > 0 {
-                    node = node!.childNode(0)
-                    depth += 1
-                } else {
-                    while node!.nextSibling() == nil && depth > 0 {
-                        try visitor.tail(node!, depth)
-                        node = node!.parent()
-                        depth -= 1
-                    }
-                    try visitor.tail(node!, depth)
-                    if node === root {
-                        break
-                    }
-                    node = node!.nextSibling()
-                }
-            }
-        }
-    }
-    #endif
-
     lazy var overrideConsole: String = { loadJS(from: "OverrideConsole") }()
 
     let enableJavascriptLogs = true
@@ -357,20 +216,20 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
         switch message.name {
         case TextSelectedMessage:
             guard let dict = message.body as? [String: AnyObject],
-                  let selectedText = dict["selectedText"] as? String,
+//                  let selectedText = dict["selectedText"] as? String,
                   let selectedHtml = dict["selectedHtml"] as? String
             else { return }
-            print("Text selected: \(selectedText)")
-            print("Html selected: \(selectedHtml)")
+//            print("Text selected: \(selectedText)")
+//            print("Html selected: \(selectedHtml)")
 
-            let text = html2Md(selectedHtml)
+            let text = html2Md(url: webView.url!, html: selectedHtml)
 
-            print("html to MD: \(text)")
+//            print("html to MD (\(url)): \(text)")
 
             // now add a bullet point with the quoted text:
             if let urlString = webView.url?.absoluteString, let title = webView.title {
                 guard let url = urlString.markdownizedURL else { return }
-                let quote = "> \(selectedText) - from [\(title)](\(url))"
+                let quote = "> \(text) - from [\(title)](\(url))"
 
                 DispatchQueue.main.async {
                     _ = self.note?.createBullet(CoreDataManager.shared.mainContext, content: quote, createdAt: Date(), afterBullet: nil, parentBullet: nil)
@@ -403,24 +262,6 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
             }
             return
         }
-
-        #if false
-        webView.evaluateJavaScript("document.body.innerHTML") { (string, _) in
-            if let html = string as? String {
-                do {
-                    let doc: Document = try SwiftSoup.parse(html)
-                    //                    let text = try doc.text()
-                    try NodeTraversor(textNodeVisitor()).traverse(doc)
-
-                    //                    print("==============================\nAll the text in the document:\n\(text)")
-                } catch Exception.Error(let type, let message) {
-                    print("SwiftSoup Error(\(type)): \(message)")
-                } catch {
-                    print("error")
-                }
-            }
-        }
-        #endif
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {

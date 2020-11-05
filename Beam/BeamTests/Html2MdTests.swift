@@ -27,9 +27,9 @@ class Html2MdTests: XCTestCase {
         """
 
         let md = html2Md(html)
-        print("MD: \(md)")
+        //print("MD: \(md)")
 
-        //XCTAssertEqual(str1, root.printTree())
+        XCTAssertEqual(md, "en orientation dans le cadre d'un processus d'orientation, par ...    [Wikipédia](https://fr.wikipedia.org/wiki/Test_%28psychologie%29)")
     }
 
 }
