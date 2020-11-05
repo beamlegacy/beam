@@ -12,6 +12,85 @@ import WebKit
 import SwiftSoup
 import FavIcon
 
+class HtmlVisitor {
+    var text = ""
+    var depth = 0
+    var tabs: String { String.tabs(depth) }
+
+    func visit(_ node: SwiftSoup.Node) {
+        if let element = node as? SwiftSoup.Element {
+            do {
+                switch element.tagName() {
+                case "a":
+                    let href = try element.attr("href")
+    //                                let t = try node.text()
+                    print(tabs + "a href = '\(href)'")
+
+                    text += "["
+
+                    visitChildren(element)
+
+                    guard let url = href.markdownizedURL else { return }
+                    text += "](\(url))"
+                case "span":
+//                    let t = try element.text()
+//                    print(tabs + "span = '\(t)'")
+//                    text += t
+                    print(tabs + "span...")
+                    visitChildren(element)
+
+                default:
+                    visitChildren(node)
+                    break
+                }
+            } catch Exception.Error(let type, let message) {
+                print(tabs + "\(type): \(message)")
+            } catch {
+                print("error")
+            }
+        } else {
+            if let textNode = node as? SwiftSoup.TextNode {
+                let t = textNode.text()
+                print(tabs + "textNode = '\(t)'")
+
+                text += t
+            } else {
+                print(tabs + "??? node ??? = '\(node)'")
+            }
+
+            visitChildren(node)
+        }
+    }
+
+    func visitChildren(_ node: SwiftSoup.Node) {
+        guard node.childNodeSize() != 0 else { return }
+        depth += 1
+        for c in node.getChildNodes() {
+            visit(c)
+        }
+        depth -= 1
+    }
+}
+
+func html2Md(_ html: String) -> String {
+    var text = ""
+    do {
+        let doc = try SwiftSoup.parseBodyFragment(html)
+
+        let visitor = HtmlVisitor()
+
+        visitor.visit(doc)
+
+        text = visitor.text
+    } catch Exception.Error(let type, let message) {
+        print("\(type): \(message)")
+    } catch {
+        print("error")
+    }
+
+    return text
+}
+
 class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler {
     var id: UUID
 
@@ -150,9 +229,6 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
         self.webView.configuration.userContentController.addUserScript(WKUserScript(source: overrideConsole, injectionTime: .atDocumentStart, forMainFrameOnly: true))
     }
 
-    func injectJSInPage() {
-    }
-
     // WKNavigationDelegate:
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         decisionHandler(.allow)
@@ -287,9 +363,13 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
             print("Text selected: \(selectedText)")
             print("Html selected: \(selectedHtml)")
 
+            let text = html2Md(selectedHtml)
+
+            print("html to MD: \(text)")
+
             // now add a bullet point with the quoted text:
             if let urlString = webView.url?.absoluteString, let title = webView.title {
-                guard let url = urlString.addingPercentEncoding(withAllowedCharacters: CharacterSet(charactersIn: "()").inverted) else { return }
+                guard let url = urlString.markdownizedURL else { return }
                 let quote = "> \(selectedText) - from [\(title)](\(url))"
 
                 DispatchQueue.main.async {
