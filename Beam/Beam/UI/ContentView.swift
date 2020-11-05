@@ -33,15 +33,14 @@ struct ModeView: View {
                         }
                     }
                 case .today:
-                    GeometryReader { geometry in
-                        ScrollView([.vertical]) {
-                            ZStack {
+                    ZStack {
+                        GeometryReader { geometry in
+                            ScrollView([.vertical]) {
                                 JournalView(journal: state.data.journal, offset: geometry.size.height * 0.4)
 
-                                AutoCompleteView(autoComplete: $state.completedQueries, selectionIndex: $state.selectionIndex)
-                                    .frame(idealWidth: 800, maxWidth: .infinity, idealHeight: 600, maxHeight: .infinity, alignment: .center)
                             }
                         }
+                        AutoCompleteView(autoComplete: $state.completedQueries, selectionIndex: $state.selectionIndex).frame(alignment: .top)
                     }
                 }
             }
