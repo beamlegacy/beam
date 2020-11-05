@@ -82,7 +82,7 @@ function Readability(doc, options) {
         var msg = Array.prototype.map.call(arguments, function(x) {
           return (x && x.nodeName) ? logEl(x) : x;
         }).join(" ");
-        dump("Reader: (Readability) " + msg + "\\n");
+        dump("Reader: (Readability) " + msg + "\n");
       } else if (typeof console !== "undefined") {
         var args = ["Reader: (Readability) "].concat(arguments);
         console.log.apply(console, args);
@@ -125,18 +125,18 @@ Readability.prototype = {
 
     positive: /article|body|content|entry|hentry|h-entry|main|page|pagination|post|text|blog|story/i,
     negative: /hidden|^hid$| hid$| hid |^hid |banner|combx|comment|com-|contact|foot|footer|footnote|gdpr|masthead|media|meta|outbrain|promo|related|scroll|share|shoutbox|sidebar|skyscraper|sponsor|shopping|tags|tool|widget/i,
-    extraneous: /print|archive|comment|discuss|e[\\-]?mail|share|reply|all|login|sign|single|utility/i,
+    extraneous: /print|archive|comment|discuss|e[\-]?mail|share|reply|all|login|sign|single|utility/i,
     byline: /byline|author|dateline|writtenby|p-author/i,
-    replaceFonts: /<(\\/?)font[^>]*>/gi,
-    normalize: /\\s{2,}/g,
-    videos: /\\/\\/(www\\.)?((dailymotion|youtube|youtube-nocookie|player\\.vimeo|v\\.qq)\\.com|(archive|upload\\.wikimedia)\\.org|player\\.twitch\\.tv)/i,
-    shareElements: /(\\b|_)(share|sharedaddy)(\\b|_)/i,
-    nextLink: /(next|weiter|continue|>([^\\|]|$)|»([^\\|]|$))/i,
+    replaceFonts: /<(\/?)font[^>]*>/gi,
+    normalize: /\s{2,}/g,
+    videos: /\/\/(www\.)?((dailymotion|youtube|youtube-nocookie|player\.vimeo|v\.qq)\.com|(archive|upload\.wikimedia)\.org|player\.twitch\.tv)/i,
+    shareElements: /(\b|_)(share|sharedaddy)(\b|_)/i,
+    nextLink: /(next|weiter|continue|>([^\|]|$)|»([^\|]|$))/i,
     prevLink: /(prev|earl|old|new|<|«)/i,
-    whitespace: /^\\s*$/,
-    hasContent: /\\S$/,
-    srcsetUrl: /(\\S+)(\\s+[\\d.]+[xw])?(\\s*(?:,|$))/g,
-    b64DataUrl: /^data:\\s*([^\\s;,]+)\\s*;\\s*base64\\s*,/i,
+    whitespace: /^\s*$/,
+    hasContent: /\S$/,
+    srcsetUrl: /(\S+)(\s+[\d.]+[xw])?(\s*(?:,|$))/g,
+    b64DataUrl: /^data:\s*([^\s;,]+)\s*;\s*base64\s*,/i,
     // See: https://schema.org/Article
     jsonLdArticleTypes: /^Article|AdvertiserContentArticle|NewsArticle|AnalysisNewsArticle|AskPublicNewsArticle|BackgroundNewsArticle|OpinionNewsArticle|ReportageNewsArticle|ReviewNewsArticle|Report|SatiricalArticle|ScholarlyArticle|MedicalScholarlyArticle|SocialMediaPosting|BlogPosting|LiveBlogPosting|DiscussionForumPosting|TechArticle|APIReference$/
   },
@@ -332,7 +332,7 @@ Readability.prototype = {
   _cleanClasses: function(node) {
     var classesToPreserve = this._classesToPreserve;
     var className = (node.getAttribute("class") || "")
-      .split(/\\s+/)
+      .split(/\s+/)
       .filter(function(cls) {
         return classesToPreserve.indexOf(cls) != -1;
       })
@@ -469,18 +469,18 @@ Readability.prototype = {
 
     var titleHadHierarchicalSeparators = false;
     function wordCount(str) {
-      return str.split(/\\s+/).length;
+      return str.split(/\s+/).length;
     }
 
     // If there's a separator in the title, first remove the final part
-    if ((/ [\\|\\-\\\\\\/>»] /).test(curTitle)) {
-      titleHadHierarchicalSeparators = / [\\\\\\/>»] /.test(curTitle);
-      curTitle = origTitle.replace(/(.*)[\\|\\-\\\\\\/>»] .*/gi, "$1");
+    if ((/ [\|\-\\\/>»] /).test(curTitle)) {
+      titleHadHierarchicalSeparators = / [\\\/>»] /.test(curTitle);
+      curTitle = origTitle.replace(/(.*)[\|\-\\\/>»] .*/gi, "$1");
 
       // If the resulting title is too short (3 words or fewer), remove
       // the first part instead:
       if (wordCount(curTitle) < 3)
-        curTitle = origTitle.replace(/[^\\|\\-\\\\\\/>»]*[\\|\\-\\\\\\/>»](.*)/gi, "$1");
+        curTitle = origTitle.replace(/[^\|\-\\\/>»]*[\|\-\\\/>»](.*)/gi, "$1");
     } else if (curTitle.indexOf(": ") !== -1) {
       // Check if we have an heading containing this exact string, so we
       // could assume it's the full title.
@@ -515,13 +515,13 @@ Readability.prototype = {
 
     curTitle = curTitle.trim().replace(this.REGEXPS.normalize, " ");
     // If we now have 4 words or fewer as our title, and either no
-    // 'hierarchical' separators (\\, /, > or ») were found in the original
+    // 'hierarchical' separators (\, /, > or ») were found in the original
     // title or we decreased the number of words by more than 1 word, use
     // the original title.
     var curTitleWordCount = wordCount(curTitle);
     if (curTitleWordCount <= 4 &&
         (!titleHadHierarchicalSeparators ||
-         curTitleWordCount != wordCount(origTitle.replace(/[\\|\\-\\\\\\/>»]+/g, "")) - 1)) {
+         curTitleWordCount != wordCount(origTitle.replace(/[\|\-\\\/>»]+/g, "")) - 1)) {
       curTitle = origTitle;
     }
 
@@ -548,11 +548,11 @@ Readability.prototype = {
   },
 
   /**
-   * Finds the next element, starting from the given node, and ignoring
+   * Finds the next node, starting from the given node, and ignoring
    * whitespace in between. If the given node is an element, the same node is
    * returned.
    */
-  _nextElement: function (node) {
+  _nextNode: function (node) {
     var next = node;
     while (next
         && (next.nodeType != this.ELEMENT_NODE)
@@ -577,10 +577,10 @@ Readability.prototype = {
       // <p> block.
       var replaced = false;
 
-      // If we find a <br> chain, remove the <br>s until we hit another element
+      // If we find a <br> chain, remove the <br>s until we hit another node
       // or non-whitespace. This leaves behind the first <br> in the chain
       // (which will be replaced with a <p> later).
-      while ((next = this._nextElement(next)) && (next.tagName == "BR")) {
+      while ((next = this._nextNode(next)) && (next.tagName == "BR")) {
         replaced = true;
         var brSibling = next.nextSibling;
         next.parentNode.removeChild(next);
@@ -598,7 +598,7 @@ Readability.prototype = {
         while (next) {
           // If we've hit another <br><br>, we're done adding children to this <p>.
           if (next.tagName == "BR") {
-            var nextElem = this._nextElement(next.nextSibling);
+            var nextElem = this._nextNode(next.nextSibling);
             if (nextElem && nextElem.tagName == "BR")
               break;
           }
@@ -736,7 +736,7 @@ Readability.prototype = {
     });
 
     this._forEachNode(this._getAllNodesWithTag(articleContent, ["br"]), function(br) {
-      var next = this._nextElement(br.nextSibling);
+      var next = this._nextNode(br.nextSibling);
       if (next && next.tagName == "P")
         br.parentNode.removeChild(br);
     });
@@ -1190,7 +1190,7 @@ Readability.prototype = {
             if (nodeLength > 80 && linkDensity < 0.25) {
               append = true;
             } else if (nodeLength < 80 && nodeLength > 0 && linkDensity === 0 &&
-                       nodeContent.search(/\\.( |$)/) !== -1) {
+                       nodeContent.search(/\.( |$)/) !== -1) {
               append = true;
             }
           }
@@ -1352,12 +1352,12 @@ Readability.prototype = {
     if (jsonLdElement) {
       try {
         // Strip CDATA markers if present
-        var content = jsonLdElement.textContent.replace(/^\\s*<!\\[CDATA\\[|\\]\\]>\\s*$/g, "");
+        var content = jsonLdElement.textContent.replace(/^\s*<!\[CDATA\[|\]\]>\s*$/g, "");
         var parsed = JSON.parse(content);
         var metadata = {};
         if (
           !parsed["@context"] ||
-          !parsed["@context"].match(/^https?\\:\\/\\/schema\\.org$/)
+          !parsed["@context"].match(/^https?\:\/\/schema\.org$/)
         ) {
           return metadata;
         }
@@ -1427,10 +1427,10 @@ Readability.prototype = {
     var metaElements = this._doc.getElementsByTagName("meta");
 
     // property is a space-separated list of values
-    var propertyPattern = /\\s*(dc|dcterm|og|twitter)\\s*:\\s*(author|creator|description|title|site_name)\\s*/gi;
+    var propertyPattern = /\s*(dc|dcterm|og|twitter)\s*:\s*(author|creator|description|title|site_name)\s*/gi;
 
     // name is a single value
-    var namePattern = /^\\s*(?:(dc|dcterm|og|twitter|weibo:(article|webpage))\\s*[\\.:]\\s*)?(author|creator|description|title|site_name)\\s*$/i;
+    var namePattern = /^\s*(?:(dc|dcterm|og|twitter|weibo:(article|webpage))\s*[\.:]\s*)?(author|creator|description|title|site_name)\s*$/i;
 
     // Find description tags.
     this._forEachNode(metaElements, function(element) {
@@ -1449,7 +1449,7 @@ Readability.prototype = {
           for (var i = matches.length - 1; i >= 0; i--) {
             // Convert to lowercase, and remove any whitespace
             // so we can match below.
-            name = matches[i].toLowerCase().replace(/\\s/g, "");
+            name = matches[i].toLowerCase().replace(/\s/g, "");
             // multiple authors
             values[name] = content.trim();
           }
@@ -1460,7 +1460,7 @@ Readability.prototype = {
         if (content) {
           // Convert to lowercase, remove any whitespace, and convert dots
           // to colons so we can match below.
-          name = name.toLowerCase().replace(/\\s/g, "").replace(/\\./g, ":");
+          name = name.toLowerCase().replace(/\s/g, "").replace(/\./g, ":");
           values[name] = content.trim();
         }
       }
@@ -1551,7 +1551,7 @@ Readability.prototype = {
             return;
         }
 
-        if (/\\.(jpg|jpeg|png|webp)/i.test(attr.value)) {
+        if (/\.(jpg|jpeg|png|webp)/i.test(attr.value)) {
           return;
         }
       }
@@ -1586,7 +1586,7 @@ Readability.prototype = {
             continue;
           }
 
-          if (attr.name === "src" || attr.name === "srcset" || /\\.(jpg|jpeg|png|webp)/i.test(attr.value)) {
+          if (attr.name === "src" || attr.name === "srcset" || /\.(jpg|jpeg|png|webp)/i.test(attr.value)) {
             if (newImg.getAttribute(attr.name) === attr.value) {
               continue;
             }
@@ -1951,7 +1951,7 @@ Readability.prototype = {
             continue;
           }
 
-          if (/\\.(jpg|jpeg|png|webp)/i.test(attr.value)) {
+          if (/\.(jpg|jpeg|png|webp)/i.test(attr.value)) {
             srcCouldBeRemoved = true;
             break;
           }
@@ -1960,7 +1960,7 @@ Readability.prototype = {
         // Here we assume if image is less than 100 bytes (or 133B after encoded to base64)
         // it will be too small, therefore it might be placeholder image.
         if (srcCouldBeRemoved) {
-          var b64starts = elem.src.search(/base64\\s*/i) + 7;
+          var b64starts = elem.src.search(/base64\s*/i) + 7;
           var b64length = elem.src.length - b64starts;
           if (b64length < 133) {
             elem.removeAttribute("src");
@@ -1979,9 +1979,9 @@ Readability.prototype = {
           continue;
         }
         var copyTo = null;
-        if (/\\.(jpg|jpeg|png|webp)\\s+\\d/.test(attr.value)) {
+        if (/\.(jpg|jpeg|png|webp)\s+\d/.test(attr.value)) {
           copyTo = "srcset";
-        } else if (/^\\s*\\S+\\.(jpg|jpeg|png|webp)\\S*\\s*$/.test(attr.value)) {
+        } else if (/^\s*\S+\.(jpg|jpeg|png|webp)\S*\s*$/.test(attr.value)) {
           copyTo = "src";
         }
         if (copyTo) {
@@ -2203,6 +2203,5 @@ Readability.prototype = {
 if (typeof module === "object") {
   module.exports = Readability;
 }
-
 var documentClone = document.cloneNode(true);
 new Readability(documentClone).parse()
