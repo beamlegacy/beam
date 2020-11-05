@@ -17,19 +17,45 @@ function beam_getSelectedText() {
     return '';
 }
 
-var beam_currentSelectedText = "";
-function beam_textSelected() {
-    window.webkit.messageHandlers.beam_textSelected.postMessage({ selectedText: beam_currentSelectedText });
+function beam_getSelectedHtml() {
+    var span = document.createElement('span')
+    span.innerHTML = "";
+
+    var selection = document.selection;
+    if (window.getSelection) {
+        selection = window.getSelection();
+    }
+    if (selection) {
+        for (let i = 0; i < selection.rangeCount; i++) {
+          var cloned = selection.getRangeAt(i).cloneContents();
+
+          span.append(cloned);
+        }
+
+        console.debug("selected range html: " + span);
+        return span;
+    }
+    return span;
 }
 
+
+var beam_currentSelectedText = "";
+var beam_currentSelectedHtml = "";
+function beam_textSelected() {
+    window.webkit.messageHandlers.beam_textSelected.postMessage({ selectedText: beam_currentSelectedText, selectedHtml: beam_currentSelectedHtml });
+}
+
+
+
 document.addEventListener('selectionchange', () => {
-    var text = beam_getSelectedText();
-    beam_currentSelectedText = text;
+    beam_currentSelectedText = beam_getSelectedText();
+    beam_currentSelectedHtml = beam_getSelectedHtml();
+    console.debug("selected html: " + beam_currentSelectedHtml.outerHTML);
 });
 
 document.addEventListener('select', () => {
-    var text = beam_getSelectedText();
-    beam_currentSelectedText = text;
+    beam_currentSelectedText = beam_getSelectedText();
+    beam_currentSelectedHtml = beam_getSelectedHtml();
 });
 
 document.addEventListener('keyup', function(e) {
