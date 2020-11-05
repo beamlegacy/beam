@@ -281,9 +281,11 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
         switch message.name {
         case TextSelectedMessage:
             guard let dict = message.body as? [String: AnyObject],
-                  let selectedText = dict["selectedText"] as? String
+                  let selectedText = dict["selectedText"] as? String,
+                  let selectedHtml = dict["selectedHtml"] as? String
             else { return }
             print("Text selected: \(selectedText)")
+            print("Html selected: \(selectedHtml)")
 
             // now add a bullet point with the quoted text:
             if let urlString = webView.url?.absoluteString, let title = webView.title {

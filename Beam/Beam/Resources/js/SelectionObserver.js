@@ -32,7 +32,7 @@ function beam_getSelectedHtml() {
           span.append(cloned);
         }
 
-        console.debug("selected range html: " + span);
+        //console.debug("selected range html: " + span);
         return span;
     }
     return span;
@@ -42,7 +42,7 @@ function beam_getSelectedHtml() {
 var beam_currentSelectedText = "";
 var beam_currentSelectedHtml = "";
 function beam_textSelected() {
-    window.webkit.messageHandlers.beam_textSelected.postMessage({ selectedText: beam_currentSelectedText, selectedHtml: beam_currentSelectedHtml });
+    window.webkit.messageHandlers.beam_textSelected.postMessage({ selectedText: beam_currentSelectedText, selectedHtml: beam_currentSelectedHtml.innerHTML });
 }
 
 
@@ -50,7 +50,7 @@ function beam_textSelected() {
 document.addEventListener('selectionchange', () => {
     beam_currentSelectedText = beam_getSelectedText();
     beam_currentSelectedHtml = beam_getSelectedHtml();
-    console.debug("selected html: " + beam_currentSelectedHtml.outerHTML);
+    //console.debug("selected html: " + beam_currentSelectedHtml.outerHTML);
 });
 
 document.addEventListener('select', () => {
