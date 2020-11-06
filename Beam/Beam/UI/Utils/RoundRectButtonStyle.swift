@@ -15,7 +15,7 @@ struct RoundRectButtonStyle: PrimitiveButtonStyle {
     @State var isHover = false
     var foregroundColor: Color {
         guard isEnabled else { return Color(.displayP3, white: 1, opacity: 0) }
-        return isHover ? Color("ToolbarButtonBackgroundOnColor") : Color("ToolbarButtonBackgroundHoverColor")
+        return isHover ? Color("ToolbarButtonBackgroundHoverColor") : Color.init(.displayP3, white: 1, opacity: 0)
     }
     public func makeBody(configuration: BorderedButtonStyle.Configuration) -> some View {
         return ZStack {
