@@ -35,9 +35,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         CoreDataManager.shared.setup()
 
-        NSApp.dockTile.badgeLabel = String(Note.countWithPredicate(CoreDataManager.shared.mainContext))
-
+        updateBadge()
         createWindow()
+    }
+
+    private func updateBadge() {
+        let count = Note.countWithPredicate(CoreDataManager.shared.mainContext)
+        NSApp.dockTile.badgeLabel = count > 0 ? String(count) : ""
     }
 
     func registerFonts() {
@@ -90,12 +94,85 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @IBAction func resetDatabase(_ sender: Any) {
         CoreDataManager.shared.destroyPersistentStore {
             CoreDataManager.shared.setup()
+            self.updateBadge()
 
             let alert = NSAlert()
             alert.alertStyle = .critical
+            // TODO: i18n
             alert.messageText = "Database deleted"
             alert.informativeText = "All coredata has been deleted"
             alert.runModal()
+
+        }
+    }
+
+    // MARK: - Notes export
+    @IBAction func exportNotes(_ sender: Any) {
+        // the panel is automatically displayed in the user's language if your project is localized
+        let savePanel = NSSavePanel()
+        savePanel.canCreateDirectories = false
+
+        // this is a preferred method to get the desktop URL
+        savePanel.directoryURL = FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask).first!
+
+        // TODO: i18n
+        savePanel.title = "Export all notes"
+        savePanel.message = "Choose the file to export all notes, please note this is used for development mode only."
+        savePanel.showsHiddenFiles = false
+        savePanel.showsTagField = false
+        savePanel.canCreateDirectories = true
+        savePanel.allowsOtherFileTypes = false
+        savePanel.isExtensionHidden = true
+
+        let dateFormatter = ISO8601DateFormatter()
+        dateFormatter.formatOptions = [.withYear, .withMonth, .withDay, .withTime]
+        let dateString = dateFormatter.string(from: Date())
+        savePanel.nameFieldStringValue = "BeamExport-\(dateString).sqlite"
+
+        if savePanel.runModal() == NSApplication.ModalResponse.OK, let url = savePanel.url {
+            if !url.startAccessingSecurityScopedResource() {
+                // TODO: raise error?
+                print("startAccessingSecurityScopedResource returned false. This directory might not need it, or this URL might not be a security scoped URL, or maybe something's wrong?")
+            }
+
+            CoreDataManager.shared.backup(url)
+
+            url.stopAccessingSecurityScopedResource()
+        }
+    }
+
+    @IBAction func importNotes(_ sender: Any) {
+        let openPanel = NSOpenPanel()
+        openPanel.allowsMultipleSelection = false
+        openPanel.canChooseDirectories = false
+        openPanel.canCreateDirectories = false
+        openPanel.canChooseFiles = true
+        openPanel.allowedFileTypes = ["sqlite"]
+
+        // TODO: i18n
+        openPanel.title = "Select the backup sqlite file"
+        openPanel.message = "We will delete all notes and import this backup"
+
+        openPanel.begin { [weak openPanel] result in
+            guard result == .OK, let url = openPanel?.url else { openPanel?.close(); return }
+
+            CoreDataManager.shared.importBackup(url) {
+                CoreDataManager.shared.setup()
+                self.updateBadge()
+
+                let alert = NSAlert()
+                alert.alertStyle = .critical
+
+                let notesCount = Note.countWithPredicate(CoreDataManager.shared.mainContext)
+                let bulletsCount = Bullet.countWithPredicate(CoreDataManager.shared.mainContext)
+
+                // TODO: i18n
+                alert.messageText = "Backup file has been imported"
+                alert.informativeText = "\(notesCount) notes and \(bulletsCount) bullets have been imported"
+                alert.runModal()
+            }
+
+            openPanel?.close()
         }
     }
 
@@ -106,6 +183,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         openPanel.canChooseDirectories = false
         openPanel.canCreateDirectories = false
         openPanel.canChooseFiles = true
+        // TODO: i18n
         openPanel.title = "Choose your ROAM JSON Export"
         openPanel.begin { [weak openPanel] result in
             guard result == .OK, let selectedPath = openPanel?.url?.path else { openPanel?.close(); return }
@@ -118,9 +196,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 try roamImporter.parseAndCreate(CoreDataManager.shared.mainContext, selectedPath)
                 CoreDataManager.shared.save()
             } catch {
-                // TODO: show error
+                // TODO: raise error?
                 fatalError("Aie")
             }
+            self.updateBadge()
 
             let afterNotesCount = Note.countWithPredicate(CoreDataManager.shared.mainContext)
             let afterBulletsCount = Bullet.countWithPredicate(CoreDataManager.shared.mainContext)

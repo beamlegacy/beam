@@ -110,6 +110,47 @@ class CoreDataManager {
         }
     }
 
+    func backup(_ url: URL) {
+        guard let storeCoordinator = mainContext.persistentStoreCoordinator else { return }
+        do {
+            let backupFile = try storeCoordinator.backupPersistentStore(atIndex: 0)
+            defer {
+                // Delete temporary directory when done
+                do {
+                    try backupFile.deleteDirectory()
+                } catch {
+                    // TODO: raise error?
+                    print("Error deleting temporary file: \(error)")
+                }
+            }
+
+            try FileManager().copyItem(at: backupFile.fileURL, to: url)
+        } catch {
+            // TODO: raise error?
+            print("Error backing up Core Data store: \(error)")
+        }
+    }
+
+    func importBackup(_ url: URL, _ completion: (() -> Void)? = nil) {
+        destroyPersistentStore {
+            guard let storeURL = self.storeURL else { return }
+
+            let fileManager = FileManager()
+
+            do {
+                if fileManager.fileExists(atPath: storeURL.path) {
+                    try fileManager.removeItem(at: storeURL)
+                }
+                try fileManager.copyItem(at: url, to: storeURL)
+            } catch {
+                // TODO: raise error?
+                print("Error importing backup: \(error)")
+            }
+
+            completion?()
+        }
+    }
+
     lazy var persistentContainer: NSPersistentCloudKitContainer! = {
         let container = NSPersistentCloudKitContainer(name: "Beam")
         let description = container.persistentStoreDescriptions.first
