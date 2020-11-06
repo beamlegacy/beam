@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		20E1B667EDD2C5D590410B9F /* Pods_Beam.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2BE96DC9A7278563E5878CCD /* Pods_Beam.framework */; };
+		520081942552C93600A6CAC6 /* CoreDataManager+backupExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 520081932552C93600A6CAC6 /* CoreDataManager+backupExtension.swift */; };
+		520081992552C97C00A6CAC6 /* TemporaryFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 520081982552C97C00A6CAC6 /* TemporaryFile.swift */; };
 		520BFE602530A1D1009DF633 /* ViewModelFetchedResults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 520BFE5F2530A1D1009DF633 /* ViewModelFetchedResults.swift */; };
 		520BFE7E25347F27009DF633 /* SearchBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 520BFE7D25347F27009DF633 /* SearchBar.swift */; };
 		520BFE8B2534B3E4009DF633 /* Note+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 520BFE8A2534B3E4009DF633 /* Note+CoreDataProperties.swift */; };
@@ -120,6 +122,8 @@
 /* Begin PBXFileReference section */
 		23F7A69644D041FDF4D3466B /* Pods-Beam.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Beam.release.xcconfig"; path = "Target Support Files/Pods-Beam/Pods-Beam.release.xcconfig"; sourceTree = "<group>"; };
 		2BE96DC9A7278563E5878CCD /* Pods_Beam.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Beam.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		520081932552C93600A6CAC6 /* CoreDataManager+backupExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CoreDataManager+backupExtension.swift"; sourceTree = "<group>"; };
+		520081982552C97C00A6CAC6 /* TemporaryFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemporaryFile.swift; sourceTree = "<group>"; };
 		520BFE5F2530A1D1009DF633 /* ViewModelFetchedResults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModelFetchedResults.swift; sourceTree = "<group>"; };
 		520BFE7D25347F27009DF633 /* SearchBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchBar.swift; sourceTree = "<group>"; };
 		520BFE8A2534B3E4009DF633 /* Note+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Note+CoreDataProperties.swift"; sourceTree = "<group>"; };
@@ -271,6 +275,8 @@
 				521812BC2524C368007E4B47 /* Bullet.swift */,
 				523586452534BF4E006748E4 /* Bullet+CoreDataProperties.swift */,
 				528E44262525BD4600B7C54E /* CoreDataManager.swift */,
+				520081932552C93600A6CAC6 /* CoreDataManager+backupExtension.swift */,
+				520081982552C97C00A6CAC6 /* TemporaryFile.swift */,
 				52326F8B252F1A8E00A40F1E /* NSManagedObject+initExtension.swift */,
 				52D4C6392535A4D800A00457 /* NotificationName.swift */,
 			);
@@ -631,7 +637,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1200;
-				LastUpgradeCheck = 1200;
+				LastUpgradeCheck = 1210;
 				TargetAttributes = {
 					965A78242514F147009980D4 = {
 						CreatedOnToolsVersion = 12.0;
@@ -866,11 +872,13 @@
 				9694F77925155F8700399E6A /* AutoComplete.swift in Sources */,
 				96C9CC392535C16800D70AA6 /* Lexer.swift in Sources */,
 				965B19642518F3BA00BCF01C /* BrowserTabBar.swift in Sources */,
+				520081992552C97C00A6CAC6 /* TemporaryFile.swift in Sources */,
 				52C82C8325306600006C188C /* NoteList.swift in Sources */,
 				966B3541251BB2A800751322 /* BeamWindow.swift in Sources */,
 				521812B62524C354007E4B47 /* Note.swift in Sources */,
 				9645488D252382DB0064D062 /* Readability.swift in Sources */,
 				52C82C8825306637006C188C /* NoteDetail.swift in Sources */,
+				520081942552C93600A6CAC6 /* CoreDataManager+backupExtension.swift in Sources */,
 				52DC106E2539D5D000F2D594 /* Config.swift in Sources */,
 				964547B725212D760064D062 /* String+Ranges.swift in Sources */,
 			);
@@ -1047,7 +1055,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = A3DE910688789AFBA4487533 /* Pods-Beam.debug.xcconfig */;
 			buildSettings = {
-				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Beam/Beam.entitlements;

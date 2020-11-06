@@ -92,20 +92,32 @@
                                                 </items>
                                             </menu>
                                         </menuItem>
-                                        <menuItem title="Import" id="AOL-7q-9yo">
+                                        <menuItem title="Import and Export" id="AOL-7q-9yo">
                                             <modifierMask key="keyEquivalentModifierMask"/>
-                                            <menu key="submenu" title="Import" id="4nL-wI-84W">
+                                            <menu key="submenu" title="Import and Export" id="4nL-wI-84W">
                                                 <items>
-                                                    <menuItem title="Import Roam JSON" id="rHG-BR-6jc">
+                                                    <menuItem title="Import From Roam" id="rHG-BR-6jc">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
                                                         <connections>
                                                             <action selector="importRoam:" target="Voe-Tx-rLC" id="8Ni-tq-Xk9"/>
                                                         </connections>
                                                     </menuItem>
-                                                    <menuItem title="Reset Database" id="4e7-0u-pUE">
+                                                    <menuItem title="Delete all notes" id="4e7-0u-pUE">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
                                                         <connections>
                                                             <action selector="resetDatabase:" target="Voe-Tx-rLC" id="BZD-93-Qp0"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                    <menuItem title="Backup all notes" id="XvI-yN-rpy">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="exportNotes:" target="Voe-Tx-rLC" id="a3N-KW-vL7"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                    <menuItem title="Import from backup" id="IpA-D7-xmG">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="importNotes:" target="Voe-Tx-rLC" id="5ba-tS-OS3"/>
                                                         </connections>
                                                     </menuItem>
                                                 </items>
