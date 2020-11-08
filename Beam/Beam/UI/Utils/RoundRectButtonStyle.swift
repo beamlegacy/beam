@@ -8,25 +8,40 @@
 import Foundation
 import SwiftUI
 
-struct RoundRectButtonStyle: PrimitiveButtonStyle {
-    private var _cornerRadius = CGFloat(7)
+struct RoundedRectangleDecoration: View {
+    @Environment(\.isEnabled) var isEnabled: Bool
+    @State var isHovering: Bool = false
+    var isPressed: Bool
 
-    @Environment(\.isEnabled) private var isEnabled: Bool
-    @State var isHover = false
-    var foregroundColor: Color {
-        guard isEnabled else { return Color(.displayP3, white: 1, opacity: 0) }
-        return isHover ? Color("ToolbarButtonBackgroundHoverColor") : Color.init(.displayP3, white: 1, opacity: 0)
+    let pressedBg = Color("ToolbarButtonBackgroundOnColor")
+    let hoverBg = Color("ToolbarButtonBackgroundOnColor")
+    let emptyBg = Color(.displayP3, white: 1, opacity: 0)
+
+    func bgColor(_ enabled: Bool, _ hover: Bool, _ pressed: Bool) -> Color {
+        //print("color: isHovering: \(hover) pressed: \(pressed) isEnabled: \(enabled)")
+        guard enabled else { return emptyBg }
+        guard !pressed else { return pressedBg }
+        return hover ? hoverBg : emptyBg
     }
-    public func makeBody(configuration: BorderedButtonStyle.Configuration) -> some View {
-        return ZStack {
-            RoundedRectangle(cornerRadius: _cornerRadius).foregroundColor(foregroundColor).frame(width: 33, height: 28, alignment: .center)
-            configuration.label.foregroundColor(Color(isEnabled ? "ToolbarButtonIconColor" : "ToolbarButtonIconDisabledColor"))
-        }
-        .onTapGesture(count: 1) {
-            configuration.trigger()
-        }
-        .onHover { h in
-            isHover = h && isEnabled
-        }
+
+    var body: some View {
+        RoundedRectangle(cornerRadius: 7)
+            .foregroundColor(bgColor(isEnabled, isHovering, isPressed))
+            .onHover { h in
+                self.isHovering = h
+                //print("onHover: isHovering: \(self.isHovering) (\(h)) isEnabled: \(self.isEnabled)")
+            }
+            .frame(width: 33, height: 28, alignment: .center)
+    }
+}
+
+struct RoundRectButtonStyle: ButtonStyle {
+    @Environment(\.isEnabled) var isEnabled: Bool
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration
+            .label
+            .background(RoundedRectangleDecoration(isPressed: configuration.isPressed))
+            .frame(width: 33, height: 28, alignment: .center)
     }
 }
