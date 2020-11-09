@@ -108,6 +108,7 @@ public class TextNode: Equatable {
         }
         children.append(child)
         child.parent = self
+        invalidateLayout()
     }
 
     func removeChild(_ child: TextNode) {
@@ -115,6 +116,7 @@ public class TextNode: Equatable {
             node === child
         }
         child.parent = nil
+        invalidateLayout()
     }
 
     func delete() {
@@ -124,8 +126,10 @@ public class TextNode: Equatable {
 
     func insert(node: TextNode, after existingNode: TextNode) -> Bool {
         guard let pos = existingNode.indexInParent else { return false }
+        node.parent?.removeChild(node)
         children.insert(node, at: pos + 1)
         node.parent = self
+        invalidateLayout()
         return true
     }
 
@@ -137,6 +141,7 @@ public class TextNode: Equatable {
         }
         children[index] = node
         node.parent = self
+        invalidateLayout()
     }
 
     var config: TextConfig {
@@ -179,7 +184,7 @@ public class TextNode: Equatable {
     var depth: Int { return allParents.count }
 
     var indent: CGFloat {
-        children.isEmpty ? 0 : 40
+        selfVisible ? 40 : 0
     }
 
     private var computedIdealSize = NSSize()
@@ -326,11 +331,7 @@ public class TextNode: Equatable {
     var readOnly: Bool = false
     var isEditing: Bool { root.node === self }
     var childInset: Float {
-        if depth == 0 && children.first?.showDisclosureButton ?? false {
-            return 0
-        } else {
-            return 40
-        }
+        return 40
     }
 
     private var needLayout = true
@@ -445,6 +446,10 @@ public class TextNode: Equatable {
     }
 
     public func draw(in context: CGContext, visibleRect: NSRect) {
+//        if debug {
+//            print("debug \(self)")
+//        }
+
         defer { needRedraw = false }
         updateTextRendering()
 
@@ -884,11 +889,7 @@ public class TextNode: Equatable {
             let sibblings = p.children
             if let i = sibblings.firstIndex(of: self) {
                 if i > 0 {
-                    var node = sibblings[i - 1]
-                    while node.children.count != 0 {
-                        node = node.children.last!
-                    }
-                    return node
+                    return sibblings[i - 1]
                 }
             }
         }

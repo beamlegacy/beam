@@ -20,26 +20,15 @@ extension TextRoot {
     }
 
     func increaseIndentation() {
-        guard let p = node.parent,
-              let replacementPos = node.indexInParent
-        else { return }
-        let newParent = TextNode(bullet: node.bullet?.note?.createBullet(CoreDataManager.shared.mainContext, content: "", afterBullet: node.bullet), recurse: false)
-        p.setChild(newParent, at: replacementPos)
+        guard let newParent = node.previousSibblingNode() else { return }
         newParent.addChild(node)
     }
 
     func decreaseIndentation() {
-        guard let p = node.parent,
-              p.parent != nil,
-              p.children.count == 1,
-              p.text.isEmpty,
-              let replacementPos = p.indexInParent
-        else { return }
+        guard let parent = node.parent else { return }
+        guard let newParent = parent.parent else { return }
 
-        p.parent?.setChild(node, at: replacementPos)
-        if p.children.isEmpty {
-            p.bullet?.delete(coreDataManager.mainContext)
-        }
+        _ = newParent.insert(node: node, after: parent)
     }
 
     func deleteForward() {

@@ -325,12 +325,10 @@ public class BeamTextEdit: NSView, NSTextInputClient {
         if option {
             rootNode.doCommand(.insertNewline)
         } else {
-            node.text.removeSubrange(node.text.range(from: selectedTextRange))
-            cursorPosition = selectedTextRange.startIndex
+            rootNode.eraseSelection()
             let splitText = node.text.substring(from: cursorPosition, to: node.text.count)
             node.text.removeLast(node.text.count - cursorPosition)
-            guard let newBullet = node.bullet?.note?.createBullet(CoreDataManager.shared.mainContext, content: splitText, afterBullet: node.bullet) else { return }
-            let newNode = TextNode(bullet: newBullet, recurse: false)
+            let newNode = TextNode(staticText: splitText)
             let nodes = node.children
             for c in nodes {
                 newNode.addChild(c)
@@ -342,7 +340,6 @@ public class BeamTextEdit: NSView, NSTextInputClient {
             _ = node.parent?.insert(node: newNode, after: node)
             cursorPosition = 0
             node = newNode
-            rootNode.cancelSelection()
         }
     }
 
@@ -419,6 +416,13 @@ public class BeamTextEdit: NSView, NSTextInputClient {
                 case .delete:
                     rootNode.doCommand(.deleteBackward)
                     return
+
+                case .backTab:
+                    rootNode.doCommand(.decreaseIndentation)
+
+                case .tab:
+                    rootNode.doCommand(.increaseIndentation)
+
                 default:
                     print("Special Key \(k)")
                 }
@@ -452,7 +456,9 @@ public class BeamTextEdit: NSView, NSTextInputClient {
                         rootNode.doCommand(.increaseIndentation)
                         return
                     }
-                default: break
+
+                default:
+                    break
                 }
             }
 
