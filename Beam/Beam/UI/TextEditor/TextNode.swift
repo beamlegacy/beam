@@ -353,9 +353,9 @@ public class TextNode: Equatable {
     lazy var downTriangle = { NSImage(named: "arrowtriangle.down.fill")!.cgImage }()
     lazy var rightTriangle = { NSImage(named: "arrowtriangle.right.fill")!.cgImage }()
 
-    lazy var symbolFont = NSFont.systemFont(ofSize: 8)
+    static var symbolFont = NSFont.systemFont(ofSize: 8)
 
-    func symbolFrame(_ string: String) -> TextFrame {
+    static func symbolFrame(_ string: String) -> TextFrame {
         let symbol = string.attributed
         let attribs: [NSAttributedString.Key: Any] = [
             .font: symbolFont,
@@ -365,12 +365,12 @@ public class TextNode: Equatable {
         return Font.draw(string: symbol, atPosition: NSPoint(), textWidth: 8)
     }
 
-    lazy var disclosureClosedFrame = symbolFrame("􀄧")
-    lazy var disclosureOpenFrame = symbolFrame("􀄥")
-    lazy var bulletPointFrame = symbolFrame("􀜞")
+    static var disclosureClosedFrame = symbolFrame("􀄧")
+    static var disclosureOpenFrame = symbolFrame("􀄥")
+    static var bulletPointFrame = symbolFrame("􀜞")
 
     func drawDisclosure(at point: NSPoint, in context: CGContext) {
-        let symbol = open ? disclosureOpenFrame : disclosureClosedFrame
+        let symbol = open ? Self.disclosureOpenFrame : Self.disclosureClosedFrame
         context.saveGState()
         context.translateBy(x: point.x + 2, y: point.y - 2)
         symbol.draw(context)
@@ -380,7 +380,7 @@ public class TextNode: Equatable {
     func drawBulletPoint(at point: NSPoint, in context: CGContext) {
         context.saveGState()
         context.translateBy(x: point.x + 2, y: point.y - 2)
-        bulletPointFrame.draw(context)
+        Self.bulletPointFrame.draw(context)
         context.restoreGState()
     }
 
