@@ -50,15 +50,17 @@ public class TextLine {
     }
 
     var imageBounds: NSRect {
-        CTLineGetImageBounds(ctLine, nil)
+        return CTLineGetImageBounds(ctLine, nil)
+            .offsetBy(dx: frame.origin.x, dy: frame.origin.y)
     }
 
     func stringIndexFor(position: NSPoint) -> Int {
-        CTLineGetStringIndexForPosition(ctLine, position)
+        let pos = NSPoint(x: position.x - frame.origin.x, y: position.y - frame.origin.y)
+        return CTLineGetStringIndexForPosition(ctLine, pos)
     }
 
     func offsetFor(index: Int) -> Float {
-        Float(CTLineGetOffsetForStringIndex(ctLine, index, nil))
+        Float(frame.origin.x) + Float(CTLineGetOffsetForStringIndex(ctLine, index, nil))
     }
 
     struct Caret {
@@ -69,7 +71,7 @@ public class TextLine {
     var carets: [Caret] {
         var c = [Caret]()
         CTLineEnumerateCaretOffsets(ctLine) { (offset, index, leading, _) in
-            c.append(Caret(offset: Float(offset), index: index, isLeadingEdge: leading))
+            c.append(Caret(offset: Float(self.frame.origin.x) + Float(offset), index: index, isLeadingEdge: leading))
         }
 
         return c
@@ -78,8 +80,8 @@ public class TextLine {
     func draw(_ context: CGContext) {
         CTLineDraw(ctLine, context)
     }
-
 }
+
 public class TextFrame {
     init(ctFrame: CTFrame, position: NSPoint) {
         self.ctFrame = ctFrame
@@ -137,39 +139,34 @@ public class TextFrame {
             let line = lines[i]
             let textPos = lineOrigins[i]
             let x = textPos.x
-            //            let y = f.maxY - textPos.y + CGFloat(line.bounds.descent)
-            let y = Y// + CGFloat(line.bounds.ascent)
-            line.frame = NSRect(x: x, y: y, width: line.bounds.width, height: line.bounds.height)
+            //let y = f.maxY - textPos.y + CGFloat(line.bounds.descent)
+            let y = Y // + CGFloat(line.bounds.ascent)
+            line.frame = NSRect(x: position.x + x, y: position.y + y, width: line.bounds.width, height: line.bounds.height)
 
             Y += line.frame.height
-            //            if debug {
-            //                print("     line[\(i)] frame \(line.frame) (textPos \(textPos)")
-            //            }
+            //if debug {
+            //print("     line[\(i)] frame \(line.frame) (textPos \(textPos)")
+            //}
         }
         if debug {
-            //            print("layout frame \(frame)")
+            //print("layout frame \(frame)")
         }
     }
 
     func draw(_ context: CGContext) {
         if debug {
-            //            print("draw frame \(ctFrame)")
+            //print("draw frame \(ctFrame)")
         }
 
-        #if false
-        CTFrameDraw(ctFrame, context)
-        return
-        #else
         for line in lines {
             context.saveGState()
             context.textPosition = NSPoint()//line.frame.origin
-            context.translateBy(x: position.x + line.frame.origin.x, y: position.y + line.frame.origin.y)
+            context.translateBy(x: line.frame.origin.x, y: line.frame.origin.y)
             context.scaleBy(x: 1, y: -1)
 
             line.draw(context)
             context.restoreGState()
         }
-        #endif
     }
 }
 

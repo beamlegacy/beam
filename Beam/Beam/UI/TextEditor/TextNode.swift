@@ -409,7 +409,13 @@ public class TextNode: Equatable {
     }
 
     var firstLineHeight: CGFloat { layout?.lines.first?.bounds.height ?? CGFloat(fHeight) }
-    var firstLineBaseline: CGFloat { CGFloat(layout?.lines.first?.typographicBounds.ascent ?? fHeight * 2.0 / 3.0) }
+    var firstLineBaseline: CGFloat {
+        if let h = layout?.lines.first?.typographicBounds.ascent {
+            return CGFloat(h)
+        }
+        let f = AttributedStringVisitor.font()
+        return f.ascender
+    }
 
     func drawText(in context: CGContext) {
         // Draw the text:
@@ -419,7 +425,7 @@ public class TextNode: Equatable {
                 context.saveGState()
                 if showIdentationLine {
                     context.setFillColor(NSColor(named: "EditorTextRectangleBackgroundColor")!.cgColor)
-                    let y = layout!.frame.height
+                    let y = textFrame.height
                     let r = NSRect(x: 3, y: y + 3, width: 1, height: frame.height - y - 6)
                     context.fill(r)
 
@@ -433,10 +439,10 @@ public class TextNode: Equatable {
             return NSPoint(x: 0, y: firstLineBaseline)
         }()
         if showDisclosureButton {
-            drawDisclosure(at: NSPoint(x: indent - 42 + offset.x, y: offset.y), in: context)
+            drawDisclosure(at: NSPoint(x: offset.x, y: offset.y), in: context)
         }
 
-        drawBulletPoint(at: NSPoint(x: indent - 20 + offset.x, y: offset.y), in: context)
+        drawBulletPoint(at: NSPoint(x: 20 + offset.x, y: offset.y), in: context)
 
         context.textMatrix = CGAffineTransform.identity
         context.translateBy(x: 0, y: firstLineBaseline)
@@ -543,7 +549,7 @@ public class TextNode: Equatable {
             guard editor?.hasFocus ?? false, editor?.blinkPhase ?? false else { return }
 
             let f = AttributedStringVisitor.font()
-            let cursorRect = NSRect(x: 0, y: 0, width: 7, height: f.ascender - f.descender)
+            let cursorRect = NSRect(x: indent, y: 0, width: 7, height: f.ascender - f.descender)
 
             context.beginPath()
             context.addRect(cursorRect)
@@ -586,7 +592,8 @@ public class TextNode: Equatable {
                 textFrame = layout!.frame
 
                 if attrStr.string.isEmpty {
-                    textFrame.size.height = CGFloat(fHeight)
+                    let f = AttributedStringVisitor.font()
+                    textFrame.size.height = CGFloat(f.ascender - f.descender)
                 }
             }
             invalidatedTextRendering = false
@@ -669,33 +676,30 @@ public class TextNode: Equatable {
 
     public func positionAt(point: NSPoint) -> Int {
         guard layout != nil, !layout!.lines.isEmpty else { return 0 }
-        let _point = NSPoint(x: point.x - textFrame.minX, y: point.y)
-        let line = lineAt(point: _point)
+        let line = lineAt(point: point)
         let l = layout!.lines[line]
-        let displayIndex = l.stringIndexFor(position: _point)
+        let displayIndex = l.stringIndexFor(position: point)
         let res = sourceIndexFor(displayIndex: displayIndex)
         return res
     }
 
     public func linkAt(point: NSPoint) -> URL? {
         guard layout != nil, !layout!.lines.isEmpty else { return nil }
-        let _point = NSPoint(x: point.x - textFrame.minX, y: point.y)
-        let line = lineAt(point: _point)
+        let line = lineAt(point: point)
         guard line >= 0 else { return nil }
         let l = layout!.lines[line]
-        guard l.frame.minX < _point.x && l.frame.maxX > _point.x else { return nil } // don't find links outside the line
-        let displayIndex = l.stringIndexFor(position: _point)
+        guard l.frame.minX < point.x && l.frame.maxX > point.x else { return nil } // don't find links outside the line
+        let displayIndex = l.stringIndexFor(position: point)
         let pos = min(displayIndex, attributedString.length - 1)
         return attributedString.attribute(.link, at: pos, effectiveRange: nil) as? URL
     }
 
     public func internalLinkAt(point: NSPoint) -> String? {
-        let _point = NSPoint(x: point.x - textFrame.minX, y: point.y)
-        let line = lineAt(point: _point)
+        let line = lineAt(point: point)
         guard line >= 0 else { return nil }
         let l = layout!.lines[line]
-        guard l.frame.minX <= _point.x && l.frame.maxX >= _point.x else { return nil } // don't find links outside the line
-        let displayIndex = l.stringIndexFor(position: _point)
+        guard l.frame.minX <= point.x && l.frame.maxX >= point.x else { return nil } // don't find links outside the line
+        let displayIndex = l.stringIndexFor(position: point)
         let pos = min(displayIndex, attributedString.length - 1)
         return attributedString.attribute(.link, at: pos, effectiveRange: nil) as? String
     }
@@ -735,7 +739,7 @@ public class TextNode: Equatable {
         let layoutLine = layout!.lines[line]
         let positionInLine = displayIndex
         let result = layoutLine.offsetFor(index: positionInLine)
-        return indent + CGFloat(result)
+        return CGFloat(result)
     }
 
     public func positionAbove(_ position: Int) -> Int {
