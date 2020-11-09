@@ -256,7 +256,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
             }
         }
 
-        webView.evaluateJavaScript(jsSelectionObserver) { (any, err) in
+        webView.evaluateJavaScript(jsSelectionObserver) { (_, err) in
             if let err = err {
                 print("Error installing JS selection observer \(err)")
             }
