@@ -12,6 +12,7 @@ struct NoteView: View {
     @EnvironmentObject var state: BeamState
     var note: Note
     var onStartEditing: () -> Void = {}
+    var leadingAlignement = CGFloat(160)
 
     var body: some View {
         BTextEdit(note: note, openURL: { url in
@@ -26,7 +27,9 @@ struct NoteView: View {
         openCard: { cardName in
                 _ = state.navigateToNote(named: cardName)
         },
-        onStartEditing: { onStartEditing() }
+        onStartEditing: { onStartEditing() },
+        leadingAlignment: leadingAlignement
         )
+
     }
 }

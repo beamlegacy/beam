@@ -28,6 +28,11 @@ public struct BTextEdit: NSViewRepresentable {
     var openCard: (String) -> Void
     var onStartEditing: () -> Void = { }
     var onEndEditing: () -> Void = { }
+    var minimumWidth: CGFloat = 800
+    var maximumWidth: CGFloat = 1024
+
+    var leadingAlignment = CGFloat(160)
+    var traillingPadding = CGFloat(80)
 
     public func makeNSView(context: Context) -> BeamTextEdit {
         let root = TextRoot(CoreDataManager.shared, note: note)
@@ -51,6 +56,13 @@ public struct BTextEdit: NSViewRepresentable {
         nsView.openCard = openCard
         nsView.onStartEditing = onStartEditing
         nsView.onEndEditing = onEndEditing
+
+        nsView.minimumWidth = minimumWidth
+        nsView.maximumWidth = maximumWidth
+
+        nsView.leadingAlignment = leadingAlignment
+        nsView.traillingPadding = traillingPadding
+
     }
 
     public typealias NSViewType = BeamTextEdit
@@ -88,11 +100,35 @@ public class BeamTextEdit: NSView, NSTextInputClient {
 
     var timer: Timer!
 
-    var minimumWidth: CGFloat = 800
-    var maximumWidth: CGFloat = 1024
+    var minimumWidth: CGFloat = 800 {
+        didSet {
+            if oldValue != minimumWidth {
+                invalidateIntrinsicContentSize()
+            }
+        }
+    }
+    var maximumWidth: CGFloat = 1024 {
+        didSet {
+            if oldValue != minimumWidth {
+                invalidateIntrinsicContentSize()
+            }
+        }
+    }
 
-    var leadingAlignment = CGFloat(160)
-    var traillingPadding = CGFloat(80)
+    var leadingAlignment = CGFloat(160) {
+        didSet {
+            if oldValue != minimumWidth {
+                invalidateIntrinsicContentSize()
+            }
+        }
+    }
+    var traillingPadding = CGFloat(80) {
+        didSet {
+            if oldValue != minimumWidth {
+                invalidateIntrinsicContentSize()
+            }
+        }
+    }
 
     public var activated: () -> Void = { }
     public var activateOnLostFocus = true

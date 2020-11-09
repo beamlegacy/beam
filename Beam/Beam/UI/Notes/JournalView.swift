@@ -15,20 +15,25 @@ struct JournalView: View {
     @State var isEditing = false
 
     var body: some View {
-        VStack {
+        ScrollView([.vertical]) {
             ForEach(journal) { note in
-                return VStack {
-                    Text(note.title).bold().padding(.leading, 150).frame(maxWidth: .infinity, alignment: .leading)
+                return HStack {
+                    Text(note.title)
+                        .bold()
+                        .padding(.leading)
+                        .padding(.trailing)
+                        .frame(width: 200, alignment: .topTrailing)
                     NoteView(note: note,
                              onStartEditing: {
                                 withAnimation {
                                     isEditing = true
                                 }
-                             }
+                             },
+                             leadingAlignement: 0
                     )
                 }.padding(.top, 20).padding(.bottom, 50)
             }
         }
-        .padding(.top, isEditing ? 20: offset)
+        .padding(.top, isEditing ? 20 : offset)
     }
 }

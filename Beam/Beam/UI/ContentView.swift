@@ -35,10 +35,7 @@ struct ModeView: View {
                 case .today:
                     ZStack {
                         GeometryReader { geometry in
-                            ScrollView([.vertical]) {
                                 JournalView(journal: state.data.journal, offset: geometry.size.height * 0.4)
-
-                            }
                         }
                         AutoCompleteView(autoComplete: $state.completedQueries, selectionIndex: $state.selectionIndex).frame(alignment: .top)
                     }
