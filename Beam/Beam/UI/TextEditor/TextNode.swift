@@ -350,9 +350,6 @@ public class TextNode: Equatable {
         p.invalidate()
     }
 
-    lazy var downTriangle = { NSImage(named: "arrowtriangle.down.fill")!.cgImage }()
-    lazy var rightTriangle = { NSImage(named: "arrowtriangle.right.fill")!.cgImage }()
-
     static var symbolFont = NSFont.systemFont(ofSize: 8)
 
     static func symbolFrame(_ string: String) -> TextFrame {
