@@ -12,12 +12,15 @@ struct AutoCompleteView: View {
     @Binding var autoComplete: [AutoCompleteResult]
     @Binding var selectionIndex: Int?
     var body: some View {
-        ZStack {
-            if !autoComplete.isEmpty {
-                Rectangle().fill(Color("EditorBackgroundColor").opacity(0.8))
-                AutoCompleteList(selectedIndex: $selectionIndex, elements: $autoComplete)
-                    .padding([.leading, .trailing], CGFloat(150))
-            }
+        ScrollView {
+            VStack {
+                ZStack {
+                        Rectangle().fill(Color("EditorBackgroundColor").opacity(0.8))
+                        AutoCompleteList(selectedIndex: $selectionIndex, elements: $autoComplete)
+                            .padding([.leading, .trailing], CGFloat(150))
+                }.frame(alignment: .top)
+                Rectangle().fill(Color("EditorTextRectangleBackgroundColor")).frame(height: 1)
+            }.frame(minHeight: 300, alignment: .top)
         }
     }
 }

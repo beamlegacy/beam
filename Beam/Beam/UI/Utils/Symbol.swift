@@ -8,6 +8,20 @@
 import Foundation
 import SwiftUI
 
+struct Icon: View {
+    var name: String
+    var size: Float = 16
+    var color = Color("ToolbarButtonIconColor")
+
+    var body: some View {
+        Image(name).renderingMode(.template)
+            .resizable()
+            .scaledToFill()
+            .frame(width: CGFloat(size / (size >= 14 ? 2 : 1)), height: CGFloat(size), alignment: .center)
+            .foregroundColor(color)
+    }
+}
+
 struct Symbol: View {
     var name: String
     var size: Float = 16
@@ -16,10 +30,6 @@ struct Symbol: View {
     let disabledFg = Color("ToolbarButtonIconDisabledColor")
 
     var body: some View {
-        Image(name).renderingMode(.template)
-            .resizable()
-            .scaledToFill()
-            .frame(width: CGFloat(size / (size >= 14 ? 2 : 1)), height: CGFloat(size), alignment: .center)
-            .foregroundColor(isEnabled ? normalFg : disabledFg)
+        Icon(name: name, color: isEnabled ? normalFg : disabledFg)
     }
 }

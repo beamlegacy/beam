@@ -15,20 +15,22 @@ struct AutoCompleteItem: View {
         HStack {
             switch item.source {
             case .history:
-                Symbol(name: "clock")
+                Icon(name: "clock", color: selected ? .white : .black).padding(.trailing, 5)
             case .autoComplete:
-                Symbol(name: "magnifyingglass").foregroundColor(Color("EditorLinkColor"))
+                Icon(name: "magnifyingglass", color: selected ? .white : Color("EditorLinkColor")).padding(.trailing, 5)
             case .note:
-                Symbol(name: "note.text")
+                Icon(name: "note.text", color: selected ? .white : .black).padding(.trailing, 5)
             }
 
             Text(item.string)
-                .foregroundColor(selected ? Color("AutoCompleteTextSelected") :  Color("AutoCompleteText"))
+                .font(.system(size: 11)).fontWeight(.semibold)
+                .frame(height: 17, alignment: .leading)
+                .foregroundColor(selected ? .white :  Color("EditorTextColor"))
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal)
         .padding([.top, .bottom], 3)
-        .background(selected ? Color.accentColor : Color("transparent"))
+        .background(selected ? (item.source == .note ? Color("EditorBidirectionalLinkColor") : Color("EditorLinkColor") )  : Color("transparent"))
         .clipShape(RoundedRectangle(cornerRadius: 8.0), style: FillStyle())
     }
 }

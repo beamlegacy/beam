@@ -37,7 +37,10 @@ struct ModeView: View {
                         GeometryReader { geometry in
                                 JournalView(journal: state.data.journal, offset: geometry.size.height * 0.4)
                         }
-                        AutoCompleteView(autoComplete: $state.completedQueries, selectionIndex: $state.selectionIndex).frame(alignment: .top)
+
+                        if !state.searchQuery.isEmpty {
+                            AutoCompleteView(autoComplete: $state.completedQueries, selectionIndex: $state.selectionIndex).frame(alignment: .top)
+                        }
                     }
                 }
             }
