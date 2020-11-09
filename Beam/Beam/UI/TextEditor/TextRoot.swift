@@ -106,6 +106,7 @@ public class TextRoot: TextNode {
         self._coreDataManager = manager
         super.init(bullet: nil, recurse: false)
         self.note = note
+        self.selfVisible = false
 
         self.text = ""
 

@@ -57,6 +57,7 @@ public class TextNode: Equatable {
         return isReference ? true : (parent?.isReferenceBranch ?? false)
     }
     var open = true { didSet { invalidateLayout() } }
+    var selfVisible = true { didSet { invalidateLayout() } }
     var hover: Bool = false {
         didSet {
             invalidate()
@@ -427,16 +428,15 @@ public class TextNode: Equatable {
             }
         }
 
-        if !text.isEmpty || isEditing || !placeholder.isEmpty {
-            let offset: NSPoint = {
-                return NSPoint(x: 0, y: firstLineBaseline)
-            }()
-            if showDisclosureButton {
-                drawDisclosure(at: NSPoint(x: indent - 42 + offset.x, y: offset.y), in: context)
-            }
-
-            drawBulletPoint(at: NSPoint(x: indent - 20 + offset.x, y: offset.y), in: context)
+        let offset: NSPoint = {
+            return NSPoint(x: 0, y: firstLineBaseline)
+        }()
+        if showDisclosureButton {
+            drawDisclosure(at: NSPoint(x: indent - 42 + offset.x, y: offset.y), in: context)
         }
+
+        drawBulletPoint(at: NSPoint(x: indent - 20 + offset.x, y: offset.y), in: context)
+
         context.textMatrix = CGAffineTransform.identity
         context.translateBy(x: 0, y: firstLineBaseline)
 
@@ -450,23 +450,25 @@ public class TextNode: Equatable {
 
         drawDebug(in: context)
 
-        guard localFrame.intersects(visibleRect) else {
-//            print("Skip \(frame) doesn't intersect \(visibleRect)")
-            return
-        }
-//        print("Draw text \(frame) intersects \(visibleRect)")
-
-        context.saveGState(); defer { context.restoreGState() }
-
-        if localFrame.intersects(visibleRect) {
-            drawSelection(in: context)
-
-            drawText(in: context)
-
-            if isEditing {
-                drawCursor(in: context)
+        if selfVisible {
+            guard localFrame.intersects(visibleRect) else {
+    //            print("Skip \(frame) doesn't intersect \(visibleRect)")
+                return
             }
+    //        print("Draw text \(frame) intersects \(visibleRect)")
 
+            context.saveGState(); defer { context.restoreGState() }
+
+            if localFrame.intersects(visibleRect) {
+                drawSelection(in: context)
+
+                drawText(in: context)
+
+                if isEditing {
+                    drawCursor(in: context)
+                }
+
+            }
         }
 
         if open {
@@ -573,16 +575,20 @@ public class TextNode: Equatable {
         if invalidatedTextRendering {
             textFrame = NSRect()
 
-            layout = Font.draw(string: attributedString, atPosition: NSPoint(x: indent, y: 0), textWidth: frame.width - indent)
-            textFrame = layout!.frame
+            if selfVisible {
+                let attrStr = attributedString
+                layout = Font.draw(string: attrStr, atPosition: NSPoint(x: indent, y: 0), textWidth: frame.width - indent)
+                textFrame = layout!.frame
+
+                if attrStr.string.isEmpty {
+                    textFrame.size.height = CGFloat(fHeight)
+                }
+            }
             invalidatedTextRendering = false
         }
 
         computedIdealSize = textFrame.size
-        if !text.isEmpty {
-            computedIdealSize.height = max(CGFloat(fHeight), computedIdealSize.height)
-            computedIdealSize.width = frame.width
-        }
+        computedIdealSize.width = frame.width
 
         if open {
             for c in children {
