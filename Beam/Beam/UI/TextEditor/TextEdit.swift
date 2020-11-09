@@ -325,6 +325,10 @@ public class BeamTextEdit: NSView, NSTextInputClient {
         if option {
             rootNode.doCommand(.insertNewline)
         } else {
+            if node.text.isEmpty && node.children.isEmpty && node.parent !== rootNode {
+                rootNode.decreaseIndentation()
+                return
+            }
             rootNode.eraseSelection()
             let splitText = node.text.substring(from: cursorPosition, to: node.text.count)
             node.text.removeLast(node.text.count - cursorPosition)

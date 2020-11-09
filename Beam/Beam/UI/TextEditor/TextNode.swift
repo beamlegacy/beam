@@ -669,7 +669,7 @@ public class TextNode: Equatable {
 
     public func positionAt(point: NSPoint) -> Int {
         guard layout != nil, !layout!.lines.isEmpty else { return 0 }
-        let _point = NSPoint(x: point.x + indent, y: point.y)
+        let _point = NSPoint(x: point.x - textFrame.minX, y: point.y)
         let line = lineAt(point: _point)
         let l = layout!.lines[line]
         let displayIndex = l.stringIndexFor(position: _point)
@@ -679,8 +679,9 @@ public class TextNode: Equatable {
 
     public func linkAt(point: NSPoint) -> URL? {
         guard layout != nil, !layout!.lines.isEmpty else { return nil }
-        let _point = NSPoint(x: point.x - indent, y: point.y)
+        let _point = NSPoint(x: point.x - textFrame.minX, y: point.y)
         let line = lineAt(point: _point)
+        guard line >= 0 else { return nil }
         let l = layout!.lines[line]
         guard l.frame.minX < _point.x && l.frame.maxX > _point.x else { return nil } // don't find links outside the line
         let displayIndex = l.stringIndexFor(position: _point)
@@ -689,8 +690,9 @@ public class TextNode: Equatable {
     }
 
     public func internalLinkAt(point: NSPoint) -> String? {
-        let _point = NSPoint(x: point.x - indent, y: point.y)
+        let _point = NSPoint(x: point.x - textFrame.minX, y: point.y)
         let line = lineAt(point: _point)
+        guard line >= 0 else { return nil }
         let l = layout!.lines[line]
         guard l.frame.minX <= _point.x && l.frame.maxX >= _point.x else { return nil } // don't find links outside the line
         let displayIndex = l.stringIndexFor(position: _point)
