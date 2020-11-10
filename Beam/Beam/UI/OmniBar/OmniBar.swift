@@ -52,7 +52,7 @@ struct OmniBar: View {
                 HStack {
                     VStack {
                         GlobalTabTitle(tab: state.currentTab)
-                            .frame(idealWidth: 600, maxWidth: .infinity, minHeight: 28, alignment: .center)
+                            .frame(idealWidth: 600, maxWidth: .infinity, minHeight: 24, maxHeight: 24, alignment: .center)
                         GeometryReader { geometry in
                             Path { path in
                                 let f = CGFloat(tab.estimatedProgress)
