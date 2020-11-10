@@ -429,7 +429,7 @@ public class TextNode: Equatable {
                 if showIdentationLine {
                     context.setFillColor(NSColor(named: "EditorTextRectangleBackgroundColor")!.cgColor)
                     let y = textFrame.height
-                    let r = NSRect(x: 3, y: y + 3, width: 1, height: frame.height - y - 6)
+                    let r = NSRect(x: 5, y: y + 3, width: 1, height: frame.height - y - 6)
                     context.fill(r)
 
                 }
