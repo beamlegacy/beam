@@ -30,6 +30,6 @@ struct Symbol: View {
     let disabledFg = Color("ToolbarButtonIconDisabledColor")
 
     var body: some View {
-        Icon(name: name, color: isEnabled ? normalFg : disabledFg)
+        Icon(name: name, size: size, color: isEnabled ? normalFg : disabledFg)
     }
 }
