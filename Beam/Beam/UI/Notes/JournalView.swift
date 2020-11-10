@@ -16,24 +16,26 @@ struct JournalView: View {
 
     var body: some View {
         ScrollView([.vertical]) {
-            ForEach(journal) { note in
-                return HStack {
-                    Text(note.title)
-                        .bold()
-                        .padding(.leading)
-                        .padding(.trailing)
-                        .frame(width: 200, alignment: .topTrailing)
-                    NoteView(note: note,
-                             onStartEditing: {
-                                withAnimation {
-                                    isEditing = true
-                                }
-                             },
-                             leadingAlignement: 0
-                    )
-                }.padding(.top, 20).padding(.bottom, 50)
+            VStack {
+                ForEach(journal) { note in
+                    return HStack {
+                        Text(note.title)
+                            .bold()
+                            .padding(.leading)
+                            .padding(.trailing)
+                            .frame(width: 200, alignment: .topTrailing)
+                        NoteView(note: note,
+                                 onStartEditing: {
+                                    withAnimation {
+                                        isEditing = true
+                                    }
+                                 },
+                                 leadingAlignement: 0
+                        )
+                    }.padding(.top, 20).padding(.bottom, 50)
+                }
             }
+            .padding(.top, isEditing ? 20 : offset)
         }
-        .padding(.top, isEditing ? 20 : offset)
     }
 }
