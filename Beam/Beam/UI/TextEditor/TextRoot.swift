@@ -90,6 +90,8 @@ public class TextRoot: TextNode {
 
     var node: TextNode! {
         didSet {
+            oldValue.invalidateTextRendering()
+            node.invalidateTextRendering()
             cancelSelection()
         }
     }
