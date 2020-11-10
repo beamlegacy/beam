@@ -826,6 +826,10 @@ public class TextNode: Equatable {
 //            print("disclosure unpressed (\(open))")
             disclosurePressed = false
             open.toggle()
+
+            if !open && root.node.allParents.contains(self) {
+                root.focus(node: self)
+            }
             return true
         }
         return false

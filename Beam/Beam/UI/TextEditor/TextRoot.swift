@@ -158,6 +158,11 @@ public class TextRoot: TextNode {
         })
     }
 
+    func focus(node: TextNode) {
+        self.node = node
+        cursorPosition = 0
+    }
+
     var lastCommand: TextRoot.Command = .none
 
     let commands: [Command: CommandDefinition] = [

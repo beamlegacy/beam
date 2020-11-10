@@ -664,7 +664,9 @@ public class BeamTextEdit: NSView, NSTextInputClient {
             reBlink()
             let point = convert(event.locationInWindow)
             guard let newNode = nodeAt(point: point) else { return }
-            _ = rootNode.dispatchMouseDown(mouseInfo: MouseInfo(rootNode, point, event))
+            if nil != rootNode.dispatchMouseDown(mouseInfo: MouseInfo(rootNode, point, event)) {
+                return
+            }
 
             if newNode !== node && !newNode.readOnly {
                 node = newNode
@@ -752,7 +754,7 @@ public class BeamTextEdit: NSView, NSTextInputClient {
     override public func mouseUp(with event: NSEvent) {
         let point = convert(event.locationInWindow)
         dragMode = .none
-        if let n = rootNode.dispatchMouseUp(mouseInfo: MouseInfo(rootNode, point, event)) {
+        if nil != rootNode.dispatchMouseUp(mouseInfo: MouseInfo(rootNode, point, event)) {
             return
         }
         super.mouseUp(with: event)
