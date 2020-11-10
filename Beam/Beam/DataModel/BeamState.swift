@@ -311,12 +311,10 @@ enum Mode {
             guard self.selectionIndex == nil else { return }
             print("received auto complete query: \(query)")
 
-            if !(query.hasPrefix("http://") || query.hasPrefix("https://")) {
-            }
             self.completedQueries = []
 
             if !query.isEmpty {
-                let notes = Note.fetchAllWithTitleMatch(CoreDataManager.shared.mainContext, query)
+                let notes = Note.fetchAllWithTitleMatch(CoreDataManager.shared.mainContext, query).prefix(4) // limit to 8 results
                 notes.forEach {
                     let autocompleteResult = AutoCompleteResult(id: $0.id, string: $0.title, source: .note)
                     self.completedQueries.append(autocompleteResult)
@@ -325,16 +323,17 @@ enum Mode {
 
                 self.completer.complete(query: query)
                 let urls = self.data.searchKit.search(query)
-                for url in urls {
+                for url in urls.prefix(4) {
                     self.completedQueries.append(AutoCompleteResult(id: UUID(), string: url.description, source: .history))
                 }
             }
         }.store(in: &scope)
+
         completer.$results.receive(on: RunLoop.main).sink { [weak self] results in
             guard let self = self else { return }
             //print("received auto complete results: \(results)")
             self.selectionIndex = nil
-            self.completedQueries.append(contentsOf: results)
+            self.completedQueries.append(contentsOf: results.prefix(8))
         }.store(in: &scope)
 
         backForwardList.push(.journal)
