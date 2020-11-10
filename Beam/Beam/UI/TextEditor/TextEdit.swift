@@ -74,6 +74,7 @@ public class BeamTextEdit: NSView, NSTextInputClient {
         self.config.font = font
         rootNode = root
         super.init(frame: NSRect())
+        self.wantsLayer = true
 
         root._editor = self
         timer = Timer.init(timeInterval: 1.0 / 60.0, repeats: true) { [unowned self] _ in

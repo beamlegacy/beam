@@ -26,12 +26,15 @@ struct ModeView: View {
                     }
                     .transition(.move(edge: .bottom))
                     .animation(.easeInOut(duration: 0.3))
+                    .zIndex(1)
                 case .note:
                     ScrollView([.vertical]) {
                         ZStack {
                             NoteView(note: state.currentNote!)
                         }
                     }
+                    .transition(.opacity)
+                    .animation(.easeInOut(duration: 0.3))
                 case .today:
                     ZStack {
                         GeometryReader { geometry in
@@ -42,6 +45,8 @@ struct ModeView: View {
                             AutoCompleteView(autoComplete: $state.completedQueries, selectionIndex: $state.selectionIndex).frame(alignment: .top)
                         }
                     }
+                    .transition(.opacity)
+                    .animation(.easeInOut(duration: 0.3))
                 }
             }
         }

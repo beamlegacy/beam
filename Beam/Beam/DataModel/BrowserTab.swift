@@ -85,6 +85,8 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
             backForwardList = w.backForwardList
         } else {
             let web = WKWebView(frame: NSRect(), configuration: Self.webViewConfiguration)
+            web.wantsLayer = true
+
             state.setup(webView: web)
             backForwardList = web.backForwardList
             self.webView = web
@@ -168,6 +170,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
             if navigationAction.modifierFlags.contains(.command) != isSearchResult {
                 // Create new tab
                 let newWebView = WKWebView(frame: NSRect(), configuration: Self.webViewConfiguration)
+                newWebView.wantsLayer = true
                 state.setup(webView: newWebView)
                 let newTab = BrowserTab(state: state, originalQuery: originalQuery, note: note, webView: newWebView)
                 newTab.load(url: targetURL)
@@ -277,6 +280,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
     // WKUIDelegate
     func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
         let newWebView = WKWebView(frame: NSRect(), configuration: configuration)
+        newWebView.wantsLayer = true
         state.setup(webView: newWebView)
         let newTab = BrowserTab(state: state, originalQuery: originalQuery, note: self.note, webView: newWebView)
         onNewTabCreated(newTab)
