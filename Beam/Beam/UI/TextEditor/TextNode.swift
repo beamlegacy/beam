@@ -1006,4 +1006,21 @@ public class TextNode: Equatable {
     var coreDataManager: CoreDataManager {
         return parent!.coreDataManager
     }
+
+    func fold() {
+        if children.isEmpty {
+            guard let p = parent else { return }
+            p.fold()
+            root.node = p
+            root.cursorPosition = 0
+            return
+        }
+
+        open = false
+    }
+
+    func unfold() {
+        guard !children.isEmpty else { return }
+        open = true
+    }
 }

@@ -352,6 +352,7 @@ public class BeamTextEdit: NSView, NSTextInputClient {
     override open func keyDown(with event: NSEvent) {
         let shift = event.modifierFlags.contains(.shift)
         let option = event.modifierFlags.contains(.option)
+        let control = event.modifierFlags.contains(.control)
         let command = event.modifierFlags.contains(.command)
 
         if self.hasFocus {
@@ -363,7 +364,9 @@ public class BeamTextEdit: NSView, NSTextInputClient {
                     pressEnter(option)
                     return
                 case .leftArrow:
-                    if shift {
+                    if control && option && command {
+                        node.fold()
+                    } else if shift {
                         if option {
                             rootNode.doCommand(.moveWordLeftAndModifySelection)
                         } else if command {
@@ -383,7 +386,9 @@ public class BeamTextEdit: NSView, NSTextInputClient {
                         return
                     }
                 case .rightArrow:
-                    if shift {
+                    if control && option && command {
+                        node.unfold()
+                    } else if shift {
                         if option {
                             rootNode.doCommand(.moveWordRightAndModifySelection)
                         } else if command {
