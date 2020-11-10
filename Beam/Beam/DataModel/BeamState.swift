@@ -279,7 +279,7 @@ enum Mode {
 
         let url: URL = {
             if searchQuery.maybeURL {
-                guard var u = URL(string: searchQuery) else {
+                guard let u = URL(string: searchQuery) else {
                     return URL(string: "https://" + searchQuery)!
                 }
 
