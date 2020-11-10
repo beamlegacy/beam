@@ -63,6 +63,7 @@ public class TextRoot: TextNode {
         }
         set {
             state.cursorPosition = newValue
+            node.invalidateTextRendering()
         }
     }
 
