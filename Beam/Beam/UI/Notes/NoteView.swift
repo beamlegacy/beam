@@ -25,7 +25,7 @@ struct NoteView: View {
             }
         },
         openCard: { cardName in
-                _ = state.navigateToNote(named: cardName)
+            _ = state.navigateToNote(named: cardName)
         },
         onStartEditing: { onStartEditing() },
         leadingAlignment: leadingAlignement

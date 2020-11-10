@@ -38,7 +38,7 @@ struct ModeView: View {
                 case .today:
                     ZStack {
                         GeometryReader { geometry in
-                                JournalView(journal: state.data.journal, offset: geometry.size.height * 0.4)
+                            JournalView(journal: state.data.journal, offset: geometry.size.height * 0.4)
                         }
 
                         if !state.searchQuery.isEmpty {
