@@ -636,10 +636,10 @@ public class BeamTextEdit: NSView, NSTextInputClient {
         context.drawPath(using: .eoFill)
 
         if showTitle {
-            let padding = CGFloat(5)
+            let padding = CGFloat(20)
             if title == nil {
                 let titleString = rootNode.note.title.attributed
-                let f = NSFont.systemFont(ofSize: 12)
+                let f = NSFont.systemFont(ofSize: 11)
                 titleString.addAttribute(.font, value: f, range: titleString.wholeRange)
                 titleString.addAttribute(.foregroundColor, value: NSColor(named: "EditorControlColor")!, range: titleString.wholeRange)
                 title = Font.draw(string: titleString, atPosition: NSPoint(x: 0, y: 0), textWidth: leadingAlignment - padding)

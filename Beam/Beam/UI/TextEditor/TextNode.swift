@@ -92,6 +92,7 @@ public class TextNode: Equatable {
 //        paragraphStyle.alignment = .justified
         paragraphStyle.lineBreakMode = .byWordWrapping
         paragraphStyle.lineHeightMultiple = 1.56
+        paragraphStyle.lineSpacing = 40
 
         str.addAttribute(.paragraphStyle, value: paragraphStyle, range: str.wholeRange)
         _attributedString = str
@@ -187,7 +188,7 @@ public class TextNode: Equatable {
     var depth: Int { return allParents.count }
 
     var indent: CGFloat {
-        selfVisible ? 40 : 0
+        selfVisible ? 15 : 0
     }
 
     private var computedIdealSize = NSSize()
@@ -333,7 +334,7 @@ public class TextNode: Equatable {
 
     var readOnly: Bool = false
     var isEditing: Bool { root.node === self }
-    var childInset = Float(40)
+    var childInset = Float(20)
 
     private var needLayout = true
     func invalidateLayout() {
@@ -439,9 +440,9 @@ public class TextNode: Equatable {
         let offset = NSPoint(x: 0, y: firstLineBaseline)
         if showDisclosureButton {
             drawDisclosure(at: NSPoint(x: offset.x, y: offset.y), in: context)
+        } else {
+            drawBulletPoint(at: NSPoint(x: offset.x, y: offset.y), in: context)
         }
-
-        drawBulletPoint(at: NSPoint(x: 20 + offset.x, y: offset.y), in: context)
 
         context.textMatrix = CGAffineTransform.identity
         context.translateBy(x: 0, y: firstLineBaseline)
