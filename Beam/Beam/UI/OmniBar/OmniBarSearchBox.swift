@@ -20,7 +20,10 @@ struct BeamSearchBox: View {
             if isEditing || state.mode == .today {
                 OmniBarSearchBox(isEditing: $isEditing)
             } else {
-                GlobalTabTitle(tab: state.currentTab, isEditing: $isEditing)
+                GeometryReader { geometry in
+                    GlobalTabTitle(tab: state.currentTab, isEditing: $isEditing)
+                        .frame(width: geometry.size.width * 0.7)
+                }
             }
 
             Button(action: isEditing ? startQuery : startNewSearch) {

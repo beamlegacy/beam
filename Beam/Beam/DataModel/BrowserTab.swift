@@ -106,7 +106,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
     private func updateFavIcon() {
         guard let url = url else { favIcon = nil; return }
         do {
-            try FavIcon.downloadPreferred(url) { [weak self] result in
+            try FavIcon.downloadPreferred(url, width: 16, height: 16) { [weak self] result in
                 guard let self = self else { return }
 
                 if case let .success(image) = result {

@@ -20,8 +20,17 @@ struct GlobalTabTitle: View {
             ZStack {
                 RoundedRectangle(cornerRadius: _cornerRadius)
                     .foregroundColor(hover ? Color("OmniboxBackgroundColor") : Color(white: 1, opacity: 0))
-                Text(tab.originalQuery)
-                    .font(.custom("SF-Pro-Text-Heavy", size: 16))
+                HStack {
+                    // fav icon:
+                    if let icon = tab.favIcon {
+                        Image(nsImage: icon)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(maxWidth: 16, maxHeight: 16)
+                    }
+                    Text(tab.originalQuery)
+                        .font(.custom("SF-Pro-Text-Heavy", size: 16))
+                }
 
                 GeometryReader { geometry in
                     Path { path in
