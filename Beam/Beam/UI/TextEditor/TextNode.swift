@@ -172,7 +172,10 @@ public class TextNode: Equatable {
         return NSRect(x: 0, y: 0, width: frame.width, height: frame.height)
     }
 
-    var disclosureButtonFrame = NSRect(x: 0, y: 0, width: 8, height: 8)
+    var disclosureButtonFrame: NSRect {
+        let r = (open ? Self.disclosureOpenFrame : Self.disclosureClosedFrame).frame
+        return r.offsetBy(dx: 0, dy: r.height).insetBy(dx: -4, dy: -4)
+    }
     var disclosurePressed = false
     var showDisclosureButton: Bool {
         depth > 0 && !children.isEmpty
@@ -359,7 +362,7 @@ public class TextNode: Equatable {
             .foregroundColor: NSColor(named: "EditorControlColor")!
         ]
         symbol.setAttributes(attribs, range: symbol.wholeRange)
-        return Font.draw(string: symbol, atPosition: NSPoint(), textWidth: 8)
+        return Font.draw(string: symbol, atPosition: NSPoint(x: 2, y: -2), textWidth: 8)
     }
 
     static var disclosureClosedFrame = symbolFrame("􀄧")
@@ -367,16 +370,19 @@ public class TextNode: Equatable {
     static var bulletPointFrame = symbolFrame("􀜞")
 
     func drawDisclosure(at point: NSPoint, in context: CGContext) {
+//        context.setFillColor(gray: 0.5, alpha: 0.5)
+//        context.fill(disclosureButtonFrame)
         let symbol = open ? Self.disclosureOpenFrame : Self.disclosureClosedFrame
         context.saveGState()
-        context.translateBy(x: point.x + 2, y: point.y - 2)
+        context.translateBy(x: point.x, y: point.y)
         symbol.draw(context)
         context.restoreGState()
+
     }
 
     func drawBulletPoint(at point: NSPoint, in context: CGContext) {
         context.saveGState()
-        context.translateBy(x: point.x + 2, y: point.y - 2)
+        context.translateBy(x: point.x, y: point.y)
         Self.bulletPointFrame.draw(context)
         context.restoreGState()
     }
@@ -432,9 +438,7 @@ public class TextNode: Equatable {
             }
         }
 
-        let offset: NSPoint = {
-            return NSPoint(x: 0, y: firstLineBaseline)
-        }()
+        let offset = NSPoint(x: 0, y: firstLineBaseline)
         if showDisclosureButton {
             drawDisclosure(at: NSPoint(x: offset.x, y: offset.y), in: context)
         }
@@ -770,9 +774,46 @@ public class TextNode: Equatable {
         return NSRect(x: Float(x1), y: Float(l) * fHeight, width: 1.5, height: fHeight )
     }
 
+    func dispatchMouseDown(mouseInfo: MouseInfo) -> TextNode? {
+        guard NSRect(origin: NSPoint(), size: frame.size).contains(mouseInfo.position) else { return nil }
+        if mouseDown(mouseInfo: mouseInfo) {
+            return self
+        }
+
+        for c in children {
+            var i = mouseInfo
+            i.position.x -= c.frame.origin.x
+            i.position.y -= c.frame.origin.y
+            if let d = c.dispatchMouseDown(mouseInfo: i) {
+                return d
+            }
+        }
+
+        return nil
+    }
+
+    func dispatchMouseUp(mouseInfo: MouseInfo) -> TextNode? {
+        guard NSRect(origin: NSPoint(), size: frame.size).contains(mouseInfo.position) else { return nil }
+        if mouseUp(mouseInfo: mouseInfo) {
+            return self
+        }
+
+        for c in children {
+            var i = mouseInfo
+            i.position.x -= c.frame.origin.x
+            i.position.y -= c.frame.origin.y
+            if let d = c.dispatchMouseUp(mouseInfo: i) {
+                return d
+            }
+        }
+
+        return nil
+    }
+
     func mouseDown(mouseInfo: MouseInfo) -> Bool {
+//        print("mouseDown (\(mouseInfo))")
         if showDisclosureButton && disclosureButtonFrame.contains(mouseInfo.position) {
-            print("disclosure pressed (\(open))")
+//            print("disclosure pressed (\(open))")
             disclosurePressed = true
             return true
         }
@@ -780,8 +821,9 @@ public class TextNode: Equatable {
     }
 
     func mouseUp(mouseInfo: MouseInfo) -> Bool {
+//        print("mouseUp (\(mouseInfo))")
         if disclosurePressed && disclosureButtonFrame.contains(mouseInfo.position) {
-            print("disclosure unpressed (\(open))")
+//            print("disclosure unpressed (\(open))")
             disclosurePressed = false
             open.toggle()
             return true
