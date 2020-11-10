@@ -19,18 +19,14 @@ struct JournalView: View {
             VStack {
                 ForEach(journal) { note in
                     return HStack {
-                        Text(note.title)
-                            .bold()
-                            .padding(.leading)
-                            .padding(.trailing)
-                            .frame(width: 200, alignment: .topTrailing)
                         NoteView(note: note,
                                  onStartEditing: {
                                     withAnimation {
                                         isEditing = true
                                     }
                                  },
-                                 leadingAlignement: 0
+                                 leadingAlignement: 160,
+                                 showTitle: true
                         )
                     }.padding(.top, 20).padding(.bottom, 50)
                 }

@@ -333,9 +333,7 @@ public class TextNode: Equatable {
 
     var readOnly: Bool = false
     var isEditing: Bool { root.node === self }
-    var childInset: Float {
-        return 40
-    }
+    var childInset = Float(40)
 
     private var needLayout = true
     func invalidateLayout() {

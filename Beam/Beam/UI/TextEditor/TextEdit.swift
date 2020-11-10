@@ -34,24 +34,12 @@ public struct BTextEdit: NSViewRepresentable {
     var leadingAlignment = CGFloat(160)
     var traillingPadding = CGFloat(80)
 
+    var showTitle = true
+
     public func makeNSView(context: Context) -> BeamTextEdit {
         let root = TextRoot(CoreDataManager.shared, note: note)
         let nsView = BeamTextEdit(root: root, font: Font.main)
-        nsView.openURL = openURL
-        nsView.openCard = openCard
-        nsView.onStartEditing = onStartEditing
-        nsView.onEndEditing = onEndEditing
-        return nsView
-    }
 
-    public func updateNSView(_ nsView: BeamTextEdit, context: Context) {
-        print("display note: \(note)")
-        if nsView.rootNode.note !== note {
-            nsView.rootNode = TextRoot(CoreDataManager.shared, note: note)
-            if let note = nsView.rootNode.children.first {
-                nsView.node = note
-            }
-        }
         nsView.openURL = openURL
         nsView.openCard = openCard
         nsView.onStartEditing = onStartEditing
@@ -63,6 +51,32 @@ public struct BTextEdit: NSViewRepresentable {
         nsView.leadingAlignment = leadingAlignment
         nsView.traillingPadding = traillingPadding
 
+        nsView.showTitle = showTitle
+
+        return nsView
+    }
+
+    public func updateNSView(_ nsView: BeamTextEdit, context: Context) {
+        print("display note: \(note)")
+        if nsView.rootNode.note !== note {
+            nsView.rootNode = TextRoot(CoreDataManager.shared, note: note)
+            if let note = nsView.rootNode.children.first {
+                nsView.node = note
+            }
+        }
+
+        nsView.openURL = openURL
+        nsView.openCard = openCard
+        nsView.onStartEditing = onStartEditing
+        nsView.onEndEditing = onEndEditing
+
+        nsView.minimumWidth = minimumWidth
+        nsView.maximumWidth = maximumWidth
+
+        nsView.leadingAlignment = leadingAlignment
+        nsView.traillingPadding = traillingPadding
+
+        nsView.showTitle = showTitle
     }
 
     public typealias NSViewType = BeamTextEdit
@@ -130,6 +144,8 @@ public class BeamTextEdit: NSView, NSTextInputClient {
             }
         }
     }
+
+    var showTitle = true { didSet { invalidate() } }
 
     public var activated: () -> Void = { }
     public var activateOnLostFocus = true
@@ -609,12 +625,35 @@ public class BeamTextEdit: NSView, NSTextInputClient {
         offBlinkTime = voff == 0 ? offBlinkTime : voff * 1000
     }
 
+    var title: TextFrame?
+
     public func draw(in context: CGContext) {
 //        print("\n\ndraw visibleRect: \(visibleRect)")
         // Draw the background
         context.setFillColor(NSColor(named: "EditorBackgroundColor")!.cgColor)
+//        context.setFillColor(NSColor.red.cgColor)
         context.addRect(bounds)
         context.drawPath(using: .eoFill)
+
+        if showTitle {
+            let padding = CGFloat(5)
+            if title == nil {
+                let titleString = rootNode.note.title.attributed
+                let f = NSFont.systemFont(ofSize: 12)
+                titleString.addAttribute(.font, value: f, range: titleString.wholeRange)
+                titleString.addAttribute(.foregroundColor, value: NSColor(named: "EditorControlColor")!, range: titleString.wholeRange)
+                title = Font.draw(string: titleString, atPosition: NSPoint(x: 0, y: 0), textWidth: leadingAlignment - padding)
+            }
+
+            context.saveGState()
+
+            guard let t = title else { return }
+            let x = leadingAlignment - t.frame.width - padding
+            context.translateBy(x: x, y: rootNode.children.first!.firstLineBaseline)
+            t.draw(context)
+
+            context.restoreGState()
+        }
 
         context.saveGState(); defer { context.restoreGState() }
         context.translateBy(x: rootNode.frame.origin.x, y: rootNode.frame.origin.y)

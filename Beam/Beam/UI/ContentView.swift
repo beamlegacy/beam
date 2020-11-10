@@ -30,7 +30,7 @@ struct ModeView: View {
                 case .note:
                     ScrollView([.vertical]) {
                         ZStack {
-                            NoteView(note: state.currentNote!)
+                            NoteView(note: state.currentNote!, showTitle: false)
                         }
                     }
                     .transition(.opacity)
