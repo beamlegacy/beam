@@ -277,11 +277,23 @@ enum Mode {
             return
         }
 
-        searchEngine.query = searchQuery
-        let searchText = searchEngine.searchUrl
-        print("Start search query: \(searchText)")
+        let url: URL = {
+            if searchQuery.maybeURL {
+                guard var u = URL(string: searchQuery) else {
+                    return URL(string: "https://" + searchQuery)!
+                }
 
-        createTab(withURL: URL(string: searchText)!, originalQuery: searchQuery)
+                if u.scheme == nil {
+                    return URL(string: "https://" + searchQuery)!
+                }
+                return u
+            }
+            searchEngine.query = searchQuery
+            return URL(string: searchEngine.searchUrl)!
+        }()
+        print("Start query: \(url)")
+
+        createTab(withURL: url, originalQuery: searchQuery)
         mode = .web
     }
 
