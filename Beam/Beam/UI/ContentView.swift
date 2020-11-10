@@ -36,19 +36,17 @@ struct ModeView: View {
                     .transition(.opacity)
                     .animation(.easeInOut(duration: 0.3))
                 case .today:
-                    ZStack {
-                        GeometryReader { geometry in
-                            JournalView(journal: state.data.journal, offset: geometry.size.height * 0.4)
-                        }
-
-                        if !state.searchQuery.isEmpty {
-                            AutoCompleteView(autoComplete: $state.completedQueries, selectionIndex: $state.selectionIndex).frame(alignment: .top)
-                        }
+                    GeometryReader { geometry in
+                        JournalView(journal: state.data.journal, offset: geometry.size.height * 0.4)
                     }
-                    .transition(.opacity)
-                    .animation(.easeInOut(duration: 0.3))
+                }
+
+                if !state.searchQuery.isEmpty && !state.completedQueries.isEmpty {
+                    AutoCompleteView(autoComplete: $state.completedQueries, selectionIndex: $state.selectionIndex).frame(alignment: .top)
+                        .zIndex(2)
                 }
             }
+
         }
         .background(Color("EditorBackgroundColor"))
     }

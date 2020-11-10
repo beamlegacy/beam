@@ -8,6 +8,52 @@
 import Foundation
 import SwiftUI
 
+struct BeamSearchBox: View {
+    @EnvironmentObject var state: BeamState
+    var canSearch: Bool {
+        return !state.searchQuery.isEmpty || !isEditing
+    }
+    @Binding var isEditing: Bool
+
+    var body: some View {
+        HStack {
+            if isEditing || state.mode == .today {
+                OmniBarSearchBox(isEditing: $isEditing)
+            } else {
+                GlobalTabTitle(tab: state.currentTab, isEditing: $isEditing)
+            }
+
+            Button(action: isEditing ? startQuery : startNewSearch) {
+                Symbol(name: "magnifyingglass")
+            }
+            .disabled(!canSearch)
+            .buttonStyle(RoundRectButtonStyle())
+            .padding(.leading, 1)
+
+            Button(action: startNewSearch) {
+                Symbol(name: "plus")
+            }
+            .buttonStyle(RoundRectButtonStyle())
+        }.padding(.leading, 9)
+    }
+
+    func startNewSearch() {
+        state.startNewSearch()
+    }
+
+    func startQuery() {
+        withAnimation {
+            //print("searchText activated: \(searchText)")
+            if state.searchQuery.isEmpty {
+                state.currentNote = nil
+            } else {
+                state.startQuery()
+                isEditing = false
+            }
+        }
+    }
+}
+
 struct OmniBarSearchBox: View {
     var _cornerRadius = CGFloat(7)
     @EnvironmentObject var state: BeamState
@@ -75,6 +121,7 @@ struct OmniBarSearchBox: View {
         withAnimation {
             //print("searchText activated: \(searchText)")
             state.startQuery()
+            isEditing = false
         }
     }
 }

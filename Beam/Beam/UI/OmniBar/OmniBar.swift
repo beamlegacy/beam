@@ -21,24 +21,7 @@ struct OmniBar: View {
         HStack {
             Chevrons()
 
-            switch state.mode {
-            case .today:
-                HStack {
-                    OmniBarSearchBox(isEditing: $isEditing)
-
-                    Button(action: isEditing ? startQuery : startNewSearch) {
-                        Symbol(name: "magnifyingglass")
-                    }
-                    .disabled(!canSearch)
-                    .buttonStyle(RoundRectButtonStyle())
-                    .padding(.leading, 1)
-
-                    Button(action: startNewSearch) {
-                        Symbol(name: "plus")
-                    }
-                    .buttonStyle(RoundRectButtonStyle())
-                }.padding(.leading, 9)
-            case .note:
+            if state.mode == .note {
                 HStack {
                     GlobalNoteTitle(note: state.currentNote!)
 
@@ -47,32 +30,8 @@ struct OmniBar: View {
                     }
                     .buttonStyle(RoundRectButtonStyle())
                 }.padding(.leading, 9)
-
-            case .web:
-                HStack {
-                    VStack {
-                        GlobalTabTitle(tab: state.currentTab)
-                            .frame(idealWidth: 600, maxWidth: .infinity, minHeight: 24, maxHeight: 24, alignment: .center)
-                        GeometryReader { geometry in
-                            Path { path in
-                                let f = CGFloat(tab.estimatedProgress)
-                                path.move(to: CGPoint(x: 0, y: 0))
-                                path.addLine(to: CGPoint(x: geometry.size.width * f, y: 0))
-                                path.addLine(to: CGPoint(x: geometry.size.width * f, y: geometry.size.height))
-                                path.addLine(to: CGPoint(x: 0, y: geometry.size.height))
-                                path.move(to: CGPoint(x: 0, y: 0))
-                            }
-                            .fill(tab.isLoading ? Color.accentColor.opacity(0.5): Color.accentColor.opacity(0))
-                        }
-                        .frame(idealWidth: 600, maxWidth: .infinity, minHeight: 2, alignment: .center)
-                        .animation(.easeIn(duration: 0.5))
-                    }
-
-                    Button(action: startNewSearch) {
-                        Symbol(name: "plus")
-                    }
-                    .buttonStyle(RoundRectButtonStyle())
-                }
+            } else {
+                BeamSearchBox(isEditing: $isEditing)
             }
 
             Button(action: toggleMode) {
@@ -88,17 +47,6 @@ struct OmniBar: View {
 
     func startNewSearch() {
         state.startNewSearch()
-    }
-
-    func startQuery() {
-        withAnimation {
-            //print("searchText activated: \(searchText)")
-            if state.searchQuery.isEmpty {
-                state.currentNote = nil
-            } else {
-                state.startQuery()
-            }
-        }
     }
 
     func toggleMode() {

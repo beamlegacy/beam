@@ -294,6 +294,7 @@ enum Mode {
         print("Start query: \(url)")
 
         createTab(withURL: url, originalQuery: searchQuery)
+        cancelAutocomplete()
         mode = .web
     }
 
