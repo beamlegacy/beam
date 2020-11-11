@@ -89,6 +89,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         // Insert code here to tear down your application
     }
 
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        if !flag {
+            createWindow()
+        }
+
+        return false
+    }
+
     // MARK: - Core Data Saving and Undo support
 
     @IBAction func resetDatabase(_ sender: Any) {
