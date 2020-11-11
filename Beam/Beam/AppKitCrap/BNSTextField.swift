@@ -48,6 +48,11 @@ class BNSTextField: NSTextView, ObservableObject, NSTextViewDelegate {
         if let n = self.name {
             Self.fields[n] = self
         }
+
+        self.maxSize = NSSize(width: CGFloat.infinity, height: CGFloat.infinity)
+        self.isHorizontallyResizable = true
+        self.textContainer?.widthTracksTextView = false
+        self.textContainer?.containerSize = NSSize(width: CGFloat.infinity, height: CGFloat.infinity)
     }
 
     required init?(coder: NSCoder) {
