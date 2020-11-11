@@ -108,14 +108,16 @@ class BNSTextField: NSTextView, ObservableObject, NSTextViewDelegate {
         return super.performKeyEquivalent(with: event)
     }
 
+    var firstPass = true
     override func viewDidMoveToWindow() {
-        if focusOnCreation {
+        if focusOnCreation, firstPass {
             //self.window?.initialFirstResponder = self
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
                 self.window?.makeFirstResponder(self)
             }
         }
+        firstPass = false
     }
 
     @objc func commit(_ sender: AnyObject) {
