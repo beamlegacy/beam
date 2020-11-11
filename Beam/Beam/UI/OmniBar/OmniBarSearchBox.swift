@@ -104,9 +104,11 @@ struct OmniBarSearchBox: View {
                 .padding([.leading, .trailing], 9)
                 .frame(idealWidth: 600, maxWidth: .infinity)
 
-                Button(action: resetSearchQuery) {
-                    Symbol(name: "xmark.circle.fill", size: 12)
-                }.buttonStyle(BorderlessButtonStyle()).disabled(state.searchQuery.isEmpty).padding([.leading, .trailing], 9)
+                if isEditing {
+                    Button(action: resetSearchQuery) {
+                        Symbol(name: "xmark.circle.fill", size: 12)
+                    }.buttonStyle(BorderlessButtonStyle()).disabled(state.searchQuery.isEmpty).padding([.leading, .trailing], 9)
+                }
             }
         }
     }
