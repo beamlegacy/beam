@@ -123,7 +123,7 @@ public class TextRoot: TextNode {
             addChild(TextNode(bullet: bullet, recurse: true))
         }
 
-        children.first?.placeholder = (note.type == NoteType.journal.rawValue) ? "This is the journal, you can type anything here!" : "..."
+        children.first?.placeholder = (note.type == NoteType.journal.rawValue && note === AppDelegate.main.data.todaysNote) ? "This is the journal, you can type anything here!" : "..."
 
         if let linkedRefs = note.linkedReferences, !linkedRefs.isEmpty {
             let node = TextNode(staticText: "Linked references")
