@@ -17,7 +17,7 @@ enum CursorMovement {
 }
 
 struct BTextField: NSViewRepresentable {
-    typealias NSViewType = BNSTextField
+    typealias NSViewType = NSScrollView
 
     @Binding var text: String
     @Binding var isEditing: Bool
@@ -58,30 +58,36 @@ struct BTextField: NSViewRepresentable {
 
             return false
         }
+        textField.backgroundColor = NSColor(calibratedWhite: 0, alpha: 0)
 
-        return textField
+        let scrollView = NSScrollView()
+        scrollView.hasVerticalScroller = false
+        scrollView.documentView = textField
+        scrollView.drawsBackground = false
+        return scrollView
     }
 
     func updateNSView(_ nsView: Self.NSViewType, context: Self.Context) {
-        nsView.string = text
-        nsView.placeholderText = placeholderText
+        let textField = nsView.documentView as! BNSTextField
+        textField.string = text
+        textField.placeholderText = placeholderText
         if let c = textColor {
-            nsView.textColor = c
+            textField.textColor = c
         }
         if let c = placeholderTextColor {
-            nsView.placeholderTextColor = c
+            textField.placeholderTextColor = c
         }
-        nsView.focusOnCreation = self.focusOnCreation
+        textField.focusOnCreation = self.focusOnCreation
 
         if let selectedRanges = self.selectedRanges {
-            nsView.inSelectionUpdate = true
+            textField.inSelectionUpdate = true
             let ranges = selectedRanges.map({ range -> NSValue in
                 let pos = Int(range.startIndex)
                 let len = Int(range.endIndex - range.startIndex)
                 return NSValue(range: NSRange(location: pos, length: len))
             })
-            nsView.selectedRanges = ranges
-            nsView.inSelectionUpdate = false
+            textField.selectedRanges = ranges
+            textField.inSelectionUpdate = false
         }
     }
 }
