@@ -445,9 +445,11 @@ public class BeamTextEdit: NSView, NSTextInputClient {
 
                 case .backTab:
                     rootNode.doCommand(.decreaseIndentation)
+                    return
 
                 case .tab:
                     rootNode.doCommand(.increaseIndentation)
+                    return
 
                 default:
                     print("Special Key \(k)")
