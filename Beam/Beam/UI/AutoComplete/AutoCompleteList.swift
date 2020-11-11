@@ -17,6 +17,7 @@ struct AutoCompleteList: View {
         VStack {
             ForEach(elements) { i in
                 return AutoCompleteItem(item: i, selected: isSelectedItem(i))
+                    .contentShape(Rectangle())
                     .onTapGesture(count: 1) {
                         selectedIndex = indexFor(item: i)
                         state.startQuery()

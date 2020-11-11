@@ -10,6 +10,10 @@ import SwiftUI
 struct AutoCompleteItem: View {
     @State var item: AutoCompleteResult
     var selected: Bool
+    @State var hover = false
+    var bgColor: Color {
+        item.source == .note ? Color("EditorBidirectionalLinkColor") : Color("EditorLinkColor")
+    }
 
     var body: some View {
         HStack {
@@ -30,8 +34,11 @@ struct AutoCompleteItem: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal)
         .padding([.top, .bottom], 3)
-        .background(selected ? (item.source == .note ? Color("EditorBidirectionalLinkColor") : Color("EditorLinkColor") )  : Color("transparent"))
+        .background(selected ? bgColor : (hover ? bgColor.opacity(0.2) : Color("transparent")))
         .clipShape(RoundedRectangle(cornerRadius: 8.0), style: FillStyle())
+        .onHover { v in
+            hover = v
+        }
     }
 }
 
