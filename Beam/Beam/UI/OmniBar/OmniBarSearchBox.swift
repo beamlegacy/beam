@@ -107,6 +107,7 @@ struct OmniBarSearchBox: View {
                 if isEditing {
                     Button(action: resetSearchQuery) {
                         Symbol(name: "xmark.circle.fill", size: 12)
+                            .offset(x: 0, y: runningOnBigSur ? 0 : -2)
                     }.buttonStyle(BorderlessButtonStyle()).disabled(state.searchQuery.isEmpty).padding([.leading, .trailing], 9)
                 }
             }
