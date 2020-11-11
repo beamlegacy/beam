@@ -28,9 +28,13 @@ struct JournalView: View {
                                  leadingAlignement: 160,
                                  showTitle: true
                         )
+                        .animation(.none)
+
                     }.padding(.top, 20).padding(.bottom, 50)
                 }
             }
+            .transition(.opacity)
+            .animation(.easeInOut)
             .padding(.top, isEditing ? 20 : offset)
         }
     }

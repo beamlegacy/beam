@@ -23,7 +23,9 @@ struct AutoCompleteList: View {
                         state.startQuery()
                     }
             }
-        }.frame(maxWidth: .infinity, alignment: .top).background(Color("transparent"))
+        }
+        .frame(maxWidth: .infinity, alignment: .top)
+        .background(Color("transparent"))
     }
 
     func isSelectedItem(_ item: AutoCompleteResult) -> Bool {
