@@ -79,3 +79,7 @@ document.addEventListener('mouseup', function() {
     }, 100);
 
 });
+
+window.addEventListener('scroll', function(e) {
+    window.webkit.messageHandlers.beam_onScrolled.postMessage({ x: window.scrollX, y: window.scrollY })
+});

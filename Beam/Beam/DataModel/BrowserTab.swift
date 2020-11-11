@@ -145,6 +145,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
         webView.uiDelegate = self
 
         self.webView.configuration.userContentController.add(self, name: TextSelectedMessage)
+        self.webView.configuration.userContentController.add(self, name: OnScrolledMessage)
 
         let messageHandler = LoggingMessageHandler()
         messageHandler.tab = self
@@ -215,6 +216,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
     }
 
     let TextSelectedMessage = "beam_textSelected"
+    let OnScrolledMessage = "beam_onScrolled"
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         switch message.name {
         case TextSelectedMessage:
@@ -238,6 +240,13 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
                     _ = self.note?.createBullet(CoreDataManager.shared.mainContext, content: quote, createdAt: Date(), afterBullet: nil, parentBullet: nil)
                 }
             }
+        case OnScrolledMessage:
+            guard let dict = message.body as? [String: AnyObject],
+//                  let selectedText = dict["selectedText"] as? String,
+                let x = dict["x"] as? Double,
+                let y = dict["y"] as? Double
+            else { return }
+            print("Web Scrolled: \(x), \(y)")
         default:
             break
         }
