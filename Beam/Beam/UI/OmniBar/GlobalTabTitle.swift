@@ -56,6 +56,7 @@ struct GlobalTabTitle: View {
             .onTapGesture {
                 // should edit
                 isEditing = true
+                state.searchQuerySelection = [state.searchQuery.wholeRange]
             }
         }.padding(.top, 4)
     }
