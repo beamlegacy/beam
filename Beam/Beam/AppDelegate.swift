@@ -23,6 +23,7 @@ public class BeamApplication: NSApplication {
 
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
+    class var main: AppDelegate { NSApplication.shared.delegate as! AppDelegate }
 
     @IBOutlet var window: BeamWindow!
     var windows: [BeamWindow] = []
