@@ -279,6 +279,7 @@ var runningOnBigSur: Bool = {
                 navigateToNote(named: searchQuery)
             }
 
+            cancelAutocomplete()
             return
         }
 
