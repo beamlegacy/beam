@@ -68,9 +68,6 @@ class BeamWindow: NSWindow, NSWindowDelegate {
     // THIS HACK IS HORRIBLE But AppKit leaves us little choice to have a similar look on Catalina and Future OSes
     var trafficLightFrame = NSRect()
     func setupTrafficLights() {
-        let version = ProcessInfo.processInfo.operatingSystemVersion
-        let runningOnBigSur = version.majorVersion >= 11 || (version.majorVersion == 10 && version.minorVersion >= 16)
-
         if let b = self.standardWindowButton(.closeButton) {
             if var f = b.superview?.superview?.frame {
                 let v = CGFloat(runningOnBigSur ? 12 : 14)

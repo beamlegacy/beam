@@ -15,6 +15,11 @@ enum Mode {
     case web
 }
 
+var runningOnBigSur: Bool = {
+    let version = ProcessInfo.processInfo.operatingSystemVersion
+    return version.majorVersion >= 11 || (version.majorVersion == 10 && version.minorVersion >= 16)
+}()
+
 @objc class BeamState: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     @Published var mode: Mode = .today {
         didSet {
