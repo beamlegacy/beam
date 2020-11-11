@@ -762,8 +762,10 @@ public class TextNode: Equatable {
     }
 
     public func isOnLastLine(_ position: Int) -> Bool {
+        guard let layout = layout else { return true }
+        guard layout.lines.count > 1 else { return true }
         guard let l = lineAt(index: position) else { return false }
-        return l == layout!.lines.count - 1
+        return l == layout.lines.count - 1
     }
 
     public func rectAt(_ position: Int) -> NSRect {
