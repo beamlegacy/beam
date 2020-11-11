@@ -35,21 +35,7 @@ struct BrowserTabView: View {
             }
             HStack {
                 Button("􀆄") {
-                    for (i, t) in state.tabs.enumerated() where t.id == tab.id {
-                        if i > 0 {
-                            state.currentTab = state.tabs[i - 1]
-                        } else if state.tabs.count > 1 {
-                            state.currentTab = state.tabs[i + 1]
-                        } else {
-                            state.currentTab = BrowserTab(state: state, originalQuery: "", note: nil)
-                            if let note = state.currentNote {
-                                state.navigateToNote(note)
-                            } else {
-                                state.navigateToJournal()
-                            }
-                        }
-                        state.tabs.remove(at: i)
-                    }
+                    closeTab(id: tab.id)
                 }.opacity(showButton ? 1 : 0)
                 .onHover(perform: { v in
                     showButton = v
@@ -73,7 +59,7 @@ struct BrowserTabView: View {
             }.onHover(perform: { hovering in
                 isHovering = hovering
             })
-        }.frame(minWidth: 50, maxWidth: .infinity, minHeight: 20, maxHeight: 20, alignment: .leading)
+        }
         .padding([.trailing], 1)
         .padding([.top], 2)
         .animation(nil)
@@ -93,6 +79,25 @@ struct BrowserTabView: View {
                     startAngle: Angle(degrees: -90), endAngle: Angle(degrees: 0), clockwise: false)
         path.addLine(to: CGPoint(x: width, y: height))
         path.closeSubpath()
+
+    }
+
+    func closeTab(id: UUID) {
+        for (i, t) in state.tabs.enumerated() where t.id == id {
+            if i > 0 {
+                state.currentTab = state.tabs[i - 1]
+            } else if state.tabs.count > 1 {
+                state.currentTab = state.tabs[i + 1]
+            } else {
+                state.currentTab = BrowserTab(state: state, originalQuery: "", note: nil)
+                if let note = state.currentNote {
+                    state.navigateToNote(note)
+                } else {
+                    state.navigateToJournal()
+                }
+            }
+            state.tabs.remove(at: i)
+        }
 
     }
 }

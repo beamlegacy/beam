@@ -18,7 +18,7 @@ private struct Background: View {
 //                    path.addLine(to: CGPoint(x: Int(geometry.size.width), y: h))
                     let h = Int(geometry.size.height - 1 )
                     path.move(to: CGPoint(x: 0, y: h))
-                    path.addLine(to: CGPoint(x: 3000, y: h))
+                    path.addLine(to: CGPoint(x: Int(geometry.size.width), y: h))
                 }
                 .stroke(Color(NSColor.separatorColor))
             }
@@ -29,20 +29,39 @@ private struct Background: View {
 struct BrowserTabBar: View {
     @Binding var tabs: [BrowserTab]
     @Binding var currentTab: BrowserTab
+    let minTabWidth = CGFloat(50)
+    let maxTabWidth = CGFloat(150)
     var body: some View {
         ZStack {
             Background()
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack {
-                    ForEach(tabs, id: \.id) { tab in
-                        BrowserTabView(tab: tab, selected: isSelected(tab))
-                            .onTapGesture {
-                                currentTab = tab
-                            }
+            GeometryReader { geometry in
+                if (geometry.size.width / CGFloat(tabs.count)) > maxTabWidth {
+                    HStack {
+                        ForEach(tabs, id: \.id) { tab in
+                            BrowserTabView(tab: tab, selected: isSelected(tab))
+                                .onTapGesture {
+                                    currentTab = tab
+                                }
+                                .frame(minHeight: 20, maxHeight: 20, alignment: .leading)
+                        }
                     }
-                }.padding([.leading, .trailing], 2)
+                } else {
+                    ScrollView(.horizontal) {
+                        HStack {
+                            ForEach(tabs, id: \.id) { tab in
+                                BrowserTabView(tab: tab, selected: isSelected(tab))
+                                    .onTapGesture {
+                                        currentTab = tab
+                                    }
+                                    .frame(minWidth: minTabWidth, maxWidth: maxTabWidth, minHeight: 20, maxHeight: 20, alignment: .leading)
+                            }
+                        }
+                        .padding([.leading, .trailing], 2)
+                    }
+                }
             }
-        }.frame(height: 25)
+        }.frame(height: 28)
+        .transition(.slide)
     }
 
     func isSelected(_ tab: BrowserTab) -> Bool {
