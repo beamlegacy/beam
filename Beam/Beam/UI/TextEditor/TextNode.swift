@@ -666,7 +666,8 @@ public class TextNode: Equatable {
 
     public func lineAt(index: Int) -> Int? {
         guard index >= 0 else { return nil }
-        guard let layout = layout else { return nil }
+        guard let layout = layout else { return 0 }
+        guard !layout.lines.isEmpty else { return 0 }
         for (i, l) in layout.lines.enumerated() where index < l.range.lowerBound {
             return i - 1
         }
