@@ -570,8 +570,8 @@ public class TextNode: Equatable {
         if text.isEmpty {
             guard editor?.hasFocus ?? false, editor?.blinkPhase ?? false else { return }
 
-            let f = AttributedStringVisitor.font()
-            let cursorRect = NSRect(x: indent, y: 0, width: 7, height: fontSize)
+            let f = AttributedStringVisitor.font(fontSize)
+            let cursorRect = NSRect(x: indent, y: 0, width: 7, height: CGFloat(f.ascender - f.descender))
 
             context.beginPath()
             context.addRect(cursorRect)
