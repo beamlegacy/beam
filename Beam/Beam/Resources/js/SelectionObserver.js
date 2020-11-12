@@ -83,3 +83,25 @@ document.addEventListener('mouseup', function() {
 window.addEventListener('scroll', function(e) {
     window.webkit.messageHandlers.beam_onScrolled.postMessage({ x: window.scrollX, y: window.scrollY })
 });
+
+//let videos = document.querySelectorAll('video');
+//videos.forEach(function(video) {
+//    video.addEventListener('durationchange', (event) => {
+//      console.log('Video duration changed ' + video.duration.toString());
+//    });
+//
+//    video.addEventListener('timeupdate', (event) => {
+//      console.log('Video progress ' + video.currentTime.toString() + ' / ' + video.duration.toString());
+//    });
+//});
+
+let video = document.querySelector('video');
+if video {
+    video.addEventListener('durationchange', (event) => {
+      console.log('Video duration changed ' + video.duration.toString());
+    });
+
+    video.addEventListener('timeupdate', (event) => {
+      console.log('Video progress ' + video.currentTime.toString() + ' / ' + video.duration.toString());
+    });
+}
