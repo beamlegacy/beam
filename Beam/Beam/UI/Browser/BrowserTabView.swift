@@ -89,14 +89,14 @@ struct BrowserTabView: View {
             } else if state.tabs.count > 1 {
                 state.currentTab = state.tabs[i + 1]
             } else {
-                state.currentTab = BrowserTab(state: state, originalQuery: "", note: nil)
+                state.currentTab = nil
                 if let note = state.currentNote {
                     state.navigateToNote(note)
                 } else {
                     state.navigateToJournal()
                 }
             }
-            state.tabs.remove(at: i)
+            state.removeTab(i)
         }
 
     }

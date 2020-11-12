@@ -28,11 +28,11 @@ var runningOnBigSur: Bool = {
             case .note: fallthrough
             case .today:
                 if mode == .web {
-                    currentTab.startViewing()
+                    currentTab?.startViewing()
                 }
 
             case .web:
-                currentTab.stopViewing()
+                currentTab?.stopViewing()
             }
             updateCanGoBackForward()
         }
@@ -46,8 +46,8 @@ var runningOnBigSur: Bool = {
             canGoBack = !backForwardList.backList.isEmpty
             canGoForward = !backForwardList.forwardList.isEmpty
         case .web:
-            canGoBack = currentTab.canGoBack
-            canGoForward = currentTab.canGoForward
+            canGoBack = currentTab?.canGoBack ?? false
+            canGoForward = currentTab?.canGoForward ?? false
         }
     }
 
@@ -106,18 +106,18 @@ var runningOnBigSur: Bool = {
             }
         }
     }
-    @Published var currentTab: BrowserTab {
+    @Published var currentTab: BrowserTab? {
         didSet {
             if self.mode == .web {
-                oldValue.stopViewing()
-                currentTab.startViewing()
+                oldValue?.stopViewing()
+                currentTab?.startViewing()
             }
 
             tabScope.removeAll()
-            currentTab.$canGoBack.sink { v in
+            currentTab?.$canGoBack.sink { v in
                 self.canGoBack = v
             }.store(in: &tabScope)
-            currentTab.$canGoForward.sink { v in
+            currentTab?.$canGoForward.sink { v in
                 self.canGoForward = v
             }.store(in: &tabScope)
         }
@@ -143,7 +143,7 @@ var runningOnBigSur: Bool = {
                 }
             }
         case .web:
-            currentTab.webView.goBack()
+            currentTab?.webView.goBack()
         }
         updateCanGoBackForward()
     }
@@ -165,7 +165,7 @@ var runningOnBigSur: Bool = {
                 }
             }
         case .web:
-            currentTab.webView.goForward()
+            currentTab?.webView.goForward()
         }
         updateCanGoBackForward()
     }
@@ -310,7 +310,6 @@ var runningOnBigSur: Bool = {
         self.data = data
 //        self.currentNote = data.todaysNote
         backForwardList = NoteBackForwardList()
-        currentTab = BrowserTab()
         super.init()
         $searchQuery.sink { [weak self] query in
             guard let self = self else { return }
@@ -377,14 +376,16 @@ var runningOnBigSur: Bool = {
     }
 
     func showNextTab() {
-        if let i = tabs.firstIndex(of: currentTab) {
+        guard let tab = currentTab else { return }
+        if let i = tabs.firstIndex(of: tab) {
             let i = (i + 1) % tabs.count
             currentTab = tabs[i]
         }
     }
 
     func showPreviousTab() {
-        if let i = tabs.firstIndex(of: currentTab) {
+        guard let tab = currentTab else { return }
+        if let i = tabs.firstIndex(of: tab) {
             let i = i - 1 < 0 ? tabs.count - 1 : i - 1
             currentTab = tabs[i]
         }
@@ -392,7 +393,10 @@ var runningOnBigSur: Bool = {
 
     func closeCurrentTab() -> Bool {
         if mode == .web {
-            if let i = tabs.firstIndex(of: currentTab) {
+            guard let tab = currentTab else { return false }
+            tab.cancelObservers()
+
+            if let i = tabs.firstIndex(of: tab) {
                 tabs.remove(at: i)
                 let nextTabIndex = min(i, tabs.count - 1)
                 if nextTabIndex >= 0 {
@@ -405,12 +409,23 @@ var runningOnBigSur: Bool = {
                     } else {
                         navigateToJournal()
                     }
+                    currentTab = nil
                 }
                 return true
             }
         }
 
         return false
+    }
+
+    func removeTab(_ index: Int) -> Bool {
+        let tab = tabs[index]
+        guard currentTab !== tab else { return closeCurrentTab() }
+
+        tab.cancelObservers()
+        tabs.remove(at: index)
+
+        return true
     }
 
     func resetAutocompleteSelection() {

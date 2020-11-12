@@ -11,7 +11,6 @@ import AppKit
 
 struct OmniBar: View {
     @EnvironmentObject var state: BeamState
-    @ObservedObject var tab: BrowserTab
     var canSearch: Bool {
         return !state.searchQuery.isEmpty || !isEditing
     }
@@ -51,7 +50,8 @@ struct OmniBar: View {
 
     func toggleMode() {
         if state.mode == .web {
-            if let note = state.currentTab.note {
+            guard let tab = state.currentTab else { return }
+            if let note = tab.note {
                 state.currentNote = note
             }
             if let note = state.currentNote {

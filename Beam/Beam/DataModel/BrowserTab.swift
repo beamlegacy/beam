@@ -153,6 +153,15 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
         self.webView.configuration.userContentController.addUserScript(WKUserScript(source: overrideConsole, injectionTime: .atDocumentStart, forMainFrameOnly: true))
     }
 
+    func cancelObservers() {
+        scope.removeAll()
+        webView.navigationDelegate = nil
+        webView.uiDelegate = nil
+
+        self.webView.configuration.userContentController.removeScriptMessageHandler(forName: TextSelectedMessage)
+        self.webView.configuration.userContentController.removeScriptMessageHandler(forName: OnScrolledMessage)
+    }
+
     // WKNavigationDelegate:
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         decisionHandler(.allow)

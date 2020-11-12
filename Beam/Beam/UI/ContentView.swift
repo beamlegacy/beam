@@ -12,7 +12,7 @@ struct ModeView: View {
     @ViewBuilder
     var body: some View {
         VStack {
-            OmniBar(tab: state.currentTab)
+            OmniBar()
                 .padding(.leading, 73)
                 .padding(.trailing, 20)
                 .frame(height: 52, alignment: .center)
@@ -22,7 +22,9 @@ struct ModeView: View {
                 case .web:
                     VStack {
                         BrowserTabBar(tabs: $state.tabs, currentTab: $state.currentTab)
-                        WebView(webView: state.currentTab.webView)
+                        if let tab = state.currentTab {
+                            WebView(webView: tab.webView)
+                        }
                     }
                     .transition(.move(edge: .bottom))
                     .animation(.easeInOut(duration: 0.3))

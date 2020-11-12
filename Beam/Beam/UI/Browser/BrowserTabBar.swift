@@ -28,7 +28,7 @@ private struct Background: View {
 
 struct BrowserTabBar: View {
     @Binding var tabs: [BrowserTab]
-    @Binding var currentTab: BrowserTab
+    @Binding var currentTab: BrowserTab?
     let minTabWidth = CGFloat(50)
     let maxTabWidth = CGFloat(150)
     var body: some View {
@@ -65,15 +65,16 @@ struct BrowserTabBar: View {
     }
 
     func isSelected(_ tab: BrowserTab) -> Bool {
-        return tab.id == currentTab.id
+        guard let ctab = currentTab else { return false }
+        return tab.id == ctab.id
     }
 }
 
-struct BrowserTabBar_Previews: PreviewProvider {
-    static var state = BeamState(data: BeamData())
-    @State static var tabs: [BrowserTab] = [BrowserTab(state: state, originalQuery: "test1", note: nil, id: UUID(uuidString: "123e4567-e89b-12d3-a456-426614174000")!), BrowserTab(state: state, originalQuery: "test2", note: nil), BrowserTab(state: state, originalQuery: "test3", note: nil)]
-    @State static var currentTab = BrowserTab(state: state, originalQuery: "test1", note: nil, id: UUID(uuidString: "123e4567-e89b-12d3-a456-426614174000")!)
-    static var previews: some View {
-        BrowserTabBar(tabs: Self.$tabs, currentTab: Self.$currentTab)
-    }
-}
+//struct BrowserTabBar_Previews: PreviewProvider {
+//    static var state = BeamState(data: BeamData())
+//    @State static var tabs: [BrowserTab] = [BrowserTab(state: state, originalQuery: "test1", note: nil, id: UUID(uuidString: "123e4567-e89b-12d3-a456-426614174000")!), BrowserTab(state: state, originalQuery: "test2", note: nil), BrowserTab(state: state, originalQuery: "test3", note: nil)]
+//    @State static var currentTab = BrowserTab(state: state, originalQuery: "test1", note: nil, id: UUID(uuidString: "123e4567-e89b-12d3-a456-426614174000")!)
+//    static var previews: some View {
+//        BrowserTabBar(tabs: Self.$tabs, currentTab: Self.$currentTab)
+//    }
+//}
