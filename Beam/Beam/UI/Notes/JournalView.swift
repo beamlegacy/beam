@@ -25,7 +25,7 @@ struct JournalView: View {
                                         isEditing = true
                                     }
                                  },
-                                 leadingAlignement: 160,
+                                 leadingAlignement: 185,
                                  showTitle: true
                         )
                         .animation(.none)

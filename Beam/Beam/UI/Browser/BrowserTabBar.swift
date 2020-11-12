@@ -29,37 +29,21 @@ private struct Background: View {
 struct BrowserTabBar: View {
     @Binding var tabs: [BrowserTab]
     @Binding var currentTab: BrowserTab?
-    let minTabWidth = CGFloat(50)
+    let minTabWidth = CGFloat(0)
     let maxTabWidth = CGFloat(150)
     var body: some View {
         ZStack {
             Background()
-            GeometryReader { geometry in
-                if (geometry.size.width / CGFloat(tabs.count)) > maxTabWidth {
-                    HStack {
-                        ForEach(tabs, id: \.id) { tab in
-                            BrowserTabView(tab: tab, selected: isSelected(tab))
-                                .onTapGesture {
-                                    currentTab = tab
-                                }
-                                .frame(minHeight: 20, maxHeight: 20, alignment: .leading)
+            HStack {
+                ForEach(tabs, id: \.id) { tab in
+                    BrowserTabView(tab: tab, selected: isSelected(tab))
+                        .onTapGesture {
+                            currentTab = tab
                         }
-                    }
-                } else {
-                    ScrollView(.horizontal) {
-                        HStack {
-                            ForEach(tabs, id: \.id) { tab in
-                                BrowserTabView(tab: tab, selected: isSelected(tab))
-                                    .onTapGesture {
-                                        currentTab = tab
-                                    }
-                                    .frame(minWidth: minTabWidth, maxWidth: maxTabWidth, minHeight: 20, maxHeight: 20, alignment: .leading)
-                            }
-                        }
-                        .padding([.leading, .trailing], 2)
-                    }
+                        .frame(minWidth: isSelected(tab) ? 100 : minTabWidth, maxWidth: maxTabWidth, minHeight: 20, maxHeight: 20, alignment: .leading)
                 }
             }
+            .padding([.leading, .trailing], 2)
         }.frame(height: 28)
         .transition(.slide)
     }

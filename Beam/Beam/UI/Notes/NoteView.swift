@@ -12,7 +12,7 @@ struct NoteView: View {
     @EnvironmentObject var state: BeamState
     var note: Note
     var onStartEditing: () -> Void = {}
-    var leadingAlignement = CGFloat(160)
+    var leadingAlignement = CGFloat(185)
     var showTitle: Bool
 
     var body: some View {
