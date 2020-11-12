@@ -8,44 +8,63 @@
 import Foundation
 import SwiftUI
 
-private struct Background: View {
-    var body: some View {
-        ZStack {
-            Rectangle().fill(Color("TabBarBg"))
-            GeometryReader { geometry in
-                Path { path in
-//                    path.move(to: CGPoint(x: 0, y: h))
-//                    path.addLine(to: CGPoint(x: Int(geometry.size.width), y: h))
-                    let h = Int(geometry.size.height - 1 )
-                    path.move(to: CGPoint(x: 0, y: h))
-                    path.addLine(to: CGPoint(x: Int(geometry.size.width), y: h))
-                }
-                .stroke(Color(NSColor.separatorColor))
-            }
-        }
-    }
-}
-
 struct BrowserTabBar: View {
     @Binding var tabs: [BrowserTab]
     @Binding var currentTab: BrowserTab?
-    let minTabWidth = CGFloat(0)
+    let minTabWidth = CGFloat(4)
     let maxTabWidth = CGFloat(150)
+    @State private var offset = CGSize.zero
+    @GestureState var isDetectingLongPress = false
+
     var body: some View {
-        ZStack {
-            Background()
-            HStack {
+        VStack(spacing: 0) {
+            Rectangle()
+                .frame(height: 1)
+                .foregroundColor(Color(NSColor.separatorColor))
+            HStack(spacing: 0) {
                 ForEach(tabs, id: \.id) { tab in
-                    BrowserTabView(tab: tab, selected: isSelected(tab))
-                        .onTapGesture {
-                            currentTab = tab
+                    HStack(spacing: 0) {
+                        BrowserTabView(tab: tab, selected: isSelected(tab))
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                currentTab = tab
+                            }
+                            .gesture(
+                                DragGesture()
+                                    .onChanged { gesture in
+                                        if !isSelected(tab) {
+                                            currentTab = tab
+                                        }
+                                        self.offset = CGSize(width: gesture.translation.width, height: 0)
+                                        print("Dragging \(self.offset)")
+                                    }
+
+                                    .onEnded { _ in
+                    //                    if abs(self.offset.width) > 100 {
+                    //                        // remove the card
+                    //                    } else {
+                                            self.offset = .zero
+                    //                    }
+                                        print("Dragging ended \(self.offset)")
+                                    }
+                            )
+//                            .offset(isSelected(tab) ? offset : CGSize.zero)
+                            .clipped()
+                            .frame(minWidth: isSelected(tab) ? 150 : minTabWidth, maxWidth: .infinity, alignment: .leading)
+                        if tab.id != tabs.last!.id {
+                            Rectangle()
+                                .frame(width: 1, height: 26)
+                                .foregroundColor(Color(NSColor.separatorColor))
                         }
-                        .frame(minWidth: isSelected(tab) ? 100 : minTabWidth, maxWidth: maxTabWidth, minHeight: 20, maxHeight: 20, alignment: .leading)
+                    }
                 }
             }
-            .padding([.leading, .trailing], 2)
-        }.frame(height: 28)
-        .transition(.slide)
+            Rectangle()
+                .frame(height: 1)
+                .foregroundColor(Color(NSColor.separatorColor))
+        }
+        .transition(.identity)
+        .animation(nil)
     }
 
     func isSelected(_ tab: BrowserTab) -> Bool {

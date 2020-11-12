@@ -12,74 +12,45 @@ struct BrowserTabView: View {
     @EnvironmentObject var state: BeamState
     @ObservedObject var tab: BrowserTab
     @State var showButton = false
-    @State var isHovering = false
     var selected: Bool
 
     static var tabFrameColor = Color("TabFrame")
 
     var body: some View {
         ZStack {
-            if isHovering {
-                RoundedRectangle(cornerRadius: 5)
-                    .padding(.all, 2)
-                    .foregroundColor(Color("TabHover"))
-
-            }
-
-            GeometryReader { geometry in
-                Path { path in
-                    path.move(to: CGPoint(x: geometry.size.width - 1, y: geometry.size.height * 0.25))
-                    path.addLine(to: CGPoint(x: geometry.size.width - 1, y: geometry.size.height * 0.75))
-                }
-                .stroke(Self.tabFrameColor)
-            }
-            HStack {
+            HStack(alignment: .center, spacing: 5) {
                 Button("􀆄") {
                     closeTab(id: tab.id)
-                }.opacity(showButton ? 1 : 0)
-                .onHover(perform: { v in
-                    showButton = v
-                })
+                }
+                .opacity(showButton ? 1 : 0)
+                .foregroundColor(Color("ToolbarButtonIconColor"))
                 .buttonStyle(BorderlessButtonStyle())
-                .padding(.leading, 2)
+                .padding(.leading, 8)
 
                 // fav icon:
-                if let icon = tab.favIcon {
-                    Image(nsImage: icon)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(maxWidth: 16, maxHeight: 16, alignment: .center)
-                }
+                HStack(spacing: 8) {
+                    if let icon = tab.favIcon {
+                        Image(nsImage: icon)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(maxWidth: 16, maxHeight: 16, alignment: .center)
+                    }
 
-                Text(tab.title)
-                    .padding(.top, 2)
-                    .padding([.leading, .trailing], 3)
-                    .frame(minWidth: 50, maxWidth: .infinity, minHeight: 20, maxHeight: 20, alignment: .leading)
-                    .font(selected ? .system(size: 12, weight: .bold) : .system(size: 12, weight: .regular))
-            }.onHover(perform: { hovering in
-                isHovering = hovering
-            })
+                    Text(tab.title)
+                        .font(.system(size: 11, weight: .regular))
+                        .foregroundColor(Color("OmniboxTextColor").opacity(selected ? 1.0 : 0.8))
+                        .allowsTightening(true)
+                        .truncationMode(.tail)
+                        .lineLimit(1)
+                }.frame(maxWidth: .infinity, alignment: .center)
+            }
         }
-        .padding([.trailing], 1)
-        .padding([.top], 2)
-        .animation(nil)
-    }
-
-    func buildTabDecoration(_ path: inout Path, width: Int, height: Int) {
-        let radius = Int(2)
-
-        path.move(to: CGPoint(x: 0, y: height))
-        path.addLine(to: CGPoint(x: 0, y: radius))
-        path.addArc(center: CGPoint(x: radius, y: radius),
-                    radius: CGFloat(radius),
-                    startAngle: Angle(degrees: 180), endAngle: Angle(degrees: -90), clockwise: false)
-        path.addLine(to: CGPoint(x: width - radius, y: 0))
-        path.addArc(center: CGPoint(x: width - radius, y: radius),
-                    radius: CGFloat(radius),
-                    startAngle: Angle(degrees: -90), endAngle: Angle(degrees: 0), clockwise: false)
-        path.addLine(to: CGPoint(x: width, y: height))
-        path.closeSubpath()
-
+        .frame(height: 26)
+        .contentShape(Rectangle())
+        .onHover(perform: { v in
+            showButton = v
+        })
+        .background(Rectangle().fill(selected ? Color("TabBarFrame") : Color("TabBarBg")))
     }
 
     func closeTab(id: UUID) {
@@ -96,7 +67,7 @@ struct BrowserTabView: View {
                     state.navigateToJournal()
                 }
             }
-            state.removeTab(i)
+            _ = state.removeTab(i)
         }
 
     }
