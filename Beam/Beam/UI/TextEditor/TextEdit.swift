@@ -298,6 +298,7 @@ public class BeamTextEdit: NSView, NSTextInputClient {
     }
 
     public func invalidate() {
+        title = nil
         setNeedsDisplay(bounds)
     }
 
@@ -657,7 +658,7 @@ public class BeamTextEdit: NSView, NSTextInputClient {
             let padding = CGFloat(20)
             if title == nil {
                 let titleString = rootNode.note.title.attributed
-                let f = NSFont.systemFont(ofSize: 11)
+                let f = NSFont.systemFont(ofSize: isBig ? 13 : 11, weight: .semibold)
                 titleString.addAttribute(.font, value: f, range: titleString.wholeRange)
                 titleString.addAttribute(.foregroundColor, value: NSColor(named: "EditorControlColor")!, range: titleString.wholeRange)
                 title = Font.draw(string: titleString, atPosition: NSPoint(x: 0, y: 0), textWidth: leadingAlignment - padding)

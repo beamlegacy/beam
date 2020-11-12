@@ -250,7 +250,7 @@ public class Font {
         return Self.draw(string: attrString, atPosition: NSPoint(), textWidth: textWidth)
     }
 
-    class func draw(string: NSAttributedString, atPosition position: NSPoint, textWidth: CGFloat) -> TextFrame {
+    class func draw(string: NSAttributedString, atPosition position: NSPoint, textWidth: CGFloat, interlineFactor: CGFloat = 1.0) -> TextFrame {
         assert(textWidth != 0)
         //        print("Font create frame with width \(textWidth) for string '\(string)'")
         let framesetter = CTFramesetterCreateWithAttributedString(string)
@@ -272,6 +272,8 @@ public class Font {
         //        print("TextFrame: \(frame)")
 
         let f = TextFrame(ctFrame: frame, position: position)
+        f.interlineFactor = interlineFactor
+
         if f.debug {
             //            print("Font created frame \(f)")
         }

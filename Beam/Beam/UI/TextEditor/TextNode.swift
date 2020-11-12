@@ -157,8 +157,6 @@ public class TextNode: Equatable {
     var alpha: Float { config.alpha }
     var blendMode: CGBlendMode { config.blendMode }
 
-    var fHeight: Float { config.fHeight }
-
     var selectedTextRange: Range<Int> { root.selectedTextRange }
     var markedTextRange: Range<Int> { root.markedTextRange }
     var cursorPosition: Int { root.cursorPosition }
@@ -426,12 +424,13 @@ public class TextNode: Equatable {
         }
     }
 
-    var firstLineHeight: CGFloat { layout?.lines.first?.bounds.height ?? CGFloat(fHeight) }
+    var interlineFactor = CGFloat(1.56)
+    var firstLineHeight: CGFloat { layout?.lines.first?.bounds.height ?? CGFloat(fontSize * interlineFactor) }
     var firstLineBaseline: CGFloat {
         if let h = layout?.lines.first?.typographicBounds.ascent {
             return CGFloat(h)
         }
-        let f = AttributedStringVisitor.font()
+        let f = AttributedStringVisitor.font(fontSize)
         return f.ascender
     }
 
@@ -572,7 +571,7 @@ public class TextNode: Equatable {
             guard editor?.hasFocus ?? false, editor?.blinkPhase ?? false else { return }
 
             let f = AttributedStringVisitor.font()
-            let cursorRect = NSRect(x: indent, y: 0, width: 7, height: f.ascender - f.descender)
+            let cursorRect = NSRect(x: indent, y: 0, width: 7, height: fontSize)
 
             context.beginPath()
             context.addRect(cursorRect)
@@ -611,12 +610,12 @@ public class TextNode: Equatable {
 
             if selfVisible {
                 let attrStr = attributedString
-                layout = Font.draw(string: attrStr, atPosition: NSPoint(x: indent, y: 0), textWidth: frame.width - indent)
+                layout = Font.draw(string: attrStr, atPosition: NSPoint(x: indent, y: 0), textWidth: frame.width - indent, interlineFactor: interlineFactor)
                 textFrame = layout!.frame
 
                 if attrStr.string.isEmpty {
-                    let f = AttributedStringVisitor.font()
-                    textFrame.size.height = CGFloat(f.ascender - f.descender)
+                    let f = AttributedStringVisitor.font(fontSize)
+                    textFrame.size.height = CGFloat(f.ascender - f.descender) * interlineFactor
                 }
             }
             invalidatedTextRendering = false
@@ -658,11 +657,11 @@ public class TextNode: Equatable {
             return 0
         }
 
-        for (i, l) in layout!.lines.enumerated() where point.y < l.frame.minY + CGFloat(fHeight) {
+        for (i, l) in layout!.lines.enumerated() where point.y < l.frame.minY + CGFloat(fontSize) {
             return i
         }
 
-        return min(Int(y / CGFloat(fHeight)), layout!.lines.count - 1)
+        return min(Int(y / CGFloat(fontSize)), layout!.lines.count - 1)
     }
 
     public func lineAt(index: Int) -> Int? {
@@ -795,7 +794,7 @@ public class TextNode: Equatable {
         updateTextRendering()
         guard let l = lineAt(index: position) else { return NSRect() }
         let x1 = offsetAt(index: position)
-        return NSRect(x: Float(x1), y: Float(l) * fHeight, width: 1.5, height: fHeight )
+        return NSRect(x: x1, y: CGFloat(l) * fontSize, width: 1.5, height: fontSize )
     }
 
     func dispatchMouseDown(mouseInfo: MouseInfo) -> TextNode? {
