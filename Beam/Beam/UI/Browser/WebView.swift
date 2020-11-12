@@ -12,23 +12,16 @@ import WebKit
 /// A container for using a WKWebView in SwiftUI
 public struct WebView: View, NSViewRepresentable {
     /// The WKWebView to display
-    public let webView: WKWebView
+    var webView: WKWebView
 
     public typealias NSViewType = NSViewContainerView<WKWebView>
 
-    public init(webView: WKWebView) {
-        self.webView = webView
-    }
-
     public func makeNSView(context: NSViewRepresentableContext<WebView>) -> WebView.NSViewType {
-        return NSViewContainerView()
+        return NSViewType()
     }
 
     public func updateNSView(_ nsView: WebView.NSViewType, context: NSViewRepresentableContext<WebView>) {
-        // If its the same content view we don't need to update.
-        if nsView.contentView !== webView {
-            nsView.contentView = webView
-        }
+        nsView.contentView = webView
     }
 }
 
