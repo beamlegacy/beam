@@ -71,6 +71,7 @@ public class TextNode: Equatable {
 
         let config = AttributedStringVisitor.Configuration()
         let visitor = AttributedStringVisitor(configuration: config)
+        visitor.defaultFontSize = fontSize
         if text.isEmpty && cursorPosition < 0 {
             let attributed = placeholder.attributed
 
@@ -174,7 +175,7 @@ public class TextNode: Equatable {
     }
 
     var disclosureButtonFrame: NSRect {
-        let r = (open ? Self.disclosureOpenFrame : Self.disclosureClosedFrame).frame
+        let r = (open ? disclosureOpenFrame : disclosureClosedFrame).frame
         return r.offsetBy(dx: 0, dy: r.height).insetBy(dx: -4, dy: -4)
     }
     var disclosurePressed = false
@@ -352,26 +353,41 @@ public class TextNode: Equatable {
         p.invalidate()
     }
 
-    static var symbolFont = NSFont.systemFont(ofSize: 8)
+    var fontSize: CGFloat { isBig ? 16 : 14 }
 
-    static func symbolFrame(_ string: String) -> TextFrame {
+    static func symbolFont(_ size: CGFloat) -> NSFont {
+        return NSFont.systemFont(ofSize: size)
+    }
+
+    static func symbolFrame(_ size: CGFloat, _ string: String) -> TextFrame {
         let symbol = string.attributed
         let attribs: [NSAttributedString.Key: Any] = [
-            .font: symbolFont,
+            .font: symbolFont(size),
             .foregroundColor: NSColor(named: "EditorControlColor")!
         ]
         symbol.setAttributes(attribs, range: symbol.wholeRange)
         return Font.draw(string: symbol, atPosition: NSPoint(x: 2, y: -2), textWidth: 8)
     }
 
-    static var disclosureClosedFrame = symbolFrame("􀄧")
-    static var disclosureOpenFrame = symbolFrame("􀄥")
-    static var bulletPointFrame = symbolFrame("􀜞")
+    static var disclosureClosedFrameSmall = symbolFrame(7, "􀄧")
+    static var disclosureOpenFrameSmall = symbolFrame(7, "􀄥")
+    static var bulletPointFrameSmall = symbolFrame(7, "􀜞")
+    static var disclosureClosedFrameBig = symbolFrame(7, "􀄧")
+    static var disclosureOpenFrameBig = symbolFrame(7, "􀄥")
+    static var bulletPointFrameBig = symbolFrame(7, "􀜞")
+
+    var isBig: Bool {
+        editor?.isBig ?? false
+    }
+
+    var disclosureClosedFrame: TextFrame { isBig ? Self.disclosureClosedFrameBig : Self.disclosureClosedFrameSmall }
+    var disclosureOpenFrame: TextFrame { isBig ? Self.disclosureOpenFrameBig : Self.disclosureOpenFrameSmall }
+    var bulletPointFrame: TextFrame { isBig ? Self.bulletPointFrameBig : Self.bulletPointFrameSmall }
 
     func drawDisclosure(at point: NSPoint, in context: CGContext) {
 //        context.setFillColor(gray: 0.5, alpha: 0.5)
 //        context.fill(disclosureButtonFrame)
-        let symbol = open ? Self.disclosureOpenFrame : Self.disclosureClosedFrame
+        let symbol = open ? disclosureOpenFrame : disclosureClosedFrame
         context.saveGState()
         context.translateBy(x: point.x, y: point.y)
         symbol.draw(context)
@@ -382,7 +398,7 @@ public class TextNode: Equatable {
     func drawBulletPoint(at point: NSPoint, in context: CGContext) {
         context.saveGState()
         context.translateBy(x: point.x, y: point.y)
-        Self.bulletPointFrame.draw(context)
+        bulletPointFrame.draw(context)
         context.restoreGState()
     }
 
@@ -509,6 +525,13 @@ public class TextNode: Equatable {
         invalidatedTextRendering = true
         _attributedString = nil
         invalidateLayout()
+    }
+
+    func deepInvalidateTextRendering() {
+        invalidateTextRendering()
+        for c in children {
+            c.deepInvalidateTextRendering()
+        }
     }
 
     public func drawMarkee(_ context: CGContext, _ start: Int, _ end: Int, _ color: NSColor) {

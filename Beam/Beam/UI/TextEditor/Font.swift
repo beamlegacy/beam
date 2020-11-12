@@ -93,6 +93,7 @@ public class TextFrame {
     var ctFrame: CTFrame
     var position: NSPoint
     var lines = [TextLine]()
+    var interlineFactor = CGFloat(1.56)
 
     var range: Range<Int> {
         let r = CTFrameGetStringRange(ctFrame)
@@ -120,6 +121,10 @@ public class TextFrame {
             minY = min(minY, r.minY)
             maxY = max(maxY, r.maxY)
         }
+        if let lastFrame = lines.last?.frame {
+            maxY = max(maxY, lastFrame.origin.y + lastFrame.height * interlineFactor)
+        }
+
         return NSRect(x: position.x + minX, y: position.y + minY, width: maxX - minX, height: maxY - minY)
     }
 
@@ -143,7 +148,7 @@ public class TextFrame {
             let y = Y // + CGFloat(line.bounds.ascent)
             line.frame = NSRect(x: position.x + x, y: position.y + y, width: line.bounds.width, height: line.bounds.height)
 
-            Y += line.frame.height
+            Y += line.frame.height * interlineFactor
             //if debug {
             //print("     line[\(i)] frame \(line.frame) (textPos \(textPos)")
             //}
@@ -273,7 +278,7 @@ public class Font {
         return f
     }
 
-    public static var main = Font.system(size: 14)
+    public static var main = Font.system(size: 12)
 
     public static func system(size: Float, weight: FontWeight = .regular) -> Font {
         let font = NSFont.systemFont(ofSize: CGFloat(size), weight: weight)

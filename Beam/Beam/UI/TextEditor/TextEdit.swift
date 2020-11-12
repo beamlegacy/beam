@@ -118,7 +118,7 @@ public class BeamTextEdit: NSView, NSTextInputClient {
 
     var timer: Timer!
 
-    var minimumWidth: CGFloat = 800 {
+    var minimumWidth: CGFloat = 300 {
         didSet {
             if oldValue != minimumWidth {
                 invalidateIntrinsicContentSize()
@@ -205,9 +205,22 @@ public class BeamTextEdit: NSView, NSTextInputClient {
         return rootNode.selectedText
     }
 
+    static let bigThreshold = CGFloat(866)
+    var isBig: Bool {
+        frame.width >= Self.bigThreshold
+    }
+
     public override var frame: NSRect {
         didSet {
 //            print("editor[\(rootNode.note.title)] frame changed to \(frame)")
+            let oldbig = oldValue.width >= Self.bigThreshold
+            let newbig = isBig
+
+            if oldbig != newbig {
+                rootNode.deepInvalidateTextRendering()
+                invalidateLayout()
+            }
+
             relayoutRoot()
         }
     }
@@ -215,7 +228,7 @@ public class BeamTextEdit: NSView, NSTextInputClient {
     func relayoutRoot() {
 //        print("editor[\(rootNode.note.title)] relayout root to \(frame)")
         let r = bounds
-        let width = min(max(minimumWidth, r.width - (leadingAlignment + traillingPadding)), maximumWidth)
+        let width = CGFloat(isBig ? 537 : 450)
         let rect = NSRect(x: leadingAlignment, y: topOffsetActual, width: width, height: r.height)
         //print("relayoutRoot -> \(rect)")
         rootNode.setLayout(rect)
@@ -263,9 +276,7 @@ public class BeamTextEdit: NSView, NSTextInputClient {
     }
 
     override public var intrinsicContentSize: NSSize {
-        let s = NSSize(width: minimumWidth + leadingAlignment + traillingPadding, height: rootNode.idealSize.height + topOffsetActual)
-//        print("editor[\(rootNode.note.title)] new intrinsic content size \(s)")
-        return s
+        return NSSize(width: 300, height: rootNode.idealSize.height + topOffsetActual)
     }
 
     public func setHotSpot(_ spot: NSRect) {
