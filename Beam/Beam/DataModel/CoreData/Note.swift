@@ -305,7 +305,7 @@ class Note: NSManagedObject {
     func sortedBullets(_ context: NSManagedObjectContext) -> [Bullet] {
         let fetchRequest: NSFetchRequest<Bullet> = Bullet.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "note = %@", self)
-        fetchRequest.sortDescriptors =  [NSSortDescriptor(key: "orderIndex", ascending: true)]
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "orderIndex", ascending: true)]
 
         do {
             let fetchedBullets = try context.fetch(fetchRequest)

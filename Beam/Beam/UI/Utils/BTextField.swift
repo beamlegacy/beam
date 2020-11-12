@@ -68,6 +68,7 @@ struct BTextField: NSViewRepresentable {
     }
 
     func updateNSView(_ nsView: Self.NSViewType, context: Self.Context) {
+        // swiftlint:disable:next force_cast
         let textField = nsView.documentView as! BNSTextField
         textField.string = text
         textField.placeholderText = placeholderText

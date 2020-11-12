@@ -581,7 +581,6 @@ public class TextNode: Equatable {
             //list.draw(shape: shape, fill: fill, alpha: 1.0, blendMode: .normal)
             context.drawPath(using: .fill)
             return
-
         }
 
         guard let editor = editor else { return }
