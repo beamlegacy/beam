@@ -11,14 +11,15 @@ import Combine
 
 struct JournalView: View {
     var journal: [Note]
+    var journals: [Note] { isEditing ? journal : [journal.first!] }
     var offset: CGFloat
     @State var isEditing = false
 
     var body: some View {
         ScrollView([.vertical]) {
             VStack {
-                ForEach(journal) { note in
-                    return HStack {
+                ForEach(journals) { note in
+                    return
                         NoteView(note: note,
                                  onStartEditing: {
                                     withAnimation {
@@ -30,11 +31,11 @@ struct JournalView: View {
                                  showTitle: true
                         )
                         .animation(.none)
-
-                    }.padding(.top, 20).padding(.bottom, 50)
+                        .padding(.top, 20)
+                        .padding(.bottom, 50)
                 }
             }
-            .transition(.opacity)
+//            .transition(.opacity)
             .animation(.easeInOut)
             .padding(.top, isEditing ? 20 : offset)
         }
