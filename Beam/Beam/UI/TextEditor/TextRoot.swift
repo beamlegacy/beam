@@ -149,7 +149,7 @@ public class TextRoot: TextNode {
 
         node = children.first ?? self
         childInset = 0
-        
+
         print("created RootNode \(note.title) with \(children.count) main bullets")
     }
 

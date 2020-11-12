@@ -10,6 +10,7 @@ import AppKit
 
 extension NSAttributedString.Key {
     static let sourcePos = NSAttributedString.Key(rawValue: "beamSourcePos")
+    static let heading = NSAttributedString.Key(rawValue: "beamHeading")
 }
 
 extension String {
@@ -71,11 +72,9 @@ class AttributedStringVisitor {
     }
 
     func font(for context: Context) -> NSFont {
-        let h = context.headingLevel != 0 ?
-            (defaultFontSize - CGFloat(context.headingLevel) * 4)
-            : 0
-        let bold = context.bold || h != 0
-        var f = Self.font(CGFloat(defaultFontSize + h), weight: bold ? .bold : .regular)
+        let fontSizes = [ defaultFontSize, defaultFontSize + 2, defaultFontSize]
+        let bold = context.bold || context.headingLevel != 0
+        var f = Self.font(CGFloat(fontSizes[context.headingLevel]), weight: bold ? .bold : .regular)
         if context.italic || context.quoteLevel != 0 {
             f = NSFontManager.shared.convert(f, toHaveTrait: .italicFontMask)
         }
@@ -127,7 +126,7 @@ class AttributedStringVisitor {
         case post
     }
 
-    // swiftlint:disable:next cyclomatic_complexity
+    // swiftlint:disable:next cyclomatic_complexity function_body_length
     func visitChildren(_ node: Parser.Node, _ applyAttributes: Bool, order: Order = .pre) -> NSMutableAttributedString {
         let decorate: Bool = {
             guard context.showMD else { return false }
@@ -152,14 +151,16 @@ class AttributedStringVisitor {
         }
 
         let f = font(for: context)
+        var heading = 0
         switch node.type {
         case .embed:
             attributed.insert(node.prefix(decorate, f), at: 0)
         case .emphasis:
             attributed.append(node.suffix(decorate, f))
             attributed.insert(node.prefix(decorate, f), at: 0)
-        case .heading:
+        case .heading(let h):
             attributed.insert(node.prefix(decorate, f), at: 0)
+            heading = h
         case .internalLink:
             attributed.insert(node.prefix(decorate, f), at: 0)
             attributed.append(node.suffix(decorate, f))
@@ -179,6 +180,10 @@ class AttributedStringVisitor {
 
         if applyAttributes && order == .post {
             attributed = attributed.replaceAttributes(attribs(for: node, context: context))
+        }
+
+        if heading != 0 {
+            attributed.addAttribute(.heading, value: NSNumber(value: heading), range: attributed.wholeRange)
         }
 
         return attributed

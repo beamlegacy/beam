@@ -380,7 +380,7 @@ class Parser {
     }
 
     private func parseHeading(_ context: ASTContext) {
-        parseLineStarter(context, tokenType: .Hash, limit: 7) { level in
+        parseLineStarter(context, tokenType: .Hash, limit: 2) { level in
             return .heading(level)
         }
     }

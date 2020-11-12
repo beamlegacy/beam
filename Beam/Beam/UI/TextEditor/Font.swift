@@ -83,11 +83,14 @@ public class TextLine {
 }
 
 public class TextFrame {
-    init(ctFrame: CTFrame, position: NSPoint) {
+    init(ctFrame: CTFrame, position: NSPoint, attributedString: NSAttributedString) {
         self.ctFrame = ctFrame
         self.position = position
+        self.attributedString = attributedString
         layout()
     }
+
+    var attributedString: NSAttributedString
 
     var debug: Bool { lines.count > 1 }
     var ctFrame: CTFrame
@@ -145,10 +148,26 @@ public class TextFrame {
             let textPos = lineOrigins[i]
             let x = textPos.x
             //let y = f.maxY - textPos.y + CGFloat(line.bounds.descent)
+
+            var offset = CGFloat(0)
+            let attribs = attributedString.attributes(at: line.range.lowerBound, effectiveRange: nil)
+            if let heading = attribs.compactMap({ key, value in
+                // swiftlint:disable:next force_cast
+                return key == NSAttributedString.Key.heading ? (value as! Int) : nil
+            }).first {
+                if heading == 1 {
+                    Y += 10
+                } else if heading == 2 {
+                    Y += 15
+                }
+                offset = 5
+            }
+
             let y = Y // + CGFloat(line.bounds.ascent)
+
             line.frame = NSRect(x: position.x + x, y: position.y + y, width: line.bounds.width, height: line.bounds.height)
 
-            Y += line.frame.height * interlineFactor
+            Y += line.frame.height * interlineFactor + offset
             //if debug {
             //print("     line[\(i)] frame \(line.frame) (textPos \(textPos)")
             //}
@@ -271,7 +290,7 @@ public class Font {
 
         //        print("TextFrame: \(frame)")
 
-        let f = TextFrame(ctFrame: frame, position: position)
+        let f = TextFrame(ctFrame: frame, position: position, attributedString: string)
         f.interlineFactor = interlineFactor
 
         if f.debug {
