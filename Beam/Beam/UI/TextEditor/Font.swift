@@ -273,7 +273,7 @@ public class Font {
         return f
     }
 
-    public static var main = Font.system(size: 12)
+    public static var main = Font.system(size: 14)
 
     public static func system(size: Float, weight: FontWeight = .regular) -> Font {
         let font = NSFont.systemFont(ofSize: CGFloat(size), weight: weight)

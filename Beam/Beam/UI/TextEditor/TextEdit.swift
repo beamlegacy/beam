@@ -33,6 +33,7 @@ public struct BTextEdit: NSViewRepresentable {
 
     var leadingAlignment = CGFloat(160)
     var traillingPadding = CGFloat(80)
+    var topOffset = CGFloat(28)
 
     var showTitle = true
 
@@ -50,6 +51,7 @@ public struct BTextEdit: NSViewRepresentable {
 
         nsView.leadingAlignment = leadingAlignment
         nsView.traillingPadding = traillingPadding
+        nsView.topOffset = topOffset
 
         nsView.showTitle = showTitle
 
@@ -75,6 +77,7 @@ public struct BTextEdit: NSViewRepresentable {
 
         nsView.leadingAlignment = leadingAlignment
         nsView.traillingPadding = traillingPadding
+        nsView.topOffset = topOffset
 
         nsView.showTitle = showTitle
     }
@@ -213,7 +216,7 @@ public class BeamTextEdit: NSView, NSTextInputClient {
 //        print("editor[\(rootNode.note.title)] relayout root to \(frame)")
         let r = bounds
         let width = min(max(minimumWidth, r.width - (leadingAlignment + traillingPadding)), maximumWidth)
-        let rect = NSRect(x: leadingAlignment, y: topOffset, width: width, height: r.height)
+        let rect = NSRect(x: leadingAlignment, y: topOffsetActual, width: width, height: r.height)
         //print("relayoutRoot -> \(rect)")
         rootNode.setLayout(rect)
     }
@@ -253,12 +256,14 @@ public class BeamTextEdit: NSView, NSTextInputClient {
         }
     }
 
-    var topOffset: CGFloat {
-        config.keepCursorMidScreen ? visibleRect.height / 2 : 0
+    var topOffset: CGFloat = 28
+
+    var topOffsetActual: CGFloat {
+        config.keepCursorMidScreen ? visibleRect.height / 2 : topOffset
     }
 
     override public var intrinsicContentSize: NSSize {
-        let s = NSSize(width: minimumWidth + leadingAlignment + traillingPadding, height: rootNode.idealSize.height + topOffset)
+        let s = NSSize(width: minimumWidth + leadingAlignment + traillingPadding, height: rootNode.idealSize.height + topOffsetActual)
 //        print("editor[\(rootNode.note.title)] new intrinsic content size \(s)")
         return s
     }

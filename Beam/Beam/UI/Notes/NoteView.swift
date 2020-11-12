@@ -13,6 +13,7 @@ struct NoteView: View {
     var note: Note
     var onStartEditing: () -> Void = {}
     var leadingAlignement = CGFloat(185)
+    var topOffset = CGFloat(28)
     var showTitle: Bool
 
     var body: some View {
@@ -30,6 +31,7 @@ struct NoteView: View {
         },
         onStartEditing: { onStartEditing() },
         leadingAlignment: leadingAlignement,
+        topOffset: topOffset,
         showTitle: showTitle
         )
 

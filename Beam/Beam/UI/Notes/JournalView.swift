@@ -26,6 +26,7 @@ struct JournalView: View {
                                     }
                                  },
                                  leadingAlignement: 185,
+                                 topOffset: 0,
                                  showTitle: true
                         )
                         .animation(.none)
