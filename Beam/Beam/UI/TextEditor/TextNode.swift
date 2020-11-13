@@ -997,11 +997,32 @@ public class TextNode: Equatable {
         return n as? TextRoot == nil ? n : nil
     }
 
+    func beginningOfLineFromPosition(_ position: Int) -> Int {
+        if let l = lineAt(index: position) {
+            return layout!.lines[l].range.lowerBound
+        }
+        return 0
+    }
+
+    func endOfLineFromPosition(_ position: Int) -> Int {
+        guard layout?.lines.count != 1 else {
+            return text.count
+        }
+        if let l = lineAt(index: position) {
+            let off = l < layout!.lines.count - 1 ? -1 : 0
+            return layout!.lines[l].range.upperBound + off
+        }
+        return text.count
+    }
+
     public func indexOnLastLine(atOffset x: CGFloat) -> Int {
         guard let lines = layout?.lines else { return 0 }
         guard !lines.isEmpty else { return 0 }
         guard let line = lines.last else { return 0 }
         let displayIndex = line.stringIndexFor(position: NSPoint(x: x, y: 0))
+        if displayIndex == line.range.upperBound {
+            return endOfLineFromPosition(displayIndex)
+        }
         let sourceIndex = sourceIndexFor(displayIndex: displayIndex)
         return sourceIndex
     }
@@ -1011,6 +1032,9 @@ public class TextNode: Equatable {
         guard !lines.isEmpty else { return 0 }
         guard let line = lines.first else { return 0 }
         let displayIndex = line.stringIndexFor(position: NSPoint(x: x, y: 0))
+        if displayIndex == line.range.upperBound {
+            return endOfLineFromPosition(displayIndex)
+        }
         let sourceIndex = sourceIndexFor(displayIndex: displayIndex)
         return sourceIndex
     }
