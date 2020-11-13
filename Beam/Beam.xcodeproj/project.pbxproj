@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		20E1B667EDD2C5D590410B9F /* Pods_Beam.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2BE96DC9A7278563E5878CCD /* Pods_Beam.framework */; };
 		520081942552C93600A6CAC6 /* CoreDataManager+backupExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 520081932552C93600A6CAC6 /* CoreDataManager+backupExtension.swift */; };
 		520081992552C97C00A6CAC6 /* TemporaryFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 520081982552C97C00A6CAC6 /* TemporaryFile.swift */; };
 		520BFE602530A1D1009DF633 /* ViewModelFetchedResults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 520BFE5F2530A1D1009DF633 /* ViewModelFetchedResults.swift */; };
@@ -1176,6 +1175,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = A3DE910688789AFBA4487533 /* Pods-Beam.debug.xcconfig */;
 			buildSettings = {
+				ARCHS = x86_64;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Beam/Beam.entitlements;
@@ -1204,6 +1204,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 23F7A69644D041FDF4D3466B /* Pods-Beam.release.xcconfig */;
 			buildSettings = {
+				ARCHS = x86_64;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Beam/Beam.entitlements;
