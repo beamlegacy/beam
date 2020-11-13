@@ -106,36 +106,22 @@ extension TextRoot {
     }
 
     func moveToBeginningOfLine() {
-        if let l = node.lineAt(index: cursorPosition) {
-            cursorPosition = node.layout!.lines[l].range.lowerBound
-            cancelSelection()
-        }
+        cursorPosition = node.beginningOfLineFromPosition(cursorPosition)
+        cancelSelection()
     }
 
     func moveToEndOfLine() {
-        guard node.layout?.lines.count != 1 else {
-            cursorPosition = node.text.count
-            return
-        }
-        if let l = node.lineAt(index: cursorPosition) {
-            let off = l < node.layout!.lines.count - 1 ? -1 : 0
-            cursorPosition = node.layout!.lines[l].range.upperBound + off
-            cancelSelection()
-        }
+        cursorPosition = node.endOfLineFromPosition(cursorPosition)
+        cancelSelection()
     }
 
     func moveToBeginningOfLineAndModifySelection() {
-        if let l = node.lineAt(index: cursorPosition) {
-            extendSelection(to: node.layout!.lines[l].range.lowerBound)
-        }
+        extendSelection(to: node.beginningOfLineFromPosition(cursorPosition))
         node.invalidateTextRendering()
     }
 
     func moveToEndOfLineAndModifySelection() {
-        if let l = node.lineAt(index: cursorPosition) {
-            let off = l < node.layout!.lines.count - 1 ? -1 : 0
-            extendSelection(to: node.layout!.lines[l].range.upperBound + off)
-        }
+        extendSelection(to: node.endOfLineFromPosition(cursorPosition))
         node.invalidateTextRendering()
     }
 
