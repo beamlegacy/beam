@@ -344,10 +344,7 @@ public class BeamTextEdit: NSView, NSTextInputClient {
     }
 
     public func setHotSpot(_ spot: NSRect) {
-        if let sv = enclosingScrollView {
-            print("setHotSpot: \(spot)")
-            sv.scrollToVisible(spot)
-        }
+        let res = scrollToVisible(spot)
     }
 
     public func invalidateLayout() {
@@ -819,7 +816,7 @@ public class BeamTextEdit: NSView, NSTextInputClient {
     }
 
     public func setHotSpotToCursorPosition() {
-        setHotSpot(rectAt(rootNode.cursorPosition))
+        setHotSpot(rectAt(rootNode.cursorPosition).insetBy(dx: -30, dy: -30))
     }
 
     public func rectAt(_ position: Int) -> NSRect {
