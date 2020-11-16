@@ -28,7 +28,7 @@ struct GlobalTabTitle: View {
                             .scaledToFit()
                             .frame(maxWidth: 16, maxHeight: 16)
                     }
-                    Text(tab.originalQuery)
+                    Text(tab.url?.minimizedHost ?? tab.originalQuery)
                         .font(.custom("SF-Pro-Text-Heavy", size: 16))
                 }
 
@@ -58,6 +58,7 @@ struct GlobalTabTitle: View {
                 isEditing = true
                 state.searchQuerySelection = [state.searchQuery.wholeRange]
             }
-        }.padding(.top, 4)
+        }
+        .padding(.top, runningOnBigSur ? 0 : 4)
     }
 }

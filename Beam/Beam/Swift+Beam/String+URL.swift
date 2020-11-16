@@ -12,3 +12,10 @@ extension String {
         return self.addingPercentEncoding(withAllowedCharacters: CharacterSet(charactersIn: "()").inverted)
     }
 }
+
+extension URL {
+    var minimizedHost: String {
+        guard let host = self.host else { return "" }
+        return host.split(separator: ".").suffix(2).joined(separator: ".")
+    }
+}

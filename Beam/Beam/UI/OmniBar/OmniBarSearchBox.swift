@@ -16,30 +16,36 @@ struct BeamSearchBox: View {
     @Binding var isEditing: Bool
 
     var body: some View {
-        HStack {
-            if isEditing || state.mode == .today {
-                OmniBarSearchBox(isEditing: $isEditing)
-            } else {
-                GeometryReader { geometry in
+        GeometryReader { geometry in
+            ZStack {
+                if !(isEditing || state.mode == .today) {
                     if let tab = state.currentTab {
                         GlobalTabTitle(tab: tab, isEditing: $isEditing)
-                            .frame(width: geometry.size.width * 0.7)
+                            .frame(width: geometry.size.width * 0.7, height: 28, alignment: .center)
                     }
                 }
-            }
 
-            Button(action: isEditing ? startQuery : startNewSearch) {
-                Symbol(name: "magnifyingglass")
-            }
-            .disabled(!canSearch)
-            .buttonStyle(RoundRectButtonStyle())
-            .padding(.leading, 1)
+                HStack {
+                    if isEditing || state.mode == .today {
+                        OmniBarSearchBox(isEditing: $isEditing)
+                    } else {
+                        Spacer()
+                    }
 
-            Button(action: startNewSearch) {
-                Symbol(name: "plus")
+                    Button(action: isEditing ? startQuery : startNewSearch) {
+                        Symbol(name: "magnifyingglass")
+                    }
+                    .disabled(!canSearch)
+                    .buttonStyle(RoundRectButtonStyle())
+                    .padding(.leading, 1)
+
+                    Button(action: startNewSearch) {
+                        Symbol(name: "plus")
+                    }
+                    .buttonStyle(RoundRectButtonStyle())
+                }.padding(.leading, 9)
             }
-            .buttonStyle(RoundRectButtonStyle())
-        }.padding(.leading, 9)
+        }
     }
 
     func startNewSearch() {
@@ -66,8 +72,12 @@ struct OmniBarSearchBox: View {
 
     var body: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: _cornerRadius).foregroundColor(Color("OmniboxBackgroundColor")) .frame(height: 28)
-            RoundedRectangle(cornerRadius: _cornerRadius).stroke(Color.accentColor.opacity(0.5), lineWidth: isEditing ? 2.5 : 0).frame(height: 28)
+            RoundedRectangle(cornerRadius: _cornerRadius)
+                .foregroundColor(Color("OmniboxBackgroundColor"))
+                .frame(height: 28)
+            RoundedRectangle(cornerRadius: _cornerRadius)
+                .stroke(Color.accentColor.opacity(0.5), lineWidth: isEditing ? 2.5 : 0)
+                .frame(height: 28)
 
             HStack {
                 BTextField(text: $state.searchQuery,
