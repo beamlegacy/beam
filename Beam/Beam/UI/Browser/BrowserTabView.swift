@@ -42,6 +42,8 @@ struct BrowserTabView: View {
                         .allowsTightening(true)
                         .truncationMode(.tail)
                         .lineLimit(1)
+
+                    Spacer(minLength: 16)
                 }.frame(maxWidth: .infinity, alignment: .center)
             }
         }
@@ -50,7 +52,7 @@ struct BrowserTabView: View {
         .onHover(perform: { v in
             showButton = v
         })
-        .background(Rectangle().fill(selected ? Color("TabFrame") : Color("TabBarBg")))
+        .background(Rectangle().fill(selected ? Color("TabBarBg") : Color("TabFrame") ))
     }
 
     func closeTab(id: UUID) {
