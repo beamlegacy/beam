@@ -236,8 +236,8 @@ var runningOnBigSur: Bool = {
         return true
     }
 
-    func createTab(withURL url: URL, originalQuery: String) {
-        let note = originalQuery.isEmpty ? nil : createNoteForQuery(originalQuery)
+    func createTab(withURL url: URL, originalQuery: String, createNote: Bool = true) {
+        let note = createNote ? (originalQuery.isEmpty ? nil : createNoteForQuery(originalQuery)) : nil
         let tab = BrowserTab(state: self, originalQuery: originalQuery, note: note)
         tab.load(url: url)
         currentTab = tab
@@ -287,13 +287,16 @@ var runningOnBigSur: Bool = {
             return
         }
 
+        var createNote = true
         let url: URL = {
             if searchQuery.maybeURL {
                 guard let u = URL(string: searchQuery) else {
+                    createNote = false
                     return URL(string: "https://" + searchQuery)!
                 }
 
                 if u.scheme == nil {
+                    createNote = false
                     return URL(string: "https://" + searchQuery)!
                 }
                 return u
@@ -303,7 +306,7 @@ var runningOnBigSur: Bool = {
         }()
         print("Start query: \(url)")
 
-        createTab(withURL: url, originalQuery: searchQuery)
+        createTab(withURL: url, originalQuery: searchQuery, createNote: createNote)
         cancelAutocomplete()
         mode = .web
     }
