@@ -116,7 +116,7 @@ struct OmniBarSearchBox: View {
                 .padding([.leading, .trailing], 9)
                 .frame(idealWidth: 600, maxWidth: .infinity)
 
-                if isEditing {
+                if isEditing, !state.searchQuery.isEmpty {
                     Button(action: resetSearchQuery) {
                         Symbol(name: "xmark.circle.fill", size: 12)
                             .offset(x: 0, y: runningOnBigSur ? 0 : -2)
