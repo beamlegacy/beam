@@ -806,9 +806,16 @@ public class BeamTextEdit: NSView, NSTextInputClient {
                 openCard(link)
                 return
             }
-            rootNode.cursorPosition = positionAt(point: point)
-            rootNode.cancelSelection()
-            dragMode = .select(rootNode.cursorPosition)
+
+            let clickPos = positionAt(point: point)
+            if event.modifierFlags.contains(.shift) {
+                dragMode = .select(rootNode.cursorPosition)
+                rootNode.extendSelection(to: clickPos)
+            } else {
+                rootNode.cursorPosition = positionAt(point: point)
+                rootNode.cancelSelection()
+                dragMode = .select(rootNode.cursorPosition)
+            }
 
         } else {
             rootNode.doCommand(.selectAll)
