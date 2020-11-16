@@ -50,7 +50,7 @@ struct BrowserTabView: View {
         .onHover(perform: { v in
             showButton = v
         })
-        .background(Rectangle().fill(selected ? Color("TabBarFrame") : Color("TabBarBg")))
+        .background(Rectangle().fill(selected ? Color("TabFrame") : Color("TabBarBg")))
     }
 
     func closeTab(id: UUID) {
