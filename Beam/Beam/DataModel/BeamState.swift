@@ -74,6 +74,7 @@ var runningOnBigSur: Bool = {
     var data: BeamData
     @Published var currentNote: Note?
     @Published var backForwardList: NoteBackForwardList
+    @Published var isEditingOmniBarTitle = false
 
     @Published public var tabs: [BrowserTab] = [] {
         didSet {
@@ -121,6 +122,8 @@ var runningOnBigSur: Bool = {
             currentTab?.$canGoForward.sink { v in
                 self.canGoForward = v
             }.store(in: &tabScope)
+
+            isEditingOmniBarTitle = false
         }
     }
 

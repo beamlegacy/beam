@@ -12,9 +12,8 @@ import AppKit
 struct OmniBar: View {
     @EnvironmentObject var state: BeamState
     var canSearch: Bool {
-        return !state.searchQuery.isEmpty || !isEditing
+        return !state.searchQuery.isEmpty || !state.isEditingOmniBarTitle
     }
-    @State var isEditing: Bool = false
 
     var body: some View {
         HStack {
@@ -30,7 +29,7 @@ struct OmniBar: View {
                     .buttonStyle(RoundRectButtonStyle())
                 }.padding(.leading, 9)
             } else {
-                BeamSearchBox(isEditing: $isEditing)
+                BeamSearchBox(isEditing: $state.isEditingOmniBarTitle)
             }
 
             Button(action: toggleMode) {

@@ -56,6 +56,11 @@ struct GlobalTabTitle: View {
             .onTapGesture {
                 // should edit
                 isEditing = true
+                if let h = tab.url?.host, h.hasSuffix("google.com") {
+                    state.searchQuery = tab.originalQuery
+                } else {
+                    state.searchQuery = tab.url?.absoluteString ?? ""
+                }
                 state.searchQuerySelection = [state.searchQuery.wholeRange]
             }
         }
