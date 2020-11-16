@@ -12,11 +12,10 @@ import WebKit
 import FavIcon
 
 class FullScreenWKWebView: WKWebView {
-    override var safeAreaInsets: NSEdgeInsets {
+    var safeAreaInsets: NSEdgeInsets {
         return NSEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
     }
 }
-
 
 class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler {
     var id: UUID
