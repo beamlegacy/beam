@@ -96,7 +96,7 @@ window.addEventListener('scroll', function(e) {
 //});
 
 let video = document.querySelector('video');
-if video {
+if (video) {
     video.addEventListener('durationchange', (event) => {
       console.log('Video duration changed ' + video.duration.toString());
     });
