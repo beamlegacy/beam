@@ -15,25 +15,47 @@ struct NoteView: View {
     var leadingAlignement = CGFloat(185)
     var topOffset = CGFloat(28)
     var showTitle: Bool
+    var scrollable: Bool
 
     var body: some View {
-        BTextEdit(note: note, openURL: { url in
-            if ["http", "https"].contains(url.scheme) {
-                state.createTab(withURL: url, originalQuery: state.currentNote?.title ?? "")
+        ZStack {
+            if scrollable {
+                BTextEditScrollable(note: note, openURL: { url in
+                    if ["http", "https"].contains(url.scheme) {
+                        state.createTab(withURL: url, originalQuery: state.currentNote?.title ?? "")
+                    } else {
+                        if let noteName = url.absoluteString.removingPercentEncoding {
+                            _ = state.navigateToNote(named: noteName)
+                        }
+                    }
+                },
+                openCard: { cardName in
+                    _ = state.navigateToNote(named: cardName)
+                },
+                onStartEditing: { onStartEditing() },
+                leadingAlignment: leadingAlignement,
+                topOffset: topOffset,
+                showTitle: showTitle
+                )
             } else {
-                if let noteName = url.absoluteString.removingPercentEncoding {
-                    _ = state.navigateToNote(named: noteName)
-                }
+                BTextEdit(note: note, openURL: { url in
+                    if ["http", "https"].contains(url.scheme) {
+                        state.createTab(withURL: url, originalQuery: state.currentNote?.title ?? "")
+                    } else {
+                        if let noteName = url.absoluteString.removingPercentEncoding {
+                            _ = state.navigateToNote(named: noteName)
+                        }
+                    }
+                },
+                openCard: { cardName in
+                    _ = state.navigateToNote(named: cardName)
+                },
+                onStartEditing: { onStartEditing() },
+                leadingAlignment: leadingAlignement,
+                topOffset: topOffset,
+                showTitle: showTitle
+                )
             }
-        },
-        openCard: { cardName in
-            _ = state.navigateToNote(named: cardName)
-        },
-        onStartEditing: { onStartEditing() },
-        leadingAlignment: leadingAlignement,
-        topOffset: topOffset,
-        showTitle: showTitle
-        )
-
+        }
     }
 }

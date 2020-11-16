@@ -33,10 +33,8 @@ struct ModeView: View {
                         .animation(.easeInOut(duration: 0.3))
                         .zIndex(1)
                     case .note:
-                        ScrollView([.vertical]) {
-                            ZStack {
-                                NoteView(note: state.currentNote!, showTitle: false)
-                            }
+                        ZStack {
+                            NoteView(note: state.currentNote!, showTitle: false, scrollable: true)
                         }
                         .transition(.opacity)
                         .animation(.easeInOut(duration: 0.3))

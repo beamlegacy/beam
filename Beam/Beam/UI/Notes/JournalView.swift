@@ -28,7 +28,8 @@ struct JournalView: View {
                                  },
                                  leadingAlignement: 185,
                                  topOffset: 0,
-                                 showTitle: true
+                                 showTitle: true,
+                                 scrollable: false
                         )
                         .animation(.none)
                         .padding(.top, 20)

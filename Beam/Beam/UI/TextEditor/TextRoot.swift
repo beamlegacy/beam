@@ -64,6 +64,8 @@ public class TextRoot: TextNode {
         set {
             state.cursorPosition = newValue
             node.invalidateTextRendering()
+            editor?.reBlink()
+            editor?.setHotSpotToCursorPosition()
         }
     }
 
