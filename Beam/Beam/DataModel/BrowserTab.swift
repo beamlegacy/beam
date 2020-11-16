@@ -11,6 +11,13 @@ import Combine
 import WebKit
 import FavIcon
 
+class FullScreenWKWebView: WKWebView {
+    override var safeAreaInsets: NSEdgeInsets {
+        return NSEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+    }
+}
+
+
 class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler {
     var id: UUID
 
@@ -84,7 +91,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
             self.webView = w
             backForwardList = w.backForwardList
         } else {
-            let web = WKWebView(frame: NSRect(), configuration: Self.webViewConfiguration)
+            let web = FullScreenWKWebView(frame: NSRect(), configuration: Self.webViewConfiguration)
             web.wantsLayer = true
 
             state.setup(webView: web)
@@ -179,7 +186,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
 
             if navigationAction.modifierFlags.contains(.command) != isSearchResult {
                 // Create new tab
-                let newWebView = WKWebView(frame: NSRect(), configuration: Self.webViewConfiguration)
+                let newWebView = FullScreenWKWebView(frame: NSRect(), configuration: Self.webViewConfiguration)
                 newWebView.wantsLayer = true
                 state.setup(webView: newWebView)
                 let newTab = BrowserTab(state: state, originalQuery: originalQuery, note: note, webView: newWebView)
@@ -297,7 +304,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
 
     // WKUIDelegate
     func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
-        let newWebView = WKWebView(frame: NSRect(), configuration: configuration)
+        let newWebView = FullScreenWKWebView(frame: NSRect(), configuration: configuration)
         newWebView.wantsLayer = true
         state.setup(webView: newWebView)
         let newTab = BrowserTab(state: state, originalQuery: originalQuery, note: self.note, webView: newWebView)
