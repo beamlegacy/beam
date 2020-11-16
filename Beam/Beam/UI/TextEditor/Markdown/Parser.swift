@@ -49,6 +49,7 @@ class Parser {
             let deco = decorations[decorationType]!
             let str = deco.attributedString
             str.addAttributes([NSAttributedString.Key.foregroundColor: NSColor(named: "EditorSyntaxColor")!], range: str.wholeRange)
+            str.addAttribute(.font, value: font, range: str.wholeRange)
 
             return str
         }
