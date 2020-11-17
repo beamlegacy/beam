@@ -569,19 +569,19 @@ public class TextNode: Equatable {
 
         if startLine == endLine {
             // Selection begins and ends on the same line:
-            let markRect = NSRect(x: xStart, y: line1.frame.minY, width: xEnd - xStart, height: line1.frame.height)
+            let markRect = NSRect(x: xStart, y: line1.frame.minY, width: xEnd - xStart, height: line1.bounds.height)
             context.addRect(markRect)
         } else {
-            let markRect1 = NSRect(x: xStart, y: line1.frame.minY, width: frame.width - xStart, height: line1.frame.height )
+            let markRect1 = NSRect(x: xStart, y: line1.frame.minY, width: frame.width - xStart, height: line2.frame.minY - line1.frame.minY )
             context.addRect(markRect1)
 
             if startLine + 1 != endLine {
                 // bloc doesn't end on the line directly below the start line, so be need to joind the start and end lines with a big rectangle
-                let markRect2 = NSRect(x: 0, y: line1.frame.minY, width: frame.width, height: line2.imageBounds.minY - line1.imageBounds.maxY)
+                let markRect2 = NSRect(x: 0, y: line1.frame.maxY, width: frame.width, height: line2.frame.minY - line1.frame.maxY)
                 context.addRect(markRect2)
             }
 
-            let markRect3 = NSRect(x: 0, y: line2.frame.minY, width: xEnd, height: CGFloat(line2.frame.height) + 1)
+            let markRect3 = NSRect(x: 0, y: line1.frame.maxY, width: xEnd, height: CGFloat(line2.frame.maxY - line1.frame.maxY) + 1)
             context.addRect(markRect3)
         }
 
