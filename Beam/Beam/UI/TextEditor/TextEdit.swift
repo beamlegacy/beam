@@ -359,9 +359,10 @@ public class BeamTextEdit: NSView, NSTextInputClient {
         super.layout()
     }
 
-    public func invalidate() {
+    public func invalidate(_ rect: NSRect? = nil) {
         title = nil
-        setNeedsDisplay(bounds)
+        guard let r = rect else { setNeedsDisplay(bounds); return }
+        setNeedsDisplay(r)
     }
 
     // Text Input from AppKit:
@@ -709,9 +710,9 @@ public class BeamTextEdit: NSView, NSTextInputClient {
     var title: TextFrame?
 
     public override func draw(_ dirtyRect: NSRect) {
-        //        print("\n\n\n\ndraw dirtyRect: \(dirtyRect)")
+                print("\n\n\n\ndraw dirtyRect: \(dirtyRect)")
         if let context = NSGraphicsContext.current?.cgContext {
-            //        print("\n\ndraw visibleRect: \(visibleRect)")
+//                    print("\n\ndraw visibleRect: \(visibleRect)")
             // Draw the background
             context.setFillColor(NSColor(named: "EditorBackgroundColor")!.cgColor)
             //        context.setFillColor(NSColor.red.cgColor)
