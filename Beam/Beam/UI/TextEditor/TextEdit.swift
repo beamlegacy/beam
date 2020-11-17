@@ -708,47 +708,44 @@ public class BeamTextEdit: NSView, NSTextInputClient {
 
     var title: TextFrame?
 
-    public func draw(in context: CGContext) {
-//        print("\n\ndraw visibleRect: \(visibleRect)")
-        // Draw the background
-        context.setFillColor(NSColor(named: "EditorBackgroundColor")!.cgColor)
-//        context.setFillColor(NSColor.red.cgColor)
-        context.addRect(bounds)
-        context.drawPath(using: .eoFill)
+    public override func draw(_ dirtyRect: NSRect) {
+        //        print("\n\n\n\ndraw dirtyRect: \(dirtyRect)")
+        if let context = NSGraphicsContext.current?.cgContext {
+            //        print("\n\ndraw visibleRect: \(visibleRect)")
+            // Draw the background
+            context.setFillColor(NSColor(named: "EditorBackgroundColor")!.cgColor)
+            //        context.setFillColor(NSColor.red.cgColor)
+            context.addRect(bounds)
+            context.drawPath(using: .eoFill)
 
-        if showTitle {
-            let padding = CGFloat(20)
-            if title == nil {
-                let titleString = rootNode.note.title.attributed
-                let f = NSFont.systemFont(ofSize: isBig ? 13 : 11, weight: .semibold)
-                titleString.addAttribute(.font, value: f, range: titleString.wholeRange)
-                titleString.addAttribute(.foregroundColor, value: NSColor(named: "EditorControlColor")!, range: titleString.wholeRange)
-                title = Font.draw(string: titleString, atPosition: NSPoint(x: 0, y: 0), textWidth: leadingAlignment - padding)
+            if showTitle {
+                let padding = CGFloat(20)
+                if title == nil {
+                    let titleString = rootNode.note.title.attributed
+                    let f = NSFont.systemFont(ofSize: isBig ? 13 : 11, weight: .semibold)
+                    titleString.addAttribute(.font, value: f, range: titleString.wholeRange)
+                    titleString.addAttribute(.foregroundColor, value: NSColor(named: "EditorControlColor")!, range: titleString.wholeRange)
+                    title = Font.draw(string: titleString, atPosition: NSPoint(x: 0, y: 0), textWidth: leadingAlignment - padding)
+                }
+
+                context.saveGState()
+
+                guard let t = title else { return }
+                let x = leadingAlignment - t.frame.width - padding
+                context.translateBy(x: x, y: rootNode.children.first!.firstLineBaseline)
+                t.draw(context)
+
+                context.restoreGState()
             }
 
-            context.saveGState()
-
-            guard let t = title else { return }
-            let x = leadingAlignment - t.frame.width - padding
-            context.translateBy(x: x, y: rootNode.children.first!.firstLineBaseline)
-            t.draw(context)
-
-            context.restoreGState()
-        }
-
-        context.saveGState(); defer { context.restoreGState() }
-        context.translateBy(x: rootNode.frame.origin.x, y: rootNode.frame.origin.y)
-//        var vis = visibleRect
-//        vis.origin.x -= rootNode.frame.origin.x
-//        vis.origin.y -= rootNode.frame.origin.y
-        let vis = bounds
-        rootNode.draw(in: context, visibleRect: vis)
-    }
-
-    public override func draw(_ dirtyRect: NSRect) {
-//        print("\n\n\n\ndraw dirtyRect: \(dirtyRect)")
-        if let context = NSGraphicsContext.current?.cgContext {
-            self.draw(in: context)
+            context.saveGState(); defer { context.restoreGState() }
+            context.translateBy(x: rootNode.frame.origin.x, y: rootNode.frame.origin.y)
+//            var vis = visibleRect
+            var vis = dirtyRect
+            vis.origin.x -= rootNode.frame.origin.x
+            vis.origin.y -= rootNode.frame.origin.y
+            //        let vis = bounds
+            rootNode.draw(in: context, visibleRect: vis)
         }
     }
 
