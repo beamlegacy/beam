@@ -21,14 +21,14 @@ public class TextNode: Equatable {
             guard oldValue != text else { return }
             bullet?.content = text
             CoreDataManager.shared.save()
-            invalidateTextRendering()
+            invalidateText()
         }
     }
 
     var placeholder: String = "" {
         didSet {
             guard oldValue != text else { return }
-            invalidateTextRendering()
+            invalidateText()
         }
     }
 
@@ -63,12 +63,8 @@ public class TextNode: Equatable {
             invalidate()
         }
     }
-    var _attributedString: NSAttributedString?
-    var attributedString: NSAttributedString {
-        if let s = _attributedString {
-            return s
-        }
 
+    private func buildAttributedString() -> NSAttributedString {
         let config = AttributedStringVisitor.Configuration()
         let visitor = AttributedStringVisitor(configuration: config)
         visitor.defaultFontSize = fontSize
@@ -96,8 +92,26 @@ public class TextNode: Equatable {
         paragraphStyle.lineSpacing = 40
 
         str.addAttribute(.paragraphStyle, value: paragraphStyle, range: str.wholeRange)
-        _attributedString = str
         return str
+    }
+
+    // update the internal attributed string and return true if it was changed
+    @discardableResult private func updateAttributedString() -> Bool {
+        let str = buildAttributedString()
+        if _attributedString?.isEqual(to: str) ?? false {
+            return false
+        }
+
+        _attributedString = str
+        return true
+    }
+
+    var _attributedString: NSAttributedString?
+    var attributedString: NSAttributedString {
+        if _attributedString == nil {
+            _attributedString = buildAttributedString()
+        }
+        return _attributedString!
     }
     var debug = false
 
@@ -522,8 +536,13 @@ public class TextNode: Equatable {
     var invalidatedTextRendering = true
     func invalidateTextRendering() {
         invalidatedTextRendering = true
-        _attributedString = nil
         invalidateLayout()
+    }
+
+    func invalidateText() {
+        if updateAttributedString() {
+            invalidateTextRendering()
+        }
     }
 
     func deepInvalidateTextRendering() {

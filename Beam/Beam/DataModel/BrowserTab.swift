@@ -12,7 +12,7 @@ import WebKit
 import FavIcon
 
 class FullScreenWKWebView: WKWebView {
-    var safeAreaInsets: NSEdgeInsets {
+    override var safeAreaInsets: NSEdgeInsets {
         return NSEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
     }
 }

@@ -63,7 +63,7 @@ public class TextRoot: TextNode {
         }
         set {
             state.cursorPosition = newValue
-            node.invalidateTextRendering()
+            node.invalidateText()
             editor?.reBlink()
             editor?.setHotSpotToCursorPosition()
         }
@@ -93,8 +93,8 @@ public class TextRoot: TextNode {
 
     var node: TextNode! {
         didSet {
-            oldValue.invalidateTextRendering()
-            node.invalidateTextRendering()
+            oldValue.invalidateText()
+            node.invalidateText()
             cancelSelection()
         }
     }

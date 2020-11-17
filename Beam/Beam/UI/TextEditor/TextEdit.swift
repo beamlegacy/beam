@@ -170,7 +170,7 @@ public class BeamTextEdit: NSView, NSTextInputClient {
         self.config.font = font
         rootNode = root
         super.init(frame: NSRect())
-        self.wantsLayer = true
+//        self.wantsLayer = true
 
         root._editor = self
         timer = Timer.init(timeInterval: 1.0 / 60.0, repeats: true) { [unowned self] _ in
@@ -911,46 +911,4 @@ public class BeamTextEdit: NSView, NSTextInputClient {
     var blinkPhase = true
 
     public override var isFlipped: Bool { true }
-
-    public override func viewDidMoveToWindow() {
-        setupNotificationListeners()
-    }
-
-    func setupNotificationListeners() {
-        let nc = NotificationCenter.default
-
-        guard let scrollView = enclosingScrollView else {
-            print("ScrollView not found")
-            return
-        }
-
-        nc.addObserver(
-            self,
-            selector: #selector(scrollViewWillStartLiveScroll(notification:)),
-            name: NSScrollView.willStartLiveScrollNotification,
-            object: scrollView
-        )
-
-        nc.addObserver(
-            self,
-            selector: #selector(scrollViewDidEndLiveScroll(notification:)),
-            name: NSScrollView.didEndLiveScrollNotification,
-            object: scrollView
-        )
-    }
-
-    @objc func scrollViewWillStartLiveScroll(notification: Notification) {
-        #if DEBUG
-        print("\(#function) ")
-        #endif
-        invalidate()
-    }
-
-    @objc func scrollViewDidEndLiveScroll(notification: Notification) {
-        #if DEBUG
-        print("\(#function) ")
-        #endif
-        invalidate()
-    }
-
 }
