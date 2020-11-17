@@ -178,7 +178,7 @@ public class BeamTextEdit: NSView, NSTextInputClient {
             if self.blinkTime < now && self.hasFocus {
                 self.blinkPhase.toggle()
                 self.blinkTime = now + (self.blinkPhase ? self.onBlinkTime : self.offBlinkTime)
-                self.invalidate()
+                self.invalidate(node.frameInDocument)
             }
         }
         RunLoop.main.add(timer, forMode: .default)
@@ -325,8 +325,9 @@ public class BeamTextEdit: NSView, NSTextInputClient {
     // This is the node that the user is currently editing. It can be any node in the rootNode tree
     var node: TextNode {
         set {
+            invalidate(rootNode.node.frameInDocument)
             rootNode.node = newValue
-            invalidate()
+            invalidate(rootNode.node.frameInDocument)
         }
         get {
             rootNode.node
@@ -710,7 +711,7 @@ public class BeamTextEdit: NSView, NSTextInputClient {
     var title: TextFrame?
 
     public override func draw(_ dirtyRect: NSRect) {
-                print("\n\n\n\ndraw dirtyRect: \(dirtyRect)")
+//                print("\n\n\n\ndraw dirtyRect: \(dirtyRect)")
         if let context = NSGraphicsContext.current?.cgContext {
 //                    print("\n\ndraw visibleRect: \(visibleRect)")
             // Draw the background
@@ -759,7 +760,7 @@ public class BeamTextEdit: NSView, NSTextInputClient {
     func reBlink() {
         blinkPhase = true
         blinkTime = CFAbsoluteTimeGetCurrent() + onBlinkTime
-        invalidate()
+        invalidate(node.frameInDocument)
     }
 
     public func lineAt(point: NSPoint) -> Int {
@@ -879,8 +880,6 @@ public class BeamTextEdit: NSView, NSTextInputClient {
 
         _ = node.mouseMoved(mouseInfo: MouseInfo(node, point, event))
         _ = hoveredNode?.mouseMoved(mouseInfo: MouseInfo(hoveredNode!, point, event))
-
-        invalidate()
     }
 
     override public func mouseUp(with event: NSEvent) {

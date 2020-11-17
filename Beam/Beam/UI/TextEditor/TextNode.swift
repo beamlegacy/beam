@@ -358,11 +358,15 @@ public class TextNode: Equatable {
     }
 
     private var needRedraw = true
-    func invalidate() {
+    func invalidate(_ rect: NSRect? = nil) {
         guard !needRedraw else { return }
         needRedraw = true
         guard let p = parent else { return }
-        p.invalidate()
+        if let r = rect {
+            p.invalidate(r.offsetBy(dx: frame.minX, dy: frame.minY))
+        } else {
+            p.invalidate(frame)
+        }
     }
 
     var fontSize: CGFloat { isBig ? 16 : 14 }

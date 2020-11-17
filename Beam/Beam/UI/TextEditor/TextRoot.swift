@@ -103,8 +103,12 @@ public class TextRoot: TextNode {
         editor?.invalidateLayout()
     }
 
-    override func invalidate() {
-        editor?.invalidate()
+    override func invalidate(_ rect: NSRect? = nil) {
+        if let r = rect {
+            editor?.invalidate(r.offsetBy(dx: frame.minX, dy: frame.minY))
+        } else {
+            editor?.invalidate(frame)
+        }
     }
 
     init(_ manager: CoreDataManager, note: Note) {
