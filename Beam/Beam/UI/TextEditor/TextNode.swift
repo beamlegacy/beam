@@ -540,6 +540,10 @@ public class TextNode: Equatable {
     }
 
     func invalidateText() {
+        if parent == nil {
+            _attributedString = nil
+            return
+        }
         if updateAttributedString() {
             invalidateTextRendering()
         }
