@@ -105,7 +105,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
     private func updateBullet() {
         if let url = url {
             let name = title.isEmpty ? url.absoluteString : title
-            self.bullet?.content = "visit [\(name)](\(url.absoluteString))"
+            self.bullet?.content = "[\(name)](\(url.absoluteString))"
         }
     }
 
