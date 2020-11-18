@@ -63,7 +63,20 @@ class BeamData: ObservableObject {
     }
 
     func updateJournal() {
-        journal = Note.fetchAllWithType(CoreDataManager.shared.mainContext, .journal)
-        print("Journal updated:\n\(journal)\n")
+        let _journal = Note.fetchAllWithType(CoreDataManager.shared.mainContext, .journal)
+        var newJournal = [Note]()
+
+        // purge journal from empty notes:
+        for j in _journal {
+            if j.bullets?.count == 1, let bullet = j.bullets?.first, bullet.content.isEmpty {
+                j.delete()
+            } else {
+                newJournal.append(j)
+            }
+
+        }
+
+        journal = newJournal
+//        print("Journal updated:\n\(journal)\n")
     }
 }
