@@ -12,6 +12,7 @@ class HtmlVisitor {
     var depth = 0
     var tabs: String { String.tabs(depth) }
     var urlBase: URL
+    var keepFormatting: Bool = false
 
     init(_ urlBase: URL) {
         self.urlBase = urlBase
@@ -51,13 +52,23 @@ class HtmlVisitor {
                 case "i": fallthrough
                 case "em":
                     if debug { print(tabs + "em...") }
-                    text += "_**" + visitChildren(element) + "**_"
+                    let contents = visitChildren(element)
+                    if keepFormatting {
+                        text += "_**" + contents + "**_"
+                    } else {
+                        text += contents
+                    }
 
                 // swiftlint:disable:next fallthrough no_fallthrough_only
                 case "b": fallthrough
                 case "strong":
                     if debug { print(tabs + "strong...") }
-                    text += "**" + visitChildren(element) + "**"
+                    let contents = visitChildren(element)
+                    if keepFormatting {
+                        text += "**" + contents + "**"
+                    } else {
+                        text += contents
+                    }
 
                 default:
                     text += visitChildren(node)
