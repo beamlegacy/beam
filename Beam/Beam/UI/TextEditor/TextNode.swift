@@ -365,7 +365,7 @@ public class TextNode: Equatable {
         if let r = rect {
             p.invalidate(r.offsetBy(dx: frame.minX, dy: frame.minY))
         } else {
-            p.invalidate(frame)
+            p.invalidate(textFrame.offsetBy(dx: frame.minX, dy: frame.minY))
         }
     }
 
@@ -566,7 +566,6 @@ public class TextNode: Equatable {
             c.deepInvalidateText()
         }
     }
-
 
     public func drawMarkee(_ context: CGContext, _ start: Int, _ end: Int, _ color: NSColor) {
         context.beginPath()

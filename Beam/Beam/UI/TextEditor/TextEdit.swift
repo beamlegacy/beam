@@ -325,9 +325,9 @@ public class BeamTextEdit: NSView, NSTextInputClient {
     // This is the node that the user is currently editing. It can be any node in the rootNode tree
     var node: TextNode {
         set {
-            invalidate(rootNode.node.frameInDocument)
+            invalidate(rootNode.node.textFrameInDocument)
             rootNode.node = newValue
-            invalidate(rootNode.node.frameInDocument)
+            invalidate(rootNode.node.textFrameInDocument)
         }
         get {
             rootNode.node
@@ -760,7 +760,7 @@ public class BeamTextEdit: NSView, NSTextInputClient {
     func reBlink() {
         blinkPhase = true
         blinkTime = CFAbsoluteTimeGetCurrent() + onBlinkTime
-        invalidate(node.frameInDocument)
+        invalidate(node.textFrameInDocument)
     }
 
     public func lineAt(point: NSPoint) -> Int {
@@ -846,7 +846,7 @@ public class BeamTextEdit: NSView, NSTextInputClient {
         case .select(let o):
             selectedTextRange = node.text.clamp(p < o ? rootNode.cursorPosition..<o : o..<rootNode.cursorPosition)
         }
-        invalidate()
+        node.invalidate()
     }
 
     var hoveredNode: TextNode? {

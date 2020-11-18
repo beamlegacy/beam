@@ -162,13 +162,13 @@ extension TextRoot {
     public func cancelSelection() {
         selectedTextRange = cursorPosition..<cursorPosition
         markedTextRange = selectedTextRange
-        invalidate()
+        node.invalidate()
     }
 
     public func selectAll() {
         selectedTextRange = node.text.wholeRange
         cursorPosition = selectedTextRange.upperBound
-        invalidate()
+        node.invalidate()
         node.invalidateText()
     }
 
@@ -196,6 +196,6 @@ extension TextRoot {
             selectedTextRange = node.text.clamp(r2..<r1)
         }
         cursorPosition = newCursorPosition
-        invalidate()
+        node.invalidate()
     }
 }
