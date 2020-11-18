@@ -29,6 +29,8 @@ struct BrowserTabView: View {
 
                 // fav icon:
                 HStack(spacing: 8) {
+                    Spacer()
+
                     if let icon = tab.favIcon {
                         Image(nsImage: icon)
                             .resizable()
