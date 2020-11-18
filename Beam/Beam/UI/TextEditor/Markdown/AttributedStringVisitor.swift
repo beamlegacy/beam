@@ -100,7 +100,6 @@ class AttributedStringVisitor {
             default:
                 break
             }
-            attr[.underlineStyle] = NSNumber(value: NSUnderlineStyle.single.rawValue)
         } else if let color = context.color {
             foregroundColor = color
         }
