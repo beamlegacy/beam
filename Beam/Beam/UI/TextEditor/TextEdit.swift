@@ -345,7 +345,7 @@ public class BeamTextEdit: NSView, NSTextInputClient {
     }
 
     public func setHotSpot(_ spot: NSRect) {
-        let res = scrollToVisible(spot)
+        _ = scrollToVisible(spot)
     }
 
     public func invalidateLayout() {
