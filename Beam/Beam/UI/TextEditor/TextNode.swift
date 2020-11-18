@@ -560,6 +560,14 @@ public class TextNode: Equatable {
         }
     }
 
+    func deepInvalidateText() {
+        invalidateText()
+        for c in children {
+            c.deepInvalidateText()
+        }
+    }
+
+
     public func drawMarkee(_ context: CGContext, _ start: Int, _ end: Int, _ color: NSColor) {
         context.beginPath()
         let startLine = lineAt(index: start)!

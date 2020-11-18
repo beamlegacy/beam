@@ -281,7 +281,7 @@ public class BeamTextEdit: NSView, NSTextInputClient {
             let newbig = isBig
 
             if oldbig != newbig {
-                rootNode.deepInvalidateTextRendering()
+                rootNode.deepInvalidateText()
                 invalidateLayout()
             }
 
@@ -292,7 +292,7 @@ public class BeamTextEdit: NSView, NSTextInputClient {
     func relayoutRoot() {
 //        print("editor[\(rootNode.note.title)] relayout root to \(frame)")
         let r = bounds
-        let width = CGFloat(isBig ? 537 : 450)
+        let width = CGFloat(isBig ? frame.width - 200 - leadingAlignment : 450)
         let rect = NSRect(x: leadingAlignment, y: topOffsetActual, width: width, height: r.height)
         //print("relayoutRoot -> \(rect)")
         rootNode.setLayout(rect)
