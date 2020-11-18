@@ -123,6 +123,7 @@ public class TextNode: Equatable {
             p.removeChild(child)
         }
         children.append(child)
+        fakeLayoutChild(child)
         child.parent = self
         invalidateLayout()
     }
@@ -144,9 +145,17 @@ public class TextNode: Equatable {
         guard let pos = existingNode.indexInParent else { return false }
         node.parent?.removeChild(node)
         children.insert(node, at: pos + 1)
+        fakeLayoutChild(node)
         node.parent = self
         invalidateLayout()
         return true
+    }
+
+    func fakeLayoutChild(_ node: TextNode) {
+        // force layout on the child to have a valid initial flow
+        if node.parent == nil && node.frame.width == 0 && node.frame.height == 0 {
+            node.frame.size.width = 1
+        }
     }
 
     func setChild(_ node: TextNode, at index: Int) {

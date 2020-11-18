@@ -358,6 +358,10 @@ public class BeamTextEdit: NSView, NSTextInputClient {
 //        print("editor[\(rootNode.note.title)] layout \(frame)")
         relayoutRoot()
         super.layout()
+        if scrollToCursorAtLayout {
+            scrollToCursorAtLayout = false
+            setHotSpotToCursorPosition()
+        }
     }
 
     public func invalidate(_ rect: NSRect? = nil) {
@@ -441,6 +445,9 @@ public class BeamTextEdit: NSView, NSTextInputClient {
 
             _ = node.parent?.insert(node: newNode, after: node)
             rootNode.cursorPosition = 0
+
+            let n = node
+            scrollToCursorAtLayout = true
             node = newNode
         }
     }
@@ -821,6 +828,7 @@ public class BeamTextEdit: NSView, NSTextInputClient {
         }
     }
 
+    var scrollToCursorAtLayout = false
     public func setHotSpotToCursorPosition() {
         setHotSpot(rectAt(rootNode.cursorPosition).insetBy(dx: -30, dy: -30))
     }
