@@ -47,7 +47,7 @@ class AttributedStringVisitor {
         var bold = false
         var italic = false
         var link = LinkType.off
-        var color: NSColor?
+        var color = NSColor(named: "EditorTextColor")!
         var showMD = true
         var quoteLevel = 0
         var headingLevel = 0
@@ -57,11 +57,6 @@ class AttributedStringVisitor {
         init() {
         }
     }
-
-//    private var contextStack: [Context]
-//    var context: Context {
-//        return contextStack.last!
-//    }
 
     var cursorPosition: Int = -1
     var anchorPosition: Int = -1
@@ -86,32 +81,13 @@ class AttributedStringVisitor {
     private func attribs(for node: Parser.Node, context: Context) -> [NSAttributedString.Key: Any] {
         var attr = [NSAttributedString.Key: Any]()
 
-        var foregroundColor = NSColor(named: "EditorTextColor")!
-
-        if context.quoteLevel != 0 {
-            foregroundColor = .gray
-        }
-
-        if context.link != .off {
-            switch context.link {
-            case .bidirectionalLink:
-                foregroundColor = NSColor(named: "EditorBidirectionalLinkColor")!
-            case .hyperLink:
-                foregroundColor = NSColor(named: "EditorLinkColor")!
-            default:
-                break
-            }
-        } else if let color = context.color {
-            foregroundColor = color
-        }
-
         if context.headingLevel == 1 {
             attr[.baselineOffset] = -10
         } else if context.headingLevel == 2 {
             attr[.baselineOffset] = -15
         }
 
-        attr[.foregroundColor] = foregroundColor
+        attr[.foregroundColor] = context.color
         attr[.font] = font(for: context)
 
         return attr
@@ -127,7 +103,7 @@ class AttributedStringVisitor {
     }
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
-    func visitChildren(_ node: Parser.Node, _ applyAttributes: Bool, order: Order = .pre) -> NSMutableAttributedString {
+    func visitChildren(_ node: Parser.Node, _ applyAttributes: Bool) -> NSMutableAttributedString {
         let decorate: Bool = {
             guard context.showMD else { return false }
             switch node.type {
@@ -144,10 +120,6 @@ class AttributedStringVisitor {
         for c in node.children {
             let str = visit(c)
             attributed.append(str)
-        }
-
-        if applyAttributes && order == .pre {
-            attributed = attributed.replaceAttributes(attribs(for: node, context: context))
         }
 
         let f = font(for: context)
@@ -178,10 +150,6 @@ class AttributedStringVisitor {
             break
         }
 
-        if applyAttributes && order == .post {
-            attributed = attributed.replaceAttributes(attribs(for: node, context: context))
-        }
-
         if heading != 0 {
             attributed.addAttribute(.heading, value: NSNumber(value: heading), range: attributed.wholeRange)
         }
@@ -190,7 +158,7 @@ class AttributedStringVisitor {
     }
 
     var context = Context()
-    var contextStack = [Context()]
+    var contextStack = [Context]()
 
     func pushContext() {
         contextStack.append(context)
@@ -198,7 +166,7 @@ class AttributedStringVisitor {
 
     func popContext() {
         context = contextStack.last!
-        _ = contextStack.dropLast()
+        contextStack = contextStack.dropLast()
     }
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
@@ -229,6 +197,7 @@ class AttributedStringVisitor {
         case let .link(link):
             pushContext(); defer { popContext() }
             context.link = .hyperLink
+            context.color = NSColor(named: "EditorLinkColor")!
             let str = visitChildren(node, false)
             if let url = URL(string: link) {
                 str.addAttribute(.link, value: url as NSURL, range: str.wholeRange)
@@ -240,6 +209,7 @@ class AttributedStringVisitor {
         case let .internalLink(link):
             pushContext(); defer { popContext() }
             context.link = .bidirectionalLink
+            context.color = NSColor(named: "EditorBidirectionalLinkColor")!
             let attributedLink = link.attributed(node, context.showMD, attribs(for: node, context: context))
             let f = font(for: context)
             attributedLink.addAttribute(.link, value: link, range: attributedLink.wholeRange)
@@ -253,12 +223,13 @@ class AttributedStringVisitor {
         case let .heading(depth):
             pushContext(); defer { popContext() }
             context.headingLevel = depth
-            return visitChildren(node, true, order: .post)
+            return visitChildren(node, true)
 
         case let .quote(depth):
             pushContext(); defer { popContext() }
             context.quoteLevel = depth
-            return visitChildren(node, true, order: .post)
+            context.color = .gray
+            return visitChildren(node, true)
 
         case .newLine:
             return "\n".attributed
