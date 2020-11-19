@@ -16,35 +16,28 @@ struct BeamSearchBox: View {
     @Binding var isEditing: Bool
 
     var body: some View {
-        GeometryReader { geometry in
-            ZStack {
-                if !(isEditing || state.mode == .today) {
-                    if let tab = state.currentTab {
-                        GlobalTabTitle(tab: tab, isEditing: $isEditing)
-                            .frame(width: geometry.size.width * 0.7, height: 28, alignment: .center)
-                    }
+        ZStack {
+            HStack {
+                if isEditing || state.mode == .today {
+                    OmniBarSearchBox(isEditing: $isEditing)
+                } else {
+                    Spacer()
+                        .frame(height: 28)
+                        .padding(.top, 8)
                 }
 
-                HStack {
-                    if isEditing || state.mode == .today {
-                        OmniBarSearchBox(isEditing: $isEditing)
-                    } else {
-                        Spacer()
-                    }
+                Button(action: isEditing ? startQuery : startNewSearch) {
+                    Symbol(name: "magnifyingglass")
+                }
+                .disabled(!canSearch)
+                .buttonStyle(RoundRectButtonStyle())
+                .padding(.leading, 1)
 
-                    Button(action: isEditing ? startQuery : startNewSearch) {
-                        Symbol(name: "magnifyingglass")
-                    }
-                    .disabled(!canSearch)
-                    .buttonStyle(RoundRectButtonStyle())
-                    .padding(.leading, 1)
-
-                    Button(action: startNewSearch) {
-                        Symbol(name: "plus")
-                    }
-                    .buttonStyle(RoundRectButtonStyle())
-                }.padding(.leading, 9)
-            }
+                Button(action: startNewSearch) {
+                    Symbol(name: "plus")
+                }
+                .buttonStyle(RoundRectButtonStyle())
+            }.padding(.leading, 9)
         }
     }
 

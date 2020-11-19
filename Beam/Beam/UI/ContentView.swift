@@ -13,10 +13,20 @@ struct ModeView: View {
     var body: some View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
-                OmniBar()
-                    .padding(.leading, 73)
-                    .padding(.trailing, 20)
-                    .frame(height: 52, alignment: .center)
+                ZStack {
+                    if !(state.isEditingOmniBarTitle || state.mode == .today) {
+                        if let tab = state.currentTab {
+                            GlobalTabTitle(tab: tab, isEditing: $state.isEditingOmniBarTitle)
+                                .frame(width: geometry.size.width * 0.5, height: 52, alignment: .center)
+                        }
+
+                    }
+
+                    OmniBar()
+                        .padding(.leading, 73)
+                        .padding(.trailing, 20)
+                        .frame(height: 52, alignment: .center)
+                }
 
                 ZStack {
                     switch state.mode {
@@ -52,7 +62,6 @@ struct ModeView: View {
                         }
                     }
                 }
-
             }
             .background(Color("EditorBackgroundColor"))
         }.frame(minWidth: 822)
