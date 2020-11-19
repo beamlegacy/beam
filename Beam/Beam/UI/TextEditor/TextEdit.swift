@@ -335,13 +335,13 @@ public class BeamTextEdit: NSView, NSTextInputClient {
     }
 
     var topOffset: CGFloat = 28
-
+    var footerHeight: CGFloat = 60
     var topOffsetActual: CGFloat {
         config.keepCursorMidScreen ? visibleRect.height / 2 : topOffset
     }
 
     override public var intrinsicContentSize: NSSize {
-        return NSSize(width: 300, height: rootNode.idealSize.height + topOffsetActual)
+        return NSSize(width: 300, height: rootNode.idealSize.height + topOffsetActual + footerHeight)
     }
 
     public func setHotSpot(_ spot: NSRect) {

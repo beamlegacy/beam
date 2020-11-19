@@ -88,12 +88,11 @@ extension TextRoot {
     //swiftlint:disable cyclomatic_complexity function_body_length
     func moveWordLeftAndModifySelection() {
         var range = node.text.startIndex ..< node.text.endIndex
-        let newCursorPosition = cursorPosition
         node.text.enumerateSubstrings(in: node.text.startIndex..<node.text.index(at: cursorPosition), options: .byWords) { (_, r1, _, _) in
             range = r1
         }
         let pos = node.position(at: range.lowerBound)
-        cursorPosition = pos == cursorPosition ? 0 : pos
+        let newCursorPosition = pos == cursorPosition ? 0 : pos
         extendSelection(to: newCursorPosition)
         node.invalidateText()
     }

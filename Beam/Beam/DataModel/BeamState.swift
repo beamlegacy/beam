@@ -254,7 +254,7 @@ var runningOnBigSur: Bool = {
         let n = Note.createNote(context, query)
         n.score = Float(0) as NSNumber
 
-        let bulletStr = "Created [[\(query)]]"
+        let bulletStr = "[[\(query)]]"
         if let bullet = self.data.todaysNote.rootBullets().first, bullet.content.isEmpty {
             bullet.content = bulletStr
         } else {
