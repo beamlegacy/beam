@@ -91,7 +91,11 @@ struct OmniBarSearchBox: View {
                             startQuery()
                            },
                            onEscape: {
-                            state.cancelAutocomplete()
+                            if state.completedQueries.isEmpty {
+                                state.searchQuery = ""
+                            } else {
+                                state.cancelAutocomplete()
+                            }
                            },
                            onCursorMovement: { cursorMovement in
                             switch cursorMovement {
