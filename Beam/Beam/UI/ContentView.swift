@@ -19,7 +19,6 @@ struct ModeView: View {
                             GlobalTabTitle(tab: tab, isEditing: $state.isEditingOmniBarTitle)
                                 .frame(width: geometry.size.width * 0.5, height: 52, alignment: .center)
                         }
-
                     }
 
                     OmniBar()
