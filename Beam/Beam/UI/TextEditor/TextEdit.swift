@@ -412,13 +412,13 @@ public class BeamTextEdit: NSView, NSTextInputClient {
 
     public override func resignFirstResponder() -> Bool {
         blinkPhase = true
+        hasFocus = false
         rootNode.cancelSelection()
-        invalidate()
-        node.invalidateTextRendering() // force removing the syntax highlighting
+        node.invalidateText() // force removing the syntax highlighting
+        node.invalidate()
         if activateOnLostFocus {
             activated()
         }
-        hasFocus = false
         onEndEditing()
         return super.resignFirstResponder()
     }
