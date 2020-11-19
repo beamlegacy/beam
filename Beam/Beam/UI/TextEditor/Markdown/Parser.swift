@@ -42,6 +42,25 @@ class Parser {
         var length: Int
 
         var children: [Node] = []
+        var parent: Node?
+
+        var description: String {
+            return "Parser.Node[\(type)] (\(start) -> \(end)) \(children.count) children"
+        }
+
+        var end: Int {
+            if let s = decorations[.suffix] {
+                return s.end
+            }
+            return positionInSource + length
+        }
+
+        var start: Int {
+            if let s = decorations[.prefix] {
+                return s.start
+            }
+            return positionInSource
+        }
 
         var decorations = [DecorationType: Lexer.Token]()
         func decoration(_ decorationType: DecorationType, _ decorate: Bool, _ font: NSFont) -> NSMutableAttributedString {
@@ -92,19 +111,44 @@ class Parser {
         }
 
         func contains(position: Int) -> Bool {
-            let start: Int = {
-                if let prefix = decorations[.prefix] {
-                    return prefix.start
-                }
-                return positionInSource
-            }()
-            let end: Int = {
-                if let suffix = decorations[.suffix] {
-                    return suffix.start + suffix.string.count
-                }
-                return positionInSource + length
-            }()
+            guard position != -1 else { return false }
             return position >= start && position <= end
+        }
+
+        func nodeContainingPosition(_ position: Int) -> Node? {
+            guard parent == nil || (positionInSource <= position && position <= positionInSource + length) else { return nil }
+
+            for c in children {
+                if let node = c.nodeContainingPosition(position) {
+                    return node
+                }
+            }
+
+            return self
+        }
+
+        var enclosingSyntaxNode: Node? {
+            guard let p = parent else { return self }
+            switch p.type {
+            case .text:
+                return self
+            case .strong:
+                return p.enclosingSyntaxNode
+            case .emphasis:
+                return p.enclosingSyntaxNode
+            case .link:
+                return p.enclosingSyntaxNode
+            case .internalLink:
+                return p.enclosingSyntaxNode
+            case .heading:
+                return p.enclosingSyntaxNode
+            case .embed:
+                return p.enclosingSyntaxNode
+            case .quote:
+                return p.enclosingSyntaxNode
+            case .newLine:
+                return self
+            }
         }
     }
 
@@ -131,6 +175,7 @@ class Parser {
         }
 
         func append(node: Node) {
+            node.parent = self.node
             self.node.children.append(node)
         }
 
@@ -435,7 +480,9 @@ class Parser {
                 context.push(node: Node(type: .embed, exclamation.start)); defer { context.pop() }
                 parseLink(context)
             } else {
-                context.node.children.append(Node(type: .text(exclamation.string), exclamation.start))
+                let child = Node(type: .text(exclamation.string), exclamation.start)
+                child.parent = context.node
+                context.node.children.append(child)
             }
 
         case .Quote:

@@ -64,6 +64,7 @@ class AttributedStringVisitor {
 //    }
 
     var cursorPosition: Int = -1
+    var anchorPosition: Int = -1
     var configuration: Configuration
     var defaultFontSize = CGFloat(16)
 
@@ -207,7 +208,7 @@ class AttributedStringVisitor {
             context.showMD = showMD
         }
 
-        context.showMD = node.contains(position: cursorPosition)
+        context.showMD = node.contains(position: cursorPosition) || node.contains(position: anchorPosition)
         switch node.type {
         case let .text(str):
             if str.isEmpty {

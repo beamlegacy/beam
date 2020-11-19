@@ -818,7 +818,7 @@ public class BeamTextEdit: NSView, NSTextInputClient {
                 dragMode = .select(rootNode.cursorPosition)
                 rootNode.extendSelection(to: clickPos)
             } else {
-                rootNode.cursorPosition = positionAt(point: point)
+                rootNode.cursorPosition = clickPos
                 rootNode.cancelSelection()
                 dragMode = .select(rootNode.cursorPosition)
             }

@@ -64,6 +64,7 @@ public class TextNode: Equatable {
         }
     }
 
+    private var _ast: Parser.Node?
     private func buildAttributedString() -> NSAttributedString {
         let config = AttributedStringVisitor.Configuration()
         let visitor = AttributedStringVisitor(configuration: config)
@@ -76,14 +77,15 @@ public class TextNode: Equatable {
             return attributed
         }
         let parser = Parser(inputString: text)
-        let AST = parser.parseAST()
+        _ast = parser.parseAST()
 
 //        print("AST:\n\(AST.treeString)")
 
         if root.node === self && editor?.hasFocus ?? true {
-            visitor.cursorPosition = cursorPosition
+            visitor.cursorPosition = selectedTextRange.startIndex
+            visitor.anchorPosition = selectedTextRange.endIndex
         }
-        let str = visitor.visit(AST)
+        let str = visitor.visit(_ast!)
 
         let paragraphStyle = NSMutableParagraphStyle()
 //        paragraphStyle.alignment = .justified
@@ -742,9 +744,25 @@ public class TextNode: Equatable {
     public func positionAt(point: NSPoint) -> Int {
         guard layout != nil, !layout!.lines.isEmpty else { return 0 }
         let line = lineAt(point: point)
-        let l = layout!.lines[line]
+        let lines = layout!.lines
+        let l = lines[line]
         let displayIndex = l.stringIndexFor(position: point)
         let res = sourceIndexFor(displayIndex: displayIndex)
+
+        if l.isAfterEndOfLine(point) {
+            // find position after all enclosing syntax
+            if let leaf = _ast!.nodeContainingPosition(res),
+               let syntax = leaf.enclosingSyntaxNode {
+                return syntax.end
+            }
+        } else if l.isBeforeStartOfLine(point) {
+            // find position before all enclosing syntax
+            if let leaf = _ast!.nodeContainingPosition(res),
+               let syntax = leaf.enclosingSyntaxNode {
+                return syntax.start
+            }
+        }
+
         return res
     }
 

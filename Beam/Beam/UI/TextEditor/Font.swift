@@ -59,6 +59,14 @@ public class TextLine {
         return CTLineGetStringIndexForPosition(ctLine, pos)
     }
 
+    func isAfterEndOfLine(_ point: NSPoint) -> Bool {
+        return (point.x - frame.origin.x) >= frame.maxX
+    }
+
+    func isBeforeStartOfLine(_ point: NSPoint) -> Bool {
+        return (point.x - frame.origin.x) <= frame.minX
+    }
+
     func offsetFor(index: Int) -> Float {
         Float(frame.origin.x) + Float(CTLineGetOffsetForStringIndex(ctLine, index, nil))
     }
