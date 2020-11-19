@@ -34,6 +34,8 @@ public struct BTextEdit: NSViewRepresentable {
     var leadingAlignment = CGFloat(160)
     var traillingPadding = CGFloat(80)
     var topOffset = CGFloat(28)
+    var footerHeight = CGFloat(60)
+    var ignoreFirstDrag = true
 
     var showTitle = true
 
@@ -52,6 +54,9 @@ public struct BTextEdit: NSViewRepresentable {
         nsView.leadingAlignment = leadingAlignment
         nsView.traillingPadding = traillingPadding
         nsView.topOffset = topOffset
+        nsView.footerHeight = footerHeight
+
+        nsView.ignoreFirstDrag = ignoreFirstDrag
 
         nsView.showTitle = showTitle
 
@@ -78,6 +83,9 @@ public struct BTextEdit: NSViewRepresentable {
         nsView.leadingAlignment = leadingAlignment
         nsView.traillingPadding = traillingPadding
         nsView.topOffset = topOffset
+        nsView.footerHeight = footerHeight
+
+        nsView.ignoreFirstDrag = ignoreFirstDrag
 
         nsView.showTitle = showTitle
     }
@@ -97,6 +105,8 @@ public struct BTextEditScrollable: NSViewRepresentable {
     var leadingAlignment = CGFloat(160)
     var traillingPadding = CGFloat(80)
     var topOffset = CGFloat(28)
+    var footerHeight = CGFloat(28)
+    var ignoreFirstDrag = false
 
     var showTitle = true
 
@@ -115,6 +125,8 @@ public struct BTextEditScrollable: NSViewRepresentable {
         edit.leadingAlignment = leadingAlignment
         edit.traillingPadding = traillingPadding
         edit.topOffset = topOffset
+        edit.footerHeight = footerHeight
+        edit.ignoreFirstDrag = ignoreFirstDrag
 
         edit.showTitle = showTitle
 
@@ -157,6 +169,8 @@ public struct BTextEditScrollable: NSViewRepresentable {
         edit.leadingAlignment = leadingAlignment
         edit.traillingPadding = traillingPadding
         edit.topOffset = topOffset
+        edit.footerHeight = footerHeight
+        edit.ignoreFirstDrag = ignoreFirstDrag
 
         edit.showTitle = showTitle
     }
@@ -334,8 +348,8 @@ public class BeamTextEdit: NSView, NSTextInputClient {
         }
     }
 
-    var topOffset: CGFloat = 28
-    var footerHeight: CGFloat = 60
+    var topOffset: CGFloat = 28 { didSet { invalidateIntrinsicContentSize() } }
+    var footerHeight: CGFloat = 60 { didSet { invalidateIntrinsicContentSize() } }
     var topOffsetActual: CGFloat {
         config.keepCursorMidScreen ? visibleRect.height / 2 : topOffset
     }
@@ -795,7 +809,13 @@ public class BeamTextEdit: NSView, NSTextInputClient {
         if event.clickCount == 1 {
             reBlink()
             let point = convert(event.locationInWindow)
-            guard let newNode = nodeAt(point: point) else { return }
+            guard let newNode = nodeAt(point: point) else {
+                // Use the first child of the root
+                guard let n = rootNode.children.first else { return }
+                rootNode.cursorPosition = 0
+                node = n
+                return
+            }
             if nil != rootNode.dispatchMouseDown(mouseInfo: MouseInfo(rootNode, point, event)) {
                 return
             }
@@ -838,7 +858,15 @@ public class BeamTextEdit: NSView, NSTextInputClient {
         return node.rectAt(position).offsetBy(dx: origin.x, dy: origin.y)
     }
 
+    var firstDrag = true
+    var ignoreFirstDrag = false
+
     override public func mouseDragged(with event: NSEvent) {
+        guard !(firstDrag && ignoreFirstDrag) else {
+            firstDrag = false
+            return
+        }
+
         //        window?.makeFirstResponder(self)
         let point = convert(event.locationInWindow)
 

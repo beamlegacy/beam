@@ -33,7 +33,6 @@ struct JournalView: View {
                         )
                         .animation(.none)
                         .padding(.top, 20)
-                        .padding(.bottom, 50)
                 }
             }
 //            .transition(.opacity)

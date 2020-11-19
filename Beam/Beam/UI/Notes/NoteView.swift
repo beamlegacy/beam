@@ -35,6 +35,7 @@ struct NoteView: View {
                 onStartEditing: { onStartEditing() },
                 leadingAlignment: leadingAlignement,
                 topOffset: topOffset,
+                footerHeight: 60,
                 showTitle: showTitle
                 )
             } else {
@@ -53,6 +54,7 @@ struct NoteView: View {
                 onStartEditing: { onStartEditing() },
                 leadingAlignment: leadingAlignement,
                 topOffset: topOffset,
+                footerHeight: 100,
                 showTitle: showTitle
                 )
             }
