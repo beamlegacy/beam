@@ -237,7 +237,7 @@ var runningOnBigSur: Bool = {
     }
 
     func createTab(withURL url: URL, originalQuery: String, createNote: Bool = true) {
-        let note = createNote ? (originalQuery.isEmpty ? nil : createNoteForQuery(originalQuery)) : nil
+        let note = createNote ? (originalQuery.isEmpty ? data.todaysNote : createNoteForQuery(originalQuery)) : data.todaysNote
         let tab = BrowserTab(state: self, originalQuery: originalQuery, note: note)
         tab.load(url: url)
         currentTab = tab
