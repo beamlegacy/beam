@@ -68,12 +68,11 @@ class BeamData: ObservableObject {
 
         // purge journal from empty notes:
         for j in _journal {
-            if j.bullets?.count == 1, let bullet = j.bullets?.first, bullet.content.isEmpty {
+            if j.title != todaysName, j.bullets?.count == 1, let bullet = j.bullets?.first, bullet.content.isEmpty {
                 j.delete()
             } else {
                 newJournal.append(j)
             }
-
         }
 
         journal = newJournal
