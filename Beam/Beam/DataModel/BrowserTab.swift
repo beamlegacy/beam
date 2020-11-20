@@ -237,7 +237,8 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
         case TextSelectedMessage:
             guard let dict = message.body as? [String: AnyObject],
 //                  let selectedText = dict["selectedText"] as? String,
-                  let selectedHtml = dict["selectedHtml"] as? String
+                  let selectedHtml = dict["selectedHtml"] as? String,
+                  !selectedHtml.isEmpty
             else { return }
 //            print("Text selected: \(selectedText)")
 //            print("Html selected: \(selectedHtml)")
