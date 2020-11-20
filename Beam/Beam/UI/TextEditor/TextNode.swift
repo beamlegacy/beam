@@ -362,21 +362,20 @@ public class TextNode: Equatable {
 
     private var needLayout = true
     func invalidateLayout() {
+        invalidate()
         guard !needLayout else { return }
         needLayout = true
         guard let p = parent else { return }
         p.invalidateLayout()
     }
 
-    private var needRedraw = true
     func invalidate(_ rect: NSRect? = nil) {
-        guard !needRedraw else { return }
-        needRedraw = true
         guard let p = parent else { return }
         if let r = rect {
             p.invalidate(r.offsetBy(dx: frame.minX, dy: frame.minY))
         } else {
-            p.invalidate(textFrame.offsetBy(dx: frame.minX, dy: frame.minY))
+            let r = NSRect(x: frame.minX, y: frame.minY, width: frame.width, height: textFrame.maxY)
+            p.invalidate(r)
         }
     }
 
@@ -500,7 +499,6 @@ public class TextNode: Equatable {
 //            print("debug \(self)")
 //        }
 
-        defer { needRedraw = false }
         updateTextRendering()
 
         drawDebug(in: context)

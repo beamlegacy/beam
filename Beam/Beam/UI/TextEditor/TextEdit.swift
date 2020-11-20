@@ -781,7 +781,7 @@ public class BeamTextEdit: NSView, NSTextInputClient {
     func reBlink() {
         blinkPhase = true
         blinkTime = CFAbsoluteTimeGetCurrent() + onBlinkTime
-        invalidate(node.textFrameInDocument)
+        node.invalidate()
     }
 
     public func lineAt(point: NSPoint) -> Int {
