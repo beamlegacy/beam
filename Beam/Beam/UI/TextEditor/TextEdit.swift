@@ -755,15 +755,16 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
     var _title: TextFrame?
     var title: TextFrame {
-        guard let t = _title else {
-            let titleString = rootNode.note.title.attributed
-            let f = NSFont.systemFont(ofSize: isBig ? 13 : 11, weight: .semibold)
-            titleString.addAttribute(.font, value: f, range: titleString.wholeRange)
-            titleString.addAttribute(.foregroundColor, value: NSColor(named: "EditorControlColor")!, range: titleString.wholeRange)
-            _title = Font.draw(string: titleString, atPosition: NSPoint(x: 0, y: 0), textWidth: frame.width)
-            return _title!
+        if let t = _title {
+            return t
         }
-        return t
+
+        let titleString = rootNode.note.title.attributed
+        let f = NSFont.systemFont(ofSize: isBig ? 13 : 11, weight: .semibold)
+        titleString.addAttribute(.font, value: f, range: titleString.wholeRange)
+        titleString.addAttribute(.foregroundColor, value: NSColor(named: "EditorControlColor")!, range: titleString.wholeRange)
+        _title = Font.draw(string: titleString, atPosition: NSPoint(x: 0, y: 0), textWidth: frame.width)
+        return _title!
     }
 
     enum DragMode {
