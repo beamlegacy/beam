@@ -81,7 +81,19 @@ document.addEventListener('mouseup', function() {
 });
 
 window.addEventListener('scroll', function(e) {
-    window.webkit.messageHandlers.beam_onScrolled.postMessage({ x: window.scrollX, y: window.scrollY })
+    let scrollWidth = Math.max(
+      document.body.scrollWidth, document.documentElement.scrollWidth,
+      document.body.offsetWidth, document.documentElement.offsetWidth,
+      document.body.clientWidth, document.documentElement.clientWidth
+    );
+
+    let scrollHeight = Math.max(
+      document.body.scrollHeight, document.documentElement.scrollHeight,
+      document.body.offsetHeight, document.documentElement.offsetHeight,
+      document.body.clientHeight, document.documentElement.clientHeight
+    );
+
+    window.webkit.messageHandlers.beam_onScrolled.postMessage({ x: window.scrollX, y: window.scrollY, width: scrollWidth, height: scrollHeight })
 });
 
 //let videos = document.querySelectorAll('video');

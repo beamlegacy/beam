@@ -7,20 +7,34 @@
 
 import Foundation
 
-class ScoreCard {
+class Scores: Codable {
+    private var cards: [String: Score] = [:]
+    func scoreCard(for id: String) -> Score {
+        if let card = cards[id] {
+            return card
+        }
+
+        let card = Score()
+        cards[id] = card
+        return card
+    }
+}
+
+class Score: Codable {
     var score: Float {
             readingTimeScore
             + textSelectionsScore
             + scrollRatioScore
-            + searchIndexScore
+            + openIndexScore
             + outboundsScore
             + densityScore
     }
 
     var readingTime: CFTimeInterval = 0 //< how long did the user spent reading this page
     var textSelections: Int = 0 //< how many chunks of text were selected by the user
-    var scrollRatio: Int = 0 //< how much of the page was seen by the user ([0, 1])
-    var searchIndex: Int = 0 //< how many clicks on the search results page before this tab was created
+    var scrollRatioX: Float = 0 //< how much of the page was seen by the user ([0, 1])
+    var scrollRatioY: Float = 0 //< how much of the page was seen by the user ([0, 1])
+    var openIndex: Int = 0 //< how many clicks on the search results page before this tab was created
     var outbounds: Int = 0 //< how many links were followed from this page
     var textAmount: Int = 0 //< amount of text (= the caracter counts from readability)
     var area: Float = 0 //< the page area in points
@@ -37,11 +51,11 @@ class ScoreCard {
     }
 
     var scrollRatioScore: Float {
-        Float(scrollRatio)
+        (scrollRatioX + scrollRatioY) * 0.5
     }
 
-    var searchIndexScore: Float {
-        Float(searchIndex)
+    var openIndexScore: Float {
+        Float(openIndex)
     }
 
     var outboundsScore: Float {

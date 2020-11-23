@@ -33,7 +33,7 @@ struct NoteView: View {
                 },
                 onStartEditing: { onStartEditing() },
                 onStartQuery: { textNode in
-                    _ = state.startQuery(textNode)
+                    state.startQuery(textNode)
                 },
                 leadingAlignment: leadingAlignement,
                 footerHeight: 60,

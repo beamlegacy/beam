@@ -22,6 +22,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
 
     public func load(url: URL) {
         self.url = url
+        navigationCount = 0
         webView.load(URLRequest(url: url))
     }
 
@@ -52,11 +53,12 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
     var rootBullet: Bullet?
     var bullet: Bullet?
 
+    var score: Score?
+
     var appendToIndexer: (URL, Readability) -> Void = { _, _ in }
 
     var creationDate: Date = Date()
     var lastViewDate: Date = Date()
-    var accumulatedViewDuration: TimeInterval = 0
 
     public var onNewTabCreated: (BrowserTab) -> Void = { _ in }
 
@@ -126,6 +128,12 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
         }
     }
 
+    private func updateScore() {
+        if let s = score?.score {
+            print("updated score[\(url!.absoluteString)] = \(s)")
+            bullet?.score = s as NSNumber
+        }
+    }
     private func setupObservers() {
         webView.publisher(for: \.title).sink { v in
             self.title = v ?? "loading..."
@@ -135,6 +143,12 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
             self.url = v
             self.updateBullet()
             self.updateFavIcon()
+            if let url = v?.absoluteString {
+                self.score = self.state.data.scores.scoreCard(for: url)
+                self.score?.openIndex = self.navigationCount
+                self.updateScore()
+                self.navigationCount = 0
+            }
         }.store(in: &scope)
         webView.publisher(for: \.isLoading).sink { v in withAnimation { self.isLoading = v } }.store(in: &scope)
         webView.publisher(for: \.estimatedProgress).sink { v in withAnimation { self.estimatedProgress = v } }.store(in: &scope)
@@ -187,6 +201,8 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
                 state.setup(webView: newWebView)
                 let newTab = BrowserTab(state: state, originalQuery: originalQuery, note: note, rootBullet: rootBullet, webView: newWebView)
                 newTab.load(url: targetURL)
+                newTab.score?.openIndex = navigationCount
+                navigationCount += 1
                 onNewTabCreated(newTab)
                 decisionHandler(.cancel, preferences)
                 return
@@ -194,8 +210,11 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
 
             visitedURLs.insert(targetURL)
         }
+
         decisionHandler(.allow, preferences)
     }
+
+    var navigationCount: Int = 0
 
     func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse, decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
         decisionHandler(.allow)
@@ -241,7 +260,8 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
 //            print("Html selected: \(selectedHtml)")
 
             let text = html2Md(url: webView.url!, html: selectedHtml)
-
+            self.score?.textSelections += 1
+            self.updateScore()
 //            print("html to MD (\(url)): \(text)")
 
             // now add a bullet point with the quoted text:
@@ -257,9 +277,17 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
             guard let dict = message.body as? [String: AnyObject],
 //                  let selectedText = dict["selectedText"] as? String,
                 let x = dict["x"] as? Double,
-                let y = dict["y"] as? Double
+                let y = dict["y"] as? Double,
+                let w = dict["width"] as? Double,
+                let h = dict["height"] as? Double
             else { return }
-            print("Web Scrolled: \(x), \(y)")
+//            print("Web Scrolled: \(x), \(y)")
+            if w > 0, h > 0 {
+                self.score?.scrollRatioX = max(Float(x / w), self.score?.scrollRatioX ?? 0)
+                self.score?.scrollRatioY = max(Float(y / h), self.score?.scrollRatioY ?? 0)
+                self.score?.area = Float(w * h)
+                self.updateScore()
+            }
         default:
             break
         }
@@ -275,6 +303,8 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
                 switch result {
                 case let .success(read):
                     self.appendToIndexer(url, read)
+                    self.score?.textAmount = read.content.count
+                    self.updateScore()
                 case let .failure(error):
                     print("Error while indexing web page: \(error)")
                 }
@@ -339,6 +369,6 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
     }
 
     func stopViewing() {
-        accumulatedViewDuration += lastViewDate.distance(to: Date())
+        score?.readingTime += lastViewDate.distance(to: Date())
     }
 }
