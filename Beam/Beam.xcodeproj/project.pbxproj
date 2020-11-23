@@ -118,6 +118,7 @@
 		96F5DB452518238C0080E3EE /* BeamState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F5DB442518238C0080E3EE /* BeamState.swift */; };
 		96F5DB4A25189DDF0080E3EE /* AutoCompleteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F5DB4925189DDF0080E3EE /* AutoCompleteView.swift */; };
 		96F6DCEB252DCF230054AF3B /* TextNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F6DCEA252DCF230054AF3B /* TextNode.swift */; };
+		96FA3F5E256C24660070C91E /* ScoreCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96FA3F5D256C24660070C91E /* ScoreCard.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -268,6 +269,7 @@
 		96F5DB442518238C0080E3EE /* BeamState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamState.swift; sourceTree = "<group>"; };
 		96F5DB4925189DDF0080E3EE /* AutoCompleteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoCompleteView.swift; sourceTree = "<group>"; };
 		96F6DCEA252DCF230054AF3B /* TextNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextNode.swift; sourceTree = "<group>"; };
+		96FA3F5D256C24660070C91E /* ScoreCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreCard.swift; sourceTree = "<group>"; };
 		9B355D858C3216B61BF461D9 /* Pods-BeamTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BeamTests.release.xcconfig"; path = "Target Support Files/Pods-BeamTests/Pods-BeamTests.release.xcconfig"; sourceTree = "<group>"; };
 		A3DE910688789AFBA4487533 /* Pods-Beam.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Beam.debug.xcconfig"; path = "Target Support Files/Pods-Beam/Pods-Beam.debug.xcconfig"; sourceTree = "<group>"; };
 		C8379DEE387FB86FA7817188 /* Pods_BeamTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_BeamTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -605,6 +607,7 @@
 				96B3A5ED253B99E000E8C366 /* NoteBackForwardList.swift */,
 				96474E38254D977E00A920B3 /* BeamData.swift */,
 				9631B02A2554B34A007BF2DE /* Html2Md.swift */,
+				96FA3F5D256C24660070C91E /* ScoreCard.swift */,
 			);
 			path = DataModel;
 			sourceTree = "<group>";
@@ -980,6 +983,7 @@
 				96E1357D254723C500133A24 /* TextEditMovements.swift in Sources */,
 				96A49B6F2533ABC9003B4767 /* NSMutableAttributedString+Ranges.swift in Sources */,
 				9601BA75254236730003BCFE /* JournalView.swift in Sources */,
+				96FA3F5E256C24660070C91E /* ScoreCard.swift in Sources */,
 				96F5DB162517A0F10080E3EE /* NSContainerView.swift in Sources */,
 				520BFE7E25347F27009DF633 /* SearchBar.swift in Sources */,
 				52A66A242535E8FB00CE247C /* TextView.swift in Sources */,
