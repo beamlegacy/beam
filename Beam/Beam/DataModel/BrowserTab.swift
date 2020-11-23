@@ -82,8 +82,8 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
         self.note = note
         self.originalQuery = originalQuery
 
-        if !originalQuery.isEmpty, self.note != nil {
-            bullet = self.note!.createBullet(CoreDataManager.shared.mainContext, content: "visiting...")
+        if !originalQuery.isEmpty, let note = self.note {
+            bullet = note.createBullet(CoreDataManager.shared.mainContext, content: "visiting...")
         }
 
         if let w = webView {

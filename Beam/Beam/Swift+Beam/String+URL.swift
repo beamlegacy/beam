@@ -11,6 +11,12 @@ extension String {
     var markdownizedURL: String? {
         return self.addingPercentEncoding(withAllowedCharacters: CharacterSet(charactersIn: "()").inverted)
     }
+
+    var urlString: URL? {
+        guard maybeURL else { return nil }
+        guard let url = URL(string: self) ?? URL(string: "https://" + self) else { return nil }
+        return url
+    }
 }
 
 extension URL {

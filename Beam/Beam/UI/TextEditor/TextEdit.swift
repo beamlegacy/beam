@@ -150,6 +150,7 @@ public struct BTextEditScrollable: NSViewRepresentable {
 
     public func updateNSView(_ nsView: NSViewType, context: Context) {
 //        print("display note: \(note)")
+        // swiftlint:disable:next force_cast
         let edit = nsView.documentView as! BeamTextEdit
         if edit.rootNode.note !== note {
             edit.rootNode = TextRoot(CoreDataManager.shared, note: note)
@@ -484,7 +485,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             _ = node.parent?.insert(node: newNode, after: node)
             rootNode.cursorPosition = 0
 
-            let n = node
             scrollToCursorAtLayout = true
             node = newNode
         }
@@ -970,4 +970,13 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         context.restoreGState()
     }
 
+    public override func viewDidChangeEffectiveAppearance() {
+        super.viewDidChangeEffectiveAppearance()
+        layer?.backgroundColor = NSColor(named: "EditorBackgroundColor")!.cgColor
+
+        layer?.setNeedsDisplay()
+        titleLayer.setNeedsDisplay()
+        rootNode.deepInvalidateTextRendering()
+        rootNode.deepInvalidateText()
+    }
 }

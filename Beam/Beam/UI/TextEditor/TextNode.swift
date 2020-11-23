@@ -723,8 +723,9 @@ public class TextNode: NSObject, CALayerDelegate {
 
             if selfVisible {
                 let attrStr = attributedString
-                layout = Font.draw(string: attrStr, atPosition: NSPoint(x: indent, y: 0), textWidth: frame.width - indent, interlineFactor: interlineFactor)
-                textFrame = layout!.frame
+                let layout = Font.draw(string: attrStr, atPosition: NSPoint(x: indent, y: 0), textWidth: frame.width - indent, interlineFactor: interlineFactor)
+                self.layout = layout
+                textFrame = layout.frame
 
                 if attrStr.string.isEmpty {
                     let f = AttributedStringVisitor.font(fontSize)

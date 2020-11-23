@@ -17,6 +17,7 @@ extension Lexer.Token {
     }
 }
 
+// swiftlint:disable:next type_body_length
 class Parser {
     enum NodeType: Equatable, Hashable {
         case text(String)
@@ -49,22 +50,16 @@ class Parser {
         }
 
         var end: Int {
-            if let s = decorations[.suffix] {
-                return s.end
-            }
-            return positionInSource + length
+            return decorations[.suffix]?.end ?? positionInSource + length
         }
 
         var start: Int {
-            if let s = decorations[.prefix] {
-                return s.start
-            }
-            return positionInSource
+            return decorations[.prefix]?.start ?? positionInSource
         }
 
         var decorations = [DecorationType: Lexer.Token]()
         func decoration(_ decorationType: DecorationType, _ decorate: Bool, _ font: NSFont) -> NSMutableAttributedString {
-            if !decorate { return "".attributed }
+            guard decorate else { return "".attributed }
             let deco = decorations[decorationType]!
             let str = deco.attributedString
             str.addAttributes([NSAttributedString.Key.foregroundColor: NSColor(named: "EditorSyntaxColor")!], range: str.wholeRange)

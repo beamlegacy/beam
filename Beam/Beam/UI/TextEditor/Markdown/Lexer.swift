@@ -112,11 +112,16 @@ class Lexer {
             return captureToken(pattern.type)
         }
 
+        var n = input.count
         while !isBlank(char)
                 && pattern.children[char] == nil
                 && char != "\u{0A}"
                 && !isFinished {
             _ = nextChar()
+            n -= 1
+            guard n > 0 else {
+                fatalError("Lexer Error: probable infinite loop")
+            }
         }
         return captureToken(.Text)
     }
