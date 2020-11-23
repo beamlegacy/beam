@@ -44,20 +44,20 @@ class Animation {
 
     func stop() {
         scope = nil
+        state = .stopped
     }
 
     private func advanceTime(by value: CFTimeInterval) {
-        if state == .running {
-            currentTime += value
-            guard currentTime < duration else {
-                currentTime = duration
-                _update()
-                state = .finished
-                return
-            }
-
+        guard state == .running else { return }
+        currentTime += value
+        guard currentTime < duration else {
+            currentTime = duration
             _update()
+            state = .finished
+            return
         }
+
+        _update()
     }
 
     private func _update() {
