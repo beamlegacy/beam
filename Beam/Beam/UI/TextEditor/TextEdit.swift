@@ -203,7 +203,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             if self.blinkTime < now && self.hasFocus {
                 self.blinkPhase.toggle()
                 self.blinkTime = now + (self.blinkPhase ? self.onBlinkTime : self.offBlinkTime)
-                self.invalidate(node.frameInDocument)
+                node.invalidate()
             }
 
             // Prepare animation frame:
