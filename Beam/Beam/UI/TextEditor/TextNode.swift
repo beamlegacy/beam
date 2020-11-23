@@ -730,10 +730,12 @@ public class TextNode: NSObject, CALayerDelegate {
                 if attrStr.string.isEmpty {
                     let f = AttributedStringVisitor.font(fontSize)
                     textFrame.size.height = CGFloat(f.ascender - f.descender) * interlineFactor
+                    textFrame.size.width += CGFloat(indent)
                 }
             }
             textFrame.size.width += maxCursorWidth
             textFrame = textFrame.rounded()
+
             invalidatedTextRendering = false
         }
 

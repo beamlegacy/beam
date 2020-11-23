@@ -112,7 +112,7 @@ class Lexer {
             return captureToken(pattern.type)
         }
 
-        var n = input.count
+        var n = input.count + 1
         while !isBlank(char)
                 && pattern.children[char] == nil
                 && char != "\u{0A}"
