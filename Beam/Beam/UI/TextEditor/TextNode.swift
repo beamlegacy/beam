@@ -48,7 +48,10 @@ public class TextNode: NSObject, CALayerDelegate {
         if let l = _language {
             return l
         }
-        _language = NLLanguageRecognizer.dominantLanguage(for: root?.fullStrippedText ?? "")
+
+        if let root = root {
+            _language = NLLanguageRecognizer.dominantLanguage(for: root.fullStrippedText)
+        }
         return _language
     }
 
