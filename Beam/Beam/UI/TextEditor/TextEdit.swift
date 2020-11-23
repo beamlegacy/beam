@@ -28,6 +28,7 @@ public struct BTextEdit: NSViewRepresentable {
     var openCard: (String) -> Void
     var onStartEditing: () -> Void = { }
     var onEndEditing: () -> Void = { }
+    var onStartQuery: (TextNode) -> Void = { _ in }
     var minimumWidth: CGFloat = 800
     var maximumWidth: CGFloat = 1024
 
@@ -47,6 +48,7 @@ public struct BTextEdit: NSViewRepresentable {
         nsView.openCard = openCard
         nsView.onStartEditing = onStartEditing
         nsView.onEndEditing = onEndEditing
+        nsView.onStartQuery = onStartQuery
 
         nsView.minimumWidth = minimumWidth
         nsView.maximumWidth = maximumWidth
@@ -76,6 +78,7 @@ public struct BTextEdit: NSViewRepresentable {
         nsView.openCard = openCard
         nsView.onStartEditing = onStartEditing
         nsView.onEndEditing = onEndEditing
+        nsView.onStartQuery = onStartQuery
 
         nsView.minimumWidth = minimumWidth
         nsView.maximumWidth = maximumWidth
@@ -99,6 +102,7 @@ public struct BTextEditScrollable: NSViewRepresentable {
     var openCard: (String) -> Void
     var onStartEditing: () -> Void = { }
     var onEndEditing: () -> Void = { }
+    var onStartQuery: (TextNode) -> Void = { _ in }
     var minimumWidth: CGFloat = 800
     var maximumWidth: CGFloat = 1024
 
@@ -118,6 +122,7 @@ public struct BTextEditScrollable: NSViewRepresentable {
         edit.openCard = openCard
         edit.onStartEditing = onStartEditing
         edit.onEndEditing = onEndEditing
+        edit.onStartQuery = onStartQuery
 
         edit.minimumWidth = minimumWidth
         edit.maximumWidth = maximumWidth
@@ -163,6 +168,7 @@ public struct BTextEditScrollable: NSViewRepresentable {
         edit.openCard = openCard
         edit.onStartEditing = onStartEditing
         edit.onEndEditing = onEndEditing
+        edit.onStartQuery = onStartQuery
 
         edit.minimumWidth = minimumWidth
         edit.maximumWidth = maximumWidth
@@ -276,6 +282,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     public var openCard: (String) -> Void = { _ in }
     public var onStartEditing: () -> Void = { }
     public var onEndEditing: () -> Void = { }
+    public var onStartQuery: (TextNode) -> Void = { _ in }
 
     public var config = TextConfig()
 
@@ -462,9 +469,11 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         return super.resignFirstResponder()
     }
 
-    func pressEnter(_ option: Bool) {
+    func pressEnter(_ option: Bool, _ command: Bool) {
         if option {
             rootNode.doCommand(.insertNewline)
+        } else if command {
+            onStartQuery(node)
         } else {
             if node.text.isEmpty && node.children.isEmpty && node.parent !== rootNode {
                 rootNode.decreaseIndentation()
@@ -501,9 +510,9 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             if let k = event.specialKey {
                 switch k {
                 case .enter:
-                    pressEnter(option)
+                    pressEnter(option, command)
                 case .carriageReturn:
-                    pressEnter(option)
+                    pressEnter(option, command)
                     return
                 case .leftArrow:
                     if control && option && command {

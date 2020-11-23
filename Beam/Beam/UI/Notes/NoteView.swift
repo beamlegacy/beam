@@ -32,6 +32,9 @@ struct NoteView: View {
                     _ = state.navigateToNote(named: cardName)
                 },
                 onStartEditing: { onStartEditing() },
+                onStartQuery: { textNode in
+                    _ = state.startQuery(textNode)
+                },
                 leadingAlignment: leadingAlignement,
                 footerHeight: 60,
                 showTitle: showTitle
@@ -50,6 +53,9 @@ struct NoteView: View {
                     _ = state.navigateToNote(named: cardName)
                 },
                 onStartEditing: { onStartEditing() },
+                onStartQuery: { textNode in
+                    state.startQuery(textNode)
+                },
                 leadingAlignment: leadingAlignement,
                 footerHeight: 100,
                 showTitle: showTitle

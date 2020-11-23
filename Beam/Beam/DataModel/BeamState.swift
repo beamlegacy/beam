@@ -245,6 +245,16 @@ var runningOnBigSur: Bool = {
         mode = .web
     }
 
+    func createTabFromNode(_ node: TextNode, withURL url: URL) {
+        guard let note = node.root?.note else { return }
+        guard let bullet = node.bullet else { return }
+        let tab = BrowserTab(state: self, originalQuery: node.strippedText, note: note, rootBullet: bullet, createBullet: false)
+        tab.load(url: url)
+        currentTab = tab
+        tabs.append(tab)
+        mode = .web
+    }
+
     func createNoteForQuery(_ query: String) -> Note {
         let context = CoreDataManager.shared.mainContext
         if let n = Note.fetchWithTitle(context, query) {
@@ -263,6 +273,30 @@ var runningOnBigSur: Bool = {
         }
 
         return n
+    }
+
+    func startQuery(_ node: TextNode) {
+        let query = node.strippedText
+        guard !query.isEmpty else { return }
+        let url: URL = {
+            if query.maybeURL {
+                guard let u = URL(string: query) else {
+                    searchEngine.query = query
+                    return URL(string: searchEngine.searchUrl)!
+                }
+
+                if u.scheme == nil {
+                    return URL(string: "https://" + query)!
+                }
+                return u
+            }
+            searchEngine.query = query
+            return URL(string: searchEngine.searchUrl)!
+        }()
+//        print("Start query: \(url)")
+
+        createTabFromNode(node, withURL: url)
+        mode = .web
     }
 
     func startQuery() {

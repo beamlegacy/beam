@@ -49,6 +49,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
     var state: BeamState!
 
     var note: Note?
+    var rootBullet: Bullet?
     var bullet: Bullet?
 
     var appendToIndexer: (URL, Readability) -> Void = { _, _ in }
@@ -61,11 +62,6 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
 
     private var scope = Set<AnyCancellable>()
 
-    override init() {
-        self.id = UUID()
-        super.init()
-    }
-
     class var webViewConfiguration: WKWebViewConfiguration {
         let config = WKWebViewConfiguration()
         config.applicationNameForUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_0) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Safari/605.1.15"
@@ -76,14 +72,15 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
         return config
     }
 
-    init(state: BeamState, originalQuery: String, note: Note?, id: UUID = UUID(), webView: WKWebView? = nil ) {
+    init(state: BeamState, originalQuery: String, note: Note?, rootBullet: Bullet? = nil, id: UUID = UUID(), webView: WKWebView? = nil, createBullet: Bool = true ) {
         self.state = state
         self.id = id
         self.note = note
+        self.rootBullet = rootBullet
         self.originalQuery = originalQuery
 
-        if !originalQuery.isEmpty, let note = self.note {
-            bullet = note.createBullet(CoreDataManager.shared.mainContext, content: "visiting...")
+        if !originalQuery.isEmpty, let note = self.note, createBullet {
+            bullet = note.createBullet(CoreDataManager.shared.mainContext, content: "visiting...", parentBullet: rootBullet)
         }
 
         if let w = webView {
@@ -188,7 +185,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
                 let newWebView = FullScreenWKWebView(frame: NSRect(), configuration: Self.webViewConfiguration)
                 newWebView.wantsLayer = true
                 state.setup(webView: newWebView)
-                let newTab = BrowserTab(state: state, originalQuery: originalQuery, note: note, webView: newWebView)
+                let newTab = BrowserTab(state: state, originalQuery: originalQuery, note: note, rootBullet: rootBullet, webView: newWebView)
                 newTab.load(url: targetURL)
                 onNewTabCreated(newTab)
                 decisionHandler(.cancel, preferences)
@@ -307,7 +304,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
         let newWebView = FullScreenWKWebView(frame: NSRect(), configuration: configuration)
         newWebView.wantsLayer = true
         state.setup(webView: newWebView)
-        let newTab = BrowserTab(state: state, originalQuery: originalQuery, note: self.note, webView: newWebView)
+        let newTab = BrowserTab(state: state, originalQuery: originalQuery, note: self.note, rootBullet: rootBullet, webView: newWebView)
         onNewTabCreated(newTab)
 
         return newTab.webView
