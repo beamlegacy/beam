@@ -705,6 +705,11 @@ CQ
                                                 <action selector="arrangeInFront:" target="Ady-hI-5gd" id="DRN-fu-gQh"/>
                                             </connections>
                                         </menuItem>
+                                        <menuItem title="Show journal" keyEquivalent="H" id="VoL-pJ-EC7">
+                                            <connections>
+                                                <action selector="showJournal:" target="Ady-hI-5gd" id="ysb-J3-SMJ"/>
+                                            </connections>
+                                        </menuItem>
                                         <menuItem isSeparatorItem="YES" id="8CZ-9R-gka"/>
                                         <menuItem title="Show all notes" keyEquivalent="s" id="KUY-Ll-jZL">
                                             <connections>

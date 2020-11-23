@@ -76,4 +76,17 @@ class ParserTests: XCTestCase {
         let str = visitor.visit(AST)
         print("attributed string: \(str)")
     }
+
+    func testParser6() {
+        let string = "\u{10}"
+
+        let parser = Parser(inputString: string)
+        let AST = parser.parseAST()
+        print("AST: \(AST.treeString)")
+
+        let config = AttributedStringVisitor.Configuration()
+        let visitor = AttributedStringVisitor(configuration: config)
+        let str = visitor.visit(AST)
+        print("attributed string: \(str)")
+    }
 }

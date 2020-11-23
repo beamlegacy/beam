@@ -23,6 +23,8 @@ public class BeamApplication: NSApplication {
 
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
+    // swiftlint:disable:next force_cast
+    class var main: AppDelegate { NSApplication.shared.delegate as! AppDelegate }
 
     @IBOutlet var window: BeamWindow!
     var windows: [BeamWindow] = []
@@ -65,7 +67,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     func createWindow() {
         // Create the window and set the content view.
-        window = BeamWindow(contentRect: NSRect(x: 0, y: 0, width: 480, height: 300), data: data)
+        window = BeamWindow(contentRect: NSRect(x: 0, y: 0, width: 1300, height: 895), data: data)
         window.center()
         window.makeKeyAndOrderFront(nil)
         windows.append(window)
@@ -87,6 +89,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     func applicationWillTerminate(_ aNotification: Notification) {
         // Insert code here to tear down your application
+    }
+
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        if !flag {
+            createWindow()
+        }
+
+        return false
     }
 
     // MARK: - Core Data Saving and Undo support
@@ -341,7 +351,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     // MARK: -
-
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
         // Save changes in the application's managed object context before the application terminates.
         let context = CoreDataManager.shared.mainContext
@@ -385,4 +394,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         return .terminateNow
     }
 
+    @IBAction func newDocument(_ sender: Any?) {
+        createWindow()
+    }
 }

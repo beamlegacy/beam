@@ -93,7 +93,7 @@ class Lexer {
             return captureToken(.NewLine)
         }
 
-        if char <= " " {
+        if isBlank(char) {
             _ = skipBlank()
             if input.index(after: start) < end {
                 return captureToken(.Blank)
@@ -112,9 +112,10 @@ class Lexer {
             return captureToken(pattern.type)
         }
 
-        while char > " "
+        while !isBlank(char)
                 && pattern.children[char] == nil
-                && char != "\u{0A}" {
+                && char != "\u{0A}"
+                && !isFinished {
             _ = nextChar()
         }
         return captureToken(.Text)
@@ -179,7 +180,7 @@ class Lexer {
     }
 
     var isDone: Bool { // True if we are past the last token in the input string
-        start >= input.endIndex
+        start >= input.endIndex || isFinished
     }
 
     var isStarved: Bool { // True if we can no longer add to the current token because we are past the end of the input string

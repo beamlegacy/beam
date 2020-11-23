@@ -1,61 +1,61 @@
 {
   "images" : [
     {
-      "filename" : "icon-16.png",
+      "filename" : "Beam Icon 16@1x.png",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "16x16"
     },
     {
-      "filename" : "icon-33.png",
+      "filename" : "Beam Icon 32@1x-1.png",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "16x16"
     },
     {
-      "filename" : "icon-32.png",
+      "filename" : "Beam Icon 32@1x.png",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "32x32"
     },
     {
-      "filename" : "icon-64.png",
+      "filename" : "Group 2 Copy 7-1 copy-1.png",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "32x32"
     },
     {
-      "filename" : "icon-128.png",
+      "filename" : "Group 2 Copy 7.png",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "128x128"
     },
     {
-      "filename" : "icon-257.png",
+      "filename" : "Group 2 Copy 6-1.png",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "128x128"
     },
     {
-      "filename" : "icon-256.png",
+      "filename" : "Group 2 Copy 6.png",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "256x256"
     },
     {
-      "filename" : "icon-513.png",
+      "filename" : "Group 2 Copy 5-1.png",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "256x256"
     },
     {
-      "filename" : "icon-512.png",
+      "filename" : "Group 2 Copy 5.png",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "512x512"
     },
     {
-      "filename" : "icon-1024.png",
+      "filename" : "Group 2.png",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "512x512"

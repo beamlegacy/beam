@@ -65,20 +65,93 @@ class BeamWindow: NSWindow, NSWindowDelegate {
         }
     }
 
-    public func windowDidResize(_ notification: Notification) {
-        let version = ProcessInfo.processInfo.operatingSystemVersion
-        let runningOnBigSur = version.majorVersion >= 11 || (version.majorVersion == 10 && version.minorVersion >= 16)
-
-        // THIS HACK IS HORRIBLE But AppKit leaves us little choice to have a similar look on Catalina and Future OSes
+    // THIS HACK IS HORRIBLE But AppKit leaves us little choice to have a similar look on Catalina and Future OSes
+    var trafficLightFrame = NSRect()
+    func setupTrafficLights() {
         if let b = self.standardWindowButton(.closeButton) {
             if var f = b.superview?.superview?.frame {
-                let v = CGFloat(runningOnBigSur ? 12 : 12)
+                let v = CGFloat(runningOnBigSur ? 12 : 14)
                 f.size.height += v
                 f.origin.x += 13
                 f.origin.y -= v
-                b.superview?.superview?.frame = f
+                trafficLightFrame = f
+                b.superview?.superview?.frame = trafficLightFrame
             }
         }
+    }
+
+    func updateTrafficLights() {
+        if let b = self.standardWindowButton(.closeButton) {
+            b.superview?.superview?.frame = trafficLightFrame
+        }
+    }
+
+    public func windowDidResize(_ notification: Notification) {
+        setupTrafficLights()
+    }
+
+    public func windowDidMove(_ notification: Notification) {
+        updateTrafficLights()
+    }
+
+    public func windowDidMiniaturize(_ notification: Notification) {
+        updateTrafficLights()
+    }
+
+    public func windowDidDeminiaturize(_ notification: Notification) {
+        updateTrafficLights()
+    }
+
+    public func windowDidUpdate(_ notification: Notification) {
+//        updateTrafficLights()
+    }
+
+    public func windowDidChangeScreen(_ notification: Notification) {
+        updateTrafficLights()
+    }
+
+    public func windowDidChangeScreenProfile(_ notification: Notification) {
+        updateTrafficLights()
+    }
+
+    public func windowDidChangeBackingProperties(_ notification: Notification) {
+        updateTrafficLights()
+    }
+
+    public func windowDidEnterFullScreen(_ notification: Notification) {
+        updateTrafficLights()
+    }
+
+//    public func windowDidExitFullScreen(_ notification: Notification) {
+//        updateTrafficLights()
+//    }
+//
+    public func windowWillExitFullScreen(_ notification: Notification) {
+        updateTrafficLights()
+    }
+
+    public func windowDidChangeOcclusionState(_ notification: Notification) {
+        updateTrafficLights()
+    }
+
+    public func windowDidExpose(_ notification: Notification) {
+        updateTrafficLights()
+    }
+
+    public func windowDidBecomeKey(_ notification: Notification) {
+        updateTrafficLights()
+    }
+
+    public func windowDidResignKey(_ notification: Notification) {
+        updateTrafficLights()
+    }
+
+    public func windowDidBecomeMain(_ notification: Notification) {
+        updateTrafficLights()
+    }
+
+    public func windowDidResignMain(_ notification: Notification) {
+        updateTrafficLights()
     }
 
     @IBAction func newDocument(_ sender: Any?) {
@@ -87,37 +160,25 @@ class BeamWindow: NSWindow, NSWindowDelegate {
     }
 
     @IBAction func showPreviousTab(_ sender: Any?) {
-        if let i = state.tabs.firstIndex(of: state.currentTab) {
-            let i = i - 1 < 0 ? state.tabs.count - 1 : i - 1
-            state.currentTab = state.tabs[i]
-        }
+        state.showPreviousTab()
     }
 
     @IBAction func showNextTab(_ sender: Any?) {
-        // Activate next tab
-        if let i = state.tabs.firstIndex(of: state.currentTab) {
-            let i = (i + 1) % state.tabs.count
-            state.currentTab = state.tabs[i]
-        }
+        state.showNextTab()
+    }
+
+    @IBAction func showJournal(_ sender: Any?) {
+        state.startNewSearch()
     }
 
     @IBAction func newSearch(_ sender: Any?) {
-        state.mode = .note
-        state.searchQuery = ""
+        state.startNewSearch()
     }
 
     override func performClose(_ sender: Any?) {
-        if state.mode == .web {
-            if let i = state.tabs.firstIndex(of: state.currentTab) {
-                state.tabs.remove(at: i)
-                let nextTabIndex = min(i, state.tabs.count - 1)
-                if nextTabIndex >= 0 {
-                    state.currentTab = state.tabs[nextTabIndex]
-                }
-                return
-            }
+        if state.closeCurrentTab() {
+            return
         }
-
         super.performClose(sender)
     }
 }

@@ -28,40 +28,173 @@ public struct BTextEdit: NSViewRepresentable {
     var openCard: (String) -> Void
     var onStartEditing: () -> Void = { }
     var onEndEditing: () -> Void = { }
+    var minimumWidth: CGFloat = 800
+    var maximumWidth: CGFloat = 1024
+
+    var leadingAlignment = CGFloat(160)
+    var traillingPadding = CGFloat(80)
+    var topOffset = CGFloat(28)
+    var footerHeight = CGFloat(60)
+    var ignoreFirstDrag = true
+
+    var showTitle = true
 
     public func makeNSView(context: Context) -> BeamTextEdit {
         let root = TextRoot(CoreDataManager.shared, note: note)
         let nsView = BeamTextEdit(root: root, font: Font.main)
+
         nsView.openURL = openURL
         nsView.openCard = openCard
         nsView.onStartEditing = onStartEditing
         nsView.onEndEditing = onEndEditing
+
+        nsView.minimumWidth = minimumWidth
+        nsView.maximumWidth = maximumWidth
+
+        nsView.leadingAlignment = leadingAlignment
+        nsView.traillingPadding = traillingPadding
+        nsView.topOffset = topOffset
+        nsView.footerHeight = footerHeight
+
+        nsView.ignoreFirstDrag = ignoreFirstDrag
+
+        nsView.showTitle = showTitle
+
         return nsView
     }
 
     public func updateNSView(_ nsView: BeamTextEdit, context: Context) {
-        print("display note: \(note)")
+//        print("display note: \(note)")
         if nsView.rootNode.note !== note {
             nsView.rootNode = TextRoot(CoreDataManager.shared, note: note)
             if let note = nsView.rootNode.children.first {
                 nsView.node = note
             }
         }
+
         nsView.openURL = openURL
         nsView.openCard = openCard
         nsView.onStartEditing = onStartEditing
         nsView.onEndEditing = onEndEditing
+
+        nsView.minimumWidth = minimumWidth
+        nsView.maximumWidth = maximumWidth
+
+        nsView.leadingAlignment = leadingAlignment
+        nsView.traillingPadding = traillingPadding
+        nsView.topOffset = topOffset
+        nsView.footerHeight = footerHeight
+
+        nsView.ignoreFirstDrag = ignoreFirstDrag
+
+        nsView.showTitle = showTitle
     }
 
     public typealias NSViewType = BeamTextEdit
 }
 
+public struct BTextEditScrollable: NSViewRepresentable {
+    var note: Note
+    var openURL: (URL) -> Void
+    var openCard: (String) -> Void
+    var onStartEditing: () -> Void = { }
+    var onEndEditing: () -> Void = { }
+    var minimumWidth: CGFloat = 800
+    var maximumWidth: CGFloat = 1024
+
+    var leadingAlignment = CGFloat(160)
+    var traillingPadding = CGFloat(80)
+    var topOffset = CGFloat(28)
+    var footerHeight = CGFloat(28)
+    var ignoreFirstDrag = false
+
+    var showTitle = true
+
+    public func makeNSView(context: Context) -> NSViewType {
+        let root = TextRoot(CoreDataManager.shared, note: note)
+        let edit = BeamTextEdit(root: root, font: Font.main)
+
+        edit.openURL = openURL
+        edit.openCard = openCard
+        edit.onStartEditing = onStartEditing
+        edit.onEndEditing = onEndEditing
+
+        edit.minimumWidth = minimumWidth
+        edit.maximumWidth = maximumWidth
+
+        edit.leadingAlignment = leadingAlignment
+        edit.traillingPadding = traillingPadding
+        edit.topOffset = topOffset
+        edit.footerHeight = footerHeight
+        edit.ignoreFirstDrag = ignoreFirstDrag
+
+        edit.showTitle = showTitle
+
+        let scrollView = NSScrollView()
+
+        let clipView = NSClipView()
+        clipView.translatesAutoresizingMaskIntoConstraints = false
+        scrollView.contentView = clipView
+        clipView.addConstraint(NSLayoutConstraint(item: clipView, attribute: .left, relatedBy: .equal, toItem: edit, attribute: .left, multiplier: 1.0, constant: 0))
+        clipView.addConstraint(NSLayoutConstraint(item: clipView, attribute: .top, relatedBy: .equal, toItem: edit, attribute: .top, multiplier: 1.0, constant: 0))
+        clipView.addConstraint(NSLayoutConstraint(item: clipView, attribute: .right, relatedBy: .equal, toItem: edit, attribute: .right, multiplier: 1.0, constant: 0))
+
+        edit.translatesAutoresizingMaskIntoConstraints = false
+        scrollView.hasVerticalScroller = true
+        scrollView.hasHorizontalScroller = false
+        scrollView.borderType = .noBorder
+        scrollView.documentView = edit
+
+        return scrollView
+    }
+
+    public func updateNSView(_ nsView: NSViewType, context: Context) {
+//        print("display note: \(note)")
+        let edit = nsView.documentView as! BeamTextEdit
+        if edit.rootNode.note !== note {
+            edit.rootNode = TextRoot(CoreDataManager.shared, note: note)
+            if let note = edit.rootNode.children.first {
+                edit.node = note
+            }
+        }
+
+        edit.openURL = openURL
+        edit.openCard = openCard
+        edit.onStartEditing = onStartEditing
+        edit.onEndEditing = onEndEditing
+
+        edit.minimumWidth = minimumWidth
+        edit.maximumWidth = maximumWidth
+
+        edit.leadingAlignment = leadingAlignment
+        edit.traillingPadding = traillingPadding
+        edit.topOffset = topOffset
+        edit.footerHeight = footerHeight
+        edit.ignoreFirstDrag = ignoreFirstDrag
+
+        edit.showTitle = showTitle
+    }
+
+    public typealias NSViewType = NSScrollView
+}
+
 // swiftlint:disable type_body_length
-public class BeamTextEdit: NSView, NSTextInputClient {
+public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     public init(root: TextRoot, font: Font = Font.main) {
         self.config.font = font
         rootNode = root
         super.init(frame: NSRect())
+        let l = CALayer()
+        self.layer = l
+        l.backgroundColor = NSColor(named: "EditorBackgroundColor")!.cgColor
+        l.addSublayer(titleLayer)
+        //titleLayer.backgroundColor = NSColor.red.cgColor.copy(alpha: 0.2)
+        titleLayer.backgroundColor = NSColor(white: 1, alpha: 0).cgColor
+        titleLayer.setNeedsDisplay()
+
+        layer?.delegate = self
+        titleLayer.delegate = self
+//        self.wantsLayer = true
 
         root._editor = self
         timer = Timer.init(timeInterval: 1.0 / 60.0, repeats: true) { [unowned self] _ in
@@ -69,8 +202,17 @@ public class BeamTextEdit: NSView, NSTextInputClient {
             if self.blinkTime < now && self.hasFocus {
                 self.blinkPhase.toggle()
                 self.blinkTime = now + (self.blinkPhase ? self.onBlinkTime : self.offBlinkTime)
-                self.invalidate()
+                self.invalidate(node.frameInDocument)
             }
+
+            // Prepare animation frame:
+            var t = tick
+            t.previous = tick.now
+            t.now = CACurrentMediaTime()
+            t.delta = t.now - t.previous
+            t.fdelta = Float(t.delta)
+            t.index += 1
+            tick = t
         }
         RunLoop.main.add(timer, forMode: .default)
 
@@ -87,12 +229,44 @@ public class BeamTextEdit: NSView, NSTextInputClient {
     }
 
     var timer: Timer!
+    @Published var tick = Tick()
 
-    var minimumWidth: CGFloat = 800
-    var maximumWidth: CGFloat = 1024
+    var minimumWidth: CGFloat = 300 {
+        didSet {
+            if oldValue != minimumWidth {
+                invalidateIntrinsicContentSize()
+            }
+        }
+    }
+    var maximumWidth: CGFloat = 1024 {
+        didSet {
+            if oldValue != minimumWidth {
+                invalidateIntrinsicContentSize()
+            }
+        }
+    }
 
-    var leadingAlignment = CGFloat(160)
-    var traillingPadding = CGFloat(80)
+    var leadingAlignment = CGFloat(160) {
+        didSet {
+            if oldValue != minimumWidth {
+                invalidateIntrinsicContentSize()
+            }
+        }
+    }
+    var traillingPadding = CGFloat(80) {
+        didSet {
+            if oldValue != minimumWidth {
+                invalidateIntrinsicContentSize()
+            }
+        }
+    }
+
+    var showTitle = true {
+        didSet {
+            titleLayer.isHidden = !showTitle
+        }
+    }
+    var titleLayer = CALayer()
 
     public var activated: () -> Void = { }
     public var activateOnLostFocus = true
@@ -129,29 +303,27 @@ public class BeamTextEdit: NSView, NSTextInputClient {
         }
 
     }
-    var cursorPosition: Int {
-        set {
-            assert(newValue != NSNotFound)
-            rootNode.state.cursorPosition = newValue
-            reBlink()
-            setHotSpotToCursorPosition()
-            if config.contextualSyntax {
-                node.invalidateTextRendering()
-            }
-        }
-
-        get {
-            rootNode.state.cursorPosition
-        }
-    }
 
     var selectedText: String {
         return rootNode.selectedText
     }
 
+    static let bigThreshold = CGFloat(866)
+    var isBig: Bool {
+        frame.width >= Self.bigThreshold
+    }
+
     public override var frame: NSRect {
         didSet {
 //            print("editor[\(rootNode.note.title)] frame changed to \(frame)")
+            let oldbig = oldValue.width >= Self.bigThreshold
+            let newbig = isBig
+
+            if oldbig != newbig {
+                rootNode.deepInvalidateText()
+                invalidateLayout()
+            }
+
             relayoutRoot()
         }
     }
@@ -159,8 +331,8 @@ public class BeamTextEdit: NSView, NSTextInputClient {
     func relayoutRoot() {
 //        print("editor[\(rootNode.note.title)] relayout root to \(frame)")
         let r = bounds
-        let width = min(max(minimumWidth, r.width - (leadingAlignment + traillingPadding)), maximumWidth)
-        let rect = NSRect(x: leadingAlignment, y: topOffset, width: width, height: r.height)
+        let width = CGFloat(isBig ? frame.width - 200 - leadingAlignment : 450)
+        let rect = NSRect(x: leadingAlignment, y: topOffsetActual, width: width, height: r.height)
         //print("relayoutRoot -> \(rect)")
         rootNode.setLayout(rect)
     }
@@ -177,7 +349,7 @@ public class BeamTextEdit: NSView, NSTextInputClient {
                 let newNode = TextNode(bullet: newBullet, recurse: false)
                 var children = rootNode.children
                 children.append(newNode)
-                cursorPosition = 0
+                rootNode.cursorPosition = 0
                 node = newNode
             }
             // put a fake layout as an init
@@ -192,28 +364,27 @@ public class BeamTextEdit: NSView, NSTextInputClient {
     // This is the node that the user is currently editing. It can be any node in the rootNode tree
     var node: TextNode {
         set {
+            invalidate(rootNode.node.textFrameInDocument)
             rootNode.node = newValue
-            invalidate()
+            invalidate(rootNode.node.textFrameInDocument)
         }
         get {
             rootNode.node
         }
     }
 
-    var topOffset: CGFloat {
-        config.keepCursorMidScreen ? visibleRect.height / 2 : 0
+    var topOffset: CGFloat = 28 { didSet { invalidateIntrinsicContentSize() } }
+    var footerHeight: CGFloat = 60 { didSet { invalidateIntrinsicContentSize() } }
+    var topOffsetActual: CGFloat {
+        config.keepCursorMidScreen ? visibleRect.height / 2 : topOffset
     }
 
     override public var intrinsicContentSize: NSSize {
-        let s = NSSize(width: minimumWidth + leadingAlignment + traillingPadding, height: rootNode.idealSize.height + topOffset)
-//        print("editor[\(rootNode.note.title)] new intrinsic content size \(s)")
-        return s
+        return NSSize(width: 300, height: rootNode.idealSize.height + topOffsetActual + footerHeight)
     }
 
     public func setHotSpot(_ spot: NSRect) {
-        if let sv = superview as? NSScrollView {
-            sv.scrollToVisible(spot)
-        }
+        _ = scrollToVisible(spot)
     }
 
     public func invalidateLayout() {
@@ -226,10 +397,15 @@ public class BeamTextEdit: NSView, NSTextInputClient {
 //        print("editor[\(rootNode.note.title)] layout \(frame)")
         relayoutRoot()
         super.layout()
+        if scrollToCursorAtLayout {
+            scrollToCursorAtLayout = false
+            setHotSpotToCursorPosition()
+        }
     }
 
-    public func invalidate() {
-        setNeedsDisplay(bounds)
+    public func invalidate(_ rect: NSRect? = nil) {
+        guard let r = rect else { setNeedsDisplay(bounds); return }
+        setNeedsDisplay(r)
     }
 
     // Text Input from AppKit:
@@ -274,12 +450,13 @@ public class BeamTextEdit: NSView, NSTextInputClient {
 
     public override func resignFirstResponder() -> Bool {
         blinkPhase = true
+        hasFocus = false
         rootNode.cancelSelection()
-        invalidate()
+        node.invalidateText() // force removing the syntax highlighting
+        node.invalidate()
         if activateOnLostFocus {
             activated()
         }
-        hasFocus = false
         onEndEditing()
         return super.resignFirstResponder()
     }
@@ -288,12 +465,14 @@ public class BeamTextEdit: NSView, NSTextInputClient {
         if option {
             rootNode.doCommand(.insertNewline)
         } else {
-            node.text.removeSubrange(node.text.range(from: selectedTextRange))
-            cursorPosition = selectedTextRange.startIndex
-            let splitText = node.text.substring(from: cursorPosition, to: node.text.count)
-            node.text.removeLast(node.text.count - cursorPosition)
-            guard let newBullet = node.bullet?.note?.createBullet(CoreDataManager.shared.mainContext, content: splitText, afterBullet: node.bullet) else { return }
-            let newNode = TextNode(bullet: newBullet, recurse: false)
+            if node.text.isEmpty && node.children.isEmpty && node.parent !== rootNode {
+                rootNode.decreaseIndentation()
+                return
+            }
+            rootNode.eraseSelection()
+            let splitText = node.text.substring(from: rootNode.cursorPosition, to: node.text.count)
+            node.text.removeLast(node.text.count - rootNode.cursorPosition)
+            let newNode = TextNode(staticText: splitText)
             let nodes = node.children
             for c in nodes {
                 newNode.addChild(c)
@@ -303,9 +482,11 @@ public class BeamTextEdit: NSView, NSTextInputClient {
             }
 
             _ = node.parent?.insert(node: newNode, after: node)
-            cursorPosition = 0
+            rootNode.cursorPosition = 0
+
+            let n = node
+            scrollToCursorAtLayout = true
             node = newNode
-            rootNode.cancelSelection()
         }
     }
 
@@ -313,6 +494,7 @@ public class BeamTextEdit: NSView, NSTextInputClient {
     override open func keyDown(with event: NSEvent) {
         let shift = event.modifierFlags.contains(.shift)
         let option = event.modifierFlags.contains(.option)
+        let control = event.modifierFlags.contains(.control)
         let command = event.modifierFlags.contains(.command)
 
         if self.hasFocus {
@@ -324,7 +506,9 @@ public class BeamTextEdit: NSView, NSTextInputClient {
                     pressEnter(option)
                     return
                 case .leftArrow:
-                    if shift {
+                    if control && option && command {
+                        node.fold()
+                    } else if shift {
                         if option {
                             rootNode.doCommand(.moveWordLeftAndModifySelection)
                         } else if command {
@@ -344,7 +528,9 @@ public class BeamTextEdit: NSView, NSTextInputClient {
                         return
                     }
                 case .rightArrow:
-                    if shift {
+                    if control && option && command {
+                        node.unfold()
+                    } else if shift {
                         if option {
                             rootNode.doCommand(.moveWordRightAndModifySelection)
                         } else if command {
@@ -382,6 +568,15 @@ public class BeamTextEdit: NSView, NSTextInputClient {
                 case .delete:
                     rootNode.doCommand(.deleteBackward)
                     return
+
+                case .backTab:
+                    rootNode.doCommand(.decreaseIndentation)
+                    return
+
+                case .tab:
+                    rootNode.doCommand(.increaseIndentation)
+                    return
+
                 default:
                     print("Special Key \(k)")
                 }
@@ -415,7 +610,9 @@ public class BeamTextEdit: NSView, NSTextInputClient {
                         rootNode.doCommand(.increaseIndentation)
                         return
                     }
-                default: break
+
+                default:
+                    break
                 }
             }
 
@@ -556,27 +753,18 @@ public class BeamTextEdit: NSView, NSTextInputClient {
         offBlinkTime = voff == 0 ? offBlinkTime : voff * 1000
     }
 
-    public func draw(in context: CGContext) {
-//        print("\n\ndraw visibleRect: \(visibleRect)")
-        // Draw the background
-        context.setFillColor(NSColor(named: "EditorBackgroundColor")!.cgColor)
-        context.addRect(bounds)
-        context.drawPath(using: .eoFill)
-
-        context.saveGState(); defer { context.restoreGState() }
-        context.translateBy(x: rootNode.frame.origin.x, y: rootNode.frame.origin.y)
-//        var vis = visibleRect
-//        vis.origin.x -= rootNode.frame.origin.x
-//        vis.origin.y -= rootNode.frame.origin.y
-        let vis = bounds
-        rootNode.draw(in: context, visibleRect: vis)
-    }
-
-    public override func draw(_ dirtyRect: NSRect) {
-//        print("\n\n\n\ndraw dirtyRect: \(dirtyRect)")
-        if let context = NSGraphicsContext.current?.cgContext {
-            self.draw(in: context)
+    var _title: TextFrame?
+    var title: TextFrame {
+        if let t = _title {
+            return t
         }
+
+        let titleString = rootNode.note.title.attributed
+        let f = NSFont.systemFont(ofSize: isBig ? 13 : 11, weight: .semibold)
+        titleString.addAttribute(.font, value: f, range: titleString.wholeRange)
+        titleString.addAttribute(.foregroundColor, value: NSColor(named: "EditorControlColor")!, range: titleString.wholeRange)
+        _title = Font.draw(string: titleString, atPosition: NSPoint(x: 0, y: 0), textWidth: frame.width)
+        return _title!
     }
 
     enum DragMode {
@@ -588,7 +776,7 @@ public class BeamTextEdit: NSView, NSTextInputClient {
     func reBlink() {
         blinkPhase = true
         blinkTime = CFAbsoluteTimeGetCurrent() + onBlinkTime
-        invalidate()
+        node.invalidate()
     }
 
     public func lineAt(point: NSPoint) -> Int {
@@ -616,8 +804,14 @@ public class BeamTextEdit: NSView, NSTextInputClient {
         if event.clickCount == 1 {
             reBlink()
             let point = convert(event.locationInWindow)
-            guard let newNode = nodeAt(point: point) else { return }
-            if newNode.mouseDown(mouseInfo: MouseInfo(newNode, point, event)) {
+            guard let newNode = nodeAt(point: point) else {
+                // Use the first child of the root
+                guard let n = rootNode.children.first else { return }
+                rootNode.cursorPosition = 0
+                node = n
+                return
+            }
+            if nil != rootNode.dispatchMouseDown(mouseInfo: MouseInfo(rootNode, point, event)) {
                 return
             }
 
@@ -633,24 +827,41 @@ public class BeamTextEdit: NSView, NSTextInputClient {
                 openCard(link)
                 return
             }
-            cursorPosition = positionAt(point: point)
-            rootNode.cancelSelection()
-            dragMode = .select(cursorPosition)
+
+            let clickPos = positionAt(point: point)
+            if event.modifierFlags.contains(.shift) {
+                dragMode = .select(rootNode.cursorPosition)
+                rootNode.extendSelection(to: clickPos)
+            } else {
+                rootNode.cursorPosition = clickPos
+                rootNode.cancelSelection()
+                dragMode = .select(rootNode.cursorPosition)
+            }
 
         } else {
             rootNode.doCommand(.selectAll)
         }
     }
 
+    var scrollToCursorAtLayout = false
     public func setHotSpotToCursorPosition() {
-        setHotSpot(rectAt(cursorPosition))
+        setHotSpot(rectAt(rootNode.cursorPosition).insetBy(dx: -30, dy: -30))
     }
 
     public func rectAt(_ position: Int) -> NSRect {
-        return node.rectAt(position)
+        let origin = node.offsetInDocument
+        return node.rectAt(position).offsetBy(dx: origin.x, dy: origin.y)
     }
 
+    var firstDrag = true
+    var ignoreFirstDrag = false
+
     override public func mouseDragged(with event: NSEvent) {
+        guard !(firstDrag && ignoreFirstDrag) else {
+            firstDrag = false
+            return
+        }
+
         //        window?.makeFirstResponder(self)
         let point = convert(event.locationInWindow)
 
@@ -659,14 +870,14 @@ public class BeamTextEdit: NSView, NSTextInputClient {
         }
 
         let p = positionAt(point: point)
-        cursorPosition = p
+        rootNode.cursorPosition = p
         switch dragMode {
         case .none:
             break
         case .select(let o):
-            selectedTextRange = node.text.clamp(p < o ? cursorPosition..<o : o..<cursorPosition)
+            selectedTextRange = node.text.clamp(p < o ? rootNode.cursorPosition..<o : o..<rootNode.cursorPosition)
         }
-        invalidate()
+        node.invalidate()
     }
 
     var hoveredNode: TextNode? {
@@ -700,14 +911,12 @@ public class BeamTextEdit: NSView, NSTextInputClient {
 
         _ = node.mouseMoved(mouseInfo: MouseInfo(node, point, event))
         _ = hoveredNode?.mouseMoved(mouseInfo: MouseInfo(hoveredNode!, point, event))
-
-        invalidate()
     }
 
     override public func mouseUp(with event: NSEvent) {
         let point = convert(event.locationInWindow)
         dragMode = .none
-        if node.mouseUp(mouseInfo: MouseInfo(node, point, event)) {
+        if nil != rootNode.dispatchMouseUp(mouseInfo: MouseInfo(rootNode, point, event)) {
             return
         }
         super.mouseUp(with: event)
@@ -721,6 +930,8 @@ public class BeamTextEdit: NSView, NSTextInputClient {
     public override func viewWillMove(toWindow newWindow: NSWindow?) {
         if let w = newWindow {
             w.acceptsMouseMovedEvents = true
+            rootNode.contentScale = w.backingScaleFactor
+            titleLayer.contentsScale = w.backingScaleFactor
         }
     }
 
@@ -731,45 +942,32 @@ public class BeamTextEdit: NSView, NSTextInputClient {
 
     public override var isFlipped: Bool { true }
 
-    public override func viewDidMoveToWindow() {
-        setupNotificationListeners()
+    // CALayerDelegate
+    let titlePadding = CGFloat(20)
+    public func layoutSublayers(of layer: CALayer) {
+        guard layer === self.layer else { return }
+        let h = title.frame.height
+        titleLayer.bounds = CGRect(x: 0, y: 0, width: leadingAlignment, height: h + 5)
+//        let x = leadingAlignment - title.frame.width - titlePadding
+        let y = topOffset
+        titleLayer.anchorPoint = NSPoint()
+        titleLayer.position = NSPoint(x: 0, y: y)
+//        print("titleFrame: \(titleLayer.bounds) / \(titleLayer.position) (hidden: \(titleLayer.isHidden))")
+
+        relayoutRoot()
     }
 
-    func setupNotificationListeners() {
-        let nc = NotificationCenter.default
+    public func draw(_ layer: CALayer, in context: CGContext) {
+        guard layer === self.titleLayer else { return }
 
-        guard let scrollView = enclosingScrollView else {
-            print("ScrollView not found")
-            return
-        }
-
-        nc.addObserver(
-            self,
-            selector: #selector(scrollViewWillStartLiveScroll(notification:)),
-            name: NSScrollView.willStartLiveScrollNotification,
-            object: scrollView
-        )
-
-        nc.addObserver(
-            self,
-            selector: #selector(scrollViewDidEndLiveScroll(notification:)),
-            name: NSScrollView.didEndLiveScrollNotification,
-            object: scrollView
-        )
-    }
-
-    @objc func scrollViewWillStartLiveScroll(notification: Notification) {
-        #if DEBUG
-        print("\(#function) ")
-        #endif
-        invalidate()
-    }
-
-    @objc func scrollViewDidEndLiveScroll(notification: Notification) {
-        #if DEBUG
-        print("\(#function) ")
-        #endif
-        invalidate()
+//        print("draw title into titleLayer: \(titleLayer.bounds) / \(titleLayer.position) (hidden: \(titleLayer.isHidden))")
+        context.saveGState()
+        context.textMatrix = CGAffineTransform.identity
+        let x = leadingAlignment - title.frame.width - titlePadding
+        let y = CGFloat(rootNode.children.first!.firstLineBaseline) //topOffset + rootNode.children.first!.firstLineBaseline
+        context.translateBy(x: x, y: y)
+        title.draw(context)
+        context.restoreGState()
     }
 
 }

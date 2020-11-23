@@ -4,6 +4,7 @@
 //
 //  Created by Sebastien Metrot on 21/09/2020.
 //
+// swiftlint:disable file_length
 
 import Foundation
 import Combine
@@ -15,81 +16,39 @@ enum Mode {
     case web
 }
 
-class BeamData: ObservableObject {
-    var _todaysNote: Note?
-    var todaysNote: Note {
-        if let note = _todaysNote, note.title == todaysName {
-            return note
-        }
+var runningOnBigSur: Bool = {
+    let version = ProcessInfo.processInfo.operatingSystemVersion
+    return version.majorVersion >= 11 || (version.majorVersion == 10 && version.minorVersion >= 16)
+}()
 
-        setupJournal()
-        return _todaysNote!
-    }
-    @Published var journal: [Note] = []
-
-    var searchKit: SearchKit
-
-    init() {
-        let paths = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true)
-        if let applicationSupportDirectory = paths.first {
-            let indexPath = URL(fileURLWithPath: applicationSupportDirectory + "/index.sk")
-            searchKit = SearchKit(indexPath)
-        } else {
-            searchKit = SearchKit(URL(fileURLWithPath: "~/Application Data/BeamApp/index.sk"))
-        }
-    }
-
-    var todaysName: String {
-        let fmt = DateFormatter()
-        let today = Date()
-        fmt.dateStyle = .long
-        fmt.doesRelativeDateFormatting = false
-        fmt.timeStyle = .none
-        return fmt.string(from: today)
-    }
-
-    func setupJournal() {
-        if let note = Note.fetchWithTitle(CoreDataManager.shared.mainContext, todaysName) {
-            print("Today's note loaded:\n\(note)\n")
-            _todaysNote = note
-        } else {
-            let note = Note.createNote(CoreDataManager.shared.mainContext, todaysName)
-            note.type = NoteType.journal.rawValue
-            let bullet = note.createBullet(CoreDataManager.shared.mainContext, content: "")
-            note.addToBullets(bullet)
-            _todaysNote = note
-            print("Today's note created:\n\(note)\n")
-
-            CoreDataManager.shared.save()
-        }
-
-        updateJournal()
-    }
-
-    func updateJournal() {
-        journal = Note.fetchAllWithType(CoreDataManager.shared.mainContext, .journal)
-        print("Journal updated:\n\(journal)\n")
-    }
-}
-
-class BeamState: ObservableObject {
-    @Published var mode: Mode = .note {
+@objc class BeamState: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
+    @Published var mode: Mode = .today {
         didSet {
+            switch oldValue {
+            // swiftlint:disable:next fallthrough no_fallthrough_only
+            case .note: fallthrough
+            case .today:
+                if mode == .web {
+                    currentTab?.startViewing()
+                }
+
+            case .web:
+                currentTab?.stopViewing()
+            }
             updateCanGoBackForward()
         }
     }
 
     func updateCanGoBackForward() {
         switch mode {
+        // swiftlint:disable:next fallthrough no_fallthrough_only
+        case .today: fallthrough
         case .note:
             canGoBack = !backForwardList.backList.isEmpty
             canGoForward = !backForwardList.forwardList.isEmpty
         case .web:
-            canGoBack = currentTab.canGoBack
-            canGoForward = currentTab.canGoForward
-        case .today:
-            canGoBack = false
-            canGoForward = false
+            canGoBack = currentTab?.canGoBack ?? false
+            canGoForward = currentTab?.canGoForward ?? false
         }
     }
 
@@ -115,6 +74,7 @@ class BeamState: ObservableObject {
     var data: BeamData
     @Published var currentNote: Note?
     @Published var backForwardList: NoteBackForwardList
+    @Published var isEditingOmniBarTitle = false
 
     @Published public var tabs: [BrowserTab] = [] {
         didSet {
@@ -140,20 +100,30 @@ class BeamState: ObservableObject {
             }
 
             if tabs.isEmpty {
-                mode = .note
+                if let note = currentNote {
+                    navigateToNote(note)
+                } else {
+                    navigateToJournal()
+                }
             }
         }
     }
-    @Published var currentTab = BrowserTab(originalQuery: "") // Fake empty tab by default
-    {
+    @Published var currentTab: BrowserTab? {
         didSet {
+            if self.mode == .web {
+                oldValue?.stopViewing()
+                currentTab?.startViewing()
+            }
+
             tabScope.removeAll()
-            currentTab.$canGoBack.sink { v in
+            currentTab?.$canGoBack.sink { v in
                 self.canGoBack = v
             }.store(in: &tabScope)
-            currentTab.$canGoForward.sink { v in
+            currentTab?.$canGoForward.sink { v in
                 self.canGoForward = v
             }.store(in: &tabScope)
+
+            isEditingOmniBarTitle = false
         }
     }
 
@@ -163,12 +133,21 @@ class BeamState: ObservableObject {
     func goBack() {
         guard canGoBack else { return }
         switch mode {
-        case .note:
-            currentNote = backForwardList.goBack()
-        case .web:
-            currentTab.webView.goBack()
+        // swiftlint:disable:next fallthrough no_fallthrough_only
+        case .note: fallthrough
         case .today:
-            break
+            if let back = backForwardList.goBack() {
+                switch back {
+                case .journal:
+                    mode = .today
+                    currentNote = nil
+                case let .note(note):
+                    currentNote = note
+                    mode = .note
+                }
+            }
+        case .web:
+            currentTab?.webView.goBack()
         }
         updateCanGoBackForward()
     }
@@ -176,12 +155,21 @@ class BeamState: ObservableObject {
     func goForward() {
         guard canGoForward else { return }
         switch mode {
-        case .note:
-            currentNote = backForwardList.goForward()
-        case .web:
-            currentTab.webView.goForward()
+        // swiftlint:disable:next fallthrough no_fallthrough_only
+        case .note: fallthrough
         case .today:
-            break
+            if let forward = backForwardList.goForward() {
+                switch forward {
+                case .journal:
+                    mode = .today
+                    currentNote = nil
+                case let .note(note):
+                    currentNote = note
+                    mode = .note
+                }
+            }
+        case .web:
+            currentTab?.webView.goForward()
         }
         updateCanGoBackForward()
     }
@@ -216,45 +204,110 @@ class BeamState: ObservableObject {
         }
     }
 
-    func navigateToNote(named: String) -> Bool {
-        print("load note named \(named)")
+    @discardableResult func navigateToNote(named: String) -> Bool {
+//        print("load note named \(named)")
         guard let note = Note.fetchWithTitle(CoreDataManager.shared.mainContext, named) else { return false }
+        return navigateToNote(note)
+    }
+
+    @discardableResult func navigateToNote(_ note: Note) -> Bool {
         completedQueries = []
         selectionIndex = nil
         searchQuery = ""
         mode = .note
 
         self.currentNote = note
-        backForwardList.push(note: note)
+
+        backForwardList.push(.note(note))
         updateCanGoBackForward()
         return true
     }
 
-    func createTab(withURL url: URL, originalQuery: String) {
-        let tab = BrowserTab(originalQuery: originalQuery)
+    @discardableResult func navigateToJournal() -> Bool {
+        completedQueries = []
+        selectionIndex = nil
+        searchQuery = ""
+        mode = .today
+
+        self.currentNote = nil
+
+        backForwardList.push(.journal)
+        updateCanGoBackForward()
+        return true
+    }
+
+    func createTab(withURL url: URL, originalQuery: String, createNote: Bool = true) {
+        let note = createNote ? (originalQuery.isEmpty ? data.todaysNote : createNoteForQuery(originalQuery)) : data.todaysNote
+        let tab = BrowserTab(state: self, originalQuery: originalQuery, note: note)
         tab.load(url: url)
         currentTab = tab
         tabs.append(tab)
         mode = .web
     }
 
-    func startQuery() {
-        let query = searchQuery
-        var searchText = query
-        let url = URL(string: searchText)
-
-        if url?.scheme == nil {
-            if navigateToNote(named: searchQuery) {
-                return
-            }
-
-            searchEngine.query = searchText
-            searchText = searchEngine.searchUrl
-            print("Start search query: \(searchText)")
+    func createNoteForQuery(_ query: String) -> Note {
+        let context = CoreDataManager.shared.mainContext
+        if let n = Note.fetchWithTitle(context, query) {
+            return n
         }
 
-        createTab(withURL: URL(string: searchText)!, originalQuery: query)
-//        currentNote = Note.createNote(CoreDataManager.shared.mainContext, query)
+        let n = Note.createNote(context, query)
+        n.score = Float(0) as NSNumber
+
+        let bulletStr = "[[\(query)]]"
+        if let bullet = self.data.todaysNote.rootBullets().first, bullet.content.isEmpty {
+            bullet.content = bulletStr
+        } else {
+            let bullet = self.data.todaysNote.createBullet(context, content: bulletStr)
+            bullet.score = Float(0) as NSNumber
+        }
+
+        return n
+    }
+
+    func startQuery() {
+        if let index = selectionIndex {
+            let query = completedQueries[index]
+            switch query.source {
+            case .autoComplete:
+                searchEngine.query = query.string
+//                print("Start search query: \(searchEngine.searchUrl)")
+                createTab(withURL: URL(string: searchEngine.searchUrl)!, originalQuery: query.string)
+                mode = .web
+
+            case .history:
+                createTab(withURL: URL(string: query.string)!, originalQuery: "")
+                mode = .web
+
+            case .note:
+                navigateToNote(named: searchQuery)
+            }
+
+            cancelAutocomplete()
+            return
+        }
+
+        var createNote = true
+        let url: URL = {
+            if searchQuery.maybeURL {
+                guard let u = URL(string: searchQuery) else {
+                    createNote = false
+                    return URL(string: "https://" + searchQuery)!
+                }
+
+                if u.scheme == nil {
+                    createNote = false
+                    return URL(string: "https://" + searchQuery)!
+                }
+                return u
+            }
+            searchEngine.query = searchQuery
+            return URL(string: searchEngine.searchUrl)!
+        }()
+//        print("Start query: \(url)")
+
+        createTab(withURL: url, originalQuery: searchQuery, createNote: createNote)
+        cancelAutocomplete()
         mode = .web
     }
 
@@ -264,43 +317,132 @@ class BeamState: ObservableObject {
         self.data = data
 //        self.currentNote = data.todaysNote
         backForwardList = NoteBackForwardList()
-
+        super.init()
         $searchQuery.sink { [weak self] query in
             guard let self = self else { return }
             guard self.searchQuerySelection == nil else { return }
             guard self.selectionIndex == nil else { return }
-            print("received auto complete query: \(query)")
+//            print("received auto complete query: \(query)")
 
-            if !(query.hasPrefix("http://") || query.hasPrefix("https://")) {
-                self.mode = .note
-            }
             self.completedQueries = []
 
             if !query.isEmpty {
-                let notes = Note.fetchAllWithTitleMatch(CoreDataManager.shared.mainContext, query)
+                let notes = Note.fetchAllWithTitleMatch(CoreDataManager.shared.mainContext, query).prefix(4) // limit to 8 results
                 notes.forEach {
                     let autocompleteResult = AutoCompleteResult(id: $0.id, string: $0.title, source: .note)
                     self.completedQueries.append(autocompleteResult)
-                    print("Found note \($0)")
+//                    print("Found note \($0)")
                 }
 
                 self.completer.complete(query: query)
                 let urls = self.data.searchKit.search(query)
-                for url in urls {
+                for url in urls.prefix(4) {
                     self.completedQueries.append(AutoCompleteResult(id: UUID(), string: url.description, source: .history))
                 }
             }
         }.store(in: &scope)
+
         completer.$results.receive(on: RunLoop.main).sink { [weak self] results in
             guard let self = self else { return }
             //print("received auto complete results: \(results)")
             self.selectionIndex = nil
-            self.completedQueries.append(contentsOf: results)
+            self.completedQueries.append(contentsOf: results.prefix(8))
         }.store(in: &scope)
+
+        backForwardList.push(.journal)
+
     }
 
     func resetQuery() {
         searchQuery = ""
+        completedQueries = []
+    }
+
+    func cookiesDidChange(in cookieStore: WKHTTPCookieStore) {
+        cookieStore.getAllCookies({ [weak self] cookies in
+            guard let self = self else { return }
+            for cookie in cookies {
+                self.data.cookies.setCookie(cookie)
+            }
+        })
+    }
+
+    func setup(webView: WKWebView) {
+        for cookie in self.data.cookies.cookies ?? [] {
+           webView.configuration.websiteDataStore.httpCookieStore.setCookie(cookie)
+        }
+        webView.configuration.websiteDataStore.httpCookieStore.add(self)
+    }
+
+    func startNewSearch() {
+        cancelAutocomplete()
+        currentNote = nil
+        resetQuery()
+        navigateToJournal()
+        BNSTextField.focusField(named: "OmniBarSearchBox")
+    }
+
+    func showNextTab() {
+        guard let tab = currentTab else { return }
+        if let i = tabs.firstIndex(of: tab) {
+            let i = (i + 1) % tabs.count
+            currentTab = tabs[i]
+        }
+    }
+
+    func showPreviousTab() {
+        guard let tab = currentTab else { return }
+        if let i = tabs.firstIndex(of: tab) {
+            let i = i - 1 < 0 ? tabs.count - 1 : i - 1
+            currentTab = tabs[i]
+        }
+    }
+
+    func closeCurrentTab() -> Bool {
+        if mode == .web {
+            guard let tab = currentTab else { return false }
+            tab.cancelObservers()
+
+            if let i = tabs.firstIndex(of: tab) {
+                tabs.remove(at: i)
+                let nextTabIndex = min(i, tabs.count - 1)
+                if nextTabIndex >= 0 {
+                    currentTab = tabs[nextTabIndex]
+                }
+
+                if tabs.isEmpty {
+                    if let note = currentNote {
+                        navigateToNote(note)
+                    } else {
+                        navigateToJournal()
+                    }
+                    currentTab = nil
+                }
+                return true
+            }
+        }
+
+        return false
+    }
+
+    func removeTab(_ index: Int) -> Bool {
+        let tab = tabs[index]
+        guard currentTab !== tab else { return closeCurrentTab() }
+
+        tab.cancelObservers()
+        tabs.remove(at: index)
+
+        return true
+    }
+
+    func resetAutocompleteSelection() {
+        searchQuerySelection = nil
+        selectionIndex = nil
+        BNSTextField.focusField(named: "OmniBarSearchBox")
+    }
+
+    func cancelAutocomplete() {
+        resetAutocompleteSelection()
         completedQueries = []
     }
 }

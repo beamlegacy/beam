@@ -9,9 +9,10 @@
 import Foundation
 import AppKit
 import NaturalLanguage
+import Combine
 
 // swiftlint:disable:next type_body_length
-public class TextNode: Equatable {
+public class TextNode: NSObject, CALayerDelegate {
     public static func == (lhs: TextNode, rhs: TextNode) -> Bool {
         return lhs === rhs
     }
@@ -21,14 +22,14 @@ public class TextNode: Equatable {
             guard oldValue != text else { return }
             bullet?.content = text
             CoreDataManager.shared.save()
-            invalidateTextRendering()
+            invalidateText()
         }
     }
 
     var placeholder: String = "" {
         didSet {
             guard oldValue != text else { return }
-            invalidateTextRendering()
+            invalidateText()
         }
     }
 
@@ -47,7 +48,10 @@ public class TextNode: Equatable {
         if let l = _language {
             return l
         }
-        _language = NLLanguageRecognizer.dominantLanguage(for: root.fullStrippedText)
+
+        if let root = root {
+            _language = NLLanguageRecognizer.dominantLanguage(for: root.fullStrippedText)
+        }
         return _language
     }
 
@@ -56,45 +60,83 @@ public class TextNode: Equatable {
     var isReferenceBranch: Bool {
         return isReference ? true : (parent?.isReferenceBranch ?? false)
     }
-    var open = true { didSet { invalidateLayout() } }
+    var open = true { didSet { invalidateLayout()
+        for c in children {
+            c.visible = open
+        }
+    } }
+    var selfVisible = true { didSet { invalidateLayout() } }
+    var visible = true {
+        didSet {
+            layer.isHidden = !visible
+        }
+    }
     var hover: Bool = false {
         didSet {
             invalidate()
         }
     }
-    var _attributedString: NSAttributedString?
-    var attributedString: NSAttributedString {
-        if let s = _attributedString {
-            return s
-        }
 
-        if text.isEmpty {
+    let layer: CALayer
+    var contentScale: CGFloat = 1 {
+        didSet {
+            layer.contentsScale = contentScale
+            for c in children {
+                c.contentScale = contentScale
+            }
+        }
+    }
+
+    private var _ast: Parser.Node?
+    private func buildAttributedString() -> NSAttributedString {
+        let config = AttributedStringVisitor.Configuration()
+        let visitor = AttributedStringVisitor(configuration: config)
+        visitor.defaultFontSize = fontSize
+        if text.isEmpty && cursorPosition < 0 {
             let attributed = placeholder.attributed
 
-            attributed.setAttributes([.font: NSFont.systemFont(ofSize: CGFloat(14)), .foregroundColor: disabledColor], range: attributed.wholeRange)
+            attributed.setAttributes([.font: visitor.font(for: visitor.context), .foregroundColor: disabledColor], range: attributed.wholeRange)
             _attributedString = attributed
             return attributed
         }
         let parser = Parser(inputString: text)
-        let AST = parser.parseAST()
+        _ast = parser.parseAST()
 
 //        print("AST:\n\(AST.treeString)")
 
-        let config = AttributedStringVisitor.Configuration()
-        let visitor = AttributedStringVisitor(configuration: config)
-        if root.node === self {
-            visitor.cursorPosition = cursorPosition
+        if root?.node === self && editor?.hasFocus ?? true {
+            visitor.cursorPosition = selectedTextRange.startIndex
+            visitor.anchorPosition = selectedTextRange.endIndex
         }
-        let str = visitor.visit(AST)
+        let str = visitor.visit(_ast!)
 
         let paragraphStyle = NSMutableParagraphStyle()
 //        paragraphStyle.alignment = .justified
         paragraphStyle.lineBreakMode = .byWordWrapping
         paragraphStyle.lineHeightMultiple = 1.56
+        paragraphStyle.lineSpacing = 40
 
         str.addAttribute(.paragraphStyle, value: paragraphStyle, range: str.wholeRange)
-        _attributedString = str
         return str
+    }
+
+    // update the internal attributed string and return true if it was changed
+    @discardableResult private func updateAttributedString() -> Bool {
+        let str = buildAttributedString()
+        if _attributedString?.isEqual(to: str) ?? false {
+            return false
+        }
+
+        _attributedString = str
+        return true
+    }
+
+    var _attributedString: NSAttributedString?
+    var attributedString: NSAttributedString {
+        if _attributedString == nil {
+            _attributedString = buildAttributedString()
+        }
+        return _attributedString!
     }
     var debug = false
 
@@ -106,7 +148,9 @@ public class TextNode: Equatable {
             p.removeChild(child)
         }
         children.append(child)
+        fakeLayoutChild(child)
         child.parent = self
+        invalidateLayout()
     }
 
     func removeChild(_ child: TextNode) {
@@ -114,6 +158,7 @@ public class TextNode: Equatable {
             node === child
         }
         child.parent = nil
+        invalidateLayout()
     }
 
     func delete() {
@@ -123,9 +168,19 @@ public class TextNode: Equatable {
 
     func insert(node: TextNode, after existingNode: TextNode) -> Bool {
         guard let pos = existingNode.indexInParent else { return false }
+        node.parent?.removeChild(node)
         children.insert(node, at: pos + 1)
+        fakeLayoutChild(node)
         node.parent = self
+        invalidateLayout()
         return true
+    }
+
+    func fakeLayoutChild(_ node: TextNode) {
+        // force layout on the child to have a valid initial flow
+        if node.parent == nil && node.frame.width == 0 && node.frame.height == 0 {
+            node.frame.size.width = 1
+        }
     }
 
     func setChild(_ node: TextNode, at index: Int) {
@@ -136,10 +191,11 @@ public class TextNode: Equatable {
         }
         children[index] = node
         node.parent = self
+        invalidateLayout()
     }
 
     var config: TextConfig {
-        root.config
+        root!.config
     }
 
     var color: NSColor { config.color }
@@ -149,11 +205,9 @@ public class TextNode: Equatable {
     var alpha: Float { config.alpha }
     var blendMode: CGBlendMode { config.blendMode }
 
-    var fHeight: Float { config.fHeight }
-
-    var selectedTextRange: Range<Int> { root.selectedTextRange }
-    var markedTextRange: Range<Int> { root.markedTextRange }
-    var cursorPosition: Int { root.cursorPosition }
+    var selectedTextRange: Range<Int> { root!.selectedTextRange }
+    var markedTextRange: Range<Int> { root!.markedTextRange }
+    var cursorPosition: Int { root!.cursorPosition }
 
     var enabled: Bool { editor?.enabled ?? true }
 
@@ -166,7 +220,10 @@ public class TextNode: Equatable {
         return NSRect(x: 0, y: 0, width: frame.width, height: frame.height)
     }
 
-    var disclosureButtonFrame = NSRect(x: 0, y: 0, width: 8, height: 8)
+    var disclosureButtonFrame: NSRect {
+        let r = (open ? disclosureOpenFrame : disclosureClosedFrame).frame
+        return r.offsetBy(dx: 0, dy: r.height).insetBy(dx: -4, dy: -4)
+    }
     var disclosurePressed = false
     var showDisclosureButton: Bool {
         depth > 0 && !children.isEmpty
@@ -178,7 +235,7 @@ public class TextNode: Equatable {
     var depth: Int { return allParents.count }
 
     var indent: CGFloat {
-        children.isEmpty ? 0 : 40
+        selfVisible ? 15 : 0
     }
 
     private var computedIdealSize = NSSize()
@@ -187,10 +244,40 @@ public class TextNode: Equatable {
         return computedIdealSize
     }
 
+    var frameAnimation: FrameAnimation?
+    var frameAnimationCancellable = Set<AnyCancellable>()
+    func cancelFrameAnimation() {
+        frameAnimation = nil
+        frameAnimationCancellable.removeAll()
+    }
+
     func setLayout(_ frame: NSRect) {
         self.frame = frame
-        invalidatedTextRendering = true
-        updateTextRendering()
+        needLayout = false
+        layer.bounds = textFrame
+        layer.position = frameInDocument.origin
+
+        layout(frame)
+    }
+
+//    public func layoutSublayers(of layer: CALayer) {
+//        for c in children {
+//            c.layer.bounds = CGRect(origin: CGPoint(), size: c.frame.size)
+//            c.layer.position = c.frame.origin
+//        }
+//    }
+
+    func layout(_ frame: NSRect) {
+        if self.currentFrameInDocument != frame {
+            if isEditing {
+//                print("Layout set: \(frame)")
+            }
+            invalidatedTextRendering = true
+            updateTextRendering()
+            invalidate() // invalidate before change
+            currentFrameInDocument = frame
+            invalidate()  // invalidate after the change
+        }
 
         var pos = NSPoint(x: CGFloat(childInset), y: self.textFrame.height)
         for c in children {
@@ -201,8 +288,6 @@ public class TextNode: Equatable {
 
             pos.y += childSize.height
         }
-
-        needLayout = false
     }
 
     var offsetInDocument: NSPoint { // the position in the global document
@@ -216,6 +301,8 @@ public class TextNode: Equatable {
         return NSRect(origin: offset, size: frame.size)
     }
 
+    var currentFrameInDocument = NSRect()
+
     var textFrameInDocument: NSRect {
         let offset = offsetInDocument
         return NSRect(origin: offset, size: textFrame.size)
@@ -228,28 +315,30 @@ public class TextNode: Equatable {
     }
 
     // swiftlint:disable:next cyclomatic_complexity
-    private func reparent() {
+    func reparent() {
+        defer {
+            for c in children {
+                c.reparent()
+            }
+        }
+
         guard let p = parent else {
             if !isReferenceBranch, let b = bullet {
                 b.parent?.removeFromChildren(b)
                 b.note?.removeFromBullets(b)
             }
 
-            for c in children {
-                c.reparent()
-            }
-
             invalidateRoot()
             return
         }
 
-        guard let b = bullet else {
-            defer {
-                for c in children {
-                    c.reparent()
-                }
+        layer.contentsScale = p.layer.contentsScale
+        if let superLayer = p.editor?.layer {
+            if layer.superlayer != superLayer {
+                superLayer.addSublayer(layer)
             }
-
+        }
+        guard let b = bullet else {
             // there is no bullet so we must create one if the parent has one
             if !isReferenceBranch, p.bullet != nil {
                 bullet = p.bullet?.note?.createBullet(coreDataManager.mainContext, content: text, createdAt: Date(), afterBullet: previousSibblingNode()?.bullet, parentBullet: p.bullet)
@@ -280,19 +369,17 @@ public class TextNode: Equatable {
     }
 
     var editor: BeamTextEdit? {
-        return root.editor
+        return root?.editor
     }
 
     private var _root: TextRoot?
-    var root: TextRoot {
+    var root: TextRoot? {
         if let r = _root {
             return r
         }
-        assert(parent != nil)
-        let p = parent!
-        _root = p.root
-        assert(_root != nil)
-        return _root!
+        guard let parent = parent else { return nil }
+        _root = parent.root
+        return _root
     }
 
     private func invalidateRoot() {
@@ -309,6 +396,10 @@ public class TextNode: Equatable {
             !char.isNewline
         }) ?? "<empty debug>"
 
+        layer = CALayer()
+        super.init()
+        configureLayer()
+
 //        print("MD: \(bullet.orderIndex) \(node.text)")
         for child in bullet?.sortedChildren() ?? [] {
             addChild(TextNode(bullet: child, recurse: true))
@@ -320,75 +411,116 @@ public class TextNode: Equatable {
         self.text = staticText
 //        print("MD: \(bullet.orderIndex) \(node.text)")
         //layout = Font.system(size: 1).draw(string: "", textWidth: 0)
+
+        layer = CALayer()
+//        layer.backgroundColor = NSColor.red.cgColor.copy(alpha: 0.1)
+        super.init()
+        configureLayer()
+    }
+
+    func configureLayer() {
+        let newActions = [
+                "onOrderIn": NSNull(),
+                "onOrderOut": NSNull(),
+                "sublayers": NSNull(),
+                "contents": NSNull(),
+                "bounds": NSNull()
+            ]
+        layer.actions = newActions
+        layer.anchorPoint = CGPoint()
+        layer.setNeedsDisplay()
+//        layer.backgroundColor = NSColor.red.cgColor.copy(alpha: 0.1)
+        layer.backgroundColor = NSColor(white: 1, alpha: 0).cgColor
+        layer.opacity = 1.0
+        layer.delegate = self
     }
 
     var readOnly: Bool = false
-    var isEditing: Bool { root.node === self }
-    var childInset: Float {
-        if depth == 0 && children.first?.showDisclosureButton ?? false {
-            return 0
-        } else {
-            return 40
-        }
-    }
+    var isEditing: Bool { root?.node === self }
+    var childInset = Float(20)
 
     private var needLayout = true
     func invalidateLayout() {
+        invalidate()
         guard !needLayout else { return }
         needLayout = true
         guard let p = parent else { return }
         p.invalidateLayout()
     }
 
-    private var needRedraw = true
-    func invalidate() {
-        guard !needRedraw else { return }
-        needRedraw = true
+    func invalidate(_ rect: NSRect? = nil) {
         guard let p = parent else { return }
-        p.invalidate()
+        layer.setNeedsDisplay()
+        let offset = NSPoint(x: frame.origin.x + currentFrameInDocument.origin.x - frameInDocument.origin.x,
+                             y: frame.origin.y + currentFrameInDocument.origin.y - frameInDocument.origin.y)
+        if let r = rect {
+            p.invalidate(r.offsetBy(dx: offset.x, dy: offset.y))
+        } else {
+            let r = NSRect(x: offset.x, y: offset.y, width: currentFrameInDocument.width, height: textFrame.maxY)
+            p.invalidate(r)
+        }
     }
 
-    lazy var downTriangle = { NSImage(named: "arrowtriangle.down.fill")!.cgImage }()
-    lazy var rightTriangle = { NSImage(named: "arrowtriangle.right.fill")!.cgImage }()
+    var fontSize: CGFloat { isBig ? 16 : 14 }
 
-    lazy var symbolFont = NSFont.systemFont(ofSize: 8)
+    static func symbolFont(_ size: CGFloat) -> NSFont {
+        return NSFont.systemFont(ofSize: size)
+    }
 
-    func symbolFrame(_ string: String) -> TextFrame {
+    static func symbolFrame(_ size: CGFloat, _ string: String) -> TextFrame {
         let symbol = string.attributed
         let attribs: [NSAttributedString.Key: Any] = [
-            .font: symbolFont,
+            .font: symbolFont(size),
             .foregroundColor: NSColor(named: "EditorControlColor")!
         ]
         symbol.setAttributes(attribs, range: symbol.wholeRange)
-        return Font.draw(string: symbol, atPosition: NSPoint(), textWidth: 8)
+        return Font.draw(string: symbol, atPosition: NSPoint(x: 2, y: -2), textWidth: 8)
     }
 
-    lazy var disclosureClosedFrame = symbolFrame("􀄧")
-    lazy var disclosureOpenFrame = symbolFrame("􀄥")
-    lazy var bulletPointFrame = symbolFrame("􀜞")
+    static var disclosureClosedFrameSmall = symbolFrame(7, "􀄧")
+    static var disclosureOpenFrameSmall = symbolFrame(7, "􀄥")
+    static var bulletPointFrameSmall = symbolFrame(7, "􀜞")
+    static var disclosureClosedFrameBig = symbolFrame(7, "􀄧")
+    static var disclosureOpenFrameBig = symbolFrame(7, "􀄥")
+    static var bulletPointFrameBig = symbolFrame(7, "􀜞")
+
+    var isBig: Bool {
+        editor?.isBig ?? false
+    }
+
+    var disclosureClosedFrame: TextFrame { isBig ? Self.disclosureClosedFrameBig : Self.disclosureClosedFrameSmall }
+    var disclosureOpenFrame: TextFrame { isBig ? Self.disclosureOpenFrameBig : Self.disclosureOpenFrameSmall }
+    var bulletPointFrame: TextFrame { isBig ? Self.bulletPointFrameBig : Self.bulletPointFrameSmall }
 
     func drawDisclosure(at point: NSPoint, in context: CGContext) {
+//        context.setFillColor(gray: 0.5, alpha: 0.5)
+//        context.fill(disclosureButtonFrame)
         let symbol = open ? disclosureOpenFrame : disclosureClosedFrame
         context.saveGState()
-        context.translateBy(x: point.x + 2, y: point.y + 9)
+        context.translateBy(x: point.x, y: point.y)
         symbol.draw(context)
         context.restoreGState()
+
     }
 
     func drawBulletPoint(at point: NSPoint, in context: CGContext) {
         context.saveGState()
-        context.translateBy(x: point.x + 2, y: point.y + 9)
+        context.translateBy(x: point.x, y: point.y)
         bulletPointFrame.draw(context)
         context.restoreGState()
     }
 
     func drawDebug(in context: CGContext) {
+        if frameAnimation != nil {
+            context.setFillColor(NSColor.blue.cgColor.copy(alpha: 0.2)!)
+            context.fill(NSRect(origin: NSPoint(), size: textFrame.size))
+        }
         // draw debug:
         guard debug, hover || isEditing else { return }
 
         let c = isEditing ? NSColor.red.cgColor : NSColor.gray.cgColor
         context.setStrokeColor(c)
-        let bounds = NSRect(origin: CGPoint(), size: frame.size)
+        let bounds = NSRect(origin: CGPoint(), size: currentFrameInDocument.size)
         context.stroke(bounds)
 
         context.setFillColor(c.copy(alpha: 0.2)!)
@@ -406,6 +538,16 @@ public class TextNode: Equatable {
         }
     }
 
+    var interlineFactor = CGFloat(1.56)
+    var firstLineHeight: CGFloat { layout?.lines.first?.bounds.height ?? CGFloat(fontSize * interlineFactor) }
+    var firstLineBaseline: CGFloat {
+        if let h = layout?.lines.first?.typographicBounds.ascent {
+            return CGFloat(h)
+        }
+        let f = AttributedStringVisitor.font(fontSize)
+        return f.ascender
+    }
+
     func drawText(in context: CGContext) {
         // Draw the text:
         context.saveGState()
@@ -414,8 +556,8 @@ public class TextNode: Equatable {
                 context.saveGState()
                 if showIdentationLine {
                     context.setFillColor(NSColor(named: "EditorTextRectangleBackgroundColor")!.cgColor)
-                    let y = layout!.frame.height
-                    let r = NSRect(x: 3, y: y + 3, width: 1, height: frame.height - y - 6)
+                    let y = textFrame.height
+                    let r = NSRect(x: 5, y: y + 3, width: 1, height: currentFrameInDocument.height - y - 6)
                     context.fill(r)
 
                 }
@@ -424,36 +566,42 @@ public class TextNode: Equatable {
             }
         }
 
-        if !text.isEmpty {
-            if showDisclosureButton {
-                drawDisclosure(at: NSPoint(x: indent - 42, y: 3), in: context)
-            }
-
-            drawBulletPoint(at: NSPoint(x: indent - 20, y: 3), in: context)
+        let offset = NSPoint(x: 0, y: firstLineBaseline)
+        if showDisclosureButton {
+            drawDisclosure(at: NSPoint(x: offset.x, y: offset.y), in: context)
+        } else {
+            drawBulletPoint(at: NSPoint(x: offset.x, y: offset.y), in: context)
         }
-//        context.textPosition = NSPoint()
+
         context.textMatrix = CGAffineTransform.identity
-        context.translateBy(x: 0, y: CGFloat(fHeight))
+        context.translateBy(x: 0, y: firstLineBaseline)
 
         layout?.draw(context)
         context.restoreGState()
     }
 
-    public func draw(in context: CGContext, visibleRect: NSRect) {
-        defer { needRedraw = false }
+    public func draw(_ layer: CALayer, in ctx: CGContext) {
+        draw(in: ctx)
+    }
+
+    public func draw(in context: CGContext) {
+        context.saveGState()
+        context.translateBy(x: indent, y: 0)
+
+//        context.translateBy(x: currentFrameInDocument.origin.x, y: currentFrameInDocument.origin.y)
+//        if debug {
+//            print("debug \(self)")
+//        }
+
         updateTextRendering()
 
         drawDebug(in: context)
 
-        guard localFrame.intersects(visibleRect) else {
-//            print("Skip \(frame) doesn't intersect \(visibleRect)")
-            return
-        }
-//        print("Draw text \(frame) intersects \(visibleRect)")
+        if selfVisible {
+    //        print("Draw text \(frame))")
 
-        context.saveGState(); defer { context.restoreGState() }
+            context.saveGState(); defer { context.restoreGState() }
 
-        if localFrame.intersects(visibleRect) {
             drawSelection(in: context)
 
             drawText(in: context)
@@ -461,36 +609,38 @@ public class TextNode: Equatable {
             if isEditing {
                 drawCursor(in: context)
             }
-
         }
-
-        if open {
-            drawChildren(in: context, visibleRect: visibleRect)
-        }
-    }
-
-    func drawChildren(in context: CGContext, visibleRect: NSRect) {
-        for c in children {
-            drawChild(c, in: context, visibleRect: visibleRect)
-        }
-    }
-
-    func drawChild(_ child: TextNode, in context: CGContext, visibleRect: NSRect) {
-        context.saveGState()
-        context.translateBy(x: child.frame.origin.x, y: child.frame.origin.y)
-
-        var vis = visibleRect
-        vis.origin.x -= child.frame.origin.x
-        vis.origin.y -= child.frame.origin.y
-        child.draw(in: context, visibleRect: vis)
         context.restoreGState()
     }
 
     var invalidatedTextRendering = true
     func invalidateTextRendering() {
         invalidatedTextRendering = true
-        _attributedString = nil
         invalidateLayout()
+    }
+
+    func invalidateText() {
+        if parent == nil {
+            _attributedString = nil
+            return
+        }
+        if updateAttributedString() {
+            invalidateTextRendering()
+        }
+    }
+
+    func deepInvalidateTextRendering() {
+        invalidateTextRendering()
+        for c in children {
+            c.deepInvalidateTextRendering()
+        }
+    }
+
+    func deepInvalidateText() {
+        invalidateText()
+        for c in children {
+            c.deepInvalidateText()
+        }
     }
 
     public func drawMarkee(_ context: CGContext, _ start: Int, _ end: Int, _ color: NSColor) {
@@ -506,31 +656,36 @@ public class TextNode: Equatable {
 
         if startLine == endLine {
             // Selection begins and ends on the same line:
-            let markRect = NSRect(x: xStart, y: line1.frame.minY, width: xEnd - xStart, height: line1.frame.height)
+            let markRect = NSRect(x: xStart, y: line1.frame.minY, width: xEnd - xStart, height: line1.bounds.height)
             context.addRect(markRect)
         } else {
-            let markRect1 = NSRect(x: xStart, y: line1.frame.minY, width: frame.width - xStart, height: line1.frame.height )
+            let markRect1 = NSRect(x: xStart, y: line1.frame.minY, width: frame.width - xStart, height: line2.frame.minY - line1.frame.minY )
             context.addRect(markRect1)
 
             if startLine + 1 != endLine {
                 // bloc doesn't end on the line directly below the start line, so be need to joind the start and end lines with a big rectangle
-                let markRect2 = NSRect(x: 0, y: line1.frame.minY, width: frame.width, height: line2.imageBounds.minY - line1.imageBounds.maxY)
+                let markRect2 = NSRect(x: 0, y: line1.frame.maxY, width: frame.width, height: line2.frame.minY - line1.frame.maxY)
                 context.addRect(markRect2)
             }
 
-            let markRect3 = NSRect(x: 0, y: line2.frame.minY, width: xEnd, height: CGFloat(line2.frame.height) + 1)
+            let markRect3 = NSRect(x: 0, y: line1.frame.maxY, width: xEnd, height: CGFloat(line2.frame.maxY - line1.frame.maxY) + 1)
             context.addRect(markRect3)
         }
 
         context.drawPath(using: .fill)
     }
 
+    let smallCursorWidth = CGFloat(2)
+    let bigCursorWidth = CGFloat(7)
+    var maxCursorWidth: CGFloat { max(smallCursorWidth, bigCursorWidth) }
+
     func drawCursor(in context: CGContext) {
         // Draw fake cursor if the text is empty
         if text.isEmpty {
             guard editor?.hasFocus ?? false, editor?.blinkPhase ?? false else { return }
 
-            let cursorRect = NSRect(x: 0, y: 0, width: 7, height: fHeight )
+            let f = AttributedStringVisitor.font(fontSize)
+            let cursorRect = NSRect(x: indent, y: 0, width: 7, height: CGFloat(f.ascender - f.descender))
 
             context.beginPath()
             context.addRect(cursorRect)
@@ -540,7 +695,6 @@ public class TextNode: Equatable {
             //list.draw(shape: shape, fill: fill, alpha: 1.0, blendMode: .normal)
             context.drawPath(using: .fill)
             return
-
         }
 
         guard let editor = editor else { return }
@@ -551,7 +705,7 @@ public class TextNode: Equatable {
         let line = layout!.lines[cursorLine]
         let pos = cursorPosition
         let x1 = offsetAt(index: pos)
-        let cursorRect = NSRect(x: x1, y: line.frame.minY, width: cursorPosition == text.count ? 7 : 2, height: line.frame.height )
+        let cursorRect = NSRect(x: x1, y: line.frame.minY, width: cursorPosition == text.count ? bigCursorWidth : smallCursorWidth, height: line.bounds.height)
 
         context.beginPath()
         context.addRect(cursorRect)
@@ -567,18 +721,23 @@ public class TextNode: Equatable {
         if invalidatedTextRendering {
             textFrame = NSRect()
 
-//            if !text.isEmpty {
-                layout = Font.draw(string: attributedString, atPosition: NSPoint(x: indent, y: 0), textWidth: frame.width - indent)
+            if selfVisible {
+                let attrStr = attributedString
+                layout = Font.draw(string: attrStr, atPosition: NSPoint(x: indent, y: 0), textWidth: frame.width - indent, interlineFactor: interlineFactor)
                 textFrame = layout!.frame
-//            }
+
+                if attrStr.string.isEmpty {
+                    let f = AttributedStringVisitor.font(fontSize)
+                    textFrame.size.height = CGFloat(f.ascender - f.descender) * interlineFactor
+                }
+            }
+            textFrame.size.width += maxCursorWidth
+            textFrame = textFrame.rounded()
             invalidatedTextRendering = false
         }
 
         computedIdealSize = textFrame.size
-        if !text.isEmpty {
-            computedIdealSize.height = max(CGFloat(fHeight), computedIdealSize.height)
-            computedIdealSize.width = frame.width
-        }
+        computedIdealSize.width = frame.width
 
         if open {
             for c in children {
@@ -613,15 +772,17 @@ public class TextNode: Equatable {
             return 0
         }
 
-        for (i, l) in layout!.lines.enumerated() where point.y < l.frame.minY + CGFloat(fHeight) {
+        for (i, l) in layout!.lines.enumerated() where point.y < l.frame.minY + CGFloat(fontSize) {
             return i
         }
 
-        return min(Int(y / CGFloat(fHeight)), layout!.lines.count - 1)
+        return min(Int(y / CGFloat(fontSize)), layout!.lines.count - 1)
     }
 
     public func lineAt(index: Int) -> Int? {
-        guard let layout = layout else { return nil }
+        guard index >= 0 else { return nil }
+        guard let layout = layout else { return 0 }
+        guard !layout.lines.isEmpty else { return 0 }
         for (i, l) in layout.lines.enumerated() where index < l.range.lowerBound {
             return i - 1
         }
@@ -653,29 +814,46 @@ public class TextNode: Equatable {
 
     public func positionAt(point: NSPoint) -> Int {
         guard layout != nil, !layout!.lines.isEmpty else { return 0 }
-        let _point = NSPoint(x: point.x + indent, y: point.y)
-        let line = lineAt(point: _point)
-        let l = layout!.lines[line]
-        let displayIndex = l.stringIndexFor(position: _point)
+        let line = lineAt(point: point)
+        let lines = layout!.lines
+        let l = lines[line]
+        let displayIndex = l.stringIndexFor(position: point)
         let res = sourceIndexFor(displayIndex: displayIndex)
+
+        if l.isAfterEndOfLine(point) {
+            // find position after all enclosing syntax
+            if let leaf = _ast!.nodeContainingPosition(res),
+               let syntax = leaf.enclosingSyntaxNode {
+                return syntax.end
+            }
+        } else if l.isBeforeStartOfLine(point) {
+            // find position before all enclosing syntax
+            if let leaf = _ast!.nodeContainingPosition(res),
+               let syntax = leaf.enclosingSyntaxNode {
+                return syntax.start
+            }
+        }
+
         return res
     }
 
     public func linkAt(point: NSPoint) -> URL? {
         guard layout != nil, !layout!.lines.isEmpty else { return nil }
-        let _point = NSPoint(x: point.x - indent, y: point.y)
-        let line = lineAt(point: _point)
+        let line = lineAt(point: point)
+        guard line >= 0 else { return nil }
         let l = layout!.lines[line]
-        let displayIndex = l.stringIndexFor(position: _point)
+        guard l.frame.minX < point.x && l.frame.maxX > point.x else { return nil } // don't find links outside the line
+        let displayIndex = l.stringIndexFor(position: point)
         let pos = min(displayIndex, attributedString.length - 1)
         return attributedString.attribute(.link, at: pos, effectiveRange: nil) as? URL
     }
 
     public func internalLinkAt(point: NSPoint) -> String? {
-        let _point = NSPoint(x: point.x - indent, y: point.y)
-        let line = lineAt(point: _point)
+        let line = lineAt(point: point)
+        guard line >= 0 else { return nil }
         let l = layout!.lines[line]
-        let displayIndex = l.stringIndexFor(position: _point)
+        guard l.frame.minX <= point.x && l.frame.maxX >= point.x else { return nil } // don't find links outside the line
+        let displayIndex = l.stringIndexFor(position: point)
         let pos = min(displayIndex, attributedString.length - 1)
         return attributedString.attribute(.link, at: pos, effectiveRange: nil) as? String
     }
@@ -715,7 +893,7 @@ public class TextNode: Equatable {
         let layoutLine = layout!.lines[line]
         let positionInLine = displayIndex
         let result = layoutLine.offsetFor(index: positionInLine)
-        return indent + CGFloat(result)
+        return CGFloat(result)
     }
 
     public func positionAbove(_ position: Int) -> Int {
@@ -738,20 +916,59 @@ public class TextNode: Equatable {
     }
 
     public func isOnLastLine(_ position: Int) -> Bool {
+        guard let layout = layout else { return true }
+        guard layout.lines.count > 1 else { return true }
         guard let l = lineAt(index: position) else { return false }
-        return l == layout!.lines.count - 1
+        return l == layout.lines.count - 1
     }
 
     public func rectAt(_ position: Int) -> NSRect {
         updateTextRendering()
         guard let l = lineAt(index: position) else { return NSRect() }
         let x1 = offsetAt(index: position)
-        return NSRect(x: Float(x1), y: Float(l) * fHeight, width: 1.5, height: fHeight )
+        return NSRect(x: x1, y: CGFloat(l) * fontSize, width: 1.5, height: fontSize )
+    }
+
+    func dispatchMouseDown(mouseInfo: MouseInfo) -> TextNode? {
+        guard NSRect(origin: NSPoint(), size: frame.size).contains(mouseInfo.position) else { return nil }
+        if mouseDown(mouseInfo: mouseInfo) {
+            return self
+        }
+
+        for c in children {
+            var i = mouseInfo
+            i.position.x -= c.frame.origin.x
+            i.position.y -= c.frame.origin.y
+            if let d = c.dispatchMouseDown(mouseInfo: i) {
+                return d
+            }
+        }
+
+        return nil
+    }
+
+    func dispatchMouseUp(mouseInfo: MouseInfo) -> TextNode? {
+        guard NSRect(origin: NSPoint(), size: frame.size).contains(mouseInfo.position) else { return nil }
+        if mouseUp(mouseInfo: mouseInfo) {
+            return self
+        }
+
+        for c in children {
+            var i = mouseInfo
+            i.position.x -= c.frame.origin.x
+            i.position.y -= c.frame.origin.y
+            if let d = c.dispatchMouseUp(mouseInfo: i) {
+                return d
+            }
+        }
+
+        return nil
     }
 
     func mouseDown(mouseInfo: MouseInfo) -> Bool {
+//        print("mouseDown (\(mouseInfo))")
         if showDisclosureButton && disclosureButtonFrame.contains(mouseInfo.position) {
-            print("disclosure pressed (\(open))")
+//            print("disclosure pressed (\(open))")
             disclosurePressed = true
             return true
         }
@@ -759,10 +976,15 @@ public class TextNode: Equatable {
     }
 
     func mouseUp(mouseInfo: MouseInfo) -> Bool {
+//        print("mouseUp (\(mouseInfo))")
         if disclosurePressed && disclosureButtonFrame.contains(mouseInfo.position) {
-            print("disclosure unpressed (\(open))")
+//            print("disclosure unpressed (\(open))")
             disclosurePressed = false
             open.toggle()
+
+            if !open && root?.node.allParents.contains(self) ?? false {
+                root?.focus(node: self)
+            }
             return true
         }
         return false
@@ -871,11 +1093,7 @@ public class TextNode: Equatable {
             let sibblings = p.children
             if let i = sibblings.firstIndex(of: self) {
                 if i > 0 {
-                    var node = sibblings[i - 1]
-                    while node.children.count != 0 {
-                        node = node.children.last!
-                    }
-                    return node
+                    return sibblings[i - 1]
                 }
             }
         }
@@ -911,11 +1129,32 @@ public class TextNode: Equatable {
         return n as? TextRoot == nil ? n : nil
     }
 
+    func beginningOfLineFromPosition(_ position: Int) -> Int {
+        if let l = lineAt(index: position) {
+            return layout!.lines[l].range.lowerBound
+        }
+        return 0
+    }
+
+    func endOfLineFromPosition(_ position: Int) -> Int {
+        guard layout?.lines.count != 1 else {
+            return text.count
+        }
+        if let l = lineAt(index: position) {
+            let off = l < layout!.lines.count - 1 ? -1 : 0
+            return layout!.lines[l].range.upperBound + off
+        }
+        return text.count
+    }
+
     public func indexOnLastLine(atOffset x: CGFloat) -> Int {
         guard let lines = layout?.lines else { return 0 }
         guard !lines.isEmpty else { return 0 }
         guard let line = lines.last else { return 0 }
         let displayIndex = line.stringIndexFor(position: NSPoint(x: x, y: 0))
+        if displayIndex == line.range.upperBound {
+            return endOfLineFromPosition(displayIndex)
+        }
         let sourceIndex = sourceIndexFor(displayIndex: displayIndex)
         return sourceIndex
     }
@@ -925,6 +1164,9 @@ public class TextNode: Equatable {
         guard !lines.isEmpty else { return 0 }
         guard let line = lines.first else { return 0 }
         let displayIndex = line.stringIndexFor(position: NSPoint(x: x, y: 0))
+        if displayIndex == line.range.upperBound {
+            return endOfLineFromPosition(displayIndex)
+        }
         let sourceIndex = sourceIndexFor(displayIndex: displayIndex)
         return sourceIndex
     }
@@ -942,5 +1184,22 @@ public class TextNode: Equatable {
 
     var coreDataManager: CoreDataManager {
         return parent!.coreDataManager
+    }
+
+    func fold() {
+        if children.isEmpty {
+            guard let p = parent else { return }
+            p.fold()
+            root?.node = p
+            root?.cursorPosition = 0
+            return
+        }
+
+        open = false
+    }
+
+    func unfold() {
+        guard !children.isEmpty else { return }
+        open = true
     }
 }

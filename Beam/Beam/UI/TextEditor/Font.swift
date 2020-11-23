@@ -50,15 +50,25 @@ public class TextLine {
     }
 
     var imageBounds: NSRect {
-        CTLineGetImageBounds(ctLine, nil)
+        return CTLineGetImageBounds(ctLine, nil)
+            .offsetBy(dx: frame.origin.x, dy: frame.origin.y)
     }
 
     func stringIndexFor(position: NSPoint) -> Int {
-        CTLineGetStringIndexForPosition(ctLine, position)
+        let pos = NSPoint(x: position.x - frame.origin.x, y: position.y - frame.origin.y)
+        return CTLineGetStringIndexForPosition(ctLine, pos)
+    }
+
+    func isAfterEndOfLine(_ point: NSPoint) -> Bool {
+        return (point.x - frame.origin.x) >= frame.maxX
+    }
+
+    func isBeforeStartOfLine(_ point: NSPoint) -> Bool {
+        return (point.x - frame.origin.x) <= frame.minX
     }
 
     func offsetFor(index: Int) -> Float {
-        Float(CTLineGetOffsetForStringIndex(ctLine, index, nil))
+        Float(frame.origin.x) + Float(CTLineGetOffsetForStringIndex(ctLine, index, nil))
     }
 
     struct Caret {
@@ -69,28 +79,39 @@ public class TextLine {
     var carets: [Caret] {
         var c = [Caret]()
         CTLineEnumerateCaretOffsets(ctLine) { (offset, index, leading, _) in
-            c.append(Caret(offset: Float(offset), index: index, isLeadingEdge: leading))
+            c.append(Caret(offset: Float(self.frame.origin.x) + Float(offset), index: index, isLeadingEdge: leading))
         }
 
         return c
     }
 
     func draw(_ context: CGContext) {
-        CTLineDraw(ctLine, context)
-    }
+        context.saveGState()
+        context.textPosition = NSPoint()//line.frame.origin
+        context.translateBy(x: frame.origin.x, y: frame.origin.y)
+        context.scaleBy(x: 1, y: -1)
 
+        CTLineDraw(ctLine, context)
+
+        context.restoreGState()
+    }
 }
+
 public class TextFrame {
-    init(ctFrame: CTFrame, position: NSPoint) {
+    init(ctFrame: CTFrame, position: NSPoint, attributedString: NSAttributedString) {
         self.ctFrame = ctFrame
         self.position = position
+        self.attributedString = attributedString
         layout()
     }
+
+    var attributedString: NSAttributedString
 
     var debug: Bool { lines.count > 1 }
     var ctFrame: CTFrame
     var position: NSPoint
     var lines = [TextLine]()
+    var interlineFactor = CGFloat(1.56)
 
     var range: Range<Int> {
         let r = CTFrameGetStringRange(ctFrame)
@@ -118,6 +139,10 @@ public class TextFrame {
             minY = min(minY, r.minY)
             maxY = max(maxY, r.maxY)
         }
+        if let lastFrame = lines.last?.frame {
+            maxY = max(maxY, lastFrame.origin.y + lastFrame.height * interlineFactor)
+        }
+
         return NSRect(x: position.x + minX, y: position.y + minY, width: maxX - minX, height: maxY - minY)
     }
 
@@ -137,39 +162,45 @@ public class TextFrame {
             let line = lines[i]
             let textPos = lineOrigins[i]
             let x = textPos.x
-            //            let y = f.maxY - textPos.y + CGFloat(line.bounds.descent)
-            let y = Y// + CGFloat(line.bounds.ascent)
-            line.frame = NSRect(x: x, y: y, width: line.bounds.width, height: line.bounds.height)
+            //let y = f.maxY - textPos.y + CGFloat(line.bounds.descent)
 
-            Y += line.frame.height
-            //            if debug {
-            //                print("     line[\(i)] frame \(line.frame) (textPos \(textPos)")
-            //            }
+            var offset = CGFloat(0)
+            let attribs = attributedString.attributes(at: line.range.lowerBound, effectiveRange: nil)
+            if let heading = attribs.compactMap({ key, value in
+                // swiftlint:disable:next force_cast
+                return key == NSAttributedString.Key.heading ? (value as! Int) : nil
+            }).first {
+                if heading == 1 {
+                    Y += 10
+                } else if heading == 2 {
+                    Y += 15
+                }
+                offset = 5
+            }
+
+            let y = Y // + CGFloat(line.bounds.ascent)
+
+            line.frame = NSRect(x: position.x + x, y: position.y + y, width: line.bounds.width, height: line.bounds.height)
+
+            Y += line.frame.height * interlineFactor + offset
+            //if debug {
+            //print("     line[\(i)] frame \(line.frame) (textPos \(textPos)")
+            //}
         }
         if debug {
-            //            print("layout frame \(frame)")
+            //print("layout frame \(frame)")
         }
     }
 
     func draw(_ context: CGContext) {
         if debug {
-            //            print("draw frame \(ctFrame)")
+            //print("draw frame \(ctFrame)")
         }
 
-        #if false
-        CTFrameDraw(ctFrame, context)
-        return
-        #else
         for line in lines {
-            context.saveGState()
-            context.textPosition = NSPoint()//line.frame.origin
-            context.translateBy(x: position.x + line.frame.origin.x, y: position.y + line.frame.origin.y)
-            context.scaleBy(x: 1, y: -1)
 
             line.draw(context)
-            context.restoreGState()
         }
-        #endif
     }
 }
 
@@ -248,7 +279,7 @@ public class Font {
         return Self.draw(string: attrString, atPosition: NSPoint(), textWidth: textWidth)
     }
 
-    class func draw(string: NSAttributedString, atPosition position: NSPoint, textWidth: CGFloat) -> TextFrame {
+    class func draw(string: NSAttributedString, atPosition position: NSPoint, textWidth: CGFloat, interlineFactor: CGFloat = 1.0) -> TextFrame {
         assert(textWidth != 0)
         //        print("Font create frame with width \(textWidth) for string '\(string)'")
         let framesetter = CTFramesetterCreateWithAttributedString(string)
@@ -269,7 +300,9 @@ public class Font {
 
         //        print("TextFrame: \(frame)")
 
-        let f = TextFrame(ctFrame: frame, position: position)
+        let f = TextFrame(ctFrame: frame, position: position, attributedString: string)
+        f.interlineFactor = interlineFactor
+
         if f.debug {
             //            print("Font created frame \(f)")
         }

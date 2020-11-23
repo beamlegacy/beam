@@ -2,12 +2,12 @@
   "object": {
     "pins": [
       {
-        "package": "Down",
-        "repositoryURL": "https://github.com/5sw/Down.git",
+        "package": "FavIcon",
+        "repositoryURL": "https://github.com/leonbreedt/FavIcon.git",
         "state": {
-          "branch": "sequence",
-          "revision": "02f8185d26c0d3f7093beb6fccdf5903576d2ad6",
-          "version": null
+          "branch": null,
+          "revision": "5bf16aad3ea543891eaef7e8da2aa2f6bb29e6e4",
+          "version": "3.1.0"
         }
       },
       {
@@ -17,15 +17,6 @@
           "branch": null,
           "revision": "774dc9c7213085db8aa59595e27c1cd22e428904",
           "version": "2.3.2"
-        }
-      },
-      {
-        "package": "VisualEffects",
-        "repositoryURL": "https://github.com/twostraws/VisualEffects.git",
-        "state": {
-          "branch": null,
-          "revision": "8ff7f90f9650d9db5774275d0b1f07ef642ecf4d",
-          "version": "1.0.3"
         }
       }
     ]

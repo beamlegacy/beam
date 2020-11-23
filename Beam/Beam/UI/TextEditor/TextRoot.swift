@@ -12,7 +12,7 @@ public struct TextState {
     var text: String = ""
     var selectedTextRange: Range<Int> = 0..<0
     var markedTextRange: Range<Int> = 0..<0
-    var cursorPosition: Int = 0
+    var cursorPosition: Int = -1
 }
 
 public struct TextConfig {
@@ -63,6 +63,10 @@ public class TextRoot: TextNode {
         }
         set {
             state.cursorPosition = newValue
+            node.invalidateText()
+            node.invalidate()
+            editor?.reBlink()
+            editor?.setHotSpotToCursorPosition()
         }
     }
 
@@ -70,7 +74,17 @@ public class TextRoot: TextNode {
         return node.text.substring(range: selectedTextRange)
     }
 
-    var _editor: BeamTextEdit?
+    var _editor: BeamTextEdit? {
+        didSet {
+            if let e = _editor {
+                if let w = e.window {
+                    self.contentScale = w.backingScaleFactor
+                }
+                reparent()
+            }
+
+        }
+    }
     override var editor: BeamTextEdit? {
         return _editor
     }
@@ -90,6 +104,10 @@ public class TextRoot: TextNode {
 
     var node: TextNode! {
         didSet {
+            oldValue.invalidateText()
+            oldValue.invalidate()
+            node.invalidateText()
+            node.invalidate()
             cancelSelection()
         }
     }
@@ -98,14 +116,19 @@ public class TextRoot: TextNode {
         editor?.invalidateLayout()
     }
 
-    override func invalidate() {
-        editor?.invalidate()
+    override func invalidate(_ rect: NSRect? = nil) {
+        if let r = rect {
+            editor?.invalidate(r.offsetBy(dx: currentFrameInDocument.minX, dy: currentFrameInDocument.minY))
+        } else {
+            editor?.invalidate(textFrame.offsetBy(dx: currentFrameInDocument.minX, dy: currentFrameInDocument.minY))
+        }
     }
 
     init(_ manager: CoreDataManager, note: Note) {
         self._coreDataManager = manager
         super.init(bullet: nil, recurse: false)
         self.note = note
+        self.selfVisible = false
 
         self.text = ""
 
@@ -119,7 +142,7 @@ public class TextRoot: TextNode {
             addChild(TextNode(bullet: bullet, recurse: true))
         }
 
-        children.first?.placeholder = (note.type == NoteType.journal.rawValue) ? "This is the journal, you can type anything here!" : "..."
+        children.first?.placeholder = (note.type == NoteType.journal.rawValue && note === AppDelegate.main.data.todaysNote) ? "This is the journal, you can type anything here!" : "..."
 
         if let linkedRefs = note.linkedReferences, !linkedRefs.isEmpty {
             let node = TextNode(staticText: "Linked references")
@@ -144,8 +167,11 @@ public class TextRoot: TextNode {
         }
 
         node = children.first ?? self
+        childInset = 0
 
-        print("created RootNode \(note.title) with \(children.count) main bullets")
+        layer.backgroundColor = NSColor.blue.cgColor.copy(alpha: 0.2)
+
+//        print("created RootNode \(note.title) with \(children.count) main bullets")
     }
 
     var linkedRefsNode: TextNode?
@@ -155,6 +181,11 @@ public class TextRoot: TextNode {
         return String.tabs(level) + note.title + "\n" + children.reduce("", { result, child -> String in
             result + child.printTree(level: level + 1)
         })
+    }
+
+    func focus(node: TextNode) {
+        self.node = node
+        cursorPosition = 0
     }
 
     var lastCommand: TextRoot.Command = .none

@@ -6,49 +6,64 @@
 //
 
 import SwiftUI
-import VisualEffects
 
 struct ModeView: View {
     @EnvironmentObject var state: BeamState
     @ViewBuilder
     var body: some View {
-        VStack {
-            ZStack {
-                VisualEffectBlur(material: .headerView, blendingMode: .withinWindow, state: .active)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-
-                OmniBar(tab: state.currentTab)
-                    .padding(.leading, 73)
-                    .padding(.trailing, 20)
-                    .frame(alignment: .center)
-            }.frame(height: 52)
-
-            ZStack {
-                if state.mode == .web {
-                    VStack {
-                        BrowserTabBar(tabs: $state.tabs, currentTab: $state.currentTab)
-                        WebView(webView: state.currentTab.webView)
+        GeometryReader { geometry in
+            VStack(spacing: 0) {
+                ZStack {
+                    if !(state.isEditingOmniBarTitle || state.mode == .today) {
+                        if let tab = state.currentTab {
+                            GlobalTabTitle(tab: tab, isEditing: $state.isEditingOmniBarTitle)
+                                .frame(width: geometry.size.width * 0.5, height: 52, alignment: .center)
+                        }
                     }
-                    .transition(.move(edge: .bottom))
-                    .animation(.easeInOut(duration: 0.3))
-                } else {
-                    GeometryReader { geometry in
-                        ScrollView([.vertical]) {
-                            ZStack {
-                                if let note = state.currentNote {
-                                    NoteView(note: note)
-                                } else {
-                                    JournalView(journal: state.data.journal, offset: geometry.size.height * 0.4)
-                                }
-                                AutoCompleteView(autoComplete: $state.completedQueries, selectionIndex: $state.selectionIndex)
-                                    .frame(idealWidth: 800, maxWidth: .infinity, idealHeight: 600, maxHeight: .infinity, alignment: .center)
+
+                    OmniBar()
+                        .padding(.leading, 73)
+                        .padding(.trailing, 20)
+                        .frame(height: 52, alignment: .center)
+                }
+
+                ZStack {
+                    switch state.mode {
+                    case .web:
+                        VStack(spacing: 0) {
+                            BrowserTabBar(tabs: $state.tabs, currentTab: $state.currentTab)
+                                .frame(width: geometry.size.width, height: 28)
+
+                            if let tab = state.currentTab {
+                                WebView(webView: tab.webView)
                             }
+                        }
+                        .transition(.move(edge: .bottom))
+                        .animation(.easeInOut(duration: 0.3))
+                        .zIndex(1)
+                    case .note:
+                        ZStack {
+                            NoteView(note: state.currentNote!, showTitle: false, scrollable: true)
+                        }
+                        .transition(.opacity)
+                        .animation(.easeInOut(duration: 0.3))
+                    case .today:
+                        GeometryReader { geometry in
+                            JournalView(journal: state.data.journal, offset: geometry.size.height * 0.4)
+                        }
+                    }
+
+                    if !state.searchQuery.isEmpty && !state.completedQueries.isEmpty {
+                        ScrollView {
+                            AutoCompleteView(autoComplete: $state.completedQueries, selectionIndex: $state.selectionIndex)
+                                .frame(minHeight: 20, maxHeight: 250, alignment: .top)
+                                .zIndex(2)
                         }
                     }
                 }
             }
-        }
-        .background(Color.white)
+            .background(Color("EditorBackgroundColor"))
+        }.frame(minWidth: 822)
     }
 }
 

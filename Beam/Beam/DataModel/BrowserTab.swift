@@ -9,16 +9,23 @@ import Foundation
 import SwiftUI
 import Combine
 import WebKit
-import SwiftSoup
+import FavIcon
 
-class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate, WKUIDelegate {
+class FullScreenWKWebView: WKWebView {
+//    override var safeAreaInsets: NSEdgeInsets {
+//        return NSEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+//    }
+}
+
+class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler {
     var id: UUID
 
     public func load(url: URL) {
+        self.url = url
         webView.load(URLRequest(url: url))
     }
 
-    @Published public var webView: WKWebView {
+    @Published public var webView: WKWebView! {
         didSet {
             setupObservers()
         }
@@ -33,8 +40,14 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
     @Published var serverTrust: SecTrust?
     @Published var canGoBack: Bool = false
     @Published var canGoForward: Bool = false
-    @Published var backForwardList: WKBackForwardList
+    @Published var backForwardList: WKBackForwardList!
     @Published var visitedURLs = Set<URL>()
+    @Published var favIcon: NSImage?
+
+    @Published var privateMode = false
+
+    var state: BeamState!
+
     var note: Note?
     var bullet: Bullet?
 
@@ -48,35 +61,39 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
 
     private var scope = Set<AnyCancellable>()
 
-    init(originalQuery: String, id: UUID = UUID(), webView: WKWebView? = nil ) {
+    override init() {
+        self.id = UUID()
+        super.init()
+    }
+
+    class var webViewConfiguration: WKWebViewConfiguration {
+        let config = WKWebViewConfiguration()
+        config.applicationNameForUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_0) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Safari/605.1.15"
+        config.preferences.javaScriptEnabled = true
+        config.preferences.javaScriptCanOpenWindowsAutomatically = false
+        config.preferences.tabFocusesLinks = true
+        config.defaultWebpagePreferences.preferredContentMode = .desktop
+        return config
+    }
+
+    init(state: BeamState, originalQuery: String, note: Note?, id: UUID = UUID(), webView: WKWebView? = nil ) {
+        self.state = state
         self.id = id
+        self.note = note
         self.originalQuery = originalQuery
 
-        if !originalQuery.isEmpty {
-            self.note = {
-                if let n = Note.fetchWithTitle(CoreDataManager.shared.mainContext, originalQuery) {
-                    return n
-                }
-
-                let n = Note.createNote(CoreDataManager.shared.mainContext, originalQuery)
-                n.score = Float(0) as NSNumber
-                return n
-            }()
-            bullet = self.note?.createBullet(CoreDataManager.shared.mainContext, content: "visiting...")
+        if !originalQuery.isEmpty, self.note != nil {
+            bullet = self.note!.createBullet(CoreDataManager.shared.mainContext, content: "visiting...")
         }
 
         if let w = webView {
             self.webView = w
             backForwardList = w.backForwardList
         } else {
-            let configuration = WKWebViewConfiguration()
-            configuration.applicationNameForUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_0) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Safari/605.1.15"
-            configuration.preferences.javaScriptEnabled = true
-            configuration.preferences.javaScriptCanOpenWindowsAutomatically = false
-            configuration.preferences.tabFocusesLinks = true
-            configuration.defaultWebpagePreferences.preferredContentMode = .desktop
+            let web = FullScreenWKWebView(frame: NSRect(), configuration: Self.webViewConfiguration)
+            web.wantsLayer = true
 
-            let web = WKWebView(frame: NSRect(), configuration: configuration)
+            state.setup(webView: web)
             backForwardList = web.backForwardList
             self.webView = web
         }
@@ -87,9 +104,31 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
 
     private func updateBullet() {
         if let url = url {
-            self.bullet?.content = "visit [\(self.title)](\(url.absoluteString))"
+            let name = title.isEmpty ? url.absoluteString : title
+            self.bullet?.content = "[\(name)](\(url.absoluteString))"
         }
     }
+
+    private func updateFavIcon() {
+        guard let url = url else { favIcon = nil; return }
+        do {
+            try FavIcon.downloadPreferred(url, width: 16, height: 16) { [weak self] result in
+                guard let self = self else { return }
+
+                if case let .success(image) = result {
+                  // On iOS, this is a UIImage, do something with it here.
+                  // This closure will be executed on the main queue, so it's safe to touch
+                  // the UI here.
+                    self.favIcon = image
+                } else {
+                    self.favIcon = nil
+                }
+            }
+        } catch {
+            self.favIcon = nil
+        }
+    }
+
     private func setupObservers() {
         webView.publisher(for: \.title).sink { v in
             self.title = v ?? "loading..."
@@ -98,6 +137,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
         webView.publisher(for: \.url).sink { v in
             self.url = v
             self.updateBullet()
+            self.updateFavIcon()
         }.store(in: &scope)
         webView.publisher(for: \.isLoading).sink { v in withAnimation { self.isLoading = v } }.store(in: &scope)
         webView.publisher(for: \.estimatedProgress).sink { v in withAnimation { self.estimatedProgress = v } }.store(in: &scope)
@@ -109,9 +149,23 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
 
         webView.navigationDelegate = self
         webView.uiDelegate = self
+
+        self.webView.configuration.userContentController.add(self, name: TextSelectedMessage)
+        self.webView.configuration.userContentController.add(self, name: OnScrolledMessage)
+
+        let messageHandler = LoggingMessageHandler()
+        messageHandler.tab = self
+        self.webView.configuration.userContentController.add(messageHandler, name: "logging")
+        self.webView.configuration.userContentController.addUserScript(WKUserScript(source: overrideConsole, injectionTime: .atDocumentStart, forMainFrameOnly: true))
     }
 
-    func injectJSInPage() {
+    func cancelObservers() {
+        scope.removeAll()
+        webView.navigationDelegate = nil
+        webView.uiDelegate = nil
+
+        self.webView.configuration.userContentController.removeScriptMessageHandler(forName: TextSelectedMessage)
+        self.webView.configuration.userContentController.removeScriptMessageHandler(forName: OnScrolledMessage)
     }
 
     // WKNavigationDelegate:
@@ -131,8 +185,10 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
 
             if navigationAction.modifierFlags.contains(.command) != isSearchResult {
                 // Create new tab
-                let newWebView = WKWebView(frame: NSRect(), configuration: webView.configuration)
-                let newTab = BrowserTab(originalQuery: originalQuery, webView: newWebView)
+                let newWebView = FullScreenWKWebView(frame: NSRect(), configuration: Self.webViewConfiguration)
+                newWebView.wantsLayer = true
+                state.setup(webView: newWebView)
+                let newTab = BrowserTab(state: state, originalQuery: originalQuery, note: note, webView: newWebView)
                 newTab.load(url: targetURL)
                 onNewTabCreated(newTab)
                 decisionHandler(.cancel, preferences)
@@ -160,67 +216,59 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
     func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
     }
 
-    #if false
-    class textNodeVisitor: SwiftSoup.NodeVisitor {
-        init() {
-        }
-        public func head(_ node: Node, _ depth: Int) {
-            if let textNode = (node as? TextNode) {
-                let string = textNode.getWholeText()
-                //                print("Node[\(depth)]: \(string)\n")
-            } else if let element = (node as? Element) {
-                //                if !accum.isEmpty &&
-                //                    (element.isBlock() || element.nodeName() == "br") &&
-                //                    !TextNode.lastCharIsWhitespace(accum) {
-                ////                    accum.append(" ")
-                //                }
-            }
-        }
+    lazy var overrideConsole: String = { loadJS(from: "OverrideConsole") }()
 
-        public func tail(_ node: Node, _ depth: Int) {
+    let enableJavascriptLogs = true
+
+    class LoggingMessageHandler: NSObject, WKScriptMessageHandler {
+        weak var tab: BrowserTab?
+
+        func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+            if tab?.enableJavascriptLogs ?? false {
+                print(message.body)
+            }
         }
     }
 
-    class NodeTraversor {
-        private let visitor: NodeVisitor
+    let TextSelectedMessage = "beam_textSelected"
+    let OnScrolledMessage = "beam_onScrolled"
+    func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+        switch message.name {
+        case TextSelectedMessage:
+            guard let dict = message.body as? [String: AnyObject],
+//                  let selectedText = dict["selectedText"] as? String,
+                  let selectedHtml = dict["selectedHtml"] as? String,
+                  !selectedHtml.isEmpty
+            else { return }
+//            print("Text selected: \(selectedText)")
+//            print("Html selected: \(selectedHtml)")
 
-        /**
-         * Create a new traversor.
-         * @param visitor a class implementing the {@link NodeVisitor} interface, to be called when visiting each node.
-         */
-        public init(_ visitor: NodeVisitor) {
-            self.visitor = visitor
-        }
+            let text = html2Md(url: webView.url!, html: selectedHtml)
 
-        /**
-         * Start a depth-first traverse of the root and all of its descendants.
-         * @param root the root node point to traverse.
-         */
-        open func traverse(_ root: Node?)throws {
-            var node: Node? = root
-            var depth: Int = 0
+//            print("html to MD (\(url)): \(text)")
 
-            while node != nil {
-                try visitor.head(node!, depth)
-                if node!.childNodeSize() > 0 {
-                    node = node!.childNode(0)
-                    depth += 1
-                } else {
-                    while node!.nextSibling() == nil && depth > 0 {
-                        try visitor.tail(node!, depth)
-                        node = node!.parent()
-                        depth -= 1
-                    }
-                    try visitor.tail(node!, depth)
-                    if node === root {
-                        break
-                    }
-                    node = node!.nextSibling()
+            // now add a bullet point with the quoted text:
+            if let urlString = webView.url?.absoluteString, let title = webView.title {
+                guard let url = urlString.markdownizedURL else { return }
+                let quote = "> \(text) - from [\(title)](\(url))"
+
+                DispatchQueue.main.async {
+                    _ = self.note?.createBullet(CoreDataManager.shared.mainContext, content: quote, createdAt: Date(), afterBullet: nil, parentBullet: nil)
                 }
             }
+        case OnScrolledMessage:
+            guard let dict = message.body as? [String: AnyObject],
+//                  let selectedText = dict["selectedText"] as? String,
+                let x = dict["x"] as? Double,
+                let y = dict["y"] as? Double
+            else { return }
+            print("Web Scrolled: \(x), \(y)")
+        default:
+            break
         }
     }
-    #endif
+
+    lazy var jsSelectionObserver: String = { loadJS(from: "SelectionObserver") }()
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         if let url = webView.url {
@@ -235,23 +283,13 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
                 }
             }
         }
-        #if false
-        webView.evaluateJavaScript("document.body.innerHTML") { (string, _) in
-            if let html = string as? String {
-                do {
-                    let doc: Document = try SwiftSoup.parse(html)
-                    //                    let text = try doc.text()
-                    try NodeTraversor(textNodeVisitor()).traverse(doc)
 
-                    //                    print("==============================\nAll the text in the document:\n\(text)")
-                } catch Exception.Error(let type, let message) {
-                    print("SwiftSoup Error(\(type)): \(message)")
-                } catch {
-                    print("error")
-                }
+        webView.evaluateJavaScript(jsSelectionObserver) { (_, err) in
+            if let err = err {
+                print("Error installing JS selection observer \(err)")
             }
+            return
         }
-        #endif
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
@@ -266,8 +304,10 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
 
     // WKUIDelegate
     func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
-        let newWebView = WKWebView(frame: NSRect(), configuration: configuration)
-        let newTab = BrowserTab(originalQuery: originalQuery, webView: newWebView)
+        let newWebView = FullScreenWKWebView(frame: NSRect(), configuration: configuration)
+        newWebView.wantsLayer = true
+        state.setup(webView: newWebView)
+        let newTab = BrowserTab(state: state, originalQuery: originalQuery, note: self.note, webView: newWebView)
         onNewTabCreated(newTab)
 
         return newTab.webView
@@ -278,19 +318,23 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
     }
 
     func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping () -> Void) {
-        print("webView runJavaScriptAlertPanelWithMessage")
+        print("webView runJavaScriptAlertPanelWithMessage \(message)")
+        completionHandler()
     }
 
     func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (Bool) -> Void) {
-        print("webView runJavaScriptConfirmPanelWithMessage")
+        print("webView runJavaScriptConfirmPanelWithMessage \(message)")
+        completionHandler(true)
     }
 
     func webView(_ webView: WKWebView, runJavaScriptTextInputPanelWithPrompt prompt: String, defaultText: String?, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (String?) -> Void) {
-        print("webView runJavaScriptTextInputPanelWithPrompt")
+        print("webView runJavaScriptTextInputPanelWithPrompt \(prompt) default: \(defaultText ?? "")")
+        completionHandler(nil)
     }
 
     func webView(_ webView: WKWebView, runOpenPanelWith parameters: WKOpenPanelParameters, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping ([URL]?) -> Void) {
         print("webView runOpenPanel")
+        completionHandler(nil)
     }
 
     func startViewing() {

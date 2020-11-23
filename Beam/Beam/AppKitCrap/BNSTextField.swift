@@ -11,6 +11,11 @@ import Combine
 import SwiftUI
 
 class BNSTextField: NSTextView, ObservableObject, NSTextViewDelegate {
+    static var fields: [String: BNSTextField] = [:]
+    class func focusField(named name: String) {
+        guard let field = Self.fields[name] else { return }
+        field.window?.makeFirstResponder(field)
+    }
     var value: Binding<String> = .constant("")
     public var onEditingChanged: (Bool) -> Void = { _ in }
     public var inSelectionUpdate: Bool = false
@@ -23,12 +28,13 @@ class BNSTextField: NSTextView, ObservableObject, NSTextViewDelegate {
     public var onCommit: () -> Void = { }
     public var onPerformKeyEquivalent: (NSEvent) -> Bool = { _ in return false }
     public var focusOnCreation: Bool!
+    public var name: String?
 
     override public init(frame frameRect: NSRect, textContainer container: NSTextContainer?) {
         super.init(frame: frameRect, textContainer: container)
     }
 
-    public init(string stringValue: Binding<String>, focusOnCreation: Bool = false) {
+    public init(string stringValue: Binding<String>, focusOnCreation: Bool = false, name: String? = nil) {
         super.init(frame: NSRect())
         self.focusOnCreation = focusOnCreation
         self.value = stringValue
@@ -38,10 +44,26 @@ class BNSTextField: NSTextView, ObservableObject, NSTextViewDelegate {
         self.font = NSFont.systemFont(ofSize: 16)
         self.backgroundColor = NSColor(named: "transparent")!
         self.delegate = self
+        self.name = name
+        if let n = self.name {
+            Self.fields[n] = self
+        }
+
+        self.maxSize = NSSize(width: CGFloat.infinity, height: CGFloat.infinity)
+        self.isHorizontallyResizable = true
+        self.textContainer?.widthTracksTextView = false
+        self.textContainer?.containerSize = NSSize(width: CGFloat.infinity, height: CGFloat.infinity)
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    deinit {
+        guard let n = name else { return }
+        DispatchQueue.main.async {
+            Self.fields.removeValue(forKey: n)
+        }
     }
 
     override func mouseDown(with event: NSEvent) {
@@ -86,14 +108,16 @@ class BNSTextField: NSTextView, ObservableObject, NSTextViewDelegate {
         return super.performKeyEquivalent(with: event)
     }
 
+    var firstPass = true
     override func viewDidMoveToWindow() {
-        if focusOnCreation {
+        if focusOnCreation, firstPass {
             //self.window?.initialFirstResponder = self
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
                 self.window?.makeFirstResponder(self)
             }
         }
+        firstPass = false
     }
 
     @objc func commit(_ sender: AnyObject) {

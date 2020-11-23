@@ -10,6 +10,7 @@ import AppKit
 
 extension NSAttributedString.Key {
     static let sourcePos = NSAttributedString.Key(rawValue: "beamSourcePos")
+    static let heading = NSAttributedString.Key(rawValue: "beamHeading")
 }
 
 extension String {
@@ -46,7 +47,7 @@ class AttributedStringVisitor {
         var bold = false
         var italic = false
         var link = LinkType.off
-        var color: NSColor?
+        var color = NSColor(named: "EditorTextColor")!
         var showMD = true
         var quoteLevel = 0
         var headingLevel = 0
@@ -57,41 +58,28 @@ class AttributedStringVisitor {
         }
     }
 
-//    private var contextStack: [Context]
-//    var context: Context {
-//        return contextStack.last!
-//    }
-
     var cursorPosition: Int = -1
-
+    var anchorPosition: Int = -1
     var configuration: Configuration
+    var defaultFontSize = CGFloat(16)
+
+    class func font(_ size: CGFloat? = nil, weight: NSFont.Weight = .regular) -> NSFont {
+        return NSFont.systemFont(ofSize: size ?? CGFloat(12), weight: weight)
+    }
+
+    func font(for context: Context) -> NSFont {
+        let fontSizes = [ defaultFontSize, defaultFontSize + 2, defaultFontSize]
+        let bold = context.bold || context.headingLevel != 0
+        var f = Self.font(CGFloat(fontSizes[context.headingLevel]), weight: bold ? .bold : .regular)
+        if context.italic || context.quoteLevel != 0 {
+            f = NSFontManager.shared.convert(f, toHaveTrait: .italicFontMask)
+        }
+
+        return f
+    }
+
     private func attribs(for node: Parser.Node, context: Context) -> [NSAttributedString.Key: Any] {
-        let h = context.headingLevel != 0 ?
-            (14 - context.headingLevel * 4)
-            : 0
-        let bold = context.bold || h != 0
-        var font = NSFont.systemFont(ofSize: CGFloat(14 + h), weight: bold ? .bold : .regular)
         var attr = [NSAttributedString.Key: Any]()
-
-        var foregroundColor = NSColor(named: "EditorTextColor")!
-
-        if context.quoteLevel != 0 {
-            foregroundColor = .gray
-        }
-
-        if context.link != .off {
-            switch context.link {
-            case .bidirectionalLink:
-                foregroundColor = NSColor(named: "EditorBidirectionalLinkColor")!
-            case .hyperLink:
-                foregroundColor = NSColor(named: "EditorLinkColor")!
-            default:
-                break
-            }
-            attr[.underlineStyle] = NSNumber(value: NSUnderlineStyle.single.rawValue)
-        } else if let color = context.color {
-            foregroundColor = color
-        }
 
         if context.headingLevel == 1 {
             attr[.baselineOffset] = -10
@@ -99,12 +87,8 @@ class AttributedStringVisitor {
             attr[.baselineOffset] = -15
         }
 
-        if context.italic || context.quoteLevel != 0 {
-            font = NSFontManager.shared.convert(font, toHaveTrait: .italicFontMask)
-        }
-
-        attr[.foregroundColor] = foregroundColor
-        attr[.font] = font
+        attr[.foregroundColor] = context.color
+        attr[.font] = font(for: context)
 
         return attr
     }
@@ -113,7 +97,12 @@ class AttributedStringVisitor {
         self.configuration = configuration
     }
 
-    // swiftlint:disable:next cyclomatic_complexity
+    enum Order {
+        case pre
+        case post
+    }
+
+    // swiftlint:disable:next cyclomatic_complexity function_body_length
     func visitChildren(_ node: Parser.Node, _ applyAttributes: Bool) -> NSMutableAttributedString {
         let decorate: Bool = {
             guard context.showMD else { return false }
@@ -133,41 +122,43 @@ class AttributedStringVisitor {
             attributed.append(str)
         }
 
-        if applyAttributes {
-            attributed = attributed.replaceAttributes(attribs(for: node, context: context))
+        let f = font(for: context)
+        var heading = 0
+        switch node.type {
+        case .embed:
+            attributed.insert(node.prefix(decorate, f), at: 0)
+        case .emphasis:
+            attributed.append(node.suffix(decorate, f))
+            attributed.insert(node.prefix(decorate, f), at: 0)
+        case .heading(let h):
+            attributed.insert(node.prefix(decorate, f), at: 0)
+            heading = h
+        case .internalLink:
+            attributed.insert(node.prefix(decorate, f), at: 0)
+            attributed.append(node.suffix(decorate, f))
+        case .link:
+            attributed.insert(node.prefix(decorate, f), at: 0)
+            attributed.append(node.suffix(decorate, f))
+        case .quote:
+            attributed.insert(node.prefix(decorate, f), at: 0)
+        case .strong:
+            attributed.insert(node.prefix(decorate, f), at: 0)
+            attributed.append(node.suffix(decorate, f))
+        case .newLine:
+            break
+        case .text:
+            break
         }
 
-        if decorate {
-            switch node.type {
-            case .embed:
-                attributed.insert(node.prefix, at: 0)
-            case .emphasis:
-                attributed.append(node.suffix)
-                attributed.insert(node.prefix, at: 0)
-            case .heading:
-                attributed.insert(node.prefix, at: 0)
-            case .internalLink:
-                attributed.insert(node.prefix, at: 0)
-                attributed.append(node.suffix)
-            case .link:
-                attributed.insert(node.prefix, at: 0)
-                attributed.append(node.suffix)
-            case .quote:
-                attributed.insert(node.prefix, at: 0)
-            case .strong:
-                attributed.insert(node.prefix, at: 0)
-                attributed.append(node.suffix)
-            case .newLine:
-                break
-            case .text:
-                break
-            }
+        if heading != 0 {
+            attributed.addAttribute(.heading, value: NSNumber(value: heading), range: attributed.wholeRange)
         }
+
         return attributed
     }
 
     var context = Context()
-    var contextStack = [Context()]
+    var contextStack = [Context]()
 
     func pushContext() {
         contextStack.append(context)
@@ -175,7 +166,7 @@ class AttributedStringVisitor {
 
     func popContext() {
         context = contextStack.last!
-        _ = contextStack.dropLast()
+        contextStack = contextStack.dropLast()
     }
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
@@ -185,7 +176,7 @@ class AttributedStringVisitor {
             context.showMD = showMD
         }
 
-        context.showMD = node.contains(position: cursorPosition)
+        context.showMD = node.contains(position: cursorPosition) || node.contains(position: anchorPosition)
         switch node.type {
         case let .text(str):
             if str.isEmpty {
@@ -206,6 +197,7 @@ class AttributedStringVisitor {
         case let .link(link):
             pushContext(); defer { popContext() }
             context.link = .hyperLink
+            context.color = NSColor(named: "EditorLinkColor")!
             let str = visitChildren(node, false)
             if let url = URL(string: link) {
                 str.addAttribute(.link, value: url as NSURL, range: str.wholeRange)
@@ -217,21 +209,26 @@ class AttributedStringVisitor {
         case let .internalLink(link):
             pushContext(); defer { popContext() }
             context.link = .bidirectionalLink
-            let str = link.attributed.addAttributes(attribs(for: node, context: context))
-            str.addAttribute(.link, value: link, range: str.wholeRange)
-            return str
+            context.color = NSColor(named: "EditorBidirectionalLinkColor")!
+            let attributedLink = link.attributed(node, context.showMD, attribs(for: node, context: context))
+            let f = font(for: context)
+            attributedLink.addAttribute(.link, value: link, range: attributedLink.wholeRange)
+            attributedLink.insert(node.prefix(context.showMD, f), at: 0)
+            attributedLink.append(node.suffix(context.showMD, f))
+            return attributedLink
+
+        case .embed:
+            return "<IMG>".attributed
 
         case let .heading(depth):
             pushContext(); defer { popContext() }
             context.headingLevel = depth
             return visitChildren(node, true)
 
-        case .embed:
-            return "<IMG>".attributed
-
         case let .quote(depth):
             pushContext(); defer { popContext() }
             context.quoteLevel = depth
+            context.color = .gray
             return visitChildren(node, true)
 
         case .newLine:
