@@ -179,11 +179,21 @@ public struct BTextEditScrollable: NSViewRepresentable {
 }
 
 // swiftlint:disable type_body_length
-public class BeamTextEdit: NSView, NSTextInputClient {
+public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     public init(root: TextRoot, font: Font = Font.main) {
         self.config.font = font
         rootNode = root
         super.init(frame: NSRect())
+        let l = CALayer()
+        self.layer = l
+        l.backgroundColor = NSColor(named: "EditorBackgroundColor")!.cgColor
+        l.addSublayer(titleLayer)
+        //titleLayer.backgroundColor = NSColor.red.cgColor.copy(alpha: 0.2)
+        titleLayer.backgroundColor = NSColor(white: 1, alpha: 0).cgColor
+        titleLayer.setNeedsDisplay()
+
+        layer?.delegate = self
+        titleLayer.delegate = self
 //        self.wantsLayer = true
 
         root._editor = self
@@ -194,6 +204,15 @@ public class BeamTextEdit: NSView, NSTextInputClient {
                 self.blinkTime = now + (self.blinkPhase ? self.onBlinkTime : self.offBlinkTime)
                 self.invalidate(node.frameInDocument)
             }
+
+            // Prepare animation frame:
+            var t = tick
+            t.previous = tick.now
+            t.now = CACurrentMediaTime()
+            t.delta = t.now - t.previous
+            t.fdelta = Float(t.delta)
+            t.index += 1
+            tick = t
         }
         RunLoop.main.add(timer, forMode: .default)
 
@@ -210,6 +229,7 @@ public class BeamTextEdit: NSView, NSTextInputClient {
     }
 
     var timer: Timer!
+    @Published var tick = Tick()
 
     var minimumWidth: CGFloat = 300 {
         didSet {
@@ -241,7 +261,12 @@ public class BeamTextEdit: NSView, NSTextInputClient {
         }
     }
 
-    var showTitle = true { didSet { invalidate() } }
+    var showTitle = true {
+        didSet {
+            titleLayer.isHidden = !showTitle
+        }
+    }
+    var titleLayer = CALayer()
 
     public var activated: () -> Void = { }
     public var activateOnLostFocus = true
@@ -379,7 +404,6 @@ public class BeamTextEdit: NSView, NSTextInputClient {
     }
 
     public func invalidate(_ rect: NSRect? = nil) {
-        title = nil
         guard let r = rect else { setNeedsDisplay(bounds); return }
         setNeedsDisplay(r)
     }
@@ -729,47 +753,17 @@ public class BeamTextEdit: NSView, NSTextInputClient {
         offBlinkTime = voff == 0 ? offBlinkTime : voff * 1000
     }
 
-    var title: TextFrame?
-
-    public override func draw(_ dirtyRect: NSRect) {
-//                print("\n\n\n\ndraw dirtyRect: \(dirtyRect)")
-        if let context = NSGraphicsContext.current?.cgContext {
-//                    print("\n\ndraw visibleRect: \(visibleRect)")
-            // Draw the background
-            context.setFillColor(NSColor(named: "EditorBackgroundColor")!.cgColor)
-            //        context.setFillColor(NSColor.red.cgColor)
-            context.addRect(bounds)
-            context.drawPath(using: .eoFill)
-
-            if showTitle {
-                let padding = CGFloat(20)
-                if title == nil {
-                    let titleString = rootNode.note.title.attributed
-                    let f = NSFont.systemFont(ofSize: isBig ? 13 : 11, weight: .semibold)
-                    titleString.addAttribute(.font, value: f, range: titleString.wholeRange)
-                    titleString.addAttribute(.foregroundColor, value: NSColor(named: "EditorControlColor")!, range: titleString.wholeRange)
-                    title = Font.draw(string: titleString, atPosition: NSPoint(x: 0, y: topOffset), textWidth: leadingAlignment - padding)
-                }
-
-                context.saveGState()
-
-                guard let t = title else { return }
-                let x = leadingAlignment - t.frame.width - padding
-                context.translateBy(x: x, y: rootNode.children.first!.firstLineBaseline)
-                t.draw(context)
-
-                context.restoreGState()
-            }
-
-            context.saveGState(); defer { context.restoreGState() }
-            context.translateBy(x: rootNode.frame.origin.x, y: rootNode.frame.origin.y)
-//            var vis = visibleRect
-            var vis = dirtyRect
-            vis.origin.x -= rootNode.frame.origin.x
-            vis.origin.y -= rootNode.frame.origin.y
-            //        let vis = bounds
-            rootNode.draw(in: context, visibleRect: vis)
+    var _title: TextFrame?
+    var title: TextFrame {
+        guard let t = _title else {
+            let titleString = rootNode.note.title.attributed
+            let f = NSFont.systemFont(ofSize: isBig ? 13 : 11, weight: .semibold)
+            titleString.addAttribute(.font, value: f, range: titleString.wholeRange)
+            titleString.addAttribute(.foregroundColor, value: NSColor(named: "EditorControlColor")!, range: titleString.wholeRange)
+            _title = Font.draw(string: titleString, atPosition: NSPoint(x: 0, y: 0), textWidth: frame.width)
+            return _title!
         }
+        return t
     }
 
     enum DragMode {
@@ -935,6 +929,8 @@ public class BeamTextEdit: NSView, NSTextInputClient {
     public override func viewWillMove(toWindow newWindow: NSWindow?) {
         if let w = newWindow {
             w.acceptsMouseMovedEvents = true
+            rootNode.contentScale = w.backingScaleFactor
+            titleLayer.contentsScale = w.backingScaleFactor
         }
     }
 
@@ -944,4 +940,33 @@ public class BeamTextEdit: NSView, NSTextInputClient {
     var blinkPhase = true
 
     public override var isFlipped: Bool { true }
+
+    // CALayerDelegate
+    let titlePadding = CGFloat(20)
+    public func layoutSublayers(of layer: CALayer) {
+        guard layer === self.layer else { return }
+        let h = title.frame.height
+        titleLayer.bounds = CGRect(x: 0, y: 0, width: leadingAlignment, height: h + 5)
+//        let x = leadingAlignment - title.frame.width - titlePadding
+        let y = topOffset
+        titleLayer.anchorPoint = NSPoint()
+        titleLayer.position = NSPoint(x: 0, y: y)
+//        print("titleFrame: \(titleLayer.bounds) / \(titleLayer.position) (hidden: \(titleLayer.isHidden))")
+
+        relayoutRoot()
+    }
+
+    public func draw(_ layer: CALayer, in context: CGContext) {
+        guard layer === self.titleLayer else { return }
+
+//        print("draw title into titleLayer: \(titleLayer.bounds) / \(titleLayer.position) (hidden: \(titleLayer.isHidden))")
+        context.saveGState()
+        context.textMatrix = CGAffineTransform.identity
+        let x = leadingAlignment - title.frame.width - titlePadding
+        let y = CGFloat(rootNode.children.first!.firstLineBaseline) //topOffset + rootNode.children.first!.firstLineBaseline
+        context.translateBy(x: x, y: y)
+        title.draw(context)
+        context.restoreGState()
+    }
+
 }
