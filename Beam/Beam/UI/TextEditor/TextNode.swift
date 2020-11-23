@@ -431,7 +431,8 @@ public class TextNode: NSObject, CALayerDelegate {
         layer.setNeedsDisplay()
 //        layer.backgroundColor = NSColor.red.cgColor.copy(alpha: 0.1)
         layer.backgroundColor = NSColor(white: 1, alpha: 0).cgColor
-        layer.opacity = 1.0
+        let score = (bullet?.score?.floatValue ?? 1.0)
+        layer.opacity = 0.3 + (score == 0 ? 1.0 : score) * 0.7
         layer.delegate = self
     }
 
