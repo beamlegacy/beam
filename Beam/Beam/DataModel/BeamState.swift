@@ -205,7 +205,7 @@ var runningOnBigSur: Bool = {
     }
 
     @discardableResult func navigateToNote(named: String) -> Bool {
-        print("load note named \(named)")
+//        print("load note named \(named)")
         guard let note = Note.fetchWithTitle(CoreDataManager.shared.mainContext, named) else { return false }
         return navigateToNote(note)
     }
@@ -271,7 +271,7 @@ var runningOnBigSur: Bool = {
             switch query.source {
             case .autoComplete:
                 searchEngine.query = query.string
-                print("Start search query: \(searchEngine.searchUrl)")
+//                print("Start search query: \(searchEngine.searchUrl)")
                 createTab(withURL: URL(string: searchEngine.searchUrl)!, originalQuery: query.string)
                 mode = .web
 
@@ -304,7 +304,7 @@ var runningOnBigSur: Bool = {
             searchEngine.query = searchQuery
             return URL(string: searchEngine.searchUrl)!
         }()
-        print("Start query: \(url)")
+//        print("Start query: \(url)")
 
         createTab(withURL: url, originalQuery: searchQuery, createNote: createNote)
         cancelAutocomplete()
@@ -322,7 +322,7 @@ var runningOnBigSur: Bool = {
             guard let self = self else { return }
             guard self.searchQuerySelection == nil else { return }
             guard self.selectionIndex == nil else { return }
-            print("received auto complete query: \(query)")
+//            print("received auto complete query: \(query)")
 
             self.completedQueries = []
 
@@ -331,7 +331,7 @@ var runningOnBigSur: Bool = {
                 notes.forEach {
                     let autocompleteResult = AutoCompleteResult(id: $0.id, string: $0.title, source: .note)
                     self.completedQueries.append(autocompleteResult)
-                    print("Found note \($0)")
+//                    print("Found note \($0)")
                 }
 
                 self.completer.complete(query: query)

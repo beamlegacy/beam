@@ -64,7 +64,7 @@ public struct BTextEdit: NSViewRepresentable {
     }
 
     public func updateNSView(_ nsView: BeamTextEdit, context: Context) {
-        print("display note: \(note)")
+//        print("display note: \(note)")
         if nsView.rootNode.note !== note {
             nsView.rootNode = TextRoot(CoreDataManager.shared, note: note)
             if let note = nsView.rootNode.children.first {
@@ -149,7 +149,7 @@ public struct BTextEditScrollable: NSViewRepresentable {
     }
 
     public func updateNSView(_ nsView: NSViewType, context: Context) {
-        print("display note: \(note)")
+//        print("display note: \(note)")
         let edit = nsView.documentView as! BeamTextEdit
         if edit.rootNode.note !== note {
             edit.rootNode = TextRoot(CoreDataManager.shared, note: note)

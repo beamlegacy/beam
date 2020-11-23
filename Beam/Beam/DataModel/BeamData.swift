@@ -46,7 +46,7 @@ class BeamData: ObservableObject {
 
     func setupJournal() {
         if let note = Note.fetchWithTitle(CoreDataManager.shared.mainContext, todaysName) {
-            print("Today's note loaded:\n\(note)\n")
+//            print("Today's note loaded:\n\(note)\n")
             _todaysNote = note
         } else {
             let note = Note.createNote(CoreDataManager.shared.mainContext, todaysName)
@@ -54,7 +54,7 @@ class BeamData: ObservableObject {
             let bullet = note.createBullet(CoreDataManager.shared.mainContext, content: "")
             note.addToBullets(bullet)
             _todaysNote = note
-            print("Today's note created:\n\(note)\n")
+//            print("Today's note created:\n\(note)\n")
 
             CoreDataManager.shared.save()
         }
