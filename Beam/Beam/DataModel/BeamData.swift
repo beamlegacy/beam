@@ -25,12 +25,9 @@ class BeamData: ObservableObject {
 
     init() {
         let paths = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true)
-        if let applicationSupportDirectory = paths.first {
-            let indexPath = URL(fileURLWithPath: applicationSupportDirectory + "/index.sk")
-            searchKit = SearchKit(indexPath)
-        } else {
-            searchKit = SearchKit(URL(fileURLWithPath: "~/Application Data/BeamApp/index.sk"))
-        }
+        let directory = paths.first ?? "~/Application Data/BeamApp/"
+        let indexPath = URL(fileURLWithPath: directory + "/index.sk")
+        searchKit = SearchKit(indexPath)
 
         cookies = HTTPCookieStorage()
     }

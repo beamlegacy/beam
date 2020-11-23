@@ -288,11 +288,12 @@ var runningOnBigSur: Bool = {
         }
 
         var createNote = true
+        //TODO make a better url detector and rewritter to transform xxx.com in https://xxx.com with less corner cases and clearer code path:
         let url: URL = {
             if searchQuery.maybeURL {
                 guard let u = URL(string: searchQuery) else {
-                    createNote = false
-                    return URL(string: "https://" + searchQuery)!
+                    searchEngine.query = searchQuery
+                    return URL(string: searchEngine.searchUrl)!
                 }
 
                 if u.scheme == nil {
@@ -383,43 +384,37 @@ var runningOnBigSur: Bool = {
     }
 
     func showNextTab() {
-        guard let tab = currentTab else { return }
-        if let i = tabs.firstIndex(of: tab) {
-            let i = (i + 1) % tabs.count
-            currentTab = tabs[i]
-        }
+        guard let tab = currentTab, let i = tabs.firstIndex(of: tab) else { return }
+        let index = (i + 1) % tabs.count
+        currentTab = tabs[index]
     }
 
     func showPreviousTab() {
-        guard let tab = currentTab else { return }
-        if let i = tabs.firstIndex(of: tab) {
-            let i = i - 1 < 0 ? tabs.count - 1 : i - 1
-            currentTab = tabs[i]
-        }
+        guard let tab = currentTab, let i = tabs.firstIndex(of: tab) else { return }
+        let index = i - 1 < 0 ? tabs.count - 1 : i - 1
+        currentTab = tabs[index]
     }
 
     func closeCurrentTab() -> Bool {
-        if mode == .web {
-            guard let tab = currentTab else { return false }
-            tab.cancelObservers()
+        guard mode == .web, let tab = currentTab else { return false }
+        tab.cancelObservers()
 
-            if let i = tabs.firstIndex(of: tab) {
-                tabs.remove(at: i)
-                let nextTabIndex = min(i, tabs.count - 1)
-                if nextTabIndex >= 0 {
-                    currentTab = tabs[nextTabIndex]
-                }
-
-                if tabs.isEmpty {
-                    if let note = currentNote {
-                        navigateToNote(note)
-                    } else {
-                        navigateToJournal()
-                    }
-                    currentTab = nil
-                }
-                return true
+        if let i = tabs.firstIndex(of: tab) {
+            tabs.remove(at: i)
+            let nextTabIndex = min(i, tabs.count - 1)
+            if nextTabIndex >= 0 {
+                currentTab = tabs[nextTabIndex]
             }
+
+            if tabs.isEmpty {
+                if let note = currentNote {
+                    navigateToNote(note)
+                } else {
+                    navigateToJournal()
+                }
+                currentTab = nil
+            }
+            return true
         }
 
         return false

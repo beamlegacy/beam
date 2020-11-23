@@ -115,7 +115,7 @@ class AttributedStringVisitor {
                 return true
             }
         }()
-        var attributed = "".attributed
+        let attributed = "".attributed
 
         for c in node.children {
             let str = visit(c)
