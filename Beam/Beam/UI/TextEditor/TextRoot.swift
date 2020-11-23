@@ -74,7 +74,17 @@ public class TextRoot: TextNode {
         return node.text.substring(range: selectedTextRange)
     }
 
-    var _editor: BeamTextEdit?
+    var _editor: BeamTextEdit? {
+        didSet {
+            if let e = _editor {
+                if let w = e.window {
+                    self.contentScale = w.backingScaleFactor
+                }
+                reparent()
+            }
+
+        }
+    }
     override var editor: BeamTextEdit? {
         return _editor
     }
@@ -108,9 +118,9 @@ public class TextRoot: TextNode {
 
     override func invalidate(_ rect: NSRect? = nil) {
         if let r = rect {
-            editor?.invalidate(r.offsetBy(dx: frame.minX, dy: frame.minY))
+            editor?.invalidate(r.offsetBy(dx: currentFrameInDocument.minX, dy: currentFrameInDocument.minY))
         } else {
-            editor?.invalidate(textFrame.offsetBy(dx: frame.minX, dy: frame.minY))
+            editor?.invalidate(textFrame.offsetBy(dx: currentFrameInDocument.minX, dy: currentFrameInDocument.minY))
         }
     }
 
@@ -158,6 +168,8 @@ public class TextRoot: TextNode {
 
         node = children.first ?? self
         childInset = 0
+
+        layer.backgroundColor = NSColor.blue.cgColor.copy(alpha: 0.2)
 
         print("created RootNode \(note.title) with \(children.count) main bullets")
     }

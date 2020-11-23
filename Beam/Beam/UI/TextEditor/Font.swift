@@ -86,7 +86,14 @@ public class TextLine {
     }
 
     func draw(_ context: CGContext) {
+        context.saveGState()
+        context.textPosition = NSPoint()//line.frame.origin
+        context.translateBy(x: frame.origin.x, y: frame.origin.y)
+        context.scaleBy(x: 1, y: -1)
+
         CTLineDraw(ctLine, context)
+
+        context.restoreGState()
     }
 }
 
@@ -191,13 +198,8 @@ public class TextFrame {
         }
 
         for line in lines {
-            context.saveGState()
-            context.textPosition = NSPoint()//line.frame.origin
-            context.translateBy(x: line.frame.origin.x, y: line.frame.origin.y)
-            context.scaleBy(x: 1, y: -1)
 
             line.draw(context)
-            context.restoreGState()
         }
     }
 }
