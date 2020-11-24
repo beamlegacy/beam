@@ -56,6 +56,7 @@
 		9631B02B2554B34A007BF2DE /* Html2Md.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9631B02A2554B34A007BF2DE /* Html2Md.swift */; };
 		9631C747251CE997009B40C4 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = 9631C746251CE997009B40C4 /* SwiftSoup */; };
 		9631C76B251E3648009B40C4 /* NSView+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9631C76A251E3648009B40C4 /* NSView+Beam.swift */; };
+		96322D81256D183C00475285 /* TabStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96322D80256D183C00475285 /* TabStats.swift */; };
 		96354BD22543136000E40788 /* Symbol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96354BD12543136000E40788 /* Symbol.swift */; };
 		964547AD2520CF3E0064D062 /* Font.swift in Sources */ = {isa = PBXBuildFile; fileRef = 964547AC2520CF3E0064D062 /* Font.swift */; };
 		964547B22520D19F0064D062 /* NSRect+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 964547B12520D19F0064D062 /* NSRect+Beam.swift */; };
@@ -200,6 +201,7 @@
 		9631B01725541FF6007BF2DE /* JSSourceLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSSourceLoader.swift; sourceTree = "<group>"; };
 		9631B02A2554B34A007BF2DE /* Html2Md.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Html2Md.swift; sourceTree = "<group>"; };
 		9631C76A251E3648009B40C4 /* NSView+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSView+Beam.swift"; sourceTree = "<group>"; };
+		96322D80256D183C00475285 /* TabStats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabStats.swift; sourceTree = "<group>"; };
 		96354BD12543136000E40788 /* Symbol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Symbol.swift; sourceTree = "<group>"; };
 		964547AC2520CF3E0064D062 /* Font.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Font.swift; sourceTree = "<group>"; };
 		964547B12520D19F0064D062 /* NSRect+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSRect+Beam.swift"; sourceTree = "<group>"; };
@@ -439,6 +441,7 @@
 				965A785A2514F1AF009980D4 /* WebView.swift */,
 				965B19632518F3BA00BCF01C /* BrowserTabBar.swift */,
 				965B19682518F4F000BCF01C /* BrowserTabView.swift */,
+				96322D80256D183C00475285 /* TabStats.swift */,
 			);
 			path = Browser;
 			sourceTree = "<group>";
@@ -1016,6 +1019,7 @@
 				96C9CC392535C16800D70AA6 /* Lexer.swift in Sources */,
 				965B19642518F3BA00BCF01C /* BrowserTabBar.swift in Sources */,
 				520081992552C97C00A6CAC6 /* TemporaryFile.swift in Sources */,
+				96322D81256D183C00475285 /* TabStats.swift in Sources */,
 				52C82C8325306600006C188C /* NoteList.swift in Sources */,
 				966B3541251BB2A800751322 /* BeamWindow.swift in Sources */,
 				521812B62524C354007E4B47 /* Note.swift in Sources */,

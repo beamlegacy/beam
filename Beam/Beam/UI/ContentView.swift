@@ -35,7 +35,13 @@ struct ModeView: View {
                                 .frame(width: geometry.size.width, height: 28)
 
                             if let tab = state.currentTab {
-                                WebView(webView: tab.webView)
+                                ZStack {
+                                    WebView(webView: tab.webView)
+
+                                    if let score = tab.score {
+                                        TabStats(score: score)
+                                    }
+                                }
                             }
                         }
                         .transition(.move(edge: .bottom))
