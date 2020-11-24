@@ -22,6 +22,8 @@ class BeamData: ObservableObject {
     var searchKit: SearchKit
     var scores = Scores()
 
+    @Published var showTabStats = true
+
     var cookies: HTTPCookieStorage
 
     init() {

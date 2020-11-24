@@ -53,7 +53,7 @@ class BeamWindow: NSWindow, NSWindowDelegate {
 
         // Create the SwiftUI view and set the context as the value for the managedObjectContext environment keyPath.
         // Add `@Environment(\.managedObjectContext)` in the views that will need the context.
-        let contentView = ContentView().environmentObject(state)
+        let contentView = ContentView().environmentObject(state).environmentObject(data)
         self.contentView = BeamHostingView(rootView: contentView)
         self.isMovableByWindowBackground = false
     }
@@ -169,6 +169,10 @@ class BeamWindow: NSWindow, NSWindowDelegate {
 
     @IBAction func showJournal(_ sender: Any?) {
         state.startNewSearch()
+    }
+
+    @IBAction func toggleScoreCard(_ sender: Any?) {
+        state.data.showTabStats.toggle()
     }
 
     @IBAction func newSearch(_ sender: Any?) {

@@ -267,7 +267,7 @@ var runningOnBigSur: Bool = {
         if let bullet = self.data.todaysNote.rootBullets().first, bullet.content.isEmpty {
             bullet.content = bulletStr
         } else {
-            let bullet = self.data.todaysNote.createBullet(context, content: bulletStr)
+            _ = self.data.todaysNote.createBullet(context, content: bulletStr)
         }
 
         return n
