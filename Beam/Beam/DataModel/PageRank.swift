@@ -13,7 +13,7 @@ class PageRank: Codable {
         var inbound = Set<String>()
         var outbound = Set<String>()
 
-        var pageRange = Float(0)
+        var pageRank: Float = 0
     }
 
     var pages = [String: Page]()
@@ -64,12 +64,25 @@ class PageRank: Codable {
         }
     }
 
-    func computePageRanks() {
-        for pageIterator in pages {
-            let url = pageIterator.key
-            let page = pageIterator.value
+    var dampingFactor = Float(0.85)
 
-            
+    func computePageRanks(iterations: Int = 20) {
+        let initialValue = 1.0 / Float(pages.count)
+        for pageIterator in pages {
+            pageIterator.value.pageRank = initialValue
+        }
+
+        for _ in 0 ..< iterations {
+            for pageIterator in pages {
+                let page = pageIterator.value
+
+                page.pageRank = (1.0 - dampingFactor)
+                    + dampingFactor
+                    * (page.inbound.map({ inbound -> Float in
+                    guard let p = pages[inbound] else { return 0 }
+                    return p.pageRank / Float(p.outbound.count)
+                }).reduce(0.0, +))
+            }
         }
     }
 }
