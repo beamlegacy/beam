@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="17192" systemVersion="19H2" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithCloudKit="YES" userDefinedModelVersionIdentifier="">
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="17511" systemVersion="20B29" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithCloudKit="YES" userDefinedModelVersionIdentifier="">
     <entity name="Bullet" representedClassName=".Bullet" syncable="YES">
+        <attribute name="apiSent" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
         <attribute name="content" attributeType="String" defaultValueString=""/>
         <attribute name="created_at" attributeType="Date" defaultDateTimeInterval="623165820" usesScalarValueType="NO"/>
         <attribute name="id" attributeType="UUID" defaultValueString="6A275532-F5C5-4FA1-8EF5-4D8BE0DAAD71" usesScalarValueType="NO"/>
@@ -19,6 +20,7 @@
         </uniquenessConstraints>
     </entity>
     <entity name="Note" representedClassName=".Note" syncable="YES">
+        <attribute name="apiSent" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
         <attribute name="created_at" attributeType="Date" defaultDateTimeInterval="623165880" usesScalarValueType="NO"/>
         <attribute name="id" attributeType="UUID" defaultValueString="6A275532-F5C5-4FA1-8EF5-4D8BE0DAAD71" usesScalarValueType="NO"/>
         <attribute name="score" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
@@ -41,7 +43,7 @@
         </uniquenessConstraints>
     </entity>
     <elements>
-        <element name="Bullet" positionX="-54" positionY="18" width="128" height="208"/>
-        <element name="Note" positionX="-489.015625" positionY="-17.69921875" width="128" height="178"/>
+        <element name="Bullet" positionX="-54" positionY="18" width="128" height="209"/>
+        <element name="Note" positionX="-489.015625" positionY="-17.69921875" width="128" height="179"/>
     </elements>
 </model>

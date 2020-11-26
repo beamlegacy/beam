@@ -509,9 +509,15 @@ class Parser {
         let root = Node(type: .text(""), 0)
         let context = ASTContext(node: root, lexer: lexer)
 
+        var index = lexer.input.count
         context.nextToken()
-        while !context.isDone {
+        while !context.isDone && index > 0 {
             parseToken(context)
+            index -= 1
+        }
+
+        if !context.isDone {
+            Logger.shared.logError("Couldn't parse AST: \(lexer.input)", category: .lexer)
         }
         return root
     }

@@ -265,7 +265,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
                 let x = dict["x"] as? Double,
                 let y = dict["y"] as? Double
             else { return }
-            print("Web Scrolled: \(x), \(y)")
+            Logger.shared.logDebug("Web Scrolled: \(x), \(y)", category: .web)
         default:
             break
         }
@@ -310,26 +310,26 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
     }
 
     func webViewDidClose(_ webView: WKWebView) {
-        print("webView webDidClose")
+        Logger.shared.logDebug("webView webDidClose", category: .web)
     }
 
     func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping () -> Void) {
-        print("webView runJavaScriptAlertPanelWithMessage \(message)")
+        Logger.shared.logDebug("webView runJavaScriptAlertPanelWithMessage \(message)", category: .web)
         completionHandler()
     }
 
     func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (Bool) -> Void) {
-        print("webView runJavaScriptConfirmPanelWithMessage \(message)")
+        Logger.shared.logDebug("webView runJavaScriptConfirmPanelWithMessage \(message)", category: .web)
         completionHandler(true)
     }
 
     func webView(_ webView: WKWebView, runJavaScriptTextInputPanelWithPrompt prompt: String, defaultText: String?, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (String?) -> Void) {
-        print("webView runJavaScriptTextInputPanelWithPrompt \(prompt) default: \(defaultText ?? "")")
+        Logger.shared.logDebug("webView runJavaScriptTextInputPanelWithPrompt \(prompt) default: \(defaultText ?? "")", category: .web)
         completionHandler(nil)
     }
 
     func webView(_ webView: WKWebView, runOpenPanelWith parameters: WKOpenPanelParameters, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping ([URL]?) -> Void) {
-        print("webView runOpenPanel")
+        Logger.shared.logDebug("webView runOpenPanel", category: .web)
         completionHandler(nil)
     }
 
