@@ -265,6 +265,7 @@ class Parser {
         var token: Lexer.Token
         var isDone = false
         var atStartOfLine = true
+        var previousType: Lexer.TokenType = .Blank
 
         func push(node: Node) {
             nodeStack.append(node)
@@ -281,6 +282,7 @@ class Parser {
 
         @discardableResult func nextToken() -> Lexer.Token {
             isDone = lexer.isFinished
+            previousType = token.type
             token = lexer.nextToken()
             atStartOfLine = token.column == 0
             return token
@@ -540,7 +542,7 @@ class Parser {
         context.nextToken()
     }
 
-    //swiftlint:disable:next cyclomatic_complexity
+    //swiftlint:disable:next cyclomatic_complexity function_body_length
     private func parseToken(_ context: ASTContext) {
         let token = context.token
         switch token.type {
@@ -551,10 +553,18 @@ class Parser {
             parseTokenAsText(context)
 
         case .Strong:
-            parseStrong(context)
+            if [.NewLine, .Blank, .Emphasis, .Strong].contains(context.previousType) {
+                parseStrong(context)
+            } else {
+                parseTokenAsText(context)
+            }
 
         case .Emphasis:
-            parseEmphasis(context)
+            if [.NewLine, .Blank, .Emphasis, .Strong].contains(context.previousType) {
+                parseEmphasis(context)
+            } else {
+                parseTokenAsText(context)
+            }
 
         case .LinkStart:
             parseInternalLink(context)
@@ -600,9 +610,15 @@ class Parser {
         let root = Node(type: .text(""), 0)
         let context = ASTContext(node: root, lexer: lexer)
 
+        var index = lexer.input.count
         context.nextToken()
-        while !context.isDone {
+        while !context.isDone && index > 0 {
             parseToken(context)
+            index -= 1
+        }
+
+        if !context.isDone {
+            Logger.shared.logError("Couldn't parse AST: \(lexer.input)", category: .lexer)
         }
         return root
     }

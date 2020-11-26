@@ -1,0 +1,4 @@
+#include "Pods/Target Support Files/Pods-Beam/Pods-Beam.release.xcconfig"
+
+// Configuration settings file format documentation can be found at:
+// https://help.apple.com/xcode/#/dev745c5c974

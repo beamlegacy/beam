@@ -20,14 +20,17 @@ public extension LocalizedStringKey {
 
 public extension String {
     static func localizedString(for key: String,
-                                locale: Locale = .current) -> String {
-
+                                locale: Locale = .current,
+                                comment: String = "") -> String {
         let language = locale.languageCode
-        let path = Bundle.main.path(forResource: language, ofType: "lproj")!
-        let bundle = Bundle(path: path)!
-        let localizedString = NSLocalizedString(key, bundle: bundle, comment: "")
+        if let path = Bundle.main.path(forResource: language, ofType: "lproj") {
+            let bundle = Bundle(path: path)!
+            let localizedString = NSLocalizedString(key, bundle: bundle, comment: comment)
 
-        return localizedString
+            return localizedString
+        }
+
+        return key
     }
 }
 
@@ -35,4 +38,8 @@ public extension LocalizedStringKey {
     func stringValue(locale: Locale = .current) -> String {
         return .localizedString(for: self.stringKey, locale: locale)
     }
+}
+
+public func loc(_ textToTranslate: String, comment: String = "") -> String {
+    return String.localizedString(for: textToTranslate, comment: comment)
 }

@@ -5,6 +5,7 @@ enum NoteType: String {
     case journal
     case note
 }
+
 extension Note {
     @nonobjc public class func fetchRequest() -> NSFetchRequest<Note> {
         return NSFetchRequest<Note>(entityName: "Note")

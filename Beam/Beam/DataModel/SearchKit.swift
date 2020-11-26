@@ -47,7 +47,7 @@ class SearchKit {
         let results: [URL] = zip(urls[0 ..< foundCount], scores).compactMap { (cfurl, score) -> URL? in
             guard let url = cfurl?.takeRetainedValue() as URL? else { return nil }
 
-            print("- \(url): \(score)")
+            Logger.shared.logDebug("- \(url): \(score)", category: .search)
             return url
         }
 

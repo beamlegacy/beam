@@ -21,7 +21,7 @@ public class TextNode: NSObject, CALayerDelegate, Codable {
         didSet {
             guard oldValue != text else { return }
             bullet?.content = text
-            CoreDataManager.shared.save()
+            try? CoreDataManager.shared.save()
             invalidateText()
         }
     }

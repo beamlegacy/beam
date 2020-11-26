@@ -150,13 +150,19 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
         webView.navigationDelegate = self
         webView.uiDelegate = self
 
+        self.webView.configuration.userContentController.removeAllUserScripts()
+
+        self.webView.configuration.userContentController.removeScriptMessageHandler(forName: TextSelectedMessage)
+        self.webView.configuration.userContentController.removeScriptMessageHandler(forName: OnScrolledMessage)
+        self.webView.configuration.userContentController.removeScriptMessageHandler(forName: JSLogger)
+
+        self.webView.configuration.userContentController.add(self, name: JSLogger)
         self.webView.configuration.userContentController.add(self, name: TextSelectedMessage)
         self.webView.configuration.userContentController.add(self, name: OnScrolledMessage)
 
-        let messageHandler = LoggingMessageHandler()
-        messageHandler.tab = self
-        self.webView.configuration.userContentController.add(messageHandler, name: "logging")
-        self.webView.configuration.userContentController.addUserScript(WKUserScript(source: overrideConsole, injectionTime: .atDocumentStart, forMainFrameOnly: true))
+        self.webView.configuration.userContentController.addUserScript(WKUserScript(source: overrideConsole, injectionTime: .atDocumentStart, forMainFrameOnly: false))
+        self.webView.configuration.userContentController.addUserScript(WKUserScript(source: jsSelectionObserver, injectionTime: .atDocumentEnd, forMainFrameOnly: false))
+
     }
 
     func cancelObservers() {
@@ -220,20 +226,17 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
 
     let enableJavascriptLogs = true
 
-    class LoggingMessageHandler: NSObject, WKScriptMessageHandler {
-        weak var tab: BrowserTab?
-
-        func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-            if tab?.enableJavascriptLogs ?? false {
-                print(message.body)
-            }
-        }
-    }
-
     let TextSelectedMessage = "beam_textSelected"
     let OnScrolledMessage = "beam_onScrolled"
+    let JSLogger = "logging"
+
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         switch message.name {
+        case JSLogger:
+            if enableJavascriptLogs {
+                print(message.body)
+            }
+
         case TextSelectedMessage:
             guard let dict = message.body as? [String: AnyObject],
 //                  let selectedText = dict["selectedText"] as? String,
@@ -262,7 +265,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
                 let x = dict["x"] as? Double,
                 let y = dict["y"] as? Double
             else { return }
-            print("Web Scrolled: \(x), \(y)")
+            Logger.shared.logDebug("Web Scrolled: \(x), \(y)", category: .web)
         default:
             break
         }
@@ -282,13 +285,6 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
                     print("Error while indexing web page: \(error)")
                 }
             }
-        }
-
-        webView.evaluateJavaScript(jsSelectionObserver) { (_, err) in
-            if let err = err {
-                print("Error installing JS selection observer \(err)")
-            }
-            return
         }
     }
 
@@ -314,26 +310,26 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
     }
 
     func webViewDidClose(_ webView: WKWebView) {
-        print("webView webDidClose")
+        Logger.shared.logDebug("webView webDidClose", category: .web)
     }
 
     func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping () -> Void) {
-        print("webView runJavaScriptAlertPanelWithMessage \(message)")
+        Logger.shared.logDebug("webView runJavaScriptAlertPanelWithMessage \(message)", category: .web)
         completionHandler()
     }
 
     func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (Bool) -> Void) {
-        print("webView runJavaScriptConfirmPanelWithMessage \(message)")
+        Logger.shared.logDebug("webView runJavaScriptConfirmPanelWithMessage \(message)", category: .web)
         completionHandler(true)
     }
 
     func webView(_ webView: WKWebView, runJavaScriptTextInputPanelWithPrompt prompt: String, defaultText: String?, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (String?) -> Void) {
-        print("webView runJavaScriptTextInputPanelWithPrompt \(prompt) default: \(defaultText ?? "")")
+        Logger.shared.logDebug("webView runJavaScriptTextInputPanelWithPrompt \(prompt) default: \(defaultText ?? "")", category: .web)
         completionHandler(nil)
     }
 
     func webView(_ webView: WKWebView, runOpenPanelWith parameters: WKOpenPanelParameters, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping ([URL]?) -> Void) {
-        print("webView runOpenPanel")
+        Logger.shared.logDebug("webView runOpenPanel", category: .web)
         completionHandler(nil)
     }
 

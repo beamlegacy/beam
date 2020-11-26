@@ -6,6 +6,10 @@ inhibit_all_warnings!
 target 'Beam' do
   pod 'SwiftLint'
   pod 'Down'
+  pod 'Alamofire', '5.0.0.beta.6'
+  pod 'JWTDecode'
+  pod 'CocoaLumberjack/Swift'
+  pod 'Sentry'
 end
 
 target 'BeamTests' do
