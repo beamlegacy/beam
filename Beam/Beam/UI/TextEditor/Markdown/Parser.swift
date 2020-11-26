@@ -29,6 +29,20 @@ class Parser {
         case embed
         case quote(Int)
         case newLine
+
+        var asInt: Int {
+            switch self {
+            case .text: return 0
+            case .strong: return 1
+            case .emphasis: return 2
+            case .link: return 3
+            case .internalLink: return 4
+            case .heading: return 5
+            case .embed: return 6
+            case .quote: return 7
+            case .newLine: return 8
+            }
+        }
     }
 
     enum DecorationType: Equatable {
@@ -37,7 +51,7 @@ class Parser {
         case infix
     }
 
-    class Node {
+    class Node: Codable {
         var type: NodeType
         var positionInSource: Int
         var length: Int
@@ -75,6 +89,88 @@ class Parser {
         }
         func suffix(_ decorate: Bool, _ font: NSFont) -> NSMutableAttributedString {
             return decoration(.suffix, decorate, font)
+        }
+
+        // swiftlint:disable:next nesting
+        enum CodingKeys: String, CodingKey {
+            case type
+            case position
+            case text
+            case link
+            case level
+            case children
+            case prefix
+            case suffix
+            case infix
+        }
+
+        // swiftlint:disable:next cyclomatic_complexity
+        required public init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            length = 0
+
+            let typeIndex = try container.decode(Int.self, forKey: .type)
+            switch typeIndex {
+            case NodeType.text("").asInt:
+                let t = try container.decode(String.self, forKey: .text)
+                type = .text(t)
+                length = t.count
+            case NodeType.strong.asInt:
+                type = .strong
+            case NodeType.emphasis.asInt:
+                type = .emphasis
+            case NodeType.link("").asInt:
+                type = .link(try container.decode(String.self, forKey: .link))
+            case NodeType.internalLink("").asInt:
+                type = .internalLink(try container.decode(String.self, forKey: .link))
+            case NodeType.heading(0).asInt:
+                type = .heading(try container.decode(Int.self, forKey: .level))
+            case NodeType.embed.asInt:
+                type = .embed
+            case NodeType.quote(0).asInt:
+                type = .quote(try container.decode(Int.self, forKey: .level))
+            case NodeType.newLine.asInt:
+                type = .newLine
+
+            default:
+                fatalError("Unexpected Parser.NodeType \(typeIndex)")
+            }
+
+            positionInSource = try container.decode(Int.self, forKey: .position)
+            children = try container.decode([Node].self, forKey: .children)
+
+            if container.contains(.prefix) { decorations[.prefix] = try container.decode(Lexer.Token.self, forKey: .prefix) }
+            if container.contains(.infix) { decorations[.infix] = try container.decode(Lexer.Token.self, forKey: .infix) }
+            if container.contains(.suffix) { decorations[.suffix] = try container.decode(Lexer.Token.self, forKey: .suffix) }
+        }
+
+        public func encode(to encoder: Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+
+            try container.encode(type.asInt, forKey: .type)
+
+            switch type {
+            case let .text(string):
+                try container.encode(string, forKey: .text)
+            case let .link(link):
+                try container.encode(link, forKey: .link)
+            case let .internalLink(link):
+                try container.encode(link, forKey: .link)
+            case let .heading(level):
+                try container.encode(level, forKey: .level)
+            case let .quote(level):
+                try container.encode(level, forKey: .level)
+
+            default:
+                break
+            }
+
+            try container.encode(positionInSource, forKey: .position)
+            try container.encode(children, forKey: .children)
+
+            if let value = decorations[.prefix] { try container.encode(value, forKey: .prefix) }
+            if let value = decorations[.infix] { try container.encode(value, forKey: .infix) }
+            if let value = decorations[.suffix] { try container.encode(value, forKey: .suffix) }
         }
 
         init(type: NodeType, _ positionInSource: Int) {

@@ -29,12 +29,11 @@ public struct TextConfig {
     var blendMode: CGBlendMode = .normal
 
     var fHeight: Float { Float(font.ascent - font.descent) }
-
 }
 
 public class TextRoot: TextNode {
     var note: Note!
-    var _coreDataManager: CoreDataManager
+    var _coreDataManager: CoreDataManager!
     override var coreDataManager: CoreDataManager {
         return _coreDataManager
     }
@@ -172,6 +171,15 @@ public class TextRoot: TextNode {
         layer.backgroundColor = NSColor.blue.cgColor.copy(alpha: 0.2)
 
 //        print("created RootNode \(note.title) with \(children.count) main bullets")
+    }
+
+    required public init(from decoder: Decoder) throws {
+
+        try super.init(from: decoder)
+    }
+
+    public override func encode(to encoder: Encoder) throws {
+        try super.encode(to: encoder)
     }
 
     var linkedRefsNode: TextNode?

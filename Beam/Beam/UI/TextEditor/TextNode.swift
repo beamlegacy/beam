@@ -12,7 +12,7 @@ import NaturalLanguage
 import Combine
 
 // swiftlint:disable:next type_body_length
-public class TextNode: NSObject, CALayerDelegate {
+public class TextNode: NSObject, CALayerDelegate, Codable {
     public static func == (lhs: TextNode, rhs: TextNode) -> Bool {
         return lhs === rhs
     }
@@ -388,6 +388,40 @@ public class TextNode: NSObject, CALayerDelegate {
         for c in children {
             c.invalidateRoot()
         }
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case text
+        case open
+        case children
+        case readOnly
+    }
+
+    required public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        text = try container.decode(String.self, forKey: .text)
+        open = try container.decode(Bool.self, forKey: .open)
+        readOnly = try container.decode(Bool.self, forKey: .readOnly)
+        let _children = try container.decode([TextNode].self, forKey: .children)
+
+        layer = CALayer()
+        super.init()
+
+        for c in _children {
+            addChild(c)
+        }
+
+        configureLayer()
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        try container.encode(text, forKey: .text)
+        try container.encode(open, forKey: .open)
+        try container.encode(readOnly, forKey: .readOnly)
+        try container.encode(children, forKey: .children)
     }
 
     init(bullet: Bullet?, recurse: Bool) {
