@@ -22,7 +22,7 @@ public class BeamApplication: SentryCrashExceptionApplication {
 }
 
 @NSApplicationMain
-class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSUserInterfaceValidations {
+class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     // swiftlint:disable:next force_cast
     class var main: AppDelegate { NSApplication.shared.delegate as! AppDelegate }
 
