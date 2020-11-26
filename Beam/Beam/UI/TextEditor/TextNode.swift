@@ -395,6 +395,7 @@ public class TextNode: NSObject, CALayerDelegate, Codable {
         case open
         case children
         case readOnly
+        case ast
     }
 
     required public init(from decoder: Decoder) throws {
@@ -403,7 +404,14 @@ public class TextNode: NSObject, CALayerDelegate, Codable {
         text = try container.decode(String.self, forKey: .text)
         open = try container.decode(Bool.self, forKey: .open)
         readOnly = try container.decode(Bool.self, forKey: .readOnly)
-        let _children = try container.decode([TextNode].self, forKey: .children)
+        var _children = [TextNode]()
+        if container.contains(.children) {
+            _children = try container.decode([TextNode].self, forKey: .children)
+        }
+
+        if container.contains(.ast) {
+            _ast = try container.decode(Parser.Node.self, forKey: .ast)
+        }
 
         layer = CALayer()
         super.init()
@@ -421,7 +429,12 @@ public class TextNode: NSObject, CALayerDelegate, Codable {
         try container.encode(text, forKey: .text)
         try container.encode(open, forKey: .open)
         try container.encode(readOnly, forKey: .readOnly)
-        try container.encode(children, forKey: .children)
+        if !children.isEmpty {
+            try container.encode(children, forKey: .children)
+        }
+        if let ast = _ast {
+            try container.encode(ast, forKey: .ast)
+        }
     }
 
     init(bullet: Bullet?, recurse: Bool) {

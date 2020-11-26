@@ -137,7 +137,10 @@ class Parser {
             }
 
             positionInSource = try container.decode(Int.self, forKey: .position)
-            children = try container.decode([Node].self, forKey: .children)
+
+            if container.contains(.children) {
+                children = try container.decode([Node].self, forKey: .children)
+            }
 
             if container.contains(.prefix) { decorations[.prefix] = try container.decode(Lexer.Token.self, forKey: .prefix) }
             if container.contains(.infix) { decorations[.infix] = try container.decode(Lexer.Token.self, forKey: .infix) }
@@ -166,7 +169,9 @@ class Parser {
             }
 
             try container.encode(positionInSource, forKey: .position)
-            try container.encode(children, forKey: .children)
+            if !children.isEmpty {
+                try container.encode(children, forKey: .children)
+            }
 
             if let value = decorations[.prefix] { try container.encode(value, forKey: .prefix) }
             if let value = decorations[.infix] { try container.encode(value, forKey: .infix) }
