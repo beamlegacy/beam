@@ -53,7 +53,7 @@ class BeamData: ObservableObject {
             _todaysNote = note
 //            print("Today's note created:\n\(note)\n")
 
-            CoreDataManager.shared.save()
+            try? CoreDataManager.shared.save()
         }
 
         updateJournal()
@@ -64,11 +64,11 @@ class BeamData: ObservableObject {
         var newJournal = [Note]()
 
         // purge journal from empty notes:
-        for j in _journal {
-            if j.title != todaysName, j.bullets?.count == 1, let bullet = j.bullets?.first, bullet.content.isEmpty {
-                j.delete()
+        for note in _journal {
+            if note.title != todaysName, note.bullets?.count == 1, let bullet = note.bullets?.first, bullet.content.isEmpty {
+                note.delete()
             } else {
-                newJournal.append(j)
+                newJournal.append(note)
             }
         }
 

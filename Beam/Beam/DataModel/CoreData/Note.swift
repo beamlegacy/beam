@@ -11,6 +11,17 @@ class Note: NSManagedObject {
         id = UUID()
     }
 
+    var uuidString: String {
+        id.uuidString.lowercased()
+    }
+
+    override func willSave() {
+        if updated_at.timeIntervalSince(Date()) > 2.0 {
+            self.updated_at = Date()
+        }
+        super.willSave()
+    }
+
     @discardableResult
     class func createNote(_ context: NSManagedObjectContext, _ title: String, createdAt: Date? = nil, type: NoteType = .note) -> Note {
         let existingNote = fetchWithTitle(context, title)
@@ -26,7 +37,7 @@ class Note: NSManagedObject {
 
     func internalLink() -> String {
         var result = Self.components()
-        result.queryItems = [ URLQueryItem(name: "id", value: id.uuidString) ]
+        result.queryItems = [ URLQueryItem(name: "id", value: uuidString) ]
 
         return result.url?.absoluteString ?? "beam://"
     }
@@ -42,10 +53,19 @@ class Note: NSManagedObject {
         var components = URLComponents()
 
         components.scheme = "beam"
-        components.host = Config.hostname
+        components.host = Configuration.publicHostname
         components.path = "/note"
 
         return components
+    }
+
+    func delete(_ context: NSManagedObjectContext = CoreDataManager.shared.mainContext) {
+        context.delete(self)
+        do {
+            try context.save()
+        } catch {
+            // TODO: raise error?
+        }
     }
 
     func parsedTitle() -> String {
@@ -103,9 +123,12 @@ class Note: NSManagedObject {
         let tree = treeBullets()
 
         print(displayBullets(tree))
-        print(displayLinkedReferences())
-        print(displayUnlinkedReferences())
-        print("")
+        var output = displayLinkedReferences()
+        if !output.isEmpty { print(output) }
+        output = displayLinkedReferences()
+        if !output.isEmpty { print(output) }
+        output = displayUnlinkedReferences()
+        if !output.isEmpty { print(output) }
     }
 
     func fullContent() -> String {
@@ -139,13 +162,22 @@ class Note: NSManagedObject {
         return result
     }
 
+    func updateAttributesFromSelf(_ attributes: Note) {
+        title = attributes.title
+        created_at = attributes.created_at
+        updated_at = attributes.updated_at
+        // TODO: add attributes
+//        score = attributes.score ?? score
+//        type = attributes.type ?? type
+    }
+
     private func displayBullets(_ tree: [Any], _ tabCount: Int = 0, _ parsedInternalLink: Bool = false) -> String {
         var result = ""
 
         for elements in tree {
             if let elements = elements as? [Any] {
                 result.append(displayBullets(elements, tabCount + 1, parsedInternalLink))
-                result.append("\n")
+                result.append("")
             } else if let element = elements as? Bullet {
                 for _ in 0...tabCount {
                     result.append(" ")
@@ -380,15 +412,6 @@ class Note: NSManagedObject {
         }
 
         return 0
-    }
-
-    func delete(_ context: NSManagedObjectContext = CoreDataManager.shared.mainContext) {
-        context.delete(self)
-        do {
-            try context.save()
-        } catch {
-            // TODO: raise error?
-        }
     }
 
     class func deleteForPredicate(_ predicate: NSPredicate, _ context: NSManagedObjectContext) -> NSPersistentStoreResult? {

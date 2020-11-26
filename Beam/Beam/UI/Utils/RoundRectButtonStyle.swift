@@ -38,7 +38,7 @@ struct RoundedRectangleDecoration: View {
 struct RoundRectButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) var isEnabled: Bool
 
-    func makeBody(configuration: Configuration) -> some View {
+    func makeBody(configuration: ButtonStyle.Configuration) -> some View {
         configuration
             .label
             .background(RoundedRectangleDecoration(isPressed: configuration.isPressed))
