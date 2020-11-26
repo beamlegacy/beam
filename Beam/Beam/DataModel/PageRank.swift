@@ -18,6 +18,8 @@ class PageRank: Codable {
 
     var pages = [String: Page]()
 
+    var initialValue: Float { 1.0 / ((pages.count > 0) ? Float(pages.count) : 1) }
+
     func updatePage(url: String, contents: String) {
         do {
             //print("html -> \(html)")
@@ -25,6 +27,7 @@ class PageRank: Codable {
             let els: Elements = try doc.select("a")
 
             let page = Page()
+            page.pageRank = initialValue
 
             // capture all the links containted in the page:
             for element: Element in els.array() {
@@ -67,7 +70,6 @@ class PageRank: Codable {
     var dampingFactor = Float(0.85)
 
     func computePageRanks(iterations: Int = 20) {
-        let initialValue = 1.0 / Float(pages.count)
         for pageIterator in pages {
             pageIterator.value.pageRank = initialValue
         }
@@ -80,7 +82,7 @@ class PageRank: Codable {
                     + dampingFactor
                     * (page.inbound.map({ inbound -> Float in
                     guard let p = pages[inbound] else { return 0 }
-                    return p.pageRank / Float(p.outbound.count)
+                    return p.pageRank / Float(p.outbound.count != 0 ? p.outbound.count : 1)
                 }).reduce(0.0, +))
             }
         }
