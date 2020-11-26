@@ -1,12 +1,13 @@
-style = document.createElement('style');
-document.head.appendChild(style);
-stylesheet = style.sheet;
-
-function css(selector,property,value)
-{
-    try{ stylesheet.insertRule(selector+' {'+property+':'+value+'}',stylesheet.cssRules.length); }
-    catch(err){}
-}
+//style = document.createElement('style');
+//document.head.appendChild(style);
+//stylesheet = style.sheet;
+//
+//function css(selector,property,value)
+//{
+//    try{ stylesheet.insertRule(selector+' {'+property+':'+value+'}',stylesheet.cssRules.length); }
+//    catch(err){}
+//}
+//
 
 function beam_getSelectedText() {
     if (window.getSelection) {
@@ -105,3 +106,5 @@ if (video) {
       console.log('Video progress ' + video.currentTime.toString() + ' / ' + video.duration.toString());
     });
 }
+
+console.log('SelectionObservers installed');
