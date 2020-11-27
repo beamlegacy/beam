@@ -20,8 +20,8 @@
         </uniquenessConstraints>
     </entity>
     <entity name="Document" representedClassName=".Document" syncable="YES">
-        <attribute name="body" optional="YES" attributeType="String"/>
         <attribute name="created_at" attributeType="Date" defaultDateTimeInterval="628161600" usesScalarValueType="NO"/>
+        <attribute name="data" optional="YES" attributeType="Binary"/>
         <attribute name="documentType" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="id" attributeType="UUID" defaultValueString="6A275532-F5C5-4FA1-8EF5-4D8BE0DAAD71" usesScalarValueType="NO"/>
         <attribute name="title" attributeType="String" defaultValueString=""/>

@@ -14,7 +14,7 @@ extension Document {
     //swiftlint:disable identifier_name
     @NSManaged public var created_at: Date
     @NSManaged public var id: UUID
-    @NSManaged public var body: String?
+    @NSManaged public var data: Data?
     @NSManaged public var title: String
     @NSManaged public var updated_at: Date
     @NSManaged public var type: String
