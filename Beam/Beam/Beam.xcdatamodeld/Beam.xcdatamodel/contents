@@ -19,6 +19,22 @@
             </uniquenessConstraint>
         </uniquenessConstraints>
     </entity>
+    <entity name="Document" representedClassName=".Document" syncable="YES">
+        <attribute name="body" optional="YES" attributeType="String"/>
+        <attribute name="created_at" attributeType="Date" defaultDateTimeInterval="628161600" usesScalarValueType="NO"/>
+        <attribute name="documentType" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="id" attributeType="UUID" defaultValueString="6A275532-F5C5-4FA1-8EF5-4D8BE0DAAD71" usesScalarValueType="NO"/>
+        <attribute name="title" attributeType="String" defaultValueString=""/>
+        <attribute name="updated_at" attributeType="Date" defaultDateTimeInterval="628161600" usesScalarValueType="NO"/>
+        <uniquenessConstraints>
+            <uniquenessConstraint>
+                <constraint value="id"/>
+            </uniquenessConstraint>
+            <uniquenessConstraint>
+                <constraint value="title"/>
+            </uniquenessConstraint>
+        </uniquenessConstraints>
+    </entity>
     <entity name="Note" representedClassName=".Note" syncable="YES">
         <attribute name="apiSent" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
         <attribute name="created_at" attributeType="Date" defaultDateTimeInterval="623165880" usesScalarValueType="NO"/>
@@ -44,6 +60,7 @@
     </entity>
     <elements>
         <element name="Bullet" positionX="-54" positionY="18" width="128" height="209"/>
+        <element name="Document" positionX="-279" positionY="99" width="128" height="119"/>
         <element name="Note" positionX="-489.015625" positionY="-17.69921875" width="128" height="179"/>
     </elements>
 </model>

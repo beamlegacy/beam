@@ -13,5 +13,6 @@ class CoreDataTests: XCTestCase {
         super.setUp()
 
         coreDataManager.setup(storeType: NSInMemoryStoreType)
+        CoreDataManager.shared = coreDataManager
     }
 }

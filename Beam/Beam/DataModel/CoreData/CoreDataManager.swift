@@ -16,7 +16,7 @@ import CoreData
  */
 
 class CoreDataManager {
-    static let shared = CoreDataManager()
+    static var shared = CoreDataManager()
     private var storeType = NSSQLiteStoreType
     private var storeURL: URL?
 
