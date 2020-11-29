@@ -32,11 +32,7 @@ public struct TextConfig {
 }
 
 public class TextRoot: TextNode {
-    var note: Note!
-    var _coreDataManager: CoreDataManager!
-    override var coreDataManager: CoreDataManager {
-        return _coreDataManager
-    }
+    var note: BeamNote?
 
     var undoManager = UndoManager()
     var state = TextState()
@@ -123,47 +119,47 @@ public class TextRoot: TextNode {
         }
     }
 
-    init(_ manager: CoreDataManager, note: Note) {
-        self._coreDataManager = manager
-        super.init(bullet: nil, recurse: false)
-        self.note = note
+    init(element: BeamElement) {
+        super.init(element: element, recurse: false)
+        self.note = element as? BeamNote
         self.selfVisible = false
 
         self.text = ""
 
         // Main bullets:
-        if note.rootBullets().isEmpty {
+        if element.children.isEmpty {
             // Create one empty initial bullet
-            _ = note.createBullet(manager.mainContext, content: "")
+            element.children.append(BeamElement())
         }
 
-        for bullet in note.rootBullets() {
-            addChild(TextNode(bullet: bullet, recurse: true))
+        for bullet in element.children {
+            addChild(TextNode(element: bullet, recurse: true))
         }
 
-        children.first?.placeholder = (note.type == NoteType.journal.rawValue && note === AppDelegate.main.data.todaysNote) ? "This is the journal, you can type anything here!" : "..."
+        let isTodaysNote = (note?.type == NoteType.journal) && (note === AppDelegate.main.data.todaysNote)
+        children.first?.placeholder = isTodaysNote ? "This is the journal, you can type anything here!" : "..."
 
-        if let linkedRefs = note.linkedReferences, !linkedRefs.isEmpty {
-            let node = TextNode(staticText: "Linked references")
-            node.isReference = true
-            node.readOnly = true
-            addChild(node)
-            for bullet in linkedRefs {
-                node.addChild(TextNode(bullet: bullet, recurse: true))
-            }
-            linkedRefsNode = node
-        }
-
-        if let unlinkedRefs = note.unlinkedReferences, !unlinkedRefs.isEmpty {
-            let node = TextNode(staticText: "Unlinked references")
-            node.isReference = true
-            node.readOnly = true
-            addChild(node)
-            for bullet in unlinkedRefs {
-                node.addChild(TextNode(bullet: bullet, recurse: true))
-            }
-            unlinkedRefsNode = node
-        }
+//        if let linkedRefs = note.linkedReferences, !linkedRefs.isEmpty {
+//            let node = TextNode(staticText: "Linked references")
+//            node.isReference = true
+//            node.readOnly = true
+//            addChild(node)
+//            for bullet in linkedRefs {
+//                node.addChild(TextNode(bullet: bullet, recurse: true))
+//            }
+//            linkedRefsNode = node
+//        }
+//
+//        if let unlinkedRefs = note.unlinkedReferences, !unlinkedRefs.isEmpty {
+//            let node = TextNode(staticText: "Unlinked references")
+//            node.isReference = true
+//            node.readOnly = true
+//            addChild(node)
+//            for bullet in unlinkedRefs {
+//                node.addChild(TextNode(bullet: bullet, recurse: true))
+//            }
+//            unlinkedRefsNode = node
+//        }
 
         node = children.first ?? self
         childInset = 0
@@ -186,7 +182,7 @@ public class TextRoot: TextNode {
     var unlinkedRefsNode: TextNode?
 
     public override func printTree(level: Int = 0) -> String {
-        return String.tabs(level) + note.title + "\n" + children.reduce("", { result, child -> String in
+        return String.tabs(level) + (note?.title ?? "<???>") + "\n" + children.reduce("", { result, child -> String in
             result + child.printTree(level: level + 1)
         })
     }

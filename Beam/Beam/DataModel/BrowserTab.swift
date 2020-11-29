@@ -48,8 +48,8 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
 
     var state: BeamState!
 
-    var note: Note?
-    var bullet: Bullet?
+    var note: BeamNote?
+    var element: BeamElement?
 
     var appendToIndexer: (URL, Readability) -> Void = { _, _ in }
 
@@ -76,14 +76,16 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
         return config
     }
 
-    init(state: BeamState, originalQuery: String, note: Note?, id: UUID = UUID(), webView: WKWebView? = nil ) {
+    init(state: BeamState, originalQuery: String, note: BeamNote?, id: UUID = UUID(), webView: WKWebView? = nil ) {
         self.state = state
         self.id = id
         self.note = note
         self.originalQuery = originalQuery
 
         if !originalQuery.isEmpty, let note = self.note {
-            bullet = note.createBullet(CoreDataManager.shared.mainContext, content: "visiting...")
+            let e = BeamElement()
+            element = e
+            note.children.append(e)
         }
 
         if let w = webView {
@@ -105,7 +107,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
     private func updateBullet() {
         if let url = url {
             let name = title.isEmpty ? url.absoluteString : title
-            self.bullet?.content = "[\(name)](\(url.absoluteString))"
+            self.element?.text = "[\(name)](\(url.absoluteString))"
         }
     }
 
@@ -256,7 +258,9 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
                 let quote = "> \(text) - from [\(title)](\(url))"
 
                 DispatchQueue.main.async {
-                    _ = self.note?.createBullet(CoreDataManager.shared.mainContext, content: quote, createdAt: Date(), afterBullet: nil, parentBullet: nil)
+                    let e = BeamElement()
+                    e.text = quote
+                    _ = self.note?.children.append(e)
                 }
             }
         case OnScrolledMessage:

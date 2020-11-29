@@ -20,8 +20,8 @@ public class TextNode: NSObject, CALayerDelegate, Codable {
     var text: String = "" {
         didSet {
             guard oldValue != text else { return }
-            bullet?.content = text
-            try? CoreDataManager.shared.save()
+//            bullet?.content = text
+//            try? CoreDataManager.shared.save()
             invalidateText()
         }
     }
@@ -55,7 +55,7 @@ public class TextNode: NSObject, CALayerDelegate, Codable {
         return _language
     }
 
-    var bullet: Bullet?
+    var element: BeamElement?
     var isReference = false
     var isReferenceBranch: Bool {
         return isReference ? true : (parent?.isReferenceBranch ?? false)
@@ -162,7 +162,6 @@ public class TextNode: NSObject, CALayerDelegate, Codable {
     }
 
     func delete() {
-        bullet?.delete(coreDataManager.mainContext)
         parent?.removeChild(self)
     }
 
@@ -323,9 +322,8 @@ public class TextNode: NSObject, CALayerDelegate, Codable {
         }
 
         guard let p = parent else {
-            if !isReferenceBranch, let b = bullet {
-                b.parent?.removeFromChildren(b)
-                b.note?.removeFromBullets(b)
+            if !isReferenceBranch, let e = element {
+                parent?.element?.removeChild(e)
             }
 
             invalidateRoot()
@@ -338,33 +336,14 @@ public class TextNode: NSObject, CALayerDelegate, Codable {
                 superLayer.addSublayer(layer)
             }
         }
-        guard let b = bullet else {
-            // there is no bullet so we must create one if the parent has one
-            if !isReferenceBranch, p.bullet != nil {
-                bullet = p.bullet?.note?.createBullet(coreDataManager.mainContext, content: text, createdAt: Date(), afterBullet: previousSibblingNode()?.bullet, parentBullet: p.bullet)
-                return
-            }
+        guard nil == element else { return }
 
-            guard let root = p as? TextRoot else {
-                return
-            }
-
-            let previousNode: TextNode? = {
-                if let i = indexInParent, i != 0 {
-                    return p.children[i - 1]
-                } else {
-                    return nil
-                }
-            }()
-            if !isReferenceBranch {
-                let previousBullet = previousNode?.bullet
-                bullet = root.note.createBullet(coreDataManager.mainContext, content: text, createdAt: Date(), afterBullet: previousBullet, parentBullet: nil)
-            }
-            return
-        }
-        if !isReference {
-            guard b.parent !== p.bullet else { return }
-            b.parent = p.bullet
+        // there is no bullet so we must create one if the parent has one
+        if !isReferenceBranch, let parentElement = p.element {
+            let newelem = BeamElement()
+            element = newelem
+            newelem.text = text
+            parentElement.insert(child: newelem, after: previousSibblingNode()?.element)
         }
     }
 
@@ -437,19 +416,19 @@ public class TextNode: NSObject, CALayerDelegate, Codable {
         }
     }
 
-    init(bullet: Bullet?, recurse: Bool) {
-        self.bullet = bullet
-        text = bullet?.content.filter({ (char) -> Bool in
+    init(element: BeamElement, recurse: Bool) {
+        self.element = element
+        text = element.text.filter({ (char) -> Bool in
             !char.isNewline
-        }) ?? "<empty debug>"
+        })
 
         layer = CALayer()
         super.init()
         configureLayer()
 
 //        print("MD: \(bullet.orderIndex) \(node.text)")
-        for child in bullet?.sortedChildren() ?? [] {
-            addChild(TextNode(bullet: child, recurse: true))
+        for child in element.children {
+            addChild(TextNode(element: child, recurse: true))
         }
 
     }
@@ -1230,10 +1209,6 @@ public class TextNode: NSObject, CALayerDelegate, Codable {
                     result + child.printTree(level: level + 1)
                 })
                 : "")
-    }
-
-    var coreDataManager: CoreDataManager {
-        return parent!.coreDataManager
     }
 
     func fold() {

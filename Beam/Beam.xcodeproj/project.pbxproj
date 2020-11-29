@@ -75,6 +75,7 @@
 		96062E5E254C692B00AAB78D /* OmniBarSearchBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96062E5D254C692B00AAB78D /* OmniBarSearchBox.swift */; };
 		96062E6E254C6D4C00AAB78D /* Frame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96062E6D254C6D4C00AAB78D /* Frame.swift */; };
 		96062E73254C74F200AAB78D /* Chevrons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96062E72254C74F200AAB78D /* Chevrons.swift */; };
+		960B823C2571BB83006ECE77 /* BeamElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 960B823B2571BB83006ECE77 /* BeamElement.swift */; };
 		9627FD4A2550203800926F0E /* Pods_Beam.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2BE96DC9A7278563E5878CCD /* Pods_Beam.framework */; };
 		9627FD4B2550203800926F0E /* Pods_Beam.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 2BE96DC9A7278563E5878CCD /* Pods_Beam.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		9631B00925541DCB007BF2DE /* SFSymbolsFallback.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9631B00625541DC1007BF2DE /* SFSymbolsFallback.ttf */; };
@@ -251,6 +252,7 @@
 		96062E5D254C692B00AAB78D /* OmniBarSearchBox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniBarSearchBox.swift; sourceTree = "<group>"; };
 		96062E6D254C6D4C00AAB78D /* Frame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Frame.swift; sourceTree = "<group>"; };
 		96062E72254C74F200AAB78D /* Chevrons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Chevrons.swift; sourceTree = "<group>"; };
+		960B823B2571BB83006ECE77 /* BeamElement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamElement.swift; sourceTree = "<group>"; };
 		9631B00425541DC0007BF2DE /* SelectionObserver.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = SelectionObserver.js; sourceTree = "<group>"; };
 		9631B00625541DC1007BF2DE /* SFSymbolsFallback.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = SFSymbolsFallback.ttf; sourceTree = "<group>"; };
 		9631B00F25541E8D007BF2DE /* OverrideConsole.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = OverrideConsole.js; sourceTree = "<group>"; };
@@ -757,6 +759,7 @@
 				96B3A5ED253B99E000E8C366 /* NoteBackForwardList.swift */,
 				96474E38254D977E00A920B3 /* BeamData.swift */,
 				9631B02A2554B34A007BF2DE /* Html2Md.swift */,
+				960B823B2571BB83006ECE77 /* BeamElement.swift */,
 			);
 			path = DataModel;
 			sourceTree = "<group>";
@@ -1165,6 +1168,7 @@
 				96474E39254D977E00A920B3 /* BeamData.swift in Sources */,
 				965A78602514F1AF009980D4 /* BeamNote.swift in Sources */,
 				96C9CC432535FA4900D70AA6 /* Parser.swift in Sources */,
+				960B823C2571BB83006ECE77 /* BeamElement.swift in Sources */,
 				5204E8BC255ED6E100458211 /* APIResponse.swift in Sources */,
 				96A49B6A253115C5003B4767 /* String+Regex.swift in Sources */,
 				964A60C125680E37008126BF /* Tick.swift in Sources */,

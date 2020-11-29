@@ -11,7 +11,7 @@ import SwiftUI
 struct GlobalNoteTitle: View {
     var _cornerRadius = CGFloat(7)
     @EnvironmentObject var state: BeamState
-    var note: Note
+    var note: BeamNote
     @State var isHover = false
     @State var isEditing = false
     @State var isRenaming = false

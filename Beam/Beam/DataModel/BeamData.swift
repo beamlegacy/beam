@@ -8,8 +8,8 @@
 import Foundation
 
 class BeamData: ObservableObject {
-    var _todaysNote: Note?
-    var todaysNote: Note {
+    var _todaysNote: BeamNote?
+    var todaysNote: BeamNote {
         if let note = _todaysNote, note.title == todaysName {
             return note
         }
@@ -17,7 +17,7 @@ class BeamData: ObservableObject {
         setupJournal()
         return _todaysNote!
     }
-    @Published var journal: [Note] = []
+    @Published var journal: [BeamNote] = []
 
     var searchKit: SearchKit
 
@@ -44,13 +44,13 @@ class BeamData: ObservableObject {
     func setupJournal() {
         if let note = Note.fetchWithTitle(CoreDataManager.shared.mainContext, todaysName) {
 //            print("Today's note loaded:\n\(note)\n")
-            _todaysNote = note
+            _todaysNote = beamNoteFrom(note: note)
         } else {
             let note = Note.createNote(CoreDataManager.shared.mainContext, todaysName)
             note.type = NoteType.journal.rawValue
             let bullet = note.createBullet(CoreDataManager.shared.mainContext, content: "")
             note.addToBullets(bullet)
-            _todaysNote = note
+            _todaysNote = beamNoteFrom(note: note)
 //            print("Today's note created:\n\(note)\n")
 
             try? CoreDataManager.shared.save()
@@ -61,14 +61,14 @@ class BeamData: ObservableObject {
 
     func updateJournal() {
         let _journal = Note.fetchAllWithType(CoreDataManager.shared.mainContext, .journal)
-        var newJournal = [Note]()
+        var newJournal = [BeamNote]()
 
         // purge journal from empty notes:
         for note in _journal {
             if note.title != todaysName, note.bullets?.count == 1, let bullet = note.bullets?.first, bullet.content.isEmpty {
                 note.delete()
             } else {
-                newJournal.append(note)
+                newJournal.append(beamNoteFrom(note: note))
             }
         }
 

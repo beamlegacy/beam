@@ -72,7 +72,7 @@ var runningOnBigSur: Bool = {
     }
 
     var data: BeamData
-    @Published var currentNote: Note?
+    @Published var currentNote: BeamNote?
     @Published var backForwardList: NoteBackForwardList
     @Published var isEditingOmniBarTitle = false
 
@@ -207,10 +207,10 @@ var runningOnBigSur: Bool = {
     @discardableResult func navigateToNote(named: String) -> Bool {
 //        print("load note named \(named)")
         guard let note = Note.fetchWithTitle(CoreDataManager.shared.mainContext, named) else { return false }
-        return navigateToNote(note)
+        return navigateToNote(beamNoteFrom(note: note))
     }
 
-    @discardableResult func navigateToNote(_ note: Note) -> Bool {
+    @discardableResult func navigateToNote(_ note: BeamNote) -> Bool {
         completedQueries = []
         selectionIndex = nil
         searchQuery = ""
@@ -245,22 +245,18 @@ var runningOnBigSur: Bool = {
         mode = .web
     }
 
-    func createNoteForQuery(_ query: String) -> Note {
+    func createNoteForQuery(_ query: String) -> BeamNote {
         let context = CoreDataManager.shared.mainContext
         if let n = Note.fetchWithTitle(context, query) {
-            return n
+            return beamNoteFrom(note: n)
         }
 
-        let n = Note.createNote(context, query)
-        n.score = Float(0) as NSNumber
+        let n = BeamNote(title: query)
 
         let bulletStr = "[[\(query)]]"
-        if let bullet = self.data.todaysNote.rootBullets().first, bullet.content.isEmpty {
-            bullet.content = bulletStr
-        } else {
-            let bullet = self.data.todaysNote.createBullet(context, content: bulletStr)
-            bullet.score = Float(0) as NSNumber
-        }
+        let e = BeamElement()
+        e.text = bulletStr
+        self.data.todaysNote.insert(child: e, after: self.data.todaysNote.children.last)
 
         return n
     }

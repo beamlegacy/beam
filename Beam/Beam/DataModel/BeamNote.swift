@@ -16,22 +16,6 @@ import AppKit
  A text block contains text. It contains the format of the text (Bold, Italic, Underline). There are different text block types to represent different attributes (Code, URL, Link...)
  */
 
-protocol BeamObject: Codable {
-    var id: BID { get set }
-}
-
-struct BeamNotes {
-    public var notes: [BID: BeamNote] = [:]
-    public var objects: [BID: BeamNote] = [:]
-    public var notesByName: [String: BID] = [:]
-}
-
-protocol BeamBlock: BeamObject {
-    var elements: [BID] { get set }
-    var outLinks: [String] { get }
-    //    mutating func addElement(_ element: BeamElement)
-}
-
 struct VisitedPage: Codable, Identifiable {
     var id: UUID = UUID()
 
@@ -41,49 +25,80 @@ struct VisitedPage: Codable, Identifiable {
     var duration: TimeInterval
 }
 
-struct BeamNote: BeamBlock {
-    var id: BID = BID()
+struct NoteReference: Codable {
+    var noteName: String
+    var elementID: BID
+}
+
+// Document:
+class BeamNote: BeamElement {
     public var title: String
-    var score: Float = 0
 
-    var elements: [BID] = []
-    var outLinks: [String] = []
+    var type: NoteType = .note
+    var outLinks: [String] = [] ///< The links contained in this note
+    var linkedReferences: [NoteReference] = [] ///< urls of the notes/bullet pointing to this note explicitely
+    var unlinkedReferences: [NoteReference] = [] ///< urls of the notes/bullet pointing to this note implicitely
 
-    var searchQueries: [String] = []
-    var visitedSearchResults: [VisitedPage] = []
+    var searchQueries: [String] = [] ///< Search queries whose results were used to populate this note
+    var visitedSearchResults: [VisitedPage] = [] ///< URLs whose content were used to create this note
+
+    init(title: String) {
+        self.title = title
+        super.init()
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case title
+        case type
+        case outLinks
+        case searchQueries
+        case visitedSearchResults
+    }
+
+    required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        title = try container.decode(String.self, forKey: .title)
+        type = try container.decode(NoteType.self, forKey: .type)
+        outLinks = try container.decode([String].self, forKey: .outLinks)
+        searchQueries = try container.decode([String].self, forKey: .searchQueries)
+        visitedSearchResults = try container.decode([VisitedPage].self, forKey: .visitedSearchResults)
+
+        try super.init(from: decoder)
+    }
+
+    override public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        try container.encode(title, forKey: .title)
+        try container.encode(type, forKey: .type)
+        try container.encode(outLinks, forKey: .outLinks)
+        try container.encode(searchQueries, forKey: .searchQueries)
+        try container.encode(visitedSearchResults, forKey: .visitedSearchResults)
+
+        try super.encode(to: encoder)
+    }
 }
 
-protocol BeamTextBlock: BeamObject {
-    var text: String { get set }
+// TODO: Remove this when we remove Note/Bullet from the build
+// temp adapter
+func beamNoteFrom(note: Note) -> BeamNote {
+    let n = BeamNote(title: note.title)
+
+    for b in note.rootBullets() {
+        n.children.append(beamElementFrom(bullet: b))
+    }
+
+    return n
 }
 
-struct TextFormat: OptionSet, Codable {
-    let rawValue: Int8
+func beamElementFrom(bullet: Bullet) -> BeamElement {
+    let element = BeamElement()
+    element.text = bullet.content
 
-    static let regular = TextFormat([])
-    static let bold = TextFormat(rawValue: 1 << 0)
-    static let italic = TextFormat(rawValue: 1 << 1)
-    static let underline = TextFormat(rawValue: 1 << 2)
-}
+    for b in bullet.sortedChildren() {
+        element.children.append(beamElementFrom(bullet: b))
+    }
 
-struct BeamText: BeamTextBlock {
-    var id: BID = BID()
-    var format: TextFormat = .regular
-    var text: String = ""
-}
-
-struct BeamTextURL: BeamTextBlock {
-    var id: BID = BID()
-    var text: String = ""
-}
-
-struct BeamTextCode: BeamTextBlock {
-    var id: BID = BID()
-    var text: String = ""
-}
-
-struct BeamTextLink: BeamTextBlock {
-    var id: BID = BID()
-    var text: String = ""
-    var target: BID
+    return element
 }
