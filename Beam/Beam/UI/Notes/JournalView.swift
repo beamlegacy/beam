@@ -10,8 +10,8 @@ import SwiftUI
 import Combine
 
 struct JournalView: View {
-    var journal: [Note]
-    var journals: [Note] { isEditing ? journal : [journal.first!] }
+    var journal: [BeamNote]
+    var journals: [BeamNote] { isEditing ? journal : [journal.first!] }
     var offset: CGFloat
     @State var isEditing = false
 
@@ -19,8 +19,7 @@ struct JournalView: View {
         ScrollView([.vertical]) {
             VStack {
                 ForEach(journals) { note in
-                    return
-                        NoteView(note: note,
+                    return NoteView(note: note,
                                  onStartEditing: {
                                     withAnimation {
                                         isEditing = true

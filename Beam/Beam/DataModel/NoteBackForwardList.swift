@@ -9,7 +9,7 @@ import Foundation
 
 class NoteBackForwardList {
     enum Element {
-        case note(Note)
+        case note(BeamNote)
         case journal
     }
 

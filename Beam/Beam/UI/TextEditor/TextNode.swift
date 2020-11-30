@@ -12,7 +12,7 @@ import NaturalLanguage
 import Combine
 
 // swiftlint:disable:next type_body_length
-public class TextNode: NSObject, CALayerDelegate {
+public class TextNode: NSObject, CALayerDelegate, Codable {
     public static func == (lhs: TextNode, rhs: TextNode) -> Bool {
         return lhs === rhs
     }
@@ -20,8 +20,9 @@ public class TextNode: NSObject, CALayerDelegate {
     var text: String = "" {
         didSet {
             guard oldValue != text else { return }
-            bullet?.content = text
-            try? CoreDataManager.shared.save()
+//            bullet?.content = text
+//            try? CoreDataManager.shared.save()
+            element?.text = text
             invalidateText()
         }
     }
@@ -55,7 +56,7 @@ public class TextNode: NSObject, CALayerDelegate {
         return _language
     }
 
-    var bullet: Bullet?
+    var element: BeamElement?
     var isReference = false
     var isReferenceBranch: Bool {
         return isReference ? true : (parent?.isReferenceBranch ?? false)
@@ -87,7 +88,11 @@ public class TextNode: NSObject, CALayerDelegate {
         }
     }
 
-    private var _ast: Parser.Node?
+    private var _ast: Parser.Node? {
+        didSet {
+            element?.ast = _ast
+        }
+    }
     private func buildAttributedString() -> NSAttributedString {
         let config = AttributedStringVisitor.Configuration()
         let visitor = AttributedStringVisitor(configuration: config)
@@ -162,7 +167,6 @@ public class TextNode: NSObject, CALayerDelegate {
     }
 
     func delete() {
-        bullet?.delete(coreDataManager.mainContext)
         parent?.removeChild(self)
     }
 
@@ -323,9 +327,8 @@ public class TextNode: NSObject, CALayerDelegate {
         }
 
         guard let p = parent else {
-            if !isReferenceBranch, let b = bullet {
-                b.parent?.removeFromChildren(b)
-                b.note?.removeFromBullets(b)
+            if !isReferenceBranch, let e = element {
+                parent?.element?.removeChild(e)
             }
 
             invalidateRoot()
@@ -338,33 +341,14 @@ public class TextNode: NSObject, CALayerDelegate {
                 superLayer.addSublayer(layer)
             }
         }
-        guard let b = bullet else {
-            // there is no bullet so we must create one if the parent has one
-            if !isReferenceBranch, p.bullet != nil {
-                bullet = p.bullet?.note?.createBullet(coreDataManager.mainContext, content: text, createdAt: Date(), afterBullet: previousSibblingNode()?.bullet, parentBullet: p.bullet)
-                return
-            }
+        guard nil == element else { return }
 
-            guard let root = p as? TextRoot else {
-                return
-            }
-
-            let previousNode: TextNode? = {
-                if let i = indexInParent, i != 0 {
-                    return p.children[i - 1]
-                } else {
-                    return nil
-                }
-            }()
-            if !isReferenceBranch {
-                let previousBullet = previousNode?.bullet
-                bullet = root.note.createBullet(coreDataManager.mainContext, content: text, createdAt: Date(), afterBullet: previousBullet, parentBullet: nil)
-            }
-            return
-        }
-        if !isReference {
-            guard b.parent !== p.bullet else { return }
-            b.parent = p.bullet
+        // there is no bullet so we must create one if the parent has one
+        if !isReferenceBranch, let parentElement = p.element {
+            let newelem = BeamElement()
+            element = newelem
+            newelem.text = text
+            parentElement.insert(child: newelem, after: previousSibblingNode()?.element)
         }
     }
 
@@ -390,21 +374,68 @@ public class TextNode: NSObject, CALayerDelegate {
         }
     }
 
-    init(bullet: Bullet?, recurse: Bool) {
-        self.bullet = bullet
-        text = bullet?.content.filter({ (char) -> Bool in
+    enum CodingKeys: String, CodingKey {
+        case text
+        case open
+        case children
+        case readOnly
+        case ast
+    }
+
+    required public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        text = try container.decode(String.self, forKey: .text)
+        open = try container.decode(Bool.self, forKey: .open)
+        readOnly = try container.decode(Bool.self, forKey: .readOnly)
+        var _children = [TextNode]()
+        if container.contains(.children) {
+            _children = try container.decode([TextNode].self, forKey: .children)
+        }
+
+        if container.contains(.ast) {
+            _ast = try container.decode(Parser.Node.self, forKey: .ast)
+        }
+
+        layer = CALayer()
+        super.init()
+
+        for c in _children {
+            addChild(c)
+        }
+
+        configureLayer()
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        try container.encode(text, forKey: .text)
+        try container.encode(open, forKey: .open)
+        try container.encode(readOnly, forKey: .readOnly)
+        if !children.isEmpty {
+            try container.encode(children, forKey: .children)
+        }
+        if let ast = _ast {
+            try container.encode(ast, forKey: .ast)
+        }
+    }
+
+    init(element: BeamElement, recurse: Bool) {
+        self.element = element
+        text = element.text.filter({ (char) -> Bool in
             !char.isNewline
-        }) ?? "<empty debug>"
+        })
 
         layer = CALayer()
         super.init()
         configureLayer()
 
-//        print("MD: \(bullet.orderIndex) \(node.text)")
-        for child in bullet?.sortedChildren() ?? [] {
-            addChild(TextNode(bullet: child, recurse: true))
+        if recurse {
+            for child in element.children {
+                addChild(TextNode(element: child, recurse: true))
+            }
         }
-
     }
 
     init(staticText: String) {
@@ -1183,10 +1214,6 @@ public class TextNode: NSObject, CALayerDelegate {
                     result + child.printTree(level: level + 1)
                 })
                 : "")
-    }
-
-    var coreDataManager: CoreDataManager {
-        return parent!.coreDataManager
     }
 
     func fold() {

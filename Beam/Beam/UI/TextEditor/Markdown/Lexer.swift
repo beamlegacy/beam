@@ -1,5 +1,5 @@
 class Lexer {
-    enum TokenType: String {
+    enum TokenType: String, Codable {
         case EndOfFile
         case Text
 
@@ -25,7 +25,7 @@ class Lexer {
         case NewLine
     }
 
-    struct Token {
+    struct Token: Codable {
         var type: TokenType ///< the recognized type of the token
         var string: String ///< The textual value of the token
         var start: Int = 0 ///< The position of the token in the original input string
@@ -44,6 +44,35 @@ class Lexer {
             self.type = type
             self.string = string
         }
+
+        // swiftlint:disable:next nesting
+        enum CodingKeys: String, CodingKey {
+            case type
+            case string
+            case start
+            case line
+            case column
+        }
+        public init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+
+            type = try container.decode(TokenType.self, forKey: .type)
+            string = try container.decode(String.self, forKey: .string)
+            start = try container.decode(Int.self, forKey: .start)
+            line = try container.decode(Int.self, forKey: .line)
+            column = try container.decode(Int.self, forKey: .column)
+        }
+
+        public func encode(to encoder: Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+
+            try container.encode(type, forKey: .type)
+            try container.encode(string, forKey: .string)
+            try container.encode(start, forKey: .start)
+            try container.encode(line, forKey: .line)
+            try container.encode(column, forKey: .column)
+        }
+
     }
 
     let input: String

@@ -68,15 +68,12 @@ extension TextRoot {
             if cursorPosition == 0 {
                 if let nextNode = node.previousVisible() {
                     let remainingText = node.text
-                    if let bullet = node.bullet {
-                        node.parent?.bullet?.removeFromChildren(bullet)
-                    }
 
                     // Reparent existing children to the node we're merging in
                     for c in node.children {
                         nextNode.addChild(c)
-                        if let b = c.bullet {
-                            nextNode.bullet?.addToChildren(b)
+                        if let b = c.element {
+                            nextNode.element?.children.append(b)
                         }
                     }
 

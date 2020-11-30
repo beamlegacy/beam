@@ -38,6 +38,10 @@
 		52375B62256D2463003180E1 /* Release.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 52375B61256D2463003180E1 /* Release.xcconfig */; };
 		52375B76256D585A003180E1 /* OSLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52375B75256D585A003180E1 /* OSLog.swift */; };
 		526B59E42562E7A700B358AA /* Configuration.plist in Resources */ = {isa = PBXBuildFile; fileRef = 526B59E32562E7A700B358AA /* Configuration.plist */; };
+		527DF48725710ECB00A0A56D /* DocumentManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 527DF48625710ECB00A0A56D /* DocumentManagerTests.swift */; };
+		527E60082570FBB20000DE93 /* DocumentManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 527E60072570FBB20000DE93 /* DocumentManager.swift */; };
+		527E600C2570FC9A0000DE93 /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = 527E600B2570FC9A0000DE93 /* Document.swift */; };
+		527E60102570FCCF0000DE93 /* Document+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 527E600F2570FCCF0000DE93 /* Document+CoreDataProperties.swift */; };
 		528E44272525BD4600B7C54E /* CoreDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 528E44262525BD4600B7C54E /* CoreDataManager.swift */; };
 		52A66A172535E77D00CE247C /* ScrollableTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52A66A162535E77D00CE247C /* ScrollableTextView.swift */; };
 		52A66A1F2535E8A500CE247C /* ScrollableTextView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 52A66A1E2535E8A500CE247C /* ScrollableTextView.xib */; };
@@ -75,6 +79,7 @@
 		96062E5E254C692B00AAB78D /* OmniBarSearchBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96062E5D254C692B00AAB78D /* OmniBarSearchBox.swift */; };
 		96062E6E254C6D4C00AAB78D /* Frame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96062E6D254C6D4C00AAB78D /* Frame.swift */; };
 		96062E73254C74F200AAB78D /* Chevrons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96062E72254C74F200AAB78D /* Chevrons.swift */; };
+		960B823C2571BB83006ECE77 /* BeamElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 960B823B2571BB83006ECE77 /* BeamElement.swift */; };
 		9627FD4A2550203800926F0E /* Pods_Beam.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2BE96DC9A7278563E5878CCD /* Pods_Beam.framework */; };
 		9627FD4B2550203800926F0E /* Pods_Beam.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 2BE96DC9A7278563E5878CCD /* Pods_Beam.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		9631B00925541DCB007BF2DE /* SFSymbolsFallback.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9631B00625541DC1007BF2DE /* SFSymbolsFallback.ttf */; };
@@ -214,6 +219,10 @@
 		52375B61256D2463003180E1 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
 		52375B75256D585A003180E1 /* OSLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSLog.swift; sourceTree = "<group>"; };
 		526B59E32562E7A700B358AA /* Configuration.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Configuration.plist; sourceTree = "<group>"; };
+		527DF48625710ECB00A0A56D /* DocumentManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentManagerTests.swift; sourceTree = "<group>"; };
+		527E60072570FBB20000DE93 /* DocumentManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentManager.swift; sourceTree = "<group>"; };
+		527E600B2570FC9A0000DE93 /* Document.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Document.swift; sourceTree = "<group>"; };
+		527E600F2570FCCF0000DE93 /* Document+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Document+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		528E44262525BD4600B7C54E /* CoreDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataManager.swift; sourceTree = "<group>"; };
 		52A66A162535E77D00CE247C /* ScrollableTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollableTextView.swift; sourceTree = "<group>"; };
 		52A66A1E2535E8A500CE247C /* ScrollableTextView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ScrollableTextView.xib; sourceTree = "<group>"; };
@@ -251,6 +260,7 @@
 		96062E5D254C692B00AAB78D /* OmniBarSearchBox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniBarSearchBox.swift; sourceTree = "<group>"; };
 		96062E6D254C6D4C00AAB78D /* Frame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Frame.swift; sourceTree = "<group>"; };
 		96062E72254C74F200AAB78D /* Chevrons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Chevrons.swift; sourceTree = "<group>"; };
+		960B823B2571BB83006ECE77 /* BeamElement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamElement.swift; sourceTree = "<group>"; };
 		9631B00425541DC0007BF2DE /* SelectionObserver.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = SelectionObserver.js; sourceTree = "<group>"; };
 		9631B00625541DC1007BF2DE /* SFSymbolsFallback.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = SFSymbolsFallback.ttf; sourceTree = "<group>"; };
 		9631B00F25541E8D007BF2DE /* OverrideConsole.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = OverrideConsole.js; sourceTree = "<group>"; };
@@ -381,6 +391,7 @@
 				5204E8A0255ED56200458211 /* AuthenticationManager.swift */,
 				5204E864255ED13500458211 /* AccountManager.swift */,
 				5204E8E2255EDACE00458211 /* LibrairiesManager.swift */,
+				527E60072570FBB20000DE93 /* DocumentManager.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -454,8 +465,18 @@
 				520081982552C97C00A6CAC6 /* TemporaryFile.swift */,
 				52326F8B252F1A8E00A40F1E /* NSManagedObject+initExtension.swift */,
 				52D4C6392535A4D800A00457 /* NotificationName.swift */,
+				527E600B2570FC9A0000DE93 /* Document.swift */,
+				527E600F2570FCCF0000DE93 /* Document+CoreDataProperties.swift */,
 			);
 			path = CoreData;
+			sourceTree = "<group>";
+		};
+		527DF48525710EAE00A0A56D /* Managers */ = {
+			isa = PBXGroup;
+			children = (
+				527DF48625710ECB00A0A56D /* DocumentManagerTests.swift */,
+			);
+			path = Managers;
 			sourceTree = "<group>";
 		};
 		52A43D90252C78E700178F3B /* Importers */ = {
@@ -720,6 +741,7 @@
 		965A78402514F149009980D4 /* BeamTests */ = {
 			isa = PBXGroup;
 			children = (
+				527DF48525710EAE00A0A56D /* Managers */,
 				52A43D92252C790200178F3B /* DataModel */,
 				965A78412514F149009980D4 /* BeamTests.swift */,
 				521812CE2524C597007E4B47 /* NoteTests.swift */,
@@ -757,6 +779,7 @@
 				96B3A5ED253B99E000E8C366 /* NoteBackForwardList.swift */,
 				96474E38254D977E00A920B3 /* BeamData.swift */,
 				9631B02A2554B34A007BF2DE /* Html2Md.swift */,
+				960B823B2571BB83006ECE77 /* BeamElement.swift */,
 			);
 			path = DataModel;
 			sourceTree = "<group>";
@@ -1113,7 +1136,9 @@
 				96B3A5EE253B99E000E8C366 /* NoteBackForwardList.swift in Sources */,
 				96062E5E254C692B00AAB78D /* OmniBarSearchBox.swift in Sources */,
 				96062E6E254C6D4C00AAB78D /* Frame.swift in Sources */,
+				527E60082570FBB20000DE93 /* DocumentManager.swift in Sources */,
 				96F5DB2B251811060080E3EE /* AutoCompleteList.swift in Sources */,
+				527E60102570FCCF0000DE93 /* Document+CoreDataProperties.swift in Sources */,
 				52C6A1DC2563FE2F00350EBE /* AccountWindow.swift in Sources */,
 				965A785F2514F1AF009980D4 /* NavigationContext.swift in Sources */,
 				964547AD2520CF3E0064D062 /* Font.swift in Sources */,
@@ -1133,6 +1158,7 @@
 				52375B76256D585A003180E1 /* OSLog.swift in Sources */,
 				964A60CB256812C2008126BF /* FrameAnimation.swift in Sources */,
 				96062E46254C67C100AAB78D /* RoundRectButtonStyle.swift in Sources */,
+				527E600C2570FC9A0000DE93 /* Document.swift in Sources */,
 				96E13582254727A000133A24 /* TextRoot.swift in Sources */,
 				52EB925D25668ED8003E49C5 /* PerformanceDebug.swift in Sources */,
 				52326F8C252F1A8E00A40F1E /* NSManagedObject+initExtension.swift in Sources */,
@@ -1165,6 +1191,7 @@
 				96474E39254D977E00A920B3 /* BeamData.swift in Sources */,
 				965A78602514F1AF009980D4 /* BeamNote.swift in Sources */,
 				96C9CC432535FA4900D70AA6 /* Parser.swift in Sources */,
+				960B823C2571BB83006ECE77 /* BeamElement.swift in Sources */,
 				5204E8BC255ED6E100458211 /* APIResponse.swift in Sources */,
 				96A49B6A253115C5003B4767 /* String+Regex.swift in Sources */,
 				964A60C125680E37008126BF /* Tick.swift in Sources */,
@@ -1216,6 +1243,7 @@
 				52B5EF78252F520100914D52 /* CoreDataTests.swift in Sources */,
 				52DEF1CA252B259700561493 /* CoreDataManagerTests.swift in Sources */,
 				967B2685255465C5003F40E3 /* Html2MdTests.swift in Sources */,
+				527DF48725710ECB00A0A56D /* DocumentManagerTests.swift in Sources */,
 				96E1356F2546F03900133A24 /* TextNodeTests.swift in Sources */,
 				969084CC25365AAE009D3C96 /* ParserTests.swift in Sources */,
 				521812CF2524C597007E4B47 /* NoteTests.swift in Sources */,

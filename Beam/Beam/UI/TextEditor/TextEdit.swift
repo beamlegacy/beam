@@ -23,7 +23,7 @@ public struct MouseInfo {
 }
 
 public struct BTextEdit: NSViewRepresentable {
-    var note: Note
+    var note: BeamNote
     var openURL: (URL) -> Void
     var openCard: (String) -> Void
     var onStartEditing: () -> Void = { }
@@ -40,7 +40,7 @@ public struct BTextEdit: NSViewRepresentable {
     var showTitle = true
 
     public func makeNSView(context: Context) -> BeamTextEdit {
-        let root = TextRoot(CoreDataManager.shared, note: note)
+        let root = TextRoot(element: note)
         let nsView = BeamTextEdit(root: root, font: Font.main)
 
         nsView.openURL = openURL
@@ -66,7 +66,7 @@ public struct BTextEdit: NSViewRepresentable {
     public func updateNSView(_ nsView: BeamTextEdit, context: Context) {
 //        print("display note: \(note)")
         if nsView.rootNode.note !== note {
-            nsView.rootNode = TextRoot(CoreDataManager.shared, note: note)
+            nsView.rootNode = TextRoot(element: note)
             if let note = nsView.rootNode.children.first {
                 nsView.node = note
             }
@@ -94,7 +94,7 @@ public struct BTextEdit: NSViewRepresentable {
 }
 
 public struct BTextEditScrollable: NSViewRepresentable {
-    var note: Note
+    var note: BeamNote
     var openURL: (URL) -> Void
     var openCard: (String) -> Void
     var onStartEditing: () -> Void = { }
@@ -111,7 +111,7 @@ public struct BTextEditScrollable: NSViewRepresentable {
     var showTitle = true
 
     public func makeNSView(context: Context) -> NSViewType {
-        let root = TextRoot(CoreDataManager.shared, note: note)
+        let root = TextRoot(element: note)
         let edit = BeamTextEdit(root: root, font: Font.main)
 
         edit.openURL = openURL
@@ -153,7 +153,7 @@ public struct BTextEditScrollable: NSViewRepresentable {
         // swiftlint:disable:next force_cast
         let edit = nsView.documentView as! BeamTextEdit
         if edit.rootNode.note !== note {
-            edit.rootNode = TextRoot(CoreDataManager.shared, note: note)
+            edit.rootNode = TextRoot(element: note)
             if let note = edit.rootNode.children.first {
                 edit.node = note
             }
@@ -346,10 +346,8 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             if let firstNode = rootNode.children.first {
                 node = firstNode
             } else {
-                guard let newBullet = rootNode.note?.createBullet(CoreDataManager.shared.mainContext, content: "", afterBullet: nil) else { return }
-                let newNode = TextNode(bullet: newBullet, recurse: false)
-                var children = rootNode.children
-                children.append(newNode)
+                let newNode = TextNode(element: BeamElement(), recurse: false)
+                rootNode.addChild(newNode)
                 rootNode.cursorPosition = 0
                 node = newNode
             }
@@ -477,9 +475,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             let nodes = node.children
             for c in nodes {
                 newNode.addChild(c)
-                if let b = c.bullet {
-                    newNode.bullet?.addToChildren(b)
-                }
             }
 
             _ = node.parent?.insert(node: newNode, after: node)
@@ -759,7 +754,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             return t
         }
 
-        let titleString = rootNode.note.title.attributed
+        guard let titleString = rootNode.note?.title.attributed else { fatalError() }
         let f = NSFont.systemFont(ofSize: isBig ? 13 : 11, weight: .semibold)
         titleString.addAttribute(.font, value: f, range: titleString.wholeRange)
         titleString.addAttribute(.foregroundColor, value: NSColor(named: "EditorControlColor")!, range: titleString.wholeRange)
@@ -978,5 +973,21 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         titleLayer.setNeedsDisplay()
         rootNode.deepInvalidateTextRendering()
         rootNode.deepInvalidateText()
+    }
+
+    let documentManager = DocumentManager(coreDataManager: CoreDataManager.shared)
+
+    @IBAction func saveDocument(_ sender: Any?) {
+        print("Save document!")
+//        let encoder = JSONEncoder()
+//        encoder.outputFormatting = .prettyPrinted
+//        do {
+//            let data = try encoder.encode(rootNode)
+//            let string = String(data: data, encoding: .utf8)!
+//            print("JSon document:\n\(string)")
+//        } catch {
+//            print("Encoding error")
+//        }
+        rootNode.note?.save(documentManager: documentManager)
     }
 }

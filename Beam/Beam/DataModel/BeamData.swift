@@ -8,8 +8,8 @@
 import Foundation
 
 class BeamData: ObservableObject {
-    var _todaysNote: Note?
-    var todaysNote: Note {
+    var _todaysNote: BeamNote?
+    var todaysNote: BeamNote {
         if let note = _todaysNote, note.title == todaysName {
             return note
         }
@@ -17,13 +17,16 @@ class BeamData: ObservableObject {
         setupJournal()
         return _todaysNote!
     }
-    @Published var journal: [Note] = []
+    @Published var journal: [BeamNote] = []
 
     var searchKit: SearchKit
 
     var cookies: HTTPCookieStorage
+    var documentManager: DocumentManager
 
     init() {
+        documentManager = DocumentManager(coreDataManager: CoreDataManager.shared)
+
         let paths = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true)
         let directory = paths.first ?? "~/Application Data/BeamApp/"
         let indexPath = URL(fileURLWithPath: directory + "/index.sk")
@@ -42,37 +45,48 @@ class BeamData: ObservableObject {
     }
 
     func setupJournal() {
-        if let note = Note.fetchWithTitle(CoreDataManager.shared.mainContext, todaysName) {
-//            print("Today's note loaded:\n\(note)\n")
-            _todaysNote = note
-        } else {
-            let note = Note.createNote(CoreDataManager.shared.mainContext, todaysName)
-            note.type = NoteType.journal.rawValue
-            let bullet = note.createBullet(CoreDataManager.shared.mainContext, content: "")
-            note.addToBullets(bullet)
-            _todaysNote = note
-//            print("Today's note created:\n\(note)\n")
 
-            try? CoreDataManager.shared.save()
+        if let doc = documentManager.loadDocumentByTitle(title: todaysName) {
+//            print("Today's note loaded:\n\(note)\n")
+            let decoder = JSONDecoder()
+            do {
+                _todaysNote = try decoder.decode(BeamNote.self, from: doc.data)
+            } catch {
+                Logger.shared.logError("Unable to decode today's note", category: .general)
+            }
+        }
+
+        if _todaysNote == nil {
+            // Create the journal
+            _todaysNote = BeamNote(title: todaysName)
+            _todaysNote?.type = .journal
         }
 
         updateJournal()
     }
 
     func updateJournal() {
-        let _journal = Note.fetchAllWithType(CoreDataManager.shared.mainContext, .journal)
-        var newJournal = [Note]()
-
-        // purge journal from empty notes:
-        for note in _journal {
-            if note.title != todaysName, note.bullets?.count == 1, let bullet = note.bullets?.first, bullet.content.isEmpty {
-                note.delete()
-            } else {
-                newJournal.append(note)
+        var _journal = documentManager.loadDocumentsWithType(type: DocumentType.journal).compactMap { docStruct -> BeamNote? in
+            let decoder = JSONDecoder()
+            do {
+                return try decoder.decode(BeamNote.self, from: docStruct.data)
+            } catch {
+                Logger.shared.logError("Unable to decode note [[\(docStruct.title)]] (uid: \(docStruct.id)", category: .general)
             }
+            return nil
         }
 
-        journal = newJournal
+//        // purge journal from empty notes:
+//        for note in _journal {
+//            if note.title != todaysName, note.bullets?.count == 1, let bullet = note.bullets?.first, bullet.content.isEmpty {
+//                note.delete()
+//            } else {
+//                newJournal.append(beamNoteFrom(note: note))
+//            }
+//        }
+
+        _journal.insert(todaysNote, at: 0)
+        journal = _journal
 //        print("Journal updated:\n\(journal)\n")
     }
 }
