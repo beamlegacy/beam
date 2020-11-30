@@ -10,7 +10,6 @@ target 'Beam' do
   pod 'JWTDecode'
   pod 'CocoaLumberjack/Swift'
   pod 'Sentry'
-  pod 'AnyCodable-FlightSchool', '~> 0.4.0'
 end
 
 target 'BeamTests' do

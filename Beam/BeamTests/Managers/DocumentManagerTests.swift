@@ -1,7 +1,6 @@
 import Foundation
 import XCTest
 import Fakery
-import AnyCodable
 
 @testable import Beam
 class DocumentManagerTests: CoreDataTests {
@@ -63,34 +62,6 @@ class DocumentManagerTests: CoreDataTests {
             let count = Document.countWithPredicate(self.context)
             XCTAssertEqual(count, 1)
         }
-    }
-
-    func testAnyDecodable() throws {
-        let json = """
-             {
-                 "boolean": true,
-                 "integer": 1,
-                 "double": 3.141592653589793,
-                 "string": "string",
-                 "array": [1, 2, 3],
-                 "nested": {
-                     "a": "alpha",
-                     "b": "bravo",
-                     "c": "charlie"
-                 }
-             }
-        """.data(using: .utf8)!
-
-        let decoder = JSONDecoder()
-        //swiftlint:disable force_cast
-        if let dictionary = try? decoder.decode([String: AnyDecodable].self, from: json) {
-            let arrayData = dictionary["array"]!.value as! [Int]
-            XCTAssertEqual(arrayData.first, 1)
-
-            let nestedData = dictionary["nested"]!.value as! [String: String]
-            XCTAssertEqual(nestedData["a"], "alpha")
-        }
-        //swiftlint:enable force_cast
     }
 
     func testLoad() throws {
