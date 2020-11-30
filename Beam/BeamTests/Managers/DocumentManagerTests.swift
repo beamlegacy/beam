@@ -21,26 +21,41 @@ class DocumentManagerTests: CoreDataTests {
     }
 
     // MARK: - Structs
-    struct DataDocument: Encodable {
+    struct DataDocument: Codable {
         var bullets: [DataBullet]
         // swiftlint:disable:next nesting
-        struct DataBullet: Encodable {
+        struct DataBullet: Codable {
             let content: String
             let updatedAt: Date
         }
+    }
+
+    func defaultDecoder() -> JSONDecoder {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return decoder
+    }
+
+    func defaultEncoder() -> JSONEncoder {
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        return encoder
     }
 
     // MARK: - Tests
     func testSave() throws {
         let setupExpectation = expectation(description: "set up completion called")
 
-        let data = DataDocument(bullets: [DataDocument.DataBullet(content: "line 1", updatedAt: Date()),
-                                          DataDocument.DataBullet(content: "line 2", updatedAt: Date())])
+        let document = DataDocument(bullets: [DataDocument.DataBullet(content: "line 1", updatedAt: Date()),
+                                              DataDocument.DataBullet(content: "line 2", updatedAt: Date())])
+
+        //swiftlint:disable:next force_try
+        let jsonData = try! self.defaultEncoder().encode(document)
 
         let id = UUID()
         let title = faker.zelda.game()
 
-        sut.saveDocument(id: id, title: title, data: data) {
+        sut.saveDocument(id: id, title: title, data: jsonData) {
             setupExpectation.fulfill()
         }
 
@@ -81,12 +96,14 @@ class DocumentManagerTests: CoreDataTests {
     func testLoad() throws {
         let setupExpectation = expectation(description: "set up completion called")
 
-        let data = DataDocument(bullets: [DataDocument.DataBullet(content: "line 1", updatedAt: Date()),
-                                          DataDocument.DataBullet(content: "line 2", updatedAt: Date())])
+        let document = DataDocument(bullets: [DataDocument.DataBullet(content: "line 1", updatedAt: Date()),
+                                              DataDocument.DataBullet(content: "line 2", updatedAt: Date())])
+        //swiftlint:disable:next force_try
+        let jsonData = try! self.defaultEncoder().encode(document)
         let id = UUID()
         let title = faker.zelda.game()
 
-        sut.saveDocument(id: id, title: title, data: data) {
+        sut.saveDocument(id: id, title: title, data: jsonData) {
             setupExpectation.fulfill()
         }
 
@@ -98,10 +115,8 @@ class DocumentManagerTests: CoreDataTests {
             XCTAssertNotNil(document)
 
             //swiftlint:disable:next force_cast
-            let documentInternalData = document!.data
-
-            //swiftlint:disable:next force_cast
-            let result = DataDocument(data: documentInternalData)!
+            //swiftlint:disable:next force_try
+            let result = try! self.defaultDecoder().decode(DataDocument.self, from: document!.data)
 
             XCTAssertEqual(result.bullets.first?.content, "line 1")
             XCTAssertEqual(result.bullets.last?.content, "line 2")
@@ -109,14 +124,16 @@ class DocumentManagerTests: CoreDataTests {
     }
 
     func testDelete() throws {
-        let data = DataDocument(bullets: [DataDocument.DataBullet(content: "line 1", updatedAt: Date()),
-                                          DataDocument.DataBullet(content: "line 2", updatedAt: Date())])
+        let document = DataDocument(bullets: [DataDocument.DataBullet(content: "line 1", updatedAt: Date()),
+                                              DataDocument.DataBullet(content: "line 2", updatedAt: Date())])
 
         let id = UUID()
         let title = faker.zelda.game()
+        //swiftlint:disable force_try
+        let jsonData = try! self.defaultEncoder().encode(document)
 
         let saveExpectation = expectation(description: "save completion called")
-        sut.saveDocument(id: id, title: title, data: data) {
+        sut.saveDocument(id: id, title: title, data: jsonData) {
             saveExpectation.fulfill()
         }
 
@@ -134,35 +151,5 @@ class DocumentManagerTests: CoreDataTests {
             let count = Document.countWithPredicate(self.context)
             XCTAssertEqual(count, 0)
         }
-    }
-}
-
-extension DocumentManagerTests.DataDocument {
-    init?(data: AnyDecodable) {
-        guard let value = data.value as? [String: Any],
-              let bullets = value["bullets"] as? [Any] else { return nil }
-
-        self.bullets = []
-
-        for bullet in bullets {
-            if let newBullet = DocumentManagerTests.DataDocument.DataBullet(data: bullet) {
-                self.bullets.append(newBullet)
-            }
-        }
-    }
-}
-
-extension DocumentManagerTests.DataDocument.DataBullet {
-    init?(data: Any) {
-        let dateFormatter = ISO8601DateFormatter()
-
-        guard let bulletDictionary = data as? [String: Any],
-              let content = bulletDictionary["content"] as? String,
-              let dateString = bulletDictionary["updatedAt"] as? String,
-              let updatedAt = dateFormatter.date(from: dateString) else {
-            return nil
-        }
-        self.content = content
-        self.updatedAt = updatedAt
     }
 }
