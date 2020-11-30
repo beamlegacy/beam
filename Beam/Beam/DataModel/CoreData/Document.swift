@@ -40,6 +40,7 @@ class Document: NSManagedObject {
             return fetchedTransactions
         } catch {
             // TODO: raise error?
+            Logger.shared.logError("Can't count: \(error)", category: .coredata)
         }
 
         return 0
@@ -52,8 +53,8 @@ class Document: NSManagedObject {
         fetchRequest.sortDescriptors = sortDescriptors
 
         do {
-            let fetchedNote = try context.fetch(fetchRequest)
-            return fetchedNote.first
+            let fetchedDocument = try context.fetch(fetchRequest)
+            return fetchedDocument.first
         } catch {
             Logger.shared.logError("Error fetching note: \(error.localizedDescription)", category: .coredata)
         }
@@ -64,14 +65,14 @@ class Document: NSManagedObject {
     class func fetchAll(context: NSManagedObjectContext, _ predicate: NSPredicate? = nil, _ sortDescriptors: [NSSortDescriptor]? = nil) -> [Document] {
         let fetchRequest: NSFetchRequest<Document> = Document.fetchRequest()
         fetchRequest.predicate = predicate
-        //fetchRequest.fetchLimit = 1
         fetchRequest.sortDescriptors = sortDescriptors
 
         do {
-            let fetchedNotes = try context.fetch(fetchRequest)
-            return fetchedNotes
+            let fetchedDocuments = try context.fetch(fetchRequest)
+            return fetchedDocuments
         } catch {
-            Logger.shared.logError("Error fetching note: \(error.localizedDescription)", category: .coredata)
+            // TODO: raise error?
+            Logger.shared.logError("Can't fetch all: \(error)", category: .coredata)
         }
 
         return []

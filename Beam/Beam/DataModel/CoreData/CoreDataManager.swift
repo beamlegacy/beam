@@ -125,14 +125,14 @@ class CoreDataManager {
                     try backupFile.deleteDirectory()
                 } catch {
                     // TODO: raise error?
-                    print("Error deleting temporary file: \(error)")
+                    Logger.shared.logError("Can't backup: \(error)", category: .coredata)
                 }
             }
 
             try FileManager().copyItem(at: backupFile.fileURL, to: url)
         } catch {
             // TODO: raise error?
-            print("Error backing up Core Data store: \(error)")
+            Logger.shared.logError("Can't backup: \(error)", category: .coredata)
         }
     }
 
@@ -149,7 +149,7 @@ class CoreDataManager {
                 try fileManager.copyItem(at: url, to: storeURL)
             } catch {
                 // TODO: raise error?
-                print("Error importing backup: \(error)")
+                Logger.shared.logError("Can't import backup: \(error)", category: .coredata)
             }
 
             completion?()
