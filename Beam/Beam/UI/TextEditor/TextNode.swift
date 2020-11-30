@@ -22,6 +22,7 @@ public class TextNode: NSObject, CALayerDelegate, Codable {
             guard oldValue != text else { return }
 //            bullet?.content = text
 //            try? CoreDataManager.shared.save()
+            element?.text = text
             invalidateText()
         }
     }
@@ -87,7 +88,11 @@ public class TextNode: NSObject, CALayerDelegate, Codable {
         }
     }
 
-    private var _ast: Parser.Node?
+    private var _ast: Parser.Node? {
+        didSet {
+            element?.ast = _ast
+        }
+    }
     private func buildAttributedString() -> NSAttributedString {
         let config = AttributedStringVisitor.Configuration()
         let visitor = AttributedStringVisitor(configuration: config)
@@ -426,11 +431,11 @@ public class TextNode: NSObject, CALayerDelegate, Codable {
         super.init()
         configureLayer()
 
-//        print("MD: \(bullet.orderIndex) \(node.text)")
-        for child in element.children {
-            addChild(TextNode(element: child, recurse: true))
+        if recurse {
+            for child in element.children {
+                addChild(TextNode(element: child, recurse: true))
+            }
         }
-
     }
 
     init(staticText: String) {
