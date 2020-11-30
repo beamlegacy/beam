@@ -92,7 +92,7 @@ public class BeamElement: Codable, Identifiable, Hashable {
             return
         }
 
-        children.insert(child, at: index)
+        children.insert(child, at: index + 1)
     }
 
     var parent: BeamElement?

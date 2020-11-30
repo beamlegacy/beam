@@ -367,8 +367,8 @@ public class TextNode: NSObject, CALayerDelegate {
         layer.actions = newActions
         layer.anchorPoint = CGPoint()
         layer.setNeedsDisplay()
-        layer.backgroundColor = NSColor.red.cgColor.copy(alpha: 0.1)
-//        layer.backgroundColor = NSColor(white: 1, alpha: 0).cgColor
+//        layer.backgroundColor = NSColor.red.cgColor.copy(alpha: 0.1)
+        layer.backgroundColor = NSColor(white: 1, alpha: 0).cgColor
         layer.opacity = 1.0
         layer.delegate = self
     }
