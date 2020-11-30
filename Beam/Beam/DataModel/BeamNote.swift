@@ -83,7 +83,12 @@ class BeamNote: BeamElement {
         do {
             let encoder = JSONEncoder()
             let data = try encoder.encode(self)
-            documentManager.saveDocument(id: id, title: title, data: data, completion: { completion?(true) })
+
+            guard let documentStruct = DocumentStruct(id: id, title: title, data: data, documentType: .journal) else { completion?(false) }
+
+            documentManager.saveDocument(documentStruct) { result in
+                completion?(true)
+            }
         } catch {
             completion?(false)
         }

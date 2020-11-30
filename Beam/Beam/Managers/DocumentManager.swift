@@ -4,10 +4,19 @@ import CoreData
 public struct DocumentStruct {
     let id: UUID
     let title: String
-    let createdAt: Date
-    let updatedAt: Date
+    var createdAt: Date?
+    var updatedAt: Date?
     let data: Data
     let documentType: DocumentType
+}
+
+extension DocumentStruct {
+    init?(id: UUID, title: String, data: Data, documentType: DocumentType) {
+        self.id = id
+        self.title = title
+        self.data = data
+        self.documentType = documentType
+    }
 }
 
 class DocumentManager {
@@ -19,13 +28,14 @@ class DocumentManager {
         self.mainContext = self.coreDataManager.mainContext
     }
 
-    func saveDocument(id: UUID, title: String, data: Data, completion: (() -> Void)? = nil) {
+    func saveDocument(_ documentStruct: DocumentStruct, completion: (() -> Void)? = nil) {
         coreDataManager.persistentContainer.performBackgroundTask { context in
-            let document = Document.fetchWithId(context, id) ?? Document(context: context)
+            let document = Document.fetchWithId(context, documentStruct.id) ?? Document(context: context)
 
-            document.id = id
-            document.data = data
-            document.title = title
+            document.id = documentStruct.id
+            document.data = documentStruct.data
+            document.title = documentStruct.title
+            document.documentType = documentStruct.documentType.rawValue
 
             do {
                 try CoreDataManager.save(context)
