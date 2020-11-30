@@ -61,6 +61,22 @@ class Document: NSManagedObject {
         return nil
     }
 
+    class func fetchAll(context: NSManagedObjectContext, _ predicate: NSPredicate? = nil, _ sortDescriptors: [NSSortDescriptor]? = nil) -> [Document] {
+        let fetchRequest: NSFetchRequest<Document> = Document.fetchRequest()
+        fetchRequest.predicate = predicate
+        //fetchRequest.fetchLimit = 1
+        fetchRequest.sortDescriptors = sortDescriptors
+
+        do {
+            let fetchedNotes = try context.fetch(fetchRequest)
+            return fetchedNotes
+        } catch {
+            Logger.shared.logError("Error fetching note: \(error.localizedDescription)", category: .coredata)
+        }
+
+        return []
+    }
+
     class func fetchWithId(_ context: NSManagedObjectContext, _ id: UUID) -> Document? {
         return fetchFirst(context: context, NSPredicate(format: "id = %@", id as CVarArg))
     }
@@ -68,4 +84,9 @@ class Document: NSManagedObject {
     class func fetchWithTitle(_ context: NSManagedObjectContext, _ title: String) -> Document? {
         return fetchFirst(context: context, NSPredicate(format: "title = %@", title as CVarArg))
     }
+
+    class func fetchAllWithType(_ context: NSManagedObjectContext, _ type: Int16) -> [Document] {
+        return fetchAll(context: context, NSPredicate(format: "documentType = %@", type as CVarArg))
+    }
+
 }

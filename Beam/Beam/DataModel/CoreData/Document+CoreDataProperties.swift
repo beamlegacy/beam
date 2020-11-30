@@ -1,7 +1,7 @@
 import Foundation
 import CoreData
 
-enum DocumentType: String {
+enum DocumentType: Int16 {
     case journal
     case note
 }
@@ -17,7 +17,7 @@ extension Document {
     @NSManaged public var data: Data?
     @NSManaged public var title: String
     @NSManaged public var updated_at: Date
-    @NSManaged public var type: String
+    @NSManaged public var documentType: Int16
     @NSManaged public var score: Int16
     //swiftlint:enable identifier_name
 }

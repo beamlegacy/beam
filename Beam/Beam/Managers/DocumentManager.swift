@@ -7,6 +7,7 @@ public struct DocumentStruct {
     let createdAt: Date
     let updatedAt: Date
     let data: Data
+    let documentType: DocumentType
 }
 
 class DocumentManager {
@@ -49,14 +50,23 @@ class DocumentManager {
         return parseDocumentBody(document)
     }
 
+    func loadDocumentsWithType(type: DocumentType) -> [DocumentStruct] {
+        return Document.fetchAllWithType(mainContext, type.rawValue).compactMap { document -> DocumentStruct? in
+            parseDocumentBody(document)
+
+        }
+    }
+
     private func parseDocumentBody(_ document: Document) -> DocumentStruct? {
         guard let data = document.data else { return nil }
+        guard let type = DocumentType(rawValue: document.documentType) else { return nil }
 
         return DocumentStruct(id: document.id,
                               title: document.title,
                               createdAt: document.created_at,
                               updatedAt: document.updated_at,
-                              data: data)
+                              data: data,
+                              documentType: type)
 
     }
 
