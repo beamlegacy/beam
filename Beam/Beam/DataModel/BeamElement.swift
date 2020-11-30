@@ -38,6 +38,9 @@ public class BeamElement: Codable, Identifiable, Hashable {
         readOnly = try container.decode(Bool.self, forKey: .readOnly)
         if container.contains(.children) {
             children = try container.decode([BeamElement].self, forKey: .children)
+            for child in children {
+                child.parent = self
+            }
         }
 
         if container.contains(.ast) {
@@ -83,13 +86,13 @@ public class BeamElement: Codable, Identifiable, Hashable {
             oldParent.removeChild(child)
         }
 
+        child.parent = self
         guard let after = after, let index = indexOfChild(after) else {
             children.insert(child, at: 0)
             return
         }
 
         children.insert(child, at: index)
-        child.parent = self
     }
 
     var parent: BeamElement?

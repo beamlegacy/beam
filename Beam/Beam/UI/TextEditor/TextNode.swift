@@ -79,14 +79,6 @@ public class TextNode: NSObject, CALayerDelegate {
     }
 
     let layer: CALayer
-    var contentScale: CGFloat = 1 {
-        didSet {
-            layer.contentsScale = contentScale
-            for c in children {
-                c.contentScale = contentScale
-            }
-        }
-    }
 
     private var _ast: Parser.Node? {
         didSet {
@@ -97,7 +89,7 @@ public class TextNode: NSObject, CALayerDelegate {
         let config = AttributedStringVisitor.Configuration()
         let visitor = AttributedStringVisitor(configuration: config)
         visitor.defaultFontSize = fontSize
-        if text.isEmpty && cursorPosition < 0 {
+        if root != nil && text.isEmpty && cursorPosition < 0 {
             let attributed = placeholder.attributed
 
             attributed.setAttributes([.font: visitor.font(for: visitor.context), .foregroundColor: disabledColor], range: attributed.wholeRange)
@@ -154,7 +146,6 @@ public class TextNode: NSObject, CALayerDelegate {
 
     func addChild(_ child: TextNode) {
         element.addChild(child.element)
-        fakeLayoutChild(child)
         invalidateLayout()
     }
 
@@ -169,16 +160,8 @@ public class TextNode: NSObject, CALayerDelegate {
 
     func insert(node: TextNode, after existingNode: TextNode) -> Bool {
         element.insert(node.element, after: existingNode.element)
-        fakeLayoutChild(node)
         invalidateLayout()
         return true
-    }
-
-    func fakeLayoutChild(_ node: TextNode) {
-        // force layout on the child to have a valid initial flow
-        if node.parent == nil && node.frame.width == 0 && node.frame.height == 0 {
-            node.frame.size.width = 1
-        }
     }
 
     var config: TextConfig {
@@ -202,7 +185,7 @@ public class TextNode: NSObject, CALayerDelegate {
     var localTextFrame: NSRect { // The rectangle of our text excluding children
         return NSRect(x: 0, y: 0, width: textFrame.width, height: textFrame.height)
     }
-    var frame = NSRect() // the total frame including text and children, in the parent reference
+    var frame = NSRect(x: 0, y: 0, width: 1, height: 0) // the total frame including text and children, in the parent reference
     var localFrame: NSRect { // the total frame including text and children, in the local reference
         return NSRect(x: 0, y: 0, width: frame.width, height: frame.height)
     }
@@ -326,14 +309,14 @@ public class TextNode: NSObject, CALayerDelegate {
 //        }
 //    }
 
-    var editor: BeamTextEdit
+    public private(set) var editor: BeamTextEdit
 
     private var _root: TextRoot?
     var root: TextRoot? {
         if let r = _root {
             return r
         }
-        guard let parent = parent else { return nil }
+        guard let parent = parent else { return self as? TextRoot }
         _root = parent.root
         return _root
     }
@@ -369,6 +352,10 @@ public class TextNode: NSObject, CALayerDelegate {
 //        configureLayer()
 //    }
 
+    deinit {
+        editor.removeNode(self)
+        layer.removeFromSuperlayer()
+    }
     func configureLayer() {
         let newActions = [
                 "onOrderIn": NSNull(),
@@ -380,8 +367,8 @@ public class TextNode: NSObject, CALayerDelegate {
         layer.actions = newActions
         layer.anchorPoint = CGPoint()
         layer.setNeedsDisplay()
-//        layer.backgroundColor = NSColor.red.cgColor.copy(alpha: 0.1)
-        layer.backgroundColor = NSColor(white: 1, alpha: 0).cgColor
+        layer.backgroundColor = NSColor.red.cgColor.copy(alpha: 0.1)
+//        layer.backgroundColor = NSColor(white: 1, alpha: 0).cgColor
         layer.opacity = 1.0
         layer.delegate = self
     }

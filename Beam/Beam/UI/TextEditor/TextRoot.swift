@@ -36,6 +36,9 @@ public class TextRoot: TextNode {
 
     var undoManager = UndoManager()
     var state = TextState()
+
+    private var _config = TextConfig()
+    override var config: TextConfig { _config }
     override var selectedTextRange: Range<Int> {
         get {
             state.selectedTextRange
@@ -105,11 +108,8 @@ public class TextRoot: TextNode {
         // Main bullets:
         if element.children.isEmpty {
             // Create one empty initial bullet
-            element.children.append(BeamElement())
+            element.addChild(BeamElement())
         }
-
-        let isTodaysNote = (note?.type == NoteType.journal) && (note === AppDelegate.main.data.todaysNote)
-        children.first?.placeholder = isTodaysNote ? "This is the journal, you can type anything here!" : "..."
 
 //        if let linkedRefs = note.linkedReferences, !linkedRefs.isEmpty {
 //            let node = TextNode(staticText: "Linked references")
