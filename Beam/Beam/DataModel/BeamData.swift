@@ -59,6 +59,7 @@ class BeamData: ObservableObject {
         if _todaysNote == nil {
             // Create the journal
             _todaysNote = BeamNote(title: todaysName)
+            _todaysNote?.type = .journal
         }
 
         updateJournal()

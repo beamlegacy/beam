@@ -9,7 +9,7 @@ import Foundation
 
 // Editable Text Data:
 class BeamElement: Codable, Identifiable {
-    var id: BID = BID()
+    var id: UUID = UUID()
     var text: String = ""
     var open: Bool = true
     var children: [BeamElement] = []

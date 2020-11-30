@@ -27,7 +27,7 @@ struct VisitedPage: Codable, Identifiable {
 
 struct NoteReference: Codable {
     var noteName: String
-    var elementID: BID
+    var elementID: UUID
 }
 
 // Document:
@@ -78,6 +78,17 @@ class BeamNote: BeamElement {
 
         try super.encode(to: encoder)
     }
+
+    func save(documentManager: DocumentManager, completion: ((Bool) -> Void)? = nil) {
+        do {
+            let encoder = JSONEncoder()
+            let data = try encoder.encode(self)
+            documentManager.saveDocument(id: id, title: title, data: data, completion: { completion?(true) })
+        } catch {
+            completion?(false)
+        }
+    }
+
 }
 
 // TODO: Remove this when we remove Note/Bullet from the build
