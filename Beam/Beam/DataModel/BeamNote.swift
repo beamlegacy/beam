@@ -82,7 +82,10 @@ class BeamNote: BeamElement {
     func save(documentManager: DocumentManager, completion: ((Result<Bool, Error>) -> Void)? = nil) {
         do {
             let encoder = JSONEncoder()
+            encoder.outputFormatting = .prettyPrinted
             let data = try encoder.encode(self)
+            let str = String(data: data, encoding: .utf8)
+            print(str!)
 
             guard let documentStruct = DocumentStruct(id: id, title: title, data: data, documentType: type == .journal ? .journal : .note) else {
                 completion?(.success(false))

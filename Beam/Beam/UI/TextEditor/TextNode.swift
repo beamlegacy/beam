@@ -12,7 +12,7 @@ import NaturalLanguage
 import Combine
 
 // swiftlint:disable:next type_body_length
-public class TextNode: NSObject, CALayerDelegate, Codable {
+public class TextNode: NSObject, CALayerDelegate {
     public static func == (lhs: TextNode, rhs: TextNode) -> Bool {
         return lhs === rhs
     }
@@ -22,7 +22,7 @@ public class TextNode: NSObject, CALayerDelegate, Codable {
             guard oldValue != text else { return }
 //            bullet?.content = text
 //            try? CoreDataManager.shared.save()
-            element?.text = text
+            element.text = text
             invalidateText()
         }
     }
@@ -56,7 +56,7 @@ public class TextNode: NSObject, CALayerDelegate, Codable {
         return _language
     }
 
-    var element: BeamElement?
+    var element: BeamElement
     var isReference = false
     var isReferenceBranch: Bool {
         return isReference ? true : (parent?.isReferenceBranch ?? false)
@@ -90,7 +90,7 @@ public class TextNode: NSObject, CALayerDelegate, Codable {
 
     private var _ast: Parser.Node? {
         didSet {
-            element?.ast = _ast
+            element.ast = _ast
         }
     }
     private func buildAttributedString() -> NSAttributedString {
@@ -146,23 +146,22 @@ public class TextNode: NSObject, CALayerDelegate, Codable {
     var debug = false
 
     var layout: TextFrame?
-    public private(set) var children: [TextNode] = []
+    public var children: [TextNode] {
+        guard let editor = editor else { return [] }
+
+        return element.children.map { childElement -> TextNode in
+            editor.nodeFor(childElement)
+        }
+    }
 
     func addChild(_ child: TextNode) {
-        if let p = child.parent, p !== self {
-            p.removeChild(child)
-        }
-        children.append(child)
+        element.addChild(child.element)
         fakeLayoutChild(child)
-        child.parent = self
         invalidateLayout()
     }
 
     func removeChild(_ child: TextNode) {
-        children.removeAll { node -> Bool in
-            node === child
-        }
-        child.parent = nil
+        element.removeChild(child.element)
         invalidateLayout()
     }
 
@@ -171,11 +170,8 @@ public class TextNode: NSObject, CALayerDelegate, Codable {
     }
 
     func insert(node: TextNode, after existingNode: TextNode) -> Bool {
-        guard let pos = existingNode.indexInParent else { return false }
-        node.parent?.removeChild(node)
-        children.insert(node, at: pos + 1)
+        element.insert(node.element, after: existingNode.element)
         fakeLayoutChild(node)
-        node.parent = self
         invalidateLayout()
         return true
     }
@@ -185,17 +181,6 @@ public class TextNode: NSObject, CALayerDelegate, Codable {
         if node.parent == nil && node.frame.width == 0 && node.frame.height == 0 {
             node.frame.size.width = 1
         }
-    }
-
-    func setChild(_ node: TextNode, at index: Int) {
-        let oldNode = children[index]
-        oldNode.parent = nil
-        if node.parent !== self {
-            node.parent?.removeChild(node)
-        }
-        children[index] = node
-        node.parent = self
-        invalidateLayout()
     }
 
     var config: TextConfig {
@@ -264,13 +249,6 @@ public class TextNode: NSObject, CALayerDelegate, Codable {
         layout(frame)
     }
 
-//    public func layoutSublayers(of layer: CALayer) {
-//        for c in children {
-//            c.layer.bounds = CGRect(origin: CGPoint(), size: c.frame.size)
-//            c.layer.position = c.frame.origin
-//        }
-//    }
-
     func layout(_ frame: NSRect) {
         if self.currentFrameInDocument != frame {
             if isEditing {
@@ -313,44 +291,42 @@ public class TextNode: NSObject, CALayerDelegate, Codable {
     }
 
     var parent: TextNode? {
-        didSet {
-            reparent()
-        }
+        guard let p = element.parent else { return nil }
+        return editor?.nodeFor(p)
     }
 
     // swiftlint:disable:next cyclomatic_complexity
-    func reparent() {
-        defer {
-            for c in children {
-                c.reparent()
-            }
-        }
-
-        guard let p = parent else {
-            if !isReferenceBranch, let e = element {
-                parent?.element?.removeChild(e)
-            }
-
-            invalidateRoot()
-            return
-        }
-
-        layer.contentsScale = p.layer.contentsScale
-        if let superLayer = p.editor?.layer {
-            if layer.superlayer != superLayer {
-                superLayer.addSublayer(layer)
-            }
-        }
-        guard nil == element else { return }
-
-        // there is no bullet so we must create one if the parent has one
-        if !isReferenceBranch, let parentElement = p.element {
-            let newelem = BeamElement()
-            element = newelem
-            newelem.text = text
-            parentElement.insert(child: newelem, after: previousSibblingNode()?.element)
-        }
-    }
+//    func reparent() {
+//        defer {
+//            for c in children {
+//                c.reparent()
+//            }
+//        }
+//
+//        guard let p = parent else {
+//            if !isReferenceBranch {
+//                parent?.element.removeChild(element)
+//            }
+//
+//            invalidateRoot()
+//            return
+//        }
+//
+//        layer.contentsScale = p.layer.contentsScale
+//        if let superLayer = p.editor?.layer {
+//            if layer.superlayer != superLayer {
+//                superLayer.addSublayer(layer)
+//            }
+//        }
+//
+//        // there is no bullet so we must create one if the parent has one
+//        if !isReferenceBranch, let parentElement = p.element {
+//            let newelem = BeamElement()
+//            element = newelem
+//            newelem.text = text
+//            parentElement.insert(child: newelem, after: previousSibblingNode()?.element)
+//        }
+//    }
 
     var editor: BeamTextEdit? {
         return root?.editor
@@ -374,54 +350,7 @@ public class TextNode: NSObject, CALayerDelegate, Codable {
         }
     }
 
-    enum CodingKeys: String, CodingKey {
-        case text
-        case open
-        case children
-        case readOnly
-        case ast
-    }
-
-    required public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-
-        text = try container.decode(String.self, forKey: .text)
-        open = try container.decode(Bool.self, forKey: .open)
-        readOnly = try container.decode(Bool.self, forKey: .readOnly)
-        var _children = [TextNode]()
-        if container.contains(.children) {
-            _children = try container.decode([TextNode].self, forKey: .children)
-        }
-
-        if container.contains(.ast) {
-            _ast = try container.decode(Parser.Node.self, forKey: .ast)
-        }
-
-        layer = CALayer()
-        super.init()
-
-        for c in _children {
-            addChild(c)
-        }
-
-        configureLayer()
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-
-        try container.encode(text, forKey: .text)
-        try container.encode(open, forKey: .open)
-        try container.encode(readOnly, forKey: .readOnly)
-        if !children.isEmpty {
-            try container.encode(children, forKey: .children)
-        }
-        if let ast = _ast {
-            try container.encode(ast, forKey: .ast)
-        }
-    }
-
-    init(element: BeamElement, recurse: Bool) {
+    init(element: BeamElement) {
         self.element = element
         text = element.text.filter({ (char) -> Bool in
             !char.isNewline
@@ -430,24 +359,18 @@ public class TextNode: NSObject, CALayerDelegate, Codable {
         layer = CALayer()
         super.init()
         configureLayer()
-
-        if recurse {
-            for child in element.children {
-                addChild(TextNode(element: child, recurse: true))
-            }
-        }
     }
 
-    init(staticText: String) {
-        self.text = staticText
-//        print("MD: \(bullet.orderIndex) \(node.text)")
-        //layout = Font.system(size: 1).draw(string: "", textWidth: 0)
-
-        layer = CALayer()
-//        layer.backgroundColor = NSColor.red.cgColor.copy(alpha: 0.1)
-        super.init()
-        configureLayer()
-    }
+//    init(staticText: String) {
+//        self.text = staticText
+////        print("MD: \(bullet.orderIndex) \(node.text)")
+//        //layout = Font.system(size: 1).draw(string: "", textWidth: 0)
+//
+//        layer = CALayer()
+////        layer.backgroundColor = NSColor.red.cgColor.copy(alpha: 0.1)
+//        super.init()
+//        configureLayer()
+//    }
 
     func configureLayer() {
         let newActions = [

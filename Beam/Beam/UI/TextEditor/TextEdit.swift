@@ -346,7 +346,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             if let firstNode = rootNode.children.first {
                 node = firstNode
             } else {
-                let newNode = TextNode(element: BeamElement(), recurse: false)
+                let newNode = TextNode(element: BeamElement())
                 rootNode.addChild(newNode)
                 rootNode.cursorPosition = 0
                 node = newNode
@@ -471,10 +471,12 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             rootNode.eraseSelection()
             let splitText = node.text.substring(from: rootNode.cursorPosition, to: node.text.count)
             node.text.removeLast(node.text.count - rootNode.cursorPosition)
-            let newNode = TextNode(staticText: splitText)
-            let nodes = node.children
-            for c in nodes {
-                newNode.addChild(c)
+            let element = BeamElement()
+            element.text = splitText
+            let newNode = TextNode(element: element)
+            let elements = node.element.children
+            for c in elements {
+                newNode.element.addChild(c)
             }
 
             _ = node.parent?.insert(node: newNode, after: node)
@@ -990,4 +992,16 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 //        }
         rootNode.note?.save(documentManager: documentManager)
     }
+
+    func nodeFor(_ element: BeamElement) -> TextNode {
+        if let node = mapping[element] {
+            return node
+        }
+
+        let node = TextNode(element: element)
+        mapping[element] = node
+        return node
+    }
+    
+    private var mapping: [BeamElement: TextNode] = [:]
 }

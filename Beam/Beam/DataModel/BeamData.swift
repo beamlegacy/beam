@@ -47,7 +47,7 @@ class BeamData: ObservableObject {
     func setupJournal() {
 
         if let doc = documentManager.loadDocumentByTitle(title: todaysName) {
-//            print("Today's note loaded:\n\(note)\n")
+            print("Today's note loaded:\n\(String(data: doc.data, encoding: .utf8)!)\n")
             let decoder = JSONDecoder()
             do {
                 _todaysNote = try decoder.decode(BeamNote.self, from: doc.data)

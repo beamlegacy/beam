@@ -70,11 +70,8 @@ extension TextRoot {
                     let remainingText = node.text
 
                     // Reparent existing children to the node we're merging in
-                    for c in node.children {
-                        nextNode.addChild(c)
-                        if let b = c.element {
-                            nextNode.element?.children.append(b)
-                        }
+                    for c in node.element.children {
+                        nextNode.element.addChild(c)
                     }
 
                     node.delete()

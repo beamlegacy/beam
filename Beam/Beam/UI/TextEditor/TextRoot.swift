@@ -75,7 +75,7 @@ public class TextRoot: TextNode {
                 if let w = e.window {
                     self.contentScale = w.backingScaleFactor
                 }
-                reparent()
+//                reparent()
             }
 
         }
@@ -119,8 +119,8 @@ public class TextRoot: TextNode {
         }
     }
 
-    init(element: BeamElement) {
-        super.init(element: element, recurse: false)
+    override init(element: BeamElement) {
+        super.init(element: element)
         self.note = element as? BeamNote
         self.selfVisible = false
 
@@ -130,10 +130,6 @@ public class TextRoot: TextNode {
         if element.children.isEmpty {
             // Create one empty initial bullet
             element.children.append(BeamElement())
-        }
-
-        for bullet in element.children {
-            addChild(TextNode(element: bullet, recurse: true))
         }
 
         let isTodaysNote = (note?.type == NoteType.journal) && (note === AppDelegate.main.data.todaysNote)
@@ -167,15 +163,6 @@ public class TextRoot: TextNode {
         layer.backgroundColor = NSColor.blue.cgColor.copy(alpha: 0.2)
 
 //        print("created RootNode \(note.title) with \(children.count) main bullets")
-    }
-
-    required public init(from decoder: Decoder) throws {
-
-        try super.init(from: decoder)
-    }
-
-    public override func encode(to encoder: Encoder) throws {
-        try super.encode(to: encoder)
     }
 
     var linkedRefsNode: TextNode?

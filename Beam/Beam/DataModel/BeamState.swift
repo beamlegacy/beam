@@ -256,7 +256,7 @@ var runningOnBigSur: Bool = {
         let bulletStr = "[[\(query)]]"
         let e = BeamElement()
         e.text = bulletStr
-        self.data.todaysNote.insert(child: e, after: self.data.todaysNote.children.last)
+        self.data.todaysNote.insert(e, after: self.data.todaysNote.children.last)
 
         return n
     }

@@ -8,7 +8,7 @@
 import Foundation
 
 // Editable Text Data:
-class BeamElement: Codable, Identifiable {
+class BeamElement: Codable, Identifiable, Hashable {
     var id: UUID = UUID()
     var text: String = ""
     var open: Bool = true
@@ -65,6 +65,7 @@ class BeamElement: Codable, Identifiable {
             e === child
         }) else { return }
         children.remove(at: index)
+        child.parent = nil
     }
 
     func indexOfChild(_ child: BeamElement) -> Int? {
@@ -73,8 +74,31 @@ class BeamElement: Codable, Identifiable {
         })
     }
 
-    func insert(child: BeamElement, after: BeamElement?) {
-        guard let after = after, let index = indexOfChild(after) else { children.append(child); return }
+    func addChild(_ child: BeamElement) {
+        insert(child, after: children.last) // append
+    }
+
+    func insert(_ child: BeamElement, after: BeamElement?) {
+        if let oldParent = child.parent {
+            oldParent.removeChild(child)
+        }
+
+        guard let after = after, let index = indexOfChild(after) else {
+            children.insert(child, at: 0)
+            return
+        }
+
         children.insert(child, at: index)
+        child.parent = self
+    }
+
+    var parent: BeamElement?
+
+    static func == (lhs: BeamElement, rhs: BeamElement) -> Bool {
+        lhs.id == rhs.id
+    }
+
+    func hash(into hasher: inout Hasher) {
+        return hasher.combine(id)
     }
 }
