@@ -40,8 +40,7 @@ public struct BTextEdit: NSViewRepresentable {
     var showTitle = true
 
     public func makeNSView(context: Context) -> BeamTextEdit {
-        let root = TextRoot(element: note)
-        let nsView = BeamTextEdit(root: root, font: Font.main)
+        let nsView = BeamTextEdit(root: note, font: Font.main)
 
         nsView.openURL = openURL
         nsView.openCard = openCard
@@ -65,11 +64,8 @@ public struct BTextEdit: NSViewRepresentable {
 
     public func updateNSView(_ nsView: BeamTextEdit, context: Context) {
 //        print("display note: \(note)")
-        if nsView.rootNode.note !== note {
-            nsView.rootNode = TextRoot(element: note)
-            if let note = nsView.rootNode.children.first {
-                nsView.node = note
-            }
+        if nsView.note !== note {
+            nsView.note = note
         }
 
         nsView.openURL = openURL
@@ -111,8 +107,7 @@ public struct BTextEditScrollable: NSViewRepresentable {
     var showTitle = true
 
     public func makeNSView(context: Context) -> NSViewType {
-        let root = TextRoot(element: note)
-        let edit = BeamTextEdit(root: root, font: Font.main)
+        let edit = BeamTextEdit(root: note, font: Font.main)
 
         edit.openURL = openURL
         edit.openCard = openCard
@@ -152,11 +147,8 @@ public struct BTextEditScrollable: NSViewRepresentable {
 //        print("display note: \(note)")
         // swiftlint:disable:next force_cast
         let edit = nsView.documentView as! BeamTextEdit
-        if edit.rootNode.note !== note {
-            edit.rootNode = TextRoot(element: note)
-            if let note = edit.rootNode.children.first {
-                edit.node = note
-            }
+        if edit.note !== note {
+            edit.note = note
         }
 
         edit.openURL = openURL
@@ -181,9 +173,19 @@ public struct BTextEditScrollable: NSViewRepresentable {
 
 // swiftlint:disable type_body_length
 public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
-    public init(root: TextRoot, font: Font = Font.main) {
+    var note: BeamElement! {
+        didSet {
+            rootNode = TextRoot(editor: self, element: note)
+            mapping[note] = rootNode
+            node = {
+                guard let n = note.children.first else { return nodeFor(note) }
+                return nodeFor(n)
+            }()
+        }
+    }
+
+    public init(root: BeamElement, font: Font = Font.main) {
         self.config.font = font
-        rootNode = root
         super.init(frame: NSRect())
         let l = CALayer()
         self.layer = l
@@ -197,7 +199,9 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         titleLayer.delegate = self
 //        self.wantsLayer = true
 
-        root._editor = self
+        rootNode = TextRoot(editor: self, element: root)
+        mapping[root] = rootNode
+
         timer = Timer.init(timeInterval: 1.0 / 60.0, repeats: true) { [unowned self] _ in
             let now = CFAbsoluteTimeGetCurrent()
             if self.blinkTime < now && self.hasFocus {
@@ -339,14 +343,14 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     // This is the root node of what we are editing:
-    var rootNode: TextRoot {
+    var rootNode: TextRoot! {
         didSet {
             guard oldValue !== rootNode else { return }
-            rootNode._editor = self
+            rootNode.editor = self
             if let firstNode = rootNode.children.first {
                 node = firstNode
             } else {
-                let newNode = TextNode(element: BeamElement())
+                let newNode = TextNode(editor: self, element: BeamElement())
                 rootNode.addChild(newNode)
                 rootNode.cursorPosition = 0
                 node = newNode
@@ -473,7 +477,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             node.text.removeLast(node.text.count - rootNode.cursorPosition)
             let element = BeamElement()
             element.text = splitText
-            let newNode = TextNode(element: element)
+            let newNode = TextNode(editor: self, element: element)
             let elements = node.element.children
             for c in elements {
                 newNode.element.addChild(c)
@@ -998,10 +1002,10 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             return node
         }
 
-        let node = TextNode(element: element)
+        let node = TextNode(editor: self, element: element)
         mapping[element] = node
         return node
     }
-    
+
     private var mapping: [BeamElement: TextNode] = [:]
 }

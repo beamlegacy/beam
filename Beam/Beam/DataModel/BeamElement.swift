@@ -8,8 +8,8 @@
 import Foundation
 
 // Editable Text Data:
-class BeamElement: Codable, Identifiable, Hashable {
-    var id: UUID = UUID()
+public class BeamElement: Codable, Identifiable, Hashable {
+    public var id: UUID = UUID()
     var text: String = ""
     var open: Bool = true
     var children: [BeamElement] = []
@@ -94,11 +94,11 @@ class BeamElement: Codable, Identifiable, Hashable {
 
     var parent: BeamElement?
 
-    static func == (lhs: BeamElement, rhs: BeamElement) -> Bool {
+    public static func == (lhs: BeamElement, rhs: BeamElement) -> Bool {
         lhs.id == rhs.id
     }
 
-    func hash(into hasher: inout Hasher) {
+    public func hash(into hasher: inout Hasher) {
         return hasher.combine(id)
     }
 }

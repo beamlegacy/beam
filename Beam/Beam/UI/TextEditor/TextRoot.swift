@@ -60,8 +60,8 @@ public class TextRoot: TextNode {
             state.cursorPosition = newValue
             node.invalidateText()
             node.invalidate()
-            editor?.reBlink()
-            editor?.setHotSpotToCursorPosition()
+            editor.reBlink()
+            editor.setHotSpotToCursorPosition()
         }
     }
 
@@ -69,32 +69,8 @@ public class TextRoot: TextNode {
         return node.text.substring(range: selectedTextRange)
     }
 
-    var _editor: BeamTextEdit? {
-        didSet {
-            if let e = _editor {
-                if let w = e.window {
-                    self.contentScale = w.backingScaleFactor
-                }
-//                reparent()
-            }
-
-        }
-    }
-    override var editor: BeamTextEdit? {
-        return _editor
-    }
-
     override var root: TextRoot {
         return self
-    }
-
-    private lazy var _config = { TextConfig() }()
-    override var config: TextConfig {
-        if let e = editor {
-            return e.config
-        }
-
-        return _config
     }
 
     var node: TextNode! {
@@ -108,19 +84,19 @@ public class TextRoot: TextNode {
     }
 
     override func invalidateLayout() {
-        editor?.invalidateLayout()
+        editor.invalidateLayout()
     }
 
     override func invalidate(_ rect: NSRect? = nil) {
         if let r = rect {
-            editor?.invalidate(r.offsetBy(dx: currentFrameInDocument.minX, dy: currentFrameInDocument.minY))
+            editor.invalidate(r.offsetBy(dx: currentFrameInDocument.minX, dy: currentFrameInDocument.minY))
         } else {
-            editor?.invalidate(textFrame.offsetBy(dx: currentFrameInDocument.minX, dy: currentFrameInDocument.minY))
+            editor.invalidate(textFrame.offsetBy(dx: currentFrameInDocument.minX, dy: currentFrameInDocument.minY))
         }
     }
 
-    override init(element: BeamElement) {
-        super.init(element: element)
+    override init(editor: BeamTextEdit, element: BeamElement) {
+        super.init(editor: editor, element: element)
         self.note = element as? BeamNote
         self.selfVisible = false
 

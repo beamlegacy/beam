@@ -109,7 +109,7 @@ public class TextNode: NSObject, CALayerDelegate {
 
 //        print("AST:\n\(AST.treeString)")
 
-        if root?.node === self && editor?.hasFocus ?? true {
+        if root?.node === self && editor.hasFocus {
             visitor.cursorPosition = selectedTextRange.startIndex
             visitor.anchorPosition = selectedTextRange.endIndex
         }
@@ -147,8 +147,6 @@ public class TextNode: NSObject, CALayerDelegate {
 
     var layout: TextFrame?
     public var children: [TextNode] {
-        guard let editor = editor else { return [] }
-
         return element.children.map { childElement -> TextNode in
             editor.nodeFor(childElement)
         }
@@ -198,7 +196,7 @@ public class TextNode: NSObject, CALayerDelegate {
     var markedTextRange: Range<Int> { root!.markedTextRange }
     var cursorPosition: Int { root!.cursorPosition }
 
-    var enabled: Bool { editor?.enabled ?? true }
+    var enabled: Bool { editor.enabled }
 
     var textFrame = NSRect() // The rectangle of our text excluding children
     var localTextFrame: NSRect { // The rectangle of our text excluding children
@@ -292,7 +290,7 @@ public class TextNode: NSObject, CALayerDelegate {
 
     var parent: TextNode? {
         guard let p = element.parent else { return nil }
-        return editor?.nodeFor(p)
+        return editor.nodeFor(p)
     }
 
     // swiftlint:disable:next cyclomatic_complexity
@@ -328,9 +326,7 @@ public class TextNode: NSObject, CALayerDelegate {
 //        }
 //    }
 
-    var editor: BeamTextEdit? {
-        return root?.editor
-    }
+    var editor: BeamTextEdit
 
     private var _root: TextRoot?
     var root: TextRoot? {
@@ -350,12 +346,13 @@ public class TextNode: NSObject, CALayerDelegate {
         }
     }
 
-    init(element: BeamElement) {
+    init(editor: BeamTextEdit, element: BeamElement) {
         self.element = element
         text = element.text.filter({ (char) -> Bool in
             !char.isNewline
         })
 
+        self.editor = editor
         layer = CALayer()
         super.init()
         configureLayer()
@@ -439,7 +436,7 @@ public class TextNode: NSObject, CALayerDelegate {
     static var bulletPointFrameBig = symbolFrame(7, "􀜞")
 
     var isBig: Bool {
-        editor?.isBig ?? false
+        editor.isBig
     }
 
     var disclosureClosedFrame: TextFrame { isBig ? Self.disclosureClosedFrameBig : Self.disclosureClosedFrameSmall }
@@ -636,7 +633,7 @@ public class TextNode: NSObject, CALayerDelegate {
     func drawCursor(in context: CGContext) {
         // Draw fake cursor if the text is empty
         if text.isEmpty {
-            guard editor?.hasFocus ?? false, editor?.blinkPhase ?? false else { return }
+            guard editor.hasFocus, editor.blinkPhase else { return }
 
             let f = AttributedStringVisitor.font(fontSize)
             let cursorRect = NSRect(x: indent, y: 0, width: 7, height: CGFloat(f.ascender - f.descender))
@@ -651,7 +648,6 @@ public class TextNode: NSObject, CALayerDelegate {
             return
         }
 
-        guard let editor = editor else { return }
         // Otherwise, draw the cursor at a real position
         guard let cursorLine = lineAt(index: cursorPosition), editor.hasFocus, editor.blinkPhase else { return }
 
