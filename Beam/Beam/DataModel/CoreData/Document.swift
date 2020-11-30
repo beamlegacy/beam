@@ -40,6 +40,7 @@ class Document: NSManagedObject {
             return fetchedTransactions
         } catch {
             // TODO: raise error?
+            Logger.shared.logError("Can't count: \(error)", category: .coredata)
         }
 
         return 0
@@ -71,6 +72,7 @@ class Document: NSManagedObject {
             return fetchedDocuments
         } catch {
             // TODO: raise error?
+            Logger.shared.logError("Can't fetch all: \(error)", category: .coredata)
         }
 
         return []
