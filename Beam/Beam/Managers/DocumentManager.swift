@@ -18,7 +18,7 @@ class DocumentManager {
         self.mainContext = self.coreDataManager.mainContext
     }
 
-    func saveDocument(id: UUID, title: String, data: Data, completion: (() -> Void)? = nil) {
+    func saveDocument(id: UUID, title: String, data: Data, completion: ((Result<Bool, Error>) -> Void)? = nil) {
         coreDataManager.persistentContainer.performBackgroundTask { context in
             let document = Document.fetchWithId(context, id) ?? Document(context: context)
 
@@ -30,10 +30,12 @@ class DocumentManager {
                 try CoreDataManager.save(context)
                 Logger.shared.logDebug("CoreDataManager saved", category: .coredata)
             } catch {
-                Logger.shared.logError("Couldn't save context: \(error.localizedDescription)", category: .coredata)
+                Logger.shared.logError("Couldn't save context: \(error)", category: .coredata)
+                completion?(.failure(error))
+                return
             }
 
-            completion?()
+            completion?(.success(true))
         }
     }
 
@@ -47,6 +49,12 @@ class DocumentManager {
         guard let document = Document.fetchWithTitle(mainContext, title) else { return nil }
 
         return parseDocumentBody(document)
+    }
+
+    func loadDocuments() -> [DocumentStruct] {
+        return Document.fetchAllWithPredicate(context: mainContext).compactMap { document in
+            parseDocumentBody(document)
+        }
     }
 
     private func parseDocumentBody(_ document: Document) -> DocumentStruct? {

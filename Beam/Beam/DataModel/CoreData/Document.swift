@@ -52,13 +52,28 @@ class Document: NSManagedObject {
         fetchRequest.sortDescriptors = sortDescriptors
 
         do {
-            let fetchedNote = try context.fetch(fetchRequest)
-            return fetchedNote.first
+            let fetchedDocument = try context.fetch(fetchRequest)
+            return fetchedDocument.first
         } catch {
             Logger.shared.logError("Error fetching note: \(error.localizedDescription)", category: .coredata)
         }
 
         return nil
+    }
+
+    class func fetchAllWithPredicate(context: NSManagedObjectContext, _ predicate: NSPredicate? = nil, _ sortDescriptors: [NSSortDescriptor]? = nil) -> [Document] {
+        let fetchRequest: NSFetchRequest<Document> = Document.fetchRequest()
+        fetchRequest.predicate = predicate
+        fetchRequest.sortDescriptors = sortDescriptors
+
+        do {
+            let fetchedDocuments = try context.fetch(fetchRequest)
+            return fetchedDocuments
+        } catch {
+            // TODO: raise error?
+        }
+
+        return []
     }
 
     class func fetchWithId(_ context: NSManagedObjectContext, _ id: UUID) -> Document? {
