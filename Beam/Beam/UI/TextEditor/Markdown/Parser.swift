@@ -553,14 +553,14 @@ class Parser {
             parseTokenAsText(context)
 
         case .Strong:
-            if [.NewLine, .Blank, .Emphasis, .Strong].contains(context.previousType) {
+            if [.EndOfFile, .NewLine, .Blank, .Emphasis, .Strong].contains(context.previousType) {
                 parseStrong(context)
             } else {
                 parseTokenAsText(context)
             }
 
         case .Emphasis:
-            if [.NewLine, .Blank, .Emphasis, .Strong].contains(context.previousType) {
+            if [.EndOfFile, .NewLine, .Blank, .Emphasis, .Strong].contains(context.previousType) {
                 parseEmphasis(context)
             } else {
                 parseTokenAsText(context)

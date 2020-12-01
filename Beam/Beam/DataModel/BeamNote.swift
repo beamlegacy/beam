@@ -82,7 +82,12 @@ class BeamNote: BeamElement {
     func save(documentManager: DocumentManager, completion: ((Result<Bool, Error>) -> Void)? = nil) {
         do {
             let encoder = JSONEncoder()
+            #if DEBUG
+            encoder.outputFormatting = .prettyPrinted
+            #endif
             let data = try encoder.encode(self)
+//            let str = String(data: data, encoding: .utf8)
+//            print(str!)
 
             guard let documentStruct = DocumentStruct(id: id, title: title, data: data, documentType: type == .journal ? .journal : .note) else {
                 completion?(.success(false))
@@ -97,6 +102,7 @@ class BeamNote: BeamElement {
         }
     }
 
+    var isTodaysNote: Bool { (type == .journal) && (self === AppDelegate.main.data.todaysNote) }
 }
 
 // TODO: Remove this when we remove Note/Bullet from the build
@@ -105,7 +111,7 @@ func beamNoteFrom(note: Note) -> BeamNote {
     let n = BeamNote(title: note.title)
 
     for b in note.rootBullets() {
-        n.children.append(beamElementFrom(bullet: b))
+        n.addChild(beamElementFrom(bullet: b))
     }
 
     return n
@@ -116,7 +122,7 @@ func beamElementFrom(bullet: Bullet) -> BeamElement {
     element.text = bullet.content
 
     for b in bullet.sortedChildren() {
-        element.children.append(beamElementFrom(bullet: b))
+        element.addChild(beamElementFrom(bullet: b))
     }
 
     return element

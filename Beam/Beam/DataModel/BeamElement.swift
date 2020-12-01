@@ -8,12 +8,12 @@
 import Foundation
 
 // Editable Text Data:
-class BeamElement: Codable, Identifiable {
-    var id: UUID = UUID()
-    var text: String = ""
-    var open: Bool = true
-    var children: [BeamElement] = []
-    var readOnly: Bool = false
+public class BeamElement: Codable, Identifiable, Hashable {
+    public var id = UUID()
+    var text = ""
+    var open = true
+    var children = [BeamElement]()
+    var readOnly = false
     var ast: Parser.Node?
     var score: Float = 0
 
@@ -29,6 +29,10 @@ class BeamElement: Codable, Identifiable {
     init() {
     }
 
+    init(_ text: String) {
+        self.text = text
+    }
+
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
@@ -38,6 +42,9 @@ class BeamElement: Codable, Identifiable {
         readOnly = try container.decode(Bool.self, forKey: .readOnly)
         if container.contains(.children) {
             children = try container.decode([BeamElement].self, forKey: .children)
+            for child in children {
+                child.parent = self
+            }
         }
 
         if container.contains(.ast) {
@@ -65,6 +72,7 @@ class BeamElement: Codable, Identifiable {
             e === child
         }) else { return }
         children.remove(at: index)
+        child.parent = nil
     }
 
     func indexOfChild(_ child: BeamElement) -> Int? {
@@ -73,8 +81,31 @@ class BeamElement: Codable, Identifiable {
         })
     }
 
-    func insert(child: BeamElement, after: BeamElement?) {
-        guard let after = after, let index = indexOfChild(after) else { children.append(child); return }
-        children.insert(child, at: index)
+    func addChild(_ child: BeamElement) {
+        insert(child, after: children.last) // append
+    }
+
+    func insert(_ child: BeamElement, after: BeamElement?) {
+        if let oldParent = child.parent {
+            oldParent.removeChild(child)
+        }
+
+        child.parent = self
+        guard let after = after, let index = indexOfChild(after) else {
+            children.insert(child, at: 0)
+            return
+        }
+
+        children.insert(child, at: index + 1)
+    }
+
+    var parent: BeamElement?
+
+    public static func == (lhs: BeamElement, rhs: BeamElement) -> Bool {
+        lhs.id == rhs.id
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        return hasher.combine(id)
     }
 }

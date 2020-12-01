@@ -36,6 +36,9 @@ public class TextRoot: TextNode {
 
     var undoManager = UndoManager()
     var state = TextState()
+
+    private var _config = TextConfig()
+    override var config: TextConfig { _config }
     override var selectedTextRange: Range<Int> {
         get {
             state.selectedTextRange
@@ -60,8 +63,8 @@ public class TextRoot: TextNode {
             state.cursorPosition = newValue
             node.invalidateText()
             node.invalidate()
-            editor?.reBlink()
-            editor?.setHotSpotToCursorPosition()
+            editor.reBlink()
+            editor.setHotSpotToCursorPosition()
         }
     }
 
@@ -69,32 +72,8 @@ public class TextRoot: TextNode {
         return node.text.substring(range: selectedTextRange)
     }
 
-    var _editor: BeamTextEdit? {
-        didSet {
-            if let e = _editor {
-                if let w = e.window {
-                    self.contentScale = w.backingScaleFactor
-                }
-                reparent()
-            }
-
-        }
-    }
-    override var editor: BeamTextEdit? {
-        return _editor
-    }
-
     override var root: TextRoot {
         return self
-    }
-
-    private lazy var _config = { TextConfig() }()
-    override var config: TextConfig {
-        if let e = editor {
-            return e.config
-        }
-
-        return _config
     }
 
     var node: TextNode! {
@@ -108,19 +87,19 @@ public class TextRoot: TextNode {
     }
 
     override func invalidateLayout() {
-        editor?.invalidateLayout()
+        editor.invalidateLayout()
     }
 
     override func invalidate(_ rect: NSRect? = nil) {
         if let r = rect {
-            editor?.invalidate(r.offsetBy(dx: currentFrameInDocument.minX, dy: currentFrameInDocument.minY))
+            editor.invalidate(r.offsetBy(dx: currentFrameInDocument.minX, dy: currentFrameInDocument.minY))
         } else {
-            editor?.invalidate(textFrame.offsetBy(dx: currentFrameInDocument.minX, dy: currentFrameInDocument.minY))
+            editor.invalidate(textFrame.offsetBy(dx: currentFrameInDocument.minX, dy: currentFrameInDocument.minY))
         }
     }
 
-    init(element: BeamElement) {
-        super.init(element: element, recurse: false)
+    override init(editor: BeamTextEdit, element: BeamElement) {
+        super.init(editor: editor, element: element)
         self.note = element as? BeamNote
         self.selfVisible = false
 
@@ -129,15 +108,8 @@ public class TextRoot: TextNode {
         // Main bullets:
         if element.children.isEmpty {
             // Create one empty initial bullet
-            element.children.append(BeamElement())
+            element.addChild(BeamElement())
         }
-
-        for bullet in element.children {
-            addChild(TextNode(element: bullet, recurse: true))
-        }
-
-        let isTodaysNote = (note?.type == NoteType.journal) && (note === AppDelegate.main.data.todaysNote)
-        children.first?.placeholder = isTodaysNote ? "This is the journal, you can type anything here!" : "..."
 
 //        if let linkedRefs = note.linkedReferences, !linkedRefs.isEmpty {
 //            let node = TextNode(staticText: "Linked references")
@@ -167,15 +139,6 @@ public class TextRoot: TextNode {
         layer.backgroundColor = NSColor.blue.cgColor.copy(alpha: 0.2)
 
 //        print("created RootNode \(note.title) with \(children.count) main bullets")
-    }
-
-    required public init(from decoder: Decoder) throws {
-
-        try super.init(from: decoder)
-    }
-
-    public override func encode(to encoder: Encoder) throws {
-        try super.encode(to: encoder)
     }
 
     var linkedRefsNode: TextNode?

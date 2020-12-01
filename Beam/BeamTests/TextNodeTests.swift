@@ -14,68 +14,69 @@ import NaturalLanguage
 import Fakery
 
 class TextNodeTests: XCTestCase {
-    var sut = CoreDataManager()
     override func setUp() {
         super.setUp()
-
-        sut.setup(storeType: NSInMemoryStoreType)
     }
 
     func reset() {
-        sut = CoreDataManager()
-        sut.setup(storeType: NSInMemoryStoreType)
     }
 
-    func validateNodeWithBullet(node: TextNode, bullet: Bullet) {
-        XCTAssert(node.bullet === bullet)
-        XCTAssertEqual(node.text, bullet.content)
+    func validateNodeWithElement(node: TextNode, element: BeamElement) {
+        XCTAssert(node.element === element)
+        XCTAssertEqual(node.text, element.text)
 
-        let bullets = bullet.sortedChildren()
-        XCTAssertEqual(node.children.count, bullets.count)
+        let elements = element.children
+        XCTAssertEqual(node.children.count, elements.count)
 
         for i in 0..<node.children.count {
             let childNode = node.children[i]
-            let childBullet = bullets[i]
+            let childElement = elements[i]
 
-            validateNodeWithBullet(node: childNode, bullet: childBullet)
+            validateNodeWithElement(node: childNode, element: childElement)
         }
 
     }
 
-    func validateRootWithNote(root: TextRoot, note: Note) {
-        let bullets = note.rootBullets()
-        XCTAssertEqual(root.children.count, bullets.count)
+    func validateRootWithNote(root: TextRoot, note: BeamNote) {
+        let elements = note.children
+        XCTAssertEqual(root.children.count, elements.count)
 
         for i in 0..<root.children.count {
             let node = root.children[i]
-            let bullet = bullets[i]
+            let element = elements[i]
 
-            validateNodeWithBullet(node: node, bullet: bullet)
+            validateNodeWithElement(node: node, element: element)
         }
     }
 
-    func createMiniArborescence(title: String) -> Note {
-        let note = Note.createNote(sut.mainContext, title)
-        let bullet1 = note.createBullet(sut.mainContext, content: "bullet1", createdAt: Date(), afterBullet: nil, parentBullet: nil)
-        let bullet11 = note.createBullet(sut.mainContext, content: "bullet11", createdAt: Date(), afterBullet: nil, parentBullet: bullet1)
-        _ = note.createBullet(sut.mainContext, content: "bullet12", createdAt: Date(), afterBullet: bullet11, parentBullet: bullet1)
-        let bullet2 = note.createBullet(sut.mainContext, content: "bullet2", createdAt: Date(), afterBullet: nil, parentBullet: nil)
-        let bullet21 = note.createBullet(sut.mainContext, content: "bullet21", createdAt: Date(), afterBullet: nil, parentBullet: bullet2)
-        let bullet22 = note.createBullet(sut.mainContext, content: "bullet22", createdAt: Date(), afterBullet: bullet21, parentBullet: bullet2)
-        _ = note.createBullet(sut.mainContext, content: "bullet23", createdAt: Date(), afterBullet: bullet22, parentBullet: bullet2)
+    func createMiniArborescence(title: String) -> BeamNote {
+        let note = BeamNote(title: title)
+        let bullet1 = BeamElement("bullet1")
+        note.addChild(bullet1)
+        let bullet11 = BeamElement("bullet11")
+        bullet1.addChild(bullet11)
+        bullet1.addChild(BeamElement("bullet12"))
+        let bullet2 = BeamElement("bullet2")
+        note.addChild(bullet2)
+        bullet2.addChild(BeamElement("bullet21"))
+        bullet2.addChild(BeamElement("bullet22"))
+        bullet2.addChild(BeamElement("bullet23"))
 
         return note
     }
 
-    func createLoremArborescence(title: String) -> Note {
-        let note = Note.createNote(sut.mainContext, title)
-        let bullet1 = note.createBullet(sut.mainContext, content: String.loremIpsumSmallMD, createdAt: Date(), afterBullet: nil, parentBullet: nil)
-        let bullet11 = note.createBullet(sut.mainContext, content: String.loremIpsumSmallMD, createdAt: Date(), afterBullet: nil, parentBullet: bullet1)
-        _ = note.createBullet(sut.mainContext, content: String.loremIpsumSmallMD, createdAt: Date(), afterBullet: bullet11, parentBullet: bullet1)
-        let bullet2 = note.createBullet(sut.mainContext, content: String.loremIpsumSmallMD, createdAt: Date(), afterBullet: nil, parentBullet: nil)
-        let bullet21 = note.createBullet(sut.mainContext, content: String.loremIpsumSmallMD, createdAt: Date(), afterBullet: nil, parentBullet: bullet2)
-        let bullet22 = note.createBullet(sut.mainContext, content: String.loremIpsumSmallMD, createdAt: Date(), afterBullet: bullet21, parentBullet: bullet2)
-        _ = note.createBullet(sut.mainContext, content: String.loremIpsumSmallMD, createdAt: Date(), afterBullet: bullet22, parentBullet: bullet2)
+    func createLoremArborescence(title: String) -> BeamNote {
+        let note = BeamNote(title: title)
+        let bullet1 = BeamElement(String.loremIpsumSmallMD)
+        note.addChild(bullet1)
+        let bullet11 = BeamElement(String.loremIpsumSmallMD)
+        bullet1.addChild(bullet11)
+        bullet1.addChild(BeamElement(String.loremIpsumSmallMD))
+        let bullet2 = BeamElement(String.loremIpsumSmallMD)
+        note.addChild(bullet2)
+        bullet2.addChild(BeamElement(String.loremIpsumSmallMD))
+        bullet2.addChild(BeamElement(String.loremIpsumSmallMD))
+        bullet2.addChild(BeamElement(String.loremIpsumSmallMD))
 
         return note
     }
@@ -83,7 +84,8 @@ class TextNodeTests: XCTestCase {
     func testLoadExistingNote() {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
-        let root = TextRoot(sut, note: note)
+        let editor = BeamTextEdit(root: note)
+        let root = editor.rootNode!
 //        print("Tree:\n\(root.printTree())\n")
         validateRootWithNote(root: root, note: note)
 
@@ -105,7 +107,8 @@ class TextNodeTests: XCTestCase {
     func testFoldNode() {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
-        let root = TextRoot(sut, note: note)
+        let editor = BeamTextEdit(root: note)
+        let root = editor.rootNode!
 //        print("Tree:\n\(root.printTree())\n")
         validateRootWithNote(root: root, note: note)
 
@@ -126,7 +129,8 @@ class TextNodeTests: XCTestCase {
     func testRemoveNode() {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
-        let root = TextRoot(sut, note: note)
+        let editor = BeamTextEdit(root: note)
+        let root = editor.rootNode!
         validateRootWithNote(root: root, note: note)
 
         root.removeChild(root.children.first!)
@@ -147,10 +151,12 @@ class TextNodeTests: XCTestCase {
     func testAddNodeToRoot() {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
-        let root = TextRoot(sut, note: note)
+        let editor = BeamTextEdit(root: note)
+        let root = editor.rootNode!
         validateRootWithNote(root: root, note: note)
 
-        root.addChild(TextNode(staticText: "bullet3"))
+        let bullet3 = BeamElement("bullet3")
+        root.addChild(TextNode(editor: editor, element: bullet3))
 
         let str1 = """
         title
@@ -172,10 +178,11 @@ class TextNodeTests: XCTestCase {
     func testInsertNodeIntoRoot() {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
-        let root = TextRoot(sut, note: note)
+        let editor = BeamTextEdit(root: note)
+        let root = editor.rootNode!
         validateRootWithNote(root: root, note: note)
 
-        _ = root.insert(node: TextNode(staticText: "bullet3"), after: root.children.first!)
+        _ = root.insert(node: TextNode(editor: editor, element: BeamElement("bullet3")), after: root.children.first!)
 
         let str1 = """
         title
@@ -197,10 +204,11 @@ class TextNodeTests: XCTestCase {
     func testAddNodeToBullet() {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
-        let root = TextRoot(sut, note: note)
+        let editor = BeamTextEdit(root: note)
+        let root = editor.rootNode!
         validateRootWithNote(root: root, note: note)
 
-        root.children.first?.addChild(TextNode(staticText: "bullet13"))
+        root.children.first?.addChild(TextNode(editor: editor, element: BeamElement("bullet13")))
 
         let str1 = """
         title
@@ -222,10 +230,11 @@ class TextNodeTests: XCTestCase {
     func testInsertNodeIntoBullet() {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
-        let root = TextRoot(sut, note: note)
+        let editor = BeamTextEdit(root: note)
+        let root = editor.rootNode!
         validateRootWithNote(root: root, note: note)
 
-        _ = root.children.first?.insert(node: TextNode(staticText: "bullet3"), after: root.children.first!.children.first!)
+        _ = root.children.first?.insert(node: TextNode(editor: editor, element: BeamElement("bullet3")), after: root.children.first!.children.first!)
 
         let str1 = """
         title
@@ -247,11 +256,12 @@ class TextNodeTests: XCTestCase {
     func testAddTreeToBullet() {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
-        let root = TextRoot(sut, note: note)
+        let editor = BeamTextEdit(root: note)
+        let root = editor.rootNode!
         validateRootWithNote(root: root, note: note)
 
-        let node = TextNode(staticText: "bullet13")
-        node.addChild(TextNode(staticText: "bullet131"))
+        let node = TextNode(editor: editor, element: BeamElement("bullet13"))
+        node.addChild(TextNode(editor: editor, element: BeamElement("bullet131")))
         root.children.first?.addChild(node)
 
         let str1 = """
@@ -275,11 +285,12 @@ class TextNodeTests: XCTestCase {
     func testInsertTreeIntoBullet() {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
-        let root = TextRoot(sut, note: note)
+        let editor = BeamTextEdit(root: note)
+        let root = editor.rootNode!
         validateRootWithNote(root: root, note: note)
 
-        let node = TextNode(staticText: "bullet13")
-        node.addChild(TextNode(staticText: "bullet131"))
+        let node = TextNode(editor: editor, element: BeamElement("bullet13"))
+        node.addChild(TextNode(editor: editor, element: BeamElement("bullet131")))
         _ = root.children.first?.insert(node: node, after: root.children.first!.children.first!)
 
         let str1 = """
@@ -303,7 +314,8 @@ class TextNodeTests: XCTestCase {
     func testRemoveBulletFromNote() {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
-        let root = TextRoot(sut, note: note)
+        let editor = BeamTextEdit(root: note)
+        let root = editor.rootNode!
 //        print("Tree:\n\(root.printTree())\n")
         validateRootWithNote(root: root, note: note)
 
@@ -324,7 +336,8 @@ class TextNodeTests: XCTestCase {
     func testRemoveBulletFromBullet() {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
-        let root = TextRoot(sut, note: note)
+        let editor = BeamTextEdit(root: note)
+        let root = editor.rootNode!
 //        print("Tree:\n\(root.printTree())\n")
         validateRootWithNote(root: root, note: note)
 
@@ -348,7 +361,8 @@ class TextNodeTests: XCTestCase {
     func testInsertText1() {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
-        let root = TextRoot(sut, note: note)
+        let editor = BeamTextEdit(root: note)
+        let root = editor.rootNode!
 //        print("Tree:\n\(root.printTree())\n")
         validateRootWithNote(root: root, note: note)
 
@@ -403,7 +417,8 @@ class TextNodeTests: XCTestCase {
     func testInsertText2() {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
-        let root = TextRoot(sut, note: note)
+        let editor = BeamTextEdit(root: note)
+        let root = editor.rootNode!
 //        print("Tree:\n\(root.printTree())\n")
         validateRootWithNote(root: root, note: note)
 
@@ -457,7 +472,8 @@ class TextNodeTests: XCTestCase {
     func testInsertText3() {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
-        let root = TextRoot(sut, note: note)
+        let editor = BeamTextEdit(root: note)
+        let root = editor.rootNode!
 //        print("Tree:\n\(root.printTree())\n")
         validateRootWithNote(root: root, note: note)
 
@@ -512,7 +528,8 @@ class TextNodeTests: XCTestCase {
     func testMoveCursor() {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
-        let root = TextRoot(sut, note: note)
+        let editor = BeamTextEdit(root: note)
+        let root = editor.rootNode!
         //print("Tree:\n\(root.printTree())\n")
         validateRootWithNote(root: root, note: note)
 
@@ -578,7 +595,8 @@ class TextNodeTests: XCTestCase {
         defer { reset() }
         let frame = NSRect(x: 0, y: 0, width: 400, height: 500)
         let note = createLoremArborescence(title: "title")
-        let root = TextRoot(sut, note: note)
+        let editor = BeamTextEdit(root: note)
+        let root = editor.rootNode!
         validateRootWithNote(root: root, note: note)
 
         root.node = root.children.first
@@ -632,7 +650,8 @@ class TextNodeTests: XCTestCase {
         defer { reset() }
         let frame = NSRect(x: 0, y: 0, width: 400, height: 500)
         let note = createMiniArborescence(title: "title")
-        let root = TextRoot(sut, note: note)
+        let editor = BeamTextEdit(root: note)
+        let root = editor.rootNode!
         validateRootWithNote(root: root, note: note)
 
         root.node = root.children.first?.children.first
@@ -654,7 +673,8 @@ class TextNodeTests: XCTestCase {
         defer { reset() }
         let frame = NSRect(x: 0, y: 0, width: 400, height: 500)
         let note = createMiniArborescence(title: "title")
-        let root = TextRoot(sut, note: note)
+        let editor = BeamTextEdit(root: note)
+        let root = editor.rootNode!
 //        print("Tree:\n\(root.printTree())\n")
         validateRootWithNote(root: root, note: note)
 
@@ -675,7 +695,8 @@ class TextNodeTests: XCTestCase {
     func testStrippedText() {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
-        let root = TextRoot(sut, note: note)
+        let editor = BeamTextEdit(root: note)
+        let root = editor.rootNode!
         XCTAssertEqual(" bullet1 bullet11 bullet12 bullet2 bullet21 bullet22 bullet23", root.fullStrippedText)
 
     }
@@ -683,7 +704,8 @@ class TextNodeTests: XCTestCase {
     func testStrippedTextMarkDown() {
         defer { reset() }
         let note = createLoremArborescence(title: "title")
-        let root = TextRoot(sut, note: note)
+        let editor = BeamTextEdit(root: note)
+        let root = editor.rootNode!
         print("Stripped: \(root.fullStrippedText)")
         XCTAssertEqual(" Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.", root.fullStrippedText)
     }
@@ -691,7 +713,8 @@ class TextNodeTests: XCTestCase {
     func testLanguageRecognizer() {
         defer { reset() }
         let note = createLoremArborescence(title: "title")
-        let root = TextRoot(sut, note: note)
+        let editor = BeamTextEdit(root: note)
+        let root = editor.rootNode!
         XCTAssertEqual(root.language, NLLanguage.romanian) // Strangely, latin mostly ressembles Romanian from the point of view of the classifier...
     }
 
