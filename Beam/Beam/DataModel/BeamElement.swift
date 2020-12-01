@@ -9,11 +9,11 @@ import Foundation
 
 // Editable Text Data:
 public class BeamElement: Codable, Identifiable, Hashable {
-    public var id: UUID = UUID()
-    var text: String = ""
-    var open: Bool = true
-    var children: [BeamElement] = []
-    var readOnly: Bool = false
+    public var id = UUID()
+    var text = ""
+    var open = true
+    var children = [BeamElement]()
+    var readOnly = false
     var ast: Parser.Node?
     var score: Float = 0
 
@@ -27,6 +27,10 @@ public class BeamElement: Codable, Identifiable, Hashable {
     }
 
     init() {
+    }
+
+    init(_ text: String) {
+        self.text = text
     }
 
     required public init(from decoder: Decoder) throws {

@@ -180,19 +180,18 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     func updateRoot(with note: BeamElement) {
-        if mapping[note] == nil {
-            guard let rootnode = nodeFor(note) as? TextRoot else { fatalError() }
-            rootNode = rootnode
-            accessingMapping = true
-            mapping[note] = rootNode
-            accessingMapping = false
-            purgeDeadNodes()
+        guard mapping[note] == nil else { return }
+        guard let rootnode = nodeFor(note) as? TextRoot else { fatalError() }
+        rootNode = rootnode
+        accessingMapping = true
+        mapping[note] = rootNode
+        accessingMapping = false
+        purgeDeadNodes()
 
-            node = {
-                guard let n = note.children.first else { return nodeFor(note) }
-                return nodeFor(n)
-            }()
-        }
+        node = {
+            guard let n = note.children.first else { return nodeFor(note) }
+            return nodeFor(n)
+        }()
     }
 
     public init(root: BeamElement, font: Font = Font.main) {
@@ -921,14 +920,13 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     public override func viewWillMove(toWindow newWindow: NSWindow?) {
-        if let w = newWindow {
-            w.acceptsMouseMovedEvents = true
-            for elem in mapping {
-                elem.value.layer.contentsScale = w.backingScaleFactor
-                elem.value.invalidate()
-            }
-            titleLayer.contentsScale = w.backingScaleFactor
+        guard let window = newWindow else { return }
+        window.acceptsMouseMovedEvents = true
+        for elem in mapping {
+            elem.value.layer.contentsScale = window.backingScaleFactor
+            elem.value.invalidate()
         }
+        titleLayer.contentsScale = window.backingScaleFactor
     }
 
     var onBlinkTime: Double = 0.7
@@ -998,16 +996,12 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         }
 
         let node: TextNode = {
-            if let note = element as? BeamNote {
-                let root = TextRoot(editor: self, element: note)
-                let isTodaysNote = (note.type == NoteType.journal) && (note === AppDelegate.main.data.todaysNote)
-                if note.children.count == 1 && note.children.first!.text.isEmpty {
-                    root.children.first?.placeholder = isTodaysNote ? "This is the journal, you can type anything here!" : "..."
-                }
-                return root
+            guard let note = element as? BeamNote else { return TextNode(editor: self, element: element) }
+            let root = TextRoot(editor: self, element: note)
+            if note.children.count == 1 && note.children.first!.text.isEmpty {
+                root.children.first?.placeholder = note.isTodaysNote ? "This is the journal, you can type anything here!" : "..."
             }
-
-            return TextNode(editor: self, element: element)
+            return root
         }()
         accessingMapping = true
         mapping[element] = node

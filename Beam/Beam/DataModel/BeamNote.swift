@@ -82,7 +82,9 @@ class BeamNote: BeamElement {
     func save(documentManager: DocumentManager, completion: ((Result<Bool, Error>) -> Void)? = nil) {
         do {
             let encoder = JSONEncoder()
+            #if DEBUG
             encoder.outputFormatting = .prettyPrinted
+            #endif
             let data = try encoder.encode(self)
 //            let str = String(data: data, encoding: .utf8)
 //            print(str!)
@@ -100,6 +102,7 @@ class BeamNote: BeamElement {
         }
     }
 
+    var isTodaysNote: Bool { (type == .journal) && (self === AppDelegate.main.data.todaysNote) }
 }
 
 // TODO: Remove this when we remove Note/Bullet from the build
