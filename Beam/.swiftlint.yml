@@ -1,5 +1,6 @@
 #only the rules specified in this list will be enabled
 whitelist_rules:
+  - if_as_guard
   - block_based_kvo
   - class_delegate_protocol
   - closing_brace
@@ -21,6 +22,7 @@ whitelist_rules:
   - for_where
   - force_cast
   - force_try
+    # - force_unwrapping
   - function_body_length
   - function_parameter_count
   - generic_type_name

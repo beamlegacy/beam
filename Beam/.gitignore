@@ -74,3 +74,6 @@ fastlane/test_output
 # Others
 *.DS_Store
 iOSInjectionProject/
+
+# Beam Configuration file
+Beam/Configuration/Configuration.plist

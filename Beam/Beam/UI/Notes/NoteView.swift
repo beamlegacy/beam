@@ -10,7 +10,7 @@ import SwiftUI
 
 struct NoteView: View {
     @EnvironmentObject var state: BeamState
-    var note: Note
+    var note: BeamNote
     var onStartEditing: () -> Void = {}
     var leadingAlignement = CGFloat(185)
     var showTitle: Bool

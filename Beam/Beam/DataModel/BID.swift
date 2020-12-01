@@ -8,14 +8,15 @@
 import Foundation
 import AppKit
 
-struct BID: Codable, Hashable {
+struct BID: Codable, Hashable, Equatable {
     var id: UInt64
-    static var baseTime = Double(1420070400000)
-    static let timeBits = 41
-    static let nodeBits = 10
-    static let seqBits = 12
-    static var sequence = 0
-    static var nodeId: Int {
+
+    private static var baseTime = Double(1420070400000)
+    private static let timeBits = 41
+    private static let nodeBits = 10
+    private static let seqBits = 12
+    private static var sequence = 0
+    private static var nodeId: Int {
         var uuidRef: CFUUID?
         var uuidBytes: [CUnsignedChar] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         var ts = timespec(tv_sec: 0, tv_nsec: 0)
@@ -45,7 +46,7 @@ struct BID: Codable, Hashable {
         return uuidRef!.hashValue
     }
 
-    func mask(_ value: Int, _ bits: Int) -> Int {
+    private func mask(_ value: Int, _ bits: Int) -> Int {
         return (value & ((1 << bits) - 1))
     }
 

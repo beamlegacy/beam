@@ -1,10 +1,11 @@
 import Foundation
 import CoreData
 
-enum NoteType: String {
+enum NoteType: String, Codable {
     case journal
     case note
 }
+
 extension Note {
     @nonobjc public class func fetchRequest() -> NSFetchRequest<Note> {
         return NSFetchRequest<Note>(entityName: "Note")

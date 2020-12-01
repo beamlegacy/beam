@@ -20,8 +20,9 @@ public class TextNode: NSObject, CALayerDelegate {
     var text: String = "" {
         didSet {
             guard oldValue != text else { return }
-            bullet?.content = text
-            CoreDataManager.shared.save()
+//            bullet?.content = text
+//            try? CoreDataManager.shared.save()
+            element.text = text
             invalidateText()
         }
     }
@@ -55,16 +56,26 @@ public class TextNode: NSObject, CALayerDelegate {
         return _language
     }
 
-    var bullet: Bullet?
+    var element: BeamElement
     var isReference = false
     var isReferenceBranch: Bool {
         return isReference ? true : (parent?.isReferenceBranch ?? false)
     }
-    var open = true { didSet { invalidateLayout()
+    var open = true {
+        didSet {
+            invalidateLayout()
+            updateVisibility(open)
+        }
+    }
+
+    func updateVisibility(_ isVisible: Bool) {
         for c in children {
             c.visible = open
+            c.updateVisibility(open && c.open)
+            invalidateLayout()
         }
-    } }
+    }
+
     var selfVisible = true { didSet { invalidateLayout() } }
     var visible = true {
         didSet {
@@ -78,21 +89,17 @@ public class TextNode: NSObject, CALayerDelegate {
     }
 
     let layer: CALayer
-    var contentScale: CGFloat = 1 {
+
+    private var _ast: Parser.Node? {
         didSet {
-            layer.contentsScale = contentScale
-            for c in children {
-                c.contentScale = contentScale
-            }
+            element.ast = _ast
         }
     }
-
-    private var _ast: Parser.Node?
     private func buildAttributedString() -> NSAttributedString {
         let config = AttributedStringVisitor.Configuration()
         let visitor = AttributedStringVisitor(configuration: config)
         visitor.defaultFontSize = fontSize
-        if text.isEmpty && cursorPosition < 0 {
+        if root != nil && text.isEmpty && cursorPosition < 0 {
             let attributed = placeholder.attributed
 
             attributed.setAttributes([.font: visitor.font(for: visitor.context), .foregroundColor: disabledColor], range: attributed.wholeRange)
@@ -104,7 +111,7 @@ public class TextNode: NSObject, CALayerDelegate {
 
 //        print("AST:\n\(AST.treeString)")
 
-        if root?.node === self && editor?.hasFocus ?? true {
+        if root?.node === self && editor.hasFocus {
             visitor.cursorPosition = selectedTextRange.startIndex
             visitor.anchorPosition = selectedTextRange.endIndex
         }
@@ -141,57 +148,30 @@ public class TextNode: NSObject, CALayerDelegate {
     var debug = false
 
     var layout: TextFrame?
-    public private(set) var children: [TextNode] = []
+    public var children: [TextNode] {
+        return element.children.map { childElement -> TextNode in
+            editor.nodeFor(childElement)
+        }
+    }
 
     func addChild(_ child: TextNode) {
-        if let p = child.parent, p !== self {
-            p.removeChild(child)
-        }
-        children.append(child)
-        fakeLayoutChild(child)
-        child.parent = self
+        element.addChild(child.element)
         invalidateLayout()
     }
 
     func removeChild(_ child: TextNode) {
-        children.removeAll { node -> Bool in
-            node === child
-        }
-        child.parent = nil
+        element.removeChild(child.element)
         invalidateLayout()
     }
 
     func delete() {
-        bullet?.delete(coreDataManager.mainContext)
         parent?.removeChild(self)
     }
 
     func insert(node: TextNode, after existingNode: TextNode) -> Bool {
-        guard let pos = existingNode.indexInParent else { return false }
-        node.parent?.removeChild(node)
-        children.insert(node, at: pos + 1)
-        fakeLayoutChild(node)
-        node.parent = self
+        element.insert(node.element, after: existingNode.element)
         invalidateLayout()
         return true
-    }
-
-    func fakeLayoutChild(_ node: TextNode) {
-        // force layout on the child to have a valid initial flow
-        if node.parent == nil && node.frame.width == 0 && node.frame.height == 0 {
-            node.frame.size.width = 1
-        }
-    }
-
-    func setChild(_ node: TextNode, at index: Int) {
-        let oldNode = children[index]
-        oldNode.parent = nil
-        if node.parent !== self {
-            node.parent?.removeChild(node)
-        }
-        children[index] = node
-        node.parent = self
-        invalidateLayout()
     }
 
     var config: TextConfig {
@@ -209,13 +189,25 @@ public class TextNode: NSObject, CALayerDelegate {
     var markedTextRange: Range<Int> { root!.markedTextRange }
     var cursorPosition: Int { root!.cursorPosition }
 
-    var enabled: Bool { editor?.enabled ?? true }
+    var enabled: Bool { editor.enabled }
 
     var textFrame = NSRect() // The rectangle of our text excluding children
     var localTextFrame: NSRect { // The rectangle of our text excluding children
         return NSRect(x: 0, y: 0, width: textFrame.width, height: textFrame.height)
     }
-    var frame = NSRect() // the total frame including text and children, in the parent reference
+    var availableWidth: CGFloat = 1 {
+        didSet {
+            if availableWidth != oldValue {
+                invalidatedTextRendering = true
+                updateTextRendering()
+            }
+
+            for c in children {
+                c.availableWidth = availableWidth - CGFloat(childInset)
+            }
+        }
+    }
+    var frame = NSRect(x: 0, y: 0, width: 0, height: 0) // the total frame including text and children, in the parent reference
     var localFrame: NSRect { // the total frame including text and children, in the local reference
         return NSRect(x: 0, y: 0, width: frame.width, height: frame.height)
     }
@@ -257,17 +249,6 @@ public class TextNode: NSObject, CALayerDelegate {
         layer.bounds = textFrame
         layer.position = frameInDocument.origin
 
-        layout(frame)
-    }
-
-//    public func layoutSublayers(of layer: CALayer) {
-//        for c in children {
-//            c.layer.bounds = CGRect(origin: CGPoint(), size: c.frame.size)
-//            c.layer.position = c.frame.origin
-//        }
-//    }
-
-    func layout(_ frame: NSRect) {
         if self.currentFrameInDocument != frame {
             if isEditing {
 //                print("Layout set: \(frame)")
@@ -291,7 +272,7 @@ public class TextNode: NSObject, CALayerDelegate {
     }
 
     var offsetInDocument: NSPoint { // the position in the global document
-        let parentOffset = parent != nil ? parent!.offsetInDocument : NSPoint()
+        let parentOffset = parent?.offsetInDocument ?? NSPoint()
         let origin = frame.origin
         return NSPoint(x: parentOffset.x + origin.x, y: parentOffset.y + origin.y)
     }
@@ -309,75 +290,18 @@ public class TextNode: NSObject, CALayerDelegate {
     }
 
     var parent: TextNode? {
-        didSet {
-            reparent()
-        }
+        guard let p = element.parent else { return nil }
+        return editor.nodeFor(p)
     }
 
-    // swiftlint:disable:next cyclomatic_complexity
-    func reparent() {
-        defer {
-            for c in children {
-                c.reparent()
-            }
-        }
-
-        guard let p = parent else {
-            if !isReferenceBranch, let b = bullet {
-                b.parent?.removeFromChildren(b)
-                b.note?.removeFromBullets(b)
-            }
-
-            invalidateRoot()
-            return
-        }
-
-        layer.contentsScale = p.layer.contentsScale
-        if let superLayer = p.editor?.layer {
-            if layer.superlayer != superLayer {
-                superLayer.addSublayer(layer)
-            }
-        }
-        guard let b = bullet else {
-            // there is no bullet so we must create one if the parent has one
-            if !isReferenceBranch, p.bullet != nil {
-                bullet = p.bullet?.note?.createBullet(coreDataManager.mainContext, content: text, createdAt: Date(), afterBullet: previousSibblingNode()?.bullet, parentBullet: p.bullet)
-                return
-            }
-
-            guard let root = p as? TextRoot else {
-                return
-            }
-
-            let previousNode: TextNode? = {
-                if let i = indexInParent, i != 0 {
-                    return p.children[i - 1]
-                } else {
-                    return nil
-                }
-            }()
-            if !isReferenceBranch {
-                let previousBullet = previousNode?.bullet
-                bullet = root.note.createBullet(coreDataManager.mainContext, content: text, createdAt: Date(), afterBullet: previousBullet, parentBullet: nil)
-            }
-            return
-        }
-        if !isReference {
-            guard b.parent !== p.bullet else { return }
-            b.parent = p.bullet
-        }
-    }
-
-    var editor: BeamTextEdit? {
-        return root?.editor
-    }
+    public private(set) var editor: BeamTextEdit
 
     private var _root: TextRoot?
     var root: TextRoot? {
         if let r = _root {
             return r
         }
-        guard let parent = parent else { return nil }
+        guard let parent = parent else { return self as? TextRoot }
         _root = parent.root
         return _root
     }
@@ -390,34 +314,22 @@ public class TextNode: NSObject, CALayerDelegate {
         }
     }
 
-    init(bullet: Bullet?, recurse: Bool) {
-        self.bullet = bullet
-        text = bullet?.content.filter({ (char) -> Bool in
+    init(editor: BeamTextEdit, element: BeamElement) {
+        self.element = element
+        text = element.text.filter({ (char) -> Bool in
             !char.isNewline
-        }) ?? "<empty debug>"
+        })
 
+        self.editor = editor
         layer = CALayer()
-        super.init()
-        configureLayer()
-
-//        print("MD: \(bullet.orderIndex) \(node.text)")
-        for child in bullet?.sortedChildren() ?? [] {
-            addChild(TextNode(bullet: child, recurse: true))
-        }
-
-    }
-
-    init(staticText: String) {
-        self.text = staticText
-//        print("MD: \(bullet.orderIndex) \(node.text)")
-        //layout = Font.system(size: 1).draw(string: "", textWidth: 0)
-
-        layer = CALayer()
-//        layer.backgroundColor = NSColor.red.cgColor.copy(alpha: 0.1)
         super.init()
         configureLayer()
     }
 
+    deinit {
+        editor.removeNode(self)
+        layer.removeFromSuperlayer()
+    }
     func configureLayer() {
         let newActions = [
                 "onOrderIn": NSNull(),
@@ -431,7 +343,7 @@ public class TextNode: NSObject, CALayerDelegate {
         layer.setNeedsDisplay()
 //        layer.backgroundColor = NSColor.red.cgColor.copy(alpha: 0.1)
         layer.backgroundColor = NSColor(white: 1, alpha: 0).cgColor
-        let score = (bullet?.score?.floatValue ?? 1.0)
+        let score = element.score
         layer.opacity = 0.3 + (score == 0 ? 1.0 : score) * 0.7
         layer.delegate = self
     }
@@ -486,7 +398,7 @@ public class TextNode: NSObject, CALayerDelegate {
     static var bulletPointFrameBig = symbolFrame(7, "􀜞")
 
     var isBig: Bool {
-        editor?.isBig ?? false
+        editor.isBig
     }
 
     var disclosureClosedFrame: TextFrame { isBig ? Self.disclosureClosedFrameBig : Self.disclosureClosedFrameSmall }
@@ -683,7 +595,7 @@ public class TextNode: NSObject, CALayerDelegate {
     func drawCursor(in context: CGContext) {
         // Draw fake cursor if the text is empty
         if text.isEmpty {
-            guard editor?.hasFocus ?? false, editor?.blinkPhase ?? false else { return }
+            guard editor.hasFocus, editor.blinkPhase else { return }
 
             let f = AttributedStringVisitor.font(fontSize)
             let cursorRect = NSRect(x: indent, y: 0, width: 7, height: CGFloat(f.ascender - f.descender))
@@ -698,7 +610,6 @@ public class TextNode: NSObject, CALayerDelegate {
             return
         }
 
-        guard let editor = editor else { return }
         // Otherwise, draw the cursor at a real position
         guard let cursorLine = lineAt(index: cursorPosition), editor.hasFocus, editor.blinkPhase else { return }
 
@@ -718,13 +629,13 @@ public class TextNode: NSObject, CALayerDelegate {
     }
 
     func updateTextRendering() {
-        guard frame.width > 0 else { return }
+        guard availableWidth > 0 else { return }
         if invalidatedTextRendering {
             textFrame = NSRect()
 
             if selfVisible {
                 let attrStr = attributedString
-                let layout = Font.draw(string: attrStr, atPosition: NSPoint(x: indent, y: 0), textWidth: frame.width - indent, interlineFactor: interlineFactor)
+                let layout = Font.draw(string: attrStr, atPosition: NSPoint(x: indent, y: 0), textWidth: availableWidth - indent, interlineFactor: interlineFactor)
                 self.layout = layout
                 textFrame = layout.frame
 
@@ -1184,10 +1095,6 @@ public class TextNode: NSObject, CALayerDelegate {
                     result + child.printTree(level: level + 1)
                 })
                 : "")
-    }
-
-    var coreDataManager: CoreDataManager {
-        return parent!.coreDataManager
     }
 
     func fold() {

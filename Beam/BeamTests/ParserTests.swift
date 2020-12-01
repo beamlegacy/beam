@@ -89,4 +89,17 @@ class ParserTests: XCTestCase {
         let str = visitor.visit(AST)
         print("attributed string: \(str)")
     }
+
+    func testParser7() {
+        let string = "[https://twitter.com/jcs/status/1291863596922806273?ref_src=twsrc%5Etfw%7Ctwcamp%5Etweetembed%7Ctwterm%5E1291863596922806273%7Ctwgr%5E%7Ctwcon%5Es1_&ref_url=https%3A%2F%2Ftwitframe.com%2Fshow%3Furl%3Dhttps3A2F2Ftwitter.com2Fjcs2Fstatus2F1291863596922806273conversation%3Dnone](https://twitter.com/jcs/status/1291863596922806273?ref_src=twsrc%5Etfw%7Ctwcamp%5Etweetembed%7Ctwterm%5E1291863596922806273%7Ctwgr%5E%7Ctwcon%5Es1_&ref_url=https%3A%2F%2Ftwitframe.com%2Fshow%3Furl%3Dhttps3A2F2Ftwitter.com2Fjcs2Fstatus2F1291863596922806273conversation%3Dnone)"
+
+        let parser = Parser(inputString: string)
+        let AST = parser.parseAST()
+        print("AST: \(AST.treeString)")
+
+        let config = AttributedStringVisitor.Configuration()
+        let visitor = AttributedStringVisitor(configuration: config)
+        let str = visitor.visit(AST)
+        print("attributed string: \(str)")
+    }
 }

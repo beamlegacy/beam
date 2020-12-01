@@ -1,0 +1,3 @@
+#include "Pods/Target Support Files/Pods-Beam/Pods-Beam.debug.xcconfig"
+
+CUSTOM_OTHER_SWIFT_FLAGS = -DDEBUG -DDEBUG_PERF -DDEBUG_API_0 // -DDEBUG_API_1 -DDEBUG_API_2

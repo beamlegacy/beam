@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="17156" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="17506" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17156"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17506"/>
     </dependencies>
     <scenes>
         <!--Beam Application-->
@@ -102,6 +102,12 @@
                                                             <action selector="importRoam:" target="Voe-Tx-rLC" id="8Ni-tq-Xk9"/>
                                                         </connections>
                                                     </menuItem>
+                                                    <menuItem title="Send all notes to API" id="hvj-Zt-QCz">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="sendAllNotesToAPI:" target="Voe-Tx-rLC" id="erI-oe-Q9k"/>
+                                                        </connections>
+                                                    </menuItem>
                                                     <menuItem title="Delete all notes" id="4e7-0u-pUE">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
                                                         <connections>
@@ -122,6 +128,12 @@
                                                     </menuItem>
                                                 </items>
                                             </menu>
+                                        </menuItem>
+                                        <menuItem title="Account..." id="a3Q-5Z-Wdm">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="showAccount:" target="Voe-Tx-rLC" id="EdB-NG-dL0"/>
+                                            </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="m54-Is-iLE"/>
                                         <menuItem title="Close" keyEquivalent="w" id="DVo-aG-piG">
@@ -724,6 +736,9 @@ CQ
                                         </menuItem>
                                     </items>
                                 </menu>
+                            </menuItem>
+                            <menuItem title="Account" id="cn4-7f-vHg" userLabel="Account">
+                                <modifierMask key="keyEquivalentModifierMask"/>
                             </menuItem>
                             <menuItem title="Help" id="wpr-3q-Mcd">
                                 <modifierMask key="keyEquivalentModifierMask"/>

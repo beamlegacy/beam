@@ -33,13 +33,10 @@ extension TextRoot {
 
     func deleteForward() {
         if !selectedTextRange.isEmpty {
-            node.text.removeSubrange(node.text.range(from: selectedTextRange))
-            cursorPosition = selectedTextRange.lowerBound
-            if cursorPosition == NSNotFound {
-                cursorPosition = node.text.count
-            }
+            eraseSelection()
         } else if cursorPosition != node.text.count {
             node.text.remove(at: node.text.index(at: cursorPosition))
+            cancelSelection()
         } else {
             if let nextNode = node.nextVisible() {
                 let remainingText = nextNode.text
@@ -51,47 +48,34 @@ extension TextRoot {
                 nextNode.delete()
                 node.text.append(remainingText)
             }
-
+            cancelSelection()
         }
-        cancelSelection()
     }
 
     func deleteBackward() {
         if !selectedTextRange.isEmpty {
-            node.text.removeSubrange(node.text.range(from: selectedTextRange))
-            cursorPosition = selectedTextRange.lowerBound
-            if cursorPosition == NSNotFound {
+            eraseSelection()
+        } else if cursorPosition == 0 {
+            if let nextNode = node.previousVisible() {
+                let remainingText = node.text
+
+                // Reparent existing children to the node we're merging in
+                for c in node.element.children {
+                    nextNode.element.addChild(c)
+                }
+
+                node.delete()
+                node = nextNode
+
                 cursorPosition = node.text.count
+                nextNode.text.append(remainingText)
             }
             cancelSelection()
         } else {
-            if cursorPosition == 0 {
-                if let nextNode = node.previousVisible() {
-                    let remainingText = node.text
-                    if let bullet = node.bullet {
-                        node.parent?.bullet?.removeFromChildren(bullet)
-                    }
-
-                    // Reparent existing children to the node we're merging in
-                    for c in node.children {
-                        nextNode.addChild(c)
-                        if let b = c.bullet {
-                            nextNode.bullet?.addToChildren(b)
-                        }
-                    }
-
-                    node.delete()
-                    node = nextNode
-
-                    cursorPosition = node.text.count
-                    nextNode.text.append(remainingText)
-                }
-            } else {
-                cursorPosition = node.position(before: cursorPosition)
-                node.text.remove(at: node.text.index(at: cursorPosition))
-            }
+            cursorPosition = node.position(before: cursorPosition)
+            node.text.remove(at: node.text.index(at: cursorPosition))
+            cancelSelection()
         }
-        cancelSelection()
     }
 
     func insertNewline() {
@@ -102,7 +86,6 @@ extension TextRoot {
             if cursorPosition == NSNotFound {
                 cursorPosition = node.text.count
             }
-            cancelSelection()
         } else if cursorPosition != 0 && node.text.count != 0 {
             node.text.insert("\n", at: node.text.index(at: cursorPosition))
             cursorPosition = node.position(after: cursorPosition)

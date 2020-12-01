@@ -16,7 +16,7 @@ import CoreData
  */
 
 class CoreDataManager {
-    static let shared = CoreDataManager()
+    static var shared = CoreDataManager()
     private var storeType = NSSQLiteStoreType
     private var storeURL: URL?
 
@@ -96,16 +96,21 @@ class CoreDataManager {
         completion?()
     }
 
-    func save() {
-        let context = mainContext
+    func save() throws {
+        try Self.save(mainContext)
+    }
 
+    class func save(_ context: NSManagedObjectContext) throws {
         if !context.commitEditing() {
-            NSLog("\(NSStringFromClass(type(of: self))) unable to commit editing before saving")
+            Logger.shared.logError("unable to commit editing before saving", category: .coredata)
         }
+
         if context.hasChanges {
             do {
                 try context.save()
             } catch {
+                Logger.shared.logError("unable to save: \(error.localizedDescription)", category: .coredata)
+                throw error
             }
         }
     }
@@ -120,14 +125,14 @@ class CoreDataManager {
                     try backupFile.deleteDirectory()
                 } catch {
                     // TODO: raise error?
-                    print("Error deleting temporary file: \(error)")
+                    Logger.shared.logError("Can't backup: \(error)", category: .coredata)
                 }
             }
 
             try FileManager().copyItem(at: backupFile.fileURL, to: url)
         } catch {
             // TODO: raise error?
-            print("Error backing up Core Data store: \(error)")
+            Logger.shared.logError("Can't backup: \(error)", category: .coredata)
         }
     }
 
@@ -144,11 +149,59 @@ class CoreDataManager {
                 try fileManager.copyItem(at: url, to: storeURL)
             } catch {
                 // TODO: raise error?
-                print("Error importing backup: \(error)")
+                Logger.shared.logError("Can't import backup: \(error)", category: .coredata)
             }
 
             completion?()
         }
+    }
+
+    let persistentContainerQueue = OperationQueue()
+    /// https://stackoverflow.com/questions/42733574/nspersistentcontainer-concurrency-for-saving-to-core-data
+    /// Based on this link, added `completionHandler`
+    func enqueue(block: @escaping (_ context: NSManagedObjectContext) -> ((Result<Bool, Error>) -> Void)?) {
+        let perf = PerformanceDebug("CoreDataManager.enqueue", true, .coredata)
+
+        // TODO [P1]: Check memory management (blockOperation create retain cycles)
+
+        var blockOperation: BlockOperation?
+        blockOperation = BlockOperation { [weak self] in
+            guard let blockOperation = blockOperation, let self = self else { return }
+
+            perf.debug("Executing BlockOperation")
+
+            // In case the operationqueue was cancelled way before this started
+            if blockOperation.isCancelled {
+                return
+            }
+
+            let context: NSManagedObjectContext = self.persistentContainer.newBackgroundContext()
+            context.performAndWait {
+                let completionHandler = block(context)
+
+                // In case the operationqueue was cancelled after the block was executed
+                if blockOperation.isCancelled {
+                    return
+                }
+
+                do {
+                    if context.hasChanges {
+                        perf.debug("willSave")
+                        try context.save()
+                        perf.debug("didSave")
+                    }
+
+                    completionHandler?(.success(true))
+                } catch {
+                    perf.debug("Error: \(error)")
+                    LibrariesManager.nonFatalError(error: error)
+                    completionHandler?(.failure(error))
+                }
+            }
+            perf.debug("Finished Executing BlockOperation")
+        }
+
+        persistentContainerQueue.addOperation(blockOperation!)
     }
 
     lazy var persistentContainer: NSPersistentCloudKitContainer! = {

@@ -23,7 +23,7 @@ public struct MouseInfo {
 }
 
 public struct BTextEdit: NSViewRepresentable {
-    var note: Note
+    var note: BeamNote
     var openURL: (URL) -> Void
     var openCard: (String) -> Void
     var onStartEditing: () -> Void = { }
@@ -41,8 +41,7 @@ public struct BTextEdit: NSViewRepresentable {
     var showTitle = true
 
     public func makeNSView(context: Context) -> BeamTextEdit {
-        let root = TextRoot(CoreDataManager.shared, note: note)
-        let nsView = BeamTextEdit(root: root, font: Font.main)
+        let nsView = BeamTextEdit(root: note, font: Font.main)
 
         nsView.openURL = openURL
         nsView.openCard = openCard
@@ -67,11 +66,8 @@ public struct BTextEdit: NSViewRepresentable {
 
     public func updateNSView(_ nsView: BeamTextEdit, context: Context) {
 //        print("display note: \(note)")
-        if nsView.rootNode.note !== note {
-            nsView.rootNode = TextRoot(CoreDataManager.shared, note: note)
-            if let note = nsView.rootNode.children.first {
-                nsView.node = note
-            }
+        if nsView.note !== note {
+            nsView.note = note
         }
 
         nsView.openURL = openURL
@@ -97,7 +93,7 @@ public struct BTextEdit: NSViewRepresentable {
 }
 
 public struct BTextEditScrollable: NSViewRepresentable {
-    var note: Note
+    var note: BeamNote
     var openURL: (URL) -> Void
     var openCard: (String) -> Void
     var onStartEditing: () -> Void = { }
@@ -115,8 +111,7 @@ public struct BTextEditScrollable: NSViewRepresentable {
     var showTitle = true
 
     public func makeNSView(context: Context) -> NSViewType {
-        let root = TextRoot(CoreDataManager.shared, note: note)
-        let edit = BeamTextEdit(root: root, font: Font.main)
+        let edit = BeamTextEdit(root: note, font: Font.main)
 
         edit.openURL = openURL
         edit.openCard = openCard
@@ -157,11 +152,8 @@ public struct BTextEditScrollable: NSViewRepresentable {
 //        print("display note: \(note)")
         // swiftlint:disable:next force_cast
         let edit = nsView.documentView as! BeamTextEdit
-        if edit.rootNode.note !== note {
-            edit.rootNode = TextRoot(CoreDataManager.shared, note: note)
-            if let note = edit.rootNode.children.first {
-                edit.node = note
-            }
+        if edit.note !== note {
+            edit.note = note
         }
 
         edit.openURL = openURL
@@ -187,9 +179,30 @@ public struct BTextEditScrollable: NSViewRepresentable {
 
 // swiftlint:disable type_body_length
 public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
-    public init(root: TextRoot, font: Font = Font.main) {
+    var note: BeamElement! {
+        didSet {
+            updateRoot(with: note)
+        }
+    }
+
+    func updateRoot(with note: BeamElement) {
+        guard mapping[note] == nil else { return }
+        guard let rootnode = nodeFor(note) as? TextRoot else { fatalError() }
+        rootNode = rootnode
+        accessingMapping = true
+        mapping[note] = rootNode
+        accessingMapping = false
+        purgeDeadNodes()
+
+        node = {
+            guard let n = note.children.first else { return nodeFor(note) }
+            return nodeFor(n)
+        }()
+    }
+
+    public init(root: BeamElement, font: Font = Font.main) {
         self.config.font = font
-        rootNode = root
+        note = root
         super.init(frame: NSRect())
         let l = CALayer()
         self.layer = l
@@ -203,7 +216,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         titleLayer.delegate = self
 //        self.wantsLayer = true
 
-        root._editor = self
         timer = Timer.init(timeInterval: 1.0 / 60.0, repeats: true) { [unowned self] _ in
             let now = CFAbsoluteTimeGetCurrent()
             if self.blinkTime < now && self.hasFocus {
@@ -226,6 +238,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         _inputContext = NSTextInputContext(client: self)
 
         initBlinking()
+        updateRoot(with: root)
     }
 
     deinit {
@@ -342,32 +355,12 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         let width = CGFloat(isBig ? frame.width - 200 - leadingAlignment : 450)
         let rect = NSRect(x: leadingAlignment, y: topOffsetActual, width: width, height: r.height)
         //print("relayoutRoot -> \(rect)")
+        rootNode.availableWidth = rect.width
         rootNode.setLayout(rect)
     }
 
     // This is the root node of what we are editing:
-    var rootNode: TextRoot {
-        didSet {
-            guard oldValue !== rootNode else { return }
-            rootNode._editor = self
-            if let firstNode = rootNode.children.first {
-                node = firstNode
-            } else {
-                guard let newBullet = rootNode.note?.createBullet(CoreDataManager.shared.mainContext, content: "", afterBullet: nil) else { return }
-                let newNode = TextNode(bullet: newBullet, recurse: false)
-                var children = rootNode.children
-                children.append(newNode)
-                rootNode.cursorPosition = 0
-                node = newNode
-            }
-            // put a fake layout as an init
-            rootNode.setLayout(NSRect(x: 0, y: 0, width: max(minimumWidth, frame.width), height: max(100, frame.height)))
-
-            // and invalidate the layout so that everything is recalculated again
-            invalidateLayout()
-            invalidate()
-        }
-    }
+    var rootNode: TextRoot!
 
     // This is the node that the user is currently editing. It can be any node in the rootNode tree
     var node: TextNode {
@@ -482,13 +475,12 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             rootNode.eraseSelection()
             let splitText = node.text.substring(from: rootNode.cursorPosition, to: node.text.count)
             node.text.removeLast(node.text.count - rootNode.cursorPosition)
-            let newNode = TextNode(staticText: splitText)
-            let nodes = node.children
-            for c in nodes {
-                newNode.addChild(c)
-                if let b = c.bullet {
-                    newNode.bullet?.addToChildren(b)
-                }
+            let element = BeamElement()
+            element.text = splitText
+            let newNode = nodeFor(element)
+            let elements = node.element.children
+            for c in elements {
+                newNode.element.addChild(c)
             }
 
             _ = node.parent?.insert(node: newNode, after: node)
@@ -768,7 +760,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             return t
         }
 
-        let titleString = rootNode.note.title.attributed
+        guard let titleString = rootNode.note?.title.attributed else { fatalError() }
         let f = NSFont.systemFont(ofSize: isBig ? 13 : 11, weight: .semibold)
         titleString.addAttribute(.font, value: f, range: titleString.wholeRange)
         titleString.addAttribute(.foregroundColor, value: NSColor(named: "EditorControlColor")!, range: titleString.wholeRange)
@@ -913,7 +905,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             return
         }
         let point = convert(event.locationInWindow)
-        guard let newNode = nodeAt(point: point) else { return }
+        let newNode = nodeAt(point: point)
         if newNode !== hoveredNode {
             hoveredNode = newNode
         }
@@ -937,11 +929,13 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     public override func viewWillMove(toWindow newWindow: NSWindow?) {
-        if let w = newWindow {
-            w.acceptsMouseMovedEvents = true
-            rootNode.contentScale = w.backingScaleFactor
-            titleLayer.contentsScale = w.backingScaleFactor
+        guard let window = newWindow else { return }
+        window.acceptsMouseMovedEvents = true
+        for elem in mapping {
+            elem.value.layer.contentsScale = window.backingScaleFactor
+            elem.value.invalidate()
         }
+        titleLayer.contentsScale = window.backingScaleFactor
     }
 
     var onBlinkTime: Double = 0.7
@@ -987,5 +981,67 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         titleLayer.setNeedsDisplay()
         rootNode.deepInvalidateTextRendering()
         rootNode.deepInvalidateText()
+    }
+
+    let documentManager = DocumentManager(coreDataManager: CoreDataManager.shared)
+
+    @IBAction func saveDocument(_ sender: Any?) {
+        print("Save document!")
+//        let encoder = JSONEncoder()
+//        encoder.outputFormatting = .prettyPrinted
+//        do {
+//            let data = try encoder.encode(rootNode)
+//            let string = String(data: data, encoding: .utf8)!
+//            print("JSon document:\n\(string)")
+//        } catch {
+//            print("Encoding error")
+//        }
+        rootNode.note?.save(documentManager: documentManager)
+    }
+
+    func nodeFor(_ element: BeamElement) -> TextNode {
+        if let node = mapping[element] {
+            return node
+        }
+
+        let node: TextNode = {
+            guard let note = element as? BeamNote else { return TextNode(editor: self, element: element) }
+            let root = TextRoot(editor: self, element: note)
+            if note.children.count == 1 && note.children.first!.text.isEmpty {
+                root.children.first?.placeholder = note.isTodaysNote ? "This is the journal, you can type anything here!" : "..."
+            }
+            return root
+        }()
+        accessingMapping = true
+        mapping[element] = node
+        accessingMapping = false
+        purgeDeadNodes()
+
+        if let w = window {
+            node.layer.contentsScale = w.backingScaleFactor
+        }
+        layer?.addSublayer(node.layer)
+
+        return node
+    }
+
+    private var accessingMapping = false
+    private var mapping: [BeamElement: TextNode] = [:]
+    private var deadNodes: [TextNode] = []
+
+    func purgeDeadNodes() {
+        guard !accessingMapping else { return }
+        for dead in deadNodes {
+            removeNode(dead)
+        }
+        deadNodes.removeAll()
+    }
+
+    func removeNode(_ node: TextNode) {
+        guard !accessingMapping else {
+            deadNodes.append(node)
+            return
+        }
+        mapping.removeValue(forKey: node.element)
     }
 }

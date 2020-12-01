@@ -49,9 +49,9 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
 
     var state: BeamState!
 
-    var note: Note?
-    var rootBullet: Bullet?
-    var bullet: Bullet?
+    var note: BeamNote?
+    var rootElement: BeamElement?
+    var element: BeamElement?
 
     var score: Score?
 
@@ -74,15 +74,17 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
         return config
     }
 
-    init(state: BeamState, originalQuery: String, note: Note?, rootBullet: Bullet? = nil, id: UUID = UUID(), webView: WKWebView? = nil, createBullet: Bool = true ) {
+    init(state: BeamState, originalQuery: String, note: BeamNote?, rootElement: BeamElement? = nil, id: UUID = UUID(), webView: WKWebView? = nil, createBullet: Bool = true) {
         self.state = state
         self.id = id
         self.note = note
-        self.rootBullet = rootBullet
+        self.rootElement = rootElement
         self.originalQuery = originalQuery
 
         if !originalQuery.isEmpty, let note = self.note, createBullet {
-            bullet = note.createBullet(CoreDataManager.shared.mainContext, content: "visiting...", parentBullet: rootBullet)
+            let e = BeamElement()
+            element = e
+            note.children.append(e)
         }
 
         if let w = webView {
@@ -104,7 +106,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
     private func updateBullet() {
         if let url = url {
             let name = title.isEmpty ? url.absoluteString : title
-            self.bullet?.content = "[\(name)](\(url.absoluteString))"
+            self.element?.text = "[\(name)](\(url.absoluteString))"
         }
     }
 
@@ -130,8 +132,8 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
 
     private func updateScore() {
         if let s = score?.score {
-            print("updated score[\(url!.absoluteString)] = \(s)")
-            bullet?.score = s as NSNumber
+            Logger.shared.logInfo("updated score[\(url!.absoluteString)] = \(s)", category: .general)
+            element?.score = s
         }
     }
     private func setupObservers() {
@@ -161,13 +163,19 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
         webView.navigationDelegate = self
         webView.uiDelegate = self
 
+        self.webView.configuration.userContentController.removeAllUserScripts()
+
+        self.webView.configuration.userContentController.removeScriptMessageHandler(forName: TextSelectedMessage)
+        self.webView.configuration.userContentController.removeScriptMessageHandler(forName: OnScrolledMessage)
+        self.webView.configuration.userContentController.removeScriptMessageHandler(forName: JSLogger)
+
+        self.webView.configuration.userContentController.add(self, name: JSLogger)
         self.webView.configuration.userContentController.add(self, name: TextSelectedMessage)
         self.webView.configuration.userContentController.add(self, name: OnScrolledMessage)
 
-        let messageHandler = LoggingMessageHandler()
-        messageHandler.tab = self
-        self.webView.configuration.userContentController.add(messageHandler, name: "logging")
-        self.webView.configuration.userContentController.addUserScript(WKUserScript(source: overrideConsole, injectionTime: .atDocumentStart, forMainFrameOnly: true))
+        self.webView.configuration.userContentController.addUserScript(WKUserScript(source: overrideConsole, injectionTime: .atDocumentStart, forMainFrameOnly: false))
+        self.webView.configuration.userContentController.addUserScript(WKUserScript(source: jsSelectionObserver, injectionTime: .atDocumentEnd, forMainFrameOnly: false))
+
     }
 
     func cancelObservers() {
@@ -199,7 +207,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
                 let newWebView = FullScreenWKWebView(frame: NSRect(), configuration: Self.webViewConfiguration)
                 newWebView.wantsLayer = true
                 state.setup(webView: newWebView)
-                let newTab = BrowserTab(state: state, originalQuery: originalQuery, note: note, rootBullet: rootBullet, webView: newWebView)
+                let newTab = BrowserTab(state: state, originalQuery: originalQuery, note: note, rootElement: rootElement, webView: newWebView)
                 newTab.load(url: targetURL)
                 newTab.score?.openIndex = navigationCount
                 navigationCount += 1
@@ -236,20 +244,17 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
 
     let enableJavascriptLogs = true
 
-    class LoggingMessageHandler: NSObject, WKScriptMessageHandler {
-        weak var tab: BrowserTab?
-
-        func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-            if tab?.enableJavascriptLogs ?? false {
-                print(message.body)
-            }
-        }
-    }
-
     let TextSelectedMessage = "beam_textSelected"
     let OnScrolledMessage = "beam_onScrolled"
+    let JSLogger = "logging"
+
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         switch message.name {
+        case JSLogger:
+            if enableJavascriptLogs {
+                print(message.body)
+            }
+
         case TextSelectedMessage:
             guard let dict = message.body as? [String: AnyObject],
 //                  let selectedText = dict["selectedText"] as? String,
@@ -270,7 +275,9 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
                 let quote = "> \(text) - from [\(title)](\(url))"
 
                 DispatchQueue.main.async {
-                    _ = self.note?.createBullet(CoreDataManager.shared.mainContext, content: quote, createdAt: Date(), afterBullet: nil, parentBullet: nil)
+                    let e = BeamElement()
+                    e.text = quote
+                    _ = self.note?.children.append(e)
                 }
             }
         case OnScrolledMessage:
@@ -281,13 +288,13 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
                 let w = dict["width"] as? Double,
                 let h = dict["height"] as? Double
             else { return }
-//            print("Web Scrolled: \(x), \(y)")
             if w > 0, h > 0 {
                 self.score?.scrollRatioX = max(Float(x / w), self.score?.scrollRatioX ?? 0)
                 self.score?.scrollRatioY = max(Float(y / h), self.score?.scrollRatioY ?? 0)
                 self.score?.area = Float(w * h)
                 self.updateScore()
             }
+            Logger.shared.logDebug("Web Scrolled: \(x), \(y)", category: .web)
         default:
             break
         }
@@ -310,13 +317,6 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
                 }
             }
         }
-
-        webView.evaluateJavaScript(jsSelectionObserver) { (_, err) in
-            if let err = err {
-                print("Error installing JS selection observer \(err)")
-            }
-            return
-        }
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
@@ -334,33 +334,33 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
         let newWebView = FullScreenWKWebView(frame: NSRect(), configuration: configuration)
         newWebView.wantsLayer = true
         state.setup(webView: newWebView)
-        let newTab = BrowserTab(state: state, originalQuery: originalQuery, note: self.note, rootBullet: rootBullet, webView: newWebView)
+        let newTab = BrowserTab(state: state, originalQuery: originalQuery, note: self.note, rootElement: rootElement, webView: newWebView)
         onNewTabCreated(newTab)
 
         return newTab.webView
     }
 
     func webViewDidClose(_ webView: WKWebView) {
-        print("webView webDidClose")
+        Logger.shared.logDebug("webView webDidClose", category: .web)
     }
 
     func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping () -> Void) {
-        print("webView runJavaScriptAlertPanelWithMessage \(message)")
+        Logger.shared.logDebug("webView runJavaScriptAlertPanelWithMessage \(message)", category: .web)
         completionHandler()
     }
 
     func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (Bool) -> Void) {
-        print("webView runJavaScriptConfirmPanelWithMessage \(message)")
+        Logger.shared.logDebug("webView runJavaScriptConfirmPanelWithMessage \(message)", category: .web)
         completionHandler(true)
     }
 
     func webView(_ webView: WKWebView, runJavaScriptTextInputPanelWithPrompt prompt: String, defaultText: String?, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (String?) -> Void) {
-        print("webView runJavaScriptTextInputPanelWithPrompt \(prompt) default: \(defaultText ?? "")")
+        Logger.shared.logDebug("webView runJavaScriptTextInputPanelWithPrompt \(prompt) default: \(defaultText ?? "")", category: .web)
         completionHandler(nil)
     }
 
     func webView(_ webView: WKWebView, runOpenPanelWith parameters: WKOpenPanelParameters, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping ([URL]?) -> Void) {
-        print("webView runOpenPanel")
+        Logger.shared.logDebug("webView runOpenPanel", category: .web)
         completionHandler(nil)
     }
 

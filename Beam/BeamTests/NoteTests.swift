@@ -109,7 +109,7 @@ class NoteTests: CoreDataTests {
     func testNoteTitleLinkReplacements() throws {
         let newNote = Note.createNote(context, "[[foobar]] and [[another card]] and #another")
 
-        XCTAssertEqual(newNote.parsedTitle(), "[[[foobar](beam://beamapp.co/note?title=foobar)]] and [[[another card](beam://beamapp.co/note?title=another%20card)]] and #[another](beam://beamapp.co/note?title=another)")
+        XCTAssertEqual(newNote.parsedTitle(), "[[[foobar](beam://app.beamapp.co/note?title=foobar)]] and [[[another card](beam://app.beamapp.co/note?title=another%20card)]] and #[another](beam://app.beamapp.co/note?title=another)")
     }
 
     func testNoteFetchFirst() throws {

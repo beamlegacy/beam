@@ -9,6 +9,17 @@ class Bullet: NSManagedObject {
         id = UUID()
     }
 
+    override func willSave() {
+        if updated_at.timeIntervalSince(Date()) > 2.0 {
+            self.updated_at = Date()
+        }
+        super.willSave()
+    }
+
+    var uuidString: String {
+        id.uuidString.lowercased()
+    }
+
     func parsedContent(_ parsedInternalLink: Bool = false) -> String {
         return parsedInternalLink ? BeamTextFormatter.parseForInternalLinks(content) : content
     }
@@ -20,7 +31,7 @@ class Bullet: NSManagedObject {
     class func internalLink(_ id: UUID) -> String {
         var components = Note.components()
         components.path = "/bullet"
-        components.queryItems = [ URLQueryItem(name: "id", value: id.uuidString) ]
+        components.queryItems = [ URLQueryItem(name: "id", value: id.uuidString.lowercased()) ]
 
         return components.url?.absoluteString ?? "beam://"
     }
@@ -49,12 +60,21 @@ class Bullet: NSManagedObject {
         return content
     }
 
-    func treeBullets(_ tabCount: Int = 0) -> [Any]? {
+    func delete(_ context: NSManagedObjectContext = CoreDataManager.shared.mainContext) {
+        context.delete(self)
+        do {
+            try context.save()
+        } catch {
+            // TODO: raise error?
+        }
+    }
+
+    func treeBullets() -> [Any]? {
         guard let children = children, children.count > 0 else {
             return [self]
         }
 
-        let results: [Any] = [self, sortedChildren().compactMap { $0.treeBullets(tabCount + 1) }]
+        let results: [Any] = [self, sortedChildren().compactMap { $0.treeBullets() }]
 
         return results
     }
@@ -121,15 +141,6 @@ class Bullet: NSManagedObject {
         }
 
         return []
-    }
-
-    func delete(_ context: NSManagedObjectContext = CoreDataManager.shared.mainContext) {
-        context.delete(self)
-        do {
-            try context.save()
-        } catch {
-            // TODO: raise error?
-        }
     }
 
     class func deleteForPredicate(_ predicate: NSPredicate, _ context: NSManagedObjectContext) -> NSPersistentStoreResult? {

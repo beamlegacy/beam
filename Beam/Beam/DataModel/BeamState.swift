@@ -72,7 +72,7 @@ var runningOnBigSur: Bool = {
     }
 
     var data: BeamData
-    @Published var currentNote: Note?
+    @Published var currentNote: BeamNote?
     @Published var backForwardList: NoteBackForwardList
     @Published var isEditingOmniBarTitle = false
 
@@ -207,10 +207,10 @@ var runningOnBigSur: Bool = {
     @discardableResult func navigateToNote(named: String) -> Bool {
 //        print("load note named \(named)")
         guard let note = Note.fetchWithTitle(CoreDataManager.shared.mainContext, named) else { return false }
-        return navigateToNote(note)
+        return navigateToNote(beamNoteFrom(note: note))
     }
 
-    @discardableResult func navigateToNote(_ note: Note) -> Bool {
+    @discardableResult func navigateToNote(_ note: BeamNote) -> Bool {
         completedQueries = []
         selectionIndex = nil
         searchQuery = ""
@@ -247,28 +247,25 @@ var runningOnBigSur: Bool = {
 
     func createTabFromNode(_ node: TextNode, withURL url: URL) {
         guard let note = node.root?.note else { return }
-        guard let bullet = node.bullet else { return }
-        let tab = BrowserTab(state: self, originalQuery: node.strippedText, note: note, rootBullet: bullet, createBullet: false)
+        let tab = BrowserTab(state: self, originalQuery: node.strippedText, note: note, rootElement: node.element, createBullet: false)
         tab.load(url: url)
         currentTab = tab
         tabs.append(tab)
         mode = .web
     }
 
-    func createNoteForQuery(_ query: String) -> Note {
+    func createNoteForQuery(_ query: String) -> BeamNote {
         let context = CoreDataManager.shared.mainContext
         if let n = Note.fetchWithTitle(context, query) {
-            return n
+            return beamNoteFrom(note: n)
         }
 
-        let n = Note.createNote(context, query)
+        let n = BeamNote(title: query)
 
         let bulletStr = "[[\(query)]]"
-        if let bullet = self.data.todaysNote.rootBullets().first, bullet.content.isEmpty {
-            bullet.content = bulletStr
-        } else {
-            _ = self.data.todaysNote.createBullet(context, content: bulletStr)
-        }
+        let e = BeamElement()
+        e.text = bulletStr
+        self.data.todaysNote.insert(e, after: self.data.todaysNote.children.last)
 
         return n
     }
