@@ -36,6 +36,7 @@ extension TextRoot {
             eraseSelection()
         } else if cursorPosition != node.text.count {
             node.text.remove(at: node.text.index(at: cursorPosition))
+            cancelSelection()
         } else {
             if let nextNode = node.nextVisible() {
                 let remainingText = nextNode.text
@@ -86,7 +87,6 @@ extension TextRoot {
             if cursorPosition == NSNotFound {
                 cursorPosition = node.text.count
             }
-            cancelSelection()
         } else if cursorPosition != 0 && node.text.count != 0 {
             node.text.insert("\n", at: node.text.index(at: cursorPosition))
             cursorPosition = node.position(after: cursorPosition)
