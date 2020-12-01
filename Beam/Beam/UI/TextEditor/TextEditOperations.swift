@@ -33,11 +33,7 @@ extension TextRoot {
 
     func deleteForward() {
         if !selectedTextRange.isEmpty {
-            node.text.removeSubrange(node.text.range(from: selectedTextRange))
-            cursorPosition = selectedTextRange.lowerBound
-            if cursorPosition == NSNotFound {
-                cursorPosition = node.text.count
-            }
+            eraseSelection()
         } else if cursorPosition != node.text.count {
             node.text.remove(at: node.text.index(at: cursorPosition))
         } else {
@@ -51,19 +47,13 @@ extension TextRoot {
                 nextNode.delete()
                 node.text.append(remainingText)
             }
-
+            cancelSelection()
         }
-        cancelSelection()
     }
 
     func deleteBackward() {
         if !selectedTextRange.isEmpty {
-            node.text.removeSubrange(node.text.range(from: selectedTextRange))
-            cursorPosition = selectedTextRange.lowerBound
-            if cursorPosition == NSNotFound {
-                cursorPosition = node.text.count
-            }
-            cancelSelection()
+            eraseSelection()
         } else {
             if cursorPosition == 0 {
                 if let nextNode = node.previousVisible() {
@@ -84,8 +74,8 @@ extension TextRoot {
                 cursorPosition = node.position(before: cursorPosition)
                 node.text.remove(at: node.text.index(at: cursorPosition))
             }
+            cancelSelection()
         }
-        cancelSelection()
     }
 
     func insertNewline() {
