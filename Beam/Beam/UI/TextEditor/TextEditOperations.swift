@@ -55,26 +55,25 @@ extension TextRoot {
     func deleteBackward() {
         if !selectedTextRange.isEmpty {
             eraseSelection()
-        } else {
-            if cursorPosition == 0 {
-                if let nextNode = node.previousVisible() {
-                    let remainingText = node.text
+        } else if cursorPosition == 0 {
+            if let nextNode = node.previousVisible() {
+                let remainingText = node.text
 
-                    // Reparent existing children to the node we're merging in
-                    for c in node.element.children {
-                        nextNode.element.addChild(c)
-                    }
-
-                    node.delete()
-                    node = nextNode
-
-                    cursorPosition = node.text.count
-                    nextNode.text.append(remainingText)
+                // Reparent existing children to the node we're merging in
+                for c in node.element.children {
+                    nextNode.element.addChild(c)
                 }
-            } else {
-                cursorPosition = node.position(before: cursorPosition)
-                node.text.remove(at: node.text.index(at: cursorPosition))
+
+                node.delete()
+                node = nextNode
+
+                cursorPosition = node.text.count
+                nextNode.text.append(remainingText)
             }
+            cancelSelection()
+        } else {
+            cursorPosition = node.position(before: cursorPosition)
+            node.text.remove(at: node.text.index(at: cursorPosition))
             cancelSelection()
         }
     }
