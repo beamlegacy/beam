@@ -84,8 +84,8 @@ class BeamNote: BeamElement {
             let encoder = JSONEncoder()
             encoder.outputFormatting = .prettyPrinted
             let data = try encoder.encode(self)
-            let str = String(data: data, encoding: .utf8)
-            print(str!)
+//            let str = String(data: data, encoding: .utf8)
+//            print(str!)
 
             guard let documentStruct = DocumentStruct(id: id, title: title, data: data, documentType: type == .journal ? .journal : .note) else {
                 completion?(.success(false))

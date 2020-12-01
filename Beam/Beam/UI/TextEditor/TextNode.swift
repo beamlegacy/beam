@@ -294,39 +294,6 @@ public class TextNode: NSObject, CALayerDelegate {
         return editor.nodeFor(p)
     }
 
-    // swiftlint:disable:next cyclomatic_complexity
-//    func reparent() {
-//        defer {
-//            for c in children {
-//                c.reparent()
-//            }
-//        }
-//
-//        guard let p = parent else {
-//            if !isReferenceBranch {
-//                parent?.element.removeChild(element)
-//            }
-//
-//            invalidateRoot()
-//            return
-//        }
-//
-//        layer.contentsScale = p.layer.contentsScale
-//        if let superLayer = p.editor?.layer {
-//            if layer.superlayer != superLayer {
-//                superLayer.addSublayer(layer)
-//            }
-//        }
-//
-//        // there is no bullet so we must create one if the parent has one
-//        if !isReferenceBranch, let parentElement = p.element {
-//            let newelem = BeamElement()
-//            element = newelem
-//            newelem.text = text
-//            parentElement.insert(child: newelem, after: previousSibblingNode()?.element)
-//        }
-//    }
-
     public private(set) var editor: BeamTextEdit
 
     private var _root: TextRoot?
@@ -358,17 +325,6 @@ public class TextNode: NSObject, CALayerDelegate {
         super.init()
         configureLayer()
     }
-
-//    init(staticText: String) {
-//        self.text = staticText
-////        print("MD: \(bullet.orderIndex) \(node.text)")
-//        //layout = Font.system(size: 1).draw(string: "", textWidth: 0)
-//
-//        layer = CALayer()
-////        layer.backgroundColor = NSColor.red.cgColor.copy(alpha: 0.1)
-//        super.init()
-//        configureLayer()
-//    }
 
     deinit {
         editor.removeNode(self)
