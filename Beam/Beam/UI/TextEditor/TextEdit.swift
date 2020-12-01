@@ -349,6 +349,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         let width = CGFloat(isBig ? frame.width - 200 - leadingAlignment : 450)
         let rect = NSRect(x: leadingAlignment, y: topOffsetActual, width: width, height: r.height)
         //print("relayoutRoot -> \(rect)")
+        rootNode.availableWidth = rect.width
         rootNode.setLayout(rect)
     }
 
@@ -896,7 +897,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             return
         }
         let point = convert(event.locationInWindow)
-        guard let newNode = nodeAt(point: point) else { return }
+        let newNode = nodeAt(point: point)
         if newNode !== hoveredNode {
             hoveredNode = newNode
         }

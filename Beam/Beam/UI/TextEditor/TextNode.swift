@@ -61,11 +61,21 @@ public class TextNode: NSObject, CALayerDelegate {
     var isReferenceBranch: Bool {
         return isReference ? true : (parent?.isReferenceBranch ?? false)
     }
-    var open = true { didSet { invalidateLayout()
+    var open = true {
+        didSet {
+            invalidateLayout()
+            updateVisibility(open)
+        }
+    }
+
+    func updateVisibility(_ isVisible: Bool) {
         for c in children {
             c.visible = open
+            c.updateVisibility(open && c.open)
+            invalidateLayout()
         }
-    } }
+    }
+
     var selfVisible = true { didSet { invalidateLayout() } }
     var visible = true {
         didSet {
@@ -185,7 +195,19 @@ public class TextNode: NSObject, CALayerDelegate {
     var localTextFrame: NSRect { // The rectangle of our text excluding children
         return NSRect(x: 0, y: 0, width: textFrame.width, height: textFrame.height)
     }
-    var frame = NSRect(x: 0, y: 0, width: 1, height: 0) // the total frame including text and children, in the parent reference
+    var availableWidth: CGFloat = 1 {
+        didSet {
+            if availableWidth != oldValue {
+                invalidatedTextRendering = true
+                updateTextRendering()
+            }
+
+            for c in children {
+                c.availableWidth = availableWidth - CGFloat(childInset)
+            }
+        }
+    }
+    var frame = NSRect(x: 0, y: 0, width: 0, height: 0) // the total frame including text and children, in the parent reference
     var localFrame: NSRect { // the total frame including text and children, in the local reference
         return NSRect(x: 0, y: 0, width: frame.width, height: frame.height)
     }
@@ -227,10 +249,6 @@ public class TextNode: NSObject, CALayerDelegate {
         layer.bounds = textFrame
         layer.position = frameInDocument.origin
 
-        layout(frame)
-    }
-
-    func layout(_ frame: NSRect) {
         if self.currentFrameInDocument != frame {
             if isEditing {
 //                print("Layout set: \(frame)")
@@ -254,7 +272,7 @@ public class TextNode: NSObject, CALayerDelegate {
     }
 
     var offsetInDocument: NSPoint { // the position in the global document
-        let parentOffset = parent != nil ? parent!.offsetInDocument : NSPoint()
+        let parentOffset = parent?.offsetInDocument ?? NSPoint()
         let origin = frame.origin
         return NSPoint(x: parentOffset.x + origin.x, y: parentOffset.y + origin.y)
     }
@@ -654,13 +672,13 @@ public class TextNode: NSObject, CALayerDelegate {
     }
 
     func updateTextRendering() {
-        guard frame.width > 0 else { return }
+        guard availableWidth > 0 else { return }
         if invalidatedTextRendering {
             textFrame = NSRect()
 
             if selfVisible {
                 let attrStr = attributedString
-                let layout = Font.draw(string: attrStr, atPosition: NSPoint(x: indent, y: 0), textWidth: frame.width - indent, interlineFactor: interlineFactor)
+                let layout = Font.draw(string: attrStr, atPosition: NSPoint(x: indent, y: 0), textWidth: availableWidth - indent, interlineFactor: interlineFactor)
                 self.layout = layout
                 textFrame = layout.frame
 
