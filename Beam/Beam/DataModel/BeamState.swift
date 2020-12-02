@@ -208,8 +208,8 @@ var runningOnBigSur: Bool = {
 
     @discardableResult func navigateToNote(named: String) -> Bool {
 //        print("load note named \(named)")
-        guard let note = Note.fetchWithTitle(CoreDataManager.shared.mainContext, named) else { return false }
-        return navigateToNote(beamNoteFrom(note: note))
+        let note = BeamNote.fetchOrCreate(data.documentManager, title: named)
+        return navigateToNote(note)
     }
 
     @discardableResult func navigateToNote(_ note: BeamNote) -> Bool {
@@ -257,12 +257,11 @@ var runningOnBigSur: Bool = {
     }
 
     func createNoteForQuery(_ query: String) -> BeamNote {
-        let context = CoreDataManager.shared.mainContext
-        if let n = Note.fetchWithTitle(context, query) {
-            return beamNoteFrom(note: n)
+        if let n = BeamNote.fetch(data.documentManager, title: query) {
+            return n
         }
 
-        let n = BeamNote(title: query)
+        let n = BeamNote.create(data.documentManager, title: query)
 
         let bulletStr = "[[\(query)]]"
         let e = BeamElement()
@@ -357,7 +356,7 @@ var runningOnBigSur: Bool = {
             self.completedQueries = []
 
             if !query.isEmpty {
-                let notes = Note.fetchAllWithTitleMatch(CoreDataManager.shared.mainContext, query).prefix(4) // limit to 8 results
+                let notes = data.documentManager.documentsWithTitleMatch(title: query).prefix(4)
                 notes.forEach {
                     let autocompleteResult = AutoCompleteResult(id: $0.id, string: $0.title, source: .note)
                     self.completedQueries.append(autocompleteResult)

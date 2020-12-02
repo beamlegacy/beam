@@ -84,7 +84,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
         if !originalQuery.isEmpty, let note = self.note, createBullet {
             let e = BeamElement()
             element = e
-            note.children.append(e)
+            note.addChild(e)
         }
 
         if let w = webView {
@@ -277,7 +277,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
                 DispatchQueue.main.async {
                     let e = BeamElement()
                     e.text = quote
-                    _ = self.note?.children.append(e)
+                    _ = self.note?.addChild(e)
                 }
             }
         case OnScrolledMessage:

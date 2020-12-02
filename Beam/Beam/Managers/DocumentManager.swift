@@ -68,6 +68,12 @@ class DocumentManager {
         }
     }
 
+    func documentsWithTitleMatch(title: String) -> [DocumentStruct] {
+        return Document.fetchAllWithTitleMatch(mainContext, title).compactMap { document -> DocumentStruct? in
+            parseDocumentBody(document)
+        }
+    }
+
     func loadDocuments() -> [DocumentStruct] {
         return Document.fetchAll(context: mainContext).compactMap { document in
             parseDocumentBody(document)

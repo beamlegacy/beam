@@ -44,6 +44,8 @@ class RoamImporter {
         return decoder
     }()
 
+    var documentManager = DocumentManager()
+
     func parseAndCreate(_ context: NSManagedObjectContext, _ filename: String) throws {
         guard let jsonData = NSData(contentsOfFile: filename) as Data? else { return }
 
@@ -55,15 +57,17 @@ class RoamImporter {
         let roamNotes = try parseData(data)
 
         for roamNote in roamNotes {
-            let newNote = Note.createNote(context, roamNote.title, createdAt: roamNote.createTime ?? roamNote.editTime)
-            newNote.updated_at = roamNote.editTime ?? roamNote.createTime ?? Date()
+            let newNote = BeamNote.fetchOrCreate(documentManager, title: roamNote.title)
+            newNote.clearChildren()
 
             if let children = roamNote.children {
-                createLocalBullets(context, newNote, children)
+                createLocalBullets(context, newNote, children, newNote)
             }
+
+            newNote.save(documentManager: documentManager)
         }
 
-        Note.detectUnlinkedNotes(context)
+        //Note.detectUnlinkedNotes(context)
 
         return roamNotes
     }
@@ -75,16 +79,13 @@ class RoamImporter {
     }
 
     private func createLocalBullets(_ context: NSManagedObjectContext,
-                                    _ note: Note,
+                                    _ note: BeamNote,
                                     _ roamBullets: [RoamBullet],
-                                    _ parentBullet: Bullet? = nil) {
+                                    _ parentBullet: BeamElement) {
         for bullet in roamBullets {
-            let newBullet = note.createBullet(context,
-                                              content: bullet.string,
-                                              createdAt: bullet.createTime ?? bullet.editTime,
-                                              parentBullet: parentBullet)
-            newBullet.updated_at = bullet.editTime ?? bullet.createTime ?? Date()
-            detectLinkedNotes(context, bullet: newBullet)
+            let newBullet = BeamElement(bullet.string)
+            parentBullet.addChild(newBullet)
+            detectLinkedNotes(context, note: note, bullet: newBullet)
 
             if let children = bullet.children {
                 createLocalBullets(context, note, children, newBullet)
@@ -92,8 +93,8 @@ class RoamImporter {
         }
     }
 
-    private func detectLinkedNotes(_ context: NSManagedObjectContext, bullet: Bullet) {
-        guard bullet.content.count > 2 else { return }
+    private func detectLinkedNotes(_ context: NSManagedObjectContext, note: BeamNote, bullet: BeamElement) {
+        guard bullet.text.count > 2 else { return }
 
         for pattern in BeamTextFormatter.linkPatterns {
             var regex: NSRegularExpression
@@ -104,14 +105,16 @@ class RoamImporter {
                 fatalError("Error")
             }
 
-            let matches = regex.matches(in: bullet.content, options: [], range: NSRange(location: 0, length: bullet.content.utf16.count))
+            let matches = regex.matches(in: bullet.text, options: [], range: NSRange(location: 0, length: bullet.text.utf16.count))
 
             for match in matches {
-                guard let linkRange = Range(match.range(at: 1), in: bullet.content) else { continue }
+                guard let linkRange = Range(match.range(at: 1), in: bullet.text) else { continue }
 
-                let linkTitle = String(bullet.content[linkRange])
-                let note = Note.createNote(context, linkTitle)
-                note.addToLinkedReferences(bullet)
+                let linkTitle = String(bullet.text[linkRange])
+                let refnote = BeamNote.fetchOrCreate(documentManager, title: linkTitle)
+                let reference = NoteReference(noteName: note.title, elementID: bullet.id)
+                refnote.addLinkedReference(reference)
+                refnote.save(documentManager: documentManager)
             }
         }
     }

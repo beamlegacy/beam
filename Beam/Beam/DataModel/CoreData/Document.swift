@@ -90,4 +90,10 @@ class Document: NSManagedObject {
         return fetchAll(context: context, NSPredicate(format: "documentType = %@", type as CVarArg))
     }
 
+    class func fetchAllWithTitleMatch(_ context: NSManagedObjectContext, _ title: String) -> [Document] {
+        let predicate = NSPredicate(format: "title CONTAINS[cd] %@", title as CVarArg)
+        return fetchAll(context: context, predicate)
+    }
+
+
 }

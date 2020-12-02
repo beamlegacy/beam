@@ -9,13 +9,15 @@ import Foundation
 
 // Editable Text Data:
 public class BeamElement: Codable, Identifiable, Hashable {
-    public var id = UUID()
+    public private(set) var id = UUID()
     var text = ""
     var open = true
-    var children = [BeamElement]()
+    public private(set) var children = [BeamElement]()
     var readOnly = false
     var ast: Parser.Node?
     var score: Float = 0
+    var creationDate = Date()
+    var updateDate = Date()
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -24,6 +26,8 @@ public class BeamElement: Codable, Identifiable, Hashable {
         case children
         case readOnly
         case ast
+        case creationDate
+        case updateDate
     }
 
     init() {
@@ -40,6 +44,10 @@ public class BeamElement: Codable, Identifiable, Hashable {
         text = try container.decode(String.self, forKey: .text)
         open = try container.decode(Bool.self, forKey: .open)
         readOnly = try container.decode(Bool.self, forKey: .readOnly)
+        if container.contains(.creationDate) {
+            creationDate = try container.decode(Date.self, forKey: .creationDate)
+            updateDate = try container.decode(Date.self, forKey: .updateDate)
+        }
         if container.contains(.children) {
             children = try container.decode([BeamElement].self, forKey: .children)
             for child in children {
@@ -59,12 +67,21 @@ public class BeamElement: Codable, Identifiable, Hashable {
         try container.encode(text, forKey: .text)
         try container.encode(open, forKey: .open)
         try container.encode(readOnly, forKey: .readOnly)
+        try container.encode(creationDate, forKey: .creationDate)
+        try container.encode(updateDate, forKey: .updateDate)
         if !children.isEmpty {
             try container.encode(children, forKey: .children)
         }
         if let ast = ast {
             try container.encode(ast, forKey: .ast)
         }
+    }
+
+    func clearChildren() {
+        for c in children {
+            c.parent = nil
+        }
+        children = []
     }
 
     func removeChild(_ child: BeamElement) {
@@ -107,5 +124,17 @@ public class BeamElement: Codable, Identifiable, Hashable {
 
     public func hash(into hasher: inout Hasher) {
         return hasher.combine(id)
+    }
+
+    func connectUnlinkedNotes(_ thisNoteTitle: String, _ allNotes: [BeamNote]) {
+        for note in allNotes {
+            if text.contains(note.title) {
+                note.addUnlinkedReference(NoteReference(noteName: thisNoteTitle, elementID: id))
+            }
+        }
+
+        for c in children {
+            c.connectUnlinkedNotes(thisNoteTitle, allNotes)
+        }
     }
 }
