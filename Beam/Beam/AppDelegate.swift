@@ -32,7 +32,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     var data: BeamData = BeamData()
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        registerFonts()
         NSApp.mainMenu?.item(withTitle: "File")?.submenu?.delegate = self
         NSApp.mainMenu?.item(withTitle: "Window")?.submenu?.delegate = self
 
@@ -47,25 +46,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     func updateBadge() {
         let count = Note.countWithPredicate(CoreDataManager.shared.mainContext)
         NSApp.dockTile.badgeLabel = count > 0 ? String(count) : ""
-    }
-
-    func registerFonts() {
-        registerFont(fontName: "SFSymbolsFallback.ttf")
-    }
-
-    func registerFont(fontName: String) {
-        let availableFonts = NSFontManager.shared.availableFonts
-
-        guard availableFonts.contains(fontName) else { return }
-        let bundle = Bundle.main
-        guard let resourcePath = bundle.resourcePath else {
-            print("unable to find resourcePath")
-            return }
-        let fontURL = URL(fileURLWithPath: resourcePath + "/" + fontName)
-        print("Font URL \(fontURL)")
-        if !CTFontManagerRegisterFontsForURL(fontURL as CFURL, .process, nil) {
-            print("unable to register font \(fontName)")
-        }
     }
 
     func createWindow() {
