@@ -25,22 +25,21 @@ struct VisitedPage: Codable, Identifiable {
     var duration: TimeInterval
 }
 
-struct NoteReference: Codable {
+struct NoteReference: Codable, Equatable {
     var noteName: String
     var elementID: UUID
 }
 
 // Document:
 class BeamNote: BeamElement {
-    public var title: String
-
+    var title: String
     var type: NoteType = .note
-    var outLinks: [String] = [] ///< The links contained in this note
-    var linkedReferences: [NoteReference] = [] ///< urls of the notes/bullet pointing to this note explicitely
-    var unlinkedReferences: [NoteReference] = [] ///< urls of the notes/bullet pointing to this note implicitely
+    public private(set) var outLinks: [String] = [] ///< The links contained in this note
+    public private(set) var linkedReferences: [NoteReference] = [] ///< urls of the notes/bullet pointing to this note explicitely
+    public private(set) var unlinkedReferences: [NoteReference] = [] ///< urls of the notes/bullet pointing to this note implicitely
 
-    var searchQueries: [String] = [] ///< Search queries whose results were used to populate this note
-    var visitedSearchResults: [VisitedPage] = [] ///< URLs whose content were used to create this note
+    public private(set) var searchQueries: [String] = [] ///< Search queries whose results were used to populate this note
+    public private(set) var visitedSearchResults: [VisitedPage] = [] ///< URLs whose content were used to create this note
 
     init(title: String) {
         self.title = title
@@ -103,6 +102,108 @@ class BeamNote: BeamElement {
     }
 
     var isTodaysNote: Bool { (type == .journal) && (self === AppDelegate.main.data.todaysNote) }
+
+    func addLinkedReference(_ reference: NoteReference) {
+        // don't add it twice
+        guard !linkedReferences.contains(reference) else { return }
+        linkedReferences.append(reference)
+    }
+
+    func addUnlinkedReference(_ reference: NoteReference) {
+        // don't add it twice
+        guard !unlinkedReferences.contains(reference) else { return }
+        unlinkedReferences.append(reference)
+    }
+
+    private static func instanciateNote(_ documentStruct: DocumentStruct) throws -> BeamNote {
+        let decoder = JSONDecoder()
+        let note = try decoder.decode(BeamNote.self, from: documentStruct.data)
+        fetchedNotes[documentStruct.title] = note
+        return note
+    }
+    static func fetch(_ documentManager: DocumentManager, title: String) -> BeamNote? {
+        // Is the note in the cache?
+        if let note = fetchedNotes[title] {
+            return note
+        }
+
+        // Is the note in the document store?
+        guard let doc = documentManager.loadDocumentByTitle(title: title) else {
+            return nil
+        }
+
+        #if DEBUG
+        Logger.shared.logInfo("Note loaded:\n\(String(data: doc.data, encoding: .utf8)!)\n", category: .general)
+        #endif
+        do {
+            return try instanciateNote(doc)
+        } catch {
+            Logger.shared.logError("Unable to decode today's note", category: .general)
+        }
+
+        return nil
+    }
+
+    static func fetchNotesWithType(_ documentManager: DocumentManager, type: DocumentType) -> [BeamNote] {
+        return documentManager.loadDocumentsWithType(type: type).compactMap { doc -> BeamNote? in
+            if let note = fetchedNotes[doc.title] {
+                return note
+            }
+            do {
+                return try instanciateNote(doc)
+            } catch {
+                return nil
+            }
+        }
+    }
+
+    // Beware that this function crashes whatever note with that title in the cache
+    static func create(_ documentManager: DocumentManager, title: String) -> BeamNote {
+        let note = BeamNote(title: title)
+        fetchedNotes[title] = note
+        return note
+    }
+
+    static func fetchOrCreate(_ documentManager: DocumentManager, title: String) -> BeamNote {
+        // Is the note in the cache?
+        if let note = fetch(documentManager, title: title) {
+            return note
+        }
+
+        // create a new note and add it to the cache
+        return create(documentManager, title: title)
+    }
+
+    static func unload(note: BeamNote) {
+        unload(note: note.title)
+    }
+
+    static func unload(note: String) {
+        fetchedNotes.removeValue(forKey: note)
+    }
+
+    static func loadAllDocument(_ documentManager: DocumentManager) -> [BeamNote] {
+        return documentManager.loadDocuments().compactMap { doc -> BeamNote? in
+            if let note = fetchedNotes[doc.title] {
+                return note
+            }
+            do {
+                return try instanciateNote(doc)
+            } catch {
+                return nil
+            }
+        }
+    }
+
+    static func detectUnlinkedNotes(_ documentManager: DocumentManager) {
+        let allNotes = Self.loadAllDocument(documentManager)
+        for note in allNotes {
+            note.connectUnlinkedNotes(note.title, allNotes)
+        }
+
+    }
+
+    private static var fetchedNotes: [String: BeamNote] = [:]
 }
 
 // TODO: Remove this when we remove Note/Bullet from the build

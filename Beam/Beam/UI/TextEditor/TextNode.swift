@@ -91,8 +91,11 @@ public class TextNode: NSObject, CALayerDelegate {
     let layer: CALayer
 
     private var _ast: Parser.Node? {
-        didSet {
-            element.ast = _ast
+        get {
+            element.ast
+        }
+        set {
+            element.ast = newValue
         }
     }
     private func buildAttributedString() -> NSAttributedString {
