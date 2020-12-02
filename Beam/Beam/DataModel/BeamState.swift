@@ -22,6 +22,19 @@ var runningOnBigSur: Bool = {
 }()
 
 @objc class BeamState: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
+    var data: BeamData
+    public var searchEngine: SearchEngine = GoogleSearch()
+
+    @Published var searchQuery: String = ""
+    @Published var searchQuerySelection: [Range<Int>]?
+    @Published var completedQueries = [AutoCompleteResult]()
+    @Published var currentNote: BeamNote?
+    @Published var backForwardList: NoteBackForwardList
+    @Published var isEditingOmniBarTitle = false
+    @Published var canGoBack: Bool = false
+    @Published var canGoForward: Bool = false
+    @Published var isFullScreen: Bool = false
+
     @Published var mode: Mode = .today {
         didSet {
             switch oldValue {
@@ -39,23 +52,6 @@ var runningOnBigSur: Bool = {
         }
     }
 
-    func updateCanGoBackForward() {
-        switch mode {
-        // swiftlint:disable:next fallthrough no_fallthrough_only
-        case .today: fallthrough
-        case .note:
-            canGoBack = !backForwardList.backList.isEmpty
-            canGoForward = !backForwardList.forwardList.isEmpty
-        case .web:
-            canGoBack = currentTab?.canGoBack ?? false
-            canGoForward = currentTab?.canGoForward ?? false
-        }
-    }
-
-    @Published var searchQuery: String = ""
-    @Published var searchQuerySelection: [Range<Int>]?
-    private let completer = Completer()
-    @Published var completedQueries = [AutoCompleteResult]()
     @Published var selectionIndex: Int? = nil {
         didSet {
             if let i = selectionIndex, i >= 0, i < completedQueries.count {
@@ -70,11 +66,6 @@ var runningOnBigSur: Bool = {
             }
         }
     }
-
-    var data: BeamData
-    @Published var currentNote: BeamNote?
-    @Published var backForwardList: NoteBackForwardList
-    @Published var isEditingOmniBarTitle = false
 
     @Published public var tabs: [BrowserTab] = [] {
         didSet {
@@ -108,6 +99,7 @@ var runningOnBigSur: Bool = {
             }
         }
     }
+
     @Published var currentTab: BrowserTab? {
         didSet {
             if self.mode == .web {
@@ -127,8 +119,9 @@ var runningOnBigSur: Bool = {
         }
     }
 
-    @Published var canGoBack: Bool = false
-    @Published var canGoForward: Bool = false
+    private let completer = Completer()
+    private var scope = Set<AnyCancellable>()
+    private var tabScope = Set<AnyCancellable>()
 
     func goBack() {
         guard canGoBack else { return }
@@ -174,9 +167,18 @@ var runningOnBigSur: Bool = {
         updateCanGoBackForward()
     }
 
-    private var tabScope = Set<AnyCancellable>()
-
-    public var searchEngine: SearchEngine = GoogleSearch()
+    func updateCanGoBackForward() {
+        switch mode {
+        // swiftlint:disable:next fallthrough no_fallthrough_only
+        case .today: fallthrough
+        case .note:
+            canGoBack = !backForwardList.backList.isEmpty
+            canGoForward = !backForwardList.forwardList.isEmpty
+        case .web:
+            canGoBack = currentTab?.canGoBack ?? false
+            canGoForward = currentTab?.canGoForward ?? false
+        }
+    }
 
     func selectPreviousAutoComplete() {
         if let i = selectionIndex {
@@ -307,8 +309,6 @@ var runningOnBigSur: Bool = {
         cancelAutocomplete()
         mode = .web
     }
-
-    private var scope = Set<AnyCancellable>()
 
     public init(data: BeamData) {
         self.data = data

@@ -35,8 +35,7 @@ struct OmniBar: View {
             Button(action: toggleMode) {
                 Symbol(name: state.mode == .web ? "note.text" : "network")
             }.buttonStyle(RoundRectButtonStyle()).disabled(state.tabs.isEmpty)
-
-        }.padding(.top, 10).padding(.bottom, 10).frame(height: 54, alignment: .topLeading)
+        }
     }
 
     func resetAutoCompleteSelection() {

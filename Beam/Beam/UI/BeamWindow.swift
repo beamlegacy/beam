@@ -22,9 +22,13 @@ class BeamHostingView<Content>: NSHostingView<Content> where Content: View {
     public override var allowsVibrancy: Bool { false }
 }
 
-class BeamWindow: NSWindow, NSWindowDelegate {
+class BeamWindow: NSWindow {
     var state: BeamState!
     var data: BeamData
+
+    private var trafficLights: [NSButton?]?
+    private var titlebarAccessoryViewHeight = 28
+    private var trafficLightLeftMargin: CGFloat = 20
 
     // This is a hack to prevent a crash with swiftUI being dumb about the initialFirstResponder
     override var initialFirstResponder: NSView? {
@@ -56,6 +60,9 @@ class BeamWindow: NSWindow, NSWindowDelegate {
         let contentView = ContentView().environmentObject(state)
         self.contentView = BeamHostingView(rootView: contentView)
         self.isMovableByWindowBackground = false
+
+        self.setupUI()
+        self.setTitleBarAccessoryView()
     }
 
     deinit {
@@ -65,94 +72,65 @@ class BeamWindow: NSWindow, NSWindowDelegate {
         }
     }
 
-    // THIS HACK IS HORRIBLE But AppKit leaves us little choice to have a similar look on Catalina and Future OSes
-    var trafficLightFrame = NSRect()
-    func setupTrafficLights() {
-        if let b = self.standardWindowButton(.closeButton) {
-            if var f = b.superview?.superview?.frame {
-                let v = CGFloat(runningOnBigSur ? 12 : 14)
-                f.size.height += v
-                f.origin.x += 13
-                f.origin.y -= v
-                trafficLightFrame = f
-                b.superview?.superview?.frame = trafficLightFrame
-            }
+    override func performClose(_ sender: Any?) {
+        if state.closeCurrentTab() { return }
+        super.performClose(sender)
+    }
+
+    override func setFrame(_ frameRect: NSRect, display flag: Bool) {
+      super.setFrame(frameRect, display: flag)
+      self.setTrafficLightsLayout()
+    }
+
+    override func restoreState(with coder: NSCoder) {
+      super.restoreState(with: coder)
+      self.setTrafficLightsLayout()
+    }
+
+    override func orderFront(_ sender: Any?) {
+      super.orderFront(sender)
+      self.setTrafficLightsLayout()
+    }
+
+    // MARK: - Setup UI
+
+    private func setupUI() {
+        trafficLights = [
+            standardWindowButton(.closeButton),
+            standardWindowButton(.miniaturizeButton),
+            standardWindowButton(.zoomButton)
+        ]
+    }
+
+    private func setTitleBarAccessoryView() {
+      let view = NSView(frame: NSRect(x: 0, y: 0, width: 10, height: titlebarAccessoryViewHeight))
+      let dummyAccessoryViewController = NSTitlebarAccessoryViewController()
+
+      dummyAccessoryViewController.view = view
+      addTitlebarAccessoryViewController(dummyAccessoryViewController)
+
+      self.setTrafficLightsLayout()
+    }
+
+    private func setTrafficLightsLayout() {
+        guard let trafficLights = trafficLights else { return }
+
+        for (index, trafficLight) in trafficLights.enumerated() {
+            var frame = trafficLight!.frame
+            frame.origin.y = trafficLight!.superview!.frame.height / 2 - trafficLight!.frame.height / 2
+            frame.origin.x = trafficLightLeftMargin + CGFloat(index) * (frame.width + 6)
+
+            trafficLight?.frame = frame
         }
     }
 
-    func updateTrafficLights() {
-        if let b = self.standardWindowButton(.closeButton) {
-            b.superview?.superview?.frame = trafficLightFrame
-        }
+    private func toggleTitleBarAccessoryView() {
+        guard let titlebarAccessoryView = titlebarAccessoryViewControllers.first else { return }
+        titlebarAccessoryView.isHidden.toggle()
+        self.state.isFullScreen.toggle()
     }
 
-    public func windowDidResize(_ notification: Notification) {
-        setupTrafficLights()
-    }
-
-    public func windowDidMove(_ notification: Notification) {
-        updateTrafficLights()
-    }
-
-    public func windowDidMiniaturize(_ notification: Notification) {
-        updateTrafficLights()
-    }
-
-    public func windowDidDeminiaturize(_ notification: Notification) {
-        updateTrafficLights()
-    }
-
-    public func windowDidUpdate(_ notification: Notification) {
-//        updateTrafficLights()
-    }
-
-    public func windowDidChangeScreen(_ notification: Notification) {
-        updateTrafficLights()
-    }
-
-    public func windowDidChangeScreenProfile(_ notification: Notification) {
-        updateTrafficLights()
-    }
-
-    public func windowDidChangeBackingProperties(_ notification: Notification) {
-        updateTrafficLights()
-    }
-
-    public func windowDidEnterFullScreen(_ notification: Notification) {
-        updateTrafficLights()
-    }
-
-//    public func windowDidExitFullScreen(_ notification: Notification) {
-//        updateTrafficLights()
-//    }
-//
-    public func windowWillExitFullScreen(_ notification: Notification) {
-        updateTrafficLights()
-    }
-
-    public func windowDidChangeOcclusionState(_ notification: Notification) {
-        updateTrafficLights()
-    }
-
-    public func windowDidExpose(_ notification: Notification) {
-        updateTrafficLights()
-    }
-
-    public func windowDidBecomeKey(_ notification: Notification) {
-        updateTrafficLights()
-    }
-
-    public func windowDidResignKey(_ notification: Notification) {
-        updateTrafficLights()
-    }
-
-    public func windowDidBecomeMain(_ notification: Notification) {
-        updateTrafficLights()
-    }
-
-    public func windowDidResignMain(_ notification: Notification) {
-        updateTrafficLights()
-    }
+    // MARK: - IBAction
 
     @IBAction func newDocument(_ sender: Any?) {
         guard let delegate = NSApplication.shared.delegate as? AppDelegate else { return }
@@ -174,11 +152,20 @@ class BeamWindow: NSWindow, NSWindowDelegate {
     @IBAction func newSearch(_ sender: Any?) {
         state.startNewSearch()
     }
+}
 
-    override func performClose(_ sender: Any?) {
-        if state.closeCurrentTab() {
-            return
-        }
-        super.performClose(sender)
+extension BeamWindow: NSWindowDelegate {
+
+    func windowDidResize(_ notification: Notification) {
+        self.setTrafficLightsLayout()
     }
+
+    func windowWillExitFullScreen(_ notification: Notification) {
+        self.toggleTitleBarAccessoryView()
+    }
+
+    func windowWillEnterFullScreen(_ notification: Notification) {
+        self.toggleTitleBarAccessoryView()
+    }
+
 }
