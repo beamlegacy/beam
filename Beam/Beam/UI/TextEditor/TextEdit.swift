@@ -198,7 +198,20 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             guard let n = note.children.first else { return nodeFor(note) }
             return nodeFor(n)
         }()
+
+        // Remove all subsciptions:
+        noteCancellables = []
+
+        // Subscribe to the note's changes
+        note.$changed
+            .debounce(for: .seconds(5), scheduler: RunLoop.main)
+            .sink { [unowned self] _ in
+                guard let note = note as? BeamNote else { return }
+                note.save(documentManager: self.documentManager)
+            }.store(in: &noteCancellables)
     }
+
+    private var noteCancellables = [AnyCancellable]()
 
     public init(root: BeamElement, font: Font = Font.main) {
         self.config.font = font
