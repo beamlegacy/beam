@@ -22,7 +22,7 @@ struct ModeView: View {
                     }
 
                     OmniBar()
-                        .padding(.leading, 73)
+                        .padding(.leading, 35)
                         .padding(.trailing, 20)
                         .frame(height: 52, alignment: .center)
                 }

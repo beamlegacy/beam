@@ -17,19 +17,16 @@ struct Chevrons: View {
                     Symbol(name: "chevron.left")//.offset(x: 0, y: -0.5)
                 }
                 .buttonStyle(RoundRectButtonStyle())
-//                .buttonStyle(BorderlessButtonStyle())
                 .disabled(!state.canGoBack)
 
                 Button(action: goForward) {
                     Symbol(name: "chevron.right")//.offset(x: 0, y: -0.5)
                 }
                 .buttonStyle(RoundRectButtonStyle())
-//                .buttonStyle(BorderlessButtonStyle())
                 .disabled(!state.canGoForward)
                 .padding(.leading, 9)
             }
             .padding(.leading, 18)
-    //        .offset(x: 0, y: -9)
     }
 
     func goBack() {
