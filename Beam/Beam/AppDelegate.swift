@@ -70,7 +70,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     func createWindow() {
         // Create the window and set the content view.
-        window = BeamWindow(contentRect: NSRect(x: 0, y: 0, width: 1300, height: 895), data: data)
+        window = BeamWindow(contentRect: NSRect(x: 0, y: 0, width: 820, height: 600), data: data)
         window.center()
         window.makeKeyAndOrderFront(nil)
         windows.append(window)
