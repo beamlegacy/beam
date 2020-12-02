@@ -271,27 +271,27 @@ var runningOnBigSur: Bool = {
         return n
     }
 
+    private func urlFor(query: String) -> URL {
+        if query.maybeURL {
+            guard let u = URL(string: query) else {
+                searchEngine.query = query
+                return URL(string: searchEngine.searchUrl)!
+            }
+
+            if u.scheme == nil {
+                return URL(string: "https://" + query)!
+            }
+            return u
+        }
+        searchEngine.query = query
+        return URL(string: searchEngine.searchUrl)!
+    }
+
     func startQuery(_ node: TextNode) {
         let query = node.strippedText
         guard !query.isEmpty else { return }
-        let url: URL = {
-            if query.maybeURL {
-                guard let u = URL(string: query) else {
-                    searchEngine.query = query
-                    return URL(string: searchEngine.searchUrl)!
-                }
 
-                if u.scheme == nil {
-                    return URL(string: "https://" + query)!
-                }
-                return u
-            }
-            searchEngine.query = query
-            return URL(string: searchEngine.searchUrl)!
-        }()
-//        print("Start query: \(url)")
-
-        createTabFromNode(node, withURL: url)
+        createTabFromNode(node, withURL: urlFor(query: query))
         mode = .web
     }
 
