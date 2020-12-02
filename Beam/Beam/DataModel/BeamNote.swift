@@ -133,12 +133,12 @@ class BeamNote: BeamElement {
         }
 
         #if DEBUG
-        Logger.shared.logInfo("Note loaded:\n\(String(data: doc.data, encoding: .utf8)!)\n", category: .general)
+        Logger.shared.logInfo("Note loaded:\n\(String(data: doc.data, encoding: .utf8)!)\n", category: .document)
         #endif
         do {
             return try instanciateNote(doc)
         } catch {
-            Logger.shared.logError("Unable to decode today's note", category: .general)
+            Logger.shared.logError("Unable to decode today's note", category: .document)
         }
 
         return nil
@@ -152,6 +152,7 @@ class BeamNote: BeamElement {
             do {
                 return try instanciateNote(doc)
             } catch {
+                Logger.shared.logError("Unable to load document \(doc.title) (\(doc.id))", category: .document)
                 return nil
             }
         }
@@ -190,6 +191,7 @@ class BeamNote: BeamElement {
             do {
                 return try instanciateNote(doc)
             } catch {
+                Logger.shared.logError("Unable to load document \(doc.title) (\(doc.id))", category: .document)
                 return nil
             }
         }
