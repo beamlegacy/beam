@@ -33,7 +33,7 @@ var runningOnBigSur: Bool = {
     @Published var isEditingOmniBarTitle = false
     @Published var canGoBack: Bool = false
     @Published var canGoForward: Bool = false
-    @Published var didEnterFullScreen: Bool = false
+    @Published var isFullScreen: Bool = false
 
     @Published var mode: Mode = .today {
         didSet {

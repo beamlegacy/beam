@@ -22,7 +22,7 @@ struct ModeView: View {
                     }
 
                     OmniBar()
-                        .padding(.leading, state.didEnterFullScreen ? 0 : 70)
+                        .padding(.leading, state.isFullScreen ? 0 : 70)
                         .padding(.trailing, 20)
                         .frame(height: 52, alignment: .center)
                 }

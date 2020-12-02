@@ -127,7 +127,7 @@ class BeamWindow: NSWindow {
     private func toggleTitleBarAccessoryView() {
         guard let titlebarAccessoryView = titlebarAccessoryViewControllers.first else { return }
         titlebarAccessoryView.isHidden.toggle()
-        self.state.didEnterFullScreen.toggle()
+        self.state.isFullScreen.toggle()
     }
 
     // MARK: - IBAction
