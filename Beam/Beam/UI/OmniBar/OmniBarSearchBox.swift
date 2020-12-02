@@ -114,16 +114,16 @@ struct OmniBarSearchBox: View {
                     .padding([.leading, .trailing], 9)
                     .frame(idealWidth: 600, maxWidth: .infinity)
 
-                    Image("xmark.circle.fill")
-                        .resizable()
-                        .frame(width: 12, height: 12)
-                        .offset(x: -7)
-                        .animation(.default)
-                        .opacity(isEditing ? 1 : 0)
-                        .onTapGesture {
-                          resetSearchQuery()
-                          NSApp.mainWindow?.makeFirstResponder(nil)
-                        }
+                    if isEditing, !state.searchQuery.isEmpty {
+                        Image("xmark.circle.fill")
+                            .resizable()
+                            .frame(width: 12, height: 12)
+                            .offset(x: -7)
+                            .onTapGesture {
+                              resetSearchQuery()
+                              NSApp.mainWindow?.makeFirstResponder(nil)
+                            }
+                    }
                 }
             }
         }
