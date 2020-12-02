@@ -45,50 +45,15 @@ class BeamData: ObservableObject {
     }
 
     func setupJournal() {
-
-        if let doc = documentManager.loadDocumentByTitle(title: todaysName) {
-            #if DEBUG
-            Logger.shared.logInfo("Today's note loaded:\n\(String(data: doc.data, encoding: .utf8)!)\n", category: .general)
-            #endif
-            let decoder = JSONDecoder()
-            do {
-                _todaysNote = try decoder.decode(BeamNote.self, from: doc.data)
-            } catch {
-                Logger.shared.logError("Unable to decode today's note", category: .general)
-            }
-        }
-
-        if _todaysNote == nil {
-            // Create the journal
-            _todaysNote = BeamNote(title: todaysName)
-            _todaysNote?.type = .journal
-        }
+        _todaysNote = BeamNote.fetchOrCreate(documentManager, title: todaysName)
+        _todaysNote?.type = .journal
 
         updateJournal()
     }
 
     func updateJournal() {
-        var _journal = documentManager.loadDocumentsWithType(type: DocumentType.journal).compactMap { docStruct -> BeamNote? in
-            let decoder = JSONDecoder()
-            do {
-                return try decoder.decode(BeamNote.self, from: docStruct.data)
-            } catch {
-                Logger.shared.logError("Unable to decode note [[\(docStruct.title)]] (uid: \(docStruct.id)", category: .general)
-            }
-            return nil
-        }
-
-//        // purge journal from empty notes:
-//        for note in _journal {
-//            if note.title != todaysName, note.bullets?.count == 1, let bullet = note.bullets?.first, bullet.content.isEmpty {
-//                note.delete()
-//            } else {
-//                newJournal.append(beamNoteFrom(note: note))
-//            }
-//        }
-
+        var _journal = BeamNote.fetchNotesWithType(documentManager, type: .journal)
         _journal.insert(todaysNote, at: 0)
         journal = _journal
-//        print("Journal updated:\n\(journal)\n")
     }
 }
