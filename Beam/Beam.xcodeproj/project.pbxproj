@@ -36,7 +36,6 @@
 		52326F8D252F1A8E00A40F1E /* NSManagedObject+initExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52326F8B252F1A8E00A40F1E /* NSManagedObject+initExtension.swift */; };
 		52326F8E252F1A8E00A40F1E /* NSManagedObject+initExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52326F8B252F1A8E00A40F1E /* NSManagedObject+initExtension.swift */; };
 		523586462534BF4E006748E4 /* Bullet+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 523586452534BF4E006748E4 /* Bullet+CoreDataProperties.swift */; };
-		52375B62256D2463003180E1 /* Release.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 52375B61256D2463003180E1 /* Release.xcconfig */; };
 		52375B76256D585A003180E1 /* OSLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52375B75256D585A003180E1 /* OSLog.swift */; };
 		527DF48725710ECB00A0A56D /* DocumentManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 527DF48625710ECB00A0A56D /* DocumentManagerTests.swift */; };
 		527E60082570FBB20000DE93 /* DocumentManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 527E60072570FBB20000DE93 /* DocumentManager.swift */; };
@@ -936,7 +935,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1200;
-				LastUpgradeCheck = 1210;
+				LastUpgradeCheck = 1220;
 				TargetAttributes = {
 					965A78242514F147009980D4 = {
 						CreatedOnToolsVersion = 12.0;
@@ -983,7 +982,6 @@
 				52CE69422562F2F700453429 /* sign_up.graphql in Resources */,
 				965A78362514F148009980D4 /* Main.storyboard in Resources */,
 				52CE69352562F2DF00453429 /* forgot_password.graphql in Resources */,
-				52375B62256D2463003180E1 /* Release.xcconfig in Resources */,
 				965A78332514F148009980D4 /* Preview Assets.xcassets in Resources */,
 				413F65352577830C003B3659 /* Configuration.plist in Resources */,
 				52CE693D2562F2EA00453429 /* sign_in.graphql in Resources */,
@@ -1212,8 +1210,6 @@
 				5204E8A1255ED56200458211 /* AuthenticationManager.swift in Sources */,
 				96062E3E254C5ECD00AAB78D /* DumpEnvironment.swift in Sources */,
 				964A60C525680E59008126BF /* Animation.swift in Sources */,
-				52A66A172535E77D00CE247C /* ScrollableTextView.swift in Sources */,
-				528E44272525BD4600B7C54E /* CoreDataManager.swift in Sources */,
 				9631B02B2554B34A007BF2DE /* Html2Md.swift in Sources */,
 				9694F77925155F8700399E6A /* AutoComplete.swift in Sources */,
 				96C9CC392535C16800D70AA6 /* Lexer.swift in Sources */,
@@ -1411,7 +1407,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = A3DE910688789AFBA4487533 /* Pods-Beam.debug.xcconfig */;
 			buildSettings = {
-				ARCHS = x86_64;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Beam/Beam.entitlements;
@@ -1440,7 +1435,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 23F7A69644D041FDF4D3466B /* Pods-Beam.release.xcconfig */;
 			buildSettings = {
-				ARCHS = x86_64;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Beam/Beam.entitlements;

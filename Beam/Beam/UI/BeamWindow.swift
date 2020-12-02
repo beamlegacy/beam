@@ -27,8 +27,8 @@ class BeamWindow: NSWindow {
     var data: BeamData
 
     private var trafficLights: [NSButton?]?
+    private var titlebarAccessoryViewHeight = 28
     private var trafficLightLeftMargin: CGFloat = 20
-    private var _titleBarHeight: CGFloat = 38 // magic number from debugger view
 
     // This is a hack to prevent a crash with swiftUI being dumb about the initialFirstResponder
     override var initialFirstResponder: NSView? {
@@ -62,7 +62,7 @@ class BeamWindow: NSWindow {
         self.isMovableByWindowBackground = false
 
         self.setupUI()
-        // self.setTrafficLightsLayout()
+        self.setTitleBarAccessoryView()
     }
 
     deinit {
@@ -73,53 +73,43 @@ class BeamWindow: NSWindow {
     }
 
     override func performClose(_ sender: Any?) {
-        if state.closeCurrentTab() {
-            return
-        }
+        if state.closeCurrentTab() { return }
         super.performClose(sender)
     }
 
     override func setFrame(_ frameRect: NSRect, display flag: Bool) {
       super.setFrame(frameRect, display: flag)
-      // self.setTrafficLightsLayout()
+      self.setTrafficLightsLayout()
     }
 
     override func restoreState(with coder: NSCoder) {
       super.restoreState(with: coder)
-      // self.setTrafficLightsLayout()
+      self.setTrafficLightsLayout()
     }
 
     override func orderFront(_ sender: Any?) {
       super.orderFront(sender)
-      // self.setTrafficLightsLayout()
+      self.setTrafficLightsLayout()
     }
 
     // MARK: - Setup UI
 
     private func setupUI() {
-        let contentView = self.contentView!
-
         trafficLights = [
             standardWindowButton(.closeButton),
             standardWindowButton(.miniaturizeButton),
             standardWindowButton(.zoomButton)
         ]
-
-        trafficLights!.forEach { (trafficLight) in
-            trafficLight!.superview?.willRemoveSubview(trafficLight!)
-            trafficLight!.removeFromSuperview()
-
-            trafficLight!.viewWillMove(toSuperview: contentView)
-            contentView.addSubview(trafficLight!)
-            trafficLight!.viewDidMoveToSuperview()
-        }
-
-        contentView.superview!.viewDidEndLiveResize()
     }
 
-    private func defaultTitleBarHeight() -> CGFloat {
-      let contentRect = NSWindow.contentRect(forFrameRect: frame, styleMask: .titled)
-        return frame.height - contentRect.height
+    private func setTitleBarAccessoryView() {
+      let view = NSView(frame: NSRect(x: 0, y: 0, width: 10, height: titlebarAccessoryViewHeight))
+      let dummyAccessoryViewController = NSTitlebarAccessoryViewController()
+
+      dummyAccessoryViewController.view = view
+      addTitlebarAccessoryViewController(dummyAccessoryViewController)
+
+      self.setTrafficLightsLayout()
     }
 
     private func setTrafficLightsLayout() {
@@ -132,6 +122,12 @@ class BeamWindow: NSWindow {
 
             trafficLight?.frame = frame
         }
+    }
+
+    private func toggleTitleBarAccessoryView() {
+        guard let titlebarAccessoryView = titlebarAccessoryViewControllers.first else { return }
+        titlebarAccessoryView.isHidden.toggle()
+        self.state.didEnterFullScreen.toggle()
     }
 
     // MARK: - IBAction
@@ -161,7 +157,15 @@ class BeamWindow: NSWindow {
 extension BeamWindow: NSWindowDelegate {
 
     func windowDidResize(_ notification: Notification) {
-        // self.setTrafficLightsLayout()
+        self.setTrafficLightsLayout()
+    }
+
+    func windowWillExitFullScreen(_ notification: Notification) {
+        self.toggleTitleBarAccessoryView()
+    }
+
+    func windowWillEnterFullScreen(_ notification: Notification) {
+        self.toggleTitleBarAccessoryView()
     }
 
 }

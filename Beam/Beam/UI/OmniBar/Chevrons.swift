@@ -12,19 +12,18 @@ struct Chevrons: View {
     @EnvironmentObject var state: BeamState
 
     var body: some View {
-            HStack {
+        HStack(spacing: 0) {
                 Button(action: goBack) {
-                    Symbol(name: "chevron.left")//.offset(x: 0, y: -0.5)
+                    Symbol(name: "chevron.left")
                 }
                 .buttonStyle(RoundRectButtonStyle())
                 .disabled(!state.canGoBack)
 
                 Button(action: goForward) {
-                    Symbol(name: "chevron.right")//.offset(x: 0, y: -0.5)
+                    Symbol(name: "chevron.right")
                 }
                 .buttonStyle(RoundRectButtonStyle())
                 .disabled(!state.canGoForward)
-                .padding(.leading, 9)
             }
             .padding(.leading, 18)
     }
