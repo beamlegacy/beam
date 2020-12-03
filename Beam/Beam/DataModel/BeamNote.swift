@@ -163,6 +163,7 @@ class BeamNote: BeamElement {
     static func create(_ documentManager: DocumentManager, title: String) -> BeamNote {
         let note = BeamNote(title: title)
         fetchedNotes[title] = note
+        updateNoteCount()
         return note
     }
 
@@ -207,6 +208,10 @@ class BeamNote: BeamElement {
     }
 
     private static var fetchedNotes: [String: BeamNote] = [:]
+
+    private static func updateNoteCount() {
+        AppDelegate.main.data.updateNoteCount()
+    }
 }
 
 // TODO: Remove this when we remove Note/Bullet from the build

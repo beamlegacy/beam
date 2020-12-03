@@ -77,7 +77,7 @@ struct OmniBarSearchBox: View {
                     BTextField(
                         text: $state.searchQuery,
                         isEditing: $isEditing,
-                        placeholderText: "Search or create note... \(Note.countWithPredicate(CoreDataManager.shared.mainContext)) notes",
+                        placeholderText: "Search or create note... \(state.data.noteCount) notes",
                         selectedRanges: state.searchQuerySelection,
                         onTextChanged: { _ in
                         state.resetAutocompleteSelection()

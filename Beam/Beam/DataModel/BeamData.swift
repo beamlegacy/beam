@@ -21,6 +21,7 @@ class BeamData: ObservableObject {
 
     var searchKit: SearchKit
     var scores = Scores()
+    @Published var noteCount = 0
 
     @Published var showTabStats = false
 
@@ -36,6 +37,8 @@ class BeamData: ObservableObject {
         searchKit = SearchKit(indexPath)
 
         cookies = HTTPCookieStorage()
+
+        updateNoteCount()
     }
 
     var todaysName: String {
@@ -59,4 +62,9 @@ class BeamData: ObservableObject {
         _journal.insert(todaysNote, at: 0)
         journal = _journal
     }
+
+    func updateNoteCount() {
+        noteCount = Document.countWithPredicate(CoreDataManager.shared.mainContext)
+    }
+
 }
