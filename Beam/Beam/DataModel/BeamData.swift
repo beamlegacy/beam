@@ -22,7 +22,7 @@ class BeamData: ObservableObject {
     var searchKit: SearchKit
     var scores = Scores()
 
-    @Published var showTabStats = true
+    @Published var showTabStats = false
 
     var cookies: HTTPCookieStorage
     var documentManager: DocumentManager
