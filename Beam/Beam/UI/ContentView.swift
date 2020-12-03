@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ModeView: View {
     @EnvironmentObject var state: BeamState
+    @EnvironmentObject var data: BeamData
     @ViewBuilder
     var body: some View {
         GeometryReader { geometry in
@@ -35,7 +36,13 @@ struct ModeView: View {
                                 .frame(width: geometry.size.width, height: 28)
 
                             if let tab = state.currentTab {
-                                WebView(webView: tab.webView)
+                                ZStack {
+                                    WebView(webView: tab.webView)
+
+                                    if data.showTabStats, let score = tab.score {
+                                        TabStats(score: score)
+                                    }
+                                }
                             }
                         }
                         .transition(.move(edge: .bottom))

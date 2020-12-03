@@ -722,6 +722,12 @@ CQ
                                                 <action selector="showJournal:" target="Ady-hI-5gd" id="ysb-J3-SMJ"/>
                                             </connections>
                                         </menuItem>
+                                        <menuItem title="Toggle score card" id="AED-TZ-YmC" userLabel="Toggle score card">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="toggleScoreCard:" target="Ady-hI-5gd" id="RTT-Uf-Jy7"/>
+                                            </connections>
+                                        </menuItem>
                                         <menuItem isSeparatorItem="YES" id="8CZ-9R-gka"/>
                                         <menuItem title="Show all notes" keyEquivalent="s" id="KUY-Ll-jZL">
                                             <connections>

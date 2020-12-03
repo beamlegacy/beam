@@ -20,6 +20,9 @@ class BeamData: ObservableObject {
     @Published var journal: [BeamNote] = []
 
     var searchKit: SearchKit
+    var scores = Scores()
+
+    @Published var showTabStats = false
 
     var cookies: HTTPCookieStorage
     var documentManager: DocumentManager

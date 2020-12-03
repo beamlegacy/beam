@@ -7,6 +7,7 @@ enum LogCategory: String {
     case tracking
     case network
     case coredata
+    case document
     case memory
     case bluetooth
     case ui

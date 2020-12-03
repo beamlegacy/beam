@@ -6,18 +6,19 @@
 //
 
 import Foundation
+import Combine
 
 // Editable Text Data:
-public class BeamElement: Codable, Identifiable, Hashable {
-    public private(set) var id = UUID()
-    var text = ""
-    var open = true
-    public private(set) var children = [BeamElement]()
-    var readOnly = false
-    var ast: Parser.Node?
-    var score: Float = 0
-    var creationDate = Date()
-    var updateDate = Date()
+public class BeamElement: Codable, Identifiable, Hashable, ObservableObject {
+    @Published public private(set) var id = UUID() { didSet { change() } }
+    @Published var text = "" { didSet { change() } }
+    @Published var open = true { didSet { change() } }
+    public private(set) var children = [BeamElement]() { didSet { change() } }
+    @Published var readOnly = false { didSet { change() } }
+    @Published var ast: Parser.Node? { didSet { change() } }
+    @Published var score: Float = 0 { didSet { change() } }
+    @Published var creationDate = Date() { didSet { change() } }
+    @Published var updateDate = Date()
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -116,7 +117,7 @@ public class BeamElement: Codable, Identifiable, Hashable {
         children.insert(child, at: index + 1)
     }
 
-    var parent: BeamElement?
+    @Published var parent: BeamElement?
 
     public static func == (lhs: BeamElement, rhs: BeamElement) -> Bool {
         lhs.id == rhs.id
@@ -136,5 +137,18 @@ public class BeamElement: Codable, Identifiable, Hashable {
         for c in children {
             c.connectUnlinkedNotes(thisNoteTitle, allNotes)
         }
+    }
+
+    @Published var changed = 0
+    func change() {
+        updateDate = Date()
+        changed += 1
+
+        parent?.childChanged()
+    }
+
+    func childChanged() {
+        change()
+        parent?.childChanged()
     }
 }
