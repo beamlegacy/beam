@@ -20,50 +20,66 @@ class PageRank: Codable {
 
     var initialValue: Float { 1.0 / ((pages.count > 0) ? Float(pages.count) : 1) }
 
-    func updatePage(url: String, contents: String) {
+    func updatePage(source: String, outbounds: [String]) {
+        //print("html -> \(html)")
+        let url = URL(string: source)
+
+        let page = Page()
+        let oldPage = pages[source]
+        page.pageRank = initialValue
+        page.inbound = oldPage?.inbound ?? []
+
+        // capture all the links containted in the page:
+        for href in outbounds {
+//            if let outUrl = URL(string: href, relativeTo: url) {
+//                page.outbound.insert(outUrl.absoluteString)
+//            } else {
+                page.outbound.insert(href)
+//            }
+        }
+
+        let common = oldPage?.outbound.intersection(page.outbound) ?? []
+        let toDelete = oldPage?.outbound.subtracting(common) ?? []
+        let toAdd = page.outbound.subtracting(common)
+
+        for linkToUpdate in toDelete {
+            pages[linkToUpdate]?.inbound.remove(source)
+        }
+
+        for linkToUpdate in toAdd {
+            if let page = pages[linkToUpdate] {
+                page.inbound.insert(source)
+            } else {
+                let p = Page()
+                p.inbound.insert(source)
+                pages[linkToUpdate] = p
+            }
+        }
+
+        page.inbound = oldPage?.inbound ?? []
+
+        pages[source] = page
+    }
+
+    func updatePage(source: String, contents: String) {
         do {
             //print("html -> \(html)")
-            let doc = try SwiftSoup.parseBodyFragment(contents)
+            let doc = try SwiftSoup.parseBodyFragment(contents, source)
             let els: Elements = try doc.select("a")
 
             let page = Page()
             page.pageRank = initialValue
 
             // capture all the links containted in the page:
-            for element: Element in els.array() {
-                let href = try element.attr("href")
-                page.outbound.insert(href)
+            let outbounds = try els.array().map { element -> String in
+                try element.attr("href")
             }
 
-            if let oldPage = pages[url] {
-                let common = oldPage.outbound.intersection(page.outbound)
-                let toDelete = oldPage.outbound.subtracting(common)
-                let toAdd = page.outbound.subtracting(common)
-
-                for linkToUpdate in toDelete {
-                    pages[linkToUpdate]?.inbound.remove(url)
-                }
-
-                for linkToUpdate in toAdd {
-                    if let page = pages[linkToUpdate] {
-                        page.inbound.insert(url)
-                    } else {
-                        let p = Page()
-                        p.inbound.insert(url)
-                        pages[linkToUpdate] = p
-                    }
-                    pages[linkToUpdate]?.inbound.remove(url)
-                }
-
-                page.inbound = oldPage.inbound
-            }
-
-            pages[url] = page
-
+            updatePage(source: source, outbounds: outbounds)
         } catch Exception.Error(let type, let message) {
-            print("PageRank \(type): \(message)")
+            print("PageRank (SwiftSoup parser) \(type): \(message)")
         } catch {
-            print("PageRank: error")
+            print("PageRank: (SwiftSoup parser) unkonwn error")
         }
     }
 
@@ -85,6 +101,12 @@ class PageRank: Codable {
                     return p.pageRank / Float(p.outbound.count != 0 ? p.outbound.count : 1)
                 }).reduce(0.0, +))
             }
+        }
+    }
+
+    func dump() {
+        for (key, page) in pages {
+            Logger.shared.logInfo("Page \(key) - in: \(page.inbound.count) - out: \(page.outbound.count) - pageRank: \(page.pageRank)", category: .document)
         }
     }
 }

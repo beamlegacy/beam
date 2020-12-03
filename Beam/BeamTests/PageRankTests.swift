@@ -12,5 +12,24 @@ import XCTest
 class PageRangeTests: CoreDataTests {
 
     func testInit() throws {
+        let pageRank = PageRank()
+
+        pageRank.updatePage(source: "A", outbounds: ["B", "C"])
+        pageRank.updatePage(source: "B", outbounds: ["C"])
+        pageRank.updatePage(source: "C", outbounds: [])
+        pageRank.updatePage(source: "D", outbounds: ["A"])
+        pageRank.updatePage(source: "E", outbounds: ["A"])
+        pageRank.updatePage(source: "F", outbounds: ["A"])
+        pageRank.updatePage(source: "G", outbounds: ["A", "B", "C"])
+        pageRank.updatePage(source: "H", outbounds: ["C"])
+        pageRank.updatePage(source: "I", outbounds: ["B"])
+
+        Logger.shared.logInfo("PageRank Before computation:\n", category: .document)
+        pageRank.dump()
+
+        pageRank.computePageRanks()
+
+        Logger.shared.logInfo("PageRank After computation:\n", category: .document)
+        pageRank.dump()
     }
 }
