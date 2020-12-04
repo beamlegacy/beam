@@ -67,8 +67,8 @@ struct BMTextField: NSViewRepresentable {
         }
 
         // Disable editing mode when the textField is out of focus.
-        if !context.coordinator.parent.isEditing && nsView.isEditing {
-            DispatchQueue.main.async {
+        DispatchQueue.main.async {
+            if !context.coordinator.parent.isEditing && nsView.isEditing {
                 nsView.isEditing = false
                 context.coordinator.didBecomeFirstResponder = false
                 self.isFirstResponder = false
