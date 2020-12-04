@@ -8,11 +8,6 @@
 import Foundation
 import SwiftUI
 
-enum KeyCode: UInt16 {
-  case up = 126
-  case down = 125
-}
-
 struct BeamSearchBox: View {
     @EnvironmentObject var state: BeamState
     var canSearch: Bool {
@@ -24,7 +19,7 @@ struct BeamSearchBox: View {
         ZStack {
             HStack {
                 if isEditing || state.mode == .today {
-                    OmniBarSearchBox(isEditing: $isEditing)
+                  OmniBarSearchBox(isEditing: $isEditing)
                 } else {
                     Spacer()
                         .frame(height: 28)
@@ -80,6 +75,7 @@ struct OmniBarSearchBox: View {
           BMTextField(
             text: $state.searchQuery,
             isEditing: $isEditing,
+            isFirstResponder: state.isFirstResponder,
             placeholder: "Search or create note... \(Note.countWithPredicate(CoreDataManager.shared.mainContext)) notes",
             selectedRanges: state.searchQuerySelection,
             onTextChanged: { _ in

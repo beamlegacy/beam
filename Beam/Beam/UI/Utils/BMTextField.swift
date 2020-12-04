@@ -13,6 +13,8 @@ struct BMTextField: NSViewRepresentable {
   @Binding var text: String
   @Binding var isEditing: Bool
 
+  var isFirstResponder: Bool
+
   var placeholder: String
   var selectedRanges: [Range<Int>]?
 
@@ -46,6 +48,13 @@ struct BMTextField: NSViewRepresentable {
         return onCursorMovement(.down)
       default:
         return false
+      }
+    }
+
+    if isFirstResponder {
+      DispatchQueue.main.async {
+        textField.isEditing = true
+        textField.window?.makeFirstResponder(textField)
       }
     }
 

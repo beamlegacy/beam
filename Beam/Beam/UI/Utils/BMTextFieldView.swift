@@ -15,10 +15,10 @@ class BMTextFieldView: NSTextField {
 
   weak var textFieldViewDelegate: BMTextFieldViewDelegate?
 
-  public var onEditingChanged: (Bool) -> Void = { _ in }
-  var onPerformKeyEquivalent: (NSEvent) -> Bool = { _ in return false }
+  public var onPerformKeyEquivalent: (NSEvent) -> Bool = { _ in return false }
+  var onEditingChanged: (Bool) -> Void = { _ in }
 
-  private var isEditing = false {
+  var isEditing = false {
     didSet {
       onEditingChanged(isEditing)
     }
@@ -29,21 +29,12 @@ class BMTextFieldView: NSTextField {
     self.setupTextFiedl()
   }
 
-  // MARK: Override Default UI
-
   internal func setupTextFiedl() {
     wantsLayer = true
     isBordered = false
     drawsBackground = false
 
     lineBreakMode = .byTruncatingTail
-  }
-
-  // MARK: Override Methods
-
-  override func resignFirstResponder() -> Bool {
-    isEditing = false
-    return super.resignFirstResponder()
   }
 
   override func mouseDown(with event: NSEvent) {

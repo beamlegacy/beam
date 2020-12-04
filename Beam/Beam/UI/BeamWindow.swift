@@ -27,7 +27,7 @@ class BeamWindow: NSWindow {
   var data: BeamData
 
   private var trafficLights: [NSButton?]?
-  private var titlebarAccessoryViewHeight = 28
+  private var titlebarAccessoryViewHeight = Constants.runningOnBigSur ? 0 : 28
   private var trafficLightLeftMargin: CGFloat = 20
 
   // This is a hack to prevent a crash with swiftUI being dumb about the initialFirstResponder
@@ -106,8 +106,6 @@ class BeamWindow: NSWindow {
     let dummyAccessoryViewController = NSTitlebarAccessoryViewController()
 
     dummyAccessoryViewController.view = view
-    dummyAccessoryViewController.view.wantsLayer = true
-    dummyAccessoryViewController.view.layer?.backgroundColor = NSColor.clear.cgColor
     addTitlebarAccessoryViewController(dummyAccessoryViewController)
     self.setTrafficLightsLayout()
   }
@@ -116,8 +114,10 @@ class BeamWindow: NSWindow {
     guard let trafficLights = trafficLights else { return }
 
     for (index, trafficLight) in trafficLights.enumerated() {
+      let originY = trafficLight!.superview!.frame.height / 2 - trafficLight!.frame.height / 2
       var frame = trafficLight!.frame
-      frame.origin.y = trafficLight!.superview!.frame.height / 2 - trafficLight!.frame.height / 2
+
+      frame.origin.y = Constants.runningOnBigSur ? originY + 2 : originY
       frame.origin.x = trafficLightLeftMargin + CGFloat(index) * (frame.width + 6)
 
       trafficLight?.frame = frame

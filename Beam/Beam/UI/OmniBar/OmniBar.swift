@@ -29,7 +29,7 @@ struct OmniBar: View {
                     .buttonStyle(RoundRectButtonStyle())
                 }.padding(.leading, 9)
             } else {
-                BeamSearchBox(isEditing: $state.isEditingOmniBarTitle)
+              BeamSearchBox(isEditing: $state.isEditingOmniBarTitle)
             }
 
             Button(action: toggleMode) {
