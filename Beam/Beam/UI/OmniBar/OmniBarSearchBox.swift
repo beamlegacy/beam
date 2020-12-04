@@ -14,7 +14,7 @@ struct BeamSearchBox: View {
         return !state.searchQuery.isEmpty || !isEditing
     }
     @Binding var isEditing: Bool
-    
+
     var body: some View {
         ZStack {
             HStack {
@@ -25,14 +25,14 @@ struct BeamSearchBox: View {
                         .frame(height: 28)
                         .padding(.top, 8)
                 }
-                
+
                 Button(action: isEditing ? startQuery : startNewSearch) {
                     Symbol(name: "magnifyingglass")
                 }
                 .disabled(!canSearch)
                 .buttonStyle(RoundRectButtonStyle())
                 .padding(.leading, 1)
-                
+
                 Button(action: startNewSearch) {
                     Symbol(name: "plus")
                 }
@@ -40,11 +40,11 @@ struct BeamSearchBox: View {
             }.padding(.leading, 9)
         }
     }
-    
+
     func startNewSearch() {
         state.startNewSearch()
     }
-    
+
     func startQuery() {
         withAnimation {
             //print("searchText activated: \(searchText)")
@@ -61,16 +61,16 @@ struct BeamSearchBox: View {
 struct OmniBarSearchBox: View {
     @EnvironmentObject var state: BeamState
     @Binding var isEditing: Bool
-    
+
     var _cornerRadius = CGFloat(7)
-    
+
     var body: some View {
         VStack {
             ZStack {
                 RoundedRectangle(cornerRadius: _cornerRadius)
                     .stroke(Color.accentColor.opacity(0.5), lineWidth: isEditing ? 3 : 0)
                     .frame(height: 28)
-                
+
                 HStack {
                     BMTextField(
                         text: $state.searchQuery,
@@ -106,7 +106,7 @@ struct OmniBarSearchBox: View {
                     )
                     .padding(.leading, 10)
                     .padding(.trailing, 5)
-                    
+
                     Image("xmark.circle.fill")
                         .resizable()
                         .frame(width: 12, height: 12)
@@ -124,18 +124,18 @@ struct OmniBarSearchBox: View {
             }
         }
     }
-    
+
     func resetSearchQuery() {
         withAnimation {
             state.startNewSearch()
         }
     }
-    
+
     func startQuery() {
         if state.searchQuery.isEmpty {
             return
         }
-        
+
         withAnimation {
             //print("searchText activated: \(searchText)")
             state.startQuery()

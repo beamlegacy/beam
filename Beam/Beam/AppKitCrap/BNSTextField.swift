@@ -29,11 +29,11 @@ class BNSTextField: NSTextView, ObservableObject, NSTextViewDelegate {
     public var onPerformKeyEquivalent: (NSEvent) -> Bool = { _ in return false }
     public var focusOnCreation: Bool!
     public var name: String?
-    
+
     override public init(frame frameRect: NSRect, textContainer container: NSTextContainer?) {
         super.init(frame: frameRect, textContainer: container)
     }
-    
+
     public init(string stringValue: Binding<String>, focusOnCreation: Bool = false, name: String? = nil) {
         super.init(frame: NSRect())
         self.focusOnCreation = focusOnCreation
@@ -48,45 +48,45 @@ class BNSTextField: NSTextView, ObservableObject, NSTextViewDelegate {
         if let n = self.name {
             Self.fields[n] = self
         }
-        
+
         self.maxSize = NSSize(width: CGFloat.infinity, height: CGFloat.infinity)
         self.isHorizontallyResizable = true
         self.textContainer?.widthTracksTextView = false
         self.textContainer?.containerSize = NSSize(width: CGFloat.infinity, height: CGFloat.infinity)
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     deinit {
         guard let n = name else { return }
         DispatchQueue.main.async {
             Self.fields.removeValue(forKey: n)
         }
     }
-    
+
     override func mouseDown(with event: NSEvent) {
         window?.makeFirstResponder(self)
         super.mouseDown(with: event)
     }
-    
+
     public override func becomeFirstResponder() -> Bool {
         needsDisplay = true
         isEditing = true
         return true
     }
-    
+
     public override func resignFirstResponder() -> Bool {
         isEditing = false
         return super.resignFirstResponder()
     }
-    
+
     public func textDidChange(_ notification: Notification) {
         onTextChanged(self.string)
         value.wrappedValue = self.string
     }
-    
+
     //    public func textViewDidChangeSelection(_ notification: Notification) {
     //        if !inSelectionUpdate {
     //            selectionRanges.wrappedValue = selectedRanges.map({ value -> Range<Int> in
@@ -98,7 +98,7 @@ class BNSTextField: NSTextView, ObservableObject, NSTextViewDelegate {
     override func insertNewline(_ sender: Any?) {
         onCommit()
     }
-    
+
     override func performKeyEquivalent(with event: NSEvent) -> Bool {
         if isEditing {
             if onPerformKeyEquivalent(event) {
@@ -107,7 +107,7 @@ class BNSTextField: NSTextView, ObservableObject, NSTextViewDelegate {
         }
         return super.performKeyEquivalent(with: event)
     }
-    
+
     var firstPass = true
     override func viewDidMoveToWindow() {
         if focusOnCreation, firstPass {
@@ -119,19 +119,19 @@ class BNSTextField: NSTextView, ObservableObject, NSTextViewDelegate {
         }
         firstPass = false
     }
-    
+
     @objc func commit(_ sender: AnyObject) {
         onCommit()
     }
-    
+
     public var placeholderText: String?
     public var placeholderTextColor: NSColor = NSColor.lightGray
-    
+
     private var placeholderInsets = NSEdgeInsets(top: 0.0, left: 4.0, bottom: 0.0, right: 4.0)
-    
+
     override func draw(_ dirtyRect: NSRect) {
         super.draw(dirtyRect)
-        
+
         guard string.isEmpty else { return }
         if let s = placeholderText {
             let attribs = [NSAttributedString.Key.font: font!, .foregroundColor: placeholderTextColor]

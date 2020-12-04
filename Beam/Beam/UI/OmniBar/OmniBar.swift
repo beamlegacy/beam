@@ -14,15 +14,15 @@ struct OmniBar: View {
     var canSearch: Bool {
         return !state.searchQuery.isEmpty || !state.isEditingOmniBarTitle
     }
-    
+
     var body: some View {
         HStack {
             Chevrons()
-            
+
             if state.mode == .note {
                 HStack {
                     GlobalNoteTitle(note: state.currentNote!)
-                    
+
                     Button(action: startNewSearch) {
                         Symbol(name: "plus")
                     }
@@ -31,21 +31,21 @@ struct OmniBar: View {
             } else {
                 BeamSearchBox(isEditing: $state.isEditingOmniBarTitle)
             }
-            
+
             Button(action: toggleMode) {
                 Symbol(name: state.mode == .web ? "note.text" : "network")
             }.buttonStyle(RoundRectButtonStyle()).disabled(state.tabs.isEmpty)
         }
     }
-    
+
     func resetAutoCompleteSelection() {
         state.resetAutocompleteSelection()
     }
-    
+
     func startNewSearch() {
         state.startNewSearch()
     }
-    
+
     func toggleMode() {
         if state.mode == .web {
             guard let tab = state.currentTab else { return }
