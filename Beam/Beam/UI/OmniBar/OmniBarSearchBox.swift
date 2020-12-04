@@ -71,60 +71,61 @@ struct OmniBarSearchBox: View {
 
   var body: some View {
     VStack {
-      HStack {
-        BMTextField(
-          text: $state.searchQuery,
-          isEditing: $isEditing,
-          placeholder: "Search or create note... \(Note.countWithPredicate(CoreDataManager.shared.mainContext)) notes",
-          selectedRanges: state.searchQuerySelection,
-          onTextChanged: { _ in
-            state.resetAutocompleteSelection()
-          },
-          onCommit: {
-            startQuery()
-          },
-          onEscape: {
-            if state.completedQueries.isEmpty {
-              state.searchQuery = ""
-            } else {
-              state.cancelAutocomplete()
-            }
-          },
-          onCursorMovement: { cursorMovement in
-            switch cursorMovement {
-            case .up:
-              state.selectPreviousAutoComplete()
-              return true
-            case .down:
-              state.selectNextAutoComplete()
-              return true
-            default:
-              return false
-            }
-          }
-        )
-        .padding(.leading, 10)
-        .padding(.trailing, 5)
+      ZStack {
+         RoundedRectangle(cornerRadius: _cornerRadius)
+             .stroke(Color.accentColor.opacity(0.5), lineWidth: isEditing ? 3 : 0)
+             .frame(height: 28)
 
-        Image("xmark.circle.fill")
-          .resizable()
-          .frame(width: 12, height: 12)
-          .offset(x: -7)
-          .animation(.default)
-          .opacity(isEditing && !state.searchQuery.isEmpty ? 1 : 0)
-          .onTapGesture(count: 1) {
-            resetSearchQuery()
-            NSApp.mainWindow?.makeFirstResponder(nil)
-          }
+        HStack {
+          BMTextField(
+            text: $state.searchQuery,
+            isEditing: $isEditing,
+            placeholder: "Search or create note... \(Note.countWithPredicate(CoreDataManager.shared.mainContext)) notes",
+            selectedRanges: state.searchQuerySelection,
+            onTextChanged: { _ in
+              state.resetAutocompleteSelection()
+            },
+            onCommit: {
+              startQuery()
+            },
+            onEscape: {
+              if state.completedQueries.isEmpty {
+                state.searchQuery = ""
+              } else {
+                state.cancelAutocomplete()
+              }
+            },
+            onCursorMovement: { cursorMovement in
+              switch cursorMovement {
+              case .up:
+                state.selectPreviousAutoComplete()
+                return true
+              case .down:
+                state.selectNextAutoComplete()
+                return true
+              default:
+                return false
+              }
+            }
+          )
+          .padding(.leading, 10)
+          .padding(.trailing, 5)
+
+          Image("xmark.circle.fill")
+            .resizable()
+            .frame(width: 12, height: 12)
+            .offset(x: -7)
+            .animation(.default)
+            .opacity(isEditing && !state.searchQuery.isEmpty ? 1 : 0)
+            .onTapGesture(count: 1) {
+              resetSearchQuery()
+              NSApp.mainWindow?.makeFirstResponder(nil)
+            }
+        }
+        .padding([.top, .bottom], 7)
+        .background(Color("OmniboxBackgroundColor"))
+        .cornerRadius(_cornerRadius)
       }
-      .padding([.top, .bottom], 7)
-      .background(Color("OmniboxBackgroundColor"))
-      .cornerRadius(_cornerRadius)
-      .overlay(
-        RoundedRectangle(cornerRadius: _cornerRadius)
-          .stroke(isEditing ? Color.accentColor.opacity(0.5) : Color.clear, lineWidth: 3)
-          .animation(.easeIn(duration: 0.15))
-      )
     }
   }
 

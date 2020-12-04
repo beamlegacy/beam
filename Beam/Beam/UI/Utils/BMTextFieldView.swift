@@ -61,11 +61,11 @@ class BMTextFieldView: NSTextField {
   }
 
   override func performKeyEquivalent(with event: NSEvent) -> Bool {
-      if isEditing && onPerformKeyEquivalent(event) {
-        return true
-      }
-
-      return super.performKeyEquivalent(with: event)
+    if isEditing && onPerformKeyEquivalent(event) {
+      return true
     }
+
+    return super.performKeyEquivalent(with: event)
+  }
 
 }
