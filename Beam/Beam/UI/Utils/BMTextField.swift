@@ -33,6 +33,7 @@ struct BMTextField: NSViewRepresentable {
         textField.delegate = context.coordinator
         textField.focusRingType = .none
         textField.textFieldViewDelegate = context.coordinator
+        textField.placeholderFontSize = 16
 
         textField.onEditingChanged = { v in
             self.isEditing = v
@@ -55,7 +56,6 @@ struct BMTextField: NSViewRepresentable {
     func updateNSView(_ nsView: Self.NSViewType, context: Self.Context) {
         nsView.stringValue = text
         nsView.placeholderText = placeholder
-        nsView.placeholderFontSize = 16
 
         // Enable focus on textField
         if isFirstResponder && !context.coordinator.didBecomeFirstResponder {
