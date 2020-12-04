@@ -105,7 +105,9 @@ class PageRank: Codable {
     }
 
     func dump() {
-        for (key, page) in pages {
+        for (key, page) in pages.sorted(by: { (arg0, arg1) -> Bool in
+            arg0.value.pageRank > arg1.value.pageRank
+        }) {
             Logger.shared.logInfo("Page \(key) - in: \(page.inbound.count) - out: \(page.outbound.count) - pageRank: \(page.pageRank)", category: .document)
         }
     }
