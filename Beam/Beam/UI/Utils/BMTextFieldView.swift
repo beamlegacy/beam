@@ -15,8 +15,11 @@ class BMTextFieldView: NSTextField {
 
     weak var textFieldViewDelegate: BMTextFieldViewDelegate?
 
-    public var onPerformKeyEquivalent: (NSEvent) -> Bool = { _ in return false }
+    var onPerformKeyEquivalent: (NSEvent) -> Bool = { _ in return false }
     var onEditingChanged: (Bool) -> Void = { _ in }
+    var placeholderText: String?
+    var placeholderFontSize: CGFloat = 14
+    var placeholderColor: NSColor = NSColor.lightGray
 
     var isEditing = false {
         didSet {
@@ -35,6 +38,16 @@ class BMTextFieldView: NSTextField {
         drawsBackground = false
 
         lineBreakMode = .byTruncatingTail
+
+        guard let placeholder = placeholderText else { return }
+
+        let attrs = [
+            NSAttributedString.Key.foregroundColor: placeholderColor,
+            NSAttributedString.Key.font: NSFont.systemFont(ofSize: placeholderFontSize)
+        ]
+
+        let placeholderString = NSAttributedString(string: placeholder, attributes: attrs)
+        self.placeholderAttributedString = placeholderString
     }
 
     override func mouseDown(with event: NSEvent) {
