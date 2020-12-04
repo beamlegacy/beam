@@ -14,7 +14,7 @@ struct GlobalTabTitle: View {
     @ObservedObject var tab: BrowserTab
     @State var hover = false
     @Binding var isEditing: Bool
-
+    
     var body: some View {
         VStack {
             ZStack {
@@ -31,7 +31,7 @@ struct GlobalTabTitle: View {
                     Text(tab.url?.minimizedHost ?? tab.originalQuery)
                         .font(.custom("SF-Pro-Text-Heavy", size: 16))
                 }
-
+                
                 GeometryReader { geometry in
                     Path { path in
                         let f = CGFloat(tab.estimatedProgress)
