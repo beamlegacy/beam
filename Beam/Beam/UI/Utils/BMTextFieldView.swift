@@ -58,5 +58,4 @@ class BMTextFieldView: NSTextField {
 
         return super.performKeyEquivalent(with: event)
     }
-
 }

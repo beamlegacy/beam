@@ -35,6 +35,7 @@ enum KeyCode: UInt16 {
     @Published var canGoBack: Bool = false
     @Published var canGoForward: Bool = false
     @Published var isFullScreen: Bool = false
+    @Published var focusOmniBox: Bool = true
 
     @Published var mode: Mode = .today {
         didSet {
@@ -417,6 +418,7 @@ enum KeyCode: UInt16 {
         currentNote = nil
         resetQuery()
         navigateToJournal()
+        focusOmniBox = true
     }
 
     func showNextTab() {

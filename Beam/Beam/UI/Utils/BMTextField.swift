@@ -13,7 +13,7 @@ struct BMTextField: NSViewRepresentable {
     @Binding var text: String
     @Binding var isEditing: Bool
 
-    var isFirstResponder: Bool
+    @Binding var isFirstResponder: Bool
 
     var placeholder: String
     var selectedRanges: [Range<Int>]?
@@ -70,6 +70,8 @@ struct BMTextField: NSViewRepresentable {
         DispatchQueue.main.async {
             if !context.coordinator.parent.isEditing && nsView.isEditing {
                 nsView.isEditing = false
+                context.coordinator.didBecomeFirstResponder = false
+                self.isFirstResponder = false
             }
         }
 
