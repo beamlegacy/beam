@@ -27,9 +27,15 @@ class PageRangeTests: CoreDataTests {
         Logger.shared.logInfo("PageRank Before computation:\n", category: .document)
         pageRank.dump()
 
-        pageRank.computePageRanks()
+        pageRank.computePageRanks(iterations: 1)
 
         Logger.shared.logInfo("PageRank After computation:\n", category: .document)
         pageRank.dump()
+
+        let total = pageRank.pages.reduce(0) { (val, page) -> Float in
+            val + page.value.pageRank
+        }
+
+        XCTAssertEqual(total, 1.0, accuracy: 0.0015)
     }
 }

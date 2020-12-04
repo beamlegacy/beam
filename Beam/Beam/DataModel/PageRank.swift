@@ -86,20 +86,22 @@ class PageRank: Codable {
     var dampingFactor = Float(0.85)
 
     func computePageRanks(iterations: Int = 20) {
+        let iv = initialValue
         for pageIterator in pages {
-            pageIterator.value.pageRank = initialValue
+            pageIterator.value.pageRank = iv
         }
 
         for _ in 0 ..< iterations {
             for pageIterator in pages {
                 let page = pageIterator.value
 
-                page.pageRank = (1.0 - dampingFactor)
-                    + dampingFactor
-                    * (page.inbound.map({ inbound -> Float in
+                let score = (page.inbound.map({ inbound -> Float in
                     guard let p = pages[inbound] else { return 0 }
-                    return p.pageRank / Float(p.outbound.count != 0 ? p.outbound.count : 1)
+                    let outboundCount = p.outbound.count
+                    guard outboundCount > 0 else { return 0 }
+                    return p.pageRank / Float(outboundCount)
                 }).reduce(0.0, +))
+                page.pageRank = (1.0 - dampingFactor) * iv + dampingFactor * score
             }
         }
     }
