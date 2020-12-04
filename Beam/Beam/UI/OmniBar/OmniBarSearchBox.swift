@@ -8,6 +8,11 @@
 import Foundation
 import SwiftUI
 
+enum KeyCode: UInt16 {
+  case up = 126
+  case down = 125
+}
+
 struct BeamSearchBox: View {
     @EnvironmentObject var state: BeamState
     var canSearch: Bool {
@@ -59,91 +64,85 @@ struct BeamSearchBox: View {
 }
 
 struct OmniBarSearchBox: View {
-    var _cornerRadius = CGFloat(7)
-    @EnvironmentObject var state: BeamState
-    @Binding var isEditing: Bool
+  @EnvironmentObject var state: BeamState
+  @Binding var isEditing: Bool
 
-    var body: some View {
-        VStack {
-            ZStack {
-                RoundedRectangle(cornerRadius: _cornerRadius)
-                    .foregroundColor(Color("OmniboxBackgroundColor"))
-                    .frame(height: 28)
-                RoundedRectangle(cornerRadius: _cornerRadius)
-                    .stroke(Color.accentColor.opacity(0.5), lineWidth: isEditing ? 2.5 : 0)
-                    .frame(height: 28)
+  var _cornerRadius = CGFloat(7)
 
-                HStack {
-                    BTextField(
-                        text: $state.searchQuery,
-                        isEditing: $isEditing,
-                        placeholderText: "Search or create note... \(Note.countWithPredicate(CoreDataManager.shared.mainContext)) notes",
-                        selectedRanges: state.searchQuerySelection,
-                        onTextChanged: { _ in
-                        state.resetAutocompleteSelection()
-                        },
-                        onCommit: {
-                            startQuery()
-                        },
-                        onEscape: {
-                            if state.completedQueries.isEmpty {
-                                state.searchQuery = ""
-                            } else {
-                                state.cancelAutocomplete()
-                            }
-                        },
-                        onCursorMovement: { cursorMovement in
-                            switch cursorMovement {
-                            case .up:
-                                state.selectPreviousAutoComplete()
-                                return true
-                            case .down:
-                                state.selectNextAutoComplete()
-                                return true
-                            default:
-                                break
-                            }
-                            return false
-                        },
-                        focusOnCreation: true,
-                        textColor: NSColor(named: "OmniboxTextColor"),
-                        placeholderTextColor: NSColor(named: "OmniboxPlaceholderTextColor"),
-                        name: "OmniBarSearchBox"
-                    )
-                    .padding(.top, 8)
-                    .padding([.leading, .trailing], 9)
-                    .frame(idealWidth: 600, maxWidth: .infinity)
-
-                    if isEditing, !state.searchQuery.isEmpty {
-                        Image("xmark.circle.fill")
-                            .resizable()
-                            .frame(width: 12, height: 12)
-                            .offset(x: -7)
-                            .onTapGesture {
-                              resetSearchQuery()
-                              NSApp.mainWindow?.makeFirstResponder(nil)
-                            }
-                    }
-                }
+  var body: some View {
+    VStack {
+      HStack {
+        BMTextField(
+          text: $state.searchQuery,
+          isEditing: $isEditing,
+          placeholder: "Search or create note... \(Note.countWithPredicate(CoreDataManager.shared.mainContext)) notes",
+          selectedRanges: state.searchQuerySelection,
+          onTextChanged: { _ in
+            state.resetAutocompleteSelection()
+          },
+          onCommit: {
+            startQuery()
+          },
+          onEscape: {
+            if state.completedQueries.isEmpty {
+              state.searchQuery = ""
+            } else {
+              state.cancelAutocomplete()
             }
-        }
-        .frame(height: 37)
+          },
+          onCursorMovement: { cursorMovement in
+            switch cursorMovement {
+            case .up:
+              state.selectPreviousAutoComplete()
+              return true
+            case .down:
+              state.selectNextAutoComplete()
+              return true
+            default:
+              return false
+            }
+          }
+        )
+        .padding(.leading, 10)
+        .padding(.trailing, 5)
+
+        Image("xmark.circle.fill")
+          .resizable()
+          .frame(width: 12, height: 12)
+          .offset(x: -7)
+          .animation(.default)
+          .opacity(isEditing && !state.searchQuery.isEmpty ? 1 : 0)
+          .onTapGesture(count: 1) {
+            resetSearchQuery()
+            NSApp.mainWindow?.makeFirstResponder(nil)
+          }
+      }
+      .padding([.top, .bottom], 7)
+      .background(Color("OmniboxBackgroundColor"))
+      .cornerRadius(_cornerRadius)
+      .overlay(
+        RoundedRectangle(cornerRadius: _cornerRadius)
+          .stroke(isEditing ? Color.accentColor.opacity(0.5) : Color.clear, lineWidth: 3)
+          .animation(.easeIn(duration: 0.15))
+      )
+    }
+  }
+
+  func resetSearchQuery() {
+    withAnimation {
+      state.startNewSearch()
+    }
+  }
+
+  func startQuery() {
+    if state.searchQuery.isEmpty {
+        return
     }
 
-    func resetSearchQuery() {
-        withAnimation {
-            state.startNewSearch()
-        }
+    withAnimation {
+      //print("searchText activated: \(searchText)")
+      state.startQuery()
+      isEditing = false
     }
-
-    func startQuery() {
-        if state.searchQuery.isEmpty {
-            return
-        }
-        withAnimation {
-            //print("searchText activated: \(searchText)")
-            state.startQuery()
-            isEditing = false
-        }
-    }
+  }
 }
