@@ -19,6 +19,7 @@ enum Mode {
 enum KeyCode: UInt16 {
     case up = 126
     case down = 125
+    case escap = 25
 }
 
 @objc class BeamState: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
@@ -34,7 +35,6 @@ enum KeyCode: UInt16 {
     @Published var canGoBack: Bool = false
     @Published var canGoForward: Bool = false
     @Published var isFullScreen: Bool = false
-    @Published var isFirstResponder: Bool = false
 
     @Published var mode: Mode = .today {
         didSet {
@@ -417,7 +417,6 @@ enum KeyCode: UInt16 {
         currentNote = nil
         resetQuery()
         navigateToJournal()
-        isFirstResponder = true
     }
 
     func showNextTab() {

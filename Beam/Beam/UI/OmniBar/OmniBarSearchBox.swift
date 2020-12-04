@@ -75,7 +75,7 @@ struct OmniBarSearchBox: View {
                     BMTextField(
                         text: $state.searchQuery,
                         isEditing: $isEditing,
-                        isFirstResponder: state.isFirstResponder,
+                        isFirstResponder: true,
                         placeholder: "Search or create note... \(Note.countWithPredicate(CoreDataManager.shared.mainContext)) notes",
                         selectedRanges: state.searchQuerySelection,
                         onTextChanged: { _ in

@@ -35,9 +35,7 @@ struct BMTextField: NSViewRepresentable {
         textField.textFieldViewDelegate = context.coordinator
 
         textField.onEditingChanged = { v in
-            withAnimation(.spring(response: 0.55, dampingFraction: 0.3, blendDuration: 0.5)) {
-                self.isEditing = v
-            }
+            self.isEditing = v
         }
 
         textField.onPerformKeyEquivalent = { event in
@@ -58,12 +56,20 @@ struct BMTextField: NSViewRepresentable {
         nsView.stringValue = text
         nsView.placeholderString = placeholder
 
+        // Enable focus on textField
         if isFirstResponder && !context.coordinator.didBecomeFirstResponder {
             context.coordinator.didBecomeFirstResponder = true
 
             DispatchQueue.main.async {
                 nsView.isEditing = true
                 nsView.window?.makeFirstResponder(nsView)
+            }
+        }
+
+        // Disable editing mode when the textField is out of focus.
+        DispatchQueue.main.async {
+            if !context.coordinator.parent.isEditing && nsView.isEditing {
+                nsView.isEditing = false
             }
         }
 
