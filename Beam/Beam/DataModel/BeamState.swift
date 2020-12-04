@@ -413,6 +413,7 @@ enum KeyCode: UInt16 {
   }
 
   func startNewSearch() {
+    print("hello")
     cancelAutocomplete()
     currentNote = nil
     resetQuery()

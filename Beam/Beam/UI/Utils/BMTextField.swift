@@ -51,19 +51,21 @@ struct BMTextField: NSViewRepresentable {
       }
     }
 
-    if isFirstResponder {
-      DispatchQueue.main.async {
-        textField.isEditing = true
-        textField.window?.makeFirstResponder(textField)
-      }
-    }
-
     return textField
   }
 
   func updateNSView(_ nsView: Self.NSViewType, context: Self.Context) {
     nsView.stringValue = text
     nsView.placeholderString = placeholder
+
+    if isFirstResponder && !context.coordinator.didBecomeFirstResponder {
+      context.coordinator.didBecomeFirstResponder = true
+
+      DispatchQueue.main.async {
+        nsView.isEditing = true
+        nsView.window?.makeFirstResponder(nsView)
+      }
+    }
 
     if let range = self.selectedRanges?.first {
       let fieldeditor = nsView.currentEditor()
@@ -75,6 +77,7 @@ struct BMTextField: NSViewRepresentable {
 
   class Coordinator: NSObject, NSTextFieldDelegate, BMTextFieldViewDelegate {
     let parent: BMTextField
+    var didBecomeFirstResponder = false
 
     init(_ textField: BMTextField) {
       self.parent = textField
