@@ -67,14 +67,15 @@ struct BMTextField: NSViewRepresentable {
         }
 
         // Disable editing mode when the textField is out of focus.
-        DispatchQueue.main.async {
-            if !context.coordinator.parent.isEditing && nsView.isEditing {
+        if !context.coordinator.parent.isEditing && nsView.isEditing {
+            DispatchQueue.main.async {
                 nsView.isEditing = false
                 context.coordinator.didBecomeFirstResponder = false
                 self.isFirstResponder = false
             }
         }
 
+        // Set the range on the textField
         if let range = self.selectedRanges?.first {
             let fieldeditor = nsView.currentEditor()
             let pos = Int(range.startIndex)
