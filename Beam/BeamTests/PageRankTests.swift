@@ -27,7 +27,7 @@ class PageRangeTests: CoreDataTests {
         Logger.shared.logInfo("PageRank Before computation:\n", category: .document)
         pageRank.dump()
 
-        pageRank.computePageRanks(iterations: 1)
+        pageRank.computePageRanks(iterations: 30)
 
         Logger.shared.logInfo("PageRank After computation:\n", category: .document)
         pageRank.dump()
@@ -36,6 +36,7 @@ class PageRangeTests: CoreDataTests {
             val + page.value.pageRank
         }
 
+        Logger.shared.logInfo("PageRank total \(total) for \(pageRank.pages.count) pages", category: .general)
         XCTAssertEqual(total, 1.0, accuracy: 0.0015)
     }
 }

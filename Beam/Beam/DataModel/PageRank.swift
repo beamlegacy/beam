@@ -22,8 +22,6 @@ class PageRank: Codable {
 
     func updatePage(source: String, outbounds: [String]) {
         //print("html -> \(html)")
-        let url = URL(string: source)
-
         let page = Page()
         let oldPage = pages[source]
         page.pageRank = initialValue

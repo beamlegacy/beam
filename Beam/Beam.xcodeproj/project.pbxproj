@@ -132,6 +132,7 @@
 		96A49B6A253115C5003B4767 /* String+Regex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96A49B69253115C5003B4767 /* String+Regex.swift */; };
 		96A49B6F2533ABC9003B4767 /* NSMutableAttributedString+Ranges.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96A49B6E2533ABC9003B4767 /* NSMutableAttributedString+Ranges.swift */; };
 		96AF5CB62537611300A7988C /* AttributedStringVisitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96AF5CB52537611300A7988C /* AttributedStringVisitor.swift */; };
+		96B2CD14257D55A000FA8C8D /* Index.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96B2CD13257D55A000FA8C8D /* Index.swift */; };
 		96B3A5EE253B99E000E8C366 /* NoteBackForwardList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96B3A5ED253B99E000E8C366 /* NoteBackForwardList.swift */; };
 		96B99AA1253F43DD008E3686 /* NSImage+CGImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96B99AA0253F43DD008E3686 /* NSImage+CGImage.swift */; };
 		96C039922520C67C00A2EDC7 /* TextEdit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C039902520C67C00A2EDC7 /* TextEdit.swift */; };
@@ -320,6 +321,7 @@
 		96A49B69253115C5003B4767 /* String+Regex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Regex.swift"; sourceTree = "<group>"; };
 		96A49B6E2533ABC9003B4767 /* NSMutableAttributedString+Ranges.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSMutableAttributedString+Ranges.swift"; sourceTree = "<group>"; };
 		96AF5CB52537611300A7988C /* AttributedStringVisitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttributedStringVisitor.swift; sourceTree = "<group>"; };
+		96B2CD13257D55A000FA8C8D /* Index.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Index.swift; sourceTree = "<group>"; };
 		96B3A5ED253B99E000E8C366 /* NoteBackForwardList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteBackForwardList.swift; sourceTree = "<group>"; };
 		96B99AA0253F43DD008E3686 /* NSImage+CGImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSImage+CGImage.swift"; sourceTree = "<group>"; };
 		96C039902520C67C00A2EDC7 /* TextEdit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextEdit.swift; sourceTree = "<group>"; };
@@ -792,6 +794,7 @@
 				96FA3F5D256C24660070C91E /* Score.swift */,
 				96FA3F65256D473B0070C91E /* PageRank.swift */,
 				960B823B2571BB83006ECE77 /* BeamElement.swift */,
+				96B2CD13257D55A000FA8C8D /* Index.swift */,
 			);
 			path = DataModel;
 			sourceTree = "<group>";
@@ -1175,6 +1178,7 @@
 				52EB925D25668ED8003E49C5 /* PerformanceDebug.swift in Sources */,
 				52326F8C252F1A8E00A40F1E /* NSManagedObject+initExtension.swift in Sources */,
 				52C6A23325644EB100350EBE /* AppDelegate+URL.swift in Sources */,
+				96B2CD14257D55A000FA8C8D /* Index.swift in Sources */,
 				965B19712518F59D00BCF01C /* BrowserTab.swift in Sources */,
 				96C039922520C67C00A2EDC7 /* TextEdit.swift in Sources */,
 				52C6A22E25644E5B00350EBE /* AppDelegate+Note.swift in Sources */,
