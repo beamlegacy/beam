@@ -87,14 +87,14 @@ class BNSTextField: NSTextView, ObservableObject, NSTextViewDelegate {
         value.wrappedValue = self.string
     }
 
-//    public func textViewDidChangeSelection(_ notification: Notification) {
-//        if !inSelectionUpdate {
-//            selectionRanges.wrappedValue = selectedRanges.map({ value -> Range<Int> in
-//                value.rangeValue.lowerBound ..< value.rangeValue.upperBound
-//            })
-//        }
-//    }
-//
+    //    public func textViewDidChangeSelection(_ notification: Notification) {
+    //        if !inSelectionUpdate {
+    //            selectionRanges.wrappedValue = selectedRanges.map({ value -> Range<Int> in
+    //                value.rangeValue.lowerBound ..< value.rangeValue.upperBound
+    //            })
+    //        }
+    //    }
+    //
     override func insertNewline(_ sender: Any?) {
         onCommit()
     }
@@ -143,6 +143,6 @@ class BNSTextField: NSTextView, ObservableObject, NSTextViewDelegate {
 extension NSRect {
     func insetBy(_ insets: NSEdgeInsets) -> NSRect {
         return insetBy(dx: insets.left + insets.right, dy: insets.top + insets.bottom)
-        .applying(CGAffineTransform(translationX: insets.left - insets.right, y: insets.top - insets.bottom))
+            .offsetBy(dx: insets.left - insets.right, dy: insets.top - insets.bottom)
     }
 }

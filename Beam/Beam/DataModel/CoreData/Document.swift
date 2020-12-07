@@ -95,5 +95,4 @@ class Document: NSManagedObject {
         return fetchAll(context: context, predicate)
     }
 
-
 }
