@@ -410,14 +410,8 @@ public class TextNode: NSObject, CALayerDelegate {
     var bulletPointFrame: TextFrame { isBig ? Self.bulletPointFrameBig : Self.bulletPointFrameSmall }
 
     func drawDisclosure(at point: NSPoint, in context: CGContext) {
-        // context.setFillColor(gray: 0.5, alpha: 0.5)
-        // context.fill(disclosureButtonFrame)
-        let symbol = open ? disclosureOpenFrame : disclosureClosedFrame
-        context.saveGState()
-        context.translateBy(x: point.x, y: point.y)
-        symbol.draw(context)
-        context.restoreGState()
-
+        let symbol = open ? "arrow_down" : "arrow_right"
+        drawImage(named: symbol, at: point, in: context)
     }
 
     func drawBulletPoint(at point: NSPoint, in context: CGContext) {
@@ -425,14 +419,21 @@ public class TextNode: NSObject, CALayerDelegate {
     }
 
     func drawImage(named: String, at point: NSPoint, in context: CGContext) {
+        guard var image = NSImage(named: named) else {
+            fatalError("Image with name: \(named) can't be found")
+        }
+
         let tintColor = NSColor(named: "EditorControlColor")!
-        var nsImage = NSImage(named: named)
-        let rect: CGRect = CGRect(x: point.x, y: point.y, width: nsImage!.size.width, height: nsImage!.size.height)
+        let rect = CGRect(x: point.x, y: point.y, width: 7, height: 7)
 
-        nsImage = nsImage!.fill(color: tintColor)
+        image = image.fill(color: tintColor)
 
-        NSGraphicsContext.current = NSGraphicsContext(cgContext: context, flipped: false)
-        nsImage!.draw(in: rect)
+        context.saveGState()
+        context.textMatrix = CGAffineTransform.identity
+        context.translateBy(x: 0, y: image.size.height)
+        context.scaleBy(x: 1.0, y: -1.0)
+        context.draw(image.cgImage, in: rect)
+        context.restoreGState()
     }
 
     func drawDebug(in context: CGContext) {
@@ -492,9 +493,9 @@ public class TextNode: NSObject, CALayerDelegate {
 
         let offset = NSPoint(x: 0, y: firstLineBaseline)
         if showDisclosureButton {
-            drawDisclosure(at: NSPoint(x: offset.x, y: offset.y), in: context)
+            drawDisclosure(at: NSPoint(x: offset.x, y: 4), in: context)
         } else {
-            drawBulletPoint(at: NSPoint(x: offset.x, y: 7), in: context)
+            drawBulletPoint(at: NSPoint(x: offset.x, y: 4), in: context)
         }
 
         context.textMatrix = CGAffineTransform.identity

@@ -86,7 +86,6 @@
 		960B823C2571BB83006ECE77 /* BeamElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 960B823B2571BB83006ECE77 /* BeamElement.swift */; };
 		9627FD4A2550203800926F0E /* Pods_Beam.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2BE96DC9A7278563E5878CCD /* Pods_Beam.framework */; };
 		9627FD4B2550203800926F0E /* Pods_Beam.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 2BE96DC9A7278563E5878CCD /* Pods_Beam.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		9631B00925541DCB007BF2DE /* SFSymbolsFallback.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9631B00625541DC1007BF2DE /* SFSymbolsFallback.ttf */; };
 		9631B00C25541DD0007BF2DE /* SelectionObserver.js in Resources */ = {isa = PBXBuildFile; fileRef = 9631B00425541DC0007BF2DE /* SelectionObserver.js */; };
 		9631B01025541E8D007BF2DE /* OverrideConsole.js in Resources */ = {isa = PBXBuildFile; fileRef = 9631B00F25541E8D007BF2DE /* OverrideConsole.js */; };
 		9631B01425541FB3007BF2DE /* Readability.js in Resources */ = {isa = PBXBuildFile; fileRef = 9631B01325541FB3007BF2DE /* Readability.js */; };
@@ -273,7 +272,6 @@
 		96062E72254C74F200AAB78D /* Chevrons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Chevrons.swift; sourceTree = "<group>"; };
 		960B823B2571BB83006ECE77 /* BeamElement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamElement.swift; sourceTree = "<group>"; };
 		9631B00425541DC0007BF2DE /* SelectionObserver.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = SelectionObserver.js; sourceTree = "<group>"; };
-		9631B00625541DC1007BF2DE /* SFSymbolsFallback.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = SFSymbolsFallback.ttf; sourceTree = "<group>"; };
 		9631B00F25541E8D007BF2DE /* OverrideConsole.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = OverrideConsole.js; sourceTree = "<group>"; };
 		9631B01325541FB3007BF2DE /* Readability.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = Readability.js; sourceTree = "<group>"; };
 		9631B01725541FF6007BF2DE /* JSSourceLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSSourceLoader.swift; sourceTree = "<group>"; };
@@ -668,14 +666,6 @@
 			path = Resources/js;
 			sourceTree = "<group>";
 		};
-		9631B00525541DC1007BF2DE /* fonts */ = {
-			isa = PBXGroup;
-			children = (
-				9631B00625541DC1007BF2DE /* SFSymbolsFallback.ttf */,
-			);
-			path = fonts;
-			sourceTree = "<group>";
-		};
 		9645488B252382AE0064D062 /* JS */ = {
 			isa = PBXGroup;
 			children = (
@@ -742,7 +732,6 @@
 				965A78382514F148009980D4 /* Beam.entitlements */,
 				965A782C2514F147009980D4 /* Beam.xcdatamodeld */,
 				96C9CBE225348F0900D70AA6 /* .swiftlint.yml */,
-				9631B00525541DC1007BF2DE /* fonts */,
 				9631B00325541DC0007BF2DE /* js */,
 				965A78312514F148009980D4 /* Preview Content */,
 			);
@@ -1011,7 +1000,6 @@
 				52A66A1F2535E8A500CE247C /* ScrollableTextView.xib in Resources */,
 				9631B01425541FB3007BF2DE /* Readability.js in Resources */,
 				9631B00C25541DD0007BF2DE /* SelectionObserver.js in Resources */,
-				9631B00925541DCB007BF2DE /* SFSymbolsFallback.ttf in Resources */,
 				9631B01025541E8D007BF2DE /* OverrideConsole.js in Resources */,
 				965A78302514F148009980D4 /* Assets.xcassets in Resources */,
 			);
