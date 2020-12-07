@@ -68,7 +68,10 @@ struct OmniBarSearchBox: View {
         VStack {
             ZStack {
                 RoundedRectangle(cornerRadius: _cornerRadius)
-                    .stroke(Color.accentColor.opacity(0.5), lineWidth: isEditing ? 3 : 0)
+                                .foregroundColor(Color("OmniboxBackgroundColor"))
+                                .frame(height: 28)
+                RoundedRectangle(cornerRadius: _cornerRadius)
+                    .stroke(Color.accentColor.opacity(0.5), lineWidth: isEditing ? 2.5 : 0)
                     .frame(height: 28)
 
                 HStack {
@@ -77,6 +80,8 @@ struct OmniBarSearchBox: View {
                         isEditing: $isEditing,
                         isFirstResponder: $state.focusOmniBox,
                         placeholder: "Search or create note... \(Note.countWithPredicate(CoreDataManager.shared.mainContext)) notes",
+                        textColor: NSColor(named: "OmniboxTextColor"),
+                        placeholderColor: NSColor(named: "OmniboxPlaceholderTextColor"),
                         selectedRanges: state.searchQuerySelection,
                         onTextChanged: { _ in
                             state.resetAutocompleteSelection()
@@ -118,9 +123,6 @@ struct OmniBarSearchBox: View {
                             NSApp.mainWindow?.makeFirstResponder(nil)
                         }
                 }
-                .padding([.top, .bottom], 7)
-                .background(Color("OmniboxBackgroundColor"))
-                .cornerRadius(_cornerRadius)
             }
         }
     }

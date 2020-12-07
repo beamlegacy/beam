@@ -16,6 +16,8 @@ struct BMTextField: NSViewRepresentable {
     @Binding var isFirstResponder: Bool
 
     var placeholder: String
+    var textColor: NSColor?
+    var placeholderColor: NSColor?
     var selectedRanges: [Range<Int>]?
 
     var onTextChanged: (String) -> Void = { _ in }
@@ -31,9 +33,17 @@ struct BMTextField: NSViewRepresentable {
         let textField = BMTextFieldView()
 
         textField.delegate = context.coordinator
-        textField.focusRingType = .none
         textField.textFieldViewDelegate = context.coordinator
-        textField.placeholderFontSize = 16
+        textField.focusRingType = .none
+        textField.fontSize = 16
+
+        if let textColor = textColor {
+            textField.textColor = textColor
+        }
+
+        if let placeholderColor = placeholderColor {
+            textField.placeholderColor = placeholderColor
+        }
 
         textField.onEditingChanged = { v in
             self.isEditing = v

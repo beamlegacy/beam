@@ -27,7 +27,7 @@ class BeamWindow: NSWindow {
     var data: BeamData
 
     private var trafficLights: [NSButton?]?
-    private var titlebarAccessoryViewHeight = Constants.runningOnBigSur ? 0 : 28
+    private var titlebarAccessoryViewHeight = 28
     private var trafficLightLeftMargin: CGFloat = 20
 
     // This is a hack to prevent a crash with swiftUI being dumb about the initialFirstResponder
