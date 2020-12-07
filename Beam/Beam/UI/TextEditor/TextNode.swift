@@ -410,24 +410,6 @@ public class TextNode: NSObject, CALayerDelegate {
         drawImage(named: "bullet", at: point, in: context)
     }
 
-    func drawImage(named: String, at point: NSPoint, in context: CGContext) {
-        guard var image = NSImage(named: named) else {
-            fatalError("Image with name: \(named) can't be found")
-        }
-
-        let tintColor = NSColor(named: "EditorControlColor")!
-        let rect = CGRect(x: point.x, y: point.y, width: 7, height: 7)
-
-        image = image.fill(color: tintColor)
-
-        context.saveGState()
-        context.textMatrix = CGAffineTransform.identity
-        context.translateBy(x: 0, y: image.size.height)
-        context.scaleBy(x: 1.0, y: -1.0)
-        context.draw(image.cgImage, in: rect)
-        context.restoreGState()
-    }
-
     func drawDebug(in context: CGContext) {
         if frameAnimation != nil {
             context.setFillColor(NSColor.blue.cgColor.copy(alpha: 0.2)!)
@@ -493,6 +475,24 @@ public class TextNode: NSObject, CALayerDelegate {
         context.translateBy(x: 0, y: firstLineBaseline)
 
         layout?.draw(context)
+        context.restoreGState()
+    }
+
+    func drawImage(named: String, at point: NSPoint, in context: CGContext) {
+        guard var image = NSImage(named: named) else {
+            fatalError("Image with name: \(named) can't be found")
+        }
+
+        let tintColor = NSColor(named: "EditorControlColor")!
+        let rect = CGRect(x: point.x, y: point.y, width: 7, height: 7)
+
+        image = image.fill(color: tintColor)
+
+        context.saveGState()
+        context.textMatrix = CGAffineTransform.identity
+        context.translateBy(x: 0, y: image.size.height)
+        context.scaleBy(x: 1.0, y: -1.0)
+        context.draw(image.cgImage, in: rect)
         context.restoreGState()
     }
 
