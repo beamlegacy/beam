@@ -333,6 +333,7 @@ public class TextNode: NSObject, CALayerDelegate {
         editor.removeNode(self)
         layer.removeFromSuperlayer()
     }
+
     func configureLayer() {
         let newActions = [
                 "onOrderIn": NSNull(),
@@ -387,7 +388,7 @@ public class TextNode: NSObject, CALayerDelegate {
         let symbol = string.attributed
         let attribs: [NSAttributedString.Key: Any] = [
             .font: symbolFont(size),
-            .foregroundColor: NSColor(named: "EditorControlColor")!
+            .foregroundColor: NSColor.red
         ]
         symbol.setAttributes(attribs, range: symbol.wholeRange)
         return Font.draw(string: symbol, atPosition: NSPoint(x: 2, y: -2), textWidth: 8)
@@ -409,8 +410,8 @@ public class TextNode: NSObject, CALayerDelegate {
     var bulletPointFrame: TextFrame { isBig ? Self.bulletPointFrameBig : Self.bulletPointFrameSmall }
 
     func drawDisclosure(at point: NSPoint, in context: CGContext) {
-//        context.setFillColor(gray: 0.5, alpha: 0.5)
-//        context.fill(disclosureButtonFrame)
+        // context.setFillColor(gray: 0.5, alpha: 0.5)
+        // context.fill(disclosureButtonFrame)
         let symbol = open ? disclosureOpenFrame : disclosureClosedFrame
         context.saveGState()
         context.translateBy(x: point.x, y: point.y)
@@ -420,10 +421,18 @@ public class TextNode: NSObject, CALayerDelegate {
     }
 
     func drawBulletPoint(at point: NSPoint, in context: CGContext) {
-        context.saveGState()
-        context.translateBy(x: point.x, y: point.y)
-        bulletPointFrame.draw(context)
-        context.restoreGState()
+        drawImage(named: "bullet", at: point, in: context)
+    }
+
+    func drawImage(named: String, at point: NSPoint, in context: CGContext) {
+        let tintColor = NSColor(named: "EditorControlColor")!
+        var nsImage = NSImage(named: named)
+        let rect: CGRect = CGRect(x: point.x, y: point.y, width: nsImage!.size.width, height: nsImage!.size.height)
+
+        nsImage = nsImage!.fill(color: tintColor)
+
+        NSGraphicsContext.current = NSGraphicsContext(cgContext: context, flipped: false)
+        nsImage!.draw(in: rect)
     }
 
     func drawDebug(in context: CGContext) {
@@ -475,7 +484,6 @@ public class TextNode: NSObject, CALayerDelegate {
                     let y = textFrame.height
                     let r = NSRect(x: 5, y: y + 3, width: 1, height: currentFrameInDocument.height - y - 6)
                     context.fill(r)
-
                 }
 
                 context.restoreGState()
@@ -486,7 +494,7 @@ public class TextNode: NSObject, CALayerDelegate {
         if showDisclosureButton {
             drawDisclosure(at: NSPoint(x: offset.x, y: offset.y), in: context)
         } else {
-            drawBulletPoint(at: NSPoint(x: offset.x, y: offset.y), in: context)
+            drawBulletPoint(at: NSPoint(x: offset.x, y: 7), in: context)
         }
 
         context.textMatrix = CGAffineTransform.identity

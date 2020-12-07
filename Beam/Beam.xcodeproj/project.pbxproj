@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		413F65352577830C003B3659 /* Configuration.plist in Resources */ = {isa = PBXBuildFile; fileRef = 413F65342577830C003B3659 /* Configuration.plist */; };
+		41C70B39257E906F0002AC34 /* NSImage+BM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41C70B38257E906F0002AC34 /* NSImage+BM.swift */; };
 		41DF78C02579A30400648ABF /* BMTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41DF78BF2579A30400648ABF /* BMTextField.swift */; };
 		41DF78C42579A31100648ABF /* BMTextFieldView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41DF78C32579A31100648ABF /* BMTextFieldView.swift */; };
 		41DF78CE257A695A00648ABF /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41DF78CD257A695A00648ABF /* Constants.swift */; };
@@ -195,6 +196,7 @@
 		23F7A69644D041FDF4D3466B /* Pods-Beam.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Beam.release.xcconfig"; path = "Target Support Files/Pods-Beam/Pods-Beam.release.xcconfig"; sourceTree = "<group>"; };
 		2BE96DC9A7278563E5878CCD /* Pods_Beam.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Beam.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		413F65342577830C003B3659 /* Configuration.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Configuration.plist; sourceTree = "<group>"; };
+		41C70B38257E906F0002AC34 /* NSImage+BM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSImage+BM.swift"; sourceTree = "<group>"; };
 		41DF78BF2579A30400648ABF /* BMTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BMTextField.swift; sourceTree = "<group>"; };
 		41DF78C32579A31100648ABF /* BMTextFieldView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BMTextFieldView.swift; sourceTree = "<group>"; };
 		41DF78CD257A695A00648ABF /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
@@ -442,6 +444,7 @@
 				5204E892255ED4AB00458211 /* Information.swift */,
 				5204E8F4255EDBF600458211 /* EventsTracker.swift */,
 				52375B75256D585A003180E1 /* OSLog.swift */,
+				41C70B38257E906F0002AC34 /* NSImage+BM.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -1183,6 +1186,7 @@
 				52326F8C252F1A8E00A40F1E /* NSManagedObject+initExtension.swift in Sources */,
 				52C6A23325644EB100350EBE /* AppDelegate+URL.swift in Sources */,
 				965B19712518F59D00BCF01C /* BrowserTab.swift in Sources */,
+				41C70B39257E906F0002AC34 /* NSImage+BM.swift in Sources */,
 				96C039922520C67C00A2EDC7 /* TextEdit.swift in Sources */,
 				52C6A22E25644E5B00350EBE /* AppDelegate+Note.swift in Sources */,
 				52C82C74253059BC006C188C /* NotesWindow.swift in Sources */,
