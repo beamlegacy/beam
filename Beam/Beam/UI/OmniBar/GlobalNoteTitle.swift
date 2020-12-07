@@ -21,13 +21,12 @@ struct GlobalNoteTitle: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: _cornerRadius)
-                .animation(.default)
                 .foregroundColor(Color("OmniboxBackgroundColor")
                                     .opacity(isHover ? 1 : 0)
                 ) .frame(height: 28)
 
             RoundedRectangle(cornerRadius: _cornerRadius)
-                .stroke(isEditing ? Color.accentColor.opacity(0.5) : Color.clear, lineWidth: 2.5)
+                .stroke(Color.accentColor.opacity(0.5), lineWidth: isEditing ? 2.5 : 0)
                 .animation(.default)
                 .frame(height: 28)
 
@@ -54,7 +53,9 @@ struct GlobalNoteTitle: View {
             title = note.title
         })
         .onHover { h in
-            isHover = h
+            withAnimation {
+               isHover = h
+            }
         }
         .frame(idealWidth: 600, maxWidth: .infinity, minHeight: 35, idealHeight: 35, maxHeight: 35, alignment: .leading)
     }

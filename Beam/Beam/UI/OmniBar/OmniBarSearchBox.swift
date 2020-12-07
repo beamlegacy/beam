@@ -72,9 +72,9 @@ struct OmniBarSearchBox: View {
                     .frame(height: 28)
 
                 RoundedRectangle(cornerRadius: _cornerRadius)
-                    .stroke(isEditing ? Color.accentColor.opacity(0.5) : Color.clear, lineWidth: 2.5)
+                    .stroke(Color.accentColor.opacity(0.5), lineWidth: isEditing ? 2.5 : 0)
                     .animation(.default)
-                    .frame(height: 28)
+                    .frame(maxWidth: .infinity, maxHeight: 28)
 
                 HStack {
                     BMTextField(

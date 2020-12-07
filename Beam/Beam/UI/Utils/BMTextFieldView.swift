@@ -15,11 +15,10 @@ class BMTextFieldView: NSTextField {
 
     weak var textFieldViewDelegate: BMTextFieldViewDelegate?
 
-    var onPerformKeyEquivalent: (NSEvent) -> Bool = { _ in return false }
-    var onEditingChanged: (Bool) -> Void = { _ in }
-    var textFont: NSFont?
     var placeholderText: String?
     var placeholderColor: NSColor = NSColor.lightGray
+    var onPerformKeyEquivalent: (NSEvent) -> Bool = { _ in return false }
+    var onEditingChanged: (Bool) -> Void = { _ in }
 
     var isEditing = false {
         didSet {
@@ -27,25 +26,30 @@ class BMTextFieldView: NSTextField {
         }
     }
 
-    override func draw(_ dirtyRect: NSRect) {
-        super.draw(dirtyRect)
-        self.setupTextFiedl()
+    public init() {
+        super.init(frame: NSRect())
+        setupTextField()
     }
 
-    internal func setupTextFiedl() {
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    override func draw(_ dirtyRect: NSRect) {
+        setupTextField()
+        super.draw(dirtyRect)
+    }
+
+    internal func setupTextField() {
         wantsLayer = true
         isBordered = false
         drawsBackground = false
-
-        if let font = textFont {
-            self.font = font
-        }
 
         guard let placeholder = placeholderText else { return }
 
         let attrs = [
             NSAttributedString.Key.foregroundColor: placeholderColor,
-            NSAttributedString.Key.font: NSFont.systemFont(ofSize: font?.pointSize ?? 14)
+            NSAttributedString.Key.font: NSFont.systemFont(ofSize: font?.pointSize ?? 13)
         ]
 
         let placeholderString = NSAttributedString(string: placeholder, attributes: attrs)

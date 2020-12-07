@@ -35,7 +35,6 @@ struct BMTextField: NSViewRepresentable {
         textField.delegate = context.coordinator
         textField.textFieldViewDelegate = context.coordinator
         textField.focusRingType = .none
-        textField.textFont = font
 
         if let textColor = textColor {
             textField.textColor = textColor
@@ -64,6 +63,7 @@ struct BMTextField: NSViewRepresentable {
     }
 
     func updateNSView(_ nsView: Self.NSViewType, context: Self.Context) {
+        nsView.font = font
         nsView.stringValue = text
         nsView.placeholderText = placeholder
 
