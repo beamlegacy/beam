@@ -17,7 +17,9 @@ struct IndexDocument: Codable {
     var title: String = ""
     var language: NLLanguage = .undetermined
     var length: Int = 0
-    var words = Set<String>()
+    var contentsWords = Set<String>()
+    var titleWords = Set<String>()
+    var tagsWords = Set<String>()
 }
 
 extension IndexDocument {
@@ -27,12 +29,13 @@ extension IndexDocument {
         self.title = title
         self.language = language ?? (NLLanguageRecognizer.dominantLanguage(for: contents) ?? .undetermined)
         length = contents.count
-        words = Set<String>(extractWords(from: contents))
+        contentsWords = extractWords(from: contents)
+        titleWords = extractWords(from: title)
     }
 
-    private func extractWords(from string: String) -> [String] {
+    private func extractWords(from string: String) -> Set<String> {
         // Store the tokenized substrings into an array.
-        var wordTokens = [String]()
+        var wordTokens = Set<String>()
 
         // Use Natural Language's NLTagger to tokenize the input by word.
         let tagger = NLTagger(tagSchemes: [.tokenType])
@@ -43,7 +46,7 @@ extension IndexDocument {
                              unit: .word,
                              scheme: .tokenType,
                              options: [.omitWhitespace]) { (_, range) -> Bool in
-            wordTokens.append(String(string[range]))
+            wordTokens.insert(String(string[range].lowercased()))
             return true
         }
 
@@ -52,29 +55,47 @@ extension IndexDocument {
 }
 
 class Index: Codable {
-    var words: [String: Set<UUID>] = [:]
+    struct WordScore: Codable {
+        var score = Float(1.0)
+    }
+    var words: [String: [UUID: WordScore]] = [:]
     var documents: [UUID: IndexDocument]
+
+    static let titleScore = Float(1.0)
+    static let contentsScore = Float(2.0)
 
     func append(document: IndexDocument) {
         remove(id: document.id)
         documents[document.id] = document
 
-        for word in document.words {
-            associate(id: document.id, withWord: word)
+        for word in document.contentsWords {
+            associate(id: document.id, withWord: word, score: WordScore(score: Self.contentsScore))
+        }
+
+        for word in document.titleWords {
+            associate(id: document.id, withWord: word, score: WordScore(score: Self.titleScore))
         }
     }
 
-    func associate(id: UUID, withWord word: String) {
+    func associate(id: UUID, withWord word: String, score: WordScore) {
         guard var ids = words[word] else {
-            words[word] = Set<UUID>([id])
+            words[word] = [id: score]
             return
         }
-        ids.insert(id)
+        if let oldScore = ids[id] {
+            // Add score up as this is a new instance of the word
+            ids[id] = WordScore(score: oldScore.score + score.score)
+        } else {
+            ids[id] = score
+        }
     }
 
     func remove(id: UUID) {
         guard let oldDoc = documents[id] else { return }
-        for word in oldDoc.words {
+        for word in oldDoc.contentsWords {
+            dissociate(id: id, fromWord: word)
+        }
+        for word in oldDoc.titleWords {
             dissociate(id: id, fromWord: word)
         }
         documents.removeValue(forKey: id)
@@ -84,6 +105,6 @@ class Index: Codable {
         guard var ids = words[word] else {
             return
         }
-        ids.remove(id)
+        ids.removeValue(forKey: id)
     }
 }
