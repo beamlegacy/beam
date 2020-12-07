@@ -17,8 +17,8 @@ class BMTextFieldView: NSTextField {
 
     var onPerformKeyEquivalent: (NSEvent) -> Bool = { _ in return false }
     var onEditingChanged: (Bool) -> Void = { _ in }
+    var textFont: NSFont?
     var placeholderText: String?
-    var fontSize: CGFloat = 14
     var placeholderColor: NSColor = NSColor.lightGray
 
     var isEditing = false {
@@ -36,13 +36,16 @@ class BMTextFieldView: NSTextField {
         wantsLayer = true
         isBordered = false
         drawsBackground = false
-        font = NSFont.systemFont(ofSize: fontSize)
+
+        if let font = textFont {
+            self.font = font
+        }
 
         guard let placeholder = placeholderText else { return }
 
         let attrs = [
             NSAttributedString.Key.foregroundColor: placeholderColor,
-            NSAttributedString.Key.font: NSFont.systemFont(ofSize: fontSize)
+            NSAttributedString.Key.font: NSFont.systemFont(ofSize: font?.pointSize ?? 14)
         ]
 
         let placeholderString = NSAttributedString(string: placeholder, attributes: attrs)

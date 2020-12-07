@@ -12,10 +12,10 @@ struct BMTextField: NSViewRepresentable {
 
     @Binding var text: String
     @Binding var isEditing: Bool
-
     @Binding var isFirstResponder: Bool
 
     var placeholder: String
+    var font: NSFont?
     var textColor: NSColor?
     var placeholderColor: NSColor?
     var selectedRanges: [Range<Int>]?
@@ -35,7 +35,7 @@ struct BMTextField: NSViewRepresentable {
         textField.delegate = context.coordinator
         textField.textFieldViewDelegate = context.coordinator
         textField.focusRingType = .none
-        textField.fontSize = 16
+        textField.textFont = font
 
         if let textColor = textColor {
             textField.textColor = textColor
