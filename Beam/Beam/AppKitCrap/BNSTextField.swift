@@ -143,6 +143,6 @@ class BNSTextField: NSTextView, ObservableObject, NSTextViewDelegate {
 extension NSRect {
     func insetBy(_ insets: NSEdgeInsets) -> NSRect {
         return insetBy(dx: insets.left + insets.right, dy: insets.top + insets.bottom)
-            .applying(CGAffineTransform(translationX: insets.left - insets.right, y: insets.top - insets.bottom))
+            .offsetBy(dx: insets.left - insets.right, dy: insets.top - insets.bottom)
     }
 }

@@ -71,7 +71,8 @@ struct OmniBarSearchBox: View {
                                 .foregroundColor(Color("OmniboxBackgroundColor"))
                                 .frame(height: 28)
                 RoundedRectangle(cornerRadius: _cornerRadius)
-                    .stroke(Color.accentColor.opacity(0.5), lineWidth: isEditing ? 2.5 : 0)
+                    .stroke(isEditing ? Color.accentColor.opacity(0.5) : Color.clear, lineWidth: 2.5)
+                    .animation(.easeIn(duration: 0.25))
                     .frame(height: 28)
 
                 HStack {
