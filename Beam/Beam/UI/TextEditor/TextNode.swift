@@ -164,6 +164,7 @@ public class TextNode: NSObject, CALayerDelegate {
 
     func delete() {
         parent?.removeChild(self)
+        editor.removeNode(self)
     }
 
     func insert(node: TextNode, after existingNode: TextNode) -> Bool {
