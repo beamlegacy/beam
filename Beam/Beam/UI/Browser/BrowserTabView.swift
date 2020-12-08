@@ -19,13 +19,16 @@ struct BrowserTabView: View {
     var body: some View {
         ZStack {
             HStack(alignment: .center, spacing: 5) {
-                Button("􀆄") {
-                    closeTab(id: tab.id)
-                }
+                Image("browser-tab-close")
+                .resizable()
+                .frame(width: 12, height: 12, alignment: .leading)
                 .opacity(showButton ? 1 : 0)
                 .foregroundColor(Color("ToolbarButtonIconColor"))
                 .buttonStyle(BorderlessButtonStyle())
                 .padding(.leading, 8)
+                .onTapGesture(count: 1) {
+                    closeTab(id: tab.id)
+                }
 
                 // fav icon:
                 HStack(spacing: 8) {
