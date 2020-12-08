@@ -64,6 +64,6 @@ struct GlobalTabTitle: View {
                 state.searchQuerySelection = [state.searchQuery.wholeRange]
             }
         }
-        .padding(.top, runningOnBigSur ? 0 : 4)
+        .padding(.top, Constants.runningOnBigSur ? 0 : 4)
     }
 }

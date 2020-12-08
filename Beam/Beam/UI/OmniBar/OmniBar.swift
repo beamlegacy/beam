@@ -21,7 +21,7 @@ struct OmniBar: View {
 
             if state.mode == .note {
                 HStack {
-                    GlobalNoteTitle(note: state.currentNote!)
+                    GlobalNoteTitle(title: state.currentNote?.title ?? "", note: state.currentNote!)
 
                     Button(action: startNewSearch) {
                         Symbol(name: "plus")

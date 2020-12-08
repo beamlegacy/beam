@@ -59,9 +59,10 @@ struct BeamSearchBox: View {
 }
 
 struct OmniBarSearchBox: View {
-    var _cornerRadius = CGFloat(7)
     @EnvironmentObject var state: BeamState
     @Binding var isEditing: Bool
+
+    var _cornerRadius = CGFloat(7)
 
     var body: some View {
         VStack {
@@ -69,18 +70,24 @@ struct OmniBarSearchBox: View {
                 RoundedRectangle(cornerRadius: _cornerRadius)
                     .foregroundColor(Color("OmniboxBackgroundColor"))
                     .frame(height: 28)
+
                 RoundedRectangle(cornerRadius: _cornerRadius)
                     .stroke(Color.accentColor.opacity(0.5), lineWidth: isEditing ? 2.5 : 0)
-                    .frame(height: 28)
+                    .animation(.default)
+                    .frame(maxWidth: .infinity, maxHeight: 28)
 
                 HStack {
-                    BTextField(
+                    BMTextField(
                         text: $state.searchQuery,
                         isEditing: $isEditing,
-                        placeholderText: "Search or create note... \(state.data.noteCount) notes",
+                        isFirstResponder: $state.focusOmniBox,
+                        placeholder: "Search or create note... \(Note.countWithPredicate(CoreDataManager.shared.mainContext)) notes",
+                        font: .systemFont(ofSize: 16),
+                        textColor: NSColor(named: "OmniboxTextColor"),
+                        placeholderColor: NSColor(named: "OmniboxPlaceholderTextColor"),
                         selectedRanges: state.searchQuerySelection,
                         onTextChanged: { _ in
-                        state.resetAutocompleteSelection()
+                            state.resetAutocompleteSelection()
                         },
                         onCommit: {
                             startQuery()
@@ -101,33 +108,26 @@ struct OmniBarSearchBox: View {
                                 state.selectNextAutoComplete()
                                 return true
                             default:
-                                break
+                                return false
                             }
-                            return false
-                        },
-                        focusOnCreation: true,
-                        textColor: NSColor(named: "OmniboxTextColor"),
-                        placeholderTextColor: NSColor(named: "OmniboxPlaceholderTextColor"),
-                        name: "OmniBarSearchBox"
+                        }
                     )
-                    .padding(.top, 8)
-                    .padding([.leading, .trailing], 9)
-                    .frame(idealWidth: 600, maxWidth: .infinity)
+                    .padding(.leading, 10)
+                    .padding(.trailing, 5)
 
-                    if isEditing, !state.searchQuery.isEmpty {
-                        Image("xmark.circle.fill")
-                            .resizable()
-                            .frame(width: 12, height: 12)
-                            .offset(x: -7)
-                            .onTapGesture {
-                              resetSearchQuery()
-                              NSApp.mainWindow?.makeFirstResponder(nil)
-                            }
-                    }
+                    Image("xmark.circle.fill")
+                        .resizable()
+                        .frame(width: 12, height: 12)
+                        .offset(x: -7)
+                        .animation(.default)
+                        .opacity(isEditing && !state.searchQuery.isEmpty ? 1 : 0)
+                        .onTapGesture(count: 1) {
+                            resetSearchQuery()
+                            NSApp.mainWindow?.makeFirstResponder(nil)
+                        }
                 }
             }
         }
-        .frame(height: 37)
     }
 
     func resetSearchQuery() {
@@ -140,6 +140,7 @@ struct OmniBarSearchBox: View {
         if state.searchQuery.isEmpty {
             return
         }
+
         withAnimation {
             //print("searchText activated: \(searchText)")
             state.startQuery()

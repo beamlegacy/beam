@@ -17,12 +17,11 @@ public class TextNode: NSObject, CALayerDelegate {
         return lhs === rhs
     }
 
-    var text: String = "" {
-        didSet {
-            guard oldValue != text else { return }
-//            bullet?.content = text
-//            try? CoreDataManager.shared.save()
-            element.text = text
+    var text: String {
+        get { element.text }
+        set {
+            guard element.text != newValue else { return }
+            element.text = newValue
             invalidateText()
         }
     }
@@ -57,10 +56,6 @@ public class TextNode: NSObject, CALayerDelegate {
     }
 
     var element: BeamElement
-    var isReference = false
-    var isReferenceBranch: Bool {
-        return isReference ? true : (parent?.isReferenceBranch ?? false)
-    }
     var open = true {
         didSet {
             invalidateLayout()
@@ -319,9 +314,6 @@ public class TextNode: NSObject, CALayerDelegate {
 
     init(editor: BeamTextEdit, element: BeamElement) {
         self.element = element
-        text = element.text.filter({ (char) -> Bool in
-            !char.isNewline
-        })
 
         self.editor = editor
         layer = CALayer()
@@ -475,9 +467,7 @@ public class TextNode: NSObject, CALayerDelegate {
                     let y = textFrame.height
                     let r = NSRect(x: 5, y: y + 3, width: 1, height: currentFrameInDocument.height - y - 6)
                     context.fill(r)
-
                 }
-
                 context.restoreGState()
             }
         }

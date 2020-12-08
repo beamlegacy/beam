@@ -16,10 +16,11 @@ enum Mode {
     case web
 }
 
-var runningOnBigSur: Bool = {
-    let version = ProcessInfo.processInfo.operatingSystemVersion
-    return version.majorVersion >= 11 || (version.majorVersion == 10 && version.minorVersion >= 16)
-}()
+enum KeyCode: UInt16 {
+    case up = 126
+    case down = 125
+    case escap = 25
+}
 
 @objc class BeamState: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var data: BeamData
@@ -34,6 +35,7 @@ var runningOnBigSur: Bool = {
     @Published var canGoBack: Bool = false
     @Published var canGoForward: Bool = false
     @Published var isFullScreen: Bool = false
+    @Published var focusOmniBox: Bool = true
 
     @Published var mode: Mode = .today {
         didSet {
@@ -73,17 +75,17 @@ var runningOnBigSur: Bool = {
                 tab.onNewTabCreated = { [weak self] newTab in
                     guard let self = self else { return }
                     self.tabs.append(newTab)
-
-//                    if var note = self.currentNote {
-                        // TODO bind visited sites with note contents:
-//                        if note.searchQueries.contains(newTab.originalQuery) {
-//                            if let url = newTab.url {
-//                                note.visitedSearchResults.append(VisitedPage(originalSearchQuery: newTab.originalQuery, url: url, date: Date(), duration: 0))
-//                                self.currentNote = note
-//                            }
-//                        }
-//                    }
+                    // if var note = self.currentNote {
+                    // TODO bind visited sites with note contents:
+                    //                        if note.searchQueries.contains(newTab.originalQuery) {
+                    //                            if let url = newTab.url {
+                    //                                note.visitedSearchResults.append(VisitedPage(originalSearchQuery: newTab.originalQuery, url: url, date: Date(), duration: 0))
+                    //                                self.currentNote = note
+                    //                            }
+                    //                        }
+                    //                    }
                 }
+
                 tab.appendToIndexer = { [weak self] url, read in
                     guard let self = self else { return }
                     self.data.searchKit.append(url: url, contents: read.title + "\n" + read.siteName + "\n" + read.textContent)
@@ -142,6 +144,7 @@ var runningOnBigSur: Bool = {
         case .web:
             currentTab?.webView.goBack()
         }
+
         updateCanGoBackForward()
     }
 
@@ -164,6 +167,7 @@ var runningOnBigSur: Bool = {
         case .web:
             currentTab?.webView.goForward()
         }
+
         updateCanGoBackForward()
     }
 
@@ -207,7 +211,7 @@ var runningOnBigSur: Bool = {
     }
 
     @discardableResult func navigateToNote(named: String) -> Bool {
-//        print("load note named \(named)")
+        //print("load note named \(named)")
         let note = BeamNote.fetchOrCreate(data.documentManager, title: named)
         return navigateToNote(note)
     }
@@ -283,6 +287,7 @@ var runningOnBigSur: Bool = {
             }
             return u
         }
+
         searchEngine.query = query
         return URL(string: searchEngine.searchUrl)!
     }
@@ -301,7 +306,7 @@ var runningOnBigSur: Bool = {
             switch query.source {
             case .autoComplete:
                 searchEngine.query = query.string
-//                print("Start search query: \(searchEngine.searchUrl)")
+                // print("Start search query: \(searchEngine.searchUrl)")
                 createTab(withURL: URL(string: searchEngine.searchUrl)!, originalQuery: query.string)
                 mode = .web
 
@@ -318,6 +323,7 @@ var runningOnBigSur: Bool = {
         }
 
         var createNote = true
+
         //TODO make a better url detector and rewritter to transform xxx.com in https://xxx.com with less corner cases and clearer code path:
         let url: URL = {
             if searchQuery.maybeURL {
@@ -332,10 +338,13 @@ var runningOnBigSur: Bool = {
                 }
                 return u
             }
+
             searchEngine.query = searchQuery
+
             return URL(string: searchEngine.searchUrl)!
         }()
-//        print("Start query: \(url)")
+
+        // print("Start query: \(url)")
 
         createTab(withURL: url, originalQuery: searchQuery, createNote: createNote)
         cancelAutocomplete()
@@ -344,14 +353,14 @@ var runningOnBigSur: Bool = {
 
     public init(data: BeamData) {
         self.data = data
-//        self.currentNote = data.todaysNote
+        // self.currentNote = data.todaysNote
         backForwardList = NoteBackForwardList()
         super.init()
         $searchQuery.sink { [weak self] query in
             guard let self = self else { return }
             guard self.searchQuerySelection == nil else { return }
             guard self.selectionIndex == nil else { return }
-//            print("received auto complete query: \(query)")
+            // print("received auto complete query: \(query)")
 
             self.completedQueries = []
 
@@ -360,7 +369,7 @@ var runningOnBigSur: Bool = {
                 notes.forEach {
                     let autocompleteResult = AutoCompleteResult(id: $0.id, string: $0.title, source: .note)
                     self.completedQueries.append(autocompleteResult)
-//                    print("Found note \($0)")
+                    // print("Found note \($0)")
                 }
 
                 self.completer.complete(query: query)
@@ -379,7 +388,6 @@ var runningOnBigSur: Bool = {
         }.store(in: &scope)
 
         backForwardList.push(.journal)
-
     }
 
     func resetQuery() {
@@ -390,6 +398,7 @@ var runningOnBigSur: Bool = {
     func cookiesDidChange(in cookieStore: WKHTTPCookieStore) {
         cookieStore.getAllCookies({ [weak self] cookies in
             guard let self = self else { return }
+
             for cookie in cookies {
                 self.data.cookies.setCookie(cookie)
             }
@@ -398,8 +407,9 @@ var runningOnBigSur: Bool = {
 
     func setup(webView: WKWebView) {
         for cookie in self.data.cookies.cookies ?? [] {
-           webView.configuration.websiteDataStore.httpCookieStore.setCookie(cookie)
+            webView.configuration.websiteDataStore.httpCookieStore.setCookie(cookie)
         }
+
         webView.configuration.websiteDataStore.httpCookieStore.add(self)
     }
 
@@ -408,7 +418,7 @@ var runningOnBigSur: Bool = {
         currentNote = nil
         resetQuery()
         navigateToJournal()
-        BNSTextField.focusField(named: "OmniBarSearchBox")
+        focusOmniBox = true
     }
 
     func showNextTab() {
@@ -461,7 +471,6 @@ var runningOnBigSur: Bool = {
     func resetAutocompleteSelection() {
         searchQuerySelection = nil
         selectionIndex = nil
-        BNSTextField.focusField(named: "OmniBarSearchBox")
     }
 
     func cancelAutocomplete() {

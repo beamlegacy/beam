@@ -35,9 +35,7 @@ class BeamWindow: NSWindow {
         get {
             nil
         }
-
-        set {
-        }
+        set { }
     }
 
     init(contentRect: NSRect, data: BeamData) {
@@ -55,15 +53,15 @@ class BeamWindow: NSWindow {
         self.tabbingMode = .disallowed
         setFrameAutosaveName("BeamWindow")
 
+        self.setupUI()
+        self.setTitleBarAccessoryView()
+
         // Create the SwiftUI view and set the context as the value for the managedObjectContext environment keyPath.
         // Add `@Environment(\.managedObjectContext)` in the views that will need the context.
         let contentView = ContentView().environmentObject(state).environmentObject(data)
             .frame(minWidth: contentRect.width, maxWidth: .infinity, minHeight: contentRect.height, maxHeight: .infinity)
         self.contentView = BeamHostingView(rootView: contentView)
         self.isMovableByWindowBackground = false
-
-        self.setupUI()
-        self.setTitleBarAccessoryView()
     }
 
     deinit {
@@ -79,18 +77,18 @@ class BeamWindow: NSWindow {
     }
 
     override func setFrame(_ frameRect: NSRect, display flag: Bool) {
-      super.setFrame(frameRect, display: flag)
-      self.setTrafficLightsLayout()
+        super.setFrame(frameRect, display: flag)
+        self.setTrafficLightsLayout()
     }
 
     override func restoreState(with coder: NSCoder) {
-      super.restoreState(with: coder)
-      self.setTrafficLightsLayout()
+        super.restoreState(with: coder)
+        self.setTrafficLightsLayout()
     }
 
     override func orderFront(_ sender: Any?) {
-      super.orderFront(sender)
-      self.setTrafficLightsLayout()
+        super.orderFront(sender)
+        self.setTrafficLightsLayout()
     }
 
     // MARK: - Setup UI
@@ -104,21 +102,22 @@ class BeamWindow: NSWindow {
     }
 
     private func setTitleBarAccessoryView() {
-      let view = NSView(frame: NSRect(x: 0, y: 0, width: 10, height: titlebarAccessoryViewHeight))
-      let dummyAccessoryViewController = NSTitlebarAccessoryViewController()
+        let view = NSView(frame: NSRect(x: 0, y: 0, width: 10, height: titlebarAccessoryViewHeight))
+        let dummyAccessoryViewController = NSTitlebarAccessoryViewController()
 
-      dummyAccessoryViewController.view = view
-      addTitlebarAccessoryViewController(dummyAccessoryViewController)
-
-      self.setTrafficLightsLayout()
+        dummyAccessoryViewController.view = view
+        addTitlebarAccessoryViewController(dummyAccessoryViewController)
+        self.setTrafficLightsLayout()
     }
 
     private func setTrafficLightsLayout() {
         guard let trafficLights = trafficLights else { return }
 
         for (index, trafficLight) in trafficLights.enumerated() {
+            let originY = trafficLight!.superview!.frame.height / 2 - trafficLight!.frame.height / 2
             var frame = trafficLight!.frame
-            frame.origin.y = trafficLight!.superview!.frame.height / 2 - trafficLight!.frame.height / 2
+
+            frame.origin.y = Constants.runningOnBigSur ? originY + 2 : originY
             frame.origin.x = trafficLightLeftMargin + CGFloat(index) * (frame.width + 6)
 
             trafficLight?.frame = frame
@@ -165,11 +164,11 @@ extension BeamWindow: NSWindowDelegate {
         self.setTrafficLightsLayout()
     }
 
-    func windowWillExitFullScreen(_ notification: Notification) {
+    func windowWillEnterFullScreen(_ notification: Notification) {
         self.toggleTitleBarAccessoryView()
     }
 
-    func windowWillEnterFullScreen(_ notification: Notification) {
+    func windowWillExitFullScreen(_ notification: Notification) {
         self.toggleTitleBarAccessoryView()
     }
 

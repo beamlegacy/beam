@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		413F65352577830C003B3659 /* Configuration.plist in Resources */ = {isa = PBXBuildFile; fileRef = 413F65342577830C003B3659 /* Configuration.plist */; };
+		41DF78C02579A30400648ABF /* BMTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41DF78BF2579A30400648ABF /* BMTextField.swift */; };
+		41DF78C42579A31100648ABF /* BMTextFieldView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41DF78C32579A31100648ABF /* BMTextFieldView.swift */; };
+		41DF78CE257A695A00648ABF /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41DF78CD257A695A00648ABF /* Constants.swift */; };
 		520081942552C93600A6CAC6 /* CoreDataManager+backupExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 520081932552C93600A6CAC6 /* CoreDataManager+backupExtension.swift */; };
 		520081992552C97C00A6CAC6 /* TemporaryFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 520081982552C97C00A6CAC6 /* TemporaryFile.swift */; };
 		5204E865255ED13500458211 /* AccountManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5204E864255ED13500458211 /* AccountManager.swift */; };
@@ -194,6 +197,9 @@
 		23F7A69644D041FDF4D3466B /* Pods-Beam.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Beam.release.xcconfig"; path = "Target Support Files/Pods-Beam/Pods-Beam.release.xcconfig"; sourceTree = "<group>"; };
 		2BE96DC9A7278563E5878CCD /* Pods_Beam.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Beam.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		413F65342577830C003B3659 /* Configuration.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Configuration.plist; sourceTree = "<group>"; };
+		41DF78BF2579A30400648ABF /* BMTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BMTextField.swift; sourceTree = "<group>"; };
+		41DF78C32579A31100648ABF /* BMTextFieldView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BMTextFieldView.swift; sourceTree = "<group>"; };
+		41DF78CD257A695A00648ABF /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		520081932552C93600A6CAC6 /* CoreDataManager+backupExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CoreDataManager+backupExtension.swift"; sourceTree = "<group>"; };
 		520081982552C97C00A6CAC6 /* TemporaryFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemporaryFile.swift; sourceTree = "<group>"; };
 		5204E864255ED13500458211 /* AccountManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountManager.swift; sourceTree = "<group>"; };
@@ -423,6 +429,7 @@
 			isa = PBXGroup;
 			children = (
 				5204E88C255ED33200458211 /* Configuration.swift */,
+				41DF78CD257A695A00648ABF /* Constants.swift */,
 				413F65342577830C003B3659 /* Configuration.plist */,
 				52CE694F2562F6F400453429 /* Debug.xcconfig */,
 				52375B61256D2463003180E1 /* Release.xcconfig */,
@@ -635,6 +642,8 @@
 				96354BD12543136000E40788 /* Symbol.swift */,
 				96062E45254C67C100AAB78D /* RoundRectButtonStyle.swift */,
 				96062E6D254C6D4C00AAB78D /* Frame.swift */,
+				41DF78BF2579A30400648ABF /* BMTextField.swift */,
+				41DF78C32579A31100648ABF /* BMTextFieldView.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -1152,6 +1161,7 @@
 				96062E5E254C692B00AAB78D /* OmniBarSearchBox.swift in Sources */,
 				96062E6E254C6D4C00AAB78D /* Frame.swift in Sources */,
 				527E60082570FBB20000DE93 /* DocumentManager.swift in Sources */,
+				41DF78C02579A30400648ABF /* BMTextField.swift in Sources */,
 				96F5DB2B251811060080E3EE /* AutoCompleteList.swift in Sources */,
 				527E60102570FCCF0000DE93 /* Document+CoreDataProperties.swift in Sources */,
 				52C6A1DC2563FE2F00350EBE /* AccountWindow.swift in Sources */,
@@ -1191,6 +1201,7 @@
 				96A49B6F2533ABC9003B4767 /* NSMutableAttributedString+Ranges.swift in Sources */,
 				5204E8F5255EDBF600458211 /* EventsTracker.swift in Sources */,
 				9601BA75254236730003BCFE /* JournalView.swift in Sources */,
+				41DF78CE257A695A00648ABF /* Constants.swift in Sources */,
 				96FA3F5E256C24660070C91E /* Score.swift in Sources */,
 				96FA3F66256D473B0070C91E /* PageRank.swift in Sources */,
 				96F5DB162517A0F10080E3EE /* NSContainerView.swift in Sources */,
@@ -1242,6 +1253,7 @@
 				521812B62524C354007E4B47 /* Note.swift in Sources */,
 				5204E8E3255EDACE00458211 /* LibrairiesManager.swift in Sources */,
 				5204E865255ED13500458211 /* AccountManager.swift in Sources */,
+				41DF78C42579A31100648ABF /* BMTextFieldView.swift in Sources */,
 				9645488D252382DB0064D062 /* Readability.swift in Sources */,
 				52C82C8825306637006C188C /* NoteDetail.swift in Sources */,
 				520081942552C93600A6CAC6 /* CoreDataManager+backupExtension.swift in Sources */,
