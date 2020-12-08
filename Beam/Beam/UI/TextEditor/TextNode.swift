@@ -459,18 +459,11 @@ public class TextNode: NSObject, CALayerDelegate {
             fatalError("Image with name: \(named) can't be found")
         }
 
-        var width = image.size.width
-        var height = image.size.height
-
-        if let size = size {
-            width = size.width
-            height = size.height
-        }
-
-        let tintColor = NSColor(named: "EditorControlColor")!
+        let width = size?.width ?? image.size.width
+        let height = size?.height ?? image.size.height
         let rect = CGRect(x: point.x, y: point.y, width: width / layer.contentsScale, height: height / layer.contentsScale)
 
-        image = image.fill(color: tintColor)
+        image = image.fill(color: NSColor(named: "EditorControlColor") ?? NSColor.black)
 
         context.saveGState()
         context.translateBy(x: 0, y: image.size.height)
