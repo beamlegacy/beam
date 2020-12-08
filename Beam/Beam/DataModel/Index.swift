@@ -58,8 +58,17 @@ class Index: Codable {
     struct WordScore: Codable {
         var score = Float(1.0)
     }
-    var words: [String: [UUID: WordScore]] = [:]
-    var documents: [UUID: IndexDocument]
+
+    struct Word: Codable {
+        var instances = [UUID: WordScore]()
+        var count: UInt = 0
+    }
+
+    var words: [String: Word] = [:]
+    var documents: [UUID: IndexDocument] = [:]
+
+    init() {
+    }
 
     static let titleScore = Float(1.0)
     static let contentsScore = Float(2.0)
@@ -79,14 +88,16 @@ class Index: Codable {
 
     func associate(id: UUID, withWord word: String, score: WordScore) {
         guard var ids = words[word] else {
-            words[word] = [id: score]
+            words[word] = Word(instances: [id: score], count: 1)
             return
         }
-        if let oldScore = ids[id] {
+        if let oldScore = ids.instances[id] {
             // Add score up as this is a new instance of the word
-            ids[id] = WordScore(score: oldScore.score + score.score)
+            ids.instances[id] = WordScore(score: oldScore.score + score.score)
+            ids.count += 1
         } else {
-            ids[id] = score
+            ids.instances[id] = score
+            ids.count += 1
         }
     }
 
@@ -105,6 +116,10 @@ class Index: Codable {
         guard var ids = words[word] else {
             return
         }
-        ids.removeValue(forKey: id)
+        ids.instances.removeValue(forKey: id)
+    }
+
+    func dump() {
+        print("Index contains \(words.count) words from \(documents.count) documents")
     }
 }

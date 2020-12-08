@@ -10,6 +10,7 @@ import XCTest
 @testable import Beam
 import NaturalLanguage
 import Accelerate
+import SwiftSoup
 
 class PageRangeTests: CoreDataTests {
 
@@ -68,5 +69,78 @@ class PageRangeTests: CoreDataTests {
         let result = vDSP.distanceSquared(frenchVector, englishVector)
 
         Logger.shared.logInfo(" -> distance '\(result)", category: .general)
+    }
+
+    var index = Index()
+
+    func append(_ url: URL, contents: String) {
+        print("Index url \(url)")
+        do {
+            //print("html -> \(html)")
+            print("Index \(url)")
+            let doc = try SwiftSoup.parse(contents, url.absoluteString)
+            try index.append(document: IndexDocument(id: UUID(), source: url.absoluteString, title: doc.title(), contents: doc.text()))
+        } catch Exception.Error(let type, let message) {
+            print("Test (SwiftSoup parser) \(type): \(message)")
+        } catch {
+            print("Test: (SwiftSoup parser) unkonwn error")
+        }
+
+    }
+
+    func testIndex() {
+        let urls = [
+            "https://en.wikipedia.org/wiki/Saeid_Taghizadeh",
+            "https://en.wikipedia.org/wiki/Sarcohyla_cembra",
+            "https://en.wikipedia.org/wiki/Induction-induction",
+            "https://en.wikipedia.org/wiki/Robert_Logan_Jack",
+            "https://en.wikipedia.org/wiki/Bulbophyllum_calceolus",
+            "https://en.wikipedia.org/wiki/Steven_Welsh",
+            "https://en.wikipedia.org/wiki/1948_Holy_Cross_Crusaders_football_team",
+            "https://en.wikipedia.org/wiki/1958_ACC_Men%27s_Basketball_Tournament",
+            "https://en.wikipedia.org/wiki/Festo_Corp._v._Shoketsu_Kinzoku_Kogyo_Kabushiki_Co.",
+            "https://en.wikipedia.org/wiki/Lost_Lake_Woods,_Michigan",
+            "https://en.wikipedia.org/wiki/Sport",
+            "https://en.wikipedia.org/wiki/Competition",
+            "https://en.wikipedia.org/wiki/Physical_activity",
+            "https://en.wikipedia.org/wiki/Game",
+            // "https://en.wikipedia.org/wiki/Entertainment"
+        ]
+        for url in urls {
+            if let url = URL(string: url) {
+                let expect = expectation(description: "load url \(url)")
+                let task = URLSession.shared.dataTask(with: url) { data, response, error in
+                    if let error = error {
+                        //self.handleClientError(error)
+                        Logger.shared.logError("Client error \(error)", category: .web)
+                        expect.fulfill()
+                        return
+                    }
+                    guard let httpResponse = response as? HTTPURLResponse,
+                        (200...299).contains(httpResponse.statusCode) else {
+                        //self.handleServerError(response)
+                        Logger.shared.logError("Server error \(response)", category: .web)
+                        expect.fulfill()
+                        return
+                    }
+                    if let mimeType = httpResponse.mimeType, mimeType == "text/html",
+                        let data = data,
+                        let string = String(data: data, encoding: .utf8) {
+//                        DispatchQueue.main.async {
+                            self.append(url, contents: string)
+                            expect.fulfill()
+//                        }
+                    }
+                }
+                task.resume()
+
+                waitForExpectations(timeout: 10) { error in
+                    Logger.shared.logError("Load error \(error) \(url)", category: .web)
+                }
+            } else {
+                Logger.shared.logError("unable to make \(url) into an URL object", category: .general)
+            }
+        }
+        index.dump()
     }
 }
