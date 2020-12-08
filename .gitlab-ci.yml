@@ -17,6 +17,7 @@ before_script:
   - unset cd
   - direnv allow
   - eval "$(direnv export bash)"
+  - eval "$(rbenv init -)"
   - cd "Beam"
   - gem install fastlane -N
   - bundle install
@@ -30,7 +31,7 @@ lint:
   only:
     - merge_requests
   script:
-    - fastlane lint
+    - bundle exec fastlane lint
   tags:
     - macos
   interruptible: true
@@ -43,7 +44,7 @@ xctests:
     - merge_requests
     - master
   script:
-    - fastlane tests
+    - bundle exec fastlane tests
   tags:
     - macos
   interruptible: true
