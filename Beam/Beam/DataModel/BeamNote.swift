@@ -79,26 +79,30 @@ class BeamNote: BeamElement {
         try super.encode(to: encoder)
     }
 
-    func save(documentManager: DocumentManager, completion: ((Result<Bool, Error>) -> Void)? = nil) {
+    var documentStruct: DocumentStruct? {
         do {
             let encoder = JSONEncoder()
             #if DEBUG
             encoder.outputFormatting = .prettyPrinted
             #endif
             let data = try encoder.encode(self)
-//            let str = String(data: data, encoding: .utf8)
-//            print(str!)
 
-            guard let documentStruct = DocumentStruct(id: id, title: title, data: data, documentType: type == .journal ? .journal : .note) else {
-                completion?(.success(false))
-                return
-            }
-
-            documentManager.saveDocument(documentStruct) { result in
-                completion?(result)
-            }
+            return DocumentStruct(id: id, title: title, createdAt: creationDate, updatedAt: updateDate, data: data, documentType: type == .journal ? .journal : .note)
         } catch {
-            completion?(.failure(error))
+            Logger.shared.logError("Unable to encode BeamNote into DocumentStruct [\(title) {\(id)}]", category: .document)
+            return nil
+        }
+    }
+
+    func save(documentManager: DocumentManager, completion: ((Result<Bool, Error>) -> Void)? = nil) {
+        guard let documentStruct = documentStruct else {
+            Logger.shared.logError("Unable to encode BeamNote into DocumentStruct [\(title) {\(id)}]", category: .document)
+            completion?(.success(false))
+            return
+        }
+
+        documentManager.saveDocument(documentStruct) { result in
+            completion?(result)
         }
     }
 

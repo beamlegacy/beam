@@ -1,0 +1,285 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
+
+default_platform(:mac)
+
+platform :mac do
+  desc "Run linting"
+  lane :lint do
+    clear_derived_data
+    cocoapods
+    swiftlint(
+      executable: './Pods/SwiftLint/swiftlint',
+      mode: :lint,
+      strict: true,
+      config_file: '.swiftlint.yml',
+    )
+  end
+
+  desc "Run tests"
+  lane :tests do
+    clear_derived_data
+    cocoapods
+    run_tests(
+      scheme: "Beam"
+    )
+    slather(
+      workspace: "Beam.xcworkspace",
+      proj: "Beam.xcodeproj",
+      scheme: "Beam",
+      source_directory: "./Beam"
+    )
+  end
+
+  ## To release developer version
+  lane :dev do
+    # Parameters at https://docs.fastlane.tools/actions/cert/
+    get_certificates(
+      development: true,
+      force: false,
+      # Don't set the filename so we can easily see which certificate is used
+      # Proper one should be 68DY6473LM for Fabien penso
+      # You can see its value at https://developer.apple.com/account/resources/certificates/list inside the certificate url
+      # filename: "developer_id.cer",
+      output_path: "./certs",
+      username: ENV["CERT_USERNAME"],
+      team_id: ENV["TEAM_ID"],
+      team_name: ENV["TEAM_NAME"],
+      platform: "macos"
+    )
+
+    # Parameters at https://docs.fastlane.tools/actions/sigh/
+    get_provisioning_profile(
+      development: true,
+      username: ENV["CERT_USERNAME"],
+      app_identifier: ENV["TEAM_IDENTIFIER"],
+      team_id: ENV["TEAM_ID"],
+      team_name: ENV["TEAM_NAME"],
+      provisioning_name: "Beam Development",
+      cert_id: "68DY6473LM",
+      cert_owner_name: ENV["CERT_OWNER_NAME"],
+      skip_certificate_verification: true,
+      platform: "macos",
+      output_path: "./certs",
+      # Actually should be .profileprovision but fastlane complains. It will
+      # automatically fetch this profile, but you can just get the one from
+      # working md5sum: 5c00f51fe03c198182f31980df51a219
+      filename: "development.co.beamapp.macos.mobileprovision",
+      readonly: true, # Don't want to mess up mine
+      # force: false,
+    )
+
+    clear_derived_data
+    cocoapods
+    build_mac_app(
+      workspace: "Beam.xcworkspace",
+      scheme: "Beam",
+      silent: true,
+      clean: true,
+      output_directory: "../builds",
+      output_name: "Beam",
+      include_symbols: true,
+      # xcargs: settings_to_override,
+      # Doesn't work :(
+      export_xcargs: 'OTHER_CODE_SIGN_FLAGS="--timestamp"',
+      export_method: "development", # Valid values are: app-store, ad-hoc, package, enterprise, development, developer-id
+      export_options: "./ExportOptions.plist",
+      # Found this at https://github.com/fastlane/fastlane/issues/15963 or we have archive failed
+      skip_package_pkg: true
+    )
+  end
+
+  ## To release DeveloperId signed builds
+  lane :beta do
+    increment_build_number(build_number: ENV['CI_JOB_ID'])
+
+    # Parameters at https://docs.fastlane.tools/actions/cert/
+    get_certificates(
+      development: false,
+      force: false,
+      # Not in documentation, found from fastlane/cert/lib/cert/options.rb
+      # Supported values: mac_installer_distribution developer_id_installer developer_id_application developer_id_kext
+      type: "developer_id_application",
+      # Don't set the filename so we can easily see which certificate is used
+      # Proper one should be M28FQCP36C, and not N3PJ728Y92.
+      # You can see its value at https://developer.apple.com/account/resources/certificates/list inside the certificate url
+      # filename: "developer_id.cer",
+      output_path: "./certs",
+      username: ENV["CERT_USERNAME"],
+      team_id: ENV["TEAM_ID"],
+      team_name: ENV["TEAM_NAME"],
+      platform: "macos"
+    )
+
+    # Parameters at https://docs.fastlane.tools/actions/sigh/
+    get_provisioning_profile(
+      developer_id: true,
+      # development: false,
+      username: ENV["CERT_USERNAME"],
+      app_identifier: ENV["TEAM_IDENTIFIER"],
+      team_id: ENV["TEAM_ID"],
+      team_name: ENV["TEAM_NAME"],
+      provisioning_name: ENV["PROVISION_NAME"],
+      # Got this from the `get_certificates` output with `Successfully installed
+      # certificate N3PJ728Y92`... Can't find this in the certificate file
+      # itself.
+      cert_id: ENV["CERT_ID"],
+      cert_owner_name: ENV["CERT_OWNER_NAME"],
+      skip_certificate_verification: true,
+      platform: "macos",
+      output_path: "./certs",
+      # Actually should be .profileprovision but fastlane complains. It will
+      # automatically fetch this profile, but you can just get the one from
+      # https://developer.apple.com/account/resources/profiles/review/CNFXLZXSTV
+      # working md5sum: 7f0d5adccb384983bfbf9ea46b05bc47
+      filename: "developer_id.co.beamapp.macos.mobileprovision",
+      readonly: true, # Don't want to mess up mine
+      # force: false,
+    )
+
+    clear_derived_data
+    cocoapods
+    build_mac_app(
+      workspace: "Beam.xcworkspace",
+      scheme: ENV["SCHEME"],
+      silent: true,
+      clean: true,
+      output_directory: "../builds",
+      output_name: "Beam",
+      include_symbols: true,
+      # xcargs: settings_to_override,
+      # Doesn't work :(
+      export_xcargs: 'OTHER_CODE_SIGN_FLAGS="--timestamp"',
+
+      export_method: "developer-id", # Valid values are: app-store, ad-hoc, package, enterprise, development, developer-id
+
+      ## Doesn't work but it should :(
+      #      export_options: {
+      #        method: "development",
+      #        provisioningProfiles: {
+      #          "co.beamapp.macos" => "Beam"
+      #        }
+      #      }
+      ## But this works
+      export_options: "./ExportOptionsDeveloperId.plist",
+      # Found this at https://github.com/fastlane/fastlane/issues/15963 or we have archive failed
+      skip_package_pkg: true
+
+      # export_xcargs: "-allowProvisioningUpdates"
+    )
+
+    # https://blog.zeplin.io/dev-journal-automate-notarizing-macos-apps-94b0b144ba9d
+    notarize(
+      package: "../builds/Beam.app",
+      verbose: true,
+      print_log: true,
+      bundle_id: ENV["APP_IDENTIFIER"]
+    )
+
+    build_dmg
+    upload_s3
+    ping_slack
+  end
+
+  lane :upload_s3 do
+    get_version_number
+    get_build_number
+    git_branch
+    aws_s3(
+      access_key: ENV["S3_ACCESS_KEY"],
+      secret_access_key: ENV["S3_SECRET_ACCESS_KEY"],
+      bucket: ENV["S3_BUCKET"],
+      region: ENV["S3_REGION"],
+      upload_metadata: true,
+      files: [
+        "../builds/Beam.dmg",
+        "../builds/Beam.app.dSYM.zip"
+      ],
+      # Doesn't work the way I expected
+      # endpoint: "http://downloads.dev.beamapp.co",
+      path: "#{Actions.git_branch}/#{lane_context[SharedValues::VERSION_NUMBER]}/#{lane_context[SharedValues::BUILD_NUMBER]}"
+    )
+
+    file = lane_context[SharedValues::S3_FILES_OUTPUT_PATHS].first
+    puts "-> #{file}".green
+  end
+
+  lane :build_dmg do
+    dmg(path: "../builds/Beam.app",
+        output_path: "../builds/Beam.dmg")
+  end
+
+  lane :ping_slack do
+    get_version_number
+    get_build_number
+    git_branch
+    attachments = lane_context[SharedValues::S3_FILES_OUTPUT_PATHS].map do |file|
+      {
+        title_link: file,
+        fallback: file
+      }
+    end
+
+    slack(
+      message: "Beam MacOS success build",
+      channel: "#webhooks",
+      success: true,
+      default_payloads: [:git_branch, :last_git_commit], # :test_result
+      payload: {
+
+      },
+      attachment_properties: {
+        fields: [
+          title: "DMG",
+          value: lane_context[SharedValues::S3_FILES_OUTPUT_PATHS].first,
+          short: false
+        ],
+      },
+      slack_url: ENV["SLACK_WEBHOOK_URL"]
+    )
+  end
+
+  lane :release do
+    # sync_code_signing
+    # disable_automatic_code_signing(path: "Beam.xcodeproj")
+    clear_derived_data
+    cocoapods
+    build_mac_app(
+      workspace: "Beam.xcworkspace",
+      scheme: "Beam release",
+      silent: true,
+      clean: true,
+      output_directory: "../builds",
+      include_symbols: false,
+      export_method: "developer-id", # Valid values are: app-store, ad-hoc, package, enterprise, development, developer-id
+      # export_xcargs: "-allowProvisioningUpdates"
+      # mac_app_installer_cert_name: "foobar"
+    )
+    # enable_automatic_code_signing(path: "Beam.xcodeproj")
+  end
+
+  # This is annoying afterall since we have fails through the CI, I don't want
+  # to pollute Slack with errors
+#  error do |lane, exception|
+#    slack(
+#      slack_url: ENV["SLACK_WEBHOOK_URL"],
+#      # message with short human friendly message
+#      message: "Exception on lane #{lane}: #{exception}",
+#      success: false,
+#      # Output containing extended log output
+#      payload: { Output: exception.to_s }
+#    )
+#  end
+end
