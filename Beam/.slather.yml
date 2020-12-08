@@ -1,0 +1,8 @@
+xcodeproj: Beam.xcodeproj
+workspace: Beam.xcworkspace
+scheme: Beam
+source_directory: ./Beam
+ignore:
+  - "**/Pods/*"
+  - "**/BeamTests/*"
+  - "**/BeamUITests/*"

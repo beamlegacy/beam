@@ -64,10 +64,12 @@ class RoamImporter {
                 createLocalBullets(context, newNote, children, newNote)
             }
 
+            newNote.creationDate = roamNote.createTime ?? newNote.creationDate
+            newNote.updateDate = roamNote.editTime ?? newNote.updateDate
             newNote.save(documentManager: documentManager)
         }
 
-        //Note.detectUnlinkedNotes(context)
+        BeamNote.detectUnlinkedNotes(documentManager)
 
         return roamNotes
     }
@@ -84,6 +86,8 @@ class RoamImporter {
                                     _ parentBullet: BeamElement) {
         for bullet in roamBullets {
             let newBullet = BeamElement(bullet.string)
+            newBullet.creationDate = bullet.createTime ?? newBullet.creationDate
+            newBullet.updateDate = bullet.editTime ?? newBullet.updateDate
             parentBullet.addChild(newBullet)
             detectLinkedNotes(context, note: note, bullet: newBullet)
 

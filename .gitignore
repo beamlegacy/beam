@@ -48,5 +48,18 @@ Thumbs.db
 *.mov
 *.wmv
 *.xcbkptlist
-Beam/Podfile.lock
 Beam/codesigndoc_exports
+
+# Configuration
+.envrc.private
+
+# Vagrant
+.vagrant
+
+# Build
+Beam.pkg
+builds
+certs
+
+# Vim
+*.swp

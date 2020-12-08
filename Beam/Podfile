@@ -3,8 +3,7 @@ use_frameworks!
 
 inhibit_all_warnings!
 
-target 'Beam' do
-  pod 'SwiftLint'
+def app_pods
   pod 'Down'
   pod 'Alamofire', '5.0.0.beta.6'
   pod 'JWTDecode'
@@ -12,6 +11,15 @@ target 'Beam' do
   pod 'Sentry'
 end
 
+target 'Beam' do
+  pod 'SwiftLint'
+  app_pods
+end
+
 target 'BeamTests' do
   pod 'Fakery'
+end
+
+target 'BeamUITests' do
+  app_pods
 end

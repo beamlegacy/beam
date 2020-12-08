@@ -1,0 +1,61 @@
+stages:
+  - lint
+  - test
+  - build
+  - deploy
+
+variables:
+  LC_ALL: "en_US.UTF-8"
+  LANG: "en_US.UTF-8"
+  GIT_STRATEGY: clone
+  GIT_BRANCH: "$CI_COMMIT_REF_NAME"
+
+before_script:
+  # RVM install a `cd` :((((
+  # Apparently the rvm(2.6.0), that I had installed previously, was overriding the cd bash command :expressionless:
+  # https://forum.gitlab.com/t/self-hosted-gitlab-ci-runner-shell-executer-fails-immediately-with-error-job-failed-exit-status-1/33252/3
+  - unset cd
+  - direnv allow
+  - eval "$(direnv export bash)"
+  - cd "Beam"
+  - gem install fastlane -N
+  - bundle install
+
+lint:
+  dependencies: []
+  stage: lint
+  artifacts:
+    paths:
+      - Beam/fastlane/logs
+  only:
+    - merge_requests
+  script:
+    - fastlane lint
+  tags:
+    - macos
+  interruptible: true
+  allow_failure: true
+
+xctests:
+  dependencies: []
+  stage: test
+  only:
+    - merge_requests
+    - master
+  script:
+    - fastlane tests
+  tags:
+    - macos
+  interruptible: true
+
+build:
+  dependencies: []
+  stage: build
+  only:
+    - merge_requests
+    - master
+  script:
+    - bundle exec fastlane beta
+  tags:
+    - macos
+  interruptible: true
