@@ -212,7 +212,7 @@ public class TextNode: NSObject, CALayerDelegate {
     }
 
     var disclosureButtonFrame: NSRect {
-        let r = (open ? disclosureOpenFrame : disclosureClosedFrame).frame
+        let r = NSRect(x: 2, y: -4, width: 8.6, height: 8.6)
         return r.offsetBy(dx: 0, dy: r.height).insetBy(dx: -4, dy: -4)
     }
     var disclosurePressed = false
@@ -373,34 +373,9 @@ public class TextNode: NSObject, CALayerDelegate {
 
     var fontSize: CGFloat { isBig ? 16 : 14 }
 
-    static func symbolFont(_ size: CGFloat) -> NSFont {
-        return NSFont.systemFont(ofSize: size)
-    }
-
-    static func symbolFrame(_ size: CGFloat, _ string: String) -> TextFrame {
-        let symbol = string.attributed
-        let attribs: [NSAttributedString.Key: Any] = [
-            .font: symbolFont(size),
-            .foregroundColor: NSColor.red
-        ]
-        symbol.setAttributes(attribs, range: symbol.wholeRange)
-        return Font.draw(string: symbol, atPosition: NSPoint(x: 2, y: -2), textWidth: 8)
-    }
-
-    static var disclosureClosedFrameSmall = symbolFrame(7, "􀄧")
-    static var disclosureOpenFrameSmall = symbolFrame(7, "􀄥")
-    static var bulletPointFrameSmall = symbolFrame(7, "􀜞")
-    static var disclosureClosedFrameBig = symbolFrame(7, "􀄧")
-    static var disclosureOpenFrameBig = symbolFrame(7, "􀄥")
-    static var bulletPointFrameBig = symbolFrame(7, "􀜞")
-
     var isBig: Bool {
         editor.isBig
     }
-
-    var disclosureClosedFrame: TextFrame { isBig ? Self.disclosureClosedFrameBig : Self.disclosureClosedFrameSmall }
-    var disclosureOpenFrame: TextFrame { isBig ? Self.disclosureOpenFrameBig : Self.disclosureOpenFrameSmall }
-    var bulletPointFrame: TextFrame { isBig ? Self.bulletPointFrameBig : Self.bulletPointFrameSmall }
 
     func drawDisclosure(at point: NSPoint, in context: CGContext) {
         let symbol = open ? "arrow_down" : "arrow_right"
@@ -408,7 +383,7 @@ public class TextNode: NSObject, CALayerDelegate {
     }
 
     func drawBulletPoint(at point: NSPoint, in context: CGContext) {
-        drawImage(named: "bullet", at: point, in: context)
+        drawImage(named: "bullet", at: point, in: context, CGRect(x: 0, y: 0, width: 12, height: 12))
     }
 
     func drawDebug(in context: CGContext) {
@@ -467,9 +442,9 @@ public class TextNode: NSObject, CALayerDelegate {
 
         let offset = NSPoint(x: 0, y: firstLineBaseline)
         if showDisclosureButton {
-            drawDisclosure(at: NSPoint(x: offset.x, y: 4), in: context)
+            drawDisclosure(at: NSPoint(x: offset.x, y: 2), in: context)
         } else {
-            drawBulletPoint(at: NSPoint(x: offset.x, y: 4), in: context)
+            drawBulletPoint(at: NSPoint(x: offset.x, y: 6), in: context)
         }
 
         context.textMatrix = CGAffineTransform.identity
@@ -479,13 +454,21 @@ public class TextNode: NSObject, CALayerDelegate {
         context.restoreGState()
     }
 
-    func drawImage(named: String, at point: NSPoint, in context: CGContext) {
+    func drawImage(named: String, at point: NSPoint, in context: CGContext, _ size: CGRect? = nil) {
         guard var image = NSImage(named: named) else {
             fatalError("Image with name: \(named) can't be found")
         }
 
+        var width = image.size.width
+        var height = image.size.height
+
+        if let size = size {
+            width = size.width
+            height = size.height
+        }
+
         let tintColor = NSColor(named: "EditorControlColor")!
-        let rect = CGRect(x: point.x, y: point.y, width: image.size.width / layer.contentsScale, height: image.size.height / layer.contentsScale)
+        let rect = CGRect(x: point.x, y: point.y, width: width / layer.contentsScale, height: height / layer.contentsScale)
 
         image = image.fill(color: tintColor)
 

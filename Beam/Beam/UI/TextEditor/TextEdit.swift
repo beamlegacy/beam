@@ -773,8 +773,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             return t
         }
 
-        print(rootNode.note?.title)
-
         guard let titleString = rootNode.note?.title.attributed else { fatalError() }
         let f = NSFont.systemFont(ofSize: isBig ? 13 : 11, weight: .semibold)
         titleString.addAttribute(.font, value: f, range: titleString.wholeRange)
