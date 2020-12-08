@@ -383,7 +383,7 @@ public class TextNode: NSObject, CALayerDelegate {
     }
 
     func drawBulletPoint(at point: NSPoint, in context: CGContext) {
-        drawImage(named: "editor-bullet", at: point, in: context, CGRect(x: 0, y: 0, width: 12, height: 12))
+        drawImage(named: "editor-bullet", at: point, in: context, size: CGRect(x: 0, y: 0, width: 12, height: 12))
     }
 
     func drawDebug(in context: CGContext) {
@@ -454,7 +454,7 @@ public class TextNode: NSObject, CALayerDelegate {
         context.restoreGState()
     }
 
-    func drawImage(named: String, at point: NSPoint, in context: CGContext, _ size: CGRect? = nil) {
+    func drawImage(named: String, at point: NSPoint, in context: CGContext, size: CGRect? = nil) {
         guard var image = NSImage(named: named) else {
             fatalError("Image with name: \(named) can't be found")
         }
