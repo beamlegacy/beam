@@ -28,7 +28,7 @@ extension LibrariesManager {
 
     func setupSentryScope() {
         SentrySDK.configureScope { scope in
-            scope.setEnvironment(Configuration.environment.rawValue)
+            scope.setEnvironment(Configuration.env)
             scope.setDist(Information.appBuild)
         }
     }

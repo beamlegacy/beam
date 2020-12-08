@@ -9,10 +9,8 @@
 /* Begin PBXBuildFile section */
 		413F65352577830C003B3659 /* Configuration.plist in Resources */ = {isa = PBXBuildFile; fileRef = 413F65342577830C003B3659 /* Configuration.plist */; };
 		41C70B39257E906F0002AC34 /* NSImage+BM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41C70B38257E906F0002AC34 /* NSImage+BM.swift */; };
-		41DF78C02579A30400648ABF /* BMTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41DF78BF2579A30400648ABF /* BMTextField.swift */; };
 		41DF78C42579A31100648ABF /* BMTextFieldView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41DF78C32579A31100648ABF /* BMTextFieldView.swift */; };
 		41DF78CE257A695A00648ABF /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41DF78CD257A695A00648ABF /* Constants.swift */; };
-		520081942552C93600A6CAC6 /* CoreDataManager+backupExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 520081932552C93600A6CAC6 /* CoreDataManager+backupExtension.swift */; };
 		520081992552C97C00A6CAC6 /* TemporaryFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 520081982552C97C00A6CAC6 /* TemporaryFile.swift */; };
 		5204E865255ED13500458211 /* AccountManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5204E864255ED13500458211 /* AccountManager.swift */; };
 		5204E86E255ED1A700458211 /* APIRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5204E86D255ED1A700458211 /* APIRequest.swift */; };
@@ -42,15 +40,17 @@
 		523586462534BF4E006748E4 /* Bullet+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 523586452534BF4E006748E4 /* Bullet+CoreDataProperties.swift */; };
 		52375B62256D2463003180E1 /* Release.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 52375B61256D2463003180E1 /* Release.xcconfig */; };
 		52375B76256D585A003180E1 /* OSLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52375B75256D585A003180E1 /* OSLog.swift */; };
+		523CBF61257E81300035FCCC /* BMTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41DF78BF2579A30400648ABF /* BMTextField.swift */; };
 		527DF48725710ECB00A0A56D /* DocumentManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 527DF48625710ECB00A0A56D /* DocumentManagerTests.swift */; };
 		527E60082570FBB20000DE93 /* DocumentManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 527E60072570FBB20000DE93 /* DocumentManager.swift */; };
 		527E600C2570FC9A0000DE93 /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = 527E600B2570FC9A0000DE93 /* Document.swift */; };
 		527E60102570FCCF0000DE93 /* Document+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 527E600F2570FCCF0000DE93 /* Document+CoreDataProperties.swift */; };
-		528E44272525BD4600B7C54E /* CoreDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 528E44262525BD4600B7C54E /* CoreDataManager.swift */; };
-		52A66A172535E77D00CE247C /* ScrollableTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52A66A162535E77D00CE247C /* ScrollableTextView.swift */; };
 		52A66A1F2535E8A500CE247C /* ScrollableTextView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 52A66A1E2535E8A500CE247C /* ScrollableTextView.xib */; };
 		52A66A242535E8FB00CE247C /* TextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52A66A232535E8FB00CE247C /* TextView.swift */; };
 		52B5EF78252F520100914D52 /* CoreDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52B5EF77252F520100914D52 /* CoreDataTests.swift */; };
+		52BF8258257A9E2100C6D77E /* CoreDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52BF8256257A9E2100C6D77E /* CoreDataManager.swift */; };
+		52BF8259257A9E2100C6D77E /* CoreDataManager+backupExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52BF8257257A9E2100C6D77E /* CoreDataManager+backupExtension.swift */; };
+		52BF825D257A9E6300C6D77E /* ScrollableTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52A66A162535E77D00CE247C /* ScrollableTextView.swift */; };
 		52C6A1DC2563FE2F00350EBE /* AccountWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52C6A1DB2563FE2F00350EBE /* AccountWindow.swift */; };
 		52C6A1E12563FE6D00350EBE /* AccountDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52C6A1E02563FE6D00350EBE /* AccountDetail.swift */; };
 		52C6A1F5256417D100350EBE /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52C6A1F4256417D100350EBE /* User.swift */; };
@@ -74,6 +74,7 @@
 		52E04FE7252C7B9E00AD9F56 /* RoamImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52E04FE6252C7B9E00AD9F56 /* RoamImporter.swift */; };
 		52E04FED252C814D00AD9F56 /* RoamImporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52E04FEC252C814D00AD9F56 /* RoamImporterTests.swift */; };
 		52EB925D25668ED8003E49C5 /* PerformanceDebug.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52EB925C25668ED8003E49C5 /* PerformanceDebug.swift */; };
+		6D33924049F5798BBE6E7AED /* Pods_BeamUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 54B49CE1C66614E244553288 /* Pods_BeamUITests.framework */; };
 		7D40159D41DDD593BDFDF664 /* Pods_BeamTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C8379DEE387FB86FA7817188 /* Pods_BeamTests.framework */; };
 		9601BA75254236730003BCFE /* JournalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9601BA74254236730003BCFE /* JournalView.swift */; };
 		96062E3E254C5ECD00AAB78D /* DumpEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96062E3D254C5ECD00AAB78D /* DumpEnvironment.swift */; };
@@ -177,29 +178,16 @@
 		};
 /* End PBXContainerItemProxy section */
 
-/* Begin PBXCopyFilesBuildPhase section */
-		9627FD4C2550203800926F0E /* Embed Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				9627FD4B2550203800926F0E /* Pods_Beam.framework in Embed Frameworks */,
-			);
-			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
-
 /* Begin PBXFileReference section */
+		1B75229D57B9672BF84D8A89 /* Pods-BeamUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BeamUITests.release.xcconfig"; path = "Target Support Files/Pods-BeamUITests/Pods-BeamUITests.release.xcconfig"; sourceTree = "<group>"; };
 		23F7A69644D041FDF4D3466B /* Pods-Beam.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Beam.release.xcconfig"; path = "Target Support Files/Pods-Beam/Pods-Beam.release.xcconfig"; sourceTree = "<group>"; };
 		2BE96DC9A7278563E5878CCD /* Pods_Beam.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Beam.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		413F65342577830C003B3659 /* Configuration.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Configuration.plist; sourceTree = "<group>"; };
 		41C70B38257E906F0002AC34 /* NSImage+BM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSImage+BM.swift"; sourceTree = "<group>"; };
+		3B2FA634DAEED958EF901A42 /* Pods-BeamUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BeamUITests.debug.xcconfig"; path = "Target Support Files/Pods-BeamUITests/Pods-BeamUITests.debug.xcconfig"; sourceTree = "<group>"; };
 		41DF78BF2579A30400648ABF /* BMTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BMTextField.swift; sourceTree = "<group>"; };
 		41DF78C32579A31100648ABF /* BMTextFieldView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BMTextFieldView.swift; sourceTree = "<group>"; };
 		41DF78CD257A695A00648ABF /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
-		520081932552C93600A6CAC6 /* CoreDataManager+backupExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CoreDataManager+backupExtension.swift"; sourceTree = "<group>"; };
 		520081982552C97C00A6CAC6 /* TemporaryFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemporaryFile.swift; sourceTree = "<group>"; };
 		5204E864255ED13500458211 /* AccountManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountManager.swift; sourceTree = "<group>"; };
 		5204E86D255ED1A700458211 /* APIRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIRequest.swift; sourceTree = "<group>"; };
@@ -238,6 +226,8 @@
 		52A66A1E2535E8A500CE247C /* ScrollableTextView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ScrollableTextView.xib; sourceTree = "<group>"; };
 		52A66A232535E8FB00CE247C /* TextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextView.swift; sourceTree = "<group>"; };
 		52B5EF77252F520100914D52 /* CoreDataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataTests.swift; sourceTree = "<group>"; };
+		52BF8256257A9E2100C6D77E /* CoreDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CoreDataManager.swift; path = Beam/DataModel/CoreData/CoreDataManager.swift; sourceTree = SOURCE_ROOT; };
+		52BF8257257A9E2100C6D77E /* CoreDataManager+backupExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "CoreDataManager+backupExtension.swift"; path = "Beam/DataModel/CoreData/CoreDataManager+backupExtension.swift"; sourceTree = SOURCE_ROOT; };
 		52C6A1DB2563FE2F00350EBE /* AccountWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountWindow.swift; sourceTree = "<group>"; };
 		52C6A1E02563FE6D00350EBE /* AccountDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountDetail.swift; sourceTree = "<group>"; };
 		52C6A1F4256417D100350EBE /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
@@ -262,6 +252,7 @@
 		52E04FE6252C7B9E00AD9F56 /* RoamImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoamImporter.swift; sourceTree = "<group>"; };
 		52E04FEC252C814D00AD9F56 /* RoamImporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoamImporterTests.swift; sourceTree = "<group>"; };
 		52EB925C25668ED8003E49C5 /* PerformanceDebug.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PerformanceDebug.swift; sourceTree = "<group>"; };
+		54B49CE1C66614E244553288 /* Pods_BeamUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_BeamUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9601BA74254236730003BCFE /* JournalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalView.swift; sourceTree = "<group>"; };
 		96062E3D254C5ECD00AAB78D /* DumpEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DumpEnvironment.swift; sourceTree = "<group>"; };
 		96062E45254C67C100AAB78D /* RoundRectButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundRectButtonStyle.swift; sourceTree = "<group>"; };
@@ -379,6 +370,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6D33924049F5798BBE6E7AED /* Pods_BeamUITests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -393,6 +385,7 @@
 				9645489F2523B3550064D062 /* CloudKit.framework */,
 				2BE96DC9A7278563E5878CCD /* Pods_Beam.framework */,
 				C8379DEE387FB86FA7817188 /* Pods_BeamTests.framework */,
+				54B49CE1C66614E244553288 /* Pods_BeamUITests.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -404,6 +397,8 @@
 				5204E864255ED13500458211 /* AccountManager.swift */,
 				5204E8E2255EDACE00458211 /* LibrairiesManager.swift */,
 				527E60072570FBB20000DE93 /* DocumentManager.swift */,
+				52BF8256257A9E2100C6D77E /* CoreDataManager.swift */,
+				52BF8257257A9E2100C6D77E /* CoreDataManager+backupExtension.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -426,7 +421,6 @@
 			children = (
 				5204E88C255ED33200458211 /* Configuration.swift */,
 				41DF78CD257A695A00648ABF /* Constants.swift */,
-				413F65342577830C003B3659 /* Configuration.plist */,
 				52CE694F2562F6F400453429 /* Debug.xcconfig */,
 				52375B61256D2463003180E1 /* Release.xcconfig */,
 			);
@@ -475,7 +469,6 @@
 				521812BC2524C368007E4B47 /* Bullet.swift */,
 				523586452534BF4E006748E4 /* Bullet+CoreDataProperties.swift */,
 				528E44262525BD4600B7C54E /* CoreDataManager.swift */,
-				520081932552C93600A6CAC6 /* CoreDataManager+backupExtension.swift */,
 				520081982552C97C00A6CAC6 /* TemporaryFile.swift */,
 				52326F8B252F1A8E00A40F1E /* NSManagedObject+initExtension.swift */,
 				52D4C6392535A4D800A00457 /* NotificationName.swift */,
@@ -595,6 +588,8 @@
 				23F7A69644D041FDF4D3466B /* Pods-Beam.release.xcconfig */,
 				DA1B14ACD3E14C7CBEB0BA6F /* Pods-BeamTests.debug.xcconfig */,
 				9B355D858C3216B61BF461D9 /* Pods-BeamTests.release.xcconfig */,
+				3B2FA634DAEED958EF901A42 /* Pods-BeamUITests.debug.xcconfig */,
+				1B75229D57B9672BF84D8A89 /* Pods-BeamUITests.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -882,11 +877,12 @@
 			buildPhases = (
 				6302F3C9780586B509787840 /* [CP] Check Pods Manifest.lock */,
 				529C0CC5251CFD0C00ED6BAF /* SwiftLint */,
+				520582C0257E351800E0533A /* Env variable Injector */,
 				965A78212514F147009980D4 /* Sources */,
+				520DDA94257E4CEE00FF8152 /* Clean Configuration.swift from variable Injector */,
 				965A78222514F147009980D4 /* Frameworks */,
 				965A78232514F147009980D4 /* Resources */,
 				6C1AE6F4B3DD3AA739D097FF /* [CP] Embed Pods Frameworks */,
-				9627FD4C2550203800926F0E /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -925,9 +921,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 965A78572514F149009980D4 /* Build configuration list for PBXNativeTarget "BeamUITests" */;
 			buildPhases = (
+				BB3FB548DAEB6AC40D3B66C3 /* [CP] Check Pods Manifest.lock */,
 				965A78442514F149009980D4 /* Sources */,
 				965A78452514F149009980D4 /* Frameworks */,
 				965A78462514F149009980D4 /* Resources */,
+				52602A73257E9B2000312365 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -950,13 +948,16 @@
 				TargetAttributes = {
 					965A78242514F147009980D4 = {
 						CreatedOnToolsVersion = 12.0;
+						ProvisioningStyle = Manual;
 					};
 					965A783C2514F149009980D4 = {
 						CreatedOnToolsVersion = 12.0;
+						ProvisioningStyle = Manual;
 						TestTargetID = 965A78242514F147009980D4;
 					};
 					965A78472514F149009980D4 = {
 						CreatedOnToolsVersion = 12.0;
+						ProvisioningStyle = Manual;
 						TestTargetID = 965A78242514F147009980D4;
 					};
 				};
@@ -995,7 +996,6 @@
 				52CE69352562F2DF00453429 /* forgot_password.graphql in Resources */,
 				52375B62256D2463003180E1 /* Release.xcconfig in Resources */,
 				965A78332514F148009980D4 /* Preview Assets.xcassets in Resources */,
-				413F65352577830C003B3659 /* Configuration.plist in Resources */,
 				52CE693D2562F2EA00453429 /* sign_in.graphql in Resources */,
 				52A66A1F2535E8A500CE247C /* ScrollableTextView.xib in Resources */,
 				9631B01425541FB3007BF2DE /* Readability.js in Resources */,
@@ -1023,6 +1023,61 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		520582C0257E351800E0533A /* Env variable Injector */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Env variable Injector";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "direnv allow ..\neval \"$(direnv export bash)\"\n\nif which variable-injector >/dev/null; then\n  variable-injector --file ${SRCROOT}/Beam/Configuration/Configuration.swift # --verbose # Pass your paramenters\nelse\n  echo \"Warning: Swift Variable Injector not installed, download from https://github.com/penso/variable-injector\"\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		520DDA94257E4CEE00FF8152 /* Clean Configuration.swift from variable Injector */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Clean Configuration.swift from variable Injector";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "git checkout Beam/Configuration/Configuration.swift\n";
+			showEnvVarsInLog = 0;
+		};
+		52602A73257E9B2000312365 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-BeamUITests/Pods-BeamUITests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-BeamUITests/Pods-BeamUITests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-BeamUITests/Pods-BeamUITests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 		529C0CC5251CFD0C00ED6BAF /* SwiftLint */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -1119,6 +1174,28 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-BeamTests/Pods-BeamTests-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
+		BB3FB548DAEB6AC40D3B66C3 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-BeamUITests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -1128,6 +1205,7 @@
 			files = (
 				52C82C7925305E27006C188C /* NotesContentView.swift in Sources */,
 				9631C76B251E3648009B40C4 /* NSView+Beam.swift in Sources */,
+				52BF825D257A9E6300C6D77E /* ScrollableTextView.swift in Sources */,
 				967B269125546878003F40E3 /* String+URL.swift in Sources */,
 				96AF5CB62537611300A7988C /* AttributedStringVisitor.swift in Sources */,
 				521812BD2524C368007E4B47 /* Bullet.swift in Sources */,
@@ -1146,7 +1224,7 @@
 				96062E5E254C692B00AAB78D /* OmniBarSearchBox.swift in Sources */,
 				96062E6E254C6D4C00AAB78D /* Frame.swift in Sources */,
 				527E60082570FBB20000DE93 /* DocumentManager.swift in Sources */,
-				41DF78C02579A30400648ABF /* BMTextField.swift in Sources */,
+				52BF8259257A9E2100C6D77E /* CoreDataManager+backupExtension.swift in Sources */,
 				96F5DB2B251811060080E3EE /* AutoCompleteList.swift in Sources */,
 				527E60102570FCCF0000DE93 /* Document+CoreDataProperties.swift in Sources */,
 				52C6A1DC2563FE2F00350EBE /* AccountWindow.swift in Sources */,
@@ -1159,6 +1237,7 @@
 				52C82C7E25305FA1006C188C /* NoteRow.swift in Sources */,
 				965A785E2514F1AF009980D4 /* WebView.swift in Sources */,
 				965B19692518F4F000BCF01C /* BrowserTabView.swift in Sources */,
+				523CBF61257E81300035FCCC /* BMTextField.swift in Sources */,
 				52D4C63A2535A4D800A00457 /* NotificationName.swift in Sources */,
 				96062E73254C74F200AAB78D /* Chevrons.swift in Sources */,
 				96C039982520CB9D00A2EDC7 /* Maths.swift in Sources */,
@@ -1189,6 +1268,7 @@
 				41DF78CE257A695A00648ABF /* Constants.swift in Sources */,
 				96FA3F5E256C24660070C91E /* Score.swift in Sources */,
 				96FA3F66256D473B0070C91E /* PageRank.swift in Sources */,
+				52BF8258257A9E2100C6D77E /* CoreDataManager.swift in Sources */,
 				96F5DB162517A0F10080E3EE /* NSContainerView.swift in Sources */,
 				520BFE7E25347F27009DF633 /* SearchBar.swift in Sources */,
 				52A66A242535E8FB00CE247C /* TextView.swift in Sources */,
@@ -1221,8 +1301,6 @@
 				96B99AA1253F43DD008E3686 /* NSImage+CGImage.swift in Sources */,
 				5204E8DE255EDAA600458211 /* AuthenticationHandler.swift in Sources */,
 				5204E8B7255ED6AC00458211 /* UserSessionRequest.swift in Sources */,
-				52A66A172535E77D00CE247C /* ScrollableTextView.swift in Sources */,
-				528E44272525BD4600B7C54E /* CoreDataManager.swift in Sources */,
 				5204E8A1255ED56200458211 /* AuthenticationManager.swift in Sources */,
 				96062E3E254C5ECD00AAB78D /* DumpEnvironment.swift in Sources */,
 				964A60C525680E59008126BF /* Animation.swift in Sources */,
@@ -1241,7 +1319,6 @@
 				41DF78C42579A31100648ABF /* BMTextFieldView.swift in Sources */,
 				9645488D252382DB0064D062 /* Readability.swift in Sources */,
 				52C82C8825306637006C188C /* NoteDetail.swift in Sources */,
-				520081942552C93600A6CAC6 /* CoreDataManager+backupExtension.swift in Sources */,
 				5204E86E255ED1A700458211 /* APIRequest.swift in Sources */,
 				964547B725212D760064D062 /* String+Ranges.swift in Sources */,
 				52C6A22925644D9000350EBE /* AppDelegate+CoreData.swift in Sources */,
@@ -1358,6 +1435,7 @@
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_CODE_SIGN_FLAGS = "--timestamp";
 				OTHER_SWIFT_FLAGS = "$(CUSTOM_OTHER_SWIFT_FLAGS)";
 				SDKROOT = macosx;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
@@ -1414,6 +1492,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
+				OTHER_CODE_SIGN_FLAGS = "--timestamp";
 				OTHER_SWIFT_FLAGS = "$(CUSTOM_OTHER_SWIFT_FLAGS)";
 				SDKROOT = macosx;
 				SWIFT_COMPILATION_MODE = wholemodule;
@@ -1428,9 +1507,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Beam/Beam.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 27;
 				DEVELOPMENT_ASSET_PATHS = "\"Beam/Preview Content\"";
 				DEVELOPMENT_TEAM = X87W5M786F;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -1442,10 +1522,11 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MARKETING_VERSION = 0.1;
-				PRODUCT_BUNDLE_IDENTIFIER = co.beamApp.Beam;
+				PRODUCT_BUNDLE_IDENTIFIER = co.beamapp.macos;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
+				PROVISIONING_PROFILE_SPECIFIER = "Beam Development";
 				SWIFT_VERSION = 5.0;
+				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Debug;
 		};
@@ -1456,9 +1537,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Beam/Beam.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "Developer ID Application";
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 27;
 				DEVELOPMENT_ASSET_PATHS = "\"Beam/Preview Content\"";
 				DEVELOPMENT_TEAM = X87W5M786F;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -1470,10 +1552,11 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MARKETING_VERSION = 0.1;
-				PRODUCT_BUNDLE_IDENTIFIER = co.beamApp.Beam;
+				PRODUCT_BUNDLE_IDENTIFIER = co.beamapp.macos;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
+				PROVISIONING_PROFILE_SPECIFIER = "DeveloperID MacOS";
 				SWIFT_VERSION = 5.0;
+				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Release;
 		};
@@ -1484,7 +1567,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = X87W5M786F;
 				INFOPLIST_FILE = BeamTests/Info.plist;
@@ -1507,7 +1590,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = X87W5M786F;
 				INFOPLIST_FILE = BeamTests/Info.plist;
@@ -1525,9 +1608,10 @@
 		};
 		965A78582514F149009980D4 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 3B2FA634DAEED958EF901A42 /* Pods-BeamUITests.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = X87W5M786F;
 				INFOPLIST_FILE = BeamUITests/Info.plist;
@@ -1546,9 +1630,10 @@
 		};
 		965A78592514F149009980D4 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1B75229D57B9672BF84D8A89 /* Pods-BeamUITests.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = X87W5M786F;
 				INFOPLIST_FILE = BeamUITests/Info.plist;
