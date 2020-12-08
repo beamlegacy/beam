@@ -164,6 +164,7 @@ public class TextNode: NSObject, CALayerDelegate {
 
     func delete() {
         parent?.removeChild(self)
+        editor.removeNode(self)
     }
 
     func insert(node: TextNode, after existingNode: TextNode) -> Bool {
@@ -484,12 +485,11 @@ public class TextNode: NSObject, CALayerDelegate {
         }
 
         let tintColor = NSColor(named: "EditorControlColor")!
-        let rect = CGRect(x: point.x, y: point.y, width: 7, height: 7)
+        let rect = CGRect(x: point.x, y: point.y, width: image.size.width / layer.contentsScale, height: image.size.height / layer.contentsScale)
 
         image = image.fill(color: tintColor)
 
         context.saveGState()
-        context.textMatrix = CGAffineTransform.identity
         context.translateBy(x: 0, y: image.size.height)
         context.scaleBy(x: 1.0, y: -1.0)
         context.draw(image.cgImage, in: rect)

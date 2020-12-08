@@ -219,7 +219,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         super.init(frame: NSRect())
         let l = CALayer()
         self.layer = l
-        l.backgroundColor = NSColor(named: "EditorBackgroundColor")!.cgColor
+        l.backgroundColor = NSColor.red.cgColor
         l.addSublayer(titleLayer)
         //titleLayer.backgroundColor = NSColor.red.cgColor.copy(alpha: 0.2)
         titleLayer.backgroundColor = NSColor(white: 1, alpha: 0).cgColor
@@ -773,6 +773,8 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             return t
         }
 
+        print(rootNode.note?.title)
+
         guard let titleString = rootNode.note?.title.attributed else { fatalError() }
         let f = NSFont.systemFont(ofSize: isBig ? 13 : 11, weight: .semibold)
         titleString.addAttribute(.font, value: f, range: titleString.wholeRange)
@@ -1025,6 +1027,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             }
             return root
         }()
+
         accessingMapping = true
         mapping[element] = node
         accessingMapping = false
