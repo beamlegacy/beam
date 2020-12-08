@@ -1,21 +1,11 @@
 //
 //  BeamNote.swift
-//  testWkWebViewSwiftUI
 //
 //  Created by Sebastien Metrot on 18/09/2020.
 //
 
 import Foundation
-import AppKit
 import Combine
-
-/*
- 
- Beam contains Notes
- A Note contains a tree of blocks. A Note has a title that has to be unique.
- A Block contains a list of text blocks. An element can be of different type (Bullet point, Numbered bullet point, Quote, Code, Header (1-6?)...). A Block can be referenced by any note
- A text block contains text. It contains the format of the text (Bold, Italic, Underline). There are different text block types to represent different attributes (Code, URL, Link...)
- */
 
 struct VisitedPage: Codable, Identifiable {
     var id: UUID = UUID()
