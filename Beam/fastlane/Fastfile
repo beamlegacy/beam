@@ -14,6 +14,7 @@
 # update_fastlane
 
 default_platform(:mac)
+xcversion(version: ENV["XCODE_VERSION"])
 
 platform :mac do
   desc "Run linting"
@@ -28,8 +29,53 @@ platform :mac do
     )
   end
 
+  desc "Register Device"
+  lane :register_local_device do
+    register_device(
+      name: `hostname | cut -d'.' -f1`,
+      udid: `ioreg -ad2 -c IOPlatformExpertDevice | xmllint --xpath '//key[.="IOPlatformUUID"]/following-sibling::*[1]/text()' -`,
+      team_id: ENV["TEAM_ID"],
+      username: ENV["CERT_USERNAME"]
+    )
+  end
+
   desc "Run tests"
   lane :tests do
+    # Parameters at https://docs.fastlane.tools/actions/cert/
+    get_certificates(
+      development: true,
+      force: false,
+      # Don't set the filename so we can easily see which certificate is used
+      # Proper one should be 68DY6473LM for Fabien penso
+      # You can see its value at https://developer.apple.com/account/resources/certificates/list inside the certificate url
+      # filename: "developer_id.cer",
+      output_path: "./certs",
+      username: ENV["CERT_USERNAME"],
+      team_id: ENV["TEAM_ID"],
+      team_name: ENV["TEAM_NAME"],
+      platform: "macos"
+    )
+
+    # Parameters at https://docs.fastlane.tools/actions/sigh/
+    get_provisioning_profile(
+      development: true,
+      username: ENV["CERT_USERNAME"],
+      app_identifier: ENV["TEAM_IDENTIFIER"],
+      team_id: ENV["TEAM_ID"],
+      team_name: ENV["TEAM_NAME"],
+      provisioning_name: "Beam Development",
+      cert_id: "68DY6473LM",
+      cert_owner_name: ENV["CERT_OWNER_NAME"],
+      skip_certificate_verification: true,
+      platform: "macos",
+      output_path: "./certs",
+      # Actually should be .profileprovision but fastlane complains. It will
+      # automatically fetch this profile, but you can just get the one from
+      # working md5sum: 5c00f51fe03c198182f31980df51a219
+      filename: "development.co.beamapp.macos.mobileprovision",
+      readonly: true, # Don't want to mess up mine
+      # force: false,
+    )
     clear_derived_data
     cocoapods
     run_tests(
