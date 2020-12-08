@@ -12,7 +12,7 @@ import NaturalLanguage
 import Accelerate
 import SwiftSoup
 
-class PageRangeTests: CoreDataTests {
+class PageRangeTests: XCTestCase {
 
     func testInit() throws {
         let pageRank = PageRank()
@@ -88,27 +88,30 @@ class PageRangeTests: CoreDataTests {
 
     }
 
+    let urls = [
+        "https://en.wikipedia.org/wiki/Saeid_Taghizadeh",
+        "https://en.wikipedia.org/wiki/Sarcohyla_cembra",
+        "https://en.wikipedia.org/wiki/Induction-induction",
+        "https://en.wikipedia.org/wiki/Robert_Logan_Jack",
+        "https://en.wikipedia.org/wiki/Bulbophyllum_calceolus",
+        "https://en.wikipedia.org/wiki/Steven_Welsh",
+        "https://en.wikipedia.org/wiki/1948_Holy_Cross_Crusaders_football_team",
+        "https://en.wikipedia.org/wiki/1958_ACC_Men%27s_Basketball_Tournament",
+        "https://en.wikipedia.org/wiki/Festo_Corp._v._Shoketsu_Kinzoku_Kogyo_Kabushiki_Co.",
+        "https://en.wikipedia.org/wiki/Lost_Lake_Woods,_Michigan",
+        "https://en.wikipedia.org/wiki/Sport",
+        "https://en.wikipedia.org/wiki/Competition",
+        "https://en.wikipedia.org/wiki/Physical_activity",
+        "https://en.wikipedia.org/wiki/Game",
+        "https://en.wikipedia.org/wiki/Entertainment"
+    ]
+
     func testIndex() {
-        let urls = [
-            "https://en.wikipedia.org/wiki/Saeid_Taghizadeh",
-            "https://en.wikipedia.org/wiki/Sarcohyla_cembra",
-            "https://en.wikipedia.org/wiki/Induction-induction",
-            "https://en.wikipedia.org/wiki/Robert_Logan_Jack",
-            "https://en.wikipedia.org/wiki/Bulbophyllum_calceolus",
-            "https://en.wikipedia.org/wiki/Steven_Welsh",
-            "https://en.wikipedia.org/wiki/1948_Holy_Cross_Crusaders_football_team",
-            "https://en.wikipedia.org/wiki/1958_ACC_Men%27s_Basketball_Tournament",
-            "https://en.wikipedia.org/wiki/Festo_Corp._v._Shoketsu_Kinzoku_Kogyo_Kabushiki_Co.",
-            "https://en.wikipedia.org/wiki/Lost_Lake_Woods,_Michigan",
-            "https://en.wikipedia.org/wiki/Sport",
-            "https://en.wikipedia.org/wiki/Competition",
-            "https://en.wikipedia.org/wiki/Physical_activity",
-            "https://en.wikipedia.org/wiki/Game",
-            // "https://en.wikipedia.org/wiki/Entertainment"
-        ]
+        var expectations = [XCTestExpectation]()
         for url in urls {
             if let url = URL(string: url) {
                 let expect = expectation(description: "load url \(url)")
+                expectations.append(expect)
                 let task = URLSession.shared.dataTask(with: url) { data, response, error in
                     if let error = error {
                         //self.handleClientError(error)
@@ -119,7 +122,7 @@ class PageRangeTests: CoreDataTests {
                     guard let httpResponse = response as? HTTPURLResponse,
                         (200...299).contains(httpResponse.statusCode) else {
                         //self.handleServerError(response)
-                        Logger.shared.logError("Server error \(response)", category: .web)
+                        Logger.shared.logError("Server error \(String(describing: response))", category: .web)
                         expect.fulfill()
                         return
                     }
@@ -133,14 +136,14 @@ class PageRangeTests: CoreDataTests {
                     }
                 }
                 task.resume()
-
-                waitForExpectations(timeout: 10) { error in
-                    Logger.shared.logError("Load error \(error) \(url)", category: .web)
-                }
             } else {
                 Logger.shared.logError("unable to make \(url) into an URL object", category: .general)
             }
         }
+
+        wait(for: expectations, timeout: 40, enforceOrder: false)
+
+        XCTAssertEqual(urls.count, index.documents.count)
         index.dump()
     }
 }

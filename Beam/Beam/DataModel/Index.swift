@@ -29,30 +29,11 @@ extension IndexDocument {
         self.title = title
         self.language = language ?? (NLLanguageRecognizer.dominantLanguage(for: contents) ?? .undetermined)
         length = contents.count
-        contentsWords = extractWords(from: contents)
-        titleWords = extractWords(from: title)
-    }
-
-    private func extractWords(from string: String) -> Set<String> {
-        // Store the tokenized substrings into an array.
-        var wordTokens = Set<String>()
-
-        // Use Natural Language's NLTagger to tokenize the input by word.
-        let tagger = NLTagger(tagSchemes: [.tokenType])
-        tagger.string = string
-
-        // Find all tokens in the string and append to the array.
-        tagger.enumerateTags(in: string.startIndex..<string.endIndex,
-                             unit: .word,
-                             scheme: .tokenType,
-                             options: [.omitWhitespace]) { (_, range) -> Bool in
-            wordTokens.insert(String(string[range].lowercased()))
-            return true
-        }
-
-        return wordTokens
+        contentsWords = Index.extractWords(from: contents)
+        titleWords = Index.extractWords(from: title)
     }
 }
+
 
 class Index: Codable {
     struct WordScore: Codable {
@@ -72,6 +53,36 @@ class Index: Codable {
 
     static let titleScore = Float(1.0)
     static let contentsScore = Float(2.0)
+
+    struct SearchResult {
+        var id: UUID
+        var score: Float
+        var title: String
+        var source: String
+    }
+
+    struct DocumentResult: Hashable {
+        var id: UUID
+        var score: Float
+    }
+
+    func search(string: String) -> [SearchResult] {
+        let inputWords = Self.extractWords(from: string)
+
+        var results = Set<DocumentResult>()
+        inputWords.map { word -> [DocumentResult] in
+            guard let wordMap = words[word] else { return [] }
+            return wordMap.instances.map { (key, value) -> Index.DocumentResult in
+                return DocumentResult(id: key, score: value.score)
+            }
+        }.reduce(results) { (results, documents) -> Set<Index.DocumentResult> in
+            documents.reduce(results) { (res, document) -> Set<Index.DocumentResult> in
+                DocumentResult(id: document.id, score: document.score)
+            }
+        }
+
+        return []
+    }
 
     func append(document: IndexDocument) {
         remove(id: document.id)
@@ -121,5 +132,30 @@ class Index: Codable {
 
     func dump() {
         print("Index contains \(words.count) words from \(documents.count) documents")
+        for doc in documents {
+            print("[Document \(doc.key)] - \(doc.value.title) / \(doc.value.source)")
+        }
     }
+
+    class func extractWords(from string: String) -> Set<String> {
+        // Store the tokenized substrings into an array.
+        var wordTokens = Set<String>()
+
+        // Use Natural Language's NLTagger to tokenize the input by word.
+        let tagger = NLTagger(tagSchemes: [.tokenType])
+        tagger.string = string
+
+        // Find all tokens in the string and append to the array.
+        tagger.enumerateTags(in: string.startIndex..<string.endIndex,
+                             unit: .word,
+                             scheme: .tokenType,
+                             options: [.omitWhitespace]) { (_, range) -> Bool in
+            wordTokens.insert(String(string[range].lowercased()))
+            return true
+        }
+
+        return wordTokens
+    }
+
+
 }
