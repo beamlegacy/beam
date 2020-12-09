@@ -8,13 +8,13 @@ struct Configuration {
     // Build configuration
     static private(set) var bundleIdentifier: String = Configuration.value(for: "CFBundleIdentifier")
     static private(set) var sentryKey = "$(SENTRY_KEY)"
-    static private(set) var sentryHostname = "$(SENTRY_HOSTNAME)"
-    static private(set) var sentryProject = "$(SENTRY_PROJECT)"
-    static private(set) var env = "$(ENV)"
+    static private(set) var sentryHostname = "o477543.ingest.sentry.io"
+    static private(set) var sentryProject = "5518785"
+    static private(set) var env = "debug"
 
     // Runtime configuration
-    static private(set) var apiBaseUrl = "$(API_BASE_URL)"
-    static private(set) var publicHostname = "$(PUBLIC_HOSTNAME)"
+    static private(set) var apiBaseUrl = "https://api.beamapp.co"
+    static private(set) var publicHostname = "app.beamapp.co"
 
     static private func value<T>(for key: String) -> T {
         guard let value = Bundle.main.infoDictionary?[key] as? T else {

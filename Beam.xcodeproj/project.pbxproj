@@ -13,7 +13,6 @@
 		4181713425810CDC00317ED8 /* Debug.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 4181712D25810CDC00317ED8 /* Debug.xcconfig */; };
 		4181713525810CDC00317ED8 /* Beam.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 4181712E25810CDC00317ED8 /* Beam.xcdatamodeld */; };
 		4181713625810CDC00317ED8 /* Release.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 4181713025810CDC00317ED8 /* Release.xcconfig */; };
-		4181713825810CDC00317ED8 /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181713225810CDC00317ED8 /* Configuration.swift */; };
 		418171EB2581107C00317ED8 /* AutoComplete.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181715B2581107C00317ED8 /* AutoComplete.swift */; };
 		418171EC2581107C00317ED8 /* Me.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181715E2581107C00317ED8 /* Me.swift */; };
 		418171ED2581107C00317ED8 /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181715F2581107C00317ED8 /* Session.swift */; };
@@ -138,6 +137,7 @@
 		418173BE2581251600317ED8 /* URL+BM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418173BD2581251600317ED8 /* URL+BM.swift */; };
 		418173C32581276F00317ED8 /* String+NSMutableAttributedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418173C22581276F00317ED8 /* String+NSMutableAttributedString.swift */; };
 		4181744325812C5F00317ED8 /* NSColor+BM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181744225812C5F00317ED8 /* NSColor+BM.swift */; };
+		41A969FF2581394300E6594B /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41A969FE2581394300E6594B /* Configuration.swift */; };
 		521812CF2524C597007E4B47 /* NoteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 521812CE2524C597007E4B47 /* NoteTests.swift */; };
 		527DF48725710ECB00A0A56D /* DocumentManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 527DF48625710ECB00A0A56D /* DocumentManagerTests.swift */; };
 		52B5EF78252F520100914D52 /* CoreDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52B5EF77252F520100914D52 /* CoreDataTests.swift */; };
@@ -191,7 +191,6 @@
 		4181712F25810CDC00317ED8 /* Beam.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Beam.xcdatamodel; sourceTree = "<group>"; };
 		4181713025810CDC00317ED8 /* Release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
 		4181713125810CDC00317ED8 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		4181713225810CDC00317ED8 /* Configuration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
 		4181715B2581107C00317ED8 /* AutoComplete.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AutoComplete.swift; sourceTree = "<group>"; };
 		4181715E2581107C00317ED8 /* Me.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Me.swift; sourceTree = "<group>"; };
 		4181715F2581107C00317ED8 /* Session.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Session.swift; sourceTree = "<group>"; };
@@ -316,6 +315,7 @@
 		418173BD2581251600317ED8 /* URL+BM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+BM.swift"; sourceTree = "<group>"; };
 		418173C22581276F00317ED8 /* String+NSMutableAttributedString.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+NSMutableAttributedString.swift"; sourceTree = "<group>"; };
 		4181744225812C5F00317ED8 /* NSColor+BM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSColor+BM.swift"; sourceTree = "<group>"; };
+		41A969FE2581394300E6594B /* Configuration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
 		521812CE2524C597007E4B47 /* NoteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteTests.swift; sourceTree = "<group>"; };
 		521813082524CEC6007E4B47 /* Fakery.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Fakery.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		5218130E2524CEDC007E4B47 /* Fakery.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Fakery.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -418,7 +418,7 @@
 			isa = PBXGroup;
 			children = (
 				4181713125810CDC00317ED8 /* Info.plist */,
-				4181713225810CDC00317ED8 /* Configuration.swift */,
+				41A969FE2581394300E6594B /* Configuration.swift */,
 				4181712B25810CDC00317ED8 /* Constants.swift */,
 				4181712D25810CDC00317ED8 /* Debug.xcconfig */,
 				4181713025810CDC00317ED8 /* Release.xcconfig */,
@@ -1291,7 +1291,6 @@
 				418172272581107C00317ED8 /* NSMutableAttributedString+BM.swift in Sources */,
 				4181723A2581107C00317ED8 /* Parser.swift in Sources */,
 				4181724A2581107C00317ED8 /* TextView.swift in Sources */,
-				4181713825810CDC00317ED8 /* Configuration.swift in Sources */,
 				4181722B2581107C00317ED8 /* String+Localization.swift in Sources */,
 				418172012581107C00317ED8 /* Document+CoreDataProperties.swift in Sources */,
 				418171EE2581107C00317ED8 /* GraphqlParametersProtocol.swift in Sources */,
@@ -1369,6 +1368,7 @@
 				418172062581107C00317ED8 /* Note.swift in Sources */,
 				418172072581107C00317ED8 /* Document.swift in Sources */,
 				418171FC2581107C00317ED8 /* RoamImporter.swift in Sources */,
+				41A969FF2581394300E6594B /* Configuration.swift in Sources */,
 				4181723C2581107C00317ED8 /* TextEditMovements.swift in Sources */,
 				418172202581107C00317ED8 /* Information.swift in Sources */,
 				4181727E258110D100317ED8 /* AppDelegate+URL.swift in Sources */,
