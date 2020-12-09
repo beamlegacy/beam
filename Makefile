@@ -73,7 +73,6 @@ swiftlint_rules:
 	swiftlint rules
 
 lint:
-	cd Beam
 	fastlane lint
 
 variable_injector:
