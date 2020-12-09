@@ -1,8 +1,8 @@
 import Foundation
 import Sentry
 
-class BMEventsTracker {
-    static let shared = BMEventsTracker()
+class EventsTracker {
+    static let shared = EventsTracker()
     private let dateFormatter: DateFormatter = {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
@@ -14,7 +14,7 @@ class BMEventsTracker {
         crumb.message = event.rawValue
         SentrySDK.addBreadcrumb(crumb: crumb)
 
-        BMLogger.shared.logInfo(event.rawValue, category: .tracking)
+        Logger.shared.logInfo(event.rawValue, category: .tracking)
     }
 
     func log(event: Event, properties: [String: String]) {
@@ -23,7 +23,7 @@ class BMEventsTracker {
         crumb.data = properties
         SentrySDK.addBreadcrumb(crumb: crumb)
 
-        BMLogger.shared.logInfo(event.rawValue, category: .tracking)
+        Logger.shared.logInfo(event.rawValue, category: .tracking)
     }
 
     func logBreadcrumb(message: String? = nil,
@@ -46,7 +46,7 @@ class BMEventsTracker {
 }
 
 // MARK: - Events
-extension BMEventsTracker {
+extension EventsTracker {
     enum Event: String, CaseIterable {
         // App livecycle
         case appLaunch = "APP_LAUNCH"

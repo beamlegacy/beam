@@ -1,5 +1,5 @@
 //
-//  URL+BM.swift
+//  URL+Beam.swift
 //  Beam
 //
 //  Created by Ravichandrane Rajendran on 09/12/2020.

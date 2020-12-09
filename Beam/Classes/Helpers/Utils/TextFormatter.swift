@@ -1,6 +1,6 @@
 import Foundation
 
-class BMTextFormatter {
+class TextFormatter {
     static let linkPatterns: [String] = ["\\[\\[(.+?)\\]\\]", "\\#([^\\#\\s]+)"]
 
     class func parseForInternalLinks(_ string: String) -> String {

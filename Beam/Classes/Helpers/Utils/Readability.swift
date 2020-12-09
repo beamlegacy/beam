@@ -1,5 +1,5 @@
 //
-//  BMReadability.swift
+//  Readability.swift
 //  Beam
 //
 //  Created by Sebastien Metrot on 29/09/2020.
@@ -9,7 +9,7 @@
 import Foundation
 import WebKit
 
-struct BMReadability {
+struct Readability {
     enum Direction {
         case ltr
         case rtl
@@ -24,11 +24,11 @@ struct BMReadability {
     var excerpt: String = ""
     var byLine: String = ""
 
-    static func read(_ webView: WKWebView, _ getResults: @escaping (Result<BMReadability, Error>) -> Void) {
+    static func read(_ webView: WKWebView, _ getResults: @escaping (Result<Readability, Error>) -> Void) {
         //let now = Date()
         webView.evaluateJavaScript(readabilitySource) { (res, err) in
             if let r = res as? [String: Any] {
-                var read = BMReadability()
+                var read = Readability()
                 read.siteName = str(r["siteName"])
                 read.textContent = str(r["textContent"])
                 read.dir = str(r["dir"]) == "ltor" ? .ltr : .rtl

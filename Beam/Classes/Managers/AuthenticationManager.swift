@@ -22,7 +22,7 @@ class AuthenticationManager {
     }()
     private init() {}
     deinit {
-        BMLogger.shared.logInfo("Deallocating \(type(of: self))", category: .memory)
+        Logger.shared.logInfo("Deallocating \(type(of: self))", category: .memory)
         semaphore.signal()
     }
     var accessToken: String? {
@@ -47,7 +47,7 @@ class AuthenticationManager {
     func updateAccessTokenIfNeeded() {
         // Refresh the token in a sync matter
         if !accessTokenIsValid(), refreshTokenIsValid() {
-            BMEventsTracker.shared.logBreadcrumb(message: "AccessToken is invalid, refresh token is valid",
+            EventsTracker.shared.logBreadcrumb(message: "AccessToken is invalid, refresh token is valid",
                                                category: "app.lifecycle",
                                                type: "system")
             updateAccessToken()
@@ -55,14 +55,14 @@ class AuthenticationManager {
     }
 
     private func log(message: String) {
-        BMLogger.shared.logDebug(message, category: .network)
-        BMEventsTracker.shared.logBreadcrumb(message: message, category: "app.lifecycle", type: "system")
+        Logger.shared.logDebug(message, category: .network)
+        EventsTracker.shared.logBreadcrumb(message: message, category: "app.lifecycle", type: "system")
     }
 
     // We want to make sure only one call to refresh token is done at a time, as we have many parallels
     // network API calls and we don't want to have multiple refresh calls when a token suddenly expires
     private func updateAccessToken() {
-        BMLogger.shared.logDebug("AuthenticationManager.refreshToken", category: .network)
+        Logger.shared.logDebug("AuthenticationManager.refreshToken", category: .network)
 
         group.enter()
         queue.addOperation {
@@ -85,8 +85,8 @@ class AuthenticationManager {
                 return
             }
 
-            BMLogger.shared.logInfo("accessToken has expired, updating it", category: .network)
-            BMEventsTracker.shared.logBreadcrumb(message: "accessToken has expired, updating it",
+            Logger.shared.logInfo("accessToken has expired, updating it", category: .network)
+            EventsTracker.shared.logBreadcrumb(message: "accessToken has expired, updating it",
                                                category: "app.lifecycle",
                                                type: "system")
 
@@ -111,7 +111,7 @@ class AuthenticationManager {
 
     private func handleUpdateAccessTokenFailure(_ error: Error) {
         LibrariesManager.nonFatalError("Can't refresh token, removing existing tokens", error: error)
-        BMEventsTracker.shared.logBreadcrumb(message: "Can't refresh token, removing existing tokens",
+        EventsTracker.shared.logBreadcrumb(message: "Can't refresh token, removing existing tokens",
                                            category: "app.lifecycle",
                                            type: "system")
         self.accessToken = nil
@@ -121,15 +121,15 @@ class AuthenticationManager {
     private func handleUpdateAccessTokenSuccess(_ refresh: UserSessionRequest.RenewCredentials, accessToken: String) {
         if let errors = refresh.errors, !errors.isEmpty {
             LibrariesManager.nonFatalError("Can't refresh token: \(errors.compactMap { $0.message })")
-            BMEventsTracker.shared.logBreadcrumb(message: "Can't refresh token, removing existing tokens",
+            EventsTracker.shared.logBreadcrumb(message: "Can't refresh token, removing existing tokens",
                                                category: "app.lifecycle",
                                                type: "system")
             self.accessToken = nil
             self.refreshToken = nil
         } else if let newAccessToken = refresh.accessToken,
             let newRefreshToken = refresh.refreshToken {
-            BMLogger.shared.logInfo("Expiration \(String(describing: self.expirationDate(accessToken))) -> \(String(describing: self.expirationDate(newAccessToken)))", category: .network)
-            BMEventsTracker.shared.logBreadcrumb(message: "Refreshed access token and refresh token",
+            Logger.shared.logInfo("Expiration \(String(describing: self.expirationDate(accessToken))) -> \(String(describing: self.expirationDate(newAccessToken)))", category: .network)
+            EventsTracker.shared.logBreadcrumb(message: "Refreshed access token and refresh token",
                                                category: "app.lifecycle",
                                                type: "system")
 
@@ -137,7 +137,7 @@ class AuthenticationManager {
             self.refreshToken = newRefreshToken
         } else {
             LibrariesManager.nonFatalError("Can't refresh token, returned success, no error and no token. Removing existing tokens")
-            BMEventsTracker.shared.logBreadcrumb(message: "Can't refresh token, returned success, no error and no token. Removing existing tokens",
+            EventsTracker.shared.logBreadcrumb(message: "Can't refresh token, returned success, no error and no token. Removing existing tokens",
                                                category: "app.lifecycle",
                                                type: "system")
             self.accessToken = nil
@@ -153,7 +153,7 @@ class AuthenticationManager {
         // add 1 hour just in case
         let result = expirationDate > Date().addingTimeInterval(60 * 60)
         if !result {
-            BMLogger.shared.logDebug("Access token is invalid: \(expirationDate)", category: .network)
+            Logger.shared.logDebug("Access token is invalid: \(expirationDate)", category: .network)
         }
 
         return result
@@ -167,7 +167,7 @@ class AuthenticationManager {
         // add 1 hour just in case
         let result = expirationDate > Date().addingTimeInterval(60 * 60)
         if result {
-            BMLogger.shared.logInfo("Refresh token is valid: \(expirationDate)", category: .network)
+            Logger.shared.logInfo("Refresh token is valid: \(expirationDate)", category: .network)
         }
 
         return result

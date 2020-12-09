@@ -21,7 +21,7 @@ class Bullet: NSManagedObject {
     }
 
     func parsedContent(_ parsedInternalLink: Bool = false) -> String {
-        return parsedInternalLink ? BMTextFormatter.parseForInternalLinks(content) : content
+        return parsedInternalLink ? TextFormatter.parseForInternalLinks(content) : content
     }
 
     func internalLink() -> String {

@@ -618,7 +618,7 @@ class Parser {
         }
 
         if !context.isDone {
-            BMLogger.shared.logError("Couldn't parse AST: \(lexer.input)", category: .lexer)
+            Logger.shared.logError("Couldn't parse AST: \(lexer.input)", category: .lexer)
         }
         return root
     }

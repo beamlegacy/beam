@@ -71,14 +71,14 @@ extension APIRequest {
                     // Because this is a possible behavior.
                     value = nil
                 case .keyNotFound(_, let context), .typeMismatch(_, let context):
-                    BMLogger.shared.logError("🛑 APIResultWrapper init \(context.debugDescription)", category: .network)
+                    Logger.shared.logError("🛑 APIResultWrapper init \(context.debugDescription)", category: .network)
                     throw error
                 default:
-                    BMLogger.shared.logError("🛑 APIResultWrapper init \(error.localizedDescription)", category: .network)
+                    Logger.shared.logError("🛑 APIResultWrapper init \(error.localizedDescription)", category: .network)
                     throw error
                 }
             } catch {
-                BMLogger.shared.logError("🛑 APIResultWrapper init \(error.localizedDescription)", category: .network)
+                Logger.shared.logError("🛑 APIResultWrapper init \(error.localizedDescription)", category: .network)
                 throw error
             }
 

@@ -26,7 +26,7 @@ class Document: NSManagedObject {
         do {
             try context.save()
         } catch {
-            BMLogger.shared.logError(error.localizedDescription, category: .coredata)
+            Logger.shared.logError(error.localizedDescription, category: .coredata)
         }
     }
 
@@ -40,7 +40,7 @@ class Document: NSManagedObject {
             return fetchedTransactions
         } catch {
             // TODO: raise error?
-            BMLogger.shared.logError("Can't count: \(error)", category: .coredata)
+            Logger.shared.logError("Can't count: \(error)", category: .coredata)
         }
 
         return 0
@@ -56,7 +56,7 @@ class Document: NSManagedObject {
             let fetchedDocument = try context.fetch(fetchRequest)
             return fetchedDocument.first
         } catch {
-            BMLogger.shared.logError("Error fetching note: \(error.localizedDescription)", category: .coredata)
+            Logger.shared.logError("Error fetching note: \(error.localizedDescription)", category: .coredata)
         }
 
         return nil
@@ -72,7 +72,7 @@ class Document: NSManagedObject {
             return fetchedDocuments
         } catch {
             // TODO: raise error?
-            BMLogger.shared.logError("Can't fetch all: \(error)", category: .coredata)
+            Logger.shared.logError("Can't fetch all: \(error)", category: .coredata)
         }
 
         return []

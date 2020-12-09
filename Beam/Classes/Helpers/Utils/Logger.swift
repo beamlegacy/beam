@@ -18,8 +18,8 @@ enum LogCategory: String {
     case search
 }
 
-final class BMLogger {
-    static let shared = BMLogger()
+final class Logger {
+    static let shared = Logger()
 
     private var subsystem = Configuration.bundleIdentifier
     private let hideCategories: [LogCategory] = [.web]

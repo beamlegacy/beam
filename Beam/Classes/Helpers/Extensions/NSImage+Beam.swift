@@ -1,5 +1,5 @@
 //
-//  NSImage+BM.swift
+//  NSImage+Beam.swift
 //  Beam
 //
 //  Created by Ravichandrane Rajendran on 07/12/2020.

@@ -1,5 +1,5 @@
 //
-//  NSRange+BM.swift
+//  NSRange+Beam.swift
 //  Beam
 //
 //  Created by Sebastien Metrot on 28/09/2020.

@@ -1,5 +1,5 @@
 //
-//  NSColor+BM.swift
+//  NSColor+Beam.swift
 //  Beam
 //
 //  Created by Ravichandrane Rajendran on 09/12/2020.

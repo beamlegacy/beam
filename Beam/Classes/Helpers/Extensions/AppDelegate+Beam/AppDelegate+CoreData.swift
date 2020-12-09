@@ -42,7 +42,7 @@ extension AppDelegate {
         if savePanel.runModal() == .OK, let url = savePanel.url {
             if !url.startAccessingSecurityScopedResource() {
                 // TODO: raise error?
-                BMLogger.shared.logError("startAccessingSecurityScopedResource returned false. This directory might not need it, or this URL might not be a security scoped URL, or maybe something's wrong?", category: .general)
+                Logger.shared.logError("startAccessingSecurityScopedResource returned false. This directory might not need it, or this URL might not be a security scoped URL, or maybe something's wrong?", category: .general)
             }
 
             CoreDataManager.shared.backup(url)
@@ -107,7 +107,7 @@ extension AppDelegate {
                 try CoreDataManager.shared.save()
             } catch {
                 // TODO: raise error?
-                BMLogger.shared.logError("error: \(error.localizedDescription)", category: .general)
+                Logger.shared.logError("error: \(error.localizedDescription)", category: .general)
             }
             self.updateBadge()
 

@@ -1,5 +1,5 @@
 //
-//  BMAnimation.swift
+//  Animation.swift
 //  Beam
 //
 //  Created by Sebastien Metrot on 20/11/2020.
@@ -8,25 +8,25 @@
 import Foundation
 import Combine
 
-enum BMAnimationState {
+enum AnimationState {
     case stopped
     case running
     case finished
 }
 
-class BMAnimation {
+class Animation {
     private var duration: CFTimeInterval
     private var currentTime: CFTimeInterval = 0
     private var scope: Cancellable?
     var easing: (CFTimeInterval) -> CFTimeInterval = { t in t }
 
-    @Published var state: BMAnimationState = .stopped
+    @Published var state: AnimationState = .stopped
 
     init(duration: CFTimeInterval) {
         self.duration = duration
     }
 
-    func start(_ tickPublisher: AnyPublisher<BMTick, Never>) {
+    func start(_ tickPublisher: AnyPublisher<Tick, Never>) {
         guard duration > 0 else {
             currentTime = 0
             update(1)

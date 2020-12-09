@@ -235,7 +235,7 @@ public class TextNode: NSObject, CALayerDelegate {
         return computedIdealSize
     }
 
-    var frameAnimation: BMFrameAnimation?
+    var frameAnimation: FrameAnimation?
     var frameAnimationCancellable = Set<AnyCancellable>()
     func cancelFrameAnimation() {
         frameAnimation = nil

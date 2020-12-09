@@ -89,14 +89,14 @@ class BeamNote: BeamElement {
 
             return DocumentStruct(id: id, title: title, createdAt: creationDate, updatedAt: updateDate, data: data, documentType: type == .journal ? .journal : .note)
         } catch {
-            BMLogger.shared.logError("Unable to encode BeamNote into DocumentStruct [\(title) {\(id)}]", category: .document)
+            Logger.shared.logError("Unable to encode BeamNote into DocumentStruct [\(title) {\(id)}]", category: .document)
             return nil
         }
     }
 
     func save(documentManager: DocumentManager, completion: ((Result<Bool, Error>) -> Void)? = nil) {
         guard let documentStruct = documentStruct else {
-            BMLogger.shared.logError("Unable to encode BeamNote into DocumentStruct [\(title) {\(id)}]", category: .document)
+            Logger.shared.logError("Unable to encode BeamNote into DocumentStruct [\(title) {\(id)}]", category: .document)
             completion?(.success(false))
             return
         }
@@ -138,12 +138,12 @@ class BeamNote: BeamElement {
         }
 
         #if DEBUG
-        BMLogger.shared.logInfo("Note loaded:\n\(String(data: doc.data, encoding: .utf8)!)\n", category: .document)
+        Logger.shared.logInfo("Note loaded:\n\(String(data: doc.data, encoding: .utf8)!)\n", category: .document)
         #endif
         do {
             return try instanciateNote(doc)
         } catch {
-            BMLogger.shared.logError("Unable to decode today's note", category: .document)
+            Logger.shared.logError("Unable to decode today's note", category: .document)
         }
 
         return nil
@@ -157,7 +157,7 @@ class BeamNote: BeamElement {
             do {
                 return try instanciateNote(doc)
             } catch {
-                BMLogger.shared.logError("Unable to load document \(doc.title) (\(doc.id))", category: .document)
+                Logger.shared.logError("Unable to load document \(doc.title) (\(doc.id))", category: .document)
                 return nil
             }
         }
@@ -196,7 +196,7 @@ class BeamNote: BeamElement {
             do {
                 return try instanciateNote(doc)
             } catch {
-                BMLogger.shared.logError("Unable to load document \(doc.title) (\(doc.id))", category: .document)
+                Logger.shared.logError("Unable to load document \(doc.title) (\(doc.id))", category: .document)
                 return nil
             }
         }

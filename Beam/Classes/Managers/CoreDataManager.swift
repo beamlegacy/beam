@@ -102,14 +102,14 @@ class CoreDataManager {
 
     class func save(_ context: NSManagedObjectContext) throws {
         if !context.commitEditing() {
-            BMLogger.shared.logError("unable to commit editing before saving", category: .coredata)
+            Logger.shared.logError("unable to commit editing before saving", category: .coredata)
         }
 
         if context.hasChanges {
             do {
                 try context.save()
             } catch {
-                BMLogger.shared.logError("unable to save: \(error.localizedDescription)", category: .coredata)
+                Logger.shared.logError("unable to save: \(error.localizedDescription)", category: .coredata)
                 throw error
             }
         }
@@ -125,14 +125,14 @@ class CoreDataManager {
                     try backupFile.deleteDirectory()
                 } catch {
                     // TODO: raise error?
-                    BMLogger.shared.logError("Can't backup: \(error)", category: .coredata)
+                    Logger.shared.logError("Can't backup: \(error)", category: .coredata)
                 }
             }
 
             try FileManager().copyItem(at: backupFile.fileURL, to: url)
         } catch {
             // TODO: raise error?
-            BMLogger.shared.logError("Can't backup: \(error)", category: .coredata)
+            Logger.shared.logError("Can't backup: \(error)", category: .coredata)
         }
     }
 
@@ -149,7 +149,7 @@ class CoreDataManager {
                 try fileManager.copyItem(at: url, to: storeURL)
             } catch {
                 // TODO: raise error?
-                BMLogger.shared.logError("Can't import backup: \(error)", category: .coredata)
+                Logger.shared.logError("Can't import backup: \(error)", category: .coredata)
             }
 
             completion?()

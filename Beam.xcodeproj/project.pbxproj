@@ -34,7 +34,7 @@
 		418171FD2581107C00317ED8 /* NavigationContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171742581107C00317ED8 /* NavigationContext.swift */; };
 		418171FE2581107C00317ED8 /* Html2Md.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171752581107C00317ED8 /* Html2Md.swift */; };
 		418171FF2581107C00317ED8 /* CoreDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171772581107C00317ED8 /* CoreDataManager.swift */; };
-		418172002581107C00317ED8 /* NotificationName+BM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171782581107C00317ED8 /* NotificationName+BM.swift */; };
+		418172002581107C00317ED8 /* NotificationName+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171782581107C00317ED8 /* NotificationName+Beam.swift */; };
 		418172012581107C00317ED8 /* Document+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171792581107C00317ED8 /* Document+CoreDataProperties.swift */; };
 		418172022581107C00317ED8 /* Bullet+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181717A2581107C00317ED8 /* Bullet+CoreDataProperties.swift */; };
 		418172032581107C00317ED8 /* Bullet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181717B2581107C00317ED8 /* Bullet.swift */; };
@@ -42,35 +42,35 @@
 		418172052581107C00317ED8 /* Note+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181717D2581107C00317ED8 /* Note+CoreDataProperties.swift */; };
 		418172062581107C00317ED8 /* Note.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181717E2581107C00317ED8 /* Note.swift */; };
 		418172072581107C00317ED8 /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181717F2581107C00317ED8 /* Document.swift */; };
-		418172082581107C00317ED8 /* NSManagedObject+BM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171802581107C00317ED8 /* NSManagedObject+BM.swift */; };
-		418172092581107C00317ED8 /* CoreDataManager+BM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171812581107C00317ED8 /* CoreDataManager+BM.swift */; };
+		418172082581107C00317ED8 /* NSManagedObject+initExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171802581107C00317ED8 /* NSManagedObject+initExtension.swift */; };
+		418172092581107C00317ED8 /* CoreDataManager+backupExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171812581107C00317ED8 /* CoreDataManager+backupExtension.swift */; };
 		4181720A2581107C00317ED8 /* BrowserTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171822581107C00317ED8 /* BrowserTab.swift */; };
 		4181720C2581107C00317ED8 /* BeamNote.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171842581107C00317ED8 /* BeamNote.swift */; };
 		4181720D2581107C00317ED8 /* BID.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171852581107C00317ED8 /* BID.swift */; };
 		4181720E2581107C00317ED8 /* NoteBackForwardList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171862581107C00317ED8 /* NoteBackForwardList.swift */; };
 		4181720F2581107C00317ED8 /* PageRank.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171872581107C00317ED8 /* PageRank.swift */; };
-		418172102581107C00317ED8 /* BMTextFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181718A2581107C00317ED8 /* BMTextFormatter.swift */; };
-		418172112581107C00317ED8 /* BMReadability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181718B2581107C00317ED8 /* BMReadability.swift */; };
-		418172122581107C00317ED8 /* BMEventsTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181718C2581107C00317ED8 /* BMEventsTracker.swift */; };
-		418172132581107C00317ED8 /* BMLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181718D2581107C00317ED8 /* BMLogger.swift */; };
+		418172102581107C00317ED8 /* TextFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181718A2581107C00317ED8 /* TextFormatter.swift */; };
+		418172112581107C00317ED8 /* Readability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181718B2581107C00317ED8 /* Readability.swift */; };
+		418172122581107C00317ED8 /* EventsTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181718C2581107C00317ED8 /* EventsTracker.swift */; };
+		418172132581107C00317ED8 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181718D2581107C00317ED8 /* Logger.swift */; };
 		418172152581107C00317ED8 /* NSContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181718F2581107C00317ED8 /* NSContainerView.swift */; };
 		418172172581107C00317ED8 /* OverrideConsole.js in Resources */ = {isa = PBXBuildFile; fileRef = 418171912581107C00317ED8 /* OverrideConsole.js */; };
 		418172182581107C00317ED8 /* PerformanceDebug.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171922581107C00317ED8 /* PerformanceDebug.swift */; };
 		418172192581107C00317ED8 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171942581107C00317ED8 /* Persistence.swift */; };
 		4181721A2581107C00317ED8 /* StandardStorable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171952581107C00317ED8 /* StandardStorable.swift */; };
 		4181721B2581107C00317ED8 /* Maths.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171962581107C00317ED8 /* Maths.swift */; };
-		4181721D2581107C00317ED8 /* NSImage+BM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171982581107C00317ED8 /* NSImage+BM.swift */; };
-		4181721E2581107C00317ED8 /* OSLog+BM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171992581107C00317ED8 /* OSLog+BM.swift */; };
+		4181721D2581107C00317ED8 /* NSImage+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171982581107C00317ED8 /* NSImage+Beam.swift */; };
+		4181721E2581107C00317ED8 /* OSLog+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171992581107C00317ED8 /* OSLog+Beam.swift */; };
 		4181721F2581107C00317ED8 /* JSSourceLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181719A2581107C00317ED8 /* JSSourceLoader.swift */; };
 		418172202581107C00317ED8 /* Information.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181719B2581107C00317ED8 /* Information.swift */; };
 		418172212581107C00317ED8 /* String+LoremIpsum.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181719D2581107C00317ED8 /* String+LoremIpsum.swift */; };
-		418172222581107C00317ED8 /* NSView+BM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181719E2581107C00317ED8 /* NSView+BM.swift */; };
+		418172222581107C00317ED8 /* NSView+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181719E2581107C00317ED8 /* NSView+Beam.swift */; };
 		418172232581107C00317ED8 /* String+Ranges.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181719F2581107C00317ED8 /* String+Ranges.swift */; };
 		418172242581107C00317ED8 /* String+URL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171A02581107C00317ED8 /* String+URL.swift */; };
 		418172252581107C00317ED8 /* String+Regex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171A12581107C00317ED8 /* String+Regex.swift */; };
-		418172262581107C00317ED8 /* NSRange+BM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171A22581107C00317ED8 /* NSRange+BM.swift */; };
-		418172272581107C00317ED8 /* NSMutableAttributedString+BM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171A32581107C00317ED8 /* NSMutableAttributedString+BM.swift */; };
-		418172282581107C00317ED8 /* ClosedRange+BM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171A42581107C00317ED8 /* ClosedRange+BM.swift */; };
+		418172262581107C00317ED8 /* NSRange+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171A22581107C00317ED8 /* NSRange+Beam.swift */; };
+		418172272581107C00317ED8 /* NSMutableAttributedString+Range.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171A32581107C00317ED8 /* NSMutableAttributedString+Range.swift */; };
+		418172282581107C00317ED8 /* ClosedRange+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171A42581107C00317ED8 /* ClosedRange+Beam.swift */; };
 		4181722A2581107C00317ED8 /* NSRect+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171A62581107C00317ED8 /* NSRect+Beam.swift */; };
 		4181722B2581107C00317ED8 /* String+Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171A72581107C00317ED8 /* String+Localization.swift */; };
 		4181722C2581107C00317ED8 /* AutoCompleteList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171AB2581107C00317ED8 /* AutoCompleteList.swift */; };
@@ -122,9 +122,9 @@
 		4181727E258110D100317ED8 /* AppDelegate+URL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181727A258110D100317ED8 /* AppDelegate+URL.swift */; };
 		418172AA25811A3A00317ED8 /* BMTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418172A825811A3A00317ED8 /* BMTextField.swift */; };
 		418172AB25811A3A00317ED8 /* BMTextFieldView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418172A925811A3A00317ED8 /* BMTextFieldView.swift */; };
-		418172B525811AAA00317ED8 /* BMTick.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418172B225811AAA00317ED8 /* BMTick.swift */; };
-		418172B625811AAA00317ED8 /* BMFrameAnimation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418172B325811AAA00317ED8 /* BMFrameAnimation.swift */; };
-		418172CF25811AF800317ED8 /* BMAnimation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418172CE25811AF800317ED8 /* BMAnimation.swift */; };
+		418172B525811AAA00317ED8 /* Tick.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418172B225811AAA00317ED8 /* Tick.swift */; };
+		418172B625811AAA00317ED8 /* FrameAnimation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418172B325811AAA00317ED8 /* FrameAnimation.swift */; };
+		418172CF25811AF800317ED8 /* Animation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418172CE25811AF800317ED8 /* Animation.swift */; };
 		418172D625811B8700317ED8 /* RoundRectButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418172D525811B8700317ED8 /* RoundRectButtonStyle.swift */; };
 		418172FF25811DB200317ED8 /* Readability.js in Resources */ = {isa = PBXBuildFile; fileRef = 418172FD25811DB200317ED8 /* Readability.js */; };
 		4181730025811DB200317ED8 /* SelectionObserver.js in Resources */ = {isa = PBXBuildFile; fileRef = 418172FE25811DB200317ED8 /* SelectionObserver.js */; };
@@ -133,10 +133,10 @@
 		4181733225811F4800317ED8 /* KeyCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181733125811F4800317ED8 /* KeyCode.swift */; };
 		4181733725811F6300317ED8 /* Mode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181733625811F6300317ED8 /* Mode.swift */; };
 		4181734E2581204900317ED8 /* BeamState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181734D2581204900317ED8 /* BeamState.swift */; };
-		418173B6258124D500317ED8 /* NSAttributedString+BM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418173B5258124D500317ED8 /* NSAttributedString+BM.swift */; };
-		418173BE2581251600317ED8 /* URL+BM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418173BD2581251600317ED8 /* URL+BM.swift */; };
+		418173B6258124D500317ED8 /* NSAttributedString+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418173B5258124D500317ED8 /* NSAttributedString+Beam.swift */; };
+		418173BE2581251600317ED8 /* URL+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418173BD2581251600317ED8 /* URL+Beam.swift */; };
 		418173C32581276F00317ED8 /* String+NSMutableAttributedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418173C22581276F00317ED8 /* String+NSMutableAttributedString.swift */; };
-		4181744325812C5F00317ED8 /* NSColor+BM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181744225812C5F00317ED8 /* NSColor+BM.swift */; };
+		4181744325812C5F00317ED8 /* NSColor+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181744225812C5F00317ED8 /* NSColor+Beam.swift */; };
 		41A969FF2581394300E6594B /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41A969FE2581394300E6594B /* Configuration.swift */; };
 		521812CF2524C597007E4B47 /* NoteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 521812CE2524C597007E4B47 /* NoteTests.swift */; };
 		527DF48725710ECB00A0A56D /* DocumentManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 527DF48625710ECB00A0A56D /* DocumentManagerTests.swift */; };
@@ -212,7 +212,7 @@
 		418171742581107C00317ED8 /* NavigationContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NavigationContext.swift; sourceTree = "<group>"; };
 		418171752581107C00317ED8 /* Html2Md.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Html2Md.swift; sourceTree = "<group>"; };
 		418171772581107C00317ED8 /* CoreDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDataManager.swift; sourceTree = "<group>"; };
-		418171782581107C00317ED8 /* NotificationName+BM.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NotificationName+BM.swift"; sourceTree = "<group>"; };
+		418171782581107C00317ED8 /* NotificationName+Beam.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NotificationName+Beam.swift"; sourceTree = "<group>"; };
 		418171792581107C00317ED8 /* Document+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Document+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		4181717A2581107C00317ED8 /* Bullet+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Bullet+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		4181717B2581107C00317ED8 /* Bullet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Bullet.swift; sourceTree = "<group>"; };
@@ -220,35 +220,35 @@
 		4181717D2581107C00317ED8 /* Note+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Note+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		4181717E2581107C00317ED8 /* Note.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Note.swift; sourceTree = "<group>"; };
 		4181717F2581107C00317ED8 /* Document.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Document.swift; sourceTree = "<group>"; };
-		418171802581107C00317ED8 /* NSManagedObject+BM.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSManagedObject+BM.swift"; sourceTree = "<group>"; };
-		418171812581107C00317ED8 /* CoreDataManager+BM.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CoreDataManager+BM.swift"; sourceTree = "<group>"; };
+		418171802581107C00317ED8 /* NSManagedObject+initExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSManagedObject+initExtension.swift"; sourceTree = "<group>"; };
+		418171812581107C00317ED8 /* CoreDataManager+backupExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CoreDataManager+backupExtension.swift"; sourceTree = "<group>"; };
 		418171822581107C00317ED8 /* BrowserTab.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BrowserTab.swift; sourceTree = "<group>"; };
 		418171842581107C00317ED8 /* BeamNote.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BeamNote.swift; sourceTree = "<group>"; };
 		418171852581107C00317ED8 /* BID.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BID.swift; sourceTree = "<group>"; };
 		418171862581107C00317ED8 /* NoteBackForwardList.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NoteBackForwardList.swift; sourceTree = "<group>"; };
 		418171872581107C00317ED8 /* PageRank.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PageRank.swift; sourceTree = "<group>"; };
-		4181718A2581107C00317ED8 /* BMTextFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BMTextFormatter.swift; sourceTree = "<group>"; };
-		4181718B2581107C00317ED8 /* BMReadability.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BMReadability.swift; sourceTree = "<group>"; };
-		4181718C2581107C00317ED8 /* BMEventsTracker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BMEventsTracker.swift; sourceTree = "<group>"; };
-		4181718D2581107C00317ED8 /* BMLogger.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BMLogger.swift; sourceTree = "<group>"; };
+		4181718A2581107C00317ED8 /* TextFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextFormatter.swift; sourceTree = "<group>"; };
+		4181718B2581107C00317ED8 /* Readability.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Readability.swift; sourceTree = "<group>"; };
+		4181718C2581107C00317ED8 /* EventsTracker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EventsTracker.swift; sourceTree = "<group>"; };
+		4181718D2581107C00317ED8 /* Logger.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 		4181718F2581107C00317ED8 /* NSContainerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSContainerView.swift; sourceTree = "<group>"; };
 		418171912581107C00317ED8 /* OverrideConsole.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = OverrideConsole.js; sourceTree = "<group>"; };
 		418171922581107C00317ED8 /* PerformanceDebug.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PerformanceDebug.swift; sourceTree = "<group>"; };
 		418171942581107C00317ED8 /* Persistence.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
 		418171952581107C00317ED8 /* StandardStorable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StandardStorable.swift; sourceTree = "<group>"; };
 		418171962581107C00317ED8 /* Maths.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Maths.swift; sourceTree = "<group>"; };
-		418171982581107C00317ED8 /* NSImage+BM.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSImage+BM.swift"; sourceTree = "<group>"; };
-		418171992581107C00317ED8 /* OSLog+BM.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "OSLog+BM.swift"; sourceTree = "<group>"; };
+		418171982581107C00317ED8 /* NSImage+Beam.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSImage+Beam.swift"; sourceTree = "<group>"; };
+		418171992581107C00317ED8 /* OSLog+Beam.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "OSLog+Beam.swift"; sourceTree = "<group>"; };
 		4181719A2581107C00317ED8 /* JSSourceLoader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSSourceLoader.swift; sourceTree = "<group>"; };
 		4181719B2581107C00317ED8 /* Information.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Information.swift; sourceTree = "<group>"; };
 		4181719D2581107C00317ED8 /* String+LoremIpsum.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+LoremIpsum.swift"; sourceTree = "<group>"; };
-		4181719E2581107C00317ED8 /* NSView+BM.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSView+BM.swift"; sourceTree = "<group>"; };
+		4181719E2581107C00317ED8 /* NSView+Beam.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSView+Beam.swift"; sourceTree = "<group>"; };
 		4181719F2581107C00317ED8 /* String+Ranges.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+Ranges.swift"; sourceTree = "<group>"; };
 		418171A02581107C00317ED8 /* String+URL.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+URL.swift"; sourceTree = "<group>"; };
 		418171A12581107C00317ED8 /* String+Regex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+Regex.swift"; sourceTree = "<group>"; };
-		418171A22581107C00317ED8 /* NSRange+BM.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSRange+BM.swift"; sourceTree = "<group>"; };
-		418171A32581107C00317ED8 /* NSMutableAttributedString+BM.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSMutableAttributedString+BM.swift"; sourceTree = "<group>"; };
-		418171A42581107C00317ED8 /* ClosedRange+BM.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ClosedRange+BM.swift"; sourceTree = "<group>"; };
+		418171A22581107C00317ED8 /* NSRange+Beam.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSRange+Beam.swift"; sourceTree = "<group>"; };
+		418171A32581107C00317ED8 /* NSMutableAttributedString+Range.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSMutableAttributedString+Range.swift"; sourceTree = "<group>"; };
+		418171A42581107C00317ED8 /* ClosedRange+Beam.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ClosedRange+Beam.swift"; sourceTree = "<group>"; };
 		418171A62581107C00317ED8 /* NSRect+Beam.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSRect+Beam.swift"; sourceTree = "<group>"; };
 		418171A72581107C00317ED8 /* String+Localization.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+Localization.swift"; sourceTree = "<group>"; };
 		418171AB2581107C00317ED8 /* AutoCompleteList.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AutoCompleteList.swift; sourceTree = "<group>"; };
@@ -300,9 +300,9 @@
 		4181727A258110D100317ED8 /* AppDelegate+URL.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "AppDelegate+URL.swift"; sourceTree = "<group>"; };
 		418172A825811A3A00317ED8 /* BMTextField.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BMTextField.swift; sourceTree = "<group>"; };
 		418172A925811A3A00317ED8 /* BMTextFieldView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BMTextFieldView.swift; sourceTree = "<group>"; };
-		418172B225811AAA00317ED8 /* BMTick.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BMTick.swift; sourceTree = "<group>"; };
-		418172B325811AAA00317ED8 /* BMFrameAnimation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BMFrameAnimation.swift; sourceTree = "<group>"; };
-		418172CE25811AF800317ED8 /* BMAnimation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BMAnimation.swift; sourceTree = "<group>"; };
+		418172B225811AAA00317ED8 /* Tick.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Tick.swift; sourceTree = "<group>"; };
+		418172B325811AAA00317ED8 /* FrameAnimation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FrameAnimation.swift; sourceTree = "<group>"; };
+		418172CE25811AF800317ED8 /* Animation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Animation.swift; sourceTree = "<group>"; };
 		418172D525811B8700317ED8 /* RoundRectButtonStyle.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RoundRectButtonStyle.swift; sourceTree = "<group>"; };
 		418172FD25811DB200317ED8 /* Readability.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = Readability.js; sourceTree = "<group>"; };
 		418172FE25811DB200317ED8 /* SelectionObserver.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = SelectionObserver.js; sourceTree = "<group>"; };
@@ -311,10 +311,10 @@
 		4181733125811F4800317ED8 /* KeyCode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyCode.swift; sourceTree = "<group>"; };
 		4181733625811F6300317ED8 /* Mode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mode.swift; sourceTree = "<group>"; };
 		4181734D2581204900317ED8 /* BeamState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BeamState.swift; sourceTree = "<group>"; };
-		418173B5258124D500317ED8 /* NSAttributedString+BM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSAttributedString+BM.swift"; sourceTree = "<group>"; };
-		418173BD2581251600317ED8 /* URL+BM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+BM.swift"; sourceTree = "<group>"; };
+		418173B5258124D500317ED8 /* NSAttributedString+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSAttributedString+Beam.swift"; sourceTree = "<group>"; };
+		418173BD2581251600317ED8 /* URL+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+Beam.swift"; sourceTree = "<group>"; };
 		418173C22581276F00317ED8 /* String+NSMutableAttributedString.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+NSMutableAttributedString.swift"; sourceTree = "<group>"; };
-		4181744225812C5F00317ED8 /* NSColor+BM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSColor+BM.swift"; sourceTree = "<group>"; };
+		4181744225812C5F00317ED8 /* NSColor+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSColor+Beam.swift"; sourceTree = "<group>"; };
 		41A969FE2581394300E6594B /* Configuration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
 		521812CE2524C597007E4B47 /* NoteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteTests.swift; sourceTree = "<group>"; };
 		521813082524CEC6007E4B47 /* Fakery.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Fakery.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -554,10 +554,10 @@
 			children = (
 				418171932581107C00317ED8 /* Persistence */,
 				418172FC25811DB200317ED8 /* Web */,
-				4181718A2581107C00317ED8 /* BMTextFormatter.swift */,
-				4181718B2581107C00317ED8 /* BMReadability.swift */,
-				4181718C2581107C00317ED8 /* BMEventsTracker.swift */,
-				4181718D2581107C00317ED8 /* BMLogger.swift */,
+				4181718A2581107C00317ED8 /* TextFormatter.swift */,
+				4181718B2581107C00317ED8 /* Readability.swift */,
+				4181718C2581107C00317ED8 /* EventsTracker.swift */,
+				4181718D2581107C00317ED8 /* Logger.swift */,
 				4181718F2581107C00317ED8 /* NSContainerView.swift */,
 				4181732C25811E9800317ED8 /* Symbol.swift */,
 				418171922581107C00317ED8 /* PerformanceDebug.swift */,
@@ -580,21 +580,21 @@
 		4181719C2581107C00317ED8 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
-				41817276258110D100317ED8 /* AppDelegate+BM */,
-				418173992581238E00317ED8 /* String+BM */,
-				418171A42581107C00317ED8 /* ClosedRange+BM.swift */,
-				418171992581107C00317ED8 /* OSLog+BM.swift */,
-				418171982581107C00317ED8 /* NSImage+BM.swift */,
-				4181719E2581107C00317ED8 /* NSView+BM.swift */,
-				418171A22581107C00317ED8 /* NSRange+BM.swift */,
+				41817276258110D100317ED8 /* AppDelegate+Beam */,
+				418173992581238E00317ED8 /* String+Beam */,
+				418171A42581107C00317ED8 /* ClosedRange+Beam.swift */,
+				418171992581107C00317ED8 /* OSLog+Beam.swift */,
+				418171982581107C00317ED8 /* NSImage+Beam.swift */,
+				4181719E2581107C00317ED8 /* NSView+Beam.swift */,
+				418171A22581107C00317ED8 /* NSRange+Beam.swift */,
 				418171A62581107C00317ED8 /* NSRect+Beam.swift */,
-				418171A32581107C00317ED8 /* NSMutableAttributedString+BM.swift */,
-				418171782581107C00317ED8 /* NotificationName+BM.swift */,
-				418171812581107C00317ED8 /* CoreDataManager+BM.swift */,
-				418171802581107C00317ED8 /* NSManagedObject+BM.swift */,
-				418173B5258124D500317ED8 /* NSAttributedString+BM.swift */,
-				418173BD2581251600317ED8 /* URL+BM.swift */,
-				4181744225812C5F00317ED8 /* NSColor+BM.swift */,
+				418171A32581107C00317ED8 /* NSMutableAttributedString+Range.swift */,
+				418171782581107C00317ED8 /* NotificationName+Beam.swift */,
+				418171812581107C00317ED8 /* CoreDataManager+backupExtension.swift */,
+				418171802581107C00317ED8 /* NSManagedObject+initExtension.swift */,
+				418173B5258124D500317ED8 /* NSAttributedString+Beam.swift */,
+				418173BD2581251600317ED8 /* URL+Beam.swift */,
+				4181744225812C5F00317ED8 /* NSColor+Beam.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -717,7 +717,7 @@
 			path = Managers;
 			sourceTree = "<group>";
 		};
-		41817276258110D100317ED8 /* AppDelegate+BM */ = {
+		41817276258110D100317ED8 /* AppDelegate+Beam */ = {
 			isa = PBXGroup;
 			children = (
 				41817277258110D100317ED8 /* AppDelegate+CoreData.swift */,
@@ -725,7 +725,7 @@
 				41817279258110D100317ED8 /* AppDelegate+Account.swift */,
 				4181727A258110D100317ED8 /* AppDelegate+URL.swift */,
 			);
-			path = "AppDelegate+BM";
+			path = "AppDelegate+Beam";
 			sourceTree = "<group>";
 		};
 		418172A625811A3A00317ED8 /* Components */ = {
@@ -752,9 +752,9 @@
 		418172B025811AAA00317ED8 /* Animator */ = {
 			isa = PBXGroup;
 			children = (
-				418172CE25811AF800317ED8 /* BMAnimation.swift */,
-				418172B325811AAA00317ED8 /* BMFrameAnimation.swift */,
-				418172B225811AAA00317ED8 /* BMTick.swift */,
+				418172CE25811AF800317ED8 /* Animation.swift */,
+				418172B325811AAA00317ED8 /* FrameAnimation.swift */,
+				418172B225811AAA00317ED8 /* Tick.swift */,
 			);
 			path = Animator;
 			sourceTree = "<group>";
@@ -796,7 +796,7 @@
 			path = Stores;
 			sourceTree = "<group>";
 		};
-		418173992581238E00317ED8 /* String+BM */ = {
+		418173992581238E00317ED8 /* String+Beam */ = {
 			isa = PBXGroup;
 			children = (
 				4181719D2581107C00317ED8 /* String+LoremIpsum.swift */,
@@ -806,7 +806,7 @@
 				418171A72581107C00317ED8 /* String+Localization.swift */,
 				418173C22581276F00317ED8 /* String+NSMutableAttributedString.swift */,
 			);
-			path = "String+BM";
+			path = "String+Beam";
 			sourceTree = "<group>";
 		};
 		418173F7258128A500317ED8 /* Journal */ = {
@@ -1274,7 +1274,7 @@
 				418172552581107C00317ED8 /* GlobalNoteTitle.swift in Sources */,
 				4181727C258110D100317ED8 /* AppDelegate+Note.swift in Sources */,
 				418172592581107C00317ED8 /* ContentView.swift in Sources */,
-				418173B6258124D500317ED8 /* NSAttributedString+BM.swift in Sources */,
+				418173B6258124D500317ED8 /* NSAttributedString+Beam.swift in Sources */,
 				418171EF2581107C00317ED8 /* User.swift in Sources */,
 				4181732D25811E9800317ED8 /* Symbol.swift in Sources */,
 				4181722E2581107C00317ED8 /* AutoCompleteItem.swift in Sources */,
@@ -1288,56 +1288,56 @@
 				4181723F2581107C00317ED8 /* Font.swift in Sources */,
 				4181722C2581107C00317ED8 /* AutoCompleteList.swift in Sources */,
 				4181727B258110D100317ED8 /* AppDelegate+CoreData.swift in Sources */,
-				418172272581107C00317ED8 /* NSMutableAttributedString+BM.swift in Sources */,
+				418172272581107C00317ED8 /* NSMutableAttributedString+Range.swift in Sources */,
 				4181723A2581107C00317ED8 /* Parser.swift in Sources */,
 				4181724A2581107C00317ED8 /* TextView.swift in Sources */,
 				4181722B2581107C00317ED8 /* String+Localization.swift in Sources */,
 				418172012581107C00317ED8 /* Document+CoreDataProperties.swift in Sources */,
 				418171EE2581107C00317ED8 /* GraphqlParametersProtocol.swift in Sources */,
-				418172122581107C00317ED8 /* BMEventsTracker.swift in Sources */,
+				418172122581107C00317ED8 /* EventsTracker.swift in Sources */,
 				4181720A2581107C00317ED8 /* BrowserTab.swift in Sources */,
 				418172D625811B8700317ED8 /* RoundRectButtonStyle.swift in Sources */,
 				4181722A2581107C00317ED8 /* NSRect+Beam.swift in Sources */,
 				4181724B2581107C00317ED8 /* NoteRow.swift in Sources */,
 				418172252581107C00317ED8 /* String+Regex.swift in Sources */,
-				418172132581107C00317ED8 /* BMLogger.swift in Sources */,
+				418172132581107C00317ED8 /* Logger.swift in Sources */,
 				418171F92581107C00317ED8 /* SearchEngine.swift in Sources */,
 				4181734E2581204900317ED8 /* BeamState.swift in Sources */,
 				418172562581107C00317ED8 /* GlobalTabTitle.swift in Sources */,
 				418171FE2581107C00317ED8 /* Html2Md.swift in Sources */,
 				418172492581107C00317ED8 /* NoteWindow.swift in Sources */,
-				418172B625811AAA00317ED8 /* BMFrameAnimation.swift in Sources */,
+				418172B625811AAA00317ED8 /* FrameAnimation.swift in Sources */,
 				418172042581107C00317ED8 /* TemporaryFile.swift in Sources */,
 				418172482581107C00317ED8 /* ViewModelFetchedResults.swift in Sources */,
 				418172AA25811A3A00317ED8 /* BMTextField.swift in Sources */,
 				418172052581107C00317ED8 /* Note+CoreDataProperties.swift in Sources */,
 				4181720D2581107C00317ED8 /* BID.swift in Sources */,
 				418172152581107C00317ED8 /* NSContainerView.swift in Sources */,
-				418172002581107C00317ED8 /* NotificationName+BM.swift in Sources */,
-				418172112581107C00317ED8 /* BMReadability.swift in Sources */,
+				418172002581107C00317ED8 /* NotificationName+Beam.swift in Sources */,
+				418172112581107C00317ED8 /* Readability.swift in Sources */,
 				4181727D258110D100317ED8 /* AppDelegate+Account.swift in Sources */,
 				418171F12581107C00317ED8 /* UserSessionRequest.swift in Sources */,
 				418172242581107C00317ED8 /* String+URL.swift in Sources */,
 				418172192581107C00317ED8 /* Persistence.swift in Sources */,
-				418172282581107C00317ED8 /* ClosedRange+BM.swift in Sources */,
+				418172282581107C00317ED8 /* ClosedRange+Beam.swift in Sources */,
 				418172232581107C00317ED8 /* String+Ranges.swift in Sources */,
-				418172CF25811AF800317ED8 /* BMAnimation.swift in Sources */,
+				418172CF25811AF800317ED8 /* Animation.swift in Sources */,
 				418171F32581107C00317ED8 /* AuthenticationHandler.swift in Sources */,
 				418171EC2581107C00317ED8 /* Me.swift in Sources */,
 				418171FB2581107C00317ED8 /* BeamElement.swift in Sources */,
 				4181724E2581107C00317ED8 /* TabStats.swift in Sources */,
 				4181724F2581107C00317ED8 /* WebView.swift in Sources */,
 				418171F02581107C00317ED8 /* APIResponse.swift in Sources */,
-				418172262581107C00317ED8 /* NSRange+BM.swift in Sources */,
-				418172222581107C00317ED8 /* NSView+BM.swift in Sources */,
-				4181744325812C5F00317ED8 /* NSColor+BM.swift in Sources */,
+				418172262581107C00317ED8 /* NSRange+Beam.swift in Sources */,
+				418172222581107C00317ED8 /* NSView+Beam.swift in Sources */,
+				4181744325812C5F00317ED8 /* NSColor+Beam.swift in Sources */,
 				4181723B2581107C00317ED8 /* AttributedStringVisitor.swift in Sources */,
-				4181721E2581107C00317ED8 /* OSLog+BM.swift in Sources */,
+				4181721E2581107C00317ED8 /* OSLog+Beam.swift in Sources */,
 				418171F72581107C00317ED8 /* BeamData.swift in Sources */,
 				418172442581107C00317ED8 /* ScrollableTextView.swift in Sources */,
 				418171EB2581107C00317ED8 /* AutoComplete.swift in Sources */,
 				418172212581107C00317ED8 /* String+LoremIpsum.swift in Sources */,
-				418172082581107C00317ED8 /* NSManagedObject+BM.swift in Sources */,
+				418172082581107C00317ED8 /* NSManagedObject+initExtension.swift in Sources */,
 				418172032581107C00317ED8 /* Bullet.swift in Sources */,
 				418173C32581276F00317ED8 /* String+NSMutableAttributedString.swift in Sources */,
 				418172402581107C00317ED8 /* TextRoot.swift in Sources */,
@@ -1347,7 +1347,7 @@
 				965A78292514F147009980D4 /* AppDelegate.swift in Sources */,
 				418171F82581107C00317ED8 /* Score.swift in Sources */,
 				418172022581107C00317ED8 /* Bullet+CoreDataProperties.swift in Sources */,
-				418172092581107C00317ED8 /* CoreDataManager+BM.swift in Sources */,
+				418172092581107C00317ED8 /* CoreDataManager+backupExtension.swift in Sources */,
 				4181721B2581107C00317ED8 /* Maths.swift in Sources */,
 				4181725D2581107C00317ED8 /* AuthenticationManager.swift in Sources */,
 				4181721F2581107C00317ED8 /* JSSourceLoader.swift in Sources */,
@@ -1358,10 +1358,10 @@
 				4181725E2581107C00317ED8 /* AccountManager.swift in Sources */,
 				418171FF2581107C00317ED8 /* CoreDataManager.swift in Sources */,
 				418171F22581107C00317ED8 /* APIRequest.swift in Sources */,
-				418172B525811AAA00317ED8 /* BMTick.swift in Sources */,
-				418173BE2581251600317ED8 /* URL+BM.swift in Sources */,
+				418172B525811AAA00317ED8 /* Tick.swift in Sources */,
+				418173BE2581251600317ED8 /* URL+Beam.swift in Sources */,
 				4181713525810CDC00317ED8 /* Beam.xcdatamodeld in Sources */,
-				418172102581107C00317ED8 /* BMTextFormatter.swift in Sources */,
+				418172102581107C00317ED8 /* TextFormatter.swift in Sources */,
 				418172382581107C00317ED8 /* TextNode.swift in Sources */,
 				418172502581107C00317ED8 /* NoteView.swift in Sources */,
 				4181725F2581107C00317ED8 /* DocumentManager.swift in Sources */,
@@ -1376,7 +1376,7 @@
 				418172542581107C00317ED8 /* OmniBar.swift in Sources */,
 				418172422581107C00317ED8 /* NotesContentView.swift in Sources */,
 				418172582581107C00317ED8 /* AccountDetail.swift in Sources */,
-				4181721D2581107C00317ED8 /* NSImage+BM.swift in Sources */,
+				4181721D2581107C00317ED8 /* NSImage+Beam.swift in Sources */,
 				418172432581107C00317ED8 /* NotesWindow.swift in Sources */,
 				418172452581107C00317ED8 /* SearchBar.swift in Sources */,
 				418171FA2581107C00317ED8 /* SearchKit.swift in Sources */,

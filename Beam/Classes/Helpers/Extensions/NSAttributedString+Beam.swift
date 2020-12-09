@@ -1,5 +1,5 @@
 //
-//  NSAttributedString+BM.swift
+//  NSAttributedString+Beam.swift
 //  Beam
 //
 //  Created by Ravichandrane Rajendran on 09/12/2020.

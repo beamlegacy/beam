@@ -55,7 +55,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
 
     var score: Score?
 
-    var appendToIndexer: (URL, BMReadability) -> Void = { _, _ in }
+    var appendToIndexer: (URL, Readability) -> Void = { _, _ in }
 
     var creationDate: Date = Date()
     var lastViewDate: Date = Date()
@@ -132,7 +132,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
 
     private func updateScore() {
         if let s = score?.score {
-            BMLogger.shared.logInfo("updated score[\(url!.absoluteString)] = \(s)", category: .general)
+            Logger.shared.logInfo("updated score[\(url!.absoluteString)] = \(s)", category: .general)
             element?.score = s
         }
     }
@@ -294,7 +294,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
                 self.score?.area = Float(w * h)
                 self.updateScore()
             }
-            BMLogger.shared.logDebug("Web Scrolled: \(x), \(y)", category: .web)
+            Logger.shared.logDebug("Web Scrolled: \(x), \(y)", category: .web)
         default:
             break
         }
@@ -304,7 +304,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         if let url = webView.url {
-            BMReadability.read(webView) { [weak self] result in
+            Readability.read(webView) { [weak self] result in
                 guard let self = self else { return }
 
                 switch result {
@@ -341,26 +341,26 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
     }
 
     func webViewDidClose(_ webView: WKWebView) {
-        BMLogger.shared.logDebug("webView webDidClose", category: .web)
+        Logger.shared.logDebug("webView webDidClose", category: .web)
     }
 
     func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping () -> Void) {
-        BMLogger.shared.logDebug("webView runJavaScriptAlertPanelWithMessage \(message)", category: .web)
+        Logger.shared.logDebug("webView runJavaScriptAlertPanelWithMessage \(message)", category: .web)
         completionHandler()
     }
 
     func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (Bool) -> Void) {
-        BMLogger.shared.logDebug("webView runJavaScriptConfirmPanelWithMessage \(message)", category: .web)
+        Logger.shared.logDebug("webView runJavaScriptConfirmPanelWithMessage \(message)", category: .web)
         completionHandler(true)
     }
 
     func webView(_ webView: WKWebView, runJavaScriptTextInputPanelWithPrompt prompt: String, defaultText: String?, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (String?) -> Void) {
-        BMLogger.shared.logDebug("webView runJavaScriptTextInputPanelWithPrompt \(prompt) default: \(defaultText ?? "")", category: .web)
+        Logger.shared.logDebug("webView runJavaScriptTextInputPanelWithPrompt \(prompt) default: \(defaultText ?? "")", category: .web)
         completionHandler(nil)
     }
 
     func webView(_ webView: WKWebView, runOpenPanelWith parameters: WKOpenPanelParameters, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping ([URL]?) -> Void) {
-        BMLogger.shared.logDebug("webView runOpenPanel", category: .web)
+        Logger.shared.logDebug("webView runOpenPanel", category: .web)
         completionHandler(nil)
     }
 

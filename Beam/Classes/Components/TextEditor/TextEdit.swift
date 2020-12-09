@@ -262,7 +262,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     var timer: Timer!
-    @Published var tick = BMTick()
+    @Published var tick = Tick()
 
     var minimumWidth: CGFloat = 300 {
         didSet {

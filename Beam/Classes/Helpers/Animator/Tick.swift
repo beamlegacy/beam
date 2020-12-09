@@ -1,5 +1,5 @@
 //
-//  BMTick.swift
+//  Tick.swift
 //  Beam
 //
 //  Created by Sebastien Metrot on 20/11/2020.
@@ -8,7 +8,7 @@
 import Foundation
 import AppKit
 
-public struct BMTick {
+public struct Tick {
     public var now: CFTimeInterval
     public var previous: CFTimeInterval
     public var index: Int

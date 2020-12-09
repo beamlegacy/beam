@@ -12,14 +12,14 @@ class AccountManager {
         UserSessionRequest().signIn(email: email, password: password) { result in
             switch result {
             case .failure(let error):
-                BMLogger.shared.logInfo("Could not signin: \(error.localizedDescription)", category: .network)
+                Logger.shared.logInfo("Could not signin: \(error.localizedDescription)", category: .network)
                 completionHandler?(.failure(error))
             case .success(let signIn):
                 Persistence.Authentication.accessToken = signIn.accessToken
                 Persistence.Authentication.email = email
                 Persistence.Authentication.password = password
 
-                BMLogger.shared.logInfo("signIn succeeded: \(signIn.accessToken ?? "-")", category: .network)
+                Logger.shared.logInfo("signIn succeeded: \(signIn.accessToken ?? "-")", category: .network)
                 completionHandler?(.success(true))
             }
         }
@@ -32,10 +32,10 @@ class AccountManager {
         UserSessionRequest().signUp(email, password) { result in
             switch result {
             case .failure(let error):
-                BMLogger.shared.logInfo("Could not sign up: \(error.localizedDescription)", category: .network)
+                Logger.shared.logInfo("Could not sign up: \(error.localizedDescription)", category: .network)
                 completionHandler?(.failure(error))
             case .success(let signUp):
-                BMLogger.shared.logInfo("signUp succeeded: \(signUp.user?.email ?? "-")", category: .network)
+                Logger.shared.logInfo("signUp succeeded: \(signUp.user?.email ?? "-")", category: .network)
                 completionHandler?(.success(true))
             }
         }
@@ -47,10 +47,10 @@ class AccountManager {
         UserSessionRequest().forgotPassword(email: email) { result in
             switch result {
             case .failure(let error):
-                BMLogger.shared.logInfo("Could not forgot password: \(error.localizedDescription)", category: .network)
+                Logger.shared.logInfo("Could not forgot password: \(error.localizedDescription)", category: .network)
                 completionHandler?(.failure(error))
             case .success:
-                BMLogger.shared.logInfo("forgot Password succeeded", category: .network)
+                Logger.shared.logInfo("forgot Password succeeded", category: .network)
                 completionHandler?(.success(true))
             }
         }
@@ -58,6 +58,6 @@ class AccountManager {
 
     func logout() {
         Persistence.cleanUp()
-        BMLogger.shared.logDebug("Logged out", category: .general)
+        Logger.shared.logDebug("Logged out", category: .general)
     }
 }

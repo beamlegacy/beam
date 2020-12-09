@@ -1,5 +1,5 @@
 //
-//  BMFrameAnimation.swift
+//  FrameAnimation.swift
 //  Beam
 //
 //  Created by Sebastien Metrot on 20/11/2020.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-class BMFrameAnimation: BMAnimation {
+class FrameAnimation: Animation {
     private var start: NSRect
     private var destination: NSRect
     @Published var current: NSRect
