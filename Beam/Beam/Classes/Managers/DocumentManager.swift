@@ -39,9 +39,9 @@ class DocumentManager {
 
             do {
                 try CoreDataManager.save(context)
-                Logger.shared.logDebug("CoreDataManager saved", category: .coredata)
+                BMLogger.shared.logDebug("CoreDataManager saved", category: .coredata)
             } catch {
-                Logger.shared.logError("Couldn't save context: \(error)", category: .coredata)
+                BMLogger.shared.logError("Couldn't save context: \(error)", category: .coredata)
                 completion?(.failure(error))
                 return
             }

@@ -100,7 +100,7 @@ class RoamImporter {
     private func detectLinkedNotes(_ context: NSManagedObjectContext, note: BeamNote, bullet: BeamElement) {
         guard bullet.text.count > 2 else { return }
 
-        for pattern in BeamTextFormatter.linkPatterns {
+        for pattern in BMTextFormatter.linkPatterns {
             var regex: NSRegularExpression
             do {
                 regex = try NSRegularExpression(pattern: pattern, options: [])

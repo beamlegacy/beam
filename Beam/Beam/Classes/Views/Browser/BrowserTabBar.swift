@@ -20,7 +20,7 @@ struct BrowserTabBar: View {
         VStack(spacing: 0) {
             Rectangle()
                 .frame(height: 1)
-                .foregroundColor(Color(NSColor.separatorColor))
+                .foregroundColor(Color(.separatorColor))
             HStack(spacing: 0) {
                 ForEach(tabs, id: \.id) { tab in
                     HStack(spacing: 0) {
@@ -54,14 +54,14 @@ struct BrowserTabBar: View {
                         if tab.id != tabs.last!.id {
                             Rectangle()
                                 .frame(width: 1, height: 26)
-                                .foregroundColor(Color(NSColor.separatorColor))
+                                .foregroundColor(Color(.separatorColor))
                         }
                     }
                 }
             }
             Rectangle()
                 .frame(height: 1)
-                .foregroundColor(Color(NSColor.separatorColor))
+                .foregroundColor(Color(.separatorColor))
         }
         .transition(.identity)
         .animation(nil)

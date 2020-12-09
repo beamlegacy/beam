@@ -258,7 +258,7 @@ class APIRequest {
             // Request explicitly cancelled
         } else {
             let nsError = error as NSError
-            Logger.shared.logError("\(nsError) - \(nsError.userInfo)", category: .network)
+            BMLogger.shared.logError("\(nsError) - \(nsError.userInfo)", category: .network)
             LibrariesManager.nonFatalError(error: error)
         }
     }
@@ -272,7 +272,7 @@ class APIRequest {
             error = APIRequestError.apiError(message)
         }
 
-        Logger.shared.logError(error.localizedDescription, category: .network)
+        BMLogger.shared.logError(error.localizedDescription, category: .network)
 
         return error
     }
@@ -287,7 +287,7 @@ class APIRequest {
             error = APIRequestError.parserError
         }
 
-        Logger.shared.logError(error.localizedDescription, category: .network)
+        BMLogger.shared.logError(error.localizedDescription, category: .network)
 
         return error
     }
@@ -304,7 +304,7 @@ class APIRequest {
             error = APIRequestError.parserError
         }
 
-        Logger.shared.logError(error.localizedDescription, category: .network)
+        BMLogger.shared.logError(error.localizedDescription, category: .network)
 
         return error
     }
@@ -353,14 +353,14 @@ extension DataRequest {
             let diff = String(format: "%.2f", diffTime)
 
             let httpStatus = response.response?.statusCode ?? 0
-            Logger.shared.logDebug("[\(callsCount)] [\(authenticated ? "authenticated" : "anonymous")] \(diff)sec \(httpStatus) \(fileName)", category: .network)
+            BMLogger.shared.logDebug("[\(callsCount)] [\(authenticated ? "authenticated" : "anonymous")] \(diff)sec \(httpStatus) \(fileName)", category: .network)
             #endif
 
             #if DEBUG_API_1
             if let httpBodyData = response.request?.httpBody,
                let httpBody = String(data: httpBodyData, encoding: .utf8) {
                 let httpStatus = response.response?.statusCode ?? 0
-                Logger.shared.logDebug("\(httpStatus) " + httpBody.replacingOccurrences(of: "\\n", with: ""), category: .network)
+                BMLogger.shared.logDebug("\(httpStatus) " + httpBody.replacingOccurrences(of: "\\n", with: ""), category: .network)
             }
             #endif
 

@@ -69,7 +69,7 @@ struct ModeView: View {
                     }
                 }
             }
-            .background(Color("EditorBackgroundColor"))
+            .background(Color(.editorBackgroundColor))
         }.frame(minWidth: 822)
     }
 }
@@ -77,7 +77,7 @@ struct ModeView: View {
 struct ContentView: View {
     var body: some View {
         ModeView()
-            .background(Color("EditorBackgroundColor").opacity(0.8))
+            .background(Color(.editorBackgroundColor).opacity(0.8))
             .edgesIgnoringSafeArea(.top)
     }
 }

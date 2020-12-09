@@ -69,7 +69,7 @@ class Note: NSManagedObject {
     }
 
     func parsedTitle() -> String {
-        return BeamTextFormatter.parseForInternalLinks(title)
+        return BMTextFormatter.parseForInternalLinks(title)
     }
 
     /// Will set the `orderIndex` properly, based on `afterBullet`

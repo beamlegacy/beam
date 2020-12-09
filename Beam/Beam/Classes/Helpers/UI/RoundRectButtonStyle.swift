@@ -13,8 +13,8 @@ struct RoundedRectangleDecoration: View {
     @State var isHovering: Bool = false
     var isPressed: Bool
 
-    let pressedBg = Color("ToolbarButtonBackgroundOnColor")
-    let hoverBg = Color("ToolbarButtonBackgroundOnColor")
+    let pressedBg = Color(.toolbarButtonBackgroundOnColor)
+    let hoverBg = Color(.toolbarButtonBackgroundOnColor)
     let emptyBg = Color(.displayP3, white: 1, opacity: 0)
 
     func bgColor(_ enabled: Bool, _ hover: Bool, _ pressed: Bool) -> Color {

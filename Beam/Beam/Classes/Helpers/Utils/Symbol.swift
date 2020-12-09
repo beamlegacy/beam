@@ -11,7 +11,7 @@ import SwiftUI
 struct Icon: View {
     var name: String
     var size: Float = 16
-    var color = Color("ToolbarButtonIconColor")
+    var color = Color(.toolbarButtonIconColor)
 
     var body: some View {
         Image(name).renderingMode(.template)
@@ -26,8 +26,8 @@ struct Symbol: View {
     var name: String
     var size: Float = 16
     @Environment(\.isEnabled) var isEnabled
-    let normalFg = Color("ToolbarButtonIconColor")
-    let disabledFg = Color("ToolbarButtonIconDisabledColor")
+    let normalFg = Color(.toolbarButtonIconColor)
+    let disabledFg = Color(.toolbarButtonIconDisabledColor)
 
     var body: some View {
         Icon(name: name, size: size, color: isEnabled ? normalFg : disabledFg)

@@ -34,9 +34,9 @@ struct AccountDetail: View {
                             accountManager.signIn(email: email, password: password) { result in
                                 switch result {
                                 case .failure(let error):
-                                    Logger.shared.logInfo("Could not signin: \(error.localizedDescription)", category: .network)
+                                    BMLogger.shared.logInfo("Could not signin: \(error.localizedDescription)", category: .network)
                                 case .success:
-                                    Logger.shared.logInfo("signIn succeeded", category: .network)
+                                    BMLogger.shared.logInfo("signIn succeeded", category: .network)
                                 }
                             }
                         }, label: {
@@ -48,9 +48,9 @@ struct AccountDetail: View {
                             accountManager.signUp(email, password) { result in
                                 switch result {
                                 case .failure(let error):
-                                    Logger.shared.logInfo("Could not sign up: \(error.localizedDescription)", category: .network)
+                                    BMLogger.shared.logInfo("Could not sign up: \(error.localizedDescription)", category: .network)
                                 case .success:
-                                    Logger.shared.logInfo("signUp succeeded", category: .network)
+                                    BMLogger.shared.logInfo("signUp succeeded", category: .network)
                                 }
                             }
                         }, label: {
@@ -61,9 +61,9 @@ struct AccountDetail: View {
                             accountManager.forgotPassword(email: email) { result in
                                 switch result {
                                 case .failure(let error):
-                                    Logger.shared.logInfo("Could not forgot password: \(error.localizedDescription)", category: .network)
+                                    BMLogger.shared.logInfo("Could not forgot password: \(error.localizedDescription)", category: .network)
                                 case .success:
-                                    Logger.shared.logInfo("forgot Password succeeded", category: .network)
+                                    BMLogger.shared.logInfo("forgot Password succeeded", category: .network)
                                 }
                             }
                         }, label: {

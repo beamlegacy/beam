@@ -14,7 +14,7 @@ struct BrowserTabView: View {
     @State var showButton = false
     var selected: Bool
 
-    static var tabFrameColor = Color("TabFrame")
+    static var tabFrameColor = Color(.tabFrame)
 
     var body: some View {
         ZStack {
@@ -23,7 +23,7 @@ struct BrowserTabView: View {
                 .resizable()
                 .frame(width: 12, height: 12, alignment: .leading)
                 .opacity(showButton ? 1 : 0)
-                .foregroundColor(Color("ToolbarButtonIconColor"))
+                    .foregroundColor(Color(.toolbarButtonIconColor))
                 .buttonStyle(BorderlessButtonStyle())
                 .padding(.leading, 8)
                 .onTapGesture(count: 1) {
@@ -43,7 +43,7 @@ struct BrowserTabView: View {
 
                     Text(tab.title)
                         .font(.system(size: 11, weight: .regular))
-                        .foregroundColor(Color("OmniboxTextColor").opacity(selected ? 1.0 : 0.8))
+                        .foregroundColor(Color(.omniboxTextColor).opacity(selected ? 1.0 : 0.8))
                         .allowsTightening(true)
                         .truncationMode(.tail)
                         .lineLimit(1)
@@ -57,7 +57,7 @@ struct BrowserTabView: View {
         .onHover(perform: { v in
             showButton = v
         })
-        .background(Rectangle().fill(selected ? Color("TabBarBg") : Color("TabFrame") ))
+        .background(Rectangle().fill(selected ? Color(.tabBarBg) : Color(.tabFrame) ))
     }
 
     func closeTab(id: UUID) {
