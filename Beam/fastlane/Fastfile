@@ -19,7 +19,7 @@ xcversion(version: ENV["XCODE_VERSION"])
 platform :mac do
   desc "Run linting"
   lane :lint do
-    clear_derived_data
+    # clear_derived_data
     cocoapods
     swiftlint(
       executable: './Pods/SwiftLint/swiftlint',
@@ -76,7 +76,19 @@ platform :mac do
       readonly: true, # Don't want to mess up mine
       # force: false,
     )
-    clear_derived_data
+
+    update_code_signing_settings(
+      use_automatic_signing: false,
+      path: "Beam.xcodeproj",
+      team_id: ENV["TEAM_ID"],
+      code_sign_identity: "Mac Developer",
+      profile_name: "Beam Development",
+      bundle_identifier: ENV["TEAM_IDENTIFIER"],
+      targets: ["Beam"],
+      build_configurations: ["Debug"]
+    )
+
+    # clear_derived_data
     cocoapods
     run_tests(
       scheme: "Beam"
@@ -127,7 +139,7 @@ platform :mac do
       # force: false,
     )
 
-    clear_derived_data
+    # clear_derived_data
     cocoapods
     build_mac_app(
       workspace: "Beam.xcworkspace",
@@ -195,7 +207,19 @@ platform :mac do
       # force: false,
     )
 
-    clear_derived_data
+    update_code_signing_settings(
+      use_automatic_signing: false,
+      path: "Beam.xcodeproj",
+      team_id: ENV["TEAM_ID"],
+      code_sign_identity: "Developer ID Application",
+      profile_name: ENV["PROVISION_NAME"],
+      bundle_identifier: ENV["TEAM_IDENTIFIER"],
+      targets: ["Beam"],
+      build_configurations: ["Release"]
+    )
+
+
+    # clear_derived_data
     cocoapods
     build_mac_app(
       workspace: "Beam.xcworkspace",
@@ -225,7 +249,9 @@ platform :mac do
 
       # export_xcargs: "-allowProvisioningUpdates"
     )
+  end
 
+  lane :deploy do
     # https://blog.zeplin.io/dev-journal-automate-notarizing-macos-apps-94b0b144ba9d
     notarize(
       package: "../builds/Beam.app",
@@ -300,7 +326,7 @@ platform :mac do
   lane :release do
     # sync_code_signing
     # disable_automatic_code_signing(path: "Beam.xcodeproj")
-    clear_derived_data
+    # clear_derived_data
     cocoapods
     build_mac_app(
       workspace: "Beam.xcworkspace",

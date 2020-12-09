@@ -22,7 +22,7 @@ before_script:
   - gem install fastlane -N
   - bundle install
 
-lint:
+swiftlint:
   dependencies: []
   stage: lint
   artifacts:
@@ -52,11 +52,35 @@ xctests:
 build:
   dependencies: []
   stage: build
+  artifacts:
+    paths:
+      - builds/
+  cache:
+    paths:
+      - builds/
   only:
     - merge_requests
     - master
   script:
     - bundle exec fastlane beta
+  tags:
+    - macos
+  interruptible: true
+
+deploy:
+  dependencies: []
+  stage: deploy
+  artifacts:
+    paths:
+      - builds/
+  cache:
+    paths:
+      - builds/
+  only:
+    - merge_requests
+    - master
+  script:
+    - bundle exec fastlane deploy
   tags:
     - macos
   interruptible: true
