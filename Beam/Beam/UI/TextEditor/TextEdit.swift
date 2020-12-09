@@ -1025,6 +1025,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             }
             return root
         }()
+
         accessingMapping = true
         mapping[element] = node
         accessingMapping = false

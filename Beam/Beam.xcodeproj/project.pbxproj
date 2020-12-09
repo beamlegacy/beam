@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		41C70B39257E906F0002AC34 /* NSImage+BM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41C70B38257E906F0002AC34 /* NSImage+BM.swift */; };
 		41DF78C42579A31100648ABF /* BMTextFieldView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41DF78C32579A31100648ABF /* BMTextFieldView.swift */; };
 		41DF78CE257A695A00648ABF /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41DF78CD257A695A00648ABF /* Constants.swift */; };
 		520081992552C97C00A6CAC6 /* TemporaryFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 520081982552C97C00A6CAC6 /* TemporaryFile.swift */; };
@@ -84,7 +85,6 @@
 		96062E73254C74F200AAB78D /* Chevrons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96062E72254C74F200AAB78D /* Chevrons.swift */; };
 		960B823C2571BB83006ECE77 /* BeamElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 960B823B2571BB83006ECE77 /* BeamElement.swift */; };
 		9627FD4A2550203800926F0E /* Pods_Beam.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2BE96DC9A7278563E5878CCD /* Pods_Beam.framework */; };
-		9631B00925541DCB007BF2DE /* SFSymbolsFallback.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9631B00625541DC1007BF2DE /* SFSymbolsFallback.ttf */; };
 		9631B00C25541DD0007BF2DE /* SelectionObserver.js in Resources */ = {isa = PBXBuildFile; fileRef = 9631B00425541DC0007BF2DE /* SelectionObserver.js */; };
 		9631B01025541E8D007BF2DE /* OverrideConsole.js in Resources */ = {isa = PBXBuildFile; fileRef = 9631B00F25541E8D007BF2DE /* OverrideConsole.js */; };
 		9631B01425541FB3007BF2DE /* Readability.js in Resources */ = {isa = PBXBuildFile; fileRef = 9631B01325541FB3007BF2DE /* Readability.js */; };
@@ -181,6 +181,7 @@
 		23F7A69644D041FDF4D3466B /* Pods-Beam.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Beam.release.xcconfig"; path = "Target Support Files/Pods-Beam/Pods-Beam.release.xcconfig"; sourceTree = "<group>"; };
 		2BE96DC9A7278563E5878CCD /* Pods_Beam.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Beam.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3B2FA634DAEED958EF901A42 /* Pods-BeamUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BeamUITests.debug.xcconfig"; path = "Target Support Files/Pods-BeamUITests/Pods-BeamUITests.debug.xcconfig"; sourceTree = "<group>"; };
+		41C70B38257E906F0002AC34 /* NSImage+BM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSImage+BM.swift"; sourceTree = "<group>"; };
 		41DF78BF2579A30400648ABF /* BMTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BMTextField.swift; sourceTree = "<group>"; };
 		41DF78C32579A31100648ABF /* BMTextFieldView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BMTextFieldView.swift; sourceTree = "<group>"; };
 		41DF78CD257A695A00648ABF /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
@@ -259,7 +260,6 @@
 		96062E72254C74F200AAB78D /* Chevrons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Chevrons.swift; sourceTree = "<group>"; };
 		960B823B2571BB83006ECE77 /* BeamElement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamElement.swift; sourceTree = "<group>"; };
 		9631B00425541DC0007BF2DE /* SelectionObserver.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = SelectionObserver.js; sourceTree = "<group>"; };
-		9631B00625541DC1007BF2DE /* SFSymbolsFallback.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = SFSymbolsFallback.ttf; sourceTree = "<group>"; };
 		9631B00F25541E8D007BF2DE /* OverrideConsole.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = OverrideConsole.js; sourceTree = "<group>"; };
 		9631B01325541FB3007BF2DE /* Readability.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = Readability.js; sourceTree = "<group>"; };
 		9631B01725541FF6007BF2DE /* JSSourceLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSSourceLoader.swift; sourceTree = "<group>"; };
@@ -433,6 +433,7 @@
 				5204E892255ED4AB00458211 /* Information.swift */,
 				5204E8F4255EDBF600458211 /* EventsTracker.swift */,
 				52375B75256D585A003180E1 /* OSLog.swift */,
+				41C70B38257E906F0002AC34 /* NSImage+BM.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -657,14 +658,6 @@
 			path = Resources/js;
 			sourceTree = "<group>";
 		};
-		9631B00525541DC1007BF2DE /* fonts */ = {
-			isa = PBXGroup;
-			children = (
-				9631B00625541DC1007BF2DE /* SFSymbolsFallback.ttf */,
-			);
-			path = fonts;
-			sourceTree = "<group>";
-		};
 		9645488B252382AE0064D062 /* JS */ = {
 			isa = PBXGroup;
 			children = (
@@ -731,7 +724,6 @@
 				965A78382514F148009980D4 /* Beam.entitlements */,
 				965A782C2514F147009980D4 /* Beam.xcdatamodeld */,
 				96C9CBE225348F0900D70AA6 /* .swiftlint.yml */,
-				9631B00525541DC1007BF2DE /* fonts */,
 				9631B00325541DC0007BF2DE /* js */,
 				965A78312514F148009980D4 /* Preview Content */,
 			);
@@ -953,7 +945,6 @@
 				TargetAttributes = {
 					965A78242514F147009980D4 = {
 						CreatedOnToolsVersion = 12.0;
-						ProvisioningStyle = Manual;
 					};
 					965A783C2514F149009980D4 = {
 						CreatedOnToolsVersion = 12.0;
@@ -1005,7 +996,6 @@
 				52A66A1F2535E8A500CE247C /* ScrollableTextView.xib in Resources */,
 				9631B01425541FB3007BF2DE /* Readability.js in Resources */,
 				9631B00C25541DD0007BF2DE /* SelectionObserver.js in Resources */,
-				9631B00925541DCB007BF2DE /* SFSymbolsFallback.ttf in Resources */,
 				9631B01025541E8D007BF2DE /* OverrideConsole.js in Resources */,
 				965A78302514F148009980D4 /* Assets.xcassets in Resources */,
 			);
@@ -1259,6 +1249,7 @@
 				52326F8C252F1A8E00A40F1E /* NSManagedObject+initExtension.swift in Sources */,
 				52C6A23325644EB100350EBE /* AppDelegate+URL.swift in Sources */,
 				965B19712518F59D00BCF01C /* BrowserTab.swift in Sources */,
+				41C70B39257E906F0002AC34 /* NSImage+BM.swift in Sources */,
 				96C039922520C67C00A2EDC7 /* TextEdit.swift in Sources */,
 				52C6A22E25644E5B00350EBE /* AppDelegate+Note.swift in Sources */,
 				52C82C74253059BC006C188C /* NotesWindow.swift in Sources */,

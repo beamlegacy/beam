@@ -164,6 +164,7 @@ public class TextNode: NSObject, CALayerDelegate {
 
     func delete() {
         parent?.removeChild(self)
+        editor.removeNode(self)
     }
 
     func insert(node: TextNode, after existingNode: TextNode) -> Bool {
@@ -211,7 +212,7 @@ public class TextNode: NSObject, CALayerDelegate {
     }
 
     var disclosureButtonFrame: NSRect {
-        let r = (open ? disclosureOpenFrame : disclosureClosedFrame).frame
+        let r = NSRect(x: 2, y: -4, width: 8.6, height: 8.6)
         return r.offsetBy(dx: 0, dy: r.height).insetBy(dx: -4, dy: -4)
     }
     var disclosurePressed = false
@@ -325,6 +326,7 @@ public class TextNode: NSObject, CALayerDelegate {
         editor.removeNode(self)
         layer.removeFromSuperlayer()
     }
+
     func configureLayer() {
         let newActions = [
                 "onOrderIn": NSNull(),
@@ -371,51 +373,17 @@ public class TextNode: NSObject, CALayerDelegate {
 
     var fontSize: CGFloat { isBig ? 16 : 14 }
 
-    static func symbolFont(_ size: CGFloat) -> NSFont {
-        return NSFont.systemFont(ofSize: size)
-    }
-
-    static func symbolFrame(_ size: CGFloat, _ string: String) -> TextFrame {
-        let symbol = string.attributed
-        let attribs: [NSAttributedString.Key: Any] = [
-            .font: symbolFont(size),
-            .foregroundColor: NSColor(named: "EditorControlColor")!
-        ]
-        symbol.setAttributes(attribs, range: symbol.wholeRange)
-        return Font.draw(string: symbol, atPosition: NSPoint(x: 2, y: -2), textWidth: 8)
-    }
-
-    static var disclosureClosedFrameSmall = symbolFrame(7, "􀄧")
-    static var disclosureOpenFrameSmall = symbolFrame(7, "􀄥")
-    static var bulletPointFrameSmall = symbolFrame(7, "􀜞")
-    static var disclosureClosedFrameBig = symbolFrame(7, "􀄧")
-    static var disclosureOpenFrameBig = symbolFrame(7, "􀄥")
-    static var bulletPointFrameBig = symbolFrame(7, "􀜞")
-
     var isBig: Bool {
         editor.isBig
     }
 
-    var disclosureClosedFrame: TextFrame { isBig ? Self.disclosureClosedFrameBig : Self.disclosureClosedFrameSmall }
-    var disclosureOpenFrame: TextFrame { isBig ? Self.disclosureOpenFrameBig : Self.disclosureOpenFrameSmall }
-    var bulletPointFrame: TextFrame { isBig ? Self.bulletPointFrameBig : Self.bulletPointFrameSmall }
-
     func drawDisclosure(at point: NSPoint, in context: CGContext) {
-//        context.setFillColor(gray: 0.5, alpha: 0.5)
-//        context.fill(disclosureButtonFrame)
-        let symbol = open ? disclosureOpenFrame : disclosureClosedFrame
-        context.saveGState()
-        context.translateBy(x: point.x, y: point.y)
-        symbol.draw(context)
-        context.restoreGState()
-
+        let symbol = open ? "editor-arrow_down" : "editor-arrow_right"
+        drawImage(named: symbol, at: point, in: context, size: CGRect(x: 0, y: 0, width: 10, height: 10))
     }
 
     func drawBulletPoint(at point: NSPoint, in context: CGContext) {
-        context.saveGState()
-        context.translateBy(x: point.x, y: point.y)
-        bulletPointFrame.draw(context)
-        context.restoreGState()
+        drawImage(named: "editor-bullet", at: point, in: context, size: CGRect(x: 0, y: 0, width: 8, height: 7))
     }
 
     func drawDebug(in context: CGContext) {
@@ -474,15 +442,33 @@ public class TextNode: NSObject, CALayerDelegate {
 
         let offset = NSPoint(x: 0, y: firstLineBaseline)
         if showDisclosureButton {
-            drawDisclosure(at: NSPoint(x: offset.x, y: offset.y), in: context)
+            drawDisclosure(at: NSPoint(x: offset.x, y: 2), in: context)
         } else {
-            drawBulletPoint(at: NSPoint(x: offset.x, y: offset.y), in: context)
+            drawBulletPoint(at: NSPoint(x: offset.x, y: 6), in: context)
         }
 
         context.textMatrix = CGAffineTransform.identity
         context.translateBy(x: 0, y: firstLineBaseline)
 
         layout?.draw(context)
+        context.restoreGState()
+    }
+
+    func drawImage(named: String, at point: NSPoint, in context: CGContext, size: CGRect? = nil) {
+        guard var image = NSImage(named: named) else {
+            fatalError("Image with name: \(named) can't be found")
+        }
+
+        let width = size?.width ?? image.size.width
+        let height = size?.height ?? image.size.height
+        let rect = CGRect(x: point.x, y: point.y, width: width / layer.contentsScale, height: height / layer.contentsScale)
+
+        image = image.fill(color: NSColor(named: "EditorControlColor") ?? NSColor.black)
+
+        context.saveGState()
+        context.translateBy(x: 0, y: image.size.height)
+        context.scaleBy(x: 1.0, y: -1.0)
+        context.draw(image.cgImage, in: rect)
         context.restoreGState()
     }
 
