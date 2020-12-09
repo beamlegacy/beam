@@ -17,9 +17,9 @@ struct IndexDocument: Codable {
     var title: String = ""
     var language: NLLanguage = .undetermined
     var length: Int = 0
-    var contentsWords = Set<String>()
-    var titleWords = Set<String>()
-    var tagsWords = Set<String>()
+    var contentsWords = [String]()
+    var titleWords = [String]()
+    var tagsWords = [String]()
 }
 
 extension IndexDocument {
@@ -149,9 +149,9 @@ class Index: Codable {
         }
     }
 
-    class func extractWords(from string: String) -> Set<String> {
+    class func extractWords(from string: String) -> [String] {
         // Store the tokenized substrings into an array.
-        var wordTokens = Set<String>()
+        var wordTokens = [String]()
 
         // Use Natural Language's NLTagger to tokenize the input by word.
         let tagger = NLTagger(tagSchemes: [.tokenType])
@@ -162,7 +162,7 @@ class Index: Codable {
                              unit: .word,
                              scheme: .tokenType,
                              options: [.omitWhitespace]) { (_, range) -> Bool in
-            wordTokens.insert(String(string[range].lowercased()))
+            wordTokens.append(String(string[range].lowercased()))
             return true
         }
 

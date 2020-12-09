@@ -74,12 +74,14 @@ class PageRangeTests: XCTestCase {
     var index = Index()
 
     func append(_ url: URL, contents: String) {
-        print("Index url \(url)")
         do {
             //print("html -> \(html)")
-            print("Index \(url)")
+            let parsingStart = CACurrentMediaTime()
             let doc = try SwiftSoup.parse(contents, url.absoluteString)
+            let indexingStart = CACurrentMediaTime()
             try index.append(document: IndexDocument(id: UUID(), source: url.absoluteString, title: doc.title(), contents: doc.text()))
+            let now = CACurrentMediaTime()
+            print("Indexed \(url) in \((now - parsingStart) * 1000) ms (parsing: \((indexingStart - parsingStart) * 1000) ms - indexing \((now - indexingStart) * 1000) ms")
         } catch Exception.Error(let type, let message) {
             print("Test (SwiftSoup parser) \(type): \(message)")
         } catch {
