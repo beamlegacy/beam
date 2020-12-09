@@ -34,7 +34,6 @@ extension IndexDocument {
     }
 }
 
-
 class Index: Codable {
     struct WordScore: Codable {
         var score = Float(1.0)
@@ -69,19 +68,30 @@ class Index: Codable {
     func search(string: String) -> [SearchResult] {
         let inputWords = Self.extractWords(from: string)
 
-        var results = Set<DocumentResult>()
-        inputWords.map { word -> [DocumentResult] in
+        var results = [UUID: DocumentResult]()
+        let documents = inputWords.map { word -> [DocumentResult] in
             guard let wordMap = words[word] else { return [] }
             return wordMap.instances.map { (key, value) -> Index.DocumentResult in
                 return DocumentResult(id: key, score: value.score)
             }
-        }.reduce(results) { (results, documents) -> Set<Index.DocumentResult> in
-            documents.reduce(results) { (res, document) -> Set<Index.DocumentResult> in
-                DocumentResult(id: document.id, score: document.score)
+        }
+
+        for docs in documents {
+            for doc in docs {
+                var score = doc.score
+                if let partialDoc = results[doc.id] {
+                    score += partialDoc.score
+                }
+                results[doc.id] = DocumentResult(id: doc.id, score: score)
             }
         }
 
-        return []
+        return results.compactMap { doc -> SearchResult? in
+            guard let originalDoc = self.documents[doc.key] else { return nil }
+            return SearchResult(id: originalDoc.id, score: doc.value.score, title: originalDoc.title, source: originalDoc.source)
+        }.sorted { lhs, rhs -> Bool in
+            lhs.score > rhs.score
+        }
     }
 
     func append(document: IndexDocument) {
@@ -106,9 +116,11 @@ class Index: Codable {
             // Add score up as this is a new instance of the word
             ids.instances[id] = WordScore(score: oldScore.score + score.score)
             ids.count += 1
+            words[word] = ids
         } else {
             ids.instances[id] = score
             ids.count += 1
+            words[word] = ids
         }
     }
 
@@ -156,6 +168,4 @@ class Index: Codable {
 
         return wordTokens
     }
-
-
 }

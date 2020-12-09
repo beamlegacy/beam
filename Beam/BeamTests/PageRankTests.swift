@@ -145,5 +145,26 @@ class PageRangeTests: XCTestCase {
 
         XCTAssertEqual(urls.count, index.documents.count)
         index.dump()
+
+        search("sport")
+        search("rules")
+        search("perform")
+        search("wikipedia")
+        search("sport rules")
+    }
+
+    func search(_ string: String) {
+        let start = CACurrentMediaTime()
+        let results = index.search(string: string)
+        let now = CACurrentMediaTime()
+
+        printResults(string, now - start, results)
+    }
+
+    func printResults(_ searchString: String, _ time: CFTimeInterval, _ results: [Index.SearchResult]) {
+        print("Search for '\(searchString)' (\(results.count) instance(s) in \(time * 1000) ms:")
+        for res in results {
+            print("\t\(res.score): \(res.source) / \(res.title)")
+        }
     }
 }
