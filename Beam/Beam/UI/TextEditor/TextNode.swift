@@ -379,11 +379,11 @@ public class TextNode: NSObject, CALayerDelegate {
 
     func drawDisclosure(at point: NSPoint, in context: CGContext) {
         let symbol = open ? "editor-arrow_down" : "editor-arrow_right"
-        drawImage(named: symbol, at: point, in: context)
+        drawImage(named: symbol, at: point, in: context, size: CGRect(x: 0, y: 0, width: 10, height: 10))
     }
 
     func drawBulletPoint(at point: NSPoint, in context: CGContext) {
-        drawImage(named: "editor-bullet", at: point, in: context, size: CGRect(x: 0, y: 0, width: 12, height: 12))
+        drawImage(named: "editor-bullet", at: point, in: context, size: CGRect(x: 0, y: 0, width: 8, height: 7))
     }
 
     func drawDebug(in context: CGContext) {
