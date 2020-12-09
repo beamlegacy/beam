@@ -3,6 +3,6 @@
 
 scheme("Beam release")
 
-output_directory("../builds/")
+output_directory("builds/")
 output_name("Beam")
 clean(true)

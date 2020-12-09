@@ -146,7 +146,7 @@ platform :mac do
       scheme: "Beam",
       silent: true,
       clean: true,
-      output_directory: "../builds",
+      output_directory: "builds",
       output_name: "Beam",
       include_symbols: true,
       # xcargs: settings_to_override,
@@ -226,7 +226,7 @@ platform :mac do
       scheme: ENV["SCHEME"],
       silent: true,
       clean: true,
-      output_directory: "../builds",
+      output_directory: "builds",
       output_name: "Beam",
       include_symbols: true,
       # xcargs: settings_to_override,
@@ -254,7 +254,7 @@ platform :mac do
   lane :deploy do
     # https://blog.zeplin.io/dev-journal-automate-notarizing-macos-apps-94b0b144ba9d
     notarize(
-      package: "../builds/Beam.app",
+      package: "builds/Beam.app",
       verbose: true,
       print_log: true,
       bundle_id: ENV["APP_IDENTIFIER"]
@@ -276,8 +276,8 @@ platform :mac do
       region: ENV["S3_REGION"],
       upload_metadata: true,
       files: [
-        "../builds/Beam.dmg",
-        "../builds/Beam.app.dSYM.zip"
+        "builds/Beam.dmg",
+        "builds/Beam.app.dSYM.zip"
       ],
       # Doesn't work the way I expected
       # endpoint: "http://downloads.dev.beamapp.co",
@@ -289,8 +289,8 @@ platform :mac do
   end
 
   lane :build_dmg do
-    dmg(path: "../builds/Beam.app",
-        output_path: "../builds/Beam.dmg")
+    dmg(path: "builds/Beam.app",
+        output_path: "builds/Beam.dmg")
   end
 
   lane :ping_slack do
@@ -333,7 +333,7 @@ platform :mac do
       scheme: "Beam release",
       silent: true,
       clean: true,
-      output_directory: "../builds",
+      output_directory: "builds",
       include_symbols: false,
       export_method: "developer-id", # Valid values are: app-store, ad-hoc, package, enterprise, development, developer-id
       # export_xcargs: "-allowProvisioningUpdates"
