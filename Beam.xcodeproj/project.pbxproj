@@ -1583,7 +1583,7 @@
 				INFOPLIST_FILE = Beam/Configuration/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
-					"@executable_path/../Frameworks",
+					"@executable_path//Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MARKETING_VERSION = 0.1;
@@ -1613,7 +1613,7 @@
 				INFOPLIST_FILE = Beam/Configuration/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
-					"@executable_path/../Frameworks",
+					"@executable_path//Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MARKETING_VERSION = 0.1;
@@ -1638,8 +1638,8 @@
 				INFOPLIST_FILE = BeamTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
-					"@executable_path/../Frameworks",
-					"@loader_path/../Frameworks",
+					"@executable_path//Frameworks",
+					"@loader_path//Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1661,8 +1661,8 @@
 				INFOPLIST_FILE = BeamTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
-					"@executable_path/../Frameworks",
-					"@loader_path/../Frameworks",
+					"@executable_path//Frameworks",
+					"@loader_path//Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1682,8 +1682,8 @@
 				INFOPLIST_FILE = BeamUITests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
-					"@executable_path/../Frameworks",
-					"@loader_path/../Frameworks",
+					"@executable_path//Frameworks",
+					"@loader_path//Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamUITests;
@@ -1704,8 +1704,8 @@
 				INFOPLIST_FILE = BeamUITests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
-					"@executable_path/../Frameworks",
-					"@loader_path/../Frameworks",
+					"@executable_path//Frameworks",
+					"@loader_path//Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamUITests;
