@@ -35,7 +35,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         NSApp.mainMenu?.item(withTitle: "File")?.submenu?.delegate = self
         NSApp.mainMenu?.item(withTitle: "Window")?.submenu?.delegate = self
 
-        Configuration.loadSavedEnvironment()
         CoreDataManager.shared.setup()
         LibrariesManager.shared.configure()
 

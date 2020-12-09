@@ -53,10 +53,11 @@ class DocumentManagerTests: CoreDataTests {
 
         let id = UUID()
         let title = faker.zelda.game()
+        let docStruct = DocumentStruct(id: id, title: title, createdAt: Date(), updatedAt: Date(), data: jsonData, documentType: .note)
 
-        sut.saveDocument(id: id, title: title, data: jsonData) { _ in
+        sut.saveDocument(docStruct, completion: { _ in
             setupExpectation.fulfill()
-        }
+        })
 
         waitForExpectations(timeout: 1.0) { _ in
             let count = Document.countWithPredicate(self.context)
@@ -76,9 +77,11 @@ class DocumentManagerTests: CoreDataTests {
         let id = UUID()
         let title = faker.zelda.game()
 
-        sut.saveDocument(id: id, title: title, data: jsonData) { _ in
+        let docStruct = DocumentStruct(id: id, title: title, createdAt: Date(), updatedAt: Date(), data: jsonData, documentType: .note)
+
+        sut.saveDocument(docStruct, completion: { _ in
             saveExpectation.fulfill()
-        }
+        })
 
         waitForExpectations(timeout: 1.0) { _ in
         }
@@ -88,7 +91,9 @@ class DocumentManagerTests: CoreDataTests {
         //swiftlint:disable:next force_try
         jsonData = try! self.defaultEncoder().encode(document)
 
-        sut.saveDocument(id: UUID(), title: title, data: jsonData) { result in
+        let docStruct2 = DocumentStruct(id: UUID(), title: title, createdAt: Date(), updatedAt: Date(), data: jsonData, documentType: .note)
+
+        sut.saveDocument(docStruct2, completion: { result in
             switch result {
             case .success:
                 XCTAssert(false)
@@ -97,7 +102,7 @@ class DocumentManagerTests: CoreDataTests {
             }
 
             saveDoubleExpectations.fulfill()
-        }
+        })
 
         waitForExpectations(timeout: 1.0) { _ in
             let count = Document.countWithPredicate(self.context)
@@ -115,9 +120,11 @@ class DocumentManagerTests: CoreDataTests {
         let id = UUID()
         let title = faker.zelda.game()
 
-        sut.saveDocument(id: id, title: title, data: jsonData) { _ in
+        let docStruct = DocumentStruct(id: id, title: title, createdAt: Date(), updatedAt: Date(), data: jsonData, documentType: .note)
+
+        sut.saveDocument(docStruct, completion: { _ in
             setupExpectation.fulfill()
-        }
+        })
 
         waitForExpectations(timeout: 1.0) { _ in
             var document = self.sut.loadDocumentById(id: id)
@@ -145,9 +152,11 @@ class DocumentManagerTests: CoreDataTests {
         let jsonData = try! self.defaultEncoder().encode(document)
 
         let saveExpectation = expectation(description: "save completion called")
-        sut.saveDocument(id: id, title: title, data: jsonData) { _ in
+        let docStruct = DocumentStruct(id: id, title: title, createdAt: Date(), updatedAt: Date(), data: jsonData, documentType: .note)
+
+        sut.saveDocument(docStruct, completion: { _ in
             saveExpectation.fulfill()
-        }
+        })
 
         waitForExpectations(timeout: 2.0) { _ in
             let count = Document.countWithPredicate(self.context)

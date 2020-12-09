@@ -45,7 +45,9 @@ struct BMTextField: NSViewRepresentable {
         }
 
         textField.onEditingChanged = { v in
-            self.isEditing = v
+            withAnimation(.default) {
+                self.isEditing = v
+            }
         }
 
         textField.onPerformKeyEquivalent = { event in
@@ -111,6 +113,7 @@ struct BMTextField: NSViewRepresentable {
 
         func controlTextDidEndEditing(_ obj: Notification) {
             self.parent.isEditing = false
+            self.parent.isFirstResponder = false
         }
 
         func controlTextDidChange(_ obj: Notification) {
