@@ -10,18 +10,6 @@ import Foundation
 import Combine
 import WebKit
 
-enum Mode {
-    case today
-    case note
-    case web
-}
-
-enum KeyCode: UInt16 {
-    case up = 126
-    case down = 125
-    case escap = 25
-}
-
 @objc class BeamState: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var data: BeamData
     public var searchEngine: SearchEngine = GoogleSearch()

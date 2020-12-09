@@ -57,13 +57,11 @@
 		418172132581107C00317ED8 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181718D2581107C00317ED8 /* Logger.swift */; };
 		418172142581107C00317ED8 /* BNSTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181718E2581107C00317ED8 /* BNSTextField.swift */; };
 		418172152581107C00317ED8 /* NSContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181718F2581107C00317ED8 /* NSContainerView.swift */; };
-		418172162581107C00317ED8 /* Readability.js in Resources */ = {isa = PBXBuildFile; fileRef = 418171902581107C00317ED8 /* Readability.js */; };
 		418172172581107C00317ED8 /* OverrideConsole.js in Resources */ = {isa = PBXBuildFile; fileRef = 418171912581107C00317ED8 /* OverrideConsole.js */; };
 		418172182581107C00317ED8 /* PerformanceDebug.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171922581107C00317ED8 /* PerformanceDebug.swift */; };
 		418172192581107C00317ED8 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171942581107C00317ED8 /* Persistence.swift */; };
 		4181721A2581107C00317ED8 /* StandardStorable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171952581107C00317ED8 /* StandardStorable.swift */; };
 		4181721B2581107C00317ED8 /* Maths.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171962581107C00317ED8 /* Maths.swift */; };
-		4181721C2581107C00317ED8 /* SelectionObserver.js in Resources */ = {isa = PBXBuildFile; fileRef = 418171972581107C00317ED8 /* SelectionObserver.js */; };
 		4181721D2581107C00317ED8 /* NSImage+BM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171982581107C00317ED8 /* NSImage+BM.swift */; };
 		4181721E2581107C00317ED8 /* OSLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171992581107C00317ED8 /* OSLog.swift */; };
 		4181721F2581107C00317ED8 /* JSSourceLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181719A2581107C00317ED8 /* JSSourceLoader.swift */; };
@@ -83,13 +81,6 @@
 		4181722D2581107C00317ED8 /* AutoCompleteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171AC2581107C00317ED8 /* AutoCompleteView.swift */; };
 		4181722E2581107C00317ED8 /* AutoCompleteItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171AD2581107C00317ED8 /* AutoCompleteItem.swift */; };
 		4181722F2581107C00317ED8 /* BeamWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171AE2581107C00317ED8 /* BeamWindow.swift */; };
-		418172302581107C00317ED8 /* BMTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171B02581107C00317ED8 /* BMTextField.swift */; };
-		418172312581107C00317ED8 /* RoundRectButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171B12581107C00317ED8 /* RoundRectButtonStyle.swift */; };
-		418172322581107C00317ED8 /* BMTextFieldView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171B22581107C00317ED8 /* BMTextFieldView.swift */; };
-		418172332581107C00317ED8 /* DumpEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171B32581107C00317ED8 /* DumpEnvironment.swift */; };
-		418172342581107C00317ED8 /* Frame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171B42581107C00317ED8 /* Frame.swift */; };
-		418172352581107C00317ED8 /* BTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171B52581107C00317ED8 /* BTextField.swift */; };
-		418172362581107C00317ED8 /* Symbol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171B62581107C00317ED8 /* Symbol.swift */; };
 		418172372581107C00317ED8 /* TextEditOperations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171B82581107C00317ED8 /* TextEditOperations.swift */; };
 		418172382581107C00317ED8 /* TextNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171B92581107C00317ED8 /* TextNode.swift */; };
 		418172392581107C00317ED8 /* Lexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171BB2581107C00317ED8 /* Lexer.swift */; };
@@ -125,9 +116,6 @@
 		418172572581107C00317ED8 /* AccountWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171DE2581107C00317ED8 /* AccountWindow.swift */; };
 		418172582581107C00317ED8 /* AccountDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171DF2581107C00317ED8 /* AccountDetail.swift */; };
 		418172592581107C00317ED8 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171E02581107C00317ED8 /* ContentView.swift */; };
-		4181725A2581107C00317ED8 /* Animation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171E22581107C00317ED8 /* Animation.swift */; };
-		4181725B2581107C00317ED8 /* Tick.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171E32581107C00317ED8 /* Tick.swift */; };
-		4181725C2581107C00317ED8 /* FrameAnimation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171E42581107C00317ED8 /* FrameAnimation.swift */; };
 		4181725D2581107C00317ED8 /* AuthenticationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171E72581107C00317ED8 /* AuthenticationManager.swift */; };
 		4181725E2581107C00317ED8 /* AccountManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171E82581107C00317ED8 /* AccountManager.swift */; };
 		4181725F2581107C00317ED8 /* DocumentManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171E92581107C00317ED8 /* DocumentManager.swift */; };
@@ -136,6 +124,18 @@
 		4181727C258110D100317ED8 /* AppDelegate+Note.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41817278258110D100317ED8 /* AppDelegate+Note.swift */; };
 		4181727D258110D100317ED8 /* AppDelegate+Account.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41817279258110D100317ED8 /* AppDelegate+Account.swift */; };
 		4181727E258110D100317ED8 /* AppDelegate+URL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181727A258110D100317ED8 /* AppDelegate+URL.swift */; };
+		418172AA25811A3A00317ED8 /* BMTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418172A825811A3A00317ED8 /* BMTextField.swift */; };
+		418172AB25811A3A00317ED8 /* BMTextFieldView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418172A925811A3A00317ED8 /* BMTextFieldView.swift */; };
+		418172B525811AAA00317ED8 /* Tick.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418172B225811AAA00317ED8 /* Tick.swift */; };
+		418172B625811AAA00317ED8 /* FrameAnimation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418172B325811AAA00317ED8 /* FrameAnimation.swift */; };
+		418172CF25811AF800317ED8 /* Animation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418172CE25811AF800317ED8 /* Animation.swift */; };
+		418172D625811B8700317ED8 /* RoundRectButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418172D525811B8700317ED8 /* RoundRectButtonStyle.swift */; };
+		418172FF25811DB200317ED8 /* Readability.js in Resources */ = {isa = PBXBuildFile; fileRef = 418172FD25811DB200317ED8 /* Readability.js */; };
+		4181730025811DB200317ED8 /* SelectionObserver.js in Resources */ = {isa = PBXBuildFile; fileRef = 418172FE25811DB200317ED8 /* SelectionObserver.js */; };
+		4181731725811E1800317ED8 /* CursorMovement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181731625811E1800317ED8 /* CursorMovement.swift */; };
+		4181732D25811E9800317ED8 /* Symbol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181732C25811E9800317ED8 /* Symbol.swift */; };
+		4181733225811F4800317ED8 /* KeyCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181733125811F4800317ED8 /* KeyCode.swift */; };
+		4181733725811F6300317ED8 /* Mode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181733625811F6300317ED8 /* Mode.swift */; };
 		521812CF2524C597007E4B47 /* NoteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 521812CE2524C597007E4B47 /* NoteTests.swift */; };
 		527DF48725710ECB00A0A56D /* DocumentManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 527DF48625710ECB00A0A56D /* DocumentManagerTests.swift */; };
 		52B5EF78252F520100914D52 /* CoreDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52B5EF77252F520100914D52 /* CoreDataTests.swift */; };
@@ -233,13 +233,11 @@
 		4181718D2581107C00317ED8 /* Logger.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 		4181718E2581107C00317ED8 /* BNSTextField.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BNSTextField.swift; sourceTree = "<group>"; };
 		4181718F2581107C00317ED8 /* NSContainerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSContainerView.swift; sourceTree = "<group>"; };
-		418171902581107C00317ED8 /* Readability.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = Readability.js; sourceTree = "<group>"; };
 		418171912581107C00317ED8 /* OverrideConsole.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = OverrideConsole.js; sourceTree = "<group>"; };
 		418171922581107C00317ED8 /* PerformanceDebug.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PerformanceDebug.swift; sourceTree = "<group>"; };
 		418171942581107C00317ED8 /* Persistence.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
 		418171952581107C00317ED8 /* StandardStorable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StandardStorable.swift; sourceTree = "<group>"; };
 		418171962581107C00317ED8 /* Maths.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Maths.swift; sourceTree = "<group>"; };
-		418171972581107C00317ED8 /* SelectionObserver.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = SelectionObserver.js; sourceTree = "<group>"; };
 		418171982581107C00317ED8 /* NSImage+BM.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSImage+BM.swift"; sourceTree = "<group>"; };
 		418171992581107C00317ED8 /* OSLog.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OSLog.swift; sourceTree = "<group>"; };
 		4181719A2581107C00317ED8 /* JSSourceLoader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSSourceLoader.swift; sourceTree = "<group>"; };
@@ -259,13 +257,6 @@
 		418171AC2581107C00317ED8 /* AutoCompleteView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AutoCompleteView.swift; sourceTree = "<group>"; };
 		418171AD2581107C00317ED8 /* AutoCompleteItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AutoCompleteItem.swift; sourceTree = "<group>"; };
 		418171AE2581107C00317ED8 /* BeamWindow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BeamWindow.swift; sourceTree = "<group>"; };
-		418171B02581107C00317ED8 /* BMTextField.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BMTextField.swift; sourceTree = "<group>"; };
-		418171B12581107C00317ED8 /* RoundRectButtonStyle.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RoundRectButtonStyle.swift; sourceTree = "<group>"; };
-		418171B22581107C00317ED8 /* BMTextFieldView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BMTextFieldView.swift; sourceTree = "<group>"; };
-		418171B32581107C00317ED8 /* DumpEnvironment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DumpEnvironment.swift; sourceTree = "<group>"; };
-		418171B42581107C00317ED8 /* Frame.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Frame.swift; sourceTree = "<group>"; };
-		418171B52581107C00317ED8 /* BTextField.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BTextField.swift; sourceTree = "<group>"; };
-		418171B62581107C00317ED8 /* Symbol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Symbol.swift; sourceTree = "<group>"; };
 		418171B82581107C00317ED8 /* TextEditOperations.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextEditOperations.swift; sourceTree = "<group>"; };
 		418171B92581107C00317ED8 /* TextNode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextNode.swift; sourceTree = "<group>"; };
 		418171BB2581107C00317ED8 /* Lexer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Lexer.swift; sourceTree = "<group>"; };
@@ -301,9 +292,6 @@
 		418171DE2581107C00317ED8 /* AccountWindow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AccountWindow.swift; sourceTree = "<group>"; };
 		418171DF2581107C00317ED8 /* AccountDetail.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AccountDetail.swift; sourceTree = "<group>"; };
 		418171E02581107C00317ED8 /* ContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		418171E22581107C00317ED8 /* Animation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Animation.swift; sourceTree = "<group>"; };
-		418171E32581107C00317ED8 /* Tick.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Tick.swift; sourceTree = "<group>"; };
-		418171E42581107C00317ED8 /* FrameAnimation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FrameAnimation.swift; sourceTree = "<group>"; };
 		418171E72581107C00317ED8 /* AuthenticationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AuthenticationManager.swift; sourceTree = "<group>"; };
 		418171E82581107C00317ED8 /* AccountManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AccountManager.swift; sourceTree = "<group>"; };
 		418171E92581107C00317ED8 /* DocumentManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DocumentManager.swift; sourceTree = "<group>"; };
@@ -312,6 +300,18 @@
 		41817278258110D100317ED8 /* AppDelegate+Note.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "AppDelegate+Note.swift"; sourceTree = "<group>"; };
 		41817279258110D100317ED8 /* AppDelegate+Account.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "AppDelegate+Account.swift"; sourceTree = "<group>"; };
 		4181727A258110D100317ED8 /* AppDelegate+URL.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "AppDelegate+URL.swift"; sourceTree = "<group>"; };
+		418172A825811A3A00317ED8 /* BMTextField.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BMTextField.swift; sourceTree = "<group>"; };
+		418172A925811A3A00317ED8 /* BMTextFieldView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BMTextFieldView.swift; sourceTree = "<group>"; };
+		418172B225811AAA00317ED8 /* Tick.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Tick.swift; sourceTree = "<group>"; };
+		418172B325811AAA00317ED8 /* FrameAnimation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FrameAnimation.swift; sourceTree = "<group>"; };
+		418172CE25811AF800317ED8 /* Animation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Animation.swift; sourceTree = "<group>"; };
+		418172D525811B8700317ED8 /* RoundRectButtonStyle.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RoundRectButtonStyle.swift; sourceTree = "<group>"; };
+		418172FD25811DB200317ED8 /* Readability.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = Readability.js; sourceTree = "<group>"; };
+		418172FE25811DB200317ED8 /* SelectionObserver.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = SelectionObserver.js; sourceTree = "<group>"; };
+		4181731625811E1800317ED8 /* CursorMovement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorMovement.swift; sourceTree = "<group>"; };
+		4181732C25811E9800317ED8 /* Symbol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Symbol.swift; sourceTree = "<group>"; };
+		4181733125811F4800317ED8 /* KeyCode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyCode.swift; sourceTree = "<group>"; };
+		4181733625811F6300317ED8 /* Mode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mode.swift; sourceTree = "<group>"; };
 		521812CE2524C597007E4B47 /* NoteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteTests.swift; sourceTree = "<group>"; };
 		521813082524CEC6007E4B47 /* Fakery.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Fakery.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		5218130E2524CEDC007E4B47 /* Fakery.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Fakery.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -401,7 +401,7 @@
 			children = (
 				4181716B2581107C00317ED8 /* Models */,
 				418171A92581107C00317ED8 /* Views */,
-				418171E52581107C00317ED8 /* Components */,
+				418172A625811A3A00317ED8 /* Components */,
 				418171E62581107C00317ED8 /* Managers */,
 				418171592581107C00317ED8 /* Services */,
 				418171A82581107C00317ED8 /* Stores */,
@@ -486,15 +486,15 @@
 		4181716B2581107C00317ED8 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				418171712581107C00317ED8 /* Importers */,
+				418171762581107C00317ED8 /* CoreData */,
 				4181716C2581107C00317ED8 /* BeamData.swift */,
 				4181716D2581107C00317ED8 /* Score.swift */,
 				4181716E2581107C00317ED8 /* SearchEngine.swift */,
 				4181716F2581107C00317ED8 /* SearchKit.swift */,
 				418171702581107C00317ED8 /* BeamElement.swift */,
-				418171712581107C00317ED8 /* Importers */,
 				418171742581107C00317ED8 /* NavigationContext.swift */,
 				418171752581107C00317ED8 /* Html2Md.swift */,
-				418171762581107C00317ED8 /* CoreData */,
 				418171822581107C00317ED8 /* BrowserTab.swift */,
 				418171832581107C00317ED8 /* BeamState.swift */,
 				418171842581107C00317ED8 /* BeamNote.swift */,
@@ -542,8 +542,11 @@
 		418171882581107C00317ED8 /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
-				418171892581107C00317ED8 /* Utils */,
+				418172B025811AAA00317ED8 /* Animator */,
 				4181719C2581107C00317ED8 /* Extensions */,
+				4181731525811E0300317ED8 /* Enum */,
+				418172D425811B8700317ED8 /* UI */,
+				418171892581107C00317ED8 /* Utils */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -551,18 +554,18 @@
 		418171892581107C00317ED8 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				418171932581107C00317ED8 /* Persistence */,
+				418172FC25811DB200317ED8 /* Web */,
 				4181718A2581107C00317ED8 /* BeamTextFormatter.swift */,
 				4181718B2581107C00317ED8 /* Readability.swift */,
 				4181718C2581107C00317ED8 /* EventsTracker.swift */,
 				4181718D2581107C00317ED8 /* Logger.swift */,
 				4181718E2581107C00317ED8 /* BNSTextField.swift */,
 				4181718F2581107C00317ED8 /* NSContainerView.swift */,
-				418171902581107C00317ED8 /* Readability.js */,
 				418171912581107C00317ED8 /* OverrideConsole.js */,
+				4181732C25811E9800317ED8 /* Symbol.swift */,
 				418171922581107C00317ED8 /* PerformanceDebug.swift */,
-				418171932581107C00317ED8 /* Persistence */,
 				418171962581107C00317ED8 /* Maths.swift */,
-				418171972581107C00317ED8 /* SelectionObserver.js */,
 				418171982581107C00317ED8 /* NSImage+BM.swift */,
 				418171992581107C00317ED8 /* OSLog.swift */,
 				4181719A2581107C00317ED8 /* JSSourceLoader.swift */,
@@ -609,17 +612,15 @@
 		418171A92581107C00317ED8 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				418171AA2581107C00317ED8 /* AutoComplete */,
+				418171E02581107C00317ED8 /* ContentView.swift */,
 				418171AE2581107C00317ED8 /* BeamWindow.swift */,
-				418171AF2581107C00317ED8 /* Utils */,
-				418171B72581107C00317ED8 /* TextEditor */,
-				418171C32581107C00317ED8 /* NotesList */,
+				418171DD2581107C00317ED8 /* Account */,
 				418171CF2581107C00317ED8 /* Browser */,
 				418171D42581107C00317ED8 /* Notes */,
+				418171AA2581107C00317ED8 /* AutoComplete */,
+				418171B72581107C00317ED8 /* TextEditor */,
+				418171C32581107C00317ED8 /* NotesList */,
 				418171D72581107C00317ED8 /* OmniBar */,
-				418171DD2581107C00317ED8 /* Account */,
-				418171E02581107C00317ED8 /* ContentView.swift */,
-				418171E12581107C00317ED8 /* Animations */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -632,20 +633,6 @@
 				418171AD2581107C00317ED8 /* AutoCompleteItem.swift */,
 			);
 			path = AutoComplete;
-			sourceTree = "<group>";
-		};
-		418171AF2581107C00317ED8 /* Utils */ = {
-			isa = PBXGroup;
-			children = (
-				418171B02581107C00317ED8 /* BMTextField.swift */,
-				418171B12581107C00317ED8 /* RoundRectButtonStyle.swift */,
-				418171B22581107C00317ED8 /* BMTextFieldView.swift */,
-				418171B32581107C00317ED8 /* DumpEnvironment.swift */,
-				418171B42581107C00317ED8 /* Frame.swift */,
-				418171B52581107C00317ED8 /* BTextField.swift */,
-				418171B62581107C00317ED8 /* Symbol.swift */,
-			);
-			path = Utils;
 			sourceTree = "<group>";
 		};
 		418171B72581107C00317ED8 /* TextEditor */ = {
@@ -732,23 +719,6 @@
 			path = Account;
 			sourceTree = "<group>";
 		};
-		418171E12581107C00317ED8 /* Animations */ = {
-			isa = PBXGroup;
-			children = (
-				418171E22581107C00317ED8 /* Animation.swift */,
-				418171E32581107C00317ED8 /* Tick.swift */,
-				418171E42581107C00317ED8 /* FrameAnimation.swift */,
-			);
-			path = Animations;
-			sourceTree = "<group>";
-		};
-		418171E52581107C00317ED8 /* Components */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Components;
-			sourceTree = "<group>";
-		};
 		418171E62581107C00317ED8 /* Managers */ = {
 			isa = PBXGroup;
 			children = (
@@ -769,6 +739,60 @@
 				4181727A258110D100317ED8 /* AppDelegate+URL.swift */,
 			);
 			path = "AppDelegate+BM";
+			sourceTree = "<group>";
+		};
+		418172A625811A3A00317ED8 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				418172A725811A3A00317ED8 /* BMTextField */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		418172A725811A3A00317ED8 /* BMTextField */ = {
+			isa = PBXGroup;
+			children = (
+				418172A825811A3A00317ED8 /* BMTextField.swift */,
+				418172A925811A3A00317ED8 /* BMTextFieldView.swift */,
+			);
+			path = BMTextField;
+			sourceTree = "<group>";
+		};
+		418172B025811AAA00317ED8 /* Animator */ = {
+			isa = PBXGroup;
+			children = (
+				418172CE25811AF800317ED8 /* Animation.swift */,
+				418172B325811AAA00317ED8 /* FrameAnimation.swift */,
+				418172B225811AAA00317ED8 /* Tick.swift */,
+			);
+			path = Animator;
+			sourceTree = "<group>";
+		};
+		418172D425811B8700317ED8 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				418172D525811B8700317ED8 /* RoundRectButtonStyle.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		418172FC25811DB200317ED8 /* Web */ = {
+			isa = PBXGroup;
+			children = (
+				418172FD25811DB200317ED8 /* Readability.js */,
+				418172FE25811DB200317ED8 /* SelectionObserver.js */,
+			);
+			path = Web;
+			sourceTree = "<group>";
+		};
+		4181731525811E0300317ED8 /* Enum */ = {
+			isa = PBXGroup;
+			children = (
+				4181731625811E1800317ED8 /* CursorMovement.swift */,
+				4181733125811F4800317ED8 /* KeyCode.swift */,
+				4181733625811F6300317ED8 /* Mode.swift */,
+			);
+			path = Enum;
 			sourceTree = "<group>";
 		};
 		527DF48525710EAE00A0A56D /* Managers */ = {
@@ -1017,12 +1041,12 @@
 				418170FF2581060A00317ED8 /* Colors.xcassets in Resources */,
 				418172172581107C00317ED8 /* OverrideConsole.js in Resources */,
 				4181713425810CDC00317ED8 /* Debug.xcconfig in Resources */,
+				418172FF25811DB200317ED8 /* Readability.js in Resources */,
 				418171122581082200317ED8 /* Assets.xcassets in Resources */,
+				4181730025811DB200317ED8 /* SelectionObserver.js in Resources */,
 				965A78332514F148009980D4 /* Preview Assets.xcassets in Resources */,
-				4181721C2581107C00317ED8 /* SelectionObserver.js in Resources */,
 				418172412581107C00317ED8 /* ScrollableTextView.xib in Resources */,
 				418171F52581107C00317ED8 /* forgot_password.graphql in Resources */,
-				418172162581107C00317ED8 /* Readability.js in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1229,15 +1253,15 @@
 				4181727C258110D100317ED8 /* AppDelegate+Note.swift in Sources */,
 				418172592581107C00317ED8 /* ContentView.swift in Sources */,
 				418171EF2581107C00317ED8 /* User.swift in Sources */,
+				4181732D25811E9800317ED8 /* Symbol.swift in Sources */,
 				4181722E2581107C00317ED8 /* AutoCompleteItem.swift in Sources */,
-				418172322581107C00317ED8 /* BMTextFieldView.swift in Sources */,
 				418172572581107C00317ED8 /* AccountWindow.swift in Sources */,
 				4181721A2581107C00317ED8 /* StandardStorable.swift in Sources */,
+				4181731725811E1800317ED8 /* CursorMovement.swift in Sources */,
 				418172522581107C00317ED8 /* OmniBarSearchBox.swift in Sources */,
-				418172362581107C00317ED8 /* Symbol.swift in Sources */,
-				418172302581107C00317ED8 /* BMTextField.swift in Sources */,
 				418172392581107C00317ED8 /* Lexer.swift in Sources */,
 				418172532581107C00317ED8 /* Chevrons.swift in Sources */,
+				4181733725811F6300317ED8 /* Mode.swift in Sources */,
 				4181723F2581107C00317ED8 /* Font.swift in Sources */,
 				4181722C2581107C00317ED8 /* AutoCompleteList.swift in Sources */,
 				4181727B258110D100317ED8 /* AppDelegate+CoreData.swift in Sources */,
@@ -1250,6 +1274,7 @@
 				418171EE2581107C00317ED8 /* GraphqlParametersProtocol.swift in Sources */,
 				418172122581107C00317ED8 /* EventsTracker.swift in Sources */,
 				4181720A2581107C00317ED8 /* BrowserTab.swift in Sources */,
+				418172D625811B8700317ED8 /* RoundRectButtonStyle.swift in Sources */,
 				4181722A2581107C00317ED8 /* NSRect+Beam.swift in Sources */,
 				4181724B2581107C00317ED8 /* NoteRow.swift in Sources */,
 				418172252581107C00317ED8 /* String+Regex.swift in Sources */,
@@ -1258,11 +1283,12 @@
 				418172562581107C00317ED8 /* GlobalTabTitle.swift in Sources */,
 				418171FE2581107C00317ED8 /* Html2Md.swift in Sources */,
 				418172492581107C00317ED8 /* NoteWindow.swift in Sources */,
+				418172B625811AAA00317ED8 /* FrameAnimation.swift in Sources */,
 				418172042581107C00317ED8 /* TemporaryFile.swift in Sources */,
 				418172482581107C00317ED8 /* ViewModelFetchedResults.swift in Sources */,
+				418172AA25811A3A00317ED8 /* BMTextField.swift in Sources */,
 				418172052581107C00317ED8 /* Note+CoreDataProperties.swift in Sources */,
 				4181720D2581107C00317ED8 /* BID.swift in Sources */,
-				4181725C2581107C00317ED8 /* FrameAnimation.swift in Sources */,
 				418172152581107C00317ED8 /* NSContainerView.swift in Sources */,
 				418172002581107C00317ED8 /* NotificationName.swift in Sources */,
 				418172112581107C00317ED8 /* Readability.swift in Sources */,
@@ -1272,6 +1298,7 @@
 				418172192581107C00317ED8 /* Persistence.swift in Sources */,
 				418172282581107C00317ED8 /* ClosedRange+Beam.swift in Sources */,
 				418172232581107C00317ED8 /* String+Ranges.swift in Sources */,
+				418172CF25811AF800317ED8 /* Animation.swift in Sources */,
 				418171F32581107C00317ED8 /* AuthenticationHandler.swift in Sources */,
 				418171EC2581107C00317ED8 /* Me.swift in Sources */,
 				418171FB2581107C00317ED8 /* BeamElement.swift in Sources */,
@@ -1291,28 +1318,25 @@
 				418172402581107C00317ED8 /* TextRoot.swift in Sources */,
 				4181723D2581107C00317ED8 /* TextEdit.swift in Sources */,
 				4181720F2581107C00317ED8 /* PageRank.swift in Sources */,
+				418172AB25811A3A00317ED8 /* BMTextFieldView.swift in Sources */,
 				965A78292514F147009980D4 /* AppDelegate.swift in Sources */,
-				4181725A2581107C00317ED8 /* Animation.swift in Sources */,
-				418172332581107C00317ED8 /* DumpEnvironment.swift in Sources */,
 				418171F82581107C00317ED8 /* Score.swift in Sources */,
 				418172022581107C00317ED8 /* Bullet+CoreDataProperties.swift in Sources */,
 				418172092581107C00317ED8 /* CoreDataManager+backupExtension.swift in Sources */,
 				4181721B2581107C00317ED8 /* Maths.swift in Sources */,
 				418172142581107C00317ED8 /* BNSTextField.swift in Sources */,
 				4181720B2581107C00317ED8 /* BeamState.swift in Sources */,
-				418172352581107C00317ED8 /* BTextField.swift in Sources */,
 				4181725D2581107C00317ED8 /* AuthenticationManager.swift in Sources */,
 				418172292581107C00317ED8 /* NSImage+CGImage.swift in Sources */,
 				4181721F2581107C00317ED8 /* JSSourceLoader.swift in Sources */,
 				4181723E2581107C00317ED8 /* TextEditCommands.swift in Sources */,
 				418171ED2581107C00317ED8 /* Session.swift in Sources */,
-				418172342581107C00317ED8 /* Frame.swift in Sources */,
 				4181713325810CDC00317ED8 /* Constants.swift in Sources */,
 				4181722D2581107C00317ED8 /* AutoCompleteView.swift in Sources */,
 				4181725E2581107C00317ED8 /* AccountManager.swift in Sources */,
 				418171FF2581107C00317ED8 /* CoreDataManager.swift in Sources */,
 				418171F22581107C00317ED8 /* APIRequest.swift in Sources */,
-				418172312581107C00317ED8 /* RoundRectButtonStyle.swift in Sources */,
+				418172B525811AAA00317ED8 /* Tick.swift in Sources */,
 				4181713525810CDC00317ED8 /* Beam.xcdatamodeld in Sources */,
 				418172102581107C00317ED8 /* BeamTextFormatter.swift in Sources */,
 				418172382581107C00317ED8 /* TextNode.swift in Sources */,
@@ -1324,7 +1348,6 @@
 				4181723C2581107C00317ED8 /* TextEditMovements.swift in Sources */,
 				418172202581107C00317ED8 /* Information.swift in Sources */,
 				4181727E258110D100317ED8 /* AppDelegate+URL.swift in Sources */,
-				4181725B2581107C00317ED8 /* Tick.swift in Sources */,
 				4181724D2581107C00317ED8 /* BrowserTabBar.swift in Sources */,
 				418172542581107C00317ED8 /* OmniBar.swift in Sources */,
 				418172422581107C00317ED8 /* NotesContentView.swift in Sources */,
@@ -1336,6 +1359,7 @@
 				418172182581107C00317ED8 /* PerformanceDebug.swift in Sources */,
 				4181722F2581107C00317ED8 /* BeamWindow.swift in Sources */,
 				418172602581107C00317ED8 /* LibrairiesManager.swift in Sources */,
+				4181733225811F4800317ED8 /* KeyCode.swift in Sources */,
 				4181724C2581107C00317ED8 /* BrowserTabView.swift in Sources */,
 				418172512581107C00317ED8 /* JournalView.swift in Sources */,
 				418172462581107C00317ED8 /* NoteList.swift in Sources */,
