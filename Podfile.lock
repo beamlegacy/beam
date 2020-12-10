@@ -6,9 +6,9 @@ PODS:
   - Down (0.9.4)
   - Fakery (5.0.0)
   - JWTDecode (2.5.0)
-  - Sentry (6.0.10):
-    - Sentry/Core (= 6.0.10)
-  - Sentry/Core (6.0.10)
+  - Sentry (6.0.11):
+    - Sentry/Core (= 6.0.11)
+  - Sentry/Core (6.0.11)
   - SwiftLint (0.41.0)
 
 DEPENDENCIES:
@@ -36,9 +36,9 @@ SPEC CHECKSUMS:
   Down: 276f2c3eeeaf30345873bdad25f44b2640fcfa3a
   Fakery: 8146918b8dd6df98564dca10cbe8bd05354b8cc4
   JWTDecode: d4c176a28a29f7e6f9abf5c90ad3002f69b98c7c
-  Sentry: 0a48d832ce921578a0c31c68272382fbef9a1726
+  Sentry: 9545ecf8d809854a7e1edc0f7348e8ead7339ab7
   SwiftLint: c585ebd615d9520d7fbdbe151f527977b0534f1e
 
 PODFILE CHECKSUM: cca706eb4e593ed13ed3e46ff1ff0d549ae4b638
 
-COCOAPODS: 1.10.0
+COCOAPODS: 1.9.3

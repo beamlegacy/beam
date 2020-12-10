@@ -158,6 +158,8 @@
 		967B2685255465C5003F40E3 /* Html2MdTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 967B2684255465C5003F40E3 /* Html2MdTests.swift */; };
 		969084CC25365AAE009D3C96 /* ParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 969084CB25365AAE009D3C96 /* ParserTests.swift */; };
 		96C9CC3E2535CE2C00D70AA6 /* LexerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C9CC3D2535CE2C00D70AA6 /* LexerTests.swift */; };
+		96CDA7192582379A00BC375C /* Index.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96CDA7182582379A00BC375C /* Index.swift */; };
+		96CDA7212582380D00BC375C /* PageRankTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96CDA7202582380D00BC375C /* PageRankTests.swift */; };
 		96E1356F2546F03900133A24 /* TextNodeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E1356E2546F03900133A24 /* TextNodeTests.swift */; };
 /* End PBXBuildFile section */
 
@@ -340,6 +342,8 @@
 		969084CB25365AAE009D3C96 /* ParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParserTests.swift; sourceTree = "<group>"; };
 		96C9CBE225348F0900D70AA6 /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = SOURCE_ROOT; };
 		96C9CC3D2535CE2C00D70AA6 /* LexerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LexerTests.swift; sourceTree = "<group>"; };
+		96CDA7182582379A00BC375C /* Index.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Index.swift; sourceTree = "<group>"; };
+		96CDA7202582380D00BC375C /* PageRankTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PageRankTests.swift; sourceTree = "<group>"; };
 		96E1356E2546F03900133A24 /* TextNodeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextNodeTests.swift; sourceTree = "<group>"; };
 		9B355D858C3216B61BF461D9 /* Pods-BeamTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BeamTests.release.xcconfig"; path = "Target Support Files/Pods-BeamTests/Pods-BeamTests.release.xcconfig"; sourceTree = "<group>"; };
 		A3DE910688789AFBA4487533 /* Pods-Beam.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Beam.debug.xcconfig"; path = "Target Support Files/Pods-Beam/Pods-Beam.debug.xcconfig"; sourceTree = "<group>"; };
@@ -503,6 +507,7 @@
 				418171842581107C00317ED8 /* BeamNote.swift */,
 				418171852581107C00317ED8 /* BID.swift */,
 				418171862581107C00317ED8 /* NoteBackForwardList.swift */,
+				96CDA7182582379A00BC375C /* Index.swift */,
 				418171872581107C00317ED8 /* PageRank.swift */,
 			);
 			path = Models;
@@ -921,6 +926,7 @@
 				969084CB25365AAE009D3C96 /* ParserTests.swift */,
 				96E1356E2546F03900133A24 /* TextNodeTests.swift */,
 				967B2684255465C5003F40E3 /* Html2MdTests.swift */,
+				96CDA7202582380D00BC375C /* PageRankTests.swift */,
 			);
 			path = BeamTests;
 			sourceTree = "<group>";
@@ -1320,6 +1326,7 @@
 				418172242581107C00317ED8 /* String+URL.swift in Sources */,
 				418172192581107C00317ED8 /* Persistence.swift in Sources */,
 				418172282581107C00317ED8 /* ClosedRange+Beam.swift in Sources */,
+				96CDA7192582379A00BC375C /* Index.swift in Sources */,
 				418172232581107C00317ED8 /* String+Ranges.swift in Sources */,
 				418172CF25811AF800317ED8 /* Animation.swift in Sources */,
 				418171F32581107C00317ED8 /* AuthenticationHandler.swift in Sources */,
@@ -1406,6 +1413,7 @@
 				527DF48725710ECB00A0A56D /* DocumentManagerTests.swift in Sources */,
 				96E1356F2546F03900133A24 /* TextNodeTests.swift in Sources */,
 				969084CC25365AAE009D3C96 /* ParserTests.swift in Sources */,
+				96CDA7212582380D00BC375C /* PageRankTests.swift in Sources */,
 				521812CF2524C597007E4B47 /* NoteTests.swift in Sources */,
 				96C9CC3E2535CE2C00D70AA6 /* LexerTests.swift in Sources */,
 			);
