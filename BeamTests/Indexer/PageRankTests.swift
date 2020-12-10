@@ -73,22 +73,12 @@ class PageRangeTests: XCTestCase {
 
     var index = Index()
 
-    func append(_ url: URL, contents: String) {
-        do {
-            //print("html -> \(html)")
-            let parsingStart = CACurrentMediaTime()
-            let doc = try SwiftSoup.parse(contents, url.absoluteString)
-            let indexingStart = CACurrentMediaTime()
-            try index.append(document: IndexDocument(id: UUID(), source: url.absoluteString, title: doc.title(), contents: doc.text()))
-            let now = CACurrentMediaTime()
-            print("Indexed \(url) in \((now - parsingStart) * 1000) ms (parsing: \((indexingStart - parsingStart) * 1000) ms - indexing \((now - indexingStart) * 1000) ms")
-        } catch Exception.Error(let type, let message) {
-            print("Test (SwiftSoup parser) \(type): \(message)")
-        } catch {
-            print("Test: (SwiftSoup parser) unkonwn error")
-        }
 
+    struct SearchSource: Codable {
+        var url: URL
+        var data: String
     }
+    var searchSources = [SearchSource]()
 
     let urls = [
         "https://en.wikipedia.org/wiki/Saeid_Taghizadeh",
@@ -108,7 +98,7 @@ class PageRangeTests: XCTestCase {
         "https://en.wikipedia.org/wiki/Entertainment"
     ]
 
-    func testIndex() {
+    func fetchSources() {
         var expectations = [XCTestExpectation]()
         for url in urls {
             if let url = URL(string: url) {
@@ -132,7 +122,7 @@ class PageRangeTests: XCTestCase {
                         let data = data,
                         let string = String(data: data, encoding: .utf8) {
 //                        DispatchQueue.main.async {
-                            self.append(url, contents: string)
+                        self.searchSources.append(SearchSource(url: url, data: string))
                             expect.fulfill()
 //                        }
                     }
@@ -144,6 +134,88 @@ class PageRangeTests: XCTestCase {
         }
 
         wait(for: expectations, timeout: 40, enforceOrder: false)
+
+        guard let fileurl = tempFile(named: "PageRankFixtures.json") else {
+            fatalError("Unable to save PageRankFixtures.json")
+        }
+        print("Save fixtures to file \(fileurl)")
+        let encoder = JSONEncoder()
+        do {
+            let data = try encoder.encode(searchSources)
+            FileManager.default.createFile(atPath: fileurl.path, contents: data, attributes: [:])
+        } catch {
+            fatalError("Unable to save fixtures")
+        }
+
+//        searchSources.removeAll()
+    }
+
+    func loadFixtures() {
+        let fixtureData: Data = {
+            do {
+                let bundle = Bundle(for: type(of: self))
+                let path = bundle.path(forResource: "PageRankFixtures", ofType: "json")!
+                return try Data(contentsOf: URL(fileURLWithPath: path))
+            } catch {
+                fatalError("unable to load fixture data for search and indexing tests")
+            }
+        }()
+
+        let decoder = JSONDecoder()
+        do {
+            searchSources = try decoder.decode([SearchSource].self, from: fixtureData)
+        } catch {
+            fatalError("Unable to decode search / page rank fixture data")
+        }
+    }
+
+    func append(_ url: URL, contents: String) {
+        do {
+            //print("html -> \(html)")
+            let parsingStart = CACurrentMediaTime()
+            let doc = try SwiftSoup.parse(contents, url.absoluteString)
+            let title = try doc.title()
+            let text = try doc.text()
+            let indexingStart = CACurrentMediaTime()
+            index.append(document: IndexDocument(id: UUID(), source: url.absoluteString, title: title, contents: text))
+            let now = CACurrentMediaTime()
+            print("Indexed \(url) (\(contents.count) characters - title: \(title.count) - text: \(text.count)) in \((now - parsingStart) * 1000) ms (parsing: \((indexingStart - parsingStart) * 1000) ms - indexing \((now - indexingStart) * 1000) ms")
+        } catch Exception.Error(let type, let message) {
+            print("Test (SwiftSoup parser) \(type): \(message)")
+        } catch {
+            print("Test: (SwiftSoup parser) unkonwn error")
+        }
+
+    }
+
+    func tempFile(named filename: String) -> URL? {
+        let template = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(filename) as NSURL
+
+        // Fill buffer with a C string representing the local file system path.
+        var buffer = [Int8](repeating: 0, count: Int(PATH_MAX))
+        template.getFileSystemRepresentation(&buffer, maxLength: buffer.count)
+
+        // Create unique file name (and open file):
+        let fd = mkstemp(&buffer)
+        if fd != -1 {
+
+            // Create URL from file system string:
+            return URL(fileURLWithFileSystemRepresentation: buffer, isDirectory: false, relativeTo: nil)
+
+        } else {
+            print("Error: " + String(cString: strerror(errno)))
+        }
+
+        return nil
+    }
+
+    func testIndex() {
+        //fetchSources()
+        loadFixtures()
+
+        for source in searchSources {
+            self.append(source.url, contents: source.data)
+        }
 
         XCTAssertEqual(urls.count, index.documents.count)
         index.dump()
