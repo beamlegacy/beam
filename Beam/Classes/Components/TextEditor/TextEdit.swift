@@ -946,6 +946,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         window.acceptsMouseMovedEvents = true
         for elem in mapping {
             elem.value.layer.contentsScale = window.backingScaleFactor
+            elem.value.contentsScale = window.backingScaleFactor
             elem.value.invalidate()
         }
         titleLayer.contentsScale = window.backingScaleFactor
@@ -1032,6 +1033,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         purgeDeadNodes()
 
         if let w = window {
+            node.contentsScale = w.backingScaleFactor
             node.layer.contentsScale = w.backingScaleFactor
         }
         layer?.addSublayer(node.layer)

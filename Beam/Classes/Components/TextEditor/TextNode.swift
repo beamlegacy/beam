@@ -17,16 +17,25 @@ public class TextNode: NSObject, CALayerDelegate {
     var element: BeamElement
     var layout: TextFrame?
     let layer: CALayer
-    var debug = true
+    var debug = false
     var disclosurePressed = false
     var frameAnimation: FrameAnimation?
     var frameAnimationCancellable = Set<AnyCancellable>()
     var currentFrameInDocument = NSRect()
 
+    var contentsScale = CGFloat(2) {
+        didSet {
+            guard let actionLayer = actionLayer else { return }
+            actionLayer.contentsScale = contentsScale
+            actionTextLayer.contentsScale = contentsScale
+            actionImageLayer.contentsScale = contentsScale
+        }
+    }
+
+    var icon = NSImage(named: "editor-cmdreturn")
     var actionLayer: CALayer?
     let actionImageLayer = CALayer()
     let actionTextLayer = CATextLayer()
-
 
     var text: String {
         get { element.text }
@@ -135,6 +144,7 @@ public class TextNode: NSObject, CALayerDelegate {
             }
         }
     }
+
     var frame = NSRect(x: 0, y: 0, width: 0, height: 0) // the total frame including text and children, in the parent reference
     var localFrame: NSRect { // the total frame including text and children, in the local reference
         return NSRect(x: 0, y: 0, width: frame.width, height: frame.height)
@@ -606,7 +616,7 @@ public class TextNode: NSObject, CALayerDelegate {
     func createActionLayer() {
         actionLayer = CALayer()
         guard let actionLayer = actionLayer else { return }
-        var icon = NSImage(named: "editor-cmdreturn")
+
         icon = icon?.fill(color: .editorSearchNormal)
 
         actionImageLayer.opacity = 0
@@ -615,13 +625,11 @@ public class TextNode: NSObject, CALayerDelegate {
 
         actionTextLayer.opacity = 0
         actionTextLayer.frame = CGRect(x: 15, y: 2.5, width: 100, height: 20)
-        actionTextLayer.contentsScale = NSWindow().backingScaleFactor
         actionTextLayer.fontSize = fontSize
         actionTextLayer.string = "to search"
         actionTextLayer.foregroundColor = NSColor.editorSearchNormal.cgColor
 
         actionLayer.frame = CGRect(x: availableWidth + 30, y: 0, width: 100, height: 20)
-        // actionLayer.backgroundColor = NSColor.yellow.cgColor
 
         actionLayer.addSublayer(actionTextLayer)
         actionLayer.addSublayer(actionImageLayer)
@@ -786,19 +794,20 @@ public class TextNode: NSObject, CALayerDelegate {
     // MARK: - Mouse Events
 
     func mouseDown(mouseInfo: MouseInfo) -> Bool {
-//        print("mouseDown (\(mouseInfo))")
+        // print("mouseDown (\(mouseInfo))")
         if showDisclosureButton && disclosureButtonFrame.contains(mouseInfo.position) {
-//            print("disclosure pressed (\(open))")
+            // print("disclosure pressed (\(open))")
             disclosurePressed = true
             return true
         }
+
         return false
     }
 
     func mouseUp(mouseInfo: MouseInfo) -> Bool {
-//        print("mouseUp (\(mouseInfo))")
+        // print("mouseUp (\(mouseInfo))")
         if disclosurePressed && disclosureButtonFrame.contains(mouseInfo.position) {
-//            print("disclosure unpressed (\(open))")
+            // print("disclosure unpressed (\(open))")
             disclosurePressed = false
             open.toggle()
 
@@ -811,16 +820,21 @@ public class TextNode: NSObject, CALayerDelegate {
     }
 
     func mouseMoved(mouseInfo: MouseInfo) -> Bool {
+        guard let actionLayer = actionLayer else { return false }
+
+        let position = NSPoint(x: indent + mouseInfo.position.x, y: mouseInfo.position.y)
 
         // Show image & text layer
-        if textFrame.contains(mouseInfo.position) && actionLayer!.frame.contains(mouseInfo.position) {
-            actionImageLayer.opacity = 1
+        if isEditing && textFrame.contains(position) && actionLayer.frame.contains(position) {
+            showHoveredActionImage(true)
+
             actionTextLayer.opacity = 1
+            actionTextLayer.foregroundColor = NSColor.editorSearchHover.cgColor
             actionTextLayer.setAffineTransform(CGAffineTransform(translationX: 10, y: 0))
 
             return true
-        } else if textFrame.contains(mouseInfo.position) {
-            actionImageLayer.opacity = 1
+        } else if isEditing && textFrame.contains(position) {
+            showHoveredActionImage(false)
 
             if actionTextLayer.opacity == 1 {
                 actionTextLayer.opacity = 0
@@ -831,7 +845,9 @@ public class TextNode: NSObject, CALayerDelegate {
         }
 
         // Remove all layer
-        if !textFrame.contains(mouseInfo.position) {
+        if !textFrame.contains(position) {
+            icon = icon?.fill(color: .editorSearchNormal)
+            actionImageLayer.contents = icon
             actionImageLayer.opacity = 0
             actionTextLayer.opacity = 0
             actionTextLayer.setAffineTransform(CGAffineTransform.identity)
@@ -1185,5 +1201,11 @@ public class TextNode: NSObject, CALayerDelegate {
             return p.inSubTreeOf(node)
         }
         return false
+    }
+
+    private func showHoveredActionImage(_ hovered: Bool) {
+        icon = icon?.fill(color: hovered ? .editorSearchHover : .editorSearchNormal)
+        actionImageLayer.contents = icon
+        actionImageLayer.opacity = 1
     }
 }
