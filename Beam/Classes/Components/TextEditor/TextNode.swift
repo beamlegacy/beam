@@ -17,7 +17,7 @@ public class TextNode: NSObject, CALayerDelegate {
     var element: BeamElement
     var layout: TextFrame?
     let layer: CALayer
-    var debug = false
+    var debug = true
     var disclosurePressed = false
     var frameAnimation: FrameAnimation?
     var frameAnimationCancellable = Set<AnyCancellable>()
@@ -26,6 +26,7 @@ public class TextNode: NSObject, CALayerDelegate {
     var actionLayer: CALayer?
     let actionImageLayer = CALayer()
     let actionTextLayer = CATextLayer()
+
 
     var text: String {
         get { element.text }
@@ -585,7 +586,8 @@ public class TextNode: NSObject, CALayerDelegate {
                     textFrame.size.width += CGFloat(indent)
                 }
             }
-            textFrame.size.width += maxCursorWidth
+
+            textFrame.size.width += availableWidth
             textFrame = textFrame.rounded()
 
             invalidatedTextRendering = false
@@ -605,18 +607,21 @@ public class TextNode: NSObject, CALayerDelegate {
         actionLayer = CALayer()
         guard let actionLayer = actionLayer else { return }
         var icon = NSImage(named: "editor-cmdreturn")
-
         icon = icon?.fill(color: .editorSearchNormal)
+
+        actionImageLayer.opacity = 0
         actionImageLayer.frame = CGRect(x: 0, y: 5, width: 20, height: 16)
         actionImageLayer.contents = icon?.cgImage
 
-        actionTextLayer.frame = CGRect(x: 25, y: 2.5, width: 100, height: 20)
+        actionTextLayer.opacity = 0
+        actionTextLayer.frame = CGRect(x: 15, y: 2.5, width: 100, height: 20)
         actionTextLayer.contentsScale = NSWindow().backingScaleFactor
         actionTextLayer.fontSize = fontSize
         actionTextLayer.string = "to search"
         actionTextLayer.foregroundColor = NSColor.editorSearchNormal.cgColor
 
-        actionLayer.frame = CGRect(x: availableWidth + 20, y: 0, width: 100, height: 20)
+        actionLayer.frame = CGRect(x: availableWidth + 30, y: 0, width: 100, height: 20)
+        // actionLayer.backgroundColor = NSColor.yellow.cgColor
 
         actionLayer.addSublayer(actionTextLayer)
         actionLayer.addSublayer(actionImageLayer)
@@ -625,13 +630,10 @@ public class TextNode: NSObject, CALayerDelegate {
     }
 
     func updateActionLayer() {
-        actionLayer?.frame = CGRect(x: availableWidth + 20, y: 0, width: 100, height: 20)
+        actionLayer?.frame = CGRect(x: availableWidth + 30, y: 0, width: 100, height: 20)
     }
 
-    func destroyActionLayer() {
-        actionLayer?.removeFromSuperlayer()
-        actionLayer = nil
-    }
+    func destroyActionLayer() { }
 
     // MARK: - Methods TextNode
 
@@ -809,6 +811,33 @@ public class TextNode: NSObject, CALayerDelegate {
     }
 
     func mouseMoved(mouseInfo: MouseInfo) -> Bool {
+
+        // Show image & text layer
+        if textFrame.contains(mouseInfo.position) && actionLayer!.frame.contains(mouseInfo.position) {
+            actionImageLayer.opacity = 1
+            actionTextLayer.opacity = 1
+            actionTextLayer.setAffineTransform(CGAffineTransform(translationX: 10, y: 0))
+
+            return true
+        } else if textFrame.contains(mouseInfo.position) {
+            actionImageLayer.opacity = 1
+
+            if actionTextLayer.opacity == 1 {
+                actionTextLayer.opacity = 0
+                actionTextLayer.setAffineTransform(CGAffineTransform.identity)
+            }
+
+            return true
+        }
+
+        // Remove all layer
+        if !textFrame.contains(mouseInfo.position) {
+            actionImageLayer.opacity = 0
+            actionTextLayer.opacity = 0
+            actionTextLayer.setAffineTransform(CGAffineTransform.identity)
+            return true
+        }
+
         return false
     }
 
