@@ -36,6 +36,7 @@ public class TextNode: NSObject, CALayerDelegate {
     var actionLayer: CALayer?
     let actionImageLayer = CALayer()
     let actionTextLayer = CATextLayer()
+    let actionLayerFrame = CGRect(x: 30, y: 0, width: 100, height: 20)
 
     var text: String {
         get { element.text }
@@ -620,17 +621,17 @@ public class TextNode: NSObject, CALayerDelegate {
         icon = icon?.fill(color: .editorSearchNormal)
 
         actionImageLayer.opacity = 0
-        actionImageLayer.frame = CGRect(x: 0, y: 5, width: 20, height: 16)
+        actionImageLayer.frame = CGRect(x: 0, y: 2, width: 20, height: 16)
         actionImageLayer.contents = icon?.cgImage
 
         actionTextLayer.opacity = 0
         actionTextLayer.font = NSFont.systemFont(ofSize: 0, weight: .medium)
-        actionTextLayer.fontSize = 12
-        actionTextLayer.frame = CGRect(x: 15, y: 5.5, width: 100, height: 20)
+        actionTextLayer.fontSize = 10
+        actionTextLayer.frame = CGRect(x: 15, y: 3.5, width: 100, height: 20)
         actionTextLayer.string = "to search"
         actionTextLayer.foregroundColor = NSColor.editorSearchNormal.cgColor
 
-        actionLayer.frame = CGRect(x: availableWidth + 30, y: 0, width: 100, height: 20)
+        actionLayer.frame = CGRect(x: availableWidth + actionLayerFrame.minX, y: 0, width: actionLayerFrame.width, height: actionLayerFrame.height)
 
         actionLayer.addSublayer(actionTextLayer)
         actionLayer.addSublayer(actionImageLayer)
@@ -639,7 +640,7 @@ public class TextNode: NSObject, CALayerDelegate {
     }
 
     func updateActionLayer() {
-        actionLayer?.frame = CGRect(x: availableWidth + 30, y: 0, width: 100, height: 20)
+        actionLayer?.frame = CGRect(x: availableWidth + actionLayerFrame.minX, y: 0, width: actionLayerFrame.width, height: actionLayerFrame.height)
     }
 
     func destroyActionLayer() { }
