@@ -22,7 +22,10 @@ public class TextNode: NSObject, CALayerDelegate {
     var frameAnimation: FrameAnimation?
     var frameAnimationCancellable = Set<AnyCancellable>()
     var currentFrameInDocument = NSRect()
+
     var actionLayer: CALayer?
+    let actionImageLayer = CALayer()
+    let actionTextLayer = CATextLayer()
 
     var text: String {
         get { element.text }
@@ -280,6 +283,7 @@ public class TextNode: NSObject, CALayerDelegate {
         layer = CALayer()
         super.init()
         configureLayer()
+        createActionLayer()
     }
 
     deinit {
@@ -381,7 +385,7 @@ public class TextNode: NSObject, CALayerDelegate {
             pos.y += childSize.height
         }
 
-        print("hello")
+        updateActionLayer()
     }
 
     func configureLayer() {
@@ -600,14 +604,29 @@ public class TextNode: NSObject, CALayerDelegate {
     func createActionLayer() {
         actionLayer = CALayer()
         guard let actionLayer = actionLayer else { return }
+        var icon = NSImage(named: "editor-cmdreturn")
 
-        actionLayer.frame = CGRect(x: availableWidth + 20, y: 0, width: 10, height: 10)
-        actionLayer.backgroundColor = NSColor.red.cgColor
+        icon = icon?.fill(color: .editorSearchNormal)
+        actionImageLayer.frame = CGRect(x: 0, y: 5, width: 20, height: 16)
+        actionImageLayer.contents = icon?.cgImage
+
+        actionTextLayer.frame = CGRect(x: 25, y: 2.5, width: 100, height: 20)
+        actionTextLayer.contentsScale = NSWindow().backingScaleFactor
+        actionTextLayer.fontSize = fontSize
+        actionTextLayer.string = "to search"
+        actionTextLayer.foregroundColor = NSColor.editorSearchNormal.cgColor
+
+        actionLayer.frame = CGRect(x: availableWidth + 20, y: 0, width: 100, height: 20)
+
+        actionLayer.addSublayer(actionTextLayer)
+        actionLayer.addSublayer(actionImageLayer)
 
         layer.addSublayer(actionLayer)
     }
 
-    func updateActionLayer() { }
+    func updateActionLayer() {
+        actionLayer?.frame = CGRect(x: availableWidth + 20, y: 0, width: 100, height: 20)
+    }
 
     func destroyActionLayer() {
         actionLayer?.removeFromSuperlayer()
@@ -758,9 +777,9 @@ public class TextNode: NSObject, CALayerDelegate {
         open = true
     }
 
-    func focus() {}
+    func focus() { }
 
-    func unFocus() {}
+    func unFocus() { }
 
     // MARK: - Mouse Events
 

@@ -22,6 +22,20 @@ extension NSColor {
         return loadColor(named: "EditorBackgroundColor")
     }
 
+    // Editor
+
+    static var editorSearchNormal: NSColor {
+        return loadColor(named: "EditorSearchNormal")
+    }
+
+    static var editorSearchHover: NSColor {
+        return loadColor(named: "EditorSearchHover")
+    }
+
+    static var editorSearchClicked: NSColor {
+        return loadColor(named: "EditorSearchClicked")
+    }
+
     static var editorBidirectionalLinkColor: NSColor {
         return loadColor(named: "EditorBidirectionalLinkColor")
     }
