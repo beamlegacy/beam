@@ -624,8 +624,9 @@ public class TextNode: NSObject, CALayerDelegate {
         actionImageLayer.contents = icon?.cgImage
 
         actionTextLayer.opacity = 0
-        actionTextLayer.frame = CGRect(x: 15, y: 2.5, width: 100, height: 20)
-        actionTextLayer.fontSize = fontSize
+        actionTextLayer.font = NSFont.systemFont(ofSize: 0, weight: .medium)
+        actionTextLayer.fontSize = 12
+        actionTextLayer.frame = CGRect(x: 15, y: 5.5, width: 100, height: 20)
         actionTextLayer.string = "to search"
         actionTextLayer.foregroundColor = NSColor.editorSearchNormal.cgColor
 
@@ -787,7 +788,9 @@ public class TextNode: NSObject, CALayerDelegate {
         open = true
     }
 
-    func focus() { }
+    func focus() {
+        showHoveredActionImage(false)
+    }
 
     func unFocus() { }
 
@@ -827,30 +830,22 @@ public class TextNode: NSObject, CALayerDelegate {
         // Show image & text layer
         if isEditing && textFrame.contains(position) && actionLayer.frame.contains(position) {
             showHoveredActionImage(true)
-
-            actionTextLayer.opacity = 1
-            actionTextLayer.foregroundColor = NSColor.editorSearchHover.cgColor
-            actionTextLayer.setAffineTransform(CGAffineTransform(translationX: 10, y: 0))
+            showHoveredActionTextLayer(true)
 
             return true
         } else if isEditing && textFrame.contains(position) {
             showHoveredActionImage(false)
 
             if actionTextLayer.opacity == 1 {
-                actionTextLayer.opacity = 0
-                actionTextLayer.setAffineTransform(CGAffineTransform.identity)
+                showHoveredActionTextLayer(false)
             }
 
             return true
         }
 
-        // Remove all layer
+        // Reset all layer
         if !textFrame.contains(position) {
-            icon = icon?.fill(color: .editorSearchNormal)
-            actionImageLayer.contents = icon
-            actionImageLayer.opacity = 0
-            actionTextLayer.opacity = 0
-            actionTextLayer.setAffineTransform(CGAffineTransform.identity)
+            resetActionLayer()
             return true
         }
 
@@ -1207,5 +1202,21 @@ public class TextNode: NSObject, CALayerDelegate {
         icon = icon?.fill(color: hovered ? .editorSearchHover : .editorSearchNormal)
         actionImageLayer.contents = icon
         actionImageLayer.opacity = 1
+        actionImageLayer.setAffineTransform(hovered ? CGAffineTransform(translationX: 1, y: 0) : CGAffineTransform.identity)
+    }
+
+    private func showHoveredActionTextLayer(_ hovered: Bool) {
+        actionTextLayer.opacity = hovered ? 1 : 0
+        actionTextLayer.foregroundColor = hovered ? NSColor.editorSearchHover.cgColor : NSColor.editorSearchNormal.cgColor
+        actionTextLayer.setAffineTransform(hovered ? CGAffineTransform(translationX: 11, y: 0) : CGAffineTransform.identity)
+    }
+
+    private func resetActionLayer() {
+        icon = icon?.fill(color: .editorSearchNormal)
+        actionImageLayer.contents = icon
+        actionImageLayer.opacity = 0
+        actionTextLayer.opacity = 0
+        actionImageLayer.setAffineTransform(CGAffineTransform.identity)
+        actionTextLayer.setAffineTransform(CGAffineTransform.identity)
     }
 }
