@@ -22,6 +22,7 @@ public class TextNode: NSObject, CALayerDelegate {
     var frameAnimation: FrameAnimation?
     var frameAnimationCancellable = Set<AnyCancellable>()
     var currentFrameInDocument = NSRect()
+    var actionLayer: CALayer?
 
     var text: String {
         get { element.text }
@@ -296,22 +297,21 @@ public class TextNode: NSObject, CALayerDelegate {
         context.saveGState()
         context.translateBy(x: indent, y: 0)
 
-//        context.translateBy(x: currentFrameInDocument.origin.x, y: currentFrameInDocument.origin.y)
-//        if debug {
-//            print("debug \(self)")
-//        }
+        //  context.translateBy(x: currentFrameInDocument.origin.x, y: currentFrameInDocument.origin.y)
+        //  if debug {
+        //      print("debug \(self)")
+        //  }
 
         updateTextRendering()
 
         drawDebug(in: context)
 
         if selfVisible {
-    //        print("Draw text \(frame))")
+            // print("Draw text \(frame))")
 
             context.saveGState(); defer { context.restoreGState() }
 
             drawSelection(in: context)
-
             drawText(in: context)
 
             if isEditing {
@@ -361,7 +361,7 @@ public class TextNode: NSObject, CALayerDelegate {
 
         if self.currentFrameInDocument != frame {
             if isEditing {
-//                print("Layout set: \(frame)")
+                // print("Layout set: \(frame)")
             }
             invalidatedTextRendering = true
             updateTextRendering()
@@ -371,6 +371,7 @@ public class TextNode: NSObject, CALayerDelegate {
         }
 
         var pos = NSPoint(x: CGFloat(childInset), y: self.textFrame.height)
+
         for c in children {
             var childSize = c.idealSize
             childSize.width = frame.width - CGFloat(childInset)
@@ -379,6 +380,8 @@ public class TextNode: NSObject, CALayerDelegate {
 
             pos.y += childSize.height
         }
+
+        print("hello")
     }
 
     func configureLayer() {
@@ -594,6 +597,23 @@ public class TextNode: NSObject, CALayerDelegate {
         }
     }
 
+    func createActionLayer() {
+        actionLayer = CALayer()
+        guard let actionLayer = actionLayer else { return }
+
+        actionLayer.frame = CGRect(x: availableWidth + 20, y: 0, width: 10, height: 10)
+        actionLayer.backgroundColor = NSColor.red.cgColor
+
+        layer.addSublayer(actionLayer)
+    }
+
+    func updateActionLayer() { }
+
+    func destroyActionLayer() {
+        actionLayer?.removeFromSuperlayer()
+        actionLayer = nil
+    }
+
     // MARK: - Methods TextNode
 
     func addChild(_ child: TextNode) {
@@ -737,6 +757,10 @@ public class TextNode: NSObject, CALayerDelegate {
         guard !children.isEmpty else { return }
         open = true
     }
+
+    func focus() {}
+
+    func unFocus() {}
 
     // MARK: - Mouse Events
 
