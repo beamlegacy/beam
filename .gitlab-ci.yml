@@ -18,7 +18,6 @@ before_script:
   - direnv allow
   - eval "$(direnv export bash)"
   - eval "$(rbenv init -)"
-  - cd "Beam"
   - gem install fastlane -N
   - bundle install
 
