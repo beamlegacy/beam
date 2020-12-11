@@ -41,9 +41,11 @@ public class TextNode: NSObject, CALayerDelegate {
     var text: String {
         get { element.text }
         set {
+            if newValue.isEmpty { resetActionLayer() }
             guard element.text != newValue else { return }
             element.text = newValue
             invalidateText()
+            showHoveredActionImage(false)
         }
     }
 
