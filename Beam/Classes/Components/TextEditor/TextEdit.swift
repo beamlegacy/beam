@@ -459,6 +459,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         hasFocus = true
         invalidate()
         onStartEditing()
+        node.focus()
         return super.becomeFirstResponder()
     }
 
