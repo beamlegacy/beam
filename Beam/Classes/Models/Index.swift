@@ -12,7 +12,7 @@ extension NLLanguage: Codable {
 }
 
 struct IndexDocument: Codable {
-    var id = UUID()
+    var id = MonotonicIncreasingID64.newValue
     var source: String = ""
     var title: String = ""
     var language: NLLanguage = .undetermined
@@ -23,7 +23,7 @@ struct IndexDocument: Codable {
 }
 
 extension IndexDocument {
-    init(id: UUID, source: String, title: String, language: NLLanguage? = nil, contents: String) {
+    init(id: UInt64, source: String, title: String, language: NLLanguage? = nil, contents: String) {
         self.id = id
         self.source = source
         self.title = title
@@ -32,20 +32,28 @@ extension IndexDocument {
         contentsWords = Index.extractWords(from: contents)
         titleWords = Index.extractWords(from: title)
     }
+
+    var leanCopy: IndexDocument {
+        return IndexDocument(id: id, source: source, title: title, language: language, length: length, contentsWords: [], titleWords: [], tagsWords: [])
+    }
 }
 
 class Index: Codable {
-    struct WordScore: Codable {
-        var score = Float(1.0)
-    }
+    typealias WordScore = Float
 
     struct Word: Codable {
-        var instances = [UUID: WordScore]()
+        var instances = [UInt64: WordScore]()
         var count: UInt = 0
+
+        enum CodingKeys: String, CodingKey {
+            case instances = "i"
+            case count = "c"
+        }
+
     }
 
     var words: [String: Word] = [:]
-    var documents: [UUID: IndexDocument] = [:]
+    var documents: [UInt64: IndexDocument] = [:]
 
     init() {
     }
@@ -54,25 +62,25 @@ class Index: Codable {
     static let contentsScore = Float(2.0)
 
     struct SearchResult {
-        var id: UUID
+        var id: UInt64
         var score: Float
         var title: String
         var source: String
     }
 
     struct DocumentResult: Hashable {
-        var id: UUID
+        var id: UInt64
         var score: Float
     }
 
     func search(string: String) -> [SearchResult] {
         let inputWords = Self.extractWords(from: string)
 
-        var results = [UUID: DocumentResult]()
+        var results = [UInt64: DocumentResult]()
         let documents = inputWords.map { word -> [DocumentResult] in
             guard let wordMap = words[word] else { return [] }
             return wordMap.instances.map { (key, value) -> Index.DocumentResult in
-                return DocumentResult(id: key, score: value.score)
+                return DocumentResult(id: key, score: value)
             }
         }
 
@@ -96,25 +104,25 @@ class Index: Codable {
 
     func append(document: IndexDocument) {
         remove(id: document.id)
-        documents[document.id] = document
+        documents[document.id] = document.leanCopy
 
         for word in document.contentsWords {
-            associate(id: document.id, withWord: word, score: WordScore(score: Self.contentsScore))
+            associate(id: document.id, withWord: word, score: Self.contentsScore)
         }
 
         for word in document.titleWords {
-            associate(id: document.id, withWord: word, score: WordScore(score: Self.titleScore))
+            associate(id: document.id, withWord: word, score: Self.titleScore)
         }
     }
 
-    func associate(id: UUID, withWord word: String, score: WordScore) {
+    func associate(id: UInt64, withWord word: String, score: WordScore) {
         guard var ids = words[word] else {
             words[word] = Word(instances: [id: score], count: 1)
             return
         }
         if let oldScore = ids.instances[id] {
             // Add score up as this is a new instance of the word
-            ids.instances[id] = WordScore(score: oldScore.score + score.score)
+            ids.instances[id] = oldScore + score
             ids.count += 1
             words[word] = ids
         } else {
@@ -124,7 +132,7 @@ class Index: Codable {
         }
     }
 
-    func remove(id: UUID) {
+    func remove(id: UInt64) {
         guard let oldDoc = documents[id] else { return }
         for word in oldDoc.contentsWords {
             dissociate(id: id, fromWord: word)
@@ -135,7 +143,7 @@ class Index: Codable {
         documents.removeValue(forKey: id)
     }
 
-    func dissociate(id: UUID, fromWord word: String) {
+    func dissociate(id: UInt64, fromWord word: String) {
         guard var ids = words[word] else {
             return
         }

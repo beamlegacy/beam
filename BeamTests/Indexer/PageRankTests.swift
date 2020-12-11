@@ -73,7 +73,6 @@ class PageRangeTests: XCTestCase {
 
     var index = Index()
 
-
     struct SearchSource: Codable {
         var url: URL
         var data: String
@@ -146,8 +145,6 @@ class PageRangeTests: XCTestCase {
         } catch {
             fatalError("Unable to save fixtures")
         }
-
-//        searchSources.removeAll()
     }
 
     func loadFixtures() {
@@ -177,7 +174,7 @@ class PageRangeTests: XCTestCase {
             let title = try doc.title()
             let text = html2Text(url: url, doc: doc)
             let indexingStart = CACurrentMediaTime()
-            index.append(document: IndexDocument(id: UUID(), source: url.absoluteString, title: title, contents: text))
+            index.append(document: IndexDocument(id: MonotonicIncreasingID64.newValue, source: url.absoluteString, title: title, contents: text))
             let now = CACurrentMediaTime()
             print("Indexed \(url) (\(contents.count) characters - title: \(title.count) - text: \(text.count)) in \((now - parsingStart) * 1000) ms (parsing: \((indexingStart - parsingStart) * 1000) ms - indexing \((now - indexingStart) * 1000) ms")
         } catch Exception.Error(let type, let message) {
@@ -195,12 +192,21 @@ class PageRangeTests: XCTestCase {
         var buffer = [Int8](repeating: 0, count: Int(PATH_MAX))
         template.getFileSystemRepresentation(&buffer, maxLength: buffer.count)
 
+        let url = URL(fileURLWithFileSystemRepresentation: buffer, isDirectory: false, relativeTo: nil)
+        if FileManager.default.fileExists(atPath: url.path) {
+            do {
+                try FileManager.default.removeItem(atPath: url.path)
+            } catch {
+                fatalError()
+            }
+        }
+
         // Create unique file name (and open file):
         let fd = mkstemp(&buffer)
         if fd != -1 {
 
             // Create URL from file system string:
-            return URL(fileURLWithFileSystemRepresentation: buffer, isDirectory: false, relativeTo: nil)
+            return url
 
         } else {
             print("Error: " + String(cString: strerror(errno)))
@@ -225,6 +231,20 @@ class PageRangeTests: XCTestCase {
         search("perform")
         search("wikipedia")
         search("sport rules")
+
+        do {
+            let encoder = JSONEncoder()
+            let data = try encoder.encode(index)
+            print("Encoded index size = \(data.count)")
+
+            guard let fileurl = tempFile(named: "Index.json") else {
+                fatalError("Unable to save PageRankFixtures.json")
+            }
+            print("Save index to file \(fileurl)")
+            FileManager.default.createFile(atPath: fileurl.path, contents: data, attributes: [:])
+        } catch {
+            fatalError()
+        }
     }
 
     func search(_ string: String) {
