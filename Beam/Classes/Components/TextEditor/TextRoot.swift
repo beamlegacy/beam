@@ -79,7 +79,7 @@ public class TextRoot: TextNode {
     var node: TextNode! {
         didSet {
             guard oldValue !== node else { return }
-            oldValue.unfold()
+            oldValue.unfocus()
             oldValue.invalidateText()
             oldValue.invalidate()
             node.focus()

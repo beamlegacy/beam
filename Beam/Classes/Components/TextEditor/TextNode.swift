@@ -798,7 +798,7 @@ public class TextNode: NSObject, CALayerDelegate {
         showHoveredActionImage(false)
     }
 
-    func unFocus() {
+    func unfocus() {
         resetActionLayers()
     }
 
@@ -1172,6 +1172,8 @@ public class TextNode: NSObject, CALayerDelegate {
         let config = AttributedStringVisitor.Configuration()
         let visitor = AttributedStringVisitor(configuration: config)
         visitor.defaultFontSize = fontSize
+        visitor.context.color = color
+
         if root != nil && text.isEmpty && cursorPosition < 0 {
             let attributed = placeholder.attributed
 
