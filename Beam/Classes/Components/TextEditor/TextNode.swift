@@ -633,7 +633,6 @@ public class TextNode: NSObject, CALayerDelegate {
         actionTextLayer.foregroundColor = NSColor.editorSearchNormal.cgColor
 
         actionLayer.frame = CGRect(x: actionLayerFrame.minX, y: 0, width: actionLayerFrame.width, height: actionLayerFrame.height)
-        // actionLayer.backgroundColor = NSColor.yellow.cgColor
 
         actionLayer.addSublayer(actionTextLayer)
         actionLayer.addSublayer(actionImageLayer)
