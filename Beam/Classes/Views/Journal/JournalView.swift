@@ -29,7 +29,7 @@ struct JournalView: View {
                                  showTitle: true,
                                  scrollable: false
                         )
-                        .animation(.none)
+                        // .animation(.none)
                         .padding(.top, 20)
                 }
             }
