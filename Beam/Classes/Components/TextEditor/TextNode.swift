@@ -23,6 +23,14 @@ public class TextNode: NSObject, CALayerDelegate {
     var frameAnimationCancellable = Set<AnyCancellable>()
     var currentFrameInDocument = NSRect()
 
+    var interlineFactor = CGFloat(1.56)
+    var interNodeSpacing = CGFloat(4)
+    var indent: CGFloat {
+        selfVisible ? 15 : 0
+    }
+    var childInset = Float(20)
+    var fontSize: CGFloat { isBig ? 16 : 14 }
+
     var contentsScale = CGFloat(2) {
         didSet {
             guard let actionLayer = actionLayer else { return }
@@ -161,10 +169,6 @@ public class TextNode: NSObject, CALayerDelegate {
 
     var depth: Int { return allParents.count }
 
-    var indent: CGFloat {
-        selfVisible ? 15 : 0
-    }
-
     var idealSize: NSSize {
         updateTextRendering()
         return computedIdealSize
@@ -201,11 +205,8 @@ public class TextNode: NSObject, CALayerDelegate {
     }
 
     var readOnly: Bool = false
-    var childInset = Float(20)
 
     var isEditing: Bool { root?.node === self }
-
-    var interlineFactor = CGFloat(1.56)
 
     var firstLineHeight: CGFloat { layout?.lines.first?.bounds.height ?? CGFloat(fontSize * interlineFactor) }
     var firstLineBaseline: CGFloat {
@@ -215,8 +216,6 @@ public class TextNode: NSObject, CALayerDelegate {
         let f = AttributedStringVisitor.font(fontSize)
         return f.ascender
     }
-
-    var fontSize: CGFloat { isBig ? 16 : 14 }
 
     var isBig: Bool {
         editor.isBig
@@ -278,6 +277,7 @@ public class TextNode: NSObject, CALayerDelegate {
 
     private var icon = NSImage(named: "editor-cmdreturn")
     private var actionLayer: CALayer?
+    private var actionLayerIsHovered = false
     private let actionImageLayer = CALayer()
     private let actionTextLayer = CATextLayer()
     private let actionLayerFrame = CGRect(x: 30, y: 0, width: 80, height: 20)
@@ -596,6 +596,10 @@ public class TextNode: NSObject, CALayerDelegate {
                     textFrame.size.height = CGFloat(f.ascender - f.descender) * interlineFactor
                     textFrame.size.width += CGFloat(indent)
                 }
+
+                if self as? TextRoot == nil {
+                    textFrame.size.height += interNodeSpacing
+                }
             }
 
             textFrame.size.width = availableWidth
@@ -811,7 +815,7 @@ public class TextNode: NSObject, CALayerDelegate {
         guard let actionLayer = actionLayer else { return false }
         let position = actionLayerMousePosition(from: mouseInfo)
 
-        if actionLayer.frame.contains(position) {
+        if isEditing && actionLayerIsHovered && actionLayer.frame.contains(position) {
             editor.onStartQuery(self)
             return true
         }
@@ -1213,6 +1217,7 @@ public class TextNode: NSObject, CALayerDelegate {
     private func showHoveredActionImage(_ hovered: Bool) {
         guard !text.isEmpty else { return }
 
+        actionLayerIsHovered = hovered
         icon = icon?.fill(color: hovered ? .editorSearchHover : .editorSearchNormal)
         actionImageLayer.contents = icon
         actionImageLayer.opacity = 1
@@ -1227,6 +1232,7 @@ public class TextNode: NSObject, CALayerDelegate {
 
     private func resetActionLayers() {
         icon = icon?.fill(color: .editorSearchNormal)
+        actionLayerIsHovered = false
         actionImageLayer.contents = icon
         actionImageLayer.opacity = 0
         actionTextLayer.opacity = 0
