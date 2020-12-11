@@ -459,7 +459,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         hasFocus = true
         invalidate()
         onStartEditing()
-        node.focus()
         return super.becomeFirstResponder()
     }
 
@@ -848,6 +847,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                 dragMode = .select(rootNode.cursorPosition)
                 rootNode.extendSelection(to: clickPos)
             } else {
+                node.focus()
                 rootNode.cursorPosition = clickPos
                 rootNode.cancelSelection()
                 dragMode = .select(rootNode.cursorPosition)
