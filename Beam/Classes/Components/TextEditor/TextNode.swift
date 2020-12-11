@@ -793,7 +793,9 @@ public class TextNode: NSObject, CALayerDelegate {
         showHoveredActionImage(false)
     }
 
-    func unFocus() { }
+    func unFocus() {
+        resetActionLayer()
+    }
 
     // MARK: - Mouse Events
 
@@ -829,12 +831,12 @@ public class TextNode: NSObject, CALayerDelegate {
         let position = NSPoint(x: indent + mouseInfo.position.x, y: mouseInfo.position.y)
 
         // Show image & text layer
-        if isEditing && textFrame.contains(position) && actionLayer.frame.contains(position) {
+        if !text.isEmpty && isEditing && textFrame.contains(position) && actionLayer.frame.contains(position) {
             showHoveredActionImage(true)
             showHoveredActionTextLayer(true)
 
             return true
-        } else if isEditing && textFrame.contains(position) {
+        } else if !text.isEmpty && isEditing && textFrame.contains(position) {
             showHoveredActionImage(false)
 
             if actionTextLayer.opacity == 1 {
@@ -1200,6 +1202,8 @@ public class TextNode: NSObject, CALayerDelegate {
     }
 
     private func showHoveredActionImage(_ hovered: Bool) {
+        guard !text.isEmpty else { return }
+
         icon = icon?.fill(color: hovered ? .editorSearchHover : .editorSearchNormal)
         actionImageLayer.contents = icon
         actionImageLayer.opacity = 1

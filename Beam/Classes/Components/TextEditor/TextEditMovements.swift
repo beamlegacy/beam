@@ -129,6 +129,7 @@ extension TextRoot {
             if let newNode = node.previousVisible() {
                 let offset = node.offsetAt(index: cursorPosition) + node.offsetInDocument.x - newNode.offsetInDocument.x
                 cursorPosition = newNode.indexOnLastLine(atOffset: offset)
+                node.unFocus()
                 node.invalidateText()
                 node = newNode
             } else {
@@ -146,6 +147,7 @@ extension TextRoot {
             if let newNode = node.nextVisible() {
                 let offset = node.offsetAt(index: cursorPosition) + node.offsetInDocument.x - newNode.offsetInDocument.x
                 cursorPosition = newNode.indexOnFirstLine(atOffset: offset)
+                node.unFocus()
                 node.invalidateText()
                 node = newNode
             } else {
