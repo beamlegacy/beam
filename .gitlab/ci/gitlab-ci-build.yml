@@ -1,0 +1,15 @@
+build:macos:
+  dependencies: []
+  stage: build
+  artifacts:
+    expire_in: 7d
+    paths:
+      - builds/
+  only:
+    - merge_requests
+    - master
+  script:
+    - bundle exec fastlane beta
+  tags:
+    - macos
+  interruptible: true

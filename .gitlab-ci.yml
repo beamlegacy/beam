@@ -2,6 +2,7 @@ stages:
   - lint
   - test
   - build
+  - notarize
   - deploy
 
 variables:
@@ -21,65 +22,16 @@ before_script:
   - gem install fastlane -N
   - bundle install
 
-swiftlint:
-  dependencies: []
-  stage: lint
-  artifacts:
-    paths:
-      - Beam/fastlane/logs
-  only:
-    - merge_requests
-  script:
-    - bundle exec fastlane lint
-  tags:
-    - macos
-  interruptible: true
-  allow_failure: true
-
-xctests:
-  dependencies: []
-  stage: test
-  only:
-    - merge_requests
-    - master
-  script:
-    - bundle exec fastlane tests
-  tags:
-    - macos
-  interruptible: true
-
-build:
-  dependencies: []
-  stage: build
-  artifacts:
-    paths:
-      - builds/
-  cache:
-    paths:
-      - builds/
-  only:
-    - merge_requests
-    - master
-  script:
-    - bundle exec fastlane beta
-  tags:
-    - macos
-  interruptible: true
-
-deploy:
-  dependencies: []
-  stage: deploy
-  artifacts:
-    paths:
-      - builds/
-  cache:
-    paths:
-      - builds/
-  only:
-    - merge_requests
-    - master
-  script:
-    - bundle exec fastlane deploy
-  tags:
-    - macos
-  interruptible: true
+include:
+  - '.gitlab/ci/gitlab-ci-lint.yml'
+  - '.gitlab/ci/gitlab-ci-test.yml'
+  - '.gitlab/ci/gitlab-ci-build.yml'
+  - '.gitlab/ci/gitlab-ci-notarize.yml'
+  - '.gitlab/ci/gitlab-ci-deploy.yml'
+#  - template: Code-Quality.gitlab-ci.yml
+#
+#code_quality:
+#  artifacts:
+#    paths: [gl-code-quality-report.json]
+#  tags:
+#    - docker
