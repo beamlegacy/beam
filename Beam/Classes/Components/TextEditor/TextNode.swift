@@ -32,17 +32,11 @@ public class TextNode: NSObject, CALayerDelegate {
         }
     }
 
-    var icon = NSImage(named: "editor-cmdreturn")
-    var actionLayer: CALayer?
-    let actionImageLayer = CALayer()
-    let actionTextLayer = CATextLayer()
-    let actionLayerFrame = CGRect(x: 30, y: 0, width: 80, height: 20)
-
     var text: String {
         get { element.text }
         set {
             guard element.text != newValue else { return }
-            if newValue.isEmpty { resetActionLayer() }
+            if newValue.isEmpty { resetActionLayers() }
             element.text = newValue
             invalidateText()
         }
@@ -269,7 +263,6 @@ public class TextNode: NSObject, CALayerDelegate {
     }
 
     public private(set) var editor: BeamTextEdit
-
     private var computedIdealSize = NSSize()
     private var _root: TextRoot?
     private var needLayout = true
@@ -282,6 +275,12 @@ public class TextNode: NSObject, CALayerDelegate {
             element.ast = newValue
         }
     }
+
+    private var icon = NSImage(named: "editor-cmdreturn")
+    private var actionLayer: CALayer?
+    private let actionImageLayer = CALayer()
+    private let actionTextLayer = CATextLayer()
+    private let actionLayerFrame = CGRect(x: 30, y: 0, width: 80, height: 20)
 
     public static func == (lhs: TextNode, rhs: TextNode) -> Bool {
         return lhs === rhs
@@ -796,7 +795,7 @@ public class TextNode: NSObject, CALayerDelegate {
     }
 
     func unFocus() {
-        resetActionLayer()
+        resetActionLayers()
     }
 
     // MARK: - Mouse Events
@@ -808,7 +807,7 @@ public class TextNode: NSObject, CALayerDelegate {
             return true
         }
 
-        // Start new query when we press on the action layer.
+        // Start new query when the action layer is pressed.
         guard let actionLayer = actionLayer else { return false }
         let position = actionLayerMousePosition(from: mouseInfo)
 
@@ -839,26 +838,22 @@ public class TextNode: NSObject, CALayerDelegate {
         guard let actionLayer = actionLayer else { return false }
 
         let position = actionLayerMousePosition(from: mouseInfo)
+        let hasTextAndeditable = !text.isEmpty && isEditing
 
-        // Show image & text layer
-        if !text.isEmpty && isEditing && textFrame.contains(position) && actionLayer.frame.contains(position) {
+        // Show image & text layers
+        if hasTextAndeditable && textFrame.contains(position) && actionLayer.frame.contains(position) {
             showHoveredActionImage(true)
             showHoveredActionTextLayer(true)
-
             return true
-        } else if !text.isEmpty && isEditing && textFrame.contains(position) {
+        } else if hasTextAndeditable && textFrame.contains(position) {
             showHoveredActionImage(false)
-
-            if actionTextLayer.opacity == 1 {
-                showHoveredActionTextLayer(false)
-            }
-
+            if actionTextLayer.opacity == 1 { showHoveredActionTextLayer(false) }
             return true
         }
 
-        // Reset all layer
+        // Reset all layers
         if !textFrame.contains(position) {
-            resetActionLayer()
+            resetActionLayers()
             return true
         }
 
@@ -1230,7 +1225,7 @@ public class TextNode: NSObject, CALayerDelegate {
         actionTextLayer.setAffineTransform(hovered ? CGAffineTransform(translationX: 11, y: 0) : CGAffineTransform.identity)
     }
 
-    private func resetActionLayer() {
+    private func resetActionLayers() {
         icon = icon?.fill(color: .editorSearchNormal)
         actionImageLayer.contents = icon
         actionImageLayer.opacity = 0
