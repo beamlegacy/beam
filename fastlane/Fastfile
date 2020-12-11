@@ -26,6 +26,10 @@ platform :mac do
       mode: :lint,
       strict: true,
       config_file: '.swiftlint.yml',
+      reporter: "json",
+      output_file: "fastlane/swiftlint.json",
+      ignore_exit_status: true,
+      # path: "Beam"
     )
   end
 
@@ -91,13 +95,27 @@ platform :mac do
     # clear_derived_data
     cocoapods
     run_tests(
-      scheme: "Beam"
+      scheme: "Beam",
+      output_types: "junit",
+      output_files: "tests.xml"
     )
+    # For Gitlab artifacts
     slather(
+      cobertura_xml: true,
       workspace: "Beam.xcworkspace",
       proj: "Beam.xcodeproj",
       scheme: "Beam",
-      source_directory: "./Beam"
+      source_directory: "./Beam",
+      output_directory: "./"
+    )
+    # For automatic code coverage check
+    slather(
+      simple_output: true,
+      workspace: "Beam.xcworkspace",
+      proj: "Beam.xcodeproj",
+      scheme: "Beam",
+      source_directory: "./Beam",
+      output_directory: "./"
     )
   end
 
@@ -251,7 +269,7 @@ platform :mac do
     )
   end
 
-  lane :deploy do
+  lane :notarize_build do
     # https://blog.zeplin.io/dev-journal-automate-notarizing-macos-apps-94b0b144ba9d
     notarize(
       package: "builds/Beam.app",
@@ -259,8 +277,9 @@ platform :mac do
       print_log: true,
       bundle_id: ENV["APP_IDENTIFIER"]
     )
+  end
 
-    build_dmg
+  lane :deploy do
     upload_s3
     ping_slack
   end
@@ -269,11 +288,17 @@ platform :mac do
     get_version_number
     get_build_number
     git_branch
+
+    s3_path = if Actions.git_branch == "master"
+                "#{Actions.git_branch}/#{lane_context[SharedValues::VERSION_NUMBER]}/#{lane_context[SharedValues::BUILD_NUMBER]}"
+              else
+                Actions.git_branch
+              end
     aws_s3(
-      access_key: ENV["S3_ACCESS_KEY"],
-      secret_access_key: ENV["S3_SECRET_ACCESS_KEY"],
+      access_key: ENV["AWS_ACCESS_KEY_ID"],
+      secret_access_key: ENV["AWS_SECRET_ACCESS_KEY"],
       bucket: ENV["S3_BUCKET"],
-      region: ENV["S3_REGION"],
+      region: ENV["AWS_DEFAULT_REGION"],
       upload_metadata: true,
       files: [
         "builds/Beam.dmg",
@@ -281,7 +306,7 @@ platform :mac do
       ],
       # Doesn't work the way I expected
       # endpoint: "http://downloads.dev.beamapp.co",
-      path: "#{Actions.git_branch}/#{lane_context[SharedValues::VERSION_NUMBER]}/#{lane_context[SharedValues::BUILD_NUMBER]}"
+      path: s3_path
     )
 
     file = lane_context[SharedValues::S3_FILES_OUTPUT_PATHS].first
@@ -297,6 +322,9 @@ platform :mac do
     get_version_number
     get_build_number
     git_branch
+
+    next unless ["HEAD", "master"].include?(Actions.git_branch)
+
     attachments = lane_context[SharedValues::S3_FILES_OUTPUT_PATHS].map do |file|
       {
         title_link: file,
@@ -321,6 +349,21 @@ platform :mac do
       },
       slack_url: ENV["SLACK_WEBHOOK_URL"]
     )
+  end
+
+  lane :delete_s3 do
+    git_branch
+    directory = Actions.git_branch
+
+    unless ["HEAD", "master"].include?(directory)
+      s3 = Aws::S3::Resource.new(region: ENV["AWS_DEFAULT_REGION"],
+                                 credentials: Aws::Credentials.new(ENV["AWS_ACCESS_KEY_ID"],
+                                                                   ENV["AWS_SECRET_ACCESS_KEY"]))
+
+      bucket = s3.bucket(ENV["S3_BUCKET"])
+      puts "Deleting S3 directory #{ENV["S3_BUCKET"]}/#{directory}".green
+      bucket.objects(prefix: directory).batch_delete!
+    end
   end
 
   lane :release do

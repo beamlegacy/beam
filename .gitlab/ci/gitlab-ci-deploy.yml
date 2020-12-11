@@ -1,0 +1,40 @@
+s3:
+  dependencies:
+    - notarize
+  stage: deploy
+  environment:
+    name: review/$CI_COMMIT_REF_NAME
+    url: https://s3.$AWS_DEFAULT_REGION.amazonaws.com/$S3_BUCKET/$CI_COMMIT_REF_NAME/Beam.dmg
+    on_stop: delete s3
+  artifacts:
+    expire_in: 7d
+    paths:
+      - builds/
+  only:
+    - merge_requests
+    - master
+  script:
+    - ./scripts/build_dmg.sh
+    - bundle exec fastlane deploy
+  tags:
+    - macos
+  interruptible: false
+
+delete s3:
+  dependencies: []
+  stage: deploy
+  variables:
+    GIT_STRATEGY: none
+  environment:
+    name: review/$CI_COMMIT_REF_NAME
+    action: stop
+  only:
+    - merge_requests
+  except:
+    - master
+  when: manual
+  script:
+    - bundle exec fastlane delete_s3
+  tags:
+    - macos
+  interruptible: false
