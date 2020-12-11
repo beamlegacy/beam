@@ -36,7 +36,7 @@ public class TextNode: NSObject, CALayerDelegate {
     var actionLayer: CALayer?
     let actionImageLayer = CALayer()
     let actionTextLayer = CATextLayer()
-    let actionLayerFrame = CGRect(x: 30, y: 0, width: 100, height: 20)
+    let actionLayerFrame = CGRect(x: 30, y: 0, width: 80, height: 20)
 
     var text: String {
         get { element.text }
@@ -588,7 +588,7 @@ public class TextNode: NSObject, CALayerDelegate {
 
             if selfVisible {
                 let attrStr = attributedString
-                let layout = Font.draw(string: attrStr, atPosition: NSPoint(x: indent, y: 0), textWidth: availableWidth - indent, interlineFactor: interlineFactor)
+                let layout = Font.draw(string: attrStr, atPosition: NSPoint(x: indent, y: 0), textWidth: availableWidth - actionLayerFrame.width, interlineFactor: interlineFactor)
                 self.layout = layout
                 textFrame = layout.frame
 
@@ -599,7 +599,7 @@ public class TextNode: NSObject, CALayerDelegate {
                 }
             }
 
-            textFrame.size.width += availableWidth
+            textFrame.size.width = availableWidth
             textFrame = textFrame.rounded()
 
             invalidatedTextRendering = false
@@ -632,7 +632,8 @@ public class TextNode: NSObject, CALayerDelegate {
         actionTextLayer.string = "to search"
         actionTextLayer.foregroundColor = NSColor.editorSearchNormal.cgColor
 
-        actionLayer.frame = CGRect(x: availableWidth + actionLayerFrame.minX, y: 0, width: actionLayerFrame.width, height: actionLayerFrame.height)
+        actionLayer.frame = CGRect(x: actionLayerFrame.minX, y: 0, width: actionLayerFrame.width, height: actionLayerFrame.height)
+        // actionLayer.backgroundColor = NSColor.yellow.cgColor
 
         actionLayer.addSublayer(actionTextLayer)
         actionLayer.addSublayer(actionImageLayer)
@@ -641,7 +642,7 @@ public class TextNode: NSObject, CALayerDelegate {
     }
 
     func updateActionLayer() {
-        actionLayer?.frame = CGRect(x: availableWidth + actionLayerFrame.minX, y: 0, width: actionLayerFrame.width, height: actionLayerFrame.height)
+        actionLayer?.frame = CGRect(x: (availableWidth - actionLayerFrame.width) + actionLayerFrame.minX, y: 0, width: actionLayerFrame.width, height: actionLayerFrame.height)
     }
 
     func destroyActionLayer() { }
@@ -791,7 +792,7 @@ public class TextNode: NSObject, CALayerDelegate {
     }
 
     func focus() {
-        guard !text.isEmpty  else { return }
+        guard !text.isEmpty else { return }
         showHoveredActionImage(false)
     }
 
@@ -802,10 +803,17 @@ public class TextNode: NSObject, CALayerDelegate {
     // MARK: - Mouse Events
 
     func mouseDown(mouseInfo: MouseInfo) -> Bool {
-        // print("mouseDown (\(mouseInfo))")
         if showDisclosureButton && disclosureButtonFrame.contains(mouseInfo.position) {
             // print("disclosure pressed (\(open))")
             disclosurePressed = true
+            return true
+        }
+
+        guard let actionLayer = actionLayer else { return false }
+        let position = actionLayerMousePosition(from: mouseInfo)
+
+        if actionLayer.frame.contains(position) {
+            print("open url")
             return true
         }
 
@@ -830,7 +838,7 @@ public class TextNode: NSObject, CALayerDelegate {
     func mouseMoved(mouseInfo: MouseInfo) -> Bool {
         guard let actionLayer = actionLayer else { return false }
 
-        let position = NSPoint(x: indent + mouseInfo.position.x, y: mouseInfo.position.y)
+        let position = actionLayerMousePosition(from: mouseInfo)
 
         // Show image & text layer
         if !text.isEmpty && isEditing && textFrame.contains(position) && actionLayer.frame.contains(position) {
@@ -1201,6 +1209,10 @@ public class TextNode: NSObject, CALayerDelegate {
             return p.inSubTreeOf(node)
         }
         return false
+    }
+
+    private func actionLayerMousePosition(from mouseInfo: MouseInfo) -> NSPoint {
+        return NSPoint(x: indent + mouseInfo.position.x, y: mouseInfo.position.y)
     }
 
     private func showHoveredActionImage(_ hovered: Bool) {
