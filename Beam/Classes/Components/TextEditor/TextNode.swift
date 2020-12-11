@@ -809,11 +809,12 @@ public class TextNode: NSObject, CALayerDelegate {
             return true
         }
 
+        // Start new query when we press on the action layer.
         guard let actionLayer = actionLayer else { return false }
         let position = actionLayerMousePosition(from: mouseInfo)
 
         if actionLayer.frame.contains(position) {
-            print("open url")
+            editor.onStartQuery(self)
             return true
         }
 
