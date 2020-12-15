@@ -145,6 +145,10 @@ public class TextFrame {
             maxY = max(maxY, lastFrame.origin.y + lastFrame.height * lastLine.interlineFactor)
         }
 
+        if let paragraphStyle = attributedString.attribute(.paragraphStyle, at: 0, longestEffectiveRange: nil, in: attributedString.wholeRange) as? NSParagraphStyle {
+            maxY += paragraphStyle.paragraphSpacing
+        }
+
         return NSRect(x: position.x + minX, y: position.y + minY, width: maxX - minX, height: maxY - minY)
     }
 
@@ -166,35 +170,27 @@ public class TextFrame {
         CTFrameGetLineOrigins(ctFrame, CFRangeMake(0, 0), &lineOrigins)
 
         var Y = CGFloat(0)
+
+        if let paragraphStyle = attributedString.attribute(.paragraphStyle, at: 0, longestEffectiveRange: nil, in: attributedString.wholeRange) as? NSParagraphStyle {
+            Y += paragraphStyle.paragraphSpacingBefore
+        }
+
         for i in lines.indices {
             let line = lines[i]
             let textPos = lineOrigins[i]
             let x = textPos.x
             //let y = f.maxY - textPos.y + CGFloat(line.bounds.descent)
 
-            var offset = CGFloat(0)
-            let attribs = attributedString.attributes(at: line.range.lowerBound, effectiveRange: nil)
-            if let heading = attribs.compactMap({ key, value in
-                // swiftlint:disable:next force_cast
-                return key == NSAttributedString.Key.heading ? (value as! Int) : nil
-            }).first {
-                if heading == 1 {
-                    Y += 10
-                } else if heading == 2 {
-                    Y += 15
-                }
-                offset = 5
-            }
-
             let y = Y // + CGFloat(line.bounds.ascent)
 
             line.frame = NSRect(x: position.x + x, y: position.y + y, width: line.bounds.width, height: line.bounds.height)
 
-            Y += line.frame.height * line.interlineFactor + offset
+            Y += line.frame.height * line.interlineFactor
             //if debug {
             //print("     line[\(i)] frame \(line.frame) (textPos \(textPos)")
             //}
         }
+
         if debug {
             //print("layout frame \(frame)")
         }

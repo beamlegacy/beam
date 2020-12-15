@@ -17,7 +17,7 @@ public class TextNode: NSObject, CALayerDelegate {
     var element: BeamElement
     var layout: TextFrame?
     let layer: CALayer
-    var debug = false
+    var debug = true
     var disclosurePressed = false
     var frameAnimation: FrameAnimation?
     var frameAnimationCancellable = Set<AnyCancellable>()
@@ -210,8 +210,9 @@ public class TextNode: NSObject, CALayerDelegate {
 
     var firstLineHeight: CGFloat { layout?.lines.first?.bounds.height ?? CGFloat(fontSize * interlineFactor) }
     var firstLineBaseline: CGFloat {
-        if let h = layout?.lines.first?.typographicBounds.ascent {
-            return CGFloat(h)
+        if let firstLine = layout?.lines.first {
+            let h = firstLine.typographicBounds.ascent
+            return CGFloat(h) + firstLine.frame.minY
         }
         let f = AttributedStringVisitor.font(fontSize)
         return f.ascender
@@ -470,11 +471,11 @@ public class TextNode: NSObject, CALayerDelegate {
 
     func drawDisclosure(at point: NSPoint, in context: CGContext) {
         let symbol = open ? "editor-arrow_down" : "editor-arrow_right"
-        drawImage(named: symbol, at: point, in: context, size: CGRect(x: 0, y: 0, width: 10, height: 10))
+        drawImage(named: symbol, at: point, in: context, size: CGRect(x: 0, y: firstLineBaseline, width: 10, height: 10))
     }
 
     func drawBulletPoint(at point: NSPoint, in context: CGContext) {
-        drawImage(named: "editor-bullet", at: point, in: context, size: CGRect(x: 0, y: 0, width: 8, height: 7))
+        drawImage(named: "editor-bullet", at: point, in: context, size: CGRect(x: 0, y: firstLineBaseline, width: 8, height: 7))
     }
 
     func drawSelection(in context: CGContext) {
@@ -1197,6 +1198,8 @@ public class TextNode: NSObject, CALayerDelegate {
         paragraphStyle.lineBreakMode = .byWordWrapping
         paragraphStyle.lineHeightMultiple = interlineFactor
         paragraphStyle.lineSpacing = 40
+        paragraphStyle.paragraphSpacingBefore = 0
+        paragraphStyle.paragraphSpacing = 20
 
         str.addAttribute(.paragraphStyle, value: paragraphStyle, range: str.wholeRange)
         return str
