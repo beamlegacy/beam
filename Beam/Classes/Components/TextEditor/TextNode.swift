@@ -244,6 +244,10 @@ public class TextNode: NSObject, CALayerDelegate {
         return parents
     }
 
+    var isHeader: Bool {
+        return text.hasPrefix("# ") || text.hasPrefix("## ")
+    }
+
     var firstVisibleParent: TextNode? {
         var last: TextNode?
         for p in allParents.reversed() {

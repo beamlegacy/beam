@@ -776,6 +776,15 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         let makeHeader = { [unowned self] in
             if self.node.cursorPosition <= 3, (self.node.text.prefix(2) == "# " || self.node.text.prefix(3) == "## ") {
                 Logger.shared.logInfo("Make header", category: .ui)
+
+                // In this case we will reparent all following sibblings that are not a header to the current node as Paper does
+                guard self.node.children.isEmpty else { return }
+                guard let parent = self.node.parent else { return }
+                guard let index = self.node.indexInParent else { return }
+                for sibbling in parent.children.suffix(from: index + 1) {
+                    guard !sibbling.isHeader else { return }
+                    self.node.addChild(sibbling)
+                }
             }
         }
 
