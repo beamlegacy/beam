@@ -61,16 +61,19 @@ class AttributedStringVisitor {
     var cursorPosition: Int = -1
     var anchorPosition: Int = -1
     var configuration: Configuration
-    var defaultFontSize = CGFloat(16)
+    var defaultFontSize = CGFloat(17)
+    private let headingFirstLevel: CGFloat = 28
+    private let headingSecondLevel: CGFloat = 22
 
     class func font(_ size: CGFloat? = nil, weight: NSFont.Weight = .regular) -> NSFont {
         return NSFont.systemFont(ofSize: size ?? CGFloat(12), weight: weight)
     }
 
     func font(for context: Context) -> NSFont {
-        let fontSizes = [ defaultFontSize, defaultFontSize + 2, defaultFontSize]
+        let fontSizes = [defaultFontSize, headingFirstLevel, headingSecondLevel]
         let bold = context.bold || context.headingLevel != 0
-        var f = Self.font(CGFloat(fontSizes[context.headingLevel]), weight: bold ? .bold : .regular)
+        var f = Self.font(CGFloat(fontSizes[context.headingLevel]), weight: bold ? .medium : .regular)
+
         if context.italic || context.quoteLevel != 0 {
             f = NSFontManager.shared.convert(f, toHaveTrait: .italicFontMask)
         }
@@ -197,7 +200,7 @@ class AttributedStringVisitor {
         case let .link(link):
             pushContext(); defer { popContext() }
             context.link = .hyperLink
-            context.color = NSColor.editorLinkColor
+            context.color = NSColor.bluetiful
             let str = visitChildren(node, false)
             if let url = URL(string: link) {
                 str.addAttribute(.link, value: url as NSURL, range: str.wholeRange)
@@ -209,7 +212,7 @@ class AttributedStringVisitor {
         case let .internalLink(link):
             pushContext(); defer { popContext() }
             context.link = .bidirectionalLink
-            context.color = NSColor.editorBidirectionalLinkColor
+            context.color = NSColor.charmedGreen
             let attributedLink = link.attributed(node, context.showMD, attribs(for: node, context: context))
             let f = font(for: context)
             attributedLink.addAttribute(.link, value: link, range: attributedLink.wholeRange)

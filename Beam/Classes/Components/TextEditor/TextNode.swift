@@ -28,8 +28,8 @@ public class TextNode: NSObject, CALayerDelegate {
     var indent: CGFloat {
         selfVisible ? 25 : 0
     }
-    var childInset = Float(20)
-    var fontSize: CGFloat { isBig ? 16 : 14 }
+    var childInset = Float(23)
+    var fontSize = CGFloat(17)
 
     var contentsScale = CGFloat(2) {
         didSet {
@@ -587,7 +587,7 @@ public class TextNode: NSObject, CALayerDelegate {
 
             if selfVisible {
                 let attrStr = attributedString
-                let layout = Font.draw(string: attrStr, atPosition: NSPoint(x: indent, y: 0), textWidth: availableWidth - actionLayerFrame.width, interlineFactor: interlineFactor)
+                let layout = Font.draw(string: attrStr, atPosition: NSPoint(x: indent, y: 0), textWidth: (availableWidth - actionLayerFrame.width) - 10, interlineFactor: interlineFactor)
                 self.layout = layout
                 textFrame = layout.frame
 
@@ -646,8 +646,6 @@ public class TextNode: NSObject, CALayerDelegate {
     func updateActionLayer() {
         actionLayer?.frame = CGRect(x: (availableWidth - actionLayerFrame.width) + actionLayerFrame.minX, y: 0, width: actionLayerFrame.width, height: actionLayerFrame.height)
     }
-
-    func destroyActionLayer() { }
 
     // MARK: - Methods TextNode
 
