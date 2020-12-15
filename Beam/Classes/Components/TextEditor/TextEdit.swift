@@ -443,6 +443,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
     public func insertText(string: String, replacementRange: Range<Int>) {
         rootNode.insertText(string: string, replacementRange: replacementRange)
+        detectInput(string)
         reBlink()
     }
 
@@ -753,9 +754,58 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         undoManager.redo()
     }
 
+    var inputDetectorState: Int = 0
+    var inputDetectorEnabled: Bool { inputDetectorState >= 0 }
+    func disableInputDetector() {
+        inputDetectorState -= 1
+    }
+    func enableInputDetector() {
+        inputDetectorState -= 1
+    }
+    var lastInput: String = ""
+    func detectInput(_ input: String) {
+        guard inputDetectorEnabled else { return }
+        defer { lastInput = input }
+
+        let makeQuote = { [unowned self] in
+            if self.node.cursorPosition <= 3, (self.node.text.prefix(2) == "> " || self.node.text.prefix(3) == ">> ") {
+                Logger.shared.logInfo("Make quote", category: .ui)
+            }
+        }
+
+        let makeHeader = { [unowned self] in
+            if self.node.cursorPosition <= 3, (self.node.text.prefix(2) == "# " || self.node.text.prefix(3) == "## ") {
+                Logger.shared.logInfo("Make header", category: .ui)
+            }
+        }
+
+        let handlers: [String: () -> Void] = [
+            "@": {
+                Logger.shared.logInfo("Insert link", category: .ui)
+            },
+            "[[": {
+                Logger.shared.logInfo("Insert internal link", category: .ui)
+            },
+            "#": makeHeader,
+            ">": makeQuote,
+            " ": {
+                makeHeader()
+                makeQuote()
+            }
+        ]
+
+        if let handler = handlers[input] {
+            handler()
+        } else if let handler = handlers[lastInput + input] {
+            handler()
+        }
+    }
+
     @IBAction func paste(_ sender: Any) {
         if let s = NSPasteboard.general.string(forType: .string) {
+            disableInputDetector()
             insertText(string: s, replacementRange: selectedTextRange)
+            enableInputDetector()
         }
     }
 
