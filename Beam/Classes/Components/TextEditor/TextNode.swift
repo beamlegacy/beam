@@ -587,7 +587,7 @@ public class TextNode: NSObject, CALayerDelegate {
 
             if selfVisible {
                 let attrStr = attributedString
-                let layout = Font.draw(string: attrStr, atPosition: NSPoint(x: indent, y: 0), textWidth: availableWidth - actionLayerFrame.width, interlineFactor: interlineFactor)
+                let layout = Font.draw(string: attrStr, atPosition: NSPoint(x: indent, y: 0), textWidth: availableWidth - actionLayerFrame.width)
                 self.layout = layout
                 textFrame = layout.frame
 
@@ -1195,7 +1195,7 @@ public class TextNode: NSObject, CALayerDelegate {
         let paragraphStyle = NSMutableParagraphStyle()
 //        paragraphStyle.alignment = .justified
         paragraphStyle.lineBreakMode = .byWordWrapping
-        paragraphStyle.lineHeightMultiple = 1.56
+        paragraphStyle.lineHeightMultiple = interlineFactor
         paragraphStyle.lineSpacing = 40
 
         str.addAttribute(.paragraphStyle, value: paragraphStyle, range: str.wholeRange)

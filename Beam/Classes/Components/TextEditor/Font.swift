@@ -95,6 +95,8 @@ public class TextLine {
 
         context.restoreGState()
     }
+
+    var interlineFactor: CGFloat = 1.0
 }
 
 public class TextFrame {
@@ -111,7 +113,6 @@ public class TextFrame {
     var ctFrame: CTFrame
     var position: NSPoint
     var lines = [TextLine]()
-    var interlineFactor = CGFloat(1.56)
 
     var range: Range<Int> {
         let r = CTFrameGetStringRange(ctFrame)
@@ -139,8 +140,9 @@ public class TextFrame {
             minY = min(minY, r.minY)
             maxY = max(maxY, r.maxY)
         }
-        if let lastFrame = lines.last?.frame {
-            maxY = max(maxY, lastFrame.origin.y + lastFrame.height * interlineFactor)
+        if let lastLine = lines.last {
+            let lastFrame = lastLine.frame
+            maxY = max(maxY, lastFrame.origin.y + lastFrame.height * lastLine.interlineFactor)
         }
 
         return NSRect(x: position.x + minX, y: position.y + minY, width: maxX - minX, height: maxY - minY)
@@ -149,7 +151,13 @@ public class TextFrame {
     func layout() {
         if lines.isEmpty {
             // swiftlint:disable:next force_cast
-            lines = (CTFrameGetLines(ctFrame) as! [CTLine]).map { TextLine(ctLine: $0) }
+            lines = (CTFrameGetLines(ctFrame) as! [CTLine]).map {
+                let line = TextLine(ctLine: $0)
+                if let paragraphStyle = attributedString.attribute(.paragraphStyle, at: line.range.lowerBound, longestEffectiveRange: nil, in: NSRange(line.range)) as? NSParagraphStyle {
+                    line.interlineFactor = paragraphStyle.lineHeightMultiple
+                }
+                return line
+            }
         }
         if debug {
             //            print("start layout for \(lines.count) lines")
@@ -182,7 +190,7 @@ public class TextFrame {
 
             line.frame = NSRect(x: position.x + x, y: position.y + y, width: line.bounds.width, height: line.bounds.height)
 
-            Y += line.frame.height * interlineFactor + offset
+            Y += line.frame.height * line.interlineFactor + offset
             //if debug {
             //print("     line[\(i)] frame \(line.frame) (textPos \(textPos)")
             //}
@@ -279,7 +287,7 @@ public class Font {
         return Self.draw(string: attrString, atPosition: NSPoint(), textWidth: textWidth)
     }
 
-    class func draw(string: NSAttributedString, atPosition position: NSPoint, textWidth: CGFloat, interlineFactor: CGFloat = 1.0) -> TextFrame {
+    class func draw(string: NSAttributedString, atPosition position: NSPoint, textWidth: CGFloat) -> TextFrame {
         assert(textWidth != 0)
         //        print("Font create frame with width \(textWidth) for string '\(string)'")
         let framesetter = CTFramesetterCreateWithAttributedString(string)
@@ -301,7 +309,6 @@ public class Font {
         //        print("TextFrame: \(frame)")
 
         let f = TextFrame(ctFrame: frame, position: position, attributedString: string)
-        f.interlineFactor = interlineFactor
 
         if f.debug {
             //            print("Font created frame \(f)")
