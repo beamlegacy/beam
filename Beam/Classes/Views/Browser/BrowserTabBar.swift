@@ -11,10 +11,13 @@ import SwiftUI
 struct BrowserTabBar: View {
     @Binding var tabs: [BrowserTab]
     @Binding var currentTab: BrowserTab?
+    @GestureState var isDetectingLongPress = false
+
+    @State private var offset = CGSize.zero
+    @State private var currentIndex = -1
+
     let minTabWidth = CGFloat(4)
     let maxTabWidth = CGFloat(150)
-    @State private var offset = CGSize.zero
-    @GestureState var isDetectingLongPress = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -22,39 +25,45 @@ struct BrowserTabBar: View {
                 .frame(height: 1)
                 .foregroundColor(Color(.separatorColor))
             HStack(spacing: 0) {
-                ForEach(tabs, id: \.id) { tab in
-                    HStack(spacing: 0) {
-                        BrowserTabView(tab: tab, selected: isSelected(tab))
-                            .contentShape(Rectangle())
-                            .onTapGesture {
-                                currentTab = tab
-                            }
-                            .gesture(
-                                DragGesture()
-                                    .onChanged { gesture in
-                                        if !isSelected(tab) {
-                                            currentTab = tab
-                                        }
-                                        self.offset = CGSize(width: gesture.translation.width, height: 0)
-                                        print("Dragging \(self.offset)")
-                                    }
+                ZStack {
+                    ForEach(tabs.indices, id: \.self) { index in
+                        let tab = tabs[index]
 
-                                    .onEnded { _ in
-                    //                    if abs(self.offset.width) > 100 {
-                    //                        // remove the card
-                    //                    } else {
+                        HStack(spacing: 0) {
+                            BrowserTabView(tab: tab, selected: isSelected(tab, at: index))
+                                .contentShape(Rectangle())
+                                .offset(x: currentTab === tab ? self.offset.width : 0, y: 0)
+                                .onTapGesture {
+                                    currentTab = tab
+                                }
+                                .gesture(
+                                    DragGesture()
+                                        .onChanged { value in
+                                            if !isSelected(tab, at: index) { currentTab = tab }
+                                            if currentTab == tab { currentIndex = index }
+                                            self.offset = CGSize(width: value.translation.width, height: 0)
+
+                                            if offset.width > 0 {
+                                                print("right")
+                                            }
+
+                                            if offset.width < 0 {
+                                                print("left")
+                                            }
+                                        }
+                                        .onEnded { _ in
+                                            // swapTabs(from: currentIndex, to: currentIndex + 1)
                                             self.offset = .zero
-                    //                    }
-                                        print("Dragging ended \(self.offset)")
-                                    }
-                            )
-//                            .offset(isSelected(tab) ? offset : CGSize.zero)
-                            .clipped()
-                            .frame(minWidth: isSelected(tab) ? 150 : minTabWidth, maxWidth: .infinity, alignment: .leading)
-                        if tab.id != tabs.last!.id {
-                            Rectangle()
-                                .frame(width: 1, height: 26)
-                                .foregroundColor(Color(.separatorColor))
+                                        }
+                                )
+                                .clipped()
+                                .frame(minWidth: isSelected(tab, at: index) ? 150 : minTabWidth, maxWidth: .infinity, alignment: .leading)
+
+                            if tab.id != tabs.last!.id {
+                                Rectangle()
+                                    .frame(width: 1, height: 26)
+                                    .foregroundColor(Color(.separatorColor))
+                            }
                         }
                     }
                 }
@@ -63,21 +72,14 @@ struct BrowserTabBar: View {
                 .frame(height: 1)
                 .foregroundColor(Color(.separatorColor))
         }
-        .transition(.identity)
-        .animation(nil)
     }
 
-    func isSelected(_ tab: BrowserTab) -> Bool {
+    func isSelected(_ tab: BrowserTab, at index: Int) -> Bool {
         guard let ctab = currentTab else { return false }
         return tab.id == ctab.id
     }
-}
 
-//struct BrowserTabBar_Previews: PreviewProvider {
-//    static var state = BeamState(data: BeamData())
-//    @State static var tabs: [BrowserTab] = [BrowserTab(state: state, originalQuery: "test1", note: nil, id: UUID(uuidString: "123e4567-e89b-12d3-a456-426614174000")!), BrowserTab(state: state, originalQuery: "test2", note: nil), BrowserTab(state: state, originalQuery: "test3", note: nil)]
-//    @State static var currentTab = BrowserTab(state: state, originalQuery: "test1", note: nil, id: UUID(uuidString: "123e4567-e89b-12d3-a456-426614174000")!)
-//    static var previews: some View {
-//        BrowserTabBar(tabs: Self.$tabs, currentTab: Self.$currentTab)
-//    }
-//}
+    private func swapTabs(from fromIndex: Int, to toIndex: Int) {
+        tabs.swapAt(fromIndex, toIndex)
+    }
+}
