@@ -156,6 +156,7 @@
 		965A78422514F149009980D4 /* BeamTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965A78412514F149009980D4 /* BeamTests.swift */; };
 		965A784D2514F149009980D4 /* BeamUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965A784C2514F149009980D4 /* BeamUITests.swift */; };
 		967B2685255465C5003F40E3 /* Html2MdTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 967B2684255465C5003F40E3 /* Html2MdTests.swift */; };
+		967FD04B2586C79A002A5EE9 /* SwiftProtobuf in Frameworks */ = {isa = PBXBuildFile; productRef = 967FD04A2586C79A002A5EE9 /* SwiftProtobuf */; };
 		969084CC25365AAE009D3C96 /* ParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 969084CB25365AAE009D3C96 /* ParserTests.swift */; };
 		96C9CC3E2535CE2C00D70AA6 /* LexerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C9CC3D2535CE2C00D70AA6 /* LexerTests.swift */; };
 		96CDA7192582379A00BC375C /* Index.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96CDA7182582379A00BC375C /* Index.swift */; };
@@ -361,6 +362,7 @@
 				9631C747251CE997009B40C4 /* SwiftSoup in Frameworks */,
 				964548A02523B3550064D062 /* CloudKit.framework in Frameworks */,
 				96474E3F254D9ADB00A920B3 /* FavIcon in Frameworks */,
+				967FD04B2586C79A002A5EE9 /* SwiftProtobuf in Frameworks */,
 				9627FD4A2550203800926F0E /* Pods_Beam.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -983,6 +985,7 @@
 			packageProductDependencies = (
 				9631C746251CE997009B40C4 /* SwiftSoup */,
 				96474E3E254D9ADB00A920B3 /* FavIcon */,
+				967FD04A2586C79A002A5EE9 /* SwiftProtobuf */,
 			);
 			productName = Beam;
 			productReference = 965A78252514F147009980D4 /* Beam.app */;
@@ -1064,6 +1067,7 @@
 			packageReferences = (
 				9631C745251CE997009B40C4 /* XCRemoteSwiftPackageReference "SwiftSoup" */,
 				96474E3D254D9ADB00A920B3 /* XCRemoteSwiftPackageReference "FavIcon" */,
+				967FD0492586C79A002A5EE9 /* XCRemoteSwiftPackageReference "swift-protobuf" */,
 			);
 			productRefGroup = 965A78262514F147009980D4 /* Products */;
 			projectDirPath = "";
@@ -1801,6 +1805,14 @@
 				minimumVersion = 3.1.0;
 			};
 		};
+		967FD0492586C79A002A5EE9 /* XCRemoteSwiftPackageReference "swift-protobuf" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-protobuf";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.14.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1813,6 +1825,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 96474E3D254D9ADB00A920B3 /* XCRemoteSwiftPackageReference "FavIcon" */;
 			productName = FavIcon;
+		};
+		967FD04A2586C79A002A5EE9 /* SwiftProtobuf */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 967FD0492586C79A002A5EE9 /* XCRemoteSwiftPackageReference "swift-protobuf" */;
+			productName = SwiftProtobuf;
 		};
 /* End XCSwiftPackageProductDependency section */
 

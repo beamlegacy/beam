@@ -226,11 +226,12 @@ class PageRangeTests: XCTestCase {
         XCTAssertEqual(urls.count, index.documents.count)
         index.dump()
 
-        search("sport")
-        search("rules")
-        search("perform")
-        search("wikipedia")
-        search("sport rules")
+        XCTAssertGreaterThanOrEqual(search("sport").count, 4)
+        XCTAssertGreaterThanOrEqual(search("rules").count, 4)
+        XCTAssertGreaterThanOrEqual(search("perform").count, 5)
+        XCTAssertGreaterThanOrEqual(search("wikipedia").count, 15)
+        XCTAssertGreaterThanOrEqual(search("sport rules").count, 5)
+        XCTAssertGreaterThanOrEqual(search("guitar").count, 0)
 
         do {
             let encoder = JSONEncoder()
@@ -247,12 +248,13 @@ class PageRangeTests: XCTestCase {
         }
     }
 
-    func search(_ string: String) {
+    func search(_ string: String) -> [Index.SearchResult] {
         let start = CACurrentMediaTime()
         let results = index.search(string: string)
         let now = CACurrentMediaTime()
 
         printResults(string, now - start, results)
+        return results
     }
 
     func printResults(_ searchString: String, _ time: CFTimeInterval, _ results: [Index.SearchResult]) {
