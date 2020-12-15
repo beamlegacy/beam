@@ -17,7 +17,7 @@ public class TextNode: NSObject, CALayerDelegate {
     var element: BeamElement
     var layout: TextFrame?
     let layer: CALayer
-    var debug = true
+    var debug = false
     var disclosurePressed = false
     var frameAnimation: FrameAnimation?
     var frameAnimationCancellable = Set<AnyCancellable>()
@@ -1203,7 +1203,7 @@ public class TextNode: NSObject, CALayerDelegate {
         paragraphStyle.lineHeightMultiple = interlineFactor
         paragraphStyle.lineSpacing = 40
         paragraphStyle.paragraphSpacingBefore = 0
-        paragraphStyle.paragraphSpacing = 20
+        paragraphStyle.paragraphSpacing = 8
 
         str.addAttribute(.paragraphStyle, value: paragraphStyle, range: str.wholeRange)
         return str
