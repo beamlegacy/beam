@@ -155,7 +155,7 @@ public class TextNode: NSObject, CALayerDelegate {
     }
 
     var disclosureButtonFrame: NSRect {
-        let r = NSRect(x: 2, y: -4, width: 8.6, height: 8.6)
+        let r = NSRect(x: 2, y: -4, width: 16, height: 16)
         return r.offsetBy(dx: 0, dy: r.height).insetBy(dx: -4, dy: -4)
     }
 
@@ -248,6 +248,10 @@ public class TextNode: NSObject, CALayerDelegate {
         return text.hasPrefix("# ") || text.hasPrefix("## ")
     }
 
+    var isHigherHeading: Bool {
+        return text.hasPrefix("# ")
+    }
+
     var firstVisibleParent: TextNode? {
         var last: TextNode?
         for p in allParents.reversed() {
@@ -278,6 +282,15 @@ public class TextNode: NSObject, CALayerDelegate {
         set {
             element.ast = newValue
         }
+    }
+
+    private var iconOffsetY: CGFloat {
+        var value: CGFloat = -2
+
+        if isHeader && isHigherHeading { value = -10 }
+        if isHeader && !isHigherHeading { value = -7 }
+
+        return value
     }
 
     private var icon = NSImage(named: "editor-cmdreturn")
@@ -510,10 +523,11 @@ public class TextNode: NSObject, CALayerDelegate {
         }
 
         let offset = NSPoint(x: 0, y: firstLineBaseline)
+
         if showDisclosureButton {
-            drawDisclosure(at: NSPoint(x: offset.x, y: -2), in: context)
+            drawDisclosure(at: NSPoint(x: offset.x, y: iconOffsetY), in: context)
         } else {
-            drawBulletPoint(at: NSPoint(x: offset.x, y: -2), in: context)
+            drawBulletPoint(at: NSPoint(x: offset.x, y: iconOffsetY), in: context)
         }
 
         context.textMatrix = CGAffineTransform.identity
@@ -592,7 +606,7 @@ public class TextNode: NSObject, CALayerDelegate {
 
             if selfVisible {
                 let attrStr = attributedString
-                let layout = Font.draw(string: attrStr, atPosition: NSPoint(x: indent, y: 0), textWidth: (availableWidth - actionLayerFrame.width) - 10)
+                let layout = Font.draw(string: attrStr, atPosition: NSPoint(x: indent, y: 0), textWidth: (availableWidth - actionLayerFrame.width) - actionLayerFrame.minX)
                 self.layout = layout
                 textFrame = layout.frame
 
@@ -649,7 +663,8 @@ public class TextNode: NSObject, CALayerDelegate {
     }
 
     func updateActionLayer() {
-        actionLayer?.frame = CGRect(x: (availableWidth - actionLayerFrame.width) + actionLayerFrame.minX, y: 0, width: actionLayerFrame.width, height: actionLayerFrame.height)
+        let actionLayerYPosition = isHeader ? (textFrame.height / 2) - actionLayerFrame.height : 0
+        actionLayer?.frame = CGRect(x: (availableWidth - actionLayerFrame.width) + actionLayerFrame.minX, y: actionLayerYPosition, width: actionLayerFrame.width, height: actionLayerFrame.height)
     }
 
     // MARK: - Methods TextNode
