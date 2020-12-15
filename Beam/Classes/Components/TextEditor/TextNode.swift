@@ -26,7 +26,7 @@ public class TextNode: NSObject, CALayerDelegate {
     var interlineFactor = CGFloat(1.56)
     var interNodeSpacing = CGFloat(4)
     var indent: CGFloat {
-        selfVisible ? 15 : 0
+        selfVisible ? 25 : 0
     }
     var childInset = Float(20)
     var fontSize: CGFloat { isBig ? 16 : 14 }
@@ -470,11 +470,11 @@ public class TextNode: NSObject, CALayerDelegate {
 
     func drawDisclosure(at point: NSPoint, in context: CGContext) {
         let symbol = open ? "editor-arrow_down" : "editor-arrow_right"
-        drawImage(named: symbol, at: point, in: context, size: CGRect(x: 0, y: 0, width: 10, height: 10))
+        drawImage(named: symbol, at: point, in: context, size: CGRect(x: 0, y: 0, width: 16, height: 16))
     }
 
     func drawBulletPoint(at point: NSPoint, in context: CGContext) {
-        drawImage(named: "editor-bullet", at: point, in: context, size: CGRect(x: 0, y: 0, width: 8, height: 7))
+        drawImage(named: "editor-bullet", at: point, in: context, size: CGRect(x: 0, y: 0, width: 16, height: 16))
     }
 
     func drawSelection(in context: CGContext) {
@@ -506,9 +506,9 @@ public class TextNode: NSObject, CALayerDelegate {
 
         let offset = NSPoint(x: 0, y: firstLineBaseline)
         if showDisclosureButton {
-            drawDisclosure(at: NSPoint(x: offset.x, y: 2), in: context)
+            drawDisclosure(at: NSPoint(x: offset.x, y: -2), in: context)
         } else {
-            drawBulletPoint(at: NSPoint(x: offset.x, y: 6), in: context)
+            drawBulletPoint(at: NSPoint(x: offset.x, y: -2), in: context)
         }
 
         context.textMatrix = CGAffineTransform.identity
@@ -525,9 +525,9 @@ public class TextNode: NSObject, CALayerDelegate {
 
         let width = size?.width ?? image.size.width
         let height = size?.height ?? image.size.height
-        let rect = CGRect(x: point.x, y: point.y, width: width / layer.contentsScale, height: height / layer.contentsScale)
+        let rect = CGRect(x: point.x, y: point.y, width: width, height: height)
 
-        image = image.fill(color: NSColor.editorControlColor)
+        image = image.fill(color: NSColor.lightStoneGray)
 
         context.saveGState()
         context.translateBy(x: 0, y: image.size.height)

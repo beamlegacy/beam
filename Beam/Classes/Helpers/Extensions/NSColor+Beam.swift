@@ -24,6 +24,22 @@ extension NSColor {
 
     // Editor
 
+    static var bluetiful: NSColor {
+        return loadColor(named: "Bluetiful")
+    }
+
+    static var charmedGreen: NSColor {
+        return loadColor(named: "CharmedGreen")
+    }
+
+    static var lightStoneGray: NSColor {
+        return loadColor(named: "LightStoneGray")
+    }
+
+    static var niobium: NSColor {
+        return loadColor(named: "Niobium")
+    }
+
     static var editorSearchNormal: NSColor {
         return loadColor(named: "EditorSearchNormal")
     }
