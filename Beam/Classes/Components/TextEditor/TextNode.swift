@@ -23,7 +23,7 @@ public class TextNode: NSObject, CALayerDelegate {
     var frameAnimationCancellable = Set<AnyCancellable>()
     var currentFrameInDocument = NSRect()
 
-    var interlineFactor = CGFloat(1.56)
+    var interlineFactor = CGFloat(1.3)
     var interNodeSpacing = CGFloat(4)
     var indent: CGFloat {
         selfVisible ? 25 : 0
@@ -210,8 +210,9 @@ public class TextNode: NSObject, CALayerDelegate {
 
     var firstLineHeight: CGFloat { layout?.lines.first?.bounds.height ?? CGFloat(fontSize * interlineFactor) }
     var firstLineBaseline: CGFloat {
-        if let h = layout?.lines.first?.typographicBounds.ascent {
-            return CGFloat(h)
+        if let firstLine = layout?.lines.first {
+            let h = firstLine.typographicBounds.ascent
+            return CGFloat(h) + firstLine.frame.minY
         }
         let f = AttributedStringVisitor.font(fontSize)
         return f.ascender
@@ -241,6 +242,10 @@ public class TextNode: NSObject, CALayerDelegate {
             node = p
         }
         return parents
+    }
+
+    var isHeader: Bool {
+        return text.hasPrefix("# ") || text.hasPrefix("## ")
     }
 
     var firstVisibleParent: TextNode? {
@@ -470,11 +475,11 @@ public class TextNode: NSObject, CALayerDelegate {
 
     func drawDisclosure(at point: NSPoint, in context: CGContext) {
         let symbol = open ? "editor-arrow_down" : "editor-arrow_right"
-        drawImage(named: symbol, at: point, in: context, size: CGRect(x: 0, y: 0, width: 16, height: 16))
+        drawImage(named: symbol, at: point, in: context, size: CGRect(x: 0, y: firstLineBaseline, width: 16, height: 16))
     }
 
     func drawBulletPoint(at point: NSPoint, in context: CGContext) {
-        drawImage(named: "editor-bullet", at: point, in: context, size: CGRect(x: 0, y: 0, width: 16, height: 16))
+        drawImage(named: "editor-bullet", at: point, in: context, size: CGRect(x: 0, y: firstLineBaseline, width: 16, height: 16))
     }
 
     func drawSelection(in context: CGContext) {
@@ -587,7 +592,7 @@ public class TextNode: NSObject, CALayerDelegate {
 
             if selfVisible {
                 let attrStr = attributedString
-                let layout = Font.draw(string: attrStr, atPosition: NSPoint(x: indent, y: 0), textWidth: (availableWidth - actionLayerFrame.width) - 10, interlineFactor: interlineFactor)
+                let layout = Font.draw(string: attrStr, atPosition: NSPoint(x: indent, y: 0), textWidth: (availableWidth - actionLayerFrame.width) - 10)
                 self.layout = layout
                 textFrame = layout.frame
 
@@ -793,7 +798,7 @@ public class TextNode: NSObject, CALayerDelegate {
 
     func focus() {
         guard !text.isEmpty else { return }
-        showHoveredActionImage(false)
+        showHoveredActionLayers(false)
     }
 
     func unfocus() {
@@ -844,12 +849,10 @@ public class TextNode: NSObject, CALayerDelegate {
 
         // Show image & text layers
         if hasTextAndeditable && textFrame.contains(position) && actionLayer.frame.contains(position) {
-            showHoveredActionImage(true)
-            showHoveredActionTextLayer(true)
+            showHoveredActionLayers(true)
             return true
         } else if hasTextAndeditable && textFrame.contains(position) {
-            showHoveredActionImage(false)
-            if actionTextLayer.opacity == 1 { showHoveredActionTextLayer(false) }
+            showHoveredActionLayers(false)
             return true
         }
 
@@ -1193,8 +1196,10 @@ public class TextNode: NSObject, CALayerDelegate {
         let paragraphStyle = NSMutableParagraphStyle()
 //        paragraphStyle.alignment = .justified
         paragraphStyle.lineBreakMode = .byWordWrapping
-        paragraphStyle.lineHeightMultiple = 1.56
+        paragraphStyle.lineHeightMultiple = interlineFactor
         paragraphStyle.lineSpacing = 40
+        paragraphStyle.paragraphSpacingBefore = 0
+        paragraphStyle.paragraphSpacing = 10
 
         str.addAttribute(.paragraphStyle, value: paragraphStyle, range: str.wholeRange)
         return str
@@ -1214,19 +1219,17 @@ public class TextNode: NSObject, CALayerDelegate {
         return NSPoint(x: indent + mouseInfo.position.x, y: mouseInfo.position.y)
     }
 
-    private func showHoveredActionImage(_ hovered: Bool) {
+    private func showHoveredActionLayers(_ hovered: Bool) {
         guard !text.isEmpty else { return }
 
         actionLayerIsHovered = hovered
-        icon = icon?.fill(color: hovered ? .editorSearchHover : .editorSearchNormal)
+        icon = icon?.fill(color: hovered ? .bluetiful : .editorSearchNormal)
         actionImageLayer.contents = icon
         actionImageLayer.opacity = 1
         actionImageLayer.setAffineTransform(hovered ? CGAffineTransform(translationX: 1, y: 0) : CGAffineTransform.identity)
-    }
 
-    private func showHoveredActionTextLayer(_ hovered: Bool) {
         actionTextLayer.opacity = hovered ? 1 : 0
-        actionTextLayer.foregroundColor = hovered ? NSColor.editorSearchHover.cgColor : NSColor.editorSearchNormal.cgColor
+        actionTextLayer.foregroundColor = hovered ? NSColor.bluetiful.cgColor : NSColor.editorSearchNormal.cgColor
         actionTextLayer.setAffineTransform(hovered ? CGAffineTransform(translationX: 11, y: 0) : CGAffineTransform.identity)
     }
 
