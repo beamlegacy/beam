@@ -23,13 +23,13 @@ public class TextNode: NSObject, CALayerDelegate {
     var frameAnimationCancellable = Set<AnyCancellable>()
     var currentFrameInDocument = NSRect()
 
-    var interlineFactor = CGFloat(1.56)
+    var interlineFactor = CGFloat(1.3)
     var interNodeSpacing = CGFloat(4)
     var indent: CGFloat {
-        selfVisible ? 15 : 0
+        selfVisible ? 25 : 0
     }
-    var childInset = Float(20)
-    var fontSize: CGFloat { isBig ? 16 : 14 }
+    var childInset = Float(23)
+    var fontSize = CGFloat(17)
 
     var contentsScale = CGFloat(2) {
         didSet {
@@ -155,7 +155,7 @@ public class TextNode: NSObject, CALayerDelegate {
     }
 
     var disclosureButtonFrame: NSRect {
-        let r = NSRect(x: 2, y: -4, width: 8.6, height: 8.6)
+        let r = NSRect(x: 2, y: -4, width: 16, height: 16)
         return r.offsetBy(dx: 0, dy: r.height).insetBy(dx: -4, dy: -4)
     }
 
@@ -210,8 +210,9 @@ public class TextNode: NSObject, CALayerDelegate {
 
     var firstLineHeight: CGFloat { layout?.lines.first?.bounds.height ?? CGFloat(fontSize * interlineFactor) }
     var firstLineBaseline: CGFloat {
-        if let h = layout?.lines.first?.typographicBounds.ascent {
-            return CGFloat(h)
+        if let firstLine = layout?.lines.first {
+            let h = firstLine.typographicBounds.ascent
+            return CGFloat(h) + firstLine.frame.minY
         }
         let f = AttributedStringVisitor.font(fontSize)
         return f.ascender
@@ -241,6 +242,14 @@ public class TextNode: NSObject, CALayerDelegate {
             node = p
         }
         return parents
+    }
+
+    var isHeader: Bool {
+        return text.hasPrefix("# ") || text.hasPrefix("## ")
+    }
+
+    var isHigherHeading: Bool {
+        return text.hasPrefix("# ")
     }
 
     var firstVisibleParent: TextNode? {
@@ -470,11 +479,11 @@ public class TextNode: NSObject, CALayerDelegate {
 
     func drawDisclosure(at point: NSPoint, in context: CGContext) {
         let symbol = open ? "editor-arrow_down" : "editor-arrow_right"
-        drawImage(named: symbol, at: point, in: context, size: CGRect(x: 0, y: 0, width: 10, height: 10))
+        drawImage(named: symbol, at: point, in: context, size: CGRect(x: 0, y: firstLineBaseline, width: 16, height: 16))
     }
 
     func drawBulletPoint(at point: NSPoint, in context: CGContext) {
-        drawImage(named: "editor-bullet", at: point, in: context, size: CGRect(x: 0, y: 0, width: 8, height: 7))
+        drawImage(named: "editor-bullet", at: point, in: context, size: CGRect(x: 0, y: firstLineBaseline, width: 16, height: 16))
     }
 
     func drawSelection(in context: CGContext) {
@@ -505,10 +514,11 @@ public class TextNode: NSObject, CALayerDelegate {
         }
 
         let offset = NSPoint(x: 0, y: firstLineBaseline)
+
         if showDisclosureButton {
-            drawDisclosure(at: NSPoint(x: offset.x, y: 2), in: context)
+            drawDisclosure(at: NSPoint(x: offset.x, y: -(firstLineBaseline - 14)), in: context)
         } else {
-            drawBulletPoint(at: NSPoint(x: offset.x, y: 6), in: context)
+            drawBulletPoint(at: NSPoint(x: offset.x, y: -(firstLineBaseline - 14)), in: context)
         }
 
         context.textMatrix = CGAffineTransform.identity
@@ -525,9 +535,9 @@ public class TextNode: NSObject, CALayerDelegate {
 
         let width = size?.width ?? image.size.width
         let height = size?.height ?? image.size.height
-        let rect = CGRect(x: point.x, y: point.y, width: width / layer.contentsScale, height: height / layer.contentsScale)
+        let rect = CGRect(x: point.x, y: point.y, width: width, height: height)
 
-        image = image.fill(color: NSColor.editorControlColor)
+        image = image.fill(color: NSColor.editorIconColor)
 
         context.saveGState()
         context.translateBy(x: 0, y: image.size.height)
@@ -538,7 +548,7 @@ public class TextNode: NSObject, CALayerDelegate {
 
     func drawCursor(in context: CGContext) {
         // Draw fake cursor if the text is empty
-        if text.isEmpty {
+        if text.isEmpty || layout!.lines.count == 0 {
             guard editor.hasFocus, editor.blinkPhase else { return }
 
             let f = AttributedStringVisitor.font(fontSize)
@@ -582,12 +592,13 @@ public class TextNode: NSObject, CALayerDelegate {
 
     func updateTextRendering() {
         guard availableWidth > 0 else { return }
+
         if invalidatedTextRendering {
             textFrame = NSRect()
 
             if selfVisible {
                 let attrStr = attributedString
-                let layout = Font.draw(string: attrStr, atPosition: NSPoint(x: indent, y: 0), textWidth: availableWidth - actionLayerFrame.width, interlineFactor: interlineFactor)
+                let layout = Font.draw(string: attrStr, atPosition: NSPoint(x: indent, y: 0), textWidth: (availableWidth - actionLayerFrame.width) - actionLayerFrame.minX)
                 self.layout = layout
                 textFrame = layout.frame
 
@@ -644,10 +655,9 @@ public class TextNode: NSObject, CALayerDelegate {
     }
 
     func updateActionLayer() {
-        actionLayer?.frame = CGRect(x: (availableWidth - actionLayerFrame.width) + actionLayerFrame.minX, y: 0, width: actionLayerFrame.width, height: actionLayerFrame.height)
+        let actionLayerYPosition = isHeader ? (textFrame.height / 2) - actionLayerFrame.height : 0
+        actionLayer?.frame = CGRect(x: (availableWidth - actionLayerFrame.width) + actionLayerFrame.minX, y: actionLayerYPosition, width: actionLayerFrame.width, height: actionLayerFrame.height)
     }
-
-    func destroyActionLayer() { }
 
     // MARK: - Methods TextNode
 
@@ -795,7 +805,7 @@ public class TextNode: NSObject, CALayerDelegate {
 
     func focus() {
         guard !text.isEmpty else { return }
-        showHoveredActionImage(false)
+        showHoveredActionLayers(false)
     }
 
     func unfocus() {
@@ -846,12 +856,10 @@ public class TextNode: NSObject, CALayerDelegate {
 
         // Show image & text layers
         if hasTextAndeditable && textFrame.contains(position) && actionLayer.frame.contains(position) {
-            showHoveredActionImage(true)
-            showHoveredActionTextLayer(true)
+            showHoveredActionLayers(true)
             return true
         } else if hasTextAndeditable && textFrame.contains(position) {
-            showHoveredActionImage(false)
-            if actionTextLayer.opacity == 1 { showHoveredActionTextLayer(false) }
+            showHoveredActionLayers(false)
             return true
         }
 
@@ -1195,8 +1203,10 @@ public class TextNode: NSObject, CALayerDelegate {
         let paragraphStyle = NSMutableParagraphStyle()
 //        paragraphStyle.alignment = .justified
         paragraphStyle.lineBreakMode = .byWordWrapping
-        paragraphStyle.lineHeightMultiple = 1.56
+        paragraphStyle.lineHeightMultiple = interlineFactor
         paragraphStyle.lineSpacing = 40
+        paragraphStyle.paragraphSpacingBefore = 0
+        paragraphStyle.paragraphSpacing = 10
 
         str.addAttribute(.paragraphStyle, value: paragraphStyle, range: str.wholeRange)
         return str
@@ -1216,7 +1226,7 @@ public class TextNode: NSObject, CALayerDelegate {
         return NSPoint(x: indent + mouseInfo.position.x, y: mouseInfo.position.y)
     }
 
-    private func showHoveredActionImage(_ hovered: Bool) {
+    private func showHoveredActionLayers(_ hovered: Bool) {
         guard !text.isEmpty else { return }
 
         actionLayerIsHovered = hovered
@@ -1224,9 +1234,7 @@ public class TextNode: NSObject, CALayerDelegate {
         actionImageLayer.contents = icon
         actionImageLayer.opacity = 1
         actionImageLayer.setAffineTransform(hovered ? CGAffineTransform(translationX: 1, y: 0) : CGAffineTransform.identity)
-    }
 
-    private func showHoveredActionTextLayer(_ hovered: Bool) {
         actionTextLayer.opacity = hovered ? 1 : 0
         actionTextLayer.foregroundColor = hovered ? NSColor.editorSearchHover.cgColor : NSColor.editorSearchNormal.cgColor
         actionTextLayer.setAffineTransform(hovered ? CGAffineTransform(translationX: 11, y: 0) : CGAffineTransform.identity)
