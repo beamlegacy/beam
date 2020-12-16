@@ -104,6 +104,7 @@ public class TextFrame {
         self.ctFrame = ctFrame
         self.position = position
         self.attributedString = attributedString
+
         layout()
     }
 
@@ -128,6 +129,26 @@ public class TextFrame {
         CTFrameGetPath(ctFrame)
     }
 
+    private var paragraphSpacing: CGFloat {
+        if !attributedString.string.isEmpty {
+            if let paragraphStyle = attributedString.attribute(.paragraphStyle, at: 0, longestEffectiveRange: nil, in: attributedString.wholeRange) as? NSParagraphStyle {
+                return paragraphStyle.paragraphSpacing
+            }
+        }
+
+        return 0
+    }
+
+    private var paragraphSpacingBefore: CGFloat {
+        if !attributedString.string.isEmpty {
+            if let paragraphStyle = attributedString.attribute(.paragraphStyle, at: 0, longestEffectiveRange: nil, in: attributedString.wholeRange) as? NSParagraphStyle {
+                return paragraphStyle.paragraphSpacingBefore
+            }
+        }
+
+        return 0
+    }
+
     var frame: NSRect {
         var minX = CGFloat(0)
         var maxX = CGFloat(0)
@@ -145,9 +166,7 @@ public class TextFrame {
             maxY = max(maxY, lastFrame.origin.y + lastFrame.height * lastLine.interlineFactor)
         }
 
-        if let paragraphStyle = attributedString.attribute(.paragraphStyle, at: 0, longestEffectiveRange: nil, in: attributedString.wholeRange) as? NSParagraphStyle {
-            maxY += paragraphStyle.paragraphSpacing
-        }
+        maxY += paragraphSpacing
 
         return NSRect(x: position.x + minX, y: position.y + minY, width: maxX - minX, height: maxY - minY)
     }
@@ -171,9 +190,7 @@ public class TextFrame {
 
         var Y = CGFloat(0)
 
-        if let paragraphStyle = attributedString.attribute(.paragraphStyle, at: 0, longestEffectiveRange: nil, in: attributedString.wholeRange) as? NSParagraphStyle {
-            Y += paragraphStyle.paragraphSpacingBefore
-        }
+        Y += paragraphSpacingBefore
 
         for i in lines.indices {
             let line = lines[i]

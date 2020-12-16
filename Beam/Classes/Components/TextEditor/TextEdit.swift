@@ -1023,7 +1023,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     public func layoutSublayers(of layer: CALayer) {
         guard layer === self.layer else { return }
         let h = title.frame.height
-        titleLayer.bounds = CGRect(x: 0, y: 0, width: leadingAlignment, height: h + 5)
+        titleLayer.bounds = CGRect(x: 0, y: 0, width: leadingAlignment, height: h + 15)
 //        let x = leadingAlignment - title.frame.width - titlePadding
         let y = topOffset
         titleLayer.anchorPoint = NSPoint()

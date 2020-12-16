@@ -601,6 +601,7 @@ public class TextNode: NSObject, CALayerDelegate {
 
     func updateTextRendering() {
         guard availableWidth > 0 else { return }
+
         if invalidatedTextRendering {
             textFrame = NSRect()
 
