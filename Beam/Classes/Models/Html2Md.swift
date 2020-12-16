@@ -136,7 +136,7 @@ class HtmlVisitor {
                 text += contents
 
             default:
-                text += visitChildren(node)
+                text += visitChildren(node) + "\n"
             }
         } else {
             if let textNode = node as? SwiftSoup.TextNode {
