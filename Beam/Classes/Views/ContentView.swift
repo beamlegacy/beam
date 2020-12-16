@@ -15,7 +15,7 @@ struct ModeView: View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
                 ZStack {
-                    if !(state.isEditingOmniBarTitle || state.mode == .today || state.mode == .note) {
+                    if !(state.isEditingOmniBarTitle || [Mode.today, Mode.note].contains(state.mode)) {
                         if let tab = state.currentTab {
                             GlobalTabTitle(tab: tab, isEditing: $state.isEditingOmniBarTitle)
                                 .frame(width: geometry.size.width * 0.5, height: 52, alignment: .center)
