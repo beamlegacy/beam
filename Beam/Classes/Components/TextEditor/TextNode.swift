@@ -557,7 +557,7 @@ public class TextNode: NSObject, CALayerDelegate {
 
     func drawCursor(in context: CGContext) {
         // Draw fake cursor if the text is empty
-        if text.isEmpty {
+        if text.isEmpty || layout!.lines.count == 0 {
             guard editor.hasFocus, editor.blinkPhase else { return }
 
             let f = AttributedStringVisitor.font(fontSize)
