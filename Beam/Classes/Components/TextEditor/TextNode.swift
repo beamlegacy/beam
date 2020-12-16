@@ -284,15 +284,6 @@ public class TextNode: NSObject, CALayerDelegate {
         }
     }
 
-    private var iconOffsetY: CGFloat {
-        var value: CGFloat = -2
-
-        if isHeader && isHigherHeading { value = -10 }
-        if isHeader && !isHigherHeading { value = -7 }
-
-        return value
-    }
-
     private var icon = NSImage(named: "editor-cmdreturn")
     private var actionLayer: CALayer?
     private var actionLayerIsHovered = false
@@ -525,9 +516,9 @@ public class TextNode: NSObject, CALayerDelegate {
         let offset = NSPoint(x: 0, y: firstLineBaseline)
 
         if showDisclosureButton {
-            drawDisclosure(at: NSPoint(x: offset.x, y: iconOffsetY), in: context)
+            drawDisclosure(at: NSPoint(x: offset.x, y: -(firstLineBaseline - 14)), in: context)
         } else {
-            drawBulletPoint(at: NSPoint(x: offset.x, y: iconOffsetY), in: context)
+            drawBulletPoint(at: NSPoint(x: offset.x, y: -(firstLineBaseline - 14)), in: context)
         }
 
         context.textMatrix = CGAffineTransform.identity
@@ -546,7 +537,7 @@ public class TextNode: NSObject, CALayerDelegate {
         let height = size?.height ?? image.size.height
         let rect = CGRect(x: point.x, y: point.y, width: width, height: height)
 
-        image = image.fill(color: NSColor.lightStoneGray)
+        image = image.fill(color: NSColor.editorIconColor)
 
         context.saveGState()
         context.translateBy(x: 0, y: image.size.height)
@@ -1239,13 +1230,13 @@ public class TextNode: NSObject, CALayerDelegate {
         guard !text.isEmpty else { return }
 
         actionLayerIsHovered = hovered
-        icon = icon?.fill(color: hovered ? .bluetiful : .editorSearchNormal)
+        icon = icon?.fill(color: hovered ? .editorSearchHover : .editorSearchNormal)
         actionImageLayer.contents = icon
         actionImageLayer.opacity = 1
         actionImageLayer.setAffineTransform(hovered ? CGAffineTransform(translationX: 1, y: 0) : CGAffineTransform.identity)
 
         actionTextLayer.opacity = hovered ? 1 : 0
-        actionTextLayer.foregroundColor = hovered ? NSColor.bluetiful.cgColor : NSColor.editorSearchNormal.cgColor
+        actionTextLayer.foregroundColor = hovered ? NSColor.editorSearchHover.cgColor : NSColor.editorSearchNormal.cgColor
         actionTextLayer.setAffineTransform(hovered ? CGAffineTransform(translationX: 11, y: 0) : CGAffineTransform.identity)
     }
 

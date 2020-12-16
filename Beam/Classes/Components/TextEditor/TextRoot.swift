@@ -21,7 +21,7 @@ public struct TextConfig {
     var contextualSyntax = true
     var keepCursorMidScreen = false //true
 
-    var color = NSColor.niobium
+    var color = NSColor.textColor
     var disabledColor = NSColor.disabledControlTextColor
     var selectionColor = NSColor.editorTextSelectionColor
     var markedColor = NSColor.editorTextSelectionColor

@@ -24,20 +24,8 @@ extension NSColor {
 
     // Editor
 
-    static var bluetiful: NSColor {
-        return loadColor(named: "Bluetiful")
-    }
-
-    static var charmedGreen: NSColor {
-        return loadColor(named: "CharmedGreen")
-    }
-
-    static var lightStoneGray: NSColor {
+    static var editorIconColor: NSColor {
         return loadColor(named: "LightStoneGray")
-    }
-
-    static var niobium: NSColor {
-        return loadColor(named: "Niobium")
     }
 
     static var editorSearchNormal: NSColor {
@@ -45,7 +33,7 @@ extension NSColor {
     }
 
     static var editorSearchHover: NSColor {
-        return loadColor(named: "EditorSearchHover")
+        return loadColor(named: "Bluetiful")
     }
 
     static var editorSearchClicked: NSColor {
@@ -53,7 +41,7 @@ extension NSColor {
     }
 
     static var editorBidirectionalLinkColor: NSColor {
-        return loadColor(named: "EditorBidirectionalLinkColor")
+        return loadColor(named: "CharmedGreen")
     }
 
     static var editorControlColor: NSColor {
@@ -69,7 +57,7 @@ extension NSColor {
     }
 
     static var editorLinkColor: NSColor {
-        return loadColor(named: "EditorLinkColor")
+        return loadColor(named: "Bluetiful")
     }
 
     static var editorPopoverBackgroundColor: NSColor {
@@ -117,7 +105,7 @@ extension NSColor {
     }
 
     static var textColor: NSColor {
-        return loadColor(named: "TextColor")
+        return loadColor(named: "Niobium")
     }
 
     static var omniboxBackgroundColor: NSColor {

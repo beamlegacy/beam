@@ -200,7 +200,7 @@ class AttributedStringVisitor {
         case let .link(link):
             pushContext(); defer { popContext() }
             context.link = .hyperLink
-            context.color = NSColor.bluetiful
+            context.color = NSColor.editorLinkColor
             let str = visitChildren(node, false)
             if let url = URL(string: link) {
                 str.addAttribute(.link, value: url as NSURL, range: str.wholeRange)
@@ -212,7 +212,7 @@ class AttributedStringVisitor {
         case let .internalLink(link):
             pushContext(); defer { popContext() }
             context.link = .bidirectionalLink
-            context.color = NSColor.charmedGreen
+            context.color = NSColor.editorBidirectionalLinkColor
             let attributedLink = link.attributed(node, context.showMD, attribs(for: node, context: context))
             let f = font(for: context)
             attributedLink.addAttribute(.link, value: link, range: attributedLink.wholeRange)
