@@ -22,6 +22,8 @@ struct IndexDocument: Codable {
     var tagsWords = [String]()
 }
 
+let gUseLemmas = true
+
 extension IndexDocument {
     init(id: UInt64, source: String, title: String, language: NLLanguage? = nil, contents: String) {
         self.id = id
@@ -29,8 +31,8 @@ extension IndexDocument {
         self.title = title
         self.language = language ?? (NLLanguageRecognizer.dominantLanguage(for: contents) ?? .undetermined)
         length = contents.count
-        contentsWords = Index.extractWords(from: contents)
-        titleWords = Index.extractWords(from: title)
+        contentsWords = Index.extractWords(from: contents, useLemmas: gUseLemmas)
+        titleWords = Index.extractWords(from: title, useLemmas: gUseLemmas)
     }
 
     var leanCopy: IndexDocument {
@@ -45,6 +47,7 @@ class Index: Codable {
         var instances = [UInt64: WordScore]()
         var count: UInt = 0
 
+        // switflint:disable:next nesting
         enum CodingKeys: String, CodingKey {
             case instances = "i"
             case count = "c"
@@ -74,7 +77,7 @@ class Index: Codable {
     }
 
     func search(string: String) -> [SearchResult] {
-        let inputWords = Self.extractWords(from: string)
+        let inputWords = Self.extractWords(from: string, useLemmas: gUseLemmas)
 
         var results = [UInt64: DocumentResult]()
         let documents = inputWords.map { word -> [DocumentResult] in
@@ -157,20 +160,32 @@ class Index: Codable {
         }
     }
 
-    class func extractWords(from string: String) -> [String] {
+    class func extractWords(from string: String, useLemmas: Bool) -> [String] {
         // Store the tokenized substrings into an array.
         var wordTokens = [String]()
 
         // Use Natural Language's NLTagger to tokenize the input by word.
-        let tagger = NLTagger(tagSchemes: [.tokenType])
+        let tagger = NLTagger(tagSchemes: [.tokenType, .lemma])
         tagger.string = string
+
+        let options: NLTagger.Options = [.omitPunctuation, .omitWhitespace, .omitOther, .joinContractions]
 
         // Find all tokens in the string and append to the array.
         tagger.enumerateTags(in: string.startIndex..<string.endIndex,
                              unit: .word,
-                             scheme: .tokenType,
-                             options: [.omitWhitespace]) { (_, range) -> Bool in
-            wordTokens.append(String(string[range].lowercased()))
+                             scheme: useLemmas ? .lemma : .tokenType,
+                             options: options) { (tag, range) -> Bool in
+            if useLemmas {
+                if let lemma = tag?.rawValue {
+                    wordTokens.append(lemma)
+                } else {
+                    let word = String(string[range].lowercased())
+                    wordTokens.append(word)
+                    print("no lemma found for word '\(word)'")
+                }
+            } else {
+                wordTokens.append(String(string[range].lowercased()))
+            }
             return true
         }
 
