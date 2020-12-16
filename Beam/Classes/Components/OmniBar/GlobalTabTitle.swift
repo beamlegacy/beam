@@ -17,7 +17,7 @@ struct GlobalTabTitle: View {
 
     var body: some View {
         VStack {
-            ZStack {
+           ZStack {
                 RoundedRectangle(cornerRadius: _cornerRadius)
                     .foregroundColor(hover ? Color(.omniboxBackgroundColor) : Color(white: 1, opacity: 0))
                 HStack {
