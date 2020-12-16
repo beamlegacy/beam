@@ -13,7 +13,7 @@ struct BrowserTabBar: View {
     @Binding var currentTab: BrowserTab?
     @GestureState var isDetectingLongPress = false
 
-    @State private var dragState: (tab: BrowserTab, translation: CGSize, location: CGPoint)?
+    @State private var dragState: (tab: BrowserTab, translation: CGSize)?
     @State private var currentIndex = -1
     @State private var secondaryIndex = -1
 
@@ -40,23 +40,23 @@ struct BrowserTabBar: View {
                                         DragGesture()
                                             .onChanged { value in
                                                 if !isSelected(tab) { currentTab = tab }
-                                                self.dragState = (tab: tab, translation: value.translation, location: value.location)
-
+                                                guard let currentTab = currentTab, let tabIndex = tabs.firstIndex(of: currentTab) else { return }
                                                 let tabFrame = reader.frame(in: .local)
-                                                let movingLeft = value.location.x > 0 ? true : false
-                                                currentIndex = tabs.firstIndex(of: currentTab!)!
+                                                let movingRight = value.translation.width > 0 ? true : false
 
-                                                if movingLeft && tabFrame.midX > tabFrame.minX && currentTab != tabs.last {
+                                                self.dragState = (tab: tab, translation: value.translation)
+                                                currentIndex = tabIndex
+
+                                                if movingRight && tabFrame.midX > tabFrame.minX {
                                                     secondaryIndex = currentIndex + 1
                                                 }
 
-                                                if !movingLeft && tabFrame.midX < tabFrame.maxX && currentTab != tabs.first {
+                                                if !movingRight && tabFrame.midX < tabFrame.maxX {
                                                     secondaryIndex = currentIndex - 1
                                                 }
                                             }
                                             .onEnded { _ in
-                                                tabs.swapAt(currentIndex, secondaryIndex)
-                                                dragState = nil
+                                                swapTabs()
                                             }
                                     )
                                     .frame(minWidth: isSelected(tab) ? 150 : minTabWidth, maxWidth: .infinity, alignment: .leading)
@@ -79,5 +79,14 @@ struct BrowserTabBar: View {
     private func dragOffset(for tab: BrowserTab) -> CGSize {
         guard let state = self.dragState, state.tab === tab else { return .zero }
         return CGSize(width: state.translation.width, height: 0)
+    }
+
+    private func swapTabs() {
+        if secondaryIndex < 0 || secondaryIndex >= tabs.count {
+            dragState = nil
+            return
+        }
+        tabs.swapAt(currentIndex, secondaryIndex)
+        dragState = nil
     }
 }
