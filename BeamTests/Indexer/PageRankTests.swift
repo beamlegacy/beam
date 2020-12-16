@@ -174,7 +174,7 @@ class PageRangeTests: XCTestCase {
             let title = try doc.title()
             let text = html2Text(url: url, doc: doc)
             let indexingStart = CACurrentMediaTime()
-            index.append(document: IndexDocument(id: MonotonicIncreasingID64.newValue, source: url.absoluteString, title: title, contents: text))
+            index.append(document: IndexDocument(id: MonotonicIncreasingID64.newValue, source: url.absoluteString, title: title, contents: text, outboundLinks: doc.extractLinks()))
             let now = CACurrentMediaTime()
             print("Indexed \(url) (\(contents.count) characters - title: \(title.count) - text: \(text.count)) in \((now - parsingStart) * 1000) ms (parsing: \((indexingStart - parsingStart) * 1000) ms - indexing \((now - indexingStart) * 1000) ms")
         } catch Exception.Error(let type, let message) {
@@ -224,6 +224,13 @@ class PageRangeTests: XCTestCase {
         }
 
         XCTAssertEqual(urls.count, index.documents.count)
+
+        let start = CACurrentMediaTime()
+        index.pageRank.computePageRanks(iterations: 20)
+        let now = CACurrentMediaTime()
+        let time = (now - start) * 1000
+        print("PageRank update took \(time) ms")
+
         index.dump()
 
         XCTAssertGreaterThanOrEqual(search("sport").count, 4)
@@ -235,6 +242,7 @@ class PageRangeTests: XCTestCase {
 
         do {
             let encoder = JSONEncoder()
+            encoder.outputFormatting = .prettyPrinted
             let data = try encoder.encode(index)
             print("Encoded index size = \(data.count)")
 

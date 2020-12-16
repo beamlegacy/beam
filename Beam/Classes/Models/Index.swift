@@ -20,16 +20,24 @@ struct IndexDocument: Codable {
     var contentsWords = [String]()
     var titleWords = [String]()
     var tagsWords = [String]()
+    var outboundLinks = [String]()
+
+    enum CodingKeys: String, CodingKey {
+        case id = "i"
+        case source = "s"
+        case title = "t"
+    }
 }
 
 let gUseLemmas = true
 
 extension IndexDocument {
-    init(id: UInt64, source: String, title: String, language: NLLanguage? = nil, contents: String) {
+    init(id: UInt64, source: String, title: String, language: NLLanguage? = nil, contents: String, outboundLinks: [String] = []) {
         self.id = id
         self.source = source
         self.title = title
         self.language = language ?? (NLLanguageRecognizer.dominantLanguage(for: contents) ?? .undetermined)
+        self.outboundLinks = outboundLinks
         length = contents.count
         contentsWords = Index.extractWords(from: contents, useLemmas: gUseLemmas)
         titleWords = Index.extractWords(from: title, useLemmas: gUseLemmas)
@@ -57,6 +65,7 @@ class Index: Codable {
 
     var words: [String: Word] = [:]
     var documents: [UInt64: IndexDocument] = [:]
+    var pageRank = PageRank()
 
     init() {
     }
@@ -116,6 +125,8 @@ class Index: Codable {
         for word in document.titleWords {
             associate(id: document.id, withWord: word, score: Self.titleScore)
         }
+
+        pageRank.updatePage(source: document.source, outbounds: document.outboundLinks)
     }
 
     func associate(id: UInt64, withWord word: String, score: WordScore) {
@@ -181,7 +192,7 @@ class Index: Codable {
                 } else {
                     let word = String(string[range].lowercased())
                     wordTokens.append(word)
-                    print("no lemma found for word '\(word)'")
+                    //print("no lemma found for word '\(word)'")
                 }
             } else {
                 wordTokens.append(String(string[range].lowercased()))

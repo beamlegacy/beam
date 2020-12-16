@@ -208,3 +208,23 @@ func html2Text(url: URL, doc: SwiftSoup.Document) -> String {
     let result = visitor.visit(doc)
     return result
 }
+
+extension SwiftSoup.Document {
+    func extractLinks() -> [String] {
+        do {
+            //print("html -> \(html)")
+            let els: Elements = try select("a")
+
+            // capture all the links containted in the page:
+            return try els.array().map { element -> String in
+                try element.attr("href")
+            }
+        } catch Exception.Error(let type, let message) {
+            Logger.shared.logError("PageRank (SwiftSoup parser) \(type): \(message)", category: .web)
+        } catch {
+            Logger.shared.logError("PageRank: (SwiftSoup parser) unkonwn error", category: .web)
+        }
+
+        return []
+    }
+}
