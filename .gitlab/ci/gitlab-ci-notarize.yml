@@ -1,0 +1,16 @@
+notarize:
+  dependencies:
+    - build:macos
+  stage: notarize
+  artifacts:
+    expire_in: 7d
+    paths:
+      - builds/
+  only:
+    - merge_requests
+    - master
+  script:
+    - bundle exec fastlane notarize_build
+  tags:
+    - macos
+  interruptible: true

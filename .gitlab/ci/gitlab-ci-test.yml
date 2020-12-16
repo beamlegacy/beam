@@ -1,0 +1,35 @@
+xctests:
+  dependencies: []
+  stage: test
+  artifacts:
+    expire_in: 7d
+    when: always
+    paths:
+      - cobertura.xml
+      - fastlane/test_output/tests.xml
+    reports:
+      cobertura: cobertura.xml
+      junit: fastlane/test_output/tests.xml
+  coverage: '/Test Coverage\: \d+(?:\.\d*)?\%/'
+  only:
+    - merge_requests
+    - master
+  script:
+    - bundle exec fastlane tests
+  tags:
+    - macos
+  interruptible: true
+
+coverage_check:
+  dependencies: []
+  stage: build
+  needs: [xctests]
+  only:
+    - merge_requests
+    - master
+  script:
+    - scripts/code_coverage.sh
+  tags:
+    - macos
+  interruptible: true
+  allow_failure: true

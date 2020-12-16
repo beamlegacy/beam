@@ -443,6 +443,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
     public func insertText(string: String, replacementRange: Range<Int>) {
         rootNode.insertText(string: string, replacementRange: replacementRange)
+        detectInput(string)
         reBlink()
     }
 
@@ -753,9 +754,67 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         undoManager.redo()
     }
 
+    var inputDetectorState: Int = 0
+    var inputDetectorEnabled: Bool { inputDetectorState >= 0 }
+    func disableInputDetector() {
+        inputDetectorState -= 1
+    }
+    func enableInputDetector() {
+        inputDetectorState -= 1
+    }
+    var lastInput: String = ""
+    func detectInput(_ input: String) {
+        guard inputDetectorEnabled else { return }
+        defer { lastInput = input }
+
+        let makeQuote = { [unowned self] in
+            if self.node.cursorPosition <= 3, (self.node.text.prefix(2) == "> " || self.node.text.prefix(3) == ">> ") {
+                Logger.shared.logInfo("Make quote", category: .ui)
+            }
+        }
+
+        let makeHeader = { [unowned self] in
+            if self.node.cursorPosition <= 3, (self.node.text.prefix(2) == "# " || self.node.text.prefix(3) == "## ") {
+                Logger.shared.logInfo("Make header", category: .ui)
+
+                // In this case we will reparent all following sibblings that are not a header to the current node as Paper does
+                guard self.node.children.isEmpty else { return }
+                guard let parent = self.node.parent else { return }
+                guard let index = self.node.indexInParent else { return }
+                for sibbling in parent.children.suffix(from: index + 1) {
+                    guard !sibbling.isHeader else { return }
+                    self.node.addChild(sibbling)
+                }
+            }
+        }
+
+        let handlers: [String: () -> Void] = [
+            "@": {
+                Logger.shared.logInfo("Insert link", category: .ui)
+            },
+            "[[": {
+                Logger.shared.logInfo("Insert internal link", category: .ui)
+            },
+            "#": makeHeader,
+            ">": makeQuote,
+            " ": {
+                makeHeader()
+                makeQuote()
+            }
+        ]
+
+        if let handler = handlers[input] {
+            handler()
+        } else if let handler = handlers[lastInput + input] {
+            handler()
+        }
+    }
+
     @IBAction func paste(_ sender: Any) {
         if let s = NSPasteboard.general.string(forType: .string) {
+            disableInputDetector()
             insertText(string: s, replacementRange: selectedTextRange)
+            enableInputDetector()
         }
     }
 
@@ -946,6 +1005,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         window.acceptsMouseMovedEvents = true
         for elem in mapping {
             elem.value.layer.contentsScale = window.backingScaleFactor
+            elem.value.contentsScale = window.backingScaleFactor
             elem.value.invalidate()
         }
         titleLayer.contentsScale = window.backingScaleFactor
@@ -963,7 +1023,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     public func layoutSublayers(of layer: CALayer) {
         guard layer === self.layer else { return }
         let h = title.frame.height
-        titleLayer.bounds = CGRect(x: 0, y: 0, width: leadingAlignment, height: h + 5)
+        titleLayer.bounds = CGRect(x: 0, y: 0, width: leadingAlignment, height: h + 15)
 //        let x = leadingAlignment - title.frame.width - titlePadding
         let y = topOffset
         titleLayer.anchorPoint = NSPoint()
@@ -1032,6 +1092,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         purgeDeadNodes()
 
         if let w = window {
+            node.contentsScale = w.backingScaleFactor
             node.layer.contentsScale = w.backingScaleFactor
         }
         layer?.addSublayer(node.layer)

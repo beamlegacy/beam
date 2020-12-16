@@ -56,6 +56,18 @@ install_gitlab_runner:
 	# injector
 	curl -ssl https://raw.githubusercontent.com/penso/variable-injector/master/scripts/install-binary.sh | sh
 
+	# DMG
+	brew install create-dmg
+
+	# AWS
+	brew install awscli
+
+	# Docker
+	brew install --cask docker
+
+	# jq for scripts
+	brew install jq
+
 	# Register new device
 	bundle exec fastlane register_local_device
 
