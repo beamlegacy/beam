@@ -13,8 +13,7 @@ struct BrowserTabBar: View {
     @Binding var currentTab: BrowserTab?
     @GestureState var isDetectingLongPress = false
 
-    @State private var offset = CGSize.zero
-
+    @State private var dragState: (tab: BrowserTab, translation: CGSize, location: CGPoint)?
     @State private var currentIndex = -1
     @State private var secondaryIndex = -1
 
@@ -27,52 +26,43 @@ struct BrowserTabBar: View {
                 .frame(height: 1)
                 .foregroundColor(Color(.separatorColor))
             HStack(spacing: 0) {
-                ForEach(tabs.indices, id: \.self) { index in
-                    let tab = tabs[index]
+                ForEach(tabs, id: \.self) { tab in
+                    ZStack {
+                        HStack(spacing: 0) {
+                            GeometryReader { reader in
+                                BrowserTabView(tab: tab, selected: isSelected(tab))
+                                    .contentShape(Rectangle())
+                                    .offset(dragOffset(for: tab))
+                                    .onTapGesture {
+                                        currentTab = tab
+                                    }
+                                    .gesture(
+                                        DragGesture()
+                                            .onChanged { value in
+                                                if !isSelected(tab) { currentTab = tab }
+                                                self.dragState = (tab: tab, translation: value.translation, location: value.location)
 
-                    HStack(spacing: 0) {
-                        GeometryReader { reader in
-                            BrowserTabView(tab: tab, selected: isSelected(tab, at: index))
-                                .contentShape(Rectangle())
-                                .offset(x: currentTab === tab ? self.offset.width : 0, y: 0)
-                                .onTapGesture {
-                                    currentTab = tab
-                                }
-                                .gesture(
-                                    DragGesture()
-                                        .onChanged { value in
-                                            if !isSelected(tab, at: index) { currentTab = tab }
-                                            self.offset = CGSize(width: value.translation.width, height: 0)
+                                                let tabFrame = reader.frame(in: .local)
+                                                let movingLeft = value.location.x > 0 ? true : false
+                                                currentIndex = tabs.firstIndex(of: currentTab!)!
 
-                                            let tabFrame = reader.frame(in: .local)
-                                            let movingLeft = value.location.x > 0 ? true : false
-                                            currentIndex = tabs.firstIndex(of: currentTab!)!
+                                                if movingLeft && tabFrame.midX > tabFrame.minX && currentTab != tabs.last {
+                                                    secondaryIndex = currentIndex + 1
+                                                }
 
-                                            if movingLeft && tabFrame.midX > tabFrame.minX && currentTab != tabs.last {
-                                                secondaryIndex = currentIndex + 1
+                                                if !movingLeft && tabFrame.midX < tabFrame.maxX && currentTab != tabs.first {
+                                                    secondaryIndex = currentIndex - 1
+                                                }
                                             }
-
-                                            if !movingLeft && tabFrame.midX < tabFrame.maxX && currentTab != tabs.first {
-                                                secondaryIndex = currentIndex - 1
+                                            .onEnded { _ in
+                                                tabs.swapAt(currentIndex, secondaryIndex)
+                                                dragState = nil
                                             }
-
-                                            print(secondaryIndex)
-
-                                        }
-                                        .onEnded { _ in
-                                            tabs.swapAt(currentIndex, secondaryIndex)
-                                            self.offset = .zero
-                                        }
-                                )
-                                .clipped()
-                        }.frame(minWidth: isSelected(tab, at: index) ? 150 : minTabWidth, maxWidth: .infinity, alignment: .leading)
-
-                        if tab.id != tabs.last!.id {
-                            Rectangle()
-                                .frame(width: 1, height: 26)
-                                .foregroundColor(Color(.separatorColor))
+                                    )
+                                    .frame(minWidth: isSelected(tab) ? 150 : minTabWidth, maxWidth: .infinity, alignment: .leading)
+                            }
                         }
-                    }
+                    }.zIndex(currentTab === tab ? 1 : 0)
                 }
             }
             Rectangle()
@@ -81,8 +71,13 @@ struct BrowserTabBar: View {
         }
     }
 
-    func isSelected(_ tab: BrowserTab, at index: Int) -> Bool {
+    private func isSelected(_ tab: BrowserTab) -> Bool {
         guard let ctab = currentTab else { return false }
         return tab.id == ctab.id
+    }
+
+    private func dragOffset(for tab: BrowserTab) -> CGSize {
+        guard let state = self.dragState, state.tab === tab else { return .zero }
+        return CGSize(width: state.translation.width, height: 0)
     }
 }
