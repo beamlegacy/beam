@@ -56,17 +56,17 @@ struct BrowserTabBar: View {
                         // print("tabFrame: \(tabFrame)")
 
                         let translation = value.location.x - value.startLocation.x
-                        self.offset = CGSize(width: translation, height: 0)
                         currentIndex = tabIndex
 
                         let tabPosition = CGFloat(tabIndex) * tabFrame.width
-                        let tabPositionOffset = tabPosition + translation
+                        let tabPositionOffset = tabPosition + tabWidth * 0.5 + translation
                         let newRatio = (tabPositionOffset) / fullFrame
                         let newPosition = CGFloat(tabs.count) * clamp(newRatio, 0, 1)
                         let secondaryIndex = Int(newPosition)
 
                         print("translation: \(translation) / tabIndex: \(tabIndex) / tabPosition: \(tabPosition) / tabPositionOffset: \(tabPositionOffset) / newPosition \(newPosition) / newIndex: \(secondaryIndex) / Twidth \(translation))")
                         // print("secondaryIndex", secondaryIndex)
+                        self.offset = CGSize(width: translation, height: 0)
 
                         if secondaryIndex != currentIndex {
                             if secondaryIndex < currentIndex {
@@ -80,8 +80,9 @@ struct BrowserTabBar: View {
                                 }
                                 tabs.remove(at: currentIndex)
                             }
-                        }
 
+                            self.offset.width -= tabWidth * CGFloat(secondaryIndex - tabIndex)
+                        }
                     }
                     .onEnded { _ in
                         offset = .zero
