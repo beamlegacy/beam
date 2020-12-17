@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle"  xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <channel>
+    <title>Beam Changelog</title>
+    <link>https://s3.eu-west-3.amazonaws.com/downloads.dev.beamapp.co/master/appcast.xml</link>
+    <description>Most recent changes with links to updates.</description>
+    <language>en</language>
+    <item>
+      <title>Version 0.1</title>
+      <sparkle:releaseNotesLink>
+        https://s3.eu-west-3.amazonaws.com/downloads.dev.beamapp.co/master/0.1/27/release_notes.html
+      </sparkle:releaseNotesLink>
+      <pubDate>Mon, 17 Jul 1978 06:20:11 +0000</pubDate>
+      <enclosure url="https://s3.eu-west-3.amazonaws.com/downloads.dev.beamapp.co/master/0.1/27/Beam.dmg" sparkle:shortVersionString='0' sparkle:version="0" type="application/octet-stream" />
+    </item>
+  </channel>
+</rss>

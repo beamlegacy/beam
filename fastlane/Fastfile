@@ -16,10 +16,11 @@
 default_platform(:mac)
 xcversion(version: ENV["XCODE_VERSION"])
 
+
+
 platform :mac do
   desc "Run linting"
   lane :lint do
-    # clear_derived_data
     cocoapods
     swiftlint(
       executable: './Pods/SwiftLint/swiftlint',
@@ -29,7 +30,6 @@ platform :mac do
       reporter: "json",
       output_file: "fastlane/swiftlint.json",
       ignore_exit_status: true,
-      # path: "Beam"
     )
   end
 
@@ -43,12 +43,12 @@ platform :mac do
     )
   end
 
-  desc "Run tests"
-  lane :tests do
+  private_lane :check_certs do |params|
     # Parameters at https://docs.fastlane.tools/actions/cert/
     get_certificates(
-      development: true,
+      development: params[:cert_development],
       force: false,
+      type: params[:cert_type],
       # Don't set the filename so we can easily see which certificate is used
       # Proper one should be 68DY6473LM for Fabien penso
       # You can see its value at https://developer.apple.com/account/resources/certificates/list inside the certificate url
@@ -62,13 +62,14 @@ platform :mac do
 
     # Parameters at https://docs.fastlane.tools/actions/sigh/
     get_provisioning_profile(
-      development: true,
+      development: params[:profile_development],
+      developer_id: params[:profile_developer_id],
       username: ENV["CERT_USERNAME"],
       app_identifier: ENV["TEAM_IDENTIFIER"],
       team_id: ENV["TEAM_ID"],
       team_name: ENV["TEAM_NAME"],
-      provisioning_name: "Beam Development",
-      cert_id: "68DY6473LM",
+      provisioning_name: params[:profile_provision_name],
+      cert_id: params[:profile_cert_id],
       cert_owner_name: ENV["CERT_OWNER_NAME"],
       skip_certificate_verification: true,
       platform: "macos",
@@ -76,7 +77,7 @@ platform :mac do
       # Actually should be .profileprovision but fastlane complains. It will
       # automatically fetch this profile, but you can just get the one from
       # working md5sum: 5c00f51fe03c198182f31980df51a219
-      filename: "development.co.beamapp.macos.mobileprovision",
+      filename: params[:profile_filename],
       readonly: true, # Don't want to mess up mine
       # force: false,
     )
@@ -85,14 +86,23 @@ platform :mac do
       use_automatic_signing: false,
       path: "Beam.xcodeproj",
       team_id: ENV["TEAM_ID"],
-      code_sign_identity: "Mac Developer",
-      profile_name: "Beam Development",
+      code_sign_identity: params[:code_sign_identity],
+      profile_name: params[:profile_name],
       bundle_identifier: ENV["TEAM_IDENTIFIER"],
       targets: ["Beam"],
-      build_configurations: ["Debug"]
-    )
+      build_configurations: params[:build_configurations])
+  end
 
-    # clear_derived_data
+  desc "Run tests"
+  lane :tests do
+    check_certs(profile_development: true,
+                cert_development: true,
+                profile_provision_name: "Beam Development",
+                profile_cert_id: "68DY6473LM",
+                profile_filename: "development.co.beamapp.macos.mobileprovision",
+                code_sign_identity: "Mac Developer",
+                profile_name: "Beam Development",
+                build_configurations: ["Debug"])
     cocoapods
     run_tests(
       scheme: "Beam",
@@ -121,44 +131,20 @@ platform :mac do
 
   ## To release developer version
   lane :dev do
-    # Parameters at https://docs.fastlane.tools/actions/cert/
-    get_certificates(
-      development: true,
-      force: false,
-      # Don't set the filename so we can easily see which certificate is used
-      # Proper one should be 68DY6473LM for Fabien penso
-      # You can see its value at https://developer.apple.com/account/resources/certificates/list inside the certificate url
-      # filename: "developer_id.cer",
-      output_path: "./certs",
-      username: ENV["CERT_USERNAME"],
-      team_id: ENV["TEAM_ID"],
-      team_name: ENV["TEAM_NAME"],
-      platform: "macos"
-    )
-
-    # Parameters at https://docs.fastlane.tools/actions/sigh/
-    get_provisioning_profile(
-      development: true,
-      username: ENV["CERT_USERNAME"],
-      app_identifier: ENV["TEAM_IDENTIFIER"],
-      team_id: ENV["TEAM_ID"],
-      team_name: ENV["TEAM_NAME"],
-      provisioning_name: "Beam Development",
-      cert_id: "68DY6473LM",
-      cert_owner_name: ENV["CERT_OWNER_NAME"],
-      skip_certificate_verification: true,
-      platform: "macos",
-      output_path: "./certs",
-      # Actually should be .profileprovision but fastlane complains. It will
-      # automatically fetch this profile, but you can just get the one from
-      # working md5sum: 5c00f51fe03c198182f31980df51a219
-      filename: "development.co.beamapp.macos.mobileprovision",
-      readonly: true, # Don't want to mess up mine
-      # force: false,
-    )
-
-    # clear_derived_data
+    check_certs(profile_development: true)
     cocoapods
+
+    git_branch
+
+    if Actions.git_branch != "master"
+      add_badge(dark: true,
+                grayscale: true,
+                glob: "/Beam/Assets/Assets.xcassets/AppIcon.appiconset/*.png")
+    else
+      add_badge(dark: true,
+                glob: "/Beam/Assets/Assets.xcassets/AppIcon.appiconset/*.png")
+    end
+
     build_mac_app(
       workspace: "Beam.xcworkspace",
       scheme: "Beam",
@@ -179,66 +165,39 @@ platform :mac do
 
   ## To release DeveloperId signed builds
   lane :beta do
-    increment_build_number(build_number: ENV['CI_JOB_ID'])
+    git_branch
+    increment_version_number(bump_type: "patch")
+    # Sadly we can't use anything out of a number for building number, so we
+    # can't include the current branch. The following fails:
+    # build_number = "#{Actions.git_branch}/#{ENV['CI_JOB_ID']}".gsub(/\//, "-")
 
-    # Parameters at https://docs.fastlane.tools/actions/cert/
-    get_certificates(
-      development: false,
-      force: false,
-      # Not in documentation, found from fastlane/cert/lib/cert/options.rb
-      # Supported values: mac_installer_distribution developer_id_installer developer_id_application developer_id_kext
-      type: "developer_id_application",
-      # Don't set the filename so we can easily see which certificate is used
-      # Proper one should be M28FQCP36C, and not N3PJ728Y92.
-      # You can see its value at https://developer.apple.com/account/resources/certificates/list inside the certificate url
-      # filename: "developer_id.cer",
-      output_path: "./certs",
-      username: ENV["CERT_USERNAME"],
-      team_id: ENV["TEAM_ID"],
-      team_name: ENV["TEAM_NAME"],
-      platform: "macos"
-    )
+    build_number = ENV['CI_JOB_ID']
+    increment_build_number(build_number: build_number)
 
-    # Parameters at https://docs.fastlane.tools/actions/sigh/
-    get_provisioning_profile(
-      developer_id: true,
-      # development: false,
-      username: ENV["CERT_USERNAME"],
-      app_identifier: ENV["TEAM_IDENTIFIER"],
-      team_id: ENV["TEAM_ID"],
-      team_name: ENV["TEAM_NAME"],
-      provisioning_name: ENV["PROVISION_NAME"],
-      # Got this from the `get_certificates` output with `Successfully installed
-      # certificate N3PJ728Y92`... Can't find this in the certificate file
-      # itself.
-      cert_id: ENV["CERT_ID"],
-      cert_owner_name: ENV["CERT_OWNER_NAME"],
-      skip_certificate_verification: true,
-      platform: "macos",
-      output_path: "./certs",
-      # Actually should be .profileprovision but fastlane complains. It will
-      # automatically fetch this profile, but you can just get the one from
-      # https://developer.apple.com/account/resources/profiles/review/CNFXLZXSTV
-      # working md5sum: 7f0d5adccb384983bfbf9ea46b05bc47
-      filename: "developer_id.co.beamapp.macos.mobileprovision",
-      readonly: true, # Don't want to mess up mine
-      # force: false,
-    )
+    sparkle_set_url(info_plist: "Beam/Configuration/Info.plist",
+                    appcast_url: "https://s3.eu-west-3.amazonaws.com/downloads.dev.beamapp.co/#{Actions.git_branch}/appcast.xml")
 
-    update_code_signing_settings(
-      use_automatic_signing: false,
-      path: "Beam.xcodeproj",
-      team_id: ENV["TEAM_ID"],
-      code_sign_identity: "Developer ID Application",
-      profile_name: ENV["PROVISION_NAME"],
-      bundle_identifier: ENV["TEAM_IDENTIFIER"],
-      targets: ["Beam"],
-      build_configurations: ["Release"]
-    )
+    check_certs(cert_development: false,
+                cert_type: "developer_id_application",
+                profile_filename: "developer_id.co.beamapp.macos.mobileprovision",
+                profile_developer_id: true,
+                profile_provision_name: ENV["PROVISION_NAME"],
+                profile_cert_id: ENV["CERT_ID"],
+                code_sign_identity: "Developer ID Application",
+                profile_name: ENV["PROVISION_NAME"],
+                build_configurations: ["Release"])
 
-
-    # clear_derived_data
     cocoapods
+
+    if Actions.git_branch != "master"
+      add_badge(dark: true,
+                grayscale: true,
+                glob: "/Beam/Assets/Assets.xcassets/AppIcon.appiconset/*.png")
+    else
+      add_badge(dark: true,
+                glob: "/Beam/Assets/Assets.xcassets/AppIcon.appiconset/*.png")
+    end
+
     build_mac_app(
       workspace: "Beam.xcworkspace",
       scheme: ENV["SCHEME"],
@@ -246,7 +205,7 @@ platform :mac do
       clean: true,
       output_directory: "builds",
       output_name: "Beam",
-      include_symbols: true,
+      include_symbols: false,
       # xcargs: settings_to_override,
       # Doesn't work :(
       export_xcargs: 'OTHER_CODE_SIGN_FLAGS="--timestamp"',
@@ -272,7 +231,7 @@ platform :mac do
   lane :notarize_build do
     # https://blog.zeplin.io/dev-journal-automate-notarizing-macos-apps-94b0b144ba9d
     notarize(
-      package: "builds/Beam.app",
+      package: "builds/Beam.dmg",
       verbose: true,
       print_log: true,
       bundle_id: ENV["APP_IDENTIFIER"]
@@ -284,16 +243,48 @@ platform :mac do
     ping_slack
   end
 
+  private_lane :create_release_notes do
+    # Fetch commit from S3 if we already had one
+    download_previous_file(filename: "commit")
+
+    changelog = if File.exists?("../builds/commit")
+                  last_commit = File.read("../builds/commit")
+                  `git log #{last_commit}`
+                else
+                  `git log`
+                end
+
+    File.open("../builds/release_notes.html", "wb") do |f|
+      f.write("<html><body><pre>#{changelog}</pre></body></html>")
+    end
+
+    # Store this commit
+    File.open("../builds/commit", "wb") do |f|
+      f.write(`git rev-parse HEAD`)
+    end
+  end
+
   lane :upload_s3 do
-    get_version_number
-    get_build_number
+    # We want the build number from `builds/Beam.app/Contents/Info.plist`
+    # get_version_number
+    # get_build_number
+    get_version_number_from_plist(info_plist: "builds/Beam.app/Contents/Info.plist")
+    get_build_number_from_plist(info_plist: "builds/Beam.app/Contents/Info.plist")
     git_branch
+
+    # I have to do Sparkle at the same time, as `increment_build_number`
+    # modifies Beam/Configuration/Info.plist but this file is not propagated to
+    # other CI jobs
+    create_release_notes
+    download_previous_file(filename: "appcast.xml", default_file: "appcast.xml")
+    generate_sparkle_feed
 
     s3_path = if Actions.git_branch == "master"
                 "#{Actions.git_branch}/#{lane_context[SharedValues::VERSION_NUMBER]}/#{lane_context[SharedValues::BUILD_NUMBER]}"
               else
                 Actions.git_branch
               end
+
     aws_s3(
       access_key: ENV["AWS_ACCESS_KEY_ID"],
       secret_access_key: ENV["AWS_SECRET_ACCESS_KEY"],
@@ -302,7 +293,10 @@ platform :mac do
       upload_metadata: true,
       files: [
         "builds/Beam.dmg",
-        "builds/Beam.app.dSYM.zip"
+        "builds/Beam.app.dSYM.zip",
+        "builds/release_notes.html",
+        "builds/appcast.xml",
+        "builds/commit"
       ],
       # Doesn't work the way I expected
       # endpoint: "http://downloads.dev.beamapp.co",
@@ -310,17 +304,74 @@ platform :mac do
     )
 
     file = lane_context[SharedValues::S3_FILES_OUTPUT_PATHS].first
-    puts "-> #{file}".green
+
+    UI.message "Link is -> #{file}"
   end
 
-  lane :build_dmg do
-    dmg(path: "builds/Beam.app",
-        output_path: "builds/Beam.dmg")
+  private_lane :download_previous_file do |params|
+    git_branch
+
+    filename = params[:filename]
+    default_file = params[:default_file]
+
+    s3_path = if Actions.git_branch == "master"
+                "#{Actions.git_branch}/#{lane_context[SharedValues::VERSION_NUMBER]}/#{lane_context[SharedValues::BUILD_NUMBER]}"
+              else
+                Actions.git_branch
+              end
+
+    s3_client = Aws::S3::Client.new(region: ENV["AWS_DEFAULT_REGION"],
+                                   access_key_id: ENV["AWS_ACCESS_KEY_ID"],
+                                   secret_access_key: ENV["AWS_SECRET_ACCESS_KEY"])
+
+    UI.message "Fetching #{s3_path}/#{filename} from S3"
+
+    s3_client.get_object(
+      response_target: "../builds/#{filename}",
+      bucket: ENV["S3_BUCKET"],
+      key: "#{s3_path}/#{filename}"
+    )
+  rescue Aws::S3::Errors::NoSuchKey => e
+    UI.message "https://s3.#{ENV['AWS_DEFAULT_REGION']}.amazonaws.com/#{ENV['S3_BUCKET']}/#{s3_path}/#{filename} does not exist"
+    if default_file
+      FileUtils.cp(default_file, "../builds/#{filename}")
+    end
+  rescue
+    UI.error "Error fetching #{s3_path}/#{filename}: #{$!}"
+    raise $!
   end
 
-  lane :ping_slack do
-    get_version_number
-    get_build_number
+  private_lane :generate_sparkle_feed do |params|
+    get_version_number_from_plist(info_plist: "builds/Beam.app/Contents/Info.plist")
+    get_build_number_from_plist(info_plist: "builds/Beam.app/Contents/Info.plist")
+    git_branch
+
+    s3_path = if Actions.git_branch == "master"
+                "#{Actions.git_branch}/#{lane_context[SharedValues::VERSION_NUMBER]}/#{lane_context[SharedValues::BUILD_NUMBER]}"
+              else
+                Actions.git_branch
+              end
+
+    app_download_url = "https://s3.#{ENV['AWS_DEFAULT_REGION']}.amazonaws.com/#{ENV['S3_BUCKET']}/#{s3_path}/Beam.dmg"
+    release_notes_html_url = "https://s3.#{ENV['AWS_DEFAULT_REGION']}.amazonaws.com/#{ENV['S3_BUCKET']}/#{s3_path}/release_notes.html"
+    human_version = "#{lane_context[SharedValues::VERSION_NUMBER]}"
+    machine_version = "#{lane_context[SharedValues::BUILD_NUMBER]}"
+    release_title = "Version #{human_version}"
+
+    sparkle_add_update(
+      feed_file: "builds/appcast.xml",
+      app_download_url: app_download_url,
+      app_size: "#{File.size("../builds/Beam.dmg")}",
+      machine_version: machine_version,
+      human_version: human_version,
+      title: release_title,
+      release_notes_link: release_notes_html_url,
+    )
+
+    UI.message "Successfully added a release item to the Sparkle XML file"
+  end
+
+  private_lane :ping_slack do
     git_branch
 
     next unless ["HEAD", "master"].include?(Actions.git_branch)
@@ -361,7 +412,7 @@ platform :mac do
                                                                    ENV["AWS_SECRET_ACCESS_KEY"]))
 
       bucket = s3.bucket(ENV["S3_BUCKET"])
-      puts "Deleting S3 directory #{ENV["S3_BUCKET"]}/#{directory}".green
+      UI.message "Deleting S3 directory #{ENV["S3_BUCKET"]}/#{directory}"
       bucket.objects(prefix: directory).batch_delete!
     end
   end
@@ -384,17 +435,4 @@ platform :mac do
     )
     # enable_automatic_code_signing(path: "Beam.xcodeproj")
   end
-
-  # This is annoying afterall since we have fails through the CI, I don't want
-  # to pollute Slack with errors
-#  error do |lane, exception|
-#    slack(
-#      slack_url: ENV["SLACK_WEBHOOK_URL"],
-#      # message with short human friendly message
-#      message: "Exception on lane #{lane}: #{exception}",
-#      success: false,
-#      # Output containing extended log output
-#      payload: { Output: exception.to_s }
-#    )
-#  end
 end

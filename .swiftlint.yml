@@ -92,3 +92,4 @@ excluded:
   - Pods
   - Beam/Pods
   - fastlane
+  - Extern
