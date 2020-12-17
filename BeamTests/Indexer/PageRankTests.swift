@@ -174,7 +174,7 @@ class PageRangeTests: XCTestCase {
             let title = try doc.title()
             let text = html2Text(url: url, doc: doc)
             let indexingStart = CACurrentMediaTime()
-            index.append(document: IndexDocument(id: MonotonicIncreasingID64.newValue, source: url.absoluteString, title: title, contents: text, outboundLinks: doc.extractLinks()))
+            index.append(document: IndexDocument(source: url.absoluteString, title: title, contents: text, outboundLinks: doc.extractLinks()))
             let now = CACurrentMediaTime()
             print("Indexed \(url) (\(contents.count) characters - title: \(title.count) - text: \(text.count)) in \((now - parsingStart) * 1000) ms (parsing: \((indexingStart - parsingStart) * 1000) ms - indexing \((now - indexingStart) * 1000) ms")
         } catch Exception.Error(let type, let message) {
@@ -240,17 +240,29 @@ class PageRangeTests: XCTestCase {
         XCTAssertGreaterThanOrEqual(search("sport rules").count, 5)
         XCTAssertGreaterThanOrEqual(search("guitar").count, 0)
 
+        XCTAssertEqual(LinkStore.shared.links.count, LinkStore.shared.ids.count)
+
+        print("LinkStore contains \(LinkStore.shared.links.count) different links")
+
         do {
             let encoder = JSONEncoder()
+            let data0 = try encoder.encode(index)
             encoder.outputFormatting = .prettyPrinted
-            let data = try encoder.encode(index)
-            print("Encoded index size = \(data.count)")
+            let data1 = try encoder.encode(index)
+            print("Encoded index size = \(data0.count)")
+            print("Encoded index size (pretty) = \(data1.count)")
 
-            guard let fileurl = tempFile(named: "Index.json") else {
-                fatalError("Unable to save PageRankFixtures.json")
+            guard let fileurl0 = tempFile(named: "Index.json") else {
+                fatalError("Unable to save Index.json")
             }
-            print("Save index to file \(fileurl)")
-            FileManager.default.createFile(atPath: fileurl.path, contents: data, attributes: [:])
+            print("Save index to file \(fileurl0)")
+            FileManager.default.createFile(atPath: fileurl0.path, contents: data0, attributes: [:])
+
+            guard let fileurl1 = tempFile(named: "IndexPretty.json") else {
+                fatalError("Unable to save IndexPretty.json")
+            }
+            print("Save pretty index to file \(fileurl1)")
+            FileManager.default.createFile(atPath: fileurl1.path, contents: data1, attributes: [:])
         } catch {
             fatalError()
         }

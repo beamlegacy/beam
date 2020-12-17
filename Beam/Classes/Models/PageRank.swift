@@ -10,29 +10,48 @@ import SwiftSoup
 
 class PageRank: Codable {
     class Page: Codable {
-        var inbound = Set<String>()
-        var outbound = Set<String>()
+        var id: UInt64 = MonotonicIncreasingID64.newValue
+        var inbound = Set<UInt64>()
+        var outbound = Set<UInt64>()
 
         var pageRank: Float = 0
+
+        enum CodingKeys: String, CodingKey {
+            case id = "i"
+            case inbound = "in"
+            case outbound = "out"
+        }
+
+        init(_ source: String) {
+            id = LinkStore.createIdFor(source)
+        }
     }
 
-    var pages = [String: Page]()
+    var pages = [UInt64: Page]()
+
+    enum CodingKeys: String, CodingKey {
+        case pages = "pages"
+    }
 
     var initialValue: Float { 1.0 / ((pages.count > 0) ? Float(pages.count) : 1) }
 
     func updatePage(source: String, outbounds: [String]) {
+        updatePage(source: source, outbounds: outbounds.map({ link -> UInt64 in LinkStore.createIdFor(link)  }))
+    }
+
+    func updatePage(source: String, outbounds: [UInt64]) {
         //print("html -> \(html)")
-        let page = Page()
-        let oldPage = pages[source]
+        let page = Page(source)
+        let oldPage = pages[page.id]
         page.pageRank = initialValue
         page.inbound = oldPage?.inbound ?? []
 
         // capture all the links containted in the page:
-        for href in outbounds {
+        for id in outbounds {
 //            if let outUrl = URL(string: href, relativeTo: url) {
 //                page.outbound.insert(outUrl.absoluteString)
 //            } else {
-                page.outbound.insert(href)
+            page.outbound.insert(id)
 //            }
         }
 
@@ -41,22 +60,22 @@ class PageRank: Codable {
         let toAdd = page.outbound.subtracting(common)
 
         for linkToUpdate in toDelete {
-            pages[linkToUpdate]?.inbound.remove(source)
+            pages[linkToUpdate]?.inbound.remove(LinkStore.createIdFor(source))
         }
 
         for linkToUpdate in toAdd {
             if let page = pages[linkToUpdate] {
-                page.inbound.insert(source)
+                page.inbound.insert(LinkStore.createIdFor(source))
             } else {
-                let p = Page()
-                p.inbound.insert(source)
+                let p = Page(source)
+                p.inbound.insert(LinkStore.createIdFor(source))
                 pages[linkToUpdate] = p
             }
         }
 
         page.inbound = oldPage?.inbound ?? []
 
-        pages[source] = page
+        pages[page.id] = page
     }
 
     func updatePage(source: String, contents: String) {
@@ -65,7 +84,7 @@ class PageRank: Codable {
             let doc = try SwiftSoup.parseBodyFragment(contents, source)
             let els: Elements = try doc.select("a")
 
-            let page = Page()
+            let page = Page(source)
             page.pageRank = initialValue
 
             // capture all the links containted in the page:

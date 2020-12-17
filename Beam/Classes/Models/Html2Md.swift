@@ -217,7 +217,7 @@ extension SwiftSoup.Document {
 
             // capture all the links containted in the page:
             return try els.array().map { element -> String in
-                try element.attr("href")
+                try element.absUrl("href")
             }
         } catch Exception.Error(let type, let message) {
             Logger.shared.logError("PageRank (SwiftSoup parser) \(type): \(message)", category: .web)

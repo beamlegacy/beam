@@ -12,19 +12,17 @@ extension NLLanguage: Codable {
 }
 
 struct IndexDocument: Codable {
-    var id = MonotonicIncreasingID64.newValue
-    var source: String = ""
+    var id: UInt64
     var title: String = ""
     var language: NLLanguage = .undetermined
     var length: Int = 0
     var contentsWords = [String]()
     var titleWords = [String]()
     var tagsWords = [String]()
-    var outboundLinks = [String]()
+    var outboundLinks = [UInt64]()
 
     enum CodingKeys: String, CodingKey {
         case id = "i"
-        case source = "s"
         case title = "t"
     }
 }
@@ -32,19 +30,23 @@ struct IndexDocument: Codable {
 let gUseLemmas = true
 
 extension IndexDocument {
-    init(id: UInt64, source: String, title: String, language: NLLanguage? = nil, contents: String, outboundLinks: [String] = []) {
-        self.id = id
-        self.source = source
+    init(source: String, title: String, language: NLLanguage? = nil, contents: String, outboundLinks: [String] = []) {
+        self.id = LinkStore.createIdFor(source)
         self.title = title
         self.language = language ?? (NLLanguageRecognizer.dominantLanguage(for: contents) ?? .undetermined)
-        self.outboundLinks = outboundLinks
+        self.outboundLinks = outboundLinks.compactMap({ link -> UInt64? in
+            // Only register links that points to cards or to pages we have really visited:
+            guard let id = LinkStore.getIdFor(link) else { return nil }
+//            guard LinkStore.isInternalLink(id: id) else { return nil }
+            return id
+        })
         length = contents.count
         contentsWords = Index.extractWords(from: contents, useLemmas: gUseLemmas)
         titleWords = Index.extractWords(from: title, useLemmas: gUseLemmas)
     }
 
     var leanCopy: IndexDocument {
-        return IndexDocument(id: id, source: source, title: title, language: language, length: length, contentsWords: [], titleWords: [], tagsWords: [])
+        return IndexDocument(id: id, title: title, language: language, length: length, contentsWords: [], titleWords: [], tagsWords: [])
     }
 }
 
@@ -66,6 +68,7 @@ class Index: Codable {
     var words: [String: Word] = [:]
     var documents: [UInt64: IndexDocument] = [:]
     var pageRank = PageRank()
+    var linkStore: LinkStore = LinkStore.shared
 
     init() {
     }
@@ -108,7 +111,8 @@ class Index: Codable {
 
         return results.compactMap { doc -> SearchResult? in
             guard let originalDoc = self.documents[doc.key] else { return nil }
-            return SearchResult(id: originalDoc.id, score: doc.value.score, title: originalDoc.title, source: originalDoc.source)
+            guard let source = LinkStore.linkFor(originalDoc.id) else { return nil }
+            return SearchResult(id: originalDoc.id, score: doc.value.score, title: originalDoc.title, source: source)
         }.sorted { lhs, rhs -> Bool in
             lhs.score > rhs.score
         }
@@ -126,7 +130,9 @@ class Index: Codable {
             associate(id: document.id, withWord: word, score: Self.titleScore)
         }
 
-        pageRank.updatePage(source: document.source, outbounds: document.outboundLinks)
+        if let source = LinkStore.linkFor(document.id), LinkStore.isInternal(link: source) {
+            pageRank.updatePage(source: source, outbounds: document.outboundLinks)
+        }
     }
 
     func associate(id: UInt64, withWord word: String, score: WordScore) {
@@ -167,7 +173,7 @@ class Index: Codable {
     func dump() {
         print("Index contains \(words.count) words from \(documents.count) documents")
         for doc in documents {
-            print("[Document \(doc.key)] - \(doc.value.title) / \(doc.value.source)")
+            print("[Document \(doc.key)] - \(doc.value.title) / \(LinkStore.linkFor(doc.value.id))")
         }
     }
 
