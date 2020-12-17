@@ -18,6 +18,9 @@ struct BrowserTabView: View {
 
     var body: some View {
         HStack(alignment: .center, spacing: 5) {
+            Rectangle()
+                .frame(width: 1, height: 28, alignment: .leading)
+                .foregroundColor(Color(.separatorColor))
             Image("browser-tab-close")
             .resizable()
             .frame(width: 12, height: 12, alignment: .leading)
@@ -49,6 +52,10 @@ struct BrowserTabView: View {
 
                 Spacer(minLength: 16)
             }.frame(maxWidth: .infinity, alignment: .center)
+
+            Rectangle()
+                .frame(width: 1, height: 28, alignment: .trailing)
+                .foregroundColor( selected ? Color.clear : Color(.separatorColor))
         }.frame(height: 26)
         .contentShape(Rectangle())
         .onHover(perform: { v in
