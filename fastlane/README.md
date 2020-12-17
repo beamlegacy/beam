@@ -21,6 +21,11 @@ or alternatively using `brew install fastlane`
 fastlane mac lint
 ```
 Run linting
+### mac register_local_device
+```
+fastlane mac register_local_device
+```
+Register Device
 ### mac tests
 ```
 fastlane mac tests
@@ -36,19 +41,29 @@ fastlane mac dev
 fastlane mac beta
 ```
 
+### mac notarize_build
+```
+fastlane mac notarize_build
+```
+
+### mac deploy
+```
+fastlane mac deploy
+```
+
 ### mac upload_s3
 ```
 fastlane mac upload_s3
 ```
 
-### mac build_dmg
+### mac download_previous_file
 ```
-fastlane mac build_dmg
+fastlane mac download_previous_file
 ```
 
-### mac ping_slack
+### mac delete_s3
 ```
-fastlane mac ping_slack
+fastlane mac delete_s3
 ```
 
 ### mac release
