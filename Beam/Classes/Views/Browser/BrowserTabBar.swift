@@ -15,80 +15,71 @@ struct BrowserTabBar: View {
 
     @State private var offset = CGSize.zero
     @State private var currentIndex = -1
+    @State private var secondaryIndex = -1
 
     let minTabWidth = CGFloat(4)
     let maxTabWidth = CGFloat(150)
 
     var body: some View {
-        GeometryReader { localReader in
-            VStack(spacing: 0) {
-                Rectangle()
-                    .frame(height: 1)
-                    .foregroundColor(Color(.separatorColor))
-                HStack(spacing: 0) {
-                    ForEach(tabs, id: \.self) { tab in
-                        ZStack {
-                            HStack(spacing: 0) {
+        let drag = DragGesture()
+            .onChanged { self.offset = $0.translation }
+            .onEnded {
+                if $0.translation.width < -100 {
+                    self.offset = .init(width: -1000, height: 0)
+                } else if $0.translation.width > 100 {
+                    self.offset = .init(width: 1000, height: 0)
+                } else {
+                    self.offset = .zero
+                }
+            }
+
+        VStack(spacing: 0) {
+            Rectangle()
+                .frame(height: 1)
+                .foregroundColor(Color(.separatorColor))
+            HStack(spacing: 0) {
+                ForEach(tabs, id: \.self) { tab in
+                    ZStack {
+                        HStack(spacing: 0) {
+                            GeometryReader { reader in
                                 BrowserTabView(tab: tab, selected: isSelected(tab))
                                     .contentShape(Rectangle())
                                     .offset(dragOffset(for: tab))
                                     .onTapGesture {
                                         currentTab = tab
                                     }
-                                    .animation(.none)
+                                    .gesture(
+                                        DragGesture()
+                                            .onChanged { value in
+                                                if !isSelected(tab) { currentTab = tab }
+                                                guard let currentTab = currentTab, let tabIndex = tabs.firstIndex(of: currentTab) else { return }
+                                                let tabFrame = reader.frame(in: .global)
+                                                let fullWidth = tabFrame.maxX
+                                                let tabWidth = fullWidth / CGFloat(tabs.count)
+
+                                                let delta = value.location.x - value.startLocation.x
+                                                self.offset = value.translation
+
+                                                print("tabWidth: \(tabWidth) / delta : \(delta) / offset: \(offset.width)")
+
+                                                if delta >= tabWidth {
+                                                    print("mid")
+                                                    tabs.swapAt(tabIndex, tabIndex + 1)
+                                                } else {
+                                                    print("no mid")
+                                                }
+                                            }
+                                            .onEnded { _ in
+                                                // swapTabs()
+                                                offset = .zero
+                                            }
+                                    )
                                     .frame(minWidth: isSelected(tab) ? 150 : minTabWidth, maxWidth: .infinity, alignment: .leading)
                             }
                         }
-                        .zIndex(currentTab == tab ? 1 : 0)
-                    }
+                    }.zIndex(currentTab === tab ? 1 : 0)
                 }
             }
-            .gesture(
-                DragGesture(minimumDistance: 0, coordinateSpace: .local)
-                    .onChanged { value in
-//                        if !isSelected(tab) { currentTab = tab }
-                        guard let currentTab = currentTab, let tabIndex = tabs.firstIndex(of: currentTab) else { return }
-                        let tabFrame = localReader.frame(in: .global)
-                        let fullFrame = tabFrame.width
-                        let tabWidth = fullFrame / CGFloat(tabs.count)
-
-                        // print("tabIndex: \(tabIndex)")
-                        // print("tabFrame: \(tabFrame)")
-
-                        let translation = value.location.x - value.startLocation.x
-                        currentIndex = tabIndex
-
-                        let tabPosition = CGFloat(tabIndex) * tabFrame.width
-                        let tabPositionOffset = tabPosition + tabWidth * 0.5 + translation
-                        let newRatio = (tabPositionOffset) / fullFrame
-                        let newPosition = CGFloat(tabs.count) * clamp(newRatio, 0, 1)
-                        let secondaryIndex = Int(newPosition)
-
-                        print("translation: \(translation) / tabIndex: \(tabIndex) / tabPosition: \(tabPosition) / tabPositionOffset: \(tabPositionOffset) / newPosition \(newPosition) / newIndex: \(secondaryIndex) / Twidth \(translation))")
-                        // print("secondaryIndex", secondaryIndex)
-                        self.offset = CGSize(width: translation, height: 0)
-
-                        if secondaryIndex != currentIndex {
-                            if secondaryIndex < currentIndex {
-                                tabs.remove(at: currentIndex)
-                                tabs.insert(currentTab, at: secondaryIndex)
-                            } else {
-                                if secondaryIndex + 1 == tabs.count {
-                                    tabs.append(currentTab)
-                                } else {
-                                    tabs.insert(currentTab, at: secondaryIndex)
-                                }
-                                tabs.remove(at: currentIndex)
-                            }
-
-                            self.offset.width -= tabWidth * CGFloat(secondaryIndex - tabIndex)
-                        }
-                    }
-                    .onEnded { _ in
-                        offset = .zero
-                        // swapTabs()
-                    }
-            )
             Rectangle()
                 .frame(height: 1)
                 .foregroundColor(Color(.separatorColor))
@@ -101,7 +92,16 @@ struct BrowserTabBar: View {
     }
 
     private func dragOffset(for tab: BrowserTab) -> CGSize {
-        guard let currentTab = currentTab, currentTab.id == tab.id else { return .zero }
+        guard currentTab?.id == tab.id else { return .zero }
         return CGSize(width: offset.width, height: 0)
+    }
+
+    private func swapTabs() {
+        if secondaryIndex < 0 || secondaryIndex >= tabs.count {
+            offset = .zero
+            return
+        }
+        tabs.swapAt(currentIndex, secondaryIndex)
+        offset = .zero
     }
 }
