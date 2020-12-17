@@ -136,12 +136,10 @@ platform :mac do
 
     git_branch
 
+    UI.message "Branch is #{Actions.git_branch}"
     if Actions.git_branch != "master"
       add_badge(dark: true,
                 grayscale: true,
-                glob: "/Beam/Assets/Assets.xcassets/AppIcon.appiconset/*.png")
-    else
-      add_badge(dark: true,
                 glob: "/Beam/Assets/Assets.xcassets/AppIcon.appiconset/*.png")
     end
 
@@ -189,12 +187,10 @@ platform :mac do
 
     cocoapods
 
+    UI.message "Branch is #{Actions.git_branch}"
     if Actions.git_branch != "master"
       add_badge(dark: true,
                 grayscale: true,
-                glob: "/Beam/Assets/Assets.xcassets/AppIcon.appiconset/*.png")
-    else
-      add_badge(dark: true,
                 glob: "/Beam/Assets/Assets.xcassets/AppIcon.appiconset/*.png")
     end
 
