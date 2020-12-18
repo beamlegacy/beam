@@ -8,9 +8,11 @@ stages:
 variables:
   LC_ALL: "en_US.UTF-8"
   LANG: "en_US.UTF-8"
-  GIT_STRATEGY: clone
+  GIT_STRATEGY: fetch
   GIT_SUBMODULE_STRATEGY: recursive
   GIT_BRANCH: "$CI_COMMIT_REF_NAME"
+  # Need to enable custom_build_dir feature
+  GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/$CI_PROJECT_NAME
 
 before_script:
   # RVM install a `cd` :((((
