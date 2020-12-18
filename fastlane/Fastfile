@@ -162,7 +162,8 @@ platform :mac do
   ## To release DeveloperId signed builds
   lane :beta do
     git_branch
-    increment_version_number(bump_type: "patch")
+    # Let's do version increment manually in Xcode
+    # increment_version_number(bump_type: "patch")
     # Sadly we can't use anything out of a number for building number, so we
     # can't include the current branch. The following fails:
     # build_number = "#{Actions.git_branch}/#{ENV['CI_JOB_ID']}".gsub(/\//, "-")
@@ -247,11 +248,11 @@ platform :mac do
 
     changelog = if File.exists?("../builds/commit")
                   last_commit = File.read("../builds/commit").chomp
-                  UI.message "Previous commit file exists, using `git log #{last_commit}`"
-                  `git log #{last_commit}`
+                  UI.message "Previous commit file exists, using `git log HEAD...#{last_commit}`"
+                  `git log HEAD...#{last_commit}`
                 else
-                  UI.message "No previous commit file, using `git log`"
-                  `git log`
+                  UI.message "No previous commit file, using `git log -1`"
+                  `git log -1`
                 end
 
     File.open("../builds/release_notes.html", "wb") do |f|
