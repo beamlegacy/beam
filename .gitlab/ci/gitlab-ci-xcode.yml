@@ -4,6 +4,7 @@ Install xcode:
   script:
     - xcversion update
     - xcversion install ${XCODE_VERSION}
+    - bundle install
   tags:
     - macos
   only:
