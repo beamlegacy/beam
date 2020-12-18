@@ -11,3 +11,4 @@
 - Add Logger
 - Add a DocumentManager to store data in CoreData
 - Add auto updates
+
