@@ -9,6 +9,7 @@ variables:
   LC_ALL: "en_US.UTF-8"
   LANG: "en_US.UTF-8"
   GIT_STRATEGY: clone
+  GIT_SUBMODULE_STRATEGY: recursive
   GIT_BRANCH: "$CI_COMMIT_REF_NAME"
 
 before_script:

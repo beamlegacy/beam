@@ -22,6 +22,7 @@ install_gitlab_runner:
 	/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 	# CI=1 /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
+	# Install direnv for environment variables
 	brew install direnv
 	direnv allow .
 
@@ -70,6 +71,9 @@ install_gitlab_runner:
 
 	# Register new device
 	bundle exec fastlane register_local_device
+
+	# For badge
+	brew install imagemagick graphicsmagick
 
 install_swiftlint:
 	brew install swiftlint
