@@ -276,12 +276,16 @@ platform :mac do
 
     create_release_notes
 
+    # appcast.xml should be in `master/appcast.xml` on S3, not `master/build/rev/appcast.xml`
+    upload_appcast
+
     s3_path = if Actions.git_branch == "master"
                 "#{Actions.git_branch}/#{lane_context[SharedValues::VERSION_NUMBER]}/#{lane_context[SharedValues::BUILD_NUMBER]}"
               else
                 Actions.git_branch
               end
 
+    # This should be last upload, or Slack links will be wrong
     aws_s3(
       access_key: ENV["AWS_ACCESS_KEY_ID"],
       secret_access_key: ENV["AWS_SECRET_ACCESS_KEY"],
@@ -301,9 +305,6 @@ platform :mac do
     lane_context[SharedValues::S3_FILES_OUTPUT_PATHS].each do |file|
       UI.success "S3: #{file}"
     end
-
-    # appcast.xml should be in `master/appcast.xml` on S3, not `master/build/rev/appcast.xml`
-    upload_appcast
   end
 
   private_lane :upload_appcast do
