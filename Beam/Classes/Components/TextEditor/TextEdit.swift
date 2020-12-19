@@ -442,8 +442,9 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     public func insertText(string: String, replacementRange: Range<Int>) {
+        guard preDetectInput(string) else { return }
         rootNode.insertText(string: string, replacementRange: replacementRange)
-        detectInput(string)
+        postDetectInput(string)
         reBlink()
     }
 
@@ -763,18 +764,59 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         inputDetectorState -= 1
     }
     var lastInput: String = ""
-    func detectInput(_ input: String) {
+    func preDetectInput(_ input: String) -> Bool {
+        guard inputDetectorEnabled else { return true }
+        defer { lastInput = input }
+
+        let handlers: [String: () -> Bool] = [
+//            "@": { [unowned self] in
+//                Logger.shared.logInfo("Insert link", category: .ui)
+//                return true
+//            },
+            "[": { [unowned self] in
+                Logger.shared.logInfo("Transform selection into internal link", category: .ui)
+                if !self.selectedTextRange.isEmpty {
+                    node.text.removeAttributes([.internalLink("")], from: self.selectedTextRange)
+                    node.text.addAttributes([.internalLink(selectedText)], to: self.selectedTextRange)
+                    return false
+                }
+                return true
+            }
+        ]
+
+        if let handler = handlers[input] {
+            return handler()
+        } else if let handler = handlers[lastInput + input] {
+            return handler()
+        }
+
+        return true
+    }
+
+
+    func postDetectInput(_ input: String) {
         guard inputDetectorEnabled else { return }
         defer { lastInput = input }
 
         let makeQuote = { [unowned self] in
-            if self.node.cursorPosition <= 3, (self.node.text.prefix(2).text == "> " || self.node.text.prefix(3).text == ">> ") {
+            let level1 = self.node.text.prefix(2).text == "> "
+            let level2 = self.node.text.prefix(3).text == ">> "
+            let level = level1 ? 1 : (level2 ? 2 : 0)
+            if self.node.cursorPosition <= 3, level > 0 {
                 Logger.shared.logInfo("Make quote", category: .ui)
+
+                node.text.removeAttributes([.quote(0, "", "")], from: node.text.wholeRange)
+                node.text.addAttributes([.quote(level, "", "")], to: node.text.wholeRange)
+                node.text.removeFirst(level + 1)
+                self.rootNode.cursorPosition = 0
             }
         }
 
         let makeHeader = { [unowned self] in
-            if self.node.cursorPosition <= 3, (self.node.text.prefix(2).text == "# " || self.node.text.prefix(3).text == "## ") {
+            let level1 = self.node.text.prefix(2).text == "# "
+            let level2 = self.node.text.prefix(3).text == "## "
+            let level = level1 ? 1 : (level2 ? 2 : 0)
+            if self.node.cursorPosition <= 3, level != 0 {
                 Logger.shared.logInfo("Make header", category: .ui)
 
                 // In this case we will reparent all following sibblings that are not a header to the current node as Paper does
@@ -785,19 +827,21 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     guard !sibbling.isHeader else { return }
                     self.node.addChild(sibbling)
                 }
+
+                node.text.removeAttributes([.heading(0)], from: node.text.wholeRange)
+                node.text.addAttributes([.heading(level)], to: node.text.wholeRange)
+                node.text.removeFirst(level + 1)
+                self.rootNode.cursorPosition = 0
             }
         }
 
         let handlers: [String: () -> Void] = [
-            "@": {
-                Logger.shared.logInfo("Insert link", category: .ui)
-            },
-            "[[": {
+            "[[": { [unowned self] in
                 Logger.shared.logInfo("Insert internal link", category: .ui)
             },
             "#": makeHeader,
             ">": makeQuote,
-            " ": {
+            " ": { [unowned self] in
                 makeHeader()
                 makeQuote()
             }

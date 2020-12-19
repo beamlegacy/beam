@@ -167,7 +167,7 @@ struct BeamText: Codable {
         let index0 = splitRangeAt(position: positionRange.lowerBound, createEmptyRanges: false)
         let index1 = splitRangeAt(position: positionRange.upperBound, createEmptyRanges: false)
 
-        for i in index0 ..< index1 {
+        for i in index0 + 1 ..< index1 + 1 {
             ranges[i].attributes.append(contentsOf: attributes)
         }
 
@@ -178,7 +178,7 @@ struct BeamText: Codable {
         let index0 = splitRangeAt(position: positionRange.lowerBound, createEmptyRanges: false)
         let index1 = splitRangeAt(position: positionRange.upperBound, createEmptyRanges: false)
 
-        for i in index0 ..< index1 {
+        for i in index0 + 1 ..< index1 + 1 {
             ranges[i].attributes = attributes
         }
 
@@ -190,7 +190,7 @@ struct BeamText: Codable {
         let index1 = splitRangeAt(position: positionRange.upperBound, createEmptyRanges: false)
 
         let rawAttributes = attributes.map { attribute -> Int in attribute.rawValue }
-        for i in index0 ..< index1 {
+        for i in index0 + 1 ..< index1 + 1 {
             ranges[i].attributes.removeAll(where: { attribute -> Bool in
                 rawAttributes.contains(attribute.rawValue)
             })
@@ -204,7 +204,7 @@ struct BeamText: Codable {
         var newRanges: [Range] = []
         for range in ranges {
             guard var last = newRanges.last else { newRanges.append(range); continue }
-            guard last.attributes != range.attributes else { newRanges.append(range); continue }
+            guard last.attributes == range.attributes else { newRanges.append(range); continue }
 
             last.string += range.string
             newRanges.removeLast()
