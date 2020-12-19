@@ -33,7 +33,10 @@ extension BeamText {
         let end = t.count - (postfix.count)
 
         let newRange = start ..< end
-        let link = String(t.substring(range: newRange))
+        var link = String(t.substring(range: newRange))
+        while link.contains("  ") {
+            link = link.replacingOccurrences(of: "  ", with: " ")
+        }
         var linkCharacterSet = CharacterSet.alphanumerics
         linkCharacterSet.insert(" ")
         guard linkCharacterSet.isSuperset(of: CharacterSet(charactersIn: link)) else {
