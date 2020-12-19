@@ -391,5 +391,4 @@ extension BeamText: Equatable {
     static func == (lhs: BeamText, rhs: BeamText) -> Bool {
         return lhs.ranges == rhs.ranges
     }
-
 }

@@ -776,8 +776,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             "[": { [unowned self] in
                 Logger.shared.logInfo("Transform selection into internal link", category: .ui)
                 if !self.selectedTextRange.isEmpty {
-                    node.text.removeAttributes([.internalLink("")], from: self.selectedTextRange)
-                    node.text.addAttributes([.internalLink(selectedText)], to: self.selectedTextRange)
+                    node.text.makeInternalLink(self.selectedTextRange)
                     return false
                 }
                 return true
@@ -792,7 +791,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
         return true
     }
-
 
     func postDetectInput(_ input: String) {
         guard inputDetectorEnabled else { return }
