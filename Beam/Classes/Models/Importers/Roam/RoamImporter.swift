@@ -98,7 +98,7 @@ class RoamImporter {
     }
 
     private func detectLinkedNotes(_ context: NSManagedObjectContext, note: BeamNote, bullet: BeamElement) {
-        guard bullet.text.count > 2 else { return }
+        guard bullet.text.text.count > 2 else { return }
 
         for pattern in TextFormatter.linkPatterns {
             var regex: NSRegularExpression
@@ -109,12 +109,12 @@ class RoamImporter {
                 fatalError("Error")
             }
 
-            let matches = regex.matches(in: bullet.text, options: [], range: NSRange(location: 0, length: bullet.text.utf16.count))
+            let matches = regex.matches(in: bullet.text.text, options: [], range: NSRange(location: 0, length: bullet.text.text.utf16.count))
 
             for match in matches {
-                guard let linkRange = Range(match.range(at: 1), in: bullet.text) else { continue }
+                guard let linkRange = Range(match.range(at: 1), in: bullet.text.text) else { continue }
 
-                let linkTitle = String(bullet.text[linkRange])
+                let linkTitle = String(bullet.text.text[linkRange])
                 let refnote = BeamNote.fetchOrCreate(documentManager, title: linkTitle)
                 let reference = NoteReference(noteName: note.title, elementID: bullet.id)
                 refnote.addLinkedReference(reference)

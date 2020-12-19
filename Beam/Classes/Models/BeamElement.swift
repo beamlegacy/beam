@@ -11,11 +11,11 @@ import Combine
 // Editable Text Data:
 public class BeamElement: Codable, Identifiable, Hashable, ObservableObject {
     @Published public private(set) var id = UUID() { didSet { change() } }
-    @Published var text = "" { didSet { change() } }
+    @Published var text = BeamText() { didSet { change() } }
     @Published var open = true { didSet { change() } }
     public private(set) var children = [BeamElement]() { didSet { change() } }
     @Published var readOnly = false { didSet { change() } }
-    @Published var ast: Parser.Node? { didSet { change() } }
+//    @Published var ast: Parser.Node? { didSet { change() } }
     @Published var score: Float = 0 { didSet { change() } }
     @Published var creationDate = Date() { didSet { change() } }
     @Published var updateDate = Date()
@@ -35,14 +35,19 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject {
     }
 
     init(_ text: String) {
-        self.text = text
+        self.text = BeamText(text: text, attributes: [])
     }
 
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         id = try container.decode(UUID.self, forKey: .id)
-        text = try container.decode(String.self, forKey: .text)
+        do {
+            text = try container.decode(BeamText.self, forKey: .text)
+        } catch {
+            let _text = try container.decode(String.self, forKey: .text)
+            text = BeamText(text: _text, attributes: [])
+        }
         open = try container.decode(Bool.self, forKey: .open)
         readOnly = try container.decode(Bool.self, forKey: .readOnly)
         if container.contains(.creationDate) {
@@ -54,10 +59,6 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject {
             for child in children {
                 child.parent = self
             }
-        }
-
-        if container.contains(.ast) {
-            ast = try container.decode(Parser.Node.self, forKey: .ast)
         }
     }
 
@@ -72,9 +73,6 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject {
         try container.encode(updateDate, forKey: .updateDate)
         if !children.isEmpty {
             try container.encode(children, forKey: .children)
-        }
-        if let ast = ast {
-            try container.encode(ast, forKey: .ast)
         }
     }
 
@@ -129,7 +127,7 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject {
 
     func connectUnlinkedNotes(_ thisNoteTitle: String, _ allNotes: [BeamNote]) {
         for note in allNotes {
-            if text.contains(note.title) {
+            if text.text.contains(note.title) {
                 note.addUnlinkedReference(NoteReference(noteName: thisNoteTitle, elementID: id))
             }
         }

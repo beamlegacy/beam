@@ -630,18 +630,18 @@ class TextNodeTests: XCTestCase {
 
         root.doCommand(.deleteBackward)
         XCTAssertEqual(root.cursorPosition, 8)
-        XCTAssertEqual(root.node.text, "Lorem **** sit amet, *consectetur* adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore **_magna aliqua_**.")
+        XCTAssertEqual(root.node.text.text, "Lorem **** sit amet, *consectetur* adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore **_magna aliqua_**.")
 
         root.doCommand(.deleteBackward)
         root.doCommand(.deleteBackward)
         XCTAssertEqual(root.cursorPosition, 6)
-        XCTAssertEqual(root.node.text, "Lorem ** sit amet, *consectetur* adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore **_magna aliqua_**.")
+        XCTAssertEqual(root.node.text.text, "Lorem ** sit amet, *consectetur* adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore **_magna aliqua_**.")
 
         root.doCommand(.deleteForward)
         root.doCommand(.deleteForward)
         root.doCommand(.deleteForward)
         XCTAssertEqual(root.cursorPosition, 6)
-        XCTAssertEqual(root.node.text, "Lorem sit amet, *consectetur* adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore **_magna aliqua_**.")
+        XCTAssertEqual(root.node.text.text, "Lorem sit amet, *consectetur* adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore **_magna aliqua_**.")
         validateRootWithNote(root: root, note: note)
     }
 
@@ -661,7 +661,7 @@ class TextNodeTests: XCTestCase {
 
         XCTAssertEqual(root.children.first?.children.count, 2)
         root.doCommand(.deleteBackward)
-        XCTAssertEqual(root.node.text, "bullet1bullet11")
+        XCTAssertEqual(root.node.text.text, "bullet1bullet11")
         XCTAssertEqual(root.children.first?.children.count, 1)
 //        print("Tree:\n\(root.printTree())\n")
 //        note.debugNote()
@@ -687,7 +687,7 @@ class TextNodeTests: XCTestCase {
         root.doCommand(.deleteForward)
 //        print("Tree:\n\(root.printTree())\n")
 //        note.debugNote()
-        XCTAssertEqual(root.node.text, "bullet11bullet12")
+        XCTAssertEqual(root.node.text.text, "bullet11bullet12")
         XCTAssertEqual(root.children.first?.children.count, 1)
         validateRootWithNote(root: root, note: note)
     }

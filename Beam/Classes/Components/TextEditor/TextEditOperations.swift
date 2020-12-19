@@ -11,7 +11,7 @@ extension TextRoot {
     func eraseSelection() {
         guard !selectedTextRange.isEmpty else { return }
 
-        node.text.removeSubrange(node.text.range(from: selectedTextRange))
+        node.text.removeSubrange(selectedTextRange)
         cursorPosition = selectedTextRange.lowerBound
         if cursorPosition == NSNotFound {
             cursorPosition = node.text.count
@@ -35,7 +35,7 @@ extension TextRoot {
         if !selectedTextRange.isEmpty {
             eraseSelection()
         } else if cursorPosition != node.text.count {
-            node.text.remove(at: node.text.index(at: cursorPosition))
+            node.text.remove(count: 1, at: cursorPosition)
             cancelSelection()
         } else {
             if let nextNode = node.nextVisible() {
@@ -73,21 +73,21 @@ extension TextRoot {
             cancelSelection()
         } else {
             cursorPosition = node.position(before: cursorPosition)
-            node.text.remove(at: node.text.index(at: cursorPosition))
+            node.text.remove(count: 1, at: cursorPosition)
             cancelSelection()
         }
     }
 
     func insertNewline() {
         if !selectedTextRange.isEmpty {
-            node.text.removeSubrange(node.text.range(from: selectedTextRange))
-            node.text.insert("\n", at: node.text.index(at: selectedTextRange.startIndex))
+            node.text.removeSubrange(selectedTextRange)
+            node.text.insert("\n", at: selectedTextRange.startIndex)
             cursorPosition = node.position(after: selectedTextRange.startIndex)
             if cursorPosition == NSNotFound {
                 cursorPosition = node.text.count
             }
         } else if cursorPosition != 0 && node.text.count != 0 {
-            node.text.insert("\n", at: node.text.index(at: cursorPosition))
+            node.text.insert("\n", at: cursorPosition)
             cursorPosition = node.position(after: cursorPosition)
         }
         cancelSelection()
@@ -137,7 +137,7 @@ extension TextRoot {
             range = self.selectedTextRange
         }
 
-        node.text.replaceSubrange(node.text.range(from: range), with: string)
+        node.text.replaceSubrange(range, with: string)
         cursorPosition = range.upperBound
         cancelSelection()
         markedTextRange = range
@@ -164,8 +164,7 @@ extension TextRoot {
             range = selectedTextRange
         }
 
-        let r = node.text.range(from: range)
-        node.text.replaceSubrange(r, with: string)
+        node.text.replaceSubrange(range, with: string)
         cursorPosition = range.lowerBound + c
         cancelSelection()
     }

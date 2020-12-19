@@ -487,7 +487,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                 return
             }
             rootNode.eraseSelection()
-            let splitText = node.text.substring(from: rootNode.cursorPosition, to: node.text.count)
+            let splitText = node.text.extract(range: rootNode.cursorPosition ..< node.text.count)
             node.text.removeLast(node.text.count - rootNode.cursorPosition)
             let element = BeamElement()
             element.text = splitText
@@ -698,7 +698,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     public func attributedString() -> NSAttributedString {
-        return NSAttributedString(string: node.text)
+        return node.attributedString
     }
 
     /* Returns an array of attribute names recognized by the receiver.
@@ -768,13 +768,13 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         defer { lastInput = input }
 
         let makeQuote = { [unowned self] in
-            if self.node.cursorPosition <= 3, (self.node.text.prefix(2) == "> " || self.node.text.prefix(3) == ">> ") {
+            if self.node.cursorPosition <= 3, (self.node.text.prefix(2).text == "> " || self.node.text.prefix(3).text == ">> ") {
                 Logger.shared.logInfo("Make quote", category: .ui)
             }
         }
 
         let makeHeader = { [unowned self] in
-            if self.node.cursorPosition <= 3, (self.node.text.prefix(2) == "# " || self.node.text.prefix(3) == "## ") {
+            if self.node.cursorPosition <= 3, (self.node.text.prefix(2).text == "# " || self.node.text.prefix(3).text == "## ") {
                 Logger.shared.logInfo("Make header", category: .ui)
 
                 // In this case we will reparent all following sibblings that are not a header to the current node as Paper does
@@ -1079,11 +1079,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
         let node: TextNode = {
             guard let note = element as? BeamNote else { return TextNode(editor: self, element: element) }
-            let root = TextRoot(editor: self, element: note)
-            if note.children.count == 1 && note.children.first!.text.isEmpty {
-                root.children.first?.placeholder = note.isTodaysNote ? "This is the journal, you can type anything here!" : "..."
-            }
-            return root
+            return TextRoot(editor: self, element: note)
         }()
 
         accessingMapping = true
@@ -1096,6 +1092,13 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             node.layer.contentsScale = w.backingScaleFactor
         }
         layer?.addSublayer(node.layer)
+
+        if let root = node as? TextRoot {
+            if root.children.count == 1 && root.children.first!.text.isEmpty {
+                let istoday = root.note?.isTodaysNote ?? false
+                root.children.first?.placeholder = BeamText(text: istoday ? "This is the journal, you can type anything here!" : "...")
+            }
+        }
 
         return node
     }

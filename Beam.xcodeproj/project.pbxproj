@@ -163,6 +163,7 @@
 		96C9CC3E2535CE2C00D70AA6 /* LexerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C9CC3D2535CE2C00D70AA6 /* LexerTests.swift */; };
 		96E1356F2546F03900133A24 /* TextNodeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E1356E2546F03900133A24 /* TextNodeTests.swift */; };
 		96E4CEF9258D7E8200D6DE22 /* BeamTextTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E4CEF8258D7E8200D6DE22 /* BeamTextTests.swift */; };
+		96E4CF30258DFB0800D6DE22 /* BeamText+NSAttributedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E4CF2F258DFB0800D6DE22 /* BeamText+NSAttributedString.swift */; };
 		96F93618258CFDD2006D8E53 /* BeamText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F93617258CFDD2006D8E53 /* BeamText.swift */; };
 /* End PBXBuildFile section */
 
@@ -528,6 +529,7 @@
 		96C9CC3D2535CE2C00D70AA6 /* LexerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LexerTests.swift; sourceTree = "<group>"; };
 		96E1356E2546F03900133A24 /* TextNodeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextNodeTests.swift; sourceTree = "<group>"; };
 		96E4CEF8258D7E8200D6DE22 /* BeamTextTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamTextTests.swift; sourceTree = "<group>"; };
+		96E4CF2F258DFB0800D6DE22 /* BeamText+NSAttributedString.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamText+NSAttributedString.swift"; sourceTree = "<group>"; };
 		96F93617258CFDD2006D8E53 /* BeamText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamText.swift; sourceTree = "<group>"; };
 		9B355D858C3216B61BF461D9 /* Pods-BeamTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BeamTests.release.xcconfig"; path = "Target Support Files/Pods-BeamTests/Pods-BeamTests.release.xcconfig"; sourceTree = "<group>"; };
 		A3DE910688789AFBA4487533 /* Pods-Beam.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Beam.debug.xcconfig"; path = "Target Support Files/Pods-Beam/Pods-Beam.debug.xcconfig"; sourceTree = "<group>"; };
@@ -824,6 +826,7 @@
 				418171C02581107C00317ED8 /* TextEditCommands.swift */,
 				418171C12581107C00317ED8 /* Font.swift */,
 				418171C22581107C00317ED8 /* TextRoot.swift */,
+				96E4CF2F258DFB0800D6DE22 /* BeamText+NSAttributedString.swift */,
 			);
 			path = TextEditor;
 			sourceTree = "<group>";
@@ -1702,6 +1705,7 @@
 				418172242581107C00317ED8 /* String+URL.swift in Sources */,
 				418172192581107C00317ED8 /* Persistence.swift in Sources */,
 				418172282581107C00317ED8 /* ClosedRange+Beam.swift in Sources */,
+				96E4CF30258DFB0800D6DE22 /* BeamText+NSAttributedString.swift in Sources */,
 				418172232581107C00317ED8 /* String+Ranges.swift in Sources */,
 				418172CF25811AF800317ED8 /* Animation.swift in Sources */,
 				418171F32581107C00317ED8 /* AuthenticationHandler.swift in Sources */,
