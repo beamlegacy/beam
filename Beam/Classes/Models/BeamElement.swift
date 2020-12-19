@@ -38,6 +38,10 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject {
         self.text = BeamText(text: text, attributes: [])
     }
 
+    init(_ text: BeamText) {
+        self.text = text
+    }
+
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 

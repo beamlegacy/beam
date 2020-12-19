@@ -85,7 +85,9 @@ class RoamImporter {
                                     _ roamBullets: [RoamBullet],
                                     _ parentBullet: BeamElement) {
         for bullet in roamBullets {
-            let newBullet = BeamElement(bullet.string)
+            let parser = Parser(inputString: bullet.string)
+            let visitor = BeamTextVisitor()
+            let newBullet = BeamElement(visitor.visit(parser.parseAST()))
             newBullet.creationDate = bullet.createTime ?? newBullet.creationDate
             newBullet.updateDate = bullet.editTime ?? newBullet.updateDate
             parentBullet.addChild(newBullet)

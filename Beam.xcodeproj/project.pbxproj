@@ -164,6 +164,7 @@
 		96E1356F2546F03900133A24 /* TextNodeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E1356E2546F03900133A24 /* TextNodeTests.swift */; };
 		96E4CEF9258D7E8200D6DE22 /* BeamTextTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E4CEF8258D7E8200D6DE22 /* BeamTextTests.swift */; };
 		96E4CF30258DFB0800D6DE22 /* BeamText+NSAttributedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E4CF2F258DFB0800D6DE22 /* BeamText+NSAttributedString.swift */; };
+		96E4CF72258E59F400D6DE22 /* BeamTextVisitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E4CF71258E59F400D6DE22 /* BeamTextVisitor.swift */; };
 		96F93618258CFDD2006D8E53 /* BeamText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F93617258CFDD2006D8E53 /* BeamText.swift */; };
 /* End PBXBuildFile section */
 
@@ -530,6 +531,7 @@
 		96E1356E2546F03900133A24 /* TextNodeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextNodeTests.swift; sourceTree = "<group>"; };
 		96E4CEF8258D7E8200D6DE22 /* BeamTextTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamTextTests.swift; sourceTree = "<group>"; };
 		96E4CF2F258DFB0800D6DE22 /* BeamText+NSAttributedString.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamText+NSAttributedString.swift"; sourceTree = "<group>"; };
+		96E4CF71258E59F400D6DE22 /* BeamTextVisitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamTextVisitor.swift; sourceTree = "<group>"; };
 		96F93617258CFDD2006D8E53 /* BeamText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamText.swift; sourceTree = "<group>"; };
 		9B355D858C3216B61BF461D9 /* Pods-BeamTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BeamTests.release.xcconfig"; path = "Target Support Files/Pods-BeamTests/Pods-BeamTests.release.xcconfig"; sourceTree = "<group>"; };
 		A3DE910688789AFBA4487533 /* Pods-Beam.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Beam.debug.xcconfig"; path = "Target Support Files/Pods-Beam/Pods-Beam.debug.xcconfig"; sourceTree = "<group>"; };
@@ -837,6 +839,7 @@
 				418171BB2581107C00317ED8 /* Lexer.swift */,
 				418171BC2581107C00317ED8 /* Parser.swift */,
 				418171BD2581107C00317ED8 /* AttributedStringVisitor.swift */,
+				96E4CF71258E59F400D6DE22 /* BeamTextVisitor.swift */,
 			);
 			path = Markdown;
 			sourceTree = "<group>";
@@ -1673,6 +1676,7 @@
 				4181723F2581107C00317ED8 /* Font.swift in Sources */,
 				4181722C2581107C00317ED8 /* AutoCompleteList.swift in Sources */,
 				4181727B258110D100317ED8 /* AppDelegate+CoreData.swift in Sources */,
+				96E4CF72258E59F400D6DE22 /* BeamTextVisitor.swift in Sources */,
 				418172272581107C00317ED8 /* NSMutableAttributedString+Range.swift in Sources */,
 				4181723A2581107C00317ED8 /* Parser.swift in Sources */,
 				4181724A2581107C00317ED8 /* TextView.swift in Sources */,
