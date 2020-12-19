@@ -11,7 +11,7 @@ enum BeamTextError: Error {
     case rangeNotFound
 }
 
-class BeamText: Codable {
+class BeamText: Codable, ObservableObject {
     var text: String {
         ranges.reduce(String()) { (string, range) -> String in
             string + range.string
@@ -108,7 +108,21 @@ class BeamText: Codable {
 
         var end: Int { position + string.count }
     }
-    var ranges: [Range] = [Range(string: "", attributes: [], position: 0)]
+    @Published var ranges: [Range] = [Range(string: "", attributes: [], position: 0)]
+
+    enum CodingKeys: String, CodingKey {
+        case ranges
+    }
+
+    required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        ranges = try container.decode([Range].self, forKey: .ranges)
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(self.ranges, forKey: .ranges)
+    }
 
     init(text: String = "", attributes: [Attribute] = []) {
         self.ranges.append(Range(string: text, attributes: attributes, position: 0))

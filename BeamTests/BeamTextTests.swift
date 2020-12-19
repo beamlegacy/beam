@@ -31,5 +31,17 @@ class BeamTextTests: XCTestCase {
 
         btext.append(" done")
         XCTAssertEqual(btext.text, "BLEH new string!! done")
+
+        btext.removeSubrange(btext.wholeRange)
+        XCTAssert(btext.isEmpty)
+        XCTAssert(btext.text == "")
+
+        btext.insert("1", at: 0)
+        XCTAssert(btext.text == "1")
+
+        btext.remove(count: 1, at: 0)
+        XCTAssert(btext.text == "")
+        XCTAssert(btext.isEmpty)
+
     }
 }

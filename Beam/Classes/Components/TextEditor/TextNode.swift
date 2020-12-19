@@ -14,7 +14,12 @@ import Combine
 // swiftlint:disable:next type_body_length
 public class TextNode: NSObject, CALayerDelegate {
 
-    var element: BeamElement
+    var element: BeamElement { didSet {
+        elementScope = element.$changed.sink { [unowned self] _ in
+            self.invalidateText()
+        }
+    }}
+    var elementScope: Cancellable?
     var layout: TextFrame?
     let layer: CALayer
     var debug = false
@@ -296,6 +301,13 @@ public class TextNode: NSObject, CALayerDelegate {
         super.init()
         configureLayer()
         createActionLayer()
+
+        var inInit = true
+        elementScope = element.$changed.sink { [unowned self] _ in
+            guard !inInit else { return }
+            self.invalidateText()
+        }
+        inInit = false
     }
 
     deinit {

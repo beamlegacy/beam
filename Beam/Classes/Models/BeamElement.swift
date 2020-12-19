@@ -11,7 +11,15 @@ import Combine
 // Editable Text Data:
 public class BeamElement: Codable, Identifiable, Hashable, ObservableObject {
     @Published public private(set) var id = UUID() { didSet { change() } }
-    @Published var text = BeamText() { didSet { change() } }
+    @Published var text = BeamText() {
+        didSet {
+            change()
+            textCancellable = text.$ranges.sink(receiveValue: { [unowned self] _ in
+                self.change()
+            })
+        }
+    }
+    private var textCancellable: Cancellable!
     @Published var open = true { didSet { change() } }
     public private(set) var children = [BeamElement]() { didSet { change() } }
     @Published var readOnly = false { didSet { change() } }
@@ -32,10 +40,16 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject {
     }
 
     init() {
+        textCancellable = text.$ranges.sink(receiveValue: { [unowned self] _ in
+            self.change()
+        })
     }
 
     init(_ text: String) {
         self.text = BeamText(text: text, attributes: [])
+        textCancellable = self.text.$ranges.sink(receiveValue: { [unowned self] _ in
+            self.change()
+        })
     }
 
     required public init(from decoder: Decoder) throws {
@@ -54,12 +68,18 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject {
             creationDate = try container.decode(Date.self, forKey: .creationDate)
             updateDate = try container.decode(Date.self, forKey: .updateDate)
         }
+
         if container.contains(.children) {
             children = try container.decode([BeamElement].self, forKey: .children)
             for child in children {
                 child.parent = self
             }
         }
+
+        textCancellable = text.$ranges.sink(receiveValue: { [unowned self] _ in
+            self.change()
+        })
+
     }
 
     public func encode(to encoder: Encoder) throws {
