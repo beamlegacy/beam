@@ -100,6 +100,8 @@ class BeamText: Codable {
         var string: String
         var attributes: [Attribute]
         var position: Int
+
+        var end: Int { position + string.count }
     }
     var ranges: [Range] = []
 
@@ -132,7 +134,7 @@ class BeamText: Codable {
         for (i, range) in ranges.enumerated() {
             let length = range.string.count
             if pos <= position && position < pos + length {
-                let offset = pos + length - position
+                let offset = position - pos
                 if !createEmptyRanges {
                     if offset == 0 { return max(0, i - 1) }
                     if offset == length { return i }
@@ -196,7 +198,7 @@ class BeamText: Codable {
         var newRanges: [Range] = []
         for range in ranges {
             guard var last = newRanges.last else { newRanges.append(range); continue }
-            guard last.attributes != range.attributes else { continue }
+            guard last.attributes != range.attributes else { newRanges.append(range); continue }
 
             last.string += range.string
             newRanges.removeLast()
@@ -217,19 +219,20 @@ class BeamText: Codable {
 
     /// insert the given string at the given index
     func insert(text: String, at position: Int) throws {
+        guard position != ranges.last?.end else { ranges.append(Range(string: text, attributes: [], position: position)); return }
         let index = try rangeIndexAt(position: position)
-        var range = ranges[index]
-        let offset = position - range.position
-        range.string.insert(contentsOf: text, at: range.string.index(at: offset))
+        let offset = position - ranges[index].position
+        ranges[index].string.insert(contentsOf: text, at: ranges[index].string.index(at: offset))
 
         computePositions(from: index)
     }
 
     /// insert the given string at the given index, with given attributes
     func insert(text: String, at position: Int, withAttributes attributes: [Attribute]) throws {
+        guard position != ranges.last?.end else { ranges.append(Range(string: text, attributes: attributes, position: position)); return }
         let index = try splitRangeAt(position: position, createEmptyRanges: true)
         let range = Range(string: text, attributes: attributes, position: position)
-        ranges.insert(range, at: index)
+        ranges.insert(range, at: index + 1)
 
         flatten()
         computePositions()
@@ -239,7 +242,7 @@ class BeamText: Codable {
         let index0 = try splitRangeAt(position: position, createEmptyRanges: false)
         let index1 = try splitRangeAt(position: position + count, createEmptyRanges: false)
 
-        ranges.removeSubrange(index0 ..< index1)
+        ranges.removeSubrange(index0 ..< index1 + 1)
         flatten()
         computePositions()
     }
