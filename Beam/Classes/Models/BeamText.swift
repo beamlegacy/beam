@@ -243,7 +243,7 @@ class BeamText: Codable {
     }
 
     func append(_ text: String) {
-        guard var range = ranges.last else { append(text, withAttributes: []); return  }
+        guard var range = ranges.last else { append(text, withAttributes: []); return }
         range.string += text
         ranges[ranges.endIndex - 1] = range
     }
@@ -255,5 +255,20 @@ class BeamText: Codable {
         ranges.removeSubrange(index0 ..< index1 + 1)
         flatten()
         computePositions()
+    }
+
+    /// Insert BeamText:
+    func insert(_ text: BeamText, at position: Int) throws {
+        var pos = position
+        for range in text.ranges {
+            try insert(range.string, at: pos, withAttributes: range.attributes)
+            pos += range.string.count
+        }
+    }
+
+    func append(_ text: BeamText) {
+        for range in text.ranges {
+            append(range.string, withAttributes: range.attributes)
+        }
     }
 }
