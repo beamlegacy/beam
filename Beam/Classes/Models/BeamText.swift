@@ -11,7 +11,7 @@ enum BeamTextError: Error {
     case rangeNotFound
 }
 
-class BeamText: Codable, ObservableObject {
+struct BeamText: Codable {
     var text: String {
         ranges.reduce(String()) { (string, range) -> String in
             string + range.string
@@ -108,21 +108,7 @@ class BeamText: Codable, ObservableObject {
 
         var end: Int { position + string.count }
     }
-    @Published var ranges: [Range] = [Range(string: "", attributes: [], position: 0)]
-
-    enum CodingKeys: String, CodingKey {
-        case ranges
-    }
-
-    required init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        ranges = try container.decode([Range].self, forKey: .ranges)
-    }
-
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(self.ranges, forKey: .ranges)
-    }
+    var ranges: [Range] = [Range(string: "", attributes: [], position: 0)]
 
     init(text: String = "", attributes: [Attribute] = []) {
         self.ranges.append(Range(string: text, attributes: attributes, position: 0))
@@ -148,7 +134,7 @@ class BeamText: Codable, ObservableObject {
     }
 
     /// split a range in two at the given position in preparation, Any of the resulting ranges may be empty. The return value is the index of the first half
-    private func splitRangeAt(position: Int, createEmptyRanges: Bool) -> Int {
+    mutating private func splitRangeAt(position: Int, createEmptyRanges: Bool) -> Int {
         let position = min(max(position, 0), count)
         var pos = 0
         for (i, range) in ranges.enumerated() {
@@ -177,7 +163,7 @@ class BeamText: Codable, ObservableObject {
         fatalError()
     }
 
-    func addAttributes(_ attributes: [Attribute], to positionRange: Swift.Range<Int>) {
+    mutating func addAttributes(_ attributes: [Attribute], to positionRange: Swift.Range<Int>) {
         let index0 = splitRangeAt(position: positionRange.lowerBound, createEmptyRanges: false)
         let index1 = splitRangeAt(position: positionRange.upperBound, createEmptyRanges: false)
 
@@ -188,7 +174,7 @@ class BeamText: Codable, ObservableObject {
         flatten()
     }
 
-    func setAttributes(_ attributes: [Attribute], to positionRange: Swift.Range<Int>) {
+    mutating func setAttributes(_ attributes: [Attribute], to positionRange: Swift.Range<Int>) {
         let index0 = splitRangeAt(position: positionRange.lowerBound, createEmptyRanges: false)
         let index1 = splitRangeAt(position: positionRange.upperBound, createEmptyRanges: false)
 
@@ -199,7 +185,7 @@ class BeamText: Codable, ObservableObject {
         flatten()
     }
 
-    func removeAttributes(_ attributes: [Attribute], from positionRange: Swift.Range<Int>) {
+    mutating func removeAttributes(_ attributes: [Attribute], from positionRange: Swift.Range<Int>) {
         let index0 = splitRangeAt(position: positionRange.lowerBound, createEmptyRanges: false)
         let index1 = splitRangeAt(position: positionRange.upperBound, createEmptyRanges: false)
 
@@ -214,7 +200,7 @@ class BeamText: Codable, ObservableObject {
     }
 
     /// de-duplicate similar ranges
-    internal func flatten() {
+    mutating internal func flatten() {
         var newRanges: [Range] = []
         for range in ranges {
             guard var last = newRanges.last else { newRanges.append(range); continue }
@@ -229,7 +215,7 @@ class BeamText: Codable, ObservableObject {
     }
 
     /// recompute the positions of the ranges, starting at the given 'from' index
-    internal func computePositions(from: Int = 0) {
+    mutating internal func computePositions(from: Int = 0) {
         var pos = from == 0 ? 0 : ranges[from].position
         for index in from ..< ranges.count {
             ranges[index].position = pos
@@ -238,7 +224,7 @@ class BeamText: Codable, ObservableObject {
     }
 
     /// insert the given string at the given index
-    func insert(_ text: String, at position: Int) {
+    mutating func insert(_ text: String, at position: Int) {
         guard position != ranges.last?.end else { ranges.append(Range(string: text, attributes: [], position: position)); return }
         let position = clamp(position)
         guard let index = rangeIndexAt(position: position) else { fatalError() }
@@ -249,7 +235,7 @@ class BeamText: Codable, ObservableObject {
     }
 
     /// insert the given string at the given index, with given attributes
-    func insert(_ text: String, at position: Int, withAttributes attributes: [Attribute]) {
+    mutating func insert(_ text: String, at position: Int, withAttributes attributes: [Attribute]) {
         guard position != ranges.last?.end else { ranges.append(Range(string: text, attributes: attributes, position: position)); return }
         let index = splitRangeAt(position: position, createEmptyRanges: true)
         let range = Range(string: text, attributes: attributes, position: position)
@@ -259,24 +245,24 @@ class BeamText: Codable, ObservableObject {
         computePositions()
     }
 
-    func append(_ text: String, withAttributes attributes: [Attribute]) {
+    mutating func append(_ text: String, withAttributes attributes: [Attribute]) {
         ranges.append(Range(string: text, attributes: attributes, position: ranges.last?.end ?? 0))
     }
 
-    func append(_ text: String) {
+    mutating func append(_ text: String) {
         guard var range = ranges.last else { append(text, withAttributes: []); return }
         range.string += text
         ranges[ranges.endIndex - 1] = range
     }
 
-    func removeSubrange(_ range: Swift.Range<Int>) {
+    mutating func removeSubrange(_ range: Swift.Range<Int>) {
         self.remove(count: range.count, at: range.lowerBound)
         if ranges.isEmpty {
             ranges.append(Range())
         }
     }
 
-    func remove(count: Int, at position: Int) {
+    mutating func remove(count: Int, at position: Int) {
         guard count > 0 else { return }
         let index0 = splitRangeAt(position: position, createEmptyRanges: true)
         let index1 = splitRangeAt(position: position + count, createEmptyRanges: true)
@@ -287,7 +273,7 @@ class BeamText: Codable, ObservableObject {
     }
 
     /// Insert BeamText:
-    func insert(_ text: BeamText, at position: Int) {
+    mutating func insert(_ text: BeamText, at position: Int) {
         var pos = position
         for range in text.ranges {
             insert(range.string, at: pos, withAttributes: range.attributes)
@@ -295,14 +281,14 @@ class BeamText: Codable, ObservableObject {
         }
     }
 
-    func append(_ text: BeamText) {
+    mutating func append(_ text: BeamText) {
         for range in text.ranges {
             append(range.string, withAttributes: range.attributes)
         }
     }
 
     func extract(range: Swift.Range<Int>) -> BeamText {
-        let newText = self
+        var newText = self
         let endLength = text.count - range.upperBound
         newText.removeLast(endLength)
         newText.removeFirst(range.lowerBound)
@@ -314,13 +300,13 @@ class BeamText: Codable, ObservableObject {
         return ranges.last?.end ?? 0
     }
 
-    func removeFirst(_ count: Int) {
+    mutating func removeFirst(_ count: Int) {
         let selfCount = self.count
         let c = min(count, selfCount)
         remove(count: c, at: 0)
     }
 
-    func removeLast(_ count: Int) {
+    mutating func removeLast(_ count: Int) {
         let selfCount = self.count
         let c = min(count, selfCount)
         remove(count: c, at: selfCount - c)
@@ -386,12 +372,12 @@ extension BeamText {
         return text.substring(range: range)
     }
 
-    func replaceSubrange(_ range: Swift.Range<Int>, with string: String) {
+    mutating func replaceSubrange(_ range: Swift.Range<Int>, with string: String) {
         removeSubrange(range)
         insert(string, at: range.lowerBound)
     }
 
-    func replaceSubrange(_ range: Swift.Range<Int>, with text: BeamText) {
+    mutating func replaceSubrange(_ range: Swift.Range<Int>, with text: BeamText) {
         removeSubrange(range)
         insert(text, at: range.lowerBound)
     }

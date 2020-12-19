@@ -15,7 +15,7 @@ import Combine
 public class TextNode: NSObject, CALayerDelegate {
 
     var element: BeamElement { didSet {
-        elementScope = element.$changed.sink { [unowned self] _ in
+        elementScope = element.$text.sink { [unowned self] _ in
             self.invalidateText()
         }
     }}
@@ -303,7 +303,7 @@ public class TextNode: NSObject, CALayerDelegate {
         createActionLayer()
 
         var inInit = true
-        elementScope = element.$changed.sink { [unowned self] _ in
+        elementScope = element.$text.sink { [unowned self] _ in
             guard !inInit else { return }
             self.invalidateText()
         }
