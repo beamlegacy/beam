@@ -11,7 +11,7 @@ import XCTest
 
 class BeamTextTests: XCTestCase {
     func testCreation() {
-        let btext = BeamText(text: "some string")
+        var btext = BeamText(text: "some string")
         XCTAssertEqual(btext.text, "some string")
 
         btext.insert("new ", at: 5)

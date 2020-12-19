@@ -701,23 +701,6 @@ class TextNodeTests: XCTestCase {
 
     }
 
-    func testStrippedTextMarkDown() {
-        defer { reset() }
-        let note = createLoremArborescence(title: "title")
-        let editor = BeamTextEdit(root: note)
-        let root = editor.rootNode!
-        print("Stripped: \(root.fullStrippedText)")
-        XCTAssertEqual(" Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.", root.fullStrippedText)
-    }
-
-    func testLanguageRecognizer() {
-        defer { reset() }
-        let note = createLoremArborescence(title: "title")
-        let editor = BeamTextEdit(root: note)
-        let root = editor.rootNode!
-        XCTAssertEqual(root.language, NLLanguage.romanian) // Strangely, latin mostly ressembles Romanian from the point of view of the classifier...
-    }
-
     func testLematizationEN() {
         defer { reset() }
         let text = "This is a Swift port of Ruby's Faker library that generates fake data. Are you still bothered with meaningless randomly character strings? Just relax and leave this job to Fakery. It's useful in all the cases when you need to use some dummy data for testing, population of database during development, etc. NOTE: Generated data is pretty realistic, supports a range of locales, but returned values are not guaranteed to be unique."
