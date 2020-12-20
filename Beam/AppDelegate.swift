@@ -10,6 +10,7 @@ import Cocoa
 import SwiftUI
 import Combine
 import Sentry
+import Sparkle
 
 @objc(BeamApplication)
 public class BeamApplication: SentryCrashExceptionApplication {
@@ -37,6 +38,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         CoreDataManager.shared.setup()
         LibrariesManager.shared.configure()
+
+        let sparkleUpdater = SPUUpdater(hostBundle: Bundle.main,
+                                        applicationBundle: Bundle.main,
+                                        userDriver: SPUStandardUserDriver(),
+                                        delegate: nil)
+
+        sparkleUpdater.checkForUpdatesInBackground()
 
         updateBadge()
         createWindow()

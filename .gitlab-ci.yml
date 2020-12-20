@@ -1,4 +1,5 @@
 stages:
+  - xcode
   - lint
   - test
   - build
@@ -22,10 +23,9 @@ before_script:
   - direnv allow
   - eval "$(direnv export bash)"
   - eval "$(rbenv init -)"
-  - gem install fastlane -N
-  - bundle install
 
 include:
+  - '.gitlab/ci/gitlab-ci-xcode.yml'
   - '.gitlab/ci/gitlab-ci-lint.yml'
   - '.gitlab/ci/gitlab-ci-test.yml'
   - '.gitlab/ci/gitlab-ci-build.yml'
