@@ -7,10 +7,6 @@
 
 import Foundation
 
-enum BeamTextError: Error {
-    case rangeNotFound
-}
-
 struct BeamText: Codable {
     var text: String {
         ranges.reduce(String()) { (string, range) -> String in
@@ -102,16 +98,67 @@ struct BeamText: Codable {
     }
 
     struct Range: Codable, Equatable {
-        var string: String = ""
-        var attributes: [Attribute] = []
-        var position: Int = 0
+        var string: String
+        var attributes: [Attribute]
 
+        var position: Int
         var end: Int { position + string.count }
+
+        // swiftlint:disable:next nesting
+        enum CodingKeys: String, CodingKey {
+            case string
+            case attributes
+        }
+
+        init(string: String = "", attributes: [Attribute] = [], position: Int = 0) {
+            self.string = string
+            self.attributes = attributes
+            self.position = position
+        }
+
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+
+            string = try container.decode(String.self, forKey: .string)
+            attributes = (try? container.decode([Attribute].self, forKey: .attributes)) ?? []
+            position = 0
+        }
+
+        func encode(to encoder: Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+
+            try container.encode(string, forKey: .string)
+            if !attributes.isEmpty {
+                try container.encode(attributes, forKey: .attributes)
+            }
+        }
     }
-    var ranges: [Range] = [Range(string: "", attributes: [], position: 0)]
+
+    var ranges: [Range]
 
     init(text: String = "", attributes: [Attribute] = []) {
-        self.ranges.append(Range(string: text, attributes: attributes, position: 0))
+        self.ranges = [Range(string: text, attributes: attributes, position: 0)]
+    }
+
+    // swiftlint:disable:next nesting
+    enum CodingKeys: String, CodingKey {
+        case ranges
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        ranges = (try? container.decode([Range].self, forKey: .ranges)) ?? []
+        flatten()
+        computePositions()
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        if !ranges.isEmpty {
+            try container.encode(ranges, forKey: .ranges)
+        }
     }
 
     func rangeAt(position: Int) -> Range {
@@ -134,7 +181,7 @@ struct BeamText: Codable {
     }
 
     /// split a range in two at the given position in preparation, Any of the resulting ranges may be empty. The return value is the index of the first half
-    mutating private func splitRangeAt(position: Int, createEmptyRanges: Bool) -> Int {
+    mutating internal func splitRangeAt(position: Int, createEmptyRanges: Bool) -> Int {
         let position = min(max(position, 0), count)
         var pos = 0
         for (i, range) in ranges.enumerated() {
@@ -143,7 +190,7 @@ struct BeamText: Codable {
                 let offset = position - pos
                 if !createEmptyRanges {
                     if offset == 0 { return max(0, i - 1) }
-                    if offset == length { return i }
+                    if offset == length { return i + 1 }
                 }
                 let newRange1 = Range(string: String(range.string.prefix(offset)), attributes: range.attributes, position: range.position)
                 let newRange2 = Range(string: String(range.string.suffix(length - offset)), attributes: range.attributes, position: range.position + offset)
@@ -154,7 +201,7 @@ struct BeamText: Codable {
                     ranges.append(newRange2)
                 }
 
-                return i
+                return i + 1
             }
 
             pos += length
@@ -167,7 +214,7 @@ struct BeamText: Codable {
         let index0 = splitRangeAt(position: positionRange.lowerBound, createEmptyRanges: false)
         let index1 = splitRangeAt(position: positionRange.upperBound, createEmptyRanges: false)
 
-        for i in index0 + 1 ..< index1 + 1 {
+        for i in index0 ..< index1 {
             ranges[i].attributes.append(contentsOf: attributes)
         }
 
@@ -178,7 +225,7 @@ struct BeamText: Codable {
         let index0 = splitRangeAt(position: positionRange.lowerBound, createEmptyRanges: false)
         let index1 = splitRangeAt(position: positionRange.upperBound, createEmptyRanges: false)
 
-        for i in index0 + 1 ..< index1 + 1 {
+        for i in index0 ..< index1 {
             ranges[i].attributes = attributes
         }
 
@@ -190,7 +237,7 @@ struct BeamText: Codable {
         let index1 = splitRangeAt(position: positionRange.upperBound, createEmptyRanges: false)
 
         let rawAttributes = attributes.map { attribute -> Int in attribute.rawValue }
-        for i in index0 + 1 ..< index1 + 1 {
+        for i in index0 ..< index1 {
             ranges[i].attributes.removeAll(where: { attribute -> Bool in
                 rawAttributes.contains(attribute.rawValue)
             })
@@ -201,8 +248,11 @@ struct BeamText: Codable {
 
     /// de-duplicate similar ranges
     mutating internal func flatten() {
+        guard silent == 0 else { return }
         var newRanges: [Range] = []
         for range in ranges {
+            // Only remove empty strings if it makes sense, that is if it's not the only range
+            guard !range.string.isEmpty || ranges.count == 1 else { continue }
             guard var last = newRanges.last else { newRanges.append(range); continue }
             guard last.attributes == range.attributes else { newRanges.append(range); continue }
 
@@ -212,6 +262,21 @@ struct BeamText: Codable {
         }
 
         ranges = newRanges
+        if ranges.isEmpty {
+            ranges.append(Range())
+        }
+
+        flattenInternalLinks()
+    }
+
+    var silent = 0
+    mutating internal func flattenInternalLinks() {
+        guard silent == 0 else { return }
+        silent += 1
+        for link in internalLinks.reversed() where !link.string.isEmpty {
+            self.replaceSubrange(link.position ..< link.end, with: BeamText(text: link.string, attributes: [.internalLink(link.string)]))
+        }
+        silent -= 1
     }
 
     /// recompute the positions of the ranges, starting at the given 'from' index
@@ -225,13 +290,25 @@ struct BeamText: Codable {
 
     /// insert the given string at the given index
     mutating func insert(_ text: String, at position: Int) {
-        guard position != ranges.last?.end else { ranges.append(Range(string: text, attributes: [], position: position)); return }
+        guard var last = ranges.last else {
+            ranges.append(Range(string: text, attributes: [], position: position))
+            return
+        }
+
+        guard position < last.end else {
+            last.string += text
+            ranges.removeLast()
+            ranges.append(last)
+            return
+        }
+
         let position = clamp(position)
         guard let index = rangeIndexAt(position: position) else { fatalError() }
         let offset = position - ranges[index].position
         ranges[index].string.insert(contentsOf: text, at: ranges[index].string.index(at: offset))
 
         computePositions(from: index)
+        flattenInternalLinks()
     }
 
     /// insert the given string at the given index, with given attributes
@@ -239,7 +316,7 @@ struct BeamText: Codable {
         guard position != ranges.last?.end else { ranges.append(Range(string: text, attributes: attributes, position: position)); return }
         let index = splitRangeAt(position: position, createEmptyRanges: true)
         let range = Range(string: text, attributes: attributes, position: position)
-        ranges.insert(range, at: index + 1)
+        ranges.insert(range, at: index)
 
         flatten()
         computePositions()
@@ -247,27 +324,45 @@ struct BeamText: Codable {
 
     mutating func append(_ text: String, withAttributes attributes: [Attribute]) {
         ranges.append(Range(string: text, attributes: attributes, position: ranges.last?.end ?? 0))
+        flattenInternalLinks()
+        computePositions()
     }
 
     mutating func append(_ text: String) {
         guard var range = ranges.last else { append(text, withAttributes: []); return }
         range.string += text
         ranges[ranges.endIndex - 1] = range
+        flattenInternalLinks()
     }
 
-    mutating func removeSubrange(_ range: Swift.Range<Int>) {
+    mutating internal func removeSubrangeSilent(_ range: Swift.Range<Int>) {
         self.remove(count: range.count, at: range.lowerBound)
         if ranges.isEmpty {
             ranges.append(Range())
         }
     }
 
+    mutating func removeSubrange(_ range: Swift.Range<Int>) {
+        guard range != wholeRange else {
+            ranges = [Range()]
+            return
+        }
+
+        self.remove(count: range.count, at: range.lowerBound)
+        if ranges.isEmpty {
+            ranges.append(Range())
+        }
+
+        flatten()
+        computePositions()
+    }
+
     mutating func remove(count: Int, at position: Int) {
         guard count > 0 else { return }
-        let index0 = splitRangeAt(position: position, createEmptyRanges: true)
-        let index1 = splitRangeAt(position: position + count, createEmptyRanges: true)
+        let index0 = splitRangeAt(position: position, createEmptyRanges: false)
+        let index1 = splitRangeAt(position: position + count, createEmptyRanges: false)
 
-        ranges.removeSubrange(index0 + 1 ..< index1 + 1)
+        ranges.removeSubrange(index0 ..< index1)
         flatten()
         computePositions()
     }
@@ -310,85 +405,5 @@ struct BeamText: Codable {
         let selfCount = self.count
         let c = min(count, selfCount)
         remove(count: c, at: selfCount - c)
-    }
-}
-
-// String additions:
-extension BeamText {
-    func prefix(_ count: Int) -> BeamText {
-        return extract(range: 0 ..< count)
-    }
-
-    func suffix(_ count: Int) -> BeamText {
-        let len = self.count
-        return extract(range: len - count ..< len)
-    }
-
-    func clamp(_ range: Swift.Range<Int>) -> Swift.Range<Int> {
-        return text.clamp(range)
-    }
-
-    func clamp(_ position: Int) -> Int {
-        return min(max(0, position), count)
-    }
-
-    func range(_ start: Int, _ end: Int) -> Swift.Range<String.Index> {
-        return text.range(start, end)
-    }
-
-    func range(from r: Swift.Range<Int>) -> Swift.Range<String.Index> {
-        return text.range(from: r)
-    }
-
-    func index(at position: Int) -> String.Index {
-        return text.index(at: position)
-    }
-
-    var wholeRange: Swift.Range<Int> {
-        return Int(0)..<Int(count)
-    }
-
-    func position(at index: String.Index) -> Int {
-        return text.position(at: index)
-    }
-
-    func position(after pos: Int) -> Int {
-        return text.position(after: pos)
-    }
-
-    func position(before pos: Int) -> Int {
-        return text.position(before: pos)
-    }
-
-//    public func description(_ range: Range<Index>) -> String {
-//        return "Range from \(position(at: range.lowerBound)) to \(position(at: range.upperBound)) [\(position(at: range.upperBound) - position(at: range.lowerBound))]"
-//    }
-
-    func substring(from: Int, to: Int) -> String {
-        return text.substring(from: from, to: to)
-    }
-
-    func substring(range: Swift.Range<Int>) -> String {
-        return text.substring(range: range)
-    }
-
-    mutating func replaceSubrange(_ range: Swift.Range<Int>, with string: String) {
-        removeSubrange(range)
-        insert(string, at: range.lowerBound)
-    }
-
-    mutating func replaceSubrange(_ range: Swift.Range<Int>, with text: BeamText) {
-        removeSubrange(range)
-        insert(text, at: range.lowerBound)
-    }
-
-    func hasPrefix(_ string: String) -> Bool {
-        return text.hasPrefix(string)
-    }
-}
-
-extension BeamText: Equatable {
-    static func == (lhs: BeamText, rhs: BeamText) -> Bool {
-        return lhs.ranges == rhs.ranges
     }
 }

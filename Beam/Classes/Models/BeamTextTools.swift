@@ -7,6 +7,101 @@
 
 import Foundation
 
+// String additions:
+extension BeamText {
+    func prefix(_ count: Int) -> BeamText {
+        return extract(range: 0 ..< count)
+    }
+
+    func suffix(_ count: Int) -> BeamText {
+        let len = self.count
+        return extract(range: len - count ..< len)
+    }
+
+    func clamp(_ range: Swift.Range<Int>) -> Swift.Range<Int> {
+        return text.clamp(range)
+    }
+
+    func clamp(_ position: Int) -> Int {
+        return min(max(0, position), count)
+    }
+
+    func range(_ start: Int, _ end: Int) -> Swift.Range<String.Index> {
+        return text.range(start, end)
+    }
+
+    func range(from r: Swift.Range<Int>) -> Swift.Range<String.Index> {
+        return text.range(from: r)
+    }
+
+    func index(at position: Int) -> String.Index {
+        return text.index(at: position)
+    }
+
+    var wholeRange: Swift.Range<Int> {
+        return Int(0)..<Int(count)
+    }
+
+    func position(at index: String.Index) -> Int {
+        return text.position(at: index)
+    }
+
+    func position(after pos: Int) -> Int {
+        return text.position(after: pos)
+    }
+
+    func position(before pos: Int) -> Int {
+        return text.position(before: pos)
+    }
+
+//    public func description(_ range: Range<Index>) -> String {
+//        return "Range from \(position(at: range.lowerBound)) to \(position(at: range.upperBound)) [\(position(at: range.upperBound) - position(at: range.lowerBound))]"
+//    }
+
+    func substring(from: Int, to: Int) -> String {
+        return text.substring(from: from, to: to)
+    }
+
+    func substring(range: Swift.Range<Int>) -> String {
+        return text.substring(range: range)
+    }
+
+    mutating func replaceSubrange(_ range: Swift.Range<Int>, with string: String) {
+        removeSubrange(range)
+        insert(string, at: range.lowerBound)
+    }
+
+    mutating func replaceSubrange(_ range: Swift.Range<Int>, with text: BeamText) {
+        removeSubrange(range)
+        insert(text, at: range.lowerBound)
+    }
+
+    func hasPrefix(_ string: String) -> Bool {
+        return text.hasPrefix(string)
+    }
+}
+
+extension BeamText: Equatable {
+    static func == (lhs: BeamText, rhs: BeamText) -> Bool {
+        return lhs.ranges == rhs.ranges
+    }
+}
+
+extension BeamText {
+    var json: String {
+        let encoder = JSONEncoder()
+        guard let data = try? encoder.encode(self) else { return "<error while encoding \(self)>" }
+        return String(data: data, encoding: .utf8) ?? "<error while making json string for \(self)>"
+    }
+
+    var jsonPretty: String {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .prettyPrinted
+        guard let data = try? encoder.encode(self) else { return "<error while encoding \(self)>" }
+        return String(data: data, encoding: .utf8) ?? "<error while making json string for \(self)>"
+    }
+}
+
 // High level manipulation:
 extension BeamText {
     mutating func makeInternalLink(_ range: Swift.Range<Int>) {
@@ -47,5 +142,37 @@ extension BeamText {
         let actualRange = range.lowerBound + start ..< range.lowerBound + end
         print("makeInternalLink range: \(range) | actual: \(actualRange)")
         replaceSubrange(actualRange, with: linkText)
+    }
+
+    var internalLinks: [Range] {
+        var links = [Range]()
+        var previousLink: Attribute?
+        for range in ranges {
+            var hasLinks = false
+            for attribute in range.attributes {
+                switch attribute {
+                case .internalLink(_):
+                    if previousLink == attribute {
+                        // coalesce links:
+                        links[links.count - 1].string += range.string
+                    } else {
+                        links.append(range)
+                    }
+                    hasLinks = true
+                    previousLink = attribute
+                default:
+                    break
+                }
+
+                if hasLinks {
+                    break
+                }
+            }
+            if !hasLinks {
+                previousLink = nil
+            }
+        }
+
+        return links
     }
 }
