@@ -602,28 +602,28 @@ class TextNodeTests: XCTestCase {
         root.node = root.children.first
         root.cursorPosition = 0
         root.setLayout(frame)
-        root.updateTextRendering()
+        root.updateRendering()
 
         let expanded1 = "Lorem **ipsum dolor** sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
 
         for i in 0..<5 {
             root.doCommand(.moveRight)
             root.setLayout(frame)
-            root.updateTextRendering()
+            root.updateRendering()
             XCTAssertEqual(root.node.attributedString.string, String.loremIpsumSmall)
             XCTAssertEqual(root.cursorPosition, i + 1)
         }
 
         root.doCommand(.moveRight)
         root.setLayout(frame)
-        root.updateTextRendering()
+        root.updateRendering()
         XCTAssertEqual(root.node.attributedString.string, expanded1)
         XCTAssertEqual(root.cursorPosition, 8)
 
         for _ in 0..<11 {
             root.doCommand(.moveRightAndModifySelection)
             root.setLayout(frame)
-            root.updateTextRendering()
+            root.updateRendering()
         }
         XCTAssertEqual(root.cursorPosition, 8 + 11)
         XCTAssertEqual(root.selectedText, "ipsum dolor")
@@ -657,7 +657,7 @@ class TextNodeTests: XCTestCase {
         root.node = root.children.first?.children.first
         root.cursorPosition = 0
         root.setLayout(frame)
-        root.updateTextRendering()
+        root.updateRendering()
 
         XCTAssertEqual(root.children.first?.children.count, 2)
         root.doCommand(.deleteBackward)
@@ -681,7 +681,7 @@ class TextNodeTests: XCTestCase {
         root.node = root.children.first?.children.first
         root.cursorPosition = root.node.text.count
         root.setLayout(frame)
-        root.updateTextRendering()
+        root.updateRendering()
 
         XCTAssertEqual(root.children.first?.children.count, 2)
         root.doCommand(.deleteForward)
