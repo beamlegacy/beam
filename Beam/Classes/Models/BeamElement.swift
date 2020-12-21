@@ -154,4 +154,16 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject {
         change()
         parent?.childChanged()
     }
+
+    func findElement(_ id: UUID) -> BeamElement? {
+        guard id != self.id else { return self }
+
+        for c in children {
+            if let result = c.findElement(id) {
+                return result
+            }
+        }
+
+        return nil
+    }
 }
