@@ -87,7 +87,7 @@ public class TextNode: NSObject, CALayerDelegate {
     var open = true {
         didSet {
             invalidateLayout()
-            updateVisibility(open)
+            updateVisibility(visible && open)
         }
     }
 
@@ -587,8 +587,8 @@ public class TextNode: NSObject, CALayerDelegate {
 
     func updateVisibility(_ isVisible: Bool) {
         for c in children {
-            c.visible = open
-            c.updateVisibility(open && c.open)
+            c.visible = isVisible
+            c.updateVisibility(open && isVisible)
             invalidateLayout()
         }
     }
