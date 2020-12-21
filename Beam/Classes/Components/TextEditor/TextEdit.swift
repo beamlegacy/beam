@@ -790,8 +790,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
         //        window?.makeFirstResponder(self)
         let point = convert(event.locationInWindow)
-
-        _ = rootNode.dispatchMouseDragged(mouseInfo: MouseInfo(node, point, event))
+        _ = rootNode.dispatchMouseDragged(mouseInfo: MouseInfo(rootNode, point, event))
     }
 
     var hoveredNode: TextNode? {

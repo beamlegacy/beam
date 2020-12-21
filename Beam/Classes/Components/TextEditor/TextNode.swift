@@ -185,6 +185,12 @@ public class TextNode: NSObject, CALayerDelegate {
         return NSPoint(x: parentOffset.x + origin.x, y: parentOffset.y + origin.y)
     }
 
+    var offsetInRoot: NSPoint { // the position in the global document
+        let parentOffset = parent?.offsetInRoot ?? NSPoint()
+        let origin = frame.origin
+        return NSPoint(x: parentOffset.x + origin.x, y: parentOffset.y + origin.y)
+    }
+
     var frameInDocument: NSRect {
         let offset = offsetInDocument
         return NSRect(origin: offset, size: frame.size)
@@ -737,8 +743,8 @@ public class TextNode: NSObject, CALayerDelegate {
         guard let focussedNode = root?.node else { return nil }
 
         var i = mouseInfo
-        i.position.x -= focussedNode.offsetInDocument.x
-        i.position.y -= focussedNode.offsetInDocument.y
+        i.position.x -= focussedNode.offsetInRoot.x
+        i.position.y -= focussedNode.offsetInRoot.y
         if focussedNode.mouseUp(mouseInfo: i) {
             return focussedNode
         }
@@ -750,8 +756,8 @@ public class TextNode: NSObject, CALayerDelegate {
         guard let focussedNode = root?.node else { return nil }
 
         var i = mouseInfo
-        i.position.x -= focussedNode.offsetInDocument.x
-        i.position.y -= focussedNode.offsetInDocument.y
+        i.position.x -= focussedNode.offsetInRoot.x
+        i.position.y -= focussedNode.offsetInRoot.y
         if focussedNode.mouseDragged(mouseInfo: i) {
             return focussedNode
         }

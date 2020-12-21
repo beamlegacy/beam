@@ -93,6 +93,8 @@ public class TextRoot: TextNode {
         editor.invalidateLayout()
     }
 
+    override var offsetInRoot: NSPoint { NSPoint() }
+
     override func invalidate(_ rect: NSRect? = nil) {
         if let r = rect {
             editor.invalidate(r.offsetBy(dx: currentFrameInDocument.minX, dy: currentFrameInDocument.minY))
