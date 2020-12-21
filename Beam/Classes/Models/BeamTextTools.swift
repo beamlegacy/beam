@@ -104,7 +104,7 @@ extension BeamText {
 
 // High level manipulation:
 extension BeamText {
-    mutating func makeInternalLink(_ range: Swift.Range<Int>) {
+    mutating func makeInternalLink(_ range: Swift.Range<Int>) -> Bool {
         let text = self.extract(range: range)
         let t = text.text
 
@@ -135,41 +135,28 @@ extension BeamText {
         var linkCharacterSet = CharacterSet.alphanumerics
         linkCharacterSet.insert(" ")
         guard linkCharacterSet.isSuperset(of: CharacterSet(charactersIn: link)) else {
-            return
+            Logger.shared.logError("makeInternalLink for range: \(range) failed: forbidden characters in range", category: .document)
+            return false
         }
 
         let linkText = BeamText(text: link, attributes: [.internalLink(link)])
         let actualRange = range.lowerBound + start ..< range.lowerBound + end
-        print("makeInternalLink range: \(range) | actual: \(actualRange)")
+        Logger.shared.logInfo("makeInternalLink for range: \(range) | actual: \(actualRange)", category: .document)
         replaceSubrange(actualRange, with: linkText)
+
+        return true
     }
 
     var internalLinks: [Range] {
         var links = [Range]()
-        var previousLink: Attribute?
         for range in ranges {
-            var hasLinks = false
             for attribute in range.attributes {
                 switch attribute {
-                case .internalLink(_):
-                    if previousLink == attribute {
-                        // coalesce links:
-                        links[links.count - 1].string += range.string
-                    } else {
-                        links.append(range)
-                    }
-                    hasLinks = true
-                    previousLink = attribute
+                case .internalLink:
+                    links.append(range)
                 default:
                     break
                 }
-
-                if hasLinks {
-                    break
-                }
-            }
-            if !hasLinks {
-                previousLink = nil
             }
         }
 
