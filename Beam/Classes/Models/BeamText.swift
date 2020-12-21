@@ -161,12 +161,12 @@ struct BeamText: Codable {
         }
     }
 
-    func rangeAt(position: Int) -> Range {
+    internal func rangeAt(position: Int) -> Range {
         guard let index = rangeIndexAt(position: clamp(position)) else { fatalError() }
         return ranges[index]
     }
 
-    func rangeIndexAt(position: Int) -> Int? {
+    internal func rangeIndexAt(position: Int) -> Int? {
         var pos = 0
         for (i, range) in ranges.enumerated() {
             let length = range.string.count
@@ -342,7 +342,7 @@ struct BeamText: Codable {
         }
     }
 
-    mutating func removeSubrange(_ range: Swift.Range<Int>) {
+    internal mutating func removeSubrange(_ range: Swift.Range<Int>) {
         guard range != wholeRange else {
             ranges = [Range()]
             return
