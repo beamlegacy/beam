@@ -727,12 +727,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         return _title!
     }
 
-    enum DragMode {
-        case none
-        case select(Int)
-    }
-    var dragMode = DragMode.none
-
     func reBlink() {
         blinkPhase = true
         blinkTime = CFAbsoluteTimeGetCurrent() + onBlinkTime
@@ -761,45 +755,17 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
     override public func mouseDown(with event: NSEvent) {
         //       window?.makeFirstResponder(self)
-        if event.clickCount == 1 {
-            reBlink()
-            let point = convert(event.locationInWindow)
-            guard let newNode = nodeAt(point: point) else {
-                // Use the first child of the root
-                guard let n = rootNode.children.first else { return }
-                rootNode.cursorPosition = 0
-                node = n
-                return
-            }
-            if nil != rootNode.dispatchMouseDown(mouseInfo: MouseInfo(rootNode, point, event)) {
-                return
-            }
+        reBlink()
+        let point = convert(event.locationInWindow)
+        guard let newNode = rootNode.dispatchMouseDown(mouseInfo: MouseInfo(rootNode, point, event)) else {
+            guard let n = rootNode.children.first else { return }
+            rootNode.cursorPosition = 0
+            node = n
+            return
+        }
 
-            if newNode !== node && !newNode.readOnly {
-                node = newNode
-            }
-
-            if let link = linkAt(point: point) {
-                openURL(link)
-                return
-            }
-            if let link = internalLinkAt(point: point) {
-                openCard(link)
-                return
-            }
-
-            let clickPos = positionAt(point: point)
-            if event.modifierFlags.contains(.shift) {
-                dragMode = .select(rootNode.cursorPosition)
-                rootNode.extendSelection(to: clickPos)
-            } else {
-                rootNode.cursorPosition = clickPos
-                rootNode.cancelSelection()
-                dragMode = .select(rootNode.cursorPosition)
-            }
-
-        } else {
-            rootNode.doCommand(.selectAll)
+        if newNode !== node && !newNode.readOnly {
+            node = newNode
         }
     }
 
@@ -825,19 +791,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         //        window?.makeFirstResponder(self)
         let point = convert(event.locationInWindow)
 
-        if node.mouseDragged(mouseInfo: MouseInfo(node, point, event)) {
-            return
-        }
-
-        let p = positionAt(point: point)
-        rootNode.cursorPosition = p
-        switch dragMode {
-        case .none:
-            break
-        case .select(let o):
-            selectedTextRange = node.text.clamp(p < o ? rootNode.cursorPosition..<o : o..<rootNode.cursorPosition)
-        }
-        node.invalidate()
+        _ = rootNode.dispatchMouseDragged(mouseInfo: MouseInfo(node, point, event))
     }
 
     var hoveredNode: TextNode? {
@@ -875,7 +829,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
     override public func mouseUp(with event: NSEvent) {
         let point = convert(event.locationInWindow)
-        dragMode = .none
         if nil != rootNode.dispatchMouseUp(mouseInfo: MouseInfo(rootNode, point, event)) {
             return
         }

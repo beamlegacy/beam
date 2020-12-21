@@ -210,7 +210,6 @@ public class TextNode: NSObject, CALayerDelegate {
     }
 
     var readOnly: Bool = false
-
     var isEditing: Bool { root?.node === self }
 
     var firstLineHeight: CGFloat { layout?.lines.first?.bounds.height ?? CGFloat(fontSize * interlineFactor) }
@@ -717,9 +716,6 @@ public class TextNode: NSObject, CALayerDelegate {
 
     func dispatchMouseDown(mouseInfo: MouseInfo) -> TextNode? {
         guard NSRect(origin: NSPoint(), size: frame.size).contains(mouseInfo.position) else { return nil }
-        if mouseDown(mouseInfo: mouseInfo) {
-            return self
-        }
 
         for c in children {
             var i = mouseInfo
@@ -730,22 +726,34 @@ public class TextNode: NSObject, CALayerDelegate {
             }
         }
 
-        return nil
-    }
-
-    func dispatchMouseUp(mouseInfo: MouseInfo) -> TextNode? {
-        guard NSRect(origin: NSPoint(), size: frame.size).contains(mouseInfo.position) else { return nil }
-        if mouseUp(mouseInfo: mouseInfo) {
+        if mouseDown(mouseInfo: mouseInfo) {
             return self
         }
 
-        for c in children {
-            var i = mouseInfo
-            i.position.x -= c.frame.origin.x
-            i.position.y -= c.frame.origin.y
-            if let d = c.dispatchMouseUp(mouseInfo: i) {
-                return d
-            }
+        return textFrame.contains(mouseInfo.position) ? self : nil
+    }
+
+    func dispatchMouseUp(mouseInfo: MouseInfo) -> TextNode? {
+        guard let focussedNode = root?.node else { return nil }
+
+        var i = mouseInfo
+        i.position.x -= focussedNode.offsetInDocument.x
+        i.position.y -= focussedNode.offsetInDocument.y
+        if focussedNode.mouseUp(mouseInfo: i) {
+            return focussedNode
+        }
+
+        return nil
+    }
+
+    func dispatchMouseDragged(mouseInfo: MouseInfo) -> TextNode? {
+        guard let focussedNode = root?.node else { return nil }
+
+        var i = mouseInfo
+        i.position.x -= focussedNode.offsetInDocument.x
+        i.position.y -= focussedNode.offsetInDocument.y
+        if focussedNode.mouseDragged(mouseInfo: i) {
+            return focussedNode
         }
 
         return nil
@@ -788,14 +796,21 @@ public class TextNode: NSObject, CALayerDelegate {
 
     func focus() {
         guard !text.isEmpty else { return }
+        dragMode = .none
         showHoveredActionLayers(false)
     }
 
     func unfocus() {
+        dragMode = .none
         resetActionLayers()
     }
 
     // MARK: - Mouse Events
+    enum DragMode {
+        case none
+        case select(Int)
+    }
+    var dragMode = DragMode.none
 
     func mouseDown(mouseInfo: MouseInfo) -> Bool {
         if showDisclosureButton && disclosureButtonFrame.contains(mouseInfo.position) {
@@ -813,11 +828,37 @@ public class TextNode: NSObject, CALayerDelegate {
             return true
         }
 
+        if let link = linkAt(point: mouseInfo.position) {
+            editor.openURL(link)
+            return true
+        }
+        if let link = internalLinkAt(point: mouseInfo.position) {
+            editor.openCard(link)
+            return true
+        }
+
+        if textFrame.contains(mouseInfo.position) {
+            if mouseInfo.event.clickCount == 1 {
+                let clickPos = positionAt(point: mouseInfo.position)
+                if mouseInfo.event.modifierFlags.contains(.shift) {
+                    dragMode = .select(cursorPosition)
+                    root?.extendSelection(to: clickPos)
+                } else {
+                    root?.cursorPosition = clickPos
+                    root?.cancelSelection()
+                    dragMode = .select(cursorPosition)
+                }
+            } else {
+                root?.doCommand(.selectAll)
+            }
+        }
+
         return false
     }
 
     func mouseUp(mouseInfo: MouseInfo) -> Bool {
         // print("mouseUp (\(mouseInfo))")
+        dragMode = .none
         if disclosurePressed && disclosureButtonFrame.contains(mouseInfo.position) {
             // print("disclosure unpressed (\(open))")
             disclosurePressed = false
@@ -856,7 +897,18 @@ public class TextNode: NSObject, CALayerDelegate {
     }
 
     func mouseDragged(mouseInfo: MouseInfo) -> Bool {
-        return false
+        let p = positionAt(point: mouseInfo.position)
+        root?.cursorPosition = p
+
+        switch dragMode {
+        case .none:
+            return false
+        case .select(let o):
+            root?.selectedTextRange = text.clamp(p < o ? cursorPosition..<o : o..<cursorPosition)
+        }
+        invalidate()
+
+        return true
     }
 
     // MARK: - Text & Cursor Position

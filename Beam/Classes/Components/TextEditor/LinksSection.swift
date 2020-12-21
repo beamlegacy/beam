@@ -8,15 +8,16 @@
 import Foundation
 import Combine
 
-class LinksSection: TextNode {
-    var note: BeamNote
+class LinksSection: TextRoot {
     var linkedReferenceNodes = [LinkedReferenceNode]()
 //    var unlinkedReferenceNodes = [UnlinkedReferenceNode]()
     var linkedReferencesCancellable: Cancellable!
 
-    init(editor: BeamTextEdit, note: BeamNote) {
-        self.note = note
+    override var parent: TextNode? {
+        return editor.rootNode
+    }
 
+    init(editor: BeamTextEdit, note: BeamNote) {
         super.init(editor: editor, element: BeamElement())
 
         // Append the linked references and unlinked references nodes
@@ -29,5 +30,7 @@ class LinksSection: TextNode {
                 return LinkedReferenceNode(editor: editor, element: referencingElement)
             }
         }
+
+        text = BeamText(text: "LINKED REFERENCE SHIT")
     }
 }
