@@ -161,12 +161,12 @@ struct BeamText: Codable {
         }
     }
 
-    func rangeAt(position: Int) -> Range {
+    internal func rangeAt(position: Int) -> Range {
         guard let index = rangeIndexAt(position: clamp(position)) else { fatalError() }
         return ranges[index]
     }
 
-    func rangeIndexAt(position: Int) -> Int? {
+    internal func rangeIndexAt(position: Int) -> Int? {
         var pos = 0
         for (i, range) in ranges.enumerated() {
             let length = range.string.count
@@ -266,6 +266,7 @@ struct BeamText: Codable {
             ranges.append(Range())
         }
 
+        computePositions()
         flattenInternalLinks()
     }
 
@@ -273,7 +274,8 @@ struct BeamText: Codable {
     mutating internal func flattenInternalLinks() {
         guard silent == 0 else { return }
         silent += 1
-        for link in internalLinks.reversed() where !link.string.isEmpty {
+        let links = internalLinks
+        for link in links.reversed() where !link.string.isEmpty {
             self.replaceSubrange(link.position ..< link.end, with: BeamText(text: link.string, attributes: [.internalLink(link.string)]))
         }
         silent -= 1
@@ -314,7 +316,7 @@ struct BeamText: Codable {
     /// insert the given string at the given index, with given attributes
     mutating func insert(_ text: String, at position: Int, withAttributes attributes: [Attribute]) {
         guard position != ranges.last?.end else { ranges.append(Range(string: text, attributes: attributes, position: position)); return }
-        let index = splitRangeAt(position: position, createEmptyRanges: true)
+        let index = splitRangeAt(position: position, createEmptyRanges: false)
         let range = Range(string: text, attributes: attributes, position: position)
         ranges.insert(range, at: index)
 
@@ -342,7 +344,7 @@ struct BeamText: Codable {
         }
     }
 
-    mutating func removeSubrange(_ range: Swift.Range<Int>) {
+    internal mutating func removeSubrange(_ range: Swift.Range<Int>) {
         guard range != wholeRange else {
             ranges = [Range()]
             return

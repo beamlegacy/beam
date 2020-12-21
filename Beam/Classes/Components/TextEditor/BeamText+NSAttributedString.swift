@@ -94,10 +94,6 @@ extension BeamText {
             stringAttributes[.source] = source
         }
 
-        if let source = source {
-            stringAttributes[.source] = source
-        }
-
         return stringAttributes
     }
 }
