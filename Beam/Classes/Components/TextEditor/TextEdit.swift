@@ -932,13 +932,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         }
         layer?.addSublayer(node.layer)
 
-        if let root = node as? TextRoot {
-            if root.children.count == 1 && root.children.first!.text.isEmpty {
-                let istoday = root.note?.isTodaysNote ?? false
-                root.children.first?.placeholder = BeamText(text: istoday ? "This is the journal, you can type anything here!" : "...")
-            }
-        }
-
         return node
     }
 

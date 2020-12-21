@@ -116,6 +116,11 @@ public class TextRoot: TextNode {
             element.addChild(BeamElement())
         }
 
+        if element.children.count == 1 && element.children.first!.text.isEmpty {
+            let istoday = note?.isTodaysNote ?? false
+            children.first?.placeholder = BeamText(text: istoday ? "This is the journal, you can type anything here!" : "...")
+        }
+
 //        if let linkedRefs = note.linkedReferences, !linkedRefs.isEmpty {
 //            let node = TextNode(staticText: "Linked references")
 //            node.isReference = true

@@ -113,7 +113,7 @@ public class TextNode: NSObject, CALayerDelegate {
         return _attributedString!
     }
 
-    public var children: [TextNode] {
+    internal var children: [TextNode] {
         return element.children.map { childElement -> TextNode in
             editor.nodeFor(childElement)
         }
@@ -145,7 +145,7 @@ public class TextNode: NSObject, CALayerDelegate {
         didSet {
             if availableWidth != oldValue {
                 invalidatedTextRendering = true
-                updateTextRendering()
+                updateRendering()
             }
 
             for c in children {
@@ -175,7 +175,7 @@ public class TextNode: NSObject, CALayerDelegate {
     var depth: Int { return allParents.count }
 
     var idealSize: NSSize {
-        updateTextRendering()
+        updateRendering()
         return computedIdealSize
     }
 
@@ -335,7 +335,7 @@ public class TextNode: NSObject, CALayerDelegate {
         //      print("debug \(self)")
         //  }
 
-        updateTextRendering()
+        updateRendering()
 
         drawDebug(in: context)
 
@@ -397,7 +397,7 @@ public class TextNode: NSObject, CALayerDelegate {
                 // print("Layout set: \(frame)")
             }
             invalidatedTextRendering = true
-            updateTextRendering()
+            updateRendering()
             invalidate() // invalidate before change
             currentFrameInDocument = frame
             invalidate()  // invalidate after the change
@@ -598,7 +598,7 @@ public class TextNode: NSObject, CALayerDelegate {
         }
     }
 
-    func updateTextRendering() {
+    func updateRendering() {
         guard availableWidth > 0 else { return }
 
         if invalidatedTextRendering {
@@ -1051,7 +1051,7 @@ public class TextNode: NSObject, CALayerDelegate {
     }
 
     public func rectAt(_ position: Int) -> NSRect {
-        updateTextRendering()
+        updateRendering()
         guard let l = lineAt(index: position) else { return NSRect() }
         let x1 = offsetAt(index: position)
         return NSRect(x: x1, y: CGFloat(l) * fontSize, width: 1.5, height: fontSize )
