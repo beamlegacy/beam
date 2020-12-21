@@ -79,6 +79,10 @@ extension BeamText {
     func hasPrefix(_ string: String) -> Bool {
         return text.hasPrefix(string)
     }
+
+    func hasSuffix(_ string: String) -> Bool {
+        return text.hasSuffix(string)
+    }
 }
 
 extension BeamText: Equatable {

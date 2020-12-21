@@ -168,4 +168,29 @@ class BeamTextTests: XCTestCase {
 
         XCTAssertEqual(text, validText)
     }
+
+    func testPrefix() {
+        var text = BeamText(text: "testText")
+        XCTAssert(text.makeInternalLink(2..<4))
+        XCTAssert(text.hasPrefix("test"))
+        XCTAssertEqual(text.internalLinks[0].string, "st")
+        let prefix = text.prefix(3)
+        XCTAssertEqual(prefix.text, "tes")
+        let links = prefix.internalLinks
+        XCTAssertEqual(links.count, 1)
+        XCTAssertEqual(links[0].string, "s")
+    }
+
+    func testSuffix() {
+        var text = BeamText(text: "testText")
+        XCTAssert(text.makeInternalLink(4..<6))
+        XCTAssert(text.hasSuffix("Text"))
+        XCTAssertEqual(text.internalLinks[0].string, "Te")
+        let suffix = text.suffix(3)
+        XCTAssertEqual(suffix.text, "ext")
+        let links = suffix.internalLinks
+        XCTAssertEqual(links.count, 1)
+        XCTAssertEqual(links[0].string, "e")
+    }
+
 }
