@@ -1,0 +1,14 @@
+Install xcode:
+  dependencies: []
+  stage: xcode
+  script:
+    - xcversion update
+    - xcversion install ${XCODE_VERSION}
+    - bundle install
+  tags:
+    - macos
+  only:
+    - merge_requests
+    - master
+  interruptible: true
+  allow_failure: false

@@ -22,6 +22,7 @@ install_gitlab_runner:
 	/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 	# CI=1 /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
+	# Install direnv for environment variables
 	brew install direnv
 	direnv allow .
 
@@ -38,7 +39,7 @@ install_gitlab_runner:
 	cd ${HOME}
 	gitlab-runner install
 	gitlab-runner start
-	gitlab-runner register --non-interactive --name=`hostname | sed -e s/\.local//` --url=https://gitlab.com/ --executor="shell" --shell="bash" --registration-token=${GITLAB_TOKEN}
+	gitlab-runner register --non-interactive --custom_build_dir-enabled=true --name=`hostname | sed -e s/\.local//` --url=https://gitlab.com/ --executor="shell" --shell="bash" --registration-token=${GITLAB_TOKEN}
 
 	# Xcode
 	curl -sL -O https://github.com/neonichu/ruby-domain_name/releases/download/v0.5.99999999/domain_name-0.5.99999999.gem
@@ -70,6 +71,9 @@ install_gitlab_runner:
 
 	# Register new device
 	bundle exec fastlane register_local_device
+
+	# For badge
+	brew install imagemagick graphicsmagick
 
 install_swiftlint:
 	brew install swiftlint

@@ -10,3 +10,5 @@
 - Can configure settings in xcconfig files
 - Add Logger
 - Add a DocumentManager to store data in CoreData
+- Add auto updates
+
