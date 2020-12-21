@@ -9,9 +9,15 @@ import Foundation
 import SwiftUI
 
 struct BrowserTabBar: View {
+
+    enum Direction: String {
+        case left, right, none
+    }
+
     @Binding var tabs: [BrowserTab]
     @Binding var currentTab: BrowserTab?
 
+    @State private var direction: Direction = .none
     @State private var offset = CGSize.zero
 
     let minTabWidth = CGFloat(4)
@@ -28,32 +34,36 @@ struct BrowserTabBar: View {
                         ZStack {
                             HStack(spacing: 0) {
                                 BrowserTabView(tab: tab, selected: isSelected(tab))
-                                    .contentShape(Rectangle())
-                                    .offset(dragOffset(for: tab))
+                                    .offset(x: currentTab == tab ? offset.width : .zero, y: 0)
                                     .onTapGesture {
                                         currentTab = tab
                                     }
-                                    .animation(.none)
                                     .gesture(
                                         DragGesture()
                                             .onChanged { value in
                                                 if !isSelected(tab) { currentTab = tab }
+                                                let currentTabIndex = position(of: tab)
+                                                let direction = detectDirection(from: value)
+
                                                 let tabFrame = reader.frame(in: .global)
                                                 let tabWidth = tabFrame.width / CGFloat(tabs.count)
                                                 let tabMidX = tabWidth / 2
+                                                let delta = abs(value.startLocation.x - value.location.x)
 
                                                 self.offset = value.translation
-                                                print(tabWidth, tabMidX, position(of: tab))
 
-                                                if value.translation.width > tabMidX {
-                                                    if let index = tabs.firstIndex(of: tab) {
-                                                        tab.isHidden = true
-                                                        withAnimation {
-                                                            tabs.remove(at: index)
-                                                            tabs.insert(currentTab!, at: index + 1)
-                                                        }
+                                                print("tabMidX: \(tabMidX)")
 
-                                                    }
+                                                if direction == .right && delta > tabMidX && tab != tabs.last {
+                                                    print("right swap")
+                                                    tabs.remove(at: currentTabIndex)
+                                                    tabs.insert(tab, at: currentTabIndex.advanced(by: 1))
+                                                }
+
+                                                if direction == .left && tabMidX < delta && tab != tabs.first {
+                                                    print("left swap")
+                                                    tabs.remove(at: currentTabIndex)
+                                                    tabs.insert(tab, at: currentTabIndex.advanced(by: -1))
                                                 }
                                             }
                                             .onEnded { _ in
@@ -62,15 +72,15 @@ struct BrowserTabBar: View {
                                     )
                                     .frame(minWidth: isSelected(tab) ? 150 : minTabWidth, maxWidth: .infinity, alignment: .leading)
                             }
-                        }.zIndex(currentTab === tab ? 1 : 0)
+                        }
+                        .zIndex(currentTab === tab ? 1 : 0)
                     }
                 }
                 Rectangle()
                     .frame(height: 1)
                     .foregroundColor(Color(.separatorColor))
             }
-            .animation(.none)
-        }
+        }.animation(.none)
     }
 
     private func isSelected(_ tab: BrowserTab) -> Bool {
@@ -82,18 +92,7 @@ struct BrowserTabBar: View {
         return tabs.firstIndex(of: tab) ?? 0
     }
 
-    private func moveToNext(_ tab: BrowserTab) {
-        print(position(of: tab))
-        // let nextTab = tabs.insert(currentTab!, at: 1)
-        // print(nextTab)
-    }
-
-    private func moveToPrev(_ tab: BrowserTab) {
-
-    }
-
-    private func dragOffset(for tab: BrowserTab) -> CGSize {
-        guard currentTab?.id == tab.id else { return .zero }
-        return CGSize(width: offset.width, height: 0)
+    private func detectDirection(from value: DragGesture.Value) -> Direction {
+        return value.startLocation.x > value.location.x ? .left : .right
     }
 }
