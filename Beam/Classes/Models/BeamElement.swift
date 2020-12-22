@@ -13,9 +13,8 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject {
     @Published public private(set) var id = UUID() { didSet { change() } }
     @Published var text = BeamText() { didSet { change() } }
     @Published var open = true { didSet { change() } }
-    public private(set) var children = [BeamElement]() { didSet { change() } }
+    public internal(set) var children = [BeamElement]() { didSet { change() } }
     @Published var readOnly = false { didSet { change() } }
-//    @Published var ast: Parser.Node? { didSet { change() } }
     @Published var score: Float = 0 { didSet { change() } }
     @Published var creationDate = Date() { didSet { change() } }
     @Published var updateDate = Date()

@@ -41,7 +41,7 @@ class LinksSection: TextRoot {
         updateLinkedReferences()
         text = BeamText(text: "Link")
         editor.layer?.addSublayer(layer)
-        layer.backgroundColor = NSColor.red.cgColor
+//        layer.backgroundColor = NSColor.red.cgColor
     }
 
     func updateLinkedReferences() {
@@ -80,12 +80,12 @@ class LinksSection: TextRoot {
 
         context.saveGState()
 
-        let c = NSColor.green.cgColor
-        context.setStrokeColor(c)
-        context.stroke(textFrame)
-
-        context.setFillColor(c.copy(alpha: 0.4)!)
-        context.fill(textFrame)
+//        let c = NSColor.green.cgColor
+//        context.setStrokeColor(c)
+//        context.stroke(textFrame)
+//
+//        context.setFillColor(c.copy(alpha: 0.4)!)
+//        context.fill(textFrame)
 
         context.restoreGState()
     }

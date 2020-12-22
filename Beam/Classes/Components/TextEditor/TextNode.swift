@@ -39,6 +39,7 @@ public class TextNode: NSObject, CALayerDelegate {
 
     var contentsScale = CGFloat(2) {
         didSet {
+            layer.contentsScale = contentsScale
             guard let actionLayer = actionLayer else { return }
             actionLayer.contentsScale = contentsScale
             actionTextLayer.contentsScale = contentsScale

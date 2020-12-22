@@ -950,7 +950,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
         if let w = window {
             node.contentsScale = w.backingScaleFactor
-            node.layer.contentsScale = w.backingScaleFactor
         }
         layer?.addSublayer(node.layer)
 
