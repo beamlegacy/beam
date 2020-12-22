@@ -66,6 +66,7 @@ class RoamImporter {
 
             newNote.creationDate = roamNote.createTime ?? newNote.creationDate
             newNote.updateDate = roamNote.editTime ?? newNote.updateDate
+            newNote.detectLinkedNotes(documentManager)
             newNote.save(documentManager: documentManager)
         }
 
@@ -91,7 +92,6 @@ class RoamImporter {
             newBullet.creationDate = bullet.createTime ?? newBullet.creationDate
             newBullet.updateDate = bullet.editTime ?? newBullet.updateDate
             parentBullet.addChild(newBullet)
-            detectLinkedNotes(context, note: note, bullet: newBullet)
 
             if let children = bullet.children {
                 createLocalBullets(context, note, children, newBullet)

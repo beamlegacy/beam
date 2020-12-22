@@ -20,6 +20,10 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject {
     @Published var creationDate = Date() { didSet { change() } }
     @Published var updateDate = Date()
 
+    var note: BeamNote? {
+        return parent?.note
+    }
+
     enum CodingKeys: String, CodingKey {
         case id
         case text
@@ -166,4 +170,22 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject {
 
         return nil
     }
+
+    func detectLinkedNotes(_ documentManager: DocumentManager) {
+        guard let note = note else { return }
+        guard text.text.count > 2 else { return }
+
+        for link in text.internalLinks {
+            let linkTitle = link.string
+            let refnote = BeamNote.fetchOrCreate(documentManager, title: linkTitle)
+            let reference = NoteReference(noteName: note.title, elementID: id)
+            refnote.addLinkedReference(reference)
+            refnote.save(documentManager: documentManager)
+        }
+
+        for c in children {
+            c.detectLinkedNotes(documentManager)
+        }
+    }
+
 }

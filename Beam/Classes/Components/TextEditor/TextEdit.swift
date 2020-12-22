@@ -49,9 +49,10 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
         // Subscribe to the note's changes
         note.$changed
-            .debounce(for: .seconds(5), scheduler: RunLoop.main)
+            .debounce(for: .seconds(1), scheduler: RunLoop.main)
             .sink { [unowned self] _ in
                 guard let note = note as? BeamNote else { return }
+                note.detectLinkedNotes(documentManager)
                 note.save(documentManager: self.documentManager)
             }.store(in: &noteCancellables)
     }

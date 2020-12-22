@@ -42,6 +42,10 @@ class BeamNote: BeamElement {
     @Published public private(set) var searchQueries: [String] = [] { didSet { change() } } ///< Search queries whose results were used to populate this note
     @Published public private(set) var visitedSearchResults: [VisitedPage] = [] { didSet { change() } } ///< URLs whose content were used to create this note
 
+    override var note: BeamNote? {
+        return self
+    }
+
     init(title: String) {
         self.title = title
         super.init()
@@ -202,12 +206,17 @@ class BeamNote: BeamElement {
         }
     }
 
+    override func detectLinkedNotes(_ documentManager: DocumentManager) {
+        for c in children {
+            c.detectLinkedNotes(documentManager)
+        }
+    }
+
     static func detectUnlinkedNotes(_ documentManager: DocumentManager) {
         let allNotes = Self.loadAllDocument(documentManager)
         for note in allNotes {
             note.connectUnlinkedNotes(note.title, allNotes)
         }
-
     }
 
     private static var fetchedNotes: [String: BeamNote] = [:]
