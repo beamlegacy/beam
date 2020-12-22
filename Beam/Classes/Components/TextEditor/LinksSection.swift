@@ -9,7 +9,14 @@ import Foundation
 import Combine
 import AppKit
 
-class LinksSection: TextRoot {
+class LinksSection: TextNode {
+    enum Mode {
+        case links
+        case references
+    }
+
+    var mode: Mode
+
     var linkedReferenceNodes = [LinkedReferenceNode]() {
         didSet {
             invalidateLayout()
@@ -17,6 +24,7 @@ class LinksSection: TextRoot {
     }
 //    var unlinkedReferenceNodes = [UnlinkedReferenceNode]()
     var linkedReferencesCancellable: Cancellable!
+    var note: BeamNote
 
     override var parent: TextNode? {
         return editor.rootNode
@@ -30,22 +38,41 @@ class LinksSection: TextRoot {
         return editor.rootNode
     }
 
-    init(editor: BeamTextEdit, note: BeamNote) {
-        super.init(editor: editor, element: BeamElement())
+    init(editor: BeamTextEdit, note: BeamNote, mode: Mode) {
         self.note = note
+        self.mode = mode
+        super.init(editor: editor, element: BeamElement())
         // Append the linked references and unlinked references nodes
-        linkedReferencesCancellable = note.$linkedReferences.sink { [unowned self] _ in
-            updateLinkedReferences()
+        switch mode {
+        case .links:
+            text = BeamText(text: "Links")
+            linkedReferencesCancellable = note.$linkedReferences.sink { [unowned self] _ in
+                updateLinkedReferences()
+            }
+        case .references:
+            text = BeamText(text: "References")
+            linkedReferencesCancellable = note.$unlinkedReferences.sink { [unowned self] _ in
+                updateLinkedReferences()
+            }
         }
 
+        readOnly = true
         updateLinkedReferences()
-        text = BeamText(text: "Link")
         editor.layer?.addSublayer(layer)
     }
 
     func updateLinkedReferences() {
-        guard let note = note else { return }
-        self.linkedReferenceNodes = note.linkedReferences.map { noteReference -> LinkedReferenceNode in
+        let
+            refs: [NoteReference] = {
+            switch mode {
+            case .links:
+                return note.linkedReferences
+            case .references:
+                return note.unlinkedReferences
+            }
+        }()
+
+        self.linkedReferenceNodes = refs.map { noteReference -> LinkedReferenceNode in
             guard let referencingNote = BeamNote.fetch(DocumentManager(), title: noteReference.noteName) else { fatalError() }
             guard let referencingElement = referencingNote.findElement(noteReference.elementID) else {
                 fatalError()
@@ -58,5 +85,13 @@ class LinksSection: TextRoot {
 
     override func setLayout(_ frame: NSRect) {
         super.setLayout(frame)
+    }
+
+    override func mouseDown(mouseInfo: MouseInfo) -> Bool {
+        return super.mouseDown(mouseInfo: mouseInfo)
+    }
+
+    override func mouseUp(mouseInfo: MouseInfo) -> Bool {
+        return super.mouseUp(mouseInfo: mouseInfo)
     }
 }

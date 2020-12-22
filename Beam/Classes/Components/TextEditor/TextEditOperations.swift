@@ -9,6 +9,7 @@ import Foundation
 
 extension TextRoot {
     func eraseSelection() {
+        guard !node.readOnly else { return }
         guard !selectedTextRange.isEmpty else { return }
 
         node.text.removeSubrange(selectedTextRange)
@@ -20,11 +21,13 @@ extension TextRoot {
     }
 
     func increaseIndentation() {
+        guard !node.readOnly else { return }
         guard let newParent = node.previousSibblingNode() else { return }
         newParent.addChild(node)
     }
 
     func decreaseIndentation() {
+        guard !node.readOnly else { return }
         guard let parent = node.parent else { return }
         guard let newParent = parent.parent else { return }
 
@@ -32,6 +35,7 @@ extension TextRoot {
     }
 
     func deleteForward() {
+        guard !node.readOnly else { return }
         if !selectedTextRange.isEmpty {
             eraseSelection()
         } else if cursorPosition != node.text.count {
@@ -53,6 +57,7 @@ extension TextRoot {
     }
 
     func deleteBackward() {
+        guard !node.readOnly else { return }
         if !selectedTextRange.isEmpty {
             eraseSelection()
         } else if cursorPosition == 0 {
@@ -79,6 +84,7 @@ extension TextRoot {
     }
 
     func insertNewline() {
+        guard !node.readOnly else { return }
         if !selectedTextRange.isEmpty {
             node.text.removeSubrange(selectedTextRange)
             node.text.insert("\n", at: selectedTextRange.startIndex)
@@ -94,6 +100,7 @@ extension TextRoot {
     }
 
     func pushUndoState(_ command: Command) {
+        guard !node.readOnly else { return }
         defer {
             if !undoManager.isRedoing {
                 lastCommand = command
@@ -125,6 +132,7 @@ extension TextRoot {
     }
 
     public func setMarkedText(string: String, selectedRange: Range<Int>, replacementRange: Range<Int>) {
+        guard !node.readOnly else { return }
         var range = cursorPosition..<cursorPosition
         if !replacementRange.isEmpty {
             range = replacementRange
@@ -149,10 +157,12 @@ extension TextRoot {
     }
 
     public func unmarkText() {
+        guard !node.readOnly else { return }
         markedTextRange = 0..<0
     }
 
     public func insertText(string: String, replacementRange: Range<Int>) {
+        guard !node.readOnly else { return }
         pushUndoState(.insertText)
 
         let c = string.count

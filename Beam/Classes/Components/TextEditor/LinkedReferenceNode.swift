@@ -35,6 +35,7 @@ class LinkedReferenceNode: TextNode {
         super.init(editor: editor, element: ProxyElement(for: element))
 
         editor.layer?.addSublayer(layer)
+        open = false
 //        layer.backgroundColor = NSColor.blue.cgColor
     }
 
@@ -63,4 +64,7 @@ class LinkedReferenceNode: TextNode {
 //        context.restoreGState()
     }
 
+    override func mouseDown(mouseInfo: MouseInfo) -> Bool {
+        return super.mouseDown(mouseInfo: mouseInfo)
+    }
 }

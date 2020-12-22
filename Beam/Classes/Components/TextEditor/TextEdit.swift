@@ -60,6 +60,8 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     private var noteCancellables = [AnyCancellable]()
 
     public init(root: BeamElement, font: Font = Font.main) {
+        BeamNote.detectUnlinkedNotes(documentManager)
+
         self.config.font = font
         note = root
         super.init(frame: NSRect())
@@ -288,6 +290,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     public func insertText(string: String, replacementRange: Range<Int>) {
+        guard !node.readOnly else { return }
         defer { lastInput = string }
         guard preDetectInput(string) else { return }
         rootNode.insertText(string: string, replacementRange: replacementRange)
@@ -325,6 +328,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     func pressEnter(_ option: Bool, _ command: Bool) {
+        guard !node.readOnly else { return }
         if option {
             rootNode.doCommand(.insertNewline)
         } else if command {
@@ -786,9 +790,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             return
         }
 
-        if newNode !== node && !newNode.readOnly {
-            node = newNode
-        }
+        node = newNode
     }
 
     var scrollToCursorAtLayout = false
@@ -931,6 +933,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 //            print("Encoding error")
 //        }
         rootNode.note?.save(documentManager: documentManager)
+        BeamNote.detectUnlinkedNotes(documentManager)
     }
 
     func nodeFor(_ element: BeamElement) -> TextNode {

@@ -76,10 +76,13 @@ public class TextRoot: TextNode {
         return self
     }
 
-    var linkSection: LinksSection?
+    var linksSection: LinksSection?
+    var referencesSection: LinksSection?
 
     override internal var children: [TextNode] {
-        return super.children + (linkSection != nil ? [linkSection!] : [])
+        return super.children
+            + (linksSection != nil ? [linksSection!] : [])
+            + (referencesSection != nil ? [referencesSection!] : [])
     }
 
     var node: TextNode! {
@@ -128,7 +131,8 @@ public class TextRoot: TextNode {
         }
 
         if let note = note {
-            linkSection = LinksSection(editor: editor, note: note)
+            linksSection = LinksSection(editor: editor, note: note, mode: .links)
+            referencesSection = LinksSection(editor: editor, note: note, mode: .references)
         }
 //        if let linkedRefs = note.linkedReferences, !linkedRefs.isEmpty {
 //            let node = TextNode(staticText: "Linked references")
