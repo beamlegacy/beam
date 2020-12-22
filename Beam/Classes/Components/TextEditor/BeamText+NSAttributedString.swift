@@ -36,6 +36,7 @@ extension BeamText {
         return f
     }
 
+    // swiftlint:disable:next cyclomatic_complexity function_body_length
     private func convert(attributes: [Attribute], fontSize: CGFloat) -> [NSAttributedString.Key: Any] {
         var stringAttributes = [NSAttributedString.Key: Any]()
         var strong = false
@@ -43,9 +44,9 @@ extension BeamText {
         var headingLevel = 0
         var quote = false
         var color = NSColor.editorTextColor
-        var quoteLevel: Int
-        var quoteTitle: String?
-        var quoteSource: String?
+//        var quoteLevel: Int
+//        var quoteTitle: String?
+//        var quoteSource: String?
         var source: String?
         var webLink: String?
         var internalLink: String?
@@ -66,10 +67,10 @@ extension BeamText {
                 internalLink = link
             case .heading(let level):
                 headingLevel = level
-            case let .quote(level, title, source):
-                quoteLevel = level
-                quoteTitle = title
-                quoteSource = source
+            case .quote: //(level, title, source):
+//                quoteLevel = level
+//                quoteTitle = title
+//                quoteSource = source
                 quote = true
             }
         }

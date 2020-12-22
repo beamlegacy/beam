@@ -776,7 +776,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             "[": { [unowned self] in
                 Logger.shared.logInfo("Transform selection into internal link", category: .ui)
                 if !self.selectedTextRange.isEmpty {
-                    node.text.makeInternalLink(self.selectedTextRange)
+                    _ = node.text.makeInternalLink(self.selectedTextRange)
                     return false
                 }
                 return true
@@ -834,12 +834,12 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         }
 
         let handlers: [String: () -> Void] = [
-            "[[": { [unowned self] in
+            "[[": { //[unowned self] in
                 Logger.shared.logInfo("Insert internal link", category: .ui)
             },
             "#": makeHeader,
             ">": makeQuote,
-            " ": { [unowned self] in
+            " ": { //[unowned self] in
                 makeHeader()
                 makeQuote()
             }

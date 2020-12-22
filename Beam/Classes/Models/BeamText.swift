@@ -4,6 +4,7 @@
 //
 //  Created by Sebastien Metrot on 18/12/2020.
 //
+// swiftlint:disable file_length
 
 import Foundation
 
@@ -37,20 +38,36 @@ struct BeamText: Codable {
             case unknownAttribute
         }
 
+        // swiftlint:disable:next cyclomatic_complexity
         init(from decoder: Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
 
-            let type = try container.decode(Int.self, forKey: .type)
-            switch type {
-            case 0: self = .strong
-            case 1: self = .emphasis
-            case 2: self = .source(try container.decode(String.self, forKey: .payload))
-            case 3: self = .link(try container.decode(String.self, forKey: .payload))
-            case 4: self = .internalLink(try container.decode(String.self, forKey: .payload))
-            case 5: self = .heading(try container.decode(Int.self, forKey: .payload))
-            case 6: self = .quote(try container.decode(Int.self, forKey: .level), try container.decode(String.self, forKey: .title), try container.decode(String.self, forKey: .source))
-            default:
-                throw AttributeError.unknownAttribute
+            do {
+                let type = try container.decode(String.self, forKey: .type)
+                switch type {
+                case "strong": self = .strong
+                case "emphasis": self = .emphasis
+                case "source": self = .source(try container.decode(String.self, forKey: .payload))
+                case "link": self = .link(try container.decode(String.self, forKey: .payload))
+                case "internalLink": self = .internalLink(try container.decode(String.self, forKey: .payload))
+                case "heading": self = .heading(try container.decode(Int.self, forKey: .payload))
+                case "quote": self = .quote(try container.decode(Int.self, forKey: .level), try container.decode(String.self, forKey: .title), try container.decode(String.self, forKey: .source))
+                default:
+                    throw AttributeError.unknownAttribute
+                }
+            } catch {
+                let type = try container.decode(Int.self, forKey: .type)
+                switch type {
+                case 0: self = .strong
+                case 1: self = .emphasis
+                case 2: self = .source(try container.decode(String.self, forKey: .payload))
+                case 3: self = .link(try container.decode(String.self, forKey: .payload))
+                case 4: self = .internalLink(try container.decode(String.self, forKey: .payload))
+                case 5: self = .heading(try container.decode(Int.self, forKey: .payload))
+                case 6: self = .quote(try container.decode(Int.self, forKey: .level), try container.decode(String.self, forKey: .title), try container.decode(String.self, forKey: .source))
+                default:
+                    throw AttributeError.unknownAttribute
+                }
             }
         }
 
@@ -77,22 +94,22 @@ struct BeamText: Codable {
             }
         }
 
-        var rawValue: Int {
+        var rawValue: String {
             switch self {
             case .strong:
-                return 0
+                return "strong"
             case .emphasis:
-                return 1
+                return "emphasis"
             case .source:
-                return 2
+                return "source"
             case .link:
-                return 3
+                return "link"
             case .internalLink:
-                return 4
+                return "internalLink"
             case .heading:
-                return 5
+                return "heading"
             case .quote:
-                return 6
+                return "quote"
             }
         }
     }
@@ -236,7 +253,7 @@ struct BeamText: Codable {
         let index0 = splitRangeAt(position: positionRange.lowerBound, createEmptyRanges: false)
         let index1 = splitRangeAt(position: positionRange.upperBound, createEmptyRanges: false)
 
-        let rawAttributes = attributes.map { attribute -> Int in attribute.rawValue }
+        let rawAttributes = attributes.map { attribute -> String in attribute.rawValue }
         for i in index0 ..< index1 {
             ranges[i].attributes.removeAll(where: { attribute -> Bool in
                 rawAttributes.contains(attribute.rawValue)
