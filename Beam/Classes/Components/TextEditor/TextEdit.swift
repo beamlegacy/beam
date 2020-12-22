@@ -759,22 +759,27 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
     var inputDetectorState: Int = 0
     var inputDetectorEnabled: Bool { inputDetectorState >= 0 }
+
     func disableInputDetector() {
         inputDetectorState -= 1
     }
+
     func enableInputDetector() {
         inputDetectorState -= 1
     }
+
     var lastInput: String = ""
     func preDetectInput(_ input: String) -> Bool {
         guard inputDetectorEnabled else { return true }
         defer { lastInput = input }
 
         let handlers: [String: () -> Bool] = [
-//            "@": { [unowned self] in
-//                Logger.shared.logInfo("Insert link", category: .ui)
-//                return true
-//            },
+            "@": {
+                let toolTip = NSHostingView(rootView: Popover())
+                toolTip.frame = NSRect(x: 0, y: 0, width: 300, height: 150)
+                self.addSubview(toolTip)
+                return true
+            },
             "[": { [unowned self] in
                 Logger.shared.logInfo("Transform selection into internal link", category: .ui)
                 if !self.selectedTextRange.isEmpty {

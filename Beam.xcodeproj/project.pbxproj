@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4170C43125923B6A0072C781 /* Popover.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4170C43025923B6A0072C781 /* Popover.swift */; };
 		418170FF2581060A00317ED8 /* Colors.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 418170FE2581060A00317ED8 /* Colors.xcassets */; };
 		418171122581082200317ED8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 418171112581082200317ED8 /* Assets.xcassets */; };
 		4181713325810CDC00317ED8 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181712B25810CDC00317ED8 /* Constants.swift */; };
@@ -372,6 +373,7 @@
 		23F7A69644D041FDF4D3466B /* Pods-Beam.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Beam.release.xcconfig"; path = "Target Support Files/Pods-Beam/Pods-Beam.release.xcconfig"; sourceTree = "<group>"; };
 		2BE96DC9A7278563E5878CCD /* Pods_Beam.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Beam.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3B2FA634DAEED958EF901A42 /* Pods-BeamUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BeamUITests.debug.xcconfig"; path = "Target Support Files/Pods-BeamUITests/Pods-BeamUITests.debug.xcconfig"; sourceTree = "<group>"; };
+		4170C43025923B6A0072C781 /* Popover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Popover.swift; sourceTree = "<group>"; };
 		418170FE2581060A00317ED8 /* Colors.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Colors.xcassets; sourceTree = "<group>"; };
 		418171112581082200317ED8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		4181712B25810CDC00317ED8 /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
@@ -585,6 +587,14 @@
 				54B49CE1C66614E244553288 /* Pods_BeamUITests.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		4170C41B25923ADA0072C781 /* Popover */ = {
+			isa = PBXGroup;
+			children = (
+				4170C43025923B6A0072C781 /* Popover.swift */,
+			);
+			path = Popover;
 			sourceTree = "<group>";
 		};
 		41816FD02581046F00317ED8 /* Assets */ = {
@@ -931,6 +941,7 @@
 		418172A625811A3A00317ED8 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				4170C41B25923ADA0072C781 /* Popover */,
 				418171AA2581107C00317ED8 /* AutoComplete */,
 				418172A725811A3A00317ED8 /* BMTextField */,
 				418171C32581107C00317ED8 /* NotesList */,
@@ -1716,6 +1727,7 @@
 				418172232581107C00317ED8 /* String+Ranges.swift in Sources */,
 				418172CF25811AF800317ED8 /* Animation.swift in Sources */,
 				418171F32581107C00317ED8 /* AuthenticationHandler.swift in Sources */,
+				4170C43125923B6A0072C781 /* Popover.swift in Sources */,
 				418171EC2581107C00317ED8 /* Me.swift in Sources */,
 				418171FB2581107C00317ED8 /* BeamElement.swift in Sources */,
 				4181724E2581107C00317ED8 /* TabStats.swift in Sources */,
