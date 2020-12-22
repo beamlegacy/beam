@@ -288,6 +288,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     public func insertText(string: String, replacementRange: Range<Int>) {
+        defer { lastInput = string }
         guard preDetectInput(string) else { return }
         rootNode.insertText(string: string, replacementRange: replacementRange)
         postDetectInput(string)
@@ -626,13 +627,18 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 //                Logger.shared.logInfo("Insert link", category: .ui)
 //                return true
 //            },
-            "[": { [unowned self] in
+            "[[": { [unowned self] in
+                insertPair("[", "]")
                 Logger.shared.logInfo("Transform selection into internal link", category: .ui)
                 if !self.selectedTextRange.isEmpty {
                     _ = node.text.makeInternalLink(self.selectedTextRange)
                     return false
                 }
                 return true
+            },
+            "[": {
+                insertPair("[", "]")
+                return false
             },
             "(": {
                 insertPair("(", ")")
@@ -646,12 +652,11 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                 insertPair("\"", "\"")
                 return false
             }
-
         ]
 
-        if let handler = handlers[input] {
+        if let handler = handlers[lastInput + input] {
             return handler()
-        } else if let handler = handlers[lastInput + input] {
+        } else if let handler = handlers[input] {
             return handler()
         }
 
@@ -660,7 +665,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
     func postDetectInput(_ input: String) {
         guard inputDetectorEnabled else { return }
-        defer { lastInput = input }
 
         let makeQuote = { [unowned self] in
             let level1 = self.node.text.prefix(2).text == "> "
@@ -700,9 +704,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         }
 
         let handlers: [String: () -> Void] = [
-            "[[": { //[unowned self] in
-                Logger.shared.logInfo("Insert internal link", category: .ui)
-            },
             "#": makeHeader,
             ">": makeQuote,
             " ": { //[unowned self] in
