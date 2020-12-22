@@ -56,7 +56,7 @@ extension TextRoot {
     }
 
     func moveWordRight() {
-        node.text.enumerateSubstrings(in: node.text.index(at: cursorPosition)..<node.text.endIndex, options: .byWords) { (_, r1, _, stop) in
+        node.text.text.enumerateSubstrings(in: node.text.index(at: cursorPosition)..<node.text.text.endIndex, options: .byWords) { (_, r1, _, stop) in
             self.cursorPosition = self.node.position(at: r1.upperBound)
             stop = true
         }
@@ -65,8 +65,8 @@ extension TextRoot {
     }
 
     func moveWordLeft() {
-        var range = node.text.startIndex ..< node.text.endIndex
-        node.text.enumerateSubstrings(in: node.text.startIndex..<node.text.index(at: cursorPosition), options: .byWords) { (_, r1, _, _) in
+        var range = node.text.text.startIndex ..< node.text.text.endIndex
+        node.text.text.enumerateSubstrings(in: node.text.text.startIndex..<node.text.text.index(at: cursorPosition), options: .byWords) { (_, r1, _, _) in
             range = r1
         }
         let pos = node.position(at: range.lowerBound)
@@ -77,7 +77,7 @@ extension TextRoot {
 
     func moveWordRightAndModifySelection() {
         var newCursorPosition = cursorPosition
-        node.text.enumerateSubstrings(in: node.text.index(at: cursorPosition)..<node.text.endIndex, options: .byWords) { (_, r1, _, stop) in
+        node.text.text.enumerateSubstrings(in: node.text.text.index(at: cursorPosition)..<node.text.text.endIndex, options: .byWords) { (_, r1, _, stop) in
             newCursorPosition = self.node.position(at: r1.upperBound)
             stop = true
         }
@@ -87,8 +87,8 @@ extension TextRoot {
 
     //swiftlint:disable cyclomatic_complexity function_body_length
     func moveWordLeftAndModifySelection() {
-        var range = node.text.startIndex ..< node.text.endIndex
-        node.text.enumerateSubstrings(in: node.text.startIndex..<node.text.index(at: cursorPosition), options: .byWords) { (_, r1, _, _) in
+        var range = node.text.text.startIndex ..< node.text.text.endIndex
+        node.text.text.enumerateSubstrings(in: node.text.text.startIndex..<node.text.text.index(at: cursorPosition), options: .byWords) { (_, r1, _, _) in
             range = r1
         }
         let pos = node.position(at: range.lowerBound)

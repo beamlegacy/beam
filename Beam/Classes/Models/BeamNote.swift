@@ -227,7 +227,7 @@ func beamNoteFrom(note: Note) -> BeamNote {
 
 func beamElementFrom(bullet: Bullet) -> BeamElement {
     let element = BeamElement()
-    element.text = bullet.content
+    element.text = BeamText(text: bullet.content)
 
     for b in bullet.sortedChildren() {
         element.addChild(beamElementFrom(bullet: b))
