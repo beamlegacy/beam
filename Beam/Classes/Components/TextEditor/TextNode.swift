@@ -282,7 +282,7 @@ public class TextNode: NSObject, CALayerDelegate {
     }
 
     public private(set) var editor: BeamTextEdit
-    private var computedIdealSize = NSSize()
+    internal var computedIdealSize = NSSize()
     private var _root: TextRoot?
     private var needLayout = true
 
