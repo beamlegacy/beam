@@ -14,7 +14,12 @@ import Combine
 // swiftlint:disable:next type_body_length
 public class TextNode: NSObject, CALayerDelegate {
 
-    var element: BeamElement
+    var element: BeamElement { didSet {
+        elementScope = element.$text.sink { [unowned self] _ in
+            self.invalidateText()
+        }
+    }}
+    var elementScope: Cancellable?
     var layout: TextFrame?
     let layer: CALayer
     var debug = false
@@ -40,7 +45,7 @@ public class TextNode: NSObject, CALayerDelegate {
         }
     }
 
-    var text: String {
+    var text: BeamText {
         get { element.text }
         set {
             guard element.text != newValue else { return }
@@ -50,7 +55,7 @@ public class TextNode: NSObject, CALayerDelegate {
         }
     }
 
-    var placeholder: String = "" {
+    var placeholder = BeamText() {
         didSet {
             guard oldValue != text else { return }
             invalidateText()
@@ -275,15 +280,6 @@ public class TextNode: NSObject, CALayerDelegate {
     private var _root: TextRoot?
     private var needLayout = true
 
-    private var _ast: Parser.Node? {
-        get {
-            element.ast
-        }
-        set {
-            element.ast = newValue
-        }
-    }
-
     private var icon = NSImage(named: "editor-cmdreturn")
     private var actionLayer: CALayer?
     private var actionLayerIsHovered = false
@@ -305,6 +301,13 @@ public class TextNode: NSObject, CALayerDelegate {
         super.init()
         configureLayer()
         createActionLayer()
+
+        var inInit = true
+        elementScope = element.$text.sink { [unowned self] _ in
+            guard !inInit else { return }
+            self.invalidateText()
+        }
+        inInit = false
     }
 
     deinit {
@@ -705,31 +708,11 @@ public class TextNode: NSObject, CALayerDelegate {
     }
 
     func sourceIndexFor(displayIndex: Int) -> Int {
-        var range = NSRange()
-        let index = displayIndex < attributedString.wholeRange.length ? displayIndex : max(0, displayIndex - 1)
-        let attributes = attributedString.attributes(at: index, effectiveRange: &range)
-        let ranges = attributes.filter({ $0.key == .sourcePos })
-        guard let position = ranges.first else { return 0 }
-        guard let number = position.value as? NSNumber else { return 0 }
-        return displayIndex - range.location + number.intValue
+        return displayIndex
     }
 
     func displayIndexFor(sourceIndex: Int) -> Int {
-        var found_range = NSRange()
-        var found_position = 0
-        attributedString.enumerateAttribute(.sourcePos, in: NSRange(location: 0, length: attributedString.length), options: .longestEffectiveRangeNotRequired) { value, range, stop in
-            guard let position = value as? NSNumber else { return }
-            let p = position.intValue
-            if p <= sourceIndex {
-                found_range = range
-                found_position = p
-            }
-            if p >= sourceIndex {
-                stop.pointee = true
-            }
-        }
-
-        return found_range.lowerBound + (sourceIndex - found_position)
+        return sourceIndex
     }
 
     func dispatchMouseDown(mouseInfo: MouseInfo) -> TextNode? {
@@ -935,19 +918,19 @@ public class TextNode: NSObject, CALayerDelegate {
         let displayIndex = l.stringIndexFor(position: point)
         let res = sourceIndexFor(displayIndex: displayIndex)
 
-        if l.isAfterEndOfLine(point) {
-            // find position after all enclosing syntax
-            if let leaf = _ast!.nodeContainingPosition(res),
-               let syntax = leaf.enclosingSyntaxNode {
-                return syntax.end
-            }
-        } else if l.isBeforeStartOfLine(point) {
-            // find position before all enclosing syntax
-            if let leaf = _ast!.nodeContainingPosition(res),
-               let syntax = leaf.enclosingSyntaxNode {
-                return syntax.start
-            }
-        }
+//        if l.isAfterEndOfLine(point) {
+//            // find position after all enclosing syntax
+//            if let leaf = _ast!.nodeContainingPosition(res),
+//               let syntax = leaf.enclosingSyntaxNode {
+//                return syntax.end
+//            }
+//        } else if l.isBeforeStartOfLine(point) {
+//            // find position before all enclosing syntax
+//            if let leaf = _ast!.nodeContainingPosition(res),
+//               let syntax = leaf.enclosingSyntaxNode {
+//                return syntax.start
+//            }
+//        }
 
         return res
     }
@@ -1130,7 +1113,7 @@ public class TextNode: NSObject, CALayerDelegate {
     public func printTree(level: Int = 0) -> String {
         return String.tabs(level)
             + (children.isEmpty ? "- " : (open ? "v - " : "> - "))
-            + text + "\n"
+            + text.text + "\n"
             + (open ?
                 children.reduce("", { result, child -> String in
                     result + child.printTree(level: level + 1)
@@ -1177,29 +1160,30 @@ public class TextNode: NSObject, CALayerDelegate {
     }
 
     private func buildAttributedString() -> NSAttributedString {
-        let config = AttributedStringVisitor.Configuration()
-        let visitor = AttributedStringVisitor(configuration: config)
-        visitor.defaultFontSize = fontSize
-        visitor.context.color = color
+//        let config = AttributedStringVisitor.Configuration()
+//        let visitor = AttributedStringVisitor(configuration: config)
+//        visitor.defaultFontSize = fontSize
+//        visitor.context.color = color
+//
+//        if root != nil && text.isEmpty && cursorPosition < 0 {
+//            let attributed = placeholder.attributed
+//
+//            attributed.setAttributes([.font: visitor.font(for: visitor.context), .foregroundColor: disabledColor], range: attributed.wholeRange)
+//            _attributedString = attributed
+//            return attributed
+//        }
+//        let parser = Parser(inputString: text)
+//        _ast = parser.parseAST()
+//
+////        print("AST:\n\(AST.treeString)")
+//
+//        if root?.node === self && editor.hasFocus {
+//            visitor.cursorPosition = selectedTextRange.startIndex
+//            visitor.anchorPosition = selectedTextRange.endIndex
+//        }
+//        let str = visitor.visit(_ast!)
 
-        if root != nil && text.isEmpty && cursorPosition < 0 {
-            let attributed = placeholder.attributed
-
-            attributed.setAttributes([.font: visitor.font(for: visitor.context), .foregroundColor: disabledColor], range: attributed.wholeRange)
-            _attributedString = attributed
-            return attributed
-        }
-        let parser = Parser(inputString: text)
-        _ast = parser.parseAST()
-
-//        print("AST:\n\(AST.treeString)")
-
-        if root?.node === self && editor.hasFocus {
-            visitor.cursorPosition = selectedTextRange.startIndex
-            visitor.anchorPosition = selectedTextRange.endIndex
-        }
-        let str = visitor.visit(_ast!)
-
+        let str = text.buildAttributedString(fontSize: fontSize, cursorPosition: cursorPosition)
         let paragraphStyle = NSMutableParagraphStyle()
 //        paragraphStyle.alignment = .justified
         paragraphStyle.lineBreakMode = .byWordWrapping

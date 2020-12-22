@@ -257,7 +257,7 @@ import WebKit
 
         let bulletStr = "[[\(query)]]"
         let e = BeamElement()
-        e.text = bulletStr
+        e.text = BeamText(text: bulletStr)
         self.data.todaysNote.insert(e, after: self.data.todaysNote.children.last)
 
         return n

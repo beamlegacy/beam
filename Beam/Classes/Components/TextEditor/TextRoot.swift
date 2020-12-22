@@ -9,7 +9,7 @@ import Foundation
 import AppKit
 
 public struct TextState {
-    var text: String = ""
+    var text = BeamText()
     var selectedTextRange: Range<Int> = 0..<0
     var markedTextRange: Range<Int> = 0..<0
     var cursorPosition: Int = -1
@@ -106,7 +106,7 @@ public class TextRoot: TextNode {
         self.note = element as? BeamNote
         self.selfVisible = false
 
-        self.text = ""
+        self.text = BeamText()
 
         // Main bullets:
         if element.children.isEmpty {

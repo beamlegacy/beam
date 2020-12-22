@@ -106,7 +106,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
     private func updateBullet() {
         if let url = url {
             let name = title.isEmpty ? url.absoluteString : title
-            self.element?.text = "[\(name)](\(url.absoluteString))"
+            self.element?.text = BeamText(text: name, attributes: [.link(url.absoluteString)])
         }
     }
 
@@ -272,7 +272,7 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
             // now add a bullet point with the quoted text:
             if let urlString = webView.url?.absoluteString, let title = webView.title {
                 guard let url = urlString.markdownizedURL else { return }
-                let quote = "> \(text) - from [\(title)](\(url))"
+                let quote = BeamText(text: text, attributes: [.quote(1, title, url)])
 
                 DispatchQueue.main.async {
                     let e = BeamElement()
