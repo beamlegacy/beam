@@ -877,8 +877,8 @@
 		418171CF2581107C00317ED8 /* Browser */ = {
 			isa = PBXGroup;
 			children = (
-				418171D02581107C00317ED8 /* BrowserTabView.swift */,
 				418171D12581107C00317ED8 /* BrowserTabBar.swift */,
+				418171D02581107C00317ED8 /* BrowserTabView.swift */,
 				418171D22581107C00317ED8 /* TabStats.swift */,
 				418171D32581107C00317ED8 /* WebView.swift */,
 			);

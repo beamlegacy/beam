@@ -401,6 +401,12 @@ import WebKit
         webView.configuration.websiteDataStore.httpCookieStore.add(self)
     }
 
+    func generateTabs(_ number: Int = 100) {
+        for _ in 0..<number {
+            createTab(withURL: URL(string: "https://beamapp.co")!, originalQuery: "beamapp.co")
+        }
+    }
+
     func startNewSearch() {
         cancelAutocomplete()
         currentNote = nil
