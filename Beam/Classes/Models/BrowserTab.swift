@@ -17,7 +17,7 @@ class FullScreenWKWebView: WKWebView {
 //    }
 }
 
-class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler {
+class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler {
     var id: UUID
 
     public func load(url: URL) {
@@ -99,8 +99,12 @@ class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate
             self.webView = web
         }
 
-        super.init()
+        super.init(frame: NSRect())
         setupObservers()
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 
     private func updateBullet() {
