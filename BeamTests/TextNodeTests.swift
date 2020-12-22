@@ -39,9 +39,9 @@ class TextNodeTests: XCTestCase {
 
     func validateRootWithNote(root: TextRoot, note: BeamNote) {
         let elements = note.children
-        XCTAssertEqual(root.children.count, elements.count)
+        XCTAssertEqual(root.children.count - 1, elements.count)
 
-        for i in 0..<root.children.count {
+        for i in 0..<root.children.count - 1 {
             let node = root.children[i]
             let element = elements[i]
 
