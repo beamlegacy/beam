@@ -30,31 +30,37 @@ class ProxyElement: BeamElement {
 }
 
 class LinkedReferenceNode: TextNode {
-    override init(editor: BeamTextEdit, element: BeamElement) {
+    init(editor: BeamTextEdit, section: LinksSection, element: BeamElement) {
+        self.section = section
         super.init(editor: editor, element: ProxyElement(for: element))
 
         editor.layer?.addSublayer(layer)
-        layer.backgroundColor = NSColor.blue.cgColor
-
+//        layer.backgroundColor = NSColor.blue.cgColor
     }
 
+    var section: LinksSection
+
+    override var parent: TextNode? {
+        return section
+    }
     override func setLayout(_ frame: NSRect) {
+        print("LinkedReferenceNode setLayout: \(frame)")
         super.setLayout(frame)
     }
 
     public override  func draw(in context: CGContext) {
         super.draw(in: context)
 
-        context.saveGState()
-
-        let c = NSColor.green.cgColor
-        context.setStrokeColor(c)
-        context.stroke(textFrame)
-
-        context.setFillColor(c.copy(alpha: 0.4)!)
-        context.fill(textFrame)
-
-        context.restoreGState()
+//        context.saveGState()
+//
+//        let c = NSColor.green.cgColor
+//        context.setStrokeColor(c)
+//        context.stroke(textFrame)
+//
+//        context.setFillColor(c.copy(alpha: 0.4)!)
+//        context.fill(textFrame)
+//
+//        context.restoreGState()
     }
 
 }

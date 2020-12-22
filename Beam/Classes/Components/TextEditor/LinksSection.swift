@@ -41,7 +41,6 @@ class LinksSection: TextRoot {
         updateLinkedReferences()
         text = BeamText(text: "Link")
         editor.layer?.addSublayer(layer)
-//        layer.backgroundColor = NSColor.red.cgColor
     }
 
     func updateLinkedReferences() {
@@ -51,7 +50,7 @@ class LinksSection: TextRoot {
             guard let referencingElement = referencingNote.findElement(noteReference.elementID) else {
                 fatalError()
             }
-            return LinkedReferenceNode(editor: editor, element: referencingElement)
+            return LinkedReferenceNode(editor: editor, section: self, element: referencingElement)
         }
 
         selfVisible = !linkedReferenceNodes.isEmpty
@@ -59,34 +58,5 @@ class LinksSection: TextRoot {
 
     override func setLayout(_ frame: NSRect) {
         super.setLayout(frame)
-    }
-
-    public override  func draw(in context: CGContext) {
-//        context.translateBy(x: indent, y: 0)
-//
-//        drawDebug(in: context)
-//
-//        if selfVisible {
-//            // print("Draw text \(frame))")
-//
-//            context.saveGState(); defer { context.restoreGState() }
-//
-//            context.textMatrix = CGAffineTransform.identity
-//            context.translateBy(x: 0, y: firstLineBaseline)
-//
-//            layout?.draw(context)
-//        }
-        super.draw(in: context)
-
-        context.saveGState()
-
-//        let c = NSColor.green.cgColor
-//        context.setStrokeColor(c)
-//        context.stroke(textFrame)
-//
-//        context.setFillColor(c.copy(alpha: 0.4)!)
-//        context.fill(textFrame)
-
-        context.restoreGState()
     }
 }

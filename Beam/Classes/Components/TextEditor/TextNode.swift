@@ -44,6 +44,10 @@ public class TextNode: NSObject, CALayerDelegate {
             actionLayer.contentsScale = contentsScale
             actionTextLayer.contentsScale = contentsScale
             actionImageLayer.contentsScale = contentsScale
+
+            for c in children {
+                c.contentsScale = contentsScale
+            }
         }
     }
 
