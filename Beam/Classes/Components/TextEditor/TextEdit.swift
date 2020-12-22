@@ -328,7 +328,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         } else if command {
             onStartQuery(node)
         } else {
-            if node.text.isEmpty && node.children.isEmpty && node.parent !== rootNode {
+            if node.text.isEmpty && node.isEmpty && node.parent !== rootNode {
                 rootNode.decreaseIndentation()
                 return
             }
@@ -663,7 +663,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                 Logger.shared.logInfo("Make header", category: .ui)
 
                 // In this case we will reparent all following sibblings that are not a header to the current node as Paper does
-                guard self.node.children.isEmpty else { return }
+                guard self.node.isEmpty else { return }
                 guard let parent = self.node.parent else { return }
                 guard let index = self.node.indexInParent else { return }
                 for sibbling in parent.children.suffix(from: index + 1) {

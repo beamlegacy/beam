@@ -35,6 +35,7 @@ public class TextNode: NSObject, CALayerDelegate {
     }
     var childInset = Float(23)
     var fontSize = CGFloat(17)
+    var isEmpty: Bool { children.isEmpty }
 
     var contentsScale = CGFloat(2) {
         didSet {
