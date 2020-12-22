@@ -121,7 +121,7 @@ public class TextNode: NSObject, CALayerDelegate {
     }
 
     var config: TextConfig {
-        root!.config
+        root?.config ?? TextConfig()
     }
 
     var color: NSColor { config.color }
@@ -131,9 +131,9 @@ public class TextNode: NSObject, CALayerDelegate {
     var alpha: Float { config.alpha }
     var blendMode: CGBlendMode { config.blendMode }
 
-    var selectedTextRange: Range<Int> { root!.selectedTextRange }
-    var markedTextRange: Range<Int> { root!.markedTextRange }
-    var cursorPosition: Int { root!.cursorPosition }
+    var selectedTextRange: Range<Int> { root?.selectedTextRange ?? 0..<0 }
+    var markedTextRange: Range<Int> { root?.markedTextRange ?? 0..<0 }
+    var cursorPosition: Int { root?.cursorPosition ?? 0 }
 
     var enabled: Bool { editor.enabled }
 

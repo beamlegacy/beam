@@ -17,6 +17,10 @@ class LinksSection: TextRoot {
         return editor.rootNode
     }
 
+    override var root: TextRoot {
+        return editor.rootNode
+    }
+
     init(editor: BeamTextEdit, note: BeamNote) {
         super.init(editor: editor, element: BeamElement())
 

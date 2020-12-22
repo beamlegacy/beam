@@ -633,15 +633,15 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                 }
                 return true
             },
-            "(": { [unowned self] in
+            "(": {
                 insertPair("(", ")")
                 return false
             },
-            "{": { [unowned self] in
+            "{": {
                 insertPair("{", "}")
                 return false
             },
-            "\"": { [unowned self] in
+            "\"": {
                 insertPair("\"", "\"")
                 return false
             }

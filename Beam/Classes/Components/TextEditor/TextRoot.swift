@@ -76,6 +76,12 @@ public class TextRoot: TextNode {
         return self
     }
 
+    var linkSection: LinksSection?
+
+    override internal var children: [TextNode] {
+        return super.children + (linkSection != nil ? [linkSection!] : [])
+    }
+
     var node: TextNode! {
         didSet {
             guard oldValue !== node else { return }
@@ -121,6 +127,9 @@ public class TextRoot: TextNode {
             children.first?.placeholder = BeamText(text: istoday ? "This is the journal, you can type anything here!" : "...")
         }
 
+        if let note = note {
+            linkSection = LinksSection(editor: editor, note: note)
+        }
 //        if let linkedRefs = note.linkedReferences, !linkedRefs.isEmpty {
 //            let node = TextNode(staticText: "Linked references")
 //            node.isReference = true
