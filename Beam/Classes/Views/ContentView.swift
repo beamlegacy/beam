@@ -52,6 +52,8 @@ struct ModeView: View {
                         ZStack {
                             NoteView(note: state.currentNote!, showTitle: false, scrollable: true)
                         }
+                        .background(Color(.editorBackgroundColor))
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .transition(.opacity)
                         .animation(.easeInOut(duration: 0.3))
                     case .today:

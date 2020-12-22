@@ -10,6 +10,7 @@ import SwiftUI
 
 struct NoteView: View {
     @EnvironmentObject var state: BeamState
+
     var note: BeamNote
     var onStartEditing: () -> Void = {}
     var leadingAlignement = CGFloat(185)
@@ -61,6 +62,6 @@ struct NoteView: View {
                 showTitle: showTitle
                 )
             }
-        }
+        }.frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
