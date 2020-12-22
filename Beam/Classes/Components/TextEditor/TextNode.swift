@@ -921,19 +921,20 @@ public class TextNode: NSObject, CALayerDelegate {
     // MARK: - Text & Cursor Position
 
     public func lineAt(point: NSPoint) -> Int {
+        guard let layout = layout else { return 0 }
         let y = point.y
         if y >= textFrame.height {
-            let v = layout!.lines.count - 1
+            let v = layout.lines.count - 1
             return max(v, 0)
         } else if y < 0 {
             return 0
         }
 
-        for (i, l) in layout!.lines.enumerated() where point.y < l.frame.minY + CGFloat(fontSize) {
+        for (i, l) in layout.lines.enumerated() where point.y < l.frame.minY + CGFloat(fontSize) {
             return i
         }
 
-        return min(Int(y / CGFloat(fontSize)), layout!.lines.count - 1)
+        return min(Int(y / CGFloat(fontSize)), layout.lines.count - 1)
     }
 
     public func lineAt(index: Int) -> Int? {
@@ -1006,9 +1007,10 @@ public class TextNode: NSObject, CALayerDelegate {
     }
 
     public func internalLinkAt(point: NSPoint) -> String? {
+        guard let layout = layout else { return nil }
         let line = lineAt(point: point)
         guard line >= 0 else { return nil }
-        let l = layout!.lines[line]
+        let l = layout.lines[line]
         guard l.frame.minX <= point.x && l.frame.maxX >= point.x else { return nil } // don't find links outside the line
         let displayIndex = l.stringIndexFor(position: point)
         let pos = min(displayIndex, attributedString.length - 1)
