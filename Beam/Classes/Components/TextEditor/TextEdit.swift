@@ -613,6 +613,13 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         guard inputDetectorEnabled else { return true }
         defer { lastInput = input }
 
+        let insertPair = { [unowned self] (left: String, right: String) in
+            node.text.insert(right, at: selectedTextRange.upperBound)
+            node.text.insert(left, at: selectedTextRange.lowerBound)
+            rootNode.cursorPosition += 1
+            selectedTextRange = selectedTextRange.lowerBound + 1 ..< selectedTextRange.upperBound + 1
+        }
+
         let handlers: [String: () -> Bool] = [
 //            "@": { [unowned self] in
 //                Logger.shared.logInfo("Insert link", category: .ui)
@@ -621,11 +628,24 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             "[": { [unowned self] in
                 Logger.shared.logInfo("Transform selection into internal link", category: .ui)
                 if !self.selectedTextRange.isEmpty {
-                    node.text.makeInternalLink(self.selectedTextRange)
+                    _ = node.text.makeInternalLink(self.selectedTextRange)
                     return false
                 }
                 return true
+            },
+            "(": { [unowned self] in
+                insertPair("(", ")")
+                return false
+            },
+            "{": { [unowned self] in
+                insertPair("{", "}")
+                return false
+            },
+            "\"": { [unowned self] in
+                insertPair("\"", "\"")
+                return false
             }
+
         ]
 
         if let handler = handlers[input] {
