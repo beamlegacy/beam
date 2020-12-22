@@ -700,12 +700,12 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         }
 
         let handlers: [String: () -> Void] = [
-            "[[": { [unowned self] in
+            "[[": { //[unowned self] in
                 Logger.shared.logInfo("Insert internal link", category: .ui)
             },
             "#": makeHeader,
             ">": makeQuote,
-            " ": { [unowned self] in
+            " ": { //[unowned self] in
                 makeHeader()
                 makeQuote()
             }

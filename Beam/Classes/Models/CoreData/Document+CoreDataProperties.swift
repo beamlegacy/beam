@@ -1,6 +1,10 @@
 import Foundation
 import CoreData
 
+/*
+ When changing this, you *must* let backend know. We have to add new values to
+ `app/models/document.rb` in our API codebase.
+ */
 enum DocumentType: Int16 {
     case journal
     case note
