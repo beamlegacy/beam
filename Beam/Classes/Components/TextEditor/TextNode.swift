@@ -1195,7 +1195,7 @@ public class TextNode: NSObject, CALayerDelegate {
         return true
     }
 
-    private func drawDebug(in context: CGContext) {
+    internal func drawDebug(in context: CGContext) {
         if frameAnimation != nil {
             context.setFillColor(NSColor.blue.cgColor.copy(alpha: 0.2)!)
             context.fill(NSRect(origin: NSPoint(), size: textFrame.size))

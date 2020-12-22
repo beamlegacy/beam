@@ -10,12 +10,20 @@ import Combine
 import AppKit
 
 class LinksSection: TextRoot {
-    var linkedReferenceNodes = [LinkedReferenceNode]()
+    var linkedReferenceNodes = [LinkedReferenceNode]() {
+        didSet {
+            invalidateLayout()
+        }
+    }
 //    var unlinkedReferenceNodes = [UnlinkedReferenceNode]()
     var linkedReferencesCancellable: Cancellable!
 
     override var parent: TextNode? {
         return editor.rootNode
+    }
+
+    override var children: [TextNode] {
+        return linkedReferenceNodes
     }
 
     override var root: TextRoot {
@@ -26,13 +34,14 @@ class LinksSection: TextRoot {
         super.init(editor: editor, element: BeamElement())
         self.note = note
         // Append the linked references and unlinked references nodes
-        linkedReferencesCancellable = note.$linkedReferences.sink { [unowned self] linked in
+        linkedReferencesCancellable = note.$linkedReferences.sink { [unowned self] _ in
             updateLinkedReferences()
         }
 
         updateLinkedReferences()
-        text = BeamText(text: "LINKED REFERENCE SHIT")
+        text = BeamText(text: "Link")
         editor.layer?.addSublayer(layer)
+        layer.backgroundColor = NSColor.red.cgColor
     }
 
     func updateLinkedReferences() {
@@ -45,28 +54,39 @@ class LinksSection: TextRoot {
             return LinkedReferenceNode(editor: editor, element: referencingElement)
         }
 
-    }
-    override func updateRendering() {
-        guard availableWidth > 0 else { return }
-
-        if invalidatedTextRendering {
-            textFrame = NSRect(x: 0, y: 0, width: availableWidth, height: 50)
-            invalidatedTextRendering = false
-        }
-
-        computedIdealSize = textFrame.size
-        computedIdealSize.width = frame.width
-
-        if open {
-            for c in children {
-                computedIdealSize.height += c.idealSize.height
-            }
-        }
+        selfVisible = !linkedReferenceNodes.isEmpty
     }
 
     override func setLayout(_ frame: NSRect) {
         super.setLayout(frame)
-        layer.backgroundColor = NSColor.red.cgColor
     }
 
+    public override  func draw(in context: CGContext) {
+//        context.translateBy(x: indent, y: 0)
+//
+//        drawDebug(in: context)
+//
+//        if selfVisible {
+//            // print("Draw text \(frame))")
+//
+//            context.saveGState(); defer { context.restoreGState() }
+//
+//            context.textMatrix = CGAffineTransform.identity
+//            context.translateBy(x: 0, y: firstLineBaseline)
+//
+//            layout?.draw(context)
+//        }
+        super.draw(in: context)
+
+        context.saveGState()
+
+        let c = NSColor.green.cgColor
+        context.setStrokeColor(c)
+        context.stroke(textFrame)
+
+        context.setFillColor(c.copy(alpha: 0.4)!)
+        context.fill(textFrame)
+
+        context.restoreGState()
+    }
 }
