@@ -45,7 +45,7 @@ class LinkedReferenceNode: TextNode {
         return section
     }
     override func setLayout(_ frame: NSRect) {
-        print("LinkedReferenceNode setLayout: \(frame)")
+//        print("LinkedReferenceNode setLayout: \(frame)")
         super.setLayout(frame)
     }
 

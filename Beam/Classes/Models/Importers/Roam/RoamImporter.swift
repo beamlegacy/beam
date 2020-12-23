@@ -88,38 +88,13 @@ class RoamImporter {
             let parser = Parser(inputString: bullet.string)
             let visitor = BeamTextVisitor()
             let newBullet = BeamElement(visitor.visit(parser.parseAST()))
+            Logger.shared.logInfo("imported bullet with \(newBullet.text.internalLinks.count) links", category: .document)
             newBullet.creationDate = bullet.createTime ?? newBullet.creationDate
             newBullet.updateDate = bullet.editTime ?? newBullet.updateDate
             parentBullet.addChild(newBullet)
 
             if let children = bullet.children {
                 createLocalBullets(context, note, children, newBullet)
-            }
-        }
-    }
-
-    private func detectLinkedNotes(_ context: NSManagedObjectContext, note: BeamNote, bullet: BeamElement) {
-        guard bullet.text.text.count > 2 else { return }
-
-        for pattern in TextFormatter.linkPatterns {
-            var regex: NSRegularExpression
-            do {
-                regex = try NSRegularExpression(pattern: pattern, options: [])
-            } catch {
-                // TODO: manage errors
-                fatalError("Error")
-            }
-
-            let matches = regex.matches(in: bullet.text.text, options: [], range: NSRange(location: 0, length: bullet.text.text.utf16.count))
-
-            for match in matches {
-                guard let linkRange = Range(match.range(at: 1), in: bullet.text.text) else { continue }
-
-                let linkTitle = String(bullet.text.text[linkRange])
-                let refnote = BeamNote.fetchOrCreate(documentManager, title: linkTitle)
-                let reference = NoteReference(noteName: note.title, elementID: bullet.id)
-                refnote.addLinkedReference(reference)
-                refnote.save(documentManager: documentManager)
             }
         }
     }
