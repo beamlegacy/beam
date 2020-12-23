@@ -49,7 +49,9 @@ public class TextNode: NSObject, CALayerDelegate {
         get { element.text }
         set {
             guard element.text != newValue else { return }
+            if !newValue.isEmpty && actionImageLayer.opacity == 0 { actionImageLayer.opacity = 1 }
             if newValue.isEmpty { resetActionLayers() }
+
             element.text = newValue
             invalidateText()
         }
@@ -848,7 +850,7 @@ public class TextNode: NSObject, CALayerDelegate {
 
         // Reset all layers
         if !textFrame.contains(position) {
-            resetActionLayers()
+            showHoveredActionLayers(false)
             return true
         }
 
