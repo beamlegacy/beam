@@ -289,6 +289,8 @@ import WebKit
     }
 
     func startQuery() {
+        searchQuery = searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
+
         if let index = selectionIndex {
             let query = completedQueries[index]
             switch query.source {
