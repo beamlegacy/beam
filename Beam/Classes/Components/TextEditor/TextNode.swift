@@ -587,8 +587,8 @@ public class TextNode: NSObject, CALayerDelegate {
 
     func updateVisibility(_ isVisible: Bool) {
         for c in children {
-            c.visible = open
-            c.updateVisibility(open && c.open)
+            c.visible = isVisible
+            c.updateVisibility(isVisible)
             invalidateLayout()
         }
     }
