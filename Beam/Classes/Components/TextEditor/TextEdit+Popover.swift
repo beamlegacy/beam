@@ -10,7 +10,7 @@ import Cocoa
 
 extension BeamTextEdit {
 
-    func showPopover() {
+    internal func showPopover() {
         let currentFrame = self.node.currentFrameInDocument
         popover = Popover(frame: NSRect(x: 210, y: currentFrame.maxY + 20, width: 300, height: 150))
 
@@ -20,20 +20,19 @@ extension BeamTextEdit {
         addSubview(popover)
     }
 
-    func updatePopover(isDeleteBackward: Bool = false) {
+    internal func updatePopover(isDeleteBackward: Bool = false) {
         var text = node.text.text
-        if isDeleteBackward && !text.contains("@") { dismissPopover() }
 
-        if let dotRange = text.range(of: "@") {
-            text.removeSubrange(..<dotRange.lowerBound)
-        }
+        if isDeleteBackward && !text.contains(where: { ["@", "#"].contains($0) }) { dismissPopover() }
+        guard let range = text.range(of: "@") ?? text.range(of: "#") else { return }
 
-        popover?.text = text.replacingOccurrences(of: "@", with: "")
+        text.removeSubrange(..<range.lowerBound)
+        popover?.text = text.replacingOccurrences(of: "@|#", with: "", options: .regularExpression)
     }
 
-    func dismissPopover() {
-        guard let popover = popover else { return }
-        popover.removeFromSuperview()
+    internal func dismissPopover() {
+        popover?.removeFromSuperview()
+        popover = nil
     }
 
 }

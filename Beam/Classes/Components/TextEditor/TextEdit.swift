@@ -590,7 +590,8 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     }
                 case .delete:
                     rootNode.doCommand(.deleteBackward)
-                    updatePopover(isDeleteBackward: true)
+
+                    if popover != nil { updatePopover(isDeleteBackward: true) }
                     return
 
                 case .backTab:
@@ -612,6 +613,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                 return
             case 53: // escape
                 rootNode.cancelSelection()
+                if popover != nil { dismissPopover() }
                 return
             default:
                 break
@@ -781,6 +783,12 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
         let handlers: [String: () -> Bool] = [
             "@": {
+                guard self.popover == nil else { return false }
+                self.showPopover()
+                return true
+            },
+            "#": {
+                guard self.popover == nil else { return false }
                 self.showPopover()
                 return true
             },
