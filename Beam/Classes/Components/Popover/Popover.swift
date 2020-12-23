@@ -11,7 +11,7 @@ protocol PopoverDelegate: class {
     func didSelected()
 }
 
-class Popover: NSView {
+class Popover<T>: NSView {
 
     // MARK: - Properties
     weak var delegate: PopoverDelegate?
@@ -19,6 +19,12 @@ class Popover: NSView {
     var text: String = "Hello World" {
         didSet {
             updateLabel(text)
+        }
+    }
+
+    var sources: [T] = [] {
+        didSet {
+            print(sources)
         }
     }
 

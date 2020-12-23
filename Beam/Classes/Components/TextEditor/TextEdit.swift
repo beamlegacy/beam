@@ -214,7 +214,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     private var noteCancellables = [AnyCancellable]()
-    internal var popover: Popover?
+    internal var popover: Popover<String>?
 
     public init(root: BeamElement, font: Font = Font.main) {
         self.config.font = font
@@ -590,7 +590,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     }
                 case .delete:
                     rootNode.doCommand(.deleteBackward)
-
                     if popover != nil { updatePopover(isDeleteBackward: true) }
                     return
 
