@@ -7,7 +7,14 @@
 
 import Cocoa
 
+protocol PopoverDelegate: class {
+    func didSelected()
+}
+
 class Popover: NSView {
+
+    // MARK: - Properties
+    weak var delegate: PopoverDelegate?
 
     var text: String = "Hello World" {
         didSet {
@@ -18,7 +25,6 @@ class Popover: NSView {
     private var label: NSTextField?
 
     // MARK: - Initializer
-
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
         wantsLayer = true
@@ -31,7 +37,7 @@ class Popover: NSView {
     }
 
     // MARK: - Setup UI
-    internal func setupLabel() {
+    private func setupLabel() {
         label = NSTextField()
         label?.stringValue = text
         label?.frame = NSRect(x: 0, y: 0, width: frame.width, height: frame.height)
@@ -39,8 +45,7 @@ class Popover: NSView {
     }
 
     // MARK: - Methods
-
-    internal func updateLabel(_ text: String) {
+    private func updateLabel(_ text: String) {
         label?.stringValue = text
     }
 

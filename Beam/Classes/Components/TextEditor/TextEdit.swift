@@ -214,7 +214,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     private var noteCancellables = [AnyCancellable]()
-    private var popover: Popover?
+    internal var popover: Popover?
 
     public init(root: BeamElement, font: Font = Font.main) {
         self.config.font = font
@@ -447,7 +447,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     public func insertText(string: String, replacementRange: Range<Int>) {
         guard preDetectInput(string) else { return }
         rootNode.insertText(string: string, replacementRange: replacementRange)
-        updatePopover(text: string)
+        updatePopover()
         postDetectInput(string)
         reBlink()
     }
@@ -479,25 +479,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         }
         onEndEditing()
         return super.resignFirstResponder()
-    }
-
-    func showPopover() {
-        let currentFrame = self.node.currentFrameInDocument
-        popover = Popover(frame: NSRect(x: 210, y: currentFrame.maxY + 20, width: 300, height: 150))
-
-        guard let popover = popover else { return }
-
-        popover.layer?.backgroundColor = NSColor.red.cgColor
-        addSubview(popover)
-    }
-
-    func updatePopover(text: String) {
-        popover?.text = text != "@" ? text : ""
-    }
-
-    func dismissPopover() {
-        guard let popover = popover else { return }
-        popover.removeFromSuperview()
     }
 
     func pressEnter(_ option: Bool, _ command: Bool) {
@@ -608,9 +589,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                         return
                     }
                 case .delete:
-                    // TODO: Do more stuff
-                    dismissPopover()
-
                     rootNode.doCommand(.deleteBackward)
                     return
 

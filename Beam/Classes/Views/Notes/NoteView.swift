@@ -60,7 +60,7 @@ struct NoteView: View {
                 leadingAlignment: leadingAlignement,
                 footerHeight: 100,
                 showTitle: showTitle
-                )
+                ).frame(maxWidth: .infinity, idealHeight: 300)
             }
         }.frame(maxWidth: .infinity, maxHeight: .infinity)
     }
