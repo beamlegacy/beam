@@ -944,12 +944,12 @@
 		418172A625811A3A00317ED8 /* Components */ = {
 			isa = PBXGroup;
 			children = (
-				4170C41B25923ADA0072C781 /* Popover */,
 				418171AA2581107C00317ED8 /* AutoComplete */,
 				418172A725811A3A00317ED8 /* BMTextField */,
 				418171C32581107C00317ED8 /* NotesList */,
 				418171D72581107C00317ED8 /* OmniBar */,
 				418171B72581107C00317ED8 /* TextEditor */,
+				4170C41B25923ADA0072C781 /* Popover */,
 			);
 			path = Components;
 			sourceTree = "<group>";

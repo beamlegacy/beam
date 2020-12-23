@@ -590,6 +590,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     }
                 case .delete:
                     rootNode.doCommand(.deleteBackward)
+                    updatePopover(isDeleteBackward: true)
                     return
 
                 case .backTab:
