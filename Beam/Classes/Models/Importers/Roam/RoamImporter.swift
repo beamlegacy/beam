@@ -66,11 +66,10 @@ class RoamImporter {
 
             newNote.creationDate = roamNote.createTime ?? newNote.creationDate
             newNote.updateDate = roamNote.editTime ?? newNote.updateDate
-            newNote.detectLinkedNotes(documentManager)
             newNote.save(documentManager: documentManager)
         }
 
-        BeamNote.detectUnlinkedNotes(documentManager)
+        BeamNote.detectLinks(documentManager)
 
         return roamNotes
     }

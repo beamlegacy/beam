@@ -60,7 +60,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     private var noteCancellables = [AnyCancellable]()
 
     public init(root: BeamElement, font: Font = Font.main) {
-        BeamNote.detectUnlinkedNotes(documentManager)
+        BeamNote.detectLinks(documentManager)
 
         self.config.font = font
         note = root
@@ -933,7 +933,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 //            print("Encoding error")
 //        }
         rootNode.note?.save(documentManager: documentManager)
-        BeamNote.detectUnlinkedNotes(documentManager)
+        BeamNote.detectLinks(documentManager)
     }
 
     func nodeFor(_ element: BeamElement) -> TextNode {

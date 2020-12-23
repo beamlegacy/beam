@@ -108,7 +108,7 @@ public class TextRoot: TextNode {
         if let r = rect {
             editor.invalidate(r.offsetBy(dx: currentFrameInDocument.minX, dy: currentFrameInDocument.minY))
         } else {
-            editor.invalidate(textFrame.offsetBy(dx: currentFrameInDocument.minX, dy: currentFrameInDocument.minY))
+            editor.invalidate(contentsFrame.offsetBy(dx: currentFrameInDocument.minX, dy: currentFrameInDocument.minY))
         }
     }
 

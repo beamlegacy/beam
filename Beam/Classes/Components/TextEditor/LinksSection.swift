@@ -59,6 +59,8 @@ class LinksSection: TextNode {
         readOnly = true
         updateLinkedReferences()
         editor.layer?.addSublayer(layer)
+
+//        offset = NSEdgeInsets(top: 10, left: 0, bottom: 0, right: 0)
     }
 
     func updateLinkedReferences() {
@@ -72,11 +74,9 @@ class LinksSection: TextNode {
             }
         }()
 
-        self.linkedReferenceNodes = refs.map { noteReference -> LinkedReferenceNode in
-            guard let referencingNote = BeamNote.fetch(DocumentManager(), title: noteReference.noteName) else { fatalError() }
-            guard let referencingElement = referencingNote.findElement(noteReference.elementID) else {
-                fatalError()
-            }
+        self.linkedReferenceNodes = refs.compactMap { noteReference -> LinkedReferenceNode? in
+            guard let referencingNote = BeamNote.fetch(DocumentManager(), title: noteReference.noteName) else { return nil }
+            guard let referencingElement = referencingNote.findElement(noteReference.elementID) else { return nil }
             return LinkedReferenceNode(editor: editor, section: self, element: referencingElement)
         }
 

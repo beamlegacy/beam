@@ -206,15 +206,10 @@ class BeamNote: BeamElement {
         }
     }
 
-    override func detectLinkedNotes(_ documentManager: DocumentManager) {
-        for c in children {
-            c.detectLinkedNotes(documentManager)
-        }
-    }
-
-    static func detectUnlinkedNotes(_ documentManager: DocumentManager) {
+    static func detectLinks(_ documentManager: DocumentManager) {
         let allNotes = Self.loadAllDocument(documentManager)
         for note in allNotes {
+            note.detectLinkedNotes(documentManager)
             note.connectUnlinkedNotes(note.title, allNotes)
         }
     }

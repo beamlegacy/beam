@@ -142,9 +142,9 @@ public class TextNode: NSObject, CALayerDelegate {
 
     var enabled: Bool { editor.enabled }
 
-    var textFrame = NSRect() // The rectangle of our text excluding children
+    var contentsFrame = NSRect() // The rectangle of our text excluding children
     var localTextFrame: NSRect { // The rectangle of our text excluding children
-        return NSRect(x: 0, y: 0, width: textFrame.width, height: textFrame.height)
+        return NSRect(x: 0, y: 0, width: contentsFrame.width, height: contentsFrame.height)
     }
 
     var availableWidth: CGFloat = 1 {
@@ -204,7 +204,7 @@ public class TextNode: NSObject, CALayerDelegate {
 
     var textFrameInDocument: NSRect {
         let offset = offsetInDocument
-        return NSRect(origin: offset, size: textFrame.size)
+        return NSRect(origin: offset, size: contentsFrame.size)
     }
 
     var parent: TextNode? {
@@ -395,7 +395,7 @@ public class TextNode: NSObject, CALayerDelegate {
     func setLayout(_ frame: NSRect) {
         self.frame = frame
         needLayout = false
-        layer.bounds = textFrame
+        layer.bounds = contentsFrame
         layer.position = frameInDocument.origin
 
         if self.currentFrameInDocument != frame {
@@ -409,7 +409,7 @@ public class TextNode: NSObject, CALayerDelegate {
             invalidate()  // invalidate after the change
         }
 
-        var pos = NSPoint(x: CGFloat(childInset), y: self.textFrame.height)
+        var pos = NSPoint(x: CGFloat(childInset), y: self.contentsFrame.height)
 
         for c in children {
             var childSize = c.idealSize
@@ -457,7 +457,7 @@ public class TextNode: NSObject, CALayerDelegate {
         if let r = rect {
             p.invalidate(r.offsetBy(dx: offset.x, dy: offset.y))
         } else {
-            let r = NSRect(x: offset.x, y: offset.y, width: currentFrameInDocument.width, height: textFrame.maxY)
+            let r = NSRect(x: offset.x, y: offset.y, width: currentFrameInDocument.width, height: contentsFrame.maxY)
             p.invalidate(r)
         }
     }
@@ -521,7 +521,7 @@ public class TextNode: NSObject, CALayerDelegate {
                 context.saveGState()
                 if showIdentationLine {
                     context.setFillColor(NSColor.editorTextRectangleBackgroundColor.cgColor)
-                    let y = textFrame.height
+                    let y = contentsFrame.height
                     let r = NSRect(x: 5, y: y + 3, width: 1, height: currentFrameInDocument.height - y - 6)
                     context.fill(r)
                 }
@@ -612,32 +612,32 @@ public class TextNode: NSObject, CALayerDelegate {
         guard availableWidth > 0 else { return }
 
         if invalidatedTextRendering {
-            textFrame = NSRect()
+            contentsFrame = NSRect()
 
             if selfVisible {
                 let attrStr = attributedString
                 let layout = Font.draw(string: attrStr, atPosition: NSPoint(x: indent, y: 0), textWidth: (availableWidth - actionLayerFrame.width) - actionLayerFrame.minX)
                 self.layout = layout
-                textFrame = layout.frame
+                contentsFrame = layout.frame
 
                 if attrStr.string.isEmpty {
                     let f = AttributedStringVisitor.font(fontSize)
-                    textFrame.size.height = CGFloat(f.ascender - f.descender) * interlineFactor
-                    textFrame.size.width += CGFloat(indent)
+                    contentsFrame.size.height = CGFloat(f.ascender - f.descender) * interlineFactor
+                    contentsFrame.size.width += CGFloat(indent)
                 }
 
                 if self as? TextRoot == nil {
-                    textFrame.size.height += interNodeSpacing
+                    contentsFrame.size.height += interNodeSpacing
                 }
             }
 
-            textFrame.size.width = availableWidth
-            textFrame = textFrame.rounded()
+            contentsFrame.size.width = availableWidth
+            contentsFrame = contentsFrame.rounded()
 
             invalidatedTextRendering = false
         }
 
-        computedIdealSize = textFrame.size
+        computedIdealSize = contentsFrame.size
         computedIdealSize.width = frame.width
 
         if open {
@@ -673,7 +673,7 @@ public class TextNode: NSObject, CALayerDelegate {
     }
 
     func updateActionLayer() {
-        let actionLayerYPosition = isHeader ? (textFrame.height / 2) - actionLayerFrame.height : 0
+        let actionLayerYPosition = isHeader ? (contentsFrame.height / 2) - actionLayerFrame.height : 0
         actionLayer?.frame = CGRect(x: (availableWidth - actionLayerFrame.width) + actionLayerFrame.minX, y: actionLayerYPosition, width: actionLayerFrame.width, height: actionLayerFrame.height)
     }
 
@@ -707,7 +707,7 @@ public class TextNode: NSObject, CALayerDelegate {
 
     func nodeAt(point: CGPoint) -> TextNode? {
         guard 0 <= point.y, point.y < frame.height else { return nil }
-        if textFrame.minY <= point.y, point.y < textFrame.maxY {
+        if contentsFrame.minY <= point.y, point.y < contentsFrame.maxY {
             return self
         }
 
@@ -746,7 +746,7 @@ public class TextNode: NSObject, CALayerDelegate {
             return self
         }
 
-        return textFrame.contains(mouseInfo.position) ? self : nil
+        return contentsFrame.contains(mouseInfo.position) ? self : nil
     }
 
     func dispatchMouseUp(mouseInfo: MouseInfo) -> TextNode? {
@@ -853,7 +853,7 @@ public class TextNode: NSObject, CALayerDelegate {
             return true
         }
 
-        if textFrame.contains(mouseInfo.position) {
+        if contentsFrame.contains(mouseInfo.position) {
             if mouseInfo.event.clickCount == 1 {
                 let clickPos = positionAt(point: mouseInfo.position)
                 if mouseInfo.event.modifierFlags.contains(.shift) {
@@ -895,16 +895,16 @@ public class TextNode: NSObject, CALayerDelegate {
         let hasTextAndeditable = !text.isEmpty && isEditing
 
         // Show image & text layers
-        if hasTextAndeditable && textFrame.contains(position) && actionLayer.frame.contains(position) {
+        if hasTextAndeditable && contentsFrame.contains(position) && actionLayer.frame.contains(position) {
             showHoveredActionLayers(true)
             return true
-        } else if hasTextAndeditable && textFrame.contains(position) {
+        } else if hasTextAndeditable && contentsFrame.contains(position) {
             showHoveredActionLayers(false)
             return true
         }
 
         // Reset all layers
-        if !textFrame.contains(position) {
+        if !contentsFrame.contains(position) {
             resetActionLayers()
             return true
         }
@@ -932,7 +932,7 @@ public class TextNode: NSObject, CALayerDelegate {
     public func lineAt(point: NSPoint) -> Int {
         guard let layout = layout else { return 0 }
         let y = point.y
-        if y >= textFrame.height {
+        if y >= contentsFrame.height {
             let v = layout.lines.count - 1
             return max(v, 0)
         } else if y < 0 {
@@ -1207,7 +1207,7 @@ public class TextNode: NSObject, CALayerDelegate {
     internal func drawDebug(in context: CGContext) {
         if frameAnimation != nil {
             context.setFillColor(NSColor.blue.cgColor.copy(alpha: 0.2)!)
-            context.fill(NSRect(origin: NSPoint(), size: textFrame.size))
+            context.fill(NSRect(origin: NSPoint(), size: contentsFrame.size))
         }
         // draw debug:
         guard debug, hover || isEditing else { return }
@@ -1218,7 +1218,7 @@ public class TextNode: NSObject, CALayerDelegate {
         context.stroke(bounds)
 
         context.setFillColor(c.copy(alpha: 0.2)!)
-        context.fill(textFrame)
+        context.fill(contentsFrame)
     }
 
     private func invalidateRoot() {

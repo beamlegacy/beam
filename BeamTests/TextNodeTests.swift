@@ -39,9 +39,9 @@ class TextNodeTests: XCTestCase {
 
     func validateRootWithNote(root: TextRoot, note: BeamNote) {
         let elements = note.children
-        XCTAssertEqual(root.children.count - 1, elements.count)
+        XCTAssertEqual(root.element.children.count, elements.count)
 
-        for i in 0..<root.children.count - 1 {
+        for i in 0..<min(root.element.children.count, elements.count) {
             let node = root.children[i]
             let element = elements[i]
 
@@ -98,6 +98,7 @@ class TextNodeTests: XCTestCase {
                 - bullet21
                 - bullet22
                 - bullet23
+            - Links
 
         """
 
@@ -120,6 +121,7 @@ class TextNodeTests: XCTestCase {
                 - bullet21
                 - bullet22
                 - bullet23
+            - Links
 
         """
 
@@ -141,6 +143,7 @@ class TextNodeTests: XCTestCase {
                 - bullet21
                 - bullet22
                 - bullet23
+            - Links
 
         """
 
@@ -168,6 +171,7 @@ class TextNodeTests: XCTestCase {
                 - bullet22
                 - bullet23
             - bullet3
+            - Links
 
         """
 
@@ -194,6 +198,7 @@ class TextNodeTests: XCTestCase {
                 - bullet21
                 - bullet22
                 - bullet23
+            - Links
 
         """
 
@@ -220,6 +225,7 @@ class TextNodeTests: XCTestCase {
                 - bullet21
                 - bullet22
                 - bullet23
+            - Links
 
         """
 
@@ -246,6 +252,7 @@ class TextNodeTests: XCTestCase {
                 - bullet21
                 - bullet22
                 - bullet23
+            - Links
 
         """
 
@@ -275,6 +282,7 @@ class TextNodeTests: XCTestCase {
                 - bullet21
                 - bullet22
                 - bullet23
+            - Links
 
         """
 
@@ -304,6 +312,7 @@ class TextNodeTests: XCTestCase {
                 - bullet21
                 - bullet22
                 - bullet23
+            - Links
 
         """
 
@@ -326,6 +335,7 @@ class TextNodeTests: XCTestCase {
                 - bullet21
                 - bullet22
                 - bullet23
+            - Links
 
         """
 
@@ -350,6 +360,7 @@ class TextNodeTests: XCTestCase {
                 - bullet21
                 - bullet22
                 - bullet23
+            - Links
 
         """
 
@@ -379,6 +390,7 @@ class TextNodeTests: XCTestCase {
                 - bullet21
                 - bullet22
                 - bullet23
+            - Links
 
         """
 
@@ -398,6 +410,7 @@ class TextNodeTests: XCTestCase {
                 - bullet21
                 - bullet22
                 - bullet23
+            - Links
 
         """
         XCTAssertEqual(str2, root.printTree())
@@ -435,6 +448,7 @@ class TextNodeTests: XCTestCase {
                 - bullet21
                 - bullet22
                 - bullet23
+            - Links
 
         """
 
@@ -454,6 +468,7 @@ class TextNodeTests: XCTestCase {
                 - bullet21
                 - bullet22
                 - bullet23
+            - Links
 
         """
         XCTAssertEqual(str2, root.printTree())
@@ -491,6 +506,7 @@ class TextNodeTests: XCTestCase {
                 - bullet21
                 - bullet22
                 - bullet23
+            - Links
 
         """
 
@@ -510,6 +526,7 @@ class TextNodeTests: XCTestCase {
                 - bullet21
                 - bullet22
                 - bullet23
+            - Links
 
         """
         XCTAssertEqual(str2, root.printTree())
@@ -547,6 +564,7 @@ class TextNodeTests: XCTestCase {
                 - bullet21
                 - bullet22
                 - bullet23
+            - Links
 
         """
 
@@ -697,7 +715,7 @@ class TextNodeTests: XCTestCase {
         let note = createMiniArborescence(title: "title")
         let editor = BeamTextEdit(root: note)
         let root = editor.rootNode!
-        XCTAssertEqual(" bullet1 bullet11 bullet12 bullet2 bullet21 bullet22 bullet23", root.fullStrippedText)
+        XCTAssertEqual(" bullet1 bullet11 bullet12 bullet2 bullet21 bullet22 bullet23 Links", root.fullStrippedText)
 
     }
 

@@ -56,10 +56,10 @@ class LinkedReferenceNode: TextNode {
 //
 //        let c = NSColor.green.cgColor
 //        context.setStrokeColor(c)
-//        context.stroke(textFrame)
+//        context.stroke(contentsFrame)
 //
 //        context.setFillColor(c.copy(alpha: 0.4)!)
-//        context.fill(textFrame)
+//        context.fill(contentsFrame)
 //
 //        context.restoreGState()
     }
