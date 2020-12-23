@@ -5,17 +5,43 @@
 //  Created by Ravichandrane Rajendran on 22/12/2020.
 //
 
-import SwiftUI
+import Cocoa
 
-struct Popover: View {
-    var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
-            .frame(width: 300, height: 150)
-    }
-}
+class Popover: NSView {
 
-struct Popover_Previews: PreviewProvider {
-    static var previews: some View {
-        Popover()
+    var text: String = "Hello World" {
+        didSet {
+            updateLabel(text)
+        }
     }
+
+    private var label: NSTextField?
+
+    // MARK: - Initializer
+
+    override init(frame frameRect: NSRect) {
+        super.init(frame: frameRect)
+        wantsLayer = true
+        layer?.cornerRadius = 10
+        setupLabel()
+    }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+    }
+
+    // MARK: - Setup UI
+    internal func setupLabel() {
+        label = NSTextField()
+        label?.stringValue = text
+        label?.frame = NSRect(x: 0, y: 0, width: frame.width, height: frame.height)
+        self.addSubview(label!)
+    }
+
+    // MARK: - Methods
+
+    internal func updateLabel(_ text: String) {
+        label?.stringValue = text
+    }
+
 }

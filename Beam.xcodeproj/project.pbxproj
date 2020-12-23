@@ -833,14 +833,14 @@
 		418171B72581107C00317ED8 /* TextEditor */ = {
 			isa = PBXGroup;
 			children = (
-				418171B82581107C00317ED8 /* TextEditOperations.swift */,
-				418171B92581107C00317ED8 /* TextNode.swift */,
 				418171BA2581107C00317ED8 /* Markdown */,
-				418171BE2581107C00317ED8 /* TextEditMovements.swift */,
+				418171B92581107C00317ED8 /* TextNode.swift */,
+				418171C22581107C00317ED8 /* TextRoot.swift */,
 				418171BF2581107C00317ED8 /* TextEdit.swift */,
+				418171BE2581107C00317ED8 /* TextEditMovements.swift */,
+				418171B82581107C00317ED8 /* TextEditOperations.swift */,
 				418171C02581107C00317ED8 /* TextEditCommands.swift */,
 				418171C12581107C00317ED8 /* Font.swift */,
-				418171C22581107C00317ED8 /* TextRoot.swift */,
 				96E4CF2F258DFB0800D6DE22 /* BeamText+NSAttributedString.swift */,
 			);
 			path = TextEditor;
