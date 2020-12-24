@@ -136,7 +136,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
     private func updateScore() {
         if let s = score?.score {
-            Logger.shared.logInfo("updated score[\(url!.absoluteString)] = \(s)", category: .general)
+            Logger.shared.logDebug("updated score[\(url!.absoluteString)] = \(s)", category: .general)
             element?.score = s
         }
     }
@@ -246,8 +246,6 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
     lazy var overrideConsole: String = { loadJS(from: "OverrideConsole") }()
 
-    let enableJavascriptLogs = true
-
     let TextSelectedMessage = "beam_textSelected"
     let OnScrolledMessage = "beam_onScrolled"
     let JSLogger = "logging"
@@ -255,23 +253,17 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         switch message.name {
         case JSLogger:
-            if enableJavascriptLogs {
-                print(message.body)
-            }
-
+            Logger.shared.logInfo(String(describing: message.body), category: .javascript)
         case TextSelectedMessage:
             guard let dict = message.body as? [String: AnyObject],
 //                  let selectedText = dict["selectedText"] as? String,
                   let selectedHtml = dict["selectedHtml"] as? String,
                   !selectedHtml.isEmpty
             else { return }
-//            print("Text selected: \(selectedText)")
-//            print("Html selected: \(selectedHtml)")
 
             let text = html2Md(url: webView.url!, html: selectedHtml)
             self.score?.textSelections += 1
             self.updateScore()
-//            print("html to MD (\(url)): \(text)")
 
             // now add a bullet point with the quoted text:
             if let urlString = webView.url?.absoluteString, let title = webView.title {
@@ -307,18 +299,18 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     lazy var jsSelectionObserver: String = { loadJS(from: "SelectionObserver") }()
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        if let url = webView.url {
-            Readability.read(webView) { [weak self] result in
-                guard let self = self else { return }
+        guard let url = webView.url else { return }
 
-                switch result {
-                case let .success(read):
-                    self.appendToIndexer(url, read)
-                    self.score?.textAmount = read.content.count
-                    self.updateScore()
-                case let .failure(error):
-                    print("Error while indexing web page: \(error)")
-                }
+        Readability.read(webView) { [weak self] result in
+            guard let self = self else { return }
+
+            switch result {
+            case let .success(read):
+                self.appendToIndexer(url, read)
+                self.score?.textAmount = read.content.count
+                self.updateScore()
+            case let .failure(error):
+                Logger.shared.logError("Error while indexing web page: \(error)", category: .javascript)
             }
         }
     }
