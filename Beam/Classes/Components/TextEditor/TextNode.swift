@@ -584,8 +584,6 @@ public class TextNode: Widget {
     }
 
     override func mouseUp(mouseInfo: MouseInfo) -> Bool {
-        // print("mouseUp (\(mouseInfo))")
-        dragMode = .none
         if disclosurePressed && disclosureButtonFrame.contains(mouseInfo.position) {
             disclosurePressed = false
             open.toggle()
