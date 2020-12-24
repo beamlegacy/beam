@@ -482,6 +482,11 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     func pressEnter(_ option: Bool, _ command: Bool) {
+
+        if popover != nil {
+            return
+        }
+
         if option {
             rootNode.doCommand(.insertNewline)
         } else if command {

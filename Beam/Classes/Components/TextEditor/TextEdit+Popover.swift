@@ -11,7 +11,9 @@ extension BeamTextEdit {
 
     internal func initPopover() {
         let currentFrame = self.node.currentFrameInDocument
-        popover = Popover<String>(frame: NSRect(x: 210, y: currentFrame.maxY + 20, width: 300, height: 150))
+        let cursorPosition = rootNode.cursorPosition
+        print(cursorPosition, rootNode.text)
+        popover = Popover<String>(frame: NSRect(x: 210, y: currentFrame.maxY + 30, width: 300, height: 150))
 
         guard let popover = popover else { return }
 
@@ -28,11 +30,9 @@ extension BeamTextEdit {
 
         guard let range = text.range(of: regex, options: .regularExpression) else { return }
         let prefixIndex = text.distance(from: text.startIndex, to: range.lowerBound)
+        let cursorPosition = rootNode.cursorPosition - 1
 
-        if command == .moveLeft && rootNode.cursorPosition <= prefixIndex {
-            print(rootNode.cursorPosition)
-            // dismissPopover()
-        }
+        if command == .moveLeft && cursorPosition <= prefixIndex { dismissPopover() }
 
         text.removeSubrange(..<range.lowerBound)
         popover?.text = text.replacingOccurrences(of: regex, with: "", options: .regularExpression)
