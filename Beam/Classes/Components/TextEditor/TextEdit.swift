@@ -482,9 +482,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     func pressEnter(_ option: Bool, _ command: Bool) {
-        // TODO: Do more stuff here with input text
-        dismissPopover()
-
         if option {
             rootNode.doCommand(.insertNewline)
         } else if command {
@@ -529,6 +526,8 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     pressEnter(option, command)
                     return
                 case .leftArrow:
+                    if popover != nil { updatePopover(.moveLeft) }
+
                     if control && option && command {
                         node.fold()
                     } else if shift {
@@ -545,6 +544,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                             rootNode.doCommand(.moveWordLeft)
                         } else if command {
                             rootNode.doCommand(.moveToBeginningOfLine)
+                            dismissPopover()
                         } else {
                             rootNode.doCommand(.moveLeft)
                         }
@@ -590,7 +590,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     }
                 case .delete:
                     rootNode.doCommand(.deleteBackward)
-                    if popover != nil { updatePopover(isDeleteBackward: true) }
+                    if popover != nil { updatePopover(.deleteForward) }
                     return
 
                 case .backTab:
@@ -612,7 +612,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                 return
             case 53: // escape
                 rootNode.cancelSelection()
-                if popover != nil { dismissPopover() }
+                dismissPopover()
                 return
             default:
                 break
@@ -783,12 +783,12 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         let handlers: [String: () -> Bool] = [
             "@": {
                 guard self.popover == nil else { return false }
-                self.showPopover()
+                self.initPopover()
                 return true
             },
             "#": {
                 guard self.popover == nil else { return false }
-                self.showPopover()
+                self.initPopover()
                 return true
             },
             "[": { [unowned self] in
