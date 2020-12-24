@@ -17,11 +17,17 @@ extension DocumentStruct {
         self.data = data
         self.documentType = documentType
     }
+
+    func asApiType() -> DocumentAPIType {
+        let result = DocumentAPIType(document: self)
+        return result
+    }
 }
 
 class DocumentManager {
     var coreDataManager: CoreDataManager
     let mainContext: NSManagedObjectContext
+    let documentRequest = DocumentRequest()
 
     init(coreDataManager: CoreDataManager? = nil) {
         self.coreDataManager = coreDataManager ?? CoreDataManager.shared
@@ -47,6 +53,15 @@ class DocumentManager {
             }
 
             completion?(.success(true))
+
+            self.documentRequest.saveDocument(documentStruct.asApiType()) { result in
+                switch result {
+                case .failure(let error):
+                    break
+                case .success:
+                    break
+                }
+            }
         }
     }
 
@@ -98,6 +113,46 @@ class DocumentManager {
             let document = Document.fetchWithId(context, id)
             document?.delete(context)
             completion?()
+
+            self.documentRequest.deleteDocument(id.uuidString.lowercased()) { result in
+                switch result {
+                case .failure(let error): break
+                case .success: break
+                }
+            }
+        }
+    }
+
+    func deleteAllDocuments(completion: ((Result<Bool, Error>) -> Void)? = nil) {
+        CoreDataManager.shared.destroyPersistentStore {
+            CoreDataManager.shared.setup()
+
+            self.documentRequest.deleteAllDocuments { result in
+                switch result {
+                case .failure(let error):
+                    completion?(.failure(error))
+                case .success:
+                    completion?(.success(true))
+                }
+            }
+        }
+    }
+
+    func uploadAllDocuments(_ completionHandler: ((Result<Bool, Error>) -> Void)? = nil) {
+        CoreDataManager.shared.persistentContainer.performBackgroundTask { context in
+            let documents = Document.fetchAll(context: context)
+            let documentsArray: [DocumentAPIType] = documents.map { document in document.asApiType() }
+
+            self.documentRequest.importDocuments(documentsArray) { result in
+                switch result {
+                case .failure(let error):
+                    Logger.shared.logError(error.localizedDescription, category: .network)
+                    completionHandler?(.failure(error))
+                case .success:
+                    Logger.shared.logDebug("Documents imported", category: .network)
+                    completionHandler?(.success(true))
+                }
+            }
         }
     }
 }

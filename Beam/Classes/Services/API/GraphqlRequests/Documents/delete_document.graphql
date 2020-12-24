@@ -1,0 +1,11 @@
+mutation DeleteDocument($id: ID!) {
+  deleteDocument(input: {document: {id: $id}}) {
+    document {
+      id
+    }
+    errors {
+      path
+      message
+    }
+  }
+}

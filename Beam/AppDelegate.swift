@@ -32,6 +32,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     var windows: [BeamWindow] = []
     var data: BeamData = BeamData()
 
+    let documentManager = DocumentManager()
+
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         NSApp.mainMenu?.item(withTitle: "File")?.submenu?.delegate = self
         NSApp.mainMenu?.item(withTitle: "Window")?.submenu?.delegate = self
@@ -129,6 +131,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     var notesWindow: NotesWindow?
     var noteWindows: [NoteWindow] = []
+    var documentsWindow: DocumentsWindow?
 
     // MARK: -
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {

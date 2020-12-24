@@ -1,0 +1,11 @@
+mutation ImportDocuments($documentsInput: JSON!) {
+  importDocuments(input: {documentsInput: $documentsInput}) {
+    documents {
+      id
+    }
+    errors {
+      path
+      message
+    }
+  }
+}
