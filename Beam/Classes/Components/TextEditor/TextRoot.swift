@@ -61,7 +61,8 @@ public class TextRoot: TextNode {
         }
         set {
             state.cursorPosition = newValue
-            node.invalidateText()
+            let n = node as? TextNode
+            n?.invalidateText()
             node.invalidate()
             editor.reBlink()
             editor.setHotSpotToCursorPosition()
@@ -69,6 +70,7 @@ public class TextRoot: TextNode {
     }
 
     var selectedText: String {
+        guard let node = node as? TextNode else { return "" }
         return node.text.substring(range: selectedTextRange)
     }
 
@@ -79,20 +81,27 @@ public class TextRoot: TextNode {
     var linksSection: LinksSection?
     var referencesSection: LinksSection?
 
-    override internal var children: [TextNode] {
-        return super.children
-            + (linksSection != nil ? [linksSection!] : [])
-            + (referencesSection != nil ? [referencesSection!] : [])
+    override internal var children: [Widget] {
+        get {
+            return super.children
+//                + (linksSection != nil ? [linksSection!] : [])
+//                + (referencesSection != nil ? [referencesSection!] : [])
+        }
+        set {
+            fatalError()
+        }
     }
 
-    var node: TextNode! {
+    var node: Widget! {
         didSet {
             guard oldValue !== node else { return }
+            let oldNode = oldValue as? TextNode
+            let newNode = node as? TextNode
             oldValue.unfocus()
-            oldValue.invalidateText()
+            oldNode?.invalidateText()
             oldValue.invalidate()
             node.focus()
-            node.invalidateText()
+            newNode?.invalidateText()
             node.invalidate()
             cancelSelection()
         }
@@ -127,7 +136,8 @@ public class TextRoot: TextNode {
 
         if element.children.count == 1 && element.children.first!.text.isEmpty {
             let istoday = note?.isTodaysNote ?? false
-            children.first?.placeholder = BeamText(text: istoday ? "This is the journal, you can type anything here!" : "...")
+            let first = children.first as? TextNode
+            first?.placeholder = BeamText(text: istoday ? "This is the journal, you can type anything here!" : "...")
         }
 
         if let note = note {
@@ -175,7 +185,8 @@ public class TextRoot: TextNode {
 
     override var fullStrippedText: String {
         children.prefix(children.count - 1).reduce(attributedString.string) { partial, node -> String in
-            partial + " " + node.fullStrippedText
+            guard let node = node as? TextNode else { return partial }
+            return partial + " " + node.fullStrippedText
         }
     }
 

@@ -9,7 +9,7 @@ import Foundation
 import Combine
 import AppKit
 
-class LinksSection: TextNode {
+class LinksSection: Widget {
     enum Mode {
         case links
         case references
@@ -20,43 +20,34 @@ class LinksSection: TextNode {
     var linkedReferenceNodes = [LinkedReferenceNode]() {
         didSet {
             invalidateLayout()
+            children = linkedReferenceNodes
+            for c in linkedReferenceNodes {
+                c.parent = self
+            }
         }
     }
 //    var unlinkedReferenceNodes = [UnlinkedReferenceNode]()
     var linkedReferencesCancellable: Cancellable!
     var note: BeamNote
 
-    override var parent: TextNode? {
-        return editor.rootNode
-    }
-
-    override var children: [TextNode] {
-        return linkedReferenceNodes
-    }
-
-    override var root: TextRoot {
-        return editor.rootNode
-    }
-
     init(editor: BeamTextEdit, note: BeamNote, mode: Mode) {
         self.note = note
         self.mode = mode
-        super.init(editor: editor, element: BeamElement())
+        super.init(editor: editor)
         // Append the linked references and unlinked references nodes
-        switch mode {
-        case .links:
-            text = BeamText(text: "Links")
-            linkedReferencesCancellable = note.$linkedReferences.sink { [unowned self] _ in
-                updateLinkedReferences()
-            }
-        case .references:
-            text = BeamText(text: "References")
-            linkedReferencesCancellable = note.$unlinkedReferences.sink { [unowned self] _ in
-                updateLinkedReferences()
-            }
-        }
+//        switch mode {
+//        case .links:
+//            text = BeamText(text: "Links")
+//            linkedReferencesCancellable = note.$linkedReferences.sink { [unowned self] _ in
+//                updateLinkedReferences()
+//            }
+//        case .references:
+//            text = BeamText(text: "References")
+//            linkedReferencesCancellable = note.$unlinkedReferences.sink { [unowned self] _ in
+//                updateLinkedReferences()
+//            }
+//        }
 
-        readOnly = true
         updateLinkedReferences()
         editor.layer?.addSublayer(layer)
 
@@ -64,6 +55,7 @@ class LinksSection: TextNode {
     }
 
     func updateLinkedReferences() {
+        return
         let
             refs: [NoteReference] = {
             switch mode {

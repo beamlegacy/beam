@@ -12,7 +12,7 @@ import NaturalLanguage
 import Combine
 
 // swiftlint:disable:next type_body_length
-public class TextNode: NSObject, CALayerDelegate {
+public class TextNode: Widget {
 
     var element: BeamElement { didSet {
         elementScope = element.$text.sink { [unowned self] _ in
@@ -21,12 +21,9 @@ public class TextNode: NSObject, CALayerDelegate {
     }}
     var elementScope: Cancellable?
     var layout: TextFrame?
-    let layer: CALayer
-    var debug = false
     var disclosurePressed = false
     var frameAnimation: FrameAnimation?
     var frameAnimationCancellable = Set<AnyCancellable>()
-    var currentFrameInDocument = NSRect()
 
     var interlineFactor = CGFloat(1.3)
     var interNodeSpacing = CGFloat(4)
@@ -35,19 +32,13 @@ public class TextNode: NSObject, CALayerDelegate {
     }
     var childInset = Float(23)
     var fontSize = CGFloat(17)
-    var isEmpty: Bool { children.isEmpty }
 
-    var contentsScale = CGFloat(2) {
+    override var contentsScale: CGFloat {
         didSet {
-            layer.contentsScale = contentsScale
             guard let actionLayer = actionLayer else { return }
             actionLayer.contentsScale = contentsScale
             actionTextLayer.contentsScale = contentsScale
             actionImageLayer.contentsScale = contentsScale
-
-            for c in children {
-                c.contentsScale = contentsScale
-            }
         }
     }
 
@@ -76,7 +67,8 @@ public class TextNode: NSObject, CALayerDelegate {
 
     var fullStrippedText: String {
         children.reduce(attributedString.string) { partial, node -> String in
-            partial + " " + node.fullStrippedText
+            guard let node = node as? TextNode else { return partial }
+            return partial + " " + node.fullStrippedText
         }
     }
 
@@ -99,20 +91,6 @@ public class TextNode: NSObject, CALayerDelegate {
         }
     }
 
-    var selfVisible = true { didSet { invalidateLayout() } }
-
-    var visible = true {
-        didSet {
-            layer.isHidden = !visible
-        }
-    }
-
-    var hover: Bool = false {
-        didSet {
-            invalidate()
-        }
-    }
-
     var _attributedString: NSAttributedString?
     var attributedString: NSAttributedString {
         if _attributedString == nil {
@@ -121,9 +99,14 @@ public class TextNode: NSObject, CALayerDelegate {
         return _attributedString!
     }
 
-    internal var children: [TextNode] {
-        return element.children.map { childElement -> TextNode in
-            editor.nodeFor(childElement)
+    internal override var children: [Widget] {
+        get {
+            return element.children.map { childElement -> TextNode in
+                editor.nodeFor(childElement)
+            }
+        }
+        set {
+            fatalError()
         }
     }
 
@@ -142,31 +125,6 @@ public class TextNode: NSObject, CALayerDelegate {
     var markedTextRange: Range<Int> { root?.markedTextRange ?? 0..<0 }
     var cursorPosition: Int { root?.cursorPosition ?? 0 }
 
-    var enabled: Bool { editor.enabled }
-
-    var contentsFrame = NSRect() // The rectangle of our text excluding children
-    var localTextFrame: NSRect { // The rectangle of our text excluding children
-        return NSRect(x: 0, y: 0, width: contentsFrame.width, height: contentsFrame.height)
-    }
-
-    var availableWidth: CGFloat = 1 {
-        didSet {
-            if availableWidth != oldValue {
-                invalidatedTextRendering = true
-                updateRendering()
-            }
-
-            for c in children {
-                c.availableWidth = availableWidth - CGFloat(childInset)
-            }
-        }
-    }
-
-    var frame = NSRect(x: 0, y: 0, width: 0, height: 0) // the total frame including text and children, in the parent reference
-    var localFrame: NSRect { // the total frame including text and children, in the local reference
-        return NSRect(x: 0, y: 0, width: frame.width, height: frame.height)
-    }
-
     var disclosureButtonFrame: NSRect {
         let r = NSRect(x: 2, y: -4, width: 16, height: 16)
         return r.offsetBy(dx: 0, dy: r.height).insetBy(dx: -4, dy: -4)
@@ -180,47 +138,14 @@ public class TextNode: NSObject, CALayerDelegate {
         return depth == 1
     }
 
-    var depth: Int { return allParents.count }
-
-    var idealSize: NSSize {
-        updateRendering()
-        return computedIdealSize
-    }
-
-    var offsetInDocument: NSPoint { // the position in the global document
-        let parentOffset = parent?.offsetInDocument ?? NSPoint()
-        let origin = frame.origin
-        return NSPoint(x: parentOffset.x + origin.x, y: parentOffset.y + origin.y)
-    }
-
-    var offsetInRoot: NSPoint { // the position in the global document
-        let parentOffset = parent?.offsetInRoot ?? NSPoint()
-        let origin = frame.origin
-        return NSPoint(x: parentOffset.x + origin.x, y: parentOffset.y + origin.y)
-    }
-
-    var frameInDocument: NSRect {
-        let offset = offsetInDocument
-        return NSRect(origin: offset, size: frame.size)
-    }
-
-    var textFrameInDocument: NSRect {
-        let offset = offsetInDocument
-        return NSRect(origin: offset, size: contentsFrame.size)
-    }
-
-    var parent: TextNode? {
-        guard let p = element.parent else { return nil }
-        return editor.nodeFor(p)
-    }
-
-    var root: TextRoot? {
-        if let r = _root {
-            return r
+    override var parent: Widget? {
+        get {
+            guard let p = element.parent else { return nil }
+            return editor.nodeFor(p)
         }
-        guard let parent = parent else { return self as? TextRoot }
-        _root = parent.root
-        return _root
+        set {
+            fatalError()
+        }
     }
 
     var readOnly: Bool = false
@@ -236,30 +161,14 @@ public class TextNode: NSObject, CALayerDelegate {
         return f.ascender
     }
 
-    var isBig: Bool {
-        editor.isBig
-    }
-
-    var invalidatedTextRendering = true
-
     let smallCursorWidth = CGFloat(2)
     let bigCursorWidth = CGFloat(7)
     var maxCursorWidth: CGFloat { max(smallCursorWidth, bigCursorWidth) }
 
     // walking the node tree:
     var inOpenBranch: Bool {
-        guard let p = parent else { return true }
+        guard let p = parent as? TextNode else { return true }
         return p.open && p.inOpenBranch
-    }
-
-    var allParents: [TextNode] {
-        var parents = [TextNode]()
-        var node = self
-        while let p = node.parent {
-            parents.append(p)
-            node = p
-        }
-        return parents
     }
 
     var isHeader: Bool {
@@ -269,29 +178,6 @@ public class TextNode: NSObject, CALayerDelegate {
     var isHigherHeading: Bool {
         return text.hasPrefix("# ")
     }
-
-    var firstVisibleParent: TextNode? {
-        var last: TextNode?
-        for p in allParents.reversed() {
-            if !p.open {
-                return last
-            }
-            last = p
-        }
-        return nil
-    }
-
-    var indexInParent: Int? {
-        guard let p = parent else { return nil }
-        return p.children.firstIndex { node -> Bool in
-            self === node
-        }
-    }
-
-    public private(set) var editor: BeamTextEdit
-    internal var computedIdealSize = NSSize()
-    private var _root: TextRoot?
-    private var needLayout = true
 
     private var icon = NSImage(named: "editor-cmdreturn")
     private var actionLayer: CALayer?
@@ -309,10 +195,7 @@ public class TextNode: NSObject, CALayerDelegate {
     init(editor: BeamTextEdit, element: BeamElement) {
         self.element = element
 
-        self.editor = editor
-        layer = CALayer()
-        super.init()
-        configureLayer()
+        super.init(editor: editor)
         createActionLayer()
 
         var inInit = true
@@ -324,17 +207,11 @@ public class TextNode: NSObject, CALayerDelegate {
     }
 
     deinit {
-        editor.removeNode(self)
-        layer.removeFromSuperlayer()
     }
 
     // MARK: - Setup UI
 
-    public func draw(_ layer: CALayer, in ctx: CGContext) {
-        draw(in: ctx)
-    }
-
-    public func draw(in context: CGContext) {
+    override public func draw(in context: CGContext) {
         context.saveGState()
         context.translateBy(x: indent, y: 0)
 
@@ -387,23 +264,7 @@ public class TextNode: NSObject, CALayerDelegate {
         context.drawPath(using: .fill)
     }
 
-    func setLayout(_ frame: NSRect) {
-        self.frame = frame
-        needLayout = false
-        layer.bounds = contentsFrame
-        layer.position = frameInDocument.origin
-
-        if self.currentFrameInDocument != frame {
-            if isEditing {
-                // print("Layout set: \(frame)")
-            }
-            invalidatedTextRendering = true
-            updateRendering()
-            invalidate() // invalidate before change
-            currentFrameInDocument = frame
-            invalidate()  // invalidate after the change
-        }
-
+    override func updateChildrenLayout() {
         var pos = NSPoint(x: CGFloat(childInset), y: self.contentsFrame.height)
 
         for c in children {
@@ -418,69 +279,20 @@ public class TextNode: NSObject, CALayerDelegate {
         updateActionLayer()
     }
 
-    func configureLayer() {
-        let newActions = [
-                "onOrderIn": NSNull(),
-                "onOrderOut": NSNull(),
-                "sublayers": NSNull(),
-                "contents": NSNull(),
-                "bounds": NSNull()
-            ]
-        layer.actions = newActions
-        layer.anchorPoint = CGPoint()
-        layer.setNeedsDisplay()
-        layer.backgroundColor = NSColor(white: 1, alpha: 0).cgColor
-        let score = element.score
-        layer.opacity = 0.3 + (score == 0 ? 1.0 : score) * 0.7
-        layer.delegate = self
-    }
-
-    func invalidateLayout() {
-        invalidate()
-        guard !needLayout else { return }
-        needLayout = true
-        guard let p = parent else { return }
-        p.invalidateLayout()
-    }
-
-    func invalidate(_ rect: NSRect? = nil) {
-        guard let p = parent else { return }
-        layer.setNeedsDisplay()
-        let offset = NSPoint(x: frame.origin.x + currentFrameInDocument.origin.x - frameInDocument.origin.x,
-                             y: frame.origin.y + currentFrameInDocument.origin.y - frameInDocument.origin.y)
-        if let r = rect {
-            p.invalidate(r.offsetBy(dx: offset.x, dy: offset.y))
-        } else {
-            let r = NSRect(x: offset.x, y: offset.y, width: currentFrameInDocument.width, height: contentsFrame.maxY)
-            p.invalidate(r)
-        }
-    }
-
-    func invalidateTextRendering() {
-        invalidatedTextRendering = true
-        invalidateLayout()
-    }
-
     func invalidateText() {
         if parent == nil {
             _attributedString = nil
             return
         }
         if updateAttributedString() {
-            invalidateTextRendering()
-        }
-    }
-
-    func deepInvalidateTextRendering() {
-        invalidateTextRendering()
-        for c in children {
-            c.deepInvalidateTextRendering()
+            invalidateRendering()
         }
     }
 
     func deepInvalidateText() {
         invalidateText()
         for c in children {
+            guard let c = c as? TextNode else { continue }
             c.deepInvalidateText()
         }
     }
@@ -538,24 +350,6 @@ public class TextNode: NSObject, CALayerDelegate {
         context.restoreGState()
     }
 
-    func drawImage(named: String, at point: NSPoint, in context: CGContext, size: CGRect? = nil) {
-        guard var image = NSImage(named: named) else {
-            fatalError("Image with name: \(named) can't be found")
-        }
-
-        let width = size?.width ?? image.size.width
-        let height = size?.height ?? image.size.height
-        let rect = CGRect(x: point.x, y: point.y, width: width, height: height)
-
-        image = image.fill(color: NSColor.editorIconColor)
-
-        context.saveGState()
-        context.translateBy(x: 0, y: image.size.height)
-        context.scaleBy(x: 1.0, y: -1.0)
-        context.draw(image.cgImage, in: rect)
-        context.restoreGState()
-    }
-
     func drawCursor(in context: CGContext) {
         guard !readOnly else { return }
 
@@ -593,18 +387,10 @@ public class TextNode: NSObject, CALayerDelegate {
         context.drawPath(using: .fill)
     }
 
-    func updateVisibility(_ isVisible: Bool) {
-        for c in children {
-            c.visible = isVisible
-            c.updateVisibility(isVisible && c.open)
-            invalidateLayout()
-        }
-    }
-
-    func updateRendering() {
+    override func updateRendering() {
         guard availableWidth > 0 else { return }
 
-        if invalidatedTextRendering {
+        if invalidatedRendering {
             contentsFrame = NSRect()
 
             if selfVisible {
@@ -627,7 +413,7 @@ public class TextNode: NSObject, CALayerDelegate {
             contentsFrame.size.width = availableWidth
             contentsFrame = contentsFrame.rounded()
 
-            invalidatedTextRendering = false
+            invalidatedRendering = false
         }
 
         computedIdealSize = contentsFrame.size
@@ -682,12 +468,13 @@ public class TextNode: NSObject, CALayerDelegate {
         invalidateLayout()
     }
 
-    func delete() {
+    override func delete() {
         parent?.removeChild(self)
         editor.removeNode(self)
     }
 
-    func insert(node: TextNode, after existingNode: TextNode) -> Bool {
+    override func insert(node: Widget, after existingNode: Widget) -> Bool {
+        guard let node = node as? TextNode, let existingNode = existingNode as? TextNode else { fatalError () }
         element.insert(node.element, after: existingNode.element)
         invalidateLayout()
         return true
@@ -698,74 +485,12 @@ public class TextNode: NSObject, CALayerDelegate {
         frameAnimationCancellable.removeAll()
     }
 
-    func nodeAt(point: CGPoint) -> TextNode? {
-        guard 0 <= point.y, point.y < frame.height else { return nil }
-        if contentsFrame.minY <= point.y, point.y < contentsFrame.maxY {
-            return self
-        }
-
-        if open {
-            for c in children {
-                let p = CGPoint(x: point.x - c.frame.origin.x, y: point.y - c.frame.origin.y)
-                if let res = c.nodeAt(point: p) {
-                    return res
-                }
-            }
-        }
-        return nil
-    }
-
     func sourceIndexFor(displayIndex: Int) -> Int {
         return displayIndex
     }
 
     func displayIndexFor(sourceIndex: Int) -> Int {
         return sourceIndex
-    }
-
-    func dispatchMouseDown(mouseInfo: MouseInfo) -> TextNode? {
-        guard NSRect(origin: NSPoint(), size: frame.size).contains(mouseInfo.position) else { return nil }
-
-        for c in children {
-            var i = mouseInfo
-            i.position.x -= c.frame.origin.x
-            i.position.y -= c.frame.origin.y
-            if let d = c.dispatchMouseDown(mouseInfo: i) {
-                return d
-            }
-        }
-
-        if mouseDown(mouseInfo: mouseInfo) {
-            return self
-        }
-
-        return contentsFrame.contains(mouseInfo.position) ? self : nil
-    }
-
-    func dispatchMouseUp(mouseInfo: MouseInfo) -> TextNode? {
-        guard let focussedNode = root?.node else { return nil }
-
-        var i = mouseInfo
-        i.position.x -= focussedNode.offsetInRoot.x
-        i.position.y -= focussedNode.offsetInRoot.y
-        if focussedNode.mouseUp(mouseInfo: i) {
-            return focussedNode
-        }
-
-        return nil
-    }
-
-    func dispatchMouseDragged(mouseInfo: MouseInfo) -> TextNode? {
-        guard let focussedNode = root?.node else { return nil }
-
-        var i = mouseInfo
-        i.position.x -= focussedNode.offsetInRoot.x
-        i.position.y -= focussedNode.offsetInRoot.y
-        if focussedNode.mouseDragged(mouseInfo: i) {
-            return focussedNode
-        }
-
-        return nil
     }
 
     func beginningOfLineFromPosition(_ position: Int) -> Int {
@@ -788,7 +513,7 @@ public class TextNode: NSObject, CALayerDelegate {
 
     func fold() {
         if children.isEmpty {
-            guard let p = parent else { return }
+            guard let p = parent as? TextNode else { return }
             p.fold()
             root?.node = p
             root?.cursorPosition = 0
@@ -803,25 +528,19 @@ public class TextNode: NSObject, CALayerDelegate {
         open = true
     }
 
-    func focus() {
+    override func focus() {
+        super.focus()
         guard !text.isEmpty else { return }
-        dragMode = .none
         showHoveredActionLayers(false)
     }
 
-    func unfocus() {
-        dragMode = .none
+    override func unfocus() {
+        super.unfocus()
         resetActionLayers()
     }
 
     // MARK: - Mouse Events
-    enum DragMode {
-        case none
-        case select(Int)
-    }
-    var dragMode = DragMode.none
-
-    func mouseDown(mouseInfo: MouseInfo) -> Bool {
+    override func mouseDown(mouseInfo: MouseInfo) -> Bool {
         if showDisclosureButton && disclosureButtonFrame.contains(mouseInfo.position) {
             disclosurePressed = true
             return true
@@ -864,7 +583,7 @@ public class TextNode: NSObject, CALayerDelegate {
         return false
     }
 
-    func mouseUp(mouseInfo: MouseInfo) -> Bool {
+    override func mouseUp(mouseInfo: MouseInfo) -> Bool {
         // print("mouseUp (\(mouseInfo))")
         dragMode = .none
         if disclosurePressed && disclosureButtonFrame.contains(mouseInfo.position) {
@@ -879,7 +598,7 @@ public class TextNode: NSObject, CALayerDelegate {
         return false
     }
 
-    func mouseMoved(mouseInfo: MouseInfo) -> Bool {
+    override func mouseMoved(mouseInfo: MouseInfo) -> Bool {
         guard let actionLayer = actionLayer else { return false }
 
         let position = actionLayerMousePosition(from: mouseInfo)
@@ -903,7 +622,7 @@ public class TextNode: NSObject, CALayerDelegate {
         return false
     }
 
-    func mouseDragged(mouseInfo: MouseInfo) -> Bool {
+    override func mouseDragged(mouseInfo: MouseInfo) -> Bool {
         let p = positionAt(point: mouseInfo.position)
         root?.cursorPosition = p
 
@@ -1060,93 +779,6 @@ public class TextNode: NSObject, CALayerDelegate {
         return NSRect(x: x1, y: CGFloat(l) * fontSize, width: 1.5, height: fontSize )
     }
 
-    public func deepestChild() -> TextNode {
-        if let n = children.last {
-            return n.deepestChild()
-        }
-        return self
-    }
-
-    public func nextNode() -> TextNode? {
-        // if we have children, take the first one
-        if children.count > 0 {
-            return children.first
-        }
-
-        // Try to find the next sibbling TextNode:
-        if let n = nextSibblingNode() {
-            return n
-        }
-
-        // Try to find the next TextNode of our parent
-        var p = parent
-        var n: TextNode?
-        while n == nil && p != nil {
-            n = p!.nextSibblingNode()
-            p = p!.parent
-        }
-
-        if n != nil {
-            return n
-        }
-
-        return nil
-    }
-
-    public func previousNode() -> TextNode? {
-        if let n = previousSibblingNode() {
-            return n.deepestChild()
-        }
-
-        if let p = parent {
-            return p
-        }
-        return nil
-    }
-
-    public func nextSibblingNode() -> TextNode? {
-        if let p = parent {
-            let sibblings = p.children
-            if let i = sibblings.firstIndex(of: self) {
-                if sibblings.count > i + 1 {
-                    return sibblings[i + 1]
-                }
-            }
-        }
-        return nil
-    }
-
-    public func previousSibblingNode() -> TextNode? {
-        if let p = parent {
-            let sibblings = p.children
-            if let i = sibblings.firstIndex(of: self) {
-                if i > 0 {
-                    return sibblings[i - 1]
-                }
-            }
-        }
-        return nil
-    }
-
-    // Focus
-    public func nextVisible() -> TextNode? {
-        var n = nextNode()
-        while n != nil && !(n!.inOpenBranch) {
-            n = n?.nextNode()
-        }
-
-        return n
-    }
-
-    public func previousVisible() -> TextNode? {
-        var n = previousNode()
-        while n != nil && !n!.inOpenBranch {
-            n = n!.previousNode()
-        }
-
-        return n as? TextRoot == nil ? n : nil
-    }
-
     public func indexOnLastLine(atOffset x: CGFloat) -> Int {
         guard let lines = layout?.lines else { return 0 }
         guard !lines.isEmpty else { return 0 }
@@ -1171,7 +803,7 @@ public class TextNode: NSObject, CALayerDelegate {
         return sourceIndex
     }
 
-    public func printTree(level: Int = 0) -> String {
+    override public func printTree(level: Int = 0) -> String {
         return String.tabs(level)
             + (children.isEmpty ? "- " : (open ? "v - " : "> - "))
             + text.text + "\n"
@@ -1195,7 +827,7 @@ public class TextNode: NSObject, CALayerDelegate {
         return true
     }
 
-    internal func drawDebug(in context: CGContext) {
+    override internal func drawDebug(in context: CGContext) {
         if frameAnimation != nil {
             context.setFillColor(NSColor.blue.cgColor.copy(alpha: 0.2)!)
             context.fill(NSRect(origin: NSPoint(), size: contentsFrame.size))
@@ -1212,38 +844,7 @@ public class TextNode: NSObject, CALayerDelegate {
         context.fill(contentsFrame)
     }
 
-    private func invalidateRoot() {
-        _root = nil
-
-        for c in children {
-            c.invalidateRoot()
-        }
-    }
-
     private func buildAttributedString() -> NSAttributedString {
-//        let config = AttributedStringVisitor.Configuration()
-//        let visitor = AttributedStringVisitor(configuration: config)
-//        visitor.defaultFontSize = fontSize
-//        visitor.context.color = color
-//
-//        if root != nil && text.isEmpty && cursorPosition < 0 {
-//            let attributed = placeholder.attributed
-//
-//            attributed.setAttributes([.font: visitor.font(for: visitor.context), .foregroundColor: disabledColor], range: attributed.wholeRange)
-//            _attributedString = attributed
-//            return attributed
-//        }
-//        let parser = Parser(inputString: text)
-//        _ast = parser.parseAST()
-//
-////        print("AST:\n\(AST.treeString)")
-//
-//        if root?.node === self && editor.hasFocus {
-//            visitor.cursorPosition = selectedTextRange.startIndex
-//            visitor.anchorPosition = selectedTextRange.endIndex
-//        }
-//        let str = visitor.visit(_ast!)
-
         let str = text.buildAttributedString(fontSize: fontSize, cursorPosition: cursorPosition)
         let paragraphStyle = NSMutableParagraphStyle()
 //        paragraphStyle.alignment = .justified
@@ -1255,16 +856,6 @@ public class TextNode: NSObject, CALayerDelegate {
 
         str.addAttribute(.paragraphStyle, value: paragraphStyle, range: str.wholeRange)
         return str
-    }
-
-    private func inSubTreeOf(_ node: TextNode) -> Bool {
-        if node === self {
-            return true
-        }
-        if let p = parent {
-            return p.inSubTreeOf(node)
-        }
-        return false
     }
 
     private func actionLayerMousePosition(from mouseInfo: MouseInfo) -> NSPoint {

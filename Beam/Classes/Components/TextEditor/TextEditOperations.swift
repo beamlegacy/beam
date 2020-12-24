@@ -9,6 +9,7 @@ import Foundation
 
 extension TextRoot {
     func eraseSelection() {
+        guard let node = node as? TextNode else { return }
         guard !node.readOnly else { return }
         guard !selectedTextRange.isEmpty else { return }
 
@@ -21,12 +22,14 @@ extension TextRoot {
     }
 
     func increaseIndentation() {
+        guard let node = node as? TextNode else { return }
         guard !node.readOnly else { return }
-        guard let newParent = node.previousSibblingNode() else { return }
+        guard let newParent = node.previousSibbling() else { return }
         newParent.addChild(node)
     }
 
     func decreaseIndentation() {
+        guard let node = node as? TextNode else { return }
         guard !node.readOnly else { return }
         guard let parent = node.parent else { return }
         guard let newParent = parent.parent else { return }
@@ -35,6 +38,7 @@ extension TextRoot {
     }
 
     func deleteForward() {
+        guard let node = node as? TextNode else { return }
         guard !node.readOnly else { return }
         if !selectedTextRange.isEmpty {
             eraseSelection()
@@ -42,7 +46,7 @@ extension TextRoot {
             node.text.remove(count: 1, at: cursorPosition)
             cancelSelection()
         } else {
-            if let nextNode = node.nextVisible() {
+            if let nextNode = node.nextVisible() as? TextNode {
                 let remainingText = nextNode.text
                 // Reparent existing children to the node we're merging in
                 for c in nextNode.children {
@@ -57,11 +61,12 @@ extension TextRoot {
     }
 
     func deleteBackward() {
+        guard let node = node as? TextNode else { return }
         guard !node.readOnly else { return }
         if !selectedTextRange.isEmpty {
             eraseSelection()
         } else if cursorPosition == 0 {
-            if let nextNode = node.previousVisible() {
+            if let nextNode = node.previousVisible() as? TextNode {
                 let remainingText = node.text
 
                 // Reparent existing children to the node we're merging in
@@ -70,7 +75,7 @@ extension TextRoot {
                 }
 
                 node.delete()
-                node = nextNode
+                self.node = nextNode
 
                 cursorPosition = node.text.count
                 nextNode.text.append(remainingText)
@@ -84,6 +89,7 @@ extension TextRoot {
     }
 
     func insertNewline() {
+        guard let node = node as? TextNode else { return }
         guard !node.readOnly else { return }
         if !selectedTextRange.isEmpty {
             node.text.removeSubrange(selectedTextRange)
@@ -100,6 +106,7 @@ extension TextRoot {
     }
 
     func pushUndoState(_ command: Command) {
+        guard let node = node as? TextNode else { return }
         guard !node.readOnly else { return }
         defer {
             if !undoManager.isRedoing {
@@ -111,14 +118,16 @@ extension TextRoot {
         guard commandDef.undo else { return }
         guard !(commandDef.coalesce && lastCommand == command) else { return }
 
-        let state = TextState(text: self.node.text, selectedTextRange: selectedTextRange, markedTextRange: markedTextRange, cursorPosition: cursorPosition)
+        let state = TextState(text: node.text, selectedTextRange: selectedTextRange, markedTextRange: markedTextRange, cursorPosition: cursorPosition)
         undoManager.registerUndo(withTarget: self, handler: { (selfTarget) in
             if commandDef.redo {
                 selfTarget.lastCommand = .none
                 selfTarget.pushUndoState(command) // push the redo!
             }
 
-            selfTarget.node.text = state.text
+
+            guard let selfNode = selfTarget.node as? TextNode else { return }
+            selfNode.text = state.text
             selfTarget.selectedTextRange = state.selectedTextRange
             selfTarget.markedTextRange = state.markedTextRange
             selfTarget.cursorPosition = state.cursorPosition
@@ -132,6 +141,7 @@ extension TextRoot {
     }
 
     public func setMarkedText(string: String, selectedRange: Range<Int>, replacementRange: Range<Int>) {
+        guard let node = node as? TextNode else { return }
         guard !node.readOnly else { return }
         var range = cursorPosition..<cursorPosition
         if !replacementRange.isEmpty {
@@ -157,11 +167,13 @@ extension TextRoot {
     }
 
     public func unmarkText() {
+        guard let node = node as? TextNode else { return }
         guard !node.readOnly else { return }
         markedTextRange = 0..<0
     }
 
     public func insertText(string: String, replacementRange: Range<Int>) {
+        guard let node = node as? TextNode else { return }
         guard !node.readOnly else { return }
         pushUndoState(.insertText)
 
