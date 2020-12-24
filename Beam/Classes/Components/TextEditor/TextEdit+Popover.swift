@@ -5,7 +5,6 @@
 //  Created by Ravichandrane Rajendran on 22/12/2020.
 //
 
-import Foundation
 import Cocoa
 
 extension BeamTextEdit {
@@ -23,12 +22,13 @@ extension BeamTextEdit {
 
     internal func updatePopover(isDeleteBackward: Bool = false) {
         var text = node.text.text
+        let regex = "@|#"
 
         if isDeleteBackward && !text.contains(where: { ["@", "#"].contains($0) }) { dismissPopover() }
-        guard let range = text.range(of: "@|#", options: .regularExpression) else { return }
+        guard let range = text.range(of: regex, options: .regularExpression) else { return }
 
         text.removeSubrange(..<range.lowerBound)
-        popover?.text = text.replacingOccurrences(of: "@|#", with: "", options: .regularExpression)
+        popover?.text = text.replacingOccurrences(of: regex, with: "", options: .regularExpression)
     }
 
     internal func dismissPopover() {
