@@ -34,7 +34,7 @@ extension APIRequestError: LocalizedError {
 }
 
 class APIRequest {
-    var route: String { Configuration.apiBaseUrl + "/graphql" }
+    var route: String { "https://\(Configuration.apiHostname)/graphql" }
     let headers: HTTPHeaders = [
         "User-Agent": "Beam client, \(Information.appVersionAndBuild)",
         "Accept": "application/json",

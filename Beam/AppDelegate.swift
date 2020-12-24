@@ -48,6 +48,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         updateBadge()
         createWindow()
+
+        // So we remember we're not currently using the default api server
+        if Configuration.apiHostnameDefault != Configuration.apiHostname {
+            Logger.shared.logInfo("🛑 API HOSTNAME is \(Configuration.apiHostname)", category: .general)
+        }
     }
 
     func updateBadge() {
@@ -110,7 +115,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     func application(_ application: NSApplication,
                      continue userActivity: NSUserActivity,
                      restorationHandler: @escaping ([NSUserActivityRestoring]) -> Void) -> Bool {
-        print(userActivity)
+        Logger.shared.logDebug(userActivity.description, category: .general)
 
         // Get URL components from the incoming user activity.
         guard userActivity.activityType == NSUserActivityTypeBrowsingWeb,
@@ -119,7 +124,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             return false
         }
 
-        return parseBeamURL(components: components)
+        return parseHTTPScheme(components: components)
     }
 
     var notesWindow: NotesWindow?

@@ -56,7 +56,7 @@ class AccountManager {
         }
     }
 
-    func logout() {
+    static func logout() {
         Persistence.cleanUp()
         Logger.shared.logDebug("Logged out", category: .general)
     }

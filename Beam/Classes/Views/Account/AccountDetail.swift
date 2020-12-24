@@ -71,7 +71,7 @@ struct AccountDetail: View {
                             Text("Forgot Password").frame(minWidth: 100)
                         }).disabled(loggedIn)
                         Button(action: {
-                            accountManager.logout()
+                            AccountManager.logout()
                         }, label: {
                             // TODO: loc
                             Text("Logout").frame(minWidth: 100)
