@@ -39,12 +39,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         CoreDataManager.shared.setup()
         LibrariesManager.shared.configure()
 
+        #if !DEBUG
         let sparkleUpdater = SPUUpdater(hostBundle: Bundle.main,
                                         applicationBundle: Bundle.main,
                                         userDriver: SPUStandardUserDriver(),
                                         delegate: nil)
 
         sparkleUpdater.checkForUpdatesInBackground()
+        #endif
 
         updateBadge()
         createWindow()
@@ -62,7 +64,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     func createWindow() {
         // Create the window and set the content view.
-        window = BeamWindow(contentRect: NSRect(x: 0, y: 0, width: 1300, height: 895), data: data)
+        window = BeamWindow(contentRect: NSRect(x: 0, y: 0, width: 800, height: 600), data: data)
         window.center()
         window.makeKeyAndOrderFront(nil)
         windows.append(window)
