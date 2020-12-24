@@ -966,6 +966,16 @@ public class TextNode: NSObject, CALayerDelegate {
         return CGFloat(result)
     }
 
+    public func offsetAndFrameAt(index: Int) -> (CGFloat, NSRect) {
+        guard layout != nil, !layout!.lines.isEmpty else { return (0, NSRect()) }
+        let displayIndex = displayIndexFor(sourceIndex: index)
+        guard let line = lineAt(index: displayIndex) else { return (0, NSRect()) }
+        let layoutLine = layout!.lines[line]
+        let positionInLine = displayIndex
+        let result = layoutLine.offsetFor(index: positionInLine)
+        return (CGFloat(result), layoutLine.frame)
+    }
+
     public func positionAbove(_ position: Int) -> Int {
         guard let l = lineAt(index: position), l > 0 else { return 0 }
         let offset = offsetAt(index: position)

@@ -10,10 +10,12 @@ import Cocoa
 extension BeamTextEdit {
 
     internal func initPopover() {
-        let currentFrame = self.node.currentFrameInDocument
         let cursorPosition = rootNode.cursorPosition
-        print(cursorPosition, rootNode.text)
-        popover = Popover<String>(frame: NSRect(x: 210, y: currentFrame.maxY + 30, width: 300, height: 150))
+        let (posX, rect) = node.offsetAndFrameAt(index: cursorPosition)
+        let x = posX == 0 ? 220 : posX + 200
+        let y = rect.maxY == 0 ? 60 : rect.maxY + 40
+
+        popover = Popover<String>(frame: NSRect(x: x, y: y, width: 300, height: 150))
 
         guard let popover = popover else { return }
 
