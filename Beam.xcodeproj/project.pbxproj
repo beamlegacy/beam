@@ -1859,6 +1859,7 @@
 /* Begin XCBuildConfiguration section */
 		965A784F2514F149009980D4 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 4181712D25810CDC00317ED8 /* Debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -1922,6 +1923,7 @@
 		};
 		965A78502514F149009980D4 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 4181713025810CDC00317ED8 /* Release.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
