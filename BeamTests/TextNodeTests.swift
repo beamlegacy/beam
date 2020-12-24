@@ -99,7 +99,6 @@ class TextNodeTests: XCTestCase {
                 - bullet21
                 - bullet22
                 - bullet23
-            - Links
 
         """
 
@@ -123,7 +122,6 @@ class TextNodeTests: XCTestCase {
                 - bullet21
                 - bullet22
                 - bullet23
-            - Links
 
         """
 
@@ -145,7 +143,6 @@ class TextNodeTests: XCTestCase {
                 - bullet21
                 - bullet22
                 - bullet23
-            - Links
 
         """
 
@@ -173,7 +170,6 @@ class TextNodeTests: XCTestCase {
                 - bullet22
                 - bullet23
             - bullet3
-            - Links
 
         """
 
@@ -200,7 +196,6 @@ class TextNodeTests: XCTestCase {
                 - bullet21
                 - bullet22
                 - bullet23
-            - Links
 
         """
 
@@ -227,7 +222,6 @@ class TextNodeTests: XCTestCase {
                 - bullet21
                 - bullet22
                 - bullet23
-            - Links
 
         """
 
@@ -254,7 +248,6 @@ class TextNodeTests: XCTestCase {
                 - bullet21
                 - bullet22
                 - bullet23
-            - Links
 
         """
 
@@ -284,7 +277,6 @@ class TextNodeTests: XCTestCase {
                 - bullet21
                 - bullet22
                 - bullet23
-            - Links
 
         """
 
@@ -314,7 +306,6 @@ class TextNodeTests: XCTestCase {
                 - bullet21
                 - bullet22
                 - bullet23
-            - Links
 
         """
 
@@ -337,7 +328,6 @@ class TextNodeTests: XCTestCase {
                 - bullet21
                 - bullet22
                 - bullet23
-            - Links
 
         """
 
@@ -362,7 +352,6 @@ class TextNodeTests: XCTestCase {
                 - bullet21
                 - bullet22
                 - bullet23
-            - Links
 
         """
 
@@ -392,7 +381,6 @@ class TextNodeTests: XCTestCase {
                 - bullet21
                 - bullet22
                 - bullet23
-            - Links
 
         """
 
@@ -412,7 +400,6 @@ class TextNodeTests: XCTestCase {
                 - bullet21
                 - bullet22
                 - bullet23
-            - Links
 
         """
         XCTAssertEqual(str2, root.printTree())
@@ -450,7 +437,6 @@ class TextNodeTests: XCTestCase {
                 - bullet21
                 - bullet22
                 - bullet23
-            - Links
 
         """
 
@@ -470,7 +456,6 @@ class TextNodeTests: XCTestCase {
                 - bullet21
                 - bullet22
                 - bullet23
-            - Links
 
         """
         XCTAssertEqual(str2, root.printTree())
@@ -508,7 +493,6 @@ class TextNodeTests: XCTestCase {
                 - bullet21
                 - bullet22
                 - bullet23
-            - Links
 
         """
 
@@ -528,7 +512,6 @@ class TextNodeTests: XCTestCase {
                 - bullet21
                 - bullet22
                 - bullet23
-            - Links
 
         """
         XCTAssertEqual(str2, root.printTree())
@@ -566,7 +549,6 @@ class TextNodeTests: XCTestCase {
                 - bullet21
                 - bullet22
                 - bullet23
-            - Links
 
         """
 
@@ -744,7 +726,7 @@ class TextNodeTests: XCTestCase {
         let note = createMiniArborescence(title: "title")
         let editor = BeamTextEdit(root: note)
         let root = editor.rootNode!
-        XCTAssertEqual(" bullet1 bullet11 bullet12 bullet2 bullet21 bullet22 bullet23 Links", root.fullStrippedText)
+        XCTAssertEqual(" bullet1 bullet11 bullet12 bullet2 bullet21 bullet22 bullet23", root.fullStrippedText)
 
     }
 

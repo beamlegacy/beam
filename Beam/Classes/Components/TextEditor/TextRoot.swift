@@ -178,13 +178,13 @@ public class TextRoot: TextNode {
     var unlinkedRefsNode: TextNode?
 
     public override func printTree(level: Int = 0) -> String {
-        return String.tabs(level) + (note?.title ?? "<???>") + "\n" + children.prefix(children.count - 1).reduce("", { result, child -> String in
+        return String.tabs(level) + (note?.title ?? "<???>") + "\n" + children.prefix(children.count).reduce("", { result, child -> String in
             result + child.printTree(level: level + 1)
         })
     }
 
     override var fullStrippedText: String {
-        children.prefix(children.count - 1).reduce(attributedString.string) { partial, node -> String in
+        children.prefix(children.count).reduce(attributedString.string) { partial, node -> String in
             guard let node = node as? TextNode else { return partial }
             return partial + " " + node.fullStrippedText
         }

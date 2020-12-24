@@ -458,12 +458,14 @@ public class TextNode: Widget {
 
     // MARK: - Methods TextNode
 
-    func addChild(_ child: TextNode) {
+    override func addChild(_ child: Widget) {
+        guard let child = child as? TextNode else { return }
         element.addChild(child.element)
         invalidateLayout()
     }
 
-    func removeChild(_ child: TextNode) {
+    override func removeChild(_ child: Widget) {
+        guard let child = child as? TextNode else { return }
         element.removeChild(child.element)
         invalidateLayout()
     }
