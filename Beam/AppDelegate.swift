@@ -88,7 +88,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             createWindow()
         }
 
-        return false
+        return true
     }
 
     func windowWillReturnUndoManager(window: NSWindow) -> UndoManager? {
