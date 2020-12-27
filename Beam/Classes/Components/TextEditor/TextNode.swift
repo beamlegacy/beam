@@ -138,13 +138,21 @@ public class TextNode: Widget {
         return depth == 1
     }
 
+    var _parent: Widget?
     override var parent: Widget? {
         get {
+            // If the parent has been forced on us:
+            if _parent != nil {
+                return _parent
+            }
+
+            // Otherwise use the document's information
             guard let p = element.parent else { return nil }
             return editor.nodeFor(p)
         }
         set {
-            fatalError()
+            // force the parent for this node (happens when using proxies)
+            _parent = newValue
         }
     }
 

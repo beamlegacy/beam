@@ -348,7 +348,7 @@ public class Widget: NSObject, CALayerDelegate {
     }
 
     func delete() {
-//        parent?.removeChild(self)
+        parent?.removeChild(self)
 //        editor.removeNode(self)
     }
 

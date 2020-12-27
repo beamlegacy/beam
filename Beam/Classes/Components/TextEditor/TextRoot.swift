@@ -84,8 +84,8 @@ public class TextRoot: TextNode {
     override internal var children: [Widget] {
         get {
             return super.children
-//                + (linksSection != nil ? [linksSection!] : [])
-//                + (referencesSection != nil ? [referencesSection!] : [])
+                + (linksSection != nil ? [linksSection!] : [])
+                + (referencesSection != nil ? [referencesSection!] : [])
         }
         set {
             fatalError()
