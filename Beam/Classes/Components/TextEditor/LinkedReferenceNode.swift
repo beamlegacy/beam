@@ -36,32 +36,7 @@ class LinkedReferenceNode: TextNode {
 
         editor.layer?.addSublayer(layer)
         open = false
-//        layer.backgroundColor = NSColor.green.withAlphaComponent(0.3).cgColor
     }
 
     var section: LinksSection
-
-//    override func updateLayout() {
-//        super.setLayout(frame)
-//        print("LinkedReferenceNode.updateLayout \(frame) / \(frameInDocument)")
-//    }
-
-    public override  func draw(in context: CGContext) {
-        super.draw(in: context)
-
-//        context.saveGState()
-//
-//        let c = NSColor.green.cgColor
-//        context.setStrokeColor(c)
-//        context.stroke(contentsFrame)
-//
-//        context.setFillColor(c.copy(alpha: 0.4)!)
-//        context.fill(contentsFrame)
-//
-//        context.restoreGState()
-    }
-
-    override func mouseDown(mouseInfo: MouseInfo) -> Bool {
-        return super.mouseDown(mouseInfo: mouseInfo)
-    }
 }

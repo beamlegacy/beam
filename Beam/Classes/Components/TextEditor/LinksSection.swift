@@ -33,7 +33,6 @@ class LinksSection: Widget {
             }
         }
     }
-//    var unlinkedReferenceNodes = [UnlinkedReferenceNode]()
     var linkedReferencesCancellable: Cancellable!
     var note: BeamNote
     let textLayer = CATextLayer()
@@ -51,7 +50,7 @@ class LinksSection: Widget {
         maskLayer.contents = chevron
         chevronLayer.mask = maskLayer
         chevronLayer.backgroundColor = NSColor.editorIconColor.cgColor
-        //chevronLayer.contents = chevron
+
         switch mode {
         case .links:
             textLayer.string = "\(note.linkedReferences.count) Links"
@@ -78,14 +77,11 @@ class LinksSection: Widget {
         chevronLayer.frame = CGRect(origin: CGPoint(x: 0, y: 0), size: chevron?.size ?? CGSize(width: 20, height: 20))
         maskLayer.frame = chevronLayer.bounds
         updateChevron()
-//        layer.backgroundColor = NSColor.red.withAlphaComponent(0.3).cgColor
-//        offset = NSEdgeInsets(top: 10, left: 0, bottom: 0, right: 0)
     }
 
     override var contentsScale: CGFloat {
         didSet {
             textLayer.contentsScale = contentsScale
-//            print("new content scale: \(contentsScale)")
         }
     }
     func updateLinkedReferences() {
@@ -137,11 +133,6 @@ class LinksSection: Widget {
 
             pos.y += childSize.height
         }
-    }
-
-    override func mouseDown(mouseInfo: MouseInfo) -> Bool {
-        print("LinkSection.mouseDown \(mouseInfo.position)")
-        return super.mouseDown(mouseInfo: mouseInfo)
     }
 
     override func mouseUp(mouseInfo: MouseInfo) -> Bool {
