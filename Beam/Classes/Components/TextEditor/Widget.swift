@@ -541,7 +541,8 @@ public class Widget: NSObject, CALayerDelegate {
     }
 
     public func printTree(level: Int = 0) -> String {
-        return String.tabs(level)
+        return ""
+//        return String.tabs(level)
 //            + (children.isEmpty ? "- " : (open ? "v - " : "> - "))
 ////            + text.text + "\n"
 //            + (open ?
