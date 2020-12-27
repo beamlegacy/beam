@@ -36,7 +36,7 @@ class LinkedReferenceNode: TextNode {
 
         editor.layer?.addSublayer(layer)
         open = false
-        layer.backgroundColor = NSColor.green.withAlphaComponent(0.3).cgColor
+//        layer.backgroundColor = NSColor.green.withAlphaComponent(0.3).cgColor
     }
 
     var section: LinksSection

@@ -19,6 +19,7 @@ class LinksSection: Widget {
     var open: Bool = true {
         didSet {
             updateVisibility(visible && open)
+            updateChevron()
             invalidateLayout()
         }
     }
@@ -36,42 +37,55 @@ class LinksSection: Widget {
     var linkedReferencesCancellable: Cancellable!
     var note: BeamNote
     let textLayer = CATextLayer()
+    let chevronLayer = CALayer()
 
     init(editor: BeamTextEdit, note: BeamNote, mode: Mode) {
         self.note = note
         self.mode = mode
         super.init(editor: editor)
         // Append the linked references and unlinked references nodes
-        textLayer.foregroundColor = NSColor.editorTextColor.cgColor
+        textLayer.foregroundColor = NSColor.editorIconColor.cgColor
         textLayer.fontSize = 14
+        let chevron = NSImage(named: "editor-arrow_right")
+        let maskLayer = CALayer()
+        maskLayer.contents = chevron
+        chevronLayer.mask = maskLayer
+        chevronLayer.backgroundColor = NSColor.editorIconColor.cgColor
+        //chevronLayer.contents = chevron
         switch mode {
         case .links:
             textLayer.string = "\(note.linkedReferences.count) Links"
             linkedReferencesCancellable = note.$linkedReferences.sink { [unowned self] links in
                 updateLinkedReferences()
-                textLayer.string = "\(note.linkedReferences.count) Links"
+                textLayer.string = "\(links.count) Links"
+                updateLayerVisibility()
             }
         case .references:
             textLayer.string = "\(note.unlinkedReferences.count) References"
             linkedReferencesCancellable = note.$unlinkedReferences.sink { [unowned self] links in
                 updateLinkedReferences()
-                textLayer.string = "\(note.unlinkedReferences.count) References"
+                textLayer.string = "\(links.count) References"
+                updateLayerVisibility()
             }
         }
 
         updateLinkedReferences()
+        updateLayerVisibility()
         editor.layer?.addSublayer(layer)
         layer.addSublayer(textLayer)
-        textLayer.frame = CGRect(origin: CGPoint(), size: textLayer.preferredFrameSize())
-        layer.backgroundColor = NSColor.red.withAlphaComponent(0.3).cgColor
-
+        layer.addSublayer(chevronLayer)
+        textLayer.frame = CGRect(origin: CGPoint(x: 25, y: 0), size: textLayer.preferredFrameSize())
+        chevronLayer.frame = CGRect(origin: CGPoint(x: 0, y: 0), size: chevron?.size ?? CGSize(width: 20, height: 20))
+        maskLayer.frame = chevronLayer.bounds
+        updateChevron()
+//        layer.backgroundColor = NSColor.red.withAlphaComponent(0.3).cgColor
 //        offset = NSEdgeInsets(top: 10, left: 0, bottom: 0, right: 0)
     }
 
     override var contentsScale: CGFloat {
         didSet {
-//            textLayer.contentScale = contentsScale
-            print("new content scale: \(contentsScale)")
+            textLayer.contentsScale = contentsScale
+//            print("new content scale: \(contentsScale)")
         }
     }
     func updateLinkedReferences() {
@@ -95,7 +109,7 @@ class LinksSection: Widget {
     }
 
     override func updateRendering() {
-        contentsFrame = NSRect(x: 0, y: 0, width: availableWidth, height: 50)
+        contentsFrame = NSRect(x: 0, y: 0, width: availableWidth, height: linkedReferenceNodes.isEmpty ? 0 : 30)
 
         computedIdealSize = contentsFrame.size
         computedIdealSize.width = frame.width
@@ -107,9 +121,9 @@ class LinksSection: Widget {
         }
     }
 
-//    override func updateLayout() {
-//        print("LinkSection.updateLayout \(frame) / \(frameInDocument)")
-//    }
+    func updateLayerVisibility() {
+        layer.isHidden = linkedReferenceNodes.isEmpty
+    }
 
     override func updateChildrenLayout() {
         let childInset = 23
@@ -136,5 +150,9 @@ class LinksSection: Widget {
             return true
         }
         return super.mouseUp(mouseInfo: mouseInfo)
+    }
+
+    func updateChevron() {
+        chevronLayer.setAffineTransform(CGAffineTransform(rotationAngle: open ? CGFloat.pi / 2 : 0))
     }
 }
