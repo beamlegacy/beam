@@ -41,10 +41,10 @@ class LinkedReferenceNode: TextNode {
 
     var section: LinksSection
 
-    override func setLayout(_ frame: NSRect) {
-//        print("LinkedReferenceNode setLayout: \(frame)")
-        super.setLayout(frame)
-    }
+//    override func updateLayout() {
+//        super.setLayout(frame)
+//        print("LinkedReferenceNode.updateLayout \(frame) / \(frameInDocument)")
+//    }
 
     public override  func draw(in context: CGContext) {
         super.draw(in: context)

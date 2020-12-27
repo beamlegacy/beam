@@ -31,7 +31,14 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     func updateRoot(with note: BeamElement) {
-        guard mapping[note] == nil else { return }
+        guard note != rootNode?.element else { return }
+        if let layers = layer?.sublayers {
+            for l in layers where l !== titleLayer {
+                l.removeFromSuperlayer()
+            }
+        }
+
+//        guard mapping[note] == nil else { return }
         guard let rootnode = nodeFor(note) as? TextRoot else { fatalError() }
         rootNode = rootnode
         accessingMapping = true

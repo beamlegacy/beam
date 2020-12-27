@@ -194,19 +194,19 @@ public class Widget: NSObject, CALayerDelegate {
         layer.bounds = contentsFrame
         layer.position = frameInDocument.origin
 
-        updateLayout()
-        updateChildrenLayout()
-    }
-
-
-    func updateLayout() {
         if self.currentFrameInDocument != frame {
+            updateLayout()
             invalidatedRendering = true
             updateRendering()
             invalidate() // invalidate before change
             currentFrameInDocument = frame
             invalidate()  // invalidate after the change
         }
+        updateChildrenLayout()
+    }
+
+
+    func updateLayout() {
     }
 
     func updateChildrenLayout() {

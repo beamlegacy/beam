@@ -142,29 +142,10 @@ public class TextRoot: TextNode {
 
         if let note = note {
             linksSection = LinksSection(editor: editor, note: note, mode: .links)
+            linksSection?.parent = self
             referencesSection = LinksSection(editor: editor, note: note, mode: .references)
+            referencesSection?.parent = self
         }
-//        if let linkedRefs = note.linkedReferences, !linkedRefs.isEmpty {
-//            let node = TextNode(staticText: "Linked references")
-//            node.isReference = true
-//            node.readOnly = true
-//            addChild(node)
-//            for bullet in linkedRefs {
-//                node.addChild(TextNode(bullet: bullet, recurse: true))
-//            }
-//            linkedRefsNode = node
-//        }
-//
-//        if let unlinkedRefs = note.unlinkedReferences, !unlinkedRefs.isEmpty {
-//            let node = TextNode(staticText: "Unlinked references")
-//            node.isReference = true
-//            node.readOnly = true
-//            addChild(node)
-//            for bullet in unlinkedRefs {
-//                node.addChild(TextNode(bullet: bullet, recurse: true))
-//            }
-//            unlinkedRefsNode = node
-//        }
 
         node = children.first ?? self
         childInset = 0

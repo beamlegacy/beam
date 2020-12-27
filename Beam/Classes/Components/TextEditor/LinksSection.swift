@@ -77,13 +77,35 @@ class LinksSection: Widget {
 
     override func updateRendering() {
         contentsFrame = NSRect(x: 0, y: 0, width: availableWidth, height: 50)
+
+        computedIdealSize = contentsFrame.size
+        computedIdealSize.width = frame.width
+
+        for c in children {
+            computedIdealSize.height += c.idealSize.height
+        }
     }
 
-    override func setLayout(_ frame: NSRect) {
-        super.setLayout(frame)
+//    override func updateLayout() {
+//        print("LinkSection.updateLayout \(frame) / \(frameInDocument)")
+//    }
+
+    override func updateChildrenLayout() {
+        let childInset = 23
+        var pos = NSPoint(x: CGFloat(childInset), y: self.contentsFrame.height)
+
+        for c in children {
+            var childSize = c.idealSize
+            childSize.width = frame.width - CGFloat(childInset)
+            let childFrame = NSRect(origin: pos, size: childSize)
+            c.setLayout(childFrame)
+
+            pos.y += childSize.height
+        }
     }
 
     override func mouseDown(mouseInfo: MouseInfo) -> Bool {
+        print("LinkSection.mouseDown \(mouseInfo.position)")
         return super.mouseDown(mouseInfo: mouseInfo)
     }
 
