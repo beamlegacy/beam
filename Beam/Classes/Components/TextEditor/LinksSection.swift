@@ -16,6 +16,12 @@ class LinksSection: Widget {
     }
 
     var mode: Mode
+    var open: Bool = true {
+        didSet {
+            updateVisibility(visible && open)
+            invalidateLayout()
+        }
+    }
 
     var linkedReferenceNodes = [LinkedReferenceNode]() {
         didSet {
@@ -29,32 +35,45 @@ class LinksSection: Widget {
 //    var unlinkedReferenceNodes = [UnlinkedReferenceNode]()
     var linkedReferencesCancellable: Cancellable!
     var note: BeamNote
+    let textLayer = CATextLayer()
 
     init(editor: BeamTextEdit, note: BeamNote, mode: Mode) {
         self.note = note
         self.mode = mode
         super.init(editor: editor)
         // Append the linked references and unlinked references nodes
+        textLayer.foregroundColor = NSColor.editorTextColor.cgColor
+        textLayer.fontSize = 14
         switch mode {
         case .links:
-//            text = BeamText(text: "Links")
-            linkedReferencesCancellable = note.$linkedReferences.sink { [unowned self] _ in
+            textLayer.string = "\(note.linkedReferences.count) Links"
+            linkedReferencesCancellable = note.$linkedReferences.sink { [unowned self] links in
                 updateLinkedReferences()
+                textLayer.string = "\(note.linkedReferences.count) Links"
             }
         case .references:
-//            text = BeamText(text: "References")
-            linkedReferencesCancellable = note.$unlinkedReferences.sink { [unowned self] _ in
+            textLayer.string = "\(note.unlinkedReferences.count) References"
+            linkedReferencesCancellable = note.$unlinkedReferences.sink { [unowned self] links in
                 updateLinkedReferences()
+                textLayer.string = "\(note.unlinkedReferences.count) References"
             }
         }
 
         updateLinkedReferences()
-        layer.backgroundColor = NSColor.red.withAlphaComponent(0.3).cgColor
         editor.layer?.addSublayer(layer)
+        layer.addSublayer(textLayer)
+        textLayer.frame = CGRect(origin: CGPoint(), size: textLayer.preferredFrameSize())
+        layer.backgroundColor = NSColor.red.withAlphaComponent(0.3).cgColor
 
 //        offset = NSEdgeInsets(top: 10, left: 0, bottom: 0, right: 0)
     }
 
+    override var contentsScale: CGFloat {
+        didSet {
+//            textLayer.contentScale = contentsScale
+            print("new content scale: \(contentsScale)")
+        }
+    }
     func updateLinkedReferences() {
         let
             refs: [NoteReference] = {
@@ -81,8 +100,10 @@ class LinksSection: Widget {
         computedIdealSize = contentsFrame.size
         computedIdealSize.width = frame.width
 
-        for c in children {
-            computedIdealSize.height += c.idealSize.height
+        if open {
+            for c in children {
+                computedIdealSize.height += c.idealSize.height
+            }
         }
     }
 
@@ -110,6 +131,10 @@ class LinksSection: Widget {
     }
 
     override func mouseUp(mouseInfo: MouseInfo) -> Bool {
+        if contentsFrame.contains(mouseInfo.position) {
+            open.toggle()
+            return true
+        }
         return super.mouseUp(mouseInfo: mouseInfo)
     }
 }
