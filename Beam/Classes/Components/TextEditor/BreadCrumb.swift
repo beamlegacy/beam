@@ -84,6 +84,7 @@ class BreadCrumb: Widget {
             x += newLayer.bounds.width + 10
         }
 
+        selectedCrumb = crumbLayers.count
     }
 
     override var contentsScale: CGFloat {
@@ -109,4 +110,40 @@ class BreadCrumb: Widget {
     }
 
     var section: LinksSection
+
+    override func mouseDown(mouseInfo: MouseInfo) -> Bool {
+        return contentsFrame.contains(mouseInfo.position)
+    }
+
+    var selectedCrumb: Int = 0
+    override func mouseUp(mouseInfo: MouseInfo) -> Bool {
+        for i in 1..<crumbChain.count where !crumbLayers[i].isHidden {
+            let crumb = crumbChain[i]
+            let layer = crumbLayers[i]
+
+            if layer.frame.contains(mouseInfo.position) {
+                selectedCrumb = i
+                updateCrumbLayersVisibility()
+                linkedReferenceNode = LinkedReferenceNode(editor: editor, parent: self, element: crumb)
+                linkedReferenceNode.unfold()
+                linkedReferenceNode.parent = self
+                invalidateLayout()
+                children = [linkedReferenceNode]
+                let scale = contentsScale
+                contentsScale = scale
+                invalidateLayout()
+
+                return true
+            }
+        }
+
+        return false
+    }
+
+    func updateCrumbLayersVisibility() {
+        for i in 0..<crumbLayers.count {
+            crumbLayers[i].opacity = i < selectedCrumb ? 1.0 : 0.5
+        }
+    }
+
 }
