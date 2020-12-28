@@ -32,6 +32,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     var windows: [BeamWindow] = []
     var data: BeamData = BeamData()
 
+    let documentManager = DocumentManager()
+
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         NSApp.mainMenu?.item(withTitle: "File")?.submenu?.delegate = self
         NSApp.mainMenu?.item(withTitle: "Window")?.submenu?.delegate = self
@@ -50,6 +52,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         updateBadge()
         createWindow()
+
+        // So we remember we're not currently using the default api server
+        if Configuration.apiHostnameDefault != Configuration.apiHostname {
+            Logger.shared.logInfo("🛑 API HOSTNAME is \(Configuration.apiHostname)", category: .general)
+        }
     }
 
     func updateBadge() {
@@ -59,7 +66,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     func createWindow() {
         // Create the window and set the content view.
-        window = BeamWindow(contentRect: NSRect(x: 0, y: 0, width: 1300, height: 895), data: data)
+        window = BeamWindow(contentRect: NSRect(x: 0, y: 0, width: 800, height: 600), data: data)
         window.center()
         window.makeKeyAndOrderFront(nil)
         windows.append(window)
@@ -112,7 +119,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     func application(_ application: NSApplication,
                      continue userActivity: NSUserActivity,
                      restorationHandler: @escaping ([NSUserActivityRestoring]) -> Void) -> Bool {
-        print(userActivity)
+        Logger.shared.logDebug(userActivity.description, category: .general)
 
         // Get URL components from the incoming user activity.
         guard userActivity.activityType == NSUserActivityTypeBrowsingWeb,
@@ -121,11 +128,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             return false
         }
 
-        return parseBeamURL(components: components)
+        return parseHTTPScheme(components: components)
     }
 
     var notesWindow: NotesWindow?
     var noteWindows: [NoteWindow] = []
+    var documentsWindow: DocumentsWindow?
 
     // MARK: -
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {

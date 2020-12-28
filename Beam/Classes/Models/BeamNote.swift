@@ -141,9 +141,8 @@ class BeamNote: BeamElement {
             return nil
         }
 
-        #if DEBUG
-        Logger.shared.logInfo("Note loaded:\n\(String(data: doc.data, encoding: .utf8)!)\n", category: .document)
-        #endif
+        Logger.shared.logDebug("Note loaded:\n\(String(data: doc.data, encoding: .utf8)!)\n", category: .document)
+
         do {
             return try instanciateNote(doc)
         } catch {

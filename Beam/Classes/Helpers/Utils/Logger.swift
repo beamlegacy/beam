@@ -16,6 +16,7 @@ enum LogCategory: String {
     case lexer
     case web
     case search
+    case javascript
 }
 
 final class Logger {

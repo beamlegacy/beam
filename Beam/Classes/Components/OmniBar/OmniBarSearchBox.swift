@@ -80,7 +80,7 @@ struct OmniBarSearchBox: View {
                         text: $state.searchQuery,
                         isEditing: $isEditing,
                         isFirstResponder: $state.focusOmniBox,
-                        placeholder: "Search or create note... \(Note.countWithPredicate(CoreDataManager.shared.mainContext)) notes",
+                        placeholder: "Search or create note... \(Document.countWithPredicate(CoreDataManager.shared.mainContext)) notes",
                         font: .systemFont(ofSize: 16),
                         textColor: NSColor.omniboxTextColor,
                         placeholderColor: NSColor.omniboxPlaceholderTextColor,

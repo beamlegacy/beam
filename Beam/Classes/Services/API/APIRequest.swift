@@ -34,7 +34,7 @@ extension APIRequestError: LocalizedError {
 }
 
 class APIRequest {
-    var route: String { Configuration.apiBaseUrl + "/graphql" }
+    var route: String { "https://\(Configuration.apiHostname)/graphql" }
     let headers: HTTPHeaders = [
         "User-Agent": "Beam client, \(Information.appVersionAndBuild)",
         "Accept": "application/json",
@@ -43,6 +43,8 @@ class APIRequest {
 
     var authenticatedAPICall = true
     private static var callsCount = 0
+    private static var uploadedBytes: Int64 = 0
+    private static var downloadedBytes: Int64 = 0
 
     func performRequest<T: Decodable, E: GraphqlParametersProtocol>(bodyParamsRequest: E,
                                                                     authenticatedCall: Bool? = nil,
@@ -77,7 +79,20 @@ class APIRequest {
         Self.callsCount += 1
 
         request.validate(statusCode: 200..<300)
-            .debugJson(queue: queue, fileName: fileName, localTimer: localTimer, authenticated: authenticatedAPICall, callsCount: Self.callsCount)
+            .uploadProgress { progress in
+                Self.uploadedBytes += progress.completedUnitCount
+
+            }
+            .downloadProgress { progress in
+                Self.downloadedBytes += progress.completedUnitCount
+            }
+            .debugJson(queue: queue,
+                       fileName: fileName,
+                       localTimer: localTimer,
+                       authenticated: authenticatedAPICall,
+                       callsCount: Self.callsCount,
+                       uploadedBytes: Self.uploadedBytes,
+                       downloadedBytes: Self.downloadedBytes)
             .responseDecodable(queue: queue, decoder: decoder) { (response: DataResponse<T>) in
                 self.manageResponse(response: response, filename: fileName) { [weak self] result in
                     switch result {
@@ -174,9 +189,19 @@ class APIRequest {
         Self.callsCount += 1
 
         request.uploadProgress { progress in
+            Self.uploadedBytes += progress.completedUnitCount
             uploadHandler?(progress)
         }
-        .debugJson(queue: queue, fileName: fileName, localTimer: localTimer, authenticated: authenticatedAPICall, callsCount: Self.callsCount)
+        .downloadProgress { progress in
+            Self.downloadedBytes += progress.completedUnitCount
+        }
+        .debugJson(queue: queue,
+                   fileName: fileName,
+                   localTimer: localTimer,
+                   authenticated: authenticatedAPICall,
+                   callsCount: Self.callsCount,
+                   uploadedBytes: Self.uploadedBytes,
+                   downloadedBytes: Self.downloadedBytes)
         .responseDecodable(queue: queue, decoder: decoder) { (response: DataResponse<T>) in
             self.manageResponse(response: response, filename: fileName) { [weak self] result in
                 switch result {
@@ -346,15 +371,21 @@ class APIRequest {
 }
 
 extension DataRequest {
-    public func debugJson(queue: DispatchQueue, fileName: String, localTimer: Date, authenticated: Bool, callsCount: Int) -> Self {
+    public func debugJson(queue: DispatchQueue,
+                          fileName: String,
+                          localTimer: Date,
+                          authenticated: Bool,
+                          callsCount: Int,
+                          uploadedBytes: Int64,
+                          downloadedBytes: Int64) -> Self {
         return self.responseJSON(queue: queue) { response in
-            #if DEBUG_API_0
+//            #if DEBUG_API_0
             let diffTime = Date().timeIntervalSince(localTimer)
             let diff = String(format: "%.2f", diffTime)
 
             let httpStatus = response.response?.statusCode ?? 0
-            Logger.shared.logDebug("[\(callsCount)] [\(authenticated ? "authenticated" : "anonymous")] \(diff)sec \(httpStatus) \(fileName)", category: .network)
-            #endif
+            Logger.shared.logDebug("[\(callsCount)] [\(uploadedBytes.byteSize)/\(downloadedBytes.byteSize)] [\(authenticated ? "authenticated" : "anonymous")] \(diff)sec \(httpStatus) \(fileName)", category: .network)
+//            #endif
 
             #if DEBUG_API_1
             if let httpBodyData = response.request?.httpBody,
