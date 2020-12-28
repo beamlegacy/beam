@@ -3,17 +3,26 @@ import Cocoa
 
 extension AppDelegate {
     @IBAction func resetDatabase(_ sender: Any) {
-        CoreDataManager.shared.destroyPersistentStore {
-            CoreDataManager.shared.setup()
-            self.updateBadge()
+        documentManager.deleteAllDocuments { result in
+            DispatchQueue.main.async {
+                self.updateBadge()
 
-            let alert = NSAlert()
-            alert.alertStyle = .informational
-            // TODO: i18n
-            alert.messageText = "Database deleted"
-            alert.informativeText = "All coredata has been deleted"
+                let alert = NSAlert()
 
-            alert.runModal()
+                switch result {
+                case .failure(let error):
+                    // TODO: i18n
+                    alert.messageText = "Could not delete documents"
+                    alert.informativeText = error.localizedDescription
+                    alert.alertStyle = .critical
+                case .success:
+                    alert.alertStyle = .informational
+                    // TODO: i18n
+                    alert.messageText = "All documents deleted"
+                }
+
+                alert.runModal()
+            }
         }
     }
 
@@ -124,4 +133,22 @@ extension AppDelegate {
         }
     }
 
+    // MARK: - Send to API
+    @IBAction func sendAllNotesToAPI(_ sender: Any) {
+        documentManager.uploadAllDocuments { result in
+            DispatchQueue.main.async {
+                let alert = NSAlert()
+                switch result {
+                case .failure(let error):
+                    alert.alertStyle = .critical
+                    alert.messageText = error.localizedDescription
+                case .success:
+                    alert.alertStyle = .informational
+                    // TODO: i18n
+                    alert.messageText = "All documents sent to API"
+                }
+                alert.runModal()
+            }
+        }
+    }
 }

@@ -1,0 +1,10 @@
+query document($id: ID!) {
+  document(id: $id) {
+    id
+    title
+    slug
+    data
+    createdAt
+    updatedAt
+  }
+}

@@ -737,7 +737,7 @@ CQ
                                         <menuItem isSeparatorItem="YES" id="8CZ-9R-gka"/>
                                         <menuItem title="Show all notes" keyEquivalent="s" id="KUY-Ll-jZL">
                                             <connections>
-                                                <action selector="showAllNotes:" target="Voe-Tx-rLC" id="SdS-fS-6SG"/>
+                                                <action selector="showAllDocuments:" target="Voe-Tx-rLC" id="sgR-1m-YeG"/>
                                             </connections>
                                         </menuItem>
                                     </items>

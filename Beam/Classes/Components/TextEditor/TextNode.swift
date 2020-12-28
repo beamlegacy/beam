@@ -49,7 +49,9 @@ public class TextNode: NSObject, CALayerDelegate {
         get { element.text }
         set {
             guard element.text != newValue else { return }
+            if !newValue.isEmpty && actionImageLayer.opacity == 0 { actionImageLayer.opacity = 1 }
             if newValue.isEmpty { resetActionLayers() }
+
             element.text = newValue
             invalidateText()
         }
@@ -325,18 +327,11 @@ public class TextNode: NSObject, CALayerDelegate {
         context.saveGState()
         context.translateBy(x: indent, y: 0)
 
-        //  context.translateBy(x: currentFrameInDocument.origin.x, y: currentFrameInDocument.origin.y)
-        //  if debug {
-        //      print("debug \(self)")
-        //  }
-
         updateTextRendering()
 
         drawDebug(in: context)
 
         if selfVisible {
-            // print("Draw text \(frame))")
-
             context.saveGState(); defer { context.restoreGState() }
 
             drawSelection(in: context)
@@ -423,7 +418,6 @@ public class TextNode: NSObject, CALayerDelegate {
         layer.actions = newActions
         layer.anchorPoint = CGPoint()
         layer.setNeedsDisplay()
-//        layer.backgroundColor = NSColor.red.cgColor.copy(alpha: 0.1)
         layer.backgroundColor = NSColor(white: 1, alpha: 0).cgColor
         let score = element.score
         layer.opacity = 0.3 + (score == 0 ? 1.0 : score) * 0.7
@@ -570,7 +564,6 @@ public class TextNode: NSObject, CALayerDelegate {
         // Otherwise, draw the cursor at a real position
         guard let cursorLine = lineAt(index: cursorPosition), editor.hasFocus, editor.blinkPhase else { return }
 
-//        var x2 = CGFloat(0)
         let line = layout!.lines[cursorLine]
         let pos = cursorPosition
         let x1 = offsetAt(index: pos)
@@ -587,8 +580,8 @@ public class TextNode: NSObject, CALayerDelegate {
 
     func updateVisibility(_ isVisible: Bool) {
         for c in children {
-            c.visible = open
-            c.updateVisibility(open && c.open)
+            c.visible = isVisible
+            c.updateVisibility(isVisible && c.open)
             invalidateLayout()
         }
     }
@@ -799,7 +792,6 @@ public class TextNode: NSObject, CALayerDelegate {
 
     func mouseDown(mouseInfo: MouseInfo) -> Bool {
         if showDisclosureButton && disclosureButtonFrame.contains(mouseInfo.position) {
-            // print("disclosure pressed (\(open))")
             disclosurePressed = true
             return true
         }
@@ -817,9 +809,7 @@ public class TextNode: NSObject, CALayerDelegate {
     }
 
     func mouseUp(mouseInfo: MouseInfo) -> Bool {
-        // print("mouseUp (\(mouseInfo))")
         if disclosurePressed && disclosureButtonFrame.contains(mouseInfo.position) {
-            // print("disclosure unpressed (\(open))")
             disclosurePressed = false
             open.toggle()
 
@@ -846,9 +836,9 @@ public class TextNode: NSObject, CALayerDelegate {
             return true
         }
 
-        // Reset all layers
-        if !textFrame.contains(position) {
-            resetActionLayers()
+        // Reset action layers
+        if !textFrame.contains(position) && isEditing {
+            showHoveredActionLayers(false)
             return true
         }
 
