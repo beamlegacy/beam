@@ -30,13 +30,13 @@ class ProxyElement: BeamElement {
 }
 
 class LinkedReferenceNode: TextNode {
-    init(editor: BeamTextEdit, section: LinksSection, element: BeamElement) {
-        self.section = section
+    init(editor: BeamTextEdit, parent: BreadCrumb, element: BeamElement) {
+//        self.section = parent
         super.init(editor: editor, element: ProxyElement(for: element))
 
         editor.layer?.addSublayer(layer)
         open = false
     }
 
-    var section: LinksSection
+//    var section: LinksSection
 }

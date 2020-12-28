@@ -180,6 +180,7 @@
 		96C9AAB92593BB67007D3D98 /* Widget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C9AAB82593BB67007D3D98 /* Widget.swift */; };
 		96C9CC3E2535CE2C00D70AA6 /* LexerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C9CC3D2535CE2C00D70AA6 /* LexerTests.swift */; };
 		96E1356F2546F03900133A24 /* TextNodeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E1356E2546F03900133A24 /* TextNodeTests.swift */; };
+		96E4505825995CA200BFF36F /* BreadCrumb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E4505725995CA200BFF36F /* BreadCrumb.swift */; };
 		96E4CEF9258D7E8200D6DE22 /* BeamTextTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E4CEF8258D7E8200D6DE22 /* BeamTextTests.swift */; };
 		96E4CF30258DFB0800D6DE22 /* BeamText+NSAttributedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E4CF2F258DFB0800D6DE22 /* BeamText+NSAttributedString.swift */; };
 		96E4CF72258E59F400D6DE22 /* BeamTextVisitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E4CF71258E59F400D6DE22 /* BeamTextVisitor.swift */; };
@@ -567,6 +568,7 @@
 		96C9AAB82593BB67007D3D98 /* Widget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Widget.swift; sourceTree = "<group>"; };
 		96C9CC3D2535CE2C00D70AA6 /* LexerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LexerTests.swift; sourceTree = "<group>"; };
 		96E1356E2546F03900133A24 /* TextNodeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextNodeTests.swift; sourceTree = "<group>"; };
+		96E4505725995CA200BFF36F /* BreadCrumb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BreadCrumb.swift; sourceTree = "<group>"; };
 		96E4CEF8258D7E8200D6DE22 /* BeamTextTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamTextTests.swift; sourceTree = "<group>"; };
 		96E4CF2F258DFB0800D6DE22 /* BeamText+NSAttributedString.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamText+NSAttributedString.swift"; sourceTree = "<group>"; };
 		96E4CF71258E59F400D6DE22 /* BeamTextVisitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamTextVisitor.swift; sourceTree = "<group>"; };
@@ -878,6 +880,7 @@
 				96C9AA3E259019E3007D3D98 /* LinkedReferenceNode.swift */,
 				96C9AA5625901AA9007D3D98 /* LinksSection.swift */,
 				96F936622590FA59006D8E53 /* BTextEdit.swift */,
+				96E4505725995CA200BFF36F /* BreadCrumb.swift */,
 				96C9AAB82593BB67007D3D98 /* Widget.swift */,
 			);
 			path = TextEditor;
@@ -1745,6 +1748,7 @@
 				4181727C258110D100317ED8 /* AppDelegate+Note.swift in Sources */,
 				418172592581107C00317ED8 /* ContentView.swift in Sources */,
 				418173B6258124D500317ED8 /* NSAttributedString+Beam.swift in Sources */,
+				96E4505825995CA200BFF36F /* BreadCrumb.swift in Sources */,
 				418171EF2581107C00317ED8 /* User.swift in Sources */,
 				4181732D25811E9800317ED8 /* Symbol.swift in Sources */,
 				4181722E2581107C00317ED8 /* AutoCompleteItem.swift in Sources */,

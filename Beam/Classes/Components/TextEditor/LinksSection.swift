@@ -24,7 +24,7 @@ class LinksSection: Widget {
         }
     }
 
-    var linkedReferenceNodes = [LinkedReferenceNode]() {
+    var linkedReferenceNodes = [BreadCrumb]() {
         didSet {
             invalidateLayout()
             children = linkedReferenceNodes
@@ -68,7 +68,6 @@ class LinksSection: Widget {
             }
         }
 
-        updateLinkedReferences()
         updateLayerVisibility()
         editor.layer?.addSublayer(layer)
         layer.addSublayer(textLayer)
@@ -84,6 +83,7 @@ class LinksSection: Widget {
             textLayer.contentsScale = contentsScale
         }
     }
+
     func updateLinkedReferences() {
         let
             refs: [NoteReference] = {
@@ -95,10 +95,10 @@ class LinksSection: Widget {
             }
         }()
 
-        self.linkedReferenceNodes = refs.compactMap { noteReference -> LinkedReferenceNode? in
+        self.linkedReferenceNodes = refs.compactMap { noteReference -> BreadCrumb? in
             guard let referencingNote = BeamNote.fetch(DocumentManager(), title: noteReference.noteName) else { return nil }
             guard let referencingElement = referencingNote.findElement(noteReference.elementID) else { return nil }
-            return LinkedReferenceNode(editor: editor, section: self, element: referencingElement)
+            return BreadCrumb(editor: editor, section: self, element: referencingElement)
         }
 
         selfVisible = !linkedReferenceNodes.isEmpty
