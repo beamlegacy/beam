@@ -23,7 +23,7 @@ extension BeamTextEdit {
     }
 
     internal func updatePopover(_ command: TextRoot.Command = .none) {
-        guard let popover = popover else { return }
+        guard let data = data, let popover = popover else { return }
 
         var text = node.text.text
         let regex = "@|#"

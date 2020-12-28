@@ -99,4 +99,8 @@ extension BidirectionalPopover: NSCollectionViewDelegateFlowLayout {
         return 0
     }
 
+    func collectionView(_ collectionView: NSCollectionView, layout collectionViewLayout: NSCollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+        return 0
+    }
+
 }

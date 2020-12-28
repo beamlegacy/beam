@@ -42,8 +42,9 @@ public struct BTextEdit: NSViewRepresentable {
     var showTitle = true
 
     public func makeNSView(context: Context) -> BeamTextEdit {
-        let nsView = BeamTextEdit(root: note, data: data, font: Font.main)
+        let nsView = BeamTextEdit(root: note, font: Font.main)
 
+        nsView.data = data
         nsView.openURL = openURL
         nsView.openCard = openCard
         nsView.onStartEditing = onStartEditing
@@ -113,8 +114,9 @@ public struct BTextEditScrollable: NSViewRepresentable {
     var showTitle = true
 
     public func makeNSView(context: Context) -> NSViewType {
-        let edit = BeamTextEdit(root: note, data: data, font: Font.main)
+        let edit = BeamTextEdit(root: note, font: Font.main)
 
+        edit.data = data
         edit.openURL = openURL
         edit.openCard = openCard
         edit.onStartEditing = onStartEditing
@@ -184,7 +186,7 @@ public struct BTextEditScrollable: NSViewRepresentable {
 // swiftlint:disable type_body_length
 public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
-    var data: BeamData
+    var data: BeamData?
 
     var note: BeamElement! {
         didSet {
@@ -221,10 +223,10 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     private var noteCancellables = [AnyCancellable]()
     internal var popover: BidirectionalPopover?
 
-    public init(root: BeamElement, data: BeamData, font: Font = Font.main) {
+    public init(root: BeamElement, font: Font = Font.main) {
         self.config.font = font
         note = root
-        self.data = data
+
         super.init(frame: NSRect())
         let l = CALayer()
         self.layer = l
