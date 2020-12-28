@@ -24,6 +24,7 @@ public struct MouseInfo {
 
 public struct BTextEdit: NSViewRepresentable {
     var note: BeamNote
+    var data: BeamData
     var openURL: (URL) -> Void
     var openCard: (String) -> Void
     var onStartEditing: () -> Void = { }
@@ -41,7 +42,7 @@ public struct BTextEdit: NSViewRepresentable {
     var showTitle = true
 
     public func makeNSView(context: Context) -> BeamTextEdit {
-        let nsView = BeamTextEdit(root: note, font: Font.main)
+        let nsView = BeamTextEdit(root: note, data: data, font: Font.main)
 
         nsView.openURL = openURL
         nsView.openCard = openCard
@@ -94,6 +95,7 @@ public struct BTextEdit: NSViewRepresentable {
 
 public struct BTextEditScrollable: NSViewRepresentable {
     var note: BeamNote
+    var data: BeamData
     var openURL: (URL) -> Void
     var openCard: (String) -> Void
     var onStartEditing: () -> Void = { }
@@ -111,7 +113,7 @@ public struct BTextEditScrollable: NSViewRepresentable {
     var showTitle = true
 
     public func makeNSView(context: Context) -> NSViewType {
-        let edit = BeamTextEdit(root: note, font: Font.main)
+        let edit = BeamTextEdit(root: note, data: data, font: Font.main)
 
         edit.openURL = openURL
         edit.openCard = openCard
@@ -181,6 +183,9 @@ public struct BTextEditScrollable: NSViewRepresentable {
 
 // swiftlint:disable type_body_length
 public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
+
+    var data: BeamData
+
     var note: BeamElement! {
         didSet {
             updateRoot(with: note)
@@ -214,11 +219,12 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     private var noteCancellables = [AnyCancellable]()
-    internal var popover: Popover<String>?
+    internal var popover: BidirectionalPopover?
 
-    public init(root: BeamElement, font: Font = Font.main) {
+    public init(root: BeamElement, data: BeamData, font: Font = Font.main) {
         self.config.font = font
         note = root
+        self.data = data
         super.init(frame: NSRect())
         let l = CALayer()
         self.layer = l

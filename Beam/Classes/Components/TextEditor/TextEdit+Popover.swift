@@ -15,16 +15,16 @@ extension BeamTextEdit {
         let x = posX == 0 ? 220 : posX + 200
         let y = rect.maxY == 0 ? 60 : rect.maxY + 40
 
-        popover = Popover<String>(frame: NSRect(x: x, y: y, width: 300, height: 150))
+        popover = BidirectionalPopover(frame: NSRect(x: x, y: y, width: 300, height: 150))
 
         guard let popover = popover else { return }
 
-        popover.sources = ["Hello", "world"]
-        popover.layer?.backgroundColor = NSColor.red.cgColor
         addSubview(popover)
     }
 
     internal func updatePopover(_ command: TextRoot.Command = .none) {
+        guard let popover = popover else { return }
+
         var text = node.text.text
         let regex = "@|#"
 
@@ -37,7 +37,9 @@ extension BeamTextEdit {
         if command == .moveLeft && cursorPosition <= prefixIndex { dismissPopover() }
 
         text.removeSubrange(..<range.lowerBound)
-        popover?.text = text.replacingOccurrences(of: regex, with: "", options: .regularExpression)
+        text = text.replacingOccurrences(of: regex, with: "", options: .regularExpression)
+
+        popover.items = Array(data.documentManager.documentsWithTitleMatch(title: text).prefix(4))
     }
 
     internal func dismissPopover() {
