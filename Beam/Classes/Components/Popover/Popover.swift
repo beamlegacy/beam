@@ -28,7 +28,7 @@ class Popover<T>: NSView {
         }
     }
 
-    private var label: NSTextField?
+    private var label = NSTextField()
 
     // MARK: - Initializer
     override init(frame frameRect: NSRect) {
@@ -44,15 +44,14 @@ class Popover<T>: NSView {
 
     // MARK: - Setup UI
     private func setupLabel() {
-        label = NSTextField()
-        label?.stringValue = text
-        label?.frame = NSRect(x: 0, y: 0, width: frame.width, height: frame.height)
-        self.addSubview(label!)
+        label.stringValue = text
+        label.frame = NSRect(x: 0, y: 0, width: frame.width, height: frame.height)
+        self.addSubview(label)
     }
 
     // MARK: - Methods
     private func updateLabel(_ text: String) {
-        label?.stringValue = text
+        label.stringValue = text
     }
 
 }
