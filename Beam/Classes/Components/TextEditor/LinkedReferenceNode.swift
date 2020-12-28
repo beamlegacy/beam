@@ -10,9 +10,10 @@ import AppKit
 
 class ProxyElement: BeamElement {
     var proxy: BeamElement
+    var proxyChildren: [BeamElement]
 
     override var text: BeamText { set { proxy.text = newValue; change() } get { proxy.text } }
-    public internal(set) override var children: [BeamElement] { get { proxy.children } set { proxy.children = newValue; change() } }
+    public internal(set) override var children: [BeamElement] { get { proxyChildren } set { fatalError() } }
 
     override var note: BeamNote? {
         return nil
@@ -20,6 +21,11 @@ class ProxyElement: BeamElement {
 
     init(for element: BeamElement) {
         self.proxy = element
+        self.proxyChildren = element.children.map({ e -> ProxyElement in
+            let p = ProxyElement(for: e)
+            p.parent = element
+            return p
+        })
         super.init(proxy.text)
     }
 
@@ -30,13 +36,26 @@ class ProxyElement: BeamElement {
 }
 
 class LinkedReferenceNode: TextNode {
-    init(editor: BeamTextEdit, parent: BreadCrumb, element: BeamElement) {
+    init(editor: BeamTextEdit, parent: Widget, element: BeamElement) {
 //        self.section = parent
-        super.init(editor: editor, element: ProxyElement(for: element))
+        let proxyElement = ProxyElement(for: element)
+        super.init(editor: editor, element: proxyElement)
+        self.proxyChildren = proxyElement.proxyChildren.map({ e -> LinkedReferenceNode in
+            LinkedReferenceNode(editor: editor, parent: self, element: e)
+        })
 
+        self.parent = parent
         editor.layer?.addSublayer(layer)
-        open = false
+        open = true
     }
 
-//    var section: LinksSection
+    internal var proxyChildren = [LinkedReferenceNode]()
+    internal override var children: [Widget] {
+        get {
+            return proxyChildren
+        }
+        set {
+            fatalError()
+        }
+    }
 }

@@ -28,9 +28,6 @@ class LinksSection: Widget {
         didSet {
             invalidateLayout()
             children = linkedReferenceNodes
-            for c in linkedReferenceNodes {
-                c.parent = self
-            }
         }
     }
     var linkedReferencesCancellable: Cancellable!
@@ -121,20 +118,10 @@ class LinksSection: Widget {
         layer.isHidden = linkedReferenceNodes.isEmpty
     }
 
-    override func updateChildrenLayout() {
-        let childInset = 23
-        var pos = NSPoint(x: CGFloat(childInset), y: self.contentsFrame.height)
-
-        for c in children {
-            var childSize = c.idealSize
-            childSize.width = frame.width - CGFloat(childInset)
-            let childFrame = NSRect(origin: pos, size: childSize)
-            c.setLayout(childFrame)
-
-            pos.y += childSize.height
-        }
+    override func mouseDown(mouseInfo: MouseInfo) -> Bool {
+        print("mouseDown \(mouseInfo.position)")
+        return super.mouseDown(mouseInfo: mouseInfo)
     }
-
     override func mouseUp(mouseInfo: MouseInfo) -> Bool {
         if contentsFrame.contains(mouseInfo.position) {
             open.toggle()

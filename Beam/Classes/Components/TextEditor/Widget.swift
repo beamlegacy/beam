@@ -40,7 +40,15 @@ public class Widget: NSObject, CALayerDelegate {
         }
     }
 
-    internal var children: [Widget] = []
+    internal var children: [Widget] = [] {
+        didSet {
+            for c in children {
+                c.parent = self
+                c.availableWidth = availableWidth
+                c.contentsScale = contentsScale
+            }
+        }
+    }
 
     var enabled: Bool { editor.enabled }
 
@@ -51,13 +59,12 @@ public class Widget: NSObject, CALayerDelegate {
 
     var availableWidth: CGFloat = 1 {
         didSet {
+            for c in children {
+                c.availableWidth = availableWidth
+            }
             if availableWidth != oldValue {
                 invalidatedRendering = true
                 updateRendering()
-            }
-
-            for c in children {
-                c.availableWidth = availableWidth
             }
         }
     }
@@ -209,8 +216,10 @@ public class Widget: NSObject, CALayerDelegate {
     func updateLayout() {
     }
 
+    var childInset = Float(23)
+
     func updateChildrenLayout() {
-        var pos = NSPoint()//NSPoint(x: CGFloat(childInset), y: self.contentsFrame.height)
+        var pos = NSPoint(x: CGFloat(childInset), y: self.contentsFrame.height)
 
         for c in children {
             var childSize = c.idealSize
@@ -376,7 +385,11 @@ public class Widget: NSObject, CALayerDelegate {
     }
 
     func dispatchMouseDown(mouseInfo: MouseInfo) -> Widget? {
-        guard NSRect(origin: NSPoint(), size: frame.size).contains(mouseInfo.position) else { return nil }
+        var globalPos = mouseInfo.position
+        var rect = NSRect(origin: CGPoint(), size: frame.size)
+        guard rect.contains(globalPos) else {
+            return nil
+        }
 
         for c in children {
             var i = mouseInfo

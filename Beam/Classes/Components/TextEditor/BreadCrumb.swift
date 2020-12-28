@@ -11,8 +11,14 @@ import AppKit
 class BreadCrumb: Widget {
     var crumbChain = [BeamElement]()
     var proxy: ProxyElement
-    var linkedReferenceNode: LinkedReferenceNode!
+    var linkedReferenceNode: LinkedReferenceNode! {
+        didSet {
+            oldValue.delete()
+        }
+    }
     var crumbLayers = [CATextLayer]()
+    var section: LinksSection
+    var selectedCrumb: Int = 0
 
     init(editor: BeamTextEdit, section: LinksSection, element: BeamElement) {
         self.section = section
@@ -22,7 +28,6 @@ class BreadCrumb: Widget {
         self.crumbChain = computeCrumChain(from: element)
 
         self.linkedReferenceNode = LinkedReferenceNode(editor: editor, parent: self, element: element)
-        self.linkedReferenceNode.parent = self
 
 //        layer.backgroundColor = NSColor.blue.withAlphaComponent(0.2).cgColor
         editor.layer?.addSublayer(layer)
@@ -36,7 +41,7 @@ class BreadCrumb: Widget {
 
     func computeCrumChain(from element: BeamElement) -> [BeamElement] {
         var chain = [BeamElement]()
-        var p = element.parent
+        var p: BeamElement? = element
 
         while p != nil {
             chain.append(p!)
@@ -50,9 +55,7 @@ class BreadCrumb: Widget {
         updateCrumbLayers()
 
         contentsFrame = NSRect(x: 0, y: 0, width: availableWidth, height: 25)
-
         computedIdealSize = contentsFrame.size
-        computedIdealSize.width = frame.width
 
         for c in children {
             computedIdealSize.height += c.idealSize.height
@@ -95,29 +98,12 @@ class BreadCrumb: Widget {
         }
     }
 
-    override func updateChildrenLayout() {
-        let childInset = 23
-        var pos = NSPoint(x: CGFloat(childInset), y: self.contentsFrame.height)
-
-        for c in children {
-            var childSize = c.idealSize
-            childSize.width = frame.width - CGFloat(childInset)
-            let childFrame = NSRect(origin: pos, size: childSize)
-            c.setLayout(childFrame)
-
-            pos.y += childSize.height
-        }
-    }
-
-    var section: LinksSection
-
     override func mouseDown(mouseInfo: MouseInfo) -> Bool {
         return contentsFrame.contains(mouseInfo.position)
     }
 
-    var selectedCrumb: Int = 0
     override func mouseUp(mouseInfo: MouseInfo) -> Bool {
-        for i in 1..<crumbChain.count where !crumbLayers[i].isHidden {
+        for i in 0..<crumbChain.count where !crumbLayers[i].isHidden {
             let crumb = crumbChain[i]
             let layer = crumbLayers[i]
 
@@ -126,7 +112,6 @@ class BreadCrumb: Widget {
                 updateCrumbLayersVisibility()
                 linkedReferenceNode = LinkedReferenceNode(editor: editor, parent: self, element: crumb)
                 linkedReferenceNode.unfold()
-                linkedReferenceNode.parent = self
                 invalidateLayout()
                 children = [linkedReferenceNode]
                 let scale = contentsScale
@@ -145,5 +130,4 @@ class BreadCrumb: Widget {
             crumbLayers[i].opacity = i < selectedCrumb ? 1.0 : 0.5
         }
     }
-
 }

@@ -30,7 +30,6 @@ public class TextNode: Widget {
     var indent: CGFloat {
         selfVisible ? 25 : 0
     }
-    var childInset = Float(23)
     var fontSize = CGFloat(17)
 
     override var contentsScale: CGFloat {
@@ -425,7 +424,7 @@ public class TextNode: Widget {
         }
 
         computedIdealSize = contentsFrame.size
-        computedIdealSize.width = frame.width
+//        computedIdealSize.width = frame.width
 
         if open {
             for c in children {
