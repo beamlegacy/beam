@@ -13,12 +13,15 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject {
     @Published public private(set) var id = UUID() { didSet { change() } }
     @Published var text = BeamText() { didSet { change() } }
     @Published var open = true { didSet { change() } }
-    public private(set) var children = [BeamElement]() { didSet { change() } }
+    public internal(set) var children = [BeamElement]() { didSet { change() } }
     @Published var readOnly = false { didSet { change() } }
-//    @Published var ast: Parser.Node? { didSet { change() } }
     @Published var score: Float = 0 { didSet { change() } }
     @Published var creationDate = Date() { didSet { change() } }
     @Published var updateDate = Date()
+
+    var note: BeamNote? {
+        return parent?.note
+    }
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -131,9 +134,11 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject {
     }
 
     func connectUnlinkedNotes(_ thisNoteTitle: String, _ allNotes: [BeamNote]) {
-        for note in allNotes {
-            if text.text.contains(note.title) {
+        for note in allNotes where thisNoteTitle != note.title {
+            let existingLinks = text.internalLinks.map { range -> String in range.string }
+            if text.text.contains(note.title), !existingLinks.contains(note.title) {
                 note.addUnlinkedReference(NoteReference(noteName: thisNoteTitle, elementID: id))
+//                Logger.shared.logInfo("New unlink \(thisNoteTitle) --> \(note.title)", category: .document)
             }
         }
 
@@ -154,4 +159,35 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject {
         change()
         parent?.childChanged()
     }
+
+    func findElement(_ id: UUID) -> BeamElement? {
+        guard id != self.id else { return self }
+
+        for c in children {
+            if let result = c.findElement(id) {
+                return result
+            }
+        }
+
+        return nil
+    }
+
+    func detectLinkedNotes(_ documentManager: DocumentManager) {
+        guard let note = note else { return }
+
+        for link in text.internalLinks where link.string != note.title {
+            let linkTitle = link.string
+//            Logger.shared.logInfo("searching link \(linkTitle)", category: .document)
+            let refnote = BeamNote.fetchOrCreate(documentManager, title: linkTitle)
+            let reference = NoteReference(noteName: note.title, elementID: id)
+//            Logger.shared.logInfo("New link \(note.title) <-> \(linkTitle)", category: .document)
+            refnote.addLinkedReference(reference)
+            refnote.save(documentManager: documentManager)
+        }
+
+        for c in children {
+            c.detectLinkedNotes(documentManager)
+        }
+    }
+
 }
