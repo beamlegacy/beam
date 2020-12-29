@@ -20,10 +20,10 @@ public struct BTextEdit: NSViewRepresentable {
     var minimumWidth: CGFloat = 800
     var maximumWidth: CGFloat = 1024
 
-    var leadingAlignment = CGFloat(160)
-    var traillingPadding = CGFloat(80)
-    var topOffset = CGFloat(28)
-    var footerHeight = CGFloat(60)
+    var leadingAlignment: CGFloat = 160
+    var traillingPadding: CGFloat = 80
+    var topOffset: CGFloat = 28
+    var footerHeight: CGFloat = 60
     var ignoreFirstDrag = true
 
     var showTitle = true

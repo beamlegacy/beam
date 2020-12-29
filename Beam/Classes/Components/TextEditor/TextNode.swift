@@ -272,11 +272,11 @@ public class TextNode: Widget {
     }
 
     override func updateChildrenLayout() {
-        var pos = NSPoint(x: CGFloat(childInset), y: self.contentsFrame.height)
+        var pos = NSPoint(x: childInset, y: self.contentsFrame.height)
 
         for c in children {
             var childSize = c.idealSize
-            childSize.width = frame.width - CGFloat(childInset)
+            childSize.width = frame.width - childInset
             let childFrame = NSRect(origin: pos, size: childSize)
             c.setLayout(childFrame)
 

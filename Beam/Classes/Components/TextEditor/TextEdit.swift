@@ -906,8 +906,8 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         context.saveGState()
         context.textMatrix = CGAffineTransform.identity
         let x = leadingAlignment - title.frame.width - titlePadding
-        let n = rootNode.children.first! as? TextNode
-        let y = CGFloat(n?.firstLineBaseline ?? 0) //topOffset + rootNode.children.first!.firstLineBaseline
+        let n = rootNode.children.first as? TextNode
+        let y = n?.firstLineBaseline ?? 0
         context.translateBy(x: x, y: y)
         title.draw(context)
         context.restoreGState()

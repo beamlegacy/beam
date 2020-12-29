@@ -83,9 +83,7 @@ public class TextRoot: TextNode {
 
     override internal var children: [Widget] {
         get {
-            return super.children
-                + (linksSection != nil ? [linksSection!] : [])
-                + (referencesSection != nil ? [referencesSection!] : [])
+            super.children + [linksSection, referencesSection].compactMap { $0 }
         }
         set {
             fatalError()
@@ -134,7 +132,7 @@ public class TextRoot: TextNode {
             element.addChild(BeamElement())
         }
 
-        if element.children.count == 1 && element.children.first!.text.isEmpty {
+        if element.children.count == 1 && element.children.first?.text.isEmpty ?? false {
             let istoday = note?.isTodaysNote ?? false
             let first = children.first as? TextNode
             first?.placeholder = BeamText(text: istoday ? "This is the journal, you can type anything here!" : "...")

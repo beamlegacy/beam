@@ -230,18 +230,16 @@ public class Widget: NSObject, CALayerDelegate {
         updateChildrenLayout()
     }
 
-
     func updateLayout() {
     }
 
-    var childInset = Float(23)
+    var childInset: CGFloat = 23
 
     func updateChildrenLayout() {
-        var pos = NSPoint(x: CGFloat(childInset), y: self.contentsFrame.height)
+        var pos = NSPoint(x: childInset, y: self.contentsFrame.height)
 
         for c in children {
-            var childSize = c.idealSize
-//            childSize.width = frame.width - CGFloat(childInset)
+            let childSize = c.idealSize
             let childFrame = NSRect(origin: pos, size: childSize)
             c.setLayout(childFrame)
 
@@ -555,7 +553,7 @@ public class Widget: NSObject, CALayerDelegate {
     // Focus
     public func nextVisible() -> Widget? {
         var n = nextWidget()
-        while n != nil && !(n!.inVisibleBranch) {
+        while !(n?.inVisibleBranch ?? true) {
             n = n?.nextWidget()
         }
 
@@ -564,8 +562,8 @@ public class Widget: NSObject, CALayerDelegate {
 
     public func previousVisible() -> Widget? {
         var n = previousWidget()
-        while n != nil && !n!.inVisibleBranch {
-            n = n!.previousWidget()
+        while !(n?.inVisibleBranch ?? true) {
+            n = n?.previousWidget()
         }
 
         return n as? TextRoot == nil ? n : nil

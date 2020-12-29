@@ -43,11 +43,11 @@ class BreadCrumb: Widget {
 
     func computeCrumChain(from element: BeamElement) -> [BeamElement] {
         var chain = [BeamElement]()
-        var p: BeamElement? = element
+        var current: BeamElement? = element
 
-        while p != nil {
-            chain.append(p!)
-            p = p?.parent
+        while let elem = current {
+            chain.append(elem)
+            current = elem.parent
         }
 
         return chain.reversed()
