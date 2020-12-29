@@ -947,7 +947,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
         let node: TextNode = {
             guard let note = element as? BeamNote else {
-                guard element.note == self.note else {
+                guard element.note == nil || element.note == self.note else {
                     return LinkedReferenceNode(editor: self, element: element)
                 }
                 return TextNode(editor: self, element: element)
