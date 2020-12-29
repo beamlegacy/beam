@@ -54,7 +54,10 @@ extension BeamTextEdit {
 extension BeamTextEdit: BidirectionalDelegate {
 
     func didSelectDocument(_ document: DocumentStruct) {
-        print(document)
+        guard let substringRange = node.text.text.range(of: node.text.text) else { return }
+        let nsRange = NSRange(substringRange, in: node.text.text)
+        insertText(document.title, replacementRange: nsRange)
+        _ = node.text.makeInternalLink(nsRange.lowerBound..<document.title.count)
         dismissPopover()
     }
 
