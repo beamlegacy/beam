@@ -21,8 +21,8 @@ class BidirectionalPopover: Popover {
 
     var items: [DocumentStruct] = [] {
         didSet {
-            guard !items.isEmpty else { return }
             collectionView.reloadData()
+            index = 0
         }
     }
 
@@ -94,8 +94,8 @@ class BidirectionalPopover: Popover {
         index += 1
     }
 
-    private func selectDocument(at: IndexPath) -> DocumentStruct? {
-        guard let item = collectionView.item(at: IndexPath(item: index - 1, section: 0)) as? BidirectionalPopoverItem else { return nil }
+    private func selectDocument(at indexPath: IndexPath) -> DocumentStruct? {
+        guard let item = collectionView.item(at: indexPath) as? BidirectionalPopoverItem else { return nil }
         return item.document
     }
 
