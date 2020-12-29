@@ -7,11 +7,17 @@
 
 import Cocoa
 
+protocol BidirectionalDelegate: class {
+    func didSelectItems(_ title: String)
+}
+
 class BidirectionalPopover: Popover {
 
     // MARK: - Properties
     @IBOutlet var containerView: NSView!
     @IBOutlet weak var collectionView: NSCollectionView!
+
+    weak var delegate: BidirectionalDelegate?
 
     var items: [DocumentStruct] = [] {
         didSet {
@@ -38,6 +44,10 @@ class BidirectionalPopover: Popover {
         super.init(coder: coder)
     }
 
+    deinit {
+        delegate = nil
+    }
+
     // MARK: - UI
     private func setupView() {
         containerView.wantsLayer = true
@@ -62,13 +72,16 @@ class BidirectionalPopover: Popover {
             keyMoveUp()
         case .moveDown:
             keyMoveDown()
+        case .insertNewline:
+            guard let item = collectionView.item(at: IndexPath(item: index - 1, section: 0)) as? BidirectionalPopoverItem, let document = item.document else { break }
+            delegate?.didSelectItems(document.title)
         default:
             break
         }
     }
 
     private func keyMoveUp() {
-        guard index != 1 else { return }
+        guard index != 0 && index != 1 else { return }
         index -= 1
         collectionView.deselectItems(at: [IndexPath(item: index, section: 0)])
         collectionView.selectItems(at: [IndexPath(item: index - 1, section: 0)], scrollPosition: .bottom)

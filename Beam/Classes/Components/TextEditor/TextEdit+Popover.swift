@@ -18,6 +18,7 @@ extension BeamTextEdit {
         popover = BidirectionalPopover(frame: NSRect(x: x, y: y, width: 300, height: 125))
 
         guard let popover = popover else { return }
+        popover.delegate = self
 
         addSubview(popover)
     }
@@ -46,6 +47,14 @@ extension BeamTextEdit {
         guard popover != nil else { return }
         popover?.removeFromSuperview()
         popover = nil
+    }
+
+}
+
+extension BeamTextEdit: BidirectionalDelegate {
+
+    func didSelectItems(_ title: String) {
+        print(title)
     }
 
 }
