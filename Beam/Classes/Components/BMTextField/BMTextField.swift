@@ -66,7 +66,7 @@ struct BMTextField: NSViewRepresentable {
 
     func updateNSView(_ nsView: Self.NSViewType, context: Self.Context) {
         nsView.font = font
-        nsView.stringValue = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        nsView.stringValue = text
         nsView.placeholderText = placeholder
 
         // Enable focus on textField

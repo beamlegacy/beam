@@ -10,6 +10,7 @@ import Cocoa
 extension BeamTextEdit {
 
     internal func initPopover() {
+        guard let node = node as? TextNode else { return }
         let cursorPosition = rootNode.cursorPosition
         let (posX, rect) = node.offsetAndFrameAt(index: cursorPosition)
         let x = posX == 0 ? 220 : posX + 200
@@ -24,7 +25,9 @@ extension BeamTextEdit {
     }
 
     internal func updatePopover(_ command: TextRoot.Command = .none) {
-        guard let data = data, let popover = popover else { return }
+        guard let node = node as? TextNode,
+              let data = data,
+              let popover = popover else { return }
 
         var text = node.text.text
         let regex = "@|#"
@@ -54,8 +57,10 @@ extension BeamTextEdit {
 extension BeamTextEdit: BidirectionalDelegate {
 
     func didSelectDocument(_ document: DocumentStruct) {
+        guard let node = node as? TextNode else { return }
         guard let substringRange = node.text.text.range(of: node.text.text) else { return }
         let nsRange = NSRange(substringRange, in: node.text.text)
+
         insertText(document.title, replacementRange: nsRange)
         _ = node.text.makeInternalLink(nsRange.lowerBound..<document.title.count)
         dismissPopover()

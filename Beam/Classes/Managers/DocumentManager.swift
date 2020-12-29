@@ -56,7 +56,7 @@ class DocumentManager {
 
             self.documentRequest.saveDocument(documentStruct.asApiType()) { result in
                 switch result {
-                case .failure(let error):
+                case .failure(_):
                     break
                 case .success:
                     break
@@ -116,7 +116,7 @@ class DocumentManager {
 
             self.documentRequest.deleteDocument(id.uuidString.lowercased()) { result in
                 switch result {
-                case .failure(let error): break
+                case .failure(_): break
                 case .success: break
                 }
             }

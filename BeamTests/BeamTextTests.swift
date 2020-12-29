@@ -193,4 +193,15 @@ class BeamTextTests: XCTestCase {
         XCTAssertEqual(links[0].string, "e")
     }
 
+    func testMD2Text() {
+        let mdString = "some [[markdown text]] with a couple of [[links]] in it"
+        let parser = Parser(inputString: mdString)
+        let ast = parser.parseAST()
+        let visitor = BeamTextVisitor()
+        let text = visitor.visit(ast)
+        let links = text.internalLinks
+        XCTAssertEqual(links.count, 2)
+        XCTAssertEqual(links[0].string, "markdown text")
+        XCTAssertEqual(links[1].string, "links")
+    }
 }
