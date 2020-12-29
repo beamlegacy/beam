@@ -38,6 +38,8 @@ extension BeamTextEdit {
         let prefixIndex = text.distance(from: text.startIndex, to: range.lowerBound)
         let cursorPosition = rootNode.cursorPosition - 1
 
+        cursorStartPosition = prefixIndex
+
         if command == .moveLeft && cursorPosition <= prefixIndex { dismissPopover() }
 
         text.removeSubrange(..<range.lowerBound)
@@ -58,11 +60,10 @@ extension BeamTextEdit: BidirectionalDelegate {
 
     func didSelectDocument(_ document: DocumentStruct) {
         guard let node = node as? TextNode else { return }
-        guard let substringRange = node.text.text.range(of: node.text.text) else { return }
-        let nsRange = NSRange(substringRange, in: node.text.text)
+        node.text.replaceSubrange(cursorStartPosition..<rootNode.cursorPosition, with: document.title)
+        rootNode.cursorPosition = cursorStartPosition + document.title.count
 
-        insertText(document.title, replacementRange: nsRange)
-        _ = node.text.makeInternalLink(nsRange.lowerBound..<document.title.count)
+        _ = node.text.makeInternalLink(cursorStartPosition..<rootNode.cursorPosition)
         dismissPopover()
     }
 

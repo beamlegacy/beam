@@ -65,6 +65,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     private var noteCancellables = [AnyCancellable]()
+    internal var cursorStartPosition = 0
     internal var popover: BidirectionalPopover?
 
     public init(root: BeamElement, font: Font = Font.main) {
@@ -485,6 +486,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                 rootNode.doCommand(.deleteForward)
                 return
             case 53: // escape
+                if popover != nil { dismissPopover() }
                 rootNode.cancelSelection()
                 return
             default:
@@ -641,13 +643,17 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
     var inputDetectorState: Int = 0
     var inputDetectorEnabled: Bool { inputDetectorState >= 0 }
+
     func disableInputDetector() {
         inputDetectorState -= 1
     }
+
     func enableInputDetector() {
         inputDetectorState -= 1
     }
+
     var lastInput: String = ""
+
     func preDetectInput(_ input: String) -> Bool {
         guard inputDetectorEnabled else { return true }
         guard let node = node as? TextNode else { return true }
@@ -1014,4 +1020,3 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         mapping.removeValue(forKey: node.element)
     }
 }
-
