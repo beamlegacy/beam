@@ -15,7 +15,7 @@ extension BeamTextEdit {
         let x = posX == 0 ? 220 : posX + 200
         let y = rect.maxY == 0 ? 60 : rect.maxY + 40
 
-        popover = BidirectionalPopover(frame: NSRect(x: x, y: y, width: 300, height: 150))
+        popover = BidirectionalPopover(frame: NSRect(x: x, y: y, width: 300, height: 125))
 
         guard let popover = popover else { return }
 

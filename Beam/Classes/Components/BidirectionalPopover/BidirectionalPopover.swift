@@ -15,11 +15,14 @@ class BidirectionalPopover: Popover {
 
     var items: [DocumentStruct] = [] {
         didSet {
+            guard !items.isEmpty else { return }
             collectionView.reloadData()
         }
     }
 
-    private var nimName: String {
+    private var index = 0
+
+    private var nibName: String {
         return String(describing: type(of: self))
     }
 
@@ -35,26 +38,50 @@ class BidirectionalPopover: Popover {
         super.init(coder: coder)
     }
 
-    // MARK: - Setup UI
+    // MARK: - UI
     private func setupView() {
         containerView.wantsLayer = true
-        containerView.layer?.backgroundColor = NSColor.red.cgColor
+        containerView.layer?.backgroundColor = NSColor.white.cgColor
     }
 
     private func setupCollectionView() {
         collectionView.register(BidirectionalPopoverItem.self, forItemWithIdentifier: BidirectionalPopoverItem.identifier)
+        collectionView.dataSource = self
+        collectionView.delegate = self
 
+        collectionView.isSelectable = true
         collectionView.wantsLayer = true
         collectionView.backgroundColors = [.clear]
         collectionView.layer?.backgroundColor = .clear
-        collectionView.delegate = self
-        collectionView.dataSource = self
     }
 
     // MARK: - Methods
+    func keyEvent(_ command: TextRoot.Command) {
+        switch command {
+        case .moveUp:
+            keyMoveUp()
+        case .moveDown:
+            keyMoveDown()
+        default:
+            break
+        }
+    }
+
+    private func keyMoveUp() {
+        index = index == 0 ? 0 : index - 1
+        collectionView.deselectItems(at: [IndexPath(item: index, section: 0)])
+        collectionView.selectItems(at: [IndexPath(item: index - 1, section: 0)], scrollPosition: .bottom)
+    }
+
+    private func keyMoveDown() {
+        collectionView.deselectItems(at: [IndexPath(item: index - 1, section: 0)])
+        collectionView.selectItems(at: [IndexPath(item: index, section: 0)], scrollPosition: .bottom)
+        index = index == items.count - 1 ? index : index + 1
+    }
+
     private func loadXib() {
         let bundle = Bundle(for: type(of: self))
-        guard let nib = NSNib(nibNamed: nimName, bundle: bundle) else { fatalError("Impossible to load \(nimName)") }
+        guard let nib = NSNib(nibNamed: nibName, bundle: bundle) else { fatalError("Impossible to load \(nibName)") }
         _ = nib.instantiate(withOwner: self, topLevelObjects: nil)
 
         containerView.frame = bounds
@@ -101,6 +128,15 @@ extension BidirectionalPopover: NSCollectionViewDelegateFlowLayout {
 
     func collectionView(_ collectionView: NSCollectionView, layout collectionViewLayout: NSCollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
         return 0
+    }
+
+}
+
+// MARK: - NSCollectionView Delegate
+extension BidirectionalPopover: NSCollectionViewDelegate {
+
+    func collectionView(_ collectionView: NSCollectionView, didSelectItemsAt indexPaths: Set<IndexPath>) {
+        print(indexPaths)
     }
 
 }

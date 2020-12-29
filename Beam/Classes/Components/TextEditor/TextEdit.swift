@@ -584,8 +584,16 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                         return
                     }
                 case .upArrow:
+                    if popover != nil {
+
+                    }
+
                     if shift {
                         rootNode.doCommand(.moveUpAndModifySelection)
+                        return
+                    } else if popover != nil {
+                        guard let popover = popover else { return }
+                        popover.keyEvent(.moveUp)
                         return
                     } else {
                         rootNode.doCommand(.moveUp)
@@ -594,6 +602,10 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                 case .downArrow:
                     if shift {
                         rootNode.doCommand(.moveDownAndModifySelection)
+                        return
+                    } else if popover != nil {
+                        guard let popover = popover else { return }
+                        popover.keyEvent(.moveDown)
                         return
                     } else {
                         rootNode.doCommand(.moveDown)
