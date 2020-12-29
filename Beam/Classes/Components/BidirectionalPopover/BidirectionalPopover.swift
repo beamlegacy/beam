@@ -68,15 +68,17 @@ class BidirectionalPopover: Popover {
     }
 
     private func keyMoveUp() {
-        index = index == 0 ? index : index - 1
+        guard index != 1 else { return }
+        index -= 1
         collectionView.deselectItems(at: [IndexPath(item: index, section: 0)])
         collectionView.selectItems(at: [IndexPath(item: index - 1, section: 0)], scrollPosition: .bottom)
     }
 
     private func keyMoveDown() {
+        guard index != items.count else { return }
         collectionView.deselectItems(at: [IndexPath(item: index - 1, section: 0)])
         collectionView.selectItems(at: [IndexPath(item: index, section: 0)], scrollPosition: .bottom)
-        index = index == items.count - 1 ? index : index + 1
+        index += 1
     }
 
     private func loadXib() {
