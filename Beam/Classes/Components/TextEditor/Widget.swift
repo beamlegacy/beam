@@ -176,6 +176,24 @@ public class Widget: NSObject, CALayerDelegate {
         layer.removeFromSuperlayer()
     }
 
+    func removeFromSuperlayer(recursive: Bool) {
+        layer.removeFromSuperlayer()
+        if recursive {
+            for c in children {
+                c.removeFromSuperlayer(recursive: recursive)
+            }
+        }
+    }
+
+    func addLayerTo(layer: CALayer, recursive: Bool) {
+        layer.addSublayer(self.layer)
+        if recursive {
+            for c in children {
+                c.addLayerTo(layer: layer, recursive: recursive)
+            }
+        }
+    }
+
     // MARK: - Setup UI
 
     public func draw(_ layer: CALayer, in ctx: CGContext) {

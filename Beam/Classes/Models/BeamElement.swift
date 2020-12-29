@@ -134,7 +134,7 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject {
     }
 
     func connectUnlinkedNotes(_ thisNoteTitle: String, _ allNotes: [BeamNote]) {
-        for note in allNotes {
+        for note in allNotes where thisNoteTitle != note.title {
             let existingLinks = text.internalLinks.map { range -> String in range.string }
             if text.text.contains(note.title), !existingLinks.contains(note.title) {
                 note.addUnlinkedReference(NoteReference(noteName: thisNoteTitle, elementID: id))
@@ -175,7 +175,7 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject {
     func detectLinkedNotes(_ documentManager: DocumentManager) {
         guard let note = note else { return }
 
-        for link in text.internalLinks {
+        for link in text.internalLinks where link.string != note.title {
             let linkTitle = link.string
 //            Logger.shared.logInfo("searching link \(linkTitle)", category: .document)
             let refnote = BeamNote.fetchOrCreate(documentManager, title: linkTitle)

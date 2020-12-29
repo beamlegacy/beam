@@ -27,7 +27,9 @@ class BreadCrumb: Widget {
 
         self.crumbChain = computeCrumChain(from: element)
 
-        self.linkedReferenceNode = LinkedReferenceNode(editor: editor, parent: self, element: element)
+        guard let ref = editor.nodeFor(element) as? LinkedReferenceNode else { fatalError() }
+        ref.parent = self
+        self.linkedReferenceNode = ref
 
 //        layer.backgroundColor = NSColor.blue.withAlphaComponent(0.2).cgColor
         editor.layer?.addSublayer(layer)
@@ -108,14 +110,19 @@ class BreadCrumb: Widget {
             let layer = crumbLayers[i]
 
             if layer.frame.contains(mouseInfo.position) {
+                guard i != 0 else {
+                    editor.openCard(crumbChain[0].note!.title)
+                    return true
+                }
+                guard i != selectedCrumb else { return false }
                 selectedCrumb = i
                 updateCrumbLayersVisibility()
-                linkedReferenceNode = LinkedReferenceNode(editor: editor, parent: self, element: crumb)
+                guard let ref = editor.nodeFor(crumb) as? LinkedReferenceNode else { fatalError() }
+                linkedReferenceNode.removeFromSuperlayer(recursive: true)
+                ref.addLayerTo(layer: editor.layer!, recursive: true)
+                linkedReferenceNode = ref
                 linkedReferenceNode.unfold()
-                invalidateLayout()
                 children = [linkedReferenceNode]
-                let scale = contentsScale
-                contentsScale = scale
                 invalidateLayout()
 
                 return true
