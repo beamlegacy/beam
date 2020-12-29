@@ -53,8 +53,9 @@ extension BeamTextEdit {
 
 extension BeamTextEdit: BidirectionalDelegate {
 
-    func didSelectItems(_ title: String) {
-        print(title)
+    func didSelectDocument(_ document: DocumentStruct) {
+        print(document)
+        dismissPopover()
     }
 
 }

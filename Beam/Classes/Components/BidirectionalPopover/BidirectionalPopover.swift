@@ -8,7 +8,7 @@
 import Cocoa
 
 protocol BidirectionalDelegate: class {
-    func didSelectItems(_ title: String)
+    func didSelectDocument(_ document: DocumentStruct)
 }
 
 class BidirectionalPopover: Popover {
@@ -73,8 +73,8 @@ class BidirectionalPopover: Popover {
         case .moveDown:
             keyMoveDown()
         case .insertNewline:
-            guard let item = collectionView.item(at: IndexPath(item: index - 1, section: 0)) as? BidirectionalPopoverItem, let document = item.document else { break }
-            delegate?.didSelectItems(document.title)
+            guard let document = selectDocument(at: IndexPath(item: index - 1, section: 0)) else { break }
+            delegate?.didSelectDocument(document)
         default:
             break
         }
@@ -92,6 +92,11 @@ class BidirectionalPopover: Popover {
         collectionView.deselectItems(at: [IndexPath(item: index - 1, section: 0)])
         collectionView.selectItems(at: [IndexPath(item: index, section: 0)], scrollPosition: .bottom)
         index += 1
+    }
+
+    private func selectDocument(at: IndexPath) -> DocumentStruct? {
+        guard let item = collectionView.item(at: IndexPath(item: index - 1, section: 0)) as? BidirectionalPopoverItem else { return nil }
+        return item.document
     }
 
     private func loadXib() {
@@ -118,7 +123,12 @@ extension BidirectionalPopover: NSCollectionViewDataSource {
     }
 
     func collectionView(_ collectionView: NSCollectionView, itemForRepresentedObjectAt indexPath: IndexPath) -> NSCollectionViewItem {
-        guard let item = collectionView.makeItem(withIdentifier: BidirectionalPopoverItem.identifier, for: indexPath) as? BidirectionalPopoverItem else { fatalError("Failed to load \(BidirectionalPopoverItem.identifier)") }
+        guard let item = collectionView.makeItem(
+                withIdentifier: BidirectionalPopoverItem.identifier,
+                for: indexPath
+        ) as? BidirectionalPopoverItem else {
+            fatalError("Failed to load \(BidirectionalPopoverItem.identifier)")
+        }
 
         item.document = items[indexPath.item]
         return item
@@ -151,7 +161,10 @@ extension BidirectionalPopover: NSCollectionViewDelegateFlowLayout {
 extension BidirectionalPopover: NSCollectionViewDelegate {
 
     func collectionView(_ collectionView: NSCollectionView, didSelectItemsAt indexPaths: Set<IndexPath>) {
-        print(indexPaths)
+        guard let indexPath = indexPaths.first,
+              let document = selectDocument(at: indexPath) else { return }
+
+        delegate?.didSelectDocument(document)
     }
 
 }
