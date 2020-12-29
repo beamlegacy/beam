@@ -68,7 +68,7 @@ class BidirectionalPopover: Popover {
     }
 
     private func keyMoveUp() {
-        index = index == 0 ? 0 : index - 1
+        index = index == 0 ? index : index - 1
         collectionView.deselectItems(at: [IndexPath(item: index, section: 0)])
         collectionView.selectItems(at: [IndexPath(item: index - 1, section: 0)], scrollPosition: .bottom)
     }

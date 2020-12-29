@@ -44,6 +44,7 @@ class BMTextFieldView: NSTextField {
         wantsLayer = true
         isBordered = false
         drawsBackground = false
+        lineBreakMode = .byTruncatingTail
 
         guard let placeholder = placeholderText else { return }
 
