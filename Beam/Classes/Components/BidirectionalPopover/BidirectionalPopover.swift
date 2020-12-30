@@ -8,7 +8,7 @@
 import Cocoa
 
 protocol BidirectionalDelegate: class {
-    func didSelectDocument(_ document: DocumentStruct)
+    func didSelectTitle(_ title: String)
 }
 
 class BidirectionalPopover: Popover {
@@ -74,7 +74,7 @@ class BidirectionalPopover: Popover {
             keyMoveDown()
         case .insertNewline:
             guard let document = selectDocument(at: IndexPath(item: index - 1, section: 0)) else { break }
-            delegate?.didSelectDocument(document)
+            delegate?.didSelectTitle(document.title)
         default:
             break
         }
@@ -164,7 +164,7 @@ extension BidirectionalPopover: NSCollectionViewDelegate {
         guard let indexPath = indexPaths.first,
               let document = selectDocument(at: indexPath) else { return }
 
-        delegate?.didSelectDocument(document)
+        delegate?.didSelectTitle(document.title)
     }
 
 }

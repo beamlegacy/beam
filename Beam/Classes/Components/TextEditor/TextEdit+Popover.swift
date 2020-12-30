@@ -13,8 +13,8 @@ extension BeamTextEdit {
         guard let node = node as? TextNode else { return }
         let cursorPosition = rootNode.cursorPosition
         let (posX, rect) = node.offsetAndFrameAt(index: cursorPosition)
-        let x = posX == 0 ? 220 : posX + 200
-        let y = rect.maxY == 0 ? 60 : rect.maxY + 40
+        let x = posX == 0 ? 220 : posX + node.offsetInDocument.x
+        let y = rect.maxY == 0 ? rect.maxY + node.offsetInDocument.y + 30 : rect.maxY + node.offsetInDocument.y + 10
 
         popover = BidirectionalPopover(frame: NSRect(x: x, y: y, width: 300, height: 125))
 
@@ -30,21 +30,30 @@ extension BeamTextEdit {
               let popover = popover else { return }
 
         var text = node.text.text
-        let regex = "@|#"
+        let cursorPosition = rootNode.cursorPosition
 
-        if command == .deleteForward && !text.contains(where: { ["@", "#"].contains($0) }) { dismissPopover() }
+        if command == .deleteForward && cursorStartPosition == cursorPosition ||
+           command == .moveLeft && cursorPosition - 1 <= cursorStartPosition {
+            dismissPopover()
+            return
+        }
 
-        guard let range = text.range(of: regex, options: .regularExpression) else { return }
-        let prefixIndex = text.distance(from: text.startIndex, to: range.lowerBound)
-        let cursorPosition = rootNode.cursorPosition - 1
+        let startIndex = text.index(at: cursorStartPosition)
+        let endIndex = text.index(at: cursorPosition)
+        let startDistance = text.distance(from: text.startIndex, to: startIndex)
+        let endDistance = text.distance(from: text.endIndex, to: endIndex)
+        let prefix = String(text[startIndex])
 
-        cursorStartPosition = prefixIndex
+        print(startDistance, endDistance)
 
-        if command == .moveLeft && cursorPosition <= prefixIndex { dismissPopover() }
+        if endDistance < 0 {
+            text.removeSubrange(endIndex...)
+            text.removeSubrange(..<startIndex)
+        } else {
+            text.removeSubrange(..<startIndex)
+        }
 
-        text.removeSubrange(..<range.lowerBound)
-        text = text.replacingOccurrences(of: regex, with: "", options: .regularExpression)
-
+        text = text.replacingOccurrences(of: prefix, with: "")
         popover.items = Array(data.documentManager.documentsWithTitleMatch(title: text).prefix(4))
     }
 
@@ -58,10 +67,10 @@ extension BeamTextEdit {
 
 extension BeamTextEdit: BidirectionalDelegate {
 
-    func didSelectDocument(_ document: DocumentStruct) {
+    func didSelectTitle(_ title: String) {
         guard let node = node as? TextNode else { return }
-        node.text.replaceSubrange(cursorStartPosition..<rootNode.cursorPosition, with: document.title)
-        rootNode.cursorPosition = cursorStartPosition + document.title.count
+        node.text.replaceSubrange(cursorStartPosition..<rootNode.cursorPosition, with: title)
+        rootNode.cursorPosition = cursorStartPosition + title.count
 
         _ = node.text.makeInternalLink(cursorStartPosition..<rootNode.cursorPosition)
         dismissPopover()

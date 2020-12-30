@@ -497,6 +497,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                 switch ch {
                 case "a":
                     if command {
+                        if popover != nil { dismissPopover() }
                         rootNode.doCommand(.selectAll)
                         return
                     }
@@ -667,15 +668,16 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         }
 
         let handlers: [String: () -> Bool] = [
-            "@": {
-                 guard self.popover == nil else { return false }
-                 self.initPopover()
-                 return true
+            "@": { [unowned self] in
+                guard self.popover == nil else { return false }
+                self.cursorStartPosition = self.rootNode.cursorPosition
+                self.initPopover()
+                return true
              },
-             "#": {
-                 guard self.popover == nil else { return false }
-                 self.initPopover()
-                 return true
+             "#": { [unowned self] in
+                guard self.popover == nil else { return false }
+                self.initPopover()
+                return true
              },
             "[[": { [unowned self] in
                 insertPair("[", "]")
