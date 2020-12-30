@@ -7,10 +7,15 @@
 
 import Foundation
 
+struct Link: Codable {
+    var url: String
+    var visits: [Date]
+}
+
 class LinkStore: Codable {
     static var shared = LinkStore()
 
-    public private(set) var links = [UInt64: String]()
+    public private(set) var links = [UInt64: Link]()
     public private(set) var ids = [String: UInt64]()
 
     func getIdFor(link: String) -> UInt64? {
@@ -25,14 +30,14 @@ class LinkStore: Codable {
         guard let id = getIdFor(link: link) else {
             let id = MonotonicIncreasingID64.newValue
             ids[link] = id
-            links[id] = link
+            links[id] = Link(url: link, visits: [])
             return id
         }
 
         return id
     }
 
-    func linkFor(id: UInt64) -> String? {
+    func linkFor(id: UInt64) -> Link? {
         guard let link = links[id] else {
             return nil
         }
@@ -40,7 +45,7 @@ class LinkStore: Codable {
         return link
     }
 
-    static func linkFor(_ id: UInt64) -> String? {
+    static func linkFor(_ id: UInt64) -> Link? {
         return shared.linkFor(id: id)
     }
 
@@ -54,7 +59,7 @@ class LinkStore: Codable {
 
     static func isInternalLink(id: UInt64) -> Bool {
         guard let link = linkFor(id) else { return false }
-        return isInternal(link: link)
+        return isInternal(link: link.url)
     }
 
     static func isInternal(link: String) -> Bool {

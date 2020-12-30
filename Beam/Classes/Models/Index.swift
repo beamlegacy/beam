@@ -57,7 +57,7 @@ class Index: Codable {
         var instances = [UInt64: WordScore]()
         var count: UInt = 0
 
-        // switflint:disable:next nesting
+        //switflint:disable:next nesting
         enum CodingKeys: String, CodingKey {
             case instances = "i"
             case count = "c"
@@ -111,7 +111,7 @@ class Index: Codable {
 
         return results.compactMap { doc -> SearchResult? in
             guard let originalDoc = self.documents[doc.key] else { return nil }
-            guard let source = LinkStore.linkFor(originalDoc.id) else { return nil }
+            guard let source = LinkStore.linkFor(originalDoc.id)?.url else { return nil }
             return SearchResult(id: originalDoc.id, score: doc.value.score, title: originalDoc.title, source: source)
         }.sorted { lhs, rhs -> Bool in
             lhs.score > rhs.score
@@ -130,7 +130,7 @@ class Index: Codable {
             associate(id: document.id, withWord: word, score: Self.titleScore)
         }
 
-        if let source = LinkStore.linkFor(document.id), LinkStore.isInternal(link: source) {
+        if let source = LinkStore.linkFor(document.id)?.url, LinkStore.isInternal(link: source) {
             pageRank.updatePage(source: source, outbounds: document.outboundLinks)
         }
     }
@@ -171,9 +171,9 @@ class Index: Codable {
     }
 
     func dump() {
-        print("Index contains \(words.count) words from \(documents.count) documents")
+        Logger.shared.logInfo("Index contains \(words.count) words from \(documents.count) documents", category: .search)
         for doc in documents {
-            print("[Document \(doc.key)] - \(doc.value.title) / \(LinkStore.linkFor(doc.value.id))")
+            Logger.shared.logInfo("[Document \(doc.key)] - \(doc.value.title) / \(String(describing: LinkStore.linkFor(doc.value.id)))", category: .search)
         }
     }
 
