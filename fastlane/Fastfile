@@ -26,7 +26,7 @@ platform :mac do
       strict: true,
       config_file: '.swiftlint.yml',
       reporter: "json",
-      output_file: "fastlane/swiftlint.json",
+      output_file: "fastlane/swiftlint.json"
     )
   end
 

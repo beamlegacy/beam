@@ -25,6 +25,7 @@ before_script:
   - eval "$(rbenv init -)"
 
 include:
+  - template: Code-Quality.gitlab-ci.yml
   - '.gitlab/ci/gitlab-ci-xcode.yml'
   - '.gitlab/ci/gitlab-ci-lint.yml'
   - '.gitlab/ci/gitlab-ci-test.yml'
