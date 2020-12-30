@@ -32,7 +32,6 @@ struct JournalView: View {
                     )
                 }
             }
-            .animation(.easeInOut)
             .padding(.top, isEditing ? 20 : offset)
         }
     }
