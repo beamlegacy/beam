@@ -673,15 +673,11 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
         let handlers: [String: () -> Bool] = [
             "@": { [unowned self] in
-                guard self.popover == nil else { return false }
-                self.cursorStartPosition = self.rootNode.cursorPosition
-                self.initPopover()
+                self.showBidirectionalPopover()
                 return true
              },
              "#": { [unowned self] in
-                guard self.popover == nil else { return false }
-                self.cursorStartPosition = self.rootNode.cursorPosition
-                self.initPopover()
+                self.showBidirectionalPopover()
                 return true
              },
             "[[": { [unowned self] in
@@ -690,7 +686,10 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                 if !self.selectedTextRange.isEmpty {
                     _ = node.text.makeInternalLink(self.selectedTextRange)
                     return false
+                } else {
+                    self.showBidirectionalPopover()
                 }
+
                 return true
             },
             "[": {
@@ -1010,6 +1009,12 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     private var accessingMapping = false
     private var mapping: [BeamElement: TextNode] = [:]
     private var deadNodes: [TextNode] = []
+
+    private func showBidirectionalPopover() {
+        guard self.popover == nil else { return }
+        self.cursorStartPosition = self.rootNode.cursorPosition
+        self.initPopover()
+    }
 
     func purgeDeadNodes() {
         guard !accessingMapping else { return }
