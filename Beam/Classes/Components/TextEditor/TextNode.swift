@@ -460,8 +460,10 @@ public class TextNode: Widget {
     }
 
     func updateActionLayer() {
-        let actionLayerYPosition = isHeader ? (contentsFrame.height / 2) - actionLayerFrame.height : 0
-        actionLayer?.frame = CGRect(x: (availableWidth - actionLayerFrame.width) + actionLayerFrame.minX, y: actionLayerYPosition, width: actionLayerFrame.width, height: actionLayerFrame.height)
+        CATransaction.disableAnimations {
+            let actionLayerYPosition = isHeader ? (contentsFrame.height / 2) - actionLayerFrame.height : 0
+            actionLayer?.frame = CGRect(x: (availableWidth - actionLayerFrame.width) + actionLayerFrame.minX, y: actionLayerYPosition, width: actionLayerFrame.width, height: actionLayerFrame.height)
+        }
     }
 
     // MARK: - Methods TextNode

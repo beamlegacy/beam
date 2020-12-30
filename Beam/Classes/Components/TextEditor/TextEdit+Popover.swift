@@ -55,7 +55,6 @@ extension BeamTextEdit {
     }
 
     internal func dismissPopover() {
-        guard popover != nil else { return }
         popover?.removeFromSuperview()
         popover = nil
     }

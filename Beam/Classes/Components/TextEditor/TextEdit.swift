@@ -343,8 +343,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         guard !node.readOnly else { return }
 
         if popover != nil {
-            guard let popover = popover else { return }
-            popover.keyEvent(.insertNewline)
+            popover?.keyEvent(.insertNewline)
             return
         }
 
@@ -413,7 +412,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                         } else if command {
                             rootNode.doCommand(.moveToBeginningOfLine)
                         } else {
-                            if popover != nil { updatePopover(.moveLeft) }
+                            updatePopover(.moveLeft)
                             rootNode.doCommand(.moveLeft)
                         }
                         return
@@ -467,7 +466,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     }
                 case .delete:
                     rootNode.doCommand(.deleteBackward)
-                    if popover != nil { updatePopover(.deleteForward) }
+                    updatePopover(.deleteForward)
                     return
 
                 case .backTab:
@@ -719,6 +718,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         return true
     }
 
+    // swiftlint:disable:next cyclomatic_complexity
     func postDetectInput(_ input: String) {
         guard inputDetectorEnabled else { return }
         guard let node = node as? TextNode else { return }
@@ -1011,9 +1011,9 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     private var deadNodes: [TextNode] = []
 
     private func showBidirectionalPopover() {
-        guard self.popover == nil else { return }
-        self.cursorStartPosition = self.rootNode.cursorPosition
-        self.initPopover()
+        guard popover == nil else { return }
+        cursorStartPosition = rootNode.cursorPosition
+        initPopover()
     }
 
     func purgeDeadNodes() {

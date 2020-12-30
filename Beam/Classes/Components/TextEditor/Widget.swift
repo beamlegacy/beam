@@ -9,7 +9,8 @@ import Foundation
 import Cocoa
 import Combine
 
-// swiftlint:disable:next type_body_length
+// swiftlint:disable type_body_length
+// swiftlint:disable file_length
 public class Widget: NSObject, CALayerDelegate {
     let layer: CALayer
     var debug = false
@@ -208,7 +209,7 @@ public class Widget: NSObject, CALayerDelegate {
         drawDebug(in: context)
 
         if selfVisible {
-            context.saveGState(); defer { context.restoreGState() }
+            context.saveGState(); do { context.restoreGState() }
         }
         context.restoreGState()
     }
@@ -614,3 +615,5 @@ public class Widget: NSObject, CALayerDelegate {
         return false
     }
 }
+// swiftlint:enable type_body_length
+// swiftlint:enable file_length

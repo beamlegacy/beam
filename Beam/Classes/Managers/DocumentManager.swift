@@ -52,14 +52,19 @@ class DocumentManager {
                 return
             }
 
-            completion?(.success(true))
+            // If not authenticated
+            guard AuthenticationManager.shared.isAuthenticated else {
+                completion?(.success(true))
+                return
+            }
 
+            // If authenticated
             self.documentRequest.saveDocument(documentStruct.asApiType()) { result in
                 switch result {
-                case .failure(_):
-                    break
+                case .failure(let error):
+                    completion?(.failure(error))
                 case .success:
-                    break
+                    completion?(.success(true))
                 }
             }
         }
@@ -108,16 +113,24 @@ class DocumentManager {
 
     }
 
-    func deleteDocument(id: UUID, completion: (() -> Void)? = nil) {
+    func deleteDocument(id: UUID, completion: ((Result<Bool, Error>) -> Void)? = nil) {
         coreDataManager.persistentContainer.performBackgroundTask { context in
             let document = Document.fetchWithId(context, id)
             document?.delete(context)
-            completion?()
 
+            // If not authenticated
+            guard AuthenticationManager.shared.isAuthenticated else {
+                completion?(.success(true))
+                return
+            }
+
+            // If authenticated
             self.documentRequest.deleteDocument(id.uuidString.lowercased()) { result in
                 switch result {
-                case .failure(_): break
-                case .success: break
+                case .failure(let error):
+                    completion?(.failure(error))
+                case .success:
+                    completion?(.success(true))
                 }
             }
         }

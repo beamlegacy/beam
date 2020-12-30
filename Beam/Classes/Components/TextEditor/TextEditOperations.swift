@@ -125,7 +125,6 @@ extension TextRoot {
                 selfTarget.pushUndoState(command) // push the redo!
             }
 
-
             guard let selfNode = selfTarget.node as? TextNode else { return }
             selfNode.text = state.text
             selfTarget.selectedTextRange = state.selectedTextRange

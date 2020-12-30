@@ -13,6 +13,7 @@
 		4159EA0A259A3568005FD355 /* BidirectionalPopoverItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159EA08259A3568005FD355 /* BidirectionalPopoverItem.swift */; };
 		4159EA0B259A3568005FD355 /* BidirectionalPopoverItem.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4159EA09259A3568005FD355 /* BidirectionalPopoverItem.xib */; };
 		4170C43125923B6A0072C781 /* Popover.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4170C43025923B6A0072C781 /* Popover.swift */; };
+		416C09F3259C919200AF2903 /* CATransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416C09F2259C919200AF2903 /* CATransaction.swift */; };
 		418170FF2581060A00317ED8 /* Colors.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 418170FE2581060A00317ED8 /* Colors.xcassets */; };
 		418171122581082200317ED8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 418171112581082200317ED8 /* Assets.xcassets */; };
 		4181713325810CDC00317ED8 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181712B25810CDC00317ED8 /* Constants.swift */; };
@@ -404,6 +405,7 @@
 		4159EA08259A3568005FD355 /* BidirectionalPopoverItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BidirectionalPopoverItem.swift; sourceTree = "<group>"; };
 		4159EA09259A3568005FD355 /* BidirectionalPopoverItem.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = BidirectionalPopoverItem.xib; sourceTree = "<group>"; };
 		4170C43025923B6A0072C781 /* Popover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Popover.swift; sourceTree = "<group>"; };
+		416C09F2259C919200AF2903 /* CATransaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CATransaction.swift; sourceTree = "<group>"; };
 		418170FE2581060A00317ED8 /* Colors.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Colors.xcassets; sourceTree = "<group>"; };
 		418171112581082200317ED8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		4181712B25810CDC00317ED8 /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
@@ -878,6 +880,7 @@
 				418173BD2581251600317ED8 /* URL+Beam.swift */,
 				4181744225812C5F00317ED8 /* NSColor+Beam.swift */,
 				521EEDFA2593927100BA2485 /* Int+ByteSize.swift */,
+				416C09F2259C919200AF2903 /* CATransaction.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -1898,6 +1901,7 @@
 				418173BE2581251600317ED8 /* URL+Beam.swift in Sources */,
 				4181713525810CDC00317ED8 /* Beam.xcdatamodeld in Sources */,
 				418172102581107C00317ED8 /* TextFormatter.swift in Sources */,
+				416C09F3259C919200AF2903 /* CATransaction.swift in Sources */,
 				418172382581107C00317ED8 /* TextNode.swift in Sources */,
 				418172502581107C00317ED8 /* NoteView.swift in Sources */,
 				4181725F2581107C00317ED8 /* DocumentManager.swift in Sources */,
