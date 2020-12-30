@@ -40,11 +40,8 @@ extension BeamTextEdit {
 
         let startIndex = text.index(at: cursorStartPosition)
         let endIndex = text.index(at: cursorPosition)
-        let startDistance = text.distance(from: text.startIndex, to: startIndex)
         let endDistance = text.distance(from: text.endIndex, to: endIndex)
         let prefix = String(text[startIndex])
-
-        print(startDistance, endDistance)
 
         if endDistance < 0 {
             text.removeSubrange(endIndex...)
