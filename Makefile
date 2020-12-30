@@ -75,6 +75,9 @@ install_gitlab_runner:
 	# For badge
 	brew install imagemagick graphicsmagick
 
+	# Sentry
+	brew install getsentry/tools/sentry-cli
+
 install_swiftlint:
 	brew install swiftlint
 	sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
