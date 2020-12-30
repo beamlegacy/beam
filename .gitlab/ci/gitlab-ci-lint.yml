@@ -16,4 +16,3 @@ swiftlint:
   tags:
     - macos
   interruptible: true
-  allow_failure: true
