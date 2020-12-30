@@ -580,7 +580,9 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             ptr.pointee = range
         }
         guard let node = node as? TextNode else { return nil }
-        return node.attributedString.attributedSubstring(from: range)
+        let str = node.attributedString.attributedSubstring(from: range)
+        Logger.shared.logDebug("TextInput.attributedString(range: \(range), actualRange: \(String(describing: actualRange))) -> \(str)", category: .document)
+        return str
     }
 
     public func attributedString() -> NSAttributedString {
