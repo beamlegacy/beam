@@ -19,7 +19,7 @@ struct Configuration {
     static private(set) var sentryKey = "$(SENTRY_KEY)"
     static private(set) var sentryHostname = "o477543.ingest.sentry.io"
     static private(set) var sentryProject = "5518785"
-    static private(set) var env = "debug"
+    static private(set) var env = "$(ENV)"
 
     // Runtime configuration
     static private(set) var apiHostnameDefault = "api.beamapp.co"
