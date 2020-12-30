@@ -392,8 +392,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     pressEnter(option, command)
                     return
                 case .leftArrow:
-                    if popover != nil { updatePopover(.moveLeft) }
-
                     if control && option && command {
                         guard let node = node as? TextNode else { return }
                         node.fold()
@@ -406,12 +404,16 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                             rootNode.doCommand(.moveLeftAndModifySelection)
                         }
                         return
+                    } else if command && popover != nil {
+                        rootNode.doCommand(.moveToBeginningOfLine)
+                        dismissPopover()
                     } else {
                         if option {
                             rootNode.doCommand(.moveWordLeft)
                         } else if command {
                             rootNode.doCommand(.moveToBeginningOfLine)
                         } else {
+                            if popover != nil { updatePopover(.moveLeft) }
                             rootNode.doCommand(.moveLeft)
                         }
                         return
