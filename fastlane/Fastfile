@@ -241,6 +241,33 @@ platform :mac do
     ping_slack
   end
 
+  lane :ping_sentry do
+    get_version_number_from_plist(info_plist: "builds/Beam.app/Contents/Info.plist")
+    get_build_number_from_plist(info_plist: "builds/Beam.app/Contents/Info.plist")
+
+    sentry_upload_dsym(
+      org_slug: "beamapp",
+      project_slug: "beam-macos",
+      dsym_path: "builds/Beam.app.dSYM.zip"
+    )
+
+    sentry_create_release(
+      org_slug: "beamapp",
+      project_slug: "beam-macos",
+      version: "#{lane_context[SharedValues::VERSION_NUMBER]}+#{lane_context[SharedValues::BUILD_NUMBER]}",
+      app_identifier: ENV["TEAM_IDENTIFIER"],
+      finalize: true
+    )
+
+#    sentry_set_commits(
+#      version: lane_context[SharedValues::BUILD_NUMBER],
+#      app_identifier: ENV["TEAM_IDENTIFIER"],
+#      auto: false, # enable completely automated commit management
+#      clear: false, # clear all current commits from the release
+#      commit: '...', # commit spec, see `sentry-cli releases help set-commits` for more information
+#    )
+  end
+
   private_lane :create_release_notes do
     # Fetch commit from S3 if we already had one
     download_previous_file(filename: "commit")
