@@ -22,6 +22,7 @@ public struct MouseInfo {
     }
 }
 
+// swiftlint:disable:next type_body_length
 public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     var data: BeamData?
     var note: BeamElement! {
@@ -656,6 +657,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
     var lastInput: String = ""
 
+    // swiftlint:disable:next function_body_length
     func preDetectInput(_ input: String) -> Bool {
         guard inputDetectorEnabled else { return true }
         guard let node = node as? TextNode else { return true }

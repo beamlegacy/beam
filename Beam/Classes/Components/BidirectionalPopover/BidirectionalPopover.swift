@@ -7,17 +7,13 @@
 
 import Cocoa
 
-protocol BidirectionalDelegate: class {
-    func didSelectTitle(_ title: String)
-}
-
 class BidirectionalPopover: Popover {
 
     // MARK: - Properties
     @IBOutlet var containerView: NSView!
     @IBOutlet weak var collectionView: NSCollectionView!
 
-    weak var delegate: BidirectionalDelegate?
+    var didSelectTitle: ((_ title: String) -> Void)?
 
     var items: [DocumentStruct] = [] {
         didSet {
@@ -42,10 +38,6 @@ class BidirectionalPopover: Popover {
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
-    }
-
-    deinit {
-        delegate = nil
     }
 
     // MARK: - UI
@@ -73,8 +65,10 @@ class BidirectionalPopover: Popover {
         case .moveDown:
             keyMoveDown()
         case .insertNewline:
-            guard let document = selectDocument(at: IndexPath(item: index - 1, section: 0)) else { break }
-            delegate?.didSelectTitle(document.title)
+            guard let document = selectDocument(at: IndexPath(item: index - 1, section: 0)),
+                  let didSelectTitle = didSelectTitle else { break }
+
+            didSelectTitle(document.title)
         default:
             break
         }
@@ -162,9 +156,10 @@ extension BidirectionalPopover: NSCollectionViewDelegate {
 
     func collectionView(_ collectionView: NSCollectionView, didSelectItemsAt indexPaths: Set<IndexPath>) {
         guard let indexPath = indexPaths.first,
-              let document = selectDocument(at: indexPath) else { return }
+              let document = selectDocument(at: indexPath),
+              let didSelectTitle = didSelectTitle else { return }
 
-        delegate?.didSelectTitle(document.title)
+        didSelectTitle(document.title)
     }
 
 }

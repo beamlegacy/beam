@@ -19,7 +19,14 @@ extension BeamTextEdit {
         popover = BidirectionalPopover(frame: NSRect(x: x, y: y, width: 300, height: 125))
 
         guard let popover = popover else { return }
-        popover.delegate = self
+
+        popover.didSelectTitle = { [unowned self] (title) -> Void in
+            node.text.replaceSubrange(cursorStartPosition..<rootNode.cursorPosition, with: title)
+            rootNode.cursorPosition = cursorStartPosition + title.count
+
+            node.text.makeInternalLink(cursorStartPosition..<rootNode.cursorPosition)
+            dismissPopover()
+        }
 
         addSubview(popover)
     }
@@ -57,19 +64,6 @@ extension BeamTextEdit {
     internal func dismissPopover() {
         popover?.removeFromSuperview()
         popover = nil
-    }
-
-}
-
-extension BeamTextEdit: BidirectionalDelegate {
-
-    func didSelectTitle(_ title: String) {
-        guard let node = node as? TextNode else { return }
-        node.text.replaceSubrange(cursorStartPosition..<rootNode.cursorPosition, with: title)
-        rootNode.cursorPosition = cursorStartPosition + title.count
-
-        node.text.makeInternalLink(cursorStartPosition..<rootNode.cursorPosition)
-        dismissPopover()
     }
 
 }
