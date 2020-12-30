@@ -68,7 +68,7 @@ extension BeamTextEdit: BidirectionalDelegate {
         node.text.replaceSubrange(cursorStartPosition..<rootNode.cursorPosition, with: title)
         rootNode.cursorPosition = cursorStartPosition + title.count
 
-        _ = node.text.makeInternalLink(cursorStartPosition..<rootNode.cursorPosition)
+        node.text.makeInternalLink(cursorStartPosition..<rootNode.cursorPosition)
         dismissPopover()
     }
 

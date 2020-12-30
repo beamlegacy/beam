@@ -20,4 +20,6 @@ class Popover: NSView {
         super.init(coder: coder)
     }
 
+    func doCommand(_ command: TextRoot.Command) {}
+
 }

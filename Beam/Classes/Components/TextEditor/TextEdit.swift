@@ -343,7 +343,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         guard !node.readOnly else { return }
 
         if popover != nil {
-            popover?.keyEvent(.insertNewline)
+            popover?.doCommand(.insertNewline)
             return
         }
 
@@ -444,9 +444,8 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     if shift {
                         rootNode.doCommand(.moveUpAndModifySelection)
                         return
-                    } else if popover != nil {
-                        guard let popover = popover else { return }
-                        popover.keyEvent(.moveUp)
+                    } else if let popover = popover {
+                        popover.doCommand(.moveUp)
                         return
                     } else {
                         rootNode.doCommand(.moveUp)
@@ -456,9 +455,8 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     if shift {
                         rootNode.doCommand(.moveDownAndModifySelection)
                         return
-                    } else if popover != nil {
-                        guard let popover = popover else { return }
-                        popover.keyEvent(.moveDown)
+                    } else if let popover = popover {
+                        popover.doCommand(.moveDown)
                         return
                     } else {
                         rootNode.doCommand(.moveDown)
@@ -683,7 +681,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                 insertPair("[", "]")
                 Logger.shared.logInfo("Transform selection into internal link", category: .ui)
                 if !self.selectedTextRange.isEmpty {
-                    _ = node.text.makeInternalLink(self.selectedTextRange)
+                    node.text.makeInternalLink(self.selectedTextRange)
                     return false
                 } else {
                     self.showBidirectionalPopover()

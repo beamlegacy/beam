@@ -66,7 +66,7 @@ class BidirectionalPopover: Popover {
     }
 
     // MARK: - Methods
-    func keyEvent(_ command: TextRoot.Command) {
+    override func doCommand(_ command: TextRoot.Command) {
         switch command {
         case .moveUp:
             keyMoveUp()
