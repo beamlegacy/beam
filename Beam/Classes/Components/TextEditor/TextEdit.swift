@@ -678,6 +678,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
              },
              "#": { [unowned self] in
                 guard self.popover == nil else { return false }
+                self.cursorStartPosition = self.rootNode.cursorPosition
                 self.initPopover()
                 return true
              },
