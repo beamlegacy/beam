@@ -2,6 +2,8 @@ import Foundation
 import Alamofire
 import os.log
 
+// swiftlint:disable file_length
+
 enum APIRequestError: Error, Equatable {
     case forbidden
     case unauthorized
@@ -46,6 +48,7 @@ class APIRequest {
     private static var uploadedBytes: Int64 = 0
     private static var downloadedBytes: Int64 = 0
 
+    // swiftlint:disable:next function_body_length
     func performRequest<T: Decodable, E: GraphqlParametersProtocol>(bodyParamsRequest: E,
                                                                     authenticatedCall: Bool? = nil,
                                                                     completionHandler: @escaping (Result<T, Error>) -> Void) -> DataRequest? {
@@ -371,6 +374,7 @@ class APIRequest {
 }
 
 extension DataRequest {
+    // swiftlint:disable:next function_parameter_count
     public func debugJson(queue: DispatchQueue,
                           fileName: String,
                           localTimer: Date,
@@ -404,3 +408,4 @@ extension DataRequest {
         }
     }
 }
+// swiftlint:enable file_length

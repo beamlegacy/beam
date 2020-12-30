@@ -164,7 +164,7 @@ class DocumentManagerTests: CoreDataTests {
         }
 
         let deleteExpectation = expectation(description: "delete completion called")
-        sut.deleteDocument(id: id) {
+        sut.deleteDocument(id: id) { _ in
             deleteExpectation.fulfill()
         }
 

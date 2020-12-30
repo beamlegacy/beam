@@ -681,6 +681,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         return true
     }
 
+    // swiftlint:disable:next cyclomatic_complexity
     func postDetectInput(_ input: String) {
         guard inputDetectorEnabled else { return }
         guard let node = node as? TextNode else { return }
