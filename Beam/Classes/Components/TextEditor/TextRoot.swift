@@ -9,7 +9,7 @@ import Foundation
 import AppKit
 
 public struct TextState {
-    var text: String = ""
+    var text = BeamText()
     var selectedTextRange: Range<Int> = 0..<0
     var markedTextRange: Range<Int> = 0..<0
     var cursorPosition: Int = -1
@@ -61,7 +61,8 @@ public class TextRoot: TextNode {
         }
         set {
             state.cursorPosition = newValue
-            node.invalidateText()
+            let n = node as? TextNode
+            n?.invalidateText()
             node.invalidate()
             editor.reBlink()
             editor.setHotSpotToCursorPosition()
@@ -69,6 +70,7 @@ public class TextRoot: TextNode {
     }
 
     var selectedText: String {
+        guard let node = node as? TextNode else { return "" }
         return node.text.substring(range: selectedTextRange)
     }
 
@@ -76,14 +78,28 @@ public class TextRoot: TextNode {
         return self
     }
 
-    var node: TextNode! {
+    var linksSection: LinksSection?
+    var referencesSection: LinksSection?
+
+    override internal var children: [Widget] {
+        get {
+            super.children + [linksSection, referencesSection].compactMap { $0 }
+        }
+        set {
+            fatalError()
+        }
+    }
+
+    var node: Widget! {
         didSet {
             guard oldValue !== node else { return }
+            let oldNode = oldValue as? TextNode
+            let newNode = node as? TextNode
             oldValue.unfocus()
-            oldValue.invalidateText()
+            oldNode?.invalidateText()
             oldValue.invalidate()
             node.focus()
-            node.invalidateText()
+            newNode?.invalidateText()
             node.invalidate()
             cancelSelection()
         }
@@ -93,11 +109,13 @@ public class TextRoot: TextNode {
         editor.invalidateLayout()
     }
 
+    override var offsetInRoot: NSPoint { NSPoint() }
+
     override func invalidate(_ rect: NSRect? = nil) {
         if let r = rect {
             editor.invalidate(r.offsetBy(dx: currentFrameInDocument.minX, dy: currentFrameInDocument.minY))
         } else {
-            editor.invalidate(textFrame.offsetBy(dx: currentFrameInDocument.minX, dy: currentFrameInDocument.minY))
+            editor.invalidate(contentsFrame.offsetBy(dx: currentFrameInDocument.minX, dy: currentFrameInDocument.minY))
         }
     }
 
@@ -106,7 +124,7 @@ public class TextRoot: TextNode {
         self.note = element as? BeamNote
         self.selfVisible = false
 
-        self.text = ""
+        self.text = BeamText()
 
         // Main bullets:
         if element.children.isEmpty {
@@ -114,27 +132,18 @@ public class TextRoot: TextNode {
             element.addChild(BeamElement())
         }
 
-//        if let linkedRefs = note.linkedReferences, !linkedRefs.isEmpty {
-//            let node = TextNode(staticText: "Linked references")
-//            node.isReference = true
-//            node.readOnly = true
-//            addChild(node)
-//            for bullet in linkedRefs {
-//                node.addChild(TextNode(bullet: bullet, recurse: true))
-//            }
-//            linkedRefsNode = node
-//        }
-//
-//        if let unlinkedRefs = note.unlinkedReferences, !unlinkedRefs.isEmpty {
-//            let node = TextNode(staticText: "Unlinked references")
-//            node.isReference = true
-//            node.readOnly = true
-//            addChild(node)
-//            for bullet in unlinkedRefs {
-//                node.addChild(TextNode(bullet: bullet, recurse: true))
-//            }
-//            unlinkedRefsNode = node
-//        }
+        if element.children.count == 1 && element.children.first?.text.isEmpty ?? false {
+            let istoday = note?.isTodaysNote ?? false
+            let first = children.first as? TextNode
+            first?.placeholder = BeamText(text: istoday ? "This is the journal, you can type anything here!" : "...")
+        }
+
+        if let note = note {
+            linksSection = LinksSection(editor: editor, note: note, mode: .links)
+            linksSection?.parent = self
+            referencesSection = LinksSection(editor: editor, note: note, mode: .references)
+            referencesSection?.parent = self
+        }
 
         node = children.first ?? self
         childInset = 0
@@ -148,9 +157,16 @@ public class TextRoot: TextNode {
     var unlinkedRefsNode: TextNode?
 
     public override func printTree(level: Int = 0) -> String {
-        return String.tabs(level) + (note?.title ?? "<???>") + "\n" + children.reduce("", { result, child -> String in
+        return String.tabs(level) + (note?.title ?? "<???>") + "\n" + children.prefix(children.count).reduce("", { result, child -> String in
             result + child.printTree(level: level + 1)
         })
+    }
+
+    override var fullStrippedText: String {
+        children.prefix(children.count).reduce(attributedString.string) { partial, node -> String in
+            guard let node = node as? TextNode else { return partial }
+            return partial + " " + node.fullStrippedText
+        }
     }
 
     func focus(node: TextNode) {

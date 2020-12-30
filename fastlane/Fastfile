@@ -28,8 +28,7 @@ platform :mac do
       strict: true,
       config_file: '.swiftlint.yml',
       reporter: "json",
-      output_file: "fastlane/swiftlint.json",
-      ignore_exit_status: true,
+      output_file: "fastlane/swiftlint.json"
     )
   end
 
@@ -164,16 +163,21 @@ platform :mac do
   ## To release DeveloperId signed builds
   lane :beta do
     git_branch
-    increment_version_number(bump_type: "patch")
+    # Let's do version increment manually in Xcode
+    # increment_version_number(bump_type: "patch")
     # Sadly we can't use anything out of a number for building number, so we
     # can't include the current branch. The following fails:
     # build_number = "#{Actions.git_branch}/#{ENV['CI_JOB_ID']}".gsub(/\//, "-")
 
     build_number = ENV['CI_JOB_ID']
     increment_build_number(build_number: build_number)
+    appcast_url = "https://s3.eu-west-3.amazonaws.com/downloads.dev.beamapp.co/#{Actions.git_branch}/appcast.xml"
+    info_plist = "Beam/Configuration/Info.plist"
 
-    sparkle_set_url(info_plist: "Beam/Configuration/Info.plist",
-                    appcast_url: "https://s3.eu-west-3.amazonaws.com/downloads.dev.beamapp.co/#{Actions.git_branch}/appcast.xml")
+    UI.message "Set appcast url to #{appcast_url} in #{info_plist}"
+
+    sparkle_set_url(info_plist: info_plist,
+                    appcast_url: appcast_url)
 
     check_certs(cert_development: false,
                 cert_type: "developer_id_application",
@@ -239,15 +243,44 @@ platform :mac do
     ping_slack
   end
 
+  lane :ping_sentry do
+    get_version_number_from_plist(info_plist: "builds/Beam.app/Contents/Info.plist")
+    get_build_number_from_plist(info_plist: "builds/Beam.app/Contents/Info.plist")
+
+    sentry_upload_dsym(
+      org_slug: "beamapp",
+      project_slug: "beam-macos",
+      dsym_path: "builds/Beam.app.dSYM.zip"
+    )
+
+    sentry_create_release(
+      org_slug: "beamapp",
+      project_slug: "beam-macos",
+      version: "#{lane_context[SharedValues::VERSION_NUMBER]}+#{lane_context[SharedValues::BUILD_NUMBER]}",
+      app_identifier: ENV["TEAM_IDENTIFIER"],
+      finalize: true
+    )
+
+#    sentry_set_commits(
+#      version: lane_context[SharedValues::BUILD_NUMBER],
+#      app_identifier: ENV["TEAM_IDENTIFIER"],
+#      auto: false, # enable completely automated commit management
+#      clear: false, # clear all current commits from the release
+#      commit: '...', # commit spec, see `sentry-cli releases help set-commits` for more information
+#    )
+  end
+
   private_lane :create_release_notes do
     # Fetch commit from S3 if we already had one
     download_previous_file(filename: "commit")
 
     changelog = if File.exists?("../builds/commit")
-                  last_commit = File.read("../builds/commit")
-                  `git log #{last_commit}`
+                  last_commit = File.read("../builds/commit").chomp
+                  UI.message "Previous commit file exists, using `git log HEAD...#{last_commit}`"
+                  `git log HEAD...#{last_commit}`
                 else
-                  `git log`
+                  UI.message "No previous commit file, using `git log -1`"
+                  `git log -1`
                 end
 
     File.open("../builds/release_notes.html", "wb") do |f|
@@ -256,7 +289,9 @@ platform :mac do
 
     # Store this commit
     File.open("../builds/commit", "wb") do |f|
-      f.write(`git rev-parse HEAD`)
+      current_commit = `git rev-parse HEAD`.chomp
+      UI.message "Storing current commit #{current_commit} for next release notes"
+      f.write(current_commit)
     end
   end
 
@@ -268,12 +303,10 @@ platform :mac do
     get_build_number_from_plist(info_plist: "builds/Beam.app/Contents/Info.plist")
     git_branch
 
-    # I have to do Sparkle at the same time, as `increment_build_number`
-    # modifies Beam/Configuration/Info.plist but this file is not propagated to
-    # other CI jobs
     create_release_notes
-    download_previous_file(filename: "appcast.xml", default_file: "appcast.xml")
-    generate_sparkle_feed
+
+    # appcast.xml should be in `master/appcast.xml` on S3, not `master/build/rev/appcast.xml`
+    upload_appcast
 
     s3_path = if Actions.git_branch == "master"
                 "#{Actions.git_branch}/#{lane_context[SharedValues::VERSION_NUMBER]}/#{lane_context[SharedValues::BUILD_NUMBER]}"
@@ -281,6 +314,7 @@ platform :mac do
                 Actions.git_branch
               end
 
+    # This should be last upload, or Slack links will be wrong
     aws_s3(
       access_key: ENV["AWS_ACCESS_KEY_ID"],
       secret_access_key: ENV["AWS_SECRET_ACCESS_KEY"],
@@ -290,7 +324,35 @@ platform :mac do
       files: [
         "builds/Beam.dmg",
         "builds/Beam.app.dSYM.zip",
-        "builds/release_notes.html",
+        "builds/release_notes.html"
+      ],
+      # Doesn't work the way I expected
+      # endpoint: "http://downloads.dev.beamapp.co",
+      path: s3_path
+    )
+
+    lane_context[SharedValues::S3_FILES_OUTPUT_PATHS].each do |file|
+      UI.success "S3: #{file}"
+    end
+  end
+
+  private_lane :upload_appcast do
+    # I have to do Sparkle at the same time, as `increment_build_number`
+    # modifies Beam/Configuration/Info.plist but this file is not propagated to
+    # other CI jobs
+    download_previous_file(filename: "appcast.xml", default_file: "appcast.xml")
+    generate_sparkle_feed
+
+    git_branch
+    s3_path = Actions.git_branch
+
+    aws_s3(
+      access_key: ENV["AWS_ACCESS_KEY_ID"],
+      secret_access_key: ENV["AWS_SECRET_ACCESS_KEY"],
+      bucket: ENV["S3_BUCKET"],
+      region: ENV["AWS_DEFAULT_REGION"],
+      upload_metadata: true,
+      files: [
         "builds/appcast.xml",
         "builds/commit"
       ],
@@ -299,9 +361,9 @@ platform :mac do
       path: s3_path
     )
 
-    file = lane_context[SharedValues::S3_FILES_OUTPUT_PATHS].first
-
-    UI.message "Link is -> #{file}"
+    lane_context[SharedValues::S3_FILES_OUTPUT_PATHS].each do |file|
+      UI.success "S3: #{file}"
+    end
   end
 
   private_lane :download_previous_file do |params|
@@ -320,20 +382,19 @@ platform :mac do
                                    access_key_id: ENV["AWS_ACCESS_KEY_ID"],
                                    secret_access_key: ENV["AWS_SECRET_ACCESS_KEY"])
 
-    UI.message "Fetching #{s3_path}/#{filename} from S3"
-
     s3_client.get_object(
       response_target: "../builds/#{filename}",
       bucket: ENV["S3_BUCKET"],
       key: "#{s3_path}/#{filename}"
     )
+    UI.success "S3: Fetched https://s3.#{ENV['AWS_DEFAULT_REGION']}.amazonaws.com/#{ENV['S3_BUCKET']}/#{s3_path}/#{filename}"
   rescue Aws::S3::Errors::NoSuchKey => e
-    UI.message "https://s3.#{ENV['AWS_DEFAULT_REGION']}.amazonaws.com/#{ENV['S3_BUCKET']}/#{s3_path}/#{filename} does not exist"
+    UI.message "S3: https://s3.#{ENV['AWS_DEFAULT_REGION']}.amazonaws.com/#{ENV['S3_BUCKET']}/#{s3_path}/#{filename} does not exist"
     if default_file
       FileUtils.cp(default_file, "../builds/#{filename}")
     end
   rescue
-    UI.error "Error fetching #{s3_path}/#{filename}: #{$!}"
+    UI.error "S3: Error fetching #{s3_path}/#{filename}: #{$!}"
     raise $!
   end
 
@@ -348,8 +409,9 @@ platform :mac do
                 Actions.git_branch
               end
 
-    app_download_url = "https://s3.#{ENV['AWS_DEFAULT_REGION']}.amazonaws.com/#{ENV['S3_BUCKET']}/#{s3_path}/Beam.dmg"
-    release_notes_html_url = "https://s3.#{ENV['AWS_DEFAULT_REGION']}.amazonaws.com/#{ENV['S3_BUCKET']}/#{s3_path}/release_notes.html"
+    directory = "https://s3.#{ENV['AWS_DEFAULT_REGION']}.amazonaws.com/#{ENV['S3_BUCKET']}/#{s3_path}"
+    app_download_url = "#{directory}/Beam.dmg"
+    release_notes_html_url = "#{directory}/release_notes.html"
     human_version = "#{lane_context[SharedValues::VERSION_NUMBER]}"
     machine_version = "#{lane_context[SharedValues::BUILD_NUMBER]}"
     release_title = "Version #{human_version}"
@@ -364,7 +426,8 @@ platform :mac do
       release_notes_link: release_notes_html_url,
     )
 
-    UI.message "Successfully added a release item to the Sparkle XML file"
+    UI.success "Sparkle: Successfully added a release item to the Appcast XML file"
+    UI.success "Sparkle: Added #{human_version} #{machine_version} at #{app_download_url}"
   end
 
   private_lane :ping_slack do
@@ -408,8 +471,9 @@ platform :mac do
                                                                    ENV["AWS_SECRET_ACCESS_KEY"]))
 
       bucket = s3.bucket(ENV["S3_BUCKET"])
-      UI.message "Deleting S3 directory #{ENV["S3_BUCKET"]}/#{directory}"
+      UI.message "S3: deleting #{ENV["S3_BUCKET"]}/#{directory}"
       bucket.objects(prefix: directory).batch_delete!
+      UI.success "S3: Removed #{ENV["S3_BUCKET"]}/#{directory}"
     end
   end
 

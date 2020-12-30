@@ -5,7 +5,7 @@
 	<key>SUFeedURL</key>
 	<string>https://s3.eu-west-3.amazonaws.com/downloads.dev.beamapp.co/master/appcast.xml</string>
 	<key>SUEnableAutomaticChecks</key>
-	<true/>
+	<string>$(SPARKLE_AUTOMATIC_UPDATE)</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>

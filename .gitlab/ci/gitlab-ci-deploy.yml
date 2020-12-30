@@ -1,3 +1,18 @@
+sentry:
+  stage: deploy
+  artifacts:
+    expire_in: 7d
+    paths:
+      - builds/
+  only:
+    - merge_requests
+    - master
+  script:
+    - bundle exec fastlane ping_sentry
+  tags:
+    - macos
+  interruptible: true
+
 s3:
   dependencies:
     - notarize

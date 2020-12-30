@@ -14,6 +14,11 @@ class Document: NSManagedObject {
         id.uuidString.lowercased()
     }
 
+    func asApiType() -> DocumentAPIType {
+        let result = DocumentAPIType(document: self)
+        return result
+    }
+
     override func willSave() {
         if updated_at.timeIntervalSince(Date()) > 2.0 {
             self.updated_at = Date()

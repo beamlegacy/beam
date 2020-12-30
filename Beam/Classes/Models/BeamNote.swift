@@ -32,6 +32,10 @@ class BeamNote: BeamElement {
     @Published public private(set) var searchQueries: [String] = [] { didSet { change() } } ///< Search queries whose results were used to populate this note
     @Published public private(set) var visitedSearchResults: [VisitedPage] = [] { didSet { change() } } ///< URLs whose content were used to create this note
 
+    override var note: BeamNote? {
+        return self
+    }
+
     init(title: String) {
         self.title = title
         super.init()
@@ -127,9 +131,8 @@ class BeamNote: BeamElement {
             return nil
         }
 
-        #if DEBUG
-        Logger.shared.logInfo("Note loaded:\n\(String(data: doc.data, encoding: .utf8)!)\n", category: .document)
-        #endif
+        Logger.shared.logDebug("Note loaded:\n\(String(data: doc.data, encoding: .utf8)!)\n", category: .document)
+
         do {
             return try instanciateNote(doc)
         } catch {
@@ -193,12 +196,12 @@ class BeamNote: BeamElement {
         }
     }
 
-    static func detectUnlinkedNotes(_ documentManager: DocumentManager) {
+    static func detectLinks(_ documentManager: DocumentManager) {
         let allNotes = Self.loadAllDocument(documentManager)
         for note in allNotes {
+            note.detectLinkedNotes(documentManager)
             note.connectUnlinkedNotes(note.title, allNotes)
         }
-
     }
 
     private static var fetchedNotes: [String: BeamNote] = [:]
@@ -222,7 +225,7 @@ func beamNoteFrom(note: Note) -> BeamNote {
 
 func beamElementFrom(bullet: Bullet) -> BeamElement {
     let element = BeamElement()
-    element.text = bullet.content
+    element.text = BeamText(text: bullet.content)
 
     for b in bullet.sortedChildren() {
         element.addChild(beamElementFrom(bullet: b))

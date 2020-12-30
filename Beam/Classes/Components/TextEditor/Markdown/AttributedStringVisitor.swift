@@ -11,6 +11,8 @@ import AppKit
 extension NSAttributedString.Key {
     static let sourcePos = NSAttributedString.Key(rawValue: "beamSourcePos")
     static let heading = NSAttributedString.Key(rawValue: "beamHeading")
+    static let quote = NSAttributedString.Key(rawValue: "beamQuote")
+    static let source = NSAttributedString.Key(rawValue: "beamSource")
 }
 
 extension String {

@@ -16,6 +16,10 @@ class LibrariesManager: NSObject {
 
 extension LibrariesManager {
     func setupSentry() {
+        guard Configuration.env != "debug" else {
+            Logger.shared.logDebug("Sentry is disabled", category: .general)
+            return
+        }
         SentrySDK.start(options: [
             "dsn": "https://\(Configuration.sentryKey)@\(Configuration.sentryHostname)/\(Configuration.sentryProject)",
             "debug": false,

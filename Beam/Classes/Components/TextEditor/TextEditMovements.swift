@@ -9,11 +9,12 @@ import Foundation
 
 extension TextRoot {
     func moveLeft() {
+        guard let node = node as? TextNode else { return }
         if selectedTextRange.isEmpty {
             if cursorPosition == 0 {
                 if let next = node.previousVisible() {
                     node.invalidateText()
-                    node = next
+                    self.node = next
                     cursorPosition = node.text.count
                 } else {
                     cursorPosition = 0
@@ -27,11 +28,12 @@ extension TextRoot {
     }
 
     func moveRight() {
+        guard let node = node as? TextNode else { return }
         if selectedTextRange.isEmpty {
             if cursorPosition == node.text.count {
                 if let next = node.nextVisible() {
                     node.invalidateText()
-                    node = next
+                    self.node = next
                     cursorPosition = 0
                 }
             } else {
@@ -43,6 +45,7 @@ extension TextRoot {
     }
 
     func moveLeftAndModifySelection() {
+        guard let node = node as? TextNode else { return }
         if cursorPosition != 0 {
             let newCursorPosition = node.position(before: cursorPosition)
             if cursorPosition == selectedTextRange.lowerBound {
@@ -56,8 +59,9 @@ extension TextRoot {
     }
 
     func moveWordRight() {
-        node.text.enumerateSubstrings(in: node.text.index(at: cursorPosition)..<node.text.endIndex, options: .byWords) { (_, r1, _, stop) in
-            self.cursorPosition = self.node.position(at: r1.upperBound)
+        guard let node = node as? TextNode else { return }
+        node.text.text.enumerateSubstrings(in: node.text.index(at: cursorPosition)..<node.text.text.endIndex, options: .byWords) { (_, r1, _, stop) in
+            self.cursorPosition = node.position(at: r1.upperBound)
             stop = true
         }
         cancelSelection()
@@ -65,8 +69,9 @@ extension TextRoot {
     }
 
     func moveWordLeft() {
-        var range = node.text.startIndex ..< node.text.endIndex
-        node.text.enumerateSubstrings(in: node.text.startIndex..<node.text.index(at: cursorPosition), options: .byWords) { (_, r1, _, _) in
+        guard let node = node as? TextNode else { return }
+        var range = node.text.text.startIndex ..< node.text.text.endIndex
+        node.text.text.enumerateSubstrings(in: node.text.text.startIndex..<node.text.text.index(at: cursorPosition), options: .byWords) { (_, r1, _, _) in
             range = r1
         }
         let pos = node.position(at: range.lowerBound)
@@ -76,9 +81,10 @@ extension TextRoot {
     }
 
     func moveWordRightAndModifySelection() {
+        guard let node = node as? TextNode else { return }
         var newCursorPosition = cursorPosition
-        node.text.enumerateSubstrings(in: node.text.index(at: cursorPosition)..<node.text.endIndex, options: .byWords) { (_, r1, _, stop) in
-            newCursorPosition = self.node.position(at: r1.upperBound)
+        node.text.text.enumerateSubstrings(in: node.text.text.index(at: cursorPosition)..<node.text.text.endIndex, options: .byWords) { (_, r1, _, stop) in
+            newCursorPosition = node.position(at: r1.upperBound)
             stop = true
         }
         extendSelection(to: newCursorPosition)
@@ -87,8 +93,9 @@ extension TextRoot {
 
     //swiftlint:disable cyclomatic_complexity function_body_length
     func moveWordLeftAndModifySelection() {
-        var range = node.text.startIndex ..< node.text.endIndex
-        node.text.enumerateSubstrings(in: node.text.startIndex..<node.text.index(at: cursorPosition), options: .byWords) { (_, r1, _, _) in
+        guard let node = node as? TextNode else { return }
+        var range = node.text.text.startIndex ..< node.text.text.endIndex
+        node.text.text.enumerateSubstrings(in: node.text.text.startIndex..<node.text.text.index(at: cursorPosition), options: .byWords) { (_, r1, _, _) in
             range = r1
         }
         let pos = node.position(at: range.lowerBound)
@@ -98,6 +105,7 @@ extension TextRoot {
     }
 
     func moveRightAndModifySelection() {
+        guard let node = node as? TextNode else { return }
         if cursorPosition != node.text.count {
             extendSelection(to: node.position(after: cursorPosition))
         }
@@ -105,32 +113,37 @@ extension TextRoot {
     }
 
     func moveToBeginningOfLine() {
+        guard let node = node as? TextNode else { return }
         cursorPosition = node.beginningOfLineFromPosition(cursorPosition)
         cancelSelection()
     }
 
     func moveToEndOfLine() {
+        guard let node = node as? TextNode else { return }
         cursorPosition = node.endOfLineFromPosition(cursorPosition)
         cancelSelection()
     }
 
     func moveToBeginningOfLineAndModifySelection() {
+        guard let node = node as? TextNode else { return }
         extendSelection(to: node.beginningOfLineFromPosition(cursorPosition))
         node.invalidateText()
     }
 
     func moveToEndOfLineAndModifySelection() {
+        guard let node = node as? TextNode else { return }
         extendSelection(to: node.endOfLineFromPosition(cursorPosition))
         node.invalidateText()
     }
 
     func moveUp() {
+        guard let node = node as? TextNode else { return }
         if node.isOnFirstLine(cursorPosition) {
-            if let newNode = node.previousVisible() {
+            if let newNode = node.previousVisible() as? TextNode {
                 let offset = node.offsetAt(index: cursorPosition) + node.offsetInDocument.x - newNode.offsetInDocument.x
                 cursorPosition = newNode.indexOnLastLine(atOffset: offset)
                 node.invalidateText()
-                node = newNode
+                self.node = newNode
             } else {
                 cursorPosition = 0
             }
@@ -142,12 +155,13 @@ extension TextRoot {
     }
 
     func moveDown() {
+        guard let node = node as? TextNode else { return }
         if node.isOnLastLine(cursorPosition) {
-            if let newNode = node.nextVisible() {
+            if let newNode = node.nextVisible() as? TextNode {
                 let offset = node.offsetAt(index: cursorPosition) + node.offsetInDocument.x - newNode.offsetInDocument.x
                 cursorPosition = newNode.indexOnFirstLine(atOffset: offset)
                 node.invalidateText()
-                node = newNode
+                self.node = newNode
             } else {
                 cursorPosition = node.text.count
             }
@@ -165,6 +179,7 @@ extension TextRoot {
     }
 
     public func selectAll() {
+        guard let node = node as? TextNode else { return }
         selectedTextRange = node.text.wholeRange
         cursorPosition = selectedTextRange.upperBound
         node.invalidate()
@@ -172,16 +187,19 @@ extension TextRoot {
     }
 
     public func moveUpAndModifySelection() {
+        guard let node = node as? TextNode else { return }
         extendSelection(to: node.positionAbove(cursorPosition))
         node.invalidateText()
     }
 
     public func moveDownAndModifySelection() {
+        guard let node = node as? TextNode else { return }
         extendSelection(to: node.positionBelow(cursorPosition))
         node.invalidateText()
     }
 
     public func extendSelection(to newCursorPosition: Int) {
+        guard let node = node as? TextNode else { return }
         var r1 = selectedTextRange.lowerBound
         var r2 = selectedTextRange.upperBound
         if cursorPosition == r2 {

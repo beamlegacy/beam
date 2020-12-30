@@ -147,6 +147,7 @@ GEM
     fastlane-plugin-badge (1.4.0)
       badge (~> 0.12.0)
     fastlane-plugin-dmg (0.1.1)
+    fastlane-plugin-sentry (1.7.0)
     fastlane-plugin-slack_train (0.2.0)
     ffi (1.13.1)
     fourflusher (2.3.1)
@@ -281,6 +282,7 @@ DEPENDENCIES
   fastlane-plugin-aws_s3
   fastlane-plugin-badge
   fastlane-plugin-dmg
+  fastlane-plugin-sentry
   fastlane-plugin-slack_train
   pry
   slather

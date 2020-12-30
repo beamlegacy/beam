@@ -39,7 +39,7 @@ install_gitlab_runner:
 	cd ${HOME}
 	gitlab-runner install
 	gitlab-runner start
-	gitlab-runner register --non-interactive --name=`hostname | sed -e s/\.local//` --url=https://gitlab.com/ --executor="shell" --shell="bash" --registration-token=${GITLAB_TOKEN}
+	gitlab-runner register --non-interactive --custom_build_dir-enabled=true --name=`hostname | sed -e s/\.local//` --url=https://gitlab.com/ --executor="shell" --shell="bash" --registration-token=${GITLAB_TOKEN}
 
 	# Xcode
 	curl -sL -O https://github.com/neonichu/ruby-domain_name/releases/download/v0.5.99999999/domain_name-0.5.99999999.gem
@@ -74,6 +74,9 @@ install_gitlab_runner:
 
 	# For badge
 	brew install imagemagick graphicsmagick
+
+	# Sentry
+	brew install getsentry/tools/sentry-cli
 
 install_swiftlint:
 	brew install swiftlint

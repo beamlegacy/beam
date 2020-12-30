@@ -257,7 +257,7 @@ import WebKit
 
         let bulletStr = "[[\(query)]]"
         let e = BeamElement()
-        e.text = bulletStr
+        e.text = BeamText(text: bulletStr)
         self.data.todaysNote.insert(e, after: self.data.todaysNote.children.last)
 
         return n
@@ -289,6 +289,8 @@ import WebKit
     }
 
     func startQuery() {
+        searchQuery = searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
+
         if let index = selectionIndex {
             let query = completedQueries[index]
             switch query.source {
@@ -399,6 +401,12 @@ import WebKit
         }
 
         webView.configuration.websiteDataStore.httpCookieStore.add(self)
+    }
+
+    func generateTabs(_ number: Int = 100) {
+        for _ in 0..<number {
+            createTab(withURL: URL(string: "https://beamapp.co")!, originalQuery: "beamapp.co")
+        }
     }
 
     func startNewSearch() {

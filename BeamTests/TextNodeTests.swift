@@ -21,7 +21,8 @@ class TextNodeTests: XCTestCase {
     func reset() {
     }
 
-    func validateNodeWithElement(node: TextNode, element: BeamElement) {
+    func validateNodeWithElement(node: Widget, element: BeamElement) {
+        guard let node = node as? TextNode else { return }
         XCTAssert(node.element === element)
         XCTAssertEqual(node.text, element.text)
 
@@ -29,7 +30,7 @@ class TextNodeTests: XCTestCase {
         XCTAssertEqual(node.children.count, elements.count)
 
         for i in 0..<node.children.count {
-            let childNode = node.children[i]
+            guard let childNode = node.children[i] as? TextNode else { continue }
             let childElement = elements[i]
 
             validateNodeWithElement(node: childNode, element: childElement)
@@ -39,9 +40,9 @@ class TextNodeTests: XCTestCase {
 
     func validateRootWithNote(root: TextRoot, note: BeamNote) {
         let elements = note.children
-        XCTAssertEqual(root.children.count, elements.count)
+        XCTAssertEqual(root.element.children.count, elements.count)
 
-        for i in 0..<root.children.count {
+        for i in 0..<min(root.element.children.count, elements.count) {
             let node = root.children[i]
             let element = elements[i]
 
@@ -112,7 +113,8 @@ class TextNodeTests: XCTestCase {
 //        print("Tree:\n\(root.printTree())\n")
         validateRootWithNote(root: root, note: note)
 
-        root.children.first?.open.toggle()
+        let node = root.children.first as? TextNode
+        node?.open.toggle()
         let str1 = """
         title
             > - bullet1
@@ -602,46 +604,64 @@ class TextNodeTests: XCTestCase {
         root.node = root.children.first
         root.cursorPosition = 0
         root.setLayout(frame)
-        root.updateTextRendering()
+        root.updateRendering()
 
         let expanded1 = "Lorem **ipsum dolor** sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
 
         for i in 0..<5 {
             root.doCommand(.moveRight)
             root.setLayout(frame)
-            root.updateTextRendering()
-            XCTAssertEqual(root.node.attributedString.string, String.loremIpsumSmall)
+            root.updateRendering()
+            let node = root.node as? TextNode
+            XCTAssertNotNil(node)
+            if let node = node {
+                XCTAssertEqual(node.attributedString.string, String.loremIpsumSmall)
+            }
             XCTAssertEqual(root.cursorPosition, i + 1)
         }
 
         root.doCommand(.moveRight)
         root.setLayout(frame)
-        root.updateTextRendering()
-        XCTAssertEqual(root.node.attributedString.string, expanded1)
+        root.updateRendering()
+
+        let node = root.node as? TextNode
+        XCTAssertNotNil(node)
+        if let node = node {
+            XCTAssertEqual(node.attributedString.string, expanded1)
+        }
         XCTAssertEqual(root.cursorPosition, 8)
 
         for _ in 0..<11 {
             root.doCommand(.moveRightAndModifySelection)
             root.setLayout(frame)
-            root.updateTextRendering()
+            root.updateRendering()
         }
         XCTAssertEqual(root.cursorPosition, 8 + 11)
         XCTAssertEqual(root.selectedText, "ipsum dolor")
 
         root.doCommand(.deleteBackward)
         XCTAssertEqual(root.cursorPosition, 8)
-        XCTAssertEqual(root.node.text, "Lorem **** sit amet, *consectetur* adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore **_magna aliqua_**.")
+        XCTAssertNotNil(root.node as? TextNode)
+        if let node = root.node as? TextNode {
+            XCTAssertEqual(node.text.text, "Lorem **** sit amet, *consectetur* adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore **_magna aliqua_**.")
+        }
 
         root.doCommand(.deleteBackward)
         root.doCommand(.deleteBackward)
         XCTAssertEqual(root.cursorPosition, 6)
-        XCTAssertEqual(root.node.text, "Lorem ** sit amet, *consectetur* adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore **_magna aliqua_**.")
+        XCTAssertNotNil(root.node as? TextNode)
+        if let node = root.node as? TextNode {
+            XCTAssertEqual(node.text.text, "Lorem ** sit amet, *consectetur* adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore **_magna aliqua_**.")
+        }
 
         root.doCommand(.deleteForward)
         root.doCommand(.deleteForward)
         root.doCommand(.deleteForward)
         XCTAssertEqual(root.cursorPosition, 6)
-        XCTAssertEqual(root.node.text, "Lorem sit amet, *consectetur* adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore **_magna aliqua_**.")
+        XCTAssertNotNil(root.node as? TextNode)
+        if let node = root.node as? TextNode {
+            XCTAssertEqual(node.text.text, "Lorem sit amet, *consectetur* adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore **_magna aliqua_**.")
+        }
         validateRootWithNote(root: root, note: note)
     }
 
@@ -657,11 +677,14 @@ class TextNodeTests: XCTestCase {
         root.node = root.children.first?.children.first
         root.cursorPosition = 0
         root.setLayout(frame)
-        root.updateTextRendering()
+        root.updateRendering()
 
         XCTAssertEqual(root.children.first?.children.count, 2)
         root.doCommand(.deleteBackward)
-        XCTAssertEqual(root.node.text, "bullet1bullet11")
+        XCTAssertNotNil(root.node as? TextNode)
+        if let node = root.node as? TextNode {
+            XCTAssertEqual(node.text.text, "bullet1bullet11")
+        }
         XCTAssertEqual(root.children.first?.children.count, 1)
 //        print("Tree:\n\(root.printTree())\n")
 //        note.debugNote()
@@ -679,15 +702,21 @@ class TextNodeTests: XCTestCase {
         validateRootWithNote(root: root, note: note)
 
         root.node = root.children.first?.children.first
-        root.cursorPosition = root.node.text.count
+        XCTAssertNotNil(root.node as? TextNode)
+        if let node = root.node as? TextNode {
+            root.cursorPosition = node.text.count
+        }
         root.setLayout(frame)
-        root.updateTextRendering()
+        root.updateRendering()
 
         XCTAssertEqual(root.children.first?.children.count, 2)
         root.doCommand(.deleteForward)
 //        print("Tree:\n\(root.printTree())\n")
 //        note.debugNote()
-        XCTAssertEqual(root.node.text, "bullet11bullet12")
+        XCTAssertNotNil(root.node as? TextNode)
+        if let node = root.node as? TextNode {
+            XCTAssertEqual(node.text.text, "bullet11bullet12")
+        }
         XCTAssertEqual(root.children.first?.children.count, 1)
         validateRootWithNote(root: root, note: note)
     }
@@ -699,23 +728,6 @@ class TextNodeTests: XCTestCase {
         let root = editor.rootNode!
         XCTAssertEqual(" bullet1 bullet11 bullet12 bullet2 bullet21 bullet22 bullet23", root.fullStrippedText)
 
-    }
-
-    func testStrippedTextMarkDown() {
-        defer { reset() }
-        let note = createLoremArborescence(title: "title")
-        let editor = BeamTextEdit(root: note)
-        let root = editor.rootNode!
-        print("Stripped: \(root.fullStrippedText)")
-        XCTAssertEqual(" Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.", root.fullStrippedText)
-    }
-
-    func testLanguageRecognizer() {
-        defer { reset() }
-        let note = createLoremArborescence(title: "title")
-        let editor = BeamTextEdit(root: note)
-        let root = editor.rootNode!
-        XCTAssertEqual(root.language, NLLanguage.romanian) // Strangely, latin mostly ressembles Romanian from the point of view of the classifier...
     }
 
     func testLematizationEN() {
