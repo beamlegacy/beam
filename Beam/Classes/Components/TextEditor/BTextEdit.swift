@@ -12,6 +12,7 @@ import Combine
 
 public struct BTextEdit: NSViewRepresentable {
     var note: BeamNote
+    var data: BeamData
     var openURL: (URL) -> Void
     var openCard: (String) -> Void
     var onStartEditing: () -> Void = { }
@@ -58,6 +59,7 @@ public struct BTextEdit: NSViewRepresentable {
             nsView.note = note
         }
 
+        nsView.data = data
         nsView.openURL = openURL
         nsView.openCard = openCard
         nsView.onStartEditing = onStartEditing
@@ -82,6 +84,7 @@ public struct BTextEdit: NSViewRepresentable {
 
 public struct BTextEditScrollable: NSViewRepresentable {
     var note: BeamNote
+    var data: BeamData
     var openURL: (URL) -> Void
     var openCard: (String) -> Void
     var onStartEditing: () -> Void = { }
@@ -101,6 +104,7 @@ public struct BTextEditScrollable: NSViewRepresentable {
     public func makeNSView(context: Context) -> NSViewType {
         let edit = BeamTextEdit(root: note, font: Font.main)
 
+        edit.data = data
         edit.openURL = openURL
         edit.openCard = openCard
         edit.onStartEditing = onStartEditing

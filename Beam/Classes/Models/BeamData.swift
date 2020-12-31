@@ -7,7 +7,7 @@
 
 import Foundation
 
-class BeamData: ObservableObject {
+public class BeamData: ObservableObject {
     var _todaysNote: BeamNote?
     var todaysNote: BeamNote {
         if let note = _todaysNote, note.title == todaysName {

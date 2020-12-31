@@ -108,7 +108,7 @@ extension BeamText {
 
 // High level manipulation:
 extension BeamText {
-    mutating func makeInternalLink(_ range: Swift.Range<Int>) -> Bool {
+    @discardableResult mutating func makeInternalLink(_ range: Swift.Range<Int>) -> Bool {
         let text = self.extract(range: range)
         let t = text.text
 
