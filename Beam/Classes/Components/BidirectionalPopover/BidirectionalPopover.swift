@@ -18,17 +18,16 @@ class BidirectionalPopover: Popover {
     var items: [DocumentStruct] = [] {
         didSet {
             collectionView.reloadData()
-            index = 0
         }
     }
 
     var query: String = "" {
         didSet {
-            print(query)
+            updateQueryUI()
         }
     }
 
-    private var index = -1
+    private var indexPath = IndexPath(item: 0, section: 0)
 
     private var nibName: String {
         return String(describing: type(of: self))
@@ -65,6 +64,17 @@ class BidirectionalPopover: Popover {
         collectionView.layer?.backgroundColor = .clear
     }
 
+    private func updateQueryUI() {
+        if items.count == 0 { resetIndexPath() }
+
+        if !query.isEmpty && indexPath == indexPath {
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                self.selectFirstItem()
+            }
+        }
+    }
+
     // MARK: - Methods
     override func doCommand(_ command: TextRoot.Command) {
         switch command {
@@ -73,27 +83,63 @@ class BidirectionalPopover: Popover {
         case .moveDown:
             keyMoveDown()
         case .insertNewline:
-            guard let document = selectDocument(at: IndexPath(item: index - 1, section: 0)),
-                  let didSelectTitle = didSelectTitle else { break }
-
-            didSelectTitle(document.title)
+            selectItem()
         default:
             break
         }
     }
 
     private func keyMoveUp() {
-        guard index != 0 && index != 1 else { return }
-        index -= 1
-        collectionView.deselectItems(at: [IndexPath(item: index, section: 0)])
-        collectionView.selectItems(at: [IndexPath(item: index - 1, section: 0)], scrollPosition: .bottom)
+        if indexPath.item == 1 {
+            collectionView.deselectItems(at: [IndexPath(item: indexPath.item - 1, section: indexPath.section)])
+            resetIndexPath()
+            selectFirstItem()
+        }
+
+        guard indexPath.item != 0 && indexPath.item != 1 else { return }
+
+        indexPath.item -= 1
+        collectionView.deselectItems(at: [indexPath])
+        collectionView.selectItems(at: [IndexPath(item: indexPath.item - 1, section: indexPath.section)], scrollPosition: .bottom)
     }
 
     private func keyMoveDown() {
-        guard index != items.count else { return }
-        collectionView.deselectItems(at: [IndexPath(item: index - 1, section: 0)])
-        collectionView.selectItems(at: [IndexPath(item: index, section: 0)], scrollPosition: .bottom)
-        index += 1
+        if items.count == 0 {
+            resetIndexPath()
+            selectFirstItem()
+        }
+
+        guard indexPath.item != items.count else { return }
+
+        if indexPath.section == 0 && items.count > 0 {
+            collectionView.deselectItems(at: [indexPath])
+            indexPath.section = 1
+        }
+
+        collectionView.deselectItems(at: [IndexPath(item: indexPath.item - 1, section: indexPath.section)])
+        collectionView.selectItems(at: [IndexPath(item: indexPath.item, section: indexPath.section)], scrollPosition: .bottom)
+        indexPath.item += 1
+    }
+
+    private func selectFirstItem() {
+        collectionView.selectItems(at: [indexPath], scrollPosition: .bottom)
+    }
+
+    private func resetIndexPath() {
+        indexPath = IndexPath(item: 0, section: 0)
+    }
+
+    private func selectItem() {
+        switch indexPath.section {
+        case 0:
+            guard let didSelectTitle = didSelectTitle else { break }
+            didSelectTitle(query)
+        default:
+            guard let document = selectDocument(at: IndexPath(item: indexPath.item - 1, section: indexPath.section)),
+                  let didSelectTitle = didSelectTitle else { break }
+
+            didSelectTitle(document.title)
+        }
     }
 
     private func selectDocument(at indexPath: IndexPath) -> DocumentStruct? {
@@ -123,9 +169,9 @@ extension BidirectionalPopover: NSCollectionViewDataSource {
     func collectionView(_ collectionView: NSCollectionView, numberOfItemsInSection section: Int) -> Int {
         switch section {
         case 0:
-            return items.count
+            return query.isEmpty ? 0 : 1
         default:
-            return 1
+            return items.count
         }
     }
 
@@ -134,6 +180,16 @@ extension BidirectionalPopover: NSCollectionViewDataSource {
         switch indexPath.section {
         case 0:
             guard let item = collectionView.makeItem(
+                withIdentifier: BidirectionalPopoverActionItem.identifier,
+                    for: indexPath
+            ) as? BidirectionalPopoverActionItem else {
+                fatalError("Failed to load \(BidirectionalPopoverActionItem.identifier)")
+            }
+
+            item.updateLabel(with: query)
+            return item
+        default:
+            guard let item = collectionView.makeItem(
                 withIdentifier: BidirectionalPopoverItem.identifier,
                     for: indexPath
             ) as? BidirectionalPopoverItem else {
@@ -141,16 +197,6 @@ extension BidirectionalPopover: NSCollectionViewDataSource {
             }
 
             item.document = items[indexPath.item]
-            return item
-        default:
-            guard let item = collectionView.makeItem(
-                withIdentifier: BidirectionalPopoverActionItem.identifier,
-                    for: indexPath
-            ) as? BidirectionalPopoverActionItem else {
-                fatalError("Failed to load \(BidirectionalPopoverActionItem.identifier)")
-            }
-
-            item.queryLabel.stringValue = query
             return item
         }
 
