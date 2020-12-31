@@ -23,12 +23,12 @@ class BidirectionalPopover: Popover {
 
     var query: String = "" {
         didSet {
-            checkQueryIsMatching()
+            checkItemsContainsQuery()
             updateQueryUI()
         }
     }
 
-    private var isMatchedQuery = false
+    private var isMatchItem = false
     private var indexPath = IndexPath(item: 0, section: 0)
     private var collectionViewItems = [
         BidirectionalPopoverActionItem.identifier,
@@ -72,9 +72,9 @@ class BidirectionalPopover: Popover {
     }
 
     private func updateQueryUI() {
-        if items.isEmpty && !isMatchedQuery { resetIndexPath() }
+        if items.isEmpty && !isMatchItem { resetIndexPath() }
 
-        if !query.isEmpty && indexPath == IndexPath(item: 0, section: 0) && !isMatchedQuery {
+        if !query.isEmpty && indexPath == IndexPath(item: 0, section: 0) && !isMatchItem {
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
                 self.selectFirstItem()
@@ -149,10 +149,16 @@ class BidirectionalPopover: Popover {
         }
     }
 
-    private func checkQueryIsMatching() {
+    private func checkItemsContainsQuery() {
         guard !items.isEmpty else { return }
-        isMatchedQuery = items.contains(where: query.contains)
-        isMatchedQuery ? collectionView.selectItems(at: [IndexPath(item: 0, section: 1)], scrollPosition: .bottom) : resetIndexPath()
+        isMatchItem = items.contains(where: query.contains)
+
+        if isMatchItem {
+            collectionView.selectItems(at: [IndexPath(item: 0, section: 1)], scrollPosition: .bottom)
+            resetIndexPath()
+        } else {
+            resetIndexPath()
+        }
     }
 
     private func selectDocument(at indexPath: IndexPath) -> String? {
@@ -188,7 +194,7 @@ extension BidirectionalPopover: NSCollectionViewDataSource {
 
         switch itemName {
         case BidirectionalPopoverActionItem.identifier:
-            return query.isEmpty || isMatchedQuery ? 0 : 1
+            return query.isEmpty || isMatchItem ? 0 : 1
         case BidirectionalPopoverItem.identifier:
             return items.count
         default:
