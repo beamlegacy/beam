@@ -84,6 +84,16 @@ extension NSColor {
         return loadColor(named: "EditorTextSelectionColor")
     }
 
+    // Popover
+
+    static var bidirectionalPopoverBackgroundColor: NSColor {
+        return loadColor(named: "Niobium")
+    }
+
+    static var bidirectionalPopoverTextColor: NSColor {
+        return loadColor(named: "AutoCompleteTextSelected")
+    }
+
     static var tableHeaderTextColor: NSColor {
         return loadColor(named: "TableHeaderTextColor")
     }

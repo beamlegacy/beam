@@ -43,7 +43,7 @@ class BidirectionalPopover: Popover {
     // MARK: - UI
     private func setupView() {
         containerView.wantsLayer = true
-        containerView.layer?.backgroundColor = NSColor.white.cgColor
+        containerView.layer?.backgroundColor = NSColor.bidirectionalPopoverBackgroundColor.cgColor
     }
 
     private func setupCollectionView() {

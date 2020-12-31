@@ -41,7 +41,7 @@ class BidirectionalPopoverItem: NSCollectionViewItem {
 
     // MARK: - UI
     private func setupUI() {
-        titleLabel.textColor = NSColor.black
+        titleLabel.textColor = NSColor.bidirectionalPopoverTextColor
     }
 
     // MARK: - Methods
