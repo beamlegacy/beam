@@ -31,7 +31,7 @@ extension BeamTextEdit {
         addSubview(popover)
     }
 
-    internal func updatePopover(_ command: TextRoot.Command = .none) {
+    internal func updatePopover(with command: TextRoot.Command = .none) {
         guard let node = node as? TextNode,
               let data = data,
               let popover = popover else { return }
@@ -58,6 +58,7 @@ extension BeamTextEdit {
         }
 
         text = text.replacingOccurrences(of: prefix, with: "")
+        popover.query = text
         popover.items = Array(data.documentManager.documentsWithTitleMatch(title: text).prefix(4))
     }
 

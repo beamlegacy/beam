@@ -413,7 +413,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                         } else if command {
                             rootNode.doCommand(.moveToBeginningOfLine)
                         } else {
-                            updatePopover(.moveLeft)
+                            updatePopover(with: .moveLeft)
                             rootNode.doCommand(.moveLeft)
                         }
                         return
@@ -465,7 +465,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     }
                 case .delete:
                     rootNode.doCommand(.deleteBackward)
-                    updatePopover(.deleteForward)
+                    updatePopover(with: .deleteForward)
                     return
 
                 case .backTab:
@@ -685,8 +685,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                 if !self.selectedTextRange.isEmpty {
                     node.text.makeInternalLink(self.selectedTextRange)
                     return false
-                } else {
-                    self.showBidirectionalPopover()
                 }
 
                 return true

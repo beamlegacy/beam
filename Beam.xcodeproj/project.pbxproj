@@ -8,12 +8,14 @@
 
 /* Begin PBXBuildFile section */
 		41221A362592771F00255197 /* TextEdit+Popover.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41221A352592771F00255197 /* TextEdit+Popover.swift */; };
+		414B987A259DE2E2002E81A3 /* BidirectionalPopoverActionItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414B9878259DE2E2002E81A3 /* BidirectionalPopoverActionItem.swift */; };
+		414B987B259DE2E2002E81A3 /* BidirectionalPopoverActionItem.xib in Resources */ = {isa = PBXBuildFile; fileRef = 414B9879259DE2E2002E81A3 /* BidirectionalPopoverActionItem.xib */; };
 		4159E9D4259A1A81005FD355 /* BidirectionalPopover.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159E9D3259A1A81005FD355 /* BidirectionalPopover.swift */; };
 		4159E9E2259A2575005FD355 /* BidirectionalPopover.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4159E9E1259A2575005FD355 /* BidirectionalPopover.xib */; };
 		4159EA0A259A3568005FD355 /* BidirectionalPopoverItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159EA08259A3568005FD355 /* BidirectionalPopoverItem.swift */; };
 		4159EA0B259A3568005FD355 /* BidirectionalPopoverItem.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4159EA09259A3568005FD355 /* BidirectionalPopoverItem.xib */; };
-		4170C43125923B6A0072C781 /* Popover.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4170C43025923B6A0072C781 /* Popover.swift */; };
 		416C09F3259C919200AF2903 /* CATransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416C09F2259C919200AF2903 /* CATransaction.swift */; };
+		4170C43125923B6A0072C781 /* Popover.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4170C43025923B6A0072C781 /* Popover.swift */; };
 		418170FF2581060A00317ED8 /* Colors.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 418170FE2581060A00317ED8 /* Colors.xcassets */; };
 		418171122581082200317ED8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 418171112581082200317ED8 /* Assets.xcassets */; };
 		4181713325810CDC00317ED8 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181712B25810CDC00317ED8 /* Constants.swift */; };
@@ -400,12 +402,14 @@
 		2BE96DC9A7278563E5878CCD /* Pods_Beam.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Beam.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3B2FA634DAEED958EF901A42 /* Pods-BeamUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BeamUITests.debug.xcconfig"; path = "Target Support Files/Pods-BeamUITests/Pods-BeamUITests.debug.xcconfig"; sourceTree = "<group>"; };
 		41221A352592771F00255197 /* TextEdit+Popover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TextEdit+Popover.swift"; sourceTree = "<group>"; };
+		414B9878259DE2E2002E81A3 /* BidirectionalPopoverActionItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BidirectionalPopoverActionItem.swift; sourceTree = "<group>"; };
+		414B9879259DE2E2002E81A3 /* BidirectionalPopoverActionItem.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = BidirectionalPopoverActionItem.xib; sourceTree = "<group>"; };
 		4159E9D3259A1A81005FD355 /* BidirectionalPopover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BidirectionalPopover.swift; sourceTree = "<group>"; };
 		4159E9E1259A2575005FD355 /* BidirectionalPopover.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = BidirectionalPopover.xib; sourceTree = "<group>"; };
 		4159EA08259A3568005FD355 /* BidirectionalPopoverItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BidirectionalPopoverItem.swift; sourceTree = "<group>"; };
 		4159EA09259A3568005FD355 /* BidirectionalPopoverItem.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = BidirectionalPopoverItem.xib; sourceTree = "<group>"; };
-		4170C43025923B6A0072C781 /* Popover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Popover.swift; sourceTree = "<group>"; };
 		416C09F2259C919200AF2903 /* CATransaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CATransaction.swift; sourceTree = "<group>"; };
+		4170C43025923B6A0072C781 /* Popover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Popover.swift; sourceTree = "<group>"; };
 		418170FE2581060A00317ED8 /* Colors.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Colors.xcassets; sourceTree = "<group>"; };
 		418171112581082200317ED8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		4181712B25810CDC00317ED8 /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
@@ -656,6 +660,8 @@
 				4159E9E1259A2575005FD355 /* BidirectionalPopover.xib */,
 				4159EA08259A3568005FD355 /* BidirectionalPopoverItem.swift */,
 				4159EA09259A3568005FD355 /* BidirectionalPopoverItem.xib */,
+				414B9878259DE2E2002E81A3 /* BidirectionalPopoverActionItem.swift */,
+				414B9879259DE2E2002E81A3 /* BidirectionalPopoverActionItem.xib */,
 			);
 			path = BidirectionalPopover;
 			sourceTree = "<group>";
@@ -1564,6 +1570,7 @@
 				418170FF2581060A00317ED8 /* Colors.xcassets in Resources */,
 				418172172581107C00317ED8 /* OverrideConsole.js in Resources */,
 				418172FF25811DB200317ED8 /* Readability.js in Resources */,
+				414B987B259DE2E2002E81A3 /* BidirectionalPopoverActionItem.xib in Resources */,
 				418171122581082200317ED8 /* Assets.xcassets in Resources */,
 				4181730025811DB200317ED8 /* SelectionObserver.js in Resources */,
 				5206281425922D7800D7CD9E /* document.graphql in Resources */,
@@ -1919,6 +1926,7 @@
 				418172582581107C00317ED8 /* AccountDetail.swift in Sources */,
 				4181721D2581107C00317ED8 /* NSImage+Beam.swift in Sources */,
 				418172432581107C00317ED8 /* NotesWindow.swift in Sources */,
+				414B987A259DE2E2002E81A3 /* BidirectionalPopoverActionItem.swift in Sources */,
 				418172452581107C00317ED8 /* SearchBar.swift in Sources */,
 				418171FA2581107C00317ED8 /* SearchKit.swift in Sources */,
 				418172182581107C00317ED8 /* PerformanceDebug.swift in Sources */,

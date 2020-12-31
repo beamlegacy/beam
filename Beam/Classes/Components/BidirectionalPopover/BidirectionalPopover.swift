@@ -22,7 +22,13 @@ class BidirectionalPopover: Popover {
         }
     }
 
-    private var index = 0
+    var query: String = "" {
+        didSet {
+            print(query)
+        }
+    }
+
+    private var index = -1
 
     private var nibName: String {
         return String(describing: type(of: self))
@@ -47,7 +53,9 @@ class BidirectionalPopover: Popover {
     }
 
     private func setupCollectionView() {
+        // TODO : Refactor later
         collectionView.register(BidirectionalPopoverItem.self, forItemWithIdentifier: BidirectionalPopoverItem.identifier)
+        collectionView.register(BidirectionalPopoverActionItem.self, forItemWithIdentifier: BidirectionalPopoverActionItem.identifier)
         collectionView.dataSource = self
         collectionView.delegate = self
 
@@ -109,23 +117,43 @@ class BidirectionalPopover: Popover {
 extension BidirectionalPopover: NSCollectionViewDataSource {
 
     func numberOfSections(in collectionView: NSCollectionView) -> Int {
-        return 1
+        return 2
     }
 
     func collectionView(_ collectionView: NSCollectionView, numberOfItemsInSection section: Int) -> Int {
-        return items.count
+        switch section {
+        case 0:
+            return items.count
+        default:
+            return 1
+        }
     }
 
     func collectionView(_ collectionView: NSCollectionView, itemForRepresentedObjectAt indexPath: IndexPath) -> NSCollectionViewItem {
-        guard let item = collectionView.makeItem(
+        // TODO: Refactor later
+        switch indexPath.section {
+        case 0:
+            guard let item = collectionView.makeItem(
                 withIdentifier: BidirectionalPopoverItem.identifier,
-                for: indexPath
-        ) as? BidirectionalPopoverItem else {
-            fatalError("Failed to load \(BidirectionalPopoverItem.identifier)")
+                    for: indexPath
+            ) as? BidirectionalPopoverItem else {
+                fatalError("Failed to load \(BidirectionalPopoverItem.identifier)")
+            }
+
+            item.document = items[indexPath.item]
+            return item
+        default:
+            guard let item = collectionView.makeItem(
+                withIdentifier: BidirectionalPopoverActionItem.identifier,
+                    for: indexPath
+            ) as? BidirectionalPopoverActionItem else {
+                fatalError("Failed to load \(BidirectionalPopoverActionItem.identifier)")
+            }
+
+            item.queryLabel.stringValue = query
+            return item
         }
 
-        item.document = items[indexPath.item]
-        return item
     }
 
 }
