@@ -60,7 +60,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     func updateBadge() {
-        let count = Note.countWithPredicate(CoreDataManager.shared.mainContext)
+        let count = Document.countWithPredicate(CoreDataManager.shared.mainContext)
         NSApp.dockTile.badgeLabel = count > 0 ? String(count) : ""
     }
 
