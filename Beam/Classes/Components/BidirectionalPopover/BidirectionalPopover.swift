@@ -56,7 +56,10 @@ class BidirectionalPopover: Popover {
     }
 
     private func setupCollectionView() {
-        _ = collectionViewItems.map({ collectionView.register(NSNib(nibNamed: $0.rawValue, bundle: nil), forItemWithIdentifier: $0) })
+        collectionViewItems.forEach({ item in
+            collectionView.register(NSNib(nibNamed: item.rawValue, bundle: nil), forItemWithIdentifier: item)
+        })
+
         collectionView.dataSource = self
         collectionView.delegate = self
 
@@ -106,14 +109,14 @@ class BidirectionalPopover: Popover {
     }
 
     private func keyMoveDown() {
-        if items.count == 0 {
+        if items.isEmpty && !query.isEmpty {
             resetIndexPath()
             selectFirstItem()
         }
 
         guard indexPath.item != items.count else { return }
 
-        if indexPath.section == 0 && items.count > 0 {
+        if indexPath.section == 0 && !items.isEmpty {
             collectionView.deselectItems(at: [indexPath])
             indexPath.section = 1
         }
@@ -187,27 +190,16 @@ extension BidirectionalPopover: NSCollectionViewDataSource {
 
     func collectionView(_ collectionView: NSCollectionView, itemForRepresentedObjectAt indexPath: IndexPath) -> NSCollectionViewItem {
         let itemName = itemNameAt(index: indexPath.section)
+        let item = collectionView.makeItem(withIdentifier: itemName, for: indexPath)
 
-        switch itemName {
-        case BidirectionalPopoverActionItem.identifier:
-            guard let item = collectionView.makeItem(
-                    withIdentifier: itemName,
-                    for: indexPath
-            ) as? BidirectionalPopoverActionItem else {
-                fatalError("Failed to load \(itemName)")
-            }
-
-            item.updateLabel(with: query)
+        switch item {
+        case is BidirectionalPopoverActionItem:
+            guard let popoverActionItem = item as? BidirectionalPopoverActionItem else { return item }
+            popoverActionItem.updateLabel(with: query)
             return item
         default:
-            guard let item = collectionView.makeItem(
-                withIdentifier: itemName,
-                for: indexPath
-            ) as? BidirectionalPopoverItem else {
-                fatalError("Failed to load \(itemName)")
-            }
-
-            item.document = items[indexPath.item]
+            guard let popoverItem = item as? BidirectionalPopoverItem else { return item }
+            popoverItem.document = items[indexPath.item]
             return item
         }
 
