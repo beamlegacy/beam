@@ -12,18 +12,6 @@ import Combine
 import Sentry
 import Sparkle
 
-#if DEBUG
-@objc(BeamApplication)
-public class BeamApplication: NSApplication {
-    override init() {
-        super.init()
-    }
-
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
-    }
-}
-#else
 @objc(BeamApplication)
 public class BeamApplication: SentryCrashExceptionApplication {
     override init() {
@@ -34,7 +22,6 @@ public class BeamApplication: SentryCrashExceptionApplication {
         super.init(coder: coder)
     }
 }
-#endif
 
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {

@@ -757,12 +757,16 @@ public class TextNode: Widget {
     }
 
     public func offsetAndFrameAt(index: Int) -> (CGFloat, NSRect) {
-        guard layout != nil, !layout!.lines.isEmpty else { return (0, NSRect()) }
         let displayIndex = displayIndexFor(sourceIndex: index)
-        guard let line = lineAt(index: displayIndex) else { return (0, NSRect()) }
+
+        guard layout != nil,
+              !layout!.lines.isEmpty,
+              let line = lineAt(index: displayIndex) else { return (0, NSRect()) }
+
         let layoutLine = layout!.lines[line]
         let positionInLine = displayIndex
         let result = layoutLine.offsetFor(index: positionInLine)
+
         return (CGFloat(result), layoutLine.frame)
     }
 
