@@ -28,6 +28,10 @@ class BidirectionalPopover: Popover {
     }
 
     private var indexPath = IndexPath(item: 0, section: 0)
+    private var collectionViewItems = [
+        BidirectionalPopoverActionItem.identifier,
+        BidirectionalPopoverItem.identifier
+    ]
 
     private var nibName: String {
         return String(describing: type(of: self))
@@ -52,9 +56,7 @@ class BidirectionalPopover: Popover {
     }
 
     private func setupCollectionView() {
-        // TODO : Refactor later
-        collectionView.register(BidirectionalPopoverItem.self, forItemWithIdentifier: BidirectionalPopoverItem.identifier)
-        collectionView.register(BidirectionalPopoverActionItem.self, forItemWithIdentifier: BidirectionalPopoverActionItem.identifier)
+        _ = collectionViewItems.map({ collectionView.register(NSNib(nibNamed: $0.rawValue, bundle: nil), forItemWithIdentifier: $0) })
         collectionView.dataSource = self
         collectionView.delegate = self
 
@@ -157,43 +159,52 @@ class BidirectionalPopover: Popover {
         addSubview(containerView)
     }
 
+    private func itemNameAt(index: Int) -> NSUserInterfaceItemIdentifier {
+        return collectionViewItems[index]
+    }
+
 }
 
 // MARK: - NSCollectionView DataSource
 extension BidirectionalPopover: NSCollectionViewDataSource {
 
     func numberOfSections(in collectionView: NSCollectionView) -> Int {
-        return 2
+        return collectionViewItems.count
     }
 
     func collectionView(_ collectionView: NSCollectionView, numberOfItemsInSection section: Int) -> Int {
-        switch section {
-        case 0:
+        let itemName = itemNameAt(index: section)
+
+        switch itemName {
+        case BidirectionalPopoverActionItem.identifier:
             return query.isEmpty ? 0 : 1
-        default:
+        case BidirectionalPopoverItem.identifier:
             return items.count
+        default:
+            return 0
         }
     }
 
     func collectionView(_ collectionView: NSCollectionView, itemForRepresentedObjectAt indexPath: IndexPath) -> NSCollectionViewItem {
-        // TODO: Refactor later
-        switch indexPath.section {
-        case 0:
+        let itemName = itemNameAt(index: indexPath.section)
+
+        switch itemName {
+        case BidirectionalPopoverActionItem.identifier:
             guard let item = collectionView.makeItem(
-                withIdentifier: BidirectionalPopoverActionItem.identifier,
+                    withIdentifier: itemName,
                     for: indexPath
             ) as? BidirectionalPopoverActionItem else {
-                fatalError("Failed to load \(BidirectionalPopoverActionItem.identifier)")
+                fatalError("Failed to load \(itemName)")
             }
 
             item.updateLabel(with: query)
             return item
         default:
             guard let item = collectionView.makeItem(
-                withIdentifier: BidirectionalPopoverItem.identifier,
-                    for: indexPath
+                withIdentifier: itemName,
+                for: indexPath
             ) as? BidirectionalPopoverItem else {
-                fatalError("Failed to load \(BidirectionalPopoverItem.identifier)")
+                fatalError("Failed to load \(itemName)")
             }
 
             item.document = items[indexPath.item]
