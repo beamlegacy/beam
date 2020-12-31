@@ -70,7 +70,7 @@ class BidirectionalPopover: Popover {
     }
 
     private func updateQueryUI() {
-        if items.count == 0 { resetIndexPath() }
+        if items.isEmpty { resetIndexPath() }
 
         if !query.isEmpty && indexPath == IndexPath(item: 0, section: 0) {
             DispatchQueue.main.async { [weak self] in
