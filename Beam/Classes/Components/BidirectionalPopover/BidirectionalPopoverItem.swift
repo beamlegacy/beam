@@ -21,15 +21,17 @@ class BidirectionalPopoverItem: NSCollectionViewItem {
         }
     }
 
+    private var trackingArea: NSTrackingArea?
+
     // MARK: Life Cycle
-    override func viewDidLoad() {
-        super.viewDidLoad()
+    override func awakeFromNib() {
+        super.awakeFromNib()
         setupUI()
     }
 
     override func prepareForReuse() {
         super.prepareForReuse()
-
+        trackingArea = nil
         titleLabel.stringValue = ""
     }
 
@@ -45,7 +47,19 @@ class BidirectionalPopoverItem: NSCollectionViewItem {
     }
 
     // MARK: - Methods
+    override func mouseEntered(with event: NSEvent) {
+        view.layer?.backgroundColor = NSColor.green.cgColor
+    }
+
+    override func mouseExited(with event: NSEvent) {
+        view.layer?.backgroundColor = .clear
+    }
+
     private func setupDocument(_ document: DocumentStruct) {
         titleLabel.stringValue = document.title
+        trackingArea = NSTrackingArea(rect: view.bounds, options: [.activeAlways, .inVisibleRect, .mouseEnteredAndExited], owner: self, userInfo: nil)
+
+        guard let trackingArea = trackingArea else { return }
+        view.addTrackingArea(trackingArea)
     }
 }
