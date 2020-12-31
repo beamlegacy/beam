@@ -18,6 +18,26 @@ class LinkStore: Codable {
     public private(set) var links = [UInt64: Link]()
     public private(set) var ids = [String: UInt64]()
 
+    init() {
+    }
+    
+    required public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        links = try container.decode([UInt64: Link].self, forKey: .links)
+        for link in links {
+            ids[link.value.url] = link.key
+        }
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(links, forKey: .links)
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case links
+    }
+
     func getIdFor(link: String) -> UInt64? {
         guard let id = ids[link] else {
             return nil
@@ -43,6 +63,16 @@ class LinkStore: Codable {
         }
 
         return link
+    }
+
+    func visit(link: String) {
+        let id = createIdFor(link: link)
+        guard var linkStruct = linkFor(id: id) else {
+            Logger.shared.logError("Unable to fetch Link Structure for link \(link)", category: .search)
+            return
+        }
+        linkStruct.visits.append(Date())
+        links[id] = linkStruct
     }
 
     static func linkFor(_ id: UInt64) -> Link? {
