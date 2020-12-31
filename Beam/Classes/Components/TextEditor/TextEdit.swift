@@ -22,8 +22,9 @@ public struct MouseInfo {
     }
 }
 
-// swiftlint:disable type_body_length
+// swiftlint:disable:next type_body_length
 public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
+    var data: BeamData?
     var note: BeamElement! {
         didSet {
             updateRoot(with: note)
@@ -65,6 +66,8 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     private var noteCancellables = [AnyCancellable]()
+    internal var cursorStartPosition = 0
+    internal var popover: BidirectionalPopover?
 
     public init(root: BeamElement, font: Font = Font.main) {
         BeamNote.detectLinks(documentManager)
@@ -302,6 +305,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         defer { lastInput = string }
         guard preDetectInput(string) else { return }
         rootNode.insertText(string: string, replacementRange: replacementRange)
+        updatePopover()
         postDetectInput(string)
         reBlink()
     }
@@ -338,6 +342,12 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     func pressEnter(_ option: Bool, _ command: Bool) {
         guard let node = node as? TextNode else { return }
         guard !node.readOnly else { return }
+
+        if popover != nil {
+            popover?.doCommand(.insertNewline)
+            return
+        }
+
         if option {
             rootNode.doCommand(.insertNewline)
         } else if command {
@@ -394,12 +404,16 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                             rootNode.doCommand(.moveLeftAndModifySelection)
                         }
                         return
+                    } else if command && popover != nil {
+                        rootNode.doCommand(.moveToBeginningOfLine)
+                        dismissPopover()
                     } else {
                         if option {
                             rootNode.doCommand(.moveWordLeft)
                         } else if command {
                             rootNode.doCommand(.moveToBeginningOfLine)
                         } else {
+                            updatePopover(with: .moveLeft)
                             rootNode.doCommand(.moveLeft)
                         }
                         return
@@ -431,6 +445,9 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     if shift {
                         rootNode.doCommand(.moveUpAndModifySelection)
                         return
+                    } else if let popover = popover {
+                        popover.doCommand(.moveUp)
+                        return
                     } else {
                         rootNode.doCommand(.moveUp)
                         return
@@ -439,12 +456,16 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     if shift {
                         rootNode.doCommand(.moveDownAndModifySelection)
                         return
+                    } else if let popover = popover {
+                        popover.doCommand(.moveDown)
+                        return
                     } else {
                         rootNode.doCommand(.moveDown)
                         return
                     }
                 case .delete:
                     rootNode.doCommand(.deleteBackward)
+                    updatePopover(with: .deleteForward)
                     return
 
                 case .backTab:
@@ -465,6 +486,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                 rootNode.doCommand(.deleteForward)
                 return
             case 53: // escape
+                if popover != nil { dismissPopover() }
                 rootNode.cancelSelection()
                 return
             default:
@@ -475,6 +497,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                 switch ch {
                 case "a":
                     if command {
+                        if popover != nil { dismissPopover() }
                         rootNode.doCommand(.selectAll)
                         return
                     }
@@ -558,7 +581,9 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             ptr.pointee = range
         }
         guard let node = node as? TextNode else { return nil }
-        return node.attributedString.attributedSubstring(from: range)
+        let str = node.attributedString.attributedSubstring(from: range)
+        Logger.shared.logDebug("TextInput.attributedString(range: \(range), actualRange: \(String(describing: actualRange))) -> \(str)", category: .document)
+        return str
     }
 
     public func attributedString() -> NSAttributedString {
@@ -621,13 +646,18 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
     var inputDetectorState: Int = 0
     var inputDetectorEnabled: Bool { inputDetectorState >= 0 }
+
     func disableInputDetector() {
         inputDetectorState -= 1
     }
+
     func enableInputDetector() {
         inputDetectorState -= 1
     }
+
     var lastInput: String = ""
+
+    // swiftlint:disable:next function_body_length
     func preDetectInput(_ input: String) -> Bool {
         guard inputDetectorEnabled else { return true }
         guard let node = node as? TextNode else { return true }
@@ -641,17 +671,22 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         }
 
         let handlers: [String: () -> Bool] = [
-//            "@": { [unowned self] in
-//                Logger.shared.logInfo("Insert link", category: .ui)
-//                return true
-//            },
+            "@": { [unowned self] in
+                self.showBidirectionalPopover()
+                return true
+             },
+             "#": { [unowned self] in
+                self.showBidirectionalPopover()
+                return true
+             },
             "[[": { [unowned self] in
                 insertPair("[", "]")
                 Logger.shared.logInfo("Transform selection into internal link", category: .ui)
                 if !self.selectedTextRange.isEmpty {
-                    _ = node.text.makeInternalLink(self.selectedTextRange)
+                    node.text.makeInternalLink(self.selectedTextRange)
                     return false
                 }
+
                 return true
             },
             "[": {
@@ -972,6 +1007,12 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     private var accessingMapping = false
     private var mapping: [BeamElement: TextNode] = [:]
     private var deadNodes: [TextNode] = []
+
+    private func showBidirectionalPopover() {
+        guard popover == nil else { return }
+        cursorStartPosition = rootNode.cursorPosition
+        initPopover()
+    }
 
     func purgeDeadNodes() {
         guard !accessingMapping else { return }

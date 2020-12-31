@@ -7,7 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		41221A362592771F00255197 /* TextEdit+Popover.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41221A352592771F00255197 /* TextEdit+Popover.swift */; };
+		414B987A259DE2E2002E81A3 /* BidirectionalPopoverActionItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414B9878259DE2E2002E81A3 /* BidirectionalPopoverActionItem.swift */; };
+		414B987B259DE2E2002E81A3 /* BidirectionalPopoverActionItem.xib in Resources */ = {isa = PBXBuildFile; fileRef = 414B9879259DE2E2002E81A3 /* BidirectionalPopoverActionItem.xib */; };
+		4159E9D4259A1A81005FD355 /* BidirectionalPopover.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159E9D3259A1A81005FD355 /* BidirectionalPopover.swift */; };
+		4159E9E2259A2575005FD355 /* BidirectionalPopover.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4159E9E1259A2575005FD355 /* BidirectionalPopover.xib */; };
+		4159EA0A259A3568005FD355 /* BidirectionalPopoverItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159EA08259A3568005FD355 /* BidirectionalPopoverItem.swift */; };
+		4159EA0B259A3568005FD355 /* BidirectionalPopoverItem.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4159EA09259A3568005FD355 /* BidirectionalPopoverItem.xib */; };
 		416C09F3259C919200AF2903 /* CATransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416C09F2259C919200AF2903 /* CATransaction.swift */; };
+		4170C43125923B6A0072C781 /* Popover.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4170C43025923B6A0072C781 /* Popover.swift */; };
 		418170FF2581060A00317ED8 /* Colors.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 418170FE2581060A00317ED8 /* Colors.xcassets */; };
 		418171122581082200317ED8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 418171112581082200317ED8 /* Assets.xcassets */; };
 		4181713325810CDC00317ED8 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181712B25810CDC00317ED8 /* Constants.swift */; };
@@ -398,7 +406,15 @@
 		23F7A69644D041FDF4D3466B /* Pods-Beam.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Beam.release.xcconfig"; path = "Target Support Files/Pods-Beam/Pods-Beam.release.xcconfig"; sourceTree = "<group>"; };
 		2BE96DC9A7278563E5878CCD /* Pods_Beam.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Beam.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3B2FA634DAEED958EF901A42 /* Pods-BeamUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BeamUITests.debug.xcconfig"; path = "Target Support Files/Pods-BeamUITests/Pods-BeamUITests.debug.xcconfig"; sourceTree = "<group>"; };
+		41221A352592771F00255197 /* TextEdit+Popover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TextEdit+Popover.swift"; sourceTree = "<group>"; };
+		414B9878259DE2E2002E81A3 /* BidirectionalPopoverActionItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BidirectionalPopoverActionItem.swift; sourceTree = "<group>"; };
+		414B9879259DE2E2002E81A3 /* BidirectionalPopoverActionItem.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = BidirectionalPopoverActionItem.xib; sourceTree = "<group>"; };
+		4159E9D3259A1A81005FD355 /* BidirectionalPopover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BidirectionalPopover.swift; sourceTree = "<group>"; };
+		4159E9E1259A2575005FD355 /* BidirectionalPopover.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = BidirectionalPopover.xib; sourceTree = "<group>"; };
+		4159EA08259A3568005FD355 /* BidirectionalPopoverItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BidirectionalPopoverItem.swift; sourceTree = "<group>"; };
+		4159EA09259A3568005FD355 /* BidirectionalPopoverItem.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = BidirectionalPopoverItem.xib; sourceTree = "<group>"; };
 		416C09F2259C919200AF2903 /* CATransaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CATransaction.swift; sourceTree = "<group>"; };
+		4170C43025923B6A0072C781 /* Popover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Popover.swift; sourceTree = "<group>"; };
 		418170FE2581060A00317ED8 /* Colors.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Colors.xcassets; sourceTree = "<group>"; };
 		418171112581082200317ED8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		4181712B25810CDC00317ED8 /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
@@ -640,6 +656,35 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		4159E9BD259A1A4C005FD355 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				4170C41B25923ADA0072C781 /* Popover */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		4159E9D2259A1A56005FD355 /* BidirectionalPopover */ = {
+			isa = PBXGroup;
+			children = (
+				4159E9D3259A1A81005FD355 /* BidirectionalPopover.swift */,
+				4159E9E1259A2575005FD355 /* BidirectionalPopover.xib */,
+				4159EA08259A3568005FD355 /* BidirectionalPopoverItem.swift */,
+				4159EA09259A3568005FD355 /* BidirectionalPopoverItem.xib */,
+				414B9878259DE2E2002E81A3 /* BidirectionalPopoverActionItem.swift */,
+				414B9879259DE2E2002E81A3 /* BidirectionalPopoverActionItem.xib */,
+			);
+			path = BidirectionalPopover;
+			sourceTree = "<group>";
+		};
+		4170C41B25923ADA0072C781 /* Popover */ = {
+			isa = PBXGroup;
+			children = (
+				4170C43025923B6A0072C781 /* Popover.swift */,
+			);
+			path = Popover;
+			sourceTree = "<group>";
+		};
 		41816FD02581046F00317ED8 /* Assets */ = {
 			isa = PBXGroup;
 			children = (
@@ -652,6 +697,7 @@
 		41816FD62581047500317ED8 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				4159E9BD259A1A4C005FD355 /* Core */,
 				4181716B2581107C00317ED8 /* Models */,
 				418171A92581107C00317ED8 /* Views */,
 				418172A625811A3A00317ED8 /* Components */,
@@ -884,15 +930,17 @@
 		418171B72581107C00317ED8 /* TextEditor */ = {
 			isa = PBXGroup;
 			children = (
-				418171B82581107C00317ED8 /* TextEditOperations.swift */,
-				418171B92581107C00317ED8 /* TextNode.swift */,
 				418171BA2581107C00317ED8 /* Markdown */,
-				418171BE2581107C00317ED8 /* TextEditMovements.swift */,
+				418171B92581107C00317ED8 /* TextNode.swift */,
+				418171C22581107C00317ED8 /* TextRoot.swift */,
 				418171BF2581107C00317ED8 /* TextEdit.swift */,
+				418171BE2581107C00317ED8 /* TextEditMovements.swift */,
+				418171B82581107C00317ED8 /* TextEditOperations.swift */,
 				418171C02581107C00317ED8 /* TextEditCommands.swift */,
 				418171C12581107C00317ED8 /* Font.swift */,
 				418171C22581107C00317ED8 /* TextRoot.swift */,
 				96E4CF2F258DFB0800D6DE22 /* BeamText+NSAttributedString.swift */,
+				41221A352592771F00255197 /* TextEdit+Popover.swift */,
 				96C9AA3E259019E3007D3D98 /* LinkedReferenceNode.swift */,
 				96C9AA5625901AA9007D3D98 /* LinksSection.swift */,
 				96F936622590FA59006D8E53 /* BTextEdit.swift */,
@@ -1000,9 +1048,11 @@
 			children = (
 				521EEDC725937E7B00BA2485 /* DocumentsList */,
 				418171AA2581107C00317ED8 /* AutoComplete */,
+				4159E9D2259A1A56005FD355 /* BidirectionalPopover */,
 				418172A725811A3A00317ED8 /* BMTextField */,
-				418171C32581107C00317ED8 /* NotesList */,
+				521EEDC725937E7B00BA2485 /* DocumentsList */,
 				418171D72581107C00317ED8 /* OmniBar */,
+				418171C32581107C00317ED8 /* NotesList */,
 				418171B72581107C00317ED8 /* TextEditor */,
 			);
 			path = Components;
@@ -1548,11 +1598,14 @@
 				5206280C25922D6300D7CD9E /* delete_document.graphql in Resources */,
 				5206281825922D8A00D7CD9E /* delete_all_documents.graphql in Resources */,
 				5206281025922D6C00D7CD9E /* update_document.graphql in Resources */,
+				4159E9E2259A2575005FD355 /* BidirectionalPopover.xib in Resources */,
 				418171F42581107C00317ED8 /* sign_up.graphql in Resources */,
 				418171F62581107C00317ED8 /* sign_in.graphql in Resources */,
+				4159EA0B259A3568005FD355 /* BidirectionalPopoverItem.xib in Resources */,
 				418170FF2581060A00317ED8 /* Colors.xcassets in Resources */,
 				418172172581107C00317ED8 /* OverrideConsole.js in Resources */,
 				418172FF25811DB200317ED8 /* Readability.js in Resources */,
+				414B987B259DE2E2002E81A3 /* BidirectionalPopoverActionItem.xib in Resources */,
 				418171122581082200317ED8 /* Assets.xcassets in Resources */,
 				4181730025811DB200317ED8 /* SelectionObserver.js in Resources */,
 				5206281425922D7800D7CD9E /* document.graphql in Resources */,
@@ -1841,11 +1894,14 @@
 				418172192581107C00317ED8 /* Persistence.swift in Sources */,
 				418172282581107C00317ED8 /* ClosedRange+Beam.swift in Sources */,
 				96CDA7192582379A00BC375C /* Index.swift in Sources */,
+				41221A362592771F00255197 /* TextEdit+Popover.swift in Sources */,
 				96E4CF30258DFB0800D6DE22 /* BeamText+NSAttributedString.swift in Sources */,
 				418172232581107C00317ED8 /* String+Ranges.swift in Sources */,
 				521EEDE525937F7F00BA2485 /* DocumentsList.swift in Sources */,
 				418172CF25811AF800317ED8 /* Animation.swift in Sources */,
 				418171F32581107C00317ED8 /* AuthenticationHandler.swift in Sources */,
+				4159EA0A259A3568005FD355 /* BidirectionalPopoverItem.swift in Sources */,
+				4170C43125923B6A0072C781 /* Popover.swift in Sources */,
 				418171EC2581107C00317ED8 /* Me.swift in Sources */,
 				418171FB2581107C00317ED8 /* BeamElement.swift in Sources */,
 				4181724E2581107C00317ED8 /* TabStats.swift in Sources */,
@@ -1854,6 +1910,7 @@
 				418171F02581107C00317ED8 /* APIResponse.swift in Sources */,
 				418172262581107C00317ED8 /* NSRange+Beam.swift in Sources */,
 				418172222581107C00317ED8 /* NSView+Beam.swift in Sources */,
+				4159E9D4259A1A81005FD355 /* BidirectionalPopover.swift in Sources */,
 				4181744325812C5F00317ED8 /* NSColor+Beam.swift in Sources */,
 				4181723B2581107C00317ED8 /* AttributedStringVisitor.swift in Sources */,
 				4181721E2581107C00317ED8 /* OSLog+Beam.swift in Sources */,
@@ -1907,6 +1964,7 @@
 				418172582581107C00317ED8 /* AccountDetail.swift in Sources */,
 				4181721D2581107C00317ED8 /* NSImage+Beam.swift in Sources */,
 				418172432581107C00317ED8 /* NotesWindow.swift in Sources */,
+				414B987A259DE2E2002E81A3 /* BidirectionalPopoverActionItem.swift in Sources */,
 				418172452581107C00317ED8 /* SearchBar.swift in Sources */,
 				418171FA2581107C00317ED8 /* SearchKit.swift in Sources */,
 				418172182581107C00317ED8 /* PerformanceDebug.swift in Sources */,

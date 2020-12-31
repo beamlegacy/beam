@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="17701" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+    <dependencies>
+        <deployment identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17701"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <customObject id="-2" userLabel="File's Owner" customClass="BidirectionalPopoverActionItem" customModule="Beam" customModuleProvider="target">
+            <connections>
+                <outlet property="actionLabel" destination="hVs-Db-E9v" id="XJr-K8-JFw"/>
+                <outlet property="queryLabel" destination="0b6-vM-sGc" id="LmB-Xd-uFf"/>
+                <outlet property="view" destination="Hz6-mo-xeY" id="0bl-1N-x8E"/>
+            </connections>
+        </customObject>
+        <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
+        <customObject id="-3" userLabel="Application" customClass="NSObject"/>
+        <customView id="Hz6-mo-xeY">
+            <rect key="frame" x="0.0" y="0.0" width="480" height="66"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+            <subviews>
+                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="0b6-vM-sGc">
+                    <rect key="frame" x="18" y="25" width="17" height="16"/>
+                    <textFieldCell key="cell" lineBreakMode="clipping" title="&quot;&quot;" id="TD3-Ho-wL6">
+                        <font key="font" usesAppearanceFont="YES"/>
+                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="hVs-Db-E9v">
+                    <rect key="frame" x="36" y="26" width="62" height="14"/>
+                    <textFieldCell key="cell" lineBreakMode="clipping" title="- New card" id="21V-ov-x6W">
+                        <font key="font" metaFont="system" size="11"/>
+                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+            </subviews>
+            <constraints>
+                <constraint firstItem="hVs-Db-E9v" firstAttribute="centerY" secondItem="0b6-vM-sGc" secondAttribute="centerY" id="7Uv-nb-Sd2"/>
+                <constraint firstItem="0b6-vM-sGc" firstAttribute="leading" secondItem="Hz6-mo-xeY" secondAttribute="leading" constant="20" symbolic="YES" id="WgS-FU-RZI"/>
+                <constraint firstItem="hVs-Db-E9v" firstAttribute="leading" secondItem="0b6-vM-sGc" secondAttribute="trailing" constant="5" id="bmh-ye-Bne"/>
+                <constraint firstItem="0b6-vM-sGc" firstAttribute="centerY" secondItem="Hz6-mo-xeY" secondAttribute="centerY" id="rMh-xf-C8f"/>
+            </constraints>
+            <point key="canvasLocation" x="67" y="51"/>
+        </customView>
+        <collectionViewItem id="lYD-Jm-xbc" customClass="BidirectionalPopoverActionItem" customModule="Beam" customModuleProvider="target">
+            <connections>
+                <outlet property="actionLabel" destination="hVs-Db-E9v" id="Nk4-aj-edg"/>
+                <outlet property="queryLabel" destination="0b6-vM-sGc" id="nF6-tK-KTQ"/>
+            </connections>
+        </collectionViewItem>
+    </objects>
+</document>

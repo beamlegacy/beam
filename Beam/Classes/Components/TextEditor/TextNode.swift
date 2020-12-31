@@ -122,6 +122,7 @@ public class TextNode: Widget {
 
     var selectedTextRange: Range<Int> { root?.selectedTextRange ?? 0..<0 }
     var markedTextRange: Range<Int> { root?.markedTextRange ?? 0..<0 }
+    var cursorsStartPosition: Int { root?.cursorPosition ?? 0 }
     var cursorPosition: Int { root?.cursorPosition ?? 0 }
 
     var disclosureButtonFrame: NSRect {
@@ -753,6 +754,20 @@ public class TextNode: Widget {
         let positionInLine = displayIndex
         let result = layoutLine.offsetFor(index: positionInLine)
         return CGFloat(result)
+    }
+
+    public func offsetAndFrameAt(index: Int) -> (CGFloat, NSRect) {
+        let displayIndex = displayIndexFor(sourceIndex: index)
+
+        guard layout != nil,
+              !layout!.lines.isEmpty,
+              let line = lineAt(index: displayIndex) else { return (0, NSRect()) }
+
+        let layoutLine = layout!.lines[line]
+        let positionInLine = displayIndex
+        let result = layoutLine.offsetFor(index: positionInLine)
+
+        return (CGFloat(result), layoutLine.frame)
     }
 
     public func positionAbove(_ position: Int) -> Int {
