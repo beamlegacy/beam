@@ -15,7 +15,7 @@ class BidirectionalPopover: Popover {
 
     var didSelectTitle: ((_ title: String) -> Void)?
 
-    var items: [DocumentStruct] = [] {
+    var items: [String] = [] {
         didSet {
             collectionView.reloadData()
         }
@@ -23,10 +23,12 @@ class BidirectionalPopover: Popover {
 
     var query: String = "" {
         didSet {
+            checkQueryIsMatching()
             updateQueryUI()
         }
     }
 
+    private var isMatchedQuery = false
     private var indexPath = IndexPath(item: 0, section: 0)
     private var collectionViewItems = [
         BidirectionalPopoverActionItem.identifier,
@@ -70,9 +72,9 @@ class BidirectionalPopover: Popover {
     }
 
     private func updateQueryUI() {
-        if items.isEmpty { resetIndexPath() }
+        if items.isEmpty && !isMatchedQuery { resetIndexPath() }
 
-        if !query.isEmpty && indexPath == IndexPath(item: 0, section: 0) {
+        if !query.isEmpty && indexPath == IndexPath(item: 0, section: 0) && !isMatchedQuery {
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
                 self.selectFirstItem()
@@ -140,16 +142,22 @@ class BidirectionalPopover: Popover {
             guard let didSelectTitle = didSelectTitle else { break }
             didSelectTitle(query)
         default:
-            guard let document = selectDocument(at: IndexPath(item: indexPath.item - 1, section: indexPath.section)),
+            guard let documentTitle = selectDocument(at: IndexPath(item: indexPath.item - 1, section: indexPath.section)),
                   let didSelectTitle = didSelectTitle else { break }
 
-            didSelectTitle(document.title)
+            didSelectTitle(documentTitle)
         }
     }
 
-    private func selectDocument(at indexPath: IndexPath) -> DocumentStruct? {
+    private func checkQueryIsMatching() {
+        guard !items.isEmpty else { return }
+        isMatchedQuery = items.contains(where: query.contains)
+        isMatchedQuery ? collectionView.selectItems(at: [IndexPath(item: 0, section: 1)], scrollPosition: .bottom) : resetIndexPath()
+    }
+
+    private func selectDocument(at indexPath: IndexPath) -> String? {
         guard let item = collectionView.item(at: indexPath) as? BidirectionalPopoverItem else { return nil }
-        return item.document
+        return item.documentTitle
     }
 
     private func loadXib() {
@@ -180,7 +188,7 @@ extension BidirectionalPopover: NSCollectionViewDataSource {
 
         switch itemName {
         case BidirectionalPopoverActionItem.identifier:
-            return query.isEmpty ? 0 : 1
+            return query.isEmpty || isMatchedQuery ? 0 : 1
         case BidirectionalPopoverItem.identifier:
             return items.count
         default:
@@ -199,7 +207,7 @@ extension BidirectionalPopover: NSCollectionViewDataSource {
             return item
         default:
             guard let popoverItem = item as? BidirectionalPopoverItem else { return item }
-            popoverItem.document = items[indexPath.item]
+            popoverItem.documentTitle = items[indexPath.item]
             return item
         }
 
@@ -233,10 +241,10 @@ extension BidirectionalPopover: NSCollectionViewDelegate {
 
     func collectionView(_ collectionView: NSCollectionView, didSelectItemsAt indexPaths: Set<IndexPath>) {
         guard let indexPath = indexPaths.first,
-              let document = selectDocument(at: indexPath),
+              let documentTitle = selectDocument(at: indexPath),
               let didSelectTitle = didSelectTitle else { return }
 
-        didSelectTitle(document.title)
+        didSelectTitle(documentTitle)
     }
 
 }

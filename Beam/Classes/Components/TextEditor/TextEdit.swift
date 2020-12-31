@@ -437,6 +437,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                         } else if command {
                             rootNode.doCommand(.moveToEndOfLine)
                         } else {
+                            updatePopover(with: .moveRight)
                             rootNode.doCommand(.moveRight)
                         }
                         return

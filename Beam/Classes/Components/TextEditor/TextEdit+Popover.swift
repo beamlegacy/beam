@@ -58,7 +58,7 @@ extension BeamTextEdit {
         }
 
         text = text.replacingOccurrences(of: prefix, with: "")
-        popover.items = Array(data.documentManager.documentsWithTitleMatch(title: text).prefix(4))
+        popover.items = data.documentManager.documentsWithTitleMatch(title: text).prefix(4).map({ $0.title })
         popover.query = text
     }
 
