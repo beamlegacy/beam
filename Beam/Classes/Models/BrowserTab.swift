@@ -70,6 +70,9 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         config.preferences.javaScriptEnabled = true
         config.preferences.javaScriptCanOpenWindowsAutomatically = false
         config.preferences.tabFocusesLinks = true
+        config.preferences.plugInsEnabled = true
+        config.preferences._setFullScreenEnabled(true)
+        config.preferences.isFraudulentWebsiteWarningEnabled = true
         config.defaultWebpagePreferences.preferredContentMode = .desktop
         return config
     }
