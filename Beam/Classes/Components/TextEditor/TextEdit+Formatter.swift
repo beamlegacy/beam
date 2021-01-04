@@ -10,10 +10,10 @@ import Cocoa
 extension BeamTextEdit {
 
     // MARK: - Properties
-    private static let viewWidth: CGFloat = 33.45
+    private static let viewWidth: CGFloat = 40.5
     private static let viewHeight: CGFloat = 32
-    private static let xAnchorConstraint: CGFloat = 16.725
-    private static let bottomAnchorConstraint: CGFloat = 50
+    private static let xAnchorConstraint: CGFloat = 20.25
+    private static let bottomAnchorConstraint: CGFloat = 25
     private static let formatterType: [FormatterType] = FormatterType.all
 
     // MARK: - UI
@@ -24,19 +24,11 @@ extension BeamTextEdit {
               let view = window?.contentView else { return }
 
         formatterView.items = BeamTextEdit.formatterType
-        let button = NSButton(frame: NSRect(x: 200, y: 200, width: 40, height: 40))
-        let image = NSImage(named: "editor-format_h1")
-
-        button.isBordered = false
-        button.image = image
-        button.action = #selector(testAction(_:))
-        addSubview(button)
+        formatterView.didSelectFormatterType = { [unowned self] (type) -> Void in
+            self.selectFormatterAction(type)
+        }
 
         view.addSubview(formatterView)
-    }
-
-    @objc func testAction(_ sender: NSButton) {
-        print("hello")
     }
 
     internal func updateFormatterViewLayout() {
@@ -56,9 +48,34 @@ extension BeamTextEdit {
 
         return NSRect(
             x: (window.frame.width / 2) - (BeamTextEdit.xAnchorConstraint * formatterSize),
-            y: window.frame.height - BeamTextEdit.bottomAnchorConstraint,
+            y: BeamTextEdit.bottomAnchorConstraint,
             width: BeamTextEdit.viewWidth * formatterSize,
             height: BeamTextEdit.viewHeight)
+    }
+
+    private func selectFormatterAction(_ type: FormatterType) {
+        switch type {
+        case .h1:
+            print("h1")
+        case .h2:
+            print("h2")
+        case .bullet:
+            print("bullet")
+        case .numbered:
+            print("numbered")
+        case .quote:
+            print("quote")
+        case .checkmark:
+            print("checkmark")
+        case .italic:
+            print("italic")
+        case .strikethrough:
+            print("strikethrough")
+        case .link:
+            print("link")
+        case .code:
+            print("code")
+        }
     }
 
 }

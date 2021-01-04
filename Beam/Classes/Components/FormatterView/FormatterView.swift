@@ -13,6 +13,8 @@ class FormatterView: NSView {
     @IBOutlet var containerView: NSView!
     @IBOutlet weak var collectionView: NSCollectionView!
 
+    var didSelectFormatterType: ((_ type: FormatterType) -> Void)?
+
     var corderRadius: CGFloat = 5 {
         didSet {
             containerView.layer?.cornerRadius = corderRadius
@@ -130,6 +132,7 @@ class FormatterView: NSView {
     }
 }
 
+// MARK: - NSCollectionView DataSource
 extension FormatterView: NSCollectionViewDataSource {
 
     func numberOfSections(in collectionView: NSCollectionView) -> Int {
@@ -151,18 +154,19 @@ extension FormatterView: NSCollectionViewDataSource {
 
 }
 
+// MARK: - NSCollectionView FlowLayout
 extension FormatterView: NSCollectionViewDelegateFlowLayout {
 
     func collectionView(_ collectionView: NSCollectionView, layout collectionViewLayout: NSCollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> NSSize {
-        return NSSize(width: 20, height: 20)
+        return NSSize(width: 34, height: 26)
     }
 
     func collectionView(_ collectionView: NSCollectionView, layout collectionViewLayout: NSCollectionViewLayout, insetForSectionAt section: Int) -> NSEdgeInsets {
-        return NSEdgeInsets(top: 0, left: 8, bottom: 0, right: 0)
+        return NSEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
     }
 
     func collectionView(_ collectionView: NSCollectionView, layout collectionViewLayout: NSCollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
-        return 13
+        return 6
     }
 
     func collectionView(_ collectionView: NSCollectionView, layout collectionViewLayout: NSCollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
@@ -171,11 +175,12 @@ extension FormatterView: NSCollectionViewDelegateFlowLayout {
 
 }
 
+// MARK: - NSCollectionView Delegate
 extension FormatterView: NSCollectionViewDelegate {
 
     func collectionView(_ collectionView: NSCollectionView, didSelectItemsAt indexPaths: Set<IndexPath>) {
-        guard let indexPath = indexPaths.first else { return }
-        print(items[indexPath.item])
+        guard let indexPath = indexPaths.first, let didSelectFormatterType = didSelectFormatterType else { return }
+        didSelectFormatterType(items[indexPath.item])
     }
 
 }
