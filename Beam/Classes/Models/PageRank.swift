@@ -16,6 +16,7 @@ class PageRank: Codable {
 
         var pageRank: Float = 0
 
+        //swiftlint:disable:next nesting
         enum CodingKeys: String, CodingKey {
             case id = "i"
             case inbound = "in"
@@ -30,13 +31,13 @@ class PageRank: Codable {
     var pages = [UInt64: Page]()
 
     enum CodingKeys: String, CodingKey {
-        case pages = "pages"
+        case pages
     }
 
     var initialValue: Float { 1.0 / ((pages.count > 0) ? Float(pages.count) : 1) }
 
     func updatePage(source: String, outbounds: [String]) {
-        updatePage(source: source, outbounds: outbounds.map({ link -> UInt64 in LinkStore.createIdFor(link)  }))
+        updatePage(source: source, outbounds: outbounds.map { link -> UInt64 in LinkStore.createIdFor(link) })
     }
 
     func updatePage(source: String, outbounds: [UInt64]) {

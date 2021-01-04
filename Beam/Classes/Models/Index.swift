@@ -89,24 +89,29 @@ class Index: Codable {
         var score: Float
     }
 
+    //swiftlint:disable:next cyclomatic_complexity
     func search(string: String, maxResults: Int? = 10) -> [SearchResult] {
         let inputWords = Self.extractWords(from: string, useLemmas: gUseLemmas, removeDiacritics: gRemoveDiacritics)
 
         var results = [UInt64: DocumentResult]()
         let documents = inputWords.map { word -> [DocumentResult] in
-            guard let wordMap = words[word] else { return [] }
             var documents: [DocumentResult] = []
-            documents += wordMap.instances.map { (key, value) -> Index.DocumentResult in DocumentResult(id: key, score: value) }
+            if let wordMap = words[word] {
+                documents += wordMap.instances.map { (key, value) -> Index.DocumentResult in DocumentResult(id: key, score: value) }
 
-            // do we have enough exact results for this word?
-            if documents.count > maxResults ?? .max {
-                return documents
+                // do we have enough exact results for this word?
+                if documents.count > maxResults ?? .max {
+                    return documents
+                }
             }
 
-            documents += words.compactMap { key, value -> [Index.DocumentResult] in
-                return key.contains(word)
-                    ? value.instances.map { (key, value) -> Index.DocumentResult in DocumentResult(id: key, score: value) }
-                    : []
+            documents += words.compactMap { wordkey, value -> [Index.DocumentResult] in
+                if wordkey.contains(word) {
+                    return value.instances.map { (key, value) -> Index.DocumentResult in
+                        let score = value * (Float(word.count) / Float(wordkey.count))
+                        return DocumentResult(id: key, score: score) }
+                }
+                return []
             }.joined()
 
             if documents.count > maxResults ?? .max {
@@ -117,7 +122,8 @@ class Index: Codable {
             documents += words.compactMap { key, value -> [Index.DocumentResult] in
                 let distance = word.levenshtein(key)
                 guard distance < 4, distance > 0 else { return [] }
-                return value.instances.map { (key, value) -> Index.DocumentResult in DocumentResult(id: key, score: value / Float(distance)) }
+                let ratio: [Float] = [0, 0.95, 0.70, 0.6, 0.3]
+                return value.instances.map { (key, value) -> Index.DocumentResult in DocumentResult(id: key, score: value / ratio[distance]) }
             }.joined()
 
             if documents.count > maxResults ?? .max {
