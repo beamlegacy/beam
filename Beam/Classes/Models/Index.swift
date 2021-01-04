@@ -118,8 +118,15 @@ class Index: Codable {
                 return documents
             }
 
+            let wordLength = word.count
+
             // Still not enough? Try levenstein distance
             documents += words.compactMap { key, value -> [Index.DocumentResult] in
+                let keyLength = key.count
+                // don't try this costly estimation if the words are obviously too different:
+                guard Float(abs(wordLength - keyLength)) / Float(max(wordLength, keyLength)) < 0.2 else {
+                    return []
+                }
                 let distance = word.levenshtein(key)
                 guard distance < 4, distance > 0 else { return [] }
                 let ratio: [Float] = [0, 0.95, 0.70, 0.6, 0.3]
