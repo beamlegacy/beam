@@ -239,9 +239,15 @@ class Index: Codable {
     }
 
     static func loadOrCreate(_ path: URL) -> Index {
-        guard let data = try? Data(contentsOf: path) else { return Index() }
+        guard let data = try? Data(contentsOf: path) else {
+            Logger.shared.logError("Unable to load index from \(path)", category: .search)
+            return Index()
+        }
         let decoder = JSONDecoder()
-        guard let index = try? decoder.decode(Index.self, from: data) else { return Index() }
+        guard let index = try? decoder.decode(Index.self, from: data) else {
+            Logger.shared.logError("Unable to decode index from \(path)", category: .search)
+            return Index()
+        }
         return index
     }
 

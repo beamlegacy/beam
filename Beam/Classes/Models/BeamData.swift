@@ -36,11 +36,17 @@ public class BeamData: ObservableObject {
 
     static var searchKitPath: URL { return URL(fileURLWithPath: dataFolder + "/index.sk") }
     static var indexPath: URL { return URL(fileURLWithPath: dataFolder + "/index.beamindex") }
+    static var linkStorePath: URL { return URL(fileURLWithPath: dataFolder + "/links.store") }
 
     init() {
         documentManager = DocumentManager(coreDataManager: CoreDataManager.shared)
 
         searchKit = SearchKit(Self.searchKitPath)
+        do {
+            try LinkStore.loadFrom(Self.linkStorePath)
+        } catch {
+            Logger.shared.logError("Unable to load link store from \(Self.linkStorePath)", category: .search)
+        }
         index = Index.loadOrCreate(Self.indexPath)
 
         cookies = HTTPCookieStorage()
@@ -48,9 +54,22 @@ public class BeamData: ObservableObject {
         updateNoteCount()
     }
 
-    deinit {
+    func saveData() {
         // save search index
-        try? index.saveTo(Self.indexPath)
+        do {
+            Logger.shared.logInfo("Save link store to \(Self.linkStorePath)", category: .search)
+            try LinkStore.saveTo(Self.linkStorePath)
+        } catch {
+            Logger.shared.logError("Unable to save link store to \(Self.linkStorePath)", category: .search)
+        }
+
+        // save search index
+        do {
+            Logger.shared.logInfo("Saving Index to \(Self.indexPath)", category: .search)
+            try index.saveTo(Self.indexPath)
+        } catch {
+            Logger.shared.logError("Unable to save index to \(Self.indexPath)", category: .search)
+        }
     }
 
     var todaysName: String {

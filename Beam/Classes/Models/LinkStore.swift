@@ -20,7 +20,7 @@ class LinkStore: Codable {
 
     init() {
     }
-    
+
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         links = try container.decode([UInt64: Link].self, forKey: .links)
@@ -95,5 +95,16 @@ class LinkStore: Codable {
     static func isInternal(link: String) -> Bool {
         guard let url = URL(string: link) else { return false }
         return url.scheme == "beam"
+    }
+
+    static func loadFrom(_ path: URL) throws {
+        let decoder = JSONDecoder()
+        shared = try decoder.decode(Self.self, from: Data(contentsOf: path))
+    }
+
+    static func saveTo(_ path: URL) throws {
+        let encoder = JSONEncoder()
+        let data = try encoder.encode(shared)
+        try data.write(to: path)
     }
 }
