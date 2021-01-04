@@ -20,6 +20,7 @@ struct AutoCompleteResult: Identifiable {
 
     var id: UUID
     var string: String
+    var title: String?
     var source: Source
 }
 

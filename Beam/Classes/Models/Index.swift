@@ -27,7 +27,8 @@ struct IndexDocument: Codable {
     }
 }
 
-let gUseLemmas = true
+let gUseLemmas = false
+let gRemoveDiacritics = true
 
 extension IndexDocument {
     init(source: String, title: String, language: NLLanguage? = nil, contents: String, outboundLinks: [String] = []) {
@@ -41,8 +42,8 @@ extension IndexDocument {
             return id
         })
         length = contents.count
-        contentsWords = Index.extractWords(from: contents, useLemmas: gUseLemmas)
-        titleWords = Index.extractWords(from: title, useLemmas: gUseLemmas)
+        contentsWords = Index.extractWords(from: contents, useLemmas: gUseLemmas, removeDiacritics: gRemoveDiacritics)
+        titleWords = Index.extractWords(from: title, useLemmas: gUseLemmas, removeDiacritics: gRemoveDiacritics)
     }
 
     var leanCopy: IndexDocument {
@@ -57,7 +58,7 @@ class Index: Codable {
         var instances = [UInt64: WordScore]()
         var count: UInt = 0
 
-        //switflint:disable:next nesting
+        //swiftlint:disable:next nesting
         enum CodingKeys: String, CodingKey {
             case instances = "i"
             case count = "c"
@@ -88,15 +89,42 @@ class Index: Codable {
         var score: Float
     }
 
-    func search(string: String) -> [SearchResult] {
-        let inputWords = Self.extractWords(from: string, useLemmas: gUseLemmas)
+    func search(string: String, maxResults: Int? = 10) -> [SearchResult] {
+        let inputWords = Self.extractWords(from: string, useLemmas: gUseLemmas, removeDiacritics: gRemoveDiacritics)
 
         var results = [UInt64: DocumentResult]()
         let documents = inputWords.map { word -> [DocumentResult] in
             guard let wordMap = words[word] else { return [] }
-            return wordMap.instances.map { (key, value) -> Index.DocumentResult in
-                return DocumentResult(id: key, score: value)
+            var documents: [DocumentResult] = []
+            documents += wordMap.instances.map { (key, value) -> Index.DocumentResult in DocumentResult(id: key, score: value) }
+
+            // do we have enough exact results for this word?
+            if documents.count > maxResults ?? .max {
+                return documents
             }
+
+            documents += words.compactMap { key, value -> [Index.DocumentResult] in
+                return key.contains(word)
+                    ? value.instances.map { (key, value) -> Index.DocumentResult in DocumentResult(id: key, score: value) }
+                    : []
+            }.joined()
+
+            if documents.count > maxResults ?? .max {
+                return documents
+            }
+
+            // Still not enough? Try levenstein distance
+            documents += words.compactMap { key, value -> [Index.DocumentResult] in
+                let distance = word.levenshtein(key)
+                guard distance < 4, distance > 0 else { return [] }
+                return value.instances.map { (key, value) -> Index.DocumentResult in DocumentResult(id: key, score: value / Float(distance)) }
+            }.joined()
+
+            if documents.count > maxResults ?? .max {
+                return documents
+            }
+
+            return documents
         }
 
         for docs in documents {
@@ -177,7 +205,7 @@ class Index: Codable {
         }
     }
 
-    class func extractWords(from string: String, useLemmas: Bool) -> [String] {
+    class func extractWords(from string: String, useLemmas: Bool, removeDiacritics: Bool) -> [String] {
         // Store the tokenized substrings into an array.
         var wordTokens = [String]()
 
@@ -194,18 +222,32 @@ class Index: Codable {
                              options: options) { (tag, range) -> Bool in
             if useLemmas {
                 if let lemma = tag?.rawValue {
-                    wordTokens.append(lemma)
+                    wordTokens.append(removeDiacritics ? lemma.folding(options: .diacriticInsensitive, locale: .current) : lemma)
                 } else {
                     let word = String(string[range].lowercased())
-                    wordTokens.append(word)
+                    wordTokens.append(removeDiacritics ? word.folding(options: .diacriticInsensitive, locale: .current) : word)
                     //print("no lemma found for word '\(word)'")
                 }
             } else {
-                wordTokens.append(String(string[range].lowercased()))
+                let word = String(string[range].lowercased())
+                wordTokens.append(removeDiacritics ? word.folding(options: .diacriticInsensitive, locale: .current) : word)
             }
             return true
         }
 
         return wordTokens
+    }
+
+    static func loadOrCreate(_ path: URL) -> Index {
+        guard let data = try? Data(contentsOf: path) else { return Index() }
+        let decoder = JSONDecoder()
+        guard let index = try? decoder.decode(Index.self, from: data) else { return Index() }
+        return index
+    }
+
+    func saveTo(_ path: URL) throws {
+        let encoder = JSONEncoder()
+        let data = try? encoder.encode(self)
+        try data?.write(to: path)
     }
 }

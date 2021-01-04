@@ -26,10 +26,21 @@ struct AutoCompleteItem: View {
                 Icon(name: "note.text", color: selected ? .white : .black).padding(.trailing, 5)
             }
 
+            if let title = item.title {
+                HStack {
+                    Text(title)
+                        .font(.system(size: 11)).fontWeight(.bold)
+                        .frame(height: 17, alignment: .leading)
+                        .foregroundColor(selected ? .white :  Color(.editorTextColor))
+                    Divider()
+                }
+            }
+
             Text(item.string)
                 .font(.system(size: 11)).fontWeight(.semibold)
                 .frame(height: 17, alignment: .leading)
                 .foregroundColor(selected ? .white :  Color(.editorTextColor))
+
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal)

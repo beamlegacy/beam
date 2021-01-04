@@ -20,6 +20,7 @@ public class BeamData: ObservableObject {
     @Published var journal: [BeamNote] = []
 
     var searchKit: SearchKit
+    var index: Index
     var scores = Scores()
     @Published var noteCount = 0
 
@@ -28,17 +29,28 @@ public class BeamData: ObservableObject {
     var cookies: HTTPCookieStorage
     var documentManager: DocumentManager
 
+    static var dataFolder: String {
+        let paths = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true)
+        return paths.first ?? "~/Application Data/BeamApp/"
+    }
+
+    static var searchKitPath: URL { return URL(fileURLWithPath: dataFolder + "/index.sk") }
+    static var indexPath: URL { return URL(fileURLWithPath: dataFolder + "/index.beamindex") }
+
     init() {
         documentManager = DocumentManager(coreDataManager: CoreDataManager.shared)
 
-        let paths = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true)
-        let directory = paths.first ?? "~/Application Data/BeamApp/"
-        let indexPath = URL(fileURLWithPath: directory + "/index.sk")
-        searchKit = SearchKit(indexPath)
+        searchKit = SearchKit(Self.searchKitPath)
+        index = Index.loadOrCreate(Self.indexPath)
 
         cookies = HTTPCookieStorage()
 
         updateNoteCount()
+    }
+
+    deinit {
+        // save search index
+        try? index.saveTo(Self.indexPath)
     }
 
     var todaysName: String {
