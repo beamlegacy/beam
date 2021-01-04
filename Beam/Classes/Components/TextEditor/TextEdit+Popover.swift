@@ -12,11 +12,18 @@ extension BeamTextEdit {
     // MARK: - Properties
     private static let viewWidth: CGFloat = 248
     private static let viewHeight: CGFloat = 36
+    private static var posX: CGFloat = 0
+    private static var posY: CGFloat = 0
 
     internal func initPopover() {
         guard let node = node as? TextNode else { return }
-        let (x, y) = self.popoverPosition(with: node)
+        let cursorPosition = rootNode.cursorPosition
+        let (posX, rect) = node.offsetAndFrameAt(index: cursorPosition)
+        let x = posX == 0 ? 220 : posX + node.offsetInDocument.x
+        let y = rect.maxY == 0 ? rect.maxY + node.offsetInDocument.y + 30 : rect.maxY + node.offsetInDocument.y + 10
 
+        BeamTextEdit.posX = x
+        BeamTextEdit.posY = y
         popover = BidirectionalPopover(frame: NSRect(x: x, y: y, width: BeamTextEdit.viewWidth, height: BeamTextEdit.viewHeight))
 
         guard let popover = popover else { return }
@@ -37,7 +44,6 @@ extension BeamTextEdit {
               let data = data,
               let popover = popover else { return }
 
-        let (x, y) = self.popoverPosition(with: node)
         let cursorPosition = rootNode.cursorPosition
         var text = node.text.text
 
@@ -60,12 +66,12 @@ extension BeamTextEdit {
         }
 
         text = text.replacingOccurrences(of: prefix, with: "")
-        let items = data.documentManager.documentsWithTitleMatch(title: text).prefix(7).map({ $0.title })
+        let items = data.documentManager.documentsWithTitleMatch(title: text).prefix(4).map({ $0.title })
         var height = items.isEmpty ? BeamTextEdit.viewHeight : BeamTextEdit.viewHeight * CGFloat(items.count)
 
-        if items.count == 1 { height = BeamTextEdit.viewHeight * 2 }
+        if items.count == 1 || items.isEmpty { height = BeamTextEdit.viewHeight * 2 }
 
-        popover.frame = NSRect(x: x, y: y, width: BeamTextEdit.viewWidth, height: height)
+        popover.frame = NSRect(x: BeamTextEdit.posX, y: BeamTextEdit.posY, width: BeamTextEdit.viewWidth, height: height)
         popover.items = items
         popover.query = text
     }
@@ -73,15 +79,6 @@ extension BeamTextEdit {
     internal func dismissPopover() {
         popover?.removeFromSuperview()
         popover = nil
-    }
-
-    private func popoverPosition(with node: TextNode) -> (CGFloat, CGFloat) {
-        let cursorPosition = rootNode.cursorPosition
-        let (posX, rect) = node.offsetAndFrameAt(index: cursorPosition)
-        let x = posX == 0 ? 220 : posX + node.offsetInDocument.x
-        let y = rect.maxY == 0 ? rect.maxY + node.offsetInDocument.y + 30 : rect.maxY + node.offsetInDocument.y + 10
-
-        return (x, y)
     }
 
 }

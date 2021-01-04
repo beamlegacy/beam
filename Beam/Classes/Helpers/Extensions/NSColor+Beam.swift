@@ -91,11 +91,15 @@ extension NSColor {
     }
 
     static var bidirectionalPopoverBackgroundHoverColor: NSColor {
-        return loadColor(named: "Niobium")
+        return loadColor(named: "PopoverBackgroundHoverColor")
     }
 
     static var bidirectionalPopoverTextColor: NSColor {
-        return loadColor(named: "AutoCompleteTextSelected")
+        return loadColor(named: "Niobium")
+    }
+
+    static var bidirectionalPopoverActionTextColor : NSColor {
+        return loadColor(named: "PopoverActionTextColor")
     }
 
     static var tableHeaderTextColor: NSColor {

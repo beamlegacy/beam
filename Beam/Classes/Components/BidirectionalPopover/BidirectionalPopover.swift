@@ -58,6 +58,9 @@ class BidirectionalPopover: Popover {
     }
 
     private func setupCollectionView() {
+        let layout = NSCollectionViewFlowLayout()
+        layout.scrollDirection = .vertical
+
         collectionViewItems.forEach({ item in
             collectionView.register(NSNib(nibNamed: item.rawValue, bundle: nil), forItemWithIdentifier: item)
         })
@@ -69,7 +72,7 @@ class BidirectionalPopover: Popover {
         collectionView.wantsLayer = true
         collectionView.backgroundColors = [.clear]
         collectionView.layer?.backgroundColor = .clear
-        collectionView.reloadData()
+        collectionView.collectionViewLayout = layout
     }
 
     private func updateQueryUI() {
@@ -195,7 +198,7 @@ extension BidirectionalPopover: NSCollectionViewDataSource {
 
         switch itemName {
         case BidirectionalPopoverActionItem.identifier:
-            return query.isEmpty || isMatchItem ? 0 : 1
+            return isMatchItem ? 0 : 1
         case BidirectionalPopoverItem.identifier:
             return items.count
         default:

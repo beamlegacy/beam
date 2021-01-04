@@ -64,6 +64,6 @@ class BidirectionalPopoverItem: NSCollectionViewItem {
         trackingArea = NSTrackingArea(rect: view.bounds, options: [.activeAlways, .inVisibleRect, .mouseEnteredAndExited], owner: self, userInfo: nil)
 
         guard let trackingArea = trackingArea else { return }
-        view.addTrackingArea(trackingArea)
+        containerView.addTrackingArea(trackingArea)
     }
 }
