@@ -68,6 +68,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     private var noteCancellables = [AnyCancellable]()
     internal var cursorStartPosition = 0
     internal var popover: BidirectionalPopover?
+    internal var formatterView: FormatterView?
 
     public init(root: BeamElement, font: Font = Font.main) {
         BeamNote.detectLinks(documentManager)
@@ -228,6 +229,9 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         //print("relayoutRoot -> \(rect)")
         rootNode.availableWidth = rect.width
         rootNode.setLayout(rect)
+
+        guard formatterView != nil else { return }
+        updateFormatterViewLayout()
     }
 
     // This is the root node of what we are editing:
@@ -266,7 +270,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     public override func layout() {
-//        print("editor[\(rootNode.note.title)] layout \(frame)")
         relayoutRoot()
         super.layout()
         if scrollToCursorAtLayout {
@@ -323,6 +326,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         hasFocus = true
         invalidate()
         onStartEditing()
+        initFormatterView()
         return super.becomeFirstResponder()
     }
 

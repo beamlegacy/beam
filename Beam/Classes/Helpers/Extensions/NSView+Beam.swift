@@ -31,4 +31,13 @@ public extension NSView {
         }
         return views
     }
+
+    var isDarkMode: Bool {
+       if #available(OSX 10.14, *) {
+           if effectiveAppearance.name == .darkAqua {
+               return true
+           }
+       }
+       return false
+   }
 }

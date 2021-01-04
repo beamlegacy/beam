@@ -33,10 +33,6 @@ class BidirectionalPopover: Popover {
         BidirectionalPopoverItem.identifier
     ]
 
-    private var nibName: String {
-        return String(describing: type(of: self))
-    }
-
     // MARK: - Initializer
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)

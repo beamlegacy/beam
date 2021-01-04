@@ -94,6 +94,26 @@ extension NSColor {
         return loadColor(named: "AutoCompleteTextSelected")
     }
 
+    // Formatter View
+
+    static var formatterViewBackgroundColor: NSColor {
+        return loadColor(named: "WildSand")
+    }
+
+    static var formatterShadowColor: NSColor {
+        return loadColor(named: "FormatterShadow")
+    }
+
+    static var formatterIconColor: NSColor {
+        return loadColor(named: "Niobium")
+    }
+
+    static var formatterButtonBackgroudHoverColor: NSColor {
+        return loadColor(named: "Niobium")
+    }
+
+    // Other
+
     static var tableHeaderTextColor: NSColor {
         return loadColor(named: "TableHeaderTextColor")
     }
