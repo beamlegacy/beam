@@ -18,6 +18,14 @@ class BidirectionalPopover: Popover {
     var items: [String] = [] {
         didSet {
             collectionView.reloadData()
+
+            if !items.isEmpty {
+                DispatchQueue.main.async { [weak self] in
+                    guard let self = self else { return }
+                    self.selectFirstItemAt(section: 0)
+                }
+
+            }
         }
     }
 
@@ -31,8 +39,8 @@ class BidirectionalPopover: Popover {
     private var isMatchItem = false
     private var indexPath = IndexPath(item: 0, section: 0)
     private var collectionViewItems = [
-        BidirectionalPopoverActionItem.identifier,
-        BidirectionalPopoverItem.identifier
+        BidirectionalPopoverItem.identifier,
+        BidirectionalPopoverActionItem.identifier
     ]
 
     private var nibName: String {
@@ -76,12 +84,13 @@ class BidirectionalPopover: Popover {
     }
 
     private func updateQueryUI() {
-        if items.isEmpty && !isMatchItem { resetIndexPath() }
+        print(indexPath)
+        if items.isEmpty && !isMatchItem { resetIndexPath(section: 1) }
 
-        if !query.isEmpty && indexPath == IndexPath(item: 0, section: 0) && !isMatchItem {
+        if !query.isEmpty && indexPath == IndexPath(item: 0, section: 1) && !isMatchItem {
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
-                self.selectFirstItem()
+                self.selectFirstItemAt(section: 1)
             }
         }
     }
@@ -101,55 +110,55 @@ class BidirectionalPopover: Popover {
     }
 
     private func keyMoveUp() {
-        if indexPath.item == 1 {
-            collectionView.deselectItems(at: [IndexPath(item: indexPath.item - 1, section: indexPath.section)])
-            resetIndexPath()
-            selectFirstItem()
+        if indexPath.section == 1 {
+            collectionView.deselectItems(at: [indexPath])
+            indexPath = IndexPath(item: items.count, section: 0)
         }
 
-        guard indexPath.item != 0 && indexPath.item != 1 else { return }
+        guard indexPath.item != 0 else { return }
 
-        indexPath.item -= 1
         collectionView.deselectItems(at: [indexPath])
         collectionView.selectItems(at: [IndexPath(item: indexPath.item - 1, section: indexPath.section)], scrollPosition: .bottom)
+        indexPath.item -= 1
     }
 
     private func keyMoveDown() {
-        if items.isEmpty && !query.isEmpty {
-            resetIndexPath()
-            selectFirstItem()
-        }
-
-        guard indexPath.item != items.count else { return }
-
-        if indexPath.section == 0 && !items.isEmpty {
+        if indexPath.item == items.count - 1 && !isMatchItem {
             collectionView.deselectItems(at: [indexPath])
-            indexPath.section = 1
+            indexPath = IndexPath(item: 0, section: 1)
+            collectionView.selectItems(at: [indexPath], scrollPosition: .bottom)
         }
 
+        guard indexPath.section == 0 && indexPath.item != items.count - 1 else { return }
+
+        indexPath.item += 1
         collectionView.deselectItems(at: [IndexPath(item: indexPath.item - 1, section: indexPath.section)])
         collectionView.selectItems(at: [IndexPath(item: indexPath.item, section: indexPath.section)], scrollPosition: .bottom)
-        indexPath.item += 1
     }
 
-    private func selectFirstItem() {
+    private func selectFirstItemAt(section: Int = 0) {
+        indexPath = IndexPath(item: 0, section: section)
         collectionView.selectItems(at: [indexPath], scrollPosition: .bottom)
     }
 
-    private func resetIndexPath() {
-        indexPath = IndexPath(item: 0, section: 0)
+    private func resetIndexPath(section: Int = 0) {
+        indexPath = IndexPath(item: 0, section: section)
     }
 
     private func selectItem() {
-        switch indexPath.section {
-        case 0:
+        let itemName = itemNameAt(index: indexPath.section)
+
+        switch itemName {
+        case BidirectionalPopoverItem.identifier:
             guard let didSelectTitle = didSelectTitle else { break }
             didSelectTitle(query)
-        default:
+        case BidirectionalPopoverActionItem.identifier:
             guard let documentTitle = selectDocument(at: IndexPath(item: indexPath.item - 1, section: indexPath.section)),
                   let didSelectTitle = didSelectTitle else { break }
 
             didSelectTitle(documentTitle)
+        default:
+            break
         }
     }
 
@@ -158,7 +167,7 @@ class BidirectionalPopover: Popover {
         isMatchItem = items.contains(where: query.contains)
 
         if isMatchItem {
-            collectionView.selectItems(at: [IndexPath(item: 0, section: 1)], scrollPosition: .bottom)
+            collectionView.selectItems(at: [IndexPath(item: 0, section: 0)], scrollPosition: .bottom)
             resetIndexPath()
         } else {
             resetIndexPath()
@@ -197,10 +206,10 @@ extension BidirectionalPopover: NSCollectionViewDataSource {
         let itemName = itemNameAt(index: section)
 
         switch itemName {
-        case BidirectionalPopoverActionItem.identifier:
-            return isMatchItem ? 0 : 1
         case BidirectionalPopoverItem.identifier:
             return items.count
+        case BidirectionalPopoverActionItem.identifier:
+            return isMatchItem ? 0 : 1
         default:
             return 1
         }
@@ -211,13 +220,13 @@ extension BidirectionalPopover: NSCollectionViewDataSource {
         let item = collectionView.makeItem(withIdentifier: itemName, for: indexPath)
 
         switch item {
-        case is BidirectionalPopoverActionItem:
-            guard let popoverActionItem = item as? BidirectionalPopoverActionItem else { return item }
-            popoverActionItem.updateLabel(with: query)
-            return item
-        default:
+        case is BidirectionalPopoverItem:
             guard let popoverItem = item as? BidirectionalPopoverItem else { return item }
             popoverItem.documentTitle = items[indexPath.item]
+            return item
+        default:
+            guard let popoverActionItem = item as? BidirectionalPopoverActionItem else { return item }
+            popoverActionItem.updateLabel(with: query)
             return item
         }
 

@@ -66,8 +66,8 @@ extension BeamTextEdit {
         }
 
         text = text.replacingOccurrences(of: prefix, with: "")
-        let items = data.documentManager.documentsWithTitleMatch(title: text).prefix(4).map({ $0.title })
-        var height = items.isEmpty ? BeamTextEdit.viewHeight : BeamTextEdit.viewHeight * CGFloat(items.count)
+        let items = data.documentManager.documentsWithTitleMatch(title: text).prefix(7).map({ $0.title })
+        var height = items.isEmpty ? BeamTextEdit.viewHeight : (BeamTextEdit.viewHeight * CGFloat(items.count)) + 36
 
         if items.count == 1 || items.isEmpty { height = BeamTextEdit.viewHeight * 2 }
 
