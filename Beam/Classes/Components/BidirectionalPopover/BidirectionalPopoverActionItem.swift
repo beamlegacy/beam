@@ -22,7 +22,7 @@ class BidirectionalPopoverActionItem: NSCollectionViewItem {
 
     override var isSelected: Bool {
         didSet {
-            view.layer?.backgroundColor = isSelected ? NSColor.green.cgColor : NSColor.clear.cgColor
+            view.layer?.backgroundColor = isSelected ? NSColor.bidirectionalPopoverBackgroundHoverColor.cgColor : NSColor.clear.cgColor
         }
     }
 

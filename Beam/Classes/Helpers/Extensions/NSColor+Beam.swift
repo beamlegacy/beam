@@ -87,6 +87,10 @@ extension NSColor {
     // Popover
 
     static var bidirectionalPopoverBackgroundColor: NSColor {
+        return loadColor(named: "PopoverBackgroudColor")
+    }
+
+    static var bidirectionalPopoverBackgroundHoverColor: NSColor {
         return loadColor(named: "Niobium")
     }
 

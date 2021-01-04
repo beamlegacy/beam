@@ -9,14 +9,15 @@ import Cocoa
 
 extension BeamTextEdit {
 
+    // MARK: - Properties
+    private static let viewWidth: CGFloat = 248
+    private static let viewHeight: CGFloat = 36
+
     internal func initPopover() {
         guard let node = node as? TextNode else { return }
-        let cursorPosition = rootNode.cursorPosition
-        let (posX, rect) = node.offsetAndFrameAt(index: cursorPosition)
-        let x = posX == 0 ? 220 : posX + node.offsetInDocument.x
-        let y = rect.maxY == 0 ? rect.maxY + node.offsetInDocument.y + 30 : rect.maxY + node.offsetInDocument.y + 10
+        let (x, y) = self.popoverPosition(with: node)
 
-        popover = BidirectionalPopover(frame: NSRect(x: x, y: y, width: 300, height: 125))
+        popover = BidirectionalPopover(frame: NSRect(x: x, y: y, width: BeamTextEdit.viewWidth, height: BeamTextEdit.viewHeight))
 
         guard let popover = popover else { return }
 
@@ -36,8 +37,9 @@ extension BeamTextEdit {
               let data = data,
               let popover = popover else { return }
 
-        var text = node.text.text
+        let (x, y) = self.popoverPosition(with: node)
         let cursorPosition = rootNode.cursorPosition
+        var text = node.text.text
 
         if command == .deleteForward && cursorStartPosition == cursorPosition ||
            command == .moveLeft && cursorPosition - 1 <= cursorStartPosition {
@@ -58,13 +60,28 @@ extension BeamTextEdit {
         }
 
         text = text.replacingOccurrences(of: prefix, with: "")
-        popover.items = data.documentManager.documentsWithTitleMatch(title: text).prefix(4).map({ $0.title })
+        let items = data.documentManager.documentsWithTitleMatch(title: text).prefix(7).map({ $0.title })
+        var height = items.isEmpty ? BeamTextEdit.viewHeight : BeamTextEdit.viewHeight * CGFloat(items.count)
+
+        if items.count == 1 { height = BeamTextEdit.viewHeight * 2 }
+
+        popover.frame = NSRect(x: x, y: y, width: BeamTextEdit.viewWidth, height: height)
+        popover.items = items
         popover.query = text
     }
 
     internal func dismissPopover() {
         popover?.removeFromSuperview()
         popover = nil
+    }
+
+    private func popoverPosition(with node: TextNode) -> (CGFloat, CGFloat) {
+        let cursorPosition = rootNode.cursorPosition
+        let (posX, rect) = node.offsetAndFrameAt(index: cursorPosition)
+        let x = posX == 0 ? 220 : posX + node.offsetInDocument.x
+        let y = rect.maxY == 0 ? rect.maxY + node.offsetInDocument.y + 30 : rect.maxY + node.offsetInDocument.y + 10
+
+        return (x, y)
     }
 
 }

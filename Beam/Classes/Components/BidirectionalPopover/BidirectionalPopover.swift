@@ -69,6 +69,7 @@ class BidirectionalPopover: Popover {
         collectionView.wantsLayer = true
         collectionView.backgroundColors = [.clear]
         collectionView.layer?.backgroundColor = .clear
+        collectionView.reloadData()
     }
 
     private func updateQueryUI() {
@@ -198,7 +199,7 @@ extension BidirectionalPopover: NSCollectionViewDataSource {
         case BidirectionalPopoverItem.identifier:
             return items.count
         default:
-            return 0
+            return 1
         }
     }
 
@@ -225,7 +226,7 @@ extension BidirectionalPopover: NSCollectionViewDataSource {
 extension BidirectionalPopover: NSCollectionViewDelegateFlowLayout {
 
     func collectionView(_ collectionView: NSCollectionView, layout collectionViewLayout: NSCollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> NSSize {
-        return NSSize(width: collectionView.bounds.width, height: 40)
+        return NSSize(width: collectionView.bounds.width, height: 36)
     }
 
     func collectionView(_ collectionView: NSCollectionView, layout collectionViewLayout: NSCollectionViewLayout, insetForSectionAt section: Int) -> NSEdgeInsets {

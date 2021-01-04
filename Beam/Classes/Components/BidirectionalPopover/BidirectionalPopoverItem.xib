@@ -8,6 +8,7 @@
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="BidirectionalPopoverItem" customModule="Beam" customModuleProvider="target">
             <connections>
+                <outlet property="containerView" destination="lPd-1A-Gby" id="0dt-by-KMB"/>
                 <outlet property="titleLabel" destination="xeC-Vd-Ywx" id="38r-i1-CRC"/>
                 <outlet property="view" destination="Hz6-mo-xeY" id="0bl-1N-x8E"/>
             </connections>
@@ -18,24 +19,36 @@
             <rect key="frame" x="0.0" y="0.0" width="322" height="61"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
-                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="xeC-Vd-Ywx">
-                    <rect key="frame" x="18" y="23" width="286" height="16"/>
-                    <textFieldCell key="cell" lineBreakMode="truncatingTail" title="Label" usesSingleLineMode="YES" id="n8g-ZS-CFq">
-                        <font key="font" usesAppearanceFont="YES"/>
-                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
-                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                    </textFieldCell>
-                </textField>
+                <customView translatesAutoresizingMaskIntoConstraints="NO" id="lPd-1A-Gby" userLabel="containerView">
+                    <rect key="frame" x="2" y="2" width="318" height="57"/>
+                    <subviews>
+                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="xeC-Vd-Ywx">
+                            <rect key="frame" x="18" y="21" width="292" height="15"/>
+                            <textFieldCell key="cell" lineBreakMode="truncatingTail" title="Label" usesSingleLineMode="YES" id="n8g-ZS-CFq">
+                                <font key="font" size="13" name="HelveticaNeue"/>
+                                <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                            </textFieldCell>
+                        </textField>
+                    </subviews>
+                    <constraints>
+                        <constraint firstItem="xeC-Vd-Ywx" firstAttribute="centerY" secondItem="lPd-1A-Gby" secondAttribute="centerY" id="Zcf-ef-dPo"/>
+                        <constraint firstItem="xeC-Vd-Ywx" firstAttribute="leading" secondItem="lPd-1A-Gby" secondAttribute="leading" constant="20" id="ocM-lp-7nE"/>
+                        <constraint firstAttribute="trailing" secondItem="xeC-Vd-Ywx" secondAttribute="trailing" constant="10" id="rVo-qD-N5Y"/>
+                    </constraints>
+                </customView>
             </subviews>
             <constraints>
-                <constraint firstAttribute="trailing" secondItem="xeC-Vd-Ywx" secondAttribute="trailing" constant="20" symbolic="YES" id="JE7-jJ-6ru"/>
-                <constraint firstItem="xeC-Vd-Ywx" firstAttribute="leading" secondItem="Hz6-mo-xeY" secondAttribute="leading" constant="20" symbolic="YES" id="UOA-eM-bgy"/>
-                <constraint firstItem="xeC-Vd-Ywx" firstAttribute="centerY" secondItem="Hz6-mo-xeY" secondAttribute="centerY" id="qsm-F4-VbK"/>
+                <constraint firstAttribute="trailing" secondItem="lPd-1A-Gby" secondAttribute="trailing" constant="2" id="Kzh-Dx-uIQ"/>
+                <constraint firstAttribute="bottom" secondItem="lPd-1A-Gby" secondAttribute="bottom" constant="2" id="R9z-hV-VQ4"/>
+                <constraint firstItem="lPd-1A-Gby" firstAttribute="leading" secondItem="Hz6-mo-xeY" secondAttribute="leading" constant="2" id="Yu0-0k-wLw"/>
+                <constraint firstItem="lPd-1A-Gby" firstAttribute="top" secondItem="Hz6-mo-xeY" secondAttribute="top" constant="2" id="iWh-Mr-meX"/>
             </constraints>
             <point key="canvasLocation" x="155" y="114.5"/>
         </customView>
         <collectionViewItem id="RPF-hd-ARv" customClass="BidirectionalPopoverItem" customModule="Beam" customModuleProvider="target">
             <connections>
+                <outlet property="containerView" destination="lPd-1A-Gby" id="fN7-ek-fLd"/>
                 <outlet property="titleLabel" destination="xeC-Vd-Ywx" id="bc8-OJ-Fda"/>
             </connections>
         </collectionViewItem>
