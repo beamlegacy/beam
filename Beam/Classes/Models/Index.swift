@@ -96,6 +96,7 @@ class Index: Codable {
         var results = [UInt64: DocumentResult]()
         let documents = inputWords.map { word -> [DocumentResult] in
             var documents: [DocumentResult] = []
+            let wordLength = word.count
             if let wordMap = words[word] {
                 documents += wordMap.instances.map { (key, value) -> Index.DocumentResult in DocumentResult(id: key, score: value) }
 
@@ -108,26 +109,17 @@ class Index: Codable {
             documents += words.compactMap { wordkey, value -> [Index.DocumentResult] in
                 if wordkey.contains(word) {
                     return value.instances.map { (key, value) -> Index.DocumentResult in
-                        let score = value * (Float(word.count) / Float(wordkey.count))
+                        let score = value * (Float(wordLength) / Float(wordkey.count))
                         return DocumentResult(id: key, score: score) }
                 }
-                return []
-            }.joined()
 
-            if documents.count > maxResults ?? .max {
-                return documents
-            }
-
-            let wordLength = word.count
-
-            // Still not enough? Try levenstein distance
-            documents += words.compactMap { key, value -> [Index.DocumentResult] in
-                let keyLength = key.count
+                // the key isn't contained, let's see if we should try levenshtein distance
                 // don't try this costly estimation if the words are obviously too different:
+                let keyLength = wordkey.count
                 guard Float(abs(wordLength - keyLength)) / Float(max(wordLength, keyLength)) < 0.2 else {
                     return []
                 }
-                let distance = word.levenshtein(key)
+                let distance = word.levenshtein(wordkey)
                 guard distance < 4, distance > 0 else { return [] }
                 let ratio: [Float] = [0, 0.95, 0.70, 0.6, 0.3]
                 return value.instances.map { (key, value) -> Index.DocumentResult in DocumentResult(id: key, score: value / ratio[distance]) }
