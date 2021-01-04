@@ -56,7 +56,7 @@ class BidirectionalPopoverItem: NSCollectionViewItem {
     }
 
     override func mouseExited(with event: NSEvent) {
-        containerView.layer?.backgroundColor = .clear
+        containerView.layer?.backgroundColor = isSelected ? NSColor.bidirectionalPopoverBackgroundHoverColor.cgColor : .clear
     }
 
     private func setupDocument(title: String) {

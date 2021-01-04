@@ -673,10 +673,12 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
         let handlers: [String: () -> Bool] = [
             "@": { [unowned self] in
+                guard popover == nil else { return false }
                 self.showBidirectionalPopover()
                 return true
              },
              "#": { [unowned self] in
+                guard popover == nil else { return false }
                 self.showBidirectionalPopover()
                 return true
              },
@@ -1010,7 +1012,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     private var deadNodes: [TextNode] = []
 
     private func showBidirectionalPopover() {
-        guard popover == nil else { return }
         cursorStartPosition = rootNode.cursorPosition
         initPopover()
     }

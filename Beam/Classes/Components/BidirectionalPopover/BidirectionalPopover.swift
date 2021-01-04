@@ -19,12 +19,10 @@ class BidirectionalPopover: Popover {
         didSet {
             collectionView.reloadData()
 
-            if !items.isEmpty {
-                DispatchQueue.main.async { [weak self] in
-                    guard let self = self else { return }
-                    self.selectFirstItemAt(section: 0)
-                }
-
+            if items.isEmpty && !isMatchItem {
+                resetIndexPath(section: 1)
+            } else {
+                resetIndexPath(section: 0)
             }
         }
     }
@@ -32,7 +30,6 @@ class BidirectionalPopover: Popover {
     var query: String = "" {
         didSet {
             checkItemsContainsQuery()
-            updateQueryUI()
         }
     }
 
@@ -59,10 +56,25 @@ class BidirectionalPopover: Popover {
         super.init(coder: coder)
     }
 
+    override func draw(_ dirtyRect: NSRect) {
+        self.shadow = NSShadow()
+        self.layer?.allowsEdgeAntialiasing = true
+        self.layer?.drawsAsynchronously = true
+        self.layer?.shadowColor = NSColor.black.cgColor
+        self.layer?.shadowOpacity = 0.15
+        self.layer?.shadowRadius = 3
+        self.layer?.shadowOffset = NSSize(width: 0, height: -3)
+
+        super.draw(dirtyRect)
+    }
+
     // MARK: - UI
     private func setupView() {
         containerView.wantsLayer = true
+        containerView.layer?.cornerRadius = 7
         containerView.layer?.backgroundColor = NSColor.bidirectionalPopoverBackgroundColor.cgColor
+        containerView.layer?.borderWidth = 1
+        containerView.layer?.borderColor = NSColor.bidirectionalPopoverBackgroundColor.cgColor
     }
 
     private func setupCollectionView() {
@@ -81,18 +93,6 @@ class BidirectionalPopover: Popover {
         collectionView.backgroundColors = [.clear]
         collectionView.layer?.backgroundColor = .clear
         collectionView.collectionViewLayout = layout
-    }
-
-    private func updateQueryUI() {
-        print(indexPath)
-        if items.isEmpty && !isMatchItem { resetIndexPath(section: 1) }
-
-        if !query.isEmpty && indexPath == IndexPath(item: 0, section: 1) && !isMatchItem {
-            DispatchQueue.main.async { [weak self] in
-                guard let self = self else { return }
-                self.selectFirstItemAt(section: 1)
-            }
-        }
     }
 
     // MARK: - Methods
@@ -132,8 +132,11 @@ class BidirectionalPopover: Popover {
         guard indexPath.section == 0 && indexPath.item != items.count - 1 else { return }
 
         indexPath.item += 1
-        collectionView.deselectItems(at: [IndexPath(item: indexPath.item - 1, section: indexPath.section)])
-        collectionView.selectItems(at: [IndexPath(item: indexPath.item, section: indexPath.section)], scrollPosition: .bottom)
+        let previousIndexPath = IndexPath(item: indexPath.item - 1, section: indexPath.section)
+
+        collectionView.deselectItems(at: [previousIndexPath])
+        collectionView.selectItems(at: [indexPath], scrollPosition: .bottom)
+        collectionView.reloadItems(at: [previousIndexPath])
     }
 
     private func selectFirstItemAt(section: Int = 0) {
@@ -150,13 +153,13 @@ class BidirectionalPopover: Popover {
 
         switch itemName {
         case BidirectionalPopoverItem.identifier:
-            guard let didSelectTitle = didSelectTitle else { break }
-            didSelectTitle(query)
-        case BidirectionalPopoverActionItem.identifier:
             guard let documentTitle = selectDocument(at: IndexPath(item: indexPath.item - 1, section: indexPath.section)),
                   let didSelectTitle = didSelectTitle else { break }
 
             didSelectTitle(documentTitle)
+        case BidirectionalPopoverActionItem.identifier:
+            guard let didSelectTitle = didSelectTitle else { break }
+            didSelectTitle(query)
         default:
             break
         }
@@ -167,10 +170,7 @@ class BidirectionalPopover: Popover {
         isMatchItem = items.contains(where: query.contains)
 
         if isMatchItem {
-            collectionView.selectItems(at: [IndexPath(item: 0, section: 0)], scrollPosition: .bottom)
-            resetIndexPath()
-        } else {
-            resetIndexPath()
+            selectFirstItemAt(section: 0)
         }
     }
 
@@ -223,11 +223,17 @@ extension BidirectionalPopover: NSCollectionViewDataSource {
         case is BidirectionalPopoverItem:
             guard let popoverItem = item as? BidirectionalPopoverItem else { return item }
             popoverItem.documentTitle = items[indexPath.item]
-            return item
+
+            if indexPath == self.indexPath { popoverItem.isSelected = true }
+
+            return popoverItem
         default:
             guard let popoverActionItem = item as? BidirectionalPopoverActionItem else { return item }
             popoverActionItem.updateLabel(with: query)
-            return item
+
+            if !query.isEmpty && indexPath == self.indexPath && !isMatchItem { popoverActionItem.isSelected = true }
+
+            return popoverActionItem
         }
 
     }

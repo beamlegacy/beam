@@ -11,7 +11,7 @@ extension BeamTextEdit {
 
     // MARK: - Properties
     private static let viewWidth: CGFloat = 248
-    private static let viewHeight: CGFloat = 36
+    private static let viewHeight: CGFloat = 36.5
     private static var posX: CGFloat = 0
     private static var posY: CGFloat = 0
 
@@ -20,7 +20,7 @@ extension BeamTextEdit {
         let cursorPosition = rootNode.cursorPosition
         let (posX, rect) = node.offsetAndFrameAt(index: cursorPosition)
         let x = posX == 0 ? 220 : posX + node.offsetInDocument.x
-        let y = rect.maxY == 0 ? rect.maxY + node.offsetInDocument.y + 30 : rect.maxY + node.offsetInDocument.y + 10
+        let y = rect.maxY == 0 ? rect.maxY + node.offsetInDocument.y + 25 : rect.maxY + node.offsetInDocument.y + 5
 
         BeamTextEdit.posX = x
         BeamTextEdit.posY = y
@@ -66,8 +66,8 @@ extension BeamTextEdit {
         }
 
         text = text.replacingOccurrences(of: prefix, with: "")
-        let items = data.documentManager.documentsWithTitleMatch(title: text).prefix(7).map({ $0.title })
-        var height = items.isEmpty ? BeamTextEdit.viewHeight : (BeamTextEdit.viewHeight * CGFloat(items.count)) + 36
+        let items = data.documentManager.documentsWithTitleMatch(title: text).prefix(4).map({ $0.title })
+        var height = items.isEmpty ? BeamTextEdit.viewHeight : (BeamTextEdit.viewHeight * CGFloat(items.count)) + 36.5
 
         if items.count == 1 || items.isEmpty { height = BeamTextEdit.viewHeight * 2 }
 

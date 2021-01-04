@@ -98,7 +98,7 @@ extension NSColor {
         return loadColor(named: "Niobium")
     }
 
-    static var bidirectionalPopoverActionTextColor : NSColor {
+    static var bidirectionalPopoverActionTextColor: NSColor {
         return loadColor(named: "PopoverActionTextColor")
     }
 

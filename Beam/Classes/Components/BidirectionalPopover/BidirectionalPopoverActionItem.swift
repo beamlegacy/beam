@@ -45,7 +45,7 @@ class BidirectionalPopoverActionItem: NSCollectionViewItem {
 
     // MARK: - Methods
     func updateLabel(with query: String) {
-        queryLabel.stringValue = query
+        queryLabel.stringValue = query.isEmpty ? "\"\"" : query
         trackingArea = NSTrackingArea(rect: view.bounds, options: [.activeAlways, .inVisibleRect, .mouseEnteredAndExited], owner: self, userInfo: nil)
 
         guard let trackingArea = trackingArea else { return }
@@ -57,7 +57,7 @@ class BidirectionalPopoverActionItem: NSCollectionViewItem {
     }
 
     override func mouseExited(with event: NSEvent) {
-        containerView.layer?.backgroundColor = .clear
+        containerView.layer?.backgroundColor = isSelected ? NSColor.bidirectionalPopoverBackgroundHoverColor.cgColor : .clear
     }
 
 }
