@@ -11,7 +11,7 @@ class FormatterView: NSView {
 
     // MARK: - Properties
     @IBOutlet var containerView: NSView!
-    @IBOutlet weak var formatterStackView: NSStackView!
+    @IBOutlet weak var collectionView: NSCollectionView!
 
     var corderRadius: CGFloat = 5 {
         didSet {
@@ -21,11 +21,11 @@ class FormatterView: NSView {
 
     var items: [FormatterType] = [] {
         didSet {
-            addItemToStackView()
+            collectionView.reloadData()
         }
     }
 
-    private var t: [FormatterType : NSButton] = [:]
+    private var buttons: [FormatterType: NSButton] = [:]
 
     // MARK: - Initializer
     override init(frame frameRect: NSRect) {
@@ -33,11 +33,15 @@ class FormatterView: NSView {
         loadXib()
         drawShadow()
         setupUI()
-        setupStackView()
+        setupCollectionView()
     }
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
+    }
+
+    deinit {
+        print("deinit")
     }
 
     // MARK: - UI
@@ -45,16 +49,26 @@ class FormatterView: NSView {
         containerView.wantsLayer = true
         containerView.layer?.backgroundColor = NSColor.formatterViewBackgroundColor.cgColor
         containerView.layer?.cornerRadius = corderRadius
+        containerView.layer?.borderWidth = 1
+        containerView.layer?.borderColor = NSColor.formatterBorderColor.cgColor
     }
 
-    private func setupStackView() {
-        formatterStackView.orientation = .horizontal
-        formatterStackView.alignment = .centerY
-        formatterStackView.distribution = .fillEqually
-        formatterStackView.spacing = 0
+    private func setupCollectionView() {
+        let trackingArea = NSTrackingArea(rect: collectionView.bounds, options: [.activeAlways, .inVisibleRect, .mouseEnteredAndExited], owner: self, userInfo: nil)
+        let layout = NSCollectionViewFlowLayout()
+        layout.scrollDirection = .horizontal
 
-        let trackingArea = NSTrackingArea(rect: formatterStackView.bounds, options: [.activeAlways, .inVisibleRect, .mouseEnteredAndExited], owner: self, userInfo: ["view": formatterStackView!])
-        formatterStackView.addTrackingArea(trackingArea)
+        collectionView.register(FormatterViewItem.self, forItemWithIdentifier: FormatterViewItem.identifier)
+        collectionView.addTrackingArea(trackingArea)
+
+        collectionView.delegate = self
+        collectionView.dataSource = self
+
+        collectionView.isSelectable = true
+        collectionView.wantsLayer = true
+        collectionView.collectionViewLayout = layout
+        collectionView.backgroundColors = [.clear]
+        collectionView.layer?.backgroundColor = .clear
     }
 
     private func drawShadow() {
@@ -64,95 +78,45 @@ class FormatterView: NSView {
         self.layer?.allowsEdgeAntialiasing = true
         self.layer?.drawsAsynchronously = true
         self.layer?.shadowColor = NSColor.formatterShadowColor.cgColor
-        self.layer?.shadowOpacity = 1
-        self.layer?.shadowRadius = 0.45
+        self.layer?.shadowOpacity = 0
+        self.layer?.shadowRadius = 0
         self.layer?.shadowOffset = NSSize(width: 0, height: 0)
+    }
+
+    private func animateShadowOnMouseEntered(_ isHover: Bool) {
+        NSAnimationContext.runAnimationGroup { (ctx) in
+            ctx.allowsImplicitAnimation = true
+            ctx.duration = 0.3
+
+            containerView.layer?.backgroundColor = isHover ? NSColor.formatterViewBackgroundHoverColor.cgColor : NSColor.formatterViewBackgroundColor.cgColor
+            layer?.shadowOpacity = isHover ? 0.25 : 0
+            layer?.shadowRadius = isHover ? 2 : 0
+            layer?.shadowOffset.height = isHover ? -1.5 : 0
+        }
+    }
+
+    private func animateButtonOnMouseEntered(_ button: NSButton, isHover: Bool) {
+        NSAnimationContext.runAnimationGroup { (ctx) in
+            ctx.allowsImplicitAnimation = true
+            ctx.duration = 0.3
+
+            button.layer?.backgroundColor = isHover ? NSColor.formatterButtonBackgroudHoverColor.cgColor : NSColor.clear.cgColor
+        }
     }
 
     // MARK: - Methods
     override func mouseEntered(with event: NSEvent) {
-        guard let userInfo = event.trackingArea?.userInfo,
-              let view = userInfo["view"] as? NSView else { return }
-
-        if view == formatterStackView {
-            DispatchQueue.main.async {[weak self] in
-                guard let self = self else { return }
-
-                NSAnimationContext.runAnimationGroup { (ctx) in
-                    ctx.allowsImplicitAnimation = true
-                    ctx.duration = 0.3
-
-                    self.layer?.shadowOpacity = 0.5
-                    self.layer?.shadowRadius = 2
-                    self.layer?.shadowOffset.height = -2
-                }
-            }
-        } else {
-            guard let item = userInfo["item"] as? FormatterType else { return }
-
-            DispatchQueue.main.async {[weak self] in
-                guard let self = self else { return }
-
-                NSAnimationContext.runAnimationGroup { (ctx) in
-                    ctx.allowsImplicitAnimation = true
-                    ctx.duration = 0.3
-
-                    self.t[item]?.layer?.backgroundColor = NSColor.red.cgColor
-                }
-            }
+        DispatchQueue.main.async {[weak self] in
+            guard let self = self else { return }
+            self.animateShadowOnMouseEntered(true)
         }
     }
 
     override func mouseExited(with event: NSEvent) {
-        guard let userInfo = event.trackingArea?.userInfo,
-              let view = userInfo["view"] as? NSView else { return }
-
-        if view == formatterStackView {
-            DispatchQueue.main.async {[weak self] in
-                guard let self = self else { return }
-
-                NSAnimationContext.runAnimationGroup { (ctx) in
-                    ctx.allowsImplicitAnimation = true
-                    ctx.duration = 0.3
-
-                    self.layer?.shadowOpacity = 1
-                    self.layer?.shadowRadius = 0.45
-                    self.layer?.shadowOffset.height = 0
-                }
-            }
-        } else {
-            guard let item = userInfo["item"] as? FormatterType else { return }
-
-            DispatchQueue.main.async {[weak self] in
-                guard let self = self else { return }
-
-                NSAnimationContext.runAnimationGroup { (ctx) in
-                    ctx.allowsImplicitAnimation = true
-                    ctx.duration = 0.3
-
-                    self.t[item]?.layer?.backgroundColor = NSColor.clear.cgColor
-                }
-            }
+        DispatchQueue.main.async {[weak self] in
+            guard let self = self else { return }
+            self.animateShadowOnMouseEntered(false)
         }
-    }
-
-    private func addItemToStackView() {
-        items.forEach({ item in
-            let button = NSButton()
-            let image = NSImage(named: "editor-format_\(item)")
-            let trackingButtonArea = NSTrackingArea(rect: button.bounds, options: [.activeAlways, .inVisibleRect, .mouseEnteredAndExited], owner: self, userInfo: ["view": button, "item": item])
-
-            button.wantsLayer = true
-            button.isBordered = false
-            button.layer?.cornerRadius = 3
-            button.contentTintColor = NSColor.formatterIconColor
-            button.image = image
-            button.addTrackingArea(trackingButtonArea)
-
-            t[item] = button
-
-            formatterStackView.addArrangedSubview(button)
-        })
     }
 
     private func loadXib() {
@@ -164,4 +128,54 @@ class FormatterView: NSView {
         containerView.autoresizingMask = [.width, .height]
         addSubview(containerView)
     }
+}
+
+extension FormatterView: NSCollectionViewDataSource {
+
+    func numberOfSections(in collectionView: NSCollectionView) -> Int {
+        return 1
+    }
+
+    func collectionView(_ collectionView: NSCollectionView, numberOfItemsInSection section: Int) -> Int {
+        return items.count
+    }
+
+    func collectionView(_ collectionView: NSCollectionView, itemForRepresentedObjectAt indexPath: IndexPath) -> NSCollectionViewItem {
+        let item = collectionView.makeItem(withIdentifier: FormatterViewItem.identifier, for: indexPath)
+
+        guard let formatterViewItem = item as? FormatterViewItem else { return item }
+        formatterViewItem.setupItem(items[indexPath.item])
+
+        return formatterViewItem
+    }
+
+}
+
+extension FormatterView: NSCollectionViewDelegateFlowLayout {
+
+    func collectionView(_ collectionView: NSCollectionView, layout collectionViewLayout: NSCollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> NSSize {
+        return NSSize(width: 20, height: 20)
+    }
+
+    func collectionView(_ collectionView: NSCollectionView, layout collectionViewLayout: NSCollectionViewLayout, insetForSectionAt section: Int) -> NSEdgeInsets {
+        return NSEdgeInsets(top: 0, left: 8, bottom: 0, right: 0)
+    }
+
+    func collectionView(_ collectionView: NSCollectionView, layout collectionViewLayout: NSCollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+        return 13
+    }
+
+    func collectionView(_ collectionView: NSCollectionView, layout collectionViewLayout: NSCollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
+        return 0
+    }
+
+}
+
+extension FormatterView: NSCollectionViewDelegate {
+
+    func collectionView(_ collectionView: NSCollectionView, didSelectItemsAt indexPaths: Set<IndexPath>) {
+        guard let indexPath = indexPaths.first else { return }
+        print(items[indexPath.item])
+    }
+
 }

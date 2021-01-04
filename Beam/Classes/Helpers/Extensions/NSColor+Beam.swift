@@ -97,11 +97,19 @@ extension NSColor {
     // Formatter View
 
     static var formatterViewBackgroundColor: NSColor {
-        return loadColor(named: "WildSand")
+        return loadColor(named: "Alabaster")
+    }
+
+    static var formatterViewBackgroundHoverColor: NSColor {
+        return loadColor(named: "FormatterBackgroundHoverColor")
+    }
+
+    static var formatterBorderColor: NSColor {
+        return loadColor(named: "FormatterBorderColor")
     }
 
     static var formatterShadowColor: NSColor {
-        return loadColor(named: "FormatterShadow")
+        return loadColor(named: "FormatterShadowColor")
     }
 
     static var formatterIconColor: NSColor {
@@ -109,7 +117,7 @@ extension NSColor {
     }
 
     static var formatterButtonBackgroudHoverColor: NSColor {
-        return loadColor(named: "Niobium")
+        return loadColor(named: "FormatterItemHoverColor")
     }
 
     // Other

@@ -24,8 +24,19 @@ extension BeamTextEdit {
               let view = window?.contentView else { return }
 
         formatterView.items = BeamTextEdit.formatterType
+        let button = NSButton(frame: NSRect(x: 200, y: 200, width: 40, height: 40))
+        let image = NSImage(named: "editor-format_h1")
+
+        button.isBordered = false
+        button.image = image
+        button.action = #selector(testAction(_:))
+        addSubview(button)
 
         view.addSubview(formatterView)
+    }
+
+    @objc func testAction(_ sender: NSButton) {
+        print("hello")
     }
 
     internal func updateFormatterViewLayout() {
@@ -33,6 +44,7 @@ extension BeamTextEdit {
     }
 
     internal func dismissFormatterView() {
+        guard formatterView != nil else { return }
         formatterView?.removeFromSuperview()
         formatterView = nil
     }
