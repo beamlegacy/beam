@@ -23,7 +23,7 @@
                     <rect key="frame" x="2" y="2" width="318" height="57"/>
                     <subviews>
                         <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="xeC-Vd-Ywx">
-                            <rect key="frame" x="18" y="19" width="292" height="19"/>
+                            <rect key="frame" x="13" y="19" width="297" height="19"/>
                             <textFieldCell key="cell" lineBreakMode="truncatingTail" title="Label" usesSingleLineMode="YES" id="n8g-ZS-CFq">
                                 <font key="font" metaFont="system" size="15"/>
                                 <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -33,7 +33,7 @@
                     </subviews>
                     <constraints>
                         <constraint firstItem="xeC-Vd-Ywx" firstAttribute="centerY" secondItem="lPd-1A-Gby" secondAttribute="centerY" id="Zcf-ef-dPo"/>
-                        <constraint firstItem="xeC-Vd-Ywx" firstAttribute="leading" secondItem="lPd-1A-Gby" secondAttribute="leading" constant="20" id="ocM-lp-7nE"/>
+                        <constraint firstItem="xeC-Vd-Ywx" firstAttribute="leading" secondItem="lPd-1A-Gby" secondAttribute="leading" constant="15" id="ocM-lp-7nE"/>
                         <constraint firstAttribute="trailing" secondItem="xeC-Vd-Ywx" secondAttribute="trailing" constant="10" id="rVo-qD-N5Y"/>
                     </constraints>
                 </customView>
