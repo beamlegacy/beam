@@ -166,4 +166,47 @@ extension BeamText {
 
         return links
     }
+
+    func range(_ range: Swift.Range<Int>, containsAttribute attribute: BeamText.Attribute) -> Bool {
+        let sub = extract(range: range)
+        for range in sub.ranges {
+            if range.attributes.contains(where: { attr -> Bool in attr.rawValue == attribute.rawValue }) {
+                return true
+            }
+        }
+
+        return false
+    }
+
+    // toggle the given attribute in the given range and return true if the attribute was added, false if it was removed
+    mutating func toggle(attribute: BeamText.Attribute, forRange _range: Swift.Range<Int>) -> Bool {
+        if range(_range, containsAttribute: attribute) {
+            removeAttributes([attribute], from: _range)
+            return false
+        } else {
+            addAttributes([attribute], to: _range)
+            return true
+        }
+    }
+
+    // return the range(s) that contains the position. If the position is in between two ranges, they are both returned
+    func rangesAt(position: Int) -> [Range] {
+        var lastRange: Range?
+        for range in ranges {
+            if range.position <= position && position < range.end {
+                if position == range.position, let last = lastRange {
+                    return [last, range]
+                }
+
+                return [range]
+            }
+            lastRange = range
+        }
+
+        return []
+    }
+
+    static func removeLinks(from attributes: [Attribute]) -> [Attribute] {
+        return attributes.compactMap({ $0.isLink ? nil : $0 })
+    }
 }

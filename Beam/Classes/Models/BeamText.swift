@@ -112,6 +112,17 @@ struct BeamText: Codable {
                 return "quote"
             }
         }
+
+        var isLink: Bool {
+            switch self {
+            case .link:
+                return true
+            case .internalLink:
+                return true
+            default:
+                return false
+            }
+        }
     }
 
     struct Range: Codable, Equatable {
