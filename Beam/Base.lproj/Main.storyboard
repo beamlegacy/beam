@@ -22,7 +22,11 @@
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="VOq-y0-SEH"/>
-                                        <menuItem title="Preferences…" keyEquivalent="," id="BOF-NM-1cW"/>
+                                        <menuItem title="Preferences…" keyEquivalent="," id="BOF-NM-1cW">
+                                            <connections>
+                                                <action selector="preferencesMenuItemActionHandler:" target="Voe-Tx-rLC" id="pc2-bG-FVH"/>
+                                            </connections>
+                                        </menuItem>
                                         <menuItem title="Check for updates..." id="JrI-WQ-BzX">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
@@ -134,12 +138,6 @@
                                                     </menuItem>
                                                 </items>
                                             </menu>
-                                        </menuItem>
-                                        <menuItem title="Account..." id="a3Q-5Z-Wdm">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                            <connections>
-                                                <action selector="showAccount:" target="Voe-Tx-rLC" id="EdB-NG-dL0"/>
-                                            </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="m54-Is-iLE"/>
                                         <menuItem title="Close" keyEquivalent="w" id="DVo-aG-piG">

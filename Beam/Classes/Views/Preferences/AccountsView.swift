@@ -1,53 +1,54 @@
 import SwiftUI
+import Preferences
 
-struct AccountDetail: View {
+/**
+Function wrapping SwiftUI into `PreferencePane`, which is mimicking view controller's default construction syntax.
+*/
+let AccountsPreferenceViewController: () -> PreferencePane = {
+	/// Wrap your custom view into `Preferences.Pane`, while providing necessary toolbar info.
+	let paneView = Preferences.Pane(
+		identifier: .accounts,
+		title: "Account",
+		toolbarIcon: NSImage(named: "person.crop.circle")!
+	) {
+		AccountsView()
+	}
+
+	return Preferences.PaneHostingController(pane: paneView)
+}
+
+/**
+The main view of “Accounts” preference pane.
+*/
+struct AccountsView: View {
     @State private var email: String = Persistence.Authentication.email ?? ""
     @State private var password: String = Persistence.Authentication.password ?? ""
     @State private var enableLogging: Bool = true
     @State private var loggedIn: Bool = AccountManager().loggedIn
     @State private var errorMessage: Error!
 
-    let accountManager = AccountManager()
+    private let accountManager = AccountManager()
+    private let contentWidth: Double = 450.0
 
-    var body: some View {
-        VStack {
-            Form {
-                Section {
-                    // TODO: loc
-                    TextField("johnnyappleseed@apple.com", text: $email).textFieldStyle(RoundedBorderTextFieldStyle())
-                        .padding()
+	var body: some View {
+        Preferences.Container(contentWidth: contentWidth) {
+            Preferences.Section(title: "Beam Account:") {
+                // TODO: loc
+                TextField("johnnyappleseed@apple.com", text: $email).textFieldStyle(RoundedBorderTextFieldStyle()).frame(maxWidth: 200)
+
+                // TODO: loc
+                SecureField("Enter your password", text: $password).textFieldStyle(RoundedBorderTextFieldStyle()).frame(maxWidth: 200)
+                HStack {
+                    SignInButton
+                    SignUpButton
                 }
-
-                Section {
-                    // TODO: loc
-                    SecureField("Enter your password", text: $password).textFieldStyle(RoundedBorderTextFieldStyle())
-                        .padding()
+                HStack {
+                    ForgotPasswordButton
+                    LogoutButton
                 }
-
-                Divider()
-
-                Section {
-                    HStack(alignment: .center) {
-                        Spacer()
-
-                        SignInButton
-
-                        SignUpButton
-
-                        ForgotPasswordButton
-
-                        LogoutButton
-
-                        ResetAPIEndpointsButton
-
-                        Spacer()
-
-                    }.padding()
-                }
-            }.padding()
-            Spacer()
-        }
-    }
+            }
+		}
+	}
 
     @State private var showingSignInAlert = false
     private var SignInButton: some View {
@@ -131,19 +132,10 @@ struct AccountDetail: View {
             Text("Logout").frame(minWidth: 100)
         }).disabled(!loggedIn)
     }
-
-    private var ResetAPIEndpointsButton: some View {
-        Button(action: {
-            Configuration.reset()
-        }, label: {
-            // TODO: loc
-            Text("Reset API Endpoints").frame(minWidth: 100)
-        })
-    }
 }
 
-struct AccountDetail_Previews: PreviewProvider {
-    static var previews: some View {
-        AccountDetail()
-    }
+struct AccountsView_Previews: PreviewProvider {
+	static var previews: some View {
+		AccountsView()
+	}
 }
