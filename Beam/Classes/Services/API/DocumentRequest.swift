@@ -99,6 +99,8 @@ class DocumentRequest: APIRequest {
         let id: String?
         let title: String
         var data: String?
+        let createdAt: Date?
+        let updatedAt: Date?
     }
 
     struct UpdateDocument: Decodable, Errorable {
@@ -113,7 +115,11 @@ class DocumentRequest: APIRequest {
             completionHandler(.success(false))
             return nil
         }
-        let parameters = UpdateDocumentParameters(id: document.id, title: title, data: document.data)
+        let parameters = UpdateDocumentParameters(id: document.id,
+                                                  title: title,
+                                                  data: document.data,
+                                                  createdAt: document.createdAt,
+                                                  updatedAt: document.updatedAt)
         let bodyParamsRequest = GraphqlParameters(fileName: "update_document", variables: parameters)
 
         return performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Result<APIResult<UpdateDocument>, Error>) in
