@@ -69,7 +69,10 @@ class Index: Codable {
     var words: [String: Word] = [:]
     var documents: [UInt64: IndexDocument] = [:]
     var pageRank = PageRank()
-    var linkStore: LinkStore = LinkStore.shared
+
+    enum CodingKeys: String, CodingKey {
+        case words, documents, pageRank
+    }
 
     init() {
     }
@@ -89,47 +92,15 @@ class Index: Codable {
         var score: Float
     }
 
+    var partialResults: [String: [DocumentResult]] = [:]
+
     //swiftlint:disable:next cyclomatic_complexity
     func search(string: String, maxResults: Int? = 10) -> [SearchResult] {
         let inputWords = Self.extractWords(from: string, useLemmas: gUseLemmas, removeDiacritics: gRemoveDiacritics)
 
         var results = [UInt64: DocumentResult]()
         let documents = inputWords.map { word -> [DocumentResult] in
-            var documents: [DocumentResult] = []
-            let wordLength = word.count
-            if let wordMap = words[word] {
-                documents += wordMap.instances.map { (key, value) -> Index.DocumentResult in DocumentResult(id: key, score: value) }
-
-                // do we have enough exact results for this word?
-                if documents.count > maxResults ?? .max {
-                    return documents
-                }
-            }
-
-            documents += words.compactMap { wordkey, value -> [Index.DocumentResult] in
-                if wordkey.contains(word) {
-                    return value.instances.map { (key, value) -> Index.DocumentResult in
-                        let score = value * (Float(wordLength) / Float(wordkey.count))
-                        return DocumentResult(id: key, score: score) }
-                }
-
-                // the key isn't contained, let's see if we should try levenshtein distance
-                // don't try this costly estimation if the words are obviously too different:
-                let keyLength = wordkey.count
-                guard Float(abs(wordLength - keyLength)) / Float(max(wordLength, keyLength)) < 0.2 else {
-                    return []
-                }
-                let distance = word.levenshtein(wordkey)
-                guard distance < 4, distance > 0 else { return [] }
-                let ratio: [Float] = [0, 0.95, 0.70, 0.6, 0.3]
-                return value.instances.map { (key, value) -> Index.DocumentResult in DocumentResult(id: key, score: value / ratio[distance]) }
-            }.joined()
-
-            if documents.count > maxResults ?? .max {
-                return documents
-            }
-
-            return documents
+            documentsContaining(word: word, maxResults: maxResults)
         }
 
         for docs in documents {
@@ -151,7 +122,56 @@ class Index: Codable {
         }
     }
 
+    func documentsContaining(word: String, maxResults: Int?) -> [DocumentResult] {
+        if let partialResult = partialResults[word] {
+            return partialResult
+        }
+
+        var documents: [DocumentResult] = []
+
+        defer {
+            partialResults[word] = documents
+        }
+
+        let wordLength = word.count
+        if let wordMap = words[word] {
+            documents += wordMap.instances.map { (key, value) -> Index.DocumentResult in DocumentResult(id: key, score: value) }
+
+            // do we have enough exact results for this word?
+            if documents.count > maxResults ?? .max {
+                return documents
+            }
+        }
+
+        documents += words.compactMap { wordkey, value -> [Index.DocumentResult] in
+            if wordkey.contains(word) {
+                return value.instances.map { (key, value) -> Index.DocumentResult in
+                    let score = value * (Float(wordLength) / Float(wordkey.count))
+                    return DocumentResult(id: key, score: score) }
+            }
+
+            // the key isn't contained, let's see if we should try levenshtein distance
+            // don't try this costly estimation if the words are obviously too different:
+            let keyLength = wordkey.count
+            guard Float(abs(wordLength - keyLength)) / Float(max(wordLength, keyLength)) < 0.2 else {
+                return []
+            }
+            let distance = word.levenshtein(wordkey)
+            guard distance < 4, distance > 0 else { return [] }
+            let ratio: [Float] = [0, 0.95, 0.70, 0.6, 0.3]
+            return value.instances.map { (key, value) -> Index.DocumentResult in DocumentResult(id: key, score: value / ratio[distance]) }
+        }.joined()
+
+        if documents.count > maxResults ?? .max {
+            return documents
+        }
+
+        return documents
+
+    }
+
     func append(document: IndexDocument) {
+        partialResults.removeAll()
         remove(id: document.id)
         documents[document.id] = document.leanCopy
 
@@ -186,6 +206,7 @@ class Index: Codable {
     }
 
     func remove(id: UInt64) {
+        partialResults.removeAll()
         guard let oldDoc = documents[id] else { return }
         for word in oldDoc.contentsWords {
             dissociate(id: id, fromWord: word)
