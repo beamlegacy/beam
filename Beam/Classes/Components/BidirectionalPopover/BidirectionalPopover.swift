@@ -68,6 +68,7 @@ class BidirectionalPopover: Popover {
         super.draw(dirtyRect)
     }
 
+    // MARK: - Life Cycle
     override func viewDidChangeEffectiveAppearance() {
         super.viewDidChangeEffectiveAppearance()
         updateUI()
@@ -161,12 +162,12 @@ class BidirectionalPopover: Popover {
 
         switch itemName {
         case BidirectionalPopoverItem.identifier:
-            guard let documentTitle = selectDocument(at: IndexPath(item: indexPath.item - 1, section: indexPath.section)),
+            guard let documentTitle = selectDocument(at: indexPath),
                   let didSelectTitle = didSelectTitle else { break }
 
             didSelectTitle(documentTitle)
         case BidirectionalPopoverActionItem.identifier:
-            guard let didSelectTitle = didSelectTitle else { break }
+            guard let didSelectTitle = didSelectTitle, !query.isEmpty else { break }
             didSelectTitle(query)
         default:
             break
