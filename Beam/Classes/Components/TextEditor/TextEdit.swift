@@ -824,7 +824,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
     override public func mouseDown(with event: NSEvent) {
         //       window?.makeFirstResponder(self)
-        print("click")
         reBlink()
         let point = convert(event.locationInWindow)
         guard let newNode = rootNode.dispatchMouseDown(mouseInfo: MouseInfo(rootNode, point, event)) else {

@@ -11,7 +11,7 @@ class FormatterView: NSView {
 
     // MARK: - Properties
     @IBOutlet var containerView: NSView!
-    @IBOutlet weak var collectionView: NSCollectionView!
+    @IBOutlet weak var stackView: NSStackView!
 
     var didSelectFormatterType: ((_ type: FormatterType) -> Void)?
 
@@ -23,7 +23,7 @@ class FormatterView: NSView {
 
     var items: [FormatterType] = [] {
         didSet {
-            collectionView.reloadData()
+            loadItems()
         }
     }
 
@@ -35,15 +35,11 @@ class FormatterView: NSView {
         loadXib()
         drawShadow()
         setupUI()
-        setupCollectionView()
+        setupStackView()
     }
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
-    }
-
-    deinit {
-        print("deinit")
     }
 
     // MARK: - UI
@@ -55,22 +51,14 @@ class FormatterView: NSView {
         containerView.layer?.borderColor = NSColor.formatterBorderColor.cgColor
     }
 
-    private func setupCollectionView() {
-        let trackingArea = NSTrackingArea(rect: collectionView.bounds, options: [.activeAlways, .inVisibleRect, .mouseEnteredAndExited], owner: self, userInfo: nil)
-        let layout = NSCollectionViewFlowLayout()
-        layout.scrollDirection = .horizontal
+    private func setupStackView() {
+        let trackingArea = NSTrackingArea(rect: stackView.bounds, options: [.activeAlways, .inVisibleRect, .mouseEnteredAndExited], owner: self, userInfo: ["view": stackView!])
 
-        collectionView.register(FormatterViewItem.self, forItemWithIdentifier: FormatterViewItem.identifier)
-        collectionView.addTrackingArea(trackingArea)
-
-        collectionView.delegate = self
-        collectionView.dataSource = self
-
-        collectionView.isSelectable = true
-        collectionView.wantsLayer = true
-        collectionView.collectionViewLayout = layout
-        collectionView.backgroundColors = [.clear]
-        collectionView.layer?.backgroundColor = .clear
+        stackView.orientation = .horizontal
+        stackView.alignment = .centerY
+        stackView.distribution = .fillEqually
+        stackView.spacing = 0
+        stackView.addTrackingArea(trackingArea)
     }
 
     private func drawShadow() {
@@ -97,7 +85,7 @@ class FormatterView: NSView {
         }
     }
 
-    private func animateButtonOnMouseEntered(_ button: NSButton, isHover: Bool) {
+    private func animateButtonOnMouseEntered(_ button: NSButton, _ isHover: Bool) {
         NSAnimationContext.runAnimationGroup { (ctx) in
             ctx.allowsImplicitAnimation = true
             ctx.duration = 0.3
@@ -108,16 +96,57 @@ class FormatterView: NSView {
 
     // MARK: - Methods
     override func mouseEntered(with event: NSEvent) {
-        DispatchQueue.main.async {[weak self] in
-            guard let self = self else { return }
-            self.animateShadowOnMouseEntered(true)
-        }
+        guard let userInfo = event.trackingArea?.userInfo else { return }
+        updateFormatterView(with: userInfo, isHover: true)
     }
 
     override func mouseExited(with event: NSEvent) {
-        DispatchQueue.main.async {[weak self] in
-            guard let self = self else { return }
-            self.animateShadowOnMouseEntered(false)
+        guard let userInfo = event.trackingArea?.userInfo else { return }
+        updateFormatterView(with: userInfo, isHover: false)
+    }
+
+    @objc
+    private func selectItemAction(_ sender: NSButton) {
+        guard let didSelectFormatterType = didSelectFormatterType else { return }
+        didSelectFormatterType(items[sender.tag])
+    }
+
+    private func loadItems() {
+        items.enumerated().forEach { (index, item) in
+            let button = NSButton()
+            let trackingButtonArea = NSTrackingArea(rect: button.bounds, options: [.activeAlways, .inVisibleRect, .mouseEnteredAndExited], owner: self, userInfo: ["view": button, "item": item])
+
+            button.isBordered = false
+            button.wantsLayer = true
+            button.layer?.cornerRadius = 3
+            button.contentTintColor = NSColor.formatterIconColor
+            button.image = NSImage(named: "editor-format_\(item)")
+            button.tag = index
+            button.target = self
+            button.action = #selector(selectItemAction(_:))
+            button.addTrackingArea(trackingButtonArea)
+
+            buttons[item] = button
+            stackView.addArrangedSubview(button)
+        }
+    }
+
+    private func updateFormatterView(with userInfo: [ AnyHashable: Any ], isHover: Bool) {
+        guard let view = userInfo["view"] as? NSView else { return }
+
+        if view == stackView {
+            DispatchQueue.main.async {[weak self] in
+                guard let self = self else { return }
+                self.animateShadowOnMouseEntered(isHover)
+            }
+        } else {
+            guard let item = userInfo["item"] as? FormatterType,
+                  let button = buttons[item] else { return }
+
+            DispatchQueue.main.async {[weak self] in
+                guard let self = self else { return }
+                self.animateButtonOnMouseEntered(button, isHover)
+            }
         }
     }
 
@@ -130,57 +159,4 @@ class FormatterView: NSView {
         containerView.autoresizingMask = [.width, .height]
         addSubview(containerView)
     }
-}
-
-// MARK: - NSCollectionView DataSource
-extension FormatterView: NSCollectionViewDataSource {
-
-    func numberOfSections(in collectionView: NSCollectionView) -> Int {
-        return 1
-    }
-
-    func collectionView(_ collectionView: NSCollectionView, numberOfItemsInSection section: Int) -> Int {
-        return items.count
-    }
-
-    func collectionView(_ collectionView: NSCollectionView, itemForRepresentedObjectAt indexPath: IndexPath) -> NSCollectionViewItem {
-        let item = collectionView.makeItem(withIdentifier: FormatterViewItem.identifier, for: indexPath)
-
-        guard let formatterViewItem = item as? FormatterViewItem else { return item }
-        formatterViewItem.setupItem(items[indexPath.item])
-
-        return formatterViewItem
-    }
-
-}
-
-// MARK: - NSCollectionView FlowLayout
-extension FormatterView: NSCollectionViewDelegateFlowLayout {
-
-    func collectionView(_ collectionView: NSCollectionView, layout collectionViewLayout: NSCollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> NSSize {
-        return NSSize(width: 34, height: 26)
-    }
-
-    func collectionView(_ collectionView: NSCollectionView, layout collectionViewLayout: NSCollectionViewLayout, insetForSectionAt section: Int) -> NSEdgeInsets {
-        return NSEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
-    }
-
-    func collectionView(_ collectionView: NSCollectionView, layout collectionViewLayout: NSCollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
-        return 6
-    }
-
-    func collectionView(_ collectionView: NSCollectionView, layout collectionViewLayout: NSCollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
-        return 0
-    }
-
-}
-
-// MARK: - NSCollectionView Delegate
-extension FormatterView: NSCollectionViewDelegate {
-
-    func collectionView(_ collectionView: NSCollectionView, didSelectItemsAt indexPaths: Set<IndexPath>) {
-        guard let indexPath = indexPaths.first, let didSelectFormatterType = didSelectFormatterType else { return }
-        didSelectFormatterType(items[indexPath.item])
-    }
-
 }
