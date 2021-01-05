@@ -57,13 +57,16 @@ class BidirectionalPopover: Popover {
     }
 
     override func draw(_ dirtyRect: NSRect) {
-        self.shadow = NSShadow()
-        self.layer?.allowsEdgeAntialiasing = true
-        self.layer?.drawsAsynchronously = true
-        self.layer?.shadowColor = NSColor.black.cgColor
-        self.layer?.shadowOpacity = 0.15
-        self.layer?.shadowRadius = 3
-        self.layer?.shadowOffset = NSSize(width: 0, height: -3)
+        if let layer = self.layer {
+            self.shadow = NSShadow()
+
+            layer.allowsEdgeAntialiasing = true
+            layer.drawsAsynchronously = true
+            layer.shadowColor = NSColor.black.cgColor
+            layer.shadowOpacity = 0.15
+            layer.shadowRadius = 3
+            layer.shadowOffset = NSSize(width: 0, height: -3)
+        }
 
         super.draw(dirtyRect)
     }
