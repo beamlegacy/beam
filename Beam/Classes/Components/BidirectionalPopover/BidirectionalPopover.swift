@@ -105,14 +105,14 @@ class BidirectionalPopover: Popover {
     }
 
     // MARK: - Methods
-    override func doCommand(_ command: TextRoot.Command) {
-        switch command {
+    override func doCommand(_ key: TextRoot.Command, _ command: Bool = false) {
+        switch key {
         case .moveUp:
             keyMoveUp()
         case .moveDown:
             keyMoveDown()
         case .insertNewline:
-            selectItem()
+            selectItem(with: command)
         default:
             break
         }
@@ -157,17 +157,21 @@ class BidirectionalPopover: Popover {
         indexPath = IndexPath(item: 0, section: section)
     }
 
-    private func selectItem() {
+    private func selectItem(with command: Bool = false) {
         let itemName = itemNameAt(index: indexPath.section)
 
         switch itemName {
         case BidirectionalPopoverItem.identifier:
             guard let documentTitle = selectDocument(at: indexPath),
-                  let didSelectTitle = didSelectTitle else { break }
+                  let didSelectTitle = didSelectTitle,
+                  !command else { break }
 
             didSelectTitle(documentTitle)
         case BidirectionalPopoverActionItem.identifier:
-            guard let didSelectTitle = didSelectTitle, !query.isEmpty else { break }
+            guard let didSelectTitle = didSelectTitle,
+                  !query.isEmpty,
+                  command else { break }
+
             didSelectTitle(query)
         default:
             break
@@ -184,8 +188,18 @@ class BidirectionalPopover: Popover {
     }
 
     private func selectDocument(at indexPath: IndexPath) -> String? {
-        guard let item = collectionView.item(at: indexPath) as? BidirectionalPopoverItem else { return nil }
-        return item.documentTitle
+        let itemName = itemNameAt(index: indexPath.section)
+
+        switch itemName {
+        case BidirectionalPopoverItem.identifier:
+            guard let item = collectionView.item(at: IndexPath(item: indexPath.item, section: indexPath.section)) as? BidirectionalPopoverItem else { return nil }
+            return item.documentTitle
+        case BidirectionalPopoverActionItem.identifier:
+            guard let item = collectionView.item(at: IndexPath(item: indexPath.item, section: indexPath.section)) as? BidirectionalPopoverActionItem else { return nil }
+            return item.queryLabel.stringValue
+        default:
+            return nil
+        }
     }
 
     private func loadXib() {

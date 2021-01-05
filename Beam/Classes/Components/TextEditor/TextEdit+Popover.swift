@@ -44,11 +44,8 @@ extension BeamTextEdit {
               let data = data,
               let popover = popover else { return }
 
-        let linkText = String(node.text.text[cursorStartPosition + 1 ..< rootNode.cursorPosition])
-        node.text.addAttributes([.internalLink(linkText)], to: cursorStartPosition ..< rootNode.cursorPosition)
-
-        let cursorPosition = rootNode.cursorPosition
         var text = node.text.text
+        let cursorPosition = rootNode.cursorPosition
 
         if command == .deleteForward && cursorStartPosition == cursorPosition ||
            command == .moveLeft && cursorPosition - 1 <= cursorStartPosition {
@@ -56,6 +53,7 @@ extension BeamTextEdit {
             return
         }
 
+        let linkText = String(text[cursorStartPosition + 1..<cursorPosition])
         let startIndex = text.index(at: cursorStartPosition)
         let endIndex = text.index(at: cursorPosition)
         let endDistance = text.distance(from: text.endIndex, to: endIndex)
@@ -68,6 +66,7 @@ extension BeamTextEdit {
             text.removeSubrange(..<startIndex)
         }
 
+        node.text.addAttributes([.internalLink(linkText)], to: cursorStartPosition..<cursorPosition)
         text = text.replacingOccurrences(of: prefix, with: "")
         let items = data.documentManager.documentsWithTitleMatch(title: text).prefix(4).map({ $0.title })
         var height = items.isEmpty ? BeamTextEdit.viewHeight : (BeamTextEdit.viewHeight * CGFloat(items.count)) + 36.5
