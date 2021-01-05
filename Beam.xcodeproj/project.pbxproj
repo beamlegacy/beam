@@ -732,6 +732,7 @@
 		4181715C2581107C00317ED8 /* API */ = {
 			isa = PBXGroup;
 			children = (
+				4181715D2581107C00317ED8 /* GraphqlRequestsTypes */,
 				418171662581107C00317ED8 /* GraphqlRequests */,
 				418171622581107C00317ED8 /* APIResponse.swift */,
 				418171632581107C00317ED8 /* UserSessionRequest.swift */,
@@ -776,7 +777,6 @@
 		4181716B2581107C00317ED8 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				4181715D2581107C00317ED8 /* GraphqlRequestsTypes */,
 				418171712581107C00317ED8 /* Importers */,
 				418171762581107C00317ED8 /* CoreData */,
 				4181716C2581107C00317ED8 /* BeamData.swift */,
