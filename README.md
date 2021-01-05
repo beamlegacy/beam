@@ -1,4 +1,11 @@
 
+# New Dev Checklist
+
+### Setting up Beam
+* Install CocoaPods (https://cocoapods.org)
+* Run:
+  `$ [arch -x86_64] make setup`
+* Setup Apple Developer Account with Beam AppleID.
 
 # CI/CD Installation with Gitlab
 
