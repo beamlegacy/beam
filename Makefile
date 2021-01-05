@@ -1,4 +1,3 @@
-
 build_virtualbox_image:
 	gem install iesd
 	# iesd -i "$(OSX_IMAGE)" -o OSX.dmg -t BaseSystem
@@ -8,6 +7,10 @@ build_virtualbox_image:
 unlock_keychain:
 	sudo security lock-keychain ~/Library/Keychains/login.keychain-db
 	sudo security unlock-keychain ~/Library/Keychains/login.keychain-db
+
+install_dependencies:
+	pod install
+	git submodule update --init --recursive
 
 install_dev_keys:
 	security unlock-keychain -p ${MACOSX_PASSWORD} ~/Library/Keychains/login.keychain
@@ -100,4 +103,4 @@ variable_injector:
 install_direnv:
 	brew install direnv
 
-setup: install_direnv install_swiftlint variable_injector
+setup: install_dependencies install_direnv install_swiftlint variable_injector
