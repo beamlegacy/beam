@@ -19,7 +19,7 @@ extension BeamTextEdit {
         guard let node = node as? TextNode else { return }
         let cursorPosition = rootNode.cursorPosition
         let (posX, rect) = node.offsetAndFrameAt(index: cursorPosition)
-        let x = posX == 0 ? 220 : posX + node.offsetInDocument.x
+        let x = posX == 0 ? 210 : posX + node.offsetInDocument.x
         let y = rect.maxY == 0 ? rect.maxY + node.offsetInDocument.y + 25 : rect.maxY + node.offsetInDocument.y + 5
 
         BeamTextEdit.posX = x
@@ -43,6 +43,9 @@ extension BeamTextEdit {
         guard let node = node as? TextNode,
               let data = data,
               let popover = popover else { return }
+
+        node.text.makeInternalLink(cursorStartPosition..<rootNode.cursorPosition)
+        node.invalidateRendering()
 
         let cursorPosition = rootNode.cursorPosition
         var text = node.text.text

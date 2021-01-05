@@ -17,11 +17,11 @@
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
         <customObject id="-3" userLabel="Application" customClass="NSObject"/>
         <customView id="Hz6-mo-xeY">
-            <rect key="frame" x="0.0" y="0.0" width="172" height="66"/>
+            <rect key="frame" x="0.0" y="0.0" width="396" height="66"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
                 <customView translatesAutoresizingMaskIntoConstraints="NO" id="BRX-9o-YdI">
-                    <rect key="frame" x="2" y="2" width="168" height="62"/>
+                    <rect key="frame" x="2" y="2" width="392" height="62"/>
                     <subviews>
                         <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="0b6-vM-sGc">
                             <rect key="frame" x="18" y="22" width="18" height="19"/>
@@ -39,10 +39,20 @@
                                 <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                             </textFieldCell>
                         </textField>
+                        <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="uWq-tA-8FE">
+                            <rect key="frame" x="364" y="23" width="20" height="16"/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="16" id="XuF-65-XsB"/>
+                                <constraint firstAttribute="width" constant="20" id="xcr-pt-7Cb"/>
+                            </constraints>
+                            <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="editor-cmdreturn" id="sDP-Yc-PS9"/>
+                        </imageView>
                     </subviews>
                     <constraints>
                         <constraint firstItem="hVs-Db-E9v" firstAttribute="centerY" secondItem="0b6-vM-sGc" secondAttribute="centerY" id="59s-GK-hA6"/>
+                        <constraint firstItem="uWq-tA-8FE" firstAttribute="centerY" secondItem="BRX-9o-YdI" secondAttribute="centerY" id="6FZ-n9-ka9"/>
                         <constraint firstItem="0b6-vM-sGc" firstAttribute="leading" secondItem="BRX-9o-YdI" secondAttribute="leading" constant="20" id="LUI-Jp-z1q"/>
+                        <constraint firstAttribute="trailing" secondItem="uWq-tA-8FE" secondAttribute="trailing" constant="8" id="MSj-TY-6Aw"/>
                         <constraint firstItem="0b6-vM-sGc" firstAttribute="centerY" secondItem="BRX-9o-YdI" secondAttribute="centerY" id="jR8-LK-8vZ"/>
                         <constraint firstItem="hVs-Db-E9v" firstAttribute="leading" secondItem="0b6-vM-sGc" secondAttribute="trailing" constant="5" id="sZd-3C-bsb"/>
                     </constraints>
@@ -54,7 +64,7 @@
                 <constraint firstItem="BRX-9o-YdI" firstAttribute="leading" secondItem="Hz6-mo-xeY" secondAttribute="leading" constant="2" id="jNP-hm-Vp9"/>
                 <constraint firstAttribute="trailing" secondItem="BRX-9o-YdI" secondAttribute="trailing" constant="2" id="k44-JV-s2Z"/>
             </constraints>
-            <point key="canvasLocation" x="-87" y="51"/>
+            <point key="canvasLocation" x="25" y="51"/>
         </customView>
         <collectionViewItem id="lYD-Jm-xbc" customClass="BidirectionalPopoverActionItem" customModule="Beam" customModuleProvider="target">
             <connections>
@@ -64,4 +74,7 @@
             </connections>
         </collectionViewItem>
     </objects>
+    <resources>
+        <image name="editor-cmdreturn" width="20" height="16"/>
+    </resources>
 </document>
