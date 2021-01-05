@@ -44,6 +44,8 @@ extension BeamTextEdit {
               let data = data,
               let popover = popover else { return }
 
+        node.text.makeInternalLink(0..<2)
+
         let cursorPosition = rootNode.cursorPosition
         var text = node.text.text
 

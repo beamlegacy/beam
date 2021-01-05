@@ -68,12 +68,20 @@ class BidirectionalPopover: Popover {
         super.draw(dirtyRect)
     }
 
+    override func viewDidChangeEffectiveAppearance() {
+        super.viewDidChangeEffectiveAppearance()
+        updateUI()
+    }
+
     // MARK: - UI
     private func setupView() {
         containerView.wantsLayer = true
         containerView.layer?.cornerRadius = 7
-        containerView.layer?.backgroundColor = NSColor.bidirectionalPopoverBackgroundColor.cgColor
         containerView.layer?.borderWidth = 1
+    }
+
+    private func updateUI() {
+        containerView.layer?.backgroundColor = NSColor.bidirectionalPopoverBackgroundColor.cgColor
         containerView.layer?.borderColor = NSColor.bidirectionalPopoverBackgroundColor.cgColor
     }
 
