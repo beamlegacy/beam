@@ -51,7 +51,7 @@ class FormatterView: NSView {
         containerView.wantsLayer = true
         containerView.layer?.backgroundColor = NSColor.formatterViewBackgroundColor.cgColor
         containerView.layer?.cornerRadius = corderRadius
-        containerView.layer?.borderWidth = 1
+        containerView.layer?.borderWidth = 0.5
         containerView.layer?.borderColor = NSColor.formatterBorderColor.cgColor
     }
 
@@ -91,8 +91,8 @@ class FormatterView: NSView {
             ctx.duration = 0.3
 
             containerView.layer?.backgroundColor = isHover ? NSColor.formatterViewBackgroundHoverColor.cgColor : NSColor.formatterViewBackgroundColor.cgColor
-            layer?.shadowOpacity = isHover ? 0.25 : 0
-            layer?.shadowRadius = isHover ? 2 : 0
+            layer?.shadowOpacity = isHover ? 0.07 : 0
+            layer?.shadowRadius = isHover ? 3 : 0
             layer?.shadowOffset.height = isHover ? -1.5 : 0
         }
     }
