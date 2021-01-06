@@ -39,21 +39,11 @@
                                 <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                             </textFieldCell>
                         </textField>
-                        <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="uWq-tA-8FE">
-                            <rect key="frame" x="364" y="23" width="20" height="16"/>
-                            <constraints>
-                                <constraint firstAttribute="height" constant="16" id="XuF-65-XsB"/>
-                                <constraint firstAttribute="width" constant="20" id="xcr-pt-7Cb"/>
-                            </constraints>
-                            <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="editor-cmdreturn" id="sDP-Yc-PS9"/>
-                        </imageView>
                     </subviews>
                     <constraints>
                         <constraint firstItem="hVs-Db-E9v" firstAttribute="centerY" secondItem="0b6-vM-sGc" secondAttribute="centerY" id="59s-GK-hA6"/>
-                        <constraint firstItem="uWq-tA-8FE" firstAttribute="centerY" secondItem="BRX-9o-YdI" secondAttribute="centerY" id="6FZ-n9-ka9"/>
                         <constraint firstItem="0b6-vM-sGc" firstAttribute="leading" secondItem="BRX-9o-YdI" secondAttribute="leading" constant="15" id="LUI-Jp-z1q"/>
-                        <constraint firstAttribute="trailing" secondItem="uWq-tA-8FE" secondAttribute="trailing" constant="8" id="MSj-TY-6Aw"/>
-                        <constraint firstItem="uWq-tA-8FE" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="hVs-Db-E9v" secondAttribute="trailing" constant="10" id="hpx-Il-PZ6"/>
+                        <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="hVs-Db-E9v" secondAttribute="trailing" constant="10" id="XbD-KO-Wcw"/>
                         <constraint firstItem="0b6-vM-sGc" firstAttribute="centerY" secondItem="BRX-9o-YdI" secondAttribute="centerY" id="jR8-LK-8vZ"/>
                         <constraint firstItem="hVs-Db-E9v" firstAttribute="leading" secondItem="0b6-vM-sGc" secondAttribute="trailing" constant="2" id="sZd-3C-bsb"/>
                     </constraints>
@@ -75,7 +65,4 @@
             </connections>
         </collectionViewItem>
     </objects>
-    <resources>
-        <image name="editor-cmdreturn" width="20" height="16"/>
-    </resources>
 </document>
