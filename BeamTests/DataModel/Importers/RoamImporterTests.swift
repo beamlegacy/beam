@@ -19,7 +19,7 @@ class RoamImporterTests: CoreDataTests {
         XCTAssertEqual(roamNotes.count, 62)
         XCTAssertEqual(Document.countWithPredicate(context), 62)
 
-        let notes = Document.fetchAll(context: context, nil, [NSSortDescriptor(keyPath: \Document.title, ascending: true)])
+        let notes = Document.fetchAll(context: context, nil, nil, [NSSortDescriptor(keyPath: \Document.title, ascending: true)])
 
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy'-'MM'-'dd' 'HH':'mm':'ss ZZZ"
