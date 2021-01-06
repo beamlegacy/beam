@@ -13,7 +13,7 @@ class FormatterView: NSView {
     @IBOutlet var containerView: NSView!
     @IBOutlet weak var stackView: NSStackView!
 
-    var didSelectFormatterType: ((_ type: FormatterType, _ isActive: Bool) -> Void)?
+    var didSelectFormatterType: ((_ type: FormatterType) -> Void)?
 
     var corderRadius: CGFloat = 5 {
         didSet {
@@ -63,7 +63,7 @@ class FormatterView: NSView {
         stackView.orientation = .horizontal
         stackView.alignment = .centerY
         stackView.distribution = .fillProportionally
-        stackView.spacing = 13
+        stackView.spacing = 20
         stackView.addTrackingArea(trackingArea)
     }
 
@@ -115,19 +115,18 @@ class FormatterView: NSView {
     private func selectItemAction(_ sender: NSButton) {
         guard let didSelectFormatterType = didSelectFormatterType else { return }
         let item = items[sender.tag]
-        let isActive = selectedItem == item
 
-        if isActive {
+        if selectedItem == item {
             guard let button = buttons[selectedItem] else { return }
             selectedItem = .unknow
 
             button.contentTintColor = NSColor.formatterIconColor
             button.layer?.backgroundColor = NSColor.clear.cgColor
-            didSelectFormatterType(item, isActive)
+            didSelectFormatterType(item)
             return
         }
 
-        didSelectFormatterType(item, isActive)
+        didSelectFormatterType(item)
 
         if selectedItem != .unknow {
             guard let button = buttons[selectedItem] else { return }

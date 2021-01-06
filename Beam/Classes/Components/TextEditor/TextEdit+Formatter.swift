@@ -24,8 +24,8 @@ extension BeamTextEdit {
               let view = window?.contentView else { return }
 
         formatterView.items = BeamTextEdit.formatterType
-        formatterView.didSelectFormatterType = { [unowned self] (type, isActive) -> Void in
-            self.selectFormatterAction(type, isActive)
+        formatterView.didSelectFormatterType = { [unowned self] (type) -> Void in
+            self.selectFormatterAction(type)
         }
 
         view.addSubview(formatterView)
@@ -54,7 +54,7 @@ extension BeamTextEdit {
     }
 
     // swiftlint:disable cyclomatic_complexity
-    private func selectFormatterAction(_ type: FormatterType, _ isActive: Bool) {
+    private func selectFormatterAction(_ type: FormatterType) {
         guard let node = node as? TextNode else { return }
 
         switch type {
