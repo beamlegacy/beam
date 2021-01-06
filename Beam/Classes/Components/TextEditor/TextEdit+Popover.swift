@@ -9,14 +9,22 @@ import Cocoa
 
 extension BeamTextEdit {
 
+    // MARK: - Properties
+    private static let viewWidth: CGFloat = 248
+    private static let viewHeight: CGFloat = 36.5
+    private static var posX: CGFloat = 0
+    private static var posY: CGFloat = 0
+
     internal func initPopover() {
         guard let node = node as? TextNode else { return }
         let cursorPosition = rootNode.cursorPosition
         let (posX, rect) = node.offsetAndFrameAt(index: cursorPosition)
-        let x = posX == 0 ? 220 : posX + node.offsetInDocument.x
-        let y = rect.maxY == 0 ? rect.maxY + node.offsetInDocument.y + 30 : rect.maxY + node.offsetInDocument.y + 10
+        let x = posX == 0 ? 208 : posX + node.offsetInDocument.x
+        let y = rect.maxY == 0 ? rect.maxY + node.offsetInDocument.y + 25 : rect.maxY + node.offsetInDocument.y + 5
 
-        popover = BidirectionalPopover(frame: NSRect(x: x, y: y, width: 300, height: 125))
+        BeamTextEdit.posX = x
+        BeamTextEdit.posY = y
+        popover = BidirectionalPopover(frame: NSRect(x: x, y: y, width: BeamTextEdit.viewWidth, height: BeamTextEdit.viewHeight))
 
         guard let popover = popover else { return }
 
@@ -45,6 +53,7 @@ extension BeamTextEdit {
             return
         }
 
+        let linkText = String(text[cursorStartPosition + 1..<cursorPosition])
         let startIndex = text.index(at: cursorStartPosition)
         let endIndex = text.index(at: cursorPosition)
         let endDistance = text.distance(from: text.endIndex, to: endIndex)
@@ -57,8 +66,15 @@ extension BeamTextEdit {
             text.removeSubrange(..<startIndex)
         }
 
+        node.text.addAttributes([.internalLink(linkText)], to: cursorStartPosition..<cursorPosition)
         text = text.replacingOccurrences(of: prefix, with: "")
-        popover.items = data.documentManager.documentsWithTitleMatch(title: text).prefix(4).map({ $0.title })
+        let items = data.documentManager.documentsWithTitleMatch(title: text).prefix(4).map({ $0.title })
+        var height = items.isEmpty ? BeamTextEdit.viewHeight : (BeamTextEdit.viewHeight * CGFloat(items.count)) + 36.5
+
+        if items.count == 1 || items.isEmpty { height = BeamTextEdit.viewHeight * 2 }
+
+        popover.frame = NSRect(x: BeamTextEdit.posX, y: BeamTextEdit.posY, width: BeamTextEdit.viewWidth, height: height)
+        popover.items = items
         popover.query = text
     }
 

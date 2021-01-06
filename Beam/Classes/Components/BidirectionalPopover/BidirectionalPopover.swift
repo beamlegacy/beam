@@ -18,21 +18,26 @@ class BidirectionalPopover: Popover {
     var items: [String] = [] {
         didSet {
             collectionView.reloadData()
+
+            if items.isEmpty && !isMatchItem {
+                resetIndexPath(section: 1)
+            } else {
+                resetIndexPath(section: 0)
+            }
         }
     }
 
     var query: String = "" {
         didSet {
             checkItemsContainsQuery()
-            updateQueryUI()
         }
     }
 
     private var isMatchItem = false
     private var indexPath = IndexPath(item: 0, section: 0)
     private var collectionViewItems = [
-        BidirectionalPopoverActionItem.identifier,
-        BidirectionalPopoverItem.identifier
+        BidirectionalPopoverItem.identifier,
+        BidirectionalPopoverActionItem.identifier
     ]
 
     private var nibName: String {
@@ -51,13 +56,43 @@ class BidirectionalPopover: Popover {
         super.init(coder: coder)
     }
 
+    override func draw(_ dirtyRect: NSRect) {
+        if let layer = self.layer {
+            self.shadow = NSShadow()
+
+            layer.allowsEdgeAntialiasing = true
+            layer.drawsAsynchronously = true
+            layer.shadowColor = NSColor.black.cgColor
+            layer.shadowOpacity = 0.15
+            layer.shadowRadius = 3
+            layer.shadowOffset = NSSize(width: 0, height: -3)
+        }
+
+        super.draw(dirtyRect)
+    }
+
+    // MARK: - Life Cycle
+    override func viewDidChangeEffectiveAppearance() {
+        super.viewDidChangeEffectiveAppearance()
+        updateUI()
+    }
+
     // MARK: - UI
     private func setupView() {
         containerView.wantsLayer = true
+        containerView.layer?.cornerRadius = 7
+        containerView.layer?.borderWidth = 1
+    }
+
+    private func updateUI() {
         containerView.layer?.backgroundColor = NSColor.bidirectionalPopoverBackgroundColor.cgColor
+        containerView.layer?.borderColor = NSColor.bidirectionalPopoverBackgroundColor.cgColor
     }
 
     private func setupCollectionView() {
+        let layout = NSCollectionViewFlowLayout()
+        layout.scrollDirection = .vertical
+
         collectionViewItems.forEach({ item in
             collectionView.register(NSNib(nibNamed: item.rawValue, bundle: nil), forItemWithIdentifier: item)
         })
@@ -69,83 +104,80 @@ class BidirectionalPopover: Popover {
         collectionView.wantsLayer = true
         collectionView.backgroundColors = [.clear]
         collectionView.layer?.backgroundColor = .clear
-    }
-
-    private func updateQueryUI() {
-        if items.isEmpty && !isMatchItem { resetIndexPath() }
-
-        if !query.isEmpty && indexPath == IndexPath(item: 0, section: 0) && !isMatchItem {
-            DispatchQueue.main.async { [weak self] in
-                guard let self = self else { return }
-                self.selectFirstItem()
-            }
-        }
+        collectionView.collectionViewLayout = layout
     }
 
     // MARK: - Methods
-    override func doCommand(_ command: TextRoot.Command) {
-        switch command {
+    override func doCommand(_ key: TextRoot.Command, _ command: Bool = false) {
+        switch key {
         case .moveUp:
             keyMoveUp()
         case .moveDown:
             keyMoveDown()
         case .insertNewline:
-            selectItem()
+            selectItem(with: command)
         default:
             break
         }
     }
 
     private func keyMoveUp() {
-        if indexPath.item == 1 {
-            collectionView.deselectItems(at: [IndexPath(item: indexPath.item - 1, section: indexPath.section)])
-            resetIndexPath()
-            selectFirstItem()
+        if indexPath.section == 1 {
+            collectionView.deselectItems(at: [indexPath])
+            indexPath = IndexPath(item: items.count, section: 0)
         }
 
-        guard indexPath.item != 0 && indexPath.item != 1 else { return }
+        guard indexPath.item != 0 else { return }
 
-        indexPath.item -= 1
         collectionView.deselectItems(at: [indexPath])
         collectionView.selectItems(at: [IndexPath(item: indexPath.item - 1, section: indexPath.section)], scrollPosition: .bottom)
+        indexPath.item -= 1
     }
 
     private func keyMoveDown() {
-        if items.isEmpty && !query.isEmpty {
-            resetIndexPath()
-            selectFirstItem()
-        }
-
-        guard indexPath.item != items.count else { return }
-
-        if indexPath.section == 0 && !items.isEmpty {
+        if indexPath.item == items.count - 1 && !isMatchItem {
             collectionView.deselectItems(at: [indexPath])
-            indexPath.section = 1
+            indexPath = IndexPath(item: 0, section: 1)
+            collectionView.selectItems(at: [indexPath], scrollPosition: .bottom)
         }
 
-        collectionView.deselectItems(at: [IndexPath(item: indexPath.item - 1, section: indexPath.section)])
-        collectionView.selectItems(at: [IndexPath(item: indexPath.item, section: indexPath.section)], scrollPosition: .bottom)
+        guard indexPath.section == 0 && indexPath.item != items.count - 1 else { return }
+
         indexPath.item += 1
+        let previousIndexPath = IndexPath(item: indexPath.item - 1, section: indexPath.section)
+
+        collectionView.deselectItems(at: [previousIndexPath])
+        collectionView.selectItems(at: [indexPath], scrollPosition: .bottom)
+        collectionView.reloadItems(at: [previousIndexPath])
     }
 
-    private func selectFirstItem() {
+    private func selectFirstItemAt(section: Int = 0) {
+        indexPath = IndexPath(item: 0, section: section)
         collectionView.selectItems(at: [indexPath], scrollPosition: .bottom)
     }
 
-    private func resetIndexPath() {
-        indexPath = IndexPath(item: 0, section: 0)
+    private func resetIndexPath(section: Int = 0) {
+        indexPath = IndexPath(item: 0, section: section)
     }
 
-    private func selectItem() {
-        switch indexPath.section {
-        case 0:
-            guard let didSelectTitle = didSelectTitle else { break }
-            didSelectTitle(query)
-        default:
-            guard let documentTitle = selectDocument(at: IndexPath(item: indexPath.item - 1, section: indexPath.section)),
-                  let didSelectTitle = didSelectTitle else { break }
+    private func selectItem(with command: Bool = false) {
+        let itemName = itemNameAt(index: indexPath.section)
+
+        switch itemName {
+        case BidirectionalPopoverItem.identifier:
+            guard let documentTitle = selectDocument(at: indexPath),
+                  let didSelectTitle = didSelectTitle,
+                  !command else { break }
 
             didSelectTitle(documentTitle)
+        case BidirectionalPopoverActionItem.identifier:
+            guard let didSelectTitle = didSelectTitle,
+                  !query.isEmpty,
+                  command else { break }
+
+            didSelectTitle(query)
+        default:
+            break
         }
     }
 
@@ -154,16 +186,23 @@ class BidirectionalPopover: Popover {
         isMatchItem = items.contains(where: query.contains)
 
         if isMatchItem {
-            collectionView.selectItems(at: [IndexPath(item: 0, section: 1)], scrollPosition: .bottom)
-            resetIndexPath()
-        } else {
-            resetIndexPath()
+            selectFirstItemAt(section: 0)
         }
     }
 
     private func selectDocument(at indexPath: IndexPath) -> String? {
-        guard let item = collectionView.item(at: indexPath) as? BidirectionalPopoverItem else { return nil }
-        return item.documentTitle
+        let itemName = itemNameAt(index: indexPath.section)
+
+        switch itemName {
+        case BidirectionalPopoverItem.identifier:
+            guard let item = collectionView.item(at: IndexPath(item: indexPath.item, section: indexPath.section)) as? BidirectionalPopoverItem else { return nil }
+            return item.documentTitle
+        case BidirectionalPopoverActionItem.identifier:
+            guard let item = collectionView.item(at: IndexPath(item: indexPath.item, section: indexPath.section)) as? BidirectionalPopoverActionItem else { return nil }
+            return item.queryLabel.stringValue
+        default:
+            return nil
+        }
     }
 
     private func loadXib() {
@@ -193,12 +232,12 @@ extension BidirectionalPopover: NSCollectionViewDataSource {
         let itemName = itemNameAt(index: section)
 
         switch itemName {
-        case BidirectionalPopoverActionItem.identifier:
-            return query.isEmpty || isMatchItem ? 0 : 1
         case BidirectionalPopoverItem.identifier:
             return items.count
+        case BidirectionalPopoverActionItem.identifier:
+            return isMatchItem ? 0 : 1
         default:
-            return 0
+            return 1
         }
     }
 
@@ -207,14 +246,20 @@ extension BidirectionalPopover: NSCollectionViewDataSource {
         let item = collectionView.makeItem(withIdentifier: itemName, for: indexPath)
 
         switch item {
-        case is BidirectionalPopoverActionItem:
-            guard let popoverActionItem = item as? BidirectionalPopoverActionItem else { return item }
-            popoverActionItem.updateLabel(with: query)
-            return item
-        default:
+        case is BidirectionalPopoverItem:
             guard let popoverItem = item as? BidirectionalPopoverItem else { return item }
             popoverItem.documentTitle = items[indexPath.item]
-            return item
+
+            if indexPath == self.indexPath { popoverItem.isSelected = true }
+
+            return popoverItem
+        default:
+            guard let popoverActionItem = item as? BidirectionalPopoverActionItem else { return item }
+            popoverActionItem.updateLabel(with: query)
+
+            if !query.isEmpty && indexPath == self.indexPath && !isMatchItem { popoverActionItem.isSelected = true }
+
+            return popoverActionItem
         }
 
     }
@@ -225,7 +270,7 @@ extension BidirectionalPopover: NSCollectionViewDataSource {
 extension BidirectionalPopover: NSCollectionViewDelegateFlowLayout {
 
     func collectionView(_ collectionView: NSCollectionView, layout collectionViewLayout: NSCollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> NSSize {
-        return NSSize(width: collectionView.bounds.width, height: 40)
+        return NSSize(width: collectionView.bounds.width, height: 36)
     }
 
     func collectionView(_ collectionView: NSCollectionView, layout collectionViewLayout: NSCollectionViewLayout, insetForSectionAt section: Int) -> NSEdgeInsets {
