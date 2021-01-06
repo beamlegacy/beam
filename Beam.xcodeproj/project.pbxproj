@@ -35,7 +35,6 @@
 		418171F72581107C00317ED8 /* BeamData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181716C2581107C00317ED8 /* BeamData.swift */; };
 		418171F82581107C00317ED8 /* Score.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181716D2581107C00317ED8 /* Score.swift */; };
 		418171F92581107C00317ED8 /* SearchEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181716E2581107C00317ED8 /* SearchEngine.swift */; };
-		418171FA2581107C00317ED8 /* SearchKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181716F2581107C00317ED8 /* SearchKit.swift */; };
 		418171FB2581107C00317ED8 /* BeamElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171702581107C00317ED8 /* BeamElement.swift */; };
 		418171FC2581107C00317ED8 /* RoamImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171732581107C00317ED8 /* RoamImporter.swift */; };
 		418171FD2581107C00317ED8 /* NavigationContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171742581107C00317ED8 /* NavigationContext.swift */; };
@@ -439,7 +438,6 @@
 		4181716C2581107C00317ED8 /* BeamData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BeamData.swift; sourceTree = "<group>"; };
 		4181716D2581107C00317ED8 /* Score.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Score.swift; sourceTree = "<group>"; };
 		4181716E2581107C00317ED8 /* SearchEngine.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SearchEngine.swift; sourceTree = "<group>"; };
-		4181716F2581107C00317ED8 /* SearchKit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SearchKit.swift; sourceTree = "<group>"; };
 		418171702581107C00317ED8 /* BeamElement.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BeamElement.swift; sourceTree = "<group>"; };
 		418171732581107C00317ED8 /* RoamImporter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RoamImporter.swift; sourceTree = "<group>"; };
 		418171742581107C00317ED8 /* NavigationContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NavigationContext.swift; sourceTree = "<group>"; };
@@ -794,7 +792,6 @@
 				4181716C2581107C00317ED8 /* BeamData.swift */,
 				4181716D2581107C00317ED8 /* Score.swift */,
 				4181716E2581107C00317ED8 /* SearchEngine.swift */,
-				4181716F2581107C00317ED8 /* SearchKit.swift */,
 				418171702581107C00317ED8 /* BeamElement.swift */,
 				418171742581107C00317ED8 /* NavigationContext.swift */,
 				418171752581107C00317ED8 /* Html2Md.swift */,
@@ -1967,7 +1964,6 @@
 				414B987A259DE2E2002E81A3 /* BidirectionalPopoverActionItem.swift in Sources */,
 				524299C725A47D2600F4DBF5 /* AppDelegate+Preferences.swift in Sources */,
 				418172452581107C00317ED8 /* SearchBar.swift in Sources */,
-				418171FA2581107C00317ED8 /* SearchKit.swift in Sources */,
 				418172182581107C00317ED8 /* PerformanceDebug.swift in Sources */,
 				4181722F2581107C00317ED8 /* BeamWindow.swift in Sources */,
 				418172602581107C00317ED8 /* LibrairiesManager.swift in Sources */,

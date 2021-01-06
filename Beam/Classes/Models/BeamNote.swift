@@ -209,27 +209,16 @@ class BeamNote: BeamElement {
     private static func updateNoteCount() {
         AppDelegate.main.data.updateNoteCount()
     }
-}
 
-// TODO: Remove this when we remove Note/Bullet from the build
-// temp adapter
-func beamNoteFrom(note: Note) -> BeamNote {
-    let n = BeamNote(title: note.title)
-
-    for b in note.rootBullets() {
-        n.addChild(beamElementFrom(bullet: b))
+    func createdByUser() {
+        score += 0.1
     }
 
-    return n
-}
-
-func beamElementFrom(bullet: Bullet) -> BeamElement {
-    let element = BeamElement()
-    element.text = BeamText(text: bullet.content)
-
-    for b in bullet.sortedChildren() {
-        element.addChild(beamElementFrom(bullet: b))
+    func viewedByUser() {
+        score += 0.1
     }
 
-    return element
+    func modifiedByUser() {
+        score += 0.1
+    }
 }

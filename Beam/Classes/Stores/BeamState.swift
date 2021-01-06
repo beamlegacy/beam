@@ -77,7 +77,6 @@ import SwiftSoup
 
                 tab.appendToIndexer = { [weak self] url, read in
                     guard let self = self else { return }
-                    self.data.searchKit.append(url: url, contents: read.title + "\n" + read.siteName + "\n" + read.textContent)
                     guard let doc = try? SwiftSoup.parse(read.content, url.absoluteString) else { return }
                     let text = html2Text(url: url, doc: doc)
                     self.data.index.append(document: IndexDocument(source: url.absoluteString, title: read.title, contents: text))
@@ -367,10 +366,6 @@ import SwiftSoup
                 }
 
                 self.completer.complete(query: query)
-//                let urls = self.data.searchKit.search(query)
-//                for url in urls.prefix(4) {
-//                    self.completedQueries.append(AutoCompleteResult(id: UUID(), string: url.description, source: .history))
-//                }
                 let results = self.data.index.search(string: query)
                 for result in results {
                     self.completedQueries.append(AutoCompleteResult(id: UUID(), string: result.source, title: result.title, source: .history))

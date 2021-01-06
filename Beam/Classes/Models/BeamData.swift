@@ -19,7 +19,6 @@ public class BeamData: ObservableObject {
     }
     @Published var journal: [BeamNote] = []
 
-    var searchKit: SearchKit
     var index: Index
     var scores = Scores()
     @Published var noteCount = 0
@@ -34,14 +33,12 @@ public class BeamData: ObservableObject {
         return paths.first ?? "~/Application Data/BeamApp/"
     }
 
-    static var searchKitPath: URL { return URL(fileURLWithPath: dataFolder + "/index.sk") }
     static var indexPath: URL { return URL(fileURLWithPath: dataFolder + "/index.beamindex") }
     static var linkStorePath: URL { return URL(fileURLWithPath: dataFolder + "/links.store") }
 
     init() {
         documentManager = DocumentManager(coreDataManager: CoreDataManager.shared)
 
-        searchKit = SearchKit(Self.searchKitPath)
         do {
             try LinkStore.loadFrom(Self.linkStorePath)
         } catch {
