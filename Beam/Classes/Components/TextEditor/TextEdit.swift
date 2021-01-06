@@ -343,19 +343,13 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         guard let node = node as? TextNode else { return }
         guard !node.readOnly else { return }
 
-        if popover != nil && !command {
-            popover?.doCommand(.insertNewline)
-            return
-        }
-
         if option {
             rootNode.doCommand(.insertNewline)
+        } else if let popover = popover {
+            popover.doCommand(.insertNewline)
+            return
         } else if command {
-            if popover != nil {
-                popover?.doCommand(.insertNewline, command)
-            } else {
-                onStartQuery(node)
-            }
+            onStartQuery(node)
         } else {
             if node.text.isEmpty && node.isEmpty && node.parent !== rootNode {
                 rootNode.decreaseIndentation()

@@ -115,7 +115,7 @@ class BidirectionalPopover: Popover {
         case .moveDown:
             keyMoveDown()
         case .insertNewline:
-            selectItem(with: command)
+            selectItem()
         default:
             break
         }
@@ -166,14 +166,12 @@ class BidirectionalPopover: Popover {
         switch itemName {
         case BidirectionalPopoverItem.identifier:
             guard let documentTitle = selectDocument(at: indexPath),
-                  let didSelectTitle = didSelectTitle,
-                  !command else { break }
+                  let didSelectTitle = didSelectTitle else { break }
 
             didSelectTitle(documentTitle)
         case BidirectionalPopoverActionItem.identifier:
             guard let didSelectTitle = didSelectTitle,
-                  !query.isEmpty,
-                  command else { break }
+                  !query.isEmpty else { break }
 
             didSelectTitle(query)
         default:
