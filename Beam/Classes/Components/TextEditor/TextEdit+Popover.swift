@@ -34,6 +34,7 @@ extension BeamTextEdit {
 
             node.text.makeInternalLink(cursorStartPosition..<rootNode.cursorPosition)
             dismissPopover()
+            initFormatterView()
         }
 
         addSubview(popover)
@@ -50,6 +51,8 @@ extension BeamTextEdit {
         if command == .deleteForward && cursorStartPosition == cursorPosition ||
            command == .moveLeft && cursorPosition - 1 <= cursorStartPosition {
             dismissPopover()
+            cancelInternalLink()
+            initFormatterView()
             return
         }
 
@@ -81,6 +84,12 @@ extension BeamTextEdit {
     internal func dismissPopover() {
         popover?.removeFromSuperview()
         popover = nil
+    }
+
+    internal func cancelInternalLink() {
+        guard let node = node as? TextNode else { return }
+        let text = node.text.text
+        node.text.removeAttributes([.internalLink(text)], from: cursorStartPosition..<rootNode.cursorPosition + text.count)
     }
 
 }

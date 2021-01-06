@@ -491,6 +491,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             case 53: // escape
                 if popover != nil {
                     dismissPopover()
+                    cancelInternalLink()
                     initFormatterView()
                 }
                 rootNode.cancelSelection()
