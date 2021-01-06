@@ -13,7 +13,7 @@ class FormatterView: NSView {
     @IBOutlet var containerView: NSView!
     @IBOutlet weak var stackView: NSStackView!
 
-    var didSelectFormatterType: ((_ type: FormatterType) -> Void)?
+    var didSelectFormatterType: ((_ type: FormatterType, _ isActive: Bool) -> Void)?
 
     var corderRadius: CGFloat = 5 {
         didSet {
@@ -27,6 +27,7 @@ class FormatterView: NSView {
         }
     }
 
+    private var selectedItem = FormatterType.unknow
     private var buttons: [FormatterType: NSButton] = [:]
 
     // MARK: - Initializer
@@ -113,7 +114,40 @@ class FormatterView: NSView {
     @objc
     private func selectItemAction(_ sender: NSButton) {
         guard let didSelectFormatterType = didSelectFormatterType else { return }
-        didSelectFormatterType(items[sender.tag])
+        let item = items[sender.tag]
+        let isActive = selectedItem == item
+
+        if isActive {
+            guard let button = buttons[selectedItem] else { return }
+            selectedItem = .unknow
+
+            button.contentTintColor = NSColor.formatterIconColor
+            button.layer?.backgroundColor = NSColor.clear.cgColor
+            didSelectFormatterType(item, isActive)
+            return
+        }
+
+        didSelectFormatterType(item, isActive)
+
+        if selectedItem != .unknow {
+            guard let button = buttons[selectedItem] else { return }
+            button.contentTintColor = NSColor.formatterIconColor
+            button.layer?.backgroundColor = NSColor.clear.cgColor
+
+            selectedItem = item
+
+            guard let buttonSelected = buttons[item] else { return }
+            buttonSelected.contentTintColor = NSColor.formatterActiveIconColor
+            buttonSelected.layer?.backgroundColor = NSColor.formatterButtonBackgroudHoverColor.cgColor
+        }
+
+        if selectedItem == .unknow {
+            guard let button = buttons[item] else { return }
+            selectedItem = item
+
+            button.contentTintColor = NSColor.formatterActiveIconColor
+            button.layer?.backgroundColor = NSColor.formatterButtonBackgroudHoverColor.cgColor
+        }
     }
 
     private func loadItems() {
@@ -153,7 +187,7 @@ class FormatterView: NSView {
 
             DispatchQueue.main.async {[weak self] in
                 guard let self = self else { return }
-                self.animateButtonOnMouseEntered(button, isHover)
+                if self.selectedItem != item { self.animateButtonOnMouseEntered(button, isHover) }
             }
         }
     }

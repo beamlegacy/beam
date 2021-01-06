@@ -26,12 +26,4 @@ class FormatterTypeButton: NSButton {
         }
     }
 
-    override func mouseDown(with event: NSEvent) {
-        self.highlight(true)
-    }
-
-    override func mouseUp(with event: NSEvent) {
-        self.highlight(false)
-    }
-
 }

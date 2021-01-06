@@ -14,12 +14,14 @@ enum FormatterType: String, CaseIterable {
     case numbered
     case quote
     case checkmark
+    case bold
     case italic
     case strikethrough
     case link
     case code
+    case unknow
 
     static var all: [FormatterType] {
-        return [.h1, .h2, .bullet, .numbered, .quote, .checkmark, .italic, .strikethrough, .link, .code]
+        return [.h1, .h2, .bullet, .numbered, .quote, .checkmark, .bold, .italic, .strikethrough, .link, .code]
     }
 }

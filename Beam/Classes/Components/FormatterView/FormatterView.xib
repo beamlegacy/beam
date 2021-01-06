@@ -19,14 +19,14 @@
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
                 <stackView distribution="fill" orientation="vertical" alignment="leading" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Faj-DU-b0c">
-                    <rect key="frame" x="10" y="0.0" width="447" height="72"/>
+                    <rect key="frame" x="5" y="0.0" width="457" height="72"/>
                 </stackView>
             </subviews>
             <constraints>
                 <constraint firstAttribute="bottom" secondItem="Faj-DU-b0c" secondAttribute="bottom" id="6z4-R8-GHw"/>
                 <constraint firstItem="Faj-DU-b0c" firstAttribute="top" secondItem="c22-O7-iKe" secondAttribute="top" id="CKf-nF-p2d"/>
-                <constraint firstItem="Faj-DU-b0c" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="10" id="vcz-QC-jgh"/>
-                <constraint firstAttribute="trailing" secondItem="Faj-DU-b0c" secondAttribute="trailing" constant="10" id="xFK-gt-DNT"/>
+                <constraint firstItem="Faj-DU-b0c" firstAttribute="leading" secondItem="c22-O7-iKe" secondAttribute="leading" constant="5" id="vcz-QC-jgh"/>
+                <constraint firstAttribute="trailing" secondItem="Faj-DU-b0c" secondAttribute="trailing" constant="5" id="xFK-gt-DNT"/>
             </constraints>
             <point key="canvasLocation" x="30.5" y="29"/>
         </customView>

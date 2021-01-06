@@ -124,6 +124,10 @@ extension NSColor {
         return loadColor(named: "Niobium")
     }
 
+    static var formatterActiveIconColor: NSColor {
+        return loadColor(named: "FormatterActiveIconColor")
+    }
+
     static var formatterButtonBackgroudHoverColor: NSColor {
         return loadColor(named: "FormatterItemHoverColor")
     }

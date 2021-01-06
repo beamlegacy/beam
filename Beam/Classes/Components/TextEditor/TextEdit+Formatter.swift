@@ -24,8 +24,8 @@ extension BeamTextEdit {
               let view = window?.contentView else { return }
 
         formatterView.items = BeamTextEdit.formatterType
-        formatterView.didSelectFormatterType = { [unowned self] (type) -> Void in
-            self.selectFormatterAction(type)
+        formatterView.didSelectFormatterType = { [unowned self] (type, isActive) -> Void in
+            self.selectFormatterAction(type, isActive)
         }
 
         view.addSubview(formatterView)
@@ -54,12 +54,14 @@ extension BeamTextEdit {
     }
 
     // swiftlint:disable cyclomatic_complexity
-    private func selectFormatterAction(_ type: FormatterType) {
+    private func selectFormatterAction(_ type: FormatterType, _ isActive: Bool) {
+        guard let node = node as? TextNode else { return }
+
         switch type {
         case .h1:
-            print("h1")
+            changeTextFormat(with: node, attributes: [.heading(1)], isActive)
         case .h2:
-            print("h2")
+            changeTextFormat(with: node, attributes: [.heading(2)], isActive)
         case .bullet:
             print("bullet")
         case .numbered:
@@ -68,15 +70,27 @@ extension BeamTextEdit {
             print("quote")
         case .checkmark:
             print("checkmark")
+        case .bold:
+            changeTextFormat(with: node, attributes: [.strong], isActive)
         case .italic:
-            print("italic")
+            changeTextFormat(with: node, attributes: [.emphasis], isActive)
         case .strikethrough:
             print("strikethrough")
         case .link:
             print("link")
         case .code:
             print("code")
+        default:
+            break
         }
+    }
+
+    private func changeTextFormat(with node: TextNode, attributes: [BeamText.Attribute], _ isActive: Bool) {
+        let text = node.text.text
+
+        isActive ?
+            node.text.removeAttributes(attributes, from: cursorStartPosition..<rootNode.cursorPosition + text.count) :
+            node.text.addAttributes(attributes, to: cursorStartPosition..<rootNode.cursorPosition + text.count)
     }
 
 }

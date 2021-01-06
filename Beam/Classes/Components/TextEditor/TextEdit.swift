@@ -489,7 +489,10 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                 rootNode.doCommand(.deleteForward)
                 return
             case 53: // escape
-                if popover != nil { dismissPopover() }
+                if popover != nil {
+                    dismissPopover()
+                    initFormatterView()
+                }
                 rootNode.cancelSelection()
                 return
             default:
@@ -1016,6 +1019,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     private func showBidirectionalPopover() {
         cursorStartPosition = rootNode.cursorPosition
         initPopover()
+        dismissFormatterView()
     }
 
     func purgeDeadNodes() {
