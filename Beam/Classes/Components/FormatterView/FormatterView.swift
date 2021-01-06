@@ -52,12 +52,17 @@ class FormatterView: NSView {
     }
 
     private func setupStackView() {
-        let trackingArea = NSTrackingArea(rect: stackView.bounds, options: [.activeAlways, .inVisibleRect, .mouseEnteredAndExited], owner: self, userInfo: ["view": stackView!])
+        let trackingArea = NSTrackingArea(
+            rect: stackView.bounds,
+            options: [.activeAlways, .inVisibleRect, .mouseEnteredAndExited],
+            owner: self,
+            userInfo: ["view": stackView!]
+        )
 
         stackView.orientation = .horizontal
         stackView.alignment = .centerY
-        stackView.distribution = .fillEqually
-        stackView.spacing = 0
+        stackView.distribution = .fillProportionally
+        stackView.spacing = 13
         stackView.addTrackingArea(trackingArea)
     }
 
@@ -113,11 +118,14 @@ class FormatterView: NSView {
 
     private func loadItems() {
         items.enumerated().forEach { (index, item) in
-            let button = NSButton()
-            let trackingButtonArea = NSTrackingArea(rect: button.bounds, options: [.activeAlways, .inVisibleRect, .mouseEnteredAndExited], owner: self, userInfo: ["view": button, "item": item])
+            let button = FormatterTypeButton()
+            let trackingButtonArea = NSTrackingArea(
+                rect: button.bounds,
+                options: [.activeAlways, .inVisibleRect, .mouseEnteredAndExited],
+                owner: self,
+                userInfo: ["view": button, "item": item]
+            )
 
-            button.isBordered = false
-            button.wantsLayer = true
             button.layer?.cornerRadius = 3
             button.contentTintColor = NSColor.formatterIconColor
             button.image = NSImage(named: "editor-format_\(item)")

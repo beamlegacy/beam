@@ -53,6 +53,7 @@ extension BeamTextEdit {
             height: BeamTextEdit.viewHeight)
     }
 
+    // swiftlint:disable cyclomatic_complexity
     private func selectFormatterAction(_ type: FormatterType) {
         switch type {
         case .h1:
