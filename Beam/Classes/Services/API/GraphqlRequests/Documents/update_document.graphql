@@ -1,5 +1,5 @@
-mutation UpdateDocument($title: String!, $id: ID, $data: String) {
-  updateDocument(input: {document: {title: $title, id: $id, data: $data}}) {
+mutation UpdateDocument($title: String!, $id: ID, $data: String, $updatedAt: ISO8601DateTime, $createdAt: ISO8601DateTime) {
+  updateDocument(input: {document: {title: $title, id: $id, data: $data, updatedAt: $updatedAt, createdAt: $createdAt}}) {
     document {
       id
     }

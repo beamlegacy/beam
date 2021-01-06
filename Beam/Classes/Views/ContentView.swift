@@ -79,7 +79,7 @@ struct ModeView: View {
 struct ContentView: View {
     var body: some View {
         ModeView()
-            .background(Color(.editorBackgroundColor).opacity(0.8))
+            .background(Color(.editorBackgroundColor))
             .edgesIgnoringSafeArea(.top)
     }
 }

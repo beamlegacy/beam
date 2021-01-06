@@ -11,6 +11,7 @@ import SwiftUI
 import Combine
 import Sentry
 import Sparkle
+import Preferences
 
 @objc(BeamApplication)
 public class BeamApplication: SentryCrashExceptionApplication {
@@ -41,14 +42,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         CoreDataManager.shared.setup()
         LibrariesManager.shared.configure()
 
-        #if !DEBUG
-        let sparkleUpdater = SPUUpdater(hostBundle: Bundle.main,
-                                        applicationBundle: Bundle.main,
-                                        userDriver: SPUStandardUserDriver(),
-                                        delegate: nil)
+        if Configuration.sparkleUpdate {
+            let sparkleUpdater = SPUUpdater(hostBundle: Bundle.main,
+                                            applicationBundle: Bundle.main,
+                                            userDriver: SPUStandardUserDriver(),
+                                            delegate: nil)
 
-        sparkleUpdater.checkForUpdatesInBackground()
-        #endif
+            sparkleUpdater.checkForUpdatesInBackground()
+        }
 
         updateBadge()
         createWindow()
@@ -90,8 +91,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         // Insert code here to tear down your application
     }
 
-    private let accountManager = AccountManager()
-    var accountWindow: AccountWindow?
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         if !flag {
             createWindow()
@@ -181,5 +180,23 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     @IBAction func newDocument(_ sender: Any?) {
         createWindow()
+    }
+
+    // MARK: -
+    // MARK: Preferences
+    lazy var preferences: [PreferencePane] = [
+        AccountsPreferenceViewController(),
+        AdvancedPreferencesViewController()
+    ]
+
+    lazy var preferencesWindowController = PreferencesWindowController(
+        preferencePanes: preferences,
+        style: .toolbarItems,
+        animated: true,
+        hidesToolbarForSingleItem: true
+    )
+
+    @IBAction private func preferencesMenuItemActionHandler(_ sender: NSMenuItem) {
+        preferencesWindowController.show()
     }
 }

@@ -348,7 +348,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         guard let node = node as? TextNode else { return }
         guard !node.readOnly else { return }
 
-        if popover != nil {
+        if popover != nil && !command {
             popover?.doCommand(.insertNewline)
             return
         }
@@ -356,7 +356,11 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         if option {
             rootNode.doCommand(.insertNewline)
         } else if command {
-            onStartQuery(node)
+            if popover != nil {
+                popover?.doCommand(.insertNewline, command)
+            } else {
+                onStartQuery(node)
+            }
         } else {
             if node.text.isEmpty && node.isEmpty && node.parent !== rootNode {
                 rootNode.decreaseIndentation()
@@ -442,6 +446,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                         } else if command {
                             rootNode.doCommand(.moveToEndOfLine)
                         } else {
+                            updatePopover(with: .moveRight)
                             rootNode.doCommand(.moveRight)
                         }
                         return
@@ -677,10 +682,12 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
         let handlers: [String: () -> Bool] = [
             "@": { [unowned self] in
+                guard popover == nil else { return false }
                 self.showBidirectionalPopover()
                 return true
              },
              "#": { [unowned self] in
+                guard popover == nil else { return false }
                 self.showBidirectionalPopover()
                 return true
              },
@@ -1014,7 +1021,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     private var deadNodes: [TextNode] = []
 
     private func showBidirectionalPopover() {
-        guard popover == nil else { return }
         cursorStartPosition = rootNode.cursorPosition
         initPopover()
     }
