@@ -100,7 +100,7 @@ class APIRequest {
                 self.manageResponse(response: response, filename: fileName) { [weak self] result in
                     switch result {
                     case .failure(let error):
-                        completionHandler(.failure(error))
+                        completionHandler(.failure(APIRequestError.apiError(["\(Configuration.apiHostname): \(error.localizedDescription)"])))
                         self?.handleNetworkError(error)
                     case .success(let data):
                         completionHandler(.success(data))
@@ -209,7 +209,7 @@ class APIRequest {
             self.manageResponse(response: response, filename: fileName) { [weak self] result in
                 switch result {
                 case .failure(let error):
-                    completionHandler(.failure(error))
+                    completionHandler(.failure(APIRequestError.apiError(["\(Configuration.apiHostname): \(error.localizedDescription)"])))
                     self?.handleNetworkError(error)
                 case .success(let data):
                     completionHandler(.success(data))

@@ -14,10 +14,10 @@ class BidirectionalPopoverItem: NSCollectionViewItem {
     // MARK: - Properties
     @IBOutlet weak var titleLabel: NSTextField!
 
-    var document: DocumentStruct? {
+    var documentTitle: String? {
         didSet {
-            guard let document = document else { return }
-            setupDocument(document)
+            guard let documentTitle = documentTitle else { return }
+            setupDocument(title: documentTitle)
         }
     }
 
@@ -55,8 +55,8 @@ class BidirectionalPopoverItem: NSCollectionViewItem {
         view.layer?.backgroundColor = .clear
     }
 
-    private func setupDocument(_ document: DocumentStruct) {
-        titleLabel.stringValue = document.title
+    private func setupDocument(title: String) {
+        titleLabel.stringValue = title
         trackingArea = NSTrackingArea(rect: view.bounds, options: [.activeAlways, .inVisibleRect, .mouseEnteredAndExited], owner: self, userInfo: nil)
 
         guard let trackingArea = trackingArea else { return }

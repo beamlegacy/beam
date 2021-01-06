@@ -20,6 +20,8 @@ struct Configuration {
     static private(set) var sentryHostname = "o477543.ingest.sentry.io"
     static private(set) var sentryProject = "5518785"
     static private(set) var env = "$(ENV)"
+    static private(set) var sparkleUpdate = NSString("$(SPARKLE_AUTOMATIC_UPDATE)").boolValue
+    static private(set) var sparkleFeedURL: String = Configuration.value(for: "SUFeedURL")
 
     // Runtime configuration
     static private(set) var apiHostnameDefault = "api.beamapp.co"
@@ -49,6 +51,11 @@ struct Configuration {
                 AccountManager.logout()
             }
         }
+    }
+
+    static func reset() {
+        UserDefaults.standard.removeObject(forKey: publicHostnameKey)
+        UserDefaults.standard.removeObject(forKey: apiHostname)
     }
 
     static private func value<T>(for key: String) -> T {
