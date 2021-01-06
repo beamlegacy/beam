@@ -77,7 +77,7 @@ extension BeamTextEdit {
         case .strikethrough:
             print("strikethrough")
         case .link:
-            print("link")
+            changeTextFormat(with: node, attributes: [.link(node.text.text)], isActive)
         case .code:
             print("code")
         default:
