@@ -67,6 +67,23 @@ class Document: NSManagedObject {
         return nil
     }
 
+    class func fetchLimit(context: NSManagedObjectContext, _ predicate: NSPredicate? = nil, _ limit: Int, _ sortDescriptors: [NSSortDescriptor]? = nil) -> [Document] {
+        let fetchRequest: NSFetchRequest<Document> = Document.fetchRequest()
+        fetchRequest.predicate = predicate
+        fetchRequest.fetchLimit = limit
+        fetchRequest.sortDescriptors = sortDescriptors
+
+        do {
+            let fetchedDocuments = try context.fetch(fetchRequest)
+            return fetchedDocuments
+        } catch {
+            // TODO: raise error?
+            Logger.shared.logError("Can't fetch all: \(error)", category: .coredata)
+        }
+
+        return []
+    }
+
     class func fetchAll(context: NSManagedObjectContext, _ predicate: NSPredicate? = nil, _ sortDescriptors: [NSSortDescriptor]? = nil) -> [Document] {
         let fetchRequest: NSFetchRequest<Document> = Document.fetchRequest()
         fetchRequest.predicate = predicate
@@ -98,6 +115,11 @@ class Document: NSManagedObject {
     class func fetchAllWithTitleMatch(_ context: NSManagedObjectContext, _ title: String) -> [Document] {
         let predicate = NSPredicate(format: "title CONTAINS[cd] %@", title as CVarArg)
         return fetchAll(context: context, predicate)
+    }
+
+    class func fetchLimitQueryResult(_ context: NSManagedObjectContext, _ title: String, _ limit: Int) -> [Document] {
+        let predicate = NSPredicate(format: "title CONTAINS[cd] %@", title as CVarArg)
+        return fetchLimit(context: context, predicate, limit)
     }
 
 }
