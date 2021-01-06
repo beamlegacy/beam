@@ -94,6 +94,12 @@ class DocumentManager {
         }
     }
 
+    func documentsWithLimitTitleMatch(title: String, limit: Int = 4) -> [DocumentStruct] {
+        return Document.fetchAllWithLimitResult(mainContext, title, limit).compactMap { document -> DocumentStruct? in
+            parseDocumentBody(document)
+        }
+    }
+
     func loadDocuments() -> [DocumentStruct] {
         return Document.fetchAll(context: mainContext).compactMap { document in
             parseDocumentBody(document)
