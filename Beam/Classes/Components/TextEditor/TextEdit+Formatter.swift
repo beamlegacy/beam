@@ -59,9 +59,9 @@ extension BeamTextEdit {
 
         switch type {
         case .h1:
-            changeTextFormat(with: node, attributes: [.heading(1)], isActive)
+            changeTextFormat(with: node, attributes: .heading(1))
         case .h2:
-            changeTextFormat(with: node, attributes: [.heading(2)], isActive)
+            changeTextFormat(with: node, attributes: .heading(2))
         case .bullet:
             print("bullet")
         case .numbered:
@@ -71,13 +71,13 @@ extension BeamTextEdit {
         case .checkmark:
             print("checkmark")
         case .bold:
-            changeTextFormat(with: node, attributes: [.strong], isActive)
+            changeTextFormat(with: node, attributes: .strong)
         case .italic:
-            changeTextFormat(with: node, attributes: [.emphasis], isActive)
+            changeTextFormat(with: node, attributes: .emphasis)
         case .strikethrough:
             print("strikethrough")
         case .link:
-            changeTextFormat(with: node, attributes: [.link(node.text.text)], isActive)
+            changeTextFormat(with: node, attributes: .link(node.text.text))
         case .code:
             print("code")
         default:
@@ -85,12 +85,9 @@ extension BeamTextEdit {
         }
     }
 
-    private func changeTextFormat(with node: TextNode, attributes: [BeamText.Attribute], _ isActive: Bool) {
+    private func changeTextFormat(with node: TextNode, attributes: BeamText.Attribute) {
         let text = node.text.text
-
-        isActive ?
-            node.text.removeAttributes(attributes, from: cursorStartPosition..<rootNode.cursorPosition + text.count) :
-            node.text.addAttributes(attributes, to: cursorStartPosition..<rootNode.cursorPosition + text.count)
+        node.text.toggle(attribute: attributes, forRange: cursorStartPosition..<rootNode.cursorPosition + text.count)
     }
 
 }

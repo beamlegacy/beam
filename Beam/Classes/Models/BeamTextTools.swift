@@ -179,7 +179,7 @@ extension BeamText {
     }
 
     // toggle the given attribute in the given range and return true if the attribute was added, false if it was removed
-    mutating func toggle(attribute: BeamText.Attribute, forRange _range: Swift.Range<Int>) -> Bool {
+    @discardableResult mutating func toggle(attribute: BeamText.Attribute, forRange _range: Swift.Range<Int>) -> Bool {
         if range(_range, containsAttribute: attribute) {
             removeAttributes([attribute], from: _range)
             return false
