@@ -68,8 +68,13 @@ class Document: NSManagedObject {
     }
 
     class func fetchAll(context: NSManagedObjectContext, _ predicate: NSPredicate? = nil, _ sortDescriptors: [NSSortDescriptor]? = nil) -> [Document] {
+        return fetchAllWithLimit(context: context, predicate, sortDescriptors)
+    }
+
+    class func fetchAllWithLimit(context: NSManagedObjectContext, _ predicate: NSPredicate? = nil, _ sortDescriptors: [NSSortDescriptor]? = nil, _ limit: Int? = nil) -> [Document] {
         let fetchRequest: NSFetchRequest<Document> = Document.fetchRequest()
         fetchRequest.predicate = predicate
+        fetchRequest.fetchLimit = limit ?? 0
         fetchRequest.sortDescriptors = sortDescriptors
 
         do {
@@ -98,6 +103,11 @@ class Document: NSManagedObject {
     class func fetchAllWithTitleMatch(_ context: NSManagedObjectContext, _ title: String) -> [Document] {
         let predicate = NSPredicate(format: "title CONTAINS[cd] %@", title as CVarArg)
         return fetchAll(context: context, predicate)
+    }
+
+    class func fetchAllWithLimitResult(_ context: NSManagedObjectContext, _ title: String, _ limit: Int) -> [Document] {
+        let predicate = NSPredicate(format: "title CONTAINS[cd] %@", title as CVarArg)
+        return fetchAllWithLimit(context: context, predicate, nil, limit)
     }
 
 }

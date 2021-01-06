@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		4105CE7525A60681009AB687 /* FormatterTypeButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4105CE7425A60681009AB687 /* FormatterTypeButton.swift */; };
+		4105CE2225A5ECA2009AB687 /* BidirectionalPopoverItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4105CE2125A5ECA2009AB687 /* BidirectionalPopoverItem.swift */; };
 		41221A362592771F00255197 /* TextEdit+Popover.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41221A352592771F00255197 /* TextEdit+Popover.swift */; };
 		414B987A259DE2E2002E81A3 /* BidirectionalPopoverActionItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414B9878259DE2E2002E81A3 /* BidirectionalPopoverActionItem.swift */; };
 		414B987B259DE2E2002E81A3 /* BidirectionalPopoverActionItem.xib in Resources */ = {isa = PBXBuildFile; fileRef = 414B9879259DE2E2002E81A3 /* BidirectionalPopoverActionItem.xib */; };
@@ -18,8 +19,8 @@
 		414B98FE25A27930002E81A3 /* FormatterType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414B98FD25A27930002E81A3 /* FormatterType.swift */; };
 		4159E9D4259A1A81005FD355 /* BidirectionalPopover.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159E9D3259A1A81005FD355 /* BidirectionalPopover.swift */; };
 		4159E9E2259A2575005FD355 /* BidirectionalPopover.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4159E9E1259A2575005FD355 /* BidirectionalPopover.xib */; };
-		4159EA0A259A3568005FD355 /* BidirectionalPopoverItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159EA08259A3568005FD355 /* BidirectionalPopoverItem.swift */; };
-		4159EA0B259A3568005FD355 /* BidirectionalPopoverItem.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4159EA09259A3568005FD355 /* BidirectionalPopoverItem.xib */; };
+		4159EA0A259A3568005FD355 /* BidirectionalPopoverResultItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159EA08259A3568005FD355 /* BidirectionalPopoverResultItem.swift */; };
+		4159EA0B259A3568005FD355 /* BidirectionalPopoverResultItem.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4159EA09259A3568005FD355 /* BidirectionalPopoverResultItem.xib */; };
 		416C09F3259C919200AF2903 /* CATransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416C09F2259C919200AF2903 /* CATransaction.swift */; };
 		4170C43125923B6A0072C781 /* Popover.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4170C43025923B6A0072C781 /* Popover.swift */; };
 		418170FF2581060A00317ED8 /* Colors.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 418170FE2581060A00317ED8 /* Colors.xcassets */; };
@@ -409,6 +410,7 @@
 		2BE96DC9A7278563E5878CCD /* Pods_Beam.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Beam.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3B2FA634DAEED958EF901A42 /* Pods-BeamUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BeamUITests.debug.xcconfig"; path = "Target Support Files/Pods-BeamUITests/Pods-BeamUITests.debug.xcconfig"; sourceTree = "<group>"; };
 		4105CE7425A60681009AB687 /* FormatterTypeButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatterTypeButton.swift; sourceTree = "<group>"; };
+		4105CE2125A5ECA2009AB687 /* BidirectionalPopoverItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BidirectionalPopoverItem.swift; sourceTree = "<group>"; };
 		41221A352592771F00255197 /* TextEdit+Popover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TextEdit+Popover.swift"; sourceTree = "<group>"; };
 		414B9878259DE2E2002E81A3 /* BidirectionalPopoverActionItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BidirectionalPopoverActionItem.swift; sourceTree = "<group>"; };
 		414B9879259DE2E2002E81A3 /* BidirectionalPopoverActionItem.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = BidirectionalPopoverActionItem.xib; sourceTree = "<group>"; };
@@ -419,8 +421,8 @@
 		414B98FD25A27930002E81A3 /* FormatterType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatterType.swift; sourceTree = "<group>"; };
 		4159E9D3259A1A81005FD355 /* BidirectionalPopover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BidirectionalPopover.swift; sourceTree = "<group>"; };
 		4159E9E1259A2575005FD355 /* BidirectionalPopover.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = BidirectionalPopover.xib; sourceTree = "<group>"; };
-		4159EA08259A3568005FD355 /* BidirectionalPopoverItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BidirectionalPopoverItem.swift; sourceTree = "<group>"; };
-		4159EA09259A3568005FD355 /* BidirectionalPopoverItem.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = BidirectionalPopoverItem.xib; sourceTree = "<group>"; };
+		4159EA08259A3568005FD355 /* BidirectionalPopoverResultItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BidirectionalPopoverResultItem.swift; sourceTree = "<group>"; };
+		4159EA09259A3568005FD355 /* BidirectionalPopoverResultItem.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = BidirectionalPopoverResultItem.xib; sourceTree = "<group>"; };
 		416C09F2259C919200AF2903 /* CATransaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CATransaction.swift; sourceTree = "<group>"; };
 		4170C43025923B6A0072C781 /* Popover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Popover.swift; sourceTree = "<group>"; };
 		418170FE2581060A00317ED8 /* Colors.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Colors.xcassets; sourceTree = "<group>"; };
@@ -681,8 +683,9 @@
 			children = (
 				4159E9D3259A1A81005FD355 /* BidirectionalPopover.swift */,
 				4159E9E1259A2575005FD355 /* BidirectionalPopover.xib */,
-				4159EA08259A3568005FD355 /* BidirectionalPopoverItem.swift */,
-				4159EA09259A3568005FD355 /* BidirectionalPopoverItem.xib */,
+				4105CE2125A5ECA2009AB687 /* BidirectionalPopoverItem.swift */,
+				4159EA08259A3568005FD355 /* BidirectionalPopoverResultItem.swift */,
+				4159EA09259A3568005FD355 /* BidirectionalPopoverResultItem.xib */,
 				414B9878259DE2E2002E81A3 /* BidirectionalPopoverActionItem.swift */,
 				414B9879259DE2E2002E81A3 /* BidirectionalPopoverActionItem.xib */,
 			);
@@ -1597,7 +1600,7 @@
 				4159E9E2259A2575005FD355 /* BidirectionalPopover.xib in Resources */,
 				418171F42581107C00317ED8 /* sign_up.graphql in Resources */,
 				418171F62581107C00317ED8 /* sign_in.graphql in Resources */,
-				4159EA0B259A3568005FD355 /* BidirectionalPopoverItem.xib in Resources */,
+				4159EA0B259A3568005FD355 /* BidirectionalPopoverResultItem.xib in Resources */,
 				418170FF2581060A00317ED8 /* Colors.xcassets in Resources */,
 				418172172581107C00317ED8 /* OverrideConsole.js in Resources */,
 				418172FF25811DB200317ED8 /* Readability.js in Resources */,
@@ -1892,7 +1895,7 @@
 				521EEDE525937F7F00BA2485 /* DocumentsList.swift in Sources */,
 				418172CF25811AF800317ED8 /* Animation.swift in Sources */,
 				418171F32581107C00317ED8 /* AuthenticationHandler.swift in Sources */,
-				4159EA0A259A3568005FD355 /* BidirectionalPopoverItem.swift in Sources */,
+				4159EA0A259A3568005FD355 /* BidirectionalPopoverResultItem.swift in Sources */,
 				4170C43125923B6A0072C781 /* Popover.swift in Sources */,
 				418171EC2581107C00317ED8 /* Me.swift in Sources */,
 				418171FB2581107C00317ED8 /* BeamElement.swift in Sources */,
@@ -1964,6 +1967,7 @@
 				418172452581107C00317ED8 /* SearchBar.swift in Sources */,
 				418171FA2581107C00317ED8 /* SearchKit.swift in Sources */,
 				418172182581107C00317ED8 /* PerformanceDebug.swift in Sources */,
+				4105CE2225A5ECA2009AB687 /* BidirectionalPopoverItem.swift in Sources */,
 				4181722F2581107C00317ED8 /* BeamWindow.swift in Sources */,
 				418172602581107C00317ED8 /* LibrairiesManager.swift in Sources */,
 				4181733225811F4800317ED8 /* KeyCode.swift in Sources */,
