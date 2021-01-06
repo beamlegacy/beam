@@ -9,6 +9,7 @@
         <customObject id="-2" userLabel="File's Owner" customClass="BidirectionalPopoverActionItem" customModule="Beam" customModuleProvider="target">
             <connections>
                 <outlet property="actionLabel" destination="hVs-Db-E9v" id="XJr-K8-JFw"/>
+                <outlet property="containerView" destination="BRX-9o-YdI" id="a2E-Op-QEC"/>
                 <outlet property="queryLabel" destination="0b6-vM-sGc" id="LmB-Xd-uFf"/>
                 <outlet property="view" destination="Hz6-mo-xeY" id="0bl-1N-x8E"/>
             </connections>
@@ -16,39 +17,65 @@
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
         <customObject id="-3" userLabel="Application" customClass="NSObject"/>
         <customView id="Hz6-mo-xeY">
-            <rect key="frame" x="0.0" y="0.0" width="480" height="66"/>
+            <rect key="frame" x="0.0" y="0.0" width="396" height="66"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
-                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="0b6-vM-sGc">
-                    <rect key="frame" x="18" y="25" width="17" height="16"/>
-                    <textFieldCell key="cell" lineBreakMode="clipping" title="&quot;&quot;" id="TD3-Ho-wL6">
-                        <font key="font" usesAppearanceFont="YES"/>
-                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
-                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                    </textFieldCell>
-                </textField>
-                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="hVs-Db-E9v">
-                    <rect key="frame" x="36" y="26" width="62" height="14"/>
-                    <textFieldCell key="cell" lineBreakMode="clipping" title="- New card" id="21V-ov-x6W">
-                        <font key="font" metaFont="system" size="11"/>
-                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
-                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                    </textFieldCell>
-                </textField>
+                <customView translatesAutoresizingMaskIntoConstraints="NO" id="BRX-9o-YdI">
+                    <rect key="frame" x="2" y="2" width="392" height="62"/>
+                    <subviews>
+                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="0b6-vM-sGc">
+                            <rect key="frame" x="13" y="22" width="18" height="19"/>
+                            <textFieldCell key="cell" lineBreakMode="truncatingTail" title="&quot;&quot;" id="TD3-Ho-wL6">
+                                <font key="font" metaFont="system" size="15"/>
+                                <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                            </textFieldCell>
+                        </textField>
+                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="hVs-Db-E9v">
+                            <rect key="frame" x="29" y="24" width="77" height="14"/>
+                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" title="- Create Card" id="21V-ov-x6W">
+                                <font key="font" metaFont="systemMedium" size="11"/>
+                                <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                            </textFieldCell>
+                        </textField>
+                        <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="uWq-tA-8FE">
+                            <rect key="frame" x="364" y="23" width="20" height="16"/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="16" id="XuF-65-XsB"/>
+                                <constraint firstAttribute="width" constant="20" id="xcr-pt-7Cb"/>
+                            </constraints>
+                            <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="editor-cmdreturn" id="sDP-Yc-PS9"/>
+                        </imageView>
+                    </subviews>
+                    <constraints>
+                        <constraint firstItem="hVs-Db-E9v" firstAttribute="centerY" secondItem="0b6-vM-sGc" secondAttribute="centerY" id="59s-GK-hA6"/>
+                        <constraint firstItem="uWq-tA-8FE" firstAttribute="centerY" secondItem="BRX-9o-YdI" secondAttribute="centerY" id="6FZ-n9-ka9"/>
+                        <constraint firstItem="0b6-vM-sGc" firstAttribute="leading" secondItem="BRX-9o-YdI" secondAttribute="leading" constant="15" id="LUI-Jp-z1q"/>
+                        <constraint firstAttribute="trailing" secondItem="uWq-tA-8FE" secondAttribute="trailing" constant="8" id="MSj-TY-6Aw"/>
+                        <constraint firstItem="uWq-tA-8FE" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="hVs-Db-E9v" secondAttribute="trailing" constant="10" id="hpx-Il-PZ6"/>
+                        <constraint firstItem="0b6-vM-sGc" firstAttribute="centerY" secondItem="BRX-9o-YdI" secondAttribute="centerY" id="jR8-LK-8vZ"/>
+                        <constraint firstItem="hVs-Db-E9v" firstAttribute="leading" secondItem="0b6-vM-sGc" secondAttribute="trailing" constant="2" id="sZd-3C-bsb"/>
+                    </constraints>
+                </customView>
             </subviews>
             <constraints>
-                <constraint firstItem="hVs-Db-E9v" firstAttribute="centerY" secondItem="0b6-vM-sGc" secondAttribute="centerY" id="7Uv-nb-Sd2"/>
-                <constraint firstItem="0b6-vM-sGc" firstAttribute="leading" secondItem="Hz6-mo-xeY" secondAttribute="leading" constant="20" symbolic="YES" id="WgS-FU-RZI"/>
-                <constraint firstItem="hVs-Db-E9v" firstAttribute="leading" secondItem="0b6-vM-sGc" secondAttribute="trailing" constant="5" id="bmh-ye-Bne"/>
-                <constraint firstItem="0b6-vM-sGc" firstAttribute="centerY" secondItem="Hz6-mo-xeY" secondAttribute="centerY" id="rMh-xf-C8f"/>
+                <constraint firstAttribute="bottom" secondItem="BRX-9o-YdI" secondAttribute="bottom" constant="2" id="TDa-vx-3Ro"/>
+                <constraint firstItem="BRX-9o-YdI" firstAttribute="top" secondItem="Hz6-mo-xeY" secondAttribute="top" constant="2" id="Vwj-bO-tFn"/>
+                <constraint firstItem="BRX-9o-YdI" firstAttribute="leading" secondItem="Hz6-mo-xeY" secondAttribute="leading" constant="2" id="jNP-hm-Vp9"/>
+                <constraint firstAttribute="trailing" secondItem="BRX-9o-YdI" secondAttribute="trailing" constant="2" id="k44-JV-s2Z"/>
             </constraints>
-            <point key="canvasLocation" x="67" y="51"/>
+            <point key="canvasLocation" x="25" y="51"/>
         </customView>
         <collectionViewItem id="lYD-Jm-xbc" customClass="BidirectionalPopoverActionItem" customModule="Beam" customModuleProvider="target">
             <connections>
                 <outlet property="actionLabel" destination="hVs-Db-E9v" id="Nk4-aj-edg"/>
+                <outlet property="containerView" destination="BRX-9o-YdI" id="8dQ-2k-Se1"/>
                 <outlet property="queryLabel" destination="0b6-vM-sGc" id="nF6-tK-KTQ"/>
             </connections>
         </collectionViewItem>
     </objects>
+    <resources>
+        <image name="editor-cmdreturn" width="20" height="16"/>
+    </resources>
 </document>

@@ -13,6 +13,7 @@ class BidirectionalPopoverItem: NSCollectionViewItem {
 
     // MARK: - Properties
     @IBOutlet weak var titleLabel: NSTextField!
+    @IBOutlet weak var containerView: NSView!
 
     var documentTitle: String? {
         didSet {
@@ -33,26 +34,29 @@ class BidirectionalPopoverItem: NSCollectionViewItem {
         super.prepareForReuse()
         trackingArea = nil
         titleLabel.stringValue = ""
+        containerView.layer?.backgroundColor = .clear
     }
 
     override var isSelected: Bool {
         didSet {
-            view.layer?.backgroundColor = isSelected ? NSColor.green.cgColor : NSColor.clear.cgColor
+            containerView.layer?.backgroundColor = isSelected ? NSColor.bidirectionalPopoverBackgroundHoverColor.cgColor : NSColor.clear.cgColor
         }
     }
 
     // MARK: - UI
     private func setupUI() {
+        containerView.wantsLayer = true
+        containerView.layer?.cornerRadius = 5
         titleLabel.textColor = NSColor.bidirectionalPopoverTextColor
     }
 
     // MARK: - Methods
     override func mouseEntered(with event: NSEvent) {
-        view.layer?.backgroundColor = NSColor.green.cgColor
+        containerView.layer?.backgroundColor = NSColor.bidirectionalPopoverBackgroundHoverColor.cgColor
     }
 
     override func mouseExited(with event: NSEvent) {
-        view.layer?.backgroundColor = .clear
+        containerView.layer?.backgroundColor = isSelected ? NSColor.bidirectionalPopoverBackgroundHoverColor.cgColor : .clear
     }
 
     private func setupDocument(title: String) {
@@ -60,6 +64,6 @@ class BidirectionalPopoverItem: NSCollectionViewItem {
         trackingArea = NSTrackingArea(rect: view.bounds, options: [.activeAlways, .inVisibleRect, .mouseEnteredAndExited], owner: self, userInfo: nil)
 
         guard let trackingArea = trackingArea else { return }
-        view.addTrackingArea(trackingArea)
+        containerView.addTrackingArea(trackingArea)
     }
 }

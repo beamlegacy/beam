@@ -88,4 +88,8 @@ extension String {
     func substring(range: Range<Int>) -> String {
         return substring(from: range.lowerBound, to: range.upperBound)
     }
+
+    subscript(_ r: Range<Int>) -> Substring {
+        self[self.range(from: r)]
+    }
 }

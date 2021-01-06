@@ -13,13 +13,13 @@ class Popover: NSView {
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
         wantsLayer = true
-        layer?.cornerRadius = 10
+        layer?.cornerRadius = 7
     }
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
     }
 
-    func doCommand(_ command: TextRoot.Command) {}
+    func doCommand(_ key: TextRoot.Command, _ command: Bool = false) {}
 
 }
