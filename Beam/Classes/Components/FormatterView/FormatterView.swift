@@ -102,8 +102,12 @@ class FormatterView: NSView {
 
     // MARK: - Methods
 
-    func setActiveFormmatter(type: FormatterType) {
-        print(type)
+    func setActiveFormmatter(type: [FormatterType]) {
+        type.forEach { (type) in
+            guard let button = buttons[type] else { return }
+            button.layer?.backgroundColor = NSColor.formatterButtonBackgroudHoverColor.cgColor
+            selectedItems[type] = type
+        }
     }
 
     func resetSelectedItems() {

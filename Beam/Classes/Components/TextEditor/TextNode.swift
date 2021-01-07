@@ -553,7 +553,7 @@ public class TextNode: Widget {
 
     // MARK: - Mouse Events
     override func mouseDown(mouseInfo: MouseInfo) -> Bool {
-        detectFormatterTypeSelected(from: text)
+        detectFormatterType(from: text)
 
         if showDisclosureButton && disclosureButtonFrame.contains(mouseInfo.position) {
             disclosurePressed = true
@@ -596,6 +596,11 @@ public class TextNode: Widget {
                 root?.doCommand(.selectAll)
             }
         }
+
+        guard editor.popover != nil else { return false }
+        editor.dismissPopover()
+        editor.cancelInternalLink()
+        editor.initFormatterView()
 
         return false
     }
@@ -873,23 +878,36 @@ public class TextNode: Widget {
         context.fill(contentsFrame)
     }
 
-    private func detectFormatterTypeSelected(from text: BeamText) {
-        guard let formatterView = editor.formatterView else { return }
+    private func detectFormatterType(from text: BeamText) {
+        var attributes: [BeamText.Attribute] = []
+        var types: [FormatterType] = []
 
-        if text.range(0..<text.text.count, containsAttribute: .strong) {
-            formatterView.setActiveFormmatter(type: .bold)
-            return
-        }
+        guard let formatterView = editor.formatterView, !text.isEmpty else { return }
 
         if text.range(0..<text.text.count, containsAttribute: .heading(1)) {
-            formatterView.setActiveFormmatter(type: .h1)
-            return
+            attributes.append(.heading(1))
+            types.append(.h1)
         }
 
         if text.range(0..<text.text.count, containsAttribute: .heading(2)) {
-            formatterView.setActiveFormmatter(type: .h2)
-            return
+            attributes.append(.heading(2))
+            types.append(.h2)
         }
+
+        if text.range(0..<text.text.count, containsAttribute: .strong) {
+            attributes.append(.strong)
+            types.append(.bold)
+        }
+
+        if text.range(0..<text.text.count, containsAttribute: .emphasis) {
+            attributes.append(.emphasis)
+            types.append(.italic)
+        }
+
+        guard !types.isEmpty, !attributes.isEmpty else { return }
+
+        editor.rootNode.state.attributes = attributes
+        formatterView.setActiveFormmatter(type: types)
     }
 
     private func buildAttributedString() -> NSAttributedString {

@@ -108,6 +108,14 @@ extension NSColor {
         return loadColor(named: "Alabaster")
     }
 
+    static var formatterViewBackgroundColorDark: NSColor {
+        return loadColor(named: "FormatterBackgroundColorDark")
+    }
+
+    static var formatterViewBackgroundColorLight: NSColor {
+        return loadColor(named: "FormatterBackgroundColorLight")
+    }
+
     static var formatterViewBackgroundHoverColor: NSColor {
         return loadColor(named: "FormatterBackgroundHoverColor")
     }

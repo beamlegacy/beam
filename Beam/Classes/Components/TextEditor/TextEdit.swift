@@ -373,6 +373,8 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
             scrollToCursorAtLayout = true
             self.node = newNode
+
+            cleanPersistentFormatter()
         }
     }
 
@@ -468,13 +470,8 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     rootNode.doCommand(.deleteBackward)
                     updatePopover(with: .deleteForward)
 
-                    guard let node = node as? TextNode,
-                          let formatterView = formatterView else { return }
-
-                    if node.text.isEmpty {
-                        rootNode.state.attributes = []
-                        formatterView.resetSelectedItems()
-                    }
+                    guard let node = node as? TextNode else { return }
+                    if node.text.isEmpty { initFormatterView() }
 
                     return
                 case .backTab:
@@ -1027,6 +1024,12 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         cursorStartPosition = rootNode.cursorPosition
         initPopover()
         dismissFormatterViewWithAnimation()
+    }
+
+    func cleanPersistentFormatter() {
+        guard let formatterView = formatterView else { return }
+        rootNode.state.attributes = []
+        formatterView.resetSelectedItems()
     }
 
     func purgeDeadNodes() {
