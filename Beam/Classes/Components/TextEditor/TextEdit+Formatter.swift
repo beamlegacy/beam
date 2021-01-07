@@ -20,13 +20,12 @@ extension BeamTextEdit {
 
     // MARK: - UI
     internal func initFormatterView() {
-
         guard formatterView == nil else {
             self.showFormatterViewWithAnimation()
             return
         }
 
-        formatterView = FormatterView(frame: formatterViewRect(0))
+        formatterView = FormatterView(frame: formatterViewRect(BeamTextEdit.startBottomConstraint))
 
         guard let formatterView = formatterView,
               let view = window?.contentView else { return }
@@ -39,14 +38,11 @@ extension BeamTextEdit {
         }
 
         BeamTextEdit.formatterIsInit = true
+        self.showFormatterViewWithAnimation()
     }
 
     internal func updateFormatterViewLayout() {
         if !BeamTextEdit.formatterIsInit { formatterView?.frame = self.formatterViewRect() }
-
-        if BeamTextEdit.formatterIsInit {
-            self.showFormatterViewWithAnimation()
-        }
     }
 
     internal func dismissFormatterView() {
