@@ -108,6 +108,9 @@ class FormatterView: NSView {
 
     func resetSelectedItems() {
         self.selectedItems = [:]
+        buttons.forEach { (button) in
+            button.value.layer?.backgroundColor = NSColor.clear.cgColor
+        }
     }
 
     override func mouseEntered(with event: NSEvent) {

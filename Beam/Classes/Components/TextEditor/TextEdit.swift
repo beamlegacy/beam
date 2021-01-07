@@ -468,9 +468,13 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     rootNode.doCommand(.deleteBackward)
                     updatePopover(with: .deleteForward)
 
-                    guard let node = node as? TextNode else { return }
+                    guard let node = node as? TextNode,
+                          let formatterView = formatterView else { return }
 
-                    if node.text.isEmpty { rootNode.state.attributes = [] }
+                    if node.text.isEmpty {
+                        rootNode.state.attributes = []
+                        formatterView.resetSelectedItems()
+                    }
 
                     return
                 case .backTab:
