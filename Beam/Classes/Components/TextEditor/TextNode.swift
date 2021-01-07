@@ -49,6 +49,7 @@ public class TextNode: Widget {
             if newValue.isEmpty { resetActionLayers() }
 
             element.text = newValue
+            element.note?.modifiedByUser()
             invalidateText()
         }
     }

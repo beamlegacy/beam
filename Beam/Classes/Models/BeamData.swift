@@ -37,7 +37,7 @@ public class BeamData: ObservableObject {
     static var linkStorePath: URL { return URL(fileURLWithPath: dataFolder + "/links.store") }
 
     init() {
-        documentManager = DocumentManager(coreDataManager: CoreDataManager.shared)
+        documentManager = DocumentManager()
 
         do {
             try LinkStore.loadFrom(Self.linkStorePath)

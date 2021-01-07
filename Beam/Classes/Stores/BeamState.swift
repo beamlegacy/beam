@@ -11,6 +11,8 @@ import Combine
 import WebKit
 import SwiftSoup
 
+let NoteDisplayThreshold = Float(0.0)
+
 @objc class BeamState: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var data: BeamData
     public var searchEngine: SearchEngine = GoogleSearch()
@@ -358,7 +360,15 @@ import SwiftSoup
             self.completedQueries = []
 
             if !query.isEmpty {
-                let notes = data.documentManager.documentsWithTitleMatch(title: query).prefix(4)
+                let notes = data.documentManager.documentsWithTitleMatch(title: query).compactMap({ doc -> DocumentStruct? in
+                    let decoder = JSONDecoder()
+                    decoder.userInfo[BeamElement.recursiveCoding] = false
+                    guard let note = try? decoder.decode(BeamNote.self, from: doc.data)
+                    else { Logger.shared.logError("unable to partially decode note '\(doc.title)'", category: .document); return nil }
+                    // do not show notes under a certain score threshold:
+                    print("Filtering note '\(note.title)' -> \(note.score)")
+                    return note.score > NoteDisplayThreshold ? doc : nil
+                }).prefix(4)
                 notes.forEach {
                     let autocompleteResult = AutoCompleteResult(id: $0.id, string: $0.title, source: .note)
                     self.completedQueries.append(autocompleteResult)

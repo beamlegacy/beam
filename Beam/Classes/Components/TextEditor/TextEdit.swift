@@ -58,16 +58,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         if let note = note as? BeamNote {
             note.viewedByUser()
         }
-
-        // Subscribe to the note's changes
-        note.$changed
-            .debounce(for: .seconds(1), scheduler: RunLoop.main)
-            .sink { [unowned self] _ in
-                guard let note = note as? BeamNote else { return }
-                note.detectLinkedNotes(documentManager)
-                note.modifiedByUser()
-                note.save(documentManager: self.documentManager)
-            }.store(in: &noteCancellables)
     }
 
     private var noteCancellables = [AnyCancellable]()
@@ -971,7 +961,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         rootNode.deepInvalidateText()
     }
 
-    let documentManager = DocumentManager(coreDataManager: CoreDataManager.shared)
+    let documentManager = DocumentManager()
 
     @IBAction func saveDocument(_ sender: Any?) {
         print("Save document!")
