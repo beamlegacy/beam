@@ -63,7 +63,7 @@ class FormatterView: NSView {
         stackView.orientation = .horizontal
         stackView.alignment = .centerY
         stackView.distribution = .fillProportionally
-        stackView.spacing = 20
+        stackView.spacing = 13
         stackView.addTrackingArea(trackingArea)
     }
 

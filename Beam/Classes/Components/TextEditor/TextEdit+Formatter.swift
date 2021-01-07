@@ -13,44 +13,89 @@ extension BeamTextEdit {
     private static let viewWidth: CGFloat = 40.5
     private static let viewHeight: CGFloat = 32
     private static let xAnchorConstraint: CGFloat = 20.25
-    private static let bottomAnchorConstraint: CGFloat = 25
+    private static let startBottomConstraint: CGFloat = -35
+    private static let bottomConstraint: CGFloat = 25
     private static let formatterType: [FormatterType] = FormatterType.all
+    private static var formatterIsInit = false
 
     // MARK: - UI
     internal func initFormatterView() {
-        formatterView = FormatterView(frame: formatterViewRect())
+
+        guard formatterView == nil else {
+            self.showFormatterViewWithAnimation()
+            return
+        }
+
+        formatterView = FormatterView(frame: formatterViewRect(0))
 
         guard let formatterView = formatterView,
               let view = window?.contentView else { return }
+
+        view.addSubview(formatterView)
 
         formatterView.items = BeamTextEdit.formatterType
         formatterView.didSelectFormatterType = { [unowned self] (type) -> Void in
             self.selectFormatterAction(type)
         }
 
-        view.addSubview(formatterView)
+        BeamTextEdit.formatterIsInit = true
     }
 
     internal func updateFormatterViewLayout() {
-        formatterView?.frame = self.formatterViewRect()
+        if !BeamTextEdit.formatterIsInit { formatterView?.frame = self.formatterViewRect() }
+
+        if BeamTextEdit.formatterIsInit {
+            self.showFormatterViewWithAnimation()
+        }
     }
 
     internal func dismissFormatterView() {
         guard formatterView != nil else { return }
-        formatterView?.removeFromSuperview()
-        formatterView = nil
+        self.formatterView?.removeFromSuperview()
+        self.formatterView = nil
+    }
+
+    internal func dismissFormatterViewWithAnimation() {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+
+            NSAnimationContext.runAnimationGroup ({ (ctx) in
+                ctx.allowsImplicitAnimation = true
+                ctx.duration = 0.3
+
+                self.formatterView?.frame = self.formatterViewRect(BeamTextEdit.startBottomConstraint)
+            }, completionHandler: {[weak self] in
+                guard let self = self else { return }
+                self.dismissFormatterView()
+            })
+        }
     }
 
     // MARK: - Methods
-    private func formatterViewRect() -> NSRect {
+    private func formatterViewRect(_ y: CGFloat = bottomConstraint) -> NSRect {
         guard let window = window else { return NSRect.zero }
         let formatterSize = CGFloat(BeamTextEdit.formatterType.count)
 
         return NSRect(
             x: (window.frame.width / 2) - (BeamTextEdit.xAnchorConstraint * formatterSize),
-            y: BeamTextEdit.bottomAnchorConstraint,
+            y: y,
             width: BeamTextEdit.viewWidth * formatterSize,
             height: BeamTextEdit.viewHeight)
+    }
+
+    private func showFormatterViewWithAnimation() {
+        guard let formatterView = formatterView else { return }
+
+        DispatchQueue.main.async { [unowned self] in
+            NSAnimationContext.runAnimationGroup ({ (ctx) in
+                ctx.allowsImplicitAnimation = true
+                ctx.duration = 0.3
+
+                formatterView.frame = formatterViewRect(BeamTextEdit.bottomConstraint)
+            }, completionHandler: {
+                BeamTextEdit.formatterIsInit = false
+            })
+        }
     }
 
     // swiftlint:disable cyclomatic_complexity

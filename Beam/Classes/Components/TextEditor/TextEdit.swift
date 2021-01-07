@@ -208,7 +208,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
     public override var frame: NSRect {
         didSet {
-//            print("editor[\(rootNode.note.title)] frame changed to \(frame)")
             let oldbig = oldValue.width >= Self.bigThreshold
             let newbig = isBig
 
@@ -222,11 +221,10 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     func relayoutRoot() {
-//        print("editor[\(rootNode.note.title)] relayout root to \(frame)")
         let r = bounds
         let width = CGFloat(isBig ? frame.width - 200 - leadingAlignment : 450)
         let rect = NSRect(x: leadingAlignment, y: topOffsetActual, width: width, height: r.height)
-        //print("relayoutRoot -> \(rect)")
+
         rootNode.availableWidth = rect.width
         rootNode.setLayout(rect)
 
@@ -1020,7 +1018,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     private func showBidirectionalPopover() {
         cursorStartPosition = rootNode.cursorPosition
         initPopover()
-        dismissFormatterView()
+        dismissFormatterViewWithAnimation()
     }
 
     func purgeDeadNodes() {
