@@ -138,4 +138,3 @@ certs
 fastlane/codequality_report.json
 fastlane/codequality_report_gitlab.json
 fastlane/swiftlint.json
-Beam.xcworkspace/xcshareddata/swiftpm/Package.resolved
