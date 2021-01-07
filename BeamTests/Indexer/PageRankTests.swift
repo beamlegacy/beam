@@ -12,7 +12,7 @@ import NaturalLanguage
 import Accelerate
 import SwiftSoup
 
-class PageRangeTests: XCTestCase {
+class PageRankTests: XCTestCase {
 
     func testInit() throws {
         let pageRank = PageRank()
