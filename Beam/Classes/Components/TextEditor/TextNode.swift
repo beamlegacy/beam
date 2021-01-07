@@ -553,6 +553,8 @@ public class TextNode: Widget {
 
     // MARK: - Mouse Events
     override func mouseDown(mouseInfo: MouseInfo) -> Bool {
+        detectFormatterTypeSelected(from: text)
+
         if showDisclosureButton && disclosureButtonFrame.contains(mouseInfo.position) {
             disclosurePressed = true
             return true
@@ -572,6 +574,7 @@ public class TextNode: Widget {
             editor.openURL(link)
             return true
         }
+
         if let link = internalLinkAt(point: mouseInfo.position) {
             editor.dismissFormatterView()
             editor.openCard(link)
@@ -868,6 +871,25 @@ public class TextNode: Widget {
 
         context.setFillColor(c.copy(alpha: 0.2)!)
         context.fill(contentsFrame)
+    }
+
+    private func detectFormatterTypeSelected(from text: BeamText) {
+        guard let formatterView = editor.formatterView else { return }
+
+        if text.range(0..<text.text.count, containsAttribute: .strong) {
+            formatterView.setActiveFormmatter(type: .bold)
+            return
+        }
+
+        if text.range(0..<text.text.count, containsAttribute: .heading(1)) {
+            formatterView.setActiveFormmatter(type: .h1)
+            return
+        }
+
+        if text.range(0..<text.text.count, containsAttribute: .heading(2)) {
+            formatterView.setActiveFormmatter(type: .h2)
+            return
+        }
     }
 
     private func buildAttributedString() -> NSAttributedString {

@@ -15,13 +15,14 @@ extension BeamTextEdit {
     private static let xAnchorConstraint: CGFloat = 20.25
     private static let startBottomConstraint: CGFloat = -35
     private static let bottomConstraint: CGFloat = 25
-    private static let formatterType: [FormatterType] = FormatterType.all
+    private static let formatterType: [FormatterType] = [.h1, .h2, .quote, .code, .bold, .italic, .strikethrough]
     private static var formatterIsInit = false
+    private static var formatterIsHidden = false
 
     // MARK: - UI
     internal func initFormatterView() {
         guard formatterView == nil else {
-            self.showFormatterViewWithAnimation()
+            showFormatterViewWithAnimation()
             return
         }
 
@@ -33,22 +34,25 @@ extension BeamTextEdit {
         view.addSubview(formatterView)
 
         formatterView.items = BeamTextEdit.formatterType
-        formatterView.didSelectFormatterType = { [unowned self] (type) -> Void in
-            self.selectFormatterAction(type)
+        formatterView.didSelectFormatterType = { [unowned self] (type, isActive) -> Void in
+            selectFormatterAction(type, isActive)
         }
 
         BeamTextEdit.formatterIsInit = true
-        self.showFormatterViewWithAnimation()
+        showFormatterViewWithAnimation()
     }
 
     internal func updateFormatterViewLayout() {
-        if !BeamTextEdit.formatterIsInit { formatterView?.frame = self.formatterViewRect() }
+        if !BeamTextEdit.formatterIsInit && !BeamTextEdit.formatterIsHidden {
+            formatterView?.frame = formatterViewRect()
+        }
     }
 
+    // MARK: - Methods
     internal func dismissFormatterView() {
         guard formatterView != nil else { return }
-        self.formatterView?.removeFromSuperview()
-        self.formatterView = nil
+        formatterView?.removeFromSuperview()
+        formatterView = nil
     }
 
     internal func dismissFormatterViewWithAnimation() {
@@ -60,23 +64,10 @@ extension BeamTextEdit {
                 ctx.duration = 0.3
 
                 self.formatterView?.frame = self.formatterViewRect(BeamTextEdit.startBottomConstraint)
-            }, completionHandler: {[weak self] in
-                guard let self = self else { return }
-                self.dismissFormatterView()
+            }, completionHandler: {
+                BeamTextEdit.formatterIsHidden = true
             })
         }
-    }
-
-    // MARK: - Methods
-    private func formatterViewRect(_ y: CGFloat = bottomConstraint) -> NSRect {
-        guard let window = window else { return NSRect.zero }
-        let formatterSize = CGFloat(BeamTextEdit.formatterType.count)
-
-        return NSRect(
-            x: (window.frame.width / 2) - (BeamTextEdit.xAnchorConstraint * formatterSize),
-            y: y,
-            width: BeamTextEdit.viewWidth * formatterSize,
-            height: BeamTextEdit.viewHeight)
     }
 
     private func showFormatterViewWithAnimation() {
@@ -90,45 +81,75 @@ extension BeamTextEdit {
                 formatterView.frame = formatterViewRect(BeamTextEdit.bottomConstraint)
             }, completionHandler: {
                 BeamTextEdit.formatterIsInit = false
+                BeamTextEdit.formatterIsHidden = false
             })
         }
     }
 
     // swiftlint:disable cyclomatic_complexity
-    private func selectFormatterAction(_ type: FormatterType) {
+    private func selectFormatterAction(_ type: FormatterType, _ isActive: Bool) {
         guard let node = node as? TextNode else { return }
 
         switch type {
         case .h1:
-            changeTextFormat(with: node, attributes: .heading(1))
+            changeTextFormat(with: node, attributes: .heading(1), isActive: isActive)
+            updateAttributeState(
+                with: node,
+                attribute: .heading(1),
+                isActive: isActive
+            )
         case .h2:
-            changeTextFormat(with: node, attributes: .heading(2))
-        case .bullet:
-            print("bullet")
-        case .numbered:
-            print("numbered")
+            changeTextFormat(with: node, attributes: .heading(2), isActive: isActive)
+            updateAttributeState(
+                with: node,
+                attribute: .heading(2),
+                isActive: isActive
+            )
         case .quote:
             print("quote")
-        case .checkmark:
-            print("checkmark")
-        case .bold:
-            changeTextFormat(with: node, attributes: .strong)
-        case .italic:
-            changeTextFormat(with: node, attributes: .emphasis)
-        case .strikethrough:
-            print("strikethrough")
-        case .link:
-            changeTextFormat(with: node, attributes: .link(node.text.text))
         case .code:
             print("code")
+        case .bold:
+            updateAttributeState(with: node, attribute: .strong, isActive: isActive)
+        case .italic:
+            updateAttributeState(with: node, attribute: .emphasis, isActive: isActive)
+        case .strikethrough:
+            print("strikethrough")
         default:
             break
         }
     }
 
-    private func changeTextFormat(with node: TextNode, attributes: BeamText.Attribute) {
+    // TODO: Rename function
+    private func changeTextFormat(with node: TextNode, attributes: BeamText.Attribute, isActive: Bool) {
         let text = node.text.text
-        node.text.toggle(attribute: attributes, forRange: cursorStartPosition..<rootNode.cursorPosition + text.count)
+        let range = cursorStartPosition..<rootNode.cursorPosition + text.count
+
+        isActive ? node.text.removeAttributes([attributes], from: range) : node.text.addAttributes([attributes], to: range)
+    }
+
+    // TODO: Rename function
+    private func updateAttributeState(with node: TextNode, attribute: BeamText.Attribute, isActive: Bool) {
+        let attributes = rootNode.state.attributes
+
+        guard let index = attributes.firstIndex(of: attribute),
+              attributes.contains(attribute), isActive else {
+            rootNode.state.attributes.append(attribute)
+            return
+        }
+
+        rootNode.state.attributes.remove(at: index)
+    }
+
+    private func formatterViewRect(_ y: CGFloat = bottomConstraint) -> NSRect {
+        guard let window = window else { return NSRect.zero }
+        let formatterSize = CGFloat(BeamTextEdit.formatterType.count)
+
+        return NSRect(
+            x: (window.frame.width / 2) - (BeamTextEdit.xAnchorConstraint * formatterSize),
+            y: y,
+            width: BeamTextEdit.viewWidth * formatterSize,
+            height: BeamTextEdit.viewHeight)
     }
 
 }

@@ -202,7 +202,8 @@ extension TextRoot {
         let ranges = node.text.rangesAt(position: cursorPosition)
         switch ranges.count {
         case 0:
-            state.attributes = []
+            print("state: \(state.attributes)")
+            // state.attributes = []
         case 1:
             guard let range = ranges.first else { return }
             state.attributes = BeamText.removeLinks(from: range.attributes)

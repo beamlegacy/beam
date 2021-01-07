@@ -11,8 +11,12 @@ class FormatterTypeButton: NSButton {
 
     public init() {
         super.init(frame: NSRect())
-        self.wantsLayer = true
-        self.isBordered = false
+        setupUI()
+    }
+
+    override init(frame frameRect: NSRect) {
+        super.init(frame: frameRect)
+        setupUI()
     }
 
     required init?(coder: NSCoder) {
@@ -24,6 +28,11 @@ class FormatterTypeButton: NSButton {
         if isHighlighted {
             layer?.backgroundColor = NSColor.formatterButtonBackgroudHoverColor.cgColor
         }
+    }
+
+    private func setupUI() {
+        self.wantsLayer = true
+        self.isBordered = false
     }
 
 }

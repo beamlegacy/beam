@@ -24,10 +24,14 @@ extension BeamText {
     private func font(fontSize: CGFloat, strong: Bool, emphasis: Bool, headingLevel: Int, quote: Bool) -> NSFont {
         let headingFirstLevel: CGFloat = 28
         let headingSecondLevel: CGFloat = 22
-
         let fontSizes = [fontSize, headingFirstLevel, headingSecondLevel]
-        let bold = strong || headingLevel != 0
-        var f = NSFont.systemFont(ofSize: fontSizes[headingLevel], weight: bold ? .medium : .regular)
+
+        var weight = NSFont.Weight.regular
+
+        if headingLevel != 0 { weight = .medium }
+        if strong { weight = .bold }
+
+        var f = NSFont.systemFont(ofSize: fontSizes[headingLevel], weight: weight)
 
         if emphasis || quote {
             f = NSFontManager.shared.convert(f, toHaveTrait: .italicFontMask)

@@ -13,7 +13,7 @@ class FormatterView: NSView {
     @IBOutlet var containerView: NSView!
     @IBOutlet weak var stackView: NSStackView!
 
-    var didSelectFormatterType: ((_ type: FormatterType) -> Void)?
+    var didSelectFormatterType: ((_ type: FormatterType, _ isActive: Bool) -> Void)?
 
     var corderRadius: CGFloat = 5 {
         didSet {
@@ -27,7 +27,7 @@ class FormatterView: NSView {
         }
     }
 
-    private var selectedItem = FormatterType.unknow
+    private var selectedItems: [FormatterType: FormatterType] = [:]
     private var buttons: [FormatterType: NSButton] = [:]
 
     // MARK: - Initializer
@@ -63,7 +63,7 @@ class FormatterView: NSView {
         stackView.orientation = .horizontal
         stackView.alignment = .centerY
         stackView.distribution = .fillProportionally
-        stackView.spacing = 13
+        stackView.spacing = 6
         stackView.addTrackingArea(trackingArea)
     }
 
@@ -101,6 +101,15 @@ class FormatterView: NSView {
     }
 
     // MARK: - Methods
+
+    func setActiveFormmatter(type: FormatterType) {
+        print(type)
+    }
+
+    func resetSelectedItems() {
+        self.selectedItems = [:]
+    }
+
     override func mouseEntered(with event: NSEvent) {
         guard let userInfo = event.trackingArea?.userInfo else { return }
         updateFormatterView(with: userInfo, isHover: true)
@@ -115,43 +124,30 @@ class FormatterView: NSView {
     private func selectItemAction(_ sender: NSButton) {
         guard let didSelectFormatterType = didSelectFormatterType else { return }
         let item = items[sender.tag]
+        let isActive = selectedItems[item] == item
 
-        if selectedItem == item {
-            guard let button = buttons[selectedItem] else { return }
-            selectedItem = .unknow
+        if selectedItems[item] != item { selectedItems[item] = item }
 
-            button.contentTintColor = NSColor.formatterIconColor
-            button.layer?.backgroundColor = NSColor.clear.cgColor
-            didSelectFormatterType(item)
-            return
-        }
+        if item == .h2 &&
+            selectedItems[.h1] == .h1 { removeActiveState(to: .h1) }
 
-        didSelectFormatterType(item)
+        if item == .h1 &&
+            selectedItems[.h2] == .h2 { removeActiveState(to: .h2) }
 
-        if selectedItem != .unknow {
-            guard let button = buttons[selectedItem] else { return }
-            button.contentTintColor = NSColor.formatterIconColor
-            button.layer?.backgroundColor = NSColor.clear.cgColor
-
-            selectedItem = item
-
-            guard let buttonSelected = buttons[item] else { return }
-            buttonSelected.contentTintColor = NSColor.formatterActiveIconColor
-            buttonSelected.layer?.backgroundColor = NSColor.formatterButtonBackgroudHoverColor.cgColor
-        }
-
-        if selectedItem == .unknow {
+        if isActive {
             guard let button = buttons[item] else { return }
-            selectedItem = item
 
-            button.contentTintColor = NSColor.formatterActiveIconColor
-            button.layer?.backgroundColor = NSColor.formatterButtonBackgroudHoverColor.cgColor
+            button.contentTintColor = NSColor.formatterIconColor
+            button.layer?.backgroundColor = NSColor.clear.cgColor
+            selectedItems[item] = nil
         }
+
+        didSelectFormatterType(item, isActive)
     }
 
     private func loadItems() {
         items.enumerated().forEach { (index, item) in
-            let button = FormatterTypeButton()
+            let button = FormatterTypeButton(frame: NSRect(x: 0, y: 0, width: 38, height: 28))
             let trackingButtonArea = NSTrackingArea(
                 rect: button.bounds,
                 options: [.activeAlways, .inVisibleRect, .mouseEnteredAndExited],
@@ -186,9 +182,15 @@ class FormatterView: NSView {
 
             DispatchQueue.main.async {[weak self] in
                 guard let self = self else { return }
-                if self.selectedItem != item { self.animateButtonOnMouseEntered(button, isHover) }
+                if self.selectedItems[item] != item { self.animateButtonOnMouseEntered(button, isHover) }
             }
         }
+    }
+
+    private func removeActiveState(to item: FormatterType) {
+        guard let button = buttons[item] else { return }
+        button.layer?.backgroundColor = NSColor.clear.cgColor
+        selectedItems[item] = nil
     }
 
     private func loadXib() {

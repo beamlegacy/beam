@@ -467,8 +467,12 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                 case .delete:
                     rootNode.doCommand(.deleteBackward)
                     updatePopover(with: .deleteForward)
-                    return
 
+                    guard let node = node as? TextNode else { return }
+
+                    if node.text.isEmpty { rootNode.state.attributes = [] }
+
+                    return
                 case .backTab:
                     rootNode.doCommand(.decreaseIndentation)
                     return
