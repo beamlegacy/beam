@@ -2,39 +2,20 @@
 //  BidirectionalPopoverItem.swift
 //  Beam
 //
-//  Created by Ravichandrane Rajendran on 28/12/2020.
+//  Created by Ravichandrane Rajendran on 06/01/2021.
 //
 
 import Cocoa
 
 class BidirectionalPopoverItem: NSCollectionViewItem {
 
-    static let identifier = NSUserInterfaceItemIdentifier("BidirectionalPopoverItem")
-
-    // MARK: - Properties
-    @IBOutlet weak var titleLabel: NSTextField!
     @IBOutlet weak var containerView: NSView!
 
-    var documentTitle: String? {
-        didSet {
-            guard let documentTitle = documentTitle else { return }
-            setupDocument(title: documentTitle)
-        }
-    }
+    var trackingArea: NSTrackingArea?
 
-    private var trackingArea: NSTrackingArea?
-
-    // MARK: Life Cycle
     override func awakeFromNib() {
         super.awakeFromNib()
-        setupUI()
-    }
-
-    override func prepareForReuse() {
-        super.prepareForReuse()
-        trackingArea = nil
-        titleLabel.stringValue = ""
-        containerView.layer?.backgroundColor = .clear
+        setupContainerUI()
     }
 
     override var isSelected: Bool {
@@ -44,10 +25,9 @@ class BidirectionalPopoverItem: NSCollectionViewItem {
     }
 
     // MARK: - UI
-    private func setupUI() {
+    private func setupContainerUI() {
         containerView.wantsLayer = true
         containerView.layer?.cornerRadius = 5
-        titleLabel.textColor = NSColor.bidirectionalPopoverTextColor
     }
 
     // MARK: - Methods
@@ -57,13 +37,5 @@ class BidirectionalPopoverItem: NSCollectionViewItem {
 
     override func mouseExited(with event: NSEvent) {
         containerView.layer?.backgroundColor = isSelected ? NSColor.bidirectionalPopoverBackgroundHoverColor.cgColor : .clear
-    }
-
-    private func setupDocument(title: String) {
-        titleLabel.stringValue = title
-        trackingArea = NSTrackingArea(rect: view.bounds, options: [.activeAlways, .inVisibleRect, .mouseEnteredAndExited], owner: self, userInfo: nil)
-
-        guard let trackingArea = trackingArea else { return }
-        containerView.addTrackingArea(trackingArea)
     }
 }

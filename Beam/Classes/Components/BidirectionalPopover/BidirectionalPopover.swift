@@ -36,7 +36,7 @@ class BidirectionalPopover: Popover {
     private var isMatchItem = false
     private var indexPath = IndexPath(item: 0, section: 0)
     private var collectionViewItems = [
-        BidirectionalPopoverItem.identifier,
+        BidirectionalPopoverResultItem.identifier,
         BidirectionalPopoverActionItem.identifier
     ]
 
@@ -115,7 +115,7 @@ class BidirectionalPopover: Popover {
         case .moveDown:
             keyMoveDown()
         case .insertNewline:
-            selectItem(with: command)
+            selectItem()
         default:
             break
         }
@@ -164,16 +164,14 @@ class BidirectionalPopover: Popover {
         let itemName = itemNameAt(index: indexPath.section)
 
         switch itemName {
-        case BidirectionalPopoverItem.identifier:
+        case BidirectionalPopoverResultItem.identifier:
             guard let documentTitle = selectDocument(at: indexPath),
-                  let didSelectTitle = didSelectTitle,
-                  !command else { break }
+                  let didSelectTitle = didSelectTitle else { break }
 
             didSelectTitle(documentTitle)
         case BidirectionalPopoverActionItem.identifier:
             guard let didSelectTitle = didSelectTitle,
-                  !query.isEmpty,
-                  command else { break }
+                  !query.isEmpty else { break }
 
             didSelectTitle(query)
         default:
@@ -194,8 +192,8 @@ class BidirectionalPopover: Popover {
         let itemName = itemNameAt(index: indexPath.section)
 
         switch itemName {
-        case BidirectionalPopoverItem.identifier:
-            guard let item = collectionView.item(at: IndexPath(item: indexPath.item, section: indexPath.section)) as? BidirectionalPopoverItem else { return nil }
+        case BidirectionalPopoverResultItem.identifier:
+            guard let item = collectionView.item(at: IndexPath(item: indexPath.item, section: indexPath.section)) as? BidirectionalPopoverResultItem else { return nil }
             return item.documentTitle
         case BidirectionalPopoverActionItem.identifier:
             guard let item = collectionView.item(at: IndexPath(item: indexPath.item, section: indexPath.section)) as? BidirectionalPopoverActionItem else { return nil }
@@ -232,7 +230,7 @@ extension BidirectionalPopover: NSCollectionViewDataSource {
         let itemName = itemNameAt(index: section)
 
         switch itemName {
-        case BidirectionalPopoverItem.identifier:
+        case BidirectionalPopoverResultItem.identifier:
             return items.count
         case BidirectionalPopoverActionItem.identifier:
             return isMatchItem ? 0 : 1
@@ -246,8 +244,8 @@ extension BidirectionalPopover: NSCollectionViewDataSource {
         let item = collectionView.makeItem(withIdentifier: itemName, for: indexPath)
 
         switch item {
-        case is BidirectionalPopoverItem:
-            guard let popoverItem = item as? BidirectionalPopoverItem else { return item }
+        case is BidirectionalPopoverResultItem:
+            guard let popoverItem = item as? BidirectionalPopoverResultItem else { return item }
             popoverItem.documentTitle = items[indexPath.item]
 
             if indexPath == self.indexPath { popoverItem.isSelected = true }

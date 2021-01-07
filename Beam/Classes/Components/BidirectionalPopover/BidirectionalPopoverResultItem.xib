@@ -6,7 +6,7 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
-        <customObject id="-2" userLabel="File's Owner" customClass="BidirectionalPopoverItem" customModule="Beam" customModuleProvider="target">
+        <customObject id="-2" userLabel="File's Owner" customClass="BidirectionalPopoverResultItem" customModule="Beam" customModuleProvider="target">
             <connections>
                 <outlet property="containerView" destination="lPd-1A-Gby" id="0dt-by-KMB"/>
                 <outlet property="titleLabel" destination="xeC-Vd-Ywx" id="38r-i1-CRC"/>
@@ -46,7 +46,7 @@
             </constraints>
             <point key="canvasLocation" x="155" y="114.5"/>
         </customView>
-        <collectionViewItem id="RPF-hd-ARv" customClass="BidirectionalPopoverItem" customModule="Beam" customModuleProvider="target">
+        <collectionViewItem id="RPF-hd-ARv" customClass="BidirectionalPopoverResultItem" customModule="Beam" customModuleProvider="target">
             <connections>
                 <outlet property="containerView" destination="lPd-1A-Gby" id="fN7-ek-fLd"/>
                 <outlet property="titleLabel" destination="xeC-Vd-Ywx" id="bc8-OJ-Fda"/>

@@ -55,9 +55,14 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         // Remove all subsciptions:
         noteCancellables = []
 
-        if let note = note as? BeamNote {
-            note.viewedByUser()
-        }
+        // Subscribe to the note's changes
+        note.$changed
+            .debounce(for: .seconds(1), scheduler: RunLoop.main)
+            .sink { [unowned self] _ in
+                guard let note = note as? BeamNote else { return }
+                note.detectLinkedNotes(documentManager)
+                note.save(documentManager: self.documentManager)
+            }.store(in: &noteCancellables)
     }
 
     private var noteCancellables = [AnyCancellable]()
@@ -338,19 +343,13 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         guard let node = node as? TextNode else { return }
         guard !node.readOnly else { return }
 
-        if popover != nil && !command {
-            popover?.doCommand(.insertNewline)
-            return
-        }
-
         if option {
             rootNode.doCommand(.insertNewline)
+        } else if let popover = popover {
+            popover.doCommand(.insertNewline)
+            return
         } else if command {
-            if popover != nil {
-                popover?.doCommand(.insertNewline, command)
-            } else {
-                onStartQuery(node)
-            }
+            onStartQuery(node)
         } else {
             if node.text.isEmpty && node.isEmpty && node.parent !== rootNode {
                 rootNode.decreaseIndentation()
@@ -961,7 +960,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         rootNode.deepInvalidateText()
     }
 
-    let documentManager = DocumentManager()
+    let documentManager = DocumentManager(coreDataManager: CoreDataManager.shared)
 
     @IBAction func saveDocument(_ sender: Any?) {
         print("Save document!")
