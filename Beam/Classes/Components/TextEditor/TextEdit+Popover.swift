@@ -16,7 +16,7 @@ extension BeamTextEdit {
     private static var posY: CGFloat = 0
 
     internal func initPopover() {
-        guard let node = node as? TextNode, let data = data else { return }
+        guard let node = node as? TextNode else { return }
         let cursorPosition = rootNode.cursorPosition
         let (posX, rect) = node.offsetAndFrameAt(index: cursorPosition)
         let x = posX == 0 ? 208 : posX + node.offsetInDocument.x
