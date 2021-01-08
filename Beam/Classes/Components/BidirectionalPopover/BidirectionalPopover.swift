@@ -135,7 +135,7 @@ class BidirectionalPopover: Popover {
     }
 
     private func keyMoveDown() {
-        if (indexPath.item == items.count - 1 && !isMatchItem) && !query.isEmpty {
+        if indexPath.item == items.count - 1 && !isMatchItem && !query.isEmpty {
             collectionView.deselectItems(at: [indexPath])
             indexPath = IndexPath(item: 0, section: 1)
             collectionView.selectItems(at: [indexPath], scrollPosition: .bottom)

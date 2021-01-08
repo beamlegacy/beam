@@ -68,7 +68,7 @@ extension BeamTextEdit {
         node.text.addAttributes([.internalLink(linkText)], to: cursorStartPosition..<cursorPosition)
         text = text.replacingOccurrences(of: prefix, with: "")
         let items = text.isEmpty ? documentManager.loadAllDocumentsWithLimit() : documentManager.documentsWithLimitTitleMatch(title: text)
-        var height = text.isEmpty ? BeamTextEdit.viewHeight * CGFloat(items.count) : (BeamTextEdit.viewHeight * CGFloat(items.count)) + 36.5
+        var height = BeamTextEdit.viewHeight * CGFloat(items.count) + (text.isEmpty ? 0 : 36.5)
 
         if items.count == 1 || items.isEmpty { height = BeamTextEdit.viewHeight * 2 }
 
