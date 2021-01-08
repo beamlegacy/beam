@@ -17,6 +17,7 @@ class BidirectionalPopover: Popover {
 
     var items: [String] = [] {
         didSet {
+            print(items)
             collectionView.reloadData()
 
             if items.isEmpty && !isMatchItem {
@@ -135,7 +136,7 @@ class BidirectionalPopover: Popover {
     }
 
     private func keyMoveDown() {
-        if indexPath.item == items.count - 1 && !isMatchItem {
+        if (indexPath.item == items.count - 1 && !isMatchItem) && !query.isEmpty {
             collectionView.deselectItems(at: [indexPath])
             indexPath = IndexPath(item: 0, section: 1)
             collectionView.selectItems(at: [indexPath], scrollPosition: .bottom)
@@ -233,7 +234,7 @@ extension BidirectionalPopover: NSCollectionViewDataSource {
         case BidirectionalPopoverResultItem.identifier:
             return items.count
         case BidirectionalPopoverActionItem.identifier:
-            return isMatchItem ? 0 : 1
+            return isMatchItem || query.isEmpty ? 0 : 1
         default:
             return 1
         }
