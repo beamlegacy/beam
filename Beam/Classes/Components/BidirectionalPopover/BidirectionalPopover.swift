@@ -17,7 +17,6 @@ class BidirectionalPopover: Popover {
 
     var items: [String] = [] {
         didSet {
-            print(items)
             collectionView.reloadData()
 
             if items.isEmpty && !isMatchItem {
