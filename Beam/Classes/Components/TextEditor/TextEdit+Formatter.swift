@@ -59,7 +59,7 @@ extension BeamTextEdit {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
 
-            NSAnimationContext.runAnimationGroup ({ (ctx) in
+            NSAnimationContext.runAnimationGroup ({ ctx in
                 ctx.allowsImplicitAnimation = true
                 ctx.duration = 0.3
 
@@ -74,7 +74,7 @@ extension BeamTextEdit {
         guard let formatterView = formatterView else { return }
 
         DispatchQueue.main.async { [unowned self] in
-            NSAnimationContext.runAnimationGroup ({ (ctx) in
+            NSAnimationContext.runAnimationGroup ({ ctx in
                 ctx.allowsImplicitAnimation = true
                 ctx.duration = 0.3
 

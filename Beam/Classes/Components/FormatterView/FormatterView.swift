@@ -103,7 +103,7 @@ class FormatterView: NSView {
     // MARK: - Methods
 
     func setActiveFormmatter(type: [FormatterType]) {
-        type.forEach { (type) in
+        type.forEach { type in
             guard let button = buttons[type] else { return }
             button.layer?.backgroundColor = NSColor.formatterButtonBackgroudHoverColor.cgColor
             selectedItems[type] = type
@@ -112,7 +112,7 @@ class FormatterView: NSView {
 
     func resetSelectedItems() {
         self.selectedItems = [:]
-        buttons.forEach { (button) in
+        buttons.forEach { button in
             button.value.layer?.backgroundColor = NSColor.clear.cgColor
         }
     }
