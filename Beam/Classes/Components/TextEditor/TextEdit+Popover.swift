@@ -41,7 +41,6 @@ extension BeamTextEdit {
 
     internal func updatePopover(with command: TextRoot.Command = .none) {
         guard let node = node as? TextNode,
-              let data = data,
               let popover = popover else { return }
 
         var text = node.text.text
@@ -68,7 +67,7 @@ extension BeamTextEdit {
 
         node.text.addAttributes([.internalLink(linkText)], to: cursorStartPosition..<cursorPosition)
         text = text.replacingOccurrences(of: prefix, with: "")
-        let items = text.isEmpty ? data.documentManager.loadAllDocumentsWithLimit() : data.documentManager.documentsWithLimitTitleMatch(title: text)
+        let items = text.isEmpty ? documentManager.loadAllDocumentsWithLimit() : documentManager.documentsWithLimitTitleMatch(title: text)
         var height = text.isEmpty ? BeamTextEdit.viewHeight * CGFloat(items.count) : (BeamTextEdit.viewHeight * CGFloat(items.count)) + 36.5
 
         if items.count == 1 || items.isEmpty { height = BeamTextEdit.viewHeight * 2 }
