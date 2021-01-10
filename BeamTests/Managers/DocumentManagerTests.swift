@@ -143,7 +143,6 @@ class DocumentManagerTests: CoreDataTests {
     }
 
     func testDelete() throws {
-        let initialCount = Document.countWithPredicate(self.context)
         let document = DataDocument(bullets: [DataDocument.DataBullet(content: "line 1", updatedAt: Date()),
                                               DataDocument.DataBullet(content: "line 2", updatedAt: Date())])
 
@@ -161,7 +160,7 @@ class DocumentManagerTests: CoreDataTests {
 
         waitForExpectations(timeout: 2.0) { _ in
             let count = Document.countWithPredicate(self.context)
-            XCTAssertEqual(count, initialCount + 1)
+            XCTAssertEqual(count, 1)
         }
 
         let deleteExpectation = expectation(description: "delete completion called")
@@ -171,7 +170,7 @@ class DocumentManagerTests: CoreDataTests {
 
         waitForExpectations(timeout: 2.0) { _ in
             let count = Document.countWithPredicate(self.context)
-            XCTAssertEqual(count, initialCount)
+            XCTAssertEqual(count, 0)
         }
     }
 }
