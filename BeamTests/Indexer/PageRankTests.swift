@@ -240,8 +240,6 @@ class PageRankTests: XCTestCase {
         XCTAssertGreaterThanOrEqual(search("sport rules").count, 5)
         XCTAssertGreaterThanOrEqual(search("guitar").count, 0)
 
-        XCTAssertEqual(LinkStore.shared.links.count, LinkStore.shared.ids.count)
-
         print("LinkStore contains \(LinkStore.shared.links.count) different links")
 
         do {
