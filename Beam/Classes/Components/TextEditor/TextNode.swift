@@ -869,7 +869,7 @@ public class TextNode: Widget {
     }
 
     private func buildAttributedString() -> NSAttributedString {
-        let str = text.buildAttributedString(fontSize: fontSize, cursorPosition: cursorPosition)
+        let str = text.buildAttributedString(fontSize: fontSize, cursorPosition: cursorPosition, elementKind: element.kind)
         let paragraphStyle = NSMutableParagraphStyle()
 //        paragraphStyle.alignment = .justified
         paragraphStyle.lineBreakMode = .byWordWrapping
