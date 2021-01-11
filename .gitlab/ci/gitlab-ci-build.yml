@@ -13,3 +13,5 @@ build:macos:
   tags:
     - macos
   interruptible: true
+  retry:
+    max: 2
