@@ -15,7 +15,7 @@ struct BeamText: Codable {
         }
     }
 
-    enum Attribute: Codable, Equatable {
+    enum Attribute: Codable, Equatable, Hashable {
         case strong
         case emphasis
         case source(String)

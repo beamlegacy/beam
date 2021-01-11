@@ -70,6 +70,37 @@ extension BeamTextEdit {
         }
     }
 
+    internal func detectFormatterType() {
+        guard let node = node as? TextNode,
+              let formatterView = formatterView else { return }
+
+        let text = node.text
+        let cursorStartPosition = rootNode.cursorPosition - 1
+        let cursorPosition = rootNode.cursorPosition
+        var attributes: [FormatterType] = []
+        formatterView.setActiveFormmatter(type: attributes)
+
+        switch node.elementKind {
+        case .heading(1):
+            attributes.append(.h1)
+        case .heading(2):
+            attributes.append(.h2)
+        default:
+            break
+        }
+
+        text.range(cursorStartPosition..<cursorPosition).forEach { (a) in
+            attributes.append(a)
+        }
+
+        formatterView.setActiveFormmatter(type: attributes)
+    }
+
+    private func indexOf(type: FormatterType, _ attributes: [FormatterType]) -> Int {
+        guard let index = attributes.firstIndex(of: type) else { return 0 }
+        return index
+    }
+
     private func showFormatterViewWithAnimation() {
         guard let formatterView = formatterView else { return }
 
@@ -86,17 +117,16 @@ extension BeamTextEdit {
         }
     }
 
-    // swiftlint:disable cyclomatic_complexity
     private func selectFormatterAction(_ type: FormatterType, _ isActive: Bool) {
         guard let node = node as? TextNode else { return }
 
         switch type {
         case .h1:
-            node.element.kind = isActive ? .bullet : .heading(1)
+            changeTextFormat(with: node, kind: .heading(1), isActive: isActive)
         case .h2:
-            node.element.kind = isActive ? .bullet : .heading(2)
+            changeTextFormat(with: node, kind: .heading(2), isActive: isActive)
         case .quote:
-            print("quote")
+            changeTextFormat(with: node, kind: .quote(1, node.text.text, node.text.text), isActive: isActive)
         case .code:
             print("code")
         case .bold:
@@ -111,11 +141,8 @@ extension BeamTextEdit {
     }
 
     // TODO: Rename function
-    private func changeTextFormat(with node: TextNode, attributes: BeamText.Attribute, isActive: Bool) {
-        let text = node.text.text
-        let range = cursorStartPosition..<rootNode.cursorPosition + text.count
-
-        isActive ? node.text.removeAttributes([attributes], from: range) : node.text.addAttributes([attributes], to: range)
+    private func changeTextFormat(with node: TextNode, kind: ElementKind, isActive: Bool) {
+        node.element.kind = isActive ? .bullet : kind
     }
 
     // TODO: Rename function

@@ -578,8 +578,6 @@ public class TextNode: Widget {
 
     // MARK: - Mouse Events
     override func mouseDown(mouseInfo: MouseInfo) -> Bool {
-        detectFormatterType(from: text)
-
         if showDisclosureButton && disclosureButtonFrame.contains(mouseInfo.position) {
             disclosurePressed = true
             return true
@@ -631,6 +629,8 @@ public class TextNode: Widget {
     }
 
     override func mouseUp(mouseInfo: MouseInfo) -> Bool {
+        editor.detectFormatterType()
+
         if disclosurePressed && disclosureButtonFrame.contains(mouseInfo.position) {
             disclosurePressed = false
             open.toggle()
@@ -901,38 +901,6 @@ public class TextNode: Widget {
 
         context.setFillColor(c.copy(alpha: 0.2)!)
         context.fill(contentsFrame)
-    }
-
-    private func detectFormatterType(from text: BeamText) {
-        /*var attributes: [BeamText.Attribute] = []
-        var types: [FormatterType] = []
-
-        guard let formatterView = editor.formatterView, !text.isEmpty else { return }
-
-        if text.range(0..<text.text.count, containsAttribute: .heading(1)) {
-            attributes.append(.heading(1))
-            types.append(.h1)
-        }
-
-        if text.range(0..<text.text.count, containsAttribute: .heading(2)) {
-            attributes.append(.heading(2))
-            types.append(.h2)
-        }
-
-        if text.range(0..<text.text.count, containsAttribute: .strong) {
-            attributes.append(.strong)
-            types.append(.bold)
-        }
-
-        if text.range(0..<text.text.count, containsAttribute: .emphasis) {
-            attributes.append(.emphasis)
-            types.append(.italic)
-        }
-
-        guard !types.isEmpty, !attributes.isEmpty else { return }
-
-        editor.rootNode.state.attributes = attributes
-        formatterView.setActiveFormmatter(type: types)*/
     }
 
     private func buildAttributedString() -> NSAttributedString {

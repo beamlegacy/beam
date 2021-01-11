@@ -178,6 +178,34 @@ extension BeamText {
         return false
     }
 
+    // TODO : Refactor, worst time complexity
+    @discardableResult func range(_ range: Swift.Range<Int>) -> [FormatterType] {
+        let sub = extract(range: range)
+        var attributes: [BeamText.Attribute] = []
+        var results: [FormatterType] = []
+
+        for range in sub.ranges {
+            range.attributes.forEach { (a) in
+                if !attributes.contains(a) {
+                    attributes.append(a)
+                }
+            }
+        }
+
+        attributes.forEach { (attribute) in
+            switch attribute {
+            case .strong:
+                results.append(.bold)
+            case .emphasis:
+                results.append(.italic)
+            default:
+                break
+            }
+        }
+
+        return results
+    }
+
     // toggle the given attribute in the given range and return true if the attribute was added, false if it was removed
     @discardableResult mutating func toggle(attribute: BeamText.Attribute, forRange _range: Swift.Range<Int>) -> Bool {
         if range(_range, containsAttribute: attribute) {

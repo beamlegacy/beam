@@ -414,6 +414,9 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                             rootNode.doCommand(.moveWordLeft)
                         } else if command {
                             rootNode.doCommand(.moveToBeginningOfLine)
+                        } else if formatterView != nil {
+                            rootNode.doCommand(.moveLeft)
+                            detectFormatterType()
                         } else {
                             updatePopover(with: .moveLeft)
                             rootNode.doCommand(.moveLeft)
@@ -438,6 +441,9 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                             rootNode.doCommand(.moveWordRight)
                         } else if command {
                             rootNode.doCommand(.moveToEndOfLine)
+                        } else if formatterView != nil {
+                            rootNode.doCommand(.moveRight)
+                            detectFormatterType()
                         } else {
                             updatePopover(with: .moveRight)
                             rootNode.doCommand(.moveRight)
@@ -451,6 +457,9 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     } else if let popover = popover {
                         popover.doCommand(.moveUp)
                         return
+                    } else if formatterView != nil {
+                        rootNode.doCommand(.moveUp)
+                        detectFormatterType()
                     } else {
                         rootNode.doCommand(.moveUp)
                         return
@@ -462,6 +471,9 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     } else if let popover = popover {
                         popover.doCommand(.moveDown)
                         return
+                    } else if formatterView != nil {
+                        rootNode.doCommand(.moveDown)
+                        detectFormatterType()
                     } else {
                         rootNode.doCommand(.moveDown)
                         return
