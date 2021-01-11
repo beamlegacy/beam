@@ -74,14 +74,14 @@ class BeamTextVisitor {
         case .embed:
             return BeamText() // ???
 
-        case let .heading(depth):
+        case .heading:
             pushContext(); defer { popContext() }
-            context.append(.heading(depth))
+//            context.append(.heading(depth))
             return visitChildren(node)
 
-        case let .quote(depth):
+        case .quote:
             pushContext(); defer { popContext() }
-            context.append(.quote(depth, "", ""))
+//            context.append(.quote(depth, "", ""))
             return visitChildren(node)
 
         case .newLine:
