@@ -8,6 +8,68 @@
 import Foundation
 import Combine
 
+enum ElementKindError: Error {
+    case typeNameUnknown(String)
+}
+
+enum ElementKind: Codable {
+    case bullet
+    case heading(Int)
+    case quote(Int, String, String)
+    case code
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case level
+        case source
+        case title
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        let typeName = try container.decode(String.self, forKey: .type)
+        switch typeName {
+        case "bullet":
+            self = .bullet
+        case "heading":
+            self = .heading(try container.decode(Int.self, forKey: .level))
+        case "quote":
+            self = .quote(try container.decode(Int.self, forKey: .level),
+                            try container.decode(String.self, forKey: .source),
+                            try container.decode(String.self, forKey: .title))
+        case "code":
+            self = .code
+        default:
+            throw ElementKindError.typeNameUnknown(typeName)
+        }
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        switch self {
+        case .bullet:
+            try container.encode("bullet", forKey: .type)
+        case let .heading(level):
+            try container.encode("heading", forKey: .type)
+            try container.encode(level, forKey: .level)
+        case let .quote(level, source, title):
+            try container.encode("quote", forKey: .type)
+            try container.encode(level, forKey: .level)
+            try container.encode(source, forKey: .source)
+            try container.encode(title, forKey: .title)
+        case .code:
+            try container.encode("code", forKey: .type)
+        }
+    }
+}
+
+enum ElementChildrenFormat: String, Codable {
+    case bullet
+    case numbered
+}
+
 // Editable Text Data:
 public class BeamElement: Codable, Identifiable, Hashable, ObservableObject {
     @Published public private(set) var id = UUID() { didSet { change() } }
@@ -18,6 +80,8 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject {
     @Published var score: Float = 0 { didSet { change() } }
     @Published var creationDate = Date() { didSet { change() } }
     @Published var updateDate = Date()
+    @Published var kind: ElementKind = .bullet { didSet { change() } }
+    @Published var childrenFormat: ElementChildrenFormat = .bullet { didSet { change() } }
 
     var note: BeamNote? {
         return parent?.note
@@ -34,6 +98,8 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject {
         case score
         case creationDate
         case updateDate
+        case kind
+        case childrenFormat
     }
 
     init() {
@@ -76,6 +142,14 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject {
                 child.parent = self
             }
         }
+
+        if container.contains(.kind) {
+            kind = try container.decode(ElementKind.self, forKey: .kind)
+        }
+
+        if container.contains(.childrenFormat) {
+            childrenFormat = try container.decode(ElementChildrenFormat.self, forKey: .childrenFormat)
+        }
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -91,6 +165,17 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject {
         try container.encode(updateDate, forKey: .updateDate)
         if recursive, !children.isEmpty {
             try container.encode(children, forKey: .children)
+        }
+
+        switch kind {
+        case .bullet:
+            break
+        default:
+            try container.encode(kind, forKey: .kind)
+        }
+
+        if childrenFormat != .bullet {
+            try container.encode(childrenFormat, forKey: .childrenFormat)
         }
     }
 

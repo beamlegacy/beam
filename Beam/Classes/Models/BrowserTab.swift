@@ -268,10 +268,11 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             // now add a bullet point with the quoted text:
             if let urlString = webView.url?.absoluteString, let title = webView.title {
                 guard let url = urlString.markdownizedURL else { return }
-                let quote = BeamText(text: text, attributes: [.quote(1, title, url)])
+                let quote = BeamText(text: text)
 
                 DispatchQueue.main.async {
                     let e = BeamElement()
+                    e.kind = .quote(1, title, url)
                     e.text = quote
                     _ = self.note?.addChild(e)
                 }
