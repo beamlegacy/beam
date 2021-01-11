@@ -67,7 +67,6 @@ struct BMTextField: NSViewRepresentable {
     }
 
     func updateNSView(_ nsView: Self.NSViewType, context: Self.Context) {
-        nsView.font = font
         nsView.setText(text, font: font)
         nsView.setPlacholder(placeholder, font: font)
 
