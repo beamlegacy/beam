@@ -15,17 +15,25 @@ import Combine
 public class TextNode: Widget {
 
     var element: BeamElement { didSet {
-        elementTextScope = element.$text.sink { [unowned self] _ in
+        elementTextScope = element.$text.sink { [unowned self] newValue in
+            elementText = newValue
             self.invalidateText()
         }
 
-        elementKindScope = element.$kind.sink { [unowned self] _ in
+        elementKindScope = element.$kind.sink { [unowned self] newValue in
+            elementKind = newValue
             self.invalidateText()
         }
+
+        elementText = element.text
+        elementKind = element.kind
     }}
 
     var elementTextScope: Cancellable?
     var elementKindScope: Cancellable?
+
+    var elementText: BeamText
+    var elementKind: ElementKind
 
     var layout: TextFrame?
     var disclosurePressed = false
@@ -210,17 +218,22 @@ public class TextNode: Widget {
     init(editor: BeamTextEdit, element: BeamElement) {
         self.element = element
 
+        elementText = element.text
+        elementKind = element.kind
+
         super.init(editor: editor)
         createActionLayer()
 
         var inInit = true
-        elementTextScope = element.$text.sink { [unowned self] _ in
+        elementTextScope = element.$text.sink { [unowned self] newValue in
             guard !inInit else { return }
+            elementText = newValue
             self.invalidateText()
         }
 
-        elementKindScope = element.$kind.sink { [unowned self] _ in
+        elementKindScope = element.$kind.sink { [unowned self] newValue in
             guard !inInit else { return }
+            elementKind = newValue
             self.invalidateText()
         }
         inInit = false
@@ -923,7 +936,7 @@ public class TextNode: Widget {
     }
 
     private func buildAttributedString() -> NSAttributedString {
-        let str = text.buildAttributedString(fontSize: fontSize, cursorPosition: cursorPosition, elementKind: element.kind)
+        let str = text.buildAttributedString(fontSize: fontSize, cursorPosition: cursorPosition, elementKind: elementKind)
         let paragraphStyle = NSMutableParagraphStyle()
 //        paragraphStyle.alignment = .justified
         paragraphStyle.lineBreakMode = .byWordWrapping
