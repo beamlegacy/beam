@@ -21,7 +21,7 @@ class HtmlVisitor {
     var debug = false
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
-    func visit(_ node: SwiftSoup.Node) -> String {
+    func visitMD(_ node: SwiftSoup.Node) -> String {
         var text = ""
         if let element = node as? SwiftSoup.Element {
             do {
@@ -41,18 +41,18 @@ class HtmlVisitor {
                     }()
                     if debug { print(tabs + "a href = '\(href)'") }
                     text += "["
-                    let title = visitChildren(element).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+                    let title = visitChildrenMD(element).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
                     text += title
                     text += "](\(url))"
                 case "span":
                     if debug { print(tabs + "span...") }
-                    text += visitChildren(element)
+                    text += visitChildrenMD(element)
 
                 // swiftlint:disable:next fallthrough no_fallthrough_only
                 case "i": fallthrough
                 case "em":
                     if debug { print(tabs + "em...") }
-                    let contents = visitChildren(element)
+                    let contents = visitChildrenMD(element)
                     if keepFormatting {
                         text += "_**" + contents + "**_"
                     } else {
@@ -63,7 +63,7 @@ class HtmlVisitor {
                 case "b": fallthrough
                 case "strong":
                     if debug { print(tabs + "strong...") }
-                    let contents = visitChildren(element)
+                    let contents = visitChildrenMD(element)
                     if keepFormatting {
                         text += "**" + contents + "**"
                     } else {
@@ -71,7 +71,7 @@ class HtmlVisitor {
                     }
 
                 default:
-                    text += visitChildren(node)
+                    text += visitChildrenMD(node)
                 }
             } catch Exception.Error(let type, let message) {
                 print("\(type): \(message)")
@@ -88,11 +88,66 @@ class HtmlVisitor {
                 if debug { print(tabs + "??? node ??? = '\(node)'") }
             }
 
-            text += visitChildren(node)
+            text += visitChildrenMD(node)
         }
 
         if depth == 0 {
             if debug { print("html2Md -> '\(text)'") }
+            return text.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+        }
+
+        return text
+    }
+
+    func visitChildrenMD(_ node: SwiftSoup.Node) -> String {
+        guard node.childNodeSize() != 0 else { return "" }
+        depth += 1
+        let result = node.getChildNodes().reduce("") { previous, node -> String in
+            previous + visitMD(node)
+        }
+        depth -= 1
+
+        return result
+    }
+
+    // Text Version:
+    // swiftlint:disable:next cyclomatic_complexity function_body_length
+    func visit(_ node: SwiftSoup.Node) -> String {
+        var text = ""
+        if let element = node as? SwiftSoup.Element {
+            switch element.tagName() {
+            case "a":
+                let title = visitChildren(element).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+                text += title
+            case "span":
+                if debug { print(tabs + "span...") }
+                text += visitChildren(element)
+
+            // swiftlint:disable:next fallthrough no_fallthrough_only
+            case "i": fallthrough
+            case "em":
+                let contents = visitChildren(element)
+                text += contents
+
+            // swiftlint:disable:next fallthrough no_fallthrough_only
+            case "b": fallthrough
+            case "strong":
+                let contents = visitChildren(element)
+                text += contents
+
+            default:
+                text += visitChildren(node) + "\n"
+            }
+        } else {
+            if let textNode = node as? SwiftSoup.TextNode {
+                let t = textNode.text()
+                text += t
+            }
+            text += visitChildren(node)
+        }
+
+        if depth == 0 {
+            if debug { print("html2 -> '\(text)'") }
             return text.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
         }
 
@@ -109,6 +164,7 @@ class HtmlVisitor {
 
         return result
     }
+
 }
 
 func html2Md(url: URL, html: String) -> String {
@@ -116,10 +172,7 @@ func html2Md(url: URL, html: String) -> String {
         //print("html -> \(html)")
         let doc = try SwiftSoup.parseBodyFragment(html)
 
-        let visitor = HtmlVisitor(url)
-        let result = visitor.visit(doc)
-        return result
-
+        return html2Md(url: url, doc: doc)
     } catch Exception.Error(let type, let message) {
         print("\(type): \(message)")
     } catch {
@@ -127,4 +180,51 @@ func html2Md(url: URL, html: String) -> String {
     }
 
     return ""
+}
+
+func html2Text(url: URL, html: String) -> String {
+    do {
+        //print("html -> \(html)")
+        let doc = try SwiftSoup.parseBodyFragment(html)
+
+        return html2Text(url: url, doc: doc)
+    } catch Exception.Error(let type, let message) {
+        print("\(type): \(message)")
+    } catch {
+        print("html2Text: error")
+    }
+
+    return ""
+}
+
+func html2Md(url: URL, doc: SwiftSoup.Document) -> String {
+    let visitor = HtmlVisitor(url)
+    let result = visitor.visitMD(doc)
+    return result
+}
+
+func html2Text(url: URL, doc: SwiftSoup.Document) -> String {
+    let visitor = HtmlVisitor(url)
+    let result = visitor.visit(doc)
+    return result
+}
+
+extension SwiftSoup.Document {
+    func extractLinks() -> [String] {
+        do {
+            //print("html -> \(html)")
+            let els: Elements = try select("a")
+
+            // capture all the links containted in the page:
+            return try els.array().map { element -> String in
+                try element.absUrl("href")
+            }
+        } catch Exception.Error(let type, let message) {
+            Logger.shared.logError("PageRank (SwiftSoup parser) \(type): \(message)", category: .web)
+        } catch {
+            Logger.shared.logError("PageRank: (SwiftSoup parser) unkonwn error", category: .web)
+        }
+
+        return []
+    }
 }
