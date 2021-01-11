@@ -12,6 +12,8 @@ sentry:
   tags:
     - macos
   interruptible: true
+  retry:
+    max: 2
 
 s3:
   dependencies:
@@ -33,6 +35,8 @@ s3:
   tags:
     - macos
   interruptible: false
+  retry:
+    max: 2
 
 delete s3:
   dependencies: []
@@ -52,3 +56,5 @@ delete s3:
   tags:
     - macos
   interruptible: false
+  retry:
+    max: 2

@@ -21,8 +21,6 @@ struct BeamText: Codable {
         case source(String)
         case link(String)
         case internalLink(String)
-        case heading(Int)
-        case quote(Int, String, String) // level, title, source
 
         // swiftlint:disable:next nesting
         enum CodingKeys: String, CodingKey {
@@ -50,8 +48,6 @@ struct BeamText: Codable {
                 case "source": self = .source(try container.decode(String.self, forKey: .payload))
                 case "link": self = .link(try container.decode(String.self, forKey: .payload))
                 case "internalLink": self = .internalLink(try container.decode(String.self, forKey: .payload))
-                case "heading": self = .heading(try container.decode(Int.self, forKey: .payload))
-                case "quote": self = .quote(try container.decode(Int.self, forKey: .level), try container.decode(String.self, forKey: .title), try container.decode(String.self, forKey: .source))
                 default:
                     throw AttributeError.unknownAttribute
                 }
@@ -63,8 +59,6 @@ struct BeamText: Codable {
                 case 2: self = .source(try container.decode(String.self, forKey: .payload))
                 case 3: self = .link(try container.decode(String.self, forKey: .payload))
                 case 4: self = .internalLink(try container.decode(String.self, forKey: .payload))
-                case 5: self = .heading(try container.decode(Int.self, forKey: .payload))
-                case 6: self = .quote(try container.decode(Int.self, forKey: .level), try container.decode(String.self, forKey: .title), try container.decode(String.self, forKey: .source))
                 default:
                     throw AttributeError.unknownAttribute
                 }
@@ -85,12 +79,6 @@ struct BeamText: Codable {
                 try container.encode(value, forKey: .payload)
             case .internalLink(let value):
                 try container.encode(value, forKey: .payload)
-            case .heading(let value):
-                try container.encode(value, forKey: .payload)
-            case let .quote(level, title, source):
-                try container.encode(level, forKey: .level)
-                try container.encode(title, forKey: .title)
-                try container.encode(source, forKey: .source)
             }
         }
 
@@ -106,10 +94,6 @@ struct BeamText: Codable {
                 return "link"
             case .internalLink:
                 return "internalLink"
-            case .heading:
-                return "heading"
-            case .quote:
-                return "quote"
             }
         }
 

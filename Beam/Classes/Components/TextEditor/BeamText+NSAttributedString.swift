@@ -9,10 +9,10 @@ import Foundation
 import AppKit
 
 extension BeamText {
-    func buildAttributedString(fontSize: CGFloat, cursorPosition: Int) -> NSMutableAttributedString {
+    func buildAttributedString(fontSize: CGFloat, cursorPosition: Int, elementKind: ElementKind) -> NSMutableAttributedString {
         let string = NSMutableAttributedString()
         for range in ranges {
-            string.append(NSAttributedString(string: range.string, attributes: convert(attributes: range.attributes, fontSize: fontSize)))
+            string.append(NSAttributedString(string: range.string, attributes: convert(attributes: range.attributes, fontSize: fontSize, elementKind: elementKind)))
         }
         return string
     }
@@ -21,17 +21,28 @@ extension BeamText {
         return NSFont.systemFont(ofSize: size, weight: weight)
     }
 
-    private func font(fontSize: CGFloat, strong: Bool, emphasis: Bool, headingLevel: Int, quote: Bool) -> NSFont {
+    private func font(fontSize: CGFloat, strong: Bool, emphasis: Bool, elementKind: ElementKind) -> NSFont {
+        var weight = NSFont.Weight.regular
         let headingFirstLevel: CGFloat = 28
         let headingSecondLevel: CGFloat = 22
-        let fontSizes = [fontSize, headingFirstLevel, headingSecondLevel]
+        var quote = false
+        var size = fontSize
 
-        var weight = NSFont.Weight.regular
+        switch elementKind {
+        case .bullet:
+            break
+        case .code:
+            break
+        case let .heading(level):
+            weight = .medium
+            size = level == 1 ? headingFirstLevel : headingSecondLevel
+        case .quote:
+            quote = true
+        }
 
-        if headingLevel != 0 { weight = .medium }
         if strong { weight = .bold }
 
-        var f = NSFont.systemFont(ofSize: fontSizes[headingLevel], weight: weight)
+        var f = NSFont.systemFont(ofSize: size, weight: weight)
 
         if emphasis || quote {
             f = NSFontManager.shared.convert(f, toHaveTrait: .italicFontMask)
@@ -41,12 +52,10 @@ extension BeamText {
     }
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
-    private func convert(attributes: [Attribute], fontSize: CGFloat) -> [NSAttributedString.Key: Any] {
+    private func convert(attributes: [Attribute], fontSize: CGFloat, elementKind: ElementKind) -> [NSAttributedString.Key: Any] {
         var stringAttributes = [NSAttributedString.Key: Any]()
         var strong = false
         var emphasis = false
-        var headingLevel = 0
-        var quote = false
         var color = NSColor.editorTextColor
 //        var quoteLevel: Int
 //        var quoteTitle: String?
@@ -69,17 +78,10 @@ extension BeamText {
             case .internalLink(let link):
                 color = NSColor.editorBidirectionalLinkColor
                 internalLink = link
-            case .heading(let level):
-                headingLevel = level
-            case .quote: //(level, title, source):
-//                quoteLevel = level
-//                quoteTitle = title
-//                quoteSource = source
-                quote = true
             }
         }
 
-        stringAttributes[.font] = font(fontSize: fontSize, strong: strong, emphasis: emphasis, headingLevel: headingLevel, quote: quote)
+        stringAttributes[.font] = font(fontSize: fontSize, strong: strong, emphasis: emphasis, elementKind: elementKind)
         stringAttributes[.foregroundColor] = color
         if let link = webLink {
             if let url = URL(string: link) {
@@ -89,10 +91,6 @@ extension BeamText {
             }
         } else if let link = internalLink {
             stringAttributes[.link] = link
-        }
-
-        if headingLevel > 0 {
-            stringAttributes[.heading] = NSNumber(value: headingLevel)
         }
 
         if let source = source {
