@@ -855,7 +855,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         _ = rootNode.dispatchMouseDragged(mouseInfo: MouseInfo(rootNode, point, event))
     }
 
-    var hoveredNode: TextNode? {
+    weak var hoveredNode: TextNode? {
         didSet {
             if let old = oldValue {
                 if old !== hoveredNode {

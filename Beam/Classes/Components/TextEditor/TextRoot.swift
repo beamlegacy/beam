@@ -90,7 +90,7 @@ public class TextRoot: TextNode {
         }
     }
 
-    var node: Widget! {
+    unowned var node: Widget! {
         didSet {
             guard oldValue !== node else { return }
             let oldNode = oldValue as? TextNode
