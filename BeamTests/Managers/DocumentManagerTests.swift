@@ -60,7 +60,7 @@ class DocumentManagerTests: CoreDataTests {
         })
 
         waitForExpectations(timeout: 1.0) { _ in
-            let count = Document.countWithPredicate(self.context)
+            let count = Document.countWithPredicate(self.context, NSPredicate(format: "id = %@", id as CVarArg))
             XCTAssertEqual(count, 1)
         }
     }
@@ -169,7 +169,7 @@ class DocumentManagerTests: CoreDataTests {
         }
 
         waitForExpectations(timeout: 2.0) { _ in
-            let count = Document.countWithPredicate(self.context)
+            let count = Document.countWithPredicate(self.context, NSPredicate(format: "id = %@", id as CVarArg))
             XCTAssertEqual(count, 0)
         }
     }
