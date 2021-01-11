@@ -9,7 +9,8 @@ PODS:
   - Sentry (6.0.12):
     - Sentry/Core (= 6.0.12)
   - Sentry/Core (6.0.12)
-  - SwiftLint (0.42.0)
+  - SwiftLint (0.41.0)
+
 
 DEPENDENCIES:
   - Alamofire (= 5.0.0.beta.6)
@@ -37,7 +38,7 @@ SPEC CHECKSUMS:
   Fakery: 8146918b8dd6df98564dca10cbe8bd05354b8cc4
   JWTDecode: d4c176a28a29f7e6f9abf5c90ad3002f69b98c7c
   Sentry: 8ffcfe3416e0a58b90bb1ae319e8e8a13022a03e
-  SwiftLint: 4fa9579c63416865179bc416f0a92d55f009600d
+  SwiftLint: c585ebd615d9520d7fbdbe151f527977b0534f1e
 
 PODFILE CHECKSUM: cca706eb4e593ed13ed3e46ff1ff0d549ae4b638
 
