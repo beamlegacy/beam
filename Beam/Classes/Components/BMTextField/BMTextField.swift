@@ -36,6 +36,8 @@ struct BMTextField: NSViewRepresentable {
         textField.textFieldViewDelegate = context.coordinator
         textField.focusRingType = .none
 
+        textField.setText(text, font: font)
+
         if let textColor = textColor {
             textField.textColor = textColor
         }
@@ -66,8 +68,8 @@ struct BMTextField: NSViewRepresentable {
 
     func updateNSView(_ nsView: Self.NSViewType, context: Self.Context) {
         nsView.font = font
-        nsView.stringValue = text
-        nsView.placeholderText = placeholder
+        nsView.setText(text, font: font)
+        nsView.setPlacholder(placeholder, font: font)
 
         // Enable focus on textField
         if isFirstResponder && !context.coordinator.didBecomeFirstResponder {
