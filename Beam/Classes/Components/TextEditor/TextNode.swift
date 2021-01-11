@@ -64,6 +64,7 @@ public class TextNode: Widget {
             if newValue.isEmpty { resetActionLayers() }
 
             element.text = newValue
+            elementText = newValue
             invalidateText()
         }
     }
@@ -195,11 +196,12 @@ public class TextNode: Widget {
     }
 
     var isHeader: Bool {
-        return text.hasPrefix("# ") || text.hasPrefix("## ")
-    }
-
-    var isHigherHeading: Bool {
-        return text.hasPrefix("# ")
+        switch elementKind {
+        case .heading:
+            return true
+        default:
+            return false
+        }
     }
 
     private var icon = NSImage(named: "editor-cmdreturn")
@@ -936,7 +938,7 @@ public class TextNode: Widget {
     }
 
     private func buildAttributedString() -> NSAttributedString {
-        let str = text.buildAttributedString(fontSize: fontSize, cursorPosition: cursorPosition, elementKind: elementKind)
+        let str = elementText.buildAttributedString(fontSize: fontSize, cursorPosition: cursorPosition, elementKind: elementKind)
         let paragraphStyle = NSMutableParagraphStyle()
 //        paragraphStyle.alignment = .justified
         paragraphStyle.lineBreakMode = .byWordWrapping
@@ -954,7 +956,7 @@ public class TextNode: Widget {
     }
 
     private func showHoveredActionLayers(_ hovered: Bool) {
-        guard !text.isEmpty else { return }
+        guard !elementText.isEmpty else { return }
 
         actionLayerIsHovered = hovered
         icon = icon?.fill(color: hovered ? .editorSearchHover : .editorSearchNormal)
