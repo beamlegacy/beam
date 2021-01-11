@@ -20,6 +20,8 @@ xctests:
   tags:
     - macos
   interruptible: true
+  retry:
+    max: 2
 
 coverage_check:
   dependencies: []

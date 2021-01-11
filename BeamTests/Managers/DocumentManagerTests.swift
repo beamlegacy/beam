@@ -143,9 +143,6 @@ class DocumentManagerTests: CoreDataTests {
     }
 
     func testDelete() throws {
-        let count = Document.countWithPredicate(self.context)
-        XCTAssertEqual(count, 0, "Document DB isn't empty")
-
         let document = DataDocument(bullets: [DataDocument.DataBullet(content: "line 1", updatedAt: Date()),
                                               DataDocument.DataBullet(content: "line 2", updatedAt: Date())])
 
@@ -163,7 +160,7 @@ class DocumentManagerTests: CoreDataTests {
 
         waitForExpectations(timeout: 2.0) { _ in
             let count = Document.countWithPredicate(self.context, NSPredicate(format: "id = %@", id as CVarArg))
-            XCTAssertEqual(count, 1, "Returns more than 1 document")
+            XCTAssertEqual(count, 1)
         }
 
         let deleteExpectation = expectation(description: "delete completion called")
@@ -173,7 +170,7 @@ class DocumentManagerTests: CoreDataTests {
 
         waitForExpectations(timeout: 2.0) { _ in
             let count = Document.countWithPredicate(self.context, NSPredicate(format: "id = %@", id as CVarArg))
-            XCTAssertEqual(count, 0, "Returns existing document for id")
+            XCTAssertEqual(count, 0)
         }
     }
 }
