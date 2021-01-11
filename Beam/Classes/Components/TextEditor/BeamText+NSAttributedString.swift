@@ -58,8 +58,6 @@ extension BeamText {
         var stringAttributes = [NSAttributedString.Key: Any]()
         var strong = false
         var emphasis = false
-        var headingLevel = 0
-        var quote = false
         var color = NSColor.editorTextColor
 //        var quoteLevel: Int
 //        var quoteTitle: String?
@@ -82,13 +80,6 @@ extension BeamText {
             case .internalLink(let link):
                 color = NSColor.editorBidirectionalLinkColor
                 internalLink = link
-            case .heading(let level):
-                headingLevel = level
-            case .quote: //(level, title, source):
-//                quoteLevel = level
-//                quoteTitle = title
-//                quoteSource = source
-                quote = true
             }
         }
 
@@ -102,10 +93,6 @@ extension BeamText {
             }
         } else if let link = internalLink {
             stringAttributes[.link] = link
-        }
-
-        if headingLevel > 0 {
-            stringAttributes[.heading] = NSNumber(value: headingLevel)
         }
 
         if let source = source {

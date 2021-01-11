@@ -729,8 +729,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             if node.cursorPosition <= 3, level > 0 {
                 Logger.shared.logInfo("Make quote", category: .ui)
 
-                node.text.removeAttributes([.quote(0, "", "")], from: node.text.wholeRange)
-                node.text.addAttributes([.quote(level, "", "")], to: node.text.wholeRange)
+                node.element.kind = .quote(level, "", "")
                 node.text.removeFirst(level + 1)
                 self.rootNode.cursorPosition = 0
             }
@@ -753,8 +752,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     self.node.addChild(sibbling)
                 }
 
-                node.text.removeAttributes([.heading(0)], from: node.text.wholeRange)
-                node.text.addAttributes([.heading(level)], to: node.text.wholeRange)
+                node.element.kind = .heading(level)
                 node.text.removeFirst(level + 1)
                 self.rootNode.cursorPosition = 0
             }
