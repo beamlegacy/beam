@@ -15,11 +15,18 @@ import Combine
 public class TextNode: Widget {
 
     var element: BeamElement { didSet {
-        elementScope = element.$text.sink { [unowned self] _ in
+        elementTextScope = element.$text.sink { [unowned self] _ in
+            self.invalidateText()
+        }
+
+        elementKindScope = element.$kind.sink { [unowned self] _ in
             self.invalidateText()
         }
     }}
-    var elementScope: Cancellable?
+
+    var elementTextScope: Cancellable?
+    var elementKindScope: Cancellable?
+
     var layout: TextFrame?
     var disclosurePressed = false
     var frameAnimation: FrameAnimation?
@@ -207,7 +214,12 @@ public class TextNode: Widget {
         createActionLayer()
 
         var inInit = true
-        elementScope = element.$text.sink { [unowned self] _ in
+        elementTextScope = element.$text.sink { [unowned self] _ in
+            guard !inInit else { return }
+            self.invalidateText()
+        }
+
+        elementKindScope = element.$kind.sink { [unowned self] _ in
             guard !inInit else { return }
             self.invalidateText()
         }

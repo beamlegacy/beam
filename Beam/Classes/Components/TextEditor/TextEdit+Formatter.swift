@@ -92,21 +92,9 @@ extension BeamTextEdit {
 
         switch type {
         case .h1:
-            node.element.kind = .heading(1)
-            /*changeTextFormat(with: node, attributes: .heading(1), isActive: isActive)
-            updateAttributeState(
-                with: node,
-                attribute: .heading(1),
-                isActive: isActive
-            )*/
+            node.element.kind = isActive ? .bullet : .heading(1)
         case .h2:
-            node.element.kind = .heading(2)
-            /*changeTextFormat(with: node, attributes: .heading(2), isActive: isActive)
-            updateAttributeState(
-                with: node,
-                attribute: .heading(2),
-                isActive: isActive
-            )*/
+            node.element.kind = isActive ? .bullet : .heading(2)
         case .quote:
             print("quote")
         case .code:
