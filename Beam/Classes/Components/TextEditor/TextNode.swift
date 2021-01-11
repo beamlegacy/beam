@@ -879,7 +879,7 @@ public class TextNode: Widget {
     }
 
     private func detectFormatterType(from text: BeamText) {
-        var attributes: [BeamText.Attribute] = []
+        /*var attributes: [BeamText.Attribute] = []
         var types: [FormatterType] = []
 
         guard let formatterView = editor.formatterView, !text.isEmpty else { return }
@@ -907,7 +907,7 @@ public class TextNode: Widget {
         guard !types.isEmpty, !attributes.isEmpty else { return }
 
         editor.rootNode.state.attributes = attributes
-        formatterView.setActiveFormmatter(type: types)
+        formatterView.setActiveFormmatter(type: types)*/
     }
 
     private func buildAttributedString() -> NSAttributedString {
