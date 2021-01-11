@@ -28,6 +28,8 @@ extension BeamTextEdit {
 
         guard let popover = popover else { return }
 
+        addSubview(popover)
+
         popover.didSelectTitle = { [unowned self] (title) -> Void in
             node.text.replaceSubrange(cursorStartPosition..<rootNode.cursorPosition, with: title)
             rootNode.cursorPosition = cursorStartPosition + title.count
@@ -35,13 +37,10 @@ extension BeamTextEdit {
             node.text.makeInternalLink(cursorStartPosition..<rootNode.cursorPosition)
             dismissPopover()
         }
-
-        addSubview(popover)
     }
 
     internal func updatePopover(with command: TextRoot.Command = .none) {
         guard let node = node as? TextNode,
-              let data = data,
               let popover = popover else { return }
 
         var text = node.text.text
@@ -68,13 +67,13 @@ extension BeamTextEdit {
 
         node.text.addAttributes([.internalLink(linkText)], to: cursorStartPosition..<cursorPosition)
         text = text.replacingOccurrences(of: prefix, with: "")
-        let items = data.documentManager.documentsWithLimitTitleMatch(title: text).map({ $0.title })
-        var height = items.isEmpty ? BeamTextEdit.viewHeight : (BeamTextEdit.viewHeight * CGFloat(items.count)) + 36.5
+        let items = text.isEmpty ? documentManager.loadAllDocumentsWithLimit() : documentManager.documentsWithLimitTitleMatch(title: text)
+        var height = BeamTextEdit.viewHeight * CGFloat(items.count) + (text.isEmpty ? 0 : 36.5)
 
         if items.count == 1 || items.isEmpty { height = BeamTextEdit.viewHeight * 2 }
 
         popover.frame = NSRect(x: BeamTextEdit.posX, y: BeamTextEdit.posY, width: BeamTextEdit.viewWidth, height: height)
-        popover.items = items
+        popover.items = items.map({ $0.title })
         popover.query = text
     }
 

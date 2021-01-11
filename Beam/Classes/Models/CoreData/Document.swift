@@ -105,9 +105,13 @@ class Document: NSManagedObject {
         return fetchAll(context: context, predicate)
     }
 
-    class func fetchAllWithLimitResult(_ context: NSManagedObjectContext, _ title: String, _ limit: Int) -> [Document] {
+    class func fetchAllWithLimitedTitleMatch(_ context: NSManagedObjectContext, _ title: String, _ limit: Int) -> [Document] {
         let predicate = NSPredicate(format: "title CONTAINS[cd] %@", title as CVarArg)
         return fetchAllWithLimit(context: context, predicate, nil, limit)
+    }
+
+    class func fetchAllWithLimitResult(_ context: NSManagedObjectContext, _ limit: Int) -> [Document] {
+        return fetchAllWithLimit(context: context, nil, nil, limit)
     }
 
 }
