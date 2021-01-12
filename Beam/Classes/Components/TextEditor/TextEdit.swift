@@ -329,8 +329,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     public override func resignFirstResponder() -> Bool {
-        dismissFormatterViewWithAnimation()
-
         blinkPhase = true
         hasFocus = false
         rootNode.cancelSelection()
@@ -340,6 +338,8 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             activated()
         }
         onEndEditing()
+
+        if formatterView != nil { dismissFormatterViewWithAnimation() }
 
         return super.resignFirstResponder()
     }

@@ -178,24 +178,24 @@ extension BeamText {
         return false
     }
 
-    @discardableResult func extractFormatterTypeFrom(_ range: Swift.Range<Int>) -> [FormatterType] {
+    @discardableResult func extractFormatterType(from range: Swift.Range<Int>) -> [FormatterType] {
         let sub = extract(range: range)
-        var results: [FormatterType] = []
+        var types: [FormatterType] = []
 
         sub.ranges.forEach { range in
             range.attributes.forEach { attribute in
                 switch attribute {
                 case .strong:
-                    results.append(.bold)
+                    types.append(.bold)
                 case .emphasis:
-                    results.append(.italic)
+                    types.append(.italic)
                 default:
                     break
                 }
             }
         }
 
-        return results
+        return types
     }
 
     // toggle the given attribute in the given range and return true if the attribute was added, false if it was removed

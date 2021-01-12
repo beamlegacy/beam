@@ -85,7 +85,7 @@ extension BeamTextEdit {
             break
         }
 
-        node.text.extractFormatterTypeFrom(rootNode.cursorPosition - 1..<rootNode.cursorPosition).forEach { type in
+        node.text.extractFormatterType(from: rootNode.cursorPosition - 1..<rootNode.cursorPosition).forEach { type in
             types.append(type)
         }
 
