@@ -56,7 +56,7 @@ extension BeamText {
         var stringAttributes = [NSAttributedString.Key: Any]()
         var strong = false
         var emphasis = false
-        var strikethrough = true
+        var strikethrough = false
         var color = NSColor.editorTextColor
 //        var quoteLevel: Int
 //        var quoteTitle: String?
