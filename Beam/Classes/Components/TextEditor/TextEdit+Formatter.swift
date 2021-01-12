@@ -97,6 +97,8 @@ extension BeamTextEdit {
                 rootNode.state.attributes.append(.strong)
             case .italic:
                 rootNode.state.attributes.append(.emphasis)
+            case .strikethrough:
+                rootNode.state.attributes.append(.strikethrough)
             default:
                 break
             }
@@ -122,7 +124,7 @@ extension BeamTextEdit {
         case .italic:
             updateAttributeState(with: node, attribute: .emphasis, isActive: isActive)
         case .strikethrough:
-            print("strikethrough")
+            updateAttributeState(with: node, attribute: .strikethrough, isActive: isActive)
         default:
             break
         }

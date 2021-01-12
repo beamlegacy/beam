@@ -196,6 +196,8 @@ extension BeamText {
                     types.append(.bold)
                 case .emphasis:
                     types.append(.italic)
+                case .strikethrough:
+                    types.append(.strikethrough)
                 default:
                     break
                 }

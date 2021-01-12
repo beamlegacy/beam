@@ -109,6 +109,7 @@ class BeamTextTests: XCTestCase {
         """.toBeamText else { fatalError() }
 
         let links2 = validText.internalLinks
+        print(links2)
         XCTAssertEqual(links2.count, 1)
         XCTAssertEqual(links2[0].string, "link")
         XCTAssertEqual(links2[0].position, 5)
