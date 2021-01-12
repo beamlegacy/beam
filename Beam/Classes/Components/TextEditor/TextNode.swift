@@ -15,11 +15,26 @@ import Combine
 public class TextNode: Widget {
 
     var element: BeamElement { didSet {
-        elementScope = element.$text.sink { [unowned self] _ in
+        elementTextScope = element.$text.sink { [unowned self] newValue in
+            elementText = newValue
             self.invalidateText()
         }
+
+        elementKindScope = element.$kind.sink { [unowned self] newValue in
+            elementKind = newValue
+            self.invalidateText()
+        }
+
+        elementText = element.text
+        elementKind = element.kind
     }}
-    var elementScope: Cancellable?
+
+    var elementTextScope: Cancellable?
+    var elementKindScope: Cancellable?
+
+    var elementText: BeamText
+    var elementKind: ElementKind
+
     var layout: TextFrame?
     var disclosurePressed = false
     var frameAnimation: FrameAnimation?
@@ -181,11 +196,12 @@ public class TextNode: Widget {
     }
 
     var isHeader: Bool {
-        return text.hasPrefix("# ") || text.hasPrefix("## ")
-    }
-
-    var isHigherHeading: Bool {
-        return text.hasPrefix("# ")
+        switch elementKind {
+        case .heading:
+            return true
+        default:
+            return false
+        }
     }
 
     private var icon = NSImage(named: "editor-cmdreturn")
@@ -204,12 +220,22 @@ public class TextNode: Widget {
     init(editor: BeamTextEdit, element: BeamElement) {
         self.element = element
 
+        elementText = element.text
+        elementKind = element.kind
+
         super.init(editor: editor)
         createActionLayer()
 
         var inInit = true
-        elementScope = element.$text.sink { [unowned self] _ in
+        elementTextScope = element.$text.sink { [unowned self] newValue in
             guard !inInit else { return }
+            elementText = newValue
+            self.invalidateText()
+        }
+
+        elementKindScope = element.$kind.sink { [unowned self] newValue in
+            guard !inInit else { return }
+            elementKind = newValue
             self.invalidateText()
         }
         inInit = false
@@ -569,10 +595,13 @@ public class TextNode: Widget {
         }
 
         if let link = linkAt(point: mouseInfo.position) {
+            editor.dismissFormatterView()
             editor.openURL(link)
             return true
         }
+
         if let link = internalLinkAt(point: mouseInfo.position) {
+            editor.dismissFormatterView()
             editor.openCard(link)
             return true
         }
@@ -593,10 +622,17 @@ public class TextNode: Widget {
             }
         }
 
+        guard editor.popover != nil else { return false }
+        editor.dismissPopover()
+        editor.cancelInternalLink()
+        editor.initFormatterView()
+
         return false
     }
 
     override func mouseUp(mouseInfo: MouseInfo) -> Bool {
+        editor.detectFormatterType()
+
         if disclosurePressed && disclosureButtonFrame.contains(mouseInfo.position) {
             disclosurePressed = false
             open.toggle()
@@ -870,7 +906,7 @@ public class TextNode: Widget {
     }
 
     private func buildAttributedString() -> NSAttributedString {
-        let str = text.buildAttributedString(fontSize: fontSize, cursorPosition: cursorPosition, elementKind: element.kind)
+        let str = elementText.buildAttributedString(fontSize: fontSize, cursorPosition: cursorPosition, elementKind: elementKind)
         let paragraphStyle = NSMutableParagraphStyle()
 //        paragraphStyle.alignment = .justified
         paragraphStyle.lineBreakMode = .byWordWrapping
@@ -888,7 +924,7 @@ public class TextNode: Widget {
     }
 
     private func showHoveredActionLayers(_ hovered: Bool) {
-        guard !text.isEmpty else { return }
+        guard !elementText.isEmpty else { return }
 
         actionLayerIsHovered = hovered
         icon = icon?.fill(color: hovered ? .editorSearchHover : .editorSearchNormal)

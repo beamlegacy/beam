@@ -34,15 +34,13 @@ extension BeamText {
         case .code:
             break
         case let .heading(level):
-            weight += 1
+            weight = .medium
             size = level == 1 ? headingFirstLevel : headingSecondLevel
         case .quote:
             quote = true
         }
 
-        if strong {
-            weight += 1
-        }
+        if strong { weight = .bold }
 
         var f = NSFont.systemFont(ofSize: size, weight: weight)
 
@@ -58,6 +56,7 @@ extension BeamText {
         var stringAttributes = [NSAttributedString.Key: Any]()
         var strong = false
         var emphasis = false
+        var strikethrough = false
         var color = NSColor.editorTextColor
 //        var quoteLevel: Int
 //        var quoteTitle: String?
@@ -80,6 +79,8 @@ extension BeamText {
             case .internalLink(let link):
                 color = NSColor.editorBidirectionalLinkColor
                 internalLink = link
+            case .strikethrough:
+                strikethrough = true
             }
         }
 
@@ -93,6 +94,11 @@ extension BeamText {
             }
         } else if let link = internalLink {
             stringAttributes[.link] = link
+        }
+
+        if strikethrough {
+            stringAttributes[.strikethroughStyle] = NSUnderlineStyle.single.rawValue
+            stringAttributes[.strikethroughColor] = NSColor.red
         }
 
         if let source = source {

@@ -15,12 +15,13 @@ struct BeamText: Codable {
         }
     }
 
-    enum Attribute: Codable, Equatable {
+    enum Attribute: Codable, Equatable, Hashable {
         case strong
         case emphasis
         case source(String)
         case link(String)
         case internalLink(String)
+        case strikethrough
 
         // swiftlint:disable:next nesting
         enum CodingKeys: String, CodingKey {
@@ -48,6 +49,7 @@ struct BeamText: Codable {
                 case "source": self = .source(try container.decode(String.self, forKey: .payload))
                 case "link": self = .link(try container.decode(String.self, forKey: .payload))
                 case "internalLink": self = .internalLink(try container.decode(String.self, forKey: .payload))
+                case "strikethrough": self = .strikethrough
                 default:
                     throw AttributeError.unknownAttribute
                 }
@@ -59,6 +61,7 @@ struct BeamText: Codable {
                 case 2: self = .source(try container.decode(String.self, forKey: .payload))
                 case 3: self = .link(try container.decode(String.self, forKey: .payload))
                 case 4: self = .internalLink(try container.decode(String.self, forKey: .payload))
+                case 5: self = .strikethrough
                 default:
                     throw AttributeError.unknownAttribute
                 }
@@ -79,6 +82,7 @@ struct BeamText: Codable {
                 try container.encode(value, forKey: .payload)
             case .internalLink(let value):
                 try container.encode(value, forKey: .payload)
+            case .strikethrough: break
             }
         }
 
@@ -94,6 +98,19 @@ struct BeamText: Codable {
                 return "link"
             case .internalLink:
                 return "internalLink"
+            case .strikethrough:
+                return "strikethrough"
+            }
+        }
+
+        var isLink: Bool {
+            switch self {
+            case .link:
+                return true
+            case .internalLink:
+                return true
+            default:
+                return false
             }
         }
     }

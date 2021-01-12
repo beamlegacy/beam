@@ -102,6 +102,46 @@ extension NSColor {
         return loadColor(named: "PopoverActionTextColor")
     }
 
+    // Formatter View
+
+    static var formatterViewBackgroundColor: NSColor {
+        return loadColor(named: "Alabaster")
+    }
+
+    static var formatterViewBackgroundColorDark: NSColor {
+        return loadColor(named: "FormatterBackgroundColorDark")
+    }
+
+    static var formatterViewBackgroundColorLight: NSColor {
+        return loadColor(named: "FormatterBackgroundColorLight")
+    }
+
+    static var formatterViewBackgroundHoverColor: NSColor {
+        return loadColor(named: "FormatterBackgroundHoverColor")
+    }
+
+    static var formatterBorderColor: NSColor {
+        return loadColor(named: "FormatterBorderColor")
+    }
+
+    static var formatterShadowColor: NSColor {
+        return loadColor(named: "FormatterShadowColor")
+    }
+
+    static var formatterIconColor: NSColor {
+        return loadColor(named: "Niobium")
+    }
+
+    static var formatterActiveIconColor: NSColor {
+        return loadColor(named: "FormatterActiveIconColor")
+    }
+
+    static var formatterButtonBackgroudHoverColor: NSColor {
+        return loadColor(named: "FormatterItemHoverColor")
+    }
+
+    // Other
+
     static var tableHeaderTextColor: NSColor {
         return loadColor(named: "TableHeaderTextColor")
     }

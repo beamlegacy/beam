@@ -185,7 +185,8 @@ extension TextRoot {
             range = selectedTextRange
         }
 
-        node.text.replaceSubrange(range, with: string)
+        let bString = BeamText(text: string, attributes: state.attributes)
+        node.text.replaceSubrange(range, with: bString)
         cursorPosition = range.lowerBound + c
         cancelSelection()
     }
@@ -195,4 +196,30 @@ extension TextRoot {
         let r2 = rectAt(range.upperBound)
         return (r1.union(r2), range)
     }
+
+    public func updateTextAttributesAtCursorPosition() {
+        guard let node = node as? TextNode else { return }
+        let ranges = node.text.rangesAt(position: cursorPosition)
+        switch ranges.count {
+        case 0:
+            state.attributes = []
+        case 1:
+            guard let range = ranges.first else { return }
+            state.attributes = BeamText.removeLinks(from: range.attributes)
+        case 2:
+            guard let range1 = ranges.first else { return }
+            guard let range2 = ranges.last else { return }
+            if !range1.attributes.contains(where: { $0.isLink }) {
+                state.attributes = range1.attributes
+            } else if !range2.attributes.contains(where: { $0.isLink }) {
+                state.attributes = range2.attributes
+            } else {
+                // They both contain links, let's take the attributes from the left one and remove the link attribute
+                state.attributes = BeamText.removeLinks(from: range1.attributes)
+            }
+        default:
+            fatalError() // NOPE!
+        }
+    }
+
 }

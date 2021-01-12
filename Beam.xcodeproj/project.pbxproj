@@ -8,14 +8,20 @@
 
 /* Begin PBXBuildFile section */
 		4105CE2225A5ECA2009AB687 /* BidirectionalPopoverItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4105CE2125A5ECA2009AB687 /* BidirectionalPopoverItem.swift */; };
+		4105CE7525A60681009AB687 /* FormatterTypeButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4105CE7425A60681009AB687 /* FormatterTypeButton.swift */; };
 		41221A362592771F00255197 /* TextEdit+Popover.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41221A352592771F00255197 /* TextEdit+Popover.swift */; };
 		414B987A259DE2E2002E81A3 /* BidirectionalPopoverActionItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414B9878259DE2E2002E81A3 /* BidirectionalPopoverActionItem.swift */; };
 		414B987B259DE2E2002E81A3 /* BidirectionalPopoverActionItem.xib in Resources */ = {isa = PBXBuildFile; fileRef = 414B9879259DE2E2002E81A3 /* BidirectionalPopoverActionItem.xib */; };
+		414B989925A21BB0002E81A3 /* TextEdit+Formatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414B989825A21BB0002E81A3 /* TextEdit+Formatter.swift */; };
+		414B98F025A239F8002E81A3 /* FormatterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414B98EF25A239F8002E81A3 /* FormatterView.swift */; };
+		414B98F625A23A04002E81A3 /* FormatterView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 414B98F525A23A04002E81A3 /* FormatterView.xib */; };
+		414B98FA25A23A4F002E81A3 /* NSView+Xib.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414B98F925A23A4F002E81A3 /* NSView+Xib.swift */; };
+		414B98FE25A27930002E81A3 /* FormatterType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414B98FD25A27930002E81A3 /* FormatterType.swift */; };
 		4159E9D4259A1A81005FD355 /* BidirectionalPopover.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159E9D3259A1A81005FD355 /* BidirectionalPopover.swift */; };
 		4159E9E2259A2575005FD355 /* BidirectionalPopover.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4159E9E1259A2575005FD355 /* BidirectionalPopover.xib */; };
 		4159EA0A259A3568005FD355 /* BidirectionalPopoverResultItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159EA08259A3568005FD355 /* BidirectionalPopoverResultItem.swift */; };
 		4159EA0B259A3568005FD355 /* BidirectionalPopoverResultItem.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4159EA09259A3568005FD355 /* BidirectionalPopoverResultItem.xib */; };
-		416C09F3259C919200AF2903 /* CATransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416C09F2259C919200AF2903 /* CATransaction.swift */; };
+		416C09F3259C919200AF2903 /* CATransaction+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416C09F2259C919200AF2903 /* CATransaction+Beam.swift */; };
 		4170C43125923B6A0072C781 /* Popover.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4170C43025923B6A0072C781 /* Popover.swift */; };
 		418170FF2581060A00317ED8 /* Colors.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 418170FE2581060A00317ED8 /* Colors.xcassets */; };
 		418171122581082200317ED8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 418171112581082200317ED8 /* Assets.xcassets */; };
@@ -409,14 +415,20 @@
 		2BE96DC9A7278563E5878CCD /* Pods_Beam.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Beam.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3B2FA634DAEED958EF901A42 /* Pods-BeamUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BeamUITests.debug.xcconfig"; path = "Target Support Files/Pods-BeamUITests/Pods-BeamUITests.debug.xcconfig"; sourceTree = "<group>"; };
 		4105CE2125A5ECA2009AB687 /* BidirectionalPopoverItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BidirectionalPopoverItem.swift; sourceTree = "<group>"; };
+		4105CE7425A60681009AB687 /* FormatterTypeButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatterTypeButton.swift; sourceTree = "<group>"; };
 		41221A352592771F00255197 /* TextEdit+Popover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TextEdit+Popover.swift"; sourceTree = "<group>"; };
 		414B9878259DE2E2002E81A3 /* BidirectionalPopoverActionItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BidirectionalPopoverActionItem.swift; sourceTree = "<group>"; };
 		414B9879259DE2E2002E81A3 /* BidirectionalPopoverActionItem.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = BidirectionalPopoverActionItem.xib; sourceTree = "<group>"; };
+		414B989825A21BB0002E81A3 /* TextEdit+Formatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TextEdit+Formatter.swift"; sourceTree = "<group>"; };
+		414B98EF25A239F8002E81A3 /* FormatterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatterView.swift; sourceTree = "<group>"; };
+		414B98F525A23A04002E81A3 /* FormatterView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = FormatterView.xib; sourceTree = "<group>"; };
+		414B98F925A23A4F002E81A3 /* NSView+Xib.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSView+Xib.swift"; sourceTree = "<group>"; };
+		414B98FD25A27930002E81A3 /* FormatterType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatterType.swift; sourceTree = "<group>"; };
 		4159E9D3259A1A81005FD355 /* BidirectionalPopover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BidirectionalPopover.swift; sourceTree = "<group>"; };
 		4159E9E1259A2575005FD355 /* BidirectionalPopover.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = BidirectionalPopover.xib; sourceTree = "<group>"; };
 		4159EA08259A3568005FD355 /* BidirectionalPopoverResultItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BidirectionalPopoverResultItem.swift; sourceTree = "<group>"; };
 		4159EA09259A3568005FD355 /* BidirectionalPopoverResultItem.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = BidirectionalPopoverResultItem.xib; sourceTree = "<group>"; };
-		416C09F2259C919200AF2903 /* CATransaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CATransaction.swift; sourceTree = "<group>"; };
+		416C09F2259C919200AF2903 /* CATransaction+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CATransaction+Beam.swift"; sourceTree = "<group>"; };
 		4170C43025923B6A0072C781 /* Popover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Popover.swift; sourceTree = "<group>"; };
 		418170FE2581060A00317ED8 /* Colors.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Colors.xcassets; sourceTree = "<group>"; };
 		418171112581082200317ED8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -660,6 +672,15 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		414B98EE25A239C6002E81A3 /* FormatterView */ = {
+			isa = PBXGroup;
+			children = (
+				414B98EF25A239F8002E81A3 /* FormatterView.swift */,
+				414B98F525A23A04002E81A3 /* FormatterView.xib */,
+			);
+			path = FormatterView;
+			sourceTree = "<group>";
+		};
 		4159E9BD259A1A4C005FD355 /* Core */ = {
 			isa = PBXGroup;
 			children = (
@@ -871,6 +892,7 @@
 				418171962581107C00317ED8 /* Maths.swift */,
 				4181719A2581107C00317ED8 /* JSSourceLoader.swift */,
 				4181719B2581107C00317ED8 /* Information.swift */,
+				4105CE7425A60681009AB687 /* FormatterTypeButton.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -903,7 +925,8 @@
 				418173BD2581251600317ED8 /* URL+Beam.swift */,
 				4181744225812C5F00317ED8 /* NSColor+Beam.swift */,
 				521EEDFA2593927100BA2485 /* Int+ByteSize.swift */,
-				416C09F2259C919200AF2903 /* CATransaction.swift */,
+				416C09F2259C919200AF2903 /* CATransaction+Beam.swift */,
+				414B98F925A23A4F002E81A3 /* NSView+Xib.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -945,6 +968,7 @@
 				418171C12581107C00317ED8 /* Font.swift */,
 				96E4CF2F258DFB0800D6DE22 /* BeamText+NSAttributedString.swift */,
 				41221A352592771F00255197 /* TextEdit+Popover.swift */,
+				414B989825A21BB0002E81A3 /* TextEdit+Formatter.swift */,
 				96C9AA3E259019E3007D3D98 /* LinkedReferenceNode.swift */,
 				96C9AA5625901AA9007D3D98 /* LinksSection.swift */,
 				96F936622590FA59006D8E53 /* BTextEdit.swift */,
@@ -1042,6 +1066,7 @@
 			children = (
 				418171AA2581107C00317ED8 /* AutoComplete */,
 				4159E9D2259A1A56005FD355 /* BidirectionalPopover */,
+				414B98EE25A239C6002E81A3 /* FormatterView */,
 				418172A725811A3A00317ED8 /* BMTextField */,
 				521EEDC725937E7B00BA2485 /* DocumentsList */,
 				418171D72581107C00317ED8 /* OmniBar */,
@@ -1094,6 +1119,7 @@
 				4181731625811E1800317ED8 /* CursorMovement.swift */,
 				4181733125811F4800317ED8 /* KeyCode.swift */,
 				4181733625811F6300317ED8 /* Mode.swift */,
+				414B98FD25A27930002E81A3 /* FormatterType.swift */,
 			);
 			path = Enum;
 			sourceTree = "<group>";
@@ -1612,6 +1638,7 @@
 				5206280C25922D6300D7CD9E /* delete_document.graphql in Resources */,
 				5206281825922D8A00D7CD9E /* delete_all_documents.graphql in Resources */,
 				5206281025922D6C00D7CD9E /* update_document.graphql in Resources */,
+				414B98F625A23A04002E81A3 /* FormatterView.xib in Resources */,
 				4159E9E2259A2575005FD355 /* BidirectionalPopover.xib in Resources */,
 				418171F42581107C00317ED8 /* sign_up.graphql in Resources */,
 				418171F62581107C00317ED8 /* sign_in.graphql in Resources */,
@@ -1878,6 +1905,7 @@
 				418171EE2581107C00317ED8 /* GraphqlParametersProtocol.swift in Sources */,
 				521EEDDD25937E9200BA2485 /* DocumentsWindow.swift in Sources */,
 				418172122581107C00317ED8 /* EventsTracker.swift in Sources */,
+				414B98FE25A27930002E81A3 /* FormatterType.swift in Sources */,
 				4181720A2581107C00317ED8 /* BrowserTab.swift in Sources */,
 				5206283E25923EB500D7CD9E /* DocumentAPIType.swift in Sources */,
 				418172D625811B8700317ED8 /* RoundRectButtonStyle.swift in Sources */,
@@ -1920,6 +1948,7 @@
 				4181724E2581107C00317ED8 /* TabStats.swift in Sources */,
 				4181724F2581107C00317ED8 /* WebView.swift in Sources */,
 				96C9AA5725901AA9007D3D98 /* LinksSection.swift in Sources */,
+				414B98FA25A23A4F002E81A3 /* NSView+Xib.swift in Sources */,
 				418171F02581107C00317ED8 /* APIResponse.swift in Sources */,
 				418172262581107C00317ED8 /* NSRange+Beam.swift in Sources */,
 				418172222581107C00317ED8 /* NSView+Beam.swift in Sources */,
@@ -1959,9 +1988,10 @@
 				4181713525810CDC00317ED8 /* Beam.xcdatamodeld in Sources */,
 				9611995E25A27A17005BEC82 /* BeamObjCBridge.m in Sources */,
 				418172102581107C00317ED8 /* TextFormatter.swift in Sources */,
-				416C09F3259C919200AF2903 /* CATransaction.swift in Sources */,
+				416C09F3259C919200AF2903 /* CATransaction+Beam.swift in Sources */,
 				418172382581107C00317ED8 /* TextNode.swift in Sources */,
 				418172502581107C00317ED8 /* NoteView.swift in Sources */,
+				414B989925A21BB0002E81A3 /* TextEdit+Formatter.swift in Sources */,
 				4181725F2581107C00317ED8 /* DocumentManager.swift in Sources */,
 				96F93618258CFDD2006D8E53 /* BeamText.swift in Sources */,
 				524299E725A480A300F4DBF5 /* AccountsView.swift in Sources */,
@@ -1990,10 +2020,12 @@
 				4181724C2581107C00317ED8 /* BrowserTabView.swift in Sources */,
 				521EEDE125937F5B00BA2485 /* DocumentsContentView.swift in Sources */,
 				418172512581107C00317ED8 /* JournalView.swift in Sources */,
+				4105CE7525A60681009AB687 /* FormatterTypeButton.swift in Sources */,
 				418172462581107C00317ED8 /* NoteList.swift in Sources */,
 				418171FD2581107C00317ED8 /* NavigationContext.swift in Sources */,
 				418172372581107C00317ED8 /* TextEditOperations.swift in Sources */,
 				521EEDE925937FAD00BA2485 /* DocumentRow.swift in Sources */,
+				414B98F025A239F8002E81A3 /* FormatterView.swift in Sources */,
 				418172472581107C00317ED8 /* NoteDetail.swift in Sources */,
 				4181720C2581107C00317ED8 /* BeamNote.swift in Sources */,
 			);

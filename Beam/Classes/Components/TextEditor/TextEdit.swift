@@ -70,6 +70,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     internal var popoverPrefix = 0
     internal var popoverSuffix = 0
     internal var popover: BidirectionalPopover?
+    internal var formatterView: FormatterView?
 
     public init(root: BeamElement, font: Font = Font.main) {
         BeamNote.detectLinks(documentManager)
@@ -209,7 +210,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
     public override var frame: NSRect {
         didSet {
-//            print("editor[\(rootNode.note.title)] frame changed to \(frame)")
             let oldbig = oldValue.width >= Self.bigThreshold
             let newbig = isBig
 
@@ -223,13 +223,15 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     func relayoutRoot() {
-//        print("editor[\(rootNode.note.title)] relayout root to \(frame)")
         let r = bounds
         let width = CGFloat(isBig ? frame.width - 200 - leadingAlignment : 450)
         let rect = NSRect(x: leadingAlignment, y: topOffsetActual, width: width, height: r.height)
-        //print("relayoutRoot -> \(rect)")
+
         rootNode.availableWidth = rect.width
         rootNode.setLayout(rect)
+
+        guard formatterView != nil else { return }
+        updateFormatterViewLayout()
     }
 
     // This is the root node of what we are editing:
@@ -268,7 +270,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     public override func layout() {
-//        print("editor[\(rootNode.note.title)] layout \(frame)")
         relayoutRoot()
         super.layout()
         if scrollToCursorAtLayout {
@@ -325,6 +326,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         hasFocus = true
         invalidate()
         onStartEditing()
+        initFormatterView()
         return super.becomeFirstResponder()
     }
 
@@ -338,6 +340,10 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             activated()
         }
         onEndEditing()
+
+        showOrHideFormatterView(isPresent: false)
+        dismissPopover()
+
         return super.resignFirstResponder()
     }
 
@@ -373,6 +379,8 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
             scrollToCursorAtLayout = true
             self.node = newNode
+
+            cleanPersistentFormatter()
         }
     }
 
@@ -392,7 +400,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     pressEnter(option, command)
                     return
                 case .leftArrow:
-                    cancelPopover()
                     if control && option && command {
                         guard let node = node as? TextNode else { return }
                         node.fold()
@@ -405,19 +412,29 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                             rootNode.doCommand(.moveLeftAndModifySelection)
                         }
                         return
+                    } else if command && popover != nil {
+                        rootNode.doCommand(.moveToBeginningOfLine)
+                        dismissPopover()
+                    } else if command && formatterView != nil {
+                        rootNode.doCommand(.moveToBeginningOfLine)
+                        detectFormatterType()
                     } else {
                         if option {
                             rootNode.doCommand(.moveWordLeft)
                         } else if command {
                             rootNode.doCommand(.moveToBeginningOfLine)
-                        } else {
+                        } else if popover != nil {
+                            rootNode.doCommand(.moveLeft)
                             updatePopover(with: .moveLeft)
+                        } else if formatterView != nil {
+                            rootNode.doCommand(.moveLeft)
+                            detectFormatterType()
+                        } else {
                             rootNode.doCommand(.moveLeft)
                         }
                         return
                     }
                 case .rightArrow:
-                    cancelPopover()
                     if control && option && command {
                         guard let node = node as? TextNode else { return }
                         node.unfold()
@@ -430,14 +447,20 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                             rootNode.doCommand(.moveRightAndModifySelection)
                         }
                         return
+                    } else if command && formatterView != nil {
+                        rootNode.doCommand(.moveToEndOfLine)
+                        detectFormatterType()
                     } else {
                         if option {
                             rootNode.doCommand(.moveWordRight)
                         } else if command {
                             rootNode.doCommand(.moveToEndOfLine)
-                        } else {
-                            updatePopover(with: .moveRight)
+                        } else if formatterView != nil {
                             rootNode.doCommand(.moveRight)
+                            detectFormatterType()
+                        } else {
+                            rootNode.doCommand(.moveRight)
+                            updatePopover(with: .moveRight)
                         }
                         return
                     }
@@ -449,8 +472,12 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     } else if let popover = popover {
                         popover.doCommand(.moveUp)
                         return
+                    } else if formatterView != nil {
+                        rootNode.doCommand(.moveUp)
+                        detectFormatterType()
                     } else {
                         rootNode.doCommand(.moveUp)
+                        dismissPopover()
                         return
                     }
                 case .downArrow:
@@ -461,15 +488,22 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     } else if let popover = popover {
                         popover.doCommand(.moveDown)
                         return
+                    } else if formatterView != nil {
+                        rootNode.doCommand(.moveDown)
+                        detectFormatterType()
                     } else {
                         rootNode.doCommand(.moveDown)
+                        dismissPopover()
                         return
                     }
                 case .delete:
                     rootNode.doCommand(.deleteBackward)
                     updatePopover(with: .deleteForward)
-                    return
 
+                    guard let node = node as? TextNode else { return }
+                    if node.text.isEmpty { initFormatterView() }
+
+                    return
                 case .backTab:
                     rootNode.doCommand(.decreaseIndentation)
                     return
@@ -489,7 +523,11 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                 rootNode.doCommand(.deleteForward)
                 return
             case 53: // escape
-                cancelPopover()
+                if popover != nil {
+                    dismissPopover()
+                    cancelInternalLink()
+                    initFormatterView()
+                }
                 rootNode.cancelSelection()
                 return
             default:
@@ -1027,6 +1065,13 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         popoverSuffix = suffix
         cursorStartPosition = rootNode.cursorPosition
         initPopover()
+        showOrHideFormatterView(isPresent: false)
+    }
+
+    func cleanPersistentFormatter() {
+        guard let formatterView = formatterView else { return }
+        rootNode.state.attributes = []
+        formatterView.resetSelectedItems()
     }
 
     func purgeDeadNodes() {

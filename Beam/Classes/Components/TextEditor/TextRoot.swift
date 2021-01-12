@@ -13,12 +13,13 @@ public struct TextState {
     var selectedTextRange: Range<Int> = 0..<0
     var markedTextRange: Range<Int> = 0..<0
     var cursorPosition: Int = -1
+
+    var attributes: [BeamText.Attribute] = []
 }
 
 public struct TextConfig {
     var editable: Bool = true
     var font: Font = Font.system(size: 12)
-    var contextualSyntax = true
     var keepCursorMidScreen = false //true
 
     var color = NSColor.textColor
@@ -61,6 +62,7 @@ public class TextRoot: TextNode {
         }
         set {
             state.cursorPosition = newValue
+            updateTextAttributesAtCursorPosition()
             let n = node as? TextNode
             n?.invalidateText()
             node.invalidate()
