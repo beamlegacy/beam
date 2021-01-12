@@ -80,7 +80,7 @@ class FormatterView: NSView {
     }
 
     private func animateShadowOnMouseEntered(_ isHover: Bool) {
-        NSAnimationContext.runAnimationGroup { (ctx) in
+        NSAnimationContext.runAnimationGroup { ctx in
             ctx.allowsImplicitAnimation = true
             ctx.duration = 0.3
 
@@ -92,7 +92,7 @@ class FormatterView: NSView {
     }
 
     private func animateButtonOnMouseEntered(_ button: NSButton, _ isHover: Bool) {
-        NSAnimationContext.runAnimationGroup { (ctx) in
+        NSAnimationContext.runAnimationGroup { ctx in
             ctx.allowsImplicitAnimation = true
             ctx.duration = 0.3
 
