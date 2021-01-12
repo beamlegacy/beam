@@ -56,6 +56,8 @@ extension BeamTextEdit {
     }
 
     internal func dismissFormatterViewWithAnimation() {
+        guard formatterView != nil else { return }
+
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
 
