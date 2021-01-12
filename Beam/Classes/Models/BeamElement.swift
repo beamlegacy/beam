@@ -87,13 +87,15 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject {
         return parent?.note
     }
 
+    static let recursiveCoding = CodingUserInfoKey(rawValue: "recursiveCoding")!
+
     enum CodingKeys: String, CodingKey {
         case id
         case text
         case open
         case children
         case readOnly
-        case ast
+        case score
         case creationDate
         case updateDate
         case kind
@@ -113,6 +115,7 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject {
 
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
+        let recursive = decoder.userInfo[Self.recursiveCoding] as? Bool ?? true
 
         id = try container.decode(UUID.self, forKey: .id)
         do {
@@ -123,12 +126,17 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject {
         }
         open = try container.decode(Bool.self, forKey: .open)
         readOnly = try container.decode(Bool.self, forKey: .readOnly)
+
+        if container.contains(.score) {
+            score = try container.decode(Float.self, forKey: .score)
+        }
+
         if container.contains(.creationDate) {
             creationDate = try container.decode(Date.self, forKey: .creationDate)
             updateDate = try container.decode(Date.self, forKey: .updateDate)
         }
 
-        if container.contains(.children) {
+        if recursive, container.contains(.children) {
             children = try container.decode([BeamElement].self, forKey: .children)
             for child in children {
                 child.parent = self
@@ -146,14 +154,16 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject {
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
+        let recursive = encoder.userInfo[Self.recursiveCoding] as? Bool ?? true
 
         try container.encode(id, forKey: .id)
         try container.encode(text, forKey: .text)
         try container.encode(open, forKey: .open)
         try container.encode(readOnly, forKey: .readOnly)
+        try container.encode(score, forKey: .score)
         try container.encode(creationDate, forKey: .creationDate)
         try container.encode(updateDate, forKey: .updateDate)
-        if !children.isEmpty {
+        if recursive, !children.isEmpty {
             try container.encode(children, forKey: .children)
         }
 
@@ -267,7 +277,6 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject {
             let reference = NoteReference(noteName: note.title, elementID: id)
 //            Logger.shared.logInfo("New link \(note.title) <-> \(linkTitle)", category: .document)
             refnote.addLinkedReference(reference)
-            refnote.save(documentManager: documentManager)
         }
 
         for c in children {

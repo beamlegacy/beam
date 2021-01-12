@@ -1,21 +1,11 @@
 //
 //  BeamNote.swift
-//  testWkWebViewSwiftUI
 //
 //  Created by Sebastien Metrot on 18/09/2020.
 //
 
 import Foundation
-import AppKit
 import Combine
-
-/*
- 
- Beam contains Notes
- A Note contains a tree of blocks. A Note has a title that has to be unique.
- A Block contains a list of text blocks. An element can be of different type (Bullet point, Numbered bullet point, Quote, Code, Header (1-6?)...). A Block can be referenced by any note
- A text block contains text. It contains the format of the text (Bold, Italic, Underline). There are different text block types to represent different attributes (Code, URL, Link...)
- */
 
 struct VisitedPage: Codable, Identifiable {
     var id: UUID = UUID()
@@ -127,7 +117,7 @@ class BeamNote: BeamElement {
     private static func instanciateNote(_ documentStruct: DocumentStruct) throws -> BeamNote {
         let decoder = JSONDecoder()
         let note = try decoder.decode(BeamNote.self, from: documentStruct.data)
-        fetchedNotes[documentStruct.title] = note
+        appendToFetchedNotes(note)
         return note
     }
     static func fetch(_ documentManager: DocumentManager, title: String) -> BeamNote? {
@@ -168,9 +158,24 @@ class BeamNote: BeamElement {
 
     // Beware that this function crashes whatever note with that title in the cache
     static func create(_ documentManager: DocumentManager, title: String) -> BeamNote {
+        assert(fetchedNotes[title] == nil)
         let note = BeamNote(title: title)
-        fetchedNotes[title] = note
+        appendToFetchedNotes(note)
+        updateNoteCount()
         return note
+    }
+
+    static func appendToFetchedNotes(_ note: BeamNote) {
+        fetchedNotesCancellables.removeValue(forKey: note.title)
+        fetchedNotesCancellables[note.title] =
+            note.$changed
+                .throttle(for: .seconds(2), scheduler: RunLoop.main, latest: false)
+                .sink { [weak note] _ in
+            let documentManager = DocumentManager()
+            note?.detectLinkedNotes(documentManager)
+            note?.save(documentManager: documentManager)
+        }
+        fetchedNotes[note.title] = note
     }
 
     static func fetchOrCreate(_ documentManager: DocumentManager, title: String) -> BeamNote {
@@ -188,6 +193,7 @@ class BeamNote: BeamElement {
     }
 
     static func unload(note: String) {
+        fetchedNotesCancellables.removeValue(forKey: note)
         fetchedNotes.removeValue(forKey: note)
     }
 
@@ -214,27 +220,29 @@ class BeamNote: BeamElement {
     }
 
     private static var fetchedNotes: [String: BeamNote] = [:]
-}
+    private static var fetchedNotesCancellables: [String: Cancellable] = [:]
 
-// TODO: Remove this when we remove Note/Bullet from the build
-// temp adapter
-func beamNoteFrom(note: Note) -> BeamNote {
-    let n = BeamNote(title: note.title)
-
-    for b in note.rootBullets() {
-        n.addChild(beamElementFrom(bullet: b))
+    private static func updateNoteCount() {
+        AppDelegate.main.data.updateNoteCount()
     }
 
-    return n
-}
-
-func beamElementFrom(bullet: Bullet) -> BeamElement {
-    let element = BeamElement()
-    element.text = BeamText(text: bullet.content)
-
-    for b in bullet.sortedChildren() {
-        element.addChild(beamElementFrom(bullet: b))
+    func createdByUser() {
+        score += 0.1
     }
 
-    return element
+    func viewedByUser() {
+        score += 0.1
+    }
+
+    func referencedByUser() {
+        score += 0.1
+    }
+
+    func modifiedByUser() {
+        score += 0.1
+    }
+
+    func importedByUser() {
+        score += 0.1
+    }
 }

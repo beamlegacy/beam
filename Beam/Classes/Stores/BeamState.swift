@@ -9,6 +9,9 @@
 import Foundation
 import Combine
 import WebKit
+import SwiftSoup
+
+let NoteDisplayThreshold = Float(0.0)
 
 @objc class BeamState: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var data: BeamData
@@ -76,7 +79,9 @@ import WebKit
 
                 tab.appendToIndexer = { [weak self] url, read in
                     guard let self = self else { return }
-                    self.data.searchKit.append(url: url, contents: read.title + "\n" + read.siteName + "\n" + read.textContent)
+                    guard let doc = try? SwiftSoup.parse(read.content, url.absoluteString) else { return }
+                    let text = html2Text(url: url, doc: doc)
+                    self.data.index.append(document: IndexDocument(source: url.absoluteString, title: read.title, contents: text))
                 }
             }
 
@@ -255,9 +260,8 @@ import WebKit
 
         let n = BeamNote.create(data.documentManager, title: query)
 
-        let bulletStr = "[[\(query)]]"
         let e = BeamElement()
-        e.text = BeamText(text: bulletStr)
+        e.text = BeamText(text: query, attributes: [.internalLink(query)])
         self.data.todaysNote.insert(e, after: self.data.todaysNote.children.last)
 
         return n
@@ -355,7 +359,15 @@ import WebKit
             self.completedQueries = []
 
             if !query.isEmpty {
-                let notes = data.documentManager.documentsWithTitleMatch(title: query).prefix(4)
+                let notes = data.documentManager.documentsWithTitleMatch(title: query).compactMap({ doc -> DocumentStruct? in
+                    let decoder = JSONDecoder()
+                    decoder.userInfo[BeamElement.recursiveCoding] = false
+                    guard let note = try? decoder.decode(BeamNote.self, from: doc.data)
+                    else { Logger.shared.logError("unable to partially decode note '\(doc.title)'", category: .document); return nil }
+                    // do not show notes under a certain score threshold:
+                    print("Filtering note '\(note.title)' -> \(note.score)")
+                    return note.score > NoteDisplayThreshold ? doc : nil
+                }).prefix(4)
                 notes.forEach {
                     let autocompleteResult = AutoCompleteResult(id: $0.id, string: $0.title, source: .note)
                     self.completedQueries.append(autocompleteResult)
@@ -363,9 +375,9 @@ import WebKit
                 }
 
                 self.completer.complete(query: query)
-                let urls = self.data.searchKit.search(query)
-                for url in urls.prefix(4) {
-                    self.completedQueries.append(AutoCompleteResult(id: UUID(), string: url.description, source: .history))
+                let results = self.data.index.search(string: query)
+                for result in results {
+                    self.completedQueries.append(AutoCompleteResult(id: UUID(), string: result.source, title: result.title, source: .history))
                 }
             }
         }.store(in: &scope)

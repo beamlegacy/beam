@@ -148,6 +148,13 @@ extension BeamText {
         Logger.shared.logInfo("makeInternalLink for range: \(range) | actual: \(actualRange)", category: .document)
         replaceSubrange(actualRange, with: linkText)
 
+        // Notes that are created by makeInternalLink shouldn't have a score of 0 as they are explicit
+        let linkedNote = BeamNote.fetchOrCreate(DocumentManager(), title: link)
+        if linkedNote.score == 0 {
+            linkedNote.createdByUser()
+        }
+
+        linkedNote.referencedByUser()
         return true
     }
 

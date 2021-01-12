@@ -67,6 +67,8 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
     private var noteCancellables = [AnyCancellable]()
     internal var cursorStartPosition = 0
+    internal var popoverPrefix = 0
+    internal var popoverSuffix = 0
     internal var popover: BidirectionalPopover?
     internal var formatterView: FormatterView?
 
@@ -420,11 +422,13 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                             rootNode.doCommand(.moveWordLeft)
                         } else if command {
                             rootNode.doCommand(.moveToBeginningOfLine)
+                        } else if popover != nil {
+                            rootNode.doCommand(.moveLeft)
+                            updatePopover(with: .moveLeft)
                         } else if formatterView != nil {
                             rootNode.doCommand(.moveLeft)
                             detectFormatterType()
                         } else {
-                            updatePopover(with: .moveLeft)
                             rootNode.doCommand(.moveLeft)
                         }
                         return
@@ -454,13 +458,14 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                             rootNode.doCommand(.moveRight)
                             detectFormatterType()
                         } else {
-                            updatePopover(with: .moveRight)
                             rootNode.doCommand(.moveRight)
+                            updatePopover(with: .moveRight)
                         }
                         return
                     }
                 case .upArrow:
                     if shift {
+                        cancelPopover()
                         rootNode.doCommand(.moveUpAndModifySelection)
                         return
                     } else if let popover = popover {
@@ -471,10 +476,12 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                         detectFormatterType()
                     } else {
                         rootNode.doCommand(.moveUp)
+                        dismissPopover()
                         return
                     }
                 case .downArrow:
                     if shift {
+                        cancelPopover()
                         rootNode.doCommand(.moveDownAndModifySelection)
                         return
                     } else if let popover = popover {
@@ -485,6 +492,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                         detectFormatterType()
                     } else {
                         rootNode.doCommand(.moveDown)
+                        dismissPopover()
                         return
                     }
                 case .delete:
@@ -510,6 +518,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
             switch event.keyCode {
             case 117: // delete
+                cancelPopover()
                 rootNode.doCommand(.deleteForward)
                 return
             case 53: // escape
@@ -528,16 +537,18 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                 switch ch {
                 case "a":
                     if command {
-                        if popover != nil { dismissPopover() }
+                        cancelPopover()
                         rootNode.doCommand(.selectAll)
                         return
                     }
                 case "[":
+                    cancelPopover()
                     if command {
                         rootNode.doCommand(.decreaseIndentation)
                         return
                     }
                 case "]":
+                    cancelPopover()
                     if command {
                         rootNode.doCommand(.increaseIndentation)
                         return
@@ -704,25 +715,34 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         let handlers: [String: () -> Bool] = [
             "@": { [unowned self] in
                 guard popover == nil else { return false }
-                self.showBidirectionalPopover()
+                self.showBidirectionalPopover(prefix: 1, suffix: 0)
                 return true
              },
              "#": { [unowned self] in
                 guard popover == nil else { return false }
-                self.showBidirectionalPopover()
+                self.showBidirectionalPopover(prefix: 1, suffix: 0)
                 return true
              },
-            "[[": { [unowned self] in
-                insertPair("[", "]")
-                Logger.shared.logInfo("Transform selection into internal link", category: .ui)
-                if !self.selectedTextRange.isEmpty {
-                    node.text.makeInternalLink(self.selectedTextRange)
-                    return false
-                }
+            "[": { [unowned self] in
+                let pos = rootNode.cursorPosition
+                let substr = node.text.extract(range: max(0, pos - 1) ..< pos)
+                let left = substr.text // capture the left of the cursor to check for an existing [
 
-                return true
-            },
-            "[": {
+                if pos > 0 && left == "[" {
+                    if !self.selectedTextRange.isEmpty {
+                        insertPair("[", "]")
+                        node.text.makeInternalLink(self.selectedTextRange)
+                        node.text.remove(count: 2, at: self.selectedTextRange.upperBound)
+                        node.text.remove(count: 2, at: self.selectedTextRange.lowerBound - 2)
+                        self.selectedTextRange = (self.selectedTextRange.lowerBound - 2) ..< (self.selectedTextRange.upperBound - 2)
+                        rootNode.cursorPosition = self.selectedTextRange.upperBound
+                        return false
+                    } else {
+                        node.text.insert("]", at: pos)
+                        self.showBidirectionalPopover(prefix: 2, suffix: 2)
+                        return true
+                    }
+                }
                 insertPair("[", "]")
                 return false
             },
@@ -1039,7 +1059,9 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     private var mapping: [BeamElement: TextNode] = [:]
     private var deadNodes: [TextNode] = []
 
-    private func showBidirectionalPopover() {
+    private func showBidirectionalPopover(prefix: Int, suffix: Int) {
+        popoverPrefix = prefix
+        popoverSuffix = suffix
         cursorStartPosition = rootNode.cursorPosition
         initPopover()
         dismissFormatterViewWithAnimation()

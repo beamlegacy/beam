@@ -40,21 +40,34 @@ class BMTextFieldView: NSTextField {
         super.draw(dirtyRect)
     }
 
-    internal func setupTextField() {
+    internal func setText(_ text: String, font: NSFont?) {
+        let attrs = buildAttributedString(NSColor.white, font)
+        let textString = NSAttributedString(string: text, attributes: attrs)
+
+        self.attributedStringValue = textString
+    }
+
+    internal func setPlacholder(_ placeholder: String, font: NSFont?) {
+        let attrs = buildAttributedString(placeholderColor, font)
+        let placeholderString = NSAttributedString(string: placeholder, attributes: attrs)
+
+        self.placeholderAttributedString = placeholderString
+    }
+
+    private func setupTextField() {
         wantsLayer = true
         isBordered = false
         drawsBackground = false
         lineBreakMode = .byTruncatingTail
+    }
 
-        guard let placeholder = placeholderText else { return }
-
+    private func buildAttributedString(_ foregroundColor: NSColor, _ font: NSFont?) -> [NSAttributedString.Key: Any] {
         let attrs = [
-            NSAttributedString.Key.foregroundColor: placeholderColor,
-            NSAttributedString.Key.font: NSFont.systemFont(ofSize: font?.pointSize ?? 13)
+            NSAttributedString.Key.foregroundColor: foregroundColor,
+            NSAttributedString.Key.font: font ?? NSFont.systemFont(ofSize: 13)
         ]
 
-        let placeholderString = NSAttributedString(string: placeholder, attributes: attrs)
-        self.placeholderAttributedString = placeholderString
+        return attrs
     }
 
     override func mouseDown(with event: NSEvent) {
