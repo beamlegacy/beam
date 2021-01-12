@@ -178,28 +178,20 @@ extension BeamText {
         return false
     }
 
-    // TODO : Refactor, worst time complexity
-    @discardableResult func range(_ range: Swift.Range<Int>) -> [FormatterType] {
+    @discardableResult func extractFormatterTypeFrom(_ range: Swift.Range<Int>) -> [FormatterType] {
         let sub = extract(range: range)
-        var attributes: [BeamText.Attribute] = []
         var results: [FormatterType] = []
 
-        for range in sub.ranges {
-            range.attributes.forEach { (a) in
-                if !attributes.contains(a) {
-                    attributes.append(a)
+        sub.ranges.forEach { range in
+            range.attributes.forEach { attribute in
+                switch attribute {
+                case .strong:
+                    results.append(.bold)
+                case .emphasis:
+                    results.append(.italic)
+                default:
+                    break
                 }
-            }
-        }
-
-        attributes.forEach { (attribute) in
-            switch attribute {
-            case .strong:
-                results.append(.bold)
-            case .emphasis:
-                results.append(.italic)
-            default:
-                break
             }
         }
 

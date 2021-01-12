@@ -64,9 +64,8 @@ extension BeamTextEdit {
                 ctx.duration = 0.3
 
                 self.formatterView?.frame = self.formatterViewRect(BeamTextEdit.startBottomConstraint)
-            }, completionHandler: {
                 BeamTextEdit.formatterIsHidden = true
-            })
+            }, completionHandler: nil)
         }
     }
 
@@ -74,31 +73,23 @@ extension BeamTextEdit {
         guard let node = node as? TextNode,
               let formatterView = formatterView else { return }
 
-        let text = node.text
-        let cursorStartPosition = rootNode.cursorPosition - 1
-        let cursorPosition = rootNode.cursorPosition
-        var attributes: [FormatterType] = []
-        formatterView.setActiveFormmatter(type: attributes)
+        var types: [FormatterType] = []
+        formatterView.setActiveFormmatter(types)
 
         switch node.elementKind {
         case .heading(1):
-            attributes.append(.h1)
+            types.append(.h1)
         case .heading(2):
-            attributes.append(.h2)
+            types.append(.h2)
         default:
             break
         }
 
-        text.range(cursorStartPosition..<cursorPosition).forEach { (a) in
-            attributes.append(a)
+        node.text.extractFormatterTypeFrom(rootNode.cursorPosition - 1..<rootNode.cursorPosition).forEach { type in
+            types.append(type)
         }
 
-        formatterView.setActiveFormmatter(type: attributes)
-    }
-
-    private func indexOf(type: FormatterType, _ attributes: [FormatterType]) -> Int {
-        guard let index = attributes.firstIndex(of: type) else { return 0 }
-        return index
+        formatterView.setActiveFormmatter(types)
     }
 
     private func showFormatterViewWithAnimation() {
@@ -140,12 +131,10 @@ extension BeamTextEdit {
         }
     }
 
-    // TODO: Rename function
     private func changeTextFormat(with node: TextNode, kind: ElementKind, isActive: Bool) {
         node.element.kind = isActive ? .bullet : kind
     }
 
-    // TODO: Rename function
     private func updateAttributeState(with node: TextNode, attribute: BeamText.Attribute, isActive: Bool) {
         let attributes = rootNode.state.attributes
 

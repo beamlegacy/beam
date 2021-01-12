@@ -329,6 +329,8 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     public override func resignFirstResponder() -> Bool {
+        dismissFormatterViewWithAnimation()
+
         blinkPhase = true
         hasFocus = false
         rootNode.cancelSelection()
@@ -338,6 +340,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             activated()
         }
         onEndEditing()
+
         return super.resignFirstResponder()
     }
 
@@ -409,6 +412,9 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     } else if command && popover != nil {
                         rootNode.doCommand(.moveToBeginningOfLine)
                         dismissPopover()
+                    } else if command && formatterView != nil {
+                        rootNode.doCommand(.moveToBeginningOfLine)
+                        detectFormatterType()
                     } else {
                         if option {
                             rootNode.doCommand(.moveWordLeft)
@@ -436,6 +442,9 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                             rootNode.doCommand(.moveRightAndModifySelection)
                         }
                         return
+                    } else if command && formatterView != nil {
+                        rootNode.doCommand(.moveToEndOfLine)
+                        detectFormatterType()
                     } else {
                         if option {
                             rootNode.doCommand(.moveWordRight)
