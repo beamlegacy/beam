@@ -341,7 +341,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         }
         onEndEditing()
 
-        dismissFormatterViewWithAnimation()
+        showOrHideFormatterView(isPresent: false)
         dismissPopover()
 
         return super.resignFirstResponder()
@@ -1065,7 +1065,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         popoverSuffix = suffix
         cursorStartPosition = rootNode.cursorPosition
         initPopover()
-        dismissFormatterViewWithAnimation()
+        showOrHideFormatterView(isPresent: false)
     }
 
     func cleanPersistentFormatter() {

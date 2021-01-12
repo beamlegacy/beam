@@ -22,7 +22,7 @@ extension BeamTextEdit {
     // MARK: - UI
     internal func initFormatterView() {
         guard formatterView == nil else {
-            showFormatterViewWithAnimation()
+            showOrHideFormatterView(isPresent: true)
             return
         }
 
@@ -38,8 +38,7 @@ extension BeamTextEdit {
             selectFormatterAction(type, isActive)
         }
 
-        BeamTextEdit.formatterIsInit = true
-        showFormatterViewWithAnimation()
+        showOrHideFormatterView(isPresent: true)
     }
 
     internal func updateFormatterViewLayout() {
@@ -55,7 +54,7 @@ extension BeamTextEdit {
         formatterView = nil
     }
 
-    internal func dismissFormatterViewWithAnimation() {
+    internal func showOrHideFormatterView(isPresent: Bool) {
         guard let formatterView = formatterView else { return }
 
         DispatchQueue.main.async { [unowned self] in
@@ -63,8 +62,9 @@ extension BeamTextEdit {
                 ctx.allowsImplicitAnimation = true
                 ctx.duration = 0.3
 
-                formatterView.frame = formatterViewRect(BeamTextEdit.startBottomConstraint)
-                BeamTextEdit.formatterIsHidden = true
+                formatterView.frame = formatterViewRect(isPresent ? BeamTextEdit.bottomConstraint : BeamTextEdit.startBottomConstraint)
+                BeamTextEdit.formatterIsInit = BeamTextEdit.formatterIsInit ? false : true
+                BeamTextEdit.formatterIsHidden = isPresent ? false : true
             }, completionHandler: nil)
         }
     }
@@ -90,22 +90,6 @@ extension BeamTextEdit {
         }
 
         formatterView.setActiveFormmatter(types)
-    }
-
-    private func showFormatterViewWithAnimation() {
-        guard let formatterView = formatterView else { return }
-
-        DispatchQueue.main.async { [unowned self] in
-            NSAnimationContext.runAnimationGroup ({ ctx in
-                ctx.allowsImplicitAnimation = true
-                ctx.duration = 0.3
-
-                formatterView.frame = formatterViewRect(BeamTextEdit.bottomConstraint)
-            }, completionHandler: {
-                BeamTextEdit.formatterIsInit = false
-                BeamTextEdit.formatterIsHidden = false
-            })
-        }
     }
 
     private func selectFormatterAction(_ type: FormatterType, _ isActive: Bool) {
