@@ -38,6 +38,7 @@ extension BeamTextEdit {
             selectFormatterAction(type, isActive)
         }
 
+        BeamTextEdit.formatterIsInit = true
         showOrHideFormatterView(isPresent: true)
     }
 
