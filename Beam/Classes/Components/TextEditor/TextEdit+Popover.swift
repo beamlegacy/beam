@@ -50,7 +50,7 @@ extension BeamTextEdit {
 
         if command == .deleteForward && cursorStartPosition == cursorPosition ||
            command == .moveLeft && cursorPosition <= cursorStartPosition {
-            dismissPopover()
+            dismissAndShowPersistentView()
             return
         }
 
@@ -67,9 +67,10 @@ extension BeamTextEdit {
     }
 
     internal func cancelPopover() {
-        guard popover != nil else { return }
+        guard popover != nil,
+              let node = node as? TextNode else { return }
+
         dismissPopover()
-        guard let node = node as? TextNode else { return }
         node.text.removeSubrange((cursorStartPosition + 1 - popoverPrefix)..<(rootNode.cursorPosition + popoverSuffix))
         rootNode.cursorPosition = cursorStartPosition + 1 - popoverPrefix
     }
@@ -78,6 +79,10 @@ extension BeamTextEdit {
         guard popover != nil else { return }
         popover?.removeFromSuperview()
         popover = nil
+    }
+
+    internal func dismissAndShowPersistentView() {
+        dismissPopover()
         cancelInternalLink()
         initFormatterView()
     }

@@ -414,7 +414,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                         return
                     } else if command && popover != nil {
                         rootNode.doCommand(.moveToBeginningOfLine)
-                        dismissPopover()
+                        dismissAndShowPersistentView()
                     } else if command && formatterView != nil {
                         rootNode.doCommand(.moveToBeginningOfLine)
                         detectFormatterType()
@@ -446,7 +446,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                         } else {
                             rootNode.doCommand(.moveRightAndModifySelection)
                         }
-                        return
                     } else if command && formatterView != nil {
                         rootNode.doCommand(.moveToEndOfLine)
                         detectFormatterType()
@@ -455,12 +454,14 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                             rootNode.doCommand(.moveWordRight)
                         } else if command {
                             rootNode.doCommand(.moveToEndOfLine)
+                        } else if popover != nil {
+                            rootNode.doCommand(.moveRight)
+                            updatePopover(with: .moveRight)
                         } else if formatterView != nil {
                             rootNode.doCommand(.moveRight)
                             detectFormatterType()
                         } else {
                             rootNode.doCommand(.moveRight)
-                            updatePopover(with: .moveRight)
                         }
                         return
                     }
@@ -468,34 +469,28 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     if shift {
                         cancelPopover()
                         rootNode.doCommand(.moveUpAndModifySelection)
-                        return
                     } else if let popover = popover {
                         popover.doCommand(.moveUp)
-                        return
                     } else if formatterView != nil {
                         rootNode.doCommand(.moveUp)
                         detectFormatterType()
                     } else {
                         rootNode.doCommand(.moveUp)
-                        dismissPopover()
-                        return
                     }
+                    return
                 case .downArrow:
                     if shift {
                         cancelPopover()
                         rootNode.doCommand(.moveDownAndModifySelection)
-                        return
                     } else if let popover = popover {
                         popover.doCommand(.moveDown)
-                        return
                     } else if formatterView != nil {
                         rootNode.doCommand(.moveDown)
                         detectFormatterType()
                     } else {
                         rootNode.doCommand(.moveDown)
-                        dismissPopover()
-                        return
                     }
+                    return
                 case .delete:
                     rootNode.doCommand(.deleteBackward)
                     updatePopover(with: .deleteForward)
@@ -519,14 +514,12 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
             switch event.keyCode {
             case 117: // delete
-                cancelPopover()
                 rootNode.doCommand(.deleteForward)
+                updatePopover(with: .deleteForward)
                 return
             case 53: // escape
                 if popover != nil {
-                    dismissPopover()
-                    cancelInternalLink()
-                    initFormatterView()
+                    dismissAndShowPersistentView()
                 }
                 rootNode.cancelSelection()
                 return
