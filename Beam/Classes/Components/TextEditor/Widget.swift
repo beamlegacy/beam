@@ -43,11 +43,15 @@ public class Widget: NSObject, CALayerDelegate {
 
     internal var children: [Widget] = [] {
         didSet {
-            for c in children {
-                c.parent = self
-                c.availableWidth = availableWidth
-                c.contentsScale = contentsScale
-            }
+            updateChildren()
+        }
+    }
+
+    func updateChildren() {
+        for c in children {
+            c.parent = self
+            c.availableWidth = availableWidth - childInset
+            c.contentsScale = contentsScale
         }
     }
 
@@ -60,9 +64,7 @@ public class Widget: NSObject, CALayerDelegate {
 
     var availableWidth: CGFloat = 1 {
         didSet {
-            for c in children {
-                c.availableWidth = availableWidth
-            }
+            updateChildren()
             if availableWidth != oldValue {
                 invalidatedRendering = true
                 updateRendering()
@@ -329,20 +331,7 @@ public class Widget: NSObject, CALayerDelegate {
             contentsFrame = NSRect()
 
             if selfVisible {
-//                let attrStr = attributedString
-//                let layout = Font.draw(string: attrStr, atPosition: NSPoint(x: indent, y: 0), textWidth: (availableWidth - actionLayerFrame.width) - actionLayerFrame.minX)
-//                self.layout = layout
-//                contentsFrame = layout.frame
-//
-//                if attrStr.string.isEmpty {
-//                    let f = AttributedStringVisitor.font(fontSize)
-//                    contentsFrame.size.height = CGFloat(f.ascender - f.descender) * interlineFactor
-//                    contentsFrame.size.width += CGFloat(indent)
-//                }
-//
-//                if self as? TextRoot == nil {
-//                    contentsFrame.size.height += interNodeSpacing
-//                }
+                // do something
             }
 
             contentsFrame.size.width = availableWidth
