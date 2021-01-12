@@ -85,6 +85,11 @@ public class TextLine {
         return c
     }
 
+    var runs: [CTRun] {
+        //swiftlint:disable:next force_cast
+        CTLineGetGlyphRuns(ctLine) as! [CTRun]
+    }
+
     func draw(_ context: CGContext) {
         context.saveGState()
         context.textPosition = NSPoint()//line.frame.origin
@@ -93,6 +98,30 @@ public class TextLine {
 
         CTLineDraw(ctLine, context)
 
+        // draw strikethrough if needed:
+        var offset = CGFloat(0)
+        for run in runs {
+            var ascent = CGFloat(0)
+            var descent = CGFloat(0)
+
+            let width = CTRunGetTypographicBounds(run, CFRangeMake(0, 0), &ascent, &descent, nil)
+
+            if let attributes = CTRunGetAttributes(run) as? [NSAttributedString.Key: Any], attributes[.strikethroughStyle] as? NSNumber != nil {
+                let strikeThroughColor = attributes[.strikethroughColor] as? NSColor ?? NSColor.black
+
+                context.setStrokeColor(strikeThroughColor.cgColor)
+
+                let  y = CGFloat(roundf(Float(ascent / 3.0)))
+                context.move(to: CGPoint(x: offset, y: y))
+                context.addLine(to: CGPoint(x: offset + CGFloat(width), y: y))
+
+                context.strokePath()
+            }
+
+            offset += CGFloat(width)
+        }
+
+        // Done!
         context.restoreGState()
     }
 
