@@ -31,10 +31,12 @@ extension BeamTextEdit {
         addSubview(popover)
 
         popover.didSelectTitle = { [unowned self] (title) -> Void in
-            node.text.replaceSubrange(cursorStartPosition..<rootNode.cursorPosition, with: title)
-            rootNode.cursorPosition = cursorStartPosition + title.count
-
-            node.text.makeInternalLink(cursorStartPosition..<rootNode.cursorPosition)
+            let replacementStart = cursorStartPosition + 1 - popoverPrefix
+            let replacementEnd = rootNode.cursorPosition + popoverSuffix
+            let linkEnd = replacementStart + title.count
+            node.text.replaceSubrange(replacementStart..<replacementEnd, with: title)
+            node.text.makeInternalLink(replacementStart..<linkEnd)
+            rootNode.cursorPosition = linkEnd
             dismissPopover()
         }
     }
@@ -43,38 +45,26 @@ extension BeamTextEdit {
         guard let node = node as? TextNode,
               let popover = popover else { return }
 
-        var text = node.text.text
         let cursorPosition = rootNode.cursorPosition
 
-        if command == .deleteForward && cursorStartPosition == cursorPosition ||
-           command == .moveLeft && cursorPosition - 1 <= cursorStartPosition {
-            dismissPopover()
-            return
-        }
-
-        let linkText = String(text[cursorStartPosition + 1..<cursorPosition])
-        let startIndex = text.index(at: cursorStartPosition)
-        let endIndex = text.index(at: cursorPosition)
-        let endDistance = text.distance(from: text.endIndex, to: endIndex)
-        let prefix = String(text[startIndex])
-
-        if endDistance < 0 {
-            text.removeSubrange(endIndex...)
-            text.removeSubrange(..<startIndex)
-        } else {
-            text.removeSubrange(..<startIndex)
-        }
-
-        node.text.addAttributes([.internalLink(linkText)], to: cursorStartPosition..<cursorPosition)
-        text = text.replacingOccurrences(of: prefix, with: "")
-        let items = text.isEmpty ? documentManager.loadAllDocumentsWithLimit() : documentManager.documentsWithLimitTitleMatch(title: text)
-        var height = BeamTextEdit.viewHeight * CGFloat(items.count) + (text.isEmpty ? 0 : 36.5)
+        let linkText = String(node.text.text[cursorStartPosition + 1..<cursorPosition])
+        node.text.addAttributes([.internalLink(linkText)], to: cursorStartPosition + 1 - popoverPrefix..<cursorPosition + popoverSuffix)
+        let items = linkText.isEmpty ? documentManager.loadAllDocumentsWithLimit() : documentManager.documentsWithLimitTitleMatch(title: linkText)
+        var height = BeamTextEdit.viewHeight * CGFloat(items.count) + (linkText.isEmpty ? 0 : 36.5)
 
         if items.count == 1 || items.isEmpty { height = BeamTextEdit.viewHeight * 2 }
 
         popover.frame = NSRect(x: BeamTextEdit.posX, y: BeamTextEdit.posY, width: BeamTextEdit.viewWidth, height: height)
         popover.items = items.map({ $0.title })
-        popover.query = text
+        popover.query = linkText
+    }
+
+    internal func cancelPopover() {
+        guard popover != nil else { return }
+        dismissPopover()
+        guard let node = node as? TextNode else { return }
+        node.text.removeSubrange((cursorStartPosition + 1 - popoverPrefix)..<(rootNode.cursorPosition + popoverSuffix))
+        rootNode.cursorPosition = cursorStartPosition + 1 - popoverPrefix
     }
 
     internal func dismissPopover() {
