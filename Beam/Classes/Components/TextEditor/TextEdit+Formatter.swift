@@ -56,16 +56,14 @@ extension BeamTextEdit {
     }
 
     internal func dismissFormatterViewWithAnimation() {
-        guard formatterView != nil else { return }
+        guard let formatterView = formatterView else { return }
 
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-
+        DispatchQueue.main.async { [unowned self] in
             NSAnimationContext.runAnimationGroup ({ ctx in
                 ctx.allowsImplicitAnimation = true
                 ctx.duration = 0.3
 
-                self.formatterView?.frame = self.formatterViewRect(BeamTextEdit.startBottomConstraint)
+                formatterView.frame = formatterViewRect(BeamTextEdit.startBottomConstraint)
                 BeamTextEdit.formatterIsHidden = true
             }, completionHandler: nil)
         }
