@@ -45,6 +45,8 @@ extension BeamTextEdit {
     internal func updateFormatterViewLayout() {
         if !BeamTextEdit.formatterIsInit && !BeamTextEdit.formatterIsHidden {
             formatterView?.frame = formatterViewRect()
+        } else {
+            formatterView?.frame = formatterViewRect(BeamTextEdit.startBottomConstraint)
         }
     }
 
