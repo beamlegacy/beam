@@ -58,10 +58,10 @@ struct BeamText: Codable {
                 switch type {
                 case 0: self = .strong
                 case 1: self = .emphasis
-                case 3: self = .source(try container.decode(String.self, forKey: .payload))
-                case 4: self = .link(try container.decode(String.self, forKey: .payload))
-                case 5: self = .internalLink(try container.decode(String.self, forKey: .payload))
-                case 6: self = .strikethrough
+                case 2: self = .source(try container.decode(String.self, forKey: .payload))
+                case 3: self = .link(try container.decode(String.self, forKey: .payload))
+                case 4: self = .internalLink(try container.decode(String.self, forKey: .payload))
+                case 5: self = .strikethrough
                 default:
                     throw AttributeError.unknownAttribute
                 }
