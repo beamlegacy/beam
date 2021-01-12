@@ -56,6 +56,7 @@ extension BeamText {
         var stringAttributes = [NSAttributedString.Key: Any]()
         var strong = false
         var emphasis = false
+        var strikethrough = true
         var color = NSColor.editorTextColor
 //        var quoteLevel: Int
 //        var quoteTitle: String?
@@ -78,6 +79,8 @@ extension BeamText {
             case .internalLink(let link):
                 color = NSColor.editorBidirectionalLinkColor
                 internalLink = link
+            case .strikethrough:
+                strikethrough = true
             }
         }
 
@@ -91,6 +94,11 @@ extension BeamText {
             }
         } else if let link = internalLink {
             stringAttributes[.link] = link
+        }
+
+        if strikethrough {
+            stringAttributes[.strikethroughStyle] = NSUnderlineStyle.single.rawValue
+            stringAttributes[.strikethroughColor] = NSColor.red
         }
 
         if let source = source {

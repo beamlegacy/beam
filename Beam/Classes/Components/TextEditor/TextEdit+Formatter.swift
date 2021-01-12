@@ -45,8 +45,6 @@ extension BeamTextEdit {
     internal func updateFormatterViewLayout() {
         if !BeamTextEdit.formatterIsInit && !BeamTextEdit.formatterIsHidden {
             formatterView?.frame = formatterViewRect()
-        } else {
-            formatterView?.frame = formatterViewRect(BeamTextEdit.startBottomConstraint)
         }
     }
 
@@ -76,7 +74,10 @@ extension BeamTextEdit {
         guard let node = node as? TextNode,
               let formatterView = formatterView else { return }
 
+        let range = rootNode.cursorPosition <= 0 ? rootNode.cursorPosition..<rootNode.cursorPosition + 1 : rootNode.cursorPosition - 1..<rootNode.cursorPosition
         var types: [FormatterType] = []
+
+        rootNode.state.attributes = []
         formatterView.setActiveFormmatter(types)
 
         switch node.elementKind {
@@ -88,8 +89,19 @@ extension BeamTextEdit {
             break
         }
 
-        node.text.extractFormatterType(from: rootNode.cursorPosition - 1..<rootNode.cursorPosition).forEach { type in
+        node.text.extractFormatterType(from: range).forEach { type in
             types.append(type)
+
+            switch type {
+            case .bold:
+                rootNode.state.attributes.append(.strong)
+            case .italic:
+                rootNode.state.attributes.append(.emphasis)
+            case .strikethrough:
+                rootNode.state.attributes.append(.strikethrough)
+            default:
+                break
+            }
         }
 
         formatterView.setActiveFormmatter(types)
@@ -112,7 +124,7 @@ extension BeamTextEdit {
         case .italic:
             updateAttributeState(with: node, attribute: .emphasis, isActive: isActive)
         case .strikethrough:
-            print("strikethrough")
+            updateAttributeState(with: node, attribute: .strikethrough, isActive: isActive)
         default:
             break
         }

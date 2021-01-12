@@ -196,6 +196,8 @@ extension BeamText {
                     types.append(.bold)
                 case .emphasis:
                     types.append(.italic)
+                case .strikethrough:
+                    types.append(.strikethrough)
                 default:
                     break
                 }
@@ -220,7 +222,7 @@ extension BeamText {
     func rangesAt(position: Int) -> [Range] {
         var lastRange: Range?
         for range in ranges {
-            if range.position <= position && position < range.end {
+            if range.position <= position && position <= range.end {
                 if position == range.position, let last = lastRange {
                     return [last, range]
                 }
