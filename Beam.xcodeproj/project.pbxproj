@@ -93,7 +93,6 @@
 		4181723D2581107C00317ED8 /* TextEdit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171BF2581107C00317ED8 /* TextEdit.swift */; };
 		4181723E2581107C00317ED8 /* TextEditCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171C02581107C00317ED8 /* TextEditCommands.swift */; };
 		4181723F2581107C00317ED8 /* Font.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171C12581107C00317ED8 /* Font.swift */; };
-		418172402581107C00317ED8 /* TextRoot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171C22581107C00317ED8 /* TextRoot.swift */; };
 		418172412581107C00317ED8 /* ScrollableTextView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 418171C42581107C00317ED8 /* ScrollableTextView.xib */; };
 		418172422581107C00317ED8 /* NotesContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171C52581107C00317ED8 /* NotesContentView.swift */; };
 		418172432581107C00317ED8 /* NotesWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171C62581107C00317ED8 /* NotesWindow.swift */; };
@@ -174,6 +173,7 @@
 		52E04FED252C814D00AD9F56 /* RoamImporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52E04FEC252C814D00AD9F56 /* RoamImporterTests.swift */; };
 		6D33924049F5798BBE6E7AED /* Pods_BeamUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 54B49CE1C66614E244553288 /* Pods_BeamUITests.framework */; };
 		7D40159D41DDD593BDFDF664 /* Pods_BeamTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C8379DEE387FB86FA7817188 /* Pods_BeamTests.framework */; };
+		9611995E25A27A17005BEC82 /* BeamObjCBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 9611995D25A27A17005BEC82 /* BeamObjCBridge.m */; };
 		9627FD4A2550203800926F0E /* Pods_Beam.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2BE96DC9A7278563E5878CCD /* Pods_Beam.framework */; };
 		9631C747251CE997009B40C4 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = 9631C746251CE997009B40C4 /* SwiftSoup */; };
 		964548A02523B3550064D062 /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9645489F2523B3550064D062 /* CloudKit.framework */; };
@@ -185,6 +185,7 @@
 		965A784D2514F149009980D4 /* BeamUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965A784C2514F149009980D4 /* BeamUITests.swift */; };
 		967B2685255465C5003F40E3 /* Html2MdTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 967B2684255465C5003F40E3 /* Html2MdTests.swift */; };
 		969084CC25365AAE009D3C96 /* ParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 969084CB25365AAE009D3C96 /* ParserTests.swift */; };
+		9691E3D825AD9F3300A13080 /* TextRoot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9691E3D725AD9F3300A13080 /* TextRoot.swift */; };
 		96956D31258BF3F50069C9C1 /* LinkStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96956D30258BF3F50069C9C1 /* LinkStore.swift */; };
 		96A8B1DD25A38A3B006F749C /* String+Levenshtein.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96A8B1DC25A38A3B006F749C /* String+Levenshtein.swift */; };
 		96C9AA3F259019E3007D3D98 /* LinkedReferenceNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C9AA3E259019E3007D3D98 /* LinkedReferenceNode.swift */; };
@@ -497,7 +498,6 @@
 		418171BF2581107C00317ED8 /* TextEdit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextEdit.swift; sourceTree = "<group>"; };
 		418171C02581107C00317ED8 /* TextEditCommands.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextEditCommands.swift; sourceTree = "<group>"; };
 		418171C12581107C00317ED8 /* Font.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Font.swift; sourceTree = "<group>"; };
-		418171C22581107C00317ED8 /* TextRoot.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextRoot.swift; sourceTree = "<group>"; };
 		418171C42581107C00317ED8 /* ScrollableTextView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ScrollableTextView.xib; sourceTree = "<group>"; };
 		418171C52581107C00317ED8 /* NotesContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotesContentView.swift; sourceTree = "<group>"; };
 		418171C62581107C00317ED8 /* NotesWindow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotesWindow.swift; sourceTree = "<group>"; };
@@ -574,6 +574,8 @@
 		52E04FD5252C7A4600AD9F56 /* writing_space.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = writing_space.json; sourceTree = "<group>"; };
 		52E04FEC252C814D00AD9F56 /* RoamImporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoamImporterTests.swift; sourceTree = "<group>"; };
 		54B49CE1C66614E244553288 /* Pods_BeamUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_BeamUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		9611995C25A27A17005BEC82 /* Beam-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Beam-Bridging-Header.h"; sourceTree = "<group>"; };
+		9611995D25A27A17005BEC82 /* BeamObjCBridge.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BeamObjCBridge.m; sourceTree = "<group>"; };
 		9645489F2523B3550064D062 /* CloudKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CloudKit.framework; path = System/Library/Frameworks/CloudKit.framework; sourceTree = SDKROOT; };
 		965A78252514F147009980D4 /* Beam.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Beam.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		965A78282514F147009980D4 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -587,6 +589,7 @@
 		965A784E2514F149009980D4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		967B2684255465C5003F40E3 /* Html2MdTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Html2MdTests.swift; sourceTree = "<group>"; };
 		969084CB25365AAE009D3C96 /* ParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParserTests.swift; sourceTree = "<group>"; };
+		9691E3D725AD9F3300A13080 /* TextRoot.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextRoot.swift; sourceTree = "<group>"; };
 		96956D30258BF3F50069C9C1 /* LinkStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkStore.swift; sourceTree = "<group>"; };
 		96A8B1DC25A38A3B006F749C /* String+Levenshtein.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Levenshtein.swift"; sourceTree = "<group>"; };
 		96C9AA3E259019E3007D3D98 /* LinkedReferenceNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkedReferenceNode.swift; sourceTree = "<group>"; };
@@ -932,8 +935,9 @@
 			isa = PBXGroup;
 			children = (
 				418171BA2581107C00317ED8 /* Markdown */,
+				96C9AAB82593BB67007D3D98 /* Widget.swift */,
 				418171B92581107C00317ED8 /* TextNode.swift */,
-				418171C22581107C00317ED8 /* TextRoot.swift */,
+				9691E3D725AD9F3300A13080 /* TextRoot.swift */,
 				418171BF2581107C00317ED8 /* TextEdit.swift */,
 				418171BE2581107C00317ED8 /* TextEditMovements.swift */,
 				418171B82581107C00317ED8 /* TextEditOperations.swift */,
@@ -945,7 +949,6 @@
 				96C9AA5625901AA9007D3D98 /* LinksSection.swift */,
 				96F936622590FA59006D8E53 /* BTextEdit.swift */,
 				96E4505725995CA200BFF36F /* BreadCrumb.swift */,
-				96C9AAB82593BB67007D3D98 /* Widget.swift */,
 			);
 			path = TextEditor;
 			sourceTree = "<group>";
@@ -1232,6 +1235,15 @@
 			path = Pods;
 			sourceTree = "<group>";
 		};
+		9611994725A279EC005BEC82 /* ObjCBridge */ = {
+			isa = PBXGroup;
+			children = (
+				9611995D25A27A17005BEC82 /* BeamObjCBridge.m */,
+				9611995C25A27A17005BEC82 /* Beam-Bridging-Header.h */,
+			);
+			path = ObjCBridge;
+			sourceTree = "<group>";
+		};
 		965A781C2514F147009980D4 = {
 			isa = PBXGroup;
 			children = (
@@ -1257,6 +1269,7 @@
 		965A78272514F147009980D4 /* Beam */ = {
 			isa = PBXGroup;
 			children = (
+				9611994725A279EC005BEC82 /* ObjCBridge */,
 				965A78282514F147009980D4 /* AppDelegate.swift */,
 				965A78342514F148009980D4 /* Main.storyboard */,
 				4181712A25810CDC00317ED8 /* Configuration */,
@@ -1408,6 +1421,7 @@
 				TargetAttributes = {
 					965A78242514F147009980D4 = {
 						CreatedOnToolsVersion = 12.0;
+						LastSwiftMigration = 1230;
 					};
 					965A783C2514F149009980D4 = {
 						CreatedOnToolsVersion = 12.0;
@@ -1920,7 +1934,6 @@
 				418172082581107C00317ED8 /* NSManagedObject+initExtension.swift in Sources */,
 				418172032581107C00317ED8 /* Bullet.swift in Sources */,
 				418173C32581276F00317ED8 /* String+NSMutableAttributedString.swift in Sources */,
-				418172402581107C00317ED8 /* TextRoot.swift in Sources */,
 				4181723D2581107C00317ED8 /* TextEdit.swift in Sources */,
 				4181720F2581107C00317ED8 /* PageRank.swift in Sources */,
 				418172AB25811A3A00317ED8 /* BMTextFieldView.swift in Sources */,
@@ -1944,6 +1957,7 @@
 				418172B525811AAA00317ED8 /* Tick.swift in Sources */,
 				418173BE2581251600317ED8 /* URL+Beam.swift in Sources */,
 				4181713525810CDC00317ED8 /* Beam.xcdatamodeld in Sources */,
+				9611995E25A27A17005BEC82 /* BeamObjCBridge.m in Sources */,
 				418172102581107C00317ED8 /* TextFormatter.swift in Sources */,
 				416C09F3259C919200AF2903 /* CATransaction.swift in Sources */,
 				418172382581107C00317ED8 /* TextNode.swift in Sources */,
@@ -1972,6 +1986,7 @@
 				4181722F2581107C00317ED8 /* BeamWindow.swift in Sources */,
 				418172602581107C00317ED8 /* LibrairiesManager.swift in Sources */,
 				4181733225811F4800317ED8 /* KeyCode.swift in Sources */,
+				9691E3D825AD9F3300A13080 /* TextRoot.swift in Sources */,
 				4181724C2581107C00317ED8 /* BrowserTabView.swift in Sources */,
 				521EEDE125937F5B00BA2485 /* DocumentsContentView.swift in Sources */,
 				418172512581107C00317ED8 /* JournalView.swift in Sources */,
@@ -2180,6 +2195,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Beam/Configuration/Beam.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
@@ -2205,6 +2221,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = co.beamapp.macos;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_OBJC_BRIDGING_HEADER = "Beam/ObjCBridge/Beam-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
@@ -2216,6 +2234,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Beam/Configuration/Beam.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
@@ -2241,6 +2260,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = co.beamapp.macos;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_OBJC_BRIDGING_HEADER = "Beam/ObjCBridge/Beam-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
