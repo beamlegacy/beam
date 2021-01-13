@@ -35,6 +35,7 @@ class DocumentManager {
     }
 
     func saveDocument(_ documentStruct: DocumentStruct, completion: ((Result<Bool, Error>) -> Void)? = nil) {
+        Logger.shared.logDebug("Saving \(documentStruct.title)", category: .coredata)
         coreDataManager.persistentContainer.performBackgroundTask { context in
             let document = Document.fetchWithId(context, documentStruct.id) ?? Document(context: context)
 

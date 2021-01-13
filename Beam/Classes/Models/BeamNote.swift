@@ -169,12 +169,13 @@ class BeamNote: BeamElement {
         fetchedNotesCancellables.removeValue(forKey: note.title)
         fetchedNotesCancellables[note.title] =
             note.$changed
-                .throttle(for: .seconds(2), scheduler: RunLoop.main, latest: false)
-                .sink { [weak note] _ in
-            let documentManager = DocumentManager()
-            note?.detectLinkedNotes(documentManager)
-            note?.save(documentManager: documentManager)
-        }
+            .throttle(for: .seconds(2), scheduler: RunLoop.main, latest: false)
+            .sink { [weak note] _ in
+                let documentManager = DocumentManager()
+                note?.detectLinkedNotes(documentManager)
+                // TODO: we should only save when changes occured
+                note?.save(documentManager: documentManager)
+            }
         fetchedNotes[note.title] = note
     }
 

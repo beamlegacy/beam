@@ -63,6 +63,10 @@ final class Logger {
         return logFileDataArray
     }
 
+    var logFileString: String {
+        return String(data: logFileData, encoding: .utf8) ?? "Couldn't parse logs data"
+    }
+
     func logInfo(_ message: String, category: LogCategory) {
         if !hideLumberCategories.contains(category) {
             DDLogInfo("[\(category.rawValue)] \(message)")
@@ -84,7 +88,7 @@ final class Logger {
             DDLogError("[\(category.rawValue)] 🛑 \(message)")
         }
 
-        log(message, level: .error, category: category)
+        log("🛑 \(message)", level: .error, category: category)
     }
 
     private func log(_ message: String, level: OSLogType, category: LogCategory) {
