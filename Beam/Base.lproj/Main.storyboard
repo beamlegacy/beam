@@ -733,9 +733,16 @@ CQ
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="8CZ-9R-gka"/>
-                                        <menuItem title="Show all notes" keyEquivalent="s" id="KUY-Ll-jZL">
+                                        <menuItem title="Show all notes" id="KUY-Ll-jZL">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
                                                 <action selector="showAllDocuments:" target="Voe-Tx-rLC" id="sgR-1m-YeG"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Show Logs" id="fn4-OZ-WHS">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="showConsole:" target="Voe-Tx-rLC" id="Ryh-ht-LIN"/>
                                             </connections>
                                         </menuItem>
                                     </items>

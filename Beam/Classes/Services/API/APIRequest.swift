@@ -67,12 +67,13 @@ class APIRequest {
         }
 
         let decoder = defaultDecoder()
+        let encoder = defaultEncoder()
         let queue = DispatchQueue(label: "co.beam.api", qos: .background, attributes: .concurrent)
 
         let request = AF.request(route,
                                  method: .post,
                                  parameters: loadQuery(bodyParamsRequest),
-                                 encoder: JSONParameterEncoder.default,
+                                 encoder: encoder,
                                  headers: headers,
                                  interceptor: authenticatedAPICall ? AuthenticationHandler() : nil)
 
@@ -363,6 +364,12 @@ class APIRequest {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         return decoder
+    }
+
+    func defaultEncoder() -> ParameterEncoder {
+        let encoder = JSONParameterEncoder()
+        encoder.encoder.dateEncodingStrategy = .iso8601
+        return encoder
     }
 
     func loadFile(fileName: String) -> String? {

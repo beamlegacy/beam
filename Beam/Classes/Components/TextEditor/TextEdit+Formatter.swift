@@ -85,6 +85,8 @@ extension BeamTextEdit {
             types.append(.h1)
         case .heading(2):
             types.append(.h2)
+        case .quote(1, node.text.text, node.text.text):
+            types.append(.quote)
         default:
             break
         }

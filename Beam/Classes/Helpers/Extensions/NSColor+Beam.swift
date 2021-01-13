@@ -84,6 +84,10 @@ extension NSColor {
         return loadColor(named: "EditorTextSelectionColor")
     }
 
+    static var strikethroughColor: NSColor {
+        return loadColor(named: "StrikethroughColor")
+    }
+
     // Popover
 
     static var bidirectionalPopoverBackgroundColor: NSColor {
