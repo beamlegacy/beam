@@ -123,7 +123,8 @@ extension BeamTextEdit {
 
         if type == .h1 && node.element.kind == .heading(1) ||
            type == .h2 && node.element.kind == .heading(2) ||
-           type == .quote && node.element.kind == .quote(1, node.text.text, node.text.text) {
+           type == .quote && node.element.kind == .quote(1, "", "") ||
+           type == .code && node.element.kind == .code {
             hasAttribute = node.element.kind == kind
         }
 

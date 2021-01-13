@@ -27,7 +27,7 @@ class FormatterView: NSView {
         }
     }
 
-    private var selectedTypes: [FormatterType: FormatterType] = [:]
+    private var selectedTypes: Set<FormatterType> = []
     private var buttons: [FormatterType: NSButton] = [:]
 
     // MARK: - Initializer
@@ -104,7 +104,7 @@ class FormatterView: NSView {
 
     func setActiveFormmatters(_ types: [FormatterType]) {
         if types.isEmpty {
-            selectedTypes = [:]
+            selectedTypes = []
             buttons.forEach { button in
                 button.value.layer?.backgroundColor = NSColor.clear.cgColor
             }
@@ -115,26 +115,28 @@ class FormatterView: NSView {
         types.forEach { type in
             guard let button = buttons[type] else { return }
             button.layer?.backgroundColor = NSColor.formatterButtonBackgroudHoverColor.cgColor
-            selectedTypes[type] = type
+            selectedTypes.insert(type)
         }
     }
 
     func setActiveFormatter(_ type: FormatterType) {
         guard let button = buttons[type] else { return }
+        var ingredients: Set = ["cocoa beans", "sugar", "cocoa butter", "salt"]
 
         removeState(type)
 
-        if selectedTypes[type] == type {
+        if selectedTypes.contains(type) {
             button.layer?.backgroundColor = NSColor.clear.cgColor
-            selectedTypes[type] = nil
+            selectedTypes.remove(type)
+            ingredients.remove("cocoa")
         } else {
             button.layer?.backgroundColor = NSColor.formatterButtonBackgroudHoverColor.cgColor
-            selectedTypes[type] = type
+            selectedTypes.insert(type)
         }
     }
 
     func resetSelectedItems() {
-        self.selectedTypes = [:]
+        self.selectedTypes = []
         buttons.forEach { button in
             button.value.layer?.backgroundColor = NSColor.clear.cgColor
         }
@@ -154,9 +156,9 @@ class FormatterView: NSView {
     private func selectItemAction(_ sender: NSButton) {
         guard let didSelectFormatterType = didSelectFormatterType else { return }
         let type = items[sender.tag]
-        let isActive = selectedTypes[type] == type
+        let isActive = selectedTypes.contains(type)
 
-        if selectedTypes[type] != type { selectedTypes[type] = type }
+        if !selectedTypes.contains(type) { selectedTypes.insert(type) }
 
         removeState(type)
 
@@ -165,7 +167,7 @@ class FormatterView: NSView {
 
             button.contentTintColor = NSColor.formatterIconColor
             button.layer?.backgroundColor = NSColor.clear.cgColor
-            selectedTypes[type] = nil
+            selectedTypes.remove(type)
         }
 
         didSelectFormatterType(type, isActive)
@@ -208,26 +210,31 @@ class FormatterView: NSView {
 
             DispatchQueue.main.async {[weak self] in
                 guard let self = self else { return }
-                if self.selectedTypes[type] != type { self.animateButtonOnMouseEntered(button, isHover) }
+                if !self.selectedTypes.contains(type) { self.animateButtonOnMouseEntered(button, isHover) }
             }
         }
     }
 
     private func removeState(_ type: FormatterType) {
-        if type == .h2 && selectedTypes[.h1] == .h1 ||
-            type == .quote && selectedTypes[.h1] == .h1 { removeActiveIndicator(to: .h1) }
+        if type == .h2 && selectedTypes.contains(.h1) ||
+           type == .quote && selectedTypes.contains(.h1) ||
+           type == .code && selectedTypes.contains(.h1) { removeActiveIndicator(to: .h1) }
 
-        if type == .h1 && selectedTypes[.h2] == .h2 ||
-            type == .quote && selectedTypes[.h2] == .h2 { removeActiveIndicator(to: .h2) }
+        if type == .h1 && selectedTypes.contains(.h2) ||
+           type == .quote && selectedTypes.contains(.h2) ||
+           type == .code && selectedTypes.contains(.h2) { removeActiveIndicator(to: .h2) }
 
-        if type == .h2 && selectedTypes[.quote] == .quote ||
-            type == .h1 && selectedTypes[.quote] == .quote { removeActiveIndicator(to: .quote) }
+        if type == .h2 && selectedTypes.contains(.quote) ||
+           type == .h1 && selectedTypes.contains(.quote) { removeActiveIndicator(to: .quote) }
+
+        if type == .h2 && selectedTypes.contains(.code) ||
+           type == .h1 && selectedTypes.contains(.code) { removeActiveIndicator(to: .code) }
     }
 
     private func removeActiveIndicator(to item: FormatterType) {
         guard let button = buttons[item] else { return }
         button.layer?.backgroundColor = NSColor.clear.cgColor
-        selectedTypes[item] = nil
+        selectedTypes.remove(item)
     }
 
     private func loadXib() {
