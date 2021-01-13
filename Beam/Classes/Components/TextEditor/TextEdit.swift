@@ -357,6 +357,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             popover.doCommand(.insertNewline)
             return
         } else if command {
+            dismissFormatterView()
             onStartQuery(node)
         } else {
             if node.text.isEmpty && node.isEmpty && node.parent !== rootNode {
