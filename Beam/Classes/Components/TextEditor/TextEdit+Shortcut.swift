@@ -13,11 +13,6 @@ extension BeamTextEdit {
         updatePersistentView(with: level == 1 ? .h1 : .h2, kind: .heading(level))
     }
 
-    internal func toggleQuote() {
-        guard let node = node as? TextNode else { return }
-        updatePersistentView(with: .quote, kind: .quote(1, node.text.text, node.text.text))
-    }
-
     internal func toggleBold() {
         updatePersistentView(with: .bold, attribute: .strong)
     }
@@ -26,7 +21,37 @@ extension BeamTextEdit {
         updatePersistentView(with: .italic, attribute: .emphasis)
     }
 
+    internal func toggleUnderline() {
+        print("underline")
+    }
+
     internal func toggleStrikeThrough() {
         updatePersistentView(with: .strikethrough, attribute: .strikethrough)
     }
+
+    internal func toggleLink() {
+        print("link")
+    }
+
+    internal func toggleBiDirectionalLink() {
+        print("internallink")
+    }
+
+    internal func toggleUnorderedAndOrderedList() {
+        print("UnorderedList // OrderedList")
+    }
+
+    internal func toggleQuote() {
+        guard let node = node as? TextNode else { return }
+        updatePersistentView(with: .quote, kind: .quote(1, node.text.text, node.text.text))
+    }
+
+    internal func toggleTodo() {
+        print("todo")
+    }
+
+    internal func toggleCode() {
+        print("code")
+    }
+
 }

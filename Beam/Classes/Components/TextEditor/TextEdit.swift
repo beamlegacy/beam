@@ -528,34 +528,9 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
             if let ch = event.charactersIgnoringModifiers {
                 switch ch.lowercased() {
-                case "a":
-                    if command {
-                        cancelPopover()
-                        rootNode.doCommand(.selectAll)
-                        return
-                    }
-                case "b" :
-                    if command {
-                        toggleBold()
-                        return
-                    }
-                case "i":
-                    if command {
-                        toggleEmphasis()
-                        return
-                    }
-                case "u":
-                    if shift && command {
-                        toggleQuote()
-                        return
-                    }
-                case "y":
-                    if command {
-                        toggleStrikeThrough()
-                        return
-                    }
                 case "1", "2":
                     if command && option || shift && command && option {
+                        cancelPopover()
                         toggleHeading(Int(ch) ?? 1)
                         return
                     }
@@ -571,7 +546,72 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                         rootNode.doCommand(.increaseIndentation)
                         return
                     }
+                case "a":
+                    if command {
+                        cancelPopover()
+                        rootNode.doCommand(.selectAll)
+                        return
+                    }
+                case "b" :
+                    if command {
+                        cancelPopover()
+                        toggleBold()
+                        return
+                    }
+                case "c":
+                    if option && command {
+                        cancelPopover()
+                        toggleCode()
+                        return
+                    }
+                case "i":
+                    if command {
+                        cancelPopover()
+                        toggleEmphasis()
+                        return
+                    }
+                case "k":
+                    if shift && command {
+                        cancelPopover()
+                        toggleBiDirectionalLink()
+                        return
+                    }
 
+                    if command {
+                        cancelPopover()
+                        toggleLink()
+                        return
+                    }
+                case "l":
+                    if shift && command {
+                        cancelPopover()
+                        toggleUnorderedAndOrderedList()
+                        return
+                    }
+                case "u":
+                    if shift && command {
+                        cancelPopover()
+                        toggleQuote()
+                        return
+                    }
+
+                    if command {
+                        cancelPopover()
+                        toggleUnderline()
+                        return
+                    }
+                case "t":
+                    if option && command {
+                        cancelPopover()
+                        toggleTodo()
+                        return
+                    }
+                case "y":
+                    if command {
+                        cancelPopover()
+                        toggleStrikeThrough()
+                        return
+                    }
                 default:
                     break
                 }
