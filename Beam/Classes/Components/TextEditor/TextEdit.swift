@@ -527,7 +527,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             }
 
             if let ch = event.charactersIgnoringModifiers {
-                switch ch {
+                switch ch.lowercased() {
                 case "a":
                     if command {
                         cancelPopover()
@@ -544,9 +544,19 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                         toggleEmphasis()
                         return
                     }
+                case "u":
+                    if shift && command {
+                        toggleQuote()
+                        return
+                    }
                 case "y":
                     if command {
                         toggleStrikeThrough()
+                        return
+                    }
+                case "1", "2":
+                    if command && option || shift && command && option {
+                        toggleHeading(Int(ch) ?? 1)
                         return
                     }
                 case "[":
