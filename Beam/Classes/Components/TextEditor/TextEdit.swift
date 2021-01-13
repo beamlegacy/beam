@@ -411,7 +411,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                         } else {
                             rootNode.doCommand(.moveLeftAndModifySelection)
                         }
-                        return
                     } else if command && popover != nil {
                         rootNode.doCommand(.moveToBeginningOfLine)
                         dismissAndShowPersistentView()
@@ -432,8 +431,8 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                         } else {
                             rootNode.doCommand(.moveLeft)
                         }
-                        return
                     }
+                    return
                 case .rightArrow:
                     if control && option && command {
                         guard let node = node as? TextNode else { return }
@@ -463,8 +462,8 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                         } else {
                             rootNode.doCommand(.moveRight)
                         }
-                        return
                     }
+                    return
                 case .upArrow:
                     if shift {
                         cancelPopover()
