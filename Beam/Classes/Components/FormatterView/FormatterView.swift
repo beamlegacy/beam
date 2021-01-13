@@ -144,11 +144,14 @@ class FormatterView: NSView {
 
         if selectedItems[item] != item { selectedItems[item] = item }
 
-        if item == .h2 &&
-            selectedItems[.h1] == .h1 { removeActiveState(to: .h1) }
+        if item == .h2 && selectedItems[.h1] == .h1 ||
+            item == .quote && selectedItems[.h1] == .h1 { removeActiveState(to: .h1) }
 
-        if item == .h1 &&
-            selectedItems[.h2] == .h2 { removeActiveState(to: .h2) }
+        if item == .h1 && selectedItems[.h2] == .h2 ||
+            item == .quote && selectedItems[.h2] == .h2 { removeActiveState(to: .h2) }
+
+        if item == .h2 && selectedItems[.quote] == .quote ||
+            item == .h1 && selectedItems[.quote] == .quote { removeActiveState(to: .quote) }
 
         if isActive {
             guard let button = buttons[item] else { return }
