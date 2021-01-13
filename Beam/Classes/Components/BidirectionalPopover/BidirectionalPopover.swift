@@ -176,7 +176,11 @@ class BidirectionalPopover: Popover {
     }
 
     private func checkItemsContainsQuery() {
-        guard !items.isEmpty else { return }
+        guard !items.isEmpty else {
+            isMatchItem = false
+            return
+        }
+
         isMatchItem = items.contains(where: query.contains)
 
         if isMatchItem {
