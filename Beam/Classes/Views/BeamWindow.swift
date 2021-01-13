@@ -88,6 +88,10 @@ class BeamWindow: NSWindow {
     }
 
     override func performClose(_ sender: Any?) {
+        if state.mode != .web, !state.tabs.isEmpty {
+            state.mode = .web
+            return
+        }
         if state.closeCurrentTab() { return }
         super.performClose(sender)
     }
