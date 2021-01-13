@@ -31,7 +31,7 @@ extension BeamTextEdit {
         addSubview(popover)
 
         popover.didSelectTitle = { [unowned self] (title) -> Void in
-            valideInternalLink(from: node, title)
+            validInternalLink(from: node, title)
         }
     }
 
@@ -50,7 +50,7 @@ extension BeamTextEdit {
         let linkText = String(node.text.text[cursorStartPosition + 1..<cursorPosition])
 
         if command == .moveRight && cursorPosition == node.text.text.count && popoverSuffix != 0 {
-            valideInternalLink(from: node, String(node.text.text[cursorStartPosition + 1..<cursorPosition - popoverSuffix]))
+            validInternalLink(from: node, String(node.text.text[cursorStartPosition + 1..<cursorPosition - popoverSuffix]))
             return
         }
 
@@ -92,7 +92,7 @@ extension BeamTextEdit {
         node.text.removeAttributes([.internalLink(text)], from: cursorStartPosition..<rootNode.cursorPosition + text.count)
     }
 
-    private func valideInternalLink(from node: TextNode, _ title: String) {
+    private func validInternalLink(from node: TextNode, _ title: String) {
         let replacementStart = cursorStartPosition + 1 - popoverPrefix
         let replacementEnd = rootNode.cursorPosition + popoverSuffix
         let linkEnd = replacementStart + title.count
