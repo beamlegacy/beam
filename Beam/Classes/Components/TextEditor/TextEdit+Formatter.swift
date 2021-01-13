@@ -74,7 +74,9 @@ extension BeamTextEdit {
         guard let node = node as? TextNode,
               let formatterView = formatterView else { return }
 
-        let range = rootNode.cursorPosition <= 0 ? rootNode.cursorPosition..<rootNode.cursorPosition + 1 : rootNode.cursorPosition - 1..<rootNode.cursorPosition
+        let startPosition = rootNode.cursorPosition..<rootNode.cursorPosition + 1
+        let middleOrEndPosition = rootNode.cursorPosition - 1..<rootNode.cursorPosition
+        let range = rootNode.cursorPosition <= 0 ? startPosition : middleOrEndPosition
         var types: [FormatterType] = []
 
         rootNode.state.attributes = []

@@ -572,7 +572,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     }
                 case "k":
                     if shift && command {
-                        cancelPopover()
                         toggleBiDirectionalLink()
                         return
                     }
@@ -1117,7 +1116,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     private var mapping: [BeamElement: TextNode] = [:]
     private var deadNodes: [TextNode] = []
 
-    private func showBidirectionalPopover(prefix: Int, suffix: Int) {
+    internal func showBidirectionalPopover(prefix: Int, suffix: Int) {
         popoverPrefix = prefix
         popoverSuffix = suffix
         cursorStartPosition = rootNode.cursorPosition

@@ -34,7 +34,13 @@ extension BeamTextEdit {
     }
 
     internal func toggleBiDirectionalLink() {
-        print("internallink")
+        guard popover == nil else {
+            dismissAndShowPersistentView()
+            return
+        }
+
+        showBidirectionalPopover(prefix: 1, suffix: 0)
+        updatePopover()
     }
 
     internal func toggleUnorderedAndOrderedList() {
