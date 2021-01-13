@@ -17,6 +17,12 @@ public class Widget: NSObject, CALayerDelegate {
     var currentFrameInDocument = NSRect()
 
     var isEmpty: Bool { children.isEmpty }
+    var selected: Bool = false {
+        didSet {
+            layer.backgroundColor = selected ? NSColor(white: 0.5, alpha: 0.1).cgColor : NSColor(white: 1, alpha: 0).cgColor
+            invalidate()
+        }
+    }
 
     var contentsScale = CGFloat(2) {
         didSet {
@@ -261,7 +267,7 @@ public class Widget: NSObject, CALayerDelegate {
         layer.actions = newActions
         layer.anchorPoint = CGPoint()
         layer.setNeedsDisplay()
-        layer.backgroundColor = NSColor(white: 1, alpha: 0).cgColor
+        layer.backgroundColor = selected ? NSColor(white: 0.5, alpha: 0.1).cgColor : NSColor(white: 1, alpha: 0).cgColor
         layer.delegate = self
     }
 
@@ -370,6 +376,12 @@ public class Widget: NSObject, CALayerDelegate {
     func insert(node: Widget, after existingNode: Widget) -> Bool {
         guard let pos = children.firstIndex(of: existingNode) else { return false }
         children.insert(node, at: pos + 1)
+        invalidateLayout()
+        return true
+    }
+
+    func insert(node: Widget, at pos: Int) -> Bool {
+        children.insert(node, at: pos)
         invalidateLayout()
         return true
     }
@@ -602,6 +614,15 @@ public class Widget: NSObject, CALayerDelegate {
             return p.inSubTreeOf(node)
         }
         return false
+    }
+
+    var areAllChildrenSelected: Bool {
+        for child in children {
+            if !child.selected || !child.areAllChildrenSelected {
+                return false
+            }
+        }
+        return true
     }
 }
 // swiftlint:enable type_body_length

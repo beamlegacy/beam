@@ -5,13 +5,157 @@
 //  Created by Sebastien Metrot on 26/10/2020.
 //
 
+//TODO: [Seb] create an abstraction for UndoManager to be able to handle faillures and not register empty undo operations. Then replace all _ with the real test
+
 import Foundation
 
 extension TextRoot {
-    func eraseSelection() {
+    func increaseNodeIndentation(_ node: TextNode) -> Bool {
+        guard !node.readOnly,
+        let newParent = node.previousSibbling() else { return false }
+
+        // Prepare Undo:
+        guard let currentParent = node.parent,
+              let indexInParent = node.indexInParent else { return false }
+        undoManager.registerUndo(withTarget: self) { selfTarget in
+            selfTarget.undoManager.registerUndo(withTarget: selfTarget) { selfTarget in
+                _ = selfTarget.increaseNodeIndentation(node)
+            }
+            _ = currentParent.insert(node: node, at: indexInParent)
+        }
+        undoManager.setActionName("Increase indentation")
+
+        newParent.addChild(node)
+        return true
+    }
+
+    func decreaseNodeIndentation(_ node: TextNode) -> Bool {
+        guard !node.readOnly, let parent = node.parent, let newParent = parent.parent else { return false }
+
+        // Prepare Undo:
+        guard let indexInParent = node.indexInParent else { return false }
+
+        undoManager.registerUndo(withTarget: self) { selfTarget in
+            selfTarget.undoManager.registerUndo(withTarget: selfTarget) { selfTarget in
+                _ = selfTarget.decreaseNodeIndentation(node)
+            }
+            _ = parent.insert(node: node, at: indexInParent)
+        }
+        undoManager.setActionName("Decrease indentation")
+
+        _ = newParent.insert(node: node, after: parent)
+
+        return true
+    }
+
+    func increaseNodeSelectionIndentation() {
+        guard let selection = root.state.nodeSelection else { return }
+        undoManager.beginUndoGrouping()
+        for node in selection.sortedRoots {
+            //TODO: [Seb] create an abstraction for UndoManager to be able to handle faillures and not register empty undo operations. Then replace _ with the real test
+            _ = increaseNodeIndentation(node)
+        }
+        undoManager.endUndoGrouping()
+        undoManager.setActionName("Increase indentation")
+    }
+
+    func decreaseNodeSelectionIndentation() {
+        guard let selection = root.state.nodeSelection else { return }
+        undoManager.beginUndoGrouping()
+        for node in selection.sortedRoots.reversed() {
+            //TODO: [Seb] create an abstraction for UndoManager to be able to handle faillures and not register empty undo operations. Then replace _ with the real test
+            _ = decreaseNodeIndentation(node)
+        }
+        undoManager.endUndoGrouping()
+        undoManager.setActionName("Decrease indentation")
+    }
+
+    func increaseIndentation() {
+        guard root.state.nodeSelection == nil else {
+            increaseNodeSelectionIndentation()
+            return
+        }
         guard let node = node as? TextNode else { return }
-        guard !node.readOnly else { return }
-        guard !selectedTextRange.isEmpty else { return }
+        _ = increaseNodeIndentation(node)
+    }
+
+    func decreaseIndentation() {
+        guard root.state.nodeSelection == nil else {
+            decreaseNodeSelectionIndentation()
+            return
+        }
+        guard let node = node as? TextNode else { return }
+        _ = decreaseNodeIndentation(node)
+    }
+
+    func erase(node: TextNode, enableRedo: Bool = true) -> Bool {
+        guard let oldParent = node.parent,
+              let oldIndexInParent = node.indexInParent else { return false }
+        let oldChildren = node.children
+        undoManager.registerUndo(withTarget: self) { selfTarget in
+            if enableRedo {
+                selfTarget.undoManager.registerUndo(withTarget: selfTarget) { selfTarget in
+                    _ = selfTarget.erase(node: node)
+                }
+            }
+            _ = oldParent.insert(node: node, at: oldIndexInParent)
+            for oldChild in oldChildren {
+                node.addChild(oldChild)
+            }
+            node.addLayerTo(layer: selfTarget.editor.layer!, recursive: false)
+        }
+
+        // reparent all children to previous sibbling or parent:
+        if let previous = node.previousSibbling() {
+            for child in node.children {
+                previous.addChild(child)
+            }
+        } else {
+            for (i, child) in node.children.enumerated() {
+                _ = parent?.insert(node: child, at: oldIndexInParent + i)
+            }
+        }
+        node.parent?.removeChild(node)
+        node.removeFromSuperlayer(recursive: false)
+        undoManager.setActionName("Erase node")
+
+        return true
+    }
+
+    func createEmptyRoot() {
+        let element = BeamElement()
+        let newNode = editor.nodeFor(element)
+
+        _ = root.insert(node: newNode, at: 0)
+        root.cursorPosition = 0
+        node = newNode
+
+        undoManager.registerUndo(withTarget: self) { selfTarget in
+            _ = selfTarget.erase(node: newNode, enableRedo: false)
+        }
+    }
+
+    func eraseNodeSelection() {
+        guard let selection = root.state.nodeSelection else { return }
+        let nodes = selection.sortedNodes.reversed()
+        let multiple = nodes.isEmpty
+        undoManager.beginUndoGrouping()
+        for node in nodes {
+            _ = erase(node: node)
+        }
+
+        cancelNodeSelection()
+
+        if root.element.children.isEmpty {
+            // we must create a new first node...
+            createEmptyRoot()
+        }
+        undoManager.endUndoGrouping()
+        undoManager.setActionName(multiple ? "Erase selected nodes" : "Erase selected node")
+    }
+
+    func eraseSelection() {
+        guard let node = node as? TextNode, !node.readOnly, !selectedTextRange.isEmpty else { return }
 
         node.text.removeSubrange(selectedTextRange)
         cursorPosition = selectedTextRange.lowerBound
@@ -21,23 +165,12 @@ extension TextRoot {
         cancelSelection()
     }
 
-    func increaseIndentation() {
-        guard let node = node as? TextNode else { return }
-        guard !node.readOnly else { return }
-        guard let newParent = node.previousSibbling() else { return }
-        newParent.addChild(node)
-    }
-
-    func decreaseIndentation() {
-        guard let node = node as? TextNode else { return }
-        guard !node.readOnly else { return }
-        guard let parent = node.parent else { return }
-        guard let newParent = parent.parent else { return }
-
-        _ = newParent.insert(node: node, after: parent)
-    }
-
     func deleteForward() {
+        guard root.state.nodeSelection == nil else {
+            eraseNodeSelection()
+            return
+        }
+
         guard let node = node as? TextNode else { return }
         guard !node.readOnly else { return }
         if !selectedTextRange.isEmpty {
@@ -61,6 +194,11 @@ extension TextRoot {
     }
 
     func deleteBackward() {
+        guard root.state.nodeSelection == nil else {
+            eraseNodeSelection()
+            return
+        }
+
         guard let node = node as? TextNode else { return }
         guard !node.readOnly else { return }
         if !selectedTextRange.isEmpty {
@@ -114,9 +252,7 @@ extension TextRoot {
             }
         }
 
-        guard let commandDef = commands[command] else { return }
-        guard commandDef.undo else { return }
-        guard !(commandDef.coalesce && lastCommand == command) else { return }
+        guard let commandDef = commands[command], commandDef.undo, !(commandDef.coalesce && lastCommand == command) else { return }
 
         let state = TextState(text: node.text, selectedTextRange: selectedTextRange, markedTextRange: markedTextRange, cursorPosition: cursorPosition)
         undoManager.registerUndo(withTarget: self, handler: { (selfTarget) in
@@ -166,14 +302,12 @@ extension TextRoot {
     }
 
     public func unmarkText() {
-        guard let node = node as? TextNode else { return }
-        guard !node.readOnly else { return }
+        guard let node = node as? TextNode, !node.readOnly else { return }
         markedTextRange = 0..<0
     }
 
     public func insertText(string: String, replacementRange: Range<Int>) {
-        guard let node = node as? TextNode else { return }
-        guard !node.readOnly else { return }
+        guard let node = node as? TextNode, !node.readOnly else { return }
         pushUndoState(.insertText)
 
         let c = string.count
@@ -207,8 +341,7 @@ extension TextRoot {
             guard let range = ranges.first else { return }
             state.attributes = BeamText.removeLinks(from: range.attributes)
         case 2:
-            guard let range1 = ranges.first else { return }
-            guard let range2 = ranges.last else { return }
+            guard let range1 = ranges.first, let range2 = ranges.last else { return }
             if !range1.attributes.contains(where: { $0.isLink }) {
                 state.attributes = range1.attributes
             } else if !range2.attributes.contains(where: { $0.isLink }) {

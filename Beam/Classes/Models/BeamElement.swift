@@ -218,6 +218,16 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject {
         children.insert(child, at: index + 1)
     }
 
+    func insert(_ child: BeamElement, at pos: Int) {
+        if let oldParent = child.parent {
+            oldParent.removeChild(child)
+        }
+
+        child.parent = self
+        children.insert(child, at: pos)
+    }
+
+
     @Published var parent: BeamElement?
 
     public static func == (lhs: BeamElement, rhs: BeamElement) -> Bool {
