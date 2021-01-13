@@ -12,7 +12,7 @@ enum ElementKindError: Error {
     case typeNameUnknown(String)
 }
 
-enum ElementKind: Codable {
+enum ElementKind: Codable, Equatable {
     case bullet
     case heading(Int)
     case quote(Int, String, String)

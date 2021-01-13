@@ -47,12 +47,13 @@ extension BeamTextEdit {
             return
         }
 
-        let linkText = String(node.text.text[cursorStartPosition + 1..<cursorPosition])
-
         if command == .moveRight && cursorPosition == node.text.text.count && popoverSuffix != 0 {
             validInternalLink(from: node, String(node.text.text[cursorStartPosition + 1..<cursorPosition - popoverSuffix]))
             return
         }
+
+        let startPosition = node.text.text.count > cursorStartPosition ? cursorStartPosition + 1 : cursorStartPosition
+        let linkText = String(node.text.text[startPosition..<cursorPosition])
 
         node.text.addAttributes([.internalLink(linkText)], to: cursorStartPosition + 1 - popoverPrefix..<cursorPosition + popoverSuffix)
         let items = linkText.isEmpty ? documentManager.loadAllDocumentsWithLimit() : documentManager.documentsWithLimitTitleMatch(title: linkText)
@@ -72,6 +73,7 @@ extension BeamTextEdit {
         dismissPopover()
         node.text.removeSubrange((cursorStartPosition + 1 - popoverPrefix)..<(rootNode.cursorPosition + popoverSuffix))
         rootNode.cursorPosition = cursorStartPosition + 1 - popoverPrefix
+        initFormatterView()
     }
 
     internal func dismissPopover() {

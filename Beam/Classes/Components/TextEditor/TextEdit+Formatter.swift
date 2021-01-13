@@ -74,11 +74,13 @@ extension BeamTextEdit {
         guard let node = node as? TextNode,
               let formatterView = formatterView else { return }
 
-        let range = rootNode.cursorPosition <= 0 ? rootNode.cursorPosition..<rootNode.cursorPosition + 1 : rootNode.cursorPosition - 1..<rootNode.cursorPosition
+        let startPosition = rootNode.cursorPosition..<rootNode.cursorPosition + 1
+        let middleOrEndPosition = rootNode.cursorPosition - 1..<rootNode.cursorPosition
+        let range = rootNode.cursorPosition <= 0 ? startPosition : middleOrEndPosition
         var types: [FormatterType] = []
 
         rootNode.state.attributes = []
-        formatterView.setActiveFormmatter(types)
+        formatterView.setActiveFormmatters(types)
 
         switch node.elementKind {
         case .heading(1):
@@ -106,10 +108,31 @@ extension BeamTextEdit {
             }
         }
 
-        formatterView.setActiveFormmatter(types)
+        formatterView.setActiveFormmatters(types)
     }
 
-    private func selectFormatterAction(_ type: FormatterType, _ isActive: Bool) {
+    internal func updatePersistentView(with type: FormatterType, attribute: BeamText.Attribute? = nil, kind: ElementKind? = .bullet) {
+        guard let formatterView = formatterView,
+              let node = node as? TextNode else { return }
+
+        var hasAttribute = false
+
+        if let attribute = attribute {
+            hasAttribute = rootNode.state.attributes.contains(attribute)
+        }
+
+        if type == .h1 && node.element.kind == .heading(1) ||
+           type == .h2 && node.element.kind == .heading(2) ||
+           type == .quote && node.element.kind == .quote(1, "", "") ||
+           type == .code && node.element.kind == .code {
+            hasAttribute = node.element.kind == kind
+        }
+
+        selectFormatterAction(type, hasAttribute)
+        formatterView.setActiveFormatter(type)
+    }
+
+    internal func selectFormatterAction(_ type: FormatterType, _ isActive: Bool) {
         guard let node = node as? TextNode else { return }
 
         switch type {

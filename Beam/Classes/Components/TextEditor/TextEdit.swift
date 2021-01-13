@@ -513,11 +513,11 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             }
 
             switch event.keyCode {
-            case 117: // delete
+            case KeyCode.delete.rawValue:
                 rootNode.doCommand(.deleteForward)
                 updatePopover(with: .deleteForward)
                 return
-            case 53: // escape
+            case KeyCode.escape.rawValue:
                 if popover != nil {
                     dismissAndShowPersistentView()
                 }
@@ -528,11 +528,11 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             }
 
             if let ch = event.charactersIgnoringModifiers {
-                switch ch {
-                case "a":
-                    if command {
+                switch ch.lowercased() {
+                case "1", "2":
+                    if command && option || shift && command && option {
                         cancelPopover()
-                        rootNode.doCommand(.selectAll)
+                        toggleHeading(Int(ch) ?? 1)
                         return
                     }
                 case "[":
@@ -547,7 +547,71 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                         rootNode.doCommand(.increaseIndentation)
                         return
                     }
+                case "a":
+                    if command {
+                        cancelPopover()
+                        rootNode.doCommand(.selectAll)
+                        return
+                    }
+                case "b" :
+                    if command {
+                        cancelPopover()
+                        toggleBold()
+                        return
+                    }
+                case "c":
+                    if option && command {
+                        cancelPopover()
+                        toggleCode()
+                        return
+                    }
+                case "i":
+                    if command {
+                        cancelPopover()
+                        toggleEmphasis()
+                        return
+                    }
+                case "k":
+                    if shift && command {
+                        toggleBiDirectionalLink()
+                        return
+                    }
 
+                    if command {
+                        cancelPopover()
+                        toggleLink()
+                        return
+                    }
+                case "l":
+                    if shift && command {
+                        cancelPopover()
+                        toggleUnorderedAndOrderedList()
+                        return
+                    }
+                case "u":
+                    if shift && command {
+                        cancelPopover()
+                        toggleQuote()
+                        return
+                    }
+
+                    if command {
+                        cancelPopover()
+                        toggleUnderline()
+                        return
+                    }
+                case "t":
+                    if option && command {
+                        cancelPopover()
+                        toggleTodo()
+                        return
+                    }
+                case "y":
+                    if command {
+                        cancelPopover()
+                        toggleStrikeThrough()
+                        return
+                    }
                 default:
                     break
                 }
@@ -1054,7 +1118,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     private var mapping: [BeamElement: TextNode] = [:]
     private var deadNodes: [TextNode] = []
 
-    private func showBidirectionalPopover(prefix: Int, suffix: Int) {
+    internal func showBidirectionalPopover(prefix: Int, suffix: Int) {
         popoverPrefix = prefix
         popoverSuffix = suffix
         cursorStartPosition = rootNode.cursorPosition
