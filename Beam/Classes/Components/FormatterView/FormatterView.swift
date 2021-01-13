@@ -122,7 +122,7 @@ class FormatterView: NSView {
     func setActiveFormatter(_ type: FormatterType) {
         guard let button = buttons[type] else { return }
 
-        enableCorrectType(type)
+        removeState(type)
 
         if selectedTypes[type] == type {
             button.layer?.backgroundColor = NSColor.clear.cgColor
@@ -158,7 +158,7 @@ class FormatterView: NSView {
 
         if selectedTypes[type] != type { selectedTypes[type] = type }
 
-        enableCorrectType(type)
+        removeState(type)
 
         if isActive {
             guard let button = buttons[type] else { return }
@@ -213,18 +213,18 @@ class FormatterView: NSView {
         }
     }
 
-    private func enableCorrectType(_ type: FormatterType) {
+    private func removeState(_ type: FormatterType) {
         if type == .h2 && selectedTypes[.h1] == .h1 ||
-            type == .quote && selectedTypes[.h1] == .h1 { removeActiveState(to: .h1) }
+            type == .quote && selectedTypes[.h1] == .h1 { removeActiveIndicator(to: .h1) }
 
         if type == .h1 && selectedTypes[.h2] == .h2 ||
-            type == .quote && selectedTypes[.h2] == .h2 { removeActiveState(to: .h2) }
+            type == .quote && selectedTypes[.h2] == .h2 { removeActiveIndicator(to: .h2) }
 
         if type == .h2 && selectedTypes[.quote] == .quote ||
-            type == .h1 && selectedTypes[.quote] == .quote { removeActiveState(to: .quote) }
+            type == .h1 && selectedTypes[.quote] == .quote { removeActiveIndicator(to: .quote) }
     }
 
-    private func removeActiveState(to item: FormatterType) {
+    private func removeActiveIndicator(to item: FormatterType) {
         guard let button = buttons[item] else { return }
         button.layer?.backgroundColor = NSColor.clear.cgColor
         selectedTypes[item] = nil
