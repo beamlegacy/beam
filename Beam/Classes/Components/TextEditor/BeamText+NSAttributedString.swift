@@ -98,7 +98,7 @@ extension BeamText {
 
         if strikethrough {
             stringAttributes[.strikethroughStyle] = NSUnderlineStyle.single.rawValue
-            stringAttributes[.strikethroughColor] = NSColor.red
+            stringAttributes[.strikethroughColor] = NSColor.strikethroughColor
         }
 
         if let source = source {
