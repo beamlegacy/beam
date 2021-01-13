@@ -12,6 +12,7 @@ sentry:
   tags:
     - macos
   interruptible: true
+  allow_failure: true
   retry:
     max: 2
 
