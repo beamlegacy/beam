@@ -31,14 +31,7 @@ extension BeamTextEdit {
         addSubview(popover)
 
         popover.didSelectTitle = { [unowned self] (title) -> Void in
-            let replacementStart = cursorStartPosition + 1 - popoverPrefix
-            let replacementEnd = rootNode.cursorPosition + popoverSuffix
-            let linkEnd = replacementStart + title.count
-            node.text.replaceSubrange(replacementStart..<replacementEnd, with: title)
-            node.text.makeInternalLink(replacementStart..<linkEnd)
-            rootNode.cursorPosition = linkEnd
-            dismissPopover()
-            initFormatterView()
+            validInternalLink(from: node, title)
         }
     }
 
@@ -55,6 +48,12 @@ extension BeamTextEdit {
         }
 
         let linkText = String(node.text.text[cursorStartPosition + 1..<cursorPosition])
+
+        if command == .moveRight && cursorPosition == node.text.text.count && popoverSuffix != 0 {
+            validInternalLink(from: node, String(node.text.text[cursorStartPosition + 1..<cursorPosition - popoverSuffix]))
+            return
+        }
+
         node.text.addAttributes([.internalLink(linkText)], to: cursorStartPosition + 1 - popoverPrefix..<cursorPosition + popoverSuffix)
         let items = linkText.isEmpty ? documentManager.loadAllDocumentsWithLimit() : documentManager.documentsWithLimitTitleMatch(title: linkText)
         var height = BeamTextEdit.viewHeight * CGFloat(items.count) + (linkText.isEmpty ? 0 : 36.5)
@@ -92,6 +91,17 @@ extension BeamTextEdit {
         guard let node = node as? TextNode else { return }
         let text = node.text.text
         node.text.removeAttributes([.internalLink(text)], from: cursorStartPosition..<rootNode.cursorPosition + text.count)
+    }
+
+    private func validInternalLink(from node: TextNode, _ title: String) {
+        let replacementStart = cursorStartPosition + 1 - popoverPrefix
+        let replacementEnd = rootNode.cursorPosition + popoverSuffix
+        let linkEnd = replacementStart + title.count
+        node.text.replaceSubrange(replacementStart..<replacementEnd, with: title)
+        node.text.makeInternalLink(replacementStart..<linkEnd)
+        rootNode.cursorPosition = linkEnd
+        dismissPopover()
+        initFormatterView()
     }
 
 }
