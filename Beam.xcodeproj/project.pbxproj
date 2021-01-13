@@ -195,6 +195,7 @@
 		967B2685255465C5003F40E3 /* Html2MdTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 967B2684255465C5003F40E3 /* Html2MdTests.swift */; };
 		969084CC25365AAE009D3C96 /* ParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 969084CB25365AAE009D3C96 /* ParserTests.swift */; };
 		9691E3D825AD9F3300A13080 /* TextRoot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9691E3D725AD9F3300A13080 /* TextRoot.swift */; };
+		9691E40225AE5D2C00A13080 /* NodeSelection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9691E40125AE5D2C00A13080 /* NodeSelection.swift */; };
 		96956D31258BF3F50069C9C1 /* LinkStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96956D30258BF3F50069C9C1 /* LinkStore.swift */; };
 		96A8B1DD25A38A3B006F749C /* String+Levenshtein.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96A8B1DC25A38A3B006F749C /* String+Levenshtein.swift */; };
 		96C9AA3F259019E3007D3D98 /* LinkedReferenceNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C9AA3E259019E3007D3D98 /* LinkedReferenceNode.swift */; };
@@ -608,6 +609,7 @@
 		967B2684255465C5003F40E3 /* Html2MdTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Html2MdTests.swift; sourceTree = "<group>"; };
 		969084CB25365AAE009D3C96 /* ParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParserTests.swift; sourceTree = "<group>"; };
 		9691E3D725AD9F3300A13080 /* TextRoot.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextRoot.swift; sourceTree = "<group>"; };
+		9691E40125AE5D2C00A13080 /* NodeSelection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NodeSelection.swift; sourceTree = "<group>"; };
 		96956D30258BF3F50069C9C1 /* LinkStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkStore.swift; sourceTree = "<group>"; };
 		96A8B1DC25A38A3B006F749C /* String+Levenshtein.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Levenshtein.swift"; sourceTree = "<group>"; };
 		96C9AA3E259019E3007D3D98 /* LinkedReferenceNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkedReferenceNode.swift; sourceTree = "<group>"; };
@@ -979,6 +981,7 @@
 				96C9AA5625901AA9007D3D98 /* LinksSection.swift */,
 				96F936622590FA59006D8E53 /* BTextEdit.swift */,
 				96E4505725995CA200BFF36F /* BreadCrumb.swift */,
+				9691E40125AE5D2C00A13080 /* NodeSelection.swift */,
 			);
 			path = TextEditor;
 			sourceTree = "<group>";
@@ -1983,6 +1986,7 @@
 				418172032581107C00317ED8 /* Bullet.swift in Sources */,
 				418173C32581276F00317ED8 /* String+NSMutableAttributedString.swift in Sources */,
 				4181723D2581107C00317ED8 /* TextEdit.swift in Sources */,
+				9691E40225AE5D2C00A13080 /* NodeSelection.swift in Sources */,
 				4181720F2581107C00317ED8 /* PageRank.swift in Sources */,
 				418172AB25811A3A00317ED8 /* BMTextFieldView.swift in Sources */,
 				965A78292514F147009980D4 /* AppDelegate.swift in Sources */,

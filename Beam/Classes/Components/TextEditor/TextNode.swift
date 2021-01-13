@@ -173,7 +173,7 @@ public class TextNode: Widget {
     }
 
     var readOnly: Bool = false
-    var isEditing: Bool { root?.node === self }
+    var isEditing: Bool { root?.node === self && root?.state.nodeSelection == nil }
 
     var firstLineHeight: CGFloat { layout?.lines.first?.bounds.height ?? CGFloat(fontSize * interlineFactor) }
     var firstLineBaseline: CGFloat {
@@ -515,6 +515,13 @@ public class TextNode: Widget {
     override func insert(node: Widget, after existingNode: Widget) -> Bool {
         guard let node = node as? TextNode, let existingNode = existingNode as? TextNode else { fatalError () }
         element.insert(node.element, after: existingNode.element)
+        invalidateLayout()
+        return true
+    }
+
+    override func insert(node: Widget, at pos: Int) -> Bool {
+        guard let node = node as? TextNode else { fatalError () }
+        element.insert(node.element, at: pos)
         invalidateLayout()
         return true
     }
@@ -946,4 +953,68 @@ public class TextNode: Widget {
         actionImageLayer.setAffineTransform(CGAffineTransform.identity)
         actionTextLayer.setAffineTransform(CGAffineTransform.identity)
     }
+
+    func nextVisibleTextNode() -> TextNode? {
+        var node = nextVisible()
+        while node != nil {
+            if let textNode = node as? TextNode {
+                return textNode
+            }
+            let next = node?.nextVisible()
+            assert(next != node)
+            node = next
+        }
+
+        return nil
+    }
+
+    func previousVisibleTextNode() -> TextNode? {
+        var node = previousVisible()
+        while node != nil {
+            if let textNode = node as? TextNode {
+                return textNode
+            }
+            let previous = node?.previousVisible()
+            assert(previous != node)
+            node = previous
+        }
+
+        return nil
+    }
+
+    func isAbove(node: TextNode) -> Bool {
+        guard !(node == self) else { return false }
+        let allParents1 = [Widget](allParents.reversed()) + [self]
+        guard !allParents1.contains(node) else { return false }
+        let allParents2 = [Widget](node.allParents.reversed()) + [node]
+        guard !allParents2.contains(self) else { return true }
+
+        // Both nodes must share the same root. If you crash here, you are comparing nodes that are NOT in the same tree...
+        assert(allParents1.first == allParents2.first)
+
+        var index = 0
+        // find first common parent:
+        let count = min(allParents1.count, allParents2.count)
+
+        while allParents1[index] == allParents2[index] {
+            let nextIndex = index + 1
+
+            guard nextIndex < count else {
+                return (allParents1[index].indexInParent!) < (allParents2[index].indexInParent!)
+            }
+            index = nextIndex
+        }
+
+        return (allParents1[index].indexInParent ?? -1) < (allParents2[index].indexInParent ?? -1)
+    }
+
+    public func deepestTextNodeChild() -> TextNode {
+        for c in children.reversed() {
+            if let c = c as? TextNode {
+                return c.deepestTextNodeChild()
+            }
+        }
+        return self
+    }
+
 }

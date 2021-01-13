@@ -15,6 +15,8 @@ public struct TextState {
     var cursorPosition: Int = -1
 
     var attributes: [BeamText.Attribute] = []
+
+    var nodeSelection: NodeSelection?
 }
 
 public struct TextConfig {

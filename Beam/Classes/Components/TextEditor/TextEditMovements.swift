@@ -9,6 +9,7 @@ import Foundation
 
 extension TextRoot {
     func moveLeft() {
+        cancelNodeSelection()
         guard let node = node as? TextNode else { return }
         if selectedTextRange.isEmpty {
             if cursorPosition == 0 {
@@ -28,6 +29,7 @@ extension TextRoot {
     }
 
     func moveRight() {
+        cancelNodeSelection()
         guard let node = node as? TextNode else { return }
         if selectedTextRange.isEmpty {
             if cursorPosition == node.text.count {
@@ -45,6 +47,7 @@ extension TextRoot {
     }
 
     func moveLeftAndModifySelection() {
+        guard root.state.nodeSelection == nil else { return }
         guard let node = node as? TextNode else { return }
         if cursorPosition != 0 {
             let newCursorPosition = node.position(before: cursorPosition)
@@ -59,6 +62,7 @@ extension TextRoot {
     }
 
     func moveWordRight() {
+        cancelNodeSelection()
         guard let node = node as? TextNode else { return }
         node.text.text.enumerateSubstrings(in: node.text.index(at: cursorPosition)..<node.text.text.endIndex, options: .byWords) { (_, r1, _, stop) in
             self.cursorPosition = node.position(at: r1.upperBound)
@@ -69,6 +73,7 @@ extension TextRoot {
     }
 
     func moveWordLeft() {
+        cancelNodeSelection()
         guard let node = node as? TextNode else { return }
         var range = node.text.text.startIndex ..< node.text.text.endIndex
         node.text.text.enumerateSubstrings(in: node.text.text.startIndex..<node.text.text.index(at: cursorPosition), options: .byWords) { (_, r1, _, _) in
@@ -81,6 +86,7 @@ extension TextRoot {
     }
 
     func moveWordRightAndModifySelection() {
+        guard root.state.nodeSelection == nil else { return }
         guard let node = node as? TextNode else { return }
         var newCursorPosition = cursorPosition
         node.text.text.enumerateSubstrings(in: node.text.text.index(at: cursorPosition)..<node.text.text.endIndex, options: .byWords) { (_, r1, _, stop) in
@@ -93,6 +99,7 @@ extension TextRoot {
 
     //swiftlint:disable cyclomatic_complexity function_body_length
     func moveWordLeftAndModifySelection() {
+        guard root.state.nodeSelection == nil else { return }
         guard let node = node as? TextNode else { return }
         var range = node.text.text.startIndex ..< node.text.text.endIndex
         node.text.text.enumerateSubstrings(in: node.text.text.startIndex..<node.text.text.index(at: cursorPosition), options: .byWords) { (_, r1, _, _) in
@@ -105,6 +112,7 @@ extension TextRoot {
     }
 
     func moveRightAndModifySelection() {
+        guard root.state.nodeSelection == nil else { return }
         guard let node = node as? TextNode else { return }
         if cursorPosition != node.text.count {
             extendSelection(to: node.position(after: cursorPosition))
@@ -113,30 +121,35 @@ extension TextRoot {
     }
 
     func moveToBeginningOfLine() {
+        cancelNodeSelection()
         guard let node = node as? TextNode else { return }
         cursorPosition = node.beginningOfLineFromPosition(cursorPosition)
         cancelSelection()
     }
 
     func moveToEndOfLine() {
+        cancelNodeSelection()
         guard let node = node as? TextNode else { return }
         cursorPosition = node.endOfLineFromPosition(cursorPosition)
         cancelSelection()
     }
 
     func moveToBeginningOfLineAndModifySelection() {
+        guard root.state.nodeSelection == nil else { return }
         guard let node = node as? TextNode else { return }
         extendSelection(to: node.beginningOfLineFromPosition(cursorPosition))
         node.invalidateText()
     }
 
     func moveToEndOfLineAndModifySelection() {
+        guard root.state.nodeSelection == nil else { return }
         guard let node = node as? TextNode else { return }
         extendSelection(to: node.endOfLineFromPosition(cursorPosition))
         node.invalidateText()
     }
 
     func moveUp() {
+        cancelNodeSelection()
         guard let node = node as? TextNode else { return }
         if node.isOnFirstLine(cursorPosition) {
             if let newNode = node.previousVisible() as? TextNode {
@@ -155,6 +168,7 @@ extension TextRoot {
     }
 
     func moveDown() {
+        cancelNodeSelection()
         guard let node = node as? TextNode else { return }
         if node.isOnLastLine(cursorPosition) {
             if let newNode = node.nextVisible() as? TextNode {
@@ -178,8 +192,39 @@ extension TextRoot {
         node.invalidate()
     }
 
+    public func selectAllNodes() -> Bool {
+        guard let selection = root.state.nodeSelection else {
+            startNodeSelection()
+            return true
+        }
+
+        if !selection.start.areAllChildrenSelected {
+            selection.appendChildren(of: selection.start)
+            return true
+        }
+
+        guard let parent = selection.start.parent as? TextNode else { return false }
+        if !parent.selected {
+            selection.append(parent)
+            selection.appendChildren(of: parent)
+            selection.start = parent
+            selection.end = parent.deepestTextNodeChild()
+            return true
+        }
+        return false
+    }
+
     public func selectAll() {
+        guard root.state.nodeSelection == nil else {
+            _ = selectAllNodes()
+            return
+        }
         guard let node = node as? TextNode else { return }
+        guard selectedTextRange != node.text.wholeRange else {
+            _ = selectAllNodes()
+            return
+        }
+
         selectedTextRange = node.text.wholeRange
         cursorPosition = selectedTextRange.upperBound
         node.invalidate()
@@ -187,14 +232,32 @@ extension TextRoot {
     }
 
     public func moveUpAndModifySelection() {
+        guard root.state.nodeSelection == nil else {
+            extendNodeSelectionUp()
+            return
+        }
+
         guard let node = node as? TextNode else { return }
-        extendSelection(to: node.positionAbove(cursorPosition))
+        if cursorPosition == 0 {
+            extendNodeSelectionUp()
+        } else {
+            extendSelection(to: node.positionAbove(cursorPosition))
+        }
         node.invalidateText()
     }
 
     public func moveDownAndModifySelection() {
+        guard root.state.nodeSelection == nil else {
+            extendNodeSelectionDown()
+            return
+        }
+
         guard let node = node as? TextNode else { return }
-        extendSelection(to: node.positionBelow(cursorPosition))
+        if cursorPosition == node.text.text.count {
+            extendNodeSelectionDown()
+        } else {
+            extendSelection(to: node.positionBelow(cursorPosition))
+        }
         node.invalidateText()
     }
 
@@ -214,5 +277,33 @@ extension TextRoot {
         }
         cursorPosition = newCursorPosition
         node.invalidate()
+    }
+
+    func extendNodeSelectionUp() {
+        if let selection = root.state.nodeSelection {
+            selection.extendUp()
+        } else {
+            startNodeSelection()
+        }
+    }
+
+    func extendNodeSelectionDown() {
+        if let selection = root.state.nodeSelection {
+            selection.extendDown()
+        } else {
+            startNodeSelection()
+        }
+    }
+
+    func startNodeSelection() {
+        guard let node = node as? TextNode else { return }
+        root.state.nodeSelection = NodeSelection(start: node, end: node)
+        cancelSelection()
+    }
+
+    func cancelNodeSelection() {
+        guard let selection = root.state.nodeSelection else { return }
+        root.node = selection.end
+        root.state.nodeSelection = nil
     }
 }

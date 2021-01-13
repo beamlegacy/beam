@@ -865,6 +865,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     override public func mouseDown(with event: NSEvent) {
         //       window?.makeFirstResponder(self)
         reBlink()
+        rootNode.cancelNodeSelection() // TODO: change this to handle manipulating the node selection with the mouse
         let point = convert(event.locationInWindow)
         guard let newNode = rootNode.dispatchMouseDown(mouseInfo: MouseInfo(rootNode, point, event)) else {
             guard let n = rootNode.children.first else { return }
