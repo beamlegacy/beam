@@ -512,11 +512,11 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             }
 
             switch event.keyCode {
-            case 117: // delete
+            case KeyCode.delete.rawValue:
                 rootNode.doCommand(.deleteForward)
                 updatePopover(with: .deleteForward)
                 return
-            case 53: // escape
+            case KeyCode.escape.rawValue:
                 if popover != nil {
                     dismissAndShowPersistentView()
                 }
