@@ -130,6 +130,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         return parseHTTPScheme(components: components)
     }
 
+    var consoleWindow: ConsoleWindow?
     var notesWindow: NotesWindow?
     var noteWindows: [NoteWindow] = []
     var documentsWindow: DocumentsWindow?

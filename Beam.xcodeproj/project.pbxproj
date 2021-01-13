@@ -167,6 +167,9 @@
 		524299C725A47D2600F4DBF5 /* AppDelegate+Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524299C625A47D2600F4DBF5 /* AppDelegate+Preferences.swift */; };
 		524299E725A480A300F4DBF5 /* AccountsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524299E225A480A300F4DBF5 /* AccountsView.swift */; };
 		524299EE25A488E000F4DBF5 /* AdvancedPreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524299ED25A488E000F4DBF5 /* AdvancedPreferencesView.swift */; };
+		526017F425AE074E00634695 /* ConsoleWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 526017F325AE074E00634695 /* ConsoleWindow.swift */; };
+		526017F825AE078600634695 /* ConsoleContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 526017F725AE078600634695 /* ConsoleContentView.swift */; };
+		526017FC25AE081E00634695 /* AppDelegate+Console.swift in Sources */ = {isa = PBXBuildFile; fileRef = 526017FB25AE081E00634695 /* AppDelegate+Console.swift */; };
 		527DF48725710ECB00A0A56D /* DocumentManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 527DF48625710ECB00A0A56D /* DocumentManagerTests.swift */; };
 		52B5EF78252F520100914D52 /* CoreDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52B5EF77252F520100914D52 /* CoreDataTests.swift */; };
 		52C60BFA258B638F008B7C10 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52C60B9D258B6333008B7C10 /* Sparkle.framework */; };
@@ -579,6 +582,9 @@
 		524299C625A47D2600F4DBF5 /* AppDelegate+Preferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+Preferences.swift"; sourceTree = "<group>"; };
 		524299E225A480A300F4DBF5 /* AccountsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AccountsView.swift; sourceTree = "<group>"; };
 		524299ED25A488E000F4DBF5 /* AdvancedPreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedPreferencesView.swift; sourceTree = "<group>"; };
+		526017F325AE074E00634695 /* ConsoleWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsoleWindow.swift; sourceTree = "<group>"; };
+		526017F725AE078600634695 /* ConsoleContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsoleContentView.swift; sourceTree = "<group>"; };
+		526017FB25AE081E00634695 /* AppDelegate+Console.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+Console.swift"; sourceTree = "<group>"; };
 		527DF48625710ECB00A0A56D /* DocumentManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentManagerTests.swift; sourceTree = "<group>"; };
 		52B5EF77252F520100914D52 /* CoreDataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataTests.swift; sourceTree = "<group>"; };
 		52C60B82258B6332008B7C10 /* Sparkle.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Sparkle.xcodeproj; path = Extern/Sparkle/Sparkle.xcodeproj; sourceTree = "<group>"; };
@@ -1057,6 +1063,7 @@
 				41817278258110D100317ED8 /* AppDelegate+Note.swift */,
 				521EEDF62593824100BA2485 /* AppDelegate+Document.swift */,
 				4181727A258110D100317ED8 /* AppDelegate+URL.swift */,
+				526017FB25AE081E00634695 /* AppDelegate+Console.swift */,
 			);
 			path = "AppDelegate+Beam";
 			sourceTree = "<group>";
@@ -1064,6 +1071,7 @@
 		418172A625811A3A00317ED8 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				526017DE25AE073800634695 /* Console */,
 				418171AA2581107C00317ED8 /* AutoComplete */,
 				4159E9D2259A1A56005FD355 /* BidirectionalPopover */,
 				414B98EE25A239C6002E81A3 /* FormatterView */,
@@ -1186,6 +1194,15 @@
 				524299ED25A488E000F4DBF5 /* AdvancedPreferencesView.swift */,
 			);
 			path = Preferences;
+			sourceTree = "<group>";
+		};
+		526017DE25AE073800634695 /* Console */ = {
+			isa = PBXGroup;
+			children = (
+				526017F325AE074E00634695 /* ConsoleWindow.swift */,
+				526017F725AE078600634695 /* ConsoleContentView.swift */,
+			);
+			path = Console;
 			sourceTree = "<group>";
 		};
 		527DF48525710EAE00A0A56D /* Managers */ = {
@@ -1899,6 +1916,7 @@
 				418172272581107C00317ED8 /* NSMutableAttributedString+Range.swift in Sources */,
 				4181723A2581107C00317ED8 /* Parser.swift in Sources */,
 				4181724A2581107C00317ED8 /* TextView.swift in Sources */,
+				526017FC25AE081E00634695 /* AppDelegate+Console.swift in Sources */,
 				4181722B2581107C00317ED8 /* String+Localization.swift in Sources */,
 				96956D31258BF3F50069C9C1 /* LinkStore.swift in Sources */,
 				418172012581107C00317ED8 /* Document+CoreDataProperties.swift in Sources */,
@@ -1932,6 +1950,7 @@
 				418172112581107C00317ED8 /* Readability.swift in Sources */,
 				418171F12581107C00317ED8 /* UserSessionRequest.swift in Sources */,
 				418172242581107C00317ED8 /* String+URL.swift in Sources */,
+				526017F825AE078600634695 /* ConsoleContentView.swift in Sources */,
 				418172192581107C00317ED8 /* Persistence.swift in Sources */,
 				418172282581107C00317ED8 /* ClosedRange+Beam.swift in Sources */,
 				96CDA7192582379A00BC375C /* Index.swift in Sources */,
@@ -2026,6 +2045,7 @@
 				418172372581107C00317ED8 /* TextEditOperations.swift in Sources */,
 				521EEDE925937FAD00BA2485 /* DocumentRow.swift in Sources */,
 				414B98F025A239F8002E81A3 /* FormatterView.swift in Sources */,
+				526017F425AE074E00634695 /* ConsoleWindow.swift in Sources */,
 				418172472581107C00317ED8 /* NoteDetail.swift in Sources */,
 				4181720C2581107C00317ED8 /* BeamNote.swift in Sources */,
 			);
