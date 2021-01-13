@@ -535,6 +535,21 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                         rootNode.doCommand(.selectAll)
                         return
                     }
+                case "b" :
+                    if command {
+                        toggleBold()
+                        return
+                    }
+                case "i":
+                    if command {
+                        toggleEmphasis()
+                        return
+                    }
+                case "y":
+                    if command {
+                        toggleStrikeThrough()
+                        return
+                    }
                 case "[":
                     cancelPopover()
                     if command {

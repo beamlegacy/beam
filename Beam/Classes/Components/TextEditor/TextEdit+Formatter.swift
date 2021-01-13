@@ -78,7 +78,7 @@ extension BeamTextEdit {
         var types: [FormatterType] = []
 
         rootNode.state.attributes = []
-        formatterView.setActiveFormmatter(types)
+        formatterView.setActiveFormmatters(types)
 
         switch node.elementKind {
         case .heading(1):
@@ -104,10 +104,10 @@ extension BeamTextEdit {
             }
         }
 
-        formatterView.setActiveFormmatter(types)
+        formatterView.setActiveFormmatters(types)
     }
 
-    private func selectFormatterAction(_ type: FormatterType, _ isActive: Bool) {
+    internal func selectFormatterAction(_ type: FormatterType, _ isActive: Bool) {
         guard let node = node as? TextNode else { return }
 
         switch type {
@@ -128,6 +128,14 @@ extension BeamTextEdit {
         default:
             break
         }
+    }
+
+    internal func updatePersistentView(with attribute: BeamText.Attribute, _ type: FormatterType) {
+        guard let formatterView = formatterView else { return }
+        let hasAttribute = rootNode.state.attributes.contains(attribute)
+
+        selectFormatterAction(type, hasAttribute)
+        formatterView.setActiveFormatter(type)
     }
 
     private func changeTextFormat(with node: TextNode, kind: ElementKind, isActive: Bool) {

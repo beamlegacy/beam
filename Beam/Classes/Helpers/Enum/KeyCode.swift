@@ -8,7 +8,8 @@
 import Foundation
 
 enum KeyCode: UInt16 {
-    case up = 126
+    case escape = 53
+    case delete = 117
     case down = 125
-    case escap = 25
+    case up = 126
 }
