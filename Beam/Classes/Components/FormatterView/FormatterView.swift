@@ -28,7 +28,7 @@ class FormatterView: NSView {
 
     private let cornerRadius: CGFloat = 3
     private let leading = 2
-    private let yPosition = 1
+    private let yPosition = 2
     private let spaceItem = 1
     private let itemWidth = 34
     private let itemHeight = 28
