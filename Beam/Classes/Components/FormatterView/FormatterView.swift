@@ -11,7 +11,6 @@ class FormatterView: NSView {
 
     // MARK: - Properties
     @IBOutlet var containerView: NSView!
-    @IBOutlet weak var stackView: NSStackView!
 
     var didSelectFormatterType: ((_ type: FormatterType, _ isActive: Bool) -> Void)?
 
@@ -26,6 +25,13 @@ class FormatterView: NSView {
             loadItems()
         }
     }
+
+    private let cornerRadius: CGFloat = 3
+    private let leading = 2
+    private let yPosition = 2
+    private let spaceItem = 1
+    private let itemWidth = 34
+    private let itemHeight = 28
 
     private var selectedTypes: Set<FormatterType> = []
     private var buttons: [FormatterType: NSButton] = [:]
@@ -48,23 +54,21 @@ class FormatterView: NSView {
         containerView.wantsLayer = true
         containerView.layer?.backgroundColor = NSColor.formatterViewBackgroundColor.cgColor
         containerView.layer?.cornerRadius = corderRadius
-        containerView.layer?.borderWidth = 0.5
+        containerView.layer?.borderWidth = 0.7
         containerView.layer?.borderColor = NSColor.formatterBorderColor.cgColor
     }
 
     private func setupStackView() {
+        guard let containerView = containerView else { return }
+
         let trackingArea = NSTrackingArea(
-            rect: stackView.bounds,
+            rect: containerView.bounds,
             options: [.activeAlways, .inVisibleRect, .mouseEnteredAndExited],
             owner: self,
-            userInfo: ["view": stackView!]
+            userInfo: ["view": containerView]
         )
 
-        stackView.orientation = .horizontal
-        stackView.alignment = .centerY
-        stackView.distribution = .fillProportionally
-        stackView.spacing = 6
-        stackView.addTrackingArea(trackingArea)
+        containerView.addTrackingArea(trackingArea)
     }
 
     private func drawShadow() {
@@ -73,7 +77,6 @@ class FormatterView: NSView {
         self.shadow = NSShadow()
         self.layer?.allowsEdgeAntialiasing = true
         self.layer?.drawsAsynchronously = true
-        self.layer?.shadowColor = NSColor.formatterShadowColor.cgColor
         self.layer?.shadowOpacity = 0
         self.layer?.shadowRadius = 0
         self.layer?.shadowOffset = NSSize(width: 0, height: 0)
@@ -85,6 +88,7 @@ class FormatterView: NSView {
             ctx.duration = 0.3
 
             containerView.layer?.backgroundColor = isHover ? NSColor.formatterViewBackgroundHoverColor.cgColor : NSColor.formatterViewBackgroundColor.cgColor
+            layer?.shadowColor = isHover ? NSColor.formatterShadowColor.cgColor : NSColor.clear.cgColor
             layer?.shadowOpacity = isHover ? 0.07 : 0
             layer?.shadowRadius = isHover ? 3 : 0
             layer?.shadowOffset.height = isHover ? -1.5 : 0
@@ -175,7 +179,8 @@ class FormatterView: NSView {
 
     private func loadItems() {
         items.enumerated().forEach { (index, item) in
-            let button = FormatterTypeButton(frame: NSRect(x: 0, y: 0, width: 38, height: 28))
+            let xPosition = index == 0 ? leading : (itemWidth * index) + (spaceItem * index) + leading
+            let button = FormatterTypeButton(frame: NSRect(x: xPosition, y: yPosition, width: itemWidth, height: itemHeight))
             let trackingButtonArea = NSTrackingArea(
                 rect: button.bounds,
                 options: [.activeAlways, .inVisibleRect, .mouseEnteredAndExited],
@@ -183,7 +188,7 @@ class FormatterView: NSView {
                 userInfo: ["view": button, "item": item]
             )
 
-            button.layer?.cornerRadius = 3
+            button.layer?.cornerRadius = cornerRadius
             button.contentTintColor = NSColor.formatterIconColor
             button.image = NSImage(named: "editor-format_\(item)")
             button.tag = index
@@ -192,14 +197,14 @@ class FormatterView: NSView {
             button.addTrackingArea(trackingButtonArea)
 
             buttons[item] = button
-            stackView.addArrangedSubview(button)
+            containerView.addSubview(button)
         }
     }
 
     private func updateFormatterView(with userInfo: [ AnyHashable: Any ], isHover: Bool) {
         guard let view = userInfo["view"] as? NSView else { return }
 
-        if view == stackView {
+        if view == containerView {
             DispatchQueue.main.async {[weak self] in
                 guard let self = self else { return }
                 self.animateShadowOnMouseEntered(isHover)
