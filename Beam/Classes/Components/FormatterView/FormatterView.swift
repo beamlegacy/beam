@@ -26,10 +26,13 @@ class FormatterView: NSView {
         }
     }
 
-    private var leading = 3
-    private var spaceItem = 5
-    private var itemWidth = 34
-    private var itemHeight = 26
+    private let cornerRadius: CGFloat = 3
+    private let leading = 2
+    private let yPosition = 1
+    private let spaceItem = 1
+    private let itemWidth = 34
+    private let itemHeight = 28
+
     private var selectedTypes: Set<FormatterType> = []
     private var buttons: [FormatterType: NSButton] = [:]
 
@@ -88,7 +91,7 @@ class FormatterView: NSView {
             layer?.shadowColor = isHover ? NSColor.formatterShadowColor.cgColor : NSColor.clear.cgColor
             layer?.shadowOpacity = isHover ? 0.07 : 0
             layer?.shadowRadius = isHover ? 3 : 0
-            layer?.shadowOffset.height = isHover ? -1.25 : 0
+            layer?.shadowOffset.height = isHover ? -1.5 : 0
         }
     }
 
@@ -176,8 +179,8 @@ class FormatterView: NSView {
 
     private func loadItems() {
         items.enumerated().forEach { (index, item) in
-            let xPos = index == 0 ? leading : (itemWidth * index) + (spaceItem * index) + leading
-            let button = FormatterTypeButton(frame: NSRect(x: xPos, y: 3, width: itemWidth, height: itemHeight))
+            let xPosition = index == 0 ? leading : (itemWidth * index) + (spaceItem * index) + leading
+            let button = FormatterTypeButton(frame: NSRect(x: xPosition, y: yPosition, width: itemWidth, height: itemHeight))
             let trackingButtonArea = NSTrackingArea(
                 rect: button.bounds,
                 options: [.activeAlways, .inVisibleRect, .mouseEnteredAndExited],
@@ -185,7 +188,7 @@ class FormatterView: NSView {
                 userInfo: ["view": button, "item": item]
             )
 
-            button.layer?.cornerRadius = 3
+            button.layer?.cornerRadius = cornerRadius
             button.contentTintColor = NSColor.formatterIconColor
             button.image = NSImage(named: "editor-format_\(item)")
             button.tag = index

@@ -12,7 +12,7 @@ extension BeamTextEdit {
     // MARK: - Properties
     private static let viewWidth: CGFloat = 34
     private static let viewHeight: CGFloat = 32
-    private static let padding: CGFloat = 5.25
+    private static let padding: CGFloat = 1.45
     private static let xAnchorConstraint: CGFloat = 20.25
     private static let startBottomConstraint: CGFloat = -35
     private static let bottomConstraint: CGFloat = 25
