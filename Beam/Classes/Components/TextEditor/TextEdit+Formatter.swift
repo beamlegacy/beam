@@ -10,8 +10,9 @@ import Cocoa
 extension BeamTextEdit {
 
     // MARK: - Properties
-    private static let viewWidth: CGFloat = 40.5
+    private static let viewWidth: CGFloat = 34
     private static let viewHeight: CGFloat = 32
+    private static let padding: CGFloat = 5.25
     private static let xAnchorConstraint: CGFloat = 20.25
     private static let startBottomConstraint: CGFloat = -35
     private static let bottomConstraint: CGFloat = 25
@@ -178,7 +179,7 @@ extension BeamTextEdit {
         return NSRect(
             x: (window.frame.width / 2) - (BeamTextEdit.xAnchorConstraint * formatterSize),
             y: y,
-            width: BeamTextEdit.viewWidth * formatterSize,
+            width: (BeamTextEdit.viewWidth * formatterSize) + (BeamTextEdit.padding * formatterSize),
             height: BeamTextEdit.viewHeight)
     }
 
