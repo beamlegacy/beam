@@ -13,7 +13,7 @@ extension TextRoot {
         guard let node = node as? TextNode else { return }
         if selectedTextRange.isEmpty {
             if cursorPosition == 0 {
-                if let next = node.previousVisible() {
+                if let next = node.previousVisibleTextNode() {
                     node.invalidateText()
                     self.node = next
                     cursorPosition = node.text.count
@@ -33,7 +33,7 @@ extension TextRoot {
         guard let node = node as? TextNode else { return }
         if selectedTextRange.isEmpty {
             if cursorPosition == node.text.count {
-                if let next = node.nextVisible() {
+                if let next = node.nextVisibleTextNode() {
                     node.invalidateText()
                     self.node = next
                     cursorPosition = 0
@@ -152,7 +152,7 @@ extension TextRoot {
         cancelNodeSelection()
         guard let node = node as? TextNode else { return }
         if node.isOnFirstLine(cursorPosition) {
-            if let newNode = node.previousVisible() as? TextNode {
+            if let newNode = node.previousVisibleTextNode() {
                 let offset = node.offsetAt(index: cursorPosition) + node.offsetInDocument.x - newNode.offsetInDocument.x
                 cursorPosition = newNode.indexOnLastLine(atOffset: offset)
                 node.invalidateText()
@@ -171,7 +171,7 @@ extension TextRoot {
         cancelNodeSelection()
         guard let node = node as? TextNode else { return }
         if node.isOnLastLine(cursorPosition) {
-            if let newNode = node.nextVisible() as? TextNode {
+            if let newNode = node.nextVisibleTextNode() {
                 let offset = node.offsetAt(index: cursorPosition) + node.offsetInDocument.x - newNode.offsetInDocument.x
                 cursorPosition = newNode.indexOnFirstLine(atOffset: offset)
                 node.invalidateText()
@@ -192,7 +192,23 @@ extension TextRoot {
         node.invalidate()
     }
 
+    @discardableResult
     public func selectAllNodes() -> Bool {
+        guard let selection = root.state.nodeSelection else {
+            startNodeSelection()
+            return true
+        }
+
+        let parent = root
+        selection.append(parent)
+        selection.appendChildren(of: parent)
+        selection.start = parent
+        selection.end = parent.deepestTextNodeChild()
+        return true
+    }
+
+    @discardableResult
+    public func selectAllNodesHierarchically() -> Bool {
         guard let selection = root.state.nodeSelection else {
             startNodeSelection()
             return true
@@ -213,6 +229,7 @@ extension TextRoot {
         }
         return false
     }
+
 
     public func selectAll() {
         guard root.state.nodeSelection == nil else {

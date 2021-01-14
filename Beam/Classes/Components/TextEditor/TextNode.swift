@@ -519,6 +519,7 @@ public class TextNode: Widget {
         return true
     }
 
+    @discardableResult
     override func insert(node: Widget, at pos: Int) -> Bool {
         guard let node = node as? TextNode else { fatalError () }
         element.insert(node.element, at: pos)
