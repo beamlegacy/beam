@@ -52,6 +52,7 @@ extension TextRoot {
         case moveWordLeftAndModifySelection
 
         case selectAll
+        case selectAllHierarchically
         case selectLine
         case selectWord
 
@@ -137,7 +138,10 @@ extension TextRoot {
             decreaseIndentation()
 
         case .selectAll:
-            selectAll()
+            selectAllNodes()
+
+        case .selectAllHierarchically:
+            selectAllNodesHierarchically()
 
         case .deleteForward:
             deleteForward()

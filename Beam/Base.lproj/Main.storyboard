@@ -222,6 +222,12 @@
                                                 <action selector="selectAll:" target="Ady-hI-5gd" id="VNm-Mi-diN"/>
                                             </connections>
                                         </menuItem>
+                                        <menuItem title="Select All Hierarchically" keyEquivalent="a" id="4ZI-jF-3WL" userLabel="Select All Hierarchically">
+                                            <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
+                                            <connections>
+                                                <action selector="selectAllHierarchically:" target="Ady-hI-5gd" id="9w1-g0-gXr"/>
+                                            </connections>
+                                        </menuItem>
                                         <menuItem isSeparatorItem="YES" id="uyl-h8-XO2"/>
                                         <menuItem title="Find" id="4EN-yA-p0u">
                                             <modifierMask key="keyEquivalentModifierMask"/>

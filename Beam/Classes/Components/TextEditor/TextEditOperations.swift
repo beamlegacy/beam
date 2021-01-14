@@ -122,11 +122,11 @@ extension TextRoot {
         return true
     }
 
-    func createEmptyRoot() {
+    func createEmptyNode(withParent parent: TextNode, atIndex index: Int = 0) {
         let element = BeamElement()
         let newNode = editor.nodeFor(element)
 
-        _ = root.insert(node: newNode, at: 0)
+        parent.insert(node: newNode, at: index)
         root.cursorPosition = 0
         node = newNode
 
@@ -135,9 +135,16 @@ extension TextRoot {
         }
     }
 
-    func eraseNodeSelection() {
+    func eraseNodeSelection(createEmptyNodeInPlace: Bool) {
         guard let selection = root.state.nodeSelection else { return }
-        let nodes = selection.sortedNodes.reversed()
+        let sortedNodes = selection.sortedNodes
+
+        // This will be used to create an empty node in place:
+        let firstParent = sortedNodes.first?.parent as? TextNode ?? root
+        let firstIndexInParent = sortedNodes.first?.indexInParent ?? 0
+        let nextNode = sortedNodes.last?.nextVisibleTextNode()
+
+        let nodes = sortedNodes.reversed()
         let multiple = nodes.isEmpty
         undoManager.beginUndoGrouping()
         for node in nodes {
@@ -146,10 +153,16 @@ extension TextRoot {
 
         cancelNodeSelection()
 
-        if root.element.children.isEmpty {
+        if createEmptyNodeInPlace {
+            createEmptyNode(withParent: firstParent, atIndex: firstIndexInParent)
+        } else if root.element.children.isEmpty {
             // we must create a new first node...
-            createEmptyRoot()
+            createEmptyNode(withParent: root, atIndex: 0)
+        } else {
+            root.node = nextNode
+            root.cursorPosition = 0
         }
+
         undoManager.endUndoGrouping()
         undoManager.setActionName(multiple ? "Erase selected nodes" : "Erase selected node")
     }
@@ -167,7 +180,7 @@ extension TextRoot {
 
     func deleteForward() {
         guard root.state.nodeSelection == nil else {
-            eraseNodeSelection()
+            eraseNodeSelection(createEmptyNodeInPlace: false)
             return
         }
 
@@ -195,7 +208,7 @@ extension TextRoot {
 
     func deleteBackward() {
         guard root.state.nodeSelection == nil else {
-            eraseNodeSelection()
+            eraseNodeSelection(createEmptyNodeInPlace: false)
             return
         }
 
@@ -227,6 +240,7 @@ extension TextRoot {
     }
 
     func insertNewline() {
+        guard root.state.nodeSelection == nil else { return }
         guard let node = node as? TextNode else { return }
         guard !node.readOnly else { return }
         if !selectedTextRange.isEmpty {
@@ -307,6 +321,7 @@ extension TextRoot {
     }
 
     public func insertText(string: String, replacementRange: Range<Int>) {
+        eraseNodeSelection(createEmptyNodeInPlace: true)
         guard let node = node as? TextNode, !node.readOnly else { return }
         pushUndoState(.insertText)
 

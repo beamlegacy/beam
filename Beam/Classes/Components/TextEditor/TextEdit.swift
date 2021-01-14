@@ -1147,4 +1147,13 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         }
         mapping.removeValue(forKey: node.element)
     }
+
+    @IBAction public override func selectAll(_ sender: Any?) {
+        rootNode.doCommand(.selectAll)
+    }
+
+    @IBAction func selectAllHierarchically(_ sender: Any?) {
+        rootNode.doCommand(.selectAllHierarchically)
+    }
+
 }
