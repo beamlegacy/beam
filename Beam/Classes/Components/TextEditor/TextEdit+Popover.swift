@@ -52,14 +52,12 @@ extension BeamTextEdit {
             return
         }
 
-        let startPosition = node.text.text.count > cursorStartPosition ? cursorStartPosition + 1 : cursorStartPosition
+        let startPosition = popoverPrefix == 0 ? cursorStartPosition : cursorStartPosition + 1
         let linkText = String(node.text.text[startPosition..<cursorPosition])
 
-        node.text.addAttributes([.internalLink(linkText)], to: cursorStartPosition + 1 - popoverPrefix..<cursorPosition + popoverSuffix)
+        node.text.addAttributes([.internalLink(linkText)], to: startPosition - popoverPrefix..<cursorPosition + popoverSuffix)
         let items = linkText.isEmpty ? documentManager.loadAllDocumentsWithLimit() : documentManager.documentsWithLimitTitleMatch(title: linkText)
-        var height = BeamTextEdit.viewHeight * CGFloat(items.count) + (linkText.isEmpty ? 0 : 36.5)
-
-        if items.count == 1 || items.isEmpty { height = BeamTextEdit.viewHeight * 2 }
+        let height = BeamTextEdit.viewHeight * CGFloat(items.count) + (linkText.isEmpty ? 0 : BeamTextEdit.viewHeight)
 
         popover.frame = NSRect(x: BeamTextEdit.posX, y: BeamTextEdit.posY, width: BeamTextEdit.viewWidth, height: height)
         popover.items = items.map({ $0.title })
