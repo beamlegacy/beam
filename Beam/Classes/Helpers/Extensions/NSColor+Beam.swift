@@ -73,7 +73,7 @@ extension NSColor {
     }
 
     static var editorTextColor: NSColor {
-        return loadColor(named: "EditorTextColor")
+        return loadColor(named: "Niobium")
     }
 
     static var editorTextRectangleBackgroundColor: NSColor {
