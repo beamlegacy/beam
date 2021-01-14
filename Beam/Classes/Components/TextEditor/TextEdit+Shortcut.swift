@@ -39,7 +39,7 @@ extension BeamTextEdit {
             return
         }
 
-        showBidirectionalPopover(prefix: 1, suffix: 0)
+        showBidirectionalPopover(prefix: 0, suffix: 0)
         updatePopover()
     }
 
