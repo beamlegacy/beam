@@ -15,6 +15,7 @@ class FullScreenWKWebView: WKWebView {
 //    override var safeAreaInsets: NSEdgeInsets {
 //        return NSEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
 //    }
+    
 }
 
 class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler {
