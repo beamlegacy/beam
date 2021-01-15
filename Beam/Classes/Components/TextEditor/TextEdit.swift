@@ -118,6 +118,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     deinit {
         timer.invalidate()
     }
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -1057,6 +1058,11 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         context.translateBy(x: x, y: y)
         title.draw(context)
         context.restoreGState()
+    }
+
+    public override func viewWillStartLiveResize() {
+        super.viewWillStartLiveResize()
+        dismissAndShowPersistentView()
     }
 
     public override func viewDidChangeEffectiveAppearance() {

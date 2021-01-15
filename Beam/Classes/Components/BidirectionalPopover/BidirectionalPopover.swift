@@ -13,6 +13,9 @@ class BidirectionalPopover: Popover {
     @IBOutlet var containerView: NSView!
     @IBOutlet weak var collectionView: NSCollectionView!
 
+    static let viewWidth: CGFloat = 248
+    static let viewHeight: CGFloat = 36.5
+
     var didSelectTitle: ((_ title: String) -> Void)?
 
     var items: [String] = [] {
@@ -31,6 +34,13 @@ class BidirectionalPopover: Popover {
         didSet {
             checkItemsContainsQuery()
         }
+    }
+
+    var idealSize: NSSize {
+        var height = Self.viewHeight * CGFloat(items.count) + (query.isEmpty ? 0 : Self.viewHeight)
+        if isMatchItem { height -= Self.viewHeight }
+
+        return NSSize(width: Self.viewWidth, height: height + 1)
     }
 
     private var isMatchItem = false
@@ -78,6 +88,7 @@ class BidirectionalPopover: Popover {
         containerView.wantsLayer = true
         containerView.layer?.cornerRadius = 7
         containerView.layer?.borderWidth = 1
+        updateUI()
     }
 
     private func updateUI() {
@@ -235,7 +246,7 @@ extension BidirectionalPopover: NSCollectionViewDataSource {
         case BidirectionalPopoverActionItem.identifier:
             return isMatchItem || query.isEmpty ? 0 : 1
         default:
-            return 1
+            return 0
         }
     }
 
@@ -289,6 +300,9 @@ extension BidirectionalPopover: NSCollectionViewDelegateFlowLayout {
 extension BidirectionalPopover: NSCollectionViewDelegate {
 
     func collectionView(_ collectionView: NSCollectionView, didSelectItemsAt indexPaths: Set<IndexPath>) {
+
+        print(indexPaths)
+
         guard let indexPath = indexPaths.first,
               let documentTitle = selectDocument(at: indexPath),
               let didSelectTitle = didSelectTitle else { return }
