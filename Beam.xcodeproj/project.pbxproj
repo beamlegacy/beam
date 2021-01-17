@@ -185,6 +185,8 @@
 		6D33924049F5798BBE6E7AED /* Pods_BeamUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 54B49CE1C66614E244553288 /* Pods_BeamUITests.framework */; };
 		7D40159D41DDD593BDFDF664 /* Pods_BeamTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C8379DEE387FB86FA7817188 /* Pods_BeamTests.framework */; };
 		9611995E25A27A17005BEC82 /* BeamObjCBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 9611995D25A27A17005BEC82 /* BeamObjCBridge.m */; };
+		961EC4F225B4511D009FA322 /* Layer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 961EC4F125B4511D009FA322 /* Layer.swift */; };
+		961EC50B25B495DB009FA322 /* ButtonLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 961EC50A25B495DB009FA322 /* ButtonLayer.swift */; };
 		9627FD4A2550203800926F0E /* Pods_Beam.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2BE96DC9A7278563E5878CCD /* Pods_Beam.framework */; };
 		9631C747251CE997009B40C4 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = 9631C746251CE997009B40C4 /* SwiftSoup */; };
 		964548A02523B3550064D062 /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9645489F2523B3550064D062 /* CloudKit.framework */; };
@@ -599,6 +601,8 @@
 		54B49CE1C66614E244553288 /* Pods_BeamUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_BeamUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9611995C25A27A17005BEC82 /* Beam-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Beam-Bridging-Header.h"; sourceTree = "<group>"; };
 		9611995D25A27A17005BEC82 /* BeamObjCBridge.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BeamObjCBridge.m; sourceTree = "<group>"; };
+		961EC4F125B4511D009FA322 /* Layer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Layer.swift; sourceTree = "<group>"; };
+		961EC50A25B495DB009FA322 /* ButtonLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonLayer.swift; sourceTree = "<group>"; };
 		9645489F2523B3550064D062 /* CloudKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CloudKit.framework; path = System/Library/Frameworks/CloudKit.framework; sourceTree = SDKROOT; };
 		965A78252514F147009980D4 /* Beam.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Beam.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		965A78282514F147009980D4 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -970,6 +974,7 @@
 		418171B72581107C00317ED8 /* TextEditor */ = {
 			isa = PBXGroup;
 			children = (
+				961EC50925B495CA009FA322 /* Layers */,
 				418171BA2581107C00317ED8 /* Markdown */,
 				96C9AAB82593BB67007D3D98 /* Widget.swift */,
 				418171B92581107C00317ED8 /* TextNode.swift */,
@@ -1294,6 +1299,15 @@
 				9611995C25A27A17005BEC82 /* Beam-Bridging-Header.h */,
 			);
 			path = ObjCBridge;
+			sourceTree = "<group>";
+		};
+		961EC50925B495CA009FA322 /* Layers */ = {
+			isa = PBXGroup;
+			children = (
+				961EC4F125B4511D009FA322 /* Layer.swift */,
+				961EC50A25B495DB009FA322 /* ButtonLayer.swift */,
+			);
+			path = Layers;
 			sourceTree = "<group>";
 		};
 		965A781C2514F147009980D4 = {
@@ -2035,6 +2049,7 @@
 				418172202581107C00317ED8 /* Information.swift in Sources */,
 				4181727E258110D100317ED8 /* AppDelegate+URL.swift in Sources */,
 				4181724D2581107C00317ED8 /* BrowserTabBar.swift in Sources */,
+				961EC50B25B495DB009FA322 /* ButtonLayer.swift in Sources */,
 				418172542581107C00317ED8 /* OmniBar.swift in Sources */,
 				418172422581107C00317ED8 /* NotesContentView.swift in Sources */,
 				4181721D2581107C00317ED8 /* NSImage+Beam.swift in Sources */,
@@ -2058,6 +2073,7 @@
 				521EEDE925937FAD00BA2485 /* DocumentRow.swift in Sources */,
 				414B98F025A239F8002E81A3 /* FormatterView.swift in Sources */,
 				526017F425AE074E00634695 /* ConsoleWindow.swift in Sources */,
+				961EC4F225B4511D009FA322 /* Layer.swift in Sources */,
 				418172472581107C00317ED8 /* NoteDetail.swift in Sources */,
 				4181720C2581107C00317ED8 /* BeamNote.swift in Sources */,
 			);

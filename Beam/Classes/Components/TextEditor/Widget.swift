@@ -62,6 +62,7 @@ public class Widget: NSObject, CALayerDelegate {
     }
 
     var enabled: Bool { editor.enabled }
+    var scope = Set<AnyCancellable>()
 
     var contentsFrame = NSRect() // The rectangle of our text excluding children
     var localTextFrame: NSRect { // The rectangle of our text excluding children
@@ -196,6 +197,10 @@ public class Widget: NSObject, CALayerDelegate {
 
     func addLayerTo(layer: CALayer, recursive: Bool) {
         layer.addSublayer(self.layer)
+        for subLayer in layers.values where subLayer.layer.superlayer != layer {
+            layer.addSublayer(subLayer.layer)
+        }
+
         if recursive {
             for c in children {
                 c.addLayerTo(layer: layer, recursive: recursive)
@@ -402,6 +407,25 @@ public class Widget: NSObject, CALayerDelegate {
         return nil
     }
 
+    internal var layers: [String: Layer] = [:]
+    func addLayer(_ layer: Layer, global: Bool = false) {
+        if global {
+            editor.layer?.addSublayer(layer.layer)
+        } else {
+            self.layer.addSublayer(layer.layer)
+        }
+
+        layers[layer.name] = layer
+    }
+
+    func removeLayer(_ layer: Layer) {
+        removeLayer(layer.name)
+    }
+
+    func removeLayer(_ name: String) {
+        layers.removeValue(forKey: name)
+    }
+
     func dispatchMouseDown(mouseInfo: MouseInfo) -> Widget? {
         let globalPos = mouseInfo.position
         let rect = NSRect(origin: CGPoint(), size: frame.size)
@@ -418,6 +442,14 @@ public class Widget: NSObject, CALayerDelegate {
             }
         }
 
+        for layer in layers.values {
+            let info = MouseInfo(self, layer, mouseInfo)
+            if layer.contains(info) && layer.mouseDown(info) {
+                return self
+            }
+        }
+
+//        print("dispatch down: \(mouseInfo.position)")
         if mouseDown(mouseInfo: mouseInfo) {
             return self
         }
@@ -428,23 +460,31 @@ public class Widget: NSObject, CALayerDelegate {
     func dispatchMouseUp(mouseInfo: MouseInfo) -> Widget? {
         guard let focussedNode = root?.node else { return nil }
 
-        var i = mouseInfo
-        i.position.x -= focussedNode.offsetInRoot.x
-        i.position.y -= focussedNode.offsetInRoot.y
-        if focussedNode.mouseUp(mouseInfo: i) {
+        if focussedNode.handleMouseUp(mouseInfo: mouseInfo) {
             return focussedNode
         }
 
         return nil
     }
 
+    func handleMouseUp(mouseInfo: MouseInfo) -> Bool {
+        let info = MouseInfo(self, mouseInfo.globalPosition, mouseInfo.event)
+//        print("dispatch up: \(info.position) vs \(mouseInfo.position)")
+
+        for layer in layers.values {
+            let info = MouseInfo(self, layer, info)
+            if layer.contains(info) && layer.mouseUp(info) {
+                return true
+            }
+        }
+
+        return mouseUp(mouseInfo: info)
+    }
+
     func dispatchMouseDragged(mouseInfo: MouseInfo) -> Widget? {
         guard let focussedNode = root?.node else { return nil }
 
-        var i = mouseInfo
-        i.position.x -= focussedNode.offsetInRoot.x
-        i.position.y -= focussedNode.offsetInRoot.y
-        if focussedNode.mouseDragged(mouseInfo: i) {
+        if focussedNode.handleMouseDragged(mouseInfo: mouseInfo) {
             return focussedNode
         }
 
@@ -471,13 +511,37 @@ public class Widget: NSObject, CALayerDelegate {
     }
 
     func mouseUp(mouseInfo: MouseInfo) -> Bool {
-        // print("mouseUp (\(mouseInfo))")
         dragMode = .none
         return false
     }
 
+    func handleMouseMoved(mouseInfo: MouseInfo) -> Bool {
+        var res = false
+        for layer in layers.values {
+            let info = MouseInfo(self, layer, mouseInfo)
+            if layer.handleMouseMoved(info) {
+                res = res || true
+            }
+        }
+
+        return res || mouseMoved(mouseInfo: mouseInfo)
+    }
+
     func mouseMoved(mouseInfo: MouseInfo) -> Bool {
         return false
+    }
+
+    func handleMouseDragged(mouseInfo: MouseInfo) -> Bool {
+        let info = MouseInfo(self, mouseInfo.globalPosition, mouseInfo.event)
+//        print("handle dragged: \(info.position) vs \(mouseInfo.position)")
+
+        var res = false
+        for layer in layers.values {
+            let info = MouseInfo(self, layer, mouseInfo)
+            res = res || layer.mouseDragged(info)
+        }
+
+        return res || mouseDragged(mouseInfo: info)
     }
 
     func mouseDragged(mouseInfo: MouseInfo) -> Bool {

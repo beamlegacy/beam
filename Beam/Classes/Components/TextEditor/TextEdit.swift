@@ -15,10 +15,25 @@ import Combine
 public struct MouseInfo {
     var position: NSPoint
     var event: NSEvent
+    var globalPosition: NSPoint
 
     init(_ node: Widget, _ position: NSPoint, _ event: NSEvent) {
-        self.position = NSPoint(x: position.x - node.frameInDocument.minX, y: position.y - node.frameInDocument.minY)
+        self.position = NSPoint(x: position.x - node.offsetInDocument.x, y: position.y - node.offsetInDocument.y)
+        self.globalPosition = position
         self.event = event
+    }
+
+    init(_ node: Widget, _ layer: Layer, _ info: MouseInfo) {
+        self.globalPosition = info.globalPosition
+        self.event = info.event
+
+        if layer.layer.superlayer != node.layer {
+            self.position = NSPoint(x: globalPosition.x - layer.position.x, y: globalPosition.y - layer.position.y)
+        } else {
+            self.position =
+                NSPoint(x: globalPosition.x - node.layer.frame.origin.x - layer.frame.origin.x,
+                        y: globalPosition.y - node.layer.frame.origin.y - layer.frame.origin.y)
+        }
     }
 }
 
@@ -931,7 +946,8 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         reBlink()
         rootNode.cancelNodeSelection() // TODO: change this to handle manipulating the node selection with the mouse
         let point = convert(event.locationInWindow)
-        guard let newNode = rootNode.dispatchMouseDown(mouseInfo: MouseInfo(rootNode, point, event)) else {
+        let info = MouseInfo(rootNode, point, event)
+        guard let newNode = rootNode.dispatchMouseDown(mouseInfo: info) else {
             guard let n = rootNode.children.first else { return }
             rootNode.cursorPosition = 0
             node = n
@@ -995,13 +1011,14 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             hoveredNode = newNode
         }
 
-        _ = node.mouseMoved(mouseInfo: MouseInfo(node, point, event))
-        _ = hoveredNode?.mouseMoved(mouseInfo: MouseInfo(hoveredNode!, point, event))
+        _ = node.handleMouseMoved(mouseInfo: MouseInfo(node, point, event))
+        _ = hoveredNode?.handleMouseMoved(mouseInfo: MouseInfo(hoveredNode!, point, event))
     }
 
     override public func mouseUp(with event: NSEvent) {
         let point = convert(event.locationInWindow)
-        if nil != rootNode.dispatchMouseUp(mouseInfo: MouseInfo(rootNode, point, event)) {
+        let info = MouseInfo(rootNode, point, event)
+        if nil != rootNode.dispatchMouseUp(mouseInfo: info) {
             return
         }
         super.mouseUp(with: event)
@@ -1072,7 +1089,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     let documentManager = DocumentManager(coreDataManager: CoreDataManager.shared)
 
     @IBAction func saveDocument(_ sender: Any?) {
-        print("Save document!")
+        Logger.shared.logInfo("Save document!", category: .document)
 //        let encoder = JSONEncoder()
 //        encoder.outputFormatting = .prettyPrinted
 //        do {
