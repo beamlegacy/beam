@@ -30,9 +30,7 @@ extension BeamTextEdit {
 
     internal func updatePopover(with command: TextRoot.Command = .none) {
         guard let node = node as? TextNode,
-              let popover = popover, let window = window else { return }
-
-        print(node.offsetInDocument.y, window.frame.height)
+              let popover = popover else { return }
 
         let cursorPosition = rootNode.cursorPosition
 
@@ -47,8 +45,6 @@ extension BeamTextEdit {
             return
         }
 
-        updatePosition(with: node)
-
         let startPosition = popoverPrefix == 0 ? cursorStartPosition : cursorStartPosition + 1
         let linkText = String(node.text.text[startPosition..<cursorPosition])
 
@@ -57,6 +53,8 @@ extension BeamTextEdit {
 
         popover.items = items.map({ $0.title })
         popover.query = linkText
+
+        updatePosition(with: node)
 
         popover.frame = NSRect(x: BeamTextEdit.xPos, y: BeamTextEdit.yPos, width: popover.idealSize.width, height: popover.idealSize.height)
     }
@@ -90,13 +88,15 @@ extension BeamTextEdit {
     }
 
     private func updatePosition(with node: TextNode) {
+        guard let window = window, let popover = popover else { return }
+
         let cursorPosition = rootNode.cursorPosition
         let (posX, rect) = node.offsetAndFrameAt(index: cursorPosition)
         let x = posX == 0 ? 208 : posX + node.offsetInDocument.x
         let y = rect.maxY == 0 ? rect.maxY + node.offsetInDocument.y + 25 : rect.maxY + node.offsetInDocument.y + 5
 
         BeamTextEdit.xPos = x
-        BeamTextEdit.yPos = y
+        BeamTextEdit.yPos = y + popover.idealSize.height > window.frame.height ? (y - popover.idealSize.height) - rect.maxY : y
     }
 
     private func validInternalLink(from node: TextNode, _ title: String) {
