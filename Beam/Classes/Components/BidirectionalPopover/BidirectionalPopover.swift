@@ -227,7 +227,6 @@ class BidirectionalPopover: Popover {
     private func itemNameAt(index: Int) -> NSUserInterfaceItemIdentifier {
         return collectionViewItems[index]
     }
-
 }
 
 // MARK: - NSCollectionView DataSource
@@ -300,8 +299,6 @@ extension BidirectionalPopover: NSCollectionViewDelegateFlowLayout {
 extension BidirectionalPopover: NSCollectionViewDelegate {
 
     func collectionView(_ collectionView: NSCollectionView, didSelectItemsAt indexPaths: Set<IndexPath>) {
-
-        print(indexPaths)
 
         guard let indexPath = indexPaths.first,
               let documentTitle = selectDocument(at: indexPath),

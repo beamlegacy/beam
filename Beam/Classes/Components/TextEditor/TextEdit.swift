@@ -342,6 +342,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         }
         onEndEditing()
 
+        dismissPopover()
         showOrHideFormatterView(isPresent: false)
 
         return super.resignFirstResponder()

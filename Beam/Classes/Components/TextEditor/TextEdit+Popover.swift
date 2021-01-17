@@ -17,7 +17,9 @@ extension BeamTextEdit {
         guard let node = node as? TextNode else { return }
 
         updatePosition(with: node)
-        popover = BidirectionalPopover(frame: NSRect(x: BeamTextEdit.xPos, y: BeamTextEdit.yPos, width: BidirectionalPopover.viewWidth, height: BidirectionalPopover.viewHeight))
+        popover = BidirectionalPopover(frame: NSRect(x: BeamTextEdit.xPos, y: BeamTextEdit.yPos,
+                                                     width: BidirectionalPopover.viewWidth,
+                                                     height: BidirectionalPopover.viewHeight))
 
         guard let popover = popover else { return }
 
@@ -88,15 +90,10 @@ extension BeamTextEdit {
     }
 
     private func updatePosition(with node: TextNode) {
-        guard let window = window, let popover = popover else { return }
-
         let cursorPosition = rootNode.cursorPosition
         let (posX, rect) = node.offsetAndFrameAt(index: cursorPosition)
-        let x = posX == 0 ? 208 : posX + node.offsetInDocument.x
-        let y = rect.maxY == 0 ? rect.maxY + node.offsetInDocument.y + 25 : rect.maxY + node.offsetInDocument.y + 5
-
-        BeamTextEdit.xPos = x
-        BeamTextEdit.yPos = y + popover.idealSize.height > window.frame.height ? (y - popover.idealSize.height) - rect.maxY : y
+        BeamTextEdit.xPos = posX == 0 ? 208 : posX + node.offsetInDocument.x
+        BeamTextEdit.yPos = rect.maxY == 0 ? rect.maxY + node.offsetInDocument.y + 25 : rect.maxY + node.offsetInDocument.y + 5
     }
 
     private func validInternalLink(from node: TextNode, _ title: String) {
