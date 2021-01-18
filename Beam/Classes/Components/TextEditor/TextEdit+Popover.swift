@@ -120,10 +120,4 @@ extension BeamTextEdit {
         initFormatterView()
     }
 
-    public override func scrollWheel(with event: NSEvent) {
-        super.scrollWheel(with: event)
-
-        if popover != nil { cancelPopover() }
-    }
-
 }

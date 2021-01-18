@@ -927,6 +927,14 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         return node.positionAt(point: NSPoint(x: point.x - fid.minX, y: point.y - fid.minY))
     }
 
+    // MARk - Scroll Event
+    public override func scrollWheel(with event: NSEvent) {
+        super.scrollWheel(with: event)
+
+        if popover != nil { cancelPopover() }
+    }
+
+    // MARk - Mouse Event
     override public func mouseDown(with event: NSEvent) {
         //       window?.makeFirstResponder(self)
         reBlink()

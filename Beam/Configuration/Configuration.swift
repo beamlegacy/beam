@@ -20,7 +20,7 @@ struct Configuration {
     static private(set) var sentryHostname = "o477543.ingest.sentry.io"
     static private(set) var sentryProject = "5518785"
     static private(set) var env = "$(ENV)"
-    static private(set) var sparkleUpdate = NSString("$(SPARKLE_AUTOMATIC_UPDATE)").boolValue
+    static private(set) var sparkleUpdate = NSString("0").boolValue
     static private(set) var sparkleFeedURL: String = Configuration.value(for: "SUFeedURL")
 
     // Runtime configuration
