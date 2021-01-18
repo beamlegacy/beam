@@ -37,7 +37,7 @@ extension BeamTextEdit {
 
         let cursorPosition = rootNode.cursorPosition
 
-        if command == .deleteForward && cursorStartPosition == cursorPosition ||
+        if command == .deleteForward && cursorStartPosition >= cursorPosition ||
            command == .moveLeft && cursorPosition <= cursorStartPosition {
             dismissAndShowPersistentView()
             return
@@ -98,11 +98,17 @@ extension BeamTextEdit {
 
         let cursorPosition = rootNode.cursorPosition
         let (posX, rect) = node.offsetAndFrameAt(index: cursorPosition)
-        let marginTop: CGFloat = ignoreFirstDrag ? 80 : 65
+        var marginTop: CGFloat = ignoreFirstDrag ? 80 : 65
 
-        // to avoid update X position during new text is inserted
+        // To avoid the update of X position during the insertion of a new text
         if isEmpty {
             BeamTextEdit.xPos = (posX - 20) + node.offsetInDocument.x
+        }
+
+        // Popover with Shortcut
+        if node.text.text.isEmpty {
+            marginTop = 97
+            BeamTextEdit.xPos = posX + 200
         }
 
         BeamTextEdit.yPos = (window.frame.height - (rect.maxY + node.offsetInDocument.y) - popover.idealSize.height) - marginTop
