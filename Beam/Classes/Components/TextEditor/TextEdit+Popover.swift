@@ -12,9 +12,18 @@ extension BeamTextEdit {
     // MARK: - Properties
     private static var xPos: CGFloat = 0
     private static var yPos: CGFloat = 0
+    private static var popoverType: PopoverType = .down
+    private static let queryLimit = 4
 
     internal func initPopover() {
-        guard let node = node as? TextNode else { return }
+        guard let node = node as? TextNode,
+              let window = window else { return }
+
+        let height = BidirectionalPopover.viewHeight * CGFloat(BeamTextEdit.queryLimit)
+
+        print("\(height) \(min(node.offsetInDocument.y, window.frame.height)) \(node.frameInDocument)")
+
+        BeamTextEdit.popoverType = height + node.offsetInDocument.y + 75 > window.frame.height ? .up : .down
 
         updatePosition(with: node)
         popover = BidirectionalPopover(frame: NSRect(x: BeamTextEdit.xPos, y: BeamTextEdit.yPos,
@@ -51,7 +60,7 @@ extension BeamTextEdit {
         let linkText = String(node.text.text[startPosition..<cursorPosition])
 
         node.text.addAttributes([.internalLink(linkText)], to: startPosition - popoverPrefix..<cursorPosition + popoverSuffix)
-        let items = linkText.isEmpty ? documentManager.loadAllDocumentsWithLimit() : documentManager.documentsWithLimitTitleMatch(title: linkText)
+        let items = linkText.isEmpty ? documentManager.loadAllDocumentsWithLimit() : documentManager.documentsWithLimitTitleMatch(title: linkText, limit: BeamTextEdit.queryLimit)
 
         popover.items = items.map({ $0.title })
         popover.query = linkText
@@ -90,10 +99,14 @@ extension BeamTextEdit {
     }
 
     private func updatePosition(with node: TextNode) {
+        guard let popover = popover else { return }
+
         let cursorPosition = rootNode.cursorPosition
         let (posX, rect) = node.offsetAndFrameAt(index: cursorPosition)
+        let y = rect.maxY == 0 ? rect.maxY + node.offsetInDocument.y + 25 : rect.maxY + node.offsetInDocument.y + 5
+
         BeamTextEdit.xPos = posX == 0 ? 208 : posX + node.offsetInDocument.x
-        BeamTextEdit.yPos = rect.maxY == 0 ? rect.maxY + node.offsetInDocument.y + 25 : rect.maxY + node.offsetInDocument.y + 5
+        BeamTextEdit.yPos = BeamTextEdit.popoverType == .up ? y - popover.idealSize.height - rect.maxY : y
     }
 
     private func validInternalLink(from node: TextNode, _ title: String) {
@@ -105,6 +118,12 @@ extension BeamTextEdit {
         rootNode.cursorPosition = linkEnd
         dismissPopover()
         initFormatterView()
+    }
+
+    public override func scrollWheel(with event: NSEvent) {
+        super.scrollWheel(with: event)
+
+        if popover != nil { cancelPopover() }
     }
 
 }
