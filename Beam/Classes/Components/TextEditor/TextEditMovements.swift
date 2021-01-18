@@ -230,7 +230,6 @@ extension TextRoot {
         return false
     }
 
-
     public func selectAll() {
         guard root.state.nodeSelection == nil else {
             _ = selectAllNodes()
@@ -322,5 +321,18 @@ extension TextRoot {
         guard let selection = root.state.nodeSelection else { return }
         root.node = selection.end
         root.state.nodeSelection = nil
+    }
+
+    func wordSelection(from pos: Int) {
+        guard let node = node as? TextNode else { return }
+        let str = node.text.text
+        let index = str.index(str.startIndex, offsetBy: pos)
+        str.enumerateSubstrings(in: str.startIndex..<str.endIndex, options: .byWords) { [self] (_, r1, _, stop) in
+            if r1.contains(index) {
+                self.selectedTextRange = str.position(at: r1.lowerBound)..<str.position(at: r1.upperBound)
+                cursorPosition = self.selectedTextRange.upperBound
+                stop = true
+            }
+        }
     }
 }
