@@ -33,7 +33,6 @@ class LinksSection: Widget {
     var linkedReferencesCancellable: Cancellable!
     var note: BeamNote
     let textLayer = CATextLayer()
-    let chevronLayer = CALayer()
 
     init(editor: BeamTextEdit, note: BeamNote, mode: Mode) {
         self.note = note
@@ -42,11 +41,8 @@ class LinksSection: Widget {
         // Append the linked references and unlinked references nodes
         textLayer.foregroundColor = NSColor.editorIconColor.cgColor
         textLayer.fontSize = 14
-        let chevron = NSImage(named: "editor-arrow_right")
-        let maskLayer = CALayer()
-        maskLayer.contents = chevron
-        chevronLayer.mask = maskLayer
-        chevronLayer.backgroundColor = NSColor.editorIconColor.cgColor
+
+        createChevron()
 
         switch mode {
         case .links:
@@ -68,10 +64,7 @@ class LinksSection: Widget {
         updateLayerVisibility()
         editor.layer?.addSublayer(layer)
         layer.addSublayer(textLayer)
-        layer.addSublayer(chevronLayer)
         textLayer.frame = CGRect(origin: CGPoint(x: 25, y: 0), size: textLayer.preferredFrameSize())
-        chevronLayer.frame = CGRect(origin: CGPoint(x: 0, y: 0), size: chevron?.size ?? CGSize(width: 20, height: 20))
-        maskLayer.frame = chevronLayer.bounds
         updateChevron()
     }
 
@@ -118,19 +111,16 @@ class LinksSection: Widget {
         layer.isHidden = linkedReferenceNodes.isEmpty
     }
 
-    override func mouseDown(mouseInfo: MouseInfo) -> Bool {
-        print("mouseDown \(mouseInfo.position)")
-        return super.mouseDown(mouseInfo: mouseInfo)
-    }
-    override func mouseUp(mouseInfo: MouseInfo) -> Bool {
-        if contentsFrame.contains(mouseInfo.position) {
+    func createChevron() {
+        let button = ButtonLayer("chevron", Layer.icon(named: "editor-arrow_right", color: NSColor.editorIconColor))
+        button.activated = { [unowned self] in
             open.toggle()
-            return true
         }
-        return super.mouseUp(mouseInfo: mouseInfo)
+        addLayer(button)
+        updateChevron()
     }
 
     func updateChevron() {
-        chevronLayer.setAffineTransform(CGAffineTransform(rotationAngle: open ? CGFloat.pi / 2 : 0))
+        layers["chevron"]?.layer.setAffineTransform(CGAffineTransform(rotationAngle: open ? CGFloat.pi / 2 : 0))
     }
 }
