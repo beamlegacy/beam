@@ -625,6 +625,9 @@ public class TextNode: Widget {
                     root?.cancelSelection()
                     dragMode = .select(cursorPosition)
                 }
+            } else if mouseInfo.event.clickCount == 2 {
+                let clickPos = positionAt(point: mouseInfo.position)
+                root?.wordSelection(from: clickPos)
             } else {
                 root?.doCommand(.selectAll)
             }
