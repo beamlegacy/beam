@@ -41,9 +41,9 @@ public struct BTextEdit: NSViewRepresentable {
         nsView.onEndEditing = onEndEditing
         nsView.onStartQuery = onStartQuery
 
-        nsView.onBackOrForwardChanged = { v in
-            self.backIsPressed = v
-            self.forwardIsPressed = v
+        nsView.onBackOrForwardChanged = { isPreesed in
+            self.backIsPressed = isPreesed
+            self.forwardIsPressed = isPreesed
         }
 
         nsView.minimumWidth = minimumWidth
@@ -124,9 +124,9 @@ public struct BTextEditScrollable: NSViewRepresentable {
         edit.onEndEditing = onEndEditing
         edit.onStartQuery = onStartQuery
 
-        edit.onBackOrForwardChanged = { v in
-            self.backIsPressed = v
-            self.forwardIsPressed = v
+        edit.onBackOrForwardChanged = { isPreesed in
+            self.backIsPressed = isPreesed
+            self.forwardIsPressed = isPreesed
         }
 
         edit.minimumWidth = minimumWidth
