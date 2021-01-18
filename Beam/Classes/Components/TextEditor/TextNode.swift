@@ -603,12 +603,14 @@ public class TextNode: Widget {
         }
 
         if let link = linkAt(point: mouseInfo.position) {
+            editor.dismissPopover()
             editor.dismissFormatterView()
             editor.openURL(link)
             return true
         }
 
         if let link = internalLinkAt(point: mouseInfo.position) {
+            editor.dismissPopover()
             editor.dismissFormatterView()
             editor.openCard(link)
             return true

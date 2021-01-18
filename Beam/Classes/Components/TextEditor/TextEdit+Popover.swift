@@ -74,18 +74,20 @@ extension BeamTextEdit {
 
     internal func dismissPopover() {
         guard popover != nil else { return }
+        cancelInternalLink()
         popover?.removeFromSuperview()
         popover = nil
     }
 
     internal func dismissAndShowPersistentView() {
-        dismissPopover()
         cancelInternalLink()
+        dismissPopover()
         initFormatterView()
     }
 
     internal func cancelInternalLink() {
-        guard let node = node as? TextNode else { return }
+        guard let node = node as? TextNode,
+              popover != nil else { return }
         let text = node.text.text
         node.text.removeAttributes([.internalLink(text)], from: cursorStartPosition..<rootNode.cursorPosition + text.count)
     }
@@ -100,7 +102,7 @@ extension BeamTextEdit {
 
         // to avoid update X position during new text is inserted
         if isEmpty {
-            BeamTextEdit.xPos = posX + node.offsetInDocument.x
+            BeamTextEdit.xPos = (posX - 20) + node.offsetInDocument.x
         }
 
         BeamTextEdit.yPos = (window.frame.height - (rect.maxY + node.offsetInDocument.y) - popover.idealSize.height) - marginTop
