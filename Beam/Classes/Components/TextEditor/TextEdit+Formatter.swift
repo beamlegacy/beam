@@ -39,14 +39,13 @@ extension BeamTextEdit {
 
         formatterView.translatesAutoresizingMaskIntoConstraints = false
 
-        view.addSubview(formatterView)
-
         BeamTextEdit.widthAnchor = formatterView.widthAnchor.constraint(equalToConstant: (BeamTextEdit.viewWidth * formatterSize) + (BeamTextEdit.padding * formatterSize))
         BeamTextEdit.bottomAnchor = formatterView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: BeamTextEdit.startBottomConstraint)
 
-        guard
-            let widthAnchor = BeamTextEdit.widthAnchor,
-            let bottomAnchor = BeamTextEdit.bottomAnchor else { return }
+        view.addSubview(formatterView)
+
+        guard let widthAnchor = BeamTextEdit.widthAnchor,
+              let bottomAnchor = BeamTextEdit.bottomAnchor else { return }
 
         NSLayoutConstraint.activate([
             widthAnchor,
