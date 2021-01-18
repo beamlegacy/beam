@@ -40,7 +40,7 @@ class BidirectionalPopover: Popover {
         var height = Self.viewHeight * CGFloat(items.count) + (query.isEmpty ? 0 : Self.viewHeight)
         if isMatchItem { height -= Self.viewHeight }
 
-        return NSSize(width: Self.viewWidth, height: height + 1)
+        return NSSize(width: Self.viewWidth, height: height)
     }
 
     private var isMatchItem = false
