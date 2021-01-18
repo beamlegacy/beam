@@ -21,9 +21,10 @@ extension BeamTextEdit {
                                                      width: BidirectionalPopover.viewWidth,
                                                      height: BidirectionalPopover.viewHeight))
 
-        guard let popover = popover else { return }
+        guard let popover = popover,
+              let view = window?.contentView else { return }
 
-        addSubview(popover)
+        view.addSubview(popover)
 
         popover.didSelectTitle = { [unowned self] (title) -> Void in
             validInternalLink(from: node, title)
@@ -56,7 +57,7 @@ extension BeamTextEdit {
         popover.items = items.map({ $0.title })
         popover.query = linkText
 
-        updatePosition(with: node)
+        updatePosition(with: node, linkText.isEmpty)
 
         popover.frame = NSRect(x: BeamTextEdit.xPos, y: BeamTextEdit.yPos, width: popover.idealSize.width, height: popover.idealSize.height)
     }
@@ -89,11 +90,20 @@ extension BeamTextEdit {
         node.text.removeAttributes([.internalLink(text)], from: cursorStartPosition..<rootNode.cursorPosition + text.count)
     }
 
-    private func updatePosition(with node: TextNode) {
+    private func updatePosition(with node: TextNode, _ isEmpty: Bool = false) {
+        guard let window = window,
+              let popover = popover else { return }
+
         let cursorPosition = rootNode.cursorPosition
         let (posX, rect) = node.offsetAndFrameAt(index: cursorPosition)
-        BeamTextEdit.xPos = posX == 0 ? 208 : posX + node.offsetInDocument.x
-        BeamTextEdit.yPos = rect.maxY == 0 ? rect.maxY + node.offsetInDocument.y + 25 : rect.maxY + node.offsetInDocument.y + 5
+        let marginTop: CGFloat = ignoreFirstDrag ? 80 : 65
+
+        // to avoid update X position during new text is inserted
+        if isEmpty {
+            BeamTextEdit.xPos = posX == 0 ? 200 : posX + node.offsetInDocument.x - 30
+        }
+
+        BeamTextEdit.yPos = (window.frame.height - (rect.maxY + node.offsetInDocument.y) - popover.idealSize.height) - marginTop
     }
 
     private func validInternalLink(from node: TextNode, _ title: String) {

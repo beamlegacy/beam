@@ -11,6 +11,9 @@ import AppKit
 import Combine
 
 public struct BTextEdit: NSViewRepresentable {
+    @Binding var backIsPressed: Bool
+    @Binding var forwardIsPressed: Bool
+
     var note: BeamNote
     var data: BeamData
     var openURL: (URL) -> Void
@@ -37,6 +40,11 @@ public struct BTextEdit: NSViewRepresentable {
         nsView.onStartEditing = onStartEditing
         nsView.onEndEditing = onEndEditing
         nsView.onStartQuery = onStartQuery
+
+        nsView.onBackOrForwardChanged = { v in
+            self.backIsPressed = v
+            self.forwardIsPressed = v
+        }
 
         nsView.minimumWidth = minimumWidth
         nsView.maximumWidth = maximumWidth
@@ -65,6 +73,8 @@ public struct BTextEdit: NSViewRepresentable {
         nsView.onStartEditing = onStartEditing
         nsView.onEndEditing = onEndEditing
         nsView.onStartQuery = onStartQuery
+        nsView.backIsPreesed = backIsPressed
+        nsView.forwardIsPressed = forwardIsPressed
 
         nsView.minimumWidth = minimumWidth
         nsView.maximumWidth = maximumWidth
@@ -83,6 +93,9 @@ public struct BTextEdit: NSViewRepresentable {
 }
 
 public struct BTextEditScrollable: NSViewRepresentable {
+    @Binding var backIsPressed: Bool
+    @Binding var forwardIsPressed: Bool
+
     var note: BeamNote
     var data: BeamData
     var openURL: (URL) -> Void
@@ -110,6 +123,11 @@ public struct BTextEditScrollable: NSViewRepresentable {
         edit.onStartEditing = onStartEditing
         edit.onEndEditing = onEndEditing
         edit.onStartQuery = onStartQuery
+
+        edit.onBackOrForwardChanged = { v in
+            self.backIsPressed = v
+            self.forwardIsPressed = v
+        }
 
         edit.minimumWidth = minimumWidth
         edit.maximumWidth = maximumWidth
@@ -155,6 +173,8 @@ public struct BTextEditScrollable: NSViewRepresentable {
         edit.onStartEditing = onStartEditing
         edit.onEndEditing = onEndEditing
         edit.onStartQuery = onStartQuery
+        edit.backIsPreesed = backIsPressed
+        edit.forwardIsPressed = forwardIsPressed
 
         edit.minimumWidth = minimumWidth
         edit.maximumWidth = maximumWidth

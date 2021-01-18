@@ -25,6 +25,8 @@ let NoteDisplayThreshold = Float(0.0)
     @Published var isEditingOmniBarTitle = false
     @Published var canGoBack: Bool = false
     @Published var canGoForward: Bool = false
+    @Published var backIsPressed: Bool = false
+    @Published var forwardIsPressed: Bool = false
     @Published var isFullScreen: Bool = false
     @Published var focusOmniBox: Bool = true
 
@@ -44,7 +46,6 @@ let NoteDisplayThreshold = Float(0.0)
             updateCanGoBackForward()
         }
     }
-
     @Published var selectionIndex: Int? = nil {
         didSet {
             if let i = selectionIndex, i >= 0, i < completedQueries.count {
@@ -125,6 +126,9 @@ let NoteDisplayThreshold = Float(0.0)
         case .note: fallthrough
         case .today:
             if let back = backForwardList.goBack() {
+                backIsPressed = true
+                forwardIsPressed = false
+
                 switch back {
                 case .journal:
                     mode = .today
@@ -148,6 +152,9 @@ let NoteDisplayThreshold = Float(0.0)
         case .note: fallthrough
         case .today:
             if let forward = backForwardList.goForward() {
+                backIsPressed = false
+                forwardIsPressed = true
+
                 switch forward {
                 case .journal:
                     mode = .today
