@@ -173,6 +173,7 @@ public struct BTextEditScrollable: NSViewRepresentable {
         edit.onStartEditing = onStartEditing
         edit.onEndEditing = onEndEditing
         edit.onStartQuery = onStartQuery
+
         edit.backIsPreesed = backIsPressed
         edit.forwardIsPressed = forwardIsPressed
 

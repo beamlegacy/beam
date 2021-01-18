@@ -100,7 +100,7 @@ extension BeamTextEdit {
 
         // to avoid update X position during new text is inserted
         if isEmpty {
-            BeamTextEdit.xPos = posX == 0 ? 200 : posX + node.offsetInDocument.x - 30
+            BeamTextEdit.xPos = posX + node.offsetInDocument.x
         }
 
         BeamTextEdit.yPos = (window.frame.height - (rect.maxY + node.offsetInDocument.y) - popover.idealSize.height) - marginTop

@@ -14,11 +14,12 @@ extension BeamTextEdit {
     private static let viewHeight: CGFloat = 32
     private static let padding: CGFloat = 1.45
     private static let xAnchorConstraint: CGFloat = 20.25
-    private static let startBottomConstraint: CGFloat = -35
-    private static let bottomConstraint: CGFloat = 25
+    private static let startBottomConstraint: CGFloat = 35
+    private static let bottomConstraint: CGFloat = -25
     private static let formatterType: [FormatterType] = [.h1, .h2, .quote, .code, .bold, .italic, .strikethrough]
-    private static var formatterIsInit = false
-    private static var formatterIsHidden = false
+
+    private static var widthAnchor: NSLayoutConstraint?
+    private static var bottomAnchor: NSLayoutConstraint?
 
     // MARK: - UI
     internal func initFormatterView() {
@@ -27,26 +28,39 @@ extension BeamTextEdit {
             return
         }
 
-        formatterView = FormatterView(frame: formatterViewRect(BeamTextEdit.startBottomConstraint))
+        if backIsPreesed || forwardIsPressed { resetBackAndForwardButton() }
+
+        formatterView = FormatterView()
 
         guard let formatterView = formatterView,
               let view = window?.contentView else { return }
 
+        let formatterSize = CGFloat(BeamTextEdit.formatterType.count)
+
+        formatterView.translatesAutoresizingMaskIntoConstraints = false
+
         view.addSubview(formatterView)
+
+        BeamTextEdit.widthAnchor = formatterView.widthAnchor.constraint(equalToConstant: (BeamTextEdit.viewWidth * formatterSize) + (BeamTextEdit.padding * formatterSize))
+        BeamTextEdit.bottomAnchor = formatterView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: BeamTextEdit.startBottomConstraint)
+
+        guard
+            let widthAnchor = BeamTextEdit.widthAnchor,
+            let bottomAnchor = BeamTextEdit.bottomAnchor else { return }
+
+        NSLayoutConstraint.activate([
+            widthAnchor,
+            formatterView.heightAnchor.constraint(equalToConstant: 32),
+            formatterView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            bottomAnchor
+        ])
 
         formatterView.items = BeamTextEdit.formatterType
         formatterView.didSelectFormatterType = { [unowned self] (type, isActive) -> Void in
             selectFormatterAction(type, isActive)
         }
 
-        BeamTextEdit.formatterIsInit = true
         showOrHideFormatterView(isPresent: true)
-    }
-
-    internal func updateFormatterViewLayout() {
-        if !BeamTextEdit.formatterIsInit && !BeamTextEdit.formatterIsHidden {
-            formatterView?.frame = formatterViewRect()
-        }
     }
 
     // MARK: - Methods
@@ -57,18 +71,21 @@ extension BeamTextEdit {
     }
 
     internal func showOrHideFormatterView(isPresent: Bool) {
-        guard let formatterView = formatterView else { return }
+        guard let formatterView = formatterView,
+              let bottomAnchor = BeamTextEdit.bottomAnchor else { return }
 
-        DispatchQueue.main.async { [unowned self] in
-            NSAnimationContext.runAnimationGroup ({ ctx in
-                ctx.allowsImplicitAnimation = true
-                ctx.duration = 0.3
+        formatterView.wantsLayer = true
+        formatterView.layoutSubtreeIfNeeded()
 
-                formatterView.frame = formatterViewRect(isPresent ? BeamTextEdit.bottomConstraint : BeamTextEdit.startBottomConstraint)
-                BeamTextEdit.formatterIsInit = BeamTextEdit.formatterIsInit ? false : true
-                BeamTextEdit.formatterIsHidden = isPresent ? false : true
-            }, completionHandler: nil)
-        }
+        bottomAnchor.isActive = true
+        bottomAnchor.constant = isPresent ? BeamTextEdit.bottomConstraint : BeamTextEdit.startBottomConstraint
+
+        NSAnimationContext.runAnimationGroup ({ ctx in
+            ctx.allowsImplicitAnimation = true
+            ctx.duration = 0.3
+
+            formatterView.layoutSubtreeIfNeeded()
+        }, completionHandler: nil)
     }
 
     internal func detectFormatterType() {
@@ -170,17 +187,6 @@ extension BeamTextEdit {
         }
 
         rootNode.state.attributes.remove(at: index)
-    }
-
-    private func formatterViewRect(_ y: CGFloat = bottomConstraint) -> NSRect {
-        guard let window = window else { return NSRect.zero }
-        let formatterSize = CGFloat(BeamTextEdit.formatterType.count)
-
-        return NSRect(
-            x: (window.frame.width / 2) - (BeamTextEdit.xAnchorConstraint * formatterSize),
-            y: y,
-            width: (BeamTextEdit.viewWidth * formatterSize) + (BeamTextEdit.padding * formatterSize),
-            height: BeamTextEdit.viewHeight)
     }
 
 }

@@ -51,7 +51,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             if backIsPreesed {
                 dismissPopover()
                 dismissFormatterView()
-                resetBackAndForwardButton()
             }
         }
     }
@@ -266,9 +265,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
         rootNode.availableWidth = rect.width
         rootNode.setLayout(rect)
-
-        guard formatterView != nil else { return }
-        updateFormatterViewLayout()
     }
 
     // This is the root node of what we are editing:
