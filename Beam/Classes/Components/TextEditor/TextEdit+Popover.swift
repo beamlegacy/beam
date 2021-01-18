@@ -74,13 +74,12 @@ extension BeamTextEdit {
 
     internal func dismissPopover() {
         guard popover != nil else { return }
-        cancelInternalLink()
         popover?.removeFromSuperview()
         popover = nil
     }
 
     internal func dismissAndShowPersistentView() {
-        cancelInternalLink()
+        if popoverPrefix > 0 { cancelInternalLink() }
         dismissPopover()
         initFormatterView()
     }
@@ -115,7 +114,8 @@ extension BeamTextEdit {
     }
 
     private func validInternalLink(from node: TextNode, _ title: String) {
-        let replacementStart = cursorStartPosition + 1 - popoverPrefix
+        let startPosition = popoverPrefix == 0 ? cursorStartPosition : cursorStartPosition + 1
+        let replacementStart = startPosition - popoverPrefix
         let replacementEnd = rootNode.cursorPosition + popoverSuffix
         let linkEnd = replacementStart + title.count
         node.text.replaceSubrange(replacementStart..<replacementEnd, with: title)
