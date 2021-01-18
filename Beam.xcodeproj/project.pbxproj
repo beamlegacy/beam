@@ -182,6 +182,8 @@
 		52DEF1CA252B259700561493 /* CoreDataManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52DEF1C9252B259700561493 /* CoreDataManagerTests.swift */; };
 		52E04FD6252C7A4600AD9F56 /* writing_space.json in Resources */ = {isa = PBXBuildFile; fileRef = 52E04FD5252C7A4600AD9F56 /* writing_space.json */; };
 		52E04FED252C814D00AD9F56 /* RoamImporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52E04FEC252C814D00AD9F56 /* RoamImporterTests.swift */; };
+		562A8B3625B5D8B5004D3D8A /* String+NL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 562A8B3525B5D8B5004D3D8A /* String+NL.swift */; };
+		562A8B5225B5E3D8004D3D8A /* String+NLTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 562A8B5125B5E3D8004D3D8A /* String+NLTests.swift */; };
 		6D33924049F5798BBE6E7AED /* Pods_BeamUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 54B49CE1C66614E244553288 /* Pods_BeamUITests.framework */; };
 		7D40159D41DDD593BDFDF664 /* Pods_BeamTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C8379DEE387FB86FA7817188 /* Pods_BeamTests.framework */; };
 		9611995E25A27A17005BEC82 /* BeamObjCBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 9611995D25A27A17005BEC82 /* BeamObjCBridge.m */; };
@@ -599,6 +601,8 @@
 		52E04FD5252C7A4600AD9F56 /* writing_space.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = writing_space.json; sourceTree = "<group>"; };
 		52E04FEC252C814D00AD9F56 /* RoamImporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoamImporterTests.swift; sourceTree = "<group>"; };
 		54B49CE1C66614E244553288 /* Pods_BeamUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_BeamUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		562A8B3525B5D8B5004D3D8A /* String+NL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+NL.swift"; sourceTree = "<group>"; };
+		562A8B5125B5E3D8004D3D8A /* String+NLTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+NLTests.swift"; sourceTree = "<group>"; };
 		9611995C25A27A17005BEC82 /* Beam-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Beam-Bridging-Header.h"; sourceTree = "<group>"; };
 		9611995D25A27A17005BEC82 /* BeamObjCBridge.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BeamObjCBridge.m; sourceTree = "<group>"; };
 		961EC4F125B4511D009FA322 /* Layer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Layer.swift; sourceTree = "<group>"; };
@@ -1165,6 +1169,7 @@
 				418171A72581107C00317ED8 /* String+Localization.swift */,
 				418173C22581276F00317ED8 /* String+NSMutableAttributedString.swift */,
 				96A8B1DC25A38A3B006F749C /* String+Levenshtein.swift */,
+				562A8B3525B5D8B5004D3D8A /* String+NL.swift */,
 			);
 			path = "String+Beam";
 			sourceTree = "<group>";
@@ -1279,6 +1284,38 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		562A8B4D25B5E36B004D3D8A /* Classes */ = {
+			isa = PBXGroup;
+			children = (
+				562A8B4E25B5E37D004D3D8A /* Helpers */,
+			);
+			path = Classes;
+			sourceTree = "<group>";
+		};
+		562A8B4E25B5E37D004D3D8A /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				562A8B4F25B5E385004D3D8A /* Extensions */,
+			);
+			path = Helpers;
+			sourceTree = "<group>";
+		};
+		562A8B4F25B5E385004D3D8A /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				562A8B5025B5E38D004D3D8A /* String+Beam */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		562A8B5025B5E38D004D3D8A /* String+Beam */ = {
+			isa = PBXGroup;
+			children = (
+				562A8B5125B5E3D8004D3D8A /* String+NLTests.swift */,
+			);
+			path = "String+Beam";
+			sourceTree = "<group>";
+		};
 		713DD2F4C2EE4FDED57ACC99 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
@@ -1357,6 +1394,7 @@
 		965A78402514F149009980D4 /* BeamTests */ = {
 			isa = PBXGroup;
 			children = (
+				562A8B4D25B5E36B004D3D8A /* Classes */,
 				96CDA7252582732500BC375C /* Indexer */,
 				527DF48525710EAE00A0A56D /* Managers */,
 				52A43D92252C790200178F3B /* DataModel */,
@@ -2047,6 +2085,7 @@
 				41A969FF2581394300E6594B /* Configuration.swift in Sources */,
 				4181723C2581107C00317ED8 /* TextEditMovements.swift in Sources */,
 				418172202581107C00317ED8 /* Information.swift in Sources */,
+				562A8B3625B5D8B5004D3D8A /* String+NL.swift in Sources */,
 				4181727E258110D100317ED8 /* AppDelegate+URL.swift in Sources */,
 				4181724D2581107C00317ED8 /* BrowserTabBar.swift in Sources */,
 				961EC50B25B495DB009FA322 /* ButtonLayer.swift in Sources */,
@@ -2088,6 +2127,7 @@
 				52B5EF78252F520100914D52 /* CoreDataTests.swift in Sources */,
 				52DEF1CA252B259700561493 /* CoreDataManagerTests.swift in Sources */,
 				967B2685255465C5003F40E3 /* Html2MdTests.swift in Sources */,
+				562A8B5225B5E3D8004D3D8A /* String+NLTests.swift in Sources */,
 				527DF48725710ECB00A0A56D /* DocumentManagerTests.swift in Sources */,
 				96E1356F2546F03900133A24 /* TextNodeTests.swift in Sources */,
 				969084CC25365AAE009D3C96 /* ParserTests.swift in Sources */,
