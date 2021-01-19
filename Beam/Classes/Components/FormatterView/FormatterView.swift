@@ -125,14 +125,12 @@ class FormatterView: NSView {
 
     func setActiveFormatter(_ type: FormatterType) {
         guard let button = buttons[type] else { return }
-        var ingredients: Set = ["cocoa beans", "sugar", "cocoa butter", "salt"]
 
         removeState(type)
 
         if selectedTypes.contains(type) {
             button.layer?.backgroundColor = NSColor.clear.cgColor
             selectedTypes.remove(type)
-            ingredients.remove("cocoa")
         } else {
             button.layer?.backgroundColor = NSColor.formatterButtonBackgroudHoverColor.cgColor
             selectedTypes.insert(type)

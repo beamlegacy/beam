@@ -9,7 +9,6 @@
 
 import Foundation
 import AppKit
-import SwiftUI
 import Combine
 
 public struct MouseInfo {
@@ -39,6 +38,7 @@ public struct MouseInfo {
 
 // swiftlint:disable:next type_body_length
 public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
+
     var data: BeamData?
     var note: BeamElement! {
         didSet {
@@ -245,9 +245,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
         rootNode.availableWidth = rect.width
         rootNode.setLayout(rect)
-
-        guard formatterView != nil else { return }
-        updateFormatterViewLayout()
     }
 
     // This is the root node of what we are editing:
@@ -798,6 +795,8 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                 return true
              },
             "[": { [unowned self] in
+                guard popover == nil else { return false }
+
                 let pos = rootNode.cursorPosition
                 let substr = node.text.extract(range: max(0, pos - 1) ..< pos)
                 let left = substr.text // capture the left of the cursor to check for an existing [
@@ -1153,6 +1152,11 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         guard let formatterView = formatterView else { return }
         rootNode.state.attributes = []
         formatterView.resetSelectedItems()
+    }
+
+    func hideFloatingView() {
+        dismissPopover()
+        dismissFormatterView()
     }
 
     func purgeDeadNodes() {

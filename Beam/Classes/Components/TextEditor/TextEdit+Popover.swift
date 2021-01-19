@@ -21,9 +21,10 @@ extension BeamTextEdit {
                                                      width: BidirectionalPopover.viewWidth,
                                                      height: BidirectionalPopover.viewHeight))
 
-        guard let popover = popover else { return }
+        guard let popover = popover,
+              let view = window?.contentView else { return }
 
-        addSubview(popover)
+        view.addSubview(popover)
 
         popover.didSelectTitle = { [unowned self] (title) -> Void in
             validInternalLink(from: node, title)
@@ -36,7 +37,7 @@ extension BeamTextEdit {
 
         let cursorPosition = rootNode.cursorPosition
 
-        if command == .deleteForward && cursorStartPosition == cursorPosition ||
+        if command == .deleteForward && cursorStartPosition >= cursorPosition ||
            command == .moveLeft && cursorPosition <= cursorStartPosition {
             dismissAndShowPersistentView()
             return
@@ -56,7 +57,7 @@ extension BeamTextEdit {
         popover.items = items.map({ $0.title })
         popover.query = linkText
 
-        updatePosition(with: node)
+        updatePosition(with: node, linkText.isEmpty)
 
         popover.frame = NSRect(x: BeamTextEdit.xPos, y: BeamTextEdit.yPos, width: popover.idealSize.width, height: popover.idealSize.height)
     }
@@ -78,28 +79,46 @@ extension BeamTextEdit {
     }
 
     internal func dismissAndShowPersistentView() {
+        if popoverPrefix > 0 { cancelInternalLink() }
         dismissPopover()
-        cancelInternalLink()
         initFormatterView()
     }
 
     internal func cancelInternalLink() {
-        guard let node = node as? TextNode else { return }
+        guard let node = node as? TextNode,
+              popover != nil else { return }
         let text = node.text.text
         node.text.removeAttributes([.internalLink(text)], from: cursorStartPosition..<rootNode.cursorPosition + text.count)
     }
 
-    private func updatePosition(with node: TextNode) {
+    private func updatePosition(with node: TextNode, _ isEmpty: Bool = false) {
+        guard let window = window,
+              let popover = popover else { return }
+
         let cursorPosition = rootNode.cursorPosition
         let (posX, rect) = node.offsetAndFrameAt(index: cursorPosition)
-        BeamTextEdit.xPos = posX == 0 ? 208 : posX + node.offsetInDocument.x
-        BeamTextEdit.yPos = rect.maxY == 0 ? rect.maxY + node.offsetInDocument.y + 25 : rect.maxY + node.offsetInDocument.y + 5
+        var marginTop: CGFloat = ignoreFirstDrag ? 80 : 65
+
+        // To avoid the update of X position during the insertion of a new text
+        if isEmpty {
+            BeamTextEdit.xPos = (posX - 20) + node.offsetInDocument.x
+        }
+
+        // Popover with Shortcut
+        if node.text.text.isEmpty {
+            marginTop = 97
+            BeamTextEdit.xPos = posX + 200
+        }
+
+        BeamTextEdit.yPos = (window.frame.height - (rect.maxY + node.offsetInDocument.y) - popover.idealSize.height) - marginTop
     }
 
     private func validInternalLink(from node: TextNode, _ title: String) {
-        let replacementStart = cursorStartPosition + 1 - popoverPrefix
+        let startPosition = popoverPrefix == 0 ? cursorStartPosition : cursorStartPosition + 1
+        let replacementStart = startPosition - popoverPrefix
         let replacementEnd = rootNode.cursorPosition + popoverSuffix
         let linkEnd = replacementStart + title.count
+
         node.text.replaceSubrange(replacementStart..<replacementEnd, with: title)
         node.text.makeInternalLink(replacementStart..<linkEnd)
         rootNode.cursorPosition = linkEnd
