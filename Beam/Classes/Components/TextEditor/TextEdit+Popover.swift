@@ -12,9 +12,6 @@ extension BeamTextEdit {
     // MARK: - Properties
     private static let queryLimit = 4
 
-    private static var xPos: CGFloat = 0
-    private static var yPos: CGFloat = 0
-
     internal func initPopover() {
         guard let node = node as? TextNode else { return }
 
@@ -95,29 +92,30 @@ extension BeamTextEdit {
               let scrollView = enclosingScrollView else { return }
 
         let cursorPosition = rootNode.cursorPosition
-        let (posX, rect) = node.offsetAndFrameAt(index: cursorPosition)
+        let (xOffset, rect) = node.offsetAndFrameAt(index: cursorPosition)
         let yOffset = scrollView.documentVisibleRect.origin.y < 0 ? 0 : scrollView.documentVisibleRect.origin.y
-        let yPos = (window.frame.height - (rect.maxY + node.offsetInDocument.y) - popover.idealSize.height) + yOffset
 
         var marginTop: CGFloat = 60
+        var yPos = (window.frame.height - (rect.maxY + node.offsetInDocument.y) - popover.idealSize.height) + yOffset
+        var xPos: CGFloat = 0
 
         // To avoid the update of X position during the insertion of a new text
         if isEmpty {
-            BeamTextEdit.xPos = (posX - 20) + node.offsetInDocument.x
+            xPos = (xOffset - 20) + node.offsetInDocument.x
         }
 
         // Popover with Shortcut
         if node.text.text.isEmpty {
             marginTop += 15
-            BeamTextEdit.xPos = posX + 200
+            xPos = xOffset + 200
         }
 
-        BeamTextEdit.yPos = yPos - marginTop
-        popover.frame = NSRect(x: BeamTextEdit.xPos, y: BeamTextEdit.yPos, width: popover.idealSize.width, height: popover.idealSize.height)
+        yPos -= marginTop
+        popover.frame = NSRect(x: xPos, y: yPos, width: popover.idealSize.width, height: popover.idealSize.height)
 
         // Up position when popover is overlapped or clipped by the superview
         if popover.visibleRect.height < popover.idealSize.height {
-            popover.frame = NSRect(x: BeamTextEdit.xPos, y: (window.frame.height - node.offsetInDocument.y + yOffset) - 50, width: popover.idealSize.width, height: popover.idealSize.height)
+            popover.frame = NSRect(x: xPos, y: (window.frame.height - node.offsetInDocument.y + yOffset) - 50, width: popover.idealSize.width, height: popover.idealSize.height)
         }
     }
 
