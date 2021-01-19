@@ -32,7 +32,7 @@ struct JournalView: View {
                     )
                 }
             }
-            .padding(.top, isEditing ? 20 : offset)
+            .padding(.top, isEditing ? 0 : offset)
         }
     }
 }

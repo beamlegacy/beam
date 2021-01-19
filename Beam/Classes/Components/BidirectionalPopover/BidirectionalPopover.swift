@@ -14,7 +14,7 @@ class BidirectionalPopover: Popover {
     @IBOutlet weak var collectionView: NSCollectionView!
 
     static let viewWidth: CGFloat = 248
-    static let viewHeight: CGFloat = 36.5
+    static let viewHeight: CGFloat = 36
 
     var didSelectTitle: ((_ title: String) -> Void)?
 
@@ -109,6 +109,8 @@ class BidirectionalPopover: Popover {
 
         collectionView.isSelectable = true
         collectionView.wantsLayer = true
+        collectionView.enclosingScrollView?.borderType = .noBorder
+        collectionView.enclosingScrollView?.hasVerticalScroller = false
         collectionView.backgroundColors = [.clear]
         collectionView.layer?.backgroundColor = .clear
         collectionView.collectionViewLayout = layout

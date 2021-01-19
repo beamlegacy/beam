@@ -603,12 +603,16 @@ public class TextNode: Widget {
         }
 
         if let link = linkAt(point: mouseInfo.position) {
+            editor.cancelInternalLink()
+            editor.dismissPopover()
             editor.dismissFormatterView()
             editor.openURL(link)
             return true
         }
 
         if let link = internalLinkAt(point: mouseInfo.position) {
+            editor.cancelInternalLink()
+            editor.dismissPopover()
             editor.dismissFormatterView()
             editor.openCard(link)
             return true
@@ -625,6 +629,9 @@ public class TextNode: Widget {
                     root?.cancelSelection()
                     dragMode = .select(cursorPosition)
                 }
+            } else if mouseInfo.event.clickCount == 2 {
+                let clickPos = positionAt(point: mouseInfo.position)
+                root?.wordSelection(from: clickPos)
             } else {
                 root?.doCommand(.selectAll)
             }

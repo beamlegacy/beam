@@ -20,7 +20,10 @@ struct NoteView: View {
     var body: some View {
         ZStack {
             if scrollable {
-                BTextEditScrollable(note: note, data: state.data, openURL: { url in
+                BTextEditScrollable(
+                    note: note,
+                    data: state.data,
+                    openURL: { url in
                     if ["http", "https"].contains(url.scheme) {
                         state.createTab(withURL: url, originalQuery: state.currentNote?.title ?? "")
                     } else {
@@ -41,7 +44,10 @@ struct NoteView: View {
                 showTitle: showTitle
                 )
             } else {
-                BTextEdit(note: note, data: state.data, openURL: { url in
+                BTextEdit(
+                    note: note,
+                    data: state.data,
+                    openURL: { url in
                     if ["http", "https"].contains(url.scheme) {
                         state.createTab(withURL: url, originalQuery: state.currentNote?.title ?? "")
                     } else {

@@ -13,6 +13,7 @@ import SwiftSoup
 
 let NoteDisplayThreshold = Float(0.0)
 
+// swiftlint:disable type_body_length
 @objc class BeamState: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var data: BeamData
     public var searchEngine: SearchEngine = GoogleSearch()
@@ -44,7 +45,6 @@ let NoteDisplayThreshold = Float(0.0)
             updateCanGoBackForward()
         }
     }
-
     @Published var selectionIndex: Int? = nil {
         didSet {
             if let i = selectionIndex, i >= 0, i < completedQueries.count {
@@ -130,8 +130,8 @@ let NoteDisplayThreshold = Float(0.0)
                     mode = .today
                     currentNote = nil
                 case let .note(note):
-                    currentNote = note
                     mode = .note
+                    currentNote = note
                 }
             }
         case .web:
@@ -153,8 +153,8 @@ let NoteDisplayThreshold = Float(0.0)
                     mode = .today
                     currentNote = nil
                 case let .note(note):
-                    currentNote = note
                     mode = .note
+                    currentNote = note
                 }
             }
         case .web:

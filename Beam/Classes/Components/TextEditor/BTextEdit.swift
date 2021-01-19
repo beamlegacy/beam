@@ -29,6 +29,10 @@ public struct BTextEdit: NSViewRepresentable {
 
     var showTitle = true
 
+    public func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+
     public func makeNSView(context: Context) -> BeamTextEdit {
         let nsView = BeamTextEdit(root: note, font: Font.main)
 
@@ -54,7 +58,6 @@ public struct BTextEdit: NSViewRepresentable {
     }
 
     public func updateNSView(_ nsView: BeamTextEdit, context: Context) {
-//        print("display note: \(note)")
         if nsView.note !== note {
             nsView.note = note
         }
@@ -77,6 +80,23 @@ public struct BTextEdit: NSViewRepresentable {
         nsView.ignoreFirstDrag = ignoreFirstDrag
 
         nsView.showTitle = showTitle
+
+        context.coordinator.onDeinit = {
+            nsView.hideFloatingView()
+        }
+    }
+
+    public class Coordinator: NSObject {
+        let parent: BTextEdit
+        var onDeinit: () -> Void = {}
+
+        init(_ edit: BTextEdit) {
+            self.parent = edit
+        }
+
+        deinit {
+            onDeinit()
+        }
     }
 
     public typealias NSViewType = BeamTextEdit
@@ -100,6 +120,10 @@ public struct BTextEditScrollable: NSViewRepresentable {
     var ignoreFirstDrag = false
 
     var showTitle = true
+
+    public func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
 
     public func makeNSView(context: Context) -> NSViewType {
         let edit = BeamTextEdit(root: note, font: Font.main)
@@ -143,9 +167,8 @@ public struct BTextEditScrollable: NSViewRepresentable {
     }
 
     public func updateNSView(_ nsView: NSViewType, context: Context) {
-//        print("display note: \(note)")
-        // swiftlint:disable:next force_cast
-        let edit = nsView.documentView as! BeamTextEdit
+        guard let edit = nsView.documentView as? BeamTextEdit else { return }
+
         if edit.note !== note {
             edit.note = note
         }
@@ -166,6 +189,23 @@ public struct BTextEditScrollable: NSViewRepresentable {
         edit.ignoreFirstDrag = ignoreFirstDrag
 
         edit.showTitle = showTitle
+
+        context.coordinator.onDeinit = {
+            edit.hideFloatingView()
+        }
+    }
+
+    public class Coordinator: NSObject {
+        let parent: BTextEditScrollable
+        var onDeinit: () -> Void = {}
+
+        init(_ edit: BTextEditScrollable) {
+            self.parent = edit
+        }
+
+        deinit {
+            onDeinit()
+        }
     }
 
     public typealias NSViewType = NSScrollView
