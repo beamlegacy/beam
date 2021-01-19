@@ -18,8 +18,14 @@ extension BeamTextEdit {
     private static let bottomConstraint: CGFloat = -25
     private static let formatterType: [FormatterType] = [.h1, .h2, .quote, .code, .bold, .italic, .strikethrough]
 
-    private static var widthAnchor: NSLayoutConstraint?
+    private static var topAnchor: NSLayoutConstraint?
     private static var bottomAnchor: NSLayoutConstraint?
+    private static var leftAnchor: NSLayoutConstraint?
+    private static var rightAnchor: NSLayoutConstraint?
+    private static var centerXAnchor: NSLayoutConstraint?
+    private static var centerYAnchor: NSLayoutConstraint?
+    private static var widthAnchor: NSLayoutConstraint?
+    private static var heightAnchor: NSLayoutConstraint?
 
     // MARK: - UI
     internal func initFormatterView() {
@@ -37,19 +43,27 @@ extension BeamTextEdit {
 
         formatterView.translatesAutoresizingMaskIntoConstraints = false
 
-        BeamTextEdit.widthAnchor = formatterView.widthAnchor.constraint(equalToConstant: (BeamTextEdit.viewWidth * formatterSize) + (BeamTextEdit.padding * formatterSize))
+        BeamTextEdit.topAnchor = formatterView.topAnchor.constraint(equalTo: view.topAnchor)
         BeamTextEdit.bottomAnchor = formatterView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: BeamTextEdit.startBottomConstraint)
+        BeamTextEdit.leftAnchor = formatterView.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 0)
+        BeamTextEdit.rightAnchor = formatterView.rightAnchor.constraint(equalTo: view.rightAnchor, constant: 0)
+        BeamTextEdit.widthAnchor = formatterView.widthAnchor.constraint(equalToConstant: (BeamTextEdit.viewWidth * formatterSize) + (BeamTextEdit.padding * formatterSize))
+        BeamTextEdit.heightAnchor = formatterView.heightAnchor.constraint(equalToConstant: 32)
+        BeamTextEdit.centerXAnchor = formatterView.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+        BeamTextEdit.centerYAnchor = formatterView.centerYAnchor.constraint(equalTo: view.centerYAnchor)
 
         view.addSubview(formatterView)
 
-        guard let widthAnchor = BeamTextEdit.widthAnchor,
-              let bottomAnchor = BeamTextEdit.bottomAnchor else { return }
+        guard let bottomAnchor = BeamTextEdit.bottomAnchor,
+              let widthAnchor = BeamTextEdit.widthAnchor,
+              let heightAnchor = BeamTextEdit.heightAnchor,
+              let centerXAnchor = BeamTextEdit.centerXAnchor else { return }
 
         NSLayoutConstraint.activate([
+            bottomAnchor,
             widthAnchor,
-            formatterView.heightAnchor.constraint(equalToConstant: 32),
-            formatterView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            bottomAnchor
+            heightAnchor,
+            centerXAnchor
         ])
 
         formatterView.items = BeamTextEdit.formatterType
@@ -61,10 +75,28 @@ extension BeamTextEdit {
     }
 
     // MARK: - Methods
-    internal func dismissFormatterView() {
-        guard formatterView != nil else { return }
-        formatterView?.removeFromSuperview()
-        formatterView = nil
+    internal func updateFormatterView() {
+        guard let node = node as? TextNode,
+              let formatterView = formatterView,
+              let topAnchor = BeamTextEdit.topAnchor,
+              let bottomAnchor = BeamTextEdit.bottomAnchor,
+              let leftAnchor = BeamTextEdit.leftAnchor,
+              let centerXAnchor = BeamTextEdit.centerXAnchor else { return }
+
+        let (xOffset, rect) = node.offsetAndFrameAt(index: rootNode.cursorPosition)
+
+        formatterView.wantsLayer = true
+        formatterView.layoutSubtreeIfNeeded()
+
+        bottomAnchor.isActive = false
+        centerXAnchor.isActive = false
+
+        topAnchor.isActive = true
+        leftAnchor.isActive = true
+
+        leftAnchor.constant = xOffset
+
+        topAnchor.constant = (node.offsetInDocument.y + rect.maxY) - 10
     }
 
     internal func showOrHideFormatterView(isPresent: Bool) {
@@ -168,6 +200,12 @@ extension BeamTextEdit {
         default:
             break
         }
+    }
+
+    internal func dismissFormatterView() {
+        guard formatterView != nil else { return }
+        formatterView?.removeFromSuperview()
+        formatterView = nil
     }
 
     private func changeTextFormat(with node: TextNode, kind: ElementKind, isActive: Bool) {

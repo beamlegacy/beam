@@ -424,6 +424,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                             rootNode.doCommand(.moveToBeginningOfLineAndModifySelection)
                         } else {
                             rootNode.doCommand(.moveLeftAndModifySelection)
+                            updateFormatterView()
                         }
                     } else if command && popover != nil {
                         rootNode.doCommand(.moveToBeginningOfLine)
@@ -458,6 +459,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                             rootNode.doCommand(.moveToEndOfLineAndModifySelection)
                         } else {
                             rootNode.doCommand(.moveRightAndModifySelection)
+                            updateFormatterView()
                         }
                     } else if command && formatterView != nil {
                         rootNode.doCommand(.moveToEndOfLine)
@@ -482,6 +484,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     if shift {
                         cancelPopover()
                         rootNode.doCommand(.moveUpAndModifySelection)
+                        updateFormatterView()
                     } else if let popover = popover {
                         popover.doCommand(.moveUp)
                     } else if formatterView != nil {
@@ -495,6 +498,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     if shift {
                         cancelPopover()
                         rootNode.doCommand(.moveDownAndModifySelection)
+                        updateFormatterView()
                     } else if let popover = popover {
                         popover.doCommand(.moveDown)
                     } else if formatterView != nil {
