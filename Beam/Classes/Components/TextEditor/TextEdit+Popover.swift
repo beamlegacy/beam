@@ -18,10 +18,8 @@ extension BeamTextEdit {
     internal func initPopover() {
         guard let node = node as? TextNode else { return }
 
-        updatePosition(with: node)
-        popover = BidirectionalPopover(frame: NSRect(x: BeamTextEdit.xPos, y: BeamTextEdit.yPos,
-                                                     width: BidirectionalPopover.viewWidth,
-                                                     height: BidirectionalPopover.viewHeight))
+        popover = BidirectionalPopover()
+        updatePopoverPosition(with: node)
 
         guard let popover = popover,
               let view = window?.contentView else { return }
@@ -35,8 +33,7 @@ extension BeamTextEdit {
 
     internal func updatePopover(with command: TextRoot.Command = .none) {
         guard let node = node as? TextNode,
-              let popover = popover,
-              let window = window else { return }
+              let popover = popover else { return }
 
         let cursorPosition = rootNode.cursorPosition
 
@@ -60,12 +57,7 @@ extension BeamTextEdit {
         popover.items = items.map({ $0.title })
         popover.query = linkText
 
-        updatePosition(with: node, linkText.isEmpty)
-        popover.frame = NSRect(x: BeamTextEdit.xPos, y: BeamTextEdit.yPos, width: popover.idealSize.width, height: popover.idealSize.height)
-
-        if popover.visibleRect.height < popover.idealSize.height {
-            popover.frame = NSRect(x: BeamTextEdit.xPos, y: window.frame.height - node.offsetInDocument.y - 50, width: popover.idealSize.width, height: popover.idealSize.height)
-        }
+        updatePopoverPosition(with: node, linkText.isEmpty)
     }
 
     internal func cancelPopover() {
@@ -97,12 +89,16 @@ extension BeamTextEdit {
         node.text.removeAttributes([.internalLink(text)], from: cursorStartPosition..<rootNode.cursorPosition + text.count)
     }
 
-    private func updatePosition(with node: TextNode, _ isEmpty: Bool = false) {
+    private func updatePopoverPosition(with node: TextNode, _ isEmpty: Bool = false) {
         guard let window = window,
-              let popover = popover else { return }
+              let popover = popover,
+              let scrollView = enclosingScrollView else { return }
 
         let cursorPosition = rootNode.cursorPosition
         let (posX, rect) = node.offsetAndFrameAt(index: cursorPosition)
+        let yOffset = scrollView.documentVisibleRect.origin.y < 0 ? 0 : scrollView.documentVisibleRect.origin.y
+        let yPos = (window.frame.height - (rect.maxY + node.offsetInDocument.y) - popover.idealSize.height) + yOffset
+
         var marginTop: CGFloat = 60
 
         // To avoid the update of X position during the insertion of a new text
@@ -116,7 +112,13 @@ extension BeamTextEdit {
             BeamTextEdit.xPos = posX + 200
         }
 
-        BeamTextEdit.yPos = (window.frame.height - (rect.maxY + node.offsetInDocument.y) - popover.idealSize.height) - marginTop
+        BeamTextEdit.yPos = yPos - marginTop
+        popover.frame = NSRect(x: BeamTextEdit.xPos, y: BeamTextEdit.yPos, width: popover.idealSize.width, height: popover.idealSize.height)
+
+        // Up position when popover is overlapped or clipped by the superview
+        if popover.visibleRect.height < popover.idealSize.height {
+            popover.frame = NSRect(x: BeamTextEdit.xPos, y: (window.frame.height - node.offsetInDocument.y + yOffset) - 50, width: popover.idealSize.width, height: popover.idealSize.height)
+        }
     }
 
     private func validInternalLink(from node: TextNode, _ title: String) {
