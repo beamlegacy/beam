@@ -13,6 +13,7 @@ import SwiftSoup
 
 let NoteDisplayThreshold = Float(0.0)
 
+// swiftlint:disable type_body_length
 @objc class BeamState: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var data: BeamData
     public var searchEngine: SearchEngine = GoogleSearch()

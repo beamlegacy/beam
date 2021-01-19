@@ -118,7 +118,7 @@ extension BeamTextEdit {
         let replacementStart = startPosition - popoverPrefix
         let replacementEnd = rootNode.cursorPosition + popoverSuffix
         let linkEnd = replacementStart + title.count
-        
+
         node.text.replaceSubrange(replacementStart..<replacementEnd, with: title)
         node.text.makeInternalLink(replacementStart..<linkEnd)
         rootNode.cursorPosition = linkEnd

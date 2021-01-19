@@ -227,7 +227,6 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject {
         children.insert(child, at: pos)
     }
 
-
     @Published var parent: BeamElement?
 
     public static func == (lhs: BeamElement, rhs: BeamElement) -> Bool {

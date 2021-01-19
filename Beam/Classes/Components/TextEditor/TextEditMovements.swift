@@ -230,7 +230,6 @@ extension TextRoot {
         return false
     }
 
-
     public func selectAll() {
         guard root.state.nodeSelection == nil else {
             _ = selectAllNodes()
