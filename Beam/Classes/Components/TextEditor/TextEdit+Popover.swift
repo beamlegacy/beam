@@ -11,6 +11,7 @@ extension BeamTextEdit {
 
     // MARK: - Properties
     private static let queryLimit = 4
+    private static var xPos: CGFloat = 0
 
     internal func initPopover() {
         guard let node = node as? TextNode else { return }
@@ -97,25 +98,24 @@ extension BeamTextEdit {
 
         var marginTop: CGFloat = 60
         var yPos = (window.frame.height - (rect.maxY + node.offsetInDocument.y) - popover.idealSize.height) + yOffset
-        var xPos: CGFloat = 0
 
         // To avoid the update of X position during the insertion of a new text
         if isEmpty {
-            xPos = (xOffset - 20) + node.offsetInDocument.x
+            BeamTextEdit.xPos = (xOffset - 20) + node.offsetInDocument.x
         }
 
         // Popover with Shortcut
         if node.text.text.isEmpty {
             marginTop += 15
-            xPos = xOffset + 200
+            BeamTextEdit.xPos = xOffset + 200
         }
 
         yPos -= marginTop
-        popover.frame = NSRect(x: xPos, y: yPos, width: popover.idealSize.width, height: popover.idealSize.height)
+        popover.frame = NSRect(x: BeamTextEdit.xPos, y: yPos, width: popover.idealSize.width, height: popover.idealSize.height)
 
         // Up position when popover is overlapped or clipped by the superview
         if popover.visibleRect.height < popover.idealSize.height {
-            popover.frame = NSRect(x: xPos, y: (window.frame.height - node.offsetInDocument.y + yOffset) - 50, width: popover.idealSize.width, height: popover.idealSize.height)
+            popover.frame = NSRect(x: BeamTextEdit.xPos, y: (window.frame.height - node.offsetInDocument.y + yOffset) - 50, width: popover.idealSize.width, height: popover.idealSize.height)
         }
     }
 
