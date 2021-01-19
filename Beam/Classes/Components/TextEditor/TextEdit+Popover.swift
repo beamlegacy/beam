@@ -12,7 +12,6 @@ extension BeamTextEdit {
     // MARK: - Properties
     private static var xPos: CGFloat = 0
     private static var yPos: CGFloat = 0
-    private static var popoverType: PopoverType = .down
 
     internal func initPopover() {
         guard let node = node as? TextNode else { return }
