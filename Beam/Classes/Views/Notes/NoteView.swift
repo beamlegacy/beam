@@ -21,8 +21,6 @@ struct NoteView: View {
         ZStack {
             if scrollable {
                 BTextEditScrollable(
-                    backIsPressed: $state.backIsPressed,
-                    forwardIsPressed: $state.forwardIsPressed,
                     note: note,
                     data: state.data,
                     openURL: { url in
@@ -47,8 +45,6 @@ struct NoteView: View {
                 )
             } else {
                 BTextEdit(
-                    backIsPressed: $state.backIsPressed,
-                    forwardIsPressed: $state.forwardIsPressed,
                     note: note,
                     data: state.data,
                     openURL: { url in

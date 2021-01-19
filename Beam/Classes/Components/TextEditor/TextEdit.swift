@@ -46,26 +46,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         }
     }
 
-    var backIsPreesed = false {
-        didSet {
-            if backIsPreesed {
-                dismissPopover()
-                dismissFormatterView()
-            }
-        }
-    }
-
-    var forwardIsPressed = false {
-        didSet {
-            if forwardIsPressed {
-                dismissPopover()
-                dismissFormatterView()
-            }
-        }
-    }
-
-    var onBackOrForwardChanged: (Bool) -> Void = { _ in }
-
     func updateRoot(with note: BeamElement) {
         guard note != rootNode?.element else { return }
         if let layers = layer?.sublayers {
@@ -151,6 +131,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     deinit {
+        print("deinit")
         timer.invalidate()
     }
 
@@ -1174,8 +1155,9 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         formatterView.resetSelectedItems()
     }
 
-    func resetBackAndForwardButton() {
-        onBackOrForwardChanged(false)
+    func hideFloatingView() {
+        dismissPopover()
+        dismissFormatterView()
     }
 
     func purgeDeadNodes() {

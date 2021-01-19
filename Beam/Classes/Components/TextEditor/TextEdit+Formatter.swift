@@ -28,8 +28,6 @@ extension BeamTextEdit {
             return
         }
 
-        if backIsPreesed || forwardIsPressed { resetBackAndForwardButton() }
-
         formatterView = FormatterView()
 
         guard let formatterView = formatterView,

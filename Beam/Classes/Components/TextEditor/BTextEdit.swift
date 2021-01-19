@@ -11,9 +11,6 @@ import AppKit
 import Combine
 
 public struct BTextEdit: NSViewRepresentable {
-    @Binding var backIsPressed: Bool
-    @Binding var forwardIsPressed: Bool
-
     var note: BeamNote
     var data: BeamData
     var openURL: (URL) -> Void
@@ -32,6 +29,10 @@ public struct BTextEdit: NSViewRepresentable {
 
     var showTitle = true
 
+    public func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+
     public func makeNSView(context: Context) -> BeamTextEdit {
         let nsView = BeamTextEdit(root: note, font: Font.main)
 
@@ -40,11 +41,6 @@ public struct BTextEdit: NSViewRepresentable {
         nsView.onStartEditing = onStartEditing
         nsView.onEndEditing = onEndEditing
         nsView.onStartQuery = onStartQuery
-
-        nsView.onBackOrForwardChanged = { isPreesed in
-            self.backIsPressed = isPreesed
-            self.forwardIsPressed = isPreesed
-        }
 
         nsView.minimumWidth = minimumWidth
         nsView.maximumWidth = maximumWidth
@@ -62,7 +58,6 @@ public struct BTextEdit: NSViewRepresentable {
     }
 
     public func updateNSView(_ nsView: BeamTextEdit, context: Context) {
-//        print("display note: \(note)")
         if nsView.note !== note {
             nsView.note = note
         }
@@ -73,8 +68,6 @@ public struct BTextEdit: NSViewRepresentable {
         nsView.onStartEditing = onStartEditing
         nsView.onEndEditing = onEndEditing
         nsView.onStartQuery = onStartQuery
-        nsView.backIsPreesed = backIsPressed
-        nsView.forwardIsPressed = forwardIsPressed
 
         nsView.minimumWidth = minimumWidth
         nsView.maximumWidth = maximumWidth
@@ -87,15 +80,29 @@ public struct BTextEdit: NSViewRepresentable {
         nsView.ignoreFirstDrag = ignoreFirstDrag
 
         nsView.showTitle = showTitle
+
+        context.coordinator.onDeinit = {
+            nsView.hideFloatingView()
+        }
+    }
+
+    public class Coordinator: NSObject {
+        let parent: BTextEdit
+        var onDeinit: () -> Void = {}
+
+        init(_ edit: BTextEdit) {
+            self.parent = edit
+        }
+
+        deinit {
+            onDeinit()
+        }
     }
 
     public typealias NSViewType = BeamTextEdit
 }
 
 public struct BTextEditScrollable: NSViewRepresentable {
-    @Binding var backIsPressed: Bool
-    @Binding var forwardIsPressed: Bool
-
     var note: BeamNote
     var data: BeamData
     var openURL: (URL) -> Void
@@ -114,6 +121,10 @@ public struct BTextEditScrollable: NSViewRepresentable {
 
     var showTitle = true
 
+    public func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+
     public func makeNSView(context: Context) -> NSViewType {
         let edit = BeamTextEdit(root: note, font: Font.main)
 
@@ -123,11 +134,6 @@ public struct BTextEditScrollable: NSViewRepresentable {
         edit.onStartEditing = onStartEditing
         edit.onEndEditing = onEndEditing
         edit.onStartQuery = onStartQuery
-
-        edit.onBackOrForwardChanged = { isPreesed in
-            self.backIsPressed = isPreesed
-            self.forwardIsPressed = isPreesed
-        }
 
         edit.minimumWidth = minimumWidth
         edit.maximumWidth = maximumWidth
@@ -161,9 +167,8 @@ public struct BTextEditScrollable: NSViewRepresentable {
     }
 
     public func updateNSView(_ nsView: NSViewType, context: Context) {
-//        print("display note: \(note)")
-        // swiftlint:disable:next force_cast
-        let edit = nsView.documentView as! BeamTextEdit
+        guard let edit = nsView.documentView as? BeamTextEdit else { return }
+
         if edit.note !== note {
             edit.note = note
         }
@@ -173,9 +178,6 @@ public struct BTextEditScrollable: NSViewRepresentable {
         edit.onStartEditing = onStartEditing
         edit.onEndEditing = onEndEditing
         edit.onStartQuery = onStartQuery
-
-        edit.backIsPreesed = backIsPressed
-        edit.forwardIsPressed = forwardIsPressed
 
         edit.minimumWidth = minimumWidth
         edit.maximumWidth = maximumWidth
@@ -187,6 +189,23 @@ public struct BTextEditScrollable: NSViewRepresentable {
         edit.ignoreFirstDrag = ignoreFirstDrag
 
         edit.showTitle = showTitle
+
+        context.coordinator.onDeinit = {
+            edit.hideFloatingView()
+        }
+    }
+
+    public class Coordinator: NSObject {
+        let parent: BTextEditScrollable
+        var onDeinit: () -> Void = {}
+
+        init(_ edit: BTextEditScrollable) {
+            self.parent = edit
+        }
+
+        deinit {
+            onDeinit()
+        }
     }
 
     public typealias NSViewType = NSScrollView
