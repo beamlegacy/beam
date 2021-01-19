@@ -184,6 +184,7 @@
 		52E04FED252C814D00AD9F56 /* RoamImporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52E04FEC252C814D00AD9F56 /* RoamImporterTests.swift */; };
 		562A8B3625B5D8B5004D3D8A /* String+NL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 562A8B3525B5D8B5004D3D8A /* String+NL.swift */; };
 		562A8B5225B5E3D8004D3D8A /* String+NLTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 562A8B5125B5E3D8004D3D8A /* String+NLTests.swift */; };
+		562A8B7925B6ED03004D3D8A /* CoreMLTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 562A8B7825B6ED03004D3D8A /* CoreMLTests.swift */; };
 		6D33924049F5798BBE6E7AED /* Pods_BeamUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 54B49CE1C66614E244553288 /* Pods_BeamUITests.framework */; };
 		7D40159D41DDD593BDFDF664 /* Pods_BeamTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C8379DEE387FB86FA7817188 /* Pods_BeamTests.framework */; };
 		9611995E25A27A17005BEC82 /* BeamObjCBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 9611995D25A27A17005BEC82 /* BeamObjCBridge.m */; };
@@ -603,6 +604,7 @@
 		54B49CE1C66614E244553288 /* Pods_BeamUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_BeamUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		562A8B3525B5D8B5004D3D8A /* String+NL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+NL.swift"; sourceTree = "<group>"; };
 		562A8B5125B5E3D8004D3D8A /* String+NLTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+NLTests.swift"; sourceTree = "<group>"; };
+		562A8B7825B6ED03004D3D8A /* CoreMLTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreMLTests.swift; sourceTree = "<group>"; };
 		9611995C25A27A17005BEC82 /* Beam-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Beam-Bridging-Header.h"; sourceTree = "<group>"; };
 		9611995D25A27A17005BEC82 /* BeamObjCBridge.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BeamObjCBridge.m; sourceTree = "<group>"; };
 		961EC4F125B4511D009FA322 /* Layer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Layer.swift; sourceTree = "<group>"; };
@@ -1316,6 +1318,14 @@
 			path = "String+Beam";
 			sourceTree = "<group>";
 		};
+		562A8B6325B6ECEB004D3D8A /* CoreML */ = {
+			isa = PBXGroup;
+			children = (
+				562A8B7825B6ED03004D3D8A /* CoreMLTests.swift */,
+			);
+			path = CoreML;
+			sourceTree = "<group>";
+		};
 		713DD2F4C2EE4FDED57ACC99 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
@@ -1394,6 +1404,7 @@
 		965A78402514F149009980D4 /* BeamTests */ = {
 			isa = PBXGroup;
 			children = (
+				562A8B6325B6ECEB004D3D8A /* CoreML */,
 				562A8B4D25B5E36B004D3D8A /* Classes */,
 				96CDA7252582732500BC375C /* Indexer */,
 				527DF48525710EAE00A0A56D /* Managers */,
@@ -2123,6 +2134,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				965A78422514F149009980D4 /* BeamTests.swift in Sources */,
+				562A8B7925B6ED03004D3D8A /* CoreMLTests.swift in Sources */,
 				52E04FED252C814D00AD9F56 /* RoamImporterTests.swift in Sources */,
 				52B5EF78252F520100914D52 /* CoreDataTests.swift in Sources */,
 				52DEF1CA252B259700561493 /* CoreDataManagerTests.swift in Sources */,
