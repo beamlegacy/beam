@@ -558,6 +558,11 @@ public class TextNode: Widget {
         return text.count
     }
 
+    func currentSelectionWithFullSentences() -> String {
+        let selectionStringRange = text.text.range(from: selectedTextRange)
+        return text.text.sentences(around: selectionStringRange)
+    }
+
     func fold() {
         if children.isEmpty {
             guard let p = parent as? TextNode else { return }
