@@ -131,7 +131,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     deinit {
-        print("deinit")
         timer.invalidate()
     }
 
