@@ -23,10 +23,14 @@ install_gitlab_runner:
 
 	# Install Brew
 	/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+	echo 'eval $(/opt/homebrew/bin/brew shellenv)' >> ~/.zprofile
+	eval $(/opt/homebrew/bin/brew shellenv)
 	# CI=1 /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
 	# Install direnv for environment variables
 	brew install direnv
+	eval "$(direnv hook zsh)"
+	
 	direnv allow .
 
 	# Ruby
@@ -51,6 +55,9 @@ install_gitlab_runner:
 	rm -f domain_name-0.5.99999999.gem
 	xcversion install ${XCODE_VERSION}
 
+	# Rubygems
+	bundle
+
 	# Fastlane
 	sudo gem install fastlane -N
 
@@ -58,7 +65,7 @@ install_gitlab_runner:
 	brew install swiftlint
 
 	# injector
-	curl -ssl https://raw.githubusercontent.com/penso/variable-injector/master/scripts/install-binary.sh | sh
+	curl -ssl https://raw.githubusercontent.com/penso/variable-injector/master/scripts/install-binary.sh | sudo sh
 
 	# DMG
 	brew install create-dmg
@@ -66,7 +73,7 @@ install_gitlab_runner:
 	# AWS
 	brew install awscli
 
-	# Docker
+	# Docker, M1 must install manually and beta version
 	brew install --cask docker
 
 	# jq for scripts
