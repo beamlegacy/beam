@@ -18,6 +18,7 @@ class AccountManager {
                 Persistence.Authentication.accessToken = signIn.accessToken
                 Persistence.Authentication.email = email
                 Persistence.Authentication.password = password
+                LibrariesManager.shared.setSentryUser()
 
                 Logger.shared.logInfo("signIn succeeded: \(signIn.accessToken ?? "-")", category: .network)
                 completionHandler?(.success(true))

@@ -36,13 +36,6 @@ class EventsTracker {
         crumb.data = data // screen: name for uiviewcontroller
         SentrySDK.addBreadcrumb(crumb: crumb)
     }
-
-    //swiftlint:disable function_body_length
-    func enrichUserInfos() {
-        if let userid = Persistence.Authentication.userId, let email = Persistence.Authentication.email {
-            LibrariesManager.shared.setSentryUser(userID: userid, email: email)
-        }
-    }
 }
 
 // MARK: - Events

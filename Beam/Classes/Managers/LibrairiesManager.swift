@@ -16,7 +16,7 @@ class LibrariesManager: NSObject {
 
 extension LibrariesManager {
     func setupSentry() {
-        guard Configuration.env != "debug" else {
+        guard Configuration.sentryEnabled else {
             Logger.shared.logDebug("Sentry is disabled", category: .general)
             return
         }
@@ -28,6 +28,7 @@ extension LibrariesManager {
             "release": Information.appVersionAndBuild
         ])
         setupSentryScope()
+        setSentryUser()
     }
 
     func setupSentryScope() {
@@ -37,9 +38,9 @@ extension LibrariesManager {
         }
     }
 
-    func setSentryUser(userID: String?, email: String?) {
-        guard let userID = userID else { return }
-        let user = Sentry.User(userId: userID)
+    func setSentryUser() {
+        guard let email = Persistence.Authentication.email else { return }
+        let user = Sentry.User()
         user.email = email
         SentrySDK.setUser(user)
         sentryUser = user
