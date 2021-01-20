@@ -610,7 +610,7 @@ public class TextNode: Widget {
         if let link = linkAt(point: mouseInfo.position) {
             editor.cancelInternalLink()
             editor.dismissPopover()
-            editor.dismissFormatterView()
+            editor.dismissFormatterView(editor.persistentFormatter)
             editor.openURL(link)
             return true
         }
@@ -618,7 +618,7 @@ public class TextNode: Widget {
         if let link = internalLinkAt(point: mouseInfo.position) {
             editor.cancelInternalLink()
             editor.dismissPopover()
-            editor.dismissFormatterView()
+            editor.dismissFormatterView(editor.persistentFormatter)
             editor.openCard(link)
             return true
         }

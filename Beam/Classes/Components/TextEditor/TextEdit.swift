@@ -86,7 +86,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     internal var popoverSuffix = 0
     internal var popover: BidirectionalPopover?
 
-
     internal var inlineFormatter: FormatterView?
     internal var persistentFormatter: FormatterView?
 
@@ -373,7 +372,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             popover.doCommand(.insertNewline)
             return
         } else if command {
-            dismissFormatterView()
+            dismissFormatterView(persistentFormatter)
             onStartQuery(node)
         } else {
             if node.text.isEmpty && node.isEmpty && node.parent !== rootNode {
@@ -420,76 +419,79 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     if control && option && command {
                         guard let node = node as? TextNode else { return }
                         node.fold()
+                    } else if shift && option {
+                        rootNode.doCommand(.moveWordLeftAndModifySelection)
+                    } else if shift && command {
+                        rootNode.doCommand(.moveToBeginningOfLineAndModifySelection)
+                        initAndUpdateInlineFormatter()
                     } else if shift {
-                        if option {
-                            rootNode.doCommand(.moveWordLeftAndModifySelection)
-                        } else if command {
-                            rootNode.doCommand(.moveToBeginningOfLineAndModifySelection)
-                        } else {
-                            rootNode.doCommand(.moveLeftAndModifySelection)
-                            updateFormatterView()
-                        }
+                        rootNode.doCommand(.moveLeftAndModifySelection)
+                        initAndUpdateInlineFormatter()
                     } else if command && popover != nil {
                         rootNode.doCommand(.moveToBeginningOfLine)
                         dismissAndShowPersistentView()
                     } else if command && persistentFormatter != nil {
                         rootNode.doCommand(.moveToBeginningOfLine)
                         detectFormatterType()
-                    } else {
-                        if option {
+                    } else if option {
                             rootNode.doCommand(.moveWordLeft)
-                        } else if command {
-                            rootNode.doCommand(.moveToBeginningOfLine)
-                        } else if popover != nil {
-                            rootNode.doCommand(.moveLeft)
-                            updatePopover(with: .moveLeft)
-                        } else if persistentFormatter != nil {
-                            rootNode.doCommand(.moveLeft)
-                            detectFormatterType()
-                        } else {
-                            rootNode.doCommand(.moveLeft)
-                        }
+                    } else if option && command {
+                        rootNode.doCommand(.moveToBeginningOfLine)
+                    } else if popover != nil {
+                        rootNode.doCommand(.moveLeft)
+                        updatePopover(with: .moveLeft)
+                    } else if inlineFormatter != nil {
+                        rootNode.doCommand(.moveLeft)
+                        hideInlineFormatter()
+                    } else if persistentFormatter != nil {
+                        rootNode.doCommand(.moveLeft)
+                        detectFormatterType()
+                    } else {
+                        rootNode.doCommand(.moveLeft)
                     }
                     return
                 case .rightArrow:
                     if control && option && command {
                         guard let node = node as? TextNode else { return }
                         node.unfold()
+                    } else if shift && option {
+                        rootNode.doCommand(.moveWordRightAndModifySelection)
+                    } else if shift && command {
+                        rootNode.doCommand(.moveToEndOfLineAndModifySelection)
+                        initAndUpdateInlineFormatter()
                     } else if shift {
-                        if option {
-                            rootNode.doCommand(.moveWordRightAndModifySelection)
-                        } else if command {
-                            rootNode.doCommand(.moveToEndOfLineAndModifySelection)
-                        } else {
-                            rootNode.doCommand(.moveRightAndModifySelection)
-                            updateFormatterView()
-                        }
+                        rootNode.doCommand(.moveRightAndModifySelection)
+                        initAndUpdateInlineFormatter()
                     } else if command && persistentFormatter != nil {
                         rootNode.doCommand(.moveToEndOfLine)
                         detectFormatterType()
+                    } else if option {
+                        rootNode.doCommand(.moveWordRight)
+                    } else if option && command {
+                        rootNode.doCommand(.moveToEndOfLine)
+                    } else if popover != nil {
+                        rootNode.doCommand(.moveRight)
+                        updatePopover(with: .moveRight)
+                    } else if inlineFormatter != nil {
+                        rootNode.doCommand(.moveRight)
+                        hideInlineFormatter()
+                    } else if persistentFormatter != nil {
+                        rootNode.doCommand(.moveRight)
+                        detectFormatterType()
                     } else {
-                        if option {
-                            rootNode.doCommand(.moveWordRight)
-                        } else if command {
-                            rootNode.doCommand(.moveToEndOfLine)
-                        } else if popover != nil {
-                            rootNode.doCommand(.moveRight)
-                            updatePopover(with: .moveRight)
-                        } else if persistentFormatter != nil {
-                            rootNode.doCommand(.moveRight)
-                            detectFormatterType()
-                        } else {
-                            rootNode.doCommand(.moveRight)
-                        }
+                        rootNode.doCommand(.moveRight)
                     }
                     return
                 case .upArrow:
                     if shift {
                         cancelPopover()
                         rootNode.doCommand(.moveUpAndModifySelection)
-                        updateFormatterView()
+                        initAndUpdateInlineFormatter()
                     } else if let popover = popover {
                         popover.doCommand(.moveUp)
+                    } else if inlineFormatter != nil {
+                        rootNode.doCommand(.moveUp)
+                        hideInlineFormatter()
                     } else if persistentFormatter != nil {
                         rootNode.doCommand(.moveUp)
                         detectFormatterType()
@@ -501,9 +503,12 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     if shift {
                         cancelPopover()
                         rootNode.doCommand(.moveDownAndModifySelection)
-                        updateFormatterView()
+                        initAndUpdateInlineFormatter()
                     } else if let popover = popover {
                         popover.doCommand(.moveDown)
+                    } else if inlineFormatter != nil {
+                        rootNode.doCommand(.moveDown)
+                        hideInlineFormatter()
                     } else if persistentFormatter != nil {
                         rootNode.doCommand(.moveDown)
                         detectFormatterType()
@@ -516,7 +521,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     updatePopover(with: .deleteForward)
 
                     guard let node = node as? TextNode else { return }
-                    if node.text.isEmpty { initFormatterView() }
+                    if node.text.isEmpty { hideInlineFormatter() }
 
                     return
                 case .backTab:
@@ -541,6 +546,11 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                 if popover != nil {
                     dismissAndShowPersistentView()
                 }
+
+                if inlineFormatter != nil {
+                    hideInlineFormatter()
+                }
+
                 rootNode.cancelSelection()
                 return
             default:
@@ -1163,6 +1173,20 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         presentPersistentFormatter(isPresent: false)
     }
 
+    internal func initAndUpdateInlineFormatter() {
+        if inlineFormatter == nil {
+            initInlineFormatter()
+            presentPersistentFormatter(isPresent: false)
+        }
+
+        updateInlineFormatterView()
+    }
+
+    internal func hideInlineFormatter() {
+        dismissFormatterView(inlineFormatter)
+        presentPersistentFormatter(isPresent: true)
+    }
+
     func cleanPersistentFormatter() {
         guard let formatterView = persistentFormatter else { return }
         rootNode.state.attributes = []
@@ -1171,7 +1195,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
     func hideFloatingView() {
         dismissPopover()
-        dismissFormatterView()
+        dismissFormatterView(persistentFormatter)
     }
 
     func purgeDeadNodes() {

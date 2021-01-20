@@ -26,6 +26,7 @@ class FormatterView: NSView {
         }
     }
 
+    // View Properties
     private let cornerRadius: CGFloat = 3
     private let leading = 2
     private let yPosition = 2
@@ -33,16 +34,29 @@ class FormatterView: NSView {
     private let itemWidth = 34
     private let itemHeight = 28
 
+    // Shadow Properties
+    private let shadowOpacity: Float = 0.07
+    private let shadowRadius: CGFloat = 3
+    private let shadowOffset = NSSize(width: 0, height: -1.5)
+
+    private var viewType: FormatterViewType = .persistent
     private var selectedTypes: Set<FormatterType> = []
     private var buttons: [FormatterType: NSButton] = [:]
 
     // MARK: - Initializer
+    convenience init(viewType: FormatterViewType) {
+        self.init(frame: CGRect.zero)
+        self.viewType = viewType
+        drawShadow()
+        commonInitUI()
+    }
+
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
         loadXib()
         drawShadow()
-        setupUI()
-        setupStackView()
+        commonInitUI()
+        setupContainerView()
     }
 
     required init?(coder: NSCoder) {
@@ -50,15 +64,17 @@ class FormatterView: NSView {
     }
 
     // MARK: - UI
-    private func setupUI() {
+    private func commonInitUI() {
         containerView.wantsLayer = true
-        containerView.layer?.backgroundColor = NSColor.formatterViewBackgroundColor.cgColor
         containerView.layer?.cornerRadius = corderRadius
         containerView.layer?.borderWidth = 0.7
         containerView.layer?.borderColor = NSColor.formatterBorderColor.cgColor
+        containerView.layer?.backgroundColor = viewType == .persistent ?
+            NSColor.formatterViewBackgroundColor.cgColor : NSColor.formatterViewBackgroundHoverColor.cgColor
+
     }
 
-    private func setupStackView() {
+    private func setupContainerView() {
         guard let containerView = containerView else { return }
 
         let trackingArea = NSTrackingArea(
@@ -77,21 +93,24 @@ class FormatterView: NSView {
         self.shadow = NSShadow()
         self.layer?.allowsEdgeAntialiasing = true
         self.layer?.drawsAsynchronously = true
-        self.layer?.shadowOpacity = 0
-        self.layer?.shadowRadius = 0
-        self.layer?.shadowOffset = NSSize(width: 0, height: 0)
+        self.layer?.shadowColor = viewType == .inline ? NSColor.formatterShadowColor.cgColor : NSColor.clear.cgColor
+        self.layer?.shadowOpacity = viewType == .inline ? shadowOpacity : 0
+        self.layer?.shadowRadius = viewType == .inline ? shadowRadius : 0
+        self.layer?.shadowOffset = viewType == .inline ? shadowOffset : NSSize.zero
     }
 
     private func animateShadowOnMouseEntered(_ isHover: Bool) {
+        guard viewType == .persistent else { return }
+
         NSAnimationContext.runAnimationGroup { ctx in
             ctx.allowsImplicitAnimation = true
             ctx.duration = 0.3
 
-            containerView.layer?.backgroundColor = isHover ? NSColor.formatterViewBackgroundHoverColor.cgColor : NSColor.formatterViewBackgroundColor.cgColor
             layer?.shadowColor = isHover ? NSColor.formatterShadowColor.cgColor : NSColor.clear.cgColor
-            layer?.shadowOpacity = isHover ? 0.07 : 0
-            layer?.shadowRadius = isHover ? 3 : 0
-            layer?.shadowOffset.height = isHover ? -1.5 : 0
+            layer?.shadowOpacity = isHover ? shadowOpacity : 0
+            layer?.shadowRadius = isHover ? shadowRadius : 0
+            layer?.shadowOffset = isHover ? shadowOffset : NSSize.zero
+            containerView.layer?.backgroundColor = isHover ? NSColor.formatterViewBackgroundHoverColor.cgColor : NSColor.formatterViewBackgroundColor.cgColor
         }
     }
 
