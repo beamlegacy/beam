@@ -85,7 +85,10 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     internal var popoverPrefix = 0
     internal var popoverSuffix = 0
     internal var popover: BidirectionalPopover?
-    internal var formatterView: FormatterView?
+
+
+    internal var inlineFormatter: FormatterView?
+    internal var persistentFormatter: FormatterView?
 
     public init(root: BeamElement, font: Font = Font.main) {
         BeamNote.detectLinks(documentManager)
@@ -355,7 +358,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         onEndEditing()
 
         dismissPopover()
-        showOrHideFormatterView(isPresent: false)
+        presentPersistentFormatter(isPresent: false)
 
         return super.resignFirstResponder()
     }
@@ -429,7 +432,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     } else if command && popover != nil {
                         rootNode.doCommand(.moveToBeginningOfLine)
                         dismissAndShowPersistentView()
-                    } else if command && formatterView != nil {
+                    } else if command && persistentFormatter != nil {
                         rootNode.doCommand(.moveToBeginningOfLine)
                         detectFormatterType()
                     } else {
@@ -440,7 +443,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                         } else if popover != nil {
                             rootNode.doCommand(.moveLeft)
                             updatePopover(with: .moveLeft)
-                        } else if formatterView != nil {
+                        } else if persistentFormatter != nil {
                             rootNode.doCommand(.moveLeft)
                             detectFormatterType()
                         } else {
@@ -461,7 +464,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                             rootNode.doCommand(.moveRightAndModifySelection)
                             updateFormatterView()
                         }
-                    } else if command && formatterView != nil {
+                    } else if command && persistentFormatter != nil {
                         rootNode.doCommand(.moveToEndOfLine)
                         detectFormatterType()
                     } else {
@@ -472,7 +475,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                         } else if popover != nil {
                             rootNode.doCommand(.moveRight)
                             updatePopover(with: .moveRight)
-                        } else if formatterView != nil {
+                        } else if persistentFormatter != nil {
                             rootNode.doCommand(.moveRight)
                             detectFormatterType()
                         } else {
@@ -487,7 +490,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                         updateFormatterView()
                     } else if let popover = popover {
                         popover.doCommand(.moveUp)
-                    } else if formatterView != nil {
+                    } else if persistentFormatter != nil {
                         rootNode.doCommand(.moveUp)
                         detectFormatterType()
                     } else {
@@ -501,7 +504,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                         updateFormatterView()
                     } else if let popover = popover {
                         popover.doCommand(.moveDown)
-                    } else if formatterView != nil {
+                    } else if persistentFormatter != nil {
                         rootNode.doCommand(.moveDown)
                         detectFormatterType()
                     } else {
@@ -1157,11 +1160,11 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         popoverSuffix = suffix
         cursorStartPosition = rootNode.cursorPosition
         initPopover()
-        showOrHideFormatterView(isPresent: false)
+        presentPersistentFormatter(isPresent: false)
     }
 
     func cleanPersistentFormatter() {
-        guard let formatterView = formatterView else { return }
+        guard let formatterView = persistentFormatter else { return }
         rootNode.state.attributes = []
         formatterView.resetSelectedItems()
     }

@@ -35,6 +35,8 @@ public struct TextConfig {
 }
 
 public class TextRoot: TextNode {
+    @Published var isTextSelected = false
+
     var note: BeamNote?
 
     var undoManager = UndoManager()
@@ -47,6 +49,7 @@ public class TextRoot: TextNode {
             state.selectedTextRange
         }
         set {
+            isTextSelected = !newValue.isEmpty
             state.selectedTextRange = newValue
         }
     }
