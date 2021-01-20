@@ -87,7 +87,7 @@ extension BeamTextEdit {
         inlineFormatter.wantsLayer = true
         inlineFormatter.layoutSubtreeIfNeeded()
 
-        topAnchor.constant = isPresent ? v - 15 : v + 15
+        topAnchor.constant = isPresent ? v - 12 : v + 12
 
         NSAnimationContext.runAnimationGroup ({ ctx in
             ctx.allowsImplicitAnimation = true

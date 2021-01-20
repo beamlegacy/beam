@@ -1190,7 +1190,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     internal func hideInlineFormatter() {
         guard inlineFormatter != nil else { return }
 
-        presentInlineFormatter(isPresent: false)
+        dismissFormatterView(inlineFormatter)
         presentPersistentFormatter(isPresent: true)
     }
 
