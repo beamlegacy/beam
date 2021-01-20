@@ -642,10 +642,7 @@ public class TextNode: Widget {
             }
         }
 
-        guard editor.popover != nil else { return false }
-        editor.dismissPopover()
-        editor.cancelInternalLink()
-        editor.initFormatterView()
+        dismissPopoverOrFormatter()
 
         return false
     }
@@ -698,6 +695,7 @@ public class TextNode: Widget {
             return false
         case .select(let o):
             root?.selectedTextRange = text.clamp(p < o ? cursorPosition..<o : o..<cursorPosition)
+            editor.initAndUpdateInlineFormatter()
         }
         invalidate()
 
@@ -965,6 +963,19 @@ public class TextNode: Widget {
         actionTextLayer.opacity = 0
         actionImageLayer.setAffineTransform(CGAffineTransform.identity)
         actionTextLayer.setAffineTransform(CGAffineTransform.identity)
+    }
+
+    private func dismissPopoverOrFormatter() {
+        if editor.popover != nil {
+            editor.cancelInternalLink()
+            editor.dismissPopover()
+            editor.initFormatterView(.persistent)
+        }
+
+        if editor.inlineFormatter != nil {
+            editor.dismissFormatterView(editor.inlineFormatter)
+            editor.initFormatterView(.persistent)
+        }
     }
 
     func nextVisibleTextNode() -> TextNode? {

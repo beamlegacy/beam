@@ -324,6 +324,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         guard preDetectInput(string) else { return }
         rootNode.insertText(string: string, replacementRange: replacementRange)
         updatePopover()
+        hideInlineFormatter()
         postDetectInput(string)
         reBlink()
     }
@@ -341,7 +342,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         hasFocus = true
         invalidate()
         onStartEditing()
-        initFormatterView()
+        initFormatterView(.persistent)
         return super.becomeFirstResponder()
     }
 
@@ -521,7 +522,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     updatePopover(with: .deleteForward)
 
                     guard let node = node as? TextNode else { return }
-                    if node.text.isEmpty { hideInlineFormatter() }
+                    if node.text.isEmpty || !rootNode.isTextSelected { hideInlineFormatter() }
 
                     return
                 case .backTab:
@@ -543,15 +544,12 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                 updatePopover(with: .deleteForward)
                 return
             case KeyCode.escape.rawValue:
-                if popover != nil {
-                    dismissAndShowPersistentView()
-                }
-
-                if inlineFormatter != nil {
-                    hideInlineFormatter()
-                }
-
                 rootNode.cancelSelection()
+
+                if popover != nil { dismissAndShowPersistentView() }
+
+                if inlineFormatter != nil { hideInlineFormatter() }
+
                 return
             default:
                 break
@@ -1174,8 +1172,8 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     internal func initAndUpdateInlineFormatter() {
-        if inlineFormatter == nil {
-            initInlineFormatter()
+        if inlineFormatter == nil && popover == nil {
+            initFormatterView(.inline)
             presentPersistentFormatter(isPresent: false)
         }
 
@@ -1183,6 +1181,8 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     internal func hideInlineFormatter() {
+        guard inlineFormatter != nil else { return }
+
         dismissFormatterView(inlineFormatter)
         presentPersistentFormatter(isPresent: true)
     }
@@ -1195,6 +1195,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
     func hideFloatingView() {
         dismissPopover()
+        dismissFormatterView(inlineFormatter)
         dismissFormatterView(persistentFormatter)
     }
 

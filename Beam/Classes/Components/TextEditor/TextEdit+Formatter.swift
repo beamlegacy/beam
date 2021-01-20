@@ -23,73 +23,39 @@ extension BeamTextEdit {
     private static var bottomAnchor: NSLayoutConstraint?
     private static var leftAnchor: NSLayoutConstraint?
     private static var centerXAnchor: NSLayoutConstraint?
-    private static var widthAnchor: NSLayoutConstraint?
-    private static var heightAnchor: NSLayoutConstraint?
 
     // MARK: - UI
-    internal func initFormatterView() {
-        guard persistentFormatter == nil else {
+    internal func initFormatterView(_ viewType: FormatterViewType) {
+        guard persistentFormatter == nil || inlineFormatter == nil else {
             presentPersistentFormatter(isPresent: true)
             return
         }
 
-        persistentFormatter = FormatterView(viewType: .persistent)
+        var view: FormatterView?
 
-        guard let persistentFormatter = persistentFormatter,
-              let view = window?.contentView else { return }
+        if viewType == .persistent {
+            persistentFormatter = FormatterView(viewType: .persistent)
+            view = persistentFormatter
+        } else {
+            inlineFormatter = FormatterView(viewType: .inline)
+            view = inlineFormatter
+        }
 
-        persistentFormatter.translatesAutoresizingMaskIntoConstraints = false
+        guard let formatterView = view,
+              let contentView = window?.contentView else { return }
 
-        BeamTextEdit.bottomAnchor = persistentFormatter.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: BeamTextEdit.startBottomConstraint)
-        BeamTextEdit.centerXAnchor = persistentFormatter.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+        formatterView.translatesAutoresizingMaskIntoConstraints = false
 
-        view.addSubview(persistentFormatter)
+        addConstraint(to: formatterView, with: contentView)
+        contentView.addSubview(formatterView)
+        activeLayoutConstraint(for: formatterView)
 
-        guard let bottomAnchor = BeamTextEdit.bottomAnchor,
-            let centerXAnchor = BeamTextEdit.centerXAnchor else { return }
-
-        persistentFormatter.items = BeamTextEdit.persistentFormatterType
-        persistentFormatter.didSelectFormatterType = { [unowned self] (type, isActive) -> Void in
+        formatterView.items = formatterView == persistentFormatter ? BeamTextEdit.persistentFormatterType : BeamTextEdit.inlineFormatterType
+        formatterView.didSelectFormatterType = { [unowned self] (type, isActive) -> Void in
             selectFormatterAction(type, isActive)
         }
 
-        NSLayoutConstraint.activate([
-            bottomAnchor,
-            persistentFormatter.widthAnchor.constraint(equalToConstant: (BeamTextEdit.viewWidth * CGFloat(BeamTextEdit.persistentFormatterType.count)) + (BeamTextEdit.padding * CGFloat(BeamTextEdit.persistentFormatterType.count))),
-            persistentFormatter.heightAnchor.constraint(equalToConstant: 32),
-            centerXAnchor
-        ])
-
-        presentPersistentFormatter(isPresent: true)
-    }
-
-    internal func initInlineFormatter() {
-        inlineFormatter = FormatterView(viewType: .inline)
-
-        guard let inlineFormatter = inlineFormatter,
-              let view = window?.contentView else { return }
-
-        inlineFormatter.translatesAutoresizingMaskIntoConstraints = false
-
-        BeamTextEdit.topAnchor = inlineFormatter.topAnchor.constraint(equalTo: view.topAnchor)
-        BeamTextEdit.leftAnchor = inlineFormatter.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 0)
-
-        view.addSubview(inlineFormatter)
-
-        guard let topAnchor = BeamTextEdit.topAnchor,
-              let leftAnchor = BeamTextEdit.leftAnchor else { return }
-
-        NSLayoutConstraint.activate([
-            topAnchor,
-            leftAnchor,
-            (inlineFormatter).widthAnchor.constraint(equalToConstant: (BeamTextEdit.viewWidth * CGFloat(BeamTextEdit.inlineFormatterType.count)) + (BeamTextEdit.padding * CGFloat(BeamTextEdit.inlineFormatterType.count))),
-            (inlineFormatter).heightAnchor.constraint(equalToConstant: 32)
-        ])
-
-        inlineFormatter.items = BeamTextEdit.inlineFormatterType
-        inlineFormatter.didSelectFormatterType = { [unowned self] (type, isActive) -> Void in
-            selectFormatterAction(type, isActive)
-        }
+        if formatterView == persistentFormatter { presentPersistentFormatter(isPresent: true) }
     }
 
     // MARK: - Methods
@@ -100,7 +66,6 @@ extension BeamTextEdit {
         formatterView.wantsLayer = true
         formatterView.layoutSubtreeIfNeeded()
 
-        bottomAnchor.isActive = true
         bottomAnchor.constant = isPresent ? BeamTextEdit.bottomConstraint : BeamTextEdit.startBottomConstraint
 
         NSAnimationContext.runAnimationGroup ({ ctx in
@@ -119,6 +84,7 @@ extension BeamTextEdit {
 
         if !rootNode.isTextSelected {
             dismissFormatterView(inlineFormatter)
+            presentPersistentFormatter(isPresent: true)
             return
         }
 
@@ -243,4 +209,42 @@ extension BeamTextEdit {
         rootNode.state.attributes.remove(at: index)
     }
 
+    private func addConstraint(to view: FormatterView, with contentView: NSView) {
+        if view == persistentFormatter {
+            BeamTextEdit.bottomAnchor = view.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: BeamTextEdit.startBottomConstraint)
+            BeamTextEdit.centerXAnchor = view.centerXAnchor.constraint(equalTo: contentView.centerXAnchor)
+        } else {
+            BeamTextEdit.topAnchor = view.topAnchor.constraint(equalTo: contentView.topAnchor)
+            BeamTextEdit.leftAnchor = view.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 0)
+        }
+    }
+
+    private func activeLayoutConstraint(for view: FormatterView) {
+        let formatterItemSize = view == persistentFormatter ? CGFloat(BeamTextEdit.persistentFormatterType.count) : CGFloat(BeamTextEdit.inlineFormatterType.count)
+
+        let widthAnchor = view.widthAnchor.constraint(equalToConstant: (BeamTextEdit.viewWidth * formatterItemSize) + (BeamTextEdit.padding * formatterItemSize))
+        let heightAnchor = view.heightAnchor.constraint(equalToConstant: 32)
+
+        if view == persistentFormatter {
+            guard let bottomAnchor = BeamTextEdit.bottomAnchor,
+                  let centerXAnchor = BeamTextEdit.centerXAnchor else { return }
+
+            NSLayoutConstraint.activate([
+                bottomAnchor,
+                widthAnchor,
+                heightAnchor,
+                centerXAnchor
+            ])
+        } else {
+            guard let topAnchor = BeamTextEdit.topAnchor,
+                  let leftAnchor = BeamTextEdit.leftAnchor else { return }
+
+            NSLayoutConstraint.activate([
+                topAnchor,
+                leftAnchor,
+                widthAnchor,
+                heightAnchor
+            ])
+        }
+    }
 }
