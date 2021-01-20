@@ -13,6 +13,9 @@ extension BeamTextEdit {
     private static let viewWidth: CGFloat = 34
     private static let viewHeight: CGFloat = 32
     private static let padding: CGFloat = 1.45
+    private static let xPosInlineFormatter: CGFloat = 55
+    private static let startTopConstraint: CGFloat = 5
+    private static let topConstraint: CGFloat = 12
     private static let startBottomConstraint: CGFloat = 35
     private static let bottomConstraint: CGFloat = -25
     private static let inlineFormatterType: [FormatterType] = [.h1, .h2, .bullet, .checkmark, .bold, .italic, .link]
@@ -27,7 +30,7 @@ extension BeamTextEdit {
     // MARK: - UI
     internal func initFormatterView(_ viewType: FormatterViewType) {
         guard persistentFormatter == nil || inlineFormatter == nil else {
-            presentPersistentFormatter(isPresent: true)
+            showOrHidePersistentFormatter(isPresent: true)
             return
         }
 
@@ -38,6 +41,7 @@ extension BeamTextEdit {
             view = persistentFormatter
         } else {
             inlineFormatter = FormatterView(viewType: .inline)
+            inlineFormatter?.alphaValue = 0
             view = inlineFormatter
         }
 
@@ -55,11 +59,11 @@ extension BeamTextEdit {
             selectFormatterAction(type, isActive)
         }
 
-        if formatterView == persistentFormatter { presentPersistentFormatter(isPresent: true) }
+        if formatterView == persistentFormatter { showOrHidePersistentFormatter(isPresent: true) }
     }
 
     // MARK: - Methods
-    internal func presentPersistentFormatter(isPresent: Bool) {
+    internal func showOrHidePersistentFormatter(isPresent: Bool) {
         guard let persistentFormatter = persistentFormatter,
               let bottomAnchor = BeamTextEdit.bottomAnchor else { return }
 
@@ -70,34 +74,35 @@ extension BeamTextEdit {
 
         NSAnimationContext.runAnimationGroup ({ ctx in
             ctx.allowsImplicitAnimation = true
-            ctx.duration = 0.3
+            ctx.duration = isPresent ? 0.3 : 0.15
 
             persistentFormatter.layoutSubtreeIfNeeded()
         }, completionHandler: nil)
     }
 
-    internal func presentInlineFormatter(isPresent: Bool) {
+    internal func showOrHideInlineFormatter(isPresent: Bool) {
         guard let node = node as? TextNode,
               let inlineFormatter = inlineFormatter,
               let topAnchor = BeamTextEdit.topAnchor else { return }
 
         let (_, rect) = node.offsetAndFrameAt(index: rootNode.cursorPosition)
-        let v = (node.offsetInDocument.y + rect.maxY)
+        let yPos = (node.offsetInDocument.y + rect.maxY)
 
         inlineFormatter.wantsLayer = true
         inlineFormatter.layoutSubtreeIfNeeded()
 
-        topAnchor.constant = isPresent ? v - 12 : v + 12
+        topAnchor.constant = isPresent ? yPos - BeamTextEdit.topConstraint : yPos + BeamTextEdit.topConstraint
 
         NSAnimationContext.runAnimationGroup ({ ctx in
             ctx.allowsImplicitAnimation = true
             ctx.duration = isPresent ? 0.3 : 0.15
 
             inlineFormatter.alphaValue = isPresent ? 1 : 0
+            isInlineFormatterHidden = false
             inlineFormatter.layoutSubtreeIfNeeded()
-        }, completionHandler: {
+
             if !isPresent { self.dismissFormatterView(inlineFormatter) }
-        })
+        }, completionHandler: nil)
 
     }
 
@@ -110,20 +115,20 @@ extension BeamTextEdit {
         detectFormatterType()
 
         if !rootNode.textIsSelected {
-            dismissFormatterView(inlineFormatter)
-            presentPersistentFormatter(isPresent: true)
+            showOrHideInlineFormatter(isPresent: false)
+            showOrHidePersistentFormatter(isPresent: true)
             return
         }
 
         let (xOffset, rect) = node.offsetAndFrameAt(index: rootNode.cursorPosition)
-        let yPosition = (node.offsetInDocument.y + rect.maxY) - 12
+        let yPosition = (node.offsetInDocument.y + rect.maxY) - (isInlineFormatterHidden ? BeamTextEdit.startTopConstraint : BeamTextEdit.topConstraint)
         let currentLowerBound = currentTextRange.lowerBound
         let selectedLowLowerBound = node.selectedTextRange.lowerBound
 
         inlineFormatter.wantsLayer = true
         inlineFormatter.layoutSubtreeIfNeeded()
 
-        leftAnchor.constant = xOffset + 55
+        leftAnchor.constant = xOffset + BeamTextEdit.xPosInlineFormatter
 
         if currentLowerBound == selectedLowLowerBound && BeamTextEdit.isSelectableContent {
             BeamTextEdit.isSelectableContent = false
@@ -236,6 +241,7 @@ extension BeamTextEdit {
             persistentFormatter = nil
         } else {
             BeamTextEdit.isSelectableContent = true
+            isInlineFormatterHidden = true
             inlineFormatter = nil
         }
     }
@@ -286,7 +292,7 @@ extension BeamTextEdit {
         let formatterItemSize = view == persistentFormatter ? CGFloat(BeamTextEdit.persistentFormatterType.count) : CGFloat(BeamTextEdit.inlineFormatterType.count)
 
         let widthAnchor = view.widthAnchor.constraint(equalToConstant: (BeamTextEdit.viewWidth * formatterItemSize) + (BeamTextEdit.padding * formatterItemSize))
-        let heightAnchor = view.heightAnchor.constraint(equalToConstant: 32)
+        let heightAnchor = view.heightAnchor.constraint(equalToConstant: BeamTextEdit.viewHeight)
 
         if view == persistentFormatter {
             guard let bottomAnchor = BeamTextEdit.bottomAnchor,

@@ -65,7 +65,7 @@ extension BeamTextEdit {
         dismissPopover()
         node.text.removeSubrange((cursorStartPosition + 1 - popoverPrefix)..<(rootNode.cursorPosition + popoverSuffix))
         rootNode.cursorPosition = cursorStartPosition + 1 - popoverPrefix
-        presentPersistentFormatter(isPresent: true)
+        showOrHidePersistentFormatter(isPresent: true)
     }
 
     internal func dismissPopover() {
@@ -94,8 +94,6 @@ extension BeamTextEdit {
 
         let (xOffset, rect) = node.offsetAndFrameAt(index: rootNode.cursorPosition)
         let yOffset = scrollView.documentVisibleRect.origin.y < 0 ? 0 : scrollView.documentVisibleRect.origin.y
-
-        print(node.offsetInDocument)
 
         var marginTop: CGFloat = 60
         var yPos = (window.frame.height - (rect.maxY + node.offsetInDocument.y) - popover.idealSize.height) + yOffset
