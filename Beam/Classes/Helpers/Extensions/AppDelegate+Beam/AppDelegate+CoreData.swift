@@ -2,8 +2,16 @@ import Foundation
 import Cocoa
 
 extension AppDelegate {
+    @IBAction func deleteLocalDocuments(_ sender: Any) {
+        deleteDocuments(includedRemote: false)
+    }
+
     @IBAction func resetDatabase(_ sender: Any) {
-        documentManager.deleteAllDocuments { result in
+        deleteDocuments(includedRemote: true)
+    }
+
+    private func deleteDocuments(includedRemote: Bool) {
+        documentManager.deleteAllDocuments(includedRemote: includedRemote) { result in
             DispatchQueue.main.async {
                 self.updateBadge()
 
@@ -146,6 +154,25 @@ extension AppDelegate {
                     alert.alertStyle = .informational
                     // TODO: i18n
                     alert.messageText = "All documents sent to API"
+                }
+                alert.runModal()
+            }
+        }
+    }
+
+    // MARK: - Fetch from API
+    @IBAction func refreshNotesFromAPI(_ sender: Any) {
+        documentManager.refreshDocuments { result in
+            DispatchQueue.main.async {
+                let alert = NSAlert()
+                switch result {
+                case .failure(let error):
+                    alert.alertStyle = .critical
+                    alert.messageText = error.localizedDescription
+                case .success(let success):
+                    alert.alertStyle = success ? .informational : .critical
+                    // TODO: i18n
+                    alert.messageText = success ? "All documents fetched from API" : "Some notes couldn't be fetched"
                 }
                 alert.runModal()
             }

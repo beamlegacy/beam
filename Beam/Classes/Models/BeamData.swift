@@ -39,10 +39,12 @@ public class BeamData: ObservableObject {
     init() {
         documentManager = DocumentManager()
 
-        do {
-            try LinkStore.loadFrom(Self.linkStorePath)
-        } catch {
-            Logger.shared.logError("Unable to load link store from \(Self.linkStorePath)", category: .search)
+        if FileManager.default.fileExists(atPath: Self.linkStorePath.absoluteString) {
+            do {
+                try LinkStore.loadFrom(Self.linkStorePath)
+            } catch {
+                Logger.shared.logError("Unable to load link store from \(Self.linkStorePath): \(error)", category: .search)
+            }
         }
         index = Index.loadOrCreate(Self.indexPath)
 
@@ -57,7 +59,7 @@ public class BeamData: ObservableObject {
             Logger.shared.logInfo("Save link store to \(Self.linkStorePath)", category: .search)
             try LinkStore.saveTo(Self.linkStorePath)
         } catch {
-            Logger.shared.logError("Unable to save link store to \(Self.linkStorePath)", category: .search)
+            Logger.shared.logError("Unable to save link store to \(Self.linkStorePath): \(error)", category: .search)
         }
 
         // save search index

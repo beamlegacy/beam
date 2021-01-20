@@ -1,0 +1,12 @@
+query documents {
+  me {
+    documents {
+      id
+      checksum
+      title
+      data
+      createdAt
+      updatedAt
+    }
+  }
+}

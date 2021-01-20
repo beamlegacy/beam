@@ -365,7 +365,7 @@ let NoteDisplayThreshold = Float(0.0)
                     guard let note = try? decoder.decode(BeamNote.self, from: doc.data)
                     else { Logger.shared.logError("unable to partially decode note '\(doc.title)'", category: .document); return nil }
                     // do not show notes under a certain score threshold:
-                    print("Filtering note '\(note.title)' -> \(note.score)")
+                    Logger.shared.logDebug("Filtering note '\(note.title)' -> \(note.score)", category: .general)
                     return note.score > NoteDisplayThreshold ? doc : nil
                 }).prefix(4)
                 notes.forEach {

@@ -11,24 +11,27 @@ enum APIRequestError: Error, Equatable {
     case parserError
     case deviceNotFound
     case notAuthenticated
+    case documentConflict
     case apiError([String])
 }
 
 extension APIRequestError: LocalizedError {
     public var errorDescription: String? {
         switch self {
+        case .documentConflict:
+            return loc("error.api.document.conflict")
         case .parserError:
-            return loc("error.api.requestError.parserError")
+            return loc("error.api.parserError")
         case .forbidden:
-            return loc("error.api.requestError.forbidden")
+            return loc("error.api.forbidden")
         case .unauthorized:
-            return loc("error.api.requestError.unauthorized")
+            return loc("error.api.unauthorized")
         case .deviceNotFound:
-            return loc("error.api.requestError.deviceNotFound")
+            return loc("error.api.deviceNotFound")
         case .internalServerError:
             return loc("error.api.internalServerError")
         case .notAuthenticated:
-            return loc("error.api.requestError.notAuthenticated")
+            return loc("error.api.notAuthenticated")
         case .apiError(let explanations):
             return explanations.joined(separator: ", ")
         }
@@ -68,6 +71,7 @@ class APIRequest {
 
         let decoder = defaultDecoder()
         let encoder = defaultEncoder()
+
         let queue = DispatchQueue(label: "co.beam.api", qos: .background, attributes: .concurrent)
 
         let request = AF.request(route,
@@ -101,7 +105,7 @@ class APIRequest {
                 self.manageResponse(response: response, filename: fileName) { [weak self] result in
                     switch result {
                     case .failure(let error):
-                        completionHandler(.failure(APIRequestError.apiError(["\(Configuration.apiHostname): \(error.localizedDescription)"])))
+                        completionHandler(.failure(error))
                         self?.handleNetworkError(error)
                     case .success(let data):
                         completionHandler(.success(data))
@@ -180,12 +184,12 @@ class APIRequest {
         var uploadHeaders = headers
         uploadHeaders["Content-type"] = "multipart/form-data"
 
-        let request = AF.upload( multipartFormData: multipartFormDataHandler,
-                                 usingThreshold: 10_000_000,
-                                 to: route,
-                                 method: .post,
-                                 headers: headers,
-                                 interceptor: authenticatedAPICall ? AuthenticationHandler() : nil)
+        let request = AF.upload(multipartFormData: multipartFormDataHandler,
+                                usingThreshold: 10_000_000,
+                                to: route,
+                                method: .post,
+                                headers: headers,
+                                interceptor: authenticatedAPICall ? AuthenticationHandler() : nil)
 
         let localTimer = Date()
         let fileName = bodyParamsRequest.fileName ?? "Unknown"
@@ -210,7 +214,7 @@ class APIRequest {
             self.manageResponse(response: response, filename: fileName) { [weak self] result in
                 switch result {
                 case .failure(let error):
-                    completionHandler(.failure(APIRequestError.apiError(["\(Configuration.apiHostname): \(error.localizedDescription)"])))
+                    completionHandler(.failure(error))
                     self?.handleNetworkError(error)
                 case .success(let data):
                     completionHandler(.success(data))
@@ -306,6 +310,7 @@ class APIRequest {
         return error
     }
 
+    // swiftlint:disable:next cyclomatic_complexity
     func handleError<T: Decodable>(result: QueryResult<T>) -> Error {
         let error: Error
         if let errors = result.errors, !errors.isEmpty {
@@ -321,6 +326,7 @@ class APIRequest {
         return error
     }
 
+    // swiftlint:disable:next cyclomatic_complexity
     func handleError<T: Decodable>(result: APIResult<T>) -> Error {
         let error: Error
         if let errors = result.errors, !errors.isEmpty {
@@ -328,7 +334,14 @@ class APIRequest {
         } else if let errors = result.data?.errors, !errors.isEmpty {
             error = APIRequestError.apiError(extractUserErrorMessages(errors))
         } else if let errors = result.data?.value?.errors, !errors.isEmpty {
-            error = APIRequestError.apiError(extractUserErrorMessages(errors))
+            // Sync issue sending an updated version of our document,
+            // server denied updating it as checksum sent is different
+            // from checksum on the server
+            if errors.count == 1, errors[0].message == "Differs from current checksum" {
+                error = APIRequestError.documentConflict
+            } else {
+                error = APIRequestError.apiError(extractUserErrorMessages(errors))
+            }
         } else {
             error = APIRequestError.parserError
         }

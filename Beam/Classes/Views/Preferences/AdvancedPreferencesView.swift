@@ -1,5 +1,6 @@
 import SwiftUI
 import Preferences
+import Sentry
 
 /**
 Function wrapping SwiftUI into `PreferencePane`, which is mimicking view controller's default construction syntax.
@@ -24,16 +25,25 @@ struct AdvancedPreferencesView: View {
     @State private var env: String = Configuration.env
     @State private var sparkleUpdate: Bool = Configuration.sparkleUpdate
     @State private var sparkleFeedURL = Configuration.sparkleFeedURL
+    @State private var sentryEnabled = Configuration.sentryEnabled
+    @State private var loggedIn: Bool = AccountManager().loggedIn
 
     private let contentWidth: Double = 450.0
 
     var body: some View {
+        let binding = Binding<String>(get: {
+            self.apiHostname
+        }, set: {
+            self.apiHostname = $0
+            Configuration.apiHostname = $0
+        })
+
         Preferences.Container(contentWidth: contentWidth) {
             Preferences.Section(title: "Bundle identifier:") {
                 Text(bundleIdentifier)
             }
             Preferences.Section(title: "API endpoint:") {
-                Text(apiHostname)
+                TextField("api hostname", text: binding).textFieldStyle(RoundedBorderTextFieldStyle()).frame(maxWidth: 200)
             }
             Preferences.Section(title: "Public endpoint:") {
                 Text(publicHostname)
@@ -47,9 +57,16 @@ struct AdvancedPreferencesView: View {
             Preferences.Section(title: "Sparkle URL:") {
                 Text(String(describing: sparkleFeedURL)).fixedSize(horizontal: false, vertical: true)
             }
-
+            Preferences.Section(title: "Sentry enabled:") {
+                Text(String(describing: sentryEnabled)).fixedSize(horizontal: false, vertical: true)
+            }
+            Preferences.Section(title: "Sentry dsn:") {
+                Text("https://\(Configuration.sentryKey)@\(Configuration.sentryHostname)/\(Configuration.sentryProject)").fixedSize(horizontal: false, vertical: true)
+            }
             Preferences.Section(title: "Actions") {
                 ResetAPIEndpointsButton
+                CrashButton
+                CopyAccessToken
             }
         }
     }
@@ -61,6 +78,28 @@ struct AdvancedPreferencesView: View {
             // TODO: loc
             Text("Reset API Endpoints").frame(minWidth: 100)
         })
+    }
+
+    private var CrashButton: some View {
+        Button(action: {
+            SentrySDK.crash()
+        }, label: {
+            // TODO: loc
+            Text("Force a crash").frame(minWidth: 100)
+        })
+    }
+
+    private var CopyAccessToken: some View {
+        Button(action: {
+            if let accessToken = AuthenticationManager.shared.accessToken {
+                let pasteboard = NSPasteboard.general
+                pasteboard.clearContents()
+                pasteboard.setString(accessToken, forType: .string)
+            }
+        }, label: {
+            // TODO: loc
+            Text("Copy Access Token").frame(minWidth: 100)
+        }).disabled(!loggedIn)
     }
 }
 
