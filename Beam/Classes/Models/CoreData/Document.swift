@@ -14,6 +14,13 @@ class Document: NSManagedObject {
         id.uuidString.lowercased()
     }
 
+    var hasLocalChanges: Bool {
+        // We don't have a saved previous version, it's a new document
+        guard let beam_api_data = beam_api_data else { return false }
+
+        return beam_api_data != data
+    }
+
     func asApiType() -> DocumentAPIType {
         let result = DocumentAPIType(document: self)
         return result
@@ -35,10 +42,25 @@ class Document: NSManagedObject {
         }
     }
 
+    class func create(_ context: NSManagedObjectContext = CoreDataManager.shared.mainContext, title: String? = nil) -> Document {
+        let document = Document(context: context)
+        document.id = UUID()
+        if let title = title {
+            document.title = title
+        }
+
+        return document
+    }
+
     class func countWithPredicate(_ context: NSManagedObjectContext, _ predicate: NSPredicate? = nil) -> Int {
+        return rawCountWithPredicate(context, predicate, onlyNonDeleted: true)
+    }
+
+    class func rawCountWithPredicate(_ context: NSManagedObjectContext, _ predicate: NSPredicate? = nil, onlyNonDeleted: Bool = false) -> Int {
         // Fetch existing if any
         let fetchRequest: NSFetchRequest<Document> = Document.fetchRequest()
-        fetchRequest.predicate = predicate
+
+        fetchRequest.predicate = onlyNonDeleted ? onlyNonDeletedPredicate(predicate) : predicate
 
         do {
             let fetchedTransactions = try context.count(for: fetchRequest)
@@ -53,7 +75,7 @@ class Document: NSManagedObject {
 
     class func fetchFirst(context: NSManagedObjectContext, _ predicate: NSPredicate? = nil, _ sortDescriptors: [NSSortDescriptor]? = nil) -> Document? {
         let fetchRequest: NSFetchRequest<Document> = Document.fetchRequest()
-        fetchRequest.predicate = predicate
+        fetchRequest.predicate = onlyNonDeletedPredicate(predicate)
         fetchRequest.fetchLimit = 1
         fetchRequest.sortDescriptors = sortDescriptors
 
@@ -71,10 +93,10 @@ class Document: NSManagedObject {
         return fetchAllWithLimit(context: context, predicate, sortDescriptors)
     }
 
-    class func fetchAllWithLimit(context: NSManagedObjectContext, _ predicate: NSPredicate? = nil, _ sortDescriptors: [NSSortDescriptor]? = nil, _ limit: Int? = nil) -> [Document] {
+    class func fetchAllWithLimit(context: NSManagedObjectContext, _ predicate: NSPredicate? = nil, _ sortDescriptors: [NSSortDescriptor]? = nil, _ limit: Int = 0) -> [Document] {
         let fetchRequest: NSFetchRequest<Document> = Document.fetchRequest()
-        fetchRequest.predicate = predicate
-        fetchRequest.fetchLimit = limit ?? 0
+        fetchRequest.predicate = onlyNonDeletedPredicate(predicate)
+        fetchRequest.fetchLimit = limit
         fetchRequest.sortDescriptors = sortDescriptors
 
         do {
@@ -92,12 +114,18 @@ class Document: NSManagedObject {
         return fetchFirst(context: context, NSPredicate(format: "id = %@", id as CVarArg))
     }
 
+    class func fetchOrCreateWithId(_ context: NSManagedObjectContext, _ id: UUID) -> Document {
+        let document = fetchFirst(context: context, NSPredicate(format: "id = %@", id as CVarArg)) ?? create(context)
+        document.id = id
+        return document
+    }
+
     class func fetchWithTitle(_ context: NSManagedObjectContext, _ title: String) -> Document? {
         return fetchFirst(context: context, NSPredicate(format: "title = %@", title as CVarArg))
     }
 
     class func fetchAllWithType(_ context: NSManagedObjectContext, _ type: Int16) -> [Document] {
-        return fetchAll(context: context, NSPredicate(format: "documentType = %@", type as CVarArg))
+        return fetchAll(context: context, NSPredicate(format: "document_type = %@", type as CVarArg))
     }
 
     class func fetchAllWithTitleMatch(_ context: NSManagedObjectContext, _ title: String) -> [Document] {
@@ -114,4 +142,26 @@ class Document: NSManagedObject {
         return fetchAllWithLimit(context: context, nil, nil, limit)
     }
 
+    class func onlyNonDeletedPredicate(_ predicate: NSPredicate? = nil) -> NSPredicate {
+        // We don't want deleted documents
+        var fetchPredicate = NSPredicate(format: "deleted_at == nil")
+        if let predicate = predicate {
+            fetchPredicate = NSCompoundPredicate(andPredicateWithSubpredicates: [fetchPredicate, predicate])
+        }
+        return fetchPredicate
+    }
+
+    // MARK: -
+    // MARK: Validations
+    override func validateForInsert() throws {
+        try super.validateForInsert()
+    }
+
+    override func validateForDelete() throws {
+        try super.validateForDelete()
+    }
+
+    override func validateForUpdate() throws {
+        try super.validateForUpdate()
+    }
 }

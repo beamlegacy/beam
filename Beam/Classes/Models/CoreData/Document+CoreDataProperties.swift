@@ -16,12 +16,14 @@ extension Document {
     }
 
     //swiftlint:disable identifier_name
-    @NSManaged public var created_at: Date
     @NSManaged public var id: UUID
     @NSManaged public var data: Data?
-    @NSManaged public var title: String
+    @NSManaged public var beam_api_data: Data?
+    @NSManaged public var deleted_at: Date?
+    @NSManaged public var created_at: Date
     @NSManaged public var updated_at: Date
-    @NSManaged public var documentType: Int16
+    @NSManaged public var title: String
+    @NSManaged public var document_type: Int16
     @NSManaged public var score: Int16
     //swiftlint:enable identifier_name
 }

@@ -118,10 +118,22 @@
                                                             <action selector="sendAllNotesToAPI:" target="Voe-Tx-rLC" id="erI-oe-Q9k"/>
                                                         </connections>
                                                     </menuItem>
+                                                    <menuItem title="Fetch all notes from API" id="nVV-sn-gD8">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="refreshNotesFromAPI:" target="Voe-Tx-rLC" id="pVk-C4-CGO"/>
+                                                        </connections>
+                                                    </menuItem>
                                                     <menuItem title="Delete all notes" id="4e7-0u-pUE">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
                                                         <connections>
                                                             <action selector="resetDatabase:" target="Voe-Tx-rLC" id="BZD-93-Qp0"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                    <menuItem title="Delete all local notes" id="T1w-pc-FGT">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="deleteLocalDocuments:" target="Voe-Tx-rLC" id="RoE-cB-YGe"/>
                                                         </connections>
                                                     </menuItem>
                                                     <menuItem title="Backup all notes" id="XvI-yN-rpy">
