@@ -10,16 +10,14 @@ import Cocoa
 extension BeamTextEdit {
 
     // MARK: - Properties
+    private static let queryLimit = 4
     private static var xPos: CGFloat = 0
-    private static var yPos: CGFloat = 0
 
     internal func initPopover() {
         guard let node = node as? TextNode else { return }
 
-        updatePosition(with: node)
-        popover = BidirectionalPopover(frame: NSRect(x: BeamTextEdit.xPos, y: BeamTextEdit.yPos,
-                                                     width: BidirectionalPopover.viewWidth,
-                                                     height: BidirectionalPopover.viewHeight))
+        popover = BidirectionalPopover()
+        updatePopoverPosition(with: node)
 
         guard let popover = popover,
               let view = window?.contentView else { return }
@@ -52,14 +50,12 @@ extension BeamTextEdit {
         let linkText = String(node.text.text[startPosition..<cursorPosition])
 
         node.text.addAttributes([.internalLink(linkText)], to: startPosition - popoverPrefix..<cursorPosition + popoverSuffix)
-        let items = linkText.isEmpty ? documentManager.loadAllDocumentsWithLimit() : documentManager.documentsWithLimitTitleMatch(title: linkText)
+        let items = linkText.isEmpty ? documentManager.loadAllDocumentsWithLimit(BeamTextEdit.queryLimit) : documentManager.documentsWithLimitTitleMatch(title: linkText, limit: BeamTextEdit.queryLimit)
 
         popover.items = items.map({ $0.title })
         popover.query = linkText
 
-        updatePosition(with: node, linkText.isEmpty)
-
-        popover.frame = NSRect(x: BeamTextEdit.xPos, y: BeamTextEdit.yPos, width: popover.idealSize.width, height: popover.idealSize.height)
+        updatePopoverPosition(with: node, linkText.isEmpty)
     }
 
     internal func cancelPopover() {
@@ -91,26 +87,36 @@ extension BeamTextEdit {
         node.text.removeAttributes([.internalLink(text)], from: cursorStartPosition..<rootNode.cursorPosition + text.count)
     }
 
-    private func updatePosition(with node: TextNode, _ isEmpty: Bool = false) {
+    private func updatePopoverPosition(with node: TextNode, _ isEmpty: Bool = false) {
         guard let window = window,
-              let popover = popover else { return }
+              let popover = popover,
+              let scrollView = enclosingScrollView else { return }
 
         let cursorPosition = rootNode.cursorPosition
-        let (posX, rect) = node.offsetAndFrameAt(index: cursorPosition)
-        var marginTop: CGFloat = ignoreFirstDrag ? 80 : 65
+        let (xOffset, rect) = node.offsetAndFrameAt(index: cursorPosition)
+        let yOffset = scrollView.documentVisibleRect.origin.y < 0 ? 0 : scrollView.documentVisibleRect.origin.y
+
+        var marginTop: CGFloat = 60
+        var yPos = (window.frame.height - (rect.maxY + node.offsetInDocument.y) - popover.idealSize.height) + yOffset
 
         // To avoid the update of X position during the insertion of a new text
         if isEmpty {
-            BeamTextEdit.xPos = (posX - 20) + node.offsetInDocument.x
+            BeamTextEdit.xPos = (xOffset - 20) + node.offsetInDocument.x
         }
 
         // Popover with Shortcut
         if node.text.text.isEmpty {
-            marginTop = 97
-            BeamTextEdit.xPos = posX + 200
+            marginTop += 15
+            BeamTextEdit.xPos = xOffset + 200
         }
 
-        BeamTextEdit.yPos = (window.frame.height - (rect.maxY + node.offsetInDocument.y) - popover.idealSize.height) - marginTop
+        yPos -= marginTop
+        popover.frame = NSRect(x: BeamTextEdit.xPos, y: yPos, width: popover.idealSize.width, height: popover.idealSize.height)
+
+        // Up position when popover is overlapped or clipped by the superview
+        if popover.visibleRect.height < popover.idealSize.height {
+            popover.frame = NSRect(x: BeamTextEdit.xPos, y: (window.frame.height - node.offsetInDocument.y + yOffset) - 50, width: popover.idealSize.width, height: popover.idealSize.height)
+        }
     }
 
     private func validInternalLink(from node: TextNode, _ title: String) {
