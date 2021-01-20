@@ -369,11 +369,9 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
         if option {
             rootNode.doCommand(.insertNewline)
-        } else if let popover = popover {
-            popover.doCommand(.insertNewline)
-            return
+        } else if popover != nil {
+            cancelPopover()
         } else if command {
-            dismissFormatterView(persistentFormatter)
             onStartQuery(node)
         } else {
             if node.text.isEmpty && node.isEmpty && node.parent !== rootNode {
@@ -522,7 +520,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     updatePopover(with: .deleteForward)
 
                     guard let node = node as? TextNode else { return }
-                    if node.text.isEmpty || !rootNode.isTextSelected { hideInlineFormatter() }
+                    if node.text.isEmpty || !rootNode.textIsSelected { hideInlineFormatter() }
 
                     return
                 case .backTab:

@@ -35,7 +35,7 @@ public struct TextConfig {
 }
 
 public class TextRoot: TextNode {
-    @Published var isTextSelected = false
+    @Published var textIsSelected = false
 
     var note: BeamNote?
 
@@ -49,7 +49,7 @@ public class TextRoot: TextNode {
             state.selectedTextRange
         }
         set {
-            isTextSelected = !newValue.isEmpty
+            textIsSelected = !newValue.isEmpty
             state.selectedTextRange = newValue
         }
     }

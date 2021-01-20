@@ -82,7 +82,9 @@ extension BeamTextEdit {
               let topAnchor = BeamTextEdit.topAnchor,
               let leftAnchor = BeamTextEdit.leftAnchor else { return }
 
-        if !rootNode.isTextSelected {
+        detectFormatterType()
+
+        if !rootNode.textIsSelected {
             dismissFormatterView(inlineFormatter)
             presentPersistentFormatter(isPresent: true)
             return
@@ -98,8 +100,7 @@ extension BeamTextEdit {
     }
 
     internal func detectFormatterType() {
-        guard let node = node as? TextNode,
-              let formatterView = persistentFormatter else { return }
+        guard let node = node as? TextNode else { return }
 
         let startPosition = rootNode.cursorPosition..<rootNode.cursorPosition + 1
         let middleOrEndPosition = rootNode.cursorPosition - 1..<rootNode.cursorPosition
@@ -107,7 +108,7 @@ extension BeamTextEdit {
         var types: [FormatterType] = []
 
         rootNode.state.attributes = []
-        formatterView.setActiveFormmatters(types)
+        setActiveFormatters(types)
 
         switch node.elementKind {
         case .heading(1):
@@ -135,12 +136,11 @@ extension BeamTextEdit {
             }
         }
 
-        formatterView.setActiveFormmatters(types)
+        setActiveFormatters(types)
     }
 
-    internal func updatePersistentView(with type: FormatterType, attribute: BeamText.Attribute? = nil, kind: ElementKind? = .bullet) {
-        guard let formatterView = persistentFormatter,
-              let node = node as? TextNode else { return }
+    internal func updateFormatterView(with type: FormatterType, attribute: BeamText.Attribute? = nil, kind: ElementKind? = .bullet) {
+        guard let node = node as? TextNode else { return }
 
         var hasAttribute = false
 
@@ -156,7 +156,14 @@ extension BeamTextEdit {
         }
 
         selectFormatterAction(type, hasAttribute)
-        formatterView.setActiveFormatter(type)
+
+        if let inlineFormatter = inlineFormatter {
+            inlineFormatter.setActiveFormatter(type)
+        }
+
+        if let persistentFormatter = persistentFormatter {
+            persistentFormatter.setActiveFormatter(type)
+        }
     }
 
     internal func selectFormatterAction(_ type: FormatterType, _ isActive: Bool) {
@@ -200,6 +207,10 @@ extension BeamTextEdit {
     private func updateAttributeState(with node: TextNode, attribute: BeamText.Attribute, isActive: Bool) {
         let attributes = rootNode.state.attributes
 
+        if rootNode.textIsSelected {
+            node.text.toggle(attribute: attribute, forRange: node.selectedTextRange)
+        }
+
         guard let index = attributes.firstIndex(of: attribute),
               attributes.contains(attribute), isActive else {
             rootNode.state.attributes.append(attribute)
@@ -207,6 +218,16 @@ extension BeamTextEdit {
         }
 
         rootNode.state.attributes.remove(at: index)
+    }
+
+    private func setActiveFormatters(_ types: [FormatterType]) {
+        if let inlineFormatter = inlineFormatter {
+            inlineFormatter.setActiveFormmatters(types)
+        }
+
+        if let persistentFormatter = persistentFormatter {
+            persistentFormatter.setActiveFormmatters(types)
+        }
     }
 
     private func addConstraint(to view: FormatterView, with contentView: NSView) {

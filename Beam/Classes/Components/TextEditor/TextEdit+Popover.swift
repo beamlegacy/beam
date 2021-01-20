@@ -65,7 +65,7 @@ extension BeamTextEdit {
         dismissPopover()
         node.text.removeSubrange((cursorStartPosition + 1 - popoverPrefix)..<(rootNode.cursorPosition + popoverSuffix))
         rootNode.cursorPosition = cursorStartPosition + 1 - popoverPrefix
-        initFormatterView(.persistent)
+        presentPersistentFormatter(isPresent: true)
     }
 
     internal func dismissPopover() {

@@ -609,16 +609,12 @@ public class TextNode: Widget {
 
         if let link = linkAt(point: mouseInfo.position) {
             editor.cancelInternalLink()
-            editor.dismissPopover()
-            editor.dismissFormatterView(editor.persistentFormatter)
             editor.openURL(link)
             return true
         }
 
         if let link = internalLinkAt(point: mouseInfo.position) {
             editor.cancelInternalLink()
-            editor.dismissPopover()
-            editor.dismissFormatterView(editor.persistentFormatter)
             editor.openCard(link)
             return true
         }
@@ -695,6 +691,7 @@ public class TextNode: Widget {
             return false
         case .select(let o):
             root?.selectedTextRange = text.clamp(p < o ? cursorPosition..<o : o..<cursorPosition)
+            editor.detectFormatterType()
             editor.initAndUpdateInlineFormatter()
         }
         invalidate()

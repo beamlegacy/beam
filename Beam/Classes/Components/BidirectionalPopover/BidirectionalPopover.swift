@@ -123,8 +123,6 @@ class BidirectionalPopover: Popover {
             keyMoveUp()
         case .moveDown:
             keyMoveDown()
-        case .insertNewline:
-            selectItem()
         default:
             break
         }
