@@ -1,6 +1,5 @@
-#only the rules specified in this list will be enabled
-whitelist_rules:
-  - if_as_guard
+# only the rules specified in this list will be enabled
+only_rules:
   - block_based_kvo
   - class_delegate_protocol
   - closing_brace
@@ -74,7 +73,6 @@ whitelist_rules:
 # configurable rules can be customized from this configuration file
 # binary rules can set their severity level
 function_parameter_count: 6
-line_length: 150
 type_body_length:
   - 300 # warning
   - 1000 # error

@@ -149,6 +149,7 @@
 		418173C32581276F00317ED8 /* String+NSMutableAttributedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418173C22581276F00317ED8 /* String+NSMutableAttributedString.swift */; };
 		4181744325812C5F00317ED8 /* NSColor+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181744225812C5F00317ED8 /* NSColor+Beam.swift */; };
 		41A969FF2581394300E6594B /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41A969FE2581394300E6594B /* Configuration.swift */; };
+		5204290B25A4B3D300DD677C /* document_updated_at.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 5204290A25A4B3D300DD677C /* document_updated_at.graphql */; };
 		5206280C25922D6300D7CD9E /* delete_document.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 5206280B25922D6300D7CD9E /* delete_document.graphql */; };
 		5206281025922D6C00D7CD9E /* update_document.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 5206280F25922D6C00D7CD9E /* update_document.graphql */; };
 		5206281425922D7800D7CD9E /* document.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 5206281325922D7800D7CD9E /* document.graphql */; };
@@ -169,11 +170,14 @@
 		524299C725A47D2600F4DBF5 /* AppDelegate+Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524299C625A47D2600F4DBF5 /* AppDelegate+Preferences.swift */; };
 		524299E725A480A300F4DBF5 /* AccountsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524299E225A480A300F4DBF5 /* AccountsView.swift */; };
 		524299EE25A488E000F4DBF5 /* AdvancedPreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524299ED25A488E000F4DBF5 /* AdvancedPreferencesView.swift */; };
+		526016CE25ADC10800634695 /* String+MD5.swift in Sources */ = {isa = PBXBuildFile; fileRef = 526016CD25ADC10800634695 /* String+MD5.swift */; };
+		5260172125ADCBE800634695 /* documents.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 5260172025ADCBE800634695 /* documents.graphql */; };
 		526017F425AE074E00634695 /* ConsoleWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 526017F325AE074E00634695 /* ConsoleWindow.swift */; };
 		526017F825AE078600634695 /* ConsoleContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 526017F725AE078600634695 /* ConsoleContentView.swift */; };
 		526017FC25AE081E00634695 /* AppDelegate+Console.swift in Sources */ = {isa = PBXBuildFile; fileRef = 526017FB25AE081E00634695 /* AppDelegate+Console.swift */; };
 		527DF48725710ECB00A0A56D /* DocumentManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 527DF48625710ECB00A0A56D /* DocumentManagerTests.swift */; };
 		52B5EF78252F520100914D52 /* CoreDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52B5EF77252F520100914D52 /* CoreDataTests.swift */; };
+		52C3294225AC7A8E00EF11E7 /* DocumentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52C3294125AC7A8E00EF11E7 /* DocumentTests.swift */; };
 		52C60BFA258B638F008B7C10 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52C60B9D258B6333008B7C10 /* Sparkle.framework */; };
 		52C60BFB258B638F008B7C10 /* Sparkle.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 52C60B9D258B6333008B7C10 /* Sparkle.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		52DD2457258B687200651C84 /* org.sparkle-project.InstallerConnection.xpc in Embed XPC Services */ = {isa = PBXBuildFile; fileRef = 52DD2442258B681500651C84 /* org.sparkle-project.InstallerConnection.xpc */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -571,6 +575,7 @@
 		418173C22581276F00317ED8 /* String+NSMutableAttributedString.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+NSMutableAttributedString.swift"; sourceTree = "<group>"; };
 		4181744225812C5F00317ED8 /* NSColor+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSColor+Beam.swift"; sourceTree = "<group>"; };
 		41A969FE2581394300E6594B /* Configuration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
+		5204290A25A4B3D300DD677C /* document_updated_at.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = document_updated_at.graphql; sourceTree = "<group>"; };
 		5206280B25922D6300D7CD9E /* delete_document.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = delete_document.graphql; sourceTree = "<group>"; };
 		5206280F25922D6C00D7CD9E /* update_document.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = update_document.graphql; sourceTree = "<group>"; };
 		5206281325922D7800D7CD9E /* document.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = document.graphql; sourceTree = "<group>"; };
@@ -592,11 +597,14 @@
 		524299C625A47D2600F4DBF5 /* AppDelegate+Preferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+Preferences.swift"; sourceTree = "<group>"; };
 		524299E225A480A300F4DBF5 /* AccountsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AccountsView.swift; sourceTree = "<group>"; };
 		524299ED25A488E000F4DBF5 /* AdvancedPreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedPreferencesView.swift; sourceTree = "<group>"; };
+		526016CD25ADC10800634695 /* String+MD5.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+MD5.swift"; sourceTree = "<group>"; };
+		5260172025ADCBE800634695 /* documents.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = documents.graphql; sourceTree = "<group>"; };
 		526017F325AE074E00634695 /* ConsoleWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsoleWindow.swift; sourceTree = "<group>"; };
 		526017F725AE078600634695 /* ConsoleContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsoleContentView.swift; sourceTree = "<group>"; };
 		526017FB25AE081E00634695 /* AppDelegate+Console.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+Console.swift"; sourceTree = "<group>"; };
 		527DF48625710ECB00A0A56D /* DocumentManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentManagerTests.swift; sourceTree = "<group>"; };
 		52B5EF77252F520100914D52 /* CoreDataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataTests.swift; sourceTree = "<group>"; };
+		52C3294125AC7A8E00EF11E7 /* DocumentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentTests.swift; sourceTree = "<group>"; };
 		52C60B82258B6332008B7C10 /* Sparkle.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Sparkle.xcodeproj; path = Extern/Sparkle/Sparkle.xcodeproj; sourceTree = "<group>"; };
 		52DEF1C9252B259700561493 /* CoreDataManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataManagerTests.swift; sourceTree = "<group>"; };
 		52E04FD5252C7A4600AD9F56 /* writing_space.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = writing_space.json; sourceTree = "<group>"; };
@@ -765,7 +773,6 @@
 				4181712B25810CDC00317ED8 /* Constants.swift */,
 				4181712D25810CDC00317ED8 /* Debug.xcconfig */,
 				4181713025810CDC00317ED8 /* Release.xcconfig */,
-				4181712E25810CDC00317ED8 /* Beam.xcdatamodeld */,
 				4181712C25810CDC00317ED8 /* Beam.entitlements */,
 			);
 			path = Configuration;
@@ -1170,6 +1177,7 @@
 				418171A12581107C00317ED8 /* String+Regex.swift */,
 				418171A72581107C00317ED8 /* String+Localization.swift */,
 				418173C22581276F00317ED8 /* String+NSMutableAttributedString.swift */,
+				526016CD25ADC10800634695 /* String+MD5.swift */,
 				96A8B1DC25A38A3B006F749C /* String+Levenshtein.swift */,
 				562A8B3525B5D8B5004D3D8A /* String+NL.swift */,
 			);
@@ -1190,6 +1198,8 @@
 				5206280B25922D6300D7CD9E /* delete_document.graphql */,
 				5206280F25922D6C00D7CD9E /* update_document.graphql */,
 				5206281325922D7800D7CD9E /* document.graphql */,
+				5260172025ADCBE800634695 /* documents.graphql */,
+				5204290A25A4B3D300DD677C /* document_updated_at.graphql */,
 				5206281725922D8A00D7CD9E /* delete_all_documents.graphql */,
 				5206281B25922D9700D7CD9E /* import_documents.graphql */,
 			);
@@ -1239,6 +1249,7 @@
 			children = (
 				52A43D93252C790A00178F3B /* Importers */,
 				52B5EF77252F520100914D52 /* CoreDataTests.swift */,
+				52C3294125AC7A8E00EF11E7 /* DocumentTests.swift */,
 			);
 			path = DataModel;
 			sourceTree = "<group>";
@@ -1385,6 +1396,7 @@
 				9611994725A279EC005BEC82 /* ObjCBridge */,
 				965A78282514F147009980D4 /* AppDelegate.swift */,
 				965A78342514F148009980D4 /* Main.storyboard */,
+				4181712E25810CDC00317ED8 /* Beam.xcdatamodeld */,
 				4181712A25810CDC00317ED8 /* Configuration */,
 				41816FD62581047500317ED8 /* Classes */,
 				41816FD02581046F00317ED8 /* Assets */,
@@ -1723,6 +1735,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				965A78362514F148009980D4 /* Main.storyboard in Resources */,
+				5204290B25A4B3D300DD677C /* document_updated_at.graphql in Resources */,
 				5206281C25922D9700D7CD9E /* import_documents.graphql in Resources */,
 				5206280C25922D6300D7CD9E /* delete_document.graphql in Resources */,
 				5206281825922D8A00D7CD9E /* delete_all_documents.graphql in Resources */,
@@ -1741,6 +1754,7 @@
 				5206281425922D7800D7CD9E /* document.graphql in Resources */,
 				965A78332514F148009980D4 /* Preview Assets.xcassets in Resources */,
 				418172412581107C00317ED8 /* ScrollableTextView.xib in Resources */,
+				5260172125ADCBE800634695 /* documents.graphql in Resources */,
 				418171F52581107C00317ED8 /* forgot_password.graphql in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2077,6 +2091,7 @@
 				418171FF2581107C00317ED8 /* CoreDataManager.swift in Sources */,
 				418171F22581107C00317ED8 /* APIRequest.swift in Sources */,
 				418172B525811AAA00317ED8 /* Tick.swift in Sources */,
+				526016CE25ADC10800634695 /* String+MD5.swift in Sources */,
 				418173BE2581251600317ED8 /* URL+Beam.swift in Sources */,
 				4181713525810CDC00317ED8 /* Beam.xcdatamodeld in Sources */,
 				9611995E25A27A17005BEC82 /* BeamObjCBridge.m in Sources */,
@@ -2138,6 +2153,7 @@
 				52E04FED252C814D00AD9F56 /* RoamImporterTests.swift in Sources */,
 				52B5EF78252F520100914D52 /* CoreDataTests.swift in Sources */,
 				52DEF1CA252B259700561493 /* CoreDataManagerTests.swift in Sources */,
+				52C3294225AC7A8E00EF11E7 /* DocumentTests.swift in Sources */,
 				967B2685255465C5003F40E3 /* Html2MdTests.swift in Sources */,
 				562A8B5225B5E3D8004D3D8A /* String+NLTests.swift in Sources */,
 				527DF48725710ECB00A0A56D /* DocumentManagerTests.swift in Sources */,

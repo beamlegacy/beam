@@ -11,12 +11,6 @@ struct UserErrorData: Decodable {
 }
 
 extension APIRequest {
-    /// Helper result type for query returning `me`
-    struct MeResult: Decodable, Errorable {
-        let me: Me?
-        let errors: [UserErrorData]?
-    }
-
     /// Wrapper for result of GraphQL mutation
     struct APIResult<T>: Decodable where T: Decodable, T: Errorable {
         let data: APIResultWrapper<T>?
@@ -29,6 +23,11 @@ extension APIRequest {
     struct QueryResult<T>: Decodable  where T: Decodable, T: Errorable {
         var data: T?
         var errors: [ErrorData]?
+    }
+
+    class FetchDocument: DocumentAPIType, Errorable {
+        static let codingKey = "document"
+        let errors: [UserErrorData]? = nil
     }
 
     /// Wrapper for the data result of the GraphQL mutation result `APIResult`
@@ -56,7 +55,15 @@ extension APIRequest {
             let container = try decoder.container(keyedBy: CodingKeys.self)
 
             let name = String(describing: T.self)
-            let finalName = name.prefix(1).lowercased() + name.dropFirst()
+            let finalName: String
+
+            if T.self == FetchDocument.self {
+                finalName = FetchDocument.codingKey
+            } else if T.self == Me.self {
+                finalName = Me.codingKey
+            } else {
+                finalName = name.prefix(1).lowercased() + name.dropFirst()
+            }
 
             guard let key = CodingKeys.key(named: finalName) else {
                 throw DecodingError.valueNotFound(T.self, DecodingError.Context(codingPath: [], debugDescription: "Value not found at root level."))

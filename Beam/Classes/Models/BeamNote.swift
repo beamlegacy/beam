@@ -76,12 +76,17 @@ class BeamNote: BeamElement {
     var documentStruct: DocumentStruct? {
         do {
             let encoder = JSONEncoder()
-            #if DEBUG
+            // Will make conflict and merge easier to know what lines conflicted instead
+            // of having all content on a single line to save space
             encoder.outputFormatting = .prettyPrinted
-            #endif
             let data = try encoder.encode(self)
 
-            return DocumentStruct(id: id, title: title, createdAt: creationDate, updatedAt: updateDate, data: data, documentType: type == .journal ? .journal : .note)
+            return DocumentStruct(id: id,
+                                  title: title,
+                                  createdAt: creationDate,
+                                  updatedAt: updateDate,
+                                  data: data,
+                                  documentType: type == .journal ? .journal : .note)
         } catch {
             Logger.shared.logError("Unable to encode BeamNote into DocumentStruct [\(title) {\(id)}]", category: .document)
             return nil
@@ -131,7 +136,7 @@ class BeamNote: BeamElement {
             return nil
         }
 
-        Logger.shared.logDebug("Note loaded:\n\(String(data: doc.data, encoding: .utf8)!)\n", category: .document)
+//        Logger.shared.logDebug("Note loaded:\n\(String(data: doc.data, encoding: .utf8)!)\n", category: .document)
 
         do {
             return try instanciateNote(doc)
