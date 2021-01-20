@@ -193,11 +193,12 @@ extension BeamText {
             range.attributes.forEach { attribute in
                 switch attribute {
                 case .strong:
-                    types.append(.bold)
+                    if !types.contains(.bold) { types.append(.bold) }
                 case .emphasis:
+                    if !types.contains(.italic) { types.append(.italic) }
                     types.append(.italic)
                 case .strikethrough:
-                    types.append(.strikethrough)
+                    if !types.contains(.strikethrough) { types.append(.strikethrough) }
                 default:
                     break
                 }

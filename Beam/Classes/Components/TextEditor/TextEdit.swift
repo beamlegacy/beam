@@ -81,13 +81,18 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     private var noteCancellables = [AnyCancellable]()
+
+    // Popover properties
     internal var cursorStartPosition = 0
     internal var popoverPrefix = 0
     internal var popoverSuffix = 0
     internal var popover: BidirectionalPopover?
 
-    internal var inlineFormatter: FormatterView?
+    // Formatter properties
     internal var persistentFormatter: FormatterView?
+    internal var inlineFormatter: FormatterView?
+    internal var isInlineFormatterHidden = true
+    internal var currentTextRange: Range<Int> = 0..<0
 
     public init(root: BeamElement, font: Font = Font.main) {
         BeamNote.detectLinks(documentManager)
@@ -521,6 +526,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
                     guard let node = node as? TextNode else { return }
                     if node.text.isEmpty || !rootNode.textIsSelected { hideInlineFormatter() }
+                    detectFormatterType()
 
                     return
                 case .backTab:
@@ -1170,7 +1176,10 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     internal func initAndUpdateInlineFormatter() {
+        guard let node = node as? TextNode else { return }
+
         if inlineFormatter == nil && popover == nil {
+            currentTextRange = node.selectedTextRange
             initFormatterView(.inline)
             presentPersistentFormatter(isPresent: false)
         }
@@ -1181,7 +1190,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     internal func hideInlineFormatter() {
         guard inlineFormatter != nil else { return }
 
-        dismissFormatterView(inlineFormatter)
+        presentInlineFormatter(isPresent: false)
         presentPersistentFormatter(isPresent: true)
     }
 

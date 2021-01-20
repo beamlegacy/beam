@@ -13,12 +13,12 @@ extension BeamTextEdit {
     private static let viewWidth: CGFloat = 34
     private static let viewHeight: CGFloat = 32
     private static let padding: CGFloat = 1.45
-    private static let xAnchorConstraint: CGFloat = 20.25
     private static let startBottomConstraint: CGFloat = 35
     private static let bottomConstraint: CGFloat = -25
     private static let inlineFormatterType: [FormatterType] = [.h1, .h2, .bullet, .checkmark, .bold, .italic, .link]
     private static let persistentFormatterType: [FormatterType] = [.h1, .h2, .quote, .code, .bold, .italic, .strikethrough]
 
+    private static var isSelectableContent = true
     private static var topAnchor: NSLayoutConstraint?
     private static var bottomAnchor: NSLayoutConstraint?
     private static var leftAnchor: NSLayoutConstraint?
@@ -60,11 +60,11 @@ extension BeamTextEdit {
 
     // MARK: - Methods
     internal func presentPersistentFormatter(isPresent: Bool) {
-        guard let formatterView = persistentFormatter,
+        guard let persistentFormatter = persistentFormatter,
               let bottomAnchor = BeamTextEdit.bottomAnchor else { return }
 
-        formatterView.wantsLayer = true
-        formatterView.layoutSubtreeIfNeeded()
+        persistentFormatter.wantsLayer = true
+        persistentFormatter.layoutSubtreeIfNeeded()
 
         bottomAnchor.constant = isPresent ? BeamTextEdit.bottomConstraint : BeamTextEdit.startBottomConstraint
 
@@ -72,8 +72,33 @@ extension BeamTextEdit {
             ctx.allowsImplicitAnimation = true
             ctx.duration = 0.3
 
-            formatterView.layoutSubtreeIfNeeded()
+            persistentFormatter.layoutSubtreeIfNeeded()
         }, completionHandler: nil)
+    }
+
+    internal func presentInlineFormatter(isPresent: Bool) {
+        guard let node = node as? TextNode,
+              let inlineFormatter = inlineFormatter,
+              let topAnchor = BeamTextEdit.topAnchor else { return }
+
+        let (_, rect) = node.offsetAndFrameAt(index: rootNode.cursorPosition)
+        let v = (node.offsetInDocument.y + rect.maxY)
+
+        inlineFormatter.wantsLayer = true
+        inlineFormatter.layoutSubtreeIfNeeded()
+
+        topAnchor.constant = isPresent ? v - 15 : v + 15
+
+        NSAnimationContext.runAnimationGroup ({ ctx in
+            ctx.allowsImplicitAnimation = true
+            ctx.duration = isPresent ? 0.3 : 0.15
+
+            inlineFormatter.alphaValue = isPresent ? 1 : 0
+            inlineFormatter.layoutSubtreeIfNeeded()
+        }, completionHandler: {
+            if !isPresent { self.dismissFormatterView(inlineFormatter) }
+        })
+
     }
 
     internal func updateInlineFormatterView() {
@@ -91,20 +116,34 @@ extension BeamTextEdit {
         }
 
         let (xOffset, rect) = node.offsetAndFrameAt(index: rootNode.cursorPosition)
+        let yPosition = (node.offsetInDocument.y + rect.maxY) - 12
+        let currentLowerBound = currentTextRange.lowerBound
+        let selectedLowLowerBound = node.selectedTextRange.lowerBound
 
         inlineFormatter.wantsLayer = true
         inlineFormatter.layoutSubtreeIfNeeded()
 
-        leftAnchor.constant = xOffset
-        topAnchor.constant = (node.offsetInDocument.y + rect.maxY) - 10
+        leftAnchor.constant = xOffset + 55
+
+        if currentLowerBound == selectedLowLowerBound && BeamTextEdit.isSelectableContent {
+            BeamTextEdit.isSelectableContent = false
+            topAnchor.constant = yPosition
+        }
+
+        if currentLowerBound > selectedLowLowerBound {
+            BeamTextEdit.isSelectableContent = true
+            topAnchor.constant = yPosition
+        }
     }
 
     internal func detectFormatterType() {
         guard let node = node as? TextNode else { return }
 
-        let startPosition = rootNode.cursorPosition..<rootNode.cursorPosition + 1
-        let middleOrEndPosition = rootNode.cursorPosition - 1..<rootNode.cursorPosition
-        let range = rootNode.cursorPosition <= 0 ? startPosition : middleOrEndPosition
+        let selectedTextRange = node.selectedTextRange
+        let cursorPosition = rootNode.cursorPosition
+        let beginPosition = selectedTextRange.lowerBound == 0 ? cursorPosition..<cursorPosition + 1 : cursorPosition - 1..<cursorPosition
+        let endPosition = cursorPosition..<cursorPosition + 1
+        let range = selectedTextRange.lowerBound == 0 && selectedTextRange.upperBound > 0 ? beginPosition : endPosition
         var types: [FormatterType] = []
 
         rootNode.state.attributes = []
@@ -196,6 +235,7 @@ extension BeamTextEdit {
         if view == persistentFormatter {
             persistentFormatter = nil
         } else {
+            BeamTextEdit.isSelectableContent = true
             inlineFormatter = nil
         }
     }
@@ -208,7 +248,9 @@ extension BeamTextEdit {
         let attributes = rootNode.state.attributes
 
         if rootNode.textIsSelected {
-            node.text.toggle(attribute: attribute, forRange: node.selectedTextRange)
+            isActive ?
+                node.text.removeAttributes([attribute], from: node.selectedTextRange) :
+                node.text.addAttributes([attribute], to: node.selectedTextRange)
         }
 
         guard let index = attributes.firstIndex(of: attribute),
@@ -235,7 +277,7 @@ extension BeamTextEdit {
             BeamTextEdit.bottomAnchor = view.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: BeamTextEdit.startBottomConstraint)
             BeamTextEdit.centerXAnchor = view.centerXAnchor.constraint(equalTo: contentView.centerXAnchor)
         } else {
-            BeamTextEdit.topAnchor = view.topAnchor.constraint(equalTo: contentView.topAnchor)
+            BeamTextEdit.topAnchor = view.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 0)
             BeamTextEdit.leftAnchor = view.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 0)
         }
     }
