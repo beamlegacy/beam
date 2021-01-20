@@ -261,13 +261,13 @@ platform :mac do
       finalize: true
     )
 
-#    sentry_set_commits(
-#      version: lane_context[SharedValues::BUILD_NUMBER],
-#      app_identifier: ENV["TEAM_IDENTIFIER"],
-#      auto: false, # enable completely automated commit management
-#      clear: false, # clear all current commits from the release
-#      commit: '...', # commit spec, see `sentry-cli releases help set-commits` for more information
-#    )
+    sentry_set_commits(
+      version: "#{lane_context[SharedValues::VERSION_NUMBER]}+#{lane_context[SharedValues::BUILD_NUMBER]}",
+      app_identifier: ENV["TEAM_IDENTIFIER"],
+      auto: true, # enable completely automated commit management
+      clear: false, # clear all current commits from the release
+      # commit: '...', # commit spec, see `sentry-cli releases help set-commits` for more information
+    )
   end
 
   private_lane :create_release_notes do

@@ -22,6 +22,7 @@ struct Configuration {
     static private(set) var env = "$(ENV)"
     static private(set) var sparkleUpdate = NSString("$(SPARKLE_AUTOMATIC_UPDATE)").boolValue
     static private(set) var sparkleFeedURL: String = Configuration.value(for: "SUFeedURL")
+    static private(set) var sentryEnabled = NSString("$(SENTRY_ENABLED)").boolValue
 
     // Runtime configuration
     static private(set) var apiHostnameDefault = "api.beamapp.co"
@@ -55,7 +56,7 @@ struct Configuration {
 
     static func reset() {
         UserDefaults.standard.removeObject(forKey: publicHostnameKey)
-        UserDefaults.standard.removeObject(forKey: apiHostname)
+        UserDefaults.standard.removeObject(forKey: apiHostnameKey)
     }
 
     static private func value<T>(for key: String) -> T {
