@@ -461,6 +461,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                         node.unfold()
                     } else if shift && option {
                         rootNode.doCommand(.moveWordRightAndModifySelection)
+                        initAndUpdateInlineFormatter()
                     } else if shift && command {
                         rootNode.doCommand(.moveToEndOfLineAndModifySelection)
                         initAndUpdateInlineFormatter()
