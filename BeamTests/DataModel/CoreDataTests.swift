@@ -15,7 +15,7 @@ class CoreDataTests: XCTestCase {
         let setupExpectation = expectation(description: "setup completion called")
 
         // Can't use `NSInMemoryStoreType` as model constraints don't work
-         // storeType: NSInMemoryStoreType
+        // storeType: NSInMemoryStoreType
         coreDataManager.setup()
         coreDataManager.destroyPersistentStore {
             self.coreDataManager.setup()
