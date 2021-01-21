@@ -112,10 +112,10 @@ extension TextRoot {
             }
         } else {
             for (i, child) in node.children.enumerated() {
-                _ = parent?.insert(node: child, at: oldIndexInParent + i)
+                _ = oldParent.insert(node: child, at: oldIndexInParent + i)
             }
         }
-        node.parent?.removeChild(node)
+        oldParent.removeChild(node)
         node.removeFromSuperlayer(recursive: false)
         undoManager.setActionName("Erase node")
 
@@ -142,7 +142,12 @@ extension TextRoot {
         // This will be used to create an empty node in place:
         let firstParent = sortedNodes.first?.parent as? TextNode ?? root
         let firstIndexInParent = sortedNodes.first?.indexInParent ?? 0
-        let nextNode = sortedNodes.last?.nextVisibleTextNode()
+        var goToPrevious = true
+        var nextNode = sortedNodes.last?.previousVisibleTextNode()
+        if nextNode == nil {
+            nextNode = sortedNodes.last?.nextVisibleTextNode()
+            goToPrevious = false
+        }
 
         let nodes = sortedNodes.reversed()
         let multiple = nodes.isEmpty
@@ -159,8 +164,9 @@ extension TextRoot {
             // we must create a new first node...
             createEmptyNode(withParent: root, atIndex: 0)
         } else {
+            assert(nextNode != nil)
             root.node = nextNode
-            root.cursorPosition = 0
+            root.cursorPosition = goToPrevious ? nextNode!.text.count : 0
         }
 
         undoManager.endUndoGrouping()
