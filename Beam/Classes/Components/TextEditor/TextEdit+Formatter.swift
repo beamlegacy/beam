@@ -68,6 +68,9 @@ extension BeamTextEdit {
         guard let persistentFormatter = persistentFormatter,
               let bottomAnchor = BeamTextEdit.bottomAnchor else { return }
 
+        let showTimingFunction = CAMediaTimingFunction(controlPoints: 0.98, 0, 0.64, 0.4)
+        let hideTimingFunction = CAMediaTimingFunction(controlPoints: 0.64, 0.4, 0, 0.98)
+
         persistentFormatter.wantsLayer = true
         persistentFormatter.layoutSubtreeIfNeeded()
 
@@ -75,8 +78,8 @@ extension BeamTextEdit {
 
         NSAnimationContext.runAnimationGroup ({ ctx in
             ctx.allowsImplicitAnimation = true
-            ctx.duration = isPresent ? 0.7 : 0.3
-            ctx.timingFunction = CAMediaTimingFunction(controlPoints: 0.64, 0.4, 0, 0.98)
+            ctx.duration = isPresent ? 0.4 : 0.7
+            ctx.timingFunction = isPresent ? showTimingFunction : hideTimingFunction
 
             persistentFormatter.alphaValue = isPresent ? 1 : 0
             persistentFormatter.layoutSubtreeIfNeeded()
@@ -90,6 +93,8 @@ extension BeamTextEdit {
 
         let (_, rect) = node.offsetAndFrameAt(index: rootNode.cursorPosition)
         let yPos = (node.offsetInDocument.y + rect.maxY)
+        let showTimingFunction = CAMediaTimingFunction(controlPoints: 0.64, 0.4, 0, 0.98)
+        let hideTimingFunction = CAMediaTimingFunction(controlPoints: 0.98, 0, 0.64, 0.4)
 
         inlineFormatter.wantsLayer = true
         inlineFormatter.layoutSubtreeIfNeeded()
@@ -99,7 +104,7 @@ extension BeamTextEdit {
         NSAnimationContext.runAnimationGroup ({ ctx in
             ctx.allowsImplicitAnimation = true
             ctx.duration = isPresent ? 0.4 : 0.3
-            ctx.timingFunction = CAMediaTimingFunction(controlPoints: 0.64, 0.4, 0, 0.98)
+            ctx.timingFunction = isPresent ? showTimingFunction : hideTimingFunction
 
             inlineFormatter.alphaValue = isPresent ? 1 : 0
             isInlineFormatterHidden = false
