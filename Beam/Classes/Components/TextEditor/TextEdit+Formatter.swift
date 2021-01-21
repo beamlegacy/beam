@@ -78,7 +78,7 @@ extension BeamTextEdit {
 
         NSAnimationContext.runAnimationGroup ({ ctx in
             ctx.allowsImplicitAnimation = true
-            ctx.duration = isPresent ? 0.4 : 0.7
+            ctx.duration = isPresent ? 0.4 : 0.5
             ctx.timingFunction = isPresent ? showTimingFunction : hideTimingFunction
 
             persistentFormatter.alphaValue = isPresent ? 1 : 0
@@ -86,7 +86,7 @@ extension BeamTextEdit {
         }, completionHandler: nil)
     }
 
-    internal func showOrHideInlineFormatter(isPresent: Bool) {
+    internal func showOrHideInlineFormatter(isPresent: Bool, isDragged: Bool = false) {
         guard let node = node as? TextNode,
               let inlineFormatter = inlineFormatter,
               let topAnchor = BeamTextEdit.topAnchor else { return }
@@ -107,15 +107,17 @@ extension BeamTextEdit {
             ctx.timingFunction = isPresent ? showTimingFunction : hideTimingFunction
 
             inlineFormatter.alphaValue = isPresent ? 1 : 0
-            isInlineFormatterHidden = false
             inlineFormatter.layoutSubtreeIfNeeded()
+            isInlineFormatterHidden = false
+
+            if !isPresent && isDragged { dismissFormatterView(inlineFormatter) }
         }, completionHandler: { [weak self] in
             guard let self = self else { return }
-            if !isPresent { self.dismissFormatterView(inlineFormatter) }
+            if !isPresent && !isDragged { self.dismissFormatterView(inlineFormatter) }
         })
     }
 
-    internal func updateInlineFormatterView() {
+    internal func updateInlineFormatterView(_ isDragged: Bool) {
         guard let node = node as? TextNode,
               let inlineFormatter = inlineFormatter,
               let topAnchor = BeamTextEdit.topAnchor,
@@ -124,7 +126,7 @@ extension BeamTextEdit {
         detectFormatterType()
 
         if !rootNode.textIsSelected {
-            showOrHideInlineFormatter(isPresent: false)
+            showOrHideInlineFormatter(isPresent: false, isDragged: isDragged)
             showOrHidePersistentFormatter(isPresent: true)
             return
         }

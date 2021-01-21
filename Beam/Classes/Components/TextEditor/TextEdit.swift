@@ -1177,7 +1177,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         showOrHidePersistentFormatter(isPresent: false)
     }
 
-    internal func initAndUpdateInlineFormatter() {
+    internal func initAndUpdateInlineFormatter(isDragged: Bool = false) {
         guard let node = node as? TextNode else { return }
 
         if inlineFormatter == nil && popover == nil {
@@ -1186,7 +1186,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             showOrHidePersistentFormatter(isPresent: false)
         }
 
-        updateInlineFormatterView()
+        updateInlineFormatterView(isDragged)
 
         if isInlineFormatterHidden {
             showOrHideInlineFormatter(isPresent: true)

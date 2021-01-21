@@ -693,7 +693,7 @@ public class TextNode: Widget {
         case .select(let o):
             root?.selectedTextRange = text.clamp(p < o ? cursorPosition..<o : o..<cursorPosition)
             editor.detectFormatterType()
-            editor.initAndUpdateInlineFormatter()
+            editor.initAndUpdateInlineFormatter(isDragged: true)
         }
         invalidate()
 
