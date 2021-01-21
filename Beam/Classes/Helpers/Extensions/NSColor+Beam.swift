@@ -88,6 +88,29 @@ extension NSColor {
         return loadColor(named: "StrikethroughColor")
     }
 
+    // Reference Linked
+
+    static var linkedSectionTitleColor: NSColor {
+        return loadColor(named: "LightStoneGray")
+    }
+
+    static var linkedActionButtonColor: NSColor {
+        return loadColor(named: "LightStoneGray")
+    }
+
+    static var linkedChevronIconColor: NSColor {
+        return loadColor(named: "LightStoneGray")
+    }
+
+    static var linkedSeparatorColor: NSColor {
+        return loadColor(named: "Tundora")
+    }
+
+    static var linkedTitleColor: NSColor {
+        return loadColor(named: "CharmedGreen")
+    }
+
+
     // Popover
 
     static var bidirectionalPopoverBackgroundColor: NSColor {

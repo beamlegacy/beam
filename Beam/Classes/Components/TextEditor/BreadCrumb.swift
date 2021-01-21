@@ -9,16 +9,43 @@ import Foundation
 import AppKit
 
 class BreadCrumb: Widget {
+
+    // MARK: - Properties
     var crumbChain = [BeamElement]()
     var proxy: ProxyElement
+    var crumbLayers = [CATextLayer]()
+    var section: LinksSection
+    var selectedCrumb: Int = 0
+
+    let chevron = NSImage(named: "editor-arrow_right")
+    let breadCrumbArrow = NSImage(named: "editor-breadcrumb_arrow")
+    let containerLayer = CALayer()
+    let chevronLayer = CALayer()
+    let maskLayer = CALayer()
+    let titleLayer = CATextLayer()
+
+    let chevronXPosition: CGFloat = 0
+    let titleLayerXPosition: CGFloat = 25
+    let titleLayerYPosition: CGFloat = 15
+    let limitCharacters: CGFloat = 100
+    let breadCrumXPosition: CGFloat = 26
+    let breadCrumYPosition: CGFloat = 20
+    let spaceBreadcrumbIcon: CGFloat = 15
+
     var linkedReferenceNode: LinkedReferenceNode! {
         didSet {
             oldValue.delete()
         }
     }
-    var crumbLayers = [CATextLayer]()
-    var section: LinksSection
-    var selectedCrumb: Int = 0
+
+    override var contentsScale: CGFloat {
+        didSet {
+            titleLayer.contentsScale = contentsScale
+            for l in crumbLayers {
+                l.contentsScale = contentsScale
+            }
+        }
+    }
 
     init(editor: BeamTextEdit, section: LinksSection, element: BeamElement) {
         self.section = section
@@ -31,10 +58,23 @@ class BreadCrumb: Widget {
         ref.parent = self
         self.linkedReferenceNode = ref
 
-//        layer.backgroundColor = NSColor.blue.withAlphaComponent(0.2).cgColor
+        layer.backgroundColor = NSColor.blue.withAlphaComponent(0.2).cgColor
         editor.layer?.addSublayer(layer)
 
+        guard let note = self.crumbChain.first as? BeamNote else { return }
+        self.crumbChain.removeFirst()
+
+        titleLayer.string = note.title.capitalized
+        titleLayer.font = NSFont.systemFont(ofSize: 0, weight: .semibold)
+        titleLayer.fontSize = 17
+        titleLayer.foregroundColor = NSColor.linkedTitleColor.cgColor
+
+        layer.addSublayer(titleLayer)
+
+        titleLayer.frame = CGRect(origin: CGPoint(x: 0, y: 0), size: titleLayer.preferredFrameSize())
+
         updateCrumbLayers()
+
         if children != [linkedReferenceNode] {
             children = [linkedReferenceNode]
             invalidateLayout()
@@ -56,7 +96,7 @@ class BreadCrumb: Widget {
     override func updateRendering() {
         updateCrumbLayers()
 
-        contentsFrame = NSRect(x: 0, y: 0, width: availableWidth, height: 25)
+        contentsFrame = NSRect(x: 0, y: 0, width: availableWidth, height: 60)
         computedIdealSize = contentsFrame.size
 
         for c in children {
@@ -72,32 +112,51 @@ class BreadCrumb: Widget {
         crumbLayers.removeAll()
 
         var x = CGFloat(0)
+        var textFrame = CGSize.zero
+
         for i in 0 ..< crumbChain.count {
             let newLayer = CATextLayer()
-            newLayer.fontSize = 12
+            let breadCrumbArrowLayer = CALayer()
+            let breadCrumbMaskLayer = CALayer()
+
+            newLayer.font = NSFont.systemFont(ofSize: 0, weight: .medium)
+            newLayer.fontSize = 10
             newLayer.foregroundColor = NSColor.editorTextColor.cgColor
+
+            breadCrumbMaskLayer.contents = breadCrumbArrow
+            breadCrumbArrowLayer.mask = breadCrumbMaskLayer
+            breadCrumbArrowLayer.backgroundColor = NSColor.linkedChevronIconColor.cgColor
+
+            if i != crumbChain.count - 1 {
+                newLayer.addSublayer(breadCrumbArrowLayer)
+            }
+
             layer.addSublayer(newLayer)
             crumbLayers.append(newLayer)
 
             let crumb = crumbChain[i]
             let note = crumb as? BeamNote
-            let text: String = (note != nil ? (note?.title ?? "???") : crumb.text.text) + " / "
-            newLayer.string = text
+            let text: String = (note != nil ? (note?.title ?? "???") : crumb.text.text)
+
+            newLayer.string = text.capitalized
+            newLayer.truncationMode = .end
             newLayer.contentsScale = contentsScale
-            newLayer.frame = CGRect(origin: CGPoint(x: x, y: 0), size: newLayer.preferredFrameSize())
-//            newLayer.backgroundColor = NSColor.red.withAlphaComponent(0.2).cgColor
-            x += newLayer.bounds.width + 10
+
+            textFrame = newLayer.preferredFrameSize()
+            let textWidth = textFrame.width > limitCharacters ? limitCharacters : textFrame.width
+
+            breadCrumbArrowLayer.frame = CGRect(origin: CGPoint(x: textWidth + 2, y: textFrame.height - 10.5), size: CGSize(width: 10, height: 10))
+            breadCrumbMaskLayer.frame = breadCrumbArrowLayer.bounds
+
+            newLayer.frame = CGRect(
+                origin: CGPoint(x: x, y: textFrame.height + breadCrumYPosition),
+                size: CGSize(width: textWidth, height: textFrame.height)
+            )
+
+            x += newLayer.bounds.width + spaceBreadcrumbIcon
         }
 
         selectedCrumb = crumbLayers.count
-    }
-
-    override var contentsScale: CGFloat {
-        didSet {
-            for l in crumbLayers {
-                l.contentsScale = contentsScale
-            }
-        }
     }
 
     override func mouseDown(mouseInfo: MouseInfo) -> Bool {

@@ -19,7 +19,10 @@ class LinksSection: Widget {
     var linkedReferencesCancellable: Cancellable!
     var note: BeamNote
 
-    let textLayer = CATextLayer()
+    let sectionLayer = CALayer()
+    let sectionTitleLayer = CATextLayer()
+    let separatorLayer = CALayer()
+    let offsetY: CGFloat = 40
 
     var open: Bool = true {
         didSet {
@@ -38,7 +41,7 @@ class LinksSection: Widget {
 
     override var contentsScale: CGFloat {
         didSet {
-            textLayer.contentsScale = contentsScale
+            sectionTitleLayer.contentsScale = contentsScale
         }
     }
 
@@ -53,47 +56,53 @@ class LinksSection: Widget {
         updateLayerVisibility()
 
         editor.layer?.addSublayer(layer)
-        layer.addSublayer(textLayer)
+        layer.addSublayer(sectionLayer)
+        layer.addSublayer(separatorLayer)
 
         setupLayerFrame()
-        updateChevron()
     }
 
     func setupUI() {
-        // Append the linked references and unlinked references nodes
-        textLayer.foregroundColor = NSColor.editorIconColor.cgColor
-        textLayer.fontSize = 14
+        sectionTitleLayer.font = NSFont.systemFont(ofSize: 0, weight: .semibold)
+        sectionTitleLayer.fontSize = 15
+        sectionTitleLayer.foregroundColor = NSColor.linkedSectionTitleColor.cgColor
+
+        sectionLayer.addSublayer(sectionTitleLayer)
+        sectionLayer.backgroundColor = NSColor.clear.cgColor
+
+        separatorLayer.backgroundColor = NSColor.linkedSeparatorColor.withAlphaComponent(0.5).cgColor
     }
 
     func setupSectionMode() {
         switch mode {
         case .links:
-            textLayer.string = "\(note.linkedReferences.count) Links"
+            sectionTitleLayer.string = "\(note.linkedReferences.count) Links"
             linkedReferencesCancellable = note.$linkedReferences.sink { [unowned self] links in
                 updateLinkedReferences()
-                textLayer.string = "\(links.count) Links"
+                sectionTitleLayer.string = "\(links.count) Links"
                 updateLayerVisibility()
             }
         case .references:
-            textLayer.string = "\(note.unlinkedReferences.count) References"
+            sectionTitleLayer.string = "\(note.unlinkedReferences.count) References"
             linkedReferencesCancellable = note.$unlinkedReferences.sink { [unowned self] links in
                 updateLinkedReferences()
-                textLayer.string = "\(links.count) References"
+                sectionTitleLayer.string = "\(links.count) References"
                 updateLayerVisibility()
             }
         }
     }
 
     func setupLayerFrame() {
-        textLayer.frame = CGRect(origin: CGPoint(x: 25, y: 0), size: textLayer.preferredFrameSize())
+        sectionTitleLayer.frame = CGRect(origin: CGPoint(x: 25, y: 0), size: sectionTitleLayer.preferredFrameSize())
     }
 
     func createChevron() {
-        let button = ButtonLayer("chevron", Layer.icon(named: "editor-arrow_right", color: NSColor.editorIconColor))
-        button.activated = { [unowned self] in
+        let chevronLayer = ButtonLayer("chevron", Layer.icon(named: "editor-arrow_right", color: NSColor.linkedChevronIconColor))
+        chevronLayer.activated = { [unowned self] in
             open.toggle()
         }
-        addLayer(button)
+
+        addLayer(chevronLayer, into: sectionLayer)
         updateChevron()
     }
 
@@ -121,6 +130,8 @@ class LinksSection: Widget {
 
         computedIdealSize = contentsFrame.size
         computedIdealSize.width = frame.width
+        sectionLayer.frame = CGRect(x: 0, y: 0, width: availableWidth, height: 26)
+        separatorLayer.frame = CGRect(x: 0, y: sectionLayer.frame.maxY, width: availableWidth, height: 2)
 
         if open {
             for c in children {
