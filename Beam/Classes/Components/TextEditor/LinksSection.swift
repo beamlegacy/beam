@@ -16,6 +16,11 @@ class LinksSection: Widget {
     }
 
     var mode: Mode
+    var linkedReferencesCancellable: Cancellable!
+    var note: BeamNote
+
+    let textLayer = CATextLayer()
+
     var open: Bool = true {
         didSet {
             updateVisibility(visible && open)
@@ -30,20 +35,37 @@ class LinksSection: Widget {
             children = linkedReferenceNodes
         }
     }
-    var linkedReferencesCancellable: Cancellable!
-    var note: BeamNote
-    let textLayer = CATextLayer()
+
+    override var contentsScale: CGFloat {
+        didSet {
+            textLayer.contentsScale = contentsScale
+        }
+    }
 
     init(editor: BeamTextEdit, note: BeamNote, mode: Mode) {
         self.note = note
         self.mode = mode
         super.init(editor: editor)
+
+        setupUI()
+        createChevron()
+        setupSectionMode()
+        updateLayerVisibility()
+
+        editor.layer?.addSublayer(layer)
+        layer.addSublayer(textLayer)
+
+        setupLayerFrame()
+        updateChevron()
+    }
+
+    func setupUI() {
         // Append the linked references and unlinked references nodes
         textLayer.foregroundColor = NSColor.editorIconColor.cgColor
         textLayer.fontSize = 14
+    }
 
-        createChevron()
-
+    func setupSectionMode() {
         switch mode {
         case .links:
             textLayer.string = "\(note.linkedReferences.count) Links"
@@ -60,23 +82,23 @@ class LinksSection: Widget {
                 updateLayerVisibility()
             }
         }
+    }
 
-        updateLayerVisibility()
-        editor.layer?.addSublayer(layer)
-        layer.addSublayer(textLayer)
+    func setupLayerFrame() {
         textLayer.frame = CGRect(origin: CGPoint(x: 25, y: 0), size: textLayer.preferredFrameSize())
+    }
+
+    func createChevron() {
+        let button = ButtonLayer("chevron", Layer.icon(named: "editor-arrow_right", color: NSColor.editorIconColor))
+        button.activated = { [unowned self] in
+            open.toggle()
+        }
+        addLayer(button)
         updateChevron()
     }
 
-    override var contentsScale: CGFloat {
-        didSet {
-            textLayer.contentsScale = contentsScale
-        }
-    }
-
     func updateLinkedReferences() {
-        let
-            refs: [NoteReference] = {
+        let refs: [NoteReference] = {
             switch mode {
             case .links:
                 return note.linkedReferences
@@ -109,15 +131,6 @@ class LinksSection: Widget {
 
     func updateLayerVisibility() {
         layer.isHidden = linkedReferenceNodes.isEmpty
-    }
-
-    func createChevron() {
-        let button = ButtonLayer("chevron", Layer.icon(named: "editor-arrow_right", color: NSColor.editorIconColor))
-        button.activated = { [unowned self] in
-            open.toggle()
-        }
-        addLayer(button)
-        updateChevron()
     }
 
     func updateChevron() {
