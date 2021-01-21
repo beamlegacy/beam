@@ -26,11 +26,10 @@ class DocumentsWindow: NSWindow, NSWindowDelegate {
 
     private var cancellables = [AnyCancellable]()
     private func observeCoredataDestroyedNotification() {
-        let cancellable = NotificationCenter.default.publisher(for: .coredataDestroyed, object: nil)
+        NotificationCenter.default.publisher(for: .coredataDestroyed, object: nil)
             .sink { _ in
                 self.contentView = BeamHostingView(rootView: DocumentsContentView())
             }
-
-        cancellables.append(cancellable)
+            .store(in: &cancellables)
     }
 }

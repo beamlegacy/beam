@@ -124,6 +124,10 @@ class Document: NSManagedObject {
         return fetchFirst(context: context, NSPredicate(format: "title = %@", title as CVarArg))
     }
 
+    class func fetchOrCreateWithTitle(_ context: NSManagedObjectContext, _ title: String) -> Document {
+        return fetchFirst(context: context, NSPredicate(format: "title = %@", title as CVarArg)) ?? create(context, title: title)
+    }
+
     class func fetchAllWithType(_ context: NSManagedObjectContext, _ type: Int16) -> [Document] {
         return fetchAll(context: context, NSPredicate(format: "document_type = %@", type as CVarArg))
     }

@@ -26,6 +26,15 @@ extension Document {
     @NSManaged public var document_type: Int16
     @NSManaged public var score: Int16
     //swiftlint:enable identifier_name
+
+    public var documentType: DocumentType {
+        guard let type = DocumentType(rawValue: document_type) else {
+            // We should always have a type
+            assert(false)
+            return DocumentType.note
+        }
+        return type
+    }
 }
 
 extension Document: Identifiable {

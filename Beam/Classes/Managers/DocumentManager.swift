@@ -1,6 +1,7 @@
 import Foundation
 import CoreData
 import Alamofire
+import Combine
 
 // swiftlint:disable file_length
 
@@ -36,6 +37,7 @@ extension DocumentStruct {
     }
 }
 
+// swiftlint:disable:next type_body_length
 class DocumentManager {
     var coreDataManager: CoreDataManager
     let mainContext: NSManagedObjectContext
@@ -44,6 +46,68 @@ class DocumentManager {
     init(coreDataManager: CoreDataManager? = nil) {
         self.coreDataManager = coreDataManager ?? CoreDataManager.shared
         self.mainContext = self.coreDataManager.mainContext
+
+        observeCoredataNotification()
+    }
+
+    private var cancellables = [AnyCancellable]()
+    private func observeCoredataNotification() {
+        NotificationCenter.default
+            .publisher(for: Notification.Name.NSManagedObjectContextObjectsDidChange)
+            .sink { [unowned self] notification in
+                // Fatal error: Attempted to read an unowned reference but object 0x60000336ed30 was already deallocated
+                self.printObjects(notification)
+            }
+            .store(in: &cancellables)
+    }
+
+    /// Use this to have updates when the underlaying CD object `Document` changes
+    func onDocumentChange(_ documentStruct: DocumentStruct, completionHandler: @escaping (DocumentStruct) -> Void) -> AnyCancellable {
+        let cancellable = NotificationCenter.default
+            .publisher(for: Notification.Name.NSManagedObjectContextObjectsDidChange)
+            .compactMap({ self.notificationsToDocuments($0) })
+            .filter({ $0.map({ $0.id }).contains(documentStruct.id) })
+            .sink { documents in
+                for document in documents where document.id == documentStruct.id {
+                    completionHandler(DocumentStruct(document: document))
+                }
+            }
+        return cancellable
+    }
+
+    private func notificationsToDocuments(_ notification: Notification) -> [Document] {
+        if let updatedObjects = notification.userInfo?[NSUpdatedObjectsKey] as? Set<NSManagedObject>, !updatedObjects.isEmpty {
+            return updatedObjects.compactMap { $0 as? Document }
+        }
+
+        return []
+    }
+
+    @objc func managedObjectContextObjectsDidChange(_ notification: Notification) {
+        printObjects(notification)
+    }
+
+    private func printObjectsFromNotification(_ notification: Notification, _ keyPath: String) {
+        if let objects = notification.userInfo?[keyPath] as? Set<NSManagedObject>, !objects.isEmpty {
+            let titles = objects.compactMap { object in
+                (object as? Document)?.title
+            }
+            Logger.shared.logDebug("\(Unmanaged.passUnretained(self).toOpaque()) \(keyPath) \(objects.count) objects: \(titles)", category: .coredata)
+        }
+    }
+
+    func printObjects(_ notification: Notification) {
+        // let context = notification.object as? NSManagedObjectContext
+
+        printObjectsFromNotification(notification, NSInsertedObjectsKey)
+        printObjectsFromNotification(notification, NSUpdatedObjectsKey)
+        printObjectsFromNotification(notification, NSDeletedObjectsKey)
+        printObjectsFromNotification(notification, NSRefreshedObjectsKey)
+        printObjectsFromNotification(notification, NSInvalidatedObjectsKey)
+
+        if let areInvalidatedAllObjects = notification.userInfo?[NSInvalidatedAllObjectsKey] as? Bool {
+            Logger.shared.logDebug("All objects are invalidated: \(areInvalidatedAllObjects)", category: .coredata)
+        }
     }
 
     func saveDocument(_ documentStruct: DocumentStruct, completion: ((Result<Bool, Error>) -> Void)? = nil) {
@@ -93,6 +157,8 @@ class DocumentManager {
                     Logger.shared.logDebug("Server rejected our update based on checksum for \(documentStruct.title), overwriting", category: .network)
                     // TODO: enforcing server overwrite for now by disabling checksum, but we should display a
                     // conflict window and suggest to the user to keep a version or another
+
+                    // Refreshing the CD persisted version
                     context.refresh(document, mergeChanges: false)
                     document.beam_api_data = nil
                     context.perform {
@@ -120,6 +186,76 @@ class DocumentManager {
         guard let document = Document.fetchWithId(mainContext, id) else { return nil }
 
         return parseDocumentBody(document)
+    }
+
+    func createAsync(title: String, completion: ((DocumentStruct?) -> Void)? = nil) {
+        coreDataManager.persistentContainer.performBackgroundTask { [unowned self] context in
+            let document = Document.create(context, title: title)
+            do {
+                try self.checkValidations(context, document)
+
+                saveContext(context: context)
+                completion?(self.parseDocumentBody(document))
+            } catch {
+                completion?(nil)
+            }
+        }
+    }
+
+    func create(title: String) -> DocumentStruct? {
+        let semaphore = DispatchSemaphore(value: 0)
+        var result: DocumentStruct?
+
+        coreDataManager.persistentContainer.performBackgroundTask { [unowned self] context in
+            let document = Document.create(context, title: title)
+
+            do {
+                try self.checkValidations(context, document)
+
+                result = self.parseDocumentBody( document)
+                saveContext(context: context)
+                semaphore.signal()
+            } catch {
+            }
+        }
+
+        semaphore.wait()
+
+        return result
+    }
+
+    func fetchOrCreateAsync(title: String, completion: ((DocumentStruct?) -> Void)? = nil) {
+        coreDataManager.persistentContainer.performBackgroundTask { [unowned self] context in
+            let document = Document.fetchOrCreateWithTitle(context, title)
+            do {
+                try self.checkValidations(context, document)
+
+                saveContext(context: context)
+                completion?(self.parseDocumentBody(document))
+            } catch {
+                completion?(nil)
+            }
+        }
+    }
+
+    func fetchOrCreate(title: String) -> DocumentStruct? {
+        let semaphore = DispatchSemaphore(value: 0)
+        var result: DocumentStruct?
+
+        coreDataManager.persistentContainer.performBackgroundTask { [unowned self] context in
+            let document = Document.fetchOrCreateWithTitle(context, title)
+            do {
+                try self.checkValidations(context, document)
+
+                result = self.parseDocumentBody( document)
+                saveContext(context: context)
+                semaphore.signal()
+            } catch {
+            }
+        }
+
+        semaphore.wait()
+        return result
     }
 
     func loadDocumentByTitle(title: String) -> DocumentStruct? {
@@ -158,17 +294,14 @@ class DocumentManager {
         }
     }
 
-    private func parseDocumentBody(_ document: Document) -> DocumentStruct? {
-        guard let data = document.data else { return nil }
-        guard let type = DocumentType(rawValue: document.document_type) else { return nil }
-
+    private func parseDocumentBody(_ document: Document) -> DocumentStruct {
         return DocumentStruct(id: document.id,
                               title: document.title,
                               createdAt: document.created_at,
                               updatedAt: document.updated_at,
                               deletedAt: document.deleted_at,
-                              data: data,
-                              documentType: type)
+                              data: document.data ?? Data(),
+                              documentType: DocumentType(rawValue: document.document_type) ?? DocumentType.note)
     }
 
     func deleteDocument(id: UUID, completion: ((Result<Bool, Error>) -> Void)? = nil) {
