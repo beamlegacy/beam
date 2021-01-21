@@ -434,7 +434,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                         initAndUpdateInlineFormatter()
                     } else if command && popover != nil {
                         rootNode.doCommand(.moveToBeginningOfLine)
-                        dismissAndShowPersistentView()
+                        dismissPopoverOrFormatter()
                     } else if command && persistentFormatter != nil {
                         rootNode.doCommand(.moveToBeginningOfLine)
                         detectFormatterType()
@@ -552,10 +552,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             case KeyCode.escape.rawValue:
                 rootNode.cancelSelection()
 
-                if popover != nil { dismissAndShowPersistentView() }
-
-                if inlineFormatter != nil { hideInlineFormatter() }
-
+                dismissPopoverOrFormatter()
                 return
             default:
                 break
@@ -1107,7 +1104,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
     public override func viewWillStartLiveResize() {
         super.viewWillStartLiveResize()
-        dismissAndShowPersistentView()
+        dismissPopoverOrFormatter()
     }
 
     public override func viewDidChangeEffectiveAppearance() {
@@ -1210,6 +1207,18 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         dismissPopover()
         dismissFormatterView(inlineFormatter)
         dismissFormatterView(persistentFormatter)
+    }
+
+    func dismissPopoverOrFormatter() {
+        if popover != nil {
+            if popoverPrefix > 0 { cancelInternalLink() }
+            dismissPopover()
+            initFormatterView(.persistent)
+        }
+
+        if inlineFormatter != nil {
+           hideInlineFormatter()
+        }
     }
 
     func purgeDeadNodes() {

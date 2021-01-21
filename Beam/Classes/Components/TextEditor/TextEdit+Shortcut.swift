@@ -35,7 +35,7 @@ extension BeamTextEdit {
 
     internal func toggleBiDirectionalLink() {
         guard popover == nil else {
-            dismissAndShowPersistentView()
+            dismissPopoverOrFormatter()
             return
         }
 

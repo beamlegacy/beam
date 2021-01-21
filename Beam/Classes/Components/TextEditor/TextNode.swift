@@ -631,7 +631,7 @@ public class TextNode: Widget {
                     dragMode = .select(cursorPosition)
                 }
 
-                dismissPopoverOrFormatter()
+                editor.dismissPopoverOrFormatter()
             } else if mouseInfo.event.clickCount == 2 {
                 let clickPos = positionAt(point: mouseInfo.position)
                 root?.wordSelection(from: clickPos)
@@ -961,19 +961,6 @@ public class TextNode: Widget {
         actionTextLayer.opacity = 0
         actionImageLayer.setAffineTransform(CGAffineTransform.identity)
         actionTextLayer.setAffineTransform(CGAffineTransform.identity)
-    }
-
-    private func dismissPopoverOrFormatter() {
-        if editor.popover != nil {
-            editor.cancelInternalLink()
-            editor.dismissPopover()
-            editor.initFormatterView(.persistent)
-        }
-
-        if editor.inlineFormatter != nil {
-            editor.dismissFormatterView(editor.inlineFormatter)
-            editor.initFormatterView(.persistent)
-        }
     }
 
     func nextVisibleTextNode() -> TextNode? {
