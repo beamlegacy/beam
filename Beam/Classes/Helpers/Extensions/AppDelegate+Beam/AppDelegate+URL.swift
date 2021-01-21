@@ -71,22 +71,16 @@ extension AppDelegate {
         }
 
         switch urlPath.dropFirst() {
-        case "note":
-            if let params = components.queryItems {
-                if let noteId = params.first(where: { $0.name == "id" })?.value {
-                    showNoteID(id: noteId)
-                    return true
-                } else if let noteTitle = params.first(where: { $0.name == "title" })?.value {
-                    showNoteTitle(title: noteTitle)
-                    return true
-                }
-            }
-        case "bullet":
-            if let params = components.queryItems,
-               let bulletId = params.first(where: { $0.name == "id" })?.value {
-                showBullet(id: bulletId)
-                return true
-            }
+//        case "note":
+//            if let params = components.queryItems {
+//                if let noteId = params.first(where: { $0.name == "id" })?.value {
+////                    showNoteID(id: noteId)
+//                    return true
+//                } else if let noteTitle = params.first(where: { $0.name == "title" })?.value {
+////                    showNoteTitle(title: noteTitle)
+//                    return true
+//                }
+//            }
         default: break
         }
 

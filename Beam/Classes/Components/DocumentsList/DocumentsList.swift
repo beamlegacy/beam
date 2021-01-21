@@ -53,7 +53,7 @@ extension DocumentsList {
         private func observeChangeNotification() {
             let cancellable = NotificationCenter.default.publisher(for: .NSManagedObjectContextObjectsDidChange,
                                                                    object: managedObjectContext)
-                .compactMap({ ManagedObjectContextChanges<Note>(notification: $0) })
+                .compactMap({ ManagedObjectContextChanges<Document>(notification: $0) })
                 .sink { changes in
                     print(changes)
                 }
