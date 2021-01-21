@@ -1,6 +1,5 @@
 import Foundation
 import CoreData
-import Down
 
 class Document: NSManagedObject {
     override func awakeFromInsert() {

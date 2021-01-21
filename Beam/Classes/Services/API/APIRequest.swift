@@ -101,7 +101,7 @@ class APIRequest {
                        callsCount: Self.callsCount,
                        uploadedBytes: Self.uploadedBytes,
                        downloadedBytes: Self.downloadedBytes)
-            .responseDecodable(queue: queue, decoder: decoder) { (response: DataResponse<T>) in
+            .responseDecodable(queue: queue, decoder: decoder) { (response: DataResponse<T, AFError>) in
                 self.manageResponse(response: response, filename: fileName) { [weak self] result in
                     switch result {
                     case .failure(let error):
@@ -185,7 +185,6 @@ class APIRequest {
         uploadHeaders["Content-type"] = "multipart/form-data"
 
         let request = AF.upload(multipartFormData: multipartFormDataHandler,
-                                usingThreshold: 10_000_000,
                                 to: route,
                                 method: .post,
                                 headers: headers,
@@ -210,7 +209,7 @@ class APIRequest {
                    callsCount: Self.callsCount,
                    uploadedBytes: Self.uploadedBytes,
                    downloadedBytes: Self.downloadedBytes)
-        .responseDecodable(queue: queue, decoder: decoder) { (response: DataResponse<T>) in
+        .responseDecodable(queue: queue, decoder: decoder) { (response: DataResponse<T, AFError>) in
             self.manageResponse(response: response, filename: fileName) { [weak self] result in
                 switch result {
                 case .failure(let error):
@@ -226,7 +225,7 @@ class APIRequest {
     }
     //swiftlint:enable function_body_length
 
-    private func manageResponse<T: Decodable>(response: DataResponse<T>,
+    private func manageResponse<T: Decodable>(response: DataResponse<T, AFError>,
                                               filename: String,
                                               completionHandler: @escaping (Result<T, Error>) -> Void) {
         if let statusCode = response.response?.statusCode, [401, 403].contains(statusCode) {
@@ -248,7 +247,12 @@ class APIRequest {
         case 500:
             completionHandler(.failure(APIRequestError.internalServerError))
         default:
-            completionHandler(response.result)
+            switch response.result {
+            case .failure(let error):
+                completionHandler(.failure(error))
+            case .success(let decodable):
+                completionHandler(.success(decodable))
+            }
         }
     }
 

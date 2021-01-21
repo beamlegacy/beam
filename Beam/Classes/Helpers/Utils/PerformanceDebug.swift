@@ -1,6 +1,7 @@
 import Foundation
 import os.log
 import CocoaLumberjack
+import CocoaLumberjackSwift
 
 enum PerformanceDebugCategory: String {
     case none = ""

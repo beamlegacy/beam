@@ -21,7 +21,6 @@ xcversion(version: ENV["XCODE_VERSION"])
 platform :mac do
   desc "Run linting"
   lane :lint do
-    cocoapods(repo_update: true)
     swiftlint(
       executable: './Pods/SwiftLint/swiftlint',
       mode: :lint,
@@ -102,7 +101,6 @@ platform :mac do
                 code_sign_identity: "Mac Developer",
                 profile_name: "Beam Development",
                 build_configurations: ["Debug"])
-    cocoapods(repo_update: true)
     run_tests(
       scheme: "Beam",
       output_types: "junit",
@@ -131,7 +129,6 @@ platform :mac do
   ## To release developer version
   lane :dev do
     check_certs(profile_development: true)
-    cocoapods(repo_update: true)
 
     git_branch
 
@@ -188,8 +185,6 @@ platform :mac do
                 code_sign_identity: "Developer ID Application",
                 profile_name: ENV["PROVISION_NAME"],
                 build_configurations: ["Release"])
-
-    cocoapods(repo_update: true)
 
     UI.message "Branch is #{Actions.git_branch}"
     if Actions.git_branch != "master"
@@ -481,7 +476,6 @@ platform :mac do
     # sync_code_signing
     # disable_automatic_code_signing(path: "Beam.xcodeproj")
     # clear_derived_data
-    cocoapods(repo_update: true)
     build_mac_app(
       workspace: "Beam.xcworkspace",
       scheme: "Beam release",

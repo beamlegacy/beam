@@ -26,9 +26,5 @@ class RoamImporterTests: CoreDataTests {
 
         XCTAssertEqual(dateFormatter.string(from: notes.first!.created_at), "2020-08-25 11:44:41 +0200")
         XCTAssertEqual(dateFormatter.string(from: notes.last!.created_at), "2020-08-25 11:44:19 +0200")
-
-        for note in Note.fetchAllWithPredicate(context: context) {
-            note.debugNote()
-        }
     }
 }
