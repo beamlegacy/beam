@@ -91,7 +91,6 @@
 		418172382581107C00317ED8 /* TextNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171B92581107C00317ED8 /* TextNode.swift */; };
 		418172392581107C00317ED8 /* Lexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171BB2581107C00317ED8 /* Lexer.swift */; };
 		4181723A2581107C00317ED8 /* Parser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171BC2581107C00317ED8 /* Parser.swift */; };
-		4181723B2581107C00317ED8 /* AttributedStringVisitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171BD2581107C00317ED8 /* AttributedStringVisitor.swift */; };
 		4181723C2581107C00317ED8 /* TextEditMovements.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171BE2581107C00317ED8 /* TextEditMovements.swift */; };
 		4181723D2581107C00317ED8 /* TextEdit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171BF2581107C00317ED8 /* TextEdit.swift */; };
 		4181723E2581107C00317ED8 /* TextEditCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171C02581107C00317ED8 /* TextEditCommands.swift */; };
@@ -503,7 +502,6 @@
 		418171B92581107C00317ED8 /* TextNode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextNode.swift; sourceTree = "<group>"; };
 		418171BB2581107C00317ED8 /* Lexer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Lexer.swift; sourceTree = "<group>"; };
 		418171BC2581107C00317ED8 /* Parser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Parser.swift; sourceTree = "<group>"; };
-		418171BD2581107C00317ED8 /* AttributedStringVisitor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AttributedStringVisitor.swift; sourceTree = "<group>"; };
 		418171BE2581107C00317ED8 /* TextEditMovements.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextEditMovements.swift; sourceTree = "<group>"; };
 		418171BF2581107C00317ED8 /* TextEdit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextEdit.swift; sourceTree = "<group>"; };
 		418171C02581107C00317ED8 /* TextEditCommands.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextEditCommands.swift; sourceTree = "<group>"; };
@@ -974,7 +972,6 @@
 			children = (
 				418171BB2581107C00317ED8 /* Lexer.swift */,
 				418171BC2581107C00317ED8 /* Parser.swift */,
-				418171BD2581107C00317ED8 /* AttributedStringVisitor.swift */,
 				96E4CF71258E59F400D6DE22 /* BeamTextVisitor.swift */,
 			);
 			path = Markdown;
@@ -1880,7 +1877,6 @@
 				418172222581107C00317ED8 /* NSView+Beam.swift in Sources */,
 				4159E9D4259A1A81005FD355 /* BidirectionalPopover.swift in Sources */,
 				4181744325812C5F00317ED8 /* NSColor+Beam.swift in Sources */,
-				4181723B2581107C00317ED8 /* AttributedStringVisitor.swift in Sources */,
 				4181721E2581107C00317ED8 /* OSLog+Beam.swift in Sources */,
 				418171F72581107C00317ED8 /* BeamData.swift in Sources */,
 				418172442581107C00317ED8 /* ScrollableTextView.swift in Sources */,
