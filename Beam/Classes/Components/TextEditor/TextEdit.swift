@@ -374,8 +374,8 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
         if option {
             rootNode.doCommand(.insertNewline)
-        } else if popover != nil {
-            cancelPopover()
+        } else if let popover = popover {
+            popover.doCommand(.insertNewline)
         } else if command {
             onStartQuery(node)
         } else {

@@ -14,7 +14,7 @@ extension BeamTextEdit {
     private static let viewHeight: CGFloat = 32
     private static let padding: CGFloat = 1.45
     private static let xPosInlineFormatter: CGFloat = 55
-    private static let startTopConstraint: CGFloat = 5
+    private static let startTopConstraint: CGFloat = 10
     private static let topConstraint: CGFloat = 12
     private static let startBottomConstraint: CGFloat = 35
     private static let bottomConstraint: CGFloat = -25
@@ -41,9 +41,10 @@ extension BeamTextEdit {
             view = persistentFormatter
         } else {
             inlineFormatter = FormatterView(viewType: .inline)
-            inlineFormatter?.alphaValue = 0
             view = inlineFormatter
         }
+
+        view?.alphaValue = 0
 
         guard let formatterView = view,
               let contentView = window?.contentView else { return }
@@ -74,8 +75,10 @@ extension BeamTextEdit {
 
         NSAnimationContext.runAnimationGroup ({ ctx in
             ctx.allowsImplicitAnimation = true
-            ctx.duration = isPresent ? 0.3 : 0.15
+            ctx.duration = isPresent ? 0.7 : 0.3
+            ctx.timingFunction = CAMediaTimingFunction(controlPoints: 0.64, 0.4, 0, 0.98)
 
+            persistentFormatter.alphaValue = isPresent ? 1 : 0
             persistentFormatter.layoutSubtreeIfNeeded()
         }, completionHandler: nil)
     }
@@ -95,15 +98,16 @@ extension BeamTextEdit {
 
         NSAnimationContext.runAnimationGroup ({ ctx in
             ctx.allowsImplicitAnimation = true
-            ctx.duration = isPresent ? 0.3 : 0.15
+            ctx.duration = isPresent ? 0.4 : 0.3
+            ctx.timingFunction = CAMediaTimingFunction(controlPoints: 0.64, 0.4, 0, 0.98)
 
             inlineFormatter.alphaValue = isPresent ? 1 : 0
             isInlineFormatterHidden = false
             inlineFormatter.layoutSubtreeIfNeeded()
-
+        }, completionHandler: { [weak self] in
+            guard let self = self else { return }
             if !isPresent { self.dismissFormatterView(inlineFormatter) }
-        }, completionHandler: nil)
-
+        })
     }
 
     internal func updateInlineFormatterView() {
