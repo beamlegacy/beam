@@ -18,23 +18,6 @@ public extension NSMutableAttributedString {
         return "".attributed
     }
 
-    var positionAttribs: [PositionAttribute] {
-        get {
-            var attribs = [PositionAttribute]()
-            enumerateAttribute(.sourcePos, in: NSRange(location: 0, length: length), options: .longestEffectiveRangeNotRequired) { value, range, _ in
-                //swiftlint:disable:next force_cast
-                attribs.append(PositionAttribute(range: range, position: value as! NSNumber))
-            }
-            return attribs
-        }
-
-        set {
-            for v in newValue {
-                addAttribute(.sourcePos, value: v.position, range: v.range)
-            }
-        }
-    }
-
     func addAttributes(_ attribs: [NSAttributedString.Key: Any]) -> Self {
         self.addAttributes(attribs, range: wholeRange)
         return self
