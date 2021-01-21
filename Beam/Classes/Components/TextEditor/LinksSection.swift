@@ -131,7 +131,10 @@ class LinksSection: Widget {
         computedIdealSize = contentsFrame.size
         computedIdealSize.width = frame.width
         sectionLayer.frame = CGRect(x: 0, y: 0, width: availableWidth, height: 26)
-        separatorLayer.frame = CGRect(x: 0, y: sectionLayer.frame.maxY, width: availableWidth, height: 2)
+
+        CATransaction.disableAnimations {
+            separatorLayer.frame = CGRect(x: 0, y: sectionLayer.frame.maxY, width: availableWidth, height: 2)
+        }
 
         if open {
             for c in children {

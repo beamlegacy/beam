@@ -102,6 +102,10 @@ extension NSColor {
         return loadColor(named: "LightStoneGray")
     }
 
+    static var linkedBreadcrumbColor: NSColor {
+        return loadColor(named: "LightStoneGray")
+    }
+
     static var linkedSeparatorColor: NSColor {
         return loadColor(named: "Tundora")
     }
@@ -109,7 +113,6 @@ extension NSColor {
     static var linkedTitleColor: NSColor {
         return loadColor(named: "CharmedGreen")
     }
-
 
     // Popover
 

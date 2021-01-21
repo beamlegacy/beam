@@ -29,7 +29,7 @@ class BreadCrumb: Widget {
     let titleLayerYPosition: CGFloat = 15
     let limitCharacters: CGFloat = 100
     let breadCrumXPosition: CGFloat = 26
-    let breadCrumYPosition: CGFloat = 20
+    let breadCrumYPosition: CGFloat = 26
     let spaceBreadcrumbIcon: CGFloat = 15
 
     var linkedReferenceNode: LinkedReferenceNode! {
@@ -71,7 +71,7 @@ class BreadCrumb: Widget {
 
         layer.addSublayer(titleLayer)
 
-        titleLayer.frame = CGRect(origin: CGPoint(x: 0, y: 0), size: titleLayer.preferredFrameSize())
+        titleLayer.frame = CGRect(origin: CGPoint(x: 0, y: titleLayerYPosition), size: titleLayer.preferredFrameSize())
 
         updateCrumbLayers()
 
@@ -96,7 +96,8 @@ class BreadCrumb: Widget {
     override func updateRendering() {
         updateCrumbLayers()
 
-        contentsFrame = NSRect(x: 0, y: 0, width: availableWidth, height: 60)
+        // let y = titleLayerYPosition + titleLayer.preferredFrameSize().height + 6 + 12
+        contentsFrame = NSRect(x: 0, y: 0, width: availableWidth, height: crumbChain.isEmpty ? 45 : 60)
         computedIdealSize = contentsFrame.size
 
         for c in children {
@@ -121,7 +122,7 @@ class BreadCrumb: Widget {
 
             newLayer.font = NSFont.systemFont(ofSize: 0, weight: .medium)
             newLayer.fontSize = 10
-            newLayer.foregroundColor = NSColor.editorTextColor.cgColor
+            newLayer.foregroundColor = NSColor.linkedBreadcrumbColor.cgColor
 
             breadCrumbMaskLayer.contents = breadCrumbArrow
             breadCrumbArrowLayer.mask = breadCrumbMaskLayer
