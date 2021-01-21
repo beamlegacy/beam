@@ -609,16 +609,12 @@ public class TextNode: Widget {
 
         if let link = linkAt(point: mouseInfo.position) {
             editor.cancelInternalLink()
-            editor.dismissPopover()
-            editor.dismissFormatterView()
             editor.openURL(link)
             return true
         }
 
         if let link = internalLinkAt(point: mouseInfo.position) {
             editor.cancelInternalLink()
-            editor.dismissPopover()
-            editor.dismissFormatterView()
             editor.openCard(link)
             return true
         }
@@ -634,18 +630,16 @@ public class TextNode: Widget {
                     root?.cancelSelection()
                     dragMode = .select(cursorPosition)
                 }
+
+                dismissPopoverOrFormatter()
             } else if mouseInfo.event.clickCount == 2 {
                 let clickPos = positionAt(point: mouseInfo.position)
                 root?.wordSelection(from: clickPos)
+                editor.initAndUpdateInlineFormatter()
             } else {
                 root?.doCommand(.selectAll)
             }
         }
-
-        guard editor.popover != nil else { return false }
-        editor.dismissPopover()
-        editor.cancelInternalLink()
-        editor.initFormatterView()
 
         return false
     }
@@ -698,6 +692,8 @@ public class TextNode: Widget {
             return false
         case .select(let o):
             root?.selectedTextRange = text.clamp(p < o ? cursorPosition..<o : o..<cursorPosition)
+            editor.detectFormatterType()
+            editor.initAndUpdateInlineFormatter(isDragged: true)
         }
         invalidate()
 
@@ -965,6 +961,19 @@ public class TextNode: Widget {
         actionTextLayer.opacity = 0
         actionImageLayer.setAffineTransform(CGAffineTransform.identity)
         actionTextLayer.setAffineTransform(CGAffineTransform.identity)
+    }
+
+    private func dismissPopoverOrFormatter() {
+        if editor.popover != nil {
+            editor.cancelInternalLink()
+            editor.dismissPopover()
+            editor.initFormatterView(.persistent)
+        }
+
+        if editor.inlineFormatter != nil {
+            editor.dismissFormatterView(editor.inlineFormatter)
+            editor.initFormatterView(.persistent)
+        }
     }
 
     func nextVisibleTextNode() -> TextNode? {

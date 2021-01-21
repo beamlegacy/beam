@@ -10,15 +10,15 @@ import Cocoa
 
 extension BeamTextEdit {
     internal func toggleHeading(_ level: Int) {
-        updatePersistentView(with: level == 1 ? .h1 : .h2, kind: .heading(level))
+        updateFormatterView(with: level == 1 ? .h1 : .h2, kind: .heading(level))
     }
 
     internal func toggleBold() {
-        updatePersistentView(with: .bold, attribute: .strong)
+        updateFormatterView(with: .bold, attribute: .strong)
     }
 
     internal func toggleEmphasis() {
-        updatePersistentView(with: .italic, attribute: .emphasis)
+        updateFormatterView(with: .italic, attribute: .emphasis)
     }
 
     internal func toggleUnderline() {
@@ -26,7 +26,7 @@ extension BeamTextEdit {
     }
 
     internal func toggleStrikeThrough() {
-        updatePersistentView(with: .strikethrough, attribute: .strikethrough)
+        updateFormatterView(with: .strikethrough, attribute: .strikethrough)
     }
 
     internal func toggleLink() {
@@ -49,7 +49,7 @@ extension BeamTextEdit {
 
     internal func toggleQuote() {
         guard let node = node as? TextNode else { return }
-        updatePersistentView(with: .quote, kind: .quote(1, node.text.text, node.text.text))
+        updateFormatterView(with: .quote, kind: .quote(1, node.text.text, node.text.text))
     }
 
     internal func toggleTodo() {
