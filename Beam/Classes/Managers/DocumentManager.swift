@@ -54,8 +54,8 @@ class DocumentManager {
     private func observeCoredataNotification() {
         NotificationCenter.default
             .publisher(for: Notification.Name.NSManagedObjectContextObjectsDidChange)
-            .sink { [unowned self] notification in
-                // Fatal error: Attempted to read an unowned reference but object 0x60000336ed30 was already deallocated
+            .sink { [weak self] notification in
+                guard let self = self else { return }
                 self.printObjects(notification)
             }
             .store(in: &cancellables)

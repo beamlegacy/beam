@@ -37,7 +37,7 @@ extension BeamTextEdit {
 
         if command == .deleteForward && cursorStartPosition >= cursorPosition ||
            command == .moveLeft && cursorPosition <= cursorStartPosition {
-            dismissAndShowPersistentView()
+            dismissPopoverOrFormatter()
             return
         }
 
@@ -72,12 +72,6 @@ extension BeamTextEdit {
         guard popover != nil else { return }
         popover?.removeFromSuperview()
         popover = nil
-    }
-
-    internal func dismissAndShowPersistentView() {
-        if popoverPrefix > 0 { cancelInternalLink() }
-        dismissPopover()
-        initFormatterView(.persistent)
     }
 
     internal func cancelInternalLink() {
