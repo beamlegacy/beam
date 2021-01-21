@@ -5,6 +5,11 @@ import Combine
 
 // swiftlint:disable file_length
 
+enum NoteType: String, Codable {
+    case journal
+    case note
+}
+
 public struct DocumentStruct {
     let id: UUID
     let title: String

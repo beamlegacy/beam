@@ -90,12 +90,11 @@ extension AppDelegate {
                 let alert = NSAlert()
                 alert.alertStyle = .critical
 
-                let notesCount = Note.countWithPredicate(CoreDataManager.shared.mainContext)
-                let bulletsCount = Bullet.countWithPredicate(CoreDataManager.shared.mainContext)
+                let documentsCount = Document.countWithPredicate(CoreDataManager.shared.mainContext)
 
                 // TODO: i18n
                 alert.messageText = "Backup file has been imported"
-                alert.informativeText = "\(notesCount) notes and \(bulletsCount) bullets have been imported"
+                alert.informativeText = "\(documentsCount) notes have been imported"
                 alert.runModal()
             }
 
@@ -115,8 +114,7 @@ extension AppDelegate {
         openPanel.begin { [weak openPanel] result in
             guard result == .OK, let selectedPath = openPanel?.url?.path else { openPanel?.close(); return }
 
-            let beforeNotesCount = Note.countWithPredicate(CoreDataManager.shared.mainContext)
-            let beforeBulletsCount = Bullet.countWithPredicate(CoreDataManager.shared.mainContext)
+            let beforeNotesCount = Document.countWithPredicate(CoreDataManager.shared.mainContext)
 
             let roamImporter = RoamImporter()
             do {
@@ -128,13 +126,12 @@ extension AppDelegate {
             }
             self.updateBadge()
 
-            let afterNotesCount = Note.countWithPredicate(CoreDataManager.shared.mainContext)
-            let afterBulletsCount = Bullet.countWithPredicate(CoreDataManager.shared.mainContext)
+            let afterNotesCount = Document.countWithPredicate(CoreDataManager.shared.mainContext)
 
             let alert = NSAlert()
             alert.alertStyle = .informational
             alert.messageText = "Roam file has been imported"
-            alert.informativeText = "\(afterNotesCount - beforeNotesCount) notes and \(afterBulletsCount - beforeBulletsCount) bullets have been imported"
+            alert.informativeText = "\(afterNotesCount - beforeNotesCount) notes have been imported"
             alert.runModal()
 
             openPanel?.close()

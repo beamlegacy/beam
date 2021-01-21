@@ -19,8 +19,8 @@ class DocumentsWindow: NSWindow, NSWindowDelegate {
     deinit {
         guard let delegate = NSApplication.shared.delegate as? AppDelegate else { return }
 
-        if delegate.notesWindow == self {
-            delegate.notesWindow = nil
+        if delegate.documentsWindow == self {
+            delegate.documentsWindow = nil
         }
     }
 
