@@ -228,7 +228,7 @@ extension TextRoot {
                 node.delete()
                 self.node = nextNode
 
-                cursorPosition = node.text.count
+                cursorPosition = nextNode.text.count
                 nextNode.text.append(remainingText)
             }
             cancelSelection()
