@@ -418,11 +418,6 @@ public class Widget: NSObject, CALayerDelegate {
         layers[layer.name] = layer
     }
 
-    func addLayer(_ layer: Layer, into parentLayer: CALayer) {
-        parentLayer.addSublayer(layer.layer)
-        layers[layer.name] = layer
-    }
-
     func removeLayer(_ layer: Layer) {
         removeLayer(layer.name)
     }

@@ -19,7 +19,6 @@ class LinksSection: Widget {
     var linkedReferencesCancellable: Cancellable!
     var note: BeamNote
 
-    let sectionLayer = CALayer()
     let sectionTitleLayer = CATextLayer()
     let separatorLayer = CALayer()
     let offsetY: CGFloat = 40
@@ -56,7 +55,7 @@ class LinksSection: Widget {
         updateLayerVisibility()
 
         editor.layer?.addSublayer(layer)
-        layer.addSublayer(sectionLayer)
+        layer.addSublayer(sectionTitleLayer)
         layer.addSublayer(separatorLayer)
 
         setupLayerFrame()
@@ -66,9 +65,6 @@ class LinksSection: Widget {
         sectionTitleLayer.font = NSFont.systemFont(ofSize: 0, weight: .semibold)
         sectionTitleLayer.fontSize = 15
         sectionTitleLayer.foregroundColor = NSColor.linkedSectionTitleColor.cgColor
-
-        sectionLayer.addSublayer(sectionTitleLayer)
-        sectionLayer.backgroundColor = NSColor.clear.cgColor
 
         separatorLayer.backgroundColor = NSColor.linkedSeparatorColor.withAlphaComponent(0.5).cgColor
     }
@@ -102,7 +98,7 @@ class LinksSection: Widget {
             open.toggle()
         }
 
-        addLayer(chevronLayer, into: sectionLayer)
+        addLayer(chevronLayer)
         updateChevron()
     }
 
@@ -130,10 +126,9 @@ class LinksSection: Widget {
 
         computedIdealSize = contentsFrame.size
         computedIdealSize.width = frame.width
-        sectionLayer.frame = CGRect(x: 0, y: 0, width: availableWidth, height: 26)
 
         CATransaction.disableAnimations {
-            separatorLayer.frame = CGRect(x: 0, y: sectionLayer.frame.maxY, width: availableWidth, height: 2)
+            separatorLayer.frame = CGRect(x: 0, y: sectionTitleLayer.frame.maxY + 7, width: availableWidth, height: 2)
         }
 
         if open {

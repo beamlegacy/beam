@@ -97,7 +97,7 @@ class BreadCrumb: Widget {
         updateCrumbLayers()
 
         // let y = titleLayerYPosition + titleLayer.preferredFrameSize().height + 6 + 12
-        contentsFrame = NSRect(x: 0, y: 0, width: availableWidth, height: crumbChain.isEmpty ? 45 : 60)
+        contentsFrame = NSRect(x: 0, y: 0, width: availableWidth, height: crumbChain.count <= 1 ? 45 : 60)
         computedIdealSize = contentsFrame.size
 
         for c in children {
@@ -114,6 +114,8 @@ class BreadCrumb: Widget {
 
         var x = CGFloat(0)
         var textFrame = CGSize.zero
+
+        guard crumbChain.count > 1 else { return }
 
         for i in 0 ..< crumbChain.count {
             let newLayer = CATextLayer()
