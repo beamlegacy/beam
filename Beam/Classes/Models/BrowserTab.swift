@@ -143,6 +143,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             element?.score = s
         }
     }
+
     private func setupObservers() {
         webView.publisher(for: \.title).sink { v in
             self.title = v ?? "loading..."
@@ -170,17 +171,11 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         webView.navigationDelegate = self
         webView.uiDelegate = self
 
-        self.webView.configuration.userContentController.removeAllUserScripts()
-
         removeScriptHandlers()
+        addScriptHandlers()
 
-        self.webView.configuration.userContentController.add(self, name: JSLogger)
-        self.webView.configuration.userContentController.add(self, name: TextSelectedMessage)
-        self.webView.configuration.userContentController.add(self, name: OnScrolledMessage)
-
-        self.webView.configuration.userContentController.addUserScript(WKUserScript(source: overrideConsole, injectionTime: .atDocumentStart, forMainFrameOnly: false))
-        self.webView.configuration.userContentController.addUserScript(WKUserScript(source: jsSelectionObserver, injectionTime: .atDocumentEnd, forMainFrameOnly: false))
-
+        removeUserScripts()
+        addUserScripts()
     }
 
     func cancelObservers() {
@@ -191,11 +186,31 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         removeScriptHandlers()
     }
 
-    func removeScriptHandlers() {
-        self.webView.configuration.userContentController.removeScriptMessageHandler(forName: JSLogger)
-        self.webView.configuration.userContentController.removeScriptMessageHandler(forName: TextSelectedMessage)
-        self.webView.configuration.userContentController.removeScriptMessageHandler(forName: OnScrolledMessage)
+    private func removeUserScripts() {
+        self.webView.configuration.userContentController.removeAllUserScripts()
+    }
 
+    private func addUserScripts() {
+        self.webView.configuration.userContentController.addUserScript(WKUserScript(source: overrideConsole, injectionTime: .atDocumentStart, forMainFrameOnly: false))
+        self.webView.configuration.userContentController.addUserScript(WKUserScript(source: jsSelectionObserver, injectionTime: .atDocumentEnd, forMainFrameOnly: false))
+    }
+
+    private enum ScriptHandlers: String, CaseIterable {
+        case textSelectedMessage
+        case onScrolledMessage
+        case jsLogger
+    }
+
+    private func removeScriptHandlers() {
+        ScriptHandlers.allCases.forEach {
+            webView.configuration.userContentController.removeScriptMessageHandler(forName: $0.rawValue)
+        }
+    }
+
+    private func addScriptHandlers() {
+        ScriptHandlers.allCases.forEach {
+            webView.configuration.userContentController.add(self, name: $0.rawValue)
+        }
     }
 
     // WKNavigationDelegate:
@@ -253,15 +268,11 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
     lazy var overrideConsole: String = { loadJS(from: "OverrideConsole") }()
 
-    let TextSelectedMessage = "beam_textSelected"
-    let OnScrolledMessage = "beam_onScrolled"
-    let JSLogger = "logging"
-
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         switch message.name {
-        case JSLogger:
+        case ScriptHandlers.jsLogger.rawValue:
             Logger.shared.logInfo(String(describing: message.body), category: .javascript)
-        case TextSelectedMessage:
+        case ScriptHandlers.textSelectedMessage.rawValue:
             guard let dict = message.body as? [String: AnyObject],
 //                  let selectedText = dict["selectedText"] as? String,
                   let selectedHtml = dict["selectedHtml"] as? String,
@@ -284,7 +295,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                     _ = self.note?.addChild(e)
                 }
             }
-        case OnScrolledMessage:
+        case ScriptHandlers.onScrolledMessage.rawValue:
             guard let dict = message.body as? [String: AnyObject],
 //                  let selectedText = dict["selectedText"] as? String,
                 let x = dict["x"] as? Double,
