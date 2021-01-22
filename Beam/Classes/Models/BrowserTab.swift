@@ -172,9 +172,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
         self.webView.configuration.userContentController.removeAllUserScripts()
 
-        self.webView.configuration.userContentController.removeScriptMessageHandler(forName: TextSelectedMessage)
-        self.webView.configuration.userContentController.removeScriptMessageHandler(forName: OnScrolledMessage)
-        self.webView.configuration.userContentController.removeScriptMessageHandler(forName: JSLogger)
+        removeScriptHandlers()
 
         self.webView.configuration.userContentController.add(self, name: JSLogger)
         self.webView.configuration.userContentController.add(self, name: TextSelectedMessage)
@@ -190,8 +188,14 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         webView.navigationDelegate = nil
         webView.uiDelegate = nil
 
+        removeScriptHandlers()
+    }
+
+    func removeScriptHandlers() {
+        self.webView.configuration.userContentController.removeScriptMessageHandler(forName: JSLogger)
         self.webView.configuration.userContentController.removeScriptMessageHandler(forName: TextSelectedMessage)
         self.webView.configuration.userContentController.removeScriptMessageHandler(forName: OnScrolledMessage)
+
     }
 
     // WKNavigationDelegate:
