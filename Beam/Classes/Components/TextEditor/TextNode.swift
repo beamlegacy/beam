@@ -620,16 +620,16 @@ public class TextNode: Widget {
 
         if contentsFrame.contains(mouseInfo.position) {
             if mouseInfo.event.clickCount == 1 {
-                let clickPos = self.positionAt(point: mouseInfo.position)
+                let clickPos = positionAt(point: mouseInfo.position)
                 if mouseInfo.event.modifierFlags.contains(.shift) {
-                    self.dragMode = .select(self.cursorPosition)
-                    self.root?.extendSelection(to: clickPos)
-                    self.editor.initAndUpdateInlineFormatter()
+                    dragMode = .select(cursorPosition)
+                    root?.extendSelection(to: clickPos)
+                    editor.initAndUpdateInlineFormatter()
                     return false
                 } else {
-                    self.root?.cursorPosition = clickPos
-                    self.root?.cancelSelection()
-                    self.dragMode = .select(self.cursorPosition)
+                    root?.cursorPosition = clickPos
+                    root?.cancelSelection()
+                    dragMode = .select(cursorPosition)
                 }
 
                 doubleClickTimer = Timer.scheduledTimer(withTimeInterval: doucleClickInterval, repeats: false, block: { [weak self] (_) in
@@ -652,8 +652,6 @@ public class TextNode: Widget {
 
     override func mouseUp(mouseInfo: MouseInfo) -> Bool {
         editor.detectFormatterType()
-
-        print("mouseUp: \(mouseInfo.event.clickCount)")
 
         if disclosurePressed && disclosureButtonFrame.contains(mouseInfo.position) {
             disclosurePressed = false
