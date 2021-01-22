@@ -10,7 +10,7 @@ import SwiftSoup
 
 class PageRank: Codable {
     class Page: Codable {
-        var id: UInt64 = MonotonicIncreasingID64.newValue
+        var id: UInt64
         var inbound = Set<UInt64>()
         var outbound = Set<UInt64>()
 

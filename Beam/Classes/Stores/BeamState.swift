@@ -12,8 +12,8 @@ import WebKit
 import SwiftSoup
 
 let NoteDisplayThreshold = Float(0.0)
-
-// swiftlint:disable type_body_length
+//swiftlint:disable file_length
+//swiftlint:disable:next type_body_length
 @objc class BeamState: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var data: BeamData
     public var searchEngine: SearchEngine = GoogleSearch()
@@ -36,11 +36,18 @@ let NoteDisplayThreshold = Float(0.0)
             case .note: fallthrough
             case .today:
                 if mode == .web {
-                    currentTab?.startViewing()
+                    currentTab?.startReading()
                 }
 
             case .web:
-                currentTab?.stopViewing()
+                switch mode {
+                case .note:
+                    currentTab?.switchToCard()
+                case .today:
+                    currentTab?.switchToNewSearch()
+                default:
+                    break
+                }
             }
             updateCanGoBackForward()
         }
@@ -98,8 +105,8 @@ let NoteDisplayThreshold = Float(0.0)
     @Published var currentTab: BrowserTab? {
         didSet {
             if self.mode == .web {
-                oldValue?.stopViewing()
-                currentTab?.startViewing()
+                oldValue?.switchToOtherTab()
+                currentTab?.startReading()
             }
 
             tabScope.removeAll()
@@ -135,7 +142,7 @@ let NoteDisplayThreshold = Float(0.0)
                 }
             }
         case .web:
-            currentTab?.webView.goBack()
+            currentTab?.goBack()
         }
 
         updateCanGoBackForward()
@@ -158,7 +165,7 @@ let NoteDisplayThreshold = Float(0.0)
                 }
             }
         case .web:
-            currentTab?.webView.goForward()
+            currentTab?.goForward()
         }
 
         updateCanGoBackForward()

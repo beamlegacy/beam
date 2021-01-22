@@ -8,8 +8,8 @@
 import Foundation
 
 class Scores: Codable {
-    private var cards: [String: Score] = [:]
-    func scoreCard(for id: String) -> Score {
+    private var cards: [UInt64: Score] = [:]
+    func scoreCard(for id: UInt64) -> Score {
         if let card = cards[id] {
             return card
         }
@@ -17,6 +17,10 @@ class Scores: Codable {
         let card = Score()
         cards[id] = card
         return card
+    }
+
+    func scoreCard(for link: String) -> Score {
+        return scoreCard(for: LinkStore.createIdFor(link))
     }
 }
 

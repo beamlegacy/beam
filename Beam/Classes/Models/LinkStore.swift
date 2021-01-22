@@ -13,12 +13,22 @@ struct Link: Codable {
 }
 
 class LinkStore: Codable {
+    var idGenerator = MonotonicIncreasingID64()
     static var shared = LinkStore()
+    lazy var linkManager: LinkManager = { LinkManager() }()
 
     public private(set) var links = [UInt64: Link]()
     public private(set) var ids = [String: UInt64]()
 
     init() {
+    }
+
+    func loadFromDB() -> Int {
+        let loadedLinks = linkManager.loadLinks()
+        for link in loadedLinks {
+            links[UInt64(bitPattern: link.bid)] = Link(url: link.url, visits: [])
+        }
+        return loadedLinks.count
     }
 
     required public init(from decoder: Decoder) throws {
@@ -27,15 +37,21 @@ class LinkStore: Codable {
         for link in links {
             ids[link.value.url] = link.key
         }
+
+        if container.contains(.idGenerator) {
+            idGenerator = try container.decode(MonotonicIncreasingID64.self, forKey: .idGenerator)
+        }
     }
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(links, forKey: .links)
+        try container.encode(idGenerator, forKey: .idGenerator)
     }
 
     enum CodingKeys: String, CodingKey {
         case links
+        case idGenerator
     }
 
     func getIdFor(link: String) -> UInt64? {
@@ -51,6 +67,8 @@ class LinkStore: Codable {
             let id = MonotonicIncreasingID64.newValue
             ids[link] = id
             links[id] = Link(url: link, visits: [])
+            let linkStruct = LinkStruct(bid: Int64(bitPattern: id), url: link, title: nil)
+            linkManager.saveLink(linkStruct)
             return id
         }
 

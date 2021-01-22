@@ -87,10 +87,11 @@ public class TextRoot: TextNode {
 
     var linksSection: LinksSection?
     var referencesSection: LinksSection?
+    var browsingSection: BrowsingSection?
 
     override internal var children: [Widget] {
         get {
-            super.children + [linksSection, referencesSection].compactMap { $0 }
+            super.children + [linksSection, referencesSection, browsingSection].compactMap { $0 }
         }
         set {
             fatalError()
@@ -150,6 +151,8 @@ public class TextRoot: TextNode {
             linksSection?.parent = self
             referencesSection = LinksSection(editor: editor, note: note, mode: .references)
             referencesSection?.parent = self
+            browsingSection = BrowsingSection(editor: editor, note: note)
+            browsingSection?.parent = self
         }
 
         node = children.first ?? self

@@ -57,9 +57,21 @@
             </uniquenessConstraint>
         </uniquenessConstraints>
     </entity>
+    <entity name="StoredLink" representedClassName=".StoredLink" syncable="YES">
+        <attribute name="bid" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="title" optional="YES" attributeType="String"/>
+        <attribute name="url" attributeType="String" defaultValueString=""/>
+        <fetchIndex name="byPropertyId">
+            <fetchIndexElement property="bid" type="Binary" order="ascending"/>
+        </fetchIndex>
+        <fetchIndex name="byPropertyUrl">
+            <fetchIndexElement property="url" type="Binary" order="ascending"/>
+        </fetchIndex>
+    </entity>
     <elements>
         <element name="Bullet" positionX="-54" positionY="18" width="128" height="209"/>
-        <element name="Document" positionX="-279" positionY="99" width="128" height="149"/>
+        <element name="Document" positionX="-176.8372802734375" positionY="-258.5739135742188" width="128" height="119"/>
         <element name="Note" positionX="-489.015625" positionY="-17.69921875" width="128" height="179"/>
+        <element name="StoredLink" positionX="-410.7252197265625" positionY="-248.30859375" width="128" height="74"/>
     </elements>
 </model>
