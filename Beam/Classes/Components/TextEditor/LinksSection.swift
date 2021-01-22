@@ -19,7 +19,6 @@ class LinksSection: Widget {
     var open: Bool = true {
         didSet {
             updateVisibility(visible && open)
-            updateChevron()
             invalidateLayout()
         }
     }
@@ -42,7 +41,9 @@ class LinksSection: Widget {
         textLayer.foregroundColor = NSColor.editorIconColor.cgColor
         textLayer.fontSize = 14
 
-        createChevron()
+        addLayer(ChevronButton("chevron", open: open, changed: { [unowned self] value in
+            self.open = value
+        }))
 
         switch mode {
         case .links:
@@ -65,7 +66,6 @@ class LinksSection: Widget {
         editor.layer?.addSublayer(layer)
         layer.addSublayer(textLayer)
         textLayer.frame = CGRect(origin: CGPoint(x: 25, y: 0), size: textLayer.preferredFrameSize())
-        updateChevron()
     }
 
     override var contentsScale: CGFloat {
@@ -109,18 +109,5 @@ class LinksSection: Widget {
 
     func updateLayerVisibility() {
         layer.isHidden = linkedReferenceNodes.isEmpty
-    }
-
-    func createChevron() {
-        let button = ButtonLayer("chevron", Layer.icon(named: "editor-arrow_right", color: NSColor.editorIconColor))
-        button.activated = { [unowned self] in
-            open.toggle()
-        }
-        addLayer(button)
-        updateChevron()
-    }
-
-    func updateChevron() {
-        layers["chevron"]?.layer.setAffineTransform(CGAffineTransform(rotationAngle: open ? CGFloat.pi / 2 : 0))
     }
 }

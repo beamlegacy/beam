@@ -79,7 +79,7 @@
                                                 <action selector="newSearch:" target="Ady-hI-5gd" id="A5z-dM-XS8"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="New Search..." tag="2" keyEquivalent="F" id="7bQ-0P-W15" userLabel="New Search...">
+                                        <menuItem title="New Search..." tag="-7" keyEquivalent="F" id="7bQ-0P-W15" userLabel="New Search...">
                                             <connections>
                                                 <action selector="newSearch:" target="Ady-hI-5gd" id="AAg-12-xc0"/>
                                             </connections>
@@ -687,9 +687,36 @@
                                     </items>
                                 </menu>
                             </menuItem>
+                            <menuItem title="Navigation" id="An6-Hf-p3M" userLabel="Navigation">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <menu key="submenu" title="Navigation" autoenablesItems="NO" id="cCx-1g-tLY">
+                                    <items>
+                                        <menuItem title="Go Back" tag="4" keyEquivalent="[" id="NOl-ax-hus">
+                                            <connections>
+                                                <action selector="goBack:" target="Voe-Tx-rLC" id="W3Y-ZE-CJG"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Go Back" tag="-4" keyEquivalent="" id="JJG-Tc-9sk">
+                                            <connections>
+                                                <action selector="goBack:" target="Voe-Tx-rLC" id="ql9-2b-itW"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Go Forward" tag="4" keyEquivalent="]" id="jIn-Gg-R6F">
+                                            <connections>
+                                                <action selector="goForward:" target="Voe-Tx-rLC" id="Sjy-FA-ty4"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Go Forward" tag="-4" keyEquivalent="" id="68V-0m-mxt">
+                                            <connections>
+                                                <action selector="goForward:" target="Voe-Tx-rLC" id="IaG-q2-Ng7"/>
+                                            </connections>
+                                        </menuItem>
+                                    </items>
+                                </menu>
+                            </menuItem>
                             <menuItem title="Window" id="aUF-d1-5bR">
                                 <modifierMask key="keyEquivalentModifierMask"/>
-                                <menu key="submenu" title="Window" systemMenu="window" id="Td7-aD-5lo">
+                                <menu key="submenu" title="Window" systemMenu="window" autoenablesItems="NO" id="Td7-aD-5lo">
                                     <items>
                                         <menuItem title="Minimize" keyEquivalent="m" id="OY7-WF-poV">
                                             <connections>
@@ -703,7 +730,7 @@
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="eu3-7i-yIM"/>
-                                        <menuItem title="Show previous tab" id="TK0-jr-lkZ" userLabel="Show Previous Tab">
+                                        <menuItem title="Show previous tab" tag="4" id="TK0-jr-lkZ" userLabel="Show Previous Tab">
                                             <string key="keyEquivalent" base64-UTF8="YES">
 GQ
 </string>
@@ -712,13 +739,13 @@ GQ
                                                 <action selector="showPreviousTab:" target="Ady-hI-5gd" id="QFs-kq-p2g"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Show Previous Tab" tag="2" keyEquivalent="[" id="oAb-PD-njU" userLabel="Show Previous Tab">
+                                        <menuItem title="Show Previous Tab" tag="-4" keyEquivalent="[" id="oAb-PD-njU" userLabel="Show Previous Tab">
                                             <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
                                             <connections>
                                                 <action selector="showPreviousTab:" target="Ady-hI-5gd" id="cP6-aq-98d"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Show Next Tab" id="ALY-z5-5pM" userLabel="Show Next Tab">
+                                        <menuItem title="Show Next Tab" tag="4" id="ALY-z5-5pM" userLabel="Show Next Tab">
                                             <string key="keyEquivalent" base64-UTF8="YES">
 CQ
 </string>
@@ -727,7 +754,7 @@ CQ
                                                 <action selector="showNextTab:" target="Ady-hI-5gd" id="NFT-aq-DrR"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Show Next Tab" tag="2" keyEquivalent="]" id="KJE-FH-Z16" userLabel="Show Next Tab">
+                                        <menuItem title="Show Next Tab" tag="-4" keyEquivalent="]" id="KJE-FH-Z16" userLabel="Show Next Tab">
                                             <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
                                             <connections>
                                                 <action selector="showNextTab:" target="Ady-hI-5gd" id="q1N-Nw-YOb"/>
@@ -744,10 +771,16 @@ CQ
                                                 <action selector="showJournal:" target="Ady-hI-5gd" id="ysb-J3-SMJ"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Toggle score card" id="AED-TZ-YmC" userLabel="Toggle score card">
+                                        <menuItem title="Toggle score card" tag="4" id="AED-TZ-YmC" userLabel="Toggle score card">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
                                                 <action selector="toggleScoreCard:" target="Ady-hI-5gd" id="RTT-Uf-Jy7"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Toggle browsing tree card" tag="4" id="Fu6-WY-AjE" userLabel="Toggle browsing tree card">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="toggleBrowsingTreeCard:" target="Ady-hI-5gd" id="Znw-6l-Fwo"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="8CZ-9R-gka"/>

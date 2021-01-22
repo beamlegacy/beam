@@ -27,6 +27,11 @@ public class Widget: NSObject, CALayerDelegate {
     var contentsScale = CGFloat(2) {
         didSet {
             layer.contentsScale = contentsScale
+
+            for layer in layers.values {
+                layer.layer.contentsScale = contentsScale
+            }
+
             for c in children {
                 c.contentsScale = contentsScale
             }
@@ -58,6 +63,10 @@ public class Widget: NSObject, CALayerDelegate {
             c.parent = self
             c.availableWidth = availableWidth - childInset
             c.contentsScale = contentsScale
+            editor.layer?.addSublayer(c.layer)
+            for l in c.layers where l.value.layer.superlayer == nil {
+                editor.layer?.addSublayer(l.value.layer)
+            }
         }
     }
 
@@ -197,6 +206,7 @@ public class Widget: NSObject, CALayerDelegate {
 
     func addLayerTo(layer: CALayer, recursive: Bool) {
         layer.addSublayer(self.layer)
+        layer.contentsScale = contentsScale
         for subLayer in layers.values where subLayer.layer.superlayer != layer {
             layer.addSublayer(subLayer.layer)
         }
@@ -364,13 +374,27 @@ public class Widget: NSObject, CALayerDelegate {
     // MARK: - Methods Widget
 
     func addChild(_ child: Widget) {
-        //addChild(child.element)
+        children.append(child)
         invalidateLayout()
     }
 
     func removeChild(_ child: Widget) {
-        //removeChild(child.element)
+        children.removeAll { w -> Bool in
+            w === child
+        }
+        child.layer.removeFromSuperlayer()
+        for l in child.layers where l.value.layer.superlayer == editor.layer {
+            l.value.layer.removeFromSuperlayer()
+        }
+
         invalidateLayout()
+    }
+
+    func clear() {
+        let c = children
+        for child in c {
+            removeChild(child)
+        }
     }
 
     func delete() {
@@ -408,7 +432,9 @@ public class Widget: NSObject, CALayerDelegate {
     }
 
     internal var layers: [String: Layer] = [:]
-    func addLayer(_ layer: Layer, global: Bool = false) {
+    func addLayer(_ layer: Layer, position: CGPoint = CGPoint(), global: Bool = false) {
+        layer.frame = CGRect(origin: position, size: layer.frame.size)
+
         if global {
             editor.layer?.addSublayer(layer.layer)
         } else {
