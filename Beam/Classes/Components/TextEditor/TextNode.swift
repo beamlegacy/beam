@@ -209,9 +209,12 @@ public class TextNode: Widget {
         }
     }
 
+    private var doubleClickTimer: Timer?
     private var icon = NSImage(named: "editor-cmdreturn")
     private var actionLayer: CALayer?
     private var actionLayerIsHovered = false
+
+    private let doucleClickInterval = 0.23
     private let actionImageLayer = CALayer()
     private let actionTextLayer = CATextLayer()
     private let actionLayerFrame = CGRect(x: 30, y: 0, width: 80, height: 20)
@@ -617,22 +620,29 @@ public class TextNode: Widget {
 
         if contentsFrame.contains(mouseInfo.position) {
             if mouseInfo.event.clickCount == 1 {
-                let clickPos = positionAt(point: mouseInfo.position)
+                let clickPos = self.positionAt(point: mouseInfo.position)
                 if mouseInfo.event.modifierFlags.contains(.shift) {
-                    dragMode = .select(cursorPosition)
-                    root?.extendSelection(to: clickPos)
+                    self.dragMode = .select(self.cursorPosition)
+                    self.root?.extendSelection(to: clickPos)
+                    self.editor.initAndUpdateInlineFormatter()
+                    return false
                 } else {
-                    root?.cursorPosition = clickPos
-                    root?.cancelSelection()
-                    dragMode = .select(cursorPosition)
+                    self.root?.cursorPosition = clickPos
+                    self.root?.cancelSelection()
+                    self.dragMode = .select(self.cursorPosition)
                 }
 
-                editor.dismissPopoverOrFormatter()
+                doubleClickTimer = Timer.scheduledTimer(withTimeInterval: doucleClickInterval, repeats: false, block: { [weak self] (_) in
+                    guard let self = self else { return }
+                    self.editor.dismissPopoverOrFormatter()
+                })
             } else if mouseInfo.event.clickCount == 2 {
                 let clickPos = positionAt(point: mouseInfo.position)
+                doubleClickTimer?.invalidate()
                 root?.wordSelection(from: clickPos)
                 editor.initAndUpdateInlineFormatter()
             } else {
+                doubleClickTimer?.invalidate()
                 root?.doCommand(.selectAll)
             }
         }
@@ -642,6 +652,8 @@ public class TextNode: Widget {
 
     override func mouseUp(mouseInfo: MouseInfo) -> Bool {
         editor.detectFormatterType()
+
+        print("mouseUp: \(mouseInfo.event.clickCount)")
 
         if disclosurePressed && disclosureButtonFrame.contains(mouseInfo.position) {
             disclosurePressed = false
