@@ -49,6 +49,8 @@ class BeamNote: BeamElement {
         case searchQueries
         case visitedSearchResults
         case browsingSessions
+        case linkedReferences
+        case unlinkedReferences
     }
 
     required init(from decoder: Decoder) throws {
@@ -61,6 +63,12 @@ class BeamNote: BeamElement {
         visitedSearchResults = try container.decode([VisitedPage].self, forKey: .visitedSearchResults)
         if container.contains(.browsingSessions) {
             browsingSessions = try container.decode([BrowsingTree].self, forKey: .browsingSessions)
+        }
+        if container.contains(.linkedReferences) {
+            linkedReferences = try container.decode([NoteReference].self, forKey: .linkedReferences)
+        }
+        if container.contains(.unlinkedReferences) {
+            unlinkedReferences = try container.decode([NoteReference].self, forKey: .unlinkedReferences)
         }
 
         try super.init(from: decoder)
@@ -76,6 +84,12 @@ class BeamNote: BeamElement {
         try container.encode(visitedSearchResults, forKey: .visitedSearchResults)
         if !browsingSessions.isEmpty {
             try container.encode(browsingSessions, forKey: .browsingSessions)
+        }
+        if !linkedReferences.isEmpty {
+            try container.encode(linkedReferences, forKey: .linkedReferences)
+        }
+        if !unlinkedReferences.isEmpty {
+            try container.encode(unlinkedReferences, forKey: .unlinkedReferences)
         }
 
         try super.encode(to: encoder)
