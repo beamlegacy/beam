@@ -103,18 +103,20 @@ class BreadCrumb: Widget {
         titleLayer.fontSize = 17
         titleLayer.foregroundColor = NSColor.linkedTitleColor.cgColor
 
-        cardTitleLayer = Layer(name: "cardTitleLayer", layer: titleLayer, down: {_ in
-            print("click")
-            return true
-        }, up: {_ in
-            print("click")
-            return true
-        })
-
         linkLayer.string = "Link"
         linkLayer.font = NSFont.systemFont(ofSize: 0, weight: .medium)
         linkLayer.fontSize = 13
         linkLayer.foregroundColor = NSColor.linkedActionButtonColor.cgColor
+
+        cardTitleLayer = Layer(name: "cardTitleLayer", layer: titleLayer, down: {[weak self] _ in
+            guard let self = self else { return false }
+            print("click down")
+            self.editor.openCard(note.title)
+            return true
+        }, up: {_ in
+            print("click up")
+            return true
+        })
 
         if section.mode == .references {
             actionLinkLayer = Layer(name: "actionLinkLayer", layer: linkLayer, hover: { [weak self] isHover in

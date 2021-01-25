@@ -402,7 +402,7 @@ public class TextNode: Widget {
                 return emptyLayout.lines[0]
             }
 
-            guard let cursorLine = lineAt(index: cursorPosition) else { fatalError() }
+            guard let cursorLine = lineAt(index: cursorPosition <= 0 ? 0 : cursorPosition) else { fatalError() }
             return layout!.lines[cursorLine]
         }()
 
