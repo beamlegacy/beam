@@ -507,6 +507,17 @@ public class Widget: NSObject, CALayerDelegate {
         return mouseUp(mouseInfo: info)
     }
 
+    func dispatchMouseMoved(mouseInfo: MouseInfo) {
+        _ = handleMouseMoved(mouseInfo: mouseInfo)
+
+        for c in children {
+            var i = mouseInfo
+            i.position.x -= c.frame.origin.x
+            i.position.y -= c.frame.origin.y
+            c.dispatchMouseMoved(mouseInfo: i)
+        }
+    }
+
     func dispatchMouseDragged(mouseInfo: MouseInfo) -> Widget? {
         guard let focussedNode = root?.node else { return nil }
 
