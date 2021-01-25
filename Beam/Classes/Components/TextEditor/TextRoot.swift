@@ -88,13 +88,14 @@ public class TextRoot: TextNode {
 
     var topSpacerWidget: SpacerWidget?
     var middleSpacerWidget: SpacerWidget?
+    var bottomSpacerWidget: SpacerWidget?
     var linksSection: LinksSection?
     var referencesSection: LinksSection?
     var browsingSection: BrowsingSection?
 
     override internal var children: [Widget] {
         get {
-            super.children + [topSpacerWidget, linksSection, middleSpacerWidget, referencesSection, browsingSection].compactMap { $0 }
+            super.children + [topSpacerWidget, linksSection, middleSpacerWidget, referencesSection, bottomSpacerWidget, browsingSection].compactMap { $0 }
         }
         set {
             fatalError()
@@ -158,6 +159,8 @@ public class TextRoot: TextNode {
             middleSpacerWidget?.parent = self
             referencesSection = LinksSection(editor: editor, note: note, mode: .references)
             referencesSection?.parent = self
+            bottomSpacerWidget = SpacerWidget(editor: editor, spacerType: .bottom)
+            bottomSpacerWidget?.parent = self
             browsingSection = BrowsingSection(editor: editor, note: note)
             browsingSection?.parent = self
         }

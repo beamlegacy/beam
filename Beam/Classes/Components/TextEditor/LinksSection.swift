@@ -58,8 +58,6 @@ class LinksSection: Widget {
         layer.addSublayer(sectionTitleLayer)
         layer.addSublayer(linkActionLayer)
         layer.addSublayer(separatorLayer)
-
-        setupLayerFrame()
     }
 
     func setupUI() {
@@ -70,6 +68,11 @@ class LinksSection: Widget {
         sectionTitleLayer.font = NSFont.systemFont(ofSize: 0, weight: .semibold)
         sectionTitleLayer.fontSize = 15
         sectionTitleLayer.foregroundColor = NSColor.linkedSectionTitleColor.cgColor
+
+        addLayer(ButtonLayer("sectionTitle", sectionTitleLayer, activated: {
+            self.open.toggle()
+            self.layers["chevron"]?.layer.setAffineTransform(CGAffineTransform(rotationAngle: self.open ? CGFloat.pi / 2 : 0))
+        }))
 
         linkActionLayer.font = NSFont.systemFont(ofSize: 0, weight: .medium)
         linkActionLayer.fontSize = 13
@@ -100,7 +103,15 @@ class LinksSection: Widget {
     }
 
     func setupLayerFrame() {
-        sectionTitleLayer.frame = CGRect(origin: CGPoint(x: 25, y: 0), size: sectionTitleLayer.preferredFrameSize())
+        sectionTitleLayer.frame = CGRect(
+            origin: CGPoint(x: 25, y: 0),
+            size: CGSize(
+                width: availableWidth - (linkActionLayer.frame.width + (mode == .references ? 30 : 25)),
+                height: sectionTitleLayer.preferredFrameSize().height
+            )
+        )
+
+        sectionTitleLayer.backgroundColor = NSColor.red.withAlphaComponent(0.2).cgColor
         linkActionLayer.frame = CGRect(origin: CGPoint(x: 0, y: 0), size: linkActionLayer.preferredFrameSize())
     }
 
@@ -130,6 +141,8 @@ class LinksSection: Widget {
         computedIdealSize.width = frame.width
 
         CATransaction.disableAnimations {
+            setupLayerFrame()
+
             separatorLayer.frame = CGRect(x: 0, y: sectionTitleLayer.frame.maxY + 7, width: availableWidth, height: 2)
             linkActionLayer.frame = CGRect(origin: CGPoint(x: availableWidth - linkActionLayer.frame.width, y: 0), size: linkActionLayer.preferredFrameSize())
         }

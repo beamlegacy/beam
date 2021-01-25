@@ -11,6 +11,7 @@ class SpacerWidget: Widget {
     enum SpacerType {
         case top
         case middle
+        case bottom
     }
 
     var spacerType: SpacerType
@@ -28,6 +29,8 @@ class SpacerWidget: Widget {
             space = 77
         case .middle:
             space = 42
+        case .bottom:
+            space = 30
         }
 
         computedIdealSize.height = space
