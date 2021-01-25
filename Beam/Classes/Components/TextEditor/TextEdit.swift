@@ -1038,8 +1038,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             hoveredNode = newNode
         }
 
-        _ = node.handleMouseMoved(mouseInfo: MouseInfo(node, point, event))
-        _ = hoveredNode?.handleMouseMoved(mouseInfo: MouseInfo(hoveredNode!, point, event))
+        rootNode.dispatchMouseMoved(mouseInfo: MouseInfo(rootNode, point, event))
     }
 
     override public func mouseUp(with event: NSEvent) {
