@@ -94,6 +94,10 @@ extension NSColor {
         return loadColor(named: "LightStoneGray")
     }
 
+    static var linkedActionButtonHoverColor: NSColor {
+        return loadColor(named: "CharmedGreen")
+    }
+
     static var linkedActionButtonColor: NSColor {
         return loadColor(named: "LightStoneGray")
     }

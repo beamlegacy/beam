@@ -17,6 +17,8 @@ class BreadCrumb: Widget {
     var section: LinksSection
     var selectedCrumb: Int = 0
     var container: Layer?
+    var cardTitleLayer: Layer?
+    var actionLinkLayer: Layer?
 
     let chevron = NSImage(named: "editor-arrow_right")
     let breadCrumbArrow = NSImage(named: "editor-breadcrumb_arrow")
@@ -24,7 +26,7 @@ class BreadCrumb: Widget {
     let maskLayer = CALayer()
     let containerLayer = CALayer()
     let titleLayer = CATextLayer()
-    let linkActionLayer = CATextLayer()
+    let linkLayer = CATextLayer()
 
     let chevronXPosition: CGFloat = 0
     let titleLayerXPosition: CGFloat = 25
@@ -50,8 +52,6 @@ class BreadCrumb: Widget {
 
     override var contentsScale: CGFloat {
         didSet {
-            titleLayer.contentsScale = contentsScale
-            linkActionLayer.contentsScale = contentsScale
             for l in crumbLayers {
                 l.contentsScale = contentsScale
             }
@@ -76,17 +76,23 @@ class BreadCrumb: Widget {
         self.crumbChain.removeFirst()
         self.crumbChain.removeLast()
 
-        // containerLayer.backgroundColor = NSColor.linkedContainerColor.cgColor
+        setupLayers(with: note)
+        updateCrumbLayers()
+
+        if children != [linkedReferenceNode] {
+            children = [linkedReferenceNode]
+            invalidateLayout()
+        }
+    }
+
+    func setupLayers(with note: BeamNote) {
         containerLayer.opacity = 0.02
         containerLayer.cornerRadius = 10
 
         container = Layer(name: "containerLayer", layer: containerLayer, hover: { [weak self] isHover in
             guard let self = self else { return }
-            print("Hover: \(isHover)")
             self.containerLayer.backgroundColor = isHover ? NSColor.linkedContainerColor.cgColor : NSColor.clear.cgColor
         })
-
-        addLayer(container!)
 
         addLayer(ChevronButton("chevron", open: open, changed: { [unowned self] value in
             self.open = value
@@ -97,26 +103,36 @@ class BreadCrumb: Widget {
         titleLayer.fontSize = 17
         titleLayer.foregroundColor = NSColor.linkedTitleColor.cgColor
 
-        linkActionLayer.string = "Link"
-        linkActionLayer.font = NSFont.systemFont(ofSize: 0, weight: .medium)
-        linkActionLayer.fontSize = 13
-        linkActionLayer.foregroundColor = NSColor.linkedActionButtonColor.cgColor
+        cardTitleLayer = Layer(name: "cardTitleLayer", layer: titleLayer, down: {_ in
+            print("click")
+            return true
+        }, up: {_ in
+            print("click")
+            return true
+        })
 
-        layer.addSublayer(titleLayer)
+        linkLayer.string = "Link"
+        linkLayer.font = NSFont.systemFont(ofSize: 0, weight: .medium)
+        linkLayer.fontSize = 13
+        linkLayer.foregroundColor = NSColor.linkedActionButtonColor.cgColor
 
         if section.mode == .references {
-            layer.addSublayer(linkActionLayer)
+            actionLinkLayer = Layer(name: "actionLinkLayer", layer: linkLayer, hover: { [weak self] isHover in
+                guard let self = self else { return }
+                self.linkLayer.foregroundColor = isHover ? NSColor.linkedActionButtonHoverColor.cgColor : NSColor.linkedActionButtonColor.cgColor
+            })
+
+            if let link = actionLinkLayer { addLayer(link) }
         }
 
-        titleLayer.frame = CGRect(origin: CGPoint(x: 25, y: titleLayerYPosition), size: titleLayer.preferredFrameSize())
+        guard let container = container,
+              let cardTitleLayer = cardTitleLayer else { return }
+
+        addLayer(cardTitleLayer)
+        addLayer(container)
+
+        cardTitleLayer.frame = CGRect(origin: CGPoint(x: 25, y: titleLayerYPosition), size: titleLayer.preferredFrameSize())
         layers["chevron"]?.frame = CGRect(origin: CGPoint(x: 0, y: titleLayer.frame.height - 8), size: CGSize(width: 20, height: 20))
-
-        updateCrumbLayers()
-
-        if children != [linkedReferenceNode] {
-            children = [linkedReferenceNode]
-            invalidateLayout()
-        }
     }
 
     func computeCrumChain(from element: BeamElement) -> [BeamElement] {
@@ -129,35 +145,6 @@ class BreadCrumb: Widget {
         }
 
         return chain.reversed()
-    }
-
-    override func updateRendering() {
-        updateCrumbLayers()
-
-        contentsFrame = NSRect(x: 0, y: 0, width: availableWidth, height: open ? (crumbChain.count <= 1 ? 35 : 60) : 30)
-        computedIdealSize = contentsFrame.size
-
-        CATransaction.disableAnimations {
-            let yPos = crumbChain.count <= 1 ? 38 : breadCrumYPosition + 9
-            linkActionLayer.frame = CGRect(origin: CGPoint(x: availableWidth - linkActionLayer.frame.width, y: yPos), size: linkActionLayer.preferredFrameSize())
-        }
-
-        if !open {
-            crumbLayers.forEach { (v) in
-                v.isHidden = true
-            }
-
-            linkActionLayer.isHidden = true
-        } else {
-            for c in children {
-                computedIdealSize.height += c.idealSize.height
-
-                CATransaction.disableAnimations {
-                    containerLayer.frame = NSRect(x: 0, y: titleLayer.frame.height + 10, width: (contentsFrame.width - linkActionLayer.frame.width) - 20, height: crumbChain.count <= 1 ? c.idealSize.height : c.idealSize.height + 20)
-                }
-            }
-        }
-
     }
 
     func updateCrumbLayers() {
@@ -217,6 +204,42 @@ class BreadCrumb: Widget {
         selectedCrumb = crumbLayers.count
     }
 
+    func updateCrumbLayersVisibility() {
+        for i in 0..<crumbLayers.count {
+            crumbLayers[i].opacity = i < selectedCrumb ? 1.0 : 0.5
+        }
+    }
+
+    override func updateRendering() {
+        updateCrumbLayers()
+
+        contentsFrame = NSRect(x: 0, y: 0, width: availableWidth, height: open ? (crumbChain.count <= 1 ? 35 : 60) : 30)
+        actionLinkLayer?.layer.isHidden = !open
+        computedIdealSize = contentsFrame.size
+
+        CATransaction.disableAnimations {
+            guard let actionLinkLayer = actionLinkLayer else { return }
+            let yPos = crumbChain.count <= 1 ? 38 : breadCrumYPosition + 9
+            actionLinkLayer.frame = CGRect(origin: CGPoint(x: (availableWidth - linkLayer.frame.width) - 10, y: yPos), size: linkLayer.preferredFrameSize())
+        }
+
+        if !open {
+            crumbLayers.forEach { (v) in
+                v.isHidden = true
+            }
+        } else {
+            for c in children {
+                computedIdealSize.height += c.idealSize.height
+
+                CATransaction.disableAnimations {
+                    guard let container = container else { return }
+                    container.frame = NSRect(x: 0, y: titleLayer.frame.height + 10, width: contentsFrame.width, height: crumbChain.count <= 1 ? c.idealSize.height : c.idealSize.height + 20)
+                }
+            }
+        }
+
+    }
+
     override func mouseDown(mouseInfo: MouseInfo) -> Bool {
         return contentsFrame.contains(mouseInfo.position)
     }
@@ -247,11 +270,5 @@ class BreadCrumb: Widget {
         }
 
         return false
-    }
-
-    func updateCrumbLayersVisibility() {
-        for i in 0..<crumbLayers.count {
-            crumbLayers[i].opacity = i < selectedCrumb ? 1.0 : 0.5
-        }
     }
 }

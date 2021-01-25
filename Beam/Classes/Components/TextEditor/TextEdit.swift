@@ -135,6 +135,9 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
         initBlinking()
         updateRoot(with: root)
+
+        let trackingArea = NSTrackingArea(rect: self.bounds, options: [.activeAlways, .inVisibleRect, .mouseEnteredAndExited], owner: self, userInfo: nil)
+        self.addTrackingArea(trackingArea)
     }
 
     deinit {
@@ -968,6 +971,14 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     // MARK: - Mouse Event
+    public override func updateTrackingAreas() {
+        for t in trackingAreas {
+            removeTrackingArea(t)
+        }
+
+        addTrackingArea(NSTrackingArea(rect: bounds, options: [.mouseMoved, .activeInActiveApp], owner: self, userInfo: nil))
+    }
+
     override public func mouseDown(with event: NSEvent) {
         //       window?.makeFirstResponder(self)
         reBlink()
