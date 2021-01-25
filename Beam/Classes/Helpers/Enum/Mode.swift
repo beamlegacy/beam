@@ -7,8 +7,8 @@
 
 import Foundation
 
-enum Mode {
-    case today
-    case note
-    case web
+enum Mode: Int {
+    case today = 1
+    case note = 2
+    case web = 4
 }

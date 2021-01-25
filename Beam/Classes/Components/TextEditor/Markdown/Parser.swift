@@ -9,14 +9,6 @@
 import Foundation
 import AppKit
 
-extension Lexer.Token {
-    var attributedString: NSMutableAttributedString {
-        let str = string.attributed
-        str.addAttribute(.sourcePos, value: start as NSNumber, range: str.wholeRange)
-        return str
-    }
-}
-
 // swiftlint:disable:next type_body_length
 class Parser {
     enum NodeType: Equatable, Hashable {
@@ -75,7 +67,7 @@ class Parser {
         func decoration(_ decorationType: DecorationType, _ decorate: Bool, _ font: NSFont) -> NSMutableAttributedString {
             guard decorate else { return "".attributed }
             let deco = decorations[decorationType]!
-            let str = deco.attributedString
+            let str = NSMutableAttributedString(string: deco.string)
             str.addAttributes([NSAttributedString.Key.foregroundColor: NSColor.editorSyntaxColor], range: str.wholeRange)
             str.addAttribute(.font, value: font, range: str.wholeRange)
 

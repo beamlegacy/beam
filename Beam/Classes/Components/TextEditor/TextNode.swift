@@ -36,6 +36,7 @@ public class TextNode: Widget {
     var elementKind: ElementKind
 
     var layout: TextFrame?
+    var emptyLayout: TextFrame?
     var disclosurePressed = false
     var frameAnimation: FrameAnimation?
     var frameAnimationCancellable = Set<AnyCancellable>()
@@ -175,13 +176,17 @@ public class TextNode: Widget {
     var readOnly: Bool = false
     var isEditing: Bool { root?.node === self && root?.state.nodeSelection == nil }
 
-    var firstLineHeight: CGFloat { layout?.lines.first?.bounds.height ?? CGFloat(fontSize * interlineFactor) }
+    var firstLineHeight: CGFloat {
+        let layout = emptyLayout ?? self.layout
+        return layout?.lines.first?.bounds.height ?? CGFloat(fontSize * interlineFactor)
+    }
     var firstLineBaseline: CGFloat {
+        let layout = emptyLayout ?? self.layout
         if let firstLine = layout?.lines.first {
             let h = firstLine.typographicBounds.ascent
             return CGFloat(h) + firstLine.frame.minY
         }
-        let f = AttributedStringVisitor.font(fontSize)
+        let f = BeamText.font(fontSize)
         return f.ascender
     }
 
@@ -204,9 +209,12 @@ public class TextNode: Widget {
         }
     }
 
+    private var doubleClickTimer: Timer?
     private var icon = NSImage(named: "editor-cmdreturn")
     private var actionLayer: CALayer?
     private var actionLayerIsHovered = false
+
+    private let doucleClickInterval = 0.23
     private let actionImageLayer = CALayer()
     private let actionTextLayer = CATextLayer()
     private let actionLayerFrame = CGRect(x: 30, y: 0, width: 80, height: 20)
@@ -319,7 +327,7 @@ public class TextNode: Widget {
             _attributedString = nil
             return
         }
-        if updateAttributedString() {
+        if updateAttributedString() || elementText.isEmpty {
             invalidateRendering()
         }
     }
@@ -386,29 +394,18 @@ public class TextNode: Widget {
     }
 
     func drawCursor(in context: CGContext) {
-        guard !readOnly else { return }
-
-        // Draw fake cursor if the text is empty
-        if text.isEmpty || layout!.lines.count == 0 {
-            guard editor.hasFocus, editor.blinkPhase else { return }
-
-            let f = AttributedStringVisitor.font(fontSize)
-            let cursorRect = NSRect(x: indent, y: 0, width: 7, height: CGFloat(f.ascender - f.descender))
-
-            context.beginPath()
-            context.addRect(cursorRect)
-            //let fill = RBFill()
-            context.setFillColor(enabled ? color.cgColor : disabledColor.cgColor)
-
-            //list.draw(shape: shape, fill: fill, alpha: 1.0, blendMode: .normal)
-            context.drawPath(using: .fill)
-            return
-        }
+        guard !readOnly, editor.hasFocus, editor.blinkPhase else { return }
 
         // Otherwise, draw the cursor at a real position
-        guard let cursorLine = lineAt(index: cursorPosition), editor.hasFocus, editor.blinkPhase else { return }
+        let line: TextLine =  {
+            if let emptyLayout = emptyLayout {
+                return emptyLayout.lines[0]
+            }
 
-        let line = layout!.lines[cursorLine]
+            guard let cursorLine = lineAt(index: cursorPosition) else { fatalError() }
+            return layout!.lines[cursorLine]
+        }()
+
         let pos = cursorPosition
         let x1 = offsetAt(index: pos)
         let cursorRect = NSRect(x: x1, y: line.frame.minY, width: cursorPosition == text.count ? bigCursorWidth : smallCursorWidth, height: line.bounds.height)
@@ -429,15 +426,18 @@ public class TextNode: Widget {
             contentsFrame = NSRect()
 
             if selfVisible {
+                emptyLayout = nil
                 let attrStr = attributedString
                 let layout = Font.draw(string: attrStr, atPosition: NSPoint(x: indent, y: 0), textWidth: (availableWidth - actionLayerFrame.width) - actionLayerFrame.minX)
                 self.layout = layout
                 contentsFrame = layout.frame
 
                 if attrStr.string.isEmpty {
-                    let f = AttributedStringVisitor.font(fontSize)
-                    contentsFrame.size.height = CGFloat(f.ascender - f.descender) * interlineFactor
-                    contentsFrame.size.width += CGFloat(indent)
+                    let dummyText = buildAttributedString(for: BeamText(text: "Dummy!"))
+                    let fakelayout = Font.draw(string: dummyText, atPosition: NSPoint(x: indent, y: 0), textWidth: (availableWidth - actionLayerFrame.width) - actionLayerFrame.minX)
+
+                    self.emptyLayout = fakelayout
+                    contentsFrame = fakelayout.frame
                 }
 
                 if self as? TextRoot == nil {
@@ -452,7 +452,6 @@ public class TextNode: Widget {
         }
 
         computedIdealSize = contentsFrame.size
-//        computedIdealSize.width = frame.width
 
         if open {
             for c in children {
@@ -625,18 +624,25 @@ public class TextNode: Widget {
                 if mouseInfo.event.modifierFlags.contains(.shift) {
                     dragMode = .select(cursorPosition)
                     root?.extendSelection(to: clickPos)
+                    editor.initAndUpdateInlineFormatter()
+                    return false
                 } else {
                     root?.cursorPosition = clickPos
                     root?.cancelSelection()
                     dragMode = .select(cursorPosition)
                 }
 
-                editor.dismissPopoverOrFormatter()
+                doubleClickTimer = Timer.scheduledTimer(withTimeInterval: doucleClickInterval, repeats: false, block: { [weak self] (_) in
+                    guard let self = self else { return }
+                    self.editor.dismissPopoverOrFormatter()
+                })
             } else if mouseInfo.event.clickCount == 2 {
                 let clickPos = positionAt(point: mouseInfo.position)
+                doubleClickTimer?.invalidate()
                 root?.wordSelection(from: clickPos)
                 editor.initAndUpdateInlineFormatter()
             } else {
+                doubleClickTimer?.invalidate()
                 root?.doCommand(.selectAll)
             }
         }
@@ -800,6 +806,7 @@ public class TextNode: Widget {
     }
 
     public func offsetAt(index: Int) -> CGFloat {
+        let layout = emptyLayout ?? self.layout
         guard layout != nil, !layout!.lines.isEmpty else { return 0 }
         let displayIndex = displayIndexFor(sourceIndex: index)
         guard let line = lineAt(index: displayIndex) else { return 0 }
@@ -921,8 +928,8 @@ public class TextNode: Widget {
         context.fill(contentsFrame)
     }
 
-    private func buildAttributedString() -> NSAttributedString {
-        let str = elementText.buildAttributedString(fontSize: fontSize, cursorPosition: cursorPosition, elementKind: elementKind)
+    private func buildAttributedString(for beamText: BeamText) -> NSAttributedString {
+        let str = beamText.buildAttributedString(fontSize: fontSize, cursorPosition: cursorPosition, elementKind: elementKind)
         let paragraphStyle = NSMutableParagraphStyle()
 //        paragraphStyle.alignment = .justified
         paragraphStyle.lineBreakMode = .byWordWrapping
@@ -933,6 +940,10 @@ public class TextNode: Widget {
 
         str.addAttribute(.paragraphStyle, value: paragraphStyle, range: str.wholeRange)
         return str
+    }
+
+    private func buildAttributedString() -> NSAttributedString {
+        return buildAttributedString(for: elementText)
     }
 
     private func actionLayerMousePosition(from mouseInfo: MouseInfo) -> NSPoint {

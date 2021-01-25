@@ -12,4 +12,12 @@ extension URL {
         guard let host = self.host else { return "" }
         return host.split(separator: ".").suffix(2).joined(separator: ".")
     }
+
+    var isSearchResult: Bool {
+        if let host = host {
+            return host.hasSuffix("google.com") && path.hasPrefix("/url")
+        }
+
+        return false
+    }
 }

@@ -42,6 +42,10 @@ struct ModeView: View {
                                     if data.showTabStats, let score = tab.score {
                                         TabStats(score: score)
                                     }
+
+                                    if data.showBrowsingTree {
+                                        BrowsingTreeView(browsingTree: tab.browsingTree)
+                                    }
                                 }
                             }
                         }

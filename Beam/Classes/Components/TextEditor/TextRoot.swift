@@ -85,12 +85,15 @@ public class TextRoot: TextNode {
         return self
     }
 
+    var topSpacerWidget: SpacerWidget?
+    var middleSpacerWidget: SpacerWidget?
     var linksSection: LinksSection?
     var referencesSection: LinksSection?
+    var browsingSection: BrowsingSection?
 
     override internal var children: [Widget] {
         get {
-            super.children + [linksSection, referencesSection].compactMap { $0 }
+            super.children + [topSpacerWidget, linksSection, middleSpacerWidget, referencesSection, browsingSection].compactMap { $0 }
         }
         set {
             fatalError()
@@ -146,16 +149,22 @@ public class TextRoot: TextNode {
         }
 
         if let note = note {
+            topSpacerWidget = SpacerWidget(editor: editor, spacerType: .top)
+            topSpacerWidget?.parent = self
             linksSection = LinksSection(editor: editor, note: note, mode: .links)
             linksSection?.parent = self
+            middleSpacerWidget = SpacerWidget(editor: editor, spacerType: .middle)
+            middleSpacerWidget?.parent = self
             referencesSection = LinksSection(editor: editor, note: note, mode: .references)
             referencesSection?.parent = self
+            browsingSection = BrowsingSection(editor: editor, note: note)
+            browsingSection?.parent = self
         }
 
         node = children.first ?? self
         childInset = 0
 
-        layer.backgroundColor = NSColor.blue.cgColor.copy(alpha: 0.2)
+        // layer.backgroundColor = NSColor.blue.cgColor.copy(alpha: 0.2)
 
 //        print("created RootNode \(note.title) with \(children.count) main bullets")
     }

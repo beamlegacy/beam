@@ -8,6 +8,10 @@
 import Foundation
 import AppKit
 
+extension NSAttributedString.Key {
+    static let source = NSAttributedString.Key(rawValue: "beamSource")
+}
+
 extension BeamText {
     func buildAttributedString(fontSize: CGFloat, cursorPosition: Int, elementKind: ElementKind) -> NSMutableAttributedString {
         let string = NSMutableAttributedString()
@@ -18,10 +22,18 @@ extension BeamText {
     }
 
     private func font(_ size: CGFloat, weight: NSFont.Weight = .regular) -> NSFont {
+        Self.font(size, weight: weight)
+    }
+
+    static func font(_ size: CGFloat, weight: NSFont.Weight = .regular) -> NSFont {
         return NSFont.systemFont(ofSize: size, weight: weight)
     }
 
     private func font(fontSize: CGFloat, strong: Bool, emphasis: Bool, elementKind: ElementKind) -> NSFont {
+        Self.font(fontSize: fontSize, strong: strong, emphasis: emphasis, elementKind: elementKind)
+    }
+
+    static func font(fontSize: CGFloat, strong: Bool, emphasis: Bool, elementKind: ElementKind) -> NSFont {
         var weight = NSFont.Weight.regular
         let headingFirstLevel: CGFloat = 28
         let headingSecondLevel: CGFloat = 22

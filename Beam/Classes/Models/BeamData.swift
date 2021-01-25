@@ -24,6 +24,7 @@ public class BeamData: ObservableObject {
     @Published var noteCount = 0
 
     @Published var showTabStats = false
+    @Published var showBrowsingTree = false
 
     var cookies: HTTPCookieStorage
     var documentManager: DocumentManager
@@ -38,14 +39,16 @@ public class BeamData: ObservableObject {
 
     init() {
         documentManager = DocumentManager()
+        let linkCount = LinkStore.shared.loadFromDB()
+        Logger.shared.logInfo("Loaded \(linkCount) links from DB", category: .document)
 
-        if FileManager.default.fileExists(atPath: Self.linkStorePath.absoluteString) {
-            do {
-                try LinkStore.loadFrom(Self.linkStorePath)
-            } catch {
-                Logger.shared.logError("Unable to load link store from \(Self.linkStorePath): \(error)", category: .search)
-            }
-        }
+//        if FileManager.default.fileExists(atPath: Self.linkStorePath.absoluteString) {
+//        do {
+//            try LinkStore.loadFrom(Self.linkStorePath)
+//        } catch {
+//            Logger.shared.logError("Unable to load link store from \(Self.linkStorePath)", category: .search)
+//        }
+//        }
         index = Index.loadOrCreate(Self.indexPath)
 
         cookies = HTTPCookieStorage()
@@ -55,12 +58,12 @@ public class BeamData: ObservableObject {
 
     func saveData() {
         // save search index
-        do {
-            Logger.shared.logInfo("Save link store to \(Self.linkStorePath)", category: .search)
-            try LinkStore.saveTo(Self.linkStorePath)
-        } catch {
-            Logger.shared.logError("Unable to save link store to \(Self.linkStorePath): \(error)", category: .search)
-        }
+//        do {
+//            Logger.shared.logInfo("Save link store to \(Self.linkStorePath)", category: .search)
+//            try LinkStore.saveTo(Self.linkStorePath)
+//        } catch {
+//            Logger.shared.logError("Unable to save link store to \(Self.linkStorePath): \(error)", category: .search)
+//        }
 
         // save search index
         do {

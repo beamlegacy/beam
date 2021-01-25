@@ -31,13 +31,16 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     @IBOutlet var window: BeamWindow!
     var windows: [BeamWindow] = []
-    var data: BeamData = BeamData()
+    var data: BeamData!
 
     let documentManager = DocumentManager()
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        NSApp.mainMenu?.item(withTitle: "File")?.submenu?.delegate = self
-        NSApp.mainMenu?.item(withTitle: "Window")?.submenu?.delegate = self
+        for item in NSApp.mainMenu?.items ?? [] {
+            item.submenu?.delegate = self
+
+            prepareMenu(items: item.submenu?.items ?? [], for: Mode.today.rawValue)
+        }
 
         CoreDataManager.shared.setup()
         LibrariesManager.shared.configure()
@@ -51,6 +54,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             sparkleUpdater.checkForUpdatesInBackground()
         }
 
+        data = BeamData()
         updateBadge()
         createWindow()
 
@@ -74,13 +78,29 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     func toggleVisibility(_ visible: Bool, ofAlternatesKeyEquivalentsItems items: [NSMenuItem]) {
-        for item in items.filter({ $0.tag == 2 }) {
+        for item in items.filter({ $0.tag < 0 }) {
             item.isHidden = !visible
         }
     }
 
+    func prepareMenu(items: [NSMenuItem], for mode: Int) {
+        for item in items {
+            if item.tag == 0 {
+                continue
+            }
+            let value = abs(item.tag)
+            let mask = value & mode
+            item.isEnabled = mask != 0
+        }
+    }
+
     func menuWillOpen(_ menu: NSMenu) {
+        // menu items with tag == 0 are ALWAYS enabled and visible
+        // menu items with tag == mode are only enabled in the corresponding mode
+        // menu items with tag == -mode are only enabled and visible in the corresponding mode
+
         toggleVisibility(false, ofAlternatesKeyEquivalentsItems: menu.items)
+        prepareMenu(items: menu.items, for: window.state.mode.rawValue)
     }
 
     func menuDidClose(_ menu: NSMenu) {
@@ -89,6 +109,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     func applicationWillTerminate(_ aNotification: Notification) {
         // Insert code here to tear down your application
+        data.saveData()
     }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
@@ -197,5 +218,37 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     @IBAction private func preferencesMenuItemActionHandler(_ sender: NSMenuItem) {
         preferencesWindowController.show()
+    }
+
+    func applicationWillHide(_ notification: Notification) {
+        for window in windows {
+            window.state.currentTab?.switchToBackground()
+        }
+    }
+
+    func applicationDidUnhide(_ notification: Notification) {
+        for window in windows where window.isMainWindow {
+            window.state.currentTab?.startReading()
+        }
+    }
+
+    func applicationDidBecomeActive(_ notification: Notification) {
+        for window in windows where window.isMainWindow {
+            window.state.currentTab?.startReading()
+        }
+    }
+
+    func applicationWillResignActive(_ notification: Notification) {
+        for window in windows {
+            window.state.currentTab?.switchToBackground()
+        }
+    }
+
+    @IBAction func goBack(_ sender: Any?) {
+        window.state.goBack()
+    }
+
+    @IBAction func goForward(_ sender: Any?) {
+        window.state.goForward()
     }
 }

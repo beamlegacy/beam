@@ -23,6 +23,7 @@ class BreadCrumb: Widget {
     let chevronLayer = CALayer()
     let maskLayer = CALayer()
     let titleLayer = CATextLayer()
+    let linkActionLayer = CATextLayer()
 
     let chevronXPosition: CGFloat = 0
     let titleLayerXPosition: CGFloat = 25
@@ -41,6 +42,7 @@ class BreadCrumb: Widget {
     override var contentsScale: CGFloat {
         didSet {
             titleLayer.contentsScale = contentsScale
+            linkActionLayer.contentsScale = contentsScale
             for l in crumbLayers {
                 l.contentsScale = contentsScale
             }
@@ -69,7 +71,16 @@ class BreadCrumb: Widget {
         titleLayer.fontSize = 17
         titleLayer.foregroundColor = NSColor.linkedTitleColor.cgColor
 
+        linkActionLayer.string = "Link"
+        linkActionLayer.font = NSFont.systemFont(ofSize: 0, weight: .medium)
+        linkActionLayer.fontSize = 13
+        linkActionLayer.foregroundColor = NSColor.linkedActionButtonColor.cgColor
+
         layer.addSublayer(titleLayer)
+
+        if section.mode == .references {
+            layer.addSublayer(linkActionLayer)
+        }
 
         titleLayer.frame = CGRect(origin: CGPoint(x: 0, y: titleLayerYPosition), size: titleLayer.preferredFrameSize())
 
@@ -99,6 +110,11 @@ class BreadCrumb: Widget {
         // let y = titleLayerYPosition + titleLayer.preferredFrameSize().height + 6 + 12
         contentsFrame = NSRect(x: 0, y: 0, width: availableWidth, height: crumbChain.count <= 1 ? 45 : 60)
         computedIdealSize = contentsFrame.size
+
+        CATransaction.disableAnimations {
+            let yPos = crumbChain.count <= 1 ? 48 : breadCrumYPosition + 9
+            linkActionLayer.frame = CGRect(origin: CGPoint(x: availableWidth - linkActionLayer.frame.width, y: yPos), size: linkActionLayer.preferredFrameSize())
+        }
 
         for c in children {
             computedIdealSize.height += c.idealSize.height

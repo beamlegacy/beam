@@ -11,9 +11,10 @@ import Combine
 
 class ButtonLayer: Layer {
     @Published var pressed: Bool = false
-    var activated = { () in }
+    var activated: () -> Void
 
-    init(_ name: String, _ layer: CALayer) {
+    init(_ name: String, _ layer: CALayer, activated: @escaping () -> Void = { }) {
+        self.activated = activated
         super.init(name: name, layer: layer)
         mouseDown = { [unowned self] _ -> Bool in
             self.pressed = true

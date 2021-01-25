@@ -45,6 +45,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     @Published var visitedURLs = Set<URL>()
     @Published var favIcon: NSImage?
 
+    @Published var browsingTree: BrowsingTree
     @Published var privateMode = false
 
     var state: BeamState!
@@ -70,7 +71,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         config.preferences.javaScriptEnabled = true
         config.preferences.javaScriptCanOpenWindowsAutomatically = false
         config.preferences.tabFocusesLinks = true
-        config.preferences.plugInsEnabled = true
+//        config.preferences.plugInsEnabled = true
         config.preferences._setFullScreenEnabled(true)
         config.preferences.isFraudulentWebsiteWarningEnabled = true
         config.defaultWebpagePreferences.preferredContentMode = .desktop
@@ -101,8 +102,10 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             backForwardList = web.backForwardList
             self.webView = web
         }
+        browsingTree = BrowsingTree(BrowsingNode(parent: nil, url: originalQuery))
 
         super.init(frame: NSRect())
+        note?.browsingSessions.append(browsingTree)
         setupObservers()
     }
 
@@ -139,10 +142,12 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
     private func updateScore() {
         if let s = score?.score {
-            Logger.shared.logDebug("updated score[\(url!.absoluteString)] = \(s)", category: .general)
+//            Logger.shared.logDebug("updated score[\(url!.absoluteString)] = \(s)", category: .general)
             element?.score = s
         }
     }
+
+    var backListSize = 0
     private func setupObservers() {
         webView.publisher(for: \.title).sink { v in
             self.title = v ?? "loading..."
@@ -170,19 +175,11 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         webView.navigationDelegate = self
         webView.uiDelegate = self
 
-        self.webView.configuration.userContentController.removeAllUserScripts()
+        removeScriptHandlers()
+        addScriptHandlers()
 
-        self.webView.configuration.userContentController.removeScriptMessageHandler(forName: TextSelectedMessage)
-        self.webView.configuration.userContentController.removeScriptMessageHandler(forName: OnScrolledMessage)
-        self.webView.configuration.userContentController.removeScriptMessageHandler(forName: JSLogger)
-
-        self.webView.configuration.userContentController.add(self, name: JSLogger)
-        self.webView.configuration.userContentController.add(self, name: TextSelectedMessage)
-        self.webView.configuration.userContentController.add(self, name: OnScrolledMessage)
-
-        self.webView.configuration.userContentController.addUserScript(WKUserScript(source: overrideConsole, injectionTime: .atDocumentStart, forMainFrameOnly: false))
-        self.webView.configuration.userContentController.addUserScript(WKUserScript(source: jsSelectionObserver, injectionTime: .atDocumentEnd, forMainFrameOnly: false))
-
+        removeUserScripts()
+        addUserScripts()
     }
 
     func cancelObservers() {
@@ -190,8 +187,51 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         webView.navigationDelegate = nil
         webView.uiDelegate = nil
 
-        self.webView.configuration.userContentController.removeScriptMessageHandler(forName: TextSelectedMessage)
-        self.webView.configuration.userContentController.removeScriptMessageHandler(forName: OnScrolledMessage)
+        removeScriptHandlers()
+    }
+
+    private func removeUserScripts() {
+        self.webView.configuration.userContentController.removeAllUserScripts()
+    }
+
+    private func addUserScripts() {
+        self.webView.configuration.userContentController.addUserScript(WKUserScript(source: overrideConsole, injectionTime: .atDocumentStart, forMainFrameOnly: false))
+        self.webView.configuration.userContentController.addUserScript(WKUserScript(source: jsSelectionObserver, injectionTime: .atDocumentEnd, forMainFrameOnly: false))
+    }
+
+    private enum ScriptHandlers: String, CaseIterable {
+        case textSelectedMessage
+        case onScrolledMessage
+        case jsLogger
+    }
+
+    private func removeScriptHandlers() {
+        ScriptHandlers.allCases.forEach {
+            webView.configuration.userContentController.removeScriptMessageHandler(forName: $0.rawValue)
+        }
+    }
+
+    private func addScriptHandlers() {
+        ScriptHandlers.allCases.forEach {
+            webView.configuration.userContentController.add(self, name: $0.rawValue)
+        }
+    }
+
+    private var currentBackForwardItem: WKBackForwardListItem?
+    private func handleBackForwardWebView(navigationAction: WKNavigationAction) {
+        if navigationAction.navigationType == .backForward {
+            let isBack = webView.backForwardList.backList
+                .filter { $0 == currentBackForwardItem }
+                .count == 0
+
+            if isBack {
+                browsingTree.goBack()
+            } else {
+                browsingTree.goForward()
+            }
+        }
+
+        currentBackForwardItem = webView.backForwardList.currentItem
     }
 
     // WKNavigationDelegate:
@@ -200,16 +240,9 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     }
 
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, preferences: WKWebpagePreferences, decisionHandler: @escaping (WKNavigationActionPolicy, WKWebpagePreferences) -> Void) {
-        var isSearchResult = false
+        handleBackForwardWebView(navigationAction: navigationAction)
         if let targetURL = navigationAction.request.url {
-            if let currentHost = self.webView.url?.host {
-                if let targetHost = targetURL.host {
-                    let startsWithURL = targetURL.path.hasPrefix("/url")
-                    isSearchResult = currentHost.hasSuffix("google.com") && targetHost.hasSuffix("google.com") && startsWithURL && !visitedURLs.isEmpty
-                }
-            }
-
-            if navigationAction.modifierFlags.contains(.command) != isSearchResult {
+            if navigationAction.modifierFlags.contains(.command) {
                 // Create new tab
                 let newWebView = FullScreenWKWebView(frame: NSRect(), configuration: Self.webViewConfiguration)
                 newWebView.wantsLayer = true
@@ -220,6 +253,8 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                 navigationCount += 1
                 onNewTabCreated(newTab)
                 decisionHandler(.cancel, preferences)
+                browsingTree.switchToOtherTab()
+
                 return
             }
 
@@ -249,15 +284,11 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
     lazy var overrideConsole: String = { loadJS(from: "OverrideConsole") }()
 
-    let TextSelectedMessage = "beam_textSelected"
-    let OnScrolledMessage = "beam_onScrolled"
-    let JSLogger = "logging"
-
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         switch message.name {
-        case JSLogger:
+        case ScriptHandlers.jsLogger.rawValue:
             Logger.shared.logInfo(String(describing: message.body), category: .javascript)
-        case TextSelectedMessage:
+        case ScriptHandlers.textSelectedMessage.rawValue:
             guard let dict = message.body as? [String: AnyObject],
 //                  let selectedText = dict["selectedText"] as? String,
                   let selectedHtml = dict["selectedHtml"] as? String,
@@ -280,7 +311,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                     _ = self.note?.addChild(e)
                 }
             }
-        case OnScrolledMessage:
+        case ScriptHandlers.onScrolledMessage.rawValue:
             guard let dict = message.body as? [String: AnyObject],
 //                  let selectedText = dict["selectedText"] as? String,
                 let x = dict["x"] as? Double,
@@ -304,6 +335,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         guard let url = webView.url else { return }
+        browsingTree.navigateTo(url: url.absoluteString)
 
         Readability.read(webView) { [weak self] result in
             guard let self = self else { return }
@@ -364,11 +396,37 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         completionHandler(nil)
     }
 
-    func startViewing() {
+    func startReading() {
         lastViewDate = Date()
+        browsingTree.startReading()
     }
 
-    func stopViewing() {
+    func switchToCard() {
+        browsingTree.switchToCard()
         score?.readingTime += lastViewDate.distance(to: Date())
+    }
+
+    func switchToOtherTab() {
+        browsingTree.switchToOtherTab()
+        score?.readingTime += lastViewDate.distance(to: Date())
+    }
+
+    func switchToNewSearch() {
+        browsingTree.switchToNewSearch()
+        score?.readingTime += lastViewDate.distance(to: Date())
+    }
+
+    func goBack() {
+        browsingTree.goBack()
+        webView.goBack()
+    }
+
+    func goForward() {
+        browsingTree.goForward()
+        webView.goForward()
+    }
+
+    func switchToBackground() {
+        browsingTree.switchToBackground()
     }
 }

@@ -86,24 +86,34 @@ struct BID32: Codable, Hashable, Equatable {
     }
 }
 
-struct MonotonicIncreasingID32 {
-    static var value: UInt32 = 0
-    static var newValue: UInt32 {
+struct MonotonicIncreasingID32: Codable {
+    var value: UInt32 = 0
+    mutating func newValue() -> UInt32 {
         defer {
-            Self.value += 1
+            value += 1
         }
 
-        return Self.value
+        return value
+    }
+
+    static var shared = Self()
+    static var newValue: UInt32 {
+        return Self.shared.newValue()
     }
 }
 
-struct MonotonicIncreasingID64 {
-    static var value: UInt64 = 0
-    static var newValue: UInt64 {
+struct MonotonicIncreasingID64: Codable {
+    var value: UInt64 = 0
+    mutating func newValue() -> UInt64 {
         defer {
-            Self.value += 1
+            value += 1
         }
 
-        return Self.value
+        return value
+    }
+
+    static var shared = Self()
+    static var newValue: UInt64 {
+        return Self.shared.newValue()
     }
 }

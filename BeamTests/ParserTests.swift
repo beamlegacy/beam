@@ -20,12 +20,6 @@ class ParserTests: XCTestCase {
         let AST = parser.parseAST()
 
         print("AST:\n\(AST.treeString)")
-
-        let config = AttributedStringVisitor.Configuration()
-        let visitor = AttributedStringVisitor(configuration: config)
-        let str = visitor.visit(AST)
-        print("attributed string: \(str)")
-
     }
 
     func testParser2() {
@@ -33,11 +27,6 @@ class ParserTests: XCTestCase {
 
         let parser = Parser(inputString: string)
         let AST = parser.parseAST()
-
-        let config = AttributedStringVisitor.Configuration()
-        let visitor = AttributedStringVisitor(configuration: config)
-        let str = visitor.visit(AST)
-        print("attributed string: \(str)")
     }
 
     func testParser3() {
@@ -45,11 +34,6 @@ class ParserTests: XCTestCase {
 
         let parser = Parser(inputString: string)
         let AST = parser.parseAST()
-
-        let config = AttributedStringVisitor.Configuration()
-        let visitor = AttributedStringVisitor(configuration: config)
-        let str = visitor.visit(AST)
-        print("attributed string: \(str)")
     }
 
     func testParser4() {
@@ -57,11 +41,6 @@ class ParserTests: XCTestCase {
 
         let parser = Parser(inputString: string)
         let AST = parser.parseAST()
-
-        let config = AttributedStringVisitor.Configuration()
-        let visitor = AttributedStringVisitor(configuration: config)
-        let str = visitor.visit(AST)
-        print("attributed string: \(str)")
     }
 
     func testParser5() {
@@ -70,11 +49,6 @@ class ParserTests: XCTestCase {
         let parser = Parser(inputString: string)
         let AST = parser.parseAST()
         print("AST: \(AST.treeString)")
-
-        let config = AttributedStringVisitor.Configuration()
-        let visitor = AttributedStringVisitor(configuration: config)
-        let str = visitor.visit(AST)
-        print("attributed string: \(str)")
     }
 
     func testParser6() {
@@ -83,11 +57,6 @@ class ParserTests: XCTestCase {
         let parser = Parser(inputString: string)
         let AST = parser.parseAST()
         print("AST: \(AST.treeString)")
-
-        let config = AttributedStringVisitor.Configuration()
-        let visitor = AttributedStringVisitor(configuration: config)
-        let str = visitor.visit(AST)
-        print("attributed string: \(str)")
     }
 
     func testParser7() {
@@ -96,10 +65,5 @@ class ParserTests: XCTestCase {
         let parser = Parser(inputString: string)
         let AST = parser.parseAST()
         print("AST: \(AST.treeString)")
-
-        let config = AttributedStringVisitor.Configuration()
-        let visitor = AttributedStringVisitor(configuration: config)
-        let str = visitor.visit(AST)
-        print("attributed string: \(str)")
     }
 }

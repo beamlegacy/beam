@@ -110,4 +110,18 @@ extension Layer {
         maskLayer.frame = iconLayer.bounds
         return iconLayer
     }
+
+    static func text(_ label: String, color: NSColor = NSColor.editorTextColor, size: CGFloat = 12) -> CATextLayer {
+        let textLayer = CATextLayer()
+        textLayer.string = label
+        textLayer.foregroundColor = NSColor.editorIconColor.cgColor
+        textLayer.fontSize = size
+        textLayer.frame = CGRect(origin: CGPoint(), size: textLayer.preferredFrameSize())
+
+        return textLayer
+    }
+
+    static func text(named: String, _ label: String, color: NSColor = NSColor.editorTextColor, size: CGFloat = 12) -> Layer {
+        Layer(name: named, layer: text(label, color: color, size: size))
+    }
 }

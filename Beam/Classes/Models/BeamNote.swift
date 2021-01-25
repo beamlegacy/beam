@@ -31,6 +31,7 @@ class BeamNote: BeamElement {
 
     @Published public private(set) var searchQueries: [String] = [] { didSet { change() } } ///< Search queries whose results were used to populate this note
     @Published public private(set) var visitedSearchResults: [VisitedPage] = [] { didSet { change() } } ///< URLs whose content were used to create this note
+    @Published public var browsingSessions = [BrowsingTree]() { didSet { change() } }
 
     override var note: BeamNote? {
         return self
@@ -47,6 +48,7 @@ class BeamNote: BeamElement {
         case outLinks
         case searchQueries
         case visitedSearchResults
+        case browsingSessions
     }
 
     required init(from decoder: Decoder) throws {
@@ -57,6 +59,9 @@ class BeamNote: BeamElement {
         outLinks = try container.decode([String].self, forKey: .outLinks)
         searchQueries = try container.decode([String].self, forKey: .searchQueries)
         visitedSearchResults = try container.decode([VisitedPage].self, forKey: .visitedSearchResults)
+        if container.contains(.browsingSessions) {
+            browsingSessions = try container.decode([BrowsingTree].self, forKey: .browsingSessions)
+        }
 
         try super.init(from: decoder)
     }
@@ -69,6 +74,9 @@ class BeamNote: BeamElement {
         try container.encode(outLinks, forKey: .outLinks)
         try container.encode(searchQueries, forKey: .searchQueries)
         try container.encode(visitedSearchResults, forKey: .visitedSearchResults)
+        if !browsingSessions.isEmpty {
+            try container.encode(browsingSessions, forKey: .browsingSessions)
+        }
 
         try super.encode(to: encoder)
     }
