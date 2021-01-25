@@ -111,7 +111,7 @@ class LinksSection: Widget {
             )
         )
 
-        sectionTitleLayer.backgroundColor = NSColor.red.withAlphaComponent(0.2).cgColor
+        layers["chevron"]?.frame = CGRect(origin: CGPoint(x: 0, y: sectionTitleLayer.preferredFrameSize().height - 15), size: CGSize(width: 20, height: 20))
         linkActionLayer.frame = CGRect(origin: CGPoint(x: 0, y: 0), size: linkActionLayer.preferredFrameSize())
     }
 

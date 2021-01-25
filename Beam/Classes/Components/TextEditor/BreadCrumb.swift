@@ -16,6 +16,7 @@ class BreadCrumb: Widget {
     var crumbLayers = [CATextLayer]()
     var section: LinksSection
     var selectedCrumb: Int = 0
+    var container: Layer?
 
     let chevron = NSImage(named: "editor-arrow_right")
     let breadCrumbArrow = NSImage(named: "editor-breadcrumb_arrow")
@@ -73,10 +74,19 @@ class BreadCrumb: Widget {
 
         guard let note = self.crumbChain.first as? BeamNote else { return }
         self.crumbChain.removeFirst()
+        self.crumbChain.removeLast()
 
-        containerLayer.backgroundColor = NSColor.linkedContainerColor.cgColor
+        // containerLayer.backgroundColor = NSColor.linkedContainerColor.cgColor
         containerLayer.opacity = 0.02
         containerLayer.cornerRadius = 10
+
+        container = Layer(name: "containerLayer", layer: containerLayer, hover: { [weak self] isHover in
+            guard let self = self else { return }
+            print("Hover: \(isHover)")
+            self.containerLayer.backgroundColor = isHover ? NSColor.linkedContainerColor.cgColor : NSColor.clear.cgColor
+        })
+
+        addLayer(container!)
 
         addLayer(ChevronButton("chevron", open: open, changed: { [unowned self] value in
             self.open = value
@@ -92,7 +102,6 @@ class BreadCrumb: Widget {
         linkActionLayer.fontSize = 13
         linkActionLayer.foregroundColor = NSColor.linkedActionButtonColor.cgColor
 
-        layer.addSublayer(containerLayer)
         layer.addSublayer(titleLayer)
 
         if section.mode == .references {

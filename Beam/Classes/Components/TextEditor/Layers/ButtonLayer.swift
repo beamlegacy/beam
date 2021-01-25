@@ -33,6 +33,9 @@ class ButtonLayer: Layer {
             self.pressed = layer.contains(info.position)
             return true
         }
+        hover = { onOff in
+                    print("Hover \(onOff)")
+                }
 
     }
 }
