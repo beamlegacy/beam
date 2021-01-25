@@ -46,7 +46,8 @@ class LinkedReferenceNode: TextNode {
             return ref as? LinkedReferenceNode
         })
 
-        // editor.layer?.addSublayer(layer)
+        editor.layer?.addSublayer(layer)
+        actionLayer?.isHidden = true
         open = true
     }
 

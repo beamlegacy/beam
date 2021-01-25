@@ -209,10 +209,10 @@ public class TextNode: Widget {
         }
     }
 
+    internal var actionLayer: CALayer?
+    private var actionLayerIsHovered = false
     private var doubleClickTimer: Timer?
     private var icon = NSImage(named: "editor-cmdreturn")
-    private var actionLayer: CALayer?
-    private var actionLayerIsHovered = false
 
     private let doucleClickInterval = 0.23
     private let actionImageLayer = CALayer()
