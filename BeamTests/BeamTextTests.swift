@@ -204,4 +204,24 @@ class BeamTextTests: XCTestCase {
         XCTAssertEqual(links[0].string, "markdown text")
         XCTAssertEqual(links[1].string, "links")
     }
+
+    func testEmoticons() {
+        let string = "tée🤦🏻‍♂️st"
+
+        let text = BeamText(text: string)
+        let attributedString = text.buildAttributedString(fontSize: 12, cursorPosition: 0, elementKind: .bullet)
+        let textFrame = Font.draw(string: attributedString, atPosition: NSPoint(), textWidth: 500)
+        guard let line = textFrame.lines.first else { fatalError() }
+        let carets = line.carets
+        for (i, caret) in carets.enumerated() where caret.isLeadingEdge {
+            print("caret[\(i)] -> \(caret)")
+        }
+
+        for i in 0..<string.count {
+            let r = i..<i + 1
+            let sub = string[r]
+            let offset = line.offsetFor(index: i)
+            print("range \(r) -> \(sub) [offset: \(offset)]")
+        }
+    }
 }
