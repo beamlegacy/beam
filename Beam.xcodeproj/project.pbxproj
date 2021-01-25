@@ -12,7 +12,7 @@
 		4105CE7525A60681009AB687 /* FormatterTypeButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4105CE7425A60681009AB687 /* FormatterTypeButton.swift */; };
 		41221A362592771F00255197 /* TextEdit+Popover.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41221A352592771F00255197 /* TextEdit+Popover.swift */; };
 		4131F16825BEC48C006473CD /* SpacerWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4131F16725BEC48C006473CD /* SpacerWidget.swift */; };
-		4131F18025BED85E006473CD /* TextLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4131F17F25BED85E006473CD /* TextLayer.swift */; };
+		4131F18425BF008C006473CD /* ContainerLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4131F18325BF008C006473CD /* ContainerLayer.swift */; };
 		414B987A259DE2E2002E81A3 /* BidirectionalPopoverActionItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414B9878259DE2E2002E81A3 /* BidirectionalPopoverActionItem.swift */; };
 		414B987B259DE2E2002E81A3 /* BidirectionalPopoverActionItem.xib in Resources */ = {isa = PBXBuildFile; fileRef = 414B9879259DE2E2002E81A3 /* BidirectionalPopoverActionItem.xib */; };
 		414B989925A21BB0002E81A3 /* TextEdit+Formatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414B989825A21BB0002E81A3 /* TextEdit+Formatter.swift */; };
@@ -428,7 +428,7 @@
 		4105CE7425A60681009AB687 /* FormatterTypeButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatterTypeButton.swift; sourceTree = "<group>"; };
 		41221A352592771F00255197 /* TextEdit+Popover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TextEdit+Popover.swift"; sourceTree = "<group>"; };
 		4131F16725BEC48C006473CD /* SpacerWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpacerWidget.swift; sourceTree = "<group>"; };
-		4131F17F25BED85E006473CD /* TextLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextLayer.swift; sourceTree = "<group>"; };
+		4131F18325BF008C006473CD /* ContainerLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContainerLayer.swift; sourceTree = "<group>"; };
 		414B9878259DE2E2002E81A3 /* BidirectionalPopoverActionItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BidirectionalPopoverActionItem.swift; sourceTree = "<group>"; };
 		414B9879259DE2E2002E81A3 /* BidirectionalPopoverActionItem.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = BidirectionalPopoverActionItem.xib; sourceTree = "<group>"; };
 		414B989825A21BB0002E81A3 /* TextEdit+Formatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TextEdit+Formatter.swift"; sourceTree = "<group>"; };
@@ -1326,7 +1326,7 @@
 				961EC4F125B4511D009FA322 /* Layer.swift */,
 				961EC50A25B495DB009FA322 /* ButtonLayer.swift */,
 				961EC51625B5038E009FA322 /* ChevronButton.swift */,
-				4131F17F25BED85E006473CD /* TextLayer.swift */,
+				4131F18325BF008C006473CD /* ContainerLayer.swift */,
 			);
 			path = Layers;
 			sourceTree = "<group>";
@@ -1853,6 +1853,7 @@
 				418172532581107C00317ED8 /* Chevrons.swift in Sources */,
 				5206282625923B6800D7CD9E /* DocumentRequest.swift in Sources */,
 				4181733725811F6300317ED8 /* Mode.swift in Sources */,
+				4131F18425BF008C006473CD /* ContainerLayer.swift in Sources */,
 				4181723F2581107C00317ED8 /* Font.swift in Sources */,
 				4181722C2581107C00317ED8 /* AutoCompleteList.swift in Sources */,
 				4181727B258110D100317ED8 /* AppDelegate+CoreData.swift in Sources */,
@@ -1969,7 +1970,6 @@
 				418172202581107C00317ED8 /* Information.swift in Sources */,
 				562A8B3625B5D8B5004D3D8A /* String+NL.swift in Sources */,
 				4181727E258110D100317ED8 /* AppDelegate+URL.swift in Sources */,
-				4131F18025BED85E006473CD /* TextLayer.swift in Sources */,
 				4181724D2581107C00317ED8 /* BrowserTabBar.swift in Sources */,
 				961EC50B25B495DB009FA322 /* ButtonLayer.swift in Sources */,
 				418172542581107C00317ED8 /* OmniBar.swift in Sources */,

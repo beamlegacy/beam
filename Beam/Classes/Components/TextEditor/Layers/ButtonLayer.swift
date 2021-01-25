@@ -29,6 +29,7 @@ class ButtonLayer: Layer {
             return true
         }
         mouseDragged = { [unowned self] info -> Bool in
+            print("hello")
             self.pressed = layer.contains(info.position)
             return true
         }

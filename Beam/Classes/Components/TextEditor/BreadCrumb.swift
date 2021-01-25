@@ -68,7 +68,7 @@ class BreadCrumb: Widget {
         ref.parent = self
         self.linkedReferenceNode = ref
 
-        // layer.backgroundColor = NSColor.blue.withAlphaComponent(0.2).cgColor
+        layer.backgroundColor = NSColor.blue.withAlphaComponent(0.2).cgColor
         editor.layer?.addSublayer(layer)
 
         guard let note = self.crumbChain.first as? BeamNote else { return }
@@ -133,11 +133,17 @@ class BreadCrumb: Widget {
             linkActionLayer.frame = CGRect(origin: CGPoint(x: availableWidth - linkActionLayer.frame.width, y: yPos), size: linkActionLayer.preferredFrameSize())
         }
 
-        for c in children {
-            computedIdealSize.height += c.idealSize.height
+        if !open {
+            crumbLayers.forEach { (v) in
+                v.isHidden = true
+            }
+        } else {
+            for c in children {
+                computedIdealSize.height += c.idealSize.height
 
-            CATransaction.disableAnimations {
-                containerLayer.frame = NSRect(x: 0, y: titleLayer.frame.height + 10, width: (contentsFrame.width - linkActionLayer.frame.width) - 20, height: crumbChain.count <= 1 ? c.idealSize.height : c.idealSize.height + 20)
+                CATransaction.disableAnimations {
+                    containerLayer.frame = NSRect(x: 0, y: titleLayer.frame.height + 10, width: (contentsFrame.width - linkActionLayer.frame.width) - 20, height: crumbChain.count <= 1 ? c.idealSize.height : c.idealSize.height + 20)
+                }
             }
         }
 
