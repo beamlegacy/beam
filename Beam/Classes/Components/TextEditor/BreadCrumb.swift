@@ -68,7 +68,7 @@ class BreadCrumb: Widget {
         ref.parent = self
         self.linkedReferenceNode = ref
 
-        layer.backgroundColor = NSColor.blue.withAlphaComponent(0.2).cgColor
+        // layer.backgroundColor = NSColor.blue.withAlphaComponent(0.2).cgColor
         editor.layer?.addSublayer(layer)
 
         guard let note = self.crumbChain.first as? BeamNote else { return }
@@ -100,7 +100,7 @@ class BreadCrumb: Widget {
         }
 
         titleLayer.frame = CGRect(origin: CGPoint(x: 25, y: titleLayerYPosition), size: titleLayer.preferredFrameSize())
-        layers["chevron"]?.frame = CGRect(origin: CGPoint(x: 0, y: titleLayerYPosition), size: CGSize(width: 20, height: 20))
+        layers["chevron"]?.frame = CGRect(origin: CGPoint(x: 0, y: titleLayer.frame.height - 8), size: CGSize(width: 20, height: 20))
 
         updateCrumbLayers()
 
@@ -125,7 +125,7 @@ class BreadCrumb: Widget {
     override func updateRendering() {
         updateCrumbLayers()
 
-        contentsFrame = NSRect(x: 0, y: 0, width: availableWidth, height: open ? (crumbChain.count <= 1 ? 35 : 60) : 0)
+        contentsFrame = NSRect(x: 0, y: 0, width: availableWidth, height: open ? (crumbChain.count <= 1 ? 35 : 60) : 30)
         computedIdealSize = contentsFrame.size
 
         CATransaction.disableAnimations {
@@ -137,6 +137,8 @@ class BreadCrumb: Widget {
             crumbLayers.forEach { (v) in
                 v.isHidden = true
             }
+
+            linkActionLayer.isHidden = true
         } else {
             for c in children {
                 computedIdealSize.height += c.idealSize.height
