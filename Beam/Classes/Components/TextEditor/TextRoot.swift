@@ -66,6 +66,7 @@ public class TextRoot: TextNode {
             state.cursorPosition
         }
         set {
+            assert(newValue >= 0)
             state.cursorPosition = newValue
             updateTextAttributesAtCursorPosition()
             let n = node as? TextNode

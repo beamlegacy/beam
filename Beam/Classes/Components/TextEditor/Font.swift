@@ -60,7 +60,7 @@ public class TextLine {
             let offset = caret.offset
             let middle = CGFloat(0.5 * (offset + previous))
             if middle > position.x {
-                return i - 1
+                return max(0, i - 1)
             }
             previous = offset
         }
