@@ -55,8 +55,16 @@ public class TextLine {
     }
 
     func stringIndexFor(position: NSPoint) -> Int {
-        let pos = NSPoint(x: position.x - frame.origin.x, y: position.y - frame.origin.y)
-        return CTLineGetStringIndexForPosition(ctLine, pos)
+        var previous = Float(0)
+        for (i, caret) in carets.enumerated() {
+            let offset = caret.offset
+            let middle = CGFloat(0.5 * (offset + previous))
+            if middle > position.x {
+                return i - 1
+            }
+            previous = offset
+        }
+        return carets.count
     }
 
     func isAfterEndOfLine(_ point: NSPoint) -> Bool {
@@ -68,7 +76,8 @@ public class TextLine {
     }
 
     func offsetFor(index: Int) -> Float {
-        Float(frame.origin.x) + Float(CTLineGetOffsetForStringIndex(ctLine, index, nil))
+        guard index < carets.count else { return Float(frame.maxX) }
+        return carets[index].offset
     }
 
     struct Caret {
@@ -76,7 +85,18 @@ public class TextLine {
         var index: Int
         var isLeadingEdge: Bool
     }
-    var carets: [Caret] {
+
+    lazy var carets: [Caret] = {
+        let carets = self.allCarets
+        var c: [Caret] = carets.compactMap { caret -> Caret? in
+            caret.isLeadingEdge ? caret : nil
+        }
+        guard let last = carets.last else { return c }
+        c.append(last)
+        return c
+    }()
+
+    var allCarets: [Caret] {
         var c = [Caret]()
         CTLineEnumerateCaretOffsets(ctLine) { (offset, index, leading, _) in
             c.append(Caret(offset: Float(self.frame.origin.x) + Float(offset), index: index, isLeadingEdge: leading))
