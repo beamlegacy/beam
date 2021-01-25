@@ -84,7 +84,7 @@ class BrowsingSection: Widget {
         updateLayerVisibility()
         editor.layer?.addSublayer(layer)
         layer.addSublayer(textLayer)
-        layer.addSublayer(chevronLayer)
+        // layer.addSublayer(chevronLayer)
         textLayer.frame = CGRect(origin: CGPoint(x: 100, y: 0), size: textLayer.preferredFrameSize())
     }
 

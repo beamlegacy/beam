@@ -383,7 +383,7 @@ public class TextNode: Widget {
         if showDisclosureButton {
             drawDisclosure(at: NSPoint(x: offset.x, y: -(firstLineBaseline - 14)), in: context)
         } else {
-            drawBulletPoint(at: NSPoint(x: offset.x, y: -(firstLineBaseline - 14)), in: context)
+            drawBulletPoint(at: NSPoint(x: 0, y: -(firstLineBaseline - 14)), in: context)
         }
 
         context.textMatrix = CGAffineTransform.identity
@@ -601,7 +601,7 @@ public class TextNode: Widget {
         guard let actionLayer = actionLayer else { return false }
         let position = actionLayerMousePosition(from: mouseInfo)
 
-        if isEditing && actionLayerIsHovered && actionLayer.frame.contains(position) {
+        if isEditing && !actionLayer.isHidden && actionLayerIsHovered && actionLayer.frame.contains(position) {
             editor.onStartQuery(self)
             return true
         }

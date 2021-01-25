@@ -19,19 +19,27 @@ class BreadCrumb: Widget {
 
     let chevron = NSImage(named: "editor-arrow_right")
     let breadCrumbArrow = NSImage(named: "editor-breadcrumb_arrow")
-    let containerLayer = CALayer()
     let chevronLayer = CALayer()
     let maskLayer = CALayer()
+    let containerLayer = CALayer()
     let titleLayer = CATextLayer()
     let linkActionLayer = CATextLayer()
 
     let chevronXPosition: CGFloat = 0
     let titleLayerXPosition: CGFloat = 25
-    let titleLayerYPosition: CGFloat = 15
+    let titleLayerYPosition: CGFloat = 10
     let limitCharacters: CGFloat = 100
     let breadCrumXPosition: CGFloat = 26
     let breadCrumYPosition: CGFloat = 26
     let spaceBreadcrumbIcon: CGFloat = 15
+
+    var open: Bool = true {
+        didSet {
+            updateVisibility(visible && open)
+            invalidateLayout()
+            containerLayer.isHidden = !open
+        }
+    }
 
     var linkedReferenceNode: LinkedReferenceNode! {
         didSet {
@@ -60,11 +68,19 @@ class BreadCrumb: Widget {
         ref.parent = self
         self.linkedReferenceNode = ref
 
-        layer.backgroundColor = NSColor.blue.withAlphaComponent(0.2).cgColor
+        // layer.backgroundColor = NSColor.blue.withAlphaComponent(0.2).cgColor
         editor.layer?.addSublayer(layer)
 
         guard let note = self.crumbChain.first as? BeamNote else { return }
         self.crumbChain.removeFirst()
+
+        containerLayer.backgroundColor = NSColor.linkedContainerColor.cgColor
+        containerLayer.opacity = 0.02
+        containerLayer.cornerRadius = 10
+
+        addLayer(ChevronButton("chevron", open: open, changed: { [unowned self] value in
+            self.open = value
+        }))
 
         titleLayer.string = note.title.capitalized
         titleLayer.font = NSFont.systemFont(ofSize: 0, weight: .semibold)
@@ -76,13 +92,15 @@ class BreadCrumb: Widget {
         linkActionLayer.fontSize = 13
         linkActionLayer.foregroundColor = NSColor.linkedActionButtonColor.cgColor
 
+        layer.addSublayer(containerLayer)
         layer.addSublayer(titleLayer)
 
         if section.mode == .references {
             layer.addSublayer(linkActionLayer)
         }
 
-        titleLayer.frame = CGRect(origin: CGPoint(x: 0, y: titleLayerYPosition), size: titleLayer.preferredFrameSize())
+        titleLayer.frame = CGRect(origin: CGPoint(x: 25, y: titleLayerYPosition), size: titleLayer.preferredFrameSize())
+        layers["chevron"]?.frame = CGRect(origin: CGPoint(x: 0, y: titleLayerYPosition), size: CGSize(width: 20, height: 20))
 
         updateCrumbLayers()
 
@@ -107,18 +125,22 @@ class BreadCrumb: Widget {
     override func updateRendering() {
         updateCrumbLayers()
 
-        // let y = titleLayerYPosition + titleLayer.preferredFrameSize().height + 6 + 12
-        contentsFrame = NSRect(x: 0, y: 0, width: availableWidth, height: crumbChain.count <= 1 ? 45 : 60)
+        contentsFrame = NSRect(x: 0, y: 0, width: availableWidth, height: open ? (crumbChain.count <= 1 ? 35 : 60) : 0)
         computedIdealSize = contentsFrame.size
 
         CATransaction.disableAnimations {
-            let yPos = crumbChain.count <= 1 ? 48 : breadCrumYPosition + 9
+            let yPos = crumbChain.count <= 1 ? 38 : breadCrumYPosition + 9
             linkActionLayer.frame = CGRect(origin: CGPoint(x: availableWidth - linkActionLayer.frame.width, y: yPos), size: linkActionLayer.preferredFrameSize())
         }
 
         for c in children {
             computedIdealSize.height += c.idealSize.height
+
+            CATransaction.disableAnimations {
+                containerLayer.frame = NSRect(x: 0, y: titleLayer.frame.height + 10, width: (contentsFrame.width - linkActionLayer.frame.width) - 20, height: crumbChain.count <= 1 ? c.idealSize.height : c.idealSize.height + 20)
+            }
         }
+
     }
 
     func updateCrumbLayers() {
@@ -128,7 +150,7 @@ class BreadCrumb: Widget {
 
         crumbLayers.removeAll()
 
-        var x = CGFloat(0)
+        var x: CGFloat = 5
         var textFrame = CGSize.zero
 
         guard crumbChain.count > 1 else { return }

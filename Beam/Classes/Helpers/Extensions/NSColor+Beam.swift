@@ -114,6 +114,10 @@ extension NSColor {
         return loadColor(named: "CharmedGreen")
     }
 
+    static var linkedContainerColor: NSColor {
+        return loadColor(named: "Niobium")
+    }
+
     // Popover
 
     static var bidirectionalPopoverBackgroundColor: NSColor {

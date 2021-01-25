@@ -36,10 +36,20 @@ class ProxyElement: BeamElement {
 }
 
 class LinkedReferenceNode: TextNode {
+    internal var proxyChildren = [LinkedReferenceNode]()
+    internal override var children: [Widget] {
+        get {
+            return proxyChildren
+        }
+        set {
+            fatalError()
+        }
+    }
+
     override init(editor: BeamTextEdit, element: BeamElement) {
-//        self.section = parent
         let proxyElement = ProxyElement(for: element)
         super.init(editor: editor, element: proxyElement)
+
         self.proxyChildren = proxyElement.proxyChildren.compactMap({ e -> LinkedReferenceNode? in
             let ref = editor.nodeFor(e)
             ref.parent = self
@@ -49,15 +59,5 @@ class LinkedReferenceNode: TextNode {
         editor.layer?.addSublayer(layer)
         actionLayer?.isHidden = true
         open = true
-    }
-
-    internal var proxyChildren = [LinkedReferenceNode]()
-    internal override var children: [Widget] {
-        get {
-            return proxyChildren
-        }
-        set {
-            fatalError()
-        }
     }
 }
