@@ -72,6 +72,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
         // Subscribe to the note's changes
         note.$changed
+            .dropFirst(1)
             .debounce(for: .seconds(1), scheduler: RunLoop.main)
             .sink { [unowned self] _ in
                 guard let note = note as? BeamNote else { return }

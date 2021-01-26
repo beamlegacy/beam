@@ -144,6 +144,7 @@ class BeamNote: BeamElement {
     private static func instanciateNote(_ documentStruct: DocumentStruct) throws -> BeamNote {
         let decoder = JSONDecoder()
         let note = try decoder.decode(BeamNote.self, from: documentStruct.data)
+        note.updateDate = documentStruct.updatedAt
         appendToFetchedNotes(note)
         return note
     }
@@ -196,6 +197,7 @@ class BeamNote: BeamElement {
         fetchedNotesCancellables.removeValue(forKey: note.title)
         fetchedNotesCancellables[note.title] =
             note.$changed
+            .dropFirst(1)
             .throttle(for: .seconds(2), scheduler: RunLoop.main, latest: false)
             .sink { [weak note] _ in
                 let documentManager = DocumentManager()
