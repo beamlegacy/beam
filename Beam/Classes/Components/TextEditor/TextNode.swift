@@ -43,8 +43,13 @@ public class TextNode: Widget {
 
     var interlineFactor = CGFloat(1.3)
     var interNodeSpacing = CGFloat(4)
+    private (set) var _indent: CGFloat = 25
     var indent: CGFloat {
-        selfVisible ? 25 : 0
+        get { selfVisible ? _indent : 0 }
+        set {
+            _indent = newValue
+        }
+
     }
     var fontSize = CGFloat(17)
 
@@ -669,19 +674,19 @@ public class TextNode: Widget {
         guard let actionLayer = actionLayer else { return false }
 
         let position = actionLayerMousePosition(from: mouseInfo)
-        let hasTextAndeditable = !text.isEmpty && isEditing
+        let hasTextAndEditable = !text.isEmpty && isEditing && editor.hasFocus
 
         // Show image & text layers
-        if hasTextAndeditable && contentsFrame.contains(position) && actionLayer.frame.contains(position) {
+        if hasTextAndEditable && contentsFrame.contains(position) && actionLayer.frame.contains(position) {
             showHoveredActionLayers(true)
             return true
-        } else if hasTextAndeditable && contentsFrame.contains(position) {
+        } else if hasTextAndEditable && contentsFrame.contains(position) {
             showHoveredActionLayers(false)
             return true
         }
 
         // Reset action layers
-        if !contentsFrame.contains(position) && isEditing {
+        if !contentsFrame.contains(position) && isEditing && editor.hasFocus {
             showHoveredActionLayers(false)
             return true
         }
@@ -946,7 +951,7 @@ public class TextNode: Widget {
         return buildAttributedString(for: elementText)
     }
 
-    private func actionLayerMousePosition(from mouseInfo: MouseInfo) -> NSPoint {
+    internal func actionLayerMousePosition(from mouseInfo: MouseInfo) -> NSPoint {
         return NSPoint(x: indent + mouseInfo.position.x, y: mouseInfo.position.y)
     }
 

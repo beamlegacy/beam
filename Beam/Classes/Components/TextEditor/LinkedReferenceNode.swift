@@ -36,6 +36,8 @@ class ProxyElement: BeamElement {
 }
 
 class LinkedReferenceNode: TextNode {
+
+    // MARK: - Properties
     internal var proxyChildren = [LinkedReferenceNode]()
     internal override var children: [Widget] {
         get {
@@ -45,6 +47,10 @@ class LinkedReferenceNode: TextNode {
             fatalError()
         }
     }
+
+    let linkTextLayer = CATextLayer()
+
+    // MARK: - Initializer
 
     override init(editor: BeamTextEdit, element: BeamElement) {
         let proxyElement = ProxyElement(for: element)
@@ -57,7 +63,36 @@ class LinkedReferenceNode: TextNode {
         })
 
         editor.layer?.addSublayer(layer)
-        actionLayer?.isHidden = true
+        actionLayer?.removeFromSuperlayer()
         open = true
+    }
+
+    // MARK: - Setup UI
+
+    func createLinkActionLayer(with note: BeamNote) {
+        linkTextLayer.string = "Link"
+        linkTextLayer.font = NSFont.systemFont(ofSize: 0, weight: .medium)
+        linkTextLayer.fontSize = 13
+        linkTextLayer.foregroundColor = NSColor.editorSearchNormal.cgColor
+        linkTextLayer.contentsScale = contentsScale
+
+        layer.addSublayer(linkTextLayer)
+    }
+
+    func updateLinknActionLayer() {
+        linkTextLayer.frame = CGRect(origin: CGPoint(x: availableWidth - 12, y: 0), size: linkTextLayer.preferredFrameSize())
+    }
+
+    // MARK: - Mouse events
+
+    override func mouseDown(mouseInfo: MouseInfo) -> Bool {
+        return true
+    }
+
+    override func mouseMoved(mouseInfo: MouseInfo) -> Bool {
+        let position = actionLayerMousePosition(from: mouseInfo)
+        self.linkTextLayer.foregroundColor = linkTextLayer.frame.contains(position) ? NSColor.linkedActionButtonHoverColor.cgColor :NSColor.linkedActionButtonColor.cgColor
+
+        return true
     }
 }
