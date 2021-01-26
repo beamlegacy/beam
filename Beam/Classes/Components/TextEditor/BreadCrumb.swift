@@ -125,6 +125,7 @@ class BreadCrumb: Widget {
                         guard let self = self else { return false }
                         self.proxy.text.makeInternalLink(0..<self.proxy.text.text.count)
                         self.updateReferenceSection(self.proxy.text.text)
+
                         return true
                     },
                     hover: { [weak self] (isHover) in
@@ -218,7 +219,7 @@ class BreadCrumb: Widget {
         selectedCrumb = crumbLayers.count
     }
 
-    func updateReferenceSection(_ text: String) {
+    func updateReferenceSection(_ text: String) {
         print("make internal link: \(text)")
     }
 
