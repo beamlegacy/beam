@@ -97,7 +97,6 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject {
         case readOnly
         case score
         case creationDate
-        case updateDate
         case kind
         case childrenFormat
     }
@@ -133,7 +132,6 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject {
 
         if container.contains(.creationDate) {
             creationDate = try container.decode(Date.self, forKey: .creationDate)
-            updateDate = try container.decode(Date.self, forKey: .updateDate)
         }
 
         if recursive, container.contains(.children) {
@@ -162,7 +160,6 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject {
         try container.encode(readOnly, forKey: .readOnly)
         try container.encode(score, forKey: .score)
         try container.encode(creationDate, forKey: .creationDate)
-        try container.encode(updateDate, forKey: .updateDate)
         if recursive, !children.isEmpty {
             try container.encode(children, forKey: .children)
         }

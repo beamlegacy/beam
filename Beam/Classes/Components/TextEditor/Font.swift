@@ -64,7 +64,7 @@ public class TextLine {
             }
             previous = offset
         }
-        return carets.count
+        return carets.count - 1
     }
 
     func isAfterEndOfLine(_ point: NSPoint) -> Bool {
