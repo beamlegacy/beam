@@ -28,12 +28,12 @@ struct NoteView: View {
                         state.createTab(withURL: url, originalQuery: state.currentNote?.title ?? "")
                     } else {
                         if let noteName = url.absoluteString.removingPercentEncoding {
-                            _ = state.navigateToNote(named: noteName)
+                            state.navigateToNote(named: noteName)
                         }
                     }
                 },
                 openCard: { cardName in
-                    _ = state.navigateToNote(named: cardName)
+                    state.navigateToNote(named: cardName)
                 },
                 onStartEditing: { onStartEditing() },
                 onStartQuery: { textNode in

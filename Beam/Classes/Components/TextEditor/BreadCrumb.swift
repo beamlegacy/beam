@@ -248,7 +248,8 @@ class BreadCrumb: Widget {
 
                 CATransaction.disableAnimations {
                     guard let container = container else { return }
-                    container.frame = NSRect(x: 0, y: titleLayer.frame.height + 10, width: contentsFrame.width, height: crumbChain.count <= 1 ? c.idealSize.height : c.idealSize.height + 20)
+                    let containerHeight = crumbChain.count <= 1 ? c.idealSize.height : computedIdealSize.height - 40
+                    container.frame = NSRect(x: 0, y: titleLayer.frame.height + 10, width: contentsFrame.width, height: containerHeight)
                 }
             }
         }
