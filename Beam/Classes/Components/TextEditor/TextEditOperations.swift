@@ -13,7 +13,6 @@ extension TextRoot {
     func increaseNodeIndentation(_ node: TextNode) -> Bool {
         guard !node.readOnly,
         let newParent = node.previousSibbling() else { return false }
-
         // Prepare Undo:
         guard let currentParent = node.parent,
               let indexInParent = node.indexInParent else { return false }
@@ -50,6 +49,7 @@ extension TextRoot {
 
     func increaseNodeSelectionIndentation() {
         guard let selection = root.state.nodeSelection else { return }
+
         undoManager.beginUndoGrouping()
         for node in selection.sortedRoots {
             //TODO: [Seb] create an abstraction for UndoManager to be able to handle faillures and not register empty undo operations. Then replace _ with the real test
