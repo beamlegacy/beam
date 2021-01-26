@@ -50,6 +50,7 @@ class LinkedReferenceNode: TextNode {
     }
 
     let linkTextLayer = CATextLayer()
+    var didMakeInternalLink: ((_ text: String) -> Void)?
 
     // MARK: - Initializer
 
@@ -70,26 +71,28 @@ class LinkedReferenceNode: TextNode {
 
     // MARK: - Setup UI
 
-    func createLinkActionLayer(with note: BeamNote) {
+    func createLinkActionLayer() {
         linkTextLayer.string = "Link"
         linkTextLayer.font = NSFont.systemFont(ofSize: 0, weight: .medium)
         linkTextLayer.fontSize = 13
-        linkTextLayer.foregroundColor = NSColor.editorSearchNormal.cgColor
+        linkTextLayer.foregroundColor = NSColor.linkedActionButtonColor.cgColor
         linkTextLayer.contentsScale = contentsScale
 
-        addLayer(ButtonLayer(
-                    "LinkLayer",
-                    linkTextLayer,
-                    mouseXPosition: 25,
-                    activated: {
-                        print("Click down")
-                    },
-                    hovered: { [weak self] isHover in
-                        guard let self = self else { return }
-                        self.linkTextLayer.foregroundColor = isHover ? NSColor.linkedActionButtonHoverColor.cgColor : NSColor.linkedActionButtonColor.cgColor
-                    }
-                )
+        addLayer(Layer(
+                name: "LinkLayer",
+                layer: linkTextLayer,
+                mouseXPosition: indent,
+                down: { [weak self] _ in
+                    guard let self = self, let didMakeInternalLink = self.didMakeInternalLink else { return false }
+                    self.text.makeInternalLink(self.cursorsStartPosition..<self.text.text.count)
+                    didMakeInternalLink(self.text.text)
+                    return true
+                },
+                hover: { (isHover) in
+                    self.linkTextLayer.foregroundColor = isHover ? NSColor.linkedActionButtonHoverColor.cgColor : NSColor.linkedActionButtonColor.cgColor
+                }
             )
+        )
     }
 
     func updateLinknActionLayer() {

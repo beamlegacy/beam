@@ -80,7 +80,10 @@ class BreadCrumb: Widget {
         updateCrumbLayers()
 
         if section.mode == .references && crumbChain.count <= 1 {
-            ref.createLinkActionLayer(with: note)
+            ref.createLinkActionLayer()
+            ref.didMakeInternalLink = {[unowned self] text in
+                updateReferenceSection(text)
+            }
         }
 
         if children != [linkedReferenceNode] {
@@ -98,18 +101,14 @@ class BreadCrumb: Widget {
             self.containerLayer.backgroundColor = isHover ? NSColor.linkedContainerColor.cgColor : NSColor.clear.cgColor
         })
 
-        addLayer(ChevronButton("chevron", open: open, changed: { [unowned self] value in
-            self.open = value
-        }))
-
         titleLayer.string = note.title.capitalized
         titleLayer.font = NSFont.systemFont(ofSize: 0, weight: .semibold)
         titleLayer.fontSize = 17
         titleLayer.foregroundColor = NSColor.linkedTitleColor.cgColor
 
         cardTitleLayer = Layer(name: "cardTitleLayer", layer: titleLayer, down: {[weak self] _ in
-            guard let self = self else { return false }
-            self.editor.openCard(note.title)
+            guard let self = self, let title = self.titleLayer.string as? String else { return false }
+            self.editor.openCard(title)
             return true
         })
 
@@ -119,18 +118,26 @@ class BreadCrumb: Widget {
             linkLayer.fontSize = 13
             linkLayer.foregroundColor = NSColor.linkedActionButtonColor.cgColor
 
-            addLayer(ButtonLayer(
-                        "actionLinkLayer",
-                        linkLayer,
-                        activated: {
-                            print("Click down")
-                        },
-                        hovered: { [weak self] isHover in
-                            guard let self = self else { return }
-                            self.linkLayer.foregroundColor = isHover ? NSColor.linkedActionButtonHoverColor.cgColor : NSColor.linkedActionButtonColor.cgColor
-                        }
+            addLayer(Layer(
+                    name: "actionLinkLayer",
+                    layer: linkLayer,
+                    down: {[weak self] _ in
+                        guard let self = self else { return false }
+                        self.proxy.text.makeInternalLink(0..<self.proxy.text.text.count)
+                        self.updateReferenceSection(self.proxy.text.text)
+                        return true
+                    },
+                    hover: { [weak self] (isHover) in
+                        guard let self = self else { return }
+                        self.linkLayer.foregroundColor = isHover ? NSColor.linkedActionButtonHoverColor.cgColor : NSColor.linkedActionButtonColor.cgColor
+                    }
                 ))
         }
+
+        addLayer(ChevronButton("chevron", open: open, changed: { [unowned self] value in
+            self.open = value
+            layers["actionLinkLayer"]?.layer.isHidden = !value
+        }))
 
         guard let container = container,
               let cardTitleLayer = cardTitleLayer else { return }
@@ -211,6 +218,10 @@ class BreadCrumb: Widget {
         selectedCrumb = crumbLayers.count
     }
 
+    func updateReferenceSection(_ text: String) {
+        print("make internal link: \(text)")
+    }
+
     func updateCrumbLayersVisibility() {
         for i in 0..<crumbLayers.count {
             crumbLayers[i].opacity = i < selectedCrumb ? 1.0 : 0.5
@@ -231,7 +242,10 @@ class BreadCrumb: Widget {
                 return
             }
 
-            layers["actionLinkLayer"]?.frame = CGRect(origin: CGPoint(x: (availableWidth - linkLayer.frame.width) - 10, y: breadCrumYPosition + 9), size: linkLayer.preferredFrameSize())
+            layers["actionLinkLayer"]?.frame = CGRect(
+                origin: CGPoint(x: (availableWidth - linkLayer.frame.width) - 10, y: breadCrumYPosition + 9),
+                size: linkLayer.preferredFrameSize()
+            )
         }
 
         if !open {
@@ -251,7 +265,11 @@ class BreadCrumb: Widget {
         }
     }
 
-    /*override func mouseUp(mouseInfo: MouseInfo) -> Bool {
+    override func mouseDown(mouseInfo: MouseInfo) -> Bool {
+        return contentsFrame.contains(mouseInfo.position)
+    }
+
+    override func mouseUp(mouseInfo: MouseInfo) -> Bool {
         for i in 0..<crumbChain.count where !crumbLayers[i].isHidden {
             let crumb = crumbChain[i]
             let layer = crumbLayers[i]
@@ -277,5 +295,5 @@ class BreadCrumb: Widget {
         }
 
         return false
-    }*/
+    }
 }

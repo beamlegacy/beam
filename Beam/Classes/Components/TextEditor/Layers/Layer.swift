@@ -32,6 +32,7 @@ class Layer: NSObject, CALayerDelegate {
 
     init(name: String,
          layer: CALayer,
+         mouseXPosition: CGFloat = 0,
          down: @escaping MouseBlock = { _ in false },
          up: @escaping MouseBlock = { _ in false },
          moved: @escaping MouseBlock = { _ in false },
@@ -49,6 +50,8 @@ class Layer: NSObject, CALayerDelegate {
         self.layout = layout
 
         super.init()
+
+        self.mouseXPosition = mouseXPosition
 
         if layer.delegate == nil {
             layer.delegate = self
