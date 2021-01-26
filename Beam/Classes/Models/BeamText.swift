@@ -237,6 +237,7 @@ struct BeamText: Codable {
         }
 
         flatten()
+        computePositions()
     }
 
     mutating func setAttributes(_ attributes: [Attribute], to positionRange: Swift.Range<Int>) {
@@ -248,6 +249,7 @@ struct BeamText: Codable {
         }
 
         flatten()
+        computePositions()
     }
 
     mutating func removeAttributes(_ attributes: [Attribute], from positionRange: Swift.Range<Int>) {
@@ -262,6 +264,7 @@ struct BeamText: Codable {
         }
 
         flatten()
+        computePositions()
     }
 
     /// de-duplicate similar ranges
@@ -296,6 +299,8 @@ struct BeamText: Codable {
         for link in links.reversed() where !link.string.isEmpty {
             self.replaceSubrange(link.position ..< link.end, with: BeamText(text: link.string, attributes: [.internalLink(link.string)]))
         }
+        flatten()
+        computePositions()
         silent -= 1
     }
 
@@ -345,7 +350,6 @@ struct BeamText: Codable {
     mutating func append(_ text: String, withAttributes attributes: [Attribute]) {
         ranges.append(Range(string: text, attributes: attributes, position: ranges.last?.end ?? 0))
         flattenInternalLinks()
-        computePositions()
     }
 
     mutating func append(_ text: String) {
@@ -383,6 +387,7 @@ struct BeamText: Codable {
         let index1 = splitRangeAt(position: position + count, createEmptyRanges: false)
 
         ranges.removeSubrange(index0 ..< index1)
+
         flatten()
         computePositions()
     }

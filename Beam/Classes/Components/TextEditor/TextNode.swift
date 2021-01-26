@@ -766,20 +766,6 @@ public class TextNode: Widget {
         let displayIndex = l.stringIndexFor(position: point)
         let res = sourceIndexFor(displayIndex: displayIndex)
 
-//        if l.isAfterEndOfLine(point) {
-//            // find position after all enclosing syntax
-//            if let leaf = _ast!.nodeContainingPosition(res),
-//               let syntax = leaf.enclosingSyntaxNode {
-//                return syntax.end
-//            }
-//        } else if l.isBeforeStartOfLine(point) {
-//            // find position before all enclosing syntax
-//            if let leaf = _ast!.nodeContainingPosition(res),
-//               let syntax = leaf.enclosingSyntaxNode {
-//                return syntax.start
-//            }
-//        }
-
         return res
     }
 
