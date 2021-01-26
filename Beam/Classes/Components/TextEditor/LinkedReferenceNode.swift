@@ -38,6 +38,7 @@ class ProxyElement: BeamElement {
 class LinkedReferenceNode: TextNode {
 
     // MARK: - Properties
+
     internal var proxyChildren = [LinkedReferenceNode]()
     internal override var children: [Widget] {
         get {
@@ -76,23 +77,22 @@ class LinkedReferenceNode: TextNode {
         linkTextLayer.foregroundColor = NSColor.editorSearchNormal.cgColor
         linkTextLayer.contentsScale = contentsScale
 
-        layer.addSublayer(linkTextLayer)
+        addLayer(ButtonLayer(
+                    "LinkLayer",
+                    linkTextLayer,
+                    mouseXPosition: 25,
+                    activated: {
+                        print("Click down")
+                    },
+                    hovered: { [weak self] isHover in
+                        guard let self = self else { return }
+                        self.linkTextLayer.foregroundColor = isHover ? NSColor.linkedActionButtonHoverColor.cgColor : NSColor.linkedActionButtonColor.cgColor
+                    }
+                )
+            )
     }
 
     func updateLinknActionLayer() {
-        linkTextLayer.frame = CGRect(origin: CGPoint(x: availableWidth - 12, y: 0), size: linkTextLayer.preferredFrameSize())
-    }
-
-    // MARK: - Mouse events
-
-    override func mouseDown(mouseInfo: MouseInfo) -> Bool {
-        return true
-    }
-
-    override func mouseMoved(mouseInfo: MouseInfo) -> Bool {
-        let position = actionLayerMousePosition(from: mouseInfo)
-        self.linkTextLayer.foregroundColor = linkTextLayer.frame.contains(position) ? NSColor.linkedActionButtonHoverColor.cgColor :NSColor.linkedActionButtonColor.cgColor
-
-        return true
+        layers["LinkLayer"]?.frame = CGRect(origin: CGPoint(x: availableWidth - 12, y: 0), size: linkTextLayer.preferredFrameSize())
     }
 }

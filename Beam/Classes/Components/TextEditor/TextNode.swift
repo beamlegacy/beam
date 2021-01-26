@@ -43,13 +43,8 @@ public class TextNode: Widget {
 
     var interlineFactor = CGFloat(1.3)
     var interNodeSpacing = CGFloat(4)
-    private (set) var _indent: CGFloat = 25
     var indent: CGFloat {
-        get { selfVisible ? _indent : 0 }
-        set {
-            _indent = newValue
-        }
-
+        selfVisible ? 25 : 0
     }
     var fontSize = CGFloat(17)
 
