@@ -7,6 +7,12 @@
 import Foundation
 import Combine
 
+extension Data {
+    var asString: String? {
+        String(data: self, encoding: .utf8)
+    }
+}
+
 struct VisitedPage: Codable, Identifiable {
     var id: UUID = UUID()
 
@@ -114,10 +120,40 @@ class BeamNote: BeamElement {
             return nil
         }
     }
+    private var activeDocumentCancellable: AnyCancellable?
+    private func observeDocumentChange(documentManager: DocumentManager) {
+        guard let docStruct = documentStruct else {
+            return
+        }
+        activeDocumentCancellable = documentManager.onDocumentChange(docStruct, completionHandler: { [unowned self] docStruct in
+            // reload self
+            changePropagationEnabled = false
+            defer {
+                changePropagationEnabled = true
+            }
+
+            let decoder = JSONDecoder()
+            guard let newSelf = try? decoder.decode(BeamNote.self, from: docStruct.data) else {
+                Logger.shared.logError("Unable to decode new documentStruct \(docStruct.title)", category: .document)
+                return
+            }
+
+            self.title = newSelf.title
+            self.type = newSelf.type
+            self.outLinks = newSelf.outLinks
+            self.linkedReferences = newSelf.linkedReferences
+            self.unlinkedReferences = newSelf.unlinkedReferences
+            self.searchQueries = newSelf.searchQueries
+            self.visitedSearchResults = newSelf.visitedSearchResults
+            self.browsingSessions = newSelf.browsingSessions
+
+            recursiveUpdate(other: newSelf)
+        })
+    }
 
     func save(documentManager: DocumentManager, completion: ((Result<Bool, Error>) -> Void)? = nil) {
         guard let documentStruct = documentStruct else {
-            Logger.shared.logError("Unable to encode BeamNote into DocumentStruct [\(title) {\(id)}]", category: .document)
+            Logger.shared.logError("Unable to find active document struct [\(title) {\(id)}]", category: .document)
             completion?(.success(false))
             return
         }
@@ -125,6 +161,8 @@ class BeamNote: BeamElement {
         documentManager.saveDocument(documentStruct) { result in
             completion?(result)
         }
+
+        observeDocumentChange(documentManager: documentManager)
     }
 
     var isTodaysNote: Bool { (type == .journal) && (self === AppDelegate.main.data.todaysNote) }
@@ -141,10 +179,11 @@ class BeamNote: BeamElement {
         unlinkedReferences.append(reference)
     }
 
-    private static func instanciateNote(_ documentStruct: DocumentStruct) throws -> BeamNote {
+    private static func instanciateNote(_ documentManager: DocumentManager, _ documentStruct: DocumentStruct) throws -> BeamNote {
         let decoder = JSONDecoder()
         let note = try decoder.decode(BeamNote.self, from: documentStruct.data)
         note.updateDate = documentStruct.updatedAt
+        note.observeDocumentChange(documentManager: documentManager)
         appendToFetchedNotes(note)
         return note
     }
@@ -162,7 +201,7 @@ class BeamNote: BeamElement {
 //        Logger.shared.logDebug("Note loaded:\n\(String(data: doc.data, encoding: .utf8)!)\n", category: .document)
 
         do {
-            return try instanciateNote(doc)
+            return try instanciateNote(documentManager, doc)
         } catch {
             Logger.shared.logError("Unable to decode today's note", category: .document)
         }
@@ -176,7 +215,7 @@ class BeamNote: BeamElement {
                 return note
             }
             do {
-                return try instanciateNote(doc)
+                return try instanciateNote(documentManager, doc)
             } catch {
                 Logger.shared.logError("Unable to load document \(doc.title) (\(doc.id))", category: .document)
                 return nil
@@ -198,13 +237,15 @@ class BeamNote: BeamElement {
         fetchedNotesCancellables[note.title] =
             note.$changed
             .dropFirst(1)
-            .throttle(for: .seconds(2), scheduler: RunLoop.main, latest: false)
+            .debounce(for: .seconds(2), scheduler: RunLoop.main)
+//            .throttle(for: .seconds(2), scheduler: RunLoop.main, latest: false)
             .sink { [weak note] _ in
                 let documentManager = DocumentManager()
                 note?.detectLinkedNotes(documentManager)
                 // TODO: we should only save when changes occured
                 note?.save(documentManager: documentManager)
             }
+
         fetchedNotes[note.title] = note
     }
 
@@ -233,7 +274,7 @@ class BeamNote: BeamElement {
                 return note
             }
             do {
-                return try instanciateNote(doc)
+                return try instanciateNote(documentManager, doc)
             } catch {
                 Logger.shared.logError("Unable to load document \(doc.title) (\(doc.id))", category: .document)
                 return nil
@@ -274,5 +315,9 @@ class BeamNote: BeamElement {
 
     func importedByUser() {
         score += 0.1
+    }
+
+    public override var debugDescription: String {
+        return "BeamNode(\(id)) [\(children.count) children]: \(title)"
     }
 }
