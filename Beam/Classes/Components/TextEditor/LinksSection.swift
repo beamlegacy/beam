@@ -18,6 +18,7 @@ class LinksSection: Widget {
     var mode: Mode
     var linkedReferencesCancellable: Cancellable!
     var note: BeamNote
+    var linkLayer: Layer?
 
     let sectionTitleLayer = CATextLayer()
     let linkActionLayer = CATextLayer()
@@ -28,6 +29,7 @@ class LinksSection: Widget {
         didSet {
             updateVisibility(visible && open)
             invalidateLayout()
+            linkLayer?.layer.isHidden = !open
         }
     }
 
@@ -56,7 +58,6 @@ class LinksSection: Widget {
 
         editor.layer?.addSublayer(layer)
         layer.addSublayer(sectionTitleLayer)
-        layer.addSublayer(linkActionLayer)
         layer.addSublayer(separatorLayer)
     }
 
@@ -84,7 +85,6 @@ class LinksSection: Widget {
     func setupSectionMode() {
         switch mode {
         case .links:
-            linkActionLayer.isHidden = true
             sectionTitleLayer.string = "\(note.linkedReferences.count) Links"
             linkedReferencesCancellable = note.$linkedReferences.sink { [unowned self] links in
                 updateLinkedReferences()
@@ -99,6 +99,21 @@ class LinksSection: Widget {
                 sectionTitleLayer.string = "\(links.count) References"
                 updateLayerVisibility()
             }
+
+            linkLayer = Layer(
+                name: "linkAllLayer",
+                layer: linkActionLayer,
+                down: { [weak self] _ in
+                    guard let self = self else { return false }
+                    if let linkLayer = self.linkLayer,
+                       linkLayer.layer.isHidden { return false }
+
+                    print("Link All")
+                    return true
+                })
+
+            guard let linkLayer = linkLayer else { return }
+            addLayer(linkLayer)
         }
     }
 
@@ -142,9 +157,10 @@ class LinksSection: Widget {
 
         CATransaction.disableAnimations {
             setupLayerFrame()
-
             separatorLayer.frame = CGRect(x: 0, y: sectionTitleLayer.frame.maxY + 7, width: availableWidth, height: 2)
-            linkActionLayer.frame = CGRect(origin: CGPoint(x: availableWidth - linkActionLayer.frame.width, y: 0), size: linkActionLayer.preferredFrameSize())
+
+            guard let linkLayer = linkLayer else { return }
+            linkLayer.frame = CGRect(origin: CGPoint(x: availableWidth - linkActionLayer.frame.width, y: 0), size: linkActionLayer.preferredFrameSize())
         }
 
         if open {

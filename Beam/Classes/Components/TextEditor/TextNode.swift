@@ -402,7 +402,7 @@ public class TextNode: Widget {
         guard !readOnly, editor.hasFocus, editor.blinkPhase else { return }
 
         // Otherwise, draw the cursor at a real position
-        let line: TextLine =  {
+        let line: TextLine = {
             if let emptyLayout = emptyLayout {
                 return emptyLayout.lines[0]
             }

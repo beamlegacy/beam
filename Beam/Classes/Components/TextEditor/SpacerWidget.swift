@@ -17,6 +17,7 @@ class SpacerWidget: Widget {
     var spacerType: SpacerType
 
     private (set) var space: CGFloat = 0
+    var open = true
 
     init(editor: BeamTextEdit, spacerType: SpacerType) {
         self.spacerType = spacerType
@@ -28,7 +29,7 @@ class SpacerWidget: Widget {
         case .top:
             space = 77
         case .middle:
-            space = 42
+            space = (root?.linksSection?.open ?? true) ? 42 : 10
         case .bottom:
             space = 30
         }

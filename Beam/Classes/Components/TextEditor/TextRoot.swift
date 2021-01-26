@@ -167,10 +167,6 @@ public class TextRoot: TextNode {
 
         node = children.first ?? self
         childInset = 0
-
-        // layer.backgroundColor = NSColor.blue.cgColor.copy(alpha: 0.2)
-
-//        print("created RootNode \(note.title) with \(children.count) main bullets")
     }
 
     var linkedRefsNode: TextNode?
