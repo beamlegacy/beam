@@ -71,11 +71,11 @@ enum ElementChildrenFormat: String, Codable {
 }
 
 // Editable Text Data:
-public class BeamElement: Codable, Identifiable, Hashable, ObservableObject {
+public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, CustomDebugStringConvertible {
     @Published public private(set) var id = UUID() { didSet { change() } }
     @Published var text = BeamText() { didSet { change() } }
     @Published var open = true { didSet { change() } }
-    public internal(set) var children = [BeamElement]() { didSet { change() } }
+    @Published public internal(set) var children = [BeamElement]() { didSet { change() } }
     @Published var readOnly = false { didSet { change() } }
     @Published var score: Float = 0 { didSet { change() } }
     @Published var creationDate = Date() { didSet { change() } }
@@ -249,7 +249,9 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject {
     }
 
     @Published var changed = 0
+    var changePropagationEnabled = true
     func change() {
+        guard changePropagationEnabled else { return }
         updateDate = Date()
         changed += 1
 
@@ -290,4 +292,42 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject {
         }
     }
 
+    func recursiveUpdate(other: BeamElement) {
+        assert(other.id == id)
+
+        changePropagationEnabled = false
+        defer {
+            changePropagationEnabled = true
+        }
+
+        text = other.text
+        open = other.open
+        readOnly = other.readOnly
+        score = other.score
+        creationDate = other.creationDate
+        updateDate = other.updateDate
+        kind = other.kind
+        childrenFormat = other.childrenFormat
+
+        var oldChildren = [UUID: BeamElement]()
+        for c in children {
+            oldChildren[c.id] = c
+        }
+
+        var newChildren = [BeamElement]()
+        for c in other.children {
+            if let child = oldChildren[c.id] {
+                child.recursiveUpdate(other: c)
+                newChildren.append(child)
+            } else {
+                newChildren.append(c)
+            }
+        }
+
+        children = newChildren
+    }
+
+    public var debugDescription: String {
+        return "BeamElement(\(id) [\(children.count) children] \(kind) - \(childrenFormat) \(!open ? "[closed]" : ""): \(text.text)"
+    }
 }

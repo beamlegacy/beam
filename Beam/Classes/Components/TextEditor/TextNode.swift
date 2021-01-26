@@ -232,6 +232,13 @@ public class TextNode: Widget {
         elementKind = element.kind
 
         super.init(editor: editor)
+
+        element.$children
+            .dropFirst()
+            .sink { [unowned self] _ in
+            self.invalidateLayout()
+        }.store(in: &scope)
+
         createActionLayer()
 
         var inInit = true

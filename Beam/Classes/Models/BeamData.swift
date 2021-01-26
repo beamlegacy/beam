@@ -85,7 +85,9 @@ public class BeamData: ObservableObject {
 
     func setupJournal() {
         _todaysNote = BeamNote.fetchOrCreate(documentManager, title: todaysName)
-        _todaysNote?.type = .journal
+        if _todaysNote?.type != .journal {
+            _todaysNote?.type = .journal
+        }
 
         updateJournal()
     }
