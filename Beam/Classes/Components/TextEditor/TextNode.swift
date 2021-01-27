@@ -632,7 +632,7 @@ public class TextNode: Widget {
                     dragMode = .select(cursorPosition)
                     root?.extendSelection(to: clickPos)
                     editor.initAndUpdateInlineFormatter()
-                    return false
+                    return true
                 } else {
                     root?.cursorPosition = clickPos
                     root?.cancelSelection()
@@ -643,14 +643,17 @@ public class TextNode: Widget {
                     guard let self = self else { return }
                     self.editor.dismissPopoverOrFormatter()
                 })
+                return true
             } else if mouseInfo.event.clickCount == 2 {
                 let clickPos = positionAt(point: mouseInfo.position)
                 doubleClickTimer?.invalidate()
                 root?.wordSelection(from: clickPos)
                 editor.initAndUpdateInlineFormatter()
+                return true
             } else {
                 doubleClickTimer?.invalidate()
                 root?.doCommand(.selectAll)
+                return true
             }
         }
 

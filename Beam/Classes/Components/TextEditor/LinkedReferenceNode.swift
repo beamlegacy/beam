@@ -95,7 +95,7 @@ class LinkedReferenceNode: TextNode {
         )
     }
 
-    func updateLinkActionLayer() {
-        layers["LinkLayer"]?.frame = CGRect(origin: CGPoint(x: availableWidth - 12, y: 0), size: linkTextLayer.preferredFrameSize())
+    override func updateSubLayersLayout() {
+        layers["LinkLayer"]?.frame = CGRect(origin: CGPoint(x: frame.width - 12, y: 0), size: linkTextLayer.preferredFrameSize())
     }
 }

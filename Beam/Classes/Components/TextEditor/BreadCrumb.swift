@@ -280,7 +280,6 @@ class BreadCrumb: Widget {
         CATransaction.disableAnimations {
             if crumbChain.count <= 1 {
                 layers["actionLinkLayer"]?.layer.isHidden = true
-                linkedReferenceNode.updateLinkActionLayer()
                 return
             }
 

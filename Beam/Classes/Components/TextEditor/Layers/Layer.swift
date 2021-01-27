@@ -24,6 +24,8 @@ class Layer: NSObject, CALayerDelegate {
         if hovered != value {
             hover(value)
             hovered = value
+//            layer.borderColor = hovered ? NSColor.red.cgColor : nil
+//            layer.borderWidth = hovered ? 2 : 0
         }
     }
     var layout: () -> Void
@@ -77,15 +79,6 @@ class Layer: NSObject, CALayerDelegate {
 
     var bounds: NSRect {
         CGRect(origin: CGPoint(), size: frame.size)
-    }
-
-    var position: NSPoint {
-        set {
-            layer.position = newValue
-        }
-        get {
-            layer.position
-        }
     }
 
     var mouseXPosition: CGFloat {

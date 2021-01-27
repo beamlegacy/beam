@@ -33,24 +33,8 @@ public struct MouseInfo {
         self.globalPosition = info.globalPosition
         self.event = info.event
 
-        if layer.layer.superlayer == node.editor.layer {
-            self.position = NSPoint(x: globalPosition.x - layer.position.x, y: globalPosition.y - layer.position.y)
-        } else {
-            let superlayers = layer.layer.superlayers.reversed()
-            var pos = NSPoint(x: globalPosition.x - node.layer.frame.origin.x - layer.frame.origin.x,
-                              y: globalPosition.y - node.layer.frame.origin.y - layer.frame.origin.y)
-            if superlayers.contains(node.layer) {
-                for sp in superlayers {
-                    if sp == node.layer {
-                        break
-                    }
-
-                    pos.x -= sp.frame.minX
-                    pos.y -= sp.frame.minY
-                }
-            }
-            self.position = pos
-        }
+        let globalPos = layer.layer.convert(CGPoint(), to: node.editor.layer)
+        self.position = CGPoint(x: globalPosition.x - globalPos.x, y: globalPosition.y - globalPos.y)
     }
 }
 

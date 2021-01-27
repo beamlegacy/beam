@@ -237,11 +237,15 @@ public class Widget: NSObject, CALayerDelegate {
         context.restoreGState()
     }
 
+    func updateSubLayersLayout() {
+    }
+
     func setLayout(_ frame: NSRect) {
         self.frame = frame
         needLayout = false
         layer.bounds = contentsFrame
         layer.position = frameInDocument.origin
+        updateSubLayersLayout()
 
         if self.currentFrameInDocument != frame {
             updateLayout()
@@ -432,8 +436,8 @@ public class Widget: NSObject, CALayerDelegate {
     }
 
     internal var layers: [String: Layer] = [:]
-    func addLayer(_ layer: Layer, position: CGPoint? = nil, global: Bool = false) {
-        layer.frame = CGRect(origin: position ?? layer.frame.origin, size: layer.frame.size)
+    func addLayer(_ layer: Layer, origin: CGPoint? = nil, global: Bool = false) {
+        layer.frame = CGRect(origin: origin ?? layer.frame.origin, size: layer.frame.size)
 
         if global {
             editor.layer?.addSublayer(layer.layer)
@@ -470,8 +474,10 @@ public class Widget: NSObject, CALayerDelegate {
 
         for layer in layers.values {
             let info = MouseInfo(self, layer, mouseInfo)
-            if layer.contains(info) && layer.mouseDown(info) {
-                return self
+            if layer.contains(info) {
+                if layer.mouseDown(info) {
+                    return self
+                }
             }
         }
 

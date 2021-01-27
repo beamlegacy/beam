@@ -72,7 +72,8 @@ class LinksSection: Widget {
 
         addLayer(ButtonLayer("sectionTitle", sectionTitleLayer, activated: {
             self.open.toggle()
-            self.layers["chevron"]?.layer.setAffineTransform(CGAffineTransform(rotationAngle: self.open ? CGFloat.pi / 2 : 0))
+            guard let chevron = self.layers["chevron"] as? ChevronButton else { return }
+            chevron.open = self.open
         }))
 
         linkActionLayer.font = NSFont.systemFont(ofSize: 0, weight: .medium)
@@ -124,19 +125,6 @@ class LinksSection: Widget {
         }
     }
 
-    func setupLayerFrame() {
-        sectionTitleLayer.frame = CGRect(
-            origin: CGPoint(x: 25, y: 0),
-            size: CGSize(
-                width: availableWidth - (linkActionLayer.frame.width + (mode == .references ? 30 : 25)),
-                height: sectionTitleLayer.preferredFrameSize().height
-            )
-        )
-
-        layers["chevron"]?.frame = CGRect(origin: CGPoint(x: 0, y: sectionTitleLayer.preferredFrameSize().height - 15), size: CGSize(width: 20, height: 20))
-        linkActionLayer.frame = CGRect(origin: CGPoint(x: 0, y: 0), size: linkActionLayer.preferredFrameSize())
-    }
-
     func updateLinkedReferences() {
         let refs: [NoteReference] = {
             switch mode {
@@ -162,19 +150,34 @@ class LinksSection: Widget {
         computedIdealSize = contentsFrame.size
         computedIdealSize.width = frame.width
 
-        CATransaction.disableAnimations {
-            setupLayerFrame()
-            separatorLayer.frame = CGRect(x: 0, y: sectionTitleLayer.frame.maxY + 7, width: availableWidth, height: 2)
-
-            guard let linkLayer = linkLayer else { return }
-            linkLayer.frame = CGRect(origin: CGPoint(x: availableWidth - linkActionLayer.frame.width, y: 0), size: linkActionLayer.preferredFrameSize())
-        }
-
         if open {
             for c in children {
                 computedIdealSize.height += c.idealSize.height
             }
         }
+    }
+
+    override func updateSubLayersLayout() {
+        CATransaction.disableAnimations {
+            setupLayerFrame()
+            separatorLayer.frame = CGRect(x: 0, y: sectionTitleLayer.frame.maxY + 7, width: frame.width, height: 2)
+
+            guard let linkLayer = linkLayer else { return }
+            linkLayer.frame = CGRect(origin: CGPoint(x: frame.width - linkActionLayer.frame.width, y: 0), size: linkActionLayer.preferredFrameSize())
+        }
+    }
+
+    func setupLayerFrame() {
+        sectionTitleLayer.frame = CGRect(
+            origin: CGPoint(x: 25, y: 0),
+            size: CGSize(
+                width: availableWidth - (linkActionLayer.frame.width + (mode == .references ? 30 : 25)),
+                height: sectionTitleLayer.preferredFrameSize().height
+            )
+        )
+
+        layers["chevron"]?.frame = CGRect(origin: CGPoint(x: 0, y: sectionTitleLayer.preferredFrameSize().height - 15), size: CGSize(width: 20, height: 20))
+        linkActionLayer.frame = CGRect(origin: CGPoint(x: 0, y: 0), size: linkActionLayer.preferredFrameSize())
     }
 
     func updateLayerVisibility() {

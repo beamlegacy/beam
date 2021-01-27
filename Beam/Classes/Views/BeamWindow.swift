@@ -173,10 +173,6 @@ class BeamWindow: NSWindow {
         state.data.showTabStats.toggle()
     }
 
-    @IBAction func toggleBrowsingTreeCard(_ sender: Any?) {
-        state.data.showBrowsingTree.toggle()
-    }
-
     @IBAction func newSearch(_ sender: Any?) {
         state.startNewSearch()
     }
