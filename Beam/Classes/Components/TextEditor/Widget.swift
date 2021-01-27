@@ -432,12 +432,12 @@ public class Widget: NSObject, CALayerDelegate {
     }
 
     internal var layers: [String: Layer] = [:]
-    func addLayer(_ layer: Layer, position: CGPoint = CGPoint(), global: Bool = false) {
-        layer.frame = CGRect(origin: position, size: layer.frame.size)
+    func addLayer(_ layer: Layer, position: CGPoint? = nil, global: Bool = false) {
+        layer.frame = CGRect(origin: position ?? layer.frame.origin, size: layer.frame.size)
 
         if global {
             editor.layer?.addSublayer(layer.layer)
-        } else {
+        } else if layer.layer.superlayer == nil {
             self.layer.addSublayer(layer.layer)
         }
 
