@@ -112,6 +112,7 @@ class BreadCrumb: Widget {
             self.editor.openCard(title)
             return true
         })
+        createChevronLayer()
 
         if section.mode == .references {
             linkLayer.string = "Link"
@@ -136,11 +137,6 @@ class BreadCrumb: Widget {
                 ))
         }
 
-        addLayer(ChevronButton("chevron", open: open, changed: { [unowned self] value in
-            self.open = value
-            layers["actionLinkLayer"]?.layer.isHidden = !value
-        }))
-
         guard let container = container,
               let cardTitleLayer = cardTitleLayer else { return }
 
@@ -151,16 +147,24 @@ class BreadCrumb: Widget {
         layers["chevron"]?.frame = CGRect(origin: CGPoint(x: 0, y: titleLayer.frame.height - 8), size: CGSize(width: 20, height: 20))
     }
 
+    func createChevronLayer() {
+        addLayer(ChevronButton("chevron", open: open, changed: { [unowned self] value in
+            self.open = value
+            layers["actionLinkLayer"]?.layer.isHidden = !value
+
+            crumbLayers.enumerated().forEach { index, crumbLayer in
+                crumbLayer.isHidden = !open
+                crumbArrowLayers[index].isHidden = !open
+            }
+        }))
+    }
+
     func createLayerWithMouseEvents(_ layer: CATextLayer, index: Int) {
         addLayer(Layer(
                 name: "newLayer\(index)",
                 layer: layer,
                 down: { [weak self] _ in
                     guard let self = self else { return false }
-
-                    if index == 0 {
-                        layer.string = "..."
-                    }
 
                     self.selectedCrumb = index
                     self.updateCrumbLayersVisibility()
@@ -293,11 +297,6 @@ class BreadCrumb: Widget {
             )
         }
 
-        crumbLayers.enumerated().forEach { index, v in
-            v.isHidden = !open
-            crumbArrowLayers[index].isHidden = !open
-        }
-
         if open {
             for c in children {
                 computedIdealSize.height += c.idealSize.height
@@ -312,11 +311,7 @@ class BreadCrumb: Widget {
 
     }
 
-    /*override func mouseDown(mouseInfo: MouseInfo) -> Bool {
-        return contentsFrame.contains(mouseInfo.position)
-    }
-
-    override func mouseUp(mouseInfo: MouseInfo) -> Bool {
+    /*override func mouseUp(mouseInfo: MouseInfo) -> Bool {
         for i in 0..<crumbChain.count where !crumbLayers[i].isHidden {
             let crumb = crumbChain[i]
             let layer = crumbLayers[i]
@@ -342,6 +337,5 @@ class BreadCrumb: Widget {
         }
 
         return false
-    }
-     */
+    }*/
 }

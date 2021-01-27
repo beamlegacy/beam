@@ -237,8 +237,7 @@ public class Widget: NSObject, CALayerDelegate {
         context.restoreGState()
     }
 
-    func updateSubLayersLayout() {
-    }
+    func updateSubLayersLayout() { }
 
     func setLayout(_ frame: NSRect) {
         self.frame = frame
