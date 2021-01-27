@@ -30,11 +30,8 @@ class Layer: NSObject, CALayerDelegate {
     }
     var layout: () -> Void
 
-    private var _mouseXPosition: CGFloat = 0
-
     init(name: String,
          layer: CALayer,
-         mouseXPosition: CGFloat = 0,
          down: @escaping MouseBlock = { _ in false },
          up: @escaping MouseBlock = { _ in false },
          moved: @escaping MouseBlock = { _ in false },
@@ -52,8 +49,6 @@ class Layer: NSObject, CALayerDelegate {
         self.layout = layout
 
         super.init()
-
-        self.mouseXPosition = mouseXPosition
 
         if layer.delegate == nil {
             layer.delegate = self
@@ -81,17 +76,8 @@ class Layer: NSObject, CALayerDelegate {
         CGRect(origin: CGPoint(), size: frame.size)
     }
 
-    var mouseXPosition: CGFloat {
-        set {
-            _mouseXPosition = newValue
-        }
-        get {
-            _mouseXPosition
-        }
-    }
-
     func contains(_ mouseInfo: MouseInfo) -> Bool {
-        bounds.contains(NSPoint(x: mouseXPosition + mouseInfo.position.x, y: mouseInfo.position.y))
+        bounds.contains(NSPoint(x: mouseInfo.position.x, y: mouseInfo.position.y))
     }
 
     func layoutSublayers(of layer: CALayer) {
