@@ -9,7 +9,8 @@ build:macos:
     - merge_requests
     - master
   script:
-    - bundle exec fastlane beta
+    - time make build_libgit2
+    - time bundle exec fastlane beta
   tags:
     - macos
   interruptible: true

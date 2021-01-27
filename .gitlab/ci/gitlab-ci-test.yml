@@ -16,7 +16,8 @@ xctests:
     - merge_requests
     - master
   script:
-    - bundle exec fastlane tests
+    - time make build_libgit2
+    - time bundle exec fastlane tests
   tags:
     - macos
   interruptible: true
