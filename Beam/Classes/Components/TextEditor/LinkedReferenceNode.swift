@@ -81,7 +81,6 @@ class LinkedReferenceNode: TextNode {
         addLayer(Layer(
                 name: "LinkLayer",
                 layer: linkTextLayer,
-                mouseXPosition: indent,
                 down: { [weak self] _ in
                     guard let self = self, let didMakeInternalLink = self.didMakeInternalLink else { return false }
                     self.text.makeInternalLink(self.cursorsStartPosition..<self.text.text.count)
