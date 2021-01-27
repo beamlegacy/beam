@@ -38,6 +38,10 @@ struct BeamSearchBox: View {
                 }
                 .buttonStyle(RoundRectButtonStyle())
             }.padding(.leading, 9)
+            .onTapGesture(perform: {
+                state.focusOmniBox = true
+                isEditing = true
+            })
         }
     }
 
