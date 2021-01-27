@@ -51,14 +51,13 @@ extension DocumentsList {
         private var cancellables = [AnyCancellable]()
 
         private func observeChangeNotification() {
-            let cancellable = NotificationCenter.default.publisher(for: .NSManagedObjectContextObjectsDidChange,
-                                                                   object: managedObjectContext)
+            NotificationCenter.default.publisher(for: .NSManagedObjectContextObjectsDidChange,
+                                                 object: managedObjectContext)
                 .compactMap({ ManagedObjectContextChanges<Document>(notification: $0) })
                 .sink { changes in
-                    print(changes)
+                    Logger.shared.logDebug("\(changes)", category: .coredata)
                 }
-
-            cancellables.append(cancellable)
+                .store(in: &cancellables)
         }
     }
 }
