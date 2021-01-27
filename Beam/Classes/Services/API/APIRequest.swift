@@ -424,10 +424,12 @@ extension DataRequest {
             #endif
 
             #if DEBUG_API_2
-            debugPrint("=======================================")
-            debugPrint(response)
-            debugPrint(self.debugDescription)
-            debugPrint("=======================================")
+            self.cURLDescription { curl in
+                debugPrint("=======================================")
+                debugPrint(response)
+                debugPrint(curl)
+                debugPrint("=======================================")
+            }
             #endif
         }
     }
