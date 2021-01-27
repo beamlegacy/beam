@@ -26,7 +26,7 @@ class Document: NSManagedObject {
     }
 
     override func willSave() {
-        if updated_at.timeIntervalSince(Date()) > 2.0 {
+        if updated_at.timeIntervalSince(Date()) < -1.0 {
             self.updated_at = Date()
         }
         super.willSave()
