@@ -457,10 +457,6 @@ public class Widget: NSObject, CALayerDelegate {
 
     func dispatchMouseDown(mouseInfo: MouseInfo) -> Widget? {
         let globalPos = mouseInfo.position
-        let rect = NSRect(origin: CGPoint(), size: frame.size)
-        guard rect.contains(globalPos) else {
-            return nil
-        }
 
         for c in children {
             var i = mouseInfo
@@ -478,6 +474,11 @@ public class Widget: NSObject, CALayerDelegate {
                     return self
                 }
             }
+        }
+
+        let rect = NSRect(origin: CGPoint(), size: frame.size)
+        guard rect.contains(globalPos) else {
+            return nil
         }
 
 //        print("dispatch down: \(mouseInfo.position)")
