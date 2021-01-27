@@ -211,10 +211,8 @@ public class TextNode: Widget {
 
     internal var actionLayer: CALayer?
     private var actionLayerIsHovered = false
-    private var doubleClickTimer: Timer?
     private var icon = NSImage(named: "editor-cmdreturn")
 
-    private let doucleClickInterval = 0.23
     private let actionImageLayer = CALayer()
     private let actionTextLayer = CATextLayer()
     private let actionLayerFrame = CGRect(x: 30, y: 0, width: 80, height: 20)
@@ -626,8 +624,11 @@ public class TextNode: Widget {
         }
 
         if contentsFrame.contains(mouseInfo.position) {
-            if mouseInfo.event.clickCount == 1 {
-                let clickPos = positionAt(point: mouseInfo.position)
+            let clickPos = positionAt(point: mouseInfo.position)
+
+            if mouseInfo.event.clickCount == 1 && editor.inlineFormatter != nil {
+                self.editor.dismissPopoverOrFormatter()
+            } else if mouseInfo.event.clickCount == 1 {
                 if mouseInfo.event.modifierFlags.contains(.shift) {
                     dragMode = .select(cursorPosition)
                     root?.extendSelection(to: clickPos)
@@ -639,19 +640,12 @@ public class TextNode: Widget {
                     dragMode = .select(cursorPosition)
                 }
 
-                doubleClickTimer = Timer.scheduledTimer(withTimeInterval: doucleClickInterval, repeats: false, block: { [weak self] (_) in
-                    guard let self = self else { return }
-                    self.editor.dismissPopoverOrFormatter()
-                })
                 return true
             } else if mouseInfo.event.clickCount == 2 {
-                let clickPos = positionAt(point: mouseInfo.position)
-                doubleClickTimer?.invalidate()
                 root?.wordSelection(from: clickPos)
                 editor.initAndUpdateInlineFormatter()
                 return true
             } else {
-                doubleClickTimer?.invalidate()
                 root?.doCommand(.selectAll)
                 return true
             }
