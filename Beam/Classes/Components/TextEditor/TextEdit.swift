@@ -983,6 +983,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         }
 
         node = newNode
+        node.editor.setHotSpotToCursorPosition()
     }
 
     var scrollToCursorAtLayout = false
