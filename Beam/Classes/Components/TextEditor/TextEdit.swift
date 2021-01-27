@@ -35,16 +35,13 @@ public struct MouseInfo {
 
         if layer.layer.superlayer == node.editor.layer {
             self.position = NSPoint(x: globalPosition.x - layer.position.x, y: globalPosition.y - layer.position.y)
-        } else if layer.layer == node.layer {
+        } else {
             self.position =
                 NSPoint(x: globalPosition.x - node.layer.frame.origin.x - layer.frame.origin.x,
                         y: globalPosition.y - node.layer.frame.origin.y - layer.frame.origin.y)
-        } else {
-            assert(layer.layer.superlayers.contains(node.layer))
-            let pos =
-                NSPoint(x: globalPosition.x - node.layer.frame.origin.x - layer.frame.origin.x,
-                        y: globalPosition.y - node.layer.frame.origin.y - layer.frame.origin.y)
-            self.position = node.layer.convert(pos, to: layer.layer)
+            if layer.layer.superlayers.contains(node.layer) {
+                self.position = node.layer.convert(self.position, to: layer.layer)
+            }
         }
     }
 }
