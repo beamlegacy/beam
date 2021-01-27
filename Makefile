@@ -9,7 +9,6 @@ unlock_keychain:
 	sudo security unlock-keychain ~/Library/Keychains/login.keychain-db
 
 install_dependencies:
-	pod install
 	git submodule update --init --recursive
 
 install_dev_keys:
@@ -92,6 +91,12 @@ install_swiftlint:
 	brew install swiftlint
 	sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 
+build_libgit2:
+	cd Extern/libgit2
+	mkdir -p build && cd build
+	cmake -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" -DBUILD_SHARED_LIBS="OFF" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -S Extern/libgit2/ -B Extern/libgit2/build
+	cmake --build Extern/libgit2/build
+
 gym:
 	fastlane gym
 
@@ -110,4 +115,7 @@ variable_injector:
 install_direnv:
 	brew install direnv
 
-setup: install_dependencies install_direnv install_swiftlint variable_injector
+install_cmake:
+	brew install cmake
+
+setup: install_dependencies install_direnv install_swiftlint install_cmake variable_injector

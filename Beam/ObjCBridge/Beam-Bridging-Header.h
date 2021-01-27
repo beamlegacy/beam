@@ -3,6 +3,7 @@
 //
 
 #import <WebKit/WebKit.h>
+#import "git2.h"
 
 @interface WKPreferences ()
 -(void)_setFullScreenEnabled:(BOOL)fullScreenEnabled;
