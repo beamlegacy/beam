@@ -128,7 +128,7 @@ class Document: NSManagedObject {
     }
 
     class func fetchAllWithType(_ context: NSManagedObjectContext, _ type: Int16) -> [Document] {
-        return fetchAll(context: context, NSPredicate(format: "document_type = %@", type as CVarArg))
+        return fetchAll(context: context, NSPredicate(format: "document_type = \(type)"))
     }
 
     class func fetchAllWithTitleMatch(_ context: NSManagedObjectContext, _ title: String) -> [Document] {
