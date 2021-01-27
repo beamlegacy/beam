@@ -16,13 +16,13 @@ import Foundation
 struct Configuration {
     // Build configuration
     static private(set) var bundleIdentifier: String = Configuration.value(for: "CFBundleIdentifier")
-    static private(set) var sentryKey = "cc3cb189ef534cab8a1d30afbe0a9c4f"
+    static private(set) var sentryKey = "$(SENTRY_KEY)"
     static private(set) var sentryHostname = "o477543.ingest.sentry.io"
     static private(set) var sentryProject = "5518785"
-    static private(set) var env = "debug"
-    static private(set) var sparkleUpdate = NSString("0").boolValue
+    static private(set) var env = "$(ENV)"
+    static private(set) var sparkleUpdate = NSString("$(SPARKLE_AUTOMATIC_UPDATE)").boolValue
     static private(set) var sparkleFeedURL: String = Configuration.value(for: "SUFeedURL")
-    static private(set) var sentryEnabled = NSString("0").boolValue
+    static private(set) var sentryEnabled = NSString("$(SENTRY_ENABLED)").boolValue
 
     // Runtime configuration
     static private(set) var apiHostnameDefault = "api.beamapp.co"
