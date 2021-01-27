@@ -110,6 +110,10 @@ extension NSColor {
         return loadColor(named: "LightStoneGray")
     }
 
+    static var linkedBreadcrumbHoverColor: NSColor {
+        return loadColor(named: "Niobium")
+    }
+
     static var linkedSeparatorColor: NSColor {
         return loadColor(named: "Tundora")
     }

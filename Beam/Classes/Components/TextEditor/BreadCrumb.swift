@@ -174,7 +174,7 @@ class BreadCrumb: Widget {
 
         guard crumbChain.count > 1 else { return }
 
-        for i in 0 ..< crumbChain.count {
+        for index in 0 ..< crumbChain.count {
             let newLayer = CATextLayer()
             let breadCrumbArrowLayer = CALayer()
             let breadCrumbMaskLayer = CALayer()
@@ -187,14 +187,26 @@ class BreadCrumb: Widget {
             breadCrumbArrowLayer.mask = breadCrumbMaskLayer
             breadCrumbArrowLayer.backgroundColor = NSColor.linkedChevronIconColor.cgColor
 
-            if i != crumbChain.count - 1 {
+            if index != crumbChain.count - 1 {
                 newLayer.addSublayer(breadCrumbArrowLayer)
             }
 
-            layer.addSublayer(newLayer)
+            addLayer(Layer(
+                    name: "newLayer\(index)",
+                    layer: newLayer,
+                    down: { info -> Bool in
+                        print(info)
+                        return true
+                    },
+                    hover: { isHover in
+                        newLayer.foregroundColor = isHover ? NSColor.linkedBreadcrumbHoverColor.cgColor : NSColor.linkedBreadcrumbColor.cgColor
+                    }
+                )
+            )
+
             crumbLayers.append(newLayer)
 
-            let crumb = crumbChain[i]
+            let crumb = crumbChain[index]
             let note = crumb as? BeamNote
             let text: String = (note != nil ? (note?.title ?? "???") : crumb.text.text)
 
@@ -208,12 +220,14 @@ class BreadCrumb: Widget {
             breadCrumbArrowLayer.frame = CGRect(origin: CGPoint(x: textWidth + 2, y: textFrame.height - 10.5), size: CGSize(width: 10, height: 10))
             breadCrumbMaskLayer.frame = breadCrumbArrowLayer.bounds
 
-            newLayer.frame = CGRect(
+            guard let layer = layers["newLayer\(index)"] else { return }
+
+            layer.frame = CGRect(
                 origin: CGPoint(x: x, y: textFrame.height + breadCrumYPosition),
                 size: CGSize(width: textWidth, height: textFrame.height)
             )
 
-            x += newLayer.bounds.width + spaceBreadcrumbIcon
+            x += layer.bounds.width + spaceBreadcrumbIcon
         }
 
         selectedCrumb = crumbLayers.count
@@ -266,7 +280,7 @@ class BreadCrumb: Widget {
         }
     }
 
-    override func mouseDown(mouseInfo: MouseInfo) -> Bool {
+    /*override func mouseDown(mouseInfo: MouseInfo) -> Bool {
         return contentsFrame.contains(mouseInfo.position)
     }
 
@@ -297,4 +311,5 @@ class BreadCrumb: Widget {
 
         return false
     }
+     */
 }
