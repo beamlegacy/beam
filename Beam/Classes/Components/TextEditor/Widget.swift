@@ -468,7 +468,7 @@ public class Widget: NSObject, CALayerDelegate {
             }
         }
 
-        for layer in layers.values {
+        for layer in layers.values where !layer.layer.isHidden {
             let info = MouseInfo(self, layer, mouseInfo)
             if layer.contains(info) {
                 if layer.mouseDown(info) {
@@ -505,7 +505,7 @@ public class Widget: NSObject, CALayerDelegate {
         let info = MouseInfo(self, mouseInfo.globalPosition, mouseInfo.event)
 //        print("dispatch up: \(info.position) vs \(mouseInfo.position)")
 
-        for layer in layers.values {
+        for layer in layers.values where !layer.layer.isHidden {
             let info = MouseInfo(self, layer, info)
             if layer.contains(info) && layer.mouseUp(info) {
                 return true
@@ -564,7 +564,7 @@ public class Widget: NSObject, CALayerDelegate {
 
     func handleMouseMoved(mouseInfo: MouseInfo) -> Bool {
         var res = false
-        for layer in layers.values {
+        for layer in layers.values where !layer.layer.isHidden {
             let info = MouseInfo(self, layer, mouseInfo)
             if layer.handleMouseMoved(info) {
                 res = res || true
@@ -583,7 +583,7 @@ public class Widget: NSObject, CALayerDelegate {
 //        print("handle dragged: \(info.position) vs \(mouseInfo.position)")
 
         var res = false
-        for layer in layers.values {
+        for layer in layers.values where !layer.layer.isHidden {
             let info = MouseInfo(self, layer, mouseInfo)
             res = res || layer.mouseDragged(info)
         }
