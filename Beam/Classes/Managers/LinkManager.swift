@@ -42,7 +42,7 @@ class LinkManager {
             }
 
             // If not authenticated
-            guard AuthenticationManager.shared.isAuthenticated else {
+            guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
                 completion?(.success(true))
                 return
             }
@@ -101,7 +101,7 @@ class LinkManager {
             link?.delete(context)
 
             // If not authenticated
-            guard AuthenticationManager.shared.isAuthenticated else {
+            guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
                 completion?(.success(true))
                 return
             }

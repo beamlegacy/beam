@@ -133,7 +133,7 @@ class DocumentManager {
             }
 
             // If not authenticated, we don't need to send to BeamAPI
-            guard AuthenticationManager.shared.isAuthenticated else {
+            guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
                 self.saveContext(context: context, completion: completion)
                 return
             }
@@ -147,7 +147,15 @@ class DocumentManager {
                                    _ document: Document,
                                    _ completion: ((Result<Bool, Error>) -> Void)? = nil) {
         // Note: This will break if we call context.save before calling `saveDocumentOnAPI`
-        guard context.hasChanges else { return }
+        guard context.hasChanges else {
+            completion?(.success(false))
+            return
+        }
+
+        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            completion?(.success(false))
+            return
+        }
 
         var documentStruct = DocumentStruct(document: document)
         documentStruct.previousChecksum = document.beam_api_data?.MD5
@@ -315,8 +323,8 @@ class DocumentManager {
             document?.delete(context)
 
             // If not authenticated
-            guard AuthenticationManager.shared.isAuthenticated else {
-                completion?(.success(true))
+            guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+                completion?(.success(false))
                 return
             }
 
@@ -337,8 +345,8 @@ class DocumentManager {
     // swiftlint:disable:next cyclomatic_complexity
     func refreshDocuments(completion: ((Result<Bool, Error>) -> Void)? = nil) {
         // If not authenticated
-        guard AuthenticationManager.shared.isAuthenticated else {
-            completion?(.success(true))
+        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            completion?(.success(false))
             return
         }
 
@@ -399,8 +407,8 @@ class DocumentManager {
     // swiftlint:disable:next cyclomatic_complexity
     func refreshDocument(_ documentStruct: DocumentStruct, completion: ((Result<Bool, Error>) -> Void)? = nil) {
         // If not authenticated
-        guard AuthenticationManager.shared.isAuthenticated else {
-            completion?(.success(true))
+        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            completion?(.success(false))
             return
         }
 
@@ -488,6 +496,11 @@ class DocumentManager {
                 return
             }
 
+            guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+                completion?(.success(false))
+                return
+            }
+
             self.documentRequest.deleteAllDocuments { result in
                 switch result {
                 case .failure(let error):
@@ -499,7 +512,12 @@ class DocumentManager {
         }
     }
 
-    func uploadAllDocuments(_ completionHandler: ((Result<Bool, Error>) -> Void)? = nil) {
+    func uploadAllDocuments(_ completion: ((Result<Bool, Error>) -> Void)? = nil) {
+        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            completion?(.success(false))
+            return
+        }
+
         CoreDataManager.shared.persistentContainer.performBackgroundTask { context in
             let documents = Document.fetchAll(context: context)
             let documentsArray: [DocumentAPIType] = documents.map { document in document.asApiType() }
@@ -508,10 +526,10 @@ class DocumentManager {
                 switch result {
                 case .failure(let error):
                     Logger.shared.logError(error.localizedDescription, category: .network)
-                    completionHandler?(.failure(error))
+                    completion?(.failure(error))
                 case .success:
                     Logger.shared.logDebug("Documents imported", category: .network)
-                    completionHandler?(.success(true))
+                    completion?(.success(true))
                 }
             }
         }
