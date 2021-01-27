@@ -456,6 +456,7 @@ public class Widget: NSObject, CALayerDelegate {
     }
 
     func dispatchMouseDown(mouseInfo: MouseInfo) -> Widget? {
+        guard inVisibleBranch else { return nil }
         let globalPos = mouseInfo.position
 
         for c in children {
@@ -490,6 +491,7 @@ public class Widget: NSObject, CALayerDelegate {
     }
 
     func dispatchMouseUp(mouseInfo: MouseInfo) -> Widget? {
+        guard inVisibleBranch else { return nil }
         guard let focussedNode = root?.node else { return nil }
 
         if focussedNode.handleMouseUp(mouseInfo: mouseInfo) {
@@ -514,6 +516,7 @@ public class Widget: NSObject, CALayerDelegate {
     }
 
     func dispatchMouseMoved(mouseInfo: MouseInfo) {
+        guard inVisibleBranch else { return }
         _ = handleMouseMoved(mouseInfo: mouseInfo)
 
         for c in children {
@@ -525,6 +528,7 @@ public class Widget: NSObject, CALayerDelegate {
     }
 
     func dispatchMouseDragged(mouseInfo: MouseInfo) -> Widget? {
+        guard inVisibleBranch else { return nil }
         guard let focussedNode = root?.node else { return nil }
 
         if focussedNode.handleMouseDragged(mouseInfo: mouseInfo) {
