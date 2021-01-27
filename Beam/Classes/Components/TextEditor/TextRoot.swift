@@ -40,7 +40,7 @@ public class TextRoot: TextNode {
     var note: BeamNote?
 
     var undoManager = UndoManager()
-    
+
     var state = TextState()
 
     private var _config = TextConfig()

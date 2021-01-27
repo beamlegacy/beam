@@ -141,7 +141,7 @@ class CommandManagerTests: XCTestCase {
             return true
         }
         cmdManager.endGroup()
-        
+
         XCTAssertEqual(cmdTest, "Hello this is a group")
         _ = cmdManager.undo()
         XCTAssertEqual(cmdTest, "")

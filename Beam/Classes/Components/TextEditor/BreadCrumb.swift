@@ -158,6 +158,10 @@ class BreadCrumb: Widget {
                 down: { [weak self] _ in
                     guard let self = self else { return false }
 
+                    if index == 0 {
+                        layer.string = "..."
+                    }
+
                     self.selectedCrumb = index
                     self.updateCrumbLayersVisibility()
 
@@ -289,11 +293,12 @@ class BreadCrumb: Widget {
             )
         }
 
-        if !open {
-            crumbLayers.forEach { (v) in
-                v.isHidden = true
-            }
-        } else {
+        crumbLayers.enumerated().forEach { index, v in
+            v.isHidden = !open
+            crumbArrowLayers[index].isHidden = !open
+        }
+
+        if open {
             for c in children {
                 computedIdealSize.height += c.idealSize.height
 
@@ -304,6 +309,7 @@ class BreadCrumb: Widget {
                 }
             }
         }
+
     }
 
     /*override func mouseDown(mouseInfo: MouseInfo) -> Bool {
