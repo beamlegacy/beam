@@ -81,6 +81,7 @@ class LinkedReferenceNode: TextNode {
         addLayer(Layer(
                 name: "LinkLayer",
                 layer: linkTextLayer,
+                mouseXPosition: indent,
                 down: { [weak self] _ in
                     guard let self = self, let didMakeInternalLink = self.didMakeInternalLink else { return false }
                     self.text.makeInternalLink(self.cursorsStartPosition..<self.text.text.count)
@@ -94,7 +95,7 @@ class LinkedReferenceNode: TextNode {
         )
     }
 
-    func updateLinknActionLayer() {
+    func updateLinkActionLayer() {
         layers["LinkLayer"]?.frame = CGRect(origin: CGPoint(x: availableWidth - 12, y: 0), size: linkTextLayer.preferredFrameSize())
     }
 }

@@ -108,8 +108,15 @@ class LinksSection: Widget {
                     if let linkLayer = self.linkLayer,
                        linkLayer.layer.isHidden { return false }
 
-                    print("Link All")
+                    self.linkedReferenceNodes.forEach { breadCrumb in
+                        // breadCrumb.proxy.text.makeInternalLink(0..<breadCrumb.proxy.text.text.count)
+                        print("Link All: \(breadCrumb.proxy.text.text)")
+                    }
                     return true
+                }, hover: {[weak self] isHover in
+                    guard let self = self else { return }
+
+                    self.linkActionLayer.foregroundColor = isHover ? NSColor.linkedActionButtonHoverColor.cgColor : NSColor.linkedActionButtonColor.cgColor
                 })
 
             guard let linkLayer = linkLayer else { return }

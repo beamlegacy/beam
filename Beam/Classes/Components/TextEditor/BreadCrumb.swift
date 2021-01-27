@@ -14,6 +14,7 @@ class BreadCrumb: Widget {
     var crumbChain = [BeamElement]()
     var proxy: ProxyElement
     var crumbLayers = [CATextLayer]()
+    var crumbArrowLayers = [CALayer]()
     var section: LinksSection
     var selectedCrumb: Int = 0
     var container: Layer?
@@ -188,22 +189,24 @@ class BreadCrumb: Widget {
             breadCrumbArrowLayer.backgroundColor = NSColor.linkedChevronIconColor.cgColor
 
             if index != crumbChain.count - 1 {
-                newLayer.addSublayer(breadCrumbArrowLayer)
+                addLayer(Layer(
+                    name: "breadCrumbArrowLayer\(index)",
+                    layer: breadCrumbArrowLayer,
+                    down: {[weak self] _ in
+                        guard let self = self else { return false }
+
+                        self.selectedCrumb = self.crumbLayers.count
+                        self.updateCrumbLayersVisibility(by: index)
+
+                        
+
+                        return true
+                    }
+                ))
             }
 
-            addLayer(Layer(
-                    name: "newLayer\(index)",
-                    layer: newLayer,
-                    down: { info -> Bool in
-                        print(info)
-                        return true
-                    },
-                    hover: { isHover in
-                        newLayer.foregroundColor = isHover ? NSColor.linkedBreadcrumbHoverColor.cgColor : NSColor.linkedBreadcrumbColor.cgColor
-                    }
-                )
-            )
-
+            createLayerWithMouseEvents(newLayer, index: index)
+            crumbArrowLayers.append(breadCrumbArrowLayer)
             crumbLayers.append(newLayer)
 
             let crumb = crumbChain[index]
@@ -217,7 +220,7 @@ class BreadCrumb: Widget {
             textFrame = newLayer.preferredFrameSize()
             let textWidth = textFrame.width > limitCharacters ? limitCharacters : textFrame.width
 
-            breadCrumbArrowLayer.frame = CGRect(origin: CGPoint(x: textWidth + 2, y: textFrame.height - 10.5), size: CGSize(width: 10, height: 10))
+            breadCrumbArrowLayer.frame = CGRect(origin: CGPoint(x: textWidth + x + 2, y: textFrame.height + breadCrumYPosition + 2), size: CGSize(width: 10, height: 10))
             breadCrumbMaskLayer.frame = breadCrumbArrowLayer.bounds
 
             guard let layer = layers["newLayer\(index)"] else { return }
@@ -237,15 +240,37 @@ class BreadCrumb: Widget {
         print("make internal link: \(text)")
     }
 
-    func updateCrumbLayersVisibility() {
+    func updateCrumbLayersVisibility(by index: Int = 0) {
         for i in 0..<crumbLayers.count {
-            crumbLayers[i].opacity = i < selectedCrumb ? 1.0 : 0.5
+            crumbLayers[i].isHidden = i < selectedCrumb ? false : true
+            crumbArrowLayers[i].isHidden = i < selectedCrumb ? false : true
+            crumbArrowLayers[i].setAffineTransform(CGAffineTransform(rotationAngle: 0))
         }
+
+        let selectedIndex = selectedCrumb == crumbLayers.count ? index : selectedCrumb - 1
+        crumbArrowLayers[selectedIndex].setAffineTransform(selectedCrumb == crumbLayers.count ? CGAffineTransform.identity : CGAffineTransform(rotationAngle: CGFloat.pi / 2))
+    }
+
+    func createLayerWithMouseEvents(_ layer: CATextLayer, index: Int) {
+        addLayer(Layer(
+                name: "newLayer\(index)",
+                layer: layer,
+                down: { [weak self] _ in
+                    guard let self = self else { return false }
+
+                    self.selectedCrumb = index
+                    self.updateCrumbLayersVisibility()
+
+                    return true
+                },
+                hover: { isHover in
+                    layer.foregroundColor = isHover ? NSColor.linkedBreadcrumbHoverColor.cgColor : NSColor.linkedBreadcrumbColor.cgColor
+                }
+            )
+        )
     }
 
     override func updateRendering() {
-        updateCrumbLayers()
-
         contentsFrame = NSRect(x: 0, y: 0, width: availableWidth, height: open ? (crumbChain.count <= 1 ? 35 : 60) : 30)
         actionLinkLayer?.layer.isHidden = !open
         computedIdealSize = contentsFrame.size
@@ -253,7 +278,7 @@ class BreadCrumb: Widget {
         CATransaction.disableAnimations {
             if crumbChain.count <= 1 {
                 layers["actionLinkLayer"]?.layer.isHidden = true
-                linkedReferenceNode.updateLinknActionLayer()
+                linkedReferenceNode.updateLinkActionLayer()
                 return
             }
 
