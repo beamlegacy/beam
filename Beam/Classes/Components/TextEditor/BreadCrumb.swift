@@ -33,8 +33,8 @@ class BreadCrumb: Widget {
     let titleLayerXPosition: CGFloat = 25
     let titleLayerYPosition: CGFloat = 10
     let limitCharacters: CGFloat = 100
-    let breadCrumXPosition: CGFloat = 26
-    let breadCrumYPosition: CGFloat = 26
+    let breadCrumbXPosition: CGFloat = 26
+    let breadCrumbYPosition: CGFloat = 26
     let spaceBreadcrumbIcon: CGFloat = 15
 
     var open: Bool = true {
@@ -64,7 +64,7 @@ class BreadCrumb: Widget {
         self.proxy = ProxyElement(for: element)
         super.init(editor: editor)
 
-        self.crumbChain = computeCrumChain(from: element)
+        self.crumbChain = computeCrumbChain(from: element)
 
         guard let ref = editor.nodeFor(element) as? LinkedReferenceNode else { fatalError() }
         ref.parent = self
@@ -178,7 +178,7 @@ class BreadCrumb: Widget {
         )
     }
 
-    func createBreadcrumArrow(_ layer: CALayer, index: Int) {
+    func createBreadcrumbArrow(_ layer: CALayer, index: Int) {
         addLayer(Layer(
             name: "breadcrumbArrowLayer\(index)",
             layer: layer,
@@ -193,7 +193,7 @@ class BreadCrumb: Widget {
         ))
     }
 
-    func computeCrumChain(from element: BeamElement) -> [BeamElement] {
+    func computeCrumbChain(from element: BeamElement) -> [BeamElement] {
         var chain = [BeamElement]()
         var current: BeamElement? = element
 
@@ -231,7 +231,7 @@ class BreadCrumb: Widget {
             breadcrumbArrowLayer.backgroundColor = NSColor.linkedChevronIconColor.cgColor
 
             if index != crumbChain.count - 1 {
-                createBreadcrumArrow(breadcrumbArrowLayer, index: index)
+                createBreadcrumbArrow(breadcrumbArrowLayer, index: index)
             }
 
             createLayerWithMouseEvents(newLayer, index: index)
@@ -249,13 +249,13 @@ class BreadCrumb: Widget {
             textFrame = newLayer.preferredFrameSize()
             let textWidth = textFrame.width > limitCharacters ? limitCharacters : textFrame.width
 
-            breadcrumbArrowLayer.frame = CGRect(origin: CGPoint(x: textWidth + x + 2, y: textFrame.height + breadCrumYPosition + 2), size: CGSize(width: 10, height: 10))
+            breadcrumbArrowLayer.frame = CGRect(origin: CGPoint(x: textWidth + x + 2, y: textFrame.height + breadCrumbYPosition + 2), size: CGSize(width: 10, height: 10))
             breadcrumbMaskLayer.frame = breadcrumbArrowLayer.bounds
 
             guard let layer = layers["newLayer\(index)"] else { return }
 
             layer.frame = CGRect(
-                origin: CGPoint(x: x, y: textFrame.height + breadCrumYPosition),
+                origin: CGPoint(x: x, y: textFrame.height + breadCrumbYPosition),
                 size: CGSize(width: textWidth, height: textFrame.height)
             )
 
@@ -292,7 +292,7 @@ class BreadCrumb: Widget {
             }
 
             layers["actionLinkLayer"]?.frame = CGRect(
-                origin: CGPoint(x: (availableWidth - linkLayer.frame.width) - 10, y: breadCrumYPosition + 9),
+                origin: CGPoint(x: (availableWidth - linkLayer.frame.width) - 10, y: breadCrumbYPosition + 9),
                 size: linkLayer.preferredFrameSize()
             )
         }
