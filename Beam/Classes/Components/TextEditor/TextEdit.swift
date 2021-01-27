@@ -33,8 +33,8 @@ public struct MouseInfo {
         self.globalPosition = info.globalPosition
         self.event = info.event
 
-        let globalPos = layer.layer.convert(CGPoint(), to: node.editor.layer)
-        self.position = CGPoint(x: globalPosition.x - globalPos.x, y: globalPosition.y - globalPos.y)
+        let globalBounds = layer.layer.convert(layer.layer.bounds, to: node.editor.layer)
+        self.position = CGPoint(x: globalPosition.x - globalBounds.minX, y: globalPosition.y - globalBounds.minY)
     }
 }
 
