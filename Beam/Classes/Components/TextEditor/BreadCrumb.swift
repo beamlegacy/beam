@@ -151,6 +151,40 @@ class BreadCrumb: Widget {
         layers["chevron"]?.frame = CGRect(origin: CGPoint(x: 0, y: titleLayer.frame.height - 8), size: CGSize(width: 20, height: 20))
     }
 
+    func createLayerWithMouseEvents(_ layer: CATextLayer, index: Int) {
+        addLayer(Layer(
+                name: "newLayer\(index)",
+                layer: layer,
+                down: { [weak self] _ in
+                    guard let self = self else { return false }
+
+                    self.selectedCrumb = index
+                    self.updateCrumbLayersVisibility()
+
+                    return true
+                },
+                hover: { isHover in
+                    layer.foregroundColor = isHover ? NSColor.linkedBreadcrumbHoverColor.cgColor : NSColor.linkedBreadcrumbColor.cgColor
+                }
+            )
+        )
+    }
+
+    func createBreadcrumArrow(_ layer: CALayer, index: Int) {
+        addLayer(Layer(
+            name: "breadcrumbArrowLayer\(index)",
+            layer: layer,
+            down: {[weak self] _ in
+                guard let self = self else { return false }
+
+                self.selectedCrumb = self.crumbLayers.count
+                self.updateCrumbLayersVisibility(by: index)
+
+                return true
+            }
+        ))
+    }
+
     func computeCrumChain(from element: BeamElement) -> [BeamElement] {
         var chain = [BeamElement]()
         var current: BeamElement? = element
@@ -177,36 +211,23 @@ class BreadCrumb: Widget {
 
         for index in 0 ..< crumbChain.count {
             let newLayer = CATextLayer()
-            let breadCrumbArrowLayer = CALayer()
-            let breadCrumbMaskLayer = CALayer()
+            let breadcrumbArrowLayer = CALayer()
+            let breadcrumbMaskLayer = CALayer()
 
             newLayer.font = NSFont.systemFont(ofSize: 0, weight: .medium)
             newLayer.fontSize = 10
             newLayer.foregroundColor = NSColor.linkedBreadcrumbColor.cgColor
 
-            breadCrumbMaskLayer.contents = breadCrumbArrow
-            breadCrumbArrowLayer.mask = breadCrumbMaskLayer
-            breadCrumbArrowLayer.backgroundColor = NSColor.linkedChevronIconColor.cgColor
+            breadcrumbMaskLayer.contents = breadCrumbArrow
+            breadcrumbArrowLayer.mask = breadcrumbMaskLayer
+            breadcrumbArrowLayer.backgroundColor = NSColor.linkedChevronIconColor.cgColor
 
             if index != crumbChain.count - 1 {
-                addLayer(Layer(
-                    name: "breadCrumbArrowLayer\(index)",
-                    layer: breadCrumbArrowLayer,
-                    down: {[weak self] _ in
-                        guard let self = self else { return false }
-
-                        self.selectedCrumb = self.crumbLayers.count
-                        self.updateCrumbLayersVisibility(by: index)
-
-                        
-
-                        return true
-                    }
-                ))
+                createBreadcrumArrow(breadcrumbArrowLayer, index: index)
             }
 
             createLayerWithMouseEvents(newLayer, index: index)
-            crumbArrowLayers.append(breadCrumbArrowLayer)
+            crumbArrowLayers.append(breadcrumbArrowLayer)
             crumbLayers.append(newLayer)
 
             let crumb = crumbChain[index]
@@ -220,8 +241,8 @@ class BreadCrumb: Widget {
             textFrame = newLayer.preferredFrameSize()
             let textWidth = textFrame.width > limitCharacters ? limitCharacters : textFrame.width
 
-            breadCrumbArrowLayer.frame = CGRect(origin: CGPoint(x: textWidth + x + 2, y: textFrame.height + breadCrumYPosition + 2), size: CGSize(width: 10, height: 10))
-            breadCrumbMaskLayer.frame = breadCrumbArrowLayer.bounds
+            breadcrumbArrowLayer.frame = CGRect(origin: CGPoint(x: textWidth + x + 2, y: textFrame.height + breadCrumYPosition + 2), size: CGSize(width: 10, height: 10))
+            breadcrumbMaskLayer.frame = breadcrumbArrowLayer.bounds
 
             guard let layer = layers["newLayer\(index)"] else { return }
 
@@ -249,25 +270,6 @@ class BreadCrumb: Widget {
 
         let selectedIndex = selectedCrumb == crumbLayers.count ? index : selectedCrumb - 1
         crumbArrowLayers[selectedIndex].setAffineTransform(selectedCrumb == crumbLayers.count ? CGAffineTransform.identity : CGAffineTransform(rotationAngle: CGFloat.pi / 2))
-    }
-
-    func createLayerWithMouseEvents(_ layer: CATextLayer, index: Int) {
-        addLayer(Layer(
-                name: "newLayer\(index)",
-                layer: layer,
-                down: { [weak self] _ in
-                    guard let self = self else { return false }
-
-                    self.selectedCrumb = index
-                    self.updateCrumbLayersVisibility()
-
-                    return true
-                },
-                hover: { isHover in
-                    layer.foregroundColor = isHover ? NSColor.linkedBreadcrumbHoverColor.cgColor : NSColor.linkedBreadcrumbColor.cgColor
-                }
-            )
-        )
     }
 
     override func updateRendering() {
