@@ -628,6 +628,8 @@ public class TextNode: Widget {
 
             if mouseInfo.event.clickCount == 1 && editor.inlineFormatter != nil {
                 self.editor.dismissPopoverOrFormatter()
+                root?.cursorPosition = clickPos
+                root?.cancelSelection()
             } else if mouseInfo.event.clickCount == 1 {
                 if mouseInfo.event.modifierFlags.contains(.shift) {
                     dragMode = .select(cursorPosition)
