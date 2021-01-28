@@ -1,5 +1,6 @@
 import Foundation
 import XCTest
+import Nimble
 
 @testable import Beam
 class CoreDataManagerTests: XCTestCase {
@@ -17,67 +18,39 @@ class CoreDataManagerTests: XCTestCase {
     }
 
     override func tearDownWithError() throws {
-//        sut.destroyPersistentStore()
+        sut.destroyPersistentStore()
     }
 
     // MARK: - Tests
 
     // MARK: Setup
     func test_setup_completionCalled() {
-        let setupExpectation = expectation(description: "set up completion called")
-
-        sut.setup {
-            setupExpectation.fulfill()
-        }
-
-        waitForExpectations(timeout: 1.0) { (_) in
-            XCTAssertTrue(self.sut.persistentContainer.persistentStoreCoordinator.persistentStores.count > 0)
+        waitUntil { [unowned self] done in
+            self.sut.setup {
+                expect(self.sut.persistentContainer.persistentStoreCoordinator.persistentStores.count).to(equal(1))
+                done()
+            }
         }
     }
 
     func test_setup_persistentContainerLoadedOnDisk() {
-        let setupExpectation = expectation(description: "set up completion called")
-
-        sut.setup {
-            XCTAssertEqual(self.sut.persistentContainer.persistentStoreDescriptions.first?.type, NSSQLiteStoreType)
-            setupExpectation.fulfill()
-        }
-
-        waitForExpectations(timeout: 1.0) { (_) in
-            self.sut.destroyPersistentStore()
+        waitUntil { [unowned self] done in
+            self.sut.setup {
+                expect(self.sut.persistentContainer.persistentStoreDescriptions.first?.type).to(equal(NSSQLiteStoreType))
+                done()
+            }
         }
     }
 
     func test_setup_persistentContainerLoadedInMemory() {
-        let setupExpectation = expectation(description: "set up completion called")
+        waitUntil { [unowned self] done in
+            self.sut.setup(storeType: NSInMemoryStoreType) {
+                expect(self.sut.persistentContainer.persistentStoreDescriptions.first?.type).to(equal(NSInMemoryStoreType))
+                expect(self.sut.backgroundContext.concurrencyType).to(equal(.privateQueueConcurrencyType))
+                expect(self.sut.mainContext.concurrencyType).to(equal(.mainQueueConcurrencyType))
 
-        sut.setup(storeType: NSInMemoryStoreType) {
-            XCTAssertEqual(self.sut.persistentContainer.persistentStoreDescriptions.first?.type, NSInMemoryStoreType)
-            setupExpectation.fulfill()
+                done()
+            }
         }
-
-        waitForExpectations(timeout: 1.0, handler: nil)
-    }
-
-    func test_backgroundContext_concurrencyType() {
-        let setupExpectation = expectation(description: "background context")
-
-        sut.setup(storeType: NSInMemoryStoreType) {
-            XCTAssertEqual(self.sut.backgroundContext.concurrencyType, .privateQueueConcurrencyType)
-            setupExpectation.fulfill()
-        }
-
-        waitForExpectations(timeout: 1.0, handler: nil)
-    }
-
-    func test_mainContext_concurrencyType() {
-        let setupExpectation = expectation(description: "main context")
-
-        sut.setup(storeType: NSInMemoryStoreType) {
-            XCTAssertEqual(self.sut.mainContext.concurrencyType, .mainQueueConcurrencyType)
-            setupExpectation.fulfill()
-        }
-
-        waitForExpectations(timeout: 1.0, handler: nil)
     }
 }

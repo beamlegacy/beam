@@ -7,6 +7,8 @@
 
 import Foundation
 import XCTest
+import Nimble
+
 @testable import Beam
 
 extension String {
@@ -36,7 +38,7 @@ class BeamTextTests: XCTestCase {
         """.toBeamText)
 
         btext.insert("!", at: btext.text.count, withAttributes: [.strong])
-        print("btext \(btext.json)")
+//        print("btext \(btext.json)")
         XCTAssertEqual(btext,
         """
         {"ranges":[{"string":"some new string!"},{"string":"!","attributes":[{"type":0}]}]}
@@ -213,15 +215,20 @@ class BeamTextTests: XCTestCase {
         let textFrame = Font.draw(string: attributedString, atPosition: NSPoint(), textWidth: 500)
         guard let line = textFrame.lines.first else { fatalError() }
         let carets = line.carets
-        for (i, caret) in carets.enumerated() where caret.isLeadingEdge {
-            print("caret[\(i)] -> \(caret)")
-        }
 
-        for i in 0..<string.count {
-            let r = i..<i + 1
-            let sub = string[r]
-            let offset = line.offsetFor(index: i)
-            print("range \(r) -> \(sub) [offset: \(offset)]")
-        }
+//        for (i, caret) in carets.enumerated() where caret.isLeadingEdge {
+//            print("caret[\(i)] -> \(caret)")
+//        }
+
+        expect(carets[5].index).to(equal(11))
+
+//        for i in 0..<string.count {
+//            let r = i..<i + 1
+//            let sub = string[r]
+//            let offset = line.offsetFor(index: i)
+//            print("range \(r) -> \(sub) [offset: \(offset)]")
+//        }
+
+        expect(line.offsetFor(index: 3)).to(equal(17.982422))
     }
 }

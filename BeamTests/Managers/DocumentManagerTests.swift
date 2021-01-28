@@ -1,6 +1,9 @@
 import Foundation
 import XCTest
 import Fakery
+import Quick
+import Nimble
+import Combine
 
 @testable import Beam
 class DocumentManagerTests: CoreDataTests {
@@ -37,8 +40,6 @@ class DocumentManagerTests: CoreDataTests {
 
     // MARK: - Tests
     func testSave() throws {
-        let setupExpectation = expectation(description: "set up completion called")
-
         let document = "whatever binary data"
 
         //swiftlint:disable:next force_try
@@ -53,23 +54,22 @@ class DocumentManagerTests: CoreDataTests {
                                        data: jsonData,
                                        documentType: .note)
 
-        sut.saveDocument(docStruct, completion: { _ in
-            setupExpectation.fulfill()
-        })
-
-        waitForExpectations(timeout: 1.0) { _ in
-            let count = Document.countWithPredicate(self.context, NSPredicate(format: "id = %@", id as CVarArg))
-            XCTAssertEqual(count, 1)
+        waitUntil { [unowned self] done in
+            self.sut.saveDocument(docStruct) { _ in
+                done()
+            }
         }
+
+        let count = Document.countWithPredicate(self.context,
+                                                NSPredicate(format: "id = %@", id as CVarArg))
+        expect(count).to(equal(1))
     }
 
     func testLoad() throws {
-        let setupExpectation = expectation(description: "set up completion called")
-
-        let document = "whatever binary data"
+        let data = "whatever binary data"
 
         //swiftlint:disable:next force_try
-        let jsonData = try! self.defaultEncoder().encode(document)
+        let jsonData = try! self.defaultEncoder().encode(data)
         let id = UUID()
         let title = faker.zelda.game()
 
@@ -80,34 +80,33 @@ class DocumentManagerTests: CoreDataTests {
                                        data: jsonData,
                                        documentType: .note)
 
-        sut.saveDocument(docStruct, completion: { _ in
-            setupExpectation.fulfill()
-        })
-
-        waitForExpectations(timeout: 1.0) { _ in
-            var document = self.sut.loadDocumentById(id: id)
-            XCTAssertNotNil(document)
-
-            document = self.sut.loadDocumentByTitle(title: title)
-            XCTAssertNotNil(document)
-
-            //swiftlint:disable:next force_cast
-            //swiftlint:disable:next force_try
-            let result = try! self.defaultDecoder().decode(String.self, from: document!.data)
-
-            XCTAssertEqual(result, "whatever binary data")
+        waitUntil { [unowned self] done in
+            self.sut.saveDocument(docStruct) { _ in
+                done()
+            }
         }
+
+        var document = self.sut.loadDocumentById(id: id)
+        expect(document).toNot(beNil())
+
+        document = self.sut.loadDocumentByTitle(title: title)
+        expect(document).toNot(beNil())
+
+        //swiftlint:disable:next force_cast
+        //swiftlint:disable:next force_try
+        let result = try! self.defaultDecoder().decode(String.self, from: document!.data)
+
+        expect(result).to(equal(data))
     }
 
     func testDelete() throws {
-        let document = "whatever binary data"
+        let data = "whatever binary data"
 
         let id = UUID()
         let title = faker.zelda.game()
         //swiftlint:disable force_try
-        let jsonData = try! self.defaultEncoder().encode(document)
+        let jsonData = try! self.defaultEncoder().encode(data)
 
-        let saveExpectation = expectation(description: "save completion called")
         let docStruct = DocumentStruct(id: id,
                                        title: title,
                                        createdAt: Date(),
@@ -115,34 +114,34 @@ class DocumentManagerTests: CoreDataTests {
                                        data: jsonData,
                                        documentType: .note)
 
-        sut.saveDocument(docStruct, completion: { _ in
-            saveExpectation.fulfill()
-        })
-
-        waitForExpectations(timeout: 2.0) { _ in
-            let count = Document.countWithPredicate(self.context, NSPredicate(format: "id = %@", id as CVarArg))
-            XCTAssertEqual(count, 1)
+        waitUntil { [unowned self] done in
+            self.sut.saveDocument(docStruct) { _ in
+                done()
+            }
         }
 
-        let deleteExpectation = expectation(description: "delete completion called")
-        sut.deleteDocument(id: id) { _ in
-            deleteExpectation.fulfill()
+        var count = Document.countWithPredicate(self.context, NSPredicate(format: "id = %@", id as
+                                                                            CVarArg))
+        expect(count).to(equal(1))
+
+        waitUntil { [unowned self] done in
+            self.sut.deleteDocument(id: id) { _ in
+                done()
+            }
         }
 
-        waitForExpectations(timeout: 2.0) { _ in
-            let count = Document.countWithPredicate(self.context, NSPredicate(format: "id = %@", id as CVarArg))
-            XCTAssertEqual(count, 0)
-        }
+        count = Document.countWithPredicate(self.context, NSPredicate(format: "id = %@", id as
+                                                                            CVarArg))
+
+        expect(count).to(equal(0))
     }
 
     // swiftlint:disable:next function_body_length
     func testDuplicateTitles() throws {
-        let saveExpectation = expectation(description: "save completion called")
-
-        let document = "whatever binary data"
+        let data = "whatever binary data"
 
         //swiftlint:disable:next force_try
-        var jsonData = try! self.defaultEncoder().encode(document)
+        var jsonData = try! self.defaultEncoder().encode(data)
 
         let id = UUID()
         let title = faker.zelda.game()
@@ -154,19 +153,15 @@ class DocumentManagerTests: CoreDataTests {
                                        data: jsonData,
                                        documentType: .note)
 
-        sut.saveDocument(docStruct, completion: { _ in
-            DispatchQueue.main.async {
-                saveExpectation.fulfill()
+        waitUntil { [unowned self] done in
+            self.sut.saveDocument(docStruct) { result in
+                expect { try result.get() }.toNot(throwError())
+                done()
             }
-        })
-
-        waitForExpectations(timeout: 1.0) { _ in
         }
 
-        // Create another one with same title
-        let saveDoubleExpectations = expectation(description: "save completion called")
         //swiftlint:disable:next force_try
-        jsonData = try! self.defaultEncoder().encode(document)
+        jsonData = try! self.defaultEncoder().encode(data)
 
         var docStruct2 = DocumentStruct(id: UUID(),
                                         title: title,
@@ -175,86 +170,69 @@ class DocumentManagerTests: CoreDataTests {
                                         data: jsonData,
                                         documentType: .note)
 
-        sut.saveDocument(docStruct2, completion: { result in
-            switch result {
-            case .success:
-                XCTAssert(false)
-            case .failure:
-                break
+        waitUntil { [unowned self] done in
+            self.sut.saveDocument(docStruct2) { result in
+                expect { try result.get() }.to(throwError())
+                done()
             }
-
-            DispatchQueue.main.async {
-                saveDoubleExpectations.fulfill()
-            }
-        })
-
-        waitForExpectations(timeout: 1.0) { _ in
-            let count = Document.countWithPredicate(self.context,
-                                                    NSPredicate(format: "id = %@", id as CVarArg))
-            XCTAssertEqual(count, 1)
         }
+
+        var count = Document.countWithPredicate(self.context,
+                                                NSPredicate(format: "id = %@", id as CVarArg))
+        expect(count).to(equal(1))
 
         docStruct2.deletedAt = Date()
-        let saveDoubleOkExpectations = expectation(description: "save completion called")
-        sut.saveDocument(docStruct2, completion: { result in
-            switch result {
-            case .success: break
-            case .failure:
-                XCTAssert(false)
-            }
 
-            DispatchQueue.main.async {
-                saveDoubleOkExpectations.fulfill()
-            }
-        })
-        waitForExpectations(timeout: 1.0) { _ in
-            let count = Document.rawCountWithPredicate(self.context,
-                                                       NSPredicate(format: "title = %@", title),
-                                                       onlyNonDeleted: false)
-            XCTAssertEqual(count, 2)
+        waitUntil { [unowned self] done in
+            self.sut.saveDocument(docStruct2, completion: { result in
+                expect { try result.get() }.toNot(throwError())
+                done()
+            })
         }
+
+        count = Document.rawCountWithPredicate(self.context,
+                                               NSPredicate(format: "title = %@", title),
+                                               onlyNonDeleted: false)
+        expect(count).to(equal(2))
     }
 
     func testDocumentCreate() throws {
         let title = faker.zelda.game()
         let documentStruct = sut.create(title: title)
-        XCTAssertEqual(documentStruct?.title, title)
+        expect(documentStruct?.title).to(equal(title))
     }
 
     func testDocumentCreateAsync() throws {
         let title = faker.zelda.game()
 
-        let createExpectation = expectation(description: "create completion called")
-
-        sut.createAsync(title: title) { documentStruct in
-            XCTAssertEqual(documentStruct?.title, title)
-            createExpectation.fulfill()
-        }
-        waitForExpectations(timeout: 1.0) { _ in
+        waitUntil { [unowned self] done in
+            self.sut.createAsync(title: title) { documentStruct in
+                expect(documentStruct?.title).to(equal(title))
+                done()
+            }
         }
     }
 
     func testDocumentFetchOrCreate() throws {
         let title = faker.zelda.game()
         let documentStruct = sut.fetchOrCreate(title: title)
-        XCTAssertEqual(documentStruct?.title, title)
+        expect(documentStruct?.title).to(equal(title))
 
         let documentStruct2 = sut.fetchOrCreate(title: title)
-        XCTAssertEqual(documentStruct2?.title, title)
+        expect(documentStruct2?.title).to(equal(title))
 
-        XCTAssertEqual(documentStruct?.id, documentStruct2?.id)
+        expect(documentStruct?.id).notTo(beNil())
+        expect(documentStruct?.id).to(equal(documentStruct2?.id))
     }
 
     func testDocumentFetchOrCreateAsync() throws {
         let title = faker.zelda.game()
 
-        let createExpectation = expectation(description: "create completion called")
-
-        sut.fetchOrCreateAsync(title: title) { documentStruct in
-            XCTAssertEqual(documentStruct?.title, title)
-            createExpectation.fulfill()
-        }
-        waitForExpectations(timeout: 1.0) { _ in
+        waitUntil { [unowned self] done in
+            self.sut.fetchOrCreateAsync(title: title) { documentStruct in
+                expect(documentStruct?.title).to(equal(title))
+                done()
+            }
         }
     }
 
@@ -274,33 +252,27 @@ class DocumentManagerTests: CoreDataTests {
     func testOnDocumentUpdate() throws {
         let title = faker.zelda.game()
         let newTitle = "a new title"
-        XCTAssertNotEqual(title, newTitle)
+        expect(title).toNot(equal(newTitle))
         let document = Document.create(context, title: title)
         document.data = Data()
         //swiftlint:disable:next force_try
         try! context.save()
 
-        guard let documentStruct = sut.loadDocumentById(id: document.id) else {
-            XCTAssert(false)
-            return
+        let documentStruct = sut.loadDocumentById(id: document.id)!
+
+        waitUntil { [unowned self] done in
+            let cancellable = self.sut.onDocumentChange(documentStruct) { updatedDocumentStruct in
+                expect(documentStruct.id).to(equal(updatedDocumentStruct.id))
+                expect(updatedDocumentStruct.title).to(equal(newTitle))
+                done()
+            }
+
+            document.title = newTitle
+            //swiftlint:disable:next force_try
+            try! context.save()
+
+            // To avoid warning
+            cancellable.cancel()
         }
-
-        let changeExpectation = expectation(description: "update completion called")
-
-        let cancellable = sut.onDocumentChange(documentStruct) { updatedDocumentStruct in
-            XCTAssertEqual(documentStruct.id, updatedDocumentStruct.id)
-            XCTAssertEqual(updatedDocumentStruct.title, newTitle)
-            changeExpectation.fulfill()
-        }
-
-        document.title = newTitle
-        //swiftlint:disable:next force_try
-        try! context.save()
-
-        waitForExpectations(timeout: 1.0) { _ in
-        }
-
-        // To avoid warning
-        cancellable.cancel()
     }
 }
