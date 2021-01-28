@@ -26,13 +26,13 @@ class ProxyElement: BeamElement {
     init(for element: BeamElement) {
         self.proxy = element
         super.init(proxy.text)
-        proxy.$children.sink { [unowned self] _ in
-            self.updateProxyChildren()
+        proxy.$children.sink { [unowned self] newChildren in
+            self.updateProxyChildren(newChildren)
         }.store(in: &scope)
     }
 
-    func updateProxyChildren() {
-        self.children = proxy.children.map({ e -> ProxyElement in
+    func updateProxyChildren(_ newChildren: [BeamElement]) {
+        self.children = newChildren.map({ e -> ProxyElement in
             let p = ProxyElement(for: e)
             p.parent = proxy
             return p
@@ -51,14 +51,10 @@ class LinkedReferenceNode: TextNode {
 
     internal override var children: [Widget] {
         get {
-            element.children.compactMap({ e -> LinkedReferenceNode? in
-                let ref = editor.nodeFor(e)
-                ref.parent = self
-                return ref as? LinkedReferenceNode
-            })
+            storedChildren
         }
         set {
-            fatalError()
+            storedChildren = newValue
         }
     }
 
@@ -74,6 +70,19 @@ class LinkedReferenceNode: TextNode {
         editor.layer?.addSublayer(layer)
         actionLayer?.removeFromSuperlayer()
         open = true
+
+        element.$children
+            .sink { [unowned self] newChildren in
+                self.children = newChildren.compactMap({ e -> LinkedReferenceNode? in
+                    let ref = editor.nodeFor(e)
+                    ref.parent = self
+                    return ref as? LinkedReferenceNode
+                })
+
+                self.invalidateRendering()
+                self.invalidateLayout()
+        }.store(in: &scope)
+
     }
 
     // MARK: - Setup UI

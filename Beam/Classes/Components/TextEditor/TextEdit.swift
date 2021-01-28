@@ -1166,15 +1166,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
     @IBAction func saveDocument(_ sender: Any?) {
         Logger.shared.logInfo("Save document!", category: .document)
-//        let encoder = JSONEncoder()
-//        encoder.outputFormatting = .prettyPrinted
-//        do {
-//            let data = try encoder.encode(rootNode)
-//            let string = String(data: data, encoding: .utf8)!
-//            print("JSon document:\n\(string)")
-//        } catch {
-//            print("Encoding error")
-//        }
         rootNode.note?.save(documentManager: documentManager)
         BeamNote.detectLinks(documentManager)
     }

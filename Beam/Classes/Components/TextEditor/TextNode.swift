@@ -119,6 +119,17 @@ public class TextNode: Widget {
         }
     }
 
+    internal var storedChildren: [Widget] {
+        get {
+            super.children
+        }
+        set {
+            super.children = newValue
+        }
+    }
+
+
+
     var config: TextConfig {
         root?.config ?? TextConfig()
     }
