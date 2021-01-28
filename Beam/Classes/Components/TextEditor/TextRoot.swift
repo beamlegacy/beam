@@ -240,4 +240,9 @@ public class TextRoot: TextNode {
         print("==================================================")
         super.dumpWidgetTree(level)
     }
+
+    override var showDisclosureButton: Bool {
+        false
+    }
+
 }

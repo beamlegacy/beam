@@ -141,7 +141,7 @@ public class TextNode: Widget {
     }
 
     var showDisclosureButton: Bool {
-        depth > 0 && !children.isEmpty
+        !children.isEmpty
     }
 
     var showIdentationLine: Bool {

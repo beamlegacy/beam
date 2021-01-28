@@ -392,19 +392,44 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             rootNode.eraseSelection()
             let splitText = node.text.extract(range: rootNode.cursorPosition ..< node.text.count)
             node.text.removeLast(node.text.count - rootNode.cursorPosition)
-            let element = BeamElement()
-            element.text = splitText
-            let newNode = nodeFor(element)
-            let elements = node.element.children
-            for c in elements {
-                newNode.element.addChild(c)
+
+            if let refNode = node as? LinkedReferenceNode {
+                guard let proxyElement = refNode.element as? ProxyElement else { fatalError() }
+                let actualElement = proxyElement.proxy
+                guard let actualParent = actualElement.parent else { fatalError() }
+
+                let element = BeamElement()
+                element.text = splitText
+
+                actualParent.addChild(element)
+                let elements = actualElement.children
+                for c in elements {
+                    element.addChild(c)
+                }
+
+                let newProxyElement = ProxyElement(for: element)
+                let newNode = nodeFor(newProxyElement)
+
+                _ = node.parent?.insert(node: newNode, after: node)
+                rootNode.cursorPosition = 0
+
+                scrollToCursorAtLayout = true
+                self.node = newNode
+
+            } else {
+                let element = BeamElement()
+                element.text = splitText
+                let newNode = nodeFor(element)
+                let elements = node.element.children
+                for c in elements {
+                    newNode.element.addChild(c)
+                }
+                _ = node.parent?.insert(node: newNode, after: node)
+                rootNode.cursorPosition = 0
+
+                scrollToCursorAtLayout = true
+                self.node = newNode
             }
-
-            _ = node.parent?.insert(node: newNode, after: node)
-            rootNode.cursorPosition = 0
-
-            scrollToCursorAtLayout = true
-            self.node = newNode
 
             cleanPersistentFormatter()
         }

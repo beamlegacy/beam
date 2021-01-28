@@ -12,11 +12,15 @@ class ProxyElement: BeamElement {
     var proxy: BeamElement
     var proxyChildren: [BeamElement]
 
-    override var text: BeamText { set { proxy.text = newValue; change() } get { proxy.text } }
+    override var text: BeamText {
+        didSet {
+            proxy.text = text
+        }
+    }
     public internal(set) override var children: [BeamElement] { get { proxyChildren } set { fatalError() } }
 
     override var note: BeamNote? {
-        return nil
+        return proxy.note
     }
 
     init(for element: BeamElement) {

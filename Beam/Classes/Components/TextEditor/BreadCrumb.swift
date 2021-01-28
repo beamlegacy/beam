@@ -67,6 +67,7 @@ class BreadCrumb: Widget {
 
         guard let ref = editor.nodeFor(element) as? LinkedReferenceNode else { fatalError() }
         ref.parent = self
+        ref.open = false
         self.linkedReferenceNode = ref
 
         editor.layer?.addSublayer(layer)
