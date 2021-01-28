@@ -11,12 +11,6 @@ import AppKit
 
 class BrowsingNodeWidget: Widget {
     var recursive: Bool
-    var open: Bool = true {
-        didSet {
-            updateVisibility(visible && open)
-            invalidateLayout()
-        }
-    }
 
     var browsingNode: BrowsingNode
     let textLayer = CATextLayer()

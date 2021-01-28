@@ -10,13 +10,6 @@ import Combine
 import AppKit
 
 class BrowsingSection: Widget {
-    var open: Bool = true {
-        didSet {
-            updateVisibility(visible && open)
-            invalidateLayout()
-        }
-    }
-
     var sorted: Bool = true {
         didSet {
             updateChildrenNodes()

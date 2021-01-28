@@ -235,4 +235,9 @@ public class TextRoot: TextNode {
         .complete: CommandDefinition(undo: true, redo: true, coalesce: true, name: "Complete"),
         .cancelOperation: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Cancel Operation")
     ]
+
+    override func dumpWidgetTree(_ level: Int = 0) {
+        print("==================================================")
+        super.dumpWidgetTree(level)
+    }
 }

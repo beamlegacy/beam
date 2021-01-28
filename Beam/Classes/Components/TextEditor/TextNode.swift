@@ -100,13 +100,6 @@ public class TextNode: Widget {
         return _language
     }
 
-    var open = true {
-        didSet {
-            invalidateLayout()
-            updateVisibility(visible && open)
-        }
-    }
-
     var _attributedString: NSAttributedString?
     var attributedString: NSAttributedString {
         if _attributedString == nil {
@@ -597,6 +590,7 @@ public class TextNode: Widget {
 
     // MARK: - Mouse Events
     override func mouseDown(mouseInfo: MouseInfo) -> Bool {
+        assert(inVisibleBranch)
         if showDisclosureButton && disclosureButtonFrame.contains(mouseInfo.position) {
             disclosurePressed = true
             return true
@@ -1027,6 +1021,14 @@ public class TextNode: Widget {
             }
         }
         return self
+    }
+
+    override func dumpWidgetTree(_ level: Int = 0) {
+        let tabs = String.tabs(level)
+        print("\(tabs)\(String(describing: Self.self)) frame(\(frame)) \(layers.count) layers - element id: \(element.id) [\(elementText.text)]")
+        for c in children {
+            c.dumpWidgetTree(level + 1)
+        }
     }
 
 }

@@ -37,10 +37,8 @@ class BreadCrumb: Widget {
     let breadCrumbYPosition: CGFloat = 26
     let spaceBreadcrumbIcon: CGFloat = 15
 
-    var open: Bool = true {
+    override var open: Bool {
         didSet {
-            updateVisibility(visible && open)
-            invalidateLayout()
             containerLayer.isHidden = !open
         }
     }

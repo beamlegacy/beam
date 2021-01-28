@@ -650,6 +650,11 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                         toggleStrikeThrough()
                         return
                     }
+                case "d":
+                    if command, shift {
+                        dumpWidgetTree()
+                        return
+                    }
                 default:
                     break
                 }
@@ -1257,6 +1262,10 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
     @IBAction func selectAllHierarchically(_ sender: Any?) {
         rootNode.doCommand(.selectAllHierarchically)
+    }
+
+    func dumpWidgetTree() {
+        rootNode.dumpWidgetTree()
     }
 
 }

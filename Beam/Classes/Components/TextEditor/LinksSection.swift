@@ -25,10 +25,8 @@ class LinksSection: Widget {
     let separatorLayer = CALayer()
     let offsetY: CGFloat = 40
 
-    var open: Bool = true {
+    override var open: Bool {
         didSet {
-            updateVisibility(visible && open)
-            invalidateLayout()
             linkLayer?.layer.isHidden = !open
         }
     }

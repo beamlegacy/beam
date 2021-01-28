@@ -17,7 +17,6 @@ class SpacerWidget: Widget {
     var spacerType: SpacerType
 
     private (set) var space: CGFloat = 0
-    var open = true
 
     init(editor: BeamTextEdit, spacerType: SpacerType) {
         self.spacerType = spacerType

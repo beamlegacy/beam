@@ -142,7 +142,7 @@ public class Widget: NSObject, CALayerDelegate {
     // walking the node tree:
     var inVisibleBranch: Bool {
         guard let p = parent else { return true }
-        return p.visible && p.inVisibleBranch
+        return p.visible && p.open && p.inVisibleBranch
     }
 
     var allParents: [Widget] {
@@ -340,10 +340,17 @@ public class Widget: NSObject, CALayerDelegate {
         context.restoreGState()
     }
 
-    func updateVisibility(_ isVisible: Bool) {
+    var open: Bool = true {
+        didSet {
+            updateChildrenVisibility(visible && open)
+            invalidateLayout()
+        }
+    }
+
+    func updateChildrenVisibility(_ isVisible: Bool) {
         for c in children {
             c.visible = isVisible
-            c.updateVisibility(isVisible)
+            c.updateChildrenVisibility(isVisible && open)
             invalidateLayout()
         }
     }
@@ -735,6 +742,15 @@ public class Widget: NSObject, CALayerDelegate {
         }
         return true
     }
+
+    func dumpWidgetTree(_ level: Int = 0) {
+        let tabs = String.tabs(level)
+        print("\(tabs)\(String(describing: Self.self)) frame(\(frame)) \(layers.count) layers")
+        for c in children {
+            c.dumpWidgetTree(level + 1)
+        }
+    }
+
 }
 // swiftlint:enable type_body_length
 // swiftlint:enable file_length
