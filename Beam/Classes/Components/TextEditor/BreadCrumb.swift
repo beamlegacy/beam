@@ -165,7 +165,10 @@ class BreadCrumb: Widget {
                 name: "newLayer\(index)",
                 layer: layer,
                 down: { [weak self] _ in
-                    guard let self = self else { return false }
+                    guard let self = self,
+                          let textValue = self.crumbLayers[index].string as? String else { return false }
+
+                    if textValue == self.breadcrumbPlaceholder { return false }
 
                     self.selectedCrumb = index
                     self.updateCrumbLayersVisibility()
