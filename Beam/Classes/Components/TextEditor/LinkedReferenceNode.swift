@@ -49,10 +49,13 @@ class LinkedReferenceNode: TextNode {
 
     // MARK: - Properties
 
-    internal var proxyChildren = [LinkedReferenceNode]()
     internal override var children: [Widget] {
         get {
-            return proxyChildren
+            element.children.compactMap({ e -> LinkedReferenceNode? in
+                let ref = editor.nodeFor(e)
+                ref.parent = self
+                return ref as? LinkedReferenceNode
+            })
         }
         set {
             fatalError()
@@ -67,12 +70,6 @@ class LinkedReferenceNode: TextNode {
     override init(editor: BeamTextEdit, element: BeamElement) {
         let proxyElement = ProxyElement(for: element)
         super.init(editor: editor, element: proxyElement)
-
-        self.proxyChildren = proxyElement.children.compactMap({ e -> LinkedReferenceNode? in
-            let ref = editor.nodeFor(e)
-            ref.parent = self
-            return ref as? LinkedReferenceNode
-        })
 
         editor.layer?.addSublayer(layer)
         actionLayer?.removeFromSuperlayer()
