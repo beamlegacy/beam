@@ -24,8 +24,8 @@ class Layer: NSObject, CALayerDelegate {
         if hovered != value {
             hover(value)
             hovered = value
-//            layer.borderColor = hovered ? NSColor.red.cgColor : nil
-//            layer.borderWidth = hovered ? 2 : 0
+            // layer.borderColor = hovered ? NSColor.red.cgColor : nil
+            // layer.borderWidth = hovered ? 2 : 0
         }
     }
     var layout: () -> Void

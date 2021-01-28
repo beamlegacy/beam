@@ -59,6 +59,9 @@ class BreadCrumb: Widget {
         }
     }
 
+    private var firstBreadcrumbText = ""
+    private var breadcrumbPlaceholder = "..."
+
     init(editor: BeamTextEdit, section: LinksSection, element: BeamElement) {
         self.section = section
         self.proxy = ProxyElement(for: element)
@@ -212,7 +215,7 @@ class BreadCrumb: Widget {
 
         crumbLayers.removeAll()
 
-        var x: CGFloat = 25
+        var startXPositionBreadcrumb: CGFloat = 25
         var textFrame = CGSize.zero
 
         guard crumbChain.count > 1 else { return }
@@ -249,17 +252,17 @@ class BreadCrumb: Widget {
             textFrame = newLayer.preferredFrameSize()
             let textWidth = textFrame.width > limitCharacters ? limitCharacters : textFrame.width
 
-            breadcrumbArrowLayer.frame = CGRect(origin: CGPoint(x: textWidth + x + 2, y: textFrame.height + breadCrumbYPosition + 2), size: CGSize(width: 10, height: 10))
+            breadcrumbArrowLayer.frame = CGRect(origin: CGPoint(x: textWidth + startXPositionBreadcrumb + 2, y: textFrame.height + breadCrumbYPosition + 2), size: CGSize(width: 10, height: 10))
             breadcrumbMaskLayer.frame = breadcrumbArrowLayer.bounds
 
             guard let layer = layers["newLayer\(index)"] else { return }
 
             layer.frame = CGRect(
-                origin: CGPoint(x: x, y: textFrame.height + breadCrumbYPosition),
+                origin: CGPoint(x: startXPositionBreadcrumb, y: textFrame.height + breadCrumbYPosition),
                 size: CGSize(width: textWidth, height: textFrame.height)
             )
 
-            x += layer.bounds.width + spaceBreadcrumbIcon
+            startXPositionBreadcrumb += layer.bounds.width + spaceBreadcrumbIcon
         }
 
         selectedCrumb = crumbLayers.count
@@ -271,12 +274,39 @@ class BreadCrumb: Widget {
 
     func updateCrumbLayersVisibility(by index: Int = 0) {
         for i in 0..<crumbLayers.count {
-            crumbLayers[i].isHidden = i < selectedCrumb ? false : true
-            crumbArrowLayers[i].isHidden = i < selectedCrumb ? false : true
+            crumbLayers[i].isHidden = selectedCrumb == 0 ? (i == selectedCrumb ? false : true) : (i < selectedCrumb ? false : true)
+            crumbArrowLayers[i].isHidden = selectedCrumb == 0 ? (i == selectedCrumb ? false : true) : (i < selectedCrumb ? false : true)
             crumbArrowLayers[i].setAffineTransform(CGAffineTransform(rotationAngle: 0))
         }
 
-        let selectedIndex = selectedCrumb == crumbLayers.count ? index : selectedCrumb - 1
+        let selectedIndex = selectedCrumb == crumbLayers.count || selectedCrumb == 0 ? index : selectedCrumb - 1
+        let textLayer = crumbLayers[selectedIndex]
+        guard let textValue = textLayer.string as? String else { return }
+
+        if selectedCrumb == 0 {
+            firstBreadcrumbText = textValue
+            textLayer.string = breadcrumbPlaceholder
+
+            layers["breadcrumbArrowLayer\(selectedIndex)"]?.frame = CGRect(
+                origin: CGPoint(x: 40, y: textLayer.preferredFrameSize().height + breadCrumbYPosition + 2),
+                size: CGSize(width: 10, height: 10)
+            )
+        } else if textValue == breadcrumbPlaceholder {
+            textLayer.string = firstBreadcrumbText
+
+            layers["breadcrumbArrowLayer\(selectedIndex)"]?.frame = CGRect(
+                origin: CGPoint(x: textLayer.preferredFrameSize().width + 25 + 2, y: textLayer.preferredFrameSize().height + breadCrumbYPosition + 2),
+                size: CGSize(width: 10, height: 10)
+            )
+        }
+
+        if selectedCrumb == 0 || textValue == breadcrumbPlaceholder || textValue == firstBreadcrumbText {
+            layers["newLayer\(selectedIndex)"]?.frame = CGRect(
+                origin: CGPoint(x: 25, y: textLayer.preferredFrameSize().height + breadCrumbYPosition),
+                size: textLayer.preferredFrameSize()
+            )
+        }
+
         crumbArrowLayers[selectedIndex].setAffineTransform(selectedCrumb == crumbLayers.count ? CGAffineTransform.identity : CGAffineTransform(rotationAngle: CGFloat.pi / 2))
     }
 
