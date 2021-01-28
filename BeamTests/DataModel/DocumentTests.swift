@@ -8,6 +8,10 @@ import Nimble
 class DocumentTests: CoreDataTests {
     let faker = Faker(locale: "en-US")
 
+    override func tearDown() {
+        BeamDate.reset()
+    }
+
     func testDocumentFetch() throws {
         let countBefore = Document.countWithPredicate(context)
         expect(countBefore).to(equal(0))
@@ -20,6 +24,24 @@ class DocumentTests: CoreDataTests {
 
         let countAfter = Document.countWithPredicate(context)
         expect(countAfter).to(equal(countBefore + count))
+    }
+
+    func testDocumentUpdatedAt() throws {
+        let document = Document.create(context, title: "foobar 1")
+        expect(document.updated_at).toNot(beNil())
+
+        BeamDate.travel(0.5)
+        let initialUpdatedAt = document.updated_at
+        document.title = "foobar 2"
+        try? context.save()
+        expect(document.updated_at).to(equal(initialUpdatedAt))
+
+        BeamDate.travel(1.5)
+        document.title = "foobar 3"
+        try? context.save()
+        expect(document.updated_at).toNot(equal(initialUpdatedAt))
+        expect(document.updated_at).to(beGreaterThan(initialUpdatedAt))
+        expect(document.updated_at.timeIntervalSince(initialUpdatedAt)).to(beGreaterThan(2.0))
     }
 
     func testDocumentFetchWithTitle() throws {
