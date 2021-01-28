@@ -21,31 +21,15 @@ class BreadCrumb: Widget {
     var cardTitleLayer: Layer?
     var actionLinkLayer: Layer?
 
-    let chevron = NSImage(named: "editor-arrow_right")
-    let breadCrumbArrow = NSImage(named: "editor-breadcrumb_arrow")
-    let chevronLayer = CALayer()
-    let maskLayer = CALayer()
-    let containerLayer = CALayer()
-    let titleLayer = CATextLayer()
-    let linkLayer = CATextLayer()
-
-    let chevronXPosition: CGFloat = 0
-    let titleLayerXPosition: CGFloat = 25
-    let titleLayerYPosition: CGFloat = 10
-    let limitCharacters: CGFloat = 100
-    let breadCrumbXPosition: CGFloat = 26
-    let breadCrumbYPosition: CGFloat = 26
-    let spaceBreadcrumbIcon: CGFloat = 15
+    var linkedReferenceNode: LinkedReferenceNode! {
+        didSet {
+            oldValue.delete()
+        }
+    }
 
     override var open: Bool {
         didSet {
             containerLayer.isHidden = !open
-        }
-    }
-
-    var linkedReferenceNode: LinkedReferenceNode! {
-        didSet {
-            oldValue.delete()
         }
     }
 
@@ -59,6 +43,20 @@ class BreadCrumb: Widget {
 
     private var firstBreadcrumbText = ""
     private var breadcrumbPlaceholder = "..."
+
+    private let chevron = NSImage(named: "editor-arrow_right")
+    private let breadCrumbArrow = NSImage(named: "editor-breadcrumb_arrow")
+    private let chevronLayer = CALayer()
+    private let maskLayer = CALayer()
+    private let containerLayer = CALayer()
+    private let titleLayer = CATextLayer()
+    private let linkLayer = CATextLayer()
+
+    private let titleLayerXPosition: CGFloat = 25
+    private let titleLayerYPosition: CGFloat = 10
+    private let limitCharacters: CGFloat = 100
+    private let breadCrumbYPosition: CGFloat = 26
+    private let spaceBreadcrumbIcon: CGFloat = 15
 
     init(editor: BeamTextEdit, section: LinksSection, element: BeamElement) {
         self.section = section
@@ -144,7 +142,7 @@ class BreadCrumb: Widget {
         addLayer(cardTitleLayer)
         addLayer(container)
 
-        cardTitleLayer.frame = CGRect(origin: CGPoint(x: 25, y: titleLayerYPosition), size: titleLayer.preferredFrameSize())
+        cardTitleLayer.frame = CGRect(origin: CGPoint(x: titleLayerXPosition, y: titleLayerYPosition), size: titleLayer.preferredFrameSize())
         layers["chevron"]?.frame = CGRect(origin: CGPoint(x: 0, y: titleLayer.frame.height - 8), size: CGSize(width: 20, height: 20))
     }
 

@@ -18,6 +18,7 @@ enum LogCategory: String {
     case web
     case search
     case javascript
+    case documentMerge
 }
 
 final class Logger {

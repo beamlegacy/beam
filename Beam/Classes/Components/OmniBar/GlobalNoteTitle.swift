@@ -49,6 +49,8 @@ struct GlobalNoteTitle: View {
             .frame(idealWidth: 600, maxWidth: .infinity)
         }
         .onTapGesture(count: 1, perform: {
+            focusOmniBox = true
+            isEditing = true
             title = note.title
         })
         .onHover { h in

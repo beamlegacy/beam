@@ -353,7 +353,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         hasFocus = true
         invalidate()
         onStartEditing()
-        initFormatterView(.persistent)
         return super.becomeFirstResponder()
     }
 
@@ -976,12 +975,13 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         super.scrollWheel(with: event)
 
         if popover != nil { cancelPopover() }
+        if inlineFormatter != nil { showOrHideInlineFormatter(isPresent: false) }
     }
 
     // MARK: - Mouse Event
-    public override func updateTrackingAreas() {
-        for t in trackingAreas {
-            removeTrackingArea(t)
+    override public func updateTrackingAreas() {
+        for trackingArea in trackingAreas {
+            removeTrackingArea(trackingArea)
         }
 
         addTrackingArea(NSTrackingArea(rect: bounds, options: [.mouseMoved, .activeInActiveApp], owner: self, userInfo: nil))
@@ -1001,6 +1001,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         }
 
         node = newNode
+        node.editor.setHotSpotToCursorPosition()
     }
 
     var scrollToCursorAtLayout = false

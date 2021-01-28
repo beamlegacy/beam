@@ -27,6 +27,7 @@ struct AdvancedPreferencesView: View {
     @State private var sparkleFeedURL = Configuration.sparkleFeedURL
     @State private var sentryEnabled = Configuration.sentryEnabled
     @State private var loggedIn: Bool = AccountManager().loggedIn
+    @State private var networkEnabled: Bool = Configuration.networkEnabled
 
     private let contentWidth: Double = 450.0
 
@@ -62,6 +63,9 @@ struct AdvancedPreferencesView: View {
             }
             Preferences.Section(title: "Sentry dsn:") {
                 Text("https://\(Configuration.sentryKey)@\(Configuration.sentryHostname)/\(Configuration.sentryProject)").fixedSize(horizontal: false, vertical: true)
+            }
+            Preferences.Section(title: "Network Enabled") {
+                NetworkEnabledButton
             }
             Preferences.Section(title: "Actions") {
                 ResetAPIEndpointsButton
@@ -100,6 +104,15 @@ struct AdvancedPreferencesView: View {
             // TODO: loc
             Text("Copy Access Token").frame(minWidth: 100)
         }).disabled(!loggedIn)
+    }
+
+    private var NetworkEnabledButton: some View {
+        Button(action: {
+            Configuration.networkEnabled = !Configuration.networkEnabled
+            networkEnabled = Configuration.networkEnabled
+        }, label: {
+            Text(String(describing: networkEnabled)).frame(minWidth: 100)
+        })
     }
 }
 

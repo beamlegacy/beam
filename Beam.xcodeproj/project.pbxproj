@@ -157,6 +157,9 @@
 		524299C725A47D2600F4DBF5 /* AppDelegate+Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524299C625A47D2600F4DBF5 /* AppDelegate+Preferences.swift */; };
 		524299E725A480A300F4DBF5 /* AccountsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524299E225A480A300F4DBF5 /* AccountsView.swift */; };
 		524299EE25A488E000F4DBF5 /* AdvancedPreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524299ED25A488E000F4DBF5 /* AdvancedPreferencesView.swift */; };
+		525C233C25BAF8EF001B9625 /* libgit2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 525C233B25BAF8EF001B9625 /* libgit2.a */; };
+		525C235125BAFC6B001B9625 /* Merge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 525C235025BAFC6B001B9625 /* Merge.swift */; };
+		525C235825BAFCAA001B9625 /* MergeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 525C235725BAFCAA001B9625 /* MergeTests.swift */; };
 		526016CE25ADC10800634695 /* String+MD5.swift in Sources */ = {isa = PBXBuildFile; fileRef = 526016CD25ADC10800634695 /* String+MD5.swift */; };
 		5260172125ADCBE800634695 /* documents.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 5260172025ADCBE800634695 /* documents.graphql */; };
 		526017F425AE074E00634695 /* ConsoleWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 526017F325AE074E00634695 /* ConsoleWindow.swift */; };
@@ -576,6 +579,9 @@
 		524299C625A47D2600F4DBF5 /* AppDelegate+Preferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+Preferences.swift"; sourceTree = "<group>"; };
 		524299E225A480A300F4DBF5 /* AccountsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AccountsView.swift; sourceTree = "<group>"; };
 		524299ED25A488E000F4DBF5 /* AdvancedPreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedPreferencesView.swift; sourceTree = "<group>"; };
+		525C233B25BAF8EF001B9625 /* libgit2.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgit2.a; path = Extern/libgit2/build/libgit2.a; sourceTree = "<group>"; };
+		525C235025BAFC6B001B9625 /* Merge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Merge.swift; sourceTree = "<group>"; };
+		525C235725BAFCAA001B9625 /* MergeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MergeTests.swift; sourceTree = "<group>"; };
 		526016CD25ADC10800634695 /* String+MD5.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+MD5.swift"; sourceTree = "<group>"; };
 		5260172025ADCBE800634695 /* documents.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = documents.graphql; sourceTree = "<group>"; };
 		526017F325AE074E00634695 /* ConsoleWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsoleWindow.swift; sourceTree = "<group>"; };
@@ -643,6 +649,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				525C233C25BAF8EF001B9625 /* libgit2.a in Frameworks */,
 				527FB72425B9AAA200959146 /* Fakery in Frameworks */,
 				9631C747251CE997009B40C4 /* SwiftSoup in Frameworks */,
 				527FB6FC25B9A8C200959146 /* Alamofire in Frameworks */,
@@ -676,6 +683,7 @@
 		24EFBA757ACC5310A2D800B2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				525C233B25BAF8EF001B9625 /* libgit2.a */,
 				52C60B82258B6332008B7C10 /* Sparkle.xcodeproj */,
 				9645489F2523B3550064D062 /* CloudKit.framework */,
 			);
@@ -875,6 +883,7 @@
 		418171882581107C00317ED8 /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
+				525C234F25BAFC34001B9625 /* Merge */,
 				418172B025811AAA00317ED8 /* Animator */,
 				4181719C2581107C00317ED8 /* Extensions */,
 				4181731525811E0300317ED8 /* Enum */,
@@ -1201,6 +1210,22 @@
 			path = Preferences;
 			sourceTree = "<group>";
 		};
+		525C234F25BAFC34001B9625 /* Merge */ = {
+			isa = PBXGroup;
+			children = (
+				525C235025BAFC6B001B9625 /* Merge.swift */,
+			);
+			path = Merge;
+			sourceTree = "<group>";
+		};
+		525C235625BAFC9E001B9625 /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				525C235725BAFCAA001B9625 /* MergeTests.swift */,
+			);
+			path = Helpers;
+			sourceTree = "<group>";
+		};
 		526017DE25AE073800634695 /* Console */ = {
 			isa = PBXGroup;
 			children = (
@@ -1377,6 +1402,7 @@
 		965A78402514F149009980D4 /* BeamTests */ = {
 			isa = PBXGroup;
 			children = (
+				525C235625BAFC9E001B9625 /* Helpers */,
 				562A8B6325B6ECEB004D3D8A /* CoreML */,
 				562A8B4D25B5E36B004D3D8A /* Classes */,
 				96CDA7252582732500BC375C /* Indexer */,
@@ -1437,6 +1463,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 965A78512514F149009980D4 /* Build configuration list for PBXNativeTarget "Beam" */;
 			buildPhases = (
+				5205F34425BB1BFE00D3CDB4 /* Build libgit2 */,
 				521ED51025B9E43F00FBFA99 /* SwiftLint */,
 				520582C0257E351800E0533A /* Env variable Injector */,
 				965A78212514F147009980D4 /* Sources */,
@@ -1769,6 +1796,24 @@
 			shellScript = "direnv allow ..\neval \"$(direnv export bash)\"\n\nif which variable-injector >/dev/null; then\n  variable-injector --file ${SRCROOT}/Beam/Configuration/Configuration.swift # --verbose # Pass your paramenters\nelse\n  echo \"Warning: Swift Variable Injector not installed, download from https://github.com/penso/variable-injector\"\nfi\n";
 			showEnvVarsInLog = 0;
 		};
+		5205F34425BB1BFE00D3CDB4 /* Build libgit2 */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Build libgit2";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "./scripts/build_libgit2.sh\n";
+		};
 		520DDA94257E4CEE00FF8152 /* Clean Configuration.swift from variable Injector */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -1804,7 +1849,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if which swiftlint >/dev/null; then\n  swiftlint\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
+			shellScript = "if which swiftlint >/dev/null; then\n  swiftlint --lenient\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
 		};
 		5259C3FE258A837300DD67E7 /* Sparkle Signing */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -1989,6 +2034,7 @@
 				418172372581107C00317ED8 /* TextEditOperations.swift in Sources */,
 				521EEDE925937FAD00BA2485 /* DocumentRow.swift in Sources */,
 				414B98F025A239F8002E81A3 /* FormatterView.swift in Sources */,
+				525C235125BAFC6B001B9625 /* Merge.swift in Sources */,
 				526017F425AE074E00634695 /* ConsoleWindow.swift in Sources */,
 				961EC4F225B4511D009FA322 /* Layer.swift in Sources */,
 				4181720C2581107C00317ED8 /* BeamNote.swift in Sources */,
@@ -1999,6 +2045,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				525C235825BAFCAA001B9625 /* MergeTests.swift in Sources */,
 				965A78422514F149009980D4 /* BeamTests.swift in Sources */,
 				562A8B7925B6ED03004D3D8A /* CoreMLTests.swift in Sources */,
 				52E04FED252C814D00AD9F56 /* RoamImporterTests.swift in Sources */,
@@ -2208,14 +2255,21 @@
 					"$(PROJECT_DIR)",
 					"$(PROJECT_DIR)/Frameworks",
 				);
+				HEADER_SEARCH_PATHS = Extern/libgit2/include;
 				INFOPLIST_FILE = Beam/Configuration/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path//Frameworks",
 					"@executable_path/../Frameworks",
 				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Extern/libgit2/build",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MARKETING_VERSION = 0.1.0;
+				OTHER_CODE_SIGN_FLAGS = "--timestamp";
+				OTHER_LDFLAGS = "-liconv";
 				PRODUCT_BUNDLE_IDENTIFIER = co.beamapp.macos;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -2246,14 +2300,21 @@
 					"$(PROJECT_DIR)",
 					"$(PROJECT_DIR)/Frameworks",
 				);
+				HEADER_SEARCH_PATHS = Extern/libgit2/include;
 				INFOPLIST_FILE = Beam/Configuration/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path//Frameworks",
 					"@executable_path/../Frameworks",
 				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Extern/libgit2/build",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MARKETING_VERSION = 0.1.0;
+				OTHER_CODE_SIGN_FLAGS = "--timestamp";
+				OTHER_LDFLAGS = "-liconv";
 				PRODUCT_BUNDLE_IDENTIFIER = co.beamapp.macos;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -2273,6 +2334,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = X87W5M786F;
+				HEADER_SEARCH_PATHS = Extern/libgit2/include;
 				INFOPLIST_FILE = BeamTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -2282,7 +2344,6 @@
 				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Beam.app/Contents/MacOS/Beam";
 			};
@@ -2298,6 +2359,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = X87W5M786F;
+				HEADER_SEARCH_PATHS = Extern/libgit2/include;
 				INFOPLIST_FILE = BeamTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -2307,7 +2369,6 @@
 				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Beam.app/Contents/MacOS/Beam";
 			};
@@ -2317,11 +2378,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
-				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = X87W5M786F;
+				HEADER_SEARCH_PATHS = Extern/libgit2/include;
 				INFOPLIST_FILE = BeamUITests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -2332,7 +2393,6 @@
 				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
 				TEST_TARGET_NAME = Beam;
 			};
@@ -2342,11 +2402,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
-				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = X87W5M786F;
+				HEADER_SEARCH_PATHS = Extern/libgit2/include;
 				INFOPLIST_FILE = BeamUITests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -2357,7 +2417,6 @@
 				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
 				TEST_TARGET_NAME = Beam;
 			};

@@ -7,7 +7,6 @@ struct DocumentDetail: View {
     let documentManager = DocumentManager()
 
     var body: some View {
-
         ScrollView {
             RefreshButton.padding()
 
@@ -25,31 +24,53 @@ struct DocumentDetail: View {
                     }
                     HStack {
                         Text("Created At:").bold()
-                        Text(String(describing: document.created_at))
+                        Text("\(document.created_at, formatter: Self.dateFormat)")
                         Spacer()
                     }
                     HStack {
                         Text("Updated At:").bold()
-                        Text(String(describing: document.updated_at))
+                        Text("\(document.updated_at, formatter: Self.dateFormat)")
                         Spacer()
                     }
                     if let deleted_at = document.deleted_at {
                         HStack {
                             Text("Deleted At:").bold()
-                            Text(String(describing: deleted_at))
+                            Text("\(deleted_at, formatter: Self.dateFormat)")
                             Spacer()
                         }
                     }
-                    if let data = document.data {
-                        Spacer()
+                    Divider()
 
-                        HStack {
-                            Text(String(data: data, encoding: .utf8) ?? "Can't convert data")
+                    Spacer()
+
+                    HStack(alignment: .top) {
+                        VStack(alignment: HorizontalAlignment.leading) {
+                            Text(document.data?.MD5 ?? "No MD5")
+                                .font(.caption)
                                 .fontWeight(.light)
                                 .background(Color.white)
-                            Spacer()
+                            Text(document.data?.asString ?? "No data")
+                                .font(.caption)
+                                .fontWeight(.light)
+                                .background(Color.white)
                         }
+                        Spacer()
+
+                        VStack(alignment: HorizontalAlignment.leading) {
+                            Text(document.beam_api_data?.MD5 ?? "No MD5")
+                                .font(.caption)
+                                .fontWeight(.light)
+                                .background(Color.white)
+                            Text(document.beam_api_data?.asString ?? "No ancestor data")
+                                .font(.caption)
+                                .fontWeight(.light)
+                                .background(Color.white)
+                        }
+                        Spacer()
                     }
+
+                    Divider()
+
                 }.background(Color.white).padding()
                 Spacer()
             }
@@ -59,7 +80,7 @@ struct DocumentDetail: View {
         }
     }
 
-    func refresh() {
+    private func refresh() {
         let timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { _ in
             refreshing = true
         }
@@ -83,6 +104,13 @@ struct DocumentDetail: View {
             }
         }).disabled(refreshing)
     }
+
+    static private let dateFormat: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .short
+        formatter.timeStyle = .long
+        return formatter
+    }()
 }
 
 struct DocumentDetail_Previews: PreviewProvider {

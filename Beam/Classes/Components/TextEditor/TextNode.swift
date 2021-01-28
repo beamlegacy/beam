@@ -634,6 +634,8 @@ public class TextNode: Widget {
                     root?.cursorPosition = clickPos
                     root?.cancelSelection()
                     dragMode = .select(cursorPosition)
+
+                    if editor.persistentFormatter == nil { editor.initFormatterView(.persistent) }
                 }
 
                 return true
