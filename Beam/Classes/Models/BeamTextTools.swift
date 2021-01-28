@@ -139,7 +139,7 @@ extension BeamText {
         var linkCharacterSet = CharacterSet.alphanumerics
         linkCharacterSet.insert(" ")
         guard linkCharacterSet.isSuperset(of: CharacterSet(charactersIn: link)) else {
-            Logger.shared.logError("makeInternalLink for range: \(range) failed: forbidden characters in range", category: .document)
+//            Logger.shared.logError("makeInternalLink for range: \(range) failed: forbidden characters in range", category: .document)
             return false
         }
 
