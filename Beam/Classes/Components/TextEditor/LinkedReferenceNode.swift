@@ -49,6 +49,7 @@ class LinkedReferenceNode: TextNode {
 
     // MARK: - Properties
 
+    internal var storedChildren: [Widget] = []
     internal override var children: [Widget] {
         get {
             storedChildren
