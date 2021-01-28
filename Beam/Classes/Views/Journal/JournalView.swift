@@ -13,7 +13,7 @@ struct JournalView: View {
     @State var isEditing = false
 
     var journal: [BeamNote]
-    var journals: [BeamNote] { isEditing ? journal : [journal.first!] }
+    var journals: [BeamNote] { journal }
     var offset: CGFloat
 
     var body: some View {
@@ -32,7 +32,8 @@ struct JournalView: View {
                     )
                 }
             }
-            .padding(.top, isEditing ? 0 : offset)
+            .padding(.top, offset)
         }
+        .clipped()
     }
 }
