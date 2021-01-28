@@ -69,8 +69,10 @@ class LinksSection: Widget {
         sectionTitleLayer.foregroundColor = NSColor.linkedSectionTitleColor.cgColor
 
         addLayer(ButtonLayer("sectionTitle", sectionTitleLayer, activated: {
-            self.open.toggle()
             guard let chevron = self.layers["chevron"] as? ChevronButton else { return }
+
+            self.open.toggle()
+            self.editor.showOrHidePersistentFormatter(isPresent: false)
             chevron.open = self.open
         }))
 
@@ -106,6 +108,8 @@ class LinksSection: Widget {
                     guard let self = self else { return false }
                     if let linkLayer = self.linkLayer,
                        linkLayer.layer.isHidden { return false }
+
+                    self.editor.showOrHidePersistentFormatter(isPresent: false)
 
                     self.linkedReferenceNodes.forEach { breadCrumb in
                         // breadCrumb.proxy.text.makeInternalLink(0..<breadCrumb.proxy.text.text.count)

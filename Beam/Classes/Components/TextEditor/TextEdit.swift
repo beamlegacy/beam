@@ -1194,6 +1194,14 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         showOrHidePersistentFormatter(isPresent: false)
     }
 
+    internal func initAndShowPersistentFormatter() {
+        if persistentFormatter == nil {
+           initFormatterView(.persistent)
+        } else if persistentFormatter != nil {
+           showOrHidePersistentFormatter(isPresent: true)
+        }
+    }
+
     internal func initAndUpdateInlineFormatter(isDragged: Bool = false) {
         guard let node = node as? TextNode else { return }
 

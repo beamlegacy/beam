@@ -268,6 +268,7 @@ class BreadCrumb: Widget {
     }
 
     func updateReferenceSection(_ text: String) {
+        self.editor.showOrHidePersistentFormatter(isPresent: false)
         print("make internal link: \(text)")
     }
 

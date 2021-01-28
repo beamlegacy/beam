@@ -589,8 +589,10 @@ public class TextNode: Widget {
     }
 
     // MARK: - Mouse Events
+    // swiftlint:disable:next function_body_length
     override func mouseDown(mouseInfo: MouseInfo) -> Bool {
         assert(inVisibleBranch)
+
         if showDisclosureButton && disclosureButtonFrame.contains(mouseInfo.position) {
             disclosurePressed = true
             return true
@@ -621,23 +623,20 @@ public class TextNode: Widget {
             let clickPos = positionAt(point: mouseInfo.position)
 
             if mouseInfo.event.clickCount == 1 && editor.inlineFormatter != nil {
-                self.editor.dismissPopoverOrFormatter()
+                editor.dismissPopoverOrFormatter()
                 root?.cursorPosition = clickPos
                 root?.cancelSelection()
+                return true
+            } else if mouseInfo.event.clickCount == 1 && mouseInfo.event.modifierFlags.contains(.shift) {
+                dragMode = .select(cursorPosition)
+                root?.extendSelection(to: clickPos)
+                editor.initAndUpdateInlineFormatter()
+                return true
             } else if mouseInfo.event.clickCount == 1 {
-                if mouseInfo.event.modifierFlags.contains(.shift) {
-                    dragMode = .select(cursorPosition)
-                    root?.extendSelection(to: clickPos)
-                    editor.initAndUpdateInlineFormatter()
-                    return true
-                } else {
-                    root?.cursorPosition = clickPos
-                    root?.cancelSelection()
-                    dragMode = .select(cursorPosition)
-
-                    if editor.persistentFormatter == nil { editor.initFormatterView(.persistent) }
-                }
-
+                root?.cursorPosition = clickPos
+                root?.cancelSelection()
+                dragMode = .select(cursorPosition)
+                editor.initAndShowPersistentFormatter()
                 return true
             } else if mouseInfo.event.clickCount == 2 {
                 root?.wordSelection(from: clickPos)
