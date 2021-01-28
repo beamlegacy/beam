@@ -168,9 +168,10 @@ class BreadCrumb: Widget {
                           let textValue = self.crumbLayers[index].string as? String else { return false }
 
                     if textValue == self.breadcrumbPlaceholder { return false }
-
+                    let crumb = self.crumbChain[index]
                     self.selectedCrumb = index
                     self.updateCrumbLayersVisibility()
+                    self.replaceNodeWithRootNode(by: index, isUnfold: false)
 
                     return true
                 },
@@ -190,6 +191,7 @@ class BreadCrumb: Widget {
 
                 self.selectedCrumb = self.crumbLayers.count
                 self.updateCrumbLayersVisibility(by: index)
+                self.replaceNodeWithRootNode(by: index)
 
                 return true
             }
@@ -342,31 +344,15 @@ class BreadCrumb: Widget {
 
     }
 
-    /*override func mouseUp(mouseInfo: MouseInfo) -> Bool {
-        for i in 0..<crumbChain.count where !crumbLayers[i].isHidden {
-            let crumb = crumbChain[i]
-            let layer = crumbLayers[i]
+    private func replaceNodeWithRootNode(by index: Int, isUnfold: Bool = true) {
+        let crumb = self.crumbChain[index]
+        guard let ref = self.editor.nodeFor(crumb) as? LinkedReferenceNode else { fatalError() }
+        self.linkedReferenceNode.removeFromSuperlayer(recursive: true)
+        ref.addLayerTo(layer: self.editor.layer!, recursive: true)
+        self.linkedReferenceNode = ref
+        isUnfold ? self.linkedReferenceNode.unfold() : self.linkedReferenceNode.fold()
+        self.children = [self.linkedReferenceNode]
+        self.invalidateLayout()
+    }
 
-            if layer.frame.contains(mouseInfo.position) {
-                guard i != 0 else {
-                    editor.openCard(crumbChain[0].note!.title)
-                    return true
-                }
-                guard i != selectedCrumb else { return false }
-                selectedCrumb = i
-                updateCrumbLayersVisibility()
-                guard let ref = editor.nodeFor(crumb) as? LinkedReferenceNode else { fatalError() }
-                linkedReferenceNode.removeFromSuperlayer(recursive: true)
-                ref.addLayerTo(layer: editor.layer!, recursive: true)
-                linkedReferenceNode = ref
-                linkedReferenceNode.unfold()
-                children = [linkedReferenceNode]
-                invalidateLayout()
-
-                return true
-            }
-        }
-
-        return false
-    }*/
 }
