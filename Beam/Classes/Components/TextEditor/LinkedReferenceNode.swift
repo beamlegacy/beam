@@ -7,30 +7,36 @@
 
 import Foundation
 import AppKit
+import Combine
 
 class ProxyElement: BeamElement {
     var proxy: BeamElement
-    var proxyChildren: [BeamElement]
 
     override var text: BeamText {
         didSet {
             proxy.text = text
         }
     }
-    public internal(set) override var children: [BeamElement] { get { proxyChildren } set { fatalError() } }
-
     override var note: BeamNote? {
         return proxy.note
     }
 
+    var scope = Set<AnyCancellable>()
+
     init(for element: BeamElement) {
         self.proxy = element
-        self.proxyChildren = element.children.map({ e -> ProxyElement in
+        super.init(proxy.text)
+        proxy.$children.sink { [unowned self] _ in
+            self.updateProxyChildren()
+        }.store(in: &scope)
+    }
+
+    func updateProxyChildren() {
+        self.children = proxy.children.map({ e -> ProxyElement in
             let p = ProxyElement(for: e)
-            p.parent = element
+            p.parent = proxy
             return p
         })
-        super.init(proxy.text)
     }
 
     required public init(from decoder: Decoder) throws {
@@ -62,7 +68,7 @@ class LinkedReferenceNode: TextNode {
         let proxyElement = ProxyElement(for: element)
         super.init(editor: editor, element: proxyElement)
 
-        self.proxyChildren = proxyElement.proxyChildren.compactMap({ e -> LinkedReferenceNode? in
+        self.proxyChildren = proxyElement.children.compactMap({ e -> LinkedReferenceNode? in
             let ref = editor.nodeFor(e)
             ref.parent = self
             return ref as? LinkedReferenceNode
