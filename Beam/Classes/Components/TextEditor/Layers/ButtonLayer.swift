@@ -25,7 +25,7 @@ class ButtonLayer: Layer {
             return true
         }
         mouseUp = { [unowned self] info -> Bool in
-            let p = layer.contains(NSPoint(x: info.position.x, y: info.position.y))
+            let p = layer.contains(info.position)
             if p {
                 self.activated()
             }
