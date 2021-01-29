@@ -101,29 +101,7 @@ class LinksSection: Widget {
                 updateLayerVisibility()
             }
 
-            linkLayer = Layer(
-                name: "linkAllLayer",
-                layer: linkActionLayer,
-                down: { [weak self] _ in
-                    guard let self = self else { return false }
-                    if let linkLayer = self.linkLayer,
-                       linkLayer.layer.isHidden { return false }
-
-                    self.editor.showOrHidePersistentFormatter(isPresent: false)
-
-                    self.linkedReferenceNodes.forEach { breadCrumb in
-                        // breadCrumb.proxy.text.makeInternalLink(0..<breadCrumb.proxy.text.text.count)
-                        print("Link All: \(breadCrumb.proxy.text.text)")
-                    }
-                    return true
-                }, hover: {[weak self] isHover in
-                    guard let self = self else { return }
-
-                    self.linkActionLayer.foregroundColor = isHover ? NSColor.linkedActionButtonHoverColor.cgColor : NSColor.linkedActionButtonColor.cgColor
-                })
-
-            guard let linkLayer = linkLayer else { return }
-            addLayer(linkLayer)
+            createLinkAllLayer()
         }
     }
 
@@ -144,6 +122,55 @@ class LinksSection: Widget {
         }
 
         selfVisible = !linkedReferenceNodes.isEmpty
+    }
+
+    func createLinkAllLayer() {
+        linkLayer = Layer(
+            name: "linkAllLayer",
+            layer: linkActionLayer,
+            down: { [weak self] _ in
+                guard let self = self,
+                      let rootNote = self.editor.note.note else { return false }
+
+                if let linkLayer = self.linkLayer, linkLayer.layer.isHidden { return false }
+
+                self.editor.showOrHidePersistentFormatter(isPresent: false)
+                self.linkedReferenceNodes.forEach { linkedReferenceNode in
+                    let text = linkedReferenceNode.proxy.text.text
+
+                    text.ranges(of: rootNote.title).forEach { range in
+                        let start = text.position(at: range.lowerBound)
+                        let end = text.position(at: range.upperBound)
+
+                        linkedReferenceNode.proxy.text.makeInternalLink(start..<end)
+                    }
+                }
+                return true
+            }, hover: {[weak self] isHover in
+                guard let self = self else { return }
+
+                self.linkActionLayer.foregroundColor = isHover ? NSColor.linkedActionButtonHoverColor.cgColor : NSColor.linkedActionButtonColor.cgColor
+            })
+
+        guard let linkLayer = linkLayer else { return }
+        addLayer(linkLayer)
+    }
+
+    func setupLayerFrame() {
+        sectionTitleLayer.frame = CGRect(
+            origin: CGPoint(x: 25, y: 0),
+            size: CGSize(
+                width: availableWidth - (linkActionLayer.frame.width + (mode == .references ? 30 : 25)),
+                height: sectionTitleLayer.preferredFrameSize().height
+            )
+        )
+
+        layers["chevron"]?.frame = CGRect(origin: CGPoint(x: 0, y: sectionTitleLayer.preferredFrameSize().height - 15), size: CGSize(width: 20, height: 20))
+        linkActionLayer.frame = CGRect(origin: CGPoint(x: 0, y: 0), size: linkActionLayer.preferredFrameSize())
+    }
+
+    func updateLayerVisibility() {
+        layer.isHidden = linkedReferenceNodes.isEmpty
     }
 
     override func updateRendering() {
@@ -167,22 +194,5 @@ class LinksSection: Widget {
             guard let linkLayer = linkLayer else { return }
             linkLayer.frame = CGRect(origin: CGPoint(x: frame.width - linkActionLayer.frame.width, y: 0), size: linkActionLayer.preferredFrameSize())
         }
-    }
-
-    func setupLayerFrame() {
-        sectionTitleLayer.frame = CGRect(
-            origin: CGPoint(x: 25, y: 0),
-            size: CGSize(
-                width: availableWidth - (linkActionLayer.frame.width + (mode == .references ? 30 : 25)),
-                height: sectionTitleLayer.preferredFrameSize().height
-            )
-        )
-
-        layers["chevron"]?.frame = CGRect(origin: CGPoint(x: 0, y: sectionTitleLayer.preferredFrameSize().height - 15), size: CGSize(width: 20, height: 20))
-        linkActionLayer.frame = CGRect(origin: CGPoint(x: 0, y: 0), size: linkActionLayer.preferredFrameSize())
-    }
-
-    func updateLayerVisibility() {
-        layer.isHidden = linkedReferenceNodes.isEmpty
     }
 }

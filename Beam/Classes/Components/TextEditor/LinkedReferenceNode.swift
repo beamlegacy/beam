@@ -100,7 +100,6 @@ class LinkedReferenceNode: TextNode {
                 layer: linkTextLayer,
                 down: { [weak self] _ in
                     guard let self = self, let didMakeInternalLink = self.didMakeInternalLink else { return false }
-                    self.text.makeInternalLink(self.cursorsStartPosition..<self.text.text.count)
                     didMakeInternalLink(self.text.text)
                     return true
                 },

@@ -41,6 +41,7 @@ class BreadCrumb: Widget {
         }
     }
 
+    private var currentNote: BeamNote?
     private var currentLinkedRefNode: LinkedReferenceNode?
     private var firstBreadcrumbText = ""
     private var breadcrumbPlaceholder = "..."
@@ -76,6 +77,7 @@ class BreadCrumb: Widget {
 
         guard let note = self.crumbChain.first as? BeamNote else { return }
 
+        currentNote = note
         self.crumbChain.removeFirst()
         self.crumbChain.removeLast()
 
@@ -127,7 +129,6 @@ class BreadCrumb: Widget {
                     layer: linkLayer,
                     down: {[weak self] _ in
                         guard let self = self else { return false }
-                        self.proxy.text.makeInternalLink(0..<self.proxy.text.text.count)
                         self.updateReferenceSection(self.proxy.text.text)
 
                         return true
@@ -272,8 +273,14 @@ class BreadCrumb: Widget {
     }
 
     func updateReferenceSection(_ text: String) {
+        guard let rootNote = editor.note.note else { return }
         self.editor.showOrHidePersistentFormatter(isPresent: false)
-        print("make internal link: \(text)")
+
+        text.ranges(of: rootNote.title).forEach { range in
+            let start = text.position(at: range.lowerBound)
+            let end = text.position(at: range.upperBound)
+            self.proxy.text.makeInternalLink(start..<end)
+        }
     }
 
     func updateCrumbLayersVisibility(by index: Int = 0) {
