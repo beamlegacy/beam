@@ -138,9 +138,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
         initBlinking()
         updateRoot(with: root)
-
-        let trackingArea = NSTrackingArea(rect: self.bounds, options: [.activeAlways, .inVisibleRect, .mouseEnteredAndExited], owner: self, userInfo: nil)
-        self.addTrackingArea(trackingArea)
     }
 
     deinit {
