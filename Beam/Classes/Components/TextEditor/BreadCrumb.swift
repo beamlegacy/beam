@@ -46,10 +46,6 @@ class BreadCrumb: Widget {
     private var firstBreadcrumbText = ""
     private var breadcrumbPlaceholder = "..."
 
-    private let chevron = NSImage(named: "editor-arrow_right")
-    private let breadCrumbArrow = NSImage(named: "editor-breadcrumb_arrow")
-    private let chevronLayer = CALayer()
-    private let maskLayer = CALayer()
     private let containerLayer = CALayer()
     private let titleLayer = CATextLayer()
     private let linkLayer = CATextLayer()
@@ -111,11 +107,12 @@ class BreadCrumb: Widget {
         titleLayer.fontSize = 17
         titleLayer.foregroundColor = NSColor.linkedTitleColor.cgColor
 
-        cardTitleLayer = Layer(name: "cardTitleLayer", layer: titleLayer, down: {[weak self] _ in
-            guard let self = self, let title = self.titleLayer.string as? String else { return false }
+        cardTitleLayer = ButtonLayer("cardTitleLayer", titleLayer, activated: {[weak self] in
+            guard let self = self, let title = self.titleLayer.string as? String else { return }
+
             self.editor.openCard(title)
-            return true
         })
+
         createChevronLayer()
 
         if section.mode == .references {
@@ -124,16 +121,15 @@ class BreadCrumb: Widget {
             linkLayer.fontSize = 13
             linkLayer.foregroundColor = NSColor.linkedActionButtonColor.cgColor
 
-            addLayer(Layer(
-                    name: "actionLinkLayer",
-                    layer: linkLayer,
-                    down: {[weak self] _ in
-                        guard let self = self else { return false }
-                        self.updateReferenceSection(self.proxy.text.text)
+            addLayer(ButtonLayer(
+                    "actionLinkLayer",
+                    linkLayer,
+                    activated: {[weak self] in
+                        guard let self = self else { return }
 
-                        return true
+                        self.updateReferenceSection(self.proxy.text.text)
                     },
-                    hover: { [weak self] (isHover) in
+                    hovered: { [weak self] isHover in
                         guard let self = self else { return }
                         self.linkLayer.foregroundColor = isHover ? NSColor.linkedActionButtonHoverColor.cgColor : NSColor.linkedActionButtonColor.cgColor
                     }
@@ -163,39 +159,34 @@ class BreadCrumb: Widget {
     }
 
     func createBreadcrumLayer(_ layer: CATextLayer, index: Int) {
-        addLayer(Layer(
-                name: "newLayer\(index)",
-                layer: layer,
-                down: { [weak self] _ in
-                    guard let self = self,
-                          let textValue = self.crumbLayers[index].string as? String else { return false }
+        addLayer(ButtonLayer("newLayer\(index)",
+            layer,
+            activated: {[weak self] in
+                guard let self = self,
+                      let textValue = self.crumbLayers[index].string as? String else { return }
 
-                    if textValue == self.breadcrumbPlaceholder { return false }
-                    self.selectedCrumb = index
-                    self.updateCrumbLayersVisibility()
-                    self.replaceNodeWithRootNode(by: index)
+                if textValue == self.breadcrumbPlaceholder { return }
 
-                    return true
-                },
-                hover: { isHover in
-                    layer.foregroundColor = isHover ? NSColor.linkedBreadcrumbHoverColor.cgColor : NSColor.linkedBreadcrumbColor.cgColor
-                }
-            )
-        )
+                self.selectedCrumb = index
+                self.updateCrumbLayersVisibility()
+                self.replaceNodeWithRootNode(by: index)
+
+            },
+            hovered: { isHover in
+                layer.foregroundColor = isHover ? NSColor.linkedBreadcrumbHoverColor.cgColor : NSColor.linkedBreadcrumbColor.cgColor
+            }
+        ))
     }
 
     func createBreadcrumbArrowLayer(_ layer: CALayer, index: Int) {
-        addLayer(Layer(
-            name: "breadcrumbArrowLayer\(index)",
-            layer: layer,
-            down: {[weak self] _ in
-                guard let self = self else { return false }
+        addLayer(ButtonLayer("breadcrumbArrowLayer\(index)",
+            layer,
+            activated: {[weak self] in
+                guard let self = self else { return }
 
                 self.selectedCrumb = self.crumbLayers.count
                 self.updateCrumbLayersVisibility(by: index)
                 self.replaceNodeWithRootNode(by: index, isUnfold: false)
-
-                return true
             }
         ))
     }
@@ -226,16 +217,13 @@ class BreadCrumb: Widget {
 
         for index in 0 ..< crumbChain.count {
             let newLayer = CATextLayer()
-            let breadcrumbArrowLayer = CALayer()
-            let breadcrumbMaskLayer = CALayer()
+            var breadcrumbArrowLayer = CALayer()
 
             newLayer.font = NSFont.systemFont(ofSize: 0, weight: .medium)
             newLayer.fontSize = 10
             newLayer.foregroundColor = NSColor.linkedBreadcrumbColor.cgColor
 
-            breadcrumbMaskLayer.contents = breadCrumbArrow
-            breadcrumbArrowLayer.mask = breadcrumbMaskLayer
-            breadcrumbArrowLayer.backgroundColor = NSColor.linkedChevronIconColor.cgColor
+            breadcrumbArrowLayer = Layer.icon(named: "editor-breadcrumb_arrow", color: NSColor.linkedChevronIconColor)
 
             if index != crumbChain.count - 1 {
                 createBreadcrumbArrowLayer(breadcrumbArrowLayer, index: index)
@@ -257,7 +245,6 @@ class BreadCrumb: Widget {
             let textWidth = textFrame.width > limitCharacters ? limitCharacters : textFrame.width
 
             breadcrumbArrowLayer.frame = CGRect(origin: CGPoint(x: textWidth + startXPositionBreadcrumb + 2, y: textFrame.height + breadCrumbYPosition + 2), size: CGSize(width: 10, height: 10))
-            breadcrumbMaskLayer.frame = breadcrumbArrowLayer.bounds
 
             guard let layer = layers["newLayer\(index)"] else { return }
 
@@ -286,7 +273,7 @@ class BreadCrumb: Widget {
     func updateCrumbLayersVisibility(by index: Int = 0) {
         for i in 0..<crumbLayers.count {
             crumbLayers[i].isHidden = selectedCrumb == 0 ? (i == selectedCrumb ? false : true) : (i < selectedCrumb ? false : true)
-            crumbArrowLayers[i].isHidden = selectedCrumb == 0 ? (i == selectedCrumb ? false : true) : (i < selectedCrumb ? false : true)
+            crumbArrowLayers[i].isHidden = crumbLayers[i].isHidden
             crumbArrowLayers[i].setAffineTransform(CGAffineTransform(rotationAngle: 0))
         }
 
@@ -354,26 +341,26 @@ class BreadCrumb: Widget {
 
     private func replaceNodeWithRootNode(by index: Int, isUnfold: Bool = true) {
 
-        if !isUnfold {
-            self.linkedReferenceNode.removeFromSuperlayer(recursive: true)
-            self.linkedReferenceNode = self.currentLinkedRefNode
-            self.children = [self.linkedReferenceNode]
-            self.invalidateLayout()
+        guard isUnfold else {
+            linkedReferenceNode.removeFromSuperlayer(recursive: true)
+            linkedReferenceNode = currentLinkedRefNode
+            children = [linkedReferenceNode]
+            invalidateLayout()
 
             return
         }
 
-        let crumb = self.crumbChain[index]
+        let crumb = crumbChain[index]
 
-        guard let ref = self.editor.nodeFor(crumb) as? LinkedReferenceNode else { fatalError() }
+        guard let ref = editor.nodeFor(crumb) as? LinkedReferenceNode else { return }
 
-        self.linkedReferenceNode.removeFromSuperlayer(recursive: true)
-        ref.addLayerTo(layer: self.editor.layer!, recursive: true)
-        self.linkedReferenceNode = ref
-        self.linkedReferenceNode.unfold()
+        linkedReferenceNode.removeFromSuperlayer(recursive: true)
+        ref.addLayerTo(layer: editor.layer!, recursive: true)
+        linkedReferenceNode = ref
+        linkedReferenceNode.unfold()
 
-        self.children = [self.linkedReferenceNode]
-        self.invalidateLayout()
+        children = [linkedReferenceNode]
+        invalidateLayout()
     }
 
 }
