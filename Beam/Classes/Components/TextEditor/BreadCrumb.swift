@@ -41,6 +41,7 @@ class BreadCrumb: Widget {
         }
     }
 
+    private var currentLinkedRefNode: LinkedReferenceNode?
     private var firstBreadcrumbText = ""
     private var breadcrumbPlaceholder = "..."
 
@@ -69,6 +70,7 @@ class BreadCrumb: Widget {
         ref.parent = self
         ref.open = false
         self.linkedReferenceNode = ref
+        self.currentLinkedRefNode = self.linkedReferenceNode
 
         editor.layer?.addSublayer(layer)
 
@@ -159,7 +161,7 @@ class BreadCrumb: Widget {
         }))
     }
 
-    func createLayerWithMouseEvents(_ layer: CATextLayer, index: Int) {
+    func createBreadcrumLayer(_ layer: CATextLayer, index: Int) {
         addLayer(Layer(
                 name: "newLayer\(index)",
                 layer: layer,
@@ -168,10 +170,9 @@ class BreadCrumb: Widget {
                           let textValue = self.crumbLayers[index].string as? String else { return false }
 
                     if textValue == self.breadcrumbPlaceholder { return false }
-                    let crumb = self.crumbChain[index]
                     self.selectedCrumb = index
                     self.updateCrumbLayersVisibility()
-                    self.replaceNodeWithRootNode(by: index, isUnfold: false)
+                    self.replaceNodeWithRootNode(by: index)
 
                     return true
                 },
@@ -182,7 +183,7 @@ class BreadCrumb: Widget {
         )
     }
 
-    func createBreadcrumbArrow(_ layer: CALayer, index: Int) {
+    func createBreadcrumbArrowLayer(_ layer: CALayer, index: Int) {
         addLayer(Layer(
             name: "breadcrumbArrowLayer\(index)",
             layer: layer,
@@ -191,7 +192,7 @@ class BreadCrumb: Widget {
 
                 self.selectedCrumb = self.crumbLayers.count
                 self.updateCrumbLayersVisibility(by: index)
-                self.replaceNodeWithRootNode(by: index)
+                self.replaceNodeWithRootNode(by: index, isUnfold: false)
 
                 return true
             }
@@ -236,10 +237,10 @@ class BreadCrumb: Widget {
             breadcrumbArrowLayer.backgroundColor = NSColor.linkedChevronIconColor.cgColor
 
             if index != crumbChain.count - 1 {
-                createBreadcrumbArrow(breadcrumbArrowLayer, index: index)
+                createBreadcrumbArrowLayer(breadcrumbArrowLayer, index: index)
             }
 
-            createLayerWithMouseEvents(newLayer, index: index)
+            createBreadcrumLayer(newLayer, index: index)
             crumbArrowLayers.append(breadcrumbArrowLayer)
             crumbLayers.append(newLayer)
 
@@ -345,12 +346,25 @@ class BreadCrumb: Widget {
     }
 
     private func replaceNodeWithRootNode(by index: Int, isUnfold: Bool = true) {
+
+        if !isUnfold {
+            self.linkedReferenceNode.removeFromSuperlayer(recursive: true)
+            self.linkedReferenceNode = self.currentLinkedRefNode
+            self.children = [self.linkedReferenceNode]
+            self.invalidateLayout()
+
+            return
+        }
+
         let crumb = self.crumbChain[index]
+
         guard let ref = self.editor.nodeFor(crumb) as? LinkedReferenceNode else { fatalError() }
+
         self.linkedReferenceNode.removeFromSuperlayer(recursive: true)
         ref.addLayerTo(layer: self.editor.layer!, recursive: true)
         self.linkedReferenceNode = ref
-        isUnfold ? self.linkedReferenceNode.unfold() : self.linkedReferenceNode.fold()
+        self.linkedReferenceNode.unfold()
+
         self.children = [self.linkedReferenceNode]
         self.invalidateLayout()
     }

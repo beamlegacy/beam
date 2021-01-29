@@ -13,7 +13,7 @@ struct JournalView: View {
     @State var isEditing = false
 
     var journal: [BeamNote]
-    var journals: [BeamNote] { isEditing ? journal : [journal.first!] }
+    var journals: [BeamNote] { [journal.first!] }
     var offset: CGFloat
 
     var body: some View {
