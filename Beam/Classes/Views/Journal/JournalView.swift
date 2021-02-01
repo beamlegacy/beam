@@ -13,7 +13,7 @@ struct JournalView: View {
     @State var isEditing = false
 
     var journal: [BeamNote]
-    var journals: [BeamNote] { [journal.first!] }
+    var journals: [BeamNote] { journal }
     var offset: CGFloat
 
     var body: some View {
@@ -21,18 +21,14 @@ struct JournalView: View {
             VStack {
                 ForEach(journals) { note in
                     NoteView(note: note,
-                         onStartEditing: {
-                            withAnimation {
-                                isEditing = true
-                            }
-                         },
                          leadingAlignement: 185,
                          showTitle: true,
                          scrollable: false
                     )
                 }
             }
-            .padding(.top, isEditing ? 0 : offset)
+            .padding(.top, offset)
         }
+        .clipped()
     }
 }

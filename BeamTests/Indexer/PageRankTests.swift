@@ -13,8 +13,7 @@ import Accelerate
 import SwiftSoup
 
 class PageRankTests: XCTestCase {
-
-    func testInit() throws {
+    private func testInit() throws {
         let pageRank = PageRank()
 
         pageRank.updatePage(source: "A", outbounds: ["B", "C"])
@@ -69,7 +68,7 @@ class PageRankTests: XCTestCase {
         "https://en.wikipedia.org/wiki/Entertainment"
     ]
 
-    func fetchSources() {
+    private func fetchSources() {
         var expectations = [XCTestExpectation]()
         for url in urls {
             if let url = URL(string: url) {
@@ -119,7 +118,7 @@ class PageRankTests: XCTestCase {
         }
     }
 
-    func loadFixtures() {
+    private func loadFixtures() {
         let fixtureData: Data = {
             do {
                 let bundle = Bundle(for: type(of: self))
@@ -138,26 +137,25 @@ class PageRankTests: XCTestCase {
         }
     }
 
-    func append(_ url: URL, contents: String) {
-        do {
+    private func append(_ url: URL, contents: String) throws {
+//        do {
             //print("html -> \(html)")
-            let parsingStart = CACurrentMediaTime()
+//            let parsingStart = CACurrentMediaTime()
             let doc = try SwiftSoup.parse(contents, url.absoluteString)
             let title = try doc.title()
             let text = html2Text(url: url, doc: doc)
-            let indexingStart = CACurrentMediaTime()
+//            let indexingStart = CACurrentMediaTime()
             index.append(document: IndexDocument(source: url.absoluteString, title: title, contents: text, outboundLinks: doc.extractLinks()))
-            let now = CACurrentMediaTime()
-            print("Indexed \(url) (\(contents.count) characters - title: \(title.count) - text: \(text.count)) in \((now - parsingStart) * 1000) ms (parsing: \((indexingStart - parsingStart) * 1000) ms - indexing \((now - indexingStart) * 1000) ms")
-        } catch Exception.Error(let type, let message) {
-            print("Test (SwiftSoup parser) \(type): \(message)")
-        } catch {
-            print("Test: (SwiftSoup parser) unkonwn error")
-        }
-
+//            let now = CACurrentMediaTime()
+//            print("Indexed \(url) (\(contents.count) characters - title: \(title.count) - text: \(text.count)) in \((now - parsingStart) * 1000) ms (parsing: \((indexingStart - parsingStart) * 1000) ms - indexing \((now - indexingStart) * 1000) ms")
+//        } catch Exception.Error(let type, let message) {
+////            print("Test (SwiftSoup parser) \(type): \(message)")
+//        } catch {
+////            print("Test: (SwiftSoup parser) unknown error")
+//        }
     }
 
-    func tempFile(named filename: String) -> URL? {
+    private func tempFile(named filename: String) -> URL? {
         let template = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(filename) as NSURL
 
         // Fill buffer with a C string representing the local file system path.
@@ -192,7 +190,7 @@ class PageRankTests: XCTestCase {
         loadFixtures()
 
         for source in searchSources {
-            self.append(source.url, contents: source.data)
+            try? self.append(source.url, contents: source.data)
         }
 
         XCTAssertEqual(urls.count, index.documents.count)
@@ -212,45 +210,45 @@ class PageRankTests: XCTestCase {
         XCTAssertGreaterThanOrEqual(search("sport rules").count, 5)
         XCTAssertGreaterThanOrEqual(search("guitar").count, 0)
 
-        print("LinkStore contains \(LinkStore.shared.links.count) different links")
+//        print("LinkStore contains \(LinkStore.shared.links.count) different links")
 
         do {
             let encoder = JSONEncoder()
             let data0 = try encoder.encode(index)
             encoder.outputFormatting = .prettyPrinted
             let data1 = try encoder.encode(index)
-            print("Encoded index size = \(data0.count)")
-            print("Encoded index size (pretty) = \(data1.count)")
+//            print("Encoded index size = \(data0.count)")
+//            print("Encoded index size (pretty) = \(data1.count)")
 
             guard let fileurl0 = tempFile(named: "Index.json") else {
                 fatalError("Unable to save Index.json")
             }
-            print("Save index to file \(fileurl0)")
+//            print("Save index to file \(fileurl0)")
             FileManager.default.createFile(atPath: fileurl0.path, contents: data0, attributes: [:])
 
             guard let fileurl1 = tempFile(named: "IndexPretty.json") else {
                 fatalError("Unable to save IndexPretty.json")
             }
-            print("Save pretty index to file \(fileurl1)")
+//            print("Save pretty index to file \(fileurl1)")
             FileManager.default.createFile(atPath: fileurl1.path, contents: data1, attributes: [:])
         } catch {
             fatalError()
         }
     }
 
-    func search(_ string: String) -> [Index.SearchResult] {
-        let start = CACurrentMediaTime()
+    private func search(_ string: String) -> [Index.SearchResult] {
+//        let start = CACurrentMediaTime()
         let results = index.search(string: string)
-        let now = CACurrentMediaTime()
+//        let now = CACurrentMediaTime()
 
-        printResults(string, now - start, results)
+//        printResults(string, now - start, results)
         return results
     }
 
-    func printResults(_ searchString: String, _ time: CFTimeInterval, _ results: [Index.SearchResult]) {
-        print("Search for '\(searchString)' (\(results.count) instance(s) in \(time * 1000) ms:")
+    private func printResults(_ searchString: String, _ time: CFTimeInterval, _ results: [Index.SearchResult]) {
+        Logger.shared.logDebug("Search for '\(searchString)' (\(results.count) instance(s) in \(time * 1000) ms:")
         for res in results {
-            print("\t\(res.score): \(res.source) / \(res.title)")
+            Logger.shared.logDebug("\t\(res.score): \(res.source) / \(res.title)")
         }
     }
 }

@@ -1,15 +1,20 @@
 import Foundation
 import Fakery
-
 import XCTest
+import Nimble
+
 @testable import Beam
 
 class DocumentTests: CoreDataTests {
     let faker = Faker(locale: "en-US")
 
+    override func tearDown() {
+        BeamDate.reset()
+    }
+
     func testDocumentFetch() throws {
         let countBefore = Document.countWithPredicate(context)
-        XCTAssertEqual(countBefore, 0)
+        expect(countBefore).to(equal(0))
 
         let count = 3
 
@@ -18,8 +23,25 @@ class DocumentTests: CoreDataTests {
         }
 
         let countAfter = Document.countWithPredicate(context)
+        expect(countAfter).to(equal(countBefore + count))
+    }
 
-        XCTAssertEqual(countAfter, countBefore + count)
+    func testDocumentUpdatedAt() throws {
+        let document = Document.create(context, title: "foobar 1")
+        expect(document.updated_at).toNot(beNil())
+
+        BeamDate.travel(0.5)
+        let initialUpdatedAt = document.updated_at
+        document.title = "foobar 2"
+        try? context.save()
+        expect(document.updated_at).to(equal(initialUpdatedAt))
+
+        BeamDate.travel(1.5)
+        document.title = "foobar 3"
+        try? context.save()
+        expect(document.updated_at).toNot(equal(initialUpdatedAt))
+        expect(document.updated_at).to(beGreaterThan(initialUpdatedAt))
+        expect(document.updated_at.timeIntervalSince(initialUpdatedAt)).to(beGreaterThan(2.0))
     }
 
     func testDocumentFetchWithTitle() throws {
@@ -28,14 +50,14 @@ class DocumentTests: CoreDataTests {
         _ = Document.create(context, title: "foobar 3")
         _ = Document.create(context, title: "another title")
 
-        XCTAssertEqual(Document.fetchAllWithTitleMatch(context, "foobar").count, 3)
+        expect(Document.fetchAllWithTitleMatch(self.context, "foobar")).to(haveCount(3))
     }
 
     func testMD5() throws {
         let document = Document.create(context, title: "foobar")
         document.data = "foobar".data(using: .utf8)
         // Calculated from Ruby with Digest::MD5.hexdigest "foobar"
-        XCTAssertEqual(document.data?.MD5, "3858f62230ac3c915f300c664312c63f")
+        expect(document.data?.MD5).to(equal("3858f62230ac3c915f300c664312c63f"))
     }
 
     func testDuplicateIds() throws {
@@ -48,9 +70,8 @@ class DocumentTests: CoreDataTests {
         document1.id = id
         document2.id = id
 
-        XCTAssertThrowsError(try CoreDataManager.save(context)) { error in
-            // This is the cocoa code for constraint error
-            XCTAssertEqual((error as NSError).code, 133021)
-        }
+        expect { try CoreDataManager.save(self.context) }.to(throwError { (error: NSError) in
+            expect(error.code).to(equal(133021))
+        })
     }
 }

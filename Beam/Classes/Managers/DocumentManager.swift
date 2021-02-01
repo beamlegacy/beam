@@ -97,7 +97,10 @@ class DocumentManager {
             let titles = objects.compactMap { object in
                 (object as? Document)?.title
             }
-            Logger.shared.logDebug("\(Unmanaged.passUnretained(self).toOpaque()) \(keyPath) \(objects.count) objects: \(titles)", category: .coredata)
+            Logger.shared.logDebug("\(Unmanaged.passUnretained(self).toOpaque()) \(keyPath) \(objects.count) CD objects. Titles: \(titles)", category: .coredataDebug)
+            if objects.count != titles.count {
+                Logger.shared.logDebug(String(describing: objects), category: .coredataDebug)
+            }
         }
     }
 

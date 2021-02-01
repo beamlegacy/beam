@@ -4,8 +4,8 @@ import CoreData
 class Document: NSManagedObject {
     override func awakeFromInsert() {
         super.awakeFromInsert()
-        created_at = Date()
-        updated_at = Date()
+        created_at = BeamDate.now
+        updated_at = BeamDate.now
         id = UUID()
     }
 
@@ -26,8 +26,8 @@ class Document: NSManagedObject {
     }
 
     override func willSave() {
-        if updated_at.timeIntervalSince(Date()) < -1.0 {
-            self.updated_at = Date()
+        if updated_at.timeIntervalSince(BeamDate.now) < -1.0 {
+            self.updated_at = BeamDate.now
         }
         super.willSave()
     }

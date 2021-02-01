@@ -181,7 +181,7 @@ class Parser {
         }
 
         private func buildTreeString(depth: Int) -> String {
-            let tabs: String = { var t = ""; for _ in 0..<depth { t += "\t" }; return t }()
+            let tabs: String = { var t = ""; for _ in 0..<depth { t += "    " }; return t }()
 
             var val = tabs + "Node[\(type)]\n"
             for c in children {

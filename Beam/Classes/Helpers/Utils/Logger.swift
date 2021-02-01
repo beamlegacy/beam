@@ -8,6 +8,7 @@ enum LogCategory: String {
     case tracking
     case network
     case coredata
+    case coredataDebug
     case document
     case memory
     case bluetooth
@@ -25,7 +26,7 @@ final class Logger {
     static let shared = Logger()
 
     private var subsystem = Configuration.bundleIdentifier
-    private let hideCategories: [LogCategory] = [.web]
+    private let hideCategories: [LogCategory] = [.web, .coredataDebug]
     private let hideLumberCategories: [LogCategory] = []
 
     private var ddFileLogger: DDFileLogger = DDFileLogger()
@@ -77,7 +78,7 @@ final class Logger {
         log(message, level: .info, category: category)
     }
 
-    func logDebug(_ message: String, category: LogCategory) {
+    func logDebug(_ message: String, category: LogCategory = .general) {
         if !hideLumberCategories.contains(category) {
             DDLogDebug("[\(category.rawValue)] \(message)")
         }
