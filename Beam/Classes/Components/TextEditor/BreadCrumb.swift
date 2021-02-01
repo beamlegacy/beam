@@ -268,6 +268,10 @@ class BreadCrumb: Widget {
             let end = text.position(at: range.upperBound)
             self.proxy.text.makeInternalLink(start..<end)
         }
+
+        let reference = NoteReference(noteName: proxy.note!.title, elementID: proxy.proxy.id)
+        rootNote.removeUnlinkedReference(reference)
+        rootNote.addLinkedReference(reference)
     }
 
     func updateCrumbLayersVisibility(by index: Int = 0) {

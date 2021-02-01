@@ -31,13 +31,6 @@ class LinksSection: Widget {
         }
     }
 
-    var linkedReferenceNodes = [BreadCrumb]() {
-        didSet {
-            invalidateLayout()
-            children = linkedReferenceNodes
-        }
-    }
-
     override var contentsScale: CGFloat {
         didSet {
             sectionTitleLayer.contentsScale = contentsScale
@@ -88,7 +81,7 @@ class LinksSection: Widget {
         case .links:
             sectionTitleLayer.string = "\(note.linkedReferences.count) Links"
             linkedReferencesCancellable = note.$linkedReferences.sink { [unowned self] links in
-                updateLinkedReferences()
+                updateLinkedReferences(links: links)
                 sectionTitleLayer.string = "\(links.count) Links"
                 updateLayerVisibility()
             }
@@ -96,7 +89,7 @@ class LinksSection: Widget {
             linkActionLayer.string = "Link All"
             sectionTitleLayer.string = "\(note.unlinkedReferences.count) References"
             linkedReferencesCancellable = note.$unlinkedReferences.sink { [unowned self] links in
-                updateLinkedReferences()
+                updateLinkedReferences(links: links)
                 sectionTitleLayer.string = "\(links.count) References"
                 updateLayerVisibility()
             }
@@ -105,23 +98,14 @@ class LinksSection: Widget {
         }
     }
 
-    func updateLinkedReferences() {
-        let refs: [NoteReference] = {
-            switch mode {
-            case .links:
-                return note.linkedReferences
-            case .references:
-                return note.unlinkedReferences
-            }
-        }()
-
-        self.linkedReferenceNodes = refs.compactMap { noteReference -> BreadCrumb? in
+    func updateLinkedReferences(links: [NoteReference]) {
+        self.children = links.compactMap { noteReference -> BreadCrumb? in
             guard let referencingNote = BeamNote.fetch(DocumentManager(), title: noteReference.noteName) else { return nil }
             guard let referencingElement = referencingNote.findElement(noteReference.elementID) else { return nil }
             return BreadCrumb(editor: editor, section: self, element: referencingElement)
         }
 
-        selfVisible = !linkedReferenceNodes.isEmpty
+        selfVisible = !children.isEmpty
     }
 
     func createLinkAllLayer() {
@@ -135,16 +119,18 @@ class LinksSection: Widget {
                 if let linkLayer = self.linkLayer, linkLayer.layer.isHidden { return false }
 
                 self.editor.showOrHidePersistentFormatter(isPresent: false)
-                self.linkedReferenceNodes.forEach { linkedReferenceNode in
-                    let text = linkedReferenceNode.proxy.text.text
+                self.children.forEach { child in
+                    guard let breadcrumb = child as? BreadCrumb else { return }
+                    let text = breadcrumb.proxy.text.text
 
                     text.ranges(of: rootNote.title).forEach { range in
                         let start = text.position(at: range.lowerBound)
                         let end = text.position(at: range.upperBound)
 
-                        linkedReferenceNode.proxy.text.makeInternalLink(start..<end)
+                        breadcrumb.proxy.text.makeInternalLink(start..<end)
                     }
                 }
+                self.note.removeAllUnlinkedReferences()
                 return true
             }, hover: {[weak self] isHover in
                 guard let self = self else { return }
@@ -170,11 +156,11 @@ class LinksSection: Widget {
     }
 
     func updateLayerVisibility() {
-        layer.isHidden = linkedReferenceNodes.isEmpty
+        layer.isHidden = children.isEmpty
     }
 
     override func updateRendering() {
-        contentsFrame = NSRect(x: 0, y: 0, width: availableWidth, height: linkedReferenceNodes.isEmpty ? 0 : 30)
+        contentsFrame = NSRect(x: 0, y: 0, width: availableWidth, height: children.isEmpty ? 0 : 30)
 
         computedIdealSize = contentsFrame.size
         computedIdealSize.width = frame.width

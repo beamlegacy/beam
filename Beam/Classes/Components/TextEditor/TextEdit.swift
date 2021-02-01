@@ -287,6 +287,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     public func invalidateLayout() {
+        guard !needsLayout else { return }
         invalidateIntrinsicContentSize()
         needsLayout = true
         invalidate()
@@ -299,6 +300,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             scrollToCursorAtLayout = false
             setHotSpotToCursorPosition()
         }
+        needsLayout = false
     }
 
     public func invalidate(_ rect: NSRect? = nil) {
@@ -568,7 +570,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     return
 
                 default:
-                    print("Special Key \(k)")
+                    Logger.shared.logInfo("Special Key \(k)", category: .noteEditor)
                 }
             }
 
@@ -746,7 +748,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         }
         guard let node = node as? TextNode else { return nil }
         let str = node.attributedString.attributedSubstring(from: range)
-        Logger.shared.logDebug("TextInput.attributedString(range: \(range), actualRange: \(String(describing: actualRange))) -> \(str)", category: .document)
+        Logger.shared.logDebug("TextInput.attributedString(range: \(range), actualRange: \(String(describing: actualRange))) -> \(str)", category: .noteEditor)
         return str
     }
 
@@ -920,16 +922,18 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
                 // In this case we will reparent all following sibblings that are not a header to the current node as Paper does
                 guard self.node.isEmpty else { return }
-                guard let parent = self.node.parent else { return }
+                guard let node = self.node as? TextNode else { return }
+                let element = node.element
+                guard let parentNode = self.node.parent as? TextNode else { return }
+                let parent = parentNode.element
                 guard let index = self.node.indexInParent else { return }
                 for sibbling in parent.children.suffix(from: index + 1) {
-                    guard let sibbling = sibbling as? TextNode else { return }
                     guard !sibbling.isHeader else { return }
-                    self.node.addChild(sibbling)
+                    element.addChild(sibbling)
                 }
 
-                node.element.kind = .heading(level)
-                node.text.removeFirst(level + 1)
+                element.kind = .heading(level)
+                element.text.removeFirst(level + 1)
                 self.rootNode.cursorPosition = 0
             }
         }
@@ -1028,6 +1032,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
     var scrollToCursorAtLayout = false
     public func setHotSpotToCursorPosition() {
+        guard node as? TextNode != nil else { return }
         setHotSpot(rectAt(rootNode.cursorPosition).insetBy(dx: -30, dy: -30))
     }
 
@@ -1162,7 +1167,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     let documentManager = DocumentManager(coreDataManager: CoreDataManager.shared)
 
     @IBAction func saveDocument(_ sender: Any?) {
-        Logger.shared.logInfo("Save document!", category: .document)
+        Logger.shared.logInfo("Save document!", category: .noteEditor)
         rootNode.note?.save(documentManager: documentManager)
         BeamNote.detectLinks(documentManager)
     }
