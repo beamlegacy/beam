@@ -15,26 +15,16 @@ class BrowsingNodeWidget: Widget {
     var browsingNode: BrowsingNode
     let textLayer = CATextLayer()
 
-    var childrenNodes: [BrowsingNodeWidget] = []
-    override var children: [Widget] {
-        get {
-            childrenNodes
-        }
-        set {
-            fatalError()
-        }
-    }
-
     func updateChildrenNodes() {
         guard recursive else {
             layers["chevron"]?.layer.isHidden = true
             return
         }
-        self.childrenNodes = browsingNode.children.map({ node -> BrowsingNodeWidget in
+        self.children = browsingNode.children.map({ node -> BrowsingNodeWidget in
             BrowsingNodeWidget(editor: editor, browsingNode: node, recursive: false)
         })
 
-        layers["chevron"]?.layer.isHidden = self.childrenNodes.isEmpty
+        layers["chevron"]?.layer.isHidden = self.children.isEmpty
         invalidateLayout()
     }
 

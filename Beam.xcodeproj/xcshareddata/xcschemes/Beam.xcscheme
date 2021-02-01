@@ -48,11 +48,6 @@
                BlueprintName = "BeamTests"
                ReferencedContainer = "container:Beam.xcodeproj">
             </BuildableReference>
-            <SkippedTests>
-               <Test
-                  Identifier = "TextNodeTests/testMoveAndEdit()">
-               </Test>
-            </SkippedTests>
          </TestableReference>
          <TestableReference
             skipped = "NO">

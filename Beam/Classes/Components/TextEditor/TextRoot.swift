@@ -94,13 +94,18 @@ public class TextRoot: TextNode {
     var referencesSection: LinksSection?
     var browsingSection: BrowsingSection?
 
-    override internal var children: [Widget] {
-        get {
-            super.children + [topSpacerWidget, linksSection, middleSpacerWidget, referencesSection, bottomSpacerWidget, browsingSection].compactMap { $0 }
-        }
-        set {
-            fatalError()
-        }
+    var otherSections: [Widget?] {
+        [
+            topSpacerWidget,
+            linksSection,
+            middleSpacerWidget,
+            referencesSection,
+            bottomSpacerWidget,
+            browsingSection
+        ]
+    }
+    override func buildTextChildren(elements: [BeamElement]) -> [Widget] {
+        return super.buildTextChildren(elements: elements) + otherSections.compactMap { $0 }
     }
 
     unowned var node: Widget! {
@@ -119,12 +124,16 @@ public class TextRoot: TextNode {
     }
 
     override func invalidateLayout() {
+        guard !needLayout else { return }
+        super.invalidateLayout()
         editor.invalidateLayout()
+        editor.invalidate()
     }
 
     override var offsetInRoot: NSPoint { NSPoint() }
 
     override func invalidate(_ rect: NSRect? = nil) {
+        super.invalidate(rect)
         if let r = rect {
             editor.invalidate(r.offsetBy(dx: currentFrameInDocument.minX, dy: currentFrameInDocument.minY))
         } else {
@@ -133,8 +142,17 @@ public class TextRoot: TextNode {
     }
 
     override init(editor: BeamTextEdit, element: BeamElement) {
-        super.init(editor: editor, element: element)
         self.note = element as? BeamNote
+        if let note = note {
+            topSpacerWidget = SpacerWidget(editor: editor, spacerType: .top)
+            linksSection = LinksSection(editor: editor, note: note, mode: .links)
+            middleSpacerWidget = SpacerWidget(editor: editor, spacerType: .middle)
+            referencesSection = LinksSection(editor: editor, note: note, mode: .references)
+            bottomSpacerWidget = SpacerWidget(editor: editor, spacerType: .bottom)
+            browsingSection = BrowsingSection(editor: editor, note: note)
+        }
+
+        super.init(editor: editor, element: element)
         self.selfVisible = false
 
         self.text = BeamText()
@@ -149,21 +167,6 @@ public class TextRoot: TextNode {
             let istoday = note?.isTodaysNote ?? false
             let first = children.first as? TextNode
             first?.placeholder = BeamText(text: istoday ? "This is the journal, you can type anything here!" : "...")
-        }
-
-        if let note = note {
-            topSpacerWidget = SpacerWidget(editor: editor, spacerType: .top)
-            topSpacerWidget?.parent = self
-            linksSection = LinksSection(editor: editor, note: note, mode: .links)
-            linksSection?.parent = self
-            middleSpacerWidget = SpacerWidget(editor: editor, spacerType: .middle)
-            middleSpacerWidget?.parent = self
-            referencesSection = LinksSection(editor: editor, note: note, mode: .references)
-            referencesSection?.parent = self
-            bottomSpacerWidget = SpacerWidget(editor: editor, spacerType: .bottom)
-            bottomSpacerWidget?.parent = self
-            browsingSection = BrowsingSection(editor: editor, note: note)
-            browsingSection?.parent = self
         }
 
         node = children.first ?? self

@@ -54,11 +54,26 @@ public class Widget: NSObject, CALayerDelegate {
 
     internal var children: [Widget] = [] {
         didSet {
-            updateChildren()
+            updateChildren(oldValue)
+            invalidateLayout()
         }
     }
 
-    func updateChildren() {
+    func updateChildren(_ oldValue: [Widget]? = nil) {
+        // First remove all old layers from the editor:
+        if let oldValue = oldValue {
+            var set = Set<Widget>(oldValue)
+
+            for c in children {
+                set.remove(c)
+            }
+
+            for c in set {
+                c.layer.removeFromSuperlayer()
+            }
+        }
+
+        // Then make sure everything is correctly on screen
         for c in children {
             c.parent = self
             c.availableWidth = availableWidth - childInset
@@ -176,7 +191,7 @@ public class Widget: NSObject, CALayerDelegate {
     public private(set) var editor: BeamTextEdit
     internal var computedIdealSize = NSSize()
     private var _root: TextRoot?
-    private var needLayout = true
+    public private(set) var needLayout = true
 
     public static func == (lhs: Widget, rhs: Widget) -> Bool {
         return lhs === rhs

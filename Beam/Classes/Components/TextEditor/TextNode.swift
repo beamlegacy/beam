@@ -108,17 +108,6 @@ public class TextNode: Widget {
         return _attributedString!
     }
 
-    internal override var children: [Widget] {
-        get {
-            return element.children.map { childElement -> TextNode in
-                editor.nodeFor(childElement)
-            }
-        }
-        set {
-            fatalError()
-        }
-    }
-
     var config: TextConfig {
         root?.config ?? TextConfig()
     }
@@ -146,24 +135,6 @@ public class TextNode: Widget {
 
     var showIdentationLine: Bool {
         return depth == 1
-    }
-
-    var _parent: Widget?
-    override var parent: Widget? {
-        get {
-            // If the parent has been forced on us:
-            if _parent != nil {
-                return _parent
-            }
-
-            // Otherwise use the document's information
-            guard let p = element.parent else { return nil }
-            return editor.nodeFor(p)
-        }
-        set {
-            // force the parent for this node (happens when using proxies)
-            _parent = newValue
-        }
     }
 
     var readOnly: Bool = false
@@ -202,7 +173,7 @@ public class TextNode: Widget {
         }
     }
 
-    internal var actionLayer: CALayer?
+    var actionLayer: CALayer?
     private var actionLayerIsHovered = false
     private var icon = NSImage(named: "editor-cmdreturn")
 
@@ -212,6 +183,16 @@ public class TextNode: Widget {
 
     public static func == (lhs: TextNode, rhs: TextNode) -> Bool {
         return lhs === rhs
+    }
+
+    func buildTextChildren(elements: [BeamElement]) -> [Widget] {
+        elements.map { childElement -> TextNode in
+            editor.nodeFor(childElement)
+        }
+    }
+
+    func updateTextChildren(elements: [BeamElement]) {
+        children = buildTextChildren(elements: elements)
     }
 
     // MARK: - Initializer
@@ -225,9 +206,8 @@ public class TextNode: Widget {
         super.init(editor: editor)
 
         element.$children
-            .dropFirst()
-            .sink { [unowned self] _ in
-            self.invalidateLayout()
+            .sink { [unowned self] elements in
+                updateTextChildren(elements: elements)
         }.store(in: &scope)
 
         createActionLayer()
@@ -492,21 +472,9 @@ public class TextNode: Widget {
 
     // MARK: - Methods TextNode
 
-    override func addChild(_ child: Widget) {
-        guard let child = child as? TextNode else { return }
-        element.addChild(child.element)
-        invalidateLayout()
-    }
-
-    override func removeChild(_ child: Widget) {
-        guard let child = child as? TextNode else { return }
-        element.removeChild(child.element)
-        invalidateLayout()
-    }
-
     override func delete() {
-        parent?.removeChild(self)
-        editor.removeNode(self)
+        guard let parent = parent as? TextNode else { return }
+        parent.element.removeChild(element)
     }
 
     override func insert(node: Widget, after existingNode: Widget) -> Bool {
