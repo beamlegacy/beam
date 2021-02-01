@@ -22,9 +22,7 @@ struct JournalView: View {
                 ForEach(journals) { note in
                     NoteView(note: note,
                          onStartEditing: {
-                            withAnimation {
-                                isEditing = true
-                            }
+                            isEditing = true
                          },
                          leadingAlignement: 185,
                          showTitle: true,
@@ -32,7 +30,7 @@ struct JournalView: View {
                     )
                 }
             }
-            .padding(.top, offset)
+            .padding(.top, isEditing ? 0 : offset)
         }
         .clipped()
     }

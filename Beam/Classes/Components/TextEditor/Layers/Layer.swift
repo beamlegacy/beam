@@ -24,6 +24,8 @@ class Layer: NSObject, CALayerDelegate {
         if hovered != value {
             hover(value)
             hovered = value
+            // layer.borderColor = hovered ? NSColor.red.cgColor : nil
+            // layer.borderWidth = hovered ? 2 : 0
         }
     }
     var layout: () -> Void
@@ -74,17 +76,8 @@ class Layer: NSObject, CALayerDelegate {
         CGRect(origin: CGPoint(), size: frame.size)
     }
 
-    var position: NSPoint {
-        set {
-            layer.position = newValue
-        }
-        get {
-            layer.position
-        }
-    }
-
     func contains(_ mouseInfo: MouseInfo) -> Bool {
-        bounds.contains(mouseInfo.position)
+        bounds.contains(NSPoint(x: mouseInfo.position.x, y: mouseInfo.position.y))
     }
 
     func layoutSublayers(of layer: CALayer) {
@@ -111,7 +104,7 @@ extension Layer {
         return iconLayer
     }
 
-    static func text(_ label: String, color: NSColor = NSColor.editorTextColor, size: CGFloat = 12) -> CALayer {
+    static func text(_ label: String, color: NSColor = NSColor.editorTextColor, size: CGFloat = 12) -> CATextLayer {
         let textLayer = CATextLayer()
         textLayer.string = label
         textLayer.foregroundColor = NSColor.editorIconColor.cgColor

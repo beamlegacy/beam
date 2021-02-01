@@ -54,11 +54,26 @@ public class Widget: NSObject, CALayerDelegate {
 
     internal var children: [Widget] = [] {
         didSet {
-            updateChildren()
+            updateChildren(oldValue)
+            invalidateLayout()
         }
     }
 
-    func updateChildren() {
+    func updateChildren(_ oldValue: [Widget]? = nil) {
+        // First remove all old layers from the editor:
+        if let oldValue = oldValue {
+            var set = Set<Widget>(oldValue)
+
+            for c in children {
+                set.remove(c)
+            }
+
+            for c in set {
+                c.layer.removeFromSuperlayer()
+            }
+        }
+
+        // Then make sure everything is correctly on screen
         for c in children {
             c.parent = self
             c.availableWidth = availableWidth - childInset
@@ -142,7 +157,7 @@ public class Widget: NSObject, CALayerDelegate {
     // walking the node tree:
     var inVisibleBranch: Bool {
         guard let p = parent else { return true }
-        return p.visible && p.inVisibleBranch
+        return p.visible && p.open && p.inVisibleBranch
     }
 
     var allParents: [Widget] {
@@ -176,7 +191,7 @@ public class Widget: NSObject, CALayerDelegate {
     public private(set) var editor: BeamTextEdit
     internal var computedIdealSize = NSSize()
     private var _root: TextRoot?
-    private var needLayout = true
+    public private(set) var needLayout = true
 
     public static func == (lhs: Widget, rhs: Widget) -> Bool {
         return lhs === rhs
@@ -237,11 +252,14 @@ public class Widget: NSObject, CALayerDelegate {
         context.restoreGState()
     }
 
+    func updateSubLayersLayout() { }
+
     func setLayout(_ frame: NSRect) {
         self.frame = frame
         needLayout = false
         layer.bounds = contentsFrame
         layer.position = frameInDocument.origin
+        updateSubLayersLayout()
 
         if self.currentFrameInDocument != frame {
             updateLayout()
@@ -337,10 +355,17 @@ public class Widget: NSObject, CALayerDelegate {
         context.restoreGState()
     }
 
-    func updateVisibility(_ isVisible: Bool) {
+    var open: Bool = true {
+        didSet {
+            updateChildrenVisibility(visible && open)
+            invalidateLayout()
+        }
+    }
+
+    func updateChildrenVisibility(_ isVisible: Bool) {
         for c in children {
             c.visible = isVisible
-            c.updateVisibility(isVisible)
+            c.updateChildrenVisibility(isVisible && open)
             invalidateLayout()
         }
     }
@@ -432,12 +457,12 @@ public class Widget: NSObject, CALayerDelegate {
     }
 
     internal var layers: [String: Layer] = [:]
-    func addLayer(_ layer: Layer, position: CGPoint = CGPoint(), global: Bool = false) {
-        layer.frame = CGRect(origin: position, size: layer.frame.size)
+    func addLayer(_ layer: Layer, origin: CGPoint? = nil, global: Bool = false) {
+        layer.frame = CGRect(origin: origin ?? layer.frame.origin, size: layer.frame.size)
 
         if global {
             editor.layer?.addSublayer(layer.layer)
-        } else {
+        } else if layer.layer.superlayer == nil {
             self.layer.addSublayer(layer.layer)
         }
 
@@ -453,11 +478,8 @@ public class Widget: NSObject, CALayerDelegate {
     }
 
     func dispatchMouseDown(mouseInfo: MouseInfo) -> Widget? {
+        guard inVisibleBranch else { return nil }
         let globalPos = mouseInfo.position
-        let rect = NSRect(origin: CGPoint(), size: frame.size)
-        guard rect.contains(globalPos) else {
-            return nil
-        }
 
         for c in children {
             var i = mouseInfo
@@ -468,11 +490,18 @@ public class Widget: NSObject, CALayerDelegate {
             }
         }
 
-        for layer in layers.values {
+        for layer in layers.values where !layer.layer.isHidden {
             let info = MouseInfo(self, layer, mouseInfo)
-            if layer.contains(info) && layer.mouseDown(info) {
-                return self
+            if layer.contains(info) {
+                if layer.mouseDown(info) {
+                    return self
+                }
             }
+        }
+
+        let rect = NSRect(origin: CGPoint(), size: frame.size)
+        guard rect.contains(globalPos) else {
+            return nil
         }
 
 //        print("dispatch down: \(mouseInfo.position)")
@@ -484,6 +513,7 @@ public class Widget: NSObject, CALayerDelegate {
     }
 
     func dispatchMouseUp(mouseInfo: MouseInfo) -> Widget? {
+        guard inVisibleBranch else { return nil }
         guard let focussedNode = root?.node else { return nil }
 
         if focussedNode.handleMouseUp(mouseInfo: mouseInfo) {
@@ -497,7 +527,7 @@ public class Widget: NSObject, CALayerDelegate {
         let info = MouseInfo(self, mouseInfo.globalPosition, mouseInfo.event)
 //        print("dispatch up: \(info.position) vs \(mouseInfo.position)")
 
-        for layer in layers.values {
+        for layer in layers.values where !layer.layer.isHidden {
             let info = MouseInfo(self, layer, info)
             if layer.contains(info) && layer.mouseUp(info) {
                 return true
@@ -508,6 +538,7 @@ public class Widget: NSObject, CALayerDelegate {
     }
 
     func dispatchMouseMoved(mouseInfo: MouseInfo) {
+        guard inVisibleBranch else { return }
         _ = handleMouseMoved(mouseInfo: mouseInfo)
 
         for c in children {
@@ -519,6 +550,7 @@ public class Widget: NSObject, CALayerDelegate {
     }
 
     func dispatchMouseDragged(mouseInfo: MouseInfo) -> Widget? {
+        guard inVisibleBranch else { return nil }
         guard let focussedNode = root?.node else { return nil }
 
         if focussedNode.handleMouseDragged(mouseInfo: mouseInfo) {
@@ -554,7 +586,7 @@ public class Widget: NSObject, CALayerDelegate {
 
     func handleMouseMoved(mouseInfo: MouseInfo) -> Bool {
         var res = false
-        for layer in layers.values {
+        for layer in layers.values where !layer.layer.isHidden {
             let info = MouseInfo(self, layer, mouseInfo)
             if layer.handleMouseMoved(info) {
                 res = res || true
@@ -573,7 +605,7 @@ public class Widget: NSObject, CALayerDelegate {
 //        print("handle dragged: \(info.position) vs \(mouseInfo.position)")
 
         var res = false
-        for layer in layers.values {
+        for layer in layers.values where !layer.layer.isHidden {
             let info = MouseInfo(self, layer, mouseInfo)
             res = res || layer.mouseDragged(info)
         }
@@ -725,6 +757,15 @@ public class Widget: NSObject, CALayerDelegate {
         }
         return true
     }
+
+    func dumpWidgetTree(_ level: Int = 0) {
+        let tabs = String.tabs(level)
+        print("\(tabs)\(String(describing: Self.self)) frame(\(frame)) \(layers.count) layers")
+        for c in children {
+            c.dumpWidgetTree(level + 1)
+        }
+    }
+
 }
 // swiftlint:enable type_body_length
 // swiftlint:enable file_length

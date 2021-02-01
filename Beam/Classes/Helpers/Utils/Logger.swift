@@ -20,6 +20,7 @@ enum LogCategory: String {
     case search
     case javascript
     case documentMerge
+    case noteEditor
 }
 
 final class Logger {

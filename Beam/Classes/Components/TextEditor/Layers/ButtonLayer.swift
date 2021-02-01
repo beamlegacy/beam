@@ -13,9 +13,13 @@ class ButtonLayer: Layer {
     @Published var pressed: Bool = false
     var activated: () -> Void
 
-    init(_ name: String, _ layer: CALayer, activated: @escaping () -> Void = { }) {
+    init(_ name: String, _ layer: CALayer,
+         activated: @escaping () -> Void = { },
+         hovered: @escaping (Bool) -> Void = { _ in }) {
+
         self.activated = activated
         super.init(name: name, layer: layer)
+
         mouseDown = { [unowned self] _ -> Bool in
             self.pressed = true
             return true
@@ -32,6 +36,8 @@ class ButtonLayer: Layer {
             self.pressed = layer.contains(info.position)
             return true
         }
-
+        hover = { isHover in
+            hovered(isHover)
+        }
     }
 }

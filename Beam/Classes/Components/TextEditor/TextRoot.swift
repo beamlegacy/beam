@@ -12,7 +12,7 @@ public struct TextState {
     var text = BeamText()
     var selectedTextRange: Range<Int> = 0..<0
     var markedTextRange: Range<Int> = 0..<0
-    var cursorPosition: Int = -1
+    var cursorPosition: Int = 0
 
     var attributes: [BeamText.Attribute] = []
 
@@ -87,17 +87,25 @@ public class TextRoot: TextNode {
         return self
     }
 
+    var topSpacerWidget: SpacerWidget?
+    var middleSpacerWidget: SpacerWidget?
+    var bottomSpacerWidget: SpacerWidget?
     var linksSection: LinksSection?
     var referencesSection: LinksSection?
     var browsingSection: BrowsingSection?
 
-    override internal var children: [Widget] {
-        get {
-            super.children + [linksSection, referencesSection, browsingSection].compactMap { $0 }
-        }
-        set {
-            fatalError()
-        }
+    var otherSections: [Widget?] {
+        [
+            topSpacerWidget,
+            linksSection,
+            middleSpacerWidget,
+            referencesSection,
+            bottomSpacerWidget,
+            browsingSection
+        ]
+    }
+    override func buildTextChildren(elements: [BeamElement]) -> [Widget] {
+        return super.buildTextChildren(elements: elements) + otherSections.compactMap { $0 }
     }
 
     unowned var node: Widget! {
@@ -116,12 +124,16 @@ public class TextRoot: TextNode {
     }
 
     override func invalidateLayout() {
+        guard !needLayout else { return }
+        super.invalidateLayout()
         editor.invalidateLayout()
+        editor.invalidate()
     }
 
     override var offsetInRoot: NSPoint { NSPoint() }
 
     override func invalidate(_ rect: NSRect? = nil) {
+        super.invalidate(rect)
         if let r = rect {
             editor.invalidate(r.offsetBy(dx: currentFrameInDocument.minX, dy: currentFrameInDocument.minY))
         } else {
@@ -130,8 +142,17 @@ public class TextRoot: TextNode {
     }
 
     override init(editor: BeamTextEdit, element: BeamElement) {
-        super.init(editor: editor, element: element)
         self.note = element as? BeamNote
+        if let note = note {
+            topSpacerWidget = SpacerWidget(editor: editor, spacerType: .top)
+            linksSection = LinksSection(editor: editor, note: note, mode: .links)
+            middleSpacerWidget = SpacerWidget(editor: editor, spacerType: .middle)
+            referencesSection = LinksSection(editor: editor, note: note, mode: .references)
+            bottomSpacerWidget = SpacerWidget(editor: editor, spacerType: .bottom)
+            browsingSection = BrowsingSection(editor: editor, note: note)
+        }
+
+        super.init(editor: editor, element: element)
         self.selfVisible = false
 
         self.text = BeamText()
@@ -148,21 +169,8 @@ public class TextRoot: TextNode {
             first?.placeholder = BeamText(text: istoday ? "This is the journal, you can type anything here!" : "...")
         }
 
-        if let note = note {
-            linksSection = LinksSection(editor: editor, note: note, mode: .links)
-            linksSection?.parent = self
-            referencesSection = LinksSection(editor: editor, note: note, mode: .references)
-            referencesSection?.parent = self
-            browsingSection = BrowsingSection(editor: editor, note: note)
-            browsingSection?.parent = self
-        }
-
         node = children.first ?? self
         childInset = 0
-
-        layer.backgroundColor = NSColor.blue.cgColor.copy(alpha: 0.2)
-
-//        print("created RootNode \(note.title) with \(children.count) main bullets")
     }
 
     var linkedRefsNode: TextNode?
@@ -230,4 +238,14 @@ public class TextRoot: TextNode {
         .complete: CommandDefinition(undo: true, redo: true, coalesce: true, name: "Complete"),
         .cancelOperation: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Cancel Operation")
     ]
+
+    override func dumpWidgetTree(_ level: Int = 0) {
+        print("==================================================")
+        super.dumpWidgetTree(level)
+    }
+
+    override var showDisclosureButton: Bool {
+        false
+    }
+
 }

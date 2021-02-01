@@ -11,6 +11,7 @@
 		4105CE2225A5ECA2009AB687 /* BidirectionalPopoverItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4105CE2125A5ECA2009AB687 /* BidirectionalPopoverItem.swift */; };
 		4105CE7525A60681009AB687 /* FormatterTypeButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4105CE7425A60681009AB687 /* FormatterTypeButton.swift */; };
 		41221A362592771F00255197 /* TextEdit+Popover.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41221A352592771F00255197 /* TextEdit+Popover.swift */; };
+		4131F16825BEC48C006473CD /* SpacerWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4131F16725BEC48C006473CD /* SpacerWidget.swift */; };
 		414B987A259DE2E2002E81A3 /* BidirectionalPopoverActionItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414B9878259DE2E2002E81A3 /* BidirectionalPopoverActionItem.swift */; };
 		414B987B259DE2E2002E81A3 /* BidirectionalPopoverActionItem.xib in Resources */ = {isa = PBXBuildFile; fileRef = 414B9879259DE2E2002E81A3 /* BidirectionalPopoverActionItem.xib */; };
 		414B989925A21BB0002E81A3 /* TextEdit+Formatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414B989825A21BB0002E81A3 /* TextEdit+Formatter.swift */; };
@@ -209,7 +210,6 @@
 		9691E44425B1091300A13080 /* BrowsingSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9691E44325B1091300A13080 /* BrowsingSection.swift */; };
 		96956D31258BF3F50069C9C1 /* LinkStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96956D30258BF3F50069C9C1 /* LinkStore.swift */; };
 		96A8B1DD25A38A3B006F749C /* String+Levenshtein.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96A8B1DC25A38A3B006F749C /* String+Levenshtein.swift */; };
-		96B8AA6725B07ECC00CC41BB /* BrowsingTreeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96B8AA6625B07ECC00CC41BB /* BrowsingTreeView.swift */; };
 		96C9AA3F259019E3007D3D98 /* LinkedReferenceNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C9AA3E259019E3007D3D98 /* LinkedReferenceNode.swift */; };
 		96C9AA5725901AA9007D3D98 /* LinksSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C9AA5625901AA9007D3D98 /* LinksSection.swift */; };
 		96C9AAB92593BB67007D3D98 /* Widget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C9AAB82593BB67007D3D98 /* Widget.swift */; };
@@ -434,6 +434,7 @@
 		4105CE2125A5ECA2009AB687 /* BidirectionalPopoverItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BidirectionalPopoverItem.swift; sourceTree = "<group>"; };
 		4105CE7425A60681009AB687 /* FormatterTypeButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatterTypeButton.swift; sourceTree = "<group>"; };
 		41221A352592771F00255197 /* TextEdit+Popover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TextEdit+Popover.swift"; sourceTree = "<group>"; };
+		4131F16725BEC48C006473CD /* SpacerWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpacerWidget.swift; sourceTree = "<group>"; };
 		414B9878259DE2E2002E81A3 /* BidirectionalPopoverActionItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BidirectionalPopoverActionItem.swift; sourceTree = "<group>"; };
 		414B9879259DE2E2002E81A3 /* BidirectionalPopoverActionItem.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = BidirectionalPopoverActionItem.xib; sourceTree = "<group>"; };
 		414B989825A21BB0002E81A3 /* TextEdit+Formatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TextEdit+Formatter.swift"; sourceTree = "<group>"; };
@@ -628,7 +629,6 @@
 		9691E44325B1091300A13080 /* BrowsingSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowsingSection.swift; sourceTree = "<group>"; };
 		96956D30258BF3F50069C9C1 /* LinkStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkStore.swift; sourceTree = "<group>"; };
 		96A8B1DC25A38A3B006F749C /* String+Levenshtein.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Levenshtein.swift"; sourceTree = "<group>"; };
-		96B8AA6625B07ECC00CC41BB /* BrowsingTreeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowsingTreeView.swift; sourceTree = "<group>"; };
 		96C9AA3E259019E3007D3D98 /* LinkedReferenceNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkedReferenceNode.swift; sourceTree = "<group>"; };
 		96C9AA5625901AA9007D3D98 /* LinksSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinksSection.swift; sourceTree = "<group>"; };
 		96C9AAB82593BB67007D3D98 /* Widget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Widget.swift; sourceTree = "<group>"; };
@@ -1002,6 +1002,7 @@
 				96F936622590FA59006D8E53 /* BTextEdit.swift */,
 				96E4505725995CA200BFF36F /* BreadCrumb.swift */,
 				9691E40125AE5D2C00A13080 /* NodeSelection.swift */,
+				4131F16725BEC48C006473CD /* SpacerWidget.swift */,
 			);
 			path = TextEditor;
 			sourceTree = "<group>";
@@ -1034,7 +1035,6 @@
 				418171D02581107C00317ED8 /* BrowserTabView.swift */,
 				418171D22581107C00317ED8 /* TabStats.swift */,
 				418171D32581107C00317ED8 /* WebView.swift */,
-				96B8AA6625B07ECC00CC41BB /* BrowsingTreeView.swift */,
 			);
 			path = Browser;
 			sourceTree = "<group>";
@@ -1825,7 +1825,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "direnv allow ..\neval \"$(direnv export bash)\"\n\nif which variable-injector >/dev/null; then\n  variable-injector --file ${SRCROOT}/Beam/Configuration/Configuration.swift # --verbose # Pass your paramenters\nelse\n  echo \"Warning: Swift Variable Injector not installed, download from https://github.com/penso/variable-injector\"\nfi\n";
+			shellScript = "direnv allow ..\neval \"$(direnv export bash)\"\n\ngit checkout ${SRCROOT}/Beam/Configuration/Configuration.swift\n\nif which variable-injector >/dev/null; then\n  variable-injector --file ${SRCROOT}/Beam/Configuration/Configuration.swift # --verbose # Pass your paramenters\nelse\n  echo \"Warning: Swift Variable Injector not installed, download from https://github.com/penso/variable-injector\"\nfi\n";
 			showEnvVarsInLog = 0;
 		};
 		5205F34425BB1BFE00D3CDB4 /* Build libgit2 */ = {
@@ -1862,7 +1862,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "git checkout Beam/Configuration/Configuration.swift\n";
+			shellScript = "git checkout ${SRCROOT}/Beam/Configuration/Configuration.swift\n";
 			showEnvVarsInLog = 0;
 		};
 		521ED51025B9E43F00FBFA99 /* SwiftLint */ = {
@@ -1933,6 +1933,7 @@
 				4181727B258110D100317ED8 /* AppDelegate+CoreData.swift in Sources */,
 				96E4CF72258E59F400D6DE22 /* BeamTextVisitor.swift in Sources */,
 				418172272581107C00317ED8 /* NSMutableAttributedString+Range.swift in Sources */,
+				4131F16825BEC48C006473CD /* SpacerWidget.swift in Sources */,
 				4181723A2581107C00317ED8 /* Parser.swift in Sources */,
 				4181724A2581107C00317ED8 /* TextView.swift in Sources */,
 				526017FC25AE081E00634695 /* AppDelegate+Console.swift in Sources */,
@@ -2006,7 +2007,6 @@
 				965A78292514F147009980D4 /* AppDelegate.swift in Sources */,
 				418171F82581107C00317ED8 /* Score.swift in Sources */,
 				418172092581107C00317ED8 /* CoreDataManager+backupExtension.swift in Sources */,
-				96B8AA6725B07ECC00CC41BB /* BrowsingTreeView.swift in Sources */,
 				4181721B2581107C00317ED8 /* Maths.swift in Sources */,
 				4181725D2581107C00317ED8 /* AuthenticationManager.swift in Sources */,
 				4181721F2581107C00317ED8 /* JSSourceLoader.swift in Sources */,

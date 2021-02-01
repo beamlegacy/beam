@@ -141,8 +141,6 @@ class BeamNote: BeamElement {
             self.title = newSelf.title
             self.type = newSelf.type
             self.outLinks = newSelf.outLinks
-            self.linkedReferences = newSelf.linkedReferences
-            self.unlinkedReferences = newSelf.unlinkedReferences
             self.searchQueries = newSelf.searchQueries
             self.visitedSearchResults = newSelf.visitedSearchResults
             self.browsingSessions = newSelf.browsingSessions
@@ -178,6 +176,17 @@ class BeamNote: BeamElement {
         guard !unlinkedReferences.contains(reference) else { return }
         unlinkedReferences.append(reference)
     }
+
+    func removeUnlinkedReference(_ reference: NoteReference) {
+        unlinkedReferences.removeAll(where: { ref -> Bool in
+            ref == reference
+        })
+    }
+
+    func removeAllUnlinkedReferences() {
+        unlinkedReferences = []
+    }
+
 
     private static func instanciateNote(_ documentManager: DocumentManager, _ documentStruct: DocumentStruct) throws -> BeamNote {
         let decoder = JSONDecoder()
