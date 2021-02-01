@@ -217,7 +217,7 @@ extension NSColor {
     }
 
     static var omniboxTextColor: NSColor {
-        return loadColor(named: "OmniboxTextColor")
+        return loadColor(named: "Niobium")
     }
 
     static var omniboxTextSelectionColor: NSColor {
