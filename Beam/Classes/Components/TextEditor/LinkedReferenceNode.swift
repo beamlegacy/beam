@@ -7,26 +7,81 @@
 
 import Foundation
 import AppKit
+import Combine
 
 class ProxyElement: BeamElement {
     var proxy: BeamElement
-    var proxyChildren: [BeamElement]
 
-    override var text: BeamText { set { proxy.text = newValue; change() } get { proxy.text } }
-    public internal(set) override var children: [BeamElement] { get { proxyChildren } set { fatalError() } }
+    override var text: BeamText {
+        didSet {
+            guard !updating else { return }
+            proxy.text = text
+        }
+    }
+
+    override var kind: ElementKind {
+        didSet {
+            guard !updating else { return }
+            proxy.kind = kind
+        }
+    }
+
+    override var childrenFormat: ElementChildrenFormat {
+        didSet {
+            guard !updating else { return }
+            proxy.childrenFormat = childrenFormat
+        }
+    }
+
+    override var updateDate: Date {
+        didSet {
+            guard !updating else { return }
+            proxy.updateDate = updateDate
+        }
+    }
 
     override var note: BeamNote? {
-        return nil
+        return proxy.note
     }
+
+    var updating = false
+    var scope = Set<AnyCancellable>()
 
     init(for element: BeamElement) {
         self.proxy = element
-        self.proxyChildren = element.children.map({ e -> ProxyElement in
+        super.init(proxy.text)
+        proxy.$children.sink { [unowned self] newChildren in
+            updating = true; defer { updating = false }
+            self.updateProxyChildren(newChildren)
+        }.store(in: &scope)
+
+        proxy.$text.sink { [unowned self] newValue in
+            updating = true; defer { updating = false }
+            text = newValue
+        }.store(in: &scope)
+
+        proxy.$kind.sink { [unowned self] newValue in
+            updating = true; defer { updating = false }
+            kind = newValue
+        }.store(in: &scope)
+
+        proxy.$childrenFormat.sink { [unowned self] newValue in
+            updating = true; defer { updating = false }
+            childrenFormat = newValue
+        }.store(in: &scope)
+
+        proxy.$updateDate.sink { [unowned self] newValue in
+            updating = true; defer { updating = false }
+            updateDate = newValue
+        }.store(in: &scope)
+    }
+
+    func updateProxyChildren(_ newChildren: [BeamElement]) {
+        self.children = newChildren.map({ e -> ProxyElement in
             let p = ProxyElement(for: e)
-            p.parent = element
+            p.parent = proxy
             return p
         })
-        super.init(proxy.text)
     }
 
     required public init(from decoder: Decoder) throws {
@@ -36,27 +91,66 @@ class ProxyElement: BeamElement {
 }
 
 class LinkedReferenceNode: TextNode {
+
+    // MARK: - Properties
+    let linkTextLayer = CATextLayer()
+    var didMakeInternalLink: ((_ text: String) -> Void)?
+
+    // MARK: - Initializer
+
     override init(editor: BeamTextEdit, element: BeamElement) {
-//        self.section = parent
         let proxyElement = ProxyElement(for: element)
         super.init(editor: editor, element: proxyElement)
-        self.proxyChildren = proxyElement.proxyChildren.compactMap({ e -> LinkedReferenceNode? in
+        self.children = proxyElement.children.compactMap({ e -> LinkedReferenceNode? in
             let ref = editor.nodeFor(e)
             ref.parent = self
             return ref as? LinkedReferenceNode
         })
 
         editor.layer?.addSublayer(layer)
+        actionLayer?.removeFromSuperlayer()
         open = true
+
+        element.$children
+            .sink { [unowned self] newChildren in
+                self.children = newChildren.compactMap({ e -> LinkedReferenceNode? in
+                    let ref = editor.nodeFor(e)
+                    ref.parent = self
+                    return ref as? LinkedReferenceNode
+                })
+
+                self.invalidateRendering()
+        }.store(in: &scope)
+
     }
 
-    internal var proxyChildren = [LinkedReferenceNode]()
-    internal override var children: [Widget] {
-        get {
-            return proxyChildren
-        }
-        set {
-            fatalError()
+    // MARK: - Setup UI
+
+    func createLinkActionLayer() {
+        linkTextLayer.string = "Link"
+        linkTextLayer.font = NSFont.systemFont(ofSize: 0, weight: .medium)
+        linkTextLayer.fontSize = 13
+        linkTextLayer.foregroundColor = NSColor.linkedActionButtonColor.cgColor
+        linkTextLayer.contentsScale = contentsScale
+
+        addLayer(Layer(
+                name: "LinkLayer",
+                layer: linkTextLayer,
+                down: { [weak self] _ in
+                    guard let self = self, let didMakeInternalLink = self.didMakeInternalLink else { return false }
+                    didMakeInternalLink(self.text.text)
+                    return true
+                },
+                hover: { (isHover) in
+                    self.linkTextLayer.foregroundColor = isHover ? NSColor.linkedActionButtonHoverColor.cgColor : NSColor.linkedActionButtonColor.cgColor
+                }
+            )
+        )
+    }
+
+    override func updateSubLayersLayout() {
+        CATransaction.disableAnimations {
+            layers["LinkLayer"]?.frame = CGRect(origin: CGPoint(x: frame.width - 12, y: 0), size: linkTextLayer.preferredFrameSize())
         }
     }
 }

@@ -16,86 +16,151 @@ class LinksSection: Widget {
     }
 
     var mode: Mode
-    var open: Bool = true {
+    var linkedReferencesCancellable: Cancellable!
+    var note: BeamNote
+    var linkLayer: Layer?
+
+    let sectionTitleLayer = CATextLayer()
+    let linkActionLayer = CATextLayer()
+    let separatorLayer = CALayer()
+    let offsetY: CGFloat = 40
+
+    override var open: Bool {
         didSet {
-            updateVisibility(visible && open)
-            invalidateLayout()
+            linkLayer?.layer.isHidden = !open
         }
     }
 
-    var linkedReferenceNodes = [BreadCrumb]() {
+    override var contentsScale: CGFloat {
         didSet {
-            invalidateLayout()
-            children = linkedReferenceNodes
+            sectionTitleLayer.contentsScale = contentsScale
+            linkActionLayer.contentsScale = contentsScale
         }
     }
-    var linkedReferencesCancellable: Cancellable!
-    var note: BeamNote
-    let textLayer = CATextLayer()
 
     init(editor: BeamTextEdit, note: BeamNote, mode: Mode) {
         self.note = note
         self.mode = mode
         super.init(editor: editor)
-        // Append the linked references and unlinked references nodes
-        textLayer.foregroundColor = NSColor.editorIconColor.cgColor
-        textLayer.fontSize = 14
 
+        setupUI()
+        setupSectionMode()
+        updateLayerVisibility()
+
+        editor.layer?.addSublayer(layer)
+        layer.addSublayer(sectionTitleLayer)
+        layer.addSublayer(separatorLayer)
+    }
+
+    func setupUI() {
         addLayer(ChevronButton("chevron", open: open, changed: { [unowned self] value in
             self.open = value
         }))
 
+        sectionTitleLayer.font = NSFont.systemFont(ofSize: 0, weight: .semibold)
+        sectionTitleLayer.fontSize = 15
+        sectionTitleLayer.foregroundColor = NSColor.linkedSectionTitleColor.cgColor
+
+        addLayer(ButtonLayer("sectionTitle", sectionTitleLayer, activated: {
+            guard let chevron = self.layers["chevron"] as? ChevronButton else { return }
+
+            self.open.toggle()
+            self.editor.showOrHidePersistentFormatter(isPresent: false)
+            chevron.open = self.open
+        }))
+
+        linkActionLayer.font = NSFont.systemFont(ofSize: 0, weight: .medium)
+        linkActionLayer.fontSize = 13
+        linkActionLayer.foregroundColor = NSColor.linkedActionButtonColor.cgColor
+
+        separatorLayer.backgroundColor = NSColor.linkedSeparatorColor.withAlphaComponent(0.5).cgColor
+    }
+
+    func setupSectionMode() {
         switch mode {
         case .links:
-            textLayer.string = "\(note.linkedReferences.count) Links"
+            sectionTitleLayer.string = "\(note.linkedReferences.count) Links"
             linkedReferencesCancellable = note.$linkedReferences.sink { [unowned self] links in
-                updateLinkedReferences()
-                textLayer.string = "\(links.count) Links"
+                updateLinkedReferences(links: links)
+                sectionTitleLayer.string = "\(links.count) Links"
                 updateLayerVisibility()
             }
         case .references:
-            textLayer.string = "\(note.unlinkedReferences.count) References"
+            linkActionLayer.string = "Link All"
+            sectionTitleLayer.string = "\(note.unlinkedReferences.count) References"
             linkedReferencesCancellable = note.$unlinkedReferences.sink { [unowned self] links in
-                updateLinkedReferences()
-                textLayer.string = "\(links.count) References"
+                updateLinkedReferences(links: links)
+                sectionTitleLayer.string = "\(links.count) References"
                 updateLayerVisibility()
             }
-        }
 
-        updateLayerVisibility()
-        editor.layer?.addSublayer(layer)
-        layer.addSublayer(textLayer)
-        textLayer.frame = CGRect(origin: CGPoint(x: 25, y: 0), size: textLayer.preferredFrameSize())
-    }
-
-    override var contentsScale: CGFloat {
-        didSet {
-            textLayer.contentsScale = contentsScale
+            createLinkAllLayer()
         }
     }
 
-    func updateLinkedReferences() {
-        let
-            refs: [NoteReference] = {
-            switch mode {
-            case .links:
-                return note.linkedReferences
-            case .references:
-                return note.unlinkedReferences
-            }
-        }()
-
-        self.linkedReferenceNodes = refs.compactMap { noteReference -> BreadCrumb? in
+    func updateLinkedReferences(links: [NoteReference]) {
+        self.children = links.compactMap { noteReference -> BreadCrumb? in
             guard let referencingNote = BeamNote.fetch(DocumentManager(), title: noteReference.noteName) else { return nil }
             guard let referencingElement = referencingNote.findElement(noteReference.elementID) else { return nil }
             return BreadCrumb(editor: editor, section: self, element: referencingElement)
         }
 
-        selfVisible = !linkedReferenceNodes.isEmpty
+        selfVisible = !children.isEmpty
+    }
+
+    func createLinkAllLayer() {
+        linkLayer = Layer(
+            name: "linkAllLayer",
+            layer: linkActionLayer,
+            down: { [weak self] _ in
+                guard let self = self,
+                      let rootNote = self.editor.note.note else { return false }
+
+                if let linkLayer = self.linkLayer, linkLayer.layer.isHidden { return false }
+
+                self.editor.showOrHidePersistentFormatter(isPresent: false)
+                self.children.forEach { child in
+                    guard let breadcrumb = child as? BreadCrumb else { return }
+                    let text = breadcrumb.proxy.text.text
+
+                    text.ranges(of: rootNote.title).forEach { range in
+                        let start = text.position(at: range.lowerBound)
+                        let end = text.position(at: range.upperBound)
+
+                        breadcrumb.proxy.text.makeInternalLink(start..<end)
+                    }
+                }
+                self.note.removeAllUnlinkedReferences()
+                return true
+            }, hover: {[weak self] isHover in
+                guard let self = self else { return }
+
+                self.linkActionLayer.foregroundColor = isHover ? NSColor.linkedActionButtonHoverColor.cgColor : NSColor.linkedActionButtonColor.cgColor
+            })
+
+        guard let linkLayer = linkLayer else { return }
+        addLayer(linkLayer)
+    }
+
+    func setupLayerFrame() {
+        sectionTitleLayer.frame = CGRect(
+            origin: CGPoint(x: 25, y: 0),
+            size: CGSize(
+                width: availableWidth - (linkActionLayer.frame.width + (mode == .references ? 30 : 25)),
+                height: sectionTitleLayer.preferredFrameSize().height
+            )
+        )
+
+        layers["chevron"]?.frame = CGRect(origin: CGPoint(x: 0, y: sectionTitleLayer.preferredFrameSize().height - 15), size: CGSize(width: 20, height: 20))
+        linkActionLayer.frame = CGRect(origin: CGPoint(x: 0, y: 0), size: linkActionLayer.preferredFrameSize())
+    }
+
+    func updateLayerVisibility() {
+        layer.isHidden = children.isEmpty
     }
 
     override func updateRendering() {
-        contentsFrame = NSRect(x: 0, y: 0, width: availableWidth, height: linkedReferenceNodes.isEmpty ? 0 : 30)
+        contentsFrame = NSRect(x: 0, y: 0, width: availableWidth, height: children.isEmpty ? 0 : 30)
 
         computedIdealSize = contentsFrame.size
         computedIdealSize.width = frame.width
@@ -107,7 +172,13 @@ class LinksSection: Widget {
         }
     }
 
-    func updateLayerVisibility() {
-        layer.isHidden = linkedReferenceNodes.isEmpty
+    override func updateSubLayersLayout() {
+        CATransaction.disableAnimations {
+            setupLayerFrame()
+            separatorLayer.frame = CGRect(x: 0, y: sectionTitleLayer.frame.maxY + 7, width: frame.width, height: 2)
+
+            guard let linkLayer = linkLayer else { return }
+            linkLayer.frame = CGRect(origin: CGPoint(x: frame.width - linkActionLayer.frame.width, y: 0), size: linkActionLayer.preferredFrameSize())
+        }
     }
 }

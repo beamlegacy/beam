@@ -33,16 +33,8 @@ public struct MouseInfo {
         self.globalPosition = info.globalPosition
         self.event = info.event
 
-        if layer.layer.superlayer == node.editor.layer {
-            self.position = NSPoint(x: globalPosition.x - layer.position.x, y: globalPosition.y - layer.position.y)
-        } else {
-            self.position =
-                NSPoint(x: globalPosition.x - node.layer.frame.origin.x - layer.frame.origin.x,
-                        y: globalPosition.y - node.layer.frame.origin.y - layer.frame.origin.y)
-            if layer.layer.superlayers.contains(node.layer) {
-                self.position = node.layer.convert(self.position, to: layer.layer)
-            }
-        }
+        let globalBounds = layer.layer.convert(layer.layer.bounds, to: node.editor.layer)
+        self.position = CGPoint(x: globalPosition.x - globalBounds.minX, y: globalPosition.y - globalBounds.minY)
     }
 }
 
@@ -295,6 +287,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     public func invalidateLayout() {
+        guard !needsLayout else { return }
         invalidateIntrinsicContentSize()
         needsLayout = true
         invalidate()
@@ -307,6 +300,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             scrollToCursorAtLayout = false
             setHotSpotToCursorPosition()
         }
+        needsLayout = false
     }
 
     public func invalidate(_ rect: NSRect? = nil) {
@@ -358,7 +352,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         hasFocus = true
         invalidate()
         onStartEditing()
-        initFormatterView(.persistent)
         return super.becomeFirstResponder()
     }
 
@@ -398,19 +391,44 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             rootNode.eraseSelection()
             let splitText = node.text.extract(range: rootNode.cursorPosition ..< node.text.count)
             node.text.removeLast(node.text.count - rootNode.cursorPosition)
-            let element = BeamElement()
-            element.text = splitText
-            let newNode = nodeFor(element)
-            let elements = node.element.children
-            for c in elements {
-                newNode.element.addChild(c)
+
+            if let refNode = node as? LinkedReferenceNode {
+                guard let proxyElement = refNode.element as? ProxyElement else { fatalError() }
+                let actualElement = proxyElement.proxy
+                guard let actualParent = actualElement.parent else { fatalError() }
+
+                let element = BeamElement()
+                element.text = splitText
+
+                actualParent.addChild(element)
+                let elements = actualElement.children
+                for c in elements {
+                    element.addChild(c)
+                }
+
+                let newProxyElement = ProxyElement(for: element)
+                let newNode = nodeFor(newProxyElement)
+
+                _ = node.parent?.insert(node: newNode, after: node)
+                rootNode.cursorPosition = 0
+
+                scrollToCursorAtLayout = true
+                self.node = newNode
+
+            } else {
+                let element = BeamElement()
+                element.text = splitText
+                let newNode = nodeFor(element)
+                let elements = node.element.children
+                for c in elements {
+                    newNode.element.addChild(c)
+                }
+                _ = node.parent?.insert(node: newNode, after: node)
+                rootNode.cursorPosition = 0
+
+                scrollToCursorAtLayout = true
+                self.node = newNode
             }
-
-            _ = node.parent?.insert(node: newNode, after: node)
-            rootNode.cursorPosition = 0
-
-            scrollToCursorAtLayout = true
-            self.node = newNode
 
             cleanPersistentFormatter()
         }
@@ -552,7 +570,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     return
 
                 default:
-                    print("Special Key \(k)")
+                    Logger.shared.logInfo("Special Key \(k)", category: .noteEditor)
                 }
             }
 
@@ -655,6 +673,11 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                         toggleStrikeThrough()
                         return
                     }
+                case "d":
+                    if command, shift {
+                        dumpWidgetTree()
+                        return
+                    }
                 default:
                     break
                 }
@@ -725,7 +748,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         }
         guard let node = node as? TextNode else { return nil }
         let str = node.attributedString.attributedSubstring(from: range)
-        Logger.shared.logDebug("TextInput.attributedString(range: \(range), actualRange: \(String(describing: actualRange))) -> \(str)", category: .document)
+        Logger.shared.logDebug("TextInput.attributedString(range: \(range), actualRange: \(String(describing: actualRange))) -> \(str)", category: .noteEditor)
         return str
     }
 
@@ -899,16 +922,18 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
                 // In this case we will reparent all following sibblings that are not a header to the current node as Paper does
                 guard self.node.isEmpty else { return }
-                guard let parent = self.node.parent else { return }
+                guard let node = self.node as? TextNode else { return }
+                let element = node.element
+                guard let parentNode = self.node.parent as? TextNode else { return }
+                let parent = parentNode.element
                 guard let index = self.node.indexInParent else { return }
                 for sibbling in parent.children.suffix(from: index + 1) {
-                    guard let sibbling = sibbling as? TextNode else { return }
                     guard !sibbling.isHeader else { return }
-                    self.node.addChild(sibbling)
+                    element.addChild(sibbling)
                 }
 
-                node.element.kind = .heading(level)
-                node.text.removeFirst(level + 1)
+                element.kind = .heading(level)
+                element.text.removeFirst(level + 1)
                 self.rootNode.cursorPosition = 0
             }
         }
@@ -976,9 +1001,18 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         super.scrollWheel(with: event)
 
         if popover != nil { cancelPopover() }
+        if inlineFormatter != nil { showOrHideInlineFormatter(isPresent: false) }
     }
 
     // MARK: - Mouse Event
+    override public func updateTrackingAreas() {
+        for trackingArea in trackingAreas {
+            removeTrackingArea(trackingArea)
+        }
+
+        addTrackingArea(NSTrackingArea(rect: bounds, options: [.mouseMoved, .activeInActiveApp], owner: self, userInfo: nil))
+    }
+
     override public func mouseDown(with event: NSEvent) {
         //       window?.makeFirstResponder(self)
         reBlink()
@@ -998,6 +1032,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
     var scrollToCursorAtLayout = false
     public func setHotSpotToCursorPosition() {
+        guard node as? TextNode != nil else { return }
         setHotSpot(rectAt(rootNode.cursorPosition).insetBy(dx: -30, dy: -30))
     }
 
@@ -1132,16 +1167,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     let documentManager = DocumentManager(coreDataManager: CoreDataManager.shared)
 
     @IBAction func saveDocument(_ sender: Any?) {
-        Logger.shared.logInfo("Save document!", category: .document)
-//        let encoder = JSONEncoder()
-//        encoder.outputFormatting = .prettyPrinted
-//        do {
-//            let data = try encoder.encode(rootNode)
-//            let string = String(data: data, encoding: .utf8)!
-//            print("JSon document:\n\(string)")
-//        } catch {
-//            print("Encoding error")
-//        }
+        Logger.shared.logInfo("Save document!", category: .noteEditor)
         rootNode.note?.save(documentManager: documentManager)
         BeamNote.detectLinks(documentManager)
     }
@@ -1184,6 +1210,14 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         cursorStartPosition = rootNode.cursorPosition
         initPopover()
         showOrHidePersistentFormatter(isPresent: false)
+    }
+
+    internal func initAndShowPersistentFormatter() {
+        if persistentFormatter == nil {
+           initFormatterView(.persistent)
+        } else if persistentFormatter != nil {
+           showOrHidePersistentFormatter(isPresent: true)
+        }
     }
 
     internal func initAndUpdateInlineFormatter(isDragged: Bool = false) {
@@ -1255,6 +1289,10 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
     @IBAction func selectAllHierarchically(_ sender: Any?) {
         rootNode.doCommand(.selectAllHierarchically)
+    }
+
+    func dumpWidgetTree() {
+        rootNode.dumpWidgetTree()
     }
 
 }

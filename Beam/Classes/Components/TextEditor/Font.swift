@@ -56,15 +56,16 @@ public class TextLine {
 
     func stringIndexFor(position: NSPoint) -> Int {
         var previous = Float(0)
+        let range = CTLineGetStringRange(ctLine)
         for (i, caret) in carets.enumerated() {
             let offset = caret.offset
             let middle = CGFloat(0.5 * (offset + previous))
             if middle > position.x {
-                return max(0, i - 1)
+                return range.location + max(0, i - 1)
             }
             previous = offset
         }
-        return carets.count - 1
+        return range.location + range.length
     }
 
     func isAfterEndOfLine(_ point: NSPoint) -> Bool {
@@ -76,6 +77,7 @@ public class TextLine {
     }
 
     func offsetFor(index: Int) -> Float {
+        let index = index - CTLineGetStringRange(ctLine).location
         guard index < carets.count else { return Float(frame.maxX) }
         return carets[index].offset
     }

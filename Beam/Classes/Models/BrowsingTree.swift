@@ -121,7 +121,7 @@ class BrowsingTree: ObservableObject, Codable {
         current.addEvent(.exitBackward)
         current = parent
         current.addEvent(.startReading)
-        print("goBack to \(currentLink)")
+        Logger.shared.logInfo("goBack to \(currentLink)", category: .web)
         return current
     }
 
@@ -131,24 +131,24 @@ class BrowsingTree: ObservableObject, Codable {
         guard let lastChild = current.children.last else { return current }
         current = lastChild
         current.addEvent(.startReading)
-        print("goForward to \(currentLink)")
+        Logger.shared.logInfo("goForward to \(currentLink)", category: .web)
         return current
     }
 
     func navigateTo(url link: String) {
         guard current.link != LinkStore.getIdFor(link) else { return }
-        print("navigateFrom \(currentLink) to \(link)")
+        Logger.shared.logInfo("navigateFrom \(currentLink) to \(link)", category: .web)
         current.addEvent(.navigateToLink)
         let node = BrowsingNode(parent: current, url: link)
         current.children.append(node)
         current = node
         current.addEvent(.startReading)
-        print("current now is \(currentLink)")
+        Logger.shared.logInfo("current now is \(currentLink)", category: .web)
     }
 
     func closeTab() {
         current.addEvent(.closeTab)
-        print("Close tab \(currentLink)")
+        Logger.shared.logInfo("Close tab \(currentLink)", category: .web)
     }
 
     func switchToBackground() {

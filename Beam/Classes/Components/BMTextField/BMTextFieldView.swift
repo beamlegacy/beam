@@ -41,7 +41,7 @@ class BMTextFieldView: NSTextField {
     }
 
     internal func setText(_ text: String, font: NSFont?) {
-        let attrs = buildAttributedString(NSColor.white, font)
+        let attrs = buildAttributedString(textColor ?? NSColor.white, font)
         let textString = NSAttributedString(string: text, attributes: attrs)
 
         self.attributedStringValue = textString

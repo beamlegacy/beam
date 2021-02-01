@@ -237,7 +237,7 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
     func connectUnlinkedNotes(_ thisNoteTitle: String, _ allNotes: [BeamNote]) {
         for note in allNotes where thisNoteTitle != note.title {
             let existingLinks = text.internalLinks.map { range -> String in range.string }
-            if text.text.contains(note.title), !existingLinks.contains(note.title) {
+            if text.text.contains(note.title) && !existingLinks.contains(note.title) {
                 note.addUnlinkedReference(NoteReference(noteName: thisNoteTitle, elementID: id))
 //                Logger.shared.logInfo("New unlink \(thisNoteTitle) --> \(note.title)", category: .document)
             }
@@ -330,4 +330,14 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
     public var debugDescription: String {
         return "BeamElement(\(id) [\(children.count) children] \(kind) - \(childrenFormat) \(!open ? "[closed]" : ""): \(text.text)"
     }
+
+    var isHeader: Bool {
+        switch kind {
+        case .heading:
+            return true
+        default:
+            return false
+        }
+    }
+
 }

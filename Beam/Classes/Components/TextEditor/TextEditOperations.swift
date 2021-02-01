@@ -12,24 +12,24 @@ import Foundation
 extension TextRoot {
     func increaseNodeIndentation(_ node: TextNode) -> Bool {
         guard !node.readOnly,
-        let newParent = node.previousSibbling() else { return false }
+        let newParent = node.previousSibbling() as? TextNode else { return false }
         // Prepare Undo:
-        guard let currentParent = node.parent,
+        guard let currentParent = node.parent as? TextNode,
               let indexInParent = node.indexInParent else { return false }
         undoManager.registerUndo(withTarget: self) { selfTarget in
             selfTarget.undoManager.registerUndo(withTarget: selfTarget) { selfTarget in
                 _ = selfTarget.increaseNodeIndentation(node)
             }
-            _ = currentParent.insert(node: node, at: indexInParent)
+            currentParent.element.insert(node.element, at: indexInParent)
         }
         undoManager.setActionName("Increase indentation")
 
-        newParent.addChild(node)
+        newParent.element.addChild(node.element)
         return true
     }
 
     func decreaseNodeIndentation(_ node: TextNode) -> Bool {
-        guard !node.readOnly, let parent = node.parent, let newParent = parent.parent else { return false }
+        guard !node.readOnly, let parent = node.parent as? TextNode, let newParent = parent.parent as? TextNode else { return false }
 
         // Prepare Undo:
         guard let indexInParent = node.indexInParent else { return false }
@@ -38,11 +38,11 @@ extension TextRoot {
             selfTarget.undoManager.registerUndo(withTarget: selfTarget) { selfTarget in
                 _ = selfTarget.decreaseNodeIndentation(node)
             }
-            _ = parent.insert(node: node, at: indexInParent)
+            parent.element.insert(node.element, at: indexInParent)
         }
         undoManager.setActionName("Decrease indentation")
 
-        _ = newParent.insert(node: node, after: parent)
+        newParent.element.insert(node.element, after: parent.element)
 
         return true
     }
@@ -89,7 +89,7 @@ extension TextRoot {
     }
 
     func erase(node: TextNode, enableRedo: Bool = true) -> Bool {
-        guard let oldParent = node.parent,
+        guard let oldParent = node.parent as? TextNode,
               let oldIndexInParent = node.indexInParent else { return false }
         let oldChildren = node.children
         undoManager.registerUndo(withTarget: self) { selfTarget in
@@ -98,25 +98,26 @@ extension TextRoot {
                     _ = selfTarget.erase(node: node)
                 }
             }
-            _ = oldParent.insert(node: node, at: oldIndexInParent)
+            oldParent.element.insert(node.element, at: oldIndexInParent)
             for oldChild in oldChildren {
-                node.addChild(oldChild)
+                guard let oldChild = oldChild as? TextNode else { return }
+                node.element.addChild(oldChild.element)
             }
-            node.addLayerTo(layer: selfTarget.editor.layer!, recursive: false)
         }
 
         // reparent all children to previous sibbling or parent:
-        if let previous = node.previousSibbling() {
+        if let previous = node.previousSibbling() as? TextNode {
             for child in node.children {
-                previous.addChild(child)
+                guard let child = child as? TextNode else { return false }
+                previous.element.addChild(child.element)
             }
         } else {
             for (i, child) in node.children.enumerated() {
-                _ = oldParent.insert(node: child, at: oldIndexInParent + i)
+                guard let child = child as? TextNode else { return false }
+                oldParent.element.insert(child.element, at: oldIndexInParent + i)
             }
         }
-        oldParent.removeChild(node)
-        node.removeFromSuperlayer(recursive: false)
+        oldParent.element.removeChild(node.element)
         undoManager.setActionName("Erase node")
 
         return true
@@ -124,10 +125,11 @@ extension TextRoot {
 
     func createEmptyNode(withParent parent: TextNode, atIndex index: Int = 0) {
         let element = BeamElement()
-        let newNode = editor.nodeFor(element)
 
-        parent.insert(node: newNode, at: index)
+        parent.element.insert(element, at: index)
         root.cursorPosition = 0
+
+        let newNode = editor.nodeFor(element)
         node = newNode
 
         undoManager.registerUndo(withTarget: self) { selfTarget in
@@ -202,7 +204,8 @@ extension TextRoot {
                 let remainingText = nextNode.text
                 // Reparent existing children to the node we're merging in
                 for c in nextNode.children {
-                    node.addChild(c)
+                    guard let c = c as? TextNode else { return }
+                    node.element.addChild(c.element)
                 }
 
                 nextNode.delete()

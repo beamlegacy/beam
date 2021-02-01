@@ -135,7 +135,7 @@ class TextNodeTests: XCTestCase {
         let root = editor.rootNode!
         validateRootWithNote(root: root, note: note)
 
-        root.removeChild(root.children.first!)
+        root.element.removeChild((root.children.first as! TextNode).element)
 
         let str1 = """
         title
@@ -210,7 +210,7 @@ class TextNodeTests: XCTestCase {
         let root = editor.rootNode!
         validateRootWithNote(root: root, note: note)
 
-        root.children.first?.addChild(TextNode(editor: editor, element: BeamElement("bullet13")))
+        (root.children.first as? TextNode)?.element.addChild(BeamElement("bullet13"))
 
         let str1 = """
         title
@@ -236,7 +236,8 @@ class TextNodeTests: XCTestCase {
         let root = editor.rootNode!
         validateRootWithNote(root: root, note: note)
 
-        _ = root.children.first?.insert(node: TextNode(editor: editor, element: BeamElement("bullet3")), after: root.children.first!.children.first!)
+        let first = root.children.first as? TextNode
+        _ = first?.element.insert(BeamElement("bullet3"), after: first!.element.children.first)
 
         let str1 = """
         title
@@ -263,8 +264,9 @@ class TextNodeTests: XCTestCase {
         validateRootWithNote(root: root, note: note)
 
         let node = TextNode(editor: editor, element: BeamElement("bullet13"))
-        node.addChild(TextNode(editor: editor, element: BeamElement("bullet131")))
-        root.children.first?.addChild(node)
+        node.element.addChild(BeamElement("bullet131"))
+        let first = root.children.first as? TextNode
+        first?.element.addChild(node.element)
 
         let str1 = """
         title
@@ -292,8 +294,9 @@ class TextNodeTests: XCTestCase {
         validateRootWithNote(root: root, note: note)
 
         let node = TextNode(editor: editor, element: BeamElement("bullet13"))
-        node.addChild(TextNode(editor: editor, element: BeamElement("bullet131")))
-        _ = root.children.first?.insert(node: node, after: root.children.first!.children.first!)
+        node.element.addChild(BeamElement("bullet131"))
+        let first = root.children.first as? TextNode
+        _ = first?.element.insert(node.element, after: first!.element.children.first!)
 
         let str1 = """
         title
@@ -321,7 +324,8 @@ class TextNodeTests: XCTestCase {
 //        print("Tree:\n\(root.printTree())\n")
         validateRootWithNote(root: root, note: note)
 
-        root.removeChild(root.children.first!)
+        let first = root.children.first as? TextNode
+        root.element.removeChild(first!.element)
         let str1 = """
         title
             v - bullet2
@@ -343,7 +347,8 @@ class TextNodeTests: XCTestCase {
 //        print("Tree:\n\(root.printTree())\n")
         validateRootWithNote(root: root, note: note)
 
-        root.children.first!.removeChild(root.children.first!.children.first!)
+        let first = root.children.first as? TextNode
+        first?.element.removeChild(first!.element.children.first!)
         let str1 = """
         title
             v - bullet1
@@ -523,145 +528,6 @@ class TextNodeTests: XCTestCase {
         XCTAssertEqual(str1, root.printTree())
         XCTAssertEqual(root.cursorPosition, 7)
         XCTAssert(root.selectedTextRange.isEmpty)
-        validateRootWithNote(root: root, note: note)
-    }
-
-    // swiftlint:disable:next function_body_length
-    func testMoveCursor() {
-        defer { reset() }
-        let note = createMiniArborescence(title: "title")
-        let editor = BeamTextEdit(root: note)
-        let root = editor.rootNode!
-        //print("Tree:\n\(root.printTree())\n")
-        validateRootWithNote(root: root, note: note)
-
-        root.node = root.children.first
-
-        root.cursorPosition = 3
-        root.selectedTextRange = 3..<7
-        root.setLayout(NSRect(x: 0, y: 0, width: 400, height: 500))
-        let str = """
-        title
-            v - bullet1
-                - bullet11
-                - bullet12
-            v - bullet2
-                - bullet21
-                - bullet22
-                - bullet23
-
-        """
-
-        root.doCommand(.moveLeft)
-        XCTAssertEqual(str, root.printTree())
-        XCTAssertEqual(root.cursorPosition, 3)
-        XCTAssert(root.selectedTextRange.isEmpty)
-
-        root.doCommand(.moveLeft)
-        XCTAssertEqual(root.cursorPosition, 2)
-        XCTAssert(root.selectedTextRange.isEmpty)
-
-        root.doCommand(.moveRight)
-        XCTAssertEqual(root.cursorPosition, 3)
-        XCTAssert(root.selectedTextRange.isEmpty)
-
-        root.doCommand(.moveRight)
-        XCTAssertEqual(root.cursorPosition, 4)
-        XCTAssert(root.selectedTextRange.isEmpty)
-
-        root.doCommand(.moveRightAndModifySelection)
-        root.doCommand(.moveRightAndModifySelection)
-        root.doCommand(.moveRightAndModifySelection)
-        XCTAssertEqual(root.cursorPosition, 7)
-        XCTAssertEqual(root.selectedTextRange, 4..<7)
-
-        root.cancelSelection()
-        XCTAssertEqual(root.cursorPosition, 7)
-        XCTAssert(root.selectedTextRange.isEmpty)
-        root.doCommand(.moveLeftAndModifySelection)
-        root.doCommand(.moveLeftAndModifySelection)
-        root.doCommand(.moveLeftAndModifySelection)
-        XCTAssertEqual(root.cursorPosition, 4)
-        XCTAssertEqual(root.selectedTextRange, 4..<7)
-
-        root.doCommand(.moveDown)
-        XCTAssert(root.node !== root.children.first)
-        XCTAssert(root.node === root.children.first?.children.first)
-        root.doCommand(.moveUp)
-        XCTAssert(root.node === root.children.first)
-        validateRootWithNote(root: root, note: note)
-    }
-
-    // swiftlint:disable:next function_body_length
-    func testMoveAndEdit() {
-        defer { reset() }
-        let frame = NSRect(x: 0, y: 0, width: 400, height: 500)
-        let note = createLoremArborescence(title: "title")
-        let editor = BeamTextEdit(root: note)
-        let root = editor.rootNode!
-        validateRootWithNote(root: root, note: note)
-
-        root.node = root.children.first
-        root.cursorPosition = 0
-        root.setLayout(frame)
-        root.updateRendering()
-
-        let expanded1 = "Lorem **ipsum dolor** sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-
-        for i in 0..<5 {
-            root.doCommand(.moveRight)
-            root.setLayout(frame)
-            root.updateRendering()
-            let node = root.node as? TextNode
-            XCTAssertNotNil(node)
-            if let node = node {
-                XCTAssertEqual(node.attributedString.string, String.loremIpsumSmall)
-            }
-            XCTAssertEqual(root.cursorPosition, i + 1)
-        }
-
-        root.doCommand(.moveRight)
-        root.setLayout(frame)
-        root.updateRendering()
-
-        let node = root.node as? TextNode
-        XCTAssertNotNil(node)
-        if let node = node {
-            XCTAssertEqual(node.attributedString.string, expanded1)
-        }
-        XCTAssertEqual(root.cursorPosition, 8)
-
-        for _ in 0..<11 {
-            root.doCommand(.moveRightAndModifySelection)
-            root.setLayout(frame)
-            root.updateRendering()
-        }
-        XCTAssertEqual(root.cursorPosition, 8 + 11)
-        XCTAssertEqual(root.selectedText, "ipsum dolor")
-
-        root.doCommand(.deleteBackward)
-        XCTAssertEqual(root.cursorPosition, 8)
-        XCTAssertNotNil(root.node as? TextNode)
-        if let node = root.node as? TextNode {
-            XCTAssertEqual(node.text.text, "Lorem **** sit amet, *consectetur* adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore **_magna aliqua_**.")
-        }
-
-        root.doCommand(.deleteBackward)
-        root.doCommand(.deleteBackward)
-        XCTAssertEqual(root.cursorPosition, 6)
-        XCTAssertNotNil(root.node as? TextNode)
-        if let node = root.node as? TextNode {
-            XCTAssertEqual(node.text.text, "Lorem ** sit amet, *consectetur* adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore **_magna aliqua_**.")
-        }
-
-        root.doCommand(.deleteForward)
-        root.doCommand(.deleteForward)
-        root.doCommand(.deleteForward)
-        XCTAssertEqual(root.cursorPosition, 6)
-        XCTAssertNotNil(root.node as? TextNode)
-        if let node = root.node as? TextNode {
-            XCTAssertEqual(node.text.text, "Lorem sit amet, *consectetur* adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore **_magna aliqua_**.")
-        }
         validateRootWithNote(root: root, note: note)
     }
 
