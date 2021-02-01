@@ -100,13 +100,6 @@ public class TextNode: Widget {
         return _language
     }
 
-    var open = true {
-        didSet {
-            invalidateLayout()
-            updateVisibility(visible && open)
-        }
-    }
-
     var _attributedString: NSAttributedString?
     var attributedString: NSAttributedString {
         if _attributedString == nil {
@@ -148,7 +141,7 @@ public class TextNode: Widget {
     }
 
     var showDisclosureButton: Bool {
-        depth > 0 && !children.isEmpty
+        !children.isEmpty
     }
 
     var showIdentationLine: Bool {
@@ -209,12 +202,10 @@ public class TextNode: Widget {
         }
     }
 
-    private var doubleClickTimer: Timer?
-    private var icon = NSImage(named: "editor-cmdreturn")
-    private var actionLayer: CALayer?
+    internal var actionLayer: CALayer?
     private var actionLayerIsHovered = false
+    private var icon = NSImage(named: "editor-cmdreturn")
 
-    private let doucleClickInterval = 0.23
     private let actionImageLayer = CALayer()
     private let actionTextLayer = CATextLayer()
     private let actionLayerFrame = CGRect(x: 30, y: 0, width: 80, height: 20)
@@ -390,7 +381,7 @@ public class TextNode: Widget {
         if showDisclosureButton {
             drawDisclosure(at: NSPoint(x: offset.x, y: -(firstLineBaseline - 14)), in: context)
         } else {
-            drawBulletPoint(at: NSPoint(x: offset.x, y: -(firstLineBaseline - 14)), in: context)
+            drawBulletPoint(at: NSPoint(x: 0, y: -(firstLineBaseline - 14)), in: context)
         }
 
         context.textMatrix = CGAffineTransform.identity
@@ -404,12 +395,12 @@ public class TextNode: Widget {
         guard !readOnly, editor.hasFocus, editor.blinkPhase else { return }
 
         // Otherwise, draw the cursor at a real position
-        let line: TextLine =  {
+        let line: TextLine = {
             if let emptyLayout = emptyLayout {
                 return emptyLayout.lines[0]
             }
 
-            guard let cursorLine = lineAt(index: cursorPosition) else { fatalError() }
+            guard let cursorLine = lineAt(index: cursorPosition <= 0 ? 0 : cursorPosition) else { fatalError() }
             return layout!.lines[cursorLine]
         }()
 
@@ -598,7 +589,10 @@ public class TextNode: Widget {
     }
 
     // MARK: - Mouse Events
+    // swiftlint:disable:next function_body_length
     override func mouseDown(mouseInfo: MouseInfo) -> Bool {
+        assert(inVisibleBranch)
+
         if showDisclosureButton && disclosureButtonFrame.contains(mouseInfo.position) {
             disclosurePressed = true
             return true
@@ -608,7 +602,7 @@ public class TextNode: Widget {
         guard let actionLayer = actionLayer else { return false }
         let position = actionLayerMousePosition(from: mouseInfo)
 
-        if isEditing && actionLayerIsHovered && actionLayer.frame.contains(position) {
+        if isEditing && !actionLayer.isHidden && actionLayerIsHovered && actionLayer.frame.contains(position) {
             editor.onStartQuery(self)
             return true
         }
@@ -626,31 +620,31 @@ public class TextNode: Widget {
         }
 
         if contentsFrame.contains(mouseInfo.position) {
-            if mouseInfo.event.clickCount == 1 {
-                let clickPos = positionAt(point: mouseInfo.position)
-                if mouseInfo.event.modifierFlags.contains(.shift) {
-                    dragMode = .select(cursorPosition)
-                    root?.extendSelection(to: clickPos)
-                    editor.initAndUpdateInlineFormatter()
-                    return false
-                } else {
-                    root?.cursorPosition = clickPos
-                    root?.cancelSelection()
-                    dragMode = .select(cursorPosition)
-                }
+            let clickPos = positionAt(point: mouseInfo.position)
 
-                doubleClickTimer = Timer.scheduledTimer(withTimeInterval: doucleClickInterval, repeats: false, block: { [weak self] (_) in
-                    guard let self = self else { return }
-                    self.editor.dismissPopoverOrFormatter()
-                })
+            if mouseInfo.event.clickCount == 1 && editor.inlineFormatter != nil {
+                editor.dismissPopoverOrFormatter()
+                root?.cursorPosition = clickPos
+                root?.cancelSelection()
+                return true
+            } else if mouseInfo.event.clickCount == 1 && mouseInfo.event.modifierFlags.contains(.shift) {
+                dragMode = .select(cursorPosition)
+                root?.extendSelection(to: clickPos)
+                editor.initAndUpdateInlineFormatter()
+                return true
+            } else if mouseInfo.event.clickCount == 1 {
+                root?.cursorPosition = clickPos
+                root?.cancelSelection()
+                dragMode = .select(cursorPosition)
+                editor.initAndShowPersistentFormatter()
+                return true
             } else if mouseInfo.event.clickCount == 2 {
-                let clickPos = positionAt(point: mouseInfo.position)
-                doubleClickTimer?.invalidate()
                 root?.wordSelection(from: clickPos)
                 editor.initAndUpdateInlineFormatter()
+                return true
             } else {
-                doubleClickTimer?.invalidate()
                 root?.doCommand(.selectAll)
+                return true
             }
         }
 
@@ -676,19 +670,19 @@ public class TextNode: Widget {
         guard let actionLayer = actionLayer else { return false }
 
         let position = actionLayerMousePosition(from: mouseInfo)
-        let hasTextAndeditable = !text.isEmpty && isEditing
+        let hasTextAndEditable = !text.isEmpty && isEditing && editor.hasFocus
 
         // Show image & text layers
-        if hasTextAndeditable && contentsFrame.contains(position) && actionLayer.frame.contains(position) {
+        if hasTextAndEditable && contentsFrame.contains(position) && actionLayer.frame.contains(position) {
             showHoveredActionLayers(true)
             return true
-        } else if hasTextAndeditable && contentsFrame.contains(position) {
+        } else if hasTextAndEditable && contentsFrame.contains(position) {
             showHoveredActionLayers(false)
             return true
         }
 
         // Reset action layers
-        if !contentsFrame.contains(position) && isEditing {
+        if !contentsFrame.contains(position) && isEditing && editor.hasFocus {
             showHoveredActionLayers(false)
             return true
         }
@@ -939,7 +933,7 @@ public class TextNode: Widget {
         return buildAttributedString(for: elementText)
     }
 
-    private func actionLayerMousePosition(from mouseInfo: MouseInfo) -> NSPoint {
+    internal func actionLayerMousePosition(from mouseInfo: MouseInfo) -> NSPoint {
         return NSPoint(x: indent + mouseInfo.position.x, y: mouseInfo.position.y)
     }
 
@@ -1028,6 +1022,14 @@ public class TextNode: Widget {
             }
         }
         return self
+    }
+
+    override func dumpWidgetTree(_ level: Int = 0) {
+        let tabs = String.tabs(level)
+        print("\(tabs)\(String(describing: Self.self)) frame(\(frame)) \(layers.count) layers - element id: \(element.id) [\(elementText.text)]")
+        for c in children {
+            c.dumpWidgetTree(level + 1)
+        }
     }
 
 }

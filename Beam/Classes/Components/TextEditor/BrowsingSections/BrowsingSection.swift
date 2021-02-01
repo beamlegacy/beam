@@ -10,13 +10,6 @@ import Combine
 import AppKit
 
 class BrowsingSection: Widget {
-    var open: Bool = true {
-        didSet {
-            updateVisibility(visible && open)
-            invalidateLayout()
-        }
-    }
-
     var sorted: Bool = true {
         didSet {
             updateChildrenNodes()
@@ -72,7 +65,7 @@ class BrowsingSection: Widget {
 
         addLayer(ButtonLayer("sorted", Layer.text("sorted"), activated: { [unowned self] in
             self.sorted.toggle()
-        }), position: CGPoint(x: 25, y: 0))
+        }), origin: CGPoint(x: 25, y: 0))
 
         note.$browsingSessions.sink { [weak self] _ in
             guard let self = self else { return }
@@ -84,7 +77,7 @@ class BrowsingSection: Widget {
         updateLayerVisibility()
         editor.layer?.addSublayer(layer)
         layer.addSublayer(textLayer)
-        layer.addSublayer(chevronLayer)
+        // layer.addSublayer(chevronLayer)
         textLayer.frame = CGRect(origin: CGPoint(x: 100, y: 0), size: textLayer.preferredFrameSize())
     }
 

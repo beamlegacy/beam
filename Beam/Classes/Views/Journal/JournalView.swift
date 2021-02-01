@@ -21,11 +21,6 @@ struct JournalView: View {
             VStack {
                 ForEach(journals) { note in
                     NoteView(note: note,
-                         onStartEditing: {
-                            withAnimation {
-                                isEditing = true
-                            }
-                         },
                          leadingAlignement: 185,
                          showTitle: true,
                          scrollable: false

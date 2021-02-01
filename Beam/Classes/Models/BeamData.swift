@@ -24,7 +24,6 @@ public class BeamData: ObservableObject {
     @Published var noteCount = 0
 
     @Published var showTabStats = false
-    @Published var showBrowsingTree = false
 
     var cookies: HTTPCookieStorage
     var documentManager: DocumentManager

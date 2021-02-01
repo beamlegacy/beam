@@ -89,9 +89,11 @@ extension BeamTextEdit {
     internal func showOrHideInlineFormatter(isPresent: Bool, isDragged: Bool = false) {
         guard let node = node as? TextNode,
               let inlineFormatter = inlineFormatter,
-              let topAnchor = BeamTextEdit.topAnchor else { return }
+              let topAnchor = BeamTextEdit.topAnchor,
+              let scrollView = enclosingScrollView else { return }
 
         let (_, rect) = node.offsetAndFrameAt(index: rootNode.cursorPosition)
+        let yOffset = scrollView.documentVisibleRect.origin.y < 0 ? 0 : scrollView.documentVisibleRect.origin.y
         let yPos = (node.offsetInDocument.y + rect.maxY)
         let showTimingFunction = CAMediaTimingFunction(controlPoints: 0.64, 0.4, 0, 0.98)
         let hideTimingFunction = CAMediaTimingFunction(controlPoints: 0.98, 0, 0.64, 0.4)
@@ -99,7 +101,7 @@ extension BeamTextEdit {
         inlineFormatter.wantsLayer = true
         inlineFormatter.layoutSubtreeIfNeeded()
 
-        topAnchor.constant = isPresent ? yPos - BeamTextEdit.topConstraint : yPos + BeamTextEdit.topConstraint
+        topAnchor.constant = isPresent ? yPos - BeamTextEdit.topConstraint - yOffset : yPos + BeamTextEdit.topConstraint - yOffset
 
         NSAnimationContext.runAnimationGroup ({ ctx in
             ctx.allowsImplicitAnimation = true
@@ -121,7 +123,8 @@ extension BeamTextEdit {
         guard let node = node as? TextNode,
               let inlineFormatter = inlineFormatter,
               let topAnchor = BeamTextEdit.topAnchor,
-              let leftAnchor = BeamTextEdit.leftAnchor else { return }
+              let leftAnchor = BeamTextEdit.leftAnchor,
+              let scrollView = enclosingScrollView else { return }
 
         detectFormatterType()
 
@@ -132,6 +135,7 @@ extension BeamTextEdit {
         }
 
         let (xOffset, rect) = node.offsetAndFrameAt(index: rootNode.cursorPosition)
+        let yOffset = scrollView.documentVisibleRect.origin.y < 0 ? 0 : scrollView.documentVisibleRect.origin.y
         let yPosition = (node.offsetInDocument.y + rect.maxY) - (isInlineFormatterHidden ? BeamTextEdit.startTopConstraint : BeamTextEdit.topConstraint)
         let currentLowerBound = currentTextRange.lowerBound
         let selectedLowLowerBound = node.selectedTextRange.lowerBound
@@ -143,12 +147,12 @@ extension BeamTextEdit {
 
         if currentLowerBound == selectedLowLowerBound && BeamTextEdit.isSelectableContent {
             BeamTextEdit.isSelectableContent = false
-            topAnchor.constant = yPosition
+            topAnchor.constant = yPosition - yOffset
         }
 
         if currentLowerBound > selectedLowLowerBound {
             BeamTextEdit.isSelectableContent = true
-            topAnchor.constant = yPosition
+            topAnchor.constant = yPosition - yOffset
         }
     }
 

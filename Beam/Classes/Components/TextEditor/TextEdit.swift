@@ -33,16 +33,8 @@ public struct MouseInfo {
         self.globalPosition = info.globalPosition
         self.event = info.event
 
-        if layer.layer.superlayer == node.editor.layer {
-            self.position = NSPoint(x: globalPosition.x - layer.position.x, y: globalPosition.y - layer.position.y)
-        } else {
-            self.position =
-                NSPoint(x: globalPosition.x - node.layer.frame.origin.x - layer.frame.origin.x,
-                        y: globalPosition.y - node.layer.frame.origin.y - layer.frame.origin.y)
-            if layer.layer.superlayers.contains(node.layer) {
-                self.position = node.layer.convert(self.position, to: layer.layer)
-            }
-        }
+        let globalBounds = layer.layer.convert(layer.layer.bounds, to: node.editor.layer)
+        self.position = CGPoint(x: globalPosition.x - globalBounds.minX, y: globalPosition.y - globalBounds.minY)
     }
 }
 
@@ -358,7 +350,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         hasFocus = true
         invalidate()
         onStartEditing()
-        initFormatterView(.persistent)
         return super.becomeFirstResponder()
     }
 
@@ -398,19 +389,44 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             rootNode.eraseSelection()
             let splitText = node.text.extract(range: rootNode.cursorPosition ..< node.text.count)
             node.text.removeLast(node.text.count - rootNode.cursorPosition)
-            let element = BeamElement()
-            element.text = splitText
-            let newNode = nodeFor(element)
-            let elements = node.element.children
-            for c in elements {
-                newNode.element.addChild(c)
+
+            if let refNode = node as? LinkedReferenceNode {
+                guard let proxyElement = refNode.element as? ProxyElement else { fatalError() }
+                let actualElement = proxyElement.proxy
+                guard let actualParent = actualElement.parent else { fatalError() }
+
+                let element = BeamElement()
+                element.text = splitText
+
+                actualParent.addChild(element)
+                let elements = actualElement.children
+                for c in elements {
+                    element.addChild(c)
+                }
+
+                let newProxyElement = ProxyElement(for: element)
+                let newNode = nodeFor(newProxyElement)
+
+                _ = node.parent?.insert(node: newNode, after: node)
+                rootNode.cursorPosition = 0
+
+                scrollToCursorAtLayout = true
+                self.node = newNode
+
+            } else {
+                let element = BeamElement()
+                element.text = splitText
+                let newNode = nodeFor(element)
+                let elements = node.element.children
+                for c in elements {
+                    newNode.element.addChild(c)
+                }
+                _ = node.parent?.insert(node: newNode, after: node)
+                rootNode.cursorPosition = 0
+
+                scrollToCursorAtLayout = true
+                self.node = newNode
             }
-
-            _ = node.parent?.insert(node: newNode, after: node)
-            rootNode.cursorPosition = 0
-
-            scrollToCursorAtLayout = true
-            self.node = newNode
 
             cleanPersistentFormatter()
         }
@@ -653,6 +669,11 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     if command {
                         cancelPopover()
                         toggleStrikeThrough()
+                        return
+                    }
+                case "d":
+                    if command, shift {
+                        dumpWidgetTree()
                         return
                     }
                 default:
@@ -976,9 +997,18 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         super.scrollWheel(with: event)
 
         if popover != nil { cancelPopover() }
+        if inlineFormatter != nil { showOrHideInlineFormatter(isPresent: false) }
     }
 
     // MARK: - Mouse Event
+    override public func updateTrackingAreas() {
+        for trackingArea in trackingAreas {
+            removeTrackingArea(trackingArea)
+        }
+
+        addTrackingArea(NSTrackingArea(rect: bounds, options: [.mouseMoved, .activeInActiveApp], owner: self, userInfo: nil))
+    }
+
     override public func mouseDown(with event: NSEvent) {
         //       window?.makeFirstResponder(self)
         reBlink()
@@ -1133,15 +1163,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
     @IBAction func saveDocument(_ sender: Any?) {
         Logger.shared.logInfo("Save document!", category: .document)
-//        let encoder = JSONEncoder()
-//        encoder.outputFormatting = .prettyPrinted
-//        do {
-//            let data = try encoder.encode(rootNode)
-//            let string = String(data: data, encoding: .utf8)!
-//            print("JSon document:\n\(string)")
-//        } catch {
-//            print("Encoding error")
-//        }
         rootNode.note?.save(documentManager: documentManager)
         BeamNote.detectLinks(documentManager)
     }
@@ -1184,6 +1205,14 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         cursorStartPosition = rootNode.cursorPosition
         initPopover()
         showOrHidePersistentFormatter(isPresent: false)
+    }
+
+    internal func initAndShowPersistentFormatter() {
+        if persistentFormatter == nil {
+           initFormatterView(.persistent)
+        } else if persistentFormatter != nil {
+           showOrHidePersistentFormatter(isPresent: true)
+        }
     }
 
     internal func initAndUpdateInlineFormatter(isDragged: Bool = false) {
@@ -1255,6 +1284,10 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
     @IBAction func selectAllHierarchically(_ sender: Any?) {
         rootNode.doCommand(.selectAllHierarchically)
+    }
+
+    func dumpWidgetTree() {
+        rootNode.dumpWidgetTree()
     }
 
 }
