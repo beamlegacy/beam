@@ -21,13 +21,16 @@ struct JournalView: View {
             VStack {
                 ForEach(journals) { note in
                     NoteView(note: note,
+                         onStartEditing: {
+                            isEditing = true
+                         },
                          leadingAlignement: 185,
                          showTitle: true,
                          scrollable: false
                     )
                 }
             }
-            .padding(.top, offset)
+            .padding(.top, isEditing ? 0 : offset)
         }
         .clipped()
     }
