@@ -272,7 +272,7 @@ class BreadCrumb: Widget {
 
     func updateCrumbLayersVisibility(by index: Int = 0) {
         for i in 0..<crumbLayers.count {
-            crumbLayers[i].isHidden = selectedCrumb == 0 ? (i == selectedCrumb ? false : true) : (i < selectedCrumb ? false : true)
+            crumbLayers[i].isHidden = selectedCrumb == 0 ?  i != selectedCrumb : i >= selectedCrumb
             crumbArrowLayers[i].isHidden = crumbLayers[i].isHidden
             crumbArrowLayers[i].setAffineTransform(CGAffineTransform(rotationAngle: 0))
         }
