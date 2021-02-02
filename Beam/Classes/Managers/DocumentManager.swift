@@ -274,6 +274,10 @@ class DocumentManager {
         return result
     }
 
+    func allDocumentsTitles() -> [String] {
+        Document.fetchAllNames(context: mainContext)
+    }
+
     func loadDocumentByTitle(title: String) -> DocumentStruct? {
         guard let document = Document.fetchWithTitle(mainContext, title) else { return nil }
 

@@ -232,36 +232,7 @@ class Index: Codable {
     }
 
     class func extractWords(from string: String, useLemmas: Bool, removeDiacritics: Bool) -> [String] {
-        // Store the tokenized substrings into an array.
-        var wordTokens = [String]()
-
-        // Use Natural Language's NLTagger to tokenize the input by word.
-        let tagger = NLTagger(tagSchemes: [.tokenType, .lemma])
-        tagger.string = string
-
-        let options: NLTagger.Options = [.omitPunctuation, .omitWhitespace, .omitOther, .joinContractions]
-
-        // Find all tokens in the string and append to the array.
-        tagger.enumerateTags(in: string.startIndex..<string.endIndex,
-                             unit: .word,
-                             scheme: useLemmas ? .lemma : .tokenType,
-                             options: options) { (tag, range) -> Bool in
-            if useLemmas {
-                if let lemma = tag?.rawValue {
-                    wordTokens.append(removeDiacritics ? lemma.folding(options: .diacriticInsensitive, locale: .current) : lemma)
-                } else {
-                    let word = String(string[range].lowercased())
-                    wordTokens.append(removeDiacritics ? word.folding(options: .diacriticInsensitive, locale: .current) : word)
-                    //print("no lemma found for word '\(word)'")
-                }
-            } else {
-                let word = String(string[range].lowercased())
-                wordTokens.append(removeDiacritics ? word.folding(options: .diacriticInsensitive, locale: .current) : word)
-            }
-            return true
-        }
-
-        return wordTokens
+        return string.extractWords(useLemmas: useLemmas, removeDiacritics: removeDiacritics)
     }
 
     static func loadOrCreate(_ path: URL) -> Index {

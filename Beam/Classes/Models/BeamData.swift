@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Combine
 
 public class BeamData: ObservableObject {
     var _todaysNote: BeamNote?
@@ -22,11 +23,12 @@ public class BeamData: ObservableObject {
     var index: Index
     var scores = Scores()
     @Published var noteCount = 0
-
+    @Published var lastChangedElement: BeamElement?
     @Published var showTabStats = false
 
     var cookies: HTTPCookieStorage
     var documentManager: DocumentManager
+    var scope = Set<AnyCancellable>()
 
     static var dataFolder: String {
         let paths = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true)
@@ -53,6 +55,14 @@ public class BeamData: ObservableObject {
         cookies = HTTPCookieStorage()
 
         updateNoteCount()
+
+        self.$lastChangedElement.sink { element in
+            guard let element = element else { return }
+            guard let note = element.note else { return }
+
+            //BeamNote.detectLinks(self.documentManager)
+            element.connectUnlinkedElement(note.title, Array(BeamNote.fetchedNotes.keys))
+        }.store(in: &scope)
     }
 
     func saveData() {

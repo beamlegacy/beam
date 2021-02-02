@@ -109,6 +109,29 @@ class Document: NSManagedObject {
         return []
     }
 
+    class func fetchAllNames(context: NSManagedObjectContext, _ predicate: NSPredicate? = nil, _ sortDescriptors: [NSSortDescriptor]? = nil) -> [String] {
+        return fetchAllNamesWithLimit(context: context, predicate, sortDescriptors)
+    }
+
+    class func fetchAllNamesWithLimit(context: NSManagedObjectContext, _ predicate: NSPredicate? = nil, _ sortDescriptors: [NSSortDescriptor]? = nil, _ limit: Int = 0) -> [String] {
+        let fetchRequest: NSFetchRequest<Document> = Document.fetchRequest()
+        fetchRequest.predicate = onlyNonDeletedPredicate(predicate)
+        fetchRequest.fetchLimit = limit
+        fetchRequest.sortDescriptors = sortDescriptors
+        fetchRequest.propertiesToFetch = ["title"]
+
+        do {
+            let fetchedDocuments = try context.fetch(fetchRequest)
+            return fetchedDocuments.compactMap { $0.title }
+        } catch {
+            // TODO: raise error?
+            Logger.shared.logError("Can't fetch all: \(error)", category: .coredata)
+        }
+
+        return []
+    }
+
+
     class func fetchWithId(_ context: NSManagedObjectContext, _ id: UUID) -> Document? {
         return fetchFirst(context: context, NSPredicate(format: "id = %@", id as CVarArg))
     }
