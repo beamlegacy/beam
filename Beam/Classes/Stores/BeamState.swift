@@ -293,7 +293,6 @@ let NoteDisplayThreshold = Float(0.0)
 
     func startQuery(_ node: TextNode) {
         let query = node.currentSelectionWithFullSentences()
-        print("query: \(query)")
         guard !query.isEmpty else { return }
 
         createTabFromNode(node, withURL: urlFor(query: query))
