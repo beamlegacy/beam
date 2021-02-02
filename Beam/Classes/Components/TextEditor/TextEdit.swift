@@ -509,6 +509,10 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     } else if option && command {
                         rootNode.doCommand(.moveToEndOfLine)
                     } else if popover != nil {
+                        // Avoid to return to the next node
+                        guard let node = node as? TextNode,
+                              node.text.text.count > rootNode.cursorPosition else { return }
+
                         rootNode.doCommand(.moveRight)
                         updatePopover(with: .moveRight)
                     } else if inlineFormatter != nil {
