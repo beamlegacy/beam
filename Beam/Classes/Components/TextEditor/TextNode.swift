@@ -176,11 +176,11 @@ public class TextNode: Widget {
 
     var actionLayer: CALayer?
 
-    private var doubleClickTimer: Timer?
+    private var deboucingClickTimer: Timer?
     private var actionLayerIsHovered = false
     private var icon = NSImage(named: "editor-cmdreturn")
 
-    private let doucleClickInterval = 0.23
+    private let deboucingClickInterval = 0.23
     private let actionImageLayer = CALayer()
     private let actionTextLayer = CATextLayer()
     private let actionLayerFrame = CGRect(x: 30, y: 0, width: 80, height: 20)
@@ -561,7 +561,7 @@ public class TextNode: Widget {
     }
 
     // MARK: - Mouse Events
-    // swiftlint:disable:next function_body_length
+    // swiftlint:disable:next function_body_length cyclomatic_complexity
     override func mouseDown(mouseInfo: MouseInfo) -> Bool {
         assert(inVisibleBranch)
 
@@ -598,7 +598,7 @@ public class TextNode: Widget {
                 root?.cursorPosition = clickPos
                 root?.cancelSelection()
 
-                doubleClickTimer = Timer.scheduledTimer(withTimeInterval: doucleClickInterval, repeats: false, block: { [weak self] (_) in
+                deboucingClickTimer = Timer.scheduledTimer(withTimeInterval: deboucingClickInterval, repeats: false, block: { [weak self] (_) in
                     guard let self = self else { return }
                     self.editor.dismissPopoverOrFormatter()
                 })
@@ -615,12 +615,12 @@ public class TextNode: Widget {
                 editor.initAndShowPersistentFormatter()
                 return true
             } else if mouseInfo.event.clickCount == 2 {
-                doubleClickTimer?.invalidate()
+                deboucingClickTimer?.invalidate()
                 root?.wordSelection(from: clickPos)
                 editor.initAndUpdateInlineFormatter()
                 return true
             } else {
-                doubleClickTimer?.invalidate()
+                deboucingClickTimer?.invalidate()
                 root?.doCommand(.selectAll)
                 return true
             }
