@@ -119,7 +119,11 @@ public class TextNode: Widget {
     var alpha: Float { config.alpha }
     var blendMode: CGBlendMode { config.blendMode }
 
-    var selectedTextRange: Range<Int> { root?.selectedTextRange ?? 0..<0 }
+    var selectedTextRange: Range<Int> {
+        get { root?.selectedTextRange ?? 0..<0 }
+        set { root?.selectedTextRange = newValue }
+    }
+
     var markedTextRange: Range<Int> { root?.markedTextRange ?? 0..<0 }
     var cursorsStartPosition: Int { root?.cursorPosition ?? 0 }
     var cursorPosition: Int { root?.cursorPosition ?? 0 }
@@ -524,6 +528,13 @@ public class TextNode: Widget {
     }
 
     func currentSelectionWithFullSentences() -> String {
+        // Set selected text range at the beginning or the end
+        if cursorPosition == text.text.count {
+            selectedTextRange = selectedTextRange.lowerBound - 1..<selectedTextRange.upperBound - 1
+        } else {
+            selectedTextRange = selectedTextRange.lowerBound + 1..<selectedTextRange.upperBound + 1
+        }
+
         let selectionStringRange = text.text.range(from: selectedTextRange)
         return text.text.sentences(around: selectionStringRange)
     }
