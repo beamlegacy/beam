@@ -842,11 +842,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                 self.showBidirectionalPopover(prefix: 1, suffix: 0)
                 return true
              },
-             "#": { [unowned self] in
-                guard popover == nil else { return false }
-                self.showBidirectionalPopover(prefix: 1, suffix: 0)
-                return true
-             },
             "[": { [unowned self] in
                 guard popover == nil else { return false }
 
