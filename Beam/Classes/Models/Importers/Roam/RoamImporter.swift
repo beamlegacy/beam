@@ -70,7 +70,7 @@ class RoamImporter {
             newNote.save(documentManager: documentManager)
         }
 
-        BeamNote.detectLinks(documentManager)
+        BeamNote.requestLinkDetection()
 
         return roamNotes
     }

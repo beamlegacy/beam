@@ -98,7 +98,10 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     internal var currentTextRange: Range<Int> = 0..<0
 
     public init(root: BeamElement, font: Font = Font.main) {
-        BeamNote.detectLinks(documentManager)
+        let start = CFAbsoluteTimeGetCurrent()
+        BeamNote.requestLinkDetection()
+        let diff = CFAbsoluteTimeGetCurrent() - start
+        print("Links detection took \(diff) seconds")
 
         self.config.font = font
         note = root
@@ -1169,7 +1172,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     @IBAction func saveDocument(_ sender: Any?) {
         Logger.shared.logInfo("Save document!", category: .noteEditor)
         rootNode.note?.save(documentManager: documentManager)
-        BeamNote.detectLinks(documentManager)
+        BeamNote.requestLinkDetection()
     }
 
     func nodeFor(_ element: BeamElement) -> TextNode {
