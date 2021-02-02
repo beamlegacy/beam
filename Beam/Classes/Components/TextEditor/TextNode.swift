@@ -119,10 +119,7 @@ public class TextNode: Widget {
     var alpha: Float { config.alpha }
     var blendMode: CGBlendMode { config.blendMode }
 
-    var selectedTextRange: Range<Int> {
-        root?.selectedTextRange ?? 0..<0
-    }
-
+    var selectedTextRange: Range<Int> { root?.selectedTextRange ?? 0..<0 }
     var markedTextRange: Range<Int> { root?.markedTextRange ?? 0..<0 }
     var cursorsStartPosition: Int { root?.cursorPosition ?? 0 }
     var cursorPosition: Int { root?.cursorPosition ?? 0 }
