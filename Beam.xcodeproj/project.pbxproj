@@ -209,6 +209,7 @@
 		9691E41425AF61BA00A13080 /* BrowsingTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9691E41325AF61BA00A13080 /* BrowsingTree.swift */; };
 		9691E44425B1091300A13080 /* BrowsingSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9691E44325B1091300A13080 /* BrowsingSection.swift */; };
 		96956D31258BF3F50069C9C1 /* LinkStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96956D30258BF3F50069C9C1 /* LinkStore.swift */; };
+		96988C8325BB0AF2000223A3 /* DestinationCardPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96988C8225BB0AF2000223A3 /* DestinationCardPicker.swift */; };
 		96A8B1DD25A38A3B006F749C /* String+Levenshtein.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96A8B1DC25A38A3B006F749C /* String+Levenshtein.swift */; };
 		96C9AA3F259019E3007D3D98 /* LinkedReferenceNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C9AA3E259019E3007D3D98 /* LinkedReferenceNode.swift */; };
 		96C9AA5725901AA9007D3D98 /* LinksSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C9AA5625901AA9007D3D98 /* LinksSection.swift */; };
@@ -629,6 +630,7 @@
 		9691E41325AF61BA00A13080 /* BrowsingTree.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowsingTree.swift; sourceTree = "<group>"; };
 		9691E44325B1091300A13080 /* BrowsingSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowsingSection.swift; sourceTree = "<group>"; };
 		96956D30258BF3F50069C9C1 /* LinkStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkStore.swift; sourceTree = "<group>"; };
+		96988C8225BB0AF2000223A3 /* DestinationCardPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DestinationCardPicker.swift; sourceTree = "<group>"; };
 		96A8B1DC25A38A3B006F749C /* String+Levenshtein.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Levenshtein.swift"; sourceTree = "<group>"; };
 		96C9AA3E259019E3007D3D98 /* LinkedReferenceNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkedReferenceNode.swift; sourceTree = "<group>"; };
 		96C9AA5625901AA9007D3D98 /* LinksSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinksSection.swift; sourceTree = "<group>"; };
@@ -727,6 +729,7 @@
 				4159EA09259A3568005FD355 /* BidirectionalPopoverResultItem.xib */,
 				414B9878259DE2E2002E81A3 /* BidirectionalPopoverActionItem.swift */,
 				414B9879259DE2E2002E81A3 /* BidirectionalPopoverActionItem.xib */,
+				96988C8225BB0AF2000223A3 /* DestinationCardPicker.swift */,
 			);
 			path = BidirectionalPopover;
 			sourceTree = "<group>";
@@ -844,6 +847,7 @@
 				418171712581107C00317ED8 /* Importers */,
 				418171762581107C00317ED8 /* CoreData */,
 				4181716C2581107C00317ED8 /* BeamData.swift */,
+				4181734D2581204900317ED8 /* BeamState.swift */,
 				4181716D2581107C00317ED8 /* Score.swift */,
 				4181716E2581107C00317ED8 /* SearchEngine.swift */,
 				418171742581107C00317ED8 /* NavigationContext.swift */,
@@ -1156,7 +1160,6 @@
 		4181734C2581204900317ED8 /* Stores */ = {
 			isa = PBXGroup;
 			children = (
-				4181734D2581204900317ED8 /* BeamState.swift */,
 				4181717C2581107C00317ED8 /* TemporaryFile.swift */,
 			);
 			path = Stores;
@@ -1934,6 +1937,7 @@
 				4181723F2581107C00317ED8 /* Font.swift in Sources */,
 				4181722C2581107C00317ED8 /* AutoCompleteList.swift in Sources */,
 				4181727B258110D100317ED8 /* AppDelegate+CoreData.swift in Sources */,
+				96988C8325BB0AF2000223A3 /* DestinationCardPicker.swift in Sources */,
 				96E4CF72258E59F400D6DE22 /* BeamTextVisitor.swift in Sources */,
 				418172272581107C00317ED8 /* NSMutableAttributedString+Range.swift in Sources */,
 				4131F16825BEC48C006473CD /* SpacerWidget.swift in Sources */,

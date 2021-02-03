@@ -82,7 +82,9 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             .debounce(for: .seconds(1), scheduler: RunLoop.main)
             .sink { [unowned self] _ in
                 guard let note = note as? BeamNote else { return }
-                note.detectLinkedNotes(documentManager)
+                if !showTitle {
+                    note.detectLinkedNotes(documentManager)
+                }
                 note.save(documentManager: self.documentManager)
             }.store(in: &noteCancellables)
     }
@@ -1188,7 +1190,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                 }
                 return TextNode(editor: self, element: element)
             }
-            return TextRoot(editor: self, element: note)
+            return TextRoot(editor: self, element: note, journalMode: showTitle)
         }()
 
         accessingMapping = true

@@ -47,10 +47,11 @@ class BrowsingNodeWidget: Widget {
             self.updateChildrenNodes()
         }.store(in: &scope)
 
-        let link = LinkStore.linkFor(browsingNode.link)?.url ?? "<???>"
-        let linkScore = AppDelegate.main.data.scores.scoreCard(for: link)
+        let link = LinkStore.linkFor(browsingNode.link)
+        let linkText = link?.title ?? link?.url ?? "<???>"
+        let linkScore = AppDelegate.main.data.scores.scoreCard(for: link?.url ?? "")
         let score = linkScore.score
-        textLayer.string = "\(score) - \(link)"
+        textLayer.string = "\(score) - \(linkText)"
 
         editor.layer?.addSublayer(layer)
         layer.addSublayer(textLayer)

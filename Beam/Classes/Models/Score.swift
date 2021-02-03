@@ -20,7 +20,7 @@ class Scores: Codable {
     }
 
     func scoreCard(for link: String) -> Score {
-        return scoreCard(for: LinkStore.createIdFor(link))
+        return scoreCard(for: LinkStore.createIdFor(link, title: nil))
     }
 }
 
