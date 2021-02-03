@@ -33,8 +33,12 @@ public struct MouseInfo {
         self.globalPosition = info.globalPosition
         self.event = info.event
 
+        self.position = Self.convert(globalPosition: info.globalPosition, node, layer)
+    }
+
+    static func convert(globalPosition: NSPoint, _ node: Widget, _ layer: Layer) -> NSPoint {
         let globalBounds = layer.layer.convert(layer.layer.bounds, to: node.editor.layer)
-        self.position = CGPoint(x: globalPosition.x - globalBounds.minX, y: globalPosition.y - globalBounds.minY)
+        return CGPoint(x: globalPosition.x - globalBounds.minX, y: globalPosition.y - globalBounds.minY)
     }
 }
 
@@ -445,6 +449,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         let command = event.modifierFlags.contains(.command)
 
         if self.hasFocus {
+            NSCursor.setHiddenUntilMouseMoves(true)
             if let k = event.specialKey {
                 switch k {
                 case .enter:
@@ -509,6 +514,10 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     } else if option && command {
                         rootNode.doCommand(.moveToEndOfLine)
                     } else if popover != nil {
+                        // Avoid to return to the next node
+                        guard let node = node as? TextNode,
+                              node.text.text.count > rootNode.cursorPosition else { return }
+
                         rootNode.doCommand(.moveRight)
                         updatePopover(with: .moveRight)
                     } else if inlineFormatter != nil {
@@ -692,11 +701,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
     //swiftlint:enable cyclomatic_complexity function_body_length
 
-    func nodeAt(point: CGPoint) -> Widget? {
-        let p = NSPoint(x: point.x - rootNode.frame.origin.x, y: point.y - rootNode.frame.origin.y)
-        return rootNode.nodeAt(point: p)
-    }
-
     // NSTextInputHandler:
     // NSTextInputClient:
     public func insertText(_ string: Any, replacementRange: NSRange) {
@@ -841,11 +845,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
         let handlers: [String: () -> Bool] = [
             "@": { [unowned self] in
-                guard popover == nil else { return false }
-                self.showBidirectionalPopover(prefix: 1, suffix: 0)
-                return true
-             },
-             "#": { [unowned self] in
                 guard popover == nil else { return false }
                 self.showBidirectionalPopover(prefix: 1, suffix: 0)
                 return true
@@ -1013,7 +1012,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             removeTrackingArea(trackingArea)
         }
 
-        addTrackingArea(NSTrackingArea(rect: bounds, options: [.mouseMoved, .activeInActiveApp], owner: self, userInfo: nil))
+        addTrackingArea(NSTrackingArea(rect: bounds, options: [.mouseMoved, .activeInActiveApp, .mouseEnteredAndExited, .cursorUpdate, .enabledDuringMouseDrag, .inVisibleRect], owner: self, userInfo: nil))
     }
 
     override public func mouseDown(with event: NSEvent) {
@@ -1031,6 +1030,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
         node = newNode
         node.editor.setHotSpotToCursorPosition()
+        cursorUpdate(with: event)
     }
 
     var scrollToCursorAtLayout = false
@@ -1057,20 +1057,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         //        window?.makeFirstResponder(self)
         let point = convert(event.locationInWindow)
         _ = rootNode.dispatchMouseDragged(mouseInfo: MouseInfo(rootNode, point, event))
-    }
-
-    weak var hoveredNode: TextNode? {
-        didSet {
-            if let old = oldValue {
-                if old !== hoveredNode {
-                    old.hover = false
-                }
-            }
-
-            if let new = hoveredNode {
-                new.hover = true
-            }
-        }
+        cursorUpdate(with: event)
     }
 
     func convert(_ point: NSPoint) -> NSPoint {
@@ -1083,12 +1070,24 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             return
         }
         let point = convert(event.locationInWindow)
-        let newNode = nodeAt(point: point) as? TextNode
-        if newNode !== hoveredNode {
-            hoveredNode = newNode
-        }
+        let mouseInfo = MouseInfo(rootNode, point, event)
+        rootNode.dispatchMouseMoved(mouseInfo: mouseInfo)
 
-        rootNode.dispatchMouseMoved(mouseInfo: MouseInfo(rootNode, point, event))
+        cursorUpdate(with: event)
+    }
+
+    public override func cursorUpdate(with event: NSEvent) {
+        let point = convert(event.locationInWindow)
+        let views = rootNode.getWidgetsAt(point, point)
+        let cursors = views.compactMap { $0.cursor }
+        let cursor = cursors.last ?? .arrow
+        cursor.set()
+
+        dispatchHover(Set<Widget>(views.compactMap { $0 as? Widget } ))
+    }
+
+    func dispatchHover(_ widgets: Set<Widget>) {
+        rootNode.dispatchHover(widgets)
     }
 
     override public func mouseUp(with event: NSEvent) {
@@ -1097,6 +1096,8 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         if nil != rootNode.dispatchMouseUp(mouseInfo: info) {
             return
         }
+
+        cursorUpdate(with: event)
         super.mouseUp(with: event)
     }
 

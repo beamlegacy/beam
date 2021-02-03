@@ -41,6 +41,7 @@ public class TextNode: Widget {
     var frameAnimation: FrameAnimation?
     var frameAnimationCancellable = Set<AnyCancellable>()
 
+    var mouseIsDragged = false
     var interlineFactor = CGFloat(1.3)
     var interNodeSpacing = CGFloat(4)
     var indent: CGFloat {
@@ -174,9 +175,12 @@ public class TextNode: Widget {
     }
 
     var actionLayer: CALayer?
+
+    private var deboucingClickTimer: Timer?
     private var actionLayerIsHovered = false
     private var icon = NSImage(named: "editor-cmdreturn")
 
+    private let deboucingClickInterval = 0.23
     private let actionImageLayer = CALayer()
     private let actionTextLayer = CATextLayer()
     private let actionLayerFrame = CGRect(x: 30, y: 0, width: 80, height: 20)
@@ -524,7 +528,11 @@ public class TextNode: Widget {
     }
 
     func currentSelectionWithFullSentences() -> String {
-        let selectionStringRange = text.text.range(from: selectedTextRange)
+        let correctRange = cursorPosition == text.text.count ?
+            selectedTextRange.lowerBound - 1..<selectedTextRange.upperBound - 1 :
+            selectedTextRange.lowerBound + 1..<selectedTextRange.upperBound + 1
+
+        let selectionStringRange = text.text.range(from: correctRange)
         return text.text.sentences(around: selectionStringRange)
     }
 
@@ -557,7 +565,7 @@ public class TextNode: Widget {
     }
 
     // MARK: - Mouse Events
-    // swiftlint:disable:next function_body_length
+    // swiftlint:disable:next function_body_length cyclomatic_complexity
     override func mouseDown(mouseInfo: MouseInfo) -> Bool {
         assert(inVisibleBranch)
 
@@ -575,25 +583,29 @@ public class TextNode: Widget {
             return true
         }
 
-        if let link = linkAt(point: mouseInfo.position) {
-            editor.cancelInternalLink()
-            editor.openURL(link)
-            return true
-        }
-
-        if let link = internalLinkAt(point: mouseInfo.position) {
-            editor.cancelInternalLink()
-            editor.openCard(link)
-            return true
-        }
-
         if contentsFrame.contains(mouseInfo.position) {
             let clickPos = positionAt(point: mouseInfo.position)
 
+            if let link = linkAt(point: mouseInfo.position) {
+                editor.cancelInternalLink()
+                editor.openURL(link)
+                return true
+            }
+
+            if let link = internalLinkAt(point: mouseInfo.position) {
+                editor.cancelInternalLink()
+                editor.openCard(link)
+                return true
+            }
+
             if mouseInfo.event.clickCount == 1 && editor.inlineFormatter != nil {
-                editor.dismissPopoverOrFormatter()
                 root?.cursorPosition = clickPos
                 root?.cancelSelection()
+
+                deboucingClickTimer = Timer.scheduledTimer(withTimeInterval: deboucingClickInterval, repeats: false, block: { [weak self] (_) in
+                    guard let self = self else { return }
+                    self.editor.dismissPopoverOrFormatter()
+                })
                 return true
             } else if mouseInfo.event.clickCount == 1 && mouseInfo.event.modifierFlags.contains(.shift) {
                 dragMode = .select(cursorPosition)
@@ -607,10 +619,12 @@ public class TextNode: Widget {
                 editor.initAndShowPersistentFormatter()
                 return true
             } else if mouseInfo.event.clickCount == 2 {
+                deboucingClickTimer?.invalidate()
                 root?.wordSelection(from: clickPos)
                 editor.initAndUpdateInlineFormatter()
                 return true
             } else {
+                deboucingClickTimer?.invalidate()
                 root?.doCommand(.selectAll)
                 return true
             }
@@ -621,6 +635,12 @@ public class TextNode: Widget {
 
     override func mouseUp(mouseInfo: MouseInfo) -> Bool {
         editor.detectFormatterType()
+
+        if mouseIsDragged {
+            editor.detectFormatterType()
+            editor.initAndUpdateInlineFormatter(isDragged: true)
+            mouseIsDragged = false
+        }
 
         if disclosurePressed && disclosureButtonFrame.contains(mouseInfo.position) {
             disclosurePressed = false
@@ -635,6 +655,21 @@ public class TextNode: Widget {
     }
 
     override func mouseMoved(mouseInfo: MouseInfo) -> Bool {
+        cursor = nil
+
+        if contentsFrame.contains(mouseInfo.position) {
+            let link = linkAt(point: mouseInfo.position)
+            let internalLink = internalLinkAt(point: mouseInfo.position)
+
+            if link != nil {
+                cursor = .pointingHand
+            } else if internalLink != nil {
+                cursor = .pointingHand
+            } else {
+                cursor = .iBeam
+            }
+        }
+
         guard let actionLayer = actionLayer else { return false }
 
         let position = actionLayerMousePosition(from: mouseInfo)
@@ -643,6 +678,7 @@ public class TextNode: Widget {
         // Show image & text layers
         if hasTextAndEditable && contentsFrame.contains(position) && actionLayer.frame.contains(position) {
             showHoveredActionLayers(true)
+            cursor = .arrow
             return true
         } else if hasTextAndEditable && contentsFrame.contains(position) {
             showHoveredActionLayers(false)
@@ -667,8 +703,7 @@ public class TextNode: Widget {
             return false
         case .select(let o):
             root?.selectedTextRange = text.clamp(p < o ? cursorPosition..<o : o..<cursorPosition)
-            editor.detectFormatterType()
-            editor.initAndUpdateInlineFormatter(isDragged: true)
+            mouseIsDragged = true
         }
         invalidate()
 
@@ -752,7 +787,7 @@ public class TextNode: Widget {
     public func internalLinkAt(point: NSPoint) -> String? {
         guard let layout = layout else { return nil }
         let line = lineAt(point: point)
-        guard line >= 0 else { return nil }
+        guard line >= 0 && layout.lines.count > 0 else { return nil }
         let l = layout.lines[line]
         guard l.frame.minX <= point.x && l.frame.maxX >= point.x else { return nil } // don't find links outside the line
         let displayIndex = l.stringIndexFor(position: point)

@@ -10,7 +10,15 @@ import SwiftUI
 
 struct GlobalNoteTitle: View {
     @EnvironmentObject var state: BeamState
-    @State var isHover = false
+    @State var isHover: Bool = false {
+        didSet {
+            if isHover {
+                NSCursor.iBeam.set()
+            } else {
+                NSCursor.arrow.set()
+            }
+        }
+    }
     @State var isEditing = false
     @State var focusOmniBox = false
     @State var title = ""
