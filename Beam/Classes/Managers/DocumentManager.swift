@@ -137,7 +137,7 @@ class DocumentManager {
 
             // If not authenticated, we don't need to send to BeamAPI
             guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
-                self.saveContext(context: context, completion: completion)
+                Self.saveContext(context: context, completion: completion)
                 return
             }
 
@@ -185,14 +185,14 @@ class DocumentManager {
                 }
 
                 context.performAndWait {
-                    self.saveContext(context: context)
+                    Self.saveContext(context: context)
                     completion?(.failure(error))
                 }
             case .success:
                 // We save the remote stored version of the document, to know if we have local changes
                 context.performAndWait {
                     document.beam_api_data = documentStruct.data
-                    self.saveContext(context: context, completion: completion)
+                    Self.saveContext(context: context, completion: completion)
                 }
             }
         }
@@ -210,7 +210,7 @@ class DocumentManager {
             do {
                 try self.checkValidations(context, document)
 
-                saveContext(context: context)
+                Self.saveContext(context: context)
                 completion?(self.parseDocumentBody(document))
             } catch {
                 completion?(nil)
@@ -229,7 +229,7 @@ class DocumentManager {
                 try self.checkValidations(context, document)
 
                 result = self.parseDocumentBody( document)
-                saveContext(context: context)
+                Self.saveContext(context: context)
                 semaphore.signal()
             } catch {
             }
@@ -246,7 +246,7 @@ class DocumentManager {
             do {
                 try self.checkValidations(context, document)
 
-                saveContext(context: context)
+                Self.saveContext(context: context)
                 completion?(self.parseDocumentBody(document))
             } catch {
                 completion?(nil)
@@ -264,7 +264,7 @@ class DocumentManager {
                 try self.checkValidations(context, document)
 
                 result = self.parseDocumentBody( document)
-                saveContext(context: context)
+                Self.saveContext(context: context)
                 semaphore.signal()
             } catch {
             }
@@ -389,10 +389,10 @@ class DocumentManager {
                     self.deleteNonExistingIds(context, remoteDocumentsIds)
 
                     if errors {
-                        self.saveContext(context: context)
+                        Self.saveContext(context: context)
                         completion?(.success(false))
                     } else {
-                        self.saveContext(context: context, completion: completion)
+                        Self.saveContext(context: context, completion: completion)
                     }
                 }
             }
@@ -457,7 +457,7 @@ class DocumentManager {
                                 return
                             }
 
-                            self.saveContext(context: context, completion: completion)
+                            Self.saveContext(context: context, completion: completion)
                         }
                     }
                 }
@@ -473,7 +473,7 @@ class DocumentManager {
 
             document.deleted_at = Date()
 
-            self.saveContext(context: context)
+            Self.saveContext(context: context)
         }
     }
 
@@ -542,7 +542,7 @@ class DocumentManager {
         }
     }
 
-    private func saveContext(context: NSManagedObjectContext, completion: ((Result<Bool, Error>) -> Void)? = nil) {
+    static func saveContext(context: NSManagedObjectContext, completion: ((Result<Bool, Error>) -> Void)? = nil) {
         guard context.hasChanges else { completion?(.success(true)); return }
 
         do {
@@ -568,7 +568,7 @@ class DocumentManager {
     }
 
     // swiftlint:disable:next cyclomatic_complexity
-    private func logConstraintConflict(_ error: NSError) {
+    static private func logConstraintConflict(_ error: NSError) {
         guard error.domain == NSCocoaErrorDomain, let conflicts = error.userInfo["conflictList"] as? [NSConstraintConflict] else { return }
 
         for conflict in conflicts {
@@ -588,7 +588,7 @@ class DocumentManager {
     }
 
     // swiftlint:disable:next cyclomatic_complexity
-    private func logMergeConflict(_ error: NSError) {
+    static private func logMergeConflict(_ error: NSError) {
         guard error.domain == NSCocoaErrorDomain, let conflicts = error.userInfo["conflictList"] as? [NSMergeConflict] else { return }
 
         for conflict in conflicts {

@@ -74,4 +74,38 @@ class DocumentTests: CoreDataTests {
             expect(error.code).to(equal(133021))
         })
     }
+
+    let documentManager = DocumentManager()
+    func testConflict() throws {
+        let title = faker.zelda.game()
+
+        let document1 = Document.create(context, title: title)
+        expect { try CoreDataManager.save(self.context) }.toNot(throwError())
+        var document2: Document!
+        backgroundContext.performAndWait {
+            // swiftlint:disable:next force_cast
+            document2 = (backgroundContext.object(with: document1.objectID) as! Document)
+        }
+
+        document1.title = "another title"
+        document2.title = "3rd title"
+
+        expect { try CoreDataManager.save(self.backgroundContext) }.toNot(throwError())
+        DocumentManager.saveContext(context: self.backgroundContext) { result in
+            expect { try result.get() }.toNot(throwError())
+        }
+
+        expect { try CoreDataManager.save(self.context) }.to(throwError { (error: NSError) in
+            expect(error.code).to(equal(133020))
+        })
+        DocumentManager.saveContext(context: context) { result in
+            expect { try result.get() }.to(throwError { (error: NSError) in
+                expect(error.code).to(equal(133020))
+            })
+        }
+
+        expect(document1.title).to(equal("another title"))
+        context.refresh(document1, mergeChanges: false)
+        expect(document1.title).to(equal("3rd title"))
+    }
 }
