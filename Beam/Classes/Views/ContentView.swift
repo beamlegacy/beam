@@ -68,6 +68,7 @@ struct ModeView: View {
                                 .frame(minHeight: 20, maxHeight: 250, alignment: .top)
                                 .zIndex(2)
                         }
+                        .accessibility(identifier: "AutoCompleteView")
                     }
                 }
             }

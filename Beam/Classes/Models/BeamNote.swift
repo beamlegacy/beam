@@ -123,9 +123,7 @@ class BeamNote: BeamElement {
     private var activeDocumentCancellable: AnyCancellable?
     private func observeDocumentChange(documentManager: DocumentManager) {
         return
-        guard let docStruct = documentStruct else {
-            return
-        }
+        guard let docStruct = documentStruct else { return }
         activeDocumentCancellable = documentManager.onDocumentChange(docStruct, completionHandler: { [unowned self] docStruct in
             // reload self
             changePropagationEnabled = false
@@ -206,7 +204,6 @@ class BeamNote: BeamElement {
     func removeAllUnlinkedReferences() {
         unlinkedReferences = []
     }
-
 
     private static func instanciateNote(_ documentManager: DocumentManager, _ documentStruct: DocumentStruct, keepInMemory: Bool = true) throws -> BeamNote {
         let decoder = JSONDecoder()

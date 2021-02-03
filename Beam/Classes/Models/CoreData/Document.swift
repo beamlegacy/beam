@@ -131,7 +131,6 @@ class Document: NSManagedObject {
         return []
     }
 
-
     class func fetchWithId(_ context: NSManagedObjectContext, _ id: UUID) -> Document? {
         return fetchFirst(context: context, NSPredicate(format: "id = %@", id as CVarArg))
     }

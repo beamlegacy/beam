@@ -380,6 +380,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         return super.resignFirstResponder()
     }
 
+    //swiftlint:disable cyclomatic_complexity function_body_length
     func pressEnter(_ option: Bool, _ command: Bool) {
         guard let node = node as? TextNode else { return }
         guard !node.readOnly else { return }
@@ -1083,7 +1084,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         let cursor = cursors.last ?? .arrow
         cursor.set()
 
-        dispatchHover(Set<Widget>(views.compactMap { $0 as? Widget } ))
+        dispatchHover(Set<Widget>(views.compactMap { $0 as? Widget }))
     }
 
     func dispatchHover(_ widgets: Set<Widget>) {

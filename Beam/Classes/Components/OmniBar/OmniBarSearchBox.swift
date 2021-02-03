@@ -115,9 +115,10 @@ struct OmniBarSearchBox: View {
                             }
                         }
                     )
+                    .accessibility(identifier: "omniBarSearchBox")
                     .padding(.leading, 10)
                     .padding(.trailing, 5)
-
+                    
                     Image("xmark.circle.fill")
                         .resizable()
                         .frame(width: 12, height: 12)
@@ -128,6 +129,7 @@ struct OmniBarSearchBox: View {
                             resetSearchQuery()
                             NSApp.mainWindow?.makeFirstResponder(nil)
                         }
+                        .accessibility(identifier: "clearTextField")
                 }
             }
         }

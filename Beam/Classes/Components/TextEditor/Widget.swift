@@ -572,7 +572,7 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
 
         for layer in layers.values where !layer.layer.isHidden {
             let p = MouseInfo.convert(globalPosition: globalPosition, self, layer)
-            if layer.contains(p)  {
+            if layer.contains(p) {
                 handlers.append(layer)
             }
         }
