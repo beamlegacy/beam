@@ -583,20 +583,20 @@ public class TextNode: Widget {
             return true
         }
 
-        if let link = linkAt(point: mouseInfo.position) {
-            editor.cancelInternalLink()
-            editor.openURL(link)
-            return true
-        }
-
-        if let link = internalLinkAt(point: mouseInfo.position) {
-            editor.cancelInternalLink()
-            editor.openCard(link)
-            return true
-        }
-
         if contentsFrame.contains(mouseInfo.position) {
             let clickPos = positionAt(point: mouseInfo.position)
+
+            if let link = linkAt(point: mouseInfo.position) {
+                editor.cancelInternalLink()
+                editor.openURL(link)
+                return true
+            }
+
+            if let link = internalLinkAt(point: mouseInfo.position) {
+                editor.cancelInternalLink()
+                editor.openCard(link)
+                return true
+            }
 
             if mouseInfo.event.clickCount == 1 && editor.inlineFormatter != nil {
                 root?.cursorPosition = clickPos
@@ -655,6 +655,21 @@ public class TextNode: Widget {
     }
 
     override func mouseMoved(mouseInfo: MouseInfo) -> Bool {
+        cursor = nil
+
+        if contentsFrame.contains(mouseInfo.position) {
+            let link = linkAt(point: mouseInfo.position)
+            let internalLink = internalLinkAt(point: mouseInfo.position)
+
+            if link != nil {
+                cursor = .pointingHand
+            } else if internalLink != nil {
+                cursor = .pointingHand
+            } else {
+                cursor = .iBeam
+            }
+        }
+
         guard let actionLayer = actionLayer else { return false }
 
         let position = actionLayerMousePosition(from: mouseInfo)
@@ -663,6 +678,7 @@ public class TextNode: Widget {
         // Show image & text layers
         if hasTextAndEditable && contentsFrame.contains(position) && actionLayer.frame.contains(position) {
             showHoveredActionLayers(true)
+            cursor = .arrow
             return true
         } else if hasTextAndEditable && contentsFrame.contains(position) {
             showHoveredActionLayers(false)
@@ -771,7 +787,7 @@ public class TextNode: Widget {
     public func internalLinkAt(point: NSPoint) -> String? {
         guard let layout = layout else { return nil }
         let line = lineAt(point: point)
-        guard line >= 0 else { return nil }
+        guard line >= 0 && layout.lines.count > 0 else { return nil }
         let l = layout.lines[line]
         guard l.frame.minX <= point.x && l.frame.maxX >= point.x else { return nil } // don't find links outside the line
         let displayIndex = l.stringIndexFor(position: point)
