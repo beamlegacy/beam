@@ -24,7 +24,7 @@ class PageRank: Codable {
         }
 
         init(_ source: String) {
-            id = LinkStore.createIdFor(source)
+            id = LinkStore.createIdFor(source, title: nil)
         }
     }
 
@@ -37,7 +37,7 @@ class PageRank: Codable {
     var initialValue: Float { 1.0 / ((pages.count > 0) ? Float(pages.count) : 1) }
 
     func updatePage(source: String, outbounds: [String]) {
-        updatePage(source: source, outbounds: outbounds.map { link -> UInt64 in LinkStore.createIdFor(link) })
+        updatePage(source: source, outbounds: outbounds.map { link -> UInt64 in LinkStore.createIdFor(link, title: nil) })
     }
 
     func updatePage(source: String, outbounds: [UInt64]) {
@@ -61,15 +61,15 @@ class PageRank: Codable {
         let toAdd = page.outbound.subtracting(common)
 
         for linkToUpdate in toDelete {
-            pages[linkToUpdate]?.inbound.remove(LinkStore.createIdFor(source))
+            pages[linkToUpdate]?.inbound.remove(LinkStore.createIdFor(source, title: nil))
         }
 
         for linkToUpdate in toAdd {
             if let page = pages[linkToUpdate] {
-                page.inbound.insert(LinkStore.createIdFor(source))
+                page.inbound.insert(LinkStore.createIdFor(source, title: nil))
             } else {
                 let p = Page(source)
-                p.inbound.insert(LinkStore.createIdFor(source))
+                p.inbound.insert(LinkStore.createIdFor(source, title: nil))
                 pages[linkToUpdate] = p
             }
         }

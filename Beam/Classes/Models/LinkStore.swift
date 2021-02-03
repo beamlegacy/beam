@@ -10,6 +10,7 @@ import Foundation
 struct Link: Codable {
     var url: String
     var visits: [Date]
+    var title: String?
 }
 
 class LinkStore: Codable {
@@ -62,12 +63,12 @@ class LinkStore: Codable {
         return id
     }
 
-    func createIdFor(link: String) -> UInt64 {
+    func createIdFor(link: String, title: String? = nil) -> UInt64 {
         guard let id = getIdFor(link: link) else {
             let id = MonotonicIncreasingID64.newValue
             ids[link] = id
-            links[id] = Link(url: link, visits: [])
-            let linkStruct = LinkStruct(bid: Int64(bitPattern: id), url: link, title: nil)
+            links[id] = Link(url: link, visits: [], title: title)
+            let linkStruct = LinkStruct(bid: Int64(bitPattern: id), url: link, title: title)
             linkManager.saveLink(linkStruct)
             return id
         }
@@ -83,13 +84,16 @@ class LinkStore: Codable {
         return link
     }
 
-    func visit(link: String) {
-        let id = createIdFor(link: link)
+    func visit(link: String, title: String? = nil) {
+        let id = createIdFor(link: link, title: title)
         guard var linkStruct = linkFor(id: id) else {
             Logger.shared.logError("Unable to fetch Link Structure for link \(link)", category: .search)
             return
         }
         linkStruct.visits.append(Date())
+        if let title = title {
+            linkStruct.title = title
+        }
         links[id] = linkStruct
     }
 
@@ -97,8 +101,8 @@ class LinkStore: Codable {
         return shared.linkFor(id: id)
     }
 
-    static func createIdFor(_ link: String) -> UInt64 {
-        return shared.createIdFor(link: link)
+    static func createIdFor(_ link: String, title: String?) -> UInt64 {
+        return shared.createIdFor(link: link, title: title)
     }
 
     static func getIdFor(_ link: String) -> UInt64? {
