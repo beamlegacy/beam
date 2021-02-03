@@ -524,7 +524,11 @@ public class TextNode: Widget {
     }
 
     func currentSelectionWithFullSentences() -> String {
-        let selectionStringRange = text.text.range(from: selectedTextRange)
+        let correctRange = cursorPosition == text.text.count ?
+            selectedTextRange.lowerBound - 1..<selectedTextRange.upperBound - 1 :
+            selectedTextRange.lowerBound + 1..<selectedTextRange.upperBound + 1
+
+        let selectionStringRange = text.text.range(from: correctRange)
         return text.text.sentences(around: selectionStringRange)
     }
 
