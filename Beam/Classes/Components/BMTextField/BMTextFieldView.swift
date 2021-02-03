@@ -20,7 +20,6 @@ class BMTextFieldView: NSTextField {
     var isEditing = false
 
     var onPerformKeyEquivalent: (NSEvent) -> Bool = { _ in return false }
-    var onEditingChanged: (Bool) -> Void = { _ in }
     var onFocusChange: (Bool) -> Void = { _ in }
 
     public init() {
