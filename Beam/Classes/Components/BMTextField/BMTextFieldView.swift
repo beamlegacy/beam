@@ -17,14 +17,11 @@ class BMTextFieldView: NSTextField {
 
     var placeholderText: String?
     var placeholderColor: NSColor = NSColor.lightGray
+    var isEditing = false
+
     var onPerformKeyEquivalent: (NSEvent) -> Bool = { _ in return false }
     var onEditingChanged: (Bool) -> Void = { _ in }
-
-    var isEditing = false {
-        didSet {
-            onEditingChanged(isEditing)
-        }
-    }
+    var onFocusChange: (Bool) -> Void = { _ in }
 
     public init() {
         super.init(frame: NSRect())
@@ -70,6 +67,12 @@ class BMTextFieldView: NSTextField {
         return attrs
     }
 
+    @discardableResult
+    override func becomeFirstResponder() -> Bool {
+        onFocusChange(true)
+        return super.becomeFirstResponder()
+    }
+
     override func mouseDown(with event: NSEvent) {
         let convertedLocation = self.convertFromBacking(event.locationInWindow)
 
@@ -79,9 +82,6 @@ class BMTextFieldView: NSTextField {
         }
 
         super.mouseDown(with: event)
-
-        isEditing = true
-        textFieldViewDelegate?.controlTextDiStartEditing()
     }
 
     override func performKeyEquivalent(with event: NSEvent) -> Bool {

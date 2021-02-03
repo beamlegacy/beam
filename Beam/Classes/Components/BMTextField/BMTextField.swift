@@ -33,7 +33,6 @@ struct BMTextField: NSViewRepresentable {
         let textField = BMTextFieldView()
 
         textField.delegate = context.coordinator
-        textField.textFieldViewDelegate = context.coordinator
         textField.focusRingType = .none
 
         textField.setText(text, font: font)
@@ -46,10 +45,10 @@ struct BMTextField: NSViewRepresentable {
             textField.placeholderColor = placeholderColor
         }
 
-        textField.onEditingChanged = { v in
-            withAnimation(.default) {
-                self.isEditing = v
-            }
+        textField.onFocusChange = { isFocus in
+            self.isEditing = isFocus
+            self.isFirstResponder = isFocus
+            context.coordinator.didBecomeFirstResponder = isFocus
         }
 
         textField.onPerformKeyEquivalent = { event in
@@ -76,16 +75,7 @@ struct BMTextField: NSViewRepresentable {
 
             DispatchQueue.main.async {
                 nsView.isEditing = true
-                nsView.window?.makeFirstResponder(nsView)
-            }
-        }
-
-        // Disable editing mode when the textField is out of focus.
-        DispatchQueue.main.async {
-            if !context.coordinator.parent.isEditing && nsView.isEditing {
-                nsView.isEditing = false
-                context.coordinator.didBecomeFirstResponder = false
-                self.isFirstResponder = false
+                nsView.becomeFirstResponder()
             }
         }
 
@@ -98,7 +88,7 @@ struct BMTextField: NSViewRepresentable {
         }
     }
 
-    class Coordinator: NSObject, NSTextFieldDelegate, BMTextFieldViewDelegate {
+    class Coordinator: NSObject, NSTextFieldDelegate {
         let parent: BMTextField
         var didBecomeFirstResponder = false
 
@@ -108,28 +98,24 @@ struct BMTextField: NSViewRepresentable {
 
         // MARK: Protocol
 
-        func controlTextDiStartEditing() {
-            self.parent.isEditing = true
-        }
-
         func controlTextDidEndEditing(_ obj: Notification) {
-            self.parent.isEditing = false
-            self.parent.isFirstResponder = false
+            guard let textField = obj.object as? NSViewType else { return }
+            textField.onFocusChange(false)
         }
 
         func controlTextDidChange(_ obj: Notification) {
             guard let textField = obj.object as? NSViewType else { return }
 
-            self.parent.text = textField.stringValue
-            self.parent.onTextChanged(textField.stringValue)
+            parent.text = textField.stringValue
+            parent.onTextChanged(textField.stringValue)
         }
 
         func control(_ control: NSControl, textView: NSTextView, doCommandBy commandSelector: Selector) -> Bool {
             if commandSelector == #selector(NSResponder.insertNewline(_:)) {
-                self.parent.onCommit()
+                parent.onCommit()
                 return true
             } else if commandSelector == #selector(NSResponder.cancelOperation(_:)) {
-                self.parent.onEscape()
+                parent.onEscape()
                 return true
             }
 

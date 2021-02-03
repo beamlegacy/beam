@@ -334,7 +334,7 @@ class BeamNote: BeamElement {
 
     static func detectLinks(_ documentManager: DocumentManager) {
         let allNotes = documentManager.allDocumentsTitles()
-        print("Detect links for \(allNotes.count) notes")
+        // print("Detect links for \(allNotes.count) notes")
         for noteName in allNotes {
             guard let doc = documentManager.loadDocumentByTitle(title: noteName) else {
                 continue
