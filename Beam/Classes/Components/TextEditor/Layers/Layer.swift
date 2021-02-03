@@ -9,10 +9,11 @@ import Foundation
 import Combine
 import AppKit
 
-class Layer: NSObject, CALayerDelegate {
+class Layer: NSObject, CALayerDelegate, MouseHandler {
     var name: String
     var layer: CALayer
     var hovered: Bool = false
+    var cursor: NSCursor?
 
     typealias MouseBlock = (MouseInfo) -> Bool
     var mouseDown: MouseBlock
@@ -76,8 +77,8 @@ class Layer: NSObject, CALayerDelegate {
         CGRect(origin: CGPoint(), size: frame.size)
     }
 
-    func contains(_ mouseInfo: MouseInfo) -> Bool {
-        bounds.contains(NSPoint(x: mouseInfo.position.x, y: mouseInfo.position.y))
+    func contains(_ position: NSPoint) -> Bool {
+        bounds.contains(position)
     }
 
     func layoutSublayers(of layer: CALayer) {
@@ -86,7 +87,7 @@ class Layer: NSObject, CALayerDelegate {
     }
 
     func handleMouseMoved(_ mouseInfo: MouseInfo) -> Bool {
-        handleHover(contains(mouseInfo))
+        handleHover(contains(mouseInfo.position))
         return mouseMoved(mouseInfo)
     }
 }

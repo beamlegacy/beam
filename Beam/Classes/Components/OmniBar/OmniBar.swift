@@ -22,7 +22,6 @@ struct OmniBar: View {
             if state.mode == .note {
                 HStack {
                     GlobalNoteTitle(title: state.currentNote?.title ?? "", note: state.currentNote!)
-
                     Button(action: startNewSearch) {
                         Symbol(name: "plus")
                     }
@@ -30,6 +29,13 @@ struct OmniBar: View {
                 }.padding(.leading, 9)
             } else {
                 BeamSearchBox(isEditing: $state.isEditingOmniBarTitle)
+                    .onHover { (hover) in
+                        if hover {
+                            NSCursor.iBeam.set()
+                        } else {
+                            NSCursor.arrow.set()
+                        }
+                    }
             }
 
             Button(action: toggleMode) {

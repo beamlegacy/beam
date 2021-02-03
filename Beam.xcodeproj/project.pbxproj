@@ -229,6 +229,7 @@
 		96FD761B25B1C43500B04ED3 /* BrowsingNodeWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96FD761A25B1C43500B04ED3 /* BrowsingNodeWidget.swift */; };
 		A0137B3525B6DFE100E65208 /* CommandManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0137B3425B6DFE100E65208 /* CommandManager.swift */; };
 		A01950AD25B838810025C5FD /* CommandManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A06DF52525B7608000E2CB62 /* CommandManagerTests.swift */; };
+		A0AA693325C41C9B0038F9A3 /* MouseHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0AA693225C41C9B0038F9A3 /* MouseHandler.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -648,6 +649,7 @@
 		96FD761A25B1C43500B04ED3 /* BrowsingNodeWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowsingNodeWidget.swift; sourceTree = "<group>"; };
 		A0137B3425B6DFE100E65208 /* CommandManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandManager.swift; sourceTree = "<group>"; usesTabs = 0; };
 		A06DF52525B7608000E2CB62 /* CommandManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CommandManagerTests.swift; path = Classes/CommandManagerTests.swift; sourceTree = "<group>"; };
+		A0AA693225C41C9B0038F9A3 /* MouseHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MouseHandler.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1069,6 +1071,7 @@
 				418171EA2581107C00317ED8 /* LibrairiesManager.swift */,
 				A0137B3425B6DFE100E65208 /* CommandManager.swift */,
 				961EC58525B7A75A009FA322 /* LinkManager.swift */,
+				A0AA693225C41C9B0038F9A3 /* MouseHandler.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -2019,6 +2022,7 @@
 				4181722D2581107C00317ED8 /* AutoCompleteView.swift in Sources */,
 				4181725E2581107C00317ED8 /* AccountManager.swift in Sources */,
 				418171FF2581107C00317ED8 /* CoreDataManager.swift in Sources */,
+				A0AA693325C41C9B0038F9A3 /* MouseHandler.swift in Sources */,
 				418171F22581107C00317ED8 /* APIRequest.swift in Sources */,
 				96F673D225B7207100E8175B /* StoredLink.swift in Sources */,
 				418172B525811AAA00317ED8 /* Tick.swift in Sources */,
