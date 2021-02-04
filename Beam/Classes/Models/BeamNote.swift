@@ -3,6 +3,7 @@
 //
 //  Created by Sebastien Metrot on 18/09/2020.
 //
+// swiftlint:disable file_length
 
 import Foundation
 import Combine
@@ -267,11 +268,16 @@ class BeamNote: BeamElement {
             .dropFirst(1)
             .debounce(for: .seconds(2), scheduler: RunLoop.main)
 //            .throttle(for: .seconds(2), scheduler: RunLoop.main, latest: false)
+            .receive(on: DispatchQueue.main)
             .sink { [weak note] _ in
                 let documentManager = DocumentManager()
-                note?.detectLinkedNotes(documentManager)
-                note?.save(documentManager: documentManager)
+
+                guard let note = note else { return }
+                note.detectLinkedNotes(documentManager)
+                // TODO: we should only save when changes occured
+                note.save(documentManager: documentManager)
             }
+        note.observeDocumentChange(documentManager: AppDelegate.main.data.documentManager)
 
         fetchedNotes[note.title] = note
     }
@@ -323,6 +329,7 @@ class BeamNote: BeamElement {
     static var linkDetectionRunning = false
     static func requestLinkDetection() {
         guard !linkDetectionRunning else { return }
+        linkDetectionRunning = true
         for note in Self.fetchedNotes.values {
             note.detectLinkedNotes(AppDelegate.main.data.documentManager)
         }
@@ -330,12 +337,15 @@ class BeamNote: BeamElement {
         linkDetectionQueue.async {
             let documentManager = DocumentManager()
             detectLinks(documentManager)
+            DispatchQueue.main.async {
+                linkDetectionRunning = false
+            }
         }
     }
 
     static func detectLinks(_ documentManager: DocumentManager) {
         let allNotes = documentManager.allDocumentsTitles()
-        print("Detect links for \(allNotes.count) notes")
+        Logger.shared.logInfo("Detect links for \(allNotes.count) notes", category: .document)
         for noteName in allNotes {
             guard let doc = documentManager.loadDocumentByTitle(title: noteName) else {
                 continue

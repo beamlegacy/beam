@@ -15,12 +15,16 @@ import Combine
 public class TextNode: Widget {
 
     var element: BeamElement { didSet {
-        elementTextScope = element.$text.sink { [unowned self] newValue in
+        elementTextScope = element.$text
+            .receive(on: DispatchQueue.main)
+            .sink { [unowned self] newValue in
             elementText = newValue
             self.invalidateText()
         }
 
-        elementKindScope = element.$kind.sink { [unowned self] newValue in
+        elementKindScope = element.$kind
+            .receive(on: DispatchQueue.main)
+            .sink { [unowned self] newValue in
             elementKind = newValue
             self.invalidateText()
         }
@@ -214,13 +218,17 @@ public class TextNode: Widget {
         createActionLayer()
 
         var inInit = true
-        elementTextScope = element.$text.sink { [unowned self] newValue in
+        elementTextScope = element.$text
+            .receive(on: DispatchQueue.main)
+            .sink { [unowned self] newValue in
             guard !inInit else { return }
             elementText = newValue
             self.invalidateText()
         }
 
-        elementKindScope = element.$kind.sink { [unowned self] newValue in
+        elementKindScope = element.$kind
+            .receive(on: DispatchQueue.main)
+            .sink { [unowned self] newValue in
             guard !inInit else { return }
             elementKind = newValue
             self.invalidateText()

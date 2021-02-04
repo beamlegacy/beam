@@ -80,7 +80,9 @@ class LinksSection: Widget {
         switch mode {
         case .links:
             sectionTitleLayer.string = "\(note.linkedReferences.count) Links"
-            linkedReferencesCancellable = note.$linkedReferences.sink { [unowned self] links in
+            linkedReferencesCancellable = note.$linkedReferences
+                .receive(on: DispatchQueue.main)
+                .sink { [unowned self] links in
                 updateLinkedReferences(links: links)
                 sectionTitleLayer.string = "\(links.count) Links"
                 updateLayerVisibility()
@@ -88,7 +90,9 @@ class LinksSection: Widget {
         case .references:
             linkActionLayer.string = "Link All"
             sectionTitleLayer.string = "\(note.unlinkedReferences.count) References"
-            linkedReferencesCancellable = note.$unlinkedReferences.sink { [unowned self] links in
+            linkedReferencesCancellable = note.$unlinkedReferences
+                .receive(on: DispatchQueue.main)
+                .sink { [unowned self] links in
                 updateLinkedReferences(links: links)
                 sectionTitleLayer.string = "\(links.count) References"
                 updateLayerVisibility()
