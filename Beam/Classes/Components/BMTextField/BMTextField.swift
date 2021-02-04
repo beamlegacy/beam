@@ -47,7 +47,7 @@ struct BMTextField: NSViewRepresentable {
             textField.placeholderColor = placeholderColor
         }
 
-        textField.onFocusChange = { isFocus in
+        textField.onFocusChanged = { isFocus in
             self.isEditing = isFocus
             self.isFirstResponder = isFocus
             context.coordinator.didBecomeFirstResponder = isFocus
@@ -113,7 +113,7 @@ struct BMTextField: NSViewRepresentable {
 
         func controlTextDidEndEditing(_ obj: Notification) {
             guard let textField = obj.object as? NSViewType else { return }
-            textField.onFocusChange(false)
+            textField.onFocusChanged(false)
         }
 
         func controlTextDidChange(_ obj: Notification) {

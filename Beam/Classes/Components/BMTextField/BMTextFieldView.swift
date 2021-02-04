@@ -25,7 +25,7 @@ class BMTextFieldView: NSTextField {
     }
 
     var onPerformKeyEquivalent: (NSEvent) -> Bool = { _ in return false }
-    var onFocusChange: (Bool) -> Void = { _ in }
+    var onFocusChanged: (Bool) -> Void = { _ in }
     var onEditingChanged: (Bool) -> Void = { _ in }
 
     public init() {
@@ -74,7 +74,7 @@ class BMTextFieldView: NSTextField {
 
     @discardableResult
     override func becomeFirstResponder() -> Bool {
-        onFocusChange(true)
+        onFocusChanged(true)
         return super.becomeFirstResponder()
     }
 
