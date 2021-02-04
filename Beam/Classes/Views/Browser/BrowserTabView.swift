@@ -56,11 +56,13 @@ struct BrowserTabView: View {
             Rectangle()
                 .frame(width: 1, height: 28, alignment: .trailing)
                 .foregroundColor( selected ? Color.clear : Color(.separatorColor))
-        }.frame(height: 26)
+        }
+        .frame(height: 26)
         .contentShape(Rectangle())
         .onHover(perform: { v in
             showButton = v
         })
+        .accessibility(identifier: "browserTabBarView")
         .background(Rectangle().fill(selected ? Color(.tabBarBg) : Color(.tabFrame) ))
     }
 

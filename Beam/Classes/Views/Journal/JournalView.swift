@@ -32,6 +32,7 @@ struct JournalView: View {
             }
             .padding(.top, isEditing ? 0 : offset)
         }
+        .accessibility(identifier: "journalView")
         .clipped()
     }
 }

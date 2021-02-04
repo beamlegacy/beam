@@ -25,6 +25,7 @@ struct OmniBar: View {
                     Button(action: startNewSearch) {
                         Symbol(name: "plus")
                     }
+                    .accessibility(identifier: "newSearch")
                     .buttonStyle(RoundRectButtonStyle())
                 }.padding(.leading, 9)
             } else {
@@ -40,7 +41,9 @@ struct OmniBar: View {
 
             Button(action: toggleMode) {
                 Symbol(name: state.mode == .web ? "note.text" : "network")
-            }.buttonStyle(RoundRectButtonStyle()).disabled(state.tabs.isEmpty)
+            }
+            .accessibility(identifier: state.mode == .web ? "note" : "network")
+            .buttonStyle(RoundRectButtonStyle()).disabled(state.tabs.isEmpty)
         }
     }
 

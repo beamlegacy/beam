@@ -38,6 +38,7 @@ struct ModeView: View {
                             if let tab = state.currentTab {
                                 ZStack {
                                     WebView(webView: tab.webView)
+                                        .accessibility(identifier: "webView")
 
                                     if data.showTabStats, let score = tab.score {
                                         TabStats(score: score)
@@ -68,7 +69,7 @@ struct ModeView: View {
                                 .frame(minHeight: 20, maxHeight: 250, alignment: .top)
                                 .zIndex(2)
                         }
-                        .accessibility(identifier: "AutoCompleteView")
+                        .accessibility(identifier: "autoCompleteView")
                     }
                 }
             }
