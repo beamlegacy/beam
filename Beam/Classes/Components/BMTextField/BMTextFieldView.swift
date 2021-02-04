@@ -17,10 +17,16 @@ class BMTextFieldView: NSTextField {
 
     var placeholderText: String?
     var placeholderColor: NSColor = NSColor.lightGray
-    var isEditing = false
+
+    var isEditing = false {
+        didSet {
+            onEditingChanged(isEditing)
+        }
+    }
 
     var onPerformKeyEquivalent: (NSEvent) -> Bool = { _ in return false }
     var onFocusChange: (Bool) -> Void = { _ in }
+    var onEditingChanged: (Bool) -> Void = { _ in }
 
     public init() {
         super.init(frame: NSRect())
@@ -80,6 +86,7 @@ class BMTextFieldView: NSTextField {
             self.window?.makeFirstResponder(viewBelow)
         }
 
+        isEditing = true
         super.mouseDown(with: event)
     }
 

@@ -144,9 +144,9 @@ public class TextRoot: TextNode {
         }
     }
 
-    override init(editor: BeamTextEdit, element: BeamElement) {
+    init(editor: BeamTextEdit, element: BeamElement, journalMode: Bool) {
         self.note = element as? BeamNote
-        if let note = note {
+        if let note = note, !journalMode {
             topSpacerWidget = SpacerWidget(editor: editor, spacerType: .top)
             linksSection = LinksSection(editor: editor, note: note, mode: .links)
             middleSpacerWidget = SpacerWidget(editor: editor, spacerType: .middle)

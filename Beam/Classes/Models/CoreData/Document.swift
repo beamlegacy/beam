@@ -72,9 +72,12 @@ class Document: NSManagedObject {
         return 0
     }
 
-    class func fetchFirst(context: NSManagedObjectContext, _ predicate: NSPredicate? = nil, _ sortDescriptors: [NSSortDescriptor]? = nil) -> Document? {
+    class func fetchFirst(context: NSManagedObjectContext,
+                          _ predicate: NSPredicate? = nil,
+                          _ sortDescriptors: [NSSortDescriptor]? = nil,
+                          onlyNonDeleted: Bool = true) -> Document? {
         let fetchRequest: NSFetchRequest<Document> = Document.fetchRequest()
-        fetchRequest.predicate = onlyNonDeletedPredicate(predicate)
+        fetchRequest.predicate = onlyNonDeleted ? onlyNonDeletedPredicate(predicate) : predicate
         fetchRequest.fetchLimit = 1
         fetchRequest.sortDescriptors = sortDescriptors
 
@@ -131,9 +134,8 @@ class Document: NSManagedObject {
         return []
     }
 
-
     class func fetchWithId(_ context: NSManagedObjectContext, _ id: UUID) -> Document? {
-        return fetchFirst(context: context, NSPredicate(format: "id = %@", id as CVarArg))
+        return fetchFirst(context: context, NSPredicate(format: "id = %@", id as CVarArg), onlyNonDeleted: false)
     }
 
     class func fetchOrCreateWithId(_ context: NSManagedObjectContext, _ id: UUID) -> Document {

@@ -24,6 +24,8 @@ struct BMTextField: NSViewRepresentable {
     var onCommit: () -> Void = { }
     var onEscape: () -> Void = { }
     var onCursorMovement: (CursorMovement) -> Bool = { _ in false }
+    var onStartEditing: () -> Void = { }
+    var onStopEditing: () -> Void = { }
 
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
@@ -49,6 +51,17 @@ struct BMTextField: NSViewRepresentable {
             self.isEditing = isFocus
             self.isFirstResponder = isFocus
             context.coordinator.didBecomeFirstResponder = isFocus
+        }
+
+        textField.onEditingChanged = { isEditing in
+            withAnimation(.default) {
+                self.isEditing = isEditing
+                if isEditing {
+                    onStartEditing()
+                } else {
+                    onStopEditing()
+                }
+            }
         }
 
         textField.onPerformKeyEquivalent = { event in

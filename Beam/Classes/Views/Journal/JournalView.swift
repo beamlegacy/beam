@@ -10,8 +10,6 @@ import SwiftUI
 import Combine
 
 struct JournalView: View {
-    @State var isEditing = false
-
     var journal: [BeamNote]
     var journals: [BeamNote] { journal }
     var offset: CGFloat
@@ -21,16 +19,13 @@ struct JournalView: View {
             VStack {
                 ForEach(journals) { note in
                     NoteView(note: note,
-                         onStartEditing: {
-                            isEditing = true
-                         },
                          leadingAlignement: 185,
                          showTitle: true,
                          scrollable: false
                     )
                 }
             }
-            .padding(.top, isEditing ? 0 : offset)
+            .padding(.top, offset)
         }
         .clipped()
     }
