@@ -15,6 +15,7 @@ xctests:
   only:
     - merge_requests
     - master
+    - develop
   script:
     - time make build_libgit2
     - time bundle exec fastlane tests
@@ -31,6 +32,7 @@ coverage_check:
   only:
     - merge_requests
     - master
+    - develop
   script:
     - scripts/code_coverage.sh
   tags:
