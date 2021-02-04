@@ -47,7 +47,7 @@ class APIRequest {
     ]
 
     var authenticatedAPICall = true
-    private static var callsCount = 0
+    static var callsCount = 0
     private static var uploadedBytes: Int64 = 0
     private static var downloadedBytes: Int64 = 0
 

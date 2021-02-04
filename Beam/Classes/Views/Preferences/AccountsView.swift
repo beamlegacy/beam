@@ -53,7 +53,7 @@ struct AccountsView: View {
     @State private var showingSignInAlert = false
     private var SignInButton: some View {
         Button(action: {
-            accountManager.signIn(email: email, password: password) { result in
+            accountManager.signIn(email, password) { result in
                 loggedIn = AccountManager().loggedIn
                 switch result {
                 case .failure(let error):

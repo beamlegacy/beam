@@ -35,22 +35,22 @@ class NLPTests: XCTestCase {
         let tagger = NLTagger(tagSchemes: [.lemma])
 
         tagger.string = text
-        let range = text.startIndex ..< text.endIndex
-        let options: NLTagger.Options = [.omitPunctuation, .omitWhitespace]
+//        let range = text.startIndex ..< text.endIndex
+//        let options: NLTagger.Options = [.omitPunctuation, .omitWhitespace]
 
 //        print("Found language: \(String(describing: tagger.dominantLanguage))")
         XCTAssertEqual(tagger.dominantLanguage, .english)
 
-        tagger.enumerateTags(in: range, unit: .word, scheme: .lemma, options: options) { tag, tokenRange -> Bool in
-            if let lemma = tag?.rawValue {
+//        tagger.enumerateTags(in: range, unit: .word, scheme: .lemma, options: options) { tag, tokenRange -> Bool in
+//            if let lemma = tag?.rawValue {
                 // Do something with each lemma
 //                let range = text.range(from: tokenRange.lowerBound ..< tokenRange.upperBound)
-                let range = text[tokenRange]
+//                let range = text[tokenRange]
 //                print("Lema: \(range) -> \(lemma)")
-            }
-
-            return true
-        }
+//            }
+//
+//            return true
+//        }
     }
 
     func testLematizationFR() {

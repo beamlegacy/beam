@@ -5,9 +5,10 @@ class AccountManager {
     var loggedIn: Bool {
         Persistence.Authentication.accessToken != nil
     }
+
     @discardableResult
-    func signIn(email: String,
-                password: String,
+    func signIn(_ email: String,
+                _ password: String,
                 _ completionHandler: ((Result<Bool, Error>) -> Void)? = nil) -> DataRequest? {
         UserSessionRequest().signIn(email: email, password: password) { result in
             switch result {
