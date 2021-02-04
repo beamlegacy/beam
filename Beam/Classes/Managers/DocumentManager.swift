@@ -14,14 +14,38 @@ public struct DocumentStruct {
     let id: UUID
     let title: String
     let createdAt: Date
-    let updatedAt: Date
+    var updatedAt: Date
     var deletedAt: Date?
-    let data: Data
+    var data: Data
     let documentType: DocumentType
     var previousChecksum: String?
+    var previousData: Data?
 
     var uuidString: String {
         id.uuidString.lowercased()
+    }
+
+    var previousDataString: String? {
+        guard let previousData = previousData else { return nil }
+        return previousData.asString
+    }
+
+    mutating func clearPreviousData() {
+        previousChecksum = nil
+        previousData = nil
+    }
+
+    func copy() -> DocumentStruct {
+        let copy = DocumentStruct(id: id,
+                                  title: title,
+                                  createdAt: createdAt,
+                                  updatedAt: updatedAt,
+                                  deletedAt: deletedAt,
+                                  data: data,
+                                  documentType: documentType,
+                                  previousChecksum: previousChecksum,
+                                  previousData: previousData)
+        return copy
     }
 }
 
@@ -33,6 +57,7 @@ extension DocumentStruct {
         self.title = document.title
         self.documentType = DocumentType(rawValue: document.document_type) ?? .note
         self.data = document.data ?? Data()
+        self.previousData = document.beam_api_data
         self.previousChecksum = document.beam_api_data?.MD5
     }
 
@@ -40,6 +65,11 @@ extension DocumentStruct {
         let result = DocumentAPIType(document: self)
         return result
     }
+}
+
+enum DocumentManagerError: Error, Equatable {
+    case unresolvedConflict
+    case localDocumentNotFound
 }
 
 // swiftlint:disable:next type_body_length
@@ -55,6 +85,8 @@ class DocumentManager {
         observeCoredataNotification()
     }
 
+    // MARK: -
+    // MARK: Coredata Updates
     private var cancellables = [AnyCancellable]()
     private func observeCoredataNotification() {
         NotificationCenter.default
@@ -74,6 +106,9 @@ class DocumentManager {
             .filter({ $0.map({ $0.id }).contains(documentStruct.id) })
             .sink { documents in
                 for document in documents where document.id == documentStruct.id {
+                    Logger.shared.logDebug("onDocumentChange: \(document.title)", category: .coredata)
+                    Logger.shared.logDebug(document.data?.asString ?? "-", category: .documentDebug)
+
                     completionHandler(DocumentStruct(document: document))
                 }
             }
@@ -118,15 +153,21 @@ class DocumentManager {
         }
     }
 
-    func saveDocument(_ documentStruct: DocumentStruct, completion: ((Result<Bool, Error>) -> Void)? = nil) {
-        Logger.shared.logDebug("Saving \(documentStruct.title)", category: .coredata)
-        coreDataManager.persistentContainer.performBackgroundTask { context in
-            let document = Document.fetchOrCreateWithId(context, documentStruct.id)
+    // MARK: -
+    // MARK: CoreData Saving
 
-            document.data = documentStruct.data
-            document.title = documentStruct.title
-            document.document_type = documentStruct.documentType.rawValue
-            document.deleted_at = documentStruct.deletedAt
+    /// `saveDocument` will save locally in CoreData then call the completion handler
+    /// If the user is authenticated, and network is enabled, it will also call the BeamAPI (async) to save the document remotely
+    /// but will not trigger the completion handler. If the network callbacks updates the coredata object, it is expected the
+    /// updates to be fetched through `onDocumentUpdate`
+    func saveDocument(_ documentStruct: DocumentStruct, completion: ((Result<Bool, Error>) -> Void)? = nil) {
+        Logger.shared.logDebug("Saving \(documentStruct.title)", category: .document)
+        Logger.shared.logDebug(documentStruct.data.asString ?? "-", category: .documentDebug)
+
+        coreDataManager.backgroundContext.perform {
+            let context = self.coreDataManager.backgroundContext
+            let document = Document.fetchOrCreateWithId(context, documentStruct.id)
+            self.updateDocumentWithDocumentStruct(document, documentStruct)
 
             do {
                 try self.checkValidations(context, document)
@@ -135,75 +176,127 @@ class DocumentManager {
                 return
             }
 
-            // If not authenticated, we don't need to send to BeamAPI
-            guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
-                Self.saveContext(context: context, completion: completion)
-                return
+            Self.saveContext(context: context) { result in
+                do {
+                    _ = try result.get()
+                } catch {
+                    completion?(.failure(error))
+                    return
+                }
             }
 
-            // If authenticated
-            self.saveDocumentOnAPI(context, document, completion)
+            // If not authenticated, we don't need to send to BeamAPI
+            if AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled {
+                // We only want one network call per document ID, to avoid overlapping
+                self.blockDocumentNetworkCall(document.id)
+
+                // We want to fetch back the document, to update it's previousChecksum
+                context.refresh(document, mergeChanges: false)
+                self.saveDocumentStructOnAPI(DocumentStruct(document: document)) { _ in
+                    Self.saveDataRequests.removeValue(forKey: documentStruct.id)
+                    self.signalDocumentNetworkCall(document.id)
+                }
+            }
+
+            completion?(.success(true))
         }
     }
 
-    private func saveDocumentOnAPI(_ context: NSManagedObjectContext,
-                                   _ document: Document,
-                                   _ completion: ((Result<Bool, Error>) -> Void)? = nil) {
-        // Note: This will break if we call context.save before calling `saveDocumentOnAPI`
-        guard context.hasChanges else {
-            completion?(.success(false))
-            return
+    func clearNetworkCalls() {
+        Self.saveDataRequestsSemaphore.wait()
+        for (_, request) in Self.saveDataRequests {
+            request?.cancel()
         }
+        Self.saveDataRequestsSemaphore.signal()
+    }
 
+    static let serialQueue = DispatchQueue(label: "co.beamapp.documentManager")
+
+    private func blockDocumentNetworkCall(_ id: UUID) {
+        Self.serialQueue.sync {
+            Self.saveSemaphores[id]?.wait()
+            Self.saveSemaphores[id] = Self.saveSemaphores[id] ?? DispatchSemaphore(value: 0)
+        }
+    }
+    private func signalDocumentNetworkCall(_ id: UUID) {
+        Self.saveSemaphores[id]?.signal()
+    }
+
+    // MARK: -
+    // MARK: Network Saving
+    private static let saveDataRequestsSemaphore = DispatchSemaphore(value: 1)
+    private static var saveDataRequests: [UUID: DataRequest?] = [:]
+    private static var saveSemaphores: [UUID: DispatchSemaphore] = [:]
+
+    internal func saveDocumentStructOnAPI(_ documentStruct: DocumentStruct,
+                                          _ completion: ((Result<Bool, Error>) -> Void)? = nil) {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             completion?(.success(false))
             return
         }
-
-        var documentStruct = DocumentStruct(document: document)
-        documentStruct.previousChecksum = document.beam_api_data?.MD5
-        self.documentRequest.saveDocument(documentStruct.asApiType()) { result in
+        Self.saveDataRequestsSemaphore.wait()
+        Self.saveDataRequests[documentStruct.id]??.cancel()
+        Self.saveDataRequests[documentStruct.id] = documentRequest.saveDocument(documentStruct.asApiType()) { result in
             switch result {
             case .failure(let error):
-                if (error as? APIRequestError) == APIRequestError.documentConflict {
-                    // Saving the document on the API gave a conflict we should fix before saving it again
-                    NotificationCenter.default.post(name: .apiDocumentConflict,
-                                                    object: documentStruct)
-
-                    Logger.shared.logDebug("Server rejected our update based on checksum for \(documentStruct.title), overwriting", category: .network)
-                    // TODO: enforcing server overwrite for now by disabling checksum, but we should display a
-                    // conflict window and suggest to the user to keep a version or another
-
-                    // Refreshing the CD persisted version
-                    context.refresh(document, mergeChanges: false)
-                    document.beam_api_data = nil
-                    context.perform {
-                        self.saveDocumentOnAPI(context, document, completion)
-                    }
-                    return
-                    //
-                }
-
-                context.performAndWait {
-                    Self.saveContext(context: context)
-                    completion?(.failure(error))
-                }
+                self.saveDocumentStructOnAPIFailure(documentStruct, error, completion)
             case .success:
-                // We save the remote stored version of the document, to know if we have local changes
-                context.performAndWait {
-                    document.beam_api_data = documentStruct.data
-                    Self.saveContext(context: context, completion: completion)
-                }
+                self.saveDocumentStructOnAPISuccess(documentStruct, completion)
+            }
+        }
+        Self.saveDataRequestsSemaphore.signal()
+    }
+
+    private func saveDocumentStructOnAPIFailure(_ documentStruct: DocumentStruct,
+                                                _ error: Error,
+                                                _ completion: ((Result<Bool, Error>) -> Void)? = nil) {
+        // We only manage conflicts, all other network errors are dispatched
+        guard case APIRequestError.documentConflict = error else {
+            completion?(.failure(error))
+            return
+        }
+
+        Logger.shared.logDebug("Server rejected our update \(documentStruct.title): \(documentStruct.previousChecksum ?? "-")", category: .network)
+        Logger.shared.logDebug("PreviousData: \(documentStruct.previousDataString ?? "-")", category: .documentDebug)
+
+        fetchAndMergeDocument(documentStruct) { result in
+            switch result {
+            case .success:
+                // Conflict was resolved
+                completion?(.success(true))
+                return
+            case .failure:
+                // Saving the document on the API gave a conflict we were not able to fix
+                NotificationCenter.default.post(name: .apiDocumentConflict,
+                                                object: documentStruct)
+
+                // TODO: enforcing server overwrite for now by disabling checksum, but we should display a
+                // conflict window and suggest to the user to keep a version or another, and not overwrite
+                // existing data
+                var clearedDocumentStruct = documentStruct.copy()
+                clearedDocumentStruct.clearPreviousData()
+                self.saveDocumentStructOnAPI(clearedDocumentStruct, completion)
             }
         }
     }
 
-    func loadDocumentById(id: UUID) -> DocumentStruct? {
-        guard let document = Document.fetchWithId(mainContext, id) else { return nil }
+    private func saveDocumentStructOnAPISuccess(_ documentStruct: DocumentStruct,
+                                                _ completion: ((Result<Bool, Error>) -> Void)? = nil) {
+        coreDataManager.persistentContainer.performBackgroundTask { context in
+            guard let documentCoreData = Document.fetchWithId(context, documentStruct.id) else {
+                completion?(.failure(DocumentManagerError.localDocumentNotFound))
+                return
+            }
 
-        return parseDocumentBody(document)
+            // We save the remote stored version of the document, to know if we have local changes later
+            // `beam_api_data` stores the last version we sent to the API
+            documentCoreData.beam_api_data = documentStruct.data
+            Self.saveContext(context: context, completion: completion)
+        }
     }
 
+    // MARK: -
+    // MARK: CoreData Create
     func createAsync(title: String, completion: ((DocumentStruct?) -> Void)? = nil) {
         coreDataManager.persistentContainer.performBackgroundTask { [unowned self] context in
             let document = Document.create(context, title: title)
@@ -238,6 +331,14 @@ class DocumentManager {
         semaphore.wait()
 
         return result
+    }
+
+    // MARK: -
+    // MARK: CoreData Load
+    func loadDocumentById(id: UUID) -> DocumentStruct? {
+        guard let document = Document.fetchWithId(mainContext, id) else { return nil }
+
+        return parseDocumentBody(document)
     }
 
     func fetchOrCreateAsync(title: String, completion: ((DocumentStruct?) -> Void)? = nil) {
@@ -321,9 +422,13 @@ class DocumentManager {
                               updatedAt: document.updated_at,
                               deletedAt: document.deleted_at,
                               data: document.data ?? Data(),
-                              documentType: DocumentType(rawValue: document.document_type) ?? DocumentType.note)
+                              documentType: DocumentType(rawValue: document.document_type) ?? DocumentType.note,
+                              previousChecksum: document.beam_api_data?.MD5,
+                              previousData: document.beam_api_data)
     }
 
+    // MARK: -
+    // MARK: CoreData Deletes
     func deleteDocument(id: UUID, completion: ((Result<Bool, Error>) -> Void)? = nil) {
         coreDataManager.persistentContainer.performBackgroundTask { context in
             let document = Document.fetchWithId(context, id)
@@ -335,8 +440,13 @@ class DocumentManager {
                 return
             }
 
-            // If authenticated
-            self.documentRequest.deleteDocument(id.uuidString.lowercased()) { result in
+            self.blockDocumentNetworkCall(id)
+
+            Self.saveDataRequestsSemaphore.wait()
+            Self.saveDataRequests[id]??.cancel()
+            Self.saveDataRequests[id] = self.documentRequest.deleteDocument(id.uuidString.lowercased()) { result in
+                self.signalDocumentNetworkCall(id)
+
                 switch result {
                 case .failure(let error):
                     completion?(.failure(error))
@@ -344,12 +454,13 @@ class DocumentManager {
                     completion?(.success(true))
                 }
             }
+            Self.saveDataRequestsSemaphore.signal()
         }
     }
 
+    // MARK: -
+    // MARK: Network refresh
     /// Fetch all remote documents from API
-    // swiftlint:disable:next function_body_length
-    // swiftlint:disable:next cyclomatic_complexity
     func refreshDocuments(completion: ((Result<Bool, Error>) -> Void)? = nil) {
         // If not authenticated
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
@@ -362,49 +473,57 @@ class DocumentManager {
             case .failure(let error):
                 completion?(.failure(error))
             case .success(let documentAPITypes):
-                self.coreDataManager.persistentContainer.performBackgroundTask { context in
-                    var errors: Bool = false
-                    var remoteDocumentsIds: [UUID] = []
-                    for documentAPIType in documentAPITypes {
-                        guard let documentId = documentAPIType.id,
-                              let uuid = UUID(uuidString: documentId) else {
-                            errors = true
-                            Logger.shared.logError("\(documentAPIType) has no id", category: .network)
-                            continue
-                        }
-                        remoteDocumentsIds.append(uuid)
+                self.refreshDocumentsSuccess(documentAPITypes, completion)
+            }
+        }
+    }
 
-                        let document = Document.fetchOrCreateWithId(context, uuid)
-
-                        guard self.updateDocumentWithDocumentType(document, documentAPIType) else {
-                            errors = true
-                            Logger.shared.logError("Document has local change! Should merge", category: .document)
-                            NotificationCenter.default.post(name: .apiDocumentConflict,
-                                                            object: DocumentStruct(document: document))
-                            continue
-                        }
-                    }
-
-                    // Deleting local documents we haven't found remotely
-                    self.deleteNonExistingIds(context, remoteDocumentsIds)
-
-                    if errors {
-                        Self.saveContext(context: context)
-                        completion?(.success(false))
-                    } else {
-                        Self.saveContext(context: context, completion: completion)
-                    }
+    private func refreshDocumentsSuccess(_ documentAPITypes: [DocumentAPIType],
+                                         _ completion: ((Result<Bool, Error>) -> Void)? = nil) {
+        coreDataManager.persistentContainer.performBackgroundTask { context in
+            var errors: Bool = false
+            var remoteDocumentsIds: [UUID] = []
+            for documentAPIType in documentAPITypes {
+                guard let uuid = documentAPIType.id?.uuid else {
+                    errors = true
+                    Logger.shared.logError("\(documentAPIType) has no id", category: .network)
+                    continue
                 }
+                remoteDocumentsIds.append(uuid)
+
+                let document = Document.fetchOrCreateWithId(context, uuid)
+
+                // Making sure we had no local updates, and simply overwritten the local version
+                if !self.updateDocumentWithDocumentAPIType(document, documentAPIType) {
+                    errors = true
+                    Logger.shared.logError("\(documentAPIType) has local changes and couldn't be merged",
+                                           category: .network)
+
+                    continue
+                }
+            }
+
+            // Deleting local documents we haven't found remotely
+            self.deleteNonExistingIds(context, remoteDocumentsIds)
+
+            if errors {
+                Self.saveContext(context: context)
+                completion?(.failure(DocumentManagerError.unresolvedConflict))
+            } else {
+                Self.saveContext(context: context, completion: completion)
             }
         }
     }
 
     /// Must be called within the context thread
     private func deleteNonExistingIds(_ context: NSManagedObjectContext, _ remoteDocumentsIds: [UUID]) {
-        let documents = Document.fetchAllWithLimit(context: context, NSPredicate(format: "NOT id IN %@", remoteDocumentsIds))
+        // TODO: We could optimize using an `UPDATE` statement instead of loading all documents but I don't expect
+        // this to ever have a lot of them
+        let documents = Document.fetchAllWithLimit(context: context,
+                                                   NSPredicate(format: "NOT id IN %@", remoteDocumentsIds))
         for document in documents {
             Logger.shared.logDebug("Marking \(document.title) as deleted", category: .document)
-            document.deleted_at = Date()
+            document.deleted_at = BeamDate.now
         }
     }
 
@@ -419,7 +538,13 @@ class DocumentManager {
             return
         }
 
-        documentRequest.fetchDocumentUpdatedAt(documentStruct.uuidString) { result in
+        self.blockDocumentNetworkCall(documentStruct.id)
+
+        Self.saveDataRequestsSemaphore.wait()
+        Self.saveDataRequests[documentStruct.id]??.cancel()
+        Self.saveDataRequests[documentStruct.id] = documentRequest.fetchDocumentUpdatedAt(documentStruct.uuidString) { result in
+            self.signalDocumentNetworkCall(documentStruct.id)
+
             switch result {
             case .failure(let error):
                 if (error as? AFError)?.responseCode == 404 {
@@ -433,35 +558,47 @@ class DocumentManager {
                     completion?(.success(false))
                     return
                 }
-
-                // Remote document is more recent, updating all the object
-                self.documentRequest.fetchDocument(documentStruct.uuidString) { result in
-                    switch result {
-                    case .failure(let error):
-                        if (error as? AFError)?.responseCode == 404 {
-                            self.deleteLocalDocument(documentStruct)
-                        }
-                        completion?(.failure(error))
-                    case .success(let documentType):
-                        self.coreDataManager.persistentContainer.performBackgroundTask { context in
-                            guard let document = Document.fetchWithId(context, documentStruct.id) else {
-                                completion?(.success(false))
-                                return
-                            }
-
-                            guard self.updateDocumentWithDocumentType(document, documentType) else {
-                                completion?(.success(false))
-                                Logger.shared.logError("Document has local change! Should merge", category: .document)
-                                NotificationCenter.default.post(name: .apiDocumentConflict,
-                                                                object: DocumentStruct(document: document))
-                                return
-                            }
-
-                            Self.saveContext(context: context, completion: completion)
-                        }
-                    }
-                }
+                self.refreshDocumentSuccess(documentStruct, documentType, completion)
             }
+        }
+        Self.saveDataRequestsSemaphore.signal()
+    }
+
+    private func refreshDocumentSuccess(_ documentStruct: DocumentStruct,
+                                        _ documentType: DocumentAPIType,
+                                        _ completion: ((Result<Bool, Error>) -> Void)? = nil) {
+
+        documentRequest.fetchDocument(documentStruct.uuidString) { result in
+            switch result {
+            case .failure(let error):
+                // Fetched returned 404, it doesn't exist anymore.
+                if (error as? AFError)?.responseCode == 404 {
+                    self.deleteLocalDocument(documentStruct)
+                }
+                completion?(.failure(error))
+            case .success(let documentType):
+                self.refreshDocumentSuccessSuccess(documentStruct, documentType, completion)
+            }
+        }
+    }
+
+    private func refreshDocumentSuccessSuccess(_ documentStruct: DocumentStruct,
+                                               _ documentType: DocumentAPIType,
+                                               _ completion: ((Result<Bool, Error>) -> Void)? = nil) {
+        // Saving the remote version locally
+        coreDataManager.persistentContainer.performBackgroundTask { context in
+            guard let document = Document.fetchWithId(context, documentStruct.id) else {
+                completion?(.failure(DocumentManagerError.localDocumentNotFound))
+                return
+            }
+
+            // Making sure we had no local updates, and simply overwritten the local version
+            if !self.updateDocumentWithDocumentAPIType(document, documentType) {
+                completion?(.failure(DocumentManagerError.unresolvedConflict))
+                return
+            }
+
+            Self.saveContext(context: context, completion: completion)
         }
     }
 
@@ -478,18 +615,162 @@ class DocumentManager {
     }
 
     /// Update local coredata instance with data we fetched remotely
-    private func updateDocumentWithDocumentType(_ document: Document, _ documentType: DocumentAPIType) -> Bool {
-        // TODO: Try to merge before returning false
-        guard !document.hasLocalChanges else { return false }
+    private func updateDocumentWithDocumentAPIType(_ document: Document, _ documentType: DocumentAPIType) -> Bool {
+        // We have local changes we didn't send to the API yet, need for merge
+        if document.hasLocalChanges {
+            let merged = mergeDocumentWithNewData(document, documentType)
+            if !merged { return false }
+        } else if let stringData = documentType.data {
+            document.data = stringData.asData
+            document.beam_api_data = stringData.asData
+        }
 
         document.title = documentType.title ?? document.title
         document.created_at = documentType.createdAt ?? document.created_at
         document.updated_at = documentType.updatedAt ?? document.updated_at
+        document.deleted_at = documentType.deletedAt ?? document.deleted_at
         document.document_type = documentType.documentType ?? document.document_type
-        if let stringData = documentType.data {
-            document.data = Data(stringData.utf8)
+
+        return true
+    }
+
+    private func updateDocumentWithDocumentStruct(_ document: Document, _ documentStruct: DocumentStruct) {
+        document.data = documentStruct.data
+        document.title = documentStruct.title
+        document.document_type = documentStruct.documentType.rawValue
+        document.updated_at = BeamDate.now
+        document.deleted_at = documentStruct.deletedAt
+    }
+
+    // MARK: -
+    // MARK: Merge and conflict management
+
+    /// When sending a new local version of a document to the API and the API rejects it,
+    /// we want to merge the new remote version, with our updated local version
+    private func fetchAndMergeDocument(_ document: DocumentStruct,
+                                       _ completion: @escaping (Result<Bool, Error>) -> Void) {
+        documentRequest.fetchDocument(document.uuidString) { [weak self] result in
+            guard let self = self else {
+                completion(.failure(DocumentManagerError.unresolvedConflict))
+                return
+            }
+
+            switch result {
+            case .failure(let error):
+                completion(.failure(error))
+            case .success(let documentAPIType):
+                self.manageDocumentConflictMerge(document, documentAPIType, completion)
+            }
+        }
+    }
+
+    // When having a conflict between versions
+    private func manageDocumentConflictMerge(_ document: DocumentStruct,
+                                             _ remoteDocument: DocumentAPIType,
+                                             _ completion: @escaping (Result<Bool, Error>) -> Void) {
+
+        guard let beam_api_data = document.previousData,
+              let remoteDataString = remoteDocument.data,
+              let remoteData = remoteDocument.data?.asData else {
+            completion(.failure(DocumentManagerError.unresolvedConflict))
+            return
         }
 
+        let localData = document.data
+
+        Logger.shared.logDebug("ancestor:", category: .documentMerge)
+        Logger.shared.logDebug(beam_api_data.asString ?? "--", category: .documentMerge)
+
+        Logger.shared.logDebug("local:", category: .documentMerge)
+        Logger.shared.logDebug(localData.asString ?? "--", category: .documentMerge)
+
+        Logger.shared.logDebug("Remote:", category: .documentMerge)
+        Logger.shared.logDebug(remoteData.asString ?? "--", category: .documentMerge)
+
+        let data = BeamElement.threeWayMerge(ancestor: beam_api_data,
+                                             input1: localData,
+                                             input2: remoteData)
+
+        guard let newData = data else {
+            Logger.shared.logDebug("Couldn't merge the two versions for: \(document.title)", category: .documentMerge)
+            Logger.shared.logDebug(prettyFirstDifferenceBetweenStrings(NSString(string: localData.asString ?? ""),
+                                                                       NSString(string: remoteDataString)) as String,
+                                   category: .documentMerge)
+            completion(.failure(DocumentManagerError.unresolvedConflict))
+            return
+        }
+
+        Logger.shared.logDebug("Diff:",
+                               category: .documentMerge)
+        Logger.shared.logDebug(prettyFirstDifferenceBetweenStrings(NSString(string: localData.asString ?? ""),
+                                                                   NSString(string: remoteDataString)) as String,
+                               category: .documentMerge)
+
+        Logger.shared.logDebug("Merged:", category: .documentDebug)
+        Logger.shared.logDebug(newData.asString ?? "--", category: .documentDebug)
+
+        Logger.shared.logDebug("manageDocumentConflict: Merged the two versions together, saving on API for \(document.title)",
+                               category: .documentMerge)
+
+        coreDataManager.persistentContainer.performBackgroundTask { context in
+            guard let documentCoreData = Document.fetchWithId(context, document.id) else {
+                completion(.failure(DocumentManagerError.localDocumentNotFound))
+                return
+            }
+            documentCoreData.data = newData
+            documentCoreData.beam_api_data = remoteData
+
+            Self.saveContext(context: context, completion: completion)
+
+            self.saveDocumentStructOnAPI(DocumentStruct(document: documentCoreData))
+        }
+    }
+
+    /// Update local coredata instance with data we fetched remotely, we detected the need for a merge between both versions
+    private func mergeWithLocalChanges(_ document: Document, _ input2: Data) -> Bool {
+        guard let beam_api_data = document.beam_api_data,
+              let input1 = document.data else {
+            return false
+        }
+
+        let data = BeamElement.threeWayMerge(ancestor: beam_api_data,
+                                             input1: input1,
+                                             input2: input2)
+
+        guard let newData = data else {
+            Logger.shared.logDebug("Could not Merge Local changes when refreshing remote -> local", category: .documentDebug)
+            Logger.shared.logDebug("Ancestor:\n\(beam_api_data.asString ?? "-")", category: .documentDebug)
+            Logger.shared.logDebug("Input1:\n\(input1.asString ?? "-")", category: .documentDebug)
+            Logger.shared.logDebug("Input2:\n\(input2.asString ?? "-")", category: .documentDebug)
+            Logger.shared.logDebug("Diff:", category: .documentDebug)
+            Logger.shared.logDebug(prettyFirstDifferenceBetweenStrings(NSString(string: input1.asString ?? ""),
+                                                                       NSString(string: input2.asString ?? "")) as String,
+                                   category: .documentDebug)
+
+            return false
+        }
+
+        Logger.shared.logDebug("Merged:\n\(newData.asString ?? "-")",
+                               category: .documentDebug)
+
+        document.data = newData
+        document.beam_api_data = input2
+        return true
+    }
+
+    /// Update local coredata instance with data we fetched remotely, and merge both together
+    private func mergeDocumentWithNewData(_ document: Document, _ documentType: DocumentAPIType) -> Bool {
+        guard let data = documentType.data?.asData,
+              mergeWithLocalChanges(document, data) else {
+            // Local version could not be merged with remote version
+            Logger.shared.logError("Document has local change but could not merge", category: .documentMerge)
+            NotificationCenter.default.post(name: .apiDocumentConflict,
+                                            object: DocumentStruct(document: document))
+            return false
+        }
+
+        // Local version was merged with remote version
+        Logger.shared.logError("Document has local change! Merged both local and remote", category: .documentMerge)
         return true
     }
 
@@ -519,6 +800,8 @@ class DocumentManager {
         }
     }
 
+    // MARK: -
+    // MARK: Bulk calls
     func uploadAllDocuments(_ completion: ((Result<Bool, Error>) -> Void)? = nil) {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             completion?(.success(false))
@@ -542,8 +825,13 @@ class DocumentManager {
         }
     }
 
+    // MARK: -
+    // MARK: NSManagedObjectContext saves
     static func saveContext(context: NSManagedObjectContext, completion: ((Result<Bool, Error>) -> Void)? = nil) {
-        guard context.hasChanges else { completion?(.success(true)); return }
+        guard context.hasChanges else {
+            completion?(.success(true))
+            return
+        }
 
         do {
             try CoreDataManager.save(context)

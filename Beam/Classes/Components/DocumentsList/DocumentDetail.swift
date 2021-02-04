@@ -70,7 +70,6 @@ struct DocumentDetail: View {
                     }
 
                     Divider()
-
                 }.background(Color.white).padding()
                 Spacer()
             }

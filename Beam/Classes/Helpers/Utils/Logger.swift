@@ -20,6 +20,7 @@ enum LogCategory: String {
     case search
     case javascript
     case documentMerge
+    case documentDebug
     case noteEditor
 }
 
@@ -27,7 +28,7 @@ final class Logger {
     static let shared = Logger()
 
     private var subsystem = Configuration.bundleIdentifier
-    private let hideCategories: [LogCategory] = [.web, .coredataDebug]
+    private let hideCategories: [LogCategory] = [.web, .coredataDebug, .documentDebug]
     private let hideLumberCategories: [LogCategory] = []
 
     private var ddFileLogger: DDFileLogger = DDFileLogger()

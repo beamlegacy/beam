@@ -318,6 +318,7 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
         }
     }
 
+    // TODO: use this for smart merging
     func recursiveUpdate(other: BeamElement) {
         assert(other.id == id)
 
