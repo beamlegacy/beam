@@ -121,19 +121,13 @@ struct OmniBarSearchBox: View {
                     .padding(.leading, 10)
                     .padding(.trailing, 5)
 
-                    Button("test", action: {
-                        resetSearchQuery()
-                        NSApp.mainWindow?.makeFirstResponder(nil)
-                    })
-                    .accessibility(identifier: "clearTextField")
-
-                    /*Image("xmark.circle.fill")
+                    Image("xmark.circle.fill")
                         .resizable()
                         .frame(width: 12, height: 12)
                         .offset(x: -7)
                         .animation(.default)
-                        .opacity(isEditing && !state.searchQuery.isEmpty ? 1 : 0)*/
-
+                        .opacity(isEditing && !state.searchQuery.isEmpty ? 1 : 0)
+                        .accessibility(identifier: "clearTextField")
                 }
             }
         }
