@@ -238,8 +238,8 @@ class BeamNote: BeamElement {
         return nil
     }
 
-    static func fetchNotesWithType(_ documentManager: DocumentManager, type: DocumentType) -> [BeamNote] {
-        return documentManager.loadDocumentsWithType(type: type).compactMap { doc -> BeamNote? in
+    static func fetchNotesWithType(_ documentManager: DocumentManager, type: DocumentType,  _ limit: Int, _ fetchOffset: Int) -> [BeamNote] {
+        return documentManager.loadDocumentsWithType(type: type, limit, fetchOffset).compactMap { doc -> BeamNote? in
             if let note = fetchedNotes[doc.title] {
                 return note
             }

@@ -385,8 +385,8 @@ class DocumentManager {
         return parseDocumentBody(document)
     }
 
-    func loadDocumentsWithType(type: DocumentType) -> [DocumentStruct] {
-        return Document.fetchAllWithType(mainContext, type.rawValue).compactMap { document -> DocumentStruct? in
+    func loadDocumentsWithType(type: DocumentType, _ limit: Int, _ fetchOffset: Int) -> [DocumentStruct] {
+        return Document.fetchWithTypeAndLimit(context: mainContext, type.rawValue, limit, fetchOffset).compactMap { (document) -> DocumentStruct? in
             parseDocumentBody(document)
         }
     }
