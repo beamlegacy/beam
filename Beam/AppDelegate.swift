@@ -10,7 +10,9 @@ import Cocoa
 import SwiftUI
 import Combine
 import Sentry
+#if canImport(Sparkle)
 import Sparkle
+#endif
 import Preferences
 
 @objc(BeamApplication)
@@ -45,14 +47,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         CoreDataManager.shared.setup()
         LibrariesManager.shared.configure()
 
+        #if canImport(Sparkle)
         if Configuration.sparkleUpdate {
             let sparkleUpdater = SPUUpdater(hostBundle: Bundle.main,
                                             applicationBundle: Bundle.main,
                                             userDriver: SPUStandardUserDriver(),
                                             delegate: nil)
-
             sparkleUpdater.checkForUpdatesInBackground()
         }
+        #endif
 
         data = BeamData()
         updateBadge()

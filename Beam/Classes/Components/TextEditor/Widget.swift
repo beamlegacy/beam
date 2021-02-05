@@ -359,15 +359,19 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
 
     var open: Bool = true {
         didSet {
+            if let chevron = self.layers["disclosure"] as? ChevronButton {
+                chevron.open = open
+            }
             updateChildrenVisibility(visible && open)
             invalidateLayout()
         }
     }
 
+    // TODO: Refactor this in two methods
     func updateChildrenVisibility(_ isVisible: Bool) {
         for c in children {
             c.visible = isVisible
-            c.updateChildrenVisibility(isVisible && open)
+            c.updateChildrenVisibility(isVisible && c.open)
             invalidateLayout()
         }
     }

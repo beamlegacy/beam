@@ -29,6 +29,12 @@ let NoteDisplayThreshold = Float(0.0)
     @Published var isFullScreen: Bool = false
     @Published var focusOmniBox: Bool = true
 
+    @Published var changingDestinationCard: Bool = false
+    @Published var destinationCardInputIsFirstResponder: Bool = false
+    @Published var destinationCardName: String
+    @Published var destinationCardNameSelectedRange: [Range<Int>]?
+    var bidirectionalPopover: BidirectionalPopover?
+
     @Published var mode: Mode = .today {
         didSet {
             switch oldValue {
@@ -243,8 +249,7 @@ let NoteDisplayThreshold = Float(0.0)
     }
 
     func createTab(withURL url: URL, originalQuery: String, createNote: Bool = true) {
-        let note = createNote ? (originalQuery.isEmpty ? data.todaysNote : createNoteForQuery(originalQuery)) : data.todaysNote
-        let tab = BrowserTab(state: self, originalQuery: originalQuery, note: note)
+        let tab = BrowserTab(state: self, originalQuery: originalQuery, note: data.todaysNote)
         tab.load(url: url)
         currentTab = tab
         tabs.append(tab)
@@ -354,6 +359,7 @@ let NoteDisplayThreshold = Float(0.0)
 
     public init(data: BeamData) {
         self.data = data
+        self.destinationCardName = data.todaysName
         // self.currentNote = data.todaysNote
         backForwardList = NoteBackForwardList()
         super.init()

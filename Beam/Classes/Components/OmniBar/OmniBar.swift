@@ -39,6 +39,11 @@ struct OmniBar: View {
                     }
             }
 
+            if state.mode == .web {
+                DestinationCardPicker(tab: state.currentTab!)
+                    .frame(width: 200, height: 30, alignment: .center)
+            }
+
             Button(action: toggleMode) {
                 Symbol(name: state.mode == .web ? "note.text" : "network")
             }

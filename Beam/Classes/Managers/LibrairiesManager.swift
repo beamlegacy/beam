@@ -51,6 +51,6 @@ extension LibrariesManager {
     // Can be called either with an Error, or with a description and an optional info dictionnary
     static func nonFatalError(_ description: String = "", error: Error? = nil, addedInfo: [String: Any]? = nil) {
         let finalDescription = "\(description) \(error?.localizedDescription ?? "")".trimmingCharacters(in: .whitespaces)
-        Logger.shared.logError("🛑 nonFatalError \(finalDescription)", category: .general)
+        Logger.shared.logError("nonFatalError \(finalDescription)", category: .general)
     }
 }

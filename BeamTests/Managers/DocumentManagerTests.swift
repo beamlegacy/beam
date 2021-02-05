@@ -1,3 +1,5 @@
+// swiftlint:disable file_length
+
 import Foundation
 import XCTest
 import Fakery
@@ -20,7 +22,7 @@ class DocumentManagerTests: CoreDataTests {
 
         // We don't want to be authenticated when running test on our desktop
         // Xcode while being authenticated in the app
-        Persistence.Authentication.accessToken = nil
+        Persistence.cleanUp()
     }
 
     override func tearDownWithError() throws {

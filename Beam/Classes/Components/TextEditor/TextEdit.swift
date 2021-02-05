@@ -75,16 +75,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
         // Remove all subsciptions:
         noteCancellables = []
-
-        // Subscribe to the note's changes
-        note.$changed
-            .dropFirst(1)
-            .debounce(for: .seconds(1), scheduler: RunLoop.main)
-            .sink { [unowned self] _ in
-                guard let note = note as? BeamNote else { return }
-                note.detectLinkedNotes(documentManager)
-                note.save(documentManager: self.documentManager)
-            }.store(in: &noteCancellables)
     }
 
     private var noteCancellables = [AnyCancellable]()
@@ -380,7 +370,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         return super.resignFirstResponder()
     }
 
-    //swiftlint:disable cyclomatic_complexity function_body_length
+    // swiftlint:disable:next cyclomatic_complexity function_body_length
     func pressEnter(_ option: Bool, _ command: Bool) {
         guard let node = node as? TextNode else { return }
         guard !node.readOnly else { return }
@@ -1189,7 +1179,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                 }
                 return TextNode(editor: self, element: element)
             }
-            return TextRoot(editor: self, element: note)
+            return TextRoot(editor: self, element: note, journalMode: showTitle)
         }()
 
         accessingMapping = true

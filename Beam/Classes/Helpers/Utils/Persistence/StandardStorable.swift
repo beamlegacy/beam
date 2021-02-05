@@ -3,7 +3,7 @@ import Foundation
 @propertyWrapper
 struct StandardStorable<T> {
     let key: String
-    private let store = UserDefaults.standard
+    private let store = UserDefaults(suiteName: Configuration.env) ?? UserDefaults.standard
 
     init(_ key: String) {
         self.key = key

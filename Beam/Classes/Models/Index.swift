@@ -32,7 +32,7 @@ let gRemoveDiacritics = true
 
 extension IndexDocument {
     init(source: String, title: String, language: NLLanguage? = nil, contents: String, outboundLinks: [String] = []) {
-        self.id = LinkStore.createIdFor(source)
+        self.id = LinkStore.createIdFor(source, title: title)
         self.title = title
         self.language = language ?? (NLLanguageRecognizer.dominantLanguage(for: contents) ?? .undetermined)
         self.outboundLinks = outboundLinks.compactMap({ link -> UInt64? in

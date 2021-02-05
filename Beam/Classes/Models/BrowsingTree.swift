@@ -36,8 +36,8 @@ class BrowsingNode: ObservableObject, Codable {
         events.append(ReadingEvent(type: type, date: date))
     }
 
-    init(parent: BrowsingNode?, url: String) {
-        self.link = LinkStore.createIdFor(url)
+    init(parent: BrowsingNode?, url: String, title: String?) {
+        self.link = LinkStore.createIdFor(url, title: title)
         self.parent = parent
     }
 
@@ -135,11 +135,11 @@ class BrowsingTree: ObservableObject, Codable {
         return current
     }
 
-    func navigateTo(url link: String) {
+    func navigateTo(url link: String, title: String?) {
         guard current.link != LinkStore.getIdFor(link) else { return }
         Logger.shared.logInfo("navigateFrom \(currentLink) to \(link)", category: .web)
         current.addEvent(.navigateToLink)
-        let node = BrowsingNode(parent: current, url: link)
+        let node = BrowsingNode(parent: current, url: link, title: title)
         current.children.append(node)
         current = node
         current.addEvent(.startReading)

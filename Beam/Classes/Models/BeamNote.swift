@@ -3,15 +3,10 @@
 //
 //  Created by Sebastien Metrot on 18/09/2020.
 //
+// swiftlint:disable file_length
 
 import Foundation
 import Combine
-
-extension Data {
-    var asString: String? {
-        String(data: self, encoding: .utf8)
-    }
-}
 
 struct VisitedPage: Codable, Identifiable {
     var id: UUID = UUID()
@@ -124,29 +119,32 @@ class BeamNote: BeamElement {
     private func observeDocumentChange(documentManager: DocumentManager) {
         return
         guard let docStruct = documentStruct else { return }
-        activeDocumentCancellable = documentManager.onDocumentChange(docStruct, completionHandler: { [unowned self] docStruct in
-            // reload self
-            changePropagationEnabled = false
-            defer {
-                changePropagationEnabled = true
+
+        activeDocumentCancellable = documentManager.onDocumentChange(docStruct) { [unowned self] docStruct in
+            DispatchQueue.main.async {
+                // reload self
+                changePropagationEnabled = false
+                defer {
+                    changePropagationEnabled = true
+                }
+
+                let decoder = JSONDecoder()
+                guard let newSelf = try? decoder.decode(BeamNote.self, from: docStruct.data) else {
+                    Logger.shared.logError("Unable to decode new documentStruct \(docStruct.title)",
+                                           category: .document)
+                    return
+                }
+
+                self.title = newSelf.title
+                self.type = newSelf.type
+                self.outLinks = newSelf.outLinks
+                self.searchQueries = newSelf.searchQueries
+                self.visitedSearchResults = newSelf.visitedSearchResults
+                self.browsingSessions = newSelf.browsingSessions
+
+                recursiveUpdate(other: newSelf)
             }
-
-            let decoder = JSONDecoder()
-            guard let newSelf = try? decoder.decode(BeamNote.self, from: docStruct.data) else {
-                Logger.shared.logError("Unable to decode new documentStruct \(docStruct.title)", category: .document)
-                return
-            }
-
-            self.title = newSelf.title
-            self.type = newSelf.type
-            self.outLinks = newSelf.outLinks
-            self.searchQueries = newSelf.searchQueries
-            self.visitedSearchResults = newSelf.visitedSearchResults
-            self.browsingSessions = newSelf.browsingSessions
-
-            recursiveUpdate(other: newSelf)
-//            merge(other: newSelf)
-        })
+        }
     }
 
     func merge(other: BeamNote) {
@@ -174,6 +172,7 @@ class BeamNote: BeamElement {
             return
         }
 
+        Logger.shared.logDebug("BeamNote wants to save: \(title)", category: .document)
         documentManager.saveDocument(documentStruct) { result in
             completion?(result)
         }
@@ -267,14 +266,23 @@ class BeamNote: BeamElement {
             .dropFirst(1)
             .debounce(for: .seconds(2), scheduler: RunLoop.main)
 //            .throttle(for: .seconds(2), scheduler: RunLoop.main, latest: false)
+            .receive(on: DispatchQueue.main)
             .sink { [weak note] _ in
                 let documentManager = DocumentManager()
-                note?.detectLinkedNotes(documentManager)
+
+                guard let note = note else { return }
+                note.detectLinkedNotes(documentManager)
                 // TODO: we should only save when changes occured
-                note?.save(documentManager: documentManager)
+                note.save(documentManager: documentManager)
             }
+        note.observeDocumentChange(documentManager: AppDelegate.main.data.documentManager)
 
         fetchedNotes[note.title] = note
+    }
+
+    static func clearCancellables() {
+        fetchedNotesCancellables.removeAll()
+        fetchedNotes.removeAll()
     }
 
     override func childChanged(_ child: BeamElement) {
@@ -319,6 +327,7 @@ class BeamNote: BeamElement {
     static var linkDetectionRunning = false
     static func requestLinkDetection() {
         guard !linkDetectionRunning else { return }
+        linkDetectionRunning = true
         for note in Self.fetchedNotes.values {
             note.detectLinkedNotes(AppDelegate.main.data.documentManager)
         }
@@ -326,12 +335,15 @@ class BeamNote: BeamElement {
         linkDetectionQueue.async {
             let documentManager = DocumentManager()
             detectLinks(documentManager)
+            DispatchQueue.main.async {
+                linkDetectionRunning = false
+            }
         }
     }
 
     static func detectLinks(_ documentManager: DocumentManager) {
         let allNotes = documentManager.allDocumentsTitles()
-        print("Detect links for \(allNotes.count) notes")
+        Logger.shared.logInfo("Detect links for \(allNotes.count) notes", category: .document)
         for noteName in allNotes {
             guard let doc = documentManager.loadDocumentByTitle(title: noteName) else {
                 continue

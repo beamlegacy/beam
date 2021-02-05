@@ -9,6 +9,7 @@ notarize:
   only:
     - merge_requests
     - master
+    - develop
   script:
     - ./scripts/build_dmg.sh
     - bundle exec fastlane notarize_build

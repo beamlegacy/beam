@@ -108,6 +108,11 @@ extension BeamText {
 
 // High level manipulation:
 extension BeamText {
+    var linkCharacterSet: CharacterSet {
+        // only refuse new line characters
+        CharacterSet.newlines.inverted
+    }
+
     @discardableResult mutating func makeInternalLink(_ range: Swift.Range<Int>) -> Bool {
         let text = self.extract(range: range)
         let t = text.text
@@ -136,8 +141,6 @@ extension BeamText {
         while link.contains("  ") {
             link = link.replacingOccurrences(of: "  ", with: " ")
         }
-        var linkCharacterSet = CharacterSet.alphanumerics
-        linkCharacterSet.insert(" ")
         guard linkCharacterSet.isSuperset(of: CharacterSet(charactersIn: link)) else {
 //            Logger.shared.logError("makeInternalLink for range: \(range) failed: forbidden characters in range", category: .document)
             return false
