@@ -20,6 +20,10 @@ struct BeamSearchBox: View {
             HStack {
                 if isEditing || state.mode == .today {
                     OmniBarSearchBox(isEditing: $isEditing)
+                        .onTapGesture(perform: {
+                            state.focusOmniBox = true
+                            isEditing = true
+                        })
                 } else {
                     Spacer()
                         .frame(height: 28)
@@ -38,10 +42,6 @@ struct BeamSearchBox: View {
                 }
                 .buttonStyle(RoundRectButtonStyle())
             }.padding(.leading, 9)
-            .onTapGesture(perform: {
-                state.focusOmniBox = true
-                isEditing = true
-            })
         }
     }
 
@@ -51,7 +51,6 @@ struct BeamSearchBox: View {
 
     func startQuery() {
         withAnimation {
-            //print("searchText activated: \(searchText)")
             if state.searchQuery.isEmpty {
                 state.currentNote = nil
             } else {
@@ -77,6 +76,7 @@ struct OmniBarSearchBox: View {
 
                 RoundedRectangle(cornerRadius: _cornerRadius)
                     .stroke(Color.accentColor.opacity(0.5), lineWidth: isEditing ? 2.5 : 0)
+                    .animation(.easeIn)
                     .frame(maxWidth: .infinity, maxHeight: 28)
 
                 HStack {
