@@ -14,27 +14,27 @@ latest="${latest#\"}"
 latest="${latest/.*}"
 echo "pipeline " ${CI_PIPELINE_ID} " coverage value = " $latest
 
-# get coverage for master
-echo "Will fetch https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/pipelines?ref=master&status=success"
+# get coverage for develop
+echo "Will fetch https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/pipelines?ref=develop&status=success"
 
-tmp=`curl -s --header "Authorization: Bearer ${GITLAB_ACCESS_TOKEN}" https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/pipelines\?ref\=master\&status\=success | jq '.[0] | .id'`
+tmp=`curl -s --header "Authorization: Bearer ${GITLAB_ACCESS_TOKEN}" https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/pipelines\?ref\=develop\&status\=success | jq '.[0] | .id'`
 
 # pass that into the curl below
 echo "Will fetch https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/pipelines/${tmp}"
-master=`curl -s --header "Authorization: Bearer ${GITLAB_ACCESS_TOKEN}" https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/pipelines/${tmp} | jq '.coverage'`
-echo "master coverage = " $master
-master="${master%\"}"
-master="${master#\"}"
-master="${master/.*}"
-echo "master coverage value =" $master
+develop=`curl -s --header "Authorization: Bearer ${GITLAB_ACCESS_TOKEN}" https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/pipelines/${tmp} | jq '.coverage'`
+echo "develop coverage = " $develop
+develop="${develop%\"}"
+develop="${develop#\"}"
+develop="${develop/.*}"
+echo "develop coverage value =" $develop
 
-# if latest >= master exit 0
-if [ "$latest" -ge "$master" ]
+# if latest >= develop exit 0
+if [ "$latest" -ge "$develop" ]
 then
-  echo "Latest pipeline coverage >= master"
+  echo "Latest pipeline coverage >= develop"
   exit 0
 # else exit 1
 else
-  echo "Latest pipeline coverage < master"
+  echo "Latest pipeline coverage < develop"
   exit 1
 fi

@@ -56,7 +56,9 @@ public class BeamData: ObservableObject {
 
         updateNoteCount()
 
-        self.$lastChangedElement.sink { element in
+        self.$lastChangedElement
+            .receive(on: DispatchQueue.main)
+            .sink { element in
             guard let element = element else { return }
             guard let note = element.note else { return }
 

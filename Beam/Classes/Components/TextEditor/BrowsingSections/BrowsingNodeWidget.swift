@@ -42,7 +42,9 @@ class BrowsingNodeWidget: Widget {
             self.open = value
         }))
 
-        browsingNode.$children.sink { [weak self] _ in
+        browsingNode.$children
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
             guard let self = self else { return }
             self.updateChildrenNodes()
         }.store(in: &scope)
