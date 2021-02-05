@@ -12,7 +12,7 @@ enum NoteType: String, Codable {
 
 public struct DocumentStruct {
     let id: UUID
-    let title: String
+    var title: String
     let createdAt: Date
     var updatedAt: Date
     var deletedAt: Date?
@@ -108,6 +108,11 @@ class DocumentManager {
                 for document in documents where document.id == documentStruct.id {
                     Logger.shared.logDebug("onDocumentChange: \(document.title)", category: .coredata)
                     Logger.shared.logDebug(document.data?.asString ?? "-", category: .documentDebug)
+
+                    let keys = Array(document.changedValues().keys)
+                    guard keys != ["beam_api_data"] else {
+                        return
+                    }
 
                     completionHandler(DocumentStruct(document: document))
                 }
