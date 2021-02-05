@@ -11,7 +11,7 @@ import Combine
 
 struct JournalView: View {
     var journal: [BeamNote]
-    var journals: [BeamNote] { journal }
+    var journals: [BeamNote] { [journal.first!] }
     var offset: CGFloat
 
     var body: some View {
@@ -27,6 +27,7 @@ struct JournalView: View {
             }
             .padding(.top, offset)
         }
+        .accessibility(identifier: "journalView")
         .clipped()
     }
 }

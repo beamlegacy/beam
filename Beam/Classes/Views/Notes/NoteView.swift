@@ -42,7 +42,9 @@ struct NoteView: View {
                 leadingAlignment: leadingAlignement,
                 footerHeight: 60,
                 showTitle: showTitle
-                ).animation(.none)
+                )
+                .accessibility(identifier: "noteView")
+                .animation(.none)
             } else {
                 BTextEdit(
                     note: note,
