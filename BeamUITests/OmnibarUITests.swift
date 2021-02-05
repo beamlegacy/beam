@@ -9,7 +9,7 @@ import XCTest
 
 class Omnibar: XCTestCase {
 
-    private let app = XCUIApplication()
+    let app = XCUIApplication()
 
     override func setUp() {
         super.setUp()
@@ -66,7 +66,7 @@ class Omnibar: XCTestCase {
         XCTAssertEqual(emptyText, "")
     }
 
-    func testDeleteCharactersInOmnibar() {
+    func testOmnibarDeleteCharacters() {
         let textField = app.textFields["omniBarSearchBox"]
 
         XCTAssert(textField.exists)
@@ -94,7 +94,7 @@ class Omnibar: XCTestCase {
         XCTAssert(autocomplete.exists)
     }
 
-    func testOmnibarCanNavigateThroughTheAutoComplete() {
+    func testOmnibarNavigateThroughTheAutoComplete() {
         let textField = app.textFields["omniBarSearchBox"]
 
         XCTAssert(textField.exists)
@@ -109,7 +109,7 @@ class Omnibar: XCTestCase {
         XCTAssert(app.staticTexts["selected"].exists)
     }
 
-    func testOmnibarCanPressEnterAndSwitchMode() {
+    func testOmnibarPressEnterAndSwitchMode() {
         let textField = app.textFields["omniBarSearchBox"]
 
         XCTAssert(textField.exists)
