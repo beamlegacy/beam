@@ -129,7 +129,7 @@ class Omnibar: XCTestCase {
         XCTAssert(app.images["browserTabBarView"].waitForExistence(timeout: 2))
         XCTAssert(app.groups["webView"].exists)
 
-        testOmnibarCommonRightButtonsExist()
+        checkCommonRightButtonsExist()
         XCTAssert(app.buttons["note"].exists)
 
         app.buttons["note"].click()
@@ -145,11 +145,11 @@ class Omnibar: XCTestCase {
     }
 
     func testOmnibarRightNetworkButtonExist() {
-        testOmnibarCommonRightButtonsExist()
+        checkCommonRightButtonsExist()
         XCTAssert(app.buttons["network"].exists)
     }
 
-    func testOmnibarCommonRightButtonsExist() {
+    func checkCommonRightButtonsExist() {
         XCTAssert(app.buttons["magnifyingglass"].exists)
         XCTAssert(app.buttons["newSearch"].exists)
     }
