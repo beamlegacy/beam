@@ -8,13 +8,13 @@ import Nimble
 import Combine
 import Alamofire
 
-// MARK: -
-// MARK: Network tests
 @testable import Beam
 // swiftlint:disable:next type_body_length
 class DocumentManagerNetworkTests: QuickSpec {
     // MARK: Properties
     var sut: DocumentManager!
+    var helper: DocumentManagerTestsHelper!
+
     lazy var coreDataManager = {
         CoreDataManager()
     }()
@@ -25,7 +25,7 @@ class DocumentManagerNetworkTests: QuickSpec {
     // swiftlint:disable:next function_body_length
     override func spec() {
         beforeEach {
-            self.login()
+            self.helper.login()
         }
 
         afterEach {
@@ -43,28 +43,36 @@ class DocumentManagerNetworkTests: QuickSpec {
             }
             CoreDataManager.shared = self.coreDataManager
             self.sut = DocumentManager(coreDataManager: self.coreDataManager)
+            self.helper = DocumentManagerTestsHelper(documentManager: self.sut,
+                                                     coreDataManager: self.coreDataManager)
+
+            waitUntil { done in
+                self.sut.deleteAllDocuments(includedRemote: false) { _ in
+                    done()
+                }
+            }
 
             // Try to avoid issues with BeamTextTests creating documents when parsing links
             BeamNote.clearCancellables()
         }
 
         afterSuite {
-            self.logout()
+            self.helper.logout()
         }
 
         describe(".refreshDocuments()") {
             var docStruct: DocumentStruct!
             afterEach {
                 // Not to leave any on the server
-                self.deleteDocumentStruct(docStruct)
+                self.helper.deleteDocumentStruct(docStruct)
             }
 
             context("when remote has the same updatedAt") {
                 beforeEach {
                     BeamDate.freeze()
-                    docStruct = self.createDocumentStruct()
-                    self.saveLocally(docStruct)
-                    self.saveRemotely(docStruct)
+                    docStruct = self.helper.createDocumentStruct()
+                    self.helper.saveLocally(docStruct)
+                    self.helper.saveRemotely(docStruct)
                 }
 
                 afterEach {
@@ -87,8 +95,8 @@ class DocumentManagerNetworkTests: QuickSpec {
 
             context("when remote document doesn't exist") {
                 beforeEach {
-                    docStruct = self.createDocumentStruct()
-                    self.saveLocally(docStruct)
+                    docStruct = self.helper.createDocumentStruct()
+                    self.helper.saveLocally(docStruct)
                 }
 
                 it("flags the local document as deleted") {
@@ -117,7 +125,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                     let ancestor = "1\n2\n3"
                     let newRemote = "1\n2\n3\n4"
                     beforeEach {
-                        docStruct = self.createLocalAndRemoteVersions(ancestor, newRemote: newRemote)
+                        docStruct = self.helper.createLocalAndRemoteVersions(ancestor, newRemote: newRemote)
                     }
 
                     afterEach {
@@ -146,7 +154,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                     let merged = "0\n1\n2\n3\n4\n"
 
                     beforeEach {
-                        docStruct = self.createLocalAndRemoteVersions(ancestor, newLocal: newLocal, newRemote: newRemote)
+                        docStruct = self.helper.createLocalAndRemoteVersions(ancestor, newLocal: newLocal, newRemote: newRemote)
                     }
 
                     afterEach {
@@ -176,7 +184,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                 let newLocal = "2\n2\n3\n"
 
                 beforeEach {
-                    docStruct = self.createLocalAndRemoteVersions(ancestor, newLocal: newLocal, newRemote: newRemote)
+                    docStruct = self.helper.createLocalAndRemoteVersions(ancestor, newLocal: newLocal, newRemote: newRemote)
                 }
 
                 afterEach {
@@ -205,15 +213,15 @@ class DocumentManagerNetworkTests: QuickSpec {
             var docStruct: DocumentStruct!
             afterEach {
                 // Not to leave any on the server
-                self.deleteDocumentStruct(docStruct)
+                self.helper.deleteDocumentStruct(docStruct)
             }
 
             context("when remote has the same updatedAt") {
                 beforeEach {
                     BeamDate.freeze()
-                    docStruct = self.createDocumentStruct()
-                    self.saveLocally(docStruct)
-                    self.saveRemotely(docStruct)
+                    docStruct = self.helper.createDocumentStruct()
+                    self.helper.saveLocally(docStruct)
+                    self.helper.saveRemotely(docStruct)
                 }
 
                 afterEach {
@@ -242,7 +250,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                     let ancestor = "1\n2\n3"
                     let newRemote = "1\n2\n3\n4"
                     beforeEach {
-                        docStruct = self.createLocalAndRemoteVersions(ancestor, newRemote: newRemote)
+                        docStruct = self.helper.createLocalAndRemoteVersions(ancestor, newRemote: newRemote)
                     }
 
                     afterEach {
@@ -271,7 +279,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                     let merged = "0\n1\n2\n3\n4\n"
 
                     beforeEach {
-                        docStruct = self.createLocalAndRemoteVersions(ancestor, newLocal: newLocal, newRemote: newRemote)
+                        docStruct = self.helper.createLocalAndRemoteVersions(ancestor, newLocal: newLocal, newRemote: newRemote)
                     }
 
                     afterEach {
@@ -299,8 +307,8 @@ class DocumentManagerNetworkTests: QuickSpec {
 
             context("when remote document doesn't exist") {
                 beforeEach {
-                    docStruct = self.createDocumentStruct()
-                    self.saveLocally(docStruct)
+                    docStruct = self.helper.createDocumentStruct()
+                    self.helper.saveLocally(docStruct)
                 }
 
                 it("doesn't refresh the local document") {
@@ -318,10 +326,13 @@ class DocumentManagerNetworkTests: QuickSpec {
         }
 
         describe(".saveDocument()") {
-            var docStruct = createDocumentStruct()
+            var docStruct: DocumentStruct!
+            beforeEach {
+                docStruct = self.helper.createDocumentStruct()
+            }
             afterEach {
                 // Not to leave any on the server
-                self.deleteDocumentStruct(docStruct)
+                self.helper.deleteDocumentStruct(docStruct)
             }
 
             context("with network") {
@@ -339,7 +350,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                     }
 
                     it("saves the document on the API") {
-                        self.saveLocally(docStruct)
+                        self.helper.saveLocally(docStruct)
 
                         waitUntil { done in
                             self.sut.saveDocumentStructOnAPI(docStruct) { result in
@@ -349,7 +360,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                             }
                         }
 
-                        expect(self.fetchOnAPI(docStruct)?.id).to(equal(docStruct.uuidString))
+                        expect(self.helper.fetchOnAPI(docStruct)?.id).to(equal(docStruct.uuidString))
                     }
                 }
 
@@ -359,7 +370,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                     let newLocal = "2\n2\n3\n"
 
                     beforeEach {
-                        docStruct = self.createLocalAndRemoteVersions(ancestor, newLocal: newLocal, newRemote: newRemote)
+                        docStruct = self.helper.createLocalAndRemoteVersions(ancestor, newLocal: newLocal, newRemote: newRemote)
                     }
 
                     afterEach {
@@ -387,7 +398,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                         // The API returns an old version if asked too quickly, a bit of latency helps... :(
                         var succeeded = false
                         for _ in 0...3 {
-                            let remoteStruct = self.fetchOnAPI(docStruct)
+                            let remoteStruct = self.helper.fetchOnAPI(docStruct)
                             expect(remoteStruct?.id).to(equal(docStruct.uuidString))
                             if remoteStruct?.data == newLocal {
                                 succeeded = true
@@ -407,7 +418,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                     let merged = "0\n1\n2\n3\n4\n"
 
                     beforeEach {
-                        docStruct = self.createLocalAndRemoteVersions(ancestor, newLocal: newLocal, newRemote: newRemote)
+                        docStruct = self.helper.createLocalAndRemoteVersions(ancestor, newLocal: newLocal, newRemote: newRemote)
                     }
 
                     afterEach {
@@ -435,7 +446,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                         // The API returns an old version if asked too quickly, a bit of latency helps... :(
                         var succeeded = false
                         for _ in 0...5 {
-                            let remoteStruct = self.fetchOnAPI(docStruct)
+                            let remoteStruct = self.helper.fetchOnAPI(docStruct)
                             expect(remoteStruct?.id).to(equal(docStruct.uuidString))
                             if remoteStruct?.data == merged {
                                 succeeded = true
@@ -449,142 +460,5 @@ class DocumentManagerNetworkTests: QuickSpec {
                 }
             }
         }
-    }
-
-    private func login() {
-        let accountManager = AccountManager()
-        let email = "fabien+test@beamapp.co"
-        let password = Configuration.testAccountPassword
-
-        guard !AuthenticationManager.shared.isAuthenticated else { return }
-
-        waitUntil { done in
-            accountManager.signIn(email, password) { _ in
-                done()
-            }
-        }
-    }
-
-    private func logout() {
-        guard AuthenticationManager.shared.isAuthenticated else { return }
-
-        AccountManager.logout()
-    }
-
-    private func deleteDocumentStruct(_ docStruct: DocumentStruct) {
-        waitUntil { done in
-            self.sut.deleteDocument(id: docStruct.id) { result in
-                expect { try result.get() }.toNot(throwError())
-                expect { try result.get() }.to(beTrue())
-                done()
-            }
-        }
-    }
-
-    private let faker = Faker(locale: "en-US")
-    private func createDocumentStruct(_ document: String? = nil) -> DocumentStruct {
-        let document = document ?? "whatever binary data"
-
-        //swiftlint:disable:next force_try
-        let jsonData = try! self.defaultEncoder().encode(document)
-
-        let id = UUID()
-        let title = faker.zelda.game() + " " + randomString(length: 40)
-        let docStruct = DocumentStruct(id: id,
-                                       title: title,
-                                       createdAt: BeamDate.now,
-                                       updatedAt: BeamDate.now,
-                                       data: jsonData,
-                                       documentType: .note)
-
-        return docStruct
-    }
-
-    private func saveLocally(_ docStruct: DocumentStruct) {
-        // The call to `saveDocumentStructOnAPI` expect the document to be already saved locally
-        waitUntil { done in
-            // To force a local save only, while using the standard code
-            Configuration.networkEnabled = false
-            self.sut.saveDocument(docStruct) { _ in
-                Configuration.networkEnabled = true
-                done()
-            }
-        }
-    }
-
-    private func saveRemotely(_ docStruct: DocumentStruct) {
-        waitUntil { done in
-            self.sut.saveDocumentStructOnAPI(docStruct) { _ in
-                done()
-            }
-        }
-    }
-
-    private func saveRemotelyOnly(_ docStruct: DocumentStruct) {
-        waitUntil { done in
-            self.sut.documentRequest.saveDocument(docStruct.asApiType()) { _ in
-                done()
-            }
-        }
-    }
-
-    private func fetchOnAPI(_ docStruct: DocumentStruct) -> DocumentAPIType? {
-        var documentAPIType: DocumentAPIType?
-        waitUntil { done in
-            self.sut.documentRequest.fetchDocument(docStruct.uuidString) { result in
-                documentAPIType = try? result.get()
-                done()
-            }
-        }
-
-        return documentAPIType
-    }
-
-    private func createLocalAndRemoteVersions(_ ancestor: String,
-                                              newLocal: String? = nil,
-                                              newRemote: String? = nil) -> DocumentStruct {
-        BeamDate.travel(-600)
-        var docStruct = self.createDocumentStruct()
-        docStruct.data = ancestor.asData
-        // Save document locally + remotely
-        self.saveLocally(docStruct)
-        self.saveRemotely(docStruct)
-
-        if let newLocal = newLocal {
-            // Force to locally save an older version of the document
-            BeamDate.travel(2)
-            docStruct.updatedAt = BeamDate.now
-            docStruct.data = newLocal.asData
-            docStruct.previousData = ancestor.asData
-            self.saveLocally(docStruct)
-        }
-
-        if let newRemote = newRemote {
-            // Generates a new version on the API side only
-            BeamDate.travel(2)
-            var newDocStruct = docStruct.copy()
-            newDocStruct.data = newRemote.asData
-            newDocStruct.updatedAt.addTimeInterval(2)
-            self.saveRemotelyOnly(newDocStruct)
-        }
-
-        return docStruct
-    }
-
-    private func defaultDecoder() -> JSONDecoder {
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-        return decoder
-    }
-
-    private func defaultEncoder() -> JSONEncoder {
-        let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
-        return encoder
-    }
-
-    private func randomString(length: Int) -> String {
-      let letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-      return String((0..<length).map { _ in letters.randomElement()! })
     }
 }

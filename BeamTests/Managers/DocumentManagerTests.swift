@@ -8,273 +8,247 @@ import Nimble
 import Combine
 
 @testable import Beam
-class DocumentManagerTests: CoreDataTests {
-    let faker = Faker(locale: "en-US")
-
-    // MARK: Properties
+class DocumentManagerTests: QuickSpec {
     var sut: DocumentManager!
+    var helper: DocumentManagerTestsHelper!
 
-    // MARK: - Lifecycle
-    override func setUp() {
-        super.setUp()
-
-        sut = DocumentManager(coreDataManager: coreDataManager)
-
-        // We don't want to be authenticated when running test on our desktop
-        // Xcode while being authenticated in the app
-        Persistence.cleanUp()
-    }
-
-    override func tearDownWithError() throws {
-    }
-
-    func defaultDecoder() -> JSONDecoder {
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-        return decoder
-    }
-
-    func defaultEncoder() -> JSONEncoder {
-        let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
-        return encoder
-    }
-
-    // MARK: - Tests
-    func testSave() throws {
-        let document = "whatever binary data"
-
-        //swiftlint:disable:next force_try
-        let jsonData = try! self.defaultEncoder().encode(document)
-
-        let id = UUID()
-        let title = faker.zelda.game()
-        let docStruct = DocumentStruct(id: id,
-                                       title: title,
-                                       createdAt: Date(),
-                                       updatedAt: Date(),
-                                       data: jsonData,
-                                       documentType: .note)
-
-        waitUntil { [unowned self] done in
-            self.sut.saveDocument(docStruct) { _ in
-                done()
-            }
-        }
-
-        let count = Document.countWithPredicate(self.context,
-                                                NSPredicate(format: "id = %@", id as CVarArg))
-        expect(count).to(equal(1))
-    }
-
-    func testLoad() throws {
-        let data = "whatever binary data"
-
-        //swiftlint:disable:next force_try
-        let jsonData = try! self.defaultEncoder().encode(data)
-        let id = UUID()
-        let title = faker.zelda.game()
-
-        let docStruct = DocumentStruct(id: id,
-                                       title: title,
-                                       createdAt: Date(),
-                                       updatedAt: Date(),
-                                       data: jsonData,
-                                       documentType: .note)
-
-        waitUntil { [unowned self] done in
-            self.sut.saveDocument(docStruct) { _ in
-                done()
-            }
-        }
-
-        var document = self.sut.loadDocumentById(id: id)
-        expect(document).toNot(beNil())
-
-        document = self.sut.loadDocumentByTitle(title: title)
-        expect(document).toNot(beNil())
-
-        //swiftlint:disable:next force_cast
-        //swiftlint:disable:next force_try
-        let result = try! self.defaultDecoder().decode(String.self, from: document!.data)
-
-        expect(result).to(equal(data))
-    }
-
-    func testDelete() throws {
-        let data = "whatever binary data"
-
-        let id = UUID()
-        let title = faker.zelda.game()
-        //swiftlint:disable force_try
-        let jsonData = try! self.defaultEncoder().encode(data)
-
-        let docStruct = DocumentStruct(id: id,
-                                       title: title,
-                                       createdAt: Date(),
-                                       updatedAt: Date(),
-                                       data: jsonData,
-                                       documentType: .note)
-
-        waitUntil { [unowned self] done in
-            self.sut.saveDocument(docStruct) { _ in
-                done()
-            }
-        }
-
-        var count = Document.countWithPredicate(self.context, NSPredicate(format: "id = %@", id as
-                                                                            CVarArg))
-        expect(count).to(equal(1))
-
-        waitUntil { [unowned self] done in
-            self.sut.deleteDocument(id: id) { _ in
-                done()
-            }
-        }
-
-        count = Document.countWithPredicate(self.context, NSPredicate(format: "id = %@", id as
-                                                                            CVarArg))
-
-        expect(count).to(equal(0))
-    }
+    lazy var coreDataManager = {
+        CoreDataManager()
+    }()
+    lazy var mainContext = {
+        coreDataManager.mainContext
+    }()
 
     // swiftlint:disable:next function_body_length
-    func testDuplicateTitles() throws {
-        let data = "whatever binary data"
+    override func spec() {
+        beforeSuite {
+            // Setup CoreData
+            self.coreDataManager.setup()
+            waitUntil { done in
+                self.coreDataManager.destroyPersistentStore {
+                    self.coreDataManager.setup()
+                    done()
+                }
+            }
+            CoreDataManager.shared = self.coreDataManager
+            self.sut = DocumentManager(coreDataManager: self.coreDataManager)
+            self.helper = DocumentManagerTestsHelper(documentManager: self.sut,
+                                                     coreDataManager: self.coreDataManager)
+            self.helper.logout()
 
-        //swiftlint:disable:next force_try
-        var jsonData = try! self.defaultEncoder().encode(data)
-
-        let id = UUID()
-        let title = faker.zelda.game()
-
-        let docStruct = DocumentStruct(id: id,
-                                       title: title,
-                                       createdAt: Date(),
-                                       updatedAt: Date(),
-                                       data: jsonData,
-                                       documentType: .note)
-
-        waitUntil { [unowned self] done in
-            self.sut.saveDocument(docStruct) { result in
-                expect { try result.get() }.toNot(throwError())
-                done()
+            waitUntil { done in
+                self.sut.deleteAllDocuments(includedRemote: false) { _ in
+                    done()
+                }
             }
         }
 
-        //swiftlint:disable:next force_try
-        jsonData = try! self.defaultEncoder().encode(data)
+        describe(".saveDocument()") {
+            it("saves document") {
+                let docStruct = self.helper.createDocumentStruct()
+                waitUntil { done in
+                    self.sut.saveDocument(docStruct) { _ in
+                        done()
+                    }
+                }
 
-        var docStruct2 = DocumentStruct(id: UUID(),
-                                        title: title,
-                                        createdAt: Date(),
-                                        updatedAt: Date(),
-                                        data: jsonData,
-                                        documentType: .note)
+                let count = Document.countWithPredicate(self.mainContext,
+                                                        NSPredicate(format: "id = %@", docStruct.id as CVarArg))
+                expect(count).to(equal(1))
+            }
 
-        waitUntil { [unowned self] done in
-            self.sut.saveDocument(docStruct2) { result in
-                expect { try result.get() }.to(throwError())
-                done()
+            context("with duplicate titles") {
+                it("should raise error") {
+                    let docStruct = self.helper.createDocumentStruct()
+                    self.helper.saveLocally(docStruct)
+
+                    var docStruct2 = self.helper.createDocumentStruct()
+                    docStruct2.title = docStruct.title
+
+                    waitUntil { done in
+                        self.sut.saveDocument(docStruct2) { result in
+                            expect { try result.get() }.to(throwError())
+                            done()
+                        }
+                    }
+
+                    docStruct2.deletedAt = Date()
+
+                    waitUntil { [unowned self] done in
+                        self.sut.saveDocument(docStruct2) { result in
+                            expect { try result.get() }.toNot(throwError())
+                            done()
+                        }
+                    }
+
+                    let count = Document.rawCountWithPredicate(self.mainContext,
+                                                           NSPredicate(format: "title = %@", docStruct.title),
+                                                           onlyNonDeleted: false)
+                    expect(count).to(equal(2))
+                }
             }
         }
 
-        var count = Document.countWithPredicate(self.context,
-                                                NSPredicate(format: "id = %@", id as CVarArg))
-        expect(count).to(equal(1))
+        describe(".loadDocumentById()") {
+            it("loads document") {
+                let docStruct = self.helper.createDocumentStruct()
+                self.helper.saveLocally(docStruct)
 
-        docStruct2.deletedAt = Date()
-
-        waitUntil { [unowned self] done in
-            self.sut.saveDocument(docStruct2, completion: { result in
-                expect { try result.get() }.toNot(throwError())
-                done()
-            })
+                let document = self.sut.loadDocumentById(id: docStruct.id)
+                expect(document).toNot(beNil())
+                expect(document?.title).to(equal(docStruct.title))
+                expect(document?.data).to(equal(docStruct.data))
+            }
         }
 
-        count = Document.rawCountWithPredicate(self.context,
-                                               NSPredicate(format: "title = %@", title),
-                                               onlyNonDeleted: false)
-        expect(count).to(equal(2))
-    }
+        describe(".loadDocumentByTitle()") {
+            it("loads document") {
+                let docStruct = self.helper.createDocumentStruct()
+                self.helper.saveLocally(docStruct)
 
-    func testDocumentCreate() throws {
-        let title = faker.zelda.game()
-        let documentStruct = sut.create(title: title)
-        expect(documentStruct?.title).to(equal(title))
-    }
+                let document = self.sut.loadDocumentByTitle(title: docStruct.title)
+                expect(document).toNot(beNil())
+                expect(document?.id).to(equal(docStruct.id))
+                expect(document?.data).to(equal(docStruct.data))
+            }
+        }
 
-    func testDocumentCreateAsync() throws {
-        let title = faker.zelda.game()
+        describe(".delete()") {
+            it("deletes document") {
+                let docStruct = self.helper.createDocumentStruct()
+                self.helper.saveLocally(docStruct)
+                waitUntil { [unowned self] done in
+                    self.sut.deleteDocument(id: docStruct.id) { _ in
+                        done()
+                    }
+                }
 
-        waitUntil { [unowned self] done in
-            self.sut.createAsync(title: title) { documentStruct in
+                let count = Document.countWithPredicate(self.mainContext,
+                                                        NSPredicate(format: "id = %@", docStruct.id as
+                                                                        CVarArg))
+
+                expect(count).to(equal(0))
+            }
+        }
+
+        describe(".create()") {
+            it("creates document") {
+                let title = self.helper.title()
+                let docStruct = self.sut.create(title: title)!
+                expect(docStruct.title).to(equal(title))
+                let count = Document.countWithPredicate(self.mainContext,
+                                                        NSPredicate(format: "id = %@", docStruct.id as CVarArg))
+
+                expect(count).to(equal(1))
+            }
+        }
+
+        describe(".createAsync()") {
+            it("creates document") {
+                let title = self.helper.title()
+
+                waitUntil { [unowned self] done in
+                    self.sut.createAsync(title: title) { docStruct in
+                        expect(docStruct?.title).to(equal(title))
+                        done()
+                    }
+                }
+            }
+        }
+
+        describe(".fetchOrCreate()") {
+            it("creates the document once") {
+                let title = self.helper.title()
+                let documentStruct = self.sut.fetchOrCreate(title: title)
                 expect(documentStruct?.title).to(equal(title))
-                done()
+
+                let documentStruct2 = self.sut.fetchOrCreate(title: title)
+                expect(documentStruct2?.title).to(equal(title))
+
+                expect(documentStruct?.id).notTo(beNil())
+                expect(documentStruct?.id).to(equal(documentStruct2?.id))
             }
         }
-    }
 
-    func testDocumentFetchOrCreate() throws {
-        let title = faker.zelda.game()
-        let documentStruct = sut.fetchOrCreate(title: title)
-        expect(documentStruct?.title).to(equal(title))
+        describe(".fetchOrCreateAsync()") {
+            it("fetches asynchronisely") {
+                let title = self.helper.title()
 
-        let documentStruct2 = sut.fetchOrCreate(title: title)
-        expect(documentStruct2?.title).to(equal(title))
-
-        expect(documentStruct?.id).notTo(beNil())
-        expect(documentStruct?.id).to(equal(documentStruct2?.id))
-    }
-
-    func testDocumentFetchOrCreateAsync() throws {
-        let title = faker.zelda.game()
-
-        waitUntil { [unowned self] done in
-            self.sut.fetchOrCreateAsync(title: title) { documentStruct in
-                expect(documentStruct?.title).to(equal(title))
-                done()
-            }
-        }
-    }
-
-    func testDocumentCreateAsync2() throws {
-        // Just a simple example showing the use of semaphores to wait for async jobs
-        let semaphore = DispatchSemaphore(value: 0)
-        let title = faker.zelda.game()
-
-        sut.createAsync(title: title) { documentStruct in
-            XCTAssertEqual(documentStruct?.title, title)
-            semaphore.signal()
-        }
-
-        semaphore.wait()
-    }
-
-    func testOnDocumentUpdate() throws {
-        let title = faker.zelda.game()
-        let newTitle = "a new title"
-        expect(title).toNot(equal(newTitle))
-        let document = Document.create(context, title: title)
-        document.data = Data()
-        //swiftlint:disable:next force_try
-        try! context.save()
-
-        let documentStruct = sut.loadDocumentById(id: document.id)!
-
-        waitUntil { [unowned self] done in
-            let cancellable = self.sut.onDocumentChange(documentStruct) { updatedDocumentStruct in
-                expect(documentStruct.id).to(equal(updatedDocumentStruct.id))
-                expect(updatedDocumentStruct.title).to(equal(newTitle))
-                done()
+                waitUntil { [unowned self] done in
+                    self.sut.fetchOrCreateAsync(title: title) { documentStruct in
+                        expect(documentStruct?.title).to(equal(title))
+                        done()
+                    }
+                }
             }
 
-            document.title = newTitle
-            //swiftlint:disable:next force_try
-            try! context.save()
+            context("with semaphore") {
+                it("fetches async") {
+                    // Just a simple example showing the use of semaphores to wait for async jobs
+                    let semaphore = DispatchSemaphore(value: 0)
+                    let title = self.helper.title()
 
-            // To avoid warning
-            cancellable.cancel()
+                    self.sut.createAsync(title: title) { documentStruct in
+                        XCTAssertEqual(documentStruct?.title, title)
+                        semaphore.signal()
+                    }
+
+                    semaphore.wait()
+                }
+            }
+        }
+
+        describe(".onDocumentChange()") {
+            it("calls handler on document updates") {
+                var docStruct = self.helper.createDocumentStruct()
+                self.helper.saveLocally(docStruct)
+
+                let newTitle = self.helper.title()
+
+                var cancellable: AnyCancellable!
+                waitUntil { done in
+                    cancellable = self.sut.onDocumentChange(docStruct) { updatedDocStruct in
+                        expect(docStruct.id).to(equal(updatedDocStruct.id))
+                        expect(updatedDocStruct.title).to(equal(newTitle))
+                        cancellable.cancel() // To avoid a warning
+                        done()
+                    }
+
+                    docStruct.title = newTitle
+                    self.sut.saveDocument(docStruct) { result in
+                        expect { try result.get() }.toNot(throwError())
+                        expect { try result.get() }.to(beTrue())
+                    }
+                }
+            }
+
+            it("doesn't call handler if beam_api_data only is modified") {
+                let docStruct = self.helper.createDocumentStruct()
+                self.helper.saveLocally(docStruct)
+                let newData = "another data"
+                var cancellable: AnyCancellable!
+                waitUntil { done in
+                    cancellable = self.sut.onDocumentChange(docStruct) { updatedDocStruct in
+                        expect(docStruct.id).to(equal(updatedDocStruct.id))
+                        expect(updatedDocStruct.data).to(equal(newData.asData))
+                        expect(updatedDocStruct.previousData).to(equal(newData.asData))
+                        cancellable.cancel() // To avoid a warning
+                        done()
+                    }
+
+                    let document = Document.fetchWithId(self.mainContext, docStruct.id)!
+                    document.beam_api_data = newData.asData
+                    //swiftlint:disable:next force_try
+                    try! self.mainContext.save()
+
+                    // Note: waitUntil fails if done() is called more than once, I use this to trigger
+                    // one event and get out of the waitUntil loop.
+                    // TL;DR: this will fail if `save()` generates 2 callbacks in `onDocumentChange`
+                    document.data = newData.asData
+                    //swiftlint:disable:next force_try
+                    try! self.mainContext.save()
+                }
+            }
         }
     }
 }
