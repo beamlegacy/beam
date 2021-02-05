@@ -10,6 +10,9 @@ import SwiftUI
 import Combine
 
 struct JournalView: View {
+    @State var isEditing = false
+
+    var data: BeamData
     var journal: [BeamNote]
     var journals: [BeamNote] { [journal.first!] }
     var offset: CGFloat
@@ -19,12 +22,21 @@ struct JournalView: View {
             VStack {
                 ForEach(journals) { note in
                     NoteView(note: note,
-                         leadingAlignement: 185,
-                         showTitle: true,
-                         scrollable: false
+                             onStartEditing: {
+                                isEditing = true
+                             },
+                             leadingAlignement: 185,
+                             showTitle: true,
+                             scrollable: false
                     )
                 }
             }
+            .background(GeometryReader { geo -> Color in
+                if geo.frame(in: .global).origin.y > 5 {
+                    data.updateJournal(with: 2, and: journals.count)
+                }
+                return Color.clear
+            })
             .padding(.top, offset)
         }
         .accessibility(identifier: "journalView")

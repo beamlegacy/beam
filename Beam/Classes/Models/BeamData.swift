@@ -100,13 +100,12 @@ public class BeamData: ObservableObject {
             _todaysNote?.type = .journal
         }
 
-        updateJournal()
+        updateJournal(with: 2, and: journal.count)
     }
 
-    func updateJournal() {
-        var _journal = BeamNote.fetchNotesWithType(documentManager, type: .journal)
-        _journal.insert(todaysNote, at: 0)
-        journal = _journal
+    func updateJournal(with limit: Int = 0, and fetchOffset: Int = 0) {
+        let _journal = BeamNote.fetchNotesWithType(documentManager, type: .journal, limit, fetchOffset)
+        journal.append(contentsOf: _journal)
     }
 
     func updateNoteCount() {
