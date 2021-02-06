@@ -96,10 +96,13 @@ public class BeamData: ObservableObject {
 
     func setupJournal() {
         _todaysNote = BeamNote.fetchOrCreate(documentManager, title: todaysName)
-        if _todaysNote?.type != .journal {
-            _todaysNote?.type = .journal
+        if let today = _todaysNote {
+            if today.type != .journal {
+                today.type = .journal
+            }
+            journal.append(today)
         }
-
+        
         updateJournal(with: 2, and: journal.count)
     }
 

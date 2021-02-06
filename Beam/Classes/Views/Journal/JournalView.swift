@@ -14,13 +14,12 @@ struct JournalView: View {
 
     var data: BeamData
     var journal: [BeamNote]
-    var journals: [BeamNote] { [journal.first!] }
     var offset: CGFloat
 
     var body: some View {
         ScrollView([.vertical]) {
             VStack {
-                ForEach(journals) { note in
+                ForEach(journal) { note in
                     NoteView(note: note,
                              onStartEditing: {
                                 isEditing = true
@@ -32,8 +31,10 @@ struct JournalView: View {
                 }
             }
             .background(GeometryReader { geo -> Color in
-                if geo.frame(in: .global).origin.y > 5 {
-                    data.updateJournal(with: 2, and: journals.count)
+                let totalJournal = data.documentManager.countDocumentsWithType(type: .journal)
+                if geo.frame(in: .global).origin.y > 5
+                    && totalJournal != journal.count {
+                    data.updateJournal(with: 2, and: journal.count)
                 }
                 return Color.clear
             })

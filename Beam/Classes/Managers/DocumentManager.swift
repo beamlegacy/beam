@@ -396,6 +396,11 @@ class DocumentManager {
         }
     }
 
+    func countDocumentsWithType(type: DocumentType) -> Int {
+        return Document.countWithPredicate(mainContext, NSPredicate(format: "document_type = %ld", type.rawValue))
+    }
+
+
     func documentsWithTitleMatch(title: String) -> [DocumentStruct] {
         return Document.fetchAllWithTitleMatch(mainContext, title).compactMap { document -> DocumentStruct? in
             parseDocumentBody(document)

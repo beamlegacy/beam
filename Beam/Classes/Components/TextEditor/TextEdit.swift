@@ -1179,7 +1179,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                 }
                 return TextNode(editor: self, element: element)
             }
-            return TextRoot(editor: self, element: note, journalMode: showTitle)
+            return TextRoot(editor: self, element: note)
         }()
 
         accessingMapping = true
