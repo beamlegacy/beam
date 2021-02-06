@@ -16,12 +16,14 @@ struct Chevrons: View {
                 Button(action: goBack) {
                     Symbol(name: "chevron.left")
                 }
+                .accessibility(identifier: "goBack")
                 .buttonStyle(RoundRectButtonStyle())
                 .disabled(!state.canGoBack)
 
                 Button(action: goForward) {
                     Symbol(name: "chevron.right")
                 }
+                .accessibility(identifier: "goForward")
                 .buttonStyle(RoundRectButtonStyle())
                 .disabled(!state.canGoForward)
             }

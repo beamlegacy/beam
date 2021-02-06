@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Combine
 
 public class BeamData: ObservableObject {
     var _todaysNote: BeamNote?
@@ -22,11 +23,12 @@ public class BeamData: ObservableObject {
     var index: Index
     var scores = Scores()
     @Published var noteCount = 0
-
+    @Published var lastChangedElement: BeamElement?
     @Published var showTabStats = false
 
     var cookies: HTTPCookieStorage
     var documentManager: DocumentManager
+    var scope = Set<AnyCancellable>()
 
     static var dataFolder: String {
         let paths = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true)
@@ -53,6 +55,16 @@ public class BeamData: ObservableObject {
         cookies = HTTPCookieStorage()
 
         updateNoteCount()
+
+        self.$lastChangedElement
+            .receive(on: DispatchQueue.main)
+            .sink { element in
+            guard let element = element else { return }
+            guard let note = element.note else { return }
+
+            //BeamNote.detectLinks(self.documentManager)
+            element.connectUnlinkedElement(note.title, Array(BeamNote.fetchedNotes.keys))
+        }.store(in: &scope)
     }
 
     func saveData() {
@@ -84,17 +96,19 @@ public class BeamData: ObservableObject {
 
     func setupJournal() {
         _todaysNote = BeamNote.fetchOrCreate(documentManager, title: todaysName)
-        if _todaysNote?.type != .journal {
-            _todaysNote?.type = .journal
+        if let today = _todaysNote {
+            if today.type != .journal {
+                today.type = .journal
+            }
+            journal.append(today)
         }
-
-        updateJournal()
+        
+        updateJournal(with: 2, and: journal.count)
     }
 
-    func updateJournal() {
-        var _journal = BeamNote.fetchNotesWithType(documentManager, type: .journal)
-        _journal.insert(todaysNote, at: 0)
-        journal = _journal
+    func updateJournal(with limit: Int = 0, and fetchOffset: Int = 0) {
+        let _journal = BeamNote.fetchNotesWithType(documentManager, type: .journal, limit, fetchOffset)
+        journal.append(contentsOf: _journal)
     }
 
     func updateNoteCount() {

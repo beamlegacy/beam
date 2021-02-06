@@ -38,6 +38,7 @@ struct ModeView: View {
                             if let tab = state.currentTab {
                                 ZStack {
                                     WebView(webView: tab.webView)
+                                        .accessibility(identifier: "webView")
 
                                     if data.showTabStats, let score = tab.score {
                                         TabStats(score: score)
@@ -58,7 +59,7 @@ struct ModeView: View {
                         .animation(.easeInOut(duration: 0.3))
                     case .today:
                         GeometryReader { geometry in
-                            JournalView(journal: state.data.journal, offset: geometry.size.height * 0.4)
+                            JournalView(data: state.data,journal: state.data.journal, offset: geometry.size.height * 0.4)
                         }
                     }
 
@@ -68,6 +69,7 @@ struct ModeView: View {
                                 .frame(minHeight: 20, maxHeight: 250, alignment: .top)
                                 .zIndex(2)
                         }
+                        .accessibility(identifier: "autoCompleteView")
                     }
                 }
             }

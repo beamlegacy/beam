@@ -234,17 +234,40 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
         return hasher.combine(id)
     }
 
-    func connectUnlinkedNotes(_ thisNoteTitle: String, _ allNotes: [BeamNote]) {
-        for note in allNotes where thisNoteTitle != note.title {
-            let existingLinks = text.internalLinks.map { range -> String in range.string }
-            if text.text.contains(note.title) && !existingLinks.contains(note.title) {
-                note.addUnlinkedReference(NoteReference(noteName: thisNoteTitle, elementID: id))
+    func getDeepUnlinkedReferences(_ thisNoteTitle: String, _ allNames: [String]) -> [String: [NoteReference]] {
+        var references = getUnlinkedReferences(thisNoteTitle, allNames)
+        for c in children {
+            for res in c.getDeepUnlinkedReferences(thisNoteTitle, allNames) {
+                references[res.key] = (references[res.key] ?? []) + res.value
+            }
+        }
+
+        return references
+    }
+
+    func getUnlinkedReferences(_ thisNoteTitle: String, _ allNames: [String]) -> [String: [NoteReference]] {
+        var references = [String: [NoteReference]]()
+        let existingLinks = text.internalLinks.map { range -> String in range.string }
+        let string = text.text
+
+        for noteName in allNames where thisNoteTitle != noteName {
+            if !existingLinks.contains(noteName), string.contains(noteName) {
+                let ref = NoteReference(noteName: thisNoteTitle, elementID: id)
+                references[noteName] = (references[noteName] ?? []) + [ref]
 //                Logger.shared.logInfo("New unlink \(thisNoteTitle) --> \(note.title)", category: .document)
             }
         }
 
-        for c in children {
-            c.connectUnlinkedNotes(thisNoteTitle, allNotes)
+        return references
+    }
+
+    func connectUnlinkedElement(_ thisNoteTitle: String, _ allNames: [String]) {
+        let results = getUnlinkedReferences(thisNoteTitle, allNames)
+        for (name, refs) in results {
+            let note = BeamNote.fetchOrCreate(AppDelegate.main.data.documentManager, title: name)
+            for ref in refs {
+                note.addUnlinkedReference(ref)
+            }
         }
     }
 
@@ -255,12 +278,15 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
         updateDate = Date()
         changed += 1
 
-        parent?.childChanged()
+        parent?.childChanged(self)
     }
 
-    func childChanged() {
-        change()
-        parent?.childChanged()
+    func childChanged(_ child: BeamElement) {
+        guard changePropagationEnabled else { return }
+        updateDate = Date()
+        changed += 1
+
+        parent?.childChanged(self)
     }
 
     func findElement(_ id: UUID) -> BeamElement? {
@@ -292,6 +318,7 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
         }
     }
 
+    // TODO: use this for smart merging
     func recursiveUpdate(other: BeamElement) {
         assert(other.id == id)
 
@@ -340,4 +367,12 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
         }
     }
 
+    var flatElements: [BeamElement] {
+        var elems = children
+        for c in children {
+            elems += c.flatElements
+        }
+
+        return elems
+    }
 }

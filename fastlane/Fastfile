@@ -100,7 +100,7 @@ platform :mac do
                 profile_filename: "development.co.beamapp.macos.mobileprovision",
                 code_sign_identity: "Mac Developer",
                 profile_name: "Beam Development",
-                build_configurations: ["Debug"])
+                build_configurations: ["Test"])
     run_tests(
       scheme: "Beam",
       output_types: "junit",

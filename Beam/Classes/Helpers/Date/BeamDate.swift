@@ -9,7 +9,7 @@ class BeamDate {
 
     static func travel(_ duration: TimeInterval) {
         // Force storing the value of time
-        currentDate = now
+        currentDate = currentDate ?? now
 
         currentDate?.addTimeInterval(duration)
     }

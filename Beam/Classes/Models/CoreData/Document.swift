@@ -72,9 +72,12 @@ class Document: NSManagedObject {
         return 0
     }
 
-    class func fetchFirst(context: NSManagedObjectContext, _ predicate: NSPredicate? = nil, _ sortDescriptors: [NSSortDescriptor]? = nil) -> Document? {
+    class func fetchFirst(context: NSManagedObjectContext,
+                          _ predicate: NSPredicate? = nil,
+                          _ sortDescriptors: [NSSortDescriptor]? = nil,
+                          onlyNonDeleted: Bool = true) -> Document? {
         let fetchRequest: NSFetchRequest<Document> = Document.fetchRequest()
-        fetchRequest.predicate = onlyNonDeletedPredicate(predicate)
+        fetchRequest.predicate = onlyNonDeleted ? onlyNonDeletedPredicate(predicate) : predicate
         fetchRequest.fetchLimit = 1
         fetchRequest.sortDescriptors = sortDescriptors
 
@@ -92,11 +95,12 @@ class Document: NSManagedObject {
         return fetchAllWithLimit(context: context, predicate, sortDescriptors)
     }
 
-    class func fetchAllWithLimit(context: NSManagedObjectContext, _ predicate: NSPredicate? = nil, _ sortDescriptors: [NSSortDescriptor]? = nil, _ limit: Int = 0) -> [Document] {
+    class func fetchAllWithLimit(context: NSManagedObjectContext, _ predicate: NSPredicate? = nil, _ sortDescriptors: [NSSortDescriptor]? = nil, _ limit: Int = 0, _ fetchOffset: Int = 0) -> [Document] {
         let fetchRequest: NSFetchRequest<Document> = Document.fetchRequest()
         fetchRequest.predicate = onlyNonDeletedPredicate(predicate)
         fetchRequest.fetchLimit = limit
         fetchRequest.sortDescriptors = sortDescriptors
+        fetchRequest.fetchOffset = fetchOffset
 
         do {
             let fetchedDocuments = try context.fetch(fetchRequest)
@@ -109,8 +113,30 @@ class Document: NSManagedObject {
         return []
     }
 
+    class func fetchAllNames(context: NSManagedObjectContext, _ predicate: NSPredicate? = nil, _ sortDescriptors: [NSSortDescriptor]? = nil) -> [String] {
+        return fetchAllNamesWithLimit(context: context, predicate, sortDescriptors)
+    }
+
+    class func fetchAllNamesWithLimit(context: NSManagedObjectContext, _ predicate: NSPredicate? = nil, _ sortDescriptors: [NSSortDescriptor]? = nil, _ limit: Int = 0) -> [String] {
+        let fetchRequest: NSFetchRequest<Document> = Document.fetchRequest()
+        fetchRequest.predicate = onlyNonDeletedPredicate(predicate)
+        fetchRequest.fetchLimit = limit
+        fetchRequest.sortDescriptors = sortDescriptors
+        fetchRequest.propertiesToFetch = ["title"]
+
+        do {
+            let fetchedDocuments = try context.fetch(fetchRequest)
+            return fetchedDocuments.compactMap { $0.title }
+        } catch {
+            // TODO: raise error?
+            Logger.shared.logError("Can't fetch all: \(error)", category: .coredata)
+        }
+
+        return []
+    }
+
     class func fetchWithId(_ context: NSManagedObjectContext, _ id: UUID) -> Document? {
-        return fetchFirst(context: context, NSPredicate(format: "id = %@", id as CVarArg))
+        return fetchFirst(context: context, NSPredicate(format: "id = %@", id as CVarArg), onlyNonDeleted: false)
     }
 
     class func fetchOrCreateWithId(_ context: NSManagedObjectContext, _ id: UUID) -> Document {
@@ -129,6 +155,10 @@ class Document: NSManagedObject {
 
     class func fetchAllWithType(_ context: NSManagedObjectContext, _ type: Int16) -> [Document] {
         return fetchAll(context: context, NSPredicate(format: "document_type = \(type)"))
+    }
+
+    class func fetchWithTypeAndLimit(context: NSManagedObjectContext, _ type: Int16, _ limit: Int, _ fetchOffset: Int) -> [Document] {
+        return fetchAllWithLimit(context: context, NSPredicate(format: "document_type = \(type)"), [NSSortDescriptor(key: "created_at", ascending: false)], limit, fetchOffset)
     }
 
     class func fetchAllWithTitleMatch(_ context: NSManagedObjectContext, _ title: String) -> [Document] {

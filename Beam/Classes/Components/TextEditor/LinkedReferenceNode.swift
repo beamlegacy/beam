@@ -50,27 +50,37 @@ class ProxyElement: BeamElement {
     init(for element: BeamElement) {
         self.proxy = element
         super.init(proxy.text)
-        proxy.$children.sink { [unowned self] newChildren in
+        proxy.$children
+            .receive(on: DispatchQueue.main)
+            .sink { [unowned self] newChildren in
             updating = true; defer { updating = false }
             self.updateProxyChildren(newChildren)
         }.store(in: &scope)
 
-        proxy.$text.sink { [unowned self] newValue in
+        proxy.$text
+            .receive(on: DispatchQueue.main)
+            .sink { [unowned self] newValue in
             updating = true; defer { updating = false }
             text = newValue
         }.store(in: &scope)
 
-        proxy.$kind.sink { [unowned self] newValue in
+        proxy.$kind
+            .receive(on: DispatchQueue.main)
+            .sink { [unowned self] newValue in
             updating = true; defer { updating = false }
             kind = newValue
         }.store(in: &scope)
 
-        proxy.$childrenFormat.sink { [unowned self] newValue in
+        proxy.$childrenFormat
+            .receive(on: DispatchQueue.main)
+            .sink { [unowned self] newValue in
             updating = true; defer { updating = false }
             childrenFormat = newValue
         }.store(in: &scope)
 
-        proxy.$updateDate.sink { [unowned self] newValue in
+        proxy.$updateDate
+            .receive(on: DispatchQueue.main)
+            .sink { [unowned self] newValue in
             updating = true; defer { updating = false }
             updateDate = newValue
         }.store(in: &scope)
@@ -112,6 +122,7 @@ class LinkedReferenceNode: TextNode {
         open = true
 
         element.$children
+            .receive(on: DispatchQueue.main)
             .sink { [unowned self] newChildren in
                 self.children = newChildren.compactMap({ e -> LinkedReferenceNode? in
                     let ref = editor.nodeFor(e)

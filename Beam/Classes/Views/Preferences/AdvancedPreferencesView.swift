@@ -75,6 +75,15 @@ struct AdvancedPreferencesView: View {
         }
     }
 
+    private var NetworkEnabledButton: some View {
+        Button(action: {
+            Configuration.networkEnabled = !Configuration.networkEnabled
+            networkEnabled = Configuration.networkEnabled
+        }, label: {
+            Text(String(describing: networkEnabled)).frame(minWidth: 100)
+        })
+    }
+
     private var ResetAPIEndpointsButton: some View {
         Button(action: {
             Configuration.reset()
@@ -104,15 +113,6 @@ struct AdvancedPreferencesView: View {
             // TODO: loc
             Text("Copy Access Token").frame(minWidth: 100)
         }).disabled(!loggedIn)
-    }
-
-    private var NetworkEnabledButton: some View {
-        Button(action: {
-            Configuration.networkEnabled = !Configuration.networkEnabled
-            networkEnabled = Configuration.networkEnabled
-        }, label: {
-            Text(String(describing: networkEnabled)).frame(minWidth: 100)
-        })
     }
 }
 

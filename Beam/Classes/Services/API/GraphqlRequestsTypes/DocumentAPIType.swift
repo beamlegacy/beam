@@ -16,13 +16,10 @@ class DocumentAPIType: Codable {
         id = document.uuidString
         createdAt = document.created_at
         updatedAt = document.updated_at
+        deletedAt = document.deleted_at
         documentType = document.document_type
         previousChecksum = document.data?.MD5
-
-        if let documentData = document.data,
-           let documentParsedData = String(data: documentData, encoding: .utf8) {
-            data = documentParsedData
-        }
+        data = document.data?.asString
     }
 
     init(document: DocumentStruct) {
@@ -31,11 +28,9 @@ class DocumentAPIType: Codable {
         createdAt = document.createdAt
         updatedAt = document.updatedAt
         deletedAt = document.deletedAt
-        previousChecksum = document.previousChecksum
-
-        if let documentParsedData = String(data: document.data, encoding: .utf8) {
-            data = documentParsedData
-        }
+        documentType = document.documentType.rawValue
+        previousChecksum = document.previousChecksum ?? document.previousData?.MD5
+        data = document.data.asString
     }
 
     init(id: String) {

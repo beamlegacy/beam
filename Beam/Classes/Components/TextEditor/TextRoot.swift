@@ -69,6 +69,9 @@ public class TextRoot: TextNode {
         set {
             assert(newValue >= 0)
             state.cursorPosition = newValue
+            if state.selectedTextRange.isEmpty {
+                state.selectedTextRange = newValue ..< newValue
+            }
             updateTextAttributesAtCursorPosition()
             let n = node as? TextNode
             n?.invalidateText()
@@ -143,7 +146,7 @@ public class TextRoot: TextNode {
 
     override init(editor: BeamTextEdit, element: BeamElement) {
         self.note = element as? BeamNote
-        if let note = note {
+        if let note = note, note.type != .journal {
             topSpacerWidget = SpacerWidget(editor: editor, spacerType: .top)
             linksSection = LinksSection(editor: editor, note: note, mode: .links)
             middleSpacerWidget = SpacerWidget(editor: editor, spacerType: .middle)
@@ -154,6 +157,7 @@ public class TextRoot: TextNode {
 
         super.init(editor: editor, element: element)
         self.selfVisible = false
+        self.cursor = .arrow
 
         self.text = BeamText()
 

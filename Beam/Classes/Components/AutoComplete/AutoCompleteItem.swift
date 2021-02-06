@@ -32,6 +32,7 @@ struct AutoCompleteItem: View {
                         .font(.system(size: 11)).fontWeight(.bold)
                         .frame(height: 17, alignment: .leading)
                         .foregroundColor(selected ? .white :  Color(.editorTextColor))
+                        .accessibility(identifier: selected ? "selected": "noSelected")
                     Divider()
                 }
             }
@@ -40,6 +41,7 @@ struct AutoCompleteItem: View {
                 .font(.system(size: 11)).fontWeight(.semibold)
                 .frame(height: 17, alignment: .leading)
                 .foregroundColor(selected ? .white :  Color(.editorTextColor))
+                .accessibility(identifier: selected ? "selected": "noSelected")
 
         }
         .frame(maxWidth: .infinity, alignment: .leading)
