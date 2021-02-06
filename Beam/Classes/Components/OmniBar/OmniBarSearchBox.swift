@@ -20,6 +20,10 @@ struct BeamSearchBox: View {
             HStack {
                 if isEditing || state.mode == .today {
                     OmniBarSearchBox(isEditing: $isEditing)
+                        .onTapGesture(perform: {
+                            state.focusOmniBox = true
+                            isEditing = true
+                        })
                 } else {
                     Spacer()
                         .frame(height: 28)
@@ -29,6 +33,7 @@ struct BeamSearchBox: View {
                 Button(action: isEditing ? startQuery : startNewSearch) {
                     Symbol(name: "magnifyingglass")
                 }
+                .accessibility(identifier: "magnifyingglass")
                 .disabled(!canSearch)
                 .buttonStyle(RoundRectButtonStyle())
                 .padding(.leading, 1)
@@ -36,12 +41,9 @@ struct BeamSearchBox: View {
                 Button(action: startNewSearch) {
                     Symbol(name: "plus")
                 }
+                .accessibility(identifier: "newSearch")
                 .buttonStyle(RoundRectButtonStyle())
             }.padding(.leading, 9)
-            .onTapGesture(perform: {
-                state.focusOmniBox = true
-                isEditing = true
-            })
         }
     }
 
@@ -51,7 +53,6 @@ struct BeamSearchBox: View {
 
     func startQuery() {
         withAnimation {
-            //print("searchText activated: \(searchText)")
             if state.searchQuery.isEmpty {
                 state.currentNote = nil
             } else {
@@ -77,6 +78,7 @@ struct OmniBarSearchBox: View {
 
                 RoundedRectangle(cornerRadius: _cornerRadius)
                     .stroke(Color.accentColor.opacity(0.5), lineWidth: isEditing ? 2.5 : 0)
+                    .animation(.easeIn)
                     .frame(maxWidth: .infinity, maxHeight: 28)
 
                 HStack {
@@ -115,6 +117,7 @@ struct OmniBarSearchBox: View {
                             }
                         }
                     )
+                    .accessibility(identifier: "omniBarSearchBox")
                     .padding(.leading, 10)
                     .padding(.trailing, 5)
 
@@ -124,10 +127,7 @@ struct OmniBarSearchBox: View {
                         .offset(x: -7)
                         .animation(.default)
                         .opacity(isEditing && !state.searchQuery.isEmpty ? 1 : 0)
-                        .onTapGesture(count: 1) {
-                            resetSearchQuery()
-                            NSApp.mainWindow?.makeFirstResponder(nil)
-                        }
+                        .accessibility(identifier: "clearTextField")
                 }
             }
         }

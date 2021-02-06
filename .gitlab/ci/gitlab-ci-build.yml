@@ -8,6 +8,7 @@ build:macos:
   only:
     - merge_requests
     - master
+    - develop
   script:
     - time make build_libgit2
     - time bundle exec fastlane beta

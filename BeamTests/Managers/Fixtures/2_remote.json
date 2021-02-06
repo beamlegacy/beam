@@ -1,0 +1,97 @@
+{
+  "id" : "0C6EF0BD-34D5-41F7-AA4B-1733C5F1BEE2",
+  "visitedSearchResults" : [
+
+  ],
+  "type" : "journal",
+  "title" : "2 February 2021",
+  "searchQueries" : [
+
+  ],
+  "open" : true,
+  "text" : {
+    "ranges" : [
+      {
+        "string" : ""
+      }
+    ]
+  },
+  "readOnly" : false,
+  "children" : [
+    {
+      "creationDate" : 633968299.10672104,
+      "id" : "564AE6B3-7D3B-4A5E-8D7D-E16E7D749D34",
+      "readOnly" : false,
+      "score" : 0,
+      "open" : true,
+      "text" : {
+        "ranges" : [
+          {
+            "string" : "1234567890123"
+          }
+        ]
+      }
+    },
+    {
+      "creationDate" : 633968567.43707299,
+      "id" : "CD85ADF6-99E2-4FCF-8E4F-6091EB7D838E",
+      "readOnly" : false,
+      "score" : 0,
+      "open" : true,
+      "text" : {
+        "ranges" : [
+          {
+            "string" : "789"
+          }
+        ]
+      }
+    },
+    {
+      "creationDate" : 633969044.03888702,
+      "id" : "7FA319BB-CF57-493D-ADDE-51A8CC9E1DA8",
+      "readOnly" : false,
+      "score" : 0,
+      "open" : true,
+      "text" : {
+        "ranges" : [
+          {
+            "string" : "123"
+          }
+        ]
+      }
+    },
+    {
+      "creationDate" : 633968343.86239505,
+      "id" : "A94F6DB7-F4FC-4EF3-ABC4-32E0AF33B132",
+      "readOnly" : false,
+      "score" : 0,
+      "open" : true,
+      "text" : {
+        "ranges" : [
+          {
+            "string" : "123"
+          }
+        ]
+      }
+    },
+    {
+      "creationDate" : 633969046.89193904,
+      "id" : "D247F78C-4BB2-40E9-8C63-28A104AB7C33",
+      "readOnly" : false,
+      "score" : 0,
+      "open" : true,
+      "text" : {
+        "ranges" : [
+          {
+            "string" : "234"
+          }
+        ]
+      }
+    }
+  ],
+  "outLinks" : [
+
+  ],
+  "score" : 5.0999975204467773,
+  "creationDate" : 633968299.05032897
+}

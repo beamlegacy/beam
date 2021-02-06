@@ -103,7 +103,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             backForwardList = web.backForwardList
             self.webView = web
         }
-        browsingTree = BrowsingTree(BrowsingNode(parent: nil, url: originalQuery))
+        browsingTree = BrowsingTree(BrowsingNode(parent: nil, url: originalQuery, title: nil))
 
         super.init(frame: NSRect())
         note?.browsingSessions.append(browsingTree)
@@ -336,8 +336,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         guard let url = webView.url else { return }
-        browsingTree.navigateTo(url: url.absoluteString)
-
+        browsingTree.navigateTo(url: url.absoluteString, title: webView.title)
         Readability.read(webView) { [weak self] result in
             guard let self = self else { return }
 

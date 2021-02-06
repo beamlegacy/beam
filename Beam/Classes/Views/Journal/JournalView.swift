@@ -12,26 +12,35 @@ import Combine
 struct JournalView: View {
     @State var isEditing = false
 
+    var data: BeamData
     var journal: [BeamNote]
-    var journals: [BeamNote] { journal }
     var offset: CGFloat
 
     var body: some View {
         ScrollView([.vertical]) {
             VStack {
-                ForEach(journals) { note in
+                ForEach(journal) { note in
                     NoteView(note: note,
-                         onStartEditing: {
-                            isEditing = true
-                         },
-                         leadingAlignement: 185,
-                         showTitle: true,
-                         scrollable: false
+                             onStartEditing: {
+                                isEditing = true
+                             },
+                             leadingAlignement: 185,
+                             showTitle: true,
+                             scrollable: false
                     )
                 }
             }
-            .padding(.top, isEditing ? 0 : offset)
+            .background(GeometryReader { geo -> Color in
+                let totalJournal = data.documentManager.countDocumentsWithType(type: .journal)
+                if geo.frame(in: .global).origin.y > 5
+                    && totalJournal != journal.count {
+                    data.updateJournal(with: 2, and: journal.count)
+                }
+                return Color.clear
+            })
+            .padding(.top, offset)
         }
+        .accessibility(identifier: "journalView")
         .clipped()
     }
 }

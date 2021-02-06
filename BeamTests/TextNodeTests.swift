@@ -135,6 +135,7 @@ class TextNodeTests: XCTestCase {
         let root = editor.rootNode!
         validateRootWithNote(root: root, note: note)
 
+        // swiftlint:disable:next force_cast
         root.element.removeChild((root.children.first as! TextNode).element)
 
         let str1 = """

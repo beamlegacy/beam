@@ -20,6 +20,16 @@ extension String {
 }
 
 class BeamTextTests: XCTestCase {
+    override class func setUp() {
+        // To prevent saving on the API side
+        AccountManager.logout()
+        Configuration.networkEnabled = false
+    }
+
+    override class func tearDown() {
+        Configuration.networkEnabled = true
+    }
+
     // swiftlint:disable:next function_body_length
     func testBasicTextManipulations() {
         var btext = BeamText(text: "some string")

@@ -11,7 +11,7 @@ import Combine
 
 // swiftlint:disable type_body_length
 // swiftlint:disable file_length
-public class Widget: NSObject, CALayerDelegate {
+public class Widget: NSObject, CALayerDelegate, MouseHandler {
     let layer: CALayer
     var debug = false
     var currentFrameInDocument = NSRect()
@@ -49,8 +49,10 @@ public class Widget: NSObject, CALayerDelegate {
     var hover: Bool = false {
         didSet {
             invalidate()
+//            layer.backgroundColor = hover ? NSColor.red.withAlphaComponent(0.3).cgColor : nil
         }
     }
+    var cursor: NSCursor?
 
     internal var children: [Widget] = [] {
         didSet {
@@ -357,15 +359,19 @@ public class Widget: NSObject, CALayerDelegate {
 
     var open: Bool = true {
         didSet {
+            if let chevron = self.layers["disclosure"] as? ChevronButton {
+                chevron.open = open
+            }
             updateChildrenVisibility(visible && open)
             invalidateLayout()
         }
     }
 
+    // TODO: Refactor this in two methods
     func updateChildrenVisibility(_ isVisible: Bool) {
         for c in children {
             c.visible = isVisible
-            c.updateChildrenVisibility(isVisible && open)
+            c.updateChildrenVisibility(isVisible && c.open)
             invalidateLayout()
         }
     }
@@ -440,7 +446,7 @@ public class Widget: NSObject, CALayerDelegate {
         return true
     }
 
-    func nodeAt(point: CGPoint) -> Widget? {
+    func widgetAt(point: CGPoint) -> Widget? {
         guard visible else { return nil }
         guard 0 <= point.y, point.y < frame.height else { return nil }
         if contentsFrame.minY <= point.y, point.y < contentsFrame.maxY {
@@ -449,7 +455,7 @@ public class Widget: NSObject, CALayerDelegate {
 
         for c in children {
             let p = CGPoint(x: point.x - c.frame.origin.x, y: point.y - c.frame.origin.y)
-            if let res = c.nodeAt(point: p) {
+            if let res = c.widgetAt(point: p) {
                 return res
             }
         }
@@ -477,9 +483,16 @@ public class Widget: NSObject, CALayerDelegate {
         layers.removeValue(forKey: name)
     }
 
+    func dispatchHover(_ widgets: Set<Widget>) {
+        hover = widgets.contains(self)
+
+        for c in children {
+            c.dispatchHover(widgets)
+        }
+    }
+
     func dispatchMouseDown(mouseInfo: MouseInfo) -> Widget? {
         guard inVisibleBranch else { return nil }
-        let globalPos = mouseInfo.position
 
         for c in children {
             var i = mouseInfo
@@ -492,7 +505,7 @@ public class Widget: NSObject, CALayerDelegate {
 
         for layer in layers.values where !layer.layer.isHidden {
             let info = MouseInfo(self, layer, mouseInfo)
-            if layer.contains(info) {
+            if layer.contains(info.position) {
                 if layer.mouseDown(info) {
                     return self
                 }
@@ -500,7 +513,7 @@ public class Widget: NSObject, CALayerDelegate {
         }
 
         let rect = NSRect(origin: CGPoint(), size: frame.size)
-        guard rect.contains(globalPos) else {
+        guard rect.contains(mouseInfo.position) else {
             return nil
         }
 
@@ -529,7 +542,7 @@ public class Widget: NSObject, CALayerDelegate {
 
         for layer in layers.values where !layer.layer.isHidden {
             let info = MouseInfo(self, layer, info)
-            if layer.contains(info) && layer.mouseUp(info) {
+            if layer.contains(info.position) && layer.mouseUp(info) {
                 return true
             }
         }
@@ -547,6 +560,28 @@ public class Widget: NSObject, CALayerDelegate {
             i.position.y -= c.frame.origin.y
             c.dispatchMouseMoved(mouseInfo: i)
         }
+    }
+
+    func getWidgetsAt(_ position: NSPoint, _ globalPosition: NSPoint) -> [MouseHandler] {
+        guard inVisibleBranch else { return [] }
+        var handlers: [MouseHandler] = layer.frame.contains(globalPosition) ? [self] : []
+
+        for c in children {
+            var p = position
+            p.x -= c.frame.origin.x
+            p.y -= c.frame.origin.y
+
+            handlers += c.getWidgetsAt(p, globalPosition)
+        }
+
+        for layer in layers.values where !layer.layer.isHidden {
+            let p = MouseInfo.convert(globalPosition: globalPosition, self, layer)
+            if layer.contains(p) {
+                handlers.append(layer)
+            }
+        }
+
+        return handlers
     }
 
     func dispatchMouseDragged(mouseInfo: MouseInfo) -> Widget? {

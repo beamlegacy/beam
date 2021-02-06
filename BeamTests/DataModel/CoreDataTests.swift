@@ -11,6 +11,9 @@ class CoreDataTests: XCTestCase {
     lazy var context = {
         coreDataManager.mainContext
     }()
+    lazy var backgroundContext = {
+        coreDataManager.backgroundContext
+    }()
     override func setUp() {
         super.setUp()
 

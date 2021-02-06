@@ -67,7 +67,9 @@ class BrowsingSection: Widget {
             self.sorted.toggle()
         }), origin: CGPoint(x: 25, y: 0))
 
-        note.$browsingSessions.sink { [weak self] _ in
+        note.$browsingSessions
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
             guard let self = self else { return }
             self.updateChildrenNodes()
         }.store(in: &scope)

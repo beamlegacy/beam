@@ -7,6 +7,7 @@ sentry:
   only:
     - merge_requests
     - master
+    - develop
   script:
     - bundle exec fastlane ping_sentry
   tags:
@@ -31,6 +32,7 @@ s3:
   only:
     - merge_requests
     - master
+    - develop
   script:
     - bundle exec fastlane deploy
   tags:
@@ -51,6 +53,7 @@ delete s3:
     - merge_requests
   except:
     - master
+    - develop
   when: manual
   script:
     - bundle exec fastlane delete_s3

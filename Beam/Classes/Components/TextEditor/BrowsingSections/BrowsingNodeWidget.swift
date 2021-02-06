@@ -42,15 +42,18 @@ class BrowsingNodeWidget: Widget {
             self.open = value
         }))
 
-        browsingNode.$children.sink { [weak self] _ in
+        browsingNode.$children
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
             guard let self = self else { return }
             self.updateChildrenNodes()
         }.store(in: &scope)
 
-        let link = LinkStore.linkFor(browsingNode.link)?.url ?? "<???>"
-        let linkScore = AppDelegate.main.data.scores.scoreCard(for: link)
+        let link = LinkStore.linkFor(browsingNode.link)
+        let linkText = link?.title ?? link?.url ?? "<???>"
+        let linkScore = AppDelegate.main.data.scores.scoreCard(for: link?.url ?? "")
         let score = linkScore.score
-        textLayer.string = "\(score) - \(link)"
+        textLayer.string = "\(score) - \(linkText)"
 
         editor.layer?.addSublayer(layer)
         layer.addSublayer(textLayer)
