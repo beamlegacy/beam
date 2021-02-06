@@ -87,7 +87,6 @@ struct BMTextField: NSViewRepresentable {
             context.coordinator.didBecomeFirstResponder = true
 
             DispatchQueue.main.async {
-                nsView.isEditing = true
                 nsView.becomeFirstResponder()
             }
         }

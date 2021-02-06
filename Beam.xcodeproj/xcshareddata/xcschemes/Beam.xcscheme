@@ -58,11 +58,6 @@
                BlueprintName = "BeamUITests"
                ReferencedContainer = "container:Beam.xcodeproj">
             </BuildableReference>
-            <SkippedTests>
-               <Test
-                  Identifier = "Omnibar/testOmnibarPressEnterAndSwitchMode()">
-               </Test>
-            </SkippedTests>
          </TestableReference>
       </Testables>
    </TestAction>
