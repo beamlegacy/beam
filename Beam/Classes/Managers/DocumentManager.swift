@@ -12,7 +12,7 @@ enum NoteType: String, Codable {
 
 public struct DocumentStruct {
     let id: UUID
-    let title: String
+    var title: String
     let createdAt: Date
     var updatedAt: Date
     var deletedAt: Date?
@@ -108,6 +108,11 @@ class DocumentManager {
                 for document in documents where document.id == documentStruct.id {
                     Logger.shared.logDebug("onDocumentChange: \(document.title)", category: .coredata)
                     Logger.shared.logDebug(document.data?.asString ?? "-", category: .documentDebug)
+
+                    let keys = Array(document.changedValues().keys)
+                    guard keys != ["beam_api_data"] else {
+                        return
+                    }
 
                     completionHandler(DocumentStruct(document: document))
                 }
@@ -385,11 +390,16 @@ class DocumentManager {
         return parseDocumentBody(document)
     }
 
-    func loadDocumentsWithType(type: DocumentType) -> [DocumentStruct] {
-        return Document.fetchAllWithType(mainContext, type.rawValue).compactMap { document -> DocumentStruct? in
+    func loadDocumentsWithType(type: DocumentType, _ limit: Int, _ fetchOffset: Int) -> [DocumentStruct] {
+        return Document.fetchWithTypeAndLimit(context: mainContext, type.rawValue, limit, fetchOffset).compactMap { (document) -> DocumentStruct? in
             parseDocumentBody(document)
         }
     }
+
+    func countDocumentsWithType(type: DocumentType) -> Int {
+        return Document.countWithPredicate(mainContext, NSPredicate(format: "document_type = %ld", type.rawValue))
+    }
+
 
     func documentsWithTitleMatch(title: String) -> [DocumentStruct] {
         return Document.fetchAllWithTitleMatch(mainContext, title).compactMap { document -> DocumentStruct? in

@@ -18,10 +18,13 @@ class BMTextFieldView: NSTextField {
     var placeholderText: String?
     var placeholderColor: NSColor = NSColor.lightGray
 
-    var isEditing = false {
-        didSet {
-            onEditingChanged(isEditing)
-        }
+    var isEditing: Bool {
+        guard let window = window else { return false }
+        guard let responder = window.firstResponder else { return false }
+        guard responder.isKind(of: NSTextView.self) else { return false }
+        guard window.fieldEditor(false, for: nil) != nil else { return false }
+        guard let tfResponder = responder as? NSTextView else { return false }
+        return self === tfResponder.delegate
     }
 
     var onPerformKeyEquivalent: (NSEvent) -> Bool = { _ in return false }
@@ -86,7 +89,6 @@ class BMTextFieldView: NSTextField {
             self.window?.makeFirstResponder(viewBelow)
         }
 
-        isEditing = true
         super.mouseDown(with: event)
     }
 

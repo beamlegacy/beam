@@ -11,8 +11,7 @@
   },
   "properties" : {
     "auto-scaling" : "auto",
-    "compression-type" : "lossless",
-    "preserves-vector-representation" : true,
+    "compression-type" : "automatic",
     "template-rendering-intent" : "template"
   }
 }

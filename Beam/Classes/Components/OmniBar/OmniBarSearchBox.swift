@@ -33,6 +33,7 @@ struct BeamSearchBox: View {
                 Button(action: isEditing ? startQuery : startNewSearch) {
                     Symbol(name: "magnifyingglass")
                 }
+                .accessibility(identifier: "magnifyingglass")
                 .disabled(!canSearch)
                 .buttonStyle(RoundRectButtonStyle())
                 .padding(.leading, 1)
@@ -40,6 +41,7 @@ struct BeamSearchBox: View {
                 Button(action: startNewSearch) {
                     Symbol(name: "plus")
                 }
+                .accessibility(identifier: "newSearch")
                 .buttonStyle(RoundRectButtonStyle())
             }.padding(.leading, 9)
         }
@@ -115,6 +117,7 @@ struct OmniBarSearchBox: View {
                             }
                         }
                     )
+                    .accessibility(identifier: "omniBarSearchBox")
                     .padding(.leading, 10)
                     .padding(.trailing, 5)
 
@@ -124,10 +127,7 @@ struct OmniBarSearchBox: View {
                         .offset(x: -7)
                         .animation(.default)
                         .opacity(isEditing && !state.searchQuery.isEmpty ? 1 : 0)
-                        .onTapGesture(count: 1) {
-                            resetSearchQuery()
-                            NSApp.mainWindow?.makeFirstResponder(nil)
-                        }
+                        .accessibility(identifier: "clearTextField")
                 }
             }
         }
