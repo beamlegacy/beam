@@ -11,7 +11,7 @@ class BidirectionalPopover: Popover {
 
     // MARK: - Properties
     @IBOutlet var containerView: NSView!
-    @IBOutlet weak var collectionView: BEAMCollectionView!
+    @IBOutlet weak var collectionView: BeamCollectionView!
 
     static let viewWidth: CGFloat = 248
     static let viewHeight: CGFloat = 36
