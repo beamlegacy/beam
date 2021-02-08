@@ -7,7 +7,7 @@
 
 import Foundation
 
-class BEAMCollectionView: NSCollectionView {
+class BeamCollectionView: NSCollectionView {
 
     override func becomeFirstResponder() -> Bool {
         return false
