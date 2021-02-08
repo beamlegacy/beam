@@ -26,6 +26,7 @@ extension BeamTextEdit {
 
         popover.didSelectTitle = { [unowned self] (title) -> Void in
             validInternalLink(from: node, title)
+            view.window?.makeFirstResponder(self)
         }
     }
 
