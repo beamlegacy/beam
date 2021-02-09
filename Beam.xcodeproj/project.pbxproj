@@ -190,6 +190,7 @@
 		5281B09425C99D3300DF66D9 /* 2_local.json in Resources */ = {isa = PBXBuildFile; fileRef = 5281B09325C99D3300DF66D9 /* 2_local.json */; };
 		5281B09825C99D4B00DF66D9 /* 2_remote.json in Resources */ = {isa = PBXBuildFile; fileRef = 5281B09725C99D4B00DF66D9 /* 2_remote.json */; };
 		5287EC2F25C42B0100CE1DD9 /* String+UUID.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5287EC2E25C42B0100CE1DD9 /* String+UUID.swift */; };
+		5298649125D151D300D27A80 /* AutoCompleteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5298649025D151D300D27A80 /* AutoCompleteTests.swift */; };
 		52B5EF78252F520100914D52 /* CoreDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52B5EF77252F520100914D52 /* CoreDataTests.swift */; };
 		52C3077B25C311950027C4B1 /* BeamDate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52C3077A25C311950027C4B1 /* BeamDate.swift */; };
 		52C3078225C311B00027C4B1 /* BeamDateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52C3078125C311B00027C4B1 /* BeamDateTests.swift */; };
@@ -629,6 +630,7 @@
 		5281B09325C99D3300DF66D9 /* 2_local.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = 2_local.json; sourceTree = "<group>"; };
 		5281B09725C99D4B00DF66D9 /* 2_remote.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = 2_remote.json; sourceTree = "<group>"; };
 		5287EC2E25C42B0100CE1DD9 /* String+UUID.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+UUID.swift"; sourceTree = "<group>"; };
+		5298649025D151D300D27A80 /* AutoCompleteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoCompleteTests.swift; sourceTree = "<group>"; };
 		52B5EF77252F520100914D52 /* CoreDataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataTests.swift; sourceTree = "<group>"; };
 		52C3077A25C311950027C4B1 /* BeamDate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamDate.swift; sourceTree = "<group>"; };
 		52C3078125C311B00027C4B1 /* BeamDateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamDateTests.swift; sourceTree = "<group>"; };
@@ -1334,6 +1336,22 @@
 			path = Fixtures;
 			sourceTree = "<group>";
 		};
+		5298647A25D151AD00D27A80 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				5298648F25D151B600D27A80 /* Network */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		5298648F25D151B600D27A80 /* Network */ = {
+			isa = PBXGroup;
+			children = (
+				5298649025D151D300D27A80 /* AutoCompleteTests.swift */,
+			);
+			path = Network;
+			sourceTree = "<group>";
+		};
 		52A43D92252C790200178F3B /* DataModel */ = {
 			isa = PBXGroup;
 			children = (
@@ -1406,6 +1424,7 @@
 		562A8B4D25B5E36B004D3D8A /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				5298647A25D151AD00D27A80 /* Services */,
 				562A8B4E25B5E37D004D3D8A /* Helpers */,
 			);
 			path = Classes;
@@ -2176,6 +2195,7 @@
 			files = (
 				525C235825BAFCAA001B9625 /* MergeTests.swift in Sources */,
 				965A78422514F149009980D4 /* BeamTests.swift in Sources */,
+				5298649125D151D300D27A80 /* AutoCompleteTests.swift in Sources */,
 				562A8B7925B6ED03004D3D8A /* CoreMLTests.swift in Sources */,
 				52E04FED252C814D00AD9F56 /* RoamImporterTests.swift in Sources */,
 				52B5EF78252F520100914D52 /* CoreDataTests.swift in Sources */,
