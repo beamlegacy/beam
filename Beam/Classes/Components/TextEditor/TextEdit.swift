@@ -363,6 +363,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         }
         onEndEditing()
 
+        cancelInternalLink()
         dismissPopover()
         showOrHideInlineFormatter(isPresent: false)
         showOrHidePersistentFormatter(isPresent: false)
