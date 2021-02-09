@@ -25,7 +25,7 @@ extension BeamTextEdit {
         view.addSubview(popover)
 
         popover.didSelectTitle = { [unowned self] (title) -> Void in
-            validInternalLink(from: node, title)
+            self.validInternalLink(from: node, title)
         }
     }
 
@@ -82,19 +82,19 @@ extension BeamTextEdit {
     }
 
     private func updatePopoverPosition(with node: TextNode, _ isEmpty: Bool = false) {
-        guard let window = window,
-              let popover = popover,
+        guard let popover = popover,
               let scrollView = enclosingScrollView else { return }
 
-        let (xOffset, rect) = node.offsetAndFrameAt(index: rootNode.cursorPosition)
+        let (xOffset, _) = node.offsetAndFrameAt(index: rootNode.cursorPosition)
+        let offsetGlobal = self.convert(node.offsetInDocument, to: nil)
         let yOffset = scrollView.documentVisibleRect.origin.y < 0 ? 0 : scrollView.documentVisibleRect.origin.y
 
-        var marginTop: CGFloat = 60
-        var yPos = (window.frame.height - (rect.maxY + node.offsetInDocument.y) - popover.idealSize.height) + yOffset
+        var marginTop: CGFloat = 30
+        var yPos = offsetGlobal.y - popover.idealSize.height
 
         // To avoid the update of X position during the insertion of a new text
         if isEmpty {
-            BeamTextEdit.xPos = (xOffset - 20) + node.offsetInDocument.x
+            BeamTextEdit.xPos = (xOffset + 10) + node.offsetInDocument.x
         }
 
         // Popover with Shortcut
@@ -108,7 +108,12 @@ extension BeamTextEdit {
 
         // Up position when popover is overlapped or clipped by the superview
         if popover.visibleRect.height < popover.idealSize.height {
-            popover.frame = NSRect(x: BeamTextEdit.xPos, y: (window.frame.height - node.offsetInDocument.y + yOffset) - 50, width: popover.idealSize.width, height: popover.idealSize.height)
+            popover.frame = NSRect(
+                x: BeamTextEdit.xPos,
+                y: offsetGlobal.y + yOffset + 10,
+                width: popover.idealSize.width,
+                height: popover.idealSize.height
+            )
         }
     }
 
