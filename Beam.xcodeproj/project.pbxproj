@@ -136,6 +136,7 @@
 		418173BE2581251600317ED8 /* URL+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418173BD2581251600317ED8 /* URL+Beam.swift */; };
 		418173C32581276F00317ED8 /* String+NSMutableAttributedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418173C22581276F00317ED8 /* String+NSMutableAttributedString.swift */; };
 		4181744325812C5F00317ED8 /* NSColor+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181744225812C5F00317ED8 /* NSColor+Beam.swift */; };
+		41855A3A25D1334F00DA49DC /* BeamCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41855A3925D1334F00DA49DC /* BeamCollectionView.swift */; };
 		41A969FF2581394300E6594B /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41A969FE2581394300E6594B /* Configuration.swift */; };
 		41EA89B825B838D40033EAB9 /* FormatterViewType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41EA89B725B838D40033EAB9 /* FormatterViewType.swift */; };
 		5204290B25A4B3D300DD677C /* document_updated_at.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 5204290A25A4B3D300DD677C /* document_updated_at.graphql */; };
@@ -190,7 +191,11 @@
 		5281B09425C99D3300DF66D9 /* 2_local.json in Resources */ = {isa = PBXBuildFile; fileRef = 5281B09325C99D3300DF66D9 /* 2_local.json */; };
 		5281B09825C99D4B00DF66D9 /* 2_remote.json in Resources */ = {isa = PBXBuildFile; fileRef = 5281B09725C99D4B00DF66D9 /* 2_remote.json */; };
 		5287EC2F25C42B0100CE1DD9 /* String+UUID.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5287EC2E25C42B0100CE1DD9 /* String+UUID.swift */; };
+		5298649125D151D300D27A80 /* AutoCompleteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5298649025D151D300D27A80 /* AutoCompleteTests.swift */; };
 		52B5EF78252F520100914D52 /* CoreDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52B5EF77252F520100914D52 /* CoreDataTests.swift */; };
+		52BB69A925CD5A49007A1173 /* OmniBarUITestsQuick.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52BB69A825CD5A49007A1173 /* OmniBarUITestsQuick.swift */; };
+		52BB69C725CD602A007A1173 /* Quick in Frameworks */ = {isa = PBXBuildFile; productRef = 52BB69C625CD602A007A1173 /* Quick */; };
+		52BB69C925CD6032007A1173 /* Nimble in Frameworks */ = {isa = PBXBuildFile; productRef = 52BB69C825CD6032007A1173 /* Nimble */; };
 		52C3077B25C311950027C4B1 /* BeamDate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52C3077A25C311950027C4B1 /* BeamDate.swift */; };
 		52C3078225C311B00027C4B1 /* BeamDateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52C3078125C311B00027C4B1 /* BeamDateTests.swift */; };
 		52C3294225AC7A8E00EF11E7 /* DocumentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52C3294125AC7A8E00EF11E7 /* DocumentTests.swift */; };
@@ -582,6 +587,7 @@
 		418173BD2581251600317ED8 /* URL+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+Beam.swift"; sourceTree = "<group>"; };
 		418173C22581276F00317ED8 /* String+NSMutableAttributedString.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+NSMutableAttributedString.swift"; sourceTree = "<group>"; };
 		4181744225812C5F00317ED8 /* NSColor+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSColor+Beam.swift"; sourceTree = "<group>"; };
+		41855A3925D1334F00DA49DC /* BeamCollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamCollectionView.swift; sourceTree = "<group>"; };
 		41A969FE2581394300E6594B /* Configuration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
 		41EA89B725B838D40033EAB9 /* FormatterViewType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatterViewType.swift; sourceTree = "<group>"; };
 		5204290A25A4B3D300DD677C /* document_updated_at.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = document_updated_at.graphql; sourceTree = "<group>"; };
@@ -629,7 +635,9 @@
 		5281B09325C99D3300DF66D9 /* 2_local.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = 2_local.json; sourceTree = "<group>"; };
 		5281B09725C99D4B00DF66D9 /* 2_remote.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = 2_remote.json; sourceTree = "<group>"; };
 		5287EC2E25C42B0100CE1DD9 /* String+UUID.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+UUID.swift"; sourceTree = "<group>"; };
+		5298649025D151D300D27A80 /* AutoCompleteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoCompleteTests.swift; sourceTree = "<group>"; };
 		52B5EF77252F520100914D52 /* CoreDataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataTests.swift; sourceTree = "<group>"; };
+		52BB69A825CD5A49007A1173 /* OmniBarUITestsQuick.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniBarUITestsQuick.swift; sourceTree = "<group>"; };
 		52C3077A25C311950027C4B1 /* BeamDate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamDate.swift; sourceTree = "<group>"; };
 		52C3078125C311B00027C4B1 /* BeamDateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamDateTests.swift; sourceTree = "<group>"; };
 		52C3294125AC7A8E00EF11E7 /* DocumentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentTests.swift; sourceTree = "<group>"; };
@@ -721,6 +729,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				52BB69C725CD602A007A1173 /* Quick in Frameworks */,
+				52BB69C925CD6032007A1173 /* Nimble in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -960,6 +970,7 @@
 				4181719A2581107C00317ED8 /* JSSourceLoader.swift */,
 				4181719B2581107C00317ED8 /* Information.swift */,
 				4105CE7425A60681009AB687 /* FormatterTypeButton.swift */,
+				41855A3925D1334F00DA49DC /* BeamCollectionView.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -1334,6 +1345,22 @@
 			path = Fixtures;
 			sourceTree = "<group>";
 		};
+		5298647A25D151AD00D27A80 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				5298648F25D151B600D27A80 /* Network */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		5298648F25D151B600D27A80 /* Network */ = {
+			isa = PBXGroup;
+			children = (
+				5298649025D151D300D27A80 /* AutoCompleteTests.swift */,
+			);
+			path = Network;
+			sourceTree = "<group>";
+		};
 		52A43D92252C790200178F3B /* DataModel */ = {
 			isa = PBXGroup;
 			children = (
@@ -1406,6 +1433,7 @@
 		562A8B4D25B5E36B004D3D8A /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				5298647A25D151AD00D27A80 /* Services */,
 				562A8B4E25B5E37D004D3D8A /* Helpers */,
 			);
 			path = Classes;
@@ -1535,6 +1563,7 @@
 				965A784E2514F149009980D4 /* Info.plist */,
 				965A784C2514F149009980D4 /* BeamUITests.swift */,
 				41774ACF25CAF3E20090AB89 /* OmnibarUITests.swift */,
+				52BB69A825CD5A49007A1173 /* OmniBarUITestsQuick.swift */,
 			);
 			path = BeamUITests;
 			sourceTree = "<group>";
@@ -1638,9 +1667,15 @@
 			buildRules = (
 			);
 			dependencies = (
+				52BB69C325CD5FBE007A1173 /* PBXTargetDependency */,
+				52BB69C125CD5FB8007A1173 /* PBXTargetDependency */,
 				965A784A2514F149009980D4 /* PBXTargetDependency */,
 			);
 			name = BeamUITests;
+			packageProductDependencies = (
+				52BB69C625CD602A007A1173 /* Quick */,
+				52BB69C825CD6032007A1173 /* Nimble */,
+			);
 			productName = BeamUITests;
 			productReference = 965A78482514F149009980D4 /* BeamUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
@@ -2069,6 +2104,7 @@
 				96CDA7192582379A00BC375C /* Index.swift in Sources */,
 				41221A362592771F00255197 /* TextEdit+Popover.swift in Sources */,
 				96E4CF30258DFB0800D6DE22 /* BeamText+NSAttributedString.swift in Sources */,
+				41855A3A25D1334F00DA49DC /* BeamCollectionView.swift in Sources */,
 				418172232581107C00317ED8 /* String+Ranges.swift in Sources */,
 				521EEDE525937F7F00BA2485 /* DocumentsList.swift in Sources */,
 				418172CF25811AF800317ED8 /* Animation.swift in Sources */,
@@ -2176,6 +2212,7 @@
 			files = (
 				525C235825BAFCAA001B9625 /* MergeTests.swift in Sources */,
 				965A78422514F149009980D4 /* BeamTests.swift in Sources */,
+				5298649125D151D300D27A80 /* AutoCompleteTests.swift in Sources */,
 				562A8B7925B6ED03004D3D8A /* CoreMLTests.swift in Sources */,
 				52E04FED252C814D00AD9F56 /* RoamImporterTests.swift in Sources */,
 				52B5EF78252F520100914D52 /* CoreDataTests.swift in Sources */,
@@ -2204,6 +2241,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				41774AD025CAF3E20090AB89 /* OmnibarUITests.swift in Sources */,
+				52BB69A925CD5A49007A1173 /* OmniBarUITestsQuick.swift in Sources */,
 				965A784D2514F149009980D4 /* BeamUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2211,6 +2249,14 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		52BB69C125CD5FB8007A1173 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = 52BB69C025CD5FB8007A1173 /* Nimble */;
+		};
+		52BB69C325CD5FBE007A1173 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = 52BB69C225CD5FBE007A1173 /* Quick */;
+		};
 		52DD2450258B685E00651C84 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = SparkleInstallerConnection;
@@ -2884,6 +2930,26 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 527FB72225B9AAA200959146 /* XCRemoteSwiftPackageReference "Fakery" */;
 			productName = Fakery;
+		};
+		52BB69C025CD5FB8007A1173 /* Nimble */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */;
+			productName = Nimble;
+		};
+		52BB69C225CD5FBE007A1173 /* Quick */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick" */;
+			productName = Quick;
+		};
+		52BB69C625CD602A007A1173 /* Quick */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick" */;
+			productName = Quick;
+		};
+		52BB69C825CD6032007A1173 /* Nimble */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */;
+			productName = Nimble;
 		};
 		9631C746251CE997009B40C4 /* SwiftSoup */ = {
 			isa = XCSwiftPackageProductDependency;

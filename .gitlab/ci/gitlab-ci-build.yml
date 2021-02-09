@@ -10,7 +10,6 @@ build:macos:
     - master
     - develop
   script:
-    - time make build_libgit2
     - time bundle exec fastlane beta
   tags:
     - macos

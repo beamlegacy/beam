@@ -1,5 +1,5 @@
 function log(emoji, type, args) {
-  window.webkit.messageHandlers.logging.postMessage(
+  window.webkit.messageHandlers.beam_logging.postMessage(
     `${emoji} JS ${type}: ${Object.values(args)
       .map(v => typeof(v) === "undefined" ? "undefined" : typeof(v) === "object" ? JSON.stringify(v) : v.toString())
       .map(v => v.substring(0, 3000)) // Limit msg to 3000 chars

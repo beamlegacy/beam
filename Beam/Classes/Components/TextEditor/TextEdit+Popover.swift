@@ -26,6 +26,7 @@ extension BeamTextEdit {
 
         popover.didSelectTitle = { [unowned self] (title) -> Void in
             self.validInternalLink(from: node, title)
+            view.window?.makeFirstResponder(self)
         }
     }
 
@@ -114,8 +115,7 @@ extension BeamTextEdit {
                 width: popover.idealSize.width,
                 height: popover.idealSize.height
             )
-        }
-    }
+        }    }
 
     private func validInternalLink(from node: TextNode, _ title: String) {
         let startPosition = popoverPrefix == 0 ? cursorStartPosition : cursorStartPosition + 1
