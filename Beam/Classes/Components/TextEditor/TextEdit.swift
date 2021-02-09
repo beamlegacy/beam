@@ -60,7 +60,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             }
         }
 
-//        guard mapping[note] == nil else { return }
+        //        guard mapping[note] == nil else { return }
         guard let rootnode = nodeFor(note) as? TextRoot else { fatalError() }
         rootNode = rootnode
         accessingMapping = true
@@ -110,7 +110,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
         layer?.delegate = self
         titleLayer.delegate = self
-//        self.wantsLayer = true
+        //        self.wantsLayer = true
 
         timer = Timer.init(timeInterval: 1.0 / 60.0, repeats: true) { [unowned self] _ in
             let now = CFAbsoluteTimeGetCurrent()
@@ -468,7 +468,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                         rootNode.doCommand(.moveToBeginningOfLine)
                         detectFormatterType()
                     } else if option {
-                            rootNode.doCommand(.moveWordLeft)
+                        rootNode.doCommand(.moveWordLeft)
                     } else if option && command {
                         rootNode.doCommand(.moveToBeginningOfLine)
                     } else if popover != nil {
@@ -784,11 +784,35 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     @IBAction func copy(_ sender: Any) {
-        let s = selectedText
         let pasteboard = NSPasteboard.general
         pasteboard.clearContents()
-        pasteboard.declareTypes([.string], owner: nil)
-        pasteboard.setString(s, forType: .string)
+        pasteboard.declareTypes([.rtf, .string], owner: nil)
+        let strNodes = NSMutableAttributedString()
+
+        if let nodes = rootNode.state.nodeSelection?.sortedNodes, !nodes.isEmpty {
+            for node in nodes {
+                if nodes.count > 1 {
+                    guard !node.text.text.isEmpty else { continue }
+                    strNodes.append(NSAttributedString(string: String.tabs(node.element.depth - 1)))
+                    strNodes.append(node.text.buildAttributedString(fontSize: node.fontSize, cursorPosition: node.cursorPosition, elementKind: node.elementKind))
+                    strNodes.append(NSAttributedString(string: "\n"))
+                } else {
+                    strNodes.append(node.attributedString)
+                }
+            }
+        } else {
+            strNodes.append(selectedText.attributed)
+        }
+
+        do {
+            let docAttrRtf: [NSAttributedString.DocumentAttributeKey: Any] = [.documentType: NSAttributedString.DocumentType.rtf, .characterEncoding: String.Encoding.utf8]
+            let rtfData = try strNodes.data(from: NSMakeRange(0, strNodes.length), documentAttributes: docAttrRtf)
+            pasteboard.setData(rtfData, forType: .rtf)
+            pasteboard.setString(strNodes.string, forType: .string)
+        }
+        catch {
+            Logger.shared.logError("Error creating RTF from Attributed String", category: .general)
+        }
     }
 
     @IBAction func cut(_ sender: Any) {
@@ -839,7 +863,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                 guard popover == nil else { return false }
                 self.showBidirectionalPopover(prefix: 1, suffix: 0)
                 return true
-             },
+            },
             "[": { [unowned self] in
                 guard popover == nil else { return false }
 
@@ -1121,11 +1145,11 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         guard layer === self.layer else { return }
         let h = title.frame.height
         titleLayer.bounds = CGRect(x: 0, y: 0, width: leadingAlignment, height: h + 15)
-//        let x = leadingAlignment - title.frame.width - titlePadding
+        //        let x = leadingAlignment - title.frame.width - titlePadding
         let y = topOffset
         titleLayer.anchorPoint = NSPoint()
         titleLayer.position = NSPoint(x: 0, y: y)
-//        print("titleFrame: \(titleLayer.bounds) / \(titleLayer.position) (hidden: \(titleLayer.isHidden))")
+        //        print("titleFrame: \(titleLayer.bounds) / \(titleLayer.position) (hidden: \(titleLayer.isHidden))")
 
         relayoutRoot()
     }
@@ -1133,7 +1157,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     public func draw(_ layer: CALayer, in context: CGContext) {
         guard layer === self.titleLayer else { return }
 
-//        print("draw title into titleLayer: \(titleLayer.bounds) / \(titleLayer.position) (hidden: \(titleLayer.isHidden))")
+        //        print("draw title into titleLayer: \(titleLayer.bounds) / \(titleLayer.position) (hidden: \(titleLayer.isHidden))")
         context.saveGState()
         context.textMatrix = CGAffineTransform.identity
         let x = leadingAlignment - title.frame.width - titlePadding
@@ -1209,9 +1233,9 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
     internal func initAndShowPersistentFormatter() {
         if persistentFormatter == nil {
-           initFormatterView(.persistent)
+            initFormatterView(.persistent)
         } else if persistentFormatter != nil {
-           showOrHidePersistentFormatter(isPresent: true)
+            showOrHidePersistentFormatter(isPresent: true)
         }
     }
 
@@ -1258,7 +1282,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         }
 
         if inlineFormatter != nil {
-           hideInlineFormatter()
+            hideInlineFormatter()
         }
     }
 
