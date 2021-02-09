@@ -375,4 +375,9 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
 
         return elems
     }
+
+    var depth: Int {
+        guard let depth = parent?.depth else { return 0 }
+        return depth + 1
+    }
 }
