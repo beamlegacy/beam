@@ -137,7 +137,10 @@ public class TextNode: Widget {
     }
 
     var readOnly: Bool = false
-    var isEditing: Bool { root?.node === self && root?.state.nodeSelection == nil }
+    var isEditing: Bool {
+        guard let r = root else { return false }
+        return r.focussedWidget === self && r.state.nodeSelection == nil
+    }
 
     var firstLineHeight: CGFloat {
         let layout = emptyLayout ?? self.layout
@@ -189,7 +192,7 @@ public class TextNode: Widget {
 
     func buildTextChildren(elements: [BeamElement]) -> [Widget] {
         elements.map { childElement -> TextNode in
-            editor.nodeFor(childElement)
+            nodeFor(childElement)
         }
     }
 
@@ -552,7 +555,7 @@ public class TextNode: Widget {
         if children.isEmpty {
             guard let p = parent as? TextNode else { return }
             p.fold()
-            root?.node = p
+            root?.focussedWidget = p
             root?.cursorPosition = 0
             return
         }

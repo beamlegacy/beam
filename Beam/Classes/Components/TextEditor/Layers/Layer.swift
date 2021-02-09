@@ -56,6 +56,10 @@ class Layer: NSObject, CALayerDelegate, MouseHandler {
         }
     }
 
+    deinit {
+        layer.removeFromSuperlayer()
+    }
+
     func invalidate() {
         layer.setNeedsDisplay()
     }

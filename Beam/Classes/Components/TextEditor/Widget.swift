@@ -527,7 +527,7 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
 
     func dispatchMouseUp(mouseInfo: MouseInfo) -> Widget? {
         guard inVisibleBranch else { return nil }
-        guard let focussedNode = root?.node else { return nil }
+        guard let focussedNode = root?.focussedWidget else { return nil }
 
         if focussedNode.handleMouseUp(mouseInfo: mouseInfo) {
             return focussedNode
@@ -586,7 +586,7 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
 
     func dispatchMouseDragged(mouseInfo: MouseInfo) -> Widget? {
         guard inVisibleBranch else { return nil }
-        guard let focussedNode = root?.node else { return nil }
+        guard let focussedNode = root?.focussedWidget else { return nil }
 
         if focussedNode.handleMouseDragged(mouseInfo: mouseInfo) {
             return focussedNode
@@ -801,6 +801,15 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
         }
     }
 
+    func nodeFor(_ element: BeamElement) -> TextNode {
+        guard let parent = parent else { return editor.nodeFor(element) }
+        return parent.nodeFor(element)
+    }
+
+    func removeNode(_ node: TextNode) {
+        guard let parent = parent else { editor.removeNode(node); return }
+        parent.removeNode(node)
+    }
 }
 // swiftlint:enable type_body_length
 // swiftlint:enable file_length

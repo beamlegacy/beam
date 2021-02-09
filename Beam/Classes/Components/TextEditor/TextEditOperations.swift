@@ -75,7 +75,7 @@ extension TextRoot {
             increaseNodeSelectionIndentation()
             return
         }
-        guard let node = node as? TextNode else { return }
+        guard let node = focussedWidget as? TextNode else { return }
         _ = increaseNodeIndentation(node)
     }
 
@@ -84,7 +84,7 @@ extension TextRoot {
             decreaseNodeSelectionIndentation()
             return
         }
-        guard let node = node as? TextNode else { return }
+        guard let node = focussedWidget as? TextNode else { return }
         _ = decreaseNodeIndentation(node)
     }
 
@@ -129,8 +129,8 @@ extension TextRoot {
         parent.element.insert(element, at: index)
         root.cursorPosition = 0
 
-        let newNode = editor.nodeFor(element)
-        node = newNode
+        let newNode = nodeFor(element)
+        focussedWidget = newNode
 
         undoManager.registerUndo(withTarget: self) { selfTarget in
             _ = selfTarget.erase(node: newNode, enableRedo: false)
@@ -167,7 +167,7 @@ extension TextRoot {
             createEmptyNode(withParent: root, atIndex: 0)
         } else {
             assert(nextNode != nil)
-            root.node = nextNode
+            root.focussedWidget = nextNode
             root.cursorPosition = goToPrevious ? nextNode!.text.count : 0
         }
 
@@ -176,7 +176,7 @@ extension TextRoot {
     }
 
     func eraseSelection() {
-        guard let node = node as? TextNode, !node.readOnly, !selectedTextRange.isEmpty else { return }
+        guard let node = focussedWidget as? TextNode, !node.readOnly, !selectedTextRange.isEmpty else { return }
 
         node.text.removeSubrange(selectedTextRange)
         cursorPosition = selectedTextRange.lowerBound
@@ -192,7 +192,7 @@ extension TextRoot {
             return
         }
 
-        guard let node = node as? TextNode else { return }
+        guard let node = focussedWidget as? TextNode else { return }
         guard !node.readOnly else { return }
         if !selectedTextRange.isEmpty {
             eraseSelection()
@@ -221,7 +221,7 @@ extension TextRoot {
             return
         }
 
-        guard let node = node as? TextNode else { return }
+        guard let node = focussedWidget as? TextNode else { return }
         guard !node.readOnly else { return }
         if !selectedTextRange.isEmpty {
             eraseSelection()
@@ -235,7 +235,7 @@ extension TextRoot {
                 }
 
                 node.delete()
-                self.node = nextNode
+                self.focussedWidget = nextNode
 
                 cursorPosition = nextNode.text.count
                 nextNode.text.append(remainingText)
@@ -250,7 +250,7 @@ extension TextRoot {
 
     func insertNewline() {
         guard root.state.nodeSelection == nil else { return }
-        guard let node = node as? TextNode else { return }
+        guard let node = focussedWidget as? TextNode else { return }
         guard !node.readOnly else { return }
         if !selectedTextRange.isEmpty {
             node.text.removeSubrange(selectedTextRange)
@@ -267,7 +267,7 @@ extension TextRoot {
     }
 
     func pushUndoState(_ command: Command) {
-        guard let node = node as? TextNode else { return }
+        guard let node = focussedWidget as? TextNode else { return }
         guard !node.readOnly else { return }
         defer {
             if !undoManager.isRedoing {
@@ -284,7 +284,7 @@ extension TextRoot {
                 selfTarget.pushUndoState(command) // push the redo!
             }
 
-            guard let selfNode = selfTarget.node as? TextNode else { return }
+            guard let selfNode = selfTarget.focussedWidget as? TextNode else { return }
             selfNode.text = state.text
             selfTarget.selectedTextRange = state.selectedTextRange
             selfTarget.markedTextRange = state.markedTextRange
@@ -299,7 +299,7 @@ extension TextRoot {
     }
 
     public func setMarkedText(string: String, selectedRange: Range<Int>, replacementRange: Range<Int>) {
-        guard let node = node as? TextNode else { return }
+        guard let node = focussedWidget as? TextNode else { return }
         guard !node.readOnly else { return }
         var range = cursorPosition..<cursorPosition
         if !replacementRange.isEmpty {
@@ -325,13 +325,13 @@ extension TextRoot {
     }
 
     public func unmarkText() {
-        guard let node = node as? TextNode, !node.readOnly else { return }
+        guard let node = focussedWidget as? TextNode, !node.readOnly else { return }
         markedTextRange = 0..<0
     }
 
     public func insertText(string: String, replacementRange: Range<Int>) {
         eraseNodeSelection(createEmptyNodeInPlace: true)
-        guard let node = node as? TextNode, !node.readOnly else { return }
+        guard let node = focussedWidget as? TextNode, !node.readOnly else { return }
         pushUndoState(.insertText)
 
         let c = string.count
@@ -356,7 +356,7 @@ extension TextRoot {
     }
 
     public func updateTextAttributesAtCursorPosition() {
-        guard let node = node as? TextNode else { return }
+        guard let node = focussedWidget as? TextNode else { return }
         let ranges = node.text.rangesAt(position: cursorPosition)
         switch ranges.count {
         case 0:
