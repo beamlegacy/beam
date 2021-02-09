@@ -32,27 +32,26 @@ class Completer: ObservableObject {
             self.results = []
             return
         }
-        let query = query.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)!
-        if let url = URL(string: "https://suggestqueries.google.com/complete/search?client=firefox&output=toolbar&q=\(query)") {
-            URLSession.shared.dataTask(with: url) { [weak self] data, _, _ in
-                guard let self = self else { return }
-                if let data = data {
-                    do {
-                        let obj = try JSONSerialization.jsonObject(with: data)
-                        if let array = obj as? [Any] {
-                            var res = [AutoCompleteResult]()
-                            if let r = array[1] as? [String] {
-                                for str in r {
-                                    res.append(AutoCompleteResult(id: UUID(), string: str, source: .autoComplete))
-                                }
-                                self.results = res
-                            }
-                        }
-                    } catch {
-                        //                        print("AutoComplete call error")
-                    }
-                }
-            }.resume()
+
+        guard let query = query.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed),
+              let url = URL(string: "https://suggestqueries.google.com/complete/search?client=firefox&output=toolbar&q=\(query)") else {
+            return
         }
+
+        URLSession.shared.dataTask(with: url) { [weak self] data, _, _ in
+            guard let self = self else { return }
+            guard let data = data else { return }
+
+            let obj = try? JSONSerialization.jsonObject(with: data)
+
+            if let array = obj as? [Any], let r = array[1] as? [String] {
+                var res = [AutoCompleteResult]()
+
+                for str in r {
+                    res.append(AutoCompleteResult(id: UUID(), string: str, source: .autoComplete))
+                }
+                self.results = res
+            }
+        }.resume()
     }
 }
