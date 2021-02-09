@@ -251,4 +251,37 @@ class PageRankTests: XCTestCase {
             Logger.shared.logDebug("\t\(res.score): \(res.source) / \(res.title)")
         }
     }
+
+    func testTF() {
+        let index = Index()
+        let doc1 = IndexDocument(source: "doc1", title: "First document", contents: "This is the first document in the collection. It talks about nothing in particular.")
+        let doc2 = IndexDocument(source: "doc2", title: "Second document", contents: "I would like to eat something good. Maybe go to a nice restaurant tonight.")
+        let doc3 = IndexDocument(source: "doc3", title: "third document", contents: "He is a food critict so he visits many restaurants to eat a lot. But nobody really cares what he likes so he's like the worst critic there is.")
+
+        let docs = [doc1, doc2, doc3]
+
+        for d in docs {
+            index.append(document: d)
+        }
+
+        XCTAssertEqual(index.documents.count, 3)
+
+        let query = "Eat nice food or nothing guys"
+        let frequencies = index.wordFrequency(for: query)
+        let tfidf = index.tfidf(for: query)
+
+        let expectedFrequencies: [String: Int] = ["eat": 1, "food": 1, "or": 1, "nothing": 1, "guys": 1, "nice": 1]
+        XCTAssertEqual(frequencies.count, expectedFrequencies.count)
+        for w in expectedFrequencies {
+            XCTAssertEqual(w.value, frequencies[w.key])
+        }
+
+        let expectedTfidf: [String: Float] = ["guys": 0.0, "eat": 0.4054651, "or": 0.0, "food": 1.0986123, "nothing": 1.0986123, "nice": 1.0986123]
+        XCTAssertEqual(tfidf.count, expectedTfidf.count)
+        for w in expectedTfidf {
+            XCTAssertEqual(w.value, tfidf[w.key] ?? 0, accuracy: 0.00001)
+        }
+
+
+    }
 }

@@ -256,4 +256,33 @@ class Index: Codable {
         let data = try? encoder.encode(self)
         try data?.write(to: path)
     }
+
+    func idf(for word: String) -> Float {
+        guard let list = words[word] else { return 0 }
+        let docs = Float(documents.count)
+        guard docs > 0 else { return 0 }
+        let instances = Float(list.instances.count)
+        let ratio = docs / instances
+        let idf = log(ratio)
+        return idf
+    }
+
+    func wordFrequency(for document: String) -> [String: Int] {
+        var counts = [String: Int]()
+
+        for word in document.extractWords(useLemmas: false, removeDiacritics: true) {
+            counts[word] = 1 + (counts[word] ?? 0)
+        }
+
+        return counts
+    }
+
+    func tfidf(for document: String) -> [String: Float] {
+        var tfidf = [String: Float]()
+        for word in wordFrequency(for: document) {
+            tfidf[word.key] = Float(word.value) * idf(for: word.key)
+        }
+
+        return tfidf
+    }
 }
