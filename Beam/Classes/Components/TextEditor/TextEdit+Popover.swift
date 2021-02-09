@@ -14,7 +14,7 @@ extension BeamTextEdit {
     private static var xPos: CGFloat = 0
 
     internal func initPopover() {
-        guard let node = node as? TextNode else { return }
+        guard let node = focussedWidget as? TextNode else { return }
 
         popover = BidirectionalPopover()
         updatePopoverPosition(with: node)
@@ -31,7 +31,7 @@ extension BeamTextEdit {
     }
 
     internal func updatePopover(with command: TextRoot.Command = .none) {
-        guard let node = node as? TextNode,
+        guard let node = focussedWidget as? TextNode,
               let popover = popover else { return }
 
         let cursorPosition = rootNode.cursorPosition
@@ -61,7 +61,7 @@ extension BeamTextEdit {
 
     internal func cancelPopover() {
         guard popover != nil,
-              let node = node as? TextNode else { return }
+              let node = focussedWidget as? TextNode else { return }
 
         dismissPopover()
         node.text.removeSubrange((cursorStartPosition + 1 - popoverPrefix)..<(rootNode.cursorPosition + popoverSuffix))
@@ -76,7 +76,7 @@ extension BeamTextEdit {
     }
 
     internal func cancelInternalLink() {
-        guard let node = node as? TextNode,
+        guard let node = focussedWidget as? TextNode,
               popover != nil else { return }
         let text = node.text.text
         node.text.removeAttributes([.internalLink(text)], from: cursorStartPosition..<rootNode.cursorPosition + text.count)

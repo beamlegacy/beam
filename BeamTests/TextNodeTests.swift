@@ -375,7 +375,7 @@ class TextNodeTests: XCTestCase {
         validateRootWithNote(root: root, note: note)
 
         // Insert some text:
-        root.node = root.children.first
+        root.focussedWidget = root.children.first
         root.cursorPosition = 0
         root.insertText(string: "test", replacementRange: root.selectedTextRange)
         let str1 = """
@@ -431,7 +431,7 @@ class TextNodeTests: XCTestCase {
         validateRootWithNote(root: root, note: note)
 
         // Insert some text:
-        root.node = root.children.first
+        root.focussedWidget = root.children.first
         root.cursorPosition = 3
         root.insertText(string: "test", replacementRange: root.selectedTextRange)
         let str1 = """
@@ -486,7 +486,7 @@ class TextNodeTests: XCTestCase {
         validateRootWithNote(root: root, note: note)
 
         // Insert some text:
-        root.node = root.children.first
+        root.focussedWidget = root.children.first
         root.cursorPosition = 3
         root.selectedTextRange = 3..<7
         root.insertText(string: "test", replacementRange: root.selectedTextRange)
@@ -541,15 +541,15 @@ class TextNodeTests: XCTestCase {
         let root = editor.rootNode!
         validateRootWithNote(root: root, note: note)
 
-        root.node = root.children.first?.children.first
+        root.focussedWidget = root.children.first?.children.first
         root.cursorPosition = 0
         root.setLayout(frame)
         root.updateRendering()
 
         XCTAssertEqual(root.children.first?.children.count, 2)
         root.doCommand(.deleteBackward)
-        XCTAssertNotNil(root.node as? TextNode)
-        if let node = root.node as? TextNode {
+        XCTAssertNotNil(root.focussedWidget as? TextNode)
+        if let node = root.focussedWidget as? TextNode {
             XCTAssertEqual(node.text.text, "bullet1bullet11")
         }
         XCTAssertEqual(root.children.first?.children.count, 1)
@@ -568,9 +568,9 @@ class TextNodeTests: XCTestCase {
 //        print("Tree:\n\(root.printTree())\n")
         validateRootWithNote(root: root, note: note)
 
-        root.node = root.children.first?.children.first
-        XCTAssertNotNil(root.node as? TextNode)
-        if let node = root.node as? TextNode {
+        root.focussedWidget = root.children.first?.children.first
+        XCTAssertNotNil(root.focussedWidget as? TextNode)
+        if let node = root.focussedWidget as? TextNode {
             root.cursorPosition = node.text.count
         }
         root.setLayout(frame)
@@ -580,8 +580,8 @@ class TextNodeTests: XCTestCase {
         root.doCommand(.deleteForward)
 //        print("Tree:\n\(root.printTree())\n")
 //        note.debugNote()
-        XCTAssertNotNil(root.node as? TextNode)
-        if let node = root.node as? TextNode {
+        XCTAssertNotNil(root.focussedWidget as? TextNode)
+        if let node = root.focussedWidget as? TextNode {
             XCTAssertEqual(node.text.text, "bullet11bullet12")
         }
         XCTAssertEqual(root.children.first?.children.count, 1)

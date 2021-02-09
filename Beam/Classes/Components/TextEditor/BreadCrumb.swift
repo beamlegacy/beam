@@ -63,7 +63,7 @@ class BreadCrumb: Widget {
 
         self.crumbChain = computeCrumbChain(from: element)
 
-        guard let ref = editor.nodeFor(element) as? LinkedReferenceNode else { fatalError() }
+        guard let ref = nodeFor(element) as? LinkedReferenceNode else { fatalError() }
         ref.parent = self
         ref.open = false
         self.linkedReferenceNode = ref
@@ -356,7 +356,7 @@ class BreadCrumb: Widget {
 
         let crumb = crumbChain[index]
 
-        guard let ref = editor.nodeFor(crumb) as? LinkedReferenceNode else { return }
+        guard let ref = nodeFor(crumb) as? LinkedReferenceNode else { return }
 
         linkedReferenceNode.removeFromSuperlayer(recursive: true)
         ref.addLayerTo(layer: editor.layer!, recursive: true)
@@ -366,5 +366,46 @@ class BreadCrumb: Widget {
         children = [linkedReferenceNode]
         invalidateLayout()
     }
+
+
+    override func nodeFor(_ element: BeamElement) -> TextNode {
+        if let node = mapping[element] {
+            return node
+        }
+
+        // BreadCrumbs can't create TextNodes, only LinkedReferenceNodes
+        let node: TextNode = LinkedReferenceNode(editor: editor, element: element)
+
+        accessingMapping = true
+        mapping[element] = node
+        accessingMapping = false
+        purgeDeadNodes()
+
+        node.contentsScale = contentsScale
+        editor.layer?.addSublayer(node.layer)
+
+        return node
+    }
+
+    private var accessingMapping = false
+    private var mapping: [BeamElement: TextNode] = [:]
+    private var deadNodes: [TextNode] = []
+
+    func purgeDeadNodes() {
+        guard !accessingMapping else { return }
+        for dead in deadNodes {
+            removeNode(dead)
+        }
+        deadNodes.removeAll()
+    }
+
+    override func removeNode(_ node: TextNode) {
+        guard !accessingMapping else {
+            deadNodes.append(node)
+            return
+        }
+        mapping.removeValue(forKey: node.element)
+    }
+
 
 }

@@ -68,7 +68,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         accessingMapping = false
         purgeDeadNodes()
 
-        node = {
+        focussedWidget = {
             guard let n = note.children.first else { return nodeFor(note) }
             return nodeFor(n)
         }()
@@ -117,7 +117,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             if self.blinkTime < now && self.hasFocus {
                 self.blinkPhase.toggle()
                 self.blinkTime = now + (self.blinkPhase ? self.onBlinkTime : self.offBlinkTime)
-                node.invalidate()
+                focussedWidget?.invalidate()
             }
 
             // Prepare animation frame:
@@ -258,14 +258,14 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     var rootNode: TextRoot!
 
     // This is the node that the user is currently editing. It can be any node in the rootNode tree
-    var node: Widget {
+    var focussedWidget: Widget? {
         set {
-            invalidate(rootNode.node.textFrameInDocument)
-            rootNode.node = newValue
-            invalidate(rootNode.node.textFrameInDocument)
+            invalidate(rootNode.focussedWidget?.textFrameInDocument)
+            rootNode.focussedWidget = newValue
+            invalidate(rootNode.focussedWidget?.textFrameInDocument)
         }
         get {
-            rootNode.node
+            rootNode.focussedWidget
         }
     }
 
@@ -325,7 +325,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     public func insertText(string: String, replacementRange: Range<Int>) {
-        guard let node = node as? TextNode else { return }
+        guard let node = focussedWidget as? TextNode else { return }
         guard !node.readOnly else { return }
         defer { lastInput = string }
         guard preDetectInput(string) else { return }
@@ -356,8 +356,8 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         blinkPhase = true
         hasFocus = false
         rootNode.cancelSelection()
-        (node as? TextNode)?.invalidateText() // force removing the syntax highlighting
-        node.invalidate()
+        (focussedWidget as? TextNode)?.invalidateText() // force removing the syntax highlighting
+        focussedWidget?.invalidate()
         if activateOnLostFocus {
             activated()
         }
@@ -373,7 +373,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
     func pressEnter(_ option: Bool, _ command: Bool) {
-        guard let node = node as? TextNode else { return }
+        guard let node = focussedWidget as? TextNode else { return }
         guard !node.readOnly else { return }
 
         if option {
@@ -412,7 +412,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                 rootNode.cursorPosition = 0
 
                 scrollToCursorAtLayout = true
-                self.node = newNode
+                self.focussedWidget = newNode
 
             } else {
                 let element = BeamElement()
@@ -426,7 +426,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                 rootNode.cursorPosition = 0
 
                 scrollToCursorAtLayout = true
-                self.node = newNode
+                self.focussedWidget = newNode
             }
 
             cleanPersistentFormatter()
@@ -451,7 +451,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     return
                 case .leftArrow:
                     if control && option && command {
-                        guard let node = node as? TextNode else { return }
+                        guard let node = focussedWidget as? TextNode else { return }
                         node.fold()
                     } else if shift && option {
                         rootNode.doCommand(.moveWordLeftAndModifySelection)
@@ -487,7 +487,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     return
                 case .rightArrow:
                     if control && option && command {
-                        guard let node = node as? TextNode else { return }
+                        guard let node = focussedWidget as? TextNode else { return }
                         node.unfold()
                     } else if shift && option {
                         rootNode.doCommand(.moveWordRightAndModifySelection)
@@ -507,7 +507,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                         rootNode.doCommand(.moveToEndOfLine)
                     } else if popover != nil {
                         // Avoid to return to the next node
-                        guard let node = node as? TextNode,
+                        guard let node = focussedWidget as? TextNode,
                               node.text.text.count > rootNode.cursorPosition else { return }
 
                         rootNode.doCommand(.moveRight)
@@ -560,7 +560,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     rootNode.doCommand(.deleteBackward)
                     updatePopover(with: .deleteForward)
 
-                    guard let node = node as? TextNode else { return }
+                    guard let node = focussedWidget as? TextNode else { return }
                     if node.text.isEmpty || !rootNode.textIsSelected { hideInlineFormatter() }
                     detectFormatterType()
 
@@ -745,14 +745,14 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         if let ptr = actualRange {
             ptr.pointee = range
         }
-        guard let node = node as? TextNode else { return nil }
+        guard let node = focussedWidget as? TextNode else { return nil }
         let str = node.attributedString.attributedSubstring(from: range)
         Logger.shared.logDebug("TextInput.attributedString(range: \(range), actualRange: \(String(describing: actualRange))) -> \(str)", category: .noteEditor)
         return str
     }
 
     public func attributedString() -> NSAttributedString {
-        guard let node = node as? TextNode else { return "".attributed }
+        guard let node = focussedWidget as? TextNode else { return "".attributed }
         return node.attributedString
     }
 
@@ -849,7 +849,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     // swiftlint:disable:next function_body_length
     func preDetectInput(_ input: String) -> Bool {
         guard inputDetectorEnabled else { return true }
-        guard let node = node as? TextNode else { return true }
+        guard let node = focussedWidget as? TextNode else { return true }
         defer { lastInput = input }
 
         let insertPair = { [unowned self] (left: String, right: String) in
@@ -916,7 +916,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     // swiftlint:disable:next cyclomatic_complexity
     func postDetectInput(_ input: String) {
         guard inputDetectorEnabled else { return }
-        guard let node = node as? TextNode else { return }
+        guard let node = focussedWidget as? TextNode else { return }
 
         let makeQuote = { [unowned self] in
             let level1 = node.text.prefix(2).text == "> "
@@ -939,12 +939,12 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                 Logger.shared.logInfo("Make header", category: .ui)
 
                 // In this case we will reparent all following sibblings that are not a header to the current node as Paper does
-                guard self.node.isEmpty else { return }
-                guard let node = self.node as? TextNode else { return }
+                guard self.focussedWidget?.isEmpty ?? false else { return }
+                guard let node = self.focussedWidget as? TextNode else { return }
                 let element = node.element
-                guard let parentNode = self.node.parent as? TextNode else { return }
+                guard let parentNode = self.focussedWidget?.parent as? TextNode else { return }
                 let parent = parentNode.element
-                guard let index = self.node.indexInParent else { return }
+                guard let index = self.focussedWidget?.indexInParent else { return }
                 for sibbling in parent.children.suffix(from: index + 1) {
                     guard !sibbling.isHeader else { return }
                     element.addChild(sibbling)
@@ -1005,11 +1005,11 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     func reBlink() {
         blinkPhase = true
         blinkTime = CFAbsoluteTimeGetCurrent() + onBlinkTime
-        node.invalidate()
+        focussedWidget?.invalidate()
     }
 
     public func positionAt(point: NSPoint) -> Int {
-        guard let node = node as? TextNode else { return 0 }
+        guard let node = focussedWidget as? TextNode else { return 0 }
         let fid = node.frameInDocument
         return node.positionAt(point: NSPoint(x: point.x - fid.minX, y: point.y - fid.minY))
     }
@@ -1040,23 +1040,23 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         guard let newNode = rootNode.dispatchMouseDown(mouseInfo: info) else {
             guard let n = rootNode.children.first else { return }
             rootNode.cursorPosition = 0
-            node = n
+            focussedWidget = n
             return
         }
 
-        node = newNode
-        node.editor.setHotSpotToCursorPosition()
+        focussedWidget = newNode
+        focussedWidget?.editor.setHotSpotToCursorPosition()
         cursorUpdate(with: event)
     }
 
     var scrollToCursorAtLayout = false
     public func setHotSpotToCursorPosition() {
-        guard node as? TextNode != nil else { return }
+        guard focussedWidget as? TextNode != nil else { return }
         setHotSpot(rectAt(rootNode.cursorPosition).insetBy(dx: -30, dy: -30))
     }
 
     public func rectAt(_ position: Int) -> NSRect {
-        guard let node = node as? TextNode else { return NSRect() }
+        guard let node = focussedWidget as? TextNode else { return NSRect() }
         let origin = node.offsetInDocument
         return node.rectAt(position).offsetBy(dx: origin.x, dy: origin.y)
     }
@@ -1125,11 +1125,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     public override func viewWillMove(toWindow newWindow: NSWindow?) {
         guard let window = newWindow else { return }
         window.acceptsMouseMovedEvents = true
-        for elem in mapping {
-            elem.value.layer.contentsScale = window.backingScaleFactor
-            elem.value.contentsScale = window.backingScaleFactor
-            elem.value.invalidate()
-        }
+        rootNode.contentsScale = window.backingScaleFactor
         titleLayer.contentsScale = window.backingScaleFactor
     }
 
@@ -1241,7 +1237,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     internal func initAndUpdateInlineFormatter(isDragged: Bool = false) {
-        guard let node = node as? TextNode else { return }
+        guard let node = focussedWidget as? TextNode else { return }
 
         if inlineFormatter == nil && popover == nil {
             currentTextRange = node.selectedTextRange

@@ -73,16 +73,16 @@ public class TextRoot: TextNode {
                 state.selectedTextRange = newValue ..< newValue
             }
             updateTextAttributesAtCursorPosition()
-            let n = node as? TextNode
+            let n = focussedWidget as? TextNode
             n?.invalidateText()
-            node.invalidate()
+            focussedWidget?.invalidate()
             editor.reBlink()
             editor.setHotSpotToCursorPosition()
         }
     }
 
     var selectedText: String {
-        guard let node = node as? TextNode else { return "" }
+        guard let node = focussedWidget as? TextNode else { return "" }
         return node.text.substring(range: selectedTextRange)
     }
 
@@ -111,17 +111,17 @@ public class TextRoot: TextNode {
         return super.buildTextChildren(elements: elements) + otherSections.compactMap { $0 }
     }
 
-    unowned var node: Widget! {
+    weak var focussedWidget: Widget? {
         didSet {
-            guard oldValue !== node else { return }
+            guard oldValue !== focussedWidget else { return }
             let oldNode = oldValue as? TextNode
-            let newNode = node as? TextNode
-            oldValue.unfocus()
+            let newNode = focussedWidget as? TextNode
+            oldValue?.unfocus()
             oldNode?.invalidateText()
-            oldValue.invalidate()
-            node.focus()
+            oldValue?.invalidate()
+            focussedWidget?.focus()
             newNode?.invalidateText()
-            node.invalidate()
+            focussedWidget?.invalidate()
             cancelSelection()
         }
     }
@@ -173,7 +173,7 @@ public class TextRoot: TextNode {
             first?.placeholder = BeamText(text: istoday ? "This is the journal, you can type anything here!" : "...")
         }
 
-        node = children.first ?? self
+        focussedWidget = children.first ?? self
         childInset = 0
     }
 
@@ -194,7 +194,7 @@ public class TextRoot: TextNode {
     }
 
     func focus(node: TextNode) {
-        self.node = node
+        self.focussedWidget = node
         cursorPosition = 0
     }
 

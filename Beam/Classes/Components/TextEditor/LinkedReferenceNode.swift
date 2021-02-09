@@ -112,27 +112,28 @@ class LinkedReferenceNode: TextNode {
         let proxyElement = ProxyElement(for: element)
         super.init(editor: editor, element: proxyElement)
         self.children = proxyElement.children.compactMap({ e -> LinkedReferenceNode? in
-            let ref = editor.nodeFor(e)
+            let ref = nodeFor(e)
             ref.parent = self
             return ref as? LinkedReferenceNode
         })
 
         editor.layer?.addSublayer(layer)
         actionLayer?.removeFromSuperlayer()
-        open = true
+
+        open = false
 
         element.$children
             .receive(on: DispatchQueue.main)
             .sink { [unowned self] newChildren in
                 self.children = newChildren.compactMap({ e -> LinkedReferenceNode? in
-                    let ref = editor.nodeFor(e)
+                    let ref = nodeFor(e)
                     ref.parent = self
                     return ref as? LinkedReferenceNode
                 })
 
                 self.invalidateRendering()
+                updateChildrenVisibility(visible && open)
         }.store(in: &scope)
-
     }
 
     // MARK: - Setup UI

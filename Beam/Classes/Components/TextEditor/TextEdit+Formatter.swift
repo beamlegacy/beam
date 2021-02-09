@@ -87,7 +87,7 @@ extension BeamTextEdit {
     }
 
     internal func showOrHideInlineFormatter(isPresent: Bool, isDragged: Bool = false) {
-        guard let node = node as? TextNode,
+        guard let node = focussedWidget as? TextNode,
               let inlineFormatter = inlineFormatter,
               let topAnchor = BeamTextEdit.topAnchor,
               let scrollView = enclosingScrollView else { return }
@@ -120,7 +120,7 @@ extension BeamTextEdit {
     }
 
     internal func updateInlineFormatterView(_ isDragged: Bool) {
-        guard let node = node as? TextNode,
+        guard let node = focussedWidget as? TextNode,
               let inlineFormatter = inlineFormatter,
               let topAnchor = BeamTextEdit.topAnchor,
               let leftAnchor = BeamTextEdit.leftAnchor,
@@ -157,7 +157,7 @@ extension BeamTextEdit {
     }
 
     internal func detectFormatterType() {
-        guard let node = node as? TextNode else { return }
+        guard let node = focussedWidget as? TextNode else { return }
 
         let selectedTextRange = node.selectedTextRange
         let cursorPosition = rootNode.cursorPosition
@@ -199,7 +199,7 @@ extension BeamTextEdit {
     }
 
     internal func updateFormatterView(with type: FormatterType, attribute: BeamText.Attribute? = nil, kind: ElementKind? = .bullet) {
-        guard let node = node as? TextNode else { return }
+        guard let node = focussedWidget as? TextNode else { return }
 
         var hasAttribute = false
 
@@ -226,7 +226,7 @@ extension BeamTextEdit {
     }
 
     internal func selectFormatterAction(_ type: FormatterType, _ isActive: Bool) {
-        guard let node = node as? TextNode else { return }
+        guard let node = focussedWidget as? TextNode else { return }
 
         switch type {
         case .h1:
