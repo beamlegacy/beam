@@ -141,6 +141,7 @@ extension BeamText {
         while link.contains("  ") {
             link = link.replacingOccurrences(of: "  ", with: " ")
         }
+        link = link.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
         guard linkCharacterSet.isSuperset(of: CharacterSet(charactersIn: link)) else {
 //            Logger.shared.logError("makeInternalLink for range: \(range) failed: forbidden characters in range", category: .document)
             return false
