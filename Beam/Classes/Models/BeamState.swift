@@ -177,6 +177,19 @@ let NoteDisplayThreshold = Float(0.0)
         updateCanGoBackForward()
     }
 
+    func toggleBetweenWebAndNote() {
+        guard let note = currentTab?.note else { return }
+
+        switch mode {
+        case .web:
+            navigateToNote(note)
+        case .note:
+            mode = .web
+        case .today:
+            if !tabs.isEmpty { mode = .web }
+        }
+    }
+
     func updateCanGoBackForward() {
         switch mode {
         // swiftlint:disable:next fallthrough no_fallthrough_only

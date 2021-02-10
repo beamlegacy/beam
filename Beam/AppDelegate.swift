@@ -88,11 +88,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     func prepareMenu(items: [NSMenuItem], for mode: Int) {
         for item in items {
-            if item.tag == 0 {
-                continue
-            }
+            if item.tag == 0 { continue }
+
             let value = abs(item.tag)
             let mask = value & mode
+
             item.isEnabled = mask != 0
         }
     }
@@ -253,5 +253,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     @IBAction func goForward(_ sender: Any?) {
         window.state.goForward()
+    }
+
+    @IBAction func toggleBetweenWebAndNote(_ sender: Any) {
+        window.state.toggleBetweenWebAndNote()
     }
 }
