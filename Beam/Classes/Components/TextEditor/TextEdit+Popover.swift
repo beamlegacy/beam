@@ -49,6 +49,11 @@ extension BeamTextEdit {
 
         let startPosition = popoverPrefix == 0 ? cursorStartPosition : cursorStartPosition + 1
         let linkText = String(node.text.text[startPosition..<cursorPosition])
+        if linkText.hasPrefix(" ") {
+            // escape if the user type a space right after the start of the popover
+            cancelPopover(leaveTextAsIs: true)
+            return
+        }
 
         node.text.addAttributes([.internalLink(linkText)], to: startPosition - popoverPrefix..<cursorPosition + popoverSuffix)
         let items = linkText.isEmpty ? documentManager.loadAllDocumentsWithLimit(BeamTextEdit.queryLimit) : documentManager.documentsWithLimitTitleMatch(title: linkText, limit: BeamTextEdit.queryLimit)
@@ -59,13 +64,18 @@ extension BeamTextEdit {
         updatePopoverPosition(with: node, linkText.isEmpty)
     }
 
-    internal func cancelPopover() {
+    internal func cancelPopover(leaveTextAsIs: Bool = false) {
         guard popover != nil,
               let node = focussedWidget as? TextNode else { return }
 
         dismissPopover()
-        node.text.removeSubrange((cursorStartPosition + 1 - popoverPrefix)..<(rootNode.cursorPosition + popoverSuffix))
-        rootNode.cursorPosition = cursorStartPosition + 1 - popoverPrefix
+        let range = (cursorStartPosition + 1 - popoverPrefix)..<(rootNode.cursorPosition + popoverSuffix)
+        if leaveTextAsIs {
+            node.text.removeAttributes([.internalLink("")], from: range)
+        } else {
+            node.text.removeSubrange(range)
+            rootNode.cursorPosition = range.lowerBound
+        }
         showOrHidePersistentFormatter(isPresent: true)
     }
 
