@@ -19,12 +19,12 @@ struct Configuration {
     static private(set) var sentryKey = "$(SENTRY_KEY)"
     static private(set) var sentryHostname = "o477543.ingest.sentry.io"
     static private(set) var sentryProject = "5518785"
-    static private(set) var env = "$(ENV)"
+    static private(set) var env = "debug"
     static private(set) var testAccountPassword = "$(TEST_ACCOUNT_PASSWORD)"
-    static private(set) var sparkleUpdate = NSString("$(SPARKLE_AUTOMATIC_UPDATE)").boolValue
+    static private(set) var sparkleUpdate = NSString("0").boolValue
     static private(set) var sparkleFeedURL: String = Configuration.value(for: "SUFeedURL")
-    static private(set) var sentryEnabled = NSString("$(SENTRY_ENABLED)").boolValue
-    static var networkEnabled = NSString("$(NETWORK_ENABLED)").boolValue
+    static private(set) var sentryEnabled = NSString("0").boolValue
+    static var networkEnabled = NSString("1").boolValue
 
     // Runtime configuration
     static private(set) var apiHostnameDefault = "api.beamapp.co"

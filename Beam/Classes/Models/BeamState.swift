@@ -182,7 +182,6 @@ let NoteDisplayThreshold = Float(0.0)
 
         switch mode {
         case .web:
-            currentNote = note
             navigateToNote(note)
         case .note:
             mode = .web
