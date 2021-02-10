@@ -372,11 +372,11 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
-    func pressEnter(_ option: Bool, _ command: Bool) {
+    func pressEnter(_ option: Bool, _ command: Bool, _ shift: Bool) {
         guard let node = focussedWidget as? TextNode else { return }
         guard !node.readOnly else { return }
 
-        if option {
+        if option || shift {
             rootNode.doCommand(.insertNewline)
         } else if let popover = popover {
             popover.doCommand(.insertNewline)
@@ -445,9 +445,9 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             if let k = event.specialKey {
                 switch k {
                 case .enter:
-                    pressEnter(option, command)
+                    pressEnter(option, command, shift)
                 case .carriageReturn:
-                    pressEnter(option, command)
+                    pressEnter(option, command, shift)
                     return
                 case .leftArrow:
                     if control && option && command {
