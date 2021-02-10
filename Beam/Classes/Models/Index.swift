@@ -42,8 +42,8 @@ extension IndexDocument {
             return id
         })
         length = contents.count
-        contentsWords = Index.extractWords(from: contents, useLemmas: gUseLemmas, removeDiacritics: gRemoveDiacritics)
-        titleWords = Index.extractWords(from: title, useLemmas: gUseLemmas, removeDiacritics: gRemoveDiacritics)
+        contentsWords = contents.extractWords(useLemmas: gUseLemmas, removeDiacritics: gRemoveDiacritics)
+        titleWords = title.extractWords(useLemmas: gUseLemmas, removeDiacritics: gRemoveDiacritics)
     }
 
     var leanCopy: IndexDocument {
@@ -96,7 +96,7 @@ class Index: Codable {
 
     //swiftlint:disable:next cyclomatic_complexity
     func search(string: String, maxResults: Int? = 10) -> [SearchResult] {
-        let inputWords = Self.extractWords(from: string, useLemmas: gUseLemmas, removeDiacritics: gRemoveDiacritics)
+        let inputWords = string.extractWords(useLemmas: gUseLemmas, removeDiacritics: gRemoveDiacritics)
 
         var results = [UInt64: DocumentResult]()
         let documents = inputWords.map { word -> [DocumentResult] in
@@ -229,10 +229,6 @@ class Index: Codable {
         for doc in documents {
             Logger.shared.logInfo("[Document \(doc.key)] - \(doc.value.title) / \(String(describing: LinkStore.linkFor(doc.value.id)))", category: .search)
         }
-    }
-
-    class func extractWords(from string: String, useLemmas: Bool, removeDiacritics: Bool) -> [String] {
-        return string.extractWords(useLemmas: useLemmas, removeDiacritics: removeDiacritics)
     }
 
     static func loadOrCreate(_ path: URL) -> Index {

@@ -252,6 +252,32 @@ class PageRankTests: XCTestCase {
         }
     }
 
+    func compareNamedEntities(list1: [(String, NLTag)], list2: [(String, NLTag)], _ message: String, file: StaticString, line: UInt) {
+        XCTAssertEqual(list1.count, list2.count)
+        for i in 0..<list1.count {
+            XCTAssertEqual(list1[i].0, list2[i].0, message, file: file, line: line)
+            XCTAssertEqual(list1[i].1, list2[i].1, message, file: file, line: line)
+        }
+    }
+
+    func checkNamedEntities(_ language: NLLanguage?, _ str: String, _ list: [(String, NLTag)], _ message: String = "", file: StaticString = #filePath, line: UInt = #line) {
+        compareNamedEntities(list1: list, list2: str.getNamedEntities(language), message, file: file, line: line)
+    }
+
+    func testNamedEntitiesExtraction() {
+//        checkNamedEntities(.french, "Je m'appelle Sébastien et je travaille chez Beam à Paris",
+//                             [("Sébastien", NLTag.personalName), ("Paris", NLTag.placeName)], "test1")
+
+        checkNamedEntities(.english, "My name is Seb and I work for Beam in Paris",
+                        [("Paris", NLTag.placeName)], "test2")
+
+        checkNamedEntities(.english, "I used to work for Apple in Paris",
+                        [("Paris", NLTag.placeName)], "test3")
+
+        checkNamedEntities(.english, "I started building guitars because the left handed offerings from Fender and Gibson was really subpar...",
+                        [("Fender", NLTag.organizationName), ("Gibson", NLTag.personalName)], "test4")
+    }
+
     func testTF() {
         let index = Index()
         let doc1 = IndexDocument(source: "doc1", title: "First document", contents: "This is the first document in the collection. It talks about nothing in particular.")
@@ -281,7 +307,5 @@ class PageRankTests: XCTestCase {
         for w in expectedTfidf {
             XCTAssertEqual(w.value, tfidf[w.key] ?? 0, accuracy: 0.00001)
         }
-
-
     }
 }
