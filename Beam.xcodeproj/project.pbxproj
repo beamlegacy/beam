@@ -224,6 +224,8 @@
 		965A78362514F148009980D4 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 965A78342514F148009980D4 /* Main.storyboard */; };
 		965A78422514F149009980D4 /* BeamTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965A78412514F149009980D4 /* BeamTests.swift */; };
 		965A784D2514F149009980D4 /* BeamUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965A784C2514F149009980D4 /* BeamUITests.swift */; };
+		9676142025CA989D00BDA862 /* WeakReference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9676141F25CA989D00BDA862 /* WeakReference.swift */; };
+		9676143825CAAD5300BDA862 /* RWLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9676143725CAAD5300BDA862 /* RWLock.swift */; };
 		967B2685255465C5003F40E3 /* Html2MdTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 967B2684255465C5003F40E3 /* Html2MdTests.swift */; };
 		969084CC25365AAE009D3C96 /* ParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 969084CB25365AAE009D3C96 /* ParserTests.swift */; };
 		9691E3D825AD9F3300A13080 /* TextRoot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9691E3D725AD9F3300A13080 /* TextRoot.swift */; };
@@ -666,6 +668,8 @@
 		965A78482514F149009980D4 /* BeamUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BeamUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		965A784C2514F149009980D4 /* BeamUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamUITests.swift; sourceTree = "<group>"; };
 		965A784E2514F149009980D4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		9676141F25CA989D00BDA862 /* WeakReference.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeakReference.swift; sourceTree = "<group>"; };
+		9676143725CAAD5300BDA862 /* RWLock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RWLock.swift; sourceTree = "<group>"; };
 		967B2684255465C5003F40E3 /* Html2MdTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Html2MdTests.swift; sourceTree = "<group>"; };
 		969084CB25365AAE009D3C96 /* ParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParserTests.swift; sourceTree = "<group>"; };
 		9691E3D725AD9F3300A13080 /* TextRoot.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextRoot.swift; sourceTree = "<group>"; };
@@ -970,6 +974,8 @@
 				4181719A2581107C00317ED8 /* JSSourceLoader.swift */,
 				4181719B2581107C00317ED8 /* Information.swift */,
 				4105CE7425A60681009AB687 /* FormatterTypeButton.swift */,
+				9676141F25CA989D00BDA862 /* WeakReference.swift */,
+				9676143725CAAD5300BDA862 /* RWLock.swift */,
 				41855A3925D1334F00DA49DC /* BeamCollectionView.swift */,
 			);
 			path = Utils;
@@ -2059,6 +2065,7 @@
 				96988C8325BB0AF2000223A3 /* DestinationCardPicker.swift in Sources */,
 				96E4CF72258E59F400D6DE22 /* BeamTextVisitor.swift in Sources */,
 				418172272581107C00317ED8 /* NSMutableAttributedString+Range.swift in Sources */,
+				9676142025CA989D00BDA862 /* WeakReference.swift in Sources */,
 				4131F16825BEC48C006473CD /* SpacerWidget.swift in Sources */,
 				4181723A2581107C00317ED8 /* Parser.swift in Sources */,
 				524520A425C8234500AC0007 /* BeamElement+Merge.swift in Sources */,
@@ -2090,6 +2097,7 @@
 				523FF66125C31D8800B4BD6E /* Data+String.swift in Sources */,
 				418172AA25811A3A00317ED8 /* BMTextField.swift in Sources */,
 				4181720D2581107C00317ED8 /* BID.swift in Sources */,
+				9676143825CAAD5300BDA862 /* RWLock.swift in Sources */,
 				418172152581107C00317ED8 /* NSContainerView.swift in Sources */,
 				9691E44425B1091300A13080 /* BrowsingSection.swift in Sources */,
 				521EEDF12593819000BA2485 /* Document+ResultsController.swift in Sources */,

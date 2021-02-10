@@ -33,6 +33,7 @@ class BeamNote: BeamElement {
     @Published public private(set) var searchQueries: [String] = [] { didSet { change() } } ///< Search queries whose results were used to populate this note
     @Published public private(set) var visitedSearchResults: [VisitedPage] = [] { didSet { change() } } ///< URLs whose content were used to create this note
     @Published public var browsingSessions = [BrowsingTree]() { didSet { change() } }
+    private var version: Int64 = 0
 
     override var note: BeamNote? {
         return self
@@ -96,6 +97,14 @@ class BeamNote: BeamElement {
         try super.encode(to: encoder)
     }
 
+    deinit {
+        let t = title
+        DispatchQueue.main.async {
+            Logger.shared.logInfo("Unload note \(t)", category: .document)
+            Self.fetchedNotes.removeValue(forKey: t)
+        }
+    }
+
     var documentStruct: DocumentStruct? {
         do {
             let encoder = JSONEncoder()
@@ -118,6 +127,7 @@ class BeamNote: BeamElement {
     private var activeDocumentCancellable: AnyCancellable?
     private func observeDocumentChange(documentManager: DocumentManager) {
         return
+        guard activeDocumentCancellable == nil else { return }
         guard let docStruct = documentStruct else { return }
 
         activeDocumentCancellable = documentManager.onDocumentChange(docStruct) { [unowned self] docStruct in
@@ -176,8 +186,6 @@ class BeamNote: BeamElement {
         documentManager.saveDocument(documentStruct) { result in
             completion?(result)
         }
-
-        observeDocumentChange(documentManager: documentManager)
     }
 
     var isTodaysNote: Bool { (type == .journal) && (self === AppDelegate.main.data.todaysNote) }
@@ -204,19 +212,28 @@ class BeamNote: BeamElement {
         unlinkedReferences = []
     }
 
+    static private func getFetchedNote(_ title: String) -> BeamNote? {
+        return Self.fetchedNotes[title]?.ref
+    }
+
+    private func getFetchedNote(_ title: String) -> BeamNote? {
+        return Self.getFetchedNote(title)
+    }
+
+
     private static func instanciateNote(_ documentManager: DocumentManager, _ documentStruct: DocumentStruct, keepInMemory: Bool = true) throws -> BeamNote {
         let decoder = JSONDecoder()
         let note = try decoder.decode(BeamNote.self, from: documentStruct.data)
         note.updateDate = documentStruct.updatedAt
-        note.observeDocumentChange(documentManager: documentManager)
         if keepInMemory {
             appendToFetchedNotes(note)
         }
         return note
     }
+
     static func fetch(_ documentManager: DocumentManager, title: String) -> BeamNote? {
         // Is the note in the cache?
-        if let note = fetchedNotes[title] {
+        if let note = getFetchedNote(title) {
             return note
         }
 
@@ -238,7 +255,7 @@ class BeamNote: BeamElement {
 
     static func fetchNotesWithType(_ documentManager: DocumentManager, type: DocumentType,  _ limit: Int, _ fetchOffset: Int) -> [BeamNote] {
         return documentManager.loadDocumentsWithType(type: type, limit, fetchOffset).compactMap { doc -> BeamNote? in
-            if let note = fetchedNotes[doc.title] {
+            if let note = getFetchedNote(doc.title) {
                 return note
             }
             do {
@@ -252,7 +269,7 @@ class BeamNote: BeamElement {
 
     // Beware that this function crashes whatever note with that title in the cache
     static func create(_ documentManager: DocumentManager, title: String) -> BeamNote {
-        assert(fetchedNotes[title] == nil)
+        assert(getFetchedNote(title) == nil)
         let note = BeamNote(title: title)
         appendToFetchedNotes(note)
         updateNoteCount()
@@ -260,6 +277,7 @@ class BeamNote: BeamElement {
     }
 
     static func appendToFetchedNotes(_ note: BeamNote) {
+        fetchedNotes[note.title] = WeakReference<BeamNote>(note)
         fetchedNotesCancellables.removeValue(forKey: note.title)
         fetchedNotesCancellables[note.title] =
             note.$changed
@@ -268,16 +286,18 @@ class BeamNote: BeamElement {
 //            .throttle(for: .seconds(2), scheduler: RunLoop.main, latest: false)
             .receive(on: DispatchQueue.main)
             .sink { [weak note] _ in
-                let documentManager = DocumentManager()
+                let documentManager = AppDelegate.main.data.documentManager
 
                 guard let note = note else { return }
-                note.detectLinkedNotes(documentManager)
+                linkDetectionQueue.async {
+                    Self.detectLinks(in: note.title, to: documentManager.allDocumentsTitles(), with: documentManager)
+                }
                 // TODO: we should only save when changes occured
                 note.save(documentManager: documentManager)
             }
         note.observeDocumentChange(documentManager: AppDelegate.main.data.documentManager)
 
-        fetchedNotes[note.title] = note
+        fetchedNotes[note.title] = WeakReference(note)
     }
 
     static func clearCancellables() {
@@ -309,66 +329,100 @@ class BeamNote: BeamElement {
         fetchedNotes.removeValue(forKey: note)
     }
 
-    static func loadAllDocument(_ documentManager: DocumentManager) -> [BeamNote] {
-        return documentManager.loadDocuments().compactMap { doc -> BeamNote? in
-            if let note = fetchedNotes[doc.title] {
-                return note
-            }
-            do {
-                return try instanciateNote(documentManager, doc)
-            } catch {
-                Logger.shared.logError("Unable to load document \(doc.title) (\(doc.id))", category: .document)
-                return nil
-            }
-        }
-    }
-
     static var linkDetectionQueue = DispatchQueue(label: "LinkDetector")
     static var linkDetectionRunning = false
     static func requestLinkDetection() {
         guard !linkDetectionRunning else { return }
         linkDetectionRunning = true
-        for note in Self.fetchedNotes.values {
-            note.detectLinkedNotes(AppDelegate.main.data.documentManager)
-        }
 
         linkDetectionQueue.async {
-            let documentManager = DocumentManager()
-            detectLinks(documentManager)
+            detectLinks()
             DispatchQueue.main.async {
                 linkDetectionRunning = false
             }
         }
     }
 
-    static func detectLinks(_ documentManager: DocumentManager) {
+    static func detectLinks(in noteName: String, to allNotes: [String], with documentManager: DocumentManager) {
+        guard let doc = documentManager.loadDocumentByTitle(title: noteName) else {
+            return
+        }
+
+        do {
+            let note = try instanciateNote(documentManager, doc, keepInMemory: false)
+
+            // Detect Linked Notes
+            note.detectLinkedNotes(documentManager, async: true)
+
+            // remove broken unlinked references
+            let brokenRefs = note.getBrokenUnlinkedReferences(documentManager, allNotes)
+
+            // Detect UnLinked Notes
+            let unlinks = note.getDeepUnlinkedReferences(noteName, allNotes)
+            DispatchQueue.main.async {
+                let note = BeamNote.fetch(AppDelegate.main.data.documentManager, title: noteName)
+                for brokenRef in brokenRefs {
+                    note?.removeUnlinkedReference(brokenRef)
+                }
+
+                for (name, refs) in unlinks {
+                    let referencedNote = BeamNote.fetch(AppDelegate.main.data.documentManager, title: name)
+                    for ref in refs {
+                        referencedNote?.addUnlinkedReference(ref)
+                    }
+                }
+            }
+        } catch {
+            Logger.shared.logError("LinkDetection: Unable to decode note \(doc.title)", category: .document)
+        }
+    }
+
+    static func detectLinks() {
+        let documentManager = DocumentManager()
         let allNotes = documentManager.allDocumentsTitles()
         Logger.shared.logInfo("Detect links for \(allNotes.count) notes", category: .document)
 
         for noteName in allNotes {
-            guard let doc = documentManager.loadDocumentByTitle(title: noteName) else {
-                continue
-            }
-
-            do {
-                let note = try instanciateNote(documentManager, doc, keepInMemory: false)
-                let unlinks = note.getDeepUnlinkedReferences(noteName, allNotes)
-
-                DispatchQueue.main.async {
-                    for (name, refs) in unlinks {
-                        let note = BeamNote.fetch(AppDelegate.main.data.documentManager, title: name)
-                        for ref in refs {
-                            note?.addUnlinkedReference(ref)
-                        }
-                    }
-                }
-            } catch {
-                Logger.shared.logError("LinkDetection: Unable to decode note \(doc.title)", category: .document)
-            }
+            detectLinks(in: noteName, to: allNotes, with: documentManager)
         }
     }
 
-    public private(set) static var fetchedNotes: [String: BeamNote] = [:]
+    func getBrokenUnlinkedReferences(_ documentManager: DocumentManager, _ allNotes: [String]) -> [NoteReference] {
+        var broken = [NoteReference]()
+        var notes = [String: BeamNote]()
+        for ref in unlinkedReferences {
+            guard let note: BeamNote = {
+                notes[ref.noteName] ?? {
+                    guard let doc = documentManager.loadDocumentByTitle(title: ref.noteName) else {
+                        return nil
+                    }
+
+                    do {
+                        let note = try Self.instanciateNote(documentManager, doc, keepInMemory: false)
+                        notes[note.title] = note
+                        return note
+                    } catch {
+                        Logger.shared.logError("UnlinkReference verification: Unable to decode note \(doc.title)", category: .document)
+                    }
+                    return nil
+                }()
+            }() else {
+                continue
+            }
+
+            guard let element = note.findElement(ref.elementID),
+                  let refs = element.getUnlinkedReferences(note.title, allNotes)[title],
+                  refs.contains(ref)
+            else {
+                broken.append(ref)
+                continue
+            }
+        }
+
+        return broken
+    }
+
+    public private(set) static var fetchedNotes: [String: WeakReference<BeamNote>] = [:]
     private static var fetchedNotesCancellables: [String: Cancellable] = [:]
 
     private static func updateNoteCount() {
@@ -398,4 +452,23 @@ class BeamNote: BeamElement {
     public override var debugDescription: String {
         return "BeamNode(\(id)) [\(children.count) children]: \(title)"
     }
+
+    var lock = RWLock()
+
+    override func readLock() {
+        lock.readLock()
+    }
+
+    override func readUnlock() {
+        lock.readUnlock()
+    }
+
+    override func writeLock() {
+        lock.writeLock()
+    }
+
+    override func writeUnlock() {
+        lock.writeUnlock()
+    }
 }
+

@@ -301,20 +301,28 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
         return nil
     }
 
-    func detectLinkedNotes(_ documentManager: DocumentManager) {
+    func detectLinkedNotes(_ documentManager: DocumentManager, async: Bool) {
         guard let note = note else { return }
 
         for link in text.internalLinks where link.string != note.title {
             let linkTitle = link.string
-//            Logger.shared.logInfo("searching link \(linkTitle)", category: .document)
-            let refnote = BeamNote.fetchOrCreate(documentManager, title: linkTitle)
-            let reference = NoteReference(noteName: note.title, elementID: id)
-//            Logger.shared.logInfo("New link \(note.title) <-> \(linkTitle)", category: .document)
-            refnote.addLinkedReference(reference)
+            //            Logger.shared.logInfo("searching link \(linkTitle)", category: .document)
+            let reference = NoteReference(noteName: linkTitle, elementID: id)
+            //            Logger.shared.logInfo("New link \(note.title) <-> \(linkTitle)", category: .document)
+
+            if async {
+                DispatchQueue.main.async {
+                    let refnote = BeamNote.fetchOrCreate(DocumentManager(), title: linkTitle)
+                    refnote.addLinkedReference(reference)
+                }
+            } else {
+                let refnote = BeamNote.fetchOrCreate(documentManager, title: linkTitle)
+                refnote.addLinkedReference(reference)
+            }
         }
 
         for c in children {
-            c.detectLinkedNotes(documentManager)
+            c.detectLinkedNotes(documentManager, async: async)
         }
     }
 
@@ -374,6 +382,23 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
         }
 
         return elems
+    }
+
+
+    func readLock() {
+        note?.readLock()
+    }
+
+    func readUnlock() {
+        note?.readUnlock()
+    }
+
+    func writeLock() {
+        note?.writeLock()
+    }
+
+    func writeUnlock() {
+        note?.writeUnlock()
     }
 
     var depth: Int {
