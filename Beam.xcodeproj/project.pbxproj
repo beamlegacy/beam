@@ -211,6 +211,8 @@
 		562A8B3625B5D8B5004D3D8A /* String+NL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 562A8B3525B5D8B5004D3D8A /* String+NL.swift */; };
 		562A8B5225B5E3D8004D3D8A /* String+NLTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 562A8B5125B5E3D8004D3D8A /* String+NLTests.swift */; };
 		562A8B7925B6ED03004D3D8A /* CoreMLTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 562A8B7825B6ED03004D3D8A /* CoreMLTests.swift */; };
+		56A5BD3125CC680E00ED7C50 /* url.stopwords in Resources */ = {isa = PBXBuildFile; fileRef = 56A5BD3025CC680E00ED7C50 /* url.stopwords */; };
+		56A5BD3725CCAFA400ED7C50 /* english.stopwords in Resources */ = {isa = PBXBuildFile; fileRef = 56A5BD3625CCAFA400ED7C50 /* english.stopwords */; };
 		9611995E25A27A17005BEC82 /* BeamObjCBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 9611995D25A27A17005BEC82 /* BeamObjCBridge.m */; };
 		961EC4F225B4511D009FA322 /* Layer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 961EC4F125B4511D009FA322 /* Layer.swift */; };
 		961EC50B25B495DB009FA322 /* ButtonLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 961EC50A25B495DB009FA322 /* ButtonLayer.swift */; };
@@ -651,6 +653,8 @@
 		562A8B3525B5D8B5004D3D8A /* String+NL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+NL.swift"; sourceTree = "<group>"; };
 		562A8B5125B5E3D8004D3D8A /* String+NLTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+NLTests.swift"; sourceTree = "<group>"; };
 		562A8B7825B6ED03004D3D8A /* CoreMLTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreMLTests.swift; sourceTree = "<group>"; };
+		56A5BD3025CC680E00ED7C50 /* url.stopwords */ = {isa = PBXFileReference; lastKnownFileType = text; path = url.stopwords; sourceTree = "<group>"; };
+		56A5BD3625CCAFA400ED7C50 /* english.stopwords */ = {isa = PBXFileReference; lastKnownFileType = text; path = english.stopwords; sourceTree = "<group>"; };
 		9611995C25A27A17005BEC82 /* Beam-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Beam-Bridging-Header.h"; sourceTree = "<group>"; };
 		9611995D25A27A17005BEC82 /* BeamObjCBridge.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BeamObjCBridge.m; sourceTree = "<group>"; };
 		961EC4F125B4511D009FA322 /* Layer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Layer.swift; sourceTree = "<group>"; };
@@ -794,6 +798,7 @@
 		41816FD02581046F00317ED8 /* Assets */ = {
 			isa = PBXGroup;
 			children = (
+				56A5BD1A25CC590500ED7C50 /* NaturalLanguage */,
 				418171112581082200317ED8 /* Assets.xcassets */,
 				418170FE2581060A00317ED8 /* Colors.xcassets */,
 			);
@@ -1478,6 +1483,23 @@
 			path = CoreML;
 			sourceTree = "<group>";
 		};
+		56A5BD1A25CC590500ED7C50 /* NaturalLanguage */ = {
+			isa = PBXGroup;
+			children = (
+				56A5BD2F25CC591600ED7C50 /* Stopwords */,
+			);
+			path = NaturalLanguage;
+			sourceTree = "<group>";
+		};
+		56A5BD2F25CC591600ED7C50 /* Stopwords */ = {
+			isa = PBXGroup;
+			children = (
+				56A5BD3025CC680E00ED7C50 /* url.stopwords */,
+				56A5BD3625CCAFA400ED7C50 /* english.stopwords */,
+			);
+			path = Stopwords;
+			sourceTree = "<group>";
+		};
 		9611994725A279EC005BEC82 /* ObjCBridge */ = {
 			isa = PBXGroup;
 			children = (
@@ -1895,6 +1917,7 @@
 				5206280C25922D6300D7CD9E /* delete_document.graphql in Resources */,
 				5206281825922D8A00D7CD9E /* delete_all_documents.graphql in Resources */,
 				5206281025922D6C00D7CD9E /* update_document.graphql in Resources */,
+				56A5BD3725CCAFA400ED7C50 /* english.stopwords in Resources */,
 				414B98F625A23A04002E81A3 /* FormatterView.xib in Resources */,
 				4159E9E2259A2575005FD355 /* BidirectionalPopover.xib in Resources */,
 				418171F42581107C00317ED8 /* sign_up.graphql in Resources */,
@@ -1905,6 +1928,7 @@
 				418172FF25811DB200317ED8 /* Readability.js in Resources */,
 				414B987B259DE2E2002E81A3 /* BidirectionalPopoverActionItem.xib in Resources */,
 				418171122581082200317ED8 /* Assets.xcassets in Resources */,
+				56A5BD3125CC680E00ED7C50 /* url.stopwords in Resources */,
 				4181730025811DB200317ED8 /* SelectionObserver.js in Resources */,
 				5206281425922D7800D7CD9E /* document.graphql in Resources */,
 				965A78332514F148009980D4 /* Preview Assets.xcassets in Resources */,
