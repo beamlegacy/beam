@@ -16,6 +16,7 @@ struct AutoCompleteResult: Identifiable {
         case history
         case note
         case autoComplete
+        case createCard
     }
 
     var id: UUID
