@@ -101,7 +101,6 @@ extension BeamTextEdit {
             isInlineFormatterHidden = false
 
             updateInlineFormatterFrame(inlineFormatter, with: node, isPresent: isPresent)
-
             if !isPresent && isDragged { dismissFormatterView(inlineFormatter) }
         }, completionHandler: { [weak self] in
             guard let self = self else { return }
