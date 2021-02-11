@@ -100,6 +100,8 @@ extension BeamTextEdit {
             inlineFormatter.layoutSubtreeIfNeeded()
             isInlineFormatterHidden = false
 
+            updateInlineFormatterFrame(inlineFormatter, with: node, isPresent: isPresent)
+
             if !isPresent && isDragged { dismissFormatterView(inlineFormatter) }
         }, completionHandler: { [weak self] in
             guard let self = self else { return }
@@ -259,16 +261,23 @@ extension BeamTextEdit {
         }
     }
 
-    private func updateInlineFormatterFrame(_ view: FormatterView, with node: TextNode) {
+    private func updateInlineFormatterFrame(_ view: FormatterView, with node: TextNode, isPresent: Bool = false) {
         let (xOffset, rect) = node.offsetAndFrameAt(index: rootNode.cursorPosition)
         let globalOffset = self.convert(node.offsetInDocument, to: nil)
+        let yPos = globalOffset.y - rect.maxY
 
-        view.frame = NSRect(
-            x: xOffset + BeamTextEdit.xPosInlineFormatter,
-            y: globalOffset.y - rect.maxY + 20,
-            width: view.idealSize.width,
-            height: view.idealSize.height
-        )
+        if isPresent && isInlineFormatterHidden {
+            view.frame.origin.y = yPos + 20
+        } else if !isPresent && !isInlineFormatterHidden {
+            view.frame.origin.y = yPos
+        } else {
+            view.frame = NSRect(
+                x: xOffset + BeamTextEdit.xPosInlineFormatter,
+                y: isPresent ? yPos + 20 : yPos,
+                width: view.idealSize.width,
+                height: view.idealSize.height
+            )
+        }
     }
 
     private func addConstraint(to view: FormatterView, with contentView: NSView) {
