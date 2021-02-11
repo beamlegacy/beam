@@ -137,7 +137,7 @@ extension BeamTextEdit {
         node.text.makeInternalLink(replacementStart..<linkEnd)
         rootNode.cursorPosition = linkEnd
         dismissPopover()
-        initFormatterView(.persistent)
+        initPersistentFormatterView()
     }
 
 }

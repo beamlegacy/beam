@@ -26,6 +26,12 @@ class FormatterView: NSView {
         }
     }
 
+    var idealSize: NSSize {
+        let itemSize = CGFloat(items.count)
+        let width = (itemSize * 34) + (1.45 * itemSize)
+        return NSSize(width: width, height: 32)
+    }
+
     // View Properties
     private let cornerRadius: CGFloat = 3
     private let leading = 2
@@ -61,6 +67,10 @@ class FormatterView: NSView {
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
+    }
+
+    deinit {
+        print("deinit")
     }
 
     // MARK: - UI
@@ -101,6 +111,8 @@ class FormatterView: NSView {
 
     private func animateShadowOnMouseEntered(_ isHover: Bool) {
         guard viewType == .persistent else { return }
+
+        isHover ? NSCursor.arrow.set() : NSCursor.iBeam.set()
 
         NSAnimationContext.runAnimationGroup { ctx in
             ctx.allowsImplicitAnimation = true

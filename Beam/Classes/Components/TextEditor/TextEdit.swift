@@ -1230,7 +1230,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
     internal func initAndShowPersistentFormatter() {
         if persistentFormatter == nil {
-            initFormatterView(.persistent)
+            initPersistentFormatterView()
         } else if persistentFormatter != nil {
             showOrHidePersistentFormatter(isPresent: true)
         }
@@ -1241,7 +1241,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
         if inlineFormatter == nil && popover == nil {
             currentTextRange = node.selectedTextRange
-            initFormatterView(.inline)
+            initInlineFormatterView()
             showOrHidePersistentFormatter(isPresent: false)
         }
 
@@ -1275,7 +1275,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         if popover != nil {
             if popoverPrefix > 0 { cancelInternalLink() }
             dismissPopover()
-            initFormatterView(.persistent)
+            initPersistentFormatterView()
         }
 
         if inlineFormatter != nil {
