@@ -18,7 +18,7 @@ class AutoCompleteTests: QuickSpec {
             let query = "Beam app"
 
             it("updates results") {
-                waitUntil { done in
+                waitUntil(timeout: .seconds(10)) { done in
                     self.sut.$results
                         .dropFirst(1)
                         .sink { results in
@@ -30,7 +30,7 @@ class AutoCompleteTests: QuickSpec {
             }
 
             it("has an empty first call") {
-                waitUntil { done in
+                waitUntil(timeout: .seconds(10)) { done in
                     self.sut.$results
                         .sink { results in
                             expect(results).to(haveCount(0))

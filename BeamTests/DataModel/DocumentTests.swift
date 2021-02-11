@@ -23,7 +23,7 @@ class DocumentTests: QuickSpec {
 
             // Setup CoreData
             self.coreDataManager.setup()
-            waitUntil { done in
+            waitUntil(timeout: .seconds(10)) { done in
                 self.coreDataManager.destroyPersistentStore {
                     self.coreDataManager.setup()
                     done()
