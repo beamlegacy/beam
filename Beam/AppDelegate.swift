@@ -92,6 +92,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
             let value = abs(item.tag)
             let mask = value & mode
+
             item.isEnabled = mask != 0
         }
     }
@@ -254,4 +255,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         window.state.goForward()
     }
 
+    @IBAction func toggleBetweenWebAndNote(_ sender: Any) {
+        window.state.toggleBetweenWebAndNote()
+    }
 }
