@@ -17,7 +17,6 @@ extension BeamTextEdit {
         guard let node = focussedWidget as? TextNode else { return }
 
         popover = BidirectionalPopover()
-        updatePopoverPosition(with: node)
 
         guard let popover = popover,
               let view = window?.contentView else { return }
@@ -125,7 +124,8 @@ extension BeamTextEdit {
                 width: popover.idealSize.width,
                 height: popover.idealSize.height
             )
-        }    }
+        }
+    }
 
     private func validInternalLink(from node: TextNode, _ title: String) {
         let startPosition = popoverPrefix == 0 ? cursorStartPosition : cursorStartPosition + 1
@@ -137,7 +137,7 @@ extension BeamTextEdit {
         node.text.makeInternalLink(replacementStart..<linkEnd)
         rootNode.cursorPosition = linkEnd
         dismissPopover()
-        initFormatterView(.persistent)
+        showOrHidePersistentFormatter(isPresent: true)
     }
 
 }
