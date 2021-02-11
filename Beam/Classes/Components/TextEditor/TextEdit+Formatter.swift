@@ -88,6 +88,9 @@ extension BeamTextEdit {
         guard let node = focussedWidget as? TextNode,
               let inlineFormatter = inlineFormatter else { return }
 
+        let (_, rect) = node.offsetAndFrameAt(index: rootNode.cursorPosition)
+        let globalOffset = self.convert(node.offsetInDocument, to: nil)
+        let yPos = isPresent ? globalOffset.y - rect.maxY + 20 : globalOffset.y - rect.maxY
         let showTimingFunction = CAMediaTimingFunction(controlPoints: 0.64, 0.4, 0, 0.98)
         let hideTimingFunction = CAMediaTimingFunction(controlPoints: 0.98, 0, 0.64, 0.4)
 
@@ -97,10 +100,9 @@ extension BeamTextEdit {
             ctx.timingFunction = isPresent ? showTimingFunction : hideTimingFunction
 
             inlineFormatter.alphaValue = isPresent ? 1 : 0
-            inlineFormatter.layoutSubtreeIfNeeded()
+            inlineFormatter.frame.origin.y = yPos
             isInlineFormatterHidden = false
 
-            updateInlineFormatterFrame(inlineFormatter, with: node, isPresent: isPresent)
             if !isPresent && isDragged { dismissFormatterView(inlineFormatter) }
         }, completionHandler: { [weak self] in
             guard let self = self else { return }
@@ -260,23 +262,17 @@ extension BeamTextEdit {
         }
     }
 
-    private func updateInlineFormatterFrame(_ view: FormatterView, with node: TextNode, isPresent: Bool = false) {
+    private func updateInlineFormatterFrame(_ view: FormatterView, with node: TextNode) {
         let (xOffset, rect) = node.offsetAndFrameAt(index: rootNode.cursorPosition)
         let globalOffset = self.convert(node.offsetInDocument, to: nil)
         let yPos = globalOffset.y - rect.maxY
 
-        if isPresent && isInlineFormatterHidden {
-            view.frame.origin.y = yPos + 20
-        } else if !isPresent && !isInlineFormatterHidden {
-            view.frame.origin.y = yPos
-        } else {
-            view.frame = NSRect(
-                x: xOffset + BeamTextEdit.xPosInlineFormatter,
-                y: isPresent ? yPos + 20 : yPos,
-                width: view.idealSize.width,
-                height: view.idealSize.height
-            )
-        }
+        view.frame = NSRect(
+            x: xOffset + BeamTextEdit.xPosInlineFormatter,
+            y: isInlineFormatterHidden ? yPos : yPos + 20,
+            width: view.idealSize.width,
+            height: view.idealSize.height
+        )
     }
 
     private func addConstraint(to view: FormatterView, with contentView: NSView) {

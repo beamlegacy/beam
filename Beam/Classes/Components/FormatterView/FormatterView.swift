@@ -108,8 +108,6 @@ class FormatterView: NSView {
     private func animateShadowOnMouseEntered(_ isHover: Bool) {
         guard viewType == .persistent else { return }
 
-        isHover ? NSCursor.arrow.set() : NSCursor.iBeam.set()
-
         NSAnimationContext.runAnimationGroup { ctx in
             ctx.allowsImplicitAnimation = true
             ctx.duration = 0.3
