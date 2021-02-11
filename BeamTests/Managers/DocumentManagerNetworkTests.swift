@@ -113,7 +113,7 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                     let newDocStruct = self.sut.loadDocumentById(id: docStruct.id)
                     expect(newDocStruct).toNot(beNil())
-                    expect(newDocStruct?.deletedAt).to(beCloseTo(BeamDate.now, within: 0.1))
+                    expect(newDocStruct?.deletedAt).to(beCloseTo(BeamDate.now, within: 1.0))
 
                     let document = Document.fetchWithId(self.mainContext, docStruct.id)
                     expect(document?.deleted_at).toNot(beNil())
