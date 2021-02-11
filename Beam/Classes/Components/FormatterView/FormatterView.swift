@@ -69,6 +69,10 @@ class FormatterView: NSView {
         super.init(coder: coder)
     }
 
+    deinit {
+        print("deinit")
+    }
+
     // MARK: - UI
     private func commonInitUI() {
         containerView.wantsLayer = true

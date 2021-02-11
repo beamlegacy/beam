@@ -90,24 +90,32 @@ extension BeamTextEdit {
 
         let (_, rect) = node.offsetAndFrameAt(index: rootNode.cursorPosition)
         let globalOffset = self.convert(node.offsetInDocument, to: nil)
-        let yPos = isPresent ? globalOffset.y - rect.maxY + 20 : globalOffset.y - rect.maxY
         let showTimingFunction = CAMediaTimingFunction(controlPoints: 0.64, 0.4, 0, 0.98)
         let hideTimingFunction = CAMediaTimingFunction(controlPoints: 0.98, 0, 0.64, 0.4)
 
-        NSAnimationContext.runAnimationGroup ({ ctx in
-            ctx.allowsImplicitAnimation = true
-            ctx.duration = isPresent ? 0.4 : 0.3
-            ctx.timingFunction = isPresent ? showTimingFunction : hideTimingFunction
-
-            inlineFormatter.alphaValue = isPresent ? 1 : 0
-            inlineFormatter.frame.origin.y = yPos
+        // Animation Alpha
+        NSAnimationContext.beginGrouping()
+        NSAnimationContext.current.duration = isPresent ? 0.4 : 0.2
+        NSAnimationContext.current.timingFunction = isPresent ? showTimingFunction : hideTimingFunction
+            inlineFormatter.animator().alphaValue = isPresent ? 1 : 0
             isInlineFormatterHidden = false
 
-            if !isPresent && isDragged { dismissFormatterView(inlineFormatter) }
-        }, completionHandler: { [weak self] in
+            // Animation YPosition
+            NSAnimationContext.beginGrouping()
+        NSAnimationContext.current.duration = isPresent ? 0.4 : 0.3
+                var origin = inlineFormatter.frame.origin
+                origin.y = isPresent ? globalOffset.y - rect.maxY + 20 : globalOffset.y - rect.maxY
+                inlineFormatter.animator().setFrameOrigin(origin)
+            NSAnimationContext.endGrouping()
+
+        if !isPresent && isDragged { dismissFormatterView(inlineFormatter) }
+        NSAnimationContext.endGrouping()
+
+        // Completion Handler animation
+        NSAnimationContext.current.completionHandler = { [weak self] in
             guard let self = self else { return }
             if !isPresent && !isDragged { self.dismissFormatterView(inlineFormatter) }
-        })
+        }
     }
 
     internal func updateInlineFormatterView(_ isDragged: Bool) {
