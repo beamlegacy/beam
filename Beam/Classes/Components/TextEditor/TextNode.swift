@@ -619,7 +619,7 @@ public class TextNode: Widget {
             } else if mouseInfo.event.clickCount == 1 && mouseInfo.event.modifierFlags.contains(.shift) {
                 dragMode = .select(cursorPosition)
                 root?.extendSelection(to: clickPos)
-                editor.initAndUpdateInlineFormatter()
+                editor.showInlineFormatterOnKeyEventsAndClick()
                 return true
             } else if mouseInfo.event.clickCount == 1 {
                 root?.cursorPosition = clickPos
@@ -630,7 +630,7 @@ public class TextNode: Widget {
             } else if mouseInfo.event.clickCount == 2 {
                 deboucingClickTimer?.invalidate()
                 root?.wordSelection(from: clickPos)
-                editor.initAndUpdateInlineFormatter()
+                editor.showInlineFormatterOnKeyEventsAndClick()
                 return true
             } else {
                 deboucingClickTimer?.invalidate()
@@ -647,7 +647,7 @@ public class TextNode: Widget {
 
         if mouseIsDragged {
             editor.detectFormatterType()
-            editor.initAndUpdateInlineFormatter(isDragged: true)
+            editor.showOrHideInlineFormatter(isPresent: true)
             mouseIsDragged = false
         }
         return false
@@ -703,6 +703,7 @@ public class TextNode: Widget {
         case .select(let o):
             root?.selectedTextRange = text.clamp(p < o ? cursorPosition..<o : o..<cursorPosition)
             mouseIsDragged = true
+            editor.updateInlineFormatterOnDrag(isDragged: true)
         }
         invalidate()
 

@@ -11,8 +11,8 @@ extension BeamTextEdit {
 
     // MARK: - Properties
     private static let xPosInlineFormatter: CGFloat = 55
-    private static let startTopConstraint: CGFloat = 10
-    private static let topConstraint: CGFloat = 12
+    private static let yPosInlineFormatter: CGFloat = 25
+    private static let yPosDismissInlineFormatter: CGFloat = 50
     private static let startBottomConstraint: CGFloat = 35
     private static let bottomConstraint: CGFloat = -25
     private static let inlineFormatterType: [FormatterType] = [.h1, .h2, .bullet, .checkmark, .bold, .italic, .link]
@@ -85,43 +85,37 @@ extension BeamTextEdit {
     }
 
     internal func showOrHideInlineFormatter(isPresent: Bool, isDragged: Bool = false) {
-        guard let node = focussedWidget as? TextNode,
-              let inlineFormatter = inlineFormatter else { return }
+        guard let inlineFormatter = inlineFormatter else { return }
 
-        let (_, rect) = node.offsetAndFrameAt(index: rootNode.cursorPosition)
-        let globalOffset = self.convert(node.offsetInDocument, to: nil)
         let showTimingFunction = CAMediaTimingFunction(controlPoints: 0.64, 0.4, 0, 0.98)
         let hideTimingFunction = CAMediaTimingFunction(controlPoints: 0.98, 0, 0.64, 0.4)
 
-        // Animation Alpha
+        // Alpha animation
         NSAnimationContext.beginGrouping()
-        NSAnimationContext.current.duration = isPresent ? 0.4 : 0.2
+        NSAnimationContext.current.duration = isPresent ? 0.4 : 0.25
         NSAnimationContext.current.timingFunction = isPresent ? showTimingFunction : hideTimingFunction
             inlineFormatter.animator().alphaValue = isPresent ? 1 : 0
             isInlineFormatterHidden = false
 
-            // Animation YPosition
+            // YPosition animation
             NSAnimationContext.beginGrouping()
-        NSAnimationContext.current.duration = isPresent ? 0.4 : 0.3
+            NSAnimationContext.current.duration = isPresent ? 0.4 : 0.3
                 var origin = inlineFormatter.frame.origin
-                origin.y = isPresent ? globalOffset.y - rect.maxY + 20 : globalOffset.y - rect.maxY
+        origin.y = isPresent ? origin.y + BeamTextEdit.yPosInlineFormatter : origin.y - BeamTextEdit.yPosDismissInlineFormatter
                 inlineFormatter.animator().setFrameOrigin(origin)
             NSAnimationContext.endGrouping()
 
-        if !isPresent && isDragged { dismissFormatterView(inlineFormatter) }
+            if !isPresent && isDragged { dismissFormatterView(inlineFormatter) }
         NSAnimationContext.endGrouping()
 
-        // Completion Handler animation
+        // Completion handler animation
         NSAnimationContext.current.completionHandler = { [weak self] in
             guard let self = self else { return }
             if !isPresent && !isDragged { self.dismissFormatterView(inlineFormatter) }
         }
     }
 
-    internal func updateInlineFormatterView(_ isDragged: Bool) {
-        guard let node = focussedWidget as? TextNode,
-              let inlineFormatter = inlineFormatter else { return }
-
+    internal func updateInlineFormatterView(_ isDragged: Bool = false) {
         detectFormatterType()
 
         if !rootNode.textIsSelected {
@@ -130,7 +124,7 @@ extension BeamTextEdit {
             return
         }
 
-        updateInlineFormatterFrame(inlineFormatter, with: node)
+        updateInlineFormatterFrame()
     }
 
     internal func detectFormatterType() {
@@ -270,17 +264,31 @@ extension BeamTextEdit {
         }
     }
 
-    private func updateInlineFormatterFrame(_ view: FormatterView, with node: TextNode) {
+    private func updateInlineFormatterFrame() {
+        guard let node = focussedWidget as? TextNode,
+              let view = inlineFormatter else { return }
+
         let (xOffset, rect) = node.offsetAndFrameAt(index: rootNode.cursorPosition)
         let globalOffset = self.convert(node.offsetInDocument, to: nil)
         let yPos = globalOffset.y - rect.maxY
+        let currentLowerBound = currentTextRange.lowerBound
+        let selectedLowerBound = node.selectedTextRange.lowerBound
 
-        view.frame = NSRect(
-            x: xOffset + BeamTextEdit.xPosInlineFormatter,
-            y: isInlineFormatterHidden ? yPos : yPos + 20,
-            width: view.idealSize.width,
-            height: view.idealSize.height
-        )
+        view.frame.origin.x = xOffset + BeamTextEdit.xPosInlineFormatter
+
+        if currentLowerBound == selectedLowerBound && BeamTextEdit.isSelectableContent {
+            BeamTextEdit.isSelectableContent = false
+            view.frame.origin.y = yPos
+        }
+
+        if currentLowerBound > selectedLowerBound {
+            BeamTextEdit.isSelectableContent = true
+            view.frame.origin.y = isInlineFormatterHidden ? yPos : yPos + BeamTextEdit.yPosInlineFormatter
+        }
+
+        if selectedLowerBound > currentLowerBound {
+            view.frame.origin.y = yPos + BeamTextEdit.yPosInlineFormatter
+        }
     }
 
     private func addConstraint(to view: FormatterView, with contentView: NSView) {

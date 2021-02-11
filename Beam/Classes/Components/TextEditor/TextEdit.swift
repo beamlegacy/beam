@@ -455,13 +455,13 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                         node.fold()
                     } else if shift && option {
                         rootNode.doCommand(.moveWordLeftAndModifySelection)
-                        initAndUpdateInlineFormatter()
+                        showInlineFormatterOnKeyEventsAndClick()
                     } else if shift && command {
                         rootNode.doCommand(.moveToBeginningOfLineAndModifySelection)
-                        initAndUpdateInlineFormatter()
+                        showInlineFormatterOnKeyEventsAndClick()
                     } else if shift {
                         rootNode.doCommand(.moveLeftAndModifySelection)
-                        initAndUpdateInlineFormatter()
+                        showInlineFormatterOnKeyEventsAndClick()
                     } else if command && popover != nil {
                         rootNode.doCommand(.moveToBeginningOfLine)
                         dismissPopoverOrFormatter()
@@ -491,13 +491,13 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                         node.unfold()
                     } else if shift && option {
                         rootNode.doCommand(.moveWordRightAndModifySelection)
-                        initAndUpdateInlineFormatter()
+                        showInlineFormatterOnKeyEventsAndClick()
                     } else if shift && command {
                         rootNode.doCommand(.moveToEndOfLineAndModifySelection)
-                        initAndUpdateInlineFormatter()
+                        showInlineFormatterOnKeyEventsAndClick()
                     } else if shift {
                         rootNode.doCommand(.moveRightAndModifySelection)
-                        initAndUpdateInlineFormatter()
+                        showInlineFormatterOnKeyEventsAndClick()
                     } else if command && persistentFormatter != nil {
                         rootNode.doCommand(.moveToEndOfLine)
                         detectFormatterType()
@@ -526,7 +526,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     if shift {
                         cancelPopover()
                         rootNode.doCommand(.moveUpAndModifySelection)
-                        initAndUpdateInlineFormatter()
+                        showInlineFormatterOnKeyEventsAndClick()
                     } else if let popover = popover {
                         popover.doCommand(.moveUp)
                     } else if inlineFormatter != nil {
@@ -543,7 +543,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     if shift {
                         cancelPopover()
                         rootNode.doCommand(.moveDownAndModifySelection)
-                        initAndUpdateInlineFormatter()
+                        showInlineFormatterOnKeyEventsAndClick()
                     } else if let popover = popover {
                         popover.doCommand(.moveDown)
                     } else if inlineFormatter != nil {
@@ -1228,7 +1228,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         }
     }
 
-    internal func initAndUpdateInlineFormatter(isDragged: Bool = false) {
+    func initInlineFormatterAndHidePersistentFormatter() {
         guard let node = focussedWidget as? TextNode else { return }
 
         if inlineFormatter == nil && popover == nil {
@@ -1236,15 +1236,23 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             initInlineFormatterView()
             showOrHidePersistentFormatter(isPresent: false)
         }
+    }
 
-        updateInlineFormatterView(isDragged)
+    func showInlineFormatterOnKeyEventsAndClick() {
+        initInlineFormatterAndHidePersistentFormatter()
+        updateInlineFormatterView()
 
         if isInlineFormatterHidden {
             showOrHideInlineFormatter(isPresent: true)
         }
     }
 
-    internal func hideInlineFormatter() {
+    func updateInlineFormatterOnDrag(isDragged: Bool = false) {
+        initInlineFormatterAndHidePersistentFormatter()
+        updateInlineFormatterView(isDragged)
+    }
+
+    func hideInlineFormatter() {
         guard inlineFormatter != nil else { return }
 
         showOrHideInlineFormatter(isPresent: false)
