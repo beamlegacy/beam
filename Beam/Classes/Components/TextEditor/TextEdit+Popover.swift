@@ -95,21 +95,20 @@ extension BeamTextEdit {
         guard let popover = popover,
               let scrollView = enclosingScrollView else { return }
 
-        let (xOffset, _) = node.offsetAndFrameAt(index: rootNode.cursorPosition)
+        let (xOffset, rect) = node.offsetAndFrameAt(index: rootNode.cursorPosition)
         let offsetGlobal = self.convert(node.offsetInDocument, to: nil)
         let yOffset = scrollView.documentVisibleRect.origin.y < 0 ? 0 : scrollView.documentVisibleRect.origin.y
+        let marginTop: CGFloat = rect.maxY == 0 ? 30 : 10
 
-        var marginTop: CGFloat = 30
-        var yPos = offsetGlobal.y - popover.idealSize.height
+        var yPos = offsetGlobal.y - rect.maxY - popover.idealSize.height
 
         // To avoid the update of X position during the insertion of a new text
         if isEmpty {
-            BeamTextEdit.xPos = (xOffset + 10) + node.offsetInDocument.x
+            BeamTextEdit.xPos = xOffset == 0 ? offsetGlobal.x + 15 : (xOffset + offsetGlobal.x) - 10
         }
 
         // Popover with Shortcut
         if node.text.text.isEmpty {
-            marginTop += 15
             BeamTextEdit.xPos = xOffset + 200
         }
 
@@ -120,7 +119,7 @@ extension BeamTextEdit {
         if popover.visibleRect.height < popover.idealSize.height {
             popover.frame = NSRect(
                 x: BeamTextEdit.xPos,
-                y: offsetGlobal.y + yOffset + 10,
+                y: offsetGlobal.y + yOffset + marginTop,
                 width: popover.idealSize.width,
                 height: popover.idealSize.height
             )
