@@ -1311,4 +1311,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         rootNode.dumpWidgetTree()
     }
 
+
+
 }

@@ -163,8 +163,10 @@ extension BeamTextEdit {
         let cursorPosition = rootNode.cursorPosition
         let beginPosition = selectedTextRange.lowerBound == 0 ? cursorPosition..<cursorPosition + 1 : cursorPosition - 1..<cursorPosition
         let endPosition = cursorPosition..<cursorPosition + 1
-        let range = selectedTextRange.lowerBound == 0 && selectedTextRange.upperBound > 0 ? beginPosition : endPosition
+        var range = selectedTextRange.lowerBound == 0 && selectedTextRange.upperBound > 0 ? beginPosition : endPosition
         var types: [FormatterType] = []
+
+        if rootNode.state.nodeSelection != nil || rootNode.textIsSelected { range = 0..<node.text.text.count }
 
         rootNode.state.attributes = []
         setActiveFormatters(types)
@@ -209,7 +211,7 @@ extension BeamTextEdit {
 
         if type == .h1 && node.element.kind == .heading(1) ||
            type == .h2 && node.element.kind == .heading(2) ||
-           type == .quote && node.element.kind == .quote(1, "", "") ||
+           type == .quote && node.element.kind == .quote(1, node.text.text, node.text.text) ||
            type == .code && node.element.kind == .code {
             hasAttribute = node.element.kind == kind
         }
@@ -268,10 +270,12 @@ extension BeamTextEdit {
     private func updateAttributeState(with node: TextNode, attribute: BeamText.Attribute, isActive: Bool) {
         let attributes = rootNode.state.attributes
 
-        if rootNode.textIsSelected {
+        if rootNode.textIsSelected || rootNode.state.nodeSelection != nil {
+            let range = rootNode.state.nodeSelection != nil ? 0..<node.text.text.count : node.selectedTextRange
+
             isActive ?
-                node.text.removeAttributes([attribute], from: node.selectedTextRange) :
-                node.text.addAttributes([attribute], to: node.selectedTextRange)
+                node.text.removeAttributes([attribute], from: range) :
+                node.text.addAttributes([attribute], to: range)
         }
 
         guard let index = attributes.firstIndex(of: attribute),

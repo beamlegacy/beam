@@ -634,6 +634,7 @@ public class TextNode: Widget {
             } else {
                 deboucingClickTimer?.invalidate()
                 root?.doCommand(.selectAll)
+                editor.detectFormatterType()
                 return true
             }
         }
