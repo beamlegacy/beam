@@ -24,7 +24,7 @@ class DocumentManagerTests: QuickSpec {
         beforeSuite {
             // Setup CoreData
             self.coreDataManager.setup()
-            waitUntil { done in
+            waitUntil(timeout: .seconds(10)) { done in
                 self.coreDataManager.destroyPersistentStore {
                     self.coreDataManager.setup()
                     done()
@@ -36,7 +36,7 @@ class DocumentManagerTests: QuickSpec {
                                                      coreDataManager: self.coreDataManager)
             self.helper.logout()
 
-            waitUntil { done in
+            waitUntil(timeout: .seconds(10)) { done in
                 self.sut.deleteAllDocuments(includedRemote: false) { _ in
                     done()
                 }
@@ -46,7 +46,7 @@ class DocumentManagerTests: QuickSpec {
         describe(".saveDocument()") {
             it("saves document") {
                 let docStruct = self.helper.createDocumentStruct()
-                waitUntil { done in
+                waitUntil(timeout: .seconds(10)) { done in
                     self.sut.saveDocument(docStruct) { _ in
                         done()
                     }
@@ -65,7 +65,7 @@ class DocumentManagerTests: QuickSpec {
                     var docStruct2 = self.helper.createDocumentStruct()
                     docStruct2.title = docStruct.title
 
-                    waitUntil { done in
+                    waitUntil(timeout: .seconds(10)) { done in
                         self.sut.saveDocument(docStruct2) { result in
                             expect { try result.get() }.to(throwError())
                             done()
@@ -74,7 +74,7 @@ class DocumentManagerTests: QuickSpec {
 
                     docStruct2.deletedAt = Date()
 
-                    waitUntil { [unowned self] done in
+                    waitUntil(timeout: .seconds(10)) { [unowned self] done in
                         self.sut.saveDocument(docStruct2) { result in
                             expect { try result.get() }.toNot(throwError())
                             done()
@@ -117,7 +117,7 @@ class DocumentManagerTests: QuickSpec {
             it("deletes document") {
                 let docStruct = self.helper.createDocumentStruct()
                 self.helper.saveLocally(docStruct)
-                waitUntil { [unowned self] done in
+                waitUntil(timeout: .seconds(10)) { [unowned self] done in
                     self.sut.deleteDocument(id: docStruct.id) { _ in
                         done()
                     }
@@ -147,7 +147,7 @@ class DocumentManagerTests: QuickSpec {
             it("creates document") {
                 let title = self.helper.title()
 
-                waitUntil { [unowned self] done in
+                waitUntil(timeout: .seconds(10)) { [unowned self] done in
                     self.sut.createAsync(title: title) { docStruct in
                         expect(docStruct?.title).to(equal(title))
                         done()
@@ -174,7 +174,7 @@ class DocumentManagerTests: QuickSpec {
             it("fetches asynchronisely") {
                 let title = self.helper.title()
 
-                waitUntil { [unowned self] done in
+                waitUntil(timeout: .seconds(10)) { [unowned self] done in
                     self.sut.fetchOrCreateAsync(title: title) { documentStruct in
                         expect(documentStruct?.title).to(equal(title))
                         done()
@@ -206,7 +206,7 @@ class DocumentManagerTests: QuickSpec {
                 let newTitle = self.helper.title()
 
                 var cancellable: AnyCancellable!
-                waitUntil { done in
+                waitUntil(timeout: .seconds(10)) { done in
                     cancellable = self.sut.onDocumentChange(docStruct) { updatedDocStruct in
                         expect(docStruct.id).to(equal(updatedDocStruct.id))
                         expect(updatedDocStruct.title).to(equal(newTitle))
@@ -227,7 +227,7 @@ class DocumentManagerTests: QuickSpec {
                 self.helper.saveLocally(docStruct)
                 let newData = "another data"
                 var cancellable: AnyCancellable!
-                waitUntil { done in
+                waitUntil(timeout: .seconds(10)) { done in
                     cancellable = self.sut.onDocumentChange(docStruct) { updatedDocStruct in
                         expect(docStruct.id).to(equal(updatedDocStruct.id))
                         expect(updatedDocStruct.data).to(equal(newData.asData))
