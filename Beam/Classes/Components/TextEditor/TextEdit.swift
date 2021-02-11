@@ -1031,12 +1031,16 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         addTrackingArea(NSTrackingArea(rect: bounds, options: [.mouseMoved, .activeInActiveApp, .mouseEnteredAndExited, .cursorUpdate, .enabledDuringMouseDrag, .inVisibleRect], owner: self, userInfo: nil))
     }
 
+    var mouseDownPos: NSPoint?
     override public func mouseDown(with event: NSEvent) {
         //       window?.makeFirstResponder(self)
         reBlink()
         rootNode.cancelNodeSelection() // TODO: change this to handle manipulating the node selection with the mouse
-        let point = convert(event.locationInWindow)
-        let info = MouseInfo(rootNode, point, event)
+        if self.mouseDownPos != nil {
+            self.mouseDownPos = nil
+        }
+        self.mouseDownPos = convert(event.locationInWindow)
+        let info = MouseInfo(rootNode, mouseDownPos ?? .zero, event)
         guard let newNode = rootNode.dispatchMouseDown(mouseInfo: info) else {
             guard let n = rootNode.children.first else { return }
             rootNode.cursorPosition = 0
@@ -1066,6 +1070,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         let point = convert(event.locationInWindow)
         _ = rootNode.dispatchMouseDragged(mouseInfo: MouseInfo(rootNode, point, event))
         cursorUpdate(with: event)
+        mouseDraggedUpdate(with: event)
     }
 
     func convert(_ point: NSPoint) -> NSPoint {
@@ -1080,8 +1085,36 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         let point = convert(event.locationInWindow)
         let mouseInfo = MouseInfo(rootNode, point, event)
         rootNode.dispatchMouseMoved(mouseInfo: mouseInfo)
-
         cursorUpdate(with: event)
+    }
+
+    public func mouseDraggedUpdate(with event: NSEvent) {
+        guard let startPos = mouseDownPos else { return }
+        let eventPoint = convert(event.locationInWindow)
+        let widgets = rootNode.getWidgetsBetween(startPos, eventPoint)
+
+        if let selection = rootNode?.state.nodeSelection, let focussedNode = focussedWidget as? TextNode {
+            let textNodes = widgets.compactMap { $0 as? TextNode }
+            selection.start = focussedNode
+            selection.append(focussedNode)
+            for textNode in textNodes {
+                if !selection.nodes.contains(textNode) {
+                    selection.append(textNode)
+                }
+            }
+            for selectedNode in selection.nodes {
+                if !textNodes.contains(selectedNode) && selectedNode != focussedNode {
+                    selection.remove(selectedNode)
+                }
+            }
+            guard let lastNode = textNodes.last else { return }
+            selection.end = lastNode
+        } else {
+            if widgets.count > 0 {
+                rootNode?.startNodeSelection()
+            }
+            return
+        }
     }
 
     public override func cursorUpdate(with event: NSEvent) {
