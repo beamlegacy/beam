@@ -606,9 +606,10 @@ public class TextNode: Widget {
                 return true
             }
 
-            if mouseInfo.event.clickCount == 1 && editor.inlineFormatter != nil {
+            if mouseInfo.event.clickCount == 1 && !selectedTextRange.isEmpty {
                 root?.cursorPosition = clickPos
                 root?.cancelSelection()
+                dragMode = .select(cursorPosition)
 
                 deboucingClickTimer = Timer.scheduledTimer(withTimeInterval: deboucingClickInterval, repeats: false, block: { [weak self] (_) in
                     guard let self = self else { return }
