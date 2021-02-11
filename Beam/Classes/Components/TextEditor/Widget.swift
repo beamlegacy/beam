@@ -503,10 +503,12 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
             }
         }
 
+        clickedLayer = nil
         for layer in layers.values where !layer.layer.isHidden {
             let info = MouseInfo(self, layer, mouseInfo)
             if layer.contains(info.position) {
                 if layer.mouseDown(info) {
+                    clickedLayer = layer
                     return self
                 }
             }
@@ -537,12 +539,15 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
     }
 
     func handleMouseUp(mouseInfo: MouseInfo) -> Bool {
+        defer {
+            clickedLayer = nil
+        }
         let info = MouseInfo(self, mouseInfo.globalPosition, mouseInfo.event)
 //        print("dispatch up: \(info.position) vs \(mouseInfo.position)")
 
-        for layer in layers.values where !layer.layer.isHidden {
+        if let layer = clickedLayer {
             let info = MouseInfo(self, layer, info)
-            if layer.contains(info.position) && layer.mouseUp(info) {
+            if layer.mouseUp(info) {
                 return true
             }
         }
@@ -596,11 +601,9 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
     }
 
     func focus() {
-        dragMode = .none
     }
 
     func unfocus() {
-        dragMode = .none
     }
 
     // MARK: - Mouse Events
@@ -635,14 +638,15 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
         return false
     }
 
+    weak var clickedLayer: Layer?
     func handleMouseDragged(mouseInfo: MouseInfo) -> Bool {
         let info = MouseInfo(self, mouseInfo.globalPosition, mouseInfo.event)
 //        print("handle dragged: \(info.position) vs \(mouseInfo.position)")
 
         var res = false
-        for layer in layers.values where !layer.layer.isHidden {
+        if let layer = clickedLayer {
             let info = MouseInfo(self, layer, mouseInfo)
-            res = res || layer.mouseDragged(info)
+            res = layer.mouseDragged(info)
         }
 
         return res || mouseDragged(mouseInfo: info)
