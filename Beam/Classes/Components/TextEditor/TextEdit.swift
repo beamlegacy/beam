@@ -1061,15 +1061,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         return node.rectAt(position).offsetBy(dx: origin.x, dy: origin.y)
     }
 
-    var firstDrag = true
-    var ignoreFirstDrag = false
-
     override public func mouseDragged(with event: NSEvent) {
-        guard !(firstDrag && ignoreFirstDrag) else {
-            firstDrag = false
-            return
-        }
-
         //        window?.makeFirstResponder(self)
         let point = convert(event.locationInWindow)
         _ = rootNode.dispatchMouseDragged(mouseInfo: MouseInfo(rootNode, point, event))
