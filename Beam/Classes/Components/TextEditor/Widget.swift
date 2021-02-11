@@ -589,6 +589,25 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
         return handlers
     }
 
+    func getWidgetsBetween(_ start: NSPoint, _ end: NSPoint) -> [Widget] {
+        guard inVisibleBranch else { return [] }
+        var widgets: [Widget] = []
+        if layer.frame.minY > start.y && layer.frame.minY < end.y {
+            widgets.append(self)
+        } else if layer.frame.maxY < start.y && layer.frame.maxY > end.y {
+            widgets.append(self)
+        }
+
+        for c in children {
+            var p = start
+            p.x -= c.frame.origin.x
+            p.y -= c.frame.origin.y
+
+            widgets += c.getWidgetsBetween(start, end)
+        }
+        return widgets
+    }
+
     func dispatchMouseDragged(mouseInfo: MouseInfo) -> Widget? {
         guard inVisibleBranch else { return nil }
         guard let focussedNode = root?.focussedWidget else { return nil }
