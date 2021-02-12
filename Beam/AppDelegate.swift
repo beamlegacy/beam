@@ -36,14 +36,23 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     var data: BeamData!
 
     let documentManager = DocumentManager()
+    #if DEBUG
+    var beamHelper: BeamTestsHelper?
+    #endif
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
+        #if DEBUG
+        if Configuration.env != "release" {
+            self.beamHelper = BeamTestsHelper()
+            prepareMenuForTestEnv()
+        }
+        #endif
         for item in NSApp.mainMenu?.items ?? [] {
             item.submenu?.delegate = self
 
             prepareMenu(items: item.submenu?.items ?? [], for: Mode.today.rawValue)
-        }
 
+        }
         CoreDataManager.shared.setup()
         LibrariesManager.shared.configure()
 
