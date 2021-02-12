@@ -1051,7 +1051,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         super.scrollWheel(with: event)
 
         if popover != nil { cancelPopover() }
-        if inlineFormatter != nil { showOrHideInlineFormatter(isPresent: false) }
     }
 
     // MARK: - Mouse Event
@@ -1341,7 +1340,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             if popoverPrefix > 0 { cancelInternalLink() }
             dismissPopover()
             showOrHidePersistentFormatter(isPresent: true)
-            // initPersistentFormatterView()
         }
 
         if inlineFormatter != nil {

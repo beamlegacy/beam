@@ -11,8 +11,8 @@ extension BeamTextEdit {
 
     // MARK: - Properties
     private static let xPosInlineFormatter: CGFloat = 55
-    private static let yPosInlineFormatter: CGFloat = 25
-    private static let yPosDismissInlineFormatter: CGFloat = 50
+    private static let yPosInlineFormatter: CGFloat = 40
+    private static let yPosDismissInlineFormatter: CGFloat = 35
     private static let startBottomConstraint: CGFloat = 35
     private static let bottomConstraint: CGFloat = -25
     private static let inlineFormatterType: [FormatterType] = [.h1, .h2, .bullet, .checkmark, .bold, .italic, .link]
@@ -21,6 +21,8 @@ extension BeamTextEdit {
     private static var isSelectableContent = true
     private static var bottomAnchor: NSLayoutConstraint?
     private static var centerXAnchor: NSLayoutConstraint?
+
+    private static var deboucingKeyEventTimer: Timer?
 
     // MARK: - UI
     internal func initPersistentFormatterView() {
@@ -49,13 +51,18 @@ extension BeamTextEdit {
     internal func initInlineFormatterView() {
         inlineFormatter = FormatterView(viewType: .inline)
 
-        guard let formatterView = inlineFormatter,
-              let contentView = window?.contentView else { return }
+        guard let formatterView = inlineFormatter else { return }
 
         formatterView.items = BeamTextEdit.inlineFormatterType
+        formatterView.didSelectFormatterType = { [unowned self] (type, isActive) -> Void in
+            selectFormatterAction(type, isActive)
+        }
+
         formatterView.alphaValue = 0
         formatterView.frame = NSRect(x: 0, y: 0, width: formatterView.idealSize.width, height: formatterView.idealSize.height)
-        contentView.addSubview(formatterView)
+        formatterView.layer?.zPosition = 1
+
+        addSubview(formatterView)
     }
 
     // MARK: - Methods
@@ -92,20 +99,19 @@ extension BeamTextEdit {
         NSAnimationContext.current.duration = isPresent ? 0.4 : 0.25
         NSAnimationContext.current.timingFunction = isPresent ? showTimingFunction : hideTimingFunction
             inlineFormatter.animator().alphaValue = isPresent ? 1 : 0
-            isInlineFormatterHidden = false
+            isInlineFormatterHidden = isPresent ? false : true
+
+            if !isPresent && isDragged { dismissFormatterView(inlineFormatter) }
 
             // YPosition animation
             NSAnimationContext.beginGrouping()
             NSAnimationContext.current.duration = isPresent ? 0.4 : 0.3
                 var origin = inlineFormatter.frame.origin
-        origin.y = isPresent ? origin.y + BeamTextEdit.yPosInlineFormatter : origin.y - BeamTextEdit.yPosDismissInlineFormatter
+                origin.y = isPresent ? origin.y - BeamTextEdit.yPosInlineFormatter : origin.y + BeamTextEdit.yPosDismissInlineFormatter
                 inlineFormatter.animator().setFrameOrigin(origin)
             NSAnimationContext.endGrouping()
 
-            if !isPresent && isDragged { dismissFormatterView(inlineFormatter) }
         NSAnimationContext.endGrouping()
-
-        // Completion handler animation
         NSAnimationContext.current.completionHandler = { [weak self] in
             guard let self = self else { return }
             if !isPresent && !isDragged { self.dismissFormatterView(inlineFormatter) }
@@ -116,9 +122,14 @@ extension BeamTextEdit {
         detectFormatterType()
 
         if !rootNode.textIsSelected {
-            showOrHideInlineFormatter(isPresent: false, isDragged: isDragged)
-            showOrHidePersistentFormatter(isPresent: true)
+            BeamTextEdit.deboucingKeyEventTimer = Timer.scheduledTimer(withTimeInterval: 0.23, repeats: false, block: { [weak self] (_) in
+                guard let self = self else { return }
+                self.showOrHideInlineFormatter(isPresent: false, isDragged: isDragged)
+                self.showOrHidePersistentFormatter(isPresent: true)
+            })
             return
+        } else {
+            BeamTextEdit.deboucingKeyEventTimer?.invalidate()
         }
 
         updateInlineFormatterFrame()
@@ -270,8 +281,8 @@ extension BeamTextEdit {
               let view = inlineFormatter else { return }
 
         let (xOffset, rect) = node.offsetAndFrameAt(index: rootNode.cursorPosition)
-        let globalOffset = self.convert(node.offsetInDocument, to: nil)
-        let yPos = globalOffset.y - rect.maxY
+        let yOffset = rect.maxY + node.offsetInDocument.y - 10
+        let yPos = isInlineFormatterHidden ? yOffset : yOffset - BeamTextEdit.yPosInlineFormatter
         let currentLowerBound = currentTextRange.lowerBound
         let selectedLowerBound = node.selectedTextRange.lowerBound
 
@@ -282,13 +293,9 @@ extension BeamTextEdit {
             view.frame.origin.y = yPos
         }
 
-        if currentLowerBound > selectedLowerBound {
-            BeamTextEdit.isSelectableContent = true
-            view.frame.origin.y = isInlineFormatterHidden ? yPos : yPos + BeamTextEdit.yPosInlineFormatter
-        }
-
-        if selectedLowerBound > currentLowerBound {
-            view.frame.origin.y = yPos + BeamTextEdit.yPosInlineFormatter
+        if currentLowerBound > selectedLowerBound || selectedLowerBound > currentLowerBound {
+            BeamTextEdit.isSelectableContent = currentLowerBound > selectedLowerBound
+            view.frame.origin.y = yPos
         }
     }
 
