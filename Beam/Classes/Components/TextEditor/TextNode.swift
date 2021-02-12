@@ -617,7 +617,7 @@ public class TextNode: Widget {
             } else if mouseInfo.event.clickCount == 2 {
                 deboucingClickTimer?.invalidate()
                 root?.wordSelection(from: clickPos)
-                editor.showInlineFormatterOnKeyEventsAndClick()
+                if !selectedTextRange.isEmpty { editor.showInlineFormatterOnKeyEventsAndClick() }
                 return true
             } else {
                 deboucingClickTimer?.invalidate()
