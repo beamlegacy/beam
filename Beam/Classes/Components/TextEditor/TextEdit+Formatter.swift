@@ -200,7 +200,7 @@ extension BeamTextEdit {
         setActiveFormatters(types)
     }
 
-    internal func updateFormatterView(with type: FormatterType, attribute: BeamText.Attribute? = nil, kind: ElementKind? = .bullet) {
+    internal func updateFormatterView(with type: FormatterType, attribute: BeamText.Attribute? = nil, kind: ElementKind = .bullet) {
         guard let node = focussedWidget as? TextNode else { return }
 
         var hasAttribute = false
@@ -209,10 +209,10 @@ extension BeamTextEdit {
             hasAttribute = rootNode.state.attributes.contains(attribute)
         }
 
-        if type == .h1 && node.element.kind == .heading(1) ||
-           type == .h2 && node.element.kind == .heading(2) ||
-           type == .quote && node.element.kind == .quote(1, node.text.text, node.text.text) ||
-           type == .code && node.element.kind == .code {
+        if type == .h1 && node.element.kind.rawValue == kind.rawValue ||
+           type == .h2 && node.element.kind.rawValue == kind.rawValue ||
+           type == .quote && node.element.kind.rawValue == kind.rawValue ||
+           type == .code && node.element.kind.rawValue == kind.rawValue {
             hasAttribute = node.element.kind == kind
         }
 
