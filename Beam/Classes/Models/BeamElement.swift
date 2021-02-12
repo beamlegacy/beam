@@ -325,7 +325,7 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
 
             if async {
                 DispatchQueue.main.async {
-                    let refnote = BeamNote.fetchOrCreate(DocumentManager(), title: linkTitle)
+                    let refnote = BeamNote.fetchOrCreate(documentManager, title: linkTitle)
                     refnote.addLinkedReference(reference)
                 }
             } else {
