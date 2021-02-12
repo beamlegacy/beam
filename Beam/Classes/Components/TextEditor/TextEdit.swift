@@ -1248,7 +1248,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     internal func showBidirectionalPopover(prefix: Int, suffix: Int) {
         popoverPrefix = prefix
         popoverSuffix = suffix
-        cursorStartPosition = rootNode.cursorPosition
+        cursorStartPosition = rootNode.textIsSelected ? 0 : rootNode.cursorPosition
         initPopover()
         showOrHidePersistentFormatter(isPresent: false)
     }
@@ -1308,7 +1308,8 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         if popover != nil {
             if popoverPrefix > 0 { cancelInternalLink() }
             dismissPopover()
-            initPersistentFormatterView()
+            showOrHidePersistentFormatter(isPresent: true)
+            // initPersistentFormatterView()
         }
 
         if inlineFormatter != nil {
@@ -1334,6 +1335,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
     @IBAction public override func selectAll(_ sender: Any?) {
         rootNode.doCommand(.selectAll)
+        rootNode.textIsSelected = true
     }
 
     @IBAction func selectAllHierarchically(_ sender: Any?) {

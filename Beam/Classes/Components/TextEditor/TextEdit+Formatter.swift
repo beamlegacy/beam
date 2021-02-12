@@ -24,10 +24,7 @@ extension BeamTextEdit {
 
     // MARK: - UI
     internal func initPersistentFormatterView() {
-        guard persistentFormatter == nil else {
-            showOrHidePersistentFormatter(isPresent: true)
-            return
-        }
+        guard persistentFormatter == nil else { return }
 
         persistentFormatter = FormatterView(viewType: .persistent)
         persistentFormatter?.alphaValue = 0
