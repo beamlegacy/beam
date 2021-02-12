@@ -56,6 +56,10 @@ extension BeamTextEdit {
               let contentView = window?.contentView else { return }
 
         formatterView.items = BeamTextEdit.inlineFormatterType
+        formatterView.didSelectFormatterType = { [unowned self] (type, isActive) -> Void in
+                selectFormatterAction(type, isActive)
+        }
+
         formatterView.alphaValue = 0
         formatterView.frame = NSRect(x: 0, y: 0, width: formatterView.idealSize.width, height: formatterView.idealSize.height)
         contentView.addSubview(formatterView)
@@ -137,7 +141,7 @@ extension BeamTextEdit {
         var range = selectedTextRange.lowerBound == 0 && selectedTextRange.upperBound > 0 ? beginPosition : endPosition
         var types: [FormatterType] = []
 
-        if rootNode.state.nodeSelection != nil || rootNode.textIsSelected { range = 0..<node.text.text.count }
+        if rootNode.state.nodeSelection != nil { range = 0..<node.text.text.count }
 
         rootNode.state.attributes = []
         setActiveFormatters(types)
