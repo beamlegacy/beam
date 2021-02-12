@@ -96,7 +96,7 @@ class DocumentManagerTestsHelper {
     }
 
     func title() -> String {
-        return faker.zelda.game() + " " + randomString(length: 40)
+        return faker.zelda.game() + " " + String.random(length: 40)
     }
 
     func saveLocally(_ docStruct: DocumentStruct) {
@@ -152,10 +152,5 @@ class DocumentManagerTestsHelper {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
         return encoder
-    }
-
-    func randomString(length: Int) -> String {
-      let letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-      return String((0..<length).map { _ in letters.randomElement()! })
     }
 }
