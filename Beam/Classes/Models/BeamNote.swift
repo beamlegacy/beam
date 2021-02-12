@@ -344,7 +344,7 @@ class BeamNote: BeamElement {
     }
 
     static func detectLinks(in noteName: String, to allNotes: [String], with documentManager: DocumentManager) {
-        guard let doc = documentManager.loadDocumentByTitle(title: noteName) else {
+        guard let doc = documentManager.loadDocByTitleInBg(title: noteName) else {
             return
         }
 
@@ -360,13 +360,13 @@ class BeamNote: BeamElement {
             // Detect UnLinked Notes
             let unlinks = note.getDeepUnlinkedReferences(noteName, allNotes)
             DispatchQueue.main.async {
-                let note = BeamNote.fetch(AppDelegate.main.data.documentManager, title: noteName)
+                let note = BeamNote.fetch(documentManager, title: noteName)
                 for brokenRef in brokenRefs {
                     note?.removeUnlinkedReference(brokenRef)
                 }
 
                 for (name, refs) in unlinks {
-                    let referencedNote = BeamNote.fetch(AppDelegate.main.data.documentManager, title: name)
+                    let referencedNote = BeamNote.fetch(documentManager, title: name)
                     for ref in refs {
                         referencedNote?.addUnlinkedReference(ref)
                     }
@@ -379,11 +379,11 @@ class BeamNote: BeamElement {
 
     static func detectLinks() {
         let documentManager = DocumentManager()
-        let allNotes = documentManager.allDocumentsTitles()
-        Logger.shared.logInfo("Detect links for \(allNotes.count) notes", category: .document)
+        let allTitles = documentManager.allDocumentsTitles()
+        Logger.shared.logInfo("Detect links for \(allTitles.count) notes", category: .document)
 
-        for noteName in allNotes {
-            detectLinks(in: noteName, to: allNotes, with: documentManager)
+        for title in allTitles {
+            detectLinks(in: title, to: allTitles, with: documentManager)
         }
     }
 
