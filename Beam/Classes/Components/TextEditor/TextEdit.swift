@@ -1302,7 +1302,4 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     func dumpWidgetTree() {
         rootNode.dumpWidgetTree()
     }
-
-
-
 }
