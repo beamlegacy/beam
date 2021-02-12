@@ -1,5 +1,5 @@
 //
-//  LinkView.swift
+//  HyperlinkView.swift
 //  Beam
 //
 //  Created by Ravichandrane Rajendran on 12/02/2021.
@@ -7,7 +7,7 @@
 
 import Cocoa
 
-class LinkView: NSView {
+class HyperlinkView: NSView {
 
     @IBOutlet var containerView: NSView!
 
