@@ -973,10 +973,42 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     @IBAction func paste(_ sender: Any) {
-        if let s = NSPasteboard.general.string(forType: .string) {
-            disableInputDetector()
-            insertText(string: s, replacementRange: selectedTextRange)
-            enableInputDetector()
+        if NSPasteboard.general.canReadObject(forClasses: [NSString.self], options: nil) {
+            let objects = NSPasteboard.general.readObjects(forClasses: [NSString.self], options: nil)
+            if objects?.count == 1 {
+                guard let pastedStr: String = objects?.first as? String else { return }
+
+                let lines = pastedStr.split(whereSeparator: \.isNewline)
+                for (idx, line) in lines.enumerated() {
+                    let str = String(line)
+                    if idx == 0 {
+                        disableInputDetector()
+                        insertText(string: str, replacementRange: selectedTextRange)
+                        enableInputDetector()
+                    } else {
+                        guard let node = focussedWidget as? TextNode else { continue }
+                        let element = BeamElement(str)
+                        let newNode = nodeFor(element)
+                        let elements = node.element.children
+                        for c in elements {
+                            newNode.element.addChild(c)
+                        }
+                        _ = node.parent?.insert(node: newNode, after: node)
+                        rootNode.cursorPosition = 0
+                        scrollToCursorAtLayout = true
+                        self.focussedWidget = newNode
+                    }
+                    if let ranges = str.urlRangesInside() {
+                        guard let node = focussedWidget as? TextNode else { continue }
+                        for range in ranges {
+                            if let range = Range(range) {
+                                let linkStr = String(str[range.lowerBound..<range.upperBound])
+                                node.text.setAttributes([.link(linkStr)], to: range)
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
