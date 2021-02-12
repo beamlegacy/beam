@@ -19,7 +19,7 @@ xctests:
   script:
     - time bundle exec fastlane tests
   tags:
-    - macos
+    - macos-mono
   interruptible: true
   retry:
     max: 2
