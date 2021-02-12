@@ -18,16 +18,16 @@ public class TextNode: Widget {
         elementTextScope = element.$text
             .receive(on: DispatchQueue.main)
             .sink { [unowned self] newValue in
-            elementText = newValue
-            self.invalidateText()
-        }
+                elementText = newValue
+                self.invalidateText()
+            }
 
         elementKindScope = element.$kind
             .receive(on: DispatchQueue.main)
             .sink { [unowned self] newValue in
-            elementKind = newValue
-            self.invalidateText()
-        }
+                elementKind = newValue
+                self.invalidateText()
+            }
 
         elementText = element.text
         elementKind = element.kind
@@ -216,7 +216,7 @@ public class TextNode: Widget {
         element.$children
             .sink { [unowned self] elements in
                 updateTextChildren(elements: elements)
-        }.store(in: &scope)
+            }.store(in: &scope)
 
         createActionLayer()
 
@@ -224,18 +224,18 @@ public class TextNode: Widget {
         elementTextScope = element.$text
             .receive(on: DispatchQueue.main)
             .sink { [unowned self] newValue in
-            guard !inInit else { return }
-            elementText = newValue
-            self.invalidateText()
-        }
+                guard !inInit else { return }
+                elementText = newValue
+                self.invalidateText()
+            }
 
         elementKindScope = element.$kind
             .receive(on: DispatchQueue.main)
             .sink { [unowned self] newValue in
-            guard !inInit else { return }
-            elementKind = newValue
-            self.invalidateText()
-        }
+                guard !inInit else { return }
+                elementKind = newValue
+                self.invalidateText()
+            }
         inInit = false
     }
 
@@ -392,20 +392,7 @@ public class TextNode: Widget {
 
     func drawCursor(in context: CGContext) {
         guard !readOnly, editor.hasFocus, editor.blinkPhase else { return }
-
-        // Otherwise, draw the cursor at a real position
-        let line: TextLine = {
-            if let emptyLayout = emptyLayout {
-                return emptyLayout.lines[0]
-            }
-
-            guard let cursorLine = lineAt(index: cursorPosition <= 0 ? 0 : cursorPosition) else { fatalError() }
-            return layout!.lines[cursorLine]
-        }()
-
-        let pos = cursorPosition
-        let x1 = offsetAt(index: pos)
-        let cursorRect = NSRect(x: x1, y: line.frame.minY, width: cursorPosition == text.count ? bigCursorWidth : smallCursorWidth, height: line.bounds.height)
+        let cursorRect = rectAt(cursorPosition)
 
         context.beginPath()
         context.addRect(cursorRect)
@@ -619,7 +606,7 @@ public class TextNode: Widget {
             } else if mouseInfo.event.clickCount == 1 && mouseInfo.event.modifierFlags.contains(.shift) {
                 dragMode = .select(cursorPosition)
                 root?.extendSelection(to: clickPos)
-                editor.initAndUpdateInlineFormatter()
+                editor.showInlineFormatterOnKeyEventsAndClick()
                 return true
             } else if mouseInfo.event.clickCount == 1 {
                 root?.cursorPosition = clickPos
@@ -630,7 +617,7 @@ public class TextNode: Widget {
             } else if mouseInfo.event.clickCount == 2 {
                 deboucingClickTimer?.invalidate()
                 root?.wordSelection(from: clickPos)
-                editor.initAndUpdateInlineFormatter()
+                editor.showInlineFormatterOnKeyEventsAndClick()
                 return true
             } else {
                 deboucingClickTimer?.invalidate()
@@ -648,7 +635,7 @@ public class TextNode: Widget {
 
         if mouseIsDragged {
             editor.detectFormatterType()
-            editor.initAndUpdateInlineFormatter(isDragged: true)
+            editor.showOrHideInlineFormatter(isPresent: true)
             mouseIsDragged = false
         }
         return false
@@ -704,6 +691,7 @@ public class TextNode: Widget {
         case .select(let o):
             root?.selectedTextRange = text.clamp(p < o ? cursorPosition..<o : o..<cursorPosition)
             mouseIsDragged = true
+            editor.updateInlineFormatterOnDrag(isDragged: true)
         }
         invalidate()
 
@@ -848,9 +836,21 @@ public class TextNode: Widget {
 
     public func rectAt(_ position: Int) -> NSRect {
         updateRendering()
-        guard let l = lineAt(index: position) else { return NSRect() }
-        let x1 = offsetAt(index: position)
-        return NSRect(x: x1, y: CGFloat(l) * fontSize, width: 1.5, height: fontSize )
+        let textLine: TextLine? = {
+            if let emptyLayout = emptyLayout {
+                return emptyLayout.lines[0]
+            }
+
+            guard let cursorLine = lineAt(index: cursorPosition <= 0 ? 0 : cursorPosition) else { fatalError() }
+            return layout?.lines[cursorLine] ?? nil
+        }()
+
+        guard let line = textLine else { return NSRect.zero }
+        let pos = cursorPosition
+        let x1 = offsetAt(index: pos)
+        let cursorRect = NSRect(x: x1, y: line.frame.minY, width: cursorPosition == text.count ? bigCursorWidth : smallCursorWidth, height: line.bounds.height)
+
+        return cursorRect
     }
 
     public func indexOnLastLine(atOffset x: CGFloat) -> Int {
@@ -921,7 +921,7 @@ public class TextNode: Widget {
     private func buildAttributedString(for beamText: BeamText) -> NSAttributedString {
         let str = beamText.buildAttributedString(fontSize: fontSize, cursorPosition: cursorPosition, elementKind: elementKind)
         let paragraphStyle = NSMutableParagraphStyle()
-//        paragraphStyle.alignment = .justified
+        //        paragraphStyle.alignment = .justified
         paragraphStyle.lineBreakMode = .byWordWrapping
         paragraphStyle.lineHeightMultiple = interlineFactor
         paragraphStyle.lineSpacing = 40

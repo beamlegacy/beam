@@ -455,13 +455,13 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                         node.fold()
                     } else if shift && option {
                         rootNode.doCommand(.moveWordLeftAndModifySelection)
-                        initAndUpdateInlineFormatter()
+                        showInlineFormatterOnKeyEventsAndClick()
                     } else if shift && command {
                         rootNode.doCommand(.moveToBeginningOfLineAndModifySelection)
-                        initAndUpdateInlineFormatter()
+                        showInlineFormatterOnKeyEventsAndClick()
                     } else if shift {
                         rootNode.doCommand(.moveLeftAndModifySelection)
-                        initAndUpdateInlineFormatter()
+                        showInlineFormatterOnKeyEventsAndClick()
                     } else if command && popover != nil {
                         rootNode.doCommand(.moveToBeginningOfLine)
                         dismissPopoverOrFormatter()
@@ -491,13 +491,13 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                         node.unfold()
                     } else if shift && option {
                         rootNode.doCommand(.moveWordRightAndModifySelection)
-                        initAndUpdateInlineFormatter()
+                        showInlineFormatterOnKeyEventsAndClick()
                     } else if shift && command {
                         rootNode.doCommand(.moveToEndOfLineAndModifySelection)
-                        initAndUpdateInlineFormatter()
+                        showInlineFormatterOnKeyEventsAndClick()
                     } else if shift {
                         rootNode.doCommand(.moveRightAndModifySelection)
-                        initAndUpdateInlineFormatter()
+                        showInlineFormatterOnKeyEventsAndClick()
                     } else if command && persistentFormatter != nil {
                         rootNode.doCommand(.moveToEndOfLine)
                         detectFormatterType()
@@ -526,7 +526,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     if shift {
                         cancelPopover()
                         rootNode.doCommand(.moveUpAndModifySelection)
-                        initAndUpdateInlineFormatter()
+                        showInlineFormatterOnKeyEventsAndClick()
                     } else if let popover = popover {
                         popover.doCommand(.moveUp)
                     } else if inlineFormatter != nil {
@@ -543,7 +543,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     if shift {
                         cancelPopover()
                         rootNode.doCommand(.moveDownAndModifySelection)
-                        initAndUpdateInlineFormatter()
+                        showInlineFormatterOnKeyEventsAndClick()
                     } else if let popover = popover {
                         popover.doCommand(.moveDown)
                     } else if inlineFormatter != nil {
@@ -1031,12 +1031,16 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         addTrackingArea(NSTrackingArea(rect: bounds, options: [.mouseMoved, .activeInActiveApp, .mouseEnteredAndExited, .cursorUpdate, .enabledDuringMouseDrag, .inVisibleRect], owner: self, userInfo: nil))
     }
 
+    var mouseDownPos: NSPoint?
     override public func mouseDown(with event: NSEvent) {
         //       window?.makeFirstResponder(self)
         reBlink()
         rootNode.cancelNodeSelection() // TODO: change this to handle manipulating the node selection with the mouse
-        let point = convert(event.locationInWindow)
-        let info = MouseInfo(rootNode, point, event)
+        if self.mouseDownPos != nil {
+            self.mouseDownPos = nil
+        }
+        self.mouseDownPos = convert(event.locationInWindow)
+        let info = MouseInfo(rootNode, mouseDownPos ?? .zero, event)
         guard let newNode = rootNode.dispatchMouseDown(mouseInfo: info) else {
             guard let n = rootNode.children.first else { return }
             rootNode.cursorPosition = 0
@@ -1066,6 +1070,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         let point = convert(event.locationInWindow)
         _ = rootNode.dispatchMouseDragged(mouseInfo: MouseInfo(rootNode, point, event))
         cursorUpdate(with: event)
+        mouseDraggedUpdate(with: event)
     }
 
     func convert(_ point: NSPoint) -> NSPoint {
@@ -1080,8 +1085,36 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         let point = convert(event.locationInWindow)
         let mouseInfo = MouseInfo(rootNode, point, event)
         rootNode.dispatchMouseMoved(mouseInfo: mouseInfo)
-
         cursorUpdate(with: event)
+    }
+
+    public func mouseDraggedUpdate(with event: NSEvent) {
+        guard let startPos = mouseDownPos else { return }
+        let eventPoint = convert(event.locationInWindow)
+        let widgets = rootNode.getWidgetsBetween(startPos, eventPoint)
+
+        if let selection = rootNode?.state.nodeSelection, let focussedNode = focussedWidget as? TextNode {
+            let textNodes = widgets.compactMap { $0 as? TextNode }
+            selection.start = focussedNode
+            selection.append(focussedNode)
+            for textNode in textNodes {
+                if !selection.nodes.contains(textNode) {
+                    selection.append(textNode)
+                }
+            }
+            for selectedNode in selection.nodes {
+                if !textNodes.contains(selectedNode) && selectedNode != focussedNode {
+                    selection.remove(selectedNode)
+                }
+            }
+            guard let lastNode = textNodes.last else { return }
+            selection.end = lastNode
+        } else {
+            if widgets.count > 0 {
+                rootNode?.startNodeSelection()
+            }
+            return
+        }
     }
 
     public override func cursorUpdate(with event: NSEvent) {
@@ -1222,29 +1255,37 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
     internal func initAndShowPersistentFormatter() {
         if persistentFormatter == nil {
-            initFormatterView(.persistent)
+            initPersistentFormatterView()
         } else if persistentFormatter != nil {
             showOrHidePersistentFormatter(isPresent: true)
         }
     }
 
-    internal func initAndUpdateInlineFormatter(isDragged: Bool = false) {
+    func initInlineFormatterAndHidePersistentFormatter() {
         guard let node = focussedWidget as? TextNode else { return }
 
         if inlineFormatter == nil && popover == nil {
             currentTextRange = node.selectedTextRange
-            initFormatterView(.inline)
+            initInlineFormatterView()
             showOrHidePersistentFormatter(isPresent: false)
         }
+    }
 
-        updateInlineFormatterView(isDragged)
+    func showInlineFormatterOnKeyEventsAndClick() {
+        initInlineFormatterAndHidePersistentFormatter()
+        updateInlineFormatterView()
 
         if isInlineFormatterHidden {
             showOrHideInlineFormatter(isPresent: true)
         }
     }
 
-    internal func hideInlineFormatter() {
+    func updateInlineFormatterOnDrag(isDragged: Bool = false) {
+        initInlineFormatterAndHidePersistentFormatter()
+        updateInlineFormatterView(isDragged)
+    }
+
+    func hideInlineFormatter() {
         guard inlineFormatter != nil else { return }
 
         showOrHideInlineFormatter(isPresent: false)
@@ -1268,6 +1309,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             if popoverPrefix > 0 { cancelInternalLink() }
             dismissPopover()
             showOrHidePersistentFormatter(isPresent: true)
+            // initPersistentFormatterView()
         }
 
         if inlineFormatter != nil {

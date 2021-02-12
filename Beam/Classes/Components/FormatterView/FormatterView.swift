@@ -26,6 +26,12 @@ class FormatterView: NSView {
         }
     }
 
+    var idealSize: NSSize {
+        let itemSize = CGFloat(items.count)
+        let width = (itemSize * 34) + (1.45 * itemSize)
+        return NSSize(width: width, height: 32)
+    }
+
     // View Properties
     private let cornerRadius: CGFloat = 3
     private let leading = 2

@@ -25,6 +25,19 @@ enum ElementKind: Codable, Equatable {
         case title
     }
 
+    var rawValue: String {
+       switch self {
+       case .bullet:
+           return "bullet"
+       case .heading(let level):
+           return "heading \(level)"
+       case .quote:
+           return "quote"
+       case .code:
+           return "code"
+       }
+   }
+
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
