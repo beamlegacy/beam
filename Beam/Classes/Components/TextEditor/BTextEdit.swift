@@ -25,7 +25,6 @@ public struct BTextEdit: NSViewRepresentable {
     var traillingPadding: CGFloat = 80
     var topOffset: CGFloat = 28
     var footerHeight: CGFloat = 60
-    var ignoreFirstDrag = true
 
     var showTitle = true
 
@@ -49,8 +48,6 @@ public struct BTextEdit: NSViewRepresentable {
         nsView.traillingPadding = traillingPadding
         nsView.topOffset = topOffset
         nsView.footerHeight = footerHeight
-
-        nsView.ignoreFirstDrag = ignoreFirstDrag
 
         nsView.showTitle = showTitle
 
@@ -76,8 +73,6 @@ public struct BTextEdit: NSViewRepresentable {
         nsView.traillingPadding = traillingPadding
         nsView.topOffset = topOffset
         nsView.footerHeight = footerHeight
-
-        nsView.ignoreFirstDrag = ignoreFirstDrag
 
         nsView.showTitle = showTitle
 
@@ -117,7 +112,6 @@ public struct BTextEditScrollable: NSViewRepresentable {
     var traillingPadding = CGFloat(80)
     var topOffset = CGFloat(28)
     var footerHeight = CGFloat(28)
-    var ignoreFirstDrag = false
 
     var showTitle = true
 
@@ -142,7 +136,6 @@ public struct BTextEditScrollable: NSViewRepresentable {
         edit.traillingPadding = traillingPadding
         edit.topOffset = topOffset
         edit.footerHeight = footerHeight
-        edit.ignoreFirstDrag = ignoreFirstDrag
 
         edit.showTitle = showTitle
 
@@ -186,7 +179,6 @@ public struct BTextEditScrollable: NSViewRepresentable {
         edit.traillingPadding = traillingPadding
         edit.topOffset = topOffset
         edit.footerHeight = footerHeight
-        edit.ignoreFirstDrag = ignoreFirstDrag
 
         edit.showTitle = showTitle
 

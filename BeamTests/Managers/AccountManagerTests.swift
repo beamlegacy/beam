@@ -22,7 +22,7 @@ class AccountManagerTests: QuickSpec {
         describe(".forgotPassword") {
             context("with existing account") {
                 it("returns") {
-                    waitUntil { done in
+                    waitUntil(timeout: .seconds(10)) { done in
                         sut.forgotPassword(email: existingAccountEmail) { result in
                             expect { try result.get() }.toNot(throwError())
                             done()
@@ -33,7 +33,7 @@ class AccountManagerTests: QuickSpec {
 
             context("with non-existing account") {
                 it("returns") {
-                    waitUntil { done in
+                    waitUntil(timeout: .seconds(10)) { done in
                         sut.forgotPassword(email: nonExistingAccountEmail) { result in
                             expect { try result.get() }.toNot(throwError())
                             done()
@@ -44,11 +44,11 @@ class AccountManagerTests: QuickSpec {
         }
 
         describe(".signUp()") {
-            let password = randomString(length: 12)
+            let password = String.random(length: 12)
 
             context("with existing account") {
                 it("returns an error") {
-                    waitUntil { done in
+                    waitUntil(timeout: .seconds(10)) { done in
                         sut.signUp(existingAccountEmail, password) { result in
                             expect { try result.get() }.to(throwError { (error: APIRequestError) in
                                 expect(error.errorDescription).to(equal("A user already exists with this email"))
@@ -61,7 +61,7 @@ class AccountManagerTests: QuickSpec {
 
             context("with non-existing account") {
                 it("doesn't return an error") {
-                    waitUntil { done in
+                    waitUntil(timeout: .seconds(10)) { done in
                         sut.signUp(nonExistingAccountEmail, password) { result in
                             expect { try result.get() }.toNot(throwError())
                             done()
@@ -97,15 +97,10 @@ class AccountManagerTests: QuickSpec {
     private func login(_ sut: AccountManager, _ email: String, _ password: String) {
         guard !AuthenticationManager.shared.isAuthenticated else { return }
 
-        waitUntil { done in
+        waitUntil(timeout: .seconds(10)) { done in
             sut.signIn(email, password) { _ in
                 done()
             }
         }
-    }
-
-    private func randomString(length: Int) -> String {
-      let letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-      return String((0..<length).map { _ in letters.randomElement()! })
     }
 }

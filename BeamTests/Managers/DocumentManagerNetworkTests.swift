@@ -35,7 +35,7 @@ class DocumentManagerNetworkTests: QuickSpec {
         beforeSuite {
             // Setup CoreData
             self.coreDataManager.setup()
-            waitUntil { done in
+            waitUntil(timeout: .seconds(10)) { done in
                 self.coreDataManager.destroyPersistentStore {
                     self.coreDataManager.setup()
                     done()
@@ -46,7 +46,7 @@ class DocumentManagerNetworkTests: QuickSpec {
             self.helper = DocumentManagerTestsHelper(documentManager: self.sut,
                                                      coreDataManager: self.coreDataManager)
 
-            waitUntil { done in
+            waitUntil(timeout: .seconds(10)) { done in
                 self.sut.deleteAllDocuments(includedRemote: false) { _ in
                     done()
                 }
@@ -82,7 +82,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                 it("refreshes the local document") {
                     let networkCalls = APIRequest.callsCount
 
-                    waitUntil { done in
+                    waitUntil(timeout: .seconds(10)) { done in
                         self.sut.refreshDocuments { result in
                             expect { try result.get() }.toNot(throwError())
                             expect { try result.get() }.to(beTrue())
@@ -102,7 +102,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                 it("flags the local document as deleted") {
                     let networkCalls = APIRequest.callsCount
 
-                    waitUntil { done in
+                    waitUntil(timeout: .seconds(10)) { done in
                         self.sut.refreshDocuments { result in
                             expect { try result.get() }.toNot(throwError())
                             expect { try result.get() }.to(beTrue())
@@ -113,7 +113,7 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                     let newDocStruct = self.sut.loadDocumentById(id: docStruct.id)
                     expect(newDocStruct).toNot(beNil())
-                    expect(newDocStruct?.deletedAt).to(beCloseTo(BeamDate.now, within: 0.1))
+                    expect(newDocStruct?.deletedAt).to(beCloseTo(BeamDate.now, within: 1.0))
 
                     let document = Document.fetchWithId(self.mainContext, docStruct.id)
                     expect(document?.deleted_at).toNot(beNil())
@@ -134,7 +134,7 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                     it("refreshes the local document") {
                         let networkCalls = APIRequest.callsCount
-                        waitUntil { done in
+                        waitUntil(timeout: .seconds(10)) { done in
                             self.sut.refreshDocuments { result in
                                 expect { try result.get() }.toNot(throwError())
                                 expect { try result.get() }.to(beTrue())
@@ -163,7 +163,7 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                     it("refreshes the local document") {
                         let networkCalls = APIRequest.callsCount
-                        waitUntil { done in
+                        waitUntil(timeout: .seconds(10)) { done in
                             self.sut.refreshDocuments { result in
                                 expect { try result.get() }.toNot(throwError())
                                 expect { try result.get() }.to(beTrue())
@@ -193,7 +193,7 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                 it("doesn't update the local document, returns error") {
                     let networkCalls = APIRequest.callsCount
-                    waitUntil { done in
+                    waitUntil(timeout: .seconds(10)) { done in
                         self.sut.refreshDocuments { result in
                             expect { try result.get() }.to(throwError { (error: DocumentManagerError) in
                                 expect(error).to(equal(DocumentManagerError.unresolvedConflict))
@@ -234,7 +234,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                     expect(AuthenticationManager.shared.isAuthenticated).to(beTrue())
                     expect(Configuration.networkEnabled).to(beTrue())
 
-                    waitUntil { done in
+                    waitUntil(timeout: .seconds(10)) { done in
                         self.sut.refreshDocument(docStruct) { result in
                             expect { try result.get() }.toNot(throwError())
                             expect { try result.get() }.to(beFalse())
@@ -259,7 +259,7 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                     it("refreshes the local document") {
                         let networkCalls = APIRequest.callsCount
-                        waitUntil { done in
+                        waitUntil(timeout: .seconds(10)) { done in
                             self.sut.refreshDocument(docStruct) { result in
                                 expect { try result.get() }.toNot(throwError())
                                 expect { try result.get() }.to(beTrue())
@@ -288,7 +288,7 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                     it("refreshes the local document") {
                         let networkCalls = APIRequest.callsCount
-                        waitUntil { done in
+                        waitUntil(timeout: .seconds(10)) { done in
                             self.sut.refreshDocument(docStruct) { result in
                                 expect { try result.get() }.toNot(throwError())
                                 expect { try result.get() }.to(beTrue())
@@ -312,7 +312,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                 }
 
                 it("doesn't refresh the local document") {
-                    waitUntil { done in
+                    waitUntil(timeout: .seconds(10)) { done in
                         self.sut.refreshDocument(docStruct) { result in
                             expect { try result.get() }.to(throwError { (error: AFError) in
                                 expect(error.responseCode).to(equal(404))
@@ -338,7 +338,7 @@ class DocumentManagerNetworkTests: QuickSpec {
             context("with network") {
                 context("without conflict") {
                     it("saves the document locally") {
-                        waitUntil { done in
+                        waitUntil(timeout: .seconds(10)) { done in
                             self.sut.saveDocument(docStruct) { _ in
                                 done()
                             }
@@ -352,7 +352,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                     it("saves the document on the API") {
                         self.helper.saveLocally(docStruct)
 
-                        waitUntil { done in
+                        waitUntil(timeout: .seconds(10)) { done in
                             self.sut.saveDocumentStructOnAPI(docStruct) { result in
                                 expect { try result.get() }.toNot(throwError())
                                 expect { try result.get() }.to(beTrue())
@@ -380,7 +380,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                     it("updates the remote document with the local version") {
                         let networkCalls = APIRequest.callsCount
 
-                        waitUntil { done in
+                        waitUntil(timeout: .seconds(10)) { done in
                             self.sut.saveDocumentStructOnAPI(docStruct) { result in
                                 expect { try result.get() }.toNot(throwError())
                                 expect { try result.get() }.to(beTrue())
@@ -428,7 +428,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                     it("updates the remote document") {
                         let networkCalls = APIRequest.callsCount
 
-                        waitUntil { done in
+                        waitUntil(timeout: .seconds(10)) { done in
                             self.sut.saveDocumentStructOnAPI(docStruct) { result in
                                 expect { try result.get() }.toNot(throwError())
                                 expect { try result.get() }.to(beTrue())

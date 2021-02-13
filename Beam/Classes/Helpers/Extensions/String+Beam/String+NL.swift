@@ -70,4 +70,33 @@ extension String {
         return wordTokens
     }
 
+    var namedEntities: [(String, NLTag)] {
+        return getNamedEntities(nil)
+    }
+
+    func getNamedEntities(_ language: NLLanguage?) -> [(String, NLTag)] {
+        var entities = [(String, NLTag)]()
+        let tagger = NLTagger(tagSchemes: [.nameType])
+
+        tagger.string = self
+        if let language = language {
+            tagger.setLanguage(language, range: self.startIndex ..< self.endIndex)
+        }
+
+        let options: NLTagger.Options = [.omitPunctuation, .omitWhitespace, .joinNames]
+        let tags: [NLTag] = [.personalName, .placeName, .organizationName]
+        tagger.enumerateTags(in: self.startIndex..<self.endIndex,
+                             unit: .word,
+                             scheme: .nameType,
+                             options: options) { (tag, range) -> Bool in
+            if let tag = tag, tags.contains(tag) {
+                let entity = String(self[range])
+                entities.append((entity, tag))
+            }
+            return true
+        }
+
+        return entities
+    }
+
 }

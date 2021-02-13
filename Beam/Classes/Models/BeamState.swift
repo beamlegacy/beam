@@ -177,6 +177,19 @@ let NoteDisplayThreshold = Float(0.0)
         updateCanGoBackForward()
     }
 
+    func toggleBetweenWebAndNote() {
+        guard let note = currentTab?.note else { return }
+
+        switch mode {
+        case .web:
+            navigateToNote(note)
+        case .note:
+            mode = .web
+        case .today:
+            if !tabs.isEmpty { mode = .web }
+        }
+    }
+
     func updateCanGoBackForward() {
         switch mode {
         // swiftlint:disable:next fallthrough no_fallthrough_only
@@ -322,6 +335,9 @@ let NoteDisplayThreshold = Float(0.0)
 
             case .note:
                 navigateToNote(named: searchQuery)
+
+            case .createCard:
+                navigateToNote(createNoteForQuery(query.string))
             }
 
             cancelAutocomplete()
@@ -372,6 +388,11 @@ let NoteDisplayThreshold = Float(0.0)
             self.completedQueries = []
 
             if !query.isEmpty {
+                if BeamNote.fetch(data.documentManager, title: query) == nil {
+                    // if the card doesn't exist, propose to create it
+                    self.completedQueries.append(AutoCompleteResult(id: UUID(), string: query, title: "Create card '\(query)'", source: .createCard))
+                }
+
                 let notes = data.documentManager.documentsWithTitleMatch(title: query).compactMap({ doc -> DocumentStruct? in
                     let decoder = JSONDecoder()
                     decoder.userInfo[BeamElement.recursiveCoding] = false

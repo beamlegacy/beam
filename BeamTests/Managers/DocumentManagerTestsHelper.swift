@@ -21,7 +21,7 @@ class DocumentManagerTestsHelper {
     }
 
     func saveRemotely(_ docStruct: DocumentStruct) {
-        waitUntil { done in
+        waitUntil(timeout: .seconds(10)) { done in
             self.sut.saveDocumentStructOnAPI(docStruct) { _ in
                 done()
             }
@@ -29,7 +29,7 @@ class DocumentManagerTestsHelper {
     }
 
     func saveRemotelyOnly(_ docStruct: DocumentStruct) {
-        waitUntil { done in
+        waitUntil(timeout: .seconds(10)) { done in
             self.sut.documentRequest.saveDocument(docStruct.asApiType()) { _ in
                 done()
             }
@@ -38,7 +38,7 @@ class DocumentManagerTestsHelper {
 
     func fetchOnAPI(_ docStruct: DocumentStruct) -> DocumentAPIType? {
         var documentAPIType: DocumentAPIType?
-        waitUntil { done in
+        waitUntil(timeout: .seconds(10)) { done in
             self.sut.documentRequest.fetchDocument(docStruct.uuidString) { result in
                 documentAPIType = try? result.get()
                 done()
@@ -55,7 +55,7 @@ class DocumentManagerTestsHelper {
 
         guard !AuthenticationManager.shared.isAuthenticated else { return }
 
-        waitUntil { done in
+        waitUntil(timeout: .seconds(10)) { done in
             accountManager.signIn(email, password) { _ in
                 done()
             }
@@ -69,7 +69,7 @@ class DocumentManagerTestsHelper {
     }
 
     func deleteDocumentStruct(_ docStruct: DocumentStruct) {
-        waitUntil { done in
+        waitUntil(timeout: .seconds(10)) { done in
             self.sut.deleteDocument(id: docStruct.id) { result in
                 expect { try result.get() }.toNot(throwError())
                 expect { try result.get() }.to(beTrue())
@@ -96,12 +96,12 @@ class DocumentManagerTestsHelper {
     }
 
     func title() -> String {
-        return faker.zelda.game() + " " + randomString(length: 40)
+        return faker.zelda.game() + " " + String.random(length: 40)
     }
 
     func saveLocally(_ docStruct: DocumentStruct) {
         // The call to `saveDocumentStructOnAPI` expect the document to be already saved locally
-        waitUntil { done in
+        waitUntil(timeout: .seconds(10)) { done in
             // To force a local save only, while using the standard code
             Configuration.networkEnabled = false
             self.sut.saveDocument(docStruct) { _ in
@@ -152,10 +152,5 @@ class DocumentManagerTestsHelper {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
         return encoder
-    }
-
-    func randomString(length: Int) -> String {
-      let letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-      return String((0..<length).map { _ in letters.randomElement()! })
     }
 }

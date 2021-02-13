@@ -381,11 +381,29 @@ class DocumentManager {
     }
 
     func allDocumentsTitles() -> [String] {
-        Document.fetchAllNames(context: mainContext)
+        if Thread.isMainThread {
+            return Document.fetchAllNames(context: mainContext)
+        } else {
+            var result: [String] = []
+            let context = coreDataManager.persistentContainer.newBackgroundContext()
+            context.performAndWait {
+                result = Document.fetchAllNames(context: context)
+            }
+            return result
+        }
     }
 
-    func loadDocumentByTitle(title: String) -> DocumentStruct? {
-        guard let document = Document.fetchWithTitle(mainContext, title) else { return nil }
+    func loadDocByTitleInBg(title: String) -> DocumentStruct? {
+        var result: DocumentStruct?
+        let context = coreDataManager.persistentContainer.newBackgroundContext()
+        context.performAndWait {
+            result = loadDocumentByTitle(title: title, context: context)
+        }
+        return result
+    }
+
+    func loadDocumentByTitle(title: String, context: NSManagedObjectContext? = nil) -> DocumentStruct? {
+        guard let document = Document.fetchWithTitle(context ?? mainContext, title) else { return nil }
 
         return parseDocumentBody(document)
     }
@@ -399,7 +417,6 @@ class DocumentManager {
     func countDocumentsWithType(type: DocumentType) -> Int {
         return Document.countWithPredicate(mainContext, NSPredicate(format: "document_type = %ld", type.rawValue))
     }
-
 
     func documentsWithTitleMatch(title: String) -> [DocumentStruct] {
         return Document.fetchAllWithTitleMatch(mainContext, title).compactMap { document -> DocumentStruct? in

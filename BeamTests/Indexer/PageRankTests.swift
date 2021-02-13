@@ -251,4 +251,61 @@ class PageRankTests: XCTestCase {
             Logger.shared.logDebug("\t\(res.score): \(res.source) / \(res.title)")
         }
     }
+
+    func compareNamedEntities(list1: [(String, NLTag)], list2: [(String, NLTag)], _ message: String, file: StaticString, line: UInt) {
+        XCTAssertEqual(list1.count, list2.count)
+        for i in 0..<list1.count {
+            XCTAssertEqual(list1[i].0, list2[i].0, message, file: file, line: line)
+            XCTAssertEqual(list1[i].1, list2[i].1, message, file: file, line: line)
+        }
+    }
+
+    func checkNamedEntities(_ language: NLLanguage?, _ str: String, _ list: [(String, NLTag)], _ message: String = "", file: StaticString = #filePath, line: UInt = #line) {
+        compareNamedEntities(list1: list, list2: str.getNamedEntities(language), message, file: file, line: line)
+    }
+
+    func testNamedEntitiesExtraction() {
+//        checkNamedEntities(.french, "Je m'appelle Sébastien et je travaille chez Beam à Paris",
+//                             [("Sébastien", NLTag.personalName), ("Paris", NLTag.placeName)], "test1")
+
+        checkNamedEntities(.english, "My name is Seb and I work for Beam in Paris",
+                        [("Paris", NLTag.placeName)], "test2")
+
+        checkNamedEntities(.english, "I used to work for Apple in Paris",
+                        [("Paris", NLTag.placeName)], "test3")
+
+        checkNamedEntities(.english, "I started building guitars because the left handed offerings from Fender and Gibson was really subpar...",
+                        [("Fender", NLTag.organizationName), ("Gibson", NLTag.personalName)], "test4")
+    }
+
+    func testTF() {
+        let index = Index()
+        let doc1 = IndexDocument(source: "doc1", title: "First document", contents: "This is the first document in the collection. It talks about nothing in particular.")
+        let doc2 = IndexDocument(source: "doc2", title: "Second document", contents: "I would like to eat something good. Maybe go to a nice restaurant tonight.")
+        let doc3 = IndexDocument(source: "doc3", title: "third document", contents: "He is a food critict so he visits many restaurants to eat a lot. But nobody really cares what he likes so he's like the worst critic there is.")
+
+        let docs = [doc1, doc2, doc3]
+
+        for d in docs {
+            index.append(document: d)
+        }
+
+        XCTAssertEqual(index.documents.count, 3)
+
+        let query = "Eat nice food or nothing guys"
+        let frequencies = index.wordFrequency(for: query)
+        let tfidf = index.tfidf(for: query)
+
+        let expectedFrequencies: [String: Int] = ["eat": 1, "food": 1, "or": 1, "nothing": 1, "guys": 1, "nice": 1]
+        XCTAssertEqual(frequencies.count, expectedFrequencies.count)
+        for w in expectedFrequencies {
+            XCTAssertEqual(w.value, frequencies[w.key])
+        }
+
+        let expectedTfidf: [String: Float] = ["guys": 0.0, "eat": 0.4054651, "or": 0.0, "food": 1.0986123, "nothing": 1.0986123, "nice": 1.0986123]
+        XCTAssertEqual(tfidf.count, expectedTfidf.count)
+        for w in expectedTfidf {
+            XCTAssertEqual(w.value, tfidf[w.key] ?? 0, accuracy: 0.00001)
+        }
+    }
 }

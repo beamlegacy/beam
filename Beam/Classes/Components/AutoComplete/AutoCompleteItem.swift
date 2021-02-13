@@ -24,6 +24,9 @@ struct AutoCompleteItem: View {
                 Icon(name: "magnifyingglass", color: selected ? .white : Color(.editorLinkColor)).padding(.trailing, 5)
             case .note:
                 Icon(name: "note.text", color: selected ? .white : .black).padding(.trailing, 5)
+
+            case .createCard:
+                Icon(name: "note.text", color: selected ? .white : .black).padding(.trailing, 5)
             }
 
             if let title = item.title {
