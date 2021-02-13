@@ -32,7 +32,7 @@ struct JournalView: View {
             }
             .background(GeometryReader { geo -> Color in
                 let totalJournal = data.documentManager.countDocumentsWithType(type: .journal)
-                if geo.frame(in: .global).origin.y > 5
+                if geo.frame(in: .global).origin.y > -5
                     && totalJournal != journal.count {
                     data.updateJournal(with: 2, and: journal.count)
                 }

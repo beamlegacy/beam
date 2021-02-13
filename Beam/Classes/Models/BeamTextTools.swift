@@ -141,6 +141,7 @@ extension BeamText {
         while link.contains("  ") {
             link = link.replacingOccurrences(of: "  ", with: " ")
         }
+        link = link.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
         guard linkCharacterSet.isSuperset(of: CharacterSet(charactersIn: link)) else {
 //            Logger.shared.logError("makeInternalLink for range: \(range) failed: forbidden characters in range", category: .document)
             return false
@@ -152,12 +153,19 @@ extension BeamText {
         replaceSubrange(actualRange, with: linkText)
 
         // Notes that are created by makeInternalLink shouldn't have a score of 0 as they are explicit
-        let linkedNote = BeamNote.fetchOrCreate(DocumentManager(), title: link)
-        if linkedNote.score == 0 {
+        let linkedNote = BeamNote.fetchOrCreate(AppDelegate.main.data.documentManager, title: link)
+        let created = linkedNote.score == 0
+        if created {
+            // this note has just been created
             linkedNote.createdByUser()
         }
 
         linkedNote.referencedByUser()
+
+        if created {
+            // make sure it's saved at least once
+            linkedNote.save(documentManager: AppDelegate.main.data.documentManager)
+        }
         return true
     }
 

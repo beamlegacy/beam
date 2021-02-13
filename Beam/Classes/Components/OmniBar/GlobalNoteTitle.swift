@@ -21,7 +21,7 @@ struct GlobalNoteTitle: View {
     }
     @State var isEditing = false
     @State var focusOmniBox = false
-    @State var title = ""
+    @Binding var title: String
 
     var _cornerRadius = CGFloat(7)
     var note: BeamNote

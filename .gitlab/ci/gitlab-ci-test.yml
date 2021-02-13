@@ -17,10 +17,9 @@ xctests:
     - master
     - develop
   script:
-    - time make build_libgit2
     - time bundle exec fastlane tests
   tags:
-    - macos
+    - macos-mono
   interruptible: true
   retry:
     max: 2

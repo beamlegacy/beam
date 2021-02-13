@@ -25,7 +25,7 @@ class CoreDataManagerTests: XCTestCase {
 
     // MARK: Setup
     func test_setup_completionCalled() {
-        waitUntil { [unowned self] done in
+        waitUntil(timeout: .seconds(10)) { [unowned self] done in
             self.sut.setup {
                 expect(self.sut.persistentContainer.persistentStoreCoordinator.persistentStores.count).to(equal(1))
                 done()
@@ -34,7 +34,7 @@ class CoreDataManagerTests: XCTestCase {
     }
 
     func test_setup_persistentContainerLoadedOnDisk() {
-        waitUntil { [unowned self] done in
+        waitUntil(timeout: .seconds(10)) { [unowned self] done in
             self.sut.setup {
                 expect(self.sut.persistentContainer.persistentStoreDescriptions.first?.type).to(equal(NSSQLiteStoreType))
                 done()
@@ -43,7 +43,7 @@ class CoreDataManagerTests: XCTestCase {
     }
 
     func test_setup_persistentContainerLoadedInMemory() {
-        waitUntil { [unowned self] done in
+        waitUntil(timeout: .seconds(10)) { [unowned self] done in
             self.sut.setup(storeType: NSInMemoryStoreType) {
                 expect(self.sut.persistentContainer.persistentStoreDescriptions.first?.type).to(equal(NSInMemoryStoreType))
                 expect(self.sut.backgroundContext.concurrencyType).to(equal(.privateQueueConcurrencyType))

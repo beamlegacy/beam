@@ -14,10 +14,9 @@ extension BeamTextEdit {
     private static var xPos: CGFloat = 0
 
     internal func initPopover() {
-        guard let node = node as? TextNode else { return }
+        guard let node = focussedWidget as? TextNode else { return }
 
         popover = BidirectionalPopover()
-        updatePopoverPosition(with: node)
 
         guard let popover = popover,
               let view = window?.contentView else { return }
@@ -25,12 +24,13 @@ extension BeamTextEdit {
         view.addSubview(popover)
 
         popover.didSelectTitle = { [unowned self] (title) -> Void in
-            validInternalLink(from: node, title)
+            self.validInternalLink(from: node, title)
+            view.window?.makeFirstResponder(self)
         }
     }
 
     internal func updatePopover(with command: TextRoot.Command = .none) {
-        guard let node = node as? TextNode,
+        guard let node = focussedWidget as? TextNode,
               let popover = popover else { return }
 
         let cursorPosition = rootNode.cursorPosition
@@ -48,6 +48,11 @@ extension BeamTextEdit {
 
         let startPosition = popoverPrefix == 0 ? cursorStartPosition : cursorStartPosition + 1
         let linkText = String(node.text.text[startPosition..<cursorPosition])
+        if linkText.hasPrefix(" ") {
+            // escape if the user type a space right after the start of the popover
+            cancelPopover(leaveTextAsIs: true)
+            return
+        }
 
         node.text.addAttributes([.internalLink(linkText)], to: startPosition - popoverPrefix..<cursorPosition + popoverSuffix)
         let items = linkText.isEmpty ? documentManager.loadAllDocumentsWithLimit(BeamTextEdit.queryLimit) : documentManager.documentsWithLimitTitleMatch(title: linkText, limit: BeamTextEdit.queryLimit)
@@ -58,13 +63,18 @@ extension BeamTextEdit {
         updatePopoverPosition(with: node, linkText.isEmpty)
     }
 
-    internal func cancelPopover() {
+    internal func cancelPopover(leaveTextAsIs: Bool = false) {
         guard popover != nil,
-              let node = node as? TextNode else { return }
+              let node = focussedWidget as? TextNode else { return }
 
         dismissPopover()
-        node.text.removeSubrange((cursorStartPosition + 1 - popoverPrefix)..<(rootNode.cursorPosition + popoverSuffix))
-        rootNode.cursorPosition = cursorStartPosition + 1 - popoverPrefix
+        let range = (cursorStartPosition + 1 - popoverPrefix)..<(rootNode.cursorPosition + popoverSuffix)
+        if leaveTextAsIs {
+            node.text.removeAttributes([.internalLink("")], from: range)
+        } else {
+            node.text.removeSubrange(range)
+            rootNode.cursorPosition = range.lowerBound
+        }
         showOrHidePersistentFormatter(isPresent: true)
     }
 
@@ -75,31 +85,30 @@ extension BeamTextEdit {
     }
 
     internal func cancelInternalLink() {
-        guard let node = node as? TextNode,
+        guard let node = focussedWidget as? TextNode,
               popover != nil else { return }
         let text = node.text.text
         node.text.removeAttributes([.internalLink(text)], from: cursorStartPosition..<rootNode.cursorPosition + text.count)
     }
 
     private func updatePopoverPosition(with node: TextNode, _ isEmpty: Bool = false) {
-        guard let window = window,
-              let popover = popover,
+        guard let popover = popover,
               let scrollView = enclosingScrollView else { return }
 
         let (xOffset, rect) = node.offsetAndFrameAt(index: rootNode.cursorPosition)
+        let offsetGlobal = self.convert(node.offsetInDocument, to: nil)
         let yOffset = scrollView.documentVisibleRect.origin.y < 0 ? 0 : scrollView.documentVisibleRect.origin.y
+        let marginTop: CGFloat = rect.maxY == 0 ? 30 : 10
 
-        var marginTop: CGFloat = 60
-        var yPos = (window.frame.height - (rect.maxY + node.offsetInDocument.y) - popover.idealSize.height) + yOffset
+        var yPos = offsetGlobal.y - rect.maxY - popover.idealSize.height
 
         // To avoid the update of X position during the insertion of a new text
         if isEmpty {
-            BeamTextEdit.xPos = (xOffset - 20) + node.offsetInDocument.x
+            BeamTextEdit.xPos = xOffset == 0 ? offsetGlobal.x + 15 : (xOffset + offsetGlobal.x) - 10
         }
 
         // Popover with Shortcut
         if node.text.text.isEmpty {
-            marginTop += 15
             BeamTextEdit.xPos = xOffset + 200
         }
 
@@ -108,7 +117,12 @@ extension BeamTextEdit {
 
         // Up position when popover is overlapped or clipped by the superview
         if popover.visibleRect.height < popover.idealSize.height {
-            popover.frame = NSRect(x: BeamTextEdit.xPos, y: (window.frame.height - node.offsetInDocument.y + yOffset) - 50, width: popover.idealSize.width, height: popover.idealSize.height)
+            popover.frame = NSRect(
+                x: BeamTextEdit.xPos,
+                y: offsetGlobal.y + yOffset + marginTop,
+                width: popover.idealSize.width,
+                height: popover.idealSize.height
+            )
         }
     }
 
@@ -122,7 +136,8 @@ extension BeamTextEdit {
         node.text.makeInternalLink(replacementStart..<linkEnd)
         rootNode.cursorPosition = linkEnd
         dismissPopover()
-        initFormatterView(.persistent)
+        showOrHidePersistentFormatter(isPresent: true)
+        // initPersistentFormatterView()
     }
 
 }

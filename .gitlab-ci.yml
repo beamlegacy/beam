@@ -13,6 +13,13 @@ variables:
   # Need to enable custom_build_dir feature
   GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/$CI_PROJECT_NAME
 
+cache:
+  key:
+    files:
+      - Extern/libgit2
+  paths:
+    - Extern/libgit2/build/libgit2.a
+
 before_script:
   # RVM install a `cd` :((((
   # Apparently the rvm(2.6.0), that I had installed previously, was overriding the cd bash command :expressionless:

@@ -36,14 +36,23 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     var data: BeamData!
 
     let documentManager = DocumentManager()
+    #if DEBUG
+    var beamHelper: BeamTestsHelper?
+    #endif
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
+        #if DEBUG
+        if Configuration.env != "release" {
+            self.beamHelper = BeamTestsHelper()
+            prepareMenuForTestEnv()
+        }
+        #endif
         for item in NSApp.mainMenu?.items ?? [] {
             item.submenu?.delegate = self
 
             prepareMenu(items: item.submenu?.items ?? [], for: Mode.today.rawValue)
-        }
 
+        }
         CoreDataManager.shared.setup()
         LibrariesManager.shared.configure()
 
@@ -88,11 +97,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     func prepareMenu(items: [NSMenuItem], for mode: Int) {
         for item in items {
-            if item.tag == 0 {
-                continue
-            }
+            if item.tag == 0 { continue }
+
             let value = abs(item.tag)
             let mask = value & mode
+
             item.isEnabled = mask != 0
         }
     }
@@ -253,5 +262,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     @IBAction func goForward(_ sender: Any?) {
         window.state.goForward()
+    }
+
+    @IBAction func toggleBetweenWebAndNote(_ sender: Any) {
+        window.state.toggleBetweenWebAndNote()
     }
 }

@@ -25,6 +25,19 @@ enum ElementKind: Codable, Equatable {
         case title
     }
 
+    var rawValue: String {
+       switch self {
+       case .bullet:
+           return "bullet"
+       case .heading(let level):
+           return "heading \(level)"
+       case .quote:
+           return "quote"
+       case .code:
+           return "code"
+       }
+   }
+
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
@@ -224,7 +237,7 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
         children.insert(child, at: pos)
     }
 
-    @Published var parent: BeamElement?
+    weak var parent: BeamElement?
 
     public static func == (lhs: BeamElement, rhs: BeamElement) -> Bool {
         lhs.id == rhs.id
@@ -301,20 +314,28 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
         return nil
     }
 
-    func detectLinkedNotes(_ documentManager: DocumentManager) {
+    func detectLinkedNotes(_ documentManager: DocumentManager, async: Bool) {
         guard let note = note else { return }
 
         for link in text.internalLinks where link.string != note.title {
             let linkTitle = link.string
-//            Logger.shared.logInfo("searching link \(linkTitle)", category: .document)
-            let refnote = BeamNote.fetchOrCreate(documentManager, title: linkTitle)
-            let reference = NoteReference(noteName: note.title, elementID: id)
-//            Logger.shared.logInfo("New link \(note.title) <-> \(linkTitle)", category: .document)
-            refnote.addLinkedReference(reference)
+            //            Logger.shared.logInfo("searching link \(linkTitle)", category: .document)
+            let reference = NoteReference(noteName: linkTitle, elementID: id)
+            //            Logger.shared.logInfo("New link \(note.title) <-> \(linkTitle)", category: .document)
+
+            if async {
+                DispatchQueue.main.async {
+                    let refnote = BeamNote.fetchOrCreate(documentManager, title: linkTitle)
+                    refnote.addLinkedReference(reference)
+                }
+            } else {
+                let refnote = BeamNote.fetchOrCreate(documentManager, title: linkTitle)
+                refnote.addLinkedReference(reference)
+            }
         }
 
         for c in children {
-            c.detectLinkedNotes(documentManager)
+            c.detectLinkedNotes(documentManager, async: async)
         }
     }
 
@@ -374,5 +395,27 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
         }
 
         return elems
+    }
+
+
+    func readLock() {
+        note?.readLock()
+    }
+
+    func readUnlock() {
+        note?.readUnlock()
+    }
+
+    func writeLock() {
+        note?.writeLock()
+    }
+
+    func writeUnlock() {
+        note?.writeUnlock()
+    }
+
+    var depth: Int {
+        guard let depth = parent?.depth else { return 0 }
+        return depth + 1
     }
 }

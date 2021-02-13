@@ -7,10 +7,13 @@
 
 import Foundation
 import SwiftUI
+import Combine
 import AppKit
 
 struct OmniBar: View {
     @EnvironmentObject var state: BeamState
+    @State var title = ""
+
     var canSearch: Bool {
         return !state.searchQuery.isEmpty || !state.isEditingOmniBarTitle
     }
@@ -21,7 +24,15 @@ struct OmniBar: View {
 
             if state.mode == .note {
                 HStack {
-                    GlobalNoteTitle(title: state.currentNote?.title ?? "", note: state.currentNote!)
+                    GlobalNoteTitle(
+                        title: $title,
+                        note: state.currentNote!
+                    ).onReceive(state.$currentNote, perform: { value in
+                        guard let currentNote = value else { return }
+                        let note = currentNote as BeamNote
+
+                        title = note.title
+                    })
                     Button(action: startNewSearch) {
                         Symbol(name: "plus")
                     }

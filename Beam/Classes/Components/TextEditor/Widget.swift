@@ -139,7 +139,7 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
         return NSRect(origin: offset, size: contentsFrame.size)
     }
 
-    var parent: Widget?
+    weak var parent: Widget?
 
     var root: TextRoot? {
         if let r = _root {
@@ -503,10 +503,12 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
             }
         }
 
+        clickedLayer = nil
         for layer in layers.values where !layer.layer.isHidden {
             let info = MouseInfo(self, layer, mouseInfo)
             if layer.contains(info.position) {
                 if layer.mouseDown(info) {
+                    clickedLayer = layer
                     return self
                 }
             }
@@ -527,7 +529,7 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
 
     func dispatchMouseUp(mouseInfo: MouseInfo) -> Widget? {
         guard inVisibleBranch else { return nil }
-        guard let focussedNode = root?.node else { return nil }
+        guard let focussedNode = root?.focussedWidget else { return nil }
 
         if focussedNode.handleMouseUp(mouseInfo: mouseInfo) {
             return focussedNode
@@ -537,12 +539,15 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
     }
 
     func handleMouseUp(mouseInfo: MouseInfo) -> Bool {
+        defer {
+            clickedLayer = nil
+        }
         let info = MouseInfo(self, mouseInfo.globalPosition, mouseInfo.event)
 //        print("dispatch up: \(info.position) vs \(mouseInfo.position)")
 
-        for layer in layers.values where !layer.layer.isHidden {
+        if let layer = clickedLayer {
             let info = MouseInfo(self, layer, info)
-            if layer.contains(info.position) && layer.mouseUp(info) {
+            if layer.mouseUp(info) {
                 return true
             }
         }
@@ -584,9 +589,28 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
         return handlers
     }
 
+    func getWidgetsBetween(_ start: NSPoint, _ end: NSPoint) -> [Widget] {
+        guard inVisibleBranch else { return [] }
+        var widgets: [Widget] = []
+        if layer.frame.minY > start.y && layer.frame.minY < end.y {
+            widgets.append(self)
+        } else if layer.frame.maxY < start.y && layer.frame.maxY > end.y {
+            widgets.append(self)
+        }
+
+        for c in children {
+            var p = start
+            p.x -= c.frame.origin.x
+            p.y -= c.frame.origin.y
+
+            widgets += c.getWidgetsBetween(start, end)
+        }
+        return widgets
+    }
+
     func dispatchMouseDragged(mouseInfo: MouseInfo) -> Widget? {
         guard inVisibleBranch else { return nil }
-        guard let focussedNode = root?.node else { return nil }
+        guard let focussedNode = root?.focussedWidget else { return nil }
 
         if focussedNode.handleMouseDragged(mouseInfo: mouseInfo) {
             return focussedNode
@@ -596,11 +620,9 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
     }
 
     func focus() {
-        dragMode = .none
     }
 
     func unfocus() {
-        dragMode = .none
     }
 
     // MARK: - Mouse Events
@@ -635,14 +657,15 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
         return false
     }
 
+    weak var clickedLayer: Layer?
     func handleMouseDragged(mouseInfo: MouseInfo) -> Bool {
         let info = MouseInfo(self, mouseInfo.globalPosition, mouseInfo.event)
 //        print("handle dragged: \(info.position) vs \(mouseInfo.position)")
 
         var res = false
-        for layer in layers.values where !layer.layer.isHidden {
+        if let layer = clickedLayer {
             let info = MouseInfo(self, layer, mouseInfo)
-            res = res || layer.mouseDragged(info)
+            res = layer.mouseDragged(info)
         }
 
         return res || mouseDragged(mouseInfo: info)
@@ -801,6 +824,15 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
         }
     }
 
+    func nodeFor(_ element: BeamElement) -> TextNode {
+        guard let parent = parent else { return editor.nodeFor(element) }
+        return parent.nodeFor(element)
+    }
+
+    func removeNode(_ node: TextNode) {
+        guard let parent = parent else { editor.removeNode(node); return }
+        parent.removeNode(node)
+    }
 }
 // swiftlint:enable type_body_length
 // swiftlint:enable file_length

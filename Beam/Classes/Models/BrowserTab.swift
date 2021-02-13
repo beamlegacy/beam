@@ -177,9 +177,9 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         webView.uiDelegate = self
 
         removeScriptHandlers()
-        addScriptHandlers()
-
         removeUserScripts()
+
+        addScriptHandlers()
         addUserScripts()
     }
 
@@ -201,9 +201,9 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     }
 
     private enum ScriptHandlers: String, CaseIterable {
-        case textSelectedMessage
-        case onScrolledMessage
-        case jsLogger
+        case beam_textSelected
+        case beam_onScrolled
+        case beam_logging
     }
 
     private func removeScriptHandlers() {
@@ -214,7 +214,9 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
     private func addScriptHandlers() {
         ScriptHandlers.allCases.forEach {
-            webView.configuration.userContentController.add(self, name: $0.rawValue)
+            let handler = $0.rawValue
+            webView.configuration.userContentController.add(self, name: handler)
+            print("Added Script handler: \(handler)")
         }
     }
 
@@ -287,9 +289,9 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         switch message.name {
-        case ScriptHandlers.jsLogger.rawValue:
+        case ScriptHandlers.beam_logging.rawValue:
             Logger.shared.logInfo(String(describing: message.body), category: .javascript)
-        case ScriptHandlers.textSelectedMessage.rawValue:
+        case ScriptHandlers.beam_textSelected.rawValue:
             guard let dict = message.body as? [String: AnyObject],
 //                  let selectedText = dict["selectedText"] as? String,
                   let selectedHtml = dict["selectedHtml"] as? String,
@@ -312,7 +314,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                     _ = self.note?.addChild(e)
                 }
             }
-        case ScriptHandlers.onScrolledMessage.rawValue:
+        case ScriptHandlers.beam_onScrolled.rawValue:
             guard let dict = message.body as? [String: AnyObject],
 //                  let selectedText = dict["selectedText"] as? String,
                 let x = dict["x"] as? Double,

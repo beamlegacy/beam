@@ -42,8 +42,8 @@ extension IndexDocument {
             return id
         })
         length = contents.count
-        contentsWords = Index.extractWords(from: contents, useLemmas: gUseLemmas, removeDiacritics: gRemoveDiacritics)
-        titleWords = Index.extractWords(from: title, useLemmas: gUseLemmas, removeDiacritics: gRemoveDiacritics)
+        contentsWords = contents.extractWords(useLemmas: gUseLemmas, removeDiacritics: gRemoveDiacritics)
+        titleWords = title.extractWords(useLemmas: gUseLemmas, removeDiacritics: gRemoveDiacritics)
     }
 
     var leanCopy: IndexDocument {
@@ -96,7 +96,7 @@ class Index: Codable {
 
     //swiftlint:disable:next cyclomatic_complexity
     func search(string: String, maxResults: Int? = 10) -> [SearchResult] {
-        let inputWords = Self.extractWords(from: string, useLemmas: gUseLemmas, removeDiacritics: gRemoveDiacritics)
+        let inputWords = string.extractWords(useLemmas: gUseLemmas, removeDiacritics: gRemoveDiacritics)
 
         var results = [UInt64: DocumentResult]()
         let documents = inputWords.map { word -> [DocumentResult] in
@@ -231,10 +231,6 @@ class Index: Codable {
         }
     }
 
-    class func extractWords(from string: String, useLemmas: Bool, removeDiacritics: Bool) -> [String] {
-        return string.extractWords(useLemmas: useLemmas, removeDiacritics: removeDiacritics)
-    }
-
     static func loadOrCreate(_ path: URL) -> Index {
         guard FileManager.default.fileExists(atPath: path.absoluteString) else {
             return Index()
@@ -255,5 +251,34 @@ class Index: Codable {
         let encoder = JSONEncoder()
         let data = try? encoder.encode(self)
         try data?.write(to: path)
+    }
+
+    func idf(for word: String) -> Float {
+        guard let list = words[word] else { return 0 }
+        let docs = Float(documents.count)
+        guard docs > 0 else { return 0 }
+        let instances = Float(list.instances.count)
+        let ratio = docs / instances
+        let idf = log(ratio)
+        return idf
+    }
+
+    func wordFrequency(for document: String) -> [String: Int] {
+        var counts = [String: Int]()
+
+        for word in document.extractWords(useLemmas: false, removeDiacritics: true) {
+            counts[word] = 1 + (counts[word] ?? 0)
+        }
+
+        return counts
+    }
+
+    func tfidf(for document: String) -> [String: Float] {
+        var tfidf = [String: Float]()
+        for word in wordFrequency(for: document) {
+            tfidf[word.key] = Float(word.value) * idf(for: word.key)
+        }
+
+        return tfidf
     }
 }
