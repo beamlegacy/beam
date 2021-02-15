@@ -97,20 +97,23 @@ extension BeamTextEdit {
         }
     }
 
-    internal func updateInlineFormatterView(_ isDragged: Bool = false) {
+    internal func updateInlineFormatterView(_ isDragged: Bool = false, _ isKeyEvent: Bool = false) {
         detectFormatterType()
 
-        if !rootNode.textIsSelected {
+        if isKeyEvent && !rootNode.textIsSelected {
             BeamTextEdit.deboucingKeyEventTimer = Timer.scheduledTimer(withTimeInterval: 0.23, repeats: false, block: { [weak self] (_) in
                 guard let self = self else { return }
                 self.showOrHideInlineFormatter(isPresent: false, isDragged: isDragged)
                 self.showOrHidePersistentFormatter(isPresent: true)
             })
+
             return
-        } else {
-            BeamTextEdit.deboucingKeyEventTimer?.invalidate()
+        } else if !rootNode.textIsSelected {
+            showOrHideInlineFormatter(isPresent: false, isDragged: isDragged)
+            showOrHidePersistentFormatter(isPresent: true)
         }
 
+        BeamTextEdit.deboucingKeyEventTimer?.invalidate()
         updateInlineFormatterFrame()
     }
 
