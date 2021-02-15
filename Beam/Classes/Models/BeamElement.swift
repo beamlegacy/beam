@@ -397,7 +397,6 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
         return elems
     }
 
-
     func readLock() {
         note?.readLock()
     }

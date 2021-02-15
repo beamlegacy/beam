@@ -25,6 +25,7 @@ public class BeamData: ObservableObject {
     @Published var noteCount = 0
     @Published var lastChangedElement: BeamElement?
     @Published var showTabStats = false
+    var noteAutoSaveService: NoteAutoSaveService
 
     var cookies: HTTPCookieStorage
     var documentManager: DocumentManager
@@ -40,6 +41,7 @@ public class BeamData: ObservableObject {
 
     init() {
         documentManager = DocumentManager()
+        noteAutoSaveService = NoteAutoSaveService()
         let linkCount = LinkStore.shared.loadFromDB()
         Logger.shared.logInfo("Loaded \(linkCount) links from DB", category: .document)
 
@@ -75,6 +77,8 @@ public class BeamData: ObservableObject {
 //        } catch {
 //            Logger.shared.logError("Unable to save link store to \(Self.linkStorePath): \(error)", category: .search)
 //        }
+
+        noteAutoSaveService.saveNotes()
 
         // save search index
         do {

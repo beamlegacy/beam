@@ -121,7 +121,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     func applicationWillTerminate(_ aNotification: Notification) {
         // Insert code here to tear down your application
-        data.saveData()
     }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
@@ -168,6 +167,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     // MARK: -
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        data.saveData()
+
         // Save changes in the application's managed object context before the application terminates.
         let context = CoreDataManager.shared.mainContext
 
