@@ -61,7 +61,7 @@ extension BeamTextEdit {
                   let link = hyperlink,
                   link.isValidUrl else { return }
 
-            note.text.addAttributes([.link(link)], to: node.selectedTextRange)
+            node.text.addAttributes([.link(link)], to: node.selectedTextRange)
         }
 
         formatterView.alphaValue = 0
