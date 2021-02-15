@@ -24,6 +24,8 @@ before_script:
   # RVM install a `cd` :((((
   # Apparently the rvm(2.6.0), that I had installed previously, was overriding the cd bash command :expressionless:
   # https://forum.gitlab.com/t/self-hosted-gitlab-ci-runner-shell-executer-fails-immediately-with-error-job-failed-exit-status-1/33252/3
+  - echo "${PATH}"
+  - pwd
   - unset cd
   - direnv allow
   - eval "$(direnv export bash)"

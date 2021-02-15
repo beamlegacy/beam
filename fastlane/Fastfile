@@ -105,7 +105,8 @@ platform :mac do
       scheme: "Beam",
       skip_testing: "BeamUITests",
       output_types: "junit",
-      output_files: "tests.xml"
+      output_files: "tests.xml",
+      xcpretty_args: "-tc"
     )
     # For Gitlab artifacts
     slather(
@@ -141,7 +142,8 @@ platform :mac do
       scheme: "Beam",
       only_testing: "BeamUITests",
       output_types: "junit",
-      output_files: "tests.xml"
+      output_files: "tests.xml",
+      xcpretty_args: "-tc"
     )
     # For Gitlab artifacts
     slather(

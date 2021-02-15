@@ -13,7 +13,6 @@ extension BeamTextEdit {
     private static let xPosInlineFormatter: CGFloat = 55
     private static let yPosInlineFormatter: CGFloat = 40
     private static let yPosDismissInlineFormatter: CGFloat = 35
-    private static let startBottomConstraint: CGFloat = 35
     private static let bottomConstraint: CGFloat = -25
     private static let inlineFormatterType: [FormatterType] = [.h1, .h2, .bullet, .checkmark, .bold, .italic, .link]
     private static let persistentFormatterType: [FormatterType] = [.h1, .h2, .quote, .code, .bold, .italic, .strikethrough]
@@ -41,7 +40,7 @@ extension BeamTextEdit {
         contentView.addSubview(formatterView)
         activeLayoutConstraint(for: formatterView)
 
-        formatterView.didSelectFormatterType = { [unowned self] (type, isActive, _) -> Void in
+        formatterView.didSelectFormatterType = { [unowned self] (type, isActive) -> Void in
             self.selectFormatterAction(type, isActive)
         }
 
@@ -54,14 +53,21 @@ extension BeamTextEdit {
         guard let formatterView = inlineFormatter else { return }
 
         formatterView.items = BeamTextEdit.inlineFormatterType
-        formatterView.didSelectFormatterType = { [unowned self] (type, isActive, hyperlink) -> Void in
+        formatterView.didSelectFormatterType = {[unowned self] (type, isActive) -> Void in
             self.selectFormatterAction(type, isActive)
+        }
+
+        formatterView.didSelectLink = {[unowned self] (hyperlink) -> Void in
+            let (isValidUrl, url) = hyperlink.validUrl()
 
             guard let node = focussedWidget as? TextNode,
-                  let link = hyperlink,
-                  link.isValidUrl else { return }
+                  isValidUrl else {
+                self.showOrHideInlineFormatter(isPresent: false)
+                return
+            }
 
-            node.text.addAttributes([.link(link)], to: node.selectedTextRange)
+            self.showOrHideInlineFormatter(isPresent: false)
+            node.text.addAttributes([.link(url)], to: node.selectedTextRange)
         }
 
         formatterView.alphaValue = 0
@@ -81,7 +87,7 @@ extension BeamTextEdit {
 
         NSAnimationContext.runAnimationGroup ({ ctx in
             ctx.allowsImplicitAnimation = true
-            ctx.duration = isPresent ? 0.4 : 0.5
+            ctx.duration = 0.3
 
             persistentFormatter.alphaValue = isPresent ? 1 : 0
             persistentFormatter.layoutSubtreeIfNeeded()
@@ -106,20 +112,23 @@ extension BeamTextEdit {
         }
     }
 
-    internal func updateInlineFormatterView(_ isDragged: Bool = false) {
+    internal func updateInlineFormatterView(_ isDragged: Bool = false, _ isKeyEvent: Bool = false) {
         detectFormatterType()
 
-        if !rootNode.textIsSelected {
+        if isKeyEvent && !rootNode.textIsSelected {
             BeamTextEdit.deboucingKeyEventTimer = Timer.scheduledTimer(withTimeInterval: 0.23, repeats: false, block: { [weak self] (_) in
                 guard let self = self else { return }
                 self.showOrHideInlineFormatter(isPresent: false, isDragged: isDragged)
                 self.showOrHidePersistentFormatter(isPresent: true)
             })
+
             return
-        } else {
-            BeamTextEdit.deboucingKeyEventTimer?.invalidate()
+        } else if !rootNode.textIsSelected {
+            showOrHideInlineFormatter(isPresent: false, isDragged: isDragged)
+            showOrHidePersistentFormatter(isPresent: true)
         }
 
+        BeamTextEdit.deboucingKeyEventTimer?.invalidate()
         updateInlineFormatterFrame()
     }
 

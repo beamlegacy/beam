@@ -462,7 +462,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                         showInlineFormatterOnKeyEventsAndClick()
                     } else if shift {
                         rootNode.doCommand(.moveLeftAndModifySelection)
-                        showInlineFormatterOnKeyEventsAndClick()
+                        showInlineFormatterOnKeyEventsAndClick(isKeyEvent: true)
                     } else if command && popover != nil {
                         rootNode.doCommand(.moveToBeginningOfLine)
                         dismissPopoverOrFormatter()
@@ -498,7 +498,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                         showInlineFormatterOnKeyEventsAndClick()
                     } else if shift {
                         rootNode.doCommand(.moveRightAndModifySelection)
-                        showInlineFormatterOnKeyEventsAndClick()
+                        showInlineFormatterOnKeyEventsAndClick(isKeyEvent: true)
                     } else if command && persistentFormatter != nil {
                         rootNode.doCommand(.moveToEndOfLine)
                         detectFormatterType()
@@ -527,7 +527,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     if shift {
                         cancelPopover()
                         rootNode.doCommand(.moveUpAndModifySelection)
-                        showInlineFormatterOnKeyEventsAndClick()
+                        showInlineFormatterOnKeyEventsAndClick(isKeyEvent: true)
                     } else if let popover = popover {
                         popover.doCommand(.moveUp)
                     } else if inlineFormatter != nil {
@@ -544,7 +544,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     if shift {
                         cancelPopover()
                         rootNode.doCommand(.moveDownAndModifySelection)
-                        showInlineFormatterOnKeyEventsAndClick()
+                        showInlineFormatterOnKeyEventsAndClick(isKeyEvent: true)
                     } else if let popover = popover {
                         popover.doCommand(.moveDown)
                     } else if inlineFormatter != nil {
@@ -1303,9 +1303,9 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         }
     }
 
-    func showInlineFormatterOnKeyEventsAndClick() {
+    func showInlineFormatterOnKeyEventsAndClick(isKeyEvent: Bool = false) {
         initInlineFormatterAndHidePersistentFormatter()
-        updateInlineFormatterView()
+        updateInlineFormatterView(isKeyEvent)
 
         if isInlineFormatterHidden {
             showOrHideInlineFormatter(isPresent: true)

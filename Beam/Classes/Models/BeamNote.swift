@@ -97,14 +97,6 @@ class BeamNote: BeamElement {
         try super.encode(to: encoder)
     }
 
-    deinit {
-        let t = title
-        DispatchQueue.main.async {
-            Logger.shared.logInfo("Unload note \(t)", category: .document)
-            Self.fetchedNotes.removeValue(forKey: t)
-        }
-    }
-
     var documentStruct: DocumentStruct? {
         do {
             let encoder = JSONEncoder()
@@ -282,18 +274,14 @@ class BeamNote: BeamElement {
         fetchedNotesCancellables[note.title] =
             note.$changed
             .dropFirst(1)
-            .debounce(for: .seconds(2), scheduler: RunLoop.main)
+
+//            .debounce(for: .seconds(2), scheduler: RunLoop.main)
 //            .throttle(for: .seconds(2), scheduler: RunLoop.main, latest: false)
             .receive(on: DispatchQueue.main)
             .sink { [weak note] _ in
-                let documentManager = AppDelegate.main.data.documentManager
-
                 guard let note = note else { return }
-                linkDetectionQueue.async {
-                    Self.detectLinks(in: note.title, to: documentManager.allDocumentsTitles(), with: documentManager)
-                }
-                // TODO: we should only save when changes occured
-                note.save(documentManager: documentManager)
+                requestLinkDetection()
+                AppDelegate.main.data.noteAutoSaveService.addNoteToSave(note)
             }
         note.observeDocumentChange(documentManager: AppDelegate.main.data.documentManager)
 

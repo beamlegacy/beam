@@ -25,23 +25,29 @@ extension String {
         return matches.compactMap({$0.range})
     }
 
-    var isValidUrl: Bool {
-        let types: NSTextCheckingResult.CheckingType = [.link]
-        let range = NSRange(self.startIndex..<self.endIndex, in: self)
-        let detector = try! NSDataDetector(types: types.rawValue)
-        var isValid = false
+    func validUrl() -> (isValid: Bool, url: String) {
+        do {
+            let detector = try NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue)
+            var isValid = false
+            var url: String = ""
 
-        detector.enumerateMatches(in: self, options: [], range: range) { (match, _, _) in
-            guard let match = match else { return }
+            detector.enumerateMatches(in: self, options: [], range: NSRange(self.startIndex..<self.endIndex, in: self)) { (match, _, _) in
+                guard let match = match else { return }
 
-            switch match.resultType {
-            case .link:
-                isValid = true
-            default:
-                break
+                switch match.resultType {
+                case .link:
+                    guard let matchUrl = match.url else { return }
+
+                    isValid = true
+                    url = matchUrl.absoluteString
+                default:
+                    break
+                }
             }
-        }
 
-        return isValid
+            return (isValid, url)
+        } catch {
+            return (false, "")
+        }
     }
 }

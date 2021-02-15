@@ -14,7 +14,8 @@ class FormatterView: NSView {
     @IBOutlet weak var formatterContainerView: NSView!
 
     var hyperlinkView: HyperlinkView?
-    var didSelectFormatterType: ((_ type: FormatterType, _ isActive: Bool, _ link: String?) -> Void)?
+    var didSelectFormatterType: ((_ type: FormatterType, _ isActive: Bool) -> Void)?
+    var didSelectLink: ((_ link: String) -> Void)?
 
     var corderRadius: CGFloat = 5 {
         didSet {
@@ -208,7 +209,7 @@ class FormatterView: NSView {
             selectedTypes.remove(type)
         }
 
-        didSelectFormatterType(type, isActive, nil)
+        didSelectFormatterType(type, isActive)
     }
 
     private func loadItems() {
@@ -282,8 +283,8 @@ class FormatterView: NSView {
         guard let hyperlinkView = hyperlinkView else { return }
 
         hyperlinkView.didPressValideButton = { [unowned self] link in
-            guard let didSelectFormatterType = didSelectFormatterType else { return }
-            didSelectFormatterType(FormatterType.link, true, link)
+            guard let didSelectLink = didSelectLink else { return }
+            didSelectLink(link)
         }
 
         containerView.addSubview(hyperlinkView)

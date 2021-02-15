@@ -1,4 +1,3 @@
-
 # New Dev Checklist
 
 ### Setting up Beam

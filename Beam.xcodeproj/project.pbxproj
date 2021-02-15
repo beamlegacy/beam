@@ -258,6 +258,7 @@
 		A01950AD25B838810025C5FD /* CommandManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A06DF52525B7608000E2CB62 /* CommandManagerTests.swift */; };
 		A0208F8225D6BB1C00CA054C /* AppDelegate+BeamTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0208F8125D6BB1C00CA054C /* AppDelegate+BeamTests.swift */; };
 		A025ED7825D52F91008BF9C7 /* BeamTestsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0FC5CB925D2D678003C3E8C /* BeamTestsHelper.swift */; };
+		A050047525DA918A009CFEB6 /* NoteAutoSaveService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A050047425DA918A009CFEB6 /* NoteAutoSaveService.swift */; };
 		A0A6F2A525D1B74200EFC4BE /* Quick in Frameworks */ = {isa = PBXBuildFile; productRef = A0A6F2A425D1B74200EFC4BE /* Quick */; };
 		A0A6F2A725D1B74800EFC4BE /* Nimble in Frameworks */ = {isa = PBXBuildFile; productRef = A0A6F2A625D1B74800EFC4BE /* Nimble */; };
 		A0AA693325C41C9B0038F9A3 /* MouseHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0AA693225C41C9B0038F9A3 /* MouseHandler.swift */; };
@@ -709,6 +710,7 @@
 		96FD761A25B1C43500B04ED3 /* BrowsingNodeWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowsingNodeWidget.swift; sourceTree = "<group>"; };
 		A0137B3425B6DFE100E65208 /* CommandManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandManager.swift; sourceTree = "<group>"; usesTabs = 0; };
 		A0208F8125D6BB1C00CA054C /* AppDelegate+BeamTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+BeamTests.swift"; sourceTree = "<group>"; };
+		A050047425DA918A009CFEB6 /* NoteAutoSaveService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteAutoSaveService.swift; sourceTree = "<group>"; };
 		A06DF52525B7608000E2CB62 /* CommandManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CommandManagerTests.swift; path = Classes/CommandManagerTests.swift; sourceTree = "<group>"; };
 		A0AA693225C41C9B0038F9A3 /* MouseHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MouseHandler.swift; sourceTree = "<group>"; };
 		A0E15FFC25D1570D00F9D72F /* JournalUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalUITests.swift; sourceTree = "<group>"; };
@@ -931,6 +933,7 @@
 				96F93617258CFDD2006D8E53 /* BeamText.swift */,
 				96E4CF75258EC88300D6DE22 /* BeamTextTools.swift */,
 				9691E41325AF61BA00A13080 /* BrowsingTree.swift */,
+				A050047425DA918A009CFEB6 /* NoteAutoSaveService.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -1996,7 +1999,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "direnv allow ..\neval \"$(direnv export bash)\"\n\ngit checkout ${SRCROOT}/Beam/Configuration/Configuration.swift\n\nif which variable-injector >/dev/null; then\n  variable-injector --file ${SRCROOT}/Beam/Configuration/Configuration.swift # --verbose # Pass your paramenters\nelse\n  echo \"Warning: Swift Variable Injector not installed, download from https://github.com/penso/variable-injector\"\nfi\n";
+			shellScript = "PATH=${PATH}:/opt/homebrew/bin\ndirenv allow ..\neval \"$(direnv export bash)\"\n\ngit checkout ${SRCROOT}/Beam/Configuration/Configuration.swift\n\nif which variable-injector >/dev/null; then\n  variable-injector --file ${SRCROOT}/Beam/Configuration/Configuration.swift # --verbose # Pass your paramenters\nelse\n  echo \"Warning: Swift Variable Injector not installed, download from https://github.com/penso/variable-injector\"\nfi\n";
 			showEnvVarsInLog = 0;
 		};
 		5205F34425BB1BFE00D3CDB4 /* Build libgit2 */ = {
@@ -2215,6 +2218,7 @@
 				414B989925A21BB0002E81A3 /* TextEdit+Formatter.swift in Sources */,
 				4181725F2581107C00317ED8 /* DocumentManager.swift in Sources */,
 				96F93618258CFDD2006D8E53 /* BeamText.swift in Sources */,
+				A050047525DA918A009CFEB6 /* NoteAutoSaveService.swift in Sources */,
 				524299E725A480A300F4DBF5 /* AccountsView.swift in Sources */,
 				418172072581107C00317ED8 /* Document.swift in Sources */,
 				4100D96B25AEFEEA00EF04CB /* TextEdit+Shortcut.swift in Sources */,
@@ -2436,7 +2440,7 @@
 				INFOPLIST_FILE = Beam/Configuration/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
-					"@executable_path//Frameworks",
+					"@executable_path/Frameworks",
 					"@executable_path/../Frameworks",
 				);
 				LIBRARY_SEARCH_PATHS = (
@@ -2471,8 +2475,8 @@
 				INFOPLIST_FILE = BeamTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
-					"@executable_path//Frameworks",
-					"@loader_path//Frameworks",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
 				);
 				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamTests;
@@ -2494,8 +2498,8 @@
 				INFOPLIST_FILE = BeamUITests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
-					"@executable_path//Frameworks",
-					"@loader_path//Frameworks",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MARKETING_VERSION = 0.1.0;
@@ -2651,7 +2655,7 @@
 				INFOPLIST_FILE = Beam/Configuration/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
-					"@executable_path//Frameworks",
+					"@executable_path/Frameworks",
 					"@executable_path/../Frameworks",
 				);
 				LIBRARY_SEARCH_PATHS = (
@@ -2696,7 +2700,7 @@
 				INFOPLIST_FILE = Beam/Configuration/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
-					"@executable_path//Frameworks",
+					"@executable_path/Frameworks",
 					"@executable_path/../Frameworks",
 				);
 				LIBRARY_SEARCH_PATHS = (
@@ -2730,8 +2734,8 @@
 				INFOPLIST_FILE = BeamTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
-					"@executable_path//Frameworks",
-					"@loader_path//Frameworks",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
 				);
 				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamTests;
@@ -2755,8 +2759,8 @@
 				INFOPLIST_FILE = BeamTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
-					"@executable_path//Frameworks",
-					"@loader_path//Frameworks",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
 				);
 				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamTests;
@@ -2778,8 +2782,8 @@
 				INFOPLIST_FILE = BeamUITests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
-					"@executable_path//Frameworks",
-					"@loader_path//Frameworks",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MARKETING_VERSION = 0.1.0;
@@ -2802,8 +2806,8 @@
 				INFOPLIST_FILE = BeamUITests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
-					"@executable_path//Frameworks",
-					"@loader_path//Frameworks",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MARKETING_VERSION = 0.1.0;
