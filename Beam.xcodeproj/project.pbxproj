@@ -1989,7 +1989,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "direnv allow ..\neval \"$(direnv export bash)\"\n\ngit checkout ${SRCROOT}/Beam/Configuration/Configuration.swift\n\nif which variable-injector >/dev/null; then\n  variable-injector --file ${SRCROOT}/Beam/Configuration/Configuration.swift # --verbose # Pass your paramenters\nelse\n  echo \"Warning: Swift Variable Injector not installed, download from https://github.com/penso/variable-injector\"\nfi\n";
+			shellScript = "PATH=${PATH}:/opt/homebrew/bin\ndirenv allow ..\neval \"$(direnv export bash)\"\n\ngit checkout ${SRCROOT}/Beam/Configuration/Configuration.swift\n\nif which variable-injector >/dev/null; then\n  variable-injector --file ${SRCROOT}/Beam/Configuration/Configuration.swift # --verbose # Pass your paramenters\nelse\n  echo \"Warning: Swift Variable Injector not installed, download from https://github.com/penso/variable-injector\"\nfi\n";
 			showEnvVarsInLog = 0;
 		};
 		5205F34425BB1BFE00D3CDB4 /* Build libgit2 */ = {

@@ -11,11 +11,9 @@ unlock_keychain:
 install_dependencies:
 	git submodule update --init --recursive
 
-install_dev_keys:
+install_certificates:
 	security unlock-keychain -p ${MACOSX_PASSWORD} ~/Library/Keychains/login.keychain
-	# security import ~/private_key.p12 -k ~/Library/Keychains/login.keychain -P "${PRIVATE_KEY_PASSWORD}"
-	# security import ~/public_key.pem -k ~/Library/Keychains/login.keychain
-	security import ~/certs.p12 -k ~/Library/Keychains/login.keychain -P "${PRIVATE_KEY_PASSWORD}"
+	security import certificates/keys.p12 -k ~/Library/Keychains/login.keychain -P "${PRIVATE_KEY_PASSWORD}"
 
 install_gitlab_runner:
 	# TODO: install sudo file
