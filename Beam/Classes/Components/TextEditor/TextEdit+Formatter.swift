@@ -13,7 +13,6 @@ extension BeamTextEdit {
     private static let xPosInlineFormatter: CGFloat = 55
     private static let yPosInlineFormatter: CGFloat = 40
     private static let yPosDismissInlineFormatter: CGFloat = 35
-    private static let startBottomConstraint: CGFloat = 35
     private static let bottomConstraint: CGFloat = -25
     private static let inlineFormatterType: [FormatterType] = [.h1, .h2, .bullet, .checkmark, .bold, .italic, .link]
     private static let persistentFormatterType: [FormatterType] = [.h1, .h2, .quote, .code, .bold, .italic, .strikethrough]
@@ -67,21 +66,14 @@ extension BeamTextEdit {
 
     // MARK: - Methods
     internal func showOrHidePersistentFormatter(isPresent: Bool) {
-        guard let persistentFormatter = persistentFormatter,
-              let bottomAnchor = BeamTextEdit.bottomAnchor else { return }
-
-        let showTimingFunction = CAMediaTimingFunction(controlPoints: 0.98, 0, 0.64, 0.4)
-        let hideTimingFunction = CAMediaTimingFunction(controlPoints: 0.64, 0.4, 0, 0.98)
+        guard let persistentFormatter = persistentFormatter else { return }
 
         persistentFormatter.wantsLayer = true
         persistentFormatter.layoutSubtreeIfNeeded()
 
-        bottomAnchor.constant = isPresent ? BeamTextEdit.bottomConstraint : BeamTextEdit.startBottomConstraint
-
         NSAnimationContext.runAnimationGroup ({ ctx in
             ctx.allowsImplicitAnimation = true
-            ctx.duration = isPresent ? 0.4 : 0.5
-            ctx.timingFunction = isPresent ? showTimingFunction : hideTimingFunction
+            ctx.duration = 0.3
 
             persistentFormatter.alphaValue = isPresent ? 1 : 0
             persistentFormatter.layoutSubtreeIfNeeded()
@@ -91,26 +83,13 @@ extension BeamTextEdit {
     internal func showOrHideInlineFormatter(isPresent: Bool, isDragged: Bool = false) {
         guard let inlineFormatter = inlineFormatter else { return }
 
-        let showTimingFunction = CAMediaTimingFunction(controlPoints: 0.64, 0.4, 0, 0.98)
-        let hideTimingFunction = CAMediaTimingFunction(controlPoints: 0.98, 0, 0.64, 0.4)
-
         // Alpha animation
         NSAnimationContext.beginGrouping()
-        NSAnimationContext.current.duration = isPresent ? 0.4 : 0.25
-        NSAnimationContext.current.timingFunction = isPresent ? showTimingFunction : hideTimingFunction
+        NSAnimationContext.current.duration = 0.3
             inlineFormatter.animator().alphaValue = isPresent ? 1 : 0
             isInlineFormatterHidden = isPresent ? false : true
 
             if !isPresent && isDragged { dismissFormatterView(inlineFormatter) }
-
-            // YPosition animation
-            NSAnimationContext.beginGrouping()
-            NSAnimationContext.current.duration = isPresent ? 0.4 : 0.3
-                var origin = inlineFormatter.frame.origin
-                origin.y = isPresent ? origin.y - BeamTextEdit.yPosInlineFormatter : origin.y + BeamTextEdit.yPosDismissInlineFormatter
-                inlineFormatter.animator().setFrameOrigin(origin)
-            NSAnimationContext.endGrouping()
-
         NSAnimationContext.endGrouping()
         NSAnimationContext.current.completionHandler = { [weak self] in
             guard let self = self else { return }
@@ -282,7 +261,7 @@ extension BeamTextEdit {
 
         let (xOffset, rect) = node.offsetAndFrameAt(index: rootNode.cursorPosition)
         let yOffset = rect.maxY + node.offsetInDocument.y - 10
-        let yPos = isInlineFormatterHidden ? yOffset : yOffset - BeamTextEdit.yPosInlineFormatter
+        let yPos = yOffset - BeamTextEdit.yPosInlineFormatter
         let currentLowerBound = currentTextRange.lowerBound
         let selectedLowerBound = node.selectedTextRange.lowerBound
 
@@ -300,7 +279,7 @@ extension BeamTextEdit {
     }
 
     private func addConstraint(to view: FormatterView, with contentView: NSView) {
-        BeamTextEdit.bottomAnchor = view.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: BeamTextEdit.startBottomConstraint)
+        BeamTextEdit.bottomAnchor = view.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: BeamTextEdit.bottomConstraint)
         BeamTextEdit.centerXAnchor = view.centerXAnchor.constraint(equalTo: contentView.centerXAnchor)
     }
 
