@@ -24,4 +24,24 @@ extension String {
         
         return matches.compactMap({$0.range})
     }
+
+    var isValidUrl: Bool {
+        let types: NSTextCheckingResult.CheckingType = [.link]
+        let range = NSRange(self.startIndex..<self.endIndex, in: self)
+        let detector = try! NSDataDetector(types: types.rawValue)
+        var isValid = false
+
+        detector.enumerateMatches(in: self, options: [], range: range) { (match, _, _) in
+            guard let match = match else { return }
+
+            switch match.resultType {
+            case .link:
+                isValid = true
+            default:
+                break
+            }
+        }
+
+        return isValid
+    }
 }

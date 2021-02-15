@@ -137,7 +137,6 @@ extension BeamTextEdit {
         rootNode.cursorPosition = linkEnd
         dismissPopover()
         showOrHidePersistentFormatter(isPresent: true)
-        // initPersistentFormatterView()
     }
 
 }

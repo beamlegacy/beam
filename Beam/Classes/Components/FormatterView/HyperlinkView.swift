@@ -13,7 +13,7 @@ class HyperlinkView: NSView {
     @IBOutlet var containerView: NSView!
     @IBOutlet weak var hyperlinkTextField: NSTextField!
 
-    var didPressValideButton: (() -> Void)?
+    var didPressValideButton: ((_ link: String) -> Void)?
     var didPressDeleteButton: (() -> Void)?
 
     // MARK: - Initializer
@@ -28,7 +28,8 @@ class HyperlinkView: NSView {
     }
 
     deinit {
-        print("deinit linkview")
+        print("deinit")
+        hyperlinkTextField.delegate = nil
     }
 
     // MARK: - Life Cycle
@@ -47,9 +48,16 @@ class HyperlinkView: NSView {
         hyperlinkTextField.isBordered = false
         hyperlinkTextField.drawsBackground = false
         hyperlinkTextField.focusRingType = .none
+        hyperlinkTextField.lineBreakMode = .byTruncatingTail
 
         hyperlinkTextField.placeholderString = "Link’s URL"
-        hyperlinkTextField.maximumNumberOfLines = 2
+
+        hyperlinkTextField.delegate = self
+    }
+
+    private func sendLinkToParentView() {
+        guard let didPressValideButton = didPressValideButton else { return }
+        didPressValideButton(hyperlinkTextField.stringValue)
     }
 
     private func loadXib() {
@@ -63,8 +71,20 @@ class HyperlinkView: NSView {
     }
 
     // MARK: - Action
-    @IBAction func dismissAction(_ sender: Any) {
-        guard let didPressValideButton = didPressValideButton else { return }
-        didPressValideButton()
+    @IBAction func validUrlAction(_ sender: Any) {
+        sendLinkToParentView()
     }
+}
+
+extension HyperlinkView: NSTextFieldDelegate {
+
+    func control(_ control: NSControl, textView: NSTextView, doCommandBy commandSelector: Selector) -> Bool {
+        if commandSelector == #selector(NSResponder.insertNewline(_:)) {
+            sendLinkToParentView()
+            return true
+        }
+
+        return false
+    }
+
 }

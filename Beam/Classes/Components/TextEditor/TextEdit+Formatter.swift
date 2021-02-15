@@ -41,7 +41,7 @@ extension BeamTextEdit {
         contentView.addSubview(formatterView)
         activeLayoutConstraint(for: formatterView)
 
-        formatterView.didSelectFormatterType = { [unowned self] (type, isActive) -> Void in
+        formatterView.didSelectFormatterType = { [unowned self] (type, isActive, _) -> Void in
             self.selectFormatterAction(type, isActive)
         }
 
@@ -54,11 +54,18 @@ extension BeamTextEdit {
         guard let formatterView = inlineFormatter else { return }
 
         formatterView.items = BeamTextEdit.inlineFormatterType
-        formatterView.didSelectFormatterType = { [unowned self] (type, isActive) -> Void in
+        formatterView.didSelectFormatterType = { [unowned self] (type, isActive, hyperlink) -> Void in
             self.selectFormatterAction(type, isActive)
+
+            guard let node = focussedWidget as? TextNode,
+                  let link = hyperlink,
+                  link.isValidUrl else { return }
+
+            note.text.addAttributes([.link(link)], to: node.selectedTextRange)
         }
 
         formatterView.alphaValue = 0
+
         formatterView.frame = NSRect(x: 0, y: 0, width: formatterView.idealSize.width, height: formatterView.idealSize.height)
         formatterView.layer?.zPosition = 1
 
@@ -67,21 +74,14 @@ extension BeamTextEdit {
 
     // MARK: - Methods
     internal func showOrHidePersistentFormatter(isPresent: Bool) {
-        guard let persistentFormatter = persistentFormatter,
-              let bottomAnchor = BeamTextEdit.bottomAnchor else { return }
-
-        let showTimingFunction = CAMediaTimingFunction(controlPoints: 0.98, 0, 0.64, 0.4)
-        let hideTimingFunction = CAMediaTimingFunction(controlPoints: 0.64, 0.4, 0, 0.98)
+        guard let persistentFormatter = persistentFormatter else { return }
 
         persistentFormatter.wantsLayer = true
         persistentFormatter.layoutSubtreeIfNeeded()
 
-        bottomAnchor.constant = isPresent ? BeamTextEdit.bottomConstraint : BeamTextEdit.startBottomConstraint
-
         NSAnimationContext.runAnimationGroup ({ ctx in
             ctx.allowsImplicitAnimation = true
             ctx.duration = isPresent ? 0.4 : 0.5
-            ctx.timingFunction = isPresent ? showTimingFunction : hideTimingFunction
 
             persistentFormatter.alphaValue = isPresent ? 1 : 0
             persistentFormatter.layoutSubtreeIfNeeded()
@@ -91,25 +91,13 @@ extension BeamTextEdit {
     internal func showOrHideInlineFormatter(isPresent: Bool, isDragged: Bool = false) {
         guard let inlineFormatter = inlineFormatter else { return }
 
-        let showTimingFunction = CAMediaTimingFunction(controlPoints: 0.64, 0.4, 0, 0.98)
-        let hideTimingFunction = CAMediaTimingFunction(controlPoints: 0.98, 0, 0.64, 0.4)
-
         // Alpha animation
         NSAnimationContext.beginGrouping()
-        NSAnimationContext.current.duration = isPresent ? 0.4 : 0.25
-        NSAnimationContext.current.timingFunction = isPresent ? showTimingFunction : hideTimingFunction
+        NSAnimationContext.current.duration = 0.3
             inlineFormatter.animator().alphaValue = isPresent ? 1 : 0
             isInlineFormatterHidden = isPresent ? false : true
 
             if !isPresent && isDragged { dismissFormatterView(inlineFormatter) }
-
-            // YPosition animation
-            NSAnimationContext.beginGrouping()
-            NSAnimationContext.current.duration = isPresent ? 0.4 : 0.3
-                var origin = inlineFormatter.frame.origin
-                origin.y = isPresent ? origin.y - BeamTextEdit.yPosInlineFormatter : origin.y + BeamTextEdit.yPosDismissInlineFormatter
-                inlineFormatter.animator().setFrameOrigin(origin)
-            NSAnimationContext.endGrouping()
 
         NSAnimationContext.endGrouping()
         NSAnimationContext.current.completionHandler = { [weak self] in
@@ -258,9 +246,10 @@ extension BeamTextEdit {
         }
 
         guard let index = attributes.firstIndex(of: attribute),
-              attributes.contains(attribute), isActive else {
-            rootNode.state.attributes.append(attribute)
-            return
+              attributes.contains(attribute),
+              isActive else {
+                rootNode.state.attributes.append(attribute)
+                return
         }
 
         rootNode.state.attributes.remove(at: index)
@@ -282,7 +271,7 @@ extension BeamTextEdit {
 
         let (xOffset, rect) = node.offsetAndFrameAt(index: rootNode.cursorPosition)
         let yOffset = rect.maxY + node.offsetInDocument.y - 10
-        let yPos = isInlineFormatterHidden ? yOffset : yOffset - BeamTextEdit.yPosInlineFormatter
+        let yPos = yOffset - BeamTextEdit.yPosInlineFormatter
         let currentLowerBound = currentTextRange.lowerBound
         let selectedLowerBound = node.selectedTextRange.lowerBound
 
@@ -300,7 +289,7 @@ extension BeamTextEdit {
     }
 
     private func addConstraint(to view: FormatterView, with contentView: NSView) {
-        BeamTextEdit.bottomAnchor = view.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: BeamTextEdit.startBottomConstraint)
+        BeamTextEdit.bottomAnchor = view.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: BeamTextEdit.bottomConstraint)
         BeamTextEdit.centerXAnchor = view.centerXAnchor.constraint(equalTo: contentView.centerXAnchor)
     }
 
