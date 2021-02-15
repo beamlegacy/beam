@@ -355,13 +355,14 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     public override func resignFirstResponder() -> Bool {
         blinkPhase = true
         hasFocus = false
+        onEndEditing()
+
+        guard inlineFormatter?.hyperlinkView == nil else { return super.resignFirstResponder() }
+
         rootNode.cancelSelection()
         (focussedWidget as? TextNode)?.invalidateText() // force removing the syntax highlighting
         focussedWidget?.invalidate()
-        if activateOnLostFocus {
-            activated()
-        }
-        onEndEditing()
+        if activateOnLostFocus { activated() }
 
         cancelInternalLink()
         dismissPopover()
@@ -973,10 +974,42 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     @IBAction func paste(_ sender: Any) {
-        if let s = NSPasteboard.general.string(forType: .string) {
-            disableInputDetector()
-            insertText(string: s, replacementRange: selectedTextRange)
-            enableInputDetector()
+        if NSPasteboard.general.canReadObject(forClasses: [NSString.self], options: nil) {
+            let objects = NSPasteboard.general.readObjects(forClasses: [NSString.self], options: nil)
+            if objects?.count == 1 {
+                guard let pastedStr: String = objects?.first as? String else { return }
+
+                let lines = pastedStr.split(whereSeparator: \.isNewline)
+                for (idx, line) in lines.enumerated() {
+                    let str = String(line)
+                    if idx == 0 {
+                        disableInputDetector()
+                        insertText(string: str, replacementRange: selectedTextRange)
+                        enableInputDetector()
+                    } else {
+                        guard let node = focussedWidget as? TextNode else { continue }
+                        let element = BeamElement(str)
+                        let newNode = nodeFor(element)
+                        let elements = node.element.children
+                        for c in elements {
+                            newNode.element.addChild(c)
+                        }
+                        _ = node.parent?.insert(node: newNode, after: node)
+                        rootNode.cursorPosition = 0
+                        scrollToCursorAtLayout = true
+                        self.focussedWidget = newNode
+                    }
+                    if let ranges = str.urlRangesInside() {
+                        guard let node = focussedWidget as? TextNode else { continue }
+                        for range in ranges {
+                            if let range = Range(range) {
+                                let linkStr = String(str[range.lowerBound..<range.upperBound])
+                                node.text.setAttributes([.link(linkStr)], to: range)
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -1019,7 +1052,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         super.scrollWheel(with: event)
 
         if popover != nil { cancelPopover() }
-        if inlineFormatter != nil { showOrHideInlineFormatter(isPresent: false) }
     }
 
     // MARK: - Mouse Event
@@ -1248,7 +1280,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     internal func showBidirectionalPopover(prefix: Int, suffix: Int) {
         popoverPrefix = prefix
         popoverSuffix = suffix
-        cursorStartPosition = rootNode.cursorPosition
+        cursorStartPosition = rootNode.textIsSelected ? 0 : rootNode.cursorPosition
         initPopover()
         showOrHidePersistentFormatter(isPresent: false)
     }
@@ -1308,7 +1340,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         if popover != nil {
             if popoverPrefix > 0 { cancelInternalLink() }
             dismissPopover()
-            initPersistentFormatterView()
+            showOrHidePersistentFormatter(isPresent: true)
         }
 
         if inlineFormatter != nil {
@@ -1334,6 +1366,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
     @IBAction public override func selectAll(_ sender: Any?) {
         rootNode.doCommand(.selectAll)
+        rootNode.textIsSelected = true
     }
 
     @IBAction func selectAllHierarchically(_ sender: Any?) {

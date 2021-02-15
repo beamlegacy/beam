@@ -119,8 +119,8 @@
 		418172602581107C00317ED8 /* LibrairiesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171EA2581107C00317ED8 /* LibrairiesManager.swift */; };
 		4181727B258110D100317ED8 /* AppDelegate+CoreData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41817277258110D100317ED8 /* AppDelegate+CoreData.swift */; };
 		4181727E258110D100317ED8 /* AppDelegate+URL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181727A258110D100317ED8 /* AppDelegate+URL.swift */; };
-		418172AA25811A3A00317ED8 /* BMTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418172A825811A3A00317ED8 /* BMTextField.swift */; };
-		418172AB25811A3A00317ED8 /* BMTextFieldView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418172A925811A3A00317ED8 /* BMTextFieldView.swift */; };
+		418172AA25811A3A00317ED8 /* BeamTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418172A825811A3A00317ED8 /* BeamTextField.swift */; };
+		418172AB25811A3A00317ED8 /* BeamTextFieldView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418172A925811A3A00317ED8 /* BeamTextFieldView.swift */; };
 		418172B525811AAA00317ED8 /* Tick.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418172B225811AAA00317ED8 /* Tick.swift */; };
 		418172B625811AAA00317ED8 /* FrameAnimation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418172B325811AAA00317ED8 /* FrameAnimation.swift */; };
 		418172CF25811AF800317ED8 /* Animation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418172CE25811AF800317ED8 /* Animation.swift */; };
@@ -196,8 +196,6 @@
 		5298649125D151D300D27A80 /* AutoCompleteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5298649025D151D300D27A80 /* AutoCompleteTests.swift */; };
 		52B5EF78252F520100914D52 /* CoreDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52B5EF77252F520100914D52 /* CoreDataTests.swift */; };
 		52BB69A925CD5A49007A1173 /* OmniBarUITestsQuick.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52BB69A825CD5A49007A1173 /* OmniBarUITestsQuick.swift */; };
-		52BB69C725CD602A007A1173 /* Quick in Frameworks */ = {isa = PBXBuildFile; productRef = 52BB69C625CD602A007A1173 /* Quick */; };
-		52BB69C925CD6032007A1173 /* Nimble in Frameworks */ = {isa = PBXBuildFile; productRef = 52BB69C825CD6032007A1173 /* Nimble */; };
 		52C3077B25C311950027C4B1 /* BeamDate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52C3077A25C311950027C4B1 /* BeamDate.swift */; };
 		52C3078225C311B00027C4B1 /* BeamDateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52C3078125C311B00027C4B1 /* BeamDateTests.swift */; };
 		52C3294225AC7A8E00EF11E7 /* DocumentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52C3294125AC7A8E00EF11E7 /* DocumentTests.swift */; };
@@ -258,7 +256,12 @@
 		96FD761B25B1C43500B04ED3 /* BrowsingNodeWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96FD761A25B1C43500B04ED3 /* BrowsingNodeWidget.swift */; };
 		A0137B3525B6DFE100E65208 /* CommandManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0137B3425B6DFE100E65208 /* CommandManager.swift */; };
 		A01950AD25B838810025C5FD /* CommandManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A06DF52525B7608000E2CB62 /* CommandManagerTests.swift */; };
+		A0208F8225D6BB1C00CA054C /* AppDelegate+BeamTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0208F8125D6BB1C00CA054C /* AppDelegate+BeamTests.swift */; };
+		A025ED7825D52F91008BF9C7 /* BeamTestsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0FC5CB925D2D678003C3E8C /* BeamTestsHelper.swift */; };
+		A0A6F2A525D1B74200EFC4BE /* Quick in Frameworks */ = {isa = PBXBuildFile; productRef = A0A6F2A425D1B74200EFC4BE /* Quick */; };
+		A0A6F2A725D1B74800EFC4BE /* Nimble in Frameworks */ = {isa = PBXBuildFile; productRef = A0A6F2A625D1B74800EFC4BE /* Nimble */; };
 		A0AA693325C41C9B0038F9A3 /* MouseHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0AA693225C41C9B0038F9A3 /* MouseHandler.swift */; };
+		A0E15FFD25D1570D00F9D72F /* JournalUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0E15FFC25D1570D00F9D72F /* JournalUITests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -576,8 +579,8 @@
 		418171EA2581107C00317ED8 /* LibrairiesManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LibrairiesManager.swift; sourceTree = "<group>"; };
 		41817277258110D100317ED8 /* AppDelegate+CoreData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "AppDelegate+CoreData.swift"; sourceTree = "<group>"; };
 		4181727A258110D100317ED8 /* AppDelegate+URL.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "AppDelegate+URL.swift"; sourceTree = "<group>"; };
-		418172A825811A3A00317ED8 /* BMTextField.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BMTextField.swift; sourceTree = "<group>"; };
-		418172A925811A3A00317ED8 /* BMTextFieldView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BMTextFieldView.swift; sourceTree = "<group>"; };
+		418172A825811A3A00317ED8 /* BeamTextField.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BeamTextField.swift; sourceTree = "<group>"; };
+		418172A925811A3A00317ED8 /* BeamTextFieldView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BeamTextFieldView.swift; sourceTree = "<group>"; };
 		418172B225811AAA00317ED8 /* Tick.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Tick.swift; sourceTree = "<group>"; };
 		418172B325811AAA00317ED8 /* FrameAnimation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FrameAnimation.swift; sourceTree = "<group>"; };
 		418172CE25811AF800317ED8 /* Animation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Animation.swift; sourceTree = "<group>"; };
@@ -705,8 +708,11 @@
 		96F936622590FA59006D8E53 /* BTextEdit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BTextEdit.swift; sourceTree = "<group>"; };
 		96FD761A25B1C43500B04ED3 /* BrowsingNodeWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowsingNodeWidget.swift; sourceTree = "<group>"; };
 		A0137B3425B6DFE100E65208 /* CommandManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandManager.swift; sourceTree = "<group>"; usesTabs = 0; };
+		A0208F8125D6BB1C00CA054C /* AppDelegate+BeamTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+BeamTests.swift"; sourceTree = "<group>"; };
 		A06DF52525B7608000E2CB62 /* CommandManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CommandManagerTests.swift; path = Classes/CommandManagerTests.swift; sourceTree = "<group>"; };
 		A0AA693225C41C9B0038F9A3 /* MouseHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MouseHandler.swift; sourceTree = "<group>"; };
+		A0E15FFC25D1570D00F9D72F /* JournalUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalUITests.swift; sourceTree = "<group>"; };
+		A0FC5CB925D2D678003C3E8C /* BeamTestsHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamTestsHelper.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -741,8 +747,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				52BB69C725CD602A007A1173 /* Quick in Frameworks */,
-				52BB69C925CD6032007A1173 /* Nimble in Frameworks */,
+				A0A6F2A525D1B74200EFC4BE /* Quick in Frameworks */,
+				A0A6F2A725D1B74800EFC4BE /* Nimble in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1156,6 +1162,7 @@
 				521EEDF62593824100BA2485 /* AppDelegate+Document.swift */,
 				4181727A258110D100317ED8 /* AppDelegate+URL.swift */,
 				526017FB25AE081E00634695 /* AppDelegate+Console.swift */,
+				A0208F8125D6BB1C00CA054C /* AppDelegate+BeamTests.swift */,
 			);
 			path = "AppDelegate+Beam";
 			sourceTree = "<group>";
@@ -1167,7 +1174,7 @@
 				418171AA2581107C00317ED8 /* AutoComplete */,
 				4159E9D2259A1A56005FD355 /* BidirectionalPopover */,
 				414B98EE25A239C6002E81A3 /* FormatterView */,
-				418172A725811A3A00317ED8 /* BMTextField */,
+				418172A725811A3A00317ED8 /* BeamTextField */,
 				521EEDC725937E7B00BA2485 /* DocumentsList */,
 				418171D72581107C00317ED8 /* OmniBar */,
 				418171C32581107C00317ED8 /* NotesList */,
@@ -1176,13 +1183,13 @@
 			path = Components;
 			sourceTree = "<group>";
 		};
-		418172A725811A3A00317ED8 /* BMTextField */ = {
+		418172A725811A3A00317ED8 /* BeamTextField */ = {
 			isa = PBXGroup;
 			children = (
-				418172A825811A3A00317ED8 /* BMTextField.swift */,
-				418172A925811A3A00317ED8 /* BMTextFieldView.swift */,
+				418172A825811A3A00317ED8 /* BeamTextField.swift */,
+				418172A925811A3A00317ED8 /* BeamTextFieldView.swift */,
 			);
-			path = BMTextField;
+			path = BeamTextField;
 			sourceTree = "<group>";
 		};
 		418172B025811AAA00317ED8 /* Animator */ = {
@@ -1306,6 +1313,7 @@
 			children = (
 				5281B06225C98D0A00DF66D9 /* Utils */,
 				525C235725BAFCAA001B9625 /* MergeTests.swift */,
+				A0FC5CB925D2D678003C3E8C /* BeamTestsHelper.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -1596,6 +1604,7 @@
 			children = (
 				965A784E2514F149009980D4 /* Info.plist */,
 				965A784C2514F149009980D4 /* BeamUITests.swift */,
+				A0E15FFC25D1570D00F9D72F /* JournalUITests.swift */,
 				41774ACF25CAF3E20090AB89 /* OmnibarUITests.swift */,
 				52BB69A825CD5A49007A1173 /* OmniBarUITestsQuick.swift */,
 			);
@@ -1701,14 +1710,14 @@
 			buildRules = (
 			);
 			dependencies = (
-				52BB69C325CD5FBE007A1173 /* PBXTargetDependency */,
-				52BB69C125CD5FB8007A1173 /* PBXTargetDependency */,
+				A0A6F2A325D1B73A00EFC4BE /* PBXTargetDependency */,
+				A0A6F2A125D1B73400EFC4BE /* PBXTargetDependency */,
 				965A784A2514F149009980D4 /* PBXTargetDependency */,
 			);
 			name = BeamUITests;
 			packageProductDependencies = (
-				52BB69C625CD602A007A1173 /* Quick */,
-				52BB69C825CD6032007A1173 /* Nimble */,
+				A0A6F2A425D1B74200EFC4BE /* Quick */,
+				A0A6F2A625D1B74800EFC4BE /* Nimble */,
 			);
 			productName = BeamUITests;
 			productReference = 965A78482514F149009980D4 /* BeamUITests.xctest */;
@@ -2043,7 +2052,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if which swiftlint >/dev/null; then\n  swiftlint --lenient\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
+			shellScript = "PATH=${PATH}:/opt/homebrew/bin\nif which swiftlint >/dev/null; then\n  swiftlint --lenient\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
 		};
 		5259C3FE258A837300DD67E7 /* Sparkle Signing */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -2089,6 +2098,7 @@
 				521EEDF72593824100BA2485 /* AppDelegate+Document.swift in Sources */,
 				418172532581107C00317ED8 /* Chevrons.swift in Sources */,
 				5206282625923B6800D7CD9E /* DocumentRequest.swift in Sources */,
+				A0208F8225D6BB1C00CA054C /* AppDelegate+BeamTests.swift in Sources */,
 				4181733725811F6300317ED8 /* Mode.swift in Sources */,
 				4181723F2581107C00317ED8 /* Font.swift in Sources */,
 				4181722C2581107C00317ED8 /* AutoCompleteList.swift in Sources */,
@@ -2126,7 +2136,7 @@
 				418172B625811AAA00317ED8 /* FrameAnimation.swift in Sources */,
 				418172042581107C00317ED8 /* TemporaryFile.swift in Sources */,
 				523FF66125C31D8800B4BD6E /* Data+String.swift in Sources */,
-				418172AA25811A3A00317ED8 /* BMTextField.swift in Sources */,
+				418172AA25811A3A00317ED8 /* BeamTextField.swift in Sources */,
 				4181720D2581107C00317ED8 /* BID.swift in Sources */,
 				9676143825CAAD5300BDA862 /* RWLock.swift in Sources */,
 				418172152581107C00317ED8 /* NSContainerView.swift in Sources */,
@@ -2170,10 +2180,11 @@
 				52F27FCB25B9B404006E09A2 /* ViewModelFetchedResults.swift in Sources */,
 				418173C32581276F00317ED8 /* String+NSMutableAttributedString.swift in Sources */,
 				9691E41425AF61BA00A13080 /* BrowsingTree.swift in Sources */,
+				A025ED7825D52F91008BF9C7 /* BeamTestsHelper.swift in Sources */,
 				4181723D2581107C00317ED8 /* TextEdit.swift in Sources */,
 				9691E40225AE5D2C00A13080 /* NodeSelection.swift in Sources */,
 				4181720F2581107C00317ED8 /* PageRank.swift in Sources */,
-				418172AB25811A3A00317ED8 /* BMTextFieldView.swift in Sources */,
+				418172AB25811A3A00317ED8 /* BeamTextFieldView.swift in Sources */,
 				965A78292514F147009980D4 /* AppDelegate.swift in Sources */,
 				418171F82581107C00317ED8 /* Score.swift in Sources */,
 				418172092581107C00317ED8 /* CoreDataManager+backupExtension.swift in Sources */,
@@ -2280,6 +2291,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A0E15FFD25D1570D00F9D72F /* JournalUITests.swift in Sources */,
 				41774AD025CAF3E20090AB89 /* OmnibarUITests.swift in Sources */,
 				52BB69A925CD5A49007A1173 /* OmniBarUITestsQuick.swift in Sources */,
 				965A784D2514F149009980D4 /* BeamUITests.swift in Sources */,
@@ -2289,14 +2301,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		52BB69C125CD5FB8007A1173 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			productRef = 52BB69C025CD5FB8007A1173 /* Nimble */;
-		};
-		52BB69C325CD5FBE007A1173 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			productRef = 52BB69C225CD5FBE007A1173 /* Quick */;
-		};
 		52DD2450258B685E00651C84 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = SparkleInstallerConnection;
@@ -2321,6 +2325,14 @@
 			isa = PBXTargetDependency;
 			target = 965A78242514F147009980D4 /* Beam */;
 			targetProxy = 965A78492514F149009980D4 /* PBXContainerItemProxy */;
+		};
+		A0A6F2A125D1B73400EFC4BE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = A0A6F2A025D1B73400EFC4BE /* Quick */;
+		};
+		A0A6F2A325D1B73A00EFC4BE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = A0A6F2A225D1B73A00EFC4BE /* Nimble */;
 		};
 /* End PBXTargetDependency section */
 
@@ -2971,26 +2983,6 @@
 			package = 527FB72225B9AAA200959146 /* XCRemoteSwiftPackageReference "Fakery" */;
 			productName = Fakery;
 		};
-		52BB69C025CD5FB8007A1173 /* Nimble */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */;
-			productName = Nimble;
-		};
-		52BB69C225CD5FBE007A1173 /* Quick */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick" */;
-			productName = Quick;
-		};
-		52BB69C625CD602A007A1173 /* Quick */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick" */;
-			productName = Quick;
-		};
-		52BB69C825CD6032007A1173 /* Nimble */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */;
-			productName = Nimble;
-		};
 		9631C746251CE997009B40C4 /* SwiftSoup */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 9631C745251CE997009B40C4 /* XCRemoteSwiftPackageReference "SwiftSoup" */;
@@ -3000,6 +2992,26 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 96474E3D254D9ADB00A920B3 /* XCRemoteSwiftPackageReference "FavIcon" */;
 			productName = FavIcon;
+		};
+		A0A6F2A025D1B73400EFC4BE /* Quick */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick" */;
+			productName = Quick;
+		};
+		A0A6F2A225D1B73A00EFC4BE /* Nimble */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */;
+			productName = Nimble;
+		};
+		A0A6F2A425D1B74200EFC4BE /* Quick */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick" */;
+			productName = Quick;
+		};
+		A0A6F2A625D1B74800EFC4BE /* Nimble */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */;
+			productName = Nimble;
 		};
 /* End XCSwiftPackageProductDependency section */
 

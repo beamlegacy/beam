@@ -40,4 +40,9 @@ Lorem **ipsum dolor** sit amet, *consectetur* adipiscing elit, sed do eiusmod te
     static func tabs(_ count: Int) -> String {
         return "    ".duplicate(count)
     }
+
+    static func random(length: Int) -> String {
+      let letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+      return String((0..<length).map { _ in letters.randomElement()! })
+    }
 }

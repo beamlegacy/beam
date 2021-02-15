@@ -1,5 +1,5 @@
 //
-//  BMTextField.swift
+//  BeamTextField.swift
 //  Beam
 //
 //  Created by Ravichandrane Rajendran on 03/12/2020.
@@ -7,8 +7,8 @@
 
 import SwiftUI
 
-struct BMTextField: NSViewRepresentable {
-    typealias NSViewType = BMTextFieldView
+struct BeamTextField: NSViewRepresentable {
+    typealias NSViewType = BeamTextFieldView
 
     @Binding var text: String
     @Binding var isEditing: Bool
@@ -32,7 +32,7 @@ struct BMTextField: NSViewRepresentable {
     }
 
     func makeNSView(context: Self.Context) -> Self.NSViewType {
-        let textField = BMTextFieldView()
+        let textField = BeamTextFieldView()
 
         textField.delegate = context.coordinator
         textField.focusRingType = .none
@@ -101,10 +101,10 @@ struct BMTextField: NSViewRepresentable {
     }
 
     class Coordinator: NSObject, NSTextFieldDelegate {
-        let parent: BMTextField
+        let parent: BeamTextField
         var didBecomeFirstResponder = false
 
-        init(_ textField: BMTextField) {
+        init(_ textField: BeamTextField) {
             self.parent = textField
         }
 

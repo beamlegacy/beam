@@ -1,5 +1,5 @@
 //
-//  BMTextFieldView.swift
+//  BeamTextFieldView.swift
 //  Beam
 //
 //  Created by Ravichandrane Rajendran on 03/12/2020.
@@ -7,13 +7,13 @@
 
 import Cocoa
 
-protocol BMTextFieldViewDelegate: class {
+protocol BeamTextFieldViewDelegate: class {
     func controlTextDiStartEditing()
 }
 
-class BMTextFieldView: NSTextField {
+class BeamTextFieldView: NSTextField {
 
-    weak var textFieldViewDelegate: BMTextFieldViewDelegate?
+    weak var textFieldViewDelegate: BeamTextFieldViewDelegate?
 
     var placeholderText: String?
     var placeholderColor: NSColor = NSColor.lightGray

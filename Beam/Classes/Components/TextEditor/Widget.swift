@@ -139,7 +139,7 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
         return NSRect(origin: offset, size: contentsFrame.size)
     }
 
-    var parent: Widget?
+    weak var parent: Widget?
 
     var root: TextRoot? {
         if let r = _root {

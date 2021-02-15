@@ -82,7 +82,7 @@ struct OmniBarSearchBox: View {
                     .frame(maxWidth: .infinity, maxHeight: 28)
 
                 HStack {
-                    BMTextField(
+                    BeamTextField(
                         text: $state.searchQuery,
                         isEditing: $isEditing,
                         isFirstResponder: $state.focusOmniBox,

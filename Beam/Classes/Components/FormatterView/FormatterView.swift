@@ -71,6 +71,11 @@ class FormatterView: NSView {
         super.init(coder: coder)
     }
 
+    deinit {
+        print("deinit formatter view")
+        hideHyperLinkView()
+    }
+
     // MARK: - UI
     private func commonInitUI() {
         containerView.wantsLayer = true
@@ -276,8 +281,8 @@ class FormatterView: NSView {
 
         guard let hyperlinkView = hyperlinkView else { return }
 
-        hyperlinkView.didPressButton = { [unowned self] in
-            self.hideHyperLinkView()
+        hyperlinkView.didPressValideButton = { [unowned self] in
+            print("valid")
         }
 
         containerView.addSubview(hyperlinkView)
@@ -287,7 +292,6 @@ class FormatterView: NSView {
     private func hideHyperLinkView() {
         hyperlinkView?.removeFromSuperview()
         hyperlinkView = nil
-        formatterContainerView.isHidden = false
         selectedTypes.remove(FormatterType.link)
     }
 

@@ -19,7 +19,33 @@ xctests:
   script:
     - time bundle exec fastlane tests
   tags:
-    - macos
+    - macos-mono
+  interruptible: true
+  retry:
+    max: 2
+
+xctests UI:
+  dependencies: []
+  stage: test
+  artifacts:
+    expire_in: 7d
+    when: always
+    paths:
+      - cobertura.xml
+      - fastlane/test_output/tests.xml
+      - builds/
+    reports:
+      cobertura: cobertura.xml
+      junit: fastlane/test_output/tests.xml
+  coverage: '/Test Coverage\: \d+(?:\.\d*)?\%/'
+  only:
+    - merge_requests
+    - master
+    - develop
+  script:
+    - time bundle exec fastlane uitests
+  tags:
+    - macos-mono
   interruptible: true
   retry:
     max: 2

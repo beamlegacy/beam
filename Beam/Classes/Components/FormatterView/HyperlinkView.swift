@@ -9,13 +9,18 @@ import Cocoa
 
 class HyperlinkView: NSView {
 
+    // MARK: - Properties
     @IBOutlet var containerView: NSView!
+    @IBOutlet weak var hyperlinkTextField: NSTextField!
 
-    var didPressButton: (() -> Void)?
+    var didPressValideButton: (() -> Void)?
+    var didPressDeleteButton: (() -> Void)?
 
+    // MARK: - Initializer
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
         loadXib()
+        setupTextField()
     }
 
     required init?(coder: NSCoder) {
@@ -26,8 +31,25 @@ class HyperlinkView: NSView {
         print("deinit linkview")
     }
 
-    @IBAction func dismissAction(_ sender: Any) {
-        didPressButton!()
+    // MARK: - Life Cycle
+    override func viewDidMoveToSuperview() {
+        super.viewDidMoveToSuperview()
+
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.hyperlinkTextField.becomeFirstResponder()
+        }
+    }
+
+    // MARK: - Private Methods
+    private func setupTextField() {
+        hyperlinkTextField.wantsLayer = true
+        hyperlinkTextField.isBordered = false
+        hyperlinkTextField.drawsBackground = false
+        hyperlinkTextField.focusRingType = .none
+
+        hyperlinkTextField.placeholderString = "Link’s URL"
+        hyperlinkTextField.maximumNumberOfLines = 2
     }
 
     private func loadXib() {
@@ -38,5 +60,11 @@ class HyperlinkView: NSView {
         containerView.frame = bounds
         containerView.autoresizingMask = [.width, .height]
         addSubview(containerView)
+    }
+
+    // MARK: - Action
+    @IBAction func dismissAction(_ sender: Any) {
+        guard let didPressValideButton = didPressValideButton else { return }
+        didPressValideButton()
     }
 }

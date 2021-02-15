@@ -237,7 +237,7 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
         children.insert(child, at: pos)
     }
 
-    @Published var parent: BeamElement?
+    weak var parent: BeamElement?
 
     public static func == (lhs: BeamElement, rhs: BeamElement) -> Bool {
         lhs.id == rhs.id
@@ -325,7 +325,7 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
 
             if async {
                 DispatchQueue.main.async {
-                    let refnote = BeamNote.fetchOrCreate(DocumentManager(), title: linkTitle)
+                    let refnote = BeamNote.fetchOrCreate(documentManager, title: linkTitle)
                     refnote.addLinkedReference(reference)
                 }
             } else {

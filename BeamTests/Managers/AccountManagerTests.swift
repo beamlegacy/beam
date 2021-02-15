@@ -44,7 +44,7 @@ class AccountManagerTests: QuickSpec {
         }
 
         describe(".signUp()") {
-            let password = randomString(length: 12)
+            let password = String.random(length: 12)
 
             context("with existing account") {
                 it("returns an error") {
@@ -102,10 +102,5 @@ class AccountManagerTests: QuickSpec {
                 done()
             }
         }
-    }
-
-    private func randomString(length: Int) -> String {
-      let letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-      return String((0..<length).map { _ in letters.randomElement()! })
     }
 }

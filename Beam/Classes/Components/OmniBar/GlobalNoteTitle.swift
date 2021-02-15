@@ -37,7 +37,7 @@ struct GlobalNoteTitle: View {
                 .stroke(Color.accentColor.opacity(0.5), lineWidth: isEditing ? 2.5 : 0)
                 .frame(height: 28)
 
-            BMTextField(
+            BeamTextField(
                 text: $title,
                 isEditing: $isEditing,
                 isFirstResponder: $focusOmniBox,
