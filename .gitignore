@@ -60,7 +60,6 @@ fastlane/test_output
 *.mobileprovision
 *.cer
 *.certSigningRequest
-*.p12
 
 # Code Injection
 #
