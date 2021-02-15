@@ -124,7 +124,7 @@ extension BeamTextEdit {
         var range = selectedTextRange.lowerBound == 0 && selectedTextRange.upperBound > 0 ? beginPosition : endPosition
         var types: [FormatterType] = []
 
-        if rootNode.state.nodeSelection != nil || rootNode.textIsSelected { range = 0..<node.text.text.count }
+        if rootNode.state.nodeSelection != nil { range = 0..<node.text.text.count }
 
         rootNode.state.attributes = []
         setActiveFormatters(types)

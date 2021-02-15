@@ -615,9 +615,12 @@ public class TextNode: Widget {
                 editor.initAndShowPersistentFormatter()
                 return true
             } else if mouseInfo.event.clickCount == 2 {
-                deboucingClickTimer?.invalidate()
                 root?.wordSelection(from: clickPos)
-                if !selectedTextRange.isEmpty { editor.showInlineFormatterOnKeyEventsAndClick() }
+
+                deboucingClickTimer = Timer.scheduledTimer(withTimeInterval: deboucingClickInterval, repeats: false, block: { [weak self] (_) in
+                    guard let self = self else { return }
+                    if !self.selectedTextRange.isEmpty { self.editor.showInlineFormatterOnKeyEventsAndClick() }
+                })
                 return true
             } else {
                 deboucingClickTimer?.invalidate()
@@ -690,8 +693,11 @@ public class TextNode: Widget {
             return false
         case .select(let o):
             root?.selectedTextRange = text.clamp(p < o ? cursorPosition..<o : o..<cursorPosition)
-            mouseIsDragged = true
-            editor.updateInlineFormatterOnDrag(isDragged: true)
+
+            if root?.state.nodeSelection == nil {
+                mouseIsDragged = true
+                editor.updateInlineFormatterOnDrag(isDragged: true)
+            }
         }
         invalidate()
 
