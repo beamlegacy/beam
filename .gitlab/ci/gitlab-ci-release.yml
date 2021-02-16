@@ -22,5 +22,5 @@ release:
   tags:
     - macos
   interruptible: true
-  allow_failure: false
+  allow_failure: true
   when: manual
