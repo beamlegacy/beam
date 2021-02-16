@@ -1,15 +1,15 @@
-notarize:
+release:
+  stage: deploy
   dependencies:
-    - build:macos
-  stage: notarize
+    - notarize
   artifacts:
     expire_in: 7d
     paths:
       - builds/
   only:
-    - merge_requests
     - master
     - develop
+    - merge_requests
   before_script:
     - echo "${PATH}"
     - pwd
@@ -17,12 +17,10 @@ notarize:
     - direnv allow
     - eval "$(direnv export bash)"
     - eval "$(rbenv init -)"
-    - xcversion update
-    - xcversion install ${XCODE_VERSION}
-    - bundle install
   script:
-    - ./scripts/build_dmg.sh
-    - bundle exec fastlane notarize_build
+    - bundle exec fastlane publish_release
   tags:
     - macos
   interruptible: true
+  allow_failure: false
+  when: manual

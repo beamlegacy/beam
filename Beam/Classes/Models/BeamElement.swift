@@ -85,16 +85,16 @@ enum ElementChildrenFormat: String, Codable {
 
 // Editable Text Data:
 public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, CustomDebugStringConvertible {
-    @Published public private(set) var id = UUID() { didSet { change() } }
-    @Published var text = BeamText() { didSet { change() } }
-    @Published var open = true { didSet { change() } }
-    @Published public internal(set) var children = [BeamElement]() { didSet { change() } }
-    @Published var readOnly = false { didSet { change() } }
-    @Published var score: Float = 0 { didSet { change() } }
-    @Published var creationDate = Date() { didSet { change() } }
+    @Published public private(set) var id = UUID() { didSet { change(.meta) } }
+    @Published var text = BeamText() { didSet { change(.text) } }
+    @Published var open = true { didSet { change(.meta) } }
+    @Published public internal(set) var children = [BeamElement]() { didSet { change(.tree) } }
+    @Published var readOnly = false { didSet { change(.meta) } }
+    @Published var score: Float = 0 { didSet { change(.meta) } }
+    @Published var creationDate = Date() { didSet { change(.meta) } }
     @Published var updateDate = Date()
-    @Published var kind: ElementKind = .bullet { didSet { change() } }
-    @Published var childrenFormat: ElementChildrenFormat = .bullet { didSet { change() } }
+    @Published var kind: ElementKind = .bullet { didSet { change(.meta) } }
+    @Published var childrenFormat: ElementChildrenFormat = .bullet { didSet { change(.meta) } }
 
     var note: BeamNote? {
         return parent?.note
@@ -284,22 +284,25 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
         }
     }
 
-    @Published var changed = 0
+    @Published var changed: (BeamElement, ChangeType)? = nil
     var changePropagationEnabled = true
-    func change() {
+    enum ChangeType {
+        case text, meta, tree
+    }
+    func change(_ type: ChangeType) {
         guard changePropagationEnabled else { return }
         updateDate = Date()
-        changed += 1
+        changed = (self, type)
 
-        parent?.childChanged(self)
+        parent?.childChanged(self, type)
     }
 
-    func childChanged(_ child: BeamElement) {
+    func childChanged(_ child: BeamElement, _ type: ChangeType) {
         guard changePropagationEnabled else { return }
         updateDate = Date()
-        changed += 1
+        changed = (child, type)
 
-        parent?.childChanged(self)
+        parent?.childChanged(self, type)
     }
 
     func findElement(_ id: UUID) -> BeamElement? {
