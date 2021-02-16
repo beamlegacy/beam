@@ -24,15 +24,15 @@ struct NoteReference: Codable, Equatable {
 
 // Document:
 class BeamNote: BeamElement {
-    @Published var title: String { didSet { change() } }
-    @Published var type: NoteType = .note { didSet { change() } }
-    @Published public private(set) var outLinks: [String] = [] { didSet { change() } } ///< The links contained in this note
-    @Published public private(set) var linkedReferences: [NoteReference] = [] { didSet { change() } } ///< urls of the notes/bullet pointing to this note explicitely
-    @Published public private(set) var unlinkedReferences: [NoteReference] = [] { didSet { change() } } ///< urls of the notes/bullet pointing to this note implicitely
+    @Published var title: String { didSet { change(.text) } }
+    @Published var type: NoteType = .note { didSet { change(.meta) } }
+    @Published public private(set) var outLinks: [String] = [] { didSet { change(.meta) } } ///< The links contained in this note
+    @Published public private(set) var linkedReferences: [NoteReference] = [] { didSet { change(.meta) } } ///< urls of the notes/bullet pointing to this note explicitely
+    @Published public private(set) var unlinkedReferences: [NoteReference] = [] { didSet { change(.meta) } } ///< urls of the notes/bullet pointing to this note implicitely
 
-    @Published public private(set) var searchQueries: [String] = [] { didSet { change() } } ///< Search queries whose results were used to populate this note
-    @Published public private(set) var visitedSearchResults: [VisitedPage] = [] { didSet { change() } } ///< URLs whose content were used to create this note
-    @Published public var browsingSessions = [BrowsingTree]() { didSet { change() } }
+    @Published public private(set) var searchQueries: [String] = [] { didSet { change(.meta) } } ///< Search queries whose results were used to populate this note
+    @Published public private(set) var visitedSearchResults: [VisitedPage] = [] { didSet { change(.meta) } } ///< URLs whose content were used to create this note
+    @Published public var browsingSessions = [BrowsingTree]() { didSet { change(.meta) } }
     private var version: Int64 = 0
 
     override var note: BeamNote? {
@@ -278,9 +278,11 @@ class BeamNote: BeamElement {
 //            .debounce(for: .seconds(2), scheduler: RunLoop.main)
 //            .throttle(for: .seconds(2), scheduler: RunLoop.main, latest: false)
             .receive(on: DispatchQueue.main)
-            .sink { [weak note] _ in
+            .sink { [weak note] change in
                 guard let note = note else { return }
-                requestLinkDetection()
+                if change?.1 == .text {
+                    requestLinkDetection()
+                }
                 AppDelegate.main.data.noteAutoSaveService.addNoteToSave(note)
             }
         note.observeDocumentChange(documentManager: AppDelegate.main.data.documentManager)
@@ -293,8 +295,8 @@ class BeamNote: BeamElement {
         fetchedNotes.removeAll()
     }
 
-    override func childChanged(_ child: BeamElement) {
-        super.childChanged(child)
+    override func childChanged(_ child: BeamElement, _ type: ChangeType) {
+        super.childChanged(child, type)
         AppDelegate.main.data.lastChangedElement = child
     }
 

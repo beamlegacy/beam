@@ -21,7 +21,7 @@ class NoteAutoSaveService: ObservableObject {
     init() {
         $noteToSaveChanged
             .dropFirst()
-            .debounce(for: .seconds(2), scheduler: RunLoop.main)
+            .throttle(for: .seconds(2), scheduler: DispatchQueue.main, latest: true)
             .sink { [unowned self] _ in
             self.saveNotes()
         }.store(in: &scope)
