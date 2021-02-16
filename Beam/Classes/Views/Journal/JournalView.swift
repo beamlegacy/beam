@@ -11,8 +11,8 @@ import Combine
 
 struct JournalView: View {
     @State var isEditing = false
-
     var data: BeamData
+    var isFetching: Bool
     var journal: [BeamNote]
     var offset: CGFloat
 
@@ -29,6 +29,8 @@ struct JournalView: View {
                              scrollable: false
                     )
                 }
+                ProgressIndicator(isAnimated: isFetching, controlSize: .small)
+                    .padding()
             }
             .background(GeometryReader { geo -> Color in
                 let totalJournal = data.documentManager.countDocumentsWithType(type: .journal)
@@ -36,6 +38,7 @@ struct JournalView: View {
                     && totalJournal != journal.count {
                     data.updateJournal(with: 2, and: journal.count)
                 }
+                data.isFetching = totalJournal != journal.count
                 return Color.clear
             })
             .padding(.top, offset)
