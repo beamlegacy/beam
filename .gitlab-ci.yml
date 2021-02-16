@@ -20,28 +20,18 @@ cache:
   paths:
     - Extern/libgit2/build/libgit2.a
 
-before_script:
-  # RVM install a `cd` :((((
-  # Apparently the rvm(2.6.0), that I had installed previously, was overriding the cd bash command :expressionless:
-  # https://forum.gitlab.com/t/self-hosted-gitlab-ci-runner-shell-executer-fails-immediately-with-error-job-failed-exit-status-1/33252/3
-  - echo "${PATH}"
-  - pwd
-  - unset cd
-  - direnv allow
-  - eval "$(direnv export bash)"
-  - eval "$(rbenv init -)"
-  - xcversion update
-  - xcversion install ${XCODE_VERSION}
-  - bundle install
-
 include:
   - '.gitlab/ci/gitlab-ci-test.yml'
   - '.gitlab/ci/gitlab-ci-build.yml'
   - '.gitlab/ci/gitlab-ci-notarize.yml'
   - '.gitlab/ci/gitlab-ci-deploy.yml'
+  - '.gitlab/ci/gitlab-ci-release.yml'
   - template: Code-Quality.gitlab-ci.yml
 
 code_quality:
+  timeout: 10 minutes
+  tags:
+    - intel
   rules:
     - if: '$CODE_QUALITY_DISABLED'
       when: never
