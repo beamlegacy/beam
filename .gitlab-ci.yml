@@ -10,8 +10,10 @@ variables:
   GIT_STRATEGY: fetch
   GIT_SUBMODULE_STRATEGY: recursive
   GIT_BRANCH: "$CI_COMMIT_REF_NAME"
+  GIT_DEPTH: 10
   # Need to enable custom_build_dir feature
-  GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/$CI_PROJECT_NAME
+  # That generates IO errors
+  # GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/$CI_PROJECT_NAME
 
 cache:
   key:
