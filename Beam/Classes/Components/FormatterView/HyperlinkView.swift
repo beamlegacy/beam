@@ -38,7 +38,9 @@ class HyperlinkView: NSView {
 
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
-            self.hyperlinkTextField.becomeFirstResponder()
+            if self.hyperlinkTextField.stringValue.isEmpty {
+                self.hyperlinkTextField.becomeFirstResponder()
+            }
         }
     }
 

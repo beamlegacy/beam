@@ -89,6 +89,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     internal var persistentFormatter: FormatterView?
     internal var inlineFormatter: FormatterView?
     internal var isInlineFormatterHidden = true
+    internal var isInlineFormatterOnHover = false
     internal var currentTextRange: Range<Int> = 0..<0
 
     public init(root: BeamElement, font: Font = Font.main) {
@@ -1308,6 +1309,16 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         updateInlineFormatterView(isKeyEvent)
 
         if isInlineFormatterHidden {
+            showOrHideInlineFormatter(isPresent: true)
+        }
+    }
+
+    func showInlineFormatterWithHyperlinkView(position: NSPoint, _ url: URL?) {
+        initInlineFormatterWithHyperlinkView()
+
+        if isInlineFormatterHidden {
+            updateInlineFormaterOnHover(position, url)
+            isInlineFormatterOnHover = true
             showOrHideInlineFormatter(isPresent: true)
         }
     }

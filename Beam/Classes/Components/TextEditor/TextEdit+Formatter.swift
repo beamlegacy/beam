@@ -71,11 +71,27 @@ extension BeamTextEdit {
         }
 
         formatterView.alphaValue = 0
-
         formatterView.frame = NSRect(x: 0, y: 0, width: formatterView.idealSize.width, height: formatterView.idealSize.height)
         formatterView.layer?.zPosition = 1
 
         addSubview(formatterView)
+    }
+
+    internal func initInlineFormatterWithHyperlinkView() {
+        guard inlineFormatter == nil else { return }
+
+        inlineFormatter = FormatterView(viewType: .inline)
+
+        guard let formatterView = inlineFormatter,
+              let contentView = window?.contentView else { return }
+
+        formatterView.items = BeamTextEdit.inlineFormatterType
+
+        formatterView.alphaValue = 0
+        formatterView.frame = NSRect(x: 0, y: 0, width: formatterView.idealSize.width, height: formatterView.idealSize.height)
+
+        formatterView.showHyperLinkView()
+        contentView.addSubview(formatterView)
     }
 
     // MARK: - Methods
@@ -130,6 +146,14 @@ extension BeamTextEdit {
 
         BeamTextEdit.deboucingKeyEventTimer?.invalidate()
         updateInlineFormatterFrame()
+    }
+
+    internal func updateInlineFormaterOnHover(_ position: NSPoint, _ url: URL?) {
+        guard let view = inlineFormatter,
+              let url = url else { return }
+
+        view.urlValue = url.absoluteString
+        view.frame.origin.y = self.convert(position, to: nil).y
     }
 
     internal func detectFormatterType() {
@@ -235,6 +259,7 @@ extension BeamTextEdit {
         } else {
             BeamTextEdit.isSelectableContent = true
             isInlineFormatterHidden = true
+            isInlineFormatterOnHover = false
             inlineFormatter = nil
         }
     }

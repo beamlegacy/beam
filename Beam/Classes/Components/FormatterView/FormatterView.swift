@@ -17,6 +17,12 @@ class FormatterView: NSView {
     var didSelectFormatterType: ((_ type: FormatterType, _ isActive: Bool) -> Void)?
     var didSelectLink: ((_ link: String) -> Void)?
 
+    var urlValue: String = "" {
+        didSet {
+            updateHyperlinkView()
+        }
+    }
+
     var corderRadius: CGFloat = 5 {
         didSet {
             containerView.layer?.cornerRadius = corderRadius
@@ -177,6 +183,26 @@ class FormatterView: NSView {
         }
     }
 
+    func showHyperLinkView() {
+        hyperlinkView = HyperlinkView(frame: containerView.frame)
+
+        guard let hyperlinkView = hyperlinkView else { return }
+
+        hyperlinkView.didPressValideButton = { [unowned self] link in
+            guard let didSelectLink = didSelectLink else { return }
+            didSelectLink(link)
+        }
+
+        containerView.addSubview(hyperlinkView)
+        formatterContainerView.isHidden = true
+    }
+
+    func updateHyperlinkView() {
+        guard let hyperlinkView = hyperlinkView else { return }
+
+        hyperlinkView.hyperlinkTextField.stringValue = urlValue
+    }
+
     override func mouseEntered(with event: NSEvent) {
         guard let userInfo = event.trackingArea?.userInfo else { return }
         updateFormatterView(with: userInfo, isHover: true)
@@ -275,20 +301,6 @@ class FormatterView: NSView {
         guard let button = buttons[item] else { return }
         button.layer?.backgroundColor = NSColor.clear.cgColor
         selectedTypes.remove(item)
-    }
-
-    private func showHyperLinkView() {
-        hyperlinkView = HyperlinkView(frame: containerView.frame)
-
-        guard let hyperlinkView = hyperlinkView else { return }
-
-        hyperlinkView.didPressValideButton = { [unowned self] link in
-            guard let didSelectLink = didSelectLink else { return }
-            didSelectLink(link)
-        }
-
-        containerView.addSubview(hyperlinkView)
-        formatterContainerView.isHidden = true
     }
 
     private func hideHyperLinkView() {

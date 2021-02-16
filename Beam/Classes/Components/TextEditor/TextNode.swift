@@ -653,10 +653,14 @@ public class TextNode: Widget {
 
             if link != nil {
                 cursor = .pointingHand
+                editor.showInlineFormatterWithHyperlinkView(position: mouseInfo.position, link)
             } else if internalLink != nil {
                 cursor = .pointingHand
             } else {
                 cursor = .iBeam
+                if editor.isInlineFormatterOnHover {
+                    editor.showOrHideInlineFormatter(isPresent: false)
+                }
             }
         }
 
