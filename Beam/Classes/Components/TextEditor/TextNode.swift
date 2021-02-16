@@ -658,6 +658,7 @@ public class TextNode: Widget {
                 cursor = .pointingHand
             } else {
                 cursor = .iBeam
+
                 if editor.isInlineFormatterOnHover {
                     editor.showOrHideInlineFormatter(isPresent: false)
                 }

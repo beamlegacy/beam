@@ -47,10 +47,13 @@ extension BeamTextEdit {
         showOrHidePersistentFormatter(isPresent: true)
     }
 
-    internal func initInlineFormatterView() {
+    internal func initInlineFormatterView(isHyperlinkView: Bool = false) {
+        guard inlineFormatter == nil else { return }
+
         inlineFormatter = FormatterView(viewType: .inline)
 
-        guard let formatterView = inlineFormatter else { return }
+        guard let formatterView = inlineFormatter,
+              let contentView = window?.contentView else { return }
 
         formatterView.items = BeamTextEdit.inlineFormatterType
         formatterView.didSelectFormatterType = {[unowned self] (type, isActive) -> Void in
@@ -72,26 +75,14 @@ extension BeamTextEdit {
 
         formatterView.alphaValue = 0
         formatterView.frame = NSRect(x: 0, y: 0, width: formatterView.idealSize.width, height: formatterView.idealSize.height)
-        formatterView.layer?.zPosition = 1
 
-        addSubview(formatterView)
-    }
-
-    internal func initInlineFormatterWithHyperlinkView() {
-        guard inlineFormatter == nil else { return }
-
-        inlineFormatter = FormatterView(viewType: .inline)
-
-        guard let formatterView = inlineFormatter,
-              let contentView = window?.contentView else { return }
-
-        formatterView.items = BeamTextEdit.inlineFormatterType
-
-        formatterView.alphaValue = 0
-        formatterView.frame = NSRect(x: 0, y: 0, width: formatterView.idealSize.width, height: formatterView.idealSize.height)
-
-        formatterView.showHyperLinkView()
-        contentView.addSubview(formatterView)
+        if isHyperlinkView {
+            formatterView.showHyperLinkView()
+            contentView.addSubview(formatterView)
+        } else {
+            formatterView.layer?.zPosition = 1
+            addSubview(formatterView)
+        }
     }
 
     // MARK: - Methods
@@ -150,10 +141,19 @@ extension BeamTextEdit {
 
     internal func updateInlineFormaterOnHover(_ position: NSPoint, _ url: URL?) {
         guard let view = inlineFormatter,
-              let url = url else { return }
+              let url = url,
+              let scrollView = enclosingScrollView else { return }
+
+        print(position)
+
+        let yOffset = scrollView.documentVisibleRect.origin.y < 0 ? 0 : scrollView.documentVisibleRect.origin.y
+        let globalOffset = convert(position, to: nil).y
+
+        print(globalOffset)
+        print(yOffset)
 
         view.urlValue = url.absoluteString
-        view.frame.origin.y = self.convert(position, to: nil).y
+        view.frame.origin.y = yOffset > globalOffset  ? yOffset - globalOffset : globalOffset
     }
 
     internal func detectFormatterType() {

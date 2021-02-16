@@ -199,7 +199,6 @@ class FormatterView: NSView {
 
     func updateHyperlinkView() {
         guard let hyperlinkView = hyperlinkView else { return }
-
         hyperlinkView.hyperlinkTextField.stringValue = urlValue
     }
 
