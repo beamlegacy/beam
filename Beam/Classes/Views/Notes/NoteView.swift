@@ -16,6 +16,7 @@ struct NoteView: View {
     var leadingAlignement = CGFloat(185)
     var showTitle: Bool
     var scrollable: Bool
+    var centerText: Bool
 
     var body: some View {
         ZStack {
@@ -41,6 +42,7 @@ struct NoteView: View {
                 },
                 leadingAlignment: leadingAlignement,
                 footerHeight: 60,
+                centerText: centerText,
                 showTitle: showTitle
                 )
                 .accessibility(identifier: "noteView")
@@ -67,6 +69,7 @@ struct NoteView: View {
                 },
                 leadingAlignment: leadingAlignement,
                 footerHeight: 100,
+                centerText: centerText,
                 showTitle: showTitle
                 )
             }

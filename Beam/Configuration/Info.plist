@@ -50,5 +50,13 @@
 	<string>Main</string>
 	<key>NSPrincipalClass</key>
 	<string>BeamApplication</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>Inter-Bold.otf</string>
+		<string>Inter-Italic.otf</string>
+		<string>Inter-Medium.otf</string>
+		<string>Inter-Regular.otf</string>
+		<string>Inter-SemiBold.otf</string>
+	</array>
 </dict>
 </plist>

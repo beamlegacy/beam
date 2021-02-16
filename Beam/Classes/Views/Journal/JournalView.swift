@@ -26,7 +26,8 @@ struct JournalView: View {
                              },
                              leadingAlignement: 185,
                              showTitle: true,
-                             scrollable: false
+                             scrollable: false,
+                             centerText: false
                     )
                 }
             }

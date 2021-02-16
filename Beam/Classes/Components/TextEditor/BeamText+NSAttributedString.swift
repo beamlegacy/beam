@@ -34,33 +34,31 @@ extension BeamText {
     }
 
     static func font(fontSize: CGFloat, strong: Bool, emphasis: Bool, elementKind: ElementKind) -> NSFont {
-        var weight = NSFont.Weight.regular
-        let headingFirstLevel: CGFloat = 28
-        let headingSecondLevel: CGFloat = 22
         var quote = false
         var size = fontSize
+
+        var font = NSFont(name: "Inter-Regular", size: size)
 
         switch elementKind {
         case .bullet:
             break
         case .code:
             break
-        case let .heading(level):
-            weight = .medium
-            size = level == 1 ? headingFirstLevel : headingSecondLevel
+        case let .heading:
+            font = NSFont(name: "Inter-Medium", size: size)
         case .quote:
             quote = true
         }
 
-        if strong { weight = .bold }
-
-        var f = NSFont.systemFont(ofSize: size, weight: weight)
-
-        if emphasis || quote {
-            f = NSFontManager.shared.convert(f, toHaveTrait: .italicFontMask)
+        if strong {
+            font = NSFont(name: "Inter-Bold", size: size)
         }
 
-        return f
+        if emphasis || quote {
+            font = NSFontManager.shared.convert(font!, toHaveTrait: .italicFontMask)
+        }
+
+        return font!
     }
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
@@ -104,13 +102,14 @@ extension BeamText {
             } else if let url = URL(string: link.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)!) {
                 stringAttributes[.link] = url as NSURL
             }
+
+            stringAttributes[.underlineStyle] = NSUnderlineStyle.single.rawValue
         } else if let link = internalLink {
             stringAttributes[.link] = link
         }
 
         if strikethrough {
             stringAttributes[.strikethroughStyle] = NSUnderlineStyle.single.rawValue
-            stringAttributes[.strikethroughColor] = NSColor.strikethroughColor
         }
 
         if let source = source {

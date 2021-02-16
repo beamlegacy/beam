@@ -128,15 +128,16 @@ public class TextLine {
 
             let width = CTRunGetTypographicBounds(run, CFRangeMake(0, 0), &ascent, &descent, nil)
 
-            if let attributes = CTRunGetAttributes(run) as? [NSAttributedString.Key: Any], attributes[.strikethroughStyle] as? NSNumber != nil {
-                let strikeThroughColor = attributes[.strikethroughColor] as? NSColor ?? NSColor.black
+            if let attributes = CTRunGetAttributes(run) as? [NSAttributedString.Key: Any],
+               attributes[.strikethroughStyle] as? NSNumber != nil,
+               attributes[.underlineStyle] as? NSNumber != nil {
 
-                context.setStrokeColor(strikeThroughColor.cgColor)
+                context.setStrokeColor(NSColor.underlineAndstrikethroughColor.cgColor)
 
                 let  y = CGFloat(roundf(Float(ascent / 3.0)))
+
                 context.move(to: CGPoint(x: offset, y: y))
                 context.addLine(to: CGPoint(x: offset + CGFloat(width), y: y))
-
                 context.strokePath()
             }
 
@@ -389,7 +390,6 @@ public class Font {
     }
 
     public static func == (lhs: Font, rhs: Font) -> Bool {
-        return lhs.size == rhs.size &&
-            lhs.name == rhs.name
+        return lhs.size == rhs.size && lhs.name == rhs.name
     }
 }
