@@ -868,7 +868,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             "[": { [unowned self] in
                 guard popover == nil else { return false }
 
-                let pos = rootNode.cursorPosition
+                let pos = self.selectedTextRange.isEmpty ? rootNode.cursorPosition : self.selectedTextRange.lowerBound
                 let substr = node.text.extract(range: max(0, pos - 1) ..< pos)
                 let left = substr.text // capture the left of the cursor to check for an existing [
 
