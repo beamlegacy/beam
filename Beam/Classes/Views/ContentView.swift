@@ -59,7 +59,7 @@ struct ModeView: View {
                         .animation(.easeInOut(duration: 0.3))
                     case .today:
                         GeometryReader { geometry in
-                            JournalView(data: state.data, journal: state.data.journal, offset: geometry.size.height * 0.4)
+                            JournalView(data: state.data, isFetching: state.data.isFetching, journal: state.data.journal, offset: geometry.size.height * 0.4)
                         }
                     }
 

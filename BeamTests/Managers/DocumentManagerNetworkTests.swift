@@ -86,7 +86,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                         self.sut.refreshDocuments { result in
                             expect { try result.get() }.toNot(throwError())
                             expect { try result.get() }.to(beTrue())
-                            expect(APIRequest.callsCount - networkCalls).to(equal(1))
+                            expect(APIRequest.callsCount - networkCalls) >= 1
                             done()
                         }
                     }
@@ -106,7 +106,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                         self.sut.refreshDocuments { result in
                             expect { try result.get() }.toNot(throwError())
                             expect { try result.get() }.to(beTrue())
-                            expect(APIRequest.callsCount - networkCalls).to(equal(1))
+                            expect(APIRequest.callsCount - networkCalls) >= 1
                             done()
                         }
                     }

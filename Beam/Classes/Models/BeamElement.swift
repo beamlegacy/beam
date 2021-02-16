@@ -319,11 +319,12 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
 
     func detectLinkedNotes(_ documentManager: DocumentManager, async: Bool) {
         guard let note = note else { return }
+        let sourceNote = note.title
 
         for link in text.internalLinks where link.string != note.title {
             let linkTitle = link.string
             //            Logger.shared.logInfo("searching link \(linkTitle)", category: .document)
-            let reference = NoteReference(noteName: linkTitle, elementID: id)
+            let reference = NoteReference(noteName: sourceNote, elementID: id)
             //            Logger.shared.logInfo("New link \(note.title) <-> \(linkTitle)", category: .document)
 
             if async {
