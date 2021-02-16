@@ -225,18 +225,28 @@ extension BeamTextEdit {
     }
 
     private func changeTextFormat(with node: TextNode, kind: ElementKind, isActive: Bool) {
-        node.element.kind = isActive ? .bullet : kind
+        if rootNode.state.nodeSelection != nil {
+            guard let nodeSelection = rootNode.state.nodeSelection else { return }
+
+            nodeSelection.nodes.forEach({ node in
+                node.element.kind = isActive ? .bullet : kind
+            })
+        } else {
+            node.element.kind = isActive ? .bullet : kind
+        }
     }
 
     private func updateAttributeState(with node: TextNode, attribute: BeamText.Attribute, isActive: Bool) {
         let attributes = rootNode.state.attributes
 
-        if rootNode.textIsSelected || rootNode.state.nodeSelection != nil {
-            let range = rootNode.state.nodeSelection != nil ? 0..<node.text.text.count : node.selectedTextRange
+        if rootNode.state.nodeSelection != nil {
+            guard let nodeSelection = rootNode.state.nodeSelection else { return }
 
-            isActive ?
-                node.text.removeAttributes([attribute], from: range) :
-                node.text.addAttributes([attribute], to: range)
+            nodeSelection.nodes.forEach({ node in
+                addAttribute(to: node, with: attribute, by: 0..<node.text.text.count, isActive)
+            })
+        } else if rootNode.textIsSelected {
+            addAttribute(to: node, with: attribute, by: node.selectedTextRange, isActive)
         }
 
         guard let index = attributes.firstIndex(of: attribute),
@@ -246,6 +256,12 @@ extension BeamTextEdit {
         }
 
         rootNode.state.attributes.remove(at: index)
+    }
+
+    private func addAttribute(to node: TextNode, with attribute: BeamText.Attribute, by range: Range<Int>, _ isActive: Bool) {
+        isActive ?
+            node.text.removeAttributes([attribute], from: range) :
+            node.text.addAttributes([attribute], to: range)
     }
 
     private func setActiveFormatters(_ types: [FormatterType]) {
