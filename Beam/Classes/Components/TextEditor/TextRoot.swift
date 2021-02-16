@@ -77,7 +77,9 @@ public class TextRoot: TextNode {
             n?.invalidateText()
             focussedWidget?.invalidate()
             editor.reBlink()
-            editor.setHotSpotToCursorPosition()
+            if state.nodeSelection == nil {
+                editor.setHotSpotToCursorPosition()
+            }
         }
     }
 

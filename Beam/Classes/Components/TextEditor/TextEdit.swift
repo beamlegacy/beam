@@ -1090,6 +1090,10 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         setHotSpot(rectAt(rootNode.cursorPosition).insetBy(dx: -30, dy: -30))
     }
 
+    public func setHotSpotToNode(_ node: Widget) {
+        setHotSpot(node.frameInDocument.insetBy(dx: -15, dy: -15))
+    }
+
     public func rectAt(_ position: Int) -> NSRect {
         guard let node = focussedWidget as? TextNode else { return NSRect() }
         let origin = node.offsetInDocument
@@ -1124,13 +1128,18 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         let eventPoint = convert(event.locationInWindow)
         let widgets = rootNode.getWidgetsBetween(startPos, eventPoint)
 
+        guard focussedWidget as? LinkedReferenceNode == nil else { return }
         if let selection = rootNode?.state.nodeSelection, let focussedNode = focussedWidget as? TextNode {
-            let textNodes = widgets.compactMap { $0 as? TextNode }
+            let textNodes = widgets.compactMap { $0 as? TextNode }.filter { (node) -> Bool in
+                return node as? LinkedReferenceNode == nil
+            }
             selection.start = focussedNode
             selection.append(focussedNode)
             for textNode in textNodes {
+                guard textNode as? LinkedReferenceNode == nil else { continue }
                 if !selection.nodes.contains(textNode) {
                     selection.append(textNode)
+                    setHotSpotToNode(textNode)
                 }
             }
             for selectedNode in selection.nodes {
@@ -1140,6 +1149,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             }
             guard let lastNode = textNodes.last else { return }
             selection.end = lastNode
+            setHotSpotToNode(selection.end)
         } else {
             if widgets.count > 0 {
                 rootNode?.startNodeSelection()
