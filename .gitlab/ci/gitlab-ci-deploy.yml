@@ -1,4 +1,6 @@
 sentry:
+  dependencies:
+    - notarize
   stage: deploy
   artifacts:
     expire_in: 7d
@@ -8,6 +10,13 @@ sentry:
     - merge_requests
     - master
     - develop
+  before_script:
+    - echo "${PATH}"
+    - pwd
+    - unset cd
+    - direnv allow
+    - eval "$(direnv export bash)"
+    - eval "$(rbenv init -)"
   script:
     - bundle exec fastlane ping_sentry
   tags:
@@ -33,6 +42,13 @@ s3:
     - merge_requests
     - master
     - develop
+  before_script:
+    - echo "${PATH}"
+    - pwd
+    - unset cd
+    - direnv allow
+    - eval "$(direnv export bash)"
+    - eval "$(rbenv init -)"
   script:
     - bundle exec fastlane deploy
   tags:
@@ -55,6 +71,13 @@ delete s3:
     - master
     - develop
   when: manual
+  before_script:
+    - echo "${PATH}"
+    - pwd
+    - unset cd
+    - direnv allow
+    - eval "$(direnv export bash)"
+    - eval "$(rbenv init -)"
   script:
     - bundle exec fastlane delete_s3
   tags:
