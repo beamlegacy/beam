@@ -35,30 +35,31 @@ extension BeamText {
 
     static func font(fontSize: CGFloat, strong: Bool, emphasis: Bool, elementKind: ElementKind) -> NSFont {
         var quote = false
-        var size = fontSize
-
-        var font = NSFont(name: "Inter-Regular", size: size)
+        var font = NSFont(name: "Inter-Regular", size: fontSize)
 
         switch elementKind {
         case .bullet:
             break
         case .code:
             break
-        case let .heading:
-            font = NSFont(name: "Inter-Medium", size: size)
+        case .heading:
+            font = NSFont(name: "Inter-Medium", size: fontSize)
         case .quote:
             quote = true
         }
 
         if strong {
-            font = NSFont(name: "Inter-Bold", size: size)
+            font = NSFont(name: "Inter-Bold", size: fontSize)
         }
 
         if emphasis || quote {
-            font = NSFontManager.shared.convert(font!, toHaveTrait: .italicFontMask)
+            guard let selfFont = font else { return NSFont.systemFont(ofSize: fontSize) }
+            font = NSFontManager.shared.convert(selfFont, toHaveTrait: .italicFontMask)
         }
 
-        return font!
+        guard let selfFont = font else { return NSFont.systemFont(ofSize: fontSize) }
+
+        return selfFont
     }
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
