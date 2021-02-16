@@ -212,7 +212,6 @@ class BeamNote: BeamElement {
         return Self.getFetchedNote(title)
     }
 
-
     private static func instanciateNote(_ documentManager: DocumentManager, _ documentStruct: DocumentStruct, keepInMemory: Bool = true) throws -> BeamNote {
         let decoder = JSONDecoder()
         let note = try decoder.decode(BeamNote.self, from: documentStruct.data)
