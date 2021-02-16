@@ -998,14 +998,11 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                         scrollToCursorAtLayout = true
                         self.focussedWidget = newNode
                     }
-                    if let ranges = str.urlRangesInside() {
-                        guard let node = focussedWidget as? TextNode else { continue }
-                        for range in ranges {
-                            if let range = Range(range) {
-                                let linkStr = String(str[range.lowerBound..<range.upperBound])
-                                node.text.setAttributes([.link(linkStr)], to: range)
-                            }
-                        }
+                    guard let node = focussedWidget as? TextNode,
+                          let ranges = node.text.text.urlRangesInside() else { return }
+                    ranges.compactMap { Range($0) }.forEach { range in
+                      let linkStr = String(str[range.lowerBound..<range.upperBound])
+                      node.text.setAttributes([.link(linkStr)], to: range)
                     }
                 }
             }
