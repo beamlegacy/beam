@@ -1,6 +1,7 @@
 stages:
   - test
   - build
+  - dmg
   - notarize
   - deploy
 
@@ -24,6 +25,7 @@ cache:
 
 include:
   - '.gitlab/ci/gitlab-ci-test.yml'
+  - '.gitlab/ci/gitlab-ci-dmg.yml'
   - '.gitlab/ci/gitlab-ci-build.yml'
   - '.gitlab/ci/gitlab-ci-notarize.yml'
   - '.gitlab/ci/gitlab-ci-deploy.yml'

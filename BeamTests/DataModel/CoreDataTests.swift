@@ -23,8 +23,4 @@ class CoreDataTests: XCTestCase {
 
         CoreDataManager.shared = coreDataManager
     }
-
-    override func tearDown() {
-        coreDataManager.destroyPersistentStore()
-    }
 }

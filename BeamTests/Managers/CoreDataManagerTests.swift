@@ -17,10 +17,6 @@ class CoreDataManagerTests: XCTestCase {
         sut = CoreDataManager()
     }
 
-    override func tearDown() {
-        sut.destroyPersistentStore()
-    }
-
     // MARK: - Tests
 
     // MARK: Setup

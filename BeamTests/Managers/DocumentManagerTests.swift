@@ -30,16 +30,6 @@ class DocumentManagerTests: QuickSpec {
             self.helper = DocumentManagerTestsHelper(documentManager: self.sut,
                                                      coreDataManager: self.coreDataManager)
             self.helper.logout()
-
-            waitUntil(timeout: .seconds(10)) { done in
-                self.sut.deleteAllDocuments(includedRemote: false) { _ in
-                    done()
-                }
-            }
-        }
-
-        afterSuite {
-            self.coreDataManager.destroyPersistentStore()
         }
 
         describe(".saveDocument()") {
