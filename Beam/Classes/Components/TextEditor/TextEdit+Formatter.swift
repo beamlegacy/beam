@@ -139,21 +139,32 @@ extension BeamTextEdit {
         updateInlineFormatterFrame()
     }
 
-    internal func updateInlineFormaterOnHover(_ position: NSPoint, _ url: URL?) {
+    static var previousValue: CGFloat = 0
+
+    internal func updateInlineFormaterOnHover(_ position: NSPoint, _ url: URL?, _ mouseDirection: MouseDirection) {
+        initInlineFormatterView(isHyperlinkView: true)
+
         guard let view = inlineFormatter,
               let url = url,
-              let scrollView = enclosingScrollView else { return }
+              isInlineFormatterHidden else { return }
 
-        print(position)
+        var globalOffset = convert(position, to: nil).y
 
-        let yOffset = scrollView.documentVisibleRect.origin.y < 0 ? 0 : scrollView.documentVisibleRect.origin.y
-        let globalOffset = convert(position, to: nil).y
+        isInlineFormatterOnHover = true
+        showOrHideInlineFormatter(isPresent: true)
 
-        print(globalOffset)
-        print(yOffset)
+        switch mouseDirection {
+        case .up:
+            print("top")
+            globalOffset += 10
+        case .down:
+            print("down")
+            globalOffset += 30
+        }
 
         view.urlValue = url.absoluteString
-        view.frame.origin.y = yOffset > globalOffset  ? yOffset - globalOffset : globalOffset
+        view.frame.origin.y = globalOffset
+        view.frame.origin.x = 200
     }
 
     internal func detectFormatterType() {

@@ -1320,16 +1320,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         }
     }
 
-    func showInlineFormatterWithHyperlinkView(position: NSPoint, _ url: URL?) {
-        initInlineFormatterView(isHyperlinkView: true)
-
-        if isInlineFormatterHidden {
-            updateInlineFormaterOnHover(position, url)
-            isInlineFormatterOnHover = true
-            showOrHideInlineFormatter(isPresent: true)
-        }
-    }
-
     func updateInlineFormatterOnDrag(isDragged: Bool = false) {
         initInlineFormatterAndHidePersistentFormatter()
         updateInlineFormatterView(isDragged)

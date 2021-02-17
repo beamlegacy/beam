@@ -653,7 +653,7 @@ public class TextNode: Widget {
 
             if link != nil {
                 cursor = .pointingHand
-                editor.showInlineFormatterWithHyperlinkView(position: mouseInfo.position, link)
+                editor.updateInlineFormaterOnHover(mouseInfo.globalPosition, link, mouseInfo.event.deltaY < 0 ? .down : .up)
             } else if internalLink != nil {
                 cursor = .pointingHand
             } else {

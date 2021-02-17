@@ -141,6 +141,7 @@
 		418EA95A25D696F8005894AA /* HyperlinkView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 418EA95925D696F8005894AA /* HyperlinkView.xib */; };
 		41A969FF2581394300E6594B /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41A969FE2581394300E6594B /* Configuration.swift */; };
 		41EA89B825B838D40033EAB9 /* FormatterViewType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41EA89B725B838D40033EAB9 /* FormatterViewType.swift */; };
+		41F1249725DD2D5000078B6C /* MouseDirection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41F1249625DD2D5000078B6C /* MouseDirection.swift */; };
 		5204290B25A4B3D300DD677C /* document_updated_at.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 5204290A25A4B3D300DD677C /* document_updated_at.graphql */; };
 		5206280C25922D6300D7CD9E /* delete_document.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 5206280B25922D6300D7CD9E /* delete_document.graphql */; };
 		5206281025922D6C00D7CD9E /* update_document.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 5206280F25922D6C00D7CD9E /* update_document.graphql */; };
@@ -603,6 +604,7 @@
 		418EA95925D696F8005894AA /* HyperlinkView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = HyperlinkView.xib; sourceTree = "<group>"; };
 		41A969FE2581394300E6594B /* Configuration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
 		41EA89B725B838D40033EAB9 /* FormatterViewType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatterViewType.swift; sourceTree = "<group>"; };
+		41F1249625DD2D5000078B6C /* MouseDirection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MouseDirection.swift; sourceTree = "<group>"; };
 		5204290A25A4B3D300DD677C /* document_updated_at.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = document_updated_at.graphql; sourceTree = "<group>"; };
 		5206280B25922D6300D7CD9E /* delete_document.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = delete_document.graphql; sourceTree = "<group>"; };
 		5206280F25922D6C00D7CD9E /* update_document.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = update_document.graphql; sourceTree = "<group>"; };
@@ -1234,6 +1236,7 @@
 				4181733625811F6300317ED8 /* Mode.swift */,
 				414B98FD25A27930002E81A3 /* FormatterType.swift */,
 				41EA89B725B838D40033EAB9 /* FormatterViewType.swift */,
+				41F1249625DD2D5000078B6C /* MouseDirection.swift */,
 			);
 			path = Enum;
 			sourceTree = "<group>";
@@ -2172,6 +2175,7 @@
 				4181724E2581107C00317ED8 /* TabStats.swift in Sources */,
 				4181724F2581107C00317ED8 /* WebView.swift in Sources */,
 				96C9AA5725901AA9007D3D98 /* LinksSection.swift in Sources */,
+				41F1249725DD2D5000078B6C /* MouseDirection.swift in Sources */,
 				414B98FA25A23A4F002E81A3 /* NSView+Xib.swift in Sources */,
 				418171F02581107C00317ED8 /* APIResponse.swift in Sources */,
 				418172262581107C00317ED8 /* NSRange+Beam.swift in Sources */,
