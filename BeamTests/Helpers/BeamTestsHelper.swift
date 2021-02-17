@@ -9,30 +9,13 @@ import Foundation
 import Fakery
 
 class BeamTestsHelper {
-    var sut: DocumentManager!
-    lazy var coreDataManager = {
-        CoreDataManager()
-    }()
-    lazy var mainContext = {
-        coreDataManager.mainContext
-    }()
-
-    init() {
-        self.coreDataManager.setup()
-        self.sut = DocumentManager(coreDataManager: self.coreDataManager)
-    }
-
     func destroyDb() {
-        let semaphore = DispatchSemaphore(value: 0)
-
-        coreDataManager.destroyPersistentStore() {
-            self.coreDataManager.setup()
-            semaphore.signal()
-        }
-        semaphore.wait()
+        CoreDataManager.shared.destroyPersistentStore()
+        CoreDataManager.shared.setup()
     }
 
     func populateWithJournalNote(count: Int) {
+        let documentManager = DocumentManager()
         var nbrOfJournal = count
         while nbrOfJournal > 0 {
             let note = BeamNote(title: self.title())
@@ -40,7 +23,7 @@ class BeamTestsHelper {
             note.creationDate = faker.date.backward(days: nbrOfJournal)
             note.updateDate = note.creationDate
             guard let docStruct = note.documentStruct else { return }
-            self.sut.saveDocument(docStruct)
+            documentManager.saveDocument(docStruct)
             nbrOfJournal -= 1
         }
     }

@@ -35,22 +35,10 @@ class DocumentManagerNetworkTests: QuickSpec {
         beforeSuite {
             // Setup CoreData
             self.coreDataManager.setup()
-            waitUntil(timeout: .seconds(10)) { done in
-                self.coreDataManager.destroyPersistentStore {
-                    self.coreDataManager.setup()
-                    done()
-                }
-            }
             CoreDataManager.shared = self.coreDataManager
             self.sut = DocumentManager(coreDataManager: self.coreDataManager)
             self.helper = DocumentManagerTestsHelper(documentManager: self.sut,
                                                      coreDataManager: self.coreDataManager)
-
-            waitUntil(timeout: .seconds(10)) { done in
-                self.sut.deleteAllDocuments(includedRemote: false) { _ in
-                    done()
-                }
-            }
 
             // Try to avoid issues with BeamTextTests creating documents when parsing links
             BeamNote.clearCancellables()
@@ -58,6 +46,7 @@ class DocumentManagerNetworkTests: QuickSpec {
 
         afterSuite {
             self.helper.logout()
+            self.coreDataManager.destroyPersistentStore()
         }
 
         describe(".refreshDocuments()") {

@@ -10,7 +10,8 @@ import Cocoa
 extension BeamTextEdit {
 
     // MARK: - Properties
-    private static let xPosInlineFormatter: CGFloat = 55
+    private static var xPosInlineFormatter: CGFloat = 55
+    private static var centerTextXPosInlineFormatter: CGFloat = 200
     private static let yPosInlineFormatter: CGFloat = 40
     private static let yPosDismissInlineFormatter: CGFloat = 35
     private static let bottomConstraint: CGFloat = -25
@@ -336,7 +337,7 @@ extension BeamTextEdit {
         let currentLowerBound = currentTextRange.lowerBound
         let selectedLowerBound = node.selectedTextRange.lowerBound
 
-        view.frame.origin.x = xOffset + BeamTextEdit.xPosInlineFormatter
+        view.frame.origin.x = xOffset + (centerText ? BeamTextEdit.centerTextXPosInlineFormatter : BeamTextEdit.xPosInlineFormatter)
 
         if currentLowerBound == selectedLowerBound && BeamTextEdit.isSelectableContent {
             BeamTextEdit.isSelectableContent = false

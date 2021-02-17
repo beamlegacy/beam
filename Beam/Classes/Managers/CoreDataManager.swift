@@ -18,12 +18,7 @@ import CoreData
 class CoreDataManager {
     static var shared = CoreDataManager()
     private var storeType = NSSQLiteStoreType
-    private var storeURL: URL?
-
-    init() {
-    }
-    deinit {
-    }
+    private(set) var storeURL: URL?
 
     lazy var backgroundContext: NSManagedObjectContext = {
         let context = self.persistentContainer.newBackgroundContext()
@@ -39,17 +34,22 @@ class CoreDataManager {
         return context
     }()
 
-    func setup(storeType: String? = nil, completion: (() -> Void)? = nil) {
-        self.storeType = storeType ?? self.storeType
+    func setup() {
+        let semaphore = DispatchSemaphore(value: 0)
 
         loadPersistentStore {
-            completion?()
+            semaphore.signal()
         }
+
+        semaphore.wait()
     }
 
     private func loadPersistentStore(completion: @escaping () -> Void) {
-        persistentContainer.loadPersistentStores(completionHandler: { (storeDescription, error) in
+        persistentContainer.loadPersistentStores { (storeDescription, error) in
             self.storeURL = storeDescription.url
+
+            Logger.shared.logDebug("sqlite file: \(String(describing: self.storeURL))",
+                                   category: .coredata)
 
             if let error = error {
                 // Replace this implementation with code to handle the error appropriately.
@@ -69,10 +69,10 @@ class CoreDataManager {
             }
 
             completion()
-        })
+        }
     }
 
-    func destroyPersistentStore(completion: (() -> Void)? = nil) {
+    func destroyPersistentStore() {
         guard let storeURL = storeURL, let persistentStoreCoordinator = mainContext.persistentStoreCoordinator else { return }
 
         do {
@@ -92,8 +92,6 @@ class CoreDataManager {
             fatalError("Can't run destroyPersistentStore")
             // Error Handling
         }
-
-        completion?()
     }
 
     func save() throws {
@@ -136,24 +134,25 @@ class CoreDataManager {
         }
     }
 
-    func importBackup(_ url: URL, _ completion: (() -> Void)? = nil) {
-        destroyPersistentStore {
-            guard let storeURL = self.storeURL else { return }
+    func importBackup(_ url: URL) {
+        destroyPersistentStore()
 
-            let fileManager = FileManager()
+        guard let storeURL = self.storeURL else { return }
 
-            do {
-                if fileManager.fileExists(atPath: storeURL.path) {
-                    try fileManager.removeItem(at: storeURL)
-                }
-                try fileManager.copyItem(at: url, to: storeURL)
-            } catch {
-                // TODO: raise error?
-                Logger.shared.logError("Can't import backup: \(error)", category: .coredata)
+        let fileManager = FileManager()
+
+        do {
+            if fileManager.fileExists(atPath: storeURL.path) {
+                try fileManager.removeItem(at: storeURL)
             }
-
-            completion?()
+            try fileManager.copyItem(at: url, to: storeURL)
+            
+        } catch {
+            // TODO: raise error?
+            Logger.shared.logError("Can't import backup: \(error)", category: .coredata)
         }
+
+        CoreDataManager.shared.setup()
     }
 
     let persistentContainerQueue = OperationQueue()
@@ -204,11 +203,30 @@ class CoreDataManager {
         persistentContainerQueue.addOperation(blockOperation!)
     }
 
+    static func storeURLFromEnv() -> URL? {
+        var name = "Beam-\(Configuration.env)"
+        if let jobId = ProcessInfo.processInfo.environment["CI_JOB_ID"] {
+            Logger.shared.logDebug("Using Gitlab CI Job ID for sqlite file: \(jobId)", category: .coredata)
+
+            name = "Beam-\(Configuration.env)-\(jobId)"
+        }
+
+        let urls = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)
+        guard let directory = urls.first else { return nil }
+
+        return directory.appendingPathComponent("Beam/\(name).sqlite")
+    }
+
     lazy var persistentContainer: NSPersistentCloudKitContainer! = {
         let container = NSPersistentCloudKitContainer(name: "Beam")
-        let description = container.persistentStoreDescriptions.first
-        description?.type = storeType
 
+        guard let containerURL = Self.storeURLFromEnv() else { return container }
+
+        let storeDescription = NSPersistentStoreDescription(url: storeURL ?? containerURL)
+        container.persistentStoreDescriptions = [storeDescription]
+
+        storeURL = containerURL
+        storeType = storeDescription.type
         return container
     }()
 }

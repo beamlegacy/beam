@@ -24,12 +24,7 @@ class DocumentManagerTests: QuickSpec {
         beforeSuite {
             // Setup CoreData
             self.coreDataManager.setup()
-            waitUntil(timeout: .seconds(10)) { done in
-                self.coreDataManager.destroyPersistentStore {
-                    self.coreDataManager.setup()
-                    done()
-                }
-            }
+
             CoreDataManager.shared = self.coreDataManager
             self.sut = DocumentManager(coreDataManager: self.coreDataManager)
             self.helper = DocumentManagerTestsHelper(documentManager: self.sut,
@@ -41,6 +36,10 @@ class DocumentManagerTests: QuickSpec {
                     done()
                 }
             }
+        }
+
+        afterSuite {
+            self.coreDataManager.destroyPersistentStore()
         }
 
         describe(".saveDocument()") {
