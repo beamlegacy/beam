@@ -25,6 +25,7 @@ public class BeamData: ObservableObject {
     @Published var noteCount = 0
     @Published var lastChangedElement: BeamElement?
     @Published var showTabStats = false
+    @Published var isFetching = false
     var noteAutoSaveService: NoteAutoSaveService
 
     var cookies: HTTPCookieStorage
@@ -106,11 +107,12 @@ public class BeamData: ObservableObject {
             }
             journal.append(today)
         }
-        
+
         updateJournal(with: 2, and: journal.count)
     }
 
     func updateJournal(with limit: Int = 0, and fetchOffset: Int = 0) {
+        isFetching = true
         let _journal = BeamNote.fetchNotesWithType(documentManager, type: .journal, limit, fetchOffset)
         journal.append(contentsOf: _journal)
     }
