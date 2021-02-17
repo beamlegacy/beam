@@ -660,13 +660,17 @@ public class TextNode: Widget {
 
             if link != nil {
                 cursor = .pointingHand
-                editor.updateInlineFormaterOnHover(mouseInfo.globalPosition, link, mouseInfo.event.deltaY < 0 ? .down : .up)
+                editor.updateInlineFormaterOnHover(
+                    position: mouseInfo.globalPosition,
+                    url: link,
+                    mouseDirection: mouseInfo.event.deltaY >= 0 ? .up : .down
+                )
             } else if internalLink != nil {
                 cursor = .pointingHand
             } else {
                 cursor = .iBeam
 
-                if editor.isInlineFormatterOnHover {
+                if editor.isInlineFormatterOnHover 	{
                     editor.showOrHideInlineFormatter(isPresent: false)
                 }
             }

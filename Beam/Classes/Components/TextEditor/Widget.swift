@@ -13,7 +13,7 @@ import Combine
 // swiftlint:disable file_length
 public class Widget: NSObject, CALayerDelegate, MouseHandler {
     let layer: CALayer
-    var debug = false
+    var debug = true
     var currentFrameInDocument = NSRect()
 
     var isEmpty: Bool { children.isEmpty }

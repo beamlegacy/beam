@@ -26,28 +26,15 @@ extension String {
     }
 
     func validUrl() -> (isValid: Bool, url: String) {
-        do {
-            let detector = try NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue)
-            var isValid = false
-            var url: String = ""
+        let url = URL(string: self)
 
-            detector.enumerateMatches(in: self, options: [], range: NSRange(self.startIndex..<self.endIndex, in: self)) { (match, _, _) in
-                guard let match = match else { return }
+        guard let domaine = url else { return (false, "") }
+        let isContainsScheme = ["http", "https"].contains(domaine.scheme)
 
-                switch match.resultType {
-                case .link:
-                    guard let matchUrl = match.url else { return }
-
-                    isValid = true
-                    url = matchUrl.absoluteString
-                default:
-                    break
-                }
-            }
-
-            return (isValid, url)
-        } catch {
-            return (false, "")
+        if !domaine.pathExtension.isEmpty || isContainsScheme {
+            return (true, isContainsScheme ? self : "http://\(domaine)")
         }
+
+        return (false, "")
     }
 }

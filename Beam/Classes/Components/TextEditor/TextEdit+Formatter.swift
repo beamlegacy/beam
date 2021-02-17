@@ -142,7 +142,7 @@ extension BeamTextEdit {
 
     static var previousValue: CGFloat = 0
 
-    internal func updateInlineFormaterOnHover(_ position: NSPoint, _ url: URL?, _ mouseDirection: MouseDirection) {
+    internal func updateInlineFormaterOnHover(position: NSPoint, url: URL?, mouseDirection: MouseDirection) {
         initInlineFormatterView(isHyperlinkView: true)
 
         guard let view = inlineFormatter,
@@ -160,7 +160,7 @@ extension BeamTextEdit {
             globalOffset += 10
         case .down:
             print("down")
-            globalOffset += 30
+            globalOffset += 40
         }
 
         view.urlValue = url.absoluteString
