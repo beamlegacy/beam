@@ -31,7 +31,6 @@ class DocumentTests: QuickSpec {
 
         afterEach {
             BeamDate.reset()
-            self.coreDataManager.destroyPersistentStore()
         }
 
         describe(".countWithPredicate()") {

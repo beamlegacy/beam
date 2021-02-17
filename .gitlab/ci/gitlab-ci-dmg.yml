@@ -1,0 +1,22 @@
+build:dmg:
+  dependencies:
+    - build:macos
+  stage: dmg
+  artifacts:
+    expire_in: 7d
+    paths:
+      - builds/
+  only:
+    - merge_requests
+    - master
+    - develop
+  before_script:
+    - echo "${PATH}"
+    - pwd
+  script:
+    - ./scripts/build_dmg.sh
+  tags:
+    - macos-mono
+  interruptible: true
+  retry:
+    max: 2

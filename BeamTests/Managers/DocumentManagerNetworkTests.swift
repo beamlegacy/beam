@@ -46,7 +46,6 @@ class DocumentManagerNetworkTests: QuickSpec {
 
         afterSuite {
             self.helper.logout()
-            self.coreDataManager.destroyPersistentStore()
         }
 
         describe(".refreshDocuments()") {
