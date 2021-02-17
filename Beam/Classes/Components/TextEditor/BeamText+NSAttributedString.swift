@@ -105,12 +105,14 @@ extension BeamText {
             }
 
             stringAttributes[.underlineStyle] = NSUnderlineStyle.single.rawValue
+            stringAttributes[.underlineColor] = NSColor.underlineAndstrikethroughColor
         } else if let link = internalLink {
             stringAttributes[.link] = link
         }
 
         if strikethrough {
             stringAttributes[.strikethroughStyle] = NSUnderlineStyle.single.rawValue
+            stringAttributes[.strikethroughColor] = NSColor.underlineAndstrikethroughColor
         }
 
         if let source = source {

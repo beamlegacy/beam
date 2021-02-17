@@ -129,10 +129,10 @@ public class TextLine {
             let width = CTRunGetTypographicBounds(run, CFRangeMake(0, 0), &ascent, &descent, nil)
 
             if let attributes = CTRunGetAttributes(run) as? [NSAttributedString.Key: Any],
-               attributes[.strikethroughStyle] as? NSNumber != nil,
-               attributes[.underlineStyle] as? NSNumber != nil {
+               let color = attributes[.strikethroughColor] as? NSColor,
+               attributes[.strikethroughStyle] as? NSNumber != nil {
 
-                context.setStrokeColor(NSColor.underlineAndstrikethroughColor.cgColor)
+                context.setStrokeColor(color.cgColor)
 
                 let  y = CGFloat(roundf(Float(ascent / 3.0)))
 
