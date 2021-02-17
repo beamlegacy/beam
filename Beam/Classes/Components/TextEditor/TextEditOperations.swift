@@ -217,6 +217,7 @@ extension TextRoot {
 
     func deleteBackward() {
         guard root.state.nodeSelection == nil else {
+            editor.cancelPopover()
             eraseNodeSelection(createEmptyNodeInPlace: false)
             return
         }

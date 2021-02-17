@@ -585,7 +585,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                 return
             case KeyCode.escape.rawValue:
                 rootNode.cancelSelection()
-
                 dismissPopoverOrFormatter()
                 return
             default:
