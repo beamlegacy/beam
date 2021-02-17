@@ -285,8 +285,6 @@ extension BeamTextEdit {
         let currentLowerBound = currentTextRange.lowerBound
         let selectedLowerBound = node.selectedTextRange.lowerBound
 
-        print(xOffset)
-
         view.frame.origin.x = xOffset + (centerText ? BeamTextEdit.centerTextXPosInlineFormatter : BeamTextEdit.xPosInlineFormatter)
 
         if currentLowerBound == selectedLowerBound && BeamTextEdit.isSelectableContent {
