@@ -52,6 +52,9 @@ struct AdvancedPreferencesView: View {
             Preferences.Section(title: "Environment:") {
                 Text(env)
             }
+            Preferences.Section(title: "CoreData:") {
+                Text(CoreDataManager.shared.storeURL?.absoluteString ?? "-").fixedSize(horizontal: false, vertical: true)
+            }
             Preferences.Section(title: "Sparkle Automatic Update:") {
                 Text(String(describing: sparkleUpdate))
             }

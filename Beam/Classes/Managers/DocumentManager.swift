@@ -803,26 +803,25 @@ class DocumentManager {
 
     // swiftlint:disable:next cyclomatic_complexity
     func deleteAllDocuments(includedRemote: Bool = true, completion: ((Result<Bool, Error>) -> Void)? = nil) {
-        CoreDataManager.shared.destroyPersistentStore {
-            CoreDataManager.shared.setup()
+        CoreDataManager.shared.destroyPersistentStore()
+        CoreDataManager.shared.setup()
 
-            guard includedRemote else {
+        guard includedRemote else {
+            completion?(.success(true))
+            return
+        }
+
+        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            completion?(.success(false))
+            return
+        }
+
+        self.documentRequest.deleteAllDocuments { result in
+            switch result {
+            case .failure(let error):
+                completion?(.failure(error))
+            case .success:
                 completion?(.success(true))
-                return
-            }
-
-            guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
-                completion?(.success(false))
-                return
-            }
-
-            self.documentRequest.deleteAllDocuments { result in
-                switch result {
-                case .failure(let error):
-                    completion?(.failure(error))
-                case .success:
-                    completion?(.success(true))
-                }
             }
         }
     }
