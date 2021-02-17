@@ -256,8 +256,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         var rect = NSRect(x: leadingAlignment, y: topOffsetActual, width: width, height: r.height)
         let textNodeWidth = textWidth + gutterWidth
 
-        print(leadingAlignment)
-
         if centerText {
             let x = (frame.width - textWidth) / 2
             rect = NSRect(x: x, y: topOffsetActual, width: textNodeWidth, height: r.height)
