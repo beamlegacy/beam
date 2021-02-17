@@ -38,7 +38,8 @@ struct JournalView: View {
                     && totalJournal != journal.count {
                     data.updateJournal(with: 2, and: journal.count)
                 }
-                data.isFetching = totalJournal != journal.count
+                // Imo we shouldn't have a case were totalJournal == 0, but alway >= 1
+                data.isFetching = totalJournal != journal.count && totalJournal != 0
                 return Color.clear
             })
             .padding(.top, offset)
