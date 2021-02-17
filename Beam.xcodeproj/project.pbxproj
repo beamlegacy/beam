@@ -138,6 +138,11 @@
 		4181744325812C5F00317ED8 /* NSColor+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181744225812C5F00317ED8 /* NSColor+Beam.swift */; };
 		41855A3A25D1334F00DA49DC /* BeamCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41855A3925D1334F00DA49DC /* BeamCollectionView.swift */; };
 		41A969FF2581394300E6594B /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41A969FE2581394300E6594B /* Configuration.swift */; };
+		41D169A625DC07260018E5F2 /* Inter-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 41D169A125DC07250018E5F2 /* Inter-Bold.otf */; };
+		41D169A725DC07260018E5F2 /* Inter-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 41D169A225DC07260018E5F2 /* Inter-Regular.otf */; };
+		41D169A825DC07260018E5F2 /* Inter-SemiBold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 41D169A325DC07260018E5F2 /* Inter-SemiBold.otf */; };
+		41D169A925DC07260018E5F2 /* Inter-Italic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 41D169A425DC07260018E5F2 /* Inter-Italic.otf */; };
+		41D169AA25DC07260018E5F2 /* Inter-Medium.otf in Resources */ = {isa = PBXBuildFile; fileRef = 41D169A525DC07260018E5F2 /* Inter-Medium.otf */; };
 		41EA89B825B838D40033EAB9 /* FormatterViewType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41EA89B725B838D40033EAB9 /* FormatterViewType.swift */; };
 		5204290B25A4B3D300DD677C /* document_updated_at.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 5204290A25A4B3D300DD677C /* document_updated_at.graphql */; };
 		5206280C25922D6300D7CD9E /* delete_document.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 5206280B25922D6300D7CD9E /* delete_document.graphql */; };
@@ -598,6 +603,11 @@
 		4181744225812C5F00317ED8 /* NSColor+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSColor+Beam.swift"; sourceTree = "<group>"; };
 		41855A3925D1334F00DA49DC /* BeamCollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamCollectionView.swift; sourceTree = "<group>"; };
 		41A969FE2581394300E6594B /* Configuration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
+		41D169A125DC07250018E5F2 /* Inter-Bold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter-Bold.otf"; sourceTree = "<group>"; };
+		41D169A225DC07260018E5F2 /* Inter-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter-Regular.otf"; sourceTree = "<group>"; };
+		41D169A325DC07260018E5F2 /* Inter-SemiBold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter-SemiBold.otf"; sourceTree = "<group>"; };
+		41D169A425DC07260018E5F2 /* Inter-Italic.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter-Italic.otf"; sourceTree = "<group>"; };
+		41D169A525DC07260018E5F2 /* Inter-Medium.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter-Medium.otf"; sourceTree = "<group>"; };
 		41EA89B725B838D40033EAB9 /* FormatterViewType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatterViewType.swift; sourceTree = "<group>"; };
 		5204290A25A4B3D300DD677C /* document_updated_at.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = document_updated_at.graphql; sourceTree = "<group>"; };
 		5206280B25922D6300D7CD9E /* delete_document.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = delete_document.graphql; sourceTree = "<group>"; };
@@ -809,6 +819,7 @@
 			isa = PBXGroup;
 			children = (
 				56A5BD1A25CC590500ED7C50 /* NaturalLanguage */,
+				41D1698625DBFDBB0018E5F2 /* Font */,
 				418171112581082200317ED8 /* Assets.xcassets */,
 				418170FE2581060A00317ED8 /* Colors.xcassets */,
 			);
@@ -1262,6 +1273,18 @@
 				418171D62581107C00317ED8 /* JournalView.swift */,
 			);
 			path = Journal;
+			sourceTree = "<group>";
+		};
+		41D1698625DBFDBB0018E5F2 /* Font */ = {
+			isa = PBXGroup;
+			children = (
+				41D169A125DC07250018E5F2 /* Inter-Bold.otf */,
+				41D169A425DC07260018E5F2 /* Inter-Italic.otf */,
+				41D169A525DC07260018E5F2 /* Inter-Medium.otf */,
+				41D169A225DC07260018E5F2 /* Inter-Regular.otf */,
+				41D169A325DC07260018E5F2 /* Inter-SemiBold.otf */,
+			);
+			path = Font;
 			sourceTree = "<group>";
 		};
 		520627F625922D4900D7CD9E /* Documents */ = {
@@ -1931,17 +1954,22 @@
 				5206281C25922D9700D7CD9E /* import_documents.graphql in Resources */,
 				5206280C25922D6300D7CD9E /* delete_document.graphql in Resources */,
 				5206281825922D8A00D7CD9E /* delete_all_documents.graphql in Resources */,
+				41D169A725DC07260018E5F2 /* Inter-Regular.otf in Resources */,
 				5206281025922D6C00D7CD9E /* update_document.graphql in Resources */,
 				56A5BD3725CCAFA400ED7C50 /* english.stopwords in Resources */,
 				414B98F625A23A04002E81A3 /* FormatterView.xib in Resources */,
 				4159E9E2259A2575005FD355 /* BidirectionalPopover.xib in Resources */,
 				418171F42581107C00317ED8 /* sign_up.graphql in Resources */,
 				418171F62581107C00317ED8 /* sign_in.graphql in Resources */,
+				41D169A925DC07260018E5F2 /* Inter-Italic.otf in Resources */,
 				4159EA0B259A3568005FD355 /* BidirectionalPopoverResultItem.xib in Resources */,
 				418170FF2581060A00317ED8 /* Colors.xcassets in Resources */,
+				41D169A825DC07260018E5F2 /* Inter-SemiBold.otf in Resources */,
+				41D169AA25DC07260018E5F2 /* Inter-Medium.otf in Resources */,
 				418172172581107C00317ED8 /* OverrideConsole.js in Resources */,
 				418172FF25811DB200317ED8 /* Readability.js in Resources */,
 				414B987B259DE2E2002E81A3 /* BidirectionalPopoverActionItem.xib in Resources */,
+				41D169A625DC07260018E5F2 /* Inter-Bold.otf in Resources */,
 				418171122581082200317ED8 /* Assets.xcassets in Resources */,
 				56A5BD3125CC680E00ED7C50 /* url.stopwords in Resources */,
 				4181730025811DB200317ED8 /* SelectionObserver.js in Resources */,

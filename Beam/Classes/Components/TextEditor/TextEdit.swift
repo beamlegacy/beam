@@ -46,6 +46,8 @@ public struct MouseInfo {
 public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
     var data: BeamData?
+    var centerText = false
+
     var note: BeamElement! {
         didSet {
             updateRoot(with: note)
@@ -90,6 +92,9 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     internal var inlineFormatter: FormatterView?
     internal var isInlineFormatterHidden = true
     internal var currentTextRange: Range<Int> = 0..<0
+
+    let gutterWidth: CGFloat = TextNode.actionLayerXOffset + TextNode.actionLayerWidth
+    var textWidth: CGFloat { isBig ? 704 : 544 }
 
     public init(root: BeamElement, font: Font = Font.main) {
         let start = CFAbsoluteTimeGetCurrent()
@@ -226,7 +231,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         return rootNode.selectedText
     }
 
-    static let bigThreshold = CGFloat(866)
+    static let bigThreshold = CGFloat(1024)
     var isBig: Bool {
         frame.width >= Self.bigThreshold
     }
@@ -248,10 +253,19 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     func relayoutRoot() {
         let r = bounds
         let width = CGFloat(isBig ? frame.width - 200 - leadingAlignment : 450)
-        let rect = NSRect(x: leadingAlignment, y: topOffsetActual, width: width, height: r.height)
+        var rect = NSRect(x: leadingAlignment, y: topOffsetActual, width: width, height: r.height)
+        let textNodeWidth = textWidth + gutterWidth
 
-        rootNode.availableWidth = rect.width
-        rootNode.setLayout(rect)
+        if centerText {
+            let x = (frame.width - textWidth) / 2
+            rect = NSRect(x: x, y: topOffsetActual, width: textNodeWidth, height: r.height)
+        }
+
+        // Disable CALayer animation
+        CATransaction.disableAnimations {
+            rootNode.availableWidth = centerText ? textNodeWidth : rect.width
+            rootNode.setLayout(rect)
+        }
     }
 
     // This is the root node of what we are editing:

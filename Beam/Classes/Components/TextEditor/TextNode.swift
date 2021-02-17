@@ -46,11 +46,9 @@ public class TextNode: Widget {
 
     var mouseIsDragged = false
     var interlineFactor = CGFloat(1.3)
-    var interNodeSpacing = CGFloat(4)
-    var indent: CGFloat {
-        selfVisible ? 25 : 0
-    }
-    var fontSize = CGFloat(17)
+    var interNodeSpacing = CGFloat(0)
+    var indent: CGFloat { selfVisible ? 18 : 0 }
+    var fontSize: CGFloat = 15
 
     override var contentsScale: CGFloat {
         didSet {
@@ -184,7 +182,9 @@ public class TextNode: Widget {
     private let deboucingClickInterval = 0.23
     private let actionImageLayer = CALayer()
     private let actionTextLayer = CATextLayer()
-    private let actionLayerFrame = CGRect(x: 30, y: 0, width: 80, height: 20)
+    public static var actionLayerWidth = CGFloat(80)
+    public static var actionLayerXOffset = CGFloat(30)
+    private var actionLayerFrame: CGRect { CGRect(x: Self.actionLayerXOffset, y: 0, width: Self.actionLayerWidth, height: 20) }
 
     public static func == (lhs: TextNode, rhs: TextNode) -> Bool {
         return lhs === rhs
@@ -210,8 +210,8 @@ public class TextNode: Widget {
 
         super.init(editor: editor)
 
-        addDisclosureLayer(at: NSPoint(x: 14, y: firstLineBaseline - 14))
-        addBulletPointLayer(at: NSPoint(x: 14, y: firstLineBaseline - 14))
+        addDisclosureLayer(at: NSPoint(x: 14, y: isHeader ? firstLineBaseline - 8 : firstLineBaseline - 13))
+        addBulletPointLayer(at: NSPoint(x: 14, y: isHeader ? firstLineBaseline - 8 : firstLineBaseline - 13))
 
         element.$children
             .sink { [unowned self] elements in
@@ -425,7 +425,14 @@ public class TextNode: Widget {
                 }
 
                 if self as? TextRoot == nil {
-                    contentsFrame.size.height += interNodeSpacing
+                    switch elementKind {
+                        case .heading(1):
+                            contentsFrame.size.height += 8
+                        case .heading(2):
+                            contentsFrame.size.height += 4
+                        default:
+                            contentsFrame.size.height -= 5
+                    }
                 }
             }
 
@@ -925,6 +932,16 @@ public class TextNode: Widget {
     }
 
     private func buildAttributedString(for beamText: BeamText) -> NSAttributedString {
+
+        switch elementKind {
+        case .heading(1):
+            fontSize = isBig ? 26 : 22
+        case .heading(2):
+            fontSize = isBig ? 22 : 18
+        default:
+            fontSize = isBig ? 17 : 15
+        }
+
         let str = beamText.buildAttributedString(fontSize: fontSize, cursorPosition: cursorPosition, elementKind: elementKind)
         let paragraphStyle = NSMutableParagraphStyle()
         //        paragraphStyle.alignment = .justified
