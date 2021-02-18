@@ -344,10 +344,15 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         defer { lastInput = string }
         guard preDetectInput(string) else { return }
         rootNode.insertText(string: string, replacementRange: replacementRange)
-        updatePopover()
         hideInlineFormatter()
         postDetectInput(string)
         reBlink()
+
+        // DispatchQueue to update the popover after the node is initialized
+        DispatchQueue.main.async {[weak self] in
+            guard let self = self else { return }
+            self.updatePopover()
+        }
     }
 
     public func firstRect(forCharacterRange range: Range<Int>) -> (NSRect, Range<Int>) {
@@ -673,8 +678,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                         return
                     }
 
-                    if command {
-                        cancelPopover()
+                    if command && rootNode.textIsSelected {
                         toggleUnderline()
                         return
                     }
@@ -1297,11 +1301,17 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     private var deadNodes: [TextNode] = []
 
     internal func showBidirectionalPopover(prefix: Int, suffix: Int) {
-        popoverPrefix = prefix
-        popoverSuffix = suffix
-        cursorStartPosition = rootNode.textIsSelected ? 0 : rootNode.cursorPosition
-        initPopover()
-        showOrHidePersistentFormatter(isPresent: false)
+        // DispatchQueue to init the popover after the node is initialized
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            let cursorPosition = prefix == 0 ? self.rootNode.cursorPosition : self.rootNode.cursorPosition - 1
+
+            self.popoverPrefix = prefix
+            self.popoverSuffix = suffix
+            self.cursorStartPosition = self.rootNode.textIsSelected ? 0 : cursorPosition
+            self.initPopover()
+            self.showOrHidePersistentFormatter(isPresent: false)
+        }
     }
 
     internal func initAndShowPersistentFormatter() {
