@@ -88,6 +88,18 @@ extension NSColor {
         return loadColor(named: "Niobium")
     }
 
+    static var cardTitleColor: NSColor {
+        return loadColor(named: "Niobium")
+    }
+
+    static var cardTimeColor: NSColor {
+        return loadColor(named: "LightStoneGray")
+    }
+
+    static var cardOptionIconColor: NSColor {
+        return loadColor(named: "LightStoneGray")
+    }
+
     // Reference Linked
 
     static var linkedSectionTitleColor: NSColor {
