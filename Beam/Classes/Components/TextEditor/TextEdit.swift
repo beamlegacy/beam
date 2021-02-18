@@ -46,7 +46,11 @@ public struct MouseInfo {
 public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
     var data: BeamData?
-    var centerText = false
+    var centerText = false {
+        didSet {
+            drawCardHeader()
+        }
+    }
 
     var note: BeamElement! {
         didSet {
@@ -92,6 +96,11 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     internal var inlineFormatter: FormatterView?
     internal var isInlineFormatterHidden = true
     internal var currentTextRange: Range<Int> = 0..<0
+
+    let cardHeaderLayer = CALayer()
+    let cardTitleLayer = CATextLayer()
+    let cardOptionLayer = CALayer()
+    let cardTimeLayer = CATextLayer()
 
     let gutterWidth: CGFloat = TextNode.actionLayerXOffset + TextNode.actionLayerWidth
     var textWidth: CGFloat { isBig ? 704 : 544 }
@@ -214,6 +223,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             rootNode.state.selectedTextRange
         }
     }
+
     var markedTextRange: Range<Int> {
         set {
             assert(newValue.lowerBound != NSNotFound)
@@ -254,18 +264,24 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         let r = bounds
         let width = CGFloat(isBig ? frame.width - 200 - leadingAlignment : 450)
         var rect = NSRect(x: leadingAlignment, y: topOffsetActual, width: width, height: r.height)
-        let textNodeWidth = textWidth + gutterWidth
 
         if centerText {
             let x = (frame.width - textWidth) / 2
-            rect = NSRect(x: x, y: topOffsetActual, width: textNodeWidth, height: r.height)
-        }
+            let textNodeWidth = textWidth + gutterWidth
 
-        // Disable CALayer animation
-        CATransaction.disableAnimations {
-            rootNode.availableWidth = centerText ? textNodeWidth : rect.width
+            rect = NSRect(x: x, y: topOffsetActual + 148, width: textNodeWidth, height: r.height)
+
+            // Disable CALayer animation
+            CATransaction.disableAnimations {
+                rootNode.availableWidth = textNodeWidth
+                updateCardHearderLayer(rect)
+                rootNode.setLayout(rect)
+            }
+        } else {
+            rootNode.availableWidth = rect.width
             rootNode.setLayout(rect)
         }
+
     }
 
     // This is the root node of what we are editing:
@@ -287,6 +303,47 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     var footerHeight: CGFloat = 60 { didSet { invalidateIntrinsicContentSize() } }
     var topOffsetActual: CGFloat {
         config.keepCursorMidScreen ? visibleRect.height / 2 : topOffset
+    }
+
+    func drawCardHeader() {
+        guard let cardNote = note as? BeamNote,
+              let layer = layer else { return }
+
+        var icon = NSImage(named: "editor-options")
+        icon = icon?.fill(color: NSColor.cardOptionIconColor)
+
+        cardOptionLayer.contents = icon?.cgImage
+        cardOptionLayer.contentsGravity = .resizeAspect
+
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMMM dd yyyy, H:mm a"
+
+        cardTitleLayer.foregroundColor = NSColor.cardTitleColor.cgColor
+        cardTitleLayer.font = NSFont(name: "Inter-SemiBold", size: 0)
+        cardTitleLayer.fontSize = isBig ? 30 : 26
+        cardTitleLayer.string = cardNote.title
+
+        cardTimeLayer.foregroundColor = NSColor.cardTimeColor.cgColor
+        cardTimeLayer.font = NSFont(name: "Inter-Regular", size: 0)
+        cardTimeLayer.fontSize = isBig ? 12 : 10
+        cardTimeLayer.string = formatter.string(from: note.updateDate)
+
+        cardHeaderLayer.addSublayer(cardTitleLayer)
+        // TODO: show option layer later 
+        // cardHeaderLayer.addSublayer(cardOptionLayer)
+
+        layer.addSublayer(cardHeaderLayer)
+        layer.addSublayer(cardTimeLayer)
+    }
+
+    func updateCardHearderLayer(_ rect: NSRect) {
+        cardHeaderLayer.frame = CGRect(origin: CGPoint(x: rect.origin.x, y: 60), size: NSSize(width: rect.width, height: cardTitleLayer.preferredFrameSize().height))
+        cardTitleLayer.frame = CGRect(origin: CGPoint(x: 0, y: 0), size: NSSize(width: rect.width, height: cardTitleLayer.preferredFrameSize().height))
+        cardOptionLayer.frame = CGRect(origin: CGPoint(x: rect.width - 16, y: 10), size: NSSize(width: 16, height: 16))
+        cardTimeLayer.frame = CGRect(
+            origin: CGPoint(x: rect.origin.x, y: isBig ? 101 : 95),
+            size: NSSize(width: rect.width, height: cardTimeLayer.preferredFrameSize().height)
+        )
     }
 
     override public var intrinsicContentSize: NSSize {
@@ -1203,6 +1260,9 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         window.acceptsMouseMovedEvents = true
         rootNode.contentsScale = window.backingScaleFactor
         titleLayer.contentsScale = window.backingScaleFactor
+
+        cardTitleLayer.contentsScale = window.backingScaleFactor
+        cardTimeLayer.contentsScale = window.backingScaleFactor
     }
 
     var onBlinkTime: Double = 0.7
