@@ -1162,7 +1162,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     public func setHotSpotToNode(_ node: Widget) {
-        setHotSpot(node.frameInDocument.insetBy(dx: -15, dy: -15))
+        setHotSpot(node.frameInDocument.insetBy(dx: -30, dy: -30))
     }
 
     public func rectAt(_ position: Int) -> NSRect {
@@ -1194,6 +1194,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         cursorUpdate(with: event)
     }
 
+    // swiftlint:disable:next cyclomatic_complexity
     public func mouseDraggedUpdate(with event: NSEvent) {
         guard let startPos = mouseDownPos else { return }
         let eventPoint = convert(event.locationInWindow)
@@ -1201,8 +1202,11 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
         guard focussedWidget as? LinkedReferenceNode == nil else { return }
         if let selection = rootNode?.state.nodeSelection, let focussedNode = focussedWidget as? TextNode {
-            let textNodes = widgets.compactMap { $0 as? TextNode }.filter { (node) -> Bool in
+            var textNodes = widgets.compactMap { $0 as? TextNode }.filter { (node) -> Bool in
                 return node as? LinkedReferenceNode == nil
+            }
+            if eventPoint.y < startPos.y {
+                textNodes = textNodes.reversed()
             }
             selection.start = focussedNode
             selection.append(focussedNode)
@@ -1210,7 +1214,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                 guard textNode as? LinkedReferenceNode == nil else { continue }
                 if !selection.nodes.contains(textNode) {
                     selection.append(textNode)
-                    setHotSpotToNode(textNode)
                 }
             }
             for selectedNode in selection.nodes {
@@ -1218,8 +1221,12 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     selection.remove(selectedNode)
                 }
             }
-            guard let lastNode = textNodes.last else { return }
-            selection.end = lastNode
+            if textNodes.isEmpty {
+                selection.end = focussedNode
+            } else {
+                guard let lastNode = textNodes.last else { return }
+                selection.end = lastNode
+            }
             setHotSpotToNode(selection.end)
         } else {
             if widgets.count > 0 {
