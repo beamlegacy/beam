@@ -347,7 +347,8 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     override public var intrinsicContentSize: NSSize {
-        return NSSize(width: 300, height: rootNode.idealSize.height + topOffsetActual + footerHeight)
+        let height = centerText ? rootNode.idealSize.height + topOffsetActual + footerHeight + 50 : rootNode.idealSize.height + topOffsetActual + footerHeight
+        return NSSize(width: 300, height: height)
     }
 
     public func setHotSpot(_ spot: NSRect) {
