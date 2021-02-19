@@ -21,7 +21,6 @@ public struct WebView: View, NSViewRepresentable {
     }
 
     public func updateNSView(_ nsView: WebView.NSViewType, context: NSViewRepresentableContext<WebView>) {
-        
         nsView.contentView = webView
     }
 }

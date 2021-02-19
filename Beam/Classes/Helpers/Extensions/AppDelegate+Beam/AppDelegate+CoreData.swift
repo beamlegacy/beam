@@ -96,7 +96,6 @@ extension AppDelegate {
             alert.informativeText = "\(documentsCount) notes have been imported"
             alert.runModal()
 
-
             openPanel?.close()
         }
     }

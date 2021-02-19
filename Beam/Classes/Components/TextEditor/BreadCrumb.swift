@@ -4,6 +4,7 @@
 //
 //  Created by Sebastien Metrot on 28/12/2020.
 //
+// swiftlint:disable file_length
 
 import Foundation
 import AppKit
@@ -367,7 +368,6 @@ class BreadCrumb: Widget {
         invalidateLayout()
     }
 
-
     override func nodeFor(_ element: BeamElement) -> TextNode {
         if let node = mapping[element] {
             return node
@@ -406,6 +406,4 @@ class BreadCrumb: Widget {
         }
         mapping.removeValue(forKey: node.element)
     }
-
-
 }

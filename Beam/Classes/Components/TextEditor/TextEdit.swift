@@ -882,11 +882,10 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
         do {
             let docAttrRtf: [NSAttributedString.DocumentAttributeKey: Any] = [.documentType: NSAttributedString.DocumentType.rtf, .characterEncoding: String.Encoding.utf8]
-            let rtfData = try strNodes.data(from: NSMakeRange(0, strNodes.length), documentAttributes: docAttrRtf)
+            let rtfData = try strNodes.data(from: NSRange(location: 0, length: strNodes.length), documentAttributes: docAttrRtf)
             pasteboard.setData(rtfData, forType: .rtf)
             pasteboard.setString(strNodes.string, forType: .string)
-        }
-        catch {
+        } catch {
             Logger.shared.logError("Error creating RTF from Attributed String", category: .general)
         }
     }
