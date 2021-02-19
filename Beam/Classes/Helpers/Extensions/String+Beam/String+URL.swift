@@ -19,10 +19,12 @@ extension String {
     }
 
     func urlRangesInside() -> [NSRange]? {
-        let detector = try! NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue)
+        guard let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue) else {
+            return nil
+        }
         let matches = detector.matches(in: self, options: [], range: NSRange(location: 0, length: self.utf16.count))
-        
-        return matches.compactMap({$0.range})
+
+        return matches.compactMap({ $0.range })
     }
 
     func validUrl() -> (isValid: Bool, url: String) {

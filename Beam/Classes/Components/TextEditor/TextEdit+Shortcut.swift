@@ -40,7 +40,11 @@ extension BeamTextEdit {
         }
 
         showBidirectionalPopover(prefix: 0, suffix: 0)
-        updatePopover()
+
+        DispatchQueue.main.async {[weak self] in
+            guard let self = self else { return }
+            self.updatePopover()
+        }
     }
 
     internal func toggleUnorderedAndOrderedList() {

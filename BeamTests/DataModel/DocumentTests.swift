@@ -31,7 +31,6 @@ class DocumentTests: QuickSpec {
 
         afterEach {
             BeamDate.reset()
-            self.coreDataManager.destroyPersistentStore()
         }
 
         describe(".countWithPredicate()") {
@@ -128,18 +127,14 @@ class DocumentTests: QuickSpec {
                 document2.title = title3
 
                 expect { try CoreDataManager.save(self.backgroundContext) }.toNot(throwError())
-                DocumentManager.saveContext(context: self.backgroundContext) { result in
-                    expect { try result.get() }.toNot(throwError())
-                }
+                expect { try DocumentManager.saveContext(context: self.backgroundContext) }.toNot(throwError())
 
                 expect { try CoreDataManager.save(self.mainContext) }.to(throwError { (error: NSError) in
                     expect(error.code).to(equal(133020))
                 })
-                DocumentManager.saveContext(context: self.mainContext) { result in
-                    expect { try result.get() }.to(throwError { (error: NSError) in
-                        expect(error.code).to(equal(133020))
-                    })
-                }
+                expect { try DocumentManager.saveContext(context: self.mainContext) }.to(throwError { (error: NSError) in
+                    expect(error.code).to(equal(133020))
+                })
 
                 expect(document1.title).to(equal(title2))
                 self.mainContext.refresh(document1, mergeChanges: false)

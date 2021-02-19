@@ -709,9 +709,9 @@ public class TextNode: Widget {
             return false
         case .select(let o):
             root?.selectedTextRange = text.clamp(p < o ? cursorPosition..<o : o..<cursorPosition)
+            mouseIsDragged = root?.state.nodeSelection == nil
 
             if root?.state.nodeSelection == nil {
-                mouseIsDragged = true
                 editor.updateInlineFormatterOnDrag(isDragged: true)
             }
         }

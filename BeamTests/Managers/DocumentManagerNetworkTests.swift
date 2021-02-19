@@ -7,6 +7,9 @@ import Quick
 import Nimble
 import Combine
 import Alamofire
+import Promises
+import PromiseKit
+import PMKFoundation
 
 @testable import Beam
 // swiftlint:disable:next type_body_length
@@ -25,7 +28,7 @@ class DocumentManagerNetworkTests: QuickSpec {
     // swiftlint:disable:next function_body_length
     override func spec() {
         beforeEach {
-            self.helper.login()
+            BeamTestsHelper.login()
         }
 
         afterEach {
@@ -45,8 +48,7 @@ class DocumentManagerNetworkTests: QuickSpec {
         }
 
         afterSuite {
-            self.helper.logout()
-            self.coreDataManager.destroyPersistentStore()
+            BeamTestsHelper.logout()
         }
 
         describe(".refreshDocuments()") {
@@ -200,6 +202,8 @@ class DocumentManagerNetworkTests: QuickSpec {
 
         describe(".refreshDocument()") {
             var docStruct: DocumentStruct!
+            var networkCalls: Int!
+
             afterEach {
                 // Not to leave any on the server
                 self.helper.deleteDocumentStruct(docStruct)
@@ -211,25 +215,72 @@ class DocumentManagerNetworkTests: QuickSpec {
                     docStruct = self.helper.createDocumentStruct()
                     self.helper.saveLocally(docStruct)
                     self.helper.saveRemotely(docStruct)
+                    networkCalls = APIRequest.callsCount
                 }
 
                 afterEach {
                     BeamDate.reset()
                 }
 
-                it("doesn't refresh the local document") {
-                    let networkCalls = APIRequest.callsCount
+                context("with Alamofire") {
+                    it("doesn't refresh the local document") {
+                        expect(AuthenticationManager.shared.isAuthenticated).to(beTrue())
+                        expect(Configuration.networkEnabled).to(beTrue())
 
-                    expect(AuthenticationManager.shared.isAuthenticated).to(beTrue())
-                    expect(Configuration.networkEnabled).to(beTrue())
-
-                    waitUntil(timeout: .seconds(10)) { done in
-                        self.sut.refreshDocument(docStruct) { result in
-                            expect { try result.get() }.toNot(throwError())
-                            expect { try result.get() }.to(beFalse())
-                            expect(APIRequest.callsCount - networkCalls).to(equal(1))
-                            done()
+                        waitUntil(timeout: .seconds(10)) { done in
+                            self.sut.refreshDocument(docStruct) { result in
+                                expect { try result.get() }.toNot(throwError())
+                                expect { try result.get() }.to(beFalse())
+                                done()
+                            }
                         }
+
+                        expect(APIRequest.callsCount - networkCalls).to(equal(1))
+                    }
+                }
+
+                context("with Foundation") {
+                    it("doesn't refresh the local document") {
+                        expect(AuthenticationManager.shared.isAuthenticated).to(beTrue())
+                        expect(Configuration.networkEnabled).to(beTrue())
+
+                        waitUntil(timeout: .seconds(10)) { done in
+                            self.sut.refreshDocument(docStruct) { result in
+                                expect { try result.get() }.toNot(throwError())
+                                expect { try result.get() }.to(beFalse())
+                                done()
+                            }
+                        }
+
+                        expect(APIRequest.callsCount - networkCalls).to(equal(1))
+                    }
+                }
+
+                context("with PromiseKit") {
+                    it("doesn't refresh the local document") {
+                        waitUntil(timeout: .seconds(10)) { done in
+                            let promise: PromiseKit.Promise<Bool> = self.sut.refreshDocument(docStruct)
+                            promise.done { refreshed in
+                                expect(refreshed).to(beFalse())
+                                done()
+                            }.catch { _ in }
+                        }
+
+                        expect(APIRequest.callsCount - networkCalls).to(equal(1))
+                    }
+                }
+
+                context("with Promises") {
+                    it("doesn't refresh the local document") {
+                        waitUntil(timeout: .seconds(10)) { done in
+                            let promise: Promises.Promise<Bool> = self.sut.refreshDocument(docStruct)
+                            promise.then { refreshed in
+                                expect(refreshed).to(beFalse())
+                                done()
+                            }
+                        }
+
+                        expect(APIRequest.callsCount - networkCalls).to(equal(1))
                     }
                 }
             }
@@ -238,26 +289,65 @@ class DocumentManagerNetworkTests: QuickSpec {
                 context("without conflict") {
                     let ancestor = "1\n2\n3"
                     let newRemote = "1\n2\n3\n4"
+
                     beforeEach {
                         docStruct = self.helper.createLocalAndRemoteVersions(ancestor, newRemote: newRemote)
+                        networkCalls = APIRequest.callsCount
                     }
 
                     afterEach {
                         BeamDate.reset()
                     }
 
-                    it("refreshes the local document") {
-                        let networkCalls = APIRequest.callsCount
-                        waitUntil(timeout: .seconds(10)) { done in
-                            self.sut.refreshDocument(docStruct) { result in
-                                expect { try result.get() }.toNot(throwError())
-                                expect { try result.get() }.to(beTrue())
-                                expect(APIRequest.callsCount - networkCalls).to(equal(2))
-                                done()
+                    context("with Alamofire") {
+                        it("refreshes the local document") {
+                            waitUntil(timeout: .seconds(10)) { done in
+                                self.sut.refreshDocument(docStruct) { result in
+                                    expect { try result.get() }.toNot(throwError())
+                                    expect { try result.get() }.to(beTrue())
+                                    done()
+                                }
                             }
+
+                            expect(APIRequest.callsCount - networkCalls).to(equal(2))
+
+                            let newDocStruct = self.sut.loadDocumentById(id: docStruct.id)
+                            expect(newDocStruct?.data).to(equal(newRemote.asData))
                         }
-                        let newDocStruct = self.sut.loadDocumentById(id: docStruct.id)
-                        expect(newDocStruct?.data).to(equal(newRemote.asData))
+                    }
+
+                    context("with PromiseKit") {
+                        it("refreshes the local document") {
+                            waitUntil(timeout: .seconds(10)) { done in
+                                let promise: PromiseKit.Promise<Bool> = self.sut.refreshDocument(docStruct)
+                                promise.done { refreshed in
+                                    expect(refreshed).to(beTrue())
+                                    done()
+                                }.catch { _ in }
+                            }
+
+                            expect(APIRequest.callsCount - networkCalls).to(equal(2))
+
+                            let newDocStruct = self.sut.loadDocumentById(id: docStruct.id)
+                            expect(newDocStruct?.data).to(equal(newRemote.asData))
+                        }
+                    }
+
+                    context("with Promises") {
+                        it("refreshes the local document") {
+                            waitUntil(timeout: .seconds(10)) { done in
+                                let promise: Promises.Promise<Bool> = self.sut.refreshDocument(docStruct)
+                                promise.then { refreshed in
+                                    expect(refreshed).to(beTrue())
+                                    done()
+                                }
+                            }
+
+                            expect(APIRequest.callsCount - networkCalls).to(equal(2))
+
+                            let newDocStruct = self.sut.loadDocumentById(id: docStruct.id)
+                            expect(newDocStruct?.data).to(equal(newRemote.asData))
+                        }
                     }
                 }
 
@@ -275,21 +365,61 @@ class DocumentManagerNetworkTests: QuickSpec {
                         BeamDate.reset()
                     }
 
-                    it("refreshes the local document") {
-                        let networkCalls = APIRequest.callsCount
-                        waitUntil(timeout: .seconds(10)) { done in
-                            self.sut.refreshDocument(docStruct) { result in
-                                expect { try result.get() }.toNot(throwError())
-                                expect { try result.get() }.to(beTrue())
-                                // We expect 2 calls, but sometimes 5. This is because of the way
-                                // `BeamNote` saves document looking for links
-                                expect([2, 5]).to(contain(APIRequest.callsCount - networkCalls))
-                                done()
+                    context("with Alamofire") {
+                        it("refreshes the local document") {
+                            let networkCalls = APIRequest.callsCount
+                            waitUntil(timeout: .seconds(10)) { done in
+                                self.sut.refreshDocument(docStruct) { result in
+                                    expect { try result.get() }.toNot(throwError())
+                                    expect { try result.get() }.to(beTrue())
+                                    // We expect 2 calls, but sometimes 5. This is because of the way
+                                    // `BeamNote` saves document looking for links
+                                    expect([2, 5]).to(contain(APIRequest.callsCount - networkCalls))
+                                    done()
+                                }
                             }
-                        }
 
-                        let newDocStruct = self.sut.loadDocumentById(id: docStruct.id)
-                        expect(newDocStruct?.data.asString).to(equal(merged))
+                            let newDocStruct = self.sut.loadDocumentById(id: docStruct.id)
+                            expect(newDocStruct?.data.asString).to(equal(merged))
+                        }
+                    }
+
+                    context("with PromiseKit") {
+                        it("refreshes the local document") {
+                            let networkCalls = APIRequest.callsCount
+
+                            waitUntil(timeout: .seconds(10)) { done in
+                                let promise: PromiseKit.Promise<Bool> = self.sut.refreshDocument(docStruct)
+                                promise.done { refreshed in
+                                    expect(refreshed).to(beTrue())
+                                    done()
+                                }.catch { _ in }
+                            }
+
+                            expect([2, 5]).to(contain(APIRequest.callsCount - networkCalls))
+
+                            let newDocStruct = self.sut.loadDocumentById(id: docStruct.id)
+                            expect(newDocStruct?.data.asString).to(equal(merged))
+                        }
+                    }
+
+                    context("with Promises") {
+                        it("refreshes the local document") {
+                            let networkCalls = APIRequest.callsCount
+
+                            waitUntil(timeout: .seconds(10)) { done in
+                                let promise: Promises.Promise<Bool> = self.sut.refreshDocument(docStruct)
+                                promise.then { refreshed in
+                                    expect(refreshed).to(beTrue())
+                                    done()
+                                }
+                            }
+
+                            expect([2, 5]).to(contain(APIRequest.callsCount - networkCalls))
+
+                            let newDocStruct = self.sut.loadDocumentById(id: docStruct.id)
+                            expect(newDocStruct?.data.asString).to(equal(merged))
+                        }
                     }
                 }
             }
@@ -298,17 +428,59 @@ class DocumentManagerNetworkTests: QuickSpec {
                 beforeEach {
                     docStruct = self.helper.createDocumentStruct()
                     self.helper.saveLocally(docStruct)
+                    networkCalls = APIRequest.callsCount
                 }
 
-                it("doesn't refresh the local document") {
-                    waitUntil(timeout: .seconds(10)) { done in
-                        self.sut.refreshDocument(docStruct) { result in
-                            expect { try result.get() }.to(throwError { (error: AFError) in
-                                expect(error.responseCode).to(equal(404))
-                            })
+                context("with Alamofire") {
+                    it("doesn't refresh the local document") {
+                        waitUntil(timeout: .seconds(10)) { done in
+                            self.sut.refreshDocument(docStruct) { result in
+                                expect { try result.get() }.to(throwError { (error: AFError) in
+                                    expect(error.responseCode).to(equal(404))
+                                })
 
-                            done()
+                                done()
+                            }
                         }
+                        expect(APIRequest.callsCount - networkCalls).to(equal(1))
+                    }
+                }
+
+                context("with PromiseKit") {
+                    it("doesn't refresh the local document") {
+                        waitUntil(timeout: .seconds(10)) { done in
+                            let promise: PromiseKit.Promise<Bool> = self.sut.refreshDocument(docStruct)
+                            promise
+                                .done { _ in }
+                                .catch { error in
+                                    expect(error).to(matchError(APIRequestError.notFound))
+                                    done()
+                                }
+                        }
+
+                        expect(APIRequest.callsCount - networkCalls).to(equal(1))
+
+                        let newDocStruct = self.sut.loadDocumentById(id: docStruct.id)
+                        expect(newDocStruct?.deletedAt).toNot(beNil())
+                    }
+                }
+
+                context("with Promises") {
+                    it("doesn't refresh the local document") {
+                        waitUntil(timeout: .seconds(10)) { done in
+                            let promise: Promises.Promise<Bool> = self.sut.refreshDocument(docStruct)
+                            promise
+                                .then { _ in }
+                                .catch { error in
+                                    expect(error).to(matchError(APIRequestError.notFound))
+                                    done()
+                            }
+                        }
+
+                        expect(APIRequest.callsCount - networkCalls).to(equal(1))
+
+                        let newDocStruct = self.sut.loadDocumentById(id: docStruct.id)
+                        expect(newDocStruct?.deletedAt).toNot(beNil())
                     }
                 }
             }
@@ -434,7 +606,7 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                         // The API returns an old version if asked too quickly, a bit of latency helps... :(
                         var succeeded = false
-                        for _ in 0...5 {
+                        for _ in 0...10 {
                             let remoteStruct = self.helper.fetchOnAPI(docStruct)
                             expect(remoteStruct?.id).to(equal(docStruct.uuidString))
                             if remoteStruct?.data == merged {

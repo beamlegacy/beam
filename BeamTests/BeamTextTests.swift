@@ -239,6 +239,9 @@ class BeamTextTests: XCTestCase {
 //            print("range \(r) -> \(sub) [offset: \(offset)]")
 //        }
 
-        expect(line.offsetFor(index: 3)).to(equal(17.982422))
+        // Now we are using a custom font the emplacement of the emoticon is changed.
+        // old value : 17.982422
+        // new value : 18.272728
+        expect(line.offsetFor(index: 3)).to(equal(18.272728))
     }
 }

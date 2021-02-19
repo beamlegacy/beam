@@ -70,7 +70,7 @@ struct NoteView: View {
                     state.startQuery(textNode)
                 },
                 leadingAlignment: leadingAlignement,
-                footerHeight: 100,
+                footerHeight: 25,
                 centerText: centerText,
                 showTitle: showTitle
                 )
