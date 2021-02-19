@@ -460,13 +460,14 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             rootNode.doCommand(.insertNewline)
         } else if let popover = popover {
             popover.doCommand(.insertNewline)
-        } else if command {
+        } else if command && rootNode.state.nodeSelection == nil {
             onStartQuery(node)
         } else {
             if node.text.isEmpty && node.isEmpty && node.parent !== rootNode {
                 rootNode.decreaseIndentation()
                 return
             }
+
             rootNode.eraseSelection()
             let splitText = node.text.extract(range: rootNode.cursorPosition ..< node.text.count)
             node.text.removeLast(node.text.count - rootNode.cursorPosition)
