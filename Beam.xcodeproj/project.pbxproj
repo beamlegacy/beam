@@ -819,7 +819,7 @@
 			isa = PBXGroup;
 			children = (
 				56A5BD1A25CC590500ED7C50 /* NaturalLanguage */,
-				41D1698625DBFDBB0018E5F2 /* Font */,
+				41D1698625DBFDBB0018E5F2 /* Fonts */,
 				418171112581082200317ED8 /* Assets.xcassets */,
 				418170FE2581060A00317ED8 /* Colors.xcassets */,
 			);
@@ -1275,7 +1275,7 @@
 			path = Journal;
 			sourceTree = "<group>";
 		};
-		41D1698625DBFDBB0018E5F2 /* Font */ = {
+		41D1698625DBFDBB0018E5F2 /* Fonts */ = {
 			isa = PBXGroup;
 			children = (
 				41D169A125DC07250018E5F2 /* Inter-Bold.otf */,
@@ -1284,7 +1284,7 @@
 				41D169A225DC07260018E5F2 /* Inter-Regular.otf */,
 				41D169A325DC07260018E5F2 /* Inter-SemiBold.otf */,
 			);
-			path = Font;
+			path = Fonts;
 			sourceTree = "<group>";
 		};
 		520627F625922D4900D7CD9E /* Documents */ = {
