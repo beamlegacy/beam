@@ -85,8 +85,7 @@ struct DestinationCardPicker: View {
                         state.destinationCardName = tab.note?.title ?? state.data.todaysName
                     })
                     .padding(EdgeInsets(top: 0, leading: 3, bottom: 0, trailing: 3))
-                }
-                else {
+                } else {
                     Text(title).onTapGesture {
                         state.destinationCardInputIsFirstResponder = true
                         state.changingDestinationCard = true
@@ -106,7 +105,7 @@ struct DestinationCardPicker: View {
         Logger.shared.logInfo("items: \(popover.items)", category: .ui)
         popover.query = state.destinationCardName
 
-        let position =  NSPoint(x: frame.minX, y: (frame.minY - popover.idealSize.height))
+        let position = NSPoint(x: frame.minX, y: (frame.minY - popover.idealSize.height))
         popover.frame = NSRect(origin: position, size: popover.idealSize)
     }
 
@@ -130,4 +129,3 @@ struct DestinationCardPicker: View {
         state.destinationCardNameSelectedRange = nil
     }
 }
-

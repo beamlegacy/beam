@@ -17,8 +17,6 @@ class CoreDataManagerTests: XCTestCase {
         sut = CoreDataManager()
     }
 
-    // MARK: - Tests
-
     // MARK: Setup
     func test_setup_persistentContainerLoadedOnDisk() {
         self.sut.setup()

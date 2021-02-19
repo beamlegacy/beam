@@ -1,35 +1,30 @@
-//
-//  BeamTestsHelper.swift
-//  BeamTests
-//
-//  Created by Jean-Louis Darmon on 09/02/2021.
-//
-
 import Foundation
+import XCTest
 import Fakery
+import Quick
+import Nimble
+import Combine
+import Alamofire
+
+@testable import Beam
 
 class BeamTestsHelper {
-    func destroyDb() {
-        CoreDataManager.shared.destroyPersistentStore()
-        CoreDataManager.shared.setup()
-    }
+    static func login() {
+        let accountManager = AccountManager()
+        let email = Configuration.testAccountEmail
+        let password = Configuration.testAccountPassword
 
-    func populateWithJournalNote(count: Int) {
-        let documentManager = DocumentManager()
-        var nbrOfJournal = count
-        while nbrOfJournal > 0 {
-            let note = BeamNote(title: self.title())
-            note.type = .journal
-            note.creationDate = faker.date.backward(days: nbrOfJournal)
-            note.updateDate = note.creationDate
-            guard let docStruct = note.documentStruct else { return }
-            documentManager.saveDocument(docStruct)
-            nbrOfJournal -= 1
+        guard !AuthenticationManager.shared.isAuthenticated else { return }
+
+        waitUntil(timeout: .seconds(10)) { done in
+            accountManager.signIn(email, password) { _ in
+                done()
+            }
         }
     }
 
-    private let faker = Faker(locale: "en-US")
-    func title() -> String {
-        return faker.commerce.productName() + " " + String.random(length: 10)
+    static func logout() {
+        guard AuthenticationManager.shared.isAuthenticated else { return }
+        AccountManager.logout()
     }
 }

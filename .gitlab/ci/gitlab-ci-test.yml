@@ -27,6 +27,7 @@ xctests:
     - xcversion install ${XCODE_VERSION}
     - bundle install
   script:
+    - pwd
     - time bundle exec fastlane tests
   after_script:
     - rm "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/Beam-test-${CI_JOB_ID}"*

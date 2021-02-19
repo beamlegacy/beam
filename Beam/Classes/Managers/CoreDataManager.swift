@@ -1,5 +1,7 @@
 import Foundation
 import CoreData
+import Promises
+import PromiseKit
 
 /*
  We can't use ordered relationships based on CloudKit and https://stackoverflow.com/questions/56967051/how-to-set-an-ordered-relationship-with-nspersistentcloudkitcontainer
@@ -146,7 +148,6 @@ class CoreDataManager {
                 try fileManager.removeItem(at: storeURL)
             }
             try fileManager.copyItem(at: url, to: storeURL)
-            
         } catch {
             // TODO: raise error?
             Logger.shared.logError("Can't import backup: \(error)", category: .coredata)
@@ -158,7 +159,7 @@ class CoreDataManager {
     let persistentContainerQueue = OperationQueue()
     /// https://stackoverflow.com/questions/42733574/nspersistentcontainer-concurrency-for-saving-to-core-data
     /// Based on this link, added `completionHandler`
-    func enqueue(block: @escaping (_ context: NSManagedObjectContext) -> ((Result<Bool, Error>) -> Void)?) {
+    func enqueue(block: @escaping (_ context: NSManagedObjectContext) -> ((Swift.Result<Bool, Error>) -> Void)?) {
         let perf = PerformanceDebug("CoreDataManager.enqueue", true, .coredata)
 
         // TODO [P1]: Check memory management (blockOperation create retain cycles)
@@ -229,4 +230,22 @@ class CoreDataManager {
         storeType = storeDescription.type
         return container
     }()
+}
+
+// MARK: PromiseKit
+extension CoreDataManager {
+    func background() -> PromiseKit.Guarantee<NSManagedObjectContext> {
+        return PromiseKit.Guarantee { fulfill in
+            fulfill(self.backgroundContext)
+        }
+    }
+}
+
+// MARK: Promises
+extension CoreDataManager {
+    func background() -> Promises.Promise<NSManagedObjectContext> {
+        return Promises.Promise { fulfill, _ in
+            fulfill(self.backgroundContext)
+        }
+    }
 }
