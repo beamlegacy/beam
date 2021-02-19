@@ -901,6 +901,7 @@ extension DocumentManager {
     }
 
     // When having a conflict between versions
+    // swiftlint:disable:next function_body_length
     private func manageDocumentConflictMerge(_ document: DocumentStruct,
                                              _ remoteDocument: DocumentAPIType,
                                              _ completion: @escaping (Swift.Result<Bool, Error>) -> Void) {

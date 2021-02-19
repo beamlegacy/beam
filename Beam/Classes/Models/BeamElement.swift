@@ -4,6 +4,7 @@
 //
 //  Created by Sebastien Metrot on 27/11/2020.
 //
+// swiftlint:disable file_length
 
 import Foundation
 import Combine
@@ -284,7 +285,7 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
         }
     }
 
-    @Published var changed: (BeamElement, ChangeType)? = nil
+    @Published var changed: (BeamElement, ChangeType)?
     var changePropagationEnabled = true
     enum ChangeType {
         case text, meta, tree

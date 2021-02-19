@@ -60,5 +60,3 @@ class JournalUITests: QuickSpec {
         }
     }
 }
-
-

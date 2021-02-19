@@ -2529,7 +2529,6 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
-					"$(PROJECT_DIR)/Frameworks",
 				);
 				HEADER_SEARCH_PATHS = Extern/libgit2/include;
 				INFOPLIST_FILE = Beam/Configuration/Info.plist;
@@ -2744,7 +2743,6 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
-					"$(PROJECT_DIR)/Frameworks",
 				);
 				HEADER_SEARCH_PATHS = Extern/libgit2/include;
 				INFOPLIST_FILE = Beam/Configuration/Info.plist;
@@ -2789,7 +2787,6 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
-					"$(PROJECT_DIR)/Frameworks",
 				);
 				HEADER_SEARCH_PATHS = Extern/libgit2/include;
 				INFOPLIST_FILE = Beam/Configuration/Info.plist;
