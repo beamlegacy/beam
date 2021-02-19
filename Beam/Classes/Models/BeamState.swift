@@ -12,7 +12,6 @@ import WebKit
 import SwiftSoup
 
 let NoteDisplayThreshold = Float(0.0)
-//swiftlint:disable file_length
 //swiftlint:disable:next type_body_length
 @objc class BeamState: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var data: BeamData

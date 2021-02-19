@@ -10,7 +10,7 @@ class AccountManagerTests: QuickSpec {
     // swiftlint:disable:next function_body_length
     override func spec() {
         let sut = AccountManager()
-        let existingAccountEmail = "fabien+test@beamapp.co"
+        let existingAccountEmail = Configuration.testAccountEmail
 
         // I filter those kind of messages in my box to be deleted right away
         let nonExistingAccountEmail = "fabien+test-\(UUID())@beamapp.co"
