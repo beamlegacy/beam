@@ -46,6 +46,7 @@ public struct MouseInfo {
 public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
     var data: BeamData?
+    var cardTopSpace: CGFloat = 148
     var centerText = false {
         didSet {
             drawCardHeader()
@@ -269,7 +270,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             let x = (frame.width - textWidth) / 2
             let textNodeWidth = textWidth + gutterWidth
 
-            rect = NSRect(x: x, y: topOffsetActual + 148, width: textNodeWidth, height: r.height)
+            rect = NSRect(x: x, y: topOffsetActual + cardTopSpace, width: textNodeWidth, height: r.height)
 
             // Disable CALayer animation
             CATransaction.disableAnimations {
@@ -347,7 +348,9 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     override public var intrinsicContentSize: NSSize {
-        let height = centerText ? rootNode.idealSize.height + topOffsetActual + footerHeight + 50 : rootNode.idealSize.height + topOffsetActual + footerHeight
+        let height = centerText ?
+            rootNode.idealSize.height + topOffsetActual + footerHeight + cardTopSpace :
+            rootNode.idealSize.height + topOffsetActual + footerHeight
         return NSSize(width: 300, height: height)
     }
 
