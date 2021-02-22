@@ -358,10 +358,8 @@ class DocumentManagerTests: QuickSpec {
                         self.sut
                             .create(title: title)
                             .done { docStruct in
-                                self.sut.backgroundContext.performAndWait {
-                                    expect(docStruct.title).to(equal(title))
-                                    done()
-                                }
+                                expect(docStruct.title).to(equal(title))
+                                done()
                             }
                             .catch { _ in }
                     }
