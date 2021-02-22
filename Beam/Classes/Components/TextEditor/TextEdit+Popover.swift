@@ -41,8 +41,18 @@ extension BeamTextEdit {
             return
         }
 
-        if command == .moveRight && cursorPosition == node.text.text.count && popoverSuffix != 0 {
+        if command == .moveRight &&
+            cursorPosition == node.text.text.count &&
+            popoverSuffix != 0 {
+
+            if node.text.text == "[[]]" {
+                cursorStartPosition = 0
+                cancelInternalLink()
+                return
+            }
+
             validInternalLink(from: node, String(node.text.text[cursorStartPosition + 1..<cursorPosition - popoverSuffix]))
+
             return
         }
 
