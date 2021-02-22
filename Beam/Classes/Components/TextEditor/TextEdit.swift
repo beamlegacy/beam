@@ -106,6 +106,8 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     let gutterWidth: CGFloat = TextNode.actionLayerXOffset + TextNode.actionLayerWidth
     var textWidth: CGFloat { isBig ? 704 : 544 }
 
+    private var isResize = false
+
     public init(root: BeamElement, font: Font = Font.main) {
         let start = CFAbsoluteTimeGetCurrent()
         BeamNote.requestLinkDetection()
@@ -158,6 +160,27 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    public override func viewWillStartLiveResize() {
+        super.viewWillStartLiveResize()
+        isResize = true
+        dismissPopoverOrFormatter()
+    }
+
+    public override func viewDidEndLiveResize() {
+        super.viewDidEndLiveResize()
+        isResize = false
+    }
+
+    public override func viewDidChangeEffectiveAppearance() {
+        super.viewDidChangeEffectiveAppearance()
+        layer?.backgroundColor = NSColor.editorBackgroundColor.cgColor
+
+        layer?.setNeedsDisplay()
+        titleLayer.setNeedsDisplay()
+        rootNode.deepInvalidateRendering()
+        rootNode.deepInvalidateText()
     }
 
     var timer: Timer!
@@ -272,12 +295,19 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
             rect = NSRect(x: x, y: topOffsetActual + cardTopSpace, width: textNodeWidth, height: r.height)
 
-            // Disable CALayer animation
-            CATransaction.disableAnimations {
+            if isResize {
+                // Disable CALayer animation on resize
+                CATransaction.disableAnimations {
+                    rootNode.availableWidth = textNodeWidth
+                    updateCardHearderLayer(rect)
+                    rootNode.setLayout(rect)
+                }
+            } else {
                 rootNode.availableWidth = textNodeWidth
                 updateCardHearderLayer(rect)
                 rootNode.setLayout(rect)
             }
+
         } else {
             rootNode.availableWidth = rect.width
             rootNode.setLayout(rect)
@@ -1314,21 +1344,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         context.translateBy(x: x, y: y)
         title.draw(context)
         context.restoreGState()
-    }
-
-    public override func viewWillStartLiveResize() {
-        super.viewWillStartLiveResize()
-        dismissPopoverOrFormatter()
-    }
-
-    public override func viewDidChangeEffectiveAppearance() {
-        super.viewDidChangeEffectiveAppearance()
-        layer?.backgroundColor = NSColor.editorBackgroundColor.cgColor
-
-        layer?.setNeedsDisplay()
-        titleLayer.setNeedsDisplay()
-        rootNode.deepInvalidateRendering()
-        rootNode.deepInvalidateText()
     }
 
     let documentManager = DocumentManager(coreDataManager: CoreDataManager.shared)
