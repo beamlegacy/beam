@@ -1,6 +1,5 @@
 import Foundation
 import CoreData
-import Alamofire
 import Combine
 import PromiseKit
 import Promises
@@ -166,7 +165,7 @@ class DocumentManager {
     // MARK: -
     // MARK: Network Saving
     private static let saveDataRequestsSemaphore = DispatchSemaphore(value: 1)
-    private static var saveDataRequests: [UUID: DataRequest?] = [:]
+    private static var saveDataRequests: [UUID: URLSessionTask?] = [:]
     private static var saveSemaphores: [UUID: DispatchSemaphore] = [:]
 
     // MARK: -
@@ -600,13 +599,17 @@ extension DocumentManager {
             return
         }
 
-        let _:DataRequest? = documentRequest.fetchDocuments { result in
-            switch result {
-            case .failure(let error):
-                completion?(.failure(error))
-            case .success(let documentAPITypes):
-                self.refreshDocumentsSuccess(documentAPITypes, completion)
+        do {
+            try documentRequest.fetchDocuments { result in
+                switch result {
+                case .failure(let error):
+                    completion?(.failure(error))
+                case .success(let documentAPITypes):
+                    self.refreshDocumentsSuccess(documentAPITypes, completion)
+                }
             }
+        } catch {
+            completion?(.failure(error))
         }
     }
 
@@ -640,24 +643,28 @@ extension DocumentManager {
 
         Self.saveDataRequestsSemaphore.wait()
         Self.saveDataRequests[documentStruct.id]??.cancel()
-        Self.saveDataRequests[documentStruct.id] = documentRequest.fetchDocumentUpdatedAt(documentStruct.uuidString) { result in
-            self.signalDocumentNetworkCall(documentStruct.id)
+        do {
+            Self.saveDataRequests[documentStruct.id] = try documentRequest.fetchDocumentUpdatedAt(documentStruct.uuidString) { result in
+                self.signalDocumentNetworkCall(documentStruct.id)
 
-            switch result {
-            case .failure(let error):
-                if (error as? AFError)?.responseCode == 404 {
-                    self.deleteLocalDocument(documentStruct)
-                }
+                switch result {
+                case .failure(let error):
+                    if case APIRequestError.notFound = error {
+                        self.deleteLocalDocument(documentStruct)
+                    }
 
-                completion?(.failure(error))
-            case .success(let documentType):
-                // If the document we fetched from the API has a lower updatedAt, we can skip it
-                guard let updatedAt = documentType.updatedAt, updatedAt > documentStruct.updatedAt else {
-                    completion?(.success(false))
-                    return
+                    completion?(.failure(error))
+                case .success(let documentType):
+                    // If the document we fetched from the API has a lower updatedAt, we can skip it
+                    guard let updatedAt = documentType.updatedAt, updatedAt > documentStruct.updatedAt else {
+                        completion?(.success(false))
+                        return
+                    }
+                    self.refreshDocumentSuccess(documentStruct, documentType, completion)
                 }
-                self.refreshDocumentSuccess(documentStruct, documentType, completion)
             }
+        } catch {
+            completion?(.failure(error))
         }
         Self.saveDataRequestsSemaphore.signal()
     }
@@ -665,18 +672,20 @@ extension DocumentManager {
     private func refreshDocumentSuccess(_ documentStruct: DocumentStruct,
                                         _ documentType: DocumentAPIType,
                                         _ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
-        // swiftlint:disable:next redundant_discardable_let
-        let _ :DataRequest? = documentRequest.fetchDocument(documentStruct.uuidString) { result in
-            switch result {
-            case .failure(let error):
-                // Fetched returned 404, it doesn't exist anymore.
-                if (error as? AFError)?.responseCode == 404 {
-                    self.deleteLocalDocument(documentStruct)
+        do {
+            try documentRequest.fetchDocument(documentStruct.uuidString) { result in
+                switch result {
+                case .failure(let error):
+                    if case APIRequestError.notFound = error {
+                        self.deleteLocalDocument(documentStruct)
+                    }
+                    completion?(.failure(error))
+                case .success(let documentType):
+                    self.refreshDocumentSuccessSuccess(documentStruct, documentType, completion)
                 }
-                completion?(.failure(error))
-            case .success(let documentType):
-                self.refreshDocumentSuccessSuccess(documentStruct, documentType, completion)
             }
+        } catch {
+            completion?(.failure(error))
         }
     }
 
@@ -751,23 +760,29 @@ extension DocumentManager {
         }
     }
 
+    @discardableResult
     internal func saveDocumentStructOnAPI(_ documentStruct: DocumentStruct,
-                                          _ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
+                                          _ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) -> URLSessionTask? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             completion?(.success(false))
-            return
+            return nil
         }
         Self.saveDataRequestsSemaphore.wait()
         Self.saveDataRequests[documentStruct.id]??.cancel()
-        Self.saveDataRequests[documentStruct.id] = documentRequest.saveDocument(documentStruct.asApiType()) { result in
-            switch result {
-            case .failure(let error):
-                self.saveDocumentStructOnAPIFailure(documentStruct, error, completion)
-            case .success:
-                self.saveDocumentStructOnAPISuccess(documentStruct, completion)
+        do {
+            Self.saveDataRequests[documentStruct.id] = try documentRequest.saveDocument(documentStruct.asApiType()) { result in
+                switch result {
+                case .failure(let error):
+                    self.saveDocumentStructOnAPIFailure(documentStruct, error, completion)
+                case .success:
+                    self.saveDocumentStructOnAPISuccess(documentStruct, completion)
+                }
             }
+        } catch {
+            completion?(.failure(error))
         }
         Self.saveDataRequestsSemaphore.signal()
+        return Self.saveDataRequests[documentStruct.id]!
     }
 
     private func saveDocumentStructOnAPIFailure(_ documentStruct: DocumentStruct,
@@ -815,7 +830,8 @@ extension DocumentManager {
             // `beam_api_data` stores the last version we sent to the API
             documentCoreData.beam_api_data = documentStruct.data
             do {
-                completion?(.success(try Self.saveContext(context: context)))
+                let success = try Self.saveContext(context: context)
+                completion?(.success(success))
             } catch {
                 completion?(.failure(error))
             }
@@ -839,15 +855,19 @@ extension DocumentManager {
 
             Self.saveDataRequestsSemaphore.wait()
             Self.saveDataRequests[id]??.cancel()
-            Self.saveDataRequests[id] = self.documentRequest.deleteDocument(id.uuidString.lowercased()) { result in
-                self.signalDocumentNetworkCall(id)
+            do {
+                Self.saveDataRequests[id] = try self.documentRequest.deleteDocument(id.uuidString.lowercased()) { result in
+                    self.signalDocumentNetworkCall(id)
 
-                switch result {
-                case .failure(let error):
-                    completion?(.failure(error))
-                case .success:
-                    completion?(.success(true))
+                    switch result {
+                    case .failure(let error):
+                        completion?(.failure(error))
+                    case .success:
+                        completion?(.success(true))
+                    }
                 }
+            } catch {
+                completion?(.failure(error))
             }
             Self.saveDataRequestsSemaphore.signal()
         }
@@ -867,13 +887,17 @@ extension DocumentManager {
             return
         }
 
-        let _:DataRequest? = self.documentRequest.deleteAllDocuments { result in
-            switch result {
-            case .failure(let error):
-                completion?(.failure(error))
-            case .success:
-                completion?(.success(true))
+        do {
+            try self.documentRequest.deleteAllDocuments { result in
+                switch result {
+                case .failure(let error):
+                    completion?(.failure(error))
+                case .success:
+                    completion?(.success(true))
+                }
             }
+        } catch {
+            completion?(.failure(error))
         }
     }
 
@@ -884,19 +908,22 @@ extension DocumentManager {
     /// we want to merge the new remote version, with our updated local version
     private func fetchAndMergeDocument(_ document: DocumentStruct,
                                        _ completion: @escaping (Swift.Result<Bool, Error>) -> Void) {
-        // swiftlint:disable:next redundant_discardable_let
-        let _ :DataRequest? = documentRequest.fetchDocument(document.uuidString) { [weak self] result in
-            guard let self = self else {
-                completion(.failure(DocumentManagerError.unresolvedConflict))
-                return
-            }
+        do {
+            try documentRequest.fetchDocument(document.uuidString) { [weak self] result in
+                guard let self = self else {
+                    completion(.failure(DocumentManagerError.unresolvedConflict))
+                    return
+                }
 
-            switch result {
-            case .failure(let error):
-                completion(.failure(error))
-            case .success(let documentAPIType):
-                self.manageDocumentConflictMerge(document, documentAPIType, completion)
+                switch result {
+                case .failure(let error):
+                    completion(.failure(error))
+                case .success(let documentAPIType):
+                    self.manageDocumentConflictMerge(document, documentAPIType, completion)
+                }
             }
+        } catch {
+            completion(.failure(error))
         }
     }
 
@@ -978,15 +1005,19 @@ extension DocumentManager {
             let documents = Document.fetchAll(context: context)
             let documentsArray: [DocumentAPIType] = documents.map { document in document.asApiType() }
 
-            let _:DataRequest? = self.documentRequest.importDocuments(documentsArray) { result in
-                switch result {
-                case .failure(let error):
-                    Logger.shared.logError(error.localizedDescription, category: .network)
-                    completion?(.failure(error))
-                case .success:
-                    Logger.shared.logDebug("Documents imported", category: .network)
-                    completion?(.success(true))
+            do {
+                try self.documentRequest.importDocuments(documentsArray) { result in
+                    switch result {
+                    case .failure(let error):
+                        Logger.shared.logError(error.localizedDescription, category: .network)
+                        completion?(.failure(error))
+                    case .success:
+                        Logger.shared.logDebug("Documents imported", category: .network)
+                        completion?(.success(true))
+                    }
                 }
+            } catch {
+                completion?(.failure(error))
             }
         }
     }
@@ -1008,21 +1039,6 @@ extension DocumentManager {
                     return Promise(self.parseDocumentBody(document))
                 }
             }
-
-//        return Promises.Promise { [unowned self] fulfill, reject in
-//            self.coreDataManager.backgroundContext.perform {
-//                let context = self.coreDataManager.backgroundContext
-//                let document = Document.create(context, title: title)
-//                do {
-//                    try self.checkValidations(context, document)
-//                    try Self.saveContext(context: context)
-//
-//                    fulfill(self.parseDocumentBody(document))
-//                } catch {
-//                    reject(error)
-//                }
-//            }
-//        }
     }
 
     func fetchOrCreate(title: String) -> Promises.Promise<DocumentStruct> {
@@ -1045,26 +1061,22 @@ extension DocumentManager {
     /// Fetch most recent document from API
     /// First we fetch the remote updated_at, if it's more recent we fetch all details
     func refreshDocument(_ documentStruct: DocumentStruct) -> Promises.Promise<Bool> {
-        return Promises.Promise<Bool> { (fulfill, reject) in
-            self.documentRequest.fetchDocumentUpdatedAt(documentStruct.uuidString)
-                .then(on: self.backgroundQueue) { documentType in
-                    guard let updatedAt = documentType.updatedAt, updatedAt > documentStruct.updatedAt else {
-                        fulfill(false)
-                        return
-                    }
-
-                    self.documentRequest.fetchDocument(documentStruct.uuidString)
-                        .then { documentType in
-                            try self.saveRefreshDocument(documentStruct, documentType)
-                            fulfill(true)
-                        }
-                }.catch(on: self.backgroundQueue) { error in
-                    if case APIRequestError.notFound = error {
-                        try? self.deleteLocalDocumentAndWait(documentStruct)
-                    }
-                    reject(error)
+        self.documentRequest.fetchDocumentUpdatedAt(documentStruct.uuidString)
+            .then(on: self.backgroundQueue) { documentType in
+                guard let updatedAt = documentType.updatedAt, updatedAt > documentStruct.updatedAt else {
+                    return Promise(false)
                 }
-        }
+
+                return self.documentRequest.fetchDocument(documentStruct.uuidString)
+                    .then { documentType in
+                        try self.saveRefreshDocument(documentStruct, documentType)
+                        return Promise(true)
+                    }
+            }.catch(on: self.backgroundQueue) { error in
+                if case APIRequestError.notFound = error {
+                    try? self.deleteLocalDocumentAndWait(documentStruct)
+                }
+            }
     }
 
     /// Fetch all remote documents from API
@@ -1127,20 +1139,16 @@ extension DocumentManager {
     }
 
     func deleteAllDocuments(includedRemote: Bool = true) -> Promises.Promise<Bool> {
-        return Promises.Promise { fulfill, reject in
-            CoreDataManager.shared.destroyPersistentStore()
-            CoreDataManager.shared.setup()
+        CoreDataManager.shared.destroyPersistentStore()
+        CoreDataManager.shared.setup()
 
-            guard includedRemote,
-                  AuthenticationManager.shared.isAuthenticated,
-                  Configuration.networkEnabled else {
-                return fulfill(true)
-            }
-
-            self.documentRequest.deleteAllDocuments()
-                .then { _ in fulfill(true) }
-                .catch { error in reject(error) }
+        guard includedRemote,
+              AuthenticationManager.shared.isAuthenticated,
+              Configuration.networkEnabled else {
+            return Promises.Promise(true)
         }
+
+        return self.documentRequest.deleteAllDocuments()
     }
 
     // MARK: Bulk calls
@@ -1164,7 +1172,8 @@ extension DocumentManager {
     // MARK: Create
 
     func create(title: String) -> PromiseKit.Promise<DocumentStruct> {
-        return coreDataManager.background()
+        let promise: PromiseKit.Guarantee<NSManagedObjectContext> = coreDataManager.background()
+        return promise
             .then(on: backgroundQueue) { context -> PromiseKit.Promise<DocumentStruct> in
                 try context.performAndWait {
                     let document = Document.create(context, title: title)
@@ -1172,7 +1181,7 @@ extension DocumentManager {
                     try self.checkValidations(context, document)
                     try Self.saveContext(context: context)
 
-                    return .value(self.parseDocumentBody(document))
+                return .value(self.parseDocumentBody(document))
                 }
             }
     }
@@ -1283,27 +1292,22 @@ extension DocumentManager {
                 }
 
                 let result: PromiseKit.Promise<DocumentAPIType?> = self.documentRequest.deleteDocument(id.uuidString.lowercased())
-                return result.map(on: self.backgroundQueue) { _ in
-                    return true
-                }
+                return result.map(on: self.backgroundQueue) { _ in true }
             }
     }
 
     func deleteAllDocuments(includedRemote: Bool = true) -> PromiseKit.Promise<Bool> {
-        return PromiseKit.Promise { seal in
-            CoreDataManager.shared.destroyPersistentStore()
-            CoreDataManager.shared.setup()
+        CoreDataManager.shared.destroyPersistentStore()
+        CoreDataManager.shared.setup()
 
-            guard includedRemote,
-                  AuthenticationManager.shared.isAuthenticated,
-                  Configuration.networkEnabled else {
-                return seal.fulfill(true)
-            }
-
-            self.documentRequest.deleteAllDocuments()
-                .then { _ in seal.fulfill(true) }
-                .catch { error in seal.reject(error) }
+        guard includedRemote,
+              AuthenticationManager.shared.isAuthenticated,
+              Configuration.networkEnabled else {
+            return .value(true)
         }
+
+        return self.documentRequest.deleteAllDocuments()
+            .map { _ in true }
     }
 
     // MARK: Bulk calls

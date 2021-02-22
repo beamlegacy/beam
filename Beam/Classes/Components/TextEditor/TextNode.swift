@@ -63,7 +63,10 @@ public class TextNode: Widget {
         get { element.text }
         set {
             guard element.text != newValue else { return }
-            if !newValue.isEmpty && actionImageLayer.opacity == 0 { actionImageLayer.opacity = 1 }
+            if !newValue.isEmpty &&
+                root?.state.nodeSelection == nil &&
+                actionImageLayer.opacity == 0 { actionImageLayer.opacity = 1 }
+
             if newValue.isEmpty { resetActionLayers() }
 
             element.text = newValue
@@ -633,6 +636,9 @@ public class TextNode: Widget {
                 deboucingClickTimer?.invalidate()
                 root?.doCommand(.selectAll)
                 editor.detectFormatterType()
+
+                if root?.state.nodeSelection != nil { resetActionLayers() }
+
                 return true
             }
         }
@@ -676,7 +682,11 @@ public class TextNode: Widget {
             }
         }
 
-        guard let actionLayer = actionLayer else { return false }
+        guard let actionLayer = actionLayer,
+              root?.state.nodeSelection == nil else {
+            resetActionLayers()
+            return false
+        }
 
         let position = actionLayerMousePosition(from: mouseInfo)
         let hasTextAndEditable = !text.isEmpty && isEditing && editor.hasFocus
@@ -710,6 +720,8 @@ public class TextNode: Widget {
         case .select(let o):
             root?.selectedTextRange = text.clamp(p < o ? cursorPosition..<o : o..<cursorPosition)
             mouseIsDragged = root?.state.nodeSelection == nil
+
+            if root?.state.nodeSelection != nil { resetActionLayers() }
 
             if root?.state.nodeSelection == nil {
                 editor.updateInlineFormatterOnDrag(isDragged: true)
@@ -973,7 +985,8 @@ public class TextNode: Widget {
     }
 
     private func showHoveredActionLayers(_ hovered: Bool) {
-        guard !elementText.isEmpty else { return }
+        guard !elementText.isEmpty,
+              root?.state.nodeSelection == nil else { return }
 
         actionLayerIsHovered = hovered
         icon = icon?.fill(color: hovered ? .editorSearchHover : .editorSearchNormal)

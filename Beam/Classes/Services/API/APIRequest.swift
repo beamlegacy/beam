@@ -1,5 +1,4 @@
 import Foundation
-import Alamofire
 import os.log
 import PromiseKit
 import PMKFoundation
@@ -10,12 +9,6 @@ import Promises
 // swiftlint:disable:next type_body_length
 class APIRequest {
     var route: String { "https://\(Configuration.apiHostname)/graphql" }
-    let headers: HTTPHeaders = [
-        "User-Agent": "Beam client, \(Information.appVersionAndBuild)",
-        "Accept": "application/json",
-        "Accept-Language": Locale.current.languageCode ?? ""
-    ]
-
     var authenticatedAPICall = true
     static var callsCount = 0
     private static var uploadedBytes: Int64 = 0
@@ -53,7 +46,23 @@ class APIRequest {
 
         let queryStruct = loadQuery(bodyParamsRequest)
 
-        if let queryData = try? JSONEncoder().encode(queryStruct) {
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+
+        if let queryData = try? encoder.encode(queryStruct) {
+            #if DEBUG_API_1
+            if let queryDataString = queryData.asString {
+//                if let jsonResult = try JSONSerialization.jsonObject(with: queryData, options: []) as? NSDictionary {
+//                    Logger.shared.logDebug("-> HTTP Request:\n\(jsonResult.description)", category: .network)
+//                }
+//                #if DEBUG_API_2
+                Logger.shared.logDebug("-> HTTP Request:\n\(queryDataString.replacingOccurrences(of: "\\n", with: "\n"))",
+                                       category: .network)
+//                #endif
+            } else {
+                assert(false)
+            }
+            #endif
             request.httpBody = queryData
         }
         assert(request.httpBody != nil)
@@ -103,8 +112,6 @@ class APIRequest {
     private func handleNetworkError(_ error: Error) {
         if [APIRequestError.unauthorized, APIRequestError.forbidden].contains(error as? APIRequestError) {
             // Request unauthorized
-        } else if let aferror = error as? AFError, aferror.isExplicitlyCancelledError {
-            // Request explicitly cancelled
         } else {
             let nsError = error as NSError
             Logger.shared.logError("\(nsError) - \(nsError.userInfo)", category: .network)
@@ -168,8 +175,14 @@ class APIRequest {
     }
 
     func handleError<T: Errorable>(_ result: T) -> Error? {
+        let error: Error
+
         guard let errors = result.errors, !errors.isEmpty else { return nil }
-        let error = APIRequestError.apiError(extractUserErrorMessages(errors))
+        if errors.count == 1, errors[0].message == "Differs from current checksum" {
+            error = APIRequestError.documentConflict
+        } else {
+            error = APIRequestError.apiError(extractUserErrorMessages(errors))
+        }
 
         Logger.shared.logError(error.localizedDescription, category: .network)
 
@@ -204,12 +217,6 @@ class APIRequest {
         return decoder
     }
 
-    func defaultEncoder() -> ParameterEncoder {
-        let encoder = JSONParameterEncoder()
-        encoder.encoder.dateEncodingStrategy = .iso8601
-        return encoder
-    }
-
     func loadFile(fileName: String) -> String? {
         if let filepath = Bundle.main.path(forResource: fileName, ofType: "graphql") {
             return try? String(contentsOfFile: filepath)
@@ -218,263 +225,44 @@ class APIRequest {
     }
 }
 
-// MARK: Alamofire
-extension DataRequest {
-    // swiftlint:disable:next function_parameter_count
-    public func debugJson(queue: DispatchQueue,
-                          fileName: String,
-                          localTimer: Date,
-                          authenticated: Bool,
-                          callsCount: Int,
-                          uploadedBytes: Int64,
-                          downloadedBytes: Int64) -> Self {
-        return self.responseJSON(queue: queue) { response in
-            #if DEBUG_API_0
-            let diffTime = Date().timeIntervalSince(localTimer)
-            let diff = String(format: "%.2f", diffTime)
-
-            let httpStatus = response.response?.statusCode ?? 0
-            Logger.shared.logDebug("[\(callsCount)] [\(uploadedBytes.byteSize)/\(downloadedBytes.byteSize)] [\(authenticated ? "authenticated" : "anonymous")] \(diff)sec \(httpStatus) \(fileName)", category: .network)
-            #endif
-
-            #if DEBUG_API_1
-            if let httpBodyData = response.request?.httpBody,
-               let httpBody = String(data: httpBodyData, encoding: .utf8) {
-                let httpStatus = response.response?.statusCode ?? 0
-                Logger.shared.logDebug("\(httpStatus) " + httpBody.replacingOccurrences(of: "\\n", with: ""), category: .network)
-            }
-            #endif
-
-            #if DEBUG_API_2
-            self.cURLDescription { curl in
-                debugPrint("=======================================")
-                debugPrint(response)
-                debugPrint(curl)
-                debugPrint("=======================================")
-            }
-            #endif
-        }
-    }
-}
-
-extension APIRequest {
-    // swiftlint:disable:next function_body_length
-    func performRequest<T: Decodable, E: GraphqlParametersProtocol>(bodyParamsRequest: E,
-                                                                    authenticatedCall: Bool? = nil,
-                                                                    completionHandler: @escaping (Swift.Result<T, Error>) -> Void) -> DataRequest? {
-        let isCallAuthenticated = authenticatedCall ?? authenticatedAPICall
-        if isCallAuthenticated {
-            AuthenticationManager.shared.updateAccessTokenIfNeeded()
-
-            guard AuthenticationManager.shared.isAuthenticated else {
-                LibrariesManager.nonFatalError(error: APIRequestError.notAuthenticated,
-                                               addedInfo: AuthenticationManager.shared.hashTokensInfos())
-
-                completionHandler(.failure(APIRequestError.notAuthenticated))
-                NotificationCenter.default.post(name: .networkUnauthorized, object: self)
-                return nil
-            }
-        }
-
-        let decoder = defaultDecoder()
-        let encoder = defaultEncoder()
-
-        let queue = DispatchQueue(label: "co.beam.api", qos: .background, attributes: .concurrent)
-
-        let request = AF.request(route,
-                                 method: .post,
-                                 parameters: loadQuery(bodyParamsRequest),
-                                 encoder: encoder,
-                                 headers: headers,
-                                 interceptor: authenticatedAPICall ? AuthenticationHandler() : nil)
-
-        let localTimer = Date()
-        let fileName = bodyParamsRequest.fileName ?? "no filename"
-
-        Self.callsCount += 1
-
-        request.validate(statusCode: 200..<300)
-            .uploadProgress { progress in
-                Self.uploadedBytes += progress.completedUnitCount
-
-            }
-            .downloadProgress { progress in
-                Self.downloadedBytes += progress.completedUnitCount
-            }
-            .debugJson(queue: queue,
-                       fileName: fileName,
-                       localTimer: localTimer,
-                       authenticated: authenticatedAPICall,
-                       callsCount: Self.callsCount,
-                       uploadedBytes: Self.uploadedBytes,
-                       downloadedBytes: Self.downloadedBytes)
-            .responseDecodable(queue: queue, decoder: decoder) { (response: DataResponse<T, AFError>) in
-                self.manageResponse(response: response, filename: fileName) { [weak self] result in
-                    switch result {
-                    case .failure(let error):
-                        completionHandler(.failure(error))
-                        self?.handleNetworkError(error)
-                    case .success(let data):
-                        completionHandler(.success(data))
-                    }
-                }
-            }
-
-        return request
-    }
-
-    /// Upload binaries
-    /// - Parameter bodyParamsRequest:
-    /// - Parameter files: ["file": UIImage] the key of the Dictionary must be the same as used inside the variables name in the GraphQL query
-    /// - Parameter uploadHandler
-    /// - Parameter completionHandler:
-    //swiftlint:disable function_body_length
-    func performUploadRequest<T: Decodable, E: GraphqlParametersProtocol>(bodyParamsRequest: E,
-                                                                          files: [FileUpload],
-                                                                          uploadHandler: ((Progress) -> Void)? = nil,
-                                                                          completionHandler: @escaping (Swift.Result<T, Error>) -> Void) -> DataRequest? {
-        if authenticatedAPICall {
-            AuthenticationManager.shared.updateAccessTokenIfNeeded()
-
-            guard AuthenticationManager.shared.isAuthenticated else {
-                LibrariesManager.nonFatalError(error: APIRequestError.notAuthenticated,
-                                               addedInfo: AuthenticationManager.shared.hashTokensInfos())
-                completionHandler(.failure(APIRequestError.notAuthenticated))
-                NotificationCenter.default.post(name: .networkUnauthorized, object: self)
-                return nil
-            }
-        }
-
-        let decoder = defaultDecoder()
-        let encoder = JSONEncoder()
-
-        let queue = DispatchQueue(label: "co.beam.api", qos: .background, attributes: .concurrent)
-
-        // When uploading files, GraphqQL expects a different format for binary uploads. The Curl examples would be:
-        // curl localhost:4000/graphql \
-        //  -F operations='{ "query": "mutation ($poster: Upload) { createPost(id: 5, poster: $poster) { id } }", "variables": { "poster": null } }' \
-        //  -F map='{ "0": ["variables.poster"] }' \
-        //  -F 0=@package.json
-        // let multipartFormData = MultipartFormData(fileManager: .default)
-        let multipartFormDataHandler: (MultipartFormData) -> Void = { multipartFormData in
-            do {
-                // Put the full query + variables into `operations`
-                let data = try encoder.encode(self.loadQuery(bodyParamsRequest))
-                multipartFormData.append(data, withName: "operations")
-
-                // Add files and send a `map` connecting the files to their variables
-                var mapperDictionary: [String: [String]] = [:]
-                for file in files {
-                    multipartFormData.append(file.binary,
-                                             withName: file.variableName,
-                                             fileName: file.filename,
-                                             mimeType: file.contentType)
-                    // Using a string for Index on purpose
-                    mapperDictionary[file.variableName] = ["variables.\(file.variableName)"]
-                }
-
-                let mapper = try encoder.encode(mapperDictionary)
-                multipartFormData.append(mapper, withName: "map")
-            } catch {
-                completionHandler(.failure(error))
-                LibrariesManager.nonFatalError(error: error)
-            }
-        }
-
-        var uploadHeaders = headers
-        uploadHeaders["Content-type"] = "multipart/form-data"
-
-        let request = AF.upload(multipartFormData: multipartFormDataHandler,
-                                to: route,
-                                method: .post,
-                                headers: headers,
-                                interceptor: authenticatedAPICall ? AuthenticationHandler() : nil)
-
-        let localTimer = Date()
-        let fileName = bodyParamsRequest.fileName ?? "no filename"
-
-        Self.callsCount += 1
-
-        request.uploadProgress { progress in
-            Self.uploadedBytes += progress.completedUnitCount
-            uploadHandler?(progress)
-        }
-        .downloadProgress { progress in
-            Self.downloadedBytes += progress.completedUnitCount
-        }
-        .debugJson(queue: queue,
-                   fileName: fileName,
-                   localTimer: localTimer,
-                   authenticated: authenticatedAPICall,
-                   callsCount: Self.callsCount,
-                   uploadedBytes: Self.uploadedBytes,
-                   downloadedBytes: Self.downloadedBytes)
-        .responseDecodable(queue: queue, decoder: decoder) { (response: DataResponse<T, AFError>) in
-            self.manageResponse(response: response, filename: fileName) { [weak self] result in
-                switch result {
-                case .failure(let error):
-                    completionHandler(.failure(error))
-                    self?.handleNetworkError(error)
-                case .success(let data):
-                    completionHandler(.success(data))
-                }
-            }
-        }
-
-        return request
-    }
-    //swiftlint:enable function_body_length
-
-    private func manageResponse<T: Decodable>(response: DataResponse<T, AFError>,
-                                              filename: String,
-                                              completionHandler: @escaping (Swift.Result<T, Error>) -> Void) {
-        if let statusCode = response.response?.statusCode, [401, 403].contains(statusCode) {
-            var addedInfo = AuthenticationManager.shared.hashTokensInfos()
-            addedInfo["graphql_request"] = filename
-            LibrariesManager.nonFatalError("Network \(statusCode)",
-                                           addedInfo: addedInfo)
-        }
-
-        switch response.response?.statusCode {
-        case 401:
-            completionHandler(.failure(APIRequestError.unauthorized))
-            NotificationCenter.default.post(name: .networkUnauthorized, object: self)
-        case 403:
-            completionHandler(.failure(APIRequestError.forbidden))
-            DispatchQueue.main.async {
-                NotificationCenter.default.post(name: .networkForbidden, object: self)
-            }
-        case 500:
-            completionHandler(.failure(APIRequestError.internalServerError))
-        default:
-            switch response.result {
-            case .failure(let error):
-                completionHandler(.failure(error))
-            case .success(let decodable):
-                completionHandler(.success(decodable))
-            }
-        }
-    }
-}
-
 // MARK: Foundation
 extension APIRequest {
+    @discardableResult
     func performRequest<T: Decodable & Errorable, E: GraphqlParametersProtocol>(bodyParamsRequest: E,
                                                                                 authenticatedCall: Bool? = nil,
-                                                                                completionHandler: @escaping (Swift.Result<T, Error>) -> Void) throws -> URLSessionDataTask? {
+                                                                                completionHandler: @escaping (Swift.Result<T, Error>) -> Void) throws -> URLSessionDataTask {
         let request = try makeUrlRequest(bodyParamsRequest, authenticatedCall: authenticatedCall)
 
-        let dataTask = URLSession.shared.dataTask(with: request) { [weak self] (data, response, error) -> Void in
+        let filename = bodyParamsRequest.fileName ?? "no filename"
+        let localTimer = Date()
+        let callsCount = Self.callsCount
+        var dataTask: URLSessionDataTask!
+
+        dataTask = URLSession.shared.dataTask(with: request) { [weak self] (data, response, error) -> Void in
+            Self.downloadedBytes += dataTask.countOfBytesReceived
+            Self.uploadedBytes += dataTask.countOfBytesSent
+
+            self?.logRequest(filename,
+                             response,
+                             localTimer,
+                             callsCount,
+                             dataTask.countOfBytesSent,
+                             dataTask.countOfBytesReceived,
+                             authenticatedCall ?? self?.authenticatedAPICall ?? false)
+
+            guard let self = self else {
+                completionHandler(.failure(APIRequestError.parserError))
+                return
+            }
             if let error = error {
                 completionHandler(.failure(error))
-                self?.handleNetworkError(error)
+                self.handleNetworkError(error)
                 return
             }
 
             do {
-                if let value: T = try self?.manageResponse(data, response) {
-                    completionHandler(.success(value))
-                }
+                let value: T = try self.manageResponse(data, response)
+                completionHandler(.success(value))
             } catch {
                 completionHandler(.failure(error))
             }
@@ -485,6 +273,25 @@ extension APIRequest {
         dataTask.resume()
 
         return dataTask
+    }
+
+    // swiftlint:disable:next function_parameter_count
+    private func logRequest(_ filename: String,
+                            _ response: URLResponse?,
+                            _ localTimer: Date,
+                            _ callsCount: Int,
+                            _ bytesSent: Int64,
+                            _ bytesReceived: Int64,
+                            _ authenticated: Bool) {
+        #if DEBUG_API_0
+        guard let httpResponse = response as? HTTPURLResponse else {
+            Logger.shared.logDebug("- \(filename)", category: .network)
+            return
+        }
+        let diffTime = Date().timeIntervalSince(localTimer)
+        let diff = String(format: "%.2f", diffTime)
+        Logger.shared.logDebug("[\(callsCount)] [\(Self.uploadedBytes.byteSize)/\(Self.downloadedBytes.byteSize)] [\(bytesSent.byteSize)/\(bytesReceived.byteSize)] [\(authenticated ? "authenticated" : "anonymous")] \(diff)sec \(httpResponse.statusCode) \(filename)", category: .network)
+        #endif
     }
 
     private func manageResponse<T: Decodable & Errorable>(_ data: Data?,
@@ -511,6 +318,8 @@ extension APIRequest {
                 throw APIRequestError.parserError
             }
 
+            manageResponseLog(data)
+
             guard (200...299).contains(httpResponse.statusCode) else {
                 Logger.shared.logError("Network error \(String(describing: response))", category: .network)
                 throw APIRequestError.error
@@ -530,6 +339,21 @@ extension APIRequest {
         }
     }
 
+    private func manageResponseLog(_ data: Data) {
+        #if DEBUG_API_1
+        if let dataString = data.asString {
+//                if let jsonResult = try JSONSerialization.jsonObject(with: data, options: []) as? NSDictionary {
+//                    Logger.shared.logDebug("-> HTTP Response:\n\(jsonResult.description)", category: .network)
+//                }
+//            #if DEBUG_API_2
+            Logger.shared.logDebug("-> HTTP Response:\n\(dataString.replacingOccurrences(of: "\\n", with: "\n"))",
+                                   category: .network)
+//            #endif
+        } else {
+            assert(false)
+        }
+        #endif
+    }
 }
 
 // MARK: PromiseKit
@@ -557,7 +381,6 @@ extension APIRequest {
 extension APIRequest {
     func performRequest<T: Decodable & Errorable, E: GraphqlParametersProtocol>(bodyParamsRequest: E,
                                                                                 authenticatedCall: Bool? = nil) -> Promises.Promise<T> {
-
         return Promises.Promise { fulfill, reject in
             do {
                 let _: URLSessionDataTask? = try self.performRequest(bodyParamsRequest: bodyParamsRequest,

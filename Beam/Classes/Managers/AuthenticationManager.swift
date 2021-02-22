@@ -1,6 +1,5 @@
 import Foundation
 import JWTDecode
-import Alamofire
 
 class AuthenticationManager {
     static var shared = AuthenticationManager()
@@ -79,7 +78,7 @@ class AuthenticationManager {
                 return
             }
 
-            guard let accessToken = self.accessToken, let refreshToken = self.refreshToken else {
+            guard self.accessToken == nil, self.refreshToken == nil else {
                 self.log(message: "no accessToken or refreshToken")
                 self.group.leave()
                 return
@@ -90,19 +89,7 @@ class AuthenticationManager {
                                                category: "app.lifecycle",
                                                type: "system")
 
-            self.userSessionRequest.refreshToken(accessToken: accessToken,
-                                                 refreshToken: refreshToken) { result in
-                                                    switch result {
-                                                    case .failure(let error):
-                                                        self.handleUpdateAccessTokenFailure(error)
-                                                    case .success(let refresh):
-                                                        self.handleUpdateAccessTokenSuccess(refresh, accessToken: accessToken)
-                                                    }
-
-                                                    self.group.leave()
-                                                    self.semaphore.signal()
-            }
-
+            // TODO: call userSessionRequest.refreshToken
             self.semaphore.wait()
         }
 

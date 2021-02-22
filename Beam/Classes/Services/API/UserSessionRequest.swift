@@ -1,5 +1,4 @@
 import Foundation
-import Alamofire
 import PromiseKit
 import Promises
 
@@ -49,100 +48,6 @@ class UserSessionRequest: APIRequest {
     }
 
     class RenewCredentials: SignIn {}
-
-    @discardableResult
-    func refreshToken(accessToken: String,
-                      refreshToken: String,
-                      _ completionHandler: @escaping (Swift.Result<RenewCredentials, Error>) -> Void) -> DataRequest? {
-        let variables = RefreshTokenParameters(accessToken: accessToken,
-                                               refreshToken: refreshToken)
-
-        let bodyParamsRequest = GraphqlParameters(fileName: "refresh_token", variables: variables)
-
-        return performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<APIResult<RenewCredentials>, Error>) in
-            switch result {
-            case .failure(let error):
-                completionHandler(.failure(error))
-            case .success(let parserResult):
-                if let renewCredendials = parserResult.data?.value,
-                    renewCredendials.accessToken != nil,
-                    renewCredendials.refreshToken != nil {
-                    completionHandler(.success(renewCredendials))
-                } else {
-                    completionHandler(.failure(self.handleError(result: parserResult)))
-                }
-            }
-        }
-    }
-}
-
-// MARK: Alamofire
-extension UserSessionRequest {
-    @discardableResult
-    func signIn(email: String,
-                password: String,
-                _ completionHandler: @escaping (Swift.Result<SignIn, Error>) -> Void) -> DataRequest? {
-        let variables = SignInParameters(email: email,
-                                         password: password)
-
-        let bodyParamsRequest = GraphqlParameters(fileName: "sign_in", variables: variables)
-
-        return performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<APIResult<SignIn>, Error>) in
-            switch result {
-            case .failure(let error):
-                completionHandler(.failure(error))
-            case .success(let parserResult):
-                if let signIn = parserResult.data?.value, signIn.accessToken != nil {
-                    completionHandler(.success(signIn))
-                } else {
-                    completionHandler(.failure(self.handleError(result: parserResult)))
-                }
-            }
-        }
-    }
-
-    @discardableResult
-    func signUp(_ email: String,
-                _ password: String,
-                _ completionHandler: @escaping (Swift.Result<SignUp, Error>) -> Void) -> DataRequest? {
-        let variables = SignUpParameters(email: email, password: password)
-
-        let bodyParamsRequest = GraphqlParameters(fileName: "sign_up", variables: variables)
-
-        return performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<APIResult<SignUp>, Error>) in
-            switch result {
-            case .failure(let error):
-                completionHandler(.failure(error))
-            case .success(let parserResult):
-                if let initSession = parserResult.data?.value, initSession.errors?.isEmpty ?? true {
-                    completionHandler(.success(initSession))
-                } else {
-                    completionHandler(.failure(self.handleError(result: parserResult)))
-                }
-            }
-        }
-    }
-
-    @discardableResult
-    func forgotPassword(email: String,
-                        _ completionHandler: @escaping (Swift.Result<ForgotPassword, Error>) -> Void) -> DataRequest? {
-        let variables = ForgotPasswordParameters(email: email)
-
-        let bodyParamsRequest = GraphqlParameters(fileName: "forgot_password", variables: variables)
-
-        return performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<APIResult<ForgotPassword>, Error>) in
-            switch result {
-            case .failure(let error):
-                completionHandler(.failure(error))
-            case .success(let parserResult):
-                if let forgotPassword = parserResult.data?.value, forgotPassword.success == true {
-                    completionHandler(.success(forgotPassword))
-                } else {
-                    completionHandler(.failure(self.handleError(result: parserResult)))
-                }
-            }
-        }
-    }
 }
 
 // MARK: PromiseKit

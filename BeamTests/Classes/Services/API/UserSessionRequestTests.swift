@@ -2,7 +2,6 @@ import Foundation
 import XCTest
 import Quick
 import Nimble
-import Alamofire
 import PromiseKit
 import Promises
 
@@ -23,34 +22,6 @@ class UserSessionRequestTests: QuickSpec {
         }
 
         describe(".signIn()") {
-            context("with Alamofire") {
-                context("with good password") {
-                    it("authenticates") {
-                        waitUntil(timeout: .seconds(10)) { done in
-                            let _: DataRequest? = self.sut.signIn(email: existingAccountEmail, password: password) { result in
-                                expect { try result.get() }.toNot(throwError())
-                                done()
-                            }
-                        }
-                    }
-                }
-
-                context("with wrong password") {
-                    let password = "wrong password"
-
-                    it("doesn't authenticate") {
-                        waitUntil(timeout: .seconds(10)) { done in
-                            let _: DataRequest? = self.sut.signIn(email: existingAccountEmail, password: password) { result in
-                                expect { try result.get() }.to(throwError { (error: APIRequestError) in
-                                    expect(error.errorDescription).to(equal("Invalid password"))
-                                })
-                                done()
-                            }
-                        }
-                    }
-                }
-            }
-
             context("with Foundation") {
                 context("with good password") {
                     it("authenticates") {
@@ -148,30 +119,6 @@ class UserSessionRequestTests: QuickSpec {
         }
 
         describe(".forgotPassword") {
-            context("with Alamofire") {
-                context("with existing account") {
-                    it("returns") {
-                        waitUntil(timeout: .seconds(10)) { done in
-                            let _: DataRequest? = self.sut.forgotPassword(email: existingAccountEmail) { result in
-                                expect { try result.get() }.toNot(throwError())
-                                done()
-                            }
-                        }
-                    }
-                }
-
-                context("with non-existing account") {
-                    it("returns") {
-                        waitUntil(timeout: .seconds(10)) { done in
-                            let _: DataRequest? = self.sut.forgotPassword(email: nonExistingAccountEmail) { result in
-                                expect { try result.get() }.toNot(throwError())
-                                done()
-                            }
-                        }
-                    }
-                }
-            }
-
             context("with Foundation") {
                 context("with existing account") {
                     it("returns") {

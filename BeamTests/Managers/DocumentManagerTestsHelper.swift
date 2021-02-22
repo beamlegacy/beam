@@ -4,7 +4,6 @@ import Fakery
 import Quick
 import Nimble
 import Combine
-import Alamofire
 
 @testable import Beam
 
@@ -22,7 +21,8 @@ class DocumentManagerTestsHelper {
 
     func saveRemotely(_ docStruct: DocumentStruct) {
         waitUntil(timeout: .seconds(10)) { done in
-            self.documentManager.saveDocumentStructOnAPI(docStruct) { _ in
+            self.documentManager.saveDocumentStructOnAPI(docStruct) { result in
+                expect { try result.get() }.toNot(throwError())
                 done()
             }
         }
@@ -30,7 +30,8 @@ class DocumentManagerTestsHelper {
 
     func saveRemotelyOnly(_ docStruct: DocumentStruct) {
         waitUntil(timeout: .seconds(10)) { done in
-            let _: DataRequest? = self.documentManager.documentRequest.saveDocument(docStruct.asApiType()) { _ in
+            try? self.documentManager.documentRequest.saveDocument(docStruct.asApiType()) { result in
+                expect { try result.get() }.toNot(throwError())
                 done()
             }
         }
@@ -39,12 +40,13 @@ class DocumentManagerTestsHelper {
     func fetchOnAPI(_ docStruct: DocumentStruct) -> DocumentAPIType? {
         var documentAPIType: DocumentAPIType?
         waitUntil(timeout: .seconds(10)) { done in
-            let _: DataRequest? = self.documentManager.documentRequest.fetchDocument(docStruct.uuidString) { result in
+            try? self.documentManager.documentRequest.fetchDocument(docStruct.uuidString) { result in
+                expect { try result.get() }.toNot(throwError())
+
                 documentAPIType = try? result.get()
                 done()
             }
         }
-
         return documentAPIType
     }
 

@@ -2,7 +2,6 @@ import Foundation
 import XCTest
 import Quick
 import Nimble
-import Alamofire
 import PromiseKit
 import Promises
 
@@ -50,22 +49,10 @@ class DocumentRequestTests: QuickSpec {
                     // Not to leave any on the server
                     self.helper.deleteDocumentStruct(docStruct)
                 }
-
-                context("with Alamofire") {
-                    it("fetches document") {
-                        waitUntil(timeout: .seconds(10)) { done in
-                            let _: DataRequest? = self.sut.fetchDocument(docStruct.uuidString) { result in
-                                expect { try result.get() }.toNot(throwError())
-                                expect { try result.get().id }.to(equal(docStruct.uuidString))
-                                done()
-                            }
-                        }
-                    }
-                }
                 context("with Foundation") {
                     it("fetches document") {
                         waitUntil(timeout: .seconds(10)) { done in
-                            let _: URLSessionTask? = try? self.sut.fetchDocument(docStruct.uuidString) { result in
+                            try? self.sut.fetchDocument(docStruct.uuidString) { result in
                                 expect { try result.get() }.toNot(throwError())
                                 expect { try result.get().id }.to(equal(docStruct.uuidString))
                                 done()
@@ -102,18 +89,6 @@ class DocumentRequestTests: QuickSpec {
             }
 
             context("with non existing document") {
-                context("with Alamofire") {
-                    it("fetches document") {
-                        waitUntil(timeout: .seconds(10)) { done in
-                            let _: DataRequest? = self.sut.fetchDocument(UUID().uuidString) { result in
-                                expect { try result.get() }.to(throwError { (error: AFError) in
-                                    expect(error.responseCode).to(equal(404))
-                                })
-                                done()
-                            }
-                        }
-                    }
-                }
                 context("with Foundation") {
                     it("fetches document") {
                         waitUntil(timeout: .seconds(10)) { done in

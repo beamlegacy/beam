@@ -1,5 +1,4 @@
 import Foundation
-import Alamofire
 import CommonCrypto
 import PromiseKit
 import Promises
@@ -54,164 +53,6 @@ class DocumentRequest: APIRequest {
     }
 }
 
-// MARK: Alamofire
-extension DocumentRequest {
-    /// Sends all documents to the API
-    @discardableResult
-    func importDocuments(_ notes: [DocumentAPIType],
-                         _ completionHandler: @escaping (Swift.Result<ImportDocuments, Error>) -> Void) -> DataRequest? {
-        do {
-            let jsonData = try JSONEncoder().encode(notes)
-            guard let jsonString = String(data: jsonData, encoding: .utf8) else {
-                completionHandler(.failure(DocumentRequestError.parserError))
-                return nil
-            }
-
-            let variables = importAllParameters(documentsInput: jsonString)
-
-            let bodyParamsRequest = GraphqlParameters(fileName: "import_documents", variables: variables)
-
-            return performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<APIResult<ImportDocuments>, Error>) in
-                switch result {
-                case .failure(let error):
-                    completionHandler(.failure(error))
-                case .success(let parserResult):
-                    if let initSession = parserResult.data?.value, initSession.errors?.isEmpty ?? true {
-                        completionHandler(.success(initSession))
-                    } else {
-                        completionHandler(.failure(self.handleError(result: parserResult)))
-                    }
-                }
-            }
-        } catch {
-            completionHandler(.failure(APIRequestError.parserError))
-        }
-
-        return nil
-    }
-
-    /// Delete all documents on the server
-    @discardableResult
-    func deleteAllDocuments(_ completionHandler: @escaping (Swift.Result<Bool, Error>) -> Void) -> DataRequest? {
-        let bodyParamsRequest = GraphqlParameters(fileName: "delete_all_documents", variables: EmptyVariable())
-
-        return performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<APIResult<DeleteAllDocuments>, Error>) in
-            switch result {
-            case .failure(let error):
-                completionHandler(.failure(error))
-            case .success(let parserResult):
-                if let deleteAllDocuments = parserResult.data?.value, deleteAllDocuments.errors?.isEmpty ?? true {
-                    completionHandler(.success(true))
-                } else {
-                    completionHandler(.failure(self.handleError(result: parserResult)))
-                }
-            }
-        }
-    }
-
-    /// Delete document on the server
-    @discardableResult
-    func deleteDocument(_ id: String, _ completionHandler: @escaping (Swift.Result<Bool, Error>) -> Void) -> DataRequest? {
-        let parameters = DeleteDocumentParameters(id: id)
-        let bodyParamsRequest = GraphqlParameters(fileName: "delete_document", variables: parameters)
-
-        return performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<APIResult<DeleteDocument>, Error>) in
-            switch result {
-            case .failure(let error):
-                completionHandler(.failure(error))
-            case .success(let parserResult):
-                if let deleteDocument = parserResult.data?.value, deleteDocument.errors?.isEmpty ?? true {
-                    completionHandler(.success(true))
-                } else {
-                    completionHandler(.failure(self.handleError(result: parserResult)))
-                }
-            }
-        }
-    }
-
-    /// Save document on the server
-    @discardableResult
-    // return multiple errors, as the API might return more than one.
-    func saveDocument(_ document: DocumentAPIType, _ completionHandler: @escaping (Swift.Result<Bool, Error>) -> Void) -> DataRequest? {
-        guard let title = document.title else {
-            completionHandler(.success(false))
-            return nil
-        }
-        let parameters = UpdateDocumentParameters(id: document.id,
-                                                  title: title,
-                                                  data: document.data,
-                                                  previousChecksum: document.previousChecksum,
-                                                  createdAt: document.createdAt,
-                                                  updatedAt: document.updatedAt)
-        let bodyParamsRequest = GraphqlParameters(fileName: "update_document", variables: parameters)
-
-        return performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<APIResult<UpdateDocument>, Error>) in
-            switch result {
-            case .failure(let error):
-                completionHandler(.failure(error))
-            case .success(let parserResult):
-                if let updateDocument = parserResult.data?.value, updateDocument.errors?.isEmpty ?? true {
-                    completionHandler(.success(true))
-                } else {
-                    completionHandler(.failure(self.handleError(result: parserResult)))
-                }
-            }
-        }
-    }
-
-    /// Fetch all documents from API
-    @discardableResult
-    func fetchDocuments(_ completionHandler: @escaping (Swift.Result<[DocumentAPIType], Error>) -> Void) -> DataRequest? {
-        let bodyParamsRequest = GraphqlParameters(fileName: "documents", variables: EmptyVariable())
-
-        return performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<APIResult<Me>, Error>) in
-            switch result {
-            case .failure(let error):
-                completionHandler(.failure(error))
-            case .success(let parserResult):
-                if let me = parserResult.data?.value, let documents = me.documents {
-                    completionHandler(.success(documents))
-                } else {
-                    completionHandler(.failure(self.handleError(result: parserResult)))
-                }
-            }
-        }
-    }
-
-    /// Fetch document from API
-    @discardableResult
-    func fetchDocument(_ documentID: String, _ completionHandler: @escaping (Swift.Result<DocumentAPIType, Error>) -> Void) -> DataRequest? {
-        fetchDocumentWithFile("document", documentID, completionHandler)
-    }
-
-    /// Fetch document from API
-    @discardableResult
-    func fetchDocumentUpdatedAt(_ documentID: String, _ completionHandler: @escaping (Swift.Result<DocumentAPIType, Error>) -> Void) -> DataRequest? {
-        fetchDocumentWithFile("document_updated_at", documentID, completionHandler)
-    }
-
-    // swiftlint:disable:next cyclomatic_complexity
-    private func fetchDocumentWithFile(_ filename: String,
-                                       _ documentID: String,
-                                       _ completionHandler: @escaping (Swift.Result<DocumentAPIType, Error>) -> Void) -> DataRequest? {
-        let parameters = FetchDocumentParameters(id: documentID)
-        let bodyParamsRequest = GraphqlParameters(fileName: filename, variables: parameters)
-
-        return performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<APIResult<FetchDocument>, Error>) in
-            switch result {
-            case .failure(let error):
-                completionHandler(.failure(error))
-            case .success(let parserResult):
-                if let fetchDocument = parserResult.data?.value {
-                    completionHandler(.success(fetchDocument))
-                } else {
-                    completionHandler(.failure(self.handleError(result: parserResult)))
-                }
-            }
-        }
-    }
-}
-
 // MARK: PromiseKit
 extension DocumentRequest {
     func fetchDocument(_ documentID: String) -> PromiseKit.Promise<DocumentAPIType> {
@@ -247,32 +88,26 @@ extension DocumentRequest {
     }
 
     func saveDocument(_ document: DocumentAPIType) -> PromiseKit.Promise<DocumentAPIType> {
-        return PromiseKit.Promise { seal in
-            guard let title = document.title else {
-                seal.reject(DocumentRequestError.noTitle)
-                return
+        guard let title = document.title else {
+            return Promise(error: DocumentRequestError.noTitle)
+        }
+
+        let parameters = UpdateDocumentParameters(id: document.id,
+                                                  title: title,
+                                                  data: document.data,
+                                                  previousChecksum: document.previousChecksum,
+                                                  createdAt: document.createdAt,
+                                                  updatedAt: document.updatedAt)
+        let bodyParamsRequest = GraphqlParameters(fileName: "update_document", variables: parameters)
+
+        let promise: PromiseKit.Promise<UpdateDocument> = performRequest(bodyParamsRequest: bodyParamsRequest,
+                                                                         authenticatedCall: true)
+
+        return promise.map(on: self.backgroundQueue) {
+            if let document = $0.document {
+                return document
             }
-
-            let parameters = UpdateDocumentParameters(id: document.id,
-                                                      title: title,
-                                                      data: document.data,
-                                                      previousChecksum: document.previousChecksum,
-                                                      createdAt: document.createdAt,
-                                                      updatedAt: document.updatedAt)
-            let bodyParamsRequest = GraphqlParameters(fileName: "update_document", variables: parameters)
-
-            let promise: PromiseKit.Promise<UpdateDocument> = performRequest(bodyParamsRequest: bodyParamsRequest,
-                                                                             authenticatedCall: true)
-
-            promise
-                .done(on: self.backgroundQueue) {
-                    if let document = $0.document {
-                        seal.fulfill(document)
-                    } else {
-                        seal.reject(DocumentRequestError.parserError)
-                    }
-                }
-                .catch(on: self.backgroundQueue) { seal.reject($0) }
+            throw APIRequestError.parserError
         }
     }
 
@@ -297,27 +132,18 @@ extension DocumentRequest {
     }
 
     func importDocuments(_ notes: [DocumentAPIType]) -> PromiseKit.Promise<ImportDocuments> {
-        return PromiseKit.Promise { seal in
-            do {
-                let jsonData = try JSONEncoder().encode(notes)
-                guard let jsonString = String(data: jsonData, encoding: .utf8) else {
-                    seal.reject(DocumentRequestError.parserError)
-                    return
-                }
-
-                let variables = importAllParameters(documentsInput: jsonString)
-
-                let bodyParamsRequest = GraphqlParameters(fileName: "import_documents", variables: variables)
-
-                let promise: PromiseKit.Promise<ImportDocuments> = performRequest(bodyParamsRequest: bodyParamsRequest,
-                                                                                  authenticatedCall: true)
-                promise
-                    .done(on: self.backgroundQueue) { seal.fulfill($0) }
-                    .catch(on: self.backgroundQueue) { seal.reject($0) }
-            } catch {
-                seal.reject(error)
-            }
+        let jsonDataEncoded = try? JSONEncoder().encode(notes)
+        guard let jsonData = jsonDataEncoded, let jsonString = String(data: jsonData, encoding: .utf8) else {
+            return PromiseKit.Promise(error: DocumentRequestError.parserError)
         }
+
+        let variables = importAllParameters(documentsInput: jsonString)
+
+        let bodyParamsRequest = GraphqlParameters(fileName: "import_documents", variables: variables)
+
+        let promise: PromiseKit.Promise<ImportDocuments> = performRequest(bodyParamsRequest: bodyParamsRequest,
+                                                                          authenticatedCall: true)
+        return promise
     }
 }
 
@@ -355,32 +181,26 @@ extension DocumentRequest {
     }
 
     func saveDocument(_ document: DocumentAPIType) -> Promises.Promise<DocumentAPIType> {
-        return Promises.Promise { fulfill, reject in
-            guard let title = document.title else {
-                reject(DocumentRequestError.noTitle)
-                return
+        guard let title = document.title else {
+            return Promises.Promise(DocumentRequestError.noTitle)
+        }
+
+        let parameters = UpdateDocumentParameters(id: document.id,
+                                                  title: title,
+                                                  data: document.data,
+                                                  previousChecksum: document.previousChecksum,
+                                                  createdAt: document.createdAt,
+                                                  updatedAt: document.updatedAt)
+        let bodyParamsRequest = GraphqlParameters(fileName: "update_document", variables: parameters)
+
+        let promise: Promises.Promise<UpdateDocument> = self.performRequest(bodyParamsRequest: bodyParamsRequest,
+                                                                            authenticatedCall: true)
+
+        return promise.then(on: self.backgroundQueue) {
+            if let document = $0.document {
+                return Promises.Promise(document)
             }
-
-            let parameters = UpdateDocumentParameters(id: document.id,
-                                                      title: title,
-                                                      data: document.data,
-                                                      previousChecksum: document.previousChecksum,
-                                                      createdAt: document.createdAt,
-                                                      updatedAt: document.updatedAt)
-            let bodyParamsRequest = GraphqlParameters(fileName: "update_document", variables: parameters)
-
-            let promise: Promises.Promise<UpdateDocument> = self.performRequest(bodyParamsRequest: bodyParamsRequest,
-                                                                             authenticatedCall: true)
-
-            promise
-                .then(on: self.backgroundQueue) {
-                    if let document = $0.document {
-                        fulfill(document)
-                    } else {
-                        reject(DocumentRequestError.parserError)
-                    }
-                }
-                .catch(on: self.backgroundQueue) { reject($0) }
+            throw DocumentRequestError.parserError
         }
     }
 
@@ -405,27 +225,18 @@ extension DocumentRequest {
     }
 
     func importDocuments(_ notes: [DocumentAPIType]) -> Promises.Promise<ImportDocuments> {
-        return Promises.Promise { fulfill, reject in
-            do {
-                let jsonData = try JSONEncoder().encode(notes)
-                guard let jsonString = String(data: jsonData, encoding: .utf8) else {
-                    reject(DocumentRequestError.parserError)
-                    return
-                }
-
-                let variables = importAllParameters(documentsInput: jsonString)
-
-                let bodyParamsRequest = GraphqlParameters(fileName: "import_documents", variables: variables)
-
-                let promise: Promises.Promise<ImportDocuments> = self.performRequest(bodyParamsRequest: bodyParamsRequest,
-                                                                                  authenticatedCall: true)
-                promise
-                    .then(on: self.backgroundQueue) { fulfill($0) }
-                    .catch(on: self.backgroundQueue) { reject($0) }
-            } catch {
-                reject(error)
-            }
+        let jsonDataEncoded = try? JSONEncoder().encode(notes)
+        guard let jsonData = jsonDataEncoded, let jsonString = String(data: jsonData, encoding: .utf8) else {
+            return Promises.Promise(DocumentRequestError.parserError)
         }
+
+        let variables = importAllParameters(documentsInput: jsonString)
+
+        let bodyParamsRequest = GraphqlParameters(fileName: "import_documents", variables: variables)
+
+        let promise: Promises.Promise<ImportDocuments> = self.performRequest(bodyParamsRequest: bodyParamsRequest,
+                                                                             authenticatedCall: true)
+        return promise
     }
 }
 
