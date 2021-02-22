@@ -4,7 +4,6 @@ import Fakery
 import Quick
 import Nimble
 import Combine
-import Alamofire
 
 @testable import Beam
 class PersistenceTests: QuickSpec {

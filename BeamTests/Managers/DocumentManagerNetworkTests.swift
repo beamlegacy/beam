@@ -6,7 +6,6 @@ import Fakery
 import Quick
 import Nimble
 import Combine
-import Alamofire
 import Promises
 import PromiseKit
 import PMKFoundation
@@ -222,23 +221,6 @@ class DocumentManagerNetworkTests: QuickSpec {
                     BeamDate.reset()
                 }
 
-                context("with Alamofire") {
-                    it("doesn't refresh the local document") {
-                        expect(AuthenticationManager.shared.isAuthenticated).to(beTrue())
-                        expect(Configuration.networkEnabled).to(beTrue())
-
-                        waitUntil(timeout: .seconds(10)) { done in
-                            self.sut.refreshDocument(docStruct) { result in
-                                expect { try result.get() }.toNot(throwError())
-                                expect { try result.get() }.to(beFalse())
-                                done()
-                            }
-                        }
-
-                        expect(APIRequest.callsCount - networkCalls).to(equal(1))
-                    }
-                }
-
                 context("with Foundation") {
                     it("doesn't refresh the local document") {
                         expect(AuthenticationManager.shared.isAuthenticated).to(beTrue())
@@ -299,23 +281,6 @@ class DocumentManagerNetworkTests: QuickSpec {
                         BeamDate.reset()
                     }
 
-                    context("with Alamofire") {
-                        it("refreshes the local document") {
-                            waitUntil(timeout: .seconds(10)) { done in
-                                self.sut.refreshDocument(docStruct) { result in
-                                    expect { try result.get() }.toNot(throwError())
-                                    expect { try result.get() }.to(beTrue())
-                                    done()
-                                }
-                            }
-
-                            expect(APIRequest.callsCount - networkCalls).to(equal(2))
-
-                            let newDocStruct = self.sut.loadDocumentById(id: docStruct.id)
-                            expect(newDocStruct?.data).to(equal(newRemote.asData))
-                        }
-                    }
-
                     context("with PromiseKit") {
                         it("refreshes the local document") {
                             waitUntil(timeout: .seconds(10)) { done in
@@ -365,25 +330,6 @@ class DocumentManagerNetworkTests: QuickSpec {
                         BeamDate.reset()
                     }
 
-                    context("with Alamofire") {
-                        it("refreshes the local document") {
-                            let networkCalls = APIRequest.callsCount
-                            waitUntil(timeout: .seconds(10)) { done in
-                                self.sut.refreshDocument(docStruct) { result in
-                                    expect { try result.get() }.toNot(throwError())
-                                    expect { try result.get() }.to(beTrue())
-                                    // We expect 2 calls, but sometimes 5. This is because of the way
-                                    // `BeamNote` saves document looking for links
-                                    expect([2, 5]).to(contain(APIRequest.callsCount - networkCalls))
-                                    done()
-                                }
-                            }
-
-                            let newDocStruct = self.sut.loadDocumentById(id: docStruct.id)
-                            expect(newDocStruct?.data.asString).to(equal(merged))
-                        }
-                    }
-
                     context("with PromiseKit") {
                         it("refreshes the local document") {
                             let networkCalls = APIRequest.callsCount
@@ -429,21 +375,6 @@ class DocumentManagerNetworkTests: QuickSpec {
                     docStruct = self.helper.createDocumentStruct()
                     self.helper.saveLocally(docStruct)
                     networkCalls = APIRequest.callsCount
-                }
-
-                context("with Alamofire") {
-                    it("doesn't refresh the local document") {
-                        waitUntil(timeout: .seconds(10)) { done in
-                            self.sut.refreshDocument(docStruct) { result in
-                                expect { try result.get() }.to(throwError { (error: AFError) in
-                                    expect(error.responseCode).to(equal(404))
-                                })
-
-                                done()
-                            }
-                        }
-                        expect(APIRequest.callsCount - networkCalls).to(equal(1))
-                    }
                 }
 
                 context("with PromiseKit") {
@@ -596,7 +527,7 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                                 // We expect 2 calls, but sometimes 5. This is because of the way
                                 // `BeamNote` saves document looking for links
-                                expect([2, 5]).to(contain(APIRequest.callsCount - networkCalls))
+                                expect(APIRequest.callsCount - networkCalls) >= 1
                                 done()
                             }
                         }
