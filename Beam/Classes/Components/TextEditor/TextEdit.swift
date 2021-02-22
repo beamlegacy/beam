@@ -106,7 +106,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     let gutterWidth: CGFloat = TextNode.actionLayerXOffset + TextNode.actionLayerWidth
     var textWidth: CGFloat { isBig ? 704 : 544 }
 
-    private var isResize = false
+    private var isResizing = false
 
     public init(root: BeamElement, font: Font = Font.main) {
         let start = CFAbsoluteTimeGetCurrent()
@@ -164,13 +164,13 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
     public override func viewWillStartLiveResize() {
         super.viewWillStartLiveResize()
-        isResize = true
+        isResizing = true
         dismissPopoverOrFormatter()
     }
 
     public override func viewDidEndLiveResize() {
         super.viewDidEndLiveResize()
-        isResize = false
+        isResizing = false
     }
 
     public override func viewDidChangeEffectiveAppearance() {
@@ -295,7 +295,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
             rect = NSRect(x: x, y: topOffsetActual + cardTopSpace, width: textNodeWidth, height: r.height)
 
-            if isResize {
+            if isResizing {
                 // Disable CALayer animation on resize
                 CATransaction.disableAnimations {
                     rootNode.availableWidth = textNodeWidth
