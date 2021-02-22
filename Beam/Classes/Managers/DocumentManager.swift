@@ -1062,21 +1062,20 @@ extension DocumentManager {
     /// First we fetch the remote updated_at, if it's more recent we fetch all details
     func refreshDocument(_ documentStruct: DocumentStruct) -> Promises.Promise<Bool> {
         self.documentRequest.fetchDocumentUpdatedAt(documentStruct.uuidString)
-            .then(on: self.backgroundQueue) { documentType -> Promises.Promise<DocumentAPIType> in
+            .then(on: self.backgroundQueue) { documentType -> Promises.Promise<(DocumentAPIType, Bool)> in
                 if let updatedAt = documentType.updatedAt, updatedAt > documentStruct.updatedAt {
-                    return self.documentRequest.fetchDocument(documentStruct.uuidString)
+                    return self.documentRequest.fetchDocument(documentStruct.uuidString).then { ($0, true) }
                 }
-                return Promise(documentType)
-            }.then(on: self.backgroundQueue) { documentType in
-                if let updatedAt = documentType.updatedAt, updatedAt > documentStruct.updatedAt {
-                    try self.saveRefreshDocument(documentStruct, documentType)
-                }
+
+                return Promise((documentType, false))
+            }.then(on: self.backgroundQueue) { documentType, updated in
+                if updated { try self.saveRefreshDocument(documentStruct, documentType) }
             }.catch(on: self.backgroundQueue) { error in
                 if case APIRequestError.notFound = error {
                     try? self.deleteLocalDocumentAndWait(documentStruct)
                 }
-            }.then(on: self.backgroundQueue) { documentType in
-                return Promise((documentType.updatedAt ?? documentStruct.updatedAt) > documentStruct.updatedAt)
+            }.then(on: self.backgroundQueue) { _, updated in
+                return updated
             }
     }
 
@@ -1210,15 +1209,13 @@ extension DocumentManager {
         let promise: PromiseKit.Promise<DocumentAPIType> = documentRequest.fetchDocumentUpdatedAt(documentStruct.uuidString)
 
         return promise
-            .then(on: backgroundQueue) { documentType -> PromiseKit.Promise<DocumentAPIType> in
+            .then(on: backgroundQueue) { documentType -> PromiseKit.Promise<(DocumentAPIType, Bool)> in
                 if let updatedAt = documentType.updatedAt, updatedAt > documentStruct.updatedAt {
-                    return self.documentRequest.fetchDocument(documentStruct.uuidString)
+                    return self.documentRequest.fetchDocument(documentStruct.uuidString).map { ($0, true) }
                 }
-                return .value(documentType)
-            }.get(on: backgroundQueue) { documentType in
-                if let updatedAt = documentType.updatedAt, updatedAt > documentStruct.updatedAt {
-                    try self.saveRefreshDocument(documentStruct, documentType)
-                }
+                return .value((documentType, false))
+            }.get(on: backgroundQueue) { documentType, updated in
+                if updated { try self.saveRefreshDocument(documentStruct, documentType) }
             }.tap(on: backgroundQueue) { result in
                 switch result {
                 case .rejected(let error):
@@ -1227,8 +1224,8 @@ extension DocumentManager {
                     }
                 case .fulfilled: break
                 }
-            }.map(on: backgroundQueue) { documentType in
-                return (documentType.updatedAt ?? documentStruct.updatedAt) > documentStruct.updatedAt
+            }.map(on: backgroundQueue) { _, updated in
+                return updated
             }
     }
 
