@@ -2,7 +2,6 @@ import Foundation
 import XCTest
 import Quick
 import Nimble
-import Alamofire
 import Promises
 import PromiseKit
 
@@ -34,53 +33,10 @@ class APIRequestTests: QuickSpec {
             Configuration.reset()
         }
 
-        context("with Alamofire") {
-            var dataRequest: Alamofire.DataRequest!
-
-            it("sends a request") {
-                waitUntil(timeout: .seconds(10)) { done in
-                    dataRequest = self.sut.performRequest(bodyParamsRequest: bodyParamsRequest,
-                                                          authenticatedCall: false) { (result: Swift.Result<APIRequest.APIResult<ForgotPassword>, Error>) in
-                        let dataRequestResult: APIRequest.APIResult<ForgotPassword>? = try? result.get()
-
-                        // Result should not generate error, and be true since this email exists
-                        expect { try result.get() }.toNot(throwError())
-                        expect(dataRequestResult?.data?.value?.success).to(beTrue())
-                        done()
-                    }
-                }
-
-                dataRequest.cancel() // to avoid a lint warning
-            }
-
-            context("with wrong api hostname") {
-                beforeEach {
-                    Configuration.apiHostname = "localhost"
-                }
-
-                it("manages errors") {
-                    waitUntil(timeout: .seconds(10)) { done in
-                        dataRequest = self.sut.performRequest(bodyParamsRequest: bodyParamsRequest,
-                                                              authenticatedCall: false) { (result: Swift.Result<APIRequest.APIResult<ForgotPassword>, Error>) in
-                            expect { try result.get() }.to(throwError { (error: AFError) in
-                                expect(error.isSessionTaskError).to(beTrue())
-                            })
-
-                            done()
-                        }
-                    }
-
-                    dataRequest.cancel() // to avoid a lint warning
-                }
-            }
-        }
-
         context("with Foundation") {
-            var dataRequest: URLSessionDataTask?
-
             it("sends a request") {
                 waitUntil(timeout: .seconds(10)) { done in
-                    dataRequest = try? self.sut.performRequest(bodyParamsRequest: bodyParamsRequest,
+                    _ = try? self.sut.performRequest(bodyParamsRequest: bodyParamsRequest,
                                                           authenticatedCall: false) { (result: Swift.Result<ForgotPassword, Error>) in
                         let forgotPassword: ForgotPassword? = try? result.get()
 
@@ -90,8 +46,6 @@ class APIRequestTests: QuickSpec {
                         done()
                     }
                 }
-
-                dataRequest?.cancel() // to avoid a lint warning
             }
 
             context("with wrong api hostname") {
@@ -100,8 +54,8 @@ class APIRequestTests: QuickSpec {
                 }
 
                 it("manages errors") {
-                    waitUntil(timeout: .seconds(10)) { done in
-                        dataRequest = try? self.sut.performRequest(bodyParamsRequest: bodyParamsRequest,
+                    waitUntil(timeout: .seconds(1)) { done in
+                        _ = try? self.sut.performRequest(bodyParamsRequest: bodyParamsRequest,
                                                               authenticatedCall: false) { (result: Swift.Result<ForgotPassword, Error>) in
                             expect { try result.get() }.to(throwError { (error: NSError) in
                                 expect(error.code).to(equal(-1004))
@@ -109,7 +63,6 @@ class APIRequestTests: QuickSpec {
                             done()
                         }
                     }
-                    dataRequest?.cancel() // to avoid a lint warning
                 }
             }
         }
@@ -134,7 +87,7 @@ class APIRequestTests: QuickSpec {
                 }
 
                 it("manages errors") {
-                    waitUntil(timeout: .seconds(10)) { done in
+                    waitUntil(timeout: .seconds(1)) { done in
                         let promise: PromiseKit.Promise<ForgotPassword> = self.sut
                             .performRequest(bodyParamsRequest: bodyParamsRequest,
                                             authenticatedCall: false)

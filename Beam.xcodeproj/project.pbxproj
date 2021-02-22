@@ -39,7 +39,6 @@
 		418171F02581107C00317ED8 /* APIResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171622581107C00317ED8 /* APIResponse.swift */; };
 		418171F12581107C00317ED8 /* UserSessionRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171632581107C00317ED8 /* UserSessionRequest.swift */; };
 		418171F22581107C00317ED8 /* APIRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171642581107C00317ED8 /* APIRequest.swift */; };
-		418171F32581107C00317ED8 /* AuthenticationHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171652581107C00317ED8 /* AuthenticationHandler.swift */; };
 		418171F42581107C00317ED8 /* sign_up.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 418171682581107C00317ED8 /* sign_up.graphql */; };
 		418171F52581107C00317ED8 /* forgot_password.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 418171692581107C00317ED8 /* forgot_password.graphql */; };
 		418171F62581107C00317ED8 /* sign_in.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 4181716A2581107C00317ED8 /* sign_in.graphql */; };
@@ -186,7 +185,6 @@
 		5273C65C25DA835500B00EC3 /* UserSessionRequestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5273C65925DA835400B00EC3 /* UserSessionRequestTests.swift */; };
 		5273C66D25DA857400B00EC3 /* BeamUITestsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5273C66C25DA857400B00EC3 /* BeamUITestsHelper.swift */; };
 		527DF48725710ECB00A0A56D /* DocumentManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 527DF48625710ECB00A0A56D /* DocumentManagerTests.swift */; };
-		527FB6FC25B9A8C200959146 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 527FB6FB25B9A8C200959146 /* Alamofire */; };
 		527FB71525B9A93400959146 /* CocoaLumberjackSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 527FB71425B9A93400959146 /* CocoaLumberjackSwift */; };
 		527FB71A25B9A97A00959146 /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = 527FB71925B9A97A00959146 /* Sentry */; };
 		527FB71F25B9A9B600959146 /* JWTDecode in Frameworks */ = {isa = PBXBuildFile; productRef = 527FB71E25B9A9B600959146 /* JWTDecode */; };
@@ -514,7 +512,6 @@
 		418171622581107C00317ED8 /* APIResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = APIResponse.swift; sourceTree = "<group>"; };
 		418171632581107C00317ED8 /* UserSessionRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserSessionRequest.swift; sourceTree = "<group>"; };
 		418171642581107C00317ED8 /* APIRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = APIRequest.swift; sourceTree = "<group>"; };
-		418171652581107C00317ED8 /* AuthenticationHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AuthenticationHandler.swift; sourceTree = "<group>"; };
 		418171682581107C00317ED8 /* sign_up.graphql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = sign_up.graphql; sourceTree = "<group>"; };
 		418171692581107C00317ED8 /* forgot_password.graphql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = forgot_password.graphql; sourceTree = "<group>"; };
 		4181716A2581107C00317ED8 /* sign_in.graphql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = sign_in.graphql; sourceTree = "<group>"; };
@@ -754,7 +751,6 @@
 				52BB698B25CD4E1E007A1173 /* PromiseKit in Frameworks */,
 				527FB72425B9AAA200959146 /* Fakery in Frameworks */,
 				9631C747251CE997009B40C4 /* SwiftSoup in Frameworks */,
-				527FB6FC25B9A8C200959146 /* Alamofire in Frameworks */,
 				523E91CC25D17004001124E0 /* PMKFoundation in Frameworks */,
 				527FB71A25B9A97A00959146 /* Sentry in Frameworks */,
 				524299AF25A47CA500F4DBF5 /* Preferences in Frameworks */,
@@ -905,7 +901,6 @@
 				418171632581107C00317ED8 /* UserSessionRequest.swift */,
 				418171642581107C00317ED8 /* APIRequest.swift */,
 				529E1AD325D45CFA00DD25B8 /* APIRequestError.swift */,
-				418171652581107C00317ED8 /* AuthenticationHandler.swift */,
 				5206282525923B6800D7CD9E /* DocumentRequest.swift */,
 			);
 			path = API;
@@ -1748,7 +1743,6 @@
 				9631C746251CE997009B40C4 /* SwiftSoup */,
 				96474E3E254D9ADB00A920B3 /* FavIcon */,
 				524299AE25A47CA500F4DBF5 /* Preferences */,
-				527FB6FB25B9A8C200959146 /* Alamofire */,
 				527FB71425B9A93400959146 /* CocoaLumberjackSwift */,
 				527FB71925B9A97A00959146 /* Sentry */,
 				527FB71E25B9A9B600959146 /* JWTDecode */,
@@ -1845,7 +1839,6 @@
 				9631C745251CE997009B40C4 /* XCRemoteSwiftPackageReference "SwiftSoup" */,
 				96474E3D254D9ADB00A920B3 /* XCRemoteSwiftPackageReference "FavIcon" */,
 				524299AD25A47CA500F4DBF5 /* XCRemoteSwiftPackageReference "Preferences" */,
-				527FB6FA25B9A8C200959146 /* XCRemoteSwiftPackageReference "Alamofire" */,
 				527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */,
 				527FB71825B9A97A00959146 /* XCRemoteSwiftPackageReference "sentry-cocoa" */,
 				527FB71D25B9A9B600959146 /* XCRemoteSwiftPackageReference "JWTDecode.swift" */,
@@ -2252,7 +2245,6 @@
 				418172232581107C00317ED8 /* String+Ranges.swift in Sources */,
 				521EEDE525937F7F00BA2485 /* DocumentsList.swift in Sources */,
 				418172CF25811AF800317ED8 /* Animation.swift in Sources */,
-				418171F32581107C00317ED8 /* AuthenticationHandler.swift in Sources */,
 				4159EA0A259A3568005FD355 /* BidirectionalPopoverResultItem.swift in Sources */,
 				4170C43125923B6A0072C781 /* Popover.swift in Sources */,
 				418171EC2581107C00317ED8 /* Me.swift in Sources */,
@@ -2988,14 +2980,6 @@
 				minimumVersion = 2.2.0;
 			};
 		};
-		527FB6FA25B9A8C200959146 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/Alamofire/Alamofire.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 5.4.1;
-			};
-		};
 		527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/CocoaLumberjack/CocoaLumberjack.git";
@@ -3082,11 +3066,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 524299AD25A47CA500F4DBF5 /* XCRemoteSwiftPackageReference "Preferences" */;
 			productName = Preferences;
-		};
-		527FB6FB25B9A8C200959146 /* Alamofire */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 527FB6FA25B9A8C200959146 /* XCRemoteSwiftPackageReference "Alamofire" */;
-			productName = Alamofire;
 		};
 		527FB71425B9A93400959146 /* CocoaLumberjackSwift */ = {
 			isa = XCSwiftPackageProductDependency;
