@@ -1008,21 +1008,6 @@ extension DocumentManager {
                     return Promise(self.parseDocumentBody(document))
                 }
             }
-
-//        return Promises.Promise { [unowned self] fulfill, reject in
-//            self.coreDataManager.backgroundContext.perform {
-//                let context = self.coreDataManager.backgroundContext
-//                let document = Document.create(context, title: title)
-//                do {
-//                    try self.checkValidations(context, document)
-//                    try Self.saveContext(context: context)
-//
-//                    fulfill(self.parseDocumentBody(document))
-//                } catch {
-//                    reject(error)
-//                }
-//            }
-//        }
     }
 
     func fetchOrCreate(title: String) -> Promises.Promise<DocumentStruct> {
@@ -1045,26 +1030,22 @@ extension DocumentManager {
     /// Fetch most recent document from API
     /// First we fetch the remote updated_at, if it's more recent we fetch all details
     func refreshDocument(_ documentStruct: DocumentStruct) -> Promises.Promise<Bool> {
-        return Promises.Promise<Bool> { (fulfill, reject) in
-            self.documentRequest.fetchDocumentUpdatedAt(documentStruct.uuidString)
-                .then(on: self.backgroundQueue) { documentType in
-                    guard let updatedAt = documentType.updatedAt, updatedAt > documentStruct.updatedAt else {
-                        fulfill(false)
-                        return
-                    }
-
-                    self.documentRequest.fetchDocument(documentStruct.uuidString)
-                        .then { documentType in
-                            try self.saveRefreshDocument(documentStruct, documentType)
-                            fulfill(true)
-                        }
-                }.catch(on: self.backgroundQueue) { error in
-                    if case APIRequestError.notFound = error {
-                        try? self.deleteLocalDocumentAndWait(documentStruct)
-                    }
-                    reject(error)
+        self.documentRequest.fetchDocumentUpdatedAt(documentStruct.uuidString)
+            .then(on: self.backgroundQueue) { documentType in
+                guard let updatedAt = documentType.updatedAt, updatedAt > documentStruct.updatedAt else {
+                    return Promise(false)
                 }
-        }
+
+                return self.documentRequest.fetchDocument(documentStruct.uuidString)
+                    .then { documentType in
+                        try self.saveRefreshDocument(documentStruct, documentType)
+                        return Promise(true)
+                    }
+            }.catch(on: self.backgroundQueue) { error in
+                if case APIRequestError.notFound = error {
+                    try? self.deleteLocalDocumentAndWait(documentStruct)
+                }
+            }
     }
 
     /// Fetch all remote documents from API
@@ -1127,20 +1108,16 @@ extension DocumentManager {
     }
 
     func deleteAllDocuments(includedRemote: Bool = true) -> Promises.Promise<Bool> {
-        return Promises.Promise { fulfill, reject in
-            CoreDataManager.shared.destroyPersistentStore()
-            CoreDataManager.shared.setup()
+        CoreDataManager.shared.destroyPersistentStore()
+        CoreDataManager.shared.setup()
 
-            guard includedRemote,
-                  AuthenticationManager.shared.isAuthenticated,
-                  Configuration.networkEnabled else {
-                return fulfill(true)
-            }
-
-            self.documentRequest.deleteAllDocuments()
-                .then { _ in fulfill(true) }
-                .catch { error in reject(error) }
+        guard includedRemote,
+              AuthenticationManager.shared.isAuthenticated,
+              Configuration.networkEnabled else {
+            return Promises.Promise(true)
         }
+
+        return self.documentRequest.deleteAllDocuments()
     }
 
     // MARK: Bulk calls
@@ -1164,7 +1141,8 @@ extension DocumentManager {
     // MARK: Create
 
     func create(title: String) -> PromiseKit.Promise<DocumentStruct> {
-        return coreDataManager.background()
+        let promise: PromiseKit.Guarantee<NSManagedObjectContext> = coreDataManager.background()
+        return promise
             .then(on: backgroundQueue) { context -> PromiseKit.Promise<DocumentStruct> in
                 try context.performAndWait {
                     let document = Document.create(context, title: title)
@@ -1172,7 +1150,7 @@ extension DocumentManager {
                     try self.checkValidations(context, document)
                     try Self.saveContext(context: context)
 
-                    return .value(self.parseDocumentBody(document))
+                return .value(self.parseDocumentBody(document))
                 }
             }
     }
@@ -1283,27 +1261,22 @@ extension DocumentManager {
                 }
 
                 let result: PromiseKit.Promise<DocumentAPIType?> = self.documentRequest.deleteDocument(id.uuidString.lowercased())
-                return result.map(on: self.backgroundQueue) { _ in
-                    return true
-                }
+                return result.map(on: self.backgroundQueue) { _ in true }
             }
     }
 
     func deleteAllDocuments(includedRemote: Bool = true) -> PromiseKit.Promise<Bool> {
-        return PromiseKit.Promise { seal in
-            CoreDataManager.shared.destroyPersistentStore()
-            CoreDataManager.shared.setup()
+        CoreDataManager.shared.destroyPersistentStore()
+        CoreDataManager.shared.setup()
 
-            guard includedRemote,
-                  AuthenticationManager.shared.isAuthenticated,
-                  Configuration.networkEnabled else {
-                return seal.fulfill(true)
-            }
-
-            self.documentRequest.deleteAllDocuments()
-                .then { _ in seal.fulfill(true) }
-                .catch { error in seal.reject(error) }
+        guard includedRemote,
+              AuthenticationManager.shared.isAuthenticated,
+              Configuration.networkEnabled else {
+            return .value(true)
         }
+
+        return self.documentRequest.deleteAllDocuments()
+            .map { _ in true }
     }
 
     // MARK: Bulk calls

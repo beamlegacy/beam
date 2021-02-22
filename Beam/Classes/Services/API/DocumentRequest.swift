@@ -247,32 +247,26 @@ extension DocumentRequest {
     }
 
     func saveDocument(_ document: DocumentAPIType) -> PromiseKit.Promise<DocumentAPIType> {
-        return PromiseKit.Promise { seal in
-            guard let title = document.title else {
-                seal.reject(DocumentRequestError.noTitle)
-                return
+        guard let title = document.title else {
+            return Promise(error: DocumentRequestError.noTitle)
+        }
+
+        let parameters = UpdateDocumentParameters(id: document.id,
+                                                  title: title,
+                                                  data: document.data,
+                                                  previousChecksum: document.previousChecksum,
+                                                  createdAt: document.createdAt,
+                                                  updatedAt: document.updatedAt)
+        let bodyParamsRequest = GraphqlParameters(fileName: "update_document", variables: parameters)
+
+        let promise: PromiseKit.Promise<UpdateDocument> = performRequest(bodyParamsRequest: bodyParamsRequest,
+                                                                         authenticatedCall: true)
+
+        return promise.map(on: self.backgroundQueue) {
+            if let document = $0.document {
+                return document
             }
-
-            let parameters = UpdateDocumentParameters(id: document.id,
-                                                      title: title,
-                                                      data: document.data,
-                                                      previousChecksum: document.previousChecksum,
-                                                      createdAt: document.createdAt,
-                                                      updatedAt: document.updatedAt)
-            let bodyParamsRequest = GraphqlParameters(fileName: "update_document", variables: parameters)
-
-            let promise: PromiseKit.Promise<UpdateDocument> = performRequest(bodyParamsRequest: bodyParamsRequest,
-                                                                             authenticatedCall: true)
-
-            promise
-                .done(on: self.backgroundQueue) {
-                    if let document = $0.document {
-                        seal.fulfill(document)
-                    } else {
-                        seal.reject(DocumentRequestError.parserError)
-                    }
-                }
-                .catch(on: self.backgroundQueue) { seal.reject($0) }
+            throw APIRequestError.parserError
         }
     }
 
@@ -297,27 +291,18 @@ extension DocumentRequest {
     }
 
     func importDocuments(_ notes: [DocumentAPIType]) -> PromiseKit.Promise<ImportDocuments> {
-        return PromiseKit.Promise { seal in
-            do {
-                let jsonData = try JSONEncoder().encode(notes)
-                guard let jsonString = String(data: jsonData, encoding: .utf8) else {
-                    seal.reject(DocumentRequestError.parserError)
-                    return
-                }
-
-                let variables = importAllParameters(documentsInput: jsonString)
-
-                let bodyParamsRequest = GraphqlParameters(fileName: "import_documents", variables: variables)
-
-                let promise: PromiseKit.Promise<ImportDocuments> = performRequest(bodyParamsRequest: bodyParamsRequest,
-                                                                                  authenticatedCall: true)
-                promise
-                    .done(on: self.backgroundQueue) { seal.fulfill($0) }
-                    .catch(on: self.backgroundQueue) { seal.reject($0) }
-            } catch {
-                seal.reject(error)
-            }
+        let jsonDataEncoded = try? JSONEncoder().encode(notes)
+        guard let jsonData = jsonDataEncoded, let jsonString = String(data: jsonData, encoding: .utf8) else {
+            return PromiseKit.Promise(error: DocumentRequestError.parserError)
         }
+
+        let variables = importAllParameters(documentsInput: jsonString)
+
+        let bodyParamsRequest = GraphqlParameters(fileName: "import_documents", variables: variables)
+
+        let promise: PromiseKit.Promise<ImportDocuments> = performRequest(bodyParamsRequest: bodyParamsRequest,
+                                                                          authenticatedCall: true)
+        return promise
     }
 }
 
@@ -355,32 +340,26 @@ extension DocumentRequest {
     }
 
     func saveDocument(_ document: DocumentAPIType) -> Promises.Promise<DocumentAPIType> {
-        return Promises.Promise { fulfill, reject in
-            guard let title = document.title else {
-                reject(DocumentRequestError.noTitle)
-                return
+        guard let title = document.title else {
+            return Promises.Promise(DocumentRequestError.noTitle)
+        }
+
+        let parameters = UpdateDocumentParameters(id: document.id,
+                                                  title: title,
+                                                  data: document.data,
+                                                  previousChecksum: document.previousChecksum,
+                                                  createdAt: document.createdAt,
+                                                  updatedAt: document.updatedAt)
+        let bodyParamsRequest = GraphqlParameters(fileName: "update_document", variables: parameters)
+
+        let promise: Promises.Promise<UpdateDocument> = self.performRequest(bodyParamsRequest: bodyParamsRequest,
+                                                                            authenticatedCall: true)
+
+        return promise.then(on: self.backgroundQueue) {
+            if let document = $0.document {
+                return Promises.Promise(document)
             }
-
-            let parameters = UpdateDocumentParameters(id: document.id,
-                                                      title: title,
-                                                      data: document.data,
-                                                      previousChecksum: document.previousChecksum,
-                                                      createdAt: document.createdAt,
-                                                      updatedAt: document.updatedAt)
-            let bodyParamsRequest = GraphqlParameters(fileName: "update_document", variables: parameters)
-
-            let promise: Promises.Promise<UpdateDocument> = self.performRequest(bodyParamsRequest: bodyParamsRequest,
-                                                                             authenticatedCall: true)
-
-            promise
-                .then(on: self.backgroundQueue) {
-                    if let document = $0.document {
-                        fulfill(document)
-                    } else {
-                        reject(DocumentRequestError.parserError)
-                    }
-                }
-                .catch(on: self.backgroundQueue) { reject($0) }
+            throw DocumentRequestError.parserError
         }
     }
 
@@ -405,27 +384,18 @@ extension DocumentRequest {
     }
 
     func importDocuments(_ notes: [DocumentAPIType]) -> Promises.Promise<ImportDocuments> {
-        return Promises.Promise { fulfill, reject in
-            do {
-                let jsonData = try JSONEncoder().encode(notes)
-                guard let jsonString = String(data: jsonData, encoding: .utf8) else {
-                    reject(DocumentRequestError.parserError)
-                    return
-                }
-
-                let variables = importAllParameters(documentsInput: jsonString)
-
-                let bodyParamsRequest = GraphqlParameters(fileName: "import_documents", variables: variables)
-
-                let promise: Promises.Promise<ImportDocuments> = self.performRequest(bodyParamsRequest: bodyParamsRequest,
-                                                                                  authenticatedCall: true)
-                promise
-                    .then(on: self.backgroundQueue) { fulfill($0) }
-                    .catch(on: self.backgroundQueue) { reject($0) }
-            } catch {
-                reject(error)
-            }
+        let jsonDataEncoded = try? JSONEncoder().encode(notes)
+        guard let jsonData = jsonDataEncoded, let jsonString = String(data: jsonData, encoding: .utf8) else {
+            return Promises.Promise(DocumentRequestError.parserError)
         }
+
+        let variables = importAllParameters(documentsInput: jsonString)
+
+        let bodyParamsRequest = GraphqlParameters(fileName: "import_documents", variables: variables)
+
+        let promise: Promises.Promise<ImportDocuments> = self.performRequest(bodyParamsRequest: bodyParamsRequest,
+                                                                             authenticatedCall: true)
+        return promise
     }
 }
 

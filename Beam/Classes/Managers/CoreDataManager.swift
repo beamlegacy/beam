@@ -235,17 +235,13 @@ class CoreDataManager {
 // MARK: PromiseKit
 extension CoreDataManager {
     func background() -> PromiseKit.Guarantee<NSManagedObjectContext> {
-        return PromiseKit.Guarantee { fulfill in
-            fulfill(self.backgroundContext)
-        }
+        .value(self.backgroundContext)
     }
 }
 
 // MARK: Promises
 extension CoreDataManager {
     func background() -> Promises.Promise<NSManagedObjectContext> {
-        return Promises.Promise { fulfill, _ in
-            fulfill(self.backgroundContext)
-        }
+        Promises.Promise(self.backgroundContext)
     }
 }
