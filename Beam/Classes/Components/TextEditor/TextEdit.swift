@@ -571,7 +571,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                         guard let node = focussedWidget as? TextNode else { return }
                         node.unfold()
                     } else if shift && option {
-                        rootNode.doCommand(.moveWordRightAndModifySelection)
+                        rootNode.doCommand(.moveToEndOfLineAndModifySelection)
                         showInlineFormatterOnKeyEventsAndClick()
                     } else if shift && command {
                         rootNode.doCommand(.moveToEndOfLineAndModifySelection)
