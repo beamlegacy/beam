@@ -1028,7 +1028,7 @@ extension DocumentManager {
     // MARK: -
     // MARK: Create
     func create(title: String) -> Promises.Promise<DocumentStruct> {
-        return coreDataManager.background()
+        coreDataManager.background()
             .then(on: backgroundQueue) { context in
                 try context.performAndWait {
                     let document = Document.create(context, title: title)
@@ -1042,7 +1042,7 @@ extension DocumentManager {
     }
 
     func fetchOrCreate(title: String) -> Promises.Promise<DocumentStruct> {
-        return coreDataManager.background()
+        coreDataManager.background()
             .then(on: backgroundQueue) { context in
                 try context.performAndWait {
                     let document = Document.fetchOrCreateWithTitle(context, title)
@@ -1062,20 +1062,21 @@ extension DocumentManager {
     /// First we fetch the remote updated_at, if it's more recent we fetch all details
     func refreshDocument(_ documentStruct: DocumentStruct) -> Promises.Promise<Bool> {
         self.documentRequest.fetchDocumentUpdatedAt(documentStruct.uuidString)
-            .then(on: self.backgroundQueue) { documentType in
-                guard let updatedAt = documentType.updatedAt, updatedAt > documentStruct.updatedAt else {
-                    return Promise(false)
+            .then(on: self.backgroundQueue) { documentType -> Promises.Promise<DocumentAPIType> in
+                if let updatedAt = documentType.updatedAt, updatedAt > documentStruct.updatedAt {
+                    return self.documentRequest.fetchDocument(documentStruct.uuidString)
                 }
-
-                return self.documentRequest.fetchDocument(documentStruct.uuidString)
-                    .then { documentType in
-                        try self.saveRefreshDocument(documentStruct, documentType)
-                        return Promise(true)
-                    }
+                return Promise(documentType)
+            }.then(on: self.backgroundQueue) { documentType in
+                if let updatedAt = documentType.updatedAt, updatedAt > documentStruct.updatedAt {
+                    try self.saveRefreshDocument(documentStruct, documentType)
+                }
             }.catch(on: self.backgroundQueue) { error in
                 if case APIRequestError.notFound = error {
                     try? self.deleteLocalDocumentAndWait(documentStruct)
                 }
+            }.then(on: self.backgroundQueue) { documentType in
+                return Promise((documentType.updatedAt ?? documentStruct.updatedAt) > documentStruct.updatedAt)
             }
     }
 
@@ -1209,26 +1210,25 @@ extension DocumentManager {
         let promise: PromiseKit.Promise<DocumentAPIType> = documentRequest.fetchDocumentUpdatedAt(documentStruct.uuidString)
 
         return promise
-            .then(on: backgroundQueue) { documentType -> PromiseKit.Promise<Bool> in
-                guard let updatedAt = documentType.updatedAt, updatedAt > documentStruct.updatedAt else {
-                    return .value(false)
+            .then(on: backgroundQueue) { documentType -> PromiseKit.Promise<DocumentAPIType> in
+                if let updatedAt = documentType.updatedAt, updatedAt > documentStruct.updatedAt {
+                    return self.documentRequest.fetchDocument(documentStruct.uuidString)
                 }
-
-                let result: PromiseKit.Promise<DocumentAPIType> = self.documentRequest.fetchDocument(documentStruct.uuidString)
-
-                return result.map { documentType in
+                return .value(documentType)
+            }.get(on: backgroundQueue) { documentType in
+                if let updatedAt = documentType.updatedAt, updatedAt > documentStruct.updatedAt {
                     try self.saveRefreshDocument(documentStruct, documentType)
-                    return true
                 }
-            }
-            .tap(on: backgroundQueue) { result in
+            }.tap(on: backgroundQueue) { result in
                 switch result {
                 case .rejected(let error):
                     if case APIRequestError.notFound = error {
                         try? self.deleteLocalDocumentAndWait(documentStruct)
                     }
-                default: break
+                case .fulfilled: break
                 }
+            }.map(on: backgroundQueue) { documentType in
+                return (documentType.updatedAt ?? documentStruct.updatedAt) > documentStruct.updatedAt
             }
     }
 
