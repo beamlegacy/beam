@@ -12,7 +12,7 @@ import AppKit
 class BrowsingSection: Widget {
     var sorted: Bool = true {
         didSet {
-            updateChildrenNodes()
+            updateChildrenNodes(sessions: note.browsingSessions)
             invalidateLayout()
         }
     }
@@ -20,29 +20,31 @@ class BrowsingSection: Widget {
     let textLayer = CATextLayer()
     let chevronLayer = CALayer()
 
-    var links: Set<UInt64> {
-        note.browsingSessions.reduce(into: Set<UInt64>()) { result, tree in
-            result = result.union(tree.links)
+    func links(sessions: [BrowsingTree]) -> Set<ScoredLink> {
+        sessions.reduce(into: Set<ScoredLink>()) { result, tree in
+            result = result.union(tree.scoredLinks)
         }
     }
 
-    var sortedLinks: [(UInt64, Float)] {
-        links.map { id -> (UInt64, Float) in
-            (id, AppDelegate.main.data.scores.scoreCard(for: id).score)
-        }
-        .sorted { left, right -> Bool in
-            left.1 < right.1
+    func sortedLinks(sessions: [BrowsingTree]) -> [ScoredLink] {
+        links(sessions: sessions).sorted { left, right -> Bool in
+            left.score.score < right.score.score
         }
     }
 
-    func updateChildrenNodes() {
+    func updateChildrenNodes(sessions: [BrowsingTree]) {
         self.clear()
+
+        for session in sessions {
+            session.dump()
+        }
+
         if sorted {
-            for link in sortedLinks.reversed() {
-                addChild(BrowsingLinkWidget(editor: editor, link: link.0, score: link.1))
+            for link in sortedLinks(sessions: sessions).reversed() {
+                addChild(BrowsingLinkWidget(editor: editor, link: link))
             }
         } else {
-            for session in note.browsingSessions {
+            for session in sessions {
                 addChild(BrowsingNodeWidget(editor: editor, browsingNode: session.root, recursive: true))
             }
         }
@@ -69,9 +71,9 @@ class BrowsingSection: Widget {
 
         note.$browsingSessions
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
+            .sink { [weak self] sessions in
             guard let self = self else { return }
-            self.updateChildrenNodes()
+                self.updateChildrenNodes(sessions: sessions)
         }.store(in: &scope)
 
         textLayer.string = "Browsing sessions"
@@ -79,7 +81,6 @@ class BrowsingSection: Widget {
         updateLayerVisibility()
         editor.layer?.addSublayer(layer)
         layer.addSublayer(textLayer)
-        // layer.addSublayer(chevronLayer)
         textLayer.frame = CGRect(origin: CGPoint(x: 100, y: 0), size: textLayer.preferredFrameSize())
     }
 

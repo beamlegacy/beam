@@ -26,19 +26,48 @@ struct ReadingEvent: Codable {
     var date: Date
 }
 
+struct ScoredLink: Hashable {
+    var link: UInt64
+    var score: Score
+
+    static func == (lhs: ScoredLink, rhs: ScoredLink) -> Bool {
+        lhs.link == rhs.link
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(link)
+    }
+}
+
 class BrowsingNode: ObservableObject, Codable {
     var link: UInt64
     var parent: BrowsingNode?
+    var tree: BrowsingTree! {
+        didSet {
+            for c in children {
+                c.tree = tree
+            }
+        }
+    }
     @Published var events = [ReadingEvent(type: .creation, date: Date())]
     @Published var children = [BrowsingNode]()
+    var score: Score { tree.scoreFor(link: link) }
+
+    var title: String {
+        LinkStore.linkFor(link)?.title ?? "<???>"
+    }
+    var url: String {
+        LinkStore.linkFor(link)?.url ?? "<???>"
+    }
 
     func addEvent(_ type: ReadingEventType, date: Date = Date()) {
         events.append(ReadingEvent(type: type, date: date))
     }
 
-    init(parent: BrowsingNode?, url: String, title: String?) {
+    init(tree: BrowsingTree, parent: BrowsingNode?, url: String, title: String?) {
         self.link = LinkStore.createIdFor(url, title: title)
         self.parent = parent
+        self.tree = tree
     }
 
     // Codable:
@@ -78,20 +107,30 @@ class BrowsingNode: ObservableObject, Codable {
             c.visit(block)
         }
     }
+
+    func dump(level: Int = 0) {
+        let tabs = String.tabs(level)
+
+        print(tabs + "'\(title)' / '\(url)'")
+        for child in children {
+            child.dump(level: level + 1)
+        }
+    }
 }
 
 class BrowsingTree: ObservableObject, Codable {
-    @Published var root: BrowsingNode
-    @Published var current: BrowsingNode!
+    @Published public private(set) var root: BrowsingNode!
+    @Published public private(set) var current: BrowsingNode!
 
-    init(_ root: BrowsingNode) {
-        self.root = root
+    init(_ originalQuery: String?) {
+        self.root = BrowsingNode(tree: self, parent: nil, url: originalQuery ?? "<???>", title: nil)
         self.current = root
     }
 
     // Codable:
     enum CodingKeys: String, CodingKey {
         case root
+        case scores
     }
 
     required init(from decoder: Decoder) throws {
@@ -99,12 +138,24 @@ class BrowsingTree: ObservableObject, Codable {
 
         root = try container.decode(BrowsingNode.self, forKey: .root)
         current = root
+
+        if container.contains(.scores) {
+            scores = try container.decode([UInt64: Score].self, forKey: .scores)
+        } else {
+            // old version, let's fish for them:
+            root.visit { link in
+                self.scores[link.link] = Score()
+            }
+        }
+
+        root.tree = self
     }
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
         try container.encode(root, forKey: .root)
+        try container.encode(scores, forKey: .scores)
     }
 
     func startReading() {
@@ -139,7 +190,7 @@ class BrowsingTree: ObservableObject, Codable {
         guard current.link != LinkStore.getIdFor(link) else { return }
         Logger.shared.logInfo("navigateFrom \(currentLink) to \(link)", category: .web)
         current.addEvent(.navigateToLink)
-        let node = BrowsingNode(parent: current, url: link, title: title)
+        let node = BrowsingNode(tree: self, parent: current, url: link, title: title)
         current.children.append(node)
         current = node
         current.addEvent(.startReading)
@@ -177,15 +228,34 @@ class BrowsingTree: ObservableObject, Codable {
         return set
     }
 
-    var sortedLinks: [(UInt64, Float)] {
-        var scores = [(UInt64, Float)]()
-        for link in links {
-            let linkScore = AppDelegate.main.data.scores.scoreCard(for: link)
-            scores.append((link, linkScore.score))
+    var scoredLinks: Set<ScoredLink> {
+        var set = Set<ScoredLink>()
+
+        root.visit { link in
+            set.insert(ScoredLink(link: link.link, score: link.score))
         }
 
-        return scores.sorted { left, right -> Bool in
-            left.1 < right.1
+        return set
+    }
+
+    var sortedLinks: [ScoredLink] {
+        scoredLinks.sorted { left, right -> Bool in
+            left.score.score < right.score.score
         }
+    }
+
+    func dump() {
+        print("BrowsingTree - current = '\(current.title)' / \(current.url)")
+        root.dump()
+    }
+
+    var scores = [UInt64: Score]()
+    func scoreFor(link: UInt64) -> Score {
+        guard let score = scores[link] else {
+            let score = Score()
+            scores[link] = score
+            return score
+        }
+        return score
     }
 }

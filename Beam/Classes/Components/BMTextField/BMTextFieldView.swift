@@ -29,7 +29,6 @@ class BMTextFieldView: NSTextField {
 
     var onPerformKeyEquivalent: (NSEvent) -> Bool = { _ in return false }
     var onFocusChanged: (Bool) -> Void = { _ in }
-    var onEditingChanged: (Bool) -> Void = { _ in }
 
     public init() {
         super.init(frame: NSRect())
@@ -79,6 +78,11 @@ class BMTextFieldView: NSTextField {
     override func becomeFirstResponder() -> Bool {
         onFocusChanged(true)
         return super.becomeFirstResponder()
+    }
+
+    override func resignFirstResponder() -> Bool {
+        onFocusChanged(false)
+        return super.resignFirstResponder()
     }
 
     override func mouseDown(with event: NSEvent) {
