@@ -10,6 +10,9 @@ import Cocoa
 extension BeamTextEdit {
 
     // MARK: - Properties
+    internal static var mouseIsExiteFromLinkView = false
+    internal static var deboucingMouseEventTimer: Timer?
+
     private static var xPosInlineFormatter: CGFloat = 55
     private static var centerTextXPosInlineFormatter: CGFloat = 80
     private static let yPosInlineFormatter: CGFloat = 50
@@ -21,7 +24,6 @@ extension BeamTextEdit {
     private static var isSelectableContent = true
     private static var bottomAnchor: NSLayoutConstraint?
     private static var centerXAnchor: NSLayoutConstraint?
-
     private static var deboucingKeyEventTimer: Timer?
 
     // MARK: - UI
@@ -154,6 +156,7 @@ extension BeamTextEdit {
         initInlineFormatterView(isHyperlinkView: true)
 
         guard let view = inlineFormatter,
+              let hyperlinkView = view.hyperlinkView,
               let node = currentNode,
               let frame = frame,
               let url = url,
@@ -162,9 +165,17 @@ extension BeamTextEdit {
         showOrHideInlineFormatter(isPresent: true)
         focussedWidget = node
 
+        let trackingArea = NSTrackingArea(
+            rect: hyperlinkView.bounds,
+            options: [.activeAlways, .mouseEnteredAndExited],
+            owner: self, userInfo: nil
+        )
+
+        hyperlinkView.addTrackingArea(trackingArea)
+
         view.urlValue = url.absoluteString
         view.frame.origin.y = (frame.maxY + node.offsetInDocument.y) - 55
-        view.frame.origin.x = convert(position, to: nil).x - 50
+        view.frame.origin.x = 60 + frame.maxX / 2
     }
 
     internal func detectFormatterType() {
@@ -274,6 +285,26 @@ extension BeamTextEdit {
         }
     }
 
+    internal func dismissHyperlinkView() {
+        guard BeamTextEdit.deboucingMouseEventTimer == nil && inlineFormatter?.hyperlinkView != nil ||
+              BeamTextEdit.mouseIsExiteFromLinkView else { return }
+        initDeboucingMouseEvent()
+    }
+
+    // MARK: Mouse Events
+    public override func mouseEntered(with event: NSEvent) {
+        super.mouseEntered(with: event)
+        guard inlineFormatter?.hyperlinkView != nil else { return }
+        BeamTextEdit.deboucingMouseEventTimer?.invalidate()
+    }
+
+    public override func mouseExited(with event: NSEvent) {
+        super.mouseExited(with: event)
+        guard inlineFormatter?.hyperlinkView != nil else { return }
+        BeamTextEdit.mouseIsExiteFromLinkView = true
+    }
+
+    // MARK: Private Methods (Text Formatting)
     private func changeTextFormat(with node: TextNode, kind: ElementKind, isActive: Bool) {
         if rootNode.state.nodeSelection != nil {
             guard let nodeSelection = rootNode.state.nodeSelection else { return }
@@ -325,6 +356,7 @@ extension BeamTextEdit {
         }
     }
 
+    // MARK: Private Methods (UI)
     private func updateInlineFormatterFrame() {
         guard let node = focussedWidget as? TextNode,
               let view = inlineFormatter else { return }
@@ -369,5 +401,15 @@ extension BeamTextEdit {
             heightAnchor,
             centerXAnchor
         ])
+    }
+
+    private func initDeboucingMouseEvent() {
+        BeamTextEdit.deboucingMouseEventTimer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false, block: { [weak self] (_) in
+            guard let self = self else { return }
+
+            self.showOrHideInlineFormatter(isPresent: false)
+            BeamTextEdit.mouseIsExiteFromLinkView = false
+            BeamTextEdit.deboucingMouseEventTimer = nil
+        })
     }
 }

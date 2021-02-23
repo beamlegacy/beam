@@ -679,6 +679,7 @@ public class TextNode: Widget {
                 cursor = editor.inlineFormatter?.hyperlinkView != nil  ? .arrow : .pointingHand
             } else {
                 cursor = .iBeam
+                editor.dismissHyperlinkView()
             }
         }
 

@@ -96,7 +96,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     internal var persistentFormatter: FormatterView?
     internal var inlineFormatter: FormatterView?
     internal var isInlineFormatterHidden = true
-    internal var isInlineFormatterOnHover = false
     internal var currentTextRange: Range<Int> = 0..<0
 
     let cardHeaderLayer = CALayer()
@@ -1228,13 +1227,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         let mouseInfo = MouseInfo(rootNode, point, event)
         rootNode.dispatchMouseMoved(mouseInfo: mouseInfo)
         cursorUpdate(with: event)
-    }
-
-    public override func mouseExited(with event: NSEvent) {
-        super.mouseExited(with: event)
-
-        guard let inlineFormatter = inlineFormatter else { return }
-        dismissFormatterView(inlineFormatter)
     }
 
     // swiftlint:disable:next cyclomatic_complexity

@@ -446,6 +446,24 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
         return true
     }
 
+    func widgetAt(point: CGPoint) -> Widget? {
+        guard visible else { return nil }
+        guard 0 <= point.y, point.y < frame.height else { return nil }
+
+        if contentsFrame.minY <= point.y, point.y < contentsFrame.maxY {
+            return self
+        }
+
+        for c in children {
+            let p = CGPoint(x: point.x - c.frame.origin.x, y: point.y - c.frame.origin.y)
+            if let res = c.widgetAt(point: p) {
+                return res
+            }
+        }
+
+        return nil
+    }
+
     internal var layers: [String: Layer] = [:]
     func addLayer(_ layer: Layer, origin: CGPoint? = nil, global: Bool = false) {
         layer.frame = CGRect(origin: origin ?? layer.frame.origin, size: layer.frame.size)
