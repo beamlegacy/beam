@@ -132,7 +132,7 @@ class LinkedReferenceNode: TextNode {
                 })
 
                 self.invalidateRendering()
-                updateChildrenVisibility(visible)
+                updateChildrenVisibility(visible && open)
         }.store(in: &scope)
     }
 
