@@ -68,17 +68,13 @@ class DocumentManagerTestsHelper {
         let jsonData = try! self.defaultEncoder().encode(dataString)
 
         let docStruct = DocumentStruct(id: UUID(),
-                                       title: titleParam ?? title(),
+                                       title: titleParam ?? String.randomTitle(),
                                        createdAt: BeamDate.now,
                                        updatedAt: BeamDate.now,
                                        data: jsonData,
                                        documentType: .note)
 
         return docStruct
-    }
-
-    func title() -> String {
-        return faker.zelda.game() + " " + String.random(length: 40)
     }
 
     func saveLocally(_ docStruct: DocumentStruct) {
