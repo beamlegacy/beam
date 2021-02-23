@@ -11,8 +11,8 @@ extension BeamTextEdit {
 
     // MARK: - Properties
     private static var xPosInlineFormatter: CGFloat = 55
-    private static var centerTextXPosInlineFormatter: CGFloat = 200
-    private static let yPosInlineFormatter: CGFloat = 40
+    private static var centerTextXPosInlineFormatter: CGFloat = 80
+    private static let yPosInlineFormatter: CGFloat = 50
     private static let yPosDismissInlineFormatter: CGFloat = 35
     private static let bottomConstraint: CGFloat = -25
     private static let inlineFormatterType: [FormatterType] = [.h1, .h2, .bullet, .checkmark, .bold, .italic, .link]
@@ -129,6 +129,7 @@ extension BeamTextEdit {
         detectFormatterType()
 
         if isKeyEvent && !rootNode.textIsSelected {
+            // Enable timer to hide inline formatter during the key selection
             BeamTextEdit.deboucingKeyEventTimer = Timer.scheduledTimer(withTimeInterval: 0.23, repeats: false, block: { [weak self] (_) in
                 guard let self = self else { return }
                 self.showOrHideInlineFormatter(isPresent: false, isDragged: isDragged)
@@ -136,12 +137,16 @@ extension BeamTextEdit {
             })
 
             return
+        } else if rootNode.state.nodeSelection != nil {
+            // Invalid the timer when we select all bullet
+            BeamTextEdit.deboucingKeyEventTimer?.invalidate()
         } else if !rootNode.textIsSelected {
+            // Invalid the timer & hide the inline formatter when nothing is selected
+            BeamTextEdit.deboucingKeyEventTimer?.invalidate()
             showOrHideInlineFormatter(isPresent: false, isDragged: isDragged)
             showOrHidePersistentFormatter(isPresent: true)
         }
 
-        BeamTextEdit.deboucingKeyEventTimer?.invalidate()
         updateInlineFormatterFrame()
     }
 
@@ -326,20 +331,22 @@ extension BeamTextEdit {
 
         let (xOffset, rect) = node.offsetAndFrameAt(index: rootNode.cursorPosition)
         let yOffset = rect.maxY + node.offsetInDocument.y - 10
+        let textFrame = isBig ? (textWidth / 2) - BeamTextEdit.centerTextXPosInlineFormatter : BeamTextEdit.centerTextXPosInlineFormatter
         let yPos = yOffset - BeamTextEdit.yPosInlineFormatter
+        let xPos = xOffset + (centerText ? textFrame : BeamTextEdit.xPosInlineFormatter)
         let currentLowerBound = currentTextRange.lowerBound
         let selectedLowerBound = node.selectedTextRange.lowerBound
 
-        view.frame.origin.x = xOffset + (centerText ? BeamTextEdit.centerTextXPosInlineFormatter : BeamTextEdit.xPosInlineFormatter)
+        view.frame.origin.x = rootNode.state.nodeSelection != nil ? (centerText ? 400 : 200) : xPos
 
         if currentLowerBound == selectedLowerBound && BeamTextEdit.isSelectableContent {
             BeamTextEdit.isSelectableContent = false
-            view.frame.origin.y = yPos
+            view.frame.origin.y = rootNode.state.nodeSelection != nil ? node.offsetInDocument.y - 40 : yPos
         }
 
         if currentLowerBound > selectedLowerBound || selectedLowerBound > currentLowerBound {
             BeamTextEdit.isSelectableContent = currentLowerBound > selectedLowerBound
-            view.frame.origin.y = yPos
+            view.frame.origin.y = rootNode.state.nodeSelection != nil ? node.offsetInDocument.y - 40 : yPos
         }
     }
 

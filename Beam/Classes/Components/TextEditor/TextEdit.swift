@@ -1230,6 +1230,13 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         cursorUpdate(with: event)
     }
 
+    public override func mouseExited(with event: NSEvent) {
+        super.mouseExited(with: event)
+
+        guard let inlineFormatter = inlineFormatter else { return }
+        dismissFormatterView(inlineFormatter)
+    }
+
     // swiftlint:disable:next cyclomatic_complexity
     public func mouseDraggedUpdate(with event: NSEvent) {
         guard let startPos = mouseDownPos else { return }

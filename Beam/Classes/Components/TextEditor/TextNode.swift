@@ -603,7 +603,7 @@ public class TextNode: Widget {
                 return true
             }
 
-            if mouseInfo.event.clickCount == 1 && !selectedTextRange.isEmpty {
+            if mouseInfo.event.clickCount == 1 && editor.inlineFormatter != nil {
                 root?.cursorPosition = clickPos
                 root?.cancelSelection()
                 dragMode = .select(cursorPosition)
@@ -625,20 +625,19 @@ public class TextNode: Widget {
                 editor.initAndShowPersistentFormatter()
                 return true
             } else if mouseInfo.event.clickCount == 2 {
+                deboucingClickTimer?.invalidate()
                 root?.wordSelection(from: clickPos)
-
-                deboucingClickTimer = Timer.scheduledTimer(withTimeInterval: deboucingClickInterval, repeats: false, block: { [weak self] (_) in
-                    guard let self = self else { return }
-                    if !self.selectedTextRange.isEmpty { self.editor.showInlineFormatterOnKeyEventsAndClick() }
-                })
+                if !selectedTextRange.isEmpty { editor.showInlineFormatterOnKeyEventsAndClick() }
                 return true
             } else {
                 deboucingClickTimer?.invalidate()
                 root?.doCommand(.selectAll)
                 editor.detectFormatterType()
 
-                if root?.state.nodeSelection != nil { resetActionLayers() }
-
+                if root?.state.nodeSelection != nil {
+                    resetActionLayers()
+                    editor.showInlineFormatterOnKeyEventsAndClick()
+                }
                 return true
             }
         }
@@ -677,11 +676,9 @@ public class TextNode: Widget {
                 )
 
             } else if internalLink != nil {
-                editor.showOrHideInlineFormatter(isPresent: false)
                 cursor = editor.inlineFormatter?.hyperlinkView != nil  ? .arrow : .pointingHand
             } else {
-                editor.showOrHideInlineFormatter(isPresent: false)
-                cursor = editor.inlineFormatter?.hyperlinkView != nil  ? .arrow : .iBeam
+                cursor = .iBeam
             }
         }
 
