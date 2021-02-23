@@ -334,10 +334,11 @@ extension BeamTextEdit {
         let textFrame = isBig ? (textWidth / 2) - BeamTextEdit.centerTextXPosInlineFormatter : BeamTextEdit.centerTextXPosInlineFormatter
         let yPos = yOffset - BeamTextEdit.yPosInlineFormatter
         let xPos = xOffset + (centerText ? textFrame : BeamTextEdit.xPosInlineFormatter)
+        let centerXPos = (frame.width - textWidth) / 2
         let currentLowerBound = currentTextRange.lowerBound
         let selectedLowerBound = node.selectedTextRange.lowerBound
 
-        view.frame.origin.x = rootNode.state.nodeSelection != nil ? (centerText ? 400 : 200) : xPos
+        view.frame.origin.x = rootNode.state.nodeSelection != nil ? (centerText ? centerXPos : 200) : xPos
 
         if currentLowerBound == selectedLowerBound && BeamTextEdit.isSelectableContent {
             BeamTextEdit.isSelectableContent = false
