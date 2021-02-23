@@ -1070,10 +1070,11 @@ extension DocumentManager {
                 return Promise((documentType, false))
             }.then(on: self.backgroundQueue) { documentType, updated in
                 if updated { try self.saveRefreshDocument(documentStruct, documentType) }
-            }.catch(on: self.backgroundQueue) { error in
+            }.recover(on: self.backgroundQueue) { (error) throws -> Promises.Promise<(DocumentAPIType, Bool)> in
                 if case APIRequestError.notFound = error {
                     try? self.deleteLocalDocumentAndWait(documentStruct)
                 }
+                throw error
             }.then(on: self.backgroundQueue) { _, updated in
                 return updated
             }
