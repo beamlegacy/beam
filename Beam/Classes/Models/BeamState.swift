@@ -122,6 +122,8 @@ let NoteDisplayThreshold = Float(0.0)
                 self.canGoForward = v
             }.store(in: &tabScope)
 
+            resetDestinationCard()
+
             isEditingOmniBarTitle = false
         }
     }
@@ -517,5 +519,12 @@ let NoteDisplayThreshold = Float(0.0)
     func cancelAutocomplete() {
         resetAutocompleteSelection()
         completedQueries = []
+    }
+
+    func resetDestinationCard() {
+        destinationCardName = currentTab?.note.title ?? data.todaysName
+        destinationCardNameSelectedRange = nil
+        changingDestinationCard = false
+        destinationCardInputIsFirstResponder = false
     }
 }

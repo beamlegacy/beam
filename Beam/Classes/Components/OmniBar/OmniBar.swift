@@ -51,7 +51,7 @@ struct OmniBar: View {
             }
 
             if state.mode == .web {
-                DestinationCardPicker(tab: state.currentTab!)
+                DestinationNotePicker(tab: state.currentTab!)
                     .frame(width: 200, height: 30, alignment: .center)
             }
 
@@ -74,14 +74,7 @@ struct OmniBar: View {
     func toggleMode() {
         if state.mode == .web {
             guard let tab = state.currentTab else { return }
-            if let note = tab.note {
-                state.currentNote = note
-            }
-            if let note = state.currentNote {
-                state.navigateToNote(note)
-            } else {
-                state.navigateToJournal()
-            }
+            state.navigateToNote(tab.note)
             state.resetQuery()
         } else {
             state.mode = .web
