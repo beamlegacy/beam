@@ -176,6 +176,7 @@ public class TextNode: Widget {
         }
     }
 
+    var indentLayer = CALayer()
     var actionLayer: CALayer?
 
     private var deboucingClickTimer: Timer?
@@ -223,6 +224,8 @@ public class TextNode: Widget {
 
         createActionLayer()
 
+        layer.addSublayer(indentLayer)
+
         var inInit = true
         elementTextScope = element.$text
             .receive(on: DispatchQueue.main)
@@ -242,8 +245,7 @@ public class TextNode: Widget {
         inInit = false
     }
 
-    deinit {
-    }
+    deinit { }
 
     // MARK: - Setup UI
 
@@ -336,6 +338,7 @@ public class TextNode: Widget {
     func addDisclosureLayer(at point: NSPoint) {
         let disclosureLayer = ChevronButton("disclosure", open: open, changed: { [unowned self] value in
             self.open = value
+            indentLayer.isHidden = !value
         })
         disclosureLayer.layer.isHidden = true
         addLayer(disclosureLayer, origin: point, global: false)
@@ -364,15 +367,10 @@ public class TextNode: Widget {
         // Draw the text:
         context.saveGState()
         if !children.isEmpty {
-            if showDisclosureButton {
-                context.saveGState()
-                if showIdentationLine {
-                    context.setFillColor(NSColor.editorTextRectangleBackgroundColor.cgColor)
-                    let y = contentsFrame.height
-                    let r = NSRect(x: 5, y: y + 3, width: 1, height: currentFrameInDocument.height - y - 6)
-                    context.fill(r)
-                }
-                context.restoreGState()
+            if showDisclosureButton && showIdentationLine {
+                let y = contentsFrame.height
+                indentLayer.frame = NSRect(x: childInset, y: y + 3, width: 1, height: currentFrameInDocument.height - y - 15)
+                indentLayer.backgroundColor = NSColor.red.cgColor
             }
         }
 
