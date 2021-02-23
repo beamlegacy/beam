@@ -7,7 +7,7 @@ xctests:
     paths:
       - cobertura.xml
       - fastlane/test_output/tests.xml
-      - builds/
+      - builds
     reports:
       cobertura: cobertura.xml
       junit: fastlane/test_output/tests.xml
@@ -34,8 +34,6 @@ xctests:
   tags:
     - macos-mono
   interruptible: true
-  retry:
-    max: 2
 
 xctests UI:
   dependencies: []
@@ -46,7 +44,8 @@ xctests UI:
     paths:
       - cobertura.xml
       - fastlane/test_output/tests.xml
-      - builds/
+      - builds
+      - screenshots
     reports:
       cobertura: cobertura.xml
       junit: fastlane/test_output/tests.xml
@@ -68,12 +67,13 @@ xctests UI:
   script:
     - time bundle exec fastlane uitests
   after_script:
+    - xcparse screenshots --activity-type attachmentContainer userCreated testAssertionFailure --test --os --model fastlane/test_output/Beam.xcresult screenshots
+    - xcparse screenshots --test-status Failure --test --os --model fastlane/test_output/Beam.xcresult screenshots
+    - find screenshots -type d -empty -delete
     - rm "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/Beam-test-${CI_JOB_ID}"*
   tags:
     - macos-mono
   interruptible: true
-  retry:
-    max: 2
 
 coverage_check:
   dependencies: []

@@ -8,7 +8,6 @@
 import XCTest
 
 class Omnibar: XCTestCase {
-
     let app = XCUIApplication()
 
     override func setUp() {
@@ -152,5 +151,12 @@ class Omnibar: XCTestCase {
     func checkCommonRightButtonsExist() {
         XCTAssert(app.buttons["magnifyingglass"].exists)
         XCTAssert(app.buttons["newSearch"].exists)
+    }
+
+    private func takeScreenshot(_ element: XCUIElement) {
+        let screenshot = element.screenshot()
+        let fullScreenshotAttachment = XCTAttachment(screenshot: screenshot)
+        fullScreenshotAttachment.lifetime = .keepAlways
+        add(fullScreenshotAttachment)
     }
 }

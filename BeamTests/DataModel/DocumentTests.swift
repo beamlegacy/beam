@@ -51,17 +51,17 @@ class DocumentTests: QuickSpec {
 
         describe(".updatedAt") {
             it("updates attribute on context save only if more than a second difference") {
-                let document = Document.create(self.mainContext, title: self.helper.title())
+                let document = Document.create(self.mainContext, title: String.randomTitle())
                 expect(document.updated_at).toNot(beNil())
 
                 BeamDate.travel(0.5)
                 let initialUpdatedAt = document.updated_at
-                document.title = self.helper.title()
+                document.title = String.randomTitle()
                 try? self.mainContext.save()
                 expect(document.updated_at).to(equal(initialUpdatedAt))
 
                 BeamDate.travel(1.5)
-                document.title = self.helper.title()
+                document.title = String.randomTitle()
                 try? self.mainContext.save()
                 expect(document.updated_at).toNot(equal(initialUpdatedAt))
                 expect(document.updated_at).to(beGreaterThan(initialUpdatedAt))
@@ -92,7 +92,7 @@ class DocumentTests: QuickSpec {
         describe(".id") {
             it("should check for constraints") {
                 let id = UUID()
-                let title = self.helper.title()
+                let title = String.randomTitle()
 
                 let document1 = Document.create(self.mainContext, title: title)
                 let document2 = Document.create(self.mainContext, title: title)
@@ -111,9 +111,9 @@ class DocumentTests: QuickSpec {
 
         describe(".title") {
             it("should check for constraints") {
-                let title = self.helper.title()
-                let title2 = self.helper.title()
-                let title3 = self.helper.title()
+                let title = String.randomTitle()
+                let title2 = String.randomTitle()
+                let title3 = String.randomTitle()
 
                 let document1 = Document.create(self.mainContext, title: title)
                 expect { try CoreDataManager.save(self.mainContext) }.toNot(throwError())

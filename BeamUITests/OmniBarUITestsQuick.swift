@@ -6,11 +6,16 @@ import Nimble
 class OmniBarUITestsQuick: QuickSpec {
     let app = XCUIApplication()
     var textField: XCUIElement!
+    var helper: BeamUITestsHelper!
 
     //swiftlint:disable:next function_body_length
     override func spec() {
         let textInput = "Hello World"
         let textEmpty = ""
+
+        beforeSuite {
+            self.helper = BeamUITestsHelper(self.app)
+        }
 
         beforeEach {
             self.continueAfterFailure = false
@@ -19,6 +24,10 @@ class OmniBarUITestsQuick: QuickSpec {
         }
 
         describe("Omnibar") {
+            afterEach {
+                self.helper.makeElementScreenShot(self.textField)
+            }
+
             it("is focused") {
                 let hasKeyboardFocus = self.textField.value(forKey: "hasKeyboardFocus") as? Bool
 
@@ -36,6 +45,9 @@ class OmniBarUITestsQuick: QuickSpec {
             var selectAll: XCUIElement!
             beforeEach {
                 selectAll = XCUIApplication().menuItems["Select All"]
+            }
+            afterEach {
+                self.helper.makeElementScreenShot(self.textField)
             }
 
             it("has textField") { expect(self.textField.exists).to(beTrue()) }
@@ -108,6 +120,8 @@ class OmniBarUITestsQuick: QuickSpec {
 
                 self.app.buttons["network"].click()
                 expect(self.app.groups["webView"].exists).to(beTrue())
+
+                self.helper.makeAppScreenShots()
             }
         }
     }
