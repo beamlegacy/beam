@@ -7,23 +7,6 @@
 
 import Foundation
 
-class Scores: Codable {
-    private var cards: [UInt64: Score] = [:]
-    func scoreCard(for id: UInt64) -> Score {
-        if let card = cards[id] {
-            return card
-        }
-
-        let card = Score()
-        cards[id] = card
-        return card
-    }
-
-    func scoreCard(for link: String) -> Score {
-        return scoreCard(for: LinkStore.createIdFor(link, title: nil))
-    }
-}
-
 class Score: Codable {
     var score: Float {
             readingTimeScore

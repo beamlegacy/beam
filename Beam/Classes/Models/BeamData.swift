@@ -21,7 +21,6 @@ public class BeamData: ObservableObject {
     @Published var journal: [BeamNote] = []
 
     var index: Index
-    var scores = Scores()
     @Published var noteCount = 0
     @Published var lastChangedElement: BeamElement?
     @Published var showTabStats = false

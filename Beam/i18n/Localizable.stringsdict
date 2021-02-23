@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>reference</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@reference_section_title@</string>
+		<key>reference_section_title</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>u</string>
+			<key>zero</key>
+			<string>Reference</string>
+			<key>one</key>
+			<string>%u Reference</string>
+			<key>other</key>
+			<string>%u References</string>
+		</dict>
+	</dict>
+	<key>link</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@link_section_title@</string>
+		<key>link_section_title</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>u</string>
+			<key>zero</key>
+			<string>Link</string>
+			<key>one</key>
+			<string>%u Link</string>
+			<key>other</key>
+			<string>%u Links</string>
+		</dict>
+	</dict>
+</dict>
+</plist>

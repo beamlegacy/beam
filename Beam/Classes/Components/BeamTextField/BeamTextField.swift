@@ -51,16 +51,10 @@ struct BeamTextField: NSViewRepresentable {
             self.isEditing = isFocus
             self.isFirstResponder = isFocus
             context.coordinator.didBecomeFirstResponder = isFocus
-        }
-
-        textField.onEditingChanged = { isEditing in
-            withAnimation(.default) {
-                self.isEditing = isEditing
-                if isEditing {
-                    onStartEditing()
-                } else {
-                    onStopEditing()
-                }
+            if isFocus {
+                onStartEditing()
+            } else {
+                onStopEditing()
             }
         }
 
