@@ -32,6 +32,11 @@ public extension String {
 
         return key
     }
+
+    func localizedWith(comment: String, _ count: Int) -> String {
+        let formatString = NSLocalizedString(self, comment: comment)
+        return String.localizedStringWithFormat(formatString, count)
+    }
 }
 
 public extension LocalizedStringKey {

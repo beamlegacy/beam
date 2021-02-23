@@ -137,6 +137,7 @@
 		4181744325812C5F00317ED8 /* NSColor+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181744225812C5F00317ED8 /* NSColor+Beam.swift */; };
 		41855A3A25D1334F00DA49DC /* BeamCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41855A3925D1334F00DA49DC /* BeamCollectionView.swift */; };
 		41A969FF2581394300E6594B /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41A969FE2581394300E6594B /* Configuration.swift */; };
+		41B4277B25E52DCA00A8243F /* Localizable.stringsdict in Resources */ = {isa = PBXBuildFile; fileRef = 41B4277A25E52DCA00A8243F /* Localizable.stringsdict */; };
 		41D169A625DC07260018E5F2 /* Inter-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 41D169A125DC07250018E5F2 /* Inter-Bold.otf */; };
 		41D169A725DC07260018E5F2 /* Inter-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 41D169A225DC07260018E5F2 /* Inter-Regular.otf */; };
 		41D169A825DC07260018E5F2 /* Inter-SemiBold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 41D169A325DC07260018E5F2 /* Inter-SemiBold.otf */; };
@@ -610,6 +611,7 @@
 		4181744225812C5F00317ED8 /* NSColor+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSColor+Beam.swift"; sourceTree = "<group>"; };
 		41855A3925D1334F00DA49DC /* BeamCollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamCollectionView.swift; sourceTree = "<group>"; };
 		41A969FE2581394300E6594B /* Configuration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
+		41B4277A25E52DCA00A8243F /* Localizable.stringsdict */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; path = Localizable.stringsdict; sourceTree = "<group>"; };
 		41D169A125DC07250018E5F2 /* Inter-Bold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter-Bold.otf"; sourceTree = "<group>"; };
 		41D169A225DC07260018E5F2 /* Inter-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter-Regular.otf"; sourceTree = "<group>"; };
 		41D169A325DC07260018E5F2 /* Inter-SemiBold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter-SemiBold.otf"; sourceTree = "<group>"; };
@@ -1293,6 +1295,14 @@
 			path = Journal;
 			sourceTree = "<group>";
 		};
+		41B4277925E52DB000A8243F /* i18n */ = {
+			isa = PBXGroup;
+			children = (
+				41B4277A25E52DCA00A8243F /* Localizable.stringsdict */,
+			);
+			path = i18n;
+			sourceTree = "<group>";
+		};
 		41D1698625DBFDBB0018E5F2 /* Fonts */ = {
 			isa = PBXGroup;
 			children = (
@@ -1623,6 +1633,7 @@
 				4181712E25810CDC00317ED8 /* Beam.xcdatamodeld */,
 				4181712A25810CDC00317ED8 /* Configuration */,
 				41816FD62581047500317ED8 /* Classes */,
+				41B4277925E52DB000A8243F /* i18n */,
 				41816FD02581046F00317ED8 /* Assets */,
 				965A78312514F148009980D4 /* Preview Content */,
 			);
@@ -2014,6 +2025,7 @@
 				41D169A625DC07260018E5F2 /* Inter-Bold.otf in Resources */,
 				418171122581082200317ED8 /* Assets.xcassets in Resources */,
 				56A5BD3125CC680E00ED7C50 /* url.stopwords in Resources */,
+				41B4277B25E52DCA00A8243F /* Localizable.stringsdict in Resources */,
 				4181730025811DB200317ED8 /* SelectionObserver.js in Resources */,
 				5206281425922D7800D7CD9E /* document.graphql in Resources */,
 				965A78332514F148009980D4 /* Preview Assets.xcassets in Resources */,
