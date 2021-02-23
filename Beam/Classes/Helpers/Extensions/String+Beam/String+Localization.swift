@@ -33,9 +33,8 @@ public extension String {
         return key
     }
 
-    func localizedWith(comment: String, _ count: Int) -> String {
-        let formatString = NSLocalizedString(self, comment: comment)
-        return String.localizedStringWithFormat(formatString, count)
+    func localizedStringWith(comment: String, _ args: CVarArg) -> String {
+        return String.localizedStringWithFormat(NSLocalizedString(self, comment: comment), args)
     }
 }
 

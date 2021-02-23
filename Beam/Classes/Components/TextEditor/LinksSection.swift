@@ -83,7 +83,7 @@ class LinksSection: Widget {
                 .receive(on: DispatchQueue.main)
                 .sink { [unowned self] links in
                 updateLinkedReferences(links: links)
-                sectionTitleLayer.string = "link".localizedWith(comment: "link section title", links.count)
+                sectionTitleLayer.string = "link".localizedStringWith(comment: "link section title", links.count)
                 updateLayerVisibility()
             }
         case .references:
@@ -92,7 +92,7 @@ class LinksSection: Widget {
                 .receive(on: DispatchQueue.main)
                 .sink { [unowned self] links in
                 updateLinkedReferences(links: links)
-                sectionTitleLayer.string = "reference".localizedWith(comment: "reference section title", links.count)
+                sectionTitleLayer.string = "reference".localizedStringWith(comment: "reference section title", links.count)
                 updateLayerVisibility()
             }
 
