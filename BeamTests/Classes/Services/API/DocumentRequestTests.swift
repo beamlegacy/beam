@@ -52,7 +52,7 @@ class DocumentRequestTests: QuickSpec {
                 context("with Foundation") {
                     it("fetches document") {
                         waitUntil(timeout: .seconds(10)) { done in
-                            try? self.sut.fetchDocument(docStruct.uuidString) { result in
+                            _ = try? self.sut.fetchDocument(docStruct.uuidString) { result in
                                 expect { try result.get() }.toNot(throwError())
                                 expect { try result.get().id }.to(equal(docStruct.uuidString))
                                 done()

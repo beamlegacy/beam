@@ -30,7 +30,7 @@ class DocumentManagerTestsHelper {
 
     func saveRemotelyOnly(_ docStruct: DocumentStruct) {
         waitUntil(timeout: .seconds(10)) { done in
-            try? self.documentManager.documentRequest.saveDocument(docStruct.asApiType()) { result in
+            _ = try? self.documentManager.documentRequest.saveDocument(docStruct.asApiType()) { result in
                 expect { try result.get() }.toNot(throwError())
                 done()
             }
@@ -40,7 +40,7 @@ class DocumentManagerTestsHelper {
     func fetchOnAPI(_ docStruct: DocumentStruct) -> DocumentAPIType? {
         var documentAPIType: DocumentAPIType?
         waitUntil(timeout: .seconds(10)) { done in
-            try? self.documentManager.documentRequest.fetchDocument(docStruct.uuidString) { result in
+            _ = try? self.documentManager.documentRequest.fetchDocument(docStruct.uuidString) { result in
                 expect { try result.get() }.toNot(throwError())
 
                 documentAPIType = try? result.get()
