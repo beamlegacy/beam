@@ -15,7 +15,8 @@ class FormatterView: NSView {
 
     var hyperlinkView: HyperlinkView?
     var didSelectFormatterType: ((_ type: FormatterType, _ isActive: Bool) -> Void)?
-    var didSelectLink: ((_ link: String) -> Void)?
+    var didPressValideLink: ((_ link: String) -> Void)?
+    var didPressDeleteLink: ((_ link: String) -> Void)?
 
     var urlValue: String = "" {
         didSet {
@@ -189,8 +190,13 @@ class FormatterView: NSView {
         guard let hyperlinkView = hyperlinkView else { return }
 
         hyperlinkView.didPressValideButton = { [unowned self] link in
-            guard let didSelectLink = didSelectLink else { return }
-            didSelectLink(link)
+            guard let didPressValideLink = didPressValideLink else { return }
+            didPressValideLink(link)
+        }
+
+        hyperlinkView.didPressDeleteButton = {[unowned self] link in
+            guard let didPressDeleteLink = didPressDeleteLink else { return }
+            didPressDeleteLink(link)
         }
 
         containerView.addSubview(hyperlinkView)
@@ -200,6 +206,7 @@ class FormatterView: NSView {
     func updateHyperlinkView() {
         guard let hyperlinkView = hyperlinkView else { return }
         hyperlinkView.hyperlinkTextField.stringValue = urlValue
+        hyperlinkView.setupActionButtons()
     }
 
     override func mouseEntered(with event: NSEvent) {

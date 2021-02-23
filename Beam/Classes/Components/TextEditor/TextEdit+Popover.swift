@@ -106,7 +106,7 @@ extension BeamTextEdit {
               let scrollView = enclosingScrollView else { return }
 
         let (xOffset, rect) = node.offsetAndFrameAt(index: rootNode.cursorPosition)
-        let offsetGlobal = self.convert(node.offsetInDocument, to: nil)
+        let offsetGlobal = convert(node.offsetInDocument, to: nil)
         let yOffset = scrollView.documentVisibleRect.origin.y < 0 ? 0 : scrollView.documentVisibleRect.origin.y
         let marginTop: CGFloat = rect.maxY == 0 ? 30 : 10
 

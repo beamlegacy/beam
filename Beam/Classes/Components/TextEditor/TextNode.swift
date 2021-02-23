@@ -665,20 +665,23 @@ public class TextNode: Widget {
             let internalLink = internalLinkAt(point: mouseInfo.position)
 
             if link != nil {
+                let currentNode = widgetAt(point: mouseInfo.position) as? TextNode
+                let frame = linkFrameAt(point: mouseInfo.position)
+
                 cursor = .pointingHand
                 editor.updateInlineFormaterOnHover(
-                    position: mouseInfo.globalPosition,
-                    url: link,
-                    mouseDirection: mouseInfo.event.deltaY >= 0 ? .up : .down
+                    currentNode,
+                    mouseInfo.globalPosition,
+                    frame,
+                    link
                 )
-            } else if internalLink != nil {
-                cursor = .pointingHand
-            } else {
-                cursor = .iBeam
 
-                if editor.isInlineFormatterOnHover 	{
-                    editor.showOrHideInlineFormatter(isPresent: false)
-                }
+            } else if internalLink != nil {
+                editor.showOrHideInlineFormatter(isPresent: false)
+                cursor = editor.inlineFormatter?.hyperlinkView != nil  ? .arrow : .pointingHand
+            } else {
+                editor.showOrHideInlineFormatter(isPresent: false)
+                cursor = editor.inlineFormatter?.hyperlinkView != nil  ? .arrow : .iBeam
             }
         }
 
@@ -803,7 +806,41 @@ public class TextNode: Widget {
         guard l.frame.minX < point.x && l.frame.maxX > point.x else { return nil } // don't find links outside the line
         let displayIndex = l.stringIndexFor(position: point)
         let pos = min(displayIndex, attributedString.length - 1)
-        return attributedString.attribute(.link, at: pos, effectiveRange: nil) as? URL
+        // return attributedString.attribute(.link, at: pos, effectiveRange: nil) as? URL
+
+        let range = elementText.rangeAt(position: pos)
+        guard let linkAttribIndex = range.attributes.firstIndex(where: { attrib -> Bool in
+            attrib.rawValue == BeamText.Attribute.link("").rawValue
+        }) else { return nil }
+
+        switch range.attributes[linkAttribIndex] {
+            case .link(let link):
+                return URL(string: link)
+            default:
+                return nil
+        }
+    }
+
+    public func linkFrameAt(point: NSPoint) -> NSRect? {
+        guard layout != nil, !layout!.lines.isEmpty else { return nil }
+        let line = lineAt(point: point)
+        guard line >= 0 else { return nil }
+        let l = layout!.lines[line]
+        guard l.frame.minX < point.x && l.frame.maxX > point.x else { return nil } // don't find links outside the line
+        let displayIndex = l.stringIndexFor(position: point)
+        let pos = min(displayIndex, attributedString.length - 1)
+
+        let range = elementText.rangeAt(position: pos)
+        guard nil != range.attributes.firstIndex(where: { attrib -> Bool in
+            attrib.rawValue == BeamText.Attribute.link("").rawValue
+        }) else { return nil }
+
+        let start = range.position
+        let end = range.end
+        let startOffset = offsetAt(index: start)
+        let endOffset = offsetAt(index: end)
+
+        return NSRect(x: startOffset, y: l.frame.minY, width: endOffset - startOffset, height: l.frame.height)
     }
 
     public func internalLinkAt(point: NSPoint) -> String? {

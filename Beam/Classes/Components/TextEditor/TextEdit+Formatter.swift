@@ -53,25 +53,31 @@ extension BeamTextEdit {
 
         inlineFormatter = FormatterView(viewType: .inline)
 
-        guard let formatterView = inlineFormatter,
-              let contentView = window?.contentView else { return }
+        guard let formatterView = inlineFormatter else { return }
 
         formatterView.items = BeamTextEdit.inlineFormatterType
         formatterView.didSelectFormatterType = {[unowned self] (type, isActive) -> Void in
             self.selectFormatterAction(type, isActive)
         }
 
-        formatterView.didSelectLink = {[unowned self] (hyperlink) -> Void in
+        formatterView.didPressValideLink = {[unowned self] (hyperlink) -> Void in
             let (isValidUrl, url) = hyperlink.validUrl()
 
             guard let node = focussedWidget as? TextNode,
-                  isValidUrl else {
+                isValidUrl else {
                 self.showOrHideInlineFormatter(isPresent: false)
                 return
             }
 
             self.showOrHideInlineFormatter(isPresent: false)
-            node.text.addAttributes([.link(url)], to: node.selectedTextRange)
+            node.text.addAttributes([.link(url)], to: node.selectedTextRange.isEmpty ? 0..<node.text.text.count : node.selectedTextRange )
+        }
+
+        formatterView.didPressDeleteLink = {[unowned self] (hyperlink) -> Void in
+            guard let node = focussedWidget as? TextNode else { return }
+
+            self.showOrHideInlineFormatter(isPresent: false)
+            node.text.removeAttributes([.link("")], from: 0..<hyperlink.count)
         }
 
         formatterView.alphaValue = 0
@@ -79,11 +85,10 @@ extension BeamTextEdit {
 
         if isHyperlinkView {
             formatterView.showHyperLinkView()
-            contentView.addSubview(formatterView)
-        } else {
-            formatterView.layer?.zPosition = 1
-            addSubview(formatterView)
         }
+
+        formatterView.layer?.zPosition = 1
+        addSubview(formatterView)
     }
 
     // MARK: - Methods
@@ -140,32 +145,21 @@ extension BeamTextEdit {
         updateInlineFormatterFrame()
     }
 
-    static var previousValue: CGFloat = 0
-
-    internal func updateInlineFormaterOnHover(position: NSPoint, url: URL?, mouseDirection: MouseDirection) {
+    internal func updateInlineFormaterOnHover(_ currentNode: TextNode?, _ position: NSPoint, _ frame: NSRect?, _ url: URL?) {
         initInlineFormatterView(isHyperlinkView: true)
 
         guard let view = inlineFormatter,
+              let node = currentNode,
+              let frame = frame,
               let url = url,
               isInlineFormatterHidden else { return }
 
-        var globalOffset = convert(position, to: nil).y
-
-        isInlineFormatterOnHover = true
         showOrHideInlineFormatter(isPresent: true)
-
-        switch mouseDirection {
-        case .up:
-            print("top")
-            globalOffset += 10
-        case .down:
-            print("down")
-            globalOffset += 40
-        }
+        focussedWidget = node
 
         view.urlValue = url.absoluteString
-        view.frame.origin.y = globalOffset
-        view.frame.origin.x = 200
+        view.frame.origin.y = (frame.maxY + node.offsetInDocument.y) - 55
+        view.frame.origin.x = convert(position, to: nil).x - 50
     }
 
     internal func detectFormatterType() {
@@ -271,7 +265,6 @@ extension BeamTextEdit {
         } else {
             BeamTextEdit.isSelectableContent = true
             isInlineFormatterHidden = true
-            isInlineFormatterOnHover = false
             inlineFormatter = nil
         }
     }

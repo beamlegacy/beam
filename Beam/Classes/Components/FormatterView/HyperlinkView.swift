@@ -12,14 +12,17 @@ class HyperlinkView: NSView {
     // MARK: - Properties
     @IBOutlet var containerView: NSView!
     @IBOutlet weak var hyperlinkTextField: NSTextField!
+    @IBOutlet weak var confirmButton: NSButton!
+    @IBOutlet weak var deleteButton: NSButton!
 
     var didPressValideButton: ((_ link: String) -> Void)?
-    var didPressDeleteButton: (() -> Void)?
+    var didPressDeleteButton: ((_ link: String) -> Void)?
 
     // MARK: - Initializer
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
         loadXib()
+        setupUI()
         setupTextField()
     }
 
@@ -44,7 +47,19 @@ class HyperlinkView: NSView {
         }
     }
 
+    override func mouseDown(with event: NSEvent) {}
+
+    func setupActionButtons() {
+        confirmButton.isHidden = hyperlinkTextField.stringValue.isEmpty ? false : true
+        deleteButton.isHidden = hyperlinkTextField.stringValue.isEmpty ? true : false
+    }
+
     // MARK: - Private Methods
+    private func setupUI() {
+        confirmButton.isHidden = false
+        deleteButton.isHidden = true
+    }
+
     private func setupTextField() {
         hyperlinkTextField.wantsLayer = true
         hyperlinkTextField.isBordered = false
@@ -76,6 +91,12 @@ class HyperlinkView: NSView {
     @IBAction func validUrlAction(_ sender: Any) {
         sendLinkToParentView()
     }
+
+    @IBAction func deleteUrlAction(_ sender: Any) {
+        guard let didPressDeleteButton = didPressDeleteButton else { return }
+        didPressDeleteButton(hyperlinkTextField.stringValue)
+    }
+
 }
 
 extension HyperlinkView: NSTextFieldDelegate {
