@@ -36,14 +36,11 @@ class HyperlinkView: NSView {
     }
 
     // MARK: - Life Cycle
-    override func viewDidMoveToSuperview() {
-        super.viewDidMoveToSuperview()
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
 
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            if self.hyperlinkTextField.stringValue.isEmpty {
-                self.hyperlinkTextField.becomeFirstResponder()
-            }
+        if hyperlinkTextField.stringValue.isEmpty {
+            hyperlinkTextField.becomeFirstResponder()
         }
     }
 
