@@ -106,4 +106,8 @@ class BrowsingSection: Widget {
     func updateLayerVisibility() {
         layer.isHidden = note.browsingSessions.isEmpty
     }
+
+    override var mainLayerName: String {
+        "BrowsingSection"
+    }
 }

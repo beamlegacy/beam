@@ -406,4 +406,8 @@ class BreadCrumb: Widget {
         }
         mapping.removeValue(forKey: node.element)
     }
+
+    override var mainLayerName: String {
+        "BreadCrumb - \(proxy.id.uuidString) (from note \(proxy.note?.title ?? "???"))"
+    }
 }
