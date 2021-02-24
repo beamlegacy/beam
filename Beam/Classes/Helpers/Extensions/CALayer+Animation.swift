@@ -8,7 +8,7 @@
 import Foundation
 
 extension CALayer {
-    var areAnimationsEnabled: Bool {
+    var enableAnimations: Bool {
         get { delegate == nil }
         set { delegate = newValue ? nil : CALayerAnimationsDisablingDelegate.shared }
     }
