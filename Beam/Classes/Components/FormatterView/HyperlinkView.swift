@@ -50,7 +50,7 @@ class HyperlinkView: NSView {
 
     func setupActionButtons() {
         confirmButton.isHidden = hyperlinkTextField.stringValue.isEmpty ? false : true
-        deleteButton.isHidden = hyperlinkTextField.stringValue.isEmpty ? true : false
+        deleteButton.isHidden = !confirmButton.isHidden
     }
 
     // MARK: - Private Methods
