@@ -61,24 +61,28 @@ extension BeamTextEdit {
             self.selectFormatterAction(type, isActive)
         }
 
-        formatterView.didPressValideLink = {[unowned self] (hyperlink) -> Void in
-            let (isValidUrl, url) = hyperlink.validUrl()
+        formatterView.didPressValidLink = {[unowned self] link, oldLink -> Void in
+            let (isValidUrl, validUrl) = link.validUrl()
 
-            guard let node = focussedWidget as? TextNode,
-                isValidUrl else {
+            guard let node = focussedWidget as? TextNode, isValidUrl else {
                 self.showOrHideInlineFormatter(isPresent: false)
                 return
             }
 
+            if node.selectedTextRange.isEmpty {
+                updateNodeWithLink(node: node, isDeleteMode: false, link: validUrl, oldLink)
+            } else {
+                node.text.addAttributes([.link(validUrl)], to: node.selectedTextRange)
+            }
+
             self.showOrHideInlineFormatter(isPresent: false)
-            node.text.addAttributes([.link(url)], to: node.selectedTextRange.isEmpty ? 0..<node.text.text.count : node.selectedTextRange )
         }
 
         formatterView.didPressDeleteLink = {[unowned self] (hyperlink) -> Void in
             guard let node = focussedWidget as? TextNode else { return }
 
+            updateNodeWithLink(node: node, isDeleteMode: true, link: hyperlink)
             self.showOrHideInlineFormatter(isPresent: false)
-            node.text.removeAttributes([.link("")], from: 0..<hyperlink.count)
         }
 
         formatterView.alphaValue = 0
@@ -370,6 +374,23 @@ extension BeamTextEdit {
 
         if let persistentFormatter = persistentFormatter {
             persistentFormatter.setActiveFormmatters(types)
+        }
+    }
+
+    private func updateNodeWithLink(node: TextNode, isDeleteMode: Bool, link: String, _ oldLink: String? = nil) {
+        node.text.ranges.forEach { range in
+            range.attributes.forEach { attribute in
+                switch attribute {
+                case .link(let url):
+                    if isDeleteMode && url == link {
+                        node.text.removeAttributes([.link("")], from: range.position..<range.end)
+                    } else if url == oldLink {
+                        node.text.setAttributes([.link(link)], to: range.position..<range.end)
+                    }
+                default:
+                    break
+                }
+            }
         }
     }
 

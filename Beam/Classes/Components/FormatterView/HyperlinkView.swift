@@ -15,7 +15,8 @@ class HyperlinkView: NSView {
     @IBOutlet weak var confirmButton: NSButton!
     @IBOutlet weak var deleteButton: NSButton!
 
-    var didPressValideButton: ((_ link: String) -> Void)?
+    var oldUrl: String = ""
+    var didPressValidButton: ((_ link: String, _ oldLink: String) -> Void)?
     var didPressDeleteButton: ((_ link: String) -> Void)?
 
     // MARK: - Initializer
@@ -72,8 +73,8 @@ class HyperlinkView: NSView {
     }
 
     private func sendLinkToParentView() {
-        guard let didPressValideButton = didPressValideButton else { return }
-        didPressValideButton(hyperlinkTextField.stringValue)
+        guard let didPressValideButton = didPressValidButton else { return }
+        didPressValideButton(hyperlinkTextField.stringValue, oldUrl)
     }
 
     private func loadXib() {
