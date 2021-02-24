@@ -41,18 +41,14 @@ extension BeamTextEdit {
             return
         }
 
-        if command == .moveRight &&
-            cursorPosition == node.text.text.count &&
-            popoverSuffix != 0 {
+        if command == .moveRight && node.text.text == "[[]]" {
+            cursorStartPosition = 0
+            dismissPopoverOrFormatter()
+            return
+        }
 
-            if node.text.text == "[[]]" {
-                cursorStartPosition = 0
-                cancelInternalLink()
-                return
-            }
-
+        if command == .moveRight && cursorPosition == node.text.text.count && popoverSuffix != 0 {
             validInternalLink(from: node, String(node.text.text[cursorStartPosition + 1..<cursorPosition - popoverSuffix]))
-
             return
         }
 
@@ -97,6 +93,7 @@ extension BeamTextEdit {
     internal func cancelInternalLink() {
         guard let node = focussedWidget as? TextNode,
               popover != nil else { return }
+
         let text = node.text.text
         node.text.removeAttributes([.internalLink(text)], from: cursorStartPosition..<rootNode.cursorPosition + text.count)
     }
