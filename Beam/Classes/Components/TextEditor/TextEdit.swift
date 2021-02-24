@@ -349,9 +349,9 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         let formatter = DateFormatter()
         formatter.dateFormat = "MMMM dd yyyy, H:mm a"
 
-        cardTitleLayer.areAnimationsEnabled = false
-        cardTimeLayer.areAnimationsEnabled = false
-        cardHeaderLayer.areAnimationsEnabled = false
+        cardTitleLayer.enableAnimations = false
+        cardTimeLayer.enableAnimations = false
+        cardHeaderLayer.enableAnimations = false
 
         cardTitleLayer.foregroundColor = NSColor.cardTitleColor.cgColor
         cardTitleLayer.font = NSFont(name: "Inter-SemiBold", size: 0)
