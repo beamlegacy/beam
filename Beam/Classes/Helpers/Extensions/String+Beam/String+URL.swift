@@ -28,13 +28,12 @@ extension String {
     }
 
     func validUrl() -> (isValid: Bool, url: String) {
-        let url = URL(string: self)
+        guard let url = URL(string: self) else { return (false, "") }
 
-        guard let _url = url else { return (false, "") }
-        let isContainsScheme = ["http", "https"].contains(_url.scheme)
+        let isContainsScheme = ["http", "https"].contains(url.scheme)
 
-        if !_url.pathExtension.isEmpty || isContainsScheme {
-            return (true, isContainsScheme ? self : "http://\(_url)")
+        if !url.pathExtension.isEmpty || isContainsScheme {
+            return (true, isContainsScheme ? self : "http://\(url)")
         }
 
         return (false, "")
