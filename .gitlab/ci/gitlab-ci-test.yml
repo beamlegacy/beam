@@ -81,8 +81,6 @@ coverage_check:
   needs: [xctests, xctests UI]
   only:
     - merge_requests
-    - master
-    - develop
   script:
     - scripts/code_coverage.sh
   tags:
