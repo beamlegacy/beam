@@ -898,6 +898,15 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         return positionAt(point: point)
     }
 
+    @IBAction func cut(_ sender: Any) {
+        let s = selectedText
+        let pasteboard = NSPasteboard.general
+        pasteboard.clearContents()
+        pasteboard.declareTypes([.string], owner: nil)
+        pasteboard.setString(s, forType: .string)
+        rootNode.eraseSelection()
+    }
+
     @IBAction func copy(_ sender: Any) {
         let pasteboard = NSPasteboard.general
         pasteboard.clearContents()
@@ -929,13 +938,41 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         }
     }
 
-    @IBAction func cut(_ sender: Any) {
-        let s = selectedText
-        let pasteboard = NSPasteboard.general
-        pasteboard.clearContents()
-        pasteboard.declareTypes([.string], owner: nil)
-        pasteboard.setString(s, forType: .string)
-        rootNode.eraseSelection()
+    @IBAction func paste(_ sender: Any) {
+        if NSPasteboard.general.canReadObject(forClasses: [NSString.self], options: nil) {
+            let objects = NSPasteboard.general.readObjects(forClasses: [NSString.self], options: nil)
+            if objects?.count == 1 {
+                guard let pastedStr: String = objects?.first as? String else { return }
+
+                let lines = pastedStr.split(whereSeparator: \.isNewline)
+                for (idx, line) in lines.enumerated() {
+                    let str = String(line)
+                    if idx == 0 {
+                        disableInputDetector()
+                        insertText(string: str, replacementRange: selectedTextRange)
+                        enableInputDetector()
+                    } else {
+                        guard let node = focussedWidget as? TextNode else { continue }
+                        let element = BeamElement(str)
+                        let newNode = nodeFor(element)
+                        let elements = node.element.children
+                        for c in elements {
+                            newNode.element.addChild(c)
+                        }
+                        _ = node.parent?.insert(node: newNode, after: node)
+                        rootNode.cursorPosition = 0
+                        scrollToCursorAtLayout = true
+                        self.focussedWidget = newNode
+                    }
+                    guard let node = focussedWidget as? TextNode,
+                          let ranges = node.text.text.urlRangesInside() else { return }
+                    ranges.compactMap { Range($0) }.forEach { range in
+                      let linkStr = String(str[range.lowerBound..<range.upperBound])
+                      node.text.setAttributes([.link(linkStr)], to: range)
+                    }
+                }
+            }
+        }
     }
 
     @IBAction func undo(_ sender: Any) {
@@ -946,15 +983,18 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         undoManager.redo()
     }
 
-    var inputDetectorState: Int = 0
-    var inputDetectorEnabled: Bool { inputDetectorState >= 0 }
+    // State to detect shortcuts: @ / [[ ]]
+    private var inputDetectorState: Int = 0
+    private var inputDetectorEnabled: Bool { inputDetectorState >= 0 }
 
-    func disableInputDetector() {
+    // Disable detection during copy / paste
+    private func disableInputDetector() {
         inputDetectorState -= 1
     }
 
-    func enableInputDetector() {
-        inputDetectorState -= 1
+    // Enable detection to show popover
+    private func enableInputDetector() {
+        inputDetectorState += 1
     }
 
     var lastInput: String = ""
@@ -1082,43 +1122,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             handler()
         } else if let handler = handlers[lastInput + input] {
             handler()
-        }
-    }
-
-    @IBAction func paste(_ sender: Any) {
-        if NSPasteboard.general.canReadObject(forClasses: [NSString.self], options: nil) {
-            let objects = NSPasteboard.general.readObjects(forClasses: [NSString.self], options: nil)
-            if objects?.count == 1 {
-                guard let pastedStr: String = objects?.first as? String else { return }
-
-                let lines = pastedStr.split(whereSeparator: \.isNewline)
-                for (idx, line) in lines.enumerated() {
-                    let str = String(line)
-                    if idx == 0 {
-                        disableInputDetector()
-                        insertText(string: str, replacementRange: selectedTextRange)
-                        enableInputDetector()
-                    } else {
-                        guard let node = focussedWidget as? TextNode else { continue }
-                        let element = BeamElement(str)
-                        let newNode = nodeFor(element)
-                        let elements = node.element.children
-                        for c in elements {
-                            newNode.element.addChild(c)
-                        }
-                        _ = node.parent?.insert(node: newNode, after: node)
-                        rootNode.cursorPosition = 0
-                        scrollToCursorAtLayout = true
-                        self.focussedWidget = newNode
-                    }
-                    guard let node = focussedWidget as? TextNode,
-                          let ranges = node.text.text.urlRangesInside() else { return }
-                    ranges.compactMap { Range($0) }.forEach { range in
-                      let linkStr = String(str[range.lowerBound..<range.upperBound])
-                      node.text.setAttributes([.link(linkStr)], to: range)
-                    }
-                }
-            }
         }
     }
 
