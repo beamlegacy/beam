@@ -1069,4 +1069,8 @@ public class TextNode: Widget {
         }
     }
 
+    override var mainLayerName: String {
+        "TextNode - \(element.id.uuidString)"
+    }
+
 }

@@ -165,4 +165,8 @@ class LinkedReferenceNode: TextNode {
             layers["LinkLayer"]?.frame = CGRect(origin: CGPoint(x: frame.width - 12, y: 0), size: linkTextLayer.preferredFrameSize())
         }
     }
+
+    override var mainLayerName: String {
+        "LinkReferenceNode - \(element.id.uuidString) (from note \(element.note?.title ?? "???"))"
+    }
 }

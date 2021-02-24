@@ -41,18 +41,14 @@ extension BeamTextEdit {
             return
         }
 
-        if command == .moveRight &&
-            cursorPosition == node.text.text.count &&
-            popoverSuffix != 0 {
+        if command == .moveRight && node.text.text == "[[]]" {
+            cursorStartPosition = 0
+            dismissPopoverOrFormatter()
+            return
+        }
 
-            if node.text.text == "[[]]" {
-                cursorStartPosition = 0
-                cancelInternalLink()
-                return
-            }
-
+        if command == .moveRight && cursorPosition == node.text.text.count && popoverSuffix != 0 {
             validInternalLink(from: node, String(node.text.text[cursorStartPosition + 1..<cursorPosition - popoverSuffix]))
-
             return
         }
 
@@ -97,17 +93,16 @@ extension BeamTextEdit {
     internal func cancelInternalLink() {
         guard let node = focussedWidget as? TextNode,
               popover != nil else { return }
+
         let text = node.text.text
         node.text.removeAttributes([.internalLink(text)], from: cursorStartPosition..<rootNode.cursorPosition + text.count)
     }
 
     private func updatePopoverPosition(with node: TextNode, _ isEmpty: Bool = false) {
-        guard let popover = popover,
-              let scrollView = enclosingScrollView else { return }
+        guard let popover = popover else { return }
 
         let (xOffset, rect) = node.offsetAndFrameAt(index: rootNode.cursorPosition)
         let offsetGlobal = self.convert(node.offsetInDocument, to: nil)
-        let yOffset = scrollView.documentVisibleRect.origin.y < 0 ? 0 : scrollView.documentVisibleRect.origin.y
         let marginTop: CGFloat = rect.maxY == 0 ? 30 : 10
 
         var yPos = offsetGlobal.y - rect.maxY - popover.idealSize.height
@@ -129,7 +124,7 @@ extension BeamTextEdit {
         if popover.visibleRect.height < popover.idealSize.height {
             popover.frame = NSRect(
                 x: BeamTextEdit.xPos,
-                y: offsetGlobal.y + yOffset + marginTop,
+                y: offsetGlobal.y + 10,
                 width: popover.idealSize.width,
                 height: popover.idealSize.height
             )

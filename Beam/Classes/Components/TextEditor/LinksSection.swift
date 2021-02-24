@@ -79,22 +79,20 @@ class LinksSection: Widget {
     func setupSectionMode() {
         switch mode {
         case .links:
-            sectionTitleLayer.string = "\(note.linkedReferences.count) Links"
             linkedReferencesCancellable = note.$linkedReferences
                 .receive(on: DispatchQueue.main)
                 .sink { [unowned self] links in
                 updateLinkedReferences(links: links)
-                sectionTitleLayer.string = "\(links.count) Links"
+                sectionTitleLayer.string = "link".localizedStringWith(comment: "link section title", links.count)
                 updateLayerVisibility()
             }
         case .references:
             linkActionLayer.string = "Link All"
-            sectionTitleLayer.string = "\(note.unlinkedReferences.count) References"
             linkedReferencesCancellable = note.$unlinkedReferences
                 .receive(on: DispatchQueue.main)
                 .sink { [unowned self] links in
                 updateLinkedReferences(links: links)
-                sectionTitleLayer.string = "\(links.count) References"
+                sectionTitleLayer.string = "reference".localizedStringWith(comment: "reference section title", links.count)
                 updateLayerVisibility()
             }
 
@@ -184,5 +182,9 @@ class LinksSection: Widget {
             guard let linkLayer = linkLayer else { return }
             linkLayer.frame = CGRect(origin: CGPoint(x: frame.width - linkActionLayer.frame.width, y: 0), size: linkActionLayer.preferredFrameSize())
         }
+    }
+
+    override var mainLayerName: String {
+        return "LinkSection"
     }
 }

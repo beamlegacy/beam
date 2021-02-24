@@ -34,7 +34,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     }
 
     @Published var title: String = ""
-    @Published var originalQuery: String = ""
+    @Published var originalQuery: String?
     @Published var url: URL?
     @Published var isLoading: Bool = false
     @Published var estimatedProgress: Double = 0
@@ -51,12 +51,22 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
     var state: BeamState!
 
-    var note: BeamNote?
-    var rootElement: BeamElement?
-    var element: BeamElement?
+    public private(set) var note: BeamNote
+    public private(set) var rootElement: BeamElement
+    public private(set) var element: BeamElement?
 
-    var score: Score?
+    func setDestinationNote(_ note: BeamNote, rootElement: BeamElement? = nil) {
+        self.note = note
+        self.rootElement = rootElement ?? note
+        self.note.browsingSessions.append(browsingTree)
 
+        if let elem = element {
+            // reparent the element that has alreay been created
+            self.rootElement.addChild(elem)
+        } else {
+            _ = addCurrentPageToNote()
+        }
+    }
     var appendToIndexer: (URL, Readability) -> Void = { _, _ in }
 
     var creationDate: Date = Date()
@@ -79,18 +89,12 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         return config
     }
 
-    init(state: BeamState, originalQuery: String, note: BeamNote?, rootElement: BeamElement? = nil, id: UUID = UUID(), webView: WKWebView? = nil, createBullet: Bool = true) {
+    init(state: BeamState, originalQuery: String?, note: BeamNote, rootElement: BeamElement? = nil, id: UUID = UUID(), webView: WKWebView? = nil, createBullet: Bool = true) {
         self.state = state
         self.id = id
         self.note = note
-        self.rootElement = rootElement
+        self.rootElement = rootElement ?? note
         self.originalQuery = originalQuery
-
-        if !originalQuery.isEmpty, let note = self.note, createBullet {
-            let e = BeamElement()
-            element = e
-            note.addChild(e)
-        }
 
         if let w = webView {
             self.webView = w
@@ -103,15 +107,29 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             backForwardList = web.backForwardList
             self.webView = web
         }
-        browsingTree = BrowsingTree(BrowsingNode(parent: nil, url: originalQuery, title: nil))
+        browsingTree = BrowsingTree(originalQuery ?? webView?.url?.absoluteString)
 
         super.init(frame: NSRect())
-        note?.browsingSessions.append(browsingTree)
+        note.browsingSessions.append(browsingTree)
         setupObservers()
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    // Add the current page to the current note and return the beam element (if the element already exist return it directly)
+    func addCurrentPageToNote() -> BeamElement {
+        guard let elem = element else {
+            Logger.shared.logDebug("add current page '\(title)' to note '\(note.title)'", category: .web)
+            let e = BeamElement()
+            e.query = originalQuery
+            e.text = BeamText(text: title, attributes: [.link(url?.absoluteString ?? "")])
+            element = e
+            rootElement.addChild(e)
+            return e
+        }
+        return elem
     }
 
     private func updateBullet() {
@@ -142,9 +160,11 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     }
 
     private func updateScore() {
-        if let s = score?.score {
+        let s = browsingTree.current.score.score
 //            Logger.shared.logDebug("updated score[\(url!.absoluteString)] = \(s)", category: .general)
-            element?.score = s
+        element?.score = s
+        if s > 0.0 {
+            _ = addCurrentPageToNote() // Automatically add current page to note over a certain threshold
         }
     }
 
@@ -159,8 +179,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             self.updateBullet()
             self.updateFavIcon()
             if let url = v?.absoluteString {
-                self.score = self.state.data.scores.scoreCard(for: url)
-                self.score?.openIndex = self.navigationCount
+                self.browsingTree.current.score.openIndex = self.navigationCount
                 self.updateScore()
                 self.navigationCount = 0
             }
@@ -216,7 +235,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         ScriptHandlers.allCases.forEach {
             let handler = $0.rawValue
             webView.configuration.userContentController.add(self, name: handler)
-            print("Added Script handler: \(handler)")
+            Logger.shared.logDebug("Added Script handler: \(handler)", category: .web)
         }
     }
 
@@ -239,10 +258,12 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
     // WKNavigationDelegate:
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+        element = nil
         decisionHandler(.allow)
     }
 
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, preferences: WKWebpagePreferences, decisionHandler: @escaping (WKNavigationActionPolicy, WKWebpagePreferences) -> Void) {
+        element = nil
         handleBackForwardWebView(navigationAction: navigationAction)
         if let targetURL = navigationAction.request.url {
             if navigationAction.modifierFlags.contains(.command) {
@@ -252,7 +273,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                 state.setup(webView: newWebView)
                 let newTab = BrowserTab(state: state, originalQuery: originalQuery, note: note, rootElement: rootElement, webView: newWebView)
                 newTab.load(url: targetURL)
-                newTab.score?.openIndex = navigationCount
+                newTab.browsingTree.current.score.openIndex = navigationCount
                 navigationCount += 1
                 onNewTabCreated(newTab)
                 decisionHandler(.cancel, preferences)
@@ -270,6 +291,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     var navigationCount: Int = 0
 
     func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse, decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
+        element = nil
         decisionHandler(.allow)
     }
 
@@ -277,6 +299,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     }
 
     func webView(_ webView: WKWebView, didReceiveServerRedirectForProvisionalNavigation navigation: WKNavigation!) {
+        element = nil
     }
 
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
@@ -291,6 +314,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         switch message.name {
         case ScriptHandlers.beam_logging.rawValue:
             Logger.shared.logInfo(String(describing: message.body), category: .javascript)
+
         case ScriptHandlers.beam_textSelected.rawValue:
             guard let dict = message.body as? [String: AnyObject],
 //                  let selectedText = dict["selectedText"] as? String,
@@ -298,22 +322,24 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                   !selectedHtml.isEmpty
             else { return }
 
-            let text = html2Md(url: webView.url!, html: selectedHtml)
-            self.score?.textSelections += 1
+            let text = html2Text(url: webView.url!, html: selectedHtml)
+            browsingTree.current.score.textSelections += 1
             self.updateScore()
 
             // now add a bullet point with the quoted text:
             if let urlString = webView.url?.absoluteString, let title = webView.title {
-                guard let url = urlString.markdownizedURL else { return }
                 let quote = BeamText(text: text)
 
                 DispatchQueue.main.async {
+                    let current = self.addCurrentPageToNote()
                     let e = BeamElement()
-                    e.kind = .quote(1, title, url)
+                    e.kind = .quote(1, title, urlString)
                     e.text = quote
-                    _ = self.note?.addChild(e)
+                    e.query = self.originalQuery
+                    current.addChild(e)
                 }
             }
+
         case ScriptHandlers.beam_onScrolled.rawValue:
             guard let dict = message.body as? [String: AnyObject],
 //                  let selectedText = dict["selectedText"] as? String,
@@ -323,9 +349,9 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                 let h = dict["height"] as? Double
             else { return }
             if w > 0, h > 0 {
-                self.score?.scrollRatioX = max(Float(x / w), self.score?.scrollRatioX ?? 0)
-                self.score?.scrollRatioY = max(Float(y / h), self.score?.scrollRatioY ?? 0)
-                self.score?.area = Float(w * h)
+                browsingTree.current.score.scrollRatioX = max(Float(x / w), browsingTree.current.score.scrollRatioX)
+                browsingTree.current.score.scrollRatioY = max(Float(y / h), browsingTree.current.score.scrollRatioY)
+                browsingTree.current.score.area = Float(w * h)
                 self.updateScore()
             }
             Logger.shared.logDebug("Web Scrolled: \(x), \(y)", category: .web)
@@ -345,7 +371,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             switch result {
             case let .success(read):
                 self.appendToIndexer(url, read)
-                self.score?.textAmount = read.content.count
+                self.browsingTree.current.score.textAmount = read.content.count
                 self.updateScore()
             case let .failure(error):
                 Logger.shared.logError("Error while indexing web page: \(error)", category: .javascript)
@@ -405,17 +431,14 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
     func switchToCard() {
         browsingTree.switchToCard()
-        score?.readingTime += lastViewDate.distance(to: Date())
     }
 
     func switchToOtherTab() {
         browsingTree.switchToOtherTab()
-        score?.readingTime += lastViewDate.distance(to: Date())
     }
 
     func switchToNewSearch() {
         browsingTree.switchToNewSearch()
-        score?.readingTime += lastViewDate.distance(to: Date())
     }
 
     func goBack() {

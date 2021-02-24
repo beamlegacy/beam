@@ -8,7 +8,7 @@
 import Foundation
 
 class SpacerWidget: Widget {
-    enum SpacerType {
+    enum SpacerType: String {
         case top
         case middle
         case bottom
@@ -36,4 +36,7 @@ class SpacerWidget: Widget {
         computedIdealSize.height = space
     }
 
+    override var mainLayerName: String {
+        "Spacer \(spacerType) - \(space)"
+    }
 }

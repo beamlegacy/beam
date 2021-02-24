@@ -65,6 +65,13 @@ extension AppDelegate {
             return false
         }
 
+        // Open external url when Beam is used as default browser.
+        if components.host != Configuration.publicHostname {
+            guard let url = components.url else { return false }
+            window.state.createTab(withURL: url, originalQuery: url.absoluteString)
+            return false
+        }
+
         guard components.host == Configuration.publicHostname else {
             Logger.shared.logDebug("components: \(components), host is different from Configuration: \(Configuration.publicHostname)", category: .general)
             return false

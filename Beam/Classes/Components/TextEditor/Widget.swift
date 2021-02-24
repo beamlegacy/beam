@@ -71,7 +71,7 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
             }
 
             for c in set {
-                c.layer.removeFromSuperlayer()
+                c.removeFromSuperlayer(recursive: true)
             }
         }
 
@@ -209,11 +209,17 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
     }
 
     deinit {
-        layer.removeFromSuperlayer()
+        removeFromSuperlayer(recursive: true)
     }
 
     func removeFromSuperlayer(recursive: Bool) {
         layer.removeFromSuperlayer()
+
+        // handle sublayers:
+        for l in layers where l.value.layer.superlayer == editor.layer {
+            l.value.layer.removeFromSuperlayer()
+        }
+
         if recursive {
             for c in children {
                 c.removeFromSuperlayer(recursive: recursive)
@@ -304,6 +310,11 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
         layer.setNeedsDisplay()
         layer.backgroundColor = selected ? NSColor(white: 0.5, alpha: 0.1).cgColor : NSColor(white: 1, alpha: 0).cgColor
         layer.delegate = self
+        layer.name = mainLayerName
+    }
+
+    var mainLayerName: String {
+        String(describing: self)
     }
 
     func invalidateLayout() {
@@ -413,10 +424,7 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
         children.removeAll { w -> Bool in
             w === child
         }
-        child.layer.removeFromSuperlayer()
-        for l in child.layers where l.value.layer.superlayer == editor.layer {
-            l.value.layer.removeFromSuperlayer()
-        }
+        child.removeFromSuperlayer(recursive: true)
 
         invalidateLayout()
     }
@@ -444,22 +452,6 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
         children.insert(node, at: pos)
         invalidateLayout()
         return true
-    }
-
-    func widgetAt(point: CGPoint) -> Widget? {
-        guard visible else { return nil }
-        guard 0 <= point.y, point.y < frame.height else { return nil }
-        if contentsFrame.minY <= point.y, point.y < contentsFrame.maxY {
-            return self
-        }
-
-        for c in children {
-            let p = CGPoint(x: point.x - c.frame.origin.x, y: point.y - c.frame.origin.y)
-            if let res = c.widgetAt(point: p) {
-                return res
-            }
-        }
-        return nil
     }
 
     internal var layers: [String: Layer] = [:]

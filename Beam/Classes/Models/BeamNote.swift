@@ -188,6 +188,12 @@ class BeamNote: BeamElement {
         linkedReferences.append(reference)
     }
 
+    func removeLinkedReference(_ reference: NoteReference) {
+        linkedReferences.removeAll(where: { ref -> Bool in
+            ref == reference
+        })
+    }
+
     func addUnlinkedReference(_ reference: NoteReference) {
         // don't add it twice
         guard !unlinkedReferences.contains(reference) else { return }
@@ -343,6 +349,9 @@ class BeamNote: BeamElement {
             // Detect Linked Notes
             note.detectLinkedNotes(documentManager, async: true)
 
+            // remove broken linked references
+            let brokenLinks = note.getBrokenLinkedReferences(documentManager, allNotes)
+
             // remove broken unlinked references
             let brokenRefs = note.getBrokenUnlinkedReferences(documentManager, allNotes)
 
@@ -350,6 +359,11 @@ class BeamNote: BeamElement {
             let unlinks = note.getDeepUnlinkedReferences(noteName, allNotes)
             DispatchQueue.main.async {
                 let note = BeamNote.fetch(documentManager, title: noteName)
+
+                for brokenLink in brokenLinks {
+                    note?.removeLinkedReference(brokenLink)
+                }
+
                 for brokenRef in brokenRefs {
                     note?.removeUnlinkedReference(brokenRef)
                 }
@@ -374,6 +388,37 @@ class BeamNote: BeamElement {
         for title in allTitles {
             detectLinks(in: title, to: allTitles, with: documentManager)
         }
+    }
+
+    func getBrokenLinkedReferences(_ documentManager: DocumentManager, _ allNotes: [String]) -> [NoteReference] {
+        var broken = [NoteReference]()
+        var notes = [String: BeamNote]()
+        for link in linkedReferences {
+            guard let note: BeamNote = {
+                notes[link.noteName] ?? {
+                    guard let doc = documentManager.loadDocumentByTitle(title: link.noteName) else {
+                        return nil
+                    }
+
+                    do {
+                        let note = try Self.instanciateNote(documentManager, doc, keepInMemory: false)
+                        notes[note.title] = note
+                        return note
+                    } catch {
+                        Logger.shared.logError("LinkReference verification: Unable to decode note \(doc.title)", category: .document)
+                    }
+                    return nil
+                }()
+            }() else {
+                continue
+            }
+
+            guard let element = note.findElement(link.elementID),
+                  element.text.internalLinks.contains(where: { range -> Bool in  range.string == title })
+            else { broken.append(link); continue }
+        }
+
+        return broken
     }
 
     func getBrokenUnlinkedReferences(_ documentManager: DocumentManager, _ allNotes: [String]) -> [NoteReference] {
