@@ -144,6 +144,7 @@
 		41D169A925DC07260018E5F2 /* Inter-Italic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 41D169A425DC07260018E5F2 /* Inter-Italic.otf */; };
 		41D169AA25DC07260018E5F2 /* Inter-Medium.otf in Resources */ = {isa = PBXBuildFile; fileRef = 41D169A525DC07260018E5F2 /* Inter-Medium.otf */; };
 		41EA89B825B838D40033EAB9 /* FormatterViewType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41EA89B725B838D40033EAB9 /* FormatterViewType.swift */; };
+		41FAD34F25E5742800D78B36 /* CALayer+Animation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41FAD34E25E5742800D78B36 /* CALayer+Animation.swift */; };
 		5204290B25A4B3D300DD677C /* document_updated_at.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 5204290A25A4B3D300DD677C /* document_updated_at.graphql */; };
 		5206280C25922D6300D7CD9E /* delete_document.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 5206280B25922D6300D7CD9E /* delete_document.graphql */; };
 		5206281025922D6C00D7CD9E /* update_document.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 5206280F25922D6C00D7CD9E /* update_document.graphql */; };
@@ -623,6 +624,7 @@
 		41D169A425DC07260018E5F2 /* Inter-Italic.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter-Italic.otf"; sourceTree = "<group>"; };
 		41D169A525DC07260018E5F2 /* Inter-Medium.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter-Medium.otf"; sourceTree = "<group>"; };
 		41EA89B725B838D40033EAB9 /* FormatterViewType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatterViewType.swift; sourceTree = "<group>"; };
+		41FAD34E25E5742800D78B36 /* CALayer+Animation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CALayer+Animation.swift"; sourceTree = "<group>"; };
 		5204290A25A4B3D300DD677C /* document_updated_at.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = document_updated_at.graphql; sourceTree = "<group>"; };
 		5206280B25922D6300D7CD9E /* delete_document.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = delete_document.graphql; sourceTree = "<group>"; };
 		5206280F25922D6C00D7CD9E /* update_document.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = update_document.graphql; sourceTree = "<group>"; };
@@ -1070,6 +1072,7 @@
 				523FF66025C31D8800B4BD6E /* Data+String.swift */,
 				523FF67825C31D9D00B4BD6E /* String+Data.swift */,
 				5287EC2E25C42B0100CE1DD9 /* String+UUID.swift */,
+				41FAD34E25E5742800D78B36 /* CALayer+Animation.swift */,
 				524B856C25D2DD0700BB7C7A /* NSMAnagedObjectContext+performAndWait.swift */,
 				52FB30C925E3D7B3001BF098 /* String+Title.swift */,
 			);
@@ -2333,6 +2336,7 @@
 				418172072581107C00317ED8 /* Document.swift in Sources */,
 				4100D96B25AEFEEA00EF04CB /* TextEdit+Shortcut.swift in Sources */,
 				41EA89B825B838D40033EAB9 /* FormatterViewType.swift in Sources */,
+				41FAD34F25E5742800D78B36 /* CALayer+Animation.swift in Sources */,
 				524299EE25A488E000F4DBF5 /* AdvancedPreferencesView.swift in Sources */,
 				418171FC2581107C00317ED8 /* RoamImporter.swift in Sources */,
 				41A969FF2581394300E6594B /* Configuration.swift in Sources */,
