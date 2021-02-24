@@ -41,18 +41,15 @@ extension BeamTextEdit {
             return
         }
 
-        if command == .moveRight &&
-            cursorPosition == node.text.text.count &&
-            popoverSuffix != 0 {
+        if command == .moveRight && node.text.text == "[[]]" {
+            cursorStartPosition = 0
+            cancelInternalLink()
+            dismissPopover()
+            return
+        }
 
-            if node.text.text == "[[]]" {
-                cursorStartPosition = 0
-                cancelInternalLink()
-                return
-            }
-
+        if command == .moveRight && cursorPosition == node.text.text.count && popoverSuffix != 0 {
             validInternalLink(from: node, String(node.text.text[cursorStartPosition + 1..<cursorPosition - popoverSuffix]))
-
             return
         }
 
@@ -94,11 +91,20 @@ extension BeamTextEdit {
         popover = nil
     }
 
-    internal func cancelInternalLink() {
+    internal func cancelInternalLink(with text: String? = nil, range: Swift.Range<Int>? = nil) {
         guard let node = focussedWidget as? TextNode,
               popover != nil else { return }
-        let text = node.text.text
-        node.text.removeAttributes([.internalLink(text)], from: cursorStartPosition..<rootNode.cursorPosition + text.count)
+
+        guard let text = text,
+              let range = range else {
+            // By default remove internal link from begin to the end
+            let text = node.text.text
+            node.text.removeAttributes([.internalLink(text)], from: cursorStartPosition..<rootNode.cursorPosition + text.count)
+            return
+        }
+
+        // Remove internal link at the specific range
+        node.text.removeAttributes([.internalLink(text)], from: range)
     }
 
     private func updatePopoverPosition(with node: TextNode, _ isEmpty: Bool = false) {
@@ -140,10 +146,13 @@ extension BeamTextEdit {
         let startPosition = popoverPrefix == 0 ? cursorStartPosition : cursorStartPosition + 1
         let replacementStart = startPosition - popoverPrefix
         let replacementEnd = rootNode.cursorPosition + popoverSuffix
-        let linkEnd = replacementStart + title.count
+        let linkEnd = replacementStart + rootNode.cursorPosition - popoverPrefix
+        let halfText = node.text.text[linkEnd...]
 
         node.text.replaceSubrange(replacementStart..<replacementEnd, with: title)
+        cancelInternalLink(with: halfText, range: linkEnd..<halfText.count + linkEnd)
         node.text.makeInternalLink(replacementStart..<linkEnd)
+
         rootNode.cursorPosition = linkEnd
         dismissPopover()
         showOrHidePersistentFormatter(isPresent: true)

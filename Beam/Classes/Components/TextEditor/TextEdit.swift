@@ -585,6 +585,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                         rootNode.doCommand(.moveToBeginningOfLine)
                     } else if popover != nil {
                         rootNode.doCommand(.moveLeft)
+                        print(rootNode.cursorPosition)
                         updatePopover(with: .moveLeft)
                     } else if inlineFormatter != nil {
                         rootNode.doCommand(.moveLeft)
