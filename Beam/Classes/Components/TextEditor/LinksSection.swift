@@ -183,4 +183,8 @@ class LinksSection: Widget {
             linkLayer.frame = CGRect(origin: CGPoint(x: frame.width - linkActionLayer.frame.width, y: 0), size: linkActionLayer.preferredFrameSize())
         }
     }
+
+    override var mainLayerName: String {
+        return "LinkSection"
+    }
 }

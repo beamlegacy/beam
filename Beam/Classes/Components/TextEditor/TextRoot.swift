@@ -254,4 +254,11 @@ public class TextRoot: TextNode {
         false
     }
 
+    override var mainLayerName: String {
+        guard let note = note else {
+            return "TextRoot - \(element.id.uuidString)"
+
+        }
+        return "TextRoot - [\(note.title)] - \(element.id.uuidString)"
+    }
 }

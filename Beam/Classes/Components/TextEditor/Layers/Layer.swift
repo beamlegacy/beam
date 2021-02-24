@@ -10,7 +10,11 @@ import Combine
 import AppKit
 
 class Layer: NSObject, CALayerDelegate, MouseHandler {
-    var name: String
+    var name: String {
+        didSet {
+            layer.name = name
+        }
+    }
     var layer: CALayer
     var hovered: Bool = false
     var cursor: NSCursor?

@@ -98,4 +98,8 @@ class BrowsingLinkWidget: Widget {
         computedIdealSize = contentsFrame.size
         computedIdealSize.width = availableWidth
     }
+
+    override var mainLayerName: String {
+        "BrowsingLinkWidget"
+    }
 }
