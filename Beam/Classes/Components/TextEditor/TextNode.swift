@@ -668,6 +668,7 @@ public class TextNode: Widget {
                 let frame = linkFrameAt(point: mouseInfo.position)
 
                 cursor = .pointingHand
+
                 editor.updateInlineFormaterOnHover(
                     currentNode,
                     mouseInfo.globalPosition,

@@ -80,7 +80,6 @@ class FormatterView: NSView {
     }
 
     deinit {
-        print("deinit formatter view")
         hideHyperLinkView()
     }
 

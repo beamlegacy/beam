@@ -31,7 +31,6 @@ class HyperlinkView: NSView {
     }
 
     deinit {
-        print("deinit")
         hyperlinkTextField.delegate = nil
     }
 
