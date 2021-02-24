@@ -326,7 +326,7 @@ class DocumentManagerTests: QuickSpec {
 
         describe(".create()") {
             it("creates document") {
-                let title = self.helper.title()
+                let title = String.randomTitle()
                 let docStruct = self.sut.create(title: title)!
                 expect(docStruct.title).to(equal(title))
                 let count = Document.countWithPredicate(self.mainContext,
@@ -338,7 +338,7 @@ class DocumentManagerTests: QuickSpec {
             context("With PromiseKit") {
                 var title: String!
                 beforeEach {
-                    title = self.helper.title()
+                    title = String.randomTitle()
                 }
 
                 it("creates document") {
@@ -385,7 +385,7 @@ class DocumentManagerTests: QuickSpec {
             context("With Promises") {
                 var title: String!
                 beforeEach {
-                    title = self.helper.title()
+                    title = String.randomTitle()
                 }
 
                 it("creates document") {
@@ -434,7 +434,7 @@ class DocumentManagerTests: QuickSpec {
 
         describe(".createAsync()") {
             it("creates document") {
-                let title = self.helper.title()
+                let title = String.randomTitle()
 
                 waitUntil(timeout: .seconds(10)) { [unowned self] done in
                     self.sut.createAsync(title: title) { result in
@@ -448,7 +448,7 @@ class DocumentManagerTests: QuickSpec {
 
         describe(".fetchOrCreate()") {
             it("creates the document once") {
-                let title = self.helper.title()
+                let title = String.randomTitle()
                 let documentStruct: DocumentStruct? = self.sut.fetchOrCreate(title: title)
                 expect(documentStruct?.title).to(equal(title))
 
@@ -463,7 +463,7 @@ class DocumentManagerTests: QuickSpec {
         describe(".fetchOrCreateAsync()") {
             context("with Foundation") {
                 it("fetches asynchronisely") {
-                    let title = self.helper.title()
+                    let title = String.randomTitle()
 
                     waitUntil(timeout: .seconds(10)) { [unowned self] done in
                         self.sut.fetchOrCreateAsync(title: title) { documentStruct in
@@ -477,7 +477,7 @@ class DocumentManagerTests: QuickSpec {
                     it("fetches async") {
                         // Just a simple example showing the use of semaphores to wait for async jobs
                         let semaphore = DispatchSemaphore(value: 0)
-                        let title = self.helper.title()
+                        let title = String.randomTitle()
 
                         self.sut.createAsync(title: title) { result in
                             expect { try result.get() }.toNot(throwError())
@@ -492,7 +492,7 @@ class DocumentManagerTests: QuickSpec {
 
             context("with PromiseKit") {
                 it("fetches asynchronisely") {
-                    let title = self.helper.title()
+                    let title = String.randomTitle()
 
                     waitUntil(timeout: .seconds(10)) { [unowned self] done in
                         let promise: PromiseKit.Promise<DocumentStruct> = self.sut.fetchOrCreate(title: title)
@@ -508,7 +508,7 @@ class DocumentManagerTests: QuickSpec {
 
             context("with Promises") {
                 it("fetches asynchronisely") {
-                    let title = self.helper.title()
+                    let title = String.randomTitle()
 
                     waitUntil(timeout: .seconds(10)) { [unowned self] done in
                         let promise: Promises.Promise<DocumentStruct> = self.sut.fetchOrCreate(title: title)
@@ -528,7 +528,7 @@ class DocumentManagerTests: QuickSpec {
                 var docStruct = self.helper.createDocumentStruct()
                 self.helper.saveLocally(docStruct)
 
-                let newTitle = self.helper.title()
+                let newTitle = String.randomTitle()
 
                 var cancellable: AnyCancellable!
                 waitUntil(timeout: .seconds(10)) { done in

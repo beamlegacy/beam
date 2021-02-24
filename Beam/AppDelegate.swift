@@ -39,12 +39,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     let documentManager = DocumentManager()
     #if DEBUG
-    var beamUIHelper: BeamUITestsHelper?
+    var beamUIMenuGenerator: BeamUITestsMenuGenerator!
     #endif
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         #if DEBUG
-        self.beamUIHelper = BeamUITestsHelper()
+        self.beamUIMenuGenerator = BeamUITestsMenuGenerator()
         prepareMenuForTestEnv()
         #endif
         for item in NSApp.mainMenu?.items ?? [] {

@@ -127,7 +127,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
         layer?.delegate = self
         titleLayer.delegate = self
-        //        self.wantsLayer = true
+        // self.wantsLayer = true
 
         timer = Timer.init(timeInterval: 1.0 / 60.0, repeats: true) { [unowned self] _ in
             let now = CFAbsoluteTimeGetCurrent()
@@ -349,6 +349,10 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         let formatter = DateFormatter()
         formatter.dateFormat = "MMMM dd yyyy, H:mm a"
 
+        cardTitleLayer.enableAnimations = false
+        cardTimeLayer.enableAnimations = false
+        cardHeaderLayer.enableAnimations = false
+
         cardTitleLayer.foregroundColor = NSColor.cardTitleColor.cgColor
         cardTitleLayer.font = NSFont(name: "Inter-SemiBold", size: 0)
         cardTitleLayer.fontSize = 26 // isBig ? 30 : 26
@@ -360,6 +364,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         cardTimeLayer.string = formatter.string(from: note.updateDate)
 
         cardHeaderLayer.addSublayer(cardTitleLayer)
+
         // TODO: show option layer later 
         // cardHeaderLayer.addSublayer(cardOptionLayer)
 

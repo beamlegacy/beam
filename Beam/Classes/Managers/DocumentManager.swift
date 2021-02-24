@@ -350,6 +350,7 @@ class DocumentManager {
         document.data = documentStruct.data
         document.title = documentStruct.title
         document.document_type = documentStruct.documentType.rawValue
+        document.created_at = documentStruct.createdAt
         document.updated_at = BeamDate.now
         document.deleted_at = documentStruct.deletedAt
     }
