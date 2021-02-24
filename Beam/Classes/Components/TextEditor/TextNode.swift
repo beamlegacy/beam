@@ -214,8 +214,8 @@ public class TextNode: Widget {
 
         super.init(editor: editor)
 
-        addDisclosureLayer(at: NSPoint(x: 14, y: isHeader ? firstLineBaseline - 8 : firstLineBaseline - 13))
-        addBulletPointLayer(at: NSPoint(x: 14, y: isHeader ? firstLineBaseline - 8 : firstLineBaseline - 13))
+        addDisclosureLayer(at: NSPoint(x: 14, y: isHeader ? firstLineBaseline - 8 : firstLineBaseline - 10))
+        addBulletPointLayer(at: NSPoint(x: 14, y: isHeader ? firstLineBaseline - 8 : firstLineBaseline - 10))
 
         element.$children
             .sink { [unowned self] elements in
@@ -224,6 +224,7 @@ public class TextNode: Widget {
 
         createActionLayer()
 
+        indentLayer.enableAnimations = false
         layer.addSublayer(indentLayer)
 
         var inInit = true
@@ -369,13 +370,16 @@ public class TextNode: Widget {
         if !children.isEmpty {
             if showDisclosureButton && showIdentationLine {
                 let y = contentsFrame.height
-                indentLayer.frame = NSRect(x: childInset, y: y + 3, width: 1, height: currentFrameInDocument.height - y - 15)
-                indentLayer.backgroundColor = NSColor.red.cgColor
+                indentLayer.frame = NSRect(x: childInset - 1, y: y - 5, width: 1, height: currentFrameInDocument.height - y - 5)
+                indentLayer.backgroundColor = NSColor.editorIndentBackgroundColor.cgColor
             }
         }
 
+        indentLayer.isHidden = children.isEmpty || !open
+
         guard let bulletLayer = self.layers["bullet"] else { return }
         guard let disclosureLayer = self.layers["disclosure"] as? ChevronButton else { return }
+
         if showDisclosureButton {
             bulletLayer.layer.isHidden = true
             disclosureLayer.layer.isHidden = false

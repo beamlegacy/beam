@@ -41,7 +41,7 @@ extension NSColor {
     }
 
     static var editorBidirectionalLinkColor: NSColor {
-        return loadColor(named: "CharmedGreen")
+        return loadColor(named: "Beam")
     }
 
     static var editorControlColor: NSColor {
@@ -82,6 +82,10 @@ extension NSColor {
 
     static var editorTextSelectionColor: NSColor {
         return loadColor(named: "EditorTextSelectionColor")
+    }
+
+    static var editorIndentBackgroundColor: NSColor {
+        return loadColor(named: "Mercury")
     }
 
     static var underlineAndstrikethroughColor: NSColor {
