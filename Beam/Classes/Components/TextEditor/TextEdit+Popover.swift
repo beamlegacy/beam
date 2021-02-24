@@ -102,12 +102,10 @@ extension BeamTextEdit {
     }
 
     private func updatePopoverPosition(with node: TextNode, _ isEmpty: Bool = false) {
-        guard let popover = popover,
-              let scrollView = enclosingScrollView else { return }
+        guard let popover = popover else { return }
 
         let (xOffset, rect) = node.offsetAndFrameAt(index: rootNode.cursorPosition)
         let offsetGlobal = self.convert(node.offsetInDocument, to: nil)
-        let yOffset = scrollView.documentVisibleRect.origin.y < 0 ? 0 : scrollView.documentVisibleRect.origin.y
         let marginTop: CGFloat = rect.maxY == 0 ? 30 : 10
 
         var yPos = offsetGlobal.y - rect.maxY - popover.idealSize.height
@@ -129,7 +127,7 @@ extension BeamTextEdit {
         if popover.visibleRect.height < popover.idealSize.height {
             popover.frame = NSRect(
                 x: BeamTextEdit.xPos,
-                y: offsetGlobal.y + yOffset + marginTop,
+                y: offsetGlobal.y + 10,
                 width: popover.idealSize.width,
                 height: popover.idealSize.height
             )
