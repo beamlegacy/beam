@@ -50,16 +50,18 @@ extension BeamText {
 
         if strong {
             font = NSFont(name: "Inter-Bold", size: fontSize)
+            if font == nil {
+                font = NSFontManager.shared.convert(NSFont.systemFont(ofSize: fontSize), toHaveTrait: .boldFontMask)
+            }
         }
 
         if emphasis || quote {
-            guard let selfFont = font else { return NSFont.systemFont(ofSize: fontSize) }
-            font = NSFontManager.shared.convert(selfFont, toHaveTrait: .italicFontMask)
+            font = NSFontManager.shared.convert(NSFont.systemFont(ofSize: fontSize), toHaveTrait: .italicFontMask)
         }
 
-        guard let selfFont = font else { return NSFont.systemFont(ofSize: fontSize) }
+        guard let actualFont = font else { return NSFont.systemFont(ofSize: fontSize) }
 
-        return selfFont
+        return actualFont
     }
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length

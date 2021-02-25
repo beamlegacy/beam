@@ -912,6 +912,22 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         rootNode.eraseSelection()
     }
 
+    func buildStringFrom(nodes: [TextNode]) -> NSAttributedString {
+        let strNodes = NSMutableAttributedString()
+        for node in nodes {
+            if nodes.count > 1 {
+                guard !node.text.text.isEmpty else { continue }
+                strNodes.append(NSAttributedString(string: String.tabs(node.element.depth - 1)))
+                strNodes.append(node.text.buildAttributedString(fontSize: node.fontSize, cursorPosition: node.cursorPosition, elementKind: node.elementKind))
+                strNodes.append(NSAttributedString(string: "\n"))
+            } else {
+                strNodes.append(node.attributedString)
+            }
+        }
+
+        return strNodes
+    }
+
     @IBAction func copy(_ sender: Any) {
         let pasteboard = NSPasteboard.general
         pasteboard.clearContents()
@@ -919,18 +935,13 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         let strNodes = NSMutableAttributedString()
 
         if let nodes = rootNode.state.nodeSelection?.sortedNodes, !nodes.isEmpty {
-            for node in nodes {
-                if nodes.count > 1 {
-                    guard !node.text.text.isEmpty else { continue }
-                    strNodes.append(NSAttributedString(string: String.tabs(node.element.depth - 1)))
-                    strNodes.append(node.text.buildAttributedString(fontSize: node.fontSize, cursorPosition: node.cursorPosition, elementKind: node.elementKind))
-                    strNodes.append(NSAttributedString(string: "\n"))
-                } else {
-                    strNodes.append(node.attributedString)
-                }
-            }
+            strNodes.append(buildStringFrom(nodes: nodes))
         } else {
-            strNodes.append(selectedText.attributed)
+            if let node = focussedWidget as? TextNode {
+                let range = NSRange(location: selectedTextRange.lowerBound, length: selectedTextRange.count)
+                let attributedString = node.attributedString.attributedSubstring(from: range)
+                strNodes.append(attributedString)
+            }
         }
 
         do {
