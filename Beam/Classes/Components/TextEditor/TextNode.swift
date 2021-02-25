@@ -315,7 +315,13 @@ public class TextNode: Widget {
             pos.y += childSize.height
         }
 
-        updateActionLayer()
+        // Disable action layer update to avoid motion glitch
+        // when the global layer width is changed
+        if let lastCommand = root?.lastCommand,
+           lastCommand != .increaseIndentation || editor.isResizing,
+           lastCommand != .decreaseIndentation || editor.isResizing {
+            updateActionLayer()
+        }
     }
 
     func invalidateText() {
