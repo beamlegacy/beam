@@ -176,7 +176,6 @@ public class TextNode: Widget {
         }
     }
 
-    var indentLayer = CALayer()
     var actionLayer: CALayer?
 
     private var deboucingClickTimer: Timer?
@@ -316,29 +315,29 @@ public class TextNode: Widget {
         }
 
         updateActionLayer()
-        updateIndentLayer()
     }
 
     func createIndentLayer() {
         let y = contentsFrame.height
+        let indentLayer = CALayer()
+
         indentLayer.frame = NSRect(x: childInset - 1, y: y - 5, width: 1, height: frame.height - y - 5)
         indentLayer.backgroundColor = NSColor.editorIndentBackgroundColor.cgColor
         indentLayer.isHidden = true
 
         indentLayer.enableAnimations = false
-        layer.addSublayer(indentLayer)
+        addLayer(Layer(name: "indentLayer", layer: indentLayer))
     }
 
     func updateIndentLayer() {
+        guard let indentLayer = layers["indentLayer"] else { return }
+
         if !children.isEmpty && showDisclosureButton && showIdentationLine {
-            print("\(frame.height) -> \(text.text)")
             let y = contentsFrame.height
             indentLayer.frame = NSRect(x: childInset - 1, y: y - 5, width: 1, height: frame.height - y - 5)
-            indentLayer.isHidden = false
-        } else {
-            print("\(frame.height) -> \(text.text)")
-            // indentLayer.isHidden = true
         }
+
+        indentLayer.layer.isHidden = children.isEmpty || !open
     }
 
     func invalidateText() {
@@ -362,7 +361,7 @@ public class TextNode: Widget {
     func addDisclosureLayer(at point: NSPoint) {
         let disclosureLayer = ChevronButton("disclosure", open: open, changed: { [unowned self] value in
             self.open = value
-            indentLayer.isHidden = !value
+            layers["indentLayer"]?.layer.isHidden = !value
         })
         disclosureLayer.layer.isHidden = true
         addLayer(disclosureLayer, origin: point, global: false)
@@ -390,6 +389,9 @@ public class TextNode: Widget {
     func drawText(in context: CGContext) {
         // Draw the text:
         context.saveGState()
+
+        updateIndentLayer()
+
         guard let bulletLayer = self.layers["bullet"] else { return }
         guard let disclosureLayer = self.layers["disclosure"] as? ChevronButton else { return }
 
