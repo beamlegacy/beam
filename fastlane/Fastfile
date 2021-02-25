@@ -48,7 +48,7 @@ platform :mac do
       force: false,
       type: params[:cert_type],
       # Don't set the filename so we can easily see which certificate is used
-      # Proper one should be 68DY6473LM for Fabien penso
+      # Proper one should be 697853WUNU for Fabien penso
       # You can see its value at https://developer.apple.com/account/resources/certificates/list inside the certificate url
       # filename: "developer_id.cer",
       output_path: "./certs",
@@ -96,7 +96,7 @@ platform :mac do
     check_certs(profile_development: true,
                 cert_development: true,
                 profile_provision_name: "Beam Development",
-                profile_cert_id: "68DY6473LM",
+                profile_cert_id: "697853WUNU",
                 profile_filename: "development.co.beamapp.macos.mobileprovision",
                 code_sign_identity: "Mac Developer",
                 profile_name: "Beam Development",
@@ -133,7 +133,7 @@ platform :mac do
     check_certs(profile_development: true,
                 cert_development: true,
                 profile_provision_name: "Beam Development",
-                profile_cert_id: "68DY6473LM",
+                profile_cert_id: "697853WUNU",
                 profile_filename: "development.co.beamapp.macos.mobileprovision",
                 code_sign_identity: "Mac Developer",
                 profile_name: "Beam Development",
