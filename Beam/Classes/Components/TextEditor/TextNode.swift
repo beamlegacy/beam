@@ -13,7 +13,6 @@ import Combine
 
 // swiftlint:disable:next type_body_length
 public class TextNode: Widget {
-
     var element: BeamElement { didSet {
         elementTextScope = element.$text
             .receive(on: DispatchQueue.main)
@@ -239,6 +238,10 @@ public class TextNode: Widget {
                 elementKind = newValue
                 self.invalidateText()
             }
+
+        setAccessibilityLabel("TextNode")
+        setAccessibilityRole(.textArea)
+
         inInit = false
     }
 
@@ -1075,4 +1078,139 @@ public class TextNode: Widget {
         "TextNode - \(element.id.uuidString)"
     }
 
+    public override func accessibilityString(for range: NSRange) -> String? {
+        return text.substring(range: range.lowerBound ..< range.upperBound)
+    }
+
+    //    Returns the attributed substring for the specified range of characters.
+    public override func accessibilityAttributedString(for range: NSRange) -> NSAttributedString? {
+        return attributedString.attributedSubstring(from: range)
+    }
+
+    //    Returns the Rich Text Format (RTF) data that describes the specified range of characters.
+    public override func accessibilityRTF(for range: NSRange) -> Data? {
+        return nil
+    }
+
+    //    Returns the rectangle enclosing the specified range of characters.
+    public override func accessibilityFrame(for: NSRange) -> NSRect {
+        return contentsFrame
+    }
+
+    //    Returns the line number for the line holding the specified character index.
+    public override func accessibilityLine(for index: Int) -> Int {
+        return lineAt(index: index) ?? 0
+    }
+
+    //    Returns the range of characters for the glyph that includes the specified character.
+    public override func accessibilityRange(for index: Int) -> NSRange {
+        return attributedString.wholeRange
+    }
+
+    //    Returns a range of characters that all have the same style as the specified character.
+    public override func accessibilityStyleRange(for index: Int) -> NSRange {
+        return attributedString.wholeRange
+    }
+
+    //    Returns the range of characters in the specified line.
+    public override func accessibilityRange(forLine line: Int) -> NSRange {
+        guard let line = layout?.lines[line] else { return NSRange() }
+        let range = line.range
+        return NSRange(location: range.lowerBound, length: range.count)
+    }
+
+    //    Returns the range of characters for the glyph at the specified point.
+    public override func accessibilityRange(for point: NSPoint) -> NSRange {
+        let lineIndex = lineAt(point: point)
+        guard let line = layout?.lines[lineIndex] else { return NSRange() }
+
+        let range = line.range
+        return NSRange(location: range.lowerBound, length: range.count)
+    }
+
+    public override func accessibilityValue() -> Any? {
+        return text.text
+    }
+
+    public override func setAccessibilityValue(_ accessibilityValue: Any?) {
+        switch accessibilityValue {
+        case is String:
+            guard let value = accessibilityValue as? String else { return }
+            text = BeamText(text: value)
+
+        case is NSAttributedString:
+            guard let value = accessibilityValue as? NSAttributedString else { return }
+            text = BeamText(text: value.string)
+
+        default:
+            return
+        }
+    }
+
+    public override func accessibilityVisibleCharacterRange() -> NSRange {
+        return attributedString.wholeRange
+    }
+
+    public override func isAccessibilityEnabled() -> Bool {
+        return true
+    }
+
+    public override func accessibilityNumberOfCharacters() -> Int {
+        return text.count
+    }
+
+    public override func accessibilitySelectedText() -> String? {
+        guard let t = root?.selectedText else { return nil }
+        return t.isEmpty ? nil : t
+    }
+
+    public override func accessibilitySelectedTextRange() -> NSRange {
+        guard let range = root?.state.selectedTextRange else { return NSRange() }
+        return NSRange(location: range.lowerBound, length: range.count)
+    }
+
+    public override func accessibilitySelectedTextRanges() -> [NSValue]? {
+        guard let range = root?.state.selectedTextRange else { return [] }
+        return [NSValue(range: NSRange(location: range.lowerBound, length: range.count))]
+    }
+
+    /*
+     I used this code to debug accessibility and try to understand what is expected of us.
+     Thus far these are requested by the system:
+     _accessibilityLabel
+     accessibilityChildren
+     accessibilityFrame
+     accessibilityIdentifier
+     accessibilityMaxValue
+     accessibilityMinValue
+     accessibilityNumberOfCharacters
+     accessibilityParent
+     accessibilityRole
+     accessibilityRoleDescription
+     accessibilitySubrole
+     accessibilityTitle
+     accessibilityTopLevelUIElement
+     accessibilityValue
+     accessibilityValueDescription
+     accessibilityVisibleChildren
+     accessibilityWindow
+     isAccessibilityElement
+     setAccessibilityChildren:
+     setAccessibilityEnabled:
+     setAccessibilityFrame:
+     setAccessibilityLabel:
+     setAccessibilityParent:
+     setAccessibilityRole:
+     setAccessibilityRoleDescription:
+     setAccessibilityTitle:
+     setAccessibilityTopLevelUIElement:
+     setAccessibilityValue:
+     setAccessibilityWindow:
+
+
+    public override func isAccessibilitySelectorAllowed(_ selector: Selector) -> Bool {
+        print("isAccessibilitySelectorAllowed(\(selector))")
+        return true
+    }
+*/
 }
