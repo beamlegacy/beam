@@ -247,8 +247,8 @@ class DocumentManager {
         }
     }
 
-    func loadAllDocumentsWithLimit(_ limit: Int = 4) -> [DocumentStruct] {
-        return Document.fetchAllWithLimitResult(mainContext, limit).compactMap { document -> DocumentStruct? in
+    func loadAllDocumentsWithLimit(_ limit: Int = 4, _ sortDescriptors: [NSSortDescriptor]? = nil) -> [DocumentStruct] {
+        return Document.fetchAllWithLimitResult(mainContext, limit, sortDescriptors).compactMap { document -> DocumentStruct? in
             parseDocumentBody(document)
         }
     }

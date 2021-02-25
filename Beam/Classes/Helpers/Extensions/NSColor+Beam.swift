@@ -135,7 +135,7 @@ extension NSColor {
     }
 
     static var linkedTitleColor: NSColor {
-        return loadColor(named: "CharmedGreen")
+        return loadColor(named: "Beam")
     }
 
     static var linkedContainerColor: NSColor {
