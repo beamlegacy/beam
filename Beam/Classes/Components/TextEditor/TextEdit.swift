@@ -46,6 +46,13 @@ public struct MouseInfo {
 public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
     var data: BeamData?
+    var cardTopSpace: CGFloat = 148
+    var centerText = false {
+        didSet {
+            drawCardHeader()
+        }
+    }
+
     var note: BeamElement! {
         didSet {
             updateRoot(with: note)
@@ -91,6 +98,16 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     internal var isInlineFormatterHidden = true
     internal var currentTextRange: Range<Int> = 0..<0
 
+    let cardHeaderLayer = CALayer()
+    let cardTitleLayer = CATextLayer()
+    let cardOptionLayer = CALayer()
+    let cardTimeLayer = CATextLayer()
+
+    let gutterWidth: CGFloat = TextNode.actionLayerXOffset + TextNode.actionLayerWidth
+    var textWidth: CGFloat { isBig ? 704 : 544 }
+
+    private var isResizing = false
+
     public init(root: BeamElement, font: Font = Font.main) {
         let start = CFAbsoluteTimeGetCurrent()
         BeamNote.requestLinkDetection()
@@ -100,6 +117,11 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         self.config.font = font
         note = root
         super.init(frame: NSRect())
+
+        setAccessibilityIdentifier("TextEdit")
+        setAccessibilityLabel("Note Editor")
+        setAccessibilityTitle((root as? BeamNote)?.title)
+
         let l = CALayer()
         self.layer = l
         l.backgroundColor = NSColor.editorBackgroundColor.cgColor
@@ -110,7 +132,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
         layer?.delegate = self
         titleLayer.delegate = self
-        //        self.wantsLayer = true
+        // self.wantsLayer = true
 
         timer = Timer.init(timeInterval: 1.0 / 60.0, repeats: true) { [unowned self] _ in
             let now = CFAbsoluteTimeGetCurrent()
@@ -143,6 +165,27 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    public override func viewWillStartLiveResize() {
+        super.viewWillStartLiveResize()
+        isResizing = true
+        dismissPopoverOrFormatter()
+    }
+
+    public override func viewDidEndLiveResize() {
+        super.viewDidEndLiveResize()
+        isResizing = false
+    }
+
+    public override func viewDidChangeEffectiveAppearance() {
+        super.viewDidChangeEffectiveAppearance()
+        layer?.backgroundColor = NSColor.editorBackgroundColor.cgColor
+
+        layer?.setNeedsDisplay()
+        titleLayer.setNeedsDisplay()
+        rootNode.deepInvalidateRendering()
+        rootNode.deepInvalidateText()
     }
 
     var timer: Timer!
@@ -209,6 +252,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             rootNode.state.selectedTextRange
         }
     }
+
     var markedTextRange: Range<Int> {
         set {
             assert(newValue.lowerBound != NSNotFound)
@@ -226,7 +270,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         return rootNode.selectedText
     }
 
-    static let bigThreshold = CGFloat(866)
+    static let bigThreshold = CGFloat(1024)
     var isBig: Bool {
         frame.width >= Self.bigThreshold
     }
@@ -248,10 +292,32 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     func relayoutRoot() {
         let r = bounds
         let width = CGFloat(isBig ? frame.width - 200 - leadingAlignment : 450)
-        let rect = NSRect(x: leadingAlignment, y: topOffsetActual, width: width, height: r.height)
+        var rect = NSRect(x: leadingAlignment, y: topOffsetActual, width: width, height: r.height)
 
-        rootNode.availableWidth = rect.width
-        rootNode.setLayout(rect)
+        if centerText {
+            let x = (frame.width - textWidth) / 2
+            let textNodeWidth = textWidth + gutterWidth
+
+            rect = NSRect(x: x, y: topOffsetActual + cardTopSpace, width: textNodeWidth, height: r.height)
+
+            if isResizing {
+                // Disable CALayer animation on resize
+                CATransaction.disableAnimations {
+                    rootNode.availableWidth = textNodeWidth
+                    updateCardHearderLayer(rect)
+                    rootNode.setLayout(rect)
+                }
+            } else {
+                rootNode.availableWidth = textNodeWidth
+                updateCardHearderLayer(rect)
+                rootNode.setLayout(rect)
+            }
+
+        } else {
+            rootNode.availableWidth = rect.width
+            rootNode.setLayout(rect)
+        }
+
     }
 
     // This is the root node of what we are editing:
@@ -275,8 +341,57 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         config.keepCursorMidScreen ? visibleRect.height / 2 : topOffset
     }
 
+    func drawCardHeader() {
+        guard let cardNote = note as? BeamNote,
+              let layer = layer else { return }
+
+        var icon = NSImage(named: "editor-options")
+        icon = icon?.fill(color: NSColor.cardOptionIconColor)
+
+        cardOptionLayer.contents = icon?.cgImage
+        cardOptionLayer.contentsGravity = .resizeAspect
+
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMMM dd yyyy, H:mm a"
+
+        cardTitleLayer.enableAnimations = false
+        cardTimeLayer.enableAnimations = false
+        cardHeaderLayer.enableAnimations = false
+
+        cardTitleLayer.foregroundColor = NSColor.cardTitleColor.cgColor
+        cardTitleLayer.font = NSFont(name: "Inter-SemiBold", size: 0)
+        cardTitleLayer.fontSize = 26 // isBig ? 30 : 26
+        cardTitleLayer.string = cardNote.title
+
+        cardTimeLayer.foregroundColor = NSColor.cardTimeColor.cgColor
+        cardTimeLayer.font = NSFont(name: "Inter-Regular", size: 0)
+        cardTimeLayer.fontSize = 10 //  isBig ? 12 : 10
+        cardTimeLayer.string = formatter.string(from: note.updateDate)
+
+        cardHeaderLayer.addSublayer(cardTitleLayer)
+
+        // TODO: show option layer later 
+        // cardHeaderLayer.addSublayer(cardOptionLayer)
+
+        layer.addSublayer(cardHeaderLayer)
+        layer.addSublayer(cardTimeLayer)
+    }
+
+    func updateCardHearderLayer(_ rect: NSRect) {
+        cardHeaderLayer.frame = CGRect(origin: CGPoint(x: rect.origin.x, y: 60), size: NSSize(width: rect.width, height: cardTitleLayer.preferredFrameSize().height))
+        cardTitleLayer.frame = CGRect(origin: CGPoint(x: 0, y: 0), size: NSSize(width: rect.width, height: cardTitleLayer.preferredFrameSize().height))
+        cardOptionLayer.frame = CGRect(origin: CGPoint(x: rect.width - 16, y: 10), size: NSSize(width: 16, height: 16))
+        cardTimeLayer.frame = CGRect(
+            origin: CGPoint(x: rect.origin.x, y: 95 /*isBig ? 101 : 95*/),
+            size: NSSize(width: rect.width, height: cardTimeLayer.preferredFrameSize().height)
+        )
+    }
+
     override public var intrinsicContentSize: NSSize {
-        return NSSize(width: 300, height: rootNode.idealSize.height + topOffsetActual + footerHeight)
+        let height = centerText ?
+            rootNode.idealSize.height + topOffsetActual + footerHeight + cardTopSpace :
+            rootNode.idealSize.height + topOffsetActual + footerHeight
+        return NSSize(width: 300, height: height)
     }
 
     public func setHotSpot(_ spot: NSRect) {
@@ -330,10 +445,15 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         defer { lastInput = string }
         guard preDetectInput(string) else { return }
         rootNode.insertText(string: string, replacementRange: replacementRange)
-        updatePopover()
         hideInlineFormatter()
         postDetectInput(string)
         reBlink()
+
+        // DispatchQueue to update the popover after the node is initialized
+        DispatchQueue.main.async {[weak self] in
+            guard let self = self else { return }
+            self.updatePopover()
+        }
     }
 
     public func firstRect(forCharacterRange range: Range<Int>) -> (NSRect, Range<Int>) {
@@ -380,13 +500,14 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             rootNode.doCommand(.insertNewline)
         } else if let popover = popover {
             popover.doCommand(.insertNewline)
-        } else if command {
+        } else if command && rootNode.state.nodeSelection == nil {
             onStartQuery(node)
         } else {
             if node.text.isEmpty && node.isEmpty && node.parent !== rootNode {
                 rootNode.decreaseIndentation()
                 return
             }
+
             rootNode.eraseSelection()
             let splitText = node.text.extract(range: rootNode.cursorPosition ..< node.text.count)
             node.text.removeLast(node.text.count - rootNode.cursorPosition)
@@ -585,7 +706,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                 return
             case KeyCode.escape.rawValue:
                 rootNode.cancelSelection()
-
                 dismissPopoverOrFormatter()
                 return
             default:
@@ -660,8 +780,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                         return
                     }
 
-                    if command {
-                        cancelPopover()
+                    if command && rootNode.textIsSelected {
                         toggleUnderline()
                         return
                     }
@@ -807,11 +926,10 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
         do {
             let docAttrRtf: [NSAttributedString.DocumentAttributeKey: Any] = [.documentType: NSAttributedString.DocumentType.rtf, .characterEncoding: String.Encoding.utf8]
-            let rtfData = try strNodes.data(from: NSMakeRange(0, strNodes.length), documentAttributes: docAttrRtf)
+            let rtfData = try strNodes.data(from: NSRange(location: 0, length: strNodes.length), documentAttributes: docAttrRtf)
             pasteboard.setData(rtfData, forType: .rtf)
             pasteboard.setString(strNodes.string, forType: .string)
-        }
-        catch {
+        } catch {
             Logger.shared.logError("Error creating RTF from Attributed String", category: .general)
         }
     }
@@ -1088,7 +1206,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     public func setHotSpotToNode(_ node: Widget) {
-        setHotSpot(node.frameInDocument.insetBy(dx: -15, dy: -15))
+        setHotSpot(node.frameInDocument.insetBy(dx: -30, dy: -30))
     }
 
     public func rectAt(_ position: Int) -> NSRect {
@@ -1120,6 +1238,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         cursorUpdate(with: event)
     }
 
+    // swiftlint:disable:next cyclomatic_complexity
     public func mouseDraggedUpdate(with event: NSEvent) {
         guard let startPos = mouseDownPos else { return }
         let eventPoint = convert(event.locationInWindow)
@@ -1127,8 +1246,11 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
         guard focussedWidget as? LinkedReferenceNode == nil else { return }
         if let selection = rootNode?.state.nodeSelection, let focussedNode = focussedWidget as? TextNode {
-            let textNodes = widgets.compactMap { $0 as? TextNode }.filter { (node) -> Bool in
+            var textNodes = widgets.compactMap { $0 as? TextNode }.filter { (node) -> Bool in
                 return node as? LinkedReferenceNode == nil
+            }
+            if eventPoint.y < startPos.y {
+                textNodes = textNodes.reversed()
             }
             selection.start = focussedNode
             selection.append(focussedNode)
@@ -1136,7 +1258,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                 guard textNode as? LinkedReferenceNode == nil else { continue }
                 if !selection.nodes.contains(textNode) {
                     selection.append(textNode)
-                    setHotSpotToNode(textNode)
                 }
             }
             for selectedNode in selection.nodes {
@@ -1144,8 +1265,12 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     selection.remove(selectedNode)
                 }
             }
-            guard let lastNode = textNodes.last else { return }
-            selection.end = lastNode
+            if textNodes.isEmpty {
+                selection.end = focussedNode
+            } else {
+                guard let lastNode = textNodes.last else { return }
+                selection.end = lastNode
+            }
             setHotSpotToNode(selection.end)
         } else {
             if widgets.count > 0 {
@@ -1190,6 +1315,9 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         window.acceptsMouseMovedEvents = true
         rootNode.contentsScale = window.backingScaleFactor
         titleLayer.contentsScale = window.backingScaleFactor
+
+        cardTitleLayer.contentsScale = window.backingScaleFactor
+        cardTimeLayer.contentsScale = window.backingScaleFactor
     }
 
     var onBlinkTime: Double = 0.7
@@ -1226,21 +1354,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         context.translateBy(x: x, y: y)
         title.draw(context)
         context.restoreGState()
-    }
-
-    public override func viewWillStartLiveResize() {
-        super.viewWillStartLiveResize()
-        dismissPopoverOrFormatter()
-    }
-
-    public override func viewDidChangeEffectiveAppearance() {
-        super.viewDidChangeEffectiveAppearance()
-        layer?.backgroundColor = NSColor.editorBackgroundColor.cgColor
-
-        layer?.setNeedsDisplay()
-        titleLayer.setNeedsDisplay()
-        rootNode.deepInvalidateRendering()
-        rootNode.deepInvalidateText()
     }
 
     let documentManager = DocumentManager(coreDataManager: CoreDataManager.shared)
@@ -1284,11 +1397,17 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     private var deadNodes: [TextNode] = []
 
     internal func showBidirectionalPopover(prefix: Int, suffix: Int) {
-        popoverPrefix = prefix
-        popoverSuffix = suffix
-        cursorStartPosition = rootNode.textIsSelected ? 0 : rootNode.cursorPosition
-        initPopover()
-        showOrHidePersistentFormatter(isPresent: false)
+        // DispatchQueue to init the popover after the node is initialized
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            let cursorPosition = prefix == 0 ? self.rootNode.cursorPosition : self.rootNode.cursorPosition - 1
+
+            self.popoverPrefix = prefix
+            self.popoverSuffix = suffix
+            self.cursorStartPosition = self.rootNode.textIsSelected ? 0 : cursorPosition
+            self.initPopover()
+            self.showOrHidePersistentFormatter(isPresent: false)
+        }
     }
 
     internal func initAndShowPersistentFormatter() {
@@ -1382,4 +1501,14 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     func dumpWidgetTree() {
         rootNode.dumpWidgetTree()
     }
+
+    public override func accessibilityChildren() -> [Any]? {
+        let ch = rootNode.allVisibleChildren
+        return ch
+    }
+
+    public override var accessibilityFocusedUIElement: Any {
+        return focussedWidget ?? self
+    }
+
 }

@@ -11,7 +11,7 @@ import Combine
 
 // swiftlint:disable type_body_length
 // swiftlint:disable file_length
-public class Widget: NSObject, CALayerDelegate, MouseHandler {
+public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     let layer: CALayer
     var debug = false
     var currentFrameInDocument = NSRect()
@@ -71,7 +71,7 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
             }
 
             for c in set {
-                c.layer.removeFromSuperlayer()
+                c.removeFromSuperlayer(recursive: true)
             }
         }
 
@@ -206,14 +206,26 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
         layer = CALayer()
         super.init()
         configureLayer()
+
+        setAccessibilityIdentifier(String(describing: Self.self))
+        setAccessibilityElement(true)
+        setAccessibilityLabel("Widget")
+        setAccessibilityRole(.none)
+        setAccessibilityParent(editor)
     }
 
     deinit {
-        layer.removeFromSuperlayer()
+        removeFromSuperlayer(recursive: true)
     }
 
     func removeFromSuperlayer(recursive: Bool) {
         layer.removeFromSuperlayer()
+
+        // handle sublayers:
+        for l in layers where l.value.layer.superlayer == editor.layer {
+            l.value.layer.removeFromSuperlayer()
+        }
+
         if recursive {
             for c in children {
                 c.removeFromSuperlayer(recursive: recursive)
@@ -304,6 +316,11 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
         layer.setNeedsDisplay()
         layer.backgroundColor = selected ? NSColor(white: 0.5, alpha: 0.1).cgColor : NSColor(white: 1, alpha: 0).cgColor
         layer.delegate = self
+        layer.name = mainLayerName
+    }
+
+    var mainLayerName: String {
+        String(describing: self)
     }
 
     func invalidateLayout() {
@@ -413,10 +430,7 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
         children.removeAll { w -> Bool in
             w === child
         }
-        child.layer.removeFromSuperlayer()
-        for l in child.layers where l.value.layer.superlayer == editor.layer {
-            l.value.layer.removeFromSuperlayer()
-        }
+        child.removeFromSuperlayer(recursive: true)
 
         invalidateLayout()
     }
@@ -430,7 +444,6 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
 
     func delete() {
         parent?.removeChild(self)
-//        editor.removeNode(self)
     }
 
     func insert(node: Widget, after existingNode: Widget) -> Bool {
@@ -446,22 +459,6 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
         return true
     }
 
-    func widgetAt(point: CGPoint) -> Widget? {
-        guard visible else { return nil }
-        guard 0 <= point.y, point.y < frame.height else { return nil }
-        if contentsFrame.minY <= point.y, point.y < contentsFrame.maxY {
-            return self
-        }
-
-        for c in children {
-            let p = CGPoint(x: point.x - c.frame.origin.x, y: point.y - c.frame.origin.y)
-            if let res = c.widgetAt(point: p) {
-                return res
-            }
-        }
-        return nil
-    }
-
     internal var layers: [String: Layer] = [:]
     func addLayer(_ layer: Layer, origin: CGPoint? = nil, global: Bool = false) {
         layer.frame = CGRect(origin: origin ?? layer.frame.origin, size: layer.frame.size)
@@ -470,6 +467,9 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
             editor.layer?.addSublayer(layer.layer)
         } else if layer.layer.superlayer == nil {
             self.layer.addSublayer(layer.layer)
+
+            layer.setAccessibilityParent(self)
+//            layer.setAccessibilityFrameInParentSpace(layer.frame)
         }
 
         layers[layer.name] = layer
@@ -833,6 +833,37 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
         guard let parent = parent else { editor.removeNode(node); return }
         parent.removeNode(node)
     }
+
+    // Accessibility:
+    public override func accessibilityChildren() -> [Any]? {
+        return layers.values.compactMap({ layer -> Layer? in
+            layer.layer.isHidden ? nil : layer
+        })
+    }
+
+    public override func accessibilityFrameInParentSpace() -> NSRect {
+        // We are flipped, but the accessibility framework ignores it so we need to change that by hand:
+        let parentRect = editor.frame
+        let rect = NSRect(origin: layer.position, size: layer.bounds.size)
+        let actualY = parentRect.height - rect.maxY
+        let correctedRect = NSRect(origin: CGPoint(x: rect.minX, y: actualY), size: rect.size)
+//        print("\(Self.self) actualY = \(actualY) - rect \(rect) - parentRect \(parentRect) -> \(correctedRect)")
+        return correctedRect
+    }
+
+    var allVisibleChildren: [Widget] {
+//        guard inVisibleBranch else { return [] }
+        guard visible else { return [] }
+        var widgets: [Widget] = []
+
+        for child in children where child.visible {
+            widgets.append(child)
+            widgets += child.allVisibleChildren
+        }
+
+        return widgets
+    }
 }
+
 // swiftlint:enable type_body_length
 // swiftlint:enable file_length

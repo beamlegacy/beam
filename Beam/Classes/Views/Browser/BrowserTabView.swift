@@ -88,7 +88,7 @@ struct BrowserTabView: View {
 
 struct BrowserTabView_Previews: PreviewProvider {
     static var state = BeamState(data: BeamData())
-    static var tab = BrowserTab(state: state, originalQuery: "test tab1", note: nil)
+    static var tab = BrowserTab(state: state, originalQuery: "test tab1", note: BeamNote(title: "test"))
     static var previews: some View {
         Group {
             HStack {

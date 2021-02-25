@@ -177,6 +177,10 @@ public class TextRoot: TextNode {
 
         focussedWidget = children.first ?? self
         childInset = 0
+
+        setAccessibilityLabel("TextRoot")
+        setAccessibilityRole(.unknown)
+        setAccessibilityParent(editor)
     }
 
     var linkedRefsNode: TextNode?
@@ -252,6 +256,19 @@ public class TextRoot: TextNode {
 
     override var showDisclosureButton: Bool {
         false
+    }
+
+    override var mainLayerName: String {
+        guard let note = note else {
+            return "TextRoot - \(element.id.uuidString)"
+
+        }
+        return "TextRoot - [\(note.title)] - \(element.id.uuidString)"
+    }
+
+    public override func accessibilityFrameInParentSpace() -> NSRect {
+        // We are flipped, but the accessibility framework ignores it so we need to change that by hand:
+        return NSRect(origin: CGPoint(), size: editor.frame.size)
     }
 
 }

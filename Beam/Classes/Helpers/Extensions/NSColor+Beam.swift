@@ -57,7 +57,7 @@ extension NSColor {
     }
 
     static var editorLinkColor: NSColor {
-        return loadColor(named: "Bluetiful")
+        return loadColor(named: "Niobium")
     }
 
     static var editorPopoverBackgroundColor: NSColor {
@@ -84,8 +84,20 @@ extension NSColor {
         return loadColor(named: "EditorTextSelectionColor")
     }
 
-    static var strikethroughColor: NSColor {
-        return loadColor(named: "StrikethroughColor")
+    static var underlineAndstrikethroughColor: NSColor {
+        return loadColor(named: "Niobium")
+    }
+
+    static var cardTitleColor: NSColor {
+        return loadColor(named: "Niobium")
+    }
+
+    static var cardTimeColor: NSColor {
+        return loadColor(named: "LightStoneGray")
+    }
+
+    static var cardOptionIconColor: NSColor {
+        return loadColor(named: "LightStoneGray")
     }
 
     // Reference Linked

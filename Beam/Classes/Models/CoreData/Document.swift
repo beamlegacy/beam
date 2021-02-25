@@ -51,11 +51,14 @@ class Document: NSManagedObject {
         return document
     }
 
-    class func countWithPredicate(_ context: NSManagedObjectContext, _ predicate: NSPredicate? = nil) -> Int {
+    class func countWithPredicate(_ context: NSManagedObjectContext,
+                                  _ predicate: NSPredicate? = nil) -> Int {
         return rawCountWithPredicate(context, predicate, onlyNonDeleted: true)
     }
 
-    class func rawCountWithPredicate(_ context: NSManagedObjectContext, _ predicate: NSPredicate? = nil, onlyNonDeleted: Bool = false) -> Int {
+    class func rawCountWithPredicate(_ context: NSManagedObjectContext,
+                                     _ predicate: NSPredicate? = nil,
+                                     onlyNonDeleted: Bool = false) -> Int {
         // Fetch existing if any
         let fetchRequest: NSFetchRequest<Document> = Document.fetchRequest()
 

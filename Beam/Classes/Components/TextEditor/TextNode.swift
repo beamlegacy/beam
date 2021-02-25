@@ -13,7 +13,6 @@ import Combine
 
 // swiftlint:disable:next type_body_length
 public class TextNode: Widget {
-
     var element: BeamElement { didSet {
         elementTextScope = element.$text
             .receive(on: DispatchQueue.main)
@@ -46,11 +45,9 @@ public class TextNode: Widget {
 
     var mouseIsDragged = false
     var interlineFactor = CGFloat(1.3)
-    var interNodeSpacing = CGFloat(4)
-    var indent: CGFloat {
-        selfVisible ? 25 : 0
-    }
-    var fontSize = CGFloat(17)
+    var interNodeSpacing = CGFloat(0)
+    var indent: CGFloat { selfVisible ? 18 : 0 }
+    var fontSize: CGFloat = 15
 
     override var contentsScale: CGFloat {
         didSet {
@@ -65,7 +62,10 @@ public class TextNode: Widget {
         get { element.text }
         set {
             guard element.text != newValue else { return }
-            if !newValue.isEmpty && actionImageLayer.opacity == 0 { actionImageLayer.opacity = 1 }
+            if !newValue.isEmpty &&
+                root?.state.nodeSelection == nil &&
+                actionImageLayer.opacity == 0 { actionImageLayer.opacity = 1 }
+
             if newValue.isEmpty { resetActionLayers() }
 
             element.text = newValue
@@ -184,7 +184,9 @@ public class TextNode: Widget {
     private let deboucingClickInterval = 0.23
     private let actionImageLayer = CALayer()
     private let actionTextLayer = CATextLayer()
-    private let actionLayerFrame = CGRect(x: 30, y: 0, width: 80, height: 20)
+    public static var actionLayerWidth = CGFloat(80)
+    public static var actionLayerXOffset = CGFloat(30)
+    private var actionLayerFrame: CGRect { CGRect(x: Self.actionLayerXOffset, y: 0, width: Self.actionLayerWidth, height: 20) }
 
     public static func == (lhs: TextNode, rhs: TextNode) -> Bool {
         return lhs === rhs
@@ -210,8 +212,8 @@ public class TextNode: Widget {
 
         super.init(editor: editor)
 
-        addDisclosureLayer(at: NSPoint(x: 14, y: firstLineBaseline - 14))
-        addBulletPointLayer(at: NSPoint(x: 14, y: firstLineBaseline - 14))
+        addDisclosureLayer(at: NSPoint(x: 14, y: isHeader ? firstLineBaseline - 8 : firstLineBaseline - 13))
+        addBulletPointLayer(at: NSPoint(x: 14, y: isHeader ? firstLineBaseline - 8 : firstLineBaseline - 13))
 
         element.$children
             .sink { [unowned self] elements in
@@ -236,6 +238,10 @@ public class TextNode: Widget {
                 elementKind = newValue
                 self.invalidateText()
             }
+
+        setAccessibilityLabel("TextNode")
+        setAccessibilityRole(.textArea)
+
         inInit = false
     }
 
@@ -433,7 +439,14 @@ public class TextNode: Widget {
                 }
 
                 if self as? TextRoot == nil {
-                    contentsFrame.size.height += interNodeSpacing
+                    switch elementKind {
+                        case .heading(1):
+                            contentsFrame.size.height += 8
+                        case .heading(2):
+                            contentsFrame.size.height += 4
+                        default:
+                            contentsFrame.size.height -= 5
+                    }
                 }
             }
 
@@ -634,6 +647,9 @@ public class TextNode: Widget {
                 deboucingClickTimer?.invalidate()
                 root?.doCommand(.selectAll)
                 editor.detectFormatterType()
+
+                if root?.state.nodeSelection != nil { resetActionLayers() }
+
                 return true
             }
         }
@@ -668,7 +684,11 @@ public class TextNode: Widget {
             }
         }
 
-        guard let actionLayer = actionLayer else { return false }
+        guard let actionLayer = actionLayer,
+              root?.state.nodeSelection == nil else {
+            resetActionLayers()
+            return false
+        }
 
         let position = actionLayerMousePosition(from: mouseInfo)
         let hasTextAndEditable = !text.isEmpty && isEditing && editor.hasFocus
@@ -701,9 +721,11 @@ public class TextNode: Widget {
             return false
         case .select(let o):
             root?.selectedTextRange = text.clamp(p < o ? cursorPosition..<o : o..<cursorPosition)
+            mouseIsDragged = root?.state.nodeSelection == nil
+
+            if root?.state.nodeSelection != nil { resetActionLayers() }
 
             if root?.state.nodeSelection == nil {
-                mouseIsDragged = true
                 editor.updateInlineFormatterOnDrag(isDragged: true)
             }
         }
@@ -933,6 +955,16 @@ public class TextNode: Widget {
     }
 
     private func buildAttributedString(for beamText: BeamText) -> NSAttributedString {
+
+        switch elementKind {
+        case .heading(1):
+            fontSize = isBig ? 26 : 22
+        case .heading(2):
+            fontSize = isBig ? 22 : 18
+        default:
+            fontSize = isBig ? 17 : 15
+        }
+
         let str = beamText.buildAttributedString(fontSize: fontSize, cursorPosition: cursorPosition, elementKind: elementKind)
         let paragraphStyle = NSMutableParagraphStyle()
         //        paragraphStyle.alignment = .justified
@@ -955,7 +987,8 @@ public class TextNode: Widget {
     }
 
     private func showHoveredActionLayers(_ hovered: Bool) {
-        guard !elementText.isEmpty else { return }
+        guard !elementText.isEmpty,
+              root?.state.nodeSelection == nil else { return }
 
         actionLayerIsHovered = hovered
         icon = icon?.fill(color: hovered ? .editorSearchHover : .editorSearchNormal)
@@ -1049,4 +1082,143 @@ public class TextNode: Widget {
         }
     }
 
+    override var mainLayerName: String {
+        "TextNode - \(element.id.uuidString)"
+    }
+
+    public override func accessibilityString(for range: NSRange) -> String? {
+        return text.substring(range: range.lowerBound ..< range.upperBound)
+    }
+
+    //    Returns the attributed substring for the specified range of characters.
+    public override func accessibilityAttributedString(for range: NSRange) -> NSAttributedString? {
+        return attributedString.attributedSubstring(from: range)
+    }
+
+    //    Returns the Rich Text Format (RTF) data that describes the specified range of characters.
+    public override func accessibilityRTF(for range: NSRange) -> Data? {
+        return nil
+    }
+
+    //    Returns the rectangle enclosing the specified range of characters.
+    public override func accessibilityFrame(for: NSRange) -> NSRect {
+        return contentsFrame
+    }
+
+    //    Returns the line number for the line holding the specified character index.
+    public override func accessibilityLine(for index: Int) -> Int {
+        return lineAt(index: index) ?? 0
+    }
+
+    //    Returns the range of characters for the glyph that includes the specified character.
+    public override func accessibilityRange(for index: Int) -> NSRange {
+        return attributedString.wholeRange
+    }
+
+    //    Returns a range of characters that all have the same style as the specified character.
+    public override func accessibilityStyleRange(for index: Int) -> NSRange {
+        return attributedString.wholeRange
+    }
+
+    //    Returns the range of characters in the specified line.
+    public override func accessibilityRange(forLine line: Int) -> NSRange {
+        guard let line = layout?.lines[line] else { return NSRange() }
+        let range = line.range
+        return NSRange(location: range.lowerBound, length: range.count)
+    }
+
+    //    Returns the range of characters for the glyph at the specified point.
+    public override func accessibilityRange(for point: NSPoint) -> NSRange {
+        let lineIndex = lineAt(point: point)
+        guard let line = layout?.lines[lineIndex] else { return NSRange() }
+
+        let range = line.range
+        return NSRange(location: range.lowerBound, length: range.count)
+    }
+
+    public override func accessibilityValue() -> Any? {
+        return text.text
+    }
+
+    public override func setAccessibilityValue(_ accessibilityValue: Any?) {
+        switch accessibilityValue {
+        case is String:
+            guard let value = accessibilityValue as? String else { return }
+            text = BeamText(text: value)
+
+        case is NSAttributedString:
+            guard let value = accessibilityValue as? NSAttributedString else { return }
+            text = BeamText(text: value.string)
+
+        default:
+            return
+        }
+    }
+
+    public override func accessibilityVisibleCharacterRange() -> NSRange {
+        return attributedString.wholeRange
+    }
+
+    public override func isAccessibilityEnabled() -> Bool {
+        return true
+    }
+
+    public override func accessibilityNumberOfCharacters() -> Int {
+        return text.count
+    }
+
+    public override func accessibilitySelectedText() -> String? {
+        guard let t = root?.selectedText else { return nil }
+        return t.isEmpty ? nil : t
+    }
+
+    public override func accessibilitySelectedTextRange() -> NSRange {
+        guard let range = root?.state.selectedTextRange else { return NSRange() }
+        return NSRange(location: range.lowerBound, length: range.count)
+    }
+
+    public override func accessibilitySelectedTextRanges() -> [NSValue]? {
+        guard let range = root?.state.selectedTextRange else { return [] }
+        return [NSValue(range: NSRange(location: range.lowerBound, length: range.count))]
+    }
+
+    /*
+     I used this code to debug accessibility and try to understand what is expected of us.
+     Thus far these are requested by the system:
+     _accessibilityLabel
+     accessibilityChildren
+     accessibilityFrame
+     accessibilityIdentifier
+     accessibilityMaxValue
+     accessibilityMinValue
+     accessibilityNumberOfCharacters
+     accessibilityParent
+     accessibilityRole
+     accessibilityRoleDescription
+     accessibilitySubrole
+     accessibilityTitle
+     accessibilityTopLevelUIElement
+     accessibilityValue
+     accessibilityValueDescription
+     accessibilityVisibleChildren
+     accessibilityWindow
+     isAccessibilityElement
+     setAccessibilityChildren:
+     setAccessibilityEnabled:
+     setAccessibilityFrame:
+     setAccessibilityLabel:
+     setAccessibilityParent:
+     setAccessibilityRole:
+     setAccessibilityRoleDescription:
+     setAccessibilityTitle:
+     setAccessibilityTopLevelUIElement:
+     setAccessibilityValue:
+     setAccessibilityWindow:
+
+
+    public override func isAccessibilitySelectorAllowed(_ selector: Selector) -> Bool {
+        print("isAccessibilitySelectorAllowed(\(selector))")
+        return true
+    }
+*/
 }

@@ -32,6 +32,10 @@ public extension String {
 
         return key
     }
+
+    func localizedStringWith(comment: String, _ args: CVarArg) -> String {
+        return String.localizedStringWithFormat(NSLocalizedString(self, comment: comment), args)
+    }
 }
 
 public extension LocalizedStringKey {

@@ -83,20 +83,18 @@ extension AppDelegate {
         openPanel.begin { [weak openPanel] result in
             guard result == .OK, let url = openPanel?.url else { openPanel?.close(); return }
 
-            CoreDataManager.shared.importBackup(url) {
-                CoreDataManager.shared.setup()
-                self.updateBadge()
+            CoreDataManager.shared.importBackup(url)
+            self.updateBadge()
 
-                let alert = NSAlert()
-                alert.alertStyle = .critical
+            let alert = NSAlert()
+            alert.alertStyle = .critical
 
-                let documentsCount = Document.countWithPredicate(CoreDataManager.shared.mainContext)
+            let documentsCount = Document.countWithPredicate(CoreDataManager.shared.mainContext)
 
-                // TODO: i18n
-                alert.messageText = "Backup file has been imported"
-                alert.informativeText = "\(documentsCount) notes have been imported"
-                alert.runModal()
-            }
+            // TODO: i18n
+            alert.messageText = "Backup file has been imported"
+            alert.informativeText = "\(documentsCount) notes have been imported"
+            alert.runModal()
 
             openPanel?.close()
         }

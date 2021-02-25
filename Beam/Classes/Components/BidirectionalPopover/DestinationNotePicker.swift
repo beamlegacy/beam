@@ -1,5 +1,5 @@
 //
-//  CardPicker.swift
+//  DestinationNodePicker.swift
 //  Beam
 //
 //  Created by Sebastien Metrot on 22/01/2021.
@@ -9,7 +9,7 @@ import AppKit
 import SwiftUI
 import Foundation
 
-struct DestinationCardPicker: View {
+struct DestinationNotePicker: View {
     var tab: BrowserTab
     @EnvironmentObject var state: BeamState
     var title: String {
@@ -43,8 +43,7 @@ struct DestinationCardPicker: View {
                         updatePopover(geometry.frame(in: .global))
 
                     } onCommit: {
-                        changeDestinationCard(to: state.destinationCardName)
-                        cancelSearch()
+                        state.bidirectionalPopover?.doCommand(.insertNewline)
                     } onEscape: {
                         cancelSearch()
                     } onCursorMovement: { move -> Bool in
@@ -82,11 +81,10 @@ struct DestinationCardPicker: View {
                     }
                     .frame(width: 200, height: 30, alignment: .center)
                     .onAppear(perform: {
-                        state.destinationCardName = tab.note?.title ?? state.data.todaysName
+                        state.destinationCardName = tab.note.title
                     })
                     .padding(EdgeInsets(top: 0, leading: 3, bottom: 0, trailing: 3))
-                }
-                else {
+                } else {
                     Text(title).onTapGesture {
                         state.destinationCardInputIsFirstResponder = true
                         state.changingDestinationCard = true
@@ -106,7 +104,7 @@ struct DestinationCardPicker: View {
         Logger.shared.logInfo("items: \(popover.items)", category: .ui)
         popover.query = state.destinationCardName
 
-        let position =  NSPoint(x: frame.minX, y: (frame.minY - popover.idealSize.height))
+        let position = NSPoint(x: frame.minX, y: (frame.minY - popover.idealSize.height))
         popover.frame = NSRect(origin: position, size: popover.idealSize)
     }
 
@@ -114,12 +112,7 @@ struct DestinationCardPicker: View {
         let cardName = cardName.lowercased() == "journal" ? state.data.todaysName : cardName
         state.destinationCardName = cardName
         let note = BeamNote.fetchOrCreate(state.data.documentManager, title: cardName)
-        tab.note = note
-        tab.rootElement = note
-
-        let e = BeamElement()
-        note.addChild(e)
-        tab.element = e
+        tab.setDestinationNote(note, rootElement: note)
     }
 
     func cancelSearch() {
@@ -130,4 +123,3 @@ struct DestinationCardPicker: View {
         state.destinationCardNameSelectedRange = nil
     }
 }
-

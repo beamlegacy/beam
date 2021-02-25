@@ -40,7 +40,7 @@ struct ModeView: View {
                                     WebView(webView: tab.webView)
                                         .accessibility(identifier: "webView")
 
-                                    if data.showTabStats, let score = tab.score {
+                                    if data.showTabStats, let score = tab.browsingTree.current.score {
                                         TabStats(score: score)
                                     }
                                 }
@@ -51,7 +51,7 @@ struct ModeView: View {
                         .zIndex(1)
                     case .note:
                         ZStack {
-                            NoteView(note: state.currentNote!, showTitle: false, scrollable: true)
+                            NoteView(note: state.currentNote!, showTitle: false, scrollable: true, centerText: true)
                         }
                         .background(Color(.editorBackgroundColor))
                         .frame(maxWidth: .infinity, maxHeight: .infinity)

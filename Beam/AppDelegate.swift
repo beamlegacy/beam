@@ -14,6 +14,8 @@ import Sentry
 import Sparkle
 #endif
 import Preferences
+import PromiseKit
+import PMKFoundation
 
 @objc(BeamApplication)
 public class BeamApplication: SentryCrashExceptionApplication {
@@ -37,15 +39,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     let documentManager = DocumentManager()
     #if DEBUG
-    var beamHelper: BeamTestsHelper?
+    var beamUIMenuGenerator: BeamUITestsMenuGenerator!
     #endif
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         #if DEBUG
-        if Configuration.env != "release" {
-            self.beamHelper = BeamTestsHelper()
-            prepareMenuForTestEnv()
-        }
+        self.beamUIMenuGenerator = BeamUITestsMenuGenerator()
+        prepareMenuForTestEnv()
         #endif
         for item in NSApp.mainMenu?.items ?? [] {
             item.submenu?.delegate = self

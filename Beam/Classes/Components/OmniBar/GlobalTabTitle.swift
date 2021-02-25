@@ -28,7 +28,7 @@ struct GlobalTabTitle: View {
                             .scaledToFit()
                             .frame(maxWidth: 16, maxHeight: 16)
                     }
-                    Text(tab.url?.minimizedHost ?? tab.originalQuery)
+                    Text(tab.url?.minimizedHost ?? tab.originalQuery ?? "")
                         .font(.custom("SF-Pro-Text-Heavy", size: 16))
                 }
 
@@ -56,8 +56,8 @@ struct GlobalTabTitle: View {
             .onTapGesture {
                 // should edit
                 isEditing = true
-                if let h = tab.url?.host, h.hasSuffix("google.com") {
-                    state.searchQuery = tab.originalQuery
+                if let h = tab.url?.host, h.hasSuffix("google.com"), let query = tab.originalQuery {
+                    state.searchQuery = query
                 } else {
                     state.searchQuery = tab.url?.absoluteString ?? ""
                 }

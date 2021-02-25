@@ -12,22 +12,23 @@ extension AppDelegate {
     func prepareMenuForTestEnv() {
         let prepareBeam = NSMenuItem()
         prepareBeam.submenu = NSMenu(title: "Prepare Beam")
-        let eraseDBMenu = NSMenuItem(title: "Destroy DB", action: #selector(destroyDbActn(sender:)), keyEquivalent: "")
-        let populateDBMenu = NSMenuItem(title: "Populate DB", action: #selector(populateDbActn(sender:)), keyEquivalent: "")
-        prepareBeam.submenu?.items = [
-            populateDBMenu, eraseDBMenu
-        ]
+
+        MenuAvailableCommands.allCases.forEach {
+            prepareBeam.submenu?.items.append(NSMenuItem(title: $0.rawValue,
+                                                         action: #selector(menuCalled),
+                                                         keyEquivalent: ""))
+        }
+
         NSApp.mainMenu?.addItem(prepareBeam)
     }
 
-    @objc func destroyDbActn(sender : NSMenuItem) {
-        guard let helper = self.beamHelper else { return }
-        helper.destroyDb()
-    }
-
-    @objc func populateDbActn(sender : NSMenuItem) {
-        guard let helper = self.beamHelper else { return }
-        helper.populateWithJournalNote(count: 100)
+    @IBAction @objc func menuCalled(sender: NSMenuItem) {
+        MenuAvailableCommands.allCases.forEach {
+            if $0.rawValue == sender.title {
+                beamUIMenuGenerator.executeCommand($0)
+                return
+            }
+        }
     }
     #endif
 }

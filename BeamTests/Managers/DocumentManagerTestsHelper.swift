@@ -4,25 +4,25 @@ import Fakery
 import Quick
 import Nimble
 import Combine
-import Alamofire
 
 @testable import Beam
 
 class DocumentManagerTestsHelper {
-    var sut: DocumentManager!
+    var documentManager: DocumentManager!
     var coreDataManager: CoreDataManager!
     lazy var mainContext = {
         coreDataManager.mainContext
     }()
 
     init(documentManager: DocumentManager, coreDataManager: CoreDataManager) {
-        sut = documentManager
+        self.documentManager = documentManager
         self.coreDataManager = coreDataManager
     }
 
     func saveRemotely(_ docStruct: DocumentStruct) {
         waitUntil(timeout: .seconds(10)) { done in
-            self.sut.saveDocumentStructOnAPI(docStruct) { _ in
+            self.documentManager.saveDocumentStructOnAPI(docStruct) { result in
+                expect { try result.get() }.toNot(throwError())
                 done()
             }
         }
@@ -30,7 +30,8 @@ class DocumentManagerTestsHelper {
 
     func saveRemotelyOnly(_ docStruct: DocumentStruct) {
         waitUntil(timeout: .seconds(10)) { done in
-            self.sut.documentRequest.saveDocument(docStruct.asApiType()) { _ in
+            _ = try? self.documentManager.documentRequest.saveDocument(docStruct.asApiType()) { result in
+                expect { try result.get() }.toNot(throwError())
                 done()
             }
         }
@@ -39,38 +40,19 @@ class DocumentManagerTestsHelper {
     func fetchOnAPI(_ docStruct: DocumentStruct) -> DocumentAPIType? {
         var documentAPIType: DocumentAPIType?
         waitUntil(timeout: .seconds(10)) { done in
-            self.sut.documentRequest.fetchDocument(docStruct.uuidString) { result in
+            _ = try? self.documentManager.documentRequest.fetchDocument(docStruct.uuidString) { result in
+                expect { try result.get() }.toNot(throwError())
+
                 documentAPIType = try? result.get()
                 done()
             }
         }
-
         return documentAPIType
-    }
-
-    func login() {
-        let accountManager = AccountManager()
-        let email = "fabien+test@beamapp.co"
-        let password = Configuration.testAccountPassword
-
-        guard !AuthenticationManager.shared.isAuthenticated else { return }
-
-        waitUntil(timeout: .seconds(10)) { done in
-            accountManager.signIn(email, password) { _ in
-                done()
-            }
-        }
-    }
-
-    func logout() {
-        guard AuthenticationManager.shared.isAuthenticated else { return }
-
-        AccountManager.logout()
     }
 
     func deleteDocumentStruct(_ docStruct: DocumentStruct) {
         waitUntil(timeout: .seconds(10)) { done in
-            self.sut.deleteDocument(id: docStruct.id) { result in
+            self.documentManager.deleteDocument(id: docStruct.id) { result in
                 expect { try result.get() }.toNot(throwError())
                 expect { try result.get() }.to(beTrue())
                 done()
@@ -86,7 +68,7 @@ class DocumentManagerTestsHelper {
         let jsonData = try! self.defaultEncoder().encode(dataString)
 
         let docStruct = DocumentStruct(id: UUID(),
-                                       title: titleParam ?? title(),
+                                       title: titleParam ?? String.randomTitle(),
                                        createdAt: BeamDate.now,
                                        updatedAt: BeamDate.now,
                                        data: jsonData,
@@ -95,16 +77,12 @@ class DocumentManagerTestsHelper {
         return docStruct
     }
 
-    func title() -> String {
-        return faker.zelda.game() + " " + String.random(length: 40)
-    }
-
     func saveLocally(_ docStruct: DocumentStruct) {
         // The call to `saveDocumentStructOnAPI` expect the document to be already saved locally
         waitUntil(timeout: .seconds(10)) { done in
             // To force a local save only, while using the standard code
             Configuration.networkEnabled = false
-            self.sut.saveDocument(docStruct) { _ in
+            self.documentManager.saveDocument(docStruct) { _ in
                 Configuration.networkEnabled = true
                 done()
             }

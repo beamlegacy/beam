@@ -26,6 +26,7 @@ public struct BTextEdit: NSViewRepresentable {
     var topOffset: CGFloat = 28
     var footerHeight: CGFloat = 60
 
+    var centerText = false
     var showTitle = true
 
     public func makeCoordinator() -> Coordinator {
@@ -49,6 +50,7 @@ public struct BTextEdit: NSViewRepresentable {
         nsView.topOffset = topOffset
         nsView.footerHeight = footerHeight
 
+        nsView.centerText = centerText
         nsView.showTitle = showTitle
 
         return nsView
@@ -74,6 +76,7 @@ public struct BTextEdit: NSViewRepresentable {
         nsView.topOffset = topOffset
         nsView.footerHeight = footerHeight
 
+        nsView.centerText = centerText
         nsView.showTitle = showTitle
 
         context.coordinator.onDeinit = {
@@ -113,6 +116,7 @@ public struct BTextEditScrollable: NSViewRepresentable {
     var topOffset = CGFloat(28)
     var footerHeight = CGFloat(28)
 
+    var centerText = false
     var showTitle = true
 
     public func makeCoordinator() -> Coordinator {
@@ -137,6 +141,7 @@ public struct BTextEditScrollable: NSViewRepresentable {
         edit.topOffset = topOffset
         edit.footerHeight = footerHeight
 
+        edit.centerText = centerText
         edit.showTitle = showTitle
 
         let scrollView = NSScrollView()
@@ -180,6 +185,7 @@ public struct BTextEditScrollable: NSViewRepresentable {
         edit.topOffset = topOffset
         edit.footerHeight = footerHeight
 
+        edit.centerText = centerText
         edit.showTitle = showTitle
 
         context.coordinator.onDeinit = {

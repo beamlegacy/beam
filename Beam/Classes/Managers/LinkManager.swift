@@ -119,8 +119,8 @@ class LinkManager {
     }
 
     func deleteAllLinks(completion: ((Result<Bool, Error>) -> Void)? = nil) {
-        CoreDataManager.shared.destroyPersistentStore {
-            CoreDataManager.shared.setup()
+//        CoreDataManager.shared.destroyPersistentStore()
+//        CoreDataManager.shared.setup()
 
 //            self.linkRequest.deleteAllLinks { result in
 //                switch result {
@@ -130,7 +130,6 @@ class LinkManager {
 //                    completion?(.success(true))
 //                }
 //            }
-        }
     }
 
 //    func uploadAllDocuments(_ completionHandler: ((Result<Bool, Error>) -> Void)? = nil) {

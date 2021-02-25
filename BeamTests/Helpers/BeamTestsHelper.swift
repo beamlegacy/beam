@@ -1,52 +1,29 @@
-//
-//  BeamTestsHelper.swift
-//  BeamTests
-//
-//  Created by Jean-Louis Darmon on 09/02/2021.
-//
-
 import Foundation
+import XCTest
 import Fakery
+import Quick
+import Nimble
+import Combine
+
+@testable import Beam
 
 class BeamTestsHelper {
-    var sut: DocumentManager!
-    lazy var coreDataManager = {
-        CoreDataManager()
-    }()
-    lazy var mainContext = {
-        coreDataManager.mainContext
-    }()
+    static func login() {
+        let accountManager = AccountManager()
+        let email = Configuration.testAccountEmail
+        let password = Configuration.testAccountPassword
 
-    init() {
-        self.coreDataManager.setup()
-        self.sut = DocumentManager(coreDataManager: self.coreDataManager)
-    }
+        guard !AuthenticationManager.shared.isAuthenticated else { return }
 
-    func destroyDb() {
-        let semaphore = DispatchSemaphore(value: 0)
-
-        coreDataManager.destroyPersistentStore() {
-            self.coreDataManager.setup()
-            semaphore.signal()
-        }
-        semaphore.wait()
-    }
-
-    func populateWithJournalNote(count: Int) {
-        var nbrOfJournal = count
-        while nbrOfJournal > 0 {
-            let note = BeamNote(title: self.title())
-            note.type = .journal
-            note.creationDate = faker.date.backward(days: nbrOfJournal)
-            note.updateDate = note.creationDate
-            guard let docStruct = note.documentStruct else { return }
-            self.sut.saveDocument(docStruct)
-            nbrOfJournal -= 1
+        waitUntil(timeout: .seconds(10)) { done in
+            accountManager.signIn(email, password) { _ in
+                done()
+            }
         }
     }
 
-    private let faker = Faker(locale: "en-US")
-    func title() -> String {
-        return faker.commerce.productName() + " " + String.random(length: 10)
+    static func logout() {
+        guard AuthenticationManager.shared.isAuthenticated else { return }
+        AccountManager.logout()
     }
 }

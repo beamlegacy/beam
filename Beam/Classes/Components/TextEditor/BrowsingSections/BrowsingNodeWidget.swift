@@ -15,13 +15,13 @@ class BrowsingNodeWidget: Widget {
     var browsingNode: BrowsingNode
     let textLayer = CATextLayer()
 
-    func updateChildrenNodes() {
+    func updateChildrenNodes(children: [BrowsingNode]) {
         guard recursive else {
             layers["chevron"]?.layer.isHidden = true
             return
         }
-        self.children = browsingNode.children.map({ node -> BrowsingNodeWidget in
-            BrowsingNodeWidget(editor: editor, browsingNode: node, recursive: false)
+        self.children = children.map({ node -> BrowsingNodeWidget in
+            BrowsingNodeWidget(editor: editor, browsingNode: node, recursive: recursive)
         })
 
         layers["chevron"]?.layer.isHidden = self.children.isEmpty
@@ -44,14 +44,14 @@ class BrowsingNodeWidget: Widget {
 
         browsingNode.$children
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
+            .sink { [weak self] children in
             guard let self = self else { return }
-            self.updateChildrenNodes()
+                self.updateChildrenNodes(children: children)
         }.store(in: &scope)
 
         let link = LinkStore.linkFor(browsingNode.link)
         let linkText = link?.title ?? link?.url ?? "<???>"
-        let linkScore = AppDelegate.main.data.scores.scoreCard(for: link?.url ?? "")
+        let linkScore = browsingNode.score
         let score = linkScore.score
         textLayer.string = "\(score) - \(linkText)"
 
@@ -81,16 +81,14 @@ class BrowsingNodeWidget: Widget {
 }
 
 class BrowsingLinkWidget: Widget {
-    var link: UInt64
-    var score: Float
+    var link: ScoredLink
 
-    init(editor: BeamTextEdit, link: UInt64, score: Float) {
+    init(editor: BeamTextEdit, link: ScoredLink) {
         self.link = link
-        self.score = score
         super.init(editor: editor)
 
-        let url = LinkStore.linkFor(link)?.url ?? "<???>"
-        addLayer(Layer.text(named: "link", "\(score) - \(url)", color: NSColor.red))
+        let url = LinkStore.linkFor(link.link)?.url ?? "<???>"
+        addLayer(Layer.text(named: "link", "\(link.score.score) - \(url)", color: NSColor.red))
         editor.layer?.addSublayer(layer)
     }
 
@@ -99,5 +97,9 @@ class BrowsingLinkWidget: Widget {
 
         computedIdealSize = contentsFrame.size
         computedIdealSize.width = availableWidth
+    }
+
+    override var mainLayerName: String {
+        "BrowsingLinkWidget"
     }
 }

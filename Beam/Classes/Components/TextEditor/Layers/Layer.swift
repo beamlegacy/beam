@@ -9,8 +9,13 @@ import Foundation
 import Combine
 import AppKit
 
-class Layer: NSObject, CALayerDelegate, MouseHandler {
-    var name: String
+class Layer: NSAccessibilityElement, CALayerDelegate, MouseHandler {
+    var name: String {
+        didSet {
+            layer.name = name
+            setAccessibilityLabel(name)
+        }
+    }
     var layer: CALayer
     var hovered: Bool = false
     var cursor: NSCursor?
@@ -54,6 +59,8 @@ class Layer: NSObject, CALayerDelegate, MouseHandler {
         if layer.delegate == nil {
             layer.delegate = self
         }
+
+        setAccessibilityRole(.none)
     }
 
     deinit {
@@ -71,6 +78,7 @@ class Layer: NSObject, CALayerDelegate, MouseHandler {
     var frame: NSRect {
         set {
             layer.frame = newValue
+            setAccessibilityFrameInParentSpace(newValue)
         }
         get {
             layer.frame

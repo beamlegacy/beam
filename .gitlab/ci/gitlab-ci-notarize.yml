@@ -1,6 +1,6 @@
 notarize:
   dependencies:
-    - build:macos
+    - build:dmg
   stage: notarize
   artifacts:
     expire_in: 7d
@@ -21,7 +21,6 @@ notarize:
     - xcversion install ${XCODE_VERSION}
     - bundle install
   script:
-    - ./scripts/build_dmg.sh
     - bundle exec fastlane notarize_build
   tags:
     - macos

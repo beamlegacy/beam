@@ -31,9 +31,24 @@ class ChevronButton: ButtonLayer {
         self.layer.addSublayer(chevron)
 
         updateChevron()
+
+        setAccessibilityLabel("disclosure triangle")
+        setAccessibilityRole(.disclosureTriangle)
+        setAccessibilityDisclosed(open)
     }
 
     func updateChevron() {
         chevron.setAffineTransform(CGAffineTransform(rotationAngle: open ? CGFloat.pi / 2 : 0))
+    }
+
+    override func isAccessibilityDisclosed() -> Bool {
+        guard !layer.isHidden else { return false }
+        return open
+    }
+
+    override func setAccessibilityDisclosed(_ accessibilityDisclosed: Bool) {
+        guard !layer.isHidden else { return }
+        open = accessibilityDisclosed
+        self.changed(self.open)
     }
 }

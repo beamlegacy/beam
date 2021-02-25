@@ -12,7 +12,6 @@ import WebKit
 import SwiftSoup
 
 let NoteDisplayThreshold = Float(0.0)
-//swiftlint:disable file_length
 //swiftlint:disable:next type_body_length
 @objc class BeamState: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var data: BeamData
@@ -122,6 +121,8 @@ let NoteDisplayThreshold = Float(0.0)
             currentTab?.$canGoForward.sink { v in
                 self.canGoForward = v
             }.store(in: &tabScope)
+
+            resetDestinationCard()
 
             isEditingOmniBarTitle = false
         }
@@ -518,5 +519,12 @@ let NoteDisplayThreshold = Float(0.0)
     func cancelAutocomplete() {
         resetAutocompleteSelection()
         completedQueries = []
+    }
+
+    func resetDestinationCard() {
+        destinationCardName = currentTab?.note.title ?? data.todaysName
+        destinationCardNameSelectedRange = nil
+        changingDestinationCard = false
+        destinationCardInputIsFirstResponder = false
     }
 }

@@ -4,6 +4,7 @@
 //
 //  Created by Sebastien Metrot on 27/11/2020.
 //
+// swiftlint:disable file_length
 
 import Foundation
 import Combine
@@ -95,6 +96,7 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
     @Published var updateDate = Date()
     @Published var kind: ElementKind = .bullet { didSet { change(.meta) } }
     @Published var childrenFormat: ElementChildrenFormat = .bullet { didSet { change(.meta) } }
+    @Published var query: String?
 
     var note: BeamNote? {
         return parent?.note
@@ -112,6 +114,7 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
         case creationDate
         case kind
         case childrenFormat
+        case query
     }
 
     init() {
@@ -161,6 +164,10 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
         if container.contains(.childrenFormat) {
             childrenFormat = try container.decode(ElementChildrenFormat.self, forKey: .childrenFormat)
         }
+
+        if container.contains(. query) {
+            query = try container.decode(String.self, forKey: .query)
+        }
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -186,6 +193,10 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
 
         if childrenFormat != .bullet {
             try container.encode(childrenFormat, forKey: .childrenFormat)
+        }
+
+        if let q = query {
+            try container.encode(q, forKey: .query)
         }
     }
 
@@ -284,7 +295,7 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
         }
     }
 
-    @Published var changed: (BeamElement, ChangeType)? = nil
+    @Published var changed: (BeamElement, ChangeType)?
     var changePropagationEnabled = true
     enum ChangeType {
         case text, meta, tree

@@ -17,13 +17,22 @@ import Nimble
 class JournalUITests: QuickSpec {
     let app = XCUIApplication()
     var journalScrollView: XCUIElement!
+    var helper: BeamUITestsHelper!
 
     // swiftlint:disable:next function_body_length
     override func spec() {
+        beforeSuite {
+            self.helper = BeamUITestsHelper(self.app)
+        }
         beforeEach {
             self.continueAfterFailure = false
             self.app.launch()
+            self.helper.tapCommand(.logout)
             self.journalScrollView = self.app.scrollViews["journalView"]
+        }
+
+        afterEach {
+            self.helper.makeAppScreenShots()
         }
 
         describe("Journal scrolling") {
@@ -34,31 +43,26 @@ class JournalUITests: QuickSpec {
             }
             context("without any data") {
                 beforeEach {
-                    var destroyDb: XCUIElement!
-                    destroyDb = XCUIApplication().menuItems["Destroy DB"]
-                    destroyDb.tap()
-                    self.app.terminate()
-                    self.app.launch()
+                    self.helper.tapCommand(.destroyDB)
+                    // Can be removed when destroying the DB changes the app window
+                    self.helper.restart()
                 }
 
                 it("has a scrollView") {
-                    expect(self.journalScrollView.exists).to(beTrue())
+                    expect(self.journalScrollView.exists) == true
                 }
             }
             context("with a few days of data") {
                 beforeEach {
-                    var prepareApp: XCUIElement!
-                    prepareApp = XCUIApplication().menuItems["Populate DB"]
-                    prepareApp.tap()
-                    self.app.terminate()
-                    self.app.launch()
+                    self.helper.tapCommand(.populateDBWithJournal)
+                    // Can be removed when destroying the DB changes the app window
+                    self.helper.restart()
                 }
+
                 it("has a scrollView") {
-                    expect(self.journalScrollView.exists).to(beTrue())
+                    expect(self.journalScrollView.exists) == true
                 }
             }
         }
     }
 }
-
-
