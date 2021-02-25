@@ -117,6 +117,11 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         self.config.font = font
         note = root
         super.init(frame: NSRect())
+
+        setAccessibilityIdentifier("TextEdit")
+        setAccessibilityLabel("Note Editor")
+        setAccessibilityTitle((root as? BeamNote)?.title)
+
         let l = CALayer()
         self.layer = l
         l.backgroundColor = NSColor.editorBackgroundColor.cgColor
@@ -1496,4 +1501,14 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     func dumpWidgetTree() {
         rootNode.dumpWidgetTree()
     }
+
+    public override func accessibilityChildren() -> [Any]? {
+        let ch = rootNode.allVisibleChildren
+        return ch
+    }
+
+    public override var accessibilityFocusedUIElement: Any {
+        return focussedWidget ?? self
+    }
+
 }

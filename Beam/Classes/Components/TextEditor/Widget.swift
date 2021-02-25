@@ -11,7 +11,7 @@ import Combine
 
 // swiftlint:disable type_body_length
 // swiftlint:disable file_length
-public class Widget: NSObject, CALayerDelegate, MouseHandler {
+public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     let layer: CALayer
     var debug = false
     var currentFrameInDocument = NSRect()
@@ -206,6 +206,12 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
         layer = CALayer()
         super.init()
         configureLayer()
+
+        setAccessibilityIdentifier(String(describing: Self.self))
+        setAccessibilityElement(true)
+        setAccessibilityLabel("Widget")
+        setAccessibilityRole(.none)
+        setAccessibilityParent(editor)
     }
 
     deinit {
@@ -438,7 +444,6 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
 
     func delete() {
         parent?.removeChild(self)
-//        editor.removeNode(self)
     }
 
     func insert(node: Widget, after existingNode: Widget) -> Bool {
@@ -462,6 +467,9 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
             editor.layer?.addSublayer(layer.layer)
         } else if layer.layer.superlayer == nil {
             self.layer.addSublayer(layer.layer)
+
+            layer.setAccessibilityParent(self)
+//            layer.setAccessibilityFrameInParentSpace(layer.frame)
         }
 
         layers[layer.name] = layer
@@ -825,6 +833,37 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
         guard let parent = parent else { editor.removeNode(node); return }
         parent.removeNode(node)
     }
+
+    // Accessibility:
+    public override func accessibilityChildren() -> [Any]? {
+        return layers.values.compactMap({ layer -> Layer? in
+            layer.layer.isHidden ? nil : layer
+        })
+    }
+
+    public override func accessibilityFrameInParentSpace() -> NSRect {
+        // We are flipped, but the accessibility framework ignores it so we need to change that by hand:
+        let parentRect = editor.frame
+        let rect = NSRect(origin: layer.position, size: layer.bounds.size)
+        let actualY = parentRect.height - rect.maxY
+        let correctedRect = NSRect(origin: CGPoint(x: rect.minX, y: actualY), size: rect.size)
+//        print("\(Self.self) actualY = \(actualY) - rect \(rect) - parentRect \(parentRect) -> \(correctedRect)")
+        return correctedRect
+    }
+
+    var allVisibleChildren: [Widget] {
+//        guard inVisibleBranch else { return [] }
+        guard visible else { return [] }
+        var widgets: [Widget] = []
+
+        for child in children where child.visible {
+            widgets.append(child)
+            widgets += child.allVisibleChildren
+        }
+
+        return widgets
+    }
 }
+
 // swiftlint:enable type_body_length
 // swiftlint:enable file_length

@@ -39,5 +39,14 @@ class ButtonLayer: Layer {
         hover = { isHover in
             hovered(isHover)
         }
+
+        setAccessibilityRole(.button)
     }
+
+    override func accessibilityPerformPress() -> Bool {
+        guard !layer.isHidden else { return false }
+        activated()
+        return true
+    }
+
 }
