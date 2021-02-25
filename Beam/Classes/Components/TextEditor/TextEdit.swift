@@ -106,7 +106,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     let gutterWidth: CGFloat = TextNode.actionLayerXOffset + TextNode.actionLayerWidth
     var textWidth: CGFloat { isBig ? 704 : 544 }
 
-    var isResizing = false
+    private (set) var isResizing = false
 
     public init(root: BeamElement, font: Font = Font.main) {
         let start = CFAbsoluteTimeGetCurrent()
