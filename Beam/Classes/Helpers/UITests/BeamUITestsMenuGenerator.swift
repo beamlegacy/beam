@@ -7,6 +7,7 @@ class BeamUITestsMenuGenerator {
         case .populateDBWithJournal: populateWithJournalNote(count: 10)
         case .destroyDB: destroyDatabase()
         case .logout: logout()
+        case .deleteLogs: deleteLogs()
         }
     }
 
@@ -25,6 +26,10 @@ class BeamUITestsMenuGenerator {
 
     private func logout() {
         AccountManager.logout()
+    }
+
+    private func deleteLogs() {
+        Logger.shared.removeFiles()
     }
 
     private func destroyDatabase() {

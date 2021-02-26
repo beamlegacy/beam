@@ -1,4 +1,5 @@
 build:macos:
+  timeout: 10 minutes
   dependencies: []
   stage: build
   artifacts:
