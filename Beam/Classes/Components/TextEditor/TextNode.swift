@@ -1001,11 +1001,11 @@ public class TextNode: Widget {
 
         switch elementKind {
         case .heading(1):
-            fontSize = isBig ? 26 : 22
+            fontSize = 22 // TODO: Change later (isBig ? 26 : 22)
         case .heading(2):
-            fontSize = isBig ? 22 : 18
+            fontSize = 18 // TODO: Change later (isBig ? 22 : 18)
         default:
-            fontSize = isBig ? 17 : 15
+            fontSize = 15 // TODO: Change later (isBig ? 17 : 15)
         }
 
         let str = beamText.buildAttributedString(fontSize: fontSize, cursorPosition: cursorPosition, elementKind: elementKind)
