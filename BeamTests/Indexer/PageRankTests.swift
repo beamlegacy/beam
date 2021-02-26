@@ -143,7 +143,7 @@ class PageRankTests: XCTestCase {
 //            let parsingStart = CACurrentMediaTime()
             let doc = try SwiftSoup.parse(contents, url.absoluteString)
             let title = try doc.title()
-            let text = html2Text(url: url, doc: doc)
+        let text: String = html2Text(url: url, doc: doc)
 //            let indexingStart = CACurrentMediaTime()
             index.append(document: IndexDocument(source: url.absoluteString, title: title, contents: text, outboundLinks: doc.extractLinks()))
 //            let now = CACurrentMediaTime()

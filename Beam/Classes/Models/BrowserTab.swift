@@ -322,13 +322,13 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                   !selectedHtml.isEmpty
             else { return }
 
-            let text = html2Text(url: webView.url!, html: selectedHtml)
+            let text: BeamText = html2Text(url: webView.url!, html: selectedHtml)
             browsingTree.current.score.textSelections += 1
             self.updateScore()
 
             // now add a bullet point with the quoted text:
             if let urlString = webView.url?.absoluteString, let title = webView.title {
-                let quote = BeamText(text: text)
+                let quote = text
 
                 DispatchQueue.main.async {
                     let current = self.addCurrentPageToNote()
