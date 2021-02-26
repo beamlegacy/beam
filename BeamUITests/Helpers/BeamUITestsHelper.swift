@@ -40,6 +40,18 @@ class BeamUITestsHelper {
         }
     }
 
+    func showLogs() {
+        let menu = XCUIApplication().menuItems["Show Logs"]
+        menu.tap()
+    }
+
+    // Doesn't work 
+    func logsValue() -> String? {
+        let allLogsWindow = XCUIApplication().windows["All Logs"]
+        allLogsWindow.click()
+        return allLogsWindow.scrollViews.containing(.button, identifier: "Bottom").element.value as? String
+    }
+
     func makeDeviceScreenShot() {
         let screenshot = XCUIScreen.main.screenshot()
         saveAttachment(screenshot)

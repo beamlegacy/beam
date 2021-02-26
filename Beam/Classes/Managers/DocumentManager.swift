@@ -88,7 +88,7 @@ class DocumentManager {
         self.mainContext = self.coreDataManager.mainContext
         self.backgroundContext = self.coreDataManager.backgroundContext
 
-        observeCoredataNotification()
+        //observeCoredataNotification()
     }
 
     // MARK: -

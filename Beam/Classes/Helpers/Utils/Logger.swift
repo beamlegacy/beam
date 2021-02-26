@@ -29,7 +29,7 @@ final class Logger {
 
     private var subsystem = Configuration.bundleIdentifier
     private let hideCategories: [LogCategory] = [.web, .coredataDebug, .documentDebug]
-    private let hideLumberCategories: [LogCategory] = []
+    private let hideLumberCategories: [LogCategory] = [.documentDebug]
 
     private var ddFileLogger: DDFileLogger = DDFileLogger()
     private func configure() {
