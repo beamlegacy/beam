@@ -50,8 +50,8 @@ class ProxyElement: BeamElement {
     init(for element: BeamElement) {
         self.proxy = element
         super.init(proxy.text)
+
         proxy.$children
-            .receive(on: DispatchQueue.main)
             .sink { [unowned self] newChildren in
             updating = true; defer { updating = false }
             self.updateProxyChildren(newChildren)
@@ -111,11 +111,6 @@ class LinkedReferenceNode: TextNode {
     override init(editor: BeamTextEdit, element: BeamElement) {
         let proxyElement = ProxyElement(for: element)
         super.init(editor: editor, element: proxyElement)
-        self.children = proxyElement.children.compactMap({ e -> LinkedReferenceNode? in
-            let ref = nodeFor(e)
-            ref.parent = self
-            return ref as? LinkedReferenceNode
-        })
 
         editor.layer?.addSublayer(layer)
         actionLayer?.removeFromSuperlayer()
