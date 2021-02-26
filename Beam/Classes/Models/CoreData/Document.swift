@@ -174,8 +174,8 @@ class Document: NSManagedObject {
         return fetchAllWithLimit(context: context, predicate, nil, limit)
     }
 
-    class func fetchAllWithLimitResult(_ context: NSManagedObjectContext, _ limit: Int) -> [Document] {
-        return fetchAllWithLimit(context: context, nil, nil, limit)
+    class func fetchAllWithLimitResult(_ context: NSManagedObjectContext, _ limit: Int, _ sortDescriptors: [NSSortDescriptor]? = nil) -> [Document] {
+        return fetchAllWithLimit(context: context, nil, sortDescriptors, limit)
     }
 
     class func onlyNonDeletedPredicate(_ predicate: NSPredicate? = nil) -> NSPredicate {

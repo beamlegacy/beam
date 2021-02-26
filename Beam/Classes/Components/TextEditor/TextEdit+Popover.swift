@@ -62,7 +62,9 @@ extension BeamTextEdit {
         }
 
         node.text.addAttributes([.internalLink(linkText)], to: startPosition - popoverPrefix..<cursorPosition + popoverSuffix)
-        let items = linkText.isEmpty ? documentManager.loadAllDocumentsWithLimit(BeamTextEdit.queryLimit) : documentManager.documentsWithLimitTitleMatch(title: linkText, limit: BeamTextEdit.queryLimit)
+        let items = linkText.isEmpty ?
+            documentManager.loadAllDocumentsWithLimit(BeamTextEdit.queryLimit, [NSSortDescriptor(key: "created_at", ascending: false)]) :
+            documentManager.documentsWithLimitTitleMatch(title: linkText, limit: BeamTextEdit.queryLimit)
 
         popover.items = items.map({ $0.title })
         popover.query = linkText
@@ -144,11 +146,19 @@ extension BeamTextEdit {
         let startPosition = popoverPrefix == 0 ? cursorStartPosition : cursorStartPosition + 1
         let replacementStart = startPosition - popoverPrefix
         let replacementEnd = rootNode.cursorPosition + popoverSuffix
-        let linkEnd = replacementStart + rootNode.cursorPosition - popoverPrefix
-        let splitTitle = node.text.text[linkEnd...]
+        // When the cursor is moved to left, the link should be split in 2 (Bi-di + Plain text)
+        let linkEnd = rootNode.lastCommand == .moveLeft ?
+            replacementStart + rootNode.cursorPosition - popoverPrefix :
+            replacementStart + title.count
 
         node.text.replaceSubrange(replacementStart..<replacementEnd, with: title)
-        cancelInternalLink(with: splitTitle, range: linkEnd..<splitTitle.count + linkEnd)
+
+        // Transform no Bi-dir text to plain text
+        if rootNode.lastCommand == .moveLeft {
+            let splitTitle = node.text.text[linkEnd...]
+            cancelInternalLink(with: splitTitle, range: linkEnd..<splitTitle.count + linkEnd)
+        }
+
         node.text.makeInternalLink(replacementStart..<linkEnd)
 
         rootNode.cursorPosition = linkEnd
