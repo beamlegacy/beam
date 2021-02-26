@@ -28,7 +28,7 @@ struct DestinationNotePicker: View {
             ZStack {
                 RoundedRectangle(cornerRadius: 7).strokeBorder(state.destinationCardInputIsFirstResponder ? Color.blue : Color.gray )
                 if state.changingDestinationCard {
-                    BMTextField(
+                    BeamTextField(
                         text: $state.destinationCardName,
                         isEditing: $state.changingDestinationCard,
                         isFirstResponder: $state.destinationCardInputIsFirstResponder,

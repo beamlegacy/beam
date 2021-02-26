@@ -118,8 +118,8 @@
 		418172602581107C00317ED8 /* LibrairiesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171EA2581107C00317ED8 /* LibrairiesManager.swift */; };
 		4181727B258110D100317ED8 /* AppDelegate+CoreData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41817277258110D100317ED8 /* AppDelegate+CoreData.swift */; };
 		4181727E258110D100317ED8 /* AppDelegate+URL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181727A258110D100317ED8 /* AppDelegate+URL.swift */; };
-		418172AA25811A3A00317ED8 /* BMTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418172A825811A3A00317ED8 /* BMTextField.swift */; };
-		418172AB25811A3A00317ED8 /* BMTextFieldView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418172A925811A3A00317ED8 /* BMTextFieldView.swift */; };
+		418172AA25811A3A00317ED8 /* BeamTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418172A825811A3A00317ED8 /* BeamTextField.swift */; };
+		418172AB25811A3A00317ED8 /* BeamTextFieldView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418172A925811A3A00317ED8 /* BeamTextFieldView.swift */; };
 		418172B525811AAA00317ED8 /* Tick.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418172B225811AAA00317ED8 /* Tick.swift */; };
 		418172B625811AAA00317ED8 /* FrameAnimation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418172B325811AAA00317ED8 /* FrameAnimation.swift */; };
 		418172CF25811AF800317ED8 /* Animation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418172CE25811AF800317ED8 /* Animation.swift */; };
@@ -136,6 +136,8 @@
 		418173C32581276F00317ED8 /* String+NSMutableAttributedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418173C22581276F00317ED8 /* String+NSMutableAttributedString.swift */; };
 		4181744325812C5F00317ED8 /* NSColor+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181744225812C5F00317ED8 /* NSColor+Beam.swift */; };
 		41855A3A25D1334F00DA49DC /* BeamCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41855A3925D1334F00DA49DC /* BeamCollectionView.swift */; };
+		418EA94225D696EA005894AA /* HyperlinkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418EA94125D696EA005894AA /* HyperlinkView.swift */; };
+		418EA95A25D696F8005894AA /* HyperlinkView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 418EA95925D696F8005894AA /* HyperlinkView.xib */; };
 		41A969FF2581394300E6594B /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41A969FE2581394300E6594B /* Configuration.swift */; };
 		41B4277B25E52DCA00A8243F /* Localizable.stringsdict in Resources */ = {isa = PBXBuildFile; fileRef = 41B4277A25E52DCA00A8243F /* Localizable.stringsdict */; };
 		41D169A625DC07260018E5F2 /* Inter-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 41D169A125DC07250018E5F2 /* Inter-Bold.otf */; };
@@ -598,8 +600,8 @@
 		418171EA2581107C00317ED8 /* LibrairiesManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LibrairiesManager.swift; sourceTree = "<group>"; };
 		41817277258110D100317ED8 /* AppDelegate+CoreData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "AppDelegate+CoreData.swift"; sourceTree = "<group>"; };
 		4181727A258110D100317ED8 /* AppDelegate+URL.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "AppDelegate+URL.swift"; sourceTree = "<group>"; };
-		418172A825811A3A00317ED8 /* BMTextField.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BMTextField.swift; sourceTree = "<group>"; };
-		418172A925811A3A00317ED8 /* BMTextFieldView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BMTextFieldView.swift; sourceTree = "<group>"; };
+		418172A825811A3A00317ED8 /* BeamTextField.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BeamTextField.swift; sourceTree = "<group>"; };
+		418172A925811A3A00317ED8 /* BeamTextFieldView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BeamTextFieldView.swift; sourceTree = "<group>"; };
 		418172B225811AAA00317ED8 /* Tick.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Tick.swift; sourceTree = "<group>"; };
 		418172B325811AAA00317ED8 /* FrameAnimation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FrameAnimation.swift; sourceTree = "<group>"; };
 		418172CE25811AF800317ED8 /* Animation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Animation.swift; sourceTree = "<group>"; };
@@ -616,6 +618,8 @@
 		418173C22581276F00317ED8 /* String+NSMutableAttributedString.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+NSMutableAttributedString.swift"; sourceTree = "<group>"; };
 		4181744225812C5F00317ED8 /* NSColor+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSColor+Beam.swift"; sourceTree = "<group>"; };
 		41855A3925D1334F00DA49DC /* BeamCollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamCollectionView.swift; sourceTree = "<group>"; };
+		418EA94125D696EA005894AA /* HyperlinkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HyperlinkView.swift; sourceTree = "<group>"; };
+		418EA95925D696F8005894AA /* HyperlinkView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = HyperlinkView.xib; sourceTree = "<group>"; };
 		41A969FE2581394300E6594B /* Configuration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
 		41B4277A25E52DCA00A8243F /* Localizable.stringsdict */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; path = Localizable.stringsdict; sourceTree = "<group>"; };
 		41D169A125DC07250018E5F2 /* Inter-Bold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter-Bold.otf"; sourceTree = "<group>"; };
@@ -809,6 +813,8 @@
 			children = (
 				414B98EF25A239F8002E81A3 /* FormatterView.swift */,
 				414B98F525A23A04002E81A3 /* FormatterView.xib */,
+				418EA94125D696EA005894AA /* HyperlinkView.swift */,
+				418EA95925D696F8005894AA /* HyperlinkView.xib */,
 			);
 			path = FormatterView;
 			sourceTree = "<group>";
@@ -1217,7 +1223,7 @@
 				418171AA2581107C00317ED8 /* AutoComplete */,
 				4159E9D2259A1A56005FD355 /* BidirectionalPopover */,
 				414B98EE25A239C6002E81A3 /* FormatterView */,
-				418172A725811A3A00317ED8 /* BMTextField */,
+				418172A725811A3A00317ED8 /* BeamTextField */,
 				521EEDC725937E7B00BA2485 /* DocumentsList */,
 				418171D72581107C00317ED8 /* OmniBar */,
 				418171C32581107C00317ED8 /* NotesList */,
@@ -1227,13 +1233,13 @@
 			path = Components;
 			sourceTree = "<group>";
 		};
-		418172A725811A3A00317ED8 /* BMTextField */ = {
+		418172A725811A3A00317ED8 /* BeamTextField */ = {
 			isa = PBXGroup;
 			children = (
-				418172A825811A3A00317ED8 /* BMTextField.swift */,
-				418172A925811A3A00317ED8 /* BMTextFieldView.swift */,
+				418172A825811A3A00317ED8 /* BeamTextField.swift */,
+				418172A925811A3A00317ED8 /* BeamTextFieldView.swift */,
 			);
-			path = BMTextField;
+			path = BeamTextField;
 			sourceTree = "<group>";
 		};
 		418172B025811AAA00317ED8 /* Animator */ = {
@@ -2044,6 +2050,7 @@
 				56A5BD3725CCAFA400ED7C50 /* english.stopwords in Resources */,
 				414B98F625A23A04002E81A3 /* FormatterView.xib in Resources */,
 				4159E9E2259A2575005FD355 /* BidirectionalPopover.xib in Resources */,
+				418EA95A25D696F8005894AA /* HyperlinkView.xib in Resources */,
 				418171F42581107C00317ED8 /* sign_up.graphql in Resources */,
 				418171F62581107C00317ED8 /* sign_in.graphql in Resources */,
 				41D169A925DC07260018E5F2 /* Inter-Italic.otf in Resources */,
@@ -2252,7 +2259,7 @@
 				418172B625811AAA00317ED8 /* FrameAnimation.swift in Sources */,
 				418172042581107C00317ED8 /* TemporaryFile.swift in Sources */,
 				523FF66125C31D8800B4BD6E /* Data+String.swift in Sources */,
-				418172AA25811A3A00317ED8 /* BMTextField.swift in Sources */,
+				418172AA25811A3A00317ED8 /* BeamTextField.swift in Sources */,
 				4181720D2581107C00317ED8 /* BID.swift in Sources */,
 				9676143825CAAD5300BDA862 /* RWLock.swift in Sources */,
 				418172152581107C00317ED8 /* NSContainerView.swift in Sources */,
@@ -2300,7 +2307,7 @@
 				4181723D2581107C00317ED8 /* TextEdit.swift in Sources */,
 				9691E40225AE5D2C00A13080 /* NodeSelection.swift in Sources */,
 				4181720F2581107C00317ED8 /* PageRank.swift in Sources */,
-				418172AB25811A3A00317ED8 /* BMTextFieldView.swift in Sources */,
+				418172AB25811A3A00317ED8 /* BeamTextFieldView.swift in Sources */,
 				965A78292514F147009980D4 /* AppDelegate.swift in Sources */,
 				418171F82581107C00317ED8 /* Score.swift in Sources */,
 				418172092581107C00317ED8 /* CoreDataManager+backupExtension.swift in Sources */,
@@ -2320,6 +2327,7 @@
 				418171F22581107C00317ED8 /* APIRequest.swift in Sources */,
 				529E1AD425D45CFA00DD25B8 /* APIRequestError.swift in Sources */,
 				96F673D225B7207100E8175B /* StoredLink.swift in Sources */,
+				418EA94225D696EA005894AA /* HyperlinkView.swift in Sources */,
 				418172B525811AAA00317ED8 /* Tick.swift in Sources */,
 				526016CE25ADC10800634695 /* String+MD5.swift in Sources */,
 				418173BE2581251600317ED8 /* URL+Beam.swift in Sources */,

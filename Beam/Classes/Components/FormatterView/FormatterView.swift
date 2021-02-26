@@ -11,8 +11,18 @@ class FormatterView: NSView {
 
     // MARK: - Properties
     @IBOutlet var containerView: NSView!
+    @IBOutlet weak var formatterContainerView: NSView!
 
+    var hyperlinkView: HyperlinkView?
     var didSelectFormatterType: ((_ type: FormatterType, _ isActive: Bool) -> Void)?
+    var didPressValidLink: ((_ link: String, _ oldLink: String) -> Void)?
+    var didPressDeleteLink: ((_ link: String) -> Void)?
+
+    var urlValue: String = "" {
+        didSet {
+            updateHyperlinkView()
+        }
+    }
 
     var corderRadius: CGFloat = 5 {
         didSet {
@@ -67,6 +77,10 @@ class FormatterView: NSView {
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
+    }
+
+    deinit {
+        hideHyperLinkView()
     }
 
     // MARK: - UI
@@ -169,6 +183,32 @@ class FormatterView: NSView {
         }
     }
 
+    func showHyperLinkView() {
+        hyperlinkView = HyperlinkView(frame: containerView.frame)
+
+        guard let hyperlinkView = hyperlinkView else { return }
+
+        hyperlinkView.didPressValidButton = { [unowned self] link, old in
+            guard let didPressValideLink = didPressValidLink else { return }
+            didPressValideLink(link, old)
+        }
+
+        hyperlinkView.didPressDeleteButton = {[unowned self] link in
+            guard let didPressDeleteLink = didPressDeleteLink else { return }
+            didPressDeleteLink(link)
+        }
+
+        containerView.addSubview(hyperlinkView)
+        formatterContainerView.isHidden = true
+    }
+
+    func updateHyperlinkView() {
+        guard let hyperlinkView = hyperlinkView else { return }
+        hyperlinkView.oldUrl = urlValue
+        hyperlinkView.hyperlinkTextField.stringValue = urlValue
+        hyperlinkView.setupActionButtons()
+    }
+
     override func mouseEntered(with event: NSEvent) {
         guard let userInfo = event.trackingArea?.userInfo else { return }
         updateFormatterView(with: userInfo, isHover: true)
@@ -184,6 +224,10 @@ class FormatterView: NSView {
         guard let didSelectFormatterType = didSelectFormatterType else { return }
         let type = items[sender.tag]
         let isActive = selectedTypes.contains(type)
+
+        if type == FormatterType.link && !isActive {
+            showHyperLinkView()
+        }
 
         if !selectedTypes.contains(type) { selectedTypes.insert(type) }
 
@@ -220,7 +264,7 @@ class FormatterView: NSView {
             button.addTrackingArea(trackingButtonArea)
 
             buttons[item] = button
-            containerView.addSubview(button)
+            formatterContainerView.addSubview(button)
         }
     }
 
@@ -263,6 +307,12 @@ class FormatterView: NSView {
         guard let button = buttons[item] else { return }
         button.layer?.backgroundColor = NSColor.clear.cgColor
         selectedTypes.remove(item)
+    }
+
+    private func hideHyperLinkView() {
+        hyperlinkView?.removeFromSuperview()
+        hyperlinkView = nil
+        selectedTypes.remove(FormatterType.link)
     }
 
     private func loadXib() {

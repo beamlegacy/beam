@@ -475,13 +475,14 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     public override func resignFirstResponder() -> Bool {
         blinkPhase = true
         hasFocus = false
+        onEndEditing()
+
+        guard inlineFormatter?.hyperlinkView == nil else { return super.resignFirstResponder() }
+
         rootNode.cancelSelection()
         (focussedWidget as? TextNode)?.invalidateText() // force removing the syntax highlighting
         focussedWidget?.invalidate()
-        if activateOnLostFocus {
-            activated()
-        }
-        onEndEditing()
+        if activateOnLostFocus { activated() }
 
         cancelInternalLink()
         dismissPopover()

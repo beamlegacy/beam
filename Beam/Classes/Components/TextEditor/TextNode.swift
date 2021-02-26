@@ -612,7 +612,7 @@ public class TextNode: Widget {
                 return true
             }
 
-            if mouseInfo.event.clickCount == 1 && !selectedTextRange.isEmpty {
+            if mouseInfo.event.clickCount == 1 && editor.inlineFormatter != nil {
                 root?.cursorPosition = clickPos
                 root?.cancelSelection()
                 dragMode = .select(cursorPosition)
@@ -634,20 +634,19 @@ public class TextNode: Widget {
                 editor.initAndShowPersistentFormatter()
                 return true
             } else if mouseInfo.event.clickCount == 2 {
+                deboucingClickTimer?.invalidate()
                 root?.wordSelection(from: clickPos)
-
-                deboucingClickTimer = Timer.scheduledTimer(withTimeInterval: deboucingClickInterval, repeats: false, block: { [weak self] (_) in
-                    guard let self = self else { return }
-                    if !self.selectedTextRange.isEmpty { self.editor.showInlineFormatterOnKeyEventsAndClick() }
-                })
+                if !selectedTextRange.isEmpty { editor.showInlineFormatterOnKeyEventsAndClick() }
                 return true
             } else {
                 deboucingClickTimer?.invalidate()
                 root?.doCommand(.selectAll)
                 editor.detectFormatterType()
 
-                if root?.state.nodeSelection != nil { resetActionLayers() }
-
+                if root?.state.nodeSelection != nil {
+                    resetActionLayers()
+                    editor.showInlineFormatterOnKeyEventsAndClick()
+                }
                 return true
             }
         }
@@ -674,11 +673,23 @@ public class TextNode: Widget {
             let internalLink = internalLinkAt(point: mouseInfo.position)
 
             if link != nil {
+                let currentNode = widgetAt(point: mouseInfo.position) as? TextNode
+                let frame = linkFrameAt(point: mouseInfo.position)
+
                 cursor = .pointingHand
+
+                editor.updateInlineFormaterOnHover(
+                    currentNode,
+                    mouseInfo.globalPosition,
+                    frame,
+                    link
+                )
+
             } else if internalLink != nil {
-                cursor = .pointingHand
+                cursor = editor.inlineFormatter?.hyperlinkView != nil  ? .arrow : .pointingHand
             } else {
                 cursor = .iBeam
+                editor.dismissHyperlinkView()
             }
         }
 
@@ -803,7 +814,41 @@ public class TextNode: Widget {
         guard l.frame.minX < point.x && l.frame.maxX > point.x else { return nil } // don't find links outside the line
         let displayIndex = l.stringIndexFor(position: point)
         let pos = min(displayIndex, attributedString.length - 1)
-        return attributedString.attribute(.link, at: pos, effectiveRange: nil) as? URL
+        // return attributedString.attribute(.link, at: pos, effectiveRange: nil) as? URL
+
+        let range = elementText.rangeAt(position: pos)
+        guard let linkAttribIndex = range.attributes.firstIndex(where: { attrib -> Bool in
+            attrib.rawValue == BeamText.Attribute.link("").rawValue
+        }) else { return nil }
+
+        switch range.attributes[linkAttribIndex] {
+            case .link(let link):
+                return URL(string: link)
+            default:
+                return nil
+        }
+    }
+
+    public func linkFrameAt(point: NSPoint) -> NSRect? {
+        guard layout != nil, !layout!.lines.isEmpty else { return nil }
+        let line = lineAt(point: point)
+        guard line >= 0 else { return nil }
+        let l = layout!.lines[line]
+        guard l.frame.minX < point.x && l.frame.maxX > point.x else { return nil } // don't find links outside the line
+        let displayIndex = l.stringIndexFor(position: point)
+        let pos = min(displayIndex, attributedString.length - 1)
+
+        let range = elementText.rangeAt(position: pos)
+        guard nil != range.attributes.firstIndex(where: { attrib -> Bool in
+            attrib.rawValue == BeamText.Attribute.link("").rawValue
+        }) else { return nil }
+
+        let start = range.position
+        let end = range.end
+        let startOffset = offsetAt(index: start)
+        let endOffset = offsetAt(index: end)
+
+        return NSRect(x: startOffset, y: l.frame.minY, width: endOffset - startOffset, height: l.frame.height)
     }
 
     public func internalLinkAt(point: NSPoint) -> String? {
