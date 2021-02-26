@@ -360,12 +360,12 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
         cardTitleLayer.foregroundColor = NSColor.cardTitleColor.cgColor
         cardTitleLayer.font = NSFont(name: "Inter-SemiBold", size: 0)
-        cardTitleLayer.fontSize = 26 // isBig ? 30 : 26
+        cardTitleLayer.fontSize = 26 // TODO: Change later (isBig ? 30 : 26)
         cardTitleLayer.string = cardNote.title
 
         cardTimeLayer.foregroundColor = NSColor.cardTimeColor.cgColor
         cardTimeLayer.font = NSFont(name: "Inter-Regular", size: 0)
-        cardTimeLayer.fontSize = 10 //  isBig ? 12 : 10
+        cardTimeLayer.fontSize = 10 //  TODO: Change later (isBig ? 12 : 10)
         cardTimeLayer.string = formatter.string(from: note.updateDate)
 
         cardHeaderLayer.addSublayer(cardTitleLayer)
@@ -382,7 +382,8 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         cardTitleLayer.frame = CGRect(origin: CGPoint(x: 0, y: 0), size: NSSize(width: rect.width, height: cardTitleLayer.preferredFrameSize().height))
         cardOptionLayer.frame = CGRect(origin: CGPoint(x: rect.width - 16, y: 10), size: NSSize(width: 16, height: 16))
         cardTimeLayer.frame = CGRect(
-            origin: CGPoint(x: rect.origin.x, y: 95 /*isBig ? 101 : 95*/),
+            // TODO: Change later (isBig ? 101 : 95)
+            origin: CGPoint(x: rect.origin.x, y: 95),
             size: NSSize(width: rect.width, height: cardTimeLayer.preferredFrameSize().height)
         )
     }
@@ -1157,7 +1158,8 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         }
 
         guard let titleString = rootNode.note?.title.attributed else { fatalError() }
-        let f = NSFont.systemFont(ofSize: isBig ? 13 : 11, weight: .semibold)
+        // TODO: Change later (isBig ? 13 : 11)
+        let f = NSFont.systemFont(ofSize: 11, weight: .semibold)
         titleString.addAttribute(.font, value: f, range: titleString.wholeRange)
         titleString.addAttribute(.foregroundColor, value: NSColor.editorControlColor, range: titleString.wholeRange)
         _title = Font.draw(string: titleString, atPosition: NSPoint(x: 0, y: 0), textWidth: frame.width)
