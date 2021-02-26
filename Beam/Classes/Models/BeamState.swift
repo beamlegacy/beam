@@ -92,7 +92,7 @@ let NoteDisplayThreshold = Float(0.0)
                 tab.appendToIndexer = { [weak self] url, read in
                     guard let self = self else { return }
                     guard let doc = try? SwiftSoup.parse(read.content, url.absoluteString) else { return }
-                    let text = html2Text(url: url, doc: doc)
+                    let text: String = html2Text(url: url, doc: doc)
                     self.data.index.append(document: IndexDocument(source: url.absoluteString, title: read.title, contents: text))
                 }
             }
