@@ -146,7 +146,7 @@ extension BeamTextEdit {
         let startPosition = popoverPrefix == 0 ? cursorStartPosition : cursorStartPosition + 1
         let replacementStart = startPosition - popoverPrefix
         let replacementEnd = rootNode.cursorPosition + popoverSuffix
-        // When the cursor is moved to left, the link shoulb be split in 2 (Bi-di + Plain text)
+        // When the cursor is moved to left, the link should be split in 2 (Bi-di + Plain text)
         let linkEnd = rootNode.lastCommand == .moveLeft ?
             replacementStart + rootNode.cursorPosition - popoverPrefix :
             replacementStart + title.count
