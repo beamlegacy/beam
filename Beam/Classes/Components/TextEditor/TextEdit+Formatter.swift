@@ -193,10 +193,17 @@ extension BeamTextEdit {
         let cursorPosition = rootNode.cursorPosition
         let beginPosition = selectedTextRange.lowerBound == 0 ? cursorPosition..<cursorPosition + 1 : cursorPosition - 1..<cursorPosition
         let endPosition = cursorPosition..<cursorPosition + 1
-        var range = selectedTextRange.lowerBound == 0 && selectedTextRange.upperBound > 0 ? beginPosition : endPosition
+        var selectedRange = selectedTextRange.lowerBound == 0 && selectedTextRange.upperBound > 0 ? beginPosition : endPosition
         var types: [FormatterType] = []
 
-        if rootNode.state.nodeSelection != nil { range = 0..<node.text.text.count }
+        // Get correct attribute range to update the inline formatter
+        node.text.ranges.forEach { (range) in
+            if !range.attributes.isEmpty && selectedTextRange == range.position..<range.end {
+                selectedRange = selectedTextRange
+            }
+        }
+
+        if rootNode.state.nodeSelection != nil { selectedRange = 0..<node.text.text.count }
 
         rootNode.state.attributes = []
         setActiveFormatters(types)
@@ -212,7 +219,7 @@ extension BeamTextEdit {
             break
         }
 
-        node.text.extractFormatterType(from: range).forEach { type in
+        node.text.extractFormatterType(from: selectedRange).forEach { type in
             types.append(type)
 
             switch type {
