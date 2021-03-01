@@ -12,7 +12,7 @@ class NoteEditorUITests: QuickSpec {
         let app = XCUIApplication()
         var journalScrollView: XCUIElement!
         var firstJournalEntry: XCUIElement!
-        let textInput = "This is a test \(Date())"
+        let textInput = "This is a test ab \(Date()) ab"
 
         beforeSuite {
             self.continueAfterFailure = false
@@ -27,8 +27,13 @@ class NoteEditorUITests: QuickSpec {
 
         describe("Editing") {
             it("adds text inputs") {
-                app.typeText(textInput)
+                for text in textInput.split(every: 1) {
+                    app.typeText(text)
+                    usleep(100000) // 0.5sec
+                }
                 expect(firstJournalEntry.value as? String) == textInput
+                // Leave a bit of time for Coredata to save
+                sleep(1)
             }
         }
     }

@@ -169,6 +169,8 @@
 		523E91CC25D17004001124E0 /* PMKFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 523E91CB25D17004001124E0 /* PMKFoundation */; };
 		523FF66125C31D8800B4BD6E /* Data+String.swift in Sources */ = {isa = PBXBuildFile; fileRef = 523FF66025C31D8800B4BD6E /* Data+String.swift */; };
 		523FF67925C31D9D00B4BD6E /* String+Data.swift in Sources */ = {isa = PBXBuildFile; fileRef = 523FF67825C31D9D00B4BD6E /* String+Data.swift */; };
+		5242684D25ED408500DB1D05 /* String+Split.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5242684C25ED408500DB1D05 /* String+Split.swift */; };
+		5242685025ED40F500DB1D05 /* String+Split.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5242684C25ED408500DB1D05 /* String+Split.swift */; };
 		524299AF25A47CA500F4DBF5 /* Preferences in Frameworks */ = {isa = PBXBuildFile; productRef = 524299AE25A47CA500F4DBF5 /* Preferences */; };
 		524299C725A47D2600F4DBF5 /* AppDelegate+Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524299C625A47D2600F4DBF5 /* AppDelegate+Preferences.swift */; };
 		524299E725A480A300F4DBF5 /* AccountsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524299E225A480A300F4DBF5 /* AccountsView.swift */; };
@@ -650,6 +652,7 @@
 		522AFB2725CBFAB100F60647 /* DocumentManagerTestsHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentManagerTestsHelper.swift; sourceTree = "<group>"; };
 		523FF66025C31D8800B4BD6E /* Data+String.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data+String.swift"; sourceTree = "<group>"; };
 		523FF67825C31D9D00B4BD6E /* String+Data.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Data.swift"; sourceTree = "<group>"; };
+		5242684C25ED408500DB1D05 /* String+Split.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Split.swift"; sourceTree = "<group>"; };
 		524299C625A47D2600F4DBF5 /* AppDelegate+Preferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+Preferences.swift"; sourceTree = "<group>"; };
 		524299E225A480A300F4DBF5 /* AccountsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AccountsView.swift; sourceTree = "<group>"; };
 		524299ED25A488E000F4DBF5 /* AdvancedPreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedPreferencesView.swift; sourceTree = "<group>"; };
@@ -1080,11 +1083,8 @@
 				414B98F925A23A4F002E81A3 /* NSView+Xib.swift */,
 				417628A425B05DFB0082FFDF /* NSBezierPath+CGPath.swift */,
 				523FF66025C31D8800B4BD6E /* Data+String.swift */,
-				523FF67825C31D9D00B4BD6E /* String+Data.swift */,
-				5287EC2E25C42B0100CE1DD9 /* String+UUID.swift */,
 				41FAD34E25E5742800D78B36 /* CALayer+Animation.swift */,
 				524B856C25D2DD0700BB7C7A /* NSMAnagedObjectContext+performAndWait.swift */,
-				52FB30C925E3D7B3001BF098 /* String+Title.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -1306,6 +1306,10 @@
 				526016CD25ADC10800634695 /* String+MD5.swift */,
 				96A8B1DC25A38A3B006F749C /* String+Levenshtein.swift */,
 				562A8B3525B5D8B5004D3D8A /* String+NL.swift */,
+				523FF67825C31D9D00B4BD6E /* String+Data.swift */,
+				5287EC2E25C42B0100CE1DD9 /* String+UUID.swift */,
+				52FB30C925E3D7B3001BF098 /* String+Title.swift */,
+				5242684C25ED408500DB1D05 /* String+Split.swift */,
 			);
 			path = "String+Beam";
 			sourceTree = "<group>";
@@ -2316,6 +2320,7 @@
 				418172212581107C00317ED8 /* String+LoremIpsum.swift in Sources */,
 				418172082581107C00317ED8 /* NSManagedObject+initExtension.swift in Sources */,
 				52F27FCB25B9B404006E09A2 /* ViewModelFetchedResults.swift in Sources */,
+				5242684D25ED408500DB1D05 /* String+Split.swift in Sources */,
 				418173C32581276F00317ED8 /* String+NSMutableAttributedString.swift in Sources */,
 				9691E41425AF61BA00A13080 /* BrowsingTree.swift in Sources */,
 				4181723D2581107C00317ED8 /* TextEdit.swift in Sources */,
@@ -2443,6 +2448,7 @@
 				52BB69A925CD5A49007A1173 /* OmniBarUITestsQuick.swift in Sources */,
 				965A784D2514F149009980D4 /* BeamUITests.swift in Sources */,
 				528286B625E806CD00C0CCEE /* NoteEditorUITests.swift in Sources */,
+				5242685025ED40F500DB1D05 /* String+Split.swift in Sources */,
 				52A94E3C25E90094004BAC93 /* XCUIElement+clear.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

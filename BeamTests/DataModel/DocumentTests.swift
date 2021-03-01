@@ -50,7 +50,7 @@ class DocumentTests: QuickSpec {
         }
 
         describe(".updatedAt") {
-            it("updates attribute on context save only if more than a second difference") {
+            it("updates attribute on context save only if more than a second difference, and has data changes") {
                 let document = Document.create(self.mainContext, title: String.randomTitle())
                 expect(document.updated_at).toNot(beNil())
 
@@ -62,6 +62,7 @@ class DocumentTests: QuickSpec {
 
                 BeamDate.travel(1.5)
                 document.title = String.randomTitle()
+                document.data = String.randomTitle().asData // force updatedAt change
                 try? self.mainContext.save()
                 expect(document.updated_at).toNot(equal(initialUpdatedAt))
                 expect(document.updated_at).to(beGreaterThan(initialUpdatedAt))

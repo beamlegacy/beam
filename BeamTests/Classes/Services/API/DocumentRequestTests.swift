@@ -23,7 +23,6 @@ class DocumentRequestTests: QuickSpec {
             // Setup CoreData
             self.coreDataManager.setup()
             self.coreDataManager.destroyPersistentStore()
-            self.coreDataManager.setup()
             CoreDataManager.shared = self.coreDataManager
             self.sut = DocumentRequest()
             self.documentManager = DocumentManager(coreDataManager: self.coreDataManager)

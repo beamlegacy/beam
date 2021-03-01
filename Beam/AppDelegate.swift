@@ -43,10 +43,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     #endif
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        #if DEBUG
-        self.beamUIMenuGenerator = BeamUITestsMenuGenerator()
-        prepareMenuForTestEnv()
-        #endif
         for item in NSApp.mainMenu?.items ?? [] {
             item.submenu?.delegate = self
 
@@ -74,6 +70,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         if Configuration.apiHostnameDefault != Configuration.apiHostname {
             Logger.shared.logInfo("🛑 API HOSTNAME is \(Configuration.apiHostname)", category: .general)
         }
+
+        #if DEBUG
+        self.beamUIMenuGenerator = BeamUITestsMenuGenerator()
+        prepareMenuForTestEnv()
+        #endif
     }
 
     func updateBadge() {

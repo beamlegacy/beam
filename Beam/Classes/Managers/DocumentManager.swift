@@ -73,6 +73,7 @@ enum DocumentManagerError: Error, Equatable {
     case unresolvedConflict
     case localDocumentNotFound
     case idNotFound
+    case operationCancelled
 }
 
 // swiftlint:disable:next type_body_length
@@ -83,10 +84,16 @@ class DocumentManager {
     let documentRequest = DocumentRequest()
     private let backgroundQueue = DispatchQueue.global(qos: .background)
 
+    private let saveDocumentQueue = OperationQueue()
+    private var saveOperations: [UUID: BlockOperation] = [:]
+    private var saveDocumentPromiseCancels: [UUID: () -> Void] = [:]
+
     init(coreDataManager: CoreDataManager? = nil) {
         self.coreDataManager = coreDataManager ?? CoreDataManager.shared
         self.mainContext = self.coreDataManager.mainContext
         self.backgroundContext = self.coreDataManager.backgroundContext
+
+        saveDocumentQueue.maxConcurrentOperationCount = 1
 
         //observeCoredataNotification()
     }
@@ -346,15 +353,6 @@ class DocumentManager {
         return true
     }
 
-    private func updateDocumentWithDocumentStruct(_ document: Document, _ documentStruct: DocumentStruct) {
-        document.data = documentStruct.data
-        document.title = documentStruct.title
-        document.document_type = documentStruct.documentType.rawValue
-        document.created_at = documentStruct.createdAt
-        document.updated_at = BeamDate.now
-        document.deleted_at = documentStruct.deletedAt
-    }
-
     /// Update local coredata instance with data we fetched remotely, we detected the need for a merge between both versions
     private func mergeWithLocalChanges(_ document: Document, _ input2: Data) -> Bool {
         guard let beam_api_data = document.beam_api_data,
@@ -434,6 +432,7 @@ class DocumentManager {
         return try Self.saveContext(context: context) && !errors
     }
 
+    static var savedCount = 0
     // MARK: -
     // MARK: NSManagedObjectContext saves
     @discardableResult
@@ -442,9 +441,11 @@ class DocumentManager {
             return false
         }
 
+        savedCount += 1
+
         do {
             try CoreDataManager.save(context)
-            Logger.shared.logDebug("CoreDataManager saved", category: .coredata)
+            Logger.shared.logDebug("[\(savedCount)] CoreDataManager saved", category: .coredata)
             return true
         } catch let error as NSError {
             switch error.code {
@@ -524,14 +525,14 @@ extension DocumentManager {
             .filter({ $0.map({ $0.id }).contains(documentStruct.id) })
             .sink { documents in
                 for document in documents where document.id == documentStruct.id {
-                    Logger.shared.logDebug("onDocumentChange: \(document.title)", category: .coredata)
-                    Logger.shared.logDebug(document.data?.asString ?? "-", category: .documentDebug)
-
+                    // We don't want to get updates if we only changed internal values
                     let keys = Array(document.changedValues().keys)
-                    guard keys != ["beam_api_data"] else {
+                    guard keys.contains("data") else {
                         return
                     }
 
+                    Logger.shared.logDebug("onDocumentChange: \(document.title) [\(keys.joined(separator: ","))]", category: .coredata)
+                    Logger.shared.logDebug(document.data?.asString ?? "-", category: .documentDebug)
                     completionHandler(DocumentStruct(document: document))
                 }
             }
@@ -721,44 +722,82 @@ extension DocumentManager {
     /// If the user is authenticated, and network is enabled, it will also call the BeamAPI (async) to save the document remotely
     /// but will not trigger the completion handler. If the network callbacks updates the coredata object, it is expected the
     /// updates to be fetched through `onDocumentUpdate`
+    // swiftlint:disable:next function_body_length
     func saveDocument(_ documentStruct: DocumentStruct, completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
         Logger.shared.logDebug("Saving \(documentStruct.title)", category: .document)
         Logger.shared.logDebug(documentStruct.data.asString ?? "-", category: .documentDebug)
 
-        coreDataManager.backgroundContext.perform {
-            let context = self.coreDataManager.backgroundContext
-            let document = Document.fetchOrCreateWithId(context, documentStruct.id)
-            self.updateDocumentWithDocumentStruct(document, documentStruct)
+        var blockOperation: BlockOperation!
 
-            do {
-                try self.checkValidations(context, document)
-            } catch {
-                completion?(.failure(error))
+        blockOperation = BlockOperation { [weak self] in
+            guard let self = self else { return }
+
+            // In case the operationqueue was cancelled way before this started
+            if blockOperation.isCancelled {
+                completion?(.failure(DocumentManagerError.operationCancelled))
                 return
             }
+            let context = self.coreDataManager.persistentContainer.newBackgroundContext()
 
-            do {
-                try Self.saveContext(context: context)
-            } catch {
-                completion?(.failure(error))
-                return
-            }
+            context.performAndWait { [weak self] in
+                guard let self = self else { return }
 
-            // If not authenticated, we don't need to send to BeamAPI
-            if AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled {
-                // We only want one network call per document ID, to avoid overlapping
-                self.blockDocumentNetworkCall(document.id)
-
-                // We want to fetch back the document, to update it's previousChecksum
-                context.refresh(document, mergeChanges: false)
-                self.saveDocumentStructOnAPI(DocumentStruct(document: document)) { _ in
-                    Self.saveDataRequests.removeValue(forKey: documentStruct.id)
-                    self.signalDocumentNetworkCall(document.id)
+                if blockOperation.isCancelled {
+                    completion?(.failure(DocumentManagerError.operationCancelled))
+                    return
                 }
-            }
 
-            completion?(.success(true))
+                let document = Document.fetchOrCreateWithId(context, documentStruct.id)
+                document.update(documentStruct)
+
+                do {
+                    try self.checkValidations(context, document)
+                } catch {
+                    completion?(.failure(error))
+                    return
+                }
+
+                if blockOperation.isCancelled {
+                    completion?(.failure(DocumentManagerError.operationCancelled))
+                    return
+                }
+
+                do {
+                    try Self.saveContext(context: context)
+                } catch {
+                    completion?(.failure(error))
+                    return
+                }
+
+                if blockOperation.isCancelled {
+                    completion?(.failure(DocumentManagerError.operationCancelled))
+                    return
+                }
+
+                // If not authenticated, we don't need to send to BeamAPI
+                if AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled {
+                    // Can't use `document.id` in the network callback thread
+                    let document_id = document.id
+                    // We only want one network call per document ID, to avoid overlapping
+                    self.blockDocumentNetworkCall(document_id)
+
+                    // We want to fetch back the document, to update it's previousChecksum
+                    context.refresh(document, mergeChanges: false)
+                    self.saveDocumentStructOnAPI(DocumentStruct(document: document)) { _ in
+                        Self.saveDataRequests.removeValue(forKey: document_id)
+                        self.signalDocumentNetworkCall(document_id)
+                    }
+                }
+
+                completion?(.success(true))
+            }
         }
+
+        if let operation = saveOperations[documentStruct.id] {
+            operation.cancel()
+        }
+        saveOperations[documentStruct.id] = blockOperation
+        saveDocumentQueue.addOperation(blockOperation)
     }
 
     @discardableResult
@@ -876,7 +915,6 @@ extension DocumentManager {
 
     func deleteAllDocuments(includedRemote: Bool = true, completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
         CoreDataManager.shared.destroyPersistentStore()
-        CoreDataManager.shared.setup()
 
         guard includedRemote else {
             completion?(.success(true))
@@ -1094,15 +1132,27 @@ extension DocumentManager {
 
     // MARK: Save
     func saveDocument(_ documentStruct: DocumentStruct) -> Promises.Promise<Bool> {
-        return coreDataManager.background()
+        let promise: Promises.Promise<NSManagedObjectContext> = coreDataManager.newBackground()
+        var cancelme = false
+
+        // Cancel previous promise
+        saveDocumentPromiseCancels[documentStruct.id]?()
+
+        let result = promise
             .then(on: self.backgroundQueue) { context -> Bool in
                 Logger.shared.logDebug("Saving \(documentStruct.title)", category: .document)
                 Logger.shared.logDebug(documentStruct.data.asString ?? "-", category: .documentDebug)
+
+                guard !cancelme else { throw DocumentManagerError.operationCancelled }
+
                 return try context.performAndWait {
                     let document = Document.fetchOrCreateWithId(context, documentStruct.id)
-                    self.updateDocumentWithDocumentStruct(document, documentStruct)
+                    document.update(documentStruct)
 
+                    guard !cancelme else { throw DocumentManagerError.operationCancelled }
                     try self.checkValidations(context, document)
+
+                    guard !cancelme else { throw DocumentManagerError.operationCancelled }
                     try Self.saveContext(context: context)
 
                     guard AuthenticationManager.shared.isAuthenticated,
@@ -1116,7 +1166,15 @@ extension DocumentManager {
 
                     return true
                 }
+            }.always {
+                self.saveDocumentPromiseCancels[documentStruct.id] = nil
             }
+
+        let cancel = { cancelme = true }
+
+        saveDocumentPromiseCancels[documentStruct.id] = cancel
+
+        return result
     }
 
     // MARK: Delete
@@ -1142,7 +1200,6 @@ extension DocumentManager {
 
     func deleteAllDocuments(includedRemote: Bool = true) -> Promises.Promise<Bool> {
         CoreDataManager.shared.destroyPersistentStore()
-        CoreDataManager.shared.setup()
 
         guard includedRemote,
               AuthenticationManager.shared.isAuthenticated,
@@ -1248,16 +1305,26 @@ extension DocumentManager {
     // MARK: Save
     func saveDocument(_ documentStruct: DocumentStruct) -> PromiseKit.Promise<Bool> {
         let promise: PromiseKit.Guarantee<NSManagedObjectContext> = coreDataManager.background()
-        return promise
+        var cancelme = false
+
+        // Cancel previous promise
+        saveDocumentPromiseCancels[documentStruct.id]?()
+
+        let result = promise
             .then(on: self.backgroundQueue) { context -> PromiseKit.Promise<Bool> in
                 Logger.shared.logDebug("Saving \(documentStruct.title)", category: .document)
                 Logger.shared.logDebug(documentStruct.data.asString ?? "-", category: .documentDebug)
 
+                guard !cancelme else { throw PMKError.cancelled }
+
                 return try context.performAndWait {
                     let document = Document.fetchOrCreateWithId(context, documentStruct.id)
-                    self.updateDocumentWithDocumentStruct(document, documentStruct)
+                    document.update(documentStruct)
 
+                    guard !cancelme else { throw PMKError.cancelled }
                     try self.checkValidations(context, document)
+
+                    guard !cancelme else { throw PMKError.cancelled }
                     try Self.saveContext(context: context)
 
                     guard AuthenticationManager.shared.isAuthenticated,
@@ -1265,13 +1332,21 @@ extension DocumentManager {
                         return .value(true)
                     }
 
-                    // We want to fetch back the document, to update it's previousChecksum
+                    // We want to fetch back the document, to update its previousChecksum
                     context.refresh(document, mergeChanges: false)
                     self.saveDocumentStructOnAPI(DocumentStruct(document: document))
 
                     return .value(true)
                 }
+            }.ensure {
+                self.saveDocumentPromiseCancels[documentStruct.id] = nil
             }
+
+        let cancel = { cancelme = true }
+
+        saveDocumentPromiseCancels[documentStruct.id] = cancel
+
+        return result
     }
 
     // MARK: Delete
@@ -1297,7 +1372,6 @@ extension DocumentManager {
 
     func deleteAllDocuments(includedRemote: Bool = true) -> PromiseKit.Promise<Bool> {
         CoreDataManager.shared.destroyPersistentStore()
-        CoreDataManager.shared.setup()
 
         guard includedRemote,
               AuthenticationManager.shared.isAuthenticated,
