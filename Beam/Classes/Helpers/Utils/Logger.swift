@@ -72,7 +72,7 @@ final class Logger {
         return String(data: logFileData, encoding: .utf8) ?? "Couldn't parse logs data"
     }
 
-    func logInfo(_ message: String, category: LogCategory) {
+    func logInfo(_ message: String, category: LogCategory = .general) {
         if !hideLumberCategories.contains(category) {
             DDLogInfo("[\(category.rawValue)] \(message)")
         }

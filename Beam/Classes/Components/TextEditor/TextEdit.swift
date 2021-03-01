@@ -111,8 +111,8 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     public init(root: BeamElement, font: Font = Font.main) {
         let start = CFAbsoluteTimeGetCurrent()
         BeamNote.requestLinkDetection()
-        let diff = CFAbsoluteTimeGetCurrent() - start
-        print("Links detection took \(diff) seconds")
+        let diff = String(format: "%.2f", CFAbsoluteTimeGetCurrent() - start)
+        Logger.shared.logDebug("Links detection took \(diff)sec")
 
         self.config.font = font
         note = root
@@ -511,6 +511,9 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             }
 
             rootNode.eraseSelection()
+
+//            assert(rootNode.cursorPosition <= node.text.count)
+
             let splitText = node.text.extract(range: rootNode.cursorPosition ..< node.text.count)
             node.text.removeLast(node.text.count - rootNode.cursorPosition)
 

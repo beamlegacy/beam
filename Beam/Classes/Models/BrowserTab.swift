@@ -178,7 +178,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             self.url = v
             self.updateBullet()
             self.updateFavIcon()
-            if let url = v?.absoluteString {
+            if v?.absoluteString != nil {
                 self.browsingTree.current.score.openIndex = self.navigationCount
                 self.updateScore()
                 self.navigationCount = 0

@@ -26,8 +26,11 @@ class Document: NSManagedObject {
     }
 
     override func willSave() {
+        let keys = self.changedValues().keys
         if updated_at.timeIntervalSince(BeamDate.now) < -1.0 {
-            self.updated_at = BeamDate.now
+            if keys.contains("data") {
+                self.updated_at = BeamDate.now
+            }
         }
         super.willSave()
     }
@@ -49,6 +52,15 @@ class Document: NSManagedObject {
         }
 
         return document
+    }
+
+    func update(_ documentStruct: DocumentStruct) {
+        data = documentStruct.data
+        title = documentStruct.title
+        document_type = documentStruct.documentType.rawValue
+        created_at = documentStruct.createdAt
+        updated_at = BeamDate.now
+        deleted_at = documentStruct.deletedAt
     }
 
     class func countWithPredicate(_ context: NSManagedObjectContext,

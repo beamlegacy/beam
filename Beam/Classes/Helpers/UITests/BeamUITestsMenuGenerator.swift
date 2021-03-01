@@ -11,18 +11,7 @@ class BeamUITestsMenuGenerator {
         }
     }
 
-    var documentManager: DocumentManager!
-    lazy var coreDataManager = {
-        CoreDataManager()
-    }()
-    lazy var mainContext = {
-        coreDataManager.mainContext
-    }()
-
-    init() {
-        self.coreDataManager.setup()
-        self.documentManager = DocumentManager(coreDataManager: self.coreDataManager)
-    }
+    var documentManager = DocumentManager()
 
     private func logout() {
         AccountManager.logout()
@@ -33,8 +22,7 @@ class BeamUITestsMenuGenerator {
     }
 
     private func destroyDatabase() {
-        coreDataManager.destroyPersistentStore()
-        coreDataManager.setup()
+        CoreDataManager.shared.destroyPersistentStore()
     }
 
     let faker = Faker(locale: "en-US")

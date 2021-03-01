@@ -118,10 +118,10 @@ class BeamNote: BeamElement {
     }
     private var activeDocumentCancellable: AnyCancellable?
     private func observeDocumentChange(documentManager: DocumentManager) {
-        return
         guard activeDocumentCancellable == nil else { return }
         guard let docStruct = documentStruct else { return }
 
+        Logger.shared.logInfo("Observe changes for note \(title)", category: .document)
         activeDocumentCancellable = documentManager.onDocumentChange(docStruct) { [unowned self] docStruct in
             DispatchQueue.main.async {
                 // reload self
@@ -276,6 +276,7 @@ class BeamNote: BeamElement {
     static func appendToFetchedNotes(_ note: BeamNote) {
         fetchedNotes[note.title] = WeakReference<BeamNote>(note)
         fetchedNotesCancellables.removeValue(forKey: note.title)
+
         fetchedNotesCancellables[note.title] =
             note.$changed
             .dropFirst(1)

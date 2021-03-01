@@ -75,6 +75,7 @@ class CoreDataManager {
     }
 
     func destroyPersistentStore() {
+        Logger.shared.logInfo("Destroying persistent store")
         guard let storeURL = storeURL, let persistentStoreCoordinator = mainContext.persistentStoreCoordinator else { return }
 
         do {
@@ -85,6 +86,8 @@ class CoreDataManager {
                 try persistentStoreCoordinator.remove(store)
             }
 
+            Logger.shared.logDebug("Destroying \(storeURL)")
+
             try persistentStoreCoordinator.destroyPersistentStore(at: storeURL,
                                                                   ofType: storeType,
                                                                   options: nil)
@@ -94,6 +97,8 @@ class CoreDataManager {
             fatalError("Can't run destroyPersistentStore")
             // Error Handling
         }
+
+        setup()
     }
 
     func save() throws {
@@ -152,8 +157,6 @@ class CoreDataManager {
             // TODO: raise error?
             Logger.shared.logError("Can't import backup: \(error)", category: .coredata)
         }
-
-        CoreDataManager.shared.setup()
     }
 
     let persistentContainerQueue = OperationQueue()
@@ -162,7 +165,7 @@ class CoreDataManager {
     func enqueue(block: @escaping (_ context: NSManagedObjectContext) -> ((Swift.Result<Bool, Error>) -> Void)?) {
         let perf = PerformanceDebug("CoreDataManager.enqueue", true, .coredata)
 
-        // TODO [P1]: Check memory management (blockOperation create retain cycles)
+        // TODO: Check memory management (blockOperation create retain cycles)
 
         var blockOperation: BlockOperation?
         blockOperation = BlockOperation { [weak self] in
@@ -235,13 +238,21 @@ class CoreDataManager {
 // MARK: PromiseKit
 extension CoreDataManager {
     func background() -> PromiseKit.Guarantee<NSManagedObjectContext> {
-        .value(self.backgroundContext)
+        .value(backgroundContext)
+    }
+
+    func newBackground() -> PromiseKit.Guarantee<NSManagedObjectContext> {
+        .value(persistentContainer.newBackgroundContext())
     }
 }
 
 // MARK: Promises
 extension CoreDataManager {
     func background() -> Promises.Promise<NSManagedObjectContext> {
-        Promises.Promise(self.backgroundContext)
+        Promises.Promise(backgroundContext)
+    }
+
+    func newBackground() -> Promises.Promise<NSManagedObjectContext> {
+        Promises.Promise(persistentContainer.newBackgroundContext())
     }
 }

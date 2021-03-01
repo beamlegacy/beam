@@ -90,3 +90,7 @@ excluded:
   - Pods
   - fastlane
   - Extern
+  - Beam/Classes/Helpers/Utils/Web/Readability.js
+  - BeamTests
+  - BeamUITests
+  - SourcePackages
