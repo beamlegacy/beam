@@ -183,6 +183,10 @@ extension NSColor {
     }
 
     static var formatterIconColor: NSColor {
+        return loadColor(named: "Corduroy")
+    }
+
+    static var formatterIconHoverAndActiveColor: NSColor {
         return loadColor(named: "Niobium")
     }
 

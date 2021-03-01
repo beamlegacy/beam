@@ -43,7 +43,7 @@ class FormatterView: NSView {
     }
 
     // View Properties
-    private let cornerRadius: CGFloat = 3
+    private let cornerRadius: CGFloat = 6
     private let leading = 2
     private let yPosition = 2
     private let spaceItem = 1
@@ -52,7 +52,7 @@ class FormatterView: NSView {
 
     // Shadow Properties
     private let shadowOpacity: Float = 0.07
-    private let shadowRadius: CGFloat = 3
+    private let shadowRadius: CGFloat = 6
     private let shadowOffset = NSSize(width: 0, height: -1.5)
 
     private var viewType: FormatterViewType = .persistent
@@ -139,7 +139,7 @@ class FormatterView: NSView {
             ctx.allowsImplicitAnimation = true
             ctx.duration = 0.3
 
-            button.layer?.backgroundColor = isHover ? NSColor.formatterButtonBackgroudHoverColor.cgColor : NSColor.clear.cgColor
+            button.contentTintColor = isHover ? NSColor.formatterIconHoverAndActiveColor : NSColor.formatterIconColor
         }
     }
 
@@ -149,6 +149,7 @@ class FormatterView: NSView {
         if types.isEmpty {
             selectedTypes = []
             buttons.forEach { button in
+                button.value.contentTintColor = NSColor.formatterIconColor
                 button.value.layer?.backgroundColor = NSColor.clear.cgColor
             }
 
@@ -157,6 +158,7 @@ class FormatterView: NSView {
 
         types.forEach { type in
             guard let button = buttons[type] else { return }
+            button.contentTintColor = NSColor.formatterIconHoverAndActiveColor
             button.layer?.backgroundColor = NSColor.formatterButtonBackgroudHoverColor.cgColor
             selectedTypes.insert(type)
         }
@@ -168,9 +170,11 @@ class FormatterView: NSView {
         removeState(type)
 
         if selectedTypes.contains(type) {
+            button.contentTintColor = NSColor.formatterIconColor
             button.layer?.backgroundColor = NSColor.clear.cgColor
             selectedTypes.remove(type)
         } else {
+            button.contentTintColor = NSColor.formatterIconHoverAndActiveColor
             button.layer?.backgroundColor = NSColor.formatterButtonBackgroudHoverColor.cgColor
             selectedTypes.insert(type)
         }
@@ -179,6 +183,7 @@ class FormatterView: NSView {
     func resetSelectedItems() {
         self.selectedTypes = []
         buttons.forEach { button in
+            button.value.contentTintColor = NSColor.formatterIconColor
             button.value.layer?.backgroundColor = NSColor.clear.cgColor
         }
     }
@@ -305,6 +310,7 @@ class FormatterView: NSView {
 
     private func removeActiveIndicator(to item: FormatterType) {
         guard let button = buttons[item] else { return }
+        button.contentTintColor = NSColor.formatterIconColor
         button.layer?.backgroundColor = NSColor.clear.cgColor
         selectedTypes.remove(item)
     }
