@@ -23,8 +23,8 @@ public struct BTextEdit: NSViewRepresentable {
 
     var leadingAlignment: CGFloat = 160
     var traillingPadding: CGFloat = 80
-    var topOffset: CGFloat = 28
-    var footerHeight: CGFloat = 60
+    var topOffset: CGFloat = 45
+    var footerHeight: CGFloat = 0
 
     var centerText = false
     var showTitle = true

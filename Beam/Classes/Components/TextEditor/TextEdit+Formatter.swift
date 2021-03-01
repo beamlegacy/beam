@@ -399,8 +399,6 @@ extension BeamTextEdit {
         guard let node = focussedWidget as? TextNode,
               let view = inlineFormatter else { return }
 
-        print(isBig, centerText)
-
         let (xOffset, rect) = node.offsetAndFrameAt(index: rootNode.cursorPosition)
         let yOffset = rect.maxY + node.offsetInDocument.y - 10
         let textFrame: CGFloat = ((frame.width - textWidth) / 2) - 125
