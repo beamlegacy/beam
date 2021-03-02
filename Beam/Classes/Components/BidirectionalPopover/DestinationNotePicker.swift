@@ -67,7 +67,14 @@ struct DestinationNotePicker: View {
                               let view = window.contentView else { return }
 
                         view.addSubview(popover)
-                        updatePopover(geometry.frame(in: .global))
+                        // updatePopover(geometry.frame(in: .global))
+
+                        NSLayoutConstraint.activate([
+                            popover.topAnchor.constraint(equalTo: view.topAnchor, constant: 0),
+                            popover.rightAnchor.constraint(equalTo: view.rightAnchor, constant: 0),
+                            popover.widthAnchor.constraint(equalToConstant: popover.idealSize.width),
+                            popover.heightAnchor.constraint(equalToConstant: popover.idealSize.height)
+                        ])
 
                         popover.didSelectTitle = { title -> Void in
                             // change the tab's destination note
@@ -98,7 +105,9 @@ struct DestinationNotePicker: View {
         Logger.shared.logInfo("update Popover for query \(state.destinationCardName)", category: .ui)
         guard let popover = state.bidirectionalPopover else { return }
 
-        let items = state.destinationCardName.isEmpty ? state.data.documentManager.loadAllDocumentsWithLimit(4) : state.data.documentManager.documentsWithLimitTitleMatch(title: state.destinationCardName, limit: 4)
+        let items = !state.destinationCardName.isEmpty ?
+            state.data.documentManager.loadAllDocumentsWithLimit(4, [NSSortDescriptor(key: "created_at", ascending: false)]):
+            state.data.documentManager.documentsWithLimitTitleMatch(title: state.destinationCardName, limit: 4)
 
         popover.items = items.map({ $0.title == state.data.todaysName ? "Journal" : $0.title })
         Logger.shared.logInfo("items: \(popover.items)", category: .ui)

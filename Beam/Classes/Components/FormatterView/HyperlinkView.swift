@@ -80,8 +80,8 @@ class HyperlinkView: NSView {
     }
 
     private func sendLinkToParentView() {
-        guard let didPressValideButton = didPressValidButton else { return }
-        didPressValideButton(hyperlinkTextField.stringValue, oldUrl)
+        guard let didPressValidButton = didPressValidButton else { return }
+        didPressValidButton(hyperlinkTextField.stringValue, oldUrl)
     }
 
     private func loadXib() {

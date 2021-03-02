@@ -177,11 +177,11 @@ public class TextNode: Widget {
 
     var actionLayer: CALayer?
 
-    private var deboucingClickTimer: Timer?
+    private var debounceClickTimer: Timer?
     private var actionLayerIsHovered = false
     private var icon = NSImage(named: "editor-cmdreturn")
 
-    private let deboucingClickInterval = 0.23
+    private let debounceClickInterval = 0.23
     private let actionImageLayer = CALayer()
     private let actionTextLayer = CATextLayer()
     public static var actionLayerWidth = CGFloat(80)
@@ -617,7 +617,7 @@ public class TextNode: Widget {
                 root?.cancelSelection()
                 dragMode = .select(cursorPosition)
 
-                deboucingClickTimer = Timer.scheduledTimer(withTimeInterval: deboucingClickInterval, repeats: false, block: { [weak self] (_) in
+                debounceClickTimer = Timer.scheduledTimer(withTimeInterval: debounceClickInterval, repeats: false, block: { [weak self] (_) in
                     guard let self = self else { return }
                     self.editor.dismissPopoverOrFormatter()
                 })
@@ -634,12 +634,15 @@ public class TextNode: Widget {
                 editor.initAndShowPersistentFormatter()
                 return true
             } else if mouseInfo.event.clickCount == 2 {
-                deboucingClickTimer?.invalidate()
+                debounceClickTimer?.invalidate()
                 root?.wordSelection(from: clickPos)
-                if !selectedTextRange.isEmpty { editor.showInlineFormatterOnKeyEventsAndClick() }
+                if !selectedTextRange.isEmpty {
+                    editor.cursorStartPosition = cursorPosition
+                    editor.showInlineFormatterOnKeyEventsAndClick()
+                }
                 return true
             } else {
-                deboucingClickTimer?.invalidate()
+                debounceClickTimer?.invalidate()
                 root?.doCommand(.selectAll)
                 editor.detectFormatterType()
 
@@ -732,11 +735,14 @@ public class TextNode: Widget {
             root?.selectedTextRange = text.clamp(p < o ? cursorPosition..<o : o..<cursorPosition)
             mouseIsDragged = root?.state.nodeSelection == nil
 
+            // When the bullet is selected hide & disable cmd+enter action
             if root?.state.nodeSelection != nil { resetActionLayers() }
 
-            if root?.state.nodeSelection == nil {
-                editor.updateInlineFormatterOnDrag(isDragged: true)
-            }
+            // Set cursor start position
+            if editor.cursorStartPosition == 0 { editor.cursorStartPosition = cursorPosition }
+
+            // Update inline formatter on drag
+            if root?.state.nodeSelection == nil { editor.updateInlineFormatterOnDrag(isDragged: true) }
         }
         invalidate()
 
