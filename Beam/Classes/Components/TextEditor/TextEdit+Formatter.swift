@@ -65,12 +65,13 @@ extension BeamTextEdit {
         formatterView.didPressValidLink = {[unowned self] link, oldLink -> Void in
             let (isValidUrl, validUrl) = link.validUrl()
 
-            guard let node = focussedWidget as? TextNode, isValidUrl else {
-                self.showOrHideInlineFormatter(isPresent: false)
-                return
+            guard let node = focussedWidget as? TextNode,
+                  isValidUrl else {
+                    self.showOrHideInlineFormatter(isPresent: false)
+                    return
             }
 
-            if node.selectedTextRange.isEmpty {
+            if node.selectedTextRange.isEmpty || !oldLink.isEmpty {
                 updateNodeWithLink(node: node, isDeleteMode: false, link: validUrl, oldLink)
             } else {
                 node.text.addAttributes([.link(validUrl)], to: node.selectedTextRange)

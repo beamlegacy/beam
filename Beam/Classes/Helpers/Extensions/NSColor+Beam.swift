@@ -183,6 +183,10 @@ extension NSColor {
     }
 
     static var formatterIconColor: NSColor {
+        return loadColor(named: "Corduroy")
+    }
+
+    static var formatterIconHoverAndActiveColor: NSColor {
         return loadColor(named: "Niobium")
     }
 
@@ -192,6 +196,14 @@ extension NSColor {
 
     static var formatterButtonBackgroudHoverColor: NSColor {
         return loadColor(named: "FormatterItemHoverColor")
+    }
+
+    static var hyperlinkTextFielDefaultdColor: NSColor {
+        return loadColor(named: "Niobium")
+    }
+
+    static var hyperlinkTextFielNoEmptydColor: NSColor {
+        return loadColor(named: "LightStoneGray")
     }
 
     // Other
