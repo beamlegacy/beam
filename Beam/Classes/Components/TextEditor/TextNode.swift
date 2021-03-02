@@ -14,29 +14,14 @@ import Combine
 // swiftlint:disable:next type_body_length
 public class TextNode: Widget {
     var element: BeamElement { didSet {
-        elementTextScope = element.$text
-            .receive(on: DispatchQueue.main)
-            .sink { [unowned self] newValue in
-                elementText = newValue
-                self.invalidateText()
-            }
-
-        elementKindScope = element.$kind
-            .receive(on: DispatchQueue.main)
-            .sink { [unowned self] newValue in
-                elementKind = newValue
-                self.invalidateText()
-            }
-
-        elementText = element.text
-        elementKind = element.kind
+        subscribeToElement(element)
     }}
 
     var elementTextScope: Cancellable?
     var elementKindScope: Cancellable?
 
-    var elementText: BeamText
-    var elementKind: ElementKind
+    var elementText = BeamText()
+    var elementKind = ElementKind.bullet
 
     var layout: TextFrame?
     var emptyLayout: TextFrame?
@@ -207,9 +192,6 @@ public class TextNode: Widget {
     init(editor: BeamTextEdit, element: BeamElement) {
         self.element = element
 
-        elementText = element.text
-        elementKind = element.kind
-
         super.init(editor: editor)
 
         addDisclosureLayer(at: NSPoint(x: 14, y: isHeader ? firstLineBaseline - 8 : firstLineBaseline - 13))
@@ -222,27 +204,10 @@ public class TextNode: Widget {
 
         createActionLayer()
 
-        var inInit = true
-        elementTextScope = element.$text
-            .receive(on: DispatchQueue.main)
-            .sink { [unowned self] newValue in
-                guard !inInit else { return }
-                elementText = newValue
-                self.invalidateText()
-            }
-
-        elementKindScope = element.$kind
-            .receive(on: DispatchQueue.main)
-            .sink { [unowned self] newValue in
-                guard !inInit else { return }
-                elementKind = newValue
-                self.invalidateText()
-            }
+        subscribeToElement(element)
 
         setAccessibilityLabel("TextNode")
         setAccessibilityRole(.textArea)
-
-        inInit = false
     }
 
     deinit {
@@ -1270,4 +1235,23 @@ public class TextNode: Widget {
         return true
     }
 */
+
+    func subscribeToElement(_ element: BeamElement) {
+        elementTextScope = element.$text
+            .dropFirst()
+            .sink { [unowned self] newValue in
+                elementText = newValue
+                self.invalidateText()
+            }
+
+        elementKindScope = element.$kind
+            .dropFirst()
+            .sink { [unowned self] newValue in
+                elementKind = newValue
+                self.invalidateText()
+            }
+
+        elementText = element.text
+        elementKind = element.kind
+    }
 }

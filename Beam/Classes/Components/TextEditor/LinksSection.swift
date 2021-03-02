@@ -17,6 +17,7 @@ class LinksSection: Widget {
 
     var mode: Mode
     var linkedReferencesCancellable: Cancellable!
+    var referencesCancellables = Set<AnyCancellable>()
     var note: BeamNote
     var linkLayer: Layer?
 
@@ -45,7 +46,6 @@ class LinksSection: Widget {
 
         setupUI()
         setupSectionMode()
-        updateLayerVisibility()
 
         editor.layer?.addSublayer(layer)
         layer.addSublayer(sectionTitleLayer)
@@ -53,7 +53,7 @@ class LinksSection: Widget {
     }
 
     func setupUI() {
-        addLayer(ChevronButton("chevron", open: open, changed: { [unowned self] value in
+        addLayer(ChevronButton("disclosure", open: mode == .links, changed: { [unowned self] value in
             self.open = value
         }))
 
@@ -62,7 +62,7 @@ class LinksSection: Widget {
         sectionTitleLayer.foregroundColor = NSColor.linkedSectionTitleColor.cgColor
 
         addLayer(ButtonLayer("sectionTitle", sectionTitleLayer, activated: {
-            guard let chevron = self.layers["chevron"] as? ChevronButton else { return }
+            guard let chevron = self.layers["disclosure"] as? ChevronButton else { return }
 
             self.open.toggle()
             self.editor.showOrHidePersistentFormatter(isPresent: false)
@@ -77,37 +77,67 @@ class LinksSection: Widget {
     }
 
     func setupSectionMode() {
-        switch mode {
-        case .links:
-            linkedReferencesCancellable = note.$linkedReferences
-                .receive(on: DispatchQueue.main)
-                .sink { [unowned self] links in
+        linkActionLayer.string = "Link All"
+        linkedReferencesCancellable = note.$references
+            .receive(on: DispatchQueue.main)
+            .sink { [unowned self] links in
+                Logger.shared.logDebug("Update \(links.count) Links and References for note '\(note.title)'")
                 updateLinkedReferences(links: links)
-                sectionTitleLayer.string = "link".localizedStringWith(comment: "link section title", links.count)
-                updateLayerVisibility()
-            }
-        case .references:
-            linkActionLayer.string = "Link All"
-            linkedReferencesCancellable = note.$unlinkedReferences
-                .receive(on: DispatchQueue.main)
-                .sink { [unowned self] links in
-                updateLinkedReferences(links: links)
-                sectionTitleLayer.string = "reference".localizedStringWith(comment: "reference section title", links.count)
-                updateLayerVisibility()
             }
 
+        switch mode {
+        case .references:
             createLinkAllLayer()
+        default: break
         }
     }
 
     func updateLinkedReferences(links: [NoteReference]) {
-        self.children = links.compactMap { noteReference -> BreadCrumb? in
-            guard let referencingNote = BeamNote.fetch(DocumentManager(), title: noteReference.noteName) else { return nil }
-            guard let referencingElement = referencingNote.findElement(noteReference.elementID) else { return nil }
-            return BreadCrumb(editor: editor, section: self, element: referencingElement)
+        guard let rootNote = self.editor.note.note else { return }
+
+        referencesCancellables.removeAll()
+        for noteReference in links {
+            guard let note = BeamNote.fetch(DocumentManager(), title: noteReference.noteName) else { continue }
+            guard let element = note.findElement(noteReference.elementID) else { continue }
+
+            guard let breadcrumb = editor.getBreadCrumb(for: noteReference) else { continue }
+            element.$text
+                .sink { [unowned self] newText in
+                    if self.shouldHandleReference(rootNote: rootNote.title, text: newText) {
+                        addChild(breadcrumb)
+                    } else {
+                        removeChild(breadcrumb)
+                    }
+                    updateHeading()
+                }.store(in: &referencesCancellables)
         }
 
+        updateHeading()
+    }
+
+    func updateHeading() {
+        switch mode {
+        case .links:
+            sectionTitleLayer.string = "link".localizedStringWith(comment: "link section title", children.count)
+        case .references:
+            sectionTitleLayer.string = "reference".localizedStringWith(comment: "reference section title", children.count)
+        }
         selfVisible = !children.isEmpty
+        visible = selfVisible
+        sectionTitleLayer.isHidden = !selfVisible
+        separatorLayer.isHidden = !selfVisible
+    }
+
+    func shouldHandleReference(rootNote: String, text: BeamText) -> Bool {
+        let linksToNote = text.hasLinkToNote(named: rootNote)
+        let referencesToNote = text.hasReferenceToNote(named: rootNote)
+
+        switch mode {
+        case .links:
+            return linksToNote
+        case .references:
+            return !linksToNote && referencesToNote
+        }
     }
 
     func createLinkAllLayer() {
@@ -132,7 +162,7 @@ class LinksSection: Widget {
                         breadcrumb.proxy.text.makeInternalLink(start..<end)
                     }
                 }
-                self.note.removeAllUnlinkedReferences()
+//                self.note.removeAllReferences()
                 return true
             }, hover: {[weak self] isHover in
                 guard let self = self else { return }
@@ -153,21 +183,17 @@ class LinksSection: Widget {
             )
         )
 
-        layers["chevron"]?.frame = CGRect(origin: CGPoint(x: 0, y: sectionTitleLayer.preferredFrameSize().height - 15), size: CGSize(width: 20, height: 20))
+        layers["disclosure"]?.frame = CGRect(origin: CGPoint(x: 0, y: sectionTitleLayer.preferredFrameSize().height - 15), size: CGSize(width: 20, height: 20))
         linkActionLayer.frame = CGRect(origin: CGPoint(x: 0, y: 0), size: linkActionLayer.preferredFrameSize())
     }
 
-    func updateLayerVisibility() {
-        layer.isHidden = children.isEmpty
-    }
-
     override func updateRendering() {
-        contentsFrame = NSRect(x: 0, y: 0, width: availableWidth, height: children.isEmpty ? 0 : 30)
+        contentsFrame = NSRect(x: 0, y: 0, width: availableWidth, height: selfVisible ? 30 : 0)
 
         computedIdealSize = contentsFrame.size
         computedIdealSize.width = frame.width
 
-        if open {
+        if open && selfVisible {
             for c in children {
                 computedIdealSize.height += c.idealSize.height
             }

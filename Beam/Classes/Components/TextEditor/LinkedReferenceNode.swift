@@ -58,28 +58,24 @@ class ProxyElement: BeamElement {
         }.store(in: &scope)
 
         proxy.$text
-            .receive(on: DispatchQueue.main)
             .sink { [unowned self] newValue in
             updating = true; defer { updating = false }
             text = newValue
         }.store(in: &scope)
 
         proxy.$kind
-            .receive(on: DispatchQueue.main)
             .sink { [unowned self] newValue in
             updating = true; defer { updating = false }
             kind = newValue
         }.store(in: &scope)
 
         proxy.$childrenFormat
-            .receive(on: DispatchQueue.main)
             .sink { [unowned self] newValue in
             updating = true; defer { updating = false }
             childrenFormat = newValue
         }.store(in: &scope)
 
         proxy.$updateDate
-            .receive(on: DispatchQueue.main)
             .sink { [unowned self] newValue in
             updating = true; defer { updating = false }
             updateDate = newValue
@@ -104,7 +100,6 @@ class LinkedReferenceNode: TextNode {
 
     // MARK: - Properties
     let linkTextLayer = CATextLayer()
-    var didMakeInternalLink: ((_ text: String) -> Void)?
 
     // MARK: - Initializer
 
@@ -112,8 +107,9 @@ class LinkedReferenceNode: TextNode {
         let proxyElement = ProxyElement(for: element)
         super.init(editor: editor, element: proxyElement)
 
-        editor.layer?.addSublayer(layer)
         actionLayer?.removeFromSuperlayer()
+
+        createLinkActionLayer()
 
         open = false
 
@@ -129,6 +125,11 @@ class LinkedReferenceNode: TextNode {
                 self.invalidateRendering()
                 updateChildrenVisibility(visible && open)
         }.store(in: &scope)
+
+        element.$text.sink { [unowned self] text in
+            self.layers["LinkLayer"]?.layer.isHidden = self.isLinkToNote(text) || !shouldDisplayLinkButton
+        }.store(in: &scope)
+
     }
 
     // MARK: - Setup UI
@@ -140,25 +141,61 @@ class LinkedReferenceNode: TextNode {
         linkTextLayer.foregroundColor = NSColor.linkedActionButtonColor.cgColor
         linkTextLayer.contentsScale = contentsScale
 
-        addLayer(Layer(
-                name: "LinkLayer",
-                layer: linkTextLayer,
-                down: { [weak self] _ in
-                    guard let self = self, let didMakeInternalLink = self.didMakeInternalLink else { return false }
-                    didMakeInternalLink(self.text.text)
-                    return true
-                },
-                hover: { (isHover) in
-                    self.linkTextLayer.foregroundColor = isHover ? NSColor.linkedActionButtonHoverColor.cgColor : NSColor.linkedActionButtonColor.cgColor
-                }
-            )
-        )
+        addLayer(ButtonLayer(
+            "LinkLayer",
+            linkTextLayer,
+            activated: { [weak self] in
+                self?.makeInternalLink()
+                return
+            },
+            hovered: { (isHover) in
+                self.linkTextLayer.foregroundColor = isHover ? NSColor.linkedActionButtonHoverColor.cgColor : NSColor.linkedActionButtonColor.cgColor
+            }
+        ))
     }
 
     override func updateSubLayersLayout() {
         CATransaction.disableAnimations {
             layers["LinkLayer"]?.frame = CGRect(origin: CGPoint(x: frame.width - 12, y: 0), size: linkTextLayer.preferredFrameSize())
         }
+    }
+
+    func isLinkToNote(_ text: BeamText) -> Bool {
+        guard let note = editor.note as? BeamNote else { return false }
+        let links = text.internalLinks
+        let title = note.title
+        return links.contains { range -> Bool in
+            range.string == title
+        }
+    }
+    var isLink: Bool {
+        isLinkToNote(text)
+    }
+
+    var isReference: Bool {
+        !isLink
+    }
+
+    var shouldDisplayLinkButton: Bool {
+        guard let proxy = element as? ProxyElement else { return false }
+        return proxy.proxy.depth < 2
+    }
+
+    func makeInternalLink() {
+        guard let note = editor.note as? BeamNote else { return }
+        guard !isLink else { return }
+        let title = note.title
+
+        text.text.ranges(of: title).forEach { range in
+            let start = text.position(at: range.lowerBound)
+            let end = text.position(at: range.upperBound)
+            self.text.makeInternalLink(start..<end)
+        }
+
+        let reference = NoteReference(noteName: element.note!.title, elementID: element.id)
+        note.addReference(reference)
+
+        self.editor.showOrHidePersistentFormatter(isPresent: false)
     }
 
     override var mainLayerName: String {
