@@ -11,7 +11,7 @@ import Cocoa
 extension BeamTextEdit {
 
     // MARK: - Properties
-    private static var xPosInlineFormatter: CGFloat = 32
+    private static let xPosInlineFormatter: CGFloat = 32
     private static let yPosInlineFormatter: CGFloat = 60
     private static let bottomConstraint: CGFloat = -25
     private static let inlineFormatterType: [FormatterType] = [.h1, .h2, .bullet, .checkmark, .bold, .italic, .link]
@@ -409,15 +409,16 @@ extension BeamTextEdit {
               let line = node.lineAt(index: node.cursorPosition),
               let currentLine = node.lineAt(index: cursorStartPosition) else { return }
 
+        let leftMargin: CGFloat = centerText ? 145 : 200 // Value to move the inline formatter to the left
         let middleFrame = (frame.width - textWidth) / 2
         let (xOffset, rect) = node.offsetAndFrameAt(index: node.cursorPosition)
         let yPos = rect.maxY + node.offsetInDocument.y - BeamTextEdit.yPosInlineFormatter
-        let xPos = xOffset + (centerText ? middleFrame - 145 : BeamTextEdit.xPosInlineFormatter) + childInsetFrom(node)
+        let xPos = xOffset + (centerText ? middleFrame - leftMargin : BeamTextEdit.xPosInlineFormatter) + childInsetFrom(node)
 
-        view.frame.origin.x = rootNode.state.nodeSelection != nil ? (centerText ? middleFrame : 200) : xPos
+        view.frame.origin.x = rootNode.state.nodeSelection != nil ? (centerText ? middleFrame : leftMargin) : xPos
 
         // Update Y position only if the current selected line is equal to selected line
-        if !(node.selectedTextRange.upperBound > node.selectedTextRange.lowerBound && currentLine < line ) {
+        if !(node.selectedTextRange.upperBound > node.selectedTextRange.lowerBound && currentLine < line) {
             view.frame.origin.y = rootNode.state.nodeSelection != nil ? node.offsetInDocument.y - 40 : yPos
         }
     }
