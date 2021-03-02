@@ -198,6 +198,14 @@ extension NSColor {
         return loadColor(named: "FormatterItemHoverColor")
     }
 
+    static var hyperlinkTextFielDefaultdColor: NSColor {
+        return loadColor(named: "Niobium")
+    }
+
+    static var hyperlinkTextFielNoEmptydColor: NSColor {
+        return loadColor(named: "LightStoneGray")
+    }
+
     // Other
 
     static var tableHeaderTextColor: NSColor {

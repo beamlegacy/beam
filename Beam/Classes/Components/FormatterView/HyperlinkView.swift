@@ -36,15 +36,24 @@ class HyperlinkView: NSView {
     }
 
     // MARK: - Life Cycle
+
     override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
-
-        if hyperlinkTextField.stringValue.isEmpty {
-            hyperlinkTextField.becomeFirstResponder()
+        DispatchQueue.main.async {
+            if self.hyperlinkTextField.stringValue.isEmpty {
+                self.hyperlinkTextField.becomeFirstResponder()
+            } else {
+                self.hyperlinkTextField.textColor = NSColor.hyperlinkTextFielNoEmptydColor
+            }
         }
     }
 
     override func mouseDown(with event: NSEvent) {}
+
+    override func mouseUp(with event: NSEvent) {
+        super.mouseUp(with: event)
+        hyperlinkTextField.textColor = NSColor.hyperlinkTextFielDefaultdColor
+    }
 
     func setupActionButtons() {
         confirmButton.isHidden = hyperlinkTextField.stringValue.isEmpty ? false : true
@@ -64,6 +73,7 @@ class HyperlinkView: NSView {
         hyperlinkTextField.focusRingType = .none
         hyperlinkTextField.lineBreakMode = .byTruncatingTail
 
+        hyperlinkTextField.textColor = NSColor.hyperlinkTextFielDefaultdColor
         hyperlinkTextField.placeholderString = "Link’s URL"
 
         hyperlinkTextField.delegate = self
