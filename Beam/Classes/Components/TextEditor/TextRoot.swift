@@ -181,6 +181,8 @@ public class TextRoot: TextNode {
         setAccessibilityLabel("TextRoot")
         setAccessibilityRole(.unknown)
         setAccessibilityParent(editor)
+
+        referencesSection?.open = false
     }
 
     var linkedRefsNode: TextNode?

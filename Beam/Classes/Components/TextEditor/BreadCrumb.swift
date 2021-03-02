@@ -16,7 +16,6 @@ class BreadCrumb: Widget {
     var proxy: ProxyElement
     var crumbLayers = [CATextLayer]()
     var crumbArrowLayers = [CALayer]()
-    var section: LinksSection
     var selectedCrumb: Int = 0
     var container: Layer?
     var cardTitleLayer: Layer?
@@ -57,8 +56,7 @@ class BreadCrumb: Widget {
     private let breadCrumbYPosition: CGFloat = 26
     private let spaceBreadcrumbIcon: CGFloat = 15
 
-    init(editor: BeamTextEdit, section: LinksSection, element: BeamElement) {
-        self.section = section
+    init(editor: BeamTextEdit, element: BeamElement) {
         self.proxy = ProxyElement(for: element)
         super.init(editor: editor)
 
@@ -80,13 +78,6 @@ class BreadCrumb: Widget {
 
         setupLayers(with: note)
         updateCrumbLayers()
-
-        if section.mode == .references && crumbChain.count <= 1 {
-            ref.createLinkActionLayer()
-            ref.didMakeInternalLink = {[unowned self] text in
-                updateReferenceSection(text)
-            }
-        }
 
         if children != [linkedReferenceNode] {
             children = [linkedReferenceNode]
@@ -116,26 +107,26 @@ class BreadCrumb: Widget {
 
         createChevronLayer()
 
-        if section.mode == .references {
-            linkLayer.string = "Link"
-            linkLayer.font = NSFont.systemFont(ofSize: 0, weight: .medium)
-            linkLayer.fontSize = 13
-            linkLayer.foregroundColor = NSColor.linkedActionButtonColor.cgColor
+        linkLayer.string = "Link"
+        linkLayer.font = NSFont.systemFont(ofSize: 0, weight: .medium)
+        linkLayer.fontSize = 13
+        linkLayer.foregroundColor = NSColor.linkedActionButtonColor.cgColor
 
-            addLayer(ButtonLayer(
-                    "actionLinkLayer",
-                    linkLayer,
-                    activated: {[weak self] in
-                        guard let self = self else { return }
+        let actionLayer = ButtonLayer(
+                "actionLinkLayer",
+                linkLayer,
+                activated: {[weak self] in
+                    guard let self = self else { return }
 
-                        self.updateReferenceSection(self.proxy.text.text)
-                    },
-                    hovered: { [weak self] isHover in
-                        guard let self = self else { return }
-                        self.linkLayer.foregroundColor = isHover ? NSColor.linkedActionButtonHoverColor.cgColor : NSColor.linkedActionButtonColor.cgColor
-                    }
-                ))
-        }
+                    self.updateReferenceSection(self.proxy.text.text)
+                },
+                hovered: { [weak self] isHover in
+                    guard let self = self else { return }
+                    self.linkLayer.foregroundColor = isHover ? NSColor.linkedActionButtonHoverColor.cgColor : NSColor.linkedActionButtonColor.cgColor
+                }
+            )
+        actionLayer.layer.isHidden = !isReference
+        addLayer(actionLayer)
 
         guard let container = container,
               let cardTitleLayer = cardTitleLayer else { return }
@@ -271,8 +262,7 @@ class BreadCrumb: Widget {
         }
 
         let reference = NoteReference(noteName: proxy.note!.title, elementID: proxy.proxy.id)
-        rootNote.removeUnlinkedReference(reference)
-        rootNote.addLinkedReference(reference)
+        rootNote.addReference(reference)
     }
 
     func updateCrumbLayersVisibility(by index: Int = 0) {
@@ -409,5 +399,13 @@ class BreadCrumb: Widget {
 
     override var mainLayerName: String {
         "BreadCrumb - \(proxy.id.uuidString) (from note \(proxy.note?.title ?? "???"))"
+    }
+
+    var isLink: Bool {
+        linkedReferenceNode.isLink
+    }
+
+    var isReference: Bool {
+        !isLink
     }
 }
