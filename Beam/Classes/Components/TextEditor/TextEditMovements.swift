@@ -253,8 +253,7 @@ extension TextRoot {
             return
         }
 
-        guard let node = focussedWidget as? TextNode,
-              node as? LinkedReferenceNode == nil else { return }
+        guard let node = focussedWidget as? TextNode else { return }
         if cursorPosition == 0 {
             extendNodeSelectionUp()
         } else {
@@ -269,8 +268,7 @@ extension TextRoot {
             return
         }
 
-        guard let node = focussedWidget as? TextNode,
-              node as? LinkedReferenceNode == nil else { return }
+        guard let node = focussedWidget as? TextNode else { return }
         if cursorPosition == node.text.text.count {
             extendNodeSelectionDown()
         } else {
