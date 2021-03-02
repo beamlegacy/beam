@@ -1269,20 +1269,18 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         let eventPoint = convert(event.locationInWindow)
         let widgets = rootNode.getWidgetsBetween(startPos, eventPoint)
 
-        guard focussedWidget as? LinkedReferenceNode == nil else { return }
         if let selection = rootNode?.state.nodeSelection, let focussedNode = focussedWidget as? TextNode {
-            var textNodes = widgets.compactMap { $0 as? TextNode }.filter { (node) -> Bool in
-                return node as? LinkedReferenceNode == nil
-            }
+            var textNodes = widgets.compactMap { $0 as? TextNode }
             if eventPoint.y < startPos.y {
                 textNodes = textNodes.reversed()
             }
             selection.start = focussedNode
             selection.append(focussedNode)
             for textNode in textNodes {
-                guard textNode as? LinkedReferenceNode == nil else { continue }
                 if !selection.nodes.contains(textNode) {
-                    selection.append(textNode)
+                    if type(of: focussedNode) == type(of: textNode) {
+                        selection.append(textNode)
+                    }
                 }
             }
             for selectedNode in selection.nodes {

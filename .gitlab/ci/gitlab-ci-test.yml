@@ -33,7 +33,7 @@ xctests:
   after_script:
     - rm "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/Beam-test-${CI_JOB_ID}"*
   tags:
-    - macos
+    - macos-mono
   interruptible: true
 
 xctests UI:

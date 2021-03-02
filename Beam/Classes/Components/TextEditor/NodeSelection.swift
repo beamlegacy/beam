@@ -73,7 +73,7 @@ class NodeSelection {
 
     func extendUp() {
         guard let next = end.previousVisibleTextNode(),
-              next as? LinkedReferenceNode == nil else { return }
+              type(of: end) == type(of: next) else { return }
 
         if next.isAbove(node: start) {
             end = next
@@ -88,7 +88,7 @@ class NodeSelection {
 
     func extendDown() {
         guard let next = end.nextVisibleTextNode(),
-              next as? LinkedReferenceNode == nil else { return }
+              type(of: end) == type(of: next) else { return }
 
         if next.isAbove(node: start) || next == start {
             if start != end {
