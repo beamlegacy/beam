@@ -290,7 +290,7 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
         for (name, refs) in results {
             let note = BeamNote.fetchOrCreate(AppDelegate.main.data.documentManager, title: name)
             for ref in refs {
-                note.addUnlinkedReference(ref)
+                note.addReference(ref)
             }
         }
     }
@@ -341,11 +341,11 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
             if async {
                 DispatchQueue.main.async {
                     let refnote = BeamNote.fetchOrCreate(documentManager, title: linkTitle)
-                    refnote.addLinkedReference(reference)
+                    refnote.addReference(reference)
                 }
             } else {
                 let refnote = BeamNote.fetchOrCreate(documentManager, title: linkTitle)
-                refnote.addLinkedReference(reference)
+                refnote.addReference(reference)
             }
         }
 
@@ -432,4 +432,13 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
         guard let depth = parent?.depth else { return 0 }
         return depth + 1
     }
+
+    func hasLinkToNote(named noteName: String) -> Bool {
+        text.hasLinkToNote(named: noteName)
+    }
+
+    func hasReferenceToNote(named noteName: String) -> Bool {
+        text.hasReferenceToNote(named: noteName)
+    }
+
 }

@@ -11,12 +11,12 @@ import Combine
 class NoteAutoSaveService: ObservableObject {
     private var scope = Set<AnyCancellable>()
 
-    func addNoteToSave(_ note: BeamNote) {
-        notesToSave.append(note)
+    func addNoteToSave(_ note: BeamNote, _ detectLinks: Bool) {
+        notesToSave[note] = (notesToSave[note] ?? false) || detectLinks
         noteToSaveChanged = true
     }
 
-    @Published private var notesToSave: [BeamNote] = []
+    @Published private var notesToSave: [BeamNote: Bool] = [:]
     @Published private var noteToSaveChanged: Bool = false
     init() {
         $noteToSaveChanged
@@ -36,9 +36,12 @@ class NoteAutoSaveService: ObservableObject {
         let documentManager = AppDelegate.main.data.documentManager
 
         for note in notesToSave {
-            note.save(documentManager: documentManager)
+            note.key.save(documentManager: documentManager)
+//            if note.value {
+//                BeamNote.requestLinkDetection()
+//            }
         }
 
-        notesToSave = []
+        notesToSave = [:]
     }
 }

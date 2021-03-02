@@ -107,12 +107,17 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     var textWidth: CGFloat { isBig ? 704 : 544 }
 
     private (set) var isResizing = false
+    private (set) var journalMode: Bool
 
-    public init(root: BeamElement, font: Font = Font.main) {
-        let start = CFAbsoluteTimeGetCurrent()
-        BeamNote.requestLinkDetection()
-        let diff = String(format: "%.2f", CFAbsoluteTimeGetCurrent() - start)
-        Logger.shared.logDebug("Links detection took \(diff)sec")
+    public init(root: BeamElement, font: Font = Font.main, journalMode: Bool) {
+        self.journalMode = journalMode
+
+        if !journalMode, let note = root as? BeamNote {
+            let start = CFAbsoluteTimeGetCurrent()
+            BeamNote.requestLinkDetection(for: note.title)
+            let diff = String(format: "%.2f", CFAbsoluteTimeGetCurrent() - start)
+            Logger.shared.logDebug("Links detection took \(diff)sec")
+        }
 
         self.config.font = font
         note = root
@@ -1381,7 +1386,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     @IBAction func saveDocument(_ sender: Any?) {
         Logger.shared.logInfo("Save document!", category: .noteEditor)
         rootNode.note?.save(documentManager: documentManager)
-        BeamNote.requestLinkDetection()
     }
 
     func nodeFor(_ element: BeamElement) -> TextNode {
@@ -1415,6 +1419,18 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     private var accessingMapping = false
     private var mapping: [BeamElement: TextNode] = [:]
     private var deadNodes: [TextNode] = []
+
+    private var breadCrumbs: [NoteReference: BreadCrumb] = [:]
+    func getBreadCrumb(for noteReference: NoteReference) -> BreadCrumb? {
+        guard let breadCrumb = breadCrumbs[noteReference] else {
+            guard let referencingNote = BeamNote.fetch(DocumentManager(), title: noteReference.noteName) else { return nil }
+            guard let referencingElement = referencingNote.findElement(noteReference.elementID) else { return nil }
+            let breadCrumb = BreadCrumb(editor: self, element: referencingElement)
+            breadCrumbs[noteReference] = breadCrumb
+            return breadCrumb
+        }
+        return breadCrumb
+    }
 
     internal func showBidirectionalPopover(prefix: Int, suffix: Int) {
         // DispatchQueue to init the popover after the node is initialized

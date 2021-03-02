@@ -38,11 +38,18 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         }
     }
 
-    var selfVisible = true { didSet { invalidateLayout() } }
+    var selfVisible = true {
+        didSet {
+            invalidateLayout()
+        }
+    }
 
     var visible = true {
         didSet {
-            layer.isHidden = !visible
+            layer.isHidden = !visible || !selfVisible
+            for l in layers where l.value.layer.superlayer == editor.layer {
+                l.value.layer.isHidden = !visible || !selfVisible
+            }
         }
     }
 
@@ -85,6 +92,8 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
                 editor.layer?.addSublayer(l.value.layer)
             }
         }
+
+        updateChildrenVisibility(visible && open)
     }
 
     var enabled: Bool { editor.enabled }
@@ -260,9 +269,6 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
         drawDebug(in: context)
 
-        if selfVisible {
-            context.saveGState(); do { context.restoreGState() }
-        }
         context.restoreGState()
     }
 
@@ -332,16 +338,8 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     }
 
     func invalidate(_ rect: NSRect? = nil) {
-        guard let p = parent else { return }
+        guard !layer.needsDisplay() else { return }
         layer.setNeedsDisplay()
-        let offset = NSPoint(x: frame.origin.x + currentFrameInDocument.origin.x - frameInDocument.origin.x,
-                             y: frame.origin.y + currentFrameInDocument.origin.y - frameInDocument.origin.y)
-        if let r = rect {
-            p.invalidate(r.offsetBy(dx: offset.x, dy: offset.y))
-        } else {
-            let r = NSRect(x: offset.x, y: offset.y, width: currentFrameInDocument.width, height: contentsFrame.maxY)
-            p.invalidate(r)
-        }
     }
 
     func invalidateRendering() {
@@ -387,6 +385,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     // TODO: Refactor this in two methods
     func updateChildrenVisibility(_ isVisible: Bool) {
         for c in children {
+            guard c.visible != isVisible else { continue }
             c.visible = isVisible
             c.updateChildrenVisibility(isVisible && c.open)
             invalidateLayout()
@@ -399,12 +398,12 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         if invalidatedRendering {
             contentsFrame = NSRect()
 
-            if selfVisible {
-                // do something
-            }
-
             contentsFrame.size.width = availableWidth
             contentsFrame = contentsFrame.rounded()
+
+            if !selfVisible {
+                contentsFrame.size.height = 0
+            }
 
             invalidatedRendering = false
         }
@@ -422,6 +421,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     // MARK: - Methods Widget
 
     func addChild(_ child: Widget) {
+        guard !children.contains(child) else { return }
         children.append(child)
         invalidateLayout()
     }
@@ -483,6 +483,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
         if global {
             editor.layer?.addSublayer(layer.layer)
+            layer.layer.isHidden = !inVisibleBranch
         } else if layer.layer.superlayer == nil {
             self.layer.addSublayer(layer.layer)
 
