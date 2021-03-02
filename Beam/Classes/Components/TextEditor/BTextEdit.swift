@@ -261,19 +261,15 @@ public struct BTextEditScrollable: NSViewRepresentable {
             return
         }
         let containerSize = scrollView.bounds.size
-        let contentView = scrollView.contentView
-        let contentOffset = contentView.bounds.origin
         let contentSize = documentView.bounds.size
-
-        let contentSizeDiff = lastContentBounds.size.height - contentSize.height
-
-        let isNewContentShorterThanViewHeight = contentSize.height - contentOffset.y - contentSizeDiff < containerSize.height
+        let previousContentOffset = lastContentBounds.origin
+        let isNewContentShorterThanViewHeight = contentSize.height - previousContentOffset.y < containerSize.height
         if isNewContentShorterThanViewHeight {
             // Force the content offset to stay the same
             // even if that means having a white space at the bottom.
-            scrollView.scroll(contentView, to: lastContentBounds.origin)
+            scrollView.scroll(scrollView.contentView, to: previousContentOffset)
         } else {
-            lastContentBounds.origin = contentOffset
+            lastContentBounds.origin = scrollView.contentView.bounds.origin
         }
         lastContentBounds.size = contentSize
     }
