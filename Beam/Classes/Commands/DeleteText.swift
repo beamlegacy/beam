@@ -33,19 +33,17 @@ class DeleteText: Command {
         }
         let count = range.count == 0 ? 1 : range.count + 1
         node.element.text.remove(count: count, at: newPos)
-        node.root?.focussedWidget = node
-        node.root?.cursorPosition = newPos
+        node.focus(cursorPosition: newPos)
         node.root?.cancelSelection()
         return true
     }
 
     func undo() -> Bool {
-        if let focussedNode = node.root?.focussedWidget as? TextNode, focussedNode !== self.node {
+        if let focussedNode = node.root?.focusedWidget as? TextNode, focussedNode !== self.node {
             self.node = focussedNode
         }
         node.element.text.replaceSubrange(node.element.text.wholeRange, with: oldText)
-        node.root?.focussedWidget = node
-        node.root?.cursorPosition = range.upperBound
+        node.focus(cursorPosition: range.upperBound)
         return true
     }
 

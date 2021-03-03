@@ -124,7 +124,7 @@ public class TextNode: Widget {
     var readOnly: Bool = false
     var isEditing: Bool {
         guard let r = root else { return false }
-        return r.focussedWidget === self && r.state.nodeSelection == nil
+        return r.focusedWidget === self && r.state.nodeSelection == nil
     }
 
     var firstLineHeight: CGFloat {
@@ -526,8 +526,7 @@ public class TextNode: Widget {
         if children.isEmpty {
             guard let p = parent as? TextNode else { return }
             p.fold()
-            root?.focussedWidget = p
-            root?.cursorPosition = 0
+            p.focus()
             return
         }
 
@@ -539,14 +538,14 @@ public class TextNode: Widget {
         open = true
     }
 
-    override func focus() {
-        super.focus()
+    override func onFocus() {
+        super.onFocus()
         guard !text.isEmpty else { return }
         showHoveredActionLayers(false)
     }
 
-    override func unfocus() {
-        super.unfocus()
+    override func onUnfocus() {
+        super.onUnfocus()
         resetActionLayers()
     }
 
@@ -578,8 +577,8 @@ public class TextNode: Widget {
             }
 
             if mouseInfo.event.clickCount == 1 && editor.inlineFormatter != nil {
-                root?.cursorPosition = clickPos
                 root?.cancelSelection()
+                focus(cursorPosition: clickPos)
                 dragMode = .select(cursorPosition)
 
                 debounceClickTimer = Timer.scheduledTimer(withTimeInterval: debounceClickInterval, repeats: false, block: { [weak self] (_) in
@@ -593,8 +592,8 @@ public class TextNode: Widget {
                 editor.showInlineFormatterOnKeyEventsAndClick()
                 return true
             } else if mouseInfo.event.clickCount == 1 {
-                root?.cursorPosition = clickPos
                 root?.cancelSelection()
+                focus(cursorPosition: clickPos)
                 dragMode = .select(cursorPosition)
                 editor.initAndShowPersistentFormatter()
                 return true

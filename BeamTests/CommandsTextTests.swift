@@ -27,7 +27,7 @@ class CommandsTextTests: QuickSpec {
 
         describe("TextNode Editing Commands") {
             beforeEach {
-                self.rootNode.focussedWidget = self.rootNode.children.first
+                self.rootNode.focusedWidget = self.rootNode.children.first
                 self.rootNode.cursorPosition = 12
             }
             afterEach {

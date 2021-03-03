@@ -22,7 +22,7 @@ class InsertNode: Command {
     }
 
     func run() -> Bool {
-        if let focussedNode = node.root?.focussedWidget as? TextNode, focussedNode !== self.node {
+        if let focussedNode = node.root?.focusedWidget as? TextNode, focussedNode !== self.node {
             self.node = focussedNode
         }
         let element = BeamElement()
@@ -50,8 +50,7 @@ class InsertNode: Command {
         }
 
         guard let result = node.parent?.insert(node: newNode, at: self.pos) else { return false }
-        node.root?.focussedWidget = newNode
-        node.root?.cursorPosition = newNode.element.text.count
+        newNode.focus(cursorPosition: newNode.element.text.count)
         self.newNode = newNode
         return result
     }
@@ -67,9 +66,7 @@ class InsertNode: Command {
         newNode.delete()
         let remainingText = newNode.element.text.extract(range: 0..<newNode.text.count)
         node.text.append(remainingText)
-        node.root?.focussedWidget = node
-        node.root?.cursorPosition = self.cursorPosition
-
+        node.focus(cursorPosition: self.cursorPosition)
         return true
     }
 

@@ -63,7 +63,7 @@ extension BeamTextEdit {
         formatterView.didPressValidLink = {[unowned self] link, oldLink -> Void in
             let (isValidUrl, validUrl) = link.validUrl()
 
-            guard let node = focussedWidget as? TextNode,
+            guard let node = focusedWidget as? TextNode,
                   isValidUrl else {
                     self.showOrHideInlineFormatter(isPresent: false)
                     return
@@ -80,7 +80,7 @@ extension BeamTextEdit {
         }
 
         formatterView.didPressDeleteLink = {[unowned self] (hyperlink) -> Void in
-            guard let node = focussedWidget as? TextNode else { return }
+            guard let node = focusedWidget as? TextNode else { return }
 
             updateNodeWithLink(node: node, isDeleteMode: true, link: hyperlink)
             self.showOrHideInlineFormatter(isPresent: false)
@@ -172,7 +172,7 @@ extension BeamTextEdit {
               isInlineFormatterHidden else { return }
 
         showOrHideInlineFormatter(isPresent: true)
-        focussedWidget = node
+        node.focus()
 
         let trackingArea = NSTrackingArea(
             rect: hyperlinkView.bounds,
@@ -188,7 +188,7 @@ extension BeamTextEdit {
     }
 
     internal func detectFormatterType() {
-        guard let node = focussedWidget as? TextNode else { return }
+        guard let node = focusedWidget as? TextNode else { return }
 
         let selectedTextRange = node.selectedTextRange
         let cursorPosition = rootNode.cursorPosition
@@ -239,7 +239,7 @@ extension BeamTextEdit {
     }
 
     internal func updateFormatterView(with type: FormatterType, attribute: BeamText.Attribute? = nil, kind: ElementKind = .bullet) {
-        guard let node = focussedWidget as? TextNode else { return }
+        guard let node = focusedWidget as? TextNode else { return }
 
         var hasAttribute = false
 
@@ -266,7 +266,7 @@ extension BeamTextEdit {
     }
 
     internal func selectFormatterAction(_ type: FormatterType, _ isActive: Bool) {
-        guard let node = focussedWidget as? TextNode else { return }
+        guard let node = focusedWidget as? TextNode else { return }
 
         switch type {
         case .h1:
@@ -402,7 +402,7 @@ extension BeamTextEdit {
 
     // MARK: Private Methods (UI)
     private func updateInlineFormatterFrame() {
-        guard let node = focussedWidget as? TextNode,
+        guard let node = focusedWidget as? TextNode,
               let view = inlineFormatter,
               let line = node.lineAt(index: node.cursorPosition),
               let currentLine = node.lineAt(index: cursorStartPosition) else { return }
