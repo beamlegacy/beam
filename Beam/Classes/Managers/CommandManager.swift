@@ -85,18 +85,27 @@ class CommandManager {
     private var groupCmd: [GroupCommand] = []
     private var groupFailed: Bool = false
 
+    private var lastCmdDate: Date?
+
     func run(name: String, run: @escaping () -> Bool, undo: @escaping () -> Bool, coalesce: @escaping (Command) -> Bool) {
         self.run(command: BlockCommand(name: name, run: run, undo: undo, coalesce: coalesce))
     }
 
     func run(command: Command) {
-        if command.run() && !groupFailed {
+        var cmdToRun = command
+        if let lastCmd = doneQueue.last, lastCmd.coalesce(command: cmdToRun) {
+            doneQueue.removeLast()
+            cmdToRun = lastCmd
+        }
+        if cmdToRun.run() && !groupFailed {
+            Logger.shared.logDebug("Run: \(cmdToRun.name)")
             guard !groupCmd.isEmpty else {
-                doneQueue.append(command)
+                doneQueue.append(cmdToRun)
                 return
             }
-            groupCmd.last?.append(command: command)
+            groupCmd.last?.append(command: cmdToRun)
         } else {
+            Logger.shared.logDebug("\(cmdToRun) run failed")
             guard groupCmd.isEmpty else {
                 groupFailed = true
                 endGroup()
@@ -109,10 +118,12 @@ class CommandManager {
         guard !groupCmd.isEmpty else {
             guard let lastCmd = doneQueue.last else { return false }
             if lastCmd.undo() {
+                Logger.shared.logDebug("Undo: \(lastCmd.name)")
                 undoneQueue.append(lastCmd)
                 doneQueue.removeLast()
                 return true
             }
+            Logger.shared.logDebug("\(lastCmd) undo failed")
             return false
         }
         fatalError("Cannot Undo with a GroupCommand active, it should be ended first.")
@@ -122,10 +133,12 @@ class CommandManager {
         guard !groupCmd.isEmpty else {
             guard let lastCmd = undoneQueue.last else { return false }
             if lastCmd.run() {
+                Logger.shared.logDebug("Redo: \(lastCmd.name)")
                 doneQueue.append(lastCmd)
                 undoneQueue.removeLast()
                 return true
             }
+            Logger.shared.logDebug("\(lastCmd) redo failed")
             return false
         }
         fatalError("Cannot Redo with a GroupCommand active, it should be ended first.")
@@ -134,6 +147,7 @@ class CommandManager {
     // MARK: - Group Command
 
     func beginGroup(with name: String) {
+        guard groupCmd.isEmpty else { return }
         groupFailed = false
         groupCmd.append(GroupCommand(name: name))
     }
@@ -142,5 +156,14 @@ class CommandManager {
         guard let lastGrp = groupCmd.last else { return }
         doneQueue.append(lastGrp)
         groupCmd.removeLast()
+    }
+
+    // MARK: - Timer
+    func getTimeInterval() -> TimeInterval? {
+        guard let lastCmdDate = self.lastCmdDate else {
+            self.lastCmdDate = Date()
+            return nil
+        }
+        return Date().timeIntervalSince(lastCmdDate)
     }
 }

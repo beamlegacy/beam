@@ -76,7 +76,6 @@ extension TextRoot {
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
     public func doCommand(_ command: Command) {
-        pushUndoState(command)
         editor.reBlink()
         switch command {
         // swiftlint:disable:next fallthrough no_fallthrough_only
