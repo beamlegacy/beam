@@ -38,7 +38,7 @@ class NLPTests: XCTestCase {
 //        let range = text.startIndex ..< text.endIndex
 //        let options: NLTagger.Options = [.omitPunctuation, .omitWhitespace]
 
-//        print("Found language: \(String(describing: tagger.dominantLanguage))")
+//        Logger.shared.logDebug("Found language: \(String(describing: tagger.dominantLanguage))")
         XCTAssertEqual(tagger.dominantLanguage, .english)
 
 //        tagger.enumerateTags(in: range, unit: .word, scheme: .lemma, options: options) { tag, tokenRange -> Bool in
@@ -46,7 +46,7 @@ class NLPTests: XCTestCase {
                 // Do something with each lemma
 //                let range = text.range(from: tokenRange.lowerBound ..< tokenRange.upperBound)
 //                let range = text[tokenRange]
-//                print("Lema: \(range) -> \(lemma)")
+//                Logger.shared.logDebug("Lema: \(range) -> \(lemma)")
 //            }
 //
 //            return true
@@ -63,7 +63,7 @@ class NLPTests: XCTestCase {
 //        let range = text.startIndex ..< text.endIndex
 //        let options: NLTagger.Options = [.omitPunctuation, .omitWhitespace]
 
-//        print("Found language: \(String(describing: tagger.dominantLanguage))")
+//        Logger.shared.logDebug("Found language: \(String(describing: tagger.dominantLanguage))")
         XCTAssertEqual(tagger.dominantLanguage, .french)
 
 //        tagger.enumerateTags(in: range, unit: .word, scheme: .lemma, options: options) { tag, tokenRange -> Bool in
@@ -71,7 +71,7 @@ class NLPTests: XCTestCase {
 //                // Do something with each lemma
 ////                let range = text.range(from: tokenRange.lowerBound ..< tokenRange.upperBound)
 //                let range = text[tokenRange]
-////                print("Lema: \(range) -> \(lemma)")
+////                Logger.shared.logDebug("Lema: \(range) -> \(lemma)")
 //            }
 //            return true
 //        }

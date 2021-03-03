@@ -825,7 +825,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     // NSTextInputHandler:
     // NSTextInputClient:
     public func insertText(_ string: Any, replacementRange: NSRange) {
-        //        print("insertText \(string) at \(replacementRange)")
+        //        Logger.shared.logDebug("insertText \(string) at \(replacementRange)")
         unmarkText()
         let range = replacementRange.lowerBound..<replacementRange.upperBound
         //swiftlint:disable:next force_cast
@@ -835,7 +835,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     /* The receiver inserts string replacing the content specified by replacementRange. string can be either an NSString or NSAttributedString instance. selectedRange specifies the selection inside the string being inserted; hence, the location is relative to the beginning of string. When string is an NSString, the receiver is expected to render the marked text with distinguishing appearance (i.e. NSTextView renders with -markedTextAttributes).
      */
     public func setMarkedText(_ string: Any, selectedRange: NSRange, replacementRange: NSRange) {
-        //        print("setMarkedText \(string) at \(replacementRange) with selection \(selectedRange)")
+        //        Logger.shared.logDebug("setMarkedText \(string) at \(replacementRange) with selection \(selectedRange)")
         //swiftlint:disable:next force_cast
         let str = string as! String
         setMarkedText(string: str, selectedRange: selectedTextRange.lowerBound..<selectedTextRange.upperBound, replacementRange: replacementRange.lowerBound..<replacementRange.upperBound)
@@ -850,7 +850,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         } else {
             r = NSRange(location: selectedTextRange.lowerBound, length: selectedTextRange.upperBound - selectedTextRange.lowerBound)
         }
-        //        print("selectedRange \(r)")
+        //        Logger.shared.logDebug("selectedRange \(r)")
         return r
     }
 
@@ -863,14 +863,14 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         } else {
             r = NSRange(location: markedTextRange.lowerBound, length: markedTextRange.upperBound - markedTextRange.lowerBound)
         }
-        //        print("markedRange \(r)")
+        //        Logger.shared.logDebug("markedRange \(r)")
         return r
     }
 
     /* Returns attributed string specified by range. It may return nil. If non-nil return value and actualRange is non-NULL, it contains the actual range for the return value. The range can be adjusted from various reasons (i.e. adjust to grapheme cluster boundary, performance optimization, etc).
      */
     public func attributedSubstring(forProposedRange range: NSRange, actualRange: NSRangePointer?) -> NSAttributedString? {
-        //        print("attributedSubstring for \(range)")
+        //        Logger.shared.logDebug("attributedSubstring for \(range)")
         if let ptr = actualRange {
             ptr.pointee = range
         }
@@ -888,14 +888,14 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     /* Returns an array of attribute names recognized by the receiver.
      */
     public func validAttributesForMarkedText() -> [NSAttributedString.Key] {
-        //        print("validAttributesForMarkedText")
+        //        Logger.shared.logDebug("validAttributesForMarkedText")
         return []
     }
 
     /* Returns the first logical rectangular area for range. The return value is in the screen coordinate. The size value can be negative if the text flows to the left. If non-NULL, actuallRange contains the character range corresponding to the returned area.
      */
     public func firstRect(forCharacterRange range: NSRange, actualRange: NSRangePointer?) -> NSRect {
-        //        print("firstRect for \(range)")
+        //        Logger.shared.logDebug("firstRect for \(range)")
         let (rect, _) = firstRect(forCharacterRange: range.lowerBound..<range.upperBound)
         let p = convert(rect.origin, to: nil)
         let x = Float(p.x)
@@ -909,7 +909,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     /* Returns the index for character that is nearest to point. point is in the screen coordinate system.
      */
     public func characterIndex(for point: NSPoint) -> Int {
-        //        print("characterIndex for \(point)")
+        //        Logger.shared.logDebug("characterIndex for \(point)")
         return positionAt(point: point)
     }
 
@@ -1360,7 +1360,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         let y = topOffset
         titleLayer.anchorPoint = NSPoint()
         titleLayer.position = NSPoint(x: 0, y: y)
-        //        print("titleFrame: \(titleLayer.bounds) / \(titleLayer.position) (hidden: \(titleLayer.isHidden))")
+        //        Logger.shared.logDebug("titleFrame: \(titleLayer.bounds) / \(titleLayer.position) (hidden: \(titleLayer.isHidden))")
 
         relayoutRoot()
     }
@@ -1368,7 +1368,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     public func draw(_ layer: CALayer, in context: CGContext) {
         guard layer === self.titleLayer else { return }
 
-        //        print("draw title into titleLayer: \(titleLayer.bounds) / \(titleLayer.position) (hidden: \(titleLayer.isHidden))")
+        //        Logger.shared.logDebug("draw title into titleLayer: \(titleLayer.bounds) / \(titleLayer.position) (hidden: \(titleLayer.isHidden))")
         context.saveGState()
         context.textMatrix = CGAffineTransform.identity
         let x = leadingAlignment - title.frame.width - titlePadding

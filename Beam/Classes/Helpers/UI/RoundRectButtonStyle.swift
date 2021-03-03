@@ -18,7 +18,7 @@ struct RoundedRectangleDecoration: View {
     let emptyBg = Color(.displayP3, white: 1, opacity: 0)
 
     func bgColor(_ enabled: Bool, _ hover: Bool, _ pressed: Bool) -> Color {
-        //print("color: isHovering: \(hover) pressed: \(pressed) isEnabled: \(enabled)")
+        //Logger.shared.logDebug("color: isHovering: \(hover) pressed: \(pressed) isEnabled: \(enabled)")
         guard enabled else { return emptyBg }
         guard !pressed else { return pressedBg }
         return hover ? hoverBg : emptyBg
@@ -29,7 +29,7 @@ struct RoundedRectangleDecoration: View {
             .foregroundColor(bgColor(isEnabled, isHovering, isPressed))
             .onHover { h in
                 self.isHovering = h
-                //print("onHover: isHovering: \(self.isHovering) (\(h)) isEnabled: \(self.isEnabled)")
+                //Logger.shared.logDebug("onHover: isHovering: \(self.isHovering) (\(h)) isEnabled: \(self.isEnabled)")
             }
             .frame(width: 33, height: 28, alignment: .center)
     }

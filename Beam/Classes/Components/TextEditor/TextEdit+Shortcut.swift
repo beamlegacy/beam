@@ -22,7 +22,7 @@ extension BeamTextEdit {
     }
 
     internal func toggleUnderline() {
-        print("underline")
+        Logger.shared.logDebug("underline")
     }
 
     internal func toggleStrikeThrough() {
@@ -30,7 +30,7 @@ extension BeamTextEdit {
     }
 
     internal func toggleLink() {
-        print("link")
+        Logger.shared.logDebug("link")
     }
 
     internal func toggleBiDirectionalLink() {
@@ -48,7 +48,7 @@ extension BeamTextEdit {
     }
 
     internal func toggleUnorderedAndOrderedList() {
-        print("UnorderedList // OrderedList")
+        Logger.shared.logDebug("UnorderedList // OrderedList")
     }
 
     internal func toggleQuote() {
@@ -57,11 +57,11 @@ extension BeamTextEdit {
     }
 
     internal func toggleTodo() {
-        print("todo")
+        Logger.shared.logDebug("todo")
     }
 
     internal func toggleCode() {
-        print("code")
+        Logger.shared.logDebug("code")
     }
 
 }

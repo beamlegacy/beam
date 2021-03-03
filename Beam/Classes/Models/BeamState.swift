@@ -231,7 +231,7 @@ let NoteDisplayThreshold = Float(0.0)
     }
 
     @discardableResult func navigateToNote(named: String) -> Bool {
-        //print("load note named \(named)")
+        //Logger.shared.logDebug("load note named \(named)")
         let note = BeamNote.fetchOrCreate(data.documentManager, title: named)
         return navigateToNote(note)
     }
@@ -326,7 +326,7 @@ let NoteDisplayThreshold = Float(0.0)
             switch query.source {
             case .autoComplete:
                 searchEngine.query = query.string
-                // print("Start search query: \(searchEngine.searchUrl)")
+                // Logger.shared.logDebug("Start search query: \(searchEngine.searchUrl)")
                 createTab(withURL: URL(string: searchEngine.searchUrl)!, originalQuery: query.string)
                 mode = .web
 
@@ -367,7 +367,7 @@ let NoteDisplayThreshold = Float(0.0)
             return URL(string: searchEngine.searchUrl)!
         }()
 
-        // print("Start query: \(url)")
+        // Logger.shared.logDebug("Start query: \(url)")
 
         createTab(withURL: url, originalQuery: searchQuery, createNote: createNote)
         cancelAutocomplete()
@@ -384,7 +384,7 @@ let NoteDisplayThreshold = Float(0.0)
             guard let self = self else { return }
             guard self.searchQuerySelection == nil else { return }
             guard self.selectionIndex == nil else { return }
-            // print("received auto complete query: \(query)")
+            // Logger.shared.logDebug("received auto complete query: \(query)")
 
             self.completedQueries = []
 
@@ -406,7 +406,7 @@ let NoteDisplayThreshold = Float(0.0)
                 notes.forEach {
                     let autocompleteResult = AutoCompleteResult(id: $0.id, string: $0.title, source: .note)
                     self.completedQueries.append(autocompleteResult)
-                    // print("Found note \($0)")
+                    // Logger.shared.logDebug("Found note \($0)")
                 }
 
                 self.completer.complete(query: query)
@@ -419,7 +419,7 @@ let NoteDisplayThreshold = Float(0.0)
 
         completer.$results.receive(on: RunLoop.main).sink { [weak self] results in
             guard let self = self else { return }
-            //print("received auto complete results: \(results)")
+            //Logger.shared.logDebug("received auto complete results: \(results)")
             self.selectionIndex = nil
             self.completedQueries.append(contentsOf: results.prefix(8))
         }.store(in: &scope)

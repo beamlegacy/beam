@@ -40,7 +40,7 @@ class Calculator: Command {
         case "/":
             self.opRes.res /= self.number
         default:
-            print("Operand is not recognized")
+            Logger.shared.logDebug("Operand is not recognized")
             return false
         }
         return true
@@ -57,7 +57,7 @@ class Calculator: Command {
         case "/":
             self.opRes.res *= self.number
         default:
-            print("Operand is not recognized")
+            Logger.shared.logDebug("Operand is not recognized")
             return false
         }
         return true
@@ -75,7 +75,7 @@ class Calculator: Command {
             case "/":
                 self.number /= cmd.number
             default:
-                print("Can't coalesce")
+                Logger.shared.logDebug("Can't coalesce")
                 return false
             }
             return true

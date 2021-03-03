@@ -67,7 +67,7 @@ class ParserTests: XCTestCase {
 //
 //        let parser = Parser(inputString: string)
 //        let AST = parser.parseAST()
-//        print("AST: \(AST.treeString)")
+//        Logger.shared.logDebug("AST: \(AST.treeString)")
 //    }
 
 //    func testParser6() {
@@ -75,7 +75,7 @@ class ParserTests: XCTestCase {
 //
 //        let parser = Parser(inputString: string)
 //        let AST = parser.parseAST()
-//        print("AST: \(AST.treeString)")
+//        Logger.shared.logDebug("AST: \(AST.treeString)")
 //    }
 
 //    func testParser7() {
@@ -83,6 +83,6 @@ class ParserTests: XCTestCase {
 //
 //        let parser = Parser(inputString: string)
 //        let AST = parser.parseAST()
-//        print("AST: \(AST.treeString)")
+//        Logger.shared.logDebug("AST: \(AST.treeString)")
 //    }
 }

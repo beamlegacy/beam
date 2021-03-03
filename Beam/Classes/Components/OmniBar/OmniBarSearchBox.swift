@@ -145,7 +145,7 @@ struct OmniBarSearchBox: View {
         }
 
         withAnimation {
-            //print("searchText activated: \(searchText)")
+            //Logger.shared.logDebug("searchText activated: \(searchText)")
             state.startQuery()
             isEditing = false
         }
