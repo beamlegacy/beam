@@ -186,11 +186,7 @@ class LinkedReferenceNode: TextNode {
         guard !isLink else { return }
         let title = note.title
 
-        text.text.ranges(of: title).forEach { range in
-            let start = text.position(at: range.lowerBound)
-            let end = text.position(at: range.upperBound)
-            self.text.makeInternalLink(start..<end)
-        }
+        text.makeLinkToNoteExplicit(forNote: title)
 
         let reference = NoteReference(noteName: element.note!.title, elementID: element.id)
         note.addReference(reference)

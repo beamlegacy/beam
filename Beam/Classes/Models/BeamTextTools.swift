@@ -169,6 +169,14 @@ extension BeamText {
         return true
     }
 
+    mutating func makeLinkToNoteExplicit(forNote title: String) {
+        text.ranges(of: title).forEach { range in
+            let start = text.position(at: range.lowerBound)
+            let end = text.position(at: range.upperBound)
+            makeInternalLink(start..<end)
+        }
+    }
+
     var internalLinks: [Range] {
         var links = [Range]()
         for range in ranges {
