@@ -11,10 +11,8 @@ import Cocoa
 extension BeamTextEdit {
 
     // MARK: - Properties
-    private static var xPosInlineFormatter: CGFloat = 55
-    private static var centerTextXPosInlineFormatter: CGFloat = 80
-    private static let yPosInlineFormatter: CGFloat = 50
-    private static let yPosDismissInlineFormatter: CGFloat = 35
+    private static let xPosInlineFormatter: CGFloat = 32
+    private static let yPosInlineFormatter: CGFloat = 60
     private static let bottomConstraint: CGFloat = -25
     private static let inlineFormatterType: [FormatterType] = [.h1, .h2, .bullet, .checkmark, .bold, .italic, .link]
     private static let persistentFormatterType: [FormatterType] = [.h1, .h2, .quote, .code, .bold, .italic, .strikethrough]
@@ -23,8 +21,8 @@ extension BeamTextEdit {
     private static var isExitingLink = false
     private static var bottomAnchor: NSLayoutConstraint?
     private static var centerXAnchor: NSLayoutConstraint?
-    private static var deboucingKeyEventTimer: Timer?
-    private static var deboucingMouseEventTimer: Timer?
+    private static var debounceKeyEventTimer: Timer?
+    private static var debounceMouseEventTimer: Timer?
 
     // MARK: - UI
     internal func initPersistentFormatterView() {
@@ -41,7 +39,7 @@ extension BeamTextEdit {
 
         addConstraint(to: formatterView, with: contentView)
         contentView.addSubview(formatterView)
-        activeLayoutConstraint(for: formatterView)
+        activateLayoutConstraint(for: formatterView)
 
         formatterView.didSelectFormatterType = { [unowned self] (type, isActive) -> Void in
             self.selectFormatterAction(type, isActive)
@@ -136,8 +134,8 @@ extension BeamTextEdit {
         detectFormatterType()
 
         if isKeyEvent && !rootNode.textIsSelected {
-            // Enable timer to hide inline formatter during the key selection
-            BeamTextEdit.deboucingKeyEventTimer = Timer.scheduledTimer(withTimeInterval: 0.23, repeats: false, block: { [weak self] (_) in
+            // Enable timer to hide inline formatter during key selection
+            BeamTextEdit.debounceKeyEventTimer = Timer.scheduledTimer(withTimeInterval: 0.23, repeats: false, block: { [weak self] (_) in
                 guard let self = self else { return }
                 self.showOrHideInlineFormatter(isPresent: false, isDragged: isDragged)
                 self.showOrHidePersistentFormatter(isPresent: true)
@@ -146,10 +144,10 @@ extension BeamTextEdit {
             return
         } else if rootNode.state.nodeSelection != nil {
             // Invalid the timer when we select all bullet
-            BeamTextEdit.deboucingKeyEventTimer?.invalidate()
+            BeamTextEdit.debounceKeyEventTimer?.invalidate()
         } else if !rootNode.textIsSelected {
             // Invalid the timer & hide the inline formatter when nothing is selected
-            BeamTextEdit.deboucingKeyEventTimer?.invalidate()
+            BeamTextEdit.debounceKeyEventTimer?.invalidate()
             showOrHideInlineFormatter(isPresent: false, isDragged: isDragged)
             showOrHidePersistentFormatter(isPresent: true)
         }
@@ -160,7 +158,7 @@ extension BeamTextEdit {
     internal func updateInlineFormaterOnHover(_ currentNode: TextNode?, _ position: NSPoint, _ frame: NSRect?, _ url: URL?) {
         initInlineFormatterView(isHyperlinkView: true)
 
-        if let debounce = BeamTextEdit.deboucingMouseEventTimer {
+        if let debounce = BeamTextEdit.debounceMouseEventTimer {
             debounce.invalidate()
             if !debounce.isValid { BeamTextEdit.isExitingLink = true }
         }
@@ -198,7 +196,7 @@ extension BeamTextEdit {
         var selectedRange = selectedTextRange.lowerBound == 0 && selectedTextRange.upperBound > 0 ? beginPosition : endPosition
         var types: [FormatterType] = []
 
-        // Get correct attribute range to update the inline formatter
+        // Get correct attribute range to update inline formatter state
         node.text.ranges.forEach { (range) in
             if !range.attributes.isEmpty && selectedTextRange == range.position..<range.end {
                 selectedRange = selectedTextRange
@@ -296,10 +294,11 @@ extension BeamTextEdit {
         if view == persistentFormatter {
             persistentFormatter = nil
         } else {
-            BeamTextEdit.isSelectableContent = true
             isInlineFormatterHidden = true
             inlineFormatter = nil
-            BeamTextEdit.deboucingMouseEventTimer = nil
+            cursorStartPosition = 0
+            BeamTextEdit.isSelectableContent = true
+            BeamTextEdit.debounceMouseEventTimer = nil
         }
     }
 
@@ -307,13 +306,13 @@ extension BeamTextEdit {
         guard let view = inlineFormatter,
               view.hyperlinkView != nil else { return }
 
-        if !view.urlValue.isEmpty && BeamTextEdit.deboucingMouseEventTimer?.isValid == nil {
-            initDeboucingMouseEvent()
+        if !view.urlValue.isEmpty && BeamTextEdit.debounceMouseEventTimer?.isValid == nil {
+            initDebounceMouseEvent()
         }
 
         if !view.urlValue.isEmpty && BeamTextEdit.isExitingLink {
             BeamTextEdit.isExitingLink = false
-            initDeboucingMouseEvent()
+            initDebounceMouseEvent()
         }
     }
 
@@ -321,7 +320,7 @@ extension BeamTextEdit {
     public override func mouseEntered(with event: NSEvent) {
         super.mouseEntered(with: event)
         guard inlineFormatter?.hyperlinkView != nil else { return }
-        BeamTextEdit.deboucingMouseEventTimer?.invalidate()
+        BeamTextEdit.debounceMouseEventTimer?.invalidate()
     }
 
     public override func mouseExited(with event: NSEvent) {
@@ -330,7 +329,7 @@ extension BeamTextEdit {
 
         // Init debounce only when the textefield is not empty
         if !hyperlinkView.hyperlinkTextField.stringValue.isEmpty {
-            initDeboucingMouseEvent()
+            initDebounceMouseEvent()
         }
     }
 
@@ -406,26 +405,20 @@ extension BeamTextEdit {
     // MARK: Private Methods (UI)
     private func updateInlineFormatterFrame() {
         guard let node = focussedWidget as? TextNode,
-              let view = inlineFormatter else { return }
+              let view = inlineFormatter,
+              let line = node.lineAt(index: node.cursorPosition),
+              let currentLine = node.lineAt(index: cursorStartPosition) else { return }
 
-        let (xOffset, rect) = node.offsetAndFrameAt(index: rootNode.cursorPosition)
-        let yOffset = rect.maxY + node.offsetInDocument.y - 10
-        let textFrame: CGFloat = ((frame.width - textWidth) / 2) - 125
-        let yPos = yOffset - BeamTextEdit.yPosInlineFormatter
-        let xPos = xOffset + (centerText ? textFrame : BeamTextEdit.xPosInlineFormatter)
-        let centerXPos = (frame.width - textWidth) / 2
-        let currentLowerBound = currentTextRange.lowerBound
-        let selectedLowerBound = node.selectedTextRange.lowerBound
+        let leftMargin: CGFloat = centerText ? 145 : 200 // Value to move the inline formatter to the left
+        let middleFrame = (frame.width - textWidth) / 2
+        let (xOffset, rect) = node.offsetAndFrameAt(index: node.cursorPosition)
+        let yPos = rect.maxY + node.offsetInDocument.y - BeamTextEdit.yPosInlineFormatter
+        let xPos = xOffset + (centerText ? middleFrame - leftMargin : BeamTextEdit.xPosInlineFormatter) + childInsetFrom(node)
 
-        view.frame.origin.x = rootNode.state.nodeSelection != nil ? (centerText ? centerXPos : 200) : xPos
+        view.frame.origin.x = rootNode.state.nodeSelection != nil ? (centerText ? middleFrame : leftMargin) : xPos
 
-        if currentLowerBound == selectedLowerBound && BeamTextEdit.isSelectableContent {
-            BeamTextEdit.isSelectableContent = false
-            view.frame.origin.y = rootNode.state.nodeSelection != nil ? node.offsetInDocument.y - 40 : yPos
-        }
-
-        if currentLowerBound > selectedLowerBound || selectedLowerBound > currentLowerBound {
-            BeamTextEdit.isSelectableContent = currentLowerBound > selectedLowerBound
+        // Update Y position only if the current selected line is equal to selected line
+        if !(node.selectedTextRange.upperBound > node.selectedTextRange.lowerBound && currentLine < line) {
             view.frame.origin.y = rootNode.state.nodeSelection != nil ? node.offsetInDocument.y - 40 : yPos
         }
     }
@@ -435,7 +428,7 @@ extension BeamTextEdit {
         BeamTextEdit.centerXAnchor = view.centerXAnchor.constraint(equalTo: contentView.centerXAnchor)
     }
 
-    private func activeLayoutConstraint(for view: FormatterView) {
+    private func activateLayoutConstraint(for view: FormatterView) {
         let widthAnchor = view.widthAnchor.constraint(equalToConstant: view.idealSize.width)
         let heightAnchor = view.heightAnchor.constraint(equalToConstant: view.idealSize.height)
 
@@ -450,12 +443,23 @@ extension BeamTextEdit {
         ])
     }
 
-    private func initDeboucingMouseEvent() {
-        BeamTextEdit.deboucingMouseEventTimer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false, block: { [weak self] (_) in
+    private func childInsetFrom(_ node: TextNode) -> CGFloat {
+        var childInset = node.childInset
+
+        // Inset calculation from the parent of the current node
+        node.allParents.forEach { parent in
+            childInset += parent.childInset
+        }
+
+        return childInset
+    }
+
+    private func initDebounceMouseEvent() {
+        BeamTextEdit.debounceMouseEventTimer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false, block: { [weak self] (_) in
             guard let self = self else { return }
 
             self.showOrHideInlineFormatter(isPresent: false)
-            BeamTextEdit.deboucingMouseEventTimer = nil
+            BeamTextEdit.debounceMouseEventTimer = nil
             BeamTextEdit.isExitingLink = false
         })
     }
