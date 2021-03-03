@@ -538,7 +538,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
             return nil
         }
 
-//        print("dispatch down: \(mouseInfo.position)")
+//        Logger.shared.logDebug("dispatch down: \(mouseInfo.position)")
         if mouseDown(mouseInfo: mouseInfo) {
             return self
         }
@@ -562,7 +562,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
             clickedLayer = nil
         }
         let info = MouseInfo(self, mouseInfo.globalPosition, mouseInfo.event)
-//        print("dispatch up: \(info.position) vs \(mouseInfo.position)")
+//        Logger.shared.logDebug("dispatch up: \(info.position) vs \(mouseInfo.position)")
 
         if let layer = clickedLayer {
             let info = MouseInfo(self, layer, info)
@@ -679,7 +679,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     weak var clickedLayer: Layer?
     func handleMouseDragged(mouseInfo: MouseInfo) -> Bool {
         let info = MouseInfo(self, mouseInfo.globalPosition, mouseInfo.event)
-//        print("handle dragged: \(info.position) vs \(mouseInfo.position)")
+//        Logger.shared.logDebug("handle dragged: \(info.position) vs \(mouseInfo.position)")
 
         var res = false
         if let layer = clickedLayer {
@@ -837,7 +837,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
     func dumpWidgetTree(_ level: Int = 0) {
         let tabs = String.tabs(level)
-        print("\(tabs)\(String(describing: Self.self)) frame(\(frame)) \(layers.count) layers")
+        Logger.shared.logDebug("\(tabs)\(String(describing: Self.self)) frame(\(frame)) \(layers.count) layers")
         for c in children {
             c.dumpWidgetTree(level + 1)
         }
@@ -866,7 +866,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         let rect = NSRect(origin: layer.position, size: layer.bounds.size)
         let actualY = parentRect.height - rect.maxY
         let correctedRect = NSRect(origin: CGPoint(x: rect.minX, y: actualY), size: rect.size)
-//        print("\(Self.self) actualY = \(actualY) - rect \(rect) - parentRect \(parentRect) -> \(correctedRect)")
+//        Logger.shared.logDebug("\(Self.self) actualY = \(actualY) - rect \(rect) - parentRect \(parentRect) -> \(correctedRect)")
         return correctedRect
     }
 

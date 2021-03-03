@@ -1090,7 +1090,7 @@ public class TextNode: Widget {
 
     override func dumpWidgetTree(_ level: Int = 0) {
         let tabs = String.tabs(level)
-        print("\(tabs)\(String(describing: Self.self)) frame(\(frame)) \(layers.count) layers - element id: \(element.id) [\(elementText.text)]")
+        Logger.shared.logDebug("\(tabs)\(String(describing: Self.self)) frame(\(frame)) \(layers.count) layers - element id: \(element.id) [\(elementText.text)]")
         for c in children {
             c.dumpWidgetTree(level + 1)
         }
@@ -1231,7 +1231,7 @@ public class TextNode: Widget {
 
 
     public override func isAccessibilitySelectorAllowed(_ selector: Selector) -> Bool {
-        print("isAccessibilitySelectorAllowed(\(selector))")
+        Logger.shared.logDebug("isAccessibilitySelectorAllowed(\(selector))")
         return true
     }
 */

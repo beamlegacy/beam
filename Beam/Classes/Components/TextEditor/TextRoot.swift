@@ -252,7 +252,7 @@ public class TextRoot: TextNode {
     ]
 
     override func dumpWidgetTree(_ level: Int = 0) {
-        print("==================================================")
+        Logger.shared.logDebug("==================================================")
         super.dumpWidgetTree(level)
     }
 

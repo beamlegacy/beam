@@ -275,7 +275,7 @@ extension BeamTextEdit {
         case .quote:
             changeTextFormat(with: node, kind: .quote(1, node.text.text, node.text.text), isActive: isActive)
         case .code:
-            print("code")
+            Logger.shared.logDebug("code")
         case .bold:
             updateAttributeState(with: node, attribute: .strong, isActive: isActive)
         case .italic:

@@ -87,7 +87,7 @@ class TextNodeTests: XCTestCase {
         let note = createMiniArborescence(title: "title")
         let editor = BeamTextEdit(root: note, journalMode: true)
         let root = editor.rootNode!
-//        print("Tree:\n\(root.printTree())\n")
+//        Logger.shared.logDebug("Tree:\n\(root.printTree())\n")
         validateRootWithNote(root: root, note: note)
 
         let str1 = """
@@ -110,7 +110,7 @@ class TextNodeTests: XCTestCase {
         let note = createMiniArborescence(title: "title")
         let editor = BeamTextEdit(root: note, journalMode: true)
         let root = editor.rootNode!
-//        print("Tree:\n\(root.printTree())\n")
+//        Logger.shared.logDebug("Tree:\n\(root.printTree())\n")
         validateRootWithNote(root: root, note: note)
 
         let node = root.children.first as? TextNode
@@ -322,7 +322,7 @@ class TextNodeTests: XCTestCase {
         let note = createMiniArborescence(title: "title")
         let editor = BeamTextEdit(root: note, journalMode: true)
         let root = editor.rootNode!
-//        print("Tree:\n\(root.printTree())\n")
+//        Logger.shared.logDebug("Tree:\n\(root.printTree())\n")
         validateRootWithNote(root: root, note: note)
 
         let first = root.children.first as? TextNode
@@ -345,7 +345,7 @@ class TextNodeTests: XCTestCase {
         let note = createMiniArborescence(title: "title")
         let editor = BeamTextEdit(root: note, journalMode: true)
         let root = editor.rootNode!
-//        print("Tree:\n\(root.printTree())\n")
+//        Logger.shared.logDebug("Tree:\n\(root.printTree())\n")
         validateRootWithNote(root: root, note: note)
 
         let first = root.children.first as? TextNode
@@ -371,7 +371,7 @@ class TextNodeTests: XCTestCase {
         let note = createMiniArborescence(title: "title")
         let editor = BeamTextEdit(root: note, journalMode: true)
         let root = editor.rootNode!
-//        print("Tree:\n\(root.printTree())\n")
+//        Logger.shared.logDebug("Tree:\n\(root.printTree())\n")
         validateRootWithNote(root: root, note: note)
 
         // Insert some text:
@@ -427,7 +427,7 @@ class TextNodeTests: XCTestCase {
         let note = createMiniArborescence(title: "title")
         let editor = BeamTextEdit(root: note, journalMode: true)
         let root = editor.rootNode!
-//        print("Tree:\n\(root.printTree())\n")
+//        Logger.shared.logDebug("Tree:\n\(root.printTree())\n")
         validateRootWithNote(root: root, note: note)
 
         // Insert some text:
@@ -482,7 +482,7 @@ class TextNodeTests: XCTestCase {
         let note = createMiniArborescence(title: "title")
         let editor = BeamTextEdit(root: note, journalMode: true)
         let root = editor.rootNode!
-//        print("Tree:\n\(root.printTree())\n")
+//        Logger.shared.logDebug("Tree:\n\(root.printTree())\n")
         validateRootWithNote(root: root, note: note)
 
         // Insert some text:
@@ -553,7 +553,7 @@ class TextNodeTests: XCTestCase {
             XCTAssertEqual(node.text.text, "bullet1bullet11")
         }
         XCTAssertEqual(root.children.first?.children.count, 1)
-//        print("Tree:\n\(root.printTree())\n")
+//        Logger.shared.logDebug("Tree:\n\(root.printTree())\n")
 //        note.debugNote()
         validateRootWithNote(root: root, note: note)
     }
@@ -565,7 +565,7 @@ class TextNodeTests: XCTestCase {
         let note = createMiniArborescence(title: "title")
         let editor = BeamTextEdit(root: note, journalMode: true)
         let root = editor.rootNode!
-//        print("Tree:\n\(root.printTree())\n")
+//        Logger.shared.logDebug("Tree:\n\(root.printTree())\n")
         validateRootWithNote(root: root, note: note)
 
         root.focussedWidget = root.children.first?.children.first
@@ -578,7 +578,7 @@ class TextNodeTests: XCTestCase {
 
         XCTAssertEqual(root.children.first?.children.count, 2)
         root.doCommand(.deleteForward)
-//        print("Tree:\n\(root.printTree())\n")
+//        Logger.shared.logDebug("Tree:\n\(root.printTree())\n")
 //        note.debugNote()
         XCTAssertNotNil(root.focussedWidget as? TextNode)
         if let node = root.focussedWidget as? TextNode {

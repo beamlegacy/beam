@@ -235,7 +235,7 @@ public class TextFrame {
             }
         }
         if debug {
-            //            print("start layout for \(lines.count) lines")
+            //            Logger.shared.logDebug("start layout for \(lines.count) lines")
         }
         var lineOrigins = [CGPoint](repeating: CGPoint(), count: lines.count)
         CTFrameGetLineOrigins(ctFrame, CFRangeMake(0, 0), &lineOrigins)
@@ -256,18 +256,18 @@ public class TextFrame {
 
             Y += line.frame.height * line.interlineFactor
             //if debug {
-            //print("     line[\(i)] frame \(line.frame) (textPos \(textPos)")
+            //Logger.shared.logDebug("     line[\(i)] frame \(line.frame) (textPos \(textPos)")
             //}
         }
 
         if debug {
-            //print("layout frame \(frame)")
+            //Logger.shared.logDebug("layout frame \(frame)")
         }
     }
 
     func draw(_ context: CGContext) {
         if debug {
-            //print("draw frame \(ctFrame)")
+            //Logger.shared.logDebug("draw frame \(ctFrame)")
         }
 
         for line in lines {
@@ -354,7 +354,7 @@ public class Font {
 
     class func draw(string: NSAttributedString, atPosition position: NSPoint, textWidth: CGFloat) -> TextFrame {
         assert(textWidth != 0)
-        //        print("Font create frame with width \(textWidth) for string '\(string)'")
+        //        Logger.shared.logDebug("Font create frame with width \(textWidth) for string '\(string)'")
         let framesetter = CTFramesetterCreateWithAttributedString(string)
         let frameSize = CTFramesetterSuggestFrameSizeWithConstraints(
             framesetter,
@@ -362,7 +362,7 @@ public class Font {
             nil,
             CGSize(width: CGFloat(textWidth), height: CGFloat.greatestFiniteMagnitude),
             nil)
-        //        print("TextFrame suggested size \(frameSize)")
+        //        Logger.shared.logDebug("TextFrame suggested size \(frameSize)")
         let path = CGPath(rect: CGRect(origin: position, size: frameSize), transform: nil)
 
         let frameAttributes: [String: Any] = [:]
@@ -371,12 +371,12 @@ public class Font {
                                              path,
                                              frameAttributes as CFDictionary)
 
-        //        print("TextFrame: \(frame)")
+        //        Logger.shared.logDebug("TextFrame: \(frame)")
 
         let f = TextFrame(ctFrame: frame, position: position, attributedString: string)
 
         if f.debug {
-            //            print("Font created frame \(f)")
+            //            Logger.shared.logDebug("Font created frame \(f)")
         }
         return f
     }

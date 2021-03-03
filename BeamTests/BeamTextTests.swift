@@ -48,7 +48,7 @@ class BeamTextTests: XCTestCase {
         """.toBeamText)
 
         btext.insert("!", at: btext.text.count, withAttributes: [.strong])
-//        print("btext \(btext.json)")
+//        Logger.shared.logDebug("btext \(btext.json)")
         XCTAssertEqual(btext,
         """
         {"ranges":[{"string":"some new string!"},{"string":"!","attributes":[{"type":0}]}]}
@@ -227,7 +227,7 @@ class BeamTextTests: XCTestCase {
         let carets = line.carets
 
 //        for (i, caret) in carets.enumerated() where caret.isLeadingEdge {
-//            print("caret[\(i)] -> \(caret)")
+//            Logger.shared.logDebug("caret[\(i)] -> \(caret)")
 //        }
 
         expect(carets[5].index).to(equal(11))
@@ -236,7 +236,7 @@ class BeamTextTests: XCTestCase {
 //            let r = i..<i + 1
 //            let sub = string[r]
 //            let offset = line.offsetFor(index: i)
-//            print("range \(r) -> \(sub) [offset: \(offset)]")
+//            Logger.shared.logDebug("range \(r) -> \(sub) [offset: \(offset)]")
 //        }
 
         // Now we are using a custom font the emplacement of the emoticon is changed.
