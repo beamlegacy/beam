@@ -39,9 +39,8 @@ public class TextRoot: TextNode {
 
     var note: BeamNote?
 
-    var undoManager = UndoManager()
-
     var state = TextState()
+    var cmdManager = CommandManager()
 
     private var _config = TextConfig()
     override var config: TextConfig { _config }

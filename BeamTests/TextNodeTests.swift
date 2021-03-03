@@ -395,7 +395,7 @@ class TextNodeTests: XCTestCase {
         XCTAssert(root.selectedTextRange.isEmpty)
 
         // Undo the text insertion:
-        root.undoManager.undo()
+        editor.undo(String("Undo"))
 
         let str2 = """
         title
@@ -413,7 +413,7 @@ class TextNodeTests: XCTestCase {
         XCTAssert(root.selectedTextRange.isEmpty)
 
         // redo the text insertion:
-        root.undoManager.redo()
+        editor.redo(String("Redo"))
         XCTAssertEqual(str1, root.printTree())
         XCTAssertEqual(root.cursorPosition, 4)
         XCTAssert(root.selectedTextRange.isEmpty)
@@ -451,7 +451,7 @@ class TextNodeTests: XCTestCase {
         XCTAssert(root.selectedTextRange.isEmpty)
 
         // Undo the text insertion:
-        root.undoManager.undo()
+        editor.undo(String("Undo"))
 
         let str2 = """
         title
@@ -469,7 +469,7 @@ class TextNodeTests: XCTestCase {
         XCTAssert(root.selectedTextRange.isEmpty)
 
         // redo the text insertion:
-        root.undoManager.redo()
+        editor.redo(String("Redo"))
         XCTAssertEqual(str1, root.printTree())
         XCTAssertEqual(root.cursorPosition, 7)
         XCTAssert(root.selectedTextRange.isEmpty)
@@ -507,7 +507,7 @@ class TextNodeTests: XCTestCase {
         XCTAssert(root.selectedTextRange.isEmpty)
 
         // Undo the text insertion:
-        root.undoManager.undo()
+        editor.undo(String("Undo"))
 
         let str2 = """
         title
@@ -521,11 +521,11 @@ class TextNodeTests: XCTestCase {
 
         """
         XCTAssertEqual(str2, root.printTree())
-        XCTAssertEqual(root.cursorPosition, 3)
+        XCTAssertEqual(root.cursorPosition, 7)
         XCTAssertEqual(root.selectedTextRange, 3..<7)
 
         // redo the text insertion:
-        root.undoManager.redo()
+        editor.redo(String("Redo"))
         XCTAssertEqual(str1, root.printTree())
         XCTAssertEqual(root.cursorPosition, 7)
         XCTAssert(root.selectedTextRange.isEmpty)

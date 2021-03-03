@@ -72,7 +72,8 @@ extension BeamTextEdit {
             if node.selectedTextRange.isEmpty || !oldLink.isEmpty {
                 updateNodeWithLink(node: node, isDeleteMode: false, link: validUrl, oldLink)
             } else {
-                node.text.addAttributes([.link(validUrl)], to: node.selectedTextRange)
+                let changeFormat = FormattingText(of: node, of: nil, with: .link(validUrl), for: node.selectedTextRange, isActive: false)
+                rootNode.cmdManager.run(command: changeFormat)
             }
 
             self.showOrHideInlineFormatter(isPresent: false)
@@ -208,7 +209,7 @@ extension BeamTextEdit {
         rootNode.state.attributes = []
         setActiveFormatters(types)
 
-        switch node.elementKind {
+        switch node.element.kind {
         case .heading(1):
             types.append(.h1)
         case .heading(2):
@@ -336,45 +337,42 @@ extension BeamTextEdit {
     // MARK: Private Methods (Text Formatting)
     private func changeTextFormat(with node: TextNode, kind: ElementKind, isActive: Bool) {
         if rootNode.state.nodeSelection != nil {
+            rootNode.cmdManager.beginGroup(with: "ChangeTextFormat")
             guard let nodeSelection = rootNode.state.nodeSelection else { return }
 
             nodeSelection.nodes.forEach({ node in
-                node.element.kind = isActive ? .bullet : kind
+                let changeFormat = FormattingText(of: node, of: kind, with: nil, for: nil, isActive: isActive)
+                rootNode.cmdManager.run(command: changeFormat)
             })
+            rootNode.cmdManager.endGroup()
         } else {
-            node.element.kind = isActive ? .bullet : kind
+            let changeFormat = FormattingText(of: node, of: kind, with: nil, for: nil, isActive: isActive)
+            rootNode.cmdManager.run(command: changeFormat)
         }
     }
 
     private func updateAttributeState(with node: TextNode, attribute: BeamText.Attribute, isActive: Bool) {
-        let attributes = rootNode.state.attributes
+        rootNode.cmdManager.beginGroup(with: "UpdateAttributes")
 
         if rootNode.state.nodeSelection != nil {
+
             guard let nodeSelection = rootNode.state.nodeSelection else { return }
 
             nodeSelection.nodes.forEach({ node in
-                addAttribute(to: node, with: attribute, by: 0..<node.text.text.count, isActive)
+                let changeAttributes = FormattingText(of: node, of: nil, with: attribute, for: 0..<node.element.text.text.count, isActive: isActive)
+                rootNode.cmdManager.run(command: changeAttributes)
             })
+
         } else if rootNode.textIsSelected {
-            addAttribute(to: node, with: attribute, by: node.selectedTextRange, isActive)
+            let changeAttributes = FormattingText(of: node, of: nil, with: attribute, for: node.selectedTextRange, isActive: isActive)
+            rootNode.cmdManager.run(command: changeAttributes)
         }
 
-        guard let index = attributes.firstIndex(of: attribute),
-              attributes.contains(attribute),
-              isActive else {
-                rootNode.state.attributes.append(attribute)
-                return
-        }
-
-        rootNode.state.attributes.remove(at: index)
+        let changeAttributes = FormattingText(of: node, of: nil, with: attribute, for: nil, isActive: isActive)
+        rootNode.cmdManager.run(command: changeAttributes)
+        rootNode.cmdManager.endGroup()
     }
-
-    private func addAttribute(to node: TextNode, with attribute: BeamText.Attribute, by range: Range<Int>, _ isActive: Bool) {
-        isActive ?
-            node.text.removeAttributes([attribute], from: range) :
-            node.text.addAttributes([attribute], to: range)
-    }
-
+    
     private func setActiveFormatters(_ types: [FormatterType]) {
         if let inlineFormatter = inlineFormatter {
             inlineFormatter.setActiveFormmatters(types)
