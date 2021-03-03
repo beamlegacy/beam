@@ -59,21 +59,7 @@ struct DestinationNotePicker: View {
                         }
                     } onStartEditing: {
                         Logger.shared.logInfo("on start editing", category: .ui)
-                        guard state.bidirectionalPopover == nil else { return }
-                        state.bidirectionalPopover = BidirectionalPopover()
-
-                        guard let popover = state.bidirectionalPopover,
-                              let window = tab.webView.window,
-                              let view = window.contentView else { return }
-
-                        view.addSubview(popover)
-                        updatePopover(geometry.frame(in: .global))
-
-                        popover.didSelectTitle = { title -> Void in
-                            // change the tab's destination note
-                            changeDestinationCard(to: title)
-                            cancelSearch()
-                        }
+                        createPopoverIfNeeded(with: geometry.frame(in: .global))
 
                         state.destinationCardNameSelectedRange = [state.destinationCardName.wholeRange]
                     } onStopEditing: {
@@ -91,6 +77,24 @@ struct DestinationNotePicker: View {
                     }
                 }
             }
+        }
+    }
+
+    func createPopoverIfNeeded(with frame: NSRect) {
+        guard state.bidirectionalPopover == nil else { return }
+        state.bidirectionalPopover = BidirectionalPopover()
+
+        guard let popover = state.bidirectionalPopover,
+              let window = tab.webView.window,
+              let view = window.contentView else { return }
+        view.addSubview(popover)
+        popover.autoresizingMask = [.minXMargin, .minYMargin]
+        updatePopover(frame)
+
+        popover.didSelectTitle = { title -> Void in
+            // change the tab's destination note
+            changeDestinationCard(to: title)
+            cancelSearch()
         }
     }
 
