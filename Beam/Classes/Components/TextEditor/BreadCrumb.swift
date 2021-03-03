@@ -89,7 +89,7 @@ class BreadCrumb: Widget {
         containerLayer.opacity = 0.02
         containerLayer.cornerRadius = 10
 
-        container = Layer(name: "containerLayer", layer: containerLayer, hover: { [weak self] isHover in
+        container = Layer(name: "containerLayer", layer: containerLayer, hovered: { [weak self] isHover in
             guard let self = self else { return }
             self.containerLayer.backgroundColor = isHover ? NSColor.linkedContainerColor.cgColor : NSColor.clear.cgColor
         })

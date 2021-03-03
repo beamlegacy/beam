@@ -17,7 +17,7 @@ class Layer: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         }
     }
     var layer: CALayer
-    var hovered: Bool = false
+    var hovering: Bool = false
     var cursor: NSCursor?
 
     typealias MouseBlock = (MouseInfo) -> Bool
@@ -25,11 +25,11 @@ class Layer: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     var mouseUp: MouseBlock
     var mouseMoved: MouseBlock
     var mouseDragged: MouseBlock
-    var hover: (Bool) -> Void
+    var hovered: (Bool) -> Void
     func handleHover(_ value: Bool) {
-        if hovered != value {
-            hover(value)
-            hovered = value
+        if hovering != value {
+            hovered(value)
+            hovering = value
             // layer.borderColor = hovered ? NSColor.red.cgColor : nil
             // layer.borderWidth = hovered ? 2 : 0
         }
@@ -42,7 +42,7 @@ class Layer: NSAccessibilityElement, CALayerDelegate, MouseHandler {
          up: @escaping MouseBlock = { _ in false },
          moved: @escaping MouseBlock = { _ in false },
          dragged: @escaping MouseBlock = { _ in false },
-         hover: @escaping (Bool) -> Void = { _ in },
+         hovered: @escaping (Bool) -> Void = { _ in },
          layout: @escaping () -> Void = { }
     ) {
         self.name = name
@@ -51,7 +51,7 @@ class Layer: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         self.mouseUp = up
         self.mouseMoved = moved
         self.mouseDragged = dragged
-        self.hover = hover
+        self.hovered = hovered
         self.layout = layout
 
         super.init()

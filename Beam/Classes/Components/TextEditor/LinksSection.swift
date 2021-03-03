@@ -141,30 +141,24 @@ class LinksSection: Widget {
     }
 
     func createLinkAllLayer() {
-        linkLayer = Layer(
-            name: "linkAllLayer",
-            layer: linkActionLayer,
-            down: { [weak self] _ in
+        linkLayer = ButtonLayer(
+            "linkAllLayer",
+            linkActionLayer,
+            activated: { [weak self] in
                 guard let self = self,
-                      let rootNote = self.editor.note.note else { return false }
+                      let rootNote = self.editor.note.note else { return }
 
-                if let linkLayer = self.linkLayer, linkLayer.layer.isHidden { return false }
+                if let linkLayer = self.linkLayer, linkLayer.layer.isHidden { return }
 
                 self.editor.showOrHidePersistentFormatter(isPresent: false)
                 self.children.forEach { child in
                     guard let breadcrumb = child as? BreadCrumb else { return }
-                    let text = breadcrumb.proxy.text.text
+                    breadcrumb.proxy.text.makeLinkToNoteExplicit(forNote: rootNote.title)
 
-                    text.ranges(of: rootNote.title).forEach { range in
-                        let start = text.position(at: range.lowerBound)
-                        let end = text.position(at: range.upperBound)
-
-                        breadcrumb.proxy.text.makeInternalLink(start..<end)
-                    }
+                    let reference = NoteReference(noteName: breadcrumb.proxy.note!.title, elementID: breadcrumb.proxy.proxy.id)
+                    self.note.addReference(reference)
                 }
-//                self.note.removeAllReferences()
-                return true
-            }, hover: {[weak self] isHover in
+            }, hovered: {[weak self] isHover in
                 guard let self = self else { return }
 
                 self.linkActionLayer.foregroundColor = isHover ? NSColor.linkedActionButtonHoverColor.cgColor : NSColor.linkedActionButtonColor.cgColor
