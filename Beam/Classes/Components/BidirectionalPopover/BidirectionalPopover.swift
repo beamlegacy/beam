@@ -111,6 +111,7 @@ class BidirectionalPopover: Popover {
         collectionView.wantsLayer = true
         collectionView.enclosingScrollView?.borderType = .noBorder
         collectionView.enclosingScrollView?.hasVerticalScroller = false
+        collectionView.enclosingScrollView?.automaticallyAdjustsContentInsets = false
         collectionView.backgroundColors = [.clear]
         collectionView.layer?.backgroundColor = .clear
         collectionView.collectionViewLayout = layout
