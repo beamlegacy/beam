@@ -54,7 +54,7 @@ extension TextRoot {
             increaseNodeSelectionIndentation()
             return
         }
-        guard let node = focussedWidget as? TextNode else { return }
+        guard let node = focusedWidget as? TextNode else { return }
         _ = increaseNodeIndentation(node)
     }
 
@@ -63,7 +63,7 @@ extension TextRoot {
             decreaseNodeSelectionIndentation()
             return
         }
-        guard let node = focussedWidget as? TextNode else { return }
+        guard let node = focusedWidget as? TextNode else { return }
         _ = decreaseNodeIndentation(node)
     }
 
@@ -74,12 +74,6 @@ extension TextRoot {
         // This will be used to create an empty node in place:
         let firstParent = sortedNodes.first?.parent as? TextNode ?? root
         let firstIndexInParent = sortedNodes.first?.indexInParent ?? 0
-        var goToPrevious = true
-        var nextNode = sortedNodes.first?.previousVisibleTextNode()
-        if nextNode == nil {
-            nextNode = sortedNodes.last?.nextVisibleTextNode()
-            goToPrevious = false
-        }
 
         cmdManager.beginGroup(with: "Delete selected nodes")
         for node in sortedNodes.reversed() {
@@ -95,16 +89,12 @@ extension TextRoot {
             // we must create a new first node...
             let insertEmptyNode = InsertEmptyNode(with: root)
             cmdManager.run(command: insertEmptyNode)
-        } else {
-            assert(nextNode != nil)
-            root.focussedWidget = nextNode
-            root.cursorPosition = goToPrevious ? nextNode!.text.count : 0
         }
         cmdManager.endGroup()
     }
 
     func eraseSelection(with str: String = "", and range: Range<Int>? = nil) {
-        guard let node = focussedWidget as? TextNode, !node.readOnly, !selectedTextRange.isEmpty else { return }
+        guard let node = focusedWidget as? TextNode, !node.readOnly, !selectedTextRange.isEmpty else { return }
 
         let rangeToReplace = range ?? selectedTextRange
         let replaceText = ReplaceText(in: node, for: rangeToReplace, at: cursorPosition, with: str)
@@ -117,7 +107,7 @@ extension TextRoot {
             return
         }
 
-        guard let node = focussedWidget as? TextNode,
+        guard let node = focusedWidget as? TextNode,
               !node.readOnly else { return }
 
         if !selectedTextRange.isEmpty {
@@ -138,7 +128,7 @@ extension TextRoot {
             return
         }
 
-        guard let node = focussedWidget as? TextNode,
+        guard let node = focusedWidget as? TextNode,
               !node.readOnly else { return }
 
         if cursorPosition == 0, selectedTextRange.isEmpty {
@@ -156,7 +146,7 @@ extension TextRoot {
 
     func insertNewline() {
         guard root.state.nodeSelection == nil,
-              let node = focussedWidget as? TextNode,
+              let node = focusedWidget as? TextNode,
               !node.readOnly else { return }
 
         let newLineStr = "\n"
@@ -176,7 +166,7 @@ extension TextRoot {
     }
 
     public func setMarkedText(string: String, selectedRange: Range<Int>, replacementRange: Range<Int>) {
-        guard let node = focussedWidget as? TextNode,
+        guard let node = focusedWidget as? TextNode,
               !node.readOnly else { return }
 
         var range = cursorPosition..<cursorPosition
@@ -203,13 +193,13 @@ extension TextRoot {
     }
 
     public func unmarkText() {
-        guard let node = focussedWidget as? TextNode, !node.readOnly else { return }
+        guard let node = focusedWidget as? TextNode, !node.readOnly else { return }
         markedTextRange = 0..<0
     }
 
     public func insertText(string: String, replacementRange: Range<Int>) {
         eraseNodeSelection(createEmptyNodeInPlace: true)
-        guard let node = focussedWidget as? TextNode, !node.readOnly else { return }
+        guard let node = focusedWidget as? TextNode, !node.readOnly else { return }
 
         var range = cursorPosition..<cursorPosition
         if !replacementRange.isEmpty {
@@ -234,7 +224,7 @@ extension TextRoot {
     }
 
     public func updateTextAttributesAtCursorPosition() {
-        guard let node = focussedWidget as? TextNode else { return }
+        guard let node = focusedWidget as? TextNode else { return }
         let ranges = node.text.rangesAt(position: cursorPosition)
         switch ranges.count {
         case 0:

@@ -22,7 +22,7 @@ class IncreaseIndentation: Command {
     }
 
     func run() -> Bool {
-        if let focussedNode = node.root?.focussedWidget as? TextNode, focussedNode !== self.node {
+        if let focussedNode = node.root?.focusedWidget as? TextNode, focussedNode !== self.node {
             self.node = focussedNode
         }
         if let parent = node.parent as? TextNode {

@@ -60,8 +60,7 @@ class DeleteNode: Command {
         node.delete()
 
         prevVisible.element.text.append(element.text)
-        prevVisible.root?.focussedWidget = prevVisible
-        prevVisible.root?.cursorPosition = prevVisible.element.text.count
+        prevVisible.focus(cursorPosition: prevVisible.element.text.count)
         prevVisible.root?.cancelSelection()
         return true
     }
@@ -85,6 +84,7 @@ class DeleteNode: Command {
 
     private func runDelete() -> Bool {
         var prevVisibleNode: TextNode
+        var nextVisibleNode: TextNode?
         isIntended(node: node)
         if let prevVisible = node.previousSibbling() as? TextNode, isIndented {
             prevVisibleNode = prevVisible
@@ -92,6 +92,7 @@ class DeleteNode: Command {
             prevVisibleNode = prevVisible
         } else if let prevVisible = node.root {
             prevVisibleNode = prevVisible
+            nextVisibleNode = node.nextVisibleTextNode()
         } else {
             return false
         }
@@ -102,6 +103,11 @@ class DeleteNode: Command {
         }
         node.delete()
         prevVisibleNode.root?.cancelNodeSelection()
+        if prevVisibleNode == node.root {
+            nextVisibleNode?.focus()
+        } else {
+            prevVisibleNode.focus(cursorPosition: prevVisibleNode.element.text.count)
+        }
         return true
     }
 
@@ -132,8 +138,7 @@ class DeleteNode: Command {
         } else {
             guard newLastNode.parent?.insert(node: newNode, after: newLastNode) != nil else { return false }
         }
-        root.focussedWidget = newNode
-        root.cursorPosition = 0
+        newNode.focus()
         self.node = newNode
         return true
     }
@@ -177,9 +182,7 @@ class DeleteNode: Command {
                 guard prevVisible.parent?.insert(node: newNode, after: prevVisible) != nil else { return false }
             }
         }
-
-        root.focussedWidget = newNode
-        root.cursorPosition = 0
+        newNode.focus()
         root.selected = true
         self.node = newNode
         return true

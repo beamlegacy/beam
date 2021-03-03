@@ -24,21 +24,19 @@ class InsertText: Command {
     }
 
     func run() -> Bool {
-        if let focussedNode = node.root?.focussedWidget as? TextNode, focussedNode !== self.node {
+        if let focussedNode = node.root?.focusedWidget as? TextNode, focussedNode !== self.node {
             self.node = focussedNode
         }
         node.element.text.insert(text, at: cursorPosition)
         newCursorPosition = text == "\n" ? node.position(after: cursorPosition) : cursorPosition + text.count
-        node.root?.focussedWidget = node
-        node.root?.cursorPosition = newCursorPosition
+        node.focus(cursorPosition: newCursorPosition)
         node.root?.cancelSelection()
         return true
     }
 
     func undo() -> Bool {
         node.element.text.replaceSubrange(node.element.text.wholeRange, with: oldText)
-        node.root?.focussedWidget = node
-        node.root?.cursorPosition = cursorPosition
+        node.focus(cursorPosition: cursorPosition)
         return true
     }
 

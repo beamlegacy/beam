@@ -67,23 +67,24 @@ public class TextRoot: TextNode {
         }
         set {
             assert(newValue >= 0)
-            state.cursorPosition = newValue
+            let n = focusedWidget as? TextNode
+            let textCount = n?.element.text.count ?? 0
+            state.cursorPosition = newValue > textCount ? textCount : newValue
             if state.selectedTextRange.isEmpty {
                 state.selectedTextRange = newValue ..< newValue
             }
             updateTextAttributesAtCursorPosition()
-            let n = focussedWidget as? TextNode
             n?.invalidateText()
-            focussedWidget?.invalidate()
+            focusedWidget?.invalidate()
             editor.reBlink()
-            if state.nodeSelection == nil {
+            if state.nodeSelection == nil && !editor.scrollToCursorAtLayout {
                 editor.setHotSpotToCursorPosition()
             }
         }
     }
 
     var selectedText: String {
-        guard let node = focussedWidget as? TextNode else { return "" }
+        guard let node = focusedWidget as? TextNode else { return "" }
         return node.text.substring(range: selectedTextRange)
     }
 
@@ -112,17 +113,17 @@ public class TextRoot: TextNode {
         return super.buildTextChildren(elements: elements) + otherSections.compactMap { $0 }
     }
 
-    weak var focussedWidget: Widget? {
+    weak var focusedWidget: Widget? {
         didSet {
-            guard oldValue !== focussedWidget else { return }
+            guard oldValue !== focusedWidget else { return }
             let oldNode = oldValue as? TextNode
-            let newNode = focussedWidget as? TextNode
-            oldValue?.unfocus()
+            let newNode = focusedWidget as? TextNode
+            oldValue?.onUnfocus()
             oldNode?.invalidateText()
             oldValue?.invalidate()
-            focussedWidget?.focus()
+            focusedWidget?.onFocus()
             newNode?.invalidateText()
-            focussedWidget?.invalidate()
+            focusedWidget?.invalidate()
             cancelSelection()
         }
     }
@@ -174,7 +175,7 @@ public class TextRoot: TextNode {
             first?.placeholder = BeamText(text: istoday ? "This is the journal, you can type anything here!" : "...")
         }
 
-        focussedWidget = children.first ?? self
+        focus(widget: children.first ?? self, cursorPosition: nil)
         childInset = 0
 
         setAccessibilityLabel("TextRoot")
@@ -200,9 +201,11 @@ public class TextRoot: TextNode {
         }
     }
 
-    func focus(node: TextNode) {
-        self.focussedWidget = node
-        cursorPosition = 0
+    func focus(widget: Widget, cursorPosition newPosition: Int? = 0) {
+        self.focusedWidget = widget
+        if let position = newPosition {
+            self.cursorPosition = position
+        }
     }
 
     var lastCommand: TextRoot.Command = .none

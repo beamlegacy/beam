@@ -27,17 +27,15 @@ class ReplaceText: Command {
     func run() -> Bool {
         node.element.text.replaceSubrange(range, with: text)
         cursorPosition = range.lowerBound + text.count
-        node.root?.cursorPosition = cursorPosition
-        node.root?.focussedWidget = node
+        node.focus(cursorPosition: cursorPosition)
         node.root?.cancelSelection()
         return true
     }
 
     func undo() -> Bool {
         node.element.text.replaceSubrange(node.element.text.wholeRange, with: oldText)
-        node.root?.focussedWidget = node
         node.root?.selectedTextRange = range
-        node.root?.cursorPosition = range.upperBound
+        node.focus(cursorPosition: range.upperBound)
         return true
     }
 

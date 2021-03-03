@@ -24,7 +24,7 @@ class CommandNodeTests: QuickSpec {
                 self.setupTree(alreadyIndented: false)
                 expect(self.rootNode.printTree()).to(equal(self.tree))
 
-                self.rootNode.focussedWidget = self.rootNode.children[1]
+                self.rootNode.focusedWidget = self.rootNode.children[1]
                 self.rootNode.cursorPosition = 0
                 self.rootNode.increaseIndentation()
 
@@ -43,7 +43,7 @@ class CommandNodeTests: QuickSpec {
                 self.setupTree(alreadyIndented: true)
                 expect(self.rootNode.printTree()).to(equal(self.tree))
 
-                self.rootNode.focussedWidget = self.rootNode.children[0].children.first
+                self.rootNode.focusedWidget = self.rootNode.children[0].children.first
                 self.rootNode.cursorPosition = 0
                 self.rootNode.decreaseIndentation()
 
@@ -64,7 +64,7 @@ class CommandNodeTests: QuickSpec {
                 self.setupTree(alreadyIndented: false)
                 expect(self.rootNode.printTree()).to(equal(self.tree))
 
-                self.rootNode.focussedWidget = self.rootNode.children[1]
+                self.rootNode.focusedWidget = self.rootNode.children[1]
                 self.rootNode.cursorPosition = 0
                 self.editor.pressEnter(false, false, false)
                 var insertedTree = """
@@ -114,7 +114,7 @@ class CommandNodeTests: QuickSpec {
                 self.setupTree(alreadyIndented: false)
                 expect(self.rootNode.printTree()).to(equal(self.tree))
 
-                self.rootNode.focussedWidget = self.rootNode.children[1]
+                self.rootNode.focusedWidget = self.rootNode.children[1]
                 self.rootNode.cursorPosition = 0
                 self.rootNode.deleteBackward()
 
@@ -131,7 +131,7 @@ class CommandNodeTests: QuickSpec {
                 self.setupTree(alreadyIndented: false)
                 expect(self.rootNode.printTree()).to(equal(self.tree))
 
-                self.rootNode.focussedWidget = self.rootNode.children[0]
+                self.rootNode.focusedWidget = self.rootNode.children[0]
                 self.rootNode.cursorPosition = 12
                 self.rootNode.deleteForward()
 
@@ -149,7 +149,7 @@ class CommandNodeTests: QuickSpec {
                 self.setupTree(alreadyIndented: false)
                 expect(self.rootNode.printTree()).to(equal(self.tree))
 
-                self.rootNode.focussedWidget = self.rootNode.children[0]
+                self.rootNode.focusedWidget = self.rootNode.children[0]
                 self.rootNode.startNodeSelection()
                 self.rootNode.extendNodeSelectionDown()
                 self.rootNode.deleteBackward()
