@@ -1,25 +1,32 @@
 import Foundation
-import XCTest
+import Quick
 import Nimble
 
 @testable import Beam
-class CoreDataManagerTests: XCTestCase {
+class CoreDataManagerTests: QuickSpec {
+    override func spec() {
+        var sut: CoreDataManager!
 
-    // MARK: Properties
+        beforeSuite {
+            sut = CoreDataManager()
+            sut.setup()
+        }
 
-    var sut: CoreDataManager!
+        it("has SQLite store") {
+            expect(sut.persistentContainer.persistentStoreDescriptions.first?.type).to(equal(NSSQLiteStoreType))
+        }
 
-    // MARK: - Lifecycle
+        describe(".importBackup(url)") {
+            let url = Bundle(for: type(of: self)).url(forResource: "BeamExport", withExtension: "sqlite")!
 
-    override func setUp() {
-        super.setUp()
+            beforeEach {
+                sut.destroyPersistentStore()
+            }
 
-        sut = CoreDataManager()
-    }
-
-    // MARK: Setup
-    func test_setup_persistentContainerLoadedOnDisk() {
-        self.sut.setup()
-        expect(self.sut.persistentContainer.persistentStoreDescriptions.first?.type).to(equal(NSSQLiteStoreType))
+            it("loads new objects from backup") {
+                sut.importBackup(url)
+                expect(Document.fetchAll(context: sut.mainContext).map { $0.title }) == ["4 March 2021"]
+            }
+        }
     }
 }
