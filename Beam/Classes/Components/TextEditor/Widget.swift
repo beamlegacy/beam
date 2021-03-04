@@ -548,10 +548,10 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
     func dispatchMouseUp(mouseInfo: MouseInfo) -> Widget? {
         guard inVisibleBranch else { return nil }
-        guard let focussedNode = root?.focusedWidget else { return nil }
+        guard let mouseHandler = root?.mouseHandler else { return nil }
 
-        if focussedNode.handleMouseUp(mouseInfo: mouseInfo) {
-            return focussedNode
+        if mouseHandler.handleMouseUp(mouseInfo: mouseInfo) {
+            return mouseHandler
         }
 
         return nil
@@ -629,10 +629,10 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
     func dispatchMouseDragged(mouseInfo: MouseInfo) -> Widget? {
         guard inVisibleBranch else { return nil }
-        guard let focussedNode = root?.focusedWidget else { return nil }
+        guard let mouseHandler = root?.mouseHandler else { return nil }
 
-        if focussedNode.handleMouseDragged(mouseInfo: mouseInfo) {
-            return focussedNode
+        if mouseHandler.handleMouseDragged(mouseInfo: mouseInfo) {
+            return mouseHandler
         }
 
         return nil

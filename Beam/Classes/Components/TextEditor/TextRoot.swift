@@ -128,6 +128,8 @@ public class TextRoot: TextNode {
         }
     }
 
+    weak var mouseHandler: Widget?
+
     override func invalidateLayout() {
         guard !needLayout else { return }
         super.invalidateLayout()

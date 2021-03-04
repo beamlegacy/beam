@@ -16,7 +16,10 @@ extension BeamText {
     func buildAttributedString(fontSize: CGFloat, cursorPosition: Int, elementKind: ElementKind) -> NSMutableAttributedString {
         let string = NSMutableAttributedString()
         for range in ranges {
-            string.append(NSAttributedString(string: range.string, attributes: convert(attributes: range.attributes, fontSize: fontSize, elementKind: elementKind)))
+            let attributedString = NSMutableAttributedString(string: range.string, attributes: convert(attributes: range.attributes, fontSize: fontSize, elementKind: elementKind))
+
+            addImageToLink(attributedString, range)
+            string.append(attributedString)
         }
         return string
     }
@@ -123,4 +126,35 @@ extension BeamText {
 
         return stringAttributes
     }
+
+    func addImageToLink(_ attributedString: NSMutableAttributedString, _ range: BeamText.Range) {
+        guard attributedString.length > 0 else { return }
+        guard range.attributes.contains(where: { attrib -> Bool in attrib.rawValue == BeamText.Attribute.link("").rawValue }) else { return }
+        guard let image = NSImage(named: "editor-url") else { return }
+
+        let extentBuffer = UnsafeMutablePointer<ImageRunStruct>.allocate(capacity: 1)
+        extentBuffer.initialize(to: ImageRunStruct(ascent: image.size.height, descent: 0, width: image.size.width, image: "editor-url"))
+
+        var callbacks = CTRunDelegateCallbacks(version: kCTRunDelegateVersion1, dealloc: { (pointer) in
+        }, getAscent: { (pointer) -> CGFloat in
+            let d = pointer.assumingMemoryBound(to: ImageRunStruct.self)
+            return d.pointee.ascent
+        }, getDescent: { (pointer) -> CGFloat in
+            let d = pointer.assumingMemoryBound(to: ImageRunStruct.self)
+            return d.pointee.descent
+        }, getWidth: { (pointer) -> CGFloat in
+            let d = pointer.assumingMemoryBound(to: ImageRunStruct.self)
+            return d.pointee.width
+        })
+
+        let delegate = CTRunDelegateCreate(&callbacks, extentBuffer)
+
+        let attrDictionaryDelegate = [(kCTRunDelegateAttributeName as NSAttributedString.Key): (delegate as Any)]
+        let fakeGlyph = NSMutableAttributedString(string: " ", attributes: attrDictionaryDelegate)
+        _ = fakeGlyph.addAttributes(attributedString.attributes(at: 0, effectiveRange: nil))
+        fakeGlyph.removeAttribute(.underlineStyle, range: fakeGlyph.wholeRange)
+        fakeGlyph.removeAttribute(.underlineColor, range: fakeGlyph.wholeRange)
+        attributedString.append(fakeGlyph)
+    }
+
 }
