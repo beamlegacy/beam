@@ -10,15 +10,29 @@ import AppKit
 
 public typealias FontWeight = NSFont.Weight
 
+struct ImageRunStruct {
+    let ascent: CGFloat
+    let descent: CGFloat
+    let width: CGFloat
+    let image: String
+}
+
 public class TextLine {
-    init(ctLine: CTLine) {
+    init(ctLine: CTLine, attributedString: NSAttributedString) {
         self.ctLine = ctLine
+
+        attributedString.enumerateAttribute((kCTRunDelegateAttributeName as NSAttributedString.Key), in: attributedString.wholeRange, options: [], using: { [unowned self] value, range, _ in
+            if value != nil {
+                self.skippablePositions.append(range.location)
+            }
+        })
     }
 
+    var skippablePositions: [Int] = []
     var ctLine: CTLine
     var range: Range<Int> {
         let r = CTLineGetStringRange(ctLine)
-        return r.location ..< r.location + r.length
+        return adjustLocation(r.location) ..< adjustLocation(r.location + r.length)
     }
     var glyphCount: Int {
         CTLineGetGlyphCount(ctLine)
@@ -61,11 +75,25 @@ public class TextLine {
             let offset = caret.offset
             let middle = CGFloat(0.5 * (offset + previous))
             if middle > position.x {
-                return range.location + max(0, i - 1)
+                return adjustLocation(range.location + max(0, i - 1))
             }
             previous = offset
         }
-        return range.location + range.length
+        return adjustLocation(range.location + range.length)
+    }
+
+    func inverseLocation(_ index: Int) -> Int {
+        let skipped = skippablePositions.compactMap { pos -> Int? in
+            pos < index ? pos : nil
+        }.count
+        return index + skipped
+    }
+
+    func adjustLocation(_ index: Int) -> Int {
+        let toSkip = skippablePositions.compactMap { pos -> Int? in
+            pos < index ? pos : nil
+        }.count
+        return index - toSkip
     }
 
     func isAfterEndOfLine(_ point: NSPoint) -> Bool {
@@ -77,7 +105,7 @@ public class TextLine {
     }
 
     func offsetFor(index: Int) -> Float {
-        let index = index - CTLineGetStringRange(ctLine).location
+        let index = index - adjustLocation(CTLineGetStringRange(ctLine).location)
         guard index < carets.count else { return Float(frame.maxX) }
         return carets[index].offset
     }
@@ -89,10 +117,16 @@ public class TextLine {
     }
 
     lazy var carets: [Caret] = {
-        let carets = self.allCarets
+        var carets = self.allCarets
         var c: [Caret] = carets.compactMap { caret -> Caret? in
             caret.isLeadingEdge ? caret : nil
         }
+
+        // remove fake glyphs from carets:
+        for skippable in skippablePositions.reversed() {
+            carets.remove(at: skippable)
+        }
+
         guard let last = carets.last else { return c }
         c.append(last)
         return c
@@ -101,7 +135,7 @@ public class TextLine {
     var allCarets: [Caret] {
         var c = [Caret]()
         CTLineEnumerateCaretOffsets(ctLine) { (offset, index, leading, _) in
-            c.append(Caret(offset: Float(self.frame.origin.x) + Float(offset), index: index, isLeadingEdge: leading))
+            c.append(Caret(offset: Float(self.frame.origin.x) + Float(offset), index: self.adjustLocation(index), isLeadingEdge: leading))
         }
 
         return c
@@ -128,17 +162,30 @@ public class TextLine {
 
             let width = CTRunGetTypographicBounds(run, CFRangeMake(0, 0), &ascent, &descent, nil)
 
-            if let attributes = CTRunGetAttributes(run) as? [NSAttributedString.Key: Any],
-               let color = attributes[.strikethroughColor] as? NSColor,
-               attributes[.strikethroughStyle] as? NSNumber != nil {
+            if let attributes = CTRunGetAttributes(run) as? [NSAttributedString.Key: Any] {
+                if let color = attributes[.strikethroughColor] as? NSColor,
+                   attributes[.strikethroughStyle] as? NSNumber != nil {
+                    context.setStrokeColor(color.cgColor)
 
-                context.setStrokeColor(color.cgColor)
+                    let  y = CGFloat(roundf(Float(ascent / 3.0)))
 
-                let  y = CGFloat(roundf(Float(ascent / 3.0)))
-
-                context.move(to: CGPoint(x: offset, y: y))
-                context.addLine(to: CGPoint(x: offset + CGFloat(width), y: y))
-                context.strokePath()
+                    context.move(to: CGPoint(x: offset, y: y))
+                    context.addLine(to: CGPoint(x: offset + CGFloat(width), y: y))
+                    context.strokePath()
+                }
+                if let delegateAttribute = attributes[kCTRunDelegateAttributeName as NSAttributedString.Key] {
+                    let delegate: CTRunDelegate = delegateAttribute as! CTRunDelegate
+                    let imageRunRef = CTRunDelegateGetRefCon(delegate)
+                    let imageRunPtr = imageRunRef.assumingMemoryBound(to: ImageRunStruct.self)
+                    let imageRun = imageRunPtr.pointee
+                    let imageName = imageRun.image
+                    guard let image = NSImage(named: imageName) else { continue }
+                    var rect = CGRect(origin: CGPoint(x: offset + CGFloat(0), y: 0), size: image.size)
+                    guard let cgImage = image.cgImage(forProposedRect: &rect,
+                                                      context: nil,
+                                                      hints: nil) else { continue }
+                    context.draw(cgImage, in: rect)
+                }
             }
 
             offset += CGFloat(width)
@@ -166,11 +213,6 @@ public class TextFrame {
     var ctFrame: CTFrame
     var position: NSPoint
     var lines = [TextLine]()
-
-    var range: Range<Int> {
-        let r = CTFrameGetStringRange(ctFrame)
-        return r.location ..< r.location + r.length
-    }
 
     var visibleRange: Range<Int> {
         let r = CTFrameGetVisibleStringRange(ctFrame)
@@ -227,8 +269,11 @@ public class TextFrame {
         if lines.isEmpty {
             // swiftlint:disable:next force_cast
             lines = (CTFrameGetLines(ctFrame) as! [CTLine]).map {
-                let line = TextLine(ctLine: $0)
-                if let paragraphStyle = attributedString.attribute(.paragraphStyle, at: line.range.lowerBound, longestEffectiveRange: nil, in: NSRange(line.range)) as? NSParagraphStyle {
+                let cfRange = CTLineGetStringRange($0)
+                let range = NSRange(location: cfRange.location, length: cfRange.length)
+                let subString = attributedString.attributedSubstring(from: range)
+                let line = TextLine(ctLine: $0, attributedString: subString)
+                if let paragraphStyle = attributedString.attribute(.paragraphStyle, at: line.range.lowerBound, longestEffectiveRange: nil, in: range) as? NSParagraphStyle {
                     line.interlineFactor = paragraphStyle.lineHeightMultiple
                 }
                 return line

@@ -67,11 +67,11 @@ public class TextNode: Widget {
     }
 
     var strippedText: String {
-        attributedString.string
+        text.text
     }
 
     var fullStrippedText: String {
-        children.reduce(attributedString.string) { partial, node -> String in
+        children.reduce(text.text) { partial, node -> String in
             guard let node = node as? TextNode else { return partial }
             return partial + " " + node.fullStrippedText
         }
@@ -752,7 +752,7 @@ public class TextNode: Widget {
     public func position(after index: Int) -> Int {
         guard layout != nil, !layout!.lines.isEmpty else { return 0 }
         let displayIndex = displayIndexFor(sourceIndex: index)
-        let newDisplayIndex = attributedString.string.position(after: displayIndex)
+        let newDisplayIndex = text.text.position(after: displayIndex)
         let newIndex = sourceIndexFor(displayIndex: newDisplayIndex)
         return newIndex
     }
@@ -760,7 +760,7 @@ public class TextNode: Widget {
     public func position(before index: Int) -> Int {
         guard layout != nil, !layout!.lines.isEmpty else { return 0 }
         let displayIndex = displayIndexFor(sourceIndex: index)
-        let newDisplayIndex = attributedString.string.position(before: displayIndex)
+        let newDisplayIndex = text.text.position(before: displayIndex)
         let newIndex = sourceIndexFor(displayIndex: newDisplayIndex)
         return newIndex
     }
@@ -784,7 +784,6 @@ public class TextNode: Widget {
         guard l.frame.minX < point.x && l.frame.maxX > point.x else { return nil } // don't find links outside the line
         let displayIndex = l.stringIndexFor(position: point)
         let pos = min(displayIndex, attributedString.length - 1)
-        // return attributedString.attribute(.link, at: pos, effectiveRange: nil) as? URL
 
         let range = elementText.rangeAt(position: pos)
         guard let linkAttribIndex = range.attributes.firstIndex(where: { attrib -> Bool in

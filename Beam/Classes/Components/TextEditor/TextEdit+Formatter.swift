@@ -172,7 +172,6 @@ extension BeamTextEdit {
               isInlineFormatterHidden else { return }
 
         showOrHideInlineFormatter(isPresent: true)
-        node.focus()
 
         let trackingArea = NSTrackingArea(
             rect: hyperlinkView.bounds,

@@ -334,6 +334,14 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             rootNode.focusedWidget
         }
     }
+    var mouseHandler: Widget? {
+        set {
+            rootNode.mouseHandler = newValue
+        }
+        get {
+            rootNode.mouseHandler
+        }
+    }
 
     var topOffset: CGFloat = 28 { didSet { invalidateIntrinsicContentSize() } }
     var footerHeight: CGFloat = 60 { didSet { invalidateIntrinsicContentSize() } }
@@ -1164,8 +1172,8 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         }
         self.mouseDownPos = convert(event.locationInWindow)
         let info = MouseInfo(rootNode, mouseDownPos ?? .zero, event)
-        guard rootNode.dispatchMouseDown(mouseInfo: info) != nil else { return }
-        cursorUpdate(with: event)
+        mouseHandler = rootNode.dispatchMouseDown(mouseInfo: info)
+        if mouseHandler != nil { cursorUpdate(with: event) }
     }
 
     var scrollToCursorAtLayout = false
@@ -1270,6 +1278,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
         cursorUpdate(with: event)
         super.mouseUp(with: event)
+        mouseHandler = nil
     }
 
     public override var acceptsFirstResponder: Bool { true }
