@@ -74,7 +74,7 @@ class CoreDataManager {
         }
     }
 
-    func destroyPersistentStore() {
+    func destroyPersistentStore(setup runSetup: Bool = true) {
         Logger.shared.logInfo("Destroying persistent store")
         guard let storeURL = storeURL, let persistentStoreCoordinator = mainContext.persistentStoreCoordinator else { return }
 
@@ -98,7 +98,9 @@ class CoreDataManager {
             // Error Handling
         }
 
-        setup()
+        if runSetup {
+            setup()
+        }
     }
 
     func save() throws {
@@ -142,9 +144,9 @@ class CoreDataManager {
     }
 
     func importBackup(_ url: URL) {
-        destroyPersistentStore()
-
         guard let storeURL = self.storeURL else { return }
+
+        destroyPersistentStore(setup: false)
 
         let fileManager = FileManager()
 
@@ -157,6 +159,8 @@ class CoreDataManager {
             // TODO: raise error?
             Logger.shared.logError("Can't import backup: \(error)", category: .coredata)
         }
+
+        setup()
     }
 
     let persistentContainerQueue = OperationQueue()
