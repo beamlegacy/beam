@@ -171,7 +171,7 @@ extension DocumentRequest {
         let bodyParamsRequest = GraphqlParameters(fileName: "documents", variables: EmptyVariable())
 
         let promise: Promises.Promise<Me> = performRequest(bodyParamsRequest: bodyParamsRequest,
-                                                             authenticatedCall: true)
+                                                           authenticatedCall: true)
         return promise.then(on: self.backgroundQueue) {
             guard let documents = $0.documents else {
                 throw DocumentRequestError.parserError
@@ -207,7 +207,7 @@ extension DocumentRequest {
     func deleteAllDocuments() -> Promises.Promise<Bool> {
         let bodyParamsRequest = GraphqlParameters(fileName: "delete_all_documents", variables: EmptyVariable())
         let promise: Promises.Promise<DeleteAllDocuments> = performRequest(bodyParamsRequest: bodyParamsRequest,
-                                                                             authenticatedCall: true)
+                                                                           authenticatedCall: true)
         return promise.then(on: self.backgroundQueue) {
             guard let success = $0.success else {
                 throw DocumentRequestError.parserError
@@ -220,7 +220,7 @@ extension DocumentRequest {
         let parameters = DeleteDocumentParameters(id: id)
         let bodyParamsRequest = GraphqlParameters(fileName: "delete_document", variables: parameters)
         let promise: Promises.Promise<DeleteDocument> = performRequest(bodyParamsRequest: bodyParamsRequest,
-                                                                         authenticatedCall: true)
+                                                                       authenticatedCall: true)
         return promise.then(on: self.backgroundQueue) { $0.document }
     }
 
@@ -267,14 +267,14 @@ extension DocumentRequest {
     }
 
     @discardableResult
-    func deleteAllDocuments(_ completionHandler: @escaping (Swift.Result<DeleteAllDocuments, Error>) -> Void) throws -> URLSessionDataTask? {
+    func deleteAllDocuments(_ completionHandler: @escaping (Swift.Result<DeleteAllDocuments, Error>) -> Void) throws -> URLSessionDataTask {
         let bodyParamsRequest = GraphqlParameters(fileName: "delete_all_documents", variables: EmptyVariable())
 
         return try performRequest(bodyParamsRequest: bodyParamsRequest, completionHandler: completionHandler)
     }
 
     @discardableResult
-    func deleteDocument(_ id: String, _ completionHandler: @escaping (Swift.Result<DeleteDocument, Error>) -> Void) throws  -> URLSessionDataTask? {
+    func deleteDocument(_ id: String, _ completionHandler: @escaping (Swift.Result<DeleteDocument, Error>) -> Void) throws  -> URLSessionDataTask {
         let parameters = DeleteDocumentParameters(id: id)
         let bodyParamsRequest = GraphqlParameters(fileName: "delete_document", variables: parameters)
 
@@ -283,7 +283,7 @@ extension DocumentRequest {
 
     @discardableResult
     // return multiple errors, as the API might return more than one.
-    func saveDocument(_ document: DocumentAPIType, _ completionHandler: @escaping (Swift.Result<UpdateDocument, Error>) -> Void) throws -> URLSessionDataTask? {
+    func saveDocument(_ document: DocumentAPIType, _ completionHandler: @escaping (Swift.Result<UpdateDocument, Error>) -> Void) throws -> URLSessionDataTask {
         guard let title = document.title else {
             throw DocumentRequestError.noTitle
         }
@@ -299,7 +299,7 @@ extension DocumentRequest {
     }
 
     @discardableResult
-    func fetchDocuments(_ completionHandler: @escaping (Swift.Result<[DocumentAPIType], Error>) -> Void) throws -> URLSessionDataTask? {
+    func fetchDocuments(_ completionHandler: @escaping (Swift.Result<[DocumentAPIType], Error>) -> Void) throws -> URLSessionDataTask {
         let bodyParamsRequest = GraphqlParameters(fileName: "documents", variables: EmptyVariable())
 
         return try performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<Me, Error>) in
@@ -317,19 +317,19 @@ extension DocumentRequest {
     }
 
     @discardableResult
-    func fetchDocument(_ documentID: String, _ completionHandler: @escaping (Swift.Result<DocumentAPIType, Error>) -> Void) throws -> URLSessionDataTask? {
+    func fetchDocument(_ documentID: String, _ completionHandler: @escaping (Swift.Result<DocumentAPIType, Error>) -> Void) throws -> URLSessionDataTask {
         try fetchDocumentWithFile("document", documentID, completionHandler)
     }
 
     @discardableResult
-    func fetchDocumentUpdatedAt(_ documentID: String, _ completionHandler: @escaping (Swift.Result<DocumentAPIType, Error>) -> Void) throws -> URLSessionDataTask? {
+    func fetchDocumentUpdatedAt(_ documentID: String, _ completionHandler: @escaping (Swift.Result<DocumentAPIType, Error>) -> Void) throws -> URLSessionDataTask {
         try fetchDocumentWithFile("document_updated_at", documentID, completionHandler)
     }
 
     // swiftlint:disable:next cyclomatic_complexity
     private func fetchDocumentWithFile(_ filename: String,
                                        _ documentID: String,
-                                       _ completionHandler: @escaping (Swift.Result<DocumentAPIType, Error>) -> Void) throws -> URLSessionDataTask? {
+                                       _ completionHandler: @escaping (Swift.Result<DocumentAPIType, Error>) -> Void) throws -> URLSessionDataTask {
         let parameters = FetchDocumentParameters(id: documentID)
         let bodyParamsRequest = GraphqlParameters(fileName: filename, variables: parameters)
 

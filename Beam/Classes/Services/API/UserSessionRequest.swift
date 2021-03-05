@@ -60,13 +60,12 @@ extension UserSessionRequest {
 
         let promise: PromiseKit.Promise<SignIn> = performRequest(bodyParamsRequest: bodyParamsRequest,
                                                                  authenticatedCall: false)
-            .get { signIn in
+
+        return promise.get { signIn in
                 guard signIn.accessToken != nil else {
                     throw UserSessionRequestError.signInFailed
                 }
             }
-
-        return promise
     }
 
     func signUp(_ email: String,
@@ -88,12 +87,11 @@ extension UserSessionRequest {
 
         let promise: PromiseKit.Promise<ForgotPassword> = performRequest(bodyParamsRequest: bodyParamsRequest,
                                                                          authenticatedCall: false)
-            .get { (forgotPassword: ForgotPassword) in
+        return promise.get { (forgotPassword: ForgotPassword) in
                 guard forgotPassword.success == true else {
                     throw UserSessionRequestError.forgotPasswordFailed
                 }
             }
-        return promise
     }
 }
 
@@ -107,13 +105,11 @@ extension UserSessionRequest {
 
         let promise: Promises.Promise<SignIn> = performRequest(bodyParamsRequest: bodyParamsRequest,
                                                                authenticatedCall: false)
-            .then { signIn in
-                guard signIn.accessToken != nil else {
-                    throw UserSessionRequestError.signInFailed
-                }
+        return promise.then { signIn in
+            guard signIn.accessToken != nil else {
+                throw UserSessionRequestError.signInFailed
             }
-
-        return promise
+        }
     }
 
     func signUp(_ email: String,
@@ -135,12 +131,11 @@ extension UserSessionRequest {
 
         let promise: Promises.Promise<ForgotPassword> = performRequest(bodyParamsRequest: bodyParamsRequest,
                                                                        authenticatedCall: false)
-            .then { forgotPassword in
-                guard forgotPassword.success == true else {
-                    throw UserSessionRequestError.forgotPasswordFailed
-                }
+        return promise.then { forgotPassword in
+            guard forgotPassword.success == true else {
+                throw UserSessionRequestError.forgotPasswordFailed
             }
-        return promise
+        }
     }
 }
 

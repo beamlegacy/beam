@@ -14,6 +14,12 @@ class APIRequest {
     private static var uploadedBytes: Int64 = 0
     private static var downloadedBytes: Int64 = 0
     let backgroundQueue = DispatchQueue.global(qos: .background)
+    private var dataTask: URLSessionDataTask?
+    private var cancelRequest: Bool = false
+
+    var isCancelled: Bool {
+        cancelRequest
+    }
 
     private func makeUrlRequest<E: GraphqlParametersProtocol>(_ bodyParamsRequest: E, authenticatedCall: Bool?) throws -> URLRequest {
         guard let url = URL(string: route) else { fatalError("Can't get URL: \(route)") }
@@ -223,6 +229,11 @@ class APIRequest {
         }
         return nil
     }
+
+    func cancel() {
+        dataTask?.cancel()
+        cancelRequest = true
+    }
 }
 
 // MARK: Foundation
@@ -236,24 +247,33 @@ extension APIRequest {
         let filename = bodyParamsRequest.fileName ?? "no filename"
         let localTimer = Date()
         let callsCount = Self.callsCount
-        var dataTask: URLSessionDataTask!
 
-        dataTask = URLSession.shared.dataTask(with: request) { [weak self] (data, response, error) -> Void in
-            Self.downloadedBytes += dataTask.countOfBytesReceived
-            Self.uploadedBytes += dataTask.countOfBytesSent
-
-            self?.logRequest(filename,
-                             response,
-                             localTimer,
-                             callsCount,
-                             dataTask.countOfBytesSent,
-                             dataTask.countOfBytesReceived,
-                             authenticatedCall ?? self?.authenticatedAPICall ?? false)
-
-            guard let self = self else {
+        dataTask = URLSession.shared.dataTask(with: request) { (data, response, error) -> Void in
+            guard let dataTask = self.dataTask else {
                 completionHandler(.failure(APIRequestError.parserError))
                 return
             }
+
+            // Quit early in case of already cancelled requests
+            if let error = error as NSError?, error.code == NSURLErrorCancelled {
+                self.logCancelledRequest(filename, localTimer)
+                completionHandler(.failure(error))
+                return
+            }
+
+            Self.downloadedBytes += dataTask.countOfBytesReceived
+            Self.uploadedBytes += dataTask.countOfBytesSent
+
+            self.logRequest(filename,
+                            response,
+                            localTimer,
+                            callsCount,
+                            dataTask.countOfBytesSent,
+                            dataTask.countOfBytesReceived,
+                            authenticatedCall ?? self.authenticatedAPICall)
+
+            Self.callsCount += 1
+
             if let error = error {
                 completionHandler(.failure(error))
                 self.handleNetworkError(error)
@@ -268,11 +288,11 @@ extension APIRequest {
             }
         }
 
-        Self.callsCount += 1
+        dataTask?.resume()
 
-        dataTask.resume()
+        if self.cancelRequest { dataTask?.cancel() }
 
-        return dataTask
+        return dataTask!
     }
 
     // swiftlint:disable:next function_parameter_count
@@ -291,6 +311,15 @@ extension APIRequest {
         let diffTime = Date().timeIntervalSince(localTimer)
         let diff = String(format: "%.2f", diffTime)
         Logger.shared.logDebug("[\(callsCount)] [\(Self.uploadedBytes.byteSize)/\(Self.downloadedBytes.byteSize)] [\(bytesSent.byteSize)/\(bytesReceived.byteSize)] [\(authenticated ? "authenticated" : "anonymous")] \(diff)sec \(httpResponse.statusCode) \(filename)", category: .network)
+        #endif
+    }
+
+    private func logCancelledRequest(_ filename: String,
+                                     _ localTimer: Date) {
+        #if DEBUG_API_0
+        let diffTime = Date().timeIntervalSince(localTimer)
+        let diff = String(format: "%.2f", diffTime)
+        Logger.shared.logDebug("\(diff)sec cancelled \(filename)", category: .network)
         #endif
     }
 
@@ -358,21 +387,27 @@ extension APIRequest {
 
 // MARK: PromiseKit
 extension APIRequest {
+    /// Make a performRequest which can be cancelled later on calling the tuple
     func performRequest<T: Decodable & Errorable, E: GraphqlParametersProtocol>(bodyParamsRequest: E,
                                                                                 authenticatedCall: Bool? = nil) -> PromiseKit.Promise<T> {
-        Self.callsCount += 1
+        return PromiseKit.Promise<T> { seal in
+            do {
+                guard !self.cancelRequest else { throw APIRequestError.operationCancelled }
 
-        return firstly {
-            URLSession.shared.dataTask(.promise,
-                                       with: try self.makeUrlRequest(bodyParamsRequest, authenticatedCall: authenticatedCall))
-        }.map(on: backgroundQueue) {
-            return try self.manageResponse($0.data, $0.response)
-        }.then(on: backgroundQueue) { (data: T) -> PromiseKit.Promise<T> in
-            if let error = self.handleError(data) {
-                throw error
+                // I can't use the PromiseKit foundation data request as it doesn't return a task, and I can't
+                // cancel it later
+                try self.performRequest(bodyParamsRequest: bodyParamsRequest,
+                                        authenticatedCall: authenticatedCall) { (result: Swift.Result<T, Error>) in
+                    switch result {
+                    case .failure(let error):
+                        seal.reject(error)
+                    case .success(let dataResult):
+                        seal.fulfill(dataResult)
+                    }
+                }
+            } catch {
+                seal.reject(error)
             }
-
-            return .value(data)
         }
     }
 }
@@ -381,20 +416,13 @@ extension APIRequest {
 extension APIRequest {
     func performRequest<T: Decodable & Errorable, E: GraphqlParametersProtocol>(bodyParamsRequest: E,
                                                                                 authenticatedCall: Bool? = nil) -> Promises.Promise<T> {
-        return Promises.Promise { fulfill, reject in
-            do {
-                let _: URLSessionDataTask? = try self.performRequest(bodyParamsRequest: bodyParamsRequest,
-                                                                     authenticatedCall: authenticatedCall) { (result: Swift.Result<T, Error>) in
-                    switch result {
-                    case .failure(let error):
-                        reject(error)
-                    case .success(let dataResult):
-                        fulfill(dataResult)
-                    }
-                }
-            } catch {
-                reject(error)
-            }
+        wrap(on: backgroundQueue) { (handler: @escaping (Swift.Result<T, Error>) -> Void) in
+            guard !self.cancelRequest else { throw APIRequestError.operationCancelled }
+            try self.performRequest(bodyParamsRequest: bodyParamsRequest,
+                                    authenticatedCall: authenticatedCall,
+                                    completionHandler: handler)
+        }.then(on: backgroundQueue) { result -> Promises.Promise<T> in
+            return Promises.Promise(try result.get())
         }
     }
 }

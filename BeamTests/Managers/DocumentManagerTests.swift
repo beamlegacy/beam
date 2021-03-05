@@ -97,7 +97,7 @@ class DocumentManagerTests: QuickSpec {
                         sut.saveDocument(docStruct) { _ in }
                     }
 
-                    waitUntil(timeout: .seconds(2)) { done in
+                    waitUntil(timeout: .seconds(10)) { done in
                         sut.saveDocument(docStruct) { _ in
                             done()
                         }
@@ -175,7 +175,7 @@ class DocumentManagerTests: QuickSpec {
                             }
                     }
 
-                    waitUntil(timeout: .seconds(2)) { done in
+                    waitUntil(timeout: .seconds(10)) { done in
                         let promise: PromiseKit.Promise<Bool> = sut.saveDocument(docStruct)
 
                         promise.done { success in
@@ -259,9 +259,9 @@ class DocumentManagerTests: QuickSpec {
                         promise.then { _ in count += 1 }.catch { _ in error = true }
                     }
 
-                    waitUntil(timeout: .seconds(2)) { done in
-                        let promise: Promises.Promise<Bool> = sut.saveDocument(docStruct)
+                    let promise: Promises.Promise<Bool> = sut.saveDocument(docStruct)
 
+                    waitUntil(timeout: .seconds(10)) { done in
                         promise.then { success in
                                 expect(success) == true
                                 done()

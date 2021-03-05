@@ -11,6 +11,7 @@ enum APIRequestError: Error, Equatable {
     case notAuthenticated
     case documentConflict
     case apiError([String])
+    case operationCancelled
 }
 
 extension APIRequestError: LocalizedError {
@@ -36,6 +37,8 @@ extension APIRequestError: LocalizedError {
             return loc("error.api.notFound")
         case .error:
             return loc("error.api.Error")
+        case .operationCancelled:
+            return loc("error.api.operationCancelled")
         }
     }
 }

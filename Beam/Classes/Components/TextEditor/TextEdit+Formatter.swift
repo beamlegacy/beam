@@ -371,7 +371,7 @@ extension BeamTextEdit {
         rootNode.cmdManager.run(command: changeAttributes)
         rootNode.cmdManager.endGroup()
     }
-    
+
     private func setActiveFormatters(_ types: [FormatterType]) {
         if let inlineFormatter = inlineFormatter {
             inlineFormatter.setActiveFormmatters(types)

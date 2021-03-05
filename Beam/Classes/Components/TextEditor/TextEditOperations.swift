@@ -159,7 +159,7 @@ extension TextRoot {
             }
         }
     }
-    
+
     // Text Input from AppKit:
     public func hasMarkedText() -> Bool {
         return !markedTextRange.isEmpty
