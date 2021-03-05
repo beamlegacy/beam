@@ -7,7 +7,7 @@ if [[ ! -d "builds" ]]
 then
   mkdir "builds"
 fi
-echo "Will sign Sparkle with ${IDENTITY}" > builds/debug_beam.txt
+echo "warning: Will sign Sparkle with ${IDENTITY}"
 
 alias dosign="${PROJECT_DIR}/Extern/Sparkle/bin/codesign_embedded_executable"
 SPARKLE_PATH=${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}/Sparkle.framework

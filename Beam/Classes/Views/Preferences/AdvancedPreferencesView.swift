@@ -29,7 +29,7 @@ struct AdvancedPreferencesView: View {
     @State private var loggedIn: Bool = AccountManager().loggedIn
     @State private var networkEnabled: Bool = Configuration.networkEnabled
 
-    private let contentWidth: Double = 450.0
+    private let contentWidth: Double = 650.0
 
     var body: some View {
         let binding = Binding<String>(get: {

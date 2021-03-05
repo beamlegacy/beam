@@ -106,7 +106,6 @@ platform :mac do
       skip_testing: "BeamUITests",
       output_types: "junit",
       output_files: "tests.xml",
-      xcpretty_args: "-tc"
     )
     # For Gitlab artifacts
     slather(

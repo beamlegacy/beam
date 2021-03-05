@@ -29,8 +29,10 @@ class DocumentManagerTestsHelper {
     }
 
     func saveRemotelyOnly(_ docStruct: DocumentStruct) {
+        let documentRequest = DocumentRequest()
+
         waitUntil(timeout: .seconds(10)) { done in
-            _ = try? self.documentManager.documentRequest.saveDocument(docStruct.asApiType()) { result in
+            _ = try? documentRequest.saveDocument(docStruct.asApiType()) { result in
                 expect { try result.get() }.toNot(throwError())
                 done()
             }
@@ -39,15 +41,28 @@ class DocumentManagerTestsHelper {
 
     func fetchOnAPI(_ docStruct: DocumentStruct) -> DocumentAPIType? {
         var documentAPIType: DocumentAPIType?
-        waitUntil(timeout: .seconds(10)) { done in
-            _ = try? self.documentManager.documentRequest.fetchDocument(docStruct.uuidString) { result in
-                expect { try result.get() }.toNot(throwError())
+        let documentRequest = DocumentRequest()
 
-                documentAPIType = try? result.get()
-                done()
-            }
+        let semaphore = DispatchSemaphore(value: 0)
+        _ = try? documentRequest.fetchDocument(docStruct.uuidString) { result in
+            documentAPIType = try? result.get()
+            semaphore.signal()
         }
+        semaphore.wait()
+
         return documentAPIType
+    }
+
+    func fetchOnAPIWithLatency(_ docStruct: DocumentStruct, _ newLocal: String) -> Bool {
+        for _ in 0...10 {
+            let remoteStruct = fetchOnAPI(docStruct)
+            expect(remoteStruct?.id).to(equal(docStruct.uuidString))
+            if remoteStruct?.data == newLocal {
+                return true
+            }
+            usleep(50)
+        }
+        return false
     }
 
     func deleteDocumentStruct(_ docStruct: DocumentStruct) {
@@ -81,9 +96,7 @@ class DocumentManagerTestsHelper {
         // The call to `saveDocumentStructOnAPI` expect the document to be already saved locally
         waitUntil(timeout: .seconds(10)) { done in
             // To force a local save only, while using the standard code
-            Configuration.networkEnabled = false
-            self.documentManager.saveDocument(docStruct) { _ in
-                Configuration.networkEnabled = true
+            self.documentManager.saveDocument(docStruct, false) { _ in
                 done()
             }
         }

@@ -16,14 +16,18 @@ class DocumentTests: QuickSpec {
 
     // swiftlint:disable:next function_body_length
     override func spec() {
-        beforeEach {
+        beforeSuite {
             self.coreDataManager = CoreDataManager()
-            self.mainContext = self.coreDataManager.mainContext
-            self.backgroundContext = self.coreDataManager.backgroundContext
 
             // Setup CoreData
             self.coreDataManager.setup()
-            CoreDataManager.shared = self.coreDataManager
+            //CoreDataManager.shared = self.coreDataManager
+        }
+
+        beforeEach {
+            self.coreDataManager.destroyPersistentStore()
+            self.mainContext = self.coreDataManager.mainContext
+            self.backgroundContext = self.coreDataManager.backgroundContext
             self.sut = DocumentManager(coreDataManager: self.coreDataManager)
             self.helper = DocumentManagerTestsHelper(documentManager: self.sut,
                                                      coreDataManager: self.coreDataManager)
@@ -35,17 +39,18 @@ class DocumentTests: QuickSpec {
 
         describe(".countWithPredicate()") {
             it("fetches document") {
-                try? self.mainContext.save()
-
                 let count = 3
                 let countBefore = Document.countWithPredicate(self.mainContext)
 
                 for _ in 1...count {
-                    self.helper.saveLocally(self.helper.createDocumentStruct())
+                    let docStruct = self.helper.createDocumentStruct()
+                    self.helper.saveLocally(docStruct)
                 }
 
                 let countAfter = Document.countWithPredicate(self.mainContext)
-                expect(countAfter).to(equal(countBefore + count))
+                expect(countAfter) >= countBefore + count
+                // Because sometimes BeamNote adds today's journal note
+                expect(countAfter) <= countBefore + count + 1
             }
         }
 
@@ -72,12 +77,13 @@ class DocumentTests: QuickSpec {
 
         describe(".fetchAllWithTitleMatch()") {
             it("fetches documents matching title") {
-                self.helper.saveLocally(self.helper.createDocumentStruct(title: "foobar 1"))
-                self.helper.saveLocally(self.helper.createDocumentStruct(title: "foobar 2"))
-                self.helper.saveLocally(self.helper.createDocumentStruct(title: "foobar 3"))
+                let times = 3
+                for index in 0..<times {
+                    self.helper.saveLocally(self.helper.createDocumentStruct(title: "foobar \(index)"))
+                }
                 self.helper.saveLocally(self.helper.createDocumentStruct())
 
-                expect(Document.fetchAllWithTitleMatch(self.mainContext, "foobar")).to(haveCount(3))
+                expect(Document.fetchAllWithTitleMatch(self.mainContext, "foobar")).to(haveCount(times))
             }
         }
 
@@ -101,8 +107,8 @@ class DocumentTests: QuickSpec {
                 document1.id = id
                 document2.id = id
 
-                expect { try CoreDataManager.save(self.mainContext) }.to(throwError { (error: NSError) in
-                    expect(error.code).to(equal(133021))
+                expect { try CoreDataManager.save(self.mainContext) }.to(throwError { (error: CocoaError) in
+                    expect(error.code) == CocoaError.Code.managedObjectConstraintMerge
                 })
 
                 self.mainContext.delete(document1)
@@ -130,11 +136,11 @@ class DocumentTests: QuickSpec {
                 expect { try CoreDataManager.save(self.backgroundContext) }.toNot(throwError())
                 expect { try DocumentManager.saveContext(context: self.backgroundContext) }.toNot(throwError())
 
-                expect { try CoreDataManager.save(self.mainContext) }.to(throwError { (error: NSError) in
-                    expect(error.code).to(equal(133020))
+                expect { try CoreDataManager.save(self.mainContext) }.to(throwError { (error: CocoaError) in
+                    expect(error.code) == CocoaError.Code.managedObjectMerge
                 })
-                expect { try DocumentManager.saveContext(context: self.mainContext) }.to(throwError { (error: NSError) in
-                    expect(error.code).to(equal(133020))
+                expect { try DocumentManager.saveContext(context: self.mainContext) }.to(throwError { (error: CocoaError) in
+                    expect(error.code) == CocoaError.Code.managedObjectMerge
                 })
 
                 expect(document1.title).to(equal(title2))
