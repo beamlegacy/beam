@@ -15,7 +15,7 @@ extension URL {
 
     var isSearchResult: Bool {
         if let host = host {
-            return host.hasSuffix("google.com") && path.hasPrefix("/url")
+            return host.hasSuffix("google.com") && (path == "/url" || path == "/search")
         }
 
         return false

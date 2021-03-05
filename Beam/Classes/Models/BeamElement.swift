@@ -441,4 +441,21 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
         text.hasReferenceToNote(named: noteName)
     }
 
+    public var outLinks: [String] {
+        text.links + children.flatMap { $0.outLinks }
+    }
+
+    func elementContainingLink(to link: String) -> BeamElement? {
+        if text.links.contains(link) {
+            return self
+        }
+
+        for c in children {
+            if let element = c.elementContainingLink(to: link) {
+                return element
+            }
+        }
+
+        return nil
+    }
 }

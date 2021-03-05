@@ -204,7 +204,8 @@ class HtmlVisitor {
             }
         } else {
             if let textNode = node as? SwiftSoup.TextNode {
-                text.append(textNode.text())
+                let string = textNode.text().components(separatedBy: CharacterSet.controlCharacters).joined()
+                text.append(string)
             }
             let contents: BeamText = visitChildren(node)
             text.append(contents)
@@ -302,7 +303,8 @@ func html2Text(url: URL, doc: SwiftSoup.Document) -> String {
 
 func html2Text(url: URL, doc: SwiftSoup.Document) -> BeamText {
     let visitor = HtmlVisitor(url)
-    return visitor.visit(doc)
+    let text: BeamText = visitor.visit(doc)
+    return text.trimming(NSCharacterSet.whitespacesAndNewlines)
 }
 
 extension SwiftSoup.Document {

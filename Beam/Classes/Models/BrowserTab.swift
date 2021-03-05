@@ -119,23 +119,26 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     }
 
     // Add the current page to the current note and return the beam element (if the element already exist return it directly)
-    func addCurrentPageToNote() -> BeamElement {
+    func addCurrentPageToNote() -> BeamElement? {
         guard let elem = element else {
+            guard let url = url else { return nil }
+            guard !url.isSearchResult else { return nil } // Don't automatically add search results
+            let linkString = url.absoluteString
+            guard !note.outLinks.contains(linkString) else { element = note.elementContainingLink(to: linkString); return element }
             Logger.shared.logDebug("add current page '\(title)' to note '\(note.title)'", category: .web)
             let e = BeamElement()
-            e.query = originalQuery
-            e.text = BeamText(text: title, attributes: [.link(url?.absoluteString ?? "")])
             element = e
+            updateElementWithTitle()
             rootElement.addChild(e)
             return e
         }
         return elem
     }
 
-    private func updateBullet() {
-        if let url = url {
-            let name = title.isEmpty ? url.absoluteString : title
-            self.element?.text = BeamText(text: name, attributes: [.link(url.absoluteString)])
+    private func updateElementWithTitle(_ title: String? = nil) {
+        if let url = url, let element = element {
+            let name = title ?? (self.title.isEmpty ? url.absoluteString : self.title)
+            element.text = BeamText(text: name, attributes: [.link(url.absoluteString)])
         }
     }
 
@@ -172,16 +175,15 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     private func setupObservers() {
         webView.publisher(for: \.title).sink { v in
             self.title = v ?? "loading..."
-            self.updateBullet()
+            self.updateElementWithTitle()
         }.store(in: &scope)
         webView.publisher(for: \.url).sink { v in
             self.url = v
-            self.updateBullet()
-            self.updateFavIcon()
             if v?.absoluteString != nil {
-                self.browsingTree.current.score.openIndex = self.navigationCount
-                self.updateScore()
-                self.navigationCount = 0
+                self.updateFavIcon()
+//                self.browsingTree.current.score.openIndex = self.navigationCount
+//                self.updateScore()
+//                self.navigationCount = 0
             }
         }.store(in: &scope)
         webView.publisher(for: \.isLoading).sink { v in withAnimation { self.isLoading = v } }.store(in: &scope)
@@ -296,6 +298,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     }
 
     func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
+        element = nil
     }
 
     func webView(_ webView: WKWebView, didReceiveServerRedirectForProvisionalNavigation navigation: WKNavigation!) {
@@ -303,9 +306,12 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     }
 
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+        element = nil
     }
 
     func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
+        element = nil
+        _ = addCurrentPageToNote()
     }
 
     lazy var overrideConsole: String = { loadJS(from: "OverrideConsole") }()
@@ -331,7 +337,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                 let quote = text
 
                 DispatchQueue.main.async {
-                    let current = self.addCurrentPageToNote()
+                    guard let current = self.addCurrentPageToNote() else { return }
                     let e = BeamElement()
                     e.kind = .quote(1, title, urlString)
                     e.text = quote
@@ -364,6 +370,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         guard let url = webView.url else { return }
+        _ = addCurrentPageToNote()
         browsingTree.navigateTo(url: url.absoluteString, title: webView.title)
         Readability.read(webView) { [weak self] result in
             guard let self = self else { return }
@@ -371,6 +378,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             switch result {
             case let .success(read):
                 self.appendToIndexer(url, read)
+                self.updateElementWithTitle(read.title)
                 self.browsingTree.current.score.textAmount = read.content.count
                 self.updateScore()
             case let .failure(error):
@@ -380,6 +388,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+        element = nil
     }
 
     func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {

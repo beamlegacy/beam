@@ -26,7 +26,6 @@ struct NoteReference: Codable, Equatable, Hashable {
 class BeamNote: BeamElement {
     @Published var title: String { didSet { change(.text) } }
     @Published var type: NoteType = .note { didSet { change(.meta) } }
-    @Published public private(set) var outLinks: [String] = [] { didSet { change(.meta) } } ///< The links contained in this note
     @Published public private(set) var references: [NoteReference] = [] { didSet { change(.meta) } } ///< urls of the notes/bullet pointing to this note
 
     @Published public private(set) var searchQueries: [String] = [] { didSet { change(.meta) } } ///< Search queries whose results were used to populate this note
@@ -46,7 +45,6 @@ class BeamNote: BeamElement {
     enum CodingKeys: String, CodingKey {
         case title
         case type
-        case outLinks
         case searchQueries
         case visitedSearchResults
         case browsingSessions
@@ -60,7 +58,6 @@ class BeamNote: BeamElement {
 
         title = try container.decode(String.self, forKey: .title)
         type = try container.decode(NoteType.self, forKey: .type)
-        outLinks = try container.decode([String].self, forKey: .outLinks)
         searchQueries = try container.decode([String].self, forKey: .searchQueries)
         visitedSearchResults = try container.decode([VisitedPage].self, forKey: .visitedSearchResults)
         if container.contains(.browsingSessions) {
@@ -90,7 +87,6 @@ class BeamNote: BeamElement {
 
         try container.encode(title, forKey: .title)
         try container.encode(type, forKey: .type)
-        try container.encode(outLinks, forKey: .outLinks)
         try container.encode(searchQueries, forKey: .searchQueries)
         try container.encode(visitedSearchResults, forKey: .visitedSearchResults)
         if !browsingSessions.isEmpty {
@@ -145,7 +141,6 @@ class BeamNote: BeamElement {
 
                 self.title = newSelf.title
                 self.type = newSelf.type
-                self.outLinks = newSelf.outLinks
                 self.searchQueries = newSelf.searchQueries
                 self.visitedSearchResults = newSelf.visitedSearchResults
                 self.browsingSessions = newSelf.browsingSessions
