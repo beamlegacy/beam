@@ -26,6 +26,7 @@ struct AccountsView: View {
     @State private var enableLogging: Bool = true
     @State private var loggedIn: Bool = AccountManager().loggedIn
     @State private var errorMessage: Error!
+    @State private var loading: Bool = false
 
     private let accountManager = AccountManager()
     private let contentWidth: Double = 450.0
@@ -53,7 +54,9 @@ struct AccountsView: View {
     @State private var showingSignInAlert = false
     private var SignInButton: some View {
         Button(action: {
+            self.loading = true
             accountManager.signIn(email, password) { result in
+                self.loading = false
                 loggedIn = AccountManager().loggedIn
                 switch result {
                 case .failure(let error):
@@ -68,7 +71,7 @@ struct AccountsView: View {
             // TODO: loc
             Text("Sign In").frame(minWidth: 100)
         })
-        .disabled(loggedIn)
+        .disabled(loggedIn || loading || email.isEmpty || password.isEmpty)
         .alert(isPresented: $showingSignInAlert) {
             Alert(title: Text("Error"),
                   message: Text(errorMessage.localizedDescription))
@@ -78,7 +81,9 @@ struct AccountsView: View {
     @State private var showingSignUpAlert = false
     private var SignUpButton: some View {
         Button(action: {
+            self.loading = true
             accountManager.signUp(email, password) { result in
+                self.loading = false
                 switch result {
                 case .failure(let error):
                     errorMessage = error
@@ -92,7 +97,7 @@ struct AccountsView: View {
             // TODO: loc
             Text("Sign Up").frame(minWidth: 100)
         })
-        .disabled(loggedIn)
+        .disabled(loggedIn || loading || email.isEmpty || password.isEmpty)
         .alert(isPresented: $showingSignUpAlert) {
             Alert(title: Text("Error"),
                   message: Text(errorMessage.localizedDescription))
@@ -102,7 +107,9 @@ struct AccountsView: View {
     @State private var showingForgotPasswordAlert = false
     private var ForgotPasswordButton: some View {
         Button(action: {
+            self.loading = true
             accountManager.forgotPassword(email: email) { result in
+                self.loading = false
                 switch result {
                 case .failure(let error):
                     errorMessage = error
@@ -116,7 +123,7 @@ struct AccountsView: View {
             // TODO: loc
             Text("Forgot Password").frame(minWidth: 100)
         })
-        .disabled(loggedIn)
+        .disabled(loggedIn || loading || email.isEmpty)
         .alert(isPresented: $showingForgotPasswordAlert) {
             Alert(title: Text("Error"),
                   message: Text(errorMessage.localizedDescription))
