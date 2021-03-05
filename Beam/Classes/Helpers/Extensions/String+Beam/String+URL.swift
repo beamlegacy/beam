@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension String {
+public extension String {
     var markdownizedURL: String? {
         return self.addingPercentEncoding(withAllowedCharacters: CharacterSet(charactersIn: "()").inverted)
     }

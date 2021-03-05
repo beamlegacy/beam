@@ -83,6 +83,29 @@ extension BeamText {
     func hasSuffix(_ string: String) -> Bool {
         return text.hasSuffix(string)
     }
+
+    func trimming(_ charSet: CharacterSet) -> BeamText {
+        var text = self
+        let string = text.text
+        let invCharSet = charSet.inverted
+        let trimstart: String.Index? = string.firstIndex(where: { ch -> Bool in
+            return ch.unicodeScalars.allSatisfy { scalar -> Bool in
+                invCharSet.contains(scalar)
+            }
+        })
+        let trimend: String.Index? = string.lastIndex(where: { ch -> Bool in
+            return ch.unicodeScalars.allSatisfy { scalar -> Bool in
+                invCharSet.contains(scalar)
+            }
+        })
+        if let trimend = trimend {
+            text.removeLast(string.count - string.position(at: trimend) - 1)
+        }
+        if let trimstart = trimstart {
+            text.removeFirst(string.position(at: trimstart))
+        }
+        return text
+    }
 }
 
 extension BeamText: Equatable {
@@ -184,6 +207,32 @@ extension BeamText {
                 switch attribute {
                 case .internalLink:
                     links.append(range)
+                default:
+                    break
+                }
+            }
+        }
+
+        return links
+    }
+
+    var linkRanges: [Range] {
+        ranges.flatMap { range in
+          range.attributes.compactMap { attribute -> Range? in // might not need -> Range?
+            if case .link = attribute { return range }
+            return nil
+          }
+        }
+
+    }
+
+    var links: [String] {
+        var links = [String]()
+        for range in ranges {
+            for attribute in range.attributes {
+                switch attribute {
+                case let .link(link):
+                    links.append(link)
                 default:
                     break
                 }
