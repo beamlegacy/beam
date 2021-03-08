@@ -232,40 +232,43 @@ extension NSColor {
         return loadColor(named: "Niobium")
     }
 
-    static var omniboxBackgroundColor: NSColor {
-        return loadColor(named: "OmniboxBackgroundColor")
-    }
-
+    // Omnibox
     static var omniboxPlaceholderTextColor: NSColor {
-        return loadColor(named: "OmniboxPlaceholderTextColor")
+        return loadColor(named: "LightStoneGray")
     }
 
     static var omniboxTextColor: NSColor {
         return loadColor(named: "Niobium")
     }
 
-    static var omniboxTextSelectionColor: NSColor {
-        return loadColor(named: "OmniboxTextSelectionColor")
+    // Destination Note
+    static var destinationNoteBorderColor: NSColor {
+        return loadColor(named: "Mercury")
     }
 
-    static var toolbarBackgroundColor: NSColor {
-        return loadColor(named: "ToolbarBackgroundColor")
+    static var destinationNoteTextColor: NSColor {
+        return loadColor(named: "LightStoneGray")
     }
 
-    static var toolbarButtonBackgroundHoverColor: NSColor {
-        return loadColor(named: "ToolbarButtonBackgroundHoverColor")
+    static var destinationNoteActiveTextColor: NSColor {
+        return loadColor(named: "Niobium")
     }
 
-    static var toolbarButtonBackgroundOnColor: NSColor {
-        return loadColor(named: "ToolbarButtonBackgroundOnColor")
+    // Toolbar
+    static var toolbarButtonActiveBackgroundColor: NSColor {
+        return loadColor(named: "Mercury")
     }
 
     static var toolbarButtonIconColor: NSColor {
-        return loadColor(named: "ToolbarButtonIconColor")
+        return loadColor(named: "LightStoneGray")
+    }
+
+    static var toolbarButtonActiveIconColor: NSColor {
+        return loadColor(named: "Niobium")
     }
 
     static var toolbarButtonIconDisabledColor: NSColor {
-        return loadColor(named: "ToolbarButtonIconDisabledColor")
+        return toolbarButtonIconColor.withAlphaComponent(0.13)
     }
 
     static var transparent: NSColor {

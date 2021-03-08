@@ -17,7 +17,7 @@ class Omnibar: XCTestCase {
     }
 
     func testOmnibarIsFocus() {
-        let textField = app.textFields["omniBarSearchBox"]
+        let textField = app.textFields["OmniBarSearchField"]
         let hasKeyboardFocus = textField.value(forKey: "hasKeyboardFocus") as? Bool ?? false
 
         XCTAssert(textField.exists)
@@ -25,7 +25,7 @@ class Omnibar: XCTestCase {
     }
 
     func testOmnibarCanSearch() {
-        let textField = app.textFields["omniBarSearchBox"]
+        let textField = app.textFields["OmniBarSearchField"]
 
         XCTAssert(textField.exists)
 
@@ -40,7 +40,7 @@ class Omnibar: XCTestCase {
     }
 
     func testOmnibarClearSearchQuery() {
-        let textField = app.textFields["omniBarSearchBox"]
+        let textField = app.textFields["OmniBarSearchField"]
         let selectAll = XCUIApplication().menuItems["Select All"]
 
         XCTAssert(textField.exists)
@@ -66,7 +66,7 @@ class Omnibar: XCTestCase {
     }
 
     func testOmnibarDeleteCharacters() {
-        let textField = app.textFields["omniBarSearchBox"]
+        let textField = app.textFields["OmniBarSearchField"]
 
         XCTAssert(textField.exists)
 
@@ -82,7 +82,7 @@ class Omnibar: XCTestCase {
     }
 
     func testOmnibarShowAutoComplete() {
-        let textField = app.textFields["omniBarSearchBox"]
+        let textField = app.textFields["OmniBarSearchField"]
 
         XCTAssert(textField.exists)
 
@@ -94,7 +94,7 @@ class Omnibar: XCTestCase {
     }
 
     func testOmnibarNavigateThroughTheAutoComplete() {
-        let textField = app.textFields["omniBarSearchBox"]
+        let textField = app.textFields["OmniBarSearchField"]
 
         XCTAssert(textField.exists)
         textField.typeText("beam app")
@@ -109,7 +109,7 @@ class Omnibar: XCTestCase {
     }
 
     func testOmnibarPressEnterAndSwitchMode() {
-        let textField = app.textFields["omniBarSearchBox"]
+        let textField = app.textFields["OmniBarSearchField"]
 
         XCTAssert(textField.exists)
         textField.typeText("Hello World")
@@ -128,30 +128,23 @@ class Omnibar: XCTestCase {
         XCTAssert(app.images["browserTabBarView"].waitForExistence(timeout: 2))
         XCTAssert(app.groups["webView"].exists)
 
-        checkCommonRightButtonsExist()
-        XCTAssert(app.buttons["note"].exists)
+        XCTAssert(app.buttons["journal"].exists)
+        XCTAssert(app.buttons["refresh"].exists)
+        XCTAssert(app.buttons["pivot-card"].exists)
+        XCTAssert(app.buttons["goBack"].exists)
 
-        app.buttons["note"].click()
+        app.buttons["pivot-card"].click()
         XCTAssert(app.scrollViews["noteView"].exists)
 
-        app.buttons["network"].click()
+        app.buttons["pivot-web"].click()
         XCTAssert(app.groups["webView"].exists)
     }
 
-    func testOmnibarBackAndForwardButtonsExist() {
-        XCTAssert(app.buttons["goBack"].exists)
-        XCTAssert(app.buttons["goForward"].exists)
+    func testOmnibarArrowsHiddenByDefault() {
+        XCTAssertFalse(app.buttons["goBack"].exists)
+        XCTAssertFalse(app.buttons["goForward"].exists)
     }
 
-    func testOmnibarRightNetworkButtonExist() {
-        checkCommonRightButtonsExist()
-        XCTAssert(app.buttons["network"].exists)
-    }
-
-    func checkCommonRightButtonsExist() {
-        XCTAssert(app.buttons["magnifyingglass"].exists)
-        XCTAssert(app.buttons["newSearch"].exists)
-    }
 
     private func takeScreenshot(_ element: XCUIElement) {
         let screenshot = element.screenshot()

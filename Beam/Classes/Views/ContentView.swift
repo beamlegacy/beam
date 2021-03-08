@@ -10,23 +10,15 @@ import SwiftUI
 struct ModeView: View {
     @EnvironmentObject var state: BeamState
     @EnvironmentObject var data: BeamData
-    @ViewBuilder
+    private let windowControlsWidth: CGFloat = 92
+
     var body: some View {
         GeometryReader { geometry in
-            VStack(spacing: 0) {
-                ZStack {
-                    if !(state.isEditingOmniBarTitle || [Mode.today, Mode.note].contains(state.mode)) {
-                        if let tab = state.currentTab {
-                            GlobalTabTitle(tab: tab, isEditing: $state.isEditingOmniBarTitle)
-                                .frame(width: geometry.size.width * 0.5, height: 52, alignment: .center)
-                        }
-                    }
-
-                    OmniBar()
-                        .padding(.leading, state.isFullScreen ? 0 : 70)
-                        .padding(.trailing, 20)
-                        .frame(height: 52, alignment: .center)
-                }
+            VStack(spacing: 0) {               
+                OmniBar()
+                    .padding(.leading, state.isFullScreen ? 0 : windowControlsWidth)
+                    .frame(height: 52)
+                    .zIndex(10)
 
                 ZStack {
                     switch state.mode {
@@ -67,8 +59,9 @@ struct ModeView: View {
                         ScrollView {
                             AutoCompleteView(autoComplete: $state.completedQueries, selectionIndex: $state.selectionIndex)
                                 .frame(minHeight: 20, maxHeight: 250, alignment: .top)
-                                .zIndex(2)
+
                         }
+                        .zIndex(2)
                         .accessibility(identifier: "autoCompleteView")
                     }
                 }

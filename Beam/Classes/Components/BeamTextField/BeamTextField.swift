@@ -12,7 +12,6 @@ struct BeamTextField: NSViewRepresentable {
 
     @Binding var text: String
     @Binding var isEditing: Bool
-    @Binding var isFirstResponder: Bool
 
     var placeholder: String
     var font: NSFont?
@@ -26,6 +25,7 @@ struct BeamTextField: NSViewRepresentable {
     var onCursorMovement: (CursorMovement) -> Bool = { _ in false }
     var onStartEditing: () -> Void = { }
     var onStopEditing: () -> Void = { }
+    internal var centered: Bool = false
 
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
@@ -33,10 +33,8 @@ struct BeamTextField: NSViewRepresentable {
 
     func makeNSView(context: Self.Context) -> Self.NSViewType {
         let textField = BeamTextFieldView()
-
         textField.delegate = context.coordinator
         textField.focusRingType = .none
-
         textField.setText(text, font: font)
 
         if let textColor = textColor {
@@ -47,11 +45,9 @@ struct BeamTextField: NSViewRepresentable {
             textField.placeholderColor = placeholderColor
         }
 
-        textField.onFocusChanged = { isFocus in
-            self.isEditing = isFocus
-            self.isFirstResponder = isFocus
-            context.coordinator.didBecomeFirstResponder = isFocus
-            if isFocus {
+        textField.onFocusChanged = { isFocused in
+            self.isEditing = isFocused
+            if isFocused {
                 onStartEditing()
             } else {
                 onStopEditing()
@@ -72,38 +68,44 @@ struct BeamTextField: NSViewRepresentable {
         return textField
     }
 
-    func updateNSView(_ nsView: Self.NSViewType, context: Self.Context) {
-        nsView.setText(text, font: font)
-        nsView.setPlacholder(placeholder, font: font)
+    func updateNSView(_ textField: Self.NSViewType, context: Self.Context) {
+        textField.setText(text, font: font)
+        textField.setPlaceholder(placeholder, font: font)
+        textField.shouldUseIntrinsicContentSize = centered
 
-        // Enable focus on textField
-        if isFirstResponder && !context.coordinator.didBecomeFirstResponder {
-            context.coordinator.didBecomeFirstResponder = true
-
-            DispatchQueue.main.async {
-                nsView.becomeFirstResponder()
+        // Force focus on textField
+        DispatchQueue.main.async {
+            let isCurrentlyFirstResponder = textField.isFirstResponder
+            if isEditing && !isCurrentlyFirstResponder {
+                textField.becomeFirstResponder()
+            } else if !isEditing && isCurrentlyFirstResponder {
+                textField.resignFirstResponder()
+                // If no other field is a first responder, we can safely clear the window's responder.
+                // Otherwise the cursor is not completely removed from the field.
+                textField.window?.makeFirstResponder(nil)
             }
         }
 
         // Set the range on the textField
         if let range = self.selectedRanges?.first {
-            let fieldeditor = nsView.currentEditor()
             let pos = Int(range.startIndex)
             let len = Int(range.endIndex - range.startIndex)
-            fieldeditor?.selectedRange = NSRange(location: pos, length: len)
+            updateSelectedRange(textField, range: NSRange(location: pos, length: len))
         }
+    }
+
+    func updateSelectedRange(_ textField: Self.NSViewType, range: NSRange) {
+        let fieldeditor = textField.currentEditor()
+        fieldeditor?.selectedRange = range
     }
 
     class Coordinator: NSObject, NSTextFieldDelegate {
         let parent: BeamTextField
-        var didBecomeFirstResponder = false
-
         init(_ textField: BeamTextField) {
             self.parent = textField
         }
 
         // MARK: Protocol
-
         func controlTextDidEndEditing(_ obj: Notification) {
             guard let textField = obj.object as? NSViewType else { return }
             textField.onFocusChanged(false)
@@ -128,5 +130,15 @@ struct BeamTextField: NSViewRepresentable {
             return false
         }
 
+    }
+}
+
+extension BeamTextField {
+    func centered(_ centered: Bool) -> some View {
+        var copy = self
+        copy.centered = centered
+        return
+            copy
+                .fixedSize(horizontal: centered, vertical: false) // enables the use of intrinsic content size
     }
 }

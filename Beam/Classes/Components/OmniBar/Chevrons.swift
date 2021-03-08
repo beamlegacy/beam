@@ -12,22 +12,14 @@ struct Chevrons: View {
     @EnvironmentObject var state: BeamState
 
     var body: some View {
-        HStack(spacing: 0) {
-                Button(action: goBack) {
-                    Symbol(name: "chevron.left")
-                }
-                .accessibility(identifier: "goBack")
-                .buttonStyle(RoundRectButtonStyle())
+        HStack(spacing: 4) {
+            OmniBarButton(icon: "nav-back", accessibilityId: "goBack", action: goBack)
                 .disabled(!state.canGoBack)
-
-                Button(action: goForward) {
-                    Symbol(name: "chevron.right")
-                }
-                .accessibility(identifier: "goForward")
-                .buttonStyle(RoundRectButtonStyle())
-                .disabled(!state.canGoForward)
+            if state.canGoForward {
+                OmniBarButton(icon: "nav-forward", accessibilityId: "goForward", action: goForward)
             }
-            .padding(.leading, 18)
+        }
+        .animation(.easeInOut)
     }
 
     func goBack() {
