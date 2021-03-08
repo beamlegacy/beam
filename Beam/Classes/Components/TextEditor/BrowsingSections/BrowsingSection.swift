@@ -41,21 +41,21 @@ class BrowsingSection: Widget {
 
         if sorted {
             for link in sortedLinks(sessions: sessions).reversed() {
-                addChild(BrowsingLinkWidget(editor: editor, link: link))
+                addChild(BrowsingLinkWidget(parent: self, link: link))
             }
         } else {
             for session in sessions {
-                addChild(BrowsingNodeWidget(editor: editor, browsingNode: session.root, recursive: true))
+                addChild(BrowsingNodeWidget(parent: self, browsingNode: session.root, recursive: true))
             }
         }
         layers["chevron"]?.layer.isHidden = self.children.isEmpty
         invalidateLayout()
     }
 
-    init(editor: BeamTextEdit, note: BeamNote) {
+    init(parent: Widget, note: BeamNote) {
         self.note = note
 
-        super.init(editor: editor)
+        super.init(parent: parent)
 
         // Append the linked references and unlinked references nodes
         textLayer.foregroundColor = NSColor.editorIconColor.cgColor

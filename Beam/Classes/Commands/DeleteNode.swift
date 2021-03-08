@@ -126,10 +126,10 @@ class DeleteNode: Command {
         guard let root = self.textRoot,
               let lastElementVisible = self.lastElementVisible else { return false }
 
-        let newLastNode = root.nodeFor(lastElementVisible)
+        let newLastNode = root.nodeFor(lastElementVisible, withParent: root)
         newLastNode.element.text.removeLast(element.text.count)
 
-        let newNode = newLastNode.nodeFor(element)
+        let newNode = newLastNode.nodeFor(element, withParent: root)
         for c in newLastNode.element.children {
             newNode.element.addChild(c)
         }
@@ -147,9 +147,9 @@ class DeleteNode: Command {
         guard let root = self.textRoot,
               let lastElementVisible = self.lastElementVisible else { return false }
 
-        let currentNode = root.nodeFor(lastElementVisible)
+        let currentNode = root.nodeFor(lastElementVisible, withParent: root)
         currentNode.text.removeLast(self.element.text.count)
-        let newNode = root.nodeFor(self.element)
+        let newNode = root.nodeFor(self.element, withParent: currentNode)
         for c in node.element.children {
             newNode.element.addChild(c)
         }
@@ -165,13 +165,13 @@ class DeleteNode: Command {
         guard let root = self.textRoot,
               let lastElementVisible = self.lastElementVisible else { return false }
 
-        let prevVisible = root.nodeFor(lastElementVisible)
+        let prevVisible = root.nodeFor(lastElementVisible, withParent: root)
 
         if prevVisible == root {
             prevVisible.element.insert(self.element, at: 0)
         }
 
-        let newNode = prevVisible.nodeFor(element)
+        let newNode = prevVisible.nodeFor(element, withParent: prevVisible)
         if prevVisible != node.root {
             for c in prevVisible.element.children {
                 newNode.element.addChild(c)

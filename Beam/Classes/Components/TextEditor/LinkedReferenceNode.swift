@@ -103,9 +103,9 @@ class LinkedReferenceNode: TextNode {
 
     // MARK: - Initializer
 
-    override init(editor: BeamTextEdit, element: BeamElement) {
+    override init(parent: Widget, element: BeamElement) {
         let proxyElement = ProxyElement(for: element)
-        super.init(editor: editor, element: proxyElement)
+        super.init(parent: parent, element: proxyElement)
 
         actionLayer?.removeFromSuperlayer()
 
@@ -117,7 +117,7 @@ class LinkedReferenceNode: TextNode {
             .receive(on: DispatchQueue.main)
             .sink { [unowned self] newChildren in
                 self.children = newChildren.compactMap({ e -> LinkedReferenceNode? in
-                    let ref = nodeFor(e)
+                    let ref = nodeFor(e, withParent: self)
                     ref.parent = self
                     return ref as? LinkedReferenceNode
                 })

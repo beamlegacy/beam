@@ -40,9 +40,9 @@ class InsertNode: Command {
                 element.addChild(c)
             }
             let newProxyElement = ProxyElement(for: element)
-            newNode = node.nodeFor(newProxyElement)
+            newNode = node.nodeFor(newProxyElement, withParent: node)
         } else {
-            newNode = node.nodeFor(element)
+            newNode = node.nodeFor(element, withParent: node)
             let elements = node.element.children
             for c in elements {
                 newNode.element.addChild(c)

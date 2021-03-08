@@ -150,18 +150,22 @@ public class TextRoot: TextNode {
 
     override init(editor: BeamTextEdit, element: BeamElement) {
         self.note = element as? BeamNote
-        if let note = note, note.type != .journal {
-            topSpacerWidget = SpacerWidget(editor: editor, spacerType: .top)
-            linksSection = LinksSection(editor: editor, note: note, mode: .links)
-            middleSpacerWidget = SpacerWidget(editor: editor, spacerType: .middle)
-            referencesSection = LinksSection(editor: editor, note: note, mode: .references)
-            bottomSpacerWidget = SpacerWidget(editor: editor, spacerType: .bottom)
-            browsingSection = BrowsingSection(editor: editor, note: note)
-        }
-
         super.init(editor: editor, element: element)
+
+        mapping[element] = self
+        if let note = note, note.type != .journal {
+            topSpacerWidget = SpacerWidget(parent: self, spacerType: .top)
+            linksSection = LinksSection(parent: self, note: note, mode: .links)
+            middleSpacerWidget = SpacerWidget(parent: self, spacerType: .middle)
+            referencesSection = LinksSection(parent: self, note: note, mode: .references)
+            bottomSpacerWidget = SpacerWidget(parent: self, spacerType: .bottom)
+            browsingSection = BrowsingSection(parent: self, note: note)
+        }
+        updateTextChildren(elements: element.children)
+
         self.selfVisible = false
         self.cursor = .arrow
+
 
         self.text = BeamText()
 
@@ -185,10 +189,10 @@ public class TextRoot: TextNode {
         setAccessibilityParent(editor)
 
         referencesSection?.open = false
-    }
 
-    var linkedRefsNode: TextNode?
-    var unlinkedRefsNode: TextNode?
+        focusedWidget = nodeFor(element.children.first ?? element, withParent: self)
+        focusedWidget?.onFocus()
+    }
 
     public override func printTree(level: Int = 0) -> String {
         return String.tabs(level) + (note?.title ?? "<???>") + "\n" + children.prefix(children.count).reduce("", { result, child -> String in
@@ -277,4 +281,70 @@ public class TextRoot: TextNode {
         return NSRect(origin: CGPoint(), size: editor.frame.size)
     }
 
+    // Mapping of elements to nodes and breadcrumbs:
+    override func nodeFor(_ element: BeamElement, withParent: Widget) -> TextNode {
+        if let node = mapping[element] {
+            return node
+        }
+
+        let node: TextNode = {
+            guard let note = element as? BeamNote else {
+                guard element.note == nil || element.note == self.note else {
+                    return LinkedReferenceNode(parent: withParent, element: element)
+                }
+                return TextNode(parent: withParent, element: element)
+            }
+            return TextRoot(editor: editor, element: note)
+        }()
+
+        accessingMapping = true
+        mapping[element] = node
+        accessingMapping = false
+        purgeDeadNodes()
+
+        if let w = editor.window {
+            node.contentsScale = w.backingScaleFactor
+        }
+
+        editor.layer?.addSublayer(node.layer)
+
+        return node
+    }
+
+    override func clearMapping() {
+        mapping.removeAll()
+        super.clearMapping()
+    }
+
+    private var accessingMapping = false
+    private var mapping: [BeamElement: TextNode] = [:]
+    private var deadNodes: [TextNode] = []
+
+    func purgeDeadNodes() {
+        guard !accessingMapping else { return }
+        for dead in deadNodes {
+            removeNode(dead)
+        }
+        deadNodes.removeAll()
+    }
+
+    override func removeNode(_ node: TextNode) {
+        guard !accessingMapping else {
+            deadNodes.append(node)
+            return
+        }
+        mapping.removeValue(forKey: node.element)
+    }
+
+    private var breadCrumbs: [NoteReference: BreadCrumb] = [:]
+    func getBreadCrumb(for noteReference: NoteReference) -> BreadCrumb? {
+        guard let breadCrumb = breadCrumbs[noteReference] else {
+            guard let referencingNote = BeamNote.fetch(DocumentManager(), title: noteReference.noteName) else { return nil }
+            guard let referencingElement = referencingNote.findElement(noteReference.elementID) else { return nil }
+            let breadCrumb = BreadCrumb(parent: self, element: referencingElement)
+            breadCrumbs[noteReference] = breadCrumb
+            return breadCrumb
+        }
+        return breadCrumb
+    }
 }

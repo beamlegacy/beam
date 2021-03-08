@@ -233,13 +233,14 @@ let NoteDisplayThreshold = Float(0.0)
     }
 
     @discardableResult func navigateToNote(_ note: BeamNote) -> Bool {
-        completedQueries = []
-        selectionIndex = nil
-        searchQuery = ""
         mode = .note
 
-        self.currentNote = note
+        guard note != self.currentNote else { return true }
 
+        self.currentNote = note
+        selectionIndex = nil
+        resetQuery()
+        
         backForwardList.push(.note(note))
         updateCanGoBackForward()
         return true

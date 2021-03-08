@@ -21,18 +21,18 @@ class BrowsingNodeWidget: Widget {
             return
         }
         self.children = children.map({ node -> BrowsingNodeWidget in
-            BrowsingNodeWidget(editor: editor, browsingNode: node, recursive: recursive)
+            BrowsingNodeWidget(parent: self, browsingNode: node, recursive: recursive)
         })
 
         layers["chevron"]?.layer.isHidden = self.children.isEmpty
         invalidateLayout()
     }
 
-    init(editor: BeamTextEdit, browsingNode: BrowsingNode, recursive: Bool) {
+    init(parent: Widget, browsingNode: BrowsingNode, recursive: Bool) {
         self.recursive = recursive
         self.browsingNode = browsingNode
 
-        super.init(editor: editor)
+        super.init(parent: parent)
 
         // Append the linked references and unlinked references nodes
         textLayer.foregroundColor = NSColor.editorIconColor.cgColor
@@ -83,9 +83,9 @@ class BrowsingNodeWidget: Widget {
 class BrowsingLinkWidget: Widget {
     var link: ScoredLink
 
-    init(editor: BeamTextEdit, link: ScoredLink) {
+    init(parent: Widget, link: ScoredLink) {
         self.link = link
-        super.init(editor: editor)
+        super.init(parent: parent)
 
         let url = LinkStore.linkFor(link.link)?.url ?? "<???>"
         addLayer(Layer.text(named: "link", "\(link.score.score) - \(url)", color: NSColor.red))

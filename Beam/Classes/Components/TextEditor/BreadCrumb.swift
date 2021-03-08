@@ -56,13 +56,13 @@ class BreadCrumb: Widget {
     private let breadCrumbYPosition: CGFloat = 26
     private let spaceBreadcrumbIcon: CGFloat = 15
 
-    init(editor: BeamTextEdit, element: BeamElement) {
+    init(parent: Widget, element: BeamElement) {
         self.proxy = ProxyElement(for: element)
-        super.init(editor: editor)
+        super.init(parent: parent)
 
         self.crumbChain = computeCrumbChain(from: element)
 
-        guard let ref = nodeFor(element) as? LinkedReferenceNode else { fatalError() }
+        guard let ref = nodeFor(element, withParent: self) as? LinkedReferenceNode else { fatalError() }
         ref.parent = self
         ref.open = false
         self.linkedReferenceNode = ref
@@ -347,7 +347,7 @@ class BreadCrumb: Widget {
 
         let crumb = crumbChain[index]
 
-        guard let ref = nodeFor(crumb) as? LinkedReferenceNode else { return }
+        guard let ref = nodeFor(crumb, withParent: self) as? LinkedReferenceNode else { return }
 
         linkedReferenceNode.removeFromSuperlayer(recursive: true)
         ref.addLayerTo(layer: editor.layer!, recursive: true)
@@ -358,13 +358,13 @@ class BreadCrumb: Widget {
         invalidateLayout()
     }
 
-    override func nodeFor(_ element: BeamElement) -> TextNode {
+    override func nodeFor(_ element: BeamElement, withParent: Widget) -> TextNode {
         if let node = mapping[element] {
             return node
         }
 
         // BreadCrumbs can't create TextNodes, only LinkedReferenceNodes
-        let node: TextNode = LinkedReferenceNode(editor: editor, element: element)
+        let node: TextNode = LinkedReferenceNode(parent: withParent, element: element)
 
         accessingMapping = true
         mapping[element] = node
@@ -375,6 +375,11 @@ class BreadCrumb: Widget {
         editor.layer?.addSublayer(node.layer)
 
         return node
+    }
+
+    override func clearMapping() {
+        mapping.removeAll()
+        super.clearMapping()
     }
 
     private var accessingMapping = false

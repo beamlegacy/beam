@@ -36,7 +36,7 @@ class IncreaseIndentation: Command {
     func undo() -> Bool {
         guard let previousParentElement = self.previousParentElement,
               let indexInParent = self.indexInParent,
-              let previousParent = node.root?.nodeFor(previousParentElement) else { return false }
+              let previousParent = node.root?.nodeFor(previousParentElement, withParent: node) else { return false }
         previousParent.element.insert(node.element, at: indexInParent)
         return true
     }

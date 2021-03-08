@@ -179,7 +179,7 @@ public class TextNode: Widget {
 
     func buildTextChildren(elements: [BeamElement]) -> [Widget] {
         elements.map { childElement -> TextNode in
-            nodeFor(childElement)
+            nodeFor(childElement, withParent: self)
         }
     }
 
@@ -188,6 +188,27 @@ public class TextNode: Widget {
     }
 
     // MARK: - Initializer
+
+    init(parent: Widget, element: BeamElement) {
+        self.element = element
+
+        super.init(parent: parent)
+
+        addDisclosureLayer(at: NSPoint(x: 14, y: isHeader ? firstLineBaseline - 8 : firstLineBaseline - 13))
+        addBulletPointLayer(at: NSPoint(x: 14, y: isHeader ? firstLineBaseline - 8 : firstLineBaseline - 13))
+
+        element.$children
+            .sink { [unowned self] elements in
+                updateTextChildren(elements: elements)
+            }.store(in: &scope)
+
+        createActionLayer()
+
+        subscribeToElement(element)
+
+        setAccessibilityLabel("TextNode")
+        setAccessibilityRole(.textArea)
+    }
 
     init(editor: BeamTextEdit, element: BeamElement) {
         self.element = element
@@ -209,6 +230,7 @@ public class TextNode: Widget {
         setAccessibilityLabel("TextNode")
         setAccessibilityRole(.textArea)
     }
+
 
     deinit {
     }
@@ -496,8 +518,10 @@ public class TextNode: Widget {
     }
 
     func beginningOfLineFromPosition(_ position: Int) -> Int {
+        guard let layout = layout else { return 0 }
+        guard layout.lines.count > 1 else { return 0 }
         if let l = lineAt(index: position) {
-            return layout!.lines[l].range.lowerBound
+            return layout.lines[l].range.lowerBound
         }
         return 0
     }
