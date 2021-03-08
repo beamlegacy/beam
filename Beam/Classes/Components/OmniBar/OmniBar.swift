@@ -14,53 +14,74 @@ struct OmniBar: View {
     @EnvironmentObject var state: BeamState
     @State var title = ""
 
-    var canSearch: Bool {
-        return !state.searchQuery.isEmpty || !state.isEditingOmniBarTitle
+    private let boxHeight: CGFloat = 32
+
+    private var isEditing: Bool {
+        return state.focusOmniBox
+    }
+    private func setIsEditing(_ editing: Bool) {
+        state.focusOmniBox = editing
+        if editing {
+            if let url = state.currentTab?.url?.absoluteString, state.mode == .web {
+                state.searchQuery = url
+            }
+        } else if state.mode == .web {
+            state.resetQuery()
+        }
     }
 
     var body: some View {
-        HStack {
-            Chevrons()
-
-            if state.mode == .note {
+            GeometryReader { containerGeo in
                 HStack {
-                    GlobalNoteTitle(
-                        title: $title,
-                        note: state.currentNote!
-                    ).onReceive(state.$currentNote, perform: { value in
-                        guard let currentNote = value else { return }
-                        let note = currentNote as BeamNote
+                    ZStack {
+                        OmniBarFieldBackground(isEditing: isEditing)
+                            .onTapGesture(perform: {
+                                setIsEditing(true)
+                            })
+                            .frame(maxWidth: .infinity)
 
-                        title = note.title
-                    })
-                    Button(action: startNewSearch) {
-                        Symbol(name: "plus")
-                    }
-                    .accessibility(identifier: "newSearch")
-                    .buttonStyle(RoundRectButtonStyle())
-                }.padding(.leading, 9)
-            } else {
-                BeamSearchBox(isEditing: $state.isEditingOmniBarTitle)
-                    .onHover { (hover) in
-                        if hover {
-                            NSCursor.iBeam.set()
-                        } else {
-                            NSCursor.arrow.set()
+                        HStack(spacing: 4) {
+                            if !isEditing {
+                                if state.mode != .today {
+                                    OmniBarButton(icon: "nav-journal", accessibilityId: "journal", action: goToJournal)
+                                }
+                                Chevrons()
+                                if state.mode == .web {
+                                    OmniBarButton(icon: "nav-refresh", accessibilityId: "refresh", action: refreshWeb)
+                                }
+                            }
+                            GlobalCenteringContainer(enabled: !isEditing && state.mode != .web, containerGeometry: containerGeo) {
+                                OmniBarSearchField(isEditing: Binding<Bool>(get: {
+                                    isEditing
+                                }, set: {
+                                    setIsEditing($0)
+                                }))
+                                .frame(maxHeight: .infinity)
+                                .onHover { (hover) in
+                                    if hover {
+                                        NSCursor.iBeam.set()
+                                    } else {
+                                        NSCursor.arrow.set()
+                                    }
+                                }
+                            }
+                            .padding(.leading, !isEditing && state.mode == .web ? 20 : 0)
                         }
+                        .animation(.easeInOut(duration: 0.3))
+                        .padding(.horizontal, 5)
+                        .frame(maxWidth: .infinity)
                     }
+                    if state.mode == .web && state.currentTab != nil {
+                        DestinationNotePicker(tab: state.currentTab!)
+                            .frame(height: boxHeight)
+                    }
+                    if !state.tabs.isEmpty {
+                        OmniBarButton(icon: state.mode == .web ? "nav-pivot_card" : "nav-pivot_web", accessibilityId: state.mode == .web ? "pivot-card" : "pivot-web", action: toggleMode)
+                    }
+                }
+                .animation(.easeInOut(duration: 0.3))
+                .padding(.trailing, 10)
             }
-
-            if state.mode == .web {
-                DestinationNotePicker(tab: state.currentTab!)
-                    .frame(width: 200, height: 30, alignment: .center)
-            }
-
-            Button(action: toggleMode) {
-                Symbol(name: state.mode == .web ? "note.text" : "network")
-            }
-            .accessibility(identifier: state.mode == .web ? "note" : "network")
-            .buttonStyle(RoundRectButtonStyle()).disabled(state.tabs.isEmpty)
-        }
     }
 
     func resetAutoCompleteSelection() {
@@ -71,6 +92,14 @@ struct OmniBar: View {
         state.startNewSearch()
     }
 
+    func goToJournal() {
+        state.mode = .today
+    }
+
+    func refreshWeb() {
+        state.currentTab?.webView.reload()
+    }
+
     func toggleMode() {
         if state.mode == .web {
             guard let tab = state.currentTab else { return }
@@ -78,6 +107,23 @@ struct OmniBar: View {
             state.resetQuery()
         } else {
             state.mode = .web
+        }
+    }
+}
+
+struct OmniBar_Previews: PreviewProvider {
+
+    static let state = BeamState(data: BeamData())
+    static let focusedState = BeamState(data: BeamData())
+
+    static var previews: some View {
+        state.focusOmniBox = false
+        focusedState.focusOmniBox = true
+        focusedState.mode = .web
+        focusedState.currentTab = BrowserTab(state: focusedState, originalQuery: "query", note: BeamNote(title: "Note title"))
+        return Group {
+            OmniBar().environmentObject(state)
+            OmniBar().environmentObject(focusedState)
         }
     }
 }

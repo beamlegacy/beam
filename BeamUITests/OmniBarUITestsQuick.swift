@@ -20,7 +20,7 @@ class OmniBarUITestsQuick: QuickSpec {
         beforeEach {
             self.continueAfterFailure = false
             self.app.launch()
-            self.textField = self.app.textFields["omniBarSearchBox"]
+            self.textField = self.app.textFields["OmniBarSearchField"]
         }
 
         describe("Omnibar") {
@@ -111,14 +111,15 @@ class OmniBarUITestsQuick: QuickSpec {
                 expect(self.app.images["browserTabBarView"].waitForExistence(timeout: 2)).to(beTrue())
 
                 expect(self.app.groups["webView"].exists).to(beTrue())
-                expect(self.app.buttons["magnifyingglass"].exists).to(beTrue())
-                expect(self.app.buttons["newSearch"].exists).to(beTrue())
-                expect(self.app.buttons["note"].exists).to(beTrue())
+                expect(self.app.buttons["journal"].exists).to(beTrue())
+                expect(self.app.buttons["refresh"].exists).to(beTrue())
+                expect(self.app.buttons["goBack"].exists).to(beTrue())
+                expect(self.app.buttons["pivot-card"].exists).to(beTrue())
 
-                self.app.buttons["note"].click()
+                self.app.buttons["pivot-card"].click()
                 expect(self.app.scrollViews["noteView"].exists).to(beTrue())
 
-                self.app.buttons["network"].click()
+                self.app.buttons["pivot-web"].click()
                 expect(self.app.groups["webView"].exists).to(beTrue())
 
                 self.helper.makeAppScreenShots()

@@ -15,10 +15,12 @@ class BeamTextFieldView: NSTextField {
 
     weak var textFieldViewDelegate: BeamTextFieldViewDelegate?
 
-    var placeholderText: String?
+    private var _placeholderText: String?
+    private var _placeholderIcon: NSImage?
+
     var placeholderColor: NSColor = NSColor.lightGray
 
-    var isEditing: Bool {
+    var isFirstResponder: Bool {
         guard let window = window else { return false }
         guard let responder = window.firstResponder else { return false }
         guard responder.isKind(of: NSTextView.self) else { return false }
@@ -26,6 +28,7 @@ class BeamTextFieldView: NSTextField {
         guard let tfResponder = responder as? NSTextView else { return false }
         return self === tfResponder.delegate
     }
+    var shouldUseIntrinsicContentSize: Bool = false
 
     var onPerformKeyEquivalent: (NSEvent) -> Bool = { _ in return false }
     var onFocusChanged: (Bool) -> Void = { _ in }
@@ -44,16 +47,25 @@ class BeamTextFieldView: NSTextField {
         super.draw(dirtyRect)
     }
 
-    internal func setText(_ text: String, font: NSFont?) {
-        let attrs = buildAttributedString(textColor ?? NSColor.white, font)
+    internal func setText(_ text: String, font: NSFont?, icon: NSImage? = nil) {
+        let attrs = attributedStringAttributes(textColor ?? NSColor.white, font)
         let textString = NSAttributedString(string: text, attributes: attrs)
-
         self.attributedStringValue = textString
     }
 
-    internal func setPlacholder(_ placeholder: String, font: NSFont?) {
-        let attrs = buildAttributedString(placeholderColor, font)
-        let placeholderString = NSAttributedString(string: placeholder, attributes: attrs)
+    internal func setPlaceholder(_ placeholder: String, font: NSFont?, icon: NSImage? = nil) {
+        guard placeholder != _placeholderText || icon != _placeholderIcon else {
+            return
+        }
+        _placeholderText = placeholder
+        let attrs = attributedStringAttributes(placeholderColor, font)
+        var placeholderString = NSAttributedString(string: placeholder, attributes: attrs)
+
+        if let icon = icon {
+            let stringWithAttachment = NSMutableAttributedString(withImage: icon, font: font, spacing: 4)
+            stringWithAttachment.append(placeholderString)
+            placeholderString = stringWithAttachment
+        }
 
         self.placeholderAttributedString = placeholderString
     }
@@ -65,7 +77,7 @@ class BeamTextFieldView: NSTextField {
         lineBreakMode = .byTruncatingTail
     }
 
-    private func buildAttributedString(_ foregroundColor: NSColor, _ font: NSFont?) -> [NSAttributedString.Key: Any] {
+    private func attributedStringAttributes(_ foregroundColor: NSColor, _ font: NSFont?) -> [NSAttributedString.Key: Any] {
         let attrs = [
             NSAttributedString.Key.foregroundColor: foregroundColor,
             NSAttributedString.Key.font: font ?? NSFont.systemFont(ofSize: 13)
@@ -76,13 +88,20 @@ class BeamTextFieldView: NSTextField {
 
     @discardableResult
     override func becomeFirstResponder() -> Bool {
-        onFocusChanged(true)
-        return super.becomeFirstResponder()
+        let became = super.becomeFirstResponder()
+        if became {
+            onFocusChanged(true)
+        }
+        return became
     }
 
+    @discardableResult
     override func resignFirstResponder() -> Bool {
-        onFocusChanged(false)
-        return super.resignFirstResponder()
+        let resigned = super.resignFirstResponder()
+        if resigned {
+            onFocusChanged(false)
+        }
+        return resigned
     }
 
     override func mouseDown(with event: NSEvent) {
@@ -96,8 +115,16 @@ class BeamTextFieldView: NSTextField {
         super.mouseDown(with: event)
     }
 
+    override var intrinsicContentSize: NSSize {
+        guard shouldUseIntrinsicContentSize else {
+            return super.intrinsicContentSize
+        }
+        let width = attributedStringValue.string.count == 0 && self.placeholderAttributedString != nil ? self.placeholderAttributedString!.size().width : self.attributedStringValue.size().width
+        return NSSize(width: width + 2, height: self.bounds.height)
+    }
+
     override func performKeyEquivalent(with event: NSEvent) -> Bool {
-        if isEditing && onPerformKeyEquivalent(event) {
+        if isFirstResponder && onPerformKeyEquivalent(event) {
             return true
         }
 

@@ -22,14 +22,12 @@ let NoteDisplayThreshold = Float(0.0)
     @Published var completedQueries = [AutoCompleteResult]()
     @Published var currentNote: BeamNote?
     @Published var backForwardList: NoteBackForwardList
-    @Published var isEditingOmniBarTitle = false
     @Published var canGoBack: Bool = false
     @Published var canGoForward: Bool = false
     @Published var isFullScreen: Bool = false
     @Published var focusOmniBox: Bool = true
 
-    @Published var changingDestinationCard: Bool = false
-    @Published var destinationCardInputIsFirstResponder: Bool = false
+    @Published var destinationCardIsFocused: Bool = false
     @Published var destinationCardName: String
     @Published var destinationCardNameSelectedRange: [Range<Int>]?
     var bidirectionalPopover: BidirectionalPopover?
@@ -123,8 +121,6 @@ let NoteDisplayThreshold = Float(0.0)
             }.store(in: &tabScope)
 
             resetDestinationCard()
-
-            isEditingOmniBarTitle = false
         }
     }
 
@@ -261,6 +257,10 @@ let NoteDisplayThreshold = Float(0.0)
         updateCanGoBackForward()
         return true
     }
+    
+    func navigateCurrentTab(toURL url: URL) {
+        currentTab?.load(url: url)
+    }
 
     func createTab(withURL url: URL, originalQuery: String, createNote: Bool = true) {
         let tab = BrowserTab(state: self, originalQuery: originalQuery, note: data.todaysNote)
@@ -319,7 +319,8 @@ let NoteDisplayThreshold = Float(0.0)
     }
 
     func startQuery() {
-        searchQuery = searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
+        let queryString = searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
+        searchQuery = ""
 
         if let index = selectionIndex {
             let query = completedQueries[index]
@@ -327,15 +328,20 @@ let NoteDisplayThreshold = Float(0.0)
             case .autoComplete:
                 searchEngine.query = query.string
                 // Logger.shared.logDebug("Start search query: \(searchEngine.searchUrl)")
-                createTab(withURL: URL(string: searchEngine.searchUrl)!, originalQuery: query.string)
-                mode = .web
+                let url = URL(string: searchEngine.searchUrl)!
+                if mode == .web, currentTab != nil {
+                    navigateCurrentTab(toURL: url)
+                } else {
+                    createTab(withURL: url, originalQuery: query.string)
+                    mode = .web
+                }
 
             case .history:
                 createTab(withURL: URL(string: query.string)!, originalQuery: "")
                 mode = .web
 
             case .note:
-                navigateToNote(named: searchQuery)
+                navigateToNote(named: queryString)
 
             case .createCard:
                 navigateToNote(createNoteForQuery(query.string))
@@ -349,27 +355,31 @@ let NoteDisplayThreshold = Float(0.0)
 
         //TODO make a better url detector and rewritter to transform xxx.com in https://xxx.com with less corner cases and clearer code path:
         let url: URL = {
-            if searchQuery.maybeURL {
-                guard let u = URL(string: searchQuery) else {
-                    searchEngine.query = searchQuery
+            if queryString.maybeURL {
+                guard let u = URL(string: queryString) else {
+                    searchEngine.query = queryString
                     return URL(string: searchEngine.searchUrl)!
                 }
 
                 if u.scheme == nil {
                     createNote = false
-                    return URL(string: "https://" + searchQuery)!
+                    return URL(string: "https://" + queryString)!
                 }
                 return u
             }
 
-            searchEngine.query = searchQuery
+            searchEngine.query = queryString
 
             return URL(string: searchEngine.searchUrl)!
         }()
 
         // Logger.shared.logDebug("Start query: \(url)")
 
-        createTab(withURL: url, originalQuery: searchQuery, createNote: createNote)
+        if mode == .web, currentTab != nil {
+            navigateCurrentTab(toURL: url)
+        } else {
+            createTab(withURL: url, originalQuery: queryString, createNote: createNote)
+        }
         cancelAutocomplete()
         mode = .web
     }
@@ -524,7 +534,6 @@ let NoteDisplayThreshold = Float(0.0)
     func resetDestinationCard() {
         destinationCardName = currentTab?.note.title ?? data.todaysName
         destinationCardNameSelectedRange = nil
-        changingDestinationCard = false
-        destinationCardInputIsFirstResponder = false
+        destinationCardIsFocused = false
     }
 }

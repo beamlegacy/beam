@@ -13,25 +13,20 @@ struct RoundedRectangleDecoration: View {
     @State var isHovering: Bool = false
     var isPressed: Bool
 
-    let pressedBg = Color(.toolbarButtonBackgroundOnColor)
-    let hoverBg = Color(.toolbarButtonBackgroundOnColor)
-    let emptyBg = Color(.displayP3, white: 1, opacity: 0)
+    private let pressedBg = Color(.toolbarButtonActiveBackgroundColor)
+    private let emptyBg = Color(.transparent)
 
-    func bgColor(_ enabled: Bool, _ hover: Bool, _ pressed: Bool) -> Color {
-        //Logger.shared.logDebug("color: isHovering: \(hover) pressed: \(pressed) isEnabled: \(enabled)")
-        guard enabled else { return emptyBg }
-        guard !pressed else { return pressedBg }
-        return hover ? hoverBg : emptyBg
+    func bgColor(_ enabled: Bool, _ pressed: Bool) -> Color {
+        return enabled && pressed ? pressedBg : emptyBg
     }
 
     var body: some View {
         RoundedRectangle(cornerRadius: 7)
-            .foregroundColor(bgColor(isEnabled, isHovering, isPressed))
+            .fill(bgColor(isEnabled, isPressed))
             .onHover { h in
                 self.isHovering = h
-                //Logger.shared.logDebug("onHover: isHovering: \(self.isHovering) (\(h)) isEnabled: \(self.isEnabled)")
             }
-            .frame(width: 33, height: 28, alignment: .center)
+            .frame(width: 26, height: 26, alignment: .center)
     }
 }
 
@@ -42,6 +37,6 @@ struct RoundRectButtonStyle: ButtonStyle {
         configuration
             .label
             .background(RoundedRectangleDecoration(isPressed: configuration.isPressed))
-            .frame(width: 33, height: 28, alignment: .center)
+            .frame(width: 26, height: 26, alignment: .center)
     }
 }

@@ -12,72 +12,110 @@ import Foundation
 struct DestinationNotePicker: View {
     var tab: BrowserTab
     @EnvironmentObject var state: BeamState
+    @State var isHovering = false
+    @State var isMouseDown = false
+    
     var title: String {
         get {
             let t = state.destinationCardName
-            return t == state.data.todaysName ? "Journal" : t
+            return t == state.data.todaysName ? "Destination Card" : t
         }
         set {
             state.destinationCardName = newValue
         }
 
     }
+    private var isEditing: Bool {
+        state.destinationCardIsFocused
+    }
+    private func setIsEditing(_ editing: Bool) {
+        state.destinationCardIsFocused = editing
+    }
 
     var body: some View {
-        GeometryReader { geometry in
+
+        let isEditingBinding = Binding<Bool>(get: {
+            isEditing
+        }, set: {
+            setIsEditing($0)
+        })
+
+        return GeometryReader { geometry in
             ZStack {
-                RoundedRectangle(cornerRadius: 7).strokeBorder(state.destinationCardInputIsFirstResponder ? Color.blue : Color.gray )
-                if state.changingDestinationCard {
-                    BeamTextField(
-                        text: $state.destinationCardName,
-                        isEditing: $state.changingDestinationCard,
-                        isFirstResponder: $state.destinationCardInputIsFirstResponder,
-                        placeholder: "destination card",
-                        font: .systemFont(ofSize: 16),
-                        textColor: NSColor.omniboxTextColor,
-                        placeholderColor: NSColor.omniboxPlaceholderTextColor,
-                        selectedRanges: state.destinationCardNameSelectedRange
-                    ) { newName in
-                        Logger.shared.logInfo("New name \(newName)", category: .ui)
-                        state.destinationCardNameSelectedRange = nil
-                        updatePopover(geometry.frame(in: .global))
-
-                    } onCommit: {
-                        state.bidirectionalPopover?.doCommand(.insertNewline)
-                    } onEscape: {
-                        cancelSearch()
-                    } onCursorMovement: { move -> Bool in
-                        switch move {
-                        case .up:
-                            state.bidirectionalPopover?.doCommand(.moveUp)
-                            return true
-                        case .down:
-                            state.bidirectionalPopover?.doCommand(.moveDown)
-                            return true
-                        default:
-                            return false
-                        }
-                    } onStartEditing: {
-                        Logger.shared.logInfo("on start editing", category: .ui)
-                        createPopoverIfNeeded(with: geometry.frame(in: .global))
-
-                        state.destinationCardNameSelectedRange = [state.destinationCardName.wholeRange]
-                    } onStopEditing: {
-                        cancelSearch()
-                    }
-                    .frame(width: 200, height: 30, alignment: .center)
-                    .onAppear(perform: {
-                        state.destinationCardName = tab.note.title
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(isMouseDown ? Color(.destinationNoteBorderColor) : Color(.transparent))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 4)
+                            .strokeBorder(isEditing || isHovering ? Color(.destinationNoteBorderColor) : Color(.transparent))
+                    )
+                    .onHover(perform: { hovering in
+                        isHovering = hovering
                     })
-                    .padding(EdgeInsets(top: 0, leading: 3, bottom: 0, trailing: 3))
-                } else {
-                    Text(title).onTapGesture {
-                        state.destinationCardInputIsFirstResponder = true
-                        state.changingDestinationCard = true
+                    .gesture(DragGesture(minimumDistance: 0)
+                                .onChanged { _ in
+                                    isMouseDown = true
+                                }
+                                .onEnded { _ in
+                                    isMouseDown = false
+                                })
+                HStack(spacing: 2) {
+
+//                    For now we don't display the icon. Might come back soon
+//                    if !isEditing {
+//                        Icon(name: "field-card_destination", color: isHovering || isMouseDown ? Color(.destinationNoteActiveTextColor) : Color(.destinationNoteTextColor))
+//                            .frame(width: 16, height: 16)
+//                    }
+                    if isEditing {
+                        BeamTextField(
+                            text: $state.destinationCardName,
+                            isEditing: isEditingBinding,
+                            placeholder: "Destination Card",
+                            font: .systemFont(ofSize: 12),
+                            textColor: .destinationNoteActiveTextColor,
+                            placeholderColor: NSColor.omniboxPlaceholderTextColor,
+                            selectedRanges: state.destinationCardNameSelectedRange
+                        ) { newName in
+                            Logger.shared.logInfo("New name \(newName)", category: .ui)
+                            state.destinationCardNameSelectedRange = nil
+                            updatePopover(geometry.frame(in: .global))
+                        } onCommit: {
+                            state.bidirectionalPopover?.doCommand(.insertNewline)
+                        } onEscape: {
+                            cancelSearch()
+                        } onCursorMovement: { move -> Bool in
+                            switch move {
+                            case .up:
+                                state.bidirectionalPopover?.doCommand(.moveUp)
+                                return true
+                            case .down:
+                                state.bidirectionalPopover?.doCommand(.moveDown)
+                                return true
+                            default:
+                                return false
+                            }
+                        } onStartEditing: {
+                            Logger.shared.logInfo("on start editing", category: .ui)
+                            createPopoverIfNeeded(with: geometry.frame(in: .global))
+                            state.destinationCardNameSelectedRange = [state.destinationCardName.wholeRange]
+                        } onStopEditing: {
+                            cancelSearch()
+                        }
+                        .onAppear(perform: {
+                            state.destinationCardName = tab.note.title
+                        })
+                    } else {
+                        Text(title)
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(isHovering || isMouseDown ? Color(.destinationNoteActiveTextColor) : Color(.destinationNoteTextColor))
+                            .onTapGesture {
+                                setIsEditing(true)
+                            }
                     }
                 }
+                .padding([.top, .bottom, .trailing], 8)
+                .padding(.leading, isEditing ? 8 : 6)
             }
-        }
+        }.frame(width: isEditing ? 230 : 130)
     }
 
     func createPopoverIfNeeded(with frame: NSRect) {
@@ -99,7 +137,7 @@ struct DestinationNotePicker: View {
     }
 
     func updatePopover(_ frame: NSRect) {
-        Logger.shared.logInfo("update Popover for query \(state.destinationCardName)", category: .ui)
+        Logger.shared.logInfo("update Popover for query \(state.destinationCardName) \(frame)", category: .ui)
         guard let popover = state.bidirectionalPopover else { return }
 
         let items = state.destinationCardName.isEmpty ? state.data.documentManager.loadAllDocumentsWithLimit(4) : state.data.documentManager.documentsWithLimitTitleMatch(title: state.destinationCardName, limit: 4)
@@ -122,8 +160,29 @@ struct DestinationNotePicker: View {
     func cancelSearch() {
         state.bidirectionalPopover?.removeFromSuperview()
         state.bidirectionalPopover = nil
-        state.destinationCardInputIsFirstResponder = false
-        state.changingDestinationCard = false
-        state.destinationCardNameSelectedRange = nil
+        state.resetDestinationCard()
+    }
+}
+
+struct DestinationNotePicker_Previews: PreviewProvider {
+    static var previews: some View {
+        let state = BeamState(data: BeamData())
+        let tab = BrowserTab(state: state, originalQuery: "original query", note: BeamNote(title: "Query text"))
+        let focusedState = BeamState(data: BeamData())
+        focusedState.destinationCardIsFocused = true
+        let itemHeight: CGFloat = 32.0
+        return
+            VStack {
+                DestinationNotePicker(tab: tab).environmentObject(state)
+                    .frame(height: itemHeight)
+                DestinationNotePicker(tab: tab, isHovering: true).environmentObject(state)
+                    .frame(height: itemHeight)
+                DestinationNotePicker(tab: tab, isMouseDown: true).environmentObject(state)
+                    .frame(height: itemHeight)
+                DestinationNotePicker(tab: tab).environmentObject(focusedState)
+                    .frame(height: itemHeight)
+            }
+            .padding()
+            .background(Color.white)
     }
 }
