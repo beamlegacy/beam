@@ -32,7 +32,7 @@ class FormattingText: Command {
 
     func run() -> Bool {
         var result: Bool = true
-        let newNode = node.nodeFor(self.element)
+        let newNode = node.nodeFor(self.element, withParent: node)
 
         if let newKind = self.newKind {
             newNode.element.kind = isActive ? .bullet : newKind
@@ -67,7 +67,7 @@ class FormattingText: Command {
 
     func undo() -> Bool {
         var result: Bool = true
-        let newNode = node.nodeFor(self.element)
+        let newNode = node.nodeFor(self.element, withParent: node)
 
         if let oldKind = self.oldKind, self.newKind != nil {
             newNode.element.kind = oldKind

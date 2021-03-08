@@ -49,12 +49,13 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     var cardTopSpace: CGFloat = 148
     var centerText = false {
         didSet {
-            drawCardHeader()
+            setupCardHeader()
         }
     }
 
     var note: BeamElement! {
         didSet {
+            scroll(.zero)
             updateRoot(with: note)
         }
     }
@@ -62,20 +63,14 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     func updateRoot(with note: BeamElement) {
         guard note != rootNode?.element else { return }
         if let layers = layer?.sublayers {
-            for l in layers where l !== titleLayer {
+            for l in layers where ![cardHeaderLayer, cardTimeLayer, titleLayer].contains(l) {
                 l.removeFromSuperlayer()
             }
         }
 
         //        guard mapping[note] == nil else { return }
-        guard let rootnode = nodeFor(note) as? TextRoot else { fatalError() }
-        rootNode = rootnode
-        accessingMapping = true
-        mapping[note] = rootNode
-        accessingMapping = false
-        purgeDeadNodes()
-
-        nodeFor(note.children.first ?? note).focus()
+        rootNode?.clearMapping() // Clear all previous references in the node tree
+        rootNode = TextRoot(editor: self, element: note)
 
         // Remove all subsciptions:
         noteCancellables = []
@@ -349,7 +344,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         config.keepCursorMidScreen ? visibleRect.height / 2 : topOffset
     }
 
-    func drawCardHeader() {
+    func setupCardHeader() {
         guard let cardNote = note as? BeamNote,
               let layer = layer else { return }
 
@@ -397,10 +392,12 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     override public var intrinsicContentSize: NSSize {
+        let availableWidth = CGFloat(textWidth)
+        rootNode.availableWidth = availableWidth
         let height = centerText ?
             rootNode.idealSize.height + topOffsetActual + footerHeight + cardTopSpace :
             rootNode.idealSize.height + topOffsetActual + footerHeight
-        return NSSize(width: 300, height: height)
+        return NSSize(width: availableWidth, height: height)
     }
 
     public func setHotSpot(_ spot: NSRect) {
@@ -941,7 +938,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     } else {
                         guard let node = focusedWidget as? TextNode else { continue }
                         let element = BeamElement(str)
-                        let newNode = nodeFor(element)
+                        let newNode = rootNode.nodeFor(element, withParent: node)
                         let elements = node.element.children
                         for c in elements {
                             newNode.element.addChild(c)
@@ -1339,50 +1336,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         rootNode.note?.save(documentManager: documentManager)
     }
 
-    func nodeFor(_ element: BeamElement) -> TextNode {
-        if let node = mapping[element] {
-            return node
-        }
-
-        let node: TextNode = {
-            guard let note = element as? BeamNote else {
-                guard element.note == nil || element.note == self.note else {
-                    return LinkedReferenceNode(editor: self, element: element)
-                }
-                return TextNode(editor: self, element: element)
-            }
-            return TextRoot(editor: self, element: note)
-        }()
-
-        accessingMapping = true
-        mapping[element] = node
-        accessingMapping = false
-        purgeDeadNodes()
-
-        if let w = window {
-            node.contentsScale = w.backingScaleFactor
-        }
-        layer?.addSublayer(node.layer)
-
-        return node
-    }
-
-    private var accessingMapping = false
-    private var mapping: [BeamElement: TextNode] = [:]
-    private var deadNodes: [TextNode] = []
-
-    private var breadCrumbs: [NoteReference: BreadCrumb] = [:]
-    func getBreadCrumb(for noteReference: NoteReference) -> BreadCrumb? {
-        guard let breadCrumb = breadCrumbs[noteReference] else {
-            guard let referencingNote = BeamNote.fetch(DocumentManager(), title: noteReference.noteName) else { return nil }
-            guard let referencingElement = referencingNote.findElement(noteReference.elementID) else { return nil }
-            let breadCrumb = BreadCrumb(editor: self, element: referencingElement)
-            breadCrumbs[noteReference] = breadCrumb
-            return breadCrumb
-        }
-        return breadCrumb
-    }
-
     internal func showBidirectionalPopover(prefix: Int, suffix: Int) {
         // DispatchQueue to init the popover after the node is initialized
         DispatchQueue.main.async { [weak self] in
@@ -1458,22 +1411,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         if inlineFormatter != nil {
             hideInlineFormatter()
         }
-    }
-
-    func purgeDeadNodes() {
-        guard !accessingMapping else { return }
-        for dead in deadNodes {
-            removeNode(dead)
-        }
-        deadNodes.removeAll()
-    }
-
-    func removeNode(_ node: TextNode) {
-        guard !accessingMapping else {
-            deadNodes.append(node)
-            return
-        }
-        mapping.removeValue(forKey: node.element)
     }
 
     @IBAction public override func selectAll(_ sender: Any?) {

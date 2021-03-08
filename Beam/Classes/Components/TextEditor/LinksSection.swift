@@ -39,17 +39,13 @@ class LinksSection: Widget {
         }
     }
 
-    init(editor: BeamTextEdit, note: BeamNote, mode: Mode) {
+    init(parent: Widget, note: BeamNote, mode: Mode) {
         self.note = note
         self.mode = mode
-        super.init(editor: editor)
+        super.init(parent: parent)
 
         setupUI()
         setupSectionMode()
-
-        editor.layer?.addSublayer(layer)
-        layer.addSublayer(sectionTitleLayer)
-        layer.addSublayer(separatorLayer)
     }
 
     func setupUI() {
@@ -100,7 +96,7 @@ class LinksSection: Widget {
             guard let note = BeamNote.fetch(DocumentManager(), title: noteReference.noteName) else { continue }
             guard let element = note.findElement(noteReference.elementID) else { continue }
 
-            guard let breadcrumb = editor.getBreadCrumb(for: noteReference) else { continue }
+            guard let breadcrumb = root?.getBreadCrumb(for: noteReference) else { continue }
             element.$text
                 .sink { [unowned self] newText in
                     if self.shouldHandleReference(rootNote: rootNote.title, text: newText) {

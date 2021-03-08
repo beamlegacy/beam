@@ -22,7 +22,7 @@ class InsertEmptyNode: Command {
     func run() -> Bool {
         let element = BeamElement()
         parent.element.insert(element, at: index)
-        let newNode = parent.root?.nodeFor(element)
+        let newNode = parent.root?.nodeFor(element, withParent: parent)
         newNode?.focus()
         self.newNode = newNode
         return true

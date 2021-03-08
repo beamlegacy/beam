@@ -209,7 +209,21 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     }
 
     // MARK: - Initializer
+    init(parent: Widget) {
+        self.parent = parent
+        self.editor = parent.editor
+        layer = CALayer()
+        super.init()
+        configureLayer()
 
+        setAccessibilityIdentifier(String(describing: Self.self))
+        setAccessibilityElement(true)
+        setAccessibilityLabel("Widget")
+        setAccessibilityRole(.none)
+        setAccessibilityParent(editor)
+    }
+
+    // this version should only be used by TextRoot
     init(editor: BeamTextEdit) {
         self.editor = editor
         layer = CALayer()
@@ -274,9 +288,16 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
     func updateSubLayersLayout() { }
 
+    var initialLayout = true
     func setLayout(_ frame: NSRect) {
         self.frame = frame
         needLayout = false
+
+        if initialLayout {
+            CATransaction.begin()
+            CATransaction.setDisableActions(true)
+
+        }
         layer.bounds = contentsFrame
         layer.position = frameInDocument.origin
         updateSubLayersLayout()
@@ -290,6 +311,11 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
             invalidate()  // invalidate after the change
         }
         updateChildrenLayout()
+
+        if initialLayout {
+            CATransaction.commit()
+        }
+        initialLayout = false
     }
 
     func updateLayout() {
@@ -847,13 +873,13 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         }
     }
 
-    func nodeFor(_ element: BeamElement) -> TextNode {
-        guard let parent = parent else { return editor.nodeFor(element) }
-        return parent.nodeFor(element)
+    func nodeFor(_ element: BeamElement, withParent: Widget) -> TextNode {
+        guard let parent = parent else { fatalError("Trying to access element that is not corrected to root") }
+        return parent.nodeFor(element, withParent: withParent)
     }
 
     func removeNode(_ node: TextNode) {
-        guard let parent = parent else { editor.removeNode(node); return }
+        guard let parent = parent else { Logger.shared.logError("Trying to access element that is not corrected to root", category: .document); return  }
         parent.removeNode(node)
     }
 
@@ -886,6 +912,13 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
         return widgets
     }
+
+    func clearMapping() {
+        for c in children {
+            c.clearMapping()
+        }
+    }
+
 }
 
 // swiftlint:enable type_body_length

@@ -159,7 +159,7 @@ class TextNodeTests: XCTestCase {
         validateRootWithNote(root: root, note: note)
 
         let bullet3 = BeamElement("bullet3")
-        root.addChild(TextNode(editor: editor, element: bullet3))
+        root.addChild(TextNode(parent: root, element: bullet3))
 
         let str1 = """
         title
@@ -185,7 +185,7 @@ class TextNodeTests: XCTestCase {
         let root = editor.rootNode!
         validateRootWithNote(root: root, note: note)
 
-        _ = root.insert(node: TextNode(editor: editor, element: BeamElement("bullet3")), after: root.children.first!)
+        _ = root.insert(node: TextNode(parent: root, element: BeamElement("bullet3")), after: root.children.first!)
 
         let str1 = """
         title
@@ -264,7 +264,7 @@ class TextNodeTests: XCTestCase {
         let root = editor.rootNode!
         validateRootWithNote(root: root, note: note)
 
-        let node = TextNode(editor: editor, element: BeamElement("bullet13"))
+        let node = TextNode(parent: root, element: BeamElement("bullet13"))
         node.element.addChild(BeamElement("bullet131"))
         let first = root.children.first as? TextNode
         first?.element.addChild(node.element)
@@ -294,7 +294,7 @@ class TextNodeTests: XCTestCase {
         let root = editor.rootNode!
         validateRootWithNote(root: root, note: note)
 
-        let node = TextNode(editor: editor, element: BeamElement("bullet13"))
+        let node = TextNode(parent: root, element: BeamElement("bullet13"))
         node.element.addChild(BeamElement("bullet131"))
         let first = root.children.first as? TextNode
         _ = first?.element.insert(node.element, after: first!.element.children.first!)
