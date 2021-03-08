@@ -403,6 +403,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
             if let chevron = self.layers["disclosure"] as? ChevronButton {
                 chevron.open = open
             }
+            guard !initialLayout else { return }
             updateChildrenVisibility(visible && open)
             invalidateLayout()
         }
