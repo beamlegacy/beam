@@ -17,9 +17,7 @@ public class TextNode: Widget {
         subscribeToElement(element)
     }}
 
-    var elementTextScope: Cancellable?
-    var elementKindScope: Cancellable?
-
+    var elementScope = Set<AnyCancellable>()
     var elementText = BeamText()
     var elementKind = ElementKind.bullet
 
@@ -56,6 +54,13 @@ public class TextNode: Widget {
             element.text = newValue
             element.note?.modifiedByUser()
             invalidateText()
+        }
+    }
+
+    override var open: Bool {
+        didSet {
+            guard !initialLayout, element.open != open else { return }
+            element.open = open
         }
     }
 
@@ -1259,19 +1264,28 @@ public class TextNode: Widget {
 */
 
     func subscribeToElement(_ element: BeamElement) {
-        elementTextScope = element.$text
+        elementScope.removeAll()
+
+        element.$text
             .dropFirst()
             .sink { [unowned self] newValue in
                 elementText = newValue
                 self.invalidateText()
-            }
+            }.store(in: &elementScope)
 
-        elementKindScope = element.$kind
+        element.$kind
             .dropFirst()
             .sink { [unowned self] newValue in
                 elementKind = newValue
                 self.invalidateText()
-            }
+            }.store(in: &elementScope)
+
+        element.$open
+            .sink { [unowned self] newValue in
+                if open != newValue {
+                    open = newValue
+                }
+            }.store(in: &elementScope)
 
         elementText = element.text
         elementKind = element.kind

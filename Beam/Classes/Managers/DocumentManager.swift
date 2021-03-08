@@ -693,15 +693,20 @@ extension DocumentManager {
                     return
                 }
 
+                completion?(.success(true))
+
                 // If not authenticated, we don't need to send to BeamAPI
                 if AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled, networkSave {
                     // We want to fetch back the document, to update it's previousChecksum
-                    context.refresh(document, mergeChanges: false)
-                    self.saveDocumentStructOnAPI(DocumentStruct(document: document)) { _ in
+                    //                    context.refresh(document, mergeChanges: false)
+                    guard let updatedDocument = Document.fetchWithId(context, documentStruct.id) else {
+                        Logger.shared.logError("Weird, document disappeared: \(documentStruct.id) \(documentStruct.title)", category: .coredata)
+                        return
                     }
-                }
 
-                completion?(.success(true))
+                    let updatedDocStruct = DocumentStruct(document: updatedDocument)
+                    self.saveDocumentStructOnAPI(updatedDocStruct) { _ in }
+                }
             }
         }
 
