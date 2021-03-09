@@ -1,5 +1,5 @@
 //
-//  AutoCompleteList.swift
+//  AutocompleteList.swift
 //  Beam
 //
 //  Created by Sebastien Metrot on 21/09/2020.
@@ -8,16 +8,18 @@
 import SwiftUI
 import AppKit
 
-struct AutoCompleteList: View {
+struct AutocompleteList: View {
     @EnvironmentObject var state: BeamState
     @Binding var selectedIndex: Int?
-    @Binding var elements: [AutoCompleteResult]
+    @Binding var elements: [AutocompleteResult]
+
+    private let itemHeight: CGFloat = 32
 
     var body: some View {
-        VStack {
+        VStack(spacing: 0) {
             ForEach(elements) { i in
-                return AutoCompleteItem(item: i, selected: isSelectedItem(i))
-                    .contentShape(Rectangle())
+                return AutocompleteItem(item: i, selected: isSelectedItem(i))
+                    .frame(height: itemHeight)
                     .onTapGesture(count: 1) {
                         selectedIndex = indexFor(item: i)
                         state.startQuery()
@@ -25,17 +27,16 @@ struct AutoCompleteList: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .top)
-        .background(Color(.transparent))
     }
 
-    func isSelectedItem(_ item: AutoCompleteResult) -> Bool {
+    func isSelectedItem(_ item: AutocompleteResult) -> Bool {
         if let i = selectedIndex {
             return elements[i].id == item.id
         }
         return false
     }
 
-    func indexFor(item: AutoCompleteResult) -> Int? {
+    func indexFor(item: AutocompleteResult) -> Int? {
         for i in elements.indices where elements[i].id == item.id {
             return i
         }
@@ -44,12 +45,12 @@ struct AutoCompleteList: View {
 
 }
 
-struct AutoCompleteList_Previews: PreviewProvider {
+struct AutocompleteList_Previews: PreviewProvider {
     static var elements = [
-        AutoCompleteResult(id: UUID(), string: "prout", source: .autoComplete),
-        AutoCompleteResult(id: UUID(), string: "asldkfjh sadlkfjh", source: .autoComplete),
-        AutoCompleteResult(id: UUID(), string: "bleh blehbleh", source: .autoComplete)]
+        AutocompleteResult(text: "prout", source: .autocomplete),
+        AutocompleteResult(text: "asldkfjh sadlkfjh", source: .autocomplete),
+        AutocompleteResult(text: "bleh blehbleh", source: .autocomplete)]
     static var previews: some View {
-        AutoCompleteList(selectedIndex: .constant(1), elements: .constant(Self.elements))
+        AutocompleteList(selectedIndex: .constant(1), elements: .constant(Self.elements))
     }
 }

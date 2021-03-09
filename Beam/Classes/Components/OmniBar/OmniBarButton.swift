@@ -26,7 +26,6 @@ struct OmniBarButton: View {
     var body: some View {
         Button(action: action) {
             Icon(name: icon, size: 20, color: foregroundColor)
-                .frame(width: 20, height: 20)
         }
         .accessibility(identifier: accessibilityId)
         .buttonStyle(RoundRectButtonStyle())

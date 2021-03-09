@@ -5,7 +5,7 @@ import Nimble
 import Combine
 
 @testable import Beam
-class AutoCompleteTests: QuickSpec {
+class AutocompleteTests: QuickSpec {
     var sut: Completer!
 
     override func spec() {
@@ -15,7 +15,6 @@ class AutoCompleteTests: QuickSpec {
             self.sut = Completer()
         }
         describe(".complete(query)") {
-            let query = "Beam app"
 
             it("updates results") {
                 waitUntil(timeout: .seconds(10)) { done in
@@ -25,7 +24,7 @@ class AutoCompleteTests: QuickSpec {
                             expect(results).to(haveCount(10))
                             done()
                         }.store(in: &scope)
-                    self.sut.complete(query: query)
+                    self.sut.complete(query: "Beam")
                 }
             }
 
@@ -36,6 +35,20 @@ class AutoCompleteTests: QuickSpec {
                             expect(results).to(haveCount(0))
                             done()
                         }.store(in: &scope)
+                }
+            }
+
+            it("called twice updates results only once") {
+                waitUntil(timeout: .seconds(10)) { done in
+                    self.sut.$results
+                        .dropFirst(1)
+                        .sink { results in
+                            expect(results).to(haveCount(10))
+                            done()
+                        }.store(in: &scope)
+                    self.sut.complete(query: "Beam")
+                    // 2nd call cancel previous query immediatly
+                    self.sut.complete(query: "Beam app")
                 }
             }
         }

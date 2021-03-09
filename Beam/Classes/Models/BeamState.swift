@@ -18,8 +18,11 @@ let NoteDisplayThreshold = Float(0.0)
     public var searchEngine: SearchEngine = GoogleSearch()
 
     @Published var searchQuery: String = ""
-    @Published var searchQuerySelection: [Range<Int>]?
-    @Published var completedQueries = [AutoCompleteResult]()
+    @Published var searchQuerySelectedRanges: [Range<Int>]?
+    @Published var autocompleteResults = [AutocompleteResult]()
+    private var autocompleteSearchGuessesHandler: (([AutocompleteResult]) -> Void)?
+    private var autocompleteTimeoutBlock: DispatchWorkItem?
+
     @Published var currentNote: BeamNote?
     @Published var backForwardList = NoteBackForwardList()
     @Published var canGoBack: Bool = false
@@ -55,17 +58,18 @@ let NoteDisplayThreshold = Float(0.0)
             updateCanGoBackForward()
         }
     }
-    @Published var selectionIndex: Int? = nil {
+    @Published var autocompleteSelectedIndex: Int? = nil {
         didSet {
-            if let i = selectionIndex, i >= 0, i < completedQueries.count {
-                let completedQuery = completedQueries[i].string
-                let oldSize = searchQuerySelection?.first?.startIndex ?? searchQuery.count
-                let newSize = completedQuery.count
+            if let i = autocompleteSelectedIndex, i >= 0, i < autocompleteResults.count {
+                let resultText = autocompleteResults[i].text
+                let oldSize = searchQuerySelectedRanges?.first?.startIndex ?? searchQuery.count
+                let newSize = resultText.count
+                let unselectedPrefix = searchQuery.substring(from: 0, to: oldSize).lowercased()
                 // If the completion shares a common root with the original query, select the portion that is different
                 // otherwise select the whole string so that the next keystroke replaces everything
-                let newSelection = [(completedQuery.hasPrefix(searchQuery.substring(from: 0, to: oldSize)) ? oldSize : 0) ..< newSize]
-                searchQuery = completedQuery
-                searchQuerySelection = newSelection
+                let newSelection = [(resultText.hasPrefix(unselectedPrefix) ? oldSize : 0) ..< newSize]
+                searchQuery = resultText
+                searchQuerySelectedRanges = newSelection
             }
         }
     }
@@ -200,32 +204,6 @@ let NoteDisplayThreshold = Float(0.0)
         }
     }
 
-    func selectPreviousAutoComplete() {
-        if let i = selectionIndex {
-            let newIndex = i - 1
-            if newIndex >= 0 {
-                selectionIndex = newIndex
-            } else {
-                selectionIndex = nil
-            }
-        } else {
-            let newIndex = completedQueries.count - 1
-            if newIndex >= 0 {
-                selectionIndex = newIndex
-            } else {
-                selectionIndex = nil
-            }
-        }
-    }
-
-    func selectNextAutoComplete() {
-        if let i = selectionIndex {
-            selectionIndex = min(i + 1, completedQueries.count - 1)
-        } else {
-            selectionIndex = 0
-        }
-    }
-
     @discardableResult func navigateToNote(named: String) -> Bool {
         //Logger.shared.logDebug("load note named \(named)")
         let note = BeamNote.fetchOrCreate(data.documentManager, title: named)
@@ -238,27 +216,26 @@ let NoteDisplayThreshold = Float(0.0)
         guard note != self.currentNote else { return true }
 
         self.currentNote = note
-        selectionIndex = nil
         resetQuery()
-        
+        autocompleteSelectedIndex = nil
+
         backForwardList.push(.note(note))
         updateCanGoBackForward()
         return true
     }
 
     @discardableResult func navigateToJournal() -> Bool {
-        completedQueries = []
-        selectionIndex = nil
-        searchQuery = ""
         mode = .today
 
         self.currentNote = nil
+        resetQuery()
+        autocompleteSelectedIndex = nil
 
         backForwardList.push(.journal)
         updateCanGoBackForward()
         return true
     }
-    
+
     func navigateCurrentTab(toURL url: URL) {
         currentTab?.load(url: url)
     }
@@ -295,6 +272,7 @@ let NoteDisplayThreshold = Float(0.0)
     }
 
     private func urlFor(query: String) -> URL {
+        //TODO make a better url detector and rewritter to transform xxx.com in https://xxx.com with less corner cases and clearer code path:
         if query.maybeURL {
             guard let u = URL(string: query) else {
                 searchEngine.query = query
@@ -319,60 +297,46 @@ let NoteDisplayThreshold = Float(0.0)
         mode = .web
     }
 
+    private func selectAutocompleteResult(_ result: AutocompleteResult) {
+
+        switch result.source {
+        case .autocomplete:
+            searchEngine.query = result.text
+            // Logger.shared.logDebug("Start search query: \(searchEngine.searchUrl)")
+            let url = URL(string: searchEngine.searchUrl)!
+            if mode == .web, currentTab != nil {
+                navigateCurrentTab(toURL: url)
+            } else {
+                createTab(withURL: url, originalQuery: result.text)
+                mode = .web
+            }
+
+        case .history, .url:
+            let url = urlFor(query: result.text)
+            createTab(withURL: url, originalQuery: "")
+            mode = .web
+
+        case .note:
+            navigateToNote(named: result.text)
+
+        case .createCard:
+            navigateToNote(createNoteForQuery(result.text))
+        }
+        cancelAutocomplete()
+    }
+
     func startQuery() {
         let queryString = searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
         searchQuery = ""
-
-        if let index = selectionIndex {
-            let query = completedQueries[index]
-            switch query.source {
-            case .autoComplete:
-                searchEngine.query = query.string
-                // Logger.shared.logDebug("Start search query: \(searchEngine.searchUrl)")
-                let url = URL(string: searchEngine.searchUrl)!
-                if mode == .web, currentTab != nil {
-                    navigateCurrentTab(toURL: url)
-                } else {
-                    createTab(withURL: url, originalQuery: query.string)
-                    mode = .web
-                }
-
-            case .history:
-                createTab(withURL: URL(string: query.string)!, originalQuery: "")
-                mode = .web
-
-            case .note:
-                navigateToNote(named: queryString)
-
-            case .createCard:
-                navigateToNote(createNoteForQuery(query.string))
-            }
-
-            cancelAutocomplete()
+        focusOmniBox = false
+        if let index = autocompleteSelectedIndex {
+            let result = autocompleteResults[index]
+            selectAutocompleteResult(result)
             return
         }
 
-        var createNote = true
-
-        //TODO make a better url detector and rewritter to transform xxx.com in https://xxx.com with less corner cases and clearer code path:
-        let url: URL = {
-            if queryString.maybeURL {
-                guard let u = URL(string: queryString) else {
-                    searchEngine.query = queryString
-                    return URL(string: searchEngine.searchUrl)!
-                }
-
-                if u.scheme == nil {
-                    createNote = false
-                    return URL(string: "https://" + queryString)!
-                }
-                return u
-            }
-
-            searchEngine.query = queryString
-
-            return URL(string: searchEngine.searchUrl)!
-        }()
+        let createNote = !queryString.maybeURL
+        let url: URL = urlFor(query: queryString)
 
         // Logger.shared.logDebug("Start query: \(url)")
 
@@ -443,55 +407,16 @@ let NoteDisplayThreshold = Float(0.0)
     func setup(data: BeamData) {
         $searchQuery.sink { [weak self] query in
             guard let self = self else { return }
-            guard self.searchQuerySelection == nil else { return }
-            guard self.selectionIndex == nil else { return }
-            // Logger.shared.logDebug("received auto complete query: \(query)")
+            self.buildAutocompleteResults(for: query)
 
-            self.completedQueries = []
-
-            if !query.isEmpty {
-                if BeamNote.fetch(data.documentManager, title: query) == nil {
-                    // if the card doesn't exist, propose to create it
-                    self.completedQueries.append(AutoCompleteResult(id: UUID(), string: query, title: "Create card '\(query)'", source: .createCard))
-                }
-
-                let notes = data.documentManager.documentsWithTitleMatch(title: query).compactMap({ doc -> DocumentStruct? in
-                    let decoder = JSONDecoder()
-                    decoder.userInfo[BeamElement.recursiveCoding] = false
-                    guard let note = try? decoder.decode(BeamNote.self, from: doc.data)
-                    else { Logger.shared.logError("unable to partially decode note '\(doc.title)'", category: .document); return nil }
-                    // do not show notes under a certain score threshold:
-                    Logger.shared.logDebug("Filtering note '\(note.title)' -> \(note.score)", category: .general)
-                    return note.score > NoteDisplayThreshold ? doc : nil
-                }).prefix(4)
-                notes.forEach {
-                    let autocompleteResult = AutoCompleteResult(id: $0.id, string: $0.title, source: .note)
-                    self.completedQueries.append(autocompleteResult)
-                    // Logger.shared.logDebug("Found note \($0)")
-                }
-
-                self.completer.complete(query: query)
-                let results = self.data.index.search(string: query)
-                for result in results {
-                    self.completedQueries.append(AutoCompleteResult(id: UUID(), string: result.source, title: result.title, source: .history))
-                }
-            }
         }.store(in: &scope)
 
         completer.$results.receive(on: RunLoop.main).sink { [weak self] results in
-            guard let self = self else { return }
-            //Logger.shared.logDebug("received auto complete results: \(results)")
-            self.selectionIndex = nil
-            self.completedQueries.append(contentsOf: results.prefix(8))
+            guard let self = self, let guessesHandler = self.autocompleteSearchGuessesHandler else { return }
+            guessesHandler(results)
         }.store(in: &scope)
 
         backForwardList.push(.journal)
-    }
-
-
-    func resetQuery() {
-        searchQuery = ""
-        completedQueries = []
     }
 
     func cookiesDidChange(in cookieStore: WKHTTPCookieStore) {
@@ -573,19 +498,145 @@ let NoteDisplayThreshold = Float(0.0)
         return true
     }
 
-    func resetAutocompleteSelection() {
-        searchQuerySelection = nil
-        selectionIndex = nil
-    }
-
-    func cancelAutocomplete() {
-        resetAutocompleteSelection()
-        completedQueries = []
-    }
-
     func resetDestinationCard() {
         destinationCardName = currentTab?.note.title ?? data.todaysName
         destinationCardNameSelectedRange = nil
         destinationCardIsFocused = false
+    }
+}
+
+// MARK: - Autocomplete
+extension BeamState {
+
+    func selectPreviousAutocomplete() {
+        if let i = autocompleteSelectedIndex {
+            let newIndex = i - 1
+            if newIndex >= 0 {
+                autocompleteSelectedIndex = newIndex
+            } else {
+                resetAutocompleteSelection()
+            }
+        } else {
+            let newIndex = autocompleteResults.count - 1
+            if newIndex >= 0 {
+                autocompleteSelectedIndex = newIndex
+            }
+        }
+    }
+
+    func selectNextAutocomplete() {
+        if let i = autocompleteSelectedIndex {
+            autocompleteSelectedIndex = min(i + 1, autocompleteResults.count - 1)
+        } else {
+            autocompleteSelectedIndex = 0
+        }
+    }
+
+    func resetAutocompleteSelection() {
+        searchQuerySelectedRanges = nil
+        autocompleteSelectedIndex = nil
+    }
+
+    func cancelAutocomplete() {
+        resetAutocompleteSelection()
+        autocompleteResults = []
+    }
+
+    func resetQuery() {
+        searchQuery = ""
+        autocompleteResults = []
+    }
+
+    private func autocompleteNotesResults(for query: String) -> [AutocompleteResult] {
+        return data.documentManager.documentsWithTitleMatch(title: query)
+            // Eventually, we should not show notes under a certain score threshold
+            // Disabling it for now until we have a better scoring system
+            // .compactMap({ doc -> DocumentStruct? in
+            //      let decoder = JSONDecoder()
+            //      decoder.userInfo[BeamElement.recursiveCoding] = false
+            //      guard let note = try? decoder.decode(BeamNote.self, from: doc.data)
+            //      else { Logger.shared.logError("unable to partially decode note '\(doc.title)'", category: .document); return nil }
+            //      Logger.shared.logDebug("Filtering note '\(note.title)' -> \(note.score)", category: .general)
+            //      return note.score >= NoteDisplayThreshold ? doc : nil
+            // })
+            .map { AutocompleteResult(text: $0.title, source: .note, completingText: query, uuid: $0.id) }
+    }
+
+    private func autocompleteHistoryResults(for query: String) -> [AutocompleteResult] {
+        return self.data.index.search(string: query).map { AutocompleteResult(text: $0.source, source: .history, information: $0.title, completingText: query) }
+    }
+
+    func buildAutocompleteResults(for query: String) {
+        guard self.searchQuerySelectedRanges == nil else { return }
+        guard self.autocompleteSelectedIndex == nil else { return }
+        // Logger.shared.logDebug("received auto complete query: \(query)")
+
+        guard !query.isEmpty else {
+            self.autocompleteResults = []
+            return
+        }
+        var finalResults = [AutocompleteResult]()
+
+        // #1 Exisiting Notes
+        let notesResults = autocompleteNotesResults(for: query)
+
+        // #2 History results
+        let historyResults = autocompleteHistoryResults(for: query)
+
+        finalResults = sortResults(notesResults: notesResults, historyResults: historyResults)
+
+        // #3 Create Card
+        let canCreateNote = BeamNote.fetch(data.documentManager, title: query) == nil
+        if canCreateNote {
+            // if the card doesn't exist, propose to create it
+            finalResults.append(AutocompleteResult(text: query, source: .createCard, information: "New card", completingText: query))
+        }
+
+        if query.count > 1 {
+            // #4 Search Autocomplete results
+            autocompleteSearchGuessesHandler = { [weak self] results in
+                guard let self = self else { return }
+                //Logger.shared.logDebug("received auto complete results: \(results)")
+                self.autocompleteSelectedIndex = nil
+                let maxGuesses = finalResults.count > 2 ? 4 : 6
+                let toInsert = results.prefix(maxGuesses)
+                let atIndex = finalResults.count - (canCreateNote ? 1 : 0)
+                if self.autocompleteTimeoutBlock != nil {
+                    self.autocompleteTimeoutBlock?.cancel()
+                    finalResults.insert(contentsOf: toInsert, at: atIndex)
+                    self.autocompleteResults = finalResults
+                } else {
+                    self.autocompleteResults.insert(contentsOf: toInsert, at: atIndex)
+                }
+            }
+            self.completer.complete(query: query)
+
+            autocompleteTimeoutBlock?.cancel()
+            autocompleteTimeoutBlock = DispatchWorkItem(block: {
+                self.autocompleteTimeoutBlock = nil
+                self.autocompleteResults = finalResults
+            })
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: autocompleteTimeoutBlock!)
+        } else {
+            autocompleteSearchGuessesHandler = nil
+            self.autocompleteResults = finalResults
+        }
+    }
+
+    func sortResults(notesResults: [AutocompleteResult], historyResults: [AutocompleteResult]) -> [AutocompleteResult] {
+        // this logic should eventually become smarter to always include the right amount of result per source.
+
+        var results = [AutocompleteResult]()
+
+        let maxHistoryResults = notesResults.isEmpty ? 6 : 4
+        let historyResultsTruncated = Array(historyResults.prefix(maxHistoryResults))
+
+        let maxNotesSuggestions = historyResults.isEmpty ? 6 : 4
+        let notesResultsTruncated = Array(notesResults.prefix(maxNotesSuggestions))
+
+        results.append(contentsOf: notesResultsTruncated)
+        results.append(contentsOf: historyResultsTruncated)
+
+        return results
     }
 }

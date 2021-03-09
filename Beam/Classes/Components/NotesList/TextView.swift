@@ -35,6 +35,12 @@ struct TextView: NSViewRepresentable {
             self.parent.text = textStorage
         }
     }
+
+    final class InternalTextView: NSTextView {
+        override var intrinsicContentSize: NSSize {
+            super.intrinsicContentSize
+        }
+    }
 }
 
 struct TextView_Previews: PreviewProvider {
