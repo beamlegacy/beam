@@ -16,6 +16,16 @@ class FullScreenWKWebView: WKWebView {
 //    override var safeAreaInsets: NSEdgeInsets {
 //        return NSEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
 //    }
+
+    //Catching those event to avoid funk sound
+    override func keyDown(with event: NSEvent) {
+        if let key = event.specialKey {
+            if key == .leftArrow || key == .rightArrow {
+                return
+            }
+        }
+        super.keyDown(with: event)
+    }
 }
 
 class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler, Codable {
