@@ -13,7 +13,7 @@ import SwiftSoup
 
 let NoteDisplayThreshold = Float(0.0)
 //swiftlint:disable:next type_body_length
-@objc class BeamState: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
+@objc class BeamState: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Codable {
     var data: BeamData
     public var searchEngine: SearchEngine = GoogleSearch()
 
@@ -21,7 +21,7 @@ let NoteDisplayThreshold = Float(0.0)
     @Published var searchQuerySelection: [Range<Int>]?
     @Published var completedQueries = [AutoCompleteResult]()
     @Published var currentNote: BeamNote?
-    @Published var backForwardList: NoteBackForwardList
+    @Published var backForwardList = NoteBackForwardList()
     @Published var canGoBack: Bool = false
     @Published var canGoForward: Bool = false
     @Published var isFullScreen: Bool = false
@@ -385,12 +385,62 @@ let NoteDisplayThreshold = Float(0.0)
         mode = .web
     }
 
-    public init(data: BeamData) {
-        self.data = data
+    override public init() {
+        self.data = AppDelegate.main.data
         self.destinationCardName = data.todaysName
-        // self.currentNote = data.todaysNote
-        backForwardList = NoteBackForwardList()
         super.init()
+        setup(data: data)
+
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case currentNote
+        case mode
+        case tabs
+        case currentTab
+        case backForwardList
+    }
+
+    required public init(from decoder: Decoder) throws {
+        self.data = AppDelegate.main.data
+        self.destinationCardName = data.todaysName
+        super.init()
+
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        if let currentNoteName = try? container.decode(String.self, forKey: .currentNote) {
+            currentNote = BeamNote.fetch(data.documentManager, title: currentNoteName)
+        }
+        backForwardList = try container.decode(NoteBackForwardList.self, forKey: .backForwardList)
+
+        tabs = try container.decode([BrowserTab].self, forKey: .tabs)
+        if let tabIndex = try? container.decode(Int.self, forKey: .currentTab), tabIndex < tabs.count {
+            currentTab = tabs[tabIndex]
+        }
+
+        setup(data: data)
+        mode = try container.decode(Mode.self, forKey: .mode)
+
+        for tab in tabs {
+            tab.postLoadSetup(state: self)
+        }
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        if let note = currentNote {
+            try container.encode(note.title, forKey: .currentNote)
+        }
+        try container.encode(backForwardList, forKey: .backForwardList)
+        try container.encode(mode, forKey: .mode)
+        try container.encode(tabs, forKey: .tabs)
+        if let tab = currentTab {
+            try container.encode(tabs.firstIndex(of: tab), forKey: .currentTab)
+        }
+    }
+
+    func setup(data: BeamData) {
         $searchQuery.sink { [weak self] query in
             guard let self = self else { return }
             guard self.searchQuerySelection == nil else { return }
@@ -437,6 +487,7 @@ let NoteDisplayThreshold = Float(0.0)
 
         backForwardList.push(.journal)
     }
+
 
     func resetQuery() {
         searchQuery = ""
