@@ -7,9 +7,10 @@
 
 import SwiftUI
 
-struct OmniBarFieldBackground: View {
+struct OmniBarFieldBackground<Content: View>: View {
     var isEditing = false
-
+    var content: () -> Content
+    
     @State private var isHoveringBox = false
     private let boxCornerRadius: CGFloat = 6
     private var boxHeight: CGFloat {
@@ -27,14 +28,16 @@ struct OmniBarFieldBackground: View {
     private let animationDuration = 0.3
 
     var body: some View {
-        RoundedRectangle(cornerRadius: boxCornerRadius)
-            .fill(Color(.editorBackgroundColor))
-            .animation(.timingCurve(0.42, 0.0, 0.58, 1.0, duration: animationDuration))
-            .shadow(color: Color.black.opacity(shadowOpacity), radius: shadowRadius, x: 0.0, y: shadowOffsetY)
-            .animation(.timingCurve(0.25, 0.1, 0.25, 1.0, duration: animationDuration))
-            .frame(height: boxHeight)
-            .onHover(perform: { hovering in
-                isHoveringBox = hovering
-            })
+        ZStack {
+            RoundedRectangle(cornerRadius: boxCornerRadius)
+                .fill(Color(.editorBackgroundColor))
+                .animation(.timingCurve(0.42, 0.0, 0.58, 1.0, duration: animationDuration))
+                .shadow(color: Color.black.opacity(shadowOpacity), radius: shadowRadius, x: 0.0, y: shadowOffsetY)
+                .animation(.timingCurve(0.25, 0.1, 0.25, 1.0, duration: animationDuration))
+                .onHover(perform: { hovering in
+                    isHoveringBox = hovering
+                })
+            content().clipped()
+        }
     }
 }

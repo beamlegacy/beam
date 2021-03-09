@@ -10,14 +10,6 @@ import Cocoa
 
 extension NSColor {
 
-    static var autoCompleteText: NSColor {
-        return loadColor(named: "AutoCompleteText")
-    }
-
-    static var autoCompleteTextSelected: NSColor {
-        return loadColor(named: "AutoCompleteTextSelected")
-    }
-
     static var editorBackgroundColor: NSColor {
         return loadColor(named: "EditorBackgroundColor")
     }
@@ -239,6 +231,19 @@ extension NSColor {
 
     static var omniboxTextColor: NSColor {
         return loadColor(named: "Niobium")
+    }
+
+    // Autocomplete
+    static var autocompleteTextColor: NSColor {
+        return self.editorTextColor
+    }
+
+    static var autocompleteSubtitleTextColor: NSColor {
+        return loadColor(named: "LightStoneGray")
+    }
+
+    static var autocompleteSelectedBackgroundColor: NSColor {
+        return loadColor(named: "AutocompleteSelectedBackgroundColor")
     }
 
     // Destination Note

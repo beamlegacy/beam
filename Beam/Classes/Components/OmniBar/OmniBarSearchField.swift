@@ -15,15 +15,26 @@ struct OmniBarSearchField: View {
     private var shouldShowWebHost: Bool {
         return state.mode == .web && !isEditing && state.currentTab != nil
     }
+
     private var textFieldText: Binding<String> {
-        return shouldShowWebHost ? .constant(state.currentTab!.url!.minimizedHost) : $state.searchQuery
+        guard let tab = state.currentTab, let url = tab.url, shouldShowWebHost else {
+            return $state.searchQuery
+        }
+        return .constant(url.minimizedHost)
+    }
+
+    private var leadingIconName: String {
+        guard let tab = state.currentTab, let url = tab.url, state.mode == .web, state.searchQuery == url.absoluteString else {
+            return "field-search"
+        }
+        return "field-web"
+
     }
 
     var body: some View {
         HStack(spacing: 8) {
             if !shouldShowWebHost {
-                Icon(name: "field-search", color: isEditing ? Color(.omniboxTextColor) : Color(.omniboxPlaceholderTextColor) )
-                    .frame(width: 16, height: 16)
+                Icon(name: leadingIconName, size: 16, color: isEditing ? Color(.omniboxTextColor) : Color(.omniboxPlaceholderTextColor) )
             }
             BeamTextField(
                 text: textFieldText,
@@ -32,7 +43,7 @@ struct OmniBarSearchField: View {
                 font: .systemFont(ofSize: 13),
                 textColor: NSColor.omniboxTextColor,
                 placeholderColor: NSColor.omniboxPlaceholderTextColor,
-                selectedRanges: state.searchQuerySelection,
+                selectedRanges: state.searchQuerySelectedRanges,
                 onTextChanged: { _ in
                     state.resetAutocompleteSelection()
                 },
@@ -40,7 +51,7 @@ struct OmniBarSearchField: View {
                     startQuery()
                 },
                 onEscape: {
-                    if state.completedQueries.isEmpty {
+                    if state.autocompleteResults.isEmpty {
                         if state.searchQuery.isEmpty {
                             unfocusField()
                         } else {
@@ -53,10 +64,10 @@ struct OmniBarSearchField: View {
                 onCursorMovement: { cursorMovement in
                     switch cursorMovement {
                     case .up:
-                        state.selectPreviousAutoComplete()
+                        state.selectPreviousAutocomplete()
                         return true
                     case .down:
-                        state.selectNextAutoComplete()
+                        state.selectNextAutocomplete()
                         return true
                     default:
                         return false
@@ -64,6 +75,7 @@ struct OmniBarSearchField: View {
                 }
             )
             .centered(!isEditing && state.mode != .web)
+            .accessibility(addTraits: .isSearchField)
             .accessibility(identifier: "OmniBarSearchField")
         }
         .animation(.timingCurve(0.25, 0.1, 0.25, 1.0, duration: 0.3))
@@ -78,7 +90,6 @@ struct OmniBarSearchField: View {
             return
         }
         state.startQuery()
-        unfocusField()
     }
 }
 

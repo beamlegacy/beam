@@ -17,9 +17,8 @@ struct ModeView: View {
             VStack(spacing: 0) {               
                 OmniBar()
                     .padding(.leading, state.isFullScreen ? 0 : windowControlsWidth)
-                    .frame(height: 52)
                     .zIndex(10)
-
+                    .frame(height: 52)
                 ZStack {
                     switch state.mode {
                     case .web:
@@ -40,7 +39,6 @@ struct ModeView: View {
                         }
                         .transition(.move(edge: .bottom))
                         .animation(.easeInOut(duration: 0.3))
-                        .zIndex(1)
                     case .note:
                         ZStack {
                             NoteView(note: state.currentNote!, showTitle: false, scrollable: true, centerText: true)
@@ -54,17 +52,8 @@ struct ModeView: View {
                             JournalView(data: state.data, isFetching: state.data.isFetching, journal: state.data.journal, offset: geometry.size.height * 0.4)
                         }
                     }
-
-                    if !state.searchQuery.isEmpty && !state.completedQueries.isEmpty {
-                        ScrollView {
-                            AutoCompleteView(autoComplete: $state.completedQueries, selectionIndex: $state.selectionIndex)
-                                .frame(minHeight: 20, maxHeight: 250, alignment: .top)
-
-                        }
-                        .zIndex(2)
-                        .accessibility(identifier: "autoCompleteView")
-                    }
                 }
+                .frame(maxHeight: .infinity)
             }
             .background(Color(.editorBackgroundColor))
         }.frame(minWidth: 822)

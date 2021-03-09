@@ -1,5 +1,5 @@
 //
-//  AutoComplete.swift
+//  Autocomplete.swift
 //  Beam
 //
 //  Created by Sebastien Metrot on 18/09/2020.
@@ -11,22 +11,30 @@ import Combine
 // To improve the auto complete results we get, look at how chromium does it:
 // https://chromium.googlesource.com/chromium/src/+/master/components/omnibox/browser/search_suggestion_parser.cc
 
-struct AutoCompleteResult: Identifiable {
+struct AutocompleteResult: Identifiable {
     enum Source {
         case history
         case note
-        case autoComplete
+        case autocomplete
+        case url
         case createCard
     }
 
-    var id: UUID
-    var string: String
-    var title: String?
+    var id: String {
+        return "\(uuid)\(completingText ?? "")"
+    }
+    var text: String
     var source: Source
+    var information: String?
+    var completingText: String?
+    var uuid = UUID()
 }
 
 class Completer: ObservableObject {
-    @Published var results: [AutoCompleteResult] = []
+    @Published var results: [AutocompleteResult] = []
+
+    private var searchEngine = GoogleSearch()
+    private var lastDataTask: URLSessionDataTask?
 
     public func complete(query: String) {
         guard query.count > 0 else {
@@ -34,25 +42,26 @@ class Completer: ObservableObject {
             return
         }
 
-        guard let query = query.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed),
-              let url = URL(string: "https://suggestqueries.google.com/complete/search?client=firefox&output=toolbar&q=\(query)") else {
+        searchEngine.query = query
+        guard let url = URL(string: searchEngine.autocompleteUrl) else {
             return
         }
-
-        URLSession.shared.dataTask(with: url) { [weak self] data, _, _ in
+        lastDataTask?.cancel()
+        lastDataTask = URLSession.shared.dataTask(with: url) { [weak self] data, _, _ in
             guard let self = self else { return }
             guard let data = data else { return }
 
             let obj = try? JSONSerialization.jsonObject(with: data)
 
             if let array = obj as? [Any], let r = array[1] as? [String] {
-                var res = [AutoCompleteResult]()
-
+                var res = [AutocompleteResult]()
                 for str in r {
-                    res.append(AutoCompleteResult(id: UUID(), string: str, source: .autoComplete))
+                    let source: AutocompleteResult.Source = str.urlString != nil ? .url : .autocomplete
+                    res.append(AutocompleteResult(text: str, source: source, completingText: query))
                 }
                 self.results = res
             }
-        }.resume()
+        }
+        lastDataTask?.resume()
     }
 }
