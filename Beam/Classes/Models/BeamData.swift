@@ -79,7 +79,6 @@ public class BeamData: ObservableObject {
 //        }
 
         noteAutoSaveService.saveNotes()
-
         // save search index
         do {
             Logger.shared.logInfo("Saving Index to \(Self.indexPath)", category: .search)

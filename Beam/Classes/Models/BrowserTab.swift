@@ -18,7 +18,7 @@ class FullScreenWKWebView: WKWebView {
 //    }
 }
 
-class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler {
+class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler, Codable {
     var id: UUID
 
     public func load(url: URL) {
@@ -109,13 +109,87 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         }
         browsingTree = BrowsingTree(originalQuery ?? webView?.url?.absoluteString)
 
-        super.init(frame: NSRect())
+        super.init(frame: .zero)
         note.browsingSessions.append(browsingTree)
         setupObservers()
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case title
+        case originalQuery
+        case url
+        case browsingTree
+        case privateMode
+        case note
+        case rootElement
+        case element
+
+    }
+
+    var preloadUrl: URL?
+
+    required public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        self.id = try container.decode(UUID.self, forKey: .id)
+        self.title = try container.decode(String.self, forKey: .title)
+        self.originalQuery = try container.decode(String.self, forKey: .originalQuery)
+        self.preloadUrl = try? container.decode(URL.self, forKey: .url)
+
+        self.browsingTree = try container.decode(BrowsingTree.self, forKey: .browsingTree)
+        self.privateMode = try container.decode(Bool.self, forKey: .privateMode)
+
+        let noteName = try container.decode(String.self, forKey: .note)
+        let loadedNote = BeamNote.fetch(AppDelegate.main.documentManager, title: noteName) ?? AppDelegate.main.data.todaysNote
+        self.note = loadedNote
+        let rootId = try? container.decode(UUID.self, forKey: .rootElement)
+        self.rootElement = note.findElement(rootId ?? loadedNote.id) ?? loadedNote.children.first!
+        if let elementId = try? container.decode(UUID.self, forKey: .element) {
+            self.element = loadedNote.findElement(elementId)
+        }
+
+        super.init(frame: .zero)
+        note.browsingSessions.append(browsingTree)
+    }
+
+    func postLoadSetup(state: BeamState) {
+        self.state = state
+        let web = FullScreenWKWebView(frame: NSRect(), configuration: Self.webViewConfiguration)
+        web.wantsLayer = true
+
+        state.setup(webView: web)
+        backForwardList = web.backForwardList
+        self.webView = web
+//        setupObservers()
+            if let _url = self.preloadUrl {
+                self.preloadUrl = nil
+                DispatchQueue.main.async { [weak self] in
+                    self?.webView.load(URLRequest(url: _url))
+                }
+            }
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        try container.encode(id, forKey: .id)
+        try container.encode(title, forKey: .title)
+        try container.encode(originalQuery, forKey: .originalQuery)
+        if let _url = webView.url {
+            try container.encode(_url, forKey: .url)
+        }
+        try container.encode(browsingTree, forKey: .browsingTree)
+        try container.encode(privateMode, forKey: .privateMode)
+        try container.encode(note.title, forKey: .note)
+        try container.encode(rootElement.id, forKey: .rootElement)
+        if let element = element {
+            try container.encode(element, forKey: .element)
+        }
     }
 
     // Add the current page to the current note and return the beam element (if the element already exist return it directly)

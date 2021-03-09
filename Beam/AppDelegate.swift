@@ -64,7 +64,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         data = BeamData()
         updateBadge()
-        createWindow()
+        createWindow(reloadState: true)
 
         // So we remember we're not currently using the default api server
         if Configuration.apiHostnameDefault != Configuration.apiHostname {
@@ -82,9 +82,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         NSApp.dockTile.badgeLabel = count > 0 ? String(count) : ""
     }
 
-    func createWindow() {
+    func createWindow(reloadState: Bool) {
         // Create the window and set the content view.
-        window = BeamWindow(contentRect: NSRect(x: 0, y: 0, width: 800, height: 600), data: data)
+        window = BeamWindow(contentRect: NSRect(x: 0, y: 0, width: 800, height: 600), data: data, reloadState: reloadState)
         window.center()
         window.makeKeyAndOrderFront(nil)
         windows.append(window)
@@ -122,11 +122,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     func applicationWillTerminate(_ aNotification: Notification) {
         // Insert code here to tear down your application
+        if let beamWindow = windows.first {
+            beamWindow.saveDefaults()
+        }
     }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         if !flag {
-            createWindow()
+            createWindow(reloadState: true)
         }
 
         return true
@@ -213,7 +216,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     @IBAction func newDocument(_ sender: Any?) {
-        createWindow()
+        createWindow(reloadState: false)
     }
 
     // MARK: -

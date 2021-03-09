@@ -84,7 +84,7 @@ struct OmniBarSearchField: View {
 
 struct OmniBarSearchField_Previews: PreviewProvider {
     static var previews: some View {
-        OmniBarSearchField(isEditing: .constant(true)).environmentObject(BeamState(data: BeamData()))
+        OmniBarSearchField(isEditing: .constant(true)).environmentObject(BeamState())
             .frame(width: 400)
             .background(Color.white)
     }

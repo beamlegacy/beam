@@ -113,8 +113,8 @@ struct OmniBar: View {
 
 struct OmniBar_Previews: PreviewProvider {
 
-    static let state = BeamState(data: BeamData())
-    static let focusedState = BeamState(data: BeamData())
+    static let state = BeamState()
+    static let focusedState = BeamState()
 
     static var previews: some View {
         state.focusOmniBox = false

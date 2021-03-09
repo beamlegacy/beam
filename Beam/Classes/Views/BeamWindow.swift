@@ -38,10 +38,22 @@ class BeamWindow: NSWindow {
         set { }
     }
 
-    init(contentRect: NSRect, data: BeamData) {
+    init(contentRect: NSRect, data: BeamData, reloadState: Bool) {
         self.data = data
-        self.state = BeamState(data: data)
-        self.state.data.setupJournal()
+
+        if reloadState && !NSEvent.modifierFlags.contains(.option) {
+            if let savedData = UserDefaults.standard.data(forKey: Self.savedTabsKey) {
+                let decoder = JSONDecoder()
+                let state = try? decoder.decode(BeamState.self, from: savedData)
+                self.state = state
+            }
+        }
+
+        if state == nil {
+            state = BeamState()
+        }
+
+        data.setupJournal()
         super.init(contentRect: contentRect, styleMask: [.titled, .closable, .miniaturizable, .resizable, .unifiedTitleAndToolbar, .fullSizeContentView],
                    backing: .buffered, defer: false)
 
@@ -154,7 +166,7 @@ class BeamWindow: NSWindow {
 
     @IBAction func newDocument(_ sender: Any?) {
         guard let delegate = NSApplication.shared.delegate as? AppDelegate else { return }
-        delegate.createWindow()
+        delegate.createWindow(reloadState: false)
     }
 
     @IBAction func showPreviousTab(_ sender: Any?) {
@@ -175,6 +187,14 @@ class BeamWindow: NSWindow {
 
     @IBAction func newSearch(_ sender: Any?) {
         state.startNewSearch()
+    }
+
+    static let savedTabsKey = "savedTabs"
+
+    func saveDefaults() {
+        let encoder = JSONEncoder()
+        guard let data = try? encoder.encode(state) else { return }
+        UserDefaults.standard.set(data, forKey: Self.savedTabsKey)
     }
 }
 
