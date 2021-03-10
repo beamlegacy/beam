@@ -20,11 +20,17 @@ struct GlobalCenteringContainer<Content: View>: View {
     var content: () -> Content
 
     var enabled: Bool = true
-    var containerGeometry: GeometryProxy
+    var containerGeometry: GeometryProxy?
 
-    func globalCenteringOffsetX(containerGeo: GeometryProxy, searchStackGeo: GeometryProxy) -> CGFloat {
+    func globalCenteringOffsetX(containerGeo: GeometryProxy?, searchStackGeo: GeometryProxy) -> CGFloat {
         guard enabled else { return 0 }
-        let containerGlobal = containerGeo.frame(in: .global)
+        var containerGlobal: NSRect
+        if let containerGeo = containerGeo {
+            containerGlobal = containerGeo.frame(in: .global)
+        } else {
+            // fallback, but prefer using the container geometry.
+            containerGlobal = AppDelegate.main.window.contentView?.bounds ?? .zero
+        }
         let stackGlobal = searchStackGeo.frame(in: .global)
 
         let rightSpacing = containerGlobal.maxX - stackGlobal.maxX
@@ -33,7 +39,7 @@ struct GlobalCenteringContainer<Content: View>: View {
         return offsetX
     }
 
-    init(enabled: Bool, containerGeometry: GeometryProxy, @ViewBuilder content: @escaping () -> Content) {
+    init(enabled: Bool, containerGeometry: GeometryProxy?, @ViewBuilder content: @escaping () -> Content) {
         self.content = content
         self.enabled = enabled
         self.containerGeometry = containerGeometry
