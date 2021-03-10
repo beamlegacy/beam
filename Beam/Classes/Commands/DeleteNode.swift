@@ -123,8 +123,14 @@ class DeleteNode: TextEditorCommand {
             prevVisibleNode.element.addChild(c)
         }
         data = encode(element: elementInstance.element)
-        node.delete()
         context?.cancelNodeSelection()
+        if let nextVisibleNode = node.nextVisibleTextNode(), prevVisibleNode === context {
+            context?.focus(widget: nextVisibleNode)
+        }
+        if let prevWidget = node.previousVisibleTextNode() {
+            context?.focus(widget: prevWidget)
+        }
+        node.delete()
         return true
     }
 
