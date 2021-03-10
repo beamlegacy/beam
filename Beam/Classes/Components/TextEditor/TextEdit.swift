@@ -500,8 +500,8 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
     func pressEnter(_ option: Bool, _ command: Bool, _ shift: Bool) {
-        guard let node = focusedWidget as? TextNode else { return }
-        guard !node.readOnly else { return }
+        guard let node = focusedWidget as? TextNode, !node.readOnly,
+              let noteTitle = node.root?.note?.title else { return }
 
         if option || shift {
             rootNode.doCommand(.insertNewline)
@@ -515,8 +515,8 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                 return
             }
             rootNode.eraseSelection()
-            let insertNode = InsertNode(in: node, with: rootNode.cursorPosition, at: node.indexInParent ?? 0)
-            rootNode.cmdManager.run(command: insertNode)
+            let insertNode = InsertNode(in: node.element.id, of: noteTitle, with: rootNode.cursorPosition)
+            rootNode.note?.cmdManager.run(command: insertNode, on: rootNode)
             scrollToCursorAtLayout = true
             cleanPersistentFormatter()
         }
@@ -929,6 +929,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                 guard let pastedStr: String = objects?.first as? String else { return }
 
                 let lines = pastedStr.split(whereSeparator: \.isNewline)
+                rootNode.note?.cmdManager.beginGroup(with: "PasteContent")
                 for (idx, line) in lines.enumerated() {
                     let str = String(line)
                     if idx == 0 {
@@ -936,34 +937,37 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                         insertText(string: str, replacementRange: selectedTextRange)
                         enableInputDetector()
                     } else {
-                        guard let node = focusedWidget as? TextNode else { continue }
-                        let element = BeamElement(str)
-                        let newNode = rootNode.nodeFor(element, withParent: node)
-                        let elements = node.element.children
-                        for c in elements {
-                            newNode.element.addChild(c)
-                        }
-                        _ = node.parent?.insert(node: newNode, after: node)
-                        newNode.focus()
+                        guard let node = focusedWidget as? TextNode,
+                              let noteTitle = node.root?.note?.title else { continue }
+                        let insertNode = InsertNode(in: node.element.id, of: noteTitle, with: nil)
+                        rootNode.note?.cmdManager.run(command: insertNode, on: rootNode)
+                        guard let newNode = focusedWidget as? TextNode else { continue }
+                        let bText = BeamText(text: str, attributes: [])
+                        let insertText = InsertText(text: bText, in: newNode.element.id, of: noteTitle, at: 0)
+                        rootNode.note?.cmdManager.run(command: insertText, on: rootNode)
                         scrollToCursorAtLayout = true
                     }
                     guard let node = focusedWidget as? TextNode,
-                          let ranges = node.text.text.urlRangesInside() else { return }
+                          let ranges = node.text.text.urlRangesInside(),
+                          let noteTitle = node.root?.note?.title else { return }
                     ranges.compactMap { Range($0) }.forEach { range in
-                      let linkStr = String(str[range.lowerBound..<range.upperBound])
-                      node.text.setAttributes([.link(linkStr)], to: range)
+                        let linkStr = String(str[range.lowerBound..<range.upperBound])
+                        let formatText = FormattingText(in: node.element.id, of: noteTitle, for: nil, with: .link(linkStr), for: range, isActive: false)
+                        rootNode.note?.cmdManager.run(command: formatText, on: rootNode)
                     }
                 }
+                rootNode.note?.cmdManager.endGroup()
             }
         }
     }
 
     @IBAction func undo(_ sender: Any) {
-        _ = rootNode.cmdManager.undo()
+        _ = rootNode.note?.cmdManager.undo(context: rootNode)
     }
 
     @IBAction func redo(_ sender: Any) {
-        _ = rootNode.cmdManager.redo()
+        _ = rootNode.note?.cmdManager.redo(context: rootNode)
+
     }
 
     // State to detect shortcuts: @ / [[ ]]

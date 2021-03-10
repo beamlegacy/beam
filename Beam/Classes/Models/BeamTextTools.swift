@@ -264,7 +264,6 @@ extension BeamText {
                     if !types.contains(.bold) { types.append(.bold) }
                 case .emphasis:
                     if !types.contains(.italic) { types.append(.italic) }
-                    types.append(.italic)
                 case .strikethrough:
                     if !types.contains(.strikethrough) { types.append(.strikethrough) }
                 default:

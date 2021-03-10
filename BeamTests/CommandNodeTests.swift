@@ -12,185 +12,251 @@ import Nimble
 
 @testable import Beam
 class CommandNodeTests: QuickSpec {
-    var note: BeamNote!
-    var editor: BeamTextEdit!
-    var tree: String!
-    var rootNode: TextRoot!
 
     // swiftlint:disable:next function_body_length
     override func spec() {
-        describe("Indentation Commands") {
-            it("increases indentation") {
-                self.setupTree(alreadyIndented: false)
-                expect(self.rootNode.printTree()).to(equal(self.tree))
+        var editor: BeamTextEdit!
+        var tree: String!
+        var rootNode: TextRoot!
 
-                self.rootNode.focusedWidget = self.rootNode.children[1]
-                self.rootNode.cursorPosition = 0
-                self.rootNode.increaseIndentation()
+        beforeSuite {
+            let note = self.setupTree()
+            let bullet2 = BeamElement("Second bullet")
+            note.addChild(bullet2)
+            let editor = BeamTextEdit(root: note, journalMode: true)
+            rootNode = editor.rootNode!
 
-                let increasedTree = """
-                TestCommands
-                    v - First bullet
-                        - Second bullet
-
-                """
-                expect(self.rootNode.printTree()).to(equal(increasedTree))
-                self.editor.undo(String("Undo"))
-                expect(self.rootNode.printTree()).to(equal(self.tree))
-            }
-
-            it("decreases indentation") {
-                self.setupTree(alreadyIndented: true)
-                expect(self.rootNode.printTree()).to(equal(self.tree))
-
-                self.rootNode.focusedWidget = self.rootNode.children[0].children.first
-                self.rootNode.cursorPosition = 0
-                self.rootNode.decreaseIndentation()
-
-                let decreasedTree = """
-                TestCommands
-                    - First bullet
-                    - Second bullet
-
-                """
-                expect(self.rootNode.printTree()).to(equal(decreasedTree))
-                self.editor.undo(String("Undo"))
-                expect(self.rootNode.printTree()).to(equal(self.tree))
-            }
-        }
-
-        describe("Insert Commands") {
-            it("inserts a node on a not intented tree") {
-                self.setupTree(alreadyIndented: false)
-                expect(self.rootNode.printTree()).to(equal(self.tree))
-
-                self.rootNode.focusedWidget = self.rootNode.children[1]
-                self.rootNode.cursorPosition = 0
-                self.editor.pressEnter(false, false, false)
-                var insertedTree = """
-                TestCommands
-                    - First bullet
-                    - 
-                    - Second bullet
-
-                """
-                expect(self.rootNode.printTree()).to(equal(insertedTree))
-                self.editor.undo(String("Undo"))
-                expect(self.rootNode.printTree()).to(equal(self.tree))
-
-                self.rootNode.cursorPosition = 6
-                self.editor.pressEnter(false, false, false)
-
-                insertedTree = """
-                TestCommands
-                    - First bullet
-                    - Second
-                    -  bullet
-
-                """
-                expect(self.rootNode.printTree()).to(equal(insertedTree))
-                self.editor.undo(String("Undo"))
-                expect(self.rootNode.printTree()).to(equal(self.tree))
-
-                self.rootNode.cursorPosition = 13
-                self.editor.pressEnter(false, false, false)
-
-                insertedTree = """
-                TestCommands
-                    - First bullet
-                    - Second bullet
-                    - 
-
-                """
-
-                expect(self.rootNode.printTree()).to(equal(insertedTree))
-                self.editor.undo(String("Undo"))
-                expect(self.rootNode.printTree()).to(equal(self.tree))
-            }
-        }
-
-        describe("Delete Commands") {
-            it("deletes node backward") {
-                self.setupTree(alreadyIndented: false)
-                expect(self.rootNode.printTree()).to(equal(self.tree))
-
-                self.rootNode.focusedWidget = self.rootNode.children[1]
-                self.rootNode.cursorPosition = 0
-                self.rootNode.deleteBackward()
-
-                let deletedBackwardTree = """
-                TestCommands
-                    - First bulletSecond bullet
-
-                """
-                expect(self.rootNode.printTree()).to(equal(deletedBackwardTree))
-                self.editor.undo(String("Undo"))
-                expect(self.rootNode.printTree()).to(equal(self.tree))
-            }
-            it("deletes node forward") {
-                self.setupTree(alreadyIndented: false)
-                expect(self.rootNode.printTree()).to(equal(self.tree))
-
-                self.rootNode.focusedWidget = self.rootNode.children[0]
-                self.rootNode.cursorPosition = 12
-                self.rootNode.deleteForward()
-
-                let deletedForwardTree = """
-                TestCommands
-                    - First bulletSecond bullet
-
-                """
-                expect(self.rootNode.printTree()).to(equal(deletedForwardTree))
-                self.editor.undo(String("Undo"))
-                expect(self.rootNode.printTree()).to(equal(self.tree))
-            }
-
-            it("deletes a selection of nodes") {
-                self.setupTree(alreadyIndented: false)
-                expect(self.rootNode.printTree()).to(equal(self.tree))
-
-                self.rootNode.focusedWidget = self.rootNode.children[0]
-                self.rootNode.startNodeSelection()
-                self.rootNode.extendNodeSelectionDown()
-                self.rootNode.deleteBackward()
-
-                let deletedTree = """
-                TestCommands
-                    - 
-
-                """
-                expect(self.rootNode.printTree()).to(equal(deletedTree))
-                self.editor.undo(String("Undo"))
-                expect(self.rootNode.printTree()).to(equal(self.tree))
-            }
-        }
-    }
-
-    private func setupTree(alreadyIndented: Bool) {
-        self.note = BeamNote(title: "TestCommands")
-        let bullet1 = BeamElement("First bullet")
-        self.note.addChild(bullet1)
-
-        self.editor = BeamTextEdit(root: self.note, journalMode: true)
-        self.rootNode = self.editor.rootNode
-
-        let bullet2 = BeamElement("Second bullet")
-        if alreadyIndented {
-            (rootNode.children.first as? TextNode)?.element.addChild(bullet2)
-            self.tree = """
-            TestCommands
-                v - First bullet
-                    - Second bullet
-
-            """
-        } else {
-            self.note.addChild(bullet2)
-            self.tree = """
+            let tree = """
             TestCommands
                 - First bullet
                 - Second bullet
 
             """
+
+            expect(rootNode.printTree()).to(equal(tree))
+            BeamNote.clearCancellables()
         }
+
+        describe("Indented tree") {
+            beforeEach {
+                BeamNote.clearCancellables()
+                let note = self.setupTree()
+                let bullet2 = BeamElement("Second bullet")
+
+                editor = BeamTextEdit(root: note, journalMode: true)
+                rootNode = editor.rootNode!
+                (rootNode.children.first as? TextNode)?.element.addChild(bullet2)
+
+                tree = """
+                TestCommands
+                    v - First bullet
+                        - Second bullet
+
+                """
+
+                expect(rootNode.printTree()).to(equal(tree))
+            }
+            afterEach {
+                BeamNote.clearCancellables()
+            }
+            context("Decrease") {
+                it("decreases indentation") {
+
+                    rootNode.focusedWidget = rootNode.children[0].children.first
+                    rootNode.cursorPosition = 0
+                    rootNode.decreaseIndentation()
+
+                    let decreasedTree = """
+                    TestCommands
+                        - First bullet
+                        - Second bullet
+
+                    """
+                    expect(rootNode.printTree()).to(equal(decreasedTree))
+                    editor.undo(String("Undo"))
+                    expect(rootNode.printTree()).to(equal(tree))
+                }
+            }
+
+        }
+
+        describe("Not Intended") {
+            beforeEach {
+                BeamNote.clearCancellables()
+                let note = self.setupTree()
+                let bullet2 = BeamElement("Second bullet")
+                note.addChild(bullet2)
+                editor = BeamTextEdit(root: note, journalMode: true)
+                rootNode = editor.rootNode!
+
+                tree = """
+                TestCommands
+                    - First bullet
+                    - Second bullet
+
+                """
+
+                expect(rootNode.printTree()).to(equal(tree))
+            }
+            afterEach {
+                BeamNote.clearCancellables()
+            }
+            context("Insert & Increase") {
+                it("increases indentation") {
+                    rootNode.focusedWidget = rootNode.children[1]
+                    rootNode.cursorPosition = 0
+                    rootNode.increaseIndentation()
+
+                    let increasedTree = """
+                    TestCommands
+                        v - First bullet
+                            - Second bullet
+
+                    """
+                    expect(rootNode.printTree()).to(equal(increasedTree))
+                    editor.undo(String("Undo"))
+                    expect(rootNode.printTree()).to(equal(tree))
+                }
+
+                it("inserts a node on a not intented tree") {
+                    rootNode.focusedWidget = rootNode.children[1]
+                    rootNode.cursorPosition = 0
+                    editor.pressEnter(false, false, false)
+                    rootNode.focusedWidget = rootNode.children[1]
+
+                    rootNode.insertText(string: "Coucou", replacementRange: rootNode.selectedTextRange)
+
+                    var insertedTree = """
+                    TestCommands
+                        - First bullet
+                        - Coucou
+                        - Second bullet
+
+                    """
+                    expect(rootNode.printTree()).to(equal(insertedTree))
+                    editor.undo(String("Undo"))
+                    editor.undo(String("Undo"))
+
+                    expect(rootNode.printTree()).to(equal(tree))
+
+                    rootNode.cursorPosition = 6
+                    editor.pressEnter(false, false, false)
+
+                    insertedTree = """
+                    TestCommands
+                        - First bullet
+                        - Second
+                        -  bullet
+
+                    """
+                    expect(rootNode.printTree()).to(equal(insertedTree))
+                    editor.undo(String("Undo"))
+                    expect(rootNode.printTree()).to(equal(tree))
+
+                    rootNode.cursorPosition = 13
+                    editor.pressEnter(false, false, false)
+                    rootNode.focusedWidget = rootNode.children[2]
+
+                    rootNode.insertText(string: "Coucou", replacementRange: rootNode.selectedTextRange)
+
+                    insertedTree = """
+                    TestCommands
+                        - First bullet
+                        - Second bullet
+                        - Coucou
+
+                    """
+
+                    expect(rootNode.printTree()).to(equal(insertedTree))
+                    editor.undo(String("Undo"))
+                    editor.undo(String("Undo"))
+                    expect(rootNode.printTree()).to(equal(tree))
+                }
+            }
+        }
+
+        describe("Delete Commands") {
+            beforeEach {
+                BeamNote.clearCancellables()
+                let note = self.setupTree()
+                let bullet2 = BeamElement("Second bullet")
+                note.addChild(bullet2)
+                editor = BeamTextEdit(root: note, journalMode: true)
+                rootNode = editor.rootNode!
+
+                tree = """
+                TestCommands
+                    - First bullet
+                    - Second bullet
+
+                """
+
+                expect(rootNode.printTree()).to(equal(tree))
+            }
+            afterEach {
+                BeamNote.clearCancellables()
+            }
+            context("Not Indented") {
+                it("deletes node backward") {
+                    rootNode.focusedWidget = rootNode.children[1]
+                    rootNode.cursorPosition = 0
+                    rootNode.deleteBackward()
+
+                    let deletedBackwardTree = """
+                    TestCommands
+                        - First bulletSecond bullet
+
+                    """
+                    expect(rootNode.printTree()).to(equal(deletedBackwardTree))
+                    editor.undo(String("Undo"))
+                    expect(rootNode.printTree()).to(equal(tree))
+                }
+                it("deletes node forward") {
+                    rootNode.focusedWidget = rootNode.children[0]
+                    rootNode.cursorPosition = 12
+                    rootNode.deleteForward()
+
+                    let deletedForwardTree = """
+                    TestCommands
+                        - First bulletSecond bullet
+
+                    """
+                    expect(rootNode.printTree()).to(equal(deletedForwardTree))
+                    editor.undo(String("Undo"))
+                    expect(rootNode.printTree()).to(equal(tree))
+                }
+
+                it("deletes a selection of nodes") {
+                    rootNode.focusedWidget = rootNode.children[0]
+                    rootNode.startNodeSelection()
+                    rootNode.extendNodeSelectionDown()
+                    rootNode.deleteBackward()
+                    rootNode.focusedWidget = rootNode.children[0]
+                    rootNode.insertText(string: "Coucou", replacementRange: rootNode.selectedTextRange)
+
+                    let deletedTree = """
+                    TestCommands
+                        - Coucou
+
+                    """
+                    expect(rootNode.printTree()).to(equal(deletedTree))
+                    editor.undo(String("Undo"))
+                    editor.undo(String("Undo"))
+                    expect(rootNode.printTree()).to(equal(tree))
+                }
+
+            }
+        }
+    }
+
+    private func setupTree() -> BeamNote {
+
+        BeamNote.clearCancellables()
+        let note = BeamNote.fetchOrCreate(DocumentManager(), title: "TestCommands")
+
+        let bullet1 = BeamElement("First bullet")
+        note.addChild(bullet1)
+
+        return note
     }
 }

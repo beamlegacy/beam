@@ -7,70 +7,68 @@
 
 import Foundation
 
-protocol Command {
-    var name: String { get set }
-    func run() -> Bool
-    func undo() -> Bool
-    func coalesce(command: Command) -> Bool
-}
-
-class BlockCommand: Command {
+class Command<Context> {
     var name: String
-    var _run: () -> Bool
-    var _undo: () -> Bool
-    var _coalesce: (Command) -> Bool
-
-    init(name: String, run: @escaping () -> Bool, undo: @escaping () -> Bool, coalesce: @escaping (Command) -> Bool) {
-        self.name = name
-        self._run = run
-        self._undo = undo
-        self._coalesce = coalesce
-    }
-
-    func run() -> Bool {
-        return _run()
-    }
-
-    func undo() -> Bool {
-        return _undo()
-    }
-
-    func coalesce(command: Command) -> Bool {
-        return _coalesce(command)
-    }
-}
-
-class GroupCommand: Command {
-    var name: String
-    var commands: [Command] = []
+    func run(context: Context?) -> Bool { return false }
+    func undo(context: Context?) -> Bool { return false }
+    func coalesce(command: Command<Context>) -> Bool { return false }
 
     init(name: String) {
         self.name = name
     }
+}
 
-    func append(command: Command) {
+class BlockCommand<Context>: Command<Context> {
+    var _run: (_ context: Context?) -> Bool
+    var _undo: (_ context: Context?) -> Bool
+    var _coalesce: (Command<Context>) -> Bool
+
+    init(name: String, run: @escaping (Context?) -> Bool, undo: @escaping (Context?) -> Bool, coalesce: @escaping (Command<Context>) -> Bool) {
+        self._run = run
+        self._undo = undo
+        self._coalesce = coalesce
+        super.init(name: name)
+    }
+
+    override func run(context: Context?) -> Bool {
+        return _run(context)
+    }
+
+    override func undo(context: Context?) -> Bool {
+        return _undo(context)
+    }
+
+    override func coalesce(command: Command<Context>) -> Bool {
+        return _coalesce(command)
+    }
+}
+
+class GroupCommand<Context>: Command<Context> {
+    var commands: [Command<Context>] = []
+
+    func append(command: Command<Context>) {
         commands.append(command)
     }
 
-    func run() -> Bool {
+    override func run(context: Context?) -> Bool {
         var running = true
         for c in commands {
-            running = c.run()
+            running = c.run(context: context)
             if !running { break }
         }
         return running
     }
 
-    func undo() -> Bool {
+    override func undo(context: Context?) -> Bool {
         var undoing = true
         for c in commands.reversed() {
-            undoing = c.undo()
+            undoing = c.undo(context: context)
             if !undoing { break }
         }
         return undoing
     }
 
-    func coalesce(command: Command) -> Bool {
+    override func coalesce(command: Command<Context>) -> Bool {
         return false
     }
 
@@ -78,26 +76,26 @@ class GroupCommand: Command {
 
 // MARK: - CommandManager
 
-class CommandManager {
-    private var doneQueue: [Command] = []
-    private var undoneQueue: [Command] = []
+class CommandManager<Context> {
+    private var doneQueue: [Command<Context>] = []
+    private var undoneQueue: [Command<Context>] = []
 
-    private var groupCmd: [GroupCommand] = []
+    private var groupCmd: [GroupCommand<Context>] = []
     private var groupFailed: Bool = false
 
     private var lastCmdDate: Date?
 
-    func run(name: String, run: @escaping () -> Bool, undo: @escaping () -> Bool, coalesce: @escaping (Command) -> Bool) {
-        self.run(command: BlockCommand(name: name, run: run, undo: undo, coalesce: coalesce))
+    func run(name: String, run: @escaping (Context?) -> Bool, undo: @escaping (Context?) -> Bool, coalesce: @escaping (Command<Context>) -> Bool, on context: Context) {
+        self.run(command: BlockCommand(name: name, run: run, undo: undo, coalesce: coalesce), on: context)
     }
 
-    func run(command: Command) {
+    func run(command: Command<Context>, on context: Context) {
         var cmdToRun = command
         if let lastCmd = doneQueue.last, lastCmd.coalesce(command: cmdToRun) {
             doneQueue.removeLast()
             cmdToRun = lastCmd
         }
-        if cmdToRun.run() && !groupFailed {
+        if cmdToRun.run(context: context) && !groupFailed {
             Logger.shared.logDebug("Run: \(cmdToRun.name)")
             guard !groupCmd.isEmpty else {
                 doneQueue.append(cmdToRun)
@@ -105,7 +103,7 @@ class CommandManager {
             }
             groupCmd.last?.append(command: cmdToRun)
         } else {
-            Logger.shared.logDebug("\(cmdToRun) run failed")
+            Logger.shared.logDebug("\(cmdToRun.name) run failed")
             guard groupCmd.isEmpty else {
                 groupFailed = true
                 endGroup()
@@ -114,31 +112,31 @@ class CommandManager {
         }
     }
 
-    func undo() -> Bool {
+    func undo(context: Context?) -> Bool {
         guard !groupCmd.isEmpty else {
             guard let lastCmd = doneQueue.last else { return false }
-            if lastCmd.undo() {
+            if lastCmd.undo(context: context) {
                 Logger.shared.logDebug("Undo: \(lastCmd.name)")
                 undoneQueue.append(lastCmd)
                 doneQueue.removeLast()
                 return true
             }
-            Logger.shared.logDebug("\(lastCmd) undo failed")
+            Logger.shared.logDebug("\(lastCmd.name) undo failed")
             return false
         }
         fatalError("Cannot Undo with a GroupCommand active, it should be ended first.")
     }
 
-    func redo() -> Bool {
+    func redo(context: Context?) -> Bool {
         guard !groupCmd.isEmpty else {
             guard let lastCmd = undoneQueue.last else { return false }
-            if lastCmd.run() {
+            if lastCmd.run(context: context) {
                 Logger.shared.logDebug("Redo: \(lastCmd.name)")
                 doneQueue.append(lastCmd)
                 undoneQueue.removeLast()
                 return true
             }
-            Logger.shared.logDebug("\(lastCmd) redo failed")
+            Logger.shared.logDebug("\(lastCmd.name) redo failed")
             return false
         }
         fatalError("Cannot Redo with a GroupCommand active, it should be ended first.")

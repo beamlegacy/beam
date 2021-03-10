@@ -7,70 +7,87 @@
 
 import Foundation
 
-class InsertNode: Command {
-    var name: String = "InsertNode"
+class InsertNode: TextEditorCommand {
+    static let name: String = "InsertNode"
 
-    let cursorPosition: Int
-    var node: TextNode
-    var newNode: TextNode?
-    var pos: Int
+    var elementId: UUID
+    var noteName: String
+    let cursorPosition: Int?
+    var newElementId: UUID?
+    var text: String?
+    var data: Data?
 
-    init(in node: TextNode, with cursorPosition: Int, at pos: Int) {
+    init(in elementId: UUID, of noteName: String, with cursorPosition: Int?) {
+        self.elementId = elementId
+        self.noteName = noteName
         self.cursorPosition = cursorPosition
-        self.node = node
-        self.pos = pos + 1
+        super.init(name: InsertNode.name)
     }
 
-    func run() -> Bool {
-        if let focussedNode = node.root?.focusedWidget as? TextNode, focussedNode !== self.node {
-            self.node = focussedNode
-        }
-        let element = BeamElement()
-        element.text = node.element.text.extract(range: self.cursorPosition..<node.element.text.count)
-        node.text.removeLast(node.element.text.count - cursorPosition)
+    override func run(context: TextRoot?) -> Bool {
+        guard let root = context,
+              let elementInstance = getElement(for: noteName, and: elementId),
+              let node = context?.nodeFor(elementInstance.element, withParent: root) else { return false }
 
-        var newNode: TextNode
-        if let refNode = node as? LinkedReferenceNode,
-           let proxyElement = refNode.element as? ProxyElement,
-           let actualElement = proxyElement.parent,
-           let actualParent = actualElement.parent {
-            actualParent.addChild(element)
-            let elements = actualElement.children
-            for c in elements {
-                element.addChild(c)
-            }
-            let newProxyElement = ProxyElement(for: element)
-            newNode = node.nodeFor(newProxyElement, withParent: node)
+        let element = decode(data: data) ?? BeamElement()
+        if let cursorPosition = self.cursorPosition {
+            element.text = node.element.text.extract(range: cursorPosition..<node.element.text.count)
+            node.text.removeLast(node.element.text.count - cursorPosition)
+        }
+
+        var insertNode: TextNode
+        if let linkedRefNode = node as? LinkedReferenceNode {
+            guard let newProxyElement = createProxyElement(for: linkedRefNode, and: element) else { return false }
+            self.newElementId = newProxyElement.id
+            insertNode = node.nodeFor(newProxyElement, withParent: root)
         } else {
-            newNode = node.nodeFor(element, withParent: node)
-            let elements = node.element.children
-            for c in elements {
-                newNode.element.addChild(c)
-            }
+            guard let newNode = context?.nodeFor(element, withParent: root) else { return false }
+            self.newElementId = element.id
+            insertNode = newNode
         }
 
-        guard let result = node.parent?.insert(node: newNode, at: self.pos) else { return false }
-        newNode.focus(cursorPosition: newNode.element.text.count)
-        self.newNode = newNode
+        guard let result = node.parent?.insert(node: insertNode, after: node) else { return false }
+        context?.focus(widget: insertNode)
         return result
     }
 
-    func undo() -> Bool {
-        guard let newNode = self.newNode else { return false }
+    private func createProxyElement(for linkedRefNode: LinkedReferenceNode, and element: BeamElement) -> ProxyElement? {
+        guard let proxyElement = linkedRefNode.element as? ProxyElement,
+              let actualElement = proxyElement.parent,
+              let actualParent = actualElement.parent else { return nil }
 
-        if let prevVisible = newNode.previousVisible() as? TextNode {
-            for c in newNode.element.children {
-                prevVisible.element.addChild(c)
-            }
+        actualParent.addChild(element)
+        let elements = actualElement.children
+        for c in elements {
+            element.addChild(c)
         }
+        return ProxyElement(for: element)
+    }
+
+    override func undo(context: TextRoot?) -> Bool {
+        guard let root = context,
+              let newElementId = self.newElementId,
+              let newElementInstance = getElement(for: noteName, and: newElementId),
+              let newNode = context?.nodeFor(newElementInstance.element, withParent: root),
+              let elementInstance = getElement(for: noteName, and: elementId),
+              let node = context?.nodeFor(elementInstance.element, withParent: root) else { return false }
+
+        for c in newNode.element.children {
+            node.element.addChild(c)
+        }
+        if self.cursorPosition != nil {
+            let remainingText = newNode.element.text.extract(range: 0..<newNode.text.count)
+            node.text.append(remainingText)
+        }
+
+        data = encode(element: newElementInstance.element)
+
         newNode.delete()
-        let remainingText = newNode.element.text.extract(range: 0..<newNode.text.count)
-        node.text.append(remainingText)
-        node.focus(cursorPosition: self.cursorPosition)
+        context?.focus(widget: node, cursorPosition: self.cursorPosition)
         return true
     }
 
-    func coalesce(command: Command) -> Bool {
+    override func coalesce(command: Command<TextRoot>) -> Bool {
         return false
     }
 }

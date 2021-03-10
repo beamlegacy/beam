@@ -7,79 +7,86 @@
 
 import Foundation
 
-class FormattingText: Command {
-    var name: String = "FormattingText"
+class FormattingText: TextEditorCommand {
+    static let name: String = "FormattingText"
 
-    var node: TextNode
-    var element: BeamElement
+    var elementId: UUID
+    var noteName: String
     var oldKind: ElementKind?
     let newKind: ElementKind?
     let newAttribute: BeamText.Attribute?
     let range: Range<Int>?
     var isActive: Bool
 
-    init(of node: TextNode, of kind: ElementKind?, with attribute: BeamText.Attribute?, for range: Range<Int>?, isActive: Bool) {
-        self.node = node
-        self.element = node.element
+    init(in elementId: UUID, of noteName: String, for kind: ElementKind?, with attribute: BeamText.Attribute?, for range: Range<Int>?, isActive: Bool) {
+        self.elementId = elementId
+        self.noteName = noteName
         self.newKind = kind
-        if newKind != nil {
-            self.oldKind = node.elementKind
-        }
         self.newAttribute = attribute
         self.range = range
         self.isActive = isActive
+        super.init(name: FormattingText.name)
+        saveOldKind()
     }
 
-    func run() -> Bool {
-        var result: Bool = true
-        let newNode = node.nodeFor(self.element, withParent: node)
+    private func saveOldKind() {
+        guard newKind != nil,
+              let elementInstance = getElement(for: noteName, and: elementId) else { return }
+        self.oldKind = elementInstance.element.kind
+    }
 
+    override func run(context: TextRoot?) -> Bool {
+        guard let root = context,
+              let elementInstance = getElement(for: noteName, and: elementId),
+              let node = context?.nodeFor(elementInstance.element, withParent: root) else { return false }
+
+        var result = true
         if let newKind = self.newKind {
-            newNode.element.kind = isActive ? .bullet : newKind
+            node.element.kind = isActive ? .bullet : newKind
         } else {
-            result = runUpdateAttributes(for: newNode)
+            result = runUpdateAttributes(for: node, context: context)
         }
         self.isActive = !isActive
-        self.node = newNode
-        self.element = newNode.element
-        newNode.root?.editor.detectFormatterType()
+        context?.editor.detectFormatterType()
         return result
     }
 
-    private func runUpdateAttributes(for newNode: TextNode) -> Bool {
+    private func runUpdateAttributes(for node: TextNode, context: TextRoot?) -> Bool {
         guard let newAttribute = self.newAttribute else { return false }
         if let range = self.range {
             if isActive {
-                newNode.text.removeAttributes([newAttribute], from: range)
+                node.text.removeAttributes([newAttribute], from: range)
             } else {
-                newNode.text.addAttributes([newAttribute], to: range)
+                node.text.addAttributes([newAttribute], to: range)
             }
         }
 
-        if let index = newNode.root?.state.attributes.firstIndex(of: newAttribute),
-           ((newNode.root?.state.attributes.contains(newAttribute)) != nil), isActive {
-            newNode.root?.state.attributes.remove(at: index)
+        if let index = context?.state.attributes.firstIndex(of: newAttribute),
+           ((context?.state.attributes.contains(newAttribute)) != nil), isActive {
+            context?.state.attributes.remove(at: index)
         } else {
-            newNode.root?.state.attributes.append(newAttribute)
+            context?.state.attributes.append(newAttribute)
         }
         return true
     }
 
-    func undo() -> Bool {
-        var result: Bool = true
-        let newNode = node.nodeFor(self.element, withParent: node)
+    override func undo(context: TextRoot?) -> Bool {
+        guard let root = context,
+              let elementInstance = getElement(for: noteName, and: elementId),
+              let node = context?.nodeFor(elementInstance.element, withParent: root) else { return false }
 
+        var result: Bool = true
         if let oldKind = self.oldKind, self.newKind != nil {
-            newNode.element.kind = oldKind
+            node.element.kind = oldKind
         } else {
-            result = runUpdateAttributes(for: newNode)
+            result = runUpdateAttributes(for: node, context: context)
         }
         self.isActive = !isActive
-        newNode.root?.editor.detectFormatterType()
+        context?.editor.detectFormatterType()
         return result
     }
 
-    func coalesce(command: Command) -> Bool {
+    override func coalesce(command: Command<TextRoot>) -> Bool {
         return false
     }
 }

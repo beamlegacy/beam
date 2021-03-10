@@ -7,24 +7,36 @@
 
 import Foundation
 
-class DeleteText: Command {
-    var name: String = "DeleteText"
+class DeleteText: TextEditorCommand {
+    static let name: String = "DeleteText"
 
-    var oldText: BeamText
-    var node: TextNode
+    var elementId: UUID
+    var noteName: String
     var cursorPosition: Int
     var range: Range<Int>
     let backward: Bool
+    var oldText: BeamText?
 
-    init(in node: TextNode, at cursorPosition: Int, for range: Range<Int>, backward: Bool = true) {
-        self.node = node
+    init(in elementId: UUID, of noteName: String, at cursorPosition: Int, for range: Range<Int>, backward: Bool = true) {
+        self.elementId = elementId
+        self.noteName = noteName
         self.cursorPosition = cursorPosition
         self.range = range
-        self.oldText = node.element.text
         self.backward = backward
+        super.init(name: DeleteText.name)
+        saveOldText()
     }
 
-    func run() -> Bool {
+    private func saveOldText() {
+        guard let elementInstance = getElement(for: noteName, and: elementId) else { return }
+        self.oldText = elementInstance.element.text
+    }
+
+    override func run(context: TextRoot?) -> Bool {
+        guard let root = context,
+              let elementInstance = getElement(for: noteName, and: elementId),
+              let node = context?.nodeFor(elementInstance.element, withParent: root) else { return false }
+
         var newPos: Int
         if backward {
             newPos = node.element.text.position(before: range.lowerBound)
@@ -33,30 +45,38 @@ class DeleteText: Command {
         }
         let count = range.count == 0 ? 1 : range.count + 1
         node.element.text.remove(count: count, at: newPos)
-        node.focus(cursorPosition: newPos)
-        node.root?.cancelSelection()
+        context?.focus(widget: node, cursorPosition: newPos)
+        context?.editor.detectFormatterType()
+        context?.cancelSelection()
         return true
     }
 
-    func undo() -> Bool {
-        if let focussedNode = node.root?.focusedWidget as? TextNode, focussedNode !== self.node {
-            self.node = focussedNode
-        }
+    override func undo(context: TextRoot?) -> Bool {
+        guard let root = context,
+              let elementInstance = getElement(for: noteName, and: elementId),
+              let node = context?.nodeFor(elementInstance.element, withParent: root),
+              let oldText = self.oldText else { return false }
+
         node.element.text.replaceSubrange(node.element.text.wholeRange, with: oldText)
-        node.focus(cursorPosition: range.upperBound)
+        context?.focus(widget: node, cursorPosition: range.upperBound)
+        context?.state.selectedTextRange = range.lowerBound - 1..<range.upperBound
+        context?.editor.detectFormatterType()
         return true
     }
 
-    func coalesce(command: Command) -> Bool {
+    override func coalesce(command: Command<TextRoot>) -> Bool {
         guard let deleteText = command as? DeleteText,
-              deleteText.backward == backward else { return false }
+              deleteText.backward == backward,
+              deleteText.elementId == elementId,
+              let elementInstance = getElement(for: noteName, and: elementId),
+              let oldText = self.oldText else { return false }
 
         if backward && deleteText.range.lowerBound == range.lowerBound - 1 {
             self.range = deleteText.range.lowerBound..<range.upperBound
         } else if range.lowerBound == deleteText.range.lowerBound {
             self.range = range.lowerBound..<range.upperBound + 1
         }
-        node.element.text.replaceSubrange(node.element.text.wholeRange, with: oldText)
+        elementInstance.element.text.replaceSubrange(elementInstance.element.text.wholeRange, with: oldText)
         return true
     }
 }
