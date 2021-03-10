@@ -14,11 +14,11 @@ struct ModeView: View {
 
     var body: some View {
         GeometryReader { geometry in
-            VStack(spacing: 0) {               
-                OmniBar()
+            VStack(spacing: 0) {
+                OmniBar(containerGeometry: geometry)
                     .padding(.leading, state.isFullScreen ? 0 : windowControlsWidth)
                     .zIndex(10)
-                    .frame(height: 52)
+                    .frame(height: 52, alignment: .top)
                 ZStack {
                     switch state.mode {
                     case .web:
