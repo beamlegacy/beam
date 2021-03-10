@@ -135,7 +135,7 @@ extension BeamText {
         let extentBuffer = UnsafeMutablePointer<ImageRunStruct>.allocate(capacity: 1)
         extentBuffer.initialize(to: ImageRunStruct(ascent: image.size.height, descent: 0, width: image.size.width, image: "editor-url"))
 
-        var callbacks = CTRunDelegateCallbacks(version: kCTRunDelegateVersion1, dealloc: { (pointer) in
+        var callbacks = CTRunDelegateCallbacks(version: kCTRunDelegateVersion1, dealloc: { _ in
         }, getAscent: { (pointer) -> CGFloat in
             let d = pointer.assumingMemoryBound(to: ImageRunStruct.self)
             return d.pointee.ascent

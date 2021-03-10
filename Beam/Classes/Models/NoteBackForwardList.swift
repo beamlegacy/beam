@@ -12,6 +12,7 @@ class NoteBackForwardList: Codable {
         case note(BeamNote)
         case journal
 
+        //swiftlint:disable:next nesting
         enum CodingKeys: String, CodingKey {
             case mode
             case note

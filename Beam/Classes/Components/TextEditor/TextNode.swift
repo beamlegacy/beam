@@ -236,10 +236,6 @@ public class TextNode: Widget {
         setAccessibilityRole(.textArea)
     }
 
-
-    deinit {
-    }
-
     // MARK: - Setup UI
 
     override public func draw(in context: CGContext) {

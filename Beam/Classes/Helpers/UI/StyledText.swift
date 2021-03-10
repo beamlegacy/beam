@@ -5,7 +5,6 @@
 //  Copyright © 2019 Rob Napier. All rights reserved.
 //  Credit: https://gist.github.com/rnapier/a37cdbf4aabb1e4a6b40436efc2c3114
 
-
 import SwiftUI
 
 public struct TextStyle {
@@ -42,9 +41,7 @@ public struct StyledText {
 
     public func style<S>(_ style: TextStyle,
                          ranges: (String) -> S) -> StyledText
-        where S: Sequence, S.Element == Range<String.Index>
-    {
-
+        where S: Sequence, S.Element == Range<String.Index> {
         // Remember this is a value type. If you want to avoid this copy,
         // then you need to implement copy-on-write.
         let newAttributedString = NSMutableAttributedString(attributedString: attributedString)
@@ -82,10 +79,11 @@ extension StyledText: View {
         var text: Text = Text(verbatim: "")
         attributedString
             .enumerateAttributes(in: NSRange(location: 0, length: attributedString.length),
-                                 options: [])
-            { (attributes, range, _) in
+                                 options: []) { (attributes, range, _) in
                 let string = attributedString.attributedSubstring(from: range).string
+                // swiftlint:disable:next force_cast
                 let modifiers = attributes.values.map { $0 as! TextStyle }
+                // swiftlint:disable:next shorthand_operator
                 text = text + modifiers.reduce(Text(verbatim: string)) { segment, style in
                     style.apply(segment)
                 }
@@ -93,4 +91,3 @@ extension StyledText: View {
         return text
     }
 }
-

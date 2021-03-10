@@ -4,6 +4,7 @@
 //
 //  Created by Sebastien Metrot on 27/09/2020.
 //
+// swiftlint:disable file_length
 
 import Foundation
 import AppKit
@@ -142,7 +143,7 @@ public class TextLine {
     }
 
     var runs: [CTRun] {
-        //swiftlint:disable:next force_cast
+        // swiftlint:disable:next force_cast
         CTLineGetGlyphRuns(ctLine) as! [CTRun]
     }
 
@@ -174,6 +175,7 @@ public class TextLine {
                     context.strokePath()
                 }
                 if let delegateAttribute = attributes[kCTRunDelegateAttributeName as NSAttributedString.Key] {
+                    // swiftlint:disable:next force_cast
                     let delegate: CTRunDelegate = delegateAttribute as! CTRunDelegate
                     let imageRunRef = CTRunDelegateGetRefCon(delegate)
                     let imageRunPtr = imageRunRef.assumingMemoryBound(to: ImageRunStruct.self)

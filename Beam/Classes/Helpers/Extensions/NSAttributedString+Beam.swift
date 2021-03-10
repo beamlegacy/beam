@@ -33,7 +33,7 @@ extension NSMutableAttributedString {
     }
 }
 
-class InlineTextAttachment : NSTextAttachment {
+class InlineTextAttachment: NSTextAttachment {
     var fontDescender: CGFloat = 0
 
     override func attachmentBounds(for textContainer: NSTextContainer?, proposedLineFragment lineFrag: NSRect, glyphPosition position: CGPoint, characterIndex charIndex: Int) -> NSRect {

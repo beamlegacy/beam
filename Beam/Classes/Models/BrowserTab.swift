@@ -28,6 +28,7 @@ class FullScreenWKWebView: WKWebView {
     }
 }
 
+// swiftlint:disable:next type_body_length
 class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler, Codable {
     var id: UUID
 
