@@ -153,13 +153,15 @@ class DeleteNode: TextEditorCommand {
         for c in previousNode.element.children {
             newLastNode.element.addChild(c)
         }
+        var result = true
         if let indexInParent = self.indexInParent, isIndented {
             previousNode.element.insert(newLastNode.element, at: indexInParent)
         } else {
-            guard newLastNode.parent?.insert(node: newLastNode, after: previousNode) != nil else { return false }
+            guard let res = newLastNode.parent?.insert(node: newLastNode, after: previousNode) else { return false }
+            result = res
         }
         context?.focus(widget: newLastNode)
-        return true
+        return result
     }
 
     private func undoForward(_ context: TextRoot?) -> Bool {
@@ -175,12 +177,14 @@ class DeleteNode: TextEditorCommand {
             deletedNode.element.addChild(c)
         }
 
+        var result = true
         if let indexInParent = self.indexInParent, isIndented {
             node.element.insert(deletedNode.element, at: indexInParent)
         } else {
-            guard node.parent?.insert(node: deletedNode, after: node) != nil else { return false }
+            guard let res = node.parent?.insert(node: deletedNode, after: node) else { return false }
+            result = res
         }
-        return true
+        return result
     }
 
     private func undoDelete(_ context: TextRoot?) -> Bool {
