@@ -279,6 +279,7 @@
 		96F93618258CFDD2006D8E53 /* BeamText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F93617258CFDD2006D8E53 /* BeamText.swift */; };
 		96F936632590FA59006D8E53 /* BTextEdit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F936622590FA59006D8E53 /* BTextEdit.swift */; };
 		96FD761B25B1C43500B04ED3 /* BrowsingNodeWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96FD761A25B1C43500B04ED3 /* BrowsingNodeWidget.swift */; };
+		A01030AA25F149EA00D740C5 /* TextEditorCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = A01030A925F149EA00D740C5 /* TextEditorCommand.swift */; };
 		A01290B725E5B8DD0063F3A0 /* DeleteNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = A01290B625E5B8DD0063F3A0 /* DeleteNode.swift */; };
 		A0137B3525B6DFE100E65208 /* CommandManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0137B3425B6DFE100E65208 /* CommandManager.swift */; };
 		A01950AD25B838810025C5FD /* CommandManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A06DF52525B7608000E2CB62 /* CommandManagerTests.swift */; };
@@ -768,6 +769,7 @@
 		96F93617258CFDD2006D8E53 /* BeamText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamText.swift; sourceTree = "<group>"; };
 		96F936622590FA59006D8E53 /* BTextEdit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BTextEdit.swift; sourceTree = "<group>"; };
 		96FD761A25B1C43500B04ED3 /* BrowsingNodeWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowsingNodeWidget.swift; sourceTree = "<group>"; };
+		A01030A925F149EA00D740C5 /* TextEditorCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEditorCommand.swift; sourceTree = "<group>"; };
 		A01290B625E5B8DD0063F3A0 /* DeleteNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteNode.swift; sourceTree = "<group>"; };
 		A0137B3425B6DFE100E65208 /* CommandManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandManager.swift; sourceTree = "<group>"; usesTabs = 0; };
 		A0208F8125D6BB1C00CA054C /* AppDelegate+BeamTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+BeamTests.swift"; sourceTree = "<group>"; };
@@ -1813,6 +1815,7 @@
 				A0EE0B8E25E68EF3001F9D65 /* InsertEmptyNode.swift */,
 				A0973A1B25E53D5A008E3441 /* IncreaseIndentation.swift */,
 				A0265BA125E5A93C00CBF88C /* DecreaseIndentation.swift */,
+				A01030A925F149EA00D740C5 /* TextEditorCommand.swift */,
 			);
 			path = Commands;
 			sourceTree = "<group>";
@@ -2333,6 +2336,7 @@
 				96C9AAB92593BB67007D3D98 /* Widget.swift in Sources */,
 				524B856D25D2DD0700BB7C7A /* NSMAnagedObjectContext+performAndWait.swift in Sources */,
 				418172B625811AAA00317ED8 /* FrameAnimation.swift in Sources */,
+				A01030AA25F149EA00D740C5 /* TextEditorCommand.swift in Sources */,
 				418172042581107C00317ED8 /* TemporaryFile.swift in Sources */,
 				523FF66125C31D8800B4BD6E /* Data+String.swift in Sources */,
 				418172AA25811A3A00317ED8 /* BeamTextField.swift in Sources */,

@@ -12,30 +12,52 @@ import Nimble
 
 @testable import Beam
 class CommandsTextTests: QuickSpec {
-    var note: BeamNote!
-    var editor: BeamTextEdit!
-    var tree: String!
-    var rootNode: TextRoot!
 
     // swiftlint:disable:next function_body_length
     override func spec() {
+        var editor: BeamTextEdit!
+        var tree: String!
+        var rootNode: TextRoot!
+
         beforeSuite {
             // Setup a simple node tree
-            self.setupAndResetTree()
-            expect(self.rootNode.printTree()).to(equal(self.tree))
+            let note = self.setupAndResetTree()
+            let editor = BeamTextEdit(root: note, journalMode: true)
+            rootNode = editor.rootNode!
+
+            tree = """
+            TestEditCommands
+                - First bullet
+                - Second bullet
+
+            """
+            expect(rootNode.printTree()).to(equal(tree))
+            BeamNote.clearCancellables()
         }
 
         describe("TextNode Editing Commands") {
             beforeEach {
-                self.rootNode.focusedWidget = self.rootNode.children.first
-                self.rootNode.cursorPosition = 12
-            }
-            afterEach {
-                self.setupAndResetTree()
+                BeamNote.clearCancellables()
+
+                let note = self.setupAndResetTree()
+                editor = BeamTextEdit(root: note, journalMode: true)
+                rootNode = editor.rootNode!
+
+                tree = """
+                TestEditCommands
+                    - First bullet
+                    - Second bullet
+
+                """
+                expect(rootNode.printTree()).to(equal(tree))
+
+
+                rootNode.focusedWidget = rootNode.children.first
+                rootNode.cursorPosition = 12
             }
             context("in bullet") {
                 it("inserts text") {
-                    self.rootNode.insertText(string: " Hello beam !", replacementRange: self.rootNode.selectedTextRange)
+                    rootNode.insertText(string: " Hello beam !", replacementRange: rootNode.selectedTextRange)
 
                     let editedTree = """
                     TestEditCommands
@@ -43,20 +65,20 @@ class CommandsTextTests: QuickSpec {
                         - Second bullet
 
                     """
-                    expect(self.rootNode.printTree()).to(equal(editedTree))
-                    expect(self.rootNode.cursorPosition).to(equal(25))
+                    expect(rootNode.printTree()).to(equal(editedTree))
+                    expect(rootNode.cursorPosition).to(equal(25))
 
-                    self.editor.undo(String("Undo"))
-                    expect(self.rootNode.printTree()).to(equal(self.tree))
-                    expect(self.rootNode.cursorPosition).to(equal(12))
+                    editor.undo(String("Undo"))
+                    expect(rootNode.printTree()).to(equal(tree))
+                    expect(rootNode.cursorPosition).to(equal(12))
 
-                    self.editor.redo(String("Redo"))
-                    expect(self.rootNode.printTree()).to(equal(editedTree))
-                    expect(self.rootNode.cursorPosition).to(equal(25))
+                    editor.redo(String("Redo"))
+                    expect(rootNode.printTree()).to(equal(editedTree))
+                    expect(rootNode.cursorPosition).to(equal(25))
 
-                    self.rootNode.cursorPosition = 13
-                    self.rootNode.deleteBackward()
-                    self.rootNode.insertNewline()
+                    rootNode.cursorPosition = 13
+                    rootNode.deleteBackward()
+                    rootNode.insertNewline()
 
                     let newEditedTree = """
                     TestEditCommands
@@ -65,27 +87,29 @@ class CommandsTextTests: QuickSpec {
                         - Second bullet
 
                     """
-                    expect(self.rootNode.printTree()).to(equal(newEditedTree))
-                    expect(self.rootNode.cursorPosition).to(equal(0))
+                    expect(rootNode.printTree()).to(equal(newEditedTree))
+                    expect(rootNode.cursorPosition).to(equal(0))
 
                     for _ in 0..<2 {
-                        self.editor.undo(String("Undo"))
+                        editor.undo(String("Undo"))
                     }
 
-                    expect(self.rootNode.printTree()).to(equal(editedTree))
-                    self.rootNode.cursorPosition = 13
+                    expect(rootNode.printTree()).to(equal(editedTree))
+                    rootNode.cursorPosition = 13
 
                     for _ in 0..<2 {
-                        self.editor.redo(String("Redo"))
+                        editor.redo(String("Redo"))
                     }
 
-                    expect(self.rootNode.printTree()).to(equal(newEditedTree))
-                    expect(self.rootNode.cursorPosition).to(equal(0))
+                    expect(rootNode.printTree()).to(equal(newEditedTree))
+                    expect(rootNode.cursorPosition).to(equal(0))
+                    BeamNote.clearCancellables()
+
                 }
 
                 it("deletes text") {
                     for _ in 0..<5 {
-                        self.rootNode.deleteBackward()
+                        rootNode.deleteBackward()
                     }
 
                     let editedTree = """
@@ -94,21 +118,23 @@ class CommandsTextTests: QuickSpec {
                         - Second bullet
 
                     """
-                    expect(self.rootNode.printTree()).to(equal(editedTree))
-                    expect(self.rootNode.cursorPosition).to(equal(7))
+                    expect(rootNode.printTree()).to(equal(editedTree))
+                    expect(rootNode.cursorPosition).to(equal(7))
 
-                    self.editor.undo(String("Undo"))
-                    expect(self.rootNode.printTree()).to(equal(self.tree))
-                    expect(self.rootNode.cursorPosition).to(equal(12))
+                    editor.undo(String("Undo"))
+                    expect(rootNode.printTree()).to(equal(tree))
+                    expect(rootNode.cursorPosition).to(equal(12))
 
-                    self.editor.redo(String("Redo"))
-                    expect(self.rootNode.printTree()).to(equal(editedTree))
-                    expect(self.rootNode.cursorPosition).to(equal(7))
+                    editor.redo(String("Redo"))
+                    expect(rootNode.printTree()).to(equal(editedTree))
+                    expect(rootNode.cursorPosition).to(equal(7))
+                    BeamNote.clearCancellables()
+
                 }
 
                 it("deletes text selection") {
-                    self.rootNode.selectedTextRange = 5..<12
-                    self.rootNode.deleteBackward()
+                    rootNode.selectedTextRange = 5..<12
+                    rootNode.deleteBackward()
 
                     let editedTree = """
                     TestEditCommands
@@ -116,35 +142,37 @@ class CommandsTextTests: QuickSpec {
                         - Second bullet
 
                     """
-                    expect(self.rootNode.printTree()).to(equal(editedTree))
-                    expect(self.rootNode.cursorPosition).to(equal(5))
-                    expect(self.rootNode.selectedTextRange.isEmpty).to(equal(true))
+                    expect(rootNode.printTree()).to(equal(editedTree))
+                    expect(rootNode.cursorPosition).to(equal(5))
+                    expect(rootNode.selectedTextRange.isEmpty).to(equal(true))
 
-                    self.editor.undo(String("Undo"))
-                    expect(self.rootNode.printTree()).to(equal(self.tree))
-                    expect(self.rootNode.cursorPosition).to(equal(12))
-                    expect(self.rootNode.selectedTextRange.lowerBound).to(equal(5))
-                    expect(self.rootNode.selectedTextRange.upperBound).to(equal(12))
+                    editor.undo(String("Undo"))
+                    expect(rootNode.printTree()).to(equal(tree))
+                    expect(rootNode.cursorPosition).to(equal(12))
+                    expect(rootNode.selectedTextRange.lowerBound).to(equal(5))
+                    expect(rootNode.selectedTextRange.upperBound).to(equal(12))
 
-                    self.editor.redo(String("Redo"))
-                    expect(self.rootNode.printTree()).to(equal(editedTree))
-                    expect(self.rootNode.cursorPosition).to(equal((5)))
-                    expect(self.rootNode.selectedTextRange.isEmpty).to(equal(true))
+                    editor.redo(String("Redo"))
+                    expect(rootNode.printTree()).to(equal(editedTree))
+                    expect(rootNode.cursorPosition).to(equal((5)))
+                    expect(rootNode.selectedTextRange.isEmpty).to(equal(true))
+                    BeamNote.clearCancellables()
+
                 }
 
                 it("inserts and delete text") {
-                    self.rootNode.insertText(string: " Hemm", replacementRange: self.rootNode.selectedTextRange)
+                    rootNode.insertText(string: " Hemm", replacementRange: rootNode.selectedTextRange)
                     let editedTree = """
                     TestEditCommands
                         - First bullet Hemm
                         - Second bullet
 
                     """
-                    expect(self.rootNode.printTree()).to(equal(editedTree))
-                    expect(self.rootNode.cursorPosition).to(equal(17))
+                    expect(rootNode.printTree()).to(equal(editedTree))
+                    expect(rootNode.cursorPosition).to(equal(17))
 
                     for _ in 0..<2 {
-                        self.rootNode.deleteBackward()
+                        rootNode.deleteBackward()
                     }
                     let deletedEditedTree = """
                     TestEditCommands
@@ -152,47 +180,43 @@ class CommandsTextTests: QuickSpec {
                         - Second bullet
 
                     """
-                    expect(self.rootNode.printTree()).to(equal(deletedEditedTree))
-                    expect(self.rootNode.cursorPosition).to(equal(15))
+                    expect(rootNode.printTree()).to(equal(deletedEditedTree))
+                    expect(rootNode.cursorPosition).to(equal(15))
 
-                    self.rootNode.insertText(string: "llo", replacementRange: self.rootNode.selectedTextRange)
+                    rootNode.insertText(string: "llo", replacementRange: rootNode.selectedTextRange)
                     let insertedEditedTree = """
                     TestEditCommands
                         - First bullet Hello
                         - Second bullet
 
                     """
-                    expect(self.rootNode.printTree()).to(equal(insertedEditedTree))
-                    expect(self.rootNode.cursorPosition).to(equal(18))
+                    expect(rootNode.printTree()).to(equal(insertedEditedTree))
+                    expect(rootNode.cursorPosition).to(equal(18))
 
-                    self.editor.undo(String("Undo"))
-                    expect(self.rootNode.printTree()).to(equal(deletedEditedTree))
-                    expect(self.rootNode.cursorPosition).to(equal(15))
+                    editor.undo(String("Undo"))
+                    expect(rootNode.printTree()).to(equal(deletedEditedTree))
+                    expect(rootNode.cursorPosition).to(equal(15))
 
-                    self.editor.redo(String("Redo"))
-                    expect(self.rootNode.printTree()).to(equal(insertedEditedTree))
-                    expect(self.rootNode.cursorPosition).to(equal(18))
+                    editor.redo(String("Redo"))
+                    expect(rootNode.printTree()).to(equal(insertedEditedTree))
+                    expect(rootNode.cursorPosition).to(equal(18))
+                    BeamNote.clearCancellables()
+
                 }
             }
         }
     }
 
-    private func setupAndResetTree() {
+    private func setupAndResetTree() -> BeamNote {
         // Setup a simple node tree
-        self.note = BeamNote(title: "TestEditCommands")
+        BeamNote.clearCancellables()
+        let note = BeamNote.fetchOrCreate(DocumentManager(), title: "TestEditCommands")
+
         let bullet1 = BeamElement("First bullet")
-        self.note.addChild(bullet1)
+        note.addChild(bullet1)
         let bullet2 = BeamElement("Second bullet")
-        self.note.addChild(bullet2)
+        note.addChild(bullet2)
 
-        self.editor = BeamTextEdit(root: self.note, journalMode: true)
-        self.rootNode = self.editor.rootNode
-
-        self.tree = """
-        TestEditCommands
-            - First bullet
-            - Second bullet
-
-        """
+        return note
     }
 }

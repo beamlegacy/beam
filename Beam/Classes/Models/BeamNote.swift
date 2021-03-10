@@ -37,6 +37,8 @@ class BeamNote: BeamElement {
         return self
     }
 
+    var cmdManager = CommandManager<TextRoot>()
+
     init(title: String) {
         self.title = title
         super.init()

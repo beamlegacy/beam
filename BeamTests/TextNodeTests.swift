@@ -51,7 +51,7 @@ class TextNodeTests: XCTestCase {
     }
 
     func createMiniArborescence(title: String) -> BeamNote {
-        let note = BeamNote(title: title)
+        let note = BeamNote.fetchOrCreate(DocumentManager(), title: title)
         let bullet1 = BeamElement("bullet1")
         note.addChild(bullet1)
         let bullet11 = BeamElement("bullet11")
@@ -103,6 +103,7 @@ class TextNodeTests: XCTestCase {
         """
 
         XCTAssertEqual(str1, root.printTree())
+        BeamNote.clearCancellables()
     }
 
     func testFoldNode() {
@@ -126,6 +127,7 @@ class TextNodeTests: XCTestCase {
         """
 
         XCTAssertEqual(str1, root.printTree())
+        BeamNote.clearCancellables()
     }
 
     func testRemoveNode() {
@@ -149,6 +151,7 @@ class TextNodeTests: XCTestCase {
 
         XCTAssertEqual(str1, root.printTree())
         validateRootWithNote(root: root, note: note)
+        BeamNote.clearCancellables()
     }
 
     func testAddNodeToRoot() {
@@ -176,6 +179,7 @@ class TextNodeTests: XCTestCase {
 
         XCTAssertEqual(str1, root.printTree())
         validateRootWithNote(root: root, note: note)
+        BeamNote.clearCancellables()
     }
 
     func testInsertNodeIntoRoot() {
@@ -202,6 +206,7 @@ class TextNodeTests: XCTestCase {
 
         XCTAssertEqual(str1, root.printTree())
         validateRootWithNote(root: root, note: note)
+        BeamNote.clearCancellables()
     }
 
     func testAddNodeToBullet() {
@@ -228,6 +233,7 @@ class TextNodeTests: XCTestCase {
 
         XCTAssertEqual(str1, root.printTree())
         validateRootWithNote(root: root, note: note)
+        BeamNote.clearCancellables()
     }
 
     func testInsertNodeIntoBullet() {
@@ -255,6 +261,7 @@ class TextNodeTests: XCTestCase {
 
         XCTAssertEqual(str1, root.printTree())
         validateRootWithNote(root: root, note: note)
+        BeamNote.clearCancellables()
     }
 
     func testAddTreeToBullet() {
@@ -285,6 +292,7 @@ class TextNodeTests: XCTestCase {
 
         XCTAssertEqual(str1, root.printTree())
         validateRootWithNote(root: root, note: note)
+        BeamNote.clearCancellables()
     }
 
     func testInsertTreeIntoBullet() {
@@ -315,6 +323,7 @@ class TextNodeTests: XCTestCase {
 
         XCTAssertEqual(str1, root.printTree())
         validateRootWithNote(root: root, note: note)
+        BeamNote.clearCancellables()
     }
 
     func testRemoveBulletFromNote() {
@@ -338,6 +347,7 @@ class TextNodeTests: XCTestCase {
 
         XCTAssertEqual(str1, root.printTree())
         validateRootWithNote(root: root, note: note)
+        BeamNote.clearCancellables()
     }
 
     func testRemoveBulletFromBullet() {
@@ -363,6 +373,7 @@ class TextNodeTests: XCTestCase {
 
         XCTAssertEqual(str1, root.printTree())
         validateRootWithNote(root: root, note: note)
+        BeamNote.clearCancellables()
     }
 
     // swiftlint:disable:next function_body_length
@@ -419,6 +430,7 @@ class TextNodeTests: XCTestCase {
         XCTAssert(root.selectedTextRange.isEmpty)
 
         validateRootWithNote(root: root, note: note)
+        BeamNote.clearCancellables()
     }
 
     // swiftlint:disable:next function_body_length
@@ -474,6 +486,7 @@ class TextNodeTests: XCTestCase {
         XCTAssertEqual(root.cursorPosition, 7)
         XCTAssert(root.selectedTextRange.isEmpty)
         validateRootWithNote(root: root, note: note)
+        BeamNote.clearCancellables()
     }
 
     // swiftlint:disable:next function_body_length
@@ -530,6 +543,7 @@ class TextNodeTests: XCTestCase {
         XCTAssertEqual(root.cursorPosition, 7)
         XCTAssert(root.selectedTextRange.isEmpty)
         validateRootWithNote(root: root, note: note)
+        BeamNote.clearCancellables()
     }
 
     // swiftlint:disable:next function_body_length
@@ -556,6 +570,7 @@ class TextNodeTests: XCTestCase {
 //        Logger.shared.logDebug("Tree:\n\(root.printTree())\n")
 //        note.debugNote()
         validateRootWithNote(root: root, note: note)
+        BeamNote.clearCancellables()
     }
 
     // swiftlint:disable:next function_body_length
@@ -586,6 +601,7 @@ class TextNodeTests: XCTestCase {
         }
         XCTAssertEqual(root.children.first?.children.count, 1)
         validateRootWithNote(root: root, note: note)
+        BeamNote.clearCancellables()
     }
 
     func testStrippedText() {
@@ -594,6 +610,7 @@ class TextNodeTests: XCTestCase {
         let editor = BeamTextEdit(root: note, journalMode: true)
         let root = editor.rootNode!
         XCTAssertEqual(" bullet1 bullet11 bullet12 bullet2 bullet21 bullet22 bullet23", root.fullStrippedText)
+        BeamNote.clearCancellables()
 
     }
 }

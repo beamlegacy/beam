@@ -17,8 +17,8 @@ class OperationResult {
     }
 }
 
-class Calculator: Command {
-    var name: String = "Calculator"
+class Calculator: Command<Any?> {
+    static let name: String = "Calculator"
     var operand: String = ""
     var number: Int
     var opRes: OperationResult
@@ -27,9 +27,9 @@ class Calculator: Command {
         self.operand = operand
         self.number = right
         self.opRes = opRes
+        super.init(name: Calculator.name)
     }
-
-    func run() -> Bool {
+    override func run(context: Any??) -> Bool {
         switch operand {
         case "+":
             self.opRes.res += self.number
@@ -46,7 +46,7 @@ class Calculator: Command {
         return true
     }
 
-    func undo() -> Bool {
+    override func undo(context: Any??) -> Bool {
         switch operand {
         case "+":
             self.opRes.res -= self.number
@@ -63,7 +63,7 @@ class Calculator: Command {
         return true
     }
 
-    func coalesce(command: Command) -> Bool {
+    override func coalesce(command: Command<Any?>) -> Bool {
         if let cmd = command as? Calculator, self.operand == cmd.operand {
             switch operand {
             case "+":
@@ -90,91 +90,92 @@ class CommandManagerTests: XCTestCase {
     func testSimpleUndoRedo() throws {
         var cmdTest = ""
         let opRes = OperationResult()
-        let cmdManager = CommandManager()
+        let cmdManager = CommandManager<Any?>()
 
         let add = Calculator(operand: "+", right: 2, opRes: opRes)
-        cmdManager.run(command: add)
+        cmdManager.run(command: add, on: nil)
         XCTAssertEqual(opRes.res, 2)
-        _ = cmdManager.undo()
+        _ = cmdManager.undo(context: nil)
         XCTAssertEqual(opRes.res, 0)
 
-        cmdManager.run(name: "InputText") { () -> Bool in
+        cmdManager.run(name: "InputText", run: { (_) -> Bool in
             cmdTest = "Hello"
             return true
-        } undo: { () -> Bool in
+        }, undo: { (root) -> Bool in
             cmdTest = ""
             return true
-        } coalesce: { (_) -> Bool in
+        }, coalesce: { (root) -> Bool in
             return true
-        }
+        }, on: nil)
 
         XCTAssertEqual(cmdTest, "Hello")
-        _ = cmdManager.undo()
+        _ = cmdManager.undo(context: nil)
         XCTAssertEqual(cmdTest, "")
-        _ = cmdManager.redo()
+        _ = cmdManager.redo(context: nil)
         XCTAssertEqual(cmdTest, "Hello")
     }
 
     func testSimpleGroupCommand() throws {
         var cmdTest = ""
 
-        let cmdManager = CommandManager()
+        let cmdManager = CommandManager<Any?>()
         cmdManager.beginGroup(with: "FirstGroup")
 
-        cmdManager.run(name: "InputText") { () -> Bool in
+        cmdManager.run(name: "InputText", run: { (_) -> Bool in
             cmdTest = "Hello"
             return true
-        } undo: { () -> Bool in
+        }, undo: { (root) -> Bool in
             cmdTest = ""
             return true
-        } coalesce: { (_) -> Bool in
+        }, coalesce: { (root) -> Bool in
             return true
-        }
+        }, on: nil)
 
-        cmdManager.run(name: "InputText") { () -> Bool in
+        cmdManager.run(name: "InputText", run: { (_) -> Bool in
             cmdTest = "\(cmdTest) this is a group"
             return true
-        } undo: { () -> Bool in
+        }, undo: { (root) -> Bool in
             cmdTest = "Hello"
             return true
-        } coalesce: { (_) -> Bool in
+        }, coalesce: { (root) -> Bool in
             return true
-        }
+        }, on: nil)
+
         cmdManager.endGroup()
 
         XCTAssertEqual(cmdTest, "Hello this is a group")
-        _ = cmdManager.undo()
+        _ = cmdManager.undo(context: nil)
         XCTAssertEqual(cmdTest, "")
-        _ = cmdManager.redo()
+        _ = cmdManager.redo(context: nil)
         XCTAssertEqual(cmdTest, "Hello this is a group")
 
         cmdManager.endGroup()
     }
 
     func testSimpleCoalescing() throws {
-        let cmdManager = CommandManager()
+        let cmdManager = CommandManager<Any?>()
         let opRes = OperationResult()
 
         let add = Calculator(operand: "+", right: 4, opRes: opRes)
-        cmdManager.run(command: add)
+        cmdManager.run(command: add, on: nil)
         XCTAssertEqual(opRes.res, 4)
-        _ = cmdManager.undo()
+        _ = cmdManager.undo(context: nil)
         XCTAssertEqual(opRes.res, 0)
 
         let add2 = Calculator(operand: "+", right: 6, opRes: opRes)
         if add.coalesce(command: add2) {
-            cmdManager.run(command: add)
+            cmdManager.run(command: add, on: nil)
             XCTAssertEqual(opRes.res, 10)
-            _ = cmdManager.undo()
+            _ = cmdManager.undo(context: nil)
             XCTAssertEqual(opRes.res, 0)
-            _ = cmdManager.redo()
+            _ = cmdManager.redo(context: nil)
             XCTAssertEqual(opRes.res, 10)
         }
         opRes.reset()
         let multi = Calculator(operand: "*", right: 4, opRes: opRes)
-        cmdManager.run(command: multi)
+        cmdManager.run(command: multi, on: nil)
         XCTAssertEqual(multi.opRes.res, 0)
-        _ = cmdManager.undo()
+        _ = cmdManager.undo(context: nil)
         XCTAssertEqual(multi.opRes.res, 0)
         XCTAssertFalse(add2.coalesce(command: multi), "Can't coalesce Addition and Multiplication")
     }

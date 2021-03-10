@@ -7,45 +7,64 @@
 
 import Foundation
 
-class ReplaceText: Command {
-    var name: String = "ReplaceText"
+class ReplaceText: TextEditorCommand {
+    static let name: String = "ReplaceText"
 
-    var oldText: BeamText
-    var node: TextNode
+    var elementId: UUID
+    var noteName: String
     var range: Range<Int>
     var cursorPosition: Int
-    var text: String
+    var text: BeamText
+    var oldText: BeamText?
 
-    init(in node: TextNode, for range: Range<Int>, at cursorPosition: Int, with text: String) {
-        self.node = node
+    init(in elementId: UUID, of noteName: String, for range: Range<Int>, at cursorPosition: Int, with text: BeamText) {
+        self.elementId = elementId
+        self.noteName = noteName
         self.range = range
         self.cursorPosition = cursorPosition
         self.text = text
-        self.oldText = node.element.text
+        super.init(name: ReplaceText.name)
+        saveOldText()
     }
 
-    func run() -> Bool {
+    private func saveOldText() {
+        guard let elementInstance = getElement(for: noteName, and: elementId) else { return }
+        self.oldText = elementInstance.element.text
+    }
+
+    override func run(context: TextRoot?) -> Bool {
+        guard let root = context,
+              let elementInstance = getElement(for: noteName, and: elementId),
+              let node = context?.nodeFor(elementInstance.element, withParent: root) else { return false }
+
         node.element.text.replaceSubrange(range, with: text)
         cursorPosition = range.lowerBound + text.count
-        node.focus(cursorPosition: cursorPosition)
-        node.root?.cancelSelection()
+        context?.focus(widget: node, cursorPosition: cursorPosition)
+        context?.cancelSelection()
         return true
     }
 
-    func undo() -> Bool {
+    override func undo(context: TextRoot?) -> Bool {
+        guard let root = context,
+              let elementInstance = getElement(for: noteName, and: elementId),
+              let node = context?.nodeFor(elementInstance.element, withParent: root),
+              let oldText = self.oldText else { return false }
+
         node.element.text.replaceSubrange(node.element.text.wholeRange, with: oldText)
-        node.root?.selectedTextRange = range
-        node.focus(cursorPosition: range.upperBound)
+        context?.focus(widget: node, cursorPosition: range.upperBound)
+        context?.state.selectedTextRange = range
         return true
     }
 
-    func coalesce(command: Command) -> Bool {
+    override func coalesce(command: Command<TextRoot>) -> Bool {
         guard let insertText = command as? InsertText,
               insertText.cursorPosition == cursorPosition,
-              insertText.text != "\n" else { return false }
+              insertText.text.text != "\n",
+              let elementInstance = getElement(for: noteName, and: elementId),
+              let oldText = self.oldText else { return false }
 
-        self.text = text + insertText.text
-        node.element.text.replaceSubrange(node.element.text.wholeRange, with: oldText)
+        self.text.append(insertText.text)
+        elementInstance.element.text.replaceSubrange(elementInstance.element.text.wholeRange, with: oldText)
         return true
     }
 }

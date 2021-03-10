@@ -7,41 +7,48 @@
 
 import Foundation
 
-class IncreaseIndentation: Command {
-    var name: String = "IncreaseIndentation"
-
-    var node: TextNode
-    var element: BeamElement
-    var previousParentElement: BeamElement?
+class IncreaseIndentation: TextEditorCommand {
+    static let name = "IncreaseIndentation"
+    var elementId: UUID
+    var noteName: String
+    var previousParentRef: NoteReference?
     var indexInParent: Int?
 
-    init(for node: TextNode) {
-        self.node = node
-        self.element = node.element
-        self.indexInParent = node.indexInParent
+    init(for elementId: UUID, of noteName: String) {
+        self.elementId = elementId
+        self.noteName = noteName
+        super.init(name: IncreaseIndentation.name)
     }
 
-    func run() -> Bool {
-        if let focussedNode = node.root?.focusedWidget as? TextNode, focussedNode !== self.node {
-            self.node = focussedNode
-        }
+    override func run(context: TextRoot?) -> Bool {
+        guard let root = context,
+            let elementInstance = getElement(for: noteName, and: elementId),
+            let node = context?.nodeFor(elementInstance.element, withParent: root) else { return false }
+//        let node = context?.nodeFor(elementInstance.element, withParent: root)
+        indexInParent = node.indexInParent
+
         if let parent = node.parent as? TextNode {
-            self.previousParentElement = parent.element
+            previousParentRef = NoteReference(noteName: noteName, elementID: parent.element.id)
         }
         guard let newParent = node.previousSibbling() as? TextNode else { return false }
-        newParent.element.addChild(node.element)
+        newParent.element.addChild(elementInstance.element)
         return true
     }
 
-    func undo() -> Bool {
-        guard let previousParentElement = self.previousParentElement,
+    override func undo(context: TextRoot?) -> Bool {
+        guard let root = context,
+              let elementInstance = getElement(for: noteName, and: elementId),
+              let previousParentRef = self.previousParentRef,
               let indexInParent = self.indexInParent,
-              let previousParent = node.root?.nodeFor(previousParentElement, withParent: node) else { return false }
-        previousParent.element.insert(node.element, at: indexInParent)
+              let previousElementInstance = getElement(for: previousParentRef.noteName, and: previousParentRef.elementID),
+              let previousParent = context?.nodeFor(previousElementInstance.element, withParent: root) else { return false }
+
+        previousParent.element.insert(elementInstance.element, at: indexInParent)
         return true
     }
 
-    func coalesce(command: Command) -> Bool {
+    override func coalesce(command: Command<TextRoot>) -> Bool {
         return false
     }
+
 }
