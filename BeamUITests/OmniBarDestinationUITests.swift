@@ -31,9 +31,9 @@ class OmniBarDestinationUITests: QuickSpec {
         self.helper.searchField.typeText(destinationNoteName)
         let createNoteResult = self.helper.allAutocompleteResults.matching(NSPredicate(format: "identifier CONTAINS '-createCard'")).firstMatch
         createNoteResult.tap()
+        sleep(1) // wait for new note to be saved
         let journalButton = self.app.buttons["journal"]
         journalButton.tap()
-        sleep(1) // wait for new note to be saved
     }
 
     
@@ -65,7 +65,7 @@ class OmniBarDestinationUITests: QuickSpec {
                 let title = self.app.staticTexts["DestinationNoteTitle"]
                 expect(title.waitForExistence(timeout: 2)).to(beTrue())
                 title.tap()
-                expect(noteSearchField.exists).to(beTrue())
+                expect(noteSearchField.waitForExistence(timeout: 2)).to(beTrue())
                 expect(self.helper.inputHasFocus(noteSearchField)).to(beTrue())
                 expect(noteSearchField.value as? String).to(equal(""))
                 expect(noteSearchField.placeholderValue).to(equal(todayName))
@@ -80,7 +80,7 @@ class OmniBarDestinationUITests: QuickSpec {
                 expect(title.waitForExistence(timeout: 2)).to(beTrue())
                 title.tap()
 
-                expect(noteSearchField.exists).to(beTrue())
+                expect(noteSearchField.waitForExistence(timeout: 2)).to(beTrue())
                 expect(self.helper.inputHasFocus(noteSearchField)).to(beTrue())
 
                 // down arrow
@@ -97,7 +97,7 @@ class OmniBarDestinationUITests: QuickSpec {
 
                 // escape
                 noteSearchField.typeKey(.escape, modifierFlags: .function)
-                expect(noteSearchField.exists).to(beFalse())
+                expect(self.helper.inputHasFocus(noteSearchField)).to(beFalse())
                 expect(title.exists).to(beTrue())
             }
 
@@ -109,11 +109,8 @@ class OmniBarDestinationUITests: QuickSpec {
                 expect(title.value as? String).to(equal(todayName))
                 title.tap()
 
-                expect(noteSearchField.exists).to(beTrue())
                 noteSearchField.typeText("One")
                 noteSearchField.typeText("\r")
-                expect(noteSearchField.exists).to(beFalse())
-                expect(title.exists).to(beTrue())
                 expect(title.value as? String).to(equal(self.destinationNoteName))
 
                 expect(self.app.buttons["pivot-card"].exists).to(beTrue())
@@ -127,6 +124,7 @@ class OmniBarDestinationUITests: QuickSpec {
                 expect(title.exists).to(beTrue())
                 expect(title.value as? String).to(equal(self.destinationNoteName))
                 title.tap()
+                expect(noteSearchField.waitForExistence(timeout: 2)).to(beTrue())
                 expect(noteSearchField.value as? String).to(equal(self.destinationNoteName))
             }
         }

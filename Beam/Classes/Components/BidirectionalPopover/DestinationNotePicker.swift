@@ -59,52 +59,56 @@ struct DestinationNotePicker: View {
                         .strokeBorder(isEditing || isHovering ? Color(.destinationNoteBorderColor) : Color(.transparent))
                 )
                 .frame(maxHeight: boxHeight)
-            if isEditing {
+            ZStack(alignment: .top) {
                 VStack(spacing: 2) {
-                    BeamTextField(
-                        text: textBinding,
-                        isEditing: isEditingBinding,
-                        placeholder: placeholder,
-                        font: .systemFont(ofSize: 12),
-                        textColor: .destinationNoteActiveTextColor,
-                        placeholderColor: NSColor.omniboxPlaceholderTextColor,
-                        selectedRanges: state.destinationCardNameSelectedRange
-                    ) { newName in
-                        Logger.shared.logInfo("[DestinationNotePicker] Searching '\(newName)'", category: .ui)
-                        state.destinationCardNameSelectedRange = nil
-                        updateSearchResults()
-                    } onCommit: {
-                        selectedCurrentAutocompleteResult()
-                    } onEscape: {
-                        cancelSearch()
-                    } onCursorMovement: { move -> Bool in
-                        return handleCursorMovement(move)
-                    } onStartEditing: {
-                        Logger.shared.logInfo("[DestinationNotePicker] Start Editing", category: .ui)
-                        if tab.note.isTodaysNote {
-                            state.destinationCardName = ""
+                    HStack {
+                        BeamTextField(
+                            text: textBinding,
+                            isEditing: isEditingBinding,
+                            placeholder: placeholder,
+                            font: .systemFont(ofSize: 12),
+                            textColor: .destinationNoteActiveTextColor,
+                            placeholderColor: NSColor.omniboxPlaceholderTextColor,
+                            selectedRanges: state.destinationCardNameSelectedRange
+                        ) { newName in
+                            Logger.shared.logInfo("[DestinationNotePicker] Searching '\(newName)'", category: .ui)
                             state.destinationCardNameSelectedRange = nil
-                        } else {
-                            state.destinationCardNameSelectedRange = [state.destinationCardName.wholeRange]
+                            updateSearchResults()
+                        } onCommit: {
+                            selectedCurrentAutocompleteResult()
+                        } onEscape: {
+                            cancelSearch()
+                        } onCursorMovement: { move -> Bool in
+                            return handleCursorMovement(move)
+                        } onStartEditing: {
+                            Logger.shared.logInfo("[DestinationNotePicker] Start Editing", category: .ui)
+                            if tab.note.isTodaysNote {
+                                state.destinationCardName = ""
+                                state.destinationCardNameSelectedRange = nil
+                            } else {
+                                state.destinationCardNameSelectedRange = [state.destinationCardName.wholeRange]
+                            }
+                            updateSearchResults()
+                        } onStopEditing: {
+                            cancelSearch()
                         }
-                        updateSearchResults()
-                    } onStopEditing: {
-                        cancelSearch()
                     }
+                    .accessibility(addTraits: .isSearchField)
+                    .accessibility(identifier: "DestinationNoteSearchField")
                     .padding(8)
                     .onAppear(perform: {
                         state.destinationCardName = tab.note.title
                     })
-                    .accessibility(addTraits: .isSearchField)
-                    .accessibility(identifier: "DestinationNoteSearchField")
-                    if listResults.count > 0 {
+                    if isEditing && listResults.count > 0 {
                         DestinationNoteAutocompleteList(selectedIndex: $selectedResultIndex, elements: $listResults)
                             .onSelectAutocompleteResult {
                                 selectedCurrentAutocompleteResult()
                             }
+                            .frame(minWidth: 230)
                     }
                 }
-            } else {
+                .opacity(!isEditing ? 0.01 : 1.0)
+                .frame(maxWidth: isEditing ? .infinity : 0.0)
                 Text(title)
                     .font(.system(size: 12, weight: .medium))
                     .fixedSize(horizontal: true, vertical: false)
@@ -116,6 +120,7 @@ struct DestinationNotePicker: View {
                     .onTapGesture {
                         setIsEditing(true)
                     }
+                    .opacity(isEditing ? 0 : 1.0)
                     .accessibility(identifier: "DestinationNoteTitle")
             }
         }
