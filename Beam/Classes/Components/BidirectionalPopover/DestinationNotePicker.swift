@@ -14,7 +14,7 @@ struct DestinationNotePicker: View {
     @EnvironmentObject var state: BeamState
     @State var isHovering = false
     @State var isMouseDown = false
-    
+
     var title: String {
         get {
             let t = state.destinationCardName

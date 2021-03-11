@@ -10,7 +10,7 @@ import SwiftUI
 struct OmniBarFieldBackground<Content: View>: View {
     var isEditing = false
     var content: () -> Content
-    
+
     @State private var isHoveringBox = false
     private let boxCornerRadius: CGFloat = 6
     private var boxHeight: CGFloat {

@@ -786,7 +786,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         //        Logger.shared.logDebug("insertText \(string) at \(replacementRange)")
         unmarkText()
         let range = replacementRange.lowerBound..<replacementRange.upperBound
-        //swiftlint:disable:next force_cast
+        // swiftlint:disable:next force_cast
         insertText(string: string as! String, replacementRange: range)
     }
 
@@ -794,7 +794,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
      */
     public func setMarkedText(_ string: Any, selectedRange: NSRange, replacementRange: NSRange) {
         //        Logger.shared.logDebug("setMarkedText \(string) at \(replacementRange) with selection \(selectedRange)")
-        //swiftlint:disable:next force_cast
+        // swiftlint:disable:next force_cast
         let str = string as! String
         setMarkedText(string: str, selectedRange: selectedTextRange.lowerBound..<selectedTextRange.upperBound, replacementRange: replacementRange.lowerBound..<replacementRange.upperBound)
     }

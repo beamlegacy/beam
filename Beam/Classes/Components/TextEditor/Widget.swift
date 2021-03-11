@@ -880,7 +880,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     }
 
     func removeNode(_ node: TextNode) {
-        guard let parent = parent else { Logger.shared.logError("Trying to access element that is not corrected to root", category: .document); return  }
+        guard let parent = parent else { Logger.shared.logError("Trying to access element that is not corrected to root", category: .document); return }
         parent.removeNode(node)
     }
 

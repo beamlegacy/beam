@@ -186,6 +186,7 @@ extension BeamTextEdit {
         view.frame.origin.x = 60 + frame.maxX / 2
     }
 
+    // swiftlint:disable:next cyclomatic_complexity
     internal func detectFormatterType() {
         guard let node = focusedWidget as? TextNode else { return }
 

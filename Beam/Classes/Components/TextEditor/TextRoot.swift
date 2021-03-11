@@ -165,7 +165,6 @@ public class TextRoot: TextNode {
         self.selfVisible = false
         self.cursor = .arrow
 
-
         self.text = BeamText()
 
         // Main bullets:
