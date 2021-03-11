@@ -41,7 +41,7 @@ class BeamWindow: NSWindow {
     init(contentRect: NSRect, data: BeamData, reloadState: Bool) {
         self.data = data
 
-        if reloadState && !NSEvent.modifierFlags.contains(.option) {
+        if reloadState && !NSEvent.modifierFlags.contains(.option) && Configuration.env != "test" {
             if let savedData = UserDefaults.standard.data(forKey: Self.savedTabsKey) {
                 let decoder = JSONDecoder()
                 let state = try? decoder.decode(BeamState.self, from: savedData)
