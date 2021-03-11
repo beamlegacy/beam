@@ -119,9 +119,6 @@ class DeleteNode: TextEditorCommand {
 
         self.previousVisibleElementId = prevVisibleNode.element.id
 
-        for c in node.element.children {
-            prevVisibleNode.element.addChild(c)
-        }
         data = encode(element: elementInstance.element)
         node.delete()
         context?.cancelNodeSelection()
