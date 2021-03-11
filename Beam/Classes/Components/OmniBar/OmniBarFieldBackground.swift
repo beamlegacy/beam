@@ -16,8 +16,15 @@ struct OmniBarFieldBackground<Content: View>: View {
     private var boxHeight: CGFloat {
         return isEditing ? 40 : 32
     }
+
+    private var backgroundColor: Color {
+        isEditing ? Color(.autocompleteFocusedBackgroundColor) : Color(.editorBackgroundColor)
+    }
+    private var shadowColor: Color {
+        isEditing ? Color(.autocompleteFocusedShadowColor) : Color(.autocompleteHoveredShadowColor)
+    }
     private var shadowOpacity: Double {
-        return isEditing ? 0.1 : (isHoveringBox ? 0.05 : 0)
+        return isHoveringBox || isEditing ? 1.0 : 0.0
     }
     private var shadowRadius: CGFloat {
         return isEditing ? 12 : 6
@@ -27,12 +34,13 @@ struct OmniBarFieldBackground<Content: View>: View {
     }
     private let animationDuration = 0.3
 
+
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: boxCornerRadius)
-                .fill(Color(.editorBackgroundColor))
+                .fill(backgroundColor)
                 .animation(.timingCurve(0.42, 0.0, 0.58, 1.0, duration: animationDuration))
-                .shadow(color: Color.black.opacity(shadowOpacity), radius: shadowRadius, x: 0.0, y: shadowOffsetY)
+                .shadow(color: shadowColor.opacity(shadowOpacity), radius: shadowRadius, x: 0.0, y: shadowOffsetY)
                 .animation(.timingCurve(0.25, 0.1, 0.25, 1.0, duration: animationDuration))
                 .onHover(perform: { hovering in
                     isHoveringBox = hovering

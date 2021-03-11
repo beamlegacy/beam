@@ -10,6 +10,12 @@ import Cocoa
 
 extension NSColor {
 
+    convenience init(withLightColor lightColor: NSColor, darkColor: NSColor) {
+        self.init(name: nil) { (appearance) -> NSColor in
+            return appearance.isDarkMode ? darkColor : lightColor
+        }
+    }
+
     static var editorBackgroundColor: NSColor {
         return loadColor(named: "EditorBackgroundColor")
     }
@@ -244,6 +250,18 @@ extension NSColor {
 
     static var autocompleteSelectedBackgroundColor: NSColor {
         return loadColor(named: "AutocompleteSelectedBackgroundColor")
+    }
+
+    static var autocompleteFocusedBackgroundColor: NSColor {
+        return NSColor(withLightColor: NSColor.white, darkColor: loadColor(named: "Nero"))
+    }
+
+    static var autocompleteFocusedShadowColor: NSColor {
+        return NSColor(withLightColor: NSColor.black.withAlphaComponent(0.1), darkColor: NSColor.black.withAlphaComponent(0.6))
+    }
+
+    static var autocompleteHoveredShadowColor: NSColor {
+        return NSColor(withLightColor: NSColor.black.withAlphaComponent(0.05), darkColor: NSColor.black.withAlphaComponent(0.4))
     }
 
     // Destination Note
