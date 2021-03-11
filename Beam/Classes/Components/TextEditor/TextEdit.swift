@@ -954,6 +954,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                         let linkStr = String(str[range.lowerBound..<range.upperBound])
                         let formatText = FormattingText(in: node.element.id, of: noteTitle, for: nil, with: .link(linkStr), for: range, isActive: false)
                         rootNode.note?.cmdManager.run(command: formatText, on: rootNode)
+                        rootNode.focus(widget: node, cursorPosition: node.element.text.count)
                     }
                 }
                 rootNode.note?.cmdManager.endGroup()
