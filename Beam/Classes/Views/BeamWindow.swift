@@ -109,7 +109,9 @@ class BeamWindow: NSWindow {
     }
 
     override func setFrame(_ frameRect: NSRect, display flag: Bool) {
+        state.windowIsResizing = true
         super.setFrame(frameRect, display: flag)
+        state.windowIsResizing = false
         self.setTrafficLightsLayout()
     }
 

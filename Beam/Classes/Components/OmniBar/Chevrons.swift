@@ -13,8 +13,9 @@ struct Chevrons: View {
 
     var body: some View {
         HStack(spacing: 4) {
-            OmniBarButton(icon: "nav-back", accessibilityId: "goBack", action: goBack)
-                .disabled(!state.canGoBack)
+            if state.canGoBack {
+                OmniBarButton(icon: "nav-back", accessibilityId: "goBack", action: goBack)
+            }
             if state.canGoForward {
                 OmniBarButton(icon: "nav-forward", accessibilityId: "goForward", action: goForward)
             }

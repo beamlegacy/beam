@@ -18,6 +18,9 @@ struct DestinationNotePicker: View {
     @State var selectedResultIndex: Int?
     @State var listResults = [AutocompleteResult]()
 
+    private var enableAnimations: Bool {
+        !state.windowIsResizing
+    }
     private let boxHeight: CGFloat = 32
     private let todaysCardReplacementName = "Today"
     private var title: String {
@@ -114,7 +117,7 @@ struct DestinationNotePicker: View {
                     .fixedSize(horizontal: true, vertical: false)
                     .foregroundColor(.white)
                     .colorMultiply(isHovering || isMouseDown ? Color(.destinationNoteActiveTextColor) : Color(.destinationNoteTextColor))
-                    .animation(.easeInOut)
+                    .animation(enableAnimations ? .easeInOut : nil)
                     .padding(8)
                     .frame(height: boxHeight)
                     .onTapGesture {

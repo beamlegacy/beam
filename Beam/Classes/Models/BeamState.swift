@@ -35,6 +35,8 @@ let NoteDisplayThreshold = Float(0.0)
     @Published var destinationCardNameSelectedRange: [Range<Int>]?
     var bidirectionalPopover: BidirectionalPopover?
 
+    @Published var windowIsResizing = false
+
     @Published var mode: Mode = .today {
         didSet {
             switch oldValue {

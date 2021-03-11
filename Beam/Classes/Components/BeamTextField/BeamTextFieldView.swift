@@ -28,7 +28,13 @@ class BeamTextFieldView: NSTextField {
         guard let tfResponder = responder as? NSTextView else { return false }
         return self === tfResponder.delegate
     }
-    var shouldUseIntrinsicContentSize: Bool = false
+    var shouldUseIntrinsicContentSize: Bool = false {
+        didSet {
+            if oldValue != shouldUseIntrinsicContentSize {
+                self.invalidateIntrinsicContentSize()
+            }
+        }
+    }
 
     var onPerformKeyEquivalent: (NSEvent) -> Bool = { _ in return false }
     var onFocusChanged: (Bool) -> Void = { _ in }

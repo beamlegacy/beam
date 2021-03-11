@@ -83,6 +83,8 @@ struct BeamTextField: NSViewRepresentable {
                 // If no other field is a first responder, we can safely clear the window's responder.
                 // Otherwise the cursor is not completely removed from the field.
                 textField.window?.makeFirstResponder(nil)
+            } else if !isEditing {
+                textField.invalidateIntrinsicContentSize()
             }
         }
 
