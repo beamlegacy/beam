@@ -16,6 +16,7 @@ class InsertNode: TextEditorCommand {
     var newElementId: UUID?
     var text: String?
     var data: Data?
+    var open: Bool?
 
     init(in elementId: UUID, of noteName: String, with cursorPosition: Int?) {
         self.elementId = elementId
@@ -35,6 +36,7 @@ class InsertNode: TextEditorCommand {
             node.text.removeLast(node.element.text.count - cursorPosition)
         }
 
+        open = self.open ?? node.open
         var insertNode: TextNode
         if let linkedRefNode = node as? LinkedReferenceNode {
             guard let newProxyElement = createProxyElement(for: linkedRefNode, and: element) else { return false }
@@ -46,7 +48,13 @@ class InsertNode: TextEditorCommand {
             insertNode = newNode
         }
 
-        guard let result = node.parent?.insert(node: insertNode, after: node) else { return false }
+        var result = true
+        if let open = self.open, !node.children.isEmpty && open {
+            node.element.insert(insertNode.element, at: 0)
+        } else {
+            guard let res = node.parent?.insert(node: insertNode, after: node) else { return false }
+            result = res
+        }
         context?.focus(widget: insertNode)
         return result
     }
