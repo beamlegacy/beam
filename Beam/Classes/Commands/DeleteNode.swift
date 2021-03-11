@@ -122,10 +122,10 @@ class DeleteNode: TextEditorCommand {
         data = encode(element: elementInstance.element)
         context?.cancelNodeSelection()
         if let nextVisibleNode = node.nextVisibleTextNode(), prevVisibleNode === context {
-            context?.focus(widget: nextVisibleNode)
+            context?.focus(widget: nextVisibleNode, cursorPosition: nextVisibleNode.element.text.count)
         }
         if let prevWidget = node.previousVisibleTextNode() {
-            context?.focus(widget: prevWidget)
+            context?.focus(widget: prevWidget, cursorPosition: prevWidget.element.text.count)
         }
         node.delete()
         return true
