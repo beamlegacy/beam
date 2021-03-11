@@ -21,7 +21,7 @@ class AutocompleteTests: QuickSpec {
                     self.sut.$results
                         .dropFirst(1)
                         .sink { results in
-                            expect(results).to(haveCount(10))
+                            expect(results.count).to(equal(10))
                             done()
                         }.store(in: &scope)
                     self.sut.complete(query: "Beam")
@@ -32,7 +32,7 @@ class AutocompleteTests: QuickSpec {
                 waitUntil(timeout: .seconds(10)) { done in
                     self.sut.$results
                         .sink { results in
-                            expect(results).to(haveCount(0))
+                            expect(results.count).to(equal(0))
                             done()
                         }.store(in: &scope)
                 }
@@ -43,12 +43,12 @@ class AutocompleteTests: QuickSpec {
                     self.sut.$results
                         .dropFirst(1)
                         .sink { results in
-                            expect(results).to(haveCount(10))
+                            expect(results.count).to(equal(10))
                             done()
                         }.store(in: &scope)
-                    self.sut.complete(query: "Beam")
+                    self.sut.complete(query: "Hello")
                     // 2nd call cancel previous query immediatly
-                    self.sut.complete(query: "Beam app")
+                    self.sut.complete(query: "Hello world")
                 }
             }
         }

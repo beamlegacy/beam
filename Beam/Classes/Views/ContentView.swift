@@ -56,7 +56,7 @@ struct ModeView: View {
                 .frame(maxHeight: .infinity)
             }
             .background(Color(.editorBackgroundColor))
-        }.frame(minWidth: 822)
+        }.frame(minWidth: 800)
     }
 }
 

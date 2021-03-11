@@ -15,16 +15,22 @@ struct DestinationNotePicker: View {
     @State var isHovering = false
     @State var isMouseDown = false
 
-    var title: String {
-        get {
-            let t = state.destinationCardName
-            return t == state.data.todaysName ? "Destination Card" : t
-        }
-        set {
-            state.destinationCardName = newValue
-        }
+    @State var selectedResultIndex: Int?
+    @State var listResults = [AutocompleteResult]()
 
+    private let boxHeight: CGFloat = 32
+    private let todaysCardReplacementName = "Today"
+    private var title: String {
+        displayNameForCardName(state.destinationCardName)
     }
+    private var placeholder: String {
+        let currentNote = displayNameForCardName(tab.note.title)
+        return !currentNote.isEmpty ? currentNote : "Destination Card"
+    }
+    private func displayNameForCardName(_ cardName: String) -> String {
+        return cardName == state.data.todaysName ? todaysCardReplacementName : cardName
+    }
+
     private var isEditing: Bool {
         state.destinationCardIsFocused
     }
@@ -40,126 +46,131 @@ struct DestinationNotePicker: View {
             setIsEditing($0)
         })
 
-        return GeometryReader { geometry in
-            ZStack {
-                RoundedRectangle(cornerRadius: 4)
-                    .fill(isMouseDown ? Color(.destinationNoteBorderColor) : Color(.transparent))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 4)
-                            .strokeBorder(isEditing || isHovering ? Color(.destinationNoteBorderColor) : Color(.transparent))
-                    )
-                    .onHover(perform: { hovering in
-                        isHovering = hovering
-                    })
-                    .gesture(DragGesture(minimumDistance: 0)
-                                .onChanged { _ in
-                                    isMouseDown = true
-                                }
-                                .onEnded { _ in
-                                    isMouseDown = false
-                                })
-                HStack(spacing: 2) {
-
-//                    For now we don't display the icon. Might come back soon
-//                    if !isEditing {
-//                        Icon(name: "field-card_destination", color: isHovering || isMouseDown ? Color(.destinationNoteActiveTextColor) : Color(.destinationNoteTextColor))
-//                            .frame(width: 16, height: 16)
-//                    }
-                    if isEditing {
-                        BeamTextField(
-                            text: $state.destinationCardName,
-                            isEditing: isEditingBinding,
-                            placeholder: "Destination Card",
-                            font: .systemFont(ofSize: 12),
-                            textColor: .destinationNoteActiveTextColor,
-                            placeholderColor: NSColor.omniboxPlaceholderTextColor,
-                            selectedRanges: state.destinationCardNameSelectedRange
-                        ) { newName in
-                            Logger.shared.logInfo("New name \(newName)", category: .ui)
+        let textBinding = Binding<String>(get: {
+            title
+        }, set: {
+            state.destinationCardName = $0
+        })
+        return ZStack(alignment: .top) {
+            RoundedRectangle(cornerRadius: 4)
+                .fill(isMouseDown ? Color(.destinationNoteBorderColor) : Color(.transparent))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 4)
+                        .strokeBorder(isEditing || isHovering ? Color(.destinationNoteBorderColor) : Color(.transparent))
+                )
+                .frame(maxHeight: boxHeight)
+            if isEditing {
+                VStack(spacing: 2) {
+                    BeamTextField(
+                        text: textBinding,
+                        isEditing: isEditingBinding,
+                        placeholder: placeholder,
+                        font: .systemFont(ofSize: 12),
+                        textColor: .destinationNoteActiveTextColor,
+                        placeholderColor: NSColor.omniboxPlaceholderTextColor,
+                        selectedRanges: state.destinationCardNameSelectedRange
+                    ) { newName in
+                        Logger.shared.logInfo("[DestinationNotePicker] Searching '\(newName)'", category: .ui)
+                        state.destinationCardNameSelectedRange = nil
+                        updateSearchResults()
+                    } onCommit: {
+                        selectedCurrentAutocompleteResult()
+                    } onEscape: {
+                        cancelSearch()
+                    } onCursorMovement: { move -> Bool in
+                        return handleCursorMovement(move)
+                    } onStartEditing: {
+                        Logger.shared.logInfo("[DestinationNotePicker] Start Editing", category: .ui)
+                        if tab.note.isTodaysNote {
+                            state.destinationCardName = ""
                             state.destinationCardNameSelectedRange = nil
-                            updatePopover(geometry.frame(in: .global))
-                        } onCommit: {
-                            state.bidirectionalPopover?.doCommand(.insertNewline)
-                        } onEscape: {
-                            cancelSearch()
-                        } onCursorMovement: { move -> Bool in
-                            switch move {
-                            case .up:
-                                state.bidirectionalPopover?.doCommand(.moveUp)
-                                return true
-                            case .down:
-                                state.bidirectionalPopover?.doCommand(.moveDown)
-                                return true
-                            default:
-                                return false
-                            }
-                        } onStartEditing: {
-                            Logger.shared.logInfo("on start editing", category: .ui)
-                            createPopoverIfNeeded(with: geometry.frame(in: .global))
+                        } else {
                             state.destinationCardNameSelectedRange = [state.destinationCardName.wholeRange]
-                        } onStopEditing: {
-                            cancelSearch()
                         }
-                        .onAppear(perform: {
-                            state.destinationCardName = tab.note.title
-                        })
-                    } else {
-                        Text(title)
-                            .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(isHovering || isMouseDown ? Color(.destinationNoteActiveTextColor) : Color(.destinationNoteTextColor))
-                            .onTapGesture {
-                                setIsEditing(true)
+                        updateSearchResults()
+                    } onStopEditing: {
+                        cancelSearch()
+                    }
+                    .padding(8)
+                    .onAppear(perform: {
+                        state.destinationCardName = tab.note.title
+                    })
+                    .accessibility(addTraits: .isSearchField)
+                    .accessibility(identifier: "DestinationNoteSearchField")
+                    if listResults.count > 0 {
+                        DestinationNoteAutocompleteList(selectedIndex: $selectedResultIndex, elements: $listResults)
+                            .onSelectAutocompleteResult {
+                                selectedCurrentAutocompleteResult()
                             }
                     }
                 }
-                .padding([.top, .bottom, .trailing], 8)
-                .padding(.leading, isEditing ? 8 : 6)
+            } else {
+                Text(title)
+                    .font(.system(size: 12, weight: .medium))
+                    .fixedSize(horizontal: true, vertical: false)
+                    .foregroundColor(.white)
+                    .colorMultiply(isHovering || isMouseDown ? Color(.destinationNoteActiveTextColor) : Color(.destinationNoteTextColor))
+                    .animation(.easeInOut)
+                    .padding(8)
+                    .frame(height: boxHeight)
+                    .onTapGesture {
+                        setIsEditing(true)
+                    }
+                    .accessibility(identifier: "DestinationNoteTitle")
             }
-        }.frame(width: isEditing ? 230 : 130)
-    }
-
-    func createPopoverIfNeeded(with frame: NSRect) {
-        guard state.bidirectionalPopover == nil else { return }
-        state.bidirectionalPopover = BidirectionalPopover()
-
-        guard let popover = state.bidirectionalPopover,
-              let window = tab.webView.window,
-              let view = window.contentView else { return }
-        view.addSubview(popover)
-        popover.autoresizingMask = [.minXMargin, .minYMargin]
-        updatePopover(frame)
-
-        popover.didSelectTitle = { title -> Void in
-            // change the tab's destination note
-            changeDestinationCard(to: title)
-            cancelSearch()
+        }
+        .frame(minWidth: isEditing ? 230 : 0)
+        .fixedSize(horizontal: true, vertical: false)
+        .onTouchDown { touching in
+            isMouseDown = touching
+        }
+        .onHover { hovering in
+            isHovering = hovering
         }
     }
 
-    func updatePopover(_ frame: NSRect) {
-        Logger.shared.logInfo("update Popover for query \(state.destinationCardName) \(frame)", category: .ui)
-        guard let popover = state.bidirectionalPopover else { return }
+    func handleCursorMovement(_ move: CursorMovement) -> Bool {
+        switch move {
+        case .down, .up:
+            NSCursor.setHiddenUntilMouseMoves(true)
+            var newIndex = selectedResultIndex ?? -1
+            newIndex += (move == .up ? -1 : 1)
+            newIndex = newIndex.clampInLoop(0, listResults.count - 1)
+            selectedResultIndex = newIndex
+            return true
+        default:
+            return false
+        }
+    }
 
-        let items = state.destinationCardName.isEmpty ? state.data.documentManager.loadAllDocumentsWithLimit(4) : state.data.documentManager.documentsWithLimitTitleMatch(title: state.destinationCardName, limit: 4)
-
-        popover.items = items.map({ $0.title == state.data.todaysName ? "Journal" : $0.title })
-        Logger.shared.logInfo("items: \(popover.items)", category: .ui)
-        popover.query = state.destinationCardName
-
-        let position = NSPoint(x: frame.minX, y: (frame.minY - popover.idealSize.height))
-        popover.frame = NSRect(origin: position, size: popover.idealSize)
+    func updateSearchResults() {
+        Logger.shared.logInfo("Update Destination Picker Results for query \(state.destinationCardName)", category: .ui)
+        var items = state.destinationCardName.isEmpty ? state.data.documentManager.loadAllDocumentsWithLimit(4) : state.data.documentManager.documentsWithLimitTitleMatch(title: state.destinationCardName, limit: 4)
+        if (todaysCardReplacementName.lowercased().contains(state.destinationCardName.lowercased())  && !items.contains(where: { $0.title == state.data.todaysName })) {
+            let todaysNotes = state.data.documentManager.documentsWithLimitTitleMatch(title: state.data.todaysName, limit: 1)
+            items.insert(contentsOf: todaysNotes, at: 0)
+        }
+        selectedResultIndex = 0
+        listResults = items.map { AutocompleteResult(text: displayNameForCardName($0.title), source: .note, uuid: $0.id) }
     }
 
     func changeDestinationCard(to cardName: String) {
-        let cardName = cardName.lowercased() == "journal" ? state.data.todaysName : cardName
+        let cardName = cardName.lowercased() == todaysCardReplacementName.lowercased() ? state.data.todaysName : cardName
         state.destinationCardName = cardName
         let note = BeamNote.fetchOrCreate(state.data.documentManager, title: cardName)
         tab.setDestinationNote(note, rootElement: note)
     }
 
+    func selectedCurrentAutocompleteResult() {
+        guard let selectedResultIndex = selectedResultIndex, selectedResultIndex < listResults.count else {
+            return
+        }
+        let result = listResults[selectedResultIndex]
+        changeDestinationCard(to: result.text)
+        cancelSearch()
+    }
+
     func cancelSearch() {
-        state.bidirectionalPopover?.removeFromSuperview()
-        state.bidirectionalPopover = nil
         state.resetDestinationCard()
     }
 }

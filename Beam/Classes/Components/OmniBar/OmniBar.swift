@@ -36,63 +36,65 @@ struct OmniBar: View {
     }
 
     var body: some View {
-            HStack(alignment: .top) {
-                OmniBarFieldBackground(isEditing: isEditing) {
-                    VStack(spacing: 0) {
-                        HStack(spacing: 4) {
-                            if !isEditing {
-                                if state.mode != .today {
-                                    OmniBarButton(icon: "nav-journal", accessibilityId: "journal", action: goToJournal)
-                                }
-                                Chevrons()
-                                if state.mode == .web {
-                                    OmniBarButton(icon: "nav-refresh", accessibilityId: "refresh", action: refreshWeb)
+        HStack(alignment: .top) {
+            OmniBarFieldBackground(isEditing: isEditing) {
+                VStack(spacing: 0) {
+                    HStack(spacing: 4) {
+                        if !isEditing {
+                            if state.mode != .today {
+                                OmniBarButton(icon: "nav-journal", accessibilityId: "journal", action: goToJournal)
+                            }
+                            Chevrons()
+                            if state.mode == .web {
+                                OmniBarButton(icon: "nav-refresh", accessibilityId: "refresh", action: refreshWeb)
+                            }
+                        }
+                        GlobalCenteringContainer(enabled: !isEditing && state.mode != .web, containerGeometry: containerGeometry) {
+                            OmniBarSearchField(isEditing: Binding<Bool>(get: {
+                                isEditing
+                            }, set: {
+                                setIsEditing($0)
+                            }))
+                            .frame(maxHeight: .infinity)
+                            .onHover { (hover) in
+                                if hover {
+                                    NSCursor.iBeam.set()
+                                } else {
+                                    NSCursor.arrow.set()
                                 }
                             }
-                            GlobalCenteringContainer(enabled: !isEditing && state.mode != .web, containerGeometry: containerGeometry) {
-                                OmniBarSearchField(isEditing: Binding<Bool>(get: {
-                                    isEditing
-                                }, set: {
-                                    setIsEditing($0)
-                                }))
-                                .frame(maxHeight: .infinity)
-                                .onHover { (hover) in
-                                    if hover {
-                                        NSCursor.iBeam.set()
-                                    } else {
-                                        NSCursor.arrow.set()
-                                    }
-                                }
-                            }
-                            .padding(.leading, !isEditing && state.mode == .web ? 20 : 7)
                         }
-                        .animation(.easeInOut(duration: 0.3))
-                        .padding(.horizontal, 5)
-                        .frame(height: boxHeight)
-                        .frame(maxWidth: .infinity)
-                        if isEditing && !state.searchQuery.isEmpty && !state.autocompleteResults.isEmpty {
-                            AutocompleteList(selectedIndex: $state.autocompleteSelectedIndex, elements: $state.autocompleteResults)
-                        }
+                        .padding(.leading, !isEditing && state.mode == .web ? 20 : 7)
+                    }
+                    .animation(.easeInOut(duration: 0.3))
+                    .padding(.horizontal, 5)
+                    .frame(height: boxHeight)
+                    .frame(maxWidth: .infinity)
+                    if isEditing && !state.searchQuery.isEmpty && !state.autocompleteResults.isEmpty {
+                        AutocompleteList(selectedIndex: $state.autocompleteSelectedIndex, elements: $state.autocompleteResults)
                     }
                 }
-                .onTapGesture(perform: {
-                    setIsEditing(true)
-                })
-                .frame(maxWidth: .infinity)
-                .fixedSize(horizontal: false, vertical: true)
-                HStack {
+            }
+            .onTapGesture(perform: {
+                setIsEditing(true)
+            })
+            .frame(maxWidth: .infinity)
+            .fixedSize(horizontal: false, vertical: true)
+                HStack(alignment: .center) {
                     if state.mode == .web && state.currentTab != nil {
                         DestinationNotePicker(tab: state.currentTab!)
+                            .frame(height: 32, alignment: .top)
                     }
-                    if !state.tabs.isEmpty {
-                        OmniBarButton(icon: state.mode == .web ? "nav-pivot_card" : "nav-pivot_web", accessibilityId: state.mode == .web ? "pivot-card" : "pivot-web", action: toggleMode)
+                    if !state.tabs.isEmpty && !state.destinationCardIsFocused {
+                        OmniBarButton(icon: state.mode == .web ? "nav-pivot_card" : "nav-pivot_web", accessibilityId: state.mode == .web ? "pivot-card" : "pivot-web", action: toggleMode, size: 32)
+                            .frame(height: 32, alignment: .top)
                     }
                 }
                 .frame(height: boxHeight)
-            }
-            .animation(.easeInOut(duration: 0.3))
-            .padding(.top, isEditing ? 6 : 10)
-            .padding(.trailing, 10)
+        }
+        .animation(.easeInOut(duration: 0.3))
+        .padding(.top, isEditing ? 6 : 10)
+        .padding(.trailing, 10)
     }
 
     func resetAutocompleteSelection() {

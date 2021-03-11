@@ -10,6 +10,8 @@ import SwiftUI
 struct AutocompleteItem: View {
     @State var item: AutocompleteResult
     var selected: Bool
+    var displayIcon: Bool = true
+    
     @State var isHovering = false
     var backgroundColor: Color {
         return selected || isHovering ? Color(.autocompleteSelectedBackgroundColor) : Color(.transparent)
@@ -48,8 +50,9 @@ struct AutocompleteItem: View {
     }
     var body: some View {
         HStack(spacing: 8) {
-            Icon(name: iconNameSource(item.source), size: 16, color: textColor)
-
+            if displayIcon {
+                Icon(name: iconNameSource(item.source), size: 16, color: textColor)
+            }
             HStack(spacing: 2) {
                 ZStack {
                     StyledText(verbatim: item.text)
