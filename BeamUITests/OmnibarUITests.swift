@@ -116,7 +116,6 @@ class OmniBarUITests: QuickSpec {
                 expect(self.app.groups["webView"].exists).to(beTrue())
                 expect(self.app.buttons["journal"].exists).to(beTrue())
                 expect(self.app.buttons["refresh"].exists).to(beTrue())
-                expect(self.app.buttons["goBack"].exists).to(beTrue())
                 expect(self.app.buttons["pivot-card"].exists).to(beTrue())
 
                 self.app.buttons["pivot-card"].tap()

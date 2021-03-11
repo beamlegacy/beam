@@ -15,6 +15,10 @@ struct OmniBar: View {
     @State var title = ""
     var containerGeometry: GeometryProxy?
 
+    private var enableAnimations: Bool {
+        !state.windowIsResizing
+    }
+
     private var boxHeight: CGFloat {
         return isEditing ? 40 : 32
     }
@@ -34,10 +38,19 @@ struct OmniBar: View {
             state.resetQuery()
         }
     }
+    private var showDestinationNotePicker: Bool {
+        state.mode == .web && state.currentTab != nil
+    }
+    private var showPivotButton: Bool {
+        !state.tabs.isEmpty && !state.destinationCardIsFocused
+    }
+    private var hasRightActions: Bool {
+        return showPivotButton || showDestinationNotePicker
+    }
 
     var body: some View {
-        HStack(alignment: .top) {
-            OmniBarFieldBackground(isEditing: isEditing) {
+        HStack(alignment: .top, spacing: 2) {
+            OmniBarFieldBackground(isEditing: isEditing, enableAnimations: enableAnimations) {
                 VStack(spacing: 0) {
                     HStack(spacing: 4) {
                         if !isEditing {
@@ -66,7 +79,7 @@ struct OmniBar: View {
                         }
                         .padding(.leading, !isEditing && state.mode == .web ? 20 : 7)
                     }
-                    .animation(.easeInOut(duration: 0.3))
+                    .animation(enableAnimations ? .easeInOut(duration: 0.3) : nil)
                     .padding(.horizontal, 5)
                     .frame(height: boxHeight)
                     .frame(maxWidth: .infinity)
@@ -78,23 +91,26 @@ struct OmniBar: View {
             .onTapGesture(perform: {
                 setIsEditing(true)
             })
+            .padding(.trailing, isEditing ? 6 : 10)
             .frame(maxWidth: .infinity)
             .fixedSize(horizontal: false, vertical: true)
+            if hasRightActions {
                 HStack(alignment: .center) {
-                    if state.mode == .web && state.currentTab != nil {
+                    if showDestinationNotePicker {
                         DestinationNotePicker(tab: state.currentTab!)
                             .frame(height: 32, alignment: .top)
                     }
-                    if !state.tabs.isEmpty && !state.destinationCardIsFocused {
+                    if showPivotButton {
                         OmniBarButton(icon: state.mode == .web ? "nav-pivot_card" : "nav-pivot_web", accessibilityId: state.mode == .web ? "pivot-card" : "pivot-web", action: toggleMode, size: 32)
                             .frame(height: 32, alignment: .top)
                     }
                 }
+                .padding(.trailing, 10)
                 .frame(height: boxHeight)
+            }
         }
-        .animation(.easeInOut(duration: 0.3))
+        .animation(enableAnimations ? .easeInOut(duration: 0.3) : nil)
         .padding(.top, isEditing ? 6 : 10)
-        .padding(.trailing, 10)
     }
 
     func resetAutocompleteSelection() {

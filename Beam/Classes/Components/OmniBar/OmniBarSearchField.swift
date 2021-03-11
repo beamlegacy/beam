@@ -10,7 +10,22 @@ import SwiftUI
 
 struct OmniBarSearchField: View {
     @EnvironmentObject var state: BeamState
-    @Binding var isEditing: Bool
+    @Binding var isEditing: Bool {
+        didSet {
+            shouldCenter = !isEditing
+        }
+    }
+
+    // this enables the call of didSet
+    private var customEditingBinding: Binding<Bool> {
+        return Binding<Bool>(get: {
+            isEditing
+        }, set: {
+            isEditing  = $0
+        })
+    }
+
+    @State private var shouldCenter: Bool = false
 
     private var shouldShowWebHost: Bool {
         return state.mode == .web && !isEditing && state.currentTab != nil
@@ -28,17 +43,17 @@ struct OmniBarSearchField: View {
             return "field-search"
         }
         return "field-web"
-
     }
 
     var body: some View {
-        HStack(spacing: 8) {
-            if !shouldShowWebHost {
-                Icon(name: leadingIconName, size: 16, color: isEditing ? Color(.omniboxTextColor) : Color(.omniboxPlaceholderTextColor) )
-            }
+
+        return HStack(spacing: 8) {
+            Icon(name: leadingIconName, size: 16, color: isEditing ? Color(.omniboxTextColor) : Color(.omniboxPlaceholderTextColor) )
+                .opacity(shouldShowWebHost ? 0 : 1.0)
+                .frame(width: shouldShowWebHost ? 0 : 16)
             BeamTextField(
                 text: textFieldText,
-                isEditing: $isEditing,
+                isEditing: customEditingBinding,
                 placeholder: "Search Beam or the web",
                 font: .systemFont(ofSize: 13),
                 textColor: NSColor.omniboxTextColor,
@@ -74,7 +89,7 @@ struct OmniBarSearchField: View {
                     }
                 }
             )
-            .centered(!isEditing && state.mode != .web)
+            .centered(shouldCenter && state.mode != .web)
             .accessibility(addTraits: .isSearchField)
             .accessibility(identifier: "OmniBarSearchField")
         }

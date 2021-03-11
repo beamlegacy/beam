@@ -19,6 +19,7 @@ struct ModeView: View {
                     .padding(.leading, state.isFullScreen ? 0 : windowControlsWidth)
                     .zIndex(10)
                     .frame(height: 52, alignment: .top)
+
                 ZStack {
                     switch state.mode {
                     case .web:
@@ -39,14 +40,16 @@ struct ModeView: View {
                         }
                         .transition(.move(edge: .bottom))
                         .animation(.easeInOut(duration: 0.3))
+
                     case .note:
                         ZStack {
                             NoteView(note: state.currentNote!, showTitle: false, scrollable: true, centerText: true)
                         }
                         .background(Color(.editorBackgroundColor))
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .transition(.opacity)
                         .animation(.easeInOut(duration: 0.3))
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+
                     case .today:
                         GeometryReader { geometry in
                             JournalView(data: state.data, isFetching: state.data.isFetching, journal: state.data.journal, offset: geometry.size.height * 0.4)

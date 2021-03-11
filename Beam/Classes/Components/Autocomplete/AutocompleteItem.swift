@@ -11,7 +11,7 @@ struct AutocompleteItem: View {
     @State var item: AutocompleteResult
     var selected: Bool
     var displayIcon: Bool = true
-    
+
     @State var isHovering = false
     var backgroundColor: Color {
         return selected || isHovering ? Color(.autocompleteSelectedBackgroundColor) : Color(.transparent)
