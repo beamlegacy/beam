@@ -517,16 +517,13 @@ extension BeamState {
                 resetAutocompleteSelection()
             }
         } else {
-            let newIndex = autocompleteResults.count - 1
-            if newIndex >= 0 {
-                autocompleteSelectedIndex = newIndex
-            }
+            autocompleteSelectedIndex = (-1).clampInLoop(0, autocompleteResults.count - 1)
         }
     }
 
     func selectNextAutocomplete() {
         if let i = autocompleteSelectedIndex {
-            autocompleteSelectedIndex = min(i + 1, autocompleteResults.count - 1)
+            autocompleteSelectedIndex = (i + 1).clampInLoop(0, autocompleteResults.count - 1)
         } else {
             autocompleteSelectedIndex = 0
         }

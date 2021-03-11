@@ -7,6 +7,18 @@
 
 import Foundation
 
-public func clamp<T>(_ value: T, _ minValue: T, _ maxValue: T) -> T where T: Comparable {
-    return min(max(value, minValue), maxValue)
+public extension Comparable {
+
+    func clamp(_ minValue: Self, _ maxValue: Self) -> Self {
+        return min(max(self, minValue), maxValue)
+    }
+
+    func clampInLoop(_ minValue: Self, _ maxValue: Self) -> Self {
+        if self < minValue {
+            return maxValue
+        } else if self > maxValue {
+            return minValue
+        }
+        return self
+    }
 }

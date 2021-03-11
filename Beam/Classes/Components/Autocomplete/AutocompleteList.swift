@@ -24,6 +24,9 @@ struct AutocompleteList: View {
                         selectedIndex = indexFor(item: i)
                         state.startQuery()
                     }
+                    .onHover { _ in
+                        selectedIndex = nil
+                    }
             }
         }
         .frame(maxWidth: .infinity, alignment: .top)

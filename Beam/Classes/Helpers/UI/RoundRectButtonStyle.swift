@@ -11,6 +11,7 @@ import SwiftUI
 struct RoundedRectangleDecoration: View {
     @Environment(\.isEnabled) var isEnabled: Bool
     @State var isHovering: Bool = false
+    var size: CGFloat
     var isPressed: Bool
 
     private let pressedBg = Color(.toolbarButtonActiveBackgroundColor)
@@ -21,22 +22,23 @@ struct RoundedRectangleDecoration: View {
     }
 
     var body: some View {
-        RoundedRectangle(cornerRadius: 7)
+        RoundedRectangle(cornerRadius: 4)
             .fill(bgColor(isEnabled, isPressed))
             .onHover { h in
                 self.isHovering = h
             }
-            .frame(width: 26, height: 26, alignment: .center)
+            .frame(width: size, height: size, alignment: .center)
     }
 }
 
 struct RoundRectButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) var isEnabled: Bool
-
+    var size: CGFloat?
+    var defaultSize: CGFloat = 26
     func makeBody(configuration: ButtonStyle.Configuration) -> some View {
         configuration
             .label
-            .background(RoundedRectangleDecoration(isPressed: configuration.isPressed))
-            .frame(width: 26, height: 26, alignment: .center)
+            .background(RoundedRectangleDecoration(size: size ?? defaultSize, isPressed: configuration.isPressed))
+            .frame(width: size, height: size, alignment: .center)
     }
 }

@@ -300,6 +300,11 @@
 		A0E15FFD25D1570D00F9D72F /* JournalUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0E15FFC25D1570D00F9D72F /* JournalUITests.swift */; };
 		A0E3150525ED1ECB001A5E55 /* FormattingText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0E3150425ED1ECB001A5E55 /* FormattingText.swift */; };
 		A0EE0B8F25E68EF3001F9D65 /* InsertEmptyNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0EE0B8E25E68EF3001F9D65 /* InsertEmptyNode.swift */; };
+		A520D8DF25F8DF8D00400720 /* TouchDownModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = A520D8DE25F8DF8D00400720 /* TouchDownModifier.swift */; };
+		A545D2FB25F7B1D800E68F94 /* DestinationNoteAutocompleteList.swift in Sources */ = {isa = PBXBuildFile; fileRef = A545D2FA25F7B1D800E68F94 /* DestinationNoteAutocompleteList.swift */; };
+		A545D30625F7D93B00E68F94 /* MathsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A545D30525F7D93B00E68F94 /* MathsTests.swift */; };
+		A5496C5B25F95E4F00B77024 /* OmniBarAutocompleteUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5496C5A25F95E4F00B77024 /* OmniBarAutocompleteUITests.swift */; };
+		A5496C7325F95E7200B77024 /* OmniBarDestinationUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5496C7225F95E7200B77024 /* OmniBarDestinationUITests.swift */; };
 		A552DF2925F0E22B00570C85 /* OmniBarFieldBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = A552DF2825F0E22B00570C85 /* OmniBarFieldBackground.swift */; };
 		A552DF2D25F12A3600570C85 /* OmniBarButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A552DF2C25F12A3600570C85 /* OmniBarButton.swift */; };
 		A552DF3325F1741900570C85 /* GlobalCenteringContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A552DF3225F1741900570C85 /* GlobalCenteringContainer.swift */; };
@@ -788,6 +793,12 @@
 		A0E15FFC25D1570D00F9D72F /* JournalUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalUITests.swift; sourceTree = "<group>"; };
 		A0E3150425ED1ECB001A5E55 /* FormattingText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormattingText.swift; sourceTree = "<group>"; };
 		A0EE0B8E25E68EF3001F9D65 /* InsertEmptyNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsertEmptyNode.swift; sourceTree = "<group>"; };
+		A520D8DE25F8DF8D00400720 /* TouchDownModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TouchDownModifier.swift; sourceTree = "<group>"; };
+		A545D2FA25F7B1D800E68F94 /* DestinationNoteAutocompleteList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DestinationNoteAutocompleteList.swift; sourceTree = "<group>"; };
+		A545D2FE25F7D92700E68F94 /* BeamTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "BeamTests-Bridging-Header.h"; sourceTree = "<group>"; };
+		A545D30525F7D93B00E68F94 /* MathsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MathsTests.swift; sourceTree = "<group>"; };
+		A5496C5A25F95E4F00B77024 /* OmniBarAutocompleteUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniBarAutocompleteUITests.swift; sourceTree = "<group>"; };
+		A5496C7225F95E7200B77024 /* OmniBarDestinationUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniBarDestinationUITests.swift; sourceTree = "<group>"; };
 		A552DF2825F0E22B00570C85 /* OmniBarFieldBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniBarFieldBackground.swift; sourceTree = "<group>"; };
 		A552DF2C25F12A3600570C85 /* OmniBarButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniBarButton.swift; sourceTree = "<group>"; };
 		A552DF3225F1741900570C85 /* GlobalCenteringContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalCenteringContainer.swift; sourceTree = "<group>"; };
@@ -877,6 +888,7 @@
 				414B9878259DE2E2002E81A3 /* BidirectionalPopoverActionItem.swift */,
 				414B9879259DE2E2002E81A3 /* BidirectionalPopoverActionItem.xib */,
 				96988C8225BB0AF2000223A3 /* DestinationNotePicker.swift */,
+				A545D2FA25F7B1D800E68F94 /* DestinationNoteAutocompleteList.swift */,
 			);
 			path = BidirectionalPopover;
 			sourceTree = "<group>";
@@ -1296,6 +1308,7 @@
 			children = (
 				418172D525811B8700317ED8 /* RoundRectButtonStyle.swift */,
 				A567157025F66F8600B46110 /* StyledText.swift */,
+				A520D8DE25F8DF8D00400720 /* TouchDownModifier.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -1428,7 +1441,9 @@
 				52FC003B25E426F100ABECB0 /* UITests */,
 				5281B06225C98D0A00DF66D9 /* Utils */,
 				525C235725BAFCAA001B9625 /* MergeTests.swift */,
+				A545D30525F7D93B00E68F94 /* MathsTests.swift */,
 				529E1EE525D3EDA300F8B500 /* BeamTestsHelper.swift */,
+				A545D2FE25F7D92700E68F94 /* BeamTests-Bridging-Header.h */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -1772,6 +1787,8 @@
 				965A784C2514F149009980D4 /* BeamUITests.swift */,
 				A0E15FFC25D1570D00F9D72F /* JournalUITests.swift */,
 				52BB69A825CD5A49007A1173 /* OmniBarUITests.swift */,
+				A5496C7225F95E7200B77024 /* OmniBarDestinationUITests.swift */,
+				A5496C5A25F95E4F00B77024 /* OmniBarAutocompleteUITests.swift */,
 				528286B525E806CD00C0CCEE /* NoteEditorUITests.swift */,
 			);
 			path = BeamUITests;
@@ -1925,6 +1942,7 @@
 					};
 					965A783C2514F149009980D4 = {
 						CreatedOnToolsVersion = 12.0;
+						LastSwiftMigration = 1240;
 						TestTargetID = 965A78242514F147009980D4;
 					};
 					965A78472514F149009980D4 = {
@@ -2191,7 +2209,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "PATH=${PATH}:/opt/homebrew/bin\ndirenv allow ..\neval \"$(direnv export bash)\"\n\ngit checkout ${SRCROOT}/Beam/Configuration/Configuration.swift\n\nif which variable-injector >/dev/null; then\n  variable-injector --file ${SRCROOT}/Beam/Configuration/Configuration.swift # --verbose # Pass your paramenters\nelse\n  echo \"Warning: Swift Variable Injector not installed, download from https://github.com/penso/variable-injector\"\nfi\n";
+			shellScript = "if [ $ENABLE_PREVIEWS == \"NO\" ]\nthen\n    # your code to execute here\n    PATH=${PATH}:/opt/homebrew/bin\n    direnv allow ..\n    eval \"$(direnv export bash)\"\n\n    git checkout ${SRCROOT}/Beam/Configuration/Configuration.swift\n\n    if which variable-injector >/dev/null; then\n      variable-injector --file ${SRCROOT}/Beam/Configuration/Configuration.swift # --verbose # Pass your paramenters\n    else\n      echo \"Warning: Swift Variable Injector not installed, download from https://github.com/penso/variable-injector\"\n    fi\n\nelse\n  echo \"Skipping the script because of SwiftUI preview mode\"\nfi\n";
 			showEnvVarsInLog = 0;
 		};
 		5205F34425BB1BFE00D3CDB4 /* Build libgit2 */ = {
@@ -2405,6 +2423,7 @@
 				4181723E2581107C00317ED8 /* TextEditCommands.swift in Sources */,
 				96F936632590FA59006D8E53 /* BTextEdit.swift in Sources */,
 				521EEDED2593803F00BA2485 /* DocumentDetail.swift in Sources */,
+				A520D8DF25F8DF8D00400720 /* TouchDownModifier.swift in Sources */,
 				418171ED2581107C00317ED8 /* Session.swift in Sources */,
 				4181713325810CDC00317ED8 /* Constants.swift in Sources */,
 				4181725E2581107C00317ED8 /* AccountManager.swift in Sources */,
@@ -2455,6 +2474,7 @@
 				9691E3D825AD9F3300A13080 /* TextRoot.swift in Sources */,
 				4181724C2581107C00317ED8 /* BrowserTabView.swift in Sources */,
 				521EEDE125937F5B00BA2485 /* DocumentsContentView.swift in Sources */,
+				A545D2FB25F7B1D800E68F94 /* DestinationNoteAutocompleteList.swift in Sources */,
 				418172512581107C00317ED8 /* JournalView.swift in Sources */,
 				4105CE7525A60681009AB687 /* FormatterTypeButton.swift in Sources */,
 				961EC58625B7A75A009FA322 /* LinkManager.swift in Sources */,
@@ -2503,6 +2523,7 @@
 				96C9CC3E2535CE2C00D70AA6 /* LexerTests.swift in Sources */,
 				5281B07525C994BE00DF66D9 /* ConfigurationTests.swift in Sources */,
 				5273C65B25DA835500B00EC3 /* APIRequestTests.swift in Sources */,
+				A545D30625F7D93B00E68F94 /* MathsTests.swift in Sources */,
 				52C3078225C311B00027C4B1 /* BeamDateTests.swift in Sources */,
 				5281B01825C962EF00DF66D9 /* DocumentManagerNetworkTests.swift in Sources */,
 				5273C65C25DA835500B00EC3 /* UserSessionRequestTests.swift in Sources */,
@@ -2515,6 +2536,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A0E15FFD25D1570D00F9D72F /* JournalUITests.swift in Sources */,
+				A5496C5B25F95E4F00B77024 /* OmniBarAutocompleteUITests.swift in Sources */,
 				52FC002425E4244200ABECB0 /* MenuAvailableCommands.swift in Sources */,
 				52DF49A625E42110009A651E /* BeamUITestsHelper.swift in Sources */,
 				52BB69A925CD5A49007A1173 /* OmniBarUITests.swift in Sources */,
@@ -2522,6 +2544,7 @@
 				528286B625E806CD00C0CCEE /* NoteEditorUITests.swift in Sources */,
 				5242685025ED40F500DB1D05 /* String+Split.swift in Sources */,
 				52A94E3C25E90094004BAC93 /* XCUIElement+clear.swift in Sources */,
+				A5496C7325F95E7200B77024 /* OmniBarDestinationUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2688,6 +2711,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -2703,6 +2727,8 @@
 				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "BeamTests/Helpers/BeamTests-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Beam.app/Contents/MacOS/Beam";
 			};
@@ -2945,6 +2971,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -2960,6 +2987,8 @@
 				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "BeamTests/Helpers/BeamTests-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Beam.app/Contents/MacOS/Beam";
 			};
@@ -2970,6 +2999,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -2985,6 +3015,7 @@
 				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "BeamTests/Helpers/BeamTests-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Beam.app/Contents/MacOS/Beam";
 			};

@@ -11,6 +11,7 @@ struct OmniBarButton: View {
     var icon: String
     var accessibilityId: String
     var action: () -> Void
+    var size: CGFloat?
     @Environment(\.isEnabled) private var isEnabled: Bool
     @State private var isHovering: Bool = false
 
@@ -28,7 +29,7 @@ struct OmniBarButton: View {
             Icon(name: icon, size: 20, color: foregroundColor)
         }
         .accessibility(identifier: accessibilityId)
-        .buttonStyle(RoundRectButtonStyle())
+        .buttonStyle(RoundRectButtonStyle(size: size))
         .onHover { h in
             self.isHovering = h
         }
