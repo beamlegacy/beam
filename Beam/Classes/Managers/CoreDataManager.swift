@@ -50,8 +50,9 @@ class CoreDataManager {
         persistentContainer.loadPersistentStores { (storeDescription, error) in
             self.storeURL = storeDescription.url
 
-            Logger.shared.logDebug("sqlite file: \(String(describing: self.storeURL))",
-                                   category: .coredata)
+            if let fileUrl = self.storeURL {
+                Logger.shared.logDebug("sqlite file: \(fileUrl)", category: .coredata)
+            }
 
             if let error = error {
                 // Replace this implementation with code to handle the error appropriately.
