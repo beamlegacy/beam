@@ -12,13 +12,15 @@ struct TouchDownModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .contentShape(Rectangle())
-            .gesture(DragGesture(minimumDistance: 0)
-                        .onChanged { _ in
-                            onTouchDown?(true)
-                        }
-                        .onEnded { _ in
-                            onTouchDown?(false)
-                        })
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { _ in
+                        onTouchDown?(true)
+                    }
+                    .onEnded { _ in
+                        onTouchDown?(false)
+                    }
+            )
     }
 }
 

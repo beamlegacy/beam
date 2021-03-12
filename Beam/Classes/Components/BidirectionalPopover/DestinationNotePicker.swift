@@ -77,7 +77,7 @@ struct DestinationNotePicker: View {
                             Logger.shared.logInfo("[DestinationNotePicker] Searching '\(newName)'", category: .ui)
                             state.destinationCardNameSelectedRange = nil
                             updateSearchResults()
-                        } onCommit: {
+                        } onCommit: { _ in
                             selectedCurrentAutocompleteResult()
                         } onEscape: {
                             cancelSearch()

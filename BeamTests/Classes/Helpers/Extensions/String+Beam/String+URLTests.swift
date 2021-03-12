@@ -56,7 +56,8 @@ class String_URLTests: XCTestCase {
 
     func testURLMinimizeHost() {
         XCTAssertEqual(URL(string: "http://google.com/search?prout")!.minimizedHost, "google.com")
-        XCTAssertEqual(URL(string: "http://search.somedomain.google.com/search?prout")!.minimizedHost, "google.com")
+        XCTAssertEqual(URL(string: "http://www.google.com/search?prout")!.minimizedHost, "google.com")
+        XCTAssertEqual(URL(string: "http://search.somedomain.google.com/search?prout")!.minimizedHost, "search.somedomain.google.com")
         XCTAssertEqual(URL(string: "http://google/search?prout")!.minimizedHost, "google")
         XCTAssertEqual(URL(string: "google/search?prout")!.minimizedHost, "")
     }
@@ -66,5 +67,19 @@ class String_URLTests: XCTestCase {
         XCTAssertTrue(URL(string: "http://google.com/url?prout")!.isSearchResult)
         XCTAssertFalse(URL(string: "http://groogle.com/search?prout")!.isSearchResult)
         XCTAssertFalse(URL(string: "http://google.com/blop?prout")!.isSearchResult)
+    }
+
+    func testUrlWithScheme() {
+        XCTAssertEqual(URL(string: "http://google.com/testing")!.urlWithScheme.absoluteString, "http://google.com/testing")
+        XCTAssertEqual(URL(string: "test://www.google.com/testing")!.urlWithScheme.absoluteString, "test://www.google.com/testing")
+        XCTAssertEqual(URL(string: "google.com/testing")!.urlWithScheme.absoluteString, "https://google.com/testing")
+        XCTAssertEqual(URL(string: "google")!.urlWithScheme.absoluteString, "https://google")
+    }
+
+    func testUrlWithoutScheme() {
+        XCTAssertEqual(URL(string: "http://google.com/testing")!.urlStringWithoutScheme, "google.com/testing")
+        XCTAssertEqual(URL(string: "http://www.google.com/testing")!.urlStringWithoutScheme, "google.com/testing")
+        XCTAssertEqual(URL(string: "google.com/testing")!.urlStringWithoutScheme, "google.com/testing")
+        XCTAssertEqual(URL(string: "google")!.urlStringWithoutScheme, "google")
     }
 }

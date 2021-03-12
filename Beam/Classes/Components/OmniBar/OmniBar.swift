@@ -15,6 +15,8 @@ struct OmniBar: View {
     @State var title = ""
     var containerGeometry: GeometryProxy?
 
+    @State var modifierFlagsPressed: NSEvent.ModifierFlags? = nil
+
     private var enableAnimations: Bool {
         !state.windowIsResizing
     }
@@ -67,7 +69,7 @@ struct OmniBar: View {
                                 isEditing
                             }, set: {
                                 setIsEditing($0)
-                            }))
+                            }), modifierFlagsPressed: $modifierFlagsPressed)
                             .frame(maxHeight: .infinity)
                             .onHover { (hover) in
                                 if hover {
@@ -84,7 +86,7 @@ struct OmniBar: View {
                     .frame(height: boxHeight)
                     .frame(maxWidth: .infinity)
                     if isEditing && !state.searchQuery.isEmpty && !state.autocompleteResults.isEmpty {
-                        AutocompleteList(selectedIndex: $state.autocompleteSelectedIndex, elements: $state.autocompleteResults)
+                        AutocompleteList(selectedIndex: $state.autocompleteSelectedIndex, elements: $state.autocompleteResults, modifierFlagsPressed: $modifierFlagsPressed)
                     }
                 }
             }
@@ -115,10 +117,6 @@ struct OmniBar: View {
 
     func resetAutocompleteSelection() {
         state.resetAutocompleteSelection()
-    }
-
-    func startNewSearch() {
-        state.startNewSearch()
     }
 
     func goToJournal() {

@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct BeamTextField: NSViewRepresentable {
+
     typealias NSViewType = BeamTextFieldView
 
     @Binding var text: String
@@ -20,9 +21,10 @@ struct BeamTextField: NSViewRepresentable {
     var selectedRanges: [Range<Int>]?
 
     var onTextChanged: (String) -> Void = { _ in }
-    var onCommit: () -> Void = { }
+    var onCommit: (_ modifierFlags: NSEvent.ModifierFlags?) -> Void = { _ in }
     var onEscape: () -> Void = { }
     var onCursorMovement: (CursorMovement) -> Bool = { _ in false }
+    var onModifierFlagPressed: ((_ modifierFlag: NSEvent) -> Void)?
     var onStartEditing: () -> Void = { }
     var onStopEditing: () -> Void = { }
     internal var centered: Bool = false
@@ -60,9 +62,16 @@ struct BeamTextField: NSViewRepresentable {
                 return onCursorMovement(.up)
             case KeyCode.down.rawValue:
                 return onCursorMovement(.down)
+            case KeyCode.enter.rawValue where event.modifierFlags.contains(.command):
+                onCommit(.command)
+                return true
             default:
-                return false
+                break
             }
+            if !event.modifierFlags.isEmpty {
+                onModifierFlagPressed?(event)
+            }
+            return false
         }
 
         return textField
@@ -122,13 +131,12 @@ struct BeamTextField: NSViewRepresentable {
 
         func control(_ control: NSControl, textView: NSTextView, doCommandBy commandSelector: Selector) -> Bool {
             if commandSelector == #selector(NSResponder.insertNewline(_:)) {
-                parent.onCommit()
+                parent.onCommit(nil)
                 return true
             } else if commandSelector == #selector(NSResponder.cancelOperation(_:)) {
                 parent.onEscape()
                 return true
             }
-
             return false
         }
 

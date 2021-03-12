@@ -251,6 +251,9 @@ extension NSColor {
     static var autocompleteSelectedBackgroundColor: NSColor {
         return loadColor(named: "AutocompleteSelectedBackgroundColor")
     }
+    static var autocompleteClickedBackgroundColor: NSColor {
+        return loadColor(named: "AutocompleteClickedBackgroundColor")
+    }
 
     static var autocompleteFocusedBackgroundColor: NSColor {
         return NSColor(withLightColor: NSColor.white, darkColor: loadColor(named: "Nero"))

@@ -280,11 +280,7 @@ let NoteDisplayThreshold = Float(0.0)
                 searchEngine.query = query
                 return URL(string: searchEngine.searchUrl)!
             }
-
-            if u.scheme == nil {
-                return URL(string: "https://" + query)!
-            }
-            return u
+            return u.urlWithScheme
         }
 
         searchEngine.query = query
@@ -314,7 +310,7 @@ let NoteDisplayThreshold = Float(0.0)
             }
 
         case .history, .url:
-            let url = urlFor(query: result.text)
+            let url = result.url?.urlWithScheme ?? urlFor(query: result.text)
             createTab(withURL: url, originalQuery: "")
             mode = .web
 
@@ -408,9 +404,8 @@ let NoteDisplayThreshold = Float(0.0)
 
     func setup(data: BeamData) {
         $searchQuery.sink { [weak self] query in
-            guard let self = self else { return }
+            guard let self = self, query != self.currentTab?.url?.absoluteString else { return }
             self.buildAutocompleteResults(for: query)
-
         }.store(in: &scope)
 
         completer.$results.receive(on: RunLoop.main).sink { [weak self] results in
@@ -562,7 +557,14 @@ extension BeamState {
     }
 
     private func autocompleteHistoryResults(for query: String) -> [AutocompleteResult] {
-        return self.data.index.search(string: query).map { AutocompleteResult(text: $0.source, source: .history, information: $0.title, completingText: query) }
+        return self.data.index.search(string: query).map {
+            var urlString = $0.source
+            let url = URL(string: urlString)
+            if let url = url {
+                urlString = url.urlStringWithoutScheme
+            }
+            return AutocompleteResult(text: $0.title, source: .history, url: url, information: urlString, completingText: query)
+        }
     }
 
     func buildAutocompleteResults(for query: String) {
@@ -585,7 +587,7 @@ extension BeamState {
         finalResults = sortResults(notesResults: notesResults, historyResults: historyResults)
 
         // #3 Create Card
-        let canCreateNote = BeamNote.fetch(data.documentManager, title: query) == nil
+        let canCreateNote = BeamNote.fetch(data.documentManager, title: query) == nil && URL(string: query)?.scheme == nil
         if canCreateNote {
             // if the card doesn't exist, propose to create it
             finalResults.append(AutocompleteResult(text: query, source: .createCard, information: "New card", completingText: query))

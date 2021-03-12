@@ -25,6 +25,7 @@ struct AutocompleteResult: Identifiable {
     }
     var text: String
     var source: Source
+    var url: URL?
     var information: String?
     var completingText: String?
     var uuid = UUID()
@@ -56,8 +57,14 @@ class Completer: ObservableObject {
             if let array = obj as? [Any], let r = array[1] as? [String] {
                 var res = [AutocompleteResult]()
                 for str in r {
-                    let source: AutocompleteResult.Source = str.urlString != nil ? .url : .autocomplete
-                    res.append(AutocompleteResult(text: str, source: source, completingText: query))
+                    let isURL = str.urlString != nil
+                    let source: AutocompleteResult.Source = isURL ? .url : .autocomplete
+                    let url = isURL ? URL(string: str) : nil
+                    var text = str
+                    if let url = url {
+                        text = url.urlStringWithoutScheme
+                    }
+                    res.append(AutocompleteResult(text: text, source: source, url: url, completingText: query))
                 }
                 self.results = res
             }

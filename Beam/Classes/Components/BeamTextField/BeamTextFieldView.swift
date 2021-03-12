@@ -81,6 +81,14 @@ class BeamTextFieldView: NSTextField {
         isBordered = false
         drawsBackground = false
         lineBreakMode = .byTruncatingTail
+        NSEvent.addLocalMonitorForEvents(matching: .flagsChanged, handler: commandKey(evt:))
+    }
+
+    private func commandKey(evt: NSEvent) -> NSEvent {
+        if isFirstResponder {
+            _ = onPerformKeyEquivalent(evt)
+        }
+        return evt
     }
 
     private func attributedStringAttributes(_ foregroundColor: NSColor, _ font: NSFont?) -> [NSAttributedString.Key: Any] {
