@@ -31,7 +31,8 @@ final class Logger {
     private let hideCategories: [LogCategory] = [.web, .coredataDebug, .documentDebug]
     private let hideLumberCategories: [LogCategory] = [.documentDebug]
 
-    private var ddFileLogger: DDFileLogger = DDFileLogger()
+    private var ddFileLogger = DDFileLogger()
+
     private func configure() {
         DDLog.add(ddFileLogger)
     }
@@ -51,8 +52,12 @@ final class Logger {
 
     private init() {
         configure()
+
+        // swiftlint:disable:next print
+        print("Storing log files to \(ddFileLogger.currentLogFileInfo?.filePath ?? "-")")
+
         ddFileLogger.logFileManager.maximumNumberOfLogFiles = 2
-        ddFileLogger.maximumFileSize = 1024 * 64 // 64k
+        ddFileLogger.maximumFileSize = 1024 * 1024 // 1MB
         ddFileLogger.rollingFrequency = 3600 * 24 * 7 // 1 week
     }
 

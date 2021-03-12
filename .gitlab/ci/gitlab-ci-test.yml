@@ -8,7 +8,7 @@ xctests:
     paths:
       - cobertura.xml
       - fastlane/test_output/tests.xml
-      - builds
+      - logs
     reports:
       cobertura: cobertura.xml
       junit: fastlane/test_output/tests.xml
@@ -32,6 +32,8 @@ xctests:
     - time bundle exec fastlane tests
   after_script:
     - rm "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/Beam-test-${CI_JOB_ID}"*
+    - mkdir -p logs
+    - mv ${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Logs/Beam/*.log logs
   tags:
     - macos-mono
   interruptible: true
@@ -46,8 +48,8 @@ xctests UI:
     paths:
       - cobertura.xml
       - fastlane/test_output/tests.xml
-      - builds
       - screenshots
+      - logs
     reports:
       cobertura: cobertura.xml
       junit: fastlane/test_output/tests.xml
@@ -73,6 +75,8 @@ xctests UI:
     - xcparse screenshots --test-status Failure --test --os --model fastlane/test_output/Beam.xcresult screenshots
     - find screenshots -type d -empty -delete
     - rm "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/Beam-test-${CI_JOB_ID}"*
+    - mkdir -p logs
+    - mv ${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Logs/Beam/*.log logs
   tags:
     - macos-mono
   interruptible: true
