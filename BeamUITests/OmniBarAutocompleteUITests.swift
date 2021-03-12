@@ -131,6 +131,16 @@ class OmniBarAutocompleteUITests: QuickSpec {
                 expect(noteResults.firstMatch.waitForExistence(timeout: 2)).to(beTrue())
             }
 
+            it("can press cmd+enter to create note") {
+                self.helper.searchField.typeText("Command Enter Note")
+                let createNoteResult = self.helper.allAutocompleteResults.matching(NSPredicate(format: "identifier CONTAINS '-createCard'")).firstMatch
+                expect(createNoteResult.exists).to(beTrue())
+                self.helper.searchField.typeKey("\r", modifierFlags: XCUIElement.KeyModifierFlags.command)
+
+                expect(self.app.scrollViews["noteView"].waitForExistence(timeout: 2)).to(beTrue())
+                expect(self.helper.inputHasFocus(self.helper.searchField)).to(beFalse())
+            }
+
         }
     }
 }

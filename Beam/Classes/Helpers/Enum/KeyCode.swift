@@ -12,4 +12,5 @@ enum KeyCode: UInt16 {
     case delete = 117
     case down = 125
     case up = 126
+    case enter = 36
 }

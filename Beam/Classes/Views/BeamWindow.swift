@@ -191,6 +191,10 @@ class BeamWindow: NSWindow {
         state.startNewSearch()
     }
 
+    @IBAction func openLocation(_ sender: Any?) {
+        state.focusOmniBox = true
+    }
+
     static let savedTabsKey = "savedTabs"
 
     func saveDefaults() {

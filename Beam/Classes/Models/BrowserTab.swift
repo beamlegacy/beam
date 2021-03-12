@@ -10,7 +10,6 @@ import Foundation
 import SwiftUI
 import Combine
 import WebKit
-import FavIcon
 
 class FullScreenWKWebView: WKWebView {
 //    override var safeAreaInsets: NSEdgeInsets {
@@ -229,21 +228,9 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
     private func updateFavIcon() {
         guard let url = url else { favIcon = nil; return }
-        do {
-            try FavIcon.downloadPreferred(url, width: 16, height: 16) { [weak self] result in
-                guard let self = self else { return }
-
-                if case let .success(image) = result {
-                  // On iOS, this is a UIImage, do something with it here.
-                  // This closure will be executed on the main queue, so it's safe to touch
-                  // the UI here.
-                    self.favIcon = image
-                } else {
-                    self.favIcon = nil
-                }
-            }
-        } catch {
-            self.favIcon = nil
+        FaviconProvider.shared.imageForUrl(url) { [weak self] (image) in
+            guard let self = self else { return }
+            self.favIcon = image
         }
     }
 

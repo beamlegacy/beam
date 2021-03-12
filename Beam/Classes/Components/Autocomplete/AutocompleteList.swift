@@ -12,6 +12,7 @@ struct AutocompleteList: View {
     @EnvironmentObject var state: BeamState
     @Binding var selectedIndex: Int?
     @Binding var elements: [AutocompleteResult]
+    @Binding var modifierFlagsPressed: NSEvent.ModifierFlags?
 
     private let itemHeight: CGFloat = 32
 
@@ -20,10 +21,12 @@ struct AutocompleteList: View {
             ForEach(elements) { i in
                 return AutocompleteItem(item: i, selected: isSelectedItem(i))
                     .frame(height: itemHeight)
-                    .onTapGesture(count: 1) {
-                        selectedIndex = indexFor(item: i)
-                        state.startQuery()
-                    }
+                    .simultaneousGesture(
+                        TapGesture(count: 1).onEnded {
+                            selectedIndex = indexFor(item: i)
+                            state.startQuery()
+                        }
+                    )
                     .onHover { _ in
                         selectedIndex = nil
                     }
@@ -35,6 +38,8 @@ struct AutocompleteList: View {
     func isSelectedItem(_ item: AutocompleteResult) -> Bool {
         if let i = selectedIndex {
             return elements[i].id == item.id
+        } else if item.source == .createCard && modifierFlagsPressed?.contains(.command) == true {
+            return true
         }
         return false
     }
@@ -54,6 +59,6 @@ struct AutocompleteList_Previews: PreviewProvider {
         AutocompleteResult(text: "asldkfjh sadlkfjh", source: .autocomplete),
         AutocompleteResult(text: "bleh blehbleh", source: .autocomplete)]
     static var previews: some View {
-        AutocompleteList(selectedIndex: .constant(1), elements: .constant(Self.elements))
+        AutocompleteList(selectedIndex: .constant(1), elements: .constant(Self.elements), modifierFlagsPressed: .constant(nil))
     }
 }

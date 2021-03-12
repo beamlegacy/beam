@@ -15,6 +15,8 @@ struct OmniBarSearchField: View {
             shouldCenter = !isEditing
         }
     }
+    @Binding var modifierFlagsPressed: NSEvent.ModifierFlags?
+
 
     // this enables the call of didSet
     private var customEditingBinding: Binding<Bool> {
@@ -26,6 +28,7 @@ struct OmniBarSearchField: View {
     }
 
     @State private var shouldCenter: Bool = false
+
 
     private var shouldShowWebHost: Bool {
         return state.mode == .web && !isEditing && state.currentTab != nil
@@ -62,12 +65,12 @@ struct OmniBarSearchField: View {
                 onTextChanged: { _ in
                     state.resetAutocompleteSelection()
                 },
-                onCommit: {
-                    startQuery()
+                onCommit: { modifierFlags in
+                    onEnterPressed(withCommand: modifierFlags?.contains(.command) ?? false)
                 },
                 onEscape: {
                     if state.autocompleteResults.isEmpty {
-                        if state.searchQuery.isEmpty {
+                        if state.searchQuery.isEmpty || state.mode == .web {
                             unfocusField()
                         } else {
                             state.resetQuery()
@@ -87,6 +90,9 @@ struct OmniBarSearchField: View {
                     default:
                         return false
                     }
+                },
+                onModifierFlagPressed: { event in
+                    modifierFlagsPressed = event.modifierFlags.contains(.command) ? .command : nil
                 }
             )
             .centered(shouldCenter && state.mode != .web)
@@ -94,6 +100,18 @@ struct OmniBarSearchField: View {
             .accessibility(identifier: "OmniBarSearchField")
         }
         .animation(.timingCurve(0.25, 0.1, 0.25, 1.0, duration: 0.3))
+    }
+
+    func onEnterPressed(withCommand: Bool) {
+        if withCommand {
+            // Cmd+Enter select create card
+            if let createCardIndex = state.autocompleteResults.firstIndex(where: { (result) -> Bool in
+                return result.source == .createCard
+            }) {
+                state.autocompleteSelectedIndex = createCardIndex
+            }
+        }
+        startQuery()
     }
 
     func unfocusField() {
@@ -110,7 +128,7 @@ struct OmniBarSearchField: View {
 
 struct OmniBarSearchField_Previews: PreviewProvider {
     static var previews: some View {
-        OmniBarSearchField(isEditing: .constant(true)).environmentObject(BeamState())
+        OmniBarSearchField(isEditing: .constant(true), modifierFlagsPressed: .constant(nil)).environmentObject(BeamState())
             .frame(width: 400)
             .background(Color.white)
     }

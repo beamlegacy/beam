@@ -13,27 +13,31 @@ struct AutocompleteItem: View {
     var displayIcon: Bool = true
 
     @State var isHovering = false
+    @State var isTouchDown = false
+
+    @State var favicon: NSImage?
     var backgroundColor: Color {
-        return selected || isHovering ? Color(.autocompleteSelectedBackgroundColor) : Color(.transparent)
+        guard !isTouchDown else {
+            return Color(.autocompleteClickedBackgroundColor)
+        }
+        return Color(.autocompleteSelectedBackgroundColor).opacity(selected || isHovering ? 1.0 : 0.0)
     }
 
     func iconNameSource(_ source: AutocompleteResult.Source) -> String {
         switch item.source {
         case .history:
             return "field-history"
-        case .autocomplete:
+        case .autocomplete, .url:
             return "field-search"
         case .createCard:
             return "field-card_new"
-        case .url:
-            return "field-web"
         case .note:
             return "field-card"
         }
     }
 
     private let textColor = Color(.autocompleteTextColor)
-    private let subtitleTextColor = Color(.autocompleteSubtitleTextColor)
+    private let secondaryTextColor = Color(.autocompleteSubtitleTextColor)
     private let subtitleLinkColor = Color(.linkColor)
 
     private func boldTextRanges(in text: String) -> [Range<String.Index>] {
@@ -51,27 +55,37 @@ struct AutocompleteItem: View {
     var body: some View {
         HStack(spacing: 8) {
             if displayIcon {
-                Icon(name: iconNameSource(item.source), size: 16, color: textColor)
+                if let icon = favicon {
+                    Image(nsImage: icon)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(maxWidth: 16, maxHeight: 16)
+                } else {
+                    Icon(name: iconNameSource(item.source), size: 16, color: secondaryTextColor)
+                }
             }
-            HStack(spacing: 2) {
+            HStack(alignment: .firstTextBaseline, spacing: 2) {
                 ZStack {
                     StyledText(verbatim: item.text)
-                        .style(.bold(), ranges: boldTextRanges)
-                        .font(.system(size: 13))
+                        .style(.semibold(), ranges: boldTextRanges)
+                        .font(.system(size: 13, weight: .regular))
                         .foregroundColor(item.source == .url ? subtitleLinkColor : textColor)
                 }
                 if let info = item.information {
                     HStack {
                         StyledText(verbatim: "– \(info)")
-                            .style(.bold(), ranges: boldTextRanges)
-                            .font(.system(size: 10))
-                            .foregroundColor(item.source == .history ? subtitleLinkColor : subtitleTextColor)
+                            .style(.semibold(), ranges: boldTextRanges)
+                            .font(.system(size: 13, weight: .regular))
+                            .foregroundColor(item.source == .history ? subtitleLinkColor : secondaryTextColor)
                     }
                 }
             }
-            if selected {
+            if item.source == .createCard {
                 Spacer()
-                Icon(name: "editor-format_enter", size: 12, color: subtitleTextColor)
+                Icon(name: "shortcut-cmd+return", size: 12, color: selected ? subtitleLinkColor : secondaryTextColor)
+            } else if selected {
+                Spacer()
+                Icon(name: "editor-format_enter", size: 12, color: secondaryTextColor)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -80,6 +94,16 @@ struct AutocompleteItem: View {
         .background(backgroundColor)
         .onHover { v in
             isHovering = v
+        }
+        .onTouchDown { t in
+            isTouchDown = t
+        }
+        .onAppear {
+            if let url = item.url, item.source == .history {
+                FaviconProvider.shared.imageForUrl(url, cacheOnly: true) { (image) in
+                    self.favicon = image
+                }
+            }
         }
         .accessibility(identifier: "autocompleteResult\(selected ? "-selected":"")-\(item.text)-\(item.source)")
     }
