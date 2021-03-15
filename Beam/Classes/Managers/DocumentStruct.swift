@@ -13,21 +13,16 @@ public struct DocumentStruct {
     var deletedAt: Date?
     var data: Data
     let documentType: DocumentType
-    var previousChecksum: String?
     var previousData: Data?
+    var previousChecksum: String?
 
     var uuidString: String {
         id.uuidString.lowercased()
     }
 
-    var previousDataString: String? {
-        guard let previousData = previousData else { return nil }
-        return previousData.asString
-    }
-
     mutating func clearPreviousData() {
-        previousChecksum = nil
         previousData = nil
+        previousChecksum = nil
     }
 
     func copy() -> DocumentStruct {
@@ -38,8 +33,8 @@ public struct DocumentStruct {
                                   deletedAt: deletedAt,
                                   data: data,
                                   documentType: documentType,
-                                  previousChecksum: previousChecksum,
-                                  previousData: previousData)
+                                  previousData: previousData,
+                                  previousChecksum: previousChecksum)
         return copy
     }
 }
@@ -53,7 +48,7 @@ extension DocumentStruct {
         self.documentType = DocumentType(rawValue: document.document_type) ?? .note
         self.data = document.data ?? Data()
         self.previousData = document.beam_api_data
-        self.previousChecksum = document.beam_api_data?.MD5
+        self.previousChecksum = document.beam_api_checksum
     }
 
     func asApiType() -> DocumentAPIType {

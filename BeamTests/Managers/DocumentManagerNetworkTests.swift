@@ -13,49 +13,254 @@ import PMKFoundation
 @testable import Beam
 // swiftlint:disable:next type_body_length
 class DocumentManagerNetworkTests: QuickSpec {
-    lazy var coreDataManager = {
-        CoreDataManager()
-    }()
-    lazy var mainContext = {
-        coreDataManager.mainContext
-    }()
-
     // swiftlint:disable:next function_body_length
     override func spec() {
         // MARK: Properties
+        var coreDataManager: CoreDataManager!
         var sut: DocumentManager!
         var helper: DocumentManagerTestsHelper!
-
-        beforeEach {
-            BeamTestsHelper.login()
-        }
 
         afterEach {
             sut.clearNetworkCalls()
         }
 
-        beforeSuite {
-            // Setup CoreData
-            self.coreDataManager.setup()
-            CoreDataManager.shared = self.coreDataManager
-            sut = DocumentManager(coreDataManager: self.coreDataManager)
-            helper = DocumentManagerTestsHelper(documentManager: sut,
-                                                     coreDataManager: self.coreDataManager)
-
+        beforeEach {
             // Try to avoid issues with BeamTextTests creating documents when parsing links
             BeamNote.clearCancellables()
+            BeamTestsHelper.login()
+        }
+
+        beforeSuite {
+            coreDataManager = CoreDataManager()
+            // Setup CoreData
+            coreDataManager.setup()
+            CoreDataManager.shared = coreDataManager
+            sut = DocumentManager(coreDataManager: coreDataManager)
+            helper = DocumentManagerTestsHelper(documentManager: sut,
+                                                     coreDataManager: coreDataManager)
+
+            helper.deleteAllDocuments()
+            EncryptionManager().clearPrivateKey()
         }
 
         afterSuite {
             BeamTestsHelper.logout()
         }
 
-        describe(".refreshDocuments()") {
+        describe(".uploadAllDocuments()") {
             var docStruct: DocumentStruct!
+            beforeEach {
+                docStruct = helper.createDocumentStruct()
+                helper.saveLocally(docStruct)
+            }
+
             afterEach {
+                assert(AuthenticationManager.shared.isAuthenticated)
                 // Not to leave any on the server
                 helper.deleteDocumentStruct(docStruct)
             }
+
+            context("with Foundation") {
+                it("uploads existing documents") {
+                    let networkCalls = APIRequest.callsCount
+
+                    waitUntil(timeout: .seconds(10)) { done in
+                        sut.uploadAllDocuments { result in
+                            expect { try result.get() }.toNot(throwError())
+                            expect { try result.get() } == true
+                            expect(APIRequest.callsCount - networkCalls) == 1
+                            done()
+                        }
+                    }
+
+                    let remoteStruct = helper.fetchOnAPI(docStruct)
+                    expect(remoteStruct?.id) == docStruct.uuidString
+                    expect(remoteStruct?.data) == docStruct.data.asString
+                }
+
+                context("with encryption") {
+                    it("uploads existing documents") {
+                        Configuration.encryptionEnabled = true
+
+                        let networkCalls = APIRequest.callsCount
+
+                        waitUntil(timeout: .seconds(10)) { done in
+                            sut.uploadAllDocuments { result in
+                                expect { try result.get() }.toNot(throwError())
+                                expect { try result.get() } == true
+                                expect(APIRequest.callsCount - networkCalls) == 1
+                                done()
+                            }
+                        }
+
+                        let remoteStruct = helper.fetchOnAPI(docStruct)
+                        expect(remoteStruct?.id) == docStruct.uuidString
+                        expect(remoteStruct?.data) == docStruct.data.asString
+                        expect(remoteStruct?.encryptedData).to(match("encryptionName\":\"ChaChaPoly"))
+
+                        Configuration.encryptionEnabled = false
+                    }
+                }
+
+                context("with PromiseKit") {
+                    it("uploads existing documents") {
+                        let networkCalls = APIRequest.callsCount
+                        let promise: PromiseKit.Promise<Bool> = sut.uploadAllDocuments()
+
+                        waitUntil(timeout: .seconds(10)) { done in
+                            promise.done { success in
+                                expect(success) == true
+                                done()
+                            }.catch { error in
+                                fail("Should not happen: \(error)")
+                            }
+                        }
+
+                        expect(APIRequest.callsCount - networkCalls) == 1
+
+                        let remoteStruct = helper.fetchOnAPI(docStruct)
+                        expect(remoteStruct?.id) == docStruct.uuidString
+                        expect(remoteStruct?.data) == docStruct.data.asString
+                    }
+
+                    context("with encryption") {
+                        it("uploads existing documents") {
+                            Configuration.encryptionEnabled = true
+
+                            let networkCalls = APIRequest.callsCount
+                            let promise: PromiseKit.Promise<Bool> = sut.uploadAllDocuments()
+
+                            waitUntil(timeout: .seconds(10)) { done in
+                                promise.done { success in
+                                    expect(success) == true
+                                    done()
+                                }.catch { error in
+                                    fail("Should not happen: \(error)")
+                                }
+                            }
+
+                            expect(APIRequest.callsCount - networkCalls) == 1
+
+                            let remoteStruct = helper.fetchOnAPI(docStruct)
+                            expect(remoteStruct?.id) == docStruct.uuidString
+                            expect(remoteStruct?.data) == docStruct.data.asString
+                            expect(remoteStruct?.encryptedData).to(match("encryptionName\":\"ChaChaPoly"))
+
+                            Configuration.encryptionEnabled = false
+                        }
+                    }
+                }
+
+                context("with Promises") {
+                    it("uploads existing documents") {
+                        let networkCalls = APIRequest.callsCount
+                        let promise: Promises.Promise<Bool> = sut.uploadAllDocuments()
+
+                        waitUntil(timeout: .seconds(10)) { done in
+                            promise.then { success in
+                                expect(success) == true
+                                done()
+                            }.catch { error in
+                                fail("Should not happen: \(error)")
+                            }
+                        }
+
+                        expect(APIRequest.callsCount - networkCalls) == 1
+
+                        let remoteStruct = helper.fetchOnAPI(docStruct)
+                        expect(remoteStruct?.id) == docStruct.uuidString
+                        expect(remoteStruct?.data) == docStruct.data.asString
+                    }
+
+                    context("with encryption") {
+                        it("uploads existing documents") {
+                            Configuration.encryptionEnabled = true
+
+                            let networkCalls = APIRequest.callsCount
+                            let promise: Promises.Promise<Bool> = sut.uploadAllDocuments()
+
+                            waitUntil(timeout: .seconds(10)) { done in
+                                promise.then { success in
+                                    expect(success) == true
+                                    done()
+                                }.catch { error in
+                                    fail("Should not happen: \(error)")
+                                }
+                            }
+
+                            expect(APIRequest.callsCount - networkCalls) == 1
+
+                            let remoteStruct = helper.fetchOnAPI(docStruct)
+                            expect(remoteStruct?.id) == docStruct.uuidString
+                            expect(remoteStruct?.data) == docStruct.data.asString
+                            expect(remoteStruct?.encryptedData).to(match("encryptionName\":\"ChaChaPoly"))
+
+                            Configuration.encryptionEnabled = false
+                        }
+                    }
+                }
+            }
+        }
+
+        describe(".refreshDocuments()") {
+            var docStruct: DocumentStruct!
+            afterEach {
+                assert(AuthenticationManager.shared.isAuthenticated)
+                // Not to leave any on the server
+                helper.deleteDocumentStruct(docStruct)
+            }
+
+            context("with encryption") {
+                beforeEach {
+                    Configuration.encryptionEnabled = true
+                    docStruct = helper.createDocumentStruct()
+                    helper.saveLocally(docStruct)
+                    helper.saveRemotely(docStruct)
+                }
+
+                afterEach {
+                    Configuration.encryptionEnabled = false
+                }
+
+                it("refreshes the local document") {
+                    let networkCalls = APIRequest.callsCount
+
+                    waitUntil(timeout: .seconds(10)) { done in
+                        sut.refreshDocuments { result in
+                            expect { try result.get() }.toNot(throwError())
+                            expect { try result.get() } == true
+                            done()
+                        }
+                    }
+                    expect(APIRequest.callsCount - networkCalls) == 1
+                }
+            }
+
+            context("with encryption and unencrypted content on the API side") {
+                beforeEach {
+                    docStruct = helper.createDocumentStruct()
+                    helper.saveLocally(docStruct)
+                    helper.saveRemotely(docStruct)
+                }
+
+                it("refreshes the local document") {
+                    let networkCalls = APIRequest.callsCount
+
+                    Configuration.encryptionEnabled = true
+
+                    waitUntil(timeout: .seconds(10)) { done in
+                        sut.refreshDocuments { result in
+                            expect { try result.get() }.toNot(throwError())
+                            expect { try result.get() } == true
+                            done()
+                        }
+                    }
+                    expect(APIRequest.callsCount - networkCalls) == 1
+
+                    Configuration.encryptionEnabled = false
+                }
+            }
+
 
             context("when remote has the same updatedAt") {
                 beforeEach {
@@ -75,10 +280,27 @@ class DocumentManagerNetworkTests: QuickSpec {
                     waitUntil(timeout: .seconds(10)) { done in
                         sut.refreshDocuments { result in
                             expect { try result.get() }.toNot(throwError())
-                            expect { try result.get() }.to(beTrue())
-                            expect(APIRequest.callsCount - networkCalls) >= 1
+                            expect { try result.get() } == true
                             done()
                         }
+                    }
+                    expect(APIRequest.callsCount - networkCalls) == 1
+                }
+
+                context("with encryption") {
+                    it("refreshes the local document") {
+                        Configuration.encryptionEnabled = true
+                        let networkCalls = APIRequest.callsCount
+
+                        waitUntil(timeout: .seconds(10)) { done in
+                            sut.refreshDocuments { result in
+                                expect { try result.get() }.toNot(throwError())
+                                expect { try result.get() } == true
+                                done()
+                            }
+                        }
+                        expect(APIRequest.callsCount - networkCalls) == 1
+                        Configuration.encryptionEnabled = false
                     }
                 }
             }
@@ -95,17 +317,17 @@ class DocumentManagerNetworkTests: QuickSpec {
                     waitUntil(timeout: .seconds(10)) { done in
                         sut.refreshDocuments { result in
                             expect { try result.get() }.toNot(throwError())
-                            expect { try result.get() }.to(beTrue())
-                            expect(APIRequest.callsCount - networkCalls) >= 1
+                            expect { try result.get() } == true
                             done()
                         }
                     }
+                    expect(APIRequest.callsCount - networkCalls) == 1
 
                     let newDocStruct = sut.loadDocumentById(id: docStruct.id)
                     expect(newDocStruct).toNot(beNil())
                     expect(newDocStruct?.deletedAt).to(beCloseTo(BeamDate.now, within: 1.0))
 
-                    let document = Document.fetchWithId(self.mainContext, docStruct.id)
+                    let document = Document.fetchWithId(coreDataManager.mainContext, docStruct.id)
                     expect(document?.deleted_at).toNot(beNil())
                 }
             }
@@ -115,11 +337,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                     let ancestor = "1\n2\n3"
                     let newRemote = "1\n2\n3\n4"
                     beforeEach {
-                        docStruct = helper.createLocalAndRemoteVersions(ancestor, newRemote: newRemote)
-                    }
-
-                    afterEach {
-                        BeamDate.reset()
+                        docStruct = try? helper.createLocalAndRemoteVersions(ancestor, newRemote: newRemote)
                     }
 
                     it("refreshes the local document") {
@@ -127,13 +345,31 @@ class DocumentManagerNetworkTests: QuickSpec {
                         waitUntil(timeout: .seconds(10)) { done in
                             sut.refreshDocuments { result in
                                 expect { try result.get() }.toNot(throwError())
-                                expect { try result.get() }.to(beTrue())
-                                expect(APIRequest.callsCount - networkCalls).to(equal(1))
+                                expect { try result.get() } == true
                                 done()
                             }
                         }
+                        expect(APIRequest.callsCount - networkCalls) == 1
                         let newDocStruct = sut.loadDocumentById(id: docStruct.id)
-                        expect(newDocStruct?.data).to(equal(newRemote.asData))
+                        expect(newDocStruct?.data) == newRemote.asData
+                    }
+
+                    context("with encryption") {
+                        it("refreshes the local document") {
+                            Configuration.encryptionEnabled = true
+                            let networkCalls = APIRequest.callsCount
+                            waitUntil(timeout: .seconds(10)) { done in
+                                sut.refreshDocuments { result in
+                                    expect { try result.get() }.toNot(throwError())
+                                    expect { try result.get() } == true
+                                    done()
+                                }
+                            }
+                            expect(APIRequest.callsCount - networkCalls) == 1
+                            let newDocStruct = sut.loadDocumentById(id: docStruct.id)
+                            expect(newDocStruct?.data) == newRemote.asData
+                            Configuration.encryptionEnabled = false
+                        }
                     }
                 }
 
@@ -144,11 +380,8 @@ class DocumentManagerNetworkTests: QuickSpec {
                     let merged = "0\n1\n2\n3\n4\n"
 
                     beforeEach {
-                        docStruct = helper.createLocalAndRemoteVersions(ancestor, newLocal: newLocal, newRemote: newRemote)
-                    }
-
-                    afterEach {
-                        BeamDate.reset()
+                        helper.deleteAllDocuments()
+                        docStruct = try? helper.createLocalAndRemoteVersions(ancestor, newLocal: newLocal, newRemote: newRemote)
                     }
 
                     it("refreshes the local document") {
@@ -156,14 +389,33 @@ class DocumentManagerNetworkTests: QuickSpec {
                         waitUntil(timeout: .seconds(10)) { done in
                             sut.refreshDocuments { result in
                                 expect { try result.get() }.toNot(throwError())
-                                expect { try result.get() }.to(beTrue())
-                                expect(APIRequest.callsCount - networkCalls).to(equal(1))
+                                expect { try result.get() } == true
                                 done()
                             }
                         }
+                        expect(APIRequest.callsCount - networkCalls) == 1
 
                         let newDocStruct = sut.loadDocumentById(id: docStruct.id)
-                        expect(newDocStruct?.data.asString).to(equal(merged))
+                        expect(newDocStruct?.data.asString) == merged
+                    }
+
+                    context("with encryption") {
+                        it("refreshes the local document") {
+                            Configuration.encryptionEnabled = true
+                            let networkCalls = APIRequest.callsCount
+                            waitUntil(timeout: .seconds(10)) { done in
+                                sut.refreshDocuments { result in
+                                    expect { try result.get() }.toNot(throwError())
+                                    expect { try result.get() } == true
+                                    done()
+                                }
+                            }
+                            expect(APIRequest.callsCount - networkCalls) == 1
+
+                            let newDocStruct = sut.loadDocumentById(id: docStruct.id)
+                            expect(newDocStruct?.data.asString) == merged
+                            Configuration.encryptionEnabled = false
+                        }
                     }
                 }
             }
@@ -174,27 +426,47 @@ class DocumentManagerNetworkTests: QuickSpec {
                 let newLocal = "2\n2\n3\n"
 
                 beforeEach {
-                    docStruct = helper.createLocalAndRemoteVersions(ancestor, newLocal: newLocal, newRemote: newRemote)
+                    docStruct = try? helper.createLocalAndRemoteVersions(ancestor, newLocal: newLocal, newRemote: newRemote)
                 }
 
-                afterEach {
-                    BeamDate.reset()
-                }
-
-                it("doesn't update the local document, returns error") {
-                    let networkCalls = APIRequest.callsCount
-                    waitUntil(timeout: .seconds(10)) { done in
-                        sut.refreshDocuments { result in
-                            expect { try result.get() }.to(throwError { (error: DocumentManagerError) in
-                                expect(error).to(equal(DocumentManagerError.unresolvedConflict))
-                            })
-                            expect(APIRequest.callsCount - networkCalls).to(equal(1))
-                            done()
+                context("with Foundation") {
+                    it("doesn't update the local document, returns error") {
+                        let networkCalls = APIRequest.callsCount
+                        waitUntil(timeout: .seconds(10)) { done in
+                            sut.refreshDocuments { result in
+                                expect { try result.get() }.to(throwError { (error: DocumentManagerError) in
+                                    expect(error) == DocumentManagerError.unresolvedConflict
+                                })
+                                done()
+                            }
                         }
+                        expect(APIRequest.callsCount - networkCalls) == 1
+
+                        let newDocStruct = sut.loadDocumentById(id: docStruct.id)
+                        expect(newDocStruct?.data.asString) == newLocal
                     }
 
-                    let newDocStruct = sut.loadDocumentById(id: docStruct.id)
-                    expect(newDocStruct?.data.asString).to(equal(newLocal))
+                    context("with encryption") {
+                        it("doesn't update the local document, returns error") {
+                            Configuration.encryptionEnabled = true
+
+                            let networkCalls = APIRequest.callsCount
+                            waitUntil(timeout: .seconds(10)) { done in
+                                sut.refreshDocuments { result in
+                                    expect { try result.get() }.to(throwError { (error: DocumentManagerError) in
+                                        expect(error) == DocumentManagerError.unresolvedConflict
+                                    })
+                                    done()
+                                }
+                            }
+                            expect(APIRequest.callsCount - networkCalls) == 1
+
+                            let newDocStruct = sut.loadDocumentById(id: docStruct.id)
+                            expect(newDocStruct?.data.asString) == newLocal
+
+                            Configuration.encryptionEnabled = false
+                        }
+                    }
                 }
             }
         }
@@ -223,46 +495,102 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                 context("with Foundation") {
                     it("doesn't refresh the local document") {
-                        expect(AuthenticationManager.shared.isAuthenticated).to(beTrue())
-                        expect(Configuration.networkEnabled).to(beTrue())
+                        expect(AuthenticationManager.shared.isAuthenticated) == true
+                        expect(Configuration.networkEnabled) == true
 
                         waitUntil(timeout: .seconds(10)) { done in
                             sut.refreshDocument(docStruct) { result in
                                 expect { try result.get() }.toNot(throwError())
-                                expect { try result.get() }.to(beFalse())
+                                expect { try result.get() } == false
                                 done()
                             }
                         }
 
-                        expect(APIRequest.callsCount - networkCalls).to(equal(1))
+                        expect(APIRequest.callsCount - networkCalls) == 1
+                    }
+
+                    context("with encryption") {
+                        it("doesn't refresh the local document") {
+                            Configuration.encryptionEnabled = true
+
+                            waitUntil(timeout: .seconds(10)) { done in
+                                sut.refreshDocument(docStruct) { result in
+                                    expect { try result.get() }.toNot(throwError())
+                                    expect { try result.get() } == false
+                                    done()
+                                }
+                            }
+
+                            expect(APIRequest.callsCount - networkCalls) == 1
+                            Configuration.encryptionEnabled = false
+                        }
                     }
                 }
 
                 context("with PromiseKit") {
                     it("doesn't refresh the local document") {
+                        let promise: PromiseKit.Promise<Bool> = sut.refreshDocument(docStruct)
+
                         waitUntil(timeout: .seconds(10)) { done in
-                            let promise: PromiseKit.Promise<Bool> = sut.refreshDocument(docStruct)
                             promise.done { refreshed in
-                                expect(refreshed).to(beFalse())
+                                expect(refreshed) == false
                                 done()
-                            }.catch { _ in }
+                            }.catch { fail("Should not be called: \($0)") }
                         }
 
-                        expect(APIRequest.callsCount - networkCalls).to(equal(1))
+                        expect(APIRequest.callsCount - networkCalls) == 1
+                    }
+
+                    context("with encryption") {
+                        it("doesn't refresh the local document") {
+                            Configuration.encryptionEnabled = true
+
+                            let promise: PromiseKit.Promise<Bool> = sut.refreshDocument(docStruct)
+
+                            waitUntil(timeout: .seconds(10)) { done in
+                                promise.done { refreshed in
+                                    expect(refreshed) == false
+                                    done()
+                                }.catch { fail("Should not be called: \($0)") }
+                            }
+
+                            expect(APIRequest.callsCount - networkCalls) == 1
+                            Configuration.encryptionEnabled = false
+                        }
                     }
                 }
 
                 context("with Promises") {
                     it("doesn't refresh the local document") {
+                        let promise: Promises.Promise<Bool> = sut.refreshDocument(docStruct)
+
                         waitUntil(timeout: .seconds(10)) { done in
-                            let promise: Promises.Promise<Bool> = sut.refreshDocument(docStruct)
                             promise.then { refreshed in
-                                expect(refreshed).to(beFalse())
+                                expect(refreshed) == false
                                 done()
                             }
                         }
 
-                        expect(APIRequest.callsCount - networkCalls).to(equal(1))
+                        expect(APIRequest.callsCount - networkCalls) == 1
+                    }
+
+                    context("with encryption") {
+                        it("doesn't refresh the local document") {
+                            Configuration.encryptionEnabled = true
+
+                            let promise: Promises.Promise<Bool> = sut.refreshDocument(docStruct)
+
+                            waitUntil(timeout: .seconds(10)) { done in
+                                promise.then { refreshed in
+                                    expect(refreshed) == false
+                                    done()
+                                }
+                            }
+
+                            expect(APIRequest.callsCount - networkCalls) == 1
+
+                            Configuration.encryptionEnabled = false
+                        }
                     }
                 }
             }
@@ -273,12 +601,46 @@ class DocumentManagerNetworkTests: QuickSpec {
                     let newRemote = "1\n2\n3\n4"
 
                     beforeEach {
-                        docStruct = helper.createLocalAndRemoteVersions(ancestor, newRemote: newRemote)
+                        docStruct = try? helper.createLocalAndRemoteVersions(ancestor, newRemote: newRemote)
                         networkCalls = APIRequest.callsCount
                     }
 
-                    afterEach {
-                        BeamDate.reset()
+                    context("with Foundation") {
+                        it("refreshes the local document") {
+                            waitUntil(timeout: .seconds(10)) { done in
+                                sut.refreshDocument(docStruct) { result in
+                                    expect { try result.get() }.toNot(throwError())
+                                    expect { try result.get() } == true
+                                    done()
+                                }
+                            }
+
+                            expect(APIRequest.callsCount - networkCalls) == 2
+
+                            let newDocStruct = sut.loadDocumentById(id: docStruct.id)
+                            expect(newDocStruct?.data) == newRemote.asData
+                        }
+
+                        context("with encryption") {
+                            it("refreshes the local document") {
+                                Configuration.encryptionEnabled = true
+
+                                waitUntil(timeout: .seconds(10)) { done in
+                                    sut.refreshDocument(docStruct) { result in
+                                        expect { try result.get() }.toNot(throwError())
+                                        expect { try result.get() } == true
+                                        done()
+                                    }
+                                }
+
+                                expect(APIRequest.callsCount - networkCalls) == 2
+
+                                let newDocStruct = sut.loadDocumentById(id: docStruct.id)
+                                expect(newDocStruct?.data) == newRemote.asData
+
+                                Configuration.encryptionEnabled = false
+                            }
+                        }
                     }
 
                     context("with PromiseKit") {
@@ -286,15 +648,15 @@ class DocumentManagerNetworkTests: QuickSpec {
                             waitUntil(timeout: .seconds(10)) { done in
                                 let promise: PromiseKit.Promise<Bool> = sut.refreshDocument(docStruct)
                                 promise.done { refreshed in
-                                    expect(refreshed).to(beTrue())
+                                    expect(refreshed) == true
                                     done()
-                                }.catch { _ in }
+                                }.catch { fail("Should not be called: \($0)") }
                             }
 
-                            expect(APIRequest.callsCount - networkCalls).to(equal(2))
+                            expect(APIRequest.callsCount - networkCalls) == 2
 
                             let newDocStruct = sut.loadDocumentById(id: docStruct.id)
-                            expect(newDocStruct?.data).to(equal(newRemote.asData))
+                            expect(newDocStruct?.data) == newRemote.asData
                         }
                     }
 
@@ -303,15 +665,15 @@ class DocumentManagerNetworkTests: QuickSpec {
                             waitUntil(timeout: .seconds(10)) { done in
                                 let promise: Promises.Promise<Bool> = sut.refreshDocument(docStruct)
                                 promise.then { refreshed in
-                                    expect(refreshed).to(beTrue())
+                                    expect(refreshed) == true
                                     done()
                                 }
                             }
 
-                            expect(APIRequest.callsCount - networkCalls).to(equal(2))
+                            expect(APIRequest.callsCount - networkCalls) == 2
 
                             let newDocStruct = sut.loadDocumentById(id: docStruct.id)
-                            expect(newDocStruct?.data).to(equal(newRemote.asData))
+                            expect(newDocStruct?.data) == newRemote.asData
                         }
                     }
                 }
@@ -323,11 +685,51 @@ class DocumentManagerNetworkTests: QuickSpec {
                     let merged = "0\n1\n2\n3\n4\n"
 
                     beforeEach {
-                        docStruct = helper.createLocalAndRemoteVersions(ancestor, newLocal: newLocal, newRemote: newRemote)
+                        docStruct = try? helper.createLocalAndRemoteVersions(ancestor, newLocal: newLocal, newRemote: newRemote)
                     }
 
-                    afterEach {
-                        BeamDate.reset()
+                    context("with Foundation") {
+                        it("refreshes the local document") {
+                            let networkCalls = APIRequest.callsCount
+
+                            waitUntil(timeout: .seconds(10)) { done in
+
+                                sut.refreshDocument(docStruct) { result in
+                                    expect { try result.get() }.toNot(throwError())
+                                    expect { try result.get() } == true
+                                    done()
+                                }
+                            }
+
+                            expect([2, 5]).to(contain(APIRequest.callsCount - networkCalls))
+
+                            let newDocStruct = sut.loadDocumentById(id: docStruct.id)
+                            expect(newDocStruct?.data.asString) == merged
+                        }
+
+                        context("with encryption") {
+                            it("refreshes the local document") {
+                                Configuration.encryptionEnabled = true
+
+                                let networkCalls = APIRequest.callsCount
+
+                                waitUntil(timeout: .seconds(10)) { done in
+
+                                    sut.refreshDocument(docStruct) { result in
+                                        expect { try result.get() }.toNot(throwError())
+                                        expect { try result.get() } == true
+                                        done()
+                                    }
+                                }
+
+                                expect([2, 5]).to(contain(APIRequest.callsCount - networkCalls))
+
+                                let newDocStruct = sut.loadDocumentById(id: docStruct.id)
+                                expect(newDocStruct?.data.asString) == merged
+
+                                Configuration.encryptionEnabled = false
+                            }
+                        }
                     }
 
                     context("with PromiseKit") {
@@ -337,15 +739,15 @@ class DocumentManagerNetworkTests: QuickSpec {
                             waitUntil(timeout: .seconds(10)) { done in
                                 let promise: PromiseKit.Promise<Bool> = sut.refreshDocument(docStruct)
                                 promise.done { refreshed in
-                                    expect(refreshed).to(beTrue())
+                                    expect(refreshed) == true
                                     done()
-                                }.catch { _ in }
+                                }.catch { fail("Should not be called: \($0)") }
                             }
 
                             expect([2, 5]).to(contain(APIRequest.callsCount - networkCalls))
 
                             let newDocStruct = sut.loadDocumentById(id: docStruct.id)
-                            expect(newDocStruct?.data.asString).to(equal(merged))
+                            expect(newDocStruct?.data.asString) == merged
                         }
                     }
 
@@ -356,7 +758,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                             waitUntil(timeout: .seconds(10)) { done in
                                 let promise: Promises.Promise<Bool> = sut.refreshDocument(docStruct)
                                 promise.then { refreshed in
-                                    expect(refreshed).to(beTrue())
+                                    expect(refreshed) == true
                                     done()
                                 }
                             }
@@ -364,7 +766,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                             expect([2, 5]).to(contain(APIRequest.callsCount - networkCalls))
 
                             let newDocStruct = sut.loadDocumentById(id: docStruct.id)
-                            expect(newDocStruct?.data.asString).to(equal(merged))
+                            expect(newDocStruct?.data.asString) == merged
                         }
                     }
                 }
@@ -375,6 +777,25 @@ class DocumentManagerNetworkTests: QuickSpec {
                     docStruct = helper.createDocumentStruct()
                     helper.saveLocally(docStruct)
                     networkCalls = APIRequest.callsCount
+                }
+
+                context("with Foundation") {
+                    it("doesn't refresh the local document") {
+                        waitUntil(timeout: .seconds(10)) { done in
+                            sut.refreshDocument(docStruct) { result in
+                                expect { try result.get() }.to(throwError { error in
+                                    expect(error).to(matchError(APIRequestError.notFound))
+                                })
+                                done()
+                            }
+                        }
+
+                        expect(APIRequest.callsCount - networkCalls) == 1
+
+                        let newDocStruct = sut.loadDocumentById(id: docStruct.id)
+                        expect(newDocStruct).toNot(beNil())
+                        expect(newDocStruct?.deletedAt).toNot(beNil())
+                    }
                 }
 
                 context("with PromiseKit") {
@@ -389,7 +810,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                                 }
                         }
 
-                        expect(APIRequest.callsCount - networkCalls).to(equal(1))
+                        expect(APIRequest.callsCount - networkCalls) == 1
 
                         let newDocStruct = sut.loadDocumentById(id: docStruct.id)
                         expect(newDocStruct?.deletedAt).toNot(beNil())
@@ -408,7 +829,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                             }
                         }
 
-                        expect(APIRequest.callsCount - networkCalls).to(equal(1))
+                        expect(APIRequest.callsCount - networkCalls) == 1
 
                         let newDocStruct = sut.loadDocumentById(id: docStruct.id)
                         expect(newDocStruct?.deletedAt).toNot(beNil())
@@ -431,14 +852,14 @@ class DocumentManagerNetworkTests: QuickSpec {
                 context("without conflict") {
                     it("saves the document locally") {
                         waitUntil(timeout: .seconds(10)) { done in
-                            sut.saveDocument(docStruct) { _ in
+                            sut.saveDocument(docStruct, completion:  { _ in
                                 done()
-                            }
+                            })
                         }
 
-                        let count = Document.countWithPredicate(self.mainContext,
+                        let count = Document.countWithPredicate(coreDataManager.mainContext,
                                                                 NSPredicate(format: "id = %@", docStruct.id as CVarArg))
-                        expect(count).to(equal(1))
+                        expect(count) == 1
                     }
 
                     context("with Foundation") {
@@ -450,12 +871,12 @@ class DocumentManagerNetworkTests: QuickSpec {
                             waitUntil(timeout: .seconds(10)) { done in
                                 sut.saveDocumentStructOnAPI(docStruct) { result in
                                     expect { try result.get() }.toNot(throwError())
-                                    expect { try result.get() }.to(beTrue())
+                                    expect { try result.get() } == true
                                     done()
                                 }
                             }
 
-                            expect(helper.fetchOnAPI(docStruct)?.id).to(equal(docStruct.uuidString))
+                            expect(helper.fetchOnAPI(docStruct)?.id) == docStruct.uuidString
                         }
 
                         it("cancels previous unfinished saves") {
@@ -489,6 +910,40 @@ class DocumentManagerNetworkTests: QuickSpec {
                             let remoteStruct = helper.fetchOnAPI(docStruct)
                             expect(remoteStruct?.title) == newTitle
                         }
+
+                        context("with encryption") {
+                            it("saves the document on the API") {
+                                Configuration.encryptionEnabled = true
+
+                                waitUntil(timeout: .seconds(10)) { done in
+                                    sut.saveDocument(docStruct, true, { result in
+                                        expect { try result.get() }.toNot(throwError())
+                                        expect { try result.get() } == true
+                                        done()
+                                    }, completion: nil)
+                                }
+
+                                // Making sure the API side has encrypted data
+                                let semaphore = DispatchSemaphore(value: 0)
+                                _ = try? DocumentRequest().fetchDocument(docStruct.uuidString) { result in
+                                    let documentAPIType = try? result.get()
+                                    expect(documentAPIType?.encryptedData).to(match("encryptionName\":\"ChaChaPoly"))
+
+                                    semaphore.signal()
+                                }
+                                semaphore.wait()
+
+                                let savedDoc = helper.fetchOnAPI(docStruct)
+
+                                // DocumentManager returns unencrypted data
+                                expect(savedDoc?.id) == docStruct.uuidString
+                                expect(savedDoc?.data?.asData) == docStruct.data
+
+                                helper.deleteDocumentStruct(docStruct)
+
+                                Configuration.encryptionEnabled = false
+                            }
+                        }
                     }
 
                     context("with PromiseKit") {
@@ -497,15 +952,16 @@ class DocumentManagerNetworkTests: QuickSpec {
                         }
 
                         it("saves the document on the API") {
+                            let promise: PromiseKit.Promise<Bool> = sut.saveDocumentOnApi(docStruct)
+
                             waitUntil(timeout: .seconds(10)) { done in
-                                let promise: PromiseKit.Promise<Bool> = sut.saveDocumentOnApi(docStruct)
                                 promise.done { success in
                                     expect(success) == true
                                     done()
                                 }.catch { fail("Should not be called: \($0)") }
                             }
 
-                            expect(helper.fetchOnAPI(docStruct)?.id).to(equal(docStruct.uuidString))
+                            expect(helper.fetchOnAPI(docStruct)?.id) == docStruct.uuidString
                         }
 
                         it("cancels previous unfinished saves") {
@@ -540,6 +996,41 @@ class DocumentManagerNetworkTests: QuickSpec {
                             let remoteStruct = helper.fetchOnAPI(docStruct)
                             expect(remoteStruct?.title) == newTitle
                         }
+
+                        context("with encryption") {
+                            it("saves the document on the API") {
+                                Configuration.encryptionEnabled = true
+
+                                let promise: PromiseKit.Promise<Bool> = sut.saveDocumentOnApi(docStruct)
+
+                                waitUntil(timeout: .seconds(10)) { done in
+                                    promise.done { success in
+                                        expect(success) == true
+                                        done()
+                                    }.catch { fail("Should not be called: \($0)") }
+                                }
+
+                                // Making sure the API side has encrypted data
+                                let semaphore = DispatchSemaphore(value: 0)
+                                _ = try? DocumentRequest().fetchDocument(docStruct.uuidString) { result in
+                                    let documentAPIType = try? result.get()
+                                    expect(documentAPIType?.encryptedData).to(match("encryptionName\":\"ChaChaPoly"))
+
+                                    semaphore.signal()
+                                }
+                                semaphore.wait()
+
+                                let savedDoc = helper.fetchOnAPI(docStruct)
+
+                                // DocumentManager returns unencrypted data
+                                expect(savedDoc?.id) == docStruct.uuidString
+                                expect(savedDoc?.data?.asData) == docStruct.data
+
+                                helper.deleteDocumentStruct(docStruct)
+
+                                Configuration.encryptionEnabled = false
+                            }
+                        }
                     }
 
                     context("with Promises") {
@@ -557,7 +1048,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                                 }.catch { fail("Should not be called: \($0)") }
                             }
 
-                            expect(helper.fetchOnAPI(docStruct)?.id).to(equal(docStruct.uuidString))
+                            expect(helper.fetchOnAPI(docStruct)?.id) == docStruct.uuidString
                         }
 
                         it("cancels previous unfinished saves") {
@@ -592,6 +1083,41 @@ class DocumentManagerNetworkTests: QuickSpec {
                             let remoteStruct = helper.fetchOnAPI(docStruct)
                             expect(remoteStruct?.title) == newTitle
                         }
+
+                        context("with encryption") {
+                            it("saves the document on the API") {
+                                Configuration.encryptionEnabled = true
+
+                                let promise: Promises.Promise<Bool> = sut.saveDocumentOnApi(docStruct)
+
+                                waitUntil(timeout: .seconds(10)) { done in
+                                    promise.then { success in
+                                        expect(success) == true
+                                        done()
+                                    }.catch { fail("Should not be called: \($0)") }
+                                }
+
+                                // Making sure the API side has encrypted data
+                                let semaphore = DispatchSemaphore(value: 0)
+                                _ = try? DocumentRequest().fetchDocument(docStruct.uuidString) { result in
+                                    let documentAPIType = try? result.get()
+                                    expect(documentAPIType?.encryptedData).to(match("encryptionName\":\"ChaChaPoly"))
+
+                                    semaphore.signal()
+                                }
+                                semaphore.wait()
+
+                                let savedDoc = helper.fetchOnAPI(docStruct)
+
+                                // DocumentManager returns unencrypted data
+                                expect(savedDoc?.id) == docStruct.uuidString
+                                expect(savedDoc?.data?.asData) == docStruct.data
+
+                                helper.deleteDocumentStruct(docStruct)
+
+                                Configuration.encryptionEnabled = false
+                            }
+                        }
                     }
                 }
 
@@ -601,32 +1127,58 @@ class DocumentManagerNetworkTests: QuickSpec {
                     let newLocal = "2\n2\n3\n"
 
                     beforeEach {
-                        docStruct = helper.createLocalAndRemoteVersions(ancestor, newLocal: newLocal, newRemote: newRemote)
-                    }
-
-                    afterEach {
-                        BeamDate.reset()
+                        docStruct = try? helper.createLocalAndRemoteVersions(ancestor, newLocal: newLocal, newRemote: newRemote)
                     }
 
                     context("with Foundation") {
                         it("updates the remote document with the local version") {
+                            let localDocStruct = sut.loadDocumentById(id: docStruct.id)
+                            // MD5 for ancestor string, making sure it's locally saved
+                            expect(localDocStruct?.previousChecksum) == "c0710d6b4f15dfa88f600b0e6b624077"
+
                             let networkCalls = APIRequest.callsCount
 
                             waitUntil(timeout: .seconds(10)) { done in
                                 sut.saveDocumentStructOnAPI(docStruct) { result in
                                     expect { try result.get() }.toNot(throwError())
-                                    expect { try result.get() }.to(beTrue())
+                                    expect { try result.get() } == true
 
                                     // When this is failing randomly, rerun. This is because of the way
                                     // `BeamNote` saves document looking for links
-                                    expect(APIRequest.callsCount - networkCalls).to(equal(3))
                                     done()
                                 }
                             }
 
+                            expect(APIRequest.callsCount - networkCalls) == 3
+
                             let newDocStruct = sut.loadDocumentById(id: docStruct.id)
-                            expect(newDocStruct?.data.asString).to(equal(newLocal))
+                            expect(newDocStruct?.data.asString) == newLocal
                             expect(helper.fetchOnAPIWithLatency(docStruct, newLocal)) == true
+                        }
+
+                        context("with encryption") {
+                            it("updates the remote document with the local version") {
+                                Configuration.encryptionEnabled = true
+
+                                let networkCalls = APIRequest.callsCount
+
+                                waitUntil(timeout: .seconds(10)) { done in
+                                    sut.saveDocument(docStruct, true, { result in
+                                        expect { try result.get() }.toNot(throwError())
+                                        expect { try result.get() } == true
+                                        done()
+                                    }, completion: nil)
+                                }
+
+                                // When this is failing randomly, rerun. This is because of the way
+                                // `BeamNote` saves document looking for links
+                                expect(APIRequest.callsCount - networkCalls) == 3
+
+                                let newDocStruct = sut.loadDocumentById(id: docStruct.id)
+                                expect(newDocStruct?.data.asString) == newLocal
+                                expect(helper.fetchOnAPIWithLatency(docStruct, newLocal)) == true
+                                Configuration.encryptionEnabled = false
+                            }
                         }
                     }
 
@@ -647,11 +1199,40 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                             // When this is failing randomly, rerun. This is because of the way
                             // `BeamNote` saves document looking for links
-                            expect(APIRequest.callsCount - networkCalls).to(equal(3))
+                            expect(APIRequest.callsCount - networkCalls) == 3
 
                             let newDocStruct = sut.loadDocumentById(id: docStruct.id)
-                            expect(newDocStruct?.data.asString).to(equal(newLocal))
+                            expect(newDocStruct?.data.asString) == newLocal
                             expect(helper.fetchOnAPIWithLatency(docStruct, newLocal)) == true
+                        }
+
+                        context("with encryption") {
+                            it("updates the remote document with the local version") {
+                                Configuration.encryptionEnabled = true
+
+                                let networkCalls = APIRequest.callsCount
+
+                                waitUntil(timeout: .seconds(10)) { done in
+                                    let promise: PromiseKit.Promise<Bool> = sut.saveDocumentOnApi(docStruct)
+
+                                    promise.done { success in
+                                        expect(success) == true
+                                        done()
+                                    }.catch { error in
+                                        fail("Error: \(error)")
+                                    }
+                                }
+
+                                // When this is failing randomly, rerun. This is because of the way
+                                // `BeamNote` saves document looking for links
+                                expect(APIRequest.callsCount - networkCalls) == 3
+
+                                let newDocStruct = sut.loadDocumentById(id: docStruct.id)
+                                expect(newDocStruct?.data.asString) == newLocal
+                                expect(helper.fetchOnAPIWithLatency(docStruct, newLocal)) == true
+
+                                Configuration.encryptionEnabled = false
+                            }
                         }
                     }
 
@@ -672,11 +1253,40 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                             // When this is failing randomly, rerun. This is because of the way
                             // `BeamNote` saves document looking for links
-                            expect(APIRequest.callsCount - networkCalls).to(equal(3))
+                            expect(APIRequest.callsCount - networkCalls) == 3
 
                             let newDocStruct = sut.loadDocumentById(id: docStruct.id)
-                            expect(newDocStruct?.data.asString).to(equal(newLocal))
+                            expect(newDocStruct?.data.asString) == newLocal
                             expect(helper.fetchOnAPIWithLatency(docStruct, newLocal)) == true
+                        }
+
+                        context("with encryption") {
+                            it("updates the remote document with the local version") {
+                                Configuration.encryptionEnabled = true
+
+                                let networkCalls = APIRequest.callsCount
+
+                                waitUntil(timeout: .seconds(10)) { done in
+                                    let promise: Promises.Promise<Bool> = sut.saveDocumentOnApi(docStruct)
+
+                                    promise.then { success in
+                                        expect(success) == true
+                                        done()
+                                    }.catch {
+                                        fail("Error: \($0)")
+                                    }
+                                }
+
+                                // When this is failing randomly, rerun. This is because of the way
+                                // `BeamNote` saves document looking for links
+                                expect(APIRequest.callsCount - networkCalls) == 3
+
+                                let newDocStruct = sut.loadDocumentById(id: docStruct.id)
+                                expect(newDocStruct?.data.asString) == newLocal
+                                expect(helper.fetchOnAPIWithLatency(docStruct, newLocal)) == true
+
+                                Configuration.encryptionEnabled = false
+                            }
                         }
                     }
                 }
@@ -688,11 +1298,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                     let merged = "0\n1\n2\n3\n4\n"
 
                     beforeEach {
-                        docStruct = helper.createLocalAndRemoteVersions(ancestor, newLocal: newLocal, newRemote: newRemote)
-                    }
-
-                    afterEach {
-                        BeamDate.reset()
+                        docStruct = try? helper.createLocalAndRemoteVersions(ancestor, newLocal: newLocal, newRemote: newRemote)
                     }
 
                     context("with Foundation") {
@@ -700,20 +1306,42 @@ class DocumentManagerNetworkTests: QuickSpec {
                             let networkCalls = APIRequest.callsCount
 
                             waitUntil(timeout: .seconds(10)) { done in
-                                sut.saveDocumentStructOnAPI(docStruct) { result in
+                                sut.saveDocument(docStruct, true, { result in
                                     expect { try result.get() }.toNot(throwError())
-                                    expect { try result.get() }.to(beTrue())
+                                    expect { try result.get() } == true
                                     done()
-                                }
+                                }, completion: nil)
                             }
 
-                            // We expect 2 calls, but sometimes 5. This is because of the way
-                            // `BeamNote` saves document looking for links
-                            expect(APIRequest.callsCount - networkCalls) >= 1
+                            expect(APIRequest.callsCount - networkCalls) == 3
 
                             let newDocStruct = sut.loadDocumentById(id: docStruct.id)
-                            expect(newDocStruct?.data.asString).to(equal(merged))
+                            expect(newDocStruct?.data.asString) == merged
                             expect(helper.fetchOnAPIWithLatency(docStruct, merged)) == true
+                        }
+
+                        context("with encryption") {
+                            it("updates the remote document") {
+                                Configuration.encryptionEnabled = true
+
+                                let networkCalls = APIRequest.callsCount
+
+                                waitUntil(timeout: .seconds(10)) { done in
+                                    sut.saveDocument(docStruct, true, { result in
+                                        expect { try result.get() }.toNot(throwError())
+                                        expect { try result.get() } == true
+                                        done()
+                                    }, completion: nil)
+                                }
+
+                                expect(APIRequest.callsCount - networkCalls) == 3
+
+                                let newDocStruct = sut.loadDocumentById(id: docStruct.id)
+                                expect(newDocStruct?.data.asString) == merged
+                                expect(helper.fetchOnAPIWithLatency(docStruct, merged)) == true
+
+                                Configuration.encryptionEnabled = false
+                            }
                         }
                     }
 
@@ -727,14 +1355,39 @@ class DocumentManagerNetworkTests: QuickSpec {
                                 promise.done { success in
                                     expect(success) == true
                                     done()
-                                }.catch { _ in }
+                                }.catch { fail("Should not be called: \($0)") }
                             }
 
-                            expect(APIRequest.callsCount - networkCalls) >= 1
+                            expect(APIRequest.callsCount - networkCalls) == 3
 
                             let newDocStruct = sut.loadDocumentById(id: docStruct.id)
-                            expect(newDocStruct?.data.asString).to(equal(merged))
+                            expect(newDocStruct?.data.asString) == merged
                             expect(helper.fetchOnAPIWithLatency(docStruct, merged)) == true
+                        }
+
+                        context("with encryption") {
+                            it("updates the remote document") {
+                                Configuration.encryptionEnabled = true
+
+                                let networkCalls = APIRequest.callsCount
+
+                                waitUntil(timeout: .seconds(10)) { done in
+                                    let promise: PromiseKit.Promise<Bool> = sut.saveDocumentOnApi(docStruct)
+
+                                    promise.done { success in
+                                        expect(success) == true
+                                        done()
+                                    }.catch { fail("Should not be called: \($0)") }
+                                }
+
+                                expect(APIRequest.callsCount - networkCalls) == 3
+
+                                let newDocStruct = sut.loadDocumentById(id: docStruct.id)
+                                expect(newDocStruct?.data.asString) == merged
+                                expect(helper.fetchOnAPIWithLatency(docStruct, merged)) == true
+
+                                Configuration.encryptionEnabled = false
+                            }
                         }
                     }
 
@@ -748,14 +1401,39 @@ class DocumentManagerNetworkTests: QuickSpec {
                                 promise.then { success in
                                     expect(success) == true
                                     done()
-                                }.catch { _ in }
+                                }.catch { fail("Should not be called: \($0)") }
                             }
 
-                            expect(APIRequest.callsCount - networkCalls) >= 1
+                            expect(APIRequest.callsCount - networkCalls) == 3
 
                             let newDocStruct = sut.loadDocumentById(id: docStruct.id)
-                            expect(newDocStruct?.data.asString).to(equal(merged))
+                            expect(newDocStruct?.data.asString) == merged
                             expect(helper.fetchOnAPIWithLatency(docStruct, merged)) == true
+                        }
+
+                        context("with encryption") {
+                            it("updates the remote document") {
+                                Configuration.encryptionEnabled = true
+
+                                let networkCalls = APIRequest.callsCount
+
+                                waitUntil(timeout: .seconds(10)) { done in
+                                    let promise: Promises.Promise<Bool> = sut.saveDocumentOnApi(docStruct)
+
+                                    promise.then { success in
+                                        expect(success) == true
+                                        done()
+                                    }.catch { fail("Should not be called: \($0)") }
+                                }
+
+                                expect(APIRequest.callsCount - networkCalls) == 3
+
+                                let newDocStruct = sut.loadDocumentById(id: docStruct.id)
+                                expect(newDocStruct?.data.asString) == merged
+                                expect(helper.fetchOnAPIWithLatency(docStruct, merged)) == true
+
+                                Configuration.encryptionEnabled = false
+                            }
                         }
                     }
                 }

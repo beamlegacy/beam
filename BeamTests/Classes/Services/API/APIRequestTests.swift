@@ -54,7 +54,7 @@ class APIRequestTests: QuickSpec {
                 }
 
                 it("manages errors") {
-                    waitUntil(timeout: .seconds(1)) { done in
+                    waitUntil(timeout: .seconds(10)) { done in
                         _ = try? self.sut.performRequest(bodyParamsRequest: bodyParamsRequest,
                                                               authenticatedCall: false) { (result: Swift.Result<ForgotPassword, Error>) in
                             expect { try result.get() }.to(throwError { (error: NSError) in
@@ -87,7 +87,7 @@ class APIRequestTests: QuickSpec {
                 }
 
                 it("manages errors") {
-                    waitUntil(timeout: .seconds(1)) { done in
+                    waitUntil(timeout: .seconds(10)) { done in
                         let promise: PromiseKit.Promise<ForgotPassword> = self.sut
                             .performRequest(bodyParamsRequest: bodyParamsRequest,
                                             authenticatedCall: false)

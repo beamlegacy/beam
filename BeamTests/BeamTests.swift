@@ -9,11 +9,11 @@ class BeamTests: XCTestCase {
 
     func testMayBeURL() {
         for url in validURLs {
-            expect(url.maybeURL).to(beTrue())
+            expect(url.maybeURL) == true
         }
 
         for url in invalidURLs {
-            expect(url.maybeURL).to(beFalse())
+            expect(url.maybeURL) == false
         }
     }
 }

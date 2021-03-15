@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="17709" systemVersion="20C69" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithCloudKit="YES" userDefinedModelVersionIdentifier="">
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="17709" systemVersion="20D80" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithCloudKit="YES" userDefinedModelVersionIdentifier="">
     <entity name="Bullet" representedClassName=".Bullet" syncable="YES">
         <attribute name="apiSent" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
         <attribute name="content" attributeType="String" defaultValueString=""/>
@@ -20,6 +20,7 @@
         </uniquenessConstraints>
     </entity>
     <entity name="Document" representedClassName=".Document" syncable="YES">
+        <attribute name="beam_api_checksum" optional="YES" attributeType="String"/>
         <attribute name="beam_api_data" optional="YES" attributeType="Binary"/>
         <attribute name="created_at" attributeType="Date" defaultDateTimeInterval="628161600" usesScalarValueType="NO"/>
         <attribute name="data" optional="YES" attributeType="Binary"/>
@@ -70,7 +71,7 @@
     </entity>
     <elements>
         <element name="Bullet" positionX="-54" positionY="18" width="128" height="209"/>
-        <element name="Document" positionX="-176.8372802734375" positionY="-258.5739135742188" width="128" height="119"/>
+        <element name="Document" positionX="-176.8372802734375" positionY="-258.5739135742188" width="128" height="164"/>
         <element name="Note" positionX="-489.015625" positionY="-17.69921875" width="128" height="179"/>
         <element name="StoredLink" positionX="-410.7252197265625" positionY="-248.30859375" width="128" height="74"/>
     </elements>

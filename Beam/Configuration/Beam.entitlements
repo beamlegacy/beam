@@ -7,6 +7,9 @@
 	<key>com.apple.developer.associated-domains</key>
 	<array>
 		<string>applinks:beamapp.co</string>
+		<string>webcredentials:beamapp.co</string>
+		<string>webcredentials:app.beamapp.co</string>
+		<string>applinks:app.beamapp.co</string>
 	</array>
 	<key>com.apple.security.app-sandbox</key>
 	<true/>

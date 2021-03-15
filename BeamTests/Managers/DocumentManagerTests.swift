@@ -79,9 +79,9 @@ class DocumentManagerTests: QuickSpec {
                 it("saves document") {
                     let docStruct = helper.createDocumentStruct()
                     waitUntil(timeout: .seconds(10)) { done in
-                        sut.saveDocument(docStruct) { _ in
+                        sut.saveDocument(docStruct, completion:  { _ in
                             done()
-                        }
+                        })
                     }
 
                     let count = Document.countWithPredicate(mainContext,
@@ -94,13 +94,11 @@ class DocumentManagerTests: QuickSpec {
                     let before = DocumentManager.savedCount
 
                     for _ in 0..<5 {
-                        sut.saveDocument(docStruct) { _ in }
+                        sut.saveDocument(docStruct, completion: { _ in })
                     }
 
                     waitUntil(timeout: .seconds(10)) { done in
-                        sut.saveDocument(docStruct) { _ in
-                            done()
-                        }
+                        sut.saveDocument(docStruct, completion: { _ in done() })
                     }
 
                     // Testing `== 1` might sometimes fail because of speed issue. We want to
@@ -118,19 +116,19 @@ class DocumentManagerTests: QuickSpec {
                         docStruct2.title = docStruct.title
 
                         waitUntil(timeout: .seconds(10)) { done in
-                            sut.saveDocument(docStruct2) { result in
+                            sut.saveDocument(docStruct2, completion: { result in
                                 expect { try result.get() }.to(throwError())
                                 done()
-                            }
+                            })
                         }
 
                         docStruct2.deletedAt = Date()
 
                         waitUntil(timeout: .seconds(10)) { done in
-                            sut.saveDocument(docStruct2) { result in
+                            sut.saveDocument(docStruct2, completion: { result in
                                 expect { try result.get() }.toNot(throwError())
                                 done()
-                            }
+                            })
                         }
 
                         let count = Document.rawCountWithPredicate(mainContext,
@@ -609,10 +607,10 @@ class DocumentManagerTests: QuickSpec {
 
                     docStruct.title = newTitle
                     docStruct.data = newTitle.asData // to force the callback
-                    sut.saveDocument(docStruct) { result in
+                    sut.saveDocument(docStruct, completion: { result in
                         expect { try result.get() }.toNot(throwError())
                         expect { try result.get() }.to(beTrue())
-                    }
+                    })
                 }
             }
 

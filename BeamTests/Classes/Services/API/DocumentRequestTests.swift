@@ -41,7 +41,7 @@ class DocumentRequestTests: QuickSpec {
                 let ancestor = "1\n2\n3"
 
                 beforeEach {
-                    docStruct = self.helper.createLocalAndRemoteVersions(ancestor)
+                    docStruct = try? self.helper.createLocalAndRemoteVersions(ancestor)
                 }
 
                 afterEach {

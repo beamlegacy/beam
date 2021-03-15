@@ -26,6 +26,7 @@ struct Configuration {
     static private(set) var sparkleFeedURL: String = Configuration.value(for: "SUFeedURL")
     static private(set) var sentryEnabled = NSString("$(SENTRY_ENABLED)").boolValue
     static var networkEnabled = NSString("$(NETWORK_ENABLED)").boolValue
+    static var encryptionEnabledDefault = NSString("$(ENCRYPTION_ENABLED)").boolValue
 
     // Runtime configuration
     static private(set) var apiHostnameDefault = "api.beamapp.co"
@@ -40,6 +41,22 @@ struct Configuration {
             if newValue != apiHostname {
                 UserDefaults.standard.set(newValue, forKey: apiHostnameKey)
                 AccountManager.logout()
+            }
+        }
+    }
+
+    static private var encryptionEnabledKey = "encryptionEnabled"
+    static var encryptionEnabled: Bool {
+        get {
+            if UserDefaults.standard.object(forKey: encryptionEnabledKey) != nil {
+                return UserDefaults.standard.bool(forKey: encryptionEnabledKey)
+            }
+
+            return encryptionEnabledDefault
+        }
+        set {
+            if newValue != encryptionEnabled {
+                UserDefaults.standard.set(newValue, forKey: encryptionEnabledKey)
             }
         }
     }
