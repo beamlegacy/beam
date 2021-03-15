@@ -35,7 +35,6 @@ struct OmniBarFieldBackground<Content: View>: View {
     }
     private let animationDuration = 0.3
 
-
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: boxCornerRadius)
@@ -46,7 +45,9 @@ struct OmniBarFieldBackground<Content: View>: View {
                 .onHover(perform: { hovering in
                     isHoveringBox = hovering
                 })
-            content().clipped()
+            content()
+                .cornerRadius(boxCornerRadius)
+                .clipped()
         }
     }
 }

@@ -14,7 +14,7 @@ enum AnimationState {
     case finished
 }
 
-class Animation {
+class BeamAnimation {
     private var duration: CFTimeInterval
     private var currentTime: CFTimeInterval = 0
     private var scope: Cancellable?
