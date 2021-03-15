@@ -58,5 +58,5 @@ private func num(_ k: Any?) -> Int {
     return k as? Int ?? 0
 }
 
-private var readabilitySource: String = { loadJS(from: "Readability") }()
+private var readabilitySource: String = { loadFile(from: "Readability", fileType: "js") }()
 // swiftlint:enable file_length

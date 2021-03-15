@@ -1,0 +1,97 @@
+:root {
+  --oulineColorLow: rgba(137, 194, 109, 0.1);
+  --oulineColorHigh: rgba(137, 194, 109, 1);
+  --outlineWidth: 3px;
+}
+
+@keyframes beam-shoot-anim {
+  0% {
+    outline: 3px solid rgba(137, 194, 109, 0.1) !important;
+  }
+  100% {
+    outline: 3px solid #89c26d !important;
+  }
+}
+.beam {
+  font-family: sans-serif;
+  font-size: 16px;
+}
+
+.hint {
+  color: graytext;
+}
+
+.beam-point {
+  outline: 3px solid rgba(37, 194, 109, 0.5) !important;
+}
+
+.beam-shoot {
+  outline: 3px solid #25c26d !important;
+}
+
+#beam-popup {
+  position: absolute;
+  background-color: white;
+  box-shadow: darkgray 0 10px 20px 0;
+  border-radius: 0.5rem;
+  border: 1px solid lightgray;
+  padding: 0.5em 1.5em;
+  transition: all 0.3s ease;
+}
+#beam-popup .card, #beam-popup .note {
+  margin: 1.5rem;
+}
+#beam-popup .card label {
+  float: left;
+  margin-right: 0.25em;
+}
+#beam-popup .card input {
+  font-weight: bold;
+  color: #8bc0d4;
+}
+#beam-popup .close, #beam-popup .drop-arrow {
+  user-select: none;
+  appearance: none;
+  color: graytext;
+  border: none;
+  padding: 0.5rem 1rem;
+  position: absolute;
+  background: none;
+  cursor: pointer;
+}
+#beam-popup .close {
+  left: 0;
+  top: 0;
+}
+#beam-popup .close:hover {
+  color: black;
+}
+#beam-popup input {
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-size: inherit;
+}
+#beam-popup .combo {
+  display: inline-block;
+  position: relative;
+}
+#beam-popup .proposals {
+  background-color: white;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+#beam-popup .proposals li {
+  padding: 0.5em;
+  cursor: pointer;
+}
+#beam-popup .proposals li:hover {
+  background-color: #f9fcfd;
+}
+
+#beam-status {
+  position: absolute;
+}
+
+/*# sourceMappingURL=index.css.map */

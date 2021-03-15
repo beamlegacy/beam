@@ -77,12 +77,15 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             _ = addCurrentPageToNote()
         }
     }
-    var appendToIndexer: (URL, Readability) -> Void = { _, _ in }
+
+    var appendToIndexer: (URL, Readability) -> Void = { _, _ in
+    }
 
     var creationDate: Date = Date()
     var lastViewDate: Date = Date()
 
-    public var onNewTabCreated: (BrowserTab) -> Void = { _ in }
+    public var onNewTabCreated: (BrowserTab) -> Void = { _ in
+    }
 
     private var scope = Set<AnyCancellable>()
 
@@ -138,7 +141,6 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         case note
         case rootElement
         case element
-
     }
 
     var preloadUrl: URL?
@@ -176,12 +178,12 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         backForwardList = web.backForwardList
         self.webView = web
 //        setupObservers()
-            if let _url = self.preloadUrl {
-                self.preloadUrl = nil
-                DispatchQueue.main.async { [weak self] in
-                    self?.webView.load(URLRequest(url: _url))
-                }
+        if let _url = self.preloadUrl {
+            self.preloadUrl = nil
+            DispatchQueue.main.async { [weak self] in
+                self?.webView.load(URLRequest(url: _url))
             }
+        }
     }
 
     func encode(to encoder: Encoder) throws {
@@ -205,10 +207,16 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     // Add the current page to the current note and return the beam element (if the element already exist return it directly)
     func addCurrentPageToNote() -> BeamElement? {
         guard let elem = element else {
-            guard let url = url else { return nil }
-            guard !url.isSearchResult else { return nil } // Don't automatically add search results
+            guard let url = url else {
+                return nil
+            }
+            guard !url.isSearchResult else {
+                return nil
+            } // Don't automatically add search results
             let linkString = url.absoluteString
-            guard !note.outLinks.contains(linkString) else { element = note.elementContainingLink(to: linkString); return element }
+            guard !note.outLinks.contains(linkString) else {
+                element = note.elementContainingLink(to: linkString); return element
+            }
             Logger.shared.logDebug("add current page '\(title)' to note '\(note.title)'", category: .web)
             let e = BeamElement()
             element = e
@@ -227,9 +235,13 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     }
 
     private func updateFavIcon() {
-        guard let url = url else { favIcon = nil; return }
+        guard let url = url else {
+            favIcon = nil; return
+        }
         FaviconProvider.shared.imageForUrl(url) { [weak self] (image) in
-            guard let self = self else { return }
+            guard let self = self else {
+                return
+            }
             self.favIcon = image
         }
     }
@@ -244,6 +256,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     }
 
     var backListSize = 0
+
     private func setupObservers() {
         webView.publisher(for: \.title).sink { v in
             self.title = v ?? "loading..."
@@ -258,13 +271,31 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 //                self.navigationCount = 0
             }
         }.store(in: &scope)
-        webView.publisher(for: \.isLoading).sink { v in withAnimation { self.isLoading = v } }.store(in: &scope)
-        webView.publisher(for: \.estimatedProgress).sink { v in withAnimation { self.estimatedProgress = v } }.store(in: &scope)
-        webView.publisher(for: \.hasOnlySecureContent).sink { v in self.hasOnlySecureContent = v }.store(in: &scope)
-        webView.publisher(for: \.serverTrust).sink { v in self.serverTrust = v }.store(in: &scope)
-        webView.publisher(for: \.canGoBack).sink { v in self.canGoBack = v }.store(in: &scope)
-        webView.publisher(for: \.canGoForward).sink { v in self.canGoForward = v }.store(in: &scope)
-        webView.publisher(for: \.backForwardList).sink { v in self.backForwardList = v }.store(in: &scope)
+        webView.publisher(for: \.isLoading).sink { v in
+            withAnimation {
+                self.isLoading = v
+            }
+        }.store(in: &scope)
+        webView.publisher(for: \.estimatedProgress).sink { v in
+            withAnimation {
+                self.estimatedProgress = v
+            }
+        }.store(in: &scope)
+        webView.publisher(for: \.hasOnlySecureContent).sink { v in
+            self.hasOnlySecureContent = v
+        }.store(in: &scope)
+        webView.publisher(for: \.serverTrust).sink { v in
+            self.serverTrust = v
+        }.store(in: &scope)
+        webView.publisher(for: \.canGoBack).sink { v in
+            self.canGoBack = v
+        }.store(in: &scope)
+        webView.publisher(for: \.canGoForward).sink { v in
+            self.canGoForward = v
+        }.store(in: &scope)
+        webView.publisher(for: \.backForwardList).sink { v in
+            self.backForwardList = v
+        }.store(in: &scope)
 
         webView.navigationDelegate = self
         webView.uiDelegate = self
@@ -288,9 +319,42 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         self.webView.configuration.userContentController.removeAllUserScripts()
     }
 
+    lazy var pointAndShoot: String = {
+        loadFile(from: "PointAndShoot", fileType: "js")
+    }()
+    lazy var devTools: String = {
+        loadFile(from: "DevTools", fileType: "js")
+    }()
+    lazy var pointAndShootStyle: String = {
+        loadFile(from: "PointAndShoot", fileType: "css")
+    }()
+
     private func addUserScripts() {
-        self.webView.configuration.userContentController.addUserScript(WKUserScript(source: overrideConsole, injectionTime: .atDocumentStart, forMainFrameOnly: false))
-        self.webView.configuration.userContentController.addUserScript(WKUserScript(source: jsSelectionObserver, injectionTime: .atDocumentEnd, forMainFrameOnly: false))
+        addJS(source: overrideConsole, when: .atDocumentStart)
+        addJS(source: jsSelectionObserver, when: .atDocumentEnd)
+        addJS(source: pointAndShoot, when: .atDocumentEnd)
+        addJS(source: devTools, when: .atDocumentEnd)
+        addCSS(source: pointAndShootStyle, when: .atDocumentEnd)
+    }
+
+    private func addJS(source: String, when: WKUserScriptInjectionTime) {
+        let script = WKUserScript(source: source, injectionTime: when, forMainFrameOnly: false)
+        self.webView.configuration.userContentController.addUserScript(script)
+    }
+
+    private func encodeStringTo64(fromString: String) -> String? {
+        let plainData = fromString.data(using: .utf8)
+        return plainData?.base64EncodedString(options: [])
+    }
+
+    private func addCSS(source: String, when: WKUserScriptInjectionTime) {
+        let styleSrc = """
+                       var style = document.createElement('style');
+                       style.innerHTML = '\(source)';
+                       document.head.appendChild(style);
+                       """
+        let script = WKUserScript(source: styleSrc, injectionTime: when, forMainFrameOnly: false)
+        self.webView.configuration.userContentController.addUserScript(script)
     }
 
     private enum ScriptHandlers: String, CaseIterable {
@@ -314,11 +378,14 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     }
 
     private var currentBackForwardItem: WKBackForwardListItem?
+
     private func handleBackForwardWebView(navigationAction: WKNavigationAction) {
         if navigationAction.navigationType == .backForward {
             let isBack = webView.backForwardList.backList
-                .filter { $0 == currentBackForwardItem }
-                .count == 0
+                    .filter {
+                $0 == currentBackForwardItem
+            }
+                    .count == 0
 
             if isBack {
                 browsingTree.goBack()
@@ -386,7 +453,9 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         _ = addCurrentPageToNote()
     }
 
-    lazy var overrideConsole: String = { loadJS(from: "OverrideConsole") }()
+    lazy var overrideConsole: String = {
+        loadFile(from: "OverrideConsole", fileType: "js")
+    }()
 
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         switch message.name {
@@ -398,7 +467,9 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 //                  let selectedText = dict["selectedText"] as? String,
                   let selectedHtml = dict["selectedHtml"] as? String,
                   !selectedHtml.isEmpty
-            else { return }
+                    else {
+                return
+            }
 
             let text: BeamText = html2Text(url: webView.url!, html: selectedHtml)
             browsingTree.current.score.textSelections += 1
@@ -409,7 +480,9 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                 let quote = text
 
                 DispatchQueue.main.async {
-                    guard let current = self.addCurrentPageToNote() else { return }
+                    guard let current = self.addCurrentPageToNote() else {
+                        return
+                    }
                     let e = BeamElement()
                     e.kind = .quote(1, title, urlString)
                     e.text = quote
@@ -421,11 +494,13 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         case ScriptHandlers.beam_onScrolled.rawValue:
             guard let dict = message.body as? [String: AnyObject],
 //                  let selectedText = dict["selectedText"] as? String,
-                let x = dict["x"] as? Double,
-                let y = dict["y"] as? Double,
-                let w = dict["width"] as? Double,
-                let h = dict["height"] as? Double
-            else { return }
+                  let x = dict["x"] as? Double,
+                  let y = dict["y"] as? Double,
+                  let w = dict["width"] as? Double,
+                  let h = dict["height"] as? Double
+                    else {
+                return
+            }
             if w > 0, h > 0 {
                 browsingTree.current.score.scrollRatioX = max(Float(x / w), browsingTree.current.score.scrollRatioX)
                 browsingTree.current.score.scrollRatioY = max(Float(y / h), browsingTree.current.score.scrollRatioY)
@@ -438,14 +513,20 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         }
     }
 
-    lazy var jsSelectionObserver: String = { loadJS(from: "SelectionObserver") }()
+    lazy var jsSelectionObserver: String = {
+        loadFile(from: "SelectionObserver", fileType: "js")
+    }()
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        guard let url = webView.url else { return }
+        guard let url = webView.url else {
+            return
+        }
         _ = addCurrentPageToNote()
         browsingTree.navigateTo(url: url.absoluteString, title: webView.title)
         Readability.read(webView) { [weak self] result in
-            guard let self = self else { return }
+            guard let self = self else {
+                return
+            }
 
             switch result {
             case let .success(read):
