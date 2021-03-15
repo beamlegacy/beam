@@ -17,7 +17,6 @@ struct OmniBarSearchField: View {
     }
     @Binding var modifierFlagsPressed: NSEvent.ModifierFlags?
 
-
     // this enables the call of didSet
     private var customEditingBinding: Binding<Bool> {
         return Binding<Bool>(get: {
@@ -28,7 +27,6 @@ struct OmniBarSearchField: View {
     }
 
     @State private var shouldCenter: Bool = false
-
 
     private var shouldShowWebHost: Bool {
         return state.mode == .web && !isEditing && state.currentTab != nil

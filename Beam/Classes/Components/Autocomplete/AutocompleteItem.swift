@@ -9,13 +9,13 @@ import SwiftUI
 
 struct AutocompleteItem: View {
     @State var item: AutocompleteResult
-    var selected: Bool
+    let selected: Bool
     var displayIcon: Bool = true
 
-    @State var isHovering = false
-    @State var isTouchDown = false
+    @State private var isHovering = false
+    @State private var isTouchDown = false
 
-    @State var favicon: NSImage?
+    @State private var favicon: NSImage?
     var backgroundColor: Color {
         guard !isTouchDown else {
             return Color(.autocompleteClickedBackgroundColor)

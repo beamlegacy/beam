@@ -3,7 +3,7 @@ import Combine
 
 struct DocumentsList: View {
     @ObservedObject var viewModel: ViewModel
-    @State var searchText: String = ""
+    @State private var searchText: String = ""
     @Binding var selectedDocument: Document?
 
     var body: some View {

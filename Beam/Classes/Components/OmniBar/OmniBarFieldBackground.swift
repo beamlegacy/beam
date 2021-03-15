@@ -35,7 +35,6 @@ struct OmniBarFieldBackground<Content: View>: View {
     }
     private let animationDuration = 0.3
 
-
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: boxCornerRadius)
