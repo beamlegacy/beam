@@ -23,8 +23,8 @@ class OmniBarDestinationUITests: QuickSpec {
         }
         self.app.launch()
         self.helper = OmniBarUITestsHelper(self.app)
-        self.helper.cleanupDB()
-        createDestinationNote()
+//        self.helper.cleanupDB()
+//        createDestinationNote()
     }
 
     func createDestinationNote() {
@@ -66,6 +66,21 @@ class OmniBarDestinationUITests: QuickSpec {
                 expect(title.waitForExistence(timeout: 2)).to(beTrue())
                 title.tap()
                 expect(noteSearchField.waitForExistence(timeout: 2)).to(beTrue())
+                expect(self.helper.inputHasFocus(noteSearchField)).to(beTrue())
+                expect(noteSearchField.value as? String).to(equal(""))
+                expect(noteSearchField.placeholderValue).to(equal(todayName))
+                let selectedResultQuery = self.helper.allAutocompleteResults.matching(self.helper.autocompleteSelectedPredicate)
+                expect(selectedResultQuery.count).to(equal(1))
+            }
+
+            fit("can be focused with shortcut") {
+                goToWebMode()
+                let title = self.app.staticTexts["DestinationNoteTitle"]
+                expect(title.waitForExistence(timeout: 2)).to(beTrue())
+
+                let menuItem = XCUIApplication().menuItems["Change Card"]
+                menuItem.tap()
+
                 expect(self.helper.inputHasFocus(noteSearchField)).to(beTrue())
                 expect(noteSearchField.value as? String).to(equal(""))
                 expect(noteSearchField.placeholderValue).to(equal(todayName))
