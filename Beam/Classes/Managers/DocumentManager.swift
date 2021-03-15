@@ -193,8 +193,8 @@ class DocumentManager {
                               deletedAt: document.deleted_at,
                               data: document.data ?? Data(),
                               documentType: DocumentType(rawValue: document.document_type) ?? DocumentType.note,
-                              previousChecksum: document.beam_api_data?.MD5,
-                              previousData: document.beam_api_data)
+                              previousData: document.beam_api_data,
+                              previousChecksum: document.beam_api_checksum)
     }
 
     /// Must be called within the context thread
@@ -237,18 +237,6 @@ class DocumentManager {
             document.deleted_at = BeamDate.now
 
             try Self.saveContext(context: context)
-        }
-    }
-
-    private func deleteLocalDocument(_ documentStruct: DocumentStruct) {
-        self.coreDataManager.persistentContainer.performBackgroundTask { context in
-            guard let document = Document.fetchWithId(context, documentStruct.id) else {
-                return
-            }
-
-            document.deleted_at = BeamDate.now
-
-            _ = try? Self.saveContext(context: context)
         }
     }
 
@@ -570,7 +558,7 @@ extension DocumentManager {
                 switch result {
                 case .failure(let error):
                     if case APIRequestError.notFound = error {
-                        self.deleteLocalDocument(documentStruct)
+                        try? self.deleteLocalDocumentAndWait(documentStruct)
                     }
 
                     completion?(.failure(error))
@@ -598,7 +586,7 @@ extension DocumentManager {
                 switch result {
                 case .failure(let error):
                     if case APIRequestError.notFound = error {
-                        self.deleteLocalDocument(documentStruct)
+                        try? self.deleteLocalDocumentAndWait(documentStruct)
                     }
                     completion?(.failure(error))
                 case .success(let documentType):
@@ -642,7 +630,10 @@ extension DocumentManager {
     /// but will not trigger the completion handler. If the network callbacks updates the coredata object, it is expected the
     /// updates to be fetched through `onDocumentUpdate`
     // swiftlint:disable:next function_body_length
-    func saveDocument(_ documentStruct: DocumentStruct, _ networkSave: Bool = true, completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
+    func saveDocument(_ documentStruct: DocumentStruct,
+                      _ networkSave: Bool = true,
+                      _ networkCompletion: ((Swift.Result<Bool, Error>) -> Void)? = nil,
+                      completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
         Logger.shared.logDebug("Saving \(documentStruct.title)", category: .document)
         Logger.shared.logDebug(documentStruct.data.asString ?? "-", category: .documentDebug)
 
@@ -705,7 +696,9 @@ extension DocumentManager {
                     }
 
                     let updatedDocStruct = DocumentStruct(document: updatedDocument)
-                    self.saveDocumentStructOnAPI(updatedDocStruct) { _ in }
+                    self.saveDocumentStructOnAPI(updatedDocStruct, networkCompletion)
+                } else {
+                    networkCompletion?(.failure(APIRequestError.notAuthenticated))
                 }
             }
         }
@@ -729,7 +722,8 @@ extension DocumentManager {
         Self.networkRequests[documentStruct.id] = documentRequest
 
         do {
-            try documentRequest.saveDocument(documentStruct.asApiType()) { result in
+            let documentApiType = documentStruct.asApiType()
+            try documentRequest.saveDocument(documentApiType) { result in
                 switch result {
                 case .failure(let error):
                     if let error = error as NSError?, error.code == NSURLErrorCancelled {
@@ -737,8 +731,11 @@ extension DocumentManager {
                         return
                     }
                     self.saveDocumentStructOnAPIFailure(documentStruct, error, completion)
-                case .success:
-                    self.saveDocumentStructOnAPISuccess(documentStruct, completion)
+                case .success(let sentDocumentApiType):
+                    // `previousChecksum` stores the checksum we sent to the API
+                    var sentDocumentStruct = documentStruct.copy()
+                    sentDocumentStruct.previousChecksum = sentDocumentApiType.document?.previousChecksum
+                    self.saveDocumentStructOnAPISuccess(sentDocumentStruct, completion)
                 }
             }
         } catch {
@@ -757,7 +754,7 @@ extension DocumentManager {
         }
 
         Logger.shared.logDebug("Server rejected our update \(documentStruct.title): \(documentStruct.previousChecksum ?? "-")", category: .network)
-        Logger.shared.logDebug("PreviousData: \(documentStruct.previousDataString ?? "-")", category: .documentDebug)
+        Logger.shared.logDebug("PreviousData: \(documentStruct.previousChecksum ?? "-")", category: .documentDebug)
 
         fetchAndMergeDocument(documentStruct) { result in
             switch result {
@@ -790,7 +787,10 @@ extension DocumentManager {
 
             // We save the remote stored version of the document, to know if we have local changes later
             // `beam_api_data` stores the last version we sent to the API
+            // `beam_api_checksum` stores the checksum we sent to the API
             documentCoreData.beam_api_data = documentStruct.data
+            documentCoreData.beam_api_checksum = documentStruct.previousChecksum
+
             do {
                 let success = try Self.saveContext(context: context)
                 completion?(.success(success))
@@ -922,10 +922,11 @@ extension DocumentManager {
                 }
                 documentCoreData.data = newData
                 documentCoreData.beam_api_data = remoteData
+                documentCoreData.beam_api_checksum = nil // enforce overwriting the API side
 
                 do {
-                    completion(.success(try Self.saveContext(context: context)))
-                    self.saveDocumentStructOnAPI(DocumentStruct(document: documentCoreData))
+                    try Self.saveContext(context: context)
+                    self.saveDocumentStructOnAPI(DocumentStruct(document: documentCoreData), completion)
                 } catch {
                     completion(.failure(error))
                 }
@@ -1097,7 +1098,7 @@ extension DocumentManager {
 
         let promise: Promises.Promise<DocumentAPIType> = documentRequest.saveDocument(documentStruct.asApiType())
 
-        return promise.then(on: backgroundQueue) { _ in
+        return promise.then(on: backgroundQueue) { documentApiType in
             guard !documentRequest.isCancelled else { throw DocumentManagerError.operationCancelled }
 
             let context = self.coreDataManager.persistentContainer.newBackgroundContext()
@@ -1108,6 +1109,7 @@ extension DocumentManager {
                     throw DocumentManagerError.localDocumentNotFound
                 }
                 documentCoreData.beam_api_data = documentStruct.data
+                documentCoreData.beam_api_checksum = documentApiType.previousChecksum
 
                 try Self.saveContext(context: context)
             }
@@ -1139,6 +1141,8 @@ extension DocumentManager {
                 }
                 documentCoreData.data = newData
                 documentCoreData.beam_api_data = remoteData
+                documentCoreData.beam_api_checksum = nil // enforce overwriting the API side
+
                 try Self.saveContext(context: context)
 
                 return DocumentStruct(document: documentCoreData)
@@ -1349,7 +1353,7 @@ extension DocumentManager {
 
         let promise: PromiseKit.Promise<DocumentAPIType> = documentRequest.saveDocument(documentStruct.asApiType())
 
-        return promise.then(on: backgroundQueue) { _ -> PromiseKit.Promise<Bool> in
+        return promise.then(on: backgroundQueue) { documentApiType -> PromiseKit.Promise<Bool> in
             guard !documentRequest.isCancelled else { throw DocumentManagerError.operationCancelled }
 
             let context = self.coreDataManager.persistentContainer.newBackgroundContext()
@@ -1359,7 +1363,12 @@ extension DocumentManager {
                 guard let documentCoreData = Document.fetchWithId(context, documentStruct.id) else {
                     throw DocumentManagerError.localDocumentNotFound
                 }
+
+                // We save the remote stored version of the document, to know if we have local changes later
+                // `beam_api_data` stores the last version we sent to the API
+                // `beam_api_checksum` stores the checksum we sent to the API
                 documentCoreData.beam_api_data = documentStruct.data
+                documentCoreData.beam_api_checksum = documentApiType.previousChecksum
                 try Self.saveContext(context: context)
             }
 
@@ -1390,6 +1399,8 @@ extension DocumentManager {
                 }
                 documentCoreData.data = newData
                 documentCoreData.beam_api_data = remoteData
+                documentCoreData.beam_api_checksum = nil // enforce overwriting the API side
+
                 try Self.saveContext(context: context)
 
                 return .value(DocumentStruct(document: documentCoreData))

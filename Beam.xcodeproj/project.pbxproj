@@ -176,6 +176,12 @@
 		524425F125C832110095422A /* AccountManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524425F025C832110095422A /* AccountManagerTests.swift */; };
 		524520A425C8234500AC0007 /* BeamElement+Merge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524520A325C8234500AC0007 /* BeamElement+Merge.swift */; };
 		524B856D25D2DD0700BB7C7A /* NSMAnagedObjectContext+performAndWait.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524B856C25D2DD0700BB7C7A /* NSMAnagedObjectContext+performAndWait.swift */; };
+		524CF6B225F27318007312F0 /* DocumentRequest+Encryption.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524CF6B125F27318007312F0 /* DocumentRequest+Encryption.swift */; };
+		524CF6CA25F2735D007312F0 /* EncryptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524CF6C925F2735D007312F0 /* EncryptionManager.swift */; };
+		524CF6CE25F27609007312F0 /* KeychainStorable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524CF6CD25F27609007312F0 /* KeychainStorable.swift */; };
+		524CF6D325F276D1007312F0 /* KeychainAccess in Frameworks */ = {isa = PBXBuildFile; productRef = 524CF6D225F276D1007312F0 /* KeychainAccess */; };
+		524CF6D725F28F97007312F0 /* EncryptionManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524CF6D625F28F97007312F0 /* EncryptionManagerTests.swift */; };
+		524CF6DB25F29119007312F0 /* SymmetricKey+Serialize.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524CF6DA25F29119007312F0 /* SymmetricKey+Serialize.swift */; };
 		525C233C25BAF8EF001B9625 /* libgit2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 525C233B25BAF8EF001B9625 /* libgit2.a */; };
 		525C235125BAFC6B001B9625 /* Merge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 525C235025BAFC6B001B9625 /* Merge.swift */; };
 		525C235825BAFCAA001B9625 /* MergeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 525C235725BAFCAA001B9625 /* MergeTests.swift */; };
@@ -205,6 +211,7 @@
 		5281B09825C99D4B00DF66D9 /* 2_remote.json in Resources */ = {isa = PBXBuildFile; fileRef = 5281B09725C99D4B00DF66D9 /* 2_remote.json */; };
 		528286B625E806CD00C0CCEE /* NoteEditorUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 528286B525E806CD00C0CCEE /* NoteEditorUITests.swift */; };
 		5287EC2F25C42B0100CE1DD9 /* String+UUID.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5287EC2E25C42B0100CE1DD9 /* String+UUID.swift */; };
+		528910ED25FBBDE800492969 /* DocumentAPITypeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 528910EC25FBBDE800492969 /* DocumentAPITypeTests.swift */; };
 		5298649125D151D300D27A80 /* AutocompleteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5298649025D151D300D27A80 /* AutocompleteTests.swift */; };
 		529E1AD425D45CFA00DD25B8 /* APIRequestError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 529E1AD325D45CFA00DD25B8 /* APIRequestError.swift */; };
 		529E1EE625D3EDA300F8B500 /* BeamTestsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 529E1EE525D3EDA300F8B500 /* BeamTestsHelper.swift */; };
@@ -680,6 +687,11 @@
 		524425F025C832110095422A /* AccountManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountManagerTests.swift; sourceTree = "<group>"; };
 		524520A325C8234500AC0007 /* BeamElement+Merge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamElement+Merge.swift"; sourceTree = "<group>"; };
 		524B856C25D2DD0700BB7C7A /* NSMAnagedObjectContext+performAndWait.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSMAnagedObjectContext+performAndWait.swift"; sourceTree = "<group>"; };
+		524CF6B125F27318007312F0 /* DocumentRequest+Encryption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DocumentRequest+Encryption.swift"; sourceTree = "<group>"; };
+		524CF6C925F2735D007312F0 /* EncryptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EncryptionManager.swift; sourceTree = "<group>"; };
+		524CF6CD25F27609007312F0 /* KeychainStorable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStorable.swift; sourceTree = "<group>"; };
+		524CF6D625F28F97007312F0 /* EncryptionManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EncryptionManagerTests.swift; sourceTree = "<group>"; };
+		524CF6DA25F29119007312F0 /* SymmetricKey+Serialize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SymmetricKey+Serialize.swift"; sourceTree = "<group>"; };
 		525C233B25BAF8EF001B9625 /* libgit2.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgit2.a; path = Extern/libgit2/build/libgit2.a; sourceTree = "<group>"; };
 		525C235025BAFC6B001B9625 /* Merge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Merge.swift; sourceTree = "<group>"; };
 		525C235725BAFCAA001B9625 /* MergeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MergeTests.swift; sourceTree = "<group>"; };
@@ -706,6 +718,7 @@
 		5281B09725C99D4B00DF66D9 /* 2_remote.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = 2_remote.json; sourceTree = "<group>"; };
 		528286B525E806CD00C0CCEE /* NoteEditorUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteEditorUITests.swift; sourceTree = "<group>"; };
 		5287EC2E25C42B0100CE1DD9 /* String+UUID.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+UUID.swift"; sourceTree = "<group>"; };
+		528910EC25FBBDE800492969 /* DocumentAPITypeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentAPITypeTests.swift; sourceTree = "<group>"; };
 		5298649025D151D300D27A80 /* AutocompleteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutocompleteTests.swift; sourceTree = "<group>"; };
 		529E1AD325D45CFA00DD25B8 /* APIRequestError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIRequestError.swift; sourceTree = "<group>"; };
 		529E1EE525D3EDA300F8B500 /* BeamTestsHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamTestsHelper.swift; sourceTree = "<group>"; };
@@ -828,6 +841,7 @@
 				527FB71525B9A93400959146 /* CocoaLumberjackSwift in Frameworks */,
 				52E5297425CD980B00307858 /* PromisesTestHelpers in Frameworks */,
 				527FB71F25B9A9B600959146 /* JWTDecode in Frameworks */,
+				524CF6D325F276D1007312F0 /* KeychainAccess in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -974,6 +988,7 @@
 				418171642581107C00317ED8 /* APIRequest.swift */,
 				529E1AD325D45CFA00DD25B8 /* APIRequestError.swift */,
 				5206282525923B6800D7CD9E /* DocumentRequest.swift */,
+				524CF6B125F27318007312F0 /* DocumentRequest+Encryption.swift */,
 			);
 			path = API;
 			sourceTree = "<group>";
@@ -1106,6 +1121,7 @@
 			children = (
 				418171942581107C00317ED8 /* Persistence.swift */,
 				418171952581107C00317ED8 /* StandardStorable.swift */,
+				524CF6CD25F27609007312F0 /* KeychainStorable.swift */,
 			);
 			path = Persistence;
 			sourceTree = "<group>";
@@ -1136,6 +1152,7 @@
 				523FF66025C31D8800B4BD6E /* Data+String.swift */,
 				41FAD34E25E5742800D78B36 /* CALayer+Animation.swift */,
 				524B856C25D2DD0700BB7C7A /* NSMAnagedObjectContext+performAndWait.swift */,
+				524CF6DA25F29119007312F0 /* SymmetricKey+Serialize.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -1256,6 +1273,7 @@
 				961EC58525B7A75A009FA322 /* LinkManager.swift */,
 				A0AA693225C41C9B0038F9A3 /* MouseHandler.swift */,
 				5204FE3A25F128BD00FD22F8 /* DocumentStruct.swift */,
+				524CF6C925F2735D007312F0 /* EncryptionManager.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -1466,6 +1484,7 @@
 		5273C65625DA834600B00EC3 /* API */ = {
 			isa = PBXGroup;
 			children = (
+				528910D725FBBDD000492969 /* GraphqlRequestsTypes */,
 				5273C65825DA835400B00EC3 /* APIRequestTests.swift */,
 				5273C65725DA835400B00EC3 /* DocumentRequestTests.swift */,
 				5273C65925DA835400B00EC3 /* UserSessionRequestTests.swift */,
@@ -1491,6 +1510,7 @@
 				522AFB2725CBFAB100F60647 /* DocumentManagerTestsHelper.swift */,
 				5281B01725C962EF00DF66D9 /* DocumentManagerNetworkTests.swift */,
 				524425F025C832110095422A /* AccountManagerTests.swift */,
+				524CF6D625F28F97007312F0 /* EncryptionManagerTests.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -1524,6 +1544,14 @@
 				52DD53DC25F1122F004F7EC8 /* BeamExport.sqlite */,
 			);
 			path = Fixtures;
+			sourceTree = "<group>";
+		};
+		528910D725FBBDD000492969 /* GraphqlRequestsTypes */ = {
+			isa = PBXGroup;
+			children = (
+				528910EC25FBBDE800492969 /* DocumentAPITypeTests.swift */,
+			);
+			path = GraphqlRequestsTypes;
 			sourceTree = "<group>";
 		};
 		5298647A25D151AD00D27A80 /* Services */ = {
@@ -1881,6 +1909,7 @@
 				52E5297125CD980B00307858 /* Promises */,
 				52E5297325CD980B00307858 /* PromisesTestHelpers */,
 				523E91CB25D17004001124E0 /* PMKFoundation */,
+				524CF6D225F276D1007312F0 /* KeychainAccess */,
 			);
 			productName = Beam;
 			productReference = 965A78252514F147009980D4 /* Beam.app */;
@@ -1979,6 +2008,7 @@
 				52BB698925CD4E1E007A1173 /* XCRemoteSwiftPackageReference "PromiseKit" */,
 				52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises" */,
 				523E91CA25D17004001124E0 /* XCRemoteSwiftPackageReference "Foundation" */,
+				524CF6D125F276D1007312F0 /* XCRemoteSwiftPackageReference "KeychainAccess" */,
 			);
 			productRefGroup = 965A78262514F147009980D4 /* Products */;
 			projectDirPath = "";
@@ -2338,6 +2368,7 @@
 				96956D31258BF3F50069C9C1 /* LinkStore.swift in Sources */,
 				418172012581107C00317ED8 /* Document+CoreDataProperties.swift in Sources */,
 				418171EE2581107C00317ED8 /* GraphqlParametersProtocol.swift in Sources */,
+				524CF6CE25F27609007312F0 /* KeychainStorable.swift in Sources */,
 				521EEDDD25937E9200BA2485 /* DocumentsWindow.swift in Sources */,
 				A0973A1C25E53D5A008E3441 /* IncreaseIndentation.swift in Sources */,
 				418172122581107C00317ED8 /* EventsTracker.swift in Sources */,
@@ -2412,6 +2443,7 @@
 				418172082581107C00317ED8 /* NSManagedObject+initExtension.swift in Sources */,
 				52F27FCB25B9B404006E09A2 /* ViewModelFetchedResults.swift in Sources */,
 				5242684D25ED408500DB1D05 /* String+Split.swift in Sources */,
+				524CF6DB25F29119007312F0 /* SymmetricKey+Serialize.swift in Sources */,
 				418173C32581276F00317ED8 /* String+NSMutableAttributedString.swift in Sources */,
 				A5233DE525FB682700BE6F05 /* FaviconProvider.swift in Sources */,
 				9691E41425AF61BA00A13080 /* BrowsingTree.swift in Sources */,
@@ -2440,6 +2472,8 @@
 				A0AA693325C41C9B0038F9A3 /* MouseHandler.swift in Sources */,
 				418171F22581107C00317ED8 /* APIRequest.swift in Sources */,
 				529E1AD425D45CFA00DD25B8 /* APIRequestError.swift in Sources */,
+				524CF6B225F27318007312F0 /* DocumentRequest+Encryption.swift in Sources */,
+				524CF6CA25F2735D007312F0 /* EncryptionManager.swift in Sources */,
 				96F673D225B7207100E8175B /* StoredLink.swift in Sources */,
 				418EA94225D696EA005894AA /* HyperlinkView.swift in Sources */,
 				418172B525811AAA00317ED8 /* Tick.swift in Sources */,
@@ -2517,9 +2551,11 @@
 				52DEF1CA252B259700561493 /* CoreDataManagerTests.swift in Sources */,
 				52C3294225AC7A8E00EF11E7 /* DocumentTests.swift in Sources */,
 				967B2685255465C5003F40E3 /* Html2MdTests.swift in Sources */,
+				528910ED25FBBDE800492969 /* DocumentAPITypeTests.swift in Sources */,
 				562A8B5225B5E3D8004D3D8A /* String+NLTests.swift in Sources */,
 				A0404F0C25E7ECDD00E347F3 /* CommandNodeTests.swift in Sources */,
 				A0689E7125DE6B8700B19CBB /* CommandsTextTests.swift in Sources */,
+				524CF6D725F28F97007312F0 /* EncryptionManagerTests.swift in Sources */,
 				527DF48725710ECB00A0A56D /* DocumentManagerTests.swift in Sources */,
 				A01950AD25B838810025C5FD /* CommandManagerTests.swift in Sources */,
 				524425F125C832110095422A /* AccountManagerTests.swift in Sources */,
@@ -3155,6 +3191,14 @@
 				minimumVersion = 2.2.0;
 			};
 		};
+		524CF6D125F276D1007312F0 /* XCRemoteSwiftPackageReference "KeychainAccess" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/kishikawakatsumi/KeychainAccess";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.2.2;
+			};
+		};
 		527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/CocoaLumberjack/CocoaLumberjack.git";
@@ -3241,6 +3285,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 524299AD25A47CA500F4DBF5 /* XCRemoteSwiftPackageReference "Preferences" */;
 			productName = Preferences;
+		};
+		524CF6D225F276D1007312F0 /* KeychainAccess */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 524CF6D125F276D1007312F0 /* XCRemoteSwiftPackageReference "KeychainAccess" */;
+			productName = KeychainAccess;
 		};
 		527FB71425B9A93400959146 /* CocoaLumberjackSwift */ = {
 			isa = XCSwiftPackageProductDependency;

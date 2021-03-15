@@ -9,14 +9,15 @@ import Combine
 
 class BeamTestsHelper {
     static func login() {
+        guard !AuthenticationManager.shared.isAuthenticated else { return }
+
         let accountManager = AccountManager()
         let email = Configuration.testAccountEmail
         let password = Configuration.testAccountPassword
 
-        guard !AuthenticationManager.shared.isAuthenticated else { return }
-
         waitUntil(timeout: .seconds(10)) { done in
-            accountManager.signIn(email, password) { _ in
+            accountManager.signIn(email, password) { result in
+                expect { try result.get() } == true
                 done()
             }
         }

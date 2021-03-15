@@ -28,6 +28,7 @@ struct AdvancedPreferencesView: View {
     @State private var sentryEnabled = Configuration.sentryEnabled
     @State private var loggedIn: Bool = AccountManager().loggedIn
     @State private var networkEnabled: Bool = Configuration.networkEnabled
+    @State private var encryptionEnabled = Configuration.encryptionEnabled
 
     private let contentWidth: Double = 650.0
 
@@ -70,6 +71,12 @@ struct AdvancedPreferencesView: View {
             Preferences.Section(title: "Network Enabled") {
                 NetworkEnabledButton
             }
+            Preferences.Section(title: "Encryption Enabled") {
+                EncryptionEnabledButton
+            }
+            Preferences.Section(title: "Encryption key") {
+                Text(String(describing: EncryptionManager().privateKey().asString())).fixedSize(horizontal: false, vertical: true)
+            }
             Preferences.Section(title: "Actions") {
                 ResetAPIEndpointsButton
                 CrashButton
@@ -84,6 +91,15 @@ struct AdvancedPreferencesView: View {
             networkEnabled = Configuration.networkEnabled
         }, label: {
             Text(String(describing: networkEnabled)).frame(minWidth: 100)
+        })
+    }
+
+    private var EncryptionEnabledButton: some View {
+        Button(action: {
+            Configuration.encryptionEnabled = !Configuration.encryptionEnabled
+            encryptionEnabled = Configuration.encryptionEnabled
+        }, label: {
+            Text(String(describing: encryptionEnabled)).frame(minWidth: 100)
         })
     }
 

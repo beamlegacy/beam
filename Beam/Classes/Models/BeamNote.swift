@@ -178,9 +178,9 @@ class BeamNote: BeamElement {
         }
 
         Logger.shared.logDebug("BeamNote wants to save: \(title)", category: .document)
-        documentManager.saveDocument(documentStruct) { result in
+        documentManager.saveDocument(documentStruct, completion:  { result in
             completion?(result)
-        }
+        })
     }
 
     var isTodaysNote: Bool { (type == .journal) && (self === AppDelegate.main.data.todaysNote) }

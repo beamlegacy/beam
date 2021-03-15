@@ -57,7 +57,7 @@ struct DocumentDetail: View {
                         Spacer()
 
                         VStack(alignment: HorizontalAlignment.leading) {
-                            Text(document.beam_api_data?.MD5 ?? "No MD5")
+                            Text(document.beam_api_checksum ?? "No MD5")
                                 .font(.caption)
                                 .fontWeight(.light)
                                 .background(Color.white)

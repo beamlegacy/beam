@@ -22,6 +22,8 @@ enum LogCategory: String {
     case documentMerge
     case documentDebug
     case noteEditor
+    case keychain
+    case encryption
 }
 
 final class Logger {
