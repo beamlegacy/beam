@@ -10,13 +10,13 @@ import SwiftUI
 import Foundation
 
 struct DestinationNotePicker: View {
-    var tab: BrowserTab
+    let tab: BrowserTab
     @EnvironmentObject var state: BeamState
     @State var isHovering = false
     @State var isMouseDown = false
 
-    @State var selectedResultIndex: Int?
-    @State var listResults = [AutocompleteResult]()
+    @State private var selectedResultIndex: Int?
+    @State private var listResults = [AutocompleteResult]()
 
     private var enableAnimations: Bool {
         !state.windowIsResizing

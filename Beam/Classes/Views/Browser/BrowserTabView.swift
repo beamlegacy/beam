@@ -11,8 +11,8 @@ import SwiftUI
 struct BrowserTabView: View {
     @EnvironmentObject var state: BeamState
     @ObservedObject var tab: BrowserTab
-    @State var showButton = false
-    var selected: Bool
+    @State private var showButton = false
+    let selected: Bool
 
     static var tabFrameColor = Color(.tabFrame)
 

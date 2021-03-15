@@ -10,9 +10,9 @@ import SwiftUI
 
 struct TabStats: View {
     var score: Score
-    @State var position = CGSize()
-    @State var initialPosition = CGSize()
-    @State var dragging = false
+    @State private var position = CGSize()
+    @State private var initialPosition = CGSize()
+    @State private var dragging = false
     func actualPosition(_ containerSize: CGSize, _ position: CGSize) -> CGSize {
         let width = max(0, min(containerSize.width - 100, position.width))
         let height = max(0, min(containerSize.height - 100, position.height))

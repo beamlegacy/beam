@@ -6,7 +6,7 @@ struct ConsoleContentView: View {
     private let timer = Timer.publish(every: 0.2, on: .main, in: .common).autoconnect()
 
     @available(OSX 11.0, *)
-    @State var scrollView: ScrollViewProxy?
+    @State private var scrollView: ScrollViewProxy?
 
     var body: some View {
         ScrollView {

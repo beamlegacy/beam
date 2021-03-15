@@ -12,10 +12,10 @@ import AppKit
 
 struct OmniBar: View {
     @EnvironmentObject var state: BeamState
-    @State var title = ""
+    @State private var title = ""
     var containerGeometry: GeometryProxy?
 
-    @State var modifierFlagsPressed: NSEvent.ModifierFlags? = nil
+    @State private var modifierFlagsPressed: NSEvent.ModifierFlags?
 
     private var enableAnimations: Bool {
         !state.windowIsResizing

@@ -10,9 +10,9 @@ import SwiftUI
 
 struct RoundedRectangleDecoration: View {
     @Environment(\.isEnabled) var isEnabled: Bool
-    @State var isHovering: Bool = false
-    var size: CGFloat
-    var isPressed: Bool
+    @State private var isHovering: Bool = false
+    let size: CGFloat
+    let isPressed: Bool
 
     private let pressedBg = Color(.toolbarButtonActiveBackgroundColor)
     private let emptyBg = Color(.transparent)
