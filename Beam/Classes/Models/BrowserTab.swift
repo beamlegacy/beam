@@ -333,8 +333,8 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         addJS(source: overrideConsole, when: .atDocumentStart)
         addJS(source: jsSelectionObserver, when: .atDocumentEnd)
         addJS(source: pointAndShoot, when: .atDocumentEnd)
-        addJS(source: devTools, when: .atDocumentEnd)
-        addCSS(source: pointAndShootStyle, when: .atDocumentEnd)
+    //    addJS(source: devTools, when: .atDocumentEnd)
+       // addCSS(source: pointAndShootStyle, when: .atDocumentEnd)
     }
 
     private func addJS(source: String, when: WKUserScriptInjectionTime) {
@@ -446,6 +446,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
         element = nil
+        Logger.shared.logError("didfail: \(error)", category: .javascript)
     }
 
     func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
@@ -538,10 +539,18 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                 Logger.shared.logError("Error while indexing web page: \(error)", category: .javascript)
             }
         }
+      //  insertContentsOfCSSFile(into: webView)
+    }
+
+    func insertContentsOfCSSFile(into webView: WKWebView) {
+        let cssString = try! pointAndShootStyle.trimmingCharacters(in: .whitespacesAndNewlines)
+        let jsString = "var style = document.createElement('style'); style.innerHTML = '\(cssString)'; document.head.appendChild(style);"
+        webView.evaluateJavaScript(jsString, completionHandler: nil)
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
         element = nil
+        Logger.shared.logError("Webview failed: \(error)", category: .javascript)
     }
 
     func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
