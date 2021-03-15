@@ -683,10 +683,10 @@
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="View" id="HyV-fh-RgO">
                                     <items>
-                                        <menuItem title="Enter Full Screen" keyEquivalent="f" id="4J7-dP-txa">
+                                        <menuItem title="Enter Full Screen" keyEquivalent="f" id="KMy-Je-3TA">
                                             <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
                                             <connections>
-                                                <action selector="toggleFullScreen:" target="Ady-hI-5gd" id="dU3-MA-1Rq"/>
+                                                <action selector="toggleFullScreen:" target="Ady-hI-5gd" id="eha-6e-Nsv"/>
                                             </connections>
                                         </menuItem>
                                     </items>
@@ -701,9 +701,14 @@
                                                 <action selector="toggleBetweenWebAndNote:" target="Voe-Tx-rLC" id="ni4-5e-0wF"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Go Back" tag="4" keyEquivalent="[" id="NOl-ax-hus">
+                                        <menuItem title="Change Card" tag="4" keyEquivalent="D" id="NOl-ax-hus">
                                             <connections>
-                                                <action selector="goBack:" target="Voe-Tx-rLC" id="W3Y-ZE-CJG"/>
+                                                <action selector="showCardSelector:" target="Ady-hI-5gd" id="FiE-9C-fLE"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Go Back" tag="4" keyEquivalent="[" id="vfj-M7-Iu5">
+                                            <connections>
+                                                <action selector="goBack:" target="Voe-Tx-rLC" id="w7p-rt-yUD"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem title="Go Back" tag="-4" keyEquivalent="" id="JJG-Tc-9sk">
