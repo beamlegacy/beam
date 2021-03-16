@@ -310,7 +310,8 @@ class DocumentManager {
 
     // MARK: -
     // MARK: Refresh
-    private func refreshDocumentsAndSave(_ context: NSManagedObjectContext,
+    private func refreshDocumentsAndSave(_ delete: Bool = true,
+                                         _ context: NSManagedObjectContext,
                                          _ documentAPITypes: [DocumentAPIType]) throws -> Bool {
         var remoteDocumentsIds: [UUID] = []
         var errors = false
@@ -335,7 +336,9 @@ class DocumentManager {
         }
 
         // Deleting local documents we haven't found remotely
-        self.deleteNonExistingIds(context, remoteDocumentsIds)
+        if delete {
+            self.deleteNonExistingIds(context, remoteDocumentsIds)
+        }
         return try Self.saveContext(context: context) && !errors
     }
 
@@ -500,8 +503,26 @@ extension DocumentManager {
 
     // MARK: -
     // MARK: Refresh
+
+    /// When we sync all documents, we don't want to flag local documents not available remotely as deleted,
+    /// as we might create document in the mean time (the UI does create a journal for today
+    // TODO: A better way would be adding a "lock" mechanism to prevent all network calls when
+    // we are in the process of a sync
+    func syncDocuments(completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
+        uploadAllDocuments { result in
+            if case .success(let success) = result {
+                if success == true {
+                    self.refreshDocuments(delete: false, completion: completion)
+                    return
+                }
+            }
+
+            completion?(result)
+        }
+    }
+
     /// Fetch all remote documents from API
-    func refreshDocuments(completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
+    func refreshDocuments(delete: Bool = true, completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
         // If not authenticated
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             completion?(.success(false))
@@ -516,7 +537,7 @@ extension DocumentManager {
                 case .failure(let error):
                     completion?(.failure(error))
                 case .success(let documentAPITypes):
-                    self.refreshDocumentsSuccess(documentAPITypes, completion)
+                    self.refreshDocumentsSuccess(delete, documentAPITypes, completion)
                 }
             }
         } catch {
@@ -524,12 +545,13 @@ extension DocumentManager {
         }
     }
 
-    private func refreshDocumentsSuccess(_ documentAPITypes: [DocumentAPIType],
+    private func refreshDocumentsSuccess(_ delete: Bool = true,
+                                         _ documentAPITypes: [DocumentAPIType],
                                          _ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
         coreDataManager.persistentContainer.performBackgroundTask { context in
 
             do {
-                let success = try self.refreshDocumentsAndSave(context, documentAPITypes)
+                let success = try self.refreshDocumentsAndSave(delete, context, documentAPITypes)
                 if !success {
                     completion?(.failure(DocumentManagerError.unresolvedConflict))
                 } else {
@@ -1026,14 +1048,24 @@ extension DocumentManager {
             }
     }
 
+    func syncDocuments() -> Promises.Promise<Bool> {
+        let promise: Promises.Promise<Bool> = uploadAllDocuments()
+
+        return promise.then { result -> Promises.Promise<Bool> in
+            guard result == true else { return Promise(result) }
+
+            return self.refreshDocuments()
+        }
+    }
+
     /// Fetch all remote documents from API
-    func refreshDocuments() -> Promises.Promise<Bool> {
+    func refreshDocuments(_ delete: Bool = true) -> Promises.Promise<Bool> {
         let documentRequest = DocumentRequest()
         return documentRequest.fetchDocuments()
                 .then(on: self.backgroundQueue) { documents -> Bool in
                     let context = self.coreDataManager.persistentContainer.newBackgroundContext()
                     return try context.performAndWait {
-                        try self.refreshDocumentsAndSave(context, documents)
+                        try self.refreshDocumentsAndSave(delete, context, documents)
                     }
                 }
     }
@@ -1277,8 +1309,18 @@ extension DocumentManager {
             }
     }
 
+    func syncDocuments() -> PromiseKit.Promise<Bool> {
+        let promise: PromiseKit.Promise<Bool> = uploadAllDocuments()
+
+        return promise.then { result -> PromiseKit.Promise<Bool> in
+            guard result == true else { return .value(result) }
+
+            return self.refreshDocuments()
+        }
+    }
+
     /// Fetch all remote documents from API
-    func refreshDocuments() -> PromiseKit.Promise<Bool> {
+    func refreshDocuments(_ delete: Bool = true) -> PromiseKit.Promise<Bool> {
         let documentRequest = DocumentRequest()
 
         let promise: PromiseKit.Promise<[DocumentAPIType]> = documentRequest.fetchDocuments()
@@ -1287,7 +1329,7 @@ extension DocumentManager {
             .then(on: backgroundQueue) { documents -> PromiseKit.Promise<Bool> in
                 let context = self.coreDataManager.persistentContainer.newBackgroundContext()
                 let result = try context.performAndWait {
-                    try self.refreshDocumentsAndSave(context, documents)
+                    try self.refreshDocumentsAndSave(delete, context, documents)
                 }
                 return .value(result)
             }
