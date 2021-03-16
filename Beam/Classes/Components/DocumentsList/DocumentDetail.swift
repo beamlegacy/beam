@@ -8,7 +8,10 @@ struct DocumentDetail: View {
 
     var body: some View {
         ScrollView {
-            RefreshButton.padding()
+            HStack(alignment: VerticalAlignment.center, spacing: 10.0) {
+                RefreshButton
+                PublicButton
+            }
 
             HStack {
                 VStack {
@@ -39,6 +42,12 @@ struct DocumentDetail: View {
                             Spacer()
                         }
                     }
+                    HStack {
+                        Text("Public:").bold()
+                        Text(document.is_public ? "Yes" : "No")
+                        Spacer()
+                    }
+
                     Divider()
 
                     Spacer()
@@ -92,6 +101,14 @@ struct DocumentDetail: View {
         }
     }
 
+    private func togglePublic() {
+        var documentStruct = DocumentStruct(document: document)
+        documentStruct.isPublic = !documentStruct.isPublic
+
+        documentManager.saveDocument(documentStruct, completion: { _ in
+        })
+    }
+
     private var RefreshButton: some View {
         Button(action: {
             refresh()
@@ -102,6 +119,14 @@ struct DocumentDetail: View {
                 Text("Refresh").frame(minWidth: 100)
             }
         }).disabled(refreshing)
+    }
+
+    private var PublicButton: some View {
+        Button(action: {
+            togglePublic()
+        }, label: {
+            Text(document.is_public ? "Make Private" : "Make Public").frame(minWidth: 100)
+        })
     }
 
     static private let dateFormat: DateFormatter = {
