@@ -12,7 +12,6 @@ struct AutocompleteItem: View {
     let selected: Bool
     var displayIcon: Bool = true
 
-    @State private var isHovering = false
     @State private var isTouchDown = false
 
     @State private var favicon: NSImage?
@@ -20,7 +19,7 @@ struct AutocompleteItem: View {
         guard !isTouchDown else {
             return Color(.autocompleteClickedBackgroundColor)
         }
-        return Color(.autocompleteSelectedBackgroundColor).opacity(selected || isHovering ? 1.0 : 0.0)
+        return Color(.autocompleteSelectedBackgroundColor).opacity(selected ? 1.0 : 0.0)
     }
 
     func iconNameSource(_ source: AutocompleteResult.Source) -> String {
@@ -92,9 +91,6 @@ struct AutocompleteItem: View {
         .padding(.vertical, 8)
         .padding(.horizontal, 12)
         .background(backgroundColor)
-        .onHover { v in
-            isHovering = v
-        }
         .onTouchDown { t in
             isTouchDown = t
         }
