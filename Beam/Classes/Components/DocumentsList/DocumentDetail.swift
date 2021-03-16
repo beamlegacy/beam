@@ -10,6 +10,7 @@ struct DocumentDetail: View {
         ScrollView {
             HStack(alignment: VerticalAlignment.center, spacing: 10.0) {
                 RefreshButton
+                DeleteButton
                 PublicButton
             }
 
@@ -101,6 +102,10 @@ struct DocumentDetail: View {
         }
     }
 
+    private func delete() {
+        documentManager.deleteDocument(id: document.id, completion: nil)
+    }
+
     private func togglePublic() {
         var documentStruct = DocumentStruct(document: document)
         documentStruct.isPublic = !documentStruct.isPublic
@@ -113,12 +118,16 @@ struct DocumentDetail: View {
         Button(action: {
             refresh()
         }, label: {
-            if refreshing {
-                Text("Refreshing").frame(minWidth: 100)
-            } else {
-                Text("Refresh").frame(minWidth: 100)
-            }
+            Text(refreshing ? "Refreshing" : "Refresh").frame(minWidth: 100)
         }).disabled(refreshing)
+    }
+
+    private var DeleteButton: some View {
+        Button(action: {
+            delete()
+        }, label: {
+            Text("Delete").frame(minWidth: 100)
+        })
     }
 
     private var PublicButton: some View {

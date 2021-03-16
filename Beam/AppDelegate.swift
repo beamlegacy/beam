@@ -75,6 +75,19 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         self.beamUIMenuGenerator = BeamUITestsMenuGenerator()
         prepareMenuForTestEnv()
         #endif
+
+        documentManager.syncDocuments { result in
+            switch result {
+            case .failure(let error):
+                Logger.shared.logError("Couldn't sync document: \(error.localizedDescription)",
+                                       category: .document)
+            case .success(let success):
+                if !success {
+                    Logger.shared.logError("Couldn't sync document",
+                                           category: .document)
+                }
+            }
+        }
     }
 
     func updateBadge() {

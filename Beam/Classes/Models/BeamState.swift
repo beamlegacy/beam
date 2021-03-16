@@ -81,7 +81,7 @@ let NoteDisplayThreshold = Float(0.0)
             }
         }
     }
-    
+
     @Published public var tabs: [BrowserTab] = [] {
         didSet {
             for tab in tabs {
