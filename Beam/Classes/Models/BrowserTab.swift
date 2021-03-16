@@ -333,8 +333,8 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         addJS(source: overrideConsole, when: .atDocumentStart)
         addJS(source: jsSelectionObserver, when: .atDocumentEnd)
         addJS(source: pointAndShoot, when: .atDocumentEnd)
-    //    addJS(source: devTools, when: .atDocumentEnd)
-       // addCSS(source: pointAndShootStyle, when: .atDocumentEnd)
+        addCSS(source: pointAndShootStyle, when: .atDocumentEnd)
+        //    addJS(source: devTools, when: .atDocumentEnd)
     }
 
     private func addJS(source: String, when: WKUserScriptInjectionTime) {
@@ -350,11 +350,10 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     private func addCSS(source: String, when: WKUserScriptInjectionTime) {
         let styleSrc = """
                        var style = document.createElement('style');
-                       style.innerHTML = '\(source)';
+                       style.innerHTML = `\(source)`;
                        document.head.appendChild(style);
                        """
-        let script = WKUserScript(source: styleSrc, injectionTime: when, forMainFrameOnly: false)
-        self.webView.configuration.userContentController.addUserScript(script)
+        self.addJS(source: styleSrc, when: when)
     }
 
     private enum ScriptHandlers: String, CaseIterable {
@@ -539,12 +538,12 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                 Logger.shared.logError("Error while indexing web page: \(error)", category: .javascript)
             }
         }
-      //  insertContentsOfCSSFile(into: webView)
+        // insertContentsOfCSSFile(into: webView)
     }
 
     func insertContentsOfCSSFile(into webView: WKWebView) {
         let cssString = try! pointAndShootStyle.trimmingCharacters(in: .whitespacesAndNewlines)
-        let jsString = "var style = document.createElement('style'); style.innerHTML = '\(cssString)'; document.head.appendChild(style);"
+        let jsString = "var style = document.createElement('style'); style.innerHTML = \"\(cssString)\"; document.head.appendChild(style);"
         webView.evaluateJavaScript(jsString, completionHandler: nil)
     }
 
