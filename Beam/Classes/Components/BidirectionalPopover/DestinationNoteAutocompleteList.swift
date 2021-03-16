@@ -27,9 +27,17 @@ struct DestinationNoteAutocompleteList: View {
                                 onSelectAutocompleteResult?()
                             }
                         )
-                        .onHover { _ in
-                            selectedIndex = nil
+                        .onHover { hovering in
+                            if hovering {
+                                selectedIndex = indexFor(item: i)
+                            }
                         }
+                }
+            }
+            .animation(nil)
+            .onHover { hovering in
+                if !hovering {
+                    selectedIndex = nil
                 }
             }
             .frame(maxWidth: .infinity)
