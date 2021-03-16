@@ -1,5 +1,5 @@
-mutation UpdateDocument($title: String!, $id: ID, $data: String, $previousChecksum: MD5, $updatedAt: ISO8601DateTime, $createdAt: ISO8601DateTime) {
-  updateDocument(input: {document: {title: $title, id: $id, data: $data, previousChecksum: $previousChecksum, updatedAt: $updatedAt, createdAt: $createdAt}}) {
+mutation UpdateDocument($title: String!, $id: ID, $data: String, $isPublic: Boolean, $previousChecksum: MD5, $updatedAt: ISO8601DateTime, $createdAt: ISO8601DateTime) {
+  updateDocument(input: {document: {title: $title, id: $id, data: $data, isPublic: $isPublic, previousChecksum: $previousChecksum, updatedAt: $updatedAt, createdAt: $createdAt}}) {
     document {
       id
     }

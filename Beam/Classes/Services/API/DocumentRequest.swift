@@ -41,6 +41,7 @@ class DocumentRequest: APIRequest {
         let previousChecksum: String?
         let createdAt: Date?
         let updatedAt: Date?
+        let isPublic: Bool?
     }
 
     struct UpdateDocument: Decodable, Errorable {
@@ -61,10 +62,11 @@ class DocumentRequest: APIRequest {
 
         let parameters = UpdateDocumentParameters(id: document.id,
                                                   title: title,
-                                                  data: Configuration.encryptionEnabled ? document.encryptedData : document.data,
+                                                  data: document.shouldEncrypt ? document.encryptedData : document.data,
                                                   previousChecksum: document.previousChecksum,
                                                   createdAt: document.createdAt,
-                                                  updatedAt: document.updatedAt)
+                                                  updatedAt: document.updatedAt,
+                                                  isPublic: document.isPublic)
 
         return parameters
     }

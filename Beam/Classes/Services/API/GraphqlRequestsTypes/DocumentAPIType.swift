@@ -32,6 +32,7 @@ class DocumentAPIType: Codable {
         documentType = document.document_type
         previousChecksum = document.beam_api_checksum
         data = document.data?.asString
+        isPublic = document.is_public
     }
 
     init(document: DocumentStruct) {
@@ -43,6 +44,7 @@ class DocumentAPIType: Codable {
         documentType = document.documentType.rawValue
         previousChecksum = document.previousChecksum
         data = document.data.asString
+        isPublic = document.isPublic
     }
 
     init(id: String) {
@@ -86,8 +88,12 @@ class DocumentAPIType: Codable {
         }
     }
 
+    var shouldEncrypt: Bool {
+        Configuration.encryptionEnabled && !(isPublic ?? false)
+    }
+
     func encrypt() throws {
-        guard Configuration.encryptionEnabled else {
+        guard shouldEncrypt else {
             dataChecksum = try data?.MD5()
             return
         }

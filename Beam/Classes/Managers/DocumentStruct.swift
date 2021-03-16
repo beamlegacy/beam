@@ -15,6 +15,7 @@ public struct DocumentStruct {
     let documentType: DocumentType
     var previousData: Data?
     var previousChecksum: String?
+    var isPublic: Bool = false
 
     var uuidString: String {
         id.uuidString.lowercased()
@@ -34,7 +35,8 @@ public struct DocumentStruct {
                                   data: data,
                                   documentType: documentType,
                                   previousData: previousData,
-                                  previousChecksum: previousChecksum)
+                                  previousChecksum: previousChecksum,
+                                  isPublic: isPublic)
         return copy
     }
 }
@@ -49,6 +51,7 @@ extension DocumentStruct {
         self.data = document.data ?? Data()
         self.previousData = document.beam_api_data
         self.previousChecksum = document.beam_api_checksum
+        self.isPublic = document.is_public
     }
 
     func asApiType() -> DocumentAPIType {
