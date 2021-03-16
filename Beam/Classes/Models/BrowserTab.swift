@@ -338,7 +338,8 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     }
 
     private func addJS(source: String, when: WKUserScriptInjectionTime) {
-        let script = WKUserScript(source: source, injectionTime: when, forMainFrameOnly: false)
+        let injected = source.replacingOccurrences(of: "__ID__", with: "beam" + self.id.uuidString.replacingOccurrences(of: "-", with: "_"))
+        let script = WKUserScript(source: injected, injectionTime: when, forMainFrameOnly: false)
         self.webView.configuration.userContentController.addUserScript(script)
     }
 
@@ -538,13 +539,6 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                 Logger.shared.logError("Error while indexing web page: \(error)", category: .javascript)
             }
         }
-        // insertContentsOfCSSFile(into: webView)
-    }
-
-    func insertContentsOfCSSFile(into webView: WKWebView) {
-        let cssString = try! pointAndShootStyle.trimmingCharacters(in: .whitespacesAndNewlines)
-        let jsString = "var style = document.createElement('style'); style.innerHTML = \"\(cssString)\"; document.head.appendChild(style);"
-        webView.evaluateJavaScript(jsString, completionHandler: nil)
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {

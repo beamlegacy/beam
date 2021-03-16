@@ -23,8 +23,6 @@ const navigatorLanguage = navigator.language.substring(0, 2);
 const documentLanguage = document.lang
 const lang = navigatorLanguage || documentLanguage;
 
-/* animation: beam-shoot-anim 3s infinite alternate !important;*/
-
 /**
  * Shoot elements.
  */
@@ -36,9 +34,9 @@ const existingCards = [
     {id: 3, title: "Michael Jordan"},
 ];
 
-const prefix = "beam"
+const prefix = "__ID__"
 
-const beamClass = prefix
+const prefixClass = prefix
 const shootClass = `${prefix}-shoot`
 const pointClass = `${prefix}-point`
 const popupClass = `${prefix}-popup`
@@ -53,44 +51,39 @@ const proposalsClass = `${prefix}-proposals`
 const proposalClass = `${prefix}-proposal`
 const statusClass = `${prefix}-status`
 
-const datasetKey = "beamCollect"
-const styleKey = "beamStyle"
+const datasetKey = `${prefix}Collect`
+const styleKey = `${prefix}Style`
 
-function setOutline(el) {
+function __ID__setOutline(el) {
     el.classList.add(pointClass);
-
-    let source = document.body.innerHTML;
-    let beamStart = source.indexOf(".beam");
-    console.log("beamStart", beamStart)
-    console.log("source", source.substring(beamStart))
 }
 
-function removeOutline(el) {
+function __ID__removeOutline(el) {
     el.classList.remove(pointClass)
     el.style.cursor = ``;
 }
 
-function removeSelected(selectedIndex, el) {
+function __ID__removeSelected(selectedIndex, el) {
     selected.splice(selectedIndex, 1);
     el.classList.remove(shootClass)
     delete el.dataset[datasetKey]
-    removeOutline(el);
+    __ID__removeOutline(el);
 }
 
 const popupId = `${prefix}-popup`;
 const popupAnchor = document.body;
 let popup;
 
-function submit() {
+function __ID__submit() {
     for (const s of selected) {
-        s.dataset.beamCollect = JSON.stringify(selectedCard)
+        s.dataset[datasetKey] = JSON.stringify(selectedCard)
     }
-    hidePopup()
+    __ID__hidePopup()
 }
 
 let inputTouched
 
-function cardsToProposals(cards, txt) {
+function __ID__cardsToProposals(cards, txt) {
     const proposals = []
     for (const c of cards) {
         let title = c.title;
@@ -109,7 +102,7 @@ function cardsToProposals(cards, txt) {
 
 let newCard
 
-function cardInput(ev) {
+function __ID__cardInput(ev) {
     const input = ev.target;
     if (!inputTouched) {
         input.value = ev.data
@@ -122,20 +115,20 @@ function cardInput(ev) {
         possibles = existingCards.concat(newCard)
     }
     const txt = inputValue.toLowerCase()
-    const proposals = cardsToProposals(possibles, txt);
-    showProposals(proposals)
+    const proposals = __ID__cardsToProposals(possibles, txt);
+    __ID__showProposals(proposals)
     inputTouched = true
 }
 
-function cardKeyDown(ev) {
+function __ID__cardKeyDown(ev) {
     console.log(ev.key)
     switch (ev.key) {
         case "Escape":
-            hidePopup();
+            __ID__hidePopup();
             break;
         case "Enter":
             if (ev.metaKey) {
-                submit();
+                __ID__submit();
             }
             break;
         case "ArrowDown":
@@ -147,54 +140,54 @@ function cardKeyDown(ev) {
 
 let selectedCard
 
-function selectProposal(id) {
+function __ID__selectProposal(id) {
     selectedCard = existingCards.find(c => c.id === id);
-    cardInputEl().value = selectedCard.title
-    proposalsEl().innerHTML = ""
+    __ID__cardInputEl().value = selectedCard.title
+    __ID__proposalsEl().innerHTML = ""
 }
 
-const proposalsEl = function () {
+const __ID__proposalsEl = function () {
     return document.querySelector(`#${popupId} #proposals`);
 };
 
-function showProposals(ps) {
-    const pList = proposalsEl()
+function __ID__showProposals(ps) {
+    const pList = __ID__proposalsEl()
     let proposalsHTML = ""
     for (const p of ps) {
-        proposalsHTML += `<li class="${proposalClass}" onclick="selectProposal(${p.key})">${p.value}</li>`
+        proposalsHTML += `<li class="${proposalClass}" onclick="__ID__selectProposal(${p.key})">${p.value}</li>`
     }
     pList.innerHTML = proposalsHTML
 }
 
-function dropDown() {
-    showProposals(cardsToProposals(existingCards, ""));
+function __ID__dropDown() {
+    __ID__showProposals(__ID__cardsToProposals(existingCards, ""));
 }
 
 const cardInputId = `${prefix}-add-to`
-const cardInputEl = function () {
+const __ID__cardInputEl = function () {
     return document.getElementById(cardInputId);
 };
 
-function showPopup(el) {
+function __ID__showPopup(el) {
     const msg = messages[lang];
     popup = document.createElement("DIV");
     popup.id = popupId;
-    popup.classList.add(beamClass)
+    popup.classList.add(prefixClass)
     popup.classList.add(popupClass)
     newCard = {id: 0, title: "", hint: "- New card"}
     selectedCard = existingCards.length > 0 ? existingCards[0] : newCard;
     const value = selectedCard.title;
     inputTouched = false
     popup.innerHTML = `
-<button type="button" aria-label="${msg.close}" class="${closeClass}" title="${msg.close}" onclick="hidePopup()">×</button>
+<button type="button" aria-label="${msg.close}" class="${closeClass}" title="${msg.close}" onclick="__ID__hidePopup()">×</button>
 <form action="javascript:submit()">
   <div class="${cardClass}">
     <label for="${cardInputId}" class="${labelClass}">${msg.addTo}</label>
     <div class="${comboClass}">
-      <input class="${inputClass}" id="${cardInputId}" value="${value}" onkeydown="cardKeyDown(event)" oninput="cardInput(event)" autocomplete="off"/>
+      <input class="${inputClass}" id="${cardInputId}" value="${value}" onkeydown="__ID__cardKeyDown(event)" oninput="__ID__cardInput(event)" autocomplete="off"/>
       <ul id="proposals" class="${proposalsClass}"></ul>
     </div>  
-    <button type="button" class="${dropArrowClass}" title="${msg.dropArrow}" onclick="dropDown()">⌄</button>
+    <button type="button" class="${dropArrowClass}" title="${msg.dropArrow}" onclick="__ID__dropDown()">⌄</button>
     <span class="shortcut hint">⌘↵</span>
   </div>
   <div class="${noteClass}">
@@ -207,10 +200,10 @@ function showPopup(el) {
     popup.style.left = `${bounds.x}px`;
     const popupTop = window.scrollY + bounds.bottom + outlineWidth;
     popup.style.top = `${popupTop}px`;
-    cardInputEl().focus();
+    __ID__cardInputEl().focus();
 }
 
-function hidePopup() {
+function __ID__hidePopup() {
     if (popup) {
         popup.remove();
         popup = null;
@@ -229,14 +222,14 @@ let status
 /**
  * Show the if a given was added to a card.
  */
-function showStatus(el) {
+function __ID__showStatus(el) {
     const msg = messages[lang];
     status = document.createElement("DIV");
-    el.classList.add(beamClass);
+    el.classList.add(prefixClass);
     el.classList.add(statusClass);
     const data = pointed.dataset[datasetKey];
-    const beamCollect = JSON.parse(data);
-    status.innerHTML = `${msg.addedTo} ${beamCollect.title}`;
+    const collected = JSON.parse(data);
+    status.innerHTML = `${msg.addedTo} ${collected.title}`;
     popupAnchor.append(status);
     const bounds = el.getBoundingClientRect();
     status.style.left = `${bounds.x}px`;
@@ -244,35 +237,35 @@ function showStatus(el) {
     status.style.top = `${statusTop}px`;
 }
 
-function hideStatus() {
+function __ID__hideStatus() {
     if (status) {
         status.remove()
         status = null
     }
 }
 
-function onMouseMove(ev) {
+function __ID__onMouseMove(ev) {
     if (ev.altKey) {
         ev.preventDefault();
         ev.stopPropagation();
         const el = ev.target;
         if (pointed !== el) {
             if (pointed) {
-                removeOutline(pointed);
+                __ID__removeOutline(pointed);
             }
             pointed = el;
-            setOutline(pointed);
-            let beamCollect = pointed.dataset[datasetKey];
-            if (beamCollect) {
-                showStatus(pointed)
+            __ID__setOutline(pointed);
+            let collected = pointed.dataset[datasetKey];
+            if (collected) {
+                __ID__showStatus(pointed)
             } else {
-                hideStatus()
+                __ID__hideStatus()
             }
         } else {
-            hidePopup();
+            __ID__hidePopup();
         }
     } else {
-        hideStatus();
+        __ID__hideStatus();
     }
 }
 
@@ -281,7 +274,7 @@ function onMouseMove(ev) {
  *
  * @param ev The selection event (click or touch).
  */
-function select(ev) {
+function __ID__select(ev) {
     const el = ev.target;
     ev.preventDefault();
     ev.stopPropagation();
@@ -289,61 +282,59 @@ function select(ev) {
     const alreadySelected = selectedIndex >= 0;
     if (alreadySelected) {
         // Unselect
-        removeSelected(selectedIndex, el);
+        __ID__removeSelected(selectedIndex, el);
         return;
     }
     const multiSelect = ev.metaKey;
     if (!multiSelect && selected.length > 0) {
-        removeSelected(0, selected[0]); // previous selection will be replaced
+        __ID__removeSelected(0, selected[0]); // previous selection will be replaced
     }
     selected.push(el);
-    setOutline(el);
+    __ID__setOutline(el);
     el.classList.remove(pointClass);
     el.classList.add(shootClass);
     const count = selected.length > 1 ? "" + selected.length : "";
     for (const s of selected) {
         s.style.cursor = `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="30" viewBox="20 0 30 55" style="stroke:rgb(165,165,165);stroke-linecap:round;stroke-width:3"><rect x="10" y="20" width="54" height="25" ry="10" style="stroke-width:1; fill:white"/><text x="15" y="39" style="font-size:20px;stroke-linecap:butt;stroke-width:1">${count}</text><line x1="35" y1="26" x2="50" y2="26"/><line x1="35" y1="32" x2="50" y2="32"/><line x1="35" y1="38" x2="45" y2="38"/><g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g id="notallowed"><path d="M8,17.4219 L8,1.4069 L19.591,13.0259 L12.55,13.0259 L12.399,13.1499 L8,17.4219 Z" id="point-border" fill="white"/><path d="M9,3.814 L9,15.002 L11.969,12.136 L12.129,11.997 L17.165,11.997 L9,3.814 Z" id="point" fill="black"/></g></g></svg>') 5 5, auto`;
     }
-    hidePopup();
-    showPopup(el);
+    __ID__hidePopup();
+    __ID__showPopup(el);
 }
 
-function onClick(ev) {
+function __ID__onClick(ev) {
     if (ev.altKey) {
-        select(ev);
+        __ID__select(ev);
     }
 }
 
-function onlongtouch(ev) {
-    select(ev);
+function __ID__onlongtouch(ev) {
+    __ID__select(ev);
 }
 
 let timer;
 const touchDuration = 2500; //length of time we want the user to touch before we do something
 
-function touchstart(ev) {
+function __ID__touchstart(ev) {
     if (!timer) {
-        timer = setTimeout(() => onlongtouch(ev), touchDuration);
+        timer = setTimeout(() => __ID__onlongtouch(ev), touchDuration);
     }
 }
 
-function touchend(_ev) {
+function __ID__touchend(_ev) {
     if (timer) {
         clearTimeout(timer);
         timer = null;
     }
 }
 
-function onKeyPress(ev) {
+function __ID__onKeyPress(ev) {
     if (ev.code === "Escape") {
-        hidePopup()
+        __ID__hidePopup()
     }
 }
 
-console.log("Point and shoot registering")
-document.addEventListener("keypress", onKeyPress);
-window.addEventListener("mousemove", onMouseMove);
-window.addEventListener("click", onClick);
+document.addEventListener("keypress", __ID__onKeyPress);
+window.addEventListener("mousemove", __ID__onMouseMove);
+window.addEventListener("click", __ID__onClick);
 //window.addEventListener("touchstart", touchstart, false);
 //window.addEventListener("touchend", touchend, false);
-console.log("Point and shoot registered")
