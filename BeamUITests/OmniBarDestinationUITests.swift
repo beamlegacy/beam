@@ -23,8 +23,8 @@ class OmniBarDestinationUITests: QuickSpec {
         }
         self.app.launch()
         self.helper = OmniBarUITestsHelper(self.app)
-//        self.helper.cleanupDB()
-//        createDestinationNote()
+        self.helper.cleanupDB()
+        createDestinationNote()
     }
 
     func createDestinationNote() {
@@ -73,7 +73,7 @@ class OmniBarDestinationUITests: QuickSpec {
                 expect(selectedResultQuery.count).to(equal(1))
             }
 
-            fit("can be focused with shortcut") {
+            it("can be focused with shortcut") {
                 goToWebMode()
                 let title = self.app.staticTexts["DestinationNoteTitle"]
                 expect(title.waitForExistence(timeout: 2)).to(beTrue())
