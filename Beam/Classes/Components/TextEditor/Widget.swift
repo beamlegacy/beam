@@ -19,7 +19,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     var isEmpty: Bool { children.isEmpty }
     var selected: Bool = false {
         didSet {
-            layer.backgroundColor = selected ? NSColor(white: 0.5, alpha: 0.1).cgColor : NSColor(white: 1, alpha: 0).cgColor
+            layer.backgroundColor = selected ? NSColor.editorTextSelectionColor.cgColor : NSColor(white: 1, alpha: 0).cgColor
             invalidate()
         }
     }
