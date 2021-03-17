@@ -75,6 +75,8 @@ class DeleteText: TextEditorCommand {
             self.range = deleteText.range.lowerBound..<range.upperBound
         } else if range.lowerBound == deleteText.range.lowerBound {
             self.range = range.lowerBound..<range.upperBound + 1
+        } else {
+            return false
         }
         elementInstance.element.text.replaceSubrange(elementInstance.element.text.wholeRange, with: oldText)
         return true
