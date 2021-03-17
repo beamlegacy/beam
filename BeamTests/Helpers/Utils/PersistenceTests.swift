@@ -16,8 +16,8 @@ class PersistenceTests: QuickSpec {
 
         let text = String.randomTitle()
         it("saves privateKey") {
-            Persistence.Encryption.privateKey = text.asData
-            expect(Persistence.Encryption.privateKey) == text.asData
+            Persistence.Encryption.privateKey = text
+            expect(Persistence.Encryption.privateKey) == text
         }
     }
 }

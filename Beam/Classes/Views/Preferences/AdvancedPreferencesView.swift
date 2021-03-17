@@ -29,15 +29,21 @@ struct AdvancedPreferencesView: View {
     @State private var loggedIn: Bool = AccountManager().loggedIn
     @State private var networkEnabled: Bool = Configuration.networkEnabled
     @State private var encryptionEnabled = Configuration.encryptionEnabled
+    @State private var privateKey = EncryptionManager.shared.privateKey().asString()
 
     private let contentWidth: Double = 650.0
 
     var body: some View {
-        let binding = Binding<String>(get: {
+        let apiHostnameBinding = Binding<String>(get: {
             self.apiHostname
         }, set: {
             self.apiHostname = $0
             Configuration.apiHostname = $0
+        })
+        let privateKeyBinding = Binding<String>(get: {
+            privateKey
+        }, set: {
+            try? EncryptionManager.shared.replacePrivateKey($0)
         })
 
         Preferences.Container(contentWidth: contentWidth) {
@@ -45,7 +51,8 @@ struct AdvancedPreferencesView: View {
                 Text(bundleIdentifier)
             }
             Preferences.Section(title: "API endpoint:") {
-                TextField("api hostname", text: binding).textFieldStyle(RoundedBorderTextFieldStyle()).frame(maxWidth: 200)
+                TextField("api hostname", text: apiHostnameBinding)
+                    .textFieldStyle(RoundedBorderTextFieldStyle()).frame(maxWidth: 400)
             }
             Preferences.Section(title: "Public endpoint:") {
                 Text(publicHostname)
@@ -66,7 +73,7 @@ struct AdvancedPreferencesView: View {
                 Text(String(describing: sentryEnabled)).fixedSize(horizontal: false, vertical: true)
             }
             Preferences.Section(title: "Sentry dsn:") {
-                Text("https://\(Configuration.sentryKey)@\(Configuration.sentryHostname)/\(Configuration.sentryProject)").fixedSize(horizontal: false, vertical: true)
+                Text(Configuration.sentryDsn).fixedSize(horizontal: false, vertical: true)
             }
             Preferences.Section(title: "Network Enabled") {
                 NetworkEnabledButton
@@ -75,12 +82,14 @@ struct AdvancedPreferencesView: View {
                 EncryptionEnabledButton
             }
             Preferences.Section(title: "Encryption key") {
-                Text(String(describing: EncryptionManager().privateKey().asString())).fixedSize(horizontal: false, vertical: true)
+                TextField("Private Key", text: privateKeyBinding)
+                    .textFieldStyle(RoundedBorderTextFieldStyle()).frame(maxWidth: 400)
             }
             Preferences.Section(title: "Actions") {
                 ResetAPIEndpointsButton
                 CrashButton
                 CopyAccessToken
+                ResetPrivateKey
             }
         }
     }
@@ -132,6 +141,16 @@ struct AdvancedPreferencesView: View {
             // TODO: loc
             Text("Copy Access Token").frame(minWidth: 100)
         }).disabled(!loggedIn)
+    }
+
+    private var ResetPrivateKey: some View {
+        Button(action: {
+            EncryptionManager.shared.resetPrivateKey()
+            privateKey = EncryptionManager.shared.privateKey().asString()
+        }, label: {
+            // TODO: loc
+            Text("Reset Private Key").frame(minWidth: 100)
+        }).disabled(!Configuration.encryptionEnabled)
     }
 }
 

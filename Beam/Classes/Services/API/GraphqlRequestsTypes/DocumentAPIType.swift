@@ -1,4 +1,5 @@
 import Foundation
+import CryptoKit
 
 /*
  Used for interacting with Beam API
@@ -64,26 +65,25 @@ class DocumentAPIType: Codable {
 
         do {
             let decodedStruct = try decoder.decode(DataEncryption.self, from: encodedData.asData)
-
             guard let encodedString = decodedStruct.data else { return }
 
             data = try EncryptionManager.shared.decryptString(encodedString)
             encryptedData = encodedData
         } catch DecodingError.dataCorrupted {
             Logger.shared.logError("DecodingError.dataCorrupted", category: .encryption)
-            Logger.shared.logError("Encoded data: \(encodedData)", category: .encryption)
+            Logger.shared.logDebug("Encoded data: \(encodedData)", category: .encryption)
 
             // JSON decoding error might happen when the content wasn't encrypted
             encryptedData = nil
         } catch DecodingError.typeMismatch {
             Logger.shared.logError("DecodingError.typeMismatch", category: .encryption)
-            Logger.shared.logError("Encoded data: \(encodedData)", category: .encryption)
+            Logger.shared.logDebug("Encoded data: \(encodedData)", category: .encryption)
 
             // JSON decoding error might happen when the content wasn't encrypted
             encryptedData = nil
         } catch {
             Logger.shared.logError("\(type(of: error)): \(error) \(error.localizedDescription)", category: .encryption)
-            Logger.shared.logError("Encoded data: \(encodedData)", category: .encryption)
+            Logger.shared.logDebug("Encoded data: \(encodedData)", category: .encryption)
             throw error
         }
     }
