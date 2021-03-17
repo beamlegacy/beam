@@ -59,6 +59,8 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     @Published var browsingTree: BrowsingTree
     @Published var privateMode = false
 
+    @Published var pointAndShootRect: NSRect?
+
     var state: BeamState!
 
     public private(set) var note: BeamNote

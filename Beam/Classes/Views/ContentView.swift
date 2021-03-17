@@ -35,6 +35,10 @@ struct ModeView: View {
                                     if data.showTabStats, let score = tab.browsingTree.current.score {
                                         TabStats(score: score)
                                     }
+
+                                    if let rect = tab.pointAndShootRect {
+                                        PointAndshootFrame(rect: rect)
+                                    }
                                 }
                             }
                         }
