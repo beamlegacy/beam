@@ -358,6 +358,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     }
 
     private enum ScriptHandlers: String, CaseIterable {
+        case beam_blockSelected
         case beam_textSelected
         case beam_onScrolled
         case beam_logging
@@ -459,9 +460,21 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     }()
 
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-        switch message.name {
+        let messageName = message.name
+        switch messageName {
         case ScriptHandlers.beam_logging.rawValue:
             Logger.shared.logInfo(String(describing: message.body), category: .javascript)
+
+        case ScriptHandlers.beam_blockSelected.rawValue:
+            guard let dict = message.body as? [String: AnyObject],
+//                  let selectedText = dict["selectedText"] as? String,
+                  let area = dict["area"] as? AnyObject,
+                  let data = dict["data"] as? AnyObject,
+                  let type = dict["type"] as? AnyObject
+                    else {
+                return
+            }
+            Logger.shared.logDebug("Web block selected: \(type), \(data), \(area)", category: .web)
 
         case ScriptHandlers.beam_textSelected.rawValue:
             guard let dict = message.body as? [String: AnyObject],

@@ -56,6 +56,23 @@ const styleKey = `${prefix}Style`
 
 function __ID__setOutline(el) {
     el.classList.add(pointClass);
+    let boundingClientRect = el.getBoundingClientRect();
+    let blockMessage = {
+        type: {
+            tagName: el.tagName,
+        },
+        data: {
+            text: el.innerText
+        },
+        area: {
+            x: boundingClientRect.x,
+            y: boundingClientRect.y,
+            width: boundingClientRect.width,
+            height: boundingClientRect.height,
+        },
+    };
+    console.log("Sending beam_blockSelected", blockMessage)
+    window.webkit.messageHandlers.beam_blockSelected.postMessage(blockMessage);
 }
 
 function __ID__removeOutline(el) {
