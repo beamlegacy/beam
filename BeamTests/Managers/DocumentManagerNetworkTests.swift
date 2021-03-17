@@ -40,7 +40,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                                                      coreDataManager: coreDataManager)
 
             helper.deleteAllDocuments()
-            EncryptionManager().clearPrivateKey()
+            EncryptionManager.shared.clearPrivateKey()
         }
 
         afterSuite {

@@ -93,6 +93,11 @@ platform :mac do
 
   desc "Run tests"
   lane :tests do
+    update_app_identifier(
+      xcodeproj: "Beam.xcodeproj",
+      plist_path: "Beam/Configuration/Info.plist",
+      app_identifier: ENV["APP_IDENTIFIER"]
+    )
     check_certs(profile_development: true,
                 cert_development: true,
                 profile_provision_name: "Beam Development",
@@ -129,6 +134,11 @@ platform :mac do
 
   desc "Run UI tests"
   lane :uitests do
+    update_app_identifier(
+      xcodeproj: "Beam.xcodeproj",
+      plist_path: "Beam/Configuration/Info.plist",
+      app_identifier: ENV["APP_IDENTIFIER"]
+    )
     check_certs(profile_development: true,
                 cert_development: true,
                 profile_provision_name: "Beam Development",
@@ -214,6 +224,12 @@ platform :mac do
 
     sparkle_set_url(info_plist: info_plist,
                     appcast_url: appcast_url)
+
+    update_app_identifier(
+      xcodeproj: "Beam.xcodeproj",
+      plist_path: "Beam/Configuration/Info.plist",
+      app_identifier: ENV["APP_IDENTIFIER"]
+    )
 
     check_certs(cert_development: false,
                 cert_type: "developer_id_application",

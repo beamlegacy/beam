@@ -18,7 +18,7 @@ enum Persistence {
     }
 
     enum Encryption {
-        @KeychainStorable("encryption.privateKey") static var privateKey: Data?
+        @KeychainStorable("encryption.privateKey") static var privateKey: String?
     }
 
     /// Clean all stored informations on logout

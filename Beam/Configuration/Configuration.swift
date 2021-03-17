@@ -28,6 +28,8 @@ struct Configuration {
     static var networkEnabled = NSString("$(NETWORK_ENABLED)").boolValue
     static var encryptionEnabledDefault = NSString("$(ENCRYPTION_ENABLED)").boolValue
 
+    static private(set) var sentryDsn = "https://\(sentryKey)@\(sentryHostname)/\(sentryProject)"
+
     // Runtime configuration
     static private(set) var apiHostnameDefault = "api.beamapp.co"
     static private(set) var publicHostnameDefault = "app.beamapp.co"
