@@ -318,6 +318,7 @@
 		A552DF2D25F12A3600570C85 /* OmniBarButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A552DF2C25F12A3600570C85 /* OmniBarButton.swift */; };
 		A552DF3325F1741900570C85 /* GlobalCenteringContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A552DF3225F1741900570C85 /* GlobalCenteringContainer.swift */; };
 		A567157125F66F8600B46110 /* StyledText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A567157025F66F8600B46110 /* StyledText.swift */; };
+		A572629825FFADC5004416C0 /* MouseInteraction.swift in Sources */ = {isa = PBXBuildFile; fileRef = A572629725FFADC5004416C0 /* MouseInteraction.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -820,6 +821,7 @@
 		A552DF2C25F12A3600570C85 /* OmniBarButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniBarButton.swift; sourceTree = "<group>"; };
 		A552DF3225F1741900570C85 /* GlobalCenteringContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalCenteringContainer.swift; sourceTree = "<group>"; };
 		A567157025F66F8600B46110 /* StyledText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StyledText.swift; sourceTree = "<group>"; };
+		A572629725FFADC5004416C0 /* MouseInteraction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MouseInteraction.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1048,6 +1050,7 @@
 				96E4CF75258EC88300D6DE22 /* BeamTextTools.swift */,
 				9691E41325AF61BA00A13080 /* BrowsingTree.swift */,
 				A050047425DA918A009CFEB6 /* NoteAutoSaveService.swift */,
+				A572629725FFADC5004416C0 /* MouseInteraction.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -2354,6 +2357,7 @@
 				4181722C2581107C00317ED8 /* AutocompleteList.swift in Sources */,
 				4181727B258110D100317ED8 /* AppDelegate+CoreData.swift in Sources */,
 				96988C8325BB0AF2000223A3 /* DestinationNotePicker.swift in Sources */,
+				A572629825FFADC5004416C0 /* MouseInteraction.swift in Sources */,
 				96E4CF72258E59F400D6DE22 /* BeamTextVisitor.swift in Sources */,
 				418172272581107C00317ED8 /* NSMutableAttributedString+Range.swift in Sources */,
 				9676142025CA989D00BDA862 /* WeakReference.swift in Sources */,
