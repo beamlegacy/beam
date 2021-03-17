@@ -22,6 +22,7 @@ struct DestinationNotePicker: View {
         !state.windowIsResizing
     }
     private let boxHeight: CGFloat = 32
+    private let maxBoxWidth: CGFloat = 230
     private let todaysCardReplacementName = "Today"
     private var title: String {
         displayNameForCardName(state.destinationCardName)
@@ -37,8 +38,13 @@ struct DestinationNotePicker: View {
     private var isEditing: Bool {
         state.destinationCardIsFocused
     }
+
     private func setIsEditing(_ editing: Bool) {
         state.destinationCardIsFocused = editing
+    }
+
+    private var animation: Animation? {
+        enableAnimations ? .easeInOut(duration: 0.3) : nil
     }
 
     var body: some View {
@@ -56,13 +62,25 @@ struct DestinationNotePicker: View {
         })
         return ZStack(alignment: .top) {
             RoundedRectangle(cornerRadius: 4)
-                .fill(isMouseDown ? Color(.destinationNoteBorderColor) : Color(.transparent))
+                .fill(Color(.destinationNoteBorderColor).opacity(isMouseDown ? 1.0 : 0.0))
                 .overlay(
                     RoundedRectangle(cornerRadius: 4)
-                        .strokeBorder(isEditing || isHovering ? Color(.destinationNoteBorderColor) : Color(.transparent))
+                        .strokeBorder(Color(.destinationNoteBorderColor))
+                        .opacity(isEditing || isHovering ? 1.0 : 0.0)
                 )
-                .frame(maxHeight: boxHeight)
-            ZStack(alignment: .top) {
+                .frame(minWidth: isEditing ? 230 : 0, maxHeight: boxHeight)
+            ZStack(alignment: .topLeading) {
+                Text(title)
+                    .font(.system(size: 12))
+                    .padding(8)
+                    .frame(maxWidth: maxBoxWidth, alignment: .leading)
+                    .frame(height: boxHeight)
+                    .fixedSize(horizontal: true, vertical: false)
+                    .foregroundColor(.white)
+                    .colorMultiply(isHovering || isMouseDown ? Color(.destinationNoteActiveTextColor) : Color(.destinationNoteTextColor))
+                    .animation(animation)
+                    .opacity(isEditing ? 0.0 : 1.0)
+                    .accessibility(identifier: "DestinationNoteTitle")
                 VStack(spacing: 2) {
                     HStack {
                         BeamTextField(
@@ -70,7 +88,7 @@ struct DestinationNotePicker: View {
                             isEditing: isEditingBinding,
                             placeholder: placeholder,
                             font: .systemFont(ofSize: 12),
-                            textColor: .destinationNoteActiveTextColor,
+                            textColor: isHovering || isMouseDown ? .destinationNoteActiveTextColor : .destinationNoteTextColor,
                             placeholderColor: NSColor.omniboxPlaceholderTextColor,
                             selectedRanges: state.destinationCardNameSelectedRange
                         ) { newName in
@@ -96,45 +114,42 @@ struct DestinationNotePicker: View {
                             cancelSearch()
                         }
                     }
+                    .padding(8)
                     .accessibility(addTraits: .isSearchField)
                     .accessibility(identifier: "DestinationNoteSearchField")
-                    .padding(8)
                     .onAppear(perform: {
                         state.destinationCardName = tab.note.title
                     })
-                    if isEditing && listResults.count > 0 {
-                        DestinationNoteAutocompleteList(selectedIndex: $selectedResultIndex, elements: $listResults)
-                            .onSelectAutocompleteResult {
-                                selectedCurrentAutocompleteResult()
-                            }
-                            .frame(minWidth: 230)
+                    .animation(animation)
+                    .opacity(isEditing ? 1.0 : 0.01)
+                    HStack {
+                        if isEditing && listResults.count > 0 {
+                            DestinationNoteAutocompleteList(selectedIndex: $selectedResultIndex, elements: $listResults)
+                                .onSelectAutocompleteResult {
+                                    selectedCurrentAutocompleteResult()
+                                }
+                                .frame(width: maxBoxWidth)
+                        }
                     }
+                    .animation(.easeInOut(duration: 0.1))
                 }
-                .opacity(!isEditing ? 0.01 : 1.0)
-                .frame(maxWidth: isEditing ? .infinity : 0.0)
-                Text(title)
-                    .font(.system(size: 12, weight: .medium))
-                    .fixedSize(horizontal: true, vertical: false)
-                    .foregroundColor(.white)
-                    .colorMultiply(isHovering || isMouseDown ? Color(.destinationNoteActiveTextColor) : Color(.destinationNoteTextColor))
-                    .animation(enableAnimations ? .easeInOut : nil)
-                    .padding(8)
-                    .frame(height: boxHeight)
-                    .onTapGesture {
-                        setIsEditing(true)
-                    }
-                    .opacity(isEditing ? 0 : 1.0)
-                    .accessibility(identifier: "DestinationNoteTitle")
+                .animation(nil)
+                .frame(maxWidth: maxBoxWidth)
             }
         }
-        .frame(minWidth: isEditing ? 230 : 0)
+        .frame(minWidth: isEditing ? maxBoxWidth : 0)
         .fixedSize(horizontal: true, vertical: false)
-        .onTouchDown { touching in
-            isMouseDown = touching
-        }
         .onHover { hovering in
             isHovering = hovering
         }
+        .onTouchDown { touching in
+            isMouseDown = touching
+        }
+        .simultaneousGesture(
+            TapGesture(count: 1).onEnded {
+                setIsEditing(true)
+            }
+        )
     }
 
     func handleCursorMovement(_ move: CursorMovement) -> Bool {
@@ -175,11 +190,14 @@ struct DestinationNotePicker: View {
         }
         let result = listResults[selectedResultIndex]
         changeDestinationCard(to: result.text)
-        cancelSearch()
+        DispatchQueue.main.async {
+            cancelSearch()
+        }
     }
 
     func cancelSearch() {
         state.resetDestinationCard()
+        listResults = []
     }
 }
 

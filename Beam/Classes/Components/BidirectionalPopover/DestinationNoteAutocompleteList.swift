@@ -16,18 +16,28 @@ struct DestinationNoteAutocompleteList: View {
     private let itemHeight: CGFloat = 32
 
     var body: some View {
-        OmniBarFieldBackground(isEditing: true) {
+        OmniBarFieldBackground(isEditing: true, enableAnimations: true) {
             VStack(spacing: 0) {
                 ForEach(elements) { i in
                     return AutocompleteItem(item: i, selected: isSelectedItem(i), displayIcon: false)
                         .frame(height: itemHeight)
-                        .onTapGesture(count: 1) {
-                            selectedIndex = indexFor(item: i)
-                            onSelectAutocompleteResult?()
+                        .simultaneousGesture(
+                            TapGesture(count: 1).onEnded {
+                                selectedIndex = indexFor(item: i)
+                                onSelectAutocompleteResult?()
+                            }
+                        )
+                        .onHover { hovering in
+                            if hovering {
+                                selectedIndex = indexFor(item: i)
+                            }
                         }
-                        .onHover { _ in
-                            selectedIndex = nil
-                        }
+                }
+            }
+            .animation(nil)
+            .onHover { hovering in
+                if !hovering {
+                    selectedIndex = nil
                 }
             }
             .frame(maxWidth: .infinity)

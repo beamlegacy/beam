@@ -45,7 +45,9 @@ struct OmniBarFieldBackground<Content: View>: View {
                 .onHover(perform: { hovering in
                     isHoveringBox = hovering
                 })
-            content().clipped()
+            content()
+                .cornerRadius(boxCornerRadius)
+                .clipped()
         }
     }
 }

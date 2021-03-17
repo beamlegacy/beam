@@ -61,6 +61,7 @@ class Document: NSManagedObject {
         created_at = documentStruct.createdAt
         updated_at = BeamDate.now
         deleted_at = documentStruct.deletedAt
+        is_public = documentStruct.isPublic
     }
 
     class func countWithPredicate(_ context: NSManagedObjectContext,

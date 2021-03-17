@@ -27,6 +27,7 @@ public class TextNode: Widget {
     var frameAnimationCancellable = Set<AnyCancellable>()
 
     var mouseIsDragged = false
+    var lastHoverMouseInfo: MouseInfo?
     var interlineFactor = CGFloat(1.3)
     var interNodeSpacing = CGFloat(0)
     var indent: CGFloat { selfVisible ? 18 : 0 }
@@ -38,6 +39,14 @@ public class TextNode: Widget {
             actionLayer.contentsScale = contentsScale
             actionTextLayer.contentsScale = contentsScale
             actionImageLayer.contentsScale = contentsScale
+        }
+    }
+
+    override var hover: Bool {
+        didSet {
+            if oldValue != hover {
+                invalidateText()
+            }
         }
     }
 
@@ -660,7 +669,8 @@ public class TextNode: Widget {
     override func mouseMoved(mouseInfo: MouseInfo) -> Bool {
         cursor = nil
 
-        if contentsFrame.contains(mouseInfo.position) {
+        let mouseHasChangedTextPosition = lastHoverMouseInfo?.position != mouseInfo.position
+        if mouseHasChangedTextPosition && contentsFrame.contains(mouseInfo.position) {
             let link = linkAt(point: mouseInfo.position)
             let internalLink = internalLinkAt(point: mouseInfo.position)
 
@@ -669,7 +679,7 @@ public class TextNode: Widget {
                 let frame = linkFrameAt(point: mouseInfo.position)
 
                 cursor = .pointingHand
-
+                invalidateText()
                 editor.updateInlineFormaterOnHover(
                     currentNode,
                     mouseInfo.globalPosition,
@@ -682,8 +692,10 @@ public class TextNode: Widget {
             } else {
                 cursor = .iBeam
                 editor.dismissHyperlinkView()
+                invalidateText()
             }
         }
+        lastHoverMouseInfo = mouseInfo
 
         guard let actionLayer = actionLayer,
               root?.state.nodeSelection == nil else {
@@ -801,15 +813,19 @@ public class TextNode: Widget {
         return res
     }
 
-    public func linkAt(point: NSPoint) -> URL? {
+    public func positionAt(point: NSPoint, inString: NSAttributedString) -> Int? {
         guard layout != nil, !layout!.lines.isEmpty else { return nil }
         let line = lineAt(point: point)
         guard line >= 0 else { return nil }
         let l = layout!.lines[line]
-        guard l.frame.minX < point.x && l.frame.maxX > point.x else { return nil } // don't find links outside the line
+        guard l.frame.minX < point.x && l.frame.maxX > point.x else { return nil } // point is outside the line
         let displayIndex = l.stringIndexFor(position: point)
-        let pos = min(displayIndex, attributedString.length - 1)
+        let pos = min(displayIndex, inString.length - 1)
+        return pos
+    }
 
+    public func linkAt(point: NSPoint) -> URL? {
+        guard let pos = positionAt(point: point, inString: attributedString) else { return nil }
         let range = elementText.rangeAt(position: pos)
         guard let linkAttribIndex = range.attributes.firstIndex(where: { attrib -> Bool in
             attrib.rawValue == BeamText.Attribute.link("").rawValue
@@ -828,9 +844,7 @@ public class TextNode: Widget {
         let line = lineAt(point: point)
         guard line >= 0 else { return nil }
         let l = layout!.lines[line]
-        guard l.frame.minX < point.x && l.frame.maxX > point.x else { return nil } // don't find links outside the line
-        let displayIndex = l.stringIndexFor(position: point)
-        let pos = min(displayIndex, attributedString.length - 1)
+        guard let pos = positionAt(point: point, inString: attributedString) else { return nil }
 
         let range = elementText.rangeAt(position: pos)
         guard nil != range.attributes.firstIndex(where: { attrib -> Bool in
@@ -1002,7 +1016,15 @@ public class TextNode: Widget {
             fontSize = 15 // TODO: Change later (isBig ? 17 : 15)
         }
 
-        let str = beamText.buildAttributedString(fontSize: fontSize, cursorPosition: cursorPosition, elementKind: elementKind)
+        var mouseInteraction: MouseInteraction?
+        if let hoverMouse = lastHoverMouseInfo, hover {
+            if let pos = positionAt(point: hoverMouse.position, inString: attributedString) {
+                let nsrange = NSRange(location: pos, length: 1)
+                mouseInteraction = MouseInteraction(type: MouseInteractionType.hovered, range: nsrange)
+            }
+        }
+
+        let str = beamText.buildAttributedString(fontSize: fontSize, cursorPosition: cursorPosition, elementKind: elementKind, mouseInteraction: mouseInteraction)
         let paragraphStyle = NSMutableParagraphStyle()
         //        paragraphStyle.alignment = .justified
         paragraphStyle.lineBreakMode = .byWordWrapping

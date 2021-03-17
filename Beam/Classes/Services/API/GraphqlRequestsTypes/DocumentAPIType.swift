@@ -1,4 +1,5 @@
 import Foundation
+import CryptoKit
 
 /*
  Used for interacting with Beam API
@@ -32,6 +33,7 @@ class DocumentAPIType: Codable {
         documentType = document.document_type
         previousChecksum = document.beam_api_checksum
         data = document.data?.asString
+        isPublic = document.is_public
     }
 
     init(document: DocumentStruct) {
@@ -43,6 +45,7 @@ class DocumentAPIType: Codable {
         documentType = document.documentType.rawValue
         previousChecksum = document.previousChecksum
         data = document.data.asString
+        isPublic = document.isPublic
     }
 
     init(id: String) {
@@ -62,32 +65,35 @@ class DocumentAPIType: Codable {
 
         do {
             let decodedStruct = try decoder.decode(DataEncryption.self, from: encodedData.asData)
-
             guard let encodedString = decodedStruct.data else { return }
 
             data = try EncryptionManager.shared.decryptString(encodedString)
             encryptedData = encodedData
         } catch DecodingError.dataCorrupted {
             Logger.shared.logError("DecodingError.dataCorrupted", category: .encryption)
-            Logger.shared.logError("Encoded data: \(encodedData)", category: .encryption)
+            Logger.shared.logDebug("Encoded data: \(encodedData)", category: .encryption)
 
             // JSON decoding error might happen when the content wasn't encrypted
             encryptedData = nil
         } catch DecodingError.typeMismatch {
             Logger.shared.logError("DecodingError.typeMismatch", category: .encryption)
-            Logger.shared.logError("Encoded data: \(encodedData)", category: .encryption)
+            Logger.shared.logDebug("Encoded data: \(encodedData)", category: .encryption)
 
             // JSON decoding error might happen when the content wasn't encrypted
             encryptedData = nil
         } catch {
             Logger.shared.logError("\(type(of: error)): \(error) \(error.localizedDescription)", category: .encryption)
-            Logger.shared.logError("Encoded data: \(encodedData)", category: .encryption)
+            Logger.shared.logDebug("Encoded data: \(encodedData)", category: .encryption)
             throw error
         }
     }
 
+    var shouldEncrypt: Bool {
+        Configuration.encryptionEnabled && !(isPublic ?? false)
+    }
+
     func encrypt() throws {
-        guard Configuration.encryptionEnabled else {
+        guard shouldEncrypt else {
             dataChecksum = try data?.MD5()
             return
         }

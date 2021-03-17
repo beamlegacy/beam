@@ -78,6 +78,9 @@ struct BeamTextField: NSViewRepresentable {
     }
 
     func updateNSView(_ textField: Self.NSViewType, context: Self.Context) {
+        if textField.textColor != textColor {
+            textField.textColor = textColor
+        }
         textField.setText(text, font: font)
         textField.setPlaceholder(placeholder, font: font)
         textField.shouldUseIntrinsicContentSize = centered

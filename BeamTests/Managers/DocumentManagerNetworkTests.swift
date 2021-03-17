@@ -40,7 +40,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                                                      coreDataManager: coreDataManager)
 
             helper.deleteAllDocuments()
-            EncryptionManager().clearPrivateKey()
+            EncryptionManager.shared.clearPrivateKey()
         }
 
         afterSuite {
@@ -876,7 +876,9 @@ class DocumentManagerNetworkTests: QuickSpec {
                                 }
                             }
 
-                            expect(helper.fetchOnAPI(docStruct)?.id) == docStruct.uuidString
+                            let remoteStruct = helper.fetchOnAPI(docStruct)
+                            expect(remoteStruct?.id) == docStruct.uuidString
+                            expect(remoteStruct?.isPublic) == false
                         }
 
                         it("cancels previous unfinished saves") {
@@ -911,10 +913,32 @@ class DocumentManagerNetworkTests: QuickSpec {
                             expect(remoteStruct?.title) == newTitle
                         }
 
-                        context("with encryption") {
-                            it("saves the document on the API") {
-                                Configuration.encryptionEnabled = true
+                        context("with deleted notes") {
+                            beforeEach { docStruct.deletedAt = BeamDate.now }
 
+                            it("does not save the document on the API") {
+                                let previousNetworkCall = APIRequest.callsCount
+
+                                waitUntil(timeout: .seconds(10)) { done in
+                                    sut.saveDocumentStructOnAPI(docStruct) { result in
+                                        expect { try result.get() }.toNot(throwError())
+                                        expect { try result.get() } == false
+                                        done()
+                                    }
+                                }
+
+                                expect(APIRequest.callsCount - previousNetworkCall) == 0
+                            }
+                        }
+
+                        context("with encryption") {
+                            beforeEach { Configuration.encryptionEnabled = true }
+                            afterEach {
+                                Configuration.encryptionEnabled = false
+                                helper.deleteDocumentStruct(docStruct)
+                            }
+                            
+                            it("saves the document on the API") {
                                 waitUntil(timeout: .seconds(10)) { done in
                                     sut.saveDocument(docStruct, true, { result in
                                         expect { try result.get() }.toNot(throwError())
@@ -938,10 +962,32 @@ class DocumentManagerNetworkTests: QuickSpec {
                                 // DocumentManager returns unencrypted data
                                 expect(savedDoc?.id) == docStruct.uuidString
                                 expect(savedDoc?.data?.asData) == docStruct.data
+                            }
 
-                                helper.deleteDocumentStruct(docStruct)
+                            context("with public notes") {
+                                beforeEach { docStruct.isPublic = true }
 
-                                Configuration.encryptionEnabled = false
+                                it("saves the document on the API") {
+                                    waitUntil(timeout: .seconds(10)) { done in
+                                        sut.saveDocument(docStruct, true, { result in
+                                            expect { try result.get() }.toNot(throwError())
+                                            expect { try result.get() } == true
+                                            done()
+                                        }, completion: nil)
+                                    }
+
+                                    // Making sure the API side has *NOT* encrypted data
+                                    let semaphore = DispatchSemaphore(value: 0)
+                                    _ = try? DocumentRequest().fetchDocument(docStruct.uuidString) { result in
+                                        let documentAPIType = try? result.get()
+                                        expect(documentAPIType?.encryptedData).to(beNil())
+                                        expect(documentAPIType?.data) == "whatever binary data"
+                                        expect(documentAPIType?.isPublic) == true
+
+                                        semaphore.signal()
+                                    }
+                                    semaphore.wait()
+                                }
                             }
                         }
                     }
@@ -961,7 +1007,9 @@ class DocumentManagerNetworkTests: QuickSpec {
                                 }.catch { fail("Should not be called: \($0)") }
                             }
 
-                            expect(helper.fetchOnAPI(docStruct)?.id) == docStruct.uuidString
+                            let remoteStruct = helper.fetchOnAPI(docStruct)
+                            expect(remoteStruct?.id) == docStruct.uuidString
+                            expect(remoteStruct?.isPublic) == false
                         }
 
                         it("cancels previous unfinished saves") {
@@ -998,9 +1046,13 @@ class DocumentManagerNetworkTests: QuickSpec {
                         }
 
                         context("with encryption") {
-                            it("saves the document on the API") {
-                                Configuration.encryptionEnabled = true
+                            beforeEach { Configuration.encryptionEnabled = true }
+                            afterEach {
+                                Configuration.encryptionEnabled = false
+                                helper.deleteDocumentStruct(docStruct)
+                            }
 
+                            it("saves the document on the API") {
                                 let promise: PromiseKit.Promise<Bool> = sut.saveDocumentOnApi(docStruct)
 
                                 waitUntil(timeout: .seconds(10)) { done in
@@ -1025,10 +1077,34 @@ class DocumentManagerNetworkTests: QuickSpec {
                                 // DocumentManager returns unencrypted data
                                 expect(savedDoc?.id) == docStruct.uuidString
                                 expect(savedDoc?.data?.asData) == docStruct.data
+                            }
 
-                                helper.deleteDocumentStruct(docStruct)
+                            context("with public notes") {
+                                beforeEach { docStruct.isPublic = true }
 
-                                Configuration.encryptionEnabled = false
+                                it("saves the document on the API") {
+                                    let promise: PromiseKit.Promise<Bool> = sut.saveDocumentOnApi(docStruct)
+
+                                    waitUntil(timeout: .seconds(10)) { done in
+                                        promise.done { success in
+                                            expect(success) == true
+                                            done()
+                                        }.catch { fail("Should not be called: \($0)") }
+                                    }
+
+                                    // Making sure the API side has encrypted data
+                                    let semaphore = DispatchSemaphore(value: 0)
+                                    _ = try? DocumentRequest().fetchDocument(docStruct.uuidString) { result in
+                                        let documentAPIType = try? result.get()
+
+                                        expect(documentAPIType?.encryptedData).to(beNil())
+                                        expect(documentAPIType?.data) == "whatever binary data"
+                                        expect(documentAPIType?.isPublic) == true
+
+                                        semaphore.signal()
+                                    }
+                                    semaphore.wait()
+                                }
                             }
                         }
                     }
@@ -1048,7 +1124,9 @@ class DocumentManagerNetworkTests: QuickSpec {
                                 }.catch { fail("Should not be called: \($0)") }
                             }
 
-                            expect(helper.fetchOnAPI(docStruct)?.id) == docStruct.uuidString
+                            let remoteStruct = helper.fetchOnAPI(docStruct)
+                            expect(remoteStruct?.id) == docStruct.uuidString
+                            expect(remoteStruct?.isPublic) == false
                         }
 
                         it("cancels previous unfinished saves") {
@@ -1085,9 +1163,13 @@ class DocumentManagerNetworkTests: QuickSpec {
                         }
 
                         context("with encryption") {
-                            it("saves the document on the API") {
-                                Configuration.encryptionEnabled = true
+                            beforeEach { Configuration.encryptionEnabled = true }
+                            afterEach {
+                                Configuration.encryptionEnabled = false
+                                helper.deleteDocumentStruct(docStruct)
+                            }
 
+                            it("saves the document on the API") {
                                 let promise: Promises.Promise<Bool> = sut.saveDocumentOnApi(docStruct)
 
                                 waitUntil(timeout: .seconds(10)) { done in
@@ -1112,10 +1194,34 @@ class DocumentManagerNetworkTests: QuickSpec {
                                 // DocumentManager returns unencrypted data
                                 expect(savedDoc?.id) == docStruct.uuidString
                                 expect(savedDoc?.data?.asData) == docStruct.data
+                            }
 
-                                helper.deleteDocumentStruct(docStruct)
+                            context("with public notes") {
+                                beforeEach { docStruct.isPublic = true }
 
-                                Configuration.encryptionEnabled = false
+                                it("saves the document on the API") {
+                                    let promise: Promises.Promise<Bool> = sut.saveDocumentOnApi(docStruct)
+
+                                    waitUntil(timeout: .seconds(10)) { done in
+                                        promise.then { success in
+                                            expect(success) == true
+                                            done()
+                                        }.catch { fail("Should not be called: \($0)") }
+                                    }
+
+                                    // Making sure the API side has encrypted data
+                                    let semaphore = DispatchSemaphore(value: 0)
+                                    _ = try? DocumentRequest().fetchDocument(docStruct.uuidString) { result in
+                                        let documentAPIType = try? result.get()
+
+                                        expect(documentAPIType?.encryptedData).to(beNil())
+                                        expect(documentAPIType?.data) == "whatever binary data"
+                                        expect(documentAPIType?.isPublic) == true
+
+                                        semaphore.signal()
+                                    }
+                                    semaphore.wait()
+                                }
                             }
                         }
                     }

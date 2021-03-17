@@ -16,6 +16,7 @@ struct ImageRunStruct {
     let descent: CGFloat
     let width: CGFloat
     let image: String
+    let color: NSColor?
 }
 
 public class TextLine {
@@ -155,7 +156,7 @@ public class TextLine {
 
         CTLineDraw(ctLine, context)
 
-        // draw strikethrough if needed:
+        // draw strikethrough or link icon if needed:
         var offset = CGFloat(0)
         for run in runs {
             var ascent = CGFloat(0)
@@ -164,6 +165,7 @@ public class TextLine {
             let width = CTRunGetTypographicBounds(run, CFRangeMake(0, 0), &ascent, &descent, nil)
 
             if let attributes = CTRunGetAttributes(run) as? [NSAttributedString.Key: Any] {
+
                 if let color = attributes[.strikethroughColor] as? NSColor,
                    attributes[.strikethroughStyle] as? NSNumber != nil {
                     context.setStrokeColor(color.cgColor)
@@ -182,11 +184,18 @@ public class TextLine {
                     let imageRun = imageRunPtr.pointee
                     let imageName = imageRun.image
                     guard let image = NSImage(named: imageName) else { continue }
-                    var rect = CGRect(origin: CGPoint(x: offset + CGFloat(0), y: 0), size: image.size)
+
+                    var rect = CGRect(origin: CGPoint(x: offset + 1, y: 4), size: image.size)
                     guard let cgImage = image.cgImage(forProposedRect: &rect,
                                                       context: nil,
                                                       hints: nil) else { continue }
+                    context.setBlendMode(.normal)
                     context.draw(cgImage, in: rect)
+                    if let imageColor = imageRun.color {
+                        context.setBlendMode(.sourceIn)
+                        context.setFillColor(imageColor.cgColor)
+                        context.fill(rect)
+                    }
                 }
             }
 
@@ -316,9 +325,7 @@ public class TextFrame {
         if debug {
             //Logger.shared.logDebug("draw frame \(ctFrame)")
         }
-
         for line in lines {
-
             line.draw(context)
         }
     }

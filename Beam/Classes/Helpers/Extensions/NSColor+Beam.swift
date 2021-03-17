@@ -58,6 +58,10 @@ extension NSColor {
         return loadColor(named: "Niobium")
     }
 
+    static var editorLinkDecorationColor: NSColor {
+        return NSColor(withLightColor: loadColor(named: "AlphaGray"), darkColor: loadColor(named: "LightStoneGray"))
+    }
+
     static var editorPopoverBackgroundColor: NSColor {
         return loadColor(named: "EditorPopoverBackgroundColor")
     }

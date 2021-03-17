@@ -886,7 +886,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             if nodes.count > 1 {
                 guard !node.text.text.isEmpty else { continue }
                 strNodes.append(NSAttributedString(string: String.tabs(node.element.depth - 1)))
-                strNodes.append(node.text.buildAttributedString(fontSize: node.fontSize, cursorPosition: node.cursorPosition, elementKind: node.elementKind))
+                strNodes.append(node.text.buildAttributedString(fontSize: node.fontSize, cursorPosition: node.cursorPosition, elementKind: node.elementKind, mouseInteraction: nil))
                 strNodes.append(NSAttributedString(string: "\n"))
             } else {
                 strNodes.append(node.attributedString)
@@ -954,6 +954,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                         let linkStr = String(str[range.lowerBound..<range.upperBound])
                         let formatText = FormattingText(in: node.element.id, of: noteTitle, for: nil, with: .link(linkStr), for: range, isActive: false)
                         rootNode.note?.cmdManager.run(command: formatText, on: rootNode)
+                        rootNode.focus(widget: node, cursorPosition: node.element.text.count)
                     }
                 }
                 rootNode.note?.cmdManager.endGroup()

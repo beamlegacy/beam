@@ -1,6 +1,24 @@
 import Foundation
 import CryptoKit
 
+enum EncryptionManagerError: Error {
+    case authenticationFailure
+    case stringEncodingError
+    case keyError
+}
+extension EncryptionManagerError: LocalizedError {
+    public var errorDescription: String? {
+        switch self {
+        case .authenticationFailure:
+            return loc("Couldn't decrypt data, did you encrypt content with a different private key?")
+        case .stringEncodingError:
+            return loc("Couldn't change String to Data.")
+        case .keyError:
+            return loc("Key couldn't be read")
+        }
+    }
+}
+
 // https://medium.com/swlh/common-cryptographic-operations-in-swift-with-cryptokit-b30a4becc895
 class EncryptionManager {
     static let shared = EncryptionManager()
@@ -15,14 +33,26 @@ class EncryptionManager {
         Persistence.Encryption.privateKey = nil
     }
 
+    func replacePrivateKey(_ base64EncodedString: String) throws {
+        guard let key = SymmetricKey(base64EncodedString: base64EncodedString) else {
+            throw EncryptionManagerError.keyError
+        }
+        Persistence.Encryption.privateKey = key.asString()
+    }
+
+    func resetPrivateKey() {
+        Persistence.Encryption.privateKey = nil
+    }
+
     func privateKey() -> SymmetricKey {
-        guard let dataKey = Persistence.Encryption.privateKey else {
+        guard let dataKey = Persistence.Encryption.privateKey,
+              let result = SymmetricKey(base64EncodedString: dataKey) else {
             let key = generateKey()
-            Persistence.Encryption.privateKey = key.asData()
+            Persistence.Encryption.privateKey = key.asString()
             return key
         }
 
-        return SymmetricKey(data: dataKey)
+        return result
     }
 
     func encryptString(_ string: String) throws -> String? {
@@ -32,13 +62,16 @@ class EncryptionManager {
     func decryptString(_ encryptedString: String, _ key: SymmetricKey? = nil) throws -> String? {
         guard let encryptedData = Data(base64Encoded: encryptedString) else {
             Logger.shared.logError("Couldn't change String to Data", category: .encryption)
-            return nil
+            throw EncryptionManagerError.stringEncodingError
         }
 
-        let sealedBox = try ChaChaPoly.SealedBox(combined: encryptedData)
-        let decryptedData = try ChaChaPoly.open(sealedBox, using: key ?? privateKey())
-
-        return decryptedData.asString
+        do {
+            let sealedBox = try ChaChaPoly.SealedBox(combined: encryptedData)
+            let decryptedData = try ChaChaPoly.open(sealedBox, using: key ?? privateKey())
+            return decryptedData.asString
+        } catch CryptoKit.CryptoKitError.authenticationFailure {
+            throw EncryptionManagerError.authenticationFailure
+        }
     }
 
     func encryptData(_ data: Data) throws -> Data? {

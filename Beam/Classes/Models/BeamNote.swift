@@ -178,7 +178,7 @@ class BeamNote: BeamElement {
         }
 
         Logger.shared.logDebug("BeamNote wants to save: \(title)", category: .document)
-        documentManager.saveDocument(documentStruct, completion:  { result in
+        documentManager.saveDocument(documentStruct, completion: { result in
             completion?(result)
         })
     }

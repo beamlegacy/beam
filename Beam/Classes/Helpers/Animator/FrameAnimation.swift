@@ -7,7 +7,7 @@
 
 import Foundation
 
-class FrameAnimation: Animation {
+class FrameAnimation: BeamAnimation {
     private var start: NSRect
     private var destination: NSRect
     @Published var current: NSRect

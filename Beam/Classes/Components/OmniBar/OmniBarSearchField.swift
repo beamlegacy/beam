@@ -78,16 +78,7 @@ struct OmniBarSearchField: View {
                     }
                 },
                 onCursorMovement: { cursorMovement in
-                    switch cursorMovement {
-                    case .up:
-                        state.selectPreviousAutocomplete()
-                        return true
-                    case .down:
-                        state.selectNextAutocomplete()
-                        return true
-                    default:
-                        return false
-                    }
+                    return handleCursorMovement(cursorMovement)
                 },
                 onModifierFlagPressed: { event in
                     modifierFlagsPressed = event.modifierFlags.contains(.command) ? .command : nil
@@ -121,6 +112,21 @@ struct OmniBarSearchField: View {
             return
         }
         state.startQuery()
+    }
+
+    func handleCursorMovement(_ move: CursorMovement) -> Bool {
+        switch move {
+        case .down, .up:
+            NSCursor.setHiddenUntilMouseMoves(true)
+            if move == .up {
+                state.selectPreviousAutocomplete()
+            } else {
+                state.selectNextAutocomplete()
+            }
+            return true
+        default:
+            return false
+        }
     }
 }
 

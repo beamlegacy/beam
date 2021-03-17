@@ -195,6 +195,10 @@ class BeamWindow: NSWindow {
         state.focusOmniBox = true
     }
 
+    @IBAction func showCardSelector(_ sender: Any?) {
+        state.destinationCardIsFocused = true
+    }
+
     static let savedTabsKey = "savedTabs"
 
     func saveDefaults() {

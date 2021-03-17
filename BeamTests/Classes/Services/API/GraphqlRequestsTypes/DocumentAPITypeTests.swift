@@ -7,35 +7,55 @@ import Nimble
 class DocumentAPITypeTests: QuickSpec {
     override func spec() {
         let text = "whatever binary data"
-        let apiStruct = DocumentAPIType(id: "whatever")
+        let sut = DocumentAPIType(id: "whatever")
 
-        beforeEach {
-            Configuration.encryptionEnabled = true
-            EncryptionManager.shared.clearPrivateKey()
-            apiStruct.data = text
-        }
-        afterEach { Configuration.encryptionEnabled = false }
-
-        describe(".decrypt()") {
-            it("works with clear text") {
-                expect { try apiStruct.decrypt() }.toNot(throwError())
-
-                expect(apiStruct.data) == text
-                expect(apiStruct.encryptedData).to(beNil())
+        context("with encryption") {
+            beforeEach {
+                Configuration.encryptionEnabled = true
+                EncryptionManager.shared.clearPrivateKey()
+                sut.data = text
             }
-        }
+            afterEach { Configuration.encryptionEnabled = false }
 
-        describe(".encrypt()") {
-            it("encrypts the clear text") {
-                expect { try apiStruct.encrypt() }.toNot(throwError())
+            describe(".decrypt()") {
+                it("works with clear text") {
+                    expect { try sut.decrypt() }.toNot(throwError())
 
-                expect(apiStruct.data) == text
-                expect(apiStruct.encryptedData).toNot(beNil())
+                    expect(sut.data) == text
+                    expect(sut.encryptedData).to(beNil())
+                }
             }
 
-            it("adds checksum") {
-                expect { try apiStruct.encrypt() }.toNot(throwError())
-                expect(apiStruct.dataChecksum).toNot(beNil())
+            describe(".encrypt()") {
+                it("encrypts the clear text") {
+                    expect { try sut.encrypt() }.toNot(throwError())
+
+                    expect(sut.data) == text
+                    expect(sut.encryptedData).toNot(beNil())
+                }
+
+                it("adds checksum") {
+                    expect { try sut.encrypt() }.toNot(throwError())
+                    expect(sut.dataChecksum).toNot(beNil())
+                }
+            }
+
+            describe(".shouldEncrypt") {
+                context("when document is public") {
+                    beforeEach { sut.isPublic = true }
+
+                    it("return false") {
+                        expect(sut.shouldEncrypt) == false
+                    }
+                }
+
+                context("when document is private") {
+                    beforeEach { sut.isPublic = false }
+
+                    it("return true") {
+                        expect(sut.shouldEncrypt) == true
+                    }
+                }
             }
         }
     }

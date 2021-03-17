@@ -72,6 +72,12 @@ let NoteDisplayThreshold = Float(0.0)
                 let newSelection = [(resultText.hasPrefix(unselectedPrefix) ? oldSize : 0) ..< newSize]
                 searchQuery = resultText
                 searchQuerySelectedRanges = newSelection
+            } else if let previousValue = oldValue,
+                      previousValue < autocompleteResults.count,
+                      autocompleteSelectedIndex == nil, searchQuerySelectedRanges != nil {
+                let previousResult = autocompleteResults[previousValue]
+                searchQuerySelectedRanges = nil
+                searchQuery = previousResult.completingText ?? ""
             }
         }
     }
