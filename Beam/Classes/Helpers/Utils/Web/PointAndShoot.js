@@ -54,10 +54,10 @@ const statusClass = `${prefix}-status`
 const datasetKey = `${prefix}Collect`
 const styleKey = `${prefix}Style`
 
-function __ID__setOutline(el) {
+function __ID__point(el) {
     el.classList.add(pointClass);
-    let boundingClientRect = el.getBoundingClientRect();
-    let blockMessage = {
+    const boundingClientRect = el.getBoundingClientRect();
+    const pointMessage = {
         type: {
             tagName: el.tagName,
         },
@@ -71,8 +71,8 @@ function __ID__setOutline(el) {
             height: boundingClientRect.height,
         },
     };
-    console.log("Sending beam_blockSelected", blockMessage)
-    window.webkit.messageHandlers.beam_blockSelected.postMessage(blockMessage);
+    console.log("Sending beam_point", pointMessage)
+    window.webkit.messageHandlers.beam_point.postMessage(pointMessage);
 }
 
 function __ID__removeOutline(el) {
@@ -185,7 +185,7 @@ const __ID__cardInputEl = function () {
     return document.getElementById(cardInputId);
 };
 
-function __ID__showPopup(el) {
+function __ID__showPopup(el, x, y) {
     const msg = messages[lang];
     popup = document.createElement("DIV");
     popup.id = popupId;
@@ -208,14 +208,13 @@ function __ID__showPopup(el) {
     <span class="shortcut hint">⌘↵</span>
   </div>
   <div class="${noteClass}">
-    <input placeholder="${msg.addNote}"/>
+    <input class="${inputClass}" placeholder="${msg.addNote}"/>
   </div>
 </form>
 `;
     popupAnchor.append(popup);
-    const bounds = el.getBoundingClientRect();
-    popup.style.left = `${bounds.x}px`;
-    const popupTop = window.scrollY + bounds.bottom + outlineWidth;
+    popup.style.left = `${x}px`;
+    const popupTop = window.scrollY + y;
     popup.style.top = `${popupTop}px`;
     __ID__cardInputEl().focus();
 }
@@ -271,7 +270,7 @@ function __ID__onMouseMove(ev) {
                 __ID__removeOutline(pointed);
             }
             pointed = el;
-            __ID__setOutline(pointed);
+            __ID__point(pointed);
             let collected = pointed.dataset[datasetKey];
             if (collected) {
                 __ID__showStatus(pointed)
@@ -290,8 +289,10 @@ function __ID__onMouseMove(ev) {
  * Select an HTML element to be added to a card.
  *
  * @param ev The selection event (click or touch).
+ * @param x Horizontal coordinate of click/touch
+ * @param y Vertical coordinate of click/touch
  */
-function __ID__select(ev) {
+function __ID__select(ev, x, y) {
     const el = ev.target;
     ev.preventDefault();
     ev.stopPropagation();
@@ -307,25 +308,47 @@ function __ID__select(ev) {
         __ID__removeSelected(0, selected[0]); // previous selection will be replaced
     }
     selected.push(el);
-    __ID__setOutline(el);
+    __ID__point(el);
     el.classList.remove(pointClass);
     el.classList.add(shootClass);
     const count = selected.length > 1 ? "" + selected.length : "";
     for (const s of selected) {
         s.style.cursor = `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="30" viewBox="20 0 30 55" style="stroke:rgb(165,165,165);stroke-linecap:round;stroke-width:3"><rect x="10" y="20" width="54" height="25" ry="10" style="stroke-width:1; fill:white"/><text x="15" y="39" style="font-size:20px;stroke-linecap:butt;stroke-width:1">${count}</text><line x1="35" y1="26" x2="50" y2="26"/><line x1="35" y1="32" x2="50" y2="32"/><line x1="35" y1="38" x2="45" y2="38"/><g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g id="notallowed"><path d="M8,17.4219 L8,1.4069 L19.591,13.0259 L12.55,13.0259 L12.399,13.1499 L8,17.4219 Z" id="point-border" fill="white"/><path d="M9,3.814 L9,15.002 L11.969,12.136 L12.129,11.997 L17.165,11.997 L9,3.814 Z" id="point" fill="black"/></g></g></svg>') 5 5, auto`;
     }
-    __ID__hidePopup();
-    __ID__showPopup(el);
+    __ID__hidePopup();      // Go native?
+    __ID__showPopup(el, x, y);    // Go native?
+    const bounds = el.getBoundingClientRect();
+    const shootMessage = {
+        type: {
+            tagName: el.tagName,
+        },
+        data: {
+            text: el.innerText
+        },
+        location: {
+            x,
+            y
+        },
+        area: {
+            x: bounds.x,
+            y: bounds.y,
+            width: bounds.width,
+            height: bounds.height,
+        },
+    };
+    console.log("Sending beam_shoot", shootMessage)
+    window.webkit.messageHandlers.beam_shoot.postMessage(shootMessage);
 }
 
 function __ID__onClick(ev) {
     if (ev.altKey) {
-        __ID__select(ev);
+        __ID__select(ev, ev.clientX, ev.clientY);
     }
 }
 
 function __ID__onlongtouch(ev) {
-    __ID__select(ev);
+    const touch = ev.touches[0];
+    __ID__select(ev, touch.clientX, touch.clientY);
 }
 
 let timer;

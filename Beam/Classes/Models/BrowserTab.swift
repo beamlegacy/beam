@@ -358,7 +358,8 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     }
 
     private enum ScriptHandlers: String, CaseIterable {
-        case beam_blockSelected
+        case beam_point
+        case beam_shoot
         case beam_textSelected
         case beam_onScrolled
         case beam_logging
@@ -465,7 +466,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         case ScriptHandlers.beam_logging.rawValue:
             Logger.shared.logInfo(String(describing: message.body), category: .javascript)
 
-        case ScriptHandlers.beam_blockSelected.rawValue:
+        case ScriptHandlers.beam_point.rawValue:
             guard let dict = message.body as? [String: AnyObject],
 //                  let selectedText = dict["selectedText"] as? String,
                   let area = dict["area"],
@@ -475,6 +476,18 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                 return
             }
             Logger.shared.logDebug("Web block selected: \(type), \(data), \(area)", category: .web)
+
+        case ScriptHandlers.beam_shoot.rawValue:
+            guard let dict = message.body as? [String: AnyObject],
+//                  let selectedText = dict["selectedText"] as? String,
+                  let location = dict["location"],
+                  let area = dict["area"],
+                  let data = dict["data"],
+                  let type = dict["type"]
+                    else {
+                return
+            }
+            Logger.shared.logDebug("Web block selected: \(location), \(type), \(data), \(area)", category: .web)
 
         case ScriptHandlers.beam_textSelected.rawValue:
             guard let dict = message.body as? [String: AnyObject],
