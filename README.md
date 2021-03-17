@@ -4,6 +4,8 @@
 * Run:
   `$ [arch -x86_64] make setup`
 * Setup Apple Developer Account with Beam AppleID.
+* If the tests fail, cd to the beam directory and run:
+  `$ direnv allow`
 
 ### If not running from an admin account:
 
