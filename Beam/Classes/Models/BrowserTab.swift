@@ -59,7 +59,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     @Published var browsingTree: BrowsingTree
     @Published var privateMode = false
 
-    @Published var pointAndShootRect: NSRect?
+    @Published var pointAndShootRect: NSRect? //= NSRect(x: 10, y: 10, width: 160, height: 100) // Uncomment to test!
 
     var state: BeamState!
 

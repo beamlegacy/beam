@@ -12,8 +12,9 @@ struct PointAndshootFrame: View {
     var rect: NSRect
     var body: some View {
             Rectangle()
-                .frame(width: rect.width, height: rect.height)
                 .offset(x: rect.minX, y: rect.minY)
-                .foregroundColor(Color.red)
+                .frame(width: rect.width, height: rect.height)
+                .position(x: rect.width / 2, y: rect.height / 2)
+                .foregroundColor(Color(red: 0, green: 0, blue: 0, opacity: 0.1))
     }
 }
