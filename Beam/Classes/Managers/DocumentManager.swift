@@ -733,13 +733,17 @@ extension DocumentManager {
     @discardableResult
     internal func saveDocumentStructOnAPI(_ documentStruct: DocumentStruct,
                                           _ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) -> URLSessionTask? {
-        Self.networkRequests[documentStruct.id]?.cancel()
-
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             completion?(.success(false))
             return nil
         }
 
+        guard documentStruct.deletedAt == nil else {
+            completion?(.success(false))
+            return nil
+        }
+
+        Self.networkRequests[documentStruct.id]?.cancel()
         let documentRequest = DocumentRequest()
         Self.networkRequests[documentStruct.id] = documentRequest
 
@@ -1119,12 +1123,15 @@ extension DocumentManager {
     }
 
     func saveDocumentOnApi(_ documentStruct: DocumentStruct) -> Promises.Promise<Bool> {
-        Self.networkRequests[documentStruct.id]?.cancel()
-
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             return Promises.Promise(true)
         }
 
+        guard documentStruct.deletedAt == nil else {
+            return Promises.Promise(true)
+        }
+
+        Self.networkRequests[documentStruct.id]?.cancel()
         let documentRequest = DocumentRequest()
         Self.networkRequests[documentStruct.id] = documentRequest
 
@@ -1384,12 +1391,15 @@ extension DocumentManager {
     }
 
     func saveDocumentOnApi(_ documentStruct: DocumentStruct) -> PromiseKit.Promise<Bool> {
-        Self.networkRequests[documentStruct.id]?.cancel()
-
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             return .value(true)
         }
 
+        guard documentStruct.deletedAt == nil else {
+            return .value(true)
+        }
+
+        Self.networkRequests[documentStruct.id]?.cancel()
         let documentRequest = DocumentRequest()
         Self.networkRequests[documentStruct.id] = documentRequest
 

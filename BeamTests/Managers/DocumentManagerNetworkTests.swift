@@ -913,6 +913,24 @@ class DocumentManagerNetworkTests: QuickSpec {
                             expect(remoteStruct?.title) == newTitle
                         }
 
+                        context("with deleted notes") {
+                            beforeEach { docStruct.deletedAt = BeamDate.now }
+
+                            it("does not save the document on the API") {
+                                let previousNetworkCall = APIRequest.callsCount
+
+                                waitUntil(timeout: .seconds(10)) { done in
+                                    sut.saveDocumentStructOnAPI(docStruct) { result in
+                                        expect { try result.get() }.toNot(throwError())
+                                        expect { try result.get() } == false
+                                        done()
+                                    }
+                                }
+
+                                expect(APIRequest.callsCount - previousNetworkCall) == 0
+                            }
+                        }
+
                         context("with encryption") {
                             beforeEach { Configuration.encryptionEnabled = true }
                             afterEach {
