@@ -468,9 +468,9 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         case ScriptHandlers.beam_blockSelected.rawValue:
             guard let dict = message.body as? [String: AnyObject],
 //                  let selectedText = dict["selectedText"] as? String,
-                  let area = dict["area"] as? AnyObject,
-                  let data = dict["data"] as? AnyObject,
-                  let type = dict["type"] as? AnyObject
+                  let area = dict["area"],
+                  let data = dict["data"],
+                  let type = dict["type"]
                     else {
                 return
             }
