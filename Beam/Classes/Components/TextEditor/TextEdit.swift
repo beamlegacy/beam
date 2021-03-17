@@ -886,7 +886,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             if nodes.count > 1 {
                 guard !node.text.text.isEmpty else { continue }
                 strNodes.append(NSAttributedString(string: String.tabs(node.element.depth - 1)))
-                strNodes.append(node.text.buildAttributedString(fontSize: node.fontSize, cursorPosition: node.cursorPosition, elementKind: node.elementKind))
+                strNodes.append(node.text.buildAttributedString(fontSize: node.fontSize, cursorPosition: node.cursorPosition, elementKind: node.elementKind, mouseInteraction: nil))
                 strNodes.append(NSAttributedString(string: "\n"))
             } else {
                 strNodes.append(node.attributedString)

@@ -10,18 +10,38 @@ import AppKit
 
 extension NSAttributedString.Key {
     static let source = NSAttributedString.Key(rawValue: "beamSource")
+    static let hoverUnderlineColor = NSAttributedString.Key(rawValue: "beam_hoverUnderlineColor") // NSColor, default nil
 }
 
 extension BeamText {
-    func buildAttributedString(fontSize: CGFloat, cursorPosition: Int, elementKind: ElementKind) -> NSMutableAttributedString {
+    func buildAttributedString(fontSize: CGFloat, cursorPosition: Int, elementKind: ElementKind, mouseInteraction: MouseInteraction? = nil) -> NSMutableAttributedString {
         let string = NSMutableAttributedString()
         for range in ranges {
-            let attributedString = NSMutableAttributedString(string: range.string, attributes: convert(attributes: range.attributes, fontSize: fontSize, elementKind: elementKind))
+            var attributedString = NSMutableAttributedString(string: range.string, attributes: convert(attributes: range.attributes, fontSize: fontSize, elementKind: elementKind))
+            if let mouseInteraction = mouseInteraction {
+                attributedString = updateAttributes(attributedString, withMouseInteraction: mouseInteraction)
+            }
 
-            addImageToLink(attributedString, range)
+            addImageToLink(attributedString, range, mouseInteraction: mouseInteraction)
             string.append(attributedString)
         }
         return string
+    }
+
+    private func updateAttributes(_ attributedString: NSMutableAttributedString, withMouseInteraction mouseInteraction: MouseInteraction) -> NSMutableAttributedString {
+        guard attributedString.wholeRange.contains(mouseInteraction.range.lowerBound) else {
+            return attributedString
+        }
+        if mouseInteraction.type == .hovered {
+            attributedString.enumerateAttribute(.hoverUnderlineColor, in: attributedString.wholeRange, options: []) { (value, range, _) in
+
+                if let value = value {
+                    attributedString.removeAttribute(.underlineColor, range: range)
+                    attributedString.addAttribute(.underlineColor, value: value, range: range)
+                }
+            }
+        }
+        return attributedString
     }
 
     private func font(_ size: CGFloat, weight: NSFont.Weight = .regular) -> NSFont {
@@ -110,7 +130,8 @@ extension BeamText {
             }
 
             stringAttributes[.underlineStyle] = NSUnderlineStyle.single.rawValue
-            stringAttributes[.underlineColor] = NSColor.underlineAndstrikethroughColor
+            stringAttributes[.underlineColor] = NSColor.editorLinkDecorationColor
+            stringAttributes[NSAttributedString.Key.hoverUnderlineColor] = NSColor.editorLinkColor
         } else if let link = internalLink {
             stringAttributes[.link] = link
         }
@@ -127,13 +148,22 @@ extension BeamText {
         return stringAttributes
     }
 
-    func addImageToLink(_ attributedString: NSMutableAttributedString, _ range: BeamText.Range) {
+    private func isMouseHoveringLinkImage(_ mouseInteraction: MouseInteraction, in attributedString: NSAttributedString) -> Bool {
+        return mouseInteraction.type == .hovered && mouseInteraction.range.lowerBound == attributedString.wholeRange.upperBound
+    }
+
+    func addImageToLink(_ attributedString: NSMutableAttributedString, _ range: BeamText.Range, mouseInteraction: MouseInteraction?) {
         guard attributedString.length > 0 else { return }
         guard range.attributes.contains(where: { attrib -> Bool in attrib.rawValue == BeamText.Attribute.link("").rawValue }) else { return }
-        guard let image = NSImage(named: "editor-url") else { return }
+        let imageName = "editor-url"
+        guard let image = NSImage(named: imageName) else { return }
 
+        var color = NSColor.editorLinkDecorationColor
+        if let mouseInt = mouseInteraction, isMouseHoveringLinkImage(mouseInt, in: attributedString) {
+            color = .editorLinkColor
+        }
         let extentBuffer = UnsafeMutablePointer<ImageRunStruct>.allocate(capacity: 1)
-        extentBuffer.initialize(to: ImageRunStruct(ascent: image.size.height, descent: 0, width: image.size.width, image: "editor-url"))
+        extentBuffer.initialize(to: ImageRunStruct(ascent: image.size.height, descent: 0, width: image.size.width, image: imageName, color: color))
 
         var callbacks = CTRunDelegateCallbacks(version: kCTRunDelegateVersion1, dealloc: { _ in
         }, getAscent: { (pointer) -> CGFloat in
