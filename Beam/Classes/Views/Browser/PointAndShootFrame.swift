@@ -13,6 +13,7 @@ struct PointAndshootFrame: View {
     var body: some View {
         if let rect = tab.pointAndShootRect {
             Rectangle()
+                .animation(nil)
                 .offset(x: rect.minX, y: rect.minY)
                 .frame(width: rect.width, height: rect.height)
                 .position(x: rect.width / 2, y: rect.height / 2)

@@ -469,8 +469,8 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     func drawSelection() {
         if self.selection != nil {
             let selection = self.selection!
-            let xDelta = -self.scrollX;
-            let yDelta = -self.scrollY;
+            let xDelta = -self.scrollX
+            let yDelta = -self.scrollY
             Logger.shared.logInfo("yDelta: \(yDelta)", category: .web)
             let newX = (Double(self.selection!.minX) + xDelta) as Double
             let newY = (Double(self.selection!.minY) + yDelta) as Double
