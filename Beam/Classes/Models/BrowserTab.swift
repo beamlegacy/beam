@@ -112,6 +112,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         } else {
             let web = FullScreenWKWebView(frame: NSRect(), configuration: Self.webViewConfiguration)
             web.wantsLayer = true
+            web.allowsMagnification = true
 
             state.setup(webView: web)
             backForwardList = web.backForwardList
@@ -171,6 +172,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         self.state = state
         let web = FullScreenWKWebView(frame: NSRect(), configuration: Self.webViewConfiguration)
         web.wantsLayer = true
+        web.allowsMagnification = true
 
         state.setup(webView: web)
         backForwardList = web.backForwardList
@@ -344,6 +346,8 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                 // Create new tab
                 let newWebView = FullScreenWKWebView(frame: NSRect(), configuration: Self.webViewConfiguration)
                 newWebView.wantsLayer = true
+                newWebView.allowsMagnification = true
+
                 state.setup(webView: newWebView)
                 let newTab = BrowserTab(state: state, originalQuery: originalQuery, note: note, rootElement: rootElement, webView: newWebView)
                 newTab.load(url: targetURL)
@@ -474,6 +478,8 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
         let newWebView = FullScreenWKWebView(frame: NSRect(), configuration: configuration)
         newWebView.wantsLayer = true
+        newWebView.allowsMagnification = true
+
         state.setup(webView: newWebView)
         let newTab = BrowserTab(state: state, originalQuery: originalQuery, note: self.note, rootElement: rootElement, webView: newWebView)
         onNewTabCreated(newTab)
