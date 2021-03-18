@@ -27,6 +27,11 @@ class FullScreenWKWebView: WKWebView {
     }
 }
 
+struct SelectionUI {
+    var rect: NSRect
+    var animated: Bool
+}
+
 // swiftlint:disable:next type_body_length
 class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler, Codable {
     var id: UUID
@@ -62,7 +67,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     @Published var browsingTree: BrowsingTree
     @Published var privateMode = false
 
-    @Published var pointAndShootRect: NSRect?
+    @Published var pointAndShootRect: SelectionUI?
     var selection: NSRect?
 
     var state: BeamState!
@@ -466,7 +471,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         loadFile(from: "OverrideConsole", fileType: "js")
     }()
 
-    func drawSelection() {
+    func drawSelection(animated: Bool) {
         if self.selection != nil {
             let selection = self.selection!
             let xDelta = -self.scrollX
@@ -474,7 +479,8 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             Logger.shared.logInfo("yDelta: \(yDelta)", category: .web)
             let newX = (Double(self.selection!.minX) + xDelta) as Double
             let newY = (Double(self.selection!.minY) + yDelta) as Double
-            self.pointAndShootRect = NSRect(x: Float(newX), y: Float(newY), width: Float(selection.width), height: Float(selection.height))
+            self.pointAndShootRect = SelectionUI(rect: NSRect(x: Float(newX), y: Float(newY), width: Float(selection.width), height: Float(selection.height)), animated: animated)
+            self.pointAndShootRect!.animated = animated
         } else {
             self.pointAndShootRect = nil
         }
@@ -501,7 +507,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             let width = (area["width"] as? Double)!
             let height = (area["height"] as? Double)!
             self.selection = NSRect(x: x, y: y, width: width, height: height)
-            self.drawSelection()
+            self.drawSelection(animated: true)
             Logger.shared.logDebug("Web block point: \(type), \(data), \(x), \(y), \(width), \(height)", category: .web)
 
         case ScriptHandlers.beam_shoot.rawValue:
@@ -558,7 +564,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             Logger.shared.logInfo("self.scrolly: \(self.scrollY), scrolly: \(y)", category: .web)
             self.scrollX = x
             self.scrollY = y
-            self.drawSelection()
+            self.drawSelection(animated: false)
             if w > 0, h > 0 {
                 browsingTree.current.score.scrollRatioX = max(Float(x / w), browsingTree.current.score.scrollRatioX)
                 browsingTree.current.score.scrollRatioY = max(Float(y / h), browsingTree.current.score.scrollRatioY)

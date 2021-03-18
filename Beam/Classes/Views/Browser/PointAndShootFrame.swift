@@ -11,13 +11,14 @@ import SwiftUI
 struct PointAndshootFrame: View {
     @ObservedObject var tab: BrowserTab
     var body: some View {
-        if let rect = tab.pointAndShootRect {
+        if let selectionUI = tab.pointAndShootRect {
+            let rect = selectionUI.rect
             Rectangle()
-                .animation(nil)
-                .offset(x: rect.minX, y: rect.minY)
-                .frame(width: rect.width, height: rect.height)
-                .position(x: rect.width / 2, y: rect.height / 2)
-                .foregroundColor(Color(red: 0, green: 0, blue: 0, opacity: 0.1))
+                    .animation(selectionUI.animated ? Animation.easeOut : nil)
+                    .offset(x: rect.minX, y: rect.minY)
+                    .frame(width: rect.width, height: rect.height)
+                    .position(x: rect.width / 2, y: rect.height / 2)
+                    .foregroundColor(Color(red: 0, green: 0, blue: 0, opacity: 0.1))
         }
     }
 }
