@@ -1,4 +1,3 @@
-
 const outlineWidth = 3;
 
 const messages = {
@@ -54,12 +53,44 @@ const statusClass = `${prefix}-status`
 const datasetKey = `${prefix}Collect`
 const styleKey = `${prefix}Style`
 
-function __ID__point(el) {
+// Cheap uuid generator, not super strong, but fast and random enough for the proof of concept
+// Crypto.getRandomValues(...) could be used, it's slower but we're only calling this a couple
+// of time right after so performance shouldn't be an issue
+const uuid = () => '8-4-4-4-12'.replace(
+    /\d+/g,
+    m => {
+        let u = '';
+        for (i = 0; i < m; i++) {
+            u += (Math.random() * 16 | 0).toString(16);
+        }
+        return u;
+    }
+);
+
+// Generate uuids
+const uuidPortal = uuid();
+const uuidPortalActive = uuid();
+const styleElement = document.createElement('style');
+document.head.appendChild(styleElement);
+const sheet = styleElement.sheet;
+
+sheet.insertRule(
+    `body:hover #${prefix}${uuidPortal}{
+      background-color: rgba(0, 0, 50, 0.15);
+    }`,
+    sheet.length
+);
+
+function __ID__point(el, x, y) {
     el.classList.add(pointClass);
     const boundingClientRect = el.getBoundingClientRect();
     const pointMessage = {
         type: {
             tagName: el.tagName,
+        },
+        location: {
+            x,
+            y
         },
         data: {
             text: el.innerText
@@ -270,7 +301,7 @@ function __ID__onMouseMove(ev) {
                 __ID__removeOutline(pointed);
             }
             pointed = el;
-            __ID__point(pointed);
+            __ID__point(pointed, ev.clientX, ev.clientY);
             let collected = pointed.dataset[datasetKey];
             if (collected) {
                 __ID__showStatus(pointed)
@@ -308,7 +339,7 @@ function __ID__select(ev, x, y) {
         __ID__removeSelected(0, selected[0]); // previous selection will be replaced
     }
     selected.push(el);
-    __ID__point(el);
+    __ID__point(el, x, y);
     el.classList.remove(pointClass);
     el.classList.add(shootClass);
     const count = selected.length > 1 ? "" + selected.length : "";

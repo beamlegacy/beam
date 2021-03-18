@@ -59,7 +59,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     @Published var browsingTree: BrowsingTree
     @Published var privateMode = false
 
-    @Published var pointAndShootRect: NSRect? //= NSRect(x: 10, y: 10, width: 160, height: 100) // Uncomment to test!
+    @Published var pointAndShootRect: NSRect? // = NSRect(x: 10, y: 10, width: 160, height: 100) // Uncomment to test!
 
     var state: BeamState!
 
@@ -471,13 +471,19 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         case ScriptHandlers.beam_point.rawValue:
             guard let dict = message.body as? [String: AnyObject],
 //                  let selectedText = dict["selectedText"] as? String,
+                  let location = dict["location"],
                   let area = dict["area"],
                   let data = dict["data"],
                   let type = dict["type"]
                     else {
                 return
             }
-            Logger.shared.logDebug("Web block selected: \(type), \(data), \(area)", category: .web)
+            let x = (area["x"] as? Float)!
+            let y = (area["y"] as? Float)!
+            let width = (area["width"] as? Float)!
+            let height = (area["height"] as? Float)!
+            self.pointAndShootRect = NSRect(x: x, y: y, width: width, height: height)
+            Logger.shared.logInfo("Web block point: \(type), \(data), \(x), \(y), \(width), \(height)")
 
         case ScriptHandlers.beam_shoot.rawValue:
             guard let dict = message.body as? [String: AnyObject],
@@ -489,7 +495,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                     else {
                 return
             }
-            Logger.shared.logDebug("Web block selected: \(location), \(type), \(data), \(area)", category: .web)
+            Logger.shared.logDebug("Web block shoot: \(location), \(type), \(data), \(area)", category: .web)
 
         case ScriptHandlers.beam_textSelected.rawValue:
             guard let dict = message.body as? [String: AnyObject],
