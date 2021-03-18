@@ -30,13 +30,14 @@ struct ModeView: View {
                             if let tab = state.currentTab {
                                 ZStack {
                                     WebView(webView: tab.webView)
-                                        .accessibility(identifier: "webView")
+                                            .accessibility(identifier: "webView")
 
                                     if data.showTabStats, let score = tab.browsingTree.current.score {
                                         TabStats(score: score)
                                     }
 
-                                    PointAndshootFrame(tab: tab)
+                                    PointFrame(tab: tab)
+                                    ShootFrame(tab: tab)
                                 }
                             }
                         }

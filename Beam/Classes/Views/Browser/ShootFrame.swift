@@ -8,17 +8,20 @@
 import Foundation
 import SwiftUI
 
-struct PointAndshootFrame: View {
+struct ShootFrame: View {
+
     @ObservedObject var tab: BrowserTab
     var body: some View {
-        if let selectionUI = tab.pointAndShootRect {
+        if tab.shootSelectionUIs.count > 0 {
+            let selectionUI = tab.shootSelectionUIs[0]  // TODO: Support mutliple shoots
             let rect = selectionUI.rect
+            let color = selectionUI.color
             Rectangle()
                     .animation(selectionUI.animated ? Animation.easeOut : nil)
                     .offset(x: rect.minX, y: rect.minY)
                     .frame(width: rect.width, height: rect.height)
                     .position(x: rect.width / 2, y: rect.height / 2)
-                    .foregroundColor(Color(red: 0, green: 0, blue: 0, opacity: 0.1))
+                    .foregroundColor(color)
         }
     }
 }

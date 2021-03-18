@@ -81,41 +81,52 @@ sheet.insertRule(
     sheet.length
 );
 
-function __ID__point(el, x, y) {
-    el.classList.add(pointClass);
-    const boundingClientRect = el.getBoundingClientRect();
-    const pointMessage = {
-        type: {
-            tagName: el.tagName,
-        },
-        location: {
-            x,
-            y
-        },
-        data: {
-            text: el.innerText
-        },
-        area: {
-            x: boundingClientRect.x,
-            y: boundingClientRect.y,
-            width: boundingClientRect.width,
-            height: boundingClientRect.height,
-        },
-    };
+
+function pointMessage(el, x, y) {
+    let pointMessage;
+    if (el) {
+        const boundingClientRect = el.getBoundingClientRect();
+        pointMessage = {
+            type: {
+                tagName: el.tagName,
+            },
+            location: {
+                x,
+                y
+            },
+            data: {
+                text: el.innerText
+            },
+            area: {
+                x: boundingClientRect.x,
+                y: boundingClientRect.y,
+                width: boundingClientRect.width,
+                height: boundingClientRect.height,
+            },
+        };
+    } else {
+        pointMessage = null;
+    }
     console.log("Sending beam_point", pointMessage)
     window.webkit.messageHandlers.beam_point.postMessage(pointMessage);
 }
 
-function __ID__removeOutline(el) {
+function __ID__point(el, x, y) {
+    el.classList.add(pointClass);
+    pointMessage(el, x, y);
+}
+
+function __ID__unpoint(el) {
     el.classList.remove(pointClass)
     el.style.cursor = ``;
+    pointMessage(null);
 }
 
 function __ID__removeSelected(selectedIndex, el) {
     selected.splice(selectedIndex, 1);
     el.classList.remove(shootClass)
     delete el.dataset[datasetKey]
-    __ID__removeOutline(el);
+    __ID__unpoint(el);
 }
 
 const popupId = `${prefix}-popup`;
@@ -217,6 +228,7 @@ const __ID__cardInputEl = function () {
 };
 
 function __ID__showPopup(el, x, y) {
+    shootMessage(el, x, y);
     const msg = messages[lang];
     popup = document.createElement("DIV");
     popup.id = popupId;
@@ -298,7 +310,7 @@ function __ID__onMouseMove(ev) {
         const el = ev.target;
         if (pointed !== el) {
             if (pointed) {
-                __ID__removeOutline(pointed);
+                __ID__unpoint(pointed);     // Remove previous
             }
             pointed = el;
             __ID__point(pointed, ev.clientX, ev.clientY);
@@ -313,7 +325,32 @@ function __ID__onMouseMove(ev) {
         }
     } else {
         __ID__hideStatus();
+        __ID__unpoint(pointed);
     }
+}
+
+function shootMessage(el, x, y) {
+    const bounds = el.getBoundingClientRect();
+    const shootMessage = {
+        type: {
+            tagName: el.tagName,
+        },
+        data: {
+            text: el.innerText
+        },
+        location: {
+            x,
+            y
+        },
+        area: {
+            x: bounds.x,
+            y: bounds.y,
+            width: bounds.width,
+            height: bounds.height,
+        },
+    };
+    console.log("Sending beam_shoot", shootMessage)
+    window.webkit.messageHandlers.beam_shoot.postMessage(shootMessage);
 }
 
 /**
@@ -348,27 +385,6 @@ function __ID__select(ev, x, y) {
     }
     __ID__hidePopup();      // Go native?
     __ID__showPopup(el, x, y);    // Go native?
-    const bounds = el.getBoundingClientRect();
-    const shootMessage = {
-        type: {
-            tagName: el.tagName,
-        },
-        data: {
-            text: el.innerText
-        },
-        location: {
-            x,
-            y
-        },
-        area: {
-            x: bounds.x,
-            y: bounds.y,
-            width: bounds.width,
-            height: bounds.height,
-        },
-    };
-    console.log("Sending beam_shoot", shootMessage)
-    window.webkit.messageHandlers.beam_shoot.postMessage(shootMessage);
 }
 
 function __ID__onClick(ev) {
@@ -404,8 +420,29 @@ function __ID__onKeyPress(ev) {
     }
 }
 
+let __ID__onScroll = function (ev) {
+    let scrollWidth = Math.max(
+        document.body.scrollWidth, document.documentElement.scrollWidth,
+        document.body.offsetWidth, document.documentElement.offsetWidth,
+        document.body.clientWidth, document.documentElement.clientWidth
+    );
+
+    let scrollHeight = Math.max(
+        document.body.scrollHeight, document.documentElement.scrollHeight,
+        document.body.offsetHeight, document.documentElement.offsetHeight,
+        document.body.clientHeight, document.documentElement.clientHeight
+    );
+
+    window.webkit.messageHandlers.beam_onScrolled.postMessage({
+        x: window.scrollX,
+        y: window.scrollY,
+        width: scrollWidth,
+        height: scrollHeight
+    })
+};
 document.addEventListener("keypress", __ID__onKeyPress);
 window.addEventListener("mousemove", __ID__onMouseMove);
 window.addEventListener("click", __ID__onClick);
+window.addEventListener('scroll', __ID__onScroll);
 //window.addEventListener("touchstart", touchstart, false);
 //window.addEventListener("touchend", touchend, false);

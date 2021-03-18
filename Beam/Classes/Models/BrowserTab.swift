@@ -30,6 +30,14 @@ class FullScreenWKWebView: WKWebView {
 struct SelectionUI {
     var rect: NSRect
     var animated: Bool
+    var color: Color
+}
+
+struct PointMessage {
+    var area: NSRect
+    var location: NSPoint
+    var data: [String: AnyObject]
+    var type: [String: AnyObject]
 }
 
 // swiftlint:disable:next type_body_length
@@ -67,8 +75,11 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     @Published var browsingTree: BrowsingTree
     @Published var privateMode = false
 
-    @Published var pointAndShootRect: SelectionUI?
-    var selection: NSRect?
+    @Published var pointSelectionUI: SelectionUI?
+    var pointArea: NSRect?
+
+    @Published var shootSelectionUIs: [SelectionUI] = []
+    var shootAreas: [NSRect] = []
 
     var state: BeamState!
 
@@ -471,48 +482,79 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         loadFile(from: "OverrideConsole", fileType: "js")
     }()
 
-    func drawSelection(animated: Bool) {
-        if self.selection != nil {
-            let selection = self.selection!
+    let pointColor = Color(red: 0, green: 0, blue: 0, opacity: 0.1)
+
+    private func drawPoint() {
+        if self.pointArea != nil {
+            let selection = self.pointArea!
+            let newX = (Double(self.pointArea!.minX)) as Double
+            let newY = (Double(self.pointArea!.minY)) as Double
+            self.pointSelectionUI = SelectionUI(
+                    rect: NSRect(
+                            x: Float(newX), y: Float(newY),
+                            width: Float(selection.width), height: Float(selection.height)
+                    ),
+                    animated: true,
+                    color: pointColor
+            )
+        } else {
+            self.pointSelectionUI = nil
+        }
+    }
+
+    let shootColor = Color(red: 1, green: 0, blue: 0, opacity: 0.1)
+
+    private func drawShoot() {
+        if self.shootAreas.count > 0 {
             let xDelta = -self.scrollX
             let yDelta = -self.scrollY
-            Logger.shared.logInfo("yDelta: \(yDelta)", category: .web)
-            let newX = (Double(self.selection!.minX) + xDelta) as Double
-            let newY = (Double(self.selection!.minY) + yDelta) as Double
-            self.pointAndShootRect = SelectionUI(rect: NSRect(x: Float(newX), y: Float(newY), width: Float(selection.width), height: Float(selection.height)), animated: animated)
-            self.pointAndShootRect!.animated = animated
+            self.shootSelectionUIs = []
+            for shootArea in shootAreas {
+                let newX = (Double(shootArea.minX) + xDelta) as Double
+                let newY = (Double(shootArea.minY) + yDelta) as Double
+                let shootSelectionUI: SelectionUI = SelectionUI(
+                        rect: NSRect(
+                                x: Float(newX), y: Float(newY),
+                                width: Float(shootArea.width), height: Float(shootArea.height)
+                        ),
+                        animated: false,
+                        color: shootColor
+                )
+                self.shootSelectionUIs.append(shootSelectionUI)
+            }
         } else {
-            self.pointAndShootRect = nil
+            self.shootSelectionUIs = []
         }
     }
 
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+        let messageBody = message.body as? [String: AnyObject]
         let messageName = message.name
         switch messageName {
         case ScriptHandlers.beam_logging.rawValue:
             Logger.shared.logInfo(String(describing: message.body), category: .javascript)
 
         case ScriptHandlers.beam_point.rawValue:
-            guard let dict = message.body as? [String: AnyObject],
-//                  let selectedText = dict["selectedText"] as? String,
+            guard let dict = messageBody,
                   let location = dict["location"],
                   let area = dict["area"],
                   let data = dict["data"],
                   let type = dict["type"]
                     else {
+                self.pointArea = nil
+                drawPoint()
                 return
             }
-            let x = (area["x"] as? Double)!
-            let y = (area["y"] as? Double)!
+            let minX = (area["x"] as? Double)!
+            let minY = (area["y"] as? Double)!
             let width = (area["width"] as? Double)!
             let height = (area["height"] as? Double)!
-            self.selection = NSRect(x: x, y: y, width: width, height: height)
-            self.drawSelection(animated: true)
-            Logger.shared.logDebug("Web block point: \(type), \(data), \(x), \(y), \(width), \(height)", category: .web)
+            self.pointArea = NSRect(x: minX, y: minY, width: width, height: height)
+            drawPoint()
+            Logger.shared.logInfo("Web block point: \(type), \(data), \(minX), \(minY), \(width), \(height)", category: .web)
 
         case ScriptHandlers.beam_shoot.rawValue:
-            guard let dict = message.body as? [String: AnyObject],
-//                  let selectedText = dict["selectedText"] as? String,
+            guard let dict = messageBody,
                   let location = dict["location"],
                   let area = dict["area"],
                   let data = dict["data"],
@@ -520,10 +562,18 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                     else {
                 return
             }
-            Logger.shared.logDebug("Web block shoot: \(location), \(type), \(data), \(area)", category: .web)
+            let minX = (area["x"] as? Double)!
+            let minY = (area["y"] as? Double)!
+            let width = (area["width"] as? Double)!
+            let height = (area["height"] as? Double)!
+            let shootArea = NSRect(x: minX, y: minY, width: width, height: height)
+            self.shootAreas.removeAll()         // TODO: Support multiple shoots
+            self.shootAreas.append(shootArea)
+            drawShoot()
+            Logger.shared.logInfo("Web shoot point: \(type), \(data), \(minX), \(minY), \(width), \(height)", category: .web)
 
         case ScriptHandlers.beam_textSelected.rawValue:
-            guard let dict = message.body as? [String: AnyObject],
+            guard let dict = messageBody,
 //                  let selectedText = dict["selectedText"] as? String,
                   let selectedHtml = dict["selectedHtml"] as? String,
                   !selectedHtml.isEmpty
@@ -552,7 +602,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             }
 
         case ScriptHandlers.beam_onScrolled.rawValue:
-            guard let dict = message.body as? [String: AnyObject],
+            guard let dict = messageBody,
 //                  let selectedText = dict["selectedText"] as? String,
                   let x = dict["x"] as? Double,
                   let y = dict["y"] as? Double,
@@ -564,7 +614,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             Logger.shared.logInfo("self.scrolly: \(self.scrollY), scrolly: \(y)", category: .web)
             self.scrollX = x
             self.scrollY = y
-            self.drawSelection(animated: false)
+            self.drawShoot()
             if w > 0, h > 0 {
                 browsingTree.current.score.scrollRatioX = max(Float(x / w), browsingTree.current.score.scrollRatioX)
                 browsingTree.current.score.scrollRatioY = max(Float(y / h), browsingTree.current.score.scrollRatioY)
