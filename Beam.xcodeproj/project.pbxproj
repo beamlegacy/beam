@@ -317,6 +317,7 @@
 		A552DF2925F0E22B00570C85 /* OmniBarFieldBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = A552DF2825F0E22B00570C85 /* OmniBarFieldBackground.swift */; };
 		A552DF2D25F12A3600570C85 /* OmniBarButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A552DF2C25F12A3600570C85 /* OmniBarButton.swift */; };
 		A552DF3325F1741900570C85 /* GlobalCenteringContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A552DF3225F1741900570C85 /* GlobalCenteringContainer.swift */; };
+		A5651A7726035D3A0035F12B /* AppDelegate+NSMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5651A7626035D3A0035F12B /* AppDelegate+NSMenu.swift */; };
 		A567157125F66F8600B46110 /* StyledText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A567157025F66F8600B46110 /* StyledText.swift */; };
 		A572629825FFADC5004416C0 /* MouseInteraction.swift in Sources */ = {isa = PBXBuildFile; fileRef = A572629725FFADC5004416C0 /* MouseInteraction.swift */; };
 /* End PBXBuildFile section */
@@ -820,6 +821,7 @@
 		A552DF2825F0E22B00570C85 /* OmniBarFieldBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniBarFieldBackground.swift; sourceTree = "<group>"; };
 		A552DF2C25F12A3600570C85 /* OmniBarButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniBarButton.swift; sourceTree = "<group>"; };
 		A552DF3225F1741900570C85 /* GlobalCenteringContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalCenteringContainer.swift; sourceTree = "<group>"; };
+		A5651A7626035D3A0035F12B /* AppDelegate+NSMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+NSMenu.swift"; sourceTree = "<group>"; };
 		A567157025F66F8600B46110 /* StyledText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StyledText.swift; sourceTree = "<group>"; };
 		A572629725FFADC5004416C0 /* MouseInteraction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MouseInteraction.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -1288,6 +1290,7 @@
 				4181727A258110D100317ED8 /* AppDelegate+URL.swift */,
 				526017FB25AE081E00634695 /* AppDelegate+Console.swift */,
 				A0208F8125D6BB1C00CA054C /* AppDelegate+BeamTests.swift */,
+				A5651A7626035D3A0035F12B /* AppDelegate+NSMenu.swift */,
 			);
 			path = "AppDelegate+Beam";
 			sourceTree = "<group>";
@@ -2526,6 +2529,7 @@
 				4181733225811F4800317ED8 /* KeyCode.swift in Sources */,
 				96A3067C25F698FB0078A453 /* RefNoteTitle.swift in Sources */,
 				9691E3D825AD9F3300A13080 /* TextRoot.swift in Sources */,
+				A5651A7726035D3A0035F12B /* AppDelegate+NSMenu.swift in Sources */,
 				4181724C2581107C00317ED8 /* BrowserTabView.swift in Sources */,
 				521EEDE125937F5B00BA2485 /* DocumentsContentView.swift in Sources */,
 				A545D2FB25F7B1D800E68F94 /* DestinationNoteAutocompleteList.swift in Sources */,
