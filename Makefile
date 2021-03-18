@@ -120,4 +120,10 @@ install_direnv:
 install_cmake:
 	brew install cmake
 
+# Not needed but left as documentation
+install_libsodium:
+	brew install libsodium
+	sudo mkdir -p /opt/local
+	sudo ln -s /opt/homebrew/lib /opt/local
+
 setup: install_dependencies install_direnv install_swiftlint install_cmake variable_injector
