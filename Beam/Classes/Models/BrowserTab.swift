@@ -31,6 +31,9 @@ class FullScreenWKWebView: WKWebView {
 class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler, Codable {
     var id: UUID
 
+    private var scrollX: Double = 0
+    private var scrollY: Double = 0
+
     public func load(url: URL) {
         self.url = url
         navigationCount = 0
@@ -59,7 +62,8 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     @Published var browsingTree: BrowsingTree
     @Published var privateMode = false
 
-    @Published var pointAndShootRect: NSRect? // = NSRect(x: 10, y: 10, width: 160, height: 100) // Uncomment to test!
+    @Published var pointAndShootRect: NSRect?
+    var selection: NSRect?
 
     var state: BeamState!
 
@@ -462,6 +466,20 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         loadFile(from: "OverrideConsole", fileType: "js")
     }()
 
+    func drawSelection() {
+        if self.selection != nil {
+            let selection = self.selection!
+            let xDelta = -self.scrollX;
+            let yDelta = -self.scrollY;
+            Logger.shared.logInfo("yDelta: \(yDelta)", category: .web)
+            let newX = (Double(self.selection!.minX) + xDelta) as Double
+            let newY = (Double(self.selection!.minY) + yDelta) as Double
+            self.pointAndShootRect = NSRect(x: Float(newX), y: Float(newY), width: Float(selection.width), height: Float(selection.height))
+        } else {
+            self.pointAndShootRect = nil
+        }
+    }
+
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         let messageName = message.name
         switch messageName {
@@ -478,12 +496,13 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                     else {
                 return
             }
-            let x = (area["x"] as? Float)!
-            let y = (area["y"] as? Float)!
-            let width = (area["width"] as? Float)!
-            let height = (area["height"] as? Float)!
-            self.pointAndShootRect = NSRect(x: x, y: y, width: width, height: height)
-            Logger.shared.logInfo("Web block point: \(type), \(data), \(x), \(y), \(width), \(height)")
+            let x = (area["x"] as? Double)!
+            let y = (area["y"] as? Double)!
+            let width = (area["width"] as? Double)!
+            let height = (area["height"] as? Double)!
+            self.selection = NSRect(x: x, y: y, width: width, height: height)
+            self.drawSelection()
+            Logger.shared.logDebug("Web block point: \(type), \(data), \(x), \(y), \(width), \(height)", category: .web)
 
         case ScriptHandlers.beam_shoot.rawValue:
             guard let dict = message.body as? [String: AnyObject],
@@ -536,6 +555,10 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                     else {
                 return
             }
+            Logger.shared.logInfo("self.scrolly: \(self.scrollY), scrolly: \(y)", category: .web)
+            self.scrollX = x
+            self.scrollY = y
+            self.drawSelection()
             if w > 0, h > 0 {
                 browsingTree.current.score.scrollRatioX = max(Float(x / w), browsingTree.current.score.scrollRatioX)
                 browsingTree.current.score.scrollRatioY = max(Float(y / h), browsingTree.current.score.scrollRatioY)
