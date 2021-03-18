@@ -36,9 +36,7 @@ struct ModeView: View {
                                         TabStats(score: score)
                                     }
 
-                                    if let rect = tab.pointAndShootRect {
-                                        PointAndshootFrame(rect: rect)
-                                    }
+                                    PointAndshootFrame(tab: tab)
                                 }
                             }
                         }
