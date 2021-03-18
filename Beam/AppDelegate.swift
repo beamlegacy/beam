@@ -61,7 +61,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         data = BeamData()
         updateBadge()
-        createWindow(reloadState: true)
+        createWindow(reloadState: Configuration.stateRestorationEnabled)
 
         // So we remember we're not currently using the default api server
         if Configuration.apiHostnameDefault != Configuration.apiHostname {
@@ -110,7 +110,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         if !flag {
-            createWindow(reloadState: true)
+            createWindow(reloadState: Configuration.stateRestorationEnabled)
         }
 
         return true
