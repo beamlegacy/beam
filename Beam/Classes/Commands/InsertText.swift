@@ -31,36 +31,43 @@ class InsertText: TextEditorCommand {
         self.oldText = elementInstance.element.text
     }
 
-    override func run(context: TextRoot?) -> Bool {
-        guard let root = context,
-              let elementInstance = getElement(for: noteName, and: elementId),
-              let node = context?.nodeFor(elementInstance.element, withParent: root) else { return false }
+    override func run(context: Widget?) -> Bool {
+        guard let elementInstance = getElement(for: noteName, and: elementId) else { return false }
+        elementInstance.element.text.replaceSubrange(cursorPosition..<cursorPosition, with: text)
 
-        node.element.text.replaceSubrange(cursorPosition..<cursorPosition, with: text)
+        // Update the UI if possible:
+        guard let context = context,
+              let root = context.root,
+              let node = context.nodeFor(elementInstance.element)
+        else { return true }
         newCursorPosition = text.text == "\n" ? node.position(after: cursorPosition) : cursorPosition + text.count
-        context?.focus(widget: node, cursorPosition: newCursorPosition)
-        context?.editor.detectFormatterType()
-        context?.cancelSelection()
+        root.focus(widget: node, cursorPosition: newCursorPosition)
+        root.editor.detectFormatterType()
+        root.cancelSelection()
         return true
     }
 
-    override func undo(context: TextRoot?) -> Bool {
-        guard let root = context,
-              let elementInstance = getElement(for: noteName, and: elementId),
-              let node = context?.nodeFor(elementInstance.element, withParent: root),
+    override func undo(context: Widget?) -> Bool {
+        guard let elementInstance = getElement(for: noteName, and: elementId),
               let oldText = self.oldText else { return false }
+        elementInstance.element.text.replaceSubrange(elementInstance.element.text.wholeRange, with: oldText)
 
-        node.element.text.replaceSubrange(node.element.text.wholeRange, with: oldText)
-        context?.focus(widget: node, cursorPosition: cursorPosition)
-        context?.editor.detectFormatterType()
+        // Update the UI if possible:
+        guard let context = context,
+              let root = context.root,
+              let node = context.nodeFor(elementInstance.element) else { return true }
+
+        root.focus(widget: node, cursorPosition: cursorPosition)
+        root.editor.detectFormatterType()
         return true
     }
 
-    override func coalesce(command: Command<TextRoot>) -> Bool {
+    override func coalesce(command: Command<Widget>) -> Bool {
         guard let insertText = command as? InsertText,
               insertText.cursorPosition == newCursorPosition,
               insertText.text.text != "\n",
               insertText.elementId == elementId,
+              insertText.noteName == noteName,
               let elementInstance = getElement(for: noteName, and: elementId),
               let oldText = self.oldText else { return false }
 

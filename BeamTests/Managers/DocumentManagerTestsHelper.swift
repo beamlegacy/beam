@@ -28,26 +28,32 @@ class DocumentManagerTestsHelper {
         semaphore.wait()
     }
 
-    func saveLocallyAndRemotely(_ docStruct: DocumentStruct) {
+    func saveLocallyAndRemotely(_ docStruct: DocumentStruct) -> DocumentStruct {
         // The call to `saveDocumentStructOnAPI` expect the document to be already saved locally
+        var newVersion = docStruct
         waitUntil(timeout: .seconds(10)) { done in
             // To force a local save only, while using the standard code
-            self.documentManager.saveDocument(docStruct, true, { result in
+            newVersion = self.documentManager.saveDocument(docStruct, true, { result in
                 expect { try result.get() }.toNot(throwError())
                 done()
             }, completion: nil)
         }
+
+        return newVersion
     }
 
-    func saveLocally(_ docStruct: DocumentStruct) {
+    func saveLocally(_ docStruct: DocumentStruct) -> DocumentStruct {
         // The call to `saveDocumentStructOnAPI` expect the document to be already saved locally
+        var newVersion = docStruct
         waitUntil(timeout: .seconds(10)) { done in
             // To force a local save only, while using the standard code
-            self.documentManager.saveDocument(docStruct, false, completion:  { result in
+            newVersion = self.documentManager.saveDocument(docStruct, false, completion:  { result in
                 expect { try result.get() }.toNot(throwError())
                 done()
             })
         }
+
+        return newVersion
     }
 
     func saveRemotely(_ docStruct: DocumentStruct) {
@@ -115,7 +121,8 @@ class DocumentManagerTestsHelper {
                                        createdAt: BeamDate.now,
                                        updatedAt: BeamDate.now,
                                        data: dataString.asData,
-                                       documentType: .note)
+                                       documentType: .note,
+                                       version: 0)
 
         return docStruct
     }
@@ -126,7 +133,7 @@ class DocumentManagerTestsHelper {
         BeamDate.travel(-600)
         var docStruct = self.createDocumentStruct()
         docStruct.data = ancestor.asData
-        self.saveLocallyAndRemotely(docStruct)
+        docStruct = self.saveLocallyAndRemotely(docStruct)
 
         // We'll use saveDocumentOnAPI() later, I need to update the result
         // DocumentStruct to add its previousChecksum
@@ -143,7 +150,7 @@ class DocumentManagerTestsHelper {
             docStruct.updatedAt = BeamDate.now
             docStruct.data = newLocal.asData
             docStruct.previousData = ancestor.asData
-            self.saveLocally(docStruct)
+            docStruct = self.saveLocally(docStruct)
         }
 
         if let newRemote = newRemote {

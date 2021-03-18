@@ -21,7 +21,7 @@ class DeleteNode: TextEditorCommand {
     let deleteNodeMode: DeleteNodeMode
     var previousVisibleElementId: UUID?
     var nextVisibleElementId: UUID?
-    var isIndented: Bool = false
+    var parentId: UUID?
     var indexInParent: Int?
     var data: Data?
     var oldChildrenData: [Data]?
@@ -33,7 +33,7 @@ class DeleteNode: TextEditorCommand {
         super.init(name: DeleteNode.name)
     }
 
-    override func run(context: TextRoot?) -> Bool {
+    override func run(context: Widget?) -> Bool {
         switch deleteNodeMode {
         case .backward:
             return runBackward(context)
@@ -44,94 +44,104 @@ class DeleteNode: TextEditorCommand {
         }
     }
 
-    private func isIntended(node: TextNode) {
-        guard let parent = node.parent as? TextNode,
-              parent.parent as? TextNode != nil else { return }
-        self.isIndented = true
-        self.indexInParent = node.indexInParent
-    }
+    private func runBackward(_ context: Widget?) -> Bool {
+        guard let elementInstance = getElement(for: noteName, and: elementId) else { return false }
 
-    private func runBackward(_ context: TextRoot?) -> Bool {
-        guard let root = context,
-              let elementInstance = getElement(for: noteName, and: elementId),
-              let node = context?.nodeFor(elementInstance.element, withParent: root),
-              let prevVisible = node.previousVisible() as? TextNode else { return false }
+        if let previousSibbling = elementInstance.element.previousSibbling() {
+            if previousSibbling.children.isEmpty {
+                self.previousVisibleElementId = previousSibbling.id
+            } else {
+                self.previousVisibleElementId = previousSibbling.deepestChildren()?.id
+                self.parentId = previousSibbling.id
+            }
+        } else {
+            self.previousVisibleElementId = elementInstance.element.parent?.id
+            self.indexInParent = elementInstance.element.indexInParent
+        }
 
-        isIntended(node: node)
-        self.previousVisibleElementId = prevVisible.element.id
+        guard let prevVisibleId = self.previousVisibleElementId,
+              let prevVisible = getElement(for: noteName, and: prevVisibleId) else { return false }
 
-        for c in node.element.children {
+        for c in elementInstance.element.children {
             prevVisible.element.addChild(c)
         }
 
         data = encode(element: elementInstance.element)
-        node.delete()
-
-        context?.focus(widget: prevVisible, cursorPosition: prevVisible.element.text.count)
         prevVisible.element.text.append(elementInstance.element.text)
-        context?.cancelSelection()
+        elementInstance.element.parent?.removeChild(elementInstance.element)
+
+        // UI Update
+        guard let context = context,
+              let root = context.root,
+              let prevNode = context.nodeFor(prevVisible.element) else { return true }
+
+        root.focus(widget: prevNode, cursorPosition: prevVisible.element.text.count)
+        root.cancelSelection()
         return true
     }
 
-    private func runForward(_ context: TextRoot?) -> Bool {
-        guard let root = context,
-              let elementInstance = getElement(for: noteName, and: elementId),
-              let node = context?.nodeFor(elementInstance.element, withParent: root),
-              let nextVisible = node.nextVisible() as? TextNode else { return false }
+    private func runForward(_ context: Widget?) -> Bool {
+        guard let elementInstance = getElement(for: noteName, and: elementId) else { return false }
 
-        isIntended(node: nextVisible)
+        if elementInstance.element.children.isEmpty {
+            if let nextSibbling = elementInstance.element.nextSibbling() {
+                self.nextVisibleElementId = nextSibbling.id
+            } else {
+                self.nextVisibleElementId = elementInstance.element.highestNextSibbling()?.id
+                self.previousVisibleElementId = elementInstance.element.highestNextSibbling()?.previousSibbling()?.id
+            }
+        } else {
+            self.nextVisibleElementId = elementInstance.element.children.first?.id
+            self.indexInParent = elementInstance.element.children.first?.indexInParent
+        }
+
+        guard let nextVisibleId = self.nextVisibleElementId,
+              let nextVisible = getElement(for: noteName, and: nextVisibleId) else { return false }
 
         for c in nextVisible.element.children {
-            node.element.addChild(c)
+            elementInstance.element.addChild(c)
         }
-        self.nextVisibleElementId = nextVisible.element.id
-        node.element.text.append(nextVisible.element.text)
+
+        elementInstance.element.text.append(nextVisible.element.text)
 
         data = encode(element: nextVisible.element)
-        nextVisible.delete()
+        nextVisible.element.parent?.removeChild(nextVisible.element)
 
-        context?.cancelSelection()
+        guard let root = context?.root else { return true }
+        root.cancelSelection()
         return true
     }
 
-    private func runDelete(_ context: TextRoot?) -> Bool {
-        guard let root = context,
-              let elementInstance = getElement(for: noteName, and: elementId),
-              let node = context?.nodeFor(elementInstance.element, withParent: root) else {
-            return false
-        }
+    private func runDelete(_ context: Widget?) -> Bool {
+        guard let elementInstance = getElement(for: noteName, and: elementId) else { return false }
 
-        var prevVisibleNode: TextNode
-        if let prevVisible = node.parent as? TextNode {
-            prevVisibleNode = prevVisible
-        } else if let prevVisible = context {
-            prevVisibleNode = prevVisible
-        } else {
-            return false
-        }
-
-        self.indexInParent = node.indexInParent
-        for child in node.children {
-            guard let child = child as? TextNode,
-                  let childData = encode(element: child.element) else { continue }
+        self.indexInParent = elementInstance.element.indexInParent
+        for child in elementInstance.element.children {
+            guard let childData = encode(element: child) else { continue }
             oldChildrenData?.append(childData)
         }
 
-        self.previousVisibleElementId = prevVisibleNode.element.id
+        self.previousVisibleElementId = elementInstance.element.parent?.id
 
         data = encode(element: elementInstance.element)
-        context?.cancelNodeSelection()
+
+        // UI Update
+        guard let context = context,
+              let root = context.root else { return true }
+        root.cancelNodeSelection()
+        let node = context.nodeFor(elementInstance.element, withParent: context)
+        guard let prevVisibleNode = (node.parent ?? context) as? TextNode else { return false }
         if let nextVisibleNode = node.nextVisibleTextNode(), prevVisibleNode === context {
-            context?.focus(widget: nextVisibleNode, cursorPosition: nextVisibleNode.element.text.count)
+            root.focus(widget: nextVisibleNode, cursorPosition: nextVisibleNode.text.count)
         }
         if let prevWidget = node.previousVisibleTextNode() {
-            context?.focus(widget: prevWidget, cursorPosition: prevWidget.element.text.count)
+            root.focus(widget: prevWidget, cursorPosition: prevWidget.text.count)
         }
         node.delete()
         return true
     }
 
-    override func undo(context: TextRoot?) -> Bool {
+    override func undo(context: Widget?) -> Bool {
         switch deleteNodeMode {
         case .backward:
             return undoBackward(context)
@@ -142,76 +152,75 @@ class DeleteNode: TextEditorCommand {
         }
     }
 
-    private func undoBackward(_ context: TextRoot?) -> Bool {
-        guard let root = context,
-              let data = self.data,
+    private func undoBackward(_ context: Widget?) -> Bool {
+        guard let data = self.data,
               let deletedElement = decode(data: data),
               let previousVisibleElementId = self.previousVisibleElementId,
-              let previousElementInstance = getElement(for: noteName, and: previousVisibleElementId),
-              let previousNode = context?.nodeFor(previousElementInstance.element, withParent: root),
-              let newLastNode = context?.nodeFor(deletedElement, withParent: root) else { return false }
+              let previousElementInstance = getElement(for: noteName, and: previousVisibleElementId) else { return false }
 
-        previousNode.element.text.removeLast(deletedElement.text.count)
+        previousElementInstance.element.text.removeLast(deletedElement.text.count)
 
-        for c in previousNode.element.children {
-            newLastNode.element.addChild(c)
+        for c in previousElementInstance.element.children {
+            deletedElement.addChild(c)
         }
-        var result = true
-        if let indexInParent = self.indexInParent, isIndented {
-            previousNode.element.insert(newLastNode.element, at: indexInParent)
+
+        if let indexInParent = self.indexInParent {
+            previousElementInstance.element.insert(deletedElement, at: indexInParent)
         } else {
-            guard let res = newLastNode.parent?.insert(node: newLastNode, after: previousNode) else { return false }
-            result = res
+            if let parentId = self.parentId,
+               let parentElementInstance = getElement(for: noteName, and: parentId) {
+                parentElementInstance.element.parent?.insert(deletedElement, after: parentElementInstance.element)
+            } else {
+                previousElementInstance.element.parent?.insert(deletedElement, after: previousElementInstance.element)
+            }
         }
-        context?.focus(widget: newLastNode)
-        return result
+
+        // UI Update
+        guard let context = context,
+              let root = context.root,
+              let newLastNode = context.nodeFor(deletedElement) else { return true }
+        root.focus(widget: newLastNode)
+        return true
     }
 
-    private func undoForward(_ context: TextRoot?) -> Bool {
-        guard let root = context,
-              let data = self.data,
+    private func undoForward(_ context: Widget?) -> Bool {
+        guard let data = self.data,
               let deletedElement = decode(data: data),
-              let elementInstance = getElement(for: noteName, and: elementId),
-              let node = context?.nodeFor(elementInstance.element, withParent: root),
-              let deletedNode = context?.nodeFor(deletedElement, withParent: root) else { return false }
+              let elementInstance = getElement(for: noteName, and: elementId) else { return false }
 
-        node.text.removeLast(deletedElement.text.count)
-        for c in node.element.children {
-            deletedNode.element.addChild(c)
+        elementInstance.element.text.removeLast(deletedElement.text.count)
+        for c in elementInstance.element.children {
+            deletedElement.addChild(c)
         }
 
-        var result = true
-        if let indexInParent = self.indexInParent, isIndented {
-            node.element.insert(deletedNode.element, at: indexInParent)
+        if let previousSibblingId = self.previousVisibleElementId,
+           let previousSibblingElementInstance = getElement(for: noteName, and: previousSibblingId) {
+            previousSibblingElementInstance.element.parent?.insert(deletedElement, after: previousSibblingElementInstance.element)
         } else {
-            guard let res = node.parent?.insert(node: deletedNode, after: node) else { return false }
-            result = res
+            if let indexInParent = self.indexInParent {
+                elementInstance.element.insert(deletedElement, at: indexInParent)
+            } else {
+                elementInstance.element.parent?.insert(deletedElement, after: elementInstance.element)
+            }
         }
-        return result
+
+        return true
     }
 
-    private func undoDelete(_ context: TextRoot?) -> Bool {
-        guard let root = context,
-              let data = self.data,
-              let deletedElement = decode(data: data),
+    private func undoDelete(_ context: Widget?) -> Bool {
+        guard let deletedElement = decode(data: data),
               let previousVisibleElementId = self.previousVisibleElementId,
               let previousElementInstance = getElement(for: noteName, and: previousVisibleElementId),
-              let previousNode = context?.nodeFor(previousElementInstance.element, withParent: root),
-              let node = context?.nodeFor(deletedElement, withParent: root),
               let indexInParent = self.indexInParent else { return false }
 
-        previousNode.element.insert(node.element, at: indexInParent)
+        previousElementInstance.element.insert(deletedElement, at: indexInParent)
         if let oldChildrenData = self.oldChildrenData {
             for data in oldChildrenData {
                 if let child = decode(data: data) {
-                    node.element.addChild(child)
+                    deletedElement.addChild(child)
                 }
             }
         }
         return true
-    }
-
-    override func coalesce(command: Command<TextRoot>) -> Bool {
-        return false
     }
 }

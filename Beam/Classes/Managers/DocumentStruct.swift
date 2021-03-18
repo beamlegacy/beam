@@ -15,6 +15,7 @@ public struct DocumentStruct {
     let documentType: DocumentType
     var previousData: Data?
     var previousChecksum: String?
+    var version: Int64
     var isPublic: Bool = false
 
     var uuidString: String {
@@ -36,7 +37,9 @@ public struct DocumentStruct {
                                   documentType: documentType,
                                   previousData: previousData,
                                   previousChecksum: previousChecksum,
-                                  isPublic: isPublic)
+                                  version: version,
+                                  isPublic: isPublic
+                                  )
         return copy
     }
 }
@@ -51,6 +54,7 @@ extension DocumentStruct {
         self.data = document.data ?? Data()
         self.previousData = document.beam_api_data
         self.previousChecksum = document.beam_api_checksum
+        self.version = document.version
         self.isPublic = document.is_public
     }
 

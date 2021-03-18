@@ -27,8 +27,8 @@ class DocumentManagerTests: QuickSpec {
 
         describe(".deleteAllDocuments()") {
             beforeEach {
-                let docStruct = helper.createDocumentStruct()
-                helper.saveLocally(docStruct)
+                var docStruct = helper.createDocumentStruct()
+                docStruct = helper.saveLocally(docStruct)
                 let count = Document.countWithPredicate(mainContext)
                 expect(count) >= 1
             }
@@ -77,9 +77,9 @@ class DocumentManagerTests: QuickSpec {
         describe(".saveDocument()") {
             context("with Foundation") {
                 it("saves document") {
-                    let docStruct = helper.createDocumentStruct()
+                    var docStruct = helper.createDocumentStruct()
                     waitUntil(timeout: .seconds(10)) { done in
-                        sut.saveDocument(docStruct, completion:  { _ in
+                        docStruct = sut.saveDocument(docStruct, completion:  { _ in
                             done()
                         })
                     }
@@ -90,15 +90,15 @@ class DocumentManagerTests: QuickSpec {
                 }
 
                 it("saves only the last call on coreData") {
-                    let docStruct = helper.createDocumentStruct()
+                    var docStruct = helper.createDocumentStruct()
                     let before = DocumentManager.savedCount
 
                     for _ in 0..<5 {
-                        sut.saveDocument(docStruct, completion: { _ in })
+                        docStruct = sut.saveDocument(docStruct, completion: { _ in })
                     }
 
                     waitUntil(timeout: .seconds(10)) { done in
-                        sut.saveDocument(docStruct, completion: { _ in done() })
+                        docStruct = sut.saveDocument(docStruct, completion: { _ in done() })
                     }
 
                     // Testing `== 1` might sometimes fail because of speed issue. We want to
@@ -109,14 +109,14 @@ class DocumentManagerTests: QuickSpec {
 
                 context("with duplicate titles") {
                     it("should raise error") {
-                        let docStruct = helper.createDocumentStruct()
-                        helper.saveLocally(docStruct)
+                        var docStruct = helper.createDocumentStruct()
+                        docStruct = helper.saveLocally(docStruct)
 
                         var docStruct2 = helper.createDocumentStruct()
                         docStruct2.title = docStruct.title
 
                         waitUntil(timeout: .seconds(10)) { done in
-                            sut.saveDocument(docStruct2, completion: { result in
+                            docStruct2 = sut.saveDocument(docStruct2, completion: { result in
                                 expect { try result.get() }.to(throwError())
                                 done()
                             })
@@ -125,7 +125,7 @@ class DocumentManagerTests: QuickSpec {
                         docStruct2.deletedAt = Date()
 
                         waitUntil(timeout: .seconds(10)) { done in
-                            sut.saveDocument(docStruct2, completion: { result in
+                            docStruct2 = sut.saveDocument(docStruct2, completion: { result in
                                 expect { try result.get() }.toNot(throwError())
                                 done()
                             })
@@ -191,8 +191,8 @@ class DocumentManagerTests: QuickSpec {
 
                 context("with duplicate titles") {
                     it("should raise error") {
-                        let docStruct = helper.createDocumentStruct()
-                        helper.saveLocally(docStruct)
+                        var docStruct = helper.createDocumentStruct()
+                        docStruct = helper.saveLocally(docStruct)
 
                         var docStruct2 = helper.createDocumentStruct()
                         docStruct2.title = docStruct.title
@@ -275,8 +275,8 @@ class DocumentManagerTests: QuickSpec {
 
                 context("with duplicate titles") {
                     it("should raise error") {
-                        let docStruct = helper.createDocumentStruct()
-                        helper.saveLocally(docStruct)
+                        var docStruct = helper.createDocumentStruct()
+                        docStruct = helper.saveLocally(docStruct)
 
                         var docStruct2 = helper.createDocumentStruct()
                         docStruct2.title = docStruct.title
@@ -314,8 +314,8 @@ class DocumentManagerTests: QuickSpec {
 
         describe(".loadDocumentById()") {
             it("loads document") {
-                let docStruct = helper.createDocumentStruct()
-                helper.saveLocally(docStruct)
+                var docStruct = helper.createDocumentStruct()
+                docStruct = helper.saveLocally(docStruct)
 
                 let document = sut.loadDocumentById(id: docStruct.id)
                 expect(document).toNot(beNil())
@@ -326,8 +326,8 @@ class DocumentManagerTests: QuickSpec {
 
         describe(".loadDocumentByTitle()") {
             it("loads document") {
-                let docStruct = helper.createDocumentStruct()
-                helper.saveLocally(docStruct)
+                var docStruct = helper.createDocumentStruct()
+                docStruct = helper.saveLocally(docStruct)
 
                 let document = sut.loadDocumentByTitle(title: docStruct.title)
                 expect(document).toNot(beNil())
@@ -339,8 +339,8 @@ class DocumentManagerTests: QuickSpec {
         describe(".delete()") {
             context("with Foundation") {
                 it("deletes document") {
-                    let docStruct = helper.createDocumentStruct()
-                    helper.saveLocally(docStruct)
+                    var docStruct = helper.createDocumentStruct()
+                    docStruct = helper.saveLocally(docStruct)
                     waitUntil(timeout: .seconds(10)) { done in
                         sut.deleteDocument(id: docStruct.id) { _ in
                             done()
@@ -356,8 +356,8 @@ class DocumentManagerTests: QuickSpec {
             }
             context("with PromiseKit") {
                 it("deletes document") {
-                    let docStruct = helper.createDocumentStruct()
-                    helper.saveLocally(docStruct)
+                    var docStruct = helper.createDocumentStruct()
+                    docStruct = helper.saveLocally(docStruct)
                     waitUntil(timeout: .seconds(10)) { done in
                         let promise: PromiseKit.Promise<Bool> = sut.deleteDocument(id: docStruct.id)
                         promise
@@ -374,8 +374,8 @@ class DocumentManagerTests: QuickSpec {
             }
             context("with Promises") {
                 it("deletes document") {
-                    let docStruct = helper.createDocumentStruct()
-                    helper.saveLocally(docStruct)
+                    var docStruct = helper.createDocumentStruct()
+                    docStruct = helper.saveLocally(docStruct)
                     waitUntil(timeout: .seconds(10)) { done in
                         let promise: Promises.Promise<Bool> = sut.deleteDocument(id: docStruct.id)
                         promise.then { _ in done() }
@@ -432,8 +432,8 @@ class DocumentManagerTests: QuickSpec {
                 }
 
                 it("doesn't create a document") {
-                    let docStruct = helper.createDocumentStruct(title: title)
-                    helper.saveLocally(docStruct)
+                    var docStruct = helper.createDocumentStruct(title: title)
+                    docStruct = helper.saveLocally(docStruct)
                     waitUntil(timeout: .seconds(10)) { done in
                         sut
                             .create(title: title)
@@ -481,8 +481,8 @@ class DocumentManagerTests: QuickSpec {
                 }
 
                 it("doesn't create a document") {
-                    let docStruct = helper.createDocumentStruct(title: title)
-                    helper.saveLocally(docStruct)
+                    var docStruct = helper.createDocumentStruct(title: title)
+                    docStruct = helper.saveLocally(docStruct)
                     waitUntil(timeout: .seconds(10)) { done in
                         sut
                             .create(title: title)
@@ -592,7 +592,8 @@ class DocumentManagerTests: QuickSpec {
         describe(".onDocumentChange()") {
             it("calls handler on document updates") {
                 var docStruct = helper.createDocumentStruct()
-                helper.saveLocally(docStruct)
+                docStruct = helper.saveLocally(docStruct)
+                docStruct.version = 1
 
                 let newTitle = String.randomTitle()
 
@@ -607,7 +608,7 @@ class DocumentManagerTests: QuickSpec {
 
                     docStruct.title = newTitle
                     docStruct.data = newTitle.asData // to force the callback
-                    sut.saveDocument(docStruct, completion: { result in
+                    docStruct = sut.saveDocument(docStruct, completion: { result in
                         expect { try result.get() }.toNot(throwError())
                         expect { try result.get() }.to(beTrue())
                     })
@@ -615,8 +616,8 @@ class DocumentManagerTests: QuickSpec {
             }
 
             it("doesn't call handler if beam_api_data only is modified") {
-                let docStruct = helper.createDocumentStruct()
-                helper.saveLocally(docStruct)
+                var docStruct = helper.createDocumentStruct()
+                docStruct = helper.saveLocally(docStruct)
                 let newData = "another data"
                 var cancellable: AnyCancellable!
                 waitUntil(timeout: .seconds(10)) { done in
@@ -642,5 +643,109 @@ class DocumentManagerTests: QuickSpec {
                 }
             }
         }
+
+        describe("DocumentVersion after creation") {
+            let faker = Faker()
+
+            it("correctly sets doc version at creation and after a save")
+            {            //swiftlint:disable:next force_cast
+                let title = faker.zelda.game()
+                var docStruct = sut.create(title: title)!
+                expect(docStruct.version).to(equal(0))
+                let document = "whatever binary data"
+                //swiftlint:disable:next force_try
+                let jsonData = try! JSONEncoder().encode(document)
+                docStruct.data = jsonData
+
+                docStruct = sut.saveDocument(docStruct)
+                expect(docStruct.version).to(equal(1))
+
+                waitUntil(timeout: .seconds(10)) { done in
+                    let promise: Promises.Promise<Bool> = sut.deleteDocument(id: docStruct.id)
+                    promise.then { _ in done() }
+                }
+            }
+
+            it("corretcly increments the version number at each save operation") {
+                let document = "whatever binary data"
+
+                //swiftlint:disable:next force_try
+                let jsonData = try! JSONEncoder().encode(document)
+
+                let id = UUID()
+                let title = faker.zelda.game()
+                var docStruct = DocumentStruct(id: id,
+                                               title: title,
+                                               createdAt: Date(),
+                                               updatedAt: Date(),
+                                               data: jsonData,
+                                               documentType: .note,
+                                               version: 0)
+
+                waitUntil { done in
+                    docStruct = sut.saveDocument(docStruct, completion:  { _ in
+                        done()
+                    })
+                    // This is done by BeamNote (the caller), it saves the returned version
+                    // and use it when saving again
+                    expect(docStruct.version).to(equal(1))
+                }
+
+                waitUntil { done in
+                    docStruct = sut.saveDocument(docStruct, completion:  { _ in
+                        done()
+                    })
+                    expect(docStruct.version).to(equal(2))
+                }
+
+                waitUntil(timeout: .seconds(10)) { done in
+                    let promise: Promises.Promise<Bool> = sut.deleteDocument(id: docStruct.id)
+                    promise.then { _ in done() }
+                }
+            }
+
+            it("refuses to save in case of mismatch") {
+                let title = faker.zelda.game()
+                //swiftlint:disable:next force_cast
+                var docStruct = sut.create(title: title)!
+                expect(docStruct.version).to(equal(0))
+
+                let document = "whatever binary data"
+                //swiftlint:disable:next force_try
+                let jsonData = try! JSONEncoder().encode(document)
+                docStruct.data = jsonData
+
+                for index in 0...3 {
+                    waitUntil { done in
+                        docStruct = sut.saveDocument(docStruct, completion:  { _ in
+                            done()
+                        })
+                        // This is done by BeamNote (the caller), it saves the returned version
+                        // and use it when saving again
+                        let expected: Int64 = 1 + Int64(index)
+                        expect(docStruct.version).to(equal(expected))
+                    }
+                }
+
+                // Try to save a previous version
+                docStruct.version = 1
+                waitUntil { done in
+                    docStruct = sut.saveDocument(docStruct, completion:  { result in
+                        expect { try result.get() }.to(throwError { (error: NSError) in
+                            expect(error.code).to(equal(1002))
+                        })
+                        done()
+                    })
+                    // TODO: shouldn't increment version
+                    expect(docStruct.version).to(equal(2))
+                }
+
+                waitUntil(timeout: .seconds(10)) { done in
+                    let promise: Promises.Promise<Bool> = sut.deleteDocument(id: docStruct.id)
+                    promise.then { _ in done() }
+                }
+            }
+        }
     }
+
 }

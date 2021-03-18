@@ -32,39 +32,47 @@ class DeleteText: TextEditorCommand {
         self.oldText = elementInstance.element.text
     }
 
-    override func run(context: TextRoot?) -> Bool {
-        guard let root = context,
-              let elementInstance = getElement(for: noteName, and: elementId),
-              let node = context?.nodeFor(elementInstance.element, withParent: root) else { return false }
+    override func run(context: Widget?) -> Bool {
+        guard let elementInstance = getElement(for: noteName, and: elementId) else { return false }
 
         var newPos: Int
         if backward {
-            newPos = node.element.text.position(before: range.lowerBound)
+            newPos = elementInstance.element.text.position(before: range.lowerBound)
         } else {
             newPos = range.lowerBound
         }
         let count = range.count == 0 ? 1 : range.count + 1
-        node.element.text.remove(count: count, at: newPos)
-        context?.focus(widget: node, cursorPosition: newPos)
-        context?.editor.detectFormatterType()
-        context?.cancelSelection()
+        elementInstance.element.text.remove(count: count, at: newPos)
+
+        guard let context = context,
+              let root = context.root,
+              let node = context.nodeFor(elementInstance.element) else { return false }
+
+        root.focus(widget: node, cursorPosition: newPos)
+        root.editor.detectFormatterType()
+        root.cancelSelection()
         return true
     }
 
-    override func undo(context: TextRoot?) -> Bool {
-        guard let root = context,
-              let elementInstance = getElement(for: noteName, and: elementId),
-              let node = context?.nodeFor(elementInstance.element, withParent: root),
-              let oldText = self.oldText else { return false }
+    override func undo(context: Widget?) -> Bool {
+        guard let elementInstance = getElement(for: noteName, and: elementId),
+              let oldText = self.oldText
+        else { return false }
 
-        node.element.text.replaceSubrange(node.element.text.wholeRange, with: oldText)
-        context?.focus(widget: node, cursorPosition: range.upperBound)
-        context?.state.selectedTextRange = range.lowerBound - 1..<range.upperBound
-        context?.editor.detectFormatterType()
+        elementInstance.element.text.replaceSubrange(elementInstance.element.text.wholeRange, with: oldText)
+
+        guard let context = context,
+              let root = context.root,
+              let node = context.nodeFor(elementInstance.element)
+              else { return false }
+
+        root.focus(widget: node, cursorPosition: range.upperBound)
+        root.state.selectedTextRange = range.lowerBound - 1..<range.upperBound
+        root.editor.detectFormatterType()
         return true
     }
 
-    override func coalesce(command: Command<TextRoot>) -> Bool {
+    override func coalesce(command: Command<Widget>) -> Bool {
         guard let deleteText = command as? DeleteText,
               deleteText.backward == backward,
               deleteText.elementId == elementId,

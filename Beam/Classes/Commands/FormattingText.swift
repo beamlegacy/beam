@@ -35,29 +35,29 @@ class FormattingText: TextEditorCommand {
         self.oldKind = elementInstance.element.kind
     }
 
-    override func run(context: TextRoot?) -> Bool {
-        guard let root = context,
-              let elementInstance = getElement(for: noteName, and: elementId),
-              let node = context?.nodeFor(elementInstance.element, withParent: root) else { return false }
+    override func run(context: Widget?) -> Bool {
+        guard let elementInstance = getElement(for: noteName, and: elementId) else { return false }
 
         var result = true
         if let newKind = self.newKind {
-            node.element.kind = isActive ? .bullet : newKind
+            elementInstance.element.kind = isActive ? .bullet : newKind
         } else {
-            result = runUpdateAttributes(for: node, context: context)
+            result = runUpdateAttributes(for: elementInstance.element, context: context?.root)
         }
         self.isActive = !isActive
-        context?.editor.detectFormatterType()
+
+        guard let root = context?.root else { return false }
+        root.editor.detectFormatterType()
         return result
     }
 
-    private func runUpdateAttributes(for node: TextNode, context: TextRoot?) -> Bool {
+    private func runUpdateAttributes(for element: BeamElement, context: TextRoot?) -> Bool {
         guard let newAttribute = self.newAttribute else { return false }
         if let range = self.range {
             if isActive {
-                node.text.removeAttributes([newAttribute], from: range)
+                element.text.removeAttributes([newAttribute], from: range)
             } else {
-                node.text.addAttributes([newAttribute], to: range)
+                element.text.addAttributes([newAttribute], to: range)
             }
         }
 
@@ -70,23 +70,19 @@ class FormattingText: TextEditorCommand {
         return true
     }
 
-    override func undo(context: TextRoot?) -> Bool {
-        guard let root = context,
-              let elementInstance = getElement(for: noteName, and: elementId),
-              let node = context?.nodeFor(elementInstance.element, withParent: root) else { return false }
+    override func undo(context: Widget?) -> Bool {
+        guard let elementInstance = getElement(for: noteName, and: elementId) else { return false }
 
         var result: Bool = true
         if let oldKind = self.oldKind, self.newKind != nil {
-            node.element.kind = oldKind
+            elementInstance.element.kind = oldKind
         } else {
-            result = runUpdateAttributes(for: node, context: context)
+            result = runUpdateAttributes(for: elementInstance.element, context: context?.root)
         }
         self.isActive = !isActive
-        context?.editor.detectFormatterType()
-        return result
-    }
 
-    override func coalesce(command: Command<TextRoot>) -> Bool {
-        return false
+        guard let root = context?.root else { return false }
+        root.editor.detectFormatterType()
+        return result
     }
 }

@@ -47,6 +47,7 @@ class Document: NSManagedObject {
     class func create(_ context: NSManagedObjectContext = CoreDataManager.shared.mainContext, title: String? = nil) -> Document {
         let document = Document(context: context)
         document.id = UUID()
+        document.version = 0
         if let title = title {
             document.title = title
         }

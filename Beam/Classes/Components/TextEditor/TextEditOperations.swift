@@ -10,20 +10,28 @@
 import Foundation
 
 extension TextRoot {
-    func increaseNodeIndentation(_ node: TextNode) -> Bool {
-        guard let noteTitle = node.root?.note?.title, !node.readOnly else { return false }
+    var cmdContext: Widget {
+        editor.focusedWidget ?? editor.rootNode
+    }
 
-        let increaseIndentation = IncreaseIndentation(for: node.element.id, of: noteTitle)
-        root.note?.cmdManager.run(command: increaseIndentation, on: root)
-        return true
+    func increaseNodeIndentation(_ node: TextNode) -> Bool {
+        guard let noteTitle = node.elementNoteTitle, !node.readOnly,
+              let newParent = node.previousSibbling() as? TextNode
+        else { return false }
+
+        let reparentElement = ReparentElement(for: node.elementId, of: noteTitle, to: newParent.elementId, atIndex: newParent.element.children.count)
+        return root.note?.cmdManager.run(command: reparentElement, on: cmdContext) ?? false
     }
 
     func decreaseNodeIndentation(_ node: TextNode) -> Bool {
-        guard let noteTitle = node.root?.note?.title, !node.readOnly else { return false }
+        guard let noteTitle = node.elementNoteTitle, !node.readOnly,
+              let prevParent = node.parent as? TextNode,
+              let newParent = prevParent.parent as? TextNode,
+              let parentIndexInParent = prevParent.element.indexInParent
+        else { return false }
 
-        let decreaseIndentation = DecreaseIndentation(for: node.element.id, of: noteTitle)
-        root.note?.cmdManager.run(command: decreaseIndentation, on: root)
-        return true
+        let reparentElement = ReparentElement(for: node.elementId, of: noteTitle, to: newParent.elementId, atIndex: parentIndexInParent + 1)
+        return root.note?.cmdManager.run(command: reparentElement, on: cmdContext) ?? false
     }
 
     func increaseNodeSelectionIndentation() {
@@ -31,10 +39,7 @@ extension TextRoot {
 
         root.note?.cmdManager.beginGroup(with: "IncreaseIndentationGroup")
         for node in selection.sortedRoots {
-            guard let noteTitle = node.root?.note?.title else { continue }
-
-            let increaseIndentation = IncreaseIndentation(for: node.element.id, of: noteTitle)
-            root.note?.cmdManager.run(command: increaseIndentation, on: root)
+            _ = increaseNodeIndentation(node)
         }
         root.note?.cmdManager.endGroup()
     }
@@ -44,10 +49,7 @@ extension TextRoot {
 
         root.note?.cmdManager.beginGroup(with: "DecreaseIndentationGroup")
         for node in selection.sortedRoots.reversed() {
-            guard let noteTitle = node.root?.note?.title else { continue }
-
-            let decreaseIndentation = DecreaseIndentation(for: node.element.id, of: noteTitle)
-            root.note?.cmdManager.run(command: decreaseIndentation, on: root)
+            _ = decreaseNodeIndentation(node)
         }
         root.note?.cmdManager.endGroup()
     }
@@ -80,27 +82,27 @@ extension TextRoot {
 
         root.note?.cmdManager.beginGroup(with: "Delete selected nodes")
         for node in sortedNodes.reversed() {
-            guard let noteTitle = node.root?.note?.title else { continue }
-            let deleteNode = DeleteNode(elementId: node.element.id, of: noteTitle, with: .selected)
-            root.note?.cmdManager.run(command: deleteNode, on: root)
+            guard let noteTitle = node.elementNoteTitle else { continue }
+            let deleteNode = DeleteNode(elementId: node.elementId, of: noteTitle, with: .selected)
+            root.note?.cmdManager.run(command: deleteNode, on: cmdContext)
         }
 
         if createEmptyNodeInPlace || root.element.children.isEmpty {
             guard let noteTitle = root.note?.title else { return }
             let insertEmptyNode = InsertEmptyNode(with: firstParent.element.id, of: noteTitle, at: firstIndexInParent)
-            root.note?.cmdManager.run(command: insertEmptyNode, on: root)
+            root.note?.cmdManager.run(command: insertEmptyNode, on: cmdContext)
         }
         root.note?.cmdManager.endGroup()
     }
 
     func eraseSelection(with str: String = "", and range: Range<Int>? = nil) {
         guard let node = focusedWidget as? TextNode, !node.readOnly, !selectedTextRange.isEmpty,
-              let noteTitle = node.root?.note?.title else { return }
+              let noteTitle = node.elementNoteTitle else { return }
 
         let rangeToReplace = range ?? selectedTextRange
         let bText = BeamText(text: str, attributes: root.state.attributes)
-        let replaceText = ReplaceText(in: node.element.id, of: noteTitle, for: rangeToReplace, at: cursorPosition, with: bText)
-        root.note?.cmdManager.run(command: replaceText, on: root)
+        let replaceText = ReplaceText(in: node.elementId, of: noteTitle, for: rangeToReplace, at: cursorPosition, with: bText)
+        root.note?.cmdManager.run(command: replaceText, on: cmdContext)
     }
 
     func deleteForward() {
@@ -110,16 +112,16 @@ extension TextRoot {
         }
 
         guard let node = focusedWidget as? TextNode, !node.readOnly,
-              let noteTitle = node.root?.note?.title else { return }
+              let noteTitle = node.elementNoteTitle else { return }
 
         if !selectedTextRange.isEmpty {
             eraseSelection()
         } else if cursorPosition != node.text.count {
-            let deleteText = DeleteText(in: node.element.id, of: noteTitle, at: cursorPosition, for: selectedTextRange, backward: false)
-            root.note?.cmdManager.run(command: deleteText, on: root)
+            let deleteText = DeleteText(in: node.elementId, of: noteTitle, at: cursorPosition, for: selectedTextRange, backward: false)
+            root.note?.cmdManager.run(command: deleteText, on: cmdContext)
         } else {
-            let deleteNode = DeleteNode(elementId: node.element.id, of: noteTitle, with: .forward)
-            root.note?.cmdManager.run(command: deleteNode, on: root)
+            let deleteNode = DeleteNode(elementId: node.elementId, of: noteTitle, with: .forward)
+            root.note?.cmdManager.run(command: deleteNode, on: cmdContext)
         }
     }
 
@@ -131,15 +133,18 @@ extension TextRoot {
         }
 
         guard let node = focusedWidget as? TextNode, !node.readOnly,
-              let noteTitle = node.root?.note?.title else { return }
+              let noteTitle = node.elementNoteTitle else { return }
 
         if cursorPosition == 0, selectedTextRange.isEmpty {
-            let deleteNode = DeleteNode(elementId: node.element.id, of: noteTitle, with: .backward)
-            root.note?.cmdManager.run(command: deleteNode, on: root)
+            if node.element == node.element.note?.children.first {
+                return // can't erase the first element of the note
+            }
+            let deleteNode = DeleteNode(elementId: node.elementId, of: noteTitle, with: .backward)
+            root.note?.cmdManager.run(command: deleteNode, on: cmdContext)
         } else {
             if selectedTextRange.isEmpty {
-                let deleteText = DeleteText(in: node.element.id, of: noteTitle, at: cursorPosition, for: selectedTextRange)
-                root.note?.cmdManager.run(command: deleteText, on: root)
+                let deleteText = DeleteText(in: node.elementId, of: noteTitle, at: cursorPosition, for: selectedTextRange)
+                root.note?.cmdManager.run(command: deleteText, on: cmdContext)
             } else {
                 eraseSelection()
             }
@@ -149,7 +154,7 @@ extension TextRoot {
     func insertNewline() {
         guard root.state.nodeSelection == nil,
               let node = focusedWidget as? TextNode,
-              let noteTitle = node.root?.note?.title, !node.readOnly else { return }
+              let noteTitle = node.elementNoteTitle, !node.readOnly else { return }
 
         let newLineStr = "\n"
         if !node.element.text.isEmpty {
@@ -157,8 +162,8 @@ extension TextRoot {
                 eraseSelection(with: newLineStr)
             } else {
                 let bText = BeamText(text: "\n", attributes: [])
-                let insertText = InsertText(text: bText, in: node.element.id, of: noteTitle, at: cursorPosition)
-                root.note?.cmdManager.run(command: insertText, on: root)
+                let insertText = InsertText(text: bText, in: node.elementId, of: noteTitle, at: cursorPosition)
+                root.note?.cmdManager.run(command: insertText, on: cmdContext)
             }
         }
     }
@@ -203,7 +208,7 @@ extension TextRoot {
     public func insertText(string: String, replacementRange: Range<Int>) {
         eraseNodeSelection(createEmptyNodeInPlace: true)
         guard let node = focusedWidget as? TextNode,
-              let noteTitle = node.root?.note?.title, !node.readOnly else { return }
+              let noteTitle = node.elementNoteTitle, !node.readOnly else { return }
 
         var range = cursorPosition..<cursorPosition
         if !replacementRange.isEmpty {
@@ -214,8 +219,8 @@ extension TextRoot {
         }
         if range.isEmpty {
             let bText = BeamText(text: string, attributes: root.state.attributes)
-            let insertText = InsertText(text: bText, in: node.element.id, of: noteTitle, at: cursorPosition)
-            root.note?.cmdManager.run(command: insertText, on: root)
+            let insertText = InsertText(text: bText, in: node.elementId, of: noteTitle, at: cursorPosition)
+            root.note?.cmdManager.run(command: insertText, on: cmdContext)
         } else {
             eraseSelection(with: string, and: range)
         }

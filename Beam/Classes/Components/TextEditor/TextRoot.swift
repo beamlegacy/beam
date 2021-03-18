@@ -138,20 +138,16 @@ public class TextRoot: TextNode {
 
     override var offsetInRoot: NSPoint { NSPoint() }
 
-    override func invalidate(_ rect: NSRect? = nil) {
-        super.invalidate(rect)
-        if let r = rect {
-            editor.invalidate(r.offsetBy(dx: currentFrameInDocument.minX, dy: currentFrameInDocument.minY))
-        } else {
-            editor.invalidate(contentsFrame.offsetBy(dx: currentFrameInDocument.minX, dy: currentFrameInDocument.minY))
-        }
+    override func invalidate() {
+        super.invalidate()
+        editor.invalidate()
     }
 
     override init(editor: BeamTextEdit, element: BeamElement) {
         self.note = element as? BeamNote
         super.init(editor: editor, element: element)
 
-        mapping[element] = self
+        mapping[element] = WeakReference(self)
         if let note = note, note.type != .journal {
             topSpacerWidget = SpacerWidget(parent: self, spacerType: .top)
             linksSection = LinksSection(parent: self, note: note, mode: .links)
@@ -280,8 +276,12 @@ public class TextRoot: TextNode {
     }
 
     // Mapping of elements to nodes and breadcrumbs:
+    override func nodeFor(_ element: BeamElement) -> TextNode? {
+        return mapping[element]?.ref
+    }
+
     override func nodeFor(_ element: BeamElement, withParent: Widget) -> TextNode {
-        if let node = mapping[element] {
+        if let node = mapping[element]?.ref {
             return node
         }
 
@@ -296,7 +296,7 @@ public class TextRoot: TextNode {
         }()
 
         accessingMapping = true
-        mapping[element] = node
+        mapping[element] = WeakReference(node)
         accessingMapping = false
         purgeDeadNodes()
 
@@ -315,7 +315,7 @@ public class TextRoot: TextNode {
     }
 
     private var accessingMapping = false
-    private var mapping: [BeamElement: TextNode] = [:]
+    private var mapping: [BeamElement: WeakReference<TextNode>] = [:]
     private var deadNodes: [TextNode] = []
 
     func purgeDeadNodes() {

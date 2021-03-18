@@ -221,6 +221,10 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
         })
     }
 
+    var indexInParent: Int? {
+        return parent?.indexOfChild(self)
+    }
+
     func addChild(_ child: BeamElement) {
         insert(child, after: children.last) // append
     }
@@ -457,5 +461,43 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
         }
 
         return nil
+    }
+
+    public func nextSibbling() -> BeamElement? {
+        if let p = parent {
+            let sibblings = p.children
+            if let i = sibblings.firstIndex(of: self) {
+                if sibblings.count > i + 1 {
+                    return sibblings[i + 1]
+                }
+            }
+        }
+        return nil
+    }
+
+    public func previousSibbling() -> BeamElement? {
+        if let p = parent {
+            let sibblings = p.children
+            if let i = sibblings.firstIndex(of: self) {
+                if i > 0 {
+                    return sibblings[i - 1]
+                }
+            }
+        }
+        return nil
+    }
+
+    public func highestNextSibbling() -> BeamElement? {
+        if let nextSibbling = self.parent?.nextSibbling() {
+            return nextSibbling
+        }
+        return self.parent?.highestNextSibbling()
+    }
+
+    public func deepestChildren() -> BeamElement? {
+        if let n = children.last {
+            return n.deepestChildren()
+        }
+        return self
     }
 }

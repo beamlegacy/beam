@@ -23,37 +23,31 @@ class InsertEmptyNode: TextEditorCommand {
         super.init(name: InsertEmptyNode.name)
     }
 
-    override func run(context: TextRoot?) -> Bool {
-        guard let root = context,
-              let parentElementInstance = getElement(for: noteName, and: parentElementId),
-              let node = context?.nodeFor(parentElementInstance.element, withParent: root) else { return false }
+    override func run(context: Widget?) -> Bool {
+        guard let context = context,
+              let root = context.root,
+              let parentElementInstance = getElement(for: noteName, and: parentElementId) else { return false }
 
         let element = decode(data: data) ?? BeamElement()
-        guard let newNode = context?.nodeFor(element, withParent: root) else { return false }
-        let result = node.insert(node: newNode, at: index)
+        parentElementInstance.element.insert(element, at: index)
         self.newElementId = element.id
-        context?.focus(widget: newNode)
-        return result
-    }
-
-    override func undo(context: TextRoot?) -> Bool {
-        guard let root = context,
-              let newElementId = newElementId,
-              let newElementInstance = getElement(for: noteName, and: newElementId),
-              let node = context?.nodeFor(newElementInstance.element, withParent: root),
-              let parentElementInstance = getElement(for: noteName, and: parentElementId),
-              let parentNode = context?.nodeFor(parentElementInstance.element, withParent: root) else { return false }
-
-        for c in node.element.children {
-            parentNode.element.addChild(c)
-        }
-
-        data = encode(element: newElementInstance.element)
-        node.delete()
+        // UI Update
+        guard let newNode = context.nodeFor(element) else { return true }
+        root.focus(widget: newNode)
         return true
     }
 
-    override func coalesce(command: Command<TextRoot>) -> Bool {
-        return false
+    override func undo(context: Widget?) -> Bool {
+        guard let newElementId = newElementId,
+              let newElementInstance = getElement(for: noteName, and: newElementId),
+              let parentElementInstance = getElement(for: noteName, and: parentElementId) else { return false }
+
+        for c in newElementInstance.element.children {
+            parentElementInstance.element.addChild(c)
+        }
+
+        data = encode(element: newElementInstance.element)
+        newElementInstance.element.parent?.removeChild(newElementInstance.element)
+        return true
     }
 }

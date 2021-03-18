@@ -349,14 +349,14 @@ struct BeamText: Codable {
 
     mutating func append(_ text: String, withAttributes attributes: [Attribute]) {
         ranges.append(Range(string: text, attributes: attributes, position: ranges.last?.end ?? 0))
-        flattenInternalLinks()
+        flatten()
     }
 
     mutating func append(_ text: String) {
         guard var range = ranges.last else { append(text, withAttributes: []); return }
         range.string += text
         ranges[ranges.endIndex - 1] = range
-        flattenInternalLinks()
+        flatten()
     }
 
     mutating internal func removeSubrangeSilent(_ range: Swift.Range<Int>) {
