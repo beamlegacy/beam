@@ -12,14 +12,14 @@ struct BeamElementInstance {
     var element: BeamElement
 }
 
-class TextEditorCommand: Command<TextRoot> {
+class TextEditorCommand: Command<Widget> {
 
     override init(name: String) {
         super.init(name: name)
     }
 
     func getElement(for noteName: String, and id: UUID) -> BeamElementInstance? {
-        guard let note = BeamNote.fetch(DocumentManager(), title: noteName),
+        guard let note = BeamNote.fetch(AppDelegate.main.documentManager, title: noteName),
               let element = note.findElement(id) else { return nil }
         return BeamElementInstance(note: note, element: element)
     }

@@ -67,11 +67,6 @@ class GroupCommand<Context>: Command<Context> {
         }
         return undoing
     }
-
-    override func coalesce(command: Command<Context>) -> Bool {
-        return false
-    }
-
 }
 
 // MARK: - CommandManager
@@ -85,21 +80,24 @@ class CommandManager<Context> {
 
     private var lastCmdDate: Date?
 
-    func run(name: String, run: @escaping (Context?) -> Bool, undo: @escaping (Context?) -> Bool, coalesce: @escaping (Command<Context>) -> Bool, on context: Context) {
+    @discardableResult
+    func run(name: String, run: @escaping (Context?) -> Bool, undo: @escaping (Context?) -> Bool, coalesce: @escaping (Command<Context>) -> Bool, on context: Context) -> Bool {
         self.run(command: BlockCommand(name: name, run: run, undo: undo, coalesce: coalesce), on: context)
     }
 
-    func run(command: Command<Context>, on context: Context) {
+    @discardableResult
+    func run(command: Command<Context>, on context: Context) -> Bool {
         var cmdToRun = command
         if let lastCmd = doneQueue.last, lastCmd.coalesce(command: cmdToRun) {
             doneQueue.removeLast()
             cmdToRun = lastCmd
         }
-        if cmdToRun.run(context: context) && !groupFailed {
+        let done = cmdToRun.run(context: context)
+        if done && !groupFailed {
             Logger.shared.logDebug("Run: \(cmdToRun.name)")
             guard !groupCmd.isEmpty else {
                 doneQueue.append(cmdToRun)
-                return
+                return true
             }
             groupCmd.last?.append(command: cmdToRun)
         } else {
@@ -107,9 +105,10 @@ class CommandManager<Context> {
             guard groupCmd.isEmpty else {
                 groupFailed = true
                 endGroup()
-                return
+                return false
             }
         }
+        return done
     }
 
     func undo(context: Context?) -> Bool {

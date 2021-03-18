@@ -51,7 +51,7 @@ class DocumentManagerNetworkTests: QuickSpec {
             var docStruct: DocumentStruct!
             beforeEach {
                 docStruct = helper.createDocumentStruct()
-                helper.saveLocally(docStruct)
+                docStruct = helper.saveLocally(docStruct)
             }
 
             afterEach {
@@ -214,7 +214,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                 beforeEach {
                     Configuration.encryptionEnabled = true
                     docStruct = helper.createDocumentStruct()
-                    helper.saveLocally(docStruct)
+                    docStruct = helper.saveLocally(docStruct)
                     helper.saveRemotely(docStruct)
                 }
 
@@ -239,7 +239,7 @@ class DocumentManagerNetworkTests: QuickSpec {
             context("with encryption and unencrypted content on the API side") {
                 beforeEach {
                     docStruct = helper.createDocumentStruct()
-                    helper.saveLocally(docStruct)
+                    docStruct = helper.saveLocally(docStruct)
                     helper.saveRemotely(docStruct)
                 }
 
@@ -266,7 +266,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                 beforeEach {
                     BeamDate.freeze()
                     docStruct = helper.createDocumentStruct()
-                    helper.saveLocally(docStruct)
+                    docStruct = helper.saveLocally(docStruct)
                     helper.saveRemotely(docStruct)
                 }
 
@@ -274,7 +274,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                     BeamDate.reset()
                 }
 
-                it("refreshes the local document") {
+                it("does not refreshes the local document") {
                     let networkCalls = APIRequest.callsCount
 
                     waitUntil(timeout: .seconds(10)) { done in
@@ -308,7 +308,7 @@ class DocumentManagerNetworkTests: QuickSpec {
             context("when remote document doesn't exist") {
                 beforeEach {
                     docStruct = helper.createDocumentStruct()
-                    helper.saveLocally(docStruct)
+                    docStruct = helper.saveLocally(docStruct)
                 }
 
                 it("flags the local document as deleted") {
@@ -325,6 +325,7 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                     let newDocStruct = sut.loadDocumentById(id: docStruct.id)
                     expect(newDocStruct).toNot(beNil())
+
                     expect(newDocStruct?.deletedAt).to(beCloseTo(BeamDate.now, within: 1.0))
 
                     let document = Document.fetchWithId(coreDataManager.mainContext, docStruct.id)
@@ -484,7 +485,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                 beforeEach {
                     BeamDate.freeze()
                     docStruct = helper.createDocumentStruct()
-                    helper.saveLocally(docStruct)
+                    docStruct = helper.saveLocally(docStruct)
                     helper.saveRemotely(docStruct)
                     networkCalls = APIRequest.callsCount
                 }
@@ -775,7 +776,7 @@ class DocumentManagerNetworkTests: QuickSpec {
             context("when remote document doesn't exist") {
                 beforeEach {
                     docStruct = helper.createDocumentStruct()
-                    helper.saveLocally(docStruct)
+                    docStruct = helper.saveLocally(docStruct)
                     networkCalls = APIRequest.callsCount
                 }
 
@@ -851,6 +852,7 @@ class DocumentManagerNetworkTests: QuickSpec {
             context("with network") {
                 context("without conflict") {
                     it("saves the document locally") {
+
                         waitUntil(timeout: .seconds(10)) { done in
                             sut.saveDocument(docStruct, completion:  { _ in
                                 done()
@@ -864,7 +866,7 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                     context("with Foundation") {
                         beforeEach {
-                            helper.saveLocally(docStruct)
+                            docStruct = helper.saveLocally(docStruct)
                         }
 
                         it("saves the document on the API") {
@@ -994,7 +996,7 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                     context("with PromiseKit") {
                         beforeEach {
-                            helper.saveLocally(docStruct)
+                            docStruct = helper.saveLocally(docStruct)
                         }
 
                         it("saves the document on the API") {
@@ -1111,7 +1113,7 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                     context("with Promises") {
                         beforeEach {
-                            helper.saveLocally(docStruct)
+                            docStruct = helper.saveLocally(docStruct)
                         }
 
                         it("saves the document on the API") {

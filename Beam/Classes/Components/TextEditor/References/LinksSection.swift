@@ -17,7 +17,6 @@ class LinksSection: Widget {
 
     var mode: Mode
     var linkedReferencesCancellable: Cancellable!
-    var referencesCancellables = Set<AnyCancellable>()
     var note: BeamNote
     var linkLayer: Layer?
 
@@ -26,6 +25,8 @@ class LinksSection: Widget {
     let separatorLayer = CALayer()
     let offsetY: CGFloat = 40
 
+    var titles: [String: RefNoteTitle] = [:]
+    
     override var open: Bool {
         didSet {
             linkLayer?.layer.isHidden = !open
@@ -89,34 +90,53 @@ class LinksSection: Widget {
     }
 
     func updateLinkedReferences(links: [NoteReference]) {
-        guard let rootNote = self.editor.note.note else { return }
+        var validRefs = 0
+        var newrefs = [String: RefNoteTitle]()
+        var toRemove = Set<RefNoteTitle>(titles.values)
 
-        referencesCancellables.removeAll()
         for noteReference in links {
-            guard let note = BeamNote.fetch(DocumentManager(), title: noteReference.noteName) else { continue }
-            guard let element = note.findElement(noteReference.elementID) else { continue }
+            let noteName = noteReference.noteName
+            guard let breadCrumb = root?.getBreadCrumb(for: noteReference) else { continue }
 
-            guard let breadcrumb = root?.getBreadCrumb(for: noteReference) else { continue }
-            element.$text
-                .sink { [unowned self] newText in
-                    if self.shouldHandleReference(rootNote: rootNote.title, text: newText) {
-                        addChild(breadcrumb)
-                    } else {
-                        removeChild(breadcrumb)
-                    }
-                    updateHeading()
-                }.store(in: &referencesCancellables)
+            // Prepare title children:
+            guard let refTitleWidget = try? titles[noteName] ?? RefNoteTitle(parent: self, noteName: noteName, actionTitle: "Link", action: {
+                self.linkAllReferencesFromNote(named: noteName)
+            }) else { continue }
+            newrefs[noteName] = refTitleWidget
+            toRemove.remove(refTitleWidget)
+
+            // now attach bread crumbs to the titles we just refreshed
+            if shouldHandleReference(rootNote: note.title, text: breadCrumb.proxy.text) {
+                refTitleWidget.addChild(breadCrumb)
+                validRefs += 1
+            } else {
+                refTitleWidget.removeChild(breadCrumb)
+            }
         }
 
-        updateHeading()
+        titles = newrefs
+
+        for refTitle in newrefs.values where !refTitle.children.isEmpty {
+            addChild(refTitle)
+        }
+
+        for oldChild in toRemove {
+            removeChild(oldChild)
+        }
+
+        updateHeading(validRefs)
     }
 
-    func updateHeading() {
+    func linkAllReferencesFromNote(named noteName: String) {
+        // TODO
+    }
+
+    func updateHeading(_ count: Int) {
         switch mode {
         case .links:
-            sectionTitleLayer.string = "link".localizedStringWith(comment: "link section title", children.count)
+            sectionTitleLayer.string = "link".localizedStringWith(comment: "link section title", count)
         case .references:
-            sectionTitleLayer.string = "reference".localizedStringWith(comment: "reference section title", children.count)
+            sectionTitleLayer.string = "reference".localizedStringWith(comment: "reference section title", count)
         }
         selfVisible = !children.isEmpty
         visible = selfVisible

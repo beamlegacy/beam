@@ -32,34 +32,39 @@ class ReplaceText: TextEditorCommand {
         self.oldText = elementInstance.element.text
     }
 
-    override func run(context: TextRoot?) -> Bool {
-        guard let root = context,
-              let elementInstance = getElement(for: noteName, and: elementId),
-              let node = context?.nodeFor(elementInstance.element, withParent: root) else { return false }
+    override func run(context: Widget?) -> Bool {
+        guard let elementInstance = getElement(for: noteName, and: elementId) else { return false }
+        elementInstance.element.text.replaceSubrange(range, with: text)
 
-        node.element.text.replaceSubrange(range, with: text)
+        guard let context = context,
+              let root = context.root,
+              let node = context.nodeFor(elementInstance.element) else { return false }
         cursorPosition = range.lowerBound + text.count
-        context?.focus(widget: node, cursorPosition: cursorPosition)
-        context?.cancelSelection()
+        root.focus(widget: node, cursorPosition: cursorPosition)
+        root.cancelSelection()
         return true
     }
 
-    override func undo(context: TextRoot?) -> Bool {
-        guard let root = context,
-              let elementInstance = getElement(for: noteName, and: elementId),
-              let node = context?.nodeFor(elementInstance.element, withParent: root),
+    override func undo(context: Widget?) -> Bool {
+        guard let elementInstance = getElement(for: noteName, and: elementId),
               let oldText = self.oldText else { return false }
+        elementInstance.element.text.replaceSubrange(elementInstance.element.text.wholeRange, with: oldText)
 
-        node.element.text.replaceSubrange(node.element.text.wholeRange, with: oldText)
-        context?.focus(widget: node, cursorPosition: range.upperBound)
-        context?.state.selectedTextRange = range
+        guard let context = context,
+              let root = context.root,
+              let node = context.nodeFor(elementInstance.element) else { return false }
+
+        root.focus(widget: node, cursorPosition: range.upperBound)
+        root.state.selectedTextRange = range
         return true
     }
 
-    override func coalesce(command: Command<TextRoot>) -> Bool {
+    override func coalesce(command: Command<Widget>) -> Bool {
         guard let insertText = command as? InsertText,
               insertText.cursorPosition == cursorPosition,
               insertText.text.text != "\n",
+              insertText.noteName == noteName,
+              insertText.elementId == elementId,
               let elementInstance = getElement(for: noteName, and: elementId),
               let oldText = self.oldText else { return false }
 

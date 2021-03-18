@@ -194,7 +194,9 @@ class DocumentManager {
                               data: document.data ?? Data(),
                               documentType: DocumentType(rawValue: document.document_type) ?? DocumentType.note,
                               previousData: document.beam_api_data,
-                              previousChecksum: document.beam_api_checksum)
+                              previousChecksum: document.beam_api_checksum,
+                              version: document.version
+                              )
     }
 
     /// Must be called within the context thread
@@ -206,6 +208,7 @@ class DocumentManager {
         for document in documents {
             Logger.shared.logDebug("Marking \(document.title) as deleted", category: .document)
             document.deleted_at = BeamDate.now
+            document.version += 1
         }
     }
 
@@ -256,6 +259,7 @@ class DocumentManager {
         document.updated_at = documentType.updatedAt ?? document.updated_at
         document.deleted_at = documentType.deletedAt ?? document.deleted_at
         document.document_type = documentType.documentType ?? document.document_type
+        document.version += 1
 
         return true
     }
@@ -289,6 +293,7 @@ class DocumentManager {
 
         document.data = newData
         document.beam_api_data = input2
+//        document.version += 1
         return true
     }
 
@@ -421,6 +426,19 @@ class DocumentManager {
             let errString = "Title is already used in another document"
             let userInfo: [String: Any] = [NSLocalizedFailureReasonErrorKey: errString, NSValidationObjectErrorKey: self]
             throw NSError(domain: "DOCUMENT_ERROR_DOMAIN", code: 1001, userInfo: userInfo)
+        }
+    }
+
+    private func checkVersion(_ context: NSManagedObjectContext, _ document: Document, _ newVersion: Int64) throws {
+        // If document is deleted, we don't need to check version uniqueness
+        guard document.deleted_at == nil else { return }
+
+        let existingDocument = Document.fetchWithId(context, document.id)
+
+        if let existingVersion = existingDocument?.version, existingVersion >= newVersion {
+            let errString = "\(document.title): coredata version: \(existingVersion), newVersion: \(newVersion)"
+            let userInfo: [String: Any] = [NSLocalizedFailureReasonErrorKey: errString, NSValidationObjectErrorKey: self]
+            throw NSError(domain: "DOCUMENT_ERROR_DOMAIN", code: 1002, userInfo: userInfo)
         }
     }
 }
@@ -655,8 +673,9 @@ extension DocumentManager {
     func saveDocument(_ documentStruct: DocumentStruct,
                       _ networkSave: Bool = true,
                       _ networkCompletion: ((Swift.Result<Bool, Error>) -> Void)? = nil,
-                      completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
-        Logger.shared.logDebug("Saving \(documentStruct.title)", category: .document)
+                      completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) -> DocumentStruct {
+        let newVersion = documentStruct.version + 1
+        Logger.shared.logDebug("Saving \(documentStruct.title) version \(newVersion)", category: .document)
         Logger.shared.logDebug(documentStruct.data.asString ?? "-", category: .documentDebug)
 
         var blockOperation: BlockOperation!
@@ -684,10 +703,12 @@ extension DocumentManager {
 
                 do {
                     try self.checkValidations(context, document)
+                    try self.checkVersion(context, document, newVersion)
                 } catch {
                     completion?(.failure(error))
                     return
                 }
+                document.version = newVersion
 
                 if blockOperation.isCancelled {
                     completion?(.failure(DocumentManagerError.operationCancelled))
@@ -728,6 +749,10 @@ extension DocumentManager {
         saveOperations[documentStruct.id]?.cancel()
         saveOperations[documentStruct.id] = blockOperation
         saveDocumentQueue.addOperation(blockOperation)
+
+        var newDoc = documentStruct
+        newDoc.version = newVersion
+        return newDoc
     }
 
     @discardableResult

@@ -321,9 +321,9 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     // This is the node that the user is currently editing. It can be any node in the rootNode tree
     var focusedWidget: Widget? {
         set {
-            invalidate(rootNode.focusedWidget?.textFrameInDocument)
+            invalidate()
             rootNode.focusedWidget = newValue
-            invalidate(rootNode.focusedWidget?.textFrameInDocument)
+            invalidate()
         }
         get {
             rootNode.focusedWidget
@@ -406,6 +406,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
     public func invalidateLayout() {
         guard !needsLayout else { return }
+        guard !inRelayout else { return }
         invalidateIntrinsicContentSize()
         needsLayout = true
         invalidate()
@@ -421,9 +422,8 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         needsLayout = false
     }
 
-    public func invalidate(_ rect: NSRect? = nil) {
-        guard let r = rect else { setNeedsDisplay(bounds); return }
-        setNeedsDisplay(r)
+    public func invalidate() {
+        setNeedsDisplay(bounds)
     }
 
     // Text Input from AppKit:
@@ -501,7 +501,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     // swiftlint:disable:next cyclomatic_complexity function_body_length
     func pressEnter(_ option: Bool, _ command: Bool, _ shift: Bool) {
         guard let node = focusedWidget as? TextNode, !node.readOnly,
-              let noteTitle = node.root?.note?.title else { return }
+              let noteTitle = node.elementNoteTitle else { return }
 
         if option || shift {
             rootNode.doCommand(.insertNewline)
@@ -515,8 +515,8 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                 return
             }
             rootNode.eraseSelection()
-            let insertNode = InsertNode(in: node.element.id, of: noteTitle, with: rootNode.cursorPosition)
-            rootNode.note?.cmdManager.run(command: insertNode, on: rootNode)
+            let insertNode = InsertNode(in: node.elementId, of: noteTitle, with: rootNode.cursorPosition)
+            rootNode.note?.cmdManager.run(command: insertNode, on: rootNode.cmdContext)
             scrollToCursorAtLayout = true
             cleanPersistentFormatter()
         }
@@ -938,22 +938,22 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                         enableInputDetector()
                     } else {
                         guard let node = focusedWidget as? TextNode,
-                              let noteTitle = node.root?.note?.title else { continue }
-                        let insertNode = InsertNode(in: node.element.id, of: noteTitle, with: nil)
-                        rootNode.note?.cmdManager.run(command: insertNode, on: rootNode)
+                              let noteTitle = node.elementNoteTitle else { continue }
+                        let insertNode = InsertNode(in: node.elementId, of: noteTitle, with: nil)
+                        rootNode.note?.cmdManager.run(command: insertNode, on: rootNode.cmdContext)
                         guard let newNode = focusedWidget as? TextNode else { continue }
                         let bText = BeamText(text: str, attributes: [])
-                        let insertText = InsertText(text: bText, in: newNode.element.id, of: noteTitle, at: 0)
-                        rootNode.note?.cmdManager.run(command: insertText, on: rootNode)
+                        let insertText = InsertText(text: bText, in: newNode.elementId, of: noteTitle, at: 0)
+                        rootNode.note?.cmdManager.run(command: insertText, on: rootNode.cmdContext)
                         scrollToCursorAtLayout = true
                     }
                     guard let node = focusedWidget as? TextNode,
                           let ranges = node.text.text.urlRangesInside(),
-                          let noteTitle = node.root?.note?.title else { return }
+                          let noteTitle = node.elementNoteTitle else { return }
                     ranges.compactMap { Range($0) }.forEach { range in
                         let linkStr = String(str[range.lowerBound..<range.upperBound])
-                        let formatText = FormattingText(in: node.element.id, of: noteTitle, for: nil, with: .link(linkStr), for: range, isActive: false)
-                        rootNode.note?.cmdManager.run(command: formatText, on: rootNode)
+                        let formatText = FormattingText(in: node.elementId, of: noteTitle, for: nil, with: .link(linkStr), for: range, isActive: false)
+                        rootNode.note?.cmdManager.run(command: formatText, on: rootNode.cmdContext)
                         rootNode.focus(widget: node, cursorPosition: node.element.text.count)
                     }
                 }
@@ -1307,7 +1307,10 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
     // CALayerDelegate
     let titlePadding = CGFloat(20)
+
+    var inRelayout = false
     public func layoutSublayers(of layer: CALayer) {
+        inRelayout = true; defer { inRelayout = false }
         guard layer === self.layer else { return }
         let h = title.frame.height
         titleLayer.bounds = CGRect(x: 0, y: 0, width: leadingAlignment, height: h + 15)

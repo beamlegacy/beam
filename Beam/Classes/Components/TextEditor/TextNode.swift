@@ -17,6 +17,16 @@ public class TextNode: Widget {
         subscribeToElement(element)
     }}
 
+    var elementId: UUID {
+        guard let elem = element as? ProxyElement else { return element.id }
+        return elem.proxy.id
+    }
+
+    var elementNoteTitle: String? {
+        guard let elem = element as? ProxyElement else { return element.note?.title }
+        return elem.proxy.note?.title
+    }
+
     var elementScope = Set<AnyCancellable>()
     var elementText = BeamText()
     var elementKind = ElementKind.bullet
@@ -272,6 +282,8 @@ public class TextNode: Widget {
         context.beginPath()
         let startLine = lineAt(index: start)!
         let endLine = lineAt(index: end)!
+        let lineCount = layout!.lines.count
+        guard lineCount > startLine, lineCount > endLine else { return }
         let line1 = layout!.lines[startLine]
         let line2 = layout!.lines[endLine]
         let xStart = offsetAt(index: start)
