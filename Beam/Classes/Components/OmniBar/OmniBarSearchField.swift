@@ -47,7 +47,6 @@ struct OmniBarSearchField: View {
     }
 
     var body: some View {
-
         return HStack(spacing: 8) {
             Icon(name: leadingIconName, size: 16, color: isEditing ? Color(.omniboxTextColor) : Color(.omniboxPlaceholderTextColor) )
                 .opacity(shouldShowWebHost ? 0 : 1.0)

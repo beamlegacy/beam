@@ -81,8 +81,12 @@ struct BeamTextField: NSViewRepresentable {
         if textField.textColor != textColor {
             textField.textColor = textColor
         }
-        textField.setText(text, font: font)
-        textField.setPlaceholder(placeholder, font: font)
+        if textField.attributedStringValue.string != text {
+            textField.setText(text, font: font)
+        }
+        if textField.placeholderAttributedString?.string != placeholder {
+            textField.setPlaceholder(placeholder, font: font)
+        }
         textField.shouldUseIntrinsicContentSize = centered
 
         // Force focus on textField

@@ -12,7 +12,7 @@ struct AutocompleteList: View {
     @EnvironmentObject var state: BeamState
     @Binding var selectedIndex: Int?
     @Binding var elements: [AutocompleteResult]
-    @Binding var modifierFlagsPressed: NSEvent.ModifierFlags?
+    var modifierFlagsPressed: NSEvent.ModifierFlags?
 
     private let itemHeight: CGFloat = 32
 
@@ -67,6 +67,6 @@ struct AutocompleteList_Previews: PreviewProvider {
         AutocompleteResult(text: "asldkfjh sadlkfjh", source: .autocomplete),
         AutocompleteResult(text: "bleh blehbleh", source: .autocomplete)]
     static var previews: some View {
-        AutocompleteList(selectedIndex: .constant(1), elements: .constant(Self.elements), modifierFlagsPressed: .constant(nil))
+        AutocompleteList(selectedIndex: .constant(1), elements: .constant(Self.elements), modifierFlagsPressed: nil)
     }
 }
