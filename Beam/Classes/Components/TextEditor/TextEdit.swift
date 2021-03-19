@@ -85,8 +85,10 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     internal var popover: BidirectionalPopover?
 
     // Formatter properties
-    internal var persistentFormatter: FormatterView?
+    internal var persistentFormatter: TextFormatterView?
     internal var inlineFormatter: FormatterView?
+    internal var formatterTargetRange: Range<Int>?
+    internal var formatterTargetNode: TextNode?
     internal var isInlineFormatterHidden = true
     internal var currentTextRange: Range<Int> = 0..<0
 
@@ -122,6 +124,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         let l = CALayer()
         self.layer = l
         l.backgroundColor = NSColor.editorBackgroundColor.cgColor
+        l.masksToBounds = false
         l.addSublayer(titleLayer)
         //titleLayer.backgroundColor = NSColor.red.cgColor.copy(alpha: 0.2)
         titleLayer.backgroundColor = NSColor(white: 1, alpha: 0).cgColor
@@ -483,7 +486,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         hasFocus = false
         onEndEditing()
 
-        guard inlineFormatter?.hyperlinkView == nil else { return super.resignFirstResponder() }
+        guard (inlineFormatter as? HyperlinkFormatterView) == nil else { return super.resignFirstResponder() }
 
         rootNode.cancelSelection()
         (focusedWidget as? TextNode)?.invalidateText() // force removing the syntax highlighting

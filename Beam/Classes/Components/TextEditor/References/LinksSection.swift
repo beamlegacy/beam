@@ -26,7 +26,7 @@ class LinksSection: Widget {
     let offsetY: CGFloat = 40
 
     var titles: [String: RefNoteTitle] = [:]
-    
+
     override var open: Bool {
         didSet {
             linkLayer?.layer.isHidden = !open

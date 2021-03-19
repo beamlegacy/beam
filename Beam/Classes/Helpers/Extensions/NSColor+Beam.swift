@@ -161,15 +161,7 @@ extension NSColor {
     // Formatter View
 
     static var formatterViewBackgroundColor: NSColor {
-        return loadColor(named: "Alabaster")
-    }
-
-    static var formatterViewBackgroundColorDark: NSColor {
-        return loadColor(named: "FormatterBackgroundColorDark")
-    }
-
-    static var formatterViewBackgroundColorLight: NSColor {
-        return loadColor(named: "FormatterBackgroundColorLight")
+        return NSColor(withLightColor: NSColor.white.withAlphaComponent(0.92), darkColor: loadColor(named: "Nero").withAlphaComponent(0.92))
     }
 
     static var formatterViewBackgroundHoverColor: NSColor {
@@ -180,8 +172,8 @@ extension NSColor {
         return loadColor(named: "FormatterBorderColor")
     }
 
-    static var formatterShadowColor: NSColor {
-        return loadColor(named: "FormatterShadowColor")
+    static var formatterViewShadowColor: NSColor {
+        return NSColor(withLightColor: NSColor.black.withAlphaComponent(0.070), darkColor: NSColor.black.withAlphaComponent(0.4))
     }
 
     static var formatterIconColor: NSColor {
@@ -200,12 +192,16 @@ extension NSColor {
         return loadColor(named: "FormatterItemHoverColor")
     }
 
-    static var hyperlinkTextFielDefaultdColor: NSColor {
+    static var hyperlinkTextFielColor: NSColor {
         return loadColor(named: "Niobium")
     }
 
-    static var hyperlinkTextFielNoEmptydColor: NSColor {
+    static var hyperlinkTextFielPlaceholderColor: NSColor {
         return loadColor(named: "LightStoneGray")
+    }
+
+    static var hyperlinkTextFielSeparatorColor: NSColor {
+        return loadColor(named: "Mercury")
     }
 
     // Other
