@@ -454,7 +454,6 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
     // MARK: HyperlinkFormatterView delegate
     func hyperlinkFormatterView(_ hyperlinkFormatterView: HyperlinkFormatterView, didFinishEditing newUrl: String?, newTitle: String?, originalUrl: String?) {
 
-        // TODO: Not necessarily the focusedWidget, can be the hovered widget
         guard let node = formatterTargetNode ?? (focusedWidget as? TextNode),
               let noteTitle = node.elementNoteTitle else {
                 self.showOrHideInlineFormatter(isPresent: false)
@@ -468,6 +467,7 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
                 let (_, validUrl) = link.validUrl()
                 attributes = [BeamText.Attribute.link(validUrl)]
             }
+            var newCursorPosition = editingRange.upperBound
 
             if let newTitle = newTitle {
                 // edited title & maybe url
@@ -475,40 +475,25 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
                 let alwaysATitle = !newTitle.isEmpty ? newTitle : fallbackTitle
                 let newBeamText = BeamText(text: alwaysATitle, attributes: attributes)
                 let replaceText = ReplaceText(in: node.element.id, of: noteTitle, for: editingRange, at: editingRange.upperBound, with: newBeamText)
+                newCursorPosition = editingRange.lowerBound + newBeamText.wholeRange.count
                 rootNode.note?.cmdManager.run(command: replaceText, on: rootNode.cmdContext)
-            } else if let newUrl = newUrl {
+            } else if newUrl != nil {
                 // edited only url
                 if originalUrl != nil {
                     // on existing link
-                    updateExistingLink(in: node, atRange: editingRange, link: newUrl, oldLink: originalUrl)
+                    let currentTitle = node.element.text.rangeAt(position: editingRange.upperBound).string
+                    let newBeamText = BeamText(text: currentTitle, attributes: attributes)
+                    let replaceText = ReplaceText(in: node.element.id, of: noteTitle, for: editingRange, at: editingRange.upperBound, with: newBeamText)
+                    rootNode.note?.cmdManager.run(command: replaceText, on: rootNode.cmdContext)
                 } else {
                     // on simple text
                     let changeFormat = FormattingText(in: node.element.id, of: noteTitle, for: nil, with: attributes.first, for: editingRange, isActive: false)
                     rootNode.note?.cmdManager.run(command: changeFormat, on: rootNode.cmdContext)
                 }
             }
+            window?.makeFirstResponder(self)
+            rootNode.focus(widget: node, cursorPosition: newCursorPosition)
         }
         self.showOrHideInlineFormatter(isPresent: false)
-    }
-
-    private func updateExistingLink(in node: TextNode, atRange: Range<Int>, link: String, oldLink: String? = nil) {
-        // TODO: replace with cmdManager for undo support
-        node.text.ranges.forEach { range in
-            range.attributes.forEach { attribute in
-                switch attribute {
-                case .link(let url):
-                    let rangeObject = (range.position..<range.end)
-                    if url == oldLink, rangeObject.contains(atRange.lowerBound) {
-                        if !link.isEmpty {
-                            node.text.setAttributes([.link(link)], to: rangeObject)
-                        } else {
-                            node.text.removeAttributes([.link(url)], from: rangeObject)
-                        }
-                    }
-                default:
-                    break
-                }
-            }
-        }
     }
 }

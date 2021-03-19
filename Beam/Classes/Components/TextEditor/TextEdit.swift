@@ -965,13 +965,22 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         }
     }
 
+    // these undo/redo methods override the subviews undoManagers behavior
+    // if we're not actually the first responder, let's just forward it.
     @IBAction func undo(_ sender: Any) {
+        if let firstResponder = window?.firstResponder, let undoManager = firstResponder.undoManager, firstResponder != self {
+            undoManager.undo()
+            return
+        }
         _ = rootNode.note?.cmdManager.undo(context: rootNode)
     }
 
     @IBAction func redo(_ sender: Any) {
+        if let firstResponder = window?.firstResponder, let undoManager = firstResponder.undoManager, firstResponder != self {
+            undoManager.redo()
+            return
+        }
         _ = rootNode.note?.cmdManager.redo(context: rootNode)
-
     }
 
     // State to detect shortcuts: @ / [[ ]]
