@@ -31,9 +31,19 @@ class ReparentElement: TextEditorCommand {
             let previousParent = elementInstance.element.parent
         else { return false }
 
+        // Bread Crumbs are a bitch
+        if let breadCrumb = context?.parent as? BreadCrumb, let node = context?.nodeFor(elementInstance.element) {
+            breadCrumb.removeChild(node)
+        }
+
         previousParentId = previousParent.id
         previousIndexInParent = elementInstance.element.indexInParent
         newParentInstance.element.insert(elementInstance.element, at: newIndexInParent)
+
+        if let newParentNode = context?.nodeFor(newParentInstance.element) {
+            newParentNode.open = true
+        }
+
         return true
     }
 
@@ -44,7 +54,17 @@ class ReparentElement: TextEditorCommand {
               let previousElementInstance = getElement(for: noteName, and: previousParentId)
         else { return false }
 
+        // Bread Crumbs are a bitch
+        if let breadCrumb = context?.parent as? BreadCrumb, let node = context?.nodeFor(elementInstance.element) {
+            breadCrumb.removeChild(node)
+        }
+
         previousElementInstance.element.insert(elementInstance.element, at: indexInParent)
+
+        if let newParentNode = context?.nodeFor(previousElementInstance.element) {
+            newParentNode.open = true
+        }
+
         return true
     }
 }

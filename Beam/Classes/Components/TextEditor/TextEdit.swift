@@ -515,7 +515,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                 return
             }
             rootNode.eraseSelection()
-            let insertNode = InsertNode(in: node.elementId, of: noteTitle, with: rootNode.cursorPosition)
+            let insertNode = InsertNode(in: node.elementId, of: noteTitle, with: rootNode.cursorPosition, asChild: node.parent as? BreadCrumb != nil)
             rootNode.note?.cmdManager.run(command: insertNode, on: rootNode.cmdContext)
             scrollToCursorAtLayout = true
             cleanPersistentFormatter()
@@ -939,7 +939,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                     } else {
                         guard let node = focusedWidget as? TextNode,
                               let noteTitle = node.elementNoteTitle else { continue }
-                        let insertNode = InsertNode(in: node.elementId, of: noteTitle, with: nil)
+                        let insertNode = InsertNode(in: node.elementId, of: noteTitle, with: nil, asChild: false)
                         rootNode.note?.cmdManager.run(command: insertNode, on: rootNode.cmdContext)
                         guard let newNode = focusedWidget as? TextNode else { continue }
                         let bText = BeamText(text: str, attributes: [])
