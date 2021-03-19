@@ -76,6 +76,24 @@ struct Configuration {
         }
     }
 
+    static var stateRestorationEnabledDefault = false
+    static private var stateRestorationEnabledKey = "stateRestorationEnabled"
+    static var stateRestorationEnabled: Bool {
+        get {
+            if UserDefaults.standard.object(forKey: stateRestorationEnabledKey) != nil {
+                return UserDefaults.standard.bool(forKey: stateRestorationEnabledKey)
+            }
+
+            return stateRestorationEnabledDefault
+        }
+        set {
+            if newValue != stateRestorationEnabled {
+                UserDefaults.standard.set(newValue, forKey: stateRestorationEnabledKey)
+            }
+        }
+    }
+
+
     static func reset() {
         UserDefaults.standard.removeObject(forKey: publicHostnameKey)
         UserDefaults.standard.removeObject(forKey: apiHostnameKey)

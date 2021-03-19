@@ -17,6 +17,19 @@ public class TextNode: Widget {
         subscribeToElement(element)
     }}
 
+    var elementId: UUID {
+        unproxyElement.id
+    }
+
+    var elementNoteTitle: String? {
+        unproxyElement.note?.title
+    }
+
+    var unproxyElement: BeamElement {
+        guard let elem = element as? ProxyElement else { return element }
+        return elem.proxy
+    }
+
     var elementScope = Set<AnyCancellable>()
     var elementText = BeamText()
     var elementKind = ElementKind.bullet
@@ -272,6 +285,8 @@ public class TextNode: Widget {
         context.beginPath()
         let startLine = lineAt(index: start)!
         let endLine = lineAt(index: end)!
+        let lineCount = layout!.lines.count
+        guard lineCount > startLine, lineCount > endLine else { return }
         let line1 = layout!.lines[startLine]
         let line2 = layout!.lines[endLine]
         let xStart = offsetAt(index: start)
@@ -667,36 +682,36 @@ public class TextNode: Widget {
     }
 
     override func mouseMoved(mouseInfo: MouseInfo) -> Bool {
-        cursor = nil
-
+        let isMouseInContentFrame = contentsFrame.contains(mouseInfo.position)
         let mouseHasChangedTextPosition = lastHoverMouseInfo?.position != mouseInfo.position
-        if mouseHasChangedTextPosition && contentsFrame.contains(mouseInfo.position) {
+        if mouseHasChangedTextPosition && isMouseInContentFrame {
             let link = linkAt(point: mouseInfo.position)
             let internalLink = internalLinkAt(point: mouseInfo.position)
 
             if link != nil {
-                let currentNode = widgetAt(point: mouseInfo.position) as? TextNode
-                let frame = linkFrameAt(point: mouseInfo.position)
-
-                cursor = .pointingHand
-                invalidateText()
-                editor.updateInlineFormaterOnHover(
-                    currentNode,
-                    mouseInfo.globalPosition,
-                    frame,
-                    link
-                )
-
-            } else if internalLink != nil {
-                cursor = editor.inlineFormatter?.hyperlinkView != nil  ? .arrow : .pointingHand
+                let (linkRange, linkFrame) = linkRangeAt(point: mouseInfo.position)
+                if let linkRange = linkRange, let currentNode = widgetAt(point: mouseInfo.position) as? TextNode {
+                    invalidateText()
+                    cursor = .pointingHand
+                    if let positionInText = positionAt(point: mouseInfo.position, inString: currentNode.attributedString), positionInText == linkRange.end {
+                        editor.linkStartedHovering(
+                            for: currentNode,
+                            targetRange: linkRange.position ..< linkRange.end,
+                            frame: linkFrame,
+                            url: link,
+                            linkTitle: linkRange.string
+                        )
+                    }
+                }
             } else {
-                cursor = .iBeam
-                editor.dismissHyperlinkView()
+                cursor = internalLink != nil ? .pointingHand : .iBeam
+                editor.linkStoppedHovering()
                 invalidateText()
             }
         }
         lastHoverMouseInfo = mouseInfo
 
+        // action layer handling
         guard let actionLayer = actionLayer,
               root?.state.nodeSelection == nil else {
             resetActionLayers()
@@ -704,20 +719,21 @@ public class TextNode: Widget {
         }
 
         let position = actionLayerMousePosition(from: mouseInfo)
+        let isMouseInContainerWithActionLayer = contentsFrame.contains(position)
         let hasTextAndEditable = !text.isEmpty && isEditing && editor.hasFocus
 
         // Show image & text layers
-        if hasTextAndEditable && contentsFrame.contains(position) && actionLayer.frame.contains(position) {
+        if hasTextAndEditable && isMouseInContainerWithActionLayer && actionLayer.frame.contains(position) {
             showHoveredActionLayers(true)
             cursor = .arrow
             return true
-        } else if hasTextAndEditable && contentsFrame.contains(position) {
+        } else if hasTextAndEditable && isMouseInContainerWithActionLayer {
             showHoveredActionLayers(false)
             return true
         }
 
         // Reset action layers
-        if !contentsFrame.contains(position) && isEditing && editor.hasFocus {
+        if !isMouseInContainerWithActionLayer && isEditing && editor.hasFocus {
             showHoveredActionLayers(false)
             return true
         }
@@ -839,24 +855,25 @@ public class TextNode: Widget {
         }
     }
 
-    public func linkFrameAt(point: NSPoint) -> NSRect? {
-        guard layout != nil, !layout!.lines.isEmpty else { return nil }
+    func linkRangeAt(point: NSPoint) -> (BeamText.Range?, NSRect?) {
+        guard layout != nil, !layout!.lines.isEmpty else { return (nil, nil) }
         let line = lineAt(point: point)
-        guard line >= 0 else { return nil }
+        guard line >= 0 else { return (nil, nil) }
         let l = layout!.lines[line]
-        guard let pos = positionAt(point: point, inString: attributedString) else { return nil }
+        guard let pos = positionAt(point: point, inString: attributedString) else { return (nil, nil) }
 
         let range = elementText.rangeAt(position: pos)
         guard nil != range.attributes.firstIndex(where: { attrib -> Bool in
             attrib.rawValue == BeamText.Attribute.link("").rawValue
-        }) else { return nil }
+        }) else { return (nil, nil) }
 
         let start = range.position
         let end = range.end
         let startOffset = offsetAt(index: start)
         let endOffset = offsetAt(index: end)
 
-        return NSRect(x: startOffset, y: l.frame.minY, width: endOffset - startOffset, height: l.frame.height)
+        let linkFrame = NSRect(x: startOffset, y: l.frame.minY, width: endOffset - startOffset, height: l.frame.height)
+        return (range, linkFrame)
     }
 
     public func internalLinkAt(point: NSPoint) -> String? {

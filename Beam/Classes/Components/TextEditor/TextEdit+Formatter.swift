@@ -12,23 +12,25 @@ extension BeamTextEdit {
 
     // MARK: - Properties
     private static let xPosInlineFormatter: CGFloat = 32
-    private static let yPosInlineFormatter: CGFloat = 60
+    private static let yPosInlineFormatter: CGFloat = 28
     private static let bottomConstraint: CGFloat = -25
     private static let inlineFormatterType: [FormatterType] = [.h1, .h2, .bullet, .checkmark, .bold, .italic, .link]
     private static let persistentFormatterType: [FormatterType] = [.h1, .h2, .quote, .code, .bold, .italic, .strikethrough]
 
-    private static var isSelectableContent = true
     private static var isExitingLink = false
     private static var bottomAnchor: NSLayoutConstraint?
     private static var centerXAnchor: NSLayoutConstraint?
     private static var debounceKeyEventTimer: Timer?
     private static var debounceMouseEventTimer: Timer?
 
+    private static var formatterPresentDelay: TimeInterval = 0.7
+    private static var formatterDismissDelay: TimeInterval = 0.4
+
     // MARK: - UI
     internal func initPersistentFormatterView() {
         guard persistentFormatter == nil else { return }
 
-        persistentFormatter = FormatterView(viewType: .persistent)
+        persistentFormatter = TextFormatterView(viewType: .persistent)
         persistentFormatter?.alphaValue = 0
 
         guard let formatterView = persistentFormatter,
@@ -51,50 +53,23 @@ extension BeamTextEdit {
     internal func initInlineFormatterView(isHyperlinkView: Bool = false) {
         guard inlineFormatter == nil else { return }
 
-        inlineFormatter = FormatterView(viewType: .inline)
-
-        guard let formatterView = inlineFormatter else { return }
-
-        formatterView.items = BeamTextEdit.inlineFormatterType
-        formatterView.didSelectFormatterType = {[unowned self] (type, isActive) -> Void in
-            self.selectFormatterAction(type, isActive)
-        }
-
-        formatterView.didPressValidLink = {[unowned self] link, oldLink -> Void in
-            let (isValidUrl, validUrl) = link.validUrl()
-
-            guard let node = focusedWidget as? TextNode, isValidUrl,
-                  let noteTitle = node.root?.note?.title else {
-                    self.showOrHideInlineFormatter(isPresent: false)
-                    return
-            }
-
-            if node.selectedTextRange.isEmpty || !oldLink.isEmpty {
-                updateNodeWithLink(node: node, isDeleteMode: false, link: validUrl, oldLink)
-            } else {
-                let changeFormat = FormattingText(in: node.element.id, of: noteTitle, for: nil, with: .link(validUrl), for: node.selectedTextRange, isActive: false)
-                rootNode.note?.cmdManager.run(command: changeFormat, on: rootNode)
-            }
-
-            self.showOrHideInlineFormatter(isPresent: false)
-        }
-
-        formatterView.didPressDeleteLink = {[unowned self] (hyperlink) -> Void in
-            guard let node = focusedWidget as? TextNode else { return }
-
-            updateNodeWithLink(node: node, isDeleteMode: true, link: hyperlink)
-            self.showOrHideInlineFormatter(isPresent: false)
-        }
-
-        formatterView.alphaValue = 0
-        formatterView.frame = NSRect(x: 0, y: 0, width: formatterView.idealSize.width, height: formatterView.idealSize.height)
-
         if isHyperlinkView {
-            formatterView.showHyperLinkView()
+            let hyperlinkView = HyperlinkFormatterView(viewType: .inline)
+            hyperlinkView.delegate = self
+            inlineFormatter = hyperlinkView
+        } else {
+            let formatterView = TextFormatterView(viewType: .inline)
+            formatterView.items = BeamTextEdit.inlineFormatterType
+            formatterView.didSelectFormatterType = {[unowned self] (type, isActive) -> Void in
+                self.selectFormatterAction(type, isActive)
+            }
+            inlineFormatter = formatterView
         }
-
-        formatterView.layer?.zPosition = 1
+        guard let formatterView = inlineFormatter else { return }
+        let idealSize = formatterView.idealSize
+        formatterView.frame = NSRect(x: 0, y: 0, width: idealSize.width, height: idealSize.height)
         addSubview(formatterView)
+        formatterView.layer?.zPosition = 1
     }
 
     // MARK: - Methods
@@ -104,30 +79,25 @@ extension BeamTextEdit {
         persistentFormatter.wantsLayer = true
         persistentFormatter.layoutSubtreeIfNeeded()
 
-        NSAnimationContext.runAnimationGroup ({ ctx in
-            ctx.allowsImplicitAnimation = true
-            ctx.duration = 0.3
-
-            persistentFormatter.alphaValue = isPresent ? 1 : 0
-            persistentFormatter.layoutSubtreeIfNeeded()
-        }, completionHandler: nil)
+        if isPresent {
+            persistentFormatter.animateOnAppear()
+        } else {
+            persistentFormatter.animateOnDisappear()
+        }
     }
 
     internal func showOrHideInlineFormatter(isPresent: Bool, isDragged: Bool = false) {
         guard let inlineFormatter = inlineFormatter else { return }
 
-        // Alpha animation
-        NSAnimationContext.beginGrouping()
-        NSAnimationContext.current.duration = 0.3
-            inlineFormatter.animator().alphaValue = isPresent ? 1 : 0
-            isInlineFormatterHidden = isPresent ? false : true
-
-            if !isPresent && isDragged { dismissFormatterView(inlineFormatter) }
-
-        NSAnimationContext.endGrouping()
-        NSAnimationContext.current.completionHandler = { [weak self] in
-            guard let self = self else { return }
-            if !isPresent && !isDragged { self.dismissFormatterView(inlineFormatter) }
+        inlineFormatter.wantsLayer = true
+        if isPresent {
+            inlineFormatter.animateOnAppear()
+        } else {
+            inlineFormatter.animateOnDisappear { [weak self] in
+                guard let self = self else { return }
+                if !isPresent && !isDragged { self.dismissFormatterView(inlineFormatter) }
+            }
+            if isDragged { self.dismissFormatterView(inlineFormatter) }
         }
     }
 
@@ -153,37 +123,7 @@ extension BeamTextEdit {
             showOrHidePersistentFormatter(isPresent: true)
         }
 
-        updateInlineFormatterFrame()
-    }
-
-    internal func updateInlineFormaterOnHover(_ currentNode: TextNode?, _ position: NSPoint, _ frame: NSRect?, _ url: URL?) {
-        initInlineFormatterView(isHyperlinkView: true)
-
-        if let debounce = BeamTextEdit.debounceMouseEventTimer {
-            debounce.invalidate()
-            if !debounce.isValid { BeamTextEdit.isExitingLink = true }
-        }
-
-        guard let view = inlineFormatter,
-              let hyperlinkView = view.hyperlinkView,
-              let node = currentNode,
-              let frame = frame,
-              let url = url,
-              isInlineFormatterHidden else { return }
-
-        showOrHideInlineFormatter(isPresent: true)
-
-        let trackingArea = NSTrackingArea(
-            rect: hyperlinkView.bounds,
-            options: [.activeAlways, .mouseEnteredAndExited],
-            owner: self, userInfo: nil
-        )
-
-        hyperlinkView.addTrackingArea(trackingArea)
-
-        view.urlValue = url.absoluteString
-        view.frame.origin.y = (frame.maxY + node.offsetInDocument.y) - 55
-        view.frame.origin.x = 60 + frame.maxX / 2
+        moveInlineFormatterAboveSelection()
     }
 
     // swiftlint:disable:next cyclomatic_complexity
@@ -253,7 +193,7 @@ extension BeamTextEdit {
 
         selectFormatterAction(type, hasAttribute)
 
-        if let inlineFormatter = inlineFormatter {
+        if let inlineFormatter = inlineFormatter as? TextFormatterView {
             inlineFormatter.setActiveFormatter(type)
         }
 
@@ -280,6 +220,10 @@ extension BeamTextEdit {
             updateAttributeState(with: node, attribute: .emphasis, isActive: isActive)
         case .strikethrough:
             updateAttributeState(with: node, attribute: .strikethrough, isActive: isActive)
+        case .link:
+            dismissFormatterView(inlineFormatter)
+            showHyperlinkFormatter(for: node, targetRange: selectedTextRange, frame: .zero, url: nil, linkTitle: selectedText, debounce: false)
+            moveInlineFormatterAboveSelection()
         default:
             break
         }
@@ -291,44 +235,21 @@ extension BeamTextEdit {
 
         if view == persistentFormatter {
             persistentFormatter = nil
-        } else {
+        } else if view == inlineFormatter {
             isInlineFormatterHidden = true
             inlineFormatter = nil
             cursorStartPosition = 0
-            BeamTextEdit.isSelectableContent = true
-            BeamTextEdit.debounceMouseEventTimer = nil
-        }
-    }
-
-    internal func dismissHyperlinkView() {
-        guard let view = inlineFormatter,
-              view.hyperlinkView != nil else { return }
-
-        if !view.urlValue.isEmpty && BeamTextEdit.debounceMouseEventTimer?.isValid == nil {
-            initDebounceMouseEvent()
-        }
-
-        if !view.urlValue.isEmpty && BeamTextEdit.isExitingLink {
-            BeamTextEdit.isExitingLink = false
-            initDebounceMouseEvent()
+            formatterTargetRange = nil
+            formatterTargetNode = nil
+            clearDebounceTimer()
         }
     }
 
     // MARK: Mouse Events
-    public override func mouseEntered(with event: NSEvent) {
-        super.mouseEntered(with: event)
-        guard inlineFormatter?.hyperlinkView != nil else { return }
-        BeamTextEdit.debounceMouseEventTimer?.invalidate()
-    }
 
     public override func mouseExited(with event: NSEvent) {
         super.mouseExited(with: event)
-        guard let hyperlinkView = inlineFormatter?.hyperlinkView else { return }
-
-        // Init debounce only when the textefield is not empty
-        if !hyperlinkView.hyperlinkTextField.stringValue.isEmpty {
-            initDebounceMouseEvent()
-        }
+        dismissHyperlinkView()
     }
 
     // MARK: Private Methods (Text Formatting)
@@ -338,17 +259,17 @@ extension BeamTextEdit {
             guard let nodeSelection = rootNode.state.nodeSelection else { return }
 
             nodeSelection.nodes.forEach({ node in
-                if let noteTitle = node.root?.note?.title {
-                    let changeFormat = FormattingText(in: node.element.id, of: noteTitle, for: kind, with: nil, for: nil, isActive: isActive)
-                    rootNode.note?.cmdManager.run(command: changeFormat, on: rootNode)
+                if let noteTitle = node.elementNoteTitle {
+                    let changeFormat = FormattingText(in: node.elementId, of: noteTitle, for: kind, with: nil, for: nil, isActive: isActive)
+                    rootNode.note?.cmdManager.run(command: changeFormat, on: rootNode.cmdContext)
                 }
 
             })
             rootNode.note?.cmdManager.endGroup()
         } else {
-            guard let noteTitle = node.root?.note?.title else { return }
-            let changeFormat = FormattingText(in: node.element.id, of: noteTitle, for: kind, with: nil, for: nil, isActive: isActive)
-            rootNode.note?.cmdManager.run(command: changeFormat, on: rootNode)
+            guard let noteTitle = node.elementNoteTitle else { return }
+            let changeFormat = FormattingText(in: node.elementId, of: noteTitle, for: kind, with: nil, for: nil, isActive: isActive)
+            rootNode.note?.cmdManager.run(command: changeFormat, on: rootNode.cmdContext)
         }
     }
 
@@ -359,18 +280,18 @@ extension BeamTextEdit {
             rootNode.note?.cmdManager.beginGroup(with: "UpdateAttributes")
 
             nodeSelection.nodes.forEach({ node in
-                if let noteTitle = node.root?.note?.title {
-                    let changeAttributes = FormattingText(in: node.element.id, of: noteTitle, for: nil, with: attribute, for: 0..<node.element.text.text.count, isActive: isActive)
-                    rootNode.note?.cmdManager.run(command: changeAttributes, on: rootNode)
+                if let noteTitle = node.elementNoteTitle {
+                    let changeAttributes = FormattingText(in: node.elementId, of: noteTitle, for: nil, with: attribute, for: 0..<node.element.text.text.count, isActive: isActive)
+                    rootNode.note?.cmdManager.run(command: changeAttributes, on: rootNode.cmdContext)
                 }
 
             })
             rootNode.note?.cmdManager.endGroup()
         } else if rootNode.textIsSelected {
-            guard let noteTitle = node.root?.note?.title else { return }
+            guard let noteTitle = node.elementNoteTitle else { return }
 
-            let changeAttributes = FormattingText(in: node.element.id, of: noteTitle, for: nil, with: attribute, for: node.selectedTextRange, isActive: isActive)
-            rootNode.note?.cmdManager.run(command: changeAttributes, on: rootNode)
+            let changeAttributes = FormattingText(in: node.elementId, of: noteTitle, for: nil, with: attribute, for: node.selectedTextRange, isActive: isActive)
+            rootNode.note?.cmdManager.run(command: changeAttributes, on: rootNode.cmdContext)
         } else {
             if let index = rootNode?.state.attributes.firstIndex(of: attribute),
                ((rootNode?.state.attributes.contains(attribute)) != nil), isActive {
@@ -382,7 +303,7 @@ extension BeamTextEdit {
     }
 
     private func setActiveFormatters(_ types: [FormatterType]) {
-        if let inlineFormatter = inlineFormatter {
+        if let inlineFormatter = inlineFormatter as? TextFormatterView {
             inlineFormatter.setActiveFormmatters(types)
         }
 
@@ -391,25 +312,8 @@ extension BeamTextEdit {
         }
     }
 
-    private func updateNodeWithLink(node: TextNode, isDeleteMode: Bool, link: String, _ oldLink: String? = nil) {
-        node.text.ranges.forEach { range in
-            range.attributes.forEach { attribute in
-                switch attribute {
-                case .link(let url):
-                    if isDeleteMode && url == link {
-                        node.text.removeAttributes([.link("")], from: range.position..<range.end)
-                    } else if url == oldLink {
-                        node.text.setAttributes([.link(link)], to: range.position..<range.end)
-                    }
-                default:
-                    break
-                }
-            }
-        }
-    }
-
     // MARK: Private Methods (UI)
-    private func updateInlineFormatterFrame() {
+    private func moveInlineFormatterAboveSelection() {
         guard let node = focusedWidget as? TextNode,
               let view = inlineFormatter,
               let line = node.lineAt(index: node.cursorPosition),
@@ -417,15 +321,16 @@ extension BeamTextEdit {
 
         let leftMargin: CGFloat = centerText ? 145 : 200 // Value to move the inline formatter to the left
         let middleFrame = (frame.width - textWidth) / 2
+        let idealSize = view.idealSize
         let (xOffset, rect) = node.offsetAndFrameAt(index: node.cursorPosition)
-        let yPos = rect.maxY + node.offsetInDocument.y - BeamTextEdit.yPosInlineFormatter
+        let yPos = rect.maxY + node.offsetInDocument.y - idealSize.height - BeamTextEdit.yPosInlineFormatter
         let xPos = xOffset + (centerText ? middleFrame - leftMargin : BeamTextEdit.xPosInlineFormatter) + childInsetFrom(node)
 
         view.frame.origin.x = rootNode.state.nodeSelection != nil ? (centerText ? middleFrame : leftMargin) : xPos
 
         // Update Y position only if the current selected line is equal to selected line
         if !(node.selectedTextRange.upperBound > node.selectedTextRange.lowerBound && currentLine < line) {
-            view.frame.origin.y = rootNode.state.nodeSelection != nil ? node.offsetInDocument.y - 40 : yPos
+            view.frame.origin.y = rootNode.state.nodeSelection != nil ? node.offsetInDocument.y - idealSize.height - 8 : yPos
         }
     }
 
@@ -460,13 +365,150 @@ extension BeamTextEdit {
         return childInset
     }
 
-    private func initDebounceMouseEvent() {
-        BeamTextEdit.debounceMouseEventTimer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false, block: { [weak self] (_) in
-            guard let self = self else { return }
-
-            self.showOrHideInlineFormatter(isPresent: false)
+    private func clearDebounceTimer() {
+        if let debounce = BeamTextEdit.debounceMouseEventTimer {
+            debounce.invalidate()
+            if !debounce.isValid { BeamTextEdit.isExitingLink = true }
             BeamTextEdit.debounceMouseEventTimer = nil
             BeamTextEdit.isExitingLink = false
+        }
+    }
+
+    private func debounceShowHyperlinkFormatter(_ show: Bool, completionHandler: (() -> Void)? = nil) {
+        BeamTextEdit.isExitingLink = !show
+        let delay = show ? Self.formatterPresentDelay : Self.formatterDismissDelay
+        BeamTextEdit.debounceMouseEventTimer = Timer.scheduledTimer(withTimeInterval: delay, repeats: false, block: { [weak self] (_) in
+            guard let self = self else { return }
+
+            if show || self.inlineFormatter?.isMouseInsideView == false {
+                self.showOrHideInlineFormatter(isPresent: show)
+                completionHandler?()
+            }
+            self.clearDebounceTimer()
         })
+    }
+}
+
+// MARK: - HyperlinkFormatterView handling
+extension BeamTextEdit: HyperlinkFormatterViewDelegate {
+
+    public func linkStartedHovering(for currentNode: TextNode?, targetRange: Range<Int>, frame: NSRect?, url: URL?, linkTitle: String?) {
+        showHyperlinkFormatter(for: currentNode, targetRange: targetRange, frame: frame, url: url, linkTitle: linkTitle)
+    }
+
+    public func linkStoppedHovering() {
+        dismissHyperlinkView()
+    }
+
+    private func dismissHyperlinkView() {
+        guard let view = inlineFormatter as? HyperlinkFormatterView else { return }
+
+        let shouldDismiss = !view.hasEditedUrl()
+        if shouldDismiss {
+            clearDebounceTimer()
+            debounceShowHyperlinkFormatter(false)
+        }
+    }
+
+    private func showHyperlinkFormatter(for targetNode: TextNode?, targetRange: Range<Int>, frame: NSRect?, url: URL?, linkTitle: String?, debounce: Bool = true) {
+
+        guard inlineFormatter?.isMouseInsideView != true else { return }
+        if let currentHyperlinkView = inlineFormatter as? HyperlinkFormatterView {
+            if !currentHyperlinkView.hasEditedUrl() && targetRange != formatterTargetRange {
+                // another link view is present, dismiss it before the new one
+                clearDebounceTimer()
+                debounceShowHyperlinkFormatter(false) {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + FormatterView.disappearAnimationDuration) { [weak self] in
+                        guard let self = self else { return }
+                        self.showHyperlinkFormatter(for: targetNode, targetRange: targetRange, frame: frame, url: url, linkTitle: linkTitle, debounce: debounce)
+                    }
+                }
+                return
+            } else if !BeamTextEdit.isExitingLink {
+                return
+            }
+        }
+
+        clearDebounceTimer()
+        initInlineFormatterView(isHyperlinkView: true)
+
+        guard let hyperlinkView = inlineFormatter as? HyperlinkFormatterView,
+              let node = targetNode,
+              let frame = frame,
+              isInlineFormatterHidden else { return }
+
+        if debounce {
+            debounceShowHyperlinkFormatter(true)
+        } else {
+            showOrHideInlineFormatter(isPresent: true)
+        }
+
+        formatterTargetRange = targetRange
+        formatterTargetNode = targetNode
+        hyperlinkView.updateHyperlinkFormatterView(withUrl: url?.absoluteString, title: linkTitle)
+        let linkViewSize = hyperlinkView.idealSize
+        hyperlinkView.frame.origin.y = frame.minY + node.offsetInDocument.y - linkViewSize.height - 4
+        hyperlinkView.frame.origin.x = frame.maxX + node.offsetInDocument.x - linkViewSize.width / 2
+    }
+
+    // MARK: HyperlinkFormatterView delegate
+    func hyperlinkFormatterView(_ hyperlinkFormatterView: HyperlinkFormatterView, didFinishEditing newUrl: String?, newTitle: String?, originalUrl: String?) {
+
+        // TODO: Not necessarily the focusedWidget, can be the hovered widget
+        guard let node = formatterTargetNode ?? (focusedWidget as? TextNode),
+              let noteTitle = node.elementNoteTitle else {
+                self.showOrHideInlineFormatter(isPresent: false)
+                return
+        }
+
+        let editingRange = !node.selectedTextRange.isEmpty ? node.selectedTextRange : self.formatterTargetRange
+        if let editingRange = editingRange, !editingRange.isEmpty {
+            var attributes = rootNode.state.attributes
+            if let link = newUrl ?? originalUrl, !link.isEmpty {
+                let (_, validUrl) = link.validUrl()
+                attributes = [BeamText.Attribute.link(validUrl)]
+            }
+
+            if let newTitle = newTitle {
+                // edited title & maybe url
+                let fallbackTitle = newUrl ?? originalUrl ?? "Link"
+                let alwaysATitle = !newTitle.isEmpty ? newTitle : fallbackTitle
+                let newBeamText = BeamText(text: alwaysATitle, attributes: attributes)
+                let replaceText = ReplaceText(in: node.element.id, of: noteTitle, for: editingRange, at: editingRange.upperBound, with: newBeamText)
+                rootNode.note?.cmdManager.run(command: replaceText, on: rootNode.cmdContext)
+            } else if let newUrl = newUrl {
+                // edited only url
+                if originalUrl != nil {
+                    // on existing link
+                    updateExistingLink(in: node, atRange: editingRange, link: newUrl, oldLink: originalUrl)
+                } else {
+                    // on simple text
+                    let changeFormat = FormattingText(in: node.element.id, of: noteTitle, for: nil, with: attributes.first, for: editingRange, isActive: false)
+                    rootNode.note?.cmdManager.run(command: changeFormat, on: rootNode.cmdContext)
+                }
+            }
+        }
+        self.showOrHideInlineFormatter(isPresent: false)
+    }
+
+    private func updateExistingLink(in node: TextNode, atRange: Range<Int>, link: String, oldLink: String? = nil) {
+        // TODO: replace with cmdManager for undo support
+        node.text.ranges.forEach { range in
+            range.attributes.forEach { attribute in
+                switch attribute {
+                case .link(let url):
+                    let rangeObject = (range.position..<range.end)
+                    if url == oldLink, rangeObject.contains(atRange.lowerBound) {
+                        if !link.isEmpty {
+                            node.text.setAttributes([.link(link)], to: rangeObject)
+                        } else {
+                            node.text.removeAttributes([.link(url)], from: rangeObject)
+                        }
+                    }
+                default:
+                    break
+                }
+            }
+        }
     }
 }

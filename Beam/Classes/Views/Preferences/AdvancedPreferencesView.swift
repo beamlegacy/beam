@@ -30,6 +30,7 @@ struct AdvancedPreferencesView: View {
     @State private var networkEnabled: Bool = Configuration.networkEnabled
     @State private var encryptionEnabled = Configuration.encryptionEnabled
     @State private var privateKey = EncryptionManager.shared.privateKey().asString()
+    @State private var stateRestorationEnabled = Configuration.stateRestorationEnabled
 
     private let contentWidth: Double = 650.0
 
@@ -90,6 +91,9 @@ struct AdvancedPreferencesView: View {
                 CrashButton
                 CopyAccessToken
                 ResetPrivateKey
+            }
+            Preferences.Section(title: "State Restoration Enabled") {
+                StateRestorationEnabledButton
             }
         }
     }
@@ -152,6 +156,16 @@ struct AdvancedPreferencesView: View {
             Text("Reset Private Key").frame(minWidth: 100)
         }).disabled(!Configuration.encryptionEnabled)
     }
+
+    private var StateRestorationEnabledButton: some View {
+        Button(action: {
+            Configuration.stateRestorationEnabled = !Configuration.stateRestorationEnabled
+            stateRestorationEnabled = Configuration.stateRestorationEnabled
+        }, label: {
+            Text(String(describing: stateRestorationEnabled)).frame(minWidth: 100)
+        })
+    }
+
 }
 
 struct AdvancedPreferencesView_Previews: PreviewProvider {

@@ -179,6 +179,7 @@ GEM
     naturally (2.2.1)
     nokogiri (1.10.10)
       mini_portile2 (~> 2.4.0)
+    openssl (2.2.0)
     os (1.1.1)
     plist (3.6.0)
     pry (0.13.1)
@@ -253,6 +254,7 @@ DEPENDENCIES
   fastlane-plugin-dmg
   fastlane-plugin-sentry
   fastlane-plugin-slack_train
+  openssl
   pry
   slather
   xcode-install

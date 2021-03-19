@@ -8,6 +8,11 @@
 import Foundation
 import Combine
 
+enum BeamNoteError: Error, Equatable {
+    case saveAlreadyRunning
+    case unableToCreateDocumentStruct
+}
+
 struct VisitedPage: Codable, Identifiable {
     var id: UUID = UUID()
 
@@ -32,12 +37,13 @@ class BeamNote: BeamElement {
     @Published public private(set) var visitedSearchResults: [VisitedPage] = [] { didSet { change(.meta) } } ///< URLs whose content were used to create this note
     @Published public var browsingSessions = [BrowsingTree]() { didSet { change(.meta) } }
     private var version: Int64 = 0
+    private var savedVersion: Int64 = 0
 
     override var note: BeamNote? {
         return self
     }
 
-    var cmdManager = CommandManager<TextRoot>()
+    var cmdManager = CommandManager<Widget>()
 
     init(title: String) {
         self.title = title
@@ -110,11 +116,12 @@ class BeamNote: BeamElement {
             let data = try encoder.encode(self)
 
             return DocumentStruct(id: id,
-                                  title: title,
+                                  title: title.lowercased(),
                                   createdAt: creationDate,
                                   updatedAt: updateDate,
                                   data: data,
-                                  documentType: type == .journal ? .journal : .note)
+                                  documentType: type == .journal ? .journal : .note,
+                                  version: version)
         } catch {
             Logger.shared.logError("Unable to encode BeamNote into DocumentStruct [\(title) {\(id)}]", category: .document)
             return nil
@@ -129,6 +136,11 @@ class BeamNote: BeamElement {
         activeDocumentCancellable = documentManager.onDocumentChange(docStruct) { [unowned self] docStruct in
             DispatchQueue.main.async {
                 // reload self
+                guard self.version < docStruct.version else {
+                    //                Logger.shared.logDebug("BeamNote \(self.title) observer skipped version \(docStruct.version) (must be greater than current \(self.version))")
+                    return
+                }
+
                 changePropagationEnabled = false
                 defer {
                     changePropagationEnabled = true
@@ -146,7 +158,8 @@ class BeamNote: BeamElement {
                 self.searchQueries = newSelf.searchQueries
                 self.visitedSearchResults = newSelf.visitedSearchResults
                 self.browsingSessions = newSelf.browsingSessions
-
+                self.version = docStruct.version
+                self.savedVersion = self.version
                 recursiveUpdate(other: newSelf)
             }
         }
@@ -171,16 +184,40 @@ class BeamNote: BeamElement {
     }
 
     func save(documentManager: DocumentManager, completion: ((Result<Bool, Error>) -> Void)? = nil) {
+        guard version == savedVersion else {
+            Logger.shared.logError("Still wating for the result from the last save [\(title) {\(id)} - saved version \(savedVersion) / current \(version)]", category: .document)
+            completion?(.failure(BeamNoteError.saveAlreadyRunning))
+            return
+        }
         guard let documentStruct = documentStruct else {
             Logger.shared.logError("Unable to find active document struct [\(title) {\(id)}]", category: .document)
-            completion?(.success(false))
+            completion?(.failure(BeamNoteError.unableToCreateDocumentStruct))
             return
         }
 
-        Logger.shared.logDebug("BeamNote wants to save: \(title)", category: .document)
-        documentManager.saveDocument(documentStruct, completion: { result in
+        Logger.shared.logInfo("BeamNote wants to save: \(title)", category: .document)
+        let newDoc = documentManager.saveDocument(documentStruct, completion: { [weak self] result in
+            if let self = self {
+                switch result {
+                case .success(true):
+                    self.savedVersion = self.version
+                    self.pendingSave = 0
+
+                case .failure(BeamNoteError.saveAlreadyRunning):
+                    self.pendingSave += 1
+
+                default:
+                    self.version = self.savedVersion
+                    Logger.shared.logError("Saving note \(self.title) failed", category: .document)
+                    if self.pendingSave > 0 {
+                        Logger.shared.logDebug("Trying again: Saving note \(self.title) as there were \(self.pendingSave) pending save operations", category: .document)
+                        self.save(documentManager: documentManager, completion: completion)
+                    }
+                }
+            }
             completion?(result)
         })
+        version = newDoc.version
     }
 
     var isTodaysNote: Bool { (type == .journal) && (self === AppDelegate.main.data.todaysNote) }
@@ -202,7 +239,7 @@ class BeamNote: BeamElement {
     }
 
     static private func getFetchedNote(_ title: String) -> BeamNote? {
-        return Self.fetchedNotes[title]?.ref
+        return Self.fetchedNotes[title.lowercased()]?.ref
     }
 
     private func getFetchedNote(_ title: String) -> BeamNote? {
@@ -212,6 +249,8 @@ class BeamNote: BeamElement {
     private static func instanciateNote(_ documentManager: DocumentManager, _ documentStruct: DocumentStruct, keepInMemory: Bool = true) throws -> BeamNote {
         let decoder = JSONDecoder()
         let note = try decoder.decode(BeamNote.self, from: documentStruct.data)
+        note.version = documentStruct.version
+        note.savedVersion = note.version
         note.updateDate = documentStruct.updatedAt
         if keepInMemory {
             appendToFetchedNotes(note)
@@ -226,7 +265,7 @@ class BeamNote: BeamElement {
         }
 
         // Is the note in the document store?
-        guard let doc = documentManager.loadDocumentByTitle(title: title) else {
+        guard let doc = documentManager.loadDocumentByTitle(title: title.lowercased()) else {
             return nil
         }
 
@@ -264,8 +303,10 @@ class BeamNote: BeamElement {
         return note
     }
 
+    var pendingSave: Int = 0
+
     static func appendToFetchedNotes(_ note: BeamNote) {
-        fetchedNotes[note.title] = WeakReference<BeamNote>(note)
+        fetchedNotes[note.title.lowercased()] = WeakReference<BeamNote>(note)
         fetchedNotesCancellables.removeValue(forKey: note.title)
 
         fetchedNotesCancellables[note.title] =
@@ -281,7 +322,7 @@ class BeamNote: BeamElement {
             }
         note.observeDocumentChange(documentManager: AppDelegate.main.data.documentManager)
 
-        fetchedNotes[note.title] = WeakReference(note)
+        fetchedNotes[note.title.lowercased()] = WeakReference(note)
     }
 
     static func clearCancellables() {
@@ -328,7 +369,7 @@ class BeamNote: BeamElement {
     }
 
     static func detectLinks(in noteName: String, to allNotes: [String], with documentManager: DocumentManager) {
-        guard let doc = documentManager.loadDocByTitleInBg(title: noteName) else {
+        guard let doc = documentManager.loadDocByTitleInBg(title: noteName.lowercased()) else {
             return
         }
 
@@ -386,7 +427,7 @@ class BeamNote: BeamElement {
         for link in references {
             guard let note: BeamNote = {
                 notes[link.noteName] ?? {
-                    guard let doc = documentManager.loadDocumentByTitle(title: link.noteName) else {
+                    guard let doc = documentManager.loadDocumentByTitle(title: link.noteName.lowercased()) else {
                         return nil
                     }
 
@@ -417,7 +458,7 @@ class BeamNote: BeamElement {
         for ref in references {
             guard let note: BeamNote = {
                 notes[ref.noteName] ?? {
-                    guard let doc = documentManager.loadDocumentByTitle(title: ref.noteName) else {
+                    guard let doc = documentManager.loadDocumentByTitle(title: ref.noteName.lowercased()) else {
                         return nil
                     }
 
@@ -495,3 +536,5 @@ class BeamNote: BeamElement {
         lock.writeUnlock()
     }
 }
+
+// swiftlint:enable file_length

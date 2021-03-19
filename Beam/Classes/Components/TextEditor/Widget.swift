@@ -363,7 +363,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         p.invalidateLayout()
     }
 
-    func invalidate(_ rect: NSRect? = nil) {
+    func invalidate() {
         guard !layer.needsDisplay() else { return }
         layer.setNeedsDisplay()
     }
@@ -874,13 +874,21 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         }
     }
 
+    func proxyFor(_ element: BeamElement) -> ProxyElement? {
+        return parent?.proxyFor(element)
+    }
+
+    func nodeFor(_ element: BeamElement) -> TextNode? {
+        return parent?.nodeFor(element)
+    }
+
     func nodeFor(_ element: BeamElement, withParent: Widget) -> TextNode {
-        guard let parent = parent else { fatalError("Trying to access element that is not corrected to root") }
+        guard let parent = parent else { fatalError("Trying to access element that is not connected to root") }
         return parent.nodeFor(element, withParent: withParent)
     }
 
     func removeNode(_ node: TextNode) {
-        guard let parent = parent else { Logger.shared.logError("Trying to access element that is not corrected to root", category: .document); return }
+        guard let parent = parent else { Logger.shared.logError("Trying to access element that is not connected to root", category: .document); return }
         parent.removeNode(node)
     }
 

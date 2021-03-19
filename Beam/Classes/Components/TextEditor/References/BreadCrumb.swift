@@ -18,7 +18,6 @@ class BreadCrumb: Widget {
     var crumbArrowLayers = [CALayer]()
     var selectedCrumb: Int = 0
     var container: Layer?
-    var cardTitleLayer: Layer?
     var actionLinkLayer: Layer?
 
     var linkedReferenceNode: LinkedReferenceNode! {
@@ -47,28 +46,24 @@ class BreadCrumb: Widget {
     private var breadcrumbPlaceholder = "..."
 
     private let containerLayer = CALayer()
-    private let titleLayer = CATextLayer()
     private let linkLayer = CATextLayer()
 
-    private let titleLayerXPosition: CGFloat = 25
-    private let titleLayerYPosition: CGFloat = 10
     private let limitCharacters: CGFloat = 100
-    private let breadCrumbYPosition: CGFloat = 26
+    private let breadCrumbYPosition: CGFloat = 1
     private let spaceBreadcrumbIcon: CGFloat = 15
 
     init(parent: Widget, element: BeamElement) {
         self.proxy = ProxyElement(for: element)
         super.init(parent: parent)
+        proxies[element] = WeakReference(proxy)
 
         self.crumbChain = computeCrumbChain(from: element)
 
         guard let ref = nodeFor(element, withParent: self) as? LinkedReferenceNode else { fatalError() }
         ref.parent = self
-        ref.open = false
+        ref.open = element.children.isEmpty // Yes, this is intentional
         self.linkedReferenceNode = ref
         self.currentLinkedRefNode = self.linkedReferenceNode
-
-        editor.layer?.addSublayer(layer)
 
         guard let note = self.crumbChain.first as? BeamNote else { return }
 
@@ -94,19 +89,6 @@ class BreadCrumb: Widget {
             self.containerLayer.backgroundColor = isHover ? NSColor.linkedContainerColor.cgColor : NSColor.clear.cgColor
         })
 
-        titleLayer.string = note.title.capitalized
-        titleLayer.font = NSFont.systemFont(ofSize: 0, weight: .semibold)
-        titleLayer.fontSize = 17
-        titleLayer.foregroundColor = NSColor.linkedTitleColor.cgColor
-
-        cardTitleLayer = ButtonLayer("cardTitleLayer", titleLayer, activated: {[weak self] in
-            guard let self = self, let title = self.titleLayer.string as? String else { return }
-
-            self.editor.openCard(title)
-        })
-
-        createChevronLayer()
-
         linkLayer.string = "Link"
         linkLayer.font = NSFont.systemFont(ofSize: 0, weight: .medium)
         linkLayer.fontSize = 13
@@ -128,26 +110,9 @@ class BreadCrumb: Widget {
         actionLayer.layer.isHidden = !isReference
         addLayer(actionLayer)
 
-        guard let container = container,
-              let cardTitleLayer = cardTitleLayer else { return }
+        guard let container = container else { return }
 
-        addLayer(cardTitleLayer)
         addLayer(container)
-
-        cardTitleLayer.frame = CGRect(origin: CGPoint(x: titleLayerXPosition, y: titleLayerYPosition), size: titleLayer.preferredFrameSize())
-        layers["chevron"]?.frame = CGRect(origin: CGPoint(x: 0, y: titleLayer.frame.height - 8), size: CGSize(width: 20, height: 20))
-    }
-
-    func createChevronLayer() {
-        addLayer(ChevronButton("chevron", open: open, changed: { [unowned self] value in
-            self.open = value
-            layers["actionLinkLayer"]?.layer.isHidden = !value
-
-            crumbLayers.enumerated().forEach { index, crumbLayer in
-                crumbLayer.isHidden = !open
-                crumbArrowLayers[index].isHidden = !open
-            }
-        }))
     }
 
     func createBreadcrumLayer(_ layer: CATextLayer, index: Int) {
@@ -157,12 +122,17 @@ class BreadCrumb: Widget {
                 guard let self = self,
                       let textValue = self.crumbLayers[index].string as? String else { return }
 
-                if textValue == self.breadcrumbPlaceholder { return }
+                if textValue == self.breadcrumbPlaceholder {
+                    self.selectedCrumb = self.crumbLayers.count
+                    self.updateCrumbLayersVisibility(by: index)
+                    self.replaceNodeWithRootNode(by: index, isUnfold: false)
+
+                    return
+                }
 
                 self.selectedCrumb = index
-                self.updateCrumbLayersVisibility()
+                self.updateCrumbLayersVisibility(by: 0)
                 self.replaceNodeWithRootNode(by: index)
-
             },
             hovered: { isHover in
                 layer.foregroundColor = isHover ? NSColor.linkedBreadcrumbHoverColor.cgColor : NSColor.linkedBreadcrumbColor.cgColor
@@ -205,7 +175,7 @@ class BreadCrumb: Widget {
         var startXPositionBreadcrumb: CGFloat = 25
         var textFrame = CGSize.zero
 
-        guard crumbChain.count > 1 else { return }
+        guard crumbChain.count > 0 else { return }
 
         for index in 0 ..< crumbChain.count {
             let newLayer = CATextLayer()
@@ -265,7 +235,7 @@ class BreadCrumb: Widget {
         rootNote.addReference(reference)
     }
 
-    func updateCrumbLayersVisibility(by index: Int = 0) {
+    func updateCrumbLayersVisibility(by index: Int) {
         for i in 0..<crumbLayers.count {
             crumbLayers[i].isHidden = selectedCrumb == 0 ?  i != selectedCrumb : i >= selectedCrumb
             crumbArrowLayers[i].isHidden = crumbLayers[i].isHidden
@@ -304,12 +274,12 @@ class BreadCrumb: Widget {
     }
 
     override func updateRendering() {
-        contentsFrame = NSRect(x: 0, y: 0, width: availableWidth, height: open ? (crumbChain.count <= 1 ? 35 : 60) : 30)
+        contentsFrame = NSRect(x: 0, y: 0, width: availableWidth, height: crumbChain.isEmpty ? 0 : 25)
         actionLinkLayer?.layer.isHidden = !open
         computedIdealSize = contentsFrame.size
 
         CATransaction.disableAnimations {
-            if crumbChain.count <= 1 {
+            if crumbChain.isEmpty {
                 layers["actionLinkLayer"]?.layer.isHidden = true
                 return
             }
@@ -326,8 +296,8 @@ class BreadCrumb: Widget {
 
                 CATransaction.disableAnimations {
                     guard let container = container else { return }
-                    let containerHeight = crumbChain.count <= 1 ? c.idealSize.height - 12 : computedIdealSize.height - 40
-                    container.frame = NSRect(x: 0, y: titleLayer.frame.height + 10, width: contentsFrame.width, height: containerHeight)
+                    let containerHeight = crumbChain.isEmpty ? c.idealSize.height - 12 : computedIdealSize.height - 40
+                    container.frame = NSRect(x: 0, y: 10, width: contentsFrame.width, height: containerHeight)
                 }
             }
         }
@@ -358,8 +328,36 @@ class BreadCrumb: Widget {
         invalidateLayout()
     }
 
+    override var mainLayerName: String {
+        "BreadCrumb - \(proxy.id.uuidString) (from note \(proxy.note?.title ?? "???"))"
+    }
+
+    var isLink: Bool {
+        linkedReferenceNode.isLink
+    }
+
+    var isReference: Bool {
+        !isLink
+    }
+
+    private var proxies: [BeamElement: WeakReference<ProxyElement>] = [:]
+    override func proxyFor(_ element: BeamElement) -> ProxyElement? {
+        assert(element as? ProxyElement == nil) // Don't create a proxy to a proxy
+
+        if let proxy = proxies[element]?.ref {
+            return proxy
+        }
+        let proxy = ProxyElement(for: element)
+        proxies[element] = WeakReference(proxy)
+        return proxy
+    }
+
+    override func nodeFor(_ element: BeamElement) -> TextNode? {
+        return mapping[element]?.ref
+    }
+
     override func nodeFor(_ element: BeamElement, withParent: Widget) -> TextNode {
-        if let node = mapping[element] {
+        if let node = mapping[element]?.ref {
             return node
         }
 
@@ -367,7 +365,7 @@ class BreadCrumb: Widget {
         let node: TextNode = LinkedReferenceNode(parent: withParent, element: element)
 
         accessingMapping = true
-        mapping[element] = node
+        mapping[element] = WeakReference(node)
         accessingMapping = false
         purgeDeadNodes()
 
@@ -383,7 +381,7 @@ class BreadCrumb: Widget {
     }
 
     private var accessingMapping = false
-    private var mapping: [BeamElement: TextNode] = [:]
+    private var mapping: [BeamElement: WeakReference<TextNode>] = [:]
     private var deadNodes: [TextNode] = []
 
     func purgeDeadNodes() {
@@ -400,17 +398,5 @@ class BreadCrumb: Widget {
             return
         }
         mapping.removeValue(forKey: node.element)
-    }
-
-    override var mainLayerName: String {
-        "BreadCrumb - \(proxy.id.uuidString) (from note \(proxy.note?.title ?? "???"))"
-    }
-
-    var isLink: Bool {
-        linkedReferenceNode.isLink
-    }
-
-    var isReference: Bool {
-        !isLink
     }
 }
