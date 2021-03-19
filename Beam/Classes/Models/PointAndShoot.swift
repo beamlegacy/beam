@@ -46,7 +46,7 @@ class PointAndShoot: ObservableObject {
         loadFile(from: "PointAndShoot", fileType: "css")
     }()
 
-    func addUserScripts(webPage: WebPage) {
+    func injectInto(webPage: WebPage) {
         webPage.addJS(source: jsSelectionObserver, when: .atDocumentEnd)
         webPage.addJS(source: pointAndShoot, when: .atDocumentEnd)
         webPage.addCSS(source: pointAndShootStyle, when: .atDocumentEnd)

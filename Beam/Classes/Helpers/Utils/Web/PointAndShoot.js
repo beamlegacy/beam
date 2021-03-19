@@ -52,35 +52,64 @@
     const statusClass = `${prefix}-status`
 
     const datasetKey = `${prefix}Collect`
-    const styleKey = `${prefix}Style`
+
+    function currentFrameAbsolutePosition() {
+        let currentWindow = window;
+        let currentParentWindow;
+        let positions = [];
+        let rect;
+
+        while (currentWindow !== window.top) {
+            currentParentWindow = currentWindow.parent;
+            for (let idx = 0; idx < currentParentWindow.frames.length; idx++)
+                if (currentParentWindow.frames[idx] === currentWindow) {
+                    for (let frameElement of currentParentWindow.document.getElementsByTagName('iframe')) {
+                        if (frameElement.contentWindow === currentWindow) {
+                            rect = frameElement.getBoundingClientRect();
+                            positions.push({x: rect.x, y: rect.y});
+                        }
+                    }
+                    currentWindow = currentParentWindow;
+                    break;
+                }
+        }
+        return positions.reduce((accumulator, currentValue) => {
+            return {
+                x: accumulator.x + currentValue.x,
+                y: accumulator.y + currentValue.y
+            };
+        }, {x: 0, y: 0});
+    }
 
     function pointMessage(el, x, y) {
-        let pointMessage;
-        if (el) {
-            const boundingClientRect = el.getBoundingClientRect();
-            pointMessage = {
-                type: {
-                    tagName: el.tagName,
-                },
-                location: {
-                    x,
-                    y
-                },
-                data: {
-                    text: el.innerText
-                },
-                area: {
-                    x: boundingClientRect.x,
-                    y: boundingClientRect.y,
-                    width: boundingClientRect.width,
-                    height: boundingClientRect.height,
-                },
-            };
-        } else {
-            pointMessage = null;
-        }
-        console.log("Sending beam_point", pointMessage)
+        const boundsInFrame = el.getBoundingClientRect();
+        let frameOffset = currentFrameAbsolutePosition();
+        console.log("frameOffset", frameOffset)
+        const pointMessage = {
+            type: {
+                tagName: el.tagName,
+            },
+            location: {
+                x: frameOffset.x + x,
+                y: frameOffset.y + y
+            },
+            data: {
+                text: el.innerText
+            },
+            area: {
+                x: frameOffset.x + boundsInFrame.x,
+                y: frameOffset.y + boundsInFrame.y,
+                width: boundsInFrame.width,
+                height: boundsInFrame.height,
+            },
+        };
+        console.log("pointMessage", pointMessage)
         window.webkit.messageHandlers.beam_point.postMessage(pointMessage);
+    }
+
+    function unpointMessage() {
+        console.log("unpointMessage")
+        window.webkit.messageHandlers.beam_point.postMessage(null);
     }
 
     function point(el, x, y) {
@@ -91,7 +120,7 @@
     function unpoint(el) {
         el.classList.remove(pointClass)
         el.style.cursor = ``;
-        pointMessage(null);
+        unpointMessage();
     }
 
     function removeSelected(selectedIndex, el) {

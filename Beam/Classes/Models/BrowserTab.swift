@@ -332,7 +332,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
     private func addUserScripts() {
         addJS(source: overrideConsole, when: .atDocumentStart)
-        self.pointAndShoot.addUserScripts(webPage: self);
+        self.pointAndShoot.injectInto(webPage: self);
         //    addJS(source: devTools, when: .atDocumentEnd)
     }
 
