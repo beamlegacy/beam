@@ -27,21 +27,10 @@ class FullScreenWKWebView: WKWebView {
     }
 }
 
-struct SelectionUI {
-    var rect: NSRect
-    var animated: Bool
-    var color: Color
-}
 
-struct PointMessage {
-    var area: NSRect
-    var location: NSPoint
-    var data: [String: AnyObject]
-    var type: [String: AnyObject]
-}
 
 // swiftlint:disable:next type_body_length
-class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler, Codable {
+class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler, Codable, WebPage {
     var id: UUID
 
     private var scrollX: Double = 0
@@ -75,11 +64,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     @Published var browsingTree: BrowsingTree
     @Published var privateMode = false
 
-    @Published var pointSelectionUI: SelectionUI?
-    var pointArea: NSRect?
-
-    @Published var shootSelectionUIs: [SelectionUI] = []
-    var shootAreas: [NSRect] = []
+    let pointAndShoot: PointAndShoot = PointAndShoot();
 
     var state: BeamState!
 
@@ -341,25 +326,17 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         self.webView.configuration.userContentController.removeAllUserScripts()
     }
 
-    lazy var pointAndShoot: String = {
-        loadFile(from: "PointAndShoot", fileType: "js")
-    }()
     lazy var devTools: String = {
         loadFile(from: "DevTools", fileType: "js")
-    }()
-    lazy var pointAndShootStyle: String = {
-        loadFile(from: "PointAndShoot", fileType: "css")
     }()
 
     private func addUserScripts() {
         addJS(source: overrideConsole, when: .atDocumentStart)
-        addJS(source: jsSelectionObserver, when: .atDocumentEnd)
-        addJS(source: pointAndShoot, when: .atDocumentEnd)
-        addCSS(source: pointAndShootStyle, when: .atDocumentEnd)
+        self.pointAndShoot.addUserScripts(webPage: self);
         //    addJS(source: devTools, when: .atDocumentEnd)
     }
 
-    private func addJS(source: String, when: WKUserScriptInjectionTime) {
+    func addJS(source: String, when: WKUserScriptInjectionTime) {
         let injected = source.replacingOccurrences(of: "__ID__", with: "beam" + self.id.uuidString.replacingOccurrences(of: "-", with: "_"))
         let script = WKUserScript(source: injected, injectionTime: when, forMainFrameOnly: false)
         self.webView.configuration.userContentController.addUserScript(script)
@@ -370,7 +347,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         return plainData?.base64EncodedString(options: [])
     }
 
-    private func addCSS(source: String, when: WKUserScriptInjectionTime) {
+    func addCSS(source: String, when: WKUserScriptInjectionTime) {
         let styleSrc = """
                        var style = document.createElement('style');
                        style.innerHTML = `\(source)`;
@@ -482,50 +459,6 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         loadFile(from: "OverrideConsole", fileType: "js")
     }()
 
-    let pointColor = Color(red: 0, green: 0, blue: 0, opacity: 0.1)
-
-    private func drawPoint() {
-        if self.pointArea != nil {
-            let selection = self.pointArea!
-            let newX = (Double(self.pointArea!.minX)) as Double
-            let newY = (Double(self.pointArea!.minY)) as Double
-            self.pointSelectionUI = SelectionUI(
-                    rect: NSRect(
-                            x: Float(newX), y: Float(newY),
-                            width: Float(selection.width), height: Float(selection.height)
-                    ),
-                    animated: true,
-                    color: pointColor
-            )
-        } else {
-            self.pointSelectionUI = nil
-        }
-    }
-
-    let shootColor = Color(red: 1, green: 0, blue: 0, opacity: 0.1)
-
-    private func drawShoot() {
-        if self.shootAreas.count > 0 {
-            let xDelta = -self.scrollX
-            let yDelta = -self.scrollY
-            self.shootSelectionUIs = []
-            for shootArea in shootAreas {
-                let newX = (Double(shootArea.minX) + xDelta) as Double
-                let newY = (Double(shootArea.minY) + yDelta) as Double
-                let shootSelectionUI: SelectionUI = SelectionUI(
-                        rect: NSRect(
-                                x: Float(newX), y: Float(newY),
-                                width: Float(shootArea.width), height: Float(shootArea.height)
-                        ),
-                        animated: false,
-                        color: shootColor
-                )
-                self.shootSelectionUIs.append(shootSelectionUI)
-            }
-        } else {
-            self.shootSelectionUIs = []
-        }
-    }
 
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         let messageBody = message.body as? [String: AnyObject]
@@ -541,16 +474,15 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                   let data = dict["data"],
                   let type = dict["type"]
                     else {
-                self.pointArea = nil
-                drawPoint()
+                self.pointAndShoot.point(area: nil)
                 return
             }
             let minX = (area["x"] as? Double)!
             let minY = (area["y"] as? Double)!
             let width = (area["width"] as? Double)!
             let height = (area["height"] as? Double)!
-            self.pointArea = NSRect(x: minX, y: minY, width: width, height: height)
-            drawPoint()
+            let pointArea = NSRect(x: minX, y: minY, width: width, height: height)
+            self.pointAndShoot.point(area: pointArea)
             Logger.shared.logInfo("Web block point: \(type), \(data), \(minX), \(minY), \(width), \(height)", category: .web)
 
         case ScriptHandlers.beam_shoot.rawValue:
@@ -567,9 +499,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             let width = (area["width"] as? Double)!
             let height = (area["height"] as? Double)!
             let shootArea = NSRect(x: minX, y: minY, width: width, height: height)
-            self.shootAreas.removeAll()         // TODO: Support multiple shoots
-            self.shootAreas.append(shootArea)
-            drawShoot()
+            self.pointAndShoot.shoot(area: shootArea, scrollX: self.scrollX, scrollY: self.scrollY)
             Logger.shared.logInfo("Web shoot point: \(type), \(data), \(minX), \(minY), \(width), \(height)", category: .web)
 
         case ScriptHandlers.beam_textSelected.rawValue:
@@ -614,7 +544,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             Logger.shared.logInfo("self.scrolly: \(self.scrollY), scrolly: \(y)", category: .web)
             self.scrollX = x
             self.scrollY = y
-            self.drawShoot()
+            pointAndShoot.drawShoot(scrollX: self.scrollX, scrollY: self.scrollY)
             if w > 0, h > 0 {
                 browsingTree.current.score.scrollRatioX = max(Float(x / w), browsingTree.current.score.scrollRatioX)
                 browsingTree.current.score.scrollRatioY = max(Float(y / h), browsingTree.current.score.scrollRatioY)
@@ -626,10 +556,6 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             break
         }
     }
-
-    lazy var jsSelectionObserver: String = {
-        loadFile(from: "SelectionObserver", fileType: "js")
-    }()
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         guard let url = webView.url else {

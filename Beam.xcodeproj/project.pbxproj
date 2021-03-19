@@ -304,11 +304,13 @@
 		A552DF3325F1741900570C85 /* GlobalCenteringContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A552DF3225F1741900570C85 /* GlobalCenteringContainer.swift */; };
 		A567157125F66F8600B46110 /* StyledText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A567157025F66F8600B46110 /* StyledText.swift */; };
 		A572629825FFADC5004416C0 /* MouseInteraction.swift in Sources */ = {isa = PBXBuildFile; fileRef = A572629725FFADC5004416C0 /* MouseInteraction.swift */; };
+		BAA67192B5EB78981741C311 /* WebPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67CEFFAFA38F29CF1C84F /* WebPage.swift */; };
 		BAA67306ACF9DFF6FDF79D92 /* PointAndShoot.css in Resources */ = {isa = PBXBuildFile; fileRef = BAA67767634DB6949E8D9497 /* PointAndShoot.css */; };
 		BAA673B8A6A97A06A2A1067E /* DevTools.js in Sources */ = {isa = PBXBuildFile; fileRef = BAA67203DD1BE4F55B2834D8 /* DevTools.js */; };
 		BAA67549CA5950E9473E2E41 /* DevTools.js in Resources */ = {isa = PBXBuildFile; fileRef = BAA67203DD1BE4F55B2834D8 /* DevTools.js */; };
 		BAA6754E90C28296EC8CA03F /* PointAndShoot.js in Resources */ = {isa = PBXBuildFile; fileRef = BAA67B75F9F87262CB9DCACD /* PointAndShoot.js */; };
 		BAA675FA20895799E92B0D8F /* PointAndShoot.js in Sources */ = {isa = PBXBuildFile; fileRef = BAA67B75F9F87262CB9DCACD /* PointAndShoot.js */; };
+		BAA67A1C810FF7C28A282C8D /* PointAndShoot.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67913BA5B5E39B9EF7854 /* PointAndShoot.swift */; };
 		BAA67B55BD18E1DC0A146065 /* ShootFrame.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA6715A58EEDB52378B859B /* ShootFrame.swift */; };
 /* End PBXBuildFile section */
 
@@ -817,7 +819,9 @@
 		BAA6715A58EEDB52378B859B /* ShootFrame.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShootFrame.swift; sourceTree = "<group>"; };
 		BAA67203DD1BE4F55B2834D8 /* DevTools.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = DevTools.js; sourceTree = "<group>"; };
 		BAA67767634DB6949E8D9497 /* PointAndShoot.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; path = PointAndShoot.css; sourceTree = "<group>"; };
+		BAA67913BA5B5E39B9EF7854 /* PointAndShoot.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PointAndShoot.swift; sourceTree = "<group>"; };
 		BAA67B75F9F87262CB9DCACD /* PointAndShoot.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = PointAndShoot.js; sourceTree = "<group>"; };
+		BAA67CEFFAFA38F29CF1C84F /* WebPage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebPage.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1031,6 +1035,8 @@
 				9691E41325AF61BA00A13080 /* BrowsingTree.swift */,
 				A050047425DA918A009CFEB6 /* NoteAutoSaveService.swift */,
 				A572629725FFADC5004416C0 /* MouseInteraction.swift */,
+				BAA67913BA5B5E39B9EF7854 /* PointAndShoot.swift */,
+				BAA67CEFFAFA38F29CF1C84F /* WebPage.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -2527,6 +2533,8 @@
 				BAA675FA20895799E92B0D8F /* PointAndShoot.js in Sources */,
 				BAA673B8A6A97A06A2A1067E /* DevTools.js in Sources */,
 				BAA67B55BD18E1DC0A146065 /* ShootFrame.swift in Sources */,
+				BAA67A1C810FF7C28A282C8D /* PointAndShoot.swift in Sources */,
+				BAA67192B5EB78981741C311 /* WebPage.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
