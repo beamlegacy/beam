@@ -39,7 +39,7 @@ extension NSColor {
     }
 
     static var editorBidirectionalLinkColor: NSColor {
-        return loadColor(named: "CharmedGreen")
+        return loadColor(named: "Beam")
     }
 
     static var editorControlColor: NSColor {
@@ -109,7 +109,7 @@ extension NSColor {
     }
 
     static var linkedActionButtonHoverColor: NSColor {
-        return loadColor(named: "CharmedGreen")
+        return loadColor(named: "Beam")
     }
 
     static var linkedActionButtonColor: NSColor {
@@ -133,7 +133,7 @@ extension NSColor {
     }
 
     static var linkedTitleColor: NSColor {
-        return loadColor(named: "CharmedGreen")
+        return loadColor(named: "Beam")
     }
 
     static var linkedContainerColor: NSColor {
@@ -278,6 +278,14 @@ extension NSColor {
 
     static var destinationNoteActiveTextColor: NSColor {
         return loadColor(named: "Niobium")
+    }
+
+    static var destinationNoteSelectedColor: NSColor {
+        return loadColor(named: "Beam").withAlphaComponent(0.03)
+    }
+
+    static var destinationNoteActiveColor: NSColor {
+        return loadColor(named: "Beam").withAlphaComponent(0.08)
     }
 
     // Toolbar
