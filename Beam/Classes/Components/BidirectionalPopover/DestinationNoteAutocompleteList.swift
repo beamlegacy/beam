@@ -14,12 +14,12 @@ struct DestinationNoteAutocompleteList: View {
 
     internal var onSelectAutocompleteResult: (() -> Void)?
     private let itemHeight: CGFloat = 32
-
+    private let colorPalette = AutocompleteItemColorPalette(selectedBackgroundColor: .destinationNoteSelectedColor, touchdownBackgroundColor: .destinationNoteActiveColor)
     var body: some View {
         OmniBarFieldBackground(isEditing: true, enableAnimations: true) {
             VStack(spacing: 0) {
                 ForEach(elements) { i in
-                    return AutocompleteItem(item: i, selected: isSelectedItem(i), displayIcon: false)
+                    return AutocompleteItem(item: i, selected: isSelectedItem(i), displayIcon: false, colorPalette: colorPalette)
                         .frame(height: itemHeight)
                         .simultaneousGesture(
                             TapGesture(count: 1).onEnded {

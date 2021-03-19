@@ -7,19 +7,26 @@
 
 import SwiftUI
 
+struct AutocompleteItemColorPalette {
+    let selectedBackgroundColor: NSColor
+    let touchdownBackgroundColor: NSColor
+}
+
+private let defaultColorPalette = AutocompleteItemColorPalette(selectedBackgroundColor: .autocompleteSelectedBackgroundColor, touchdownBackgroundColor: .autocompleteClickedBackgroundColor)
+
 struct AutocompleteItem: View {
     @State var item: AutocompleteResult
     let selected: Bool
     var displayIcon: Bool = true
-
+    var colorPalette: AutocompleteItemColorPalette = defaultColorPalette
     @State private var isTouchDown = false
 
     @State private var favicon: NSImage?
     var backgroundColor: Color {
         guard !isTouchDown else {
-            return Color(.autocompleteClickedBackgroundColor)
+            return Color(colorPalette.touchdownBackgroundColor)
         }
-        return Color(.autocompleteSelectedBackgroundColor).opacity(selected ? 1.0 : 0.0)
+        return Color(colorPalette.selectedBackgroundColor).opacity(selected ? 1.0 : 0.0)
     }
 
     func iconNameSource(_ source: AutocompleteResult.Source) -> String {
