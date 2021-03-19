@@ -119,4 +119,9 @@ public class BeamData: ObservableObject {
         noteCount = Document.countWithPredicate(CoreDataManager.shared.mainContext)
     }
 
+    func reloadJournal() {
+        journal = []
+        setupJournal()
+    }
+
 }

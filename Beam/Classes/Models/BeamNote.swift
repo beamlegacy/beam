@@ -354,6 +354,14 @@ class BeamNote: BeamElement {
         fetchedNotes.removeValue(forKey: note)
     }
 
+    func isEntireNoteEmpty() -> Bool {
+        guard let child = children.first,
+              child.text.isEmpty && children.count == 1 else {
+            return false
+        }
+        return true
+    }
+
     static var linkDetectionQueue = DispatchQueue(label: "LinkDetector")
     static var linkDetectionRunning = false
     static func requestLinkDetection(for noteNamed: String? = nil) {
