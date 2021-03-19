@@ -83,11 +83,7 @@ class ProxyElement: BeamElement {
     }
 
     func updateProxyChildren(_ newChildren: [BeamElement]) {
-        self.children = newChildren.map({ e -> ProxyElement in
-            let p = ProxyElement(for: e)
-            p.parent = proxy
-            return p
-        })
+        self.children = newChildren
     }
 
     required public init(from decoder: Decoder) throws {
@@ -104,14 +100,12 @@ class LinkedReferenceNode: TextNode {
     // MARK: - Initializer
 
     override init(parent: Widget, element: BeamElement) {
-        let proxyElement = ProxyElement(for: element)
+        guard let proxyElement = parent.proxyFor(element) else { fatalError("Can't create a LinkedReferenceNode without a proxy provider in the parent chain") }
         super.init(parent: parent, element: proxyElement)
 
         actionLayer?.removeFromSuperlayer()
 
         createLinkActionLayer()
-
-        open = false
 
         element.$children
             .receive(on: DispatchQueue.main)

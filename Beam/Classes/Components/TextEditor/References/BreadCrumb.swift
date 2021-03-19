@@ -55,12 +55,13 @@ class BreadCrumb: Widget {
     init(parent: Widget, element: BeamElement) {
         self.proxy = ProxyElement(for: element)
         super.init(parent: parent)
+        proxies[element] = WeakReference(proxy)
 
         self.crumbChain = computeCrumbChain(from: element)
 
         guard let ref = nodeFor(element, withParent: self) as? LinkedReferenceNode else { fatalError() }
         ref.parent = self
-        ref.open = false
+        ref.open = element.children.isEmpty // Yes, this is intentional
         self.linkedReferenceNode = ref
         self.currentLinkedRefNode = self.linkedReferenceNode
 
@@ -337,6 +338,18 @@ class BreadCrumb: Widget {
 
     var isReference: Bool {
         !isLink
+    }
+
+    private var proxies: [BeamElement: WeakReference<ProxyElement>] = [:]
+    override func proxyFor(_ element: BeamElement) -> ProxyElement? {
+        assert(element as? ProxyElement == nil) // Don't create a proxy to a proxy
+
+        if let proxy = proxies[element]?.ref {
+            return proxy
+        }
+        let proxy = ProxyElement(for: element)
+        proxies[element] = WeakReference(proxy)
+        return proxy
     }
 
     override func nodeFor(_ element: BeamElement) -> TextNode? {

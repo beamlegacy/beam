@@ -874,6 +874,10 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         }
     }
 
+    func proxyFor(_ element: BeamElement) -> ProxyElement? {
+        return parent?.proxyFor(element)
+    }
+
     func nodeFor(_ element: BeamElement) -> TextNode? {
         return parent?.nodeFor(element)
     }

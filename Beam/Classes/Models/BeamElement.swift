@@ -249,7 +249,7 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
         }
 
         child.parent = self
-        children.insert(child, at: pos)
+        children.insert(child, at: min(children.count, pos))
     }
 
     weak var parent: BeamElement?

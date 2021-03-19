@@ -16,6 +16,7 @@ extension TextRoot {
 
     func increaseNodeIndentation(_ node: TextNode) -> Bool {
         guard let noteTitle = node.elementNoteTitle, !node.readOnly,
+              node.parent as? BreadCrumb == nil,
               let newParent = node.previousSibbling() as? TextNode
         else { return false }
 
@@ -25,12 +26,14 @@ extension TextRoot {
 
     func decreaseNodeIndentation(_ node: TextNode) -> Bool {
         guard let noteTitle = node.elementNoteTitle, !node.readOnly,
-              let prevParent = node.parent as? TextNode,
-              let newParent = prevParent.parent as? TextNode,
-              let parentIndexInParent = prevParent.element.indexInParent
+              node.parent as? BreadCrumb == nil,
+              node.parent?.parent as? BreadCrumb == nil,
+              let prevParent = node.unproxyElement.parent,
+              let newParent = prevParent.parent,
+              let parentIndexInParent = newParent.id == node.elementId ? node.unproxyElement.children.count : prevParent.indexInParent
         else { return false }
 
-        let reparentElement = ReparentElement(for: node.elementId, of: noteTitle, to: newParent.elementId, atIndex: parentIndexInParent + 1)
+        let reparentElement = ReparentElement(for: node.elementId, of: noteTitle, to: newParent.id, atIndex: parentIndexInParent + 1)
         return root.note?.cmdManager.run(command: reparentElement, on: cmdContext) ?? false
     }
 

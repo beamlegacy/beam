@@ -18,13 +18,16 @@ public class TextNode: Widget {
     }}
 
     var elementId: UUID {
-        guard let elem = element as? ProxyElement else { return element.id }
-        return elem.proxy.id
+        unproxyElement.id
     }
 
     var elementNoteTitle: String? {
-        guard let elem = element as? ProxyElement else { return element.note?.title }
-        return elem.proxy.note?.title
+        unproxyElement.note?.title
+    }
+
+    var unproxyElement: BeamElement {
+        guard let elem = element as? ProxyElement else { return element }
+        return elem.proxy
     }
 
     var elementScope = Set<AnyCancellable>()

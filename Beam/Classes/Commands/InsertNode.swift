@@ -16,11 +16,13 @@ class InsertNode: TextEditorCommand {
     var newElementId: UUID?
     var text: String?
     var data: Data?
+    var insertAsChild: Bool
 
-    init(in elementId: UUID, of noteName: String, with cursorPosition: Int?) {
+    init(in elementId: UUID, of noteName: String, with cursorPosition: Int?, asChild: Bool) {
         self.elementId = elementId
         self.noteName = noteName
         self.cursorPosition = cursorPosition
+        self.insertAsChild = asChild
         super.init(name: InsertNode.name)
     }
 
@@ -33,31 +35,22 @@ class InsertNode: TextEditorCommand {
             elementInstance.element.text.removeLast(elementInstance.element.text.count - cursorPosition)
         }
 
-        if let proxyElement = elementInstance.element as? ProxyElement {
-        }
         self.newElementId = element.id
 
-        elementInstance.element.parent?.insert(element, after: elementInstance.element)
+        if insertAsChild {
+            elementInstance.element.insert(element, after: nil)
+        } else {
+            elementInstance.element.parent?.insert(element, after: elementInstance.element)
+        }
 
         // UI Update
         guard let context = context,
-              let root = context.root,
-              let insertedNode = context.nodeFor(element) else { return true }
+              let root = context.root else { return true }
+
+        guard let insertedNode = context.nodeFor(element) else { return true }
+        insertedNode.parent?.open = true
         root.focus(widget: insertedNode)
         return true
-    }
-
-    private func createProxyElement(for linkedRefNode: LinkedReferenceNode, and element: BeamElement) -> ProxyElement? {
-        guard let proxyElement = linkedRefNode.element as? ProxyElement,
-              let actualElement = proxyElement.parent,
-              let actualParent = actualElement.parent else { return nil }
-
-        actualParent.addChild(element)
-        let elements = actualElement.children
-        for c in elements {
-            element.addChild(c)
-        }
-        return ProxyElement(for: element)
     }
 
     override func undo(context: Widget?) -> Bool {
