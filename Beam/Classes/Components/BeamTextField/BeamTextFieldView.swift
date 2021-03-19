@@ -56,6 +56,7 @@ class BeamTextFieldView: NSTextField {
     internal func setText(_ text: String, font: NSFont?, icon: NSImage? = nil) {
         let attrs = attributedStringAttributes(textColor ?? NSColor.white, font)
         let textString = NSAttributedString(string: text, attributes: attrs)
+        self.font = font
         self.attributedStringValue = textString
     }
 
