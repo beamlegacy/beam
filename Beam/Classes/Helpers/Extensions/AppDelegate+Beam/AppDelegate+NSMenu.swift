@@ -7,20 +7,30 @@
 
 import Foundation
 
+private enum MenuEnablingConditionTag: Int {
+    // state mode conditions
+    case today = 1 // enable only for today mode
+    case note = 2 // enable only for node mode
+    case web = 4 // enable only for web mode
+    // use binary mask to combine modes
+
+    // other conditions
+    case hasBrowserTab = 11 // enable only if browser tabs are open
+}
 extension AppDelegate: NSMenuDelegate {
 
     func subscribeToStateChanges(for state: BeamState) {
-        state.$mode.sink { [weak self] mode in
+        state.$mode.sink { [weak self] _ in
             guard let self = self else { return }
-            self.updateMainMenuItems(for: mode)
+            self.updateMainMenuItems(for: state)
         }.store(in: &cancellableScope)
     }
 
-    func updateMainMenuItems(for mode: Mode) {
+    func updateMainMenuItems(for state: BeamState) {
         if let menu = NSApp.mainMenu {
             for item in menu.items {
                 item.submenu?.delegate = self
-                updateMenuItems(items: item.submenu?.items ?? [], for: mode.rawValue)
+                updateMenuItems(items: item.submenu?.items ?? [], for: state)
             }
         }
     }
@@ -32,23 +42,33 @@ extension AppDelegate: NSMenuDelegate {
     }
 
     // menu items with tag == 0 are ALWAYS enabled and visible
-    // menu items with tag == mode are only enabled in the corresponding mode
-    // menu items with tag == -mode are only enabled and visible in the corresponding mode
-    private func updateMenuItems(items: [NSMenuItem], for mode: Int) {
+    // menu items with tag == conditionTag are only enabled in the corresponding state
+    // menu items with tag == -condition are only enabled in the corresponding state. But not visible to the user.
+    private func passConditionTag(tag: Int, for state: BeamState) -> Bool {
+        let mode = state.mode
+        let rawTag = abs(tag)
+        let tagEnum = MenuEnablingConditionTag(rawValue: rawTag)
+        if rawTag < 10 {
+            return rawTag & mode.rawValue != 0
+        } else if tagEnum == .hasBrowserTab {
+            return state.tabs.count > 0
+        }
+        return false
+    }
+
+    private func updateMenuItems(items: [NSMenuItem], for state: BeamState) {
         for item in items {
             if item.tag == 0 { continue }
 
             let value = abs(item.tag)
-            let mask = value & mode
-
-            item.isEnabled = mask != 0
+            item.isEnabled = passConditionTag(tag: value, for: state)
         }
     }
 
     // MARK: - NSMenu Delegate
     func menuWillOpen(_ menu: NSMenu) {
         toggleVisibility(false, ofAlternatesKeyEquivalentsItems: menu.items)
-        updateMenuItems(items: menu.items, for: window.state.mode.rawValue)
+        updateMenuItems(items: menu.items, for: window.state)
     }
 
     func menuDidClose(_ menu: NSMenu) {
