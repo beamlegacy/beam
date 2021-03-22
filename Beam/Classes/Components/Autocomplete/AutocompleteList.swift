@@ -16,6 +16,10 @@ struct AutocompleteList: View {
 
     private let itemHeight: CGFloat = 32
 
+    // if the mouse is over an item when it appears, onHover is called
+    // this helps prevent this unwanted behavior. (linear.app/beamapp/issue/BE-566)
+    @State private var lastItemThatAppeared: [AutocompleteResult.ID: Date]?
+
     var body: some View {
         VStack(spacing: 0) {
             ForEach(elements) { i in
@@ -27,9 +31,19 @@ struct AutocompleteList: View {
                             state.startQuery()
                         }
                     )
+                    .onAppear {
+                        lastItemThatAppeared = [i.id: Date()]
+                    }
                     .onHover { hovering in
                         if hovering {
-                            selectedIndex = indexFor(item: i)
+                            var timeSinceAppear: TimeInterval = 0.25
+                            if let lastAppearedAt = lastItemThatAppeared?[i.id] {
+                                timeSinceAppear = Date().timeIntervalSince(lastAppearedAt)
+                                lastItemThatAppeared = nil
+                            }
+                            if timeSinceAppear >= 0.25 {
+                                selectedIndex = indexFor(item: i)
+                            }
                         }
                     }
             }
