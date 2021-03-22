@@ -13,7 +13,7 @@ import Combine
 public struct BTextEdit: NSViewRepresentable {
     var note: BeamNote
     var data: BeamData
-    var openURL: (URL) -> Void
+    var openURL: (URL, BeamElement) -> Void
     var openCard: (String) -> Void
     var onStartEditing: () -> Void = { }
     var onEndEditing: () -> Void = { }
@@ -103,7 +103,7 @@ public struct BTextEdit: NSViewRepresentable {
 public struct BTextEditScrollable: NSViewRepresentable {
     var note: BeamNote
     var data: BeamData
-    var openURL: (URL) -> Void
+    var openURL: (URL, BeamElement) -> Void
     var openCard: (String) -> Void
     var onStartEditing: () -> Void = { }
     var onEndEditing: () -> Void = { }

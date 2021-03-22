@@ -26,9 +26,9 @@ struct NoteView: View {
                 BTextEditScrollable(
                     note: note,
                     data: state.data,
-                    openURL: { url in
+                    openURL: { url, element in
                     if urlSchemes.contains(url.scheme) {
-                        state.createTab(withURL: url, originalQuery: state.currentNote?.title ?? "")
+                        state.createTabFromNote(note, element: element, withURL: url)
                     } else {
                         if let noteTitle = url.absoluteString.removingPercentEncoding {
                             state.navigateToNote(named: noteTitle)
@@ -53,9 +53,9 @@ struct NoteView: View {
                 BTextEdit(
                     note: note,
                     data: state.data,
-                    openURL: { url in
+                    openURL: { url, element in
                     if urlSchemes.contains(url.scheme) {
-                        state.createTab(withURL: url, originalQuery: state.currentNote?.title ?? "")
+                        state.createTabFromNote(note, element: element, withURL: url)
                     } else {
                         if let noteTitle = url.absoluteString.removingPercentEncoding {
                             _ = state.navigateToNote(named: noteTitle)

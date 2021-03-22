@@ -248,6 +248,14 @@ let NoteDisplayThreshold = Float(0.0)
         currentTab?.load(url: url)
     }
 
+    func createTabFromNote(_ note: BeamNote, element: BeamElement, withURL url: URL) {
+        let tab = BrowserTab(state: self, originalQuery: note.title, note: note, rootElement: element)
+        tab.load(url: url)
+        currentTab = tab
+        tabs.append(tab)
+        mode = .web
+    }
+
     func createTab(withURL url: URL, originalQuery: String, createNote: Bool = true) {
         let tab = BrowserTab(state: self, originalQuery: originalQuery, note: data.todaysNote)
         tab.load(url: url)

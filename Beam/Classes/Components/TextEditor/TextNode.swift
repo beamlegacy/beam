@@ -623,7 +623,7 @@ public class TextNode: Widget {
 
             if let link = linkAt(point: mouseInfo.position) {
                 editor.cancelInternalLink()
-                editor.openURL(link)
+                editor.openURL(link, element)
                 return true
             }
 

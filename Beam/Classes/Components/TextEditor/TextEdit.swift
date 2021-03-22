@@ -231,7 +231,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     public var activated: () -> Void = { }
     public var activateOnLostFocus = true
     public var useFocusRing = false
-    public var openURL: (URL) -> Void = { _ in }
+    public var openURL: (URL, BeamElement) -> Void = { _, _ in }
     public var openCard: (String) -> Void = { _ in }
     public var onStartEditing: () -> Void = { }
     public var onEndEditing: () -> Void = { }
