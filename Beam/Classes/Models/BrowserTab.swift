@@ -601,7 +601,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             switch result {
             case let .success(read):
                 self.appendToIndexer(url, read)
-                self.updateElementWithTitle(read.title)
+                self.updateElementWithTitle(webView.title)
                 self.browsingTree.current.score.textAmount = read.content.count
                 self.updateScore()
             case let .failure(error):
