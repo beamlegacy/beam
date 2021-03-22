@@ -36,7 +36,7 @@ class BeamUITestsMenuGenerator {
             note.creationDate = date
             note.updateDate = date
             guard let docStruct = note.documentStruct else { return }
-            self.documentManager.saveDocument(docStruct, completion: nil)
+            _ = self.documentManager.saveDocument(docStruct, completion: nil)
             nbrOfJournal -= 1
         }
     }

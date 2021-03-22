@@ -24,6 +24,8 @@ class APIRequestTests: QuickSpec {
         let variables = ForgotPasswordParameters(email: email)
         let bodyParamsRequest = GraphqlParameters(fileName: "forgot_password", variables: variables)
         let backgroundQueue = DispatchQueue.global(qos: .background)
+        let beamHelper = BeamTestsHelper()
+
         beforeEach {
             self.sut = APIRequest()
             Configuration.reset()
@@ -31,19 +33,25 @@ class APIRequestTests: QuickSpec {
 
         afterEach {
             Configuration.reset()
+            beamHelper.endNetworkRecording()
         }
 
         context("with Foundation") {
-            it("sends a request") {
-                waitUntil(timeout: .seconds(10)) { done in
-                    _ = try? self.sut.performRequest(bodyParamsRequest: bodyParamsRequest,
-                                                          authenticatedCall: false) { (result: Swift.Result<ForgotPassword, Error>) in
-                        let forgotPassword: ForgotPassword? = try? result.get()
+            context("with good api hostname") {
+                beforeEach {
+                    beamHelper.beginNetworkRecording()
+                }
+                it("sends a request") {
+                    waitUntil(timeout: .seconds(10)) { done in
+                        _ = try? self.sut.performRequest(bodyParamsRequest: bodyParamsRequest,
+                                                         authenticatedCall: false) { (result: Swift.Result<ForgotPassword, Error>) in
+                            let forgotPassword: ForgotPassword? = try? result.get()
 
-                        // Result should not generate error, and be true since this email exists
-                        expect { try result.get() }.toNot(throwError())
-                        expect(forgotPassword?.success).to(beTrue())
-                        done()
+                            // Result should not generate error, and be true since this email exists
+                            expect { try result.get() }.toNot(throwError())
+                            expect(forgotPassword?.success).to(beTrue())
+                            done()
+                        }
                     }
                 }
             }
@@ -51,6 +59,7 @@ class APIRequestTests: QuickSpec {
             context("with wrong api hostname") {
                 beforeEach {
                     Configuration.apiHostname = "localhost2"
+                    beamHelper.disableNetworkRecording()
                 }
 
                 it("manages errors") {
@@ -68,16 +77,21 @@ class APIRequestTests: QuickSpec {
         }
 
         context("with PromiseKit") {
-            it("sends a request") {
-                waitUntil(timeout: .seconds(10)) { [unowned self] done in
-                    let promise: PromiseKit.Promise<ForgotPassword> = self.sut
-                        .performRequest(bodyParamsRequest: bodyParamsRequest,
-                                        authenticatedCall: false)
-                    promise.done(on: backgroundQueue) { (forgotPassword: ForgotPassword) in
-                        expect(forgotPassword.success).to(beTrue())
-                        done()
+            context("with good api hostname") {
+                beforeEach {
+                    beamHelper.beginNetworkRecording()
+                }
+                it("sends a request") {
+                    waitUntil(timeout: .seconds(10)) { [unowned self] done in
+                        let promise: PromiseKit.Promise<ForgotPassword> = self.sut
+                            .performRequest(bodyParamsRequest: bodyParamsRequest,
+                                            authenticatedCall: false)
+                        promise.done(on: backgroundQueue) { (forgotPassword: ForgotPassword) in
+                            expect(forgotPassword.success).to(beTrue())
+                            done()
+                        }
+                        .catch { fail("Should not be called: \($0)"); done() }
                     }
-                    .catch { fail("Should not be called: \($0)") }
                 }
             }
 
@@ -104,22 +118,29 @@ class APIRequestTests: QuickSpec {
         }
 
         context("with Promises") {
-            it("sends a request") {
-                waitUntil(timeout: .seconds(10)) { [unowned self] done in
-                    let promise: Promises.Promise<ForgotPassword> = self.sut
-                        .performRequest(bodyParamsRequest: bodyParamsRequest,
-                                        authenticatedCall: false)
-                    promise.then(on: backgroundQueue) { (forgotPassword: ForgotPassword) in
-                        expect(forgotPassword.success).to(beTrue())
-                        done()
+            context("with good api hostname") {
+                beforeEach {
+                    beamHelper.beginNetworkRecording()
+                }
+
+                it("sends a request") {
+                    waitUntil(timeout: .seconds(10)) { [unowned self] done in
+                        let promise: Promises.Promise<ForgotPassword> = self.sut
+                            .performRequest(bodyParamsRequest: bodyParamsRequest,
+                                            authenticatedCall: false)
+                        promise.then(on: backgroundQueue) { (forgotPassword: ForgotPassword) in
+                            expect(forgotPassword.success).to(beTrue())
+                            done()
+                        }
+                        .catch { _ in }
                     }
-                    .catch { _ in }
                 }
             }
 
             context("with wrong api hostname") {
                 beforeEach {
                     Configuration.apiHostname = "localhost2"
+                    beamHelper.disableNetworkRecording()
                 }
 
                 it("manages errors") {

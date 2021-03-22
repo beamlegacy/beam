@@ -16,15 +16,13 @@ class DocumentTests: QuickSpec {
         var mainContext: NSManagedObjectContext!
         var backgroundContext: NSManagedObjectContext!
 
-        beforeSuite {
+        beforeEach {
             coreDataManager = CoreDataManager()
 
             // Setup CoreData
             coreDataManager.setup()
             //CoreDataManager.shared = coreDataManager
-        }
 
-        beforeEach {
             coreDataManager.destroyPersistentStore()
             mainContext = coreDataManager.mainContext
             backgroundContext = coreDataManager.backgroundContext
@@ -43,8 +41,8 @@ class DocumentTests: QuickSpec {
                 let countBefore = Document.countWithPredicate(mainContext)
 
                 for _ in 1...count {
-                    let docStruct = helper.createDocumentStruct()
-                    helper.saveLocally(docStruct)
+                    var docStruct = helper.createDocumentStruct()
+                    docStruct = helper.saveLocally(docStruct)
                 }
 
                 let countAfter = Document.countWithPredicate(mainContext)
@@ -79,9 +77,9 @@ class DocumentTests: QuickSpec {
             it("fetches documents matching title") {
                 let times = 3
                 for index in 0..<times {
-                    helper.saveLocally(helper.createDocumentStruct(title: "foobar \(index)"))
+                    _ = helper.saveLocally(helper.createDocumentStruct(title: "foobar \(index)"))
                 }
-                helper.saveLocally(helper.createDocumentStruct())
+                _ = helper.saveLocally(helper.createDocumentStruct())
 
                 expect(Document.fetchAllWithTitleMatch(mainContext, "foobar")).to(haveCount(times))
             }

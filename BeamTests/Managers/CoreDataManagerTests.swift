@@ -7,7 +7,7 @@ class CoreDataManagerTests: QuickSpec {
     override func spec() {
         var sut: CoreDataManager!
 
-        beforeSuite {
+        beforeEach {
             sut = CoreDataManager()
             sut.setup()
         }

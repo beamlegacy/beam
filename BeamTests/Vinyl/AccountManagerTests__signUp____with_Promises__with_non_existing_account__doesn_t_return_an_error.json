@@ -1,0 +1,59 @@
+[
+  {
+    "response" : {
+      "headers" : {
+        "X-Request-Id" : "05e861b7-b321-40af-96b6-1510d6a28b01",
+        "X-Permitted-Cross-Domain-Policies" : "none",
+        "Cache-Control" : "max-age=0, private, must-revalidate",
+        "X-Download-Options" : "noopen",
+        "X-Runtime" : "0.422503",
+        "Connection" : "keep-alive",
+        "Etag" : "W\/\"6f92aea03341f2e847b9861b1404ea64\"",
+        "X-Xss-Protection" : "1; mode=block",
+        "Vary" : "Accept, Origin",
+        "Strict-Transport-Security" : "max-age=63072000; includeSubDomains",
+        "Transfer-Encoding" : "Identity",
+        "Date" : "Mon, 22 Mar 2021 15:30:22 GMT",
+        "Via" : "1.1 vegur",
+        "Server" : "Cowboy",
+        "Content-Type" : "application\/json; charset=utf-8",
+        "X-Frame-Options" : "SAMEORIGIN",
+        "X-Content-Type-Options" : "nosniff",
+        "Referrer-Policy" : "strict-origin-when-cross-origin"
+      },
+      "status" : 200,
+      "body" : {
+        "data" : {
+          "signUp" : {
+            "user" : {
+              "email" : "fabien+test-eab6b866-d758-4759-8f86-a61beaff9f46@beamapp.co",
+              "id" : "006917a5-cf08-4e5d-9166-8a82fa876147",
+              "unconfirmedEmail" : null
+            },
+            "errors" : [
+
+            ]
+          }
+        }
+      },
+      "url" : "https:\/\/api.beamapp.co\/graphql"
+    },
+    "request" : {
+      "headers" : {
+        "Accept-Language" : "en",
+        "Accept" : "application\/json",
+        "User-Agent" : "Beam client, 0.1.0 (1)",
+        "Content-Type" : "application\/json"
+      },
+      "url" : "https:\/\/api.beamapp.co\/graphql",
+      "method" : "POST",
+      "body" : {
+        "query" : "mutation SignUp($email: Email!, $password: String!) {\n  signUp(input: {email: $email, password: $password}) {\n    user {\n      unconfirmedEmail\n      email\n      id\n    }\n    errors {\n      path\n      message\n    }\n  }\n}\n",
+        "variables" : {
+          "email" : "fabien+test-EAB6B866-D758-4759-8F86-A61BEAFF9F46@beamapp.co",
+          "password" : "YurcEmxnSxEd"
+        }
+      }
+    }
+  }
+]

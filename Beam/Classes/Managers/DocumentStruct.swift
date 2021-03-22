@@ -6,7 +6,7 @@ enum NoteType: String, Codable {
 }
 
 public struct DocumentStruct {
-    let id: UUID
+    var id: UUID
     var title: String
     let createdAt: Date
     var updatedAt: Date

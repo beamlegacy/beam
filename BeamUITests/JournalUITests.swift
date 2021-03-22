@@ -21,10 +21,8 @@ class JournalUITests: QuickSpec {
 
     // swiftlint:disable:next function_body_length
     override func spec() {
-        beforeSuite {
-            self.helper = BeamUITestsHelper(self.app)
-        }
         beforeEach {
+            self.helper = BeamUITestsHelper(self.app)
             self.continueAfterFailure = false
             self.app.launch()
             self.helper.tapCommand(.logout)

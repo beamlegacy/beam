@@ -1,0 +1,59 @@
+[
+  {
+    "request" : {
+      "method" : "POST",
+      "headers" : {
+        "Content-Type" : "application\/json",
+        "Accept-Language" : "en",
+        "User-Agent" : "Beam client, 0.1.0 (1)",
+        "Accept" : "application\/json"
+      },
+      "url" : "https:\/\/api.beamapp.co\/graphql",
+      "body" : {
+        "query" : "mutation SignUp($email: Email!, $password: String!) {\n  signUp(input: {email: $email, password: $password}) {\n    user {\n      unconfirmedEmail\n      email\n      id\n    }\n    errors {\n      path\n      message\n    }\n  }\n}\n",
+        "variables" : {
+          "email" : "fabien+test-080B5787-5F47-4AE3-AA61-1E707C0F2B5D@beamapp.co",
+          "password" : "YurcEmxnSxEd"
+        }
+      }
+    },
+    "response" : {
+      "body" : {
+        "data" : {
+          "signUp" : {
+            "user" : {
+              "email" : "fabien+test-080b5787-5f47-4ae3-aa61-1e707c0f2b5d@beamapp.co",
+              "id" : "e47f4ac9-2031-4558-a386-4d6dc3917f31",
+              "unconfirmedEmail" : null
+            },
+            "errors" : [
+
+            ]
+          }
+        }
+      },
+      "status" : 200,
+      "headers" : {
+        "Transfer-Encoding" : "Identity",
+        "X-Runtime" : "0.490942",
+        "Connection" : "keep-alive",
+        "X-Frame-Options" : "SAMEORIGIN",
+        "X-Request-Id" : "c5896f5c-ba03-4167-b18f-7cd30054cdd1",
+        "Referrer-Policy" : "strict-origin-when-cross-origin",
+        "X-Xss-Protection" : "1; mode=block",
+        "Cache-Control" : "max-age=0, private, must-revalidate",
+        "Date" : "Mon, 22 Mar 2021 15:30:21 GMT",
+        "X-Content-Type-Options" : "nosniff",
+        "X-Permitted-Cross-Domain-Policies" : "none",
+        "Server" : "Cowboy",
+        "Content-Type" : "application\/json; charset=utf-8",
+        "X-Download-Options" : "noopen",
+        "Etag" : "W\/\"9f8171b0ce18eb50f0b3189b6f51d0d3\"",
+        "Vary" : "Accept, Origin",
+        "Strict-Transport-Security" : "max-age=63072000; includeSubDomains",
+        "Via" : "1.1 vegur"
+      },
+      "url" : "https:\/\/api.beamapp.co\/graphql"
+    }
+  }
+]

@@ -49,6 +49,9 @@ class DocumentManagerTestsHelper {
             // To force a local save only, while using the standard code
             newVersion = self.documentManager.saveDocument(docStruct, false, completion:  { result in
                 expect { try result.get() }.toNot(throwError())
+                if case .failure(let error) = result {
+                    fail(error.localizedDescription)
+                }
                 done()
             })
         }
@@ -85,7 +88,7 @@ class DocumentManagerTestsHelper {
             documentAPIType = try? result.get()
             semaphore.signal()
         }
-        semaphore.wait()
+        _ = semaphore.wait(timeout: DispatchTime.now() + .seconds(5))
 
         return documentAPIType
     }
@@ -103,20 +106,26 @@ class DocumentManagerTestsHelper {
     }
 
     func deleteDocumentStruct(_ docStruct: DocumentStruct) {
-        waitUntil(timeout: .seconds(3)) { done in
+        waitUntil(timeout: .seconds(10)) { done in
             self.documentManager.deleteDocument(id: docStruct.id) { result in
                 expect { try result.get() }.toNot(throwError())
                 expect { try result.get() }.to(beTrue())
+                if case .failure(let error) = result {
+                    fail(error.localizedDescription)
+                }
+                if case .success(let success) = result, success == false {
+                    fail("Should not happen")
+                }
                 done()
             }
         }
     }
 
     private let faker = Faker(locale: "en-US")
-    func createDocumentStruct(_ dataString: String? = nil, title titleParam: String? = nil) -> DocumentStruct {
+    func createDocumentStruct(_ dataString: String? = nil, title titleParam: String? = nil, id: String? = nil) -> DocumentStruct {
         let dataString = dataString ?? "whatever binary data"
 
-        let docStruct = DocumentStruct(id: UUID(),
+        var docStruct = DocumentStruct(id: UUID(),
                                        title: titleParam ?? String.randomTitle(),
                                        createdAt: BeamDate.now,
                                        updatedAt: BeamDate.now,
@@ -124,16 +133,27 @@ class DocumentManagerTestsHelper {
                                        documentType: .note,
                                        version: 0)
 
+        if let id = id {
+            docStruct.id = UUID(uuidString: id) ?? docStruct.id
+        }
+
         return docStruct
     }
 
     func createLocalAndRemoteVersions(_ ancestor: String,
                                       newLocal: String? = nil,
-                                      newRemote: String? = nil) throws -> DocumentStruct {
+                                      newRemote: String? = nil,
+                                      _ id: String? = nil,
+                                      _ title: String? = nil) throws -> DocumentStruct {
         BeamDate.travel(-600)
         var docStruct = self.createDocumentStruct()
+        if let id = id, let uuid = UUID(uuidString: id) {
+            docStruct.id = uuid
+        }
+
+        docStruct.title = title ?? docStruct.title
         docStruct.data = ancestor.asData
-        docStruct = self.saveLocallyAndRemotely(docStruct)
+        docStruct = saveLocallyAndRemotely(docStruct)
 
         // We'll use saveDocumentOnAPI() later, I need to update the result
         // DocumentStruct to add its previousChecksum

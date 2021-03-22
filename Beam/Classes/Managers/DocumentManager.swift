@@ -858,6 +858,13 @@ extension DocumentManager {
             let document = Document.fetchWithId(context, id)
             document?.delete(context)
 
+            do {
+                try Self.saveContext(context: context)
+            } catch {
+                completion?(.failure(error))
+                return
+            }
+
             // If not authenticated
             guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
                 completion?(.success(false))

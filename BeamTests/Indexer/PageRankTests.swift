@@ -13,6 +13,8 @@ import Accelerate
 import SwiftSoup
 
 class PageRankTests: XCTestCase {
+    let beamHelper = BeamTestsHelper()
+
     private func testInit() throws {
         let pageRank = PageRank()
 
@@ -74,7 +76,7 @@ class PageRankTests: XCTestCase {
             if let url = URL(string: url) {
                 let expect = expectation(description: "load url \(url)")
                 expectations.append(expect)
-                let task = URLSession.shared.dataTask(with: url) { data, response, error in
+                let task = BeamURLSession.shared.dataTask(with: url) { data, response, error in
                     if let error = error {
                         //self.handleClientError(error)
                         Logger.shared.logError("Client error \(error)", category: .web)

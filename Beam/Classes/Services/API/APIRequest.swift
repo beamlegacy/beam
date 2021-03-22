@@ -6,6 +6,13 @@ import Promises
 
 // swiftlint:disable file_length
 
+class BeamURLSession {
+    static var shared = URLSession.shared
+    static func reset() {
+        Self.shared = URLSession.shared
+    }
+}
+
 // swiftlint:disable:next type_body_length
 class APIRequest {
     var route: String { "https://\(Configuration.apiHostname)/graphql" }
@@ -248,7 +255,7 @@ extension APIRequest {
         let localTimer = Date()
         let callsCount = Self.callsCount
 
-        dataTask = URLSession.shared.dataTask(with: request) { (data, response, error) -> Void in
+        dataTask = BeamURLSession.shared.dataTask(with: request) { (data, response, error) -> Void in
             guard let dataTask = self.dataTask else {
                 completionHandler(.failure(APIRequestError.parserError))
                 return

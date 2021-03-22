@@ -14,8 +14,14 @@ class BeamDate {
         currentDate?.addTimeInterval(duration)
     }
 
-    static func freeze() {
-        currentDate = now
+    static func freeze(_ dateString: String? = nil) {
+        guard let dateString = dateString else {
+            currentDate = now
+            return
+        }
+
+        let dateFormatter = ISO8601DateFormatter()
+        currentDate = dateFormatter.date(from: dateString)
     }
 
     static func reset() {

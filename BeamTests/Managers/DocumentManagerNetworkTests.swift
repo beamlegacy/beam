@@ -19,18 +19,9 @@ class DocumentManagerNetworkTests: QuickSpec {
         var coreDataManager: CoreDataManager!
         var sut: DocumentManager!
         var helper: DocumentManagerTestsHelper!
-
-        afterEach {
-            sut.clearNetworkCalls()
-        }
+        let beamHelper = BeamTestsHelper()
 
         beforeEach {
-            // Try to avoid issues with BeamTextTests creating documents when parsing links
-            BeamNote.clearCancellables()
-            BeamTestsHelper.login()
-        }
-
-        beforeSuite {
             coreDataManager = CoreDataManager()
             // Setup CoreData
             coreDataManager.setup()
@@ -39,19 +30,26 @@ class DocumentManagerNetworkTests: QuickSpec {
             helper = DocumentManagerTestsHelper(documentManager: sut,
                                                      coreDataManager: coreDataManager)
 
-            helper.deleteAllDocuments()
-            EncryptionManager.shared.clearPrivateKey()
+            sut.clearNetworkCalls()
+            beamHelper.beginNetworkRecording()
+
+            // Try to avoid issues with BeamTextTests creating documents when parsing links
+            BeamNote.clearCancellables()
+            BeamTestsHelper.login()
+
+            try? EncryptionManager.shared.replacePrivateKey("j6tifPZTjUtGoz+1RJkO8dOMlu48MUUSlwACw/fCBw0=")
         }
 
-        afterSuite {
-            BeamTestsHelper.logout()
+        afterEach {
+            beamHelper.endNetworkRecording()
+
+            sut.clearNetworkCalls()
         }
 
         describe(".uploadAllDocuments()") {
             var docStruct: DocumentStruct!
             beforeEach {
-                docStruct = helper.createDocumentStruct()
-                docStruct = helper.saveLocally(docStruct)
+                docStruct = self.createStruct("995d94e1-e0df-4eca-93e6-8778984bcd18", helper)
             }
 
             afterEach {
@@ -62,6 +60,8 @@ class DocumentManagerNetworkTests: QuickSpec {
 
             context("with Foundation") {
                 it("uploads existing documents") {
+                    Configuration.encryptionEnabled = false
+
                     let networkCalls = APIRequest.callsCount
 
                     waitUntil(timeout: .seconds(10)) { done in
@@ -206,20 +206,19 @@ class DocumentManagerNetworkTests: QuickSpec {
             var docStruct: DocumentStruct!
             afterEach {
                 assert(AuthenticationManager.shared.isAuthenticated)
-                // Not to leave any on the server
-                helper.deleteDocumentStruct(docStruct)
             }
 
             context("with encryption") {
                 beforeEach {
                     Configuration.encryptionEnabled = true
-                    docStruct = helper.createDocumentStruct()
-                    docStruct = helper.saveLocally(docStruct)
+                    docStruct = self.createStruct("995d94e1-e0df-4eca-93e6-8778984bcd18", helper)
                     helper.saveRemotely(docStruct)
                 }
 
                 afterEach {
                     Configuration.encryptionEnabled = false
+                    // Not to leave any on the server
+                    helper.deleteDocumentStruct(docStruct)
                 }
 
                 it("refreshes the local document") {
@@ -238,9 +237,12 @@ class DocumentManagerNetworkTests: QuickSpec {
 
             context("with encryption and unencrypted content on the API side") {
                 beforeEach {
-                    docStruct = helper.createDocumentStruct()
-                    docStruct = helper.saveLocally(docStruct)
+                    docStruct = self.createStruct("995d94e1-e0df-4eca-93e6-8778984bcd18", helper)
                     helper.saveRemotely(docStruct)
+                }
+
+                afterEach {
+                    helper.deleteDocumentStruct(docStruct)
                 }
 
                 it("refreshes the local document") {
@@ -252,6 +254,11 @@ class DocumentManagerNetworkTests: QuickSpec {
                         sut.refreshDocuments { result in
                             expect { try result.get() }.toNot(throwError())
                             expect { try result.get() } == true
+
+                            if case .failure(let error) = result {
+                                fail(error.localizedDescription)
+                            }
+
                             done()
                         }
                     }
@@ -265,13 +272,13 @@ class DocumentManagerNetworkTests: QuickSpec {
             context("when remote has the same updatedAt") {
                 beforeEach {
                     BeamDate.freeze()
-                    docStruct = helper.createDocumentStruct()
-                    docStruct = helper.saveLocally(docStruct)
+                    docStruct = self.createStruct("995d94e1-e0df-4eca-93e6-8778984bcd18", helper)
                     helper.saveRemotely(docStruct)
                 }
 
                 afterEach {
                     BeamDate.reset()
+                    helper.deleteDocumentStruct(docStruct)
                 }
 
                 it("does not refreshes the local document") {
@@ -307,8 +314,11 @@ class DocumentManagerNetworkTests: QuickSpec {
 
             context("when remote document doesn't exist") {
                 beforeEach {
-                    docStruct = helper.createDocumentStruct()
-                    docStruct = helper.saveLocally(docStruct)
+                    docStruct = self.createStruct("995d94e1-e0df-4eca-93e6-8778984bcd18", helper)
+                }
+
+                afterEach {
+                    helper.deleteDocumentStruct(docStruct)
                 }
 
                 it("flags the local document as deleted") {
@@ -338,7 +348,13 @@ class DocumentManagerNetworkTests: QuickSpec {
                     let ancestor = "1\n2\n3"
                     let newRemote = "1\n2\n3\n4"
                     beforeEach {
-                        docStruct = try? helper.createLocalAndRemoteVersions(ancestor, newRemote: newRemote)
+                        docStruct = try? helper.createLocalAndRemoteVersions(ancestor,
+                                                                             newRemote: newRemote,
+                                                                             "995d94e1-e0df-4eca-93e6-8778984bcd18")
+                    }
+
+                    afterEach {
+                        helper.deleteDocumentStruct(docStruct)
                     }
 
                     it("refreshes the local document") {
@@ -382,7 +398,14 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                     beforeEach {
                         helper.deleteAllDocuments()
-                        docStruct = try? helper.createLocalAndRemoteVersions(ancestor, newLocal: newLocal, newRemote: newRemote)
+                        docStruct = try? helper.createLocalAndRemoteVersions(ancestor,
+                                                                             newLocal: newLocal,
+                                                                             newRemote: newRemote,
+                                                                             "995d94e1-e0df-4eca-93e6-8778984bcd18")
+                    }
+
+                    afterEach {
+                        helper.deleteDocumentStruct(docStruct)
                     }
 
                     it("refreshes the local document") {
@@ -427,7 +450,14 @@ class DocumentManagerNetworkTests: QuickSpec {
                 let newLocal = "2\n2\n3\n"
 
                 beforeEach {
-                    docStruct = try? helper.createLocalAndRemoteVersions(ancestor, newLocal: newLocal, newRemote: newRemote)
+                    docStruct = try? helper.createLocalAndRemoteVersions(ancestor,
+                                                                         newLocal: newLocal,
+                                                                         newRemote: newRemote,
+                                                                         "995d94e1-e0df-4eca-93e6-8778984bcd18")
+                }
+
+                afterEach {
+                    helper.deleteDocumentStruct(docStruct)
                 }
 
                 context("with Foundation") {
@@ -484,8 +514,7 @@ class DocumentManagerNetworkTests: QuickSpec {
             context("when remote has the same updatedAt") {
                 beforeEach {
                     BeamDate.freeze()
-                    docStruct = helper.createDocumentStruct()
-                    docStruct = helper.saveLocally(docStruct)
+                    docStruct = self.createStruct("995d94e1-e0df-4eca-93e6-8778984bcd18", helper)
                     helper.saveRemotely(docStruct)
                     networkCalls = APIRequest.callsCount
                 }
@@ -536,7 +565,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                             promise.done { refreshed in
                                 expect(refreshed) == false
                                 done()
-                            }.catch { fail("Should not be called: \($0)") }
+                            }.catch { fail("Should not be called: \($0)"); done() }
                         }
 
                         expect(APIRequest.callsCount - networkCalls) == 1
@@ -552,7 +581,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                                 promise.done { refreshed in
                                     expect(refreshed) == false
                                     done()
-                                }.catch { fail("Should not be called: \($0)") }
+                                }.catch { fail("Should not be called: \($0)"); done() }
                             }
 
                             expect(APIRequest.callsCount - networkCalls) == 1
@@ -602,8 +631,16 @@ class DocumentManagerNetworkTests: QuickSpec {
                     let newRemote = "1\n2\n3\n4"
 
                     beforeEach {
-                        docStruct = try? helper.createLocalAndRemoteVersions(ancestor, newRemote: newRemote)
+                        BeamDate.freeze("2021-03-19T12:21:03Z")
+                        docStruct = try? helper.createLocalAndRemoteVersions(ancestor,
+                                                                             newRemote: newRemote,
+                                                                             "995d94e1-e0df-4eca-93e6-8778984bcd18")
                         networkCalls = APIRequest.callsCount
+                    }
+
+                    afterEach {
+                        BeamDate.reset()
+                        helper.deleteDocumentStruct(docStruct)
                     }
 
                     context("with Foundation") {
@@ -651,7 +688,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                                 promise.done { refreshed in
                                     expect(refreshed) == true
                                     done()
-                                }.catch { fail("Should not be called: \($0)") }
+                                }.catch { fail("Should not be called: \($0)"); done() }
                             }
 
                             expect(APIRequest.callsCount - networkCalls) == 2
@@ -686,7 +723,16 @@ class DocumentManagerNetworkTests: QuickSpec {
                     let merged = "0\n1\n2\n3\n4\n"
 
                     beforeEach {
-                        docStruct = try? helper.createLocalAndRemoteVersions(ancestor, newLocal: newLocal, newRemote: newRemote)
+                        BeamDate.freeze("2021-03-19T12:21:03Z")
+
+                        docStruct = try! helper.createLocalAndRemoteVersions(ancestor,
+                                                                             newLocal: newLocal,
+                                                                             newRemote: newRemote,
+                                                                             "995d94e1-e0df-4eca-93e6-8778984bcd18")
+                    }
+
+                    afterEach {
+                        helper.deleteDocumentStruct(docStruct)
                     }
 
                     context("with Foundation") {
@@ -742,7 +788,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                                 promise.done { refreshed in
                                     expect(refreshed) == true
                                     done()
-                                }.catch { fail("Should not be called: \($0)") }
+                                }.catch { fail("Should not be called: \($0)"); done() }
                             }
 
                             expect([2, 5]).to(contain(APIRequest.callsCount - networkCalls))
@@ -775,8 +821,7 @@ class DocumentManagerNetworkTests: QuickSpec {
 
             context("when remote document doesn't exist") {
                 beforeEach {
-                    docStruct = helper.createDocumentStruct()
-                    docStruct = helper.saveLocally(docStruct)
+                    docStruct = self.createStruct("995d94e1-e0df-4eca-93e6-8778984bcd18", helper)
                     networkCalls = APIRequest.callsCount
                 }
 
@@ -842,7 +887,7 @@ class DocumentManagerNetworkTests: QuickSpec {
         describe(".saveDocument()") {
             var docStruct: DocumentStruct!
             beforeEach {
-                docStruct = helper.createDocumentStruct()
+                docStruct = helper.createDocumentStruct(id: "995d94e1-e0df-4eca-93e6-8778984bcd18")
             }
             afterEach {
                 // Not to leave any on the server
@@ -854,7 +899,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                     it("saves the document locally") {
 
                         waitUntil(timeout: .seconds(10)) { done in
-                            sut.saveDocument(docStruct, completion:  { _ in
+                            _ = sut.saveDocument(docStruct, completion:  { _ in
                                 done()
                             })
                         }
@@ -884,6 +929,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                         }
 
                         it("cancels previous unfinished saves") {
+                            beamHelper.disableNetworkRecording()
                             let previousNetworkCall = APIRequest.callsCount
                             let times = 10
                             let title = docStruct.title
@@ -942,7 +988,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                             
                             it("saves the document on the API") {
                                 waitUntil(timeout: .seconds(10)) { done in
-                                    sut.saveDocument(docStruct, true, { result in
+                                    _ = sut.saveDocument(docStruct, true, { result in
                                         expect { try result.get() }.toNot(throwError())
                                         expect { try result.get() } == true
                                         done()
@@ -971,7 +1017,7 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                                 it("saves the document on the API") {
                                     waitUntil(timeout: .seconds(10)) { done in
-                                        sut.saveDocument(docStruct, true, { result in
+                                        _ = sut.saveDocument(docStruct, true, { result in
                                             expect { try result.get() }.toNot(throwError())
                                             expect { try result.get() } == true
                                             done()
@@ -1006,7 +1052,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                                 promise.done { success in
                                     expect(success) == true
                                     done()
-                                }.catch { fail("Should not be called: \($0)") }
+                                }.catch { fail("Should not be called: \($0)"); done() }
                             }
 
                             let remoteStruct = helper.fetchOnAPI(docStruct)
@@ -1015,6 +1061,8 @@ class DocumentManagerNetworkTests: QuickSpec {
                         }
 
                         it("cancels previous unfinished saves") {
+                            beamHelper.disableNetworkRecording()
+
                             let previousNetworkCall = APIRequest.callsCount
                             let times = 10
                             let title = docStruct.title
@@ -1038,7 +1086,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                                 promise.done { success in
                                     expect(success) == true
                                     done()
-                                }.catch { fail("Should not be called: \($0)") }
+                                }.catch { fail("Should not be called: \($0)"); done() }
                             }
 
                             expect(APIRequest.callsCount - previousNetworkCall) == 1
@@ -1061,7 +1109,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                                     promise.done { success in
                                         expect(success) == true
                                         done()
-                                    }.catch { fail("Should not be called: \($0)") }
+                                    }.catch { fail("Should not be called: \($0)"); done() }
                                 }
 
                                 // Making sure the API side has encrypted data
@@ -1091,7 +1139,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                                         promise.done { success in
                                             expect(success) == true
                                             done()
-                                        }.catch { fail("Should not be called: \($0)") }
+                                        }.catch { fail("Should not be called: \($0)"); done() }
                                     }
 
                                     // Making sure the API side has encrypted data
@@ -1116,6 +1164,10 @@ class DocumentManagerNetworkTests: QuickSpec {
                             docStruct = helper.saveLocally(docStruct)
                         }
 
+                        afterEach {
+                            helper.deleteDocumentStruct(docStruct)
+                        }
+
                         it("saves the document on the API") {
                             let promise: Promises.Promise<Bool> = sut.saveDocumentOnApi(docStruct)
 
@@ -1123,7 +1175,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                                 promise.then { success in
                                     expect(success) == true
                                     done()
-                                }.catch { fail("Should not be called: \($0)") }
+                                }.catch { fail("Should not be called: \($0)"); done() }
                             }
 
                             let remoteStruct = helper.fetchOnAPI(docStruct)
@@ -1132,6 +1184,8 @@ class DocumentManagerNetworkTests: QuickSpec {
                         }
 
                         it("cancels previous unfinished saves") {
+                            beamHelper.disableNetworkRecording()
+
                             let previousNetworkCall = APIRequest.callsCount
                             let times = 10
                             let title = docStruct.title
@@ -1155,7 +1209,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                                 promise.then { success in
                                     expect(success) == true
                                     done()
-                                }.catch { fail("Should not be called: \($0)") }
+                                }.catch { fail("Should not be called: \($0)"); done() }
                             }
 
                             expect(APIRequest.callsCount - previousNetworkCall) == 1
@@ -1178,7 +1232,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                                     promise.then { success in
                                         expect(success) == true
                                         done()
-                                    }.catch { fail("Should not be called: \($0)") }
+                                    }.catch { fail("Should not be called: \($0)"); done() }
                                 }
 
                                 // Making sure the API side has encrypted data
@@ -1208,7 +1262,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                                         promise.then { success in
                                             expect(success) == true
                                             done()
-                                        }.catch { fail("Should not be called: \($0)") }
+                                        }.catch { fail("Should not be called: \($0)"); done() }
                                     }
 
                                     // Making sure the API side has encrypted data
@@ -1235,7 +1289,14 @@ class DocumentManagerNetworkTests: QuickSpec {
                     let newLocal = "2\n2\n3\n"
 
                     beforeEach {
-                        docStruct = try? helper.createLocalAndRemoteVersions(ancestor, newLocal: newLocal, newRemote: newRemote)
+                        docStruct = try? helper.createLocalAndRemoteVersions(ancestor,
+                                                                             newLocal: newLocal,
+                                                                             newRemote: newRemote,
+                                                                             "995d94e1-e0df-4eca-93e6-8778984bcd18")
+                    }
+
+                    afterEach {
+                        helper.deleteDocumentStruct(docStruct)
                     }
 
                     context("with Foundation") {
@@ -1271,7 +1332,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                                 let networkCalls = APIRequest.callsCount
 
                                 waitUntil(timeout: .seconds(10)) { done in
-                                    sut.saveDocument(docStruct, true, { result in
+                                    _ = sut.saveDocument(docStruct, true, { result in
                                         expect { try result.get() }.toNot(throwError())
                                         expect { try result.get() } == true
                                         done()
@@ -1406,7 +1467,14 @@ class DocumentManagerNetworkTests: QuickSpec {
                     let merged = "0\n1\n2\n3\n4\n"
 
                     beforeEach {
-                        docStruct = try? helper.createLocalAndRemoteVersions(ancestor, newLocal: newLocal, newRemote: newRemote)
+                        docStruct = try? helper.createLocalAndRemoteVersions(ancestor,
+                                                                             newLocal: newLocal,
+                                                                             newRemote: newRemote,
+                                                                             "995d94e1-e0df-4eca-93e6-8778984bcd18")
+                    }
+
+                    afterEach {
+                        helper.deleteDocumentStruct(docStruct)
                     }
 
                     context("with Foundation") {
@@ -1414,7 +1482,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                             let networkCalls = APIRequest.callsCount
 
                             waitUntil(timeout: .seconds(10)) { done in
-                                sut.saveDocument(docStruct, true, { result in
+                                _ = sut.saveDocument(docStruct, true, { result in
                                     expect { try result.get() }.toNot(throwError())
                                     expect { try result.get() } == true
                                     done()
@@ -1435,7 +1503,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                                 let networkCalls = APIRequest.callsCount
 
                                 waitUntil(timeout: .seconds(10)) { done in
-                                    sut.saveDocument(docStruct, true, { result in
+                                    _ = sut.saveDocument(docStruct, true, { result in
                                         expect { try result.get() }.toNot(throwError())
                                         expect { try result.get() } == true
                                         done()
@@ -1463,7 +1531,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                                 promise.done { success in
                                     expect(success) == true
                                     done()
-                                }.catch { fail("Should not be called: \($0)") }
+                                }.catch { fail("Should not be called: \($0)"); done() }
                             }
 
                             expect(APIRequest.callsCount - networkCalls) == 3
@@ -1485,7 +1553,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                                     promise.done { success in
                                         expect(success) == true
                                         done()
-                                    }.catch { fail("Should not be called: \($0)") }
+                                    }.catch { fail("Should not be called: \($0)"); done() }
                                 }
 
                                 expect(APIRequest.callsCount - networkCalls) == 3
@@ -1509,7 +1577,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                                 promise.then { success in
                                     expect(success) == true
                                     done()
-                                }.catch { fail("Should not be called: \($0)") }
+                                }.catch { fail("Should not be called: \($0)"); done() }
                             }
 
                             expect(APIRequest.callsCount - networkCalls) == 3
@@ -1531,7 +1599,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                                     promise.then { success in
                                         expect(success) == true
                                         done()
-                                    }.catch { fail("Should not be called: \($0)") }
+                                    }.catch { fail("Should not be called: \($0)"); done() }
                                 }
 
                                 expect(APIRequest.callsCount - networkCalls) == 3
@@ -1547,5 +1615,15 @@ class DocumentManagerNetworkTests: QuickSpec {
                 }
             }
         }
+    }
+
+    private func createStruct(_ id: String?, _ helper: DocumentManagerTestsHelper) -> DocumentStruct {
+        var docStruct = helper.createDocumentStruct()
+        if let id = id, let existingDocStructID = UUID(uuidString: id) {
+            docStruct.id = existingDocStructID
+        }
+        docStruct = helper.saveLocally(docStruct)
+
+        return docStruct
     }
 }

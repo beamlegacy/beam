@@ -8,7 +8,7 @@ class BeamUITestsMenuGeneratorTests: QuickSpec {
     var sut: BeamUITestsMenuGenerator = BeamUITestsMenuGenerator()
 
     override func spec() {
-        beforeSuite {
+        beforeEach {
             BeamTestsHelper.logout()
         }
         describe(".populateWithJournalNote()") {

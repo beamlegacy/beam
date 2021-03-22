@@ -14,9 +14,16 @@ class AccountManagerTests: QuickSpec {
         let sut = AccountManager()
         let existingAccountEmail = Configuration.testAccountEmail
         let nonExistingAccountEmail = "fabien+test-\(UUID())@beamapp.co"
+        let beamHelper = BeamTestsHelper()
 
         beforeEach {
             AccountManager.logout()
+
+            beamHelper.beginNetworkRecording()
+        }
+
+        afterEach {
+            beamHelper.endNetworkRecording()
         }
 
         describe(".forgotPassword") {
