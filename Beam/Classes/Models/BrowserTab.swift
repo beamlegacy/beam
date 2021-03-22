@@ -218,12 +218,8 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     // Add the current page to the current note and return the beam element (if the element already exist return it directly)
     func addCurrentPageToNote() -> BeamElement? {
         guard let elem = element else {
-            guard let url = url else {
-                return nil
-            }
-            guard !url.isSearchResult else {
-                return nil
-            } // Don't automatically add search results
+            guard let url = url else { return nil }
+            guard !url.isSearchResult else { return nil } // Don't automatically add search results
             let linkString = url.absoluteString
             guard !note.outLinks.contains(linkString) else {
                 element = note.elementContainingLink(to: linkString); return element
@@ -246,13 +242,9 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     }
 
     private func updateFavIcon() {
-        guard let url = url else {
-            favIcon = nil; return
-        }
+        guard let url = url else { favIcon = nil; return }
         FaviconProvider.shared.imageForUrl(url) { [weak self] (image) in
-            guard let self = self else {
-                return
-            }
+            guard let self = self else { return }
             self.favIcon = image
         }
     }
@@ -528,9 +520,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                 let quote = text
 
                 DispatchQueue.main.async {
-                    guard let current = self.addCurrentPageToNote() else {
-                        return
-                    }
+                    guard let current = self.addCurrentPageToNote() else { return }
                     let e = BeamElement()
                     e.kind = .quote(1, title, urlString)
                     e.text = quote
@@ -603,16 +593,11 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        guard let url = webView.url else {
-            return
-        }
+        guard let url = webView.url else { return }
         _ = addCurrentPageToNote()
         browsingTree.navigateTo(url: url.absoluteString, title: webView.title)
         Readability.read(webView) { [weak self] result in
-            guard let self = self else {
-                return
-            }
-
+            guard let self = self else { return }
             switch result {
             case let .success(read):
                 self.appendToIndexer(url, read)
