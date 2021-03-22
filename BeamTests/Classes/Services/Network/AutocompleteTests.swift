@@ -6,49 +6,60 @@ import Combine
 
 @testable import Beam
 class AutocompleteTests: QuickSpec {
-    var sut: Completer!
-
     override func spec() {
         var scope = Set<AnyCancellable>()
+        var sut: Completer!
+        let beamHelper = BeamTestsHelper()
 
         beforeEach {
-            self.sut = Completer()
+            sut = Completer()
         }
-        describe(".complete(query)") {
 
+        describe(".complete(query)") {
             it("updates results") {
+                beamHelper.beginNetworkRecording()
+
                 waitUntil(timeout: .seconds(10)) { done in
-                    self.sut.$results
+                    sut.$results
                         .dropFirst(1)
                         .sink { results in
                             expect(results.count).to(equal(10))
                             done()
                         }.store(in: &scope)
-                    self.sut.complete(query: "Beam")
+                    sut.complete(query: "Beam")
                 }
+
+                beamHelper.endNetworkRecording()
             }
 
             it("has an empty first call") {
+                beamHelper.beginNetworkRecording()
+
                 waitUntil(timeout: .seconds(10)) { done in
-                    self.sut.$results
+                    sut.$results
                         .sink { results in
                             expect(results.count).to(equal(0))
                             done()
                         }.store(in: &scope)
                 }
+
+                beamHelper.endNetworkRecording()
             }
 
             it("called twice updates results only once") {
                 waitUntil(timeout: .seconds(10)) { done in
-                    self.sut.$results
+                    sut.$results
                         .dropFirst(1)
                         .sink { results in
                             expect(results.count).to(equal(10))
                             done()
                         }.store(in: &scope)
-                    self.sut.complete(query: "Hello")
+
+                    sut.complete(query: "Hello")
+                    beamHelper.beginNetworkRecording()
                     // 2nd call cancel previous query immediatly
-                    self.sut.complete(query: "Hello world")
+                    sut.complete(query: "Hello world")
+                    beamHelper.endNetworkRecording()
                 }
             }
         }

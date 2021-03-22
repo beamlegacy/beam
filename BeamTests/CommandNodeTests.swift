@@ -19,7 +19,7 @@ class CommandNodeTests: QuickSpec {
         var tree: String!
         var rootNode: TextRoot!
 
-        beforeSuite {
+        beforeEach {
             let note = self.setupTree()
             let bullet2 = BeamElement("Second bullet")
             note.addChild(bullet2)

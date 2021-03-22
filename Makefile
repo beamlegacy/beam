@@ -126,4 +126,7 @@ install_libsodium:
 	sudo mkdir -p /opt/local
 	sudo ln -s /opt/homebrew/lib /opt/local
 
+copy_vinyl_files:
+	cp ${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Logs/Beam/Vinyl/*.json BeamTests/Vinyl/
+
 setup: install_dependencies install_direnv install_swiftlint install_cmake variable_injector

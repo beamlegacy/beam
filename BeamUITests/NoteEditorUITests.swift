@@ -14,7 +14,7 @@ class NoteEditorUITests: QuickSpec {
         var firstJournalEntry: XCUIElement!
         let textInput = "This is a test ab \(Date()) ab"
 
-        beforeSuite {
+        beforeEach {
             self.continueAfterFailure = false
         }
 

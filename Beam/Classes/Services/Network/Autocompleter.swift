@@ -48,7 +48,7 @@ class Completer: ObservableObject {
             return
         }
         lastDataTask?.cancel()
-        lastDataTask = URLSession.shared.dataTask(with: url) { [weak self] data, _, _ in
+        lastDataTask = BeamURLSession.shared.dataTask(with: url) { [weak self] data, _, _ in
             guard let self = self else { return }
             guard let data = data else { return }
 

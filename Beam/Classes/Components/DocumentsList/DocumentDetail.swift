@@ -110,7 +110,7 @@ struct DocumentDetail: View {
         var documentStruct = DocumentStruct(document: document)
         documentStruct.isPublic = !documentStruct.isPublic
 
-        documentManager.saveDocument(documentStruct, completion: { _ in
+        _ = documentManager.saveDocument(documentStruct, completion: { _ in
         })
     }
 

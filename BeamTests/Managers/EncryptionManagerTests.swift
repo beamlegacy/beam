@@ -10,7 +10,7 @@ class EncryptionManagerTests: QuickSpec {
     override func spec() {
         let sut = EncryptionManager()
         let text = String.randomTitle()
-        beforeSuite {
+        beforeEach {
             sut.clearPrivateKey()
         }
 

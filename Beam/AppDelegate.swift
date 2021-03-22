@@ -72,6 +72,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         prepareMenuForTestEnv()
         #endif
 
+        syncDocuments()
+    }
+
+    private func syncDocuments() {
+        guard Configuration.env != "test" else { return }
+
+        // With Vinyl and Network test recording, and this executing, it generates async network
+        // calls and randomly fails.
+        // My feeling is we should sync + trigger notification and only start network calls when
+        // this sync has finished.
         documentManager.syncDocuments { result in
             switch result {
             case .failure(let error):

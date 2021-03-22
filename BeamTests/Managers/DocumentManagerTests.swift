@@ -18,7 +18,7 @@ class DocumentManagerTests: QuickSpec {
         var helper: DocumentManagerTestsHelper!
         let mainContext = CoreDataManager.shared.mainContext
 
-        beforeSuite {
+        beforeEach {
             sut = DocumentManager()
             helper = DocumentManagerTestsHelper(documentManager: sut,
                                                 coreDataManager: CoreDataManager.shared)
@@ -644,29 +644,31 @@ class DocumentManagerTests: QuickSpec {
             }
         }
 
-        describe("DocumentVersion after creation") {
+        describe("document.version") {
             let faker = Faker()
+            var docStruct: DocumentStruct!
 
-            it("correctly sets doc version at creation and after a save")
-            {            //swiftlint:disable:next force_cast
+            it("sets document version at creation and after a save") {
                 let title = faker.zelda.game()
-                var docStruct = sut.create(title: title)!
+                //swiftlint:disable:next force_cast
+                docStruct = sut.create(title: title)!
                 expect(docStruct.version).to(equal(0))
                 let document = "whatever binary data"
                 //swiftlint:disable:next force_try
                 let jsonData = try! JSONEncoder().encode(document)
                 docStruct.data = jsonData
 
-                docStruct = sut.saveDocument(docStruct)
-                expect(docStruct.version).to(equal(1))
+                // Semaphore is needed or the afterEach deleteDocument might be called *before* this saveDocument is finished
+                let semaphore = DispatchSemaphore(value: 0)
+                docStruct = sut.saveDocument(docStruct, completion: { _ in
+                    semaphore.signal()
+                })
+                semaphore.wait()
 
-                waitUntil(timeout: .seconds(10)) { done in
-                    let promise: Promises.Promise<Bool> = sut.deleteDocument(id: docStruct.id)
-                    promise.then { _ in done() }
-                }
+                expect(docStruct.version).to(equal(1))
             }
 
-            it("corretcly increments the version number at each save operation") {
+            it("increments the version number for each save operations") {
                 let document = "whatever binary data"
 
                 //swiftlint:disable:next force_try
@@ -674,15 +676,15 @@ class DocumentManagerTests: QuickSpec {
 
                 let id = UUID()
                 let title = faker.zelda.game()
-                var docStruct = DocumentStruct(id: id,
-                                               title: title,
-                                               createdAt: Date(),
-                                               updatedAt: Date(),
-                                               data: jsonData,
-                                               documentType: .note,
-                                               version: 0)
+                docStruct = DocumentStruct(id: id,
+                                           title: title,
+                                           createdAt: Date(),
+                                           updatedAt: Date(),
+                                           data: jsonData,
+                                           documentType: .note,
+                                           version: 0)
 
-                waitUntil { done in
+                waitUntil(timeout: .seconds(2)) { done in
                     docStruct = sut.saveDocument(docStruct, completion:  { _ in
                         done()
                     })
@@ -691,23 +693,18 @@ class DocumentManagerTests: QuickSpec {
                     expect(docStruct.version).to(equal(1))
                 }
 
-                waitUntil { done in
+                waitUntil(timeout: .seconds(2)) { done in
                     docStruct = sut.saveDocument(docStruct, completion:  { _ in
                         done()
                     })
                     expect(docStruct.version).to(equal(2))
                 }
-
-                waitUntil(timeout: .seconds(10)) { done in
-                    let promise: Promises.Promise<Bool> = sut.deleteDocument(id: docStruct.id)
-                    promise.then { _ in done() }
-                }
             }
 
-            it("refuses to save in case of mismatch") {
+            it("refuses to save in case of version mismatch") {
                 let title = faker.zelda.game()
                 //swiftlint:disable:next force_cast
-                var docStruct = sut.create(title: title)!
+                docStruct = sut.create(title: title)!
                 expect(docStruct.version).to(equal(0))
 
                 let document = "whatever binary data"
@@ -716,7 +713,7 @@ class DocumentManagerTests: QuickSpec {
                 docStruct.data = jsonData
 
                 for index in 0...3 {
-                    waitUntil { done in
+                    waitUntil(timeout: .seconds(2)) { done in
                         docStruct = sut.saveDocument(docStruct, completion:  { _ in
                             done()
                         })
@@ -729,7 +726,7 @@ class DocumentManagerTests: QuickSpec {
 
                 // Try to save a previous version
                 docStruct.version = 1
-                waitUntil { done in
+                waitUntil(timeout: .seconds(2)) { done in
                     docStruct = sut.saveDocument(docStruct, completion:  { result in
                         expect { try result.get() }.to(throwError { (error: NSError) in
                             expect(error.code).to(equal(1002))
@@ -738,11 +735,6 @@ class DocumentManagerTests: QuickSpec {
                     })
                     // TODO: shouldn't increment version
                     expect(docStruct.version).to(equal(2))
-                }
-
-                waitUntil(timeout: .seconds(10)) { done in
-                    let promise: Promises.Promise<Bool> = sut.deleteDocument(id: docStruct.id)
-                    promise.then { _ in done() }
                 }
             }
         }

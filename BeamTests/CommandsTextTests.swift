@@ -19,7 +19,7 @@ class CommandsTextTests: QuickSpec {
         var tree: String!
         var rootNode: TextRoot!
 
-        beforeSuite {
+        beforeEach {
             // Setup a simple node tree
             let note = self.setupAndResetTree()
             let editor = BeamTextEdit(root: note, journalMode: true)
