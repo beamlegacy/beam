@@ -326,6 +326,7 @@ public class TextNode: Widget {
     }
 
     override func updateChildrenLayout() {
+        updateIndentLayer()
         var pos = NSPoint(x: childInset, y: self.contentsFrame.height)
 
         for c in children {
@@ -346,25 +347,17 @@ public class TextNode: Widget {
     }
 
     func createIndentLayer() {
-        let y = contentsFrame.height
         let indentLayer = CALayer()
-
-        indentLayer.frame = NSRect(x: childInset - 1, y: y - 5, width: 1, height: frame.height - y - 5)
         indentLayer.backgroundColor = NSColor.editorIndentBackgroundColor.cgColor
-        indentLayer.isHidden = true
-
         indentLayer.enableAnimations = false
         addLayer(Layer(name: "indentLayer", layer: indentLayer))
+        updateIndentLayer()
     }
 
     func updateIndentLayer() {
         guard let indentLayer = layers["indentLayer"] else { return }
-
-        if !children.isEmpty && showDisclosureButton && showIdentationLine {
-            let y = contentsFrame.height
-            indentLayer.frame = NSRect(x: childInset - 1, y: y - 5, width: 1, height: frame.height - y - 5)
-        }
-
+        let y = firstLineHeight + 8
+        indentLayer.frame = NSRect(x: childInset - 1.5, y: y - 5, width: 1, height: frame.height - y - 5)
         indentLayer.layer.isHidden = children.isEmpty || !open
     }
 
@@ -417,8 +410,6 @@ public class TextNode: Widget {
     func drawText(in context: CGContext) {
         // Draw the text:
         context.saveGState()
-
-        updateIndentLayer()
 
         guard let bulletLayer = self.layers["bullet"] else { return }
         guard let disclosureLayer = self.layers["disclosure"] as? ChevronButton else { return }
