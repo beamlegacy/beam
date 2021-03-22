@@ -66,7 +66,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     @Published var browsingTree: BrowsingTree
     @Published var privateMode = false
 
-    let pointAndShoot: PointAndShoot = PointAndShoot(config: PointAndShootConfig(native: false, web: false));
+    let pointAndShoot: PointAndShoot = PointAndShoot(config: PointAndShootConfig(native: true, web: true));
 
     var state: BeamState!
 
