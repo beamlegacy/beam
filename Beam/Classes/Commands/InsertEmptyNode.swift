@@ -11,22 +11,22 @@ class InsertEmptyNode: TextEditorCommand {
     static let name: String = "InsertEmptyNode"
 
     var parentElementId: UUID
-    var noteName: String
+    var noteTitle: String
     let index: Int
     var newElementId: UUID?
     var data: Data?
 
-    init(with parentElementId: UUID, of noteName: String, at index: Int = 0) {
+    init(with parentElementId: UUID, of noteTitle: String, at index: Int = 0) {
         self.parentElementId = parentElementId
-        self.noteName = noteName
+        self.noteTitle = noteTitle
         self.index = index
-        super.init(name: InsertEmptyNode.name)
+        super.init(name: Self.name)
     }
 
     override func run(context: Widget?) -> Bool {
         guard let context = context,
               let root = context.root,
-              let parentElementInstance = getElement(for: noteName, and: parentElementId) else { return false }
+              let parentElementInstance = getElement(for: noteTitle, and: parentElementId) else { return false }
 
         let element = decode(data: data) ?? BeamElement()
         parentElementInstance.element.insert(element, at: index)
@@ -39,8 +39,8 @@ class InsertEmptyNode: TextEditorCommand {
 
     override func undo(context: Widget?) -> Bool {
         guard let newElementId = newElementId,
-              let newElementInstance = getElement(for: noteName, and: newElementId),
-              let parentElementInstance = getElement(for: noteName, and: parentElementId) else { return false }
+              let newElementInstance = getElement(for: noteTitle, and: newElementId),
+              let parentElementInstance = getElement(for: noteTitle, and: parentElementId) else { return false }
 
         for c in newElementInstance.element.children {
             parentElementInstance.element.addChild(c)

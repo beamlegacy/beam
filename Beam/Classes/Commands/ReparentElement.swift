@@ -12,22 +12,22 @@ class ReparentElement: TextEditorCommand {
     var elementId: UUID
     var newParentId: UUID
     var newIndexInParent: Int
-    var noteName: String
+    var noteTitle: String
     var previousParentId: UUID?
     var previousIndexInParent: Int?
 
-    init(for elementId: UUID, of noteName: String, to newParent: UUID, atIndex newIndexInParent: Int) {
+    init(for elementId: UUID, of noteTitle: String, to newParent: UUID, atIndex newIndexInParent: Int) {
         self.elementId = elementId
         self.newParentId = newParent
         self.newIndexInParent = newIndexInParent
-        self.noteName = noteName
+        self.noteTitle = noteTitle
 
-        super.init(name: ReparentElement.name)
+        super.init(name: Self.name)
     }
 
     override func run(context: Widget?) -> Bool {
-        guard let elementInstance = getElement(for: noteName, and: elementId),
-            let newParentInstance = getElement(for: noteName, and: newParentId),
+        guard let elementInstance = getElement(for: noteTitle, and: elementId),
+            let newParentInstance = getElement(for: noteTitle, and: newParentId),
             let previousParent = elementInstance.element.parent
         else { return false }
 
@@ -48,10 +48,10 @@ class ReparentElement: TextEditorCommand {
     }
 
     override func undo(context: Widget?) -> Bool {
-        guard let elementInstance = getElement(for: noteName, and: elementId),
+        guard let elementInstance = getElement(for: noteTitle, and: elementId),
               let previousParentId = self.previousParentId,
               let indexInParent = self.previousIndexInParent,
-              let previousElementInstance = getElement(for: noteName, and: previousParentId)
+              let previousElementInstance = getElement(for: noteTitle, and: previousParentId)
         else { return false }
 
         // Bread Crumbs are a bitch

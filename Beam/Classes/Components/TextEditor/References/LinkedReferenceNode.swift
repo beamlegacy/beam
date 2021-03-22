@@ -182,7 +182,7 @@ class LinkedReferenceNode: TextNode {
 
         text.makeLinkToNoteExplicit(forNote: title)
 
-        let reference = NoteReference(noteName: element.note!.title, elementID: element.id)
+        let reference = NoteReference(noteTitle: element.note!.title, elementID: element.id)
         note.addReference(reference)
 
         self.editor.showOrHidePersistentFormatter(isPresent: false)

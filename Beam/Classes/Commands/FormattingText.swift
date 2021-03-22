@@ -11,32 +11,32 @@ class FormattingText: TextEditorCommand {
     static let name: String = "FormattingText"
 
     var elementId: UUID
-    var noteName: String
+    var noteTitle: String
     var oldKind: ElementKind?
     let newKind: ElementKind?
     let newAttribute: BeamText.Attribute?
     let range: Range<Int>?
     var isActive: Bool
 
-    init(in elementId: UUID, of noteName: String, for kind: ElementKind?, with attribute: BeamText.Attribute?, for range: Range<Int>?, isActive: Bool) {
+    init(in elementId: UUID, of noteTitle: String, for kind: ElementKind?, with attribute: BeamText.Attribute?, for range: Range<Int>?, isActive: Bool) {
         self.elementId = elementId
-        self.noteName = noteName
+        self.noteTitle = noteTitle
         self.newKind = kind
         self.newAttribute = attribute
         self.range = range
         self.isActive = isActive
-        super.init(name: FormattingText.name)
+        super.init(name: Self.name)
         saveOldKind()
     }
 
     private func saveOldKind() {
         guard newKind != nil,
-              let elementInstance = getElement(for: noteName, and: elementId) else { return }
+              let elementInstance = getElement(for: noteTitle, and: elementId) else { return }
         self.oldKind = elementInstance.element.kind
     }
 
     override func run(context: Widget?) -> Bool {
-        guard let elementInstance = getElement(for: noteName, and: elementId) else { return false }
+        guard let elementInstance = getElement(for: noteTitle, and: elementId) else { return false }
 
         var result = true
         if let newKind = self.newKind {
@@ -71,7 +71,7 @@ class FormattingText: TextEditorCommand {
     }
 
     override func undo(context: Widget?) -> Bool {
-        guard let elementInstance = getElement(for: noteName, and: elementId) else { return false }
+        guard let elementInstance = getElement(for: noteTitle, and: elementId) else { return false }
 
         var result: Bool = true
         if let oldKind = self.oldKind, self.newKind != nil {

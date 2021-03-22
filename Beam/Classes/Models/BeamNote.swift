@@ -23,7 +23,7 @@ struct VisitedPage: Codable, Identifiable {
 }
 
 struct NoteReference: Codable, Equatable, Hashable {
-    var noteName: String
+    var noteTitle: String
     var elementID: UUID
 }
 
@@ -364,20 +364,20 @@ class BeamNote: BeamElement {
 
     static var linkDetectionQueue = DispatchQueue(label: "LinkDetector")
     static var linkDetectionRunning = false
-    static func requestLinkDetection(for noteNamed: String? = nil) {
+    static func requestLinkDetection(for noteTitled: String? = nil) {
         guard !linkDetectionRunning else { return }
         linkDetectionRunning = true
 
         linkDetectionQueue.async {
-            detectLinks(for: noteNamed)
+            detectLinks(for: noteTitled)
             DispatchQueue.main.async {
                 linkDetectionRunning = false
             }
         }
     }
 
-    static func detectLinks(in noteName: String, to allNotes: [String], with documentManager: DocumentManager) {
-        guard let doc = documentManager.loadDocByTitleInBg(title: noteName.lowercased()) else {
+    static func detectLinks(in noteTitle: String, to allNotes: [String], with documentManager: DocumentManager) {
+        guard let doc = documentManager.loadDocByTitleInBg(title: noteTitle.lowercased()) else {
             return
         }
 
@@ -394,9 +394,9 @@ class BeamNote: BeamElement {
             let brokenRefs = note.getBrokenUnlinkedReferences(documentManager, allNotes)
 
             // Detect UnLinked Notes
-            let unlinks = note.getDeepUnlinkedReferences(noteName, allNotes)
+            let unlinks = note.getDeepUnlinkedReferences(noteTitle, allNotes)
             DispatchQueue.main.async {
-                let note = BeamNote.fetch(documentManager, title: noteName)
+                let note = BeamNote.fetch(documentManager, title: noteTitle)
 
                 for brokenLink in brokenLinks {
                     note?.removeReference(brokenLink)
@@ -418,10 +418,10 @@ class BeamNote: BeamElement {
         }
     }
 
-    static func detectLinks(for noteNamed: String? = nil) {
+    static func detectLinks(for noteTitled: String? = nil) {
         let documentManager = DocumentManager()
         let allNotes = documentManager.allDocumentsTitles()
-        let allTitles = noteNamed == nil ? allNotes : [noteNamed!]
+        let allTitles = noteTitled == nil ? allNotes : [noteTitled!]
         Logger.shared.logInfo("Detect links for \(allTitles.count) notes", category: .document)
 
         for title in allNotes {
@@ -434,8 +434,8 @@ class BeamNote: BeamElement {
         var notes = [String: BeamNote]()
         for link in references {
             guard let note: BeamNote = {
-                notes[link.noteName] ?? {
-                    guard let doc = documentManager.loadDocumentByTitle(title: link.noteName.lowercased()) else {
+                notes[link.noteTitle] ?? {
+                    guard let doc = documentManager.loadDocumentByTitle(title: link.noteTitle.lowercased()) else {
                         return nil
                     }
 
@@ -465,8 +465,8 @@ class BeamNote: BeamElement {
         var notes = [String: BeamNote]()
         for ref in references {
             guard let note: BeamNote = {
-                notes[ref.noteName] ?? {
-                    guard let doc = documentManager.loadDocumentByTitle(title: ref.noteName.lowercased()) else {
+                notes[ref.noteTitle] ?? {
+                    guard let doc = documentManager.loadDocumentByTitle(title: ref.noteTitle.lowercased()) else {
                         return nil
                     }
 

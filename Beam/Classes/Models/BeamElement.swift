@@ -278,10 +278,10 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
         let existingLinks = text.internalLinks.map { range -> String in range.string }
         let string = text.text
 
-        for noteName in allNames where thisNoteTitle != noteName {
-            if !existingLinks.contains(noteName), string.contains(noteName) {
-                let ref = NoteReference(noteName: thisNoteTitle, elementID: id)
-                references[noteName] = (references[noteName] ?? []) + [ref]
+        for noteTitle in allNames where thisNoteTitle != noteTitle {
+            if !existingLinks.contains(noteTitle), string.contains(noteTitle) {
+                let ref = NoteReference(noteTitle: thisNoteTitle, elementID: id)
+                references[noteTitle] = (references[noteTitle] ?? []) + [ref]
 //                Logger.shared.logInfo("New unlink \(thisNoteTitle) --> \(note.title)", category: .document)
             }
         }
@@ -339,7 +339,7 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
         for link in text.internalLinks where link.string != note.title {
             let linkTitle = link.string
             //            Logger.shared.logInfo("searching link \(linkTitle)", category: .document)
-            let reference = NoteReference(noteName: sourceNote, elementID: id)
+            let reference = NoteReference(noteTitle: sourceNote, elementID: id)
             //            Logger.shared.logInfo("New link \(note.title) <-> \(linkTitle)", category: .document)
 
             if async {
@@ -437,12 +437,12 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
         return depth + 1
     }
 
-    func hasLinkToNote(named noteName: String) -> Bool {
-        text.hasLinkToNote(named: noteName)
+    func hasLinkToNote(named noteTitle: String) -> Bool {
+        text.hasLinkToNote(named: noteTitle)
     }
 
-    func hasReferenceToNote(named noteName: String) -> Bool {
-        text.hasReferenceToNote(named: noteName)
+    func hasReferenceToNote(named noteTitle: String) -> Bool {
+        text.hasReferenceToNote(titled: noteTitle)
     }
 
     public var outLinks: [String] {

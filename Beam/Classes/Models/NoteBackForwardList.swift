@@ -24,8 +24,8 @@ class NoteBackForwardList: Codable {
 
             switch try container.decode(Int.self, forKey: .mode) {
             case 0:
-                let noteName = try container.decode(String.self, forKey: .note)
-                if let note = BeamNote.fetch(AppDelegate.main.data.documentManager, title: noteName) {
+                let noteTitle = try container.decode(String.self, forKey: .note)
+                if let note = BeamNote.fetch(AppDelegate.main.data.documentManager, title: noteTitle) {
                     self = .note(note)
                 }
             default:

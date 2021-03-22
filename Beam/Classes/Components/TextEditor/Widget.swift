@@ -928,6 +928,11 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         }
     }
 
+    var cmdManager: CommandManager<Widget> {
+        guard let root = root else { fatalError("Trying to access the command manager on an unconnected Widget is a programming error.") }
+        return root.cmdManager
+    }
+
 }
 
 // swiftlint:enable type_body_length
