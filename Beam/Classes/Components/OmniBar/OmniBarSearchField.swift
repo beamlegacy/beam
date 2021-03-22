@@ -55,8 +55,8 @@ struct OmniBarSearchField: View {
                 text: textFieldText,
                 isEditing: customEditingBinding,
                 placeholder: "Search Beam or the web",
-                font: .systemFont(ofSize: 13),
-                textColor: NSColor.omniboxTextColor,
+                font: NSFont(name: "Inter-Medium", size: 13),
+                textColor: isEditing ? NSColor.omniboxTextColor : NSColor.omniboxPlaceholderTextColor,
                 placeholderColor: NSColor.omniboxPlaceholderTextColor,
                 selectedRanges: state.searchQuerySelectedRanges,
                 onTextChanged: { _ in

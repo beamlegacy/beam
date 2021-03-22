@@ -79,7 +79,7 @@ struct OmniBar: View {
                                 }
                             }
                         }
-                        .padding(.leading, !isEditing && state.mode == .web ? 20 : 7)
+                        .padding(.leading, !isEditing && state.mode == .web ? 8 : 7)
                     }
                     .animation(enableAnimations ? .easeInOut(duration: 0.3) : nil)
                     .padding(.horizontal, 5)
