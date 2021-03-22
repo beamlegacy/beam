@@ -111,7 +111,7 @@ class BrowsingNode: ObservableObject, Codable {
     func dump(level: Int = 0) {
         let tabs = String.tabs(level)
 
-        print(tabs + "'\(title)' / '\(url)'")
+        Logger.shared.logDebug(tabs + "'\(title)' / '\(url)'")
         for child in children {
             child.dump(level: level + 1)
         }
@@ -245,7 +245,7 @@ class BrowsingTree: ObservableObject, Codable {
     }
 
     func dump() {
-        print("BrowsingTree - current = '\(current.title)' / \(current.url)")
+        Logger.shared.logDebug("BrowsingTree - current = '\(current.title)' / \(current.url)")
         root.dump()
     }
 

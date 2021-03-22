@@ -41,6 +41,7 @@ class DocumentRequest: APIRequest {
         let previousChecksum: String?
         let createdAt: Date?
         let updatedAt: Date?
+        let isPublic: Bool?
     }
 
     struct UpdateDocument: Decodable, Errorable {
@@ -50,6 +51,32 @@ class DocumentRequest: APIRequest {
 
     struct FetchDocumentParameters: Encodable {
         let id: String
+    }
+
+    internal func saveDocumentParameters(_ document: DocumentAPIType) throws -> UpdateDocumentParameters {
+        guard let title = document.title else {
+            throw DocumentRequestError.noTitle
+        }
+
+        try document.encrypt()
+
+        let parameters = UpdateDocumentParameters(id: document.id,
+                                                  title: title,
+                                                  data: document.shouldEncrypt ? document.encryptedData : document.data,
+                                                  previousChecksum: document.previousChecksum,
+                                                  createdAt: document.createdAt,
+                                                  updatedAt: document.updatedAt,
+                                                  isPublic: document.isPublic)
+
+        return parameters
+    }
+
+    internal func encryptAllNotes(_ notes: [DocumentAPIType]) throws {
+        guard Configuration.encryptionEnabled else { return }
+        try notes.forEach {
+            try $0.encrypt()
+            $0.data = $0.encryptedData
+        }
     }
 }
 
@@ -70,7 +97,16 @@ extension DocumentRequest {
         let promise: PromiseKit.Promise<FetchDocument> = performRequest(bodyParamsRequest: bodyParamsRequest,
                                                                         authenticatedCall: true)
 
-        return promise.map(on: self.backgroundQueue) { $0 as DocumentAPIType }
+        return promise
+            .map(on: self.backgroundQueue) { $0 as DocumentAPIType }
+            .then(on: self.backgroundQueue) { (documentAPIType: DocumentAPIType) -> PromiseKit.Promise<DocumentAPIType> in
+                guard Configuration.encryptionEnabled else {
+                    return .value(documentAPIType)
+                }
+
+                try documentAPIType.decrypt()
+                return .value(documentAPIType)
+            }
     }
 
     func fetchDocuments() -> PromiseKit.Promise<[DocumentAPIType]> {
@@ -84,28 +120,33 @@ extension DocumentRequest {
             }
 
             return documents
+        }.then(on: self.backgroundQueue) { (documents: [DocumentAPIType]) -> PromiseKit.Promise<[DocumentAPIType]> in
+            guard Configuration.encryptionEnabled else { return .value(documents) }
+
+            try documents.forEach { try $0.decrypt() }
+
+            return .value(documents)
         }
     }
 
     func saveDocument(_ document: DocumentAPIType) -> PromiseKit.Promise<DocumentAPIType> {
-        guard let title = document.title else {
-            return Promise(error: DocumentRequestError.noTitle)
+        var parameters: UpdateDocumentParameters
+
+        do {
+            parameters = try saveDocumentParameters(document)
+        } catch {
+            return Promise(error: error)
         }
 
-        let parameters = UpdateDocumentParameters(id: document.id,
-                                                  title: title,
-                                                  data: document.data,
-                                                  previousChecksum: document.previousChecksum,
-                                                  createdAt: document.createdAt,
-                                                  updatedAt: document.updatedAt)
         let bodyParamsRequest = GraphqlParameters(fileName: "update_document", variables: parameters)
 
         let promise: PromiseKit.Promise<UpdateDocument> = performRequest(bodyParamsRequest: bodyParamsRequest,
                                                                          authenticatedCall: true)
 
         return promise.map(on: self.backgroundQueue) {
-            if let document = $0.document {
-                return document
+            if let updateDocument = $0.document {
+                updateDocument.previousChecksum = document.dataChecksum
+                return updateDocument
             }
             throw APIRequestError.parserError
         }
@@ -132,6 +173,14 @@ extension DocumentRequest {
     }
 
     func importDocuments(_ notes: [DocumentAPIType]) -> PromiseKit.Promise<ImportDocuments> {
+        do {
+            try encryptAllNotes(notes)
+        } catch {
+            return PromiseKit.Promise(error: DocumentRequestError.parserError)
+        }
+
+        notes.forEach { $0.clearForImports() }
+
         let jsonDataEncoded = try? JSONEncoder().encode(notes)
         guard let jsonData = jsonDataEncoded, let jsonString = String(data: jsonData, encoding: .utf8) else {
             return PromiseKit.Promise(error: DocumentRequestError.parserError)
@@ -164,41 +213,55 @@ extension DocumentRequest {
         let promise: Promises.Promise<FetchDocument> = performRequest(bodyParamsRequest: bodyParamsRequest,
                                                                       authenticatedCall: true)
 
-        return promise.then(on: self.backgroundQueue) { $0 as DocumentAPIType }
+        return promise
+            .then(on: self.backgroundQueue) { $0 as DocumentAPIType }
+            .then(on: self.backgroundQueue) { (documentAPIType: DocumentAPIType) -> Promises.Promise<DocumentAPIType> in
+                guard Configuration.encryptionEnabled else {
+                    return Promises.Promise(documentAPIType)
+                }
+
+                try documentAPIType.decrypt()
+                return Promises.Promise(documentAPIType)
+            }
     }
 
     func fetchDocuments() -> Promises.Promise<[DocumentAPIType]> {
         let bodyParamsRequest = GraphqlParameters(fileName: "documents", variables: EmptyVariable())
 
         let promise: Promises.Promise<Me> = performRequest(bodyParamsRequest: bodyParamsRequest,
-                                                             authenticatedCall: true)
+                                                           authenticatedCall: true)
         return promise.then(on: self.backgroundQueue) {
             guard let documents = $0.documents else {
                 throw DocumentRequestError.parserError
             }
             return Promise(documents)
+        }.then(on: self.backgroundQueue) { (documents: [DocumentAPIType]) -> Promises.Promise<[DocumentAPIType]> in
+            guard Configuration.encryptionEnabled else { return Promises.Promise(documents) }
+
+            try documents.forEach { try $0.decrypt() }
+
+            return Promises.Promise(documents)
         }
     }
 
     func saveDocument(_ document: DocumentAPIType) -> Promises.Promise<DocumentAPIType> {
-        guard let title = document.title else {
-            return Promises.Promise(DocumentRequestError.noTitle)
+        var parameters: UpdateDocumentParameters
+
+        do {
+            parameters = try saveDocumentParameters(document)
+        } catch {
+            return Promise(error)
         }
 
-        let parameters = UpdateDocumentParameters(id: document.id,
-                                                  title: title,
-                                                  data: document.data,
-                                                  previousChecksum: document.previousChecksum,
-                                                  createdAt: document.createdAt,
-                                                  updatedAt: document.updatedAt)
         let bodyParamsRequest = GraphqlParameters(fileName: "update_document", variables: parameters)
 
         let promise: Promises.Promise<UpdateDocument> = self.performRequest(bodyParamsRequest: bodyParamsRequest,
                                                                             authenticatedCall: true)
 
         return promise.then(on: self.backgroundQueue) {
-            if let document = $0.document {
-                return Promises.Promise(document)
+            if let updateDocument = $0.document {
+                updateDocument.previousChecksum = document.dataChecksum
+                return Promises.Promise(updateDocument)
             }
             throw DocumentRequestError.parserError
         }
@@ -207,7 +270,7 @@ extension DocumentRequest {
     func deleteAllDocuments() -> Promises.Promise<Bool> {
         let bodyParamsRequest = GraphqlParameters(fileName: "delete_all_documents", variables: EmptyVariable())
         let promise: Promises.Promise<DeleteAllDocuments> = performRequest(bodyParamsRequest: bodyParamsRequest,
-                                                                             authenticatedCall: true)
+                                                                           authenticatedCall: true)
         return promise.then(on: self.backgroundQueue) {
             guard let success = $0.success else {
                 throw DocumentRequestError.parserError
@@ -220,11 +283,19 @@ extension DocumentRequest {
         let parameters = DeleteDocumentParameters(id: id)
         let bodyParamsRequest = GraphqlParameters(fileName: "delete_document", variables: parameters)
         let promise: Promises.Promise<DeleteDocument> = performRequest(bodyParamsRequest: bodyParamsRequest,
-                                                                         authenticatedCall: true)
+                                                                       authenticatedCall: true)
         return promise.then(on: self.backgroundQueue) { $0.document }
     }
 
     func importDocuments(_ notes: [DocumentAPIType]) -> Promises.Promise<ImportDocuments> {
+        do {
+            try encryptAllNotes(notes)
+        } catch {
+            return Promises.Promise(DocumentRequestError.parserError)
+        }
+
+        notes.forEach { $0.clearForImports() }
+
         let jsonDataEncoded = try? JSONEncoder().encode(notes)
         guard let jsonData = jsonDataEncoded, let jsonString = String(data: jsonData, encoding: .utf8) else {
             return Promises.Promise(DocumentRequestError.parserError)
@@ -247,6 +318,10 @@ extension DocumentRequest {
                          _ completionHandler: @escaping (Swift.Result<ImportDocuments, Error>) -> Void) throws -> URLSessionDataTask? {
         var jsonString: String!
 
+        try encryptAllNotes(notes)
+
+        notes.forEach { $0.clearForImports() }
+
         do {
             let jsonData = try JSONEncoder().encode(notes)
             guard let parsedData = String(data: jsonData, encoding: .utf8) else {
@@ -267,14 +342,14 @@ extension DocumentRequest {
     }
 
     @discardableResult
-    func deleteAllDocuments(_ completionHandler: @escaping (Swift.Result<DeleteAllDocuments, Error>) -> Void) throws -> URLSessionDataTask? {
+    func deleteAllDocuments(_ completionHandler: @escaping (Swift.Result<DeleteAllDocuments, Error>) -> Void) throws -> URLSessionDataTask {
         let bodyParamsRequest = GraphqlParameters(fileName: "delete_all_documents", variables: EmptyVariable())
 
         return try performRequest(bodyParamsRequest: bodyParamsRequest, completionHandler: completionHandler)
     }
 
     @discardableResult
-    func deleteDocument(_ id: String, _ completionHandler: @escaping (Swift.Result<DeleteDocument, Error>) -> Void) throws  -> URLSessionDataTask? {
+    func deleteDocument(_ id: String, _ completionHandler: @escaping (Swift.Result<DeleteDocument, Error>) -> Void) throws  -> URLSessionDataTask {
         let parameters = DeleteDocumentParameters(id: id)
         let bodyParamsRequest = GraphqlParameters(fileName: "delete_document", variables: parameters)
 
@@ -283,23 +358,20 @@ extension DocumentRequest {
 
     @discardableResult
     // return multiple errors, as the API might return more than one.
-    func saveDocument(_ document: DocumentAPIType, _ completionHandler: @escaping (Swift.Result<UpdateDocument, Error>) -> Void) throws -> URLSessionDataTask? {
-        guard let title = document.title else {
-            throw DocumentRequestError.noTitle
-        }
-        let parameters = UpdateDocumentParameters(id: document.id,
-                                                  title: title,
-                                                  data: document.data,
-                                                  previousChecksum: document.previousChecksum,
-                                                  createdAt: document.createdAt,
-                                                  updatedAt: document.updatedAt)
+    func saveDocument(_ document: DocumentAPIType, _ completionHandler: @escaping (Swift.Result<UpdateDocument, Error>) -> Void) throws -> URLSessionDataTask {
+        let parameters = try saveDocumentParameters(document)
         let bodyParamsRequest = GraphqlParameters(fileName: "update_document", variables: parameters)
 
-        return try performRequest(bodyParamsRequest: bodyParamsRequest, completionHandler: completionHandler)
+        return try performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<UpdateDocument, Error>) in
+            if case .success(let updateDocument) = result {
+                updateDocument.document?.previousChecksum = document.dataChecksum
+            }
+            completionHandler(result)
+        }
     }
 
     @discardableResult
-    func fetchDocuments(_ completionHandler: @escaping (Swift.Result<[DocumentAPIType], Error>) -> Void) throws -> URLSessionDataTask? {
+    func fetchDocuments(_ completionHandler: @escaping (Swift.Result<[DocumentAPIType], Error>) -> Void) throws -> URLSessionDataTask {
         let bodyParamsRequest = GraphqlParameters(fileName: "documents", variables: EmptyVariable())
 
         return try performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<Me, Error>) in
@@ -308,6 +380,16 @@ extension DocumentRequest {
                 completionHandler(.failure(error))
             case .success(let me):
                 if let documents = me.documents {
+                    do {
+                        if Configuration.encryptionEnabled {
+                            try documents.forEach { try $0.decrypt() }
+                        }
+                    } catch {
+                        // Will catch uncrypting errors
+                        completionHandler(.failure(error))
+                        return
+                    }
+
                     completionHandler(.success(documents))
                 } else {
                     completionHandler(.failure(APIRequestError.parserError))
@@ -317,19 +399,19 @@ extension DocumentRequest {
     }
 
     @discardableResult
-    func fetchDocument(_ documentID: String, _ completionHandler: @escaping (Swift.Result<DocumentAPIType, Error>) -> Void) throws -> URLSessionDataTask? {
+    func fetchDocument(_ documentID: String, _ completionHandler: @escaping (Swift.Result<DocumentAPIType, Error>) -> Void) throws -> URLSessionDataTask {
         try fetchDocumentWithFile("document", documentID, completionHandler)
     }
 
     @discardableResult
-    func fetchDocumentUpdatedAt(_ documentID: String, _ completionHandler: @escaping (Swift.Result<DocumentAPIType, Error>) -> Void) throws -> URLSessionDataTask? {
+    func fetchDocumentUpdatedAt(_ documentID: String, _ completionHandler: @escaping (Swift.Result<DocumentAPIType, Error>) -> Void) throws -> URLSessionDataTask {
         try fetchDocumentWithFile("document_updated_at", documentID, completionHandler)
     }
 
     // swiftlint:disable:next cyclomatic_complexity
     private func fetchDocumentWithFile(_ filename: String,
                                        _ documentID: String,
-                                       _ completionHandler: @escaping (Swift.Result<DocumentAPIType, Error>) -> Void) throws -> URLSessionDataTask? {
+                                       _ completionHandler: @escaping (Swift.Result<DocumentAPIType, Error>) -> Void) throws -> URLSessionDataTask {
         let parameters = FetchDocumentParameters(id: documentID)
         let bodyParamsRequest = GraphqlParameters(fileName: filename, variables: parameters)
 
@@ -338,6 +420,14 @@ extension DocumentRequest {
             case .failure(let error):
                 completionHandler(.failure(error))
             case .success(let fetchDocument):
+                do {
+                    try fetchDocument.decrypt()
+                } catch {
+                    // Will catch uncrypting errors
+                    completionHandler(.failure(error))
+                    return
+                }
+
                 completionHandler(.success(fetchDocument))
             }
         }

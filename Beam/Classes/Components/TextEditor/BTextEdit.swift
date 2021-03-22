@@ -23,8 +23,8 @@ public struct BTextEdit: NSViewRepresentable {
 
     var leadingAlignment: CGFloat = 160
     var traillingPadding: CGFloat = 80
-    var topOffset: CGFloat = 28
-    var footerHeight: CGFloat = 60
+    var topOffset: CGFloat = 45
+    var footerHeight: CGFloat = 0
 
     var centerText = false
     var showTitle = true
@@ -34,7 +34,7 @@ public struct BTextEdit: NSViewRepresentable {
     }
 
     public func makeNSView(context: Context) -> BeamTextEdit {
-        let nsView = BeamTextEdit(root: note, font: Font.main)
+        let nsView = BeamTextEdit(root: note, font: Font.main, journalMode: true)
 
         nsView.openURL = openURL
         nsView.openCard = openCard
@@ -119,12 +119,12 @@ public struct BTextEditScrollable: NSViewRepresentable {
     var centerText = false
     var showTitle = true
 
-    public func makeCoordinator() -> Coordinator {
-        Coordinator(self)
+    public func makeCoordinator() -> BTextEditScrollableCoordinator {
+        BTextEditScrollableCoordinator(self)
     }
 
     public func makeNSView(context: Context) -> NSViewType {
-        let edit = BeamTextEdit(root: note, font: Font.main)
+        let edit = BeamTextEdit(root: note, font: Font.main, journalMode: false)
 
         edit.data = data
         edit.openURL = openURL
@@ -161,6 +161,7 @@ public struct BTextEditScrollable: NSViewRepresentable {
         scrollView.borderType = .noBorder
         scrollView.documentView = edit
 
+        context.coordinator.adjustScrollViewContentAutomatically(scrollView)
         return scrollView
     }
 
@@ -193,12 +194,17 @@ public struct BTextEditScrollable: NSViewRepresentable {
         }
     }
 
-    public class Coordinator: NSObject {
+    public class BTextEditScrollableCoordinator: NSObject {
         let parent: BTextEditScrollable
         var onDeinit: () -> Void = {}
+        internal var scrollViewContentAdjuster: ScrollViewContentAdjuster?
 
         init(_ edit: BTextEditScrollable) {
             self.parent = edit
+        }
+
+        func adjustScrollViewContentAutomatically(_ scrollView: NSScrollView) {
+            scrollViewContentAdjuster = ScrollViewContentAdjuster(with: scrollView)
         }
 
         deinit {
@@ -207,4 +213,64 @@ public struct BTextEditScrollable: NSViewRepresentable {
     }
 
     public typealias NSViewType = NSScrollView
+}
+
+/**
+ A NSScrollView helper that will adjust behavior when resizing the container or content.
+ Currently only support content height becoming smaller.
+*/
+@objc class ScrollViewContentAdjuster: NSObject {
+    private var lastContentBounds: NSRect = .zero
+
+    init(with scrollView: NSScrollView) {
+        super.init()
+        let documentView = scrollView.documentView
+        documentView?.postsFrameChangedNotifications = true
+        let contentView = scrollView.contentView
+        contentView.postsBoundsChangedNotifications = true
+
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(contentOffsetDidChange(notification:)),
+                                               name: NSView.boundsDidChangeNotification,
+                                               object: contentView)
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(contentSizeDidChange(notification:)),
+                                               name: NSView.frameDidChangeNotification,
+                                               object: documentView)
+    }
+
+    private func didContentHeightChange(for documentView: NSView) -> Bool {
+        let newContentSize = documentView.bounds
+        return lastContentBounds.size.height != newContentSize.height
+    }
+
+    @objc private func contentOffsetDidChange(notification: Notification) {
+        guard let clipView = notification.object as? NSClipView, let scrollView = clipView.superview as? NSScrollView, let documentView = scrollView.documentView else {
+            return
+        }
+        guard !didContentHeightChange(for: documentView) else {
+            // content offset changed because content size changed
+            // let the didContentSizeChange handler do its job
+            return
+        }
+        lastContentBounds.origin = clipView.bounds.origin
+    }
+
+    @objc private func contentSizeDidChange(notification: Notification) {
+        guard let documentView = notification.object as? NSView, let clipView = documentView.superview as? NSClipView, let scrollView = clipView.superview as? NSScrollView  else {
+            return
+        }
+        let containerSize = scrollView.bounds.size
+        let contentSize = documentView.bounds.size
+        let previousContentOffset = lastContentBounds.origin
+        let isNewContentShorterThanViewHeight = contentSize.height - previousContentOffset.y < containerSize.height
+        if isNewContentShorterThanViewHeight {
+            // Force the content offset to stay the same
+            // even if that means having a white space at the bottom.
+            scrollView.scroll(scrollView.contentView, to: previousContentOffset)
+        } else {
+            lastContentBounds.origin = scrollView.contentView.bounds.origin
+        }
+        lastContentBounds.size = contentSize
+    }
 }

@@ -18,9 +18,9 @@ class SpacerWidget: Widget {
 
     private (set) var space: CGFloat = 0
 
-    init(editor: BeamTextEdit, spacerType: SpacerType) {
+    init(parent: Widget, spacerType: SpacerType) {
         self.spacerType = spacerType
-        super.init(editor: editor)
+        super.init(parent: parent)
     }
 
     override func updateRendering() {

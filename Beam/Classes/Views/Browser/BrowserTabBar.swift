@@ -101,6 +101,6 @@ struct BrowserTabBar: View {
     private func moveTabs(from currentIndex: Int, by index: Int, with tab: BrowserTab) {
         tab.isHidden = true
         tabs.remove(at: currentIndex)
-        tabs.insert(tab, at: clamp(currentIndex.advanced(by: index), 0, tabs.count))
+        tabs.insert(tab, at: currentIndex.advanced(by: index).clamp(0, tabs.count))
     }
 }

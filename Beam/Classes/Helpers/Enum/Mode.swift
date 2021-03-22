@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum Mode: Int {
+enum Mode: Int, Codable {
     case today = 1
     case note = 2
     case web = 4

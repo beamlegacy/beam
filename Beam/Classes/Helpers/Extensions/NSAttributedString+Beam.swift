@@ -17,4 +17,66 @@ extension NSAttributedString {
         return NSRange(location: 0, length: self.length)
     }
 
+    func split(seperateBy: String) -> [NSAttributedString] {
+        let input = self.string
+        let separatedInput = input.components(separatedBy: seperateBy)
+        var output = [NSAttributedString]()
+        var start = 0
+        for sub in separatedInput {
+            let range = NSRange(location: start, length: sub.utf16.count)
+            let attribStr = self.attributedSubstring(from: range)
+            output.append(attribStr)
+            start += range.length + seperateBy.count
+        }
+        return output
+    }
+
+    func getRangesOfFont(for type: NSFontDescriptor.SymbolicTraits) -> [NSRange] {
+        var ranges: [NSRange] = []
+        self.enumerateAttributes(in: NSRange(location: 0, length: self.length), options: []) { (attributes, range, _) in
+            attributes.forEach { (key, value) in
+                if key == NSAttributedString.Key.font {
+                    guard let font = value as? NSFont else { return }
+                    if font.fontDescriptor.symbolicTraits.contains(type) {
+                        ranges.append(range)
+                    }
+                }
+            }
+        }
+        return ranges
+    }
+
+    func getLinks() -> [String: NSRange] {
+        var ranges: [String: NSRange] = [:]
+        self.enumerateAttribute(.link, in: NSRange(0..<self.length)) { value, range, _ in
+            if let url = value as? URL {
+                ranges[url.absoluteString] = range
+            }
+        }
+        return ranges
+    }
+}
+
+extension NSMutableAttributedString {
+    convenience init(withImage image: NSImage, font: NSFont?, spacing: Float?) {
+        let attachment = InlineTextAttachment()
+        if let font = font {
+            attachment.fontDescender = font.descender
+        }
+        attachment.image = image
+        self.init(attachment: attachment)
+        if let spacing = spacing {
+            append(NSAttributedString(string: "\u{200B}", attributes: [NSAttributedString.Key.kern: spacing]))
+        }
+    }
+}
+
+class InlineTextAttachment: NSTextAttachment {
+    var fontDescender: CGFloat = 0
+
+    override func attachmentBounds(for textContainer: NSTextContainer?, proposedLineFragment lineFrag: NSRect, glyphPosition position: CGPoint, characterIndex charIndex: Int) -> NSRect {
+        var superRect = super.attachmentBounds(for: textContainer, proposedLineFragment: lineFrag, glyphPosition: position, characterIndex: charIndex)
+        superRect.origin.y = fontDescender
+        return superRect
+    }
 }

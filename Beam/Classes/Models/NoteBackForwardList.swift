@@ -7,10 +7,67 @@
 
 import Foundation
 
-class NoteBackForwardList {
-    enum Element {
+class NoteBackForwardList: Codable {
+    enum Element: Codable {
         case note(BeamNote)
         case journal
+
+        //swiftlint:disable:next nesting
+        enum CodingKeys: String, CodingKey {
+            case mode
+            case note
+        }
+
+        public init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            self = .journal
+
+            switch try container.decode(Int.self, forKey: .mode) {
+            case 0:
+                let noteTitle = try container.decode(String.self, forKey: .note)
+                if let note = BeamNote.fetch(AppDelegate.main.data.documentManager, title: noteTitle) {
+                    self = .note(note)
+                }
+            default:
+                break
+            }
+        }
+
+        func encode(to encoder: Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            switch self {
+            case .journal:
+                try container.encode(1, forKey: .mode)
+            case .note(let note):
+                try container.encode(0, forKey: .mode)
+                try container.encode(note.title, forKey: .note)
+            }
+        }
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case back
+        case current
+        case forward
+    }
+
+    init() {
+    }
+
+    required public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        backList = try container.decode([Element].self, forKey: .back)
+        forwardList = try container.decode([Element].self, forKey: .forward)
+        current = try? container.decode(Element.self, forKey: .current)
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(backList, forKey: .back)
+        try container.encode(forwardList, forKey: .forward)
+        if let current = current {
+            try container.encode(current, forKey: .current)
+        }
     }
 
     func push(_ element: Element) {

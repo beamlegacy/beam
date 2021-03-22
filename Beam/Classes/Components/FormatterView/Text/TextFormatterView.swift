@@ -1,0 +1,289 @@
+//
+//  TextFormatterView.swift
+//  Beam
+//
+//  Created by Remi Santos on 18/03/2021.
+//
+
+import Foundation
+
+class TextFormatterView: FormatterView {
+
+    // MARK: - Properties
+    @IBOutlet var containerView: NSView!
+    @IBOutlet weak var formatterContainerView: NSView!
+
+    var didSelectFormatterType: ((_ type: FormatterType, _ isActive: Bool) -> Void)?
+
+    var corderRadius: CGFloat = 5 {
+        didSet {
+            containerView.layer?.cornerRadius = corderRadius
+        }
+    }
+
+    var items: [FormatterType] = [] {
+        didSet {
+            loadItems()
+        }
+    }
+
+    override var idealSize: NSSize {
+        let itemSize = CGFloat(items.count)
+        let width = (itemSize * 34) + (1.45 * itemSize)
+        return NSSize(width: width, height: 32)
+    }
+
+    // View Properties
+    private let cornerRadius: CGFloat = 6
+    private let leading = 2
+    private let yPosition = 2
+    private let spaceItem = 1
+    private let itemWidth = 34
+    private let itemHeight = 28
+
+    // Shadow Properties
+    private let shadowRadius: CGFloat = 16
+    private let shadowOffset = NSSize(width: 0, height: 3)
+
+    private var selectedTypes: Set<FormatterType> = []
+    private var buttons: [FormatterType: NSButton] = [:]
+
+    // MARK: - Initializer
+    convenience init(viewType: FormatterViewType) {
+        self.init(frame: CGRect.zero)
+        self.viewType = viewType
+        setupLayer()
+        drawShadow()
+        commonInitUI()
+    }
+
+    override init(frame frameRect: NSRect) {
+        super.init(frame: frameRect)
+        loadXib()
+        setupLayer()
+        drawShadow()
+        commonInitUI()
+    }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+    }
+
+    override func animateOnAppear(completionHandler: (() -> Void)? = nil) {
+        super.animateOnAppear()
+        NSAnimationContext.runAnimationGroup ({ ctx in
+            ctx.allowsImplicitAnimation = true
+            ctx.duration = FormatterView.appearAnimationDuration
+            self.alphaValue = 1
+        }, completionHandler: completionHandler)
+    }
+
+    override func animateOnDisappear(completionHandler: (() -> Void)? = nil) {
+        super.animateOnDisappear()
+        NSAnimationContext.runAnimationGroup ({ ctx in
+            ctx.allowsImplicitAnimation = true
+            ctx.duration = FormatterView.disappearAnimationDuration
+            self.alphaValue = 0
+        }, completionHandler: completionHandler)
+    }
+
+    // MARK: - UI
+    private func commonInitUI() {
+        self.alphaValue = 0.0
+        containerView.wantsLayer = true
+        containerView.layer?.cornerRadius = corderRadius
+        containerView.layer?.borderWidth = 0.7
+        containerView.layer?.borderColor = NSColor.formatterBorderColor.cgColor
+        containerView.layer?.backgroundColor = viewType == .persistent ?
+            NSColor.formatterViewBackgroundColor.cgColor : NSColor.formatterViewBackgroundHoverColor.cgColor
+
+    }
+
+    private func drawShadow() {
+        self.layer?.allowsEdgeAntialiasing = true
+        self.layer?.drawsAsynchronously = true
+        self.shadow = NSShadow()
+        self.layer?.shadowColor = viewType == .inline ? NSColor.formatterViewShadowColor.cgColor : NSColor.clear.cgColor
+        self.layer?.shadowOpacity = viewType == .inline ? 1.0 : 0
+        self.layer?.shadowRadius = viewType == .inline ? shadowRadius : 0
+        self.layer?.shadowOffset = viewType == .inline ? shadowOffset : NSSize.zero
+    }
+
+    private func animateShadowOnMouseEntered(_ isHover: Bool) {
+        guard viewType == .persistent else { return }
+
+        NSAnimationContext.runAnimationGroup { ctx in
+            ctx.allowsImplicitAnimation = true
+            ctx.duration = FormatterView.appearAnimationDuration
+
+            layer?.shadowColor = isHover ? NSColor.formatterViewShadowColor.cgColor : NSColor.clear.cgColor
+            layer?.shadowOpacity = isHover ? 1.0 : 0
+            layer?.shadowRadius = isHover ? shadowRadius : 0
+            layer?.shadowOffset = isHover ? shadowOffset : NSSize.zero
+            containerView.layer?.backgroundColor = isHover ? NSColor.formatterViewBackgroundHoverColor.cgColor : NSColor.formatterViewBackgroundColor.cgColor
+        }
+    }
+
+    private func animateButtonOnMouseEntered(_ button: NSButton, _ isHover: Bool) {
+        NSAnimationContext.runAnimationGroup { ctx in
+            ctx.allowsImplicitAnimation = true
+            ctx.duration = 0.3
+
+            button.contentTintColor = isHover ? NSColor.formatterIconHoverAndActiveColor : NSColor.formatterIconColor
+        }
+    }
+
+    // MARK: - Methods
+
+    func setActiveFormmatters(_ types: [FormatterType]) {
+        if types.isEmpty {
+            selectedTypes = []
+            buttons.forEach { button in
+                button.value.contentTintColor = NSColor.formatterIconColor
+                button.value.layer?.backgroundColor = NSColor.clear.cgColor
+            }
+
+            return
+        }
+
+        types.forEach { type in
+            guard let button = buttons[type] else { return }
+            button.contentTintColor = NSColor.formatterIconHoverAndActiveColor
+            button.layer?.backgroundColor = NSColor.formatterButtonBackgroudHoverColor.cgColor
+            selectedTypes.insert(type)
+        }
+    }
+
+    func setActiveFormatter(_ type: FormatterType) {
+        guard let button = buttons[type] else { return }
+
+        removeState(type)
+
+        if selectedTypes.contains(type) {
+            button.contentTintColor = NSColor.formatterIconColor
+            button.layer?.backgroundColor = NSColor.clear.cgColor
+            selectedTypes.remove(type)
+        } else {
+            button.contentTintColor = NSColor.formatterIconHoverAndActiveColor
+            button.layer?.backgroundColor = NSColor.formatterButtonBackgroudHoverColor.cgColor
+            selectedTypes.insert(type)
+        }
+    }
+
+    func resetSelectedItems() {
+        self.selectedTypes = []
+        buttons.forEach { button in
+            button.value.contentTintColor = NSColor.formatterIconColor
+            button.value.layer?.backgroundColor = NSColor.clear.cgColor
+        }
+    }
+
+    override func mouseEntered(with event: NSEvent) {
+        super.mouseEntered(with: event)
+        guard let userInfo = event.trackingArea?.userInfo else { return }
+        updateFormatterView(with: userInfo, isHover: true)
+    }
+
+    override func mouseExited(with event: NSEvent) {
+        super.mouseExited(with: event)
+        guard let userInfo = event.trackingArea?.userInfo else { return }
+        updateFormatterView(with: userInfo, isHover: false)
+    }
+
+    @objc
+    private func selectItemAction(_ sender: NSButton) {
+        guard let didSelectFormatterType = didSelectFormatterType else { return }
+        let type = items[sender.tag]
+        let isActive = selectedTypes.contains(type)
+
+        if !selectedTypes.contains(type) { selectedTypes.insert(type) }
+
+        removeState(type)
+
+        if isActive {
+            guard let button = buttons[type] else { return }
+
+            button.contentTintColor = NSColor.formatterIconColor
+            button.layer?.backgroundColor = NSColor.clear.cgColor
+            selectedTypes.remove(type)
+        }
+
+        didSelectFormatterType(type, isActive)
+    }
+
+    private func loadItems() {
+        items.enumerated().forEach { (index, item) in
+            let xPosition = index == 0 ? leading : (itemWidth * index) + (spaceItem * index) + leading
+            let button = FormatterTypeButton(frame: NSRect(x: xPosition, y: yPosition, width: itemWidth, height: itemHeight))
+            let trackingButtonArea = NSTrackingArea(
+                rect: button.bounds,
+                options: [.activeAlways, .inVisibleRect, .mouseEnteredAndExited],
+                owner: self,
+                userInfo: ["view": button, "item": item]
+            )
+
+            button.layer?.cornerRadius = cornerRadius
+            button.contentTintColor = NSColor.formatterIconColor
+            button.image = NSImage(named: "editor-format_\(item)")
+            button.tag = index
+            button.target = self
+            button.action = #selector(selectItemAction(_:))
+            button.addTrackingArea(trackingButtonArea)
+
+            buttons[item] = button
+            formatterContainerView.addSubview(button)
+        }
+    }
+
+    private func updateFormatterView(with userInfo: [ AnyHashable: Any ], isHover: Bool) {
+        guard let view = userInfo["view"] as? NSView else { return }
+
+        if view == self {
+            DispatchQueue.main.async {[weak self] in
+                guard let self = self else { return }
+                self.animateShadowOnMouseEntered(isHover)
+            }
+        } else {
+            guard let type = userInfo["item"] as? FormatterType,
+                  let button = buttons[type] else { return }
+
+            DispatchQueue.main.async {[weak self] in
+                guard let self = self else { return }
+                if !self.selectedTypes.contains(type) { self.animateButtonOnMouseEntered(button, isHover) }
+            }
+        }
+    }
+
+    private func removeState(_ type: FormatterType) {
+        if type == .h2 && selectedTypes.contains(.h1) ||
+           type == .quote && selectedTypes.contains(.h1) ||
+           type == .code && selectedTypes.contains(.h1) { removeActiveIndicator(to: .h1) }
+
+        if type == .h1 && selectedTypes.contains(.h2) ||
+           type == .quote && selectedTypes.contains(.h2) ||
+           type == .code && selectedTypes.contains(.h2) { removeActiveIndicator(to: .h2) }
+
+        if type == .h2 && selectedTypes.contains(.quote) ||
+           type == .h1 && selectedTypes.contains(.quote) { removeActiveIndicator(to: .quote) }
+
+        if type == .h2 && selectedTypes.contains(.code) ||
+           type == .h1 && selectedTypes.contains(.code) { removeActiveIndicator(to: .code) }
+    }
+
+    private func removeActiveIndicator(to item: FormatterType) {
+        guard let button = buttons[item] else { return }
+        button.contentTintColor = NSColor.formatterIconColor
+        button.layer?.backgroundColor = NSColor.clear.cgColor
+        selectedTypes.remove(item)
+    }
+
+    private func loadXib() {
+        let bundle = Bundle(for: type(of: self))
+        guard let nib = NSNib(nibNamed: nibName, bundle: bundle) else { fatalError("Impossible to load \(nibName)") }
+        _ = nib.instantiate(withOwner: self, topLevelObjects: nil)
+
+        containerView.frame = bounds
+        containerView.autoresizingMask = [.width, .height]
+        addSubview(containerView)
+    }
+}

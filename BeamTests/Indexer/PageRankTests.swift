@@ -108,7 +108,7 @@ class PageRankTests: XCTestCase {
         guard let fileurl = tempFile(named: "PageRankFixtures.json") else {
             fatalError("Unable to save PageRankFixtures.json")
         }
-        print("Save fixtures to file \(fileurl)")
+        Logger.shared.logDebug("Save fixtures to file \(fileurl)")
         let encoder = JSONEncoder()
         do {
             let data = try encoder.encode(searchSources)
@@ -139,19 +139,19 @@ class PageRankTests: XCTestCase {
 
     private func append(_ url: URL, contents: String) throws {
 //        do {
-            //print("html -> \(html)")
+            //Logger.shared.logDebug("html -> \(html)")
 //            let parsingStart = CACurrentMediaTime()
             let doc = try SwiftSoup.parse(contents, url.absoluteString)
             let title = try doc.title()
-            let text = html2Text(url: url, doc: doc)
+        let text: String = html2Text(url: url, doc: doc)
 //            let indexingStart = CACurrentMediaTime()
             index.append(document: IndexDocument(source: url.absoluteString, title: title, contents: text, outboundLinks: doc.extractLinks()))
 //            let now = CACurrentMediaTime()
-//            print("Indexed \(url) (\(contents.count) characters - title: \(title.count) - text: \(text.count)) in \((now - parsingStart) * 1000) ms (parsing: \((indexingStart - parsingStart) * 1000) ms - indexing \((now - indexingStart) * 1000) ms")
+//            Logger.shared.logDebug("Indexed \(url) (\(contents.count) characters - title: \(title.count) - text: \(text.count)) in \((now - parsingStart) * 1000) ms (parsing: \((indexingStart - parsingStart) * 1000) ms - indexing \((now - indexingStart) * 1000) ms")
 //        } catch Exception.Error(let type, let message) {
-////            print("Test (SwiftSoup parser) \(type): \(message)")
+////            Logger.shared.logDebug("Test (SwiftSoup parser) \(type): \(message)")
 //        } catch {
-////            print("Test: (SwiftSoup parser) unknown error")
+////            Logger.shared.logDebug("Test: (SwiftSoup parser) unknown error")
 //        }
     }
 
@@ -179,7 +179,7 @@ class PageRankTests: XCTestCase {
             return url
 
         } else {
-            print("Error: " + String(cString: strerror(errno)))
+            Logger.shared.logDebug("Error: " + String(cString: strerror(errno)))
         }
 
         return nil
@@ -199,7 +199,7 @@ class PageRankTests: XCTestCase {
         index.pageRank.computePageRanks(iterations: 20)
         let now = CACurrentMediaTime()
         let time = (now - start) * 1000
-        print("PageRank update took \(time) ms")
+        Logger.shared.logDebug("PageRank update took \(time) ms")
 
         index.dump()
 
@@ -210,26 +210,26 @@ class PageRankTests: XCTestCase {
         XCTAssertGreaterThanOrEqual(search("sport rules").count, 5)
         XCTAssertGreaterThanOrEqual(search("guitar").count, 0)
 
-//        print("LinkStore contains \(LinkStore.shared.links.count) different links")
+//        Logger.shared.logDebug("LinkStore contains \(LinkStore.shared.links.count) different links")
 
         do {
             let encoder = JSONEncoder()
             let data0 = try encoder.encode(index)
             encoder.outputFormatting = .prettyPrinted
             let data1 = try encoder.encode(index)
-//            print("Encoded index size = \(data0.count)")
-//            print("Encoded index size (pretty) = \(data1.count)")
+//            Logger.shared.logDebug("Encoded index size = \(data0.count)")
+//            Logger.shared.logDebug("Encoded index size (pretty) = \(data1.count)")
 
             guard let fileurl0 = tempFile(named: "Index.json") else {
                 fatalError("Unable to save Index.json")
             }
-//            print("Save index to file \(fileurl0)")
+//            Logger.shared.logDebug("Save index to file \(fileurl0)")
             FileManager.default.createFile(atPath: fileurl0.path, contents: data0, attributes: [:])
 
             guard let fileurl1 = tempFile(named: "IndexPretty.json") else {
                 fatalError("Unable to save IndexPretty.json")
             }
-//            print("Save pretty index to file \(fileurl1)")
+//            Logger.shared.logDebug("Save pretty index to file \(fileurl1)")
             FileManager.default.createFile(atPath: fileurl1.path, contents: data1, attributes: [:])
         } catch {
             fatalError()

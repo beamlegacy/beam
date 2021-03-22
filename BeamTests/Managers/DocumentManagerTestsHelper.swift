@@ -19,6 +19,43 @@ class DocumentManagerTestsHelper {
         self.coreDataManager = coreDataManager
     }
 
+    func deleteAllDocuments() {
+        let semaphore = DispatchSemaphore(value: 0)
+
+        documentManager.deleteAllDocuments() { _ in
+            semaphore.signal()
+        }
+        semaphore.wait()
+    }
+
+    func saveLocallyAndRemotely(_ docStruct: DocumentStruct) -> DocumentStruct {
+        // The call to `saveDocumentStructOnAPI` expect the document to be already saved locally
+        var newVersion = docStruct
+        waitUntil(timeout: .seconds(10)) { done in
+            // To force a local save only, while using the standard code
+            newVersion = self.documentManager.saveDocument(docStruct, true, { result in
+                expect { try result.get() }.toNot(throwError())
+                done()
+            }, completion: nil)
+        }
+
+        return newVersion
+    }
+
+    func saveLocally(_ docStruct: DocumentStruct) -> DocumentStruct {
+        // The call to `saveDocumentStructOnAPI` expect the document to be already saved locally
+        var newVersion = docStruct
+        waitUntil(timeout: .seconds(10)) { done in
+            // To force a local save only, while using the standard code
+            newVersion = self.documentManager.saveDocument(docStruct, false, completion:  { result in
+                expect { try result.get() }.toNot(throwError())
+                done()
+            })
+        }
+
+        return newVersion
+    }
+
     func saveRemotely(_ docStruct: DocumentStruct) {
         waitUntil(timeout: .seconds(10)) { done in
             self.documentManager.saveDocumentStructOnAPI(docStruct) { result in
@@ -29,8 +66,10 @@ class DocumentManagerTestsHelper {
     }
 
     func saveRemotelyOnly(_ docStruct: DocumentStruct) {
+        let documentRequest = DocumentRequest()
+
         waitUntil(timeout: .seconds(10)) { done in
-            _ = try? self.documentManager.documentRequest.saveDocument(docStruct.asApiType()) { result in
+            _ = try? documentRequest.saveDocument(docStruct.asApiType()) { result in
                 expect { try result.get() }.toNot(throwError())
                 done()
             }
@@ -39,19 +78,32 @@ class DocumentManagerTestsHelper {
 
     func fetchOnAPI(_ docStruct: DocumentStruct) -> DocumentAPIType? {
         var documentAPIType: DocumentAPIType?
-        waitUntil(timeout: .seconds(10)) { done in
-            _ = try? self.documentManager.documentRequest.fetchDocument(docStruct.uuidString) { result in
-                expect { try result.get() }.toNot(throwError())
+        let documentRequest = DocumentRequest()
 
-                documentAPIType = try? result.get()
-                done()
-            }
+        let semaphore = DispatchSemaphore(value: 0)
+        _ = try? documentRequest.fetchDocument(docStruct.uuidString) { result in
+            documentAPIType = try? result.get()
+            semaphore.signal()
         }
+        semaphore.wait()
+
         return documentAPIType
     }
 
+    func fetchOnAPIWithLatency(_ docStruct: DocumentStruct, _ newLocal: String) -> Bool {
+        for _ in 0...10 {
+            let remoteStruct = fetchOnAPI(docStruct)
+            expect(remoteStruct?.id).to(equal(docStruct.uuidString))
+            if remoteStruct?.data == newLocal {
+                return true
+            }
+            usleep(50)
+        }
+        return false
+    }
+
     func deleteDocumentStruct(_ docStruct: DocumentStruct) {
-        waitUntil(timeout: .seconds(10)) { done in
+        waitUntil(timeout: .seconds(3)) { done in
             self.documentManager.deleteDocument(id: docStruct.id) { result in
                 expect { try result.get() }.toNot(throwError())
                 expect { try result.get() }.to(beTrue())
@@ -64,40 +116,33 @@ class DocumentManagerTestsHelper {
     func createDocumentStruct(_ dataString: String? = nil, title titleParam: String? = nil) -> DocumentStruct {
         let dataString = dataString ?? "whatever binary data"
 
-        //swiftlint:disable:next force_try
-        let jsonData = try! self.defaultEncoder().encode(dataString)
-
         let docStruct = DocumentStruct(id: UUID(),
                                        title: titleParam ?? String.randomTitle(),
                                        createdAt: BeamDate.now,
                                        updatedAt: BeamDate.now,
-                                       data: jsonData,
-                                       documentType: .note)
+                                       data: dataString.asData,
+                                       documentType: .note,
+                                       version: 0)
 
         return docStruct
     }
 
-    func saveLocally(_ docStruct: DocumentStruct) {
-        // The call to `saveDocumentStructOnAPI` expect the document to be already saved locally
-        waitUntil(timeout: .seconds(10)) { done in
-            // To force a local save only, while using the standard code
-            Configuration.networkEnabled = false
-            self.documentManager.saveDocument(docStruct) { _ in
-                Configuration.networkEnabled = true
-                done()
-            }
-        }
-    }
-
     func createLocalAndRemoteVersions(_ ancestor: String,
                                       newLocal: String? = nil,
-                                      newRemote: String? = nil) -> DocumentStruct {
+                                      newRemote: String? = nil) throws -> DocumentStruct {
         BeamDate.travel(-600)
         var docStruct = self.createDocumentStruct()
         docStruct.data = ancestor.asData
-        // Save document locally + remotely
-        self.saveLocally(docStruct)
-        self.saveRemotely(docStruct)
+        docStruct = self.saveLocallyAndRemotely(docStruct)
+
+        // We'll use saveDocumentOnAPI() later, I need to update the result
+        // DocumentStruct to add its previousChecksum
+        guard let localDocument = Document.fetchWithId(mainContext, docStruct.id) else {
+            throw DocumentManagerError.localDocumentNotFound
+        }
+        docStruct.previousChecksum = localDocument.beam_api_checksum
+        //
+
 
         if let newLocal = newLocal {
             // Force to locally save an older version of the document
@@ -105,7 +150,7 @@ class DocumentManagerTestsHelper {
             docStruct.updatedAt = BeamDate.now
             docStruct.data = newLocal.asData
             docStruct.previousData = ancestor.asData
-            self.saveLocally(docStruct)
+            docStruct = self.saveLocally(docStruct)
         }
 
         if let newRemote = newRemote {

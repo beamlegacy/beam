@@ -10,38 +10,35 @@ import SwiftUI
 
 struct RoundedRectangleDecoration: View {
     @Environment(\.isEnabled) var isEnabled: Bool
-    @State var isHovering: Bool = false
-    var isPressed: Bool
+    @State private var isHovering: Bool = false
+    let size: CGFloat
+    let isPressed: Bool
 
-    let pressedBg = Color(.toolbarButtonBackgroundOnColor)
-    let hoverBg = Color(.toolbarButtonBackgroundOnColor)
-    let emptyBg = Color(.displayP3, white: 1, opacity: 0)
+    private let pressedBg = Color(.toolbarButtonActiveBackgroundColor)
+    private let emptyBg = Color(.transparent)
 
-    func bgColor(_ enabled: Bool, _ hover: Bool, _ pressed: Bool) -> Color {
-        //print("color: isHovering: \(hover) pressed: \(pressed) isEnabled: \(enabled)")
-        guard enabled else { return emptyBg }
-        guard !pressed else { return pressedBg }
-        return hover ? hoverBg : emptyBg
+    func bgColor(_ enabled: Bool, _ pressed: Bool) -> Color {
+        return enabled && pressed ? pressedBg : emptyBg
     }
 
     var body: some View {
-        RoundedRectangle(cornerRadius: 7)
-            .foregroundColor(bgColor(isEnabled, isHovering, isPressed))
+        RoundedRectangle(cornerRadius: 4)
+            .fill(bgColor(isEnabled, isPressed))
             .onHover { h in
                 self.isHovering = h
-                //print("onHover: isHovering: \(self.isHovering) (\(h)) isEnabled: \(self.isEnabled)")
             }
-            .frame(width: 33, height: 28, alignment: .center)
+            .frame(width: size, height: size, alignment: .center)
     }
 }
 
 struct RoundRectButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) var isEnabled: Bool
-
+    var size: CGFloat?
+    var defaultSize: CGFloat = 26
     func makeBody(configuration: ButtonStyle.Configuration) -> some View {
         configuration
             .label
-            .background(RoundedRectangleDecoration(isPressed: configuration.isPressed))
-            .frame(width: 33, height: 28, alignment: .center)
+            .background(RoundedRectangleDecoration(size: size ?? defaultSize, isPressed: configuration.isPressed))
+            .frame(width: size, height: size, alignment: .center)
     }
 }

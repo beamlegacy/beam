@@ -29,7 +29,7 @@ public class BeamApplication: SentryCrashExceptionApplication {
 }
 
 @NSApplicationMain
-class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
+class AppDelegate: NSObject, NSApplicationDelegate {
     // swiftlint:disable:next force_cast
     class var main: AppDelegate { NSApplication.shared.delegate as! AppDelegate }
 
@@ -37,22 +37,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     var windows: [BeamWindow] = []
     var data: BeamData!
 
+    var cancellableScope = Set<AnyCancellable>()
+
     let documentManager = DocumentManager()
     #if DEBUG
     var beamUIMenuGenerator: BeamUITestsMenuGenerator!
     #endif
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        #if DEBUG
-        self.beamUIMenuGenerator = BeamUITestsMenuGenerator()
-        prepareMenuForTestEnv()
-        #endif
-        for item in NSApp.mainMenu?.items ?? [] {
-            item.submenu?.delegate = self
-
-            prepareMenu(items: item.submenu?.items ?? [], for: Mode.today.rawValue)
-
-        }
         CoreDataManager.shared.setup()
         LibrariesManager.shared.configure()
 
@@ -68,11 +60,29 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         data = BeamData()
         updateBadge()
-        createWindow()
+        createWindow(reloadState: Configuration.stateRestorationEnabled)
 
         // So we remember we're not currently using the default api server
         if Configuration.apiHostnameDefault != Configuration.apiHostname {
             Logger.shared.logInfo("🛑 API HOSTNAME is \(Configuration.apiHostname)", category: .general)
+        }
+
+        #if DEBUG
+        self.beamUIMenuGenerator = BeamUITestsMenuGenerator()
+        prepareMenuForTestEnv()
+        #endif
+
+        documentManager.syncDocuments { result in
+            switch result {
+            case .failure(let error):
+                Logger.shared.logError("Couldn't sync document: \(error.localizedDescription)",
+                                       category: .document)
+            case .success(let success):
+                if !success {
+                    Logger.shared.logError("Couldn't sync document",
+                                           category: .document)
+                }
+            }
         }
     }
 
@@ -81,51 +91,25 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         NSApp.dockTile.badgeLabel = count > 0 ? String(count) : ""
     }
 
-    func createWindow() {
+    func createWindow(reloadState: Bool) {
         // Create the window and set the content view.
-        window = BeamWindow(contentRect: NSRect(x: 0, y: 0, width: 800, height: 600), data: data)
+        window = BeamWindow(contentRect: NSRect(x: 0, y: 0, width: 800, height: 600), data: data, reloadState: reloadState)
         window.center()
         window.makeKeyAndOrderFront(nil)
         windows.append(window)
-    }
-
-    func toggleVisibility(_ visible: Bool, ofAlternatesKeyEquivalentsItems items: [NSMenuItem]) {
-        for item in items.filter({ $0.tag < 0 }) {
-            item.isHidden = !visible
-        }
-    }
-
-    func prepareMenu(items: [NSMenuItem], for mode: Int) {
-        for item in items {
-            if item.tag == 0 { continue }
-
-            let value = abs(item.tag)
-            let mask = value & mode
-
-            item.isEnabled = mask != 0
-        }
-    }
-
-    func menuWillOpen(_ menu: NSMenu) {
-        // menu items with tag == 0 are ALWAYS enabled and visible
-        // menu items with tag == mode are only enabled in the corresponding mode
-        // menu items with tag == -mode are only enabled and visible in the corresponding mode
-
-        toggleVisibility(false, ofAlternatesKeyEquivalentsItems: menu.items)
-        prepareMenu(items: menu.items, for: window.state.mode.rawValue)
-    }
-
-    func menuDidClose(_ menu: NSMenu) {
-        toggleVisibility(true, ofAlternatesKeyEquivalentsItems: menu.items)
+        subscribeToStateChanges(for: window.state)
     }
 
     func applicationWillTerminate(_ aNotification: Notification) {
         // Insert code here to tear down your application
+        if let beamWindow = windows.first {
+            beamWindow.saveDefaults()
+        }
     }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         if !flag {
-            createWindow()
+            createWindow(reloadState: Configuration.stateRestorationEnabled)
         }
 
         return true
@@ -212,7 +196,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     @IBAction func newDocument(_ sender: Any?) {
-        createWindow()
+        createWindow(reloadState: false)
     }
 
     // MARK: -

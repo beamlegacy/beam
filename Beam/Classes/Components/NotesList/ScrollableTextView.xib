@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="17156" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="17701" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17156"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17701"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -13,26 +13,26 @@
             <rect key="frame" x="0.0" y="0.0" width="240" height="135"/>
             <autoresizingMask key="autoresizingMask"/>
             <clipView key="contentView" drawsBackground="NO" copiesOnScroll="NO" id="A17-mj-R0R">
-                <rect key="frame" x="0.0" y="0.0" width="225" height="135"/>
+                <rect key="frame" x="0.0" y="0.0" width="240" height="135"/>
                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                 <subviews>
-                    <textView importsGraphics="NO" richText="NO" verticallyResizable="YES" smartInsertDelete="YES" id="d9Y-bG-e9d">
-                        <rect key="frame" x="0.0" y="0.0" width="225" height="135"/>
+                    <textView importsGraphics="NO" richText="NO" verticallyResizable="YES" smartInsertDelete="YES" id="d9Y-bG-e9d" customClass="InternalTextView">
+                        <rect key="frame" x="0.0" y="0.0" width="240" height="135"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                        <size key="minSize" width="225" height="135"/>
-                        <size key="maxSize" width="225" height="10000000"/>
+                        <size key="minSize" width="240" height="135"/>
+                        <size key="maxSize" width="240" height="10000000"/>
                         <color key="insertionPointColor" name="textColor" catalog="System" colorSpace="catalog"/>
                     </textView>
                 </subviews>
             </clipView>
-            <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="nw3-WZ-wvL">
+            <scroller key="horizontalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="YES" id="nw3-WZ-wvL">
                 <rect key="frame" x="-100" y="-100" width="225" height="15"/>
                 <autoresizingMask key="autoresizingMask"/>
             </scroller>
-            <scroller key="verticalScroller" verticalHuggingPriority="750" horizontal="NO" id="mPT-Ap-kbN">
-                <rect key="frame" x="225" y="0.0" width="15" height="135"/>
+            <scroller key="verticalScroller" wantsLayer="YES" verticalHuggingPriority="750" horizontal="NO" id="mPT-Ap-kbN">
+                <rect key="frame" x="224" y="0.0" width="16" height="135"/>
                 <autoresizingMask key="autoresizingMask"/>
             </scroller>
             <connections>

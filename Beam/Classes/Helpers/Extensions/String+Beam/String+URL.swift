@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension String {
+public extension String {
     var markdownizedURL: String? {
         return self.addingPercentEncoding(withAllowedCharacters: CharacterSet(charactersIn: "()").inverted)
     }
@@ -26,4 +26,17 @@ extension String {
 
         return matches.compactMap({ $0.range })
     }
+
+    func validUrl() -> (isValid: Bool, url: String) {
+        guard let url = URL(string: self) else { return (false, "") }
+
+        let isContainsScheme = ["http", "https"].contains(url.scheme)
+
+        if !url.pathExtension.isEmpty || isContainsScheme {
+            return (true, isContainsScheme ? self : "http://\(url)")
+        }
+
+        return (false, "")
+    }
+
 }

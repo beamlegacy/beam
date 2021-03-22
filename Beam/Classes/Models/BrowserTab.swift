@@ -10,15 +10,25 @@ import Foundation
 import SwiftUI
 import Combine
 import WebKit
-import FavIcon
 
 class FullScreenWKWebView: WKWebView {
 //    override var safeAreaInsets: NSEdgeInsets {
 //        return NSEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
 //    }
+
+    //Catching those event to avoid funk sound
+    override func keyDown(with event: NSEvent) {
+        if let key = event.specialKey {
+            if key == .leftArrow || key == .rightArrow {
+                return
+            }
+        }
+        super.keyDown(with: event)
+    }
 }
 
-class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler {
+// swiftlint:disable:next type_body_length
+class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler, Codable {
     var id: UUID
 
     public func load(url: URL) {
@@ -102,6 +112,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         } else {
             let web = FullScreenWKWebView(frame: NSRect(), configuration: Self.webViewConfiguration)
             web.wantsLayer = true
+            web.allowsMagnification = true
 
             state.setup(webView: web)
             backForwardList = web.backForwardList
@@ -109,7 +120,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         }
         browsingTree = BrowsingTree(originalQuery ?? webView?.url?.absoluteString)
 
-        super.init(frame: NSRect())
+        super.init(frame: .zero)
         note.browsingSessions.append(browsingTree)
         setupObservers()
     }
@@ -118,44 +129,110 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         fatalError("init(coder:) has not been implemented")
     }
 
+    enum CodingKeys: String, CodingKey {
+        case id
+        case title
+        case originalQuery
+        case url
+        case browsingTree
+        case privateMode
+        case note
+        case rootElement
+        case element
+
+    }
+
+    var preloadUrl: URL?
+
+    required public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        self.id = try container.decode(UUID.self, forKey: .id)
+        self.title = try container.decode(String.self, forKey: .title)
+        self.originalQuery = try container.decode(String.self, forKey: .originalQuery)
+        self.preloadUrl = try? container.decode(URL.self, forKey: .url)
+
+        self.browsingTree = try container.decode(BrowsingTree.self, forKey: .browsingTree)
+        self.privateMode = try container.decode(Bool.self, forKey: .privateMode)
+
+        let noteTitle = try container.decode(String.self, forKey: .note)
+        let loadedNote = BeamNote.fetch(AppDelegate.main.documentManager, title: noteTitle) ?? AppDelegate.main.data.todaysNote
+        self.note = loadedNote
+        let rootId = try? container.decode(UUID.self, forKey: .rootElement)
+        self.rootElement = note.findElement(rootId ?? loadedNote.id) ?? loadedNote.children.first!
+        if let elementId = try? container.decode(UUID.self, forKey: .element) {
+            self.element = loadedNote.findElement(elementId)
+        }
+
+        super.init(frame: .zero)
+        note.browsingSessions.append(browsingTree)
+    }
+
+    func postLoadSetup(state: BeamState) {
+        self.state = state
+        let web = FullScreenWKWebView(frame: NSRect(), configuration: Self.webViewConfiguration)
+        web.wantsLayer = true
+        web.allowsMagnification = true
+
+        state.setup(webView: web)
+        backForwardList = web.backForwardList
+        self.webView = web
+//        setupObservers()
+            if let _url = self.preloadUrl {
+                self.preloadUrl = nil
+                DispatchQueue.main.async { [weak self] in
+                    self?.webView.load(URLRequest(url: _url))
+                }
+            }
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        try container.encode(id, forKey: .id)
+        try container.encode(title, forKey: .title)
+        try container.encode(originalQuery, forKey: .originalQuery)
+        if let _url = webView.url {
+            try container.encode(_url, forKey: .url)
+        }
+        try container.encode(browsingTree, forKey: .browsingTree)
+        try container.encode(privateMode, forKey: .privateMode)
+        try container.encode(note.title, forKey: .note)
+        try container.encode(rootElement.id, forKey: .rootElement)
+        if let element = element {
+            try container.encode(element, forKey: .element)
+        }
+    }
+
     // Add the current page to the current note and return the beam element (if the element already exist return it directly)
-    func addCurrentPageToNote() -> BeamElement {
+    func addCurrentPageToNote() -> BeamElement? {
         guard let elem = element else {
+            guard let url = url else { return nil }
+            guard !url.isSearchResult else { return nil } // Don't automatically add search results
+            let linkString = url.absoluteString
+            guard !note.outLinks.contains(linkString) else { element = note.elementContainingLink(to: linkString); return element }
             Logger.shared.logDebug("add current page '\(title)' to note '\(note.title)'", category: .web)
             let e = BeamElement()
-            e.query = originalQuery
-            e.text = BeamText(text: title, attributes: [.link(url?.absoluteString ?? "")])
             element = e
+            updateElementWithTitle()
             rootElement.addChild(e)
             return e
         }
         return elem
     }
 
-    private func updateBullet() {
-        if let url = url {
-            let name = title.isEmpty ? url.absoluteString : title
-            self.element?.text = BeamText(text: name, attributes: [.link(url.absoluteString)])
+    private func updateElementWithTitle(_ title: String? = nil) {
+        if let url = url, let element = element {
+            let name = title ?? (self.title.isEmpty ? url.absoluteString : self.title)
+            element.text = BeamText(text: name, attributes: [.link(url.absoluteString)])
         }
     }
 
     private func updateFavIcon() {
         guard let url = url else { favIcon = nil; return }
-        do {
-            try FavIcon.downloadPreferred(url, width: 16, height: 16) { [weak self] result in
-                guard let self = self else { return }
-
-                if case let .success(image) = result {
-                  // On iOS, this is a UIImage, do something with it here.
-                  // This closure will be executed on the main queue, so it's safe to touch
-                  // the UI here.
-                    self.favIcon = image
-                } else {
-                    self.favIcon = nil
-                }
-            }
-        } catch {
-            self.favIcon = nil
+        FaviconProvider.shared.imageForUrl(url) { [weak self] (image) in
+            guard let self = self else { return }
+            self.favIcon = image
         }
     }
 
@@ -172,16 +249,15 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     private func setupObservers() {
         webView.publisher(for: \.title).sink { v in
             self.title = v ?? "loading..."
-            self.updateBullet()
+            self.updateElementWithTitle()
         }.store(in: &scope)
         webView.publisher(for: \.url).sink { v in
             self.url = v
-            self.updateBullet()
-            self.updateFavIcon()
-            if let url = v?.absoluteString {
-                self.browsingTree.current.score.openIndex = self.navigationCount
-                self.updateScore()
-                self.navigationCount = 0
+            if v?.absoluteString != nil {
+                self.updateFavIcon()
+//                self.browsingTree.current.score.openIndex = self.navigationCount
+//                self.updateScore()
+//                self.navigationCount = 0
             }
         }.store(in: &scope)
         webView.publisher(for: \.isLoading).sink { v in withAnimation { self.isLoading = v } }.store(in: &scope)
@@ -270,6 +346,8 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                 // Create new tab
                 let newWebView = FullScreenWKWebView(frame: NSRect(), configuration: Self.webViewConfiguration)
                 newWebView.wantsLayer = true
+                newWebView.allowsMagnification = true
+
                 state.setup(webView: newWebView)
                 let newTab = BrowserTab(state: state, originalQuery: originalQuery, note: note, rootElement: rootElement, webView: newWebView)
                 newTab.load(url: targetURL)
@@ -296,6 +374,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     }
 
     func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
+        element = nil
     }
 
     func webView(_ webView: WKWebView, didReceiveServerRedirectForProvisionalNavigation navigation: WKNavigation!) {
@@ -303,9 +382,12 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     }
 
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+        element = nil
     }
 
     func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
+        element = nil
+        _ = addCurrentPageToNote()
     }
 
     lazy var overrideConsole: String = { loadJS(from: "OverrideConsole") }()
@@ -322,16 +404,16 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                   !selectedHtml.isEmpty
             else { return }
 
-            let text = html2Text(url: webView.url!, html: selectedHtml)
+            let text: BeamText = html2Text(url: webView.url!, html: selectedHtml)
             browsingTree.current.score.textSelections += 1
             self.updateScore()
 
             // now add a bullet point with the quoted text:
             if let urlString = webView.url?.absoluteString, let title = webView.title {
-                let quote = BeamText(text: text)
+                let quote = text
 
                 DispatchQueue.main.async {
-                    let current = self.addCurrentPageToNote()
+                    guard let current = self.addCurrentPageToNote() else { return }
                     let e = BeamElement()
                     e.kind = .quote(1, title, urlString)
                     e.text = quote
@@ -364,6 +446,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         guard let url = webView.url else { return }
+        _ = addCurrentPageToNote()
         browsingTree.navigateTo(url: url.absoluteString, title: webView.title)
         Readability.read(webView) { [weak self] result in
             guard let self = self else { return }
@@ -371,6 +454,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             switch result {
             case let .success(read):
                 self.appendToIndexer(url, read)
+                self.updateElementWithTitle(read.title)
                 self.browsingTree.current.score.textAmount = read.content.count
                 self.updateScore()
             case let .failure(error):
@@ -380,6 +464,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+        element = nil
     }
 
     func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
@@ -393,6 +478,8 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
         let newWebView = FullScreenWKWebView(frame: NSRect(), configuration: configuration)
         newWebView.wantsLayer = true
+        newWebView.allowsMagnification = true
+
         state.setup(webView: newWebView)
         let newTab = BrowserTab(state: state, originalQuery: originalQuery, note: self.note, rootElement: rootElement, webView: newWebView)
         onNewTabCreated(newTab)

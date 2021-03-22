@@ -34,7 +34,7 @@ class LinkManager {
 
             do {
                 try CoreDataManager.save(context)
-                Logger.shared.logDebug("CoreDataManager saved", category: .coredata)
+                Logger.shared.logDebug("saveLink CoreDataManager saved", category: .coredata)
             } catch {
                 Logger.shared.logError("Couldn't save context: \(error)", category: .coredata)
                 completion?(.failure(error))

@@ -18,6 +18,8 @@ struct NoteView: View {
     var scrollable: Bool
     var centerText: Bool
 
+    let urlSchemes: [String?] = ["http", "https"]
+
     var body: some View {
         ZStack {
             if scrollable {
@@ -25,11 +27,11 @@ struct NoteView: View {
                     note: note,
                     data: state.data,
                     openURL: { url in
-                    if ["http", "https"].contains(url.scheme) {
+                    if urlSchemes.contains(url.scheme) {
                         state.createTab(withURL: url, originalQuery: state.currentNote?.title ?? "")
                     } else {
-                        if let noteName = url.absoluteString.removingPercentEncoding {
-                            state.navigateToNote(named: noteName)
+                        if let noteTitle = url.absoluteString.removingPercentEncoding {
+                            state.navigateToNote(named: noteTitle)
                         }
                     }
                 },
@@ -52,11 +54,11 @@ struct NoteView: View {
                     note: note,
                     data: state.data,
                     openURL: { url in
-                    if ["http", "https"].contains(url.scheme) {
+                    if urlSchemes.contains(url.scheme) {
                         state.createTab(withURL: url, originalQuery: state.currentNote?.title ?? "")
                     } else {
-                        if let noteName = url.absoluteString.removingPercentEncoding {
-                            _ = state.navigateToNote(named: noteName)
+                        if let noteTitle = url.absoluteString.removingPercentEncoding {
+                            _ = state.navigateToNote(named: noteTitle)
                         }
                     }
                 },

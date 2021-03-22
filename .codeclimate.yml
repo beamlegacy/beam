@@ -12,3 +12,5 @@ exclude_patterns:
   - Beam/Classes/Helpers/Utils/Web/Readability.js
   - BeamTests
   - BeamUITests
+  - SourcePackages
+  - fastlane

@@ -21,6 +21,9 @@ struct DocumentRow: View {
 
             HStack {
                 Text("\(document.updated_at, formatter: Self.taskDateFormat)").font(.footnote)
+                if document.isDeleted || document.deleted_at != nil {
+                    Text("deleted").font(.footnote)
+                }
                 Spacer()
             }
         }.padding(.bottom).padding(.top)

@@ -8,7 +8,11 @@ struct DocumentDetail: View {
 
     var body: some View {
         ScrollView {
-            RefreshButton.padding()
+            HStack(alignment: VerticalAlignment.center, spacing: 10.0) {
+                RefreshButton
+                DeleteButton
+                PublicButton
+            }
 
             HStack {
                 VStack {
@@ -39,6 +43,12 @@ struct DocumentDetail: View {
                             Spacer()
                         }
                     }
+                    HStack {
+                        Text("Public:").bold()
+                        Text(document.is_public ? "Yes" : "No")
+                        Spacer()
+                    }
+
                     Divider()
 
                     Spacer()
@@ -57,7 +67,7 @@ struct DocumentDetail: View {
                         Spacer()
 
                         VStack(alignment: HorizontalAlignment.leading) {
-                            Text(document.beam_api_data?.MD5 ?? "No MD5")
+                            Text(document.beam_api_checksum ?? "No MD5")
                                 .font(.caption)
                                 .fontWeight(.light)
                                 .background(Color.white)
@@ -92,16 +102,40 @@ struct DocumentDetail: View {
         }
     }
 
+    private func delete() {
+        documentManager.deleteDocument(id: document.id, completion: nil)
+    }
+
+    private func togglePublic() {
+        var documentStruct = DocumentStruct(document: document)
+        documentStruct.isPublic = !documentStruct.isPublic
+
+        documentManager.saveDocument(documentStruct, completion: { _ in
+        })
+    }
+
     private var RefreshButton: some View {
         Button(action: {
             refresh()
         }, label: {
-            if refreshing {
-                Text("Refreshing").frame(minWidth: 100)
-            } else {
-                Text("Refresh").frame(minWidth: 100)
-            }
+            Text(refreshing ? "Refreshing" : "Refresh").frame(minWidth: 100)
         }).disabled(refreshing)
+    }
+
+    private var DeleteButton: some View {
+        Button(action: {
+            delete()
+        }, label: {
+            Text("Delete").frame(minWidth: 100)
+        })
+    }
+
+    private var PublicButton: some View {
+        Button(action: {
+            togglePublic()
+        }, label: {
+            Text(document.is_public ? "Make Private" : "Make Public").frame(minWidth: 100)
+        })
     }
 
     static private let dateFormat: DateFormatter = {

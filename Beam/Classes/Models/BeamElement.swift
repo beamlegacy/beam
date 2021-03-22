@@ -221,6 +221,10 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
         })
     }
 
+    var indexInParent: Int? {
+        return parent?.indexOfChild(self)
+    }
+
     func addChild(_ child: BeamElement) {
         insert(child, after: children.last) // append
     }
@@ -245,7 +249,7 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
         }
 
         child.parent = self
-        children.insert(child, at: pos)
+        children.insert(child, at: min(children.count, pos))
     }
 
     weak var parent: BeamElement?
@@ -274,10 +278,10 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
         let existingLinks = text.internalLinks.map { range -> String in range.string }
         let string = text.text
 
-        for noteName in allNames where thisNoteTitle != noteName {
-            if !existingLinks.contains(noteName), string.contains(noteName) {
-                let ref = NoteReference(noteName: thisNoteTitle, elementID: id)
-                references[noteName] = (references[noteName] ?? []) + [ref]
+        for noteTitle in allNames where thisNoteTitle != noteTitle {
+            if !existingLinks.contains(noteTitle), string.contains(noteTitle) {
+                let ref = NoteReference(noteTitle: thisNoteTitle, elementID: id)
+                references[noteTitle] = (references[noteTitle] ?? []) + [ref]
 //                Logger.shared.logInfo("New unlink \(thisNoteTitle) --> \(note.title)", category: .document)
             }
         }
@@ -290,7 +294,7 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
         for (name, refs) in results {
             let note = BeamNote.fetchOrCreate(AppDelegate.main.data.documentManager, title: name)
             for ref in refs {
-                note.addUnlinkedReference(ref)
+                note.addReference(ref)
             }
         }
     }
@@ -335,17 +339,17 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
         for link in text.internalLinks where link.string != note.title {
             let linkTitle = link.string
             //            Logger.shared.logInfo("searching link \(linkTitle)", category: .document)
-            let reference = NoteReference(noteName: sourceNote, elementID: id)
+            let reference = NoteReference(noteTitle: sourceNote, elementID: id)
             //            Logger.shared.logInfo("New link \(note.title) <-> \(linkTitle)", category: .document)
 
             if async {
                 DispatchQueue.main.async {
                     let refnote = BeamNote.fetchOrCreate(documentManager, title: linkTitle)
-                    refnote.addLinkedReference(reference)
+                    refnote.addReference(reference)
                 }
             } else {
                 let refnote = BeamNote.fetchOrCreate(documentManager, title: linkTitle)
-                refnote.addLinkedReference(reference)
+                refnote.addReference(reference)
             }
         }
 
@@ -431,5 +435,69 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
     var depth: Int {
         guard let depth = parent?.depth else { return 0 }
         return depth + 1
+    }
+
+    func hasLinkToNote(named noteTitle: String) -> Bool {
+        text.hasLinkToNote(named: noteTitle)
+    }
+
+    func hasReferenceToNote(named noteTitle: String) -> Bool {
+        text.hasReferenceToNote(titled: noteTitle)
+    }
+
+    public var outLinks: [String] {
+        text.links + children.flatMap { $0.outLinks }
+    }
+
+    func elementContainingLink(to link: String) -> BeamElement? {
+        if text.links.contains(link) {
+            return self
+        }
+
+        for c in children {
+            if let element = c.elementContainingLink(to: link) {
+                return element
+            }
+        }
+
+        return nil
+    }
+
+    public func nextSibbling() -> BeamElement? {
+        if let p = parent {
+            let sibblings = p.children
+            if let i = sibblings.firstIndex(of: self) {
+                if sibblings.count > i + 1 {
+                    return sibblings[i + 1]
+                }
+            }
+        }
+        return nil
+    }
+
+    public func previousSibbling() -> BeamElement? {
+        if let p = parent {
+            let sibblings = p.children
+            if let i = sibblings.firstIndex(of: self) {
+                if i > 0 {
+                    return sibblings[i - 1]
+                }
+            }
+        }
+        return nil
+    }
+
+    public func highestNextSibbling() -> BeamElement? {
+        if let nextSibbling = self.parent?.nextSibbling() {
+            return nextSibbling
+        }
+        return self.parent?.highestNextSibbling()
+    }
+
+    public func deepestChildren() -> BeamElement? {
+        if let n = children.last {
+            return n.deepestChildren()
+        }
+        return self
     }
 }

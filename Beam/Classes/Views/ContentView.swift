@@ -10,23 +10,15 @@ import SwiftUI
 struct ModeView: View {
     @EnvironmentObject var state: BeamState
     @EnvironmentObject var data: BeamData
-    @ViewBuilder
+    private let windowControlsWidth: CGFloat = 92
+
     var body: some View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
-                ZStack {
-                    if !(state.isEditingOmniBarTitle || [Mode.today, Mode.note].contains(state.mode)) {
-                        if let tab = state.currentTab {
-                            GlobalTabTitle(tab: tab, isEditing: $state.isEditingOmniBarTitle)
-                                .frame(width: geometry.size.width * 0.5, height: 52, alignment: .center)
-                        }
-                    }
-
-                    OmniBar()
-                        .padding(.leading, state.isFullScreen ? 0 : 70)
-                        .padding(.trailing, 20)
-                        .frame(height: 52, alignment: .center)
-                }
+                OmniBar(containerGeometry: geometry)
+                    .padding(.leading, state.isFullScreen ? 0 : windowControlsWidth)
+                    .zIndex(10)
+                    .frame(height: 52, alignment: .top)
 
                 ZStack {
                     switch state.mode {
@@ -48,33 +40,26 @@ struct ModeView: View {
                         }
                         .transition(.move(edge: .bottom))
                         .animation(.easeInOut(duration: 0.3))
-                        .zIndex(1)
+
                     case .note:
                         ZStack {
                             NoteView(note: state.currentNote!, showTitle: false, scrollable: true, centerText: true)
                         }
                         .background(Color(.editorBackgroundColor))
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .transition(.opacity)
                         .animation(.easeInOut(duration: 0.3))
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+
                     case .today:
                         GeometryReader { geometry in
                             JournalView(data: state.data, isFetching: state.data.isFetching, journal: state.data.journal, offset: geometry.size.height * 0.4)
                         }
                     }
-
-                    if !state.searchQuery.isEmpty && !state.completedQueries.isEmpty {
-                        ScrollView {
-                            AutoCompleteView(autoComplete: $state.completedQueries, selectionIndex: $state.selectionIndex)
-                                .frame(minHeight: 20, maxHeight: 250, alignment: .top)
-                                .zIndex(2)
-                        }
-                        .accessibility(identifier: "autoCompleteView")
-                    }
                 }
+                .frame(maxHeight: .infinity)
             }
             .background(Color(.editorBackgroundColor))
-        }.frame(minWidth: 822)
+        }.frame(minWidth: 800)
     }
 }
 

@@ -10,12 +10,10 @@ import Cocoa
 
 extension NSColor {
 
-    static var autoCompleteText: NSColor {
-        return loadColor(named: "AutoCompleteText")
-    }
-
-    static var autoCompleteTextSelected: NSColor {
-        return loadColor(named: "AutoCompleteTextSelected")
+    convenience init(withLightColor lightColor: NSColor, darkColor: NSColor) {
+        self.init(name: nil) { (appearance) -> NSColor in
+            return appearance.isDarkMode ? darkColor : lightColor
+        }
     }
 
     static var editorBackgroundColor: NSColor {
@@ -58,6 +56,10 @@ extension NSColor {
 
     static var editorLinkColor: NSColor {
         return loadColor(named: "Niobium")
+    }
+
+    static var editorLinkDecorationColor: NSColor {
+        return NSColor(withLightColor: loadColor(named: "AlphaGray"), darkColor: loadColor(named: "LightStoneGray"))
     }
 
     static var editorPopoverBackgroundColor: NSColor {
@@ -111,7 +113,7 @@ extension NSColor {
     }
 
     static var linkedActionButtonHoverColor: NSColor {
-        return loadColor(named: "CharmedGreen")
+        return loadColor(named: "Beam")
     }
 
     static var linkedActionButtonColor: NSColor {
@@ -163,15 +165,7 @@ extension NSColor {
     // Formatter View
 
     static var formatterViewBackgroundColor: NSColor {
-        return loadColor(named: "Alabaster")
-    }
-
-    static var formatterViewBackgroundColorDark: NSColor {
-        return loadColor(named: "FormatterBackgroundColorDark")
-    }
-
-    static var formatterViewBackgroundColorLight: NSColor {
-        return loadColor(named: "FormatterBackgroundColorLight")
+        return NSColor(withLightColor: NSColor.white.withAlphaComponent(0.92), darkColor: loadColor(named: "Nero").withAlphaComponent(0.92))
     }
 
     static var formatterViewBackgroundHoverColor: NSColor {
@@ -182,11 +176,15 @@ extension NSColor {
         return loadColor(named: "FormatterBorderColor")
     }
 
-    static var formatterShadowColor: NSColor {
-        return loadColor(named: "FormatterShadowColor")
+    static var formatterViewShadowColor: NSColor {
+        return NSColor(withLightColor: NSColor.black.withAlphaComponent(0.070), darkColor: NSColor.black.withAlphaComponent(0.4))
     }
 
     static var formatterIconColor: NSColor {
+        return loadColor(named: "Corduroy")
+    }
+
+    static var formatterIconHoverAndActiveColor: NSColor {
         return loadColor(named: "Niobium")
     }
 
@@ -196,6 +194,18 @@ extension NSColor {
 
     static var formatterButtonBackgroudHoverColor: NSColor {
         return loadColor(named: "FormatterItemHoverColor")
+    }
+
+    static var hyperlinkTextFielColor: NSColor {
+        return loadColor(named: "Niobium")
+    }
+
+    static var hyperlinkTextFielPlaceholderColor: NSColor {
+        return loadColor(named: "LightStoneGray")
+    }
+
+    static var hyperlinkTextFielSeparatorColor: NSColor {
+        return loadColor(named: "Mercury")
     }
 
     // Other
@@ -224,40 +234,79 @@ extension NSColor {
         return loadColor(named: "Niobium")
     }
 
-    static var omniboxBackgroundColor: NSColor {
-        return loadColor(named: "OmniboxBackgroundColor")
-    }
-
+    // Omnibox
     static var omniboxPlaceholderTextColor: NSColor {
-        return loadColor(named: "OmniboxPlaceholderTextColor")
+        return loadColor(named: "LightStoneGray")
     }
 
     static var omniboxTextColor: NSColor {
         return loadColor(named: "Niobium")
     }
 
-    static var omniboxTextSelectionColor: NSColor {
-        return loadColor(named: "OmniboxTextSelectionColor")
+    // Autocomplete
+    static var autocompleteTextColor: NSColor {
+        return self.editorTextColor
     }
 
-    static var toolbarBackgroundColor: NSColor {
-        return loadColor(named: "ToolbarBackgroundColor")
+    static var autocompleteSubtitleTextColor: NSColor {
+        return loadColor(named: "LightStoneGray")
     }
 
-    static var toolbarButtonBackgroundHoverColor: NSColor {
-        return loadColor(named: "ToolbarButtonBackgroundHoverColor")
+    static var autocompleteSelectedBackgroundColor: NSColor {
+        return loadColor(named: "AutocompleteSelectedBackgroundColor")
+    }
+    static var autocompleteClickedBackgroundColor: NSColor {
+        return loadColor(named: "AutocompleteClickedBackgroundColor")
     }
 
-    static var toolbarButtonBackgroundOnColor: NSColor {
-        return loadColor(named: "ToolbarButtonBackgroundOnColor")
+    static var autocompleteFocusedBackgroundColor: NSColor {
+        return NSColor(withLightColor: NSColor.white, darkColor: loadColor(named: "Nero"))
+    }
+
+    static var autocompleteFocusedShadowColor: NSColor {
+        return NSColor(withLightColor: NSColor.black.withAlphaComponent(0.1), darkColor: NSColor.black.withAlphaComponent(0.6))
+    }
+
+    static var autocompleteHoveredShadowColor: NSColor {
+        return NSColor(withLightColor: NSColor.black.withAlphaComponent(0.05), darkColor: NSColor.black.withAlphaComponent(0.4))
+    }
+
+    // Destination Note
+    static var destinationNoteBorderColor: NSColor {
+        return loadColor(named: "Mercury")
+    }
+
+    static var destinationNoteTextColor: NSColor {
+        return loadColor(named: "LightStoneGray")
+    }
+
+    static var destinationNoteActiveTextColor: NSColor {
+        return loadColor(named: "Niobium")
+    }
+
+    static var destinationNoteSelectedColor: NSColor {
+        return loadColor(named: "Beam").withAlphaComponent(0.03)
+    }
+
+    static var destinationNoteActiveColor: NSColor {
+        return loadColor(named: "Beam").withAlphaComponent(0.08)
+    }
+
+    // Toolbar
+    static var toolbarButtonActiveBackgroundColor: NSColor {
+        return loadColor(named: "Mercury")
     }
 
     static var toolbarButtonIconColor: NSColor {
-        return loadColor(named: "ToolbarButtonIconColor")
+        return loadColor(named: "LightStoneGray")
+    }
+
+    static var toolbarButtonActiveIconColor: NSColor {
+        return loadColor(named: "Niobium")
     }
 
     static var toolbarButtonIconDisabledColor: NSColor {
-        return loadColor(named: "ToolbarButtonIconDisabledColor")
+        return toolbarButtonIconColor.withAlphaComponent(0.13)
     }
 
     static var transparent: NSColor {

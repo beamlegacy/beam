@@ -85,6 +85,11 @@ extension String {
         return String(self[start ..< end])
     }
 
+    subscript(_ range: CountablePartialRangeFrom<Int>) -> String {
+       let start = index(startIndex, offsetBy: max(0, range.lowerBound))
+        return String(self[start...])
+   }
+
     func substring(range: Range<Int>) -> String {
         return substring(from: range.lowerBound, to: range.upperBound)
     }

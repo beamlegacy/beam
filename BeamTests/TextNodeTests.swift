@@ -51,7 +51,7 @@ class TextNodeTests: XCTestCase {
     }
 
     func createMiniArborescence(title: String) -> BeamNote {
-        let note = BeamNote(title: title)
+        let note = BeamNote.fetchOrCreate(DocumentManager(), title: title)
         let bullet1 = BeamElement("bullet1")
         note.addChild(bullet1)
         let bullet11 = BeamElement("bullet11")
@@ -85,9 +85,9 @@ class TextNodeTests: XCTestCase {
     func testLoadExistingNote() {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
-        let editor = BeamTextEdit(root: note)
+        let editor = BeamTextEdit(root: note, journalMode: true)
         let root = editor.rootNode!
-//        print("Tree:\n\(root.printTree())\n")
+//        Logger.shared.logDebug("Tree:\n\(root.printTree())\n")
         validateRootWithNote(root: root, note: note)
 
         let str1 = """
@@ -103,14 +103,15 @@ class TextNodeTests: XCTestCase {
         """
 
         XCTAssertEqual(str1, root.printTree())
+        BeamNote.clearCancellables()
     }
 
     func testFoldNode() {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
-        let editor = BeamTextEdit(root: note)
+        let editor = BeamTextEdit(root: note, journalMode: true)
         let root = editor.rootNode!
-//        print("Tree:\n\(root.printTree())\n")
+//        Logger.shared.logDebug("Tree:\n\(root.printTree())\n")
         validateRootWithNote(root: root, note: note)
 
         let node = root.children.first as? TextNode
@@ -126,12 +127,13 @@ class TextNodeTests: XCTestCase {
         """
 
         XCTAssertEqual(str1, root.printTree())
+        BeamNote.clearCancellables()
     }
 
     func testRemoveNode() {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
-        let editor = BeamTextEdit(root: note)
+        let editor = BeamTextEdit(root: note, journalMode: true)
         let root = editor.rootNode!
         validateRootWithNote(root: root, note: note)
 
@@ -149,17 +151,18 @@ class TextNodeTests: XCTestCase {
 
         XCTAssertEqual(str1, root.printTree())
         validateRootWithNote(root: root, note: note)
+        BeamNote.clearCancellables()
     }
 
     func testAddNodeToRoot() {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
-        let editor = BeamTextEdit(root: note)
+        let editor = BeamTextEdit(root: note, journalMode: true)
         let root = editor.rootNode!
         validateRootWithNote(root: root, note: note)
 
         let bullet3 = BeamElement("bullet3")
-        root.addChild(TextNode(editor: editor, element: bullet3))
+        root.addChild(TextNode(parent: root, element: bullet3))
 
         let str1 = """
         title
@@ -176,16 +179,17 @@ class TextNodeTests: XCTestCase {
 
         XCTAssertEqual(str1, root.printTree())
         validateRootWithNote(root: root, note: note)
+        BeamNote.clearCancellables()
     }
 
     func testInsertNodeIntoRoot() {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
-        let editor = BeamTextEdit(root: note)
+        let editor = BeamTextEdit(root: note, journalMode: true)
         let root = editor.rootNode!
         validateRootWithNote(root: root, note: note)
 
-        _ = root.insert(node: TextNode(editor: editor, element: BeamElement("bullet3")), after: root.children.first!)
+        _ = root.insert(node: TextNode(parent: root, element: BeamElement("bullet3")), after: root.children.first!)
 
         let str1 = """
         title
@@ -202,12 +206,13 @@ class TextNodeTests: XCTestCase {
 
         XCTAssertEqual(str1, root.printTree())
         validateRootWithNote(root: root, note: note)
+        BeamNote.clearCancellables()
     }
 
     func testAddNodeToBullet() {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
-        let editor = BeamTextEdit(root: note)
+        let editor = BeamTextEdit(root: note, journalMode: true)
         let root = editor.rootNode!
         validateRootWithNote(root: root, note: note)
 
@@ -228,12 +233,13 @@ class TextNodeTests: XCTestCase {
 
         XCTAssertEqual(str1, root.printTree())
         validateRootWithNote(root: root, note: note)
+        BeamNote.clearCancellables()
     }
 
     func testInsertNodeIntoBullet() {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
-        let editor = BeamTextEdit(root: note)
+        let editor = BeamTextEdit(root: note, journalMode: true)
         let root = editor.rootNode!
         validateRootWithNote(root: root, note: note)
 
@@ -255,16 +261,17 @@ class TextNodeTests: XCTestCase {
 
         XCTAssertEqual(str1, root.printTree())
         validateRootWithNote(root: root, note: note)
+        BeamNote.clearCancellables()
     }
 
     func testAddTreeToBullet() {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
-        let editor = BeamTextEdit(root: note)
+        let editor = BeamTextEdit(root: note, journalMode: true)
         let root = editor.rootNode!
         validateRootWithNote(root: root, note: note)
 
-        let node = TextNode(editor: editor, element: BeamElement("bullet13"))
+        let node = TextNode(parent: root, element: BeamElement("bullet13"))
         node.element.addChild(BeamElement("bullet131"))
         let first = root.children.first as? TextNode
         first?.element.addChild(node.element)
@@ -285,16 +292,17 @@ class TextNodeTests: XCTestCase {
 
         XCTAssertEqual(str1, root.printTree())
         validateRootWithNote(root: root, note: note)
+        BeamNote.clearCancellables()
     }
 
     func testInsertTreeIntoBullet() {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
-        let editor = BeamTextEdit(root: note)
+        let editor = BeamTextEdit(root: note, journalMode: true)
         let root = editor.rootNode!
         validateRootWithNote(root: root, note: note)
 
-        let node = TextNode(editor: editor, element: BeamElement("bullet13"))
+        let node = TextNode(parent: root, element: BeamElement("bullet13"))
         node.element.addChild(BeamElement("bullet131"))
         let first = root.children.first as? TextNode
         _ = first?.element.insert(node.element, after: first!.element.children.first!)
@@ -315,14 +323,15 @@ class TextNodeTests: XCTestCase {
 
         XCTAssertEqual(str1, root.printTree())
         validateRootWithNote(root: root, note: note)
+        BeamNote.clearCancellables()
     }
 
     func testRemoveBulletFromNote() {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
-        let editor = BeamTextEdit(root: note)
+        let editor = BeamTextEdit(root: note, journalMode: true)
         let root = editor.rootNode!
-//        print("Tree:\n\(root.printTree())\n")
+//        Logger.shared.logDebug("Tree:\n\(root.printTree())\n")
         validateRootWithNote(root: root, note: note)
 
         let first = root.children.first as? TextNode
@@ -338,14 +347,15 @@ class TextNodeTests: XCTestCase {
 
         XCTAssertEqual(str1, root.printTree())
         validateRootWithNote(root: root, note: note)
+        BeamNote.clearCancellables()
     }
 
     func testRemoveBulletFromBullet() {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
-        let editor = BeamTextEdit(root: note)
+        let editor = BeamTextEdit(root: note, journalMode: true)
         let root = editor.rootNode!
-//        print("Tree:\n\(root.printTree())\n")
+//        Logger.shared.logDebug("Tree:\n\(root.printTree())\n")
         validateRootWithNote(root: root, note: note)
 
         let first = root.children.first as? TextNode
@@ -363,19 +373,20 @@ class TextNodeTests: XCTestCase {
 
         XCTAssertEqual(str1, root.printTree())
         validateRootWithNote(root: root, note: note)
+        BeamNote.clearCancellables()
     }
 
     // swiftlint:disable:next function_body_length
     func testInsertText1() {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
-        let editor = BeamTextEdit(root: note)
+        let editor = BeamTextEdit(root: note, journalMode: true)
         let root = editor.rootNode!
-//        print("Tree:\n\(root.printTree())\n")
+//        Logger.shared.logDebug("Tree:\n\(root.printTree())\n")
         validateRootWithNote(root: root, note: note)
 
         // Insert some text:
-        root.focussedWidget = root.children.first
+        root.focusedWidget = root.children.first
         root.cursorPosition = 0
         root.insertText(string: "test", replacementRange: root.selectedTextRange)
         let str1 = """
@@ -395,7 +406,7 @@ class TextNodeTests: XCTestCase {
         XCTAssert(root.selectedTextRange.isEmpty)
 
         // Undo the text insertion:
-        root.undoManager.undo()
+        editor.undo(String("Undo"))
 
         let str2 = """
         title
@@ -413,25 +424,26 @@ class TextNodeTests: XCTestCase {
         XCTAssert(root.selectedTextRange.isEmpty)
 
         // redo the text insertion:
-        root.undoManager.redo()
+        editor.redo(String("Redo"))
         XCTAssertEqual(str1, root.printTree())
         XCTAssertEqual(root.cursorPosition, 4)
         XCTAssert(root.selectedTextRange.isEmpty)
 
         validateRootWithNote(root: root, note: note)
+        BeamNote.clearCancellables()
     }
 
     // swiftlint:disable:next function_body_length
     func testInsertText2() {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
-        let editor = BeamTextEdit(root: note)
+        let editor = BeamTextEdit(root: note, journalMode: true)
         let root = editor.rootNode!
-//        print("Tree:\n\(root.printTree())\n")
+//        Logger.shared.logDebug("Tree:\n\(root.printTree())\n")
         validateRootWithNote(root: root, note: note)
 
         // Insert some text:
-        root.focussedWidget = root.children.first
+        root.focusedWidget = root.children.first
         root.cursorPosition = 3
         root.insertText(string: "test", replacementRange: root.selectedTextRange)
         let str1 = """
@@ -451,7 +463,7 @@ class TextNodeTests: XCTestCase {
         XCTAssert(root.selectedTextRange.isEmpty)
 
         // Undo the text insertion:
-        root.undoManager.undo()
+        editor.undo(String("Undo"))
 
         let str2 = """
         title
@@ -469,24 +481,25 @@ class TextNodeTests: XCTestCase {
         XCTAssert(root.selectedTextRange.isEmpty)
 
         // redo the text insertion:
-        root.undoManager.redo()
+        editor.redo(String("Redo"))
         XCTAssertEqual(str1, root.printTree())
         XCTAssertEqual(root.cursorPosition, 7)
         XCTAssert(root.selectedTextRange.isEmpty)
         validateRootWithNote(root: root, note: note)
+        BeamNote.clearCancellables()
     }
 
     // swiftlint:disable:next function_body_length
     func testInsertText3() {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
-        let editor = BeamTextEdit(root: note)
+        let editor = BeamTextEdit(root: note, journalMode: true)
         let root = editor.rootNode!
-//        print("Tree:\n\(root.printTree())\n")
+//        Logger.shared.logDebug("Tree:\n\(root.printTree())\n")
         validateRootWithNote(root: root, note: note)
 
         // Insert some text:
-        root.focussedWidget = root.children.first
+        root.focusedWidget = root.children.first
         root.cursorPosition = 3
         root.selectedTextRange = 3..<7
         root.insertText(string: "test", replacementRange: root.selectedTextRange)
@@ -507,7 +520,9 @@ class TextNodeTests: XCTestCase {
         XCTAssert(root.selectedTextRange.isEmpty)
 
         // Undo the text insertion:
-        root.undoManager.undo()
+        editor.undo(String("Undo"))
+        // Undo selection deletion (insertText does both in two operations)
+        editor.undo(String("Undo"))
 
         let str2 = """
         title
@@ -524,12 +539,15 @@ class TextNodeTests: XCTestCase {
         XCTAssertEqual(root.cursorPosition, 3)
         XCTAssertEqual(root.selectedTextRange, 3..<7)
 
-        // redo the text insertion:
-        root.undoManager.redo()
+        // redo the text insertion / selection deletion:
+        editor.redo(String("Redo"))
+        editor.redo(String("Redo"))
+
         XCTAssertEqual(str1, root.printTree())
         XCTAssertEqual(root.cursorPosition, 7)
         XCTAssert(root.selectedTextRange.isEmpty)
         validateRootWithNote(root: root, note: note)
+        BeamNote.clearCancellables()
     }
 
     // swiftlint:disable:next function_body_length
@@ -537,25 +555,26 @@ class TextNodeTests: XCTestCase {
         defer { reset() }
         let frame = NSRect(x: 0, y: 0, width: 400, height: 500)
         let note = createMiniArborescence(title: "title")
-        let editor = BeamTextEdit(root: note)
+        let editor = BeamTextEdit(root: note, journalMode: true)
         let root = editor.rootNode!
         validateRootWithNote(root: root, note: note)
 
-        root.focussedWidget = root.children.first?.children.first
+        root.focusedWidget = root.children.first?.children.first
         root.cursorPosition = 0
         root.setLayout(frame)
         root.updateRendering()
 
         XCTAssertEqual(root.children.first?.children.count, 2)
         root.doCommand(.deleteBackward)
-        XCTAssertNotNil(root.focussedWidget as? TextNode)
-        if let node = root.focussedWidget as? TextNode {
+        XCTAssertNotNil(root.focusedWidget as? TextNode)
+        if let node = root.focusedWidget as? TextNode {
             XCTAssertEqual(node.text.text, "bullet1bullet11")
         }
         XCTAssertEqual(root.children.first?.children.count, 1)
-//        print("Tree:\n\(root.printTree())\n")
+//        Logger.shared.logDebug("Tree:\n\(root.printTree())\n")
 //        note.debugNote()
         validateRootWithNote(root: root, note: note)
+        BeamNote.clearCancellables()
     }
 
     // swiftlint:disable:next function_body_length
@@ -563,14 +582,14 @@ class TextNodeTests: XCTestCase {
         defer { reset() }
         let frame = NSRect(x: 0, y: 0, width: 400, height: 500)
         let note = createMiniArborescence(title: "title")
-        let editor = BeamTextEdit(root: note)
+        let editor = BeamTextEdit(root: note, journalMode: true)
         let root = editor.rootNode!
-//        print("Tree:\n\(root.printTree())\n")
+//        Logger.shared.logDebug("Tree:\n\(root.printTree())\n")
         validateRootWithNote(root: root, note: note)
 
-        root.focussedWidget = root.children.first?.children.first
-        XCTAssertNotNil(root.focussedWidget as? TextNode)
-        if let node = root.focussedWidget as? TextNode {
+        root.focusedWidget = root.children.first?.children.first
+        XCTAssertNotNil(root.focusedWidget as? TextNode)
+        if let node = root.focusedWidget as? TextNode {
             root.cursorPosition = node.text.count
         }
         root.setLayout(frame)
@@ -578,22 +597,24 @@ class TextNodeTests: XCTestCase {
 
         XCTAssertEqual(root.children.first?.children.count, 2)
         root.doCommand(.deleteForward)
-//        print("Tree:\n\(root.printTree())\n")
+//        Logger.shared.logDebug("Tree:\n\(root.printTree())\n")
 //        note.debugNote()
-        XCTAssertNotNil(root.focussedWidget as? TextNode)
-        if let node = root.focussedWidget as? TextNode {
+        XCTAssertNotNil(root.focusedWidget as? TextNode)
+        if let node = root.focusedWidget as? TextNode {
             XCTAssertEqual(node.text.text, "bullet11bullet12")
         }
         XCTAssertEqual(root.children.first?.children.count, 1)
         validateRootWithNote(root: root, note: note)
+        BeamNote.clearCancellables()
     }
 
     func testStrippedText() {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
-        let editor = BeamTextEdit(root: note)
+        let editor = BeamTextEdit(root: note, journalMode: true)
         let root = editor.rootNode!
         XCTAssertEqual(" bullet1 bullet11 bullet12 bullet2 bullet21 bullet22 bullet23", root.fullStrippedText)
+        BeamNote.clearCancellables()
 
     }
 }

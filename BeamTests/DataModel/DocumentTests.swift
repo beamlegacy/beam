@@ -7,26 +7,30 @@ import Combine
 
 @testable import Beam
 class DocumentTests: QuickSpec {
-    // MARK: Properties
-    var sut: DocumentManager!
-    var helper: DocumentManagerTestsHelper!
-    var coreDataManager: CoreDataManager!
-    var mainContext: NSManagedObjectContext!
-    var backgroundContext: NSManagedObjectContext!
-
     // swiftlint:disable:next function_body_length
     override func spec() {
-        beforeEach {
-            self.coreDataManager = CoreDataManager()
-            self.mainContext = self.coreDataManager.mainContext
-            self.backgroundContext = self.coreDataManager.backgroundContext
+        // MARK: Properties
+        var sut: DocumentManager!
+        var helper: DocumentManagerTestsHelper!
+        var coreDataManager: CoreDataManager!
+        var mainContext: NSManagedObjectContext!
+        var backgroundContext: NSManagedObjectContext!
+
+        beforeSuite {
+            coreDataManager = CoreDataManager()
 
             // Setup CoreData
-            self.coreDataManager.setup()
-            CoreDataManager.shared = self.coreDataManager
-            self.sut = DocumentManager(coreDataManager: self.coreDataManager)
-            self.helper = DocumentManagerTestsHelper(documentManager: self.sut,
-                                                     coreDataManager: self.coreDataManager)
+            coreDataManager.setup()
+            //CoreDataManager.shared = coreDataManager
+        }
+
+        beforeEach {
+            coreDataManager.destroyPersistentStore()
+            mainContext = coreDataManager.mainContext
+            backgroundContext = coreDataManager.backgroundContext
+            sut = DocumentManager(coreDataManager: coreDataManager)
+            helper = DocumentManagerTestsHelper(documentManager: sut,
+                                                     coreDataManager: coreDataManager)
         }
 
         afterEach {
@@ -35,34 +39,36 @@ class DocumentTests: QuickSpec {
 
         describe(".countWithPredicate()") {
             it("fetches document") {
-                try? self.mainContext.save()
-
                 let count = 3
-                let countBefore = Document.countWithPredicate(self.mainContext)
+                let countBefore = Document.countWithPredicate(mainContext)
 
                 for _ in 1...count {
-                    self.helper.saveLocally(self.helper.createDocumentStruct())
+                    let docStruct = helper.createDocumentStruct()
+                    helper.saveLocally(docStruct)
                 }
 
-                let countAfter = Document.countWithPredicate(self.mainContext)
-                expect(countAfter).to(equal(countBefore + count))
+                let countAfter = Document.countWithPredicate(mainContext)
+                expect(countAfter) >= countBefore + count
+                // Because sometimes BeamNote adds today's journal note
+                expect(countAfter) <= countBefore + count + 1
             }
         }
 
         describe(".updatedAt") {
-            it("updates attribute on context save only if more than a second difference") {
-                let document = Document.create(self.mainContext, title: String.randomTitle())
+            it("updates attribute on context save only if more than a second difference, and has data changes") {
+                let document = Document.create(mainContext, title: String.randomTitle())
                 expect(document.updated_at).toNot(beNil())
 
                 BeamDate.travel(0.5)
                 let initialUpdatedAt = document.updated_at
                 document.title = String.randomTitle()
-                try? self.mainContext.save()
-                expect(document.updated_at).to(equal(initialUpdatedAt))
+                try? mainContext.save()
+                expect(document.updated_at) == initialUpdatedAt
 
                 BeamDate.travel(1.5)
                 document.title = String.randomTitle()
-                try? self.mainContext.save()
+                document.data = String.randomTitle().asData // force updatedAt change
+                try? mainContext.save()
                 expect(document.updated_at).toNot(equal(initialUpdatedAt))
                 expect(document.updated_at).to(beGreaterThan(initialUpdatedAt))
                 expect(document.updated_at.timeIntervalSince(initialUpdatedAt)).to(beGreaterThan(2.0))
@@ -71,21 +77,41 @@ class DocumentTests: QuickSpec {
 
         describe(".fetchAllWithTitleMatch()") {
             it("fetches documents matching title") {
-                self.helper.saveLocally(self.helper.createDocumentStruct(title: "foobar 1"))
-                self.helper.saveLocally(self.helper.createDocumentStruct(title: "foobar 2"))
-                self.helper.saveLocally(self.helper.createDocumentStruct(title: "foobar 3"))
-                self.helper.saveLocally(self.helper.createDocumentStruct())
+                let times = 3
+                for index in 0..<times {
+                    helper.saveLocally(helper.createDocumentStruct(title: "foobar \(index)"))
+                }
+                helper.saveLocally(helper.createDocumentStruct())
 
-                expect(Document.fetchAllWithTitleMatch(self.mainContext, "foobar")).to(haveCount(3))
+                expect(Document.fetchAllWithTitleMatch(mainContext, "foobar")).to(haveCount(times))
             }
         }
 
         describe("MD5") {
             it("generates the same MD5 as Ruby") {
-                let document = Document.create(self.mainContext, title: "foobar")
+                let document = Document.create(mainContext, title: "foobar")
                 document.data = "foobar".data(using: .utf8)
                 // Calculated from Ruby with Digest::MD5.hexdigest "foobar"
                 expect(document.data?.MD5).to(equal("3858f62230ac3c915f300c664312c63f"))
+            }
+        }
+
+        describe("JSON encoding") {
+            let encoder = JSONEncoder()
+            let text = "this is a text"
+            let base64EncodedText = text.asData.base64EncodedString()
+            let expectedJson = "{\"data\":\"\(base64EncodedText)\"}"
+
+            struct Foobar: Codable {
+                let data: Data
+            }
+
+            it("generates a string with base64 encoded data") {
+                let newstruct = Foobar(data: text.asData)
+                let data = try encoder.encode(newstruct)
+
+                expect(data.asString) == expectedJson
+                expect(Data(base64Encoded: base64EncodedText)?.asString) == text
             }
         }
 
@@ -94,18 +120,18 @@ class DocumentTests: QuickSpec {
                 let id = UUID()
                 let title = String.randomTitle()
 
-                let document1 = Document.create(self.mainContext, title: title)
-                let document2 = Document.create(self.mainContext, title: title)
+                let document1 = Document.create(mainContext, title: title)
+                let document2 = Document.create(mainContext, title: title)
 
                 document1.id = id
                 document2.id = id
 
-                expect { try CoreDataManager.save(self.mainContext) }.to(throwError { (error: NSError) in
-                    expect(error.code).to(equal(133021))
+                expect { try CoreDataManager.save(mainContext) }.to(throwError { (error: CocoaError) in
+                    expect(error.code) == CocoaError.Code.managedObjectConstraintMerge
                 })
 
-                self.mainContext.delete(document1)
-                self.mainContext.delete(document2)
+                mainContext.delete(document1)
+                mainContext.delete(document2)
             }
         }
 
@@ -115,29 +141,29 @@ class DocumentTests: QuickSpec {
                 let title2 = String.randomTitle()
                 let title3 = String.randomTitle()
 
-                let document1 = Document.create(self.mainContext, title: title)
-                expect { try CoreDataManager.save(self.mainContext) }.toNot(throwError())
+                let document1 = Document.create(mainContext, title: title)
+                expect { try CoreDataManager.save(mainContext) }.toNot(throwError())
                 var document2: Document!
-                self.backgroundContext.performAndWait {
+                backgroundContext.performAndWait {
                     // swiftlint:disable:next force_cast
-                    document2 = (self.backgroundContext.object(with: document1.objectID) as! Document)
+                    document2 = (backgroundContext.object(with: document1.objectID) as! Document)
                 }
 
                 document1.title = title2
                 document2.title = title3
 
-                expect { try CoreDataManager.save(self.backgroundContext) }.toNot(throwError())
-                expect { try DocumentManager.saveContext(context: self.backgroundContext) }.toNot(throwError())
+                expect { try CoreDataManager.save(backgroundContext) }.toNot(throwError())
+                expect { try DocumentManager.saveContext(context: backgroundContext) }.toNot(throwError())
 
-                expect { try CoreDataManager.save(self.mainContext) }.to(throwError { (error: NSError) in
-                    expect(error.code).to(equal(133020))
+                expect { try CoreDataManager.save(mainContext) }.to(throwError { (error: CocoaError) in
+                    expect(error.code) == CocoaError.Code.managedObjectMerge
                 })
-                expect { try DocumentManager.saveContext(context: self.mainContext) }.to(throwError { (error: NSError) in
-                    expect(error.code).to(equal(133020))
+                expect { try DocumentManager.saveContext(context: mainContext) }.to(throwError { (error: CocoaError) in
+                    expect(error.code) == CocoaError.Code.managedObjectMerge
                 })
 
                 expect(document1.title).to(equal(title2))
-                self.mainContext.refresh(document1, mergeChanges: false)
+                mainContext.refresh(document1, mergeChanges: false)
                 expect(document1.title).to(equal(title3))
             }
         }

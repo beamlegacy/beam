@@ -39,8 +39,6 @@ public class TextRoot: TextNode {
 
     var note: BeamNote?
 
-    var undoManager = UndoManager()
-
     var state = TextState()
 
     private var _config = TextConfig()
@@ -68,23 +66,24 @@ public class TextRoot: TextNode {
         }
         set {
             assert(newValue >= 0)
-            state.cursorPosition = newValue
+            let n = focusedWidget as? TextNode
+            let textCount = n?.element.text.count ?? 0
+            state.cursorPosition = newValue > textCount ? textCount : newValue
             if state.selectedTextRange.isEmpty {
                 state.selectedTextRange = newValue ..< newValue
             }
             updateTextAttributesAtCursorPosition()
-            let n = focussedWidget as? TextNode
             n?.invalidateText()
-            focussedWidget?.invalidate()
+            focusedWidget?.invalidate()
             editor.reBlink()
-            if state.nodeSelection == nil {
+            if state.nodeSelection == nil && !editor.scrollToCursorAtLayout {
                 editor.setHotSpotToCursorPosition()
             }
         }
     }
 
     var selectedText: String {
-        guard let node = focussedWidget as? TextNode else { return "" }
+        guard let node = focusedWidget as? TextNode else { return "" }
         return node.text.substring(range: selectedTextRange)
     }
 
@@ -113,20 +112,22 @@ public class TextRoot: TextNode {
         return super.buildTextChildren(elements: elements) + otherSections.compactMap { $0 }
     }
 
-    weak var focussedWidget: Widget? {
+    weak var focusedWidget: Widget? {
         didSet {
-            guard oldValue !== focussedWidget else { return }
+            guard oldValue !== focusedWidget else { return }
             let oldNode = oldValue as? TextNode
-            let newNode = focussedWidget as? TextNode
-            oldValue?.unfocus()
+            let newNode = focusedWidget as? TextNode
+            oldValue?.onUnfocus()
             oldNode?.invalidateText()
             oldValue?.invalidate()
-            focussedWidget?.focus()
+            focusedWidget?.onFocus()
             newNode?.invalidateText()
-            focussedWidget?.invalidate()
+            focusedWidget?.invalidate()
             cancelSelection()
         }
     }
+
+    weak var mouseHandler: Widget?
 
     override func invalidateLayout() {
         guard !needLayout else { return }
@@ -137,27 +138,26 @@ public class TextRoot: TextNode {
 
     override var offsetInRoot: NSPoint { NSPoint() }
 
-    override func invalidate(_ rect: NSRect? = nil) {
-        super.invalidate(rect)
-        if let r = rect {
-            editor.invalidate(r.offsetBy(dx: currentFrameInDocument.minX, dy: currentFrameInDocument.minY))
-        } else {
-            editor.invalidate(contentsFrame.offsetBy(dx: currentFrameInDocument.minX, dy: currentFrameInDocument.minY))
-        }
+    override func invalidate() {
+        super.invalidate()
+        editor.invalidate()
     }
 
     override init(editor: BeamTextEdit, element: BeamElement) {
         self.note = element as? BeamNote
-        if let note = note, note.type != .journal {
-            topSpacerWidget = SpacerWidget(editor: editor, spacerType: .top)
-            linksSection = LinksSection(editor: editor, note: note, mode: .links)
-            middleSpacerWidget = SpacerWidget(editor: editor, spacerType: .middle)
-            referencesSection = LinksSection(editor: editor, note: note, mode: .references)
-            bottomSpacerWidget = SpacerWidget(editor: editor, spacerType: .bottom)
-            browsingSection = BrowsingSection(editor: editor, note: note)
-        }
-
         super.init(editor: editor, element: element)
+
+        mapping[element] = WeakReference(self)
+        if let note = note, note.type != .journal {
+            topSpacerWidget = SpacerWidget(parent: self, spacerType: .top)
+            linksSection = LinksSection(parent: self, note: note, mode: .links)
+            middleSpacerWidget = SpacerWidget(parent: self, spacerType: .middle)
+            referencesSection = LinksSection(parent: self, note: note, mode: .references)
+            bottomSpacerWidget = SpacerWidget(parent: self, spacerType: .bottom)
+            browsingSection = BrowsingSection(parent: self, note: note)
+        }
+        updateTextChildren(elements: element.children)
+
         self.selfVisible = false
         self.cursor = .arrow
 
@@ -175,12 +175,18 @@ public class TextRoot: TextNode {
             first?.placeholder = BeamText(text: istoday ? "This is the journal, you can type anything here!" : "...")
         }
 
-        focussedWidget = children.first ?? self
+        focus(widget: children.first ?? self, cursorPosition: nil)
         childInset = 0
-    }
 
-    var linkedRefsNode: TextNode?
-    var unlinkedRefsNode: TextNode?
+        setAccessibilityLabel("TextRoot")
+        setAccessibilityRole(.unknown)
+        setAccessibilityParent(editor)
+
+        referencesSection?.open = false
+
+        focusedWidget = nodeFor(element.children.first ?? element, withParent: self)
+        focusedWidget?.onFocus()
+    }
 
     public override func printTree(level: Int = 0) -> String {
         return String.tabs(level) + (note?.title ?? "<???>") + "\n" + children.prefix(children.count).reduce("", { result, child -> String in
@@ -195,9 +201,11 @@ public class TextRoot: TextNode {
         }
     }
 
-    func focus(node: TextNode) {
-        self.focussedWidget = node
-        cursorPosition = 0
+    func focus(widget: Widget, cursorPosition newPosition: Int? = 0) {
+        self.focusedWidget = widget
+        if let position = newPosition {
+            self.cursorPosition = position
+        }
     }
 
     var lastCommand: TextRoot.Command = .none
@@ -246,7 +254,7 @@ public class TextRoot: TextNode {
     ]
 
     override func dumpWidgetTree(_ level: Int = 0) {
-        print("==================================================")
+        Logger.shared.logDebug("==================================================")
         super.dumpWidgetTree(level)
     }
 
@@ -261,4 +269,86 @@ public class TextRoot: TextNode {
         }
         return "TextRoot - [\(note.title)] - \(element.id.uuidString)"
     }
+
+    public override func accessibilityFrameInParentSpace() -> NSRect {
+        // We are flipped, but the accessibility framework ignores it so we need to change that by hand:
+        return NSRect(origin: CGPoint(), size: editor.frame.size)
+    }
+
+    // Mapping of elements to nodes and breadcrumbs:
+    override func nodeFor(_ element: BeamElement) -> TextNode? {
+        return mapping[element]?.ref
+    }
+
+    override func nodeFor(_ element: BeamElement, withParent: Widget) -> TextNode {
+        if let node = mapping[element]?.ref {
+            return node
+        }
+
+        let node: TextNode = {
+            guard let note = element as? BeamNote else {
+                guard element.note == nil || element.note == self.note else {
+                    return LinkedReferenceNode(parent: withParent, element: element)
+                }
+                return TextNode(parent: withParent, element: element)
+            }
+            return TextRoot(editor: editor, element: note)
+        }()
+
+        accessingMapping = true
+        mapping[element] = WeakReference(node)
+        accessingMapping = false
+        purgeDeadNodes()
+
+        if let w = editor.window {
+            node.contentsScale = w.backingScaleFactor
+        }
+
+        editor.layer?.addSublayer(node.layer)
+
+        return node
+    }
+
+    override func clearMapping() {
+        mapping.removeAll()
+        super.clearMapping()
+    }
+
+    private var accessingMapping = false
+    private var mapping: [BeamElement: WeakReference<TextNode>] = [:]
+    private var deadNodes: [TextNode] = []
+
+    func purgeDeadNodes() {
+        guard !accessingMapping else { return }
+        for dead in deadNodes {
+            removeNode(dead)
+        }
+        deadNodes.removeAll()
+    }
+
+    override func removeNode(_ node: TextNode) {
+        guard !accessingMapping else {
+            deadNodes.append(node)
+            return
+        }
+        mapping.removeValue(forKey: node.element)
+    }
+
+    private var breadCrumbs: [NoteReference: BreadCrumb] = [:]
+    func getBreadCrumb(for noteReference: NoteReference) -> BreadCrumb? {
+        guard let breadCrumb = breadCrumbs[noteReference] else {
+            guard let referencingNote = BeamNote.fetch(DocumentManager(), title: noteReference.noteTitle) else { return nil }
+            guard let referencingElement = referencingNote.findElement(noteReference.elementID) else { return nil }
+            let breadCrumb = BreadCrumb(parent: self, element: referencingElement)
+            breadCrumbs[noteReference] = breadCrumb
+            return breadCrumb
+        }
+        return breadCrumb
+    }
+
+    override var cmdManager: CommandManager<Widget> {
+        guard let note = note else { fatalError("Trying to access the command manager on an unconnected TextRoot is a programming error.") }
+        return note.cmdManager
+    }
+
 }

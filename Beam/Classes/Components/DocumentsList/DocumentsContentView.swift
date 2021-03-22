@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct DocumentsContentView: View {
-    @State var selectedDocument: Document?
+    @State private var selectedDocument: Document?
 
     let context = CoreDataManager.shared.mainContext
     let viewModel = DocumentsList.ViewModel(managedObjectContext: CoreDataManager.shared.mainContext)

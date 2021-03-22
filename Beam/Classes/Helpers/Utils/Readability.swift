@@ -42,7 +42,7 @@ struct Readability {
                 getResults(.success(read))
 
                 //let t1 = now.distance(to: Date()) - t0
-                //print("Extraction time: \(t0)s / indexing \(t1)s")
+                //Logger.shared.logDebug("Extraction time: \(t0)s / indexing \(t1)s")
             } else if let e = err {
                 getResults(.failure(e))
             }

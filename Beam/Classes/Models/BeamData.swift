@@ -79,7 +79,6 @@ public class BeamData: ObservableObject {
 //        }
 
         noteAutoSaveService.saveNotes()
-
         // save search index
         do {
             Logger.shared.logInfo("Saving Index to \(Self.indexPath)", category: .search)
@@ -118,6 +117,11 @@ public class BeamData: ObservableObject {
 
     func updateNoteCount() {
         noteCount = Document.countWithPredicate(CoreDataManager.shared.mainContext)
+    }
+
+    func reloadJournal() {
+        journal = []
+        setupJournal()
     }
 
 }

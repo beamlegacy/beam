@@ -23,7 +23,6 @@ class DocumentRequestTests: QuickSpec {
             // Setup CoreData
             self.coreDataManager.setup()
             self.coreDataManager.destroyPersistentStore()
-            self.coreDataManager.setup()
             CoreDataManager.shared = self.coreDataManager
             self.sut = DocumentRequest()
             self.documentManager = DocumentManager(coreDataManager: self.coreDataManager)
@@ -42,7 +41,7 @@ class DocumentRequestTests: QuickSpec {
                 let ancestor = "1\n2\n3"
 
                 beforeEach {
-                    docStruct = self.helper.createLocalAndRemoteVersions(ancestor)
+                    docStruct = try? self.helper.createLocalAndRemoteVersions(ancestor)
                 }
 
                 afterEach {

@@ -14,7 +14,7 @@ extension BeamTextEdit {
     private static var xPos: CGFloat = 0
 
     internal func initPopover() {
-        guard let node = focussedWidget as? TextNode else { return }
+        guard let node = focusedWidget as? TextNode else { return }
 
         popover = BidirectionalPopover()
 
@@ -30,7 +30,7 @@ extension BeamTextEdit {
     }
 
     internal func updatePopover(with command: TextRoot.Command = .none) {
-        guard let node = focussedWidget as? TextNode,
+        guard let node = focusedWidget as? TextNode,
               let popover = popover else { return }
 
         let cursorPosition = rootNode.cursorPosition
@@ -43,7 +43,8 @@ extension BeamTextEdit {
 
         if command == .moveRight && node.text.text == "[[]]" {
             cursorStartPosition = 0
-            dismissPopoverOrFormatter()
+            cancelInternalLink()
+            dismissPopover()
             return
         }
 
@@ -73,7 +74,7 @@ extension BeamTextEdit {
 
     internal func cancelPopover(leaveTextAsIs: Bool = false) {
         guard popover != nil,
-              let node = focussedWidget as? TextNode else { return }
+              let node = focusedWidget as? TextNode else { return }
 
         dismissPopover()
         let range = (cursorStartPosition + 1 - popoverPrefix)..<(rootNode.cursorPosition + popoverSuffix)
@@ -92,12 +93,20 @@ extension BeamTextEdit {
         popover = nil
     }
 
-    internal func cancelInternalLink() {
-        guard let node = focussedWidget as? TextNode,
+    internal func cancelInternalLink(with text: String? = nil, range: Swift.Range<Int>? = nil) {
+        guard let node = focusedWidget as? TextNode,
               popover != nil else { return }
 
-        let text = node.text.text
-        node.text.removeAttributes([.internalLink(text)], from: cursorStartPosition..<rootNode.cursorPosition + text.count)
+        guard let text = text,
+              let range = range else {
+            // By default remove internal link from begin to the end
+            let text = node.text.text
+            node.text.removeAttributes([.internalLink(text)], from: cursorStartPosition..<rootNode.cursorPosition + text.count)
+            return
+        }
+
+        // Remove internal link at the specific range
+        node.text.removeAttributes([.internalLink(text)], from: range)
     }
 
     private func updatePopoverPosition(with node: TextNode, _ isEmpty: Bool = false) {
@@ -137,10 +146,21 @@ extension BeamTextEdit {
         let startPosition = popoverPrefix == 0 ? cursorStartPosition : cursorStartPosition + 1
         let replacementStart = startPosition - popoverPrefix
         let replacementEnd = rootNode.cursorPosition + popoverSuffix
-        let linkEnd = replacementStart + title.count
+        // When the cursor is moved to left, the link should be split in 2 (Bi-di + Plain text)
+        let linkEnd = rootNode.lastCommand == .moveLeft ?
+            replacementStart + rootNode.cursorPosition - popoverPrefix :
+            replacementStart + title.count
 
         node.text.replaceSubrange(replacementStart..<replacementEnd, with: title)
+
+        // Transform no Bi-dir text to plain text
+        if rootNode.lastCommand == .moveLeft {
+            let splitTitle = node.text.text[linkEnd...]
+            cancelInternalLink(with: splitTitle, range: linkEnd..<splitTitle.count + linkEnd)
+        }
+
         node.text.makeInternalLink(replacementStart..<linkEnd)
+
         rootNode.cursorPosition = linkEnd
         dismissPopover()
         showOrHidePersistentFormatter(isPresent: true)

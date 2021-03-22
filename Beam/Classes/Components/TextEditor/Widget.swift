@@ -11,7 +11,7 @@ import Combine
 
 // swiftlint:disable type_body_length
 // swiftlint:disable file_length
-public class Widget: NSObject, CALayerDelegate, MouseHandler {
+public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     let layer: CALayer
     var debug = false
     var currentFrameInDocument = NSRect()
@@ -19,7 +19,7 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
     var isEmpty: Bool { children.isEmpty }
     var selected: Bool = false {
         didSet {
-            layer.backgroundColor = selected ? NSColor(white: 0.5, alpha: 0.1).cgColor : NSColor(white: 1, alpha: 0).cgColor
+            layer.backgroundColor = selected ? NSColor.editorTextSelectionColor.cgColor : NSColor(white: 1, alpha: 0).cgColor
             invalidate()
         }
     }
@@ -38,11 +38,18 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
         }
     }
 
-    var selfVisible = true { didSet { invalidateLayout() } }
+    var selfVisible = true {
+        didSet {
+            invalidateLayout()
+        }
+    }
 
     var visible = true {
         didSet {
-            layer.isHidden = !visible
+            layer.isHidden = !visible || !selfVisible
+            for l in layers where l.value.layer.superlayer == editor.layer {
+                l.value.layer.isHidden = !visible || !selfVisible
+            }
         }
     }
 
@@ -85,6 +92,8 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
                 editor.layer?.addSublayer(l.value.layer)
             }
         }
+
+        updateChildrenVisibility(visible && open)
     }
 
     var enabled: Bool { editor.enabled }
@@ -200,12 +209,32 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
     }
 
     // MARK: - Initializer
+    init(parent: Widget) {
+        self.parent = parent
+        self.editor = parent.editor
+        layer = CALayer()
+        super.init()
+        configureLayer()
 
+        setAccessibilityIdentifier(String(describing: Self.self))
+        setAccessibilityElement(true)
+        setAccessibilityLabel("Widget")
+        setAccessibilityRole(.none)
+        setAccessibilityParent(editor)
+    }
+
+    // this version should only be used by TextRoot
     init(editor: BeamTextEdit) {
         self.editor = editor
         layer = CALayer()
         super.init()
         configureLayer()
+
+        setAccessibilityIdentifier(String(describing: Self.self))
+        setAccessibilityElement(true)
+        setAccessibilityLabel("Widget")
+        setAccessibilityRole(.none)
+        setAccessibilityParent(editor)
     }
 
     deinit {
@@ -254,17 +283,21 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
 
         drawDebug(in: context)
 
-        if selfVisible {
-            context.saveGState(); do { context.restoreGState() }
-        }
         context.restoreGState()
     }
 
     func updateSubLayersLayout() { }
 
+    var initialLayout = true
     func setLayout(_ frame: NSRect) {
         self.frame = frame
         needLayout = false
+
+        if initialLayout {
+            CATransaction.begin()
+            CATransaction.setDisableActions(true)
+
+        }
         layer.bounds = contentsFrame
         layer.position = frameInDocument.origin
         updateSubLayersLayout()
@@ -278,6 +311,11 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
             invalidate()  // invalidate after the change
         }
         updateChildrenLayout()
+
+        if initialLayout {
+            CATransaction.commit()
+        }
+        initialLayout = false
     }
 
     func updateLayout() {
@@ -325,17 +363,9 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
         p.invalidateLayout()
     }
 
-    func invalidate(_ rect: NSRect? = nil) {
-        guard let p = parent else { return }
+    func invalidate() {
+        guard !layer.needsDisplay() else { return }
         layer.setNeedsDisplay()
-        let offset = NSPoint(x: frame.origin.x + currentFrameInDocument.origin.x - frameInDocument.origin.x,
-                             y: frame.origin.y + currentFrameInDocument.origin.y - frameInDocument.origin.y)
-        if let r = rect {
-            p.invalidate(r.offsetBy(dx: offset.x, dy: offset.y))
-        } else {
-            let r = NSRect(x: offset.x, y: offset.y, width: currentFrameInDocument.width, height: contentsFrame.maxY)
-            p.invalidate(r)
-        }
     }
 
     func invalidateRendering() {
@@ -373,6 +403,7 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
             if let chevron = self.layers["disclosure"] as? ChevronButton {
                 chevron.open = open
             }
+            guard !initialLayout else { return }
             updateChildrenVisibility(visible && open)
             invalidateLayout()
         }
@@ -381,6 +412,7 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
     // TODO: Refactor this in two methods
     func updateChildrenVisibility(_ isVisible: Bool) {
         for c in children {
+            guard c.visible != isVisible else { continue }
             c.visible = isVisible
             c.updateChildrenVisibility(isVisible && c.open)
             invalidateLayout()
@@ -393,12 +425,12 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
         if invalidatedRendering {
             contentsFrame = NSRect()
 
-            if selfVisible {
-                // do something
-            }
-
             contentsFrame.size.width = availableWidth
             contentsFrame = contentsFrame.rounded()
+
+            if !selfVisible {
+                contentsFrame.size.height = 0
+            }
 
             invalidatedRendering = false
         }
@@ -416,6 +448,7 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
     // MARK: - Methods Widget
 
     func addChild(_ child: Widget) {
+        guard !children.contains(child) else { return }
         children.append(child)
         invalidateLayout()
     }
@@ -438,7 +471,6 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
 
     func delete() {
         parent?.removeChild(self)
-//        editor.removeNode(self)
     }
 
     func insert(node: Widget, after existingNode: Widget) -> Bool {
@@ -454,14 +486,36 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
         return true
     }
 
+    func widgetAt(point: CGPoint) -> Widget? {
+        guard visible else { return nil }
+        guard 0 <= point.y, point.y < frame.height else { return nil }
+
+        if contentsFrame.minY <= point.y, point.y < contentsFrame.maxY {
+            return self
+        }
+
+        for c in children {
+            let p = CGPoint(x: point.x - c.frame.origin.x, y: point.y - c.frame.origin.y)
+            if let res = c.widgetAt(point: p) {
+                return res
+            }
+        }
+
+        return nil
+    }
+
     internal var layers: [String: Layer] = [:]
     func addLayer(_ layer: Layer, origin: CGPoint? = nil, global: Bool = false) {
         layer.frame = CGRect(origin: origin ?? layer.frame.origin, size: layer.frame.size)
 
         if global {
             editor.layer?.addSublayer(layer.layer)
+            layer.layer.isHidden = !inVisibleBranch
         } else if layer.layer.superlayer == nil {
             self.layer.addSublayer(layer.layer)
+
+            layer.setAccessibilityParent(self)
+//            layer.setAccessibilityFrameInParentSpace(layer.frame)
         }
 
         layers[layer.name] = layer
@@ -511,7 +565,7 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
             return nil
         }
 
-//        print("dispatch down: \(mouseInfo.position)")
+//        Logger.shared.logDebug("dispatch down: \(mouseInfo.position)")
         if mouseDown(mouseInfo: mouseInfo) {
             return self
         }
@@ -521,10 +575,10 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
 
     func dispatchMouseUp(mouseInfo: MouseInfo) -> Widget? {
         guard inVisibleBranch else { return nil }
-        guard let focussedNode = root?.focussedWidget else { return nil }
+        guard let mouseHandler = root?.mouseHandler else { return nil }
 
-        if focussedNode.handleMouseUp(mouseInfo: mouseInfo) {
-            return focussedNode
+        if mouseHandler.handleMouseUp(mouseInfo: mouseInfo) {
+            return mouseHandler
         }
 
         return nil
@@ -535,7 +589,7 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
             clickedLayer = nil
         }
         let info = MouseInfo(self, mouseInfo.globalPosition, mouseInfo.event)
-//        print("dispatch up: \(info.position) vs \(mouseInfo.position)")
+//        Logger.shared.logDebug("dispatch up: \(info.position) vs \(mouseInfo.position)")
 
         if let layer = clickedLayer {
             let info = MouseInfo(self, layer, info)
@@ -602,19 +656,23 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
 
     func dispatchMouseDragged(mouseInfo: MouseInfo) -> Widget? {
         guard inVisibleBranch else { return nil }
-        guard let focussedNode = root?.focussedWidget else { return nil }
+        guard let mouseHandler = root?.mouseHandler else { return nil }
 
-        if focussedNode.handleMouseDragged(mouseInfo: mouseInfo) {
-            return focussedNode
+        if mouseHandler.handleMouseDragged(mouseInfo: mouseInfo) {
+            return mouseHandler
         }
 
         return nil
     }
 
-    func focus() {
+    func focus(cursorPosition: Int? = 0) {
+        root?.focus(widget: self, cursorPosition: cursorPosition)
     }
 
-    func unfocus() {
+    func onFocus() {
+    }
+
+    func onUnfocus() {
     }
 
     // MARK: - Mouse Events
@@ -652,7 +710,7 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
     weak var clickedLayer: Layer?
     func handleMouseDragged(mouseInfo: MouseInfo) -> Bool {
         let info = MouseInfo(self, mouseInfo.globalPosition, mouseInfo.event)
-//        print("handle dragged: \(info.position) vs \(mouseInfo.position)")
+//        Logger.shared.logDebug("handle dragged: \(info.position) vs \(mouseInfo.position)")
 
         var res = false
         if let layer = clickedLayer {
@@ -810,21 +868,72 @@ public class Widget: NSObject, CALayerDelegate, MouseHandler {
 
     func dumpWidgetTree(_ level: Int = 0) {
         let tabs = String.tabs(level)
-        print("\(tabs)\(String(describing: Self.self)) frame(\(frame)) \(layers.count) layers")
+        Logger.shared.logDebug("\(tabs)\(String(describing: Self.self)) frame(\(frame)) \(layers.count) layers")
         for c in children {
             c.dumpWidgetTree(level + 1)
         }
     }
 
-    func nodeFor(_ element: BeamElement) -> TextNode {
-        guard let parent = parent else { return editor.nodeFor(element) }
-        return parent.nodeFor(element)
+    func proxyFor(_ element: BeamElement) -> ProxyElement? {
+        return parent?.proxyFor(element)
+    }
+
+    func nodeFor(_ element: BeamElement) -> TextNode? {
+        return parent?.nodeFor(element)
+    }
+
+    func nodeFor(_ element: BeamElement, withParent: Widget) -> TextNode {
+        guard let parent = parent else { fatalError("Trying to access element that is not connected to root") }
+        return parent.nodeFor(element, withParent: withParent)
     }
 
     func removeNode(_ node: TextNode) {
-        guard let parent = parent else { editor.removeNode(node); return }
+        guard let parent = parent else { Logger.shared.logError("Trying to access element that is not connected to root", category: .document); return }
         parent.removeNode(node)
     }
+
+    // Accessibility:
+    public override func accessibilityChildren() -> [Any]? {
+        return layers.values.compactMap({ layer -> Layer? in
+            layer.layer.isHidden ? nil : layer
+        })
+    }
+
+    public override func accessibilityFrameInParentSpace() -> NSRect {
+        // We are flipped, but the accessibility framework ignores it so we need to change that by hand:
+        let parentRect = editor.frame
+        let rect = NSRect(origin: layer.position, size: layer.bounds.size)
+        let actualY = parentRect.height - rect.maxY
+        let correctedRect = NSRect(origin: CGPoint(x: rect.minX, y: actualY), size: rect.size)
+//        Logger.shared.logDebug("\(Self.self) actualY = \(actualY) - rect \(rect) - parentRect \(parentRect) -> \(correctedRect)")
+        return correctedRect
+    }
+
+    var allVisibleChildren: [Widget] {
+//        guard inVisibleBranch else { return [] }
+        guard visible else { return [] }
+        var widgets: [Widget] = []
+
+        for child in children where child.visible {
+            widgets.append(child)
+            widgets += child.allVisibleChildren
+        }
+
+        return widgets
+    }
+
+    func clearMapping() {
+        for c in children {
+            c.clearMapping()
+        }
+    }
+
+    var cmdManager: CommandManager<Widget> {
+        guard let root = root else { fatalError("Trying to access the command manager on an unconnected Widget is a programming error.") }
+        return root.cmdManager
+    }
+
 }
+
 // swiftlint:enable type_body_length
 // swiftlint:enable file_length

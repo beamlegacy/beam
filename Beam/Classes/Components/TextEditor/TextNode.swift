@@ -13,31 +13,26 @@ import Combine
 
 // swiftlint:disable:next type_body_length
 public class TextNode: Widget {
-
     var element: BeamElement { didSet {
-        elementTextScope = element.$text
-            .receive(on: DispatchQueue.main)
-            .sink { [unowned self] newValue in
-                elementText = newValue
-                self.invalidateText()
-            }
-
-        elementKindScope = element.$kind
-            .receive(on: DispatchQueue.main)
-            .sink { [unowned self] newValue in
-                elementKind = newValue
-                self.invalidateText()
-            }
-
-        elementText = element.text
-        elementKind = element.kind
+        subscribeToElement(element)
     }}
 
-    var elementTextScope: Cancellable?
-    var elementKindScope: Cancellable?
+    var elementId: UUID {
+        unproxyElement.id
+    }
 
-    var elementText: BeamText
-    var elementKind: ElementKind
+    var elementNoteTitle: String? {
+        unproxyElement.note?.title
+    }
+
+    var unproxyElement: BeamElement {
+        guard let elem = element as? ProxyElement else { return element }
+        return elem.proxy
+    }
+
+    var elementScope = Set<AnyCancellable>()
+    var elementText = BeamText()
+    var elementKind = ElementKind.bullet
 
     var layout: TextFrame?
     var emptyLayout: TextFrame?
@@ -45,6 +40,7 @@ public class TextNode: Widget {
     var frameAnimationCancellable = Set<AnyCancellable>()
 
     var mouseIsDragged = false
+    var lastHoverMouseInfo: MouseInfo?
     var interlineFactor = CGFloat(1.3)
     var interNodeSpacing = CGFloat(0)
     var indent: CGFloat { selfVisible ? 18 : 0 }
@@ -56,6 +52,14 @@ public class TextNode: Widget {
             actionLayer.contentsScale = contentsScale
             actionTextLayer.contentsScale = contentsScale
             actionImageLayer.contentsScale = contentsScale
+        }
+    }
+
+    override var hover: Bool {
+        didSet {
+            if oldValue != hover {
+                invalidateText()
+            }
         }
     }
 
@@ -75,6 +79,13 @@ public class TextNode: Widget {
         }
     }
 
+    override var open: Bool {
+        didSet {
+            guard !initialLayout, element.open != open else { return }
+            element.open = open
+        }
+    }
+
     var placeholder = BeamText() {
         didSet {
             guard oldValue != text else { return }
@@ -83,11 +94,11 @@ public class TextNode: Widget {
     }
 
     var strippedText: String {
-        attributedString.string
+        text.text
     }
 
     var fullStrippedText: String {
-        children.reduce(attributedString.string) { partial, node -> String in
+        children.reduce(text.text) { partial, node -> String in
             guard let node = node as? TextNode else { return partial }
             return partial + " " + node.fullStrippedText
         }
@@ -140,7 +151,7 @@ public class TextNode: Widget {
     var readOnly: Bool = false
     var isEditing: Bool {
         guard let r = root else { return false }
-        return r.focussedWidget === self && r.state.nodeSelection == nil
+        return r.focusedWidget === self && r.state.nodeSelection == nil
     }
 
     var firstLineHeight: CGFloat {
@@ -178,11 +189,11 @@ public class TextNode: Widget {
 
     var actionLayer: CALayer?
 
-    private var deboucingClickTimer: Timer?
+    private var debounceClickTimer: Timer?
     private var actionLayerIsHovered = false
     private var icon = NSImage(named: "editor-cmdreturn")
 
-    private let deboucingClickInterval = 0.23
+    private let debounceClickInterval = 0.23
     private let actionImageLayer = CALayer()
     private let actionTextLayer = CATextLayer()
     public static var actionLayerWidth = CGFloat(80)
@@ -195,7 +206,7 @@ public class TextNode: Widget {
 
     func buildTextChildren(elements: [BeamElement]) -> [Widget] {
         elements.map { childElement -> TextNode in
-            nodeFor(childElement)
+            nodeFor(childElement, withParent: self)
         }
     }
 
@@ -205,13 +216,10 @@ public class TextNode: Widget {
 
     // MARK: - Initializer
 
-    init(editor: BeamTextEdit, element: BeamElement) {
+    init(parent: Widget, element: BeamElement) {
         self.element = element
 
-        elementText = element.text
-        elementKind = element.kind
-
-        super.init(editor: editor)
+        super.init(parent: parent)
 
         addDisclosureLayer(at: NSPoint(x: 14, y: isHeader ? firstLineBaseline - 8 : firstLineBaseline - 11))
         addBulletPointLayer(at: NSPoint(x: 14, y: isHeader ? firstLineBaseline - 8 : firstLineBaseline - 11))
@@ -223,27 +231,39 @@ public class TextNode: Widget {
 
         createActionLayer()
 
-        var inInit = true
-        elementTextScope = element.$text
-            .receive(on: DispatchQueue.main)
-            .sink { [unowned self] newValue in
-                guard !inInit else { return }
-                elementText = newValue
-                self.invalidateText()
-            }
-
-        elementKindScope = element.$kind
-            .receive(on: DispatchQueue.main)
-            .sink { [unowned self] newValue in
-                guard !inInit else { return }
-                elementKind = newValue
-                self.invalidateText()
-            }
-        inInit = false
+        subscribeToElement(element)
 
         DispatchQueue.main.async {
             self.createIndentLayer()
         }
+
+        setAccessibilityLabel("TextNode")
+        setAccessibilityRole(.textArea)
+    }
+
+    init(editor: BeamTextEdit, element: BeamElement) {
+        self.element = element
+
+        super.init(editor: editor)
+
+        addDisclosureLayer(at: NSPoint(x: 14, y: isHeader ? firstLineBaseline - 8 : firstLineBaseline - 13))
+        addBulletPointLayer(at: NSPoint(x: 14, y: isHeader ? firstLineBaseline - 8 : firstLineBaseline - 13))
+
+        element.$children
+            .sink { [unowned self] elements in
+                updateTextChildren(elements: elements)
+            }.store(in: &scope)
+
+        createActionLayer()
+
+        subscribeToElement(element)
+
+        DispatchQueue.main.async {
+            self.createIndentLayer()
+        }
+
+        setAccessibilityLabel("TextNode")
+        setAccessibilityRole(.textArea)
     }
 
     deinit { }
@@ -275,6 +295,8 @@ public class TextNode: Widget {
         context.beginPath()
         let startLine = lineAt(index: start)!
         let endLine = lineAt(index: end)!
+        let lineCount = layout!.lines.count
+        guard lineCount > startLine, lineCount > endLine else { return }
         let line1 = layout!.lines[startLine]
         let line2 = layout!.lines[endLine]
         let xStart = offsetAt(index: start)
@@ -314,7 +336,13 @@ public class TextNode: Widget {
             pos.y += childSize.height
         }
 
-        updateActionLayer()
+        // Disable action layer update to avoid motion glitch
+        // when the global layer width is changed
+        if let lastCommand = root?.lastCommand,
+           lastCommand != .increaseIndentation || editor.isResizing,
+           lastCommand != .decreaseIndentation || editor.isResizing {
+            updateActionLayer()
+        }
     }
 
     func createIndentLayer() {
@@ -540,8 +568,10 @@ public class TextNode: Widget {
     }
 
     func beginningOfLineFromPosition(_ position: Int) -> Int {
+        guard let layout = layout else { return 0 }
+        guard layout.lines.count > 1 else { return 0 }
         if let l = lineAt(index: position) {
-            return layout!.lines[l].range.lowerBound
+            return layout.lines[l].range.lowerBound
         }
         return 0
     }
@@ -570,8 +600,7 @@ public class TextNode: Widget {
         if children.isEmpty {
             guard let p = parent as? TextNode else { return }
             p.fold()
-            root?.focussedWidget = p
-            root?.cursorPosition = 0
+            p.focus()
             return
         }
 
@@ -583,14 +612,14 @@ public class TextNode: Widget {
         open = true
     }
 
-    override func focus() {
-        super.focus()
+    override func onFocus() {
+        super.onFocus()
         guard !text.isEmpty else { return }
         showHoveredActionLayers(false)
     }
 
-    override func unfocus() {
-        super.unfocus()
+    override func onUnfocus() {
+        super.onUnfocus()
         resetActionLayers()
     }
 
@@ -621,12 +650,12 @@ public class TextNode: Widget {
                 return true
             }
 
-            if mouseInfo.event.clickCount == 1 && !selectedTextRange.isEmpty {
-                root?.cursorPosition = clickPos
+            if mouseInfo.event.clickCount == 1 && editor.inlineFormatter != nil {
                 root?.cancelSelection()
+                focus(cursorPosition: clickPos)
                 dragMode = .select(cursorPosition)
 
-                deboucingClickTimer = Timer.scheduledTimer(withTimeInterval: deboucingClickInterval, repeats: false, block: { [weak self] (_) in
+                debounceClickTimer = Timer.scheduledTimer(withTimeInterval: debounceClickInterval, repeats: false, block: { [weak self] (_) in
                     guard let self = self else { return }
                     self.editor.dismissPopoverOrFormatter()
                 })
@@ -637,26 +666,28 @@ public class TextNode: Widget {
                 editor.showInlineFormatterOnKeyEventsAndClick()
                 return true
             } else if mouseInfo.event.clickCount == 1 {
-                root?.cursorPosition = clickPos
                 root?.cancelSelection()
+                focus(cursorPosition: clickPos)
                 dragMode = .select(cursorPosition)
                 editor.initAndShowPersistentFormatter()
                 return true
             } else if mouseInfo.event.clickCount == 2 {
+                debounceClickTimer?.invalidate()
                 root?.wordSelection(from: clickPos)
-
-                deboucingClickTimer = Timer.scheduledTimer(withTimeInterval: deboucingClickInterval, repeats: false, block: { [weak self] (_) in
-                    guard let self = self else { return }
-                    if !self.selectedTextRange.isEmpty { self.editor.showInlineFormatterOnKeyEventsAndClick() }
-                })
+                if !selectedTextRange.isEmpty {
+                    editor.cursorStartPosition = cursorPosition
+                    editor.showInlineFormatterOnKeyEventsAndClick()
+                }
                 return true
             } else {
-                deboucingClickTimer?.invalidate()
+                debounceClickTimer?.invalidate()
                 root?.doCommand(.selectAll)
                 editor.detectFormatterType()
 
-                if root?.state.nodeSelection != nil { resetActionLayers() }
-
+                if root?.state.nodeSelection != nil {
+                    resetActionLayers()
+                    editor.showInlineFormatterOnKeyEventsAndClick()
+                }
                 return true
             }
         }
@@ -676,21 +707,36 @@ public class TextNode: Widget {
     }
 
     override func mouseMoved(mouseInfo: MouseInfo) -> Bool {
-        cursor = nil
-
-        if contentsFrame.contains(mouseInfo.position) {
+        let isMouseInContentFrame = contentsFrame.contains(mouseInfo.position)
+        let mouseHasChangedTextPosition = lastHoverMouseInfo?.position != mouseInfo.position
+        if mouseHasChangedTextPosition && isMouseInContentFrame {
             let link = linkAt(point: mouseInfo.position)
             let internalLink = internalLinkAt(point: mouseInfo.position)
 
             if link != nil {
-                cursor = .pointingHand
-            } else if internalLink != nil {
-                cursor = .pointingHand
+                let (linkRange, linkFrame) = linkRangeAt(point: mouseInfo.position)
+                if let linkRange = linkRange, let currentNode = widgetAt(point: mouseInfo.position) as? TextNode {
+                    invalidateText()
+                    cursor = .pointingHand
+                    if let positionInText = positionAt(point: mouseInfo.position, inString: currentNode.attributedString), positionInText == linkRange.end {
+                        editor.linkStartedHovering(
+                            for: currentNode,
+                            targetRange: linkRange.position ..< linkRange.end,
+                            frame: linkFrame,
+                            url: link,
+                            linkTitle: linkRange.string
+                        )
+                    }
+                }
             } else {
-                cursor = .iBeam
+                cursor = internalLink != nil ? .pointingHand : .iBeam
+                editor.linkStoppedHovering()
+                invalidateText()
             }
         }
+        lastHoverMouseInfo = mouseInfo
 
+        // action layer handling
         guard let actionLayer = actionLayer,
               root?.state.nodeSelection == nil else {
             resetActionLayers()
@@ -698,20 +744,21 @@ public class TextNode: Widget {
         }
 
         let position = actionLayerMousePosition(from: mouseInfo)
+        let isMouseInContainerWithActionLayer = contentsFrame.contains(position)
         let hasTextAndEditable = !text.isEmpty && isEditing && editor.hasFocus
 
         // Show image & text layers
-        if hasTextAndEditable && contentsFrame.contains(position) && actionLayer.frame.contains(position) {
+        if hasTextAndEditable && isMouseInContainerWithActionLayer && actionLayer.frame.contains(position) {
             showHoveredActionLayers(true)
             cursor = .arrow
             return true
-        } else if hasTextAndEditable && contentsFrame.contains(position) {
+        } else if hasTextAndEditable && isMouseInContainerWithActionLayer {
             showHoveredActionLayers(false)
             return true
         }
 
         // Reset action layers
-        if !contentsFrame.contains(position) && isEditing && editor.hasFocus {
+        if !isMouseInContainerWithActionLayer && isEditing && editor.hasFocus {
             showHoveredActionLayers(false)
             return true
         }
@@ -730,11 +777,14 @@ public class TextNode: Widget {
             root?.selectedTextRange = text.clamp(p < o ? cursorPosition..<o : o..<cursorPosition)
             mouseIsDragged = root?.state.nodeSelection == nil
 
+            // When the bullet is selected hide & disable cmd+enter action
             if root?.state.nodeSelection != nil { resetActionLayers() }
 
-            if root?.state.nodeSelection == nil {
-                editor.updateInlineFormatterOnDrag(isDragged: true)
-            }
+            // Set cursor start position
+            if editor.cursorStartPosition == 0 { editor.cursorStartPosition = cursorPosition }
+
+            // Update inline formatter on drag
+            if root?.state.nodeSelection == nil { editor.updateInlineFormatterOnDrag(isDragged: true) }
         }
         invalidate()
 
@@ -780,7 +830,7 @@ public class TextNode: Widget {
     public func position(after index: Int) -> Int {
         guard layout != nil, !layout!.lines.isEmpty else { return 0 }
         let displayIndex = displayIndexFor(sourceIndex: index)
-        let newDisplayIndex = attributedString.string.position(after: displayIndex)
+        let newDisplayIndex = text.text.position(after: displayIndex)
         let newIndex = sourceIndexFor(displayIndex: newDisplayIndex)
         return newIndex
     }
@@ -788,7 +838,7 @@ public class TextNode: Widget {
     public func position(before index: Int) -> Int {
         guard layout != nil, !layout!.lines.isEmpty else { return 0 }
         let displayIndex = displayIndexFor(sourceIndex: index)
-        let newDisplayIndex = attributedString.string.position(before: displayIndex)
+        let newDisplayIndex = text.text.position(before: displayIndex)
         let newIndex = sourceIndexFor(displayIndex: newDisplayIndex)
         return newIndex
     }
@@ -804,15 +854,51 @@ public class TextNode: Widget {
         return res
     }
 
-    public func linkAt(point: NSPoint) -> URL? {
+    public func positionAt(point: NSPoint, inString: NSAttributedString) -> Int? {
         guard layout != nil, !layout!.lines.isEmpty else { return nil }
         let line = lineAt(point: point)
         guard line >= 0 else { return nil }
         let l = layout!.lines[line]
-        guard l.frame.minX < point.x && l.frame.maxX > point.x else { return nil } // don't find links outside the line
+        guard l.frame.minX < point.x && l.frame.maxX > point.x else { return nil } // point is outside the line
         let displayIndex = l.stringIndexFor(position: point)
-        let pos = min(displayIndex, attributedString.length - 1)
-        return attributedString.attribute(.link, at: pos, effectiveRange: nil) as? URL
+        let pos = min(displayIndex, inString.length - 1)
+        return pos
+    }
+
+    public func linkAt(point: NSPoint) -> URL? {
+        guard let pos = positionAt(point: point, inString: attributedString) else { return nil }
+        let range = elementText.rangeAt(position: pos)
+        guard let linkAttribIndex = range.attributes.firstIndex(where: { attrib -> Bool in
+            attrib.rawValue == BeamText.Attribute.link("").rawValue
+        }) else { return nil }
+
+        switch range.attributes[linkAttribIndex] {
+            case .link(let link):
+                return URL(string: link)
+            default:
+                return nil
+        }
+    }
+
+    func linkRangeAt(point: NSPoint) -> (BeamText.Range?, NSRect?) {
+        guard layout != nil, !layout!.lines.isEmpty else { return (nil, nil) }
+        let line = lineAt(point: point)
+        guard line >= 0 else { return (nil, nil) }
+        let l = layout!.lines[line]
+        guard let pos = positionAt(point: point, inString: attributedString) else { return (nil, nil) }
+
+        let range = elementText.rangeAt(position: pos)
+        guard nil != range.attributes.firstIndex(where: { attrib -> Bool in
+            attrib.rawValue == BeamText.Attribute.link("").rawValue
+        }) else { return (nil, nil) }
+
+        let start = range.position
+        let end = range.end
+        let startOffset = offsetAt(index: start)
+        let endOffset = offsetAt(index: end)
+
+        let linkFrame = NSRect(x: startOffset, y: l.frame.minY, width: endOffset - startOffset, height: l.frame.height)
+        return (range, linkFrame)
     }
 
     public func internalLinkAt(point: NSPoint) -> String? {
@@ -965,14 +1051,22 @@ public class TextNode: Widget {
 
         switch elementKind {
         case .heading(1):
-            fontSize = isBig ? 26 : 22
+            fontSize = 22 // TODO: Change later (isBig ? 26 : 22)
         case .heading(2):
-            fontSize = isBig ? 22 : 18
+            fontSize = 18 // TODO: Change later (isBig ? 22 : 18)
         default:
-            fontSize = isBig ? 17 : 15
+            fontSize = 15 // TODO: Change later (isBig ? 17 : 15)
         }
 
-        let str = beamText.buildAttributedString(fontSize: fontSize, cursorPosition: cursorPosition, elementKind: elementKind)
+        var mouseInteraction: MouseInteraction?
+        if let hoverMouse = lastHoverMouseInfo, hover {
+            if let pos = positionAt(point: hoverMouse.position, inString: attributedString) {
+                let nsrange = NSRange(location: pos, length: 1)
+                mouseInteraction = MouseInteraction(type: MouseInteractionType.hovered, range: nsrange)
+            }
+        }
+
+        let str = beamText.buildAttributedString(fontSize: fontSize, cursorPosition: cursorPosition, elementKind: elementKind, mouseInteraction: mouseInteraction)
         let paragraphStyle = NSMutableParagraphStyle()
         //        paragraphStyle.alignment = .justified
         paragraphStyle.lineBreakMode = .byWordWrapping
@@ -1083,7 +1177,7 @@ public class TextNode: Widget {
 
     override func dumpWidgetTree(_ level: Int = 0) {
         let tabs = String.tabs(level)
-        print("\(tabs)\(String(describing: Self.self)) frame(\(frame)) \(layers.count) layers - element id: \(element.id) [\(elementText.text)]")
+        Logger.shared.logDebug("\(tabs)\(String(describing: Self.self)) frame(\(frame)) \(layers.count) layers - element id: \(element.id) [\(elementText.text)]")
         for c in children {
             c.dumpWidgetTree(level + 1)
         }
@@ -1093,4 +1187,167 @@ public class TextNode: Widget {
         "TextNode - \(element.id.uuidString)"
     }
 
+    public override func accessibilityString(for range: NSRange) -> String? {
+        return text.substring(range: range.lowerBound ..< range.upperBound)
+    }
+
+    //    Returns the attributed substring for the specified range of characters.
+    public override func accessibilityAttributedString(for range: NSRange) -> NSAttributedString? {
+        return attributedString.attributedSubstring(from: range)
+    }
+
+    //    Returns the Rich Text Format (RTF) data that describes the specified range of characters.
+    public override func accessibilityRTF(for range: NSRange) -> Data? {
+        return nil
+    }
+
+    //    Returns the rectangle enclosing the specified range of characters.
+    public override func accessibilityFrame(for: NSRange) -> NSRect {
+        return contentsFrame
+    }
+
+    //    Returns the line number for the line holding the specified character index.
+    public override func accessibilityLine(for index: Int) -> Int {
+        return lineAt(index: index) ?? 0
+    }
+
+    //    Returns the range of characters for the glyph that includes the specified character.
+    public override func accessibilityRange(for index: Int) -> NSRange {
+        return attributedString.wholeRange
+    }
+
+    //    Returns a range of characters that all have the same style as the specified character.
+    public override func accessibilityStyleRange(for index: Int) -> NSRange {
+        return attributedString.wholeRange
+    }
+
+    //    Returns the range of characters in the specified line.
+    public override func accessibilityRange(forLine line: Int) -> NSRange {
+        guard let line = layout?.lines[line] else { return NSRange() }
+        let range = line.range
+        return NSRange(location: range.lowerBound, length: range.count)
+    }
+
+    //    Returns the range of characters for the glyph at the specified point.
+    public override func accessibilityRange(for point: NSPoint) -> NSRange {
+        let lineIndex = lineAt(point: point)
+        guard let line = layout?.lines[lineIndex] else { return NSRange() }
+
+        let range = line.range
+        return NSRange(location: range.lowerBound, length: range.count)
+    }
+
+    public override func accessibilityValue() -> Any? {
+        return text.text
+    }
+
+    public override func setAccessibilityValue(_ accessibilityValue: Any?) {
+        switch accessibilityValue {
+        case is String:
+            guard let value = accessibilityValue as? String else { return }
+            text = BeamText(text: value)
+
+        case is NSAttributedString:
+            guard let value = accessibilityValue as? NSAttributedString else { return }
+            text = BeamText(text: value.string)
+
+        default:
+            return
+        }
+    }
+
+    public override func accessibilityVisibleCharacterRange() -> NSRange {
+        return attributedString.wholeRange
+    }
+
+    public override func isAccessibilityEnabled() -> Bool {
+        return true
+    }
+
+    public override func accessibilityNumberOfCharacters() -> Int {
+        return text.count
+    }
+
+    public override func accessibilitySelectedText() -> String? {
+        guard let t = root?.selectedText else { return nil }
+        return t.isEmpty ? nil : t
+    }
+
+    public override func accessibilitySelectedTextRange() -> NSRange {
+        guard let range = root?.state.selectedTextRange else { return NSRange() }
+        return NSRange(location: range.lowerBound, length: range.count)
+    }
+
+    public override func accessibilitySelectedTextRanges() -> [NSValue]? {
+        guard let range = root?.state.selectedTextRange else { return [] }
+        return [NSValue(range: NSRange(location: range.lowerBound, length: range.count))]
+    }
+
+    /*
+     I used this code to debug accessibility and try to understand what is expected of us.
+     Thus far these are requested by the system:
+     _accessibilityLabel
+     accessibilityChildren
+     accessibilityFrame
+     accessibilityIdentifier
+     accessibilityMaxValue
+     accessibilityMinValue
+     accessibilityNumberOfCharacters
+     accessibilityParent
+     accessibilityRole
+     accessibilityRoleDescription
+     accessibilitySubrole
+     accessibilityTitle
+     accessibilityTopLevelUIElement
+     accessibilityValue
+     accessibilityValueDescription
+     accessibilityVisibleChildren
+     accessibilityWindow
+     isAccessibilityElement
+     setAccessibilityChildren:
+     setAccessibilityEnabled:
+     setAccessibilityFrame:
+     setAccessibilityLabel:
+     setAccessibilityParent:
+     setAccessibilityRole:
+     setAccessibilityRoleDescription:
+     setAccessibilityTitle:
+     setAccessibilityTopLevelUIElement:
+     setAccessibilityValue:
+     setAccessibilityWindow:
+
+
+    public override func isAccessibilitySelectorAllowed(_ selector: Selector) -> Bool {
+        Logger.shared.logDebug("isAccessibilitySelectorAllowed(\(selector))")
+        return true
+    }
+*/
+
+    func subscribeToElement(_ element: BeamElement) {
+        elementScope.removeAll()
+
+        element.$text
+            .dropFirst()
+            .sink { [unowned self] newValue in
+                elementText = newValue
+                self.invalidateText()
+            }.store(in: &elementScope)
+
+        element.$kind
+            .dropFirst()
+            .sink { [unowned self] newValue in
+                elementKind = newValue
+                self.invalidateText()
+            }.store(in: &elementScope)
+
+        element.$open
+            .sink { [unowned self] newValue in
+                if open != newValue {
+                    open = newValue
+                }
+            }.store(in: &elementScope)
+
+        elementText = element.text
+        elementKind = element.kind
+    }
 }

@@ -18,7 +18,7 @@ class ButtonLayer: Layer {
          hovered: @escaping (Bool) -> Void = { _ in }) {
 
         self.activated = activated
-        super.init(name: name, layer: layer)
+        super.init(name: name, layer: layer, hovered: hovered)
 
         mouseDown = { [unowned self] _ -> Bool in
             self.pressed = true
@@ -36,8 +36,14 @@ class ButtonLayer: Layer {
             self.pressed = layer.contains(info.position)
             return true
         }
-        hover = { isHover in
-            hovered(isHover)
-        }
+
+        setAccessibilityRole(.button)
     }
+
+    override func accessibilityPerformPress() -> Bool {
+        guard !layer.isHidden else { return false }
+        activated()
+        return true
+    }
+
 }

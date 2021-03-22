@@ -26,8 +26,11 @@ class Document: NSManagedObject {
     }
 
     override func willSave() {
+        let keys = self.changedValues().keys
         if updated_at.timeIntervalSince(BeamDate.now) < -1.0 {
-            self.updated_at = BeamDate.now
+            if keys.contains("data") {
+                self.updated_at = BeamDate.now
+            }
         }
         super.willSave()
     }
@@ -44,11 +47,31 @@ class Document: NSManagedObject {
     class func create(_ context: NSManagedObjectContext = CoreDataManager.shared.mainContext, title: String? = nil) -> Document {
         let document = Document(context: context)
         document.id = UUID()
+        document.version = 0
         if let title = title {
             document.title = title
         }
 
         return document
+    }
+
+    func update(_ documentStruct: DocumentStruct) {
+        data = documentStruct.data
+        title = documentStruct.title
+        document_type = documentStruct.documentType.rawValue
+        created_at = documentStruct.createdAt
+        updated_at = BeamDate.now
+        if documentStruct.documentType == .journal {
+            do {
+                let note = try JSONDecoder().decode(BeamNote.self, from: documentStruct.data)
+                deleted_at = note.isEntireNoteEmpty() ? BeamDate.now : documentStruct.deletedAt
+            } catch {
+                Logger.shared.logError("Unable to decode journal's note", category: .document)
+            }
+        } else {
+            deleted_at = documentStruct.deletedAt
+        }
+        is_public = documentStruct.isPublic
     }
 
     class func countWithPredicate(_ context: NSManagedObjectContext,

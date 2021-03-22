@@ -22,6 +22,8 @@ enum LogCategory: String {
     case documentMerge
     case documentDebug
     case noteEditor
+    case keychain
+    case encryption
 }
 
 final class Logger {
@@ -29,9 +31,10 @@ final class Logger {
 
     private var subsystem = Configuration.bundleIdentifier
     private let hideCategories: [LogCategory] = [.web, .coredataDebug, .documentDebug]
-    private let hideLumberCategories: [LogCategory] = []
+    private let hideLumberCategories: [LogCategory] = [.documentDebug]
 
-    private var ddFileLogger: DDFileLogger = DDFileLogger()
+    private var ddFileLogger = DDFileLogger()
+
     private func configure() {
         DDLog.add(ddFileLogger)
     }
@@ -42,7 +45,7 @@ final class Logger {
                 do {
                     try FileManager.default.removeItem(atPath: filename)
                 } catch {
-                    print(error.localizedDescription)
+                    Logger.shared.logDebug(error.localizedDescription)
                 }
             }
         })
@@ -51,8 +54,12 @@ final class Logger {
 
     private init() {
         configure()
+
+        // swiftlint:disable:next print
+        print("Storing log files to \(ddFileLogger.currentLogFileInfo?.filePath ?? "-")")
+
         ddFileLogger.logFileManager.maximumNumberOfLogFiles = 2
-        ddFileLogger.maximumFileSize = 1024 * 64 // 64k
+        ddFileLogger.maximumFileSize = 1024 * 1024 // 1MB
         ddFileLogger.rollingFrequency = 3600 * 24 * 7 // 1 week
     }
 
@@ -72,7 +79,7 @@ final class Logger {
         return String(data: logFileData, encoding: .utf8) ?? "Couldn't parse logs data"
     }
 
-    func logInfo(_ message: String, category: LogCategory) {
+    func logInfo(_ message: String, category: LogCategory = .general) {
         if !hideLumberCategories.contains(category) {
             DDLogInfo("[\(category.rawValue)] \(message)")
         }

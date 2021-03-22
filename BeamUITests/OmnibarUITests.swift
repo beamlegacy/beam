@@ -1,162 +1,133 @@
-//
-//  Omnibar.swift
-//  BeamUITests
-//
-//  Created by Ravichandrane Rajendran on 03/02/2021.
-//
-
+import Foundation
 import XCTest
+import Quick
+import Nimble
 
-class Omnibar: XCTestCase {
+class OmniBarUITestsHelper : BeamUITestsHelper {
+    let searchField: XCUIElement
+    let autocompleteResultPredicate = NSPredicate(format: "identifier CONTAINS 'autocompleteResult'")
+    let autocompleteSelectedPredicate = NSPredicate(format: "identifier CONTAINS '-selected'")
+    let allAutocompleteResults: XCUIElementQuery
+
+    override init(_ app: XCUIApplication) {
+        searchField = app.searchFields["OmniBarSearchField"]
+        allAutocompleteResults = app.staticTexts.matching(self.autocompleteResultPredicate)
+        super.init(app)
+    }
+
+    func cleanupDB() {
+        self.tapCommand(.destroyDB)
+        self.restart()
+    }
+
+    func inputHasFocus(_ input: XCUIElement) -> Bool {
+        return input.value(forKey: "hasKeyboardFocus") as? Bool ?? false
+    }
+}
+
+class OmniBarUITests: QuickSpec {
     let app = XCUIApplication()
+    var helper: OmniBarUITestsHelper!
 
-    override func setUp() {
-        super.setUp()
-        continueAfterFailure = false
-        app.launch()
-    }
-
-    func testOmnibarIsFocus() {
-        let textField = app.textFields["omniBarSearchBox"]
-        let hasKeyboardFocus = textField.value(forKey: "hasKeyboardFocus") as? Bool ?? false
-
-        XCTAssert(textField.exists)
-        XCTAssertTrue(hasKeyboardFocus)
-    }
-
-    func testOmnibarCanSearch() {
-        let textField = app.textFields["omniBarSearchBox"]
-
-        XCTAssert(textField.exists)
-
-        textField.typeText("Hello World")
-
-        guard let text = textField.value as? String else {
-            XCTFail("Search Query: Textfield has no string value")
+    func manualBeforeSuite () {
+        // QuickSpec beforeSuite is called before ALL
+        // this is called only before all test of this test class.
+        guard self.helper == nil else {
             return
         }
-
-        XCTAssertEqual(text, "Hello World")
+        self.app.launch()
+        self.helper = OmniBarUITestsHelper(self.app)
     }
 
-    func testOmnibarClearSearchQuery() {
-        let textField = app.textFields["omniBarSearchBox"]
-        let selectAll = XCUIApplication().menuItems["Select All"]
 
-        XCTAssert(textField.exists)
+    //swiftlint:disable:next function_body_length
+    override func spec() {
+        let textInputDumb = "Hello World"
+        let textEmpty = ""
 
-        textField.typeText("Hello World")
-
-        guard let text = textField.value as? String else {
-            XCTFail("ClearSearchQuery #1 : Textfield has no string value")
-            return
+        beforeEach {
+            self.manualBeforeSuite()
+            self.continueAfterFailure = false
+            self.app.launch()
         }
 
-        XCTAssertEqual(text, "Hello World")
+        describe("Search Field") {
 
-        selectAll.tap()
-        textField.typeText(XCUIKeyboardKey.delete.rawValue)
+            let selectAll = XCUIApplication().menuItems["Select All"]
 
-        guard let emptyText = textField.value as? String else {
-            XCTFail("ClearSearchQuery #2: Textfield has no string value")
-            return
+            afterEach {
+                self.helper.makeElementScreenShot(self.helper.searchField)
+            }
+
+            it("is focused on launch") {
+                expect(self.helper.searchField.exists).to(beTrue())
+                expect(self.helper.inputHasFocus(self.helper.searchField)).to(beTrue())
+            }
+
+            it("can handle user input") {
+                self.helper.searchField.typeText(textInputDumb)
+                expect(self.helper.searchField.value as? String).to(equal(textInputDumb))
+            }
+
+            context("with user input") {
+                beforeEach {
+                    self.helper.searchField.typeText(textInputDumb)
+                }
+
+                it("can delete chars") {
+                    self.helper.searchField.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 2))
+                    let startIndex = textInputDumb.index(textInputDumb.startIndex, offsetBy: 0)
+                    let endIndex = textInputDumb.index(textInputDumb.endIndex, offsetBy: -3)
+                    let subString = String(textInputDumb[startIndex...endIndex])
+                    expect(self.helper.searchField.value as? String).to(equal(subString))
+                }
+
+                it("can delete whole input") {
+                    expect(self.helper.searchField.value as? String).to(equal(textInputDumb))
+                    selectAll.tap()
+                    self.helper.searchField.typeText(XCUIKeyboardKey.delete.rawValue)
+                    expect(self.helper.searchField.value as? String).to(equal(textEmpty))
+                }
+            }
+
+            context("without user input") {
+                it("deleting all doesnt change input") {
+                    expect(self.helper.searchField.value as? String).to(equal(textEmpty))
+                    selectAll.tap()
+                    self.helper.searchField.typeText(XCUIKeyboardKey.delete.rawValue)
+                    expect(self.helper.searchField.value as? String).to(equal(textEmpty))
+                }
+            }
         }
 
-        XCTAssertEqual(emptyText, "")
-    }
+        describe("Pivot Button") {
 
-    func testOmnibarDeleteCharacters() {
-        let textField = app.textFields["omniBarSearchBox"]
+            afterEach {
+                self.helper.makeAppScreenShots()
+            }
 
-        XCTAssert(textField.exists)
+            it("can toggle web and note") {
+                self.helper.searchField.typeText("hello")
+                self.helper.searchField.typeText("\r")
+                expect(self.app.images["browserTabBarView"].waitForExistence(timeout: 2)).to(beTrue())
 
-        textField.typeText("Hello World")
-        textField.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 2))
+                expect(self.helper.allAutocompleteResults.count).to(equal(0))
 
-        guard let text = textField.value as? String else {
-            XCTFail("DeleteCharacters : Textfield has no string value")
-            return
+                expect(self.app.groups["webView"].exists).to(beTrue())
+                expect(self.app.buttons["journal"].exists).to(beTrue())
+                expect(self.app.buttons["refresh"].exists).to(beTrue())
+                expect(self.app.buttons["pivot-card"].exists).to(beTrue())
+
+                self.app.buttons["pivot-card"].tap()
+                expect(self.app.scrollViews["noteView"].exists).to(beTrue())
+                expect(self.app.buttons["refresh"].exists).to(beFalse())
+
+                self.app.buttons["pivot-web"].tap()
+                expect(self.app.groups["webView"].exists).to(beTrue())
+                expect(self.app.buttons["refresh"].exists).to(beTrue())
+
+                self.helper.makeAppScreenShots()
+            }
         }
-
-        XCTAssertEqual(text, "Hello Wor")
-    }
-
-    func testOmnibarShowAutoComplete() {
-        let textField = app.textFields["omniBarSearchBox"]
-
-        XCTAssert(textField.exists)
-
-        textField.typeText("Hello World")
-
-        let autocomplete = app.scrollViews["autoCompleteView"]
-
-        XCTAssert(autocomplete.exists)
-    }
-
-    func testOmnibarNavigateThroughTheAutoComplete() {
-        let textField = app.textFields["omniBarSearchBox"]
-
-        XCTAssert(textField.exists)
-        textField.typeText("beam app")
-
-        let autocomplete = app.scrollViews["autoCompleteView"]
-
-        XCTAssert(autocomplete.exists)
-
-        textField.typeKey(.downArrow, modifierFlags: .function)
-
-        XCTAssert(app.staticTexts["selected"].exists)
-    }
-
-    func testOmnibarPressEnterAndSwitchMode() {
-        let textField = app.textFields["omniBarSearchBox"]
-
-        XCTAssert(textField.exists)
-        textField.typeText("Hello World")
-
-        let autocomplete = app.scrollViews["autoCompleteView"]
-
-        XCTAssert(autocomplete.exists)
-
-        textField.typeKey(.downArrow, modifierFlags: .function)
-        textField.typeKey(.downArrow, modifierFlags: .function)
-        textField.typeKey(.downArrow, modifierFlags: .function)
-        textField.typeKey(.downArrow, modifierFlags: .function)
-
-        textField.typeText("\r")
-
-        XCTAssert(app.images["browserTabBarView"].waitForExistence(timeout: 2))
-        XCTAssert(app.groups["webView"].exists)
-
-        checkCommonRightButtonsExist()
-        XCTAssert(app.buttons["note"].exists)
-
-        app.buttons["note"].click()
-        XCTAssert(app.scrollViews["noteView"].exists)
-
-        app.buttons["network"].click()
-        XCTAssert(app.groups["webView"].exists)
-    }
-
-    func testOmnibarBackAndForwardButtonsExist() {
-        XCTAssert(app.buttons["goBack"].exists)
-        XCTAssert(app.buttons["goForward"].exists)
-    }
-
-    func testOmnibarRightNetworkButtonExist() {
-        checkCommonRightButtonsExist()
-        XCTAssert(app.buttons["network"].exists)
-    }
-
-    func checkCommonRightButtonsExist() {
-        XCTAssert(app.buttons["magnifyingglass"].exists)
-        XCTAssert(app.buttons["newSearch"].exists)
-    }
-
-    private func takeScreenshot(_ element: XCUIElement) {
-        let screenshot = element.screenshot()
-        let fullScreenshotAttachment = XCTAttachment(screenshot: screenshot)
-        fullScreenshotAttachment.lifetime = .keepAlways
-        add(fullScreenshotAttachment)
     }
 }

@@ -10,64 +10,51 @@
 import Foundation
 
 extension TextRoot {
-    func increaseNodeIndentation(_ node: TextNode) -> Bool {
-        guard !node.readOnly,
-        let newParent = node.previousSibbling() as? TextNode else { return false }
-        // Prepare Undo:
-        guard let currentParent = node.parent as? TextNode,
-              let indexInParent = node.indexInParent else { return false }
-        undoManager.registerUndo(withTarget: self) { selfTarget in
-            selfTarget.undoManager.registerUndo(withTarget: selfTarget) { selfTarget in
-                _ = selfTarget.increaseNodeIndentation(node)
-            }
-            currentParent.element.insert(node.element, at: indexInParent)
-        }
-        undoManager.setActionName("Increase indentation")
+    var cmdContext: Widget {
+        editor.focusedWidget ?? editor.rootNode
+    }
 
-        newParent.element.addChild(node.element)
-        return true
+    func increaseNodeIndentation(_ node: TextNode) -> Bool {
+        guard let noteTitle = node.elementNoteTitle, !node.readOnly,
+              node.parent as? BreadCrumb == nil,
+              let newParent = node.previousSibbling() as? TextNode
+        else { return false }
+
+        let reparentElement = ReparentElement(for: node.elementId, of: noteTitle, to: newParent.elementId, atIndex: newParent.element.children.count)
+        return cmdManager.run(command: reparentElement, on: cmdContext)
     }
 
     func decreaseNodeIndentation(_ node: TextNode) -> Bool {
-        guard !node.readOnly, let parent = node.parent as? TextNode, let newParent = parent.parent as? TextNode else { return false }
+        guard let noteTitle = node.elementNoteTitle, !node.readOnly,
+              node.parent as? BreadCrumb == nil,
+              node.parent?.parent as? BreadCrumb == nil,
+              let prevParent = node.unproxyElement.parent,
+              let newParent = prevParent.parent,
+              let parentIndexInParent = newParent.id == node.elementId ? node.unproxyElement.children.count : prevParent.indexInParent
+        else { return false }
 
-        // Prepare Undo:
-        guard let indexInParent = node.indexInParent else { return false }
-
-        undoManager.registerUndo(withTarget: self) { selfTarget in
-            selfTarget.undoManager.registerUndo(withTarget: selfTarget) { selfTarget in
-                _ = selfTarget.decreaseNodeIndentation(node)
-            }
-            parent.element.insert(node.element, at: indexInParent)
-        }
-        undoManager.setActionName("Decrease indentation")
-
-        newParent.element.insert(node.element, after: parent.element)
-
-        return true
+        let reparentElement = ReparentElement(for: node.elementId, of: noteTitle, to: newParent.id, atIndex: parentIndexInParent + 1)
+        return cmdManager.run(command: reparentElement, on: cmdContext)
     }
 
     func increaseNodeSelectionIndentation() {
         guard let selection = root.state.nodeSelection else { return }
 
-        undoManager.beginUndoGrouping()
+        root.note?.cmdManager.beginGroup(with: "IncreaseIndentationGroup")
         for node in selection.sortedRoots {
-            //TODO: [Seb] create an abstraction for UndoManager to be able to handle faillures and not register empty undo operations. Then replace _ with the real test
             _ = increaseNodeIndentation(node)
         }
-        undoManager.endUndoGrouping()
-        undoManager.setActionName("Increase indentation")
+        root.note?.cmdManager.endGroup()
     }
 
     func decreaseNodeSelectionIndentation() {
         guard let selection = root.state.nodeSelection else { return }
-        undoManager.beginUndoGrouping()
+
+        root.note?.cmdManager.beginGroup(with: "DecreaseIndentationGroup")
         for node in selection.sortedRoots.reversed() {
-            //TODO: [Seb] create an abstraction for UndoManager to be able to handle faillures and not register empty undo operations. Then replace _ with the real test
             _ = decreaseNodeIndentation(node)
         }
-        undoManager.endUndoGrouping()
-        undoManager.setActionName("Decrease indentation")
+        root.note?.cmdManager.endGroup()
     }
 
     func increaseIndentation() {
@@ -75,7 +62,7 @@ extension TextRoot {
             increaseNodeSelectionIndentation()
             return
         }
-        guard let node = focussedWidget as? TextNode else { return }
+        guard let node = focusedWidget as? TextNode else { return }
         _ = increaseNodeIndentation(node)
     }
 
@@ -84,57 +71,8 @@ extension TextRoot {
             decreaseNodeSelectionIndentation()
             return
         }
-        guard let node = focussedWidget as? TextNode else { return }
+        guard let node = focusedWidget as? TextNode else { return }
         _ = decreaseNodeIndentation(node)
-    }
-
-    func erase(node: TextNode, enableRedo: Bool = true) -> Bool {
-        guard let oldParent = node.parent as? TextNode,
-              let oldIndexInParent = node.indexInParent else { return false }
-        let oldChildren = node.children
-        undoManager.registerUndo(withTarget: self) { selfTarget in
-            if enableRedo {
-                selfTarget.undoManager.registerUndo(withTarget: selfTarget) { selfTarget in
-                    _ = selfTarget.erase(node: node)
-                }
-            }
-            oldParent.element.insert(node.element, at: oldIndexInParent)
-            for oldChild in oldChildren {
-                guard let oldChild = oldChild as? TextNode else { return }
-                node.element.addChild(oldChild.element)
-            }
-        }
-
-        // reparent all children to previous sibbling or parent:
-        if let previous = node.previousSibbling() as? TextNode {
-            for child in node.children {
-                guard let child = child as? TextNode else { return false }
-                previous.element.addChild(child.element)
-            }
-        } else {
-            for (i, child) in node.children.enumerated() {
-                guard let child = child as? TextNode else { return false }
-                oldParent.element.insert(child.element, at: oldIndexInParent + i)
-            }
-        }
-        oldParent.element.removeChild(node.element)
-        undoManager.setActionName("Erase node")
-
-        return true
-    }
-
-    func createEmptyNode(withParent parent: TextNode, atIndex index: Int = 0) {
-        let element = BeamElement()
-
-        parent.element.insert(element, at: index)
-        root.cursorPosition = 0
-
-        let newNode = nodeFor(element)
-        focussedWidget = newNode
-
-        undoManager.registerUndo(withTarget: self) { selfTarget in
-            _ = selfTarget.erase(node: newNode, enableRedo: false)
-        }
     }
 
     func eraseNodeSelection(createEmptyNodeInPlace: Bool) {
@@ -144,46 +82,40 @@ extension TextRoot {
         // This will be used to create an empty node in place:
         let firstParent = sortedNodes.first?.parent as? TextNode ?? root
         let firstIndexInParent = sortedNodes.first?.indexInParent ?? 0
-        var goToPrevious = true
-        var nextNode = sortedNodes.last?.previousVisibleTextNode()
-        if nextNode == nil {
-            nextNode = sortedNodes.last?.nextVisibleTextNode()
-            goToPrevious = false
-        }
-
-        let nodes = sortedNodes.reversed()
-        let multiple = nodes.isEmpty
-        undoManager.beginUndoGrouping()
-        for node in nodes {
-            _ = erase(node: node)
-        }
 
         cancelNodeSelection()
 
-        if createEmptyNodeInPlace {
-            createEmptyNode(withParent: firstParent, atIndex: firstIndexInParent)
-        } else if root.element.children.isEmpty {
-            // we must create a new first node...
-            createEmptyNode(withParent: root, atIndex: 0)
-        } else {
-            assert(nextNode != nil)
-            root.focussedWidget = nextNode
-            root.cursorPosition = goToPrevious ? nextNode!.text.count : 0
+        root.note?.cmdManager.beginGroup(with: "Delete selected nodes")
+        defer { root.note?.cmdManager.endGroup() }
+
+        if let prevWidget = sortedNodes.first?.previousVisibleTextNode() {
+            cmdManager.focusElement(prevWidget, position: prevWidget.text.count)
+        } else if let nextVisibleNode = sortedNodes.last?.nextVisibleTextNode() {
+            cmdManager.focusElement(nextVisibleNode, position: 0)
         }
 
-        undoManager.endUndoGrouping()
-        undoManager.setActionName(multiple ? "Erase selected nodes" : "Erase selected node")
+        for node in sortedNodes.reversed() {
+            // Delete Selected Element:
+            cmdManager.deleteElement(for: node)
+        }
+
+        if createEmptyNodeInPlace || root.element.children.isEmpty {
+            guard let noteTitle = root.note?.title else { return }
+            let insertEmptyNode = InsertEmptyNode(with: firstParent.element.id, of: noteTitle, at: firstIndexInParent)
+            cmdManager.run(command: insertEmptyNode, on: cmdContext)
+        }
     }
 
-    func eraseSelection() {
-        guard let node = focussedWidget as? TextNode, !node.readOnly, !selectedTextRange.isEmpty else { return }
+    func replaceSelection(with str: String) {
+        guard let node = focusedWidget as? TextNode, !node.readOnly, !selectedTextRange.isEmpty
+        else { return }
 
-        node.text.removeSubrange(selectedTextRange)
-        cursorPosition = selectedTextRange.lowerBound
-        if cursorPosition == NSNotFound {
-            cursorPosition = node.text.count
-        }
-        cancelSelection()
+        let bText = BeamText(text: str, attributes: root.state.attributes)
+        cmdManager.beginGroup(with: "erase selection")
+        defer { cmdManager.endGroup() }
+        cmdManager.replaceText(in: node, for: selectedTextRange, with: bText)
+        cmdManager.cancelSelection(node)
+        cmdManager.focusElement(node, position: selectedTextRange.lowerBound + bText.count)
     }
 
     func deleteForward() {
@@ -192,26 +124,24 @@ extension TextRoot {
             return
         }
 
-        guard let node = focussedWidget as? TextNode else { return }
-        guard !node.readOnly else { return }
-        if !selectedTextRange.isEmpty {
-            eraseSelection()
-        } else if cursorPosition != node.text.count {
-            node.text.remove(count: 1, at: cursorPosition)
-            cancelSelection()
-        } else {
-            if let nextNode = node.nextVisible() as? TextNode {
-                let remainingText = nextNode.text
-                // Reparent existing children to the node we're merging in
-                for c in nextNode.children {
-                    guard let c = c as? TextNode else { return }
-                    node.element.addChild(c.element)
-                }
+        guard let node = focusedWidget as? TextNode, !node.readOnly,
+              let noteTitle = node.elementNoteTitle else { return }
 
-                nextNode.delete()
-                node.text.append(remainingText)
+        if !selectedTextRange.isEmpty {
+            cmdManager.deleteText(in: node, for: selectedTextRange)
+        } else if cursorPosition != node.text.count {
+            cmdManager.deleteText(in: node, for: cursorPosition ..< cursorPosition + 1)
+        } else {
+            // Delete element forward
+            cmdManager.beginGroup(with: "Delete forward")
+            defer { cmdManager.endGroup() }
+            if let nextVisibleNode = node.nextVisibleTextNode() {
+                let pos = cursorPosition
+                cmdManager.replaceText(in: node, for: cursorPosition..<cursorPosition, with: nextVisibleNode.text)
+                cmdManager.cancelSelection(node)
+                cmdManager.focusElement(node, position: pos)
+                cmdManager.deleteElement(for: nextVisibleNode)
             }
-            cancelSelection()
         }
     }
 
@@ -222,76 +152,44 @@ extension TextRoot {
             return
         }
 
-        guard let node = focussedWidget as? TextNode else { return }
-        guard !node.readOnly else { return }
-        if !selectedTextRange.isEmpty {
-            eraseSelection()
-        } else if cursorPosition == 0 {
-            if let nextNode = node.previousVisible() as? TextNode {
-                let remainingText = node.text
+        guard let node = focusedWidget as? TextNode, !node.readOnly else { return }
 
-                // Reparent existing children to the node we're merging in
-                for c in node.element.children {
-                    nextNode.element.addChild(c)
-                }
-
-                node.delete()
-                self.focussedWidget = nextNode
-
-                cursorPosition = nextNode.text.count
-                nextNode.text.append(remainingText)
+        if cursorPosition == 0, selectedTextRange.isEmpty {
+            if node.element == node.element.note?.children.first {
+                return // can't erase the first element of the note
             }
-            cancelSelection()
+            // Delete element backward
+
+            cmdManager.beginGroup(with: "Delete backward")
+            defer { cmdManager.endGroup() }
+            if let prevVisibleNode = node.previousVisibleTextNode() {
+                let pos = prevVisibleNode.text.count
+                cmdManager.replaceText(in: prevVisibleNode, for: pos..<pos, with: node.text)
+                cmdManager.focusElement(prevVisibleNode, position: pos)
+                cmdManager.deleteElement(for: node)
+            }
         } else {
-            cursorPosition = node.position(before: cursorPosition)
-            node.text.remove(count: 1, at: cursorPosition)
-            cancelSelection()
+            if selectedTextRange.isEmpty {
+                cmdManager.deleteText(in: node, for: cursorPosition - 1 ..< cursorPosition)
+            } else {
+                cmdManager.deleteText(in: node, for: selectedTextRange)
+            }
         }
     }
 
     func insertNewline() {
-        guard root.state.nodeSelection == nil else { return }
-        guard let node = focussedWidget as? TextNode else { return }
-        guard !node.readOnly else { return }
-        if !selectedTextRange.isEmpty {
-            node.text.removeSubrange(selectedTextRange)
-            node.text.insert("\n", at: selectedTextRange.startIndex)
-            cursorPosition = node.position(after: selectedTextRange.startIndex)
-            if cursorPosition == NSNotFound {
-                cursorPosition = node.text.count
+        guard root.state.nodeSelection == nil,
+              let node = focusedWidget as? TextNode,
+              !node.readOnly else { return }
+
+        if !node.element.text.isEmpty {
+            if !selectedTextRange.isEmpty {
+                cmdManager.deleteText(in: node, for: selectedTextRange)
             }
-        } else if cursorPosition != 0 && node.text.count != 0 {
-            node.text.insert("\n", at: cursorPosition)
-            cursorPosition = node.position(after: cursorPosition)
+
+            let bText = BeamText(text: "\n", attributes: [])
+            cmdManager.inputText(bText, in: node, at: cursorPosition)
         }
-        cancelSelection()
-    }
-
-    func pushUndoState(_ command: Command) {
-        guard let node = focussedWidget as? TextNode else { return }
-        guard !node.readOnly else { return }
-        defer {
-            if !undoManager.isRedoing {
-                lastCommand = command
-            }
-        }
-
-        guard let commandDef = commands[command], commandDef.undo, !(commandDef.coalesce && lastCommand == command) else { return }
-
-        let state = TextState(text: node.text, selectedTextRange: selectedTextRange, markedTextRange: markedTextRange, cursorPosition: cursorPosition)
-        undoManager.registerUndo(withTarget: self, handler: { (selfTarget) in
-            if commandDef.redo {
-                selfTarget.lastCommand = .none
-                selfTarget.pushUndoState(command) // push the redo!
-            }
-
-            guard let selfNode = selfTarget.focussedWidget as? TextNode else { return }
-            selfNode.text = state.text
-            selfTarget.selectedTextRange = state.selectedTextRange
-            selfTarget.markedTextRange = state.markedTextRange
-            selfTarget.cursorPosition = state.cursorPosition
-        })
-        undoManager.setActionName(commandDef.name)
     }
 
     // Text Input from AppKit:
@@ -300,8 +198,9 @@ extension TextRoot {
     }
 
     public func setMarkedText(string: String, selectedRange: Range<Int>, replacementRange: Range<Int>) {
-        guard let node = focussedWidget as? TextNode else { return }
-        guard !node.readOnly else { return }
+        guard let node = focusedWidget as? TextNode,
+              !node.readOnly else { return }
+
         var range = cursorPosition..<cursorPosition
         if !replacementRange.isEmpty {
             range = replacementRange
@@ -326,28 +225,30 @@ extension TextRoot {
     }
 
     public func unmarkText() {
-        guard let node = focussedWidget as? TextNode, !node.readOnly else { return }
+        guard let node = focusedWidget as? TextNode, !node.readOnly else { return }
         markedTextRange = 0..<0
     }
 
     public func insertText(string: String, replacementRange: Range<Int>) {
         eraseNodeSelection(createEmptyNodeInPlace: true)
-        guard let node = focussedWidget as? TextNode, !node.readOnly else { return }
-        pushUndoState(.insertText)
+        guard let node = focusedWidget as? TextNode,
+              !node.readOnly else { return }
 
-        let c = string.count
         var range = cursorPosition..<cursorPosition
         if !replacementRange.isEmpty {
             range = replacementRange
         }
+
         if !selectedTextRange.isEmpty {
             range = selectedTextRange
         }
 
-        let bString = BeamText(text: string, attributes: state.attributes)
-        node.text.replaceSubrange(range, with: bString)
-        cursorPosition = range.lowerBound + c
-        cancelSelection()
+        if !range.isEmpty {
+            cmdManager.deleteText(in: node, for: range)
+        }
+
+        let bText = BeamText(text: string, attributes: root.state.attributes)
+        cmdManager.inputText(bText, in: node, at: cursorPosition)
     }
 
     public func firstRect(forCharacterRange range: Range<Int>) -> (NSRect, Range<Int>) {
@@ -357,7 +258,7 @@ extension TextRoot {
     }
 
     public func updateTextAttributesAtCursorPosition() {
-        guard let node = focussedWidget as? TextNode else { return }
+        guard let node = focusedWidget as? TextNode else { return }
         let ranges = node.text.rangesAt(position: cursorPosition)
         switch ranges.count {
         case 0:

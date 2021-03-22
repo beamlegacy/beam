@@ -26,6 +26,18 @@ extension String {
         return "\u{200B}"
     }
 
+    static var zeroWidthJoiner: String {
+        return "\u{200D}"
+    }
+
+    static var zeroWidthNonJoiner: String {
+        return "\u{200C}"
+    }
+
+    static var nonBreakingSpace: String {
+        return "\u{202F}"
+    }
+
     func replacingNewlinesWithLineSeparators() -> String {
         let trimmed = trimmingCharacters(in: .newlines)
         let lines = trimmed.components(separatedBy: .newlines)

@@ -58,7 +58,7 @@ extension String {
                 } else {
                     let word = String(self[range].lowercased())
                     wordTokens.append(removeDiacritics ? word.folding(options: .diacriticInsensitive, locale: .current) : word)
-                    //print("no lemma found for word '\(word)'")
+                    //Logger.shared.logDebug("no lemma found for word '\(word)'")
                 }
             } else {
                 let word = String(self[range].lowercased())

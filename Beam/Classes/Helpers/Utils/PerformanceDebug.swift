@@ -38,7 +38,7 @@ class PerformanceDebug {
                 do {
                     try FileManager.default.removeItem(atPath: filename)
                 } catch {
-                    print(error.localizedDescription)
+                    Logger.shared.logDebug(error.localizedDescription)
                 }
             }
         })

@@ -10,13 +10,12 @@ import Foundation
 extension TextRoot {
     func moveLeft() {
         cancelNodeSelection()
-        guard let node = focussedWidget as? TextNode else { return }
+        guard let node = focusedWidget as? TextNode else { return }
         if selectedTextRange.isEmpty {
             if cursorPosition == 0 {
                 if let next = node.previousVisibleTextNode() {
                     node.invalidateText()
-                    self.focussedWidget = next
-                    cursorPosition = node.text.count
+                    next.focus(cursorPosition: node.text.count)
                 } else {
                     cursorPosition = 0
                 }
@@ -30,13 +29,12 @@ extension TextRoot {
 
     func moveRight() {
         cancelNodeSelection()
-        guard let node = focussedWidget as? TextNode else { return }
+        guard let node = focusedWidget as? TextNode else { return }
         if selectedTextRange.isEmpty {
             if cursorPosition == node.text.count {
                 if let next = node.nextVisibleTextNode() {
                     node.invalidateText()
-                    self.focussedWidget = next
-                    cursorPosition = 0
+                    next.focus()
                 }
             } else {
                 cursorPosition = node.position(after: cursorPosition)
@@ -48,7 +46,7 @@ extension TextRoot {
 
     func moveLeftAndModifySelection() {
         guard root.state.nodeSelection == nil else { return }
-        guard let node = focussedWidget as? TextNode else { return }
+        guard let node = focusedWidget as? TextNode else { return }
         if cursorPosition != 0 {
             let newCursorPosition = node.position(before: cursorPosition)
             if cursorPosition == selectedTextRange.lowerBound {
@@ -63,7 +61,7 @@ extension TextRoot {
 
     func moveWordRight() {
         cancelNodeSelection()
-        guard let node = focussedWidget as? TextNode else { return }
+        guard let node = focusedWidget as? TextNode else { return }
         node.text.text.enumerateSubstrings(in: node.text.index(at: cursorPosition)..<node.text.text.endIndex, options: .byWords) { (_, r1, _, stop) in
             self.cursorPosition = node.position(at: r1.upperBound)
             stop = true
@@ -74,7 +72,7 @@ extension TextRoot {
 
     func moveWordLeft() {
         cancelNodeSelection()
-        guard let node = focussedWidget as? TextNode else { return }
+        guard let node = focusedWidget as? TextNode else { return }
         var range = node.text.text.startIndex ..< node.text.text.endIndex
         node.text.text.enumerateSubstrings(in: node.text.text.startIndex..<node.text.text.index(at: cursorPosition), options: .byWords) { (_, r1, _, _) in
             range = r1
@@ -87,7 +85,7 @@ extension TextRoot {
 
     func moveWordRightAndModifySelection() {
         guard root.state.nodeSelection == nil else { return }
-        guard let node = focussedWidget as? TextNode else { return }
+        guard let node = focusedWidget as? TextNode else { return }
         var newCursorPosition = cursorPosition
         node.text.text.enumerateSubstrings(in: node.text.text.index(at: cursorPosition)..<node.text.text.endIndex, options: .byWords) { (_, r1, _, stop) in
             newCursorPosition = node.position(at: r1.upperBound)
@@ -100,7 +98,7 @@ extension TextRoot {
     //swiftlint:disable cyclomatic_complexity function_body_length
     func moveWordLeftAndModifySelection() {
         guard root.state.nodeSelection == nil else { return }
-        guard let node = focussedWidget as? TextNode else { return }
+        guard let node = focusedWidget as? TextNode else { return }
         var range = node.text.text.startIndex ..< node.text.text.endIndex
         node.text.text.enumerateSubstrings(in: node.text.text.startIndex..<node.text.text.index(at: cursorPosition), options: .byWords) { (_, r1, _, _) in
             range = r1
@@ -113,7 +111,7 @@ extension TextRoot {
 
     func moveRightAndModifySelection() {
         guard root.state.nodeSelection == nil else { return }
-        guard let node = focussedWidget as? TextNode else { return }
+        guard let node = focusedWidget as? TextNode else { return }
         if cursorPosition != node.text.count {
             extendSelection(to: node.position(after: cursorPosition))
         }
@@ -122,41 +120,40 @@ extension TextRoot {
 
     func moveToBeginningOfLine() {
         cancelNodeSelection()
-        guard let node = focussedWidget as? TextNode else { return }
+        guard let node = focusedWidget as? TextNode else { return }
         cursorPosition = node.beginningOfLineFromPosition(cursorPosition)
         cancelSelection()
     }
 
     func moveToEndOfLine() {
         cancelNodeSelection()
-        guard let node = focussedWidget as? TextNode else { return }
+        guard let node = focusedWidget as? TextNode else { return }
         cursorPosition = node.endOfLineFromPosition(cursorPosition)
         cancelSelection()
     }
 
     func moveToBeginningOfLineAndModifySelection() {
         guard root.state.nodeSelection == nil else { return }
-        guard let node = focussedWidget as? TextNode else { return }
+        guard let node = focusedWidget as? TextNode else { return }
         extendSelection(to: node.beginningOfLineFromPosition(cursorPosition))
         node.invalidateText()
     }
 
     func moveToEndOfLineAndModifySelection() {
         guard root.state.nodeSelection == nil else { return }
-        guard let node = focussedWidget as? TextNode else { return }
+        guard let node = focusedWidget as? TextNode else { return }
         extendSelection(to: node.endOfLineFromPosition(cursorPosition))
         node.invalidateText()
     }
 
     func moveUp() {
         cancelNodeSelection()
-        guard let node = focussedWidget as? TextNode else { return }
+        guard let node = focusedWidget as? TextNode else { return }
         if node.isOnFirstLine(cursorPosition) {
             if let newNode = node.previousVisibleTextNode() {
                 let offset = node.offsetAt(index: cursorPosition) + node.offsetInDocument.x - newNode.offsetInDocument.x
-                cursorPosition = newNode.indexOnLastLine(atOffset: offset)
                 node.invalidateText()
-                self.focussedWidget = newNode
+                newNode.focus(cursorPosition: newNode.indexOnLastLine(atOffset: offset))
             } else {
                 cursorPosition = 0
             }
@@ -169,13 +166,12 @@ extension TextRoot {
 
     func moveDown() {
         cancelNodeSelection()
-        guard let node = focussedWidget as? TextNode else { return }
+        guard let node = focusedWidget as? TextNode else { return }
         if node.isOnLastLine(cursorPosition) {
             if let newNode = node.nextVisibleTextNode() {
                 let offset = node.offsetAt(index: cursorPosition) + node.offsetInDocument.x - newNode.offsetInDocument.x
-                cursorPosition = newNode.indexOnFirstLine(atOffset: offset)
                 node.invalidateText()
-                self.focussedWidget = newNode
+                newNode.focus(cursorPosition: newNode.indexOnFirstLine(atOffset: offset))
             } else {
                 cursorPosition = node.text.count
             }
@@ -189,7 +185,7 @@ extension TextRoot {
     public func cancelSelection() {
         selectedTextRange = cursorPosition..<cursorPosition
         markedTextRange = selectedTextRange
-        focussedWidget?.invalidate()
+        focusedWidget?.invalidate()
     }
 
     @discardableResult
@@ -235,7 +231,7 @@ extension TextRoot {
             _ = selectAllNodes()
             return
         }
-        guard let node = focussedWidget as? TextNode else { return }
+        guard let node = focusedWidget as? TextNode else { return }
         guard selectedTextRange != node.text.wholeRange else {
             _ = selectAllNodes()
             return
@@ -253,8 +249,7 @@ extension TextRoot {
             return
         }
 
-        guard let node = focussedWidget as? TextNode,
-              node as? LinkedReferenceNode == nil else { return }
+        guard let node = focusedWidget as? TextNode else { return }
         if cursorPosition == 0 {
             extendNodeSelectionUp()
         } else {
@@ -269,8 +264,7 @@ extension TextRoot {
             return
         }
 
-        guard let node = focussedWidget as? TextNode,
-              node as? LinkedReferenceNode == nil else { return }
+        guard let node = focusedWidget as? TextNode else { return }
         if cursorPosition == node.text.text.count {
             extendNodeSelectionDown()
         } else {
@@ -280,7 +274,7 @@ extension TextRoot {
     }
 
     public func extendSelection(to newCursorPosition: Int) {
-        guard let node = focussedWidget as? TextNode else { return }
+        guard let node = focusedWidget as? TextNode else { return }
         var r1 = selectedTextRange.lowerBound
         var r2 = selectedTextRange.upperBound
         if cursorPosition == r2 {
@@ -316,19 +310,19 @@ extension TextRoot {
     }
 
     func startNodeSelection() {
-        guard let node = focussedWidget as? TextNode else { return }
+        guard let node = focusedWidget as? TextNode else { return }
         root.state.nodeSelection = NodeSelection(start: node, end: node)
         cancelSelection()
     }
 
     func cancelNodeSelection() {
         guard let selection = root.state.nodeSelection else { return }
-        root.focussedWidget = selection.end
+        selection.end.focus()
         root.state.nodeSelection = nil
     }
 
     func wordSelection(from pos: Int) {
-        guard let node = focussedWidget as? TextNode else { return }
+        guard let node = focusedWidget as? TextNode else { return }
         let str = node.text.text
         let index = str.index(str.startIndex, offsetBy: pos)
         str.enumerateSubstrings(in: str.startIndex..<str.endIndex, options: .byWords) { [self] (_, r1, _, stop) in

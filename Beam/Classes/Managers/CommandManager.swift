@@ -7,133 +7,154 @@
 
 import Foundation
 
-protocol Command {
-    var name: String { get set }
-    func run() -> Bool
-    func undo() -> Bool
-    func coalesce(command: Command) -> Bool
-}
-
-class BlockCommand: Command {
+class Command<Context> {
     var name: String
-    var _run: () -> Bool
-    var _undo: () -> Bool
-    var _coalesce: (Command) -> Bool
-
-    init(name: String, run: @escaping () -> Bool, undo: @escaping () -> Bool, coalesce: @escaping (Command) -> Bool) {
-        self.name = name
-        self._run = run
-        self._undo = undo
-        self._coalesce = coalesce
-    }
-
-    func run() -> Bool {
-        return _run()
-    }
-
-    func undo() -> Bool {
-        return _undo()
-    }
-
-    func coalesce(command: Command) -> Bool {
-        return _coalesce(command)
-    }
-}
-
-class GroupCommand: Command {
-    var name: String
-    var commands: [Command] = []
+    func run(context: Context?) -> Bool { return false }
+    func undo(context: Context?) -> Bool { return false }
+    func coalesce(command: Command<Context>) -> Bool { return false }
 
     init(name: String) {
         self.name = name
     }
+}
 
-    func append(command: Command) {
-        commands.append(command)
+class BlockCommand<Context>: Command<Context> {
+    var _run: (_ context: Context?) -> Bool
+    var _undo: (_ context: Context?) -> Bool
+    var _coalesce: (Command<Context>) -> Bool
+
+    init(name: String, run: @escaping (Context?) -> Bool, undo: @escaping (Context?) -> Bool, coalesce: @escaping (Command<Context>) -> Bool) {
+        self._run = run
+        self._undo = undo
+        self._coalesce = coalesce
+        super.init(name: name)
     }
 
-    func run() -> Bool {
-        var running = true
+    override func run(context: Context?) -> Bool {
+        return _run(context)
+    }
+
+    override func undo(context: Context?) -> Bool {
+        return _undo(context)
+    }
+
+    override func coalesce(command: Command<Context>) -> Bool {
+        return _coalesce(command)
+    }
+}
+
+class GroupCommand<Context>: Command<Context> {
+    var commands: [Command<Context>] = []
+
+    func append(command: Command<Context>) {
+        guard let lastCommand = commands.last,
+            lastCommand.coalesce(command: command)
+        else {
+            commands.append(command)
+            return
+        }
+    }
+
+    override func run(context: Context?) -> Bool {
         for c in commands {
-            running = c.run()
-            if !running { break }
+            guard c.run(context: context) else { return false }
         }
-        return running
+        return true
     }
 
-    func undo() -> Bool {
-        var undoing = true
+    override func undo(context: Context?) -> Bool {
         for c in commands.reversed() {
-            undoing = c.undo()
-            if !undoing { break }
+            guard c.undo(context: context) else { return false }
         }
-        return undoing
+        return true
     }
-
-    func coalesce(command: Command) -> Bool {
-        return false
-    }
-
 }
 
 // MARK: - CommandManager
 
-class CommandManager {
-    private var doneQueue: [Command] = []
-    private var undoneQueue: [Command] = []
+class CommandManager<Context> {
+    private var doneQueue: [Command<Context>] = []
+    private var undoneQueue: [Command<Context>] = []
 
-    private var groupCmd: [GroupCommand] = []
+    private var groupCmd: [GroupCommand<Context>] = []
     private var groupFailed: Bool = false
 
-    func run(name: String, run: @escaping () -> Bool, undo: @escaping () -> Bool, coalesce: @escaping (Command) -> Bool) {
-        self.run(command: BlockCommand(name: name, run: run, undo: undo, coalesce: coalesce))
+    private var lastCmdDate: Date?
+
+    @discardableResult
+    func run(name: String, run: @escaping (Context?) -> Bool, undo: @escaping (Context?) -> Bool, coalesce: @escaping (Command<Context>) -> Bool, on context: Context) -> Bool {
+        self.run(command: BlockCommand(name: name, run: run, undo: undo, coalesce: coalesce), on: context)
     }
 
-    func run(command: Command) {
-        if command.run() && !groupFailed {
-            guard !groupCmd.isEmpty else {
+    private func appendToDone(command: Command<Context>) {
+        guard let lastGroup = groupCmd.last else {
+            guard let lastCmd = doneQueue.last, lastCmd.coalesce(command: command) else {
                 doneQueue.append(command)
                 return
             }
-            groupCmd.last?.append(command: command)
+            return
+        }
+
+        lastGroup.append(command: command)
+    }
+
+    @discardableResult
+    func run(command: Command<Context>, on context: Context) -> Bool {
+        Logger.shared.logDebug("Run: \(command.name)")
+        let done = command.run(context: context)
+
+        if done && !groupFailed {
+            appendToDone(command: command)
         } else {
+            Logger.shared.logDebug("\(command.name) run failed")
             guard groupCmd.isEmpty else {
                 groupFailed = true
                 endGroup()
-                return
+                return false
             }
         }
+        return done
     }
 
-    func undo() -> Bool {
-        guard !groupCmd.isEmpty else {
-            guard let lastCmd = doneQueue.last else { return false }
-            if lastCmd.undo() {
-                undoneQueue.append(lastCmd)
-                doneQueue.removeLast()
-                return true
-            }
+    func undo(context: Context?) -> Bool {
+        guard groupCmd.isEmpty else {
+            fatalError("Cannot Undo with a GroupCommand active, it should be ended first.")
+        }
+
+        guard let lastCmd = doneQueue.last else { return false }
+        Logger.shared.logDebug("Undo: \(lastCmd.name)")
+
+        guard lastCmd.undo(context: context) else {
+            Logger.shared.logDebug("\(lastCmd.name) undo failed")
             return false
         }
-        fatalError("Cannot Undo with a GroupCommand active, it should be ended first.")
+
+        undoneQueue.append(lastCmd)
+        doneQueue.removeLast()
+        return true
     }
 
-    func redo() -> Bool {
-        guard !groupCmd.isEmpty else {
-            guard let lastCmd = undoneQueue.last else { return false }
-            if lastCmd.run() {
-                doneQueue.append(lastCmd)
-                undoneQueue.removeLast()
-                return true
-            }
+    func redo(context: Context?) -> Bool {
+        guard groupCmd.isEmpty else {
+            fatalError("Cannot Redo with a GroupCommand active, it should be ended first.")
+        }
+
+        guard let lastCmd = undoneQueue.last else { return false }
+        Logger.shared.logDebug("Redo: \(lastCmd.name)")
+
+        guard lastCmd.run(context: context) else {
+            Logger.shared.logDebug("\(lastCmd.name) redo failed")
             return false
         }
-        fatalError("Cannot Redo with a GroupCommand active, it should be ended first.")
+
+        doneQueue.append(lastCmd)
+        undoneQueue.removeLast()
+        return true
     }
 
     // MARK: - Group Command
-
     func beginGroup(with name: String) {
+        guard groupCmd.isEmpty else { return }
         groupFailed = false
         groupCmd.append(GroupCommand(name: name))
     }
@@ -142,5 +163,14 @@ class CommandManager {
         guard let lastGrp = groupCmd.last else { return }
         doneQueue.append(lastGrp)
         groupCmd.removeLast()
+    }
+
+    // MARK: - Timer
+    func getTimeInterval() -> TimeInterval? {
+        guard let lastCmdDate = self.lastCmdDate else {
+            self.lastCmdDate = Date()
+            return nil
+        }
+        return Date().timeIntervalSince(lastCmdDate)
     }
 }

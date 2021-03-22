@@ -50,15 +50,15 @@ class APIRequestTests: QuickSpec {
 
             context("with wrong api hostname") {
                 beforeEach {
-                    Configuration.apiHostname = "localhost"
+                    Configuration.apiHostname = "localhost2"
                 }
 
                 it("manages errors") {
-                    waitUntil(timeout: .seconds(1)) { done in
+                    waitUntil(timeout: .seconds(10)) { done in
                         _ = try? self.sut.performRequest(bodyParamsRequest: bodyParamsRequest,
                                                               authenticatedCall: false) { (result: Swift.Result<ForgotPassword, Error>) in
                             expect { try result.get() }.to(throwError { (error: NSError) in
-                                expect(error.code).to(equal(-1004))
+                                expect(error.code) == NSURLErrorCannotFindHost
                             })
                             done()
                         }
@@ -77,25 +77,25 @@ class APIRequestTests: QuickSpec {
                         expect(forgotPassword.success).to(beTrue())
                         done()
                     }
-                    .catch { _ in }
+                    .catch { fail("Should not be called: \($0)") }
                 }
             }
 
             context("with wrong api hostname") {
                 beforeEach {
-                    Configuration.apiHostname = "localhost"
+                    Configuration.apiHostname = "localhost2"
                 }
 
                 it("manages errors") {
-                    waitUntil(timeout: .seconds(1)) { done in
+                    waitUntil(timeout: .seconds(10)) { done in
                         let promise: PromiseKit.Promise<ForgotPassword> = self.sut
                             .performRequest(bodyParamsRequest: bodyParamsRequest,
                                             authenticatedCall: false)
                         promise.done(on: backgroundQueue) { _ in
-
+                            fail("shouldn't be called")
                         }
                         .catch(on: backgroundQueue) { error in
-                            expect((error as NSError).code).to(equal(-1004))
+                            expect((error as NSError).code) == NSURLErrorCannotFindHost
                             done()
                         }
                     }
@@ -119,7 +119,7 @@ class APIRequestTests: QuickSpec {
 
             context("with wrong api hostname") {
                 beforeEach {
-                    Configuration.apiHostname = "localhost"
+                    Configuration.apiHostname = "localhost2"
                 }
 
                 it("manages errors") {
@@ -128,11 +128,10 @@ class APIRequestTests: QuickSpec {
                             .performRequest(bodyParamsRequest: bodyParamsRequest,
                                             authenticatedCall: false)
                         promise.then(on: backgroundQueue) { (forgotPassword: ForgotPassword) in
-                            expect(forgotPassword.success).to(beTrue())
-                            done()
+                            fail("shouldn't be called")
                         }
                         .catch(on: backgroundQueue) { error in
-                            expect((error as NSError).code).to(equal(-1004))
+                            expect((error as NSError).code) == NSURLErrorCannotFindHost
                             done()
                         }
                     }

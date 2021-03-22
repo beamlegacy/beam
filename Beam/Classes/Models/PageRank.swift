@@ -41,7 +41,7 @@ class PageRank: Codable {
     }
 
     func updatePage(source: String, outbounds: [UInt64]) {
-        //print("html -> \(html)")
+        //Logger.shared.logDebug("html -> \(html)")
         let page = Page(source)
         let oldPage = pages[page.id]
         page.pageRank = initialValue
@@ -81,7 +81,7 @@ class PageRank: Codable {
 
     func updatePage(source: String, contents: String) {
         do {
-            //print("html -> \(html)")
+            //Logger.shared.logDebug("html -> \(html)")
             let doc = try SwiftSoup.parseBodyFragment(contents, source)
             let els: Elements = try doc.select("a")
 
@@ -95,9 +95,9 @@ class PageRank: Codable {
 
             updatePage(source: source, outbounds: outbounds)
         } catch Exception.Error(let type, let message) {
-            print("PageRank (SwiftSoup parser) \(type): \(message)")
+            Logger.shared.logDebug("PageRank (SwiftSoup parser) \(type): \(message)")
         } catch {
-            print("PageRank: (SwiftSoup parser) unkonwn error")
+            Logger.shared.logDebug("PageRank: (SwiftSoup parser) unkonwn error")
         }
     }
 

@@ -10,11 +10,11 @@ import SwiftUI
 import Combine
 
 struct JournalView: View {
-    @State var isEditing = false
-    var data: BeamData
-    var isFetching: Bool
-    var journal: [BeamNote]
-    var offset: CGFloat
+    @State private var isEditing = false
+    let data: BeamData
+    let isFetching: Bool
+    let journal: [BeamNote]
+    let offset: CGFloat
 
     var body: some View {
         ScrollView([.vertical]) {
@@ -47,5 +47,8 @@ struct JournalView: View {
         }
         .accessibility(identifier: "journalView")
         .clipped()
+        .onDisappear {
+            data.reloadJournal()
+        }
     }
 }

@@ -26,6 +26,9 @@ struct Configuration {
     static private(set) var sparkleFeedURL: String = Configuration.value(for: "SUFeedURL")
     static private(set) var sentryEnabled = NSString("$(SENTRY_ENABLED)").boolValue
     static var networkEnabled = NSString("$(NETWORK_ENABLED)").boolValue
+    static var encryptionEnabledDefault = NSString("$(ENCRYPTION_ENABLED)").boolValue
+
+    static private(set) var sentryDsn = "https://\(sentryKey)@\(sentryHostname)/\(sentryProject)"
 
     // Runtime configuration
     static private(set) var apiHostnameDefault = "api.beamapp.co"
@@ -44,6 +47,22 @@ struct Configuration {
         }
     }
 
+    static private var encryptionEnabledKey = "encryptionEnabled"
+    static var encryptionEnabled: Bool {
+        get {
+            if UserDefaults.standard.object(forKey: encryptionEnabledKey) != nil {
+                return UserDefaults.standard.bool(forKey: encryptionEnabledKey)
+            }
+
+            return encryptionEnabledDefault
+        }
+        set {
+            if newValue != encryptionEnabled {
+                UserDefaults.standard.set(newValue, forKey: encryptionEnabledKey)
+            }
+        }
+    }
+
     static private var publicHostnameKey = "publicHostname"
     static var publicHostname: String {
         get {
@@ -56,6 +75,24 @@ struct Configuration {
             }
         }
     }
+
+    static var stateRestorationEnabledDefault = false
+    static private var stateRestorationEnabledKey = "stateRestorationEnabled"
+    static var stateRestorationEnabled: Bool {
+        get {
+            if UserDefaults.standard.object(forKey: stateRestorationEnabledKey) != nil {
+                return UserDefaults.standard.bool(forKey: stateRestorationEnabledKey)
+            }
+
+            return stateRestorationEnabledDefault
+        }
+        set {
+            if newValue != stateRestorationEnabled {
+                UserDefaults.standard.set(newValue, forKey: stateRestorationEnabledKey)
+            }
+        }
+    }
+
 
     static func reset() {
         UserDefaults.standard.removeObject(forKey: publicHostnameKey)

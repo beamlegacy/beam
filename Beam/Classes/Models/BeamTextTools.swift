@@ -83,6 +83,29 @@ extension BeamText {
     func hasSuffix(_ string: String) -> Bool {
         return text.hasSuffix(string)
     }
+
+    func trimming(_ charSet: CharacterSet) -> BeamText {
+        var text = self
+        let string = text.text
+        let invCharSet = charSet.inverted
+        let trimstart: String.Index? = string.firstIndex(where: { ch -> Bool in
+            return ch.unicodeScalars.allSatisfy { scalar -> Bool in
+                invCharSet.contains(scalar)
+            }
+        })
+        let trimend: String.Index? = string.lastIndex(where: { ch -> Bool in
+            return ch.unicodeScalars.allSatisfy { scalar -> Bool in
+                invCharSet.contains(scalar)
+            }
+        })
+        if let trimend = trimend {
+            text.removeLast(string.count - string.position(at: trimend) - 1)
+        }
+        if let trimstart = trimstart {
+            text.removeFirst(string.position(at: trimstart))
+        }
+        return text
+    }
 }
 
 extension BeamText: Equatable {
@@ -169,6 +192,14 @@ extension BeamText {
         return true
     }
 
+    mutating func makeLinkToNoteExplicit(forNote title: String) {
+        text.ranges(of: title).forEach { range in
+            let start = text.position(at: range.lowerBound)
+            let end = text.position(at: range.upperBound)
+            makeInternalLink(start..<end)
+        }
+    }
+
     var internalLinks: [Range] {
         var links = [Range]()
         for range in ranges {
@@ -176,6 +207,32 @@ extension BeamText {
                 switch attribute {
                 case .internalLink:
                     links.append(range)
+                default:
+                    break
+                }
+            }
+        }
+
+        return links
+    }
+
+    var linkRanges: [Range] {
+        ranges.flatMap { range in
+          range.attributes.compactMap { attribute -> Range? in // might not need -> Range?
+            if case .link = attribute { return range }
+            return nil
+          }
+        }
+
+    }
+
+    var links: [String] {
+        var links = [String]()
+        for range in ranges {
+            for attribute in range.attributes {
+                switch attribute {
+                case let .link(link):
+                    links.append(link)
                 default:
                     break
                 }
@@ -207,7 +264,6 @@ extension BeamText {
                     if !types.contains(.bold) { types.append(.bold) }
                 case .emphasis:
                     if !types.contains(.italic) { types.append(.italic) }
-                    types.append(.italic)
                 case .strikethrough:
                     if !types.contains(.strikethrough) { types.append(.strikethrough) }
                 default:
@@ -250,4 +306,15 @@ extension BeamText {
     static func removeLinks(from attributes: [Attribute]) -> [Attribute] {
         return attributes.compactMap({ $0.isLink ? nil : $0 })
     }
+
+    func hasLinkToNote(named noteTitle: String) -> Bool {
+        internalLinks.contains(where: { range -> Bool in
+            range.attributes.contains(.internalLink(noteTitle))
+        })
+    }
+
+    func hasReferenceToNote(titled noteTitle: String) -> Bool {
+        text.contains(noteTitle)
+    }
+
 }

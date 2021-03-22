@@ -11,8 +11,8 @@ import SwiftUI
 struct BrowserTabView: View {
     @EnvironmentObject var state: BeamState
     @ObservedObject var tab: BrowserTab
-    @State var showButton = false
-    var selected: Bool
+    @State private var showButton = false
+    let selected: Bool
 
     static var tabFrameColor = Color(.tabFrame)
 
@@ -87,7 +87,7 @@ struct BrowserTabView: View {
 }
 
 struct BrowserTabView_Previews: PreviewProvider {
-    static var state = BeamState(data: BeamData())
+    static var state = BeamState()
     static var tab = BrowserTab(state: state, originalQuery: "test tab1", note: BeamNote(title: "test"))
     static var previews: some View {
         Group {

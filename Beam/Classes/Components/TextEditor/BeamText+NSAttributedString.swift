@@ -10,15 +10,34 @@ import AppKit
 
 extension NSAttributedString.Key {
     static let source = NSAttributedString.Key(rawValue: "beamSource")
+    static let hoverUnderlineColor = NSAttributedString.Key(rawValue: "beam_hoverUnderlineColor") // NSColor, default nil
 }
 
 extension BeamText {
-    func buildAttributedString(fontSize: CGFloat, cursorPosition: Int, elementKind: ElementKind) -> NSMutableAttributedString {
+    func buildAttributedString(fontSize: CGFloat, cursorPosition: Int, elementKind: ElementKind, mouseInteraction: MouseInteraction? = nil) -> NSMutableAttributedString {
         let string = NSMutableAttributedString()
         for range in ranges {
-            string.append(NSAttributedString(string: range.string, attributes: convert(attributes: range.attributes, fontSize: fontSize, elementKind: elementKind)))
+            var attributedString = NSMutableAttributedString(string: range.string, attributes: convert(attributes: range.attributes, fontSize: fontSize, elementKind: elementKind))
+            if let mouseInteraction = mouseInteraction, (range.position..<range.end).contains(mouseInteraction.range.lowerBound) {
+                attributedString = updateAttributes(attributedString, withMouseInteraction: mouseInteraction)
+            }
+
+            addImageToLink(attributedString, range, mouseInteraction: mouseInteraction)
+            string.append(attributedString)
         }
         return string
+    }
+
+    private func updateAttributes(_ attributedString: NSMutableAttributedString, withMouseInteraction mouseInteraction: MouseInteraction) -> NSMutableAttributedString {
+        if mouseInteraction.type == .hovered {
+            attributedString.enumerateAttribute(.hoverUnderlineColor, in: attributedString.wholeRange, options: []) { (value, range, _) in
+                if let value = value {
+                    attributedString.removeAttribute(.underlineColor, range: range)
+                    attributedString.addAttribute(.underlineColor, value: value, range: range)
+                }
+            }
+        }
+        return attributedString
     }
 
     private func font(_ size: CGFloat, weight: NSFont.Weight = .regular) -> NSFont {
@@ -50,16 +69,18 @@ extension BeamText {
 
         if strong {
             font = NSFont(name: "Inter-Bold", size: fontSize)
+            if font == nil {
+                font = NSFontManager.shared.convert(NSFont.systemFont(ofSize: fontSize), toHaveTrait: .boldFontMask)
+            }
         }
 
         if emphasis || quote {
-            guard let selfFont = font else { return NSFont.systemFont(ofSize: fontSize) }
-            font = NSFontManager.shared.convert(selfFont, toHaveTrait: .italicFontMask)
+            font = NSFontManager.shared.convert(NSFont.systemFont(ofSize: fontSize), toHaveTrait: .italicFontMask)
         }
 
-        guard let selfFont = font else { return NSFont.systemFont(ofSize: fontSize) }
+        guard let actualFont = font else { return NSFont.systemFont(ofSize: fontSize) }
 
-        return selfFont
+        return actualFont
     }
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
@@ -105,7 +126,8 @@ extension BeamText {
             }
 
             stringAttributes[.underlineStyle] = NSUnderlineStyle.single.rawValue
-            stringAttributes[.underlineColor] = NSColor.underlineAndstrikethroughColor
+            stringAttributes[.underlineColor] = NSColor.editorLinkDecorationColor
+            stringAttributes[NSAttributedString.Key.hoverUnderlineColor] = NSColor.editorLinkColor
         } else if let link = internalLink {
             stringAttributes[.link] = link
         }
@@ -121,4 +143,44 @@ extension BeamText {
 
         return stringAttributes
     }
+
+    private func isMouseHoveringLinkImage(_ mouseInteraction: MouseInteraction, in range: BeamText.Range) -> Bool {
+        return mouseInteraction.type == .hovered && mouseInteraction.range.lowerBound == range.end
+    }
+
+    func addImageToLink(_ attributedString: NSMutableAttributedString, _ range: BeamText.Range, mouseInteraction: MouseInteraction?) {
+        guard attributedString.length > 0 else { return }
+        guard range.attributes.contains(where: { attrib -> Bool in attrib.rawValue == BeamText.Attribute.link("").rawValue }) else { return }
+        let imageName = "editor-url"
+        guard let image = NSImage(named: imageName) else { return }
+
+        var color = NSColor.editorLinkDecorationColor
+        if let mouseInt = mouseInteraction, isMouseHoveringLinkImage(mouseInt, in: range) {
+            color = .editorLinkColor
+        }
+        let extentBuffer = UnsafeMutablePointer<ImageRunStruct>.allocate(capacity: 1)
+        extentBuffer.initialize(to: ImageRunStruct(ascent: image.size.height, descent: 0, width: image.size.width, image: imageName, color: color))
+
+        var callbacks = CTRunDelegateCallbacks(version: kCTRunDelegateVersion1, dealloc: { _ in
+        }, getAscent: { (pointer) -> CGFloat in
+            let d = pointer.assumingMemoryBound(to: ImageRunStruct.self)
+            return d.pointee.ascent
+        }, getDescent: { (pointer) -> CGFloat in
+            let d = pointer.assumingMemoryBound(to: ImageRunStruct.self)
+            return d.pointee.descent
+        }, getWidth: { (pointer) -> CGFloat in
+            let d = pointer.assumingMemoryBound(to: ImageRunStruct.self)
+            return d.pointee.width
+        })
+
+        let delegate = CTRunDelegateCreate(&callbacks, extentBuffer)
+
+        let attrDictionaryDelegate = [(kCTRunDelegateAttributeName as NSAttributedString.Key): (delegate as Any)]
+        let fakeGlyph = NSMutableAttributedString(string: " ", attributes: attrDictionaryDelegate)
+        _ = fakeGlyph.addAttributes(attributedString.attributes(at: 0, effectiveRange: nil))
+        fakeGlyph.removeAttribute(.underlineStyle, range: fakeGlyph.wholeRange)
+        fakeGlyph.removeAttribute(.underlineColor, range: fakeGlyph.wholeRange)
+        attributedString.append(fakeGlyph)
+    }
+
 }

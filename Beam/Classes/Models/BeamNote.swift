@@ -8,6 +8,11 @@
 import Foundation
 import Combine
 
+enum BeamNoteError: Error, Equatable {
+    case saveAlreadyRunning
+    case unableToCreateDocumentStruct
+}
+
 struct VisitedPage: Codable, Identifiable {
     var id: UUID = UUID()
 
@@ -17,8 +22,8 @@ struct VisitedPage: Codable, Identifiable {
     var duration: TimeInterval
 }
 
-struct NoteReference: Codable, Equatable {
-    var noteName: String
+struct NoteReference: Codable, Equatable, Hashable {
+    var noteTitle: String
     var elementID: UUID
 }
 
@@ -26,18 +31,19 @@ struct NoteReference: Codable, Equatable {
 class BeamNote: BeamElement {
     @Published var title: String { didSet { change(.text) } }
     @Published var type: NoteType = .note { didSet { change(.meta) } }
-    @Published public private(set) var outLinks: [String] = [] { didSet { change(.meta) } } ///< The links contained in this note
-    @Published public private(set) var linkedReferences: [NoteReference] = [] { didSet { change(.meta) } } ///< urls of the notes/bullet pointing to this note explicitely
-    @Published public private(set) var unlinkedReferences: [NoteReference] = [] { didSet { change(.meta) } } ///< urls of the notes/bullet pointing to this note implicitely
+    @Published public private(set) var references: [NoteReference] = [] { didSet { change(.meta) } } ///< urls of the notes/bullet pointing to this note
 
     @Published public private(set) var searchQueries: [String] = [] { didSet { change(.meta) } } ///< Search queries whose results were used to populate this note
     @Published public private(set) var visitedSearchResults: [VisitedPage] = [] { didSet { change(.meta) } } ///< URLs whose content were used to create this note
     @Published public var browsingSessions = [BrowsingTree]() { didSet { change(.meta) } }
     private var version: Int64 = 0
+    private var savedVersion: Int64 = 0
 
     override var note: BeamNote? {
         return self
     }
+
+    var cmdManager = CommandManager<Widget>()
 
     init(title: String) {
         self.title = title
@@ -47,12 +53,12 @@ class BeamNote: BeamElement {
     enum CodingKeys: String, CodingKey {
         case title
         case type
-        case outLinks
         case searchQueries
         case visitedSearchResults
         case browsingSessions
         case linkedReferences
         case unlinkedReferences
+        case references
     }
 
     required init(from decoder: Decoder) throws {
@@ -60,18 +66,26 @@ class BeamNote: BeamElement {
 
         title = try container.decode(String.self, forKey: .title)
         type = try container.decode(NoteType.self, forKey: .type)
-        outLinks = try container.decode([String].self, forKey: .outLinks)
         searchQueries = try container.decode([String].self, forKey: .searchQueries)
         visitedSearchResults = try container.decode([VisitedPage].self, forKey: .visitedSearchResults)
         if container.contains(.browsingSessions) {
             browsingSessions = try container.decode([BrowsingTree].self, forKey: .browsingSessions)
         }
+
+        var refs = [NoteReference]()
+        // old references
         if container.contains(.linkedReferences) {
-            linkedReferences = try container.decode([NoteReference].self, forKey: .linkedReferences)
+            refs += try container.decode([NoteReference].self, forKey: .linkedReferences)
         }
         if container.contains(.unlinkedReferences) {
-            unlinkedReferences = try container.decode([NoteReference].self, forKey: .unlinkedReferences)
+            refs += try container.decode([NoteReference].self, forKey: .unlinkedReferences)
         }
+        // new (unified) references
+        if container.contains(.references) {
+            refs += try container.decode([NoteReference].self, forKey: .references)
+        }
+
+        references = refs
 
         try super.init(from: decoder)
     }
@@ -81,17 +95,13 @@ class BeamNote: BeamElement {
 
         try container.encode(title, forKey: .title)
         try container.encode(type, forKey: .type)
-        try container.encode(outLinks, forKey: .outLinks)
         try container.encode(searchQueries, forKey: .searchQueries)
         try container.encode(visitedSearchResults, forKey: .visitedSearchResults)
         if !browsingSessions.isEmpty {
             try container.encode(browsingSessions, forKey: .browsingSessions)
         }
-        if !linkedReferences.isEmpty {
-            try container.encode(linkedReferences, forKey: .linkedReferences)
-        }
-        if !unlinkedReferences.isEmpty {
-            try container.encode(unlinkedReferences, forKey: .unlinkedReferences)
+        if !references.isEmpty {
+            try container.encode(references, forKey: .references)
         }
 
         try super.encode(to: encoder)
@@ -106,11 +116,12 @@ class BeamNote: BeamElement {
             let data = try encoder.encode(self)
 
             return DocumentStruct(id: id,
-                                  title: title,
+                                  title: title.lowercased(),
                                   createdAt: creationDate,
                                   updatedAt: updateDate,
                                   data: data,
-                                  documentType: type == .journal ? .journal : .note)
+                                  documentType: type == .journal ? .journal : .note,
+                                  version: version)
         } catch {
             Logger.shared.logError("Unable to encode BeamNote into DocumentStruct [\(title) {\(id)}]", category: .document)
             return nil
@@ -118,13 +129,18 @@ class BeamNote: BeamElement {
     }
     private var activeDocumentCancellable: AnyCancellable?
     private func observeDocumentChange(documentManager: DocumentManager) {
-        return
         guard activeDocumentCancellable == nil else { return }
         guard let docStruct = documentStruct else { return }
 
+        Logger.shared.logInfo("Observe changes for note \(title)", category: .document)
         activeDocumentCancellable = documentManager.onDocumentChange(docStruct) { [unowned self] docStruct in
             DispatchQueue.main.async {
                 // reload self
+                guard self.version < docStruct.version else {
+                    //                Logger.shared.logDebug("BeamNote \(self.title) observer skipped version \(docStruct.version) (must be greater than current \(self.version))")
+                    return
+                }
+
                 changePropagationEnabled = false
                 defer {
                     changePropagationEnabled = true
@@ -139,11 +155,11 @@ class BeamNote: BeamElement {
 
                 self.title = newSelf.title
                 self.type = newSelf.type
-                self.outLinks = newSelf.outLinks
                 self.searchQueries = newSelf.searchQueries
                 self.visitedSearchResults = newSelf.visitedSearchResults
                 self.browsingSessions = newSelf.browsingSessions
-
+                self.version = docStruct.version
+                self.savedVersion = self.version
                 recursiveUpdate(other: newSelf)
             }
         }
@@ -168,50 +184,62 @@ class BeamNote: BeamElement {
     }
 
     func save(documentManager: DocumentManager, completion: ((Result<Bool, Error>) -> Void)? = nil) {
+        guard version == savedVersion else {
+            Logger.shared.logError("Still wating for the result from the last save [\(title) {\(id)} - saved version \(savedVersion) / current \(version)]", category: .document)
+            completion?(.failure(BeamNoteError.saveAlreadyRunning))
+            return
+        }
         guard let documentStruct = documentStruct else {
             Logger.shared.logError("Unable to find active document struct [\(title) {\(id)}]", category: .document)
-            completion?(.success(false))
+            completion?(.failure(BeamNoteError.unableToCreateDocumentStruct))
             return
         }
 
-        Logger.shared.logDebug("BeamNote wants to save: \(title)", category: .document)
-        documentManager.saveDocument(documentStruct) { result in
+        Logger.shared.logInfo("BeamNote wants to save: \(title)", category: .document)
+        let newDoc = documentManager.saveDocument(documentStruct, completion: { [weak self] result in
+            if let self = self {
+                switch result {
+                case .success(true):
+                    self.savedVersion = self.version
+                    self.pendingSave = 0
+
+                case .failure(BeamNoteError.saveAlreadyRunning):
+                    self.pendingSave += 1
+
+                default:
+                    self.version = self.savedVersion
+                    Logger.shared.logError("Saving note \(self.title) failed", category: .document)
+                    if self.pendingSave > 0 {
+                        Logger.shared.logDebug("Trying again: Saving note \(self.title) as there were \(self.pendingSave) pending save operations", category: .document)
+                        self.save(documentManager: documentManager, completion: completion)
+                    }
+                }
+            }
             completion?(result)
-        }
+        })
+        version = newDoc.version
     }
 
     var isTodaysNote: Bool { (type == .journal) && (self === AppDelegate.main.data.todaysNote) }
 
-    func addLinkedReference(_ reference: NoteReference) {
+    func addReference(_ reference: NoteReference) {
         // don't add it twice
-        guard !linkedReferences.contains(reference) else { return }
-        linkedReferences.append(reference)
+        guard !references.contains(reference) else { return }
+        references.append(reference)
     }
 
-    func removeLinkedReference(_ reference: NoteReference) {
-        linkedReferences.removeAll(where: { ref -> Bool in
+    func removeReference(_ reference: NoteReference) {
+        references.removeAll(where: { ref -> Bool in
             ref == reference
         })
     }
 
-    func addUnlinkedReference(_ reference: NoteReference) {
-        // don't add it twice
-        guard !unlinkedReferences.contains(reference) else { return }
-        unlinkedReferences.append(reference)
-    }
-
-    func removeUnlinkedReference(_ reference: NoteReference) {
-        unlinkedReferences.removeAll(where: { ref -> Bool in
-            ref == reference
-        })
-    }
-
-    func removeAllUnlinkedReferences() {
-        unlinkedReferences = []
+    func removeAllReferences() {
+        references = []
     }
 
     static private func getFetchedNote(_ title: String) -> BeamNote? {
-        return Self.fetchedNotes[title]?.ref
+        return Self.fetchedNotes[title.lowercased()]?.ref
     }
 
     private func getFetchedNote(_ title: String) -> BeamNote? {
@@ -221,6 +249,8 @@ class BeamNote: BeamElement {
     private static func instanciateNote(_ documentManager: DocumentManager, _ documentStruct: DocumentStruct, keepInMemory: Bool = true) throws -> BeamNote {
         let decoder = JSONDecoder()
         let note = try decoder.decode(BeamNote.self, from: documentStruct.data)
+        note.version = documentStruct.version
+        note.savedVersion = note.version
         note.updateDate = documentStruct.updatedAt
         if keepInMemory {
             appendToFetchedNotes(note)
@@ -235,7 +265,7 @@ class BeamNote: BeamElement {
         }
 
         // Is the note in the document store?
-        guard let doc = documentManager.loadDocumentByTitle(title: title) else {
+        guard let doc = documentManager.loadDocumentByTitle(title: title.lowercased()) else {
             return nil
         }
 
@@ -273,9 +303,12 @@ class BeamNote: BeamElement {
         return note
     }
 
+    var pendingSave: Int = 0
+
     static func appendToFetchedNotes(_ note: BeamNote) {
-        fetchedNotes[note.title] = WeakReference<BeamNote>(note)
+        fetchedNotes[note.title.lowercased()] = WeakReference<BeamNote>(note)
         fetchedNotesCancellables.removeValue(forKey: note.title)
+
         fetchedNotesCancellables[note.title] =
             note.$changed
             .dropFirst(1)
@@ -285,14 +318,11 @@ class BeamNote: BeamElement {
             .receive(on: DispatchQueue.main)
             .sink { [weak note] change in
                 guard let note = note else { return }
-                if change?.1 == .text {
-                    requestLinkDetection()
-                }
-                AppDelegate.main.data.noteAutoSaveService.addNoteToSave(note)
+                AppDelegate.main.data.noteAutoSaveService.addNoteToSave(note, change?.1 == .text)
             }
         note.observeDocumentChange(documentManager: AppDelegate.main.data.documentManager)
 
-        fetchedNotes[note.title] = WeakReference(note)
+        fetchedNotes[note.title.lowercased()] = WeakReference(note)
     }
 
     static func clearCancellables() {
@@ -324,22 +354,30 @@ class BeamNote: BeamElement {
         fetchedNotes.removeValue(forKey: note)
     }
 
+    func isEntireNoteEmpty() -> Bool {
+        guard let child = children.first,
+              child.text.isEmpty && children.count == 1 else {
+            return false
+        }
+        return true
+    }
+
     static var linkDetectionQueue = DispatchQueue(label: "LinkDetector")
     static var linkDetectionRunning = false
-    static func requestLinkDetection() {
+    static func requestLinkDetection(for noteTitled: String? = nil) {
         guard !linkDetectionRunning else { return }
         linkDetectionRunning = true
 
         linkDetectionQueue.async {
-            detectLinks()
+            detectLinks(for: noteTitled)
             DispatchQueue.main.async {
                 linkDetectionRunning = false
             }
         }
     }
 
-    static func detectLinks(in noteName: String, to allNotes: [String], with documentManager: DocumentManager) {
-        guard let doc = documentManager.loadDocByTitleInBg(title: noteName) else {
+    static func detectLinks(in noteTitle: String, to allNotes: [String], with documentManager: DocumentManager) {
+        guard let doc = documentManager.loadDocByTitleInBg(title: noteTitle.lowercased()) else {
             return
         }
 
@@ -356,22 +394,22 @@ class BeamNote: BeamElement {
             let brokenRefs = note.getBrokenUnlinkedReferences(documentManager, allNotes)
 
             // Detect UnLinked Notes
-            let unlinks = note.getDeepUnlinkedReferences(noteName, allNotes)
+            let unlinks = note.getDeepUnlinkedReferences(noteTitle, allNotes)
             DispatchQueue.main.async {
-                let note = BeamNote.fetch(documentManager, title: noteName)
+                let note = BeamNote.fetch(documentManager, title: noteTitle)
 
                 for brokenLink in brokenLinks {
-                    note?.removeLinkedReference(brokenLink)
+                    note?.removeReference(brokenLink)
                 }
 
                 for brokenRef in brokenRefs {
-                    note?.removeUnlinkedReference(brokenRef)
+                    note?.removeReference(brokenRef)
                 }
 
                 for (name, refs) in unlinks {
                     let referencedNote = BeamNote.fetch(documentManager, title: name)
                     for ref in refs {
-                        referencedNote?.addUnlinkedReference(ref)
+                        referencedNote?.addReference(ref)
                     }
                 }
             }
@@ -380,12 +418,13 @@ class BeamNote: BeamElement {
         }
     }
 
-    static func detectLinks() {
+    static func detectLinks(for noteTitled: String? = nil) {
         let documentManager = DocumentManager()
-        let allTitles = documentManager.allDocumentsTitles()
+        let allNotes = documentManager.allDocumentsTitles()
+        let allTitles = noteTitled == nil ? allNotes : [noteTitled!]
         Logger.shared.logInfo("Detect links for \(allTitles.count) notes", category: .document)
 
-        for title in allTitles {
+        for title in allNotes {
             detectLinks(in: title, to: allTitles, with: documentManager)
         }
     }
@@ -393,10 +432,10 @@ class BeamNote: BeamElement {
     func getBrokenLinkedReferences(_ documentManager: DocumentManager, _ allNotes: [String]) -> [NoteReference] {
         var broken = [NoteReference]()
         var notes = [String: BeamNote]()
-        for link in linkedReferences {
+        for link in references {
             guard let note: BeamNote = {
-                notes[link.noteName] ?? {
-                    guard let doc = documentManager.loadDocumentByTitle(title: link.noteName) else {
+                notes[link.noteTitle] ?? {
+                    guard let doc = documentManager.loadDocumentByTitle(title: link.noteTitle.lowercased()) else {
                         return nil
                     }
 
@@ -414,7 +453,7 @@ class BeamNote: BeamElement {
             }
 
             guard let element = note.findElement(link.elementID),
-                  element.text.internalLinks.contains(where: { range -> Bool in  range.string == title })
+                  element.hasLinkToNote(named: title)
             else { broken.append(link); continue }
         }
 
@@ -424,10 +463,10 @@ class BeamNote: BeamElement {
     func getBrokenUnlinkedReferences(_ documentManager: DocumentManager, _ allNotes: [String]) -> [NoteReference] {
         var broken = [NoteReference]()
         var notes = [String: BeamNote]()
-        for ref in unlinkedReferences {
+        for ref in references {
             guard let note: BeamNote = {
-                notes[ref.noteName] ?? {
-                    guard let doc = documentManager.loadDocumentByTitle(title: ref.noteName) else {
+                notes[ref.noteTitle] ?? {
+                    guard let doc = documentManager.loadDocumentByTitle(title: ref.noteTitle.lowercased()) else {
                         return nil
                     }
 
@@ -505,3 +544,5 @@ class BeamNote: BeamElement {
         lock.writeUnlock()
     }
 }
+
+// swiftlint:enable file_length

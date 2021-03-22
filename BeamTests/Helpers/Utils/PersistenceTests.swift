@@ -7,12 +7,17 @@ import Combine
 
 @testable import Beam
 class PersistenceTests: QuickSpec {
-    // swiftlint:disable:next function_body_length
     override func spec() {
         let email = "foobar"
         it("saves email") {
             Persistence.Authentication.email = email
             expect(Persistence.Authentication.email).to(equal(email))
+        }
+
+        let text = String.randomTitle()
+        it("saves privateKey") {
+            Persistence.Encryption.privateKey = text
+            expect(Persistence.Encryption.privateKey) == text
         }
     }
 }

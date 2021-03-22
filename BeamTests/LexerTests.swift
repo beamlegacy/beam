@@ -39,7 +39,7 @@ class LexerTests: XCTestCase {
 
         for e in results {
             let token = lexer.nextToken()
-//            print("new token: \(token)")
+//            Logger.shared.logDebug("new token: \(token)")
             XCTAssertEqual(e.0, token.string)
             XCTAssertEqual(e.1, token.type)
         }
@@ -70,7 +70,7 @@ class LexerTests: XCTestCase {
 
         for e in results {
             let token = lexer.nextToken()
-//            print("new token: \(token)")
+//            Logger.shared.logDebug("new token: \(token)")
             XCTAssertEqual(e.0, token.string)
             XCTAssertEqual(e.1, token.type)
         }
@@ -101,7 +101,7 @@ class LexerTests: XCTestCase {
 
         for e in results {
             let token = lexer.nextToken()
-//            print("new token: \(token)")
+//            Logger.shared.logDebug("new token: \(token)")
             XCTAssertEqual(e.0, token.string)
             XCTAssertEqual(e.1, token.type)
         }
@@ -119,7 +119,7 @@ class LexerTests: XCTestCase {
 
         for e in results {
             let token = lexer.nextToken()
-//            print("new token: \(token)")
+//            Logger.shared.logDebug("new token: \(token)")
             XCTAssertEqual(e.0, token.string)
             XCTAssertEqual(e.1, token.type)
         }
@@ -136,7 +136,7 @@ class LexerTests: XCTestCase {
 
         for e in results {
             let token = lexer.nextToken()
-//            print("new token: \(token)")
+//            Logger.shared.logDebug("new token: \(token)")
             XCTAssertEqual(e.0, token.string)
             XCTAssertEqual(e.1, token.type)
         }
@@ -154,7 +154,7 @@ class LexerTests: XCTestCase {
 
         for e in results {
             let token = lexer.nextToken()
-//            print("new token: \(token)")
+//            Logger.shared.logDebug("new token: \(token)")
             XCTAssertEqual(e.0, token.string)
             XCTAssertEqual(e.1, token.type)
         }
