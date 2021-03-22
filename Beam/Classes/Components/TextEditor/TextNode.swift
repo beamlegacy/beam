@@ -221,8 +221,8 @@ public class TextNode: Widget {
 
         super.init(parent: parent)
 
-        addDisclosureLayer(at: NSPoint(x: 14, y: isHeader ? firstLineBaseline - 8 : firstLineBaseline - 13))
-        addBulletPointLayer(at: NSPoint(x: 14, y: isHeader ? firstLineBaseline - 8 : firstLineBaseline - 13))
+        addDisclosureLayer(at: NSPoint(x: 14, y: isHeader ? firstLineBaseline - 8 : firstLineBaseline - 11))
+        addBulletPointLayer(at: NSPoint(x: 14, y: isHeader ? firstLineBaseline - 8 : firstLineBaseline - 11))
 
         element.$children
             .sink { [unowned self] elements in
@@ -230,6 +230,7 @@ public class TextNode: Widget {
             }.store(in: &scope)
 
         createActionLayer()
+        createIndentLayer()
 
         subscribeToElement(element)
 
@@ -251,6 +252,7 @@ public class TextNode: Widget {
             }.store(in: &scope)
 
         createActionLayer()
+        createIndentLayer()
 
         subscribeToElement(element)
 
@@ -316,6 +318,7 @@ public class TextNode: Widget {
     }
 
     override func updateChildrenLayout() {
+        updateIndentLayer()
         var pos = NSPoint(x: childInset, y: self.contentsFrame.height)
 
         for c in children {
@@ -323,7 +326,6 @@ public class TextNode: Widget {
             childSize.width = frame.width - childInset
             let childFrame = NSRect(origin: pos, size: childSize)
             c.setLayout(childFrame)
-
             pos.y += childSize.height
         }
 
@@ -334,6 +336,21 @@ public class TextNode: Widget {
            lastCommand != .decreaseIndentation || editor.isResizing {
             updateActionLayer()
         }
+    }
+
+    func createIndentLayer() {
+        let indentLayer = CALayer()
+        indentLayer.backgroundColor = NSColor.editorIndentBackgroundColor.cgColor
+        indentLayer.enableAnimations = false
+        addLayer(Layer(name: "indentLayer", layer: indentLayer))
+        updateIndentLayer()
+    }
+
+    func updateIndentLayer() {
+        guard let indentLayer = layers["indentLayer"] else { return }
+        let y = firstLineHeight + 8
+        indentLayer.frame = NSRect(x: childInset - 1.5, y: y - 5, width: 1, height: frame.height - y - 5)
+        indentLayer.layer.isHidden = children.isEmpty || !open
     }
 
     func invalidateText() {
@@ -357,6 +374,7 @@ public class TextNode: Widget {
     func addDisclosureLayer(at point: NSPoint) {
         let disclosureLayer = ChevronButton("disclosure", open: open, changed: { [unowned self] value in
             self.open = value
+            layers["indentLayer"]?.layer.isHidden = !value
         })
         disclosureLayer.layer.isHidden = true
         addLayer(disclosureLayer, origin: point, global: false)
@@ -384,21 +402,10 @@ public class TextNode: Widget {
     func drawText(in context: CGContext) {
         // Draw the text:
         context.saveGState()
-        if !children.isEmpty {
-            if showDisclosureButton {
-                context.saveGState()
-                if showIdentationLine {
-                    context.setFillColor(NSColor.editorTextRectangleBackgroundColor.cgColor)
-                    let y = contentsFrame.height
-                    let r = NSRect(x: 5, y: y + 3, width: 1, height: currentFrameInDocument.height - y - 6)
-                    context.fill(r)
-                }
-                context.restoreGState()
-            }
-        }
 
         guard let bulletLayer = self.layers["bullet"] else { return }
         guard let disclosureLayer = self.layers["disclosure"] as? ChevronButton else { return }
+
         if showDisclosureButton {
             bulletLayer.layer.isHidden = true
             disclosureLayer.layer.isHidden = false
@@ -501,10 +508,11 @@ public class TextNode: Widget {
     }
 
     func updateActionLayer() {
-        CATransaction.disableAnimations {
-            let actionLayerYPosition = isHeader ? (contentsFrame.height / 2) - actionLayerFrame.height : 0
-            actionLayer?.frame = CGRect(x: (availableWidth - actionLayerFrame.width) + actionLayerFrame.minX, y: actionLayerYPosition, width: actionLayerFrame.width, height: actionLayerFrame.height)
-        }
+        let actionLayerYPosition = isHeader ? (contentsFrame.height / 2) - actionLayerFrame.height : 0
+        CATransaction.begin()
+        CATransaction.setValue(kCFBooleanTrue, forKey: kCATransactionDisableActions)
+            actionLayer?.frame = CGRect(x: availableWidth, y: actionLayerYPosition, width: actionLayerFrame.width, height: actionLayerFrame.height)
+        CATransaction.commit()
     }
 
     // MARK: - Methods TextNode
