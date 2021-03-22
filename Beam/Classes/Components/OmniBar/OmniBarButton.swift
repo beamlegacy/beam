@@ -30,6 +30,11 @@ struct OmniBarButton: View {
         }
         .accessibility(identifier: accessibilityId)
         .buttonStyle(RoundRectButtonStyle(size: size))
+        .frame(width: 26, height: 32)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            action()
+        }
         .onHover { h in
             self.isHovering = h
         }
