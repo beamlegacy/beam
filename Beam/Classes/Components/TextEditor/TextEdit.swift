@@ -793,7 +793,11 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         unmarkText()
         let range = replacementRange.lowerBound..<replacementRange.upperBound
         // swiftlint:disable:next force_cast
-        insertText(string: string as! String, replacementRange: range)
+        if let str = string as? String {
+            insertText(string: str, replacementRange: range)
+        } else if let str = string as? NSAttributedString {
+            insertText(string: str.string, replacementRange: range)
+        }
     }
 
     /* The receiver inserts string replacing the content specified by replacementRange. string can be either an NSString or NSAttributedString instance. selectedRange specifies the selection inside the string being inserted; hence, the location is relative to the beginning of string. When string is an NSString, the receiver is expected to render the marked text with distinguishing appearance (i.e. NSTextView renders with -markedTextAttributes).
@@ -801,8 +805,11 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     public func setMarkedText(_ string: Any, selectedRange: NSRange, replacementRange: NSRange) {
         //        Logger.shared.logDebug("setMarkedText \(string) at \(replacementRange) with selection \(selectedRange)")
         // swiftlint:disable:next force_cast
-        let str = string as! String
-        setMarkedText(string: str, selectedRange: selectedTextRange.lowerBound..<selectedTextRange.upperBound, replacementRange: replacementRange.lowerBound..<replacementRange.upperBound)
+        if let str = string as? String {
+            setMarkedText(string: str, selectedRange: selectedTextRange.lowerBound..<selectedTextRange.upperBound, replacementRange: replacementRange.lowerBound..<replacementRange.upperBound)
+        } else if let str = string as? NSAttributedString {
+            setMarkedText(string: str.string, selectedRange: selectedTextRange.lowerBound..<selectedTextRange.upperBound, replacementRange: replacementRange.lowerBound..<replacementRange.upperBound)
+        }
     }
 
     /* Returns the selection range. The valid location is from 0 to the document length.
