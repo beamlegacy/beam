@@ -307,14 +307,14 @@ extension BeamText {
         return attributes.compactMap({ $0.isLink ? nil : $0 })
     }
 
-    func hasLinkToNote(named noteName: String) -> Bool {
+    func hasLinkToNote(named noteTitle: String) -> Bool {
         internalLinks.contains(where: { range -> Bool in
-            range.attributes.contains(.internalLink(noteName))
+            range.attributes.contains(.internalLink(noteTitle))
         })
     }
 
-    func hasReferenceToNote(named noteName: String) -> Bool {
-        text.contains(noteName)
+    func hasReferenceToNote(titled noteTitle: String) -> Bool {
+        text.contains(noteTitle)
     }
 
 }

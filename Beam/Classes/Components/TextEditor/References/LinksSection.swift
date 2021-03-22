@@ -95,14 +95,14 @@ class LinksSection: Widget {
         var toRemove = Set<RefNoteTitle>(titles.values)
 
         for noteReference in links {
-            let noteName = noteReference.noteName
+            let noteTitle = noteReference.noteTitle
             guard let breadCrumb = root?.getBreadCrumb(for: noteReference) else { continue }
 
             // Prepare title children:
-            guard let refTitleWidget = try? titles[noteName] ?? RefNoteTitle(parent: self, noteName: noteName, actionTitle: "Link", action: {
-                self.linkAllReferencesFromNote(named: noteName)
+            guard let refTitleWidget = try? titles[noteTitle] ?? RefNoteTitle(parent: self, noteTitle: noteTitle, actionTitle: "Link", action: {
+                self.linkAllReferencesFromNote(named: noteTitle)
             }) else { continue }
-            newrefs[noteName] = refTitleWidget
+            newrefs[noteTitle] = refTitleWidget
             toRemove.remove(refTitleWidget)
 
             // now attach bread crumbs to the titles we just refreshed
@@ -127,7 +127,7 @@ class LinksSection: Widget {
         updateHeading(validRefs)
     }
 
-    func linkAllReferencesFromNote(named noteName: String) {
+    func linkAllReferencesFromNote(named noteTitle: String) {
         // TODO
     }
 
@@ -146,7 +146,7 @@ class LinksSection: Widget {
 
     func shouldHandleReference(rootNote: String, text: BeamText) -> Bool {
         let linksToNote = text.hasLinkToNote(named: rootNote)
-        let referencesToNote = text.hasReferenceToNote(named: rootNote)
+        let referencesToNote = text.hasReferenceToNote(titled: rootNote)
 
         switch mode {
         case .links:
@@ -171,7 +171,7 @@ class LinksSection: Widget {
                     guard let breadcrumb = child as? BreadCrumb else { return }
                     breadcrumb.proxy.text.makeLinkToNoteExplicit(forNote: rootNote.title)
 
-                    let reference = NoteReference(noteName: breadcrumb.proxy.note!.title, elementID: breadcrumb.proxy.proxy.id)
+                    let reference = NoteReference(noteTitle: breadcrumb.proxy.note!.title, elementID: breadcrumb.proxy.proxy.id)
                     self.note.addReference(reference)
                 }
             }, hovered: {[weak self] isHover in

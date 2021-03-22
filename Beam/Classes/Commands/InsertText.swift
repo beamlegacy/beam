@@ -12,27 +12,26 @@ class InsertText: TextEditorCommand {
 
     var text: BeamText
     var elementId: UUID
-    var noteName: String
+    var noteTitle: String
     var cursorPosition: Int
-    var newCursorPosition: Int = 0
     var oldText: BeamText?
 
-    init(text: BeamText, in elementId: UUID, of noteName: String, at cursorPosition: Int) {
+    init(text: BeamText, in elementId: UUID, of noteTitle: String, at cursorPosition: Int) {
         self.text = text
         self.elementId = elementId
-        self.noteName = noteName
+        self.noteTitle = noteTitle
         self.cursorPosition = cursorPosition
-        super.init(name: InsertText.name)
+        super.init(name: Self.name)
         saveOldText()
     }
 
     private func saveOldText() {
-        guard let elementInstance = getElement(for: noteName, and: elementId) else { return }
+        guard let elementInstance = getElement(for: noteTitle, and: elementId) else { return }
         self.oldText = elementInstance.element.text
     }
 
     override func run(context: Widget?) -> Bool {
-        guard let elementInstance = getElement(for: noteName, and: elementId) else { return false }
+        guard let elementInstance = getElement(for: noteTitle, and: elementId) else { return false }
         elementInstance.element.text.replaceSubrange(cursorPosition..<cursorPosition, with: text)
 
         // Update the UI if possible:
@@ -40,15 +39,12 @@ class InsertText: TextEditorCommand {
               let root = context.root,
               let node = context.nodeFor(elementInstance.element)
         else { return true }
-        newCursorPosition = text.text == "\n" ? node.position(after: cursorPosition) : cursorPosition + text.count
-        root.focus(widget: node, cursorPosition: newCursorPosition)
         root.editor.detectFormatterType()
-        root.cancelSelection()
         return true
     }
 
     override func undo(context: Widget?) -> Bool {
-        guard let elementInstance = getElement(for: noteName, and: elementId),
+        guard let elementInstance = getElement(for: noteTitle, and: elementId),
               let oldText = self.oldText else { return false }
         elementInstance.element.text.replaceSubrange(elementInstance.element.text.wholeRange, with: oldText)
 
@@ -64,15 +60,22 @@ class InsertText: TextEditorCommand {
 
     override func coalesce(command: Command<Widget>) -> Bool {
         guard let insertText = command as? InsertText,
-              insertText.cursorPosition == newCursorPosition,
+              insertText.cursorPosition == cursorPosition + text.count,
               insertText.text.text != "\n",
               insertText.elementId == elementId,
-              insertText.noteName == noteName,
-              let elementInstance = getElement(for: noteName, and: elementId),
-              let oldText = self.oldText else { return false }
+              insertText.noteTitle == noteTitle
+              else { return false }
 
         self.text.append(insertText.text)
-        elementInstance.element.text.replaceSubrange(elementInstance.element.text.wholeRange, with: oldText)
         return true
+    }
+}
+
+extension CommandManager where Context == Widget {
+    @discardableResult
+    func insertText(_ text: BeamText, in node: TextNode, at position: Int) -> Bool {
+        guard let title = node.elementNoteTitle else { return false }
+        let cmd = InsertText(text: text, in: node.elementId, of: title, at: position)
+        return run(command: cmd, on: node)
     }
 }

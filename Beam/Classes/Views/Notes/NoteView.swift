@@ -30,8 +30,8 @@ struct NoteView: View {
                     if urlSchemes.contains(url.scheme) {
                         state.createTab(withURL: url, originalQuery: state.currentNote?.title ?? "")
                     } else {
-                        if let noteName = url.absoluteString.removingPercentEncoding {
-                            state.navigateToNote(named: noteName)
+                        if let noteTitle = url.absoluteString.removingPercentEncoding {
+                            state.navigateToNote(named: noteTitle)
                         }
                     }
                 },
@@ -57,8 +57,8 @@ struct NoteView: View {
                     if urlSchemes.contains(url.scheme) {
                         state.createTab(withURL: url, originalQuery: state.currentNote?.title ?? "")
                     } else {
-                        if let noteName = url.absoluteString.removingPercentEncoding {
-                            _ = state.navigateToNote(named: noteName)
+                        if let noteTitle = url.absoluteString.removingPercentEncoding {
+                            _ = state.navigateToNote(named: noteTitle)
                         }
                     }
                 },

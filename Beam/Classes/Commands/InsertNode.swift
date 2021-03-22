@@ -11,23 +11,23 @@ class InsertNode: TextEditorCommand {
     static let name: String = "InsertNode"
 
     var elementId: UUID
-    var noteName: String
+    var noteTitle: String
     let cursorPosition: Int?
     var newElementId: UUID?
     var text: String?
     var data: Data?
     var insertAsChild: Bool
 
-    init(in elementId: UUID, of noteName: String, with cursorPosition: Int?, asChild: Bool) {
+    init(in elementId: UUID, of noteTitle: String, with cursorPosition: Int?, asChild: Bool) {
         self.elementId = elementId
-        self.noteName = noteName
+        self.noteTitle = noteTitle
         self.cursorPosition = cursorPosition
         self.insertAsChild = asChild
-        super.init(name: InsertNode.name)
+        super.init(name: Self.name)
     }
 
     override func run(context: Widget?) -> Bool {
-        guard let elementInstance = getElement(for: noteName, and: elementId) else { return false }
+        guard let elementInstance = getElement(for: noteTitle, and: elementId) else { return false }
 
         let element = decode(data: data) ?? BeamElement()
         if let cursorPosition = self.cursorPosition {
@@ -55,8 +55,8 @@ class InsertNode: TextEditorCommand {
 
     override func undo(context: Widget?) -> Bool {
         guard let newElementId = self.newElementId,
-              let newElementInstance = getElement(for: noteName, and: newElementId),
-              let elementInstance = getElement(for: noteName, and: elementId)
+              let newElementInstance = getElement(for: noteTitle, and: newElementId),
+              let elementInstance = getElement(for: noteTitle, and: elementId)
         else { return false }
 
         for c in newElementInstance.element.children {

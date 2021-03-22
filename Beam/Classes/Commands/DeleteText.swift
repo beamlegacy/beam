@@ -11,82 +11,71 @@ class DeleteText: TextEditorCommand {
     static let name: String = "DeleteText"
 
     var elementId: UUID
-    var noteName: String
-    var cursorPosition: Int
+    var noteTitle: String
     var range: Range<Int>
-    let backward: Bool
-    var oldText: BeamText?
+    var oldText = BeamText()
 
-    init(in elementId: UUID, of noteName: String, at cursorPosition: Int, for range: Range<Int>, backward: Bool = true) {
+    var cancelSelection: CancelSelection
+    var focusElement: FocusElement
+
+    init(in elementId: UUID, of noteTitle: String, for range: Range<Int>) {
         self.elementId = elementId
-        self.noteName = noteName
-        self.cursorPosition = cursorPosition
+        self.noteTitle = noteTitle
         self.range = range
-        self.backward = backward
-        super.init(name: DeleteText.name)
-        saveOldText()
-    }
 
-    private func saveOldText() {
-        guard let elementInstance = getElement(for: noteName, and: elementId) else { return }
-        self.oldText = elementInstance.element.text
+        cancelSelection = CancelSelection()
+        focusElement = FocusElement(element: elementId, from: noteTitle, at: range.lowerBound)
+
+        super.init(name: Self.name)
     }
 
     override func run(context: Widget?) -> Bool {
-        guard let elementInstance = getElement(for: noteName, and: elementId) else { return false }
+        guard let elementInstance = getElement(for: noteTitle, and: elementId) else { return false }
 
-        var newPos: Int
-        if backward {
-            newPos = elementInstance.element.text.position(before: range.lowerBound)
-        } else {
-            newPos = range.lowerBound
-        }
-        let count = range.count == 0 ? 1 : range.count + 1
-        elementInstance.element.text.remove(count: count, at: newPos)
+        self.oldText = elementInstance.element.text.extract(range: range)
+        elementInstance.element.text.remove(count: range.count, at: range.lowerBound)
 
-        guard let context = context,
-              let root = context.root,
-              let node = context.nodeFor(elementInstance.element) else { return false }
+        _ = cancelSelection.run(context: context)
+        _ = focusElement.run(context: context)
 
-        root.focus(widget: node, cursorPosition: newPos)
-        root.editor.detectFormatterType()
-        root.cancelSelection()
         return true
     }
 
     override func undo(context: Widget?) -> Bool {
-        guard let elementInstance = getElement(for: noteName, and: elementId),
-              let oldText = self.oldText
+        guard let elementInstance = getElement(for: noteTitle, and: elementId)
         else { return false }
 
-        elementInstance.element.text.replaceSubrange(elementInstance.element.text.wholeRange, with: oldText)
+        elementInstance.element.text.insert(oldText, at: range.lowerBound)
 
-        guard let context = context,
-              let root = context.root,
-              let node = context.nodeFor(elementInstance.element)
-              else { return false }
+        _ = focusElement.undo(context: context)
+        _ = cancelSelection.undo(context: context)
 
-        root.focus(widget: node, cursorPosition: range.upperBound)
-        root.state.selectedTextRange = range.lowerBound - 1..<range.upperBound
-        root.editor.detectFormatterType()
         return true
     }
 
     override func coalesce(command: Command<Widget>) -> Bool {
         guard let deleteText = command as? DeleteText,
-              deleteText.backward == backward,
               deleteText.elementId == elementId,
-              let elementInstance = getElement(for: noteName, and: elementId),
-              let oldText = self.oldText else { return false }
+              deleteText.noteTitle == noteTitle,
+              (deleteText.range.upperBound == range.lowerBound || deleteText.range.lowerBound == range.lowerBound)
+        else { return false }
 
-        if backward && deleteText.range.lowerBound == range.lowerBound - 1 {
-            self.range = deleteText.range.lowerBound..<range.upperBound
-        } else if range.lowerBound == deleteText.range.lowerBound {
-            self.range = range.lowerBound..<range.upperBound + 1
+        if range.lowerBound == deleteText.range.lowerBound {
+            self.range = range.lowerBound ..< (range.lowerBound + range.count + deleteText.range.count)
+            oldText.append(deleteText.oldText)
         } else {
-            return false
+            self.range = deleteText.range.lowerBound ..< (range.lowerBound + range.count + deleteText.range.count)
+            oldText.insert(deleteText.oldText, at: 0)
         }
-        elementInstance.element.text.replaceSubrange(elementInstance.element.text.wholeRange, with: oldText)
         return true
+    }
+}
+
+extension CommandManager where Context == Widget {
+    @discardableResult
+    func deleteText(in node: TextNode, for range: Range<Int>) -> Bool {
+        guard let title = node.elementNoteTitle else { return false }
+        let cmd = DeleteText(in: node.elementId, of: title, for: range)
+        return run(command: cmd, on: node)
     }
 }

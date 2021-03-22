@@ -128,7 +128,7 @@ class CommandManagerTests: XCTestCase {
             cmdTest = ""
             return true
         }, coalesce: { (root) -> Bool in
-            return true
+            return false
         }, on: nil)
 
         cmdManager.run(name: "InputText", run: { (_) -> Bool in
@@ -138,7 +138,7 @@ class CommandManagerTests: XCTestCase {
             cmdTest = "Hello"
             return true
         }, coalesce: { (root) -> Bool in
-            return true
+            return false
         }, on: nil)
 
         cmdManager.endGroup()

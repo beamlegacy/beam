@@ -18,8 +18,8 @@ class TextEditorCommand: Command<Widget> {
         super.init(name: name)
     }
 
-    func getElement(for noteName: String, and id: UUID) -> BeamElementInstance? {
-        guard let note = BeamNote.fetch(AppDelegate.main.documentManager, title: noteName),
+    func getElement(for noteTitle: String, and id: UUID) -> BeamElementInstance? {
+        guard let note = BeamNote.fetch(AppDelegate.main.documentManager, title: noteTitle),
               let element = note.findElement(id) else { return nil }
         return BeamElementInstance(note: note, element: element)
     }

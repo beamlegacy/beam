@@ -87,8 +87,9 @@ class CommandsTextTests: QuickSpec {
                         - Second bullet
 
                     """
+
                     expect(rootNode.printTree()).to(equal(newEditedTree))
-                    expect(rootNode.cursorPosition).to(equal(0))
+                    expect(rootNode.cursorPosition).to(equal(13))
 
                     for _ in 0..<2 {
                         editor.undo(String("Undo"))
@@ -102,7 +103,7 @@ class CommandsTextTests: QuickSpec {
                     }
 
                     expect(rootNode.printTree()).to(equal(newEditedTree))
-                    expect(rootNode.cursorPosition).to(equal(0))
+                    expect(rootNode.cursorPosition).to(equal(13))
                     BeamNote.clearCancellables()
 
                 }

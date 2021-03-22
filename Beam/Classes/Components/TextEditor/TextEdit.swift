@@ -320,6 +320,9 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
     // This is the root node of what we are editing:
     var rootNode: TextRoot!
+    var cmdManager: CommandManager<Widget> {
+        rootNode.cmdManager
+    }
 
     // This is the node that the user is currently editing. It can be any node in the rootNode tree
     var focusedWidget: Widget? {
@@ -517,9 +520,9 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                 rootNode.decreaseIndentation()
                 return
             }
-            rootNode.eraseSelection()
+            rootNode.cmdManager.deleteText(in: node, for: rootNode.selectedTextRange)
             let insertNode = InsertNode(in: node.elementId, of: noteTitle, with: rootNode.cursorPosition, asChild: node.parent as? BreadCrumb != nil)
-            rootNode.note?.cmdManager.run(command: insertNode, on: rootNode.cmdContext)
+            cmdManager.run(command: insertNode, on: rootNode.cmdContext)
             scrollToCursorAtLayout = true
             cleanPersistentFormatter()
         }
@@ -880,7 +883,8 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         pasteboard.clearContents()
         pasteboard.declareTypes([.string], owner: nil)
         pasteboard.setString(s, forType: .string)
-        rootNode.eraseSelection()
+        guard let node = rootNode.focusedWidget as? TextNode else { return }
+        rootNode.cmdManager.deleteText(in: node, for: rootNode.selectedTextRange)
     }
 
     func buildStringFrom(nodes: [TextNode]) -> NSAttributedString {
@@ -974,7 +978,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                 guard let node = focusedWidget as? TextNode,
                       let noteTitle = node.root?.note?.title else { continue }
                 let insertNode = InsertNode(in: node.element.id, of: noteTitle, with: nil, asChild: false)
-                rootNode.note?.cmdManager.run(command: insertNode, on: rootNode)
+                rootNode.note?.cmdManager.run(command: insertNode, on: rootNode.cmdContext)
                 guard let newNode = focusedWidget as? TextNode else { continue }
                 paste(element.text, in: newNode.element.id, for: noteTitle)
             }
@@ -994,7 +998,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                 guard let node = focusedWidget as? TextNode,
                       let noteTitle = node.root?.note?.title else { continue }
                 let insertNode = InsertNode(in: node.element.id, of: noteTitle, with: nil, asChild: false)
-                rootNode.note?.cmdManager.run(command: insertNode, on: rootNode)
+                rootNode.note?.cmdManager.run(command: insertNode, on: rootNode.cmdContext)
                 guard let newNode = focusedWidget as? TextNode else { continue }
                 let bText = BeamText(text: str, attributes: [])
                 paste(bText, in: newNode.element.id, for: noteTitle)
@@ -1005,24 +1009,24 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             ranges.compactMap { Range($0) }.forEach { range in
                 let linkStr = String(str[range.lowerBound..<range.upperBound])
                 let formatText = FormattingText(in: node.element.id, of: noteTitle, for: nil, with: .link(linkStr), for: range, isActive: false)
-                rootNode.note?.cmdManager.run(command: formatText, on: rootNode)
+                rootNode.note?.cmdManager.run(command: formatText, on: rootNode.cmdContext)
             }
 
             let boldRanges = attributedString.getRangesOfFont(for: .bold)
             for boldRange in boldRanges {
                 let boldText = FormattingText(in: node.element.id, of: noteTitle, for: nil, with: .strong, for: Range(boldRange), isActive: false)
-                rootNode.note?.cmdManager.run(command: boldText, on: rootNode)
+                rootNode.note?.cmdManager.run(command: boldText, on: rootNode.cmdContext)
             }
             let emphasisRanges = attributedString.getRangesOfFont(for: .italic)
             for emphasisRange in emphasisRanges {
                 let emphasisText = FormattingText(in: node.element.id, of: noteTitle, for: nil, with: .emphasis, for: Range(emphasisRange), isActive: false)
-                rootNode.note?.cmdManager.run(command: emphasisText, on: rootNode)
+                rootNode.note?.cmdManager.run(command: emphasisText, on: rootNode.cmdContext)
             }
 
             let linkRanges = attributedString.getLinks()
             for linkRange in linkRanges {
                 let linkText = FormattingText(in: node.element.id, of: noteTitle, for: nil, with: .link(linkRange.key), for: Range(linkRange.value), isActive: false)
-                rootNode.note?.cmdManager.run(command: linkText, on: rootNode)
+                rootNode.note?.cmdManager.run(command: linkText, on: rootNode.cmdContext)
             }
         }
         rootNode.note?.cmdManager.endGroup()
@@ -1041,7 +1045,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                 guard let node = focusedWidget as? TextNode,
                       let noteTitle = node.root?.note?.title else { continue }
                 let insertNode = InsertNode(in: node.element.id, of: noteTitle, with: nil, asChild: false)
-                rootNode.note?.cmdManager.run(command: insertNode, on: rootNode)
+                rootNode.note?.cmdManager.run(command: insertNode, on: rootNode.cmdContext)
                 guard let newNode = focusedWidget as? TextNode else { continue }
                 let bText = BeamText(text: str, attributes: [])
                 paste(bText, in: newNode.element.id, for: noteTitle)
@@ -1052,7 +1056,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             ranges.compactMap { Range($0) }.forEach { range in
                 let linkStr = String(str[range.lowerBound..<range.upperBound])
                 let formatText = FormattingText(in: node.element.id, of: noteTitle, for: nil, with: .link(linkStr), for: range, isActive: false)
-                rootNode.note?.cmdManager.run(command: formatText, on: rootNode)
+                rootNode.note?.cmdManager.run(command: formatText, on: rootNode.cmdContext)
             }
         }
         rootNode.note?.cmdManager.endGroup()
@@ -1060,7 +1064,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
     private func paste(_ text: BeamText, in id: UUID, for noteTitle: String) {
         let insertText = InsertText(text: text, in: id, of: noteTitle, at: 0)
-        rootNode.note?.cmdManager.run(command: insertText, on: rootNode)
+        rootNode.note?.cmdManager.run(command: insertText, on: rootNode.cmdContext)
         scrollToCursorAtLayout = true
     }
 
@@ -1071,7 +1075,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             undoManager.undo()
             return
         }
-        _ = rootNode.note?.cmdManager.undo(context: rootNode)
+        _ = rootNode.note?.cmdManager.undo(context: rootNode.cmdContext)
     }
 
     @IBAction func redo(_ sender: Any) {
