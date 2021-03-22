@@ -7,12 +7,12 @@
 
 import Foundation
 
-func loadJS(from fileName: String) -> String {
+func loadFile(from fileName: String, fileType: String) -> String {
     do {
-        let path = Bundle.main.path(forResource: fileName, ofType: "js")
+        let path = Bundle.main.path(forResource: fileName, ofType: fileType)
         return try String(contentsOfFile: path!, encoding: String.Encoding.utf8)
-    } catch {
+    } catch (let error) {
         //
-        fatalError("Error, couldnt' load '\(fileName)'")
+        fatalError("Error, could not load '\(fileName)': \(error)")
     }
 }
