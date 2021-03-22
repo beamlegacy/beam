@@ -230,12 +230,9 @@ public class TextNode: Widget {
             }.store(in: &scope)
 
         createActionLayer()
+        createIndentLayer()
 
         subscribeToElement(element)
-
-        DispatchQueue.main.async {
-            self.createIndentLayer()
-        }
 
         setAccessibilityLabel("TextNode")
         setAccessibilityRole(.textArea)
@@ -255,12 +252,9 @@ public class TextNode: Widget {
             }.store(in: &scope)
 
         createActionLayer()
+        createIndentLayer()
 
         subscribeToElement(element)
-
-        DispatchQueue.main.async {
-            self.createIndentLayer()
-        }
 
         setAccessibilityLabel("TextNode")
         setAccessibilityRole(.textArea)
