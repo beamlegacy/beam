@@ -29,6 +29,7 @@ class FullScreenWKWebView: WKWebView {
 
 
 // swiftlint:disable:next type_body_length
+
 class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler, Codable, WebPage {
     var id: UUID
 
@@ -65,7 +66,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     @Published var browsingTree: BrowsingTree
     @Published var privateMode = false
 
-    let pointAndShoot: PointAndShoot = PointAndShoot();
+    let pointAndShoot: PointAndShoot = PointAndShoot(config: PointAndShootConfig(native: false, web: false));
 
     var state: BeamState!
 
@@ -340,8 +341,9 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     }
 
     func addJS(source: String, when: WKUserScriptInjectionTime) {
-        let injected = source.replacingOccurrences(of: "__ID__", with: "beam" + self.id.uuidString.replacingOccurrences(of: "-", with: "_"))
-        let script = WKUserScript(source: injected, injectionTime: when, forMainFrameOnly: false)
+        let parameterized = source.replacingOccurrences(of: "__ENABLED__", with: pointAndShoot.config.web ? "true" : "false")
+        let obfuscated = parameterized.replacingOccurrences(of: "__ID__", with: "beam" + self.id.uuidString.replacingOccurrences(of: "-", with: "_"))
+        let script = WKUserScript(source: obfuscated, injectionTime: when, forMainFrameOnly: false)
         self.webView.configuration.userContentController.addUserScript(script)
     }
 
@@ -465,7 +467,6 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     lazy var overrideConsole: String = {
         loadFile(from: "OverrideConsole", fileType: "js")
     }()
-
 
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         let messageBody = message.body as? [String: AnyObject]

@@ -12,17 +12,17 @@ struct SelectionUI {
     var color: Color
 }
 
-struct PointMessage {
-    var area: NSRect
-    var location: NSPoint
-    var data: [String: AnyObject]
-    var type: [String: AnyObject]
+struct PointAndShootConfig {
+    let native: Bool
+    let web: Bool
 }
 
 class PointAndShoot: ObservableObject {
 
-    init() {
+    let config: PointAndShootConfig
 
+    init(config: PointAndShootConfig) {
+        self.config = config
     }
 
     /**
@@ -99,12 +99,17 @@ class PointAndShoot: ObservableObject {
 
     func point(area: NSRect?) {
         self.pointArea = area
-        drawPoint()
+        if (config.native) {
+            drawPoint()
+        }
     }
 
+    // TODO: Observe scroll values instead of requiring them here?
     func shoot(area: NSRect, scrollX: Double, scrollY: Double) {
         self.shootAreas.removeAll()         // TODO: Support multiple shoots
         self.shootAreas.append(area)
-        drawShoot(scrollX: scrollX, scrollY: scrollY)
+        if (config.native) {
+            drawShoot(scrollX: scrollX, scrollY: scrollY)
+        }
     }
 }

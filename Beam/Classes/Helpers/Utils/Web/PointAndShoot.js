@@ -6,6 +6,7 @@
     }
 
     const outlineWidth = 3;
+    const enabled = __ENABLED__ || false
 
     const messages = {
         en: {
@@ -113,7 +114,9 @@
     }
 
     function point(el, x, y) {
-        el.classList.add(pointClass);
+        if (enabled) {
+            el.classList.add(pointClass);
+        }
         pointMessage(el, x, y);
     }
 
@@ -231,37 +234,39 @@
 
     function showPopup(el, x, y) {
         shootMessage(el, x, y);
-        const msg = messages[lang];
-        popup = document.createElement("DIV");
-        popup.id = popupId;
-        popup.classList.add(prefixClass)
-        popup.classList.add(popupClass)
-        newCard = {id: 0, title: "", hint: "- New card"}
-        selectedCard = existingCards.length > 0 ? existingCards[0] : newCard;
-        const value = selectedCard.title;
-        inputTouched = false
-        popup.innerHTML = `
-<button type="button" aria-label="${msg.close}" class="${closeClass}" title="${msg.close}" onclick="hidePopup()">×</button>
-<form action="javascript:submit()">
-  <div class="${cardClass}">
-    <label for="${cardInputId}" class="${labelClass}">${msg.addTo}</label>
-    <div class="${comboClass}">
-      <input class="${inputClass}" id="${cardInputId}" value="${value}" onkeydown="cardKeyDown(event)" oninput="cardInput(event)" autocomplete="off"/>
-      <ul id="proposals" class="${proposalsClass}"></ul>
-    </div>  
-    <button type="button" class="${dropArrowClass}" title="${msg.dropArrow}" onclick="dropDown()">⌄</button>
-    <span class="shortcut hint">⌘↵</span>
-  </div>
-  <div class="${noteClass}">
-    <input class="${inputClass}" placeholder="${msg.addNote}"/>
-  </div>
-</form>
-`;
-        popupAnchor.append(popup);
-        popup.style.left = `${x}px`;
-        const popupTop = window.scrollY + y;
-        popup.style.top = `${popupTop}px`;
-        cardInputEl().focus();
+        if (enabled) {
+            const msg = messages[lang];
+            popup = document.createElement("DIV");
+            popup.id = popupId;
+            popup.classList.add(prefixClass)
+            popup.classList.add(popupClass)
+            newCard = {id: 0, title: "", hint: "- New card"}
+            selectedCard = existingCards.length > 0 ? existingCards[0] : newCard;
+            const value = selectedCard.title;
+            inputTouched = false
+            popup.innerHTML = `
+    <button type="button" aria-label="${msg.close}" class="${closeClass}" title="${msg.close}" onclick="hidePopup()">×</button>
+    <form action="javascript:submit()">
+      <div class="${cardClass}">
+        <label for="${cardInputId}" class="${labelClass}">${msg.addTo}</label>
+        <div class="${comboClass}">
+          <input class="${inputClass}" id="${cardInputId}" value="${value}" onkeydown="cardKeyDown(event)" oninput="cardInput(event)" autocomplete="off"/>
+          <ul id="proposals" class="${proposalsClass}"></ul>
+        </div>  
+        <button type="button" class="${dropArrowClass}" title="${msg.dropArrow}" onclick="dropDown()">⌄</button>
+        <span class="shortcut hint">⌘↵</span>
+      </div>
+      <div class="${noteClass}">
+        <input class="${inputClass}" placeholder="${msg.addNote}"/>
+      </div>
+    </form>
+    `;
+            popupAnchor.append(popup);
+            popup.style.left = `${x}px`;
+            const popupTop = window.scrollY + y;
+            popup.style.top = `${popupTop}px`;
+            cardInputEl().focus();
+        }
     }
 
     function hidePopup() {
@@ -284,18 +289,20 @@
      * Show the if a given was added to a card.
      */
     function showStatus(el) {
-        const msg = messages[lang];
-        status = document.createElement("DIV");
-        el.classList.add(prefixClass);
-        el.classList.add(statusClass);
-        const data = pointed.dataset[datasetKey];
-        const collected = JSON.parse(data);
-        status.innerHTML = `${msg.addedTo} ${collected.title}`;
-        popupAnchor.append(status);
-        const bounds = el.getBoundingClientRect();
-        status.style.left = `${bounds.x}px`;
-        const statusTop = window.scrollY + bounds.bottom + outlineWidth;
-        status.style.top = `${statusTop}px`;
+        if (enabled) {
+            const msg = messages[lang];
+            status = document.createElement("DIV");
+            el.classList.add(prefixClass);
+            el.classList.add(statusClass);
+            const data = pointed.dataset[datasetKey];
+            const collected = JSON.parse(data);
+            status.innerHTML = `${msg.addedTo} ${collected.title}`;
+            popupAnchor.append(status);
+            const bounds = el.getBoundingClientRect();
+            status.style.left = `${bounds.x}px`;
+            const statusTop = window.scrollY + bounds.bottom + outlineWidth;
+            status.style.top = `${statusTop}px`;
+        }
     }
 
     function hideStatus() {
