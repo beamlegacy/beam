@@ -809,12 +809,8 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
      */
     public func selectedRange() -> NSRange {
         var r = NSRange()
-        if selectedTextRange.isEmpty {
-            r = NSRange(location: NSNotFound, length: 0)
-        } else {
             r = NSRange(location: selectedTextRange.lowerBound, length: selectedTextRange.upperBound - selectedTextRange.lowerBound)
-        }
-        //        Logger.shared.logDebug("selectedRange \(r)")
+//        Logger.shared.logDebug("selectedRange \(r)", category: .document)
         return r
     }
 
@@ -827,7 +823,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         } else {
             r = NSRange(location: markedTextRange.lowerBound, length: markedTextRange.upperBound - markedTextRange.lowerBound)
         }
-        //        Logger.shared.logDebug("markedRange \(r)")
+//        Logger.shared.logDebug("markedRange \(r)", category: .document)
         return r
     }
 
@@ -835,18 +831,27 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
      */
     public func attributedSubstring(forProposedRange range: NSRange, actualRange: NSRangePointer?) -> NSAttributedString? {
         //        Logger.shared.logDebug("attributedSubstring for \(range)")
+        guard let node = focusedWidget as? TextNode else {
+//            Logger.shared.logDebug("TextInput.attributedSubstring(range: \(range)) FAILED -> nil", category: .noteEditor)
+            return nil
+        }
+
         if let ptr = actualRange {
             ptr.pointee = range
         }
-        guard let node = focusedWidget as? TextNode else { return nil }
         let str = node.attributedString.attributedSubstring(from: range)
-        Logger.shared.logDebug("TextInput.attributedString(range: \(range), actualRange: \(String(describing: actualRange))) -> \(str)", category: .noteEditor)
+//        Logger.shared.logDebug("TextInput.attributedSubstring(range: \(range), actualRange: \(String(describing: actualRange))) -> \(str)", category: .noteEditor)
         return str
     }
 
     public func attributedString() -> NSAttributedString {
-        guard let node = focusedWidget as? TextNode else { return "".attributed }
-        return node.attributedString
+        guard let node = focusedWidget as? TextNode else {
+//            Logger.shared.logDebug("TextInput.attributedString FAILED", category: .noteEditor)
+            return "".attributed
+        }
+        let str = node.attributedString
+//        Logger.shared.logDebug("TextInput.attributedString -> \"\(str)\"", category: .noteEditor)
+        return str
     }
 
     /* Returns an array of attribute names recognized by the receiver.
