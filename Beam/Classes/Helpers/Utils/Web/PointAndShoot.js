@@ -1,4 +1,10 @@
 (function PointAndShoot() {
+
+    function beamMessage(name, payload) {
+        console.log("Send message", name, payload)
+        window.webkit.messageHandlers[name].postMessage(payload);
+    }
+
     const outlineWidth = 3;
 
     const messages = {
@@ -103,13 +109,7 @@
                 height: boundsInFrame.height,
             },
         };
-        console.log("pointMessage", pointMessage)
-        window.webkit.messageHandlers.beam_point.postMessage(pointMessage);
-    }
-
-    function unpointMessage() {
-        console.log("unpointMessage")
-        window.webkit.messageHandlers.beam_point.postMessage(null);
+        beamMessage("beam_point", pointMessage);
     }
 
     function point(el, x, y) {
@@ -120,7 +120,8 @@
     function unpoint(el) {
         el.classList.remove(pointClass)
         el.style.cursor = ``;
-        unpointMessage();
+        pointed = null
+        beamMessage("beam_point", null);
     }
 
     function removeSelected(selectedIndex, el) {
@@ -326,7 +327,9 @@
             }
         } else {
             hideStatus();
-            unpoint(pointed);
+            if (pointed) {
+                unpoint(pointed);
+            }
         }
     }
 
@@ -350,8 +353,7 @@
                 height: bounds.height,
             },
         };
-        console.log("Sending beam_shoot", shootMessage)
-        window.webkit.messageHandlers.beam_shoot.postMessage(shootMessage);
+        beamMessage("beam_shoot", shootMessage);
     }
 
     /**
@@ -421,31 +423,57 @@
         }
     }
 
-    let onScroll = function (ev) {
-        let scrollWidth = Math.max(
-            document.body.scrollWidth, document.documentElement.scrollWidth,
-            document.body.offsetWidth, document.documentElement.offsetWidth,
-            document.body.clientWidth, document.documentElement.clientWidth
+    function onScroll(_ev) {
+        const body = document.body;
+        const documentEl = document.documentElement;
+        const scrollWidth = Math.max(
+            body.scrollWidth, documentEl.scrollWidth,
+            body.offsetWidth, documentEl.offsetWidth,
+            body.clientWidth, documentEl.clientWidth
         );
-
-        let scrollHeight = Math.max(
-            document.body.scrollHeight, document.documentElement.scrollHeight,
-            document.body.offsetHeight, document.documentElement.offsetHeight,
-            document.body.clientHeight, document.documentElement.clientHeight
+        const scrollHeight = Math.max(
+            body.scrollHeight, documentEl.scrollHeight,
+            body.offsetHeight, documentEl.offsetHeight,
+            body.clientHeight, documentEl.clientHeight
         );
-
-        window.webkit.messageHandlers.beam_onScrolled.postMessage({
+        beamMessage("beam_onScrolled", {
             x: window.scrollX,
             y: window.scrollY,
             width: scrollWidth,
             height: scrollHeight
-        })
-    };
+        });
+    }
 
-    document.addEventListener("keypress", onKeyPress);
+    function onResize(ev) {
+        console.log("resize", ev)
+        beamMessage("beam_resize", {
+            width: window.innerWidth,
+            height: window.innerHeight,
+        })
+    }
+
+    const vv = window.visualViewport
+
+    function onPinch(ev) {
+        console.log("gesturestart", ev)
+        beamMessage("beam_pinch", {
+            offsetTop: vv.offsetTop,
+            pageTop: vv.pageTop,
+            offsetLeft: vv.offsetLeft,
+            pageLeft: vv.pageLeft,
+            width: vv.width,
+            height: vv.height,
+            scale: vv.scale
+        })
+    }
+
+    vv.addEventListener("onresize", onPinch);
+    vv.addEventListener("scroll", onPinch);
+    window.addEventListener("resize", onResize);
     window.addEventListener("mousemove", onMouseMove);
     window.addEventListener("click", onClick);
     window.addEventListener('scroll', onScroll);
-//window.addEventListener("touchstart", touchstart, false);
-//window.addEventListener("touchend", touchend, false);
+    document.addEventListener("keypress", onKeyPress);
+    // window.addEventListener("touchstart", touchstart, false);
+    // window.addEventListener("touchend", touchend, false);
 })()

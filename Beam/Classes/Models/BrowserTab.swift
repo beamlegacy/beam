@@ -28,13 +28,14 @@ class FullScreenWKWebView: WKWebView {
 }
 
 
-
 // swiftlint:disable:next type_body_length
 class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler, Codable, WebPage {
     var id: UUID
 
     private var scrollX: Double = 0
     private var scrollY: Double = 0
+    private var pixelRatio: Double = 1
+    private var visualScale: Double = 1
 
     public func load(url: URL) {
         self.url = url
@@ -364,6 +365,8 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         case beam_textSelected
         case beam_onScrolled
         case beam_logging
+        case beam_resize
+        case beam_pinch
     }
 
     private func removeScriptHandlers() {
@@ -481,10 +484,10 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                 self.pointAndShoot.point(area: nil)
                 return
             }
-            let minX = (area["x"] as? Double)!
-            let minY = (area["y"] as? Double)!
-            let width = (area["width"] as? Double)!
-            let height = (area["height"] as? Double)!
+            let minX = nativeX(x: (area["x"] as? Double)!)
+            let minY = nativeY(y: (area["y"] as? Double)!)
+            let width = nativeWidth(width: (area["width"] as? Double)!)
+            let height = nativeHeight(height: (area["height"] as? Double)!)
             let pointArea = NSRect(x: minX, y: minY, width: width, height: height)
             self.pointAndShoot.point(area: pointArea)
             Logger.shared.logInfo("Web block point: \(type), \(data), \(minX), \(minY), \(width), \(height)", category: .web)
@@ -498,10 +501,10 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                     else {
                 return
             }
-            let minX = (area["x"] as? Double)!
-            let minY = (area["y"] as? Double)!
-            let width = (area["width"] as? Double)!
-            let height = (area["height"] as? Double)!
+            let minX = nativeX(x: (area["x"] as? Double)!)
+            let minY = nativeY(y: (area["y"] as? Double)!)
+            let width = nativeWidth(width: (area["width"] as? Double)!)
+            let height = nativeHeight(height: (area["height"] as? Double)!)
             let shootArea = NSRect(x: minX, y: minY, width: width, height: height)
             self.pointAndShoot.shoot(area: shootArea, scrollX: self.scrollX, scrollY: self.scrollY)
             Logger.shared.logInfo("Web shoot point: \(type), \(data), \(minX), \(minY), \(width), \(height)", category: .web)
@@ -535,9 +538,30 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                 }
             }
 
+        case ScriptHandlers.beam_resize.rawValue:
+            guard let dict = messageBody,
+                  let w = dict["width"] as? Double,
+                  let h = dict["height"] as? Double
+                    else {
+                return
+            }
+
+        case ScriptHandlers.beam_pinch.rawValue:
+            guard let dict = messageBody,
+                  let offsetLeft = dict["offsetLeft"] as? Double,
+                  let pageLeft = dict["pageLeft"] as? Double,
+                  let offsetTop = dict["offsetTop"] as? Double,
+                  let pageTop = dict["pageTop"] as? Double,
+                  let width = dict["width"] as? Double,
+                  let height = dict["height"] as? Double,
+                  let scale = dict["scale"] as? Double
+                    else {
+                return
+            }
+            self.visualScale = scale
+
         case ScriptHandlers.beam_onScrolled.rawValue:
             guard let dict = messageBody,
-//                  let selectedText = dict["selectedText"] as? String,
                   let x = dict["x"] as? Double,
                   let y = dict["y"] as? Double,
                   let w = dict["width"] as? Double,
@@ -545,7 +569,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                     else {
                 return
             }
-            Logger.shared.logInfo("self.scrolly: \(self.scrollY), scrolly: \(y)", category: .web)
+            Logger.shared.logDebug("self.scrolly: \(self.scrollY), scrolly: \(y)")
             self.scrollX = x
             self.scrollY = y
             pointAndShoot.drawShoot(scrollX: self.scrollX, scrollY: self.scrollY)
@@ -559,6 +583,22 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         default:
             break
         }
+    }
+
+    private func nativeX(x: Double) -> Double {
+        return x * self.visualScale
+    }
+
+    private func nativeWidth(width: Double) -> Double {
+        return width * self.visualScale
+    }
+
+    private func nativeHeight(height: Double) -> Double {
+        return height * self.visualScale
+    }
+
+    private func nativeY(y: Double) -> Double {
+        return y * self.visualScale
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {

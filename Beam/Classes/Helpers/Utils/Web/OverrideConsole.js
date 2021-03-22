@@ -1,6 +1,6 @@
 function log(emoji, type, args) {
     window.webkit.messageHandlers.beam_logging.postMessage(
-        `${emoji} JS ${type}: ${Object.values(args)
+        `${emoji} ${type}: ${Object.values(args)
             .map(v => {
                 let str
                 if (typeof v === "object") {
