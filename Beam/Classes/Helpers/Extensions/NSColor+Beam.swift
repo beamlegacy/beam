@@ -86,10 +86,6 @@ extension NSColor {
         return loadColor(named: "EditorTextSelectionColor")
     }
 
-    static var editorIndentBackgroundColor: NSColor {
-        return loadColor(named: "Mercury")
-    }
-
     static var underlineAndstrikethroughColor: NSColor {
         return loadColor(named: "Niobium")
     }
