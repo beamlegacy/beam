@@ -86,7 +86,7 @@ struct OmniBar: View {
                     .frame(height: boxHeight)
                     .frame(maxWidth: .infinity)
                     if isEditing && !state.searchQuery.isEmpty && !state.autocompleteResults.isEmpty {
-                        AutocompleteList(selectedIndex: $state.autocompleteSelectedIndex, elements: $state.autocompleteResults, modifierFlagsPressed: $modifierFlagsPressed)
+                        AutocompleteList(selectedIndex: $state.autocompleteSelectedIndex, elements: $state.autocompleteResults, modifierFlagsPressed: modifierFlagsPressed)
                     }
                 }
             }

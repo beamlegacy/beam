@@ -47,5 +47,8 @@ struct JournalView: View {
         }
         .accessibility(identifier: "journalView")
         .clipped()
+        .onDisappear {
+            data.reloadJournal()
+        }
     }
 }

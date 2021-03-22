@@ -61,7 +61,16 @@ class Document: NSManagedObject {
         document_type = documentStruct.documentType.rawValue
         created_at = documentStruct.createdAt
         updated_at = BeamDate.now
-        deleted_at = documentStruct.deletedAt
+        if documentStruct.documentType == .journal {
+            do {
+                let note = try JSONDecoder().decode(BeamNote.self, from: documentStruct.data)
+                deleted_at = note.isEntireNoteEmpty() ? BeamDate.now : documentStruct.deletedAt
+            } catch {
+                Logger.shared.logError("Unable to decode journal's note", category: .document)
+            }
+        } else {
+            deleted_at = documentStruct.deletedAt
+        }
         is_public = documentStruct.isPublic
     }
 

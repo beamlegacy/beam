@@ -45,7 +45,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     #endif
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        updateMainMenuItems(for: .today)
         CoreDataManager.shared.setup()
         LibrariesManager.shared.configure()
 

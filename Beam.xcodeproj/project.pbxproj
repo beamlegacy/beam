@@ -279,6 +279,7 @@
 		A0137B3525B6DFE100E65208 /* CommandManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0137B3425B6DFE100E65208 /* CommandManager.swift */; };
 		A01950AD25B838810025C5FD /* CommandManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A06DF52525B7608000E2CB62 /* CommandManagerTests.swift */; };
 		A0208F8225D6BB1C00CA054C /* AppDelegate+BeamTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0208F8125D6BB1C00CA054C /* AppDelegate+BeamTests.swift */; };
+		A03CE0EC25F954CB00D767B0 /* BeamElementHolder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A03CE0EB25F954CB00D767B0 /* BeamElementHolder.swift */; };
 		A0404F0C25E7ECDD00E347F3 /* CommandNodeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0404F0B25E7ECDD00E347F3 /* CommandNodeTests.swift */; };
 		A04E849525DD1CEF0066CD44 /* InsertText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A04E849425DD1CEF0066CD44 /* InsertText.swift */; };
 		A050047525DA918A009CFEB6 /* NoteAutoSaveService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A050047425DA918A009CFEB6 /* NoteAutoSaveService.swift */; };
@@ -289,6 +290,7 @@
 		A0A6F2A725D1B74800EFC4BE /* Nimble in Frameworks */ = {isa = PBXBuildFile; productRef = A0A6F2A625D1B74800EFC4BE /* Nimble */; };
 		A0AA693325C41C9B0038F9A3 /* MouseHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0AA693225C41C9B0038F9A3 /* MouseHandler.swift */; };
 		A0C0C2A725E5109F00BE34F0 /* InsertNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0C0C2A625E5109F00BE34F0 /* InsertNode.swift */; };
+		A0C63A6825FA249700FB4CCE /* BeamTextHolder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0C63A6725FA249700FB4CCE /* BeamTextHolder.swift */; };
 		A0D1731425E4FC2D00FDE73C /* ReplaceText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0D1731325E4FC2D00FDE73C /* ReplaceText.swift */; };
 		A0E15FFD25D1570D00F9D72F /* JournalUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0E15FFC25D1570D00F9D72F /* JournalUITests.swift */; };
 		A0E3150525ED1ECB001A5E55 /* FormattingText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0E3150425ED1ECB001A5E55 /* FormattingText.swift */; };
@@ -793,6 +795,7 @@
 		A01290B625E5B8DD0063F3A0 /* DeleteNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteNode.swift; sourceTree = "<group>"; };
 		A0137B3425B6DFE100E65208 /* CommandManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandManager.swift; sourceTree = "<group>"; usesTabs = 0; };
 		A0208F8125D6BB1C00CA054C /* AppDelegate+BeamTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+BeamTests.swift"; sourceTree = "<group>"; };
+		A03CE0EB25F954CB00D767B0 /* BeamElementHolder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamElementHolder.swift; sourceTree = "<group>"; };
 		A0404F0B25E7ECDD00E347F3 /* CommandNodeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandNodeTests.swift; sourceTree = "<group>"; };
 		A04E849425DD1CEF0066CD44 /* InsertText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsertText.swift; sourceTree = "<group>"; };
 		A050047425DA918A009CFEB6 /* NoteAutoSaveService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteAutoSaveService.swift; sourceTree = "<group>"; };
@@ -802,6 +805,7 @@
 		A06DF52525B7608000E2CB62 /* CommandManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CommandManagerTests.swift; path = Classes/CommandManagerTests.swift; sourceTree = "<group>"; };
 		A0AA693225C41C9B0038F9A3 /* MouseHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MouseHandler.swift; sourceTree = "<group>"; };
 		A0C0C2A625E5109F00BE34F0 /* InsertNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsertNode.swift; sourceTree = "<group>"; };
+		A0C63A6725FA249700FB4CCE /* BeamTextHolder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamTextHolder.swift; sourceTree = "<group>"; };
 		A0D1731325E4FC2D00FDE73C /* ReplaceText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplaceText.swift; sourceTree = "<group>"; };
 		A0E15FFC25D1570D00F9D72F /* JournalUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalUITests.swift; sourceTree = "<group>"; };
 		A0E3150425ED1ECB001A5E55 /* FormattingText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormattingText.swift; sourceTree = "<group>"; };
@@ -1030,6 +1034,7 @@
 				418171822581107C00317ED8 /* BrowserTab.swift */,
 				418171702581107C00317ED8 /* BeamElement.swift */,
 				524520A325C8234500AC0007 /* BeamElement+Merge.swift */,
+				A03CE0EB25F954CB00D767B0 /* BeamElementHolder.swift */,
 				418171842581107C00317ED8 /* BeamNote.swift */,
 				418171852581107C00317ED8 /* BID.swift */,
 				418171862581107C00317ED8 /* NoteBackForwardList.swift */,
@@ -1037,6 +1042,7 @@
 				418171872581107C00317ED8 /* PageRank.swift */,
 				96956D30258BF3F50069C9C1 /* LinkStore.swift */,
 				96F93617258CFDD2006D8E53 /* BeamText.swift */,
+				A0C63A6725FA249700FB4CCE /* BeamTextHolder.swift */,
 				96E4CF75258EC88300D6DE22 /* BeamTextTools.swift */,
 				9691E41325AF61BA00A13080 /* BrowsingTree.swift */,
 				A050047425DA918A009CFEB6 /* NoteAutoSaveService.swift */,
@@ -2417,6 +2423,7 @@
 				418172562581107C00317ED8 /* GlobalTabTitle.swift in Sources */,
 				961EC51725B5038E009FA322 /* ChevronButton.swift in Sources */,
 				418171FE2581107C00317ED8 /* Html2Md.swift in Sources */,
+				A03CE0EC25F954CB00D767B0 /* BeamElementHolder.swift in Sources */,
 				96C9AAB92593BB67007D3D98 /* Widget.swift in Sources */,
 				524B856D25D2DD0700BB7C7A /* NSMAnagedObjectContext+performAndWait.swift in Sources */,
 				418172B625811AAA00317ED8 /* FrameAnimation.swift in Sources */,
@@ -2500,6 +2507,7 @@
 				418171FF2581107C00317ED8 /* CoreDataManager.swift in Sources */,
 				A0D1731425E4FC2D00FDE73C /* ReplaceText.swift in Sources */,
 				A0AA693325C41C9B0038F9A3 /* MouseHandler.swift in Sources */,
+				A0C63A6825FA249700FB4CCE /* BeamTextHolder.swift in Sources */,
 				418171F22581107C00317ED8 /* APIRequest.swift in Sources */,
 				529E1AD425D45CFA00DD25B8 /* APIRequestError.swift in Sources */,
 				524CF6B225F27318007312F0 /* DocumentRequest+Encryption.swift in Sources */,
