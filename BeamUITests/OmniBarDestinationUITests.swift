@@ -13,7 +13,7 @@ import Nimble
 class OmniBarDestinationUITests: QuickSpec {
     let app = XCUIApplication()
     var helper: OmniBarUITestsHelper!
-    let destinationNoteName = "One Destination"
+    let destinationNoteTitle = "One Destination"
 
     func manualBeforeSuite () {
         // QuickSpec beforeSuite is called before ALL
@@ -28,7 +28,7 @@ class OmniBarDestinationUITests: QuickSpec {
     }
 
     func createDestinationNote() {
-        self.helper.searchField.typeText(destinationNoteName)
+        self.helper.searchField.typeText(destinationNoteTitle)
         let createNoteResult = self.helper.allAutocompleteResults.matching(NSPredicate(format: "identifier CONTAINS '-createCard'")).firstMatch
         createNoteResult.tap()
         sleep(1) // wait for new note to be saved
@@ -126,7 +126,7 @@ class OmniBarDestinationUITests: QuickSpec {
 
                 noteSearchField.typeText("One")
                 noteSearchField.typeText("\r")
-                expect(title.value as? String).to(equal(self.destinationNoteName))
+                expect(title.value as? String).to(equal(self.destinationNoteTitle))
 
                 expect(self.app.buttons["pivot-card"].exists).to(beTrue())
                 self.app.buttons["pivot-card"].tap()
@@ -137,10 +137,10 @@ class OmniBarDestinationUITests: QuickSpec {
                 expect(self.app.buttons["pivot-web"].exists).to(beTrue())
                 self.app.buttons["pivot-web"].tap()
                 expect(title.exists).to(beTrue())
-                expect(title.value as? String).to(equal(self.destinationNoteName))
+                expect(title.value as? String).to(equal(self.destinationNoteTitle))
                 title.tap()
                 expect(noteSearchField.waitForExistence(timeout: 2)).to(beTrue())
-                expect(noteSearchField.value as? String).to(equal(self.destinationNoteName))
+                expect(noteSearchField.value as? String).to(equal(self.destinationNoteTitle))
             }
         }
     }

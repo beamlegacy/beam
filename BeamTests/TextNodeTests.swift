@@ -521,6 +521,8 @@ class TextNodeTests: XCTestCase {
 
         // Undo the text insertion:
         editor.undo(String("Undo"))
+        // Undo selection deletion (insertText does both in two operations)
+        editor.undo(String("Undo"))
 
         let str2 = """
         title
@@ -534,11 +536,13 @@ class TextNodeTests: XCTestCase {
 
         """
         XCTAssertEqual(str2, root.printTree())
-        XCTAssertEqual(root.cursorPosition, 7)
+        XCTAssertEqual(root.cursorPosition, 3)
         XCTAssertEqual(root.selectedTextRange, 3..<7)
 
-        // redo the text insertion:
+        // redo the text insertion / selection deletion:
         editor.redo(String("Redo"))
+        editor.redo(String("Redo"))
+
         XCTAssertEqual(str1, root.printTree())
         XCTAssertEqual(root.cursorPosition, 7)
         XCTAssert(root.selectedTextRange.isEmpty)

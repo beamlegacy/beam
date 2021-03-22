@@ -273,9 +273,12 @@
 		96F673D225B7207100E8175B /* StoredLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F673D125B7207100E8175B /* StoredLink.swift */; };
 		96F93618258CFDD2006D8E53 /* BeamText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F93617258CFDD2006D8E53 /* BeamText.swift */; };
 		96F936632590FA59006D8E53 /* BTextEdit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F936622590FA59006D8E53 /* BTextEdit.swift */; };
+		96FACC522604B0EE0088DD67 /* DeleteElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96FACC512604B0EE0088DD67 /* DeleteElement.swift */; };
+		96FACC6C2604F2650088DD67 /* FocusElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96FACC6B2604F2650088DD67 /* FocusElement.swift */; };
+		96FACC8626050B1E0088DD67 /* SetSelection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96FACC8526050B1E0088DD67 /* SetSelection.swift */; };
+		96FACC8A26079C7E0088DD67 /* InputText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96FACC8926079C7E0088DD67 /* InputText.swift */; };
 		96FD761B25B1C43500B04ED3 /* BrowsingNodeWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96FD761A25B1C43500B04ED3 /* BrowsingNodeWidget.swift */; };
 		A01030AA25F149EA00D740C5 /* TextEditorCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = A01030A925F149EA00D740C5 /* TextEditorCommand.swift */; };
-		A01290B725E5B8DD0063F3A0 /* DeleteNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = A01290B625E5B8DD0063F3A0 /* DeleteNode.swift */; };
 		A0137B3525B6DFE100E65208 /* CommandManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0137B3425B6DFE100E65208 /* CommandManager.swift */; };
 		A01950AD25B838810025C5FD /* CommandManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A06DF52525B7608000E2CB62 /* CommandManagerTests.swift */; };
 		A0208F8225D6BB1C00CA054C /* AppDelegate+BeamTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0208F8125D6BB1C00CA054C /* AppDelegate+BeamTests.swift */; };
@@ -790,9 +793,12 @@
 		96F673D125B7207100E8175B /* StoredLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoredLink.swift; sourceTree = "<group>"; };
 		96F93617258CFDD2006D8E53 /* BeamText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamText.swift; sourceTree = "<group>"; };
 		96F936622590FA59006D8E53 /* BTextEdit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BTextEdit.swift; sourceTree = "<group>"; };
+		96FACC512604B0EE0088DD67 /* DeleteElement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteElement.swift; sourceTree = "<group>"; };
+		96FACC6B2604F2650088DD67 /* FocusElement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusElement.swift; sourceTree = "<group>"; };
+		96FACC8526050B1E0088DD67 /* SetSelection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetSelection.swift; sourceTree = "<group>"; };
+		96FACC8926079C7E0088DD67 /* InputText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputText.swift; sourceTree = "<group>"; };
 		96FD761A25B1C43500B04ED3 /* BrowsingNodeWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowsingNodeWidget.swift; sourceTree = "<group>"; };
 		A01030A925F149EA00D740C5 /* TextEditorCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEditorCommand.swift; sourceTree = "<group>"; };
-		A01290B625E5B8DD0063F3A0 /* DeleteNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteNode.swift; sourceTree = "<group>"; };
 		A0137B3425B6DFE100E65208 /* CommandManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandManager.swift; sourceTree = "<group>"; usesTabs = 0; };
 		A0208F8125D6BB1C00CA054C /* AppDelegate+BeamTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+BeamTests.swift"; sourceTree = "<group>"; };
 		A03CE0EB25F954CB00D767B0 /* BeamElementHolder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamElementHolder.swift; sourceTree = "<group>"; };
@@ -1878,10 +1884,13 @@
 				A0D1731325E4FC2D00FDE73C /* ReplaceText.swift */,
 				A0E3150425ED1ECB001A5E55 /* FormattingText.swift */,
 				A0C0C2A625E5109F00BE34F0 /* InsertNode.swift */,
-				A01290B625E5B8DD0063F3A0 /* DeleteNode.swift */,
+				96FACC512604B0EE0088DD67 /* DeleteElement.swift */,
 				A0EE0B8E25E68EF3001F9D65 /* InsertEmptyNode.swift */,
 				A01030A925F149EA00D740C5 /* TextEditorCommand.swift */,
 				96BBA78A25FBA573008276FC /* ReparentElement.swift */,
+				96FACC6B2604F2650088DD67 /* FocusElement.swift */,
+				96FACC8526050B1E0088DD67 /* SetSelection.swift */,
+				96FACC8926079C7E0088DD67 /* InputText.swift */,
 			);
 			path = Commands;
 			sourceTree = "<group>";
@@ -2412,7 +2421,9 @@
 				523FF67925C31D9D00B4BD6E /* String+Data.swift in Sources */,
 				5206283E25923EB500D7CD9E /* DocumentAPIType.swift in Sources */,
 				418172D625811B8700317ED8 /* RoundRectButtonStyle.swift in Sources */,
+				96FACC8626050B1E0088DD67 /* SetSelection.swift in Sources */,
 				4181722A2581107C00317ED8 /* NSRect+Beam.swift in Sources */,
+				96FACC6C2604F2650088DD67 /* FocusElement.swift in Sources */,
 				418172252581107C00317ED8 /* String+Regex.swift in Sources */,
 				418172132581107C00317ED8 /* Logger.swift in Sources */,
 				96A8B1DD25A38A3B006F749C /* String+Levenshtein.swift in Sources */,
@@ -2439,7 +2450,7 @@
 				521EEDF12593819000BA2485 /* Document+ResultsController.swift in Sources */,
 				A04E849525DD1CEF0066CD44 /* InsertText.swift in Sources */,
 				96929D2C26025F7200F8961C /* PointFrame.swift in Sources */,
-				A01290B725E5B8DD0063F3A0 /* DeleteNode.swift in Sources */,
+				96FACC8A26079C7E0088DD67 /* InputText.swift in Sources */,
 				418172002581107C00317ED8 /* NotificationName+Beam.swift in Sources */,
 				418172112581107C00317ED8 /* Readability.swift in Sources */,
 				418171F12581107C00317ED8 /* UserSessionRequest.swift in Sources */,
@@ -2503,6 +2514,7 @@
 				A520D8DF25F8DF8D00400720 /* TouchDownModifier.swift in Sources */,
 				418171ED2581107C00317ED8 /* Session.swift in Sources */,
 				4181713325810CDC00317ED8 /* Constants.swift in Sources */,
+				96FACC522604B0EE0088DD67 /* DeleteElement.swift in Sources */,
 				4181725E2581107C00317ED8 /* AccountManager.swift in Sources */,
 				418171FF2581107C00317ED8 /* CoreDataManager.swift in Sources */,
 				A0D1731425E4FC2D00FDE73C /* ReplaceText.swift in Sources */,

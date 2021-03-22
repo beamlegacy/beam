@@ -166,8 +166,8 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         self.browsingTree = try container.decode(BrowsingTree.self, forKey: .browsingTree)
         self.privateMode = try container.decode(Bool.self, forKey: .privateMode)
 
-        let noteName = try container.decode(String.self, forKey: .note)
-        let loadedNote = BeamNote.fetch(AppDelegate.main.documentManager, title: noteName) ?? AppDelegate.main.data.todaysNote
+        let noteTitle = try container.decode(String.self, forKey: .note)
+        let loadedNote = BeamNote.fetch(AppDelegate.main.documentManager, title: noteTitle) ?? AppDelegate.main.data.todaysNote
         self.note = loadedNote
         let rootId = try? container.decode(UUID.self, forKey: .rootElement)
         self.rootElement = note.findElement(rootId ?? loadedNote.id) ?? loadedNote.children.first!

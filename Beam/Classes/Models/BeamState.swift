@@ -376,8 +376,8 @@ let NoteDisplayThreshold = Float(0.0)
 
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        if let currentNoteName = try? container.decode(String.self, forKey: .currentNote) {
-            currentNote = BeamNote.fetch(data.documentManager, title: currentNoteName)
+        if let currentNoteTitle = try? container.decode(String.self, forKey: .currentNote) {
+            currentNote = BeamNote.fetch(data.documentManager, title: currentNoteTitle)
         }
         backForwardList = try container.decode(NoteBackForwardList.self, forKey: .backForwardList)
 

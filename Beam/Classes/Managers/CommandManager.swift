@@ -47,25 +47,26 @@ class GroupCommand<Context>: Command<Context> {
     var commands: [Command<Context>] = []
 
     func append(command: Command<Context>) {
-        commands.append(command)
+        guard let lastCommand = commands.last,
+            lastCommand.coalesce(command: command)
+        else {
+            commands.append(command)
+            return
+        }
     }
 
     override func run(context: Context?) -> Bool {
-        var running = true
         for c in commands {
-            running = c.run(context: context)
-            if !running { break }
+            guard c.run(context: context) else { return false }
         }
-        return running
+        return true
     }
 
     override func undo(context: Context?) -> Bool {
-        var undoing = true
         for c in commands.reversed() {
-            undoing = c.undo(context: context)
-            if !undoing { break }
+            guard c.undo(context: context) else { return false }
         }
-        return undoing
+        return true
     }
 }
 
@@ -85,23 +86,27 @@ class CommandManager<Context> {
         self.run(command: BlockCommand(name: name, run: run, undo: undo, coalesce: coalesce), on: context)
     }
 
+    private func appendToDone(command: Command<Context>) {
+        guard let lastGroup = groupCmd.last else {
+            guard let lastCmd = doneQueue.last, lastCmd.coalesce(command: command) else {
+                doneQueue.append(command)
+                return
+            }
+            return
+        }
+
+        lastGroup.append(command: command)
+    }
+
     @discardableResult
     func run(command: Command<Context>, on context: Context) -> Bool {
-        var cmdToRun = command
-        if let lastCmd = doneQueue.last, lastCmd.coalesce(command: cmdToRun) {
-            doneQueue.removeLast()
-            cmdToRun = lastCmd
-        }
-        let done = cmdToRun.run(context: context)
+        Logger.shared.logDebug("Run: \(command.name)")
+        let done = command.run(context: context)
+
         if done && !groupFailed {
-            Logger.shared.logDebug("Run: \(cmdToRun.name)")
-            guard !groupCmd.isEmpty else {
-                doneQueue.append(cmdToRun)
-                return true
-            }
-            groupCmd.last?.append(command: cmdToRun)
+            appendToDone(command: command)
         } else {
-            Logger.shared.logDebug("\(cmdToRun.name) run failed")
+            Logger.shared.logDebug("\(command.name) run failed")
             guard groupCmd.isEmpty else {
                 groupFailed = true
                 endGroup()
@@ -112,37 +117,42 @@ class CommandManager<Context> {
     }
 
     func undo(context: Context?) -> Bool {
-        guard !groupCmd.isEmpty else {
-            guard let lastCmd = doneQueue.last else { return false }
-            if lastCmd.undo(context: context) {
-                Logger.shared.logDebug("Undo: \(lastCmd.name)")
-                undoneQueue.append(lastCmd)
-                doneQueue.removeLast()
-                return true
-            }
+        guard groupCmd.isEmpty else {
+            fatalError("Cannot Undo with a GroupCommand active, it should be ended first.")
+        }
+
+        guard let lastCmd = doneQueue.last else { return false }
+        Logger.shared.logDebug("Undo: \(lastCmd.name)")
+
+        guard lastCmd.undo(context: context) else {
             Logger.shared.logDebug("\(lastCmd.name) undo failed")
             return false
         }
-        fatalError("Cannot Undo with a GroupCommand active, it should be ended first.")
+
+        undoneQueue.append(lastCmd)
+        doneQueue.removeLast()
+        return true
     }
 
     func redo(context: Context?) -> Bool {
-        guard !groupCmd.isEmpty else {
-            guard let lastCmd = undoneQueue.last else { return false }
-            if lastCmd.run(context: context) {
-                Logger.shared.logDebug("Redo: \(lastCmd.name)")
-                doneQueue.append(lastCmd)
-                undoneQueue.removeLast()
-                return true
-            }
+        guard groupCmd.isEmpty else {
+            fatalError("Cannot Redo with a GroupCommand active, it should be ended first.")
+        }
+
+        guard let lastCmd = undoneQueue.last else { return false }
+        Logger.shared.logDebug("Redo: \(lastCmd.name)")
+
+        guard lastCmd.run(context: context) else {
             Logger.shared.logDebug("\(lastCmd.name) redo failed")
             return false
         }
-        fatalError("Cannot Redo with a GroupCommand active, it should be ended first.")
+
+        doneQueue.append(lastCmd)
+        undoneQueue.removeLast()
+        return true
     }
 
     // MARK: - Group Command
-
     func beginGroup(with name: String) {
         guard groupCmd.isEmpty else { return }
         groupFailed = false

@@ -231,7 +231,7 @@ class BreadCrumb: Widget {
             self.proxy.text.makeInternalLink(start..<end)
         }
 
-        let reference = NoteReference(noteName: proxy.note!.title, elementID: proxy.proxy.id)
+        let reference = NoteReference(noteTitle: proxy.note!.title, elementID: proxy.proxy.id)
         rootNote.addReference(reference)
     }
 

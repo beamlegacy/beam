@@ -33,14 +33,14 @@ class RefNoteTitle: Widget {
     private let titleLayerXPosition: CGFloat = 25
     private let titleLayerYPosition: CGFloat = 10
 
-    private var noteName: String
+    private var noteTitle: String
 
-    init(parent: Widget, noteName: String, actionTitle: String, action: @escaping () -> Void) throws {
+    init(parent: Widget, noteTitle: String, actionTitle: String, action: @escaping () -> Void) throws {
         self.action = action
-        self.noteName = noteName
+        self.noteTitle = noteTitle
         super.init(parent: parent)
 
-        titleLayer.string = noteName.capitalized
+        titleLayer.string = noteTitle.capitalized
         titleLayer.font = NSFont.systemFont(ofSize: 0, weight: .semibold)
         titleLayer.fontSize = 17
         titleLayer.foregroundColor = NSColor.linkedTitleColor.cgColor
@@ -96,6 +96,6 @@ class RefNoteTitle: Widget {
     }
 
     override var mainLayerName: String {
-        "RefNoteTitle - \(noteName)"
+        "RefNoteTitle - \(noteTitle)"
     }
 }

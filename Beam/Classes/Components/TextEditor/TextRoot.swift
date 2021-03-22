@@ -337,7 +337,7 @@ public class TextRoot: TextNode {
     private var breadCrumbs: [NoteReference: BreadCrumb] = [:]
     func getBreadCrumb(for noteReference: NoteReference) -> BreadCrumb? {
         guard let breadCrumb = breadCrumbs[noteReference] else {
-            guard let referencingNote = BeamNote.fetch(DocumentManager(), title: noteReference.noteName) else { return nil }
+            guard let referencingNote = BeamNote.fetch(DocumentManager(), title: noteReference.noteTitle) else { return nil }
             guard let referencingElement = referencingNote.findElement(noteReference.elementID) else { return nil }
             let breadCrumb = BreadCrumb(parent: self, element: referencingElement)
             breadCrumbs[noteReference] = breadCrumb
@@ -345,4 +345,10 @@ public class TextRoot: TextNode {
         }
         return breadCrumb
     }
+
+    override var cmdManager: CommandManager<Widget> {
+        guard let note = note else { fatalError("Trying to access the command manager on an unconnected TextRoot is a programming error.") }
+        return note.cmdManager
+    }
+
 }
