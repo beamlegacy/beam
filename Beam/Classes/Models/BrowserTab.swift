@@ -530,7 +530,8 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
             // now add a bullet point with the quoted text:
             if let urlString = webView.url?.absoluteString, let title = webView.title {
-                let quote = text
+                var quote = text
+                quote.addAttributes([.emphasis], to: quote.wholeRange)
 
                 DispatchQueue.main.async {
                     guard let current = self.addCurrentPageToNote() else { return }
