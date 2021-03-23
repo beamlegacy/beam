@@ -34,10 +34,6 @@ class PointAndShoot: ObservableObject {
     @Published var shootSelectionUIs: [SelectionUI] = []
     var shootAreas: [NSRect] = []
 
-    lazy var jsSelectionObserver: String = {
-        loadFile(from: "SelectionObserver", fileType: "js")
-    }()
-
     lazy var pointAndShoot: String = {
         loadFile(from: "PointAndShoot", fileType: "js")
     }()
@@ -47,7 +43,6 @@ class PointAndShoot: ObservableObject {
     }()
 
     func injectInto(webPage: WebPage) {
-        webPage.addJS(source: jsSelectionObserver, when: .atDocumentEnd)
         webPage.addJS(source: pointAndShoot, when: .atDocumentEnd)
         webPage.addCSS(source: pointAndShootStyle, when: .atDocumentEnd)
     }

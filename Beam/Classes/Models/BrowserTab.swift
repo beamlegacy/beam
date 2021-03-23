@@ -517,14 +517,15 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
         case ScriptHandlers.beam_textSelected.rawValue:
             guard let dict = messageBody,
-//                  let selectedText = dict["selectedText"] as? String,
-                  let selectedHtml = dict["selectedHtml"] as? String,
-                  !selectedHtml.isEmpty
+                  let index = dict["index"] as? Int,
+                  let selectedText = dict["text"] as? String,
+                  let html = dict["html"] as? String,
+                  let areas = dict["areas"],
+                  !html.isEmpty
                     else {
                 return
             }
-
-            let text: BeamText = html2Text(url: webView.url!, html: selectedHtml)
+            let text: BeamText = html2Text(url: webView.url!, html: html)
             browsingTree.current.score.textSelections += 1
             updateScore()
 
@@ -590,6 +591,15 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             let height = nativeHeight(height: (bounds["height"] as? Double)!)
             let frameInfo: FrameInfo = FrameInfo(origin: origin, x: x, y: y, width: width, height: height)
             framesInfo[href] = frameInfo
+
+        case ScriptHandlers.beam_frameBounds.rawValue:
+            guard let dict = messageBody,
+                  let origin = dict["origin"] as? String ?? originalQuery,
+                  let href = dict["href"] as? String,
+                  let bounds = dict["bounds"]
+                    else {
+                return
+            }
 
         default:
             break
