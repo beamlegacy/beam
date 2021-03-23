@@ -74,7 +74,7 @@ extension BeamText {
             }
         }
 
-        if emphasis || quote {
+        if emphasis {
             font = NSFontManager.shared.convert(NSFont.systemFont(ofSize: fontSize), toHaveTrait: .italicFontMask)
         }
 
