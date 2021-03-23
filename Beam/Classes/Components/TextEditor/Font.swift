@@ -120,8 +120,9 @@ public class TextLine {
         }
 
         // remove fake glyphs from carets:
-        for skippable in skippablePositions.reversed() {
-            carets.remove(at: skippable)
+        let r = CTLineGetStringRange(ctLine)
+        for skippable in skippablePositions.reversed() where r.location <= skippable && skippable < r.location + r.length {
+            carets.remove(at: skippable - r.location)
         }
 
         guard let last = carets.last else { return c }
