@@ -331,10 +331,10 @@ public class TextNode: Widget {
 
         // Disable action layer update to avoid motion glitch
         // when the global layer width is changed
-        if let lastCommand = root?.lastCommand,
-           lastCommand != .increaseIndentation || editor.isResizing,
-           lastCommand != .decreaseIndentation || editor.isResizing {
-            updateActionLayer()
+        if !editor.isResizing {
+            updateActionLayer(animate: true)
+        } else {
+            updateActionLayer(animate: false)
         }
     }
 
@@ -507,12 +507,15 @@ public class TextNode: Widget {
         layer.addSublayer(actionLayer)
     }
 
-    func updateActionLayer() {
+    func updateActionLayer(animate: Bool) {
         let actionLayerYPosition = isHeader ? (contentsFrame.height / 2) - actionLayerFrame.height : 0
-        CATransaction.begin()
-        CATransaction.setValue(kCFBooleanTrue, forKey: kCATransactionDisableActions)
-            actionLayer?.frame = CGRect(x: availableWidth, y: actionLayerYPosition, width: actionLayerFrame.width, height: actionLayerFrame.height)
-        CATransaction.commit()
+        if animate {
+                actionLayer?.frame = CGRect(x: availableWidth, y: actionLayerYPosition, width: actionLayerFrame.width, height: actionLayerFrame.height)
+        } else {
+            CATransaction.disableAnimations {
+                actionLayer?.frame = CGRect(x: availableWidth, y: actionLayerYPosition, width: actionLayerFrame.width, height: actionLayerFrame.height)
+            }
+        }
     }
 
     // MARK: - Methods TextNode
