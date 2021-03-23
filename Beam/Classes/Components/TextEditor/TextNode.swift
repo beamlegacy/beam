@@ -704,7 +704,7 @@ public class TextNode: Widget {
                 if let linkRange = linkRange, let currentNode = widgetAt(point: mouseInfo.position) as? TextNode {
                     invalidateText()
                     cursor = .pointingHand
-                    if let positionInText = positionAt(point: mouseInfo.position, inString: currentNode.attributedString), positionInText == linkRange.end {
+                    if let positionInText = indexAt(point: mouseInfo.position), positionInText == linkRange.end {
                         editor.linkStartedHovering(
                             for: currentNode,
                             targetRange: linkRange.position ..< linkRange.end,
@@ -840,19 +840,19 @@ public class TextNode: Widget {
         return res
     }
 
-    public func positionAt(point: NSPoint, inString: NSAttributedString) -> Int? {
+    public func indexAt(point: NSPoint) -> Int? {
         guard layout != nil, !layout!.lines.isEmpty else { return nil }
         let line = lineAt(point: point)
         guard line >= 0 else { return nil }
         let l = layout!.lines[line]
         guard l.frame.minX < point.x && l.frame.maxX > point.x else { return nil } // point is outside the line
         let displayIndex = l.stringIndexFor(position: point)
-        let pos = min(displayIndex, inString.length - 1)
+        let pos = min(displayIndex, text.count - 1)
         return pos
     }
 
     public func linkAt(point: NSPoint) -> URL? {
-        guard let pos = positionAt(point: point, inString: attributedString) else { return nil }
+        guard let pos = indexAt(point: point) else { return nil }
         let range = elementText.rangeAt(position: pos)
         guard let linkAttribIndex = range.attributes.firstIndex(where: { attrib -> Bool in
             attrib.rawValue == BeamText.Attribute.link("").rawValue
@@ -871,7 +871,7 @@ public class TextNode: Widget {
         let line = lineAt(point: point)
         guard line >= 0 else { return (nil, nil) }
         let l = layout!.lines[line]
-        guard let pos = positionAt(point: point, inString: attributedString) else { return (nil, nil) }
+        guard let pos = indexAt(point: point) else { return (nil, nil) }
 
         let range = elementText.rangeAt(position: pos)
         guard nil != range.attributes.firstIndex(where: { attrib -> Bool in
@@ -956,14 +956,14 @@ public class TextNode: Widget {
                 return emptyLayout.lines[0]
             }
 
-            guard let cursorLine = lineAt(index: cursorPosition <= 0 ? 0 : cursorPosition) else { fatalError() }
+            guard let cursorLine = lineAt(index: position <= 0 ? 0 : position) else { fatalError() }
             return layout?.lines[cursorLine] ?? nil
         }()
 
         guard let line = textLine else { return NSRect.zero }
-        let pos = cursorPosition
+        let pos = position
         let x1 = offsetAt(index: pos)
-        let cursorRect = NSRect(x: x1, y: line.frame.minY, width: cursorPosition == text.count ? bigCursorWidth : smallCursorWidth, height: line.bounds.height)
+        let cursorRect = NSRect(x: x1, y: line.frame.minY, width: position == text.count ? bigCursorWidth : smallCursorWidth, height: line.bounds.height)
 
         return cursorRect
     }
@@ -1046,7 +1046,7 @@ public class TextNode: Widget {
 
         var mouseInteraction: MouseInteraction?
         if let hoverMouse = lastHoverMouseInfo, hover {
-            if let pos = positionAt(point: hoverMouse.position, inString: attributedString) {
+            if let pos = indexAt(point: hoverMouse.position) {
                 let nsrange = NSRange(location: pos, length: 1)
                 mouseInteraction = MouseInteraction(type: MouseInteractionType.hovered, range: nsrange)
             }
