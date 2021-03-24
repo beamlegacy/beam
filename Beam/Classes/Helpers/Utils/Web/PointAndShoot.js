@@ -1,5 +1,5 @@
 (function PointAndShoot() {
-  const origin = location.href;
+  const origin = document.body.baseURI;
 
   function beamMessage(name, payload) {
     console.log("Send message", name, payload);
@@ -331,12 +331,9 @@
       type: {
         tagName: el.tagName
       },
+      location: {x, y},
       data: {
         text: el.innerText
-      },
-      location: {
-        x,
-        y
       },
       area: {
         x: bounds.x,
@@ -477,7 +474,8 @@
       x: window.scrollX,
       y: window.scrollY,
       width: scrollWidth,
-      height: scrollHeight
+      height: scrollHeight,
+      origin
     });
     checkFrames();
   }
@@ -529,7 +527,7 @@
           overlayEl.appendChild(rectSelection);
         }
       }
-      beamMessage("beam_textSelected", {index: i, text: selectedText, html: selectedHTML, areas: textAreas})
+      beamMessage("beam_textSelected", {index: i, text: selectedText, html: selectedHTML, areas: textAreas, origin})
     }
   }
 
