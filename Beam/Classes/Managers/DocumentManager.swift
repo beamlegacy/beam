@@ -481,10 +481,11 @@ extension DocumentManager {
 
                 result = self.parseDocumentBody( document)
                 try Self.saveContext(context: context)
-                semaphore.signal()
             } catch {
                 Logger.shared.logError(error.localizedDescription, category: .coredata)
             }
+
+            semaphore.signal()
         }
 
         semaphore.wait()

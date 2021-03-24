@@ -401,6 +401,14 @@ class DocumentManagerTests: QuickSpec {
                 expect(count).to(equal(1))
             }
 
+            it("fails creating document") {
+                let title = String.randomTitle()
+                _ = sut.create(title: title)!
+
+                let failDocStruct: DocumentStruct? = sut.create(title: title)
+                expect(failDocStruct).to(beNil())
+            }
+
             context("With PromiseKit") {
                 var title: String!
                 beforeEach {
@@ -649,7 +657,8 @@ class DocumentManagerTests: QuickSpec {
             var docStruct: DocumentStruct!
 
             it("sets document version at creation and after a save") {
-                let title = faker.zelda.game()
+                let title = String.randomTitle()
+
                 //swiftlint:disable:next force_cast
                 docStruct = sut.create(title: title)!
                 expect(docStruct.version).to(equal(0))
@@ -670,12 +679,12 @@ class DocumentManagerTests: QuickSpec {
 
             it("increments the version number for each save operations") {
                 let document = "whatever binary data"
+                let title = String.randomTitle()
 
                 //swiftlint:disable:next force_try
                 let jsonData = try! JSONEncoder().encode(document)
 
                 let id = UUID()
-                let title = faker.zelda.game()
                 docStruct = DocumentStruct(id: id,
                                            title: title,
                                            createdAt: Date(),
@@ -702,7 +711,8 @@ class DocumentManagerTests: QuickSpec {
             }
 
             it("refuses to save in case of version mismatch") {
-                let title = faker.zelda.game()
+                let title = String.randomTitle()
+
                 //swiftlint:disable:next force_cast
                 docStruct = sut.create(title: title)!
                 expect(docStruct.version).to(equal(0))
