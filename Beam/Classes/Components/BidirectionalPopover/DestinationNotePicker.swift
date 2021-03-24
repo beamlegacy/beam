@@ -95,8 +95,8 @@ struct DestinationNotePicker: View {
                             Logger.shared.logInfo("[DestinationNotePicker] Searching '\(newName)'", category: .ui)
                             state.destinationCardNameSelectedRange = nil
                             updateSearchResults()
-                        } onCommit: { _ in
-                            selectedCurrentAutocompleteResult()
+                        } onCommit: { modifierFlags in
+                            selectedCurrentAutocompleteResult(withCommand: modifierFlags?.contains(.command) ?? false)
                         } onEscape: {
                             cancelSearch()
                         } onCursorMovement: { move -> Bool in
@@ -168,13 +168,33 @@ struct DestinationNotePicker: View {
 
     func updateSearchResults() {
         Logger.shared.logInfo("Update Destination Picker Results for query \(state.destinationCardName)", category: .ui)
-        var items = state.destinationCardName.isEmpty ? state.data.documentManager.loadAllDocumentsWithLimit(4) : state.data.documentManager.documentsWithLimitTitleMatch(title: state.destinationCardName, limit: 4)
-        if (todaysCardReplacementName.lowercased().contains(state.destinationCardName.lowercased())  && !items.contains(where: { $0.title == state.data.todaysName })) {
+        var allowCreateCard = false
+        var items = [DocumentStruct]()
+        let queryText = state.destinationCardName
+        let itemLimit = 4
+        if queryText.isEmpty {
+            items = state.data.documentManager.loadAllDocumentsWithLimit(itemLimit)
+        } else {
+            allowCreateCard = true
+            items = state.data.documentManager.documentsWithLimitTitleMatch(title: queryText, limit: itemLimit)
+        }
+        if (todaysCardReplacementName.lowercased().contains(queryText.lowercased()) && !items.contains(where: { $0.title == state.data.todaysName })) {
             let todaysNotes = state.data.documentManager.documentsWithLimitTitleMatch(title: state.data.todaysName, limit: 1)
             items.insert(contentsOf: todaysNotes, at: 0)
+            items = Array(items.prefix(itemLimit))
         }
+        allowCreateCard = allowCreateCard && !items.contains(where: { $0.title.lowercased() == queryText.lowercased() })
         selectedResultIndex = 0
-        listResults = items.map { AutocompleteResult(text: displayNameForCardName($0.title), source: .note, uuid: $0.id) }
+        var autocompleteItems = items.map { AutocompleteResult(text: displayNameForCardName($0.title), source: .note, uuid: $0.id) }
+        if allowCreateCard {
+            let createItem = AutocompleteResult(text: queryText, source: .createCard, information: "New Card")
+            if autocompleteItems.count >= itemLimit {
+                autocompleteItems[autocompleteItems.count - 1] = createItem
+            } else {
+                autocompleteItems.append(createItem)
+            }
+        }
+        listResults = autocompleteItems
     }
 
     func changeDestinationCard(to cardName: String) {
@@ -184,12 +204,26 @@ struct DestinationNotePicker: View {
         tab.setDestinationNote(note, rootElement: note)
     }
 
-    func selectedCurrentAutocompleteResult() {
-        guard let selectedResultIndex = selectedResultIndex, selectedResultIndex < listResults.count else {
-            return
+    func createNote(named name: String) {
+        _ = state.createNoteForQuery(name)
+    }
+
+    func selectedCurrentAutocompleteResult(withCommand: Bool = false) {
+        let noteName: String
+        if withCommand {
+            noteName = state.destinationCardName
+            createNote(named: noteName)
+        } else {
+            guard let selectedResultIndex = selectedResultIndex, selectedResultIndex < listResults.count else {
+                return
+            }
+            let result = listResults[selectedResultIndex]
+            if result.source == .createCard {
+                createNote(named: result.text)
+            }
+            noteName = result.text
         }
-        let result = listResults[selectedResultIndex]
-        changeDestinationCard(to: result.text)
+        changeDestinationCard(to: noteName)
         DispatchQueue.main.async {
             cancelSearch()
         }

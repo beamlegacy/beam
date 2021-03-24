@@ -11,6 +11,7 @@ struct DestinationNoteAutocompleteList: View {
     @EnvironmentObject var state: BeamState
     @Binding var selectedIndex: Int?
     @Binding var elements: [AutocompleteResult]
+    var modifierFlagsPressed: NSEvent.ModifierFlags?
 
     internal var onSelectAutocompleteResult: (() -> Void)?
     private let itemHeight: CGFloat = 32
@@ -47,6 +48,8 @@ struct DestinationNoteAutocompleteList: View {
     func isSelectedItem(_ item: AutocompleteResult) -> Bool {
         if let i = selectedIndex {
             return elements[i].id == item.id
+        } else if item.source == .createCard && modifierFlagsPressed?.contains(.command) == true {
+            return true
         }
         return false
     }
