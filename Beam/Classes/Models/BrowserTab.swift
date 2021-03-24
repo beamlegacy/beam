@@ -42,6 +42,11 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
     private(set) var scrollX: CGFloat = 0
     private(set) var scrollY: CGFloat = 0
+    var zoomLevel: CGFloat {
+        get {
+            webView.magnification
+        }
+    }
 
     private var pixelRatio: Double = 1
 
@@ -550,8 +555,8 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
         case ScriptHandlers.beam_resize.rawValue:
             guard let dict = messageBody,
-                  let w = dict["width"] as? Double,
-                  let h = dict["height"] as? Double
+                  let width = dict["width"] as? Double,
+                  let height = dict["height"] as? Double
                     else {
                 return
             }
@@ -560,8 +565,8 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             guard let dict = messageBody,
                   let x = dict["x"] as? CGFloat,
                   let y = dict["y"] as? CGFloat,
-                  let w = dict["width"] as? CGFloat,
-                  let h = dict["height"] as? CGFloat,
+                  let width = dict["width"] as? CGFloat,
+                  let height = dict["height"] as? CGFloat,
                   let origin = dict["origin"] as? String
                     else {
                 return
@@ -569,10 +574,10 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             scrollX = x // nativeX(x: x, origin: origin)
             scrollY = y // nativeY(y: y, origin: origin)
             pointAndShoot.drawAllShoots(origin: origin)
-            if w > 0, h > 0 {
-                browsingTree.current.score.scrollRatioX = max(Float(x / w), browsingTree.current.score.scrollRatioX)
-                browsingTree.current.score.scrollRatioY = max(Float(y / h), browsingTree.current.score.scrollRatioY)
-                browsingTree.current.score.area = Float(w * h)
+            if width > 0, height > 0 {
+                browsingTree.current.score.scrollRatioX = max(Float(x / width), browsingTree.current.score.scrollRatioX)
+                browsingTree.current.score.scrollRatioY = max(Float(y / height), browsingTree.current.score.scrollRatioY)
+                browsingTree.current.score.area = Float(width * height)
                 updateScore()
             }
             Logger.shared.logDebug("Web Scrolled: \(x), \(y)", category: .web)
@@ -653,7 +658,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             } while (framesInfo[currentOrigin]?.origin != currentOrigin)
         }
         let xPos = frameX + x
-        return xPos * webView.magnification
+        return xPos * zoomLevel
     }
 
     func nativeY(y: CGFloat, origin: String) -> CGFloat {
@@ -668,15 +673,15 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             } while (framesInfo[currentOrigin]?.origin != currentOrigin)
         }
         let yPos = frameY + y
-        return yPos * webView.magnification
+        return yPos * zoomLevel
     }
 
-    private func nativeWidth(width: CGFloat) -> CGFloat {
-        return width * webView.magnification
+    func nativeWidth(width: CGFloat) -> CGFloat {
+        return width * zoomLevel
     }
 
-    private func nativeHeight(height: CGFloat) -> CGFloat {
-        return height * webView.magnification
+    func nativeHeight(height: CGFloat) -> CGFloat {
+        return height * zoomLevel
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {

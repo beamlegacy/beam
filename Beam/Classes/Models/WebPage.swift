@@ -12,6 +12,8 @@ protocol WebPage {
 
     var scrollY: CGFloat { get }
 
+    var zoomLevel: CGFloat { get }
+
     func nativeX(x: CGFloat, origin: String) -> CGFloat
 
     func nativeY(y: CGFloat, origin: String) -> CGFloat

@@ -86,8 +86,8 @@ class PointAndShoot: ObservableObject {
 
     func drawAllShoots(origin: String) {
         if shootAreas.count > 0 {
-            let xDelta = -page.scrollX
-            let yDelta = -page.scrollY
+            let xDelta = -page.scrollX * page.zoomLevel
+            let yDelta = -page.scrollY * page.zoomLevel
             shootSelectionUIs.removeAll()
             for shootArea in shootAreas {
                 let nativeArea = page.nativeArea(area: shootArea, origin: origin)
