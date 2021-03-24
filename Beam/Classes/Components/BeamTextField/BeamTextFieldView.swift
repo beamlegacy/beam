@@ -55,11 +55,10 @@ class BeamTextFieldView: NSTextField {
     }
 
     internal func setText(_ text: String, font: NSFont?, icon: NSImage? = nil) {
-        guard text != _currentText || font?.pointSize != self.font?.pointSize else {
+        guard text != _currentText else {
             return
         }
         _currentText = text
-        self.font = font
         let attrs = attributedStringAttributes(textColor ?? NSColor.white, font)
         let textString = NSAttributedString(string: text, attributes: attrs)
         self.attributedStringValue = textString
@@ -87,6 +86,7 @@ class BeamTextFieldView: NSTextField {
         isBordered = false
         drawsBackground = false
         lineBreakMode = .byTruncatingTail
+        allowsEditingTextAttributes = true
         NSEvent.addLocalMonitorForEvents(matching: .flagsChanged, handler: commandKey(evt:))
     }
 

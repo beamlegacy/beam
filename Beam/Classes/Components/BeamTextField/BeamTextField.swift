@@ -37,7 +37,6 @@ struct BeamTextField: NSViewRepresentable {
         let textField = BeamTextFieldView()
         textField.delegate = context.coordinator
         textField.focusRingType = .none
-        textField.setText(text, font: font)
 
         if let textColor = textColor {
             textField.textColor = textColor
@@ -46,6 +45,8 @@ struct BeamTextField: NSViewRepresentable {
         if let placeholderColor = placeholderColor {
             textField.placeholderColor = placeholderColor
         }
+
+        textField.setText(text, font: font)
 
         textField.onFocusChanged = { isFocused in
             self.isEditing = isFocused
@@ -85,8 +86,8 @@ struct BeamTextField: NSViewRepresentable {
         textField.setPlaceholder(placeholder, font: font)
         textField.shouldUseIntrinsicContentSize = centered
 
-        // Force focus on textField
         DispatchQueue.main.async {
+            // Force focus on textField
             let isCurrentlyFirstResponder = textField.isFirstResponder
             if isEditing && !isCurrentlyFirstResponder {
                 textField.becomeFirstResponder()
@@ -98,13 +99,13 @@ struct BeamTextField: NSViewRepresentable {
             } else if !isEditing {
                 textField.invalidateIntrinsicContentSize()
             }
-        }
 
-        // Set the range on the textField
-        if let range = self.selectedRanges?.first {
-            let pos = Int(range.startIndex)
-            let len = Int(range.endIndex - range.startIndex)
-            updateSelectedRange(textField, range: NSRange(location: pos, length: len))
+            // Set the range on the textField
+            if let range = self.selectedRanges?.first {
+                let pos = Int(range.startIndex)
+                let len = Int(range.endIndex - range.startIndex)
+                self.updateSelectedRange(textField, range: NSRange(location: pos, length: len))
+            }
         }
     }
 
