@@ -33,8 +33,8 @@ struct OmniBar: View {
         state.focusOmniBox = editing
         if editing {
             if let url = state.currentTab?.url?.absoluteString, state.mode == .web {
+                state.searchQuerySelectedRanges = [url.wholeRange]
                 state.searchQuery = url
-                state.searchQuerySelectedRanges = [0..<url.count]
             }
         } else if state.mode == .web {
             state.resetQuery()

@@ -20,21 +20,16 @@ struct ImageRunStruct {
 }
 
 public class TextLine {
-    init(ctLine: CTLine, attributedString: NSAttributedString) {
+    init(ctLine: CTLine, attributedString: NSAttributedString, skippablePositions: [Int]) {
         self.ctLine = ctLine
-
-        attributedString.enumerateAttribute((kCTRunDelegateAttributeName as NSAttributedString.Key), in: attributedString.wholeRange, options: [], using: { [unowned self] value, range, _ in
-            if value != nil {
-                self.skippablePositions.append(range.location)
-            }
-        })
+        self.skippablePositions = skippablePositions
     }
 
     var skippablePositions: [Int] = []
     var ctLine: CTLine
     var range: Range<Int> {
         let r = CTLineGetStringRange(ctLine)
-        return adjustLocation(r.location) ..< adjustLocation(r.location + r.length)
+        return toSource(r.location) ..< toSource(r.location + r.length)
     }
     var glyphCount: Int {
         CTLineGetGlyphCount(ctLine)
@@ -77,21 +72,21 @@ public class TextLine {
             let offset = caret.offset
             let middle = CGFloat(0.5 * (offset + previous))
             if middle > position.x {
-                return adjustLocation(range.location + max(0, i - 1))
+                return toSource(range.location + max(0, i - 1))
             }
             previous = offset
         }
-        return adjustLocation(range.location + range.length)
+        return toSource(range.location + range.length)
     }
 
-    func inverseLocation(_ index: Int) -> Int {
+    func fromSource(_ index: Int) -> Int {
         let skipped = skippablePositions.compactMap { pos -> Int? in
             pos < index ? pos : nil
         }.count
         return index + skipped
     }
 
-    func adjustLocation(_ index: Int) -> Int {
+    func toSource(_ index: Int) -> Int {
         let toSkip = skippablePositions.compactMap { pos -> Int? in
             pos < index ? pos : nil
         }.count
@@ -107,7 +102,7 @@ public class TextLine {
     }
 
     func offsetFor(index: Int) -> Float {
-        let index = index - adjustLocation(CTLineGetStringRange(ctLine).location)
+        let index = fromSource(index) - CTLineGetStringRange(ctLine).location
         guard index < carets.count else { return Float(frame.maxX) }
         return carets[index].offset
     }
@@ -125,8 +120,9 @@ public class TextLine {
         }
 
         // remove fake glyphs from carets:
-        for skippable in skippablePositions.reversed() {
-            carets.remove(at: skippable)
+        let r = CTLineGetStringRange(ctLine)
+        for skippable in skippablePositions.reversed() where r.location <= skippable && skippable < r.location + r.length {
+            carets.remove(at: skippable - r.location)
         }
 
         guard let last = carets.last else { return c }
@@ -137,7 +133,7 @@ public class TextLine {
     var allCarets: [Caret] {
         var c = [Caret]()
         CTLineEnumerateCaretOffsets(ctLine) { (offset, index, leading, _) in
-            c.append(Caret(offset: Float(self.frame.origin.x) + Float(offset), index: self.adjustLocation(index), isLeadingEdge: leading))
+            c.append(Caret(offset: Float(self.frame.origin.x) + Float(offset), index: self.toSource(index), isLeadingEdge: leading))
         }
 
         return c
@@ -279,11 +275,17 @@ public class TextFrame {
     func layout() {
         if lines.isEmpty {
             // swiftlint:disable:next force_cast
+            var skippablePositions = [Int]()
+            attributedString.enumerateAttribute((kCTRunDelegateAttributeName as NSAttributedString.Key), in: attributedString.wholeRange, options: [], using: { value, range, _ in
+                if value != nil {
+                    skippablePositions.append(range.location)
+                }
+            })
+
             lines = (CTFrameGetLines(ctFrame) as! [CTLine]).map {
                 let cfRange = CTLineGetStringRange($0)
                 let range = NSRange(location: cfRange.location, length: cfRange.length)
-                let subString = attributedString.attributedSubstring(from: range)
-                let line = TextLine(ctLine: $0, attributedString: subString)
+                let line = TextLine(ctLine: $0, attributedString: attributedString, skippablePositions: skippablePositions)
                 if let paragraphStyle = attributedString.attribute(.paragraphStyle, at: line.range.lowerBound, longestEffectiveRange: nil, in: range) as? NSParagraphStyle {
                     line.interlineFactor = paragraphStyle.lineHeightMultiple
                 }

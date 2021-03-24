@@ -633,7 +633,8 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
         // now add a bullet point with the quoted text:
         if let urlString = webView.url?.absoluteString, let title = webView.title {
-            let quote = text
+            var quote = text
+            quote.addAttributes([.emphasis], to: quote.wholeRange)
 
             DispatchQueue.main.async {
                 guard let current = self.addCurrentPageToNote() else { return }
@@ -693,7 +694,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             switch result {
             case let .success(read):
                 self.appendToIndexer(url, read)
-                self.updateElementWithTitle(read.title)
+                self.updateElementWithTitle(webView.title)
                 self.browsingTree.current.score.textAmount = read.content.count
                 self.updateScore()
             case let .failure(error):

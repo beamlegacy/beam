@@ -142,6 +142,36 @@ class OmniBarDestinationUITests: QuickSpec {
                 expect(noteSearchField.waitForExistence(timeout: 2)).to(beTrue())
                 expect(noteSearchField.value as? String).to(equal(self.destinationNoteTitle))
             }
+
+            it("can create note and pivot") {
+                goToWebMode()
+
+                let secondTitle = "Second Destination"
+                let title = self.app.staticTexts["DestinationNoteTitle"]
+                expect(title.waitForExistence(timeout: 2)).to(beTrue())
+                expect(title.value as? String).to(equal(todayName))
+                title.tap()
+
+                noteSearchField.typeText(secondTitle)
+                let createNoteItem = self.app.staticTexts.matching(NSPredicate(format: "identifier CONTAINS 'autocompleteResult'")).matching(NSPredicate(format: "identifier CONTAINS '-createCard'")).firstMatch
+                expect(createNoteItem.exists).to(beTrue())
+                noteSearchField.typeText("\r")
+                expect(title.value as? String).to(equal(secondTitle))
+
+                expect(self.app.buttons["pivot-card"].exists).to(beTrue())
+                self.app.buttons["pivot-card"].tap()
+
+                expect(self.app.scrollViews["noteView"].exists).to(beTrue())
+                expect(title.exists).to(beFalse())
+
+                expect(self.app.buttons["pivot-web"].exists).to(beTrue())
+                self.app.buttons["pivot-web"].tap()
+                expect(title.exists).to(beTrue())
+                expect(title.value as? String).to(equal(secondTitle))
+                title.tap()
+                expect(noteSearchField.waitForExistence(timeout: 2)).to(beTrue())
+                expect(noteSearchField.value as? String).to(equal(secondTitle))
+            }
         }
     }
 }
