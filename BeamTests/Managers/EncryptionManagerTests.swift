@@ -83,19 +83,42 @@ class EncryptionManagerTests: QuickSpec {
                 expect(text) == decryptedData.asString
             }
 
-            let keyString = "/oRhk2rBHS1/P7qK0Hu3s3HTZSlHZyw6kHxwzuqB88I="
-            let encryptedString = "kgm0JIcnycUQgRFidnEGMoMJFCkT+Y4WVK3SIhVGQjlFwJu7Wu9ZBDbH1nwKI+oVjY+jbyT9PPV2nKlLMemglR9NnkY9cN6QO9KaxbRong5qB1ahBU6jY++0rIs="
-            let clearText = "Ergonomic Cotton Gloves Jj7rvg9rigKdl9XfWKp8FdfcjExxmOzitrzz0NUT"
-            it("decrypts previously encrypted data") {
-                let key = SymmetricKey(base64EncodedString: keyString)
+            context("using ChaChaPoly") {
+                let keyString = "/oRhk2rBHS1/P7qK0Hu3s3HTZSlHZyw6kHxwzuqB88I="
+                let encryptedString = "kgm0JIcnycUQgRFidnEGMoMJFCkT+Y4WVK3SIhVGQjlFwJu7Wu9ZBDbH1nwKI+oVjY+jbyT9PPV2nKlLMemglR9NnkY9cN6QO9KaxbRong5qB1ahBU6jY++0rIs="
+                let clearText = "Ergonomic Cotton Gloves Jj7rvg9rigKdl9XfWKp8FdfcjExxmOzitrzz0NUT"
+                it("decrypts previously encrypted data") {
+                    let key = SymmetricKey(base64EncodedString: keyString)
 
-                guard let encryptedData = Data(base64Encoded: encryptedString),
-                      let decryptedData = try sut.decryptData(encryptedData, key) else {
-                    fail("Should not happen")
-                    return
+                    guard let encryptedData = Data(base64Encoded: encryptedString),
+                          let decryptedData = try sut.decryptData(encryptedData,
+                                                                  key,
+                                                                  using: EncryptionManager.Algorithm.ChaChaPoly) else {
+                        fail("Should not happen")
+                        return
+                    }
+
+                    expect(clearText) == decryptedData.asString
                 }
+            }
 
-                expect(clearText) == decryptedData.asString
+            context("Using AES GCM") {
+                let keyString = "nc0ogib3Ymdink8ys3pf2wuoZTjdQLK0MF3LwAPqP6A="
+                let encryptedString = "OMlHyj4XvkfG0hp1rCVzm9dFLN0gR6HPv4r/HRSi6IKFHYQhY4fMlN5/GqRTgxa75wUlasnFa136Hj6hXkrouSyaEvGjqLy8gn27NIpJd3GqDayNLJvE"
+                let clearText = "Small Cotton Chair dLRKbPUjmfTmnGNjd0z7iYs6MdWVJNTIOyfactPI"
+                it("decrypts previously encrypted data") {
+                    let key = SymmetricKey(base64EncodedString: keyString)
+
+                    guard let encryptedData = Data(base64Encoded: encryptedString),
+                          let decryptedData = try sut.decryptData(encryptedData,
+                                                                  key,
+                                                                  using: EncryptionManager.Algorithm.AES_GCM) else {
+                        fail("Should not happen")
+                        return
+                    }
+
+                    expect(clearText) == decryptedData.asString
+                }
             }
         }
 

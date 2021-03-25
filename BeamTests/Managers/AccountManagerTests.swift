@@ -235,7 +235,7 @@ class AccountManagerTests: QuickSpec {
                             promise.done { success in
                                 expect(success) == true
                                 done()
-                            }.catch { _ in }
+                            }.catch { fail("Should not be called: \($0)"); done() }
                         }
                         expect(sut.loggedIn).to(beTrue())
                     }
@@ -268,7 +268,7 @@ class AccountManagerTests: QuickSpec {
                             promise.then { success in
                                 expect(success) == true
                                 done()
-                            }.catch { _ in }
+                            }.catch { fail("Should not be called: \($0)"); done() }
                         }
                         expect(sut.loggedIn).to(beTrue())
                     }

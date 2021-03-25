@@ -1,8 +1,26 @@
 [
   {
     "response" : {
-      "url" : "https:\/\/api.beamapp.co\/graphql",
-      "status" : 200,
+      "headers" : {
+        "X-Content-Type-Options" : "nosniff",
+        "X-Frame-Options" : "SAMEORIGIN",
+        "X-Download-Options" : "noopen",
+        "Server" : "Cowboy",
+        "X-Request-Id" : "15272833-7a80-4436-8811-7e474106bf21",
+        "Referrer-Policy" : "strict-origin-when-cross-origin",
+        "X-Xss-Protection" : "1; mode=block",
+        "Etag" : "W\/\"7b29a7c56f1c592fb5b308a997767ae1\"",
+        "Strict-Transport-Security" : "max-age=63072000; includeSubDomains",
+        "X-Permitted-Cross-Domain-Policies" : "none",
+        "Via" : "1.1 vegur",
+        "Date" : "Wed, 24 Mar 2021 12:44:25 GMT",
+        "Cache-Control" : "max-age=0, private, must-revalidate",
+        "Vary" : "Accept, Origin",
+        "Content-Type" : "application\/json; charset=utf-8",
+        "Connection" : "keep-alive",
+        "X-Runtime" : "0.017146",
+        "Transfer-Encoding" : "Identity"
+      },
       "body" : {
         "data" : {
           "forgotPassword" : {
@@ -13,42 +31,24 @@
           }
         }
       },
-      "headers" : {
-        "Referrer-Policy" : "strict-origin-when-cross-origin",
-        "X-Request-Id" : "0692e91e-9038-42ff-b7af-7be398f9e8de",
-        "X-Frame-Options" : "SAMEORIGIN",
-        "X-Xss-Protection" : "1; mode=block",
-        "X-Download-Options" : "noopen",
-        "Content-Type" : "application\/json; charset=utf-8",
-        "Connection" : "keep-alive",
-        "Etag" : "W\/\"7b29a7c56f1c592fb5b308a997767ae1\"",
-        "Vary" : "Accept, Origin",
-        "Cache-Control" : "max-age=0, private, must-revalidate",
-        "Via" : "1.1 vegur",
-        "Strict-Transport-Security" : "max-age=63072000; includeSubDomains",
-        "X-Content-Type-Options" : "nosniff",
-        "X-Permitted-Cross-Domain-Policies" : "none",
-        "Transfer-Encoding" : "Identity",
-        "Server" : "Cowboy",
-        "Date" : "Mon, 22 Mar 2021 15:30:20 GMT",
-        "X-Runtime" : "0.084015"
-      }
+      "url" : "https:\/\/api.beamapp.co\/graphql",
+      "status" : 200
     },
     "request" : {
       "headers" : {
-        "Accept" : "application\/json",
-        "User-Agent" : "Beam client, 0.1.0 (1)",
+        "Accept-Language" : "en",
         "Content-Type" : "application\/json",
-        "Accept-Language" : "en"
+        "Accept" : "application\/json",
+        "User-Agent" : "Beam client, 0.1.0 (1)"
       },
+      "method" : "POST",
       "url" : "https:\/\/api.beamapp.co\/graphql",
       "body" : {
         "query" : "mutation ForgotPassword($email: Email!) {\n  forgotPassword(input: {email: $email}) {\n    errors { path message}\n    success\n  }\n}\n",
         "variables" : {
           "email" : "fabien+test@beamapp.co"
         }
-      },
-      "method" : "POST"
+      }
     }
   }
 ]
