@@ -35,10 +35,32 @@ struct AccountsView: View {
         Preferences.Container(contentWidth: contentWidth) {
             Preferences.Section(title: "Beam Account:") {
                 // TODO: loc
-                TextField("johnnyappleseed@apple.com", text: $email).textFieldStyle(RoundedBorderTextFieldStyle()).frame(maxWidth: 200)
+                if #available(OSX 11.0, *) {
+                    TextField("johnnyappleseed@apple.com", text: $email)
+                        .textContentType(.username)
+                        .disabled(loggedIn || loading)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .frame(maxWidth: 200)
+                } else {
+                    TextField("johnnyappleseed@apple.com", text: $email)
+                        .disabled(loggedIn || loading)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .frame(maxWidth: 200)
+                }
 
                 // TODO: loc
-                SecureField("Enter your password", text: $password).textFieldStyle(RoundedBorderTextFieldStyle()).frame(maxWidth: 200)
+                if #available(OSX 11.0, *) {
+                    SecureField("Enter your password", text: $password)
+                        .textContentType(.password)
+                        .disabled(loggedIn || loading)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .frame(maxWidth: 200)
+                } else {
+                    SecureField("Enter your password", text: $password)
+                        .disabled(loggedIn || loading)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .frame(maxWidth: 200)
+                }
                 HStack {
                     SignInButton
                     SignUpButton
@@ -48,7 +70,18 @@ struct AccountsView: View {
                     LogoutButton
                 }
             }
-		}
+        }.onAppear(perform: {
+            // Fetch Safari credentials if not already logged in
+            guard !self.loggedIn else { return }
+
+            /*
+             This is not implemented due to Apple limitations
+            accountManager.fetchSafariCredentials { (username, password) in
+                if let username = username, !username.isEmpty { self.email = username }
+                if let password = password, !password.isEmpty { self.password = password }
+            }
+             */
+        })
 	}
 
     @State private var showingSignInAlert = false
