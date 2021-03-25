@@ -66,9 +66,12 @@ class DocumentAPIType: Codable {
         do {
             let decodedStruct = try decoder.decode(DataEncryption.self, from: encodedData.asData)
             guard let encodedString = decodedStruct.data else { return }
+            guard let encryptionName = decodedStruct.encryptionName,
+                  let algorithm = EncryptionManager.Algorithm(rawValue: encryptionName) else { return }
 
-            data = try EncryptionManager.shared.decryptString(encodedString)
+            data = try EncryptionManager.shared.decryptString(encodedString, using: algorithm)
             encryptedData = encodedData
+
         } catch DecodingError.dataCorrupted {
             Logger.shared.logError("DecodingError.dataCorrupted", category: .encryption)
             Logger.shared.logDebug("Encoded data: \(encodedData)", category: .encryption)
@@ -100,7 +103,7 @@ class DocumentAPIType: Codable {
         guard let clearData = data else { return }
 
         let encryptedClearData = try EncryptionManager.shared.encryptString(clearData)
-        let encryptStruct = DataEncryption(encryptionName: EncryptionManager.shared.name,
+        let encryptStruct = DataEncryption(encryptionName: EncryptionManager.Algorithm.AES_GCM.rawValue,
                                            data: encryptedClearData)
 
         let encoder = JSONEncoder()

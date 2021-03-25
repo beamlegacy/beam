@@ -1,26 +1,6 @@
 [
   {
     "response" : {
-      "headers" : {
-        "Vary" : "Accept, Origin",
-        "Etag" : "W\/\"4166932be5502b5037593e3e6d400364\"",
-        "X-Permitted-Cross-Domain-Policies" : "none",
-        "X-Download-Options" : "noopen",
-        "X-Frame-Options" : "SAMEORIGIN",
-        "Referrer-Policy" : "strict-origin-when-cross-origin",
-        "Strict-Transport-Security" : "max-age=63072000; includeSubDomains",
-        "Content-Type" : "application\/json; charset=utf-8",
-        "Date" : "Mon, 22 Mar 2021 15:30:30 GMT",
-        "Server" : "Cowboy",
-        "X-Content-Type-Options" : "nosniff",
-        "X-Request-Id" : "7093e24d-009d-4e7a-b0cb-620af193bbe3",
-        "Cache-Control" : "max-age=0, private, must-revalidate",
-        "X-Runtime" : "0.042746",
-        "X-Xss-Protection" : "1; mode=block",
-        "Via" : "1.1 vegur",
-        "Connection" : "keep-alive",
-        "Transfer-Encoding" : "Identity"
-      },
       "url" : "https:\/\/api.beamapp.co\/graphql",
       "status" : 200,
       "body" : {
@@ -28,137 +8,58 @@
           "me" : {
             "documents" : [
               {
-                "id" : "4fad4528-d939-49f9-8b32-1c38ed08a336",
-                "checksum" : "c12cfb116e0f30d0397153e575d7e2c0",
-                "title" : "Intelligent Plastic Shirt OupLJHFyPLQmeD3ODXQWes74Dkv7nIIsJBKoFC8Z",
-                "data" : "whatever binary data",
-                "updatedAt" : "2021-03-22T12:09:48Z",
-                "createdAt" : "2021-03-22T12:09:48Z",
-                "isPublic" : false
-              },
-              {
-                "id" : "7ddb2cb4-b3a9-483f-9f99-3bdc1a854912",
-                "checksum" : "c12cfb116e0f30d0397153e575d7e2c0",
-                "title" : "Intelligent Rubber Hat hob1prjjPwZajYDqX3zJqzOXDx9IOkkKDSQ6CfCL",
-                "data" : "whatever binary data",
-                "updatedAt" : "2021-03-22T12:09:48Z",
-                "createdAt" : "2021-03-22T12:09:48Z",
-                "isPublic" : false
-              },
-              {
-                "id" : "4ef85923-b3bf-4856-b7a3-abdd2bd7646d",
-                "checksum" : "c12cfb116e0f30d0397153e575d7e2c0",
-                "title" : "Intelligent Granite Shoes XxS4Wfv7pKeOMgUza7aGcPmDztZUczPlUgwkCEFS",
-                "data" : "whatever binary data",
-                "updatedAt" : "2021-03-22T12:09:48Z",
-                "createdAt" : "2021-03-22T12:09:48Z",
-                "isPublic" : false
-              },
-              {
-                "id" : "a4fc58c2-0c32-4d21-bbb4-add72bea0c15",
-                "checksum" : "c12cfb116e0f30d0397153e575d7e2c0",
-                "title" : "Rustic Steel Shirt yQTMVwkSd6XJkjAOWMFIiJUALO1rOTyG6PXmgzMT",
-                "data" : "whatever binary data",
-                "updatedAt" : "2021-03-22T12:09:48Z",
-                "createdAt" : "2021-03-22T12:09:48Z",
-                "isPublic" : false
-              },
-              {
-                "id" : "182342df-acd8-4816-9e75-34c365ff656e",
-                "checksum" : "c12cfb116e0f30d0397153e575d7e2c0",
-                "title" : "Fantastic Steel Shoes JwDaZxVenYPkmRzQBPRFJNtpoHrYp1fa5T2BZz5A",
-                "data" : "whatever binary data",
-                "updatedAt" : "2021-03-22T12:09:48Z",
-                "createdAt" : "2021-03-22T12:09:48Z",
-                "isPublic" : false
-              },
-              {
-                "id" : "67c88add-d08a-4cc7-87b4-d1b8ffd7c9ad",
-                "checksum" : "6ef08ef1607758490489f72e888af692",
-                "title" : "Rustic Wooden Pants q1O4hiGLtYaO14ewzE1pKbyPxhm9C8emIGcd8MBC",
-                "data" : "Rustic Wooden Pants q1O4hiGLtYaO14ewzE1pKbyPxhm9C8emIGcd8MBC",
-                "updatedAt" : "2021-03-22T12:09:48Z",
-                "createdAt" : "2021-03-22T12:09:48Z",
-                "isPublic" : false
-              },
-              {
-                "id" : "3d312fc7-f7bf-479a-ac4f-62647d5911e4",
-                "checksum" : "c12cfb116e0f30d0397153e575d7e2c0",
-                "title" : "Incredible Steel Shirt dxCdpxZbbs7AEzy8L44TnU0CBggOurb6fpaXo1FJ",
-                "data" : "whatever binary data",
-                "updatedAt" : "2021-03-22T12:09:48Z",
-                "createdAt" : "2021-03-22T12:09:48Z",
-                "isPublic" : false
-              },
-              {
-                "id" : "0e41c148-06f2-41d1-b002-2ff33f41403a",
-                "checksum" : "c12cfb116e0f30d0397153e575d7e2c0",
-                "title" : "Intelligent Steel Computer H4jvfi7WQsduaFew4EGjUpFbQgBKVnUvy8lZ9B3d",
-                "data" : "whatever binary data",
-                "updatedAt" : "2021-03-22T12:09:48Z",
-                "createdAt" : "2021-03-22T12:09:48Z",
-                "isPublic" : false
-              },
-              {
-                "id" : "42aacad9-9b4e-4e66-8257-d7d6a562b8a9",
-                "checksum" : "c12cfb116e0f30d0397153e575d7e2c0",
-                "title" : "Incredible Cotton Hat YfDeCzbZNTQrhj9brkfHxMq6xO4MZ5eNlZNH4krV",
-                "data" : "whatever binary data",
-                "updatedAt" : "2021-03-22T12:09:48Z",
-                "createdAt" : "2021-03-22T12:09:48Z",
-                "isPublic" : false
-              },
-              {
-                "id" : "e4f8a9a3-6838-4aa6-a421-f0f4ab8e0315",
-                "checksum" : "c12cfb116e0f30d0397153e575d7e2c0",
-                "title" : "Intelligent Concrete Computer aJc3hP66nTmxZ8cC6eJpxrqzrtPvk3pli2XaVYH6",
-                "data" : "whatever binary data",
-                "updatedAt" : "2021-03-22T12:09:48Z",
-                "createdAt" : "2021-03-22T12:09:48Z",
-                "isPublic" : false
-              },
-              {
-                "id" : "e19895eb-ba19-4e12-8988-35c796553198",
-                "checksum" : "6981c2cb04811356aa71dd9616212579",
-                "title" : "Oracle of Seasons - Oracle of Ages",
-                "data" : "\"whatever binary data\"",
-                "updatedAt" : "2021-03-22T12:09:48Z",
-                "createdAt" : "2021-03-22T15:28:59Z",
-                "isPublic" : false
-              },
-              {
-                "id" : "8e7b8cc6-d14c-4768-946f-91e24d3ff590",
-                "checksum" : "499b9768ceddbc09e806cfa1ce0b1b2a",
-                "title" : "22 march 2021",
-                "data" : "{\n  \"readOnly\" : false,\n  \"score\" : 0,\n  \"open\" : true,\n  \"id\" : \"8E7B8CC6-D14C-4768-946F-91E24D3FF590\",\n  \"title\" : \"22 March 2021\",\n  \"visitedSearchResults\" : [\n\n  ],\n  \"text\" : {\n    \"ranges\" : [\n      {\n        \"string\" : \"\"\n      }\n    ]\n  },\n  \"creationDate\" : 638119765.90122294,\n  \"type\" : \"journal\",\n  \"children\" : [\n    {\n      \"creationDate\" : 638119765.962731,\n      \"id\" : \"AAAC5FE4-564F-455D-8BAA-D9E0A2606E21\",\n      \"readOnly\" : false,\n      \"score\" : 0,\n      \"open\" : true,\n      \"text\" : {\n        \"ranges\" : [\n          {\n            \"string\" : \"\"\n          }\n        ]\n      }\n    }\n  ],\n  \"searchQueries\" : [\n\n  ]\n}",
-                "updatedAt" : "2021-03-22T15:29:26Z",
-                "createdAt" : "2021-03-22T15:29:25Z",
+                "id" : "db9d2e5b-a2c3-437e-879c-e1b5ba5b71d2",
+                "checksum" : "4c3949e735a8bc0b9804cf905d441d18",
+                "title" : "24 march 2021",
+                "data" : "{\n  \"readOnly\" : false,\n  \"score\" : 0,\n  \"open\" : true,\n  \"id\" : \"DB9D2E5B-A2C3-437E-879C-E1B5BA5B71D2\",\n  \"title\" : \"24 March 2021\",\n  \"visitedSearchResults\" : [\n\n  ],\n  \"text\" : {\n    \"ranges\" : [\n      {\n        \"string\" : \"\"\n      }\n    ]\n  },\n  \"creationDate\" : 638282390.82649004,\n  \"type\" : \"journal\",\n  \"children\" : [\n    {\n      \"creationDate\" : 638282390.89208698,\n      \"id\" : \"66F94D40-0DDD-4265-AD8A-B7832190F3AB\",\n      \"readOnly\" : false,\n      \"score\" : 0,\n      \"open\" : true,\n      \"text\" : {\n        \"ranges\" : [\n          {\n            \"string\" : \"\"\n          }\n        ]\n      }\n    }\n  ],\n  \"searchQueries\" : [\n\n  ]\n}",
+                "updatedAt" : "2021-03-24T12:39:50Z",
+                "createdAt" : "2021-03-24T12:39:50Z",
                 "isPublic" : false
               },
               {
                 "id" : "a6117be6-7624-4aa2-b611-dcd400d82e97",
-                "checksum" : "966c686a220020cfbabb2855a1b66c51",
+                "checksum" : "8d2f7573dcb8925b2b36e47af6e7a4a3",
                 "title" : "4 March 2021",
-                "data" : "{\"encryptionName\":\"ChaChaPoly\",\"data\":\"nc5KvUbejyrprTfEAi+gIDvnVIvTSnRyFPwBROvejKN1KVFC26B2tOyuW2s14i9cHONV86B3vFJ5276+XEePX\\\/zHnEWY0XuWtMyp2qnX1nX4Lo+B1lgdci2z0wtfDKXm\\\/3Ii2wCA0jIFo1LLJnCaJh2qCNtSbhpjGG3OSFUiLg+XnDDseJ2dMrMTH7YMJPfXKuIL7uaP4FxFmzANhNVwbtOoQnWrFZ3gBs5VlxcPn0l9\\\/IKCqaQ1jeIYcjnro2+VdOrRk70F0xiHtLMnhSyt\\\/kIqGBLxS2ND6UyTRwq1fDhQSLmJUv4kSgaUkGWueEuwH0nYZ0w7ylnqR6AJNsXJXcXLJAM6YQqyP8NvG7sBeNz54FMiGInP\\\/xWCI0PbtWJRZVU57YBUtyMQeB1jra4Gb7Twy9j5N5JbUMwt7h\\\/EAvxHWK2Lt3v6yGJYzYFtYd\\\/hIlkB73UAFHkMSM83EEzIqyXNX0MDcNLmbd++\\\/OfY5JarSiLKnvgYxWivGMt\\\/nEZxVKA7UR\\\/Dii9cE5MdyCiZ4h2w2qt7m2wIcDAi2fwR4ziFhdv37iz4BsVSwp\\\/AOM1d3cixUJ0vHDGOwJ5hNyracvmctO8fE6K0SY\\\/JUB1AneR4dQYB7usY+c378i1Ah5cRt5XbljTb4xtv\\\/befek7c5oMNlp\\\/ng+dpko9lDqgRjQOIKY\\\/tvVCZ0tSInZbtOzfzbH7pU3MhQFunYmf9N\\\/TPNxvgetwWpwO9qvGphK6JqDzUAsG8k36t18Vzv2lUld5eYkd5A3Kkxq\\\/OpOEWt50HdDhHDUNodqJ6zMVIB+luWrBO0HrU\\\/3ZuRV9h+b2kiG+15tEyq82HmuCj71qn8R4bdp9OhqHq1iC0jDN2k4C6fIF9dkbZTDWzSFq1XZnBKhpwNe8z1+pstqS9x1BWuivSwxyZKTOi3\\\/0SC33fIY2RtLmmjc1xSTpu\"}",
-                "updatedAt" : "2021-03-22T15:30:29Z",
-                "createdAt" : "2021-03-22T15:30:27Z",
+                "data" : "{\"encryptionName\":\"AES_GCM\",\"data\":\"UWHJg1ZNQ0ugw1AXt565TKXt9PXfEQign0yR3XXw+xGQpa6IVYqNRb\\\/4oK8+8+fbZEdrCnk6ZTIUY7jRbBXRB1VkFz6g+2vspuQvnKmcV5rr0go\\\/Tt\\\/RGvXKa++CuBarV3cIeVFqMoocP3GID4X7TTMhb3UXSDfKr19ako3r\\\/LPbtG3rvY52X8\\\/MBJFI3wpJ3VRRjcexH53vwT4FQdPDDxZH7bsQ1e5U0jD6MdhpDqHO+RkcqRgFPgLuNVMC0zoUbH1SeceYbEhvoA9INJAcuLY1oJf+naX3LSGbV06wGad\\\/hNtHBAVdocNRBhpJ94XH6fTzATqxOcWaH0yjkyY0\\\/gzUO053de9rJ6Fhme03DKC2IovADA76VGCAsrcURoqm89MBLDcG6jhT+gNbfWLrICFLxWwevXUvwM1Qd0KeHVqCTP69GXa0oYtbFL3TyMjWXlqMGnxXStCrGx5KG7Kz8qFohyYhoEPEIp6W0zZr1zD7Gq68g32xxkuTusFoSzeGDrIebv3Qam4a\\\/ueuklc7VrB1oUwb0MQuTxP+xZOd\\\/GXJ8yzB5vCD1IGdQdgyWyotaNhdCrEaGH2Q04QflmnK88ZPYz3Kh9KVjUocPt93SoQizQu9AxHBTXrFpUa3Pc01Xp1AsWf09LY4fFZYVhYhdRVNs\\\/635eQGxBWbHLOqSv\\\/f9go\\\/fX+cdIuDKHpf+cIHsR8s\\\/j5QI\\\/z3jc1Qw7xKVD6AS+Xen\\\/l02ltAxFpNuhA3gBcQXJywoehJ0r\\\/D7\\\/qLST+6knJfaeAY+l8gfyzLF0yZ36grOEAsVRTiWMaBGj++RW6axgKRx8T9ssBbCOvyX3ftdQx6RmIh2Gbycs0k91LEPe1vAqazXGMwtpk\\\/VULV8ZzhGDtMBIryXcRf52XMjcS03Yra3XOaRTSsjp\\\/941MG++EnEWDmlPcDXSkOqJlQnGCyg+DP\"}",
+                "updatedAt" : "2021-03-24T12:44:31Z",
+                "createdAt" : "2021-03-24T12:44:30Z",
                 "isPublic" : false
               }
             ]
           }
         }
+      },
+      "headers" : {
+        "Cache-Control" : "max-age=0, private, must-revalidate",
+        "X-Frame-Options" : "SAMEORIGIN",
+        "X-Request-Id" : "aaed4929-9491-4422-bd0c-0fab9883c870",
+        "Referrer-Policy" : "strict-origin-when-cross-origin",
+        "Date" : "Wed, 24 Mar 2021 12:44:32 GMT",
+        "Transfer-Encoding" : "Identity",
+        "X-Xss-Protection" : "1; mode=block",
+        "Server" : "Cowboy",
+        "X-Download-Options" : "noopen",
+        "Etag" : "W\/\"55cd0b44c03af57c18f0026c078ccc38\"",
+        "X-Permitted-Cross-Domain-Policies" : "none",
+        "X-Runtime" : "0.014681",
+        "Vary" : "Accept, Origin",
+        "Via" : "1.1 vegur",
+        "Strict-Transport-Security" : "max-age=63072000; includeSubDomains",
+        "X-Content-Type-Options" : "nosniff",
+        "Content-Type" : "application\/json; charset=utf-8",
+        "Connection" : "keep-alive"
       }
     },
     "request" : {
-      "headers" : {
-        "Content-Type" : "application\/json",
-        "Accept-Language" : "en",
-        "User-Agent" : "Beam client, 0.1.0 (1)",
-        "Authorization" : "Bearer eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJmZWNkMTFkMy0yZDZmLTQ3OTgtYTM4YS1lMjkzN2JmZGZmNjIiLCJzdWIiOiJlMTQwYzU5YS1lYmIyLTQ3YjEtYmU3OC05ZDJkNTYyNWRjYWQiLCJzY3AiOiJ1c2VyIiwiYXVkIjpudWxsLCJpYXQiOjE2MTY0MjcwMjcsImV4cCI6MTYxOTA1Njc3M30.5_8DmqzToMXUMBwMBWtesu64JGWtoXsoMx6R1wUSek4",
-        "Accept" : "application\/json"
-      },
       "url" : "https:\/\/api.beamapp.co\/graphql",
       "method" : "POST",
+      "headers" : {
+        "User-Agent" : "Beam client, 0.1.0 (1)",
+        "Accept" : "application\/json",
+        "Authorization" : "Bearer eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJmZWNkMTFkMy0yZDZmLTQ3OTgtYTM4YS1lMjkzN2JmZGZmNjIiLCJzdWIiOiJlMTQwYzU5YS1lYmIyLTQ3YjEtYmU3OC05ZDJkNTYyNWRjYWQiLCJzY3AiOiJ1c2VyIiwiYXVkIjpudWxsLCJpYXQiOjE2MTY1ODk4NzAsImV4cCI6MTYxOTIxOTYxNn0.1yBfXv3pMC3ncYRJdIJjD5cV6wrwM6028FyzIW37GLE",
+        "Content-Type" : "application\/json",
+        "Accept-Language" : "en"
+      },
       "body" : {
         "query" : "query documents {\n  me {\n    documents {\n      id\n      checksum\n      title\n      data\n      createdAt\n      updatedAt\n      isPublic\n    }\n  }\n}\n",
         "variables" : {
@@ -169,44 +70,25 @@
   },
   {
     "request" : {
+      "method" : "POST",
       "body" : {
         "query" : "mutation DeleteDocument($id: ID!) {\n  deleteDocument(input: {document: {id: $id}}) {\n    document {\n      id\n    }\n    errors {\n      path\n      message\n    }\n  }\n}\n",
         "variables" : {
           "id" : "995d94e1-e0df-4eca-93e6-8778984bcd18"
         }
       },
-      "url" : "https:\/\/api.beamapp.co\/graphql",
-      "method" : "POST",
       "headers" : {
-        "Accept" : "application\/json",
-        "Accept-Language" : "en",
-        "Content-Type" : "application\/json",
         "User-Agent" : "Beam client, 0.1.0 (1)",
-        "Authorization" : "Bearer eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJmZWNkMTFkMy0yZDZmLTQ3OTgtYTM4YS1lMjkzN2JmZGZmNjIiLCJzdWIiOiJlMTQwYzU5YS1lYmIyLTQ3YjEtYmU3OC05ZDJkNTYyNWRjYWQiLCJzY3AiOiJ1c2VyIiwiYXVkIjpudWxsLCJpYXQiOjE2MTY0MjcwMjcsImV4cCI6MTYxOTA1Njc3M30.5_8DmqzToMXUMBwMBWtesu64JGWtoXsoMx6R1wUSek4"
-      }
+        "Accept-Language" : "en",
+        "Authorization" : "Bearer eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJmZWNkMTFkMy0yZDZmLTQ3OTgtYTM4YS1lMjkzN2JmZGZmNjIiLCJzdWIiOiJlMTQwYzU5YS1lYmIyLTQ3YjEtYmU3OC05ZDJkNTYyNWRjYWQiLCJzY3AiOiJ1c2VyIiwiYXVkIjpudWxsLCJpYXQiOjE2MTY1ODk4NzAsImV4cCI6MTYxOTIxOTYxNn0.1yBfXv3pMC3ncYRJdIJjD5cV6wrwM6028FyzIW37GLE",
+        "Accept" : "application\/json",
+        "Content-Type" : "application\/json"
+      },
+      "url" : "https:\/\/api.beamapp.co\/graphql"
     },
     "response" : {
       "url" : "https:\/\/api.beamapp.co\/graphql",
-      "headers" : {
-        "Via" : "1.1 vegur",
-        "Server" : "Cowboy",
-        "Connection" : "keep-alive",
-        "X-Request-Id" : "0ce2b7c1-5e38-44e4-93cd-38d8177f5900",
-        "Content-Type" : "application\/json; charset=utf-8",
-        "X-Xss-Protection" : "1; mode=block",
-        "X-Download-Options" : "noopen",
-        "Referrer-Policy" : "strict-origin-when-cross-origin",
-        "X-Runtime" : "0.060674",
-        "X-Permitted-Cross-Domain-Policies" : "none",
-        "X-Content-Type-Options" : "nosniff",
-        "Vary" : "Accept, Origin",
-        "Transfer-Encoding" : "Identity",
-        "Etag" : "W\/\"295505cc83cd26fa87b03436d0d35c20\"",
-        "X-Frame-Options" : "SAMEORIGIN",
-        "Strict-Transport-Security" : "max-age=63072000; includeSubDomains",
-        "Cache-Control" : "max-age=0, private, must-revalidate",
-        "Date" : "Mon, 22 Mar 2021 15:30:30 GMT"
-      },
+      "status" : 200,
       "body" : {
         "data" : {
           "deleteDocument" : {
@@ -217,7 +99,26 @@
           }
         }
       },
-      "status" : 200
+      "headers" : {
+        "Server" : "Cowboy",
+        "X-Frame-Options" : "SAMEORIGIN",
+        "Etag" : "W\/\"295505cc83cd26fa87b03436d0d35c20\"",
+        "Strict-Transport-Security" : "max-age=63072000; includeSubDomains",
+        "Cache-Control" : "max-age=0, private, must-revalidate",
+        "X-Runtime" : "0.017416",
+        "X-Xss-Protection" : "1; mode=block",
+        "Date" : "Wed, 24 Mar 2021 12:44:32 GMT",
+        "X-Request-Id" : "f81e1743-6c65-4138-9d7c-2269a8b5af0d",
+        "X-Download-Options" : "noopen",
+        "Connection" : "keep-alive",
+        "X-Permitted-Cross-Domain-Policies" : "none",
+        "X-Content-Type-Options" : "nosniff",
+        "Content-Type" : "application\/json; charset=utf-8",
+        "Vary" : "Accept, Origin",
+        "Transfer-Encoding" : "Identity",
+        "Referrer-Policy" : "strict-origin-when-cross-origin",
+        "Via" : "1.1 vegur"
+      }
     }
   }
 ]

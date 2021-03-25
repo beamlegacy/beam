@@ -96,7 +96,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                         let remoteStruct = helper.fetchOnAPI(docStruct)
                         expect(remoteStruct?.id) == docStruct.uuidString
                         expect(remoteStruct?.data) == docStruct.data.asString
-                        expect(remoteStruct?.encryptedData).to(match("encryptionName\":\"ChaChaPoly"))
+                        expect(remoteStruct?.encryptedData).to(match("encryptionName\":\"AES_GCM"))
 
                         Configuration.encryptionEnabled = false
                     }
@@ -144,7 +144,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                             let remoteStruct = helper.fetchOnAPI(docStruct)
                             expect(remoteStruct?.id) == docStruct.uuidString
                             expect(remoteStruct?.data) == docStruct.data.asString
-                            expect(remoteStruct?.encryptedData).to(match("encryptionName\":\"ChaChaPoly"))
+                            expect(remoteStruct?.encryptedData).to(match("encryptionName\":\"AES_GCM"))
 
                             Configuration.encryptionEnabled = false
                         }
@@ -193,7 +193,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                             let remoteStruct = helper.fetchOnAPI(docStruct)
                             expect(remoteStruct?.id) == docStruct.uuidString
                             expect(remoteStruct?.data) == docStruct.data.asString
-                            expect(remoteStruct?.encryptedData).to(match("encryptionName\":\"ChaChaPoly"))
+                            expect(remoteStruct?.encryptedData).to(match("encryptionName\":\"AES_GCM"))
 
                             Configuration.encryptionEnabled = false
                         }
@@ -999,7 +999,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                                 let semaphore = DispatchSemaphore(value: 0)
                                 _ = try? DocumentRequest().fetchDocument(docStruct.uuidString) { result in
                                     let documentAPIType = try? result.get()
-                                    expect(documentAPIType?.encryptedData).to(match("encryptionName\":\"ChaChaPoly"))
+                                    expect(documentAPIType?.encryptedData).to(match("encryptionName\":\"AES_GCM"))
 
                                     semaphore.signal()
                                 }
@@ -1116,7 +1116,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                                 let semaphore = DispatchSemaphore(value: 0)
                                 _ = try? DocumentRequest().fetchDocument(docStruct.uuidString) { result in
                                     let documentAPIType = try? result.get()
-                                    expect(documentAPIType?.encryptedData).to(match("encryptionName\":\"ChaChaPoly"))
+                                    expect(documentAPIType?.encryptedData).to(match("encryptionName\":\"AES_GCM"))
 
                                     semaphore.signal()
                                 }
@@ -1239,7 +1239,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                                 let semaphore = DispatchSemaphore(value: 0)
                                 _ = try? DocumentRequest().fetchDocument(docStruct.uuidString) { result in
                                     let documentAPIType = try? result.get()
-                                    expect(documentAPIType?.encryptedData).to(match("encryptionName\":\"ChaChaPoly"))
+                                    expect(documentAPIType?.encryptedData).to(match("encryptionName\":\"AES_GCM"))
 
                                     semaphore.signal()
                                 }
