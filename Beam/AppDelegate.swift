@@ -77,6 +77,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func syncDocuments() {
         guard Configuration.env != "test" else { return }
+        guard AuthenticationManager.shared.isAuthenticated else { return }
 
         // With Vinyl and Network test recording, and this executing, it generates async network
         // calls and randomly fails.
