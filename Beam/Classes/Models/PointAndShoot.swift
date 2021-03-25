@@ -73,28 +73,26 @@ class PointAndShoot: ObservableObject {
 
     let shootColor = Color(red: 1, green: 0, blue: 0, opacity: 0.1)
 
-    private func drawShoot(shootArea: NSRect, xDelta: CGFloat, yDelta: CGFloat) {
+    private func drawShoot(shootArea: NSRect, xDelta: CGFloat, yDelta: CGFloat) -> SelectionUI {
         let newX = shootArea.minX + xDelta
         let newY = shootArea.minY + yDelta
-        let shootSelectionUI: SelectionUI = SelectionUI(
+        return SelectionUI(
                 rect: NSRect(x: newX, y: newY, width: shootArea.width, height: shootArea.height),
                 animated: false,
                 color: shootColor
         )
-        shootSelectionUIs.append(shootSelectionUI)
     }
 
     func drawAllShoots(origin: String) {
+        shootSelectionUIs.removeAll()
         if shootAreas.count > 0 {
             let xDelta = -page.scrollX * page.zoomLevel
             let yDelta = -page.scrollY * page.zoomLevel
-            shootSelectionUIs.removeAll()
             for shootArea in shootAreas {
                 let nativeArea = page.nativeArea(area: shootArea, origin: origin)
-                drawShoot(shootArea: nativeArea, xDelta: xDelta, yDelta: yDelta)
+                let shootSelectionUI = drawShoot(shootArea: nativeArea, xDelta: xDelta, yDelta: yDelta)
+                shootSelectionUIs.append(shootSelectionUI)
             }
-        } else {
-            clearAllShoots()
         }
     }
 
@@ -105,11 +103,8 @@ class PointAndShoot: ObservableObject {
         }
     }
 
-    func addShoot(area: NSRect, origin: String) {
+    func addShoot(area: NSRect) {
         shootAreas.append(area)
-        if (config.native) {
-            drawAllShoots(origin: origin)
-        }
     }
 
     func clearAllShoots() {

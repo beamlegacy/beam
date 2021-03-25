@@ -280,35 +280,42 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     var backListSize = 0
 
     private func setupObservers() {
-        webView.publisher(for: \.title).sink { v in
-            self.title = v ?? "loading..."
-            self.updateElementWithTitle()
-        }.store(in: &scope)
-        webView.publisher(for: \.url).sink { v in
-            self.url = v
-            if v?.absoluteString != nil {
-                self.updateFavIcon()
-//                self.browsingTree.current.score.openIndex = self.navigationCount
-//                self.updateScore()
-//                self.navigationCount = 0
-            }
-        }.store(in: &scope)
-        webView.publisher(for: \.isLoading).sink { v in
-            withAnimation {
-                self.isLoading = v
-            }
-        }.store(in: &scope)
-        webView.publisher(for: \.estimatedProgress).sink { v in
-            withAnimation {
-                self.estimatedProgress = v
-            }
-        }.store(in: &scope)
-        webView.publisher(for: \.hasOnlySecureContent).sink { v in
-            self.hasOnlySecureContent = v
-        }.store(in: &scope)
-        webView.publisher(for: \.serverTrust).sink { v in
-            self.serverTrust = v
-        }.store(in: &scope)
+        Logger.shared.logInfo("setupObservers", category: .general)
+        webView.publisher(for: \.title)
+                .sink { v in
+                    self.title = v ?? "loading..."
+                    self.updateElementWithTitle()
+                }.store(in: &scope)
+        webView.publisher(for: \.url)
+                .sink { v in
+                    self.url = v
+                    if v?.absoluteString != nil {
+                        self.updateFavIcon()
+                        // self.browsingTree.current.score.openIndex = self.navigationCount
+                        // self.updateScore()
+                        // self.navigationCount = 0
+                    }
+                }.store(in: &scope)
+        webView.publisher(for: \.isLoading)
+                .sink { v in
+                    withAnimation {
+                        self.isLoading = v
+                    }
+                }.store(in: &scope)
+        webView.publisher(for: \.estimatedProgress)
+                .sink { v in
+                    withAnimation {
+                        self.estimatedProgress = v
+                    }
+                }.store(in: &scope)
+        webView.publisher(for: \.hasOnlySecureContent)
+                .sink { v in
+                    self.hasOnlySecureContent = v
+                }.store(in: &scope)
+        webView.publisher(for: \.serverTrust)
+                .sink { v in
+                    self.serverTrust = v
+                }.store(in: &scope)
         webView.publisher(for: \.canGoBack).sink { v in
             self.canGoBack = v
         }.store(in: &scope)
@@ -412,13 +419,14 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                 browsingTree.goForward()
             }
         }
-
+        pointAndShoot.clearAllShoots()
         currentBackForwardItem = webView.backForwardList.currentItem
     }
 
     // WKNavigationDelegate:
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         element = nil
+        pointAndShoot.clearAllShoots()
         decisionHandler(.allow)
     }
 
@@ -527,11 +535,8 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                     else {
                 return
             }
-            let rectArea = jsToRect(jsArea: area)
-            let shootArea = nativeArea(area: rectArea, origin: origin)
-            pointAndShoot.clearAllShoots()  // TODO: Support multiple shoots
-            pointAndShoot.addShoot(area: shootArea, origin: origin)
-            Logger.shared.logInfo("Web shoot point: \(type), \(data), \(shootArea)", category: .web)
+            shootAreas(areas: [area], origin: origin)
+            Logger.shared.logInfo("Web shoot point: \(type), \(data), \(area)", category: .web)
 
         case ScriptHandlers.beam_textSelected.rawValue:
             guard let dict = messageBody,
@@ -542,24 +547,11 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                   let origin = dict["origin"] as? String,
                   !html.isEmpty
                     else {
+                Logger.shared.logError("Ignored text selection event: \(messageBody)", category: .general)
                 return
             }
-            pointAndShoot.clearAllShoots()
-            for area in (areas) {
-                let jsArea = area as AnyObject
-                let rectArea = jsToRect(jsArea: jsArea)
-                let textArea = nativeArea(area: rectArea, origin: origin)
-                pointAndShoot.addShoot(area: textArea, origin: origin)
-            }
+            shootAreas(areas: areas, origin: origin)
             noteTextSelection(url: webView.url!, html: html)
-
-        case ScriptHandlers.beam_resize.rawValue:
-            guard let dict = messageBody,
-                  let width = dict["width"] as? Double,
-                  let height = dict["height"] as? Double
-                    else {
-                return
-            }
 
         case ScriptHandlers.beam_onScrolled.rawValue:
             guard let dict = messageBody,
@@ -569,6 +561,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                   let height = dict["height"] as? CGFloat,
                   let origin = dict["origin"] as? String
                     else {
+                Logger.shared.logError("Ignored scroll event: \(messageBody)", category: .general)
                 return
             }
             scrollX = x // nativeX(x: x, origin: origin)
@@ -584,26 +577,58 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
         case ScriptHandlers.beam_frameBounds.rawValue:
             guard let dict = messageBody,
-                  let origin = dict["origin"] as? String ?? originalQuery,
-                  let href = dict["href"] as? String,
-                  let bounds = dict["bounds"]
+                  let jsFramesInfo = dict["frames"] as? NSArray
                     else {
+                Logger.shared.logError("Ignored beam_frameBounds: \(messageBody)", category: .general)
                 return
             }
-            var originFrame = framesInfo[origin]
-            if originFrame == nil {
-                originFrame = FrameInfo(origin: origin, x: 0, y: 0, width: -1, height: -1)
-                framesInfo[origin] = originFrame
+            framesInfo.removeAll()
+            for jsFrameInfo in jsFramesInfo {
+                let d = jsFrameInfo as AnyObject
+                let origin = d["origin"] as! String
+                let href = d["href"] as! String
+                let bounds = d["bounds"] as AnyObject
+                registerOrigin(origin: origin)
+                let rectArea = jsToRect(jsArea: bounds)
+                let nativeBounds = nativeArea(area: rectArea, origin: origin)
+                framesInfo[href] = FrameInfo(
+                        origin: origin, x: nativeBounds.minX, y: nativeBounds.minY,
+                        width: nativeBounds.width, height: nativeBounds.height
+                )
             }
-            let rectArea = jsToRect(jsArea: bounds)
-            let nativeBounds = nativeArea(area: rectArea, origin: origin)
-            framesInfo[href] = FrameInfo(
-                    origin: origin, x: nativeBounds.minX, y: nativeBounds.minY,
-                    width: nativeBounds.width, height: nativeBounds.height
-            )
+
+        case ScriptHandlers.beam_resize.rawValue:
+            guard let dict = messageBody,
+                  let width = dict["width"] as? Double,
+                  let height = dict["height"] as? Double,
+                  let origin = dict["origin"] as? String
+                    else {
+                Logger.shared.logError("Ignored beam_resize: \(messageBody)", category: .general)
+                return
+            }
+            pointAndShoot.drawAllShoots(origin: origin)
 
         default:
             break
+        }
+    }
+
+    private func shootAreas(areas: NSArray, origin: String) {
+        pointAndShoot.clearAllShoots()
+        for area in areas {
+            let jsArea = area as AnyObject
+            let rectArea = jsToRect(jsArea: jsArea)
+            let textArea = nativeArea(area: rectArea, origin: origin)
+            pointAndShoot.addShoot(area: textArea)
+        }
+        pointAndShoot.drawAllShoots(origin: origin)
+    }
+
+    private func registerOrigin(origin: String) {
+        var originFrame = framesInfo[origin]
+        if originFrame == nil {
+            originFrame = FrameInfo(origin: origin, x: 0, y: 0, width: -1, height: -1)
+            framesInfo[origin] = originFrame
         }
     }
 
@@ -647,34 +672,32 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         }
     }
 
-    func nativeX(x: CGFloat, origin: String) -> CGFloat {
-        var frameX: CGFloat = 0
-        var frameInfo: FrameInfo
+    func absolutePosition(v: CGFloat, origin: String, prop: String) -> CGFloat {
+        var framePos: CGFloat = 0
         if framesInfo.count > 0 {
             var currentOrigin = origin
             repeat {
-                frameInfo = framesInfo[currentOrigin]!
-                frameX += frameInfo.x
-                currentOrigin = frameInfo.origin
+                let foundFrameInfo = framesInfo[currentOrigin]
+                if (foundFrameInfo != nil) {
+                    let frameInfo = foundFrameInfo!
+                    framePos += prop == "x" ? frameInfo.x : frameInfo.y
+                    currentOrigin = frameInfo.origin
+                } else {
+                    Logger.shared.logError("Could not find frameInfo for origin \(currentOrigin) in \(framesInfo.map { $0.value.origin })", category: .general)
+                    break
+                }
             } while (framesInfo[currentOrigin]?.origin != currentOrigin)
         }
-        let xPos = frameX + x
-        return xPos * zoomLevel
+        let pos = framePos + v
+        return pos * zoomLevel
+    }
+
+    func nativeX(x: CGFloat, origin: String) -> CGFloat {
+        return absolutePosition(v: x, origin: origin, prop: "x")
     }
 
     func nativeY(y: CGFloat, origin: String) -> CGFloat {
-        var frameY: CGFloat = 0
-        var frameInfo: FrameInfo
-        if framesInfo.count > 0 {
-            var currentOrigin = origin
-            repeat {
-                frameInfo = framesInfo[currentOrigin]!
-                frameY += frameInfo.y
-                currentOrigin = frameInfo.origin
-            } while (framesInfo[currentOrigin]?.origin != currentOrigin)
-        }
-        let yPos = frameY + y
-        return yPos * zoomLevel
+        return absolutePosition(v: y, origin: origin, prop: "y")
     }
 
     func nativeWidth(width: CGFloat) -> CGFloat {
