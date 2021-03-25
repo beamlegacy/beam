@@ -1,26 +1,26 @@
 [
   {
     "request" : {
-      "method" : "GET",
-      "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=Beam"
+      "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=Beam",
+      "method" : "GET"
     },
     "response" : {
-      "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=Beam",
       "headers" : {
-        "Pragma" : "no-cache",
-        "Server" : "gws",
-        "Expires" : "-1",
-        "Content-Encoding" : "gzip",
         "Cache-Control" : "no-cache, must-revalidate",
-        "x-xss-protection" : "0",
-        "Content-Disposition" : "attachment; filename=\"f.txt\"",
         "x-frame-options" : "SAMEORIGIN",
+        "Date" : "Wed, 24 Mar 2021 12:44:29 GMT",
+        "Content-Disposition" : "attachment; filename=\"f.txt\"",
+        "Pragma" : "no-cache",
+        "Content-Type" : "text\/javascript; charset=ISO-8859-1",
+        "Server" : "gws",
         "Alt-Svc" : "h3-29=\":443\"; ma=2592000,h3-T051=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\"",
-        "Date" : "Mon, 22 Mar 2021 15:30:26 GMT",
-        "Content-Type" : "text\/javascript; charset=ISO-8859-1"
+        "Content-Encoding" : "gzip",
+        "x-xss-protection" : "0",
+        "Expires" : "-1"
       },
+      "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=Beam",
       "status" : 200,
-      "body" : "[\"Beam\",[\"beam\",\"beamng drive\",\"beamy\",\"beamer\",\"beam ng\",\"beams plus\",\"beam traduction\",\"beam app\",\"beamer boy lyrics\",\"beamforming\"],[],{\"google:suggestsubtypes\":[[433],[433],[],[433],[433],[],[],[],[],[433]]}]"
+      "body" : "[\"Beam\",[\"beam\",\"beamng drive\",\"beamy\",\"beamer\",\"beams plus\",\"beam traduction\",\"beam app\",\"beamer boy lyrics\",\"beamforming\",\"beam stock\"],[],{\"google:suggestsubtypes\":[[433],[433],[],[433],[],[],[],[],[],[]]}]"
     }
   }
 ]

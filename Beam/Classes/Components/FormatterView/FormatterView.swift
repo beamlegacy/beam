@@ -59,3 +59,7 @@ class FormatterView: NSView {
         isMouseInsideView = false
     }
 }
+
+class FormatterViewViewModel: ObservableObject {
+    @Published var visible: Bool = false
+}

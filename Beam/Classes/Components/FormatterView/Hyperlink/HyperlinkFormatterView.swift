@@ -9,10 +9,10 @@ import Cocoa
 import SwiftUI
 
 // MARK: - SwiftUI View
-private class HyperlinkEditorViewModel: ObservableObject {
+private class HyperlinkEditorViewModel: FormatterViewViewModel {
     var url: Binding<String> = .constant("")
     var title: Binding<String> = .constant("")
-    @Published var visible: Bool = false
+    @Published var shouldFocusOnAppear: Bool = false
 }
 
 private struct HyperlinkEditorView: View {
@@ -51,9 +51,7 @@ private struct HyperlinkEditorView: View {
                             }
                     }
                 }
-                Rectangle()
-                    .fill(Color(.hyperlinkTextFielSeparatorColor))
-                    .frame(height: 1)
+                Separator()
                     .padding(.horizontal, 2)
                 HStack(spacing: 4) {
                     Icon(name: "editor-url_link", size: 16, color: Color(urlTextColor))
@@ -75,6 +73,11 @@ private struct HyperlinkEditorView: View {
         .animation(.spring(response: 0.4, dampingFraction: 0.6))
         .opacity(viewModel.visible ? 1.0 : 0.0)
         .animation(viewModel.visible ? .easeInOut(duration: 0.3) : .easeInOut(duration: 0.15))
+        .onAppear {
+            if viewModel.visible && viewModel.shouldFocusOnAppear {
+                isEditingUrl = true
+            }
+        }
     }
 }
 
@@ -185,6 +188,10 @@ extension HyperlinkFormatterView {
 
     func hasEditedUrl() -> Bool {
         return editingUrl != originalUrlValue || editingTitle != originalTitleValue
+    }
+
+    func startEditingUrl() {
+        subviewModel.shouldFocusOnAppear = true
     }
 
 }

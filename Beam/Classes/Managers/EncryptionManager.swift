@@ -23,7 +23,10 @@ extension EncryptionManagerError: LocalizedError {
 class EncryptionManager {
     static let shared = EncryptionManager()
 
-    let name = "ChaChaPoly"
+    enum Algorithm: String, CaseIterable {
+        case ChaChaPoly
+        case AES_GCM
+    }
 
     func generateKey() -> SymmetricKey {
         SymmetricKey(size: .bits256)
@@ -55,33 +58,64 @@ class EncryptionManager {
         return result
     }
 
-    func encryptString(_ string: String) throws -> String? {
-        try ChaChaPoly.seal(string.asData, using: privateKey()).combined.base64EncodedString()
+    func encryptString(_ string: String, using: Algorithm = .AES_GCM) throws -> String? {
+        switch using {
+        case .ChaChaPoly:
+            return try ChaChaPoly
+                .seal(string.asData, using: privateKey())
+                .combined
+                .base64EncodedString()
+        case .AES_GCM:
+            return try AES.GCM
+                .seal(string.asData, using: privateKey())
+                .combined?
+                .base64EncodedString()
+        }
     }
 
-    func decryptString(_ encryptedString: String, _ key: SymmetricKey? = nil) throws -> String? {
+    func decryptString(_ encryptedString: String, _ key: SymmetricKey? = nil, using: Algorithm = .AES_GCM) throws -> String? {
         guard let encryptedData = Data(base64Encoded: encryptedString) else {
             Logger.shared.logError("Couldn't change String to Data", category: .encryption)
             throw EncryptionManagerError.stringEncodingError
         }
 
         do {
-            let sealedBox = try ChaChaPoly.SealedBox(combined: encryptedData)
-            let decryptedData = try ChaChaPoly.open(sealedBox, using: key ?? privateKey())
-            return decryptedData.asString
+            switch using {
+            case .ChaChaPoly:
+                let sealedBox = try ChaChaPoly.SealedBox(combined: encryptedData)
+                let decryptedData = try ChaChaPoly.open(sealedBox, using: key ?? privateKey())
+                return decryptedData.asString
+            case .AES_GCM:
+                let sealedBox = try AES.GCM.SealedBox(combined: encryptedData)
+                let decryptedData = try AES.GCM.open(sealedBox, using: key ?? privateKey())
+                return decryptedData.asString
+            }
         } catch CryptoKit.CryptoKitError.authenticationFailure {
             throw EncryptionManagerError.authenticationFailure
         }
     }
 
-    func encryptData(_ data: Data) throws -> Data? {
-        try ChaChaPoly.seal(data, using: privateKey()).combined
+    func encryptData(_ data: Data, using: Algorithm = .AES_GCM) throws -> Data? {
+        switch using {
+        case .ChaChaPoly:
+            return try ChaChaPoly.seal(data, using: privateKey()).combined
+        case .AES_GCM:
+            return try AES.GCM
+                .seal(data, using: privateKey())
+                .combined
+        }
     }
 
-    func decryptData(_ encryptedData: Data, _ key: SymmetricKey? = nil) throws -> Data? {
-        let sealedBox = try ChaChaPoly.SealedBox(combined: encryptedData)
-        let decryptedData = try ChaChaPoly.open(sealedBox, using: key ?? privateKey())
-
-        return decryptedData
+    func decryptData(_ encryptedData: Data, _ key: SymmetricKey? = nil, using: Algorithm = .AES_GCM) throws -> Data? {
+        switch using {
+        case .ChaChaPoly:
+            let sealedBox = try ChaChaPoly.SealedBox(combined: encryptedData)
+            let decryptedData = try ChaChaPoly.open(sealedBox, using: key ?? privateKey())
+            return decryptedData
+        case .AES_GCM:
+            let sealedBox = try AES.GCM.SealedBox(combined: encryptedData)
+            let decryptedData = try AES.GCM.open(sealedBox, using: key ?? privateKey())
+            return decryptedData
+        }
     }
 }

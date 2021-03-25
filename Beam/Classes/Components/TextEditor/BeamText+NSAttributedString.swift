@@ -18,7 +18,7 @@ extension BeamText {
         let string = NSMutableAttributedString()
         for range in ranges {
             var attributedString = NSMutableAttributedString(string: range.string, attributes: convert(attributes: range.attributes, fontSize: fontSize, elementKind: elementKind))
-            if let mouseInteraction = mouseInteraction, (range.position..<range.end).contains(mouseInteraction.range.lowerBound) {
+            if let mouseInteraction = mouseInteraction, (range.position...range.end).contains(mouseInteraction.range.upperBound) {
                 attributedString = updateAttributes(attributedString, withMouseInteraction: mouseInteraction)
             }
 
@@ -144,8 +144,8 @@ extension BeamText {
         return stringAttributes
     }
 
-    private func isMouseHoveringLinkImage(_ mouseInteraction: MouseInteraction, in range: BeamText.Range) -> Bool {
-        return mouseInteraction.type == .hovered && mouseInteraction.range.lowerBound == range.end
+    static func isPositionOnLinkArrow(_ position: Int, in range: BeamText.Range) -> Bool {
+        return position == range.end
     }
 
     func addImageToLink(_ attributedString: NSMutableAttributedString, _ range: BeamText.Range, mouseInteraction: MouseInteraction?) {
@@ -155,7 +155,7 @@ extension BeamText {
         guard let image = NSImage(named: imageName) else { return }
 
         var color = NSColor.editorLinkDecorationColor
-        if let mouseInt = mouseInteraction, isMouseHoveringLinkImage(mouseInt, in: range) {
+        if let mouseInt = mouseInteraction, mouseInt.type == .hovered, Self.isPositionOnLinkArrow(mouseInt.range.lowerBound, in: range) {
             color = .editorLinkColor
         }
         let extentBuffer = UnsafeMutablePointer<ImageRunStruct>.allocate(capacity: 1)
