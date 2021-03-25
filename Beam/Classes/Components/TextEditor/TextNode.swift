@@ -612,6 +612,11 @@ public class TextNode: Widget {
     // MARK: - Mouse Events
     // swiftlint:disable:next function_body_length cyclomatic_complexity
     override func mouseDown(mouseInfo: MouseInfo) -> Bool {
+
+        guard !mouseInfo.rightMouse else {
+            return handleRightMouseDown(mouseInfo: mouseInfo)
+        }
+
         // Start new query when the action layer is pressed.
         guard let actionLayer = actionLayer else { return false }
         let position = actionLayerMousePosition(from: mouseInfo)
@@ -625,8 +630,7 @@ public class TextNode: Widget {
             let clickPos = positionAt(point: mouseInfo.position)
 
             if let link = linkAt(point: mouseInfo.position) {
-                editor.cancelInternalLink()
-                editor.openURL(link, element)
+                openExternalLink(link: link, element: element)
                 return true
             }
 
@@ -681,6 +685,33 @@ public class TextNode: Widget {
         return false
     }
 
+    private func handleRightMouseDown(mouseInfo: MouseInfo) -> Bool {
+
+        if contentsFrame.contains(mouseInfo.position) {
+            let clickPos = positionAt(point: mouseInfo.position)
+            // default right click behavior: select word
+
+            let (linkRange, _) = linkRangeAt(point: mouseInfo.position)
+            if let linkRange = linkRange {
+                // open link right menu
+                focus(cursorPosition: linkRange.end)
+                let selectRange = linkRange.position..<linkRange.end
+                root?.selectedTextRange = selectRange
+                cursor = .arrow
+                editor.showLinkFormatterForSelection(mousePosition: mouseInfo.position, showMenu: true)
+            } else {
+                focus(cursorPosition: clickPos)
+                root?.wordSelection(from: clickPos)
+                if !selectedTextRange.isEmpty {
+                    editor.cursorStartPosition = cursorPosition
+                    editor.showInlineFormatterOnKeyEventsAndClick()
+                }
+            }
+            return true
+        }
+        return false
+    }
+
     override func mouseUp(mouseInfo: MouseInfo) -> Bool {
         editor.detectFormatterType()
 
@@ -694,6 +725,7 @@ public class TextNode: Widget {
 
     override func mouseMoved(mouseInfo: MouseInfo) -> Bool {
         let isMouseInContentFrame = contentsFrame.contains(mouseInfo.position)
+        let isMouseInsideFormatter = editor.inlineFormatter?.isMouseInsideView == true
         let mouseHasChangedTextPosition = lastHoverMouseInfo?.position != mouseInfo.position
         if mouseHasChangedTextPosition && isMouseInContentFrame {
             let link = linkAt(point: mouseInfo.position)
@@ -701,10 +733,11 @@ public class TextNode: Widget {
 
             if link != nil {
                 let (linkRange, linkFrame) = linkRangeAt(point: mouseInfo.position)
-                if let linkRange = linkRange, let currentNode = widgetAt(point: mouseInfo.position) as? TextNode {
+                if let linkRange = linkRange, let currentNode = widgetAt(point: mouseInfo.position) as? TextNode, !isMouseInsideFormatter {
                     invalidateText()
                     cursor = .pointingHand
-                    if let positionInText = indexAt(point: mouseInfo.position), positionInText == linkRange.end {
+                    if let positionInText = indexAt(point: mouseInfo.position, limitToTextString: false),
+                       BeamText.isPositionOnLinkArrow(positionInText, in: linkRange) {
                         editor.linkStartedHovering(
                             for: currentNode,
                             targetRange: linkRange.position ..< linkRange.end,
@@ -715,13 +748,17 @@ public class TextNode: Widget {
                     }
                 }
             } else {
-                cursor = internalLink != nil ? .pointingHand : .iBeam
+                if !isMouseInsideFormatter {
+                    cursor = internalLink != nil ? .pointingHand : .iBeam
+                }
                 editor.linkStoppedHovering()
                 invalidateText()
             }
         }
-        lastHoverMouseInfo = mouseInfo
-
+        lastHoverMouseInfo = !isMouseInsideFormatter ? mouseInfo : nil
+        if isMouseInsideFormatter {
+            cursor = nil
+        }
         // action layer handling
         guard let actionLayer = actionLayer,
               root?.state.nodeSelection == nil else {
@@ -840,20 +877,27 @@ public class TextNode: Widget {
         return res
     }
 
-    public func indexAt(point: NSPoint) -> Int? {
+    public func indexAt(point: NSPoint, limitToTextString: Bool = true) -> Int? {
         guard layout != nil, !layout!.lines.isEmpty else { return nil }
         let line = lineAt(point: point)
         guard line >= 0 else { return nil }
         let l = layout!.lines[line]
         guard l.frame.minX < point.x && l.frame.maxX > point.x else { return nil } // point is outside the line
         let displayIndex = l.stringIndexFor(position: point)
-        let pos = min(displayIndex, text.count - 1)
-        return pos
+        if !limitToTextString {
+            // can be outside of text string for decoration element like link arrow
+            return displayIndex
+        }
+        return min(displayIndex, text.count - 1)
     }
 
     public func linkAt(point: NSPoint) -> URL? {
         guard let pos = indexAt(point: point) else { return nil }
-        let range = elementText.rangeAt(position: pos)
+        return linkAt(index: pos)
+    }
+
+    public func linkAt(index: Int) -> URL? {
+        let range = elementText.rangeAt(position: index)
         guard let linkAttribIndex = range.attributes.firstIndex(where: { attrib -> Bool in
             attrib.rawValue == BeamText.Attribute.link("").rawValue
         }) else { return nil }
@@ -1046,7 +1090,7 @@ public class TextNode: Widget {
 
         var mouseInteraction: MouseInteraction?
         if let hoverMouse = lastHoverMouseInfo, hover {
-            if let pos = indexAt(point: hoverMouse.position) {
+            if let pos = indexAt(point: hoverMouse.position, limitToTextString: false) {
                 let nsrange = NSRange(location: pos, length: 1)
                 mouseInteraction = MouseInteraction(type: MouseInteractionType.hovered, range: nsrange)
             }
@@ -1071,6 +1115,11 @@ public class TextNode: Widget {
 
     internal func actionLayerMousePosition(from mouseInfo: MouseInfo) -> NSPoint {
         return NSPoint(x: indent + mouseInfo.position.x, y: mouseInfo.position.y)
+    }
+
+    func openExternalLink(link: URL, element: BeamElement) {
+        editor.cancelInternalLink()
+        editor.openURL(link, element)
     }
 
     private func showHoveredActionLayers(_ hovered: Bool) {

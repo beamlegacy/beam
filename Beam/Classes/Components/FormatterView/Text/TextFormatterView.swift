@@ -42,8 +42,8 @@ class TextFormatterView: FormatterView {
     private let itemHeight = 28
 
     // Shadow Properties
-    private let shadowRadius: CGFloat = 16
-    private let shadowOffset = NSSize(width: 0, height: 3)
+    private let shadowRadius: CGFloat = 13
+    private let shadowOffset = NSSize(width: 0, height: -7)
 
     private var selectedTypes: Set<FormatterType> = []
     private var buttons: [FormatterType: NSButton] = [:]
