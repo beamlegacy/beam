@@ -18,30 +18,6 @@ public extension CALayer {
     }
 }
 
-public struct MouseInfo {
-    var position: NSPoint
-    var event: NSEvent
-    var globalPosition: NSPoint
-
-    init(_ node: Widget, _ position: NSPoint, _ event: NSEvent) {
-        self.position = NSPoint(x: position.x - node.offsetInDocument.x, y: position.y - node.offsetInDocument.y)
-        self.globalPosition = position
-        self.event = event
-    }
-
-    init(_ node: Widget, _ layer: Layer, _ info: MouseInfo) {
-        self.globalPosition = info.globalPosition
-        self.event = info.event
-
-        self.position = Self.convert(globalPosition: info.globalPosition, node, layer)
-    }
-
-    static func convert(globalPosition: NSPoint, _ node: Widget, _ layer: Layer) -> NSPoint {
-        let globalBounds = layer.layer.convert(layer.layer.bounds, to: node.editor.layer)
-        return CGPoint(x: globalPosition.x - globalBounds.minX, y: globalPosition.y - globalBounds.minY)
-    }
-}
-
 // swiftlint:disable:next type_body_length
 public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
@@ -1292,8 +1268,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     var mouseDownPos: NSPoint?
-    override public func mouseDown(with event: NSEvent) {
-        //       window?.makeFirstResponder(self)
+    private func handleMouseDown(event: NSEvent) {
         reBlink()
         rootNode.cancelNodeSelection() // TODO: change this to handle manipulating the node selection with the mouse
         if self.mouseDownPos != nil {
@@ -1303,6 +1278,15 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         let info = MouseInfo(rootNode, mouseDownPos ?? .zero, event)
         mouseHandler = rootNode.dispatchMouseDown(mouseInfo: info)
         if mouseHandler != nil { cursorUpdate(with: event) }
+    }
+
+    public override func rightMouseDown(with event: NSEvent) {
+        handleMouseDown(event: event)
+    }
+
+    public override func mouseDown(with event: NSEvent) {
+        //       window?.makeFirstResponder(self)
+        handleMouseDown(event: event)
     }
 
     var scrollToCursorAtLayout = false
@@ -1390,7 +1374,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         let cursors = views.compactMap { $0.cursor }
         let cursor = cursors.last ?? .arrow
         cursor.set()
-
         dispatchHover(Set<Widget>(views.compactMap { $0 as? Widget }))
     }
 

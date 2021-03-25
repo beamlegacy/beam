@@ -204,7 +204,7 @@ extension NSColor {
         return loadColor(named: "LightStoneGray")
     }
 
-    static var hyperlinkTextFielSeparatorColor: NSColor {
+    static var verticalSeparatorColor: NSColor {
         return loadColor(named: "Mercury")
     }
 
@@ -319,6 +319,12 @@ extension NSColor {
         }
 
         return color
+    }
+
+
+    // Context Menu
+    static var contextMenuHoverColor: NSColor {
+        return loadColor(named: "Mercury")
     }
 
 }

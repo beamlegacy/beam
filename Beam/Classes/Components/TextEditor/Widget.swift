@@ -539,7 +539,6 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
     func dispatchMouseDown(mouseInfo: MouseInfo) -> Widget? {
         guard inVisibleBranch else { return nil }
-
         for c in children {
             var i = mouseInfo
             i.position.x -= c.frame.origin.x
