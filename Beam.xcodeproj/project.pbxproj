@@ -324,6 +324,7 @@
 		BAA676BFF4B830E6A5CD5BEB /* PointFrame.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA679F6C221431D64C46945 /* PointFrame.swift */; };
 		BAA67A1C810FF7C28A282C8D /* PointAndShoot.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67913BA5B5E39B9EF7854 /* PointAndShoot.swift */; };
 		BAA67DCFEAB652474B00FF4F /* ShootFrame.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67FB11EF06A38E7E5EB36 /* ShootFrame.swift */; };
+		BAA67F2655955909590FECBB /* PointAndShootUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67F5FF48CE3C971FA1487 /* PointAndShootUI.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -845,6 +846,7 @@
 		BAA679F6C221431D64C46945 /* PointFrame.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PointFrame.swift; sourceTree = "<group>"; };
 		BAA67B75F9F87262CB9DCACD /* PointAndShoot.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = PointAndShoot.js; sourceTree = "<group>"; };
 		BAA67CEFFAFA38F29CF1C84F /* WebPage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebPage.swift; sourceTree = "<group>"; };
+		BAA67F5FF48CE3C971FA1487 /* PointAndShootUI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PointAndShootUI.swift; sourceTree = "<group>"; };
 		BAA67FB11EF06A38E7E5EB36 /* ShootFrame.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShootFrame.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -1063,6 +1065,7 @@
 				A572629725FFADC5004416C0 /* MouseInteraction.swift */,
 				BAA67913BA5B5E39B9EF7854 /* PointAndShoot.swift */,
 				BAA67CEFFAFA38F29CF1C84F /* WebPage.swift */,
+				BAA67F5FF48CE3C971FA1487 /* PointAndShootUI.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -2644,6 +2647,7 @@
 				BAA67192B5EB78981741C311 /* WebPage.swift in Sources */,
 				BAA676BFF4B830E6A5CD5BEB /* PointFrame.swift in Sources */,
 				BAA67DCFEAB652474B00FF4F /* ShootFrame.swift in Sources */,
+				BAA67F2655955909590FECBB /* PointAndShootUI.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

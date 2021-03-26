@@ -79,7 +79,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     @Published var privateMode = false
 
     lazy var pointAndShoot: PointAndShoot = {
-        PointAndShoot(page: self)
+        PointAndShoot(page: self, ui: PointAndShootUI())
     }()
 
     /**
