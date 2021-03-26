@@ -58,7 +58,7 @@ class APIRequestTests: QuickSpec {
 
             context("with wrong api hostname") {
                 beforeEach {
-                    Configuration.apiHostname = "localhost2"
+                    Configuration.apiHostname = "http://localhost2"
                     beamHelper.disableNetworkRecording()
                 }
 
@@ -97,7 +97,7 @@ class APIRequestTests: QuickSpec {
 
             context("with wrong api hostname") {
                 beforeEach {
-                    Configuration.apiHostname = "localhost2"
+                    Configuration.apiHostname = "http://localhost2"
                 }
 
                 it("manages errors") {
@@ -139,7 +139,7 @@ class APIRequestTests: QuickSpec {
 
             context("with wrong api hostname") {
                 beforeEach {
-                    Configuration.apiHostname = "localhost2"
+                    Configuration.apiHostname = "http://localhost2"
                     beamHelper.disableNetworkRecording()
                 }
 

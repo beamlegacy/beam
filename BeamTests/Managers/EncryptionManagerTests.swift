@@ -9,7 +9,7 @@ import CryptoKit
 class EncryptionManagerTests: QuickSpec {
     override func spec() {
         let sut = EncryptionManager()
-        let text = String.randomTitle()
+        let text = "✔ \(String.randomTitle()) ✅"
         beforeEach {
             sut.clearPrivateKey()
         }
@@ -65,6 +65,11 @@ class EncryptionManagerTests: QuickSpec {
                 expect(encryptedString).toNot(beNil())
                 expect(encryptedString) != encryptedString2
                 expect(text) != encryptedString
+
+                // Used to get new samples
+                Logger.shared.logDebug(text, category: .encryption)
+                Logger.shared.logDebug(sut.privateKey().asString(), category: .encryption)
+                Logger.shared.logDebug(encryptedString, category: .encryption)
             }
         }
 
@@ -103,9 +108,9 @@ class EncryptionManagerTests: QuickSpec {
             }
 
             context("Using AES GCM") {
-                let keyString = "nc0ogib3Ymdink8ys3pf2wuoZTjdQLK0MF3LwAPqP6A="
-                let encryptedString = "OMlHyj4XvkfG0hp1rCVzm9dFLN0gR6HPv4r/HRSi6IKFHYQhY4fMlN5/GqRTgxa75wUlasnFa136Hj6hXkrouSyaEvGjqLy8gn27NIpJd3GqDayNLJvE"
-                let clearText = "Small Cotton Chair dLRKbPUjmfTmnGNjd0z7iYs6MdWVJNTIOyfactPI"
+                let keyString = "g77d4Ulrd7jfUJeKEXTQDU5JMd2FlIRbjm3N/o3pAeI="
+                let encryptedString = "6ykpONKB2A8zXqNbjpSTURkwpGHQgR2mF3fv+l8Jc5MNfFIm1CeaUuUad9U5PXP40mTXGazQCLQ/Xkq4efWEfRpezPZL2c8tJlBNYLuOtgyoJFGprr/cE9fltey4fUBVUWoSwCZ5yA=="
+                let clearText = "✔ Ergonomic Granite Computer 7svhQcDlj4LraUa9BuC2p9Ek5OagBet2JpptTbls ✅"
                 it("decrypts previously encrypted data") {
                     let key = SymmetricKey(base64EncodedString: keyString)
 
