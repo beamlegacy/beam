@@ -32,8 +32,8 @@ struct Configuration {
     static private(set) var sentryDsn = "https://\(sentryKey)@\(sentryHostname)/\(sentryProject)"
 
     // Runtime configuration
-    static private(set) var apiHostnameDefault = "api.beamapp.co"
-    static private(set) var publicHostnameDefault = "app.beamapp.co"
+    static private(set) var apiHostnameDefault = "https://api.beamapp.co"
+    static private(set) var publicHostnameDefault = "https://app.beamapp.co"
 
     static private var apiHostnameKey = "apiHostname"
     static var apiHostname: String {

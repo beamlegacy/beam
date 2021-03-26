@@ -74,6 +74,7 @@ iOSInjectionProject/
 
 # Node artifact files
 node_modules/
+scripts/decrypt/node/node_modules/
 dist/
 
 # Compiled Java class files

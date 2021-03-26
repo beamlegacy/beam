@@ -43,9 +43,9 @@ else:
     print(f"Not equal: {clear}")
 
 # AES_GCM
-key = b64decode("nc0ogib3Ymdink8ys3pf2wuoZTjdQLK0MF3LwAPqP6A=")
-combined = b64decode("OMlHyj4XvkfG0hp1rCVzm9dFLN0gR6HPv4r/HRSi6IKFHYQhY4fMlN5/GqRTgxa75wUlasnFa136Hj6hXkrouSyaEvGjqLy8gn27NIpJd3GqDayNLJvE")
-clearText = "Small Cotton Chair dLRKbPUjmfTmnGNjd0z7iYs6MdWVJNTIOyfactPI"
+key = b64decode("g77d4Ulrd7jfUJeKEXTQDU5JMd2FlIRbjm3N/o3pAeI==")
+combined = b64decode("6ykpONKB2A8zXqNbjpSTURkwpGHQgR2mF3fv+l8Jc5MNfFIm1CeaUuUad9U5PXP40mTXGazQCLQ/Xkq4efWEfRpezPZL2c8tJlBNYLuOtgyoJFGprr/cE9fltey4fUBVUWoSwCZ5yA==")
+clearText = "✔ Ergonomic Granite Computer 7svhQcDlj4LraUa9BuC2p9Ek5OagBet2JpptTbls ✅"
 
 combinedNonce = combined[:12]
 combinedTag = combined[:-16]
