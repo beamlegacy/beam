@@ -16,6 +16,7 @@ class BeamTextFieldView: NSTextField {
     weak var textFieldViewDelegate: BeamTextFieldViewDelegate?
 
     private var _currentText: String?
+    private var _currentColor: NSColor?
     private var _placeholderText: String?
     private var _placeholderIcon: NSImage?
 
@@ -55,10 +56,11 @@ class BeamTextFieldView: NSTextField {
     }
 
     internal func setText(_ text: String, font: NSFont?, icon: NSImage? = nil) {
-        guard text != _currentText else {
+        guard text != _currentText || textColor != _currentColor else {
             return
         }
         _currentText = text
+        _currentColor = textColor
         let attrs = attributedStringAttributes(textColor ?? NSColor.white, font)
         let textString = NSAttributedString(string: text, attributes: attrs)
         self.attributedStringValue = textString
