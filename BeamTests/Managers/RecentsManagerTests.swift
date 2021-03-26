@@ -84,12 +84,12 @@ class RecentsManagerTests: QuickSpec {
                     recentsManager.currentNoteChanged(BeamNote(title: "5"))
                     recentsManager.currentNoteChanged(firstAddedNote)
 
-                    XCTAssertEqual(recentsManager.recentNotes.last?.id, firstAddedNote.id)
+                    expect(recentsManager.recentNotes.last?.id) == firstAddedNote.id
                     recentsManager.currentNoteChanged(newNote)
-                    XCTAssertEqual(recentsManager.recentNotes.first?.id, newNote.id)
+                    expect(recentsManager.recentNotes.first?.id) == newNote.id
                     // Note #1 is still here because it was added multiple times
-                    XCTAssertEqual(recentsManager.recentNotes.last?.id, firstAddedNote.id)
-                    XCTAssertEqual(recentsManager.recentNotes.count, 5)
+                    expect(recentsManager.recentNotes.last?.id) == firstAddedNote.id
+                    expect(recentsManager.recentNotes.count) == 5
                 }
             }
             context("when already a recent") {
