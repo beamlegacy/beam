@@ -23,7 +23,15 @@ let NoteDisplayThreshold = Float(0.0)
     private var autocompleteSearchGuessesHandler: (([AutocompleteResult]) -> Void)?
     private var autocompleteTimeoutBlock: DispatchWorkItem?
 
-    @Published var currentNote: BeamNote?
+    @Published var currentNote: BeamNote? {
+        didSet {
+            if let note = currentNote {
+                recentsManager.currentNoteChanged(note)
+            }
+        }
+    }
+    private(set) var recentsManager: RecentsManager
+
     @Published var backForwardList = NoteBackForwardList()
     @Published var canGoBack: Bool = false
     @Published var canGoForward: Bool = false
@@ -364,9 +372,9 @@ let NoteDisplayThreshold = Float(0.0)
     override public init() {
         self.data = AppDelegate.main.data
         self.destinationCardName = data.todaysName
+        self.recentsManager = RecentsManager(with: data.documentManager)
         super.init()
         setup(data: data)
-
     }
 
     enum CodingKeys: String, CodingKey {
@@ -380,6 +388,7 @@ let NoteDisplayThreshold = Float(0.0)
     required public init(from decoder: Decoder) throws {
         self.data = AppDelegate.main.data
         self.destinationCardName = data.todaysName
+        self.recentsManager = RecentsManager(with: data.documentManager)
         super.init()
 
         let container = try decoder.container(keyedBy: CodingKeys.self)

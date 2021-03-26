@@ -31,6 +31,8 @@ struct NoteReference: Codable, Equatable, Hashable {
 class BeamNote: BeamElement {
     @Published var title: String { didSet { change(.text) } }
     @Published var type: NoteType = .note { didSet { change(.meta) } }
+    @Published var isPublic: Bool = false
+
     @Published public private(set) var references: [NoteReference] = [] { didSet { change(.meta) } } ///< urls of the notes/bullet pointing to this note
 
     @Published public private(set) var searchQueries: [String] = [] { didSet { change(.meta) } } ///< Search queries whose results were used to populate this note
@@ -121,7 +123,8 @@ class BeamNote: BeamElement {
                                   updatedAt: updateDate,
                                   data: data,
                                   documentType: type == .journal ? .journal : .note,
-                                  version: version)
+                                  version: version,
+                                  isPublic: isPublic)
         } catch {
             Logger.shared.logError("Unable to encode BeamNote into DocumentStruct [\(title) {\(id)}]", category: .document)
             return nil
@@ -160,6 +163,7 @@ class BeamNote: BeamElement {
                 self.browsingSessions = newSelf.browsingSessions
                 self.version = docStruct.version
                 self.savedVersion = self.version
+                self.isPublic = docStruct.isPublic
                 recursiveUpdate(other: newSelf)
             }
         }
@@ -252,6 +256,7 @@ class BeamNote: BeamElement {
         note.version = documentStruct.version
         note.savedVersion = note.version
         note.updateDate = documentStruct.updatedAt
+        note.isPublic = documentStruct.isPublic
         if keepInMemory {
             appendToFetchedNotes(note)
         }

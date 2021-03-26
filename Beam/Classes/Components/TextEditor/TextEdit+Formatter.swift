@@ -13,7 +13,7 @@ extension BeamTextEdit {
     // MARK: - Properties
     private static let xPosInlineFormatter: CGFloat = 32
     private static let yPosInlineFormatter: CGFloat = 28
-    private static let bottomConstraint: CGFloat = -25
+    private static let bottomConstraint: CGFloat = -55
     private static let inlineFormatterType: [FormatterType] = [.h1, .h2, .bullet, .checkmark, .bold, .italic, .link]
     private static let persistentFormatterType: [FormatterType] = [.h1, .h2, .quote, .code, .bold, .italic, .strikethrough]
 
