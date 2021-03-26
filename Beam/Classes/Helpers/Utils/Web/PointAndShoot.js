@@ -63,8 +63,6 @@ class WebUI {
   overlayEl
   backdropEl
 
-  datasetKey = `${this.prefix}Collect`
-
   point(el) {
     el.classList.add(this.pointClass)
   }
@@ -76,17 +74,14 @@ class WebUI {
 
   removeSelected(el) {
     el.classList.remove(this.shootClass)
-    delete el.dataset[this.datasetKey]
   }
 
-  submit(selected) {
-    for (const s of selected) {
-      s.dataset[this.datasetKey] = JSON.stringify(this.selectedCard)
-    }
+  submit(submitCb) {
     this.hidePopup()
+    submitCb()
   }
 
-  showPopup(el, x, y, selected) {
+  showPopup(el, x, y, submitCb) {
     const msg = this.messages[this.lang]
     this.popup = document.createElement("DIV")
     this.popup.id = this.popupId
@@ -114,9 +109,9 @@ class WebUI {
     this.popupAnchor.append(this.popup)
 
     const form = this.popup.querySelector(`form`)
-    form.addEventListener("submit", () => this.submit(selected))
+    form.addEventListener("submit", () => this.submit())
     const cardInput = this.popup.querySelector(`#${this.cardInputId}`)
-    cardInput.addEventListener("keydown", this.cardKeyDown)
+    cardInput.addEventListener("keydown", (ev) => this.cardKeyDown(ev, submitCb))
     cardInput.addEventListener("input", this.onCardInput)
 
     this.popup.style.left = `${x}px`
@@ -173,14 +168,14 @@ class WebUI {
     this.inputTouched = true
   }
 
-  cardKeyDown(ev) {
+  cardKeyDown(ev, submitCb) {
     console.log(ev.key)
     switch (ev.key) {
       case "Escape":
         this.hidePopup()
         break
       case "Enter":
-        this.submit()
+        this.submit(submitCb)
         break
       case "ArrowDown":
         break
@@ -223,7 +218,7 @@ class WebUI {
     return document.getElementById(this.cardInputId)
   }
 
-  shoot(el, x, y, selected) {
+  shoot(el, x, y, selected, submitCb) {
     el.classList.remove(this.pointClass)
     el.classList.add(this.shootClass)
     const count = selected.length > 1 ? "" + selected.length : ""
@@ -231,7 +226,7 @@ class WebUI {
       s.style.cursor = `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="30" viewBox="20 0 30 55" style="stroke:rgb(165,165,165);stroke-linecap:round;stroke-width:3"><rect x="10" y="20" width="54" height="25" ry="10" style="stroke-width:1; fill:white"/><text x="15" y="39" style="font-size:20px;stroke-linecap:butt;stroke-width:1">${count}</text><line x1="35" y1="26" x2="50" y2="26"/><line x1="35" y1="32" x2="50" y2="32"/><line x1="35" y1="38" x2="45" y2="38"/><g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g id="notallowed"><path d="M8,17.4219 L8,1.4069 L19.591,13.0259 L12.55,13.0259 L12.399,13.1499 L8,17.4219 Z" id="point-border" fill="white"/><path d="M9,3.814 L9,15.002 L11.969,12.136 L12.129,11.997 L17.165,11.997 L9,3.814 Z" id="point" fill="black"/></g></g></svg>') 5 5, auto`
     }
     this.hidePopup()  // Hide previous, if any
-    this.showPopup(el, x, y, selected)
+    this.showPopup(el, x, y, submitCb)
   }
 
   statusEl
@@ -239,13 +234,11 @@ class WebUI {
   /**
    * Show the if a given was added to a card.
    */
-  showStatus(el) {
+  showStatus(el, collected) {
     const msg = this.messages[this.lang]
     const statusEl = this.statusEl = document.createElement("DIV")
     el.classList.add(this.prefixClass)
     el.classList.add(this.statusClass)
-    const data = el.dataset[this.datasetKey]
-    const collected = JSON.parse(data)
     statusEl.innerHTML = `${msg.addedTo} ${collected.title}`
     this.popupAnchor.append(this.statusEl)
     const bounds = el.getBoundingClientRect()
@@ -254,17 +247,15 @@ class WebUI {
     statusEl.style.top = `${statusTop}px`
   }
 
-  function
-
   hideStatus() {
-    if (status) {
-      status.remove()
-      status = null
+    if (this.statusEl) {
+      this.statusEl.remove()
+      this.statusEl = null
     }
   }
 
   enterSelection(scrollWidth) {
-    if (webUI && !this.overlayEl) {
+    if (!this.overlayEl) {
       this.backdropEl = document.createElement("div")
       this.backdropEl.id = this.backdropId
       this.overlayEl = document.createElement("div")
@@ -301,80 +292,243 @@ class WebUI {
   }
 }
 
-const webUI = new WebUI();
+class NativeUI {
+  prefix = "__ID__"
+  origin = document.body.baseURI
 
+  constructor() {
+    this.messageHandlers = window.webkit && window.webkit.messageHandlers
+    if (!this.messageHandlers) {
+      throw Error("Could not find webkit message handlers")
+    }
+  }
+
+  /**
+   * Message to the native part.
+   *
+   * @param name Message name.
+   *        Will be converted to ${prefix}_beam_${name} before sending.
+   * @param payload The message data.
+   *        An "origin" property will always be added as the base URI of the current frame.
+   */
+  sendMessage(name, payload) {
+    console.log("sendMessage", name, payload)
+    const messageKey = `beam_${name}`
+    const messageHandler = this.messageHandlers[messageKey]
+    if (messageHandler) {
+      messageHandler.postMessage({origin, ...payload}, origin)
+    } else {
+      throw Error(`No message handler for message "${name}"`)
+    }
+  }
+
+  pointMessage(el, x, y) {
+    const bounds = el.getBoundingClientRect()
+    const pointPayload = {
+      origin,
+      type: {
+        tagName: el.tagName
+      },
+      location: {x, y},
+      data: {
+        text: el.innerText
+      },
+      area: {
+        x: bounds.x,
+        y: bounds.y,
+        width: bounds.width,
+        height: bounds.height
+      }
+    }
+    this.sendMessage("point", pointPayload)
+  }
+
+  shootMessage(el, x, y) {
+    const bounds = el.getBoundingClientRect()
+    const shootMessage = {
+      origin,
+      type: {
+        tagName: el.tagName
+      },
+      data: {
+        text: el.innerText
+      },
+      location: {x, y},
+      area: {
+        x: bounds.x,
+        y: bounds.y,
+        width: bounds.width,
+        height: bounds.height
+      }
+    }
+    this.sendMessage("shoot", shootMessage)
+  }
+
+  point(el, x, y) {
+    this.pointMessage(el, x, y)
+  }
+
+  unpoint() {
+    this.sendMessage("point", null)
+  }
+
+  removeSelected(el) {
+    // TODO: message to un-shoot
+  }
+
+  submit(selected) {
+    for (const s of selected) {
+      s.dataset[this.datasetKey] = JSON.stringify(this.selectedCard)
+    }
+    this.hidePopup()
+  }
+
+  showPopup(el, x, y, selected) {
+    // TODO: Send popup message?
+  }
+
+  hidePopup() {
+    // TODO: Hide popup message?
+  }
+
+  shoot(el, x, y, selected, submitCb) {
+    this.shootMessage(el, x, y)
+    this.hidePopup()  // Hide previous, if any
+    this.showPopup(el, x, y, selected)
+    // TODO: handle native popup result (probably not using submitCb, but rather through native explicitly invoking JS directly?)
+  }
+
+  /**
+   * Show the if a given was added to a card.
+   */
+  showStatus(el, collected) {
+    // TODO: Send message to display native status as "collected" data
+  }
+
+  hideStatus() {
+    // TODO: Send message to hide native status display
+  }
+
+  enterSelection(scrollWidth) {
+    // TODO: enter selction message
+  }
+
+  leaveSelection() {
+    // TODO:
+  }
+
+  selectAreas(i, selectedText, selectedHTML, textAreas) {
+    // TODO: Throttle
+    this.sendMessage("textSelected", {index: i, text: selectedText, html: selectedHTML, areas: textAreas})
+  }
+
+  setFramesInfos(framesInfo) {
+    this.sendMessage("frameBounds", {frames: framesInfo})
+  }
+
+  setScrollInfo(scrollInfo) {
+    this.sendMessage("onScrolled", scrollInfo)
+  }
+
+  setResizeInfo(resizeInfo, selected) {
+    this.sendMessage("resize", resizeInfo)
+    for (const someSelected of selected) {
+      this.shootMessage(someSelected, -1, -1)
+    }
+  }
+}
+
+const webUi = new WebUI()
+const nativeUi = new NativeUI()
+
+/**
+ * UI that performs both Web and native UI.
+ *
+ * For debug purposes.
+ */
+class BothUI {
+
+  point(el, x, y) {
+    webUi.point(el)
+    nativeUi.point(el, x, y)
+  }
+
+  unpoint(el) {
+    webUi.unpoint(el)
+    nativeUi.unpoint(el)
+  }
+
+  shoot(el, x, y, selected, submitCb) {
+    webUi.shoot(el, x, y, selected, submitCb)
+    nativeUi.shoot(el, x, y, selected, submitCb)
+  }
+
+  setFramesInfo(framesInfo) {
+    nativeUi.setFramesInfos(framesInfo)
+  }
+
+  setScrollInfo(scrollInfo) {
+    nativeUi.setScrollInfo(scrollInfo)
+  }
+
+  setResizeInfo(resizeInfo, selected) {
+    nativeUi.setResizeInfo(resizeInfo, selected)
+  }
+
+  enterSelection(scrollWidth) {
+    webUi.enterSelection(scrollWidth)
+    nativeUi.enterSelection()
+  }
+
+  leaveSelection() {
+    webUi.leaveSelection()
+    nativeUi.leaveSelection()
+  }
+
+  selectAreas(i, selectedText, selectedHTML, textAreas) {
+    webUi.selectAreas(textAreas)
+    nativeUi.selectAreas(i, selectedText, selectedHTML, textAreas)
+  }
+
+  hideStatus() {
+    webUi.hideStatus()
+    nativeUi.hideStatus()
+  }
+
+  hidePopup() {
+    webUi.hidePopup()
+    nativeUi.hidePopup()
+  }
+}
+
+const ui = new BothUI();
 
 (function PointAndShoot() {
       const origin = document.body.baseURI
       console.log("PointAndShoot initializing", origin)
 
-      const messageHandlers = window.webkit && window.webkit.messageHandlers
-      if (!messageHandlers) {
-        throw Error("Could not find webkit message handlers")
-      }
+      const datasetKey = `${this.prefix}Collect`
 
       let scrollWidth
-
-      /**
-       * Message to the native part.
-       *
-       * @param name Message name.
-       *        Will be converted to ${prefix}_beam_${name} before sending.
-       * @param payload The message data.
-       *        An "origin" property will always be added as the base URI of the current frame.
-       */
-      function sendMessage(name, payload) {
-        console.log("sendMessage", name, payload)
-        const messageKey = `beam_${name}`
-        const messageHandler = messageHandlers[messageKey]
-        if (messageHandler) {
-          messageHandler.postMessage({origin, ...payload}, origin)
-        } else {
-          throw Error(`No message handler for message "${name}"`)
-        }
-      }
 
       /**
        * Shoot elements.
        */
       const selected = []
 
-      function pointMessage(el, x, y) {
-        const bounds = el.getBoundingClientRect()
-        const pointPayload = {
-          origin,
-          type: {
-            tagName: el.tagName
-          },
-          location: {x, y},
-          data: {
-            text: el.innerText
-          },
-          area: {
-            x: bounds.x,
-            y: bounds.y,
-            width: bounds.width,
-            height: bounds.height
-          }
-        }
-        sendMessage("point", pointPayload)
-      }
-
       function point(el, x, y) {
-        webUI.point(el)
-        pointMessage(el, x, y)
+        ui.point(el, x, y)
       }
 
       function unpoint(el) {
-        webUI.unpoint(el)
+        ui.unpoint(el)
         pointed = null
-        sendMessage("point", pointed)
       }
 
       function removeSelected(selectedIndex, el) {
         selected.splice(selectedIndex, 1)
-        webUI.removeSelected(el)
-        unpoint(el)
+        ui.removeSelected(el)
+        delete el.dataset[datasetKey]
       }
 
       /**
@@ -393,14 +547,14 @@ const webUI = new WebUI();
             }
             pointed = el
             point(pointed, ev.clientX, ev.clientY)
-            let collected = pointed.dataset[this.datasetKey]
+            let collected = pointed.dataset[datasetKey]
             if (collected) {
               showStatus(pointed)
             } else {
               hideStatus()
             }
           } else {
-            webUI.hidePopup()
+            ui.hidePopup()
           }
         } else {
           hideStatus()
@@ -411,33 +565,13 @@ const webUI = new WebUI();
       }
 
       function showStatus(el) {
-        // TODO: Send message to display native status
-        webUI.showStatus(el)
+        const data = el.dataset[this.datasetKey]
+        const collected = JSON.parse(data)
+        ui.showStatus(el, collected)
       }
 
-      function hideStatus(el) {
-        webUI.hideStatus(el)
-      }
-
-      function shootMessage(el, x, y) {
-        const bounds = el.getBoundingClientRect()
-        const shootMessage = {
-          origin,
-          type: {
-            tagName: el.tagName
-          },
-          data: {
-            text: el.innerText
-          },
-          location: {x, y},
-          area: {
-            x: bounds.x,
-            y: bounds.y,
-            width: bounds.width,
-            height: bounds.height
-          }
-        }
-        sendMessage("shoot", shootMessage)
+      function hideStatus() {
+        ui.hideStatus()
       }
 
       /**
@@ -464,8 +598,11 @@ const webUI = new WebUI();
         }
         selected.push(el)
         // point(el, x, y)
-        webUI.shoot(el, x, y, selected)
-        shootMessage(el, x, y)
+        ui.shoot(el, x, y, selected, () => {
+          for (const s of selected) {
+            s.dataset[datasetKey] = JSON.stringify(this.selectedCard) // Remember shoots in DOM
+          }
+        })
       }
 
       function onClick(ev) {
@@ -497,8 +634,8 @@ const webUI = new WebUI();
 
       function onKeyPress(ev) {
         if (ev.code === "Escape") {
-          webUI.hidePopup()
-          webUI.leaveSelection()
+          ui.hidePopup()
+          ui.leaveSelection()
         }
       }
 
@@ -525,7 +662,7 @@ const webUI = new WebUI();
         } else {
           console.log("No frames")
         }
-        sendMessage("frameBounds", {frames: framesInfo})
+        ui.setFramesInfo(framesInfo)
         return hasFrames
       }
 
@@ -549,33 +686,32 @@ const webUI = new WebUI();
             body.clientHeight,
             documentEl.clientHeight
         )
-        sendMessage("onScrolled", {
+        const scrollInfo = {
           x: window.scrollX,
           y: window.scrollY,
           width: scrollWidth,
           height: scrollHeight
-        })
+        }
+        ui.setScrollInfo(scrollInfo)
         const hasFrames = checkFrames()
         console.log(hasFrames ? "Scroll updated frames info" : "Scroll did not update frames info since there is none")
       }
 
       function onResize(_ev) {
-        sendMessage("resize", {
+        const resizeInfo = {
           width: window.innerWidth,
           height: window.innerHeight
-        })
-        for (const someSelected of selected) {
-          shootMessage(someSelected, -1, -1)
         }
+        ui.setResizeInfo(resizeInfo, selected)
       }
 
       function onSelectionChange(_ev) {
         const selection = document.getSelection()
         if (selection.isCollapsed) {
-          webUI.leaveSelection()
+          ui.leaveSelection()
           return
         }
-        webUI.enterSelection(scrollWidth)
+        ui.enterSelection(scrollWidth)
 
         for (let i = 0; i < selection.rangeCount; ++i) {
           const range = selection.getRangeAt(i)
@@ -594,9 +730,7 @@ const webUI = new WebUI();
             const rect = rects[r]
             textAreas.push({x: frameX + rect.x, y: frameY + rect.y, width: rect.width, height: rect.height})
           }
-          webUI.selectAreas(textAreas)
-          // TODO: Throttle
-          sendMessage("textSelected", {index: i, text: selectedText, html: selectedHTML, areas: textAreas})
+          ui.selectAreas(i, selectedText, selectedHTML, textAreas)
         }
       }
 
