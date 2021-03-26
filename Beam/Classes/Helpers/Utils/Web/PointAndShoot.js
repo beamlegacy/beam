@@ -2,24 +2,39 @@
       const origin = document.body.baseURI
       console.log("PointAndShoot initializing", origin)
 
+      const prefix = "__ID__"
+
       let scrollWidth
 
+      /**
+       * Message to the native part.
+       *
+       * @param name Message name.
+       *        Will be converted to ${prefix}_beam_${name} before sending.
+       * @param payload The message data.
+       *        An "origin" property will always be added as the base URI of the current frame.
+       */
       function beamMessage(name, payload) {
-        console.log("Send message", name, payload)
+        console.log("beamMessage", name, payload)
+        const messageKey = `beam_${name}`
         if (
             window.webkit &&
             window.webkit.messageHandlers &&
-            window.webkit.messageHandlers[name]
+            window.webkit.messageHandlers[messageKey]
         ) {
-          window.webkit.messageHandlers[name].postMessage({origin, ...payload})
+          window.webkit.messageHandlers[messageKey].postMessage({origin, ...payload})
         } else {
           // Local test
         }
       }
 
       const outlineWidth = 4
-      const enabled = true
 
+      const webUI = true
+
+      /**
+       * Message translations for web UI, if required.
+       */
       const messages = {
         en: {
           close: "Close",
@@ -53,7 +68,6 @@
        */
       const selected = []
 
-      const prefix = "__ID__"
 
       const prefixClass = prefix
       const shootClass = `${prefix}-shoot`
@@ -91,11 +105,11 @@
             height: bounds.height
           }
         }
-        beamMessage("beam_point", pointMessage)
+        beamMessage("point", pointMessage)
       }
 
       function point(el, x, y) {
-        if (enabled) {
+        if (webUI) {
           el.classList.add(pointClass)
         }
         pointMessage(el, x, y)
@@ -105,7 +119,7 @@
         el.classList.remove(pointClass)
         el.style.cursor = ``
         pointed = null
-        beamMessage("beam_point", pointed)
+        beamMessage("point", pointed)
       }
 
       function removeSelected(selectedIndex, el) {
@@ -220,7 +234,7 @@
 
       function showPopup(el, x, y) {
         shootMessage(el, x, y)
-        if (enabled) {
+        if (webUI) {
           const msg = messages[lang]
           popup = document.createElement("DIV")
           popup.id = popupId
@@ -277,7 +291,7 @@
        * Show the if a given was added to a card.
        */
       function showStatus(el) {
-        if (enabled) {
+        if (webUI) {
           const msg = messages[lang]
           status = document.createElement("DIV")
           el.classList.add(prefixClass)
@@ -346,7 +360,7 @@
             height: bounds.height
           }
         }
-        beamMessage("beam_shoot", shootMessage)
+        beamMessage("shoot", shootMessage)
       }
 
       /**
@@ -414,7 +428,7 @@
       let backdropEl
 
       function enterSelection() {
-        if (enabled && !overlayEl) {
+        if (webUI && !overlayEl) {
           backdropEl = document.createElement("div")
           backdropEl.id = backdropId
           overlayEl = document.createElement("div")
@@ -464,7 +478,7 @@
         } else {
           console.log("No frames")
         }
-        beamMessage("beam_frameBounds", {frames: framesInfo})
+        beamMessage("frameBounds", {frames: framesInfo})
         return hasFrames
       }
 
@@ -488,7 +502,7 @@
             body.clientHeight,
             documentEl.clientHeight
         )
-        beamMessage("beam_onScrolled", {
+        beamMessage("onScrolled", {
           x: window.scrollX,
           y: window.scrollY,
           width: scrollWidth,
@@ -499,7 +513,7 @@
       }
 
       function onResize(_ev) {
-        beamMessage("beam_resize", {
+        beamMessage("resize", {
           width: window.innerWidth,
           height: window.innerHeight,
         })
@@ -533,7 +547,7 @@
             const rect = rects[r]
             textAreas.push({x: frameX + rect.x, y: frameY + rect.y, width: rect.width, height: rect.height})
           }
-          if (enabled) {
+          if (webUI) {
             overlayEl.innerHTML = ""
             const padding = 5
             for (let r = 0; r < textAreas.length; r++) {
@@ -549,7 +563,7 @@
             }
           }
           // TODO: Throttle
-          beamMessage("beam_textSelected", {index: i, text: selectedText, html: selectedHTML, areas: textAreas})
+          beamMessage("textSelected", {index: i, text: selectedText, html: selectedHTML, areas: textAreas})
         }
       }
 

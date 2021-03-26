@@ -10,11 +10,11 @@ import SwiftUI
 
 struct ShootFrame: View {
 
-    @ObservedObject var pointAndShoot: PointAndShoot
+    @ObservedObject var pointAndShootUI: PointAndShootUI
     var body: some View {
         ZStack {
-            ForEach(0..<pointAndShoot.shootSelectionUIs.count, id: \.self) { index in
-                let selectionUI = pointAndShoot.shootSelectionUIs[index]  // TODO: Support mutliple shoots
+            ForEach(0..<pointAndShootUI.shootSelections.count, id: \.self) { index in
+                let selectionUI = pointAndShootUI.shootSelections[index]  // TODO: Support mutliple shoots
                 let rect = selectionUI.rect
                 let color = selectionUI.color
                 Rectangle()

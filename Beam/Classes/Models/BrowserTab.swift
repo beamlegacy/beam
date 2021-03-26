@@ -79,7 +79,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     @Published var privateMode = false
 
     lazy var pointAndShoot: PointAndShoot = {
-        PointAndShoot(config: PointAndShootConfig(native: true, web: true), page: self)
+        PointAndShoot(page: self)
     }()
 
     /**
@@ -359,7 +359,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     }
 
     func addJS(source: String, when: WKUserScriptInjectionTime) {
-        let parameterized = source.replacingOccurrences(of: "__ENABLED__", with: pointAndShoot.config.web ? "true" : "false")
+        let parameterized = source.replacingOccurrences(of: "__ENABLED__", with: "true")
         let obfuscated = parameterized.replacingOccurrences(of: "__ID__", with: "beam" + id.uuidString.replacingOccurrences(of: "-", with: "_"))
         let script = WKUserScript(source: obfuscated, injectionTime: when, forMainFrameOnly: false)
         webView.configuration.userContentController.addUserScript(script)
@@ -504,7 +504,8 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         let messageBody = message.body as? [String: AnyObject]
-        let messageName = message.name
+        let messageKey = message.name
+        let messageName = messageKey //.components(separatedBy: "_beam_")[1]
         switch messageName {
         case ScriptHandlers.beam_logging.rawValue:
             Logger.shared.logInfo(String(describing: message.body), category: .javascript)

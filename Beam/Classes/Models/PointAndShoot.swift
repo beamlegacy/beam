@@ -12,20 +12,65 @@ struct SelectionUI {
     var color: Color
 }
 
-struct PointAndShootConfig {
-    let native: Bool
-    let web: Bool
+class PointAndShootUI: ObservableObject {
+
+    @Published var pointSelection: SelectionUI?
+    @Published var shootSelections: [SelectionUI] = []
+
+    private func drawSelection(selection: NSRect, animated: Bool, color: Color) -> SelectionUI {
+        let newX = (Double(selection.minX)) as Double
+        let newY = (Double(selection.minY)) as Double
+        return SelectionUI(
+                rect: NSRect(
+                        x: Float(newX), y: Float(newY),
+                        width: Float(selection.width), height: Float(selection.height)
+                ),
+                animated: animated,
+                color: color
+        )
+    }
+
+    let pointColor = Color(red: 0, green: 0, blue: 0, opacity: 0.1)
+
+    func drawPoint(area: NSRect) {
+        pointSelection = drawSelection(selection: area, animated: true, color: pointColor)
+    }
+
+    func clearPoint() {
+        pointSelection = nil
+    }
+
+    let shootColor = Color(red: 1, green: 0, blue: 0, opacity: 0.1)
+
+    func drawShoot(shootArea: NSRect, xDelta: CGFloat, yDelta: CGFloat) {
+        let newX = shootArea.minX + xDelta
+        let newY = shootArea.minY + yDelta
+        let shootSelectionUI = SelectionUI(
+                rect: NSRect(x: newX, y: newY, width: shootArea.width, height: shootArea.height),
+                animated: false,
+                color: shootColor
+        )
+        shootSelections.append(shootSelectionUI)
+    }
+
+    func clearShoots() {
+        shootSelections.removeAll()
+    }
+
+    func clear() {
+        shootSelections.removeAll()
+    }
 }
 
-class PointAndShoot: ObservableObject {
-
-    let config: PointAndShootConfig
+class PointAndShoot {
 
     private var page: WebPage
 
-    init(config: PointAndShootConfig, page: WebPage) {
-        self.config = config
+    let ui: PointAndShootUI
+
+    init(page: WebPage) {
         self.page = page
+        self.ui = PointAndShootUI()
     }
 
     /**
@@ -34,10 +79,8 @@ class PointAndShoot: ObservableObject {
      * There is only one at a time.
      */
     var pointArea: NSRect?
-    @Published var pointSelectionUI: SelectionUI?
 
     var shootAreas: [NSRect] = []
-    @Published var shootSelectionUIs: [SelectionUI] = []
 
     lazy var pointAndShoot: String = {
         loadFile(from: "PointAndShoot", fileType: "js")
@@ -52,54 +95,24 @@ class PointAndShoot: ObservableObject {
         page.addCSS(source: pointAndShootStyle, when: .atDocumentEnd)
     }
 
-    private func drawSelection(selection: NSRect, animated: Bool, color: Color) -> SelectionUI {
-        let newX = (Double(pointArea!.minX)) as Double
-        let newY = (Double(pointArea!.minY)) as Double
-        return SelectionUI(
-                rect: NSRect(
-                        x: Float(newX), y: Float(newY),
-                        width: Float(selection.width), height: Float(selection.height)
-                ),
-                animated: animated,
-                color: color
-        )
-    }
-
-    let pointColor = Color(red: 0, green: 0, blue: 0, opacity: 0.1)
-
-    private func drawPoint() {
-        pointSelectionUI = pointArea != nil ? drawSelection(selection: pointArea!, animated: true, color: pointColor) : nil
-    }
-
-    let shootColor = Color(red: 1, green: 0, blue: 0, opacity: 0.1)
-
-    private func drawShoot(shootArea: NSRect, xDelta: CGFloat, yDelta: CGFloat) -> SelectionUI {
-        let newX = shootArea.minX + xDelta
-        let newY = shootArea.minY + yDelta
-        return SelectionUI(
-                rect: NSRect(x: newX, y: newY, width: shootArea.width, height: shootArea.height),
-                animated: false,
-                color: shootColor
-        )
-    }
-
     func drawAllShoots(origin: String) {
-        shootSelectionUIs.removeAll()
+        ui.clearShoots()
         if shootAreas.count > 0 {
             let xDelta = -page.scrollX * page.zoomLevel
             let yDelta = -page.scrollY * page.zoomLevel
             for shootArea in shootAreas {
                 let nativeArea = page.nativeArea(area: shootArea, origin: origin)
-                let shootSelectionUI = drawShoot(shootArea: nativeArea, xDelta: xDelta, yDelta: yDelta)
-                shootSelectionUIs.append(shootSelectionUI)
+                ui.drawShoot(shootArea: nativeArea, xDelta: xDelta, yDelta: yDelta)
             }
         }
     }
 
     func point(area: NSRect?) {
         pointArea = area
-        if (config.native) {
-            drawPoint()
+        if pointArea != nil {
+            ui.drawPoint(area: pointArea!)
+        } else {
+            ui.clearPoint()
         }
     }
 
@@ -109,6 +122,6 @@ class PointAndShoot: ObservableObject {
 
     func clearAllShoots() {
         shootAreas.removeAll()
-        shootSelectionUIs.removeAll()
+        ui.clear()
     }
 }
