@@ -194,53 +194,52 @@ extension TextRoot {
 
     // Text Input from AppKit:
     public func hasMarkedText() -> Bool {
-        return !markedTextRange.isEmpty
+        return markedTextRange != nil
     }
 
-    public func setMarkedText(string: String, selectedRange: Range<Int>, replacementRange: Range<Int>) {
+    public func setMarkedText(string: String, selectedRange: Range<Int>?, replacementRange: Range<Int>?) {
+        //print("setMarkedText(string: '\(string)', selectedRange: \(selectedRange), replacementRange: \(replacementRange)")
         guard let node = focusedWidget as? TextNode,
               !node.readOnly else { return }
 
         var range = cursorPosition..<cursorPosition
-        if !replacementRange.isEmpty {
-            range = replacementRange
-        }
-        if !markedTextRange.isEmpty {
-            range = markedTextRange
+        if let r = replacementRange {
+            range = r
+        } else {
+            if let markedRange = markedTextRange {
+                range = markedRange
+            } else {
+                range = selectedTextRange
+            }
         }
 
-        if !self.selectedTextRange.isEmpty {
-            range = self.selectedTextRange
-        }
-
+        //print("   replace sub range \(range) wirth '\(string)'")
         node.text.replaceSubrange(range, with: string)
         cursorPosition = range.upperBound
-        cancelSelection()
-        markedTextRange = range
-        if markedTextRange.isEmpty {
-            markedTextRange = node.text.clamp(markedTextRange.lowerBound ..< (markedTextRange.upperBound + string.count))
-        }
-        self.selectedTextRange = markedTextRange
-        cursorPosition = self.selectedTextRange.upperBound
+        markedTextRange = range.lowerBound ..< range.lowerBound + string.count
+        cursorPosition = range.lowerBound + string.count
+        selectedTextRange = cursorPosition ..< cursorPosition
     }
 
     public func unmarkText() {
         guard let node = focusedWidget as? TextNode, !node.readOnly else { return }
-        markedTextRange = 0..<0
+        markedTextRange = nil
     }
 
-    public func insertText(string: String, replacementRange: Range<Int>) {
+    public func insertText(string: String, replacementRange: Range<Int>?) {
         eraseNodeSelection(createEmptyNodeInPlace: true)
         guard let node = focusedWidget as? TextNode,
               !node.readOnly else { return }
 
         var range = cursorPosition..<cursorPosition
-        if !replacementRange.isEmpty {
-            range = replacementRange
-        }
-
-        if !selectedTextRange.isEmpty {
-            range = selectedTextRange
+        if let r = replacementRange {
+            range = r
+        } else {
+            if let markedRange = markedTextRange {
+                range = markedRange
+            } else {
+                range = selectedTextRange
+            }
         }
 
         if !range.isEmpty {
@@ -249,6 +248,8 @@ extension TextRoot {
 
         let bText = BeamText(text: string, attributes: root.state.attributes)
         cmdManager.inputText(bText, in: node, at: cursorPosition)
+
+        unmarkText()
     }
 
     public func firstRect(forCharacterRange range: Range<Int>) -> (NSRect, Range<Int>) {

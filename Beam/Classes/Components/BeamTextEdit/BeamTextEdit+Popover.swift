@@ -29,7 +29,11 @@ extension BeamTextEdit {
         }
     }
 
-    internal func updatePopover(with command: TextRoot.Command = .none) {
+    enum Command {
+        case none, moveLeft, moveRight, moveUp, moveDown, deleteBackward, deleteForward, insertNewline
+    }
+
+    internal func updatePopover(with command: Command = .none) {
         guard let node = focusedWidget as? TextNode,
               let popover = popover else { return }
 

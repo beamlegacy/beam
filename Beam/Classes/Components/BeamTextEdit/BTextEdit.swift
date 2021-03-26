@@ -34,7 +34,7 @@ public struct BTextEdit: NSViewRepresentable {
     }
 
     public func makeNSView(context: Context) -> BeamTextEdit {
-        let nsView = BeamTextEdit(root: note, font: Font.main, journalMode: true)
+        let nsView = BeamTextEdit(root: note, journalMode: true)
 
         nsView.openURL = openURL
         nsView.openCard = openCard
@@ -124,7 +124,7 @@ public struct BTextEditScrollable: NSViewRepresentable {
     }
 
     public func makeNSView(context: Context) -> NSViewType {
-        let edit = BeamTextEdit(root: note, font: Font.main, journalMode: false)
+        let edit = BeamTextEdit(root: note, journalMode: false)
 
         edit.data = data
         edit.openURL = openURL
