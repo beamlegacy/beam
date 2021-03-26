@@ -14,7 +14,7 @@ struct RoundedRectangleDecoration: View {
     let size: CGFloat
     let isPressed: Bool
 
-    private let pressedBg = Color(.toolbarButtonActiveBackgroundColor)
+    private let pressedBg = Color(.buttonActiveBackgroundColor)
     private let emptyBg = Color(.transparent)
 
     func bgColor(_ enabled: Bool, _ pressed: Bool) -> Color {

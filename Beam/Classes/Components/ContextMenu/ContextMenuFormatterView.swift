@@ -51,7 +51,7 @@ private struct ContextMenuView: View {
         }
         let spacing: CGFloat = 5.0
         let itemsHeights = CGFloat(numberOfItems) * (ContextMenuView.itemHeight + spacing)
-        let height: CGFloat = spacing + itemsHeights + CGFloat(numberOfSections - 1) * (Separator.defaultHeight + spacing)
+        let height: CGFloat = spacing + itemsHeights + CGFloat(numberOfSections - 1) * (Separator.height + spacing)
         return CGSize(width: self.defaultWidth, height: height)
     }
 
@@ -68,7 +68,7 @@ private struct ContextMenuView: View {
                             }
                     }
                     if i != items.count - 1 {
-                        Separator()
+                        Separator(horizontal: true)
                     }
                 }
             }

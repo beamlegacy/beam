@@ -51,7 +51,7 @@ private struct HyperlinkEditorView: View {
                             }
                     }
                 }
-                Separator()
+                Separator(horizontal: true)
                     .padding(.horizontal, 2)
                 HStack(spacing: 4) {
                     Icon(name: "editor-url_link", size: 16, color: Color(urlTextColor))

@@ -195,7 +195,8 @@ class DocumentManager {
                               documentType: DocumentType(rawValue: document.document_type) ?? DocumentType.note,
                               previousData: document.beam_api_data,
                               previousChecksum: document.beam_api_checksum,
-                              version: document.version
+                              version: document.version,
+                              isPublic: document.is_public
                               )
     }
 

@@ -204,10 +204,6 @@ extension NSColor {
         return loadColor(named: "LightStoneGray")
     }
 
-    static var verticalSeparatorColor: NSColor {
-        return loadColor(named: "Mercury")
-    }
-
     // Other
 
     static var tableHeaderTextColor: NSColor {
@@ -293,9 +289,6 @@ extension NSColor {
     }
 
     // Toolbar
-    static var toolbarButtonActiveBackgroundColor: NSColor {
-        return loadColor(named: "Mercury")
-    }
 
     static var toolbarButtonIconColor: NSColor {
         return loadColor(named: "LightStoneGray")
@@ -307,6 +300,37 @@ extension NSColor {
 
     static var toolbarButtonIconDisabledColor: NSColor {
         return toolbarButtonIconColor.withAlphaComponent(0.13)
+    }
+
+    static var bottomBarBackgroundColor: NSColor {
+        return loadColor(named: "BottomBarBackgroundColor")
+    }
+
+    static var bottomBarShadowColor: NSColor {
+        return NSColor(withLightColor: NSColor.black.withAlphaComponent(0.050), darkColor: loadColor(named: "Mercury"))
+    }
+
+    // Context Menu
+    static var contextMenuHoverColor: NSColor {
+        return loadColor(named: "Mercury")
+    }
+
+    // Button
+
+    static var buttonActiveBackgroundColor: NSColor {
+        return loadColor(named: "Mercury")
+    }
+
+    static var buttonTextColor: NSColor {
+        return loadColor(named: "LightStoneGray")
+    }
+
+    static var buttonActiveTextColor: NSColor {
+        return loadColor(named: "Niobium")
+    }
+
+    static var beamSeparatorColor: NSColor {
+        return loadColor(named: "Mercury")
     }
 
     static var transparent: NSColor {
@@ -321,10 +345,5 @@ extension NSColor {
         return color
     }
 
-
-    // Context Menu
-    static var contextMenuHoverColor: NSColor {
-        return loadColor(named: "Mercury")
-    }
 
 }
