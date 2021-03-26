@@ -565,7 +565,7 @@ class TextNodeTests: XCTestCase {
         root.updateRendering()
 
         XCTAssertEqual(root.children.first?.children.count, 2)
-        root.doCommand(.deleteBackward)
+        root.deleteBackward()
         XCTAssertNotNil(root.focusedWidget as? TextNode)
         if let node = root.focusedWidget as? TextNode {
             XCTAssertEqual(node.text.text, "bullet1bullet11")
@@ -596,7 +596,7 @@ class TextNodeTests: XCTestCase {
         root.updateRendering()
 
         XCTAssertEqual(root.children.first?.children.count, 2)
-        root.doCommand(.deleteForward)
+        root.deleteForward()
 //        Logger.shared.logDebug("Tree:\n\(root.printTree())\n")
 //        note.debugNote()
         XCTAssertNotNil(root.focusedWidget as? TextNode)

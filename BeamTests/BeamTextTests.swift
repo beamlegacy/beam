@@ -230,7 +230,7 @@ class BeamTextTests: XCTestCase {
 //            Logger.shared.logDebug("caret[\(i)] -> \(caret)")
 //        }
 
-        expect(carets[5].index).to(equal(11))
+        expect(carets[5].indexInSource).to(equal(5))
 
 //        for i in 0..<string.count {
 //            let r = i..<i + 1

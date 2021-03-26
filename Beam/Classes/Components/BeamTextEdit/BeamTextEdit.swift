@@ -19,7 +19,7 @@ public extension CALayer {
 }
 
 // swiftlint:disable:next type_body_length
-public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
+@objc public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
     var data: BeamData?
     var cardTopSpace: CGFloat = 148
@@ -79,7 +79,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     private (set) var isResizing = false
     private (set) var journalMode: Bool
 
-    public init(root: BeamElement, font: Font = Font.main, journalMode: Bool) {
+    public init(root: BeamElement, journalMode: Bool) {
         self.journalMode = journalMode
 
         if !journalMode, let note = root as? BeamNote {
@@ -89,7 +89,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
             Logger.shared.logDebug("Links detection took \(diff)sec")
         }
 
-        self.config.font = font
         note = root
         super.init(frame: NSRect())
 
@@ -129,7 +128,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         }
         RunLoop.main.add(timer, forMode: .default)
 
-        _inputContext = NSTextInputContext(client: self)
+//        inputContext = NSTextInputContext(client: self)
 
         initBlinking()
         updateRoot(with: root)
@@ -225,19 +224,6 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         get {
             rootNode.state.selectedTextRange
         }
-    }
-
-    var markedTextRange: Range<Int> {
-        set {
-            assert(newValue.lowerBound != NSNotFound)
-            assert(newValue.upperBound != NSNotFound)
-            rootNode.state.markedTextRange = newValue
-            reBlink()
-        }
-        get {
-            rootNode.state.markedTextRange
-        }
-
     }
 
     var selectedText: String {
@@ -409,25 +395,20 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     // Text Input from AppKit:
-    private var _inputContext: NSTextInputContext!
-    public override var inputContext: NSTextInputContext? {
-        return _inputContext
-    }
+//    private var _inputContext: NSTextInputContext!
+//    public override var inputContext: NSTextInputContext? {
+//        return _inputContext
+//    }
 
     public func hasMarkedText() -> Bool {
         return rootNode.hasMarkedText()
     }
 
-    public func setMarkedText(string: String, selectedRange: Range<Int>, replacementRange: Range<Int>) {
-        rootNode.setMarkedText(string: string, selectedRange: selectedRange, replacementRange: replacementRange)
-        reBlink()
-    }
-
     public func unmarkText() {
-        markedTextRange = 0..<0
+        rootNode.unmarkText()
     }
 
-    public func insertText(string: String, replacementRange: Range<Int>) {
+    public func insertText(string: String, replacementRange: Range<Int>?) {
         guard let node = focusedWidget as? TextNode else { return }
         guard !node.readOnly else { return }
         defer { lastInput = string }
@@ -457,7 +438,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         hasFocus = true
         invalidate()
         onStartEditing()
-        return super.becomeFirstResponder()
+        return true
     }
 
     public override func resignFirstResponder() -> Bool {
@@ -477,7 +458,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         showOrHideInlineFormatter(isPresent: false)
         showOrHidePersistentFormatter(isPresent: false)
 
-        return super.resignFirstResponder()
+        return true
     }
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
@@ -486,7 +467,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
               let noteTitle = node.elementNoteTitle else { return }
 
         if option || shift {
-            rootNode.doCommand(.insertNewline)
+            rootNode.insertNewline()
         } else if let popover = popover {
             popover.doCommand(.insertNewline)
         } else if command && rootNode.state.nodeSelection == nil {
@@ -504,156 +485,17 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         }
     }
 
-    //swiftlint:disable cyclomatic_complexity function_body_length
-    override open func keyDown(with event: NSEvent) {
-        let shift = event.modifierFlags.contains(.shift)
-        let option = event.modifierFlags.contains(.option)
-        let control = event.modifierFlags.contains(.control)
-        let command = event.modifierFlags.contains(.command)
+    var shift: Bool { NSEvent.modifierFlags.contains(.shift) }
+    var option: Bool { NSEvent.modifierFlags.contains(.option) }
+    var control: Bool { NSEvent.modifierFlags.contains(.control) }
+    var command: Bool { NSEvent.modifierFlags.contains(.command) }
 
+    //swiftlint:disable:next cyclomatic_complexity function_body_length
+    override open func keyDown(with event: NSEvent) {
         if self.hasFocus {
             NSCursor.setHiddenUntilMouseMoves(true)
-            if let k = event.specialKey {
-                switch k {
-                case .enter:
-                    pressEnter(option, command, shift)
-                case .carriageReturn:
-                    pressEnter(option, command, shift)
-                    return
-                case .leftArrow:
-                    if control && option && command {
-                        guard let node = focusedWidget as? TextNode else { return }
-                        node.fold()
-                    } else if shift && option {
-                        rootNode.doCommand(.moveWordLeftAndModifySelection)
-                        showInlineFormatterOnKeyEventsAndClick()
-                    } else if shift && command {
-                        rootNode.doCommand(.moveToBeginningOfLineAndModifySelection)
-                        showInlineFormatterOnKeyEventsAndClick()
-                    } else if shift {
-                        rootNode.doCommand(.moveLeftAndModifySelection)
-                        showInlineFormatterOnKeyEventsAndClick(isKeyEvent: true)
-                    } else if command && popover != nil {
-                        rootNode.doCommand(.moveToBeginningOfLine)
-                        dismissPopoverOrFormatter()
-                    } else if command && persistentFormatter != nil {
-                        rootNode.doCommand(.moveToBeginningOfLine)
-                        detectFormatterType()
-                    } else if option {
-                        rootNode.doCommand(.moveWordLeft)
-                    } else if option && command {
-                        rootNode.doCommand(.moveToBeginningOfLine)
-                    } else if popover != nil {
-                        rootNode.doCommand(.moveLeft)
-                        updatePopover(with: .moveLeft)
-                    } else if inlineFormatter != nil {
-                        rootNode.doCommand(.moveLeft)
-                        hideInlineFormatter()
-                    } else if persistentFormatter != nil {
-                        rootNode.doCommand(.moveLeft)
-                        detectFormatterType()
-                    } else {
-                        rootNode.doCommand(.moveLeft)
-                    }
-                    return
-                case .rightArrow:
-                    if control && option && command {
-                        guard let node = focusedWidget as? TextNode else { return }
-                        node.unfold()
-                    } else if shift && option {
-                        rootNode.doCommand(.moveWordRightAndModifySelection)
-                        showInlineFormatterOnKeyEventsAndClick()
-                    } else if shift && command {
-                        rootNode.doCommand(.moveToEndOfLineAndModifySelection)
-                        showInlineFormatterOnKeyEventsAndClick()
-                    } else if shift {
-                        rootNode.doCommand(.moveRightAndModifySelection)
-                        showInlineFormatterOnKeyEventsAndClick(isKeyEvent: true)
-                    } else if command && persistentFormatter != nil {
-                        rootNode.doCommand(.moveToEndOfLine)
-                        detectFormatterType()
-                    } else if option {
-                        rootNode.doCommand(.moveWordRight)
-                    } else if option && command {
-                        rootNode.doCommand(.moveToEndOfLine)
-                    } else if popover != nil {
-                        // Avoid to return to the next node
-                        guard let node = focusedWidget as? TextNode,
-                              node.text.text.count > rootNode.cursorPosition else { return }
-
-                        rootNode.doCommand(.moveRight)
-                        updatePopover(with: .moveRight)
-                    } else if inlineFormatter != nil {
-                        rootNode.doCommand(.moveRight)
-                        hideInlineFormatter()
-                    } else if persistentFormatter != nil {
-                        rootNode.doCommand(.moveRight)
-                        detectFormatterType()
-                    } else {
-                        rootNode.doCommand(.moveRight)
-                    }
-                    return
-                case .upArrow:
-                    if shift {
-                        cancelPopover()
-                        rootNode.doCommand(.moveUpAndModifySelection)
-                        showInlineFormatterOnKeyEventsAndClick(isKeyEvent: true)
-                    } else if let popover = popover {
-                        popover.doCommand(.moveUp)
-                    } else if inlineFormatter != nil {
-                        rootNode.doCommand(.moveUp)
-                        hideInlineFormatter()
-                    } else if persistentFormatter != nil {
-                        rootNode.doCommand(.moveUp)
-                        detectFormatterType()
-                    } else {
-                        rootNode.doCommand(.moveUp)
-                    }
-                    return
-                case .downArrow:
-                    if shift {
-                        cancelPopover()
-                        rootNode.doCommand(.moveDownAndModifySelection)
-                        showInlineFormatterOnKeyEventsAndClick(isKeyEvent: true)
-                    } else if let popover = popover {
-                        popover.doCommand(.moveDown)
-                    } else if inlineFormatter != nil {
-                        rootNode.doCommand(.moveDown)
-                        hideInlineFormatter()
-                    } else if persistentFormatter != nil {
-                        rootNode.doCommand(.moveDown)
-                        detectFormatterType()
-                    } else {
-                        rootNode.doCommand(.moveDown)
-                    }
-                    return
-                case .delete:
-                    rootNode.doCommand(.deleteBackward)
-                    updatePopover(with: .deleteForward)
-
-                    guard let node = focusedWidget as? TextNode else { return }
-                    if node.text.isEmpty || !rootNode.textIsSelected { hideInlineFormatter() }
-                    detectFormatterType()
-
-                    return
-                case .backTab:
-                    rootNode.doCommand(.decreaseIndentation)
-                    return
-
-                case .tab:
-                    rootNode.doCommand(.increaseIndentation)
-                    return
-
-                default:
-                    Logger.shared.logInfo("Special Key \(k)", category: .noteEditor)
-                }
-            }
 
             switch event.keyCode {
-            case KeyCode.delete.rawValue:
-                rootNode.doCommand(.deleteForward)
-                updatePopover(with: .deleteForward)
-                return
             case KeyCode.escape.rawValue:
                 rootNode.cancelSelection()
                 dismissPopoverOrFormatter()
@@ -671,21 +513,15 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                         return
                     }
                 case "[":
-                    cancelPopover()
                     if command {
-                        rootNode.doCommand(.decreaseIndentation)
+                        cancelPopover()
+                        rootNode.decreaseIndentation()
                         return
                     }
                 case "]":
-                    cancelPopover()
-                    if command {
-                        rootNode.doCommand(.increaseIndentation)
-                        return
-                    }
-                case "a":
                     if command {
                         cancelPopover()
-                        rootNode.doCommand(.selectAll)
+                        rootNode.increaseIndentation()
                         return
                     }
                 case "b" :
@@ -751,23 +587,32 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
                         dumpWidgetTree()
                         return
                     }
+
+                case "s":
+                    if command, shift {
+                        let encoder = JSONEncoder()
+                        if let data = try? encoder.encode(note) {
+                            if let str = String(data: data, encoding: .utf8) {
+                                //swiftlint:disable:next print
+                                print("JSON Dump of the current note:\n\n\(str)\n")
+                            }
+                        }
+                        return
+                    }
                 default:
                     break
                 }
             }
-
         }
+
         inputContext?.handleEvent(event)
-        //super.keyDown(with: event)
     }
-    //swiftlint:enable cyclomatic_complexity function_body_length
 
     // NSTextInputHandler:
     // NSTextInputClient:
     public func insertText(_ string: Any, replacementRange: NSRange) {
         //        Logger.shared.logDebug("insertText \(string) at \(replacementRange)")
-        unmarkText()
-        let range = replacementRange.lowerBound..<replacementRange.upperBound
+        let range = replacementRange.lowerBound == NSNotFound ? nil :  replacementRange.lowerBound..<replacementRange.upperBound
         // swiftlint:disable:next force_cast
         if let str = string as? String {
             insertText(string: str, replacementRange: range)
@@ -781,11 +626,15 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     public func setMarkedText(_ string: Any, selectedRange: NSRange, replacementRange: NSRange) {
         //        Logger.shared.logDebug("setMarkedText \(string) at \(replacementRange) with selection \(selectedRange)")
         // swiftlint:disable:next force_cast
+
+        let selection = selectedRange.location == NSNotFound ? nil : selectedRange.lowerBound..<selectedRange.upperBound
+        let replacement = replacementRange.location == NSNotFound ? nil : replacementRange.lowerBound..<replacementRange.upperBound
         if let str = string as? String {
-            setMarkedText(string: str, selectedRange: selectedTextRange.lowerBound..<selectedTextRange.upperBound, replacementRange: replacementRange.lowerBound..<replacementRange.upperBound)
+            rootNode.setMarkedText(string: str, selectedRange: selection, replacementRange: replacement)
         } else if let str = string as? NSAttributedString {
-            setMarkedText(string: str.string, selectedRange: selectedTextRange.lowerBound..<selectedTextRange.upperBound, replacementRange: replacementRange.lowerBound..<replacementRange.upperBound)
+            rootNode.setMarkedText(string: str.string, selectedRange: selection, replacementRange: replacement)
         }
+        reBlink()
     }
 
     /* Returns the selection range. The valid location is from 0 to the document length.
@@ -800,14 +649,11 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     /* Returns the marked range. Returns {NSNotFound, 0} if no marked range.
      */
     public func markedRange() -> NSRange {
-        var r = NSRange()
-        if markedTextRange.isEmpty {
-            r = NSRange(location: NSNotFound, length: 0)
-        } else {
-            r = NSRange(location: markedTextRange.lowerBound, length: markedTextRange.upperBound - markedTextRange.lowerBound)
+        guard let range = rootNode.markedTextRange else {
+            return NSRange(location: NSNotFound, length: 0)
         }
-//        Logger.shared.logDebug("markedRange \(r)", category: .document)
-        return r
+        //        Logger.shared.logDebug("markedRange \(r)", category: .document)
+        return NSRange(location: range.lowerBound, length: range.upperBound - range.lowerBound)
     }
 
     /* Returns attributed string specified by range. It may return nil. If non-nil return value and actualRange is non-NULL, it contains the actual range for the return value. The range can be adjusted from various reasons (i.e. adjust to grapheme cluster boundary, performance optimization, etc).
@@ -1269,6 +1115,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
     var mouseDownPos: NSPoint?
     private func handleMouseDown(event: NSEvent) {
+        guard !(inputContext?.handleEvent(event) ?? false) else { return }
         reBlink()
         rootNode.cancelNodeSelection() // TODO: change this to handle manipulating the node selection with the mouse
         if self.mouseDownPos != nil {
@@ -1306,6 +1153,8 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     override public func mouseDragged(with event: NSEvent) {
+        guard !(inputContext?.handleEvent(event) ?? false) else { return }
+
         //        window?.makeFirstResponder(self)
         let point = convert(event.locationInWindow)
         _ = rootNode.dispatchMouseDragged(mouseInfo: MouseInfo(rootNode, point, event))
@@ -1382,6 +1231,8 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     }
 
     override public func mouseUp(with event: NSEvent) {
+        guard !(inputContext?.handleEvent(event) ?? false) else { return }
+
         let point = convert(event.locationInWindow)
         let info = MouseInfo(rootNode, point, event)
         if nil != rootNode.dispatchMouseUp(mouseInfo: info) {
@@ -1481,7 +1332,7 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
         if inlineFormatter == nil && popover == nil {
             currentTextRange = node.selectedTextRange
-            initInlineFormatterView()
+                initInlineFormatterView()
             showOrHidePersistentFormatter(isPresent: false)
         }
     }
@@ -1531,13 +1382,8 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         }
     }
 
-    @IBAction public override func selectAll(_ sender: Any?) {
-        rootNode.doCommand(.selectAll)
-        rootNode.textIsSelected = true
-    }
-
     @IBAction func selectAllHierarchically(_ sender: Any?) {
-        rootNode.doCommand(.selectAllHierarchically)
+        rootNode.selectAllNodesHierarchically()
     }
 
     func dumpWidgetTree() {
@@ -1553,4 +1399,347 @@ public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
         return focusedWidget ?? self
     }
 
+    /////////////////////////////////////
+    /// NSResponder:
+    override public func moveLeft(_ sender: Any?) {
+        if control && option && command {
+            guard let node = focusedWidget as? TextNode else { return }
+            node.fold()
+            return
+        }
+
+        rootNode.moveLeft()
+
+        if popover != nil {
+            updatePopover(with: .moveLeft)
+        }
+
+        if inlineFormatter != nil {
+            hideInlineFormatter()
+        }
+
+        if persistentFormatter != nil {
+            detectFormatterType()
+        }
+    }
+
+    override public func moveRight(_ sender: Any?) {
+        if control && option && command {
+            guard let node = focusedWidget as? TextNode else { return }
+            node.unfold()
+            return
+        }
+
+        if popover != nil {
+            guard let node = focusedWidget as? TextNode,
+                  node.text.text.count > rootNode.cursorPosition else { return }
+        }
+
+        rootNode.moveRight()
+
+        if popover != nil {
+            updatePopover(with: .moveRight)
+        }
+
+        if inlineFormatter != nil {
+            hideInlineFormatter()
+        }
+
+        if persistentFormatter != nil {
+            detectFormatterType()
+        }
+    }
+
+    override public func moveLeftAndModifySelection(_ sender: Any?) {
+        rootNode.moveLeftAndModifySelection()
+        showInlineFormatterOnKeyEventsAndClick(isKeyEvent: true)
+    }
+
+    override public func moveWordRight(_ sender: Any?) {
+        rootNode.moveWordRight()
+    }
+
+    override public func moveWordLeft(_ sender: Any?) {
+        rootNode.moveWordLeft()
+    }
+
+    override public func moveWordRightAndModifySelection(_ sender: Any?) {
+        rootNode.moveWordRightAndModifySelection()
+        showInlineFormatterOnKeyEventsAndClick()
+    }
+
+    override public func moveWordLeftAndModifySelection(_ sender: Any?) {
+        rootNode.moveWordLeftAndModifySelection()
+        showInlineFormatterOnKeyEventsAndClick()
+    }
+
+    override public func moveRightAndModifySelection(_ sender: Any?) {
+        rootNode.moveRightAndModifySelection()
+        showInlineFormatterOnKeyEventsAndClick(isKeyEvent: true)
+    }
+
+    override public func moveToBeginningOfLine(_ sender: Any?) {
+        rootNode.moveToBeginningOfLine()
+
+        if persistentFormatter != nil {
+            detectFormatterType()
+        }
+
+        if popover != nil {
+            dismissPopoverOrFormatter()
+        }
+    }
+
+    override public func moveToEndOfLine(_ sender: Any?) {
+        rootNode.moveToEndOfLine()
+        detectFormatterType()
+    }
+
+    override public func moveToBeginningOfLineAndModifySelection(_ sender: Any?) {
+        rootNode.moveToBeginningOfLineAndModifySelection()
+        showInlineFormatterOnKeyEventsAndClick()
+    }
+
+    override public func moveToEndOfLineAndModifySelection(_ sender: Any?) {
+        rootNode.moveToEndOfLineAndModifySelection()
+        showInlineFormatterOnKeyEventsAndClick()
+    }
+
+    override public func moveUp(_ sender: Any?) {
+        rootNode.moveUp()
+
+        if popover != nil {
+            updatePopover(with: .moveLeft)
+        }
+
+        if inlineFormatter != nil {
+            hideInlineFormatter()
+        }
+
+        if persistentFormatter != nil {
+            detectFormatterType()
+        }
+    }
+
+    override public func moveDown(_ sender: Any?) {
+        rootNode.moveDown()
+
+        if popover != nil {
+            updatePopover(with: .moveLeft)
+        }
+
+        if inlineFormatter != nil {
+            hideInlineFormatter()
+        }
+
+        if persistentFormatter != nil {
+            detectFormatterType()
+        }
+    }
+
+    override public func selectAll(_ sender: Any?) {
+        cancelPopover()
+        rootNode.selectAll()
+    }
+
+    override public func moveUpAndModifySelection(_ sender: Any?) {
+        cancelPopover()
+        rootNode.moveUpAndModifySelection()
+        showInlineFormatterOnKeyEventsAndClick(isKeyEvent: true)
+    }
+
+    override public func moveDownAndModifySelection(_ sender: Any?) {
+        cancelPopover()
+        rootNode.moveDownAndModifySelection()
+        showInlineFormatterOnKeyEventsAndClick(isKeyEvent: true)
+    }
+
+    override public func insertNewline(_ sender: Any?) {
+        let shift = NSEvent.modifierFlags.contains(.shift)
+        let option = NSEvent.modifierFlags.contains(.option)
+        let command = NSEvent.modifierFlags.contains(.command)
+        pressEnter(option, command, shift)
+    }
+
+//    override public func scrollPageUp(_ sender: Any?) {
+//    }
+//
+//    override public func scrollPageDown(_ sender: Any?) {
+//    }
+//
+//    override public func scrollLineUp(_ sender: Any?) {
+//    }
+//
+//    override public func scrollLineDown(_ sender: Any?) {
+//    }
+//
+//    override public func scrollToBeginningOfDocument(_ sender: Any?) {
+//    }
+//
+//    override public func scrollToEndOfDocument(_ sender: Any?) {
+//    }
+
+        /* Graphical Element transposition */
+
+//    override public func transpose(_ sender: Any?) {
+//    }
+//
+//    override public func transposeWords(_ sender: Any?) {
+//    }
+
+        /* Selections */
+
+    override public func selectParagraph(_ sender: Any?) {
+        rootNode.selectAll()
+    }
+
+    override public func selectLine(_ sender: Any?) {
+    }
+
+    override public func selectWord(_ sender: Any?) {
+    }
+
+        /* Insertions and Indentations */
+
+    override public func indent(_ sender: Any?) {
+        rootNode.increaseIndentation()
+    }
+
+    override public func insertTab(_ sender: Any?) {
+        rootNode.increaseIndentation()
+    }
+
+    override public func insertBacktab(_ sender: Any?) {
+        rootNode.decreaseIndentation()
+    }
+
+//    override public func insertParagraphSeparator(_ sender: Any?) {
+//    }
+//
+//    override public func insertNewlineIgnoringFieldEditor(_ sender: Any?) {
+//    }
+//
+//    override public func insertTabIgnoringFieldEditor(_ sender: Any?) {
+//    }
+//
+//    override public func insertLineBreak(_ sender: Any?) {
+//    }
+//
+//    override public func insertContainerBreak(_ sender: Any?) {
+//    }
+//
+//    override public func insertSingleQuoteIgnoringSubstitution(_ sender: Any?) {
+//    }
+//
+//    override public func insertDoubleQuoteIgnoringSubstitution(_ sender: Any?) {
+//    }
+
+        /* Case changes */
+
+//    override public func changeCaseOfLetter(_ sender: Any?) {
+//    }
+//
+//    override public func uppercaseWord(_ sender: Any?) {
+//    }
+//
+//    override public func lowercaseWord(_ sender: Any?) {
+//    }
+//
+//    override public func capitalizeWord(_ sender: Any?) {
+//    }
+
+        /* Deletions */
+
+    override public func deleteForward(_ sender: Any?) {
+        rootNode.deleteForward()
+        updatePopover(with: .deleteForward)
+
+        guard let node = focusedWidget as? TextNode else { return }
+        if node.text.isEmpty || !rootNode.textIsSelected { hideInlineFormatter() }
+        detectFormatterType()
+    }
+
+    override public func deleteBackward(_ sender: Any?) {
+        rootNode.deleteBackward()
+        updatePopover(with: .deleteBackward)
+
+        guard let node = focusedWidget as? TextNode else { return }
+        if node.text.isEmpty || !rootNode.textIsSelected { hideInlineFormatter() }
+        detectFormatterType()
+    }
+
+//    override public func deleteBackwardByDecomposingPreviousCharacter(_ sender: Any?) {
+//    }
+
+//    override public func deleteWordForward(_ sender: Any?) {
+//    }
+//
+//    override public func deleteWordBackward(_ sender: Any?) {
+//    }
+//
+//    override public func deleteToBeginningOfLine(_ sender: Any?) {
+//    }
+//
+//    override public func deleteToEndOfLine(_ sender: Any?) {
+//    }
+//
+//    override public func deleteToBeginningOfParagraph(_ sender: Any?) {
+//    }
+//
+//    override public func deleteToEndOfParagraph(_ sender: Any?) {
+//    }
+//
+//    override public func yank(_ sender: Any?) {
+//    }
+
+        /* Completion */
+
+    override public func complete(_ sender: Any?) {
+    }
+
+        /* Mark/Point manipulation */
+
+//    override public func setMark(_ sender: Any?) {
+//    }
+//
+//    override public func deleteToMark(_ sender: Any?) {
+//    }
+//
+//    override public func selectToMark(_ sender: Any?) {
+//    }
+//
+//    override public func swapWithMark(_ sender: Any?) {
+//    }
+
+        /* Cancellation */
+
+    override public func cancelOperation(_ sender: Any?) {
+        cancelPopover(leaveTextAsIs: true)
+    }
+
+        /* Writing Direction */
+
+//    override public func makeBaseWritingDirectionNatural(_ sender: Any?) {
+//    }
+//
+//    override public func makeBaseWritingDirectionLeftToRight(_ sender: Any?) {
+//    }
+//
+//    override public func makeBaseWritingDirectionRightToLeft(_ sender: Any?) {
+//    }
+//
+//    override public func makeTextWritingDirectionNatural(_ sender: Any?) {
+//    }
+//
+//    override public func makeTextWritingDirectionLeftToRight(_ sender: Any?) {
+//    }
+//
+//    override public func makeTextWritingDirectionRightToLeft(_ sender: Any?) {
+//    }
+
+       /* Quick Look */
+    /* Perform a Quick Look on the text cursor position, selection, or whatever is appropriate for your view. If there are no Quick Look items, then call [[self nextResponder] tryToPerform:_cmd with:sender]; to pass the request up the responder chain. Eventually AppKit will attempt to perform a dictionary look up. Also see quickLookWithEvent: above.
+    */
+//    override public func quickLookPreviewItems(_ sender: Any?) {
+//    }
 }
