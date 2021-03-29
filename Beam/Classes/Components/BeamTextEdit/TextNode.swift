@@ -34,8 +34,8 @@ public class TextNode: Widget {
     var elementText = BeamText()
     var elementKind = ElementKind.bullet
 
-    var layout: TextFrame?
-    var emptyLayout: TextFrame?
+    var textFrame: TextFrame?
+    var emptyTextFrame: TextFrame?
     var frameAnimation: FrameAnimation?
     var frameAnimationCancellable = Set<AnyCancellable>()
 
@@ -136,7 +136,7 @@ public class TextNode: Widget {
     var blendMode: CGBlendMode { config.blendMode }
 
     var selectedTextRange: Range<Int> { root?.selectedTextRange ?? 0..<0 }
-    var markedTextRange: Range<Int> { root?.markedTextRange ?? 0..<0 }
+    var markedTextRange: Range<Int>? { root?.markedTextRange }
     var cursorsStartPosition: Int { root?.cursorPosition ?? 0 }
     var cursorPosition: Int { root?.cursorPosition ?? 0 }
 
@@ -155,12 +155,12 @@ public class TextNode: Widget {
     }
 
     var firstLineHeight: CGFloat {
-        let layout = emptyLayout ?? self.layout
-        return layout?.lines.first?.bounds.height ?? CGFloat(fontSize * interlineFactor)
+        let textFrame = emptyTextFrame ?? self.textFrame
+        return textFrame?.lines.first?.bounds.height ?? CGFloat(fontSize * interlineFactor)
     }
     var firstLineBaseline: CGFloat {
-        let layout = emptyLayout ?? self.layout
-        if let firstLine = layout?.lines.first {
+        let textFrame = emptyTextFrame ?? self.textFrame
+        if let firstLine = textFrame?.lines.first {
             let h = firstLine.typographicBounds.ascent
             return CGFloat(h) + firstLine.frame.minY
         }
@@ -284,13 +284,15 @@ public class TextNode: Widget {
     }
 
     public func drawMarkee(_ context: CGContext, _ start: Int, _ end: Int, _ color: NSColor) {
+        guard let textFrame = textFrame else { return }
+
         context.beginPath()
         let startLine = lineAt(index: start)!
         let endLine = lineAt(index: end)!
-        let lineCount = layout!.lines.count
+        let lineCount = textFrame.lines.count
         guard lineCount > startLine, lineCount > endLine else { return }
-        let line1 = layout!.lines[startLine]
-        let line2 = layout!.lines[endLine]
+        let line1 = textFrame.lines[startLine]
+        let line2 = textFrame.lines[endLine]
         let xStart = offsetAt(index: start)
         let xEnd = offsetAt(index: end)
 
@@ -391,9 +393,11 @@ public class TextNode: Widget {
 
         //Draw Selection:
         if isEditing {
-            if !markedTextRange.isEmpty {
-                drawMarkee(context, markedTextRange.lowerBound, markedTextRange.upperBound, markedColor)
-            } else if !selectedTextRange.isEmpty {
+            if let range = markedTextRange {
+                drawMarkee(context, range.lowerBound, range.upperBound, markedColor)
+            }
+
+            if !selectedTextRange.isEmpty {
                 drawMarkee(context, selectedTextRange.lowerBound, selectedTextRange.upperBound, selectionColor)
             }
         }
@@ -417,7 +421,7 @@ public class TextNode: Widget {
         context.textMatrix = CGAffineTransform.identity
         context.translateBy(x: 0, y: firstLineBaseline)
 
-        layout?.draw(context)
+        textFrame?.draw(context)
         context.restoreGState()
     }
 
@@ -441,17 +445,17 @@ public class TextNode: Widget {
             contentsFrame = NSRect()
 
             if selfVisible {
-                emptyLayout = nil
+                emptyTextFrame = nil
                 let attrStr = attributedString
-                let layout = Font.draw(string: attrStr, atPosition: NSPoint(x: indent, y: 0), textWidth: (availableWidth - actionLayerFrame.width) - actionLayerFrame.minX)
-                self.layout = layout
-                contentsFrame = layout.frame
+                let textFrame = Font.draw(string: attrStr, atPosition: NSPoint(x: indent, y: 0), textWidth: (availableWidth - actionLayerFrame.width) - actionLayerFrame.minX)
+                self.textFrame = textFrame
+                contentsFrame = textFrame.frame
 
                 if attrStr.string.isEmpty {
                     let dummyText = buildAttributedString(for: BeamText(text: "Dummy!"))
                     let fakelayout = Font.draw(string: dummyText, atPosition: NSPoint(x: indent, y: 0), textWidth: (availableWidth - actionLayerFrame.width) - actionLayerFrame.minX)
 
-                    self.emptyLayout = fakelayout
+                    self.emptyTextFrame = fakelayout
                     contentsFrame = fakelayout.frame
                 }
 
@@ -554,21 +558,22 @@ public class TextNode: Widget {
     }
 
     func beginningOfLineFromPosition(_ position: Int) -> Int {
-        guard let layout = layout else { return 0 }
-        guard layout.lines.count > 1 else { return 0 }
+        guard let textFrame = textFrame else { return 0 }
+        guard textFrame.lines.count > 1 else { return 0 }
         if let l = lineAt(index: position) {
-            return layout.lines[l].range.lowerBound
+            return textFrame.lines[l].range.lowerBound
         }
         return 0
     }
 
     func endOfLineFromPosition(_ position: Int) -> Int {
-        guard layout?.lines.count != 1 else {
+        guard let textFrame = textFrame else { return 0 }
+        guard textFrame.lines.count != 1 else {
             return text.count
         }
         if let l = lineAt(index: position) {
-            let off = l < layout!.lines.count - 1 ? -1 : 0
-            return layout!.lines[l].range.upperBound + off
+            let off = l < textFrame.lines.count - 1 ? -1 : 0
+            return textFrame.lines[l].range.upperBound + off
         }
         return text.count
     }
@@ -671,7 +676,7 @@ public class TextNode: Widget {
                 return true
             } else {
                 debounceClickTimer?.invalidate()
-                root?.doCommand(.selectAll)
+                root?.selectAll()
                 editor.detectFormatterType()
 
                 if root?.state.nodeSelection != nil {
@@ -817,31 +822,31 @@ public class TextNode: Widget {
     // MARK: - Text & Cursor Position
 
     public func lineAt(point: NSPoint) -> Int {
-        guard let layout = layout, !layout.lines.isEmpty else { return 0 }
+        guard let textFrame = textFrame, !textFrame.lines.isEmpty else { return 0 }
         let y = point.y
         if y >= contentsFrame.height {
-            let v = layout.lines.count - 1
+            let v = textFrame.lines.count - 1
             return max(v, 0)
         } else if y < 0 {
             return 0
         }
 
-        for (i, l) in layout.lines.enumerated() where point.y < l.frame.minY + CGFloat(fontSize) {
+        for (i, l) in textFrame.lines.enumerated() where point.y < l.frame.minY + CGFloat(fontSize) {
             return i
         }
 
-        return max(0, min(Int(y / CGFloat(fontSize)), layout.lines.count - 1))
+        return max(0, min(Int(y / CGFloat(fontSize)), textFrame.lines.count - 1))
     }
 
     public func lineAt(index: Int) -> Int? {
         guard index >= 0 else { return nil }
-        guard let layout = layout else { return 0 }
-        guard !layout.lines.isEmpty else { return 0 }
-        for (i, l) in layout.lines.enumerated() where index < l.range.lowerBound {
+        guard let textFrame = textFrame else { return 0 }
+        guard !textFrame.lines.isEmpty else { return 0 }
+        for (i, l) in textFrame.lines.enumerated() where index < l.range.lowerBound {
             return i - 1
         }
-        if !layout.lines.isEmpty {
-            return layout.lines.count - 1
+        if !textFrame.lines.isEmpty {
+            return textFrame.lines.count - 1
         }
         return nil
     }
@@ -851,25 +856,20 @@ public class TextNode: Widget {
     }
 
     public func position(after index: Int) -> Int {
-        guard layout != nil, !layout!.lines.isEmpty else { return 0 }
-        let displayIndex = displayIndexFor(sourceIndex: index)
-        let newDisplayIndex = text.text.position(after: displayIndex)
-        let newIndex = sourceIndexFor(displayIndex: newDisplayIndex)
-        return newIndex
+        guard let textFrame = textFrame else { return 0 }
+        return textFrame.position(after: index)
     }
 
     public func position(before index: Int) -> Int {
-        guard layout != nil, !layout!.lines.isEmpty else { return 0 }
-        let displayIndex = displayIndexFor(sourceIndex: index)
-        let newDisplayIndex = text.text.position(before: displayIndex)
-        let newIndex = sourceIndexFor(displayIndex: newDisplayIndex)
-        return newIndex
+        guard let textFrame = textFrame else { return 0 }
+        return textFrame.position(before: index)
     }
 
     public func positionAt(point: NSPoint) -> Int {
-        guard layout != nil, !layout!.lines.isEmpty else { return 0 }
+        guard let textFrame = textFrame else { return 0 }
+        guard textFrame != nil, !textFrame.lines.isEmpty else { return 0 }
         let line = lineAt(point: point)
-        let lines = layout!.lines
+        let lines = textFrame.lines
         let l = lines[line]
         let displayIndex = l.stringIndexFor(position: point)
         let res = sourceIndexFor(displayIndex: displayIndex)
@@ -878,10 +878,11 @@ public class TextNode: Widget {
     }
 
     public func indexAt(point: NSPoint, limitToTextString: Bool = true) -> Int? {
-        guard layout != nil, !layout!.lines.isEmpty else { return nil }
+        guard let textFrame = textFrame else { return nil }
+        guard !textFrame.lines.isEmpty else { return nil }
         let line = lineAt(point: point)
         guard line >= 0 else { return nil }
-        let l = layout!.lines[line]
+        let l = textFrame.lines[line]
         guard l.frame.minX < point.x && l.frame.maxX > point.x else { return nil } // point is outside the line
         let displayIndex = l.stringIndexFor(position: point)
         if !limitToTextString {
@@ -911,10 +912,11 @@ public class TextNode: Widget {
     }
 
     func linkRangeAt(point: NSPoint) -> (BeamText.Range?, NSRect?) {
-        guard layout != nil, !layout!.lines.isEmpty else { return (nil, nil) }
+        guard let textFrame = textFrame else { return (nil, nil) }
+        guard !textFrame.lines.isEmpty else { return (nil, nil) }
         let line = lineAt(point: point)
         guard line >= 0 else { return (nil, nil) }
-        let l = layout!.lines[line]
+        let l = textFrame.lines[line]
         guard let pos = indexAt(point: point) else { return (nil, nil) }
 
         let range = elementText.rangeAt(position: pos)
@@ -932,10 +934,10 @@ public class TextNode: Widget {
     }
 
     public func internalLinkAt(point: NSPoint) -> String? {
-        guard let layout = layout else { return nil }
+        guard let textFrame = textFrame else { return nil }
         let line = lineAt(point: point)
-        guard line >= 0, !layout.lines.isEmpty else { return nil }
-        let l = layout.lines[line]
+        guard line >= 0, !textFrame.lines.isEmpty else { return nil }
+        let l = textFrame.lines[line]
         guard l.frame.minX <= point.x && l.frame.maxX >= point.x else { return nil } // don't find links outside the line
         let displayIndex = l.stringIndexFor(position: point)
         let pos = min(displayIndex, attributedString.length - 1)
@@ -943,41 +945,43 @@ public class TextNode: Widget {
     }
 
     public func offsetAt(index: Int) -> CGFloat {
-        let layout = emptyLayout ?? self.layout
-        guard layout != nil, !layout!.lines.isEmpty else { return 0 }
+        guard let textFrame = emptyTextFrame ?? self.textFrame else { return 0 }
+        guard !textFrame.lines.isEmpty else { return 0 }
         let displayIndex = displayIndexFor(sourceIndex: index)
         guard let line = lineAt(index: displayIndex) else { return 0 }
-        let layoutLine = layout!.lines[line]
+        let textLine = textFrame.lines[line]
         let positionInLine = displayIndex
-        let result = layoutLine.offsetFor(index: positionInLine)
+        let result = textLine.offsetFor(index: positionInLine)
         return CGFloat(result)
     }
 
     public func offsetAndFrameAt(index: Int) -> (CGFloat, NSRect) {
+        guard let textFrame = textFrame else { return (0, .zero) }
         let displayIndex = displayIndexFor(sourceIndex: index)
 
-        guard layout != nil,
-              !layout!.lines.isEmpty,
-              let line = lineAt(index: displayIndex) else { return (0, NSRect()) }
+        guard !textFrame.lines.isEmpty,
+              let line = lineAt(index: displayIndex) else { return (0, .zero) }
 
-        let layoutLine = layout!.lines[line]
+        let textLine = textFrame.lines[line]
         let positionInLine = displayIndex
-        let result = layoutLine.offsetFor(index: positionInLine)
+        let result = textLine.offsetFor(index: positionInLine)
 
-        return (CGFloat(result), layoutLine.frame)
+        return (CGFloat(result), textLine.frame)
     }
 
     public func positionAbove(_ position: Int) -> Int {
+        guard let textFrame = textFrame else { return 0 }
         guard let l = lineAt(index: position), l > 0 else { return 0 }
         let offset = offsetAt(index: position)
-        let indexAbove = layout!.lines[l - 1].stringIndexFor(position: NSPoint(x: offset, y: 0))
+        let indexAbove = textFrame.lines[l - 1].stringIndexFor(position: NSPoint(x: offset, y: 0))
         return sourceIndexFor(displayIndex: indexAbove)
     }
 
     public func positionBelow(_ position: Int) -> Int {
-        guard let l = lineAt(index: position), l < layout!.lines.count - 1 else { return text.count }
+        guard let textFrame = textFrame else { return 0 }
+        guard let l = lineAt(index: position), l < textFrame.lines.count - 1 else { return text.count }
         let offset = offsetAt(index: position)
-        let indexBelow = layout!.lines[l + 1].stringIndexFor(position: NSPoint(x: offset, y: 0))
+        let indexBelow = textFrame.lines[l + 1].stringIndexFor(position: NSPoint(x: offset, y: 0))
         return sourceIndexFor(displayIndex: indexBelow)
     }
 
@@ -987,21 +991,21 @@ public class TextNode: Widget {
     }
 
     public func isOnLastLine(_ position: Int) -> Bool {
-        guard let layout = layout else { return true }
-        guard layout.lines.count > 1 else { return true }
+        guard let textFrame = textFrame else { return true }
+        guard textFrame.lines.count > 1 else { return true }
         guard let l = lineAt(index: position) else { return false }
-        return l == layout.lines.count - 1
+        return l == textFrame.lines.count - 1
     }
 
     public func rectAt(_ position: Int) -> NSRect {
         updateRendering()
         let textLine: TextLine? = {
-            if let emptyLayout = emptyLayout {
+            if let emptyLayout = emptyTextFrame {
                 return emptyLayout.lines[0]
             }
 
             guard let cursorLine = lineAt(index: position <= 0 ? 0 : position) else { fatalError() }
-            return layout?.lines[cursorLine] ?? nil
+            return textFrame?.lines[cursorLine] ?? nil
         }()
 
         guard let line = textLine else { return NSRect.zero }
@@ -1013,7 +1017,7 @@ public class TextNode: Widget {
     }
 
     public func indexOnLastLine(atOffset x: CGFloat) -> Int {
-        guard let lines = layout?.lines else { return 0 }
+        guard let lines = textFrame?.lines else { return 0 }
         guard !lines.isEmpty else { return 0 }
         guard let line = lines.last else { return 0 }
         let displayIndex = line.stringIndexFor(position: NSPoint(x: x, y: 0))
@@ -1025,7 +1029,7 @@ public class TextNode: Widget {
     }
 
     public func indexOnFirstLine(atOffset x: CGFloat) -> Int {
-        guard let lines = layout?.lines else { return 0 }
+        guard let lines = textFrame?.lines else { return 0 }
         guard !lines.isEmpty else { return 0 }
         guard let line = lines.first else { return 0 }
         let displayIndex = line.stringIndexFor(position: NSPoint(x: x, y: 0))
@@ -1258,7 +1262,7 @@ public class TextNode: Widget {
 
     //    Returns the range of characters in the specified line.
     public override func accessibilityRange(forLine line: Int) -> NSRange {
-        guard let line = layout?.lines[line] else { return NSRange() }
+        guard let line = textFrame?.lines[line] else { return NSRange() }
         let range = line.range
         return NSRange(location: range.lowerBound, length: range.count)
     }
@@ -1266,7 +1270,7 @@ public class TextNode: Widget {
     //    Returns the range of characters for the glyph at the specified point.
     public override func accessibilityRange(for point: NSPoint) -> NSRange {
         let lineIndex = lineAt(point: point)
-        guard let line = layout?.lines[lineIndex] else { return NSRange() }
+        guard let line = textFrame?.lines[lineIndex] else { return NSRange() }
 
         let range = line.range
         return NSRange(location: range.lowerBound, length: range.count)

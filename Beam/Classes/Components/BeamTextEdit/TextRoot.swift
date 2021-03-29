@@ -11,7 +11,7 @@ import AppKit
 public struct TextState {
     var text = BeamText()
     var selectedTextRange: Range<Int> = 0..<0
-    var markedTextRange: Range<Int> = 0..<0
+    var markedTextRange: Range<Int>?
     var cursorPosition: Int = 0
 
     var attributes: [BeamText.Attribute] = []
@@ -21,7 +21,6 @@ public struct TextState {
 
 public struct TextConfig {
     var editable: Bool = true
-    var font: Font = Font.system(size: 12)
     var keepCursorMidScreen = false //true
 
     var color = NSColor.textColor
@@ -30,8 +29,6 @@ public struct TextConfig {
     var markedColor = NSColor.editorTextSelectionColor
     var alpha: Float = 1.0
     var blendMode: CGBlendMode = .normal
-
-    var fHeight: Float { Float(font.ascent - font.descent) }
 }
 
 public class TextRoot: TextNode {
@@ -52,7 +49,7 @@ public class TextRoot: TextNode {
             state.selectedTextRange = newValue
         }
     }
-    override var markedTextRange: Range<Int> {
+    override var markedTextRange: Range<Int>? {
         get {
             state.markedTextRange
         }
@@ -208,50 +205,7 @@ public class TextRoot: TextNode {
         }
     }
 
-    var lastCommand: TextRoot.Command = .none
-
-    let commands: [Command: CommandDefinition] = [
-        .none: CommandDefinition(undo: false, redo: false, coalesce: false, name: ""),
-        .insertText: CommandDefinition(undo: true, redo: true, coalesce: true, name: "Insert Text"),
-        .moveForward: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move Forward"),
-        .moveRight: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move Right"),
-        .moveBackward: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move Right"),
-        .moveLeft: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move Left"),
-        .moveUp: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move Up"),
-        .moveDown: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move Down"),
-        .moveWordForward: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move Word Forward"),
-        .moveWordBackward: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move Word Backward"),
-        .moveToBeginningOfLine: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move To Beginning Of Line"),
-        .moveToEndOfLine: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move To End Of Line"),
-        .centerSelectionInVisibleArea: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Center Selection In Visible Area"),
-        .moveBackwardAndModifySelection: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move Backward And Modify Selection"),
-        .moveForwardAndModifySelection: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move Forward And Modify Selection"),
-        .moveWordForwardAndModifySelection: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move Word Forward And Modify Selection"),
-        .moveWordBackwardAndModifySelection: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move Word Backward And Modify Selection"),
-        .moveUpAndModifySelection: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move Up And Modify Selection"),
-        .moveDownAndModifySelection: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move Down And Modify Selection"),
-        .moveToBeginningOfLineAndModifySelection: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move To Beginning Of Line And Modify Selection"),
-        .moveToEndOfLineAndModifySelection: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move To End Of Line And Modify Selection"),
-        .moveWordRight: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move Word Right"),
-        .moveWordLeft: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move Word Left"),
-        .moveRightAndModifySelection: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move Right And Modify Selection"),
-        .moveLeftAndModifySelection: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move Left And Modify Selection"),
-        .moveWordRightAndModifySelection: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move Word Right And Modify Selection"),
-        .moveWordLeftAndModifySelection: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Move Word Left And Modify Selection"),
-        .selectAll: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Select All"),
-        .selectLine: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Select Line"),
-        .selectWord: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Select Word"),
-        .insertTab: CommandDefinition(undo: true, redo: true, coalesce: true, name: "Insert Tab"),
-        .insertNewline: CommandDefinition(undo: true, redo: true, coalesce: true, name: "Insert New Line"),
-        .deleteForward: CommandDefinition(undo: true, redo: true, coalesce: true, name: "Delete Forward"),
-        .deleteBackward: CommandDefinition(undo: true, redo: true, coalesce: true, name: "Delete Backward"),
-        .deleteWordForward: CommandDefinition(undo: true, redo: true, coalesce: true, name: "Delete Word Forward"),
-        .deleteWordBackward: CommandDefinition(undo: true, redo: true, coalesce: true, name: "Delete Word Backward"),
-        .deleteToBeginningOfLine: CommandDefinition(undo: true, redo: true, coalesce: true, name: "Delete To Begining Of Line"),
-        .deleteToEndOfLine: CommandDefinition(undo: true, redo: true, coalesce: true, name: "Delete To End Of Line"),
-        .complete: CommandDefinition(undo: true, redo: true, coalesce: true, name: "Complete"),
-        .cancelOperation: CommandDefinition(undo: false, redo: false, coalesce: false, name: "Cancel Operation")
-    ]
+    var lastCommand: BeamTextEdit.Command = .none
 
     override func dumpWidgetTree(_ level: Int = 0) {
         Logger.shared.logDebug("==================================================")

@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "atob": "^2.1.2",
+    "btoa": "^1.2.1",
+    "js-crypto-aes": "^1.0.2"
+  }
+}

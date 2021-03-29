@@ -184,7 +184,7 @@ extension TextRoot {
 
     public func cancelSelection() {
         selectedTextRange = cursorPosition..<cursorPosition
-        markedTextRange = selectedTextRange
+        unmarkText()
         focusedWidget?.invalidate()
     }
 
@@ -227,6 +227,7 @@ extension TextRoot {
     }
 
     public func selectAll() {
+        textIsSelected = true
         guard root.state.nodeSelection == nil else {
             _ = selectAllNodes()
             return

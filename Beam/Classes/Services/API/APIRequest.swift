@@ -15,7 +15,7 @@ class BeamURLSession {
 
 // swiftlint:disable:next type_body_length
 class APIRequest {
-    var route: String { "https://\(Configuration.apiHostname)/graphql" }
+    var route: String { "\(Configuration.apiHostname)/graphql" }
     var authenticatedAPICall = true
     static var callsCount = 0
     private static var uploadedBytes: Int64 = 0

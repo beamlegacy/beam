@@ -20,6 +20,6 @@ class Popover: NSView {
         super.init(coder: coder)
     }
 
-    func doCommand(_ key: TextRoot.Command, _ command: Bool = false) {}
+    func doCommand(_ key: BeamTextEdit.Command, _ command: Bool = false) {}
 
 }

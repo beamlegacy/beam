@@ -42,9 +42,9 @@ end
 
 ### AES GCM
 
-key = Base64.decode64 "nc0ogib3Ymdink8ys3pf2wuoZTjdQLK0MF3LwAPqP6A="
-combined = Base64.decode64 "OMlHyj4XvkfG0hp1rCVzm9dFLN0gR6HPv4r/HRSi6IKFHYQhY4fMlN5/GqRTgxa75wUlasnFa136Hj6hXkrouSyaEvGjqLy8gn27NIpJd3GqDayNLJvE"
-text = "Small Cotton Chair dLRKbPUjmfTmnGNjd0z7iYs6MdWVJNTIOyfactPI"
+key = Base64.decode64 "g77d4Ulrd7jfUJeKEXTQDU5JMd2FlIRbjm3N/o3pAeI="
+combined = Base64.decode64 "6ykpONKB2A8zXqNbjpSTURkwpGHQgR2mF3fv+l8Jc5MNfFIm1CeaUuUad9U5PXP40mTXGazQCLQ/Xkq4efWEfRpezPZL2c8tJlBNYLuOtgyoJFGprr/cE9fltey4fUBVUWoSwCZ5yA=="
+text = "✔ Ergonomic Granite Computer 7svhQcDlj4LraUa9BuC2p9Ek5OagBet2JpptTbls ✅"
 
 # Combined version
 combinedTag = combined[-16..-1]

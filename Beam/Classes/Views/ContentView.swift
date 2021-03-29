@@ -59,6 +59,10 @@ struct ModeView: View {
                     }
                 }
                 .frame(maxHeight: .infinity)
+                if [.note, .today].contains(state.mode) {
+                    WindowBottomToolBar()
+                        .transition(.offset(x: 0, y: 30))
+                }
             }
             .background(Color(.editorBackgroundColor))
         }.frame(minWidth: 800)

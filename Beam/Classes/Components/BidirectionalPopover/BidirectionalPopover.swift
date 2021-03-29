@@ -118,7 +118,7 @@ class BidirectionalPopover: Popover {
     }
 
     // MARK: - Methods
-    override func doCommand(_ key: TextRoot.Command, _ command: Bool = false) {
+    override func doCommand(_ key: BeamTextEdit.Command, _ command: Bool = false) {
         switch key {
         case .moveUp:
             keyMoveUp()
