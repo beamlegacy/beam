@@ -652,7 +652,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             var currentOrigin = origin
             repeat {
                 let foundFrameInfo = framesInfo[currentOrigin]
-                if (foundFrameInfo != nil) {
+                if foundFrameInfo != nil {
                     let frameInfo = foundFrameInfo!
                     framePos += prop == "x" ? frameInfo.x : frameInfo.y
                     currentOrigin = frameInfo.origin
@@ -663,7 +663,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                                            """, category: .general)
                     break
                 }
-            } while (framesInfo[currentOrigin]?.origin != currentOrigin)
+            } while framesInfo[currentOrigin]?.origin != currentOrigin
         }
         let pos = framePos + v
         return pos * zoomLevel

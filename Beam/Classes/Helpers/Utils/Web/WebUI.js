@@ -139,21 +139,25 @@ export class WebUI {
   cardsToProposals(cards, txt) {
     const proposals = []
     for (const c of cards) {
-      let title = c.title
-      let matchPos = title.toLowerCase().indexOf(txt)
-      if (matchPos >= 0) {
-        let value = `${title.substr(0, matchPos)}<b>${title.substr(
-            matchPos,
-            txt.length
-        )}</b>${title.substr(matchPos + txt.length)}`
-        let hint = c.hint
-        if (hint) {
-          value += ` <span class="hint">${hint}</span>`
-        }
-        proposals.push({key: c.id, value})
-      }
+      this.cardToProposal(c, txt, proposals)
     }
     return proposals
+  }
+
+  cardToProposal(c, txt, proposals) {
+    let title = c.title
+    let matchPos = title.toLowerCase().indexOf(txt)
+    if (matchPos >= 0) {
+      let value = `${title.substr(0, matchPos)}<b>${title.substr(
+          matchPos,
+          txt.length
+      )}</b>${title.substr(matchPos + txt.length)}`
+      let hint = c.hint
+      if (hint) {
+        value += ` <span class="hint">${hint}</span>`
+      }
+      proposals.push({key: c.id, value})
+    }
   }
 
   onCardInput(ev) {

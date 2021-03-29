@@ -168,27 +168,16 @@ export const PointAndShoot = (ui) => {
     const body = document.body
     const documentEl = document.documentElement
     scrollWidth = Math.max(
-        body.scrollWidth,
-        documentEl.scrollWidth,
-        body.offsetWidth,
-        documentEl.offsetWidth,
-        body.clientWidth,
-        documentEl.clientWidth
+        body.scrollWidth, documentEl.scrollWidth,
+        body.offsetWidth, documentEl.offsetWidth,
+        body.clientWidth, documentEl.clientWidth
     )
     const scrollHeight = Math.max(
-        body.scrollHeight,
-        documentEl.scrollHeight,
-        body.offsetHeight,
-        documentEl.offsetHeight,
-        body.clientHeight,
-        documentEl.clientHeight
+        body.scrollHeight, documentEl.scrollHeight,
+        body.offsetHeight, documentEl.offsetHeight,
+        body.clientHeight, documentEl.clientHeight
     )
-    const scrollInfo = {
-      x: window.scrollX,
-      y: window.scrollY,
-      width: scrollWidth,
-      height: scrollHeight
-    }
+    const scrollInfo = {x: window.scrollX, y: window.scrollY, width: scrollWidth, height: scrollHeight}
     ui.setScrollInfo(scrollInfo)
     const hasFrames = checkFrames()
     console.log(hasFrames ? "Scroll updated frames info" : "Scroll did not update frames info since there is none")

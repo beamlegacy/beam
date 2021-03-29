@@ -5,13 +5,11 @@
 import Foundation
 import SwiftUI
 
-
 struct SelectionUI {
     var rect: NSRect
     var animated: Bool
     var color: Color
 }
-
 
 class PointAndShootUI: ObservableObject {
 
