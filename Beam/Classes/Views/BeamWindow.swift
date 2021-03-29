@@ -70,7 +70,9 @@ class BeamWindow: NSWindow {
 
         // Create the SwiftUI view and set the context as the value for the managedObjectContext environment keyPath.
         // Add `@Environment(\.managedObjectContext)` in the views that will need the context.
-        let mainView = ContentView().environmentObject(state).environmentObject(data)
+        let mainView = ContentView()
+            .environmentObject(state)
+            .environmentObject(data)
             .frame(minWidth: contentRect.width, maxWidth: .infinity, minHeight: contentRect.height, maxHeight: .infinity)
 
         let hostingView = BeamHostingView(rootView: mainView)

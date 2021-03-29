@@ -244,6 +244,10 @@ extension NSColor {
         return self.editorTextColor
     }
 
+    static var autocompleteLinkColor: NSColor {
+        return loadColor(named: "Bluetiful")
+    }
+
     static var autocompleteSubtitleTextColor: NSColor {
         return loadColor(named: "LightStoneGray")
     }

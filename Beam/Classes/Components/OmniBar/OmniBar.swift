@@ -12,6 +12,7 @@ import AppKit
 
 struct OmniBar: View {
     @EnvironmentObject var state: BeamState
+    @EnvironmentObject var autocompleteManager: AutocompleteManager
     @State private var title = ""
     var containerGeometry: GeometryProxy?
 
@@ -33,13 +34,18 @@ struct OmniBar: View {
         state.focusOmniBox = editing
         if editing {
             if let url = state.currentTab?.url?.absoluteString, state.mode == .web {
-                state.searchQuerySelectedRanges = [url.wholeRange]
-                state.searchQuery = url
+                autocompleteManager.searchQuerySelectedRanges = [url.wholeRange]
+                autocompleteManager.searchQuery = url
             }
         } else if state.mode == .web {
-            state.resetQuery()
+            autocompleteManager.resetQuery()
         }
     }
+
+    private var shouldShowAutocompleteResults: Bool {
+        isEditing && !autocompleteManager.searchQuery.isEmpty && !autocompleteManager.autocompleteResults.isEmpty && autocompleteManager.searchQuery != state.currentTab?.url?.absoluteString
+    }
+
     private var showDestinationNotePicker: Bool {
         state.mode == .web && state.currentTab != nil
     }
@@ -85,8 +91,8 @@ struct OmniBar: View {
                     .padding(.horizontal, 5)
                     .frame(height: boxHeight)
                     .frame(maxWidth: .infinity)
-                    if isEditing && !state.searchQuery.isEmpty && !state.autocompleteResults.isEmpty {
-                        AutocompleteList(selectedIndex: $state.autocompleteSelectedIndex, elements: $state.autocompleteResults, modifierFlagsPressed: modifierFlagsPressed)
+                    if shouldShowAutocompleteResults {
+                        AutocompleteList(selectedIndex: $autocompleteManager.autocompleteSelectedIndex, elements: $autocompleteManager.autocompleteResults, modifierFlagsPressed: modifierFlagsPressed)
                     }
                 }
             }
@@ -116,7 +122,7 @@ struct OmniBar: View {
     }
 
     func resetAutocompleteSelection() {
-        state.resetAutocompleteSelection()
+        autocompleteManager.resetAutocompleteSelection()
     }
 
     func goToJournal() {
@@ -131,7 +137,7 @@ struct OmniBar: View {
         if state.mode == .web {
             guard let tab = state.currentTab else { return }
             state.navigateToNote(tab.note)
-            state.resetQuery()
+            autocompleteManager.resetQuery()
         } else {
             state.mode = .web
         }
