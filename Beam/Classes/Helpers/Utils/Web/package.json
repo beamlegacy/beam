@@ -1,0 +1,25 @@
+{
+  "private": "true",
+  "name": "beam-collect",
+  "version": "0.1.0",
+  "description": "Beam",
+  "main": "PointAndShoot_prod.js",
+  "scripts": {
+    "build": "npm install && parcel build --no-content-hash PointAndShoot.js",
+    "test": "jest"
+  },
+  "browserslist": [
+    "safari 13"
+  ],
+  "author": "frontend@beam.co",
+  "devDependencies": {
+    "@parcel/transformer-sass": "^2.0.0-beta.2",
+    "@types/jest": "26.0.20",
+    "jest": "26.6.3",
+    "parcel": "2.0.0-beta.2",
+    "sass": "1.32.8"
+  },
+  "dependencies": {
+    "build": "^0.1.4"
+  }
+}

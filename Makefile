@@ -126,10 +126,14 @@ install_libsodium:
 	sudo mkdir -p /opt/local
 	sudo ln -s /opt/homebrew/lib /opt/local
 
+install_js:
+	brew install node
+	brew install yarn
+
 git_checkout:
 	git submodule sync && git submodule update --init --recursive
 
 copy_vinyl_files:
 	cp ${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Logs/Beam/Vinyl/*.json BeamTests/Vinyl/
 
-setup: git_checkout install_dependencies install_direnv install_swiftlint install_cmake variable_injector build_libgit2
+setup: git_checkout install_dependencies install_direnv install_swiftlint install_cmake variable_injector build_libgit2 install_js

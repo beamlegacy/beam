@@ -26,7 +26,7 @@ class PointAndShoot {
     var shootAreas: [NSRect] = []
 
     lazy var pointAndShoot: String = {
-        loadFile(from: "PointAndShoot", fileType: "js")
+        loadFile(from: "PointAndShoot_prod", fileType: "js")
     }()
 
     lazy var pointAndShootStyle: String = {
