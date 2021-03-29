@@ -1,12 +1,20 @@
 {
+  "type": "module",
   "private": "true",
   "name": "beam-collect",
   "version": "0.1.0",
-  "description": "Beam",
+  "description": "Beam web collect",
   "main": "PointAndShoot_prod.js",
   "scripts": {
-    "build": "npm install && parcel build --no-content-hash PointAndShoot.js",
-    "test": "jest"
+    "build": "npm install && npm test && parcel build --no-content-hash index.js",
+    "test": "node --experimental-vm-modules node_modules/.bin/jest"
+  },
+  "targets": {
+    "main": {
+      "sourceMap": {
+        "inline": true
+      }
+    }
   },
   "browserslist": [
     "safari 13"
@@ -21,5 +29,9 @@
   },
   "dependencies": {
     "build": "^0.1.4"
+  },
+  "jest": {
+    "verbose": true,
+    "transform": {}
   }
 }

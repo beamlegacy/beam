@@ -98,13 +98,6 @@ export class NativeUI {
     // TODO: message to un-shoot
   }
 
-  submit(selected) {
-    for (const s of selected) {
-      s.dataset[this.datasetKey] = JSON.stringify(this.selectedCard)
-    }
-    this.hidePopup()
-  }
-
   showPopup(el, x, y, selected) {
     // TODO: Send popup message?
   }
@@ -113,7 +106,7 @@ export class NativeUI {
     // TODO: Hide popup message?
   }
 
-  shoot(el, x, y, selected, submitCb) {
+  shoot(el, x, y, selected, _submitCb) {
     this.shootMessage(el, x, y)
     this.hidePopup()  // Hide previous, if any
     this.showPopup(el, x, y, selected)

@@ -1,8 +1,5 @@
-import {BeamUI} from "./BeamUI";
 
-const ui = BeamUI.getInstance();
-
-const PointAndShoot = (ui) => {
+export const PointAndShoot = (ui) => {
   const prefix = "__ID__"
   const origin = document.body.baseURI
   console.log("PointAndShoot initializing", origin)
@@ -65,7 +62,7 @@ const PointAndShoot = (ui) => {
   }
 
   function showStatus(el) {
-    const data = el.dataset[this.datasetKey]
+    const data = el.dataset[datasetKey]
     const collected = JSON.parse(data)
     ui.showStatus(el, collected)
   }
@@ -247,19 +244,10 @@ const PointAndShoot = (ui) => {
   window.addEventListener("mousemove", onMouseMove)
   window.addEventListener("click", onClick)
   window.addEventListener("scroll", onScroll)
+  window.addEventListener("touchstart", touchstart, false);
+  window.addEventListener("touchend", touchend, false);
   document.addEventListener("keypress", onKeyPress)
   document.addEventListener("selectionchange", onSelectionChange)
-  // window.addEventListener("touchstart", touchstart, false);
-  // window.addEventListener("touchend", touchend, false);
-
-
-  function submitted() {
-    console.log("submitted")
-  }
-
-  return {
-    submitted
-  }
 }
-var pointAndShoot = PointAndShoot(ui)
+
 
