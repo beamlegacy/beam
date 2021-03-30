@@ -35,6 +35,10 @@ struct FrameInfo {
     let height: CGFloat
 }
 
+struct BeamShootMessage {
+    let origin: String
+}
+
 // swiftlint:disable:next type_body_length
 
 class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler, Codable, WebPage {
@@ -486,7 +490,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         case ScriptHandlers.beam_point.rawValue:
             guard let dict = messageBody,
                   let origin = dict["origin"] as? String ?? originalQuery,
-                  let _ = dict["location"],
+                  dict["location"] != nil,
                   let area = dict["area"],
                   let data = dict["data"],
                   let type = dict["type"]
@@ -502,7 +506,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         case ScriptHandlers.beam_shoot.rawValue:
             guard let dict = messageBody,
                   let origin = dict["origin"] as? String,
-                  let _ = dict["location"],
+                  dict["location"] != nil,
                   let area = dict["area"],
                   let data = dict["data"],
                   let type = dict["type"]
@@ -514,8 +518,8 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
         case ScriptHandlers.beam_textSelected.rawValue:
             guard let dict = messageBody,
-                  let _ = dict["index"] as? Int,
-                  let _ = dict["text"] as? String,
+                  dict["index"] as? Int != nil,
+                  dict["text"] as? String != nil,
                   let html = dict["html"] as? String,
                   let areas = dict["areas"] as? NSArray,
                   let origin = dict["origin"] as? String,
@@ -553,7 +557,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             guard let dict = messageBody,
                   let jsFramesInfo = dict["frames"] as? NSArray
                     else {
-                Logger.shared.logError("Ignored beam_frameBounds: \(String(describing: messageBody))", category: .general)
+                Logger.shared.logError("Ignored beam_frameBounds: \(String(describing: messageBody))", category: .web)
                 return
             }
             framesInfo.removeAll()
@@ -573,8 +577,8 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
         case ScriptHandlers.beam_resize.rawValue:
             guard let dict = messageBody,
-                  let _ = dict["width"] as? Double,
-                  let _ = dict["height"] as? Double,
+                  dict["width"] as? Double != nil,
+                  dict["height"] as? Double != nil,
                   let origin = dict["origin"] as? String
                     else {
                 Logger.shared.logError("Ignored beam_resize: \(String(describing: messageBody))", category: .general)

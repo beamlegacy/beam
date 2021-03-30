@@ -24,7 +24,7 @@ export const PointAndShoot = (ui) => {
 
   function removeSelected(selectedIndex, el) {
     selected.splice(selectedIndex, 1)
-    ui.removeSelected(el)
+    ui.unshoot(el)
     delete el.dataset[datasetKey]
   }
 

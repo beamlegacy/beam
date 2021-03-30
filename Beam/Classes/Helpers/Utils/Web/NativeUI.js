@@ -94,12 +94,8 @@ export class NativeUI {
     this.sendMessage("point", null)
   }
 
-  removeSelected(el) {
+  unshoot(el) {
     // TODO: message to un-shoot
-  }
-
-  showPopup(el, x, y, selected) {
-    // TODO: Send popup message?
   }
 
   hidePopup() {
@@ -107,9 +103,11 @@ export class NativeUI {
   }
 
   shoot(el, x, y, selected, _submitCb) {
+    /*
+     * - Hide previous native popup if any
+     * - Show native popup
+     */
     this.shootMessage(el, x, y)
-    this.hidePopup()  // Hide previous, if any
-    this.showPopup(el, x, y, selected)
     // TODO: handle native popup result (probably not using submitCb, but rather through native explicitly invoking JS directly?)
   }
 
