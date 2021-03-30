@@ -17,12 +17,6 @@ let NoteDisplayThreshold = Float(0.0)
     var data: BeamData
     public var searchEngine: SearchEngine = GoogleSearch()
 
-    @Published var searchQuery: String = ""
-    @Published var searchQuerySelectedRanges: [Range<Int>]?
-    @Published var autocompleteResults = [AutocompleteResult]()
-    private var autocompleteSearchGuessesHandler: (([AutocompleteResult]) -> Void)?
-    private var autocompleteTimeoutBlock: DispatchWorkItem?
-
     @Published var currentNote: BeamNote? {
         didSet {
             if let note = currentNote {
@@ -30,7 +24,12 @@ let NoteDisplayThreshold = Float(0.0)
             }
         }
     }
-    private(set) var recentsManager: RecentsManager
+    private(set) lazy var recentsManager: RecentsManager = {
+        return RecentsManager(with: data.documentManager)
+    }()
+    private(set) lazy var autocompleteManager: AutocompleteManager = {
+        return AutocompleteManager(with: data)
+    }()
 
     @Published var backForwardList = NoteBackForwardList()
     @Published var canGoBack: Bool = false
@@ -39,7 +38,7 @@ let NoteDisplayThreshold = Float(0.0)
     @Published var focusOmniBox: Bool = true
 
     @Published var destinationCardIsFocused: Bool = false
-    @Published var destinationCardName: String
+    @Published var destinationCardName: String = ""
     @Published var destinationCardNameSelectedRange: [Range<Int>]?
     var bidirectionalPopover: BidirectionalPopover?
 
@@ -66,27 +65,6 @@ let NoteDisplayThreshold = Float(0.0)
                 }
             }
             updateCanGoBackForward()
-        }
-    }
-    @Published var autocompleteSelectedIndex: Int? = nil {
-        didSet {
-            if let i = autocompleteSelectedIndex, i >= 0, i < autocompleteResults.count {
-                let resultText = autocompleteResults[i].text
-                let oldSize = searchQuerySelectedRanges?.first?.startIndex ?? searchQuery.count
-                let newSize = resultText.count
-                let unselectedPrefix = searchQuery.substring(from: 0, to: oldSize).lowercased()
-                // If the completion shares a common root with the original query, select the portion that is different
-                // otherwise select the whole string so that the next keystroke replaces everything
-                let newSelection = [(resultText.hasPrefix(unselectedPrefix) ? oldSize : 0) ..< newSize]
-                searchQuery = resultText
-                searchQuerySelectedRanges = newSelection
-            } else if let previousValue = oldValue,
-                      previousValue < autocompleteResults.count,
-                      autocompleteSelectedIndex == nil, searchQuerySelectedRanges != nil {
-                let previousResult = autocompleteResults[previousValue]
-                searchQuerySelectedRanges = nil
-                searchQuery = previousResult.completingText ?? ""
-            }
         }
     }
 
@@ -144,7 +122,6 @@ let NoteDisplayThreshold = Float(0.0)
         }
     }
 
-    private let completer = Completer()
     private var scope = Set<AnyCancellable>()
     private var tabScope = Set<AnyCancellable>()
 
@@ -232,8 +209,8 @@ let NoteDisplayThreshold = Float(0.0)
         guard note != self.currentNote else { return true }
 
         self.currentNote = note
-        resetQuery()
-        autocompleteSelectedIndex = nil
+        autocompleteManager.resetQuery()
+        autocompleteManager.autocompleteSelectedIndex = nil
 
         backForwardList.push(.note(note))
         updateCanGoBackForward()
@@ -244,8 +221,8 @@ let NoteDisplayThreshold = Float(0.0)
         mode = .today
 
         self.currentNote = nil
-        resetQuery()
-        autocompleteSelectedIndex = nil
+        autocompleteManager.resetQuery()
+        autocompleteManager.autocompleteSelectedIndex = nil
 
         backForwardList.push(.journal)
         updateCanGoBackForward()
@@ -342,15 +319,15 @@ let NoteDisplayThreshold = Float(0.0)
         case .createCard:
             navigateToNote(createNoteForQuery(result.text))
         }
-        cancelAutocomplete()
+        autocompleteManager.cancelAutocomplete()
     }
 
     func startQuery() {
-        let queryString = searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
-        searchQuery = ""
+        let queryString = autocompleteManager.searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
+        autocompleteManager.searchQuery = ""
         focusOmniBox = false
-        if let index = autocompleteSelectedIndex {
-            let result = autocompleteResults[index]
+        if let index = autocompleteManager.autocompleteSelectedIndex {
+            let result = autocompleteManager.autocompleteResults[index]
             selectAutocompleteResult(result)
             return
         }
@@ -365,14 +342,12 @@ let NoteDisplayThreshold = Float(0.0)
         } else {
             createTab(withURL: url, originalQuery: queryString, createNote: createNote)
         }
-        cancelAutocomplete()
+        autocompleteManager.cancelAutocomplete()
         mode = .web
     }
 
     override public init() {
         self.data = AppDelegate.main.data
-        self.destinationCardName = data.todaysName
-        self.recentsManager = RecentsManager(with: data.documentManager)
         super.init()
         setup(data: data)
     }
@@ -387,8 +362,6 @@ let NoteDisplayThreshold = Float(0.0)
 
     required public init(from decoder: Decoder) throws {
         self.data = AppDelegate.main.data
-        self.destinationCardName = data.todaysName
-        self.recentsManager = RecentsManager(with: data.documentManager)
         super.init()
 
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -426,16 +399,7 @@ let NoteDisplayThreshold = Float(0.0)
     }
 
     func setup(data: BeamData) {
-        $searchQuery.sink { [weak self] query in
-            guard let self = self, query != self.currentTab?.url?.absoluteString else { return }
-            self.buildAutocompleteResults(for: query)
-        }.store(in: &scope)
-
-        completer.$results.receive(on: RunLoop.main).sink { [weak self] results in
-            guard let self = self, let guessesHandler = self.autocompleteSearchGuessesHandler else { return }
-            guessesHandler(results)
-        }.store(in: &scope)
-
+        destinationCardName = data.todaysName
         backForwardList.push(.journal)
     }
 
@@ -464,9 +428,9 @@ let NoteDisplayThreshold = Float(0.0)
     }
 
     func startNewSearch() {
-        cancelAutocomplete()
+        autocompleteManager.cancelAutocomplete()
         currentNote = nil
-        resetQuery()
+        autocompleteManager.resetQuery()
         navigateToJournal()
         focusOmniBox = true
     }
@@ -522,145 +486,5 @@ let NoteDisplayThreshold = Float(0.0)
         destinationCardName = currentTab?.note.title ?? data.todaysName
         destinationCardNameSelectedRange = nil
         destinationCardIsFocused = false
-    }
-}
-
-// MARK: - Autocomplete
-extension BeamState {
-
-    func selectPreviousAutocomplete() {
-        if let i = autocompleteSelectedIndex {
-            let newIndex = i - 1
-            if newIndex >= 0 {
-                autocompleteSelectedIndex = newIndex
-            } else {
-                resetAutocompleteSelection()
-            }
-        } else {
-            autocompleteSelectedIndex = (-1).clampInLoop(0, autocompleteResults.count - 1)
-        }
-    }
-
-    func selectNextAutocomplete() {
-        if let i = autocompleteSelectedIndex {
-            autocompleteSelectedIndex = (i + 1).clampInLoop(0, autocompleteResults.count - 1)
-        } else {
-            autocompleteSelectedIndex = 0
-        }
-    }
-
-    func resetAutocompleteSelection() {
-        searchQuerySelectedRanges = nil
-        autocompleteSelectedIndex = nil
-    }
-
-    func cancelAutocomplete() {
-        resetAutocompleteSelection()
-        autocompleteResults = []
-    }
-
-    func resetQuery() {
-        searchQuery = ""
-        autocompleteResults = []
-    }
-
-    private func autocompleteNotesResults(for query: String) -> [AutocompleteResult] {
-        return data.documentManager.documentsWithTitleMatch(title: query)
-            // Eventually, we should not show notes under a certain score threshold
-            // Disabling it for now until we have a better scoring system
-            // .compactMap({ doc -> DocumentStruct? in
-            //      let decoder = JSONDecoder()
-            //      decoder.userInfo[BeamElement.recursiveCoding] = false
-            //      guard let note = try? decoder.decode(BeamNote.self, from: doc.data)
-            //      else { Logger.shared.logError("unable to partially decode note '\(doc.title)'", category: .document); return nil }
-            //      Logger.shared.logDebug("Filtering note '\(note.title)' -> \(note.score)", category: .general)
-            //      return note.score >= NoteDisplayThreshold ? doc : nil
-            // })
-            .map { AutocompleteResult(text: $0.title, source: .note, completingText: query, uuid: $0.id) }
-    }
-
-    private func autocompleteHistoryResults(for query: String) -> [AutocompleteResult] {
-        return self.data.index.search(string: query).map {
-            var urlString = $0.source
-            let url = URL(string: urlString)
-            if let url = url {
-                urlString = url.urlStringWithoutScheme
-            }
-            return AutocompleteResult(text: $0.title, source: .history, url: url, information: urlString, completingText: query)
-        }
-    }
-
-    func buildAutocompleteResults(for query: String) {
-        guard self.searchQuerySelectedRanges == nil else { return }
-        guard self.autocompleteSelectedIndex == nil else { return }
-        // Logger.shared.logDebug("received auto complete query: \(query)")
-
-        guard !query.isEmpty else {
-            self.autocompleteResults = []
-            return
-        }
-        var finalResults = [AutocompleteResult]()
-
-        // #1 Exisiting Notes
-        let notesResults = autocompleteNotesResults(for: query)
-
-        // #2 History results
-        let historyResults = autocompleteHistoryResults(for: query)
-
-        finalResults = sortResults(notesResults: notesResults, historyResults: historyResults)
-
-        // #3 Create Card
-        let canCreateNote = BeamNote.fetch(data.documentManager, title: query) == nil && URL(string: query)?.scheme == nil
-        if canCreateNote {
-            // if the card doesn't exist, propose to create it
-            finalResults.append(AutocompleteResult(text: query, source: .createCard, information: "New card", completingText: query))
-        }
-
-        if query.count > 1 {
-            // #4 Search Autocomplete results
-            autocompleteSearchGuessesHandler = { [weak self] results in
-                guard let self = self else { return }
-                //Logger.shared.logDebug("received auto complete results: \(results)")
-                self.autocompleteSelectedIndex = nil
-                let maxGuesses = finalResults.count > 2 ? 4 : 6
-                let toInsert = results.prefix(maxGuesses)
-                let atIndex = finalResults.count - (canCreateNote ? 1 : 0)
-                if self.autocompleteTimeoutBlock != nil {
-                    self.autocompleteTimeoutBlock?.cancel()
-                    finalResults.insert(contentsOf: toInsert, at: atIndex)
-                    self.autocompleteResults = finalResults
-                } else {
-                    self.autocompleteResults.insert(contentsOf: toInsert, at: atIndex)
-                }
-            }
-            self.completer.complete(query: query)
-
-            autocompleteTimeoutBlock?.cancel()
-            autocompleteTimeoutBlock = DispatchWorkItem(block: {
-                self.autocompleteTimeoutBlock = nil
-                self.autocompleteResults = finalResults
-            })
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: autocompleteTimeoutBlock!)
-        } else {
-            autocompleteSearchGuessesHandler = nil
-            self.autocompleteResults = finalResults
-        }
-    }
-
-    func sortResults(notesResults: [AutocompleteResult], historyResults: [AutocompleteResult]) -> [AutocompleteResult] {
-        // this logic should eventually become smarter to always include the right amount of result per source.
-
-        var results = [AutocompleteResult]()
-
-        let maxHistoryResults = notesResults.isEmpty ? 6 : 4
-        let historyResultsTruncated = Array(historyResults.prefix(maxHistoryResults))
-
-        let maxNotesSuggestions = historyResults.isEmpty ? 6 : 4
-        let notesResultsTruncated = Array(notesResults.prefix(maxNotesSuggestions))
-
-        results.append(contentsOf: notesResultsTruncated)
-        results.append(contentsOf: historyResultsTruncated)
-
-        return results
     }
 }
