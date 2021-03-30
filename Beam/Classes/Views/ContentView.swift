@@ -16,6 +16,7 @@ struct ModeView: View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
                 OmniBar(containerGeometry: geometry)
+                    .environmentObject(state.autocompleteManager)
                     .padding(.leading, state.isFullScreen ? 0 : windowControlsWidth)
                     .zIndex(10)
                     .frame(height: 52, alignment: .top)

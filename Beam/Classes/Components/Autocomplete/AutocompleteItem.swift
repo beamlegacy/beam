@@ -44,7 +44,7 @@ struct AutocompleteItem: View {
 
     private let textColor = Color(.autocompleteTextColor)
     private let secondaryTextColor = Color(.autocompleteSubtitleTextColor)
-    private let subtitleLinkColor = Color(.linkColor)
+    private let subtitleLinkColor = Color(.autocompleteLinkColor)
 
     private func boldTextRanges(in text: String) -> [Range<String.Index>] {
         guard let completingText = item.completingText else {
@@ -74,14 +74,14 @@ struct AutocompleteItem: View {
                 ZStack {
                     StyledText(verbatim: item.text)
                         .style(.semibold(), ranges: boldTextRanges)
-                        .font(.system(size: 13, weight: .regular))
+                        .font(NSFont.beam_regular(ofSize: 13).toSwiftUIFont())
                         .foregroundColor(item.source == .url ? subtitleLinkColor : textColor)
                 }
                 if let info = item.information {
                     HStack {
-                        StyledText(verbatim: "– \(info)")
+                        StyledText(verbatim: "— \(info)")
                             .style(.semibold(), ranges: boldTextRanges)
-                            .font(.system(size: 13, weight: .regular))
+                            .font(NSFont.beam_regular(ofSize: 13).toSwiftUIFont())
                             .foregroundColor(item.source == .history ? subtitleLinkColor : secondaryTextColor)
                     }
                 }

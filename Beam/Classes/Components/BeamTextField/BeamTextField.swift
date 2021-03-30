@@ -63,6 +63,10 @@ struct BeamTextField: NSViewRepresentable {
                 return onCursorMovement(.up)
             case KeyCode.down.rawValue:
                 return onCursorMovement(.down)
+            case KeyCode.left.rawValue:
+                return onCursorMovement(.left)
+            case KeyCode.right.rawValue:
+                return onCursorMovement(.right)
             case KeyCode.enter.rawValue where event.modifierFlags.contains(.command):
                 onCommit(.command)
                 return true
