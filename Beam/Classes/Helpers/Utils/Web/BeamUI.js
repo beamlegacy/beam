@@ -55,9 +55,14 @@ export class BeamUI {
     this.nativeUi.leaveSelection()
   }
 
-  selectAreas(i, selectedText, selectedHTML, textAreas) {
-    this.webUi.selectAreas(textAreas)
-    this.nativeUi.selectAreas(i, selectedText, selectedHTML, textAreas)
+  addTextSelection(selection) {
+    this.webUi.addTextSelection(selection)
+    this.nativeUi.addTextSelection(selection)
+  }
+
+  textSelected(selection) {
+    this.webUi.textSelected(selection)
+    this.nativeUi.textSelected(selection)
   }
 
   hideStatus() {

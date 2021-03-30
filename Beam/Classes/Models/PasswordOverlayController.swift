@@ -101,14 +101,14 @@ class PasswordOverlayController {
         }
     }
 
-    func updateScrollPosition(x: Double, y: Double, width: Double, height: Double) {
+    func updateScrollPosition(x: CGFloat, y: CGFloat, width: CGFloat, height: CGFloat) {
         DispatchQueue.main.async {
             self.overlay?.frame.origin = CGPoint(x: x, y: -y)
             Logger.shared.logDebug("scrolled to \(x) \(y) \(width) \(height)")
         }
     }
 
-    func updateViewSize(width: Double, height: Double) {
+    func updateViewSize(width: CGFloat, height: CGFloat) {
         let ids = inputFields.keys
         let formattedList = ids.map { "\"\($0)\"" }.joined(separator: ",")
         let script = "beam_getElementRects('[\(formattedList)]');"

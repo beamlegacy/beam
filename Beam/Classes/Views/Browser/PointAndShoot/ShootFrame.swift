@@ -14,7 +14,7 @@ struct ShootFrame: View {
     var body: some View {
         ZStack {
             ForEach(0..<pointAndShootUI.shootSelections.count, id: \.self) { index in
-                let selectionUI = pointAndShootUI.shootSelections[index]  // TODO: Support mutliple shoots
+                let selectionUI = pointAndShootUI.shootSelections[index]
                 let rect = selectionUI.rect
                 let color = selectionUI.color
                 Rectangle()

@@ -12,7 +12,8 @@
   "targets": {
     "main": {
       "sourceMap": {
-        "inline": true
+        "inline": true,
+        "inlineSources": true
       }
     }
   },
@@ -33,5 +34,14 @@
   "jest": {
     "verbose": true,
     "transform": {}
+  },
+  "terser": {
+    "mangle": {
+      "safari10": true
+    },
+    "format": {
+      "safari10": true
+    },
+    "safari10": true
   }
 }

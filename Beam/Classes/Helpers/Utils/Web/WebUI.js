@@ -265,14 +265,13 @@ export class WebUI {
     }
   }
 
-  enterSelection(scrollWidth) {
+  enterSelection() {
     if (!this.overlayEl) {
       this.backdropEl = document.createElement("div")
       this.backdropEl.id = this.backdropId
       this.overlayEl = document.createElement("div")
       this.overlayEl.id = this.overlayId
       let body = document.body
-      this.overlayEl.style.width = (scrollWidth || window.innerWidth) + "px"
       body.appendChild(this.backdropEl)
       body.appendChild(this.overlayEl)
     }
@@ -286,7 +285,8 @@ export class WebUI {
     }
   }
 
-  selectAreas(textAreas) {
+  addTextSelection(selection) {
+    const textAreas = selection.areas
     this.overlayEl.innerHTML = ""
     const padding = 5
     for (let r = 0; r < textAreas.length; r++) {
@@ -300,6 +300,10 @@ export class WebUI {
       rectSelection.style.height = rect.height + padding * 2 + "px"
       this.overlayEl.appendChild(rectSelection)
     }
+  }
+
+  textSelected(selection) {
+    // TODO: Shoot selected areas
   }
 
   setFramesInfo(framesInfo) {

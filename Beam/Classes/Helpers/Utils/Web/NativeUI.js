@@ -45,7 +45,7 @@ export class NativeUI {
   }
 
   pointMessage(el, x, y) {
-    const bounds = el.getBoundingClientRect()
+    const pointBounds = el.getBoundingClientRect()
     const pointPayload = {
       origin,
       type: {
@@ -56,17 +56,17 @@ export class NativeUI {
         text: el.innerText
       },
       area: {
-        x: bounds.x,
-        y: bounds.y,
-        width: bounds.width,
-        height: bounds.height
+        x: pointBounds.x,
+        y: pointBounds.y,
+        width: pointBounds.width,
+        height: pointBounds.height
       }
     }
     this.sendMessage("point", pointPayload)
   }
 
   shootMessage(el, x, y) {
-    const bounds = el.getBoundingClientRect()
+    const shootBounds = el.getBoundingClientRect()
     const shootMessage = {
       origin,
       type: {
@@ -77,10 +77,10 @@ export class NativeUI {
       },
       location: {x, y},
       area: {
-        x: bounds.x,
-        y: bounds.y,
-        width: bounds.width,
-        height: bounds.height
+        x: shootBounds.x,
+        y: shootBounds.y,
+        width: shootBounds.width,
+        height: shootBounds.height
       }
     }
     this.sendMessage("shoot", shootMessage)
@@ -130,9 +130,13 @@ export class NativeUI {
     // TODO:
   }
 
-  selectAreas(i, selectedText, selectedHTML, textAreas) {
+  addTextSelection(selection) {
     // TODO: Throttle
-    this.sendMessage("textSelected", {index: i, text: selectedText, html: selectedHTML, areas: textAreas})
+    this.sendMessage("textSelection", selection)
+  }
+
+  textSelected(selection) {
+    this.sendMessage("textSelected", selection)
   }
 
   setFramesInfos(framesInfo) {

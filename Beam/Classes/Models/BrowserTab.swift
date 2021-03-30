@@ -47,9 +47,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     private(set) var scrollX: CGFloat = 0
     private(set) var scrollY: CGFloat = 0
     var zoomLevel: CGFloat {
-        get {
-            webView.magnification
-        }
+        webView.magnification
     }
 
     private var pixelRatio: Double = 1
@@ -293,18 +291,21 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
     private func setupObservers() {
         Logger.shared.logInfo("setupObservers", category: .general)
-        webView.publisher(for: \.title).sink { v in self.title = v ?? "loading..."; self.updateElementWithTitle()
-                }.store(in: &scope)
-        webView.publisher(for: \.url).sink { v in self.url = v; if v?.absoluteString != nil {
-                        self.updateFavIcon()
-                        // self.browsingTree.current.score.openIndex = self.navigationCount
-                        // self.updateScore()
-                        // self.navigationCount = 0
-                    }
-                }.store(in: &scope)
+        webView.publisher(for: \.title).sink { v in
+            self.title = v ?? "loading..."; self.updateElementWithTitle()
+        }.store(in: &scope)
+        webView.publisher(for: \.url).sink { v in
+            self.url = v; if v?.absoluteString != nil {
+                self.updateFavIcon()
+                // self.browsingTree.current.score.openIndex = self.navigationCount
+                // self.updateScore()
+                // self.navigationCount = 0
+            }
+        }.store(in: &scope)
         webView.publisher(for: \.isLoading).sink { v in withAnimation { self.isLoading = v } }.store(in: &scope)
-        webView.publisher(for: \.estimatedProgress).sink { v in withAnimation {self.estimatedProgress = v }
-                }.store(in: &scope)
+        webView.publisher(for: \.estimatedProgress).sink { v in
+            withAnimation { self.estimatedProgress = v }
+        }.store(in: &scope)
         webView.publisher(for: \.hasOnlySecureContent).sink { v in self.hasOnlySecureContent = v }.store(in: &scope)
         webView.publisher(for: \.serverTrust).sink { v in self.serverTrust = v }.store(in: &scope)
         webView.publisher(for: \.canGoBack).sink { v in self.canGoBack = v }.store(in: &scope)
@@ -368,6 +369,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     private enum ScriptHandlers: String, CaseIterable {
         case beam_point
         case beam_shoot
+        case beam_textSelection
         case beam_textSelected
         case beam_onScrolled
         case beam_logging
@@ -540,11 +542,27 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                   let origin = dict["origin"] as? String,
                   !html.isEmpty
                     else {
-                Logger.shared.logError("Ignored text select event: \(String(describing: messageBody))", category: .web)
+                Logger.shared.logError("Ignored text selected event: \(String(describing: messageBody))",
+                        category: .web)
                 return
             }
             shootAreas(areas: areas, origin: origin)
             noteTextSelection(url: webView.url!, html: html)
+
+        case ScriptHandlers.beam_textSelection.rawValue:
+            guard let dict = messageBody,
+                  dict["index"] as? Int != nil,
+                  dict["text"] as? String != nil,
+                  let html = dict["html"] as? String,
+                  let areas = dict["areas"] as? NSArray,
+                  let origin = dict["origin"] as? String,
+                  !html.isEmpty
+                    else {
+                Logger.shared.logError("Ignored text selection event: \(String(describing: messageBody))",
+                        category: .web)
+                return
+            }
+            shootAreas(areas: areas, origin: origin)
 
         case ScriptHandlers.beam_onScrolled.rawValue:
             guard let dict = messageBody,
@@ -559,12 +577,13 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             }
             scrollX = x // nativeX(x: x, origin: origin)
             scrollY = y // nativeY(y: y, origin: origin)
-            passwordOverlayController.updateScrollPosition(x: x, y: y, width: w, height: h)
+            passwordOverlayController.updateScrollPosition(x: x, y: y, width: width, height: height)
             pointAndShoot.drawAllShoots(origin: origin)
             if width > 0, height > 0 {
-                browsingTree.current.score.scrollRatioX = max(Float(x / width), browsingTree.current.score.scrollRatioX)
-                browsingTree.current.score.scrollRatioY = max(Float(y / height), browsingTree.current.score.scrollRatioY)
-                browsingTree.current.score.area = Float(width * height)
+                let currentScore = browsingTree.current.score
+                currentScore.scrollRatioX = max(Float(x / width), currentScore.scrollRatioX)
+                currentScore.scrollRatioY = max(Float(y / height), currentScore.scrollRatioY)
+                currentScore.area = Float(width * height)
                 updateScore()
             }
             Logger.shared.logDebug("Web Scrolled: \(x), \(y)", category: .web)
@@ -605,15 +624,15 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
         case ScriptHandlers.beam_resize.rawValue:
             guard let dict = messageBody,
-                  dict["width"] as? Double != nil,
-                  dict["height"] as? Double != nil,
+                  let width = dict["width"] as? CGFloat,
+                  let height = dict["height"] as? CGFloat,
                   let origin = dict["origin"] as? String
                     else {
                 Logger.shared.logError("Ignored beam_resize: \(String(describing: messageBody))", category: .general)
                 return
             }
             pointAndShoot.drawAllShoots(origin: origin)
-            self.passwordOverlayController.updateViewSize(width: w, height: h)
+            self.passwordOverlayController.updateViewSize(width: width, height: height)
 
         default:
             break
@@ -691,7 +710,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                     currentOrigin = frameInfo.origin
                 } else {
                     Logger.shared.logError("""
-                                           Could not find frameInfo for origin \(currentOrigin) 
+                                           Could not find frameInfo for origin \(currentOrigin)
                                            in \(framesInfo.map { $0.value.origin })
                                            """, category: .general)
                     break

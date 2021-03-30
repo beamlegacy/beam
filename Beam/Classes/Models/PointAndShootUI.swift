@@ -17,16 +17,7 @@ class PointAndShootUI: ObservableObject {
     @Published var shootSelections: [SelectionUI] = []
 
     private func drawSelection(selection: NSRect, animated: Bool, color: Color) -> SelectionUI {
-        let newX = (Double(selection.minX)) as Double
-        let newY = (Double(selection.minY)) as Double
-        return SelectionUI(
-                rect: NSRect(
-                        x: Float(newX), y: Float(newY),
-                        width: Float(selection.width), height: Float(selection.height)
-                ),
-                animated: animated,
-                color: color
-        )
+        return SelectionUI(rect: selection, animated: animated, color: color)
     }
 
     let pointColor = Color(red: 0, green: 0, blue: 0, opacity: 0.1)

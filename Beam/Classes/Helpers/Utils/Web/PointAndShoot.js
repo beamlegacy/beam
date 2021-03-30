@@ -1,3 +1,4 @@
+import {TextSelector} from "./TextSelector"
 
 export const PointAndShoot = (ui) => {
   const prefix = "__ID__"
@@ -22,7 +23,7 @@ export const PointAndShoot = (ui) => {
     pointed = null
   }
 
-  function removeSelected(selectedIndex, el) {
+  function unshoot(selectedIndex, el) {
     selected.splice(selectedIndex, 1)
     ui.unshoot(el)
     delete el.dataset[datasetKey]
@@ -86,12 +87,12 @@ export const PointAndShoot = (ui) => {
     const alreadySelected = selectedIndex >= 0
     if (alreadySelected) {
       // Unselect
-      removeSelected(selectedIndex, el)
+      unshoot(selectedIndex, el)
       return
     }
     const multiSelect = ev.metaKey
     if (!multiSelect && selected.length > 0) {
-      removeSelected(0, selected[0]) // previous selection will be replaced
+      unshoot(0, selected[0]) // previous selection will be replaced
     }
     selected.push(el)
     // point(el, x, y)
@@ -132,7 +133,6 @@ export const PointAndShoot = (ui) => {
   function onKeyPress(ev) {
     if (ev.code === "Escape") {
       ui.hidePopup()
-      ui.leaveSelection()
     }
   }
 
@@ -191,35 +191,6 @@ export const PointAndShoot = (ui) => {
     ui.setResizeInfo(resizeInfo, selected)
   }
 
-  function onSelectionChange(_ev) {
-    const selection = document.getSelection()
-    if (selection.isCollapsed) {
-      ui.leaveSelection()
-      return
-    }
-    ui.enterSelection(scrollWidth)
-
-    for (let i = 0; i < selection.rangeCount; ++i) {
-      const range = selection.getRangeAt(i)
-      const selectedText = range.toString()
-      const selectedFragment = range.cloneContents()
-      let selectedHTML = Array.prototype.reduce.call(
-          selectedFragment.childNodes,
-          (result, node) => result + (node.outerHTML || node.nodeValue),
-          ""
-      )
-      const rects = range.getClientRects()
-      const textAreas = []
-      let frameX = window.scrollX
-      let frameY = window.scrollY
-      for (let r = 0; r < rects.length; r++) {
-        const rect = rects[r]
-        textAreas.push({x: frameX + rect.x, y: frameY + rect.y, width: rect.width, height: rect.height})
-      }
-      ui.selectAreas(i, selectedText, selectedHTML, textAreas)
-    }
-  }
-
   function onLoad(_ev) {
     console.log("Page load. Checking frames")
     checkFrames()
@@ -228,15 +199,14 @@ export const PointAndShoot = (ui) => {
   checkFrames()
   onScroll()   // Init/refresh scroll info
 
+  const textSelector = new TextSelector(ui)
+
   window.addEventListener("load", onLoad)
   window.addEventListener("resize", onResize)
   window.addEventListener("mousemove", onMouseMove)
   window.addEventListener("click", onClick)
   window.addEventListener("scroll", onScroll)
-  window.addEventListener("touchstart", touchstart, false);
-  window.addEventListener("touchend", touchend, false);
+  window.addEventListener("touchstart", touchstart, false)
+  window.addEventListener("touchend", touchend, false)
   document.addEventListener("keypress", onKeyPress)
-  document.addEventListener("selectionchange", onSelectionChange)
 }
-
-
