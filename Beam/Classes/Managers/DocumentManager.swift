@@ -706,6 +706,7 @@ extension DocumentManager {
                     try self.checkValidations(context, document)
                     try self.checkVersion(context, document, newVersion)
                 } catch {
+                    Logger.shared.logError(error.localizedDescription, category: .document)
                     completion?(.failure(error))
                     return
                 }
