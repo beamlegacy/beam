@@ -25,7 +25,7 @@ private struct ContextMenuItemView: View {
         ZStack(alignment: .leading) {
             RoundedRectangle(cornerRadius: 3).fill(Color(.contextMenuHoverColor).opacity(isHovering ? 1.0 : 0.0))
             Text(item.title)
-                .font(NSFont.beam_medium(ofSize: 12).toSwiftUIFont())
+                .font(NSFont.beam_medium(ofSize: 13).toSwiftUIFont())
                 .foregroundColor(Color(.editorTextColor))
                 .padding(.vertical, 4)
                 .padding(.horizontal, 5)
