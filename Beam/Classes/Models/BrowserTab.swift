@@ -48,6 +48,11 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         self.url = url
         navigationCount = 0
         webView.load(URLRequest(url: url))
+        $isLoading.sink { [weak passwordOverlayController] loading in
+            if !loading {
+                passwordOverlayController?.detectInputFields()
+            }
+        }.store(in: &scope)
     }
 
     @Published public var webView: WKWebView! {
@@ -73,6 +78,8 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     @Published var privateMode = false
 
     let pointAndShoot: PointAndShoot = PointAndShoot(config: PointAndShootConfig(native: true, web: true));
+
+    lazy var passwordOverlayController: PasswordOverlayController = PasswordOverlayController(webView: webView)
 
     /**
      * Frame info by frame URL
@@ -141,6 +148,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             backForwardList = web.backForwardList
             self.webView = web
         }
+        
         browsingTree = BrowsingTree(originalQuery ?? webView?.url?.absoluteString)
 
         super.init(frame: .zero)
@@ -339,7 +347,8 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
     private func addUserScripts() {
         addJS(source: overrideConsole, when: .atDocumentStart)
-        pointAndShoot.injectInto(webPage: self);
+        pointAndShoot.injectInto(webPage: self)
+        addJS(source: jsPasswordManager, when: .atDocumentEnd)
         //    addJS(source: devTools, when: .atDocumentEnd)
     }
 
@@ -370,6 +379,9 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         case beam_textSelected
         case beam_onScrolled
         case beam_logging
+        case beam_textInputFields
+        case beam_textInputFocusIn
+        case beam_textInputFocusOut
         case beam_resize
         case beam_frameBounds
     }
@@ -470,6 +482,9 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     lazy var overrideConsole: String = {
         loadFile(from: "OverrideConsole", fileType: "js")
     }()
+    lazy var jsPasswordManager: String = {
+        loadFile(from: "PasswordManager", fileType: "js")
+    }()
 
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         let messageBody = message.body as? [String: AnyObject]
@@ -550,6 +565,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                     else {
                 return
             }
+            self.passwordOverlayController.updateViewSize(width: w, height: h)
 
         case ScriptHandlers.beam_onScrolled.rawValue:
             guard let dict = messageBody,
@@ -563,6 +579,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             Logger.shared.logDebug("self.scrolly: \(scrollY), scrolly: \(y)")
             scrollX = x
             scrollY = y
+            passwordOverlayController.updateScrollPosition(x: x, y: y, width: w, height: h)
             pointAndShoot.drawShoot(scrollX: scrollX, scrollY: scrollY)
             if w > 0, h > 0 {
                 browsingTree.current.score.scrollRatioX = max(Float(x / w), browsingTree.current.score.scrollRatioX)
@@ -571,6 +588,18 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                 updateScore()
             }
             Logger.shared.logDebug("Web Scrolled: \(x), \(y)", category: .web)
+
+        case ScriptHandlers.beam_textInputFields.rawValue:
+            guard let jsonString = message.body as? String else { break }
+            self.passwordOverlayController.updateInputFields(with: jsonString)
+
+        case ScriptHandlers.beam_textInputFocusIn.rawValue:
+            guard let elementId = message.body as? String else { break }
+            self.passwordOverlayController.updateInputFocus(for: elementId, becomingActive: true)
+
+        case ScriptHandlers.beam_textInputFocusOut.rawValue:
+            guard let elementId = message.body as? String else { break }
+            self.passwordOverlayController.updateInputFocus(for: elementId, becomingActive: false)
 
         case ScriptHandlers.beam_frameBounds.rawValue:
             guard let dict = messageBody,
