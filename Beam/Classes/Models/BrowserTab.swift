@@ -58,6 +58,11 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         self.url = url
         navigationCount = 0
         webView.load(URLRequest(url: url))
+        $isLoading.sink { [weak passwordOverlayController] loading in
+            if !loading {
+                passwordOverlayController?.detectInputFields()
+            }
+        }.store(in: &scope)
     }
 
     @Published public var webView: WKWebView! {
@@ -85,6 +90,8 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     lazy var pointAndShoot: PointAndShoot = {
         PointAndShoot(page: self, ui: PointAndShootUI())
     }()
+
+    lazy var passwordOverlayController: PasswordOverlayController = PasswordOverlayController(webView: webView)
 
     /**
      * Frame info by frame URL
@@ -153,6 +160,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             backForwardList = web.backForwardList
             self.webView = web
         }
+
         browsingTree = BrowsingTree(originalQuery ?? webView?.url?.absoluteString)
 
         super.init(frame: .zero)
@@ -332,6 +340,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     private func addUserScripts() {
         addJS(source: overrideConsole, when: .atDocumentStart)
         pointAndShoot.injectScripts()
+        addJS(source: jsPasswordManager, when: .atDocumentEnd)
         //    addJS(source: devTools, when: .atDocumentEnd)
     }
 
@@ -362,6 +371,9 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         case beam_textSelected
         case beam_onScrolled
         case beam_logging
+        case beam_textInputFields
+        case beam_textInputFocusIn
+        case beam_textInputFocusOut
         case beam_resize
         case beam_frameBounds
     }
@@ -463,6 +475,9 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     lazy var overrideConsole: String = {
         loadFile(from: "OverrideConsole", fileType: "js")
     }()
+    lazy var jsPasswordManager: String = {
+        loadFile(from: "PasswordManager", fileType: "js")
+    }()
 
     /**
      Resolve some area coords sent by JS to a NSRect with coords on the WebView frame.
@@ -544,6 +559,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             }
             scrollX = x // nativeX(x: x, origin: origin)
             scrollY = y // nativeY(y: y, origin: origin)
+            passwordOverlayController.updateScrollPosition(x: x, y: y, width: w, height: h)
             pointAndShoot.drawAllShoots(origin: origin)
             if width > 0, height > 0 {
                 browsingTree.current.score.scrollRatioX = max(Float(x / width), browsingTree.current.score.scrollRatioX)
@@ -552,6 +568,18 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                 updateScore()
             }
             Logger.shared.logDebug("Web Scrolled: \(x), \(y)", category: .web)
+
+        case ScriptHandlers.beam_textInputFields.rawValue:
+            guard let jsonString = message.body as? String else { break }
+            self.passwordOverlayController.updateInputFields(with: jsonString)
+
+        case ScriptHandlers.beam_textInputFocusIn.rawValue:
+            guard let elementId = message.body as? String else { break }
+            self.passwordOverlayController.updateInputFocus(for: elementId, becomingActive: true)
+
+        case ScriptHandlers.beam_textInputFocusOut.rawValue:
+            guard let elementId = message.body as? String else { break }
+            self.passwordOverlayController.updateInputFocus(for: elementId, becomingActive: false)
 
         case ScriptHandlers.beam_frameBounds.rawValue:
             guard let dict = messageBody,
@@ -585,6 +613,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                 return
             }
             pointAndShoot.drawAllShoots(origin: origin)
+            self.passwordOverlayController.updateViewSize(width: w, height: h)
 
         default:
             break

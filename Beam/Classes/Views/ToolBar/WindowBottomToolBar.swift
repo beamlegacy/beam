@@ -13,6 +13,11 @@ struct WindowBottomToolBar: View {
     var isJournal: Bool {
         return state.mode == .today
     }
+
+    private var animationEnabled: Bool {
+        return !state.windowIsResizing
+    }
+
     var body: some View {
         GeometryReader { geo in
             HStack {
@@ -47,7 +52,7 @@ struct WindowBottomToolBar: View {
                         }
                     }
                 }
-                .animation(.easeInOut(duration: 0.3))
+                .animation(animationEnabled ? .easeInOut(duration: 0.3) : nil)
                 Spacer(minLength: 20)
                 HStack {
                     if state.mode == .today {
@@ -56,7 +61,7 @@ struct WindowBottomToolBar: View {
                     }
                     ButtonLabel("?", customStyle: ButtonLabelStyle(font: NSFont.beam_medium(ofSize: 11).toSwiftUIFont(), horizontalPadding: 5, verticalPadding: 2))
                         .overlay(
-                            Circle().stroke(Color(.buttonTextColor), lineWidth: 1)
+                            Circle().stroke(Color(.buttonActiveBackgroundColor), lineWidth: 1)
                                 .frame(width: 16, height: 16)
                                 .offset(x: -0.5)
                         )

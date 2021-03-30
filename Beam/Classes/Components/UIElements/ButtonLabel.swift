@@ -73,13 +73,14 @@ struct ButtonLabel: View {
         .padding(.horizontal, style.horizontalPadding)
         .padding(.vertical, style.verticalPadding)
         .background(backgroundColor)
+        .animation(nil)
         .cornerRadius(3)
         .onHover { hovering in
             guard defaultState != .disabled else { return }
             isHovering = hovering
         }
         .onTouchDown { touching in
-            guard defaultState != .disabled else { return }
+            guard defaultState != .disabled else { return }            
             isTouching = touching
         }
     }
