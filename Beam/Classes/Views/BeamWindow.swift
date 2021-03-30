@@ -199,6 +199,13 @@ class BeamWindow: NSWindow {
         state.destinationCardIsFocused = true
     }
 
+    @IBAction func showRecentCard(_ sender: Any?) {
+        let recents = state.recentsManager.recentNotes
+        if let item = sender as? NSMenuItem, let index = Int(item.title.components(separatedBy: CharacterSet.decimalDigits.inverted).joined()), index <= recents.count {
+            state.navigateToNote(named: recents[index - 1].title)
+        }
+    }
+
     static let savedTabsKey = "savedTabs"
 
     func saveDefaults() {
