@@ -20,10 +20,13 @@ private enum MenuEnablingConditionTag: Int {
 extension AppDelegate: NSMenuDelegate {
 
     func subscribeToStateChanges(for state: BeamState) {
-        state.$mode.sink { [weak self] _ in
-            guard let self = self else { return }
-            self.updateMainMenuItems(for: state)
-        }.store(in: &cancellableScope)
+        state.$mode
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                guard let self = self else { return }
+                self.updateMainMenuItems(for: state)
+            }
+            .store(in: &cancellableScope)
     }
 
     func updateMainMenuItems(for state: BeamState) {

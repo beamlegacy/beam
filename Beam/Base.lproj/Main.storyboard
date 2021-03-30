@@ -726,6 +726,37 @@
                                                 <action selector="goForward:" target="Voe-Tx-rLC" id="IaG-q2-Ng7"/>
                                             </connections>
                                         </menuItem>
+                                        <menuItem isSeparatorItem="YES" tag="-3" id="nTu-5u-Dge"/>
+                                        <menuItem title="Show journal" tag="-3" keyEquivalent="0" id="tjl-Q9-d8d">
+                                            <connections>
+                                                <action selector="showJournal:" target="Ady-hI-5gd" id="zpT-Kn-hB1"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Select Recent Card 1" tag="-3" keyEquivalent="1" id="C1g-c1-8fA">
+                                            <connections>
+                                                <action selector="showRecentCard:" target="Ady-hI-5gd" id="yMd-VZ-XD0"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Select Recent Card 2" tag="-3" keyEquivalent="2" id="G0G-q6-hMG">
+                                            <connections>
+                                                <action selector="showRecentCard:" target="Ady-hI-5gd" id="wgC-j9-U32"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Select Recent Card 3" tag="-3" keyEquivalent="3" id="80D-gr-PVN">
+                                            <connections>
+                                                <action selector="showRecentCard:" target="Ady-hI-5gd" id="yB2-Na-uJB"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Select Recent Card 4" tag="-3" keyEquivalent="4" id="WBf-9k-y4c">
+                                            <connections>
+                                                <action selector="showRecentCard:" target="Ady-hI-5gd" id="stC-as-544"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Select Recent Card 5" tag="-3" keyEquivalent="5" id="esw-z0-LHW">
+                                            <connections>
+                                                <action selector="showRecentCard:" target="Ady-hI-5gd" id="9SO-pC-ALz"/>
+                                            </connections>
+                                        </menuItem>
                                     </items>
                                 </menu>
                             </menuItem>
