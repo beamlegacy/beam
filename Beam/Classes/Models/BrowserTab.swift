@@ -29,10 +29,14 @@ class FullScreenWKWebView: WKWebView {
 
 struct FrameInfo {
     let origin: String
-    let x: Double
-    let y: Double
-    let width: Double
-    let height: Double
+    let x: CGFloat
+    let y: CGFloat
+    let width: CGFloat
+    let height: CGFloat
+}
+
+struct BeamShootMessage {
+    let origin: String
 }
 
 // swiftlint:disable:next type_body_length
@@ -40,8 +44,12 @@ struct FrameInfo {
 class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler, Codable, WebPage {
     var id: UUID
 
-    private var scrollX: Double = 0
-    private var scrollY: Double = 0
+    private(set) var scrollX: CGFloat = 0
+    private(set) var scrollY: CGFloat = 0
+    var zoomLevel: CGFloat {
+        webView.magnification
+    }
+
     private var pixelRatio: Double = 1
 
     public func load(url: URL) {
@@ -77,7 +85,9 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     @Published var browsingTree: BrowsingTree
     @Published var privateMode = false
 
-    let pointAndShoot: PointAndShoot = PointAndShoot(config: PointAndShootConfig(native: true, web: true));
+    lazy var pointAndShoot: PointAndShoot = {
+        PointAndShoot(page: self, ui: PointAndShootUI())
+    }()
 
     lazy var passwordOverlayController: PasswordOverlayController = PasswordOverlayController(webView: webView)
 
@@ -148,7 +158,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             backForwardList = web.backForwardList
             self.webView = web
         }
-        
+
         browsingTree = BrowsingTree(originalQuery ?? webView?.url?.absoluteString)
 
         super.init(frame: .zero)
@@ -280,44 +290,27 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     var backListSize = 0
 
     private func setupObservers() {
+        Logger.shared.logInfo("setupObservers", category: .general)
         webView.publisher(for: \.title).sink { v in
-            self.title = v ?? "loading..."
-            self.updateElementWithTitle()
+            self.title = v ?? "loading..."; self.updateElementWithTitle()
         }.store(in: &scope)
         webView.publisher(for: \.url).sink { v in
-            self.url = v
-            if v?.absoluteString != nil {
+            self.url = v; if v?.absoluteString != nil {
                 self.updateFavIcon()
-//                self.browsingTree.current.score.openIndex = self.navigationCount
-//                self.updateScore()
-//                self.navigationCount = 0
+                // self.browsingTree.current.score.openIndex = self.navigationCount
+                // self.updateScore()
+                // self.navigationCount = 0
             }
         }.store(in: &scope)
-        webView.publisher(for: \.isLoading).sink { v in
-            withAnimation {
-                self.isLoading = v
-            }
-        }.store(in: &scope)
+        webView.publisher(for: \.isLoading).sink { v in withAnimation { self.isLoading = v } }.store(in: &scope)
         webView.publisher(for: \.estimatedProgress).sink { v in
-            withAnimation {
-                self.estimatedProgress = v
-            }
+            withAnimation { self.estimatedProgress = v }
         }.store(in: &scope)
-        webView.publisher(for: \.hasOnlySecureContent).sink { v in
-            self.hasOnlySecureContent = v
-        }.store(in: &scope)
-        webView.publisher(for: \.serverTrust).sink { v in
-            self.serverTrust = v
-        }.store(in: &scope)
-        webView.publisher(for: \.canGoBack).sink { v in
-            self.canGoBack = v
-        }.store(in: &scope)
-        webView.publisher(for: \.canGoForward).sink { v in
-            self.canGoForward = v
-        }.store(in: &scope)
-        webView.publisher(for: \.backForwardList).sink { v in
-            self.backForwardList = v
-        }.store(in: &scope)
+        webView.publisher(for: \.hasOnlySecureContent).sink { v in self.hasOnlySecureContent = v }.store(in: &scope)
+        webView.publisher(for: \.serverTrust).sink { v in self.serverTrust = v }.store(in: &scope)
+        webView.publisher(for: \.canGoBack).sink { v in self.canGoBack = v }.store(in: &scope)
+        webView.publisher(for: \.canGoForward).sink { v in self.canGoForward = v }.store(in: &scope)
+        webView.publisher(for: \.backForwardList).sink { v in self.backForwardList = v }.store(in: &scope)
 
         webView.navigationDelegate = self
         webView.uiDelegate = self
@@ -347,13 +340,13 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
     private func addUserScripts() {
         addJS(source: overrideConsole, when: .atDocumentStart)
-        pointAndShoot.injectInto(webPage: self)
+        pointAndShoot.injectScripts()
         addJS(source: jsPasswordManager, when: .atDocumentEnd)
         //    addJS(source: devTools, when: .atDocumentEnd)
     }
 
     func addJS(source: String, when: WKUserScriptInjectionTime) {
-        let parameterized = source.replacingOccurrences(of: "__ENABLED__", with: pointAndShoot.config.web ? "true" : "false")
+        let parameterized = source.replacingOccurrences(of: "__ENABLED__", with: "true")
         let obfuscated = parameterized.replacingOccurrences(of: "__ID__", with: "beam" + id.uuidString.replacingOccurrences(of: "-", with: "_"))
         let script = WKUserScript(source: obfuscated, injectionTime: when, forMainFrameOnly: false)
         webView.configuration.userContentController.addUserScript(script)
@@ -376,6 +369,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     private enum ScriptHandlers: String, CaseIterable {
         case beam_point
         case beam_shoot
+        case beam_textSelection
         case beam_textSelected
         case beam_onScrolled
         case beam_logging
@@ -416,13 +410,14 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                 browsingTree.goForward()
             }
         }
-
+        pointAndShoot.clearAllShoots()
         currentBackForwardItem = webView.backForwardList.currentItem
     }
 
     // WKNavigationDelegate:
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         element = nil
+        pointAndShoot.clearAllShoots()
         decisionHandler(.allow)
     }
 
@@ -486,9 +481,25 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         loadFile(from: "PasswordManager", fileType: "js")
     }()
 
+    /**
+     Resolve some area coords sent by JS to a NSRect with coords on the WebView frame.
+     - Parameters:
+       - area: The area coords as sent by JS.
+       - origin: URL where the text comes from. This helps resolving the position of a selection in iframes.
+     - Returns:
+     */
+    func nativeArea(area: NSRect, origin: String) -> NSRect {
+        let minX = nativeX(x: area.minX, origin: origin)
+        let minY = nativeY(y: area.minY, origin: origin)
+        let width = nativeWidth(width: area.width)
+        let height = nativeHeight(height: area.height)
+        return NSRect(x: minX, y: minY, width: width, height: height)
+    }
+
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         let messageBody = message.body as? [String: AnyObject]
-        let messageName = message.name
+        let messageKey = message.name
+        let messageName = messageKey //.components(separatedBy: "_beam_")[1]
         switch messageName {
         case ScriptHandlers.beam_logging.rawValue:
             Logger.shared.logInfo(String(describing: message.body), category: .javascript)
@@ -496,7 +507,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         case ScriptHandlers.beam_point.rawValue:
             guard let dict = messageBody,
                   let origin = dict["origin"] as? String ?? originalQuery,
-                  let location = dict["location"],
+                  dict["location"] != nil,
                   let area = dict["area"],
                   let data = dict["data"],
                   let type = dict["type"]
@@ -504,87 +515,75 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                 pointAndShoot.point(area: nil)
                 return
             }
-            let minX = nativeX(x: (area["x"] as? Double)!, origin: origin)
-            let minY = nativeY(y: (area["y"] as? Double)!, origin: origin)
-            let width = nativeWidth(width: (area["width"] as? Double)!)
-            let height = nativeHeight(height: (area["height"] as? Double)!)
-            let pointArea = NSRect(x: minX, y: minY, width: width, height: height)
+            let rectArea = jsToRect(jsArea: area)
+            let pointArea = nativeArea(area: rectArea, origin: origin)
             pointAndShoot.point(area: pointArea)
-            Logger.shared.logInfo("Web block point: \(type), \(data), \(minX), \(minY), \(width), \(height)", category: .web)
+            Logger.shared.logInfo("Web block point: \(type), \(data), \(pointArea)", category: .web)
 
         case ScriptHandlers.beam_shoot.rawValue:
             guard let dict = messageBody,
                   let origin = dict["origin"] as? String,
-                  let location = dict["location"],
+                  dict["location"] != nil,
                   let area = dict["area"],
                   let data = dict["data"],
                   let type = dict["type"]
                     else {
                 return
             }
-            let minX = nativeX(x: (area["x"] as? Double)!, origin: origin)
-            let minY = nativeY(y: (area["y"] as? Double)!, origin: origin)
-            let width = nativeWidth(width: (area["width"] as? Double)!)
-            let height = nativeHeight(height: (area["height"] as? Double)!)
-            let shootArea = NSRect(x: minX, y: minY, width: width, height: height)
-            pointAndShoot.shoot(area: shootArea, scrollX: scrollX, scrollY: scrollY)
-            Logger.shared.logInfo("Web shoot point: \(type), \(data), \(minX), \(minY), \(width), \(height)", category: .web)
+            shootAreas(areas: [area], origin: origin)
+            Logger.shared.logInfo("Web shoot point: \(type), \(data), \(area)", category: .web)
 
         case ScriptHandlers.beam_textSelected.rawValue:
             guard let dict = messageBody,
-//                  let selectedText = dict["selectedText"] as? String,
-                  let selectedHtml = dict["selectedHtml"] as? String,
-                  !selectedHtml.isEmpty
+                  dict["index"] as? Int != nil,
+                  dict["text"] as? String != nil,
+                  let html = dict["html"] as? String,
+                  let areas = dict["areas"] as? NSArray,
+                  let origin = dict["origin"] as? String,
+                  !html.isEmpty
                     else {
+                Logger.shared.logError("Ignored text selected event: \(String(describing: messageBody))",
+                        category: .web)
                 return
             }
+            shootAreas(areas: areas, origin: origin)
+            noteTextSelection(url: webView.url!, html: html)
 
-            let text: BeamText = html2Text(url: webView.url!, html: selectedHtml)
-            browsingTree.current.score.textSelections += 1
-            updateScore()
-
-            // now add a bullet point with the quoted text:
-            if let urlString = webView.url?.absoluteString, let title = webView.title {
-                var quote = text
-                quote.addAttributes([.emphasis], to: quote.wholeRange)
-
-                DispatchQueue.main.async {
-                    guard let current = self.addCurrentPageToNote() else { return }
-                    let e = BeamElement()
-                    e.kind = .quote(1, title, urlString)
-                    e.text = quote
-                    e.query = self.originalQuery
-                    current.addChild(e)
-                }
-            }
-
-        case ScriptHandlers.beam_resize.rawValue:
+        case ScriptHandlers.beam_textSelection.rawValue:
             guard let dict = messageBody,
-                  let w = dict["width"] as? Double,
-                  let h = dict["height"] as? Double
+                  dict["index"] as? Int != nil,
+                  dict["text"] as? String != nil,
+                  let html = dict["html"] as? String,
+                  let areas = dict["areas"] as? NSArray,
+                  let origin = dict["origin"] as? String,
+                  !html.isEmpty
                     else {
+                Logger.shared.logError("Ignored text selection event: \(String(describing: messageBody))",
+                        category: .web)
                 return
             }
-            self.passwordOverlayController.updateViewSize(width: w, height: h)
+            shootAreas(areas: areas, origin: origin)
 
         case ScriptHandlers.beam_onScrolled.rawValue:
             guard let dict = messageBody,
-                  let x = dict["x"] as? Double,
-                  let y = dict["y"] as? Double,
-                  let w = dict["width"] as? Double,
-                  let h = dict["height"] as? Double
+                  let x = dict["x"] as? CGFloat,
+                  let y = dict["y"] as? CGFloat,
+                  let width = dict["width"] as? CGFloat,
+                  let height = dict["height"] as? CGFloat,
+                  let origin = dict["origin"] as? String
                     else {
+                Logger.shared.logError("Ignored scroll event: \(String(describing: messageBody))", category: .web)
                 return
             }
-            Logger.shared.logDebug("self.scrolly: \(scrollY), scrolly: \(y)")
-            scrollX = x
-            scrollY = y
-            passwordOverlayController.updateScrollPosition(x: x, y: y, width: w, height: h)
-            pointAndShoot.drawShoot(scrollX: scrollX, scrollY: scrollY)
-            if w > 0, h > 0 {
-                browsingTree.current.score.scrollRatioX = max(Float(x / w), browsingTree.current.score.scrollRatioX)
-                browsingTree.current.score.scrollRatioY = max(Float(y / h), browsingTree.current.score.scrollRatioY)
-                browsingTree.current.score.area = Float(w * h)
+            scrollX = x // nativeX(x: x, origin: origin)
+            scrollY = y // nativeY(y: y, origin: origin)
+            passwordOverlayController.updateScrollPosition(x: x, y: y, width: width, height: height)
+            pointAndShoot.drawAllShoots(origin: origin)
+            if width > 0, height > 0 {
+                let currentScore = browsingTree.current.score
+                currentScore.scrollRatioX = max(Float(x / width), currentScore.scrollRatioX)
+                currentScore.scrollRatioY = max(Float(y / height), currentScore.scrollRatioY)
+                currentScore.area = Float(width * height)
                 updateScore()
             }
             Logger.shared.logDebug("Web Scrolled: \(x), \(y)", category: .web)
@@ -603,63 +602,139 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
         case ScriptHandlers.beam_frameBounds.rawValue:
             guard let dict = messageBody,
-                  let origin = dict["origin"] as? String ?? originalQuery,
-                  let href = dict["href"] as? String,
-                  let bounds = dict["bounds"]
+                  let jsFramesInfo = dict["frames"] as? NSArray
                     else {
+                Logger.shared.logError("Ignored beam_frameBounds: \(String(describing: messageBody))", category: .web)
                 return
             }
-            var originFrame = framesInfo[origin]
-            if originFrame == nil {
-                originFrame = FrameInfo(origin: origin, x: 0, y: 0, width: -1, height: -1)
-                framesInfo[origin] = originFrame
+            framesInfo.removeAll()
+            for jsFrameInfo in jsFramesInfo {
+                let d = jsFrameInfo as AnyObject
+                let origin = d["origin"] as! String
+                let href = d["href"] as! String
+                let bounds = d["bounds"] as AnyObject
+                registerOrigin(origin: origin)
+                let rectArea = jsToRect(jsArea: bounds)
+                let nativeBounds = nativeArea(area: rectArea, origin: origin)
+                framesInfo[href] = FrameInfo(
+                        origin: origin, x: nativeBounds.minX, y: nativeBounds.minY,
+                        width: nativeBounds.width, height: nativeBounds.height
+                )
             }
-            let x = nativeX(x: (bounds["x"] as? Double)!, origin: origin)
-            let y = nativeY(y: (bounds["y"] as? Double)!, origin: origin)
-            let width = nativeWidth(width: (bounds["width"] as? Double)!)
-            let height = nativeHeight(height: (bounds["height"] as? Double)!)
-            let frameInfo: FrameInfo = FrameInfo(origin: origin, x: x, y: y, width: width, height: height)
-            framesInfo[href] = frameInfo
+
+        case ScriptHandlers.beam_resize.rawValue:
+            guard let dict = messageBody,
+                  let width = dict["width"] as? CGFloat,
+                  let height = dict["height"] as? CGFloat,
+                  let origin = dict["origin"] as? String
+                    else {
+                Logger.shared.logError("Ignored beam_resize: \(String(describing: messageBody))", category: .general)
+                return
+            }
+            pointAndShoot.drawAllShoots(origin: origin)
+            self.passwordOverlayController.updateViewSize(width: width, height: height)
 
         default:
             break
         }
     }
 
-    private func nativeX(x: Double, origin: String) -> Double {
-        var frameX: Double = 0
-        var frameInfo: FrameInfo
+    private func shootAreas(areas: NSArray, origin: String) {
+        pointAndShoot.clearAllShoots()
+        for area in areas {
+            let jsArea = area as AnyObject
+            let rectArea = jsToRect(jsArea: jsArea)
+            let textArea = nativeArea(area: rectArea, origin: origin)
+            pointAndShoot.addShoot(area: textArea)
+        }
+        pointAndShoot.drawAllShoots(origin: origin)
+    }
+
+    private func registerOrigin(origin: String) {
+        var originFrame = framesInfo[origin]
+        if originFrame == nil {
+            originFrame = FrameInfo(origin: origin, x: 0, y: 0, width: -1, height: -1)
+            framesInfo[origin] = originFrame
+        }
+    }
+
+    /**
+     - Parameter jsArea: a dictionary with x, y, width and height
+     - Returns:
+     */
+    private func jsToRect(jsArea: AnyObject) -> NSRect {
+        NSRect(
+                x: jsArea["x"] as! CGFloat,
+                y: jsArea["y"] as! CGFloat,
+                width: jsArea["width"] as! CGFloat,
+                height: jsArea["height"] as! CGFloat
+        )
+    }
+
+    /**
+     What to do when some text chunk has been selected
+     - Parameters:
+       - url: The URL of the web page where text was selected
+       - html: The selected HTML
+     */
+    private func noteTextSelection(url: URL, html: String) {
+        let text: BeamText = html2Text(url: url, html: html)
+        browsingTree.current.score.textSelections += 1
+        updateScore()
+
+        // now add a bullet point with the quoted text:
+        if let urlString = webView.url?.absoluteString, let title = webView.title {
+            var quote = text
+            quote.addAttributes([.emphasis], to: quote.wholeRange)
+
+            DispatchQueue.main.async {
+                guard let current = self.addCurrentPageToNote() else { return }
+                let e = BeamElement()
+                e.kind = .quote(1, title, urlString)
+                e.text = quote
+                e.query = self.originalQuery
+                current.addChild(e)
+            }
+        }
+    }
+
+    func absolutePosition(v: CGFloat, origin: String, prop: String) -> CGFloat {
+        var framePos: CGFloat = 0
         if framesInfo.count > 0 {
             var currentOrigin = origin
             repeat {
-                frameInfo = framesInfo[currentOrigin]!
-                frameX += frameInfo.x
-                currentOrigin = frameInfo.origin
-            } while (framesInfo[currentOrigin]?.origin != currentOrigin)
+                let foundFrameInfo = framesInfo[currentOrigin]
+                if foundFrameInfo != nil {
+                    let frameInfo = foundFrameInfo!
+                    framePos += prop == "x" ? frameInfo.x : frameInfo.y
+                    currentOrigin = frameInfo.origin
+                } else {
+                    Logger.shared.logError("""
+                                           Could not find frameInfo for origin \(currentOrigin)
+                                           in \(framesInfo.map { $0.value.origin })
+                                           """, category: .general)
+                    break
+                }
+            } while framesInfo[currentOrigin]?.origin != currentOrigin
         }
-        return frameX + x * Double(webView.magnification)
+        let pos = framePos + v
+        return pos * zoomLevel
     }
 
-    private func nativeY(y: Double, origin: String) -> Double {
-        var frameY: Double = 0
-        var frameInfo: FrameInfo
-        if framesInfo.count > 0 {
-            var currentOrigin = origin
-            repeat {
-                frameInfo = framesInfo[currentOrigin]!
-                frameY += frameInfo.y
-                currentOrigin = frameInfo.origin
-            } while (framesInfo[currentOrigin]?.origin != currentOrigin)
-        }
-        return frameY + y * Double(webView.magnification)
+    func nativeX(x: CGFloat, origin: String) -> CGFloat {
+        absolutePosition(v: x, origin: origin, prop: "x")
     }
 
-    private func nativeWidth(width: Double) -> Double {
-        return width * Double(webView.magnification)
+    func nativeY(y: CGFloat, origin: String) -> CGFloat {
+        absolutePosition(v: y, origin: origin, prop: "y")
     }
 
-    private func nativeHeight(height: Double) -> Double {
-        return height * Double(webView.magnification)
+    func nativeWidth(width: CGFloat) -> CGFloat {
+        width * zoomLevel
+    }
+
+    func nativeHeight(height: CGFloat) -> CGFloat {
+        height * zoomLevel
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {

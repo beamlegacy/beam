@@ -3,113 +3,68 @@
 //
 
 import Foundation
-import SwiftUI
 
 
-struct SelectionUI {
-    var rect: NSRect
-    var animated: Bool
-    var color: Color
-}
+class PointAndShoot {
 
-struct PointAndShootConfig {
-    let native: Bool
-    let web: Bool
-}
+    private var page: WebPage
 
-class PointAndShoot: ObservableObject {
+    let ui: PointAndShootUI
 
-    let config: PointAndShootConfig
-
-    init(config: PointAndShootConfig) {
-        self.config = config
+    init(page: WebPage, ui: PointAndShootUI) {
+        self.page = page
+        self.ui = ui
     }
 
     /**
-     * The pointed areas
+     * The pointed area.
+     *
+     * There is only one at a time.
      */
-    @Published var pointSelectionUI: SelectionUI?
     var pointArea: NSRect?
 
-    @Published var shootSelectionUIs: [SelectionUI] = []
     var shootAreas: [NSRect] = []
 
-    lazy var jsSelectionObserver: String = {
-        loadFile(from: "SelectionObserver", fileType: "js")
-    }()
-
     lazy var pointAndShoot: String = {
-        loadFile(from: "PointAndShoot", fileType: "js")
+        loadFile(from: "PointAndShoot_prod", fileType: "js")
     }()
 
     lazy var pointAndShootStyle: String = {
         loadFile(from: "PointAndShoot", fileType: "css")
     }()
 
-    func injectInto(webPage: WebPage) {
-        webPage.addJS(source: jsSelectionObserver, when: .atDocumentEnd)
-        webPage.addJS(source: pointAndShoot, when: .atDocumentEnd)
-        webPage.addCSS(source: pointAndShootStyle, when: .atDocumentEnd)
+    func injectScripts() {
+        page.addJS(source: pointAndShoot, when: .atDocumentEnd)
+        page.addCSS(source: pointAndShootStyle, when: .atDocumentEnd)
     }
 
-    let pointColor = Color(red: 0, green: 0, blue: 0, opacity: 0.1)
-
-    private func drawPoint() {
-        if self.pointArea != nil {
-            let selection = self.pointArea!
-            let newX = (Double(self.pointArea!.minX)) as Double
-            let newY = (Double(self.pointArea!.minY)) as Double
-            self.pointSelectionUI = SelectionUI(
-                    rect: NSRect(
-                            x: Float(newX), y: Float(newY),
-                            width: Float(selection.width), height: Float(selection.height)
-                    ),
-                    animated: true,
-                    color: pointColor
-            )
-        } else {
-            self.pointSelectionUI = nil
-        }
-    }
-
-    let shootColor = Color(red: 1, green: 0, blue: 0, opacity: 0.1)
-
-    func drawShoot(scrollX: Double, scrollY: Double) {
-        if self.shootAreas.count > 0 {
-            let xDelta = -scrollX
-            let yDelta = -scrollY
-            self.shootSelectionUIs = []
+    func drawAllShoots(origin: String) {
+        ui.clearShoots()
+        if shootAreas.count > 0 {
+            let xDelta = -page.scrollX * page.zoomLevel
+            let yDelta = -page.scrollY * page.zoomLevel
             for shootArea in shootAreas {
-                let newX = (Double(shootArea.minX) + xDelta) as Double
-                let newY = (Double(shootArea.minY) + yDelta) as Double
-                let shootSelectionUI: SelectionUI = SelectionUI(
-                        rect: NSRect(
-                                x: Float(newX), y: Float(newY),
-                                width: Float(shootArea.width), height: Float(shootArea.height)
-                        ),
-                        animated: false,
-                        color: shootColor
-                )
-                self.shootSelectionUIs.append(shootSelectionUI)
+                let nativeArea = page.nativeArea(area: shootArea, origin: origin)
+                ui.drawShoot(shootArea: nativeArea, xDelta: xDelta, yDelta: yDelta)
             }
-        } else {
-            self.shootSelectionUIs = []
         }
     }
 
     func point(area: NSRect?) {
-        self.pointArea = area
-        if (config.native) {
-            drawPoint()
+        pointArea = area
+        if pointArea != nil {
+            ui.drawPoint(area: pointArea!)
+        } else {
+            ui.clearPoint()
         }
     }
 
-    // TODO: Observe scroll values instead of requiring them here?
-    func shoot(area: NSRect, scrollX: Double, scrollY: Double) {
-        self.shootAreas.removeAll()         // TODO: Support multiple shoots
-        self.shootAreas.append(area)
-        if (config.native) {
-            drawShoot(scrollX: scrollX, scrollY: scrollY)
-        }
+    func addShoot(area: NSRect) {
+        shootAreas.append(area)
+    }
+
+    func clearAllShoots() {
+        shootAreas.removeAll()
+        ui.clear()
     }
 }

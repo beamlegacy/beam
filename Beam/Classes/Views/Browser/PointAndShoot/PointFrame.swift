@@ -10,9 +10,9 @@ import SwiftUI
 
 struct PointFrame: View {
 
-    @ObservedObject var pointAndShoot: PointAndShoot
+    @ObservedObject var pointAndShootUI: PointAndShootUI
     var body: some View {
-        if let selectionUI = pointAndShoot.pointSelectionUI {
+        if let selectionUI = pointAndShootUI.pointSelection {
             let rect = selectionUI.rect
             let color = selectionUI.color
             Rectangle()

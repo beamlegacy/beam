@@ -7,6 +7,24 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0226BA1426133D4300E0DA64 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = 9631C746251CE997009B40C4 /* SwiftSoup */; };
+		0226BA1526133D4300E0DA64 /* FavIcon in Frameworks */ = {isa = PBXBuildFile; productRef = 96474E3E254D9ADB00A920B3 /* FavIcon */; };
+		0226BA1626133D4300E0DA64 /* Preferences in Frameworks */ = {isa = PBXBuildFile; productRef = 524299AE25A47CA500F4DBF5 /* Preferences */; };
+		0226BA1726133D4300E0DA64 /* CocoaLumberjackSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 527FB71425B9A93400959146 /* CocoaLumberjackSwift */; };
+		0226BA1826133D4300E0DA64 /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = 527FB71925B9A97A00959146 /* Sentry */; };
+		0226BA1926133D4300E0DA64 /* JWTDecode in Frameworks */ = {isa = PBXBuildFile; productRef = 527FB71E25B9A9B600959146 /* JWTDecode */; };
+		0226BA1A26133D4300E0DA64 /* Fakery in Frameworks */ = {isa = PBXBuildFile; productRef = 527FB72325B9AAA200959146 /* Fakery */; };
+		0226BA1B26133D4300E0DA64 /* PromiseKit in Frameworks */ = {isa = PBXBuildFile; productRef = 52BB698A25CD4E1E007A1173 /* PromiseKit */; };
+		0226BA1C26133D4300E0DA64 /* Promises in Frameworks */ = {isa = PBXBuildFile; productRef = 52E5297125CD980B00307858 /* Promises */; };
+		0226BA1D26133D4300E0DA64 /* PromisesTestHelpers in Frameworks */ = {isa = PBXBuildFile; productRef = 52E5297325CD980B00307858 /* PromisesTestHelpers */; };
+		0226BA1E26133D4300E0DA64 /* PMKFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 523E91CB25D17004001124E0 /* PMKFoundation */; };
+		0226BA1F26133D4300E0DA64 /* KeychainAccess in Frameworks */ = {isa = PBXBuildFile; productRef = 524CF6D225F276D1007312F0 /* KeychainAccess */; };
+		0226BA2026133D4300E0DA64 /* Vinyl in Frameworks */ = {isa = PBXBuildFile; productRef = 521FEC992604F9B4009000F9 /* Vinyl */; };
+		0226BA2126133D4300E0DA64 /* Nimble in Frameworks */ = {isa = PBXBuildFile; productRef = 5239C11525C2C4AE009C51E1 /* Nimble */; };
+		0226BA2226133D4300E0DA64 /* Quick in Frameworks */ = {isa = PBXBuildFile; productRef = 5239C12E25C2C4C6009C51E1 /* Quick */; };
+		0226BA2326133D4300E0DA64 /* Quick in Frameworks */ = {isa = PBXBuildFile; productRef = A0A6F2A425D1B74200EFC4BE /* Quick */; };
+		0226BA2426133D4300E0DA64 /* Nimble in Frameworks */ = {isa = PBXBuildFile; productRef = A0A6F2A625D1B74800EFC4BE /* Nimble */; };
+		02338A8A2612214100600147 /* PointAndShoot_prod.js in Resources */ = {isa = PBXBuildFile; fileRef = 02338A892612214100600147 /* PointAndShoot_prod.js */; };
 		4100D96B25AEFEEA00EF04CB /* BeamTextEdit+Shortcut.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4100D96A25AEFEEA00EF04CB /* BeamTextEdit+Shortcut.swift */; };
 		4105CE2225A5ECA2009AB687 /* BidirectionalPopoverItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4105CE2125A5ECA2009AB687 /* BidirectionalPopoverItem.swift */; };
 		4105CE7525A60681009AB687 /* FormatterTypeButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4105CE7425A60681009AB687 /* FormatterTypeButton.swift */; };
@@ -121,7 +139,6 @@
 		418172CF25811AF800317ED8 /* Animation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418172CE25811AF800317ED8 /* Animation.swift */; };
 		418172D625811B8700317ED8 /* RoundRectButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418172D525811B8700317ED8 /* RoundRectButtonStyle.swift */; };
 		418172FF25811DB200317ED8 /* Readability.js in Resources */ = {isa = PBXBuildFile; fileRef = 418172FD25811DB200317ED8 /* Readability.js */; };
-		4181730025811DB200317ED8 /* SelectionObserver.js in Resources */ = {isa = PBXBuildFile; fileRef = 418172FE25811DB200317ED8 /* SelectionObserver.js */; };
 		4181731725811E1800317ED8 /* CursorMovement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181731625811E1800317ED8 /* CursorMovement.swift */; };
 		4181732D25811E9800317ED8 /* Icon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181732C25811E9800317ED8 /* Icon.swift */; };
 		4181733225811F4800317ED8 /* KeyCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181733125811F4800317ED8 /* KeyCode.swift */; };
@@ -160,7 +177,6 @@
 		521EEDF72593824100BA2485 /* AppDelegate+Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = 521EEDF62593824100BA2485 /* AppDelegate+Document.swift */; };
 		521EEDFB2593927100BA2485 /* Int+ByteSize.swift in Sources */ = {isa = PBXBuildFile; fileRef = 521EEDFA2593927100BA2485 /* Int+ByteSize.swift */; };
 		521FEC662604B830009000F9 /* String+c99.swift in Sources */ = {isa = PBXBuildFile; fileRef = 521FEC652604B830009000F9 /* String+c99.swift */; };
-		521FEC9A2604F9B4009000F9 /* Vinyl in Frameworks */ = {isa = PBXBuildFile; productRef = 521FEC992604F9B4009000F9 /* Vinyl */; };
 		522AFB2825CBFAB100F60647 /* DocumentManagerTestsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 522AFB2725CBFAB100F60647 /* DocumentManagerTestsHelper.swift */; };
 		523FF66125C31D8800B4BD6E /* Data+String.swift in Sources */ = {isa = PBXBuildFile; fileRef = 523FF66025C31D8800B4BD6E /* Data+String.swift */; };
 		523FF67925C31D9D00B4BD6E /* String+Data.swift in Sources */ = {isa = PBXBuildFile; fileRef = 523FF67825C31D9D00B4BD6E /* String+Data.swift */; };
@@ -189,22 +205,6 @@
 		5273C65B25DA835500B00EC3 /* APIRequestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5273C65825DA835400B00EC3 /* APIRequestTests.swift */; };
 		5273C65C25DA835500B00EC3 /* UserSessionRequestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5273C65925DA835400B00EC3 /* UserSessionRequestTests.swift */; };
 		5273C66D25DA857400B00EC3 /* BeamUITestsMenuGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5273C66C25DA857400B00EC3 /* BeamUITestsMenuGenerator.swift */; };
-		527C43632608D7FB00DB1667 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = 9631C746251CE997009B40C4 /* SwiftSoup */; };
-		527C43642608D7FB00DB1667 /* FavIcon in Frameworks */ = {isa = PBXBuildFile; productRef = 96474E3E254D9ADB00A920B3 /* FavIcon */; };
-		527C43652608D7FB00DB1667 /* Preferences in Frameworks */ = {isa = PBXBuildFile; productRef = 524299AE25A47CA500F4DBF5 /* Preferences */; };
-		527C43662608D7FB00DB1667 /* CocoaLumberjackSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 527FB71425B9A93400959146 /* CocoaLumberjackSwift */; };
-		527C43672608D7FB00DB1667 /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = 527FB71925B9A97A00959146 /* Sentry */; };
-		527C43682608D7FB00DB1667 /* JWTDecode in Frameworks */ = {isa = PBXBuildFile; productRef = 527FB71E25B9A9B600959146 /* JWTDecode */; };
-		527C43692608D7FB00DB1667 /* Fakery in Frameworks */ = {isa = PBXBuildFile; productRef = 527FB72325B9AAA200959146 /* Fakery */; };
-		527C436A2608D7FB00DB1667 /* PromiseKit in Frameworks */ = {isa = PBXBuildFile; productRef = 52BB698A25CD4E1E007A1173 /* PromiseKit */; };
-		527C436B2608D7FB00DB1667 /* Promises in Frameworks */ = {isa = PBXBuildFile; productRef = 52E5297125CD980B00307858 /* Promises */; };
-		527C436C2608D7FB00DB1667 /* PromisesTestHelpers in Frameworks */ = {isa = PBXBuildFile; productRef = 52E5297325CD980B00307858 /* PromisesTestHelpers */; };
-		527C436D2608D7FB00DB1667 /* PMKFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 523E91CB25D17004001124E0 /* PMKFoundation */; };
-		527C436E2608D7FB00DB1667 /* KeychainAccess in Frameworks */ = {isa = PBXBuildFile; productRef = 524CF6D225F276D1007312F0 /* KeychainAccess */; };
-		527C436F2608D7FB00DB1667 /* Nimble in Frameworks */ = {isa = PBXBuildFile; productRef = 5239C11525C2C4AE009C51E1 /* Nimble */; };
-		527C43702608D7FB00DB1667 /* Quick in Frameworks */ = {isa = PBXBuildFile; productRef = 5239C12E25C2C4C6009C51E1 /* Quick */; };
-		527C43712608D7FB00DB1667 /* Quick in Frameworks */ = {isa = PBXBuildFile; productRef = A0A6F2A425D1B74200EFC4BE /* Quick */; };
-		527C43722608D7FB00DB1667 /* Nimble in Frameworks */ = {isa = PBXBuildFile; productRef = A0A6F2A625D1B74800EFC4BE /* Nimble */; };
 		527DF48725710ECB00A0A56D /* DocumentManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 527DF48625710ECB00A0A56D /* DocumentManagerTests.swift */; };
 		5281B01825C962EF00DF66D9 /* DocumentManagerNetworkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5281B01725C962EF00DF66D9 /* DocumentManagerNetworkTests.swift */; };
 		5281B06425C98D2600DF66D9 /* PersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5281B06325C98D2600DF66D9 /* PersistenceTests.swift */; };
@@ -274,7 +274,6 @@
 		9691E40225AE5D2C00A13080 /* NodeSelection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9691E40125AE5D2C00A13080 /* NodeSelection.swift */; };
 		9691E41425AF61BA00A13080 /* BrowsingTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9691E41325AF61BA00A13080 /* BrowsingTree.swift */; };
 		9691E44425B1091300A13080 /* BrowsingSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9691E44325B1091300A13080 /* BrowsingSection.swift */; };
-		96929D2C26025F7200F8961C /* PointFrame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96929D2B26025F7200F8961C /* PointFrame.swift */; };
 		96956D31258BF3F50069C9C1 /* LinkStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96956D30258BF3F50069C9C1 /* LinkStore.swift */; };
 		96988C8325BB0AF2000223A3 /* DestinationNotePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96988C8225BB0AF2000223A3 /* DestinationNotePicker.swift */; };
 		96A3067C25F698FB0078A453 /* RefNoteTitle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96A3067B25F698FB0078A453 /* RefNoteTitle.swift */; };
@@ -342,6 +341,7 @@
 		A567157125F66F8600B46110 /* StyledText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A567157025F66F8600B46110 /* StyledText.swift */; };
 		A572629825FFADC5004416C0 /* MouseInteraction.swift in Sources */ = {isa = PBXBuildFile; fileRef = A572629725FFADC5004416C0 /* MouseInteraction.swift */; };
 		A5D6250A26034B1C00A3E676 /* FormatterViewBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5D6250926034B1C00A3E676 /* FormatterViewBackground.swift */; };
+		BAA6708054034C21F4FCFBC0 /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = BAA67985EC2702FD80604994 /* .gitignore */; };
 		A5FE96CD2612469C002A2B73 /* AutocompleteManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5FE96CC2612469C002A2B73 /* AutocompleteManager.swift */; };
 		BAA67192B5EB78981741C311 /* WebPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67CEFFAFA38F29CF1C84F /* WebPage.swift */; };
 		BAA67306ACF9DFF6FDF79D92 /* PointAndShoot.css in Resources */ = {isa = PBXBuildFile; fileRef = BAA67767634DB6949E8D9497 /* PointAndShoot.css */; };
@@ -349,8 +349,13 @@
 		BAA67549CA5950E9473E2E41 /* DevTools.js in Resources */ = {isa = PBXBuildFile; fileRef = BAA67203DD1BE4F55B2834D8 /* DevTools.js */; };
 		BAA6754E90C28296EC8CA03F /* PointAndShoot.js in Resources */ = {isa = PBXBuildFile; fileRef = BAA67B75F9F87262CB9DCACD /* PointAndShoot.js */; };
 		BAA675FA20895799E92B0D8F /* PointAndShoot.js in Sources */ = {isa = PBXBuildFile; fileRef = BAA67B75F9F87262CB9DCACD /* PointAndShoot.js */; };
+		BAA676BFF4B830E6A5CD5BEB /* PointFrame.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA679F6C221431D64C46945 /* PointFrame.swift */; };
+		BAA676C5DED14C324B651F81 /* PointAndShoot.test.js in Sources */ = {isa = PBXBuildFile; fileRef = BAA6716E24521F888D05F4C9 /* PointAndShoot.test.js */; };
 		BAA67A1C810FF7C28A282C8D /* PointAndShoot.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67913BA5B5E39B9EF7854 /* PointAndShoot.swift */; };
-		BAA67B55BD18E1DC0A146065 /* ShootFrame.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA6715A58EEDB52378B859B /* ShootFrame.swift */; };
+		BAA67DC79E1BCAF3869F3DBB /* build_js.sh in Resources */ = {isa = PBXBuildFile; fileRef = BAA6740CED2A340CD3002907 /* build_js.sh */; };
+		BAA67DCFEAB652474B00FF4F /* ShootFrame.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67FB11EF06A38E7E5EB36 /* ShootFrame.swift */; };
+		BAA67F15ED7F4697724AE471 /* index.js in Sources */ = {isa = PBXBuildFile; fileRef = BAA67BCB325E41FC73668E60 /* index.js */; };
+		BAA67F2655955909590FECBB /* PointAndShootUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67F5FF48CE3C971FA1487 /* PointAndShootUI.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -552,6 +557,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		02338A892612214100600147 /* PointAndShoot_prod.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = PointAndShoot_prod.js; path = Beam/Classes/Helpers/Utils/Web/PointAndShoot_prod.js; sourceTree = "<group>"; };
 		4100D96A25AEFEEA00EF04CB /* BeamTextEdit+Shortcut.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamTextEdit+Shortcut.swift"; sourceTree = "<group>"; };
 		4105CE2125A5ECA2009AB687 /* BidirectionalPopoverItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BidirectionalPopoverItem.swift; sourceTree = "<group>"; };
 		4105CE7425A60681009AB687 /* FormatterTypeButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatterTypeButton.swift; sourceTree = "<group>"; };
@@ -670,7 +676,6 @@
 		418172CE25811AF800317ED8 /* Animation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Animation.swift; sourceTree = "<group>"; };
 		418172D525811B8700317ED8 /* RoundRectButtonStyle.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RoundRectButtonStyle.swift; sourceTree = "<group>"; };
 		418172FD25811DB200317ED8 /* Readability.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = Readability.js; sourceTree = "<group>"; };
-		418172FE25811DB200317ED8 /* SelectionObserver.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = SelectionObserver.js; sourceTree = "<group>"; };
 		4181731625811E1800317ED8 /* CursorMovement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorMovement.swift; sourceTree = "<group>"; };
 		4181732C25811E9800317ED8 /* Icon.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Icon.swift; sourceTree = "<group>"; };
 		4181733125811F4800317ED8 /* KeyCode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyCode.swift; sourceTree = "<group>"; };
@@ -807,7 +812,6 @@
 		9691E40125AE5D2C00A13080 /* NodeSelection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NodeSelection.swift; sourceTree = "<group>"; };
 		9691E41325AF61BA00A13080 /* BrowsingTree.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowsingTree.swift; sourceTree = "<group>"; };
 		9691E44325B1091300A13080 /* BrowsingSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowsingSection.swift; sourceTree = "<group>"; };
-		96929D2B26025F7200F8961C /* PointFrame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointFrame.swift; sourceTree = "<group>"; };
 		96956D30258BF3F50069C9C1 /* LinkStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkStore.swift; sourceTree = "<group>"; };
 		96988C8225BB0AF2000223A3 /* DestinationNotePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DestinationNotePicker.swift; sourceTree = "<group>"; };
 		96A3067B25F698FB0078A453 /* RefNoteTitle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefNoteTitle.swift; sourceTree = "<group>"; };
@@ -876,13 +880,20 @@
 		A567157025F66F8600B46110 /* StyledText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StyledText.swift; sourceTree = "<group>"; };
 		A572629725FFADC5004416C0 /* MouseInteraction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MouseInteraction.swift; sourceTree = "<group>"; };
 		A5D6250926034B1C00A3E676 /* FormatterViewBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatterViewBackground.swift; sourceTree = "<group>"; };
+		BAA6716E24521F888D05F4C9 /* PointAndShoot.test.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = PointAndShoot.test.js; sourceTree = "<group>"; };
 		A5FE96CC2612469C002A2B73 /* AutocompleteManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutocompleteManager.swift; sourceTree = "<group>"; };
 		BAA6715A58EEDB52378B859B /* ShootFrame.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShootFrame.swift; sourceTree = "<group>"; };
 		BAA67203DD1BE4F55B2834D8 /* DevTools.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = DevTools.js; sourceTree = "<group>"; };
+		BAA6740CED2A340CD3002907 /* build_js.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = build_js.sh; path = scripts/build_js.sh; sourceTree = "<group>"; };
 		BAA67767634DB6949E8D9497 /* PointAndShoot.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; path = PointAndShoot.css; sourceTree = "<group>"; };
 		BAA67913BA5B5E39B9EF7854 /* PointAndShoot.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PointAndShoot.swift; sourceTree = "<group>"; };
+		BAA67985EC2702FD80604994 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = file.gitignore; path = .gitignore; sourceTree = "<group>"; };
+		BAA679F6C221431D64C46945 /* PointFrame.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PointFrame.swift; sourceTree = "<group>"; };
 		BAA67B75F9F87262CB9DCACD /* PointAndShoot.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = PointAndShoot.js; sourceTree = "<group>"; };
+		BAA67BCB325E41FC73668E60 /* index.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = index.js; sourceTree = "<group>"; };
 		BAA67CEFFAFA38F29CF1C84F /* WebPage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebPage.swift; sourceTree = "<group>"; };
+		BAA67F5FF48CE3C971FA1487 /* PointAndShootUI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PointAndShootUI.swift; sourceTree = "<group>"; };
+		BAA67FB11EF06A38E7E5EB36 /* ShootFrame.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShootFrame.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -890,22 +901,22 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				527C43692608D7FB00DB1667 /* Fakery in Frameworks */,
-				527C436A2608D7FB00DB1667 /* PromiseKit in Frameworks */,
-				527C43652608D7FB00DB1667 /* Preferences in Frameworks */,
+				0226BA1A26133D4300E0DA64 /* Fakery in Frameworks */,
 				525C233C25BAF8EF001B9625 /* libgit2.a in Frameworks */,
-				527C43672608D7FB00DB1667 /* Sentry in Frameworks */,
-				527C436D2608D7FB00DB1667 /* PMKFoundation in Frameworks */,
-				521FEC9A2604F9B4009000F9 /* Vinyl in Frameworks */,
+				0226BA1C26133D4300E0DA64 /* Promises in Frameworks */,
+				0226BA1D26133D4300E0DA64 /* PromisesTestHelpers in Frameworks */,
+				0226BA1626133D4300E0DA64 /* Preferences in Frameworks */,
+				0226BA1B26133D4300E0DA64 /* PromiseKit in Frameworks */,
+				0226BA1926133D4300E0DA64 /* JWTDecode in Frameworks */,
+				0226BA2026133D4300E0DA64 /* Vinyl in Frameworks */,
+				0226BA1526133D4300E0DA64 /* FavIcon in Frameworks */,
+				0226BA1E26133D4300E0DA64 /* PMKFoundation in Frameworks */,
+				0226BA1826133D4300E0DA64 /* Sentry in Frameworks */,
+				0226BA1426133D4300E0DA64 /* SwiftSoup in Frameworks */,
+				0226BA1726133D4300E0DA64 /* CocoaLumberjackSwift in Frameworks */,
 				964548A02523B3550064D062 /* CloudKit.framework in Frameworks */,
-				527C43642608D7FB00DB1667 /* FavIcon in Frameworks */,
 				52C60BFA258B638F008B7C10 /* Sparkle.framework in Frameworks */,
-				527C43662608D7FB00DB1667 /* CocoaLumberjackSwift in Frameworks */,
-				527C436B2608D7FB00DB1667 /* Promises in Frameworks */,
-				527C436E2608D7FB00DB1667 /* KeychainAccess in Frameworks */,
-				527C43682608D7FB00DB1667 /* JWTDecode in Frameworks */,
-				527C436C2608D7FB00DB1667 /* PromisesTestHelpers in Frameworks */,
-				527C43632608D7FB00DB1667 /* SwiftSoup in Frameworks */,
+				0226BA1F26133D4300E0DA64 /* KeychainAccess in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -913,8 +924,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				527C43702608D7FB00DB1667 /* Quick in Frameworks */,
-				527C436F2608D7FB00DB1667 /* Nimble in Frameworks */,
+				0226BA2226133D4300E0DA64 /* Quick in Frameworks */,
+				0226BA2126133D4300E0DA64 /* Nimble in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -922,8 +933,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				527C43712608D7FB00DB1667 /* Quick in Frameworks */,
-				527C43722608D7FB00DB1667 /* Nimble in Frameworks */,
+				0226BA2326133D4300E0DA64 /* Quick in Frameworks */,
+				0226BA2426133D4300E0DA64 /* Nimble in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -936,6 +947,7 @@
 				525C233B25BAF8EF001B9625 /* libgit2.a */,
 				52C60B82258B6332008B7C10 /* Sparkle.xcodeproj */,
 				9645489F2523B3550064D062 /* CloudKit.framework */,
+				BAA6740CED2A340CD3002907 /* build_js.sh */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -1120,6 +1132,7 @@
 				A572629725FFADC5004416C0 /* MouseInteraction.swift */,
 				BAA67913BA5B5E39B9EF7854 /* PointAndShoot.swift */,
 				BAA67CEFFAFA38F29CF1C84F /* WebPage.swift */,
+				BAA67F5FF48CE3C971FA1487 /* PointAndShootUI.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -1307,8 +1320,7 @@
 				418171D02581107C00317ED8 /* BrowserTabView.swift */,
 				418171D22581107C00317ED8 /* TabStats.swift */,
 				418171D32581107C00317ED8 /* WebView.swift */,
-				96929D2B26025F7200F8961C /* PointFrame.swift */,
-				BAA6715A58EEDB52378B859B /* ShootFrame.swift */,
+				BAA679594309C4858C403757 /* PointAndShoot */,
 			);
 			path = Browser;
 			sourceTree = "<group>";
@@ -1421,10 +1433,12 @@
 				87E39CDC260BDBC100E4A684 /* PasswordManager.js */,
 				418172FD25811DB200317ED8 /* Readability.js */,
 				418171912581107C00317ED8 /* OverrideConsole.js */,
-				418172FE25811DB200317ED8 /* SelectionObserver.js */,
 				BAA67B75F9F87262CB9DCACD /* PointAndShoot.js */,
 				BAA67767634DB6949E8D9497 /* PointAndShoot.css */,
 				BAA67203DD1BE4F55B2834D8 /* DevTools.js */,
+				BAA67985EC2702FD80604994 /* .gitignore */,
+				BAA6716E24521F888D05F4C9 /* PointAndShoot.test.js */,
+				BAA67BCB325E41FC73668E60 /* index.js */,
 			);
 			path = Web;
 			sourceTree = "<group>";
@@ -1848,6 +1862,7 @@
 		965A781C2514F147009980D4 = {
 			isa = PBXGroup;
 			children = (
+				02338A892612214100600147 /* PointAndShoot_prod.js */,
 				965A78272514F147009980D4 /* Beam */,
 				965A78402514F149009980D4 /* BeamTests */,
 				965A784B2514F149009980D4 /* BeamUITests */,
@@ -2029,6 +2044,15 @@
 			path = Text;
 			sourceTree = "<group>";
 		};
+		BAA679594309C4858C403757 /* PointAndShoot */ = {
+			isa = PBXGroup;
+			children = (
+				BAA679F6C221431D64C46945 /* PointFrame.swift */,
+				BAA67FB11EF06A38E7E5EB36 /* ShootFrame.swift */,
+			);
+			path = PointAndShoot;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -2042,6 +2066,7 @@
 				965A78212514F147009980D4 /* Sources */,
 				520DDA94257E4CEE00FF8152 /* Clean Configuration.swift from variable Injector */,
 				965A78222514F147009980D4 /* Frameworks */,
+				0274A217261212DC00DA35CE /* Build Web */,
 				965A78232514F147009980D4 /* Resources */,
 				5259C3AA258A7DC300DD67E7 /* Embed Frameworks */,
 				52C60BFF258B63A5008B7C10 /* Embed XPC Services */,
@@ -2354,15 +2379,17 @@
 				418171122581082200317ED8 /* Assets.xcassets in Resources */,
 				56A5BD3125CC680E00ED7C50 /* url.stopwords in Resources */,
 				41B4277B25E52DCA00A8243F /* Localizable.stringsdict in Resources */,
-				4181730025811DB200317ED8 /* SelectionObserver.js in Resources */,
 				5206281425922D7800D7CD9E /* document.graphql in Resources */,
 				965A78332514F148009980D4 /* Preview Assets.xcassets in Resources */,
 				418172412581107C00317ED8 /* ScrollableTextView.xib in Resources */,
 				5260172125ADCBE800634695 /* documents.graphql in Resources */,
 				418171F52581107C00317ED8 /* forgot_password.graphql in Resources */,
 				BAA6754E90C28296EC8CA03F /* PointAndShoot.js in Resources */,
+				02338A8A2612214100600147 /* PointAndShoot_prod.js in Resources */,
 				BAA67306ACF9DFF6FDF79D92 /* PointAndShoot.css in Resources */,
 				BAA67549CA5950E9473E2E41 /* DevTools.js in Resources */,
+				BAA67DC79E1BCAF3869F3DBB /* build_js.sh in Resources */,
+				BAA6708054034C21F4FCFBC0 /* .gitignore in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2393,6 +2420,24 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		0274A217261212DC00DA35CE /* Build Web */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Build Web";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "export PATH=\"$PATH:/opt/homebrew/bin\"\n./scripts/build_js.sh\n";
+		};
 		520582C0257E351800E0533A /* Env variable Injector */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 12;
@@ -2593,7 +2638,6 @@
 				9691E44425B1091300A13080 /* BrowsingSection.swift in Sources */,
 				521EEDF12593819000BA2485 /* Document+ResultsController.swift in Sources */,
 				A04E849525DD1CEF0066CD44 /* InsertText.swift in Sources */,
-				96929D2C26025F7200F8961C /* PointFrame.swift in Sources */,
 				96FACC8A26079C7E0088DD67 /* InputText.swift in Sources */,
 				418172002581107C00317ED8 /* NotificationName+Beam.swift in Sources */,
 				418172112581107C00317ED8 /* Readability.swift in Sources */,
@@ -2738,9 +2782,13 @@
 				A5FE96CD2612469C002A2B73 /* AutocompleteManager.swift in Sources */,
 				BAA675FA20895799E92B0D8F /* PointAndShoot.js in Sources */,
 				BAA673B8A6A97A06A2A1067E /* DevTools.js in Sources */,
-				BAA67B55BD18E1DC0A146065 /* ShootFrame.swift in Sources */,
 				BAA67A1C810FF7C28A282C8D /* PointAndShoot.swift in Sources */,
 				BAA67192B5EB78981741C311 /* WebPage.swift in Sources */,
+				BAA676BFF4B830E6A5CD5BEB /* PointFrame.swift in Sources */,
+				BAA67DCFEAB652474B00FF4F /* ShootFrame.swift in Sources */,
+				BAA67F2655955909590FECBB /* PointAndShootUI.swift in Sources */,
+				BAA676C5DED14C324B651F81 /* PointAndShoot.test.js in Sources */,
+				BAA67F15ED7F4697724AE471 /* index.js in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
