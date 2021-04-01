@@ -11,18 +11,6 @@ $paletteTransparent: rgba(0, 0, 0, 0);
   z-index: 2147483638;
 }
 
-/*@keyframes beam-shoot-anim {
-  0% {
-    outline: 3px solid rgba(137, 194, 109, 0.1) !important
-    /* var(--outlineColorLow)*
-  }
-  100% {
-    outline: 3px solid rgba(137, 194, 109, 1) !important
-    /*var(--outlineColorHigh)*
-  ;
-  }
-}*/
-
 .#{$prefix} {
   font-family: sans-serif;
   font-size: 16px;
@@ -35,13 +23,14 @@ $paletteTransparent: rgba(0, 0, 0, 0);
 .#{$prefix}-point {
   @include topLevel();
 
-  outline: 3px solid rgba(37, 194, 109, 0.5) !important;
+  outline: var(--outlineWidth) solid rgba(37, 194, 109, 0.5) !important;
+  -webkit-backdrop-filter: brightness(1.1) contrast(1.1);
 }
 
 .#{$prefix}-shoot {
   @include topLevel();
 
-  outline: 3px solid rgba(37, 194, 109, 1) !important;
+  outline: var(--outlineWidth) solid rgba(37, 194, 109, 1) !important;
 }
 
 $colorSelectedFg: rgb(139, 192, 212);
@@ -123,7 +112,7 @@ $colorItemSelectedBg: #F9F7FF;
   position: absolute;
 }
 
-::selection {
+body.#{$prefix}-selecting ::selection {
   background-color: $paletteTransparent;
   color: black;
 }
@@ -152,12 +141,4 @@ $colorItemSelectedBg: #F9F7FF;
   right: 0;
   height: 100%;
   pointer-events: none;
-}
-
-.#{$prefix}-selection {
-  -webkit-backdrop-filter: brightness(1.1) contrast(1.1);
-  // outline: 3px solid green;
-  // border-radius: 0.5em;
-  // border: 2px solid #372eff;
-  // box-shadow: #aaaaaa 0 5px 5px;
 }

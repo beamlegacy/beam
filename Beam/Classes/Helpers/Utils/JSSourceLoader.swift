@@ -10,6 +10,9 @@ import Foundation
 func loadFile(from fileName: String, fileType: String) -> String {
     do {
         let path = Bundle.main.path(forResource: fileName, ofType: fileType)
+        if path == nil {
+            fatalError("Could not find '\(fileName).\(fileType)'")
+        }
         return try String(contentsOfFile: path!, encoding: String.Encoding.utf8)
     } catch (let error) {
         //

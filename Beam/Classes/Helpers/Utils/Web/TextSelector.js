@@ -1,37 +1,74 @@
+export class TextSelection {
+  /**
+   * Selection range index.
+   *
+   * @type {number}
+   */
+  index
+
+  /**
+   * Selected text.
+   *
+   * @type {String}
+   */
+  text
+
+  /**
+   * Selected HTML.
+   *
+   * @type {String}
+   */
+  html
+
+  /**
+   * Selected rectangles.
+   *
+   * @type {{BeamRect}[]}
+   */
+  areas
+}
+
 export class TextSelector {
 
-  selections = []
+  selectionsList = []
 
-  constructor(ui) {
+  /**
+   *
+   * @param win {(BeamWindow)}
+   * @param ui {TextSelectorUI}
+   */
+  constructor(win, ui) {
     this.ui = ui
-    document.addEventListener("selectionchange", (ev) => this.onSelectionChange(ev))
-    window.addEventListener("mouseup", this.onMouseUp.bind(this))
-    console.log("Text selector initialized")
+    this.win = win
+    win.addEventListener("mouseup", this.onMouseUp.bind(this))
+    win.document.addEventListener("selectionchange", (ev) => this.onSelectionChange(ev))
+    console.log(`Initialized ${this}`)
   }
 
   enterSelection() {
-    this.selections = []
+    this.selectionsList = []
     this.ui.enterSelection()
   }
 
   leaveSelection() {
     this.ui.leaveSelection()
-    this.selections = []
+    this.selectionsList = []
   }
 
   onMouseUp(_ev) {
-    const selectionsCount = this.selections.length
+    const selectionsCount = this.selectionsList.length
     if (selectionsCount > 0) {
       for (let i = 0; i < selectionsCount; ++i) {
-        this.ui.textSelected(this.selections[i])
+        this.ui.textSelected(this.selectionsList[i])
       }
+      getSelection().removeAllRanges()
       this.leaveSelection()
     }
   }
 
   onSelectionChange(_ev) {
     console.log("this", this)
-    const docSelection = document.getSelection()
+    const docSelection = this.getSelection()
     if (docSelection.isCollapsed) {
       this.leaveSelection()
       return
@@ -43,22 +80,34 @@ export class TextSelector {
       const range = docSelection.getRangeAt(i)
       const selectedText = range.toString()
       const selectedFragment = range.cloneContents()
-      let selectedHTML = Array.prototype.reduce.call(
+      const selectedHTML = Array.prototype.reduce.call(
           selectedFragment.childNodes,
           (result, node) => result + (node.outerHTML || node.nodeValue),
           ""
       )
-      const rects = range.getClientRects()
+      const rangeRects = range.getClientRects()
       const textAreas = []
-      let frameX = window.scrollX
-      let frameY = window.scrollY
-      for (let r = 0; r < rects.length; r++) {
-        const rect = rects[r]
-        textAreas.push({x: frameX + rect.x, y: frameY + rect.y, width: rect.width, height: rect.height})
+      for (let r = 0; r < rangeRects.length; r++) {
+        const rangeRect = rangeRects[r]
+        const rect = {
+          x: this.win.scrollX + rangeRect.x,
+          y: this.win.scrollY + rangeRect.y,
+          width: rangeRect.width,
+          height: rangeRect.height
+        }
+        textAreas.push(rect)
       }
       const selection = {index: i, text: selectedText, html: selectedHTML, areas: textAreas}
-      this.selections.push(selection)
+      this.selectionsList.push(selection)
       this.ui.addTextSelection(selection)
     }
+  }
+
+  getSelection() {
+    return this.win.document.getSelection()
+  }
+
+  toString() {
+    return "Text selector"
   }
 }

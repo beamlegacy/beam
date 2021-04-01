@@ -20,7 +20,7 @@ class PointAndShootUI: ObservableObject {
         return SelectionUI(rect: selection, animated: animated, color: color)
     }
 
-    let pointColor = Color(red: 0, green: 0, blue: 0, opacity: 0.1)
+    let pointColor = Color(red: 50 / 255, green: 4 / 255, blue: 245 / 255, opacity: 1)
 
     func drawPoint(area: NSRect) {
         pointSelection = drawSelection(selection: area, animated: true, color: pointColor)

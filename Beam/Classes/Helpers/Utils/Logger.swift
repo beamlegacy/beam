@@ -103,6 +103,14 @@ final class Logger {
         log("🛑 \(message)", level: .error, category: category)
     }
 
+    func logWarning(_ message: String, category: LogCategory) {
+        if !hideLumberCategories.contains(category) {
+            DDLogWarn("[\(category.rawValue)] 🛑 \(message)")
+        }
+
+        log("🛑 \(message)", level: .default, category: category)
+    }
+
     private func log(_ message: String, level: OSLogType, category: LogCategory) {
         #if DEBUG
         if hideCategories.contains(category) { return }

@@ -1,6 +1,9 @@
-export class WebUI {
+import {UI} from "./UI"
+import {PointAndShootUI_web} from "./PointAndShootUI_web"
+import {TextSelectorUI_web} from "./TextSelectorUI_web"
+
+export class UI_web extends UI {
   prefix = "__ID__"
-  origin = document.body.baseURI
 
   outlineWidth = 4
 
@@ -25,8 +28,11 @@ export class WebUI {
       addedTo: "Ajouté à"
     }
   }
+
   navigatorLanguage = navigator.language.substring(0, 2)
+
   documentLanguage = document.lang
+
   lang = this.navigatorLanguage || this.documentLanguage
 
   existingCards = [
@@ -36,51 +42,74 @@ export class WebUI {
   ]
 
   prefixClass = this.prefix
-  shootClass = `${this.prefix}-shoot`
-  pointClass = `${this.prefix}-point`
+
   popupClass = `${this.prefix}-popup`
+
   cardClass = `${this.prefix}-card`
+
   noteClass = `${this.prefix}-note`
+
   labelClass = `${this.prefix}-label`
+
   inputClass = `${this.prefix}-input`
+
   proposalsClass = `${this.prefix}-proposals`
+
   proposalClass = `${this.prefix}-proposal`
+
   statusClass = `${this.prefix}-status`
+
   formRowClass = `${this.prefix}-form-row`
-  overlayId = `${this.prefix}-overlay`
-  backdropId = `${this.prefix}-backdrop`
-  selectionClass = `${this.prefix}-selection`
 
   popupId = `${this.prefix}-popup`
+
   popupAnchor = document.body
+
   popup
+
+  cardInputId = `${this.prefix}-add-to`
 
   statusId = `${this.prefix}-status`
 
   inputTouched
 
   overlayEl
+
   backdropEl
 
-  constructor() {
+  statusEl
+
+  /**
+   *
+   * @param win {BeamWindow}
+   * @param pointAndShoot {PointAndShootUI_web}
+   */
+  constructor(win, pointAndShoot = new PointAndShootUI_web(win)) {
+    super(pointAndShoot, new TextSelectorUI_web(win, pointAndShoot))
+    this.win = win
     console.log(`${this} instantiated`)
   }
 
-  toString() {
-    return "WebUI"
-  }
-
-  point(el) {
-    el.classList.add(this.pointClass)
+  point(el, x, y) {
+    this.pointAndShoot.point(el, x, y)
   }
 
   unpoint(el) {
-    el.classList.remove(this.pointClass)
-    el.style.cursor = ``
+    this.pointAndShoot.unpoint(el)
   }
 
-  removeSelected(el) {
-    el.classList.remove(this.shootClass)
+  shoot(el, x, y, selected, submitCb) {
+    this.pointAndShoot.shoot(el)
+    const count = selected.length > 1 ? `${selected.length}` : ""
+    for (const s of selected) {
+      s.style.cursor = `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="30" viewBox="20 0 30 55" style="stroke:rgb(165,165,165);stroke-linecap:round;stroke-width:3"><rect x="10" y="20" width="54" height="25" ry="10" style="stroke-width:1; fill:white"/><text x="15" y="39" style="font-size:20px;stroke-linecap:butt;stroke-width:1">${count}</text><line x1="35" y1="26" x2="50" y2="26"/><line x1="35" y1="32" x2="50" y2="32"/><line x1="35" y1="38" x2="45" y2="38"/><g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g id="notallowed"><path d="M8,17.4219 L8,1.4069 L19.591,13.0259 L12.55,13.0259 L12.399,13.1499 L8,17.4219 Z" id="point-border" fill="white"/><path d="M9,3.814 L9,15.002 L11.969,12.136 L12.129,11.997 L17.165,11.997 L9,3.814 Z" id="point" fill="black"/></g></g></svg>') 5 5, auto`
+    }
+    this.hidePopup()  // Hide previous, if any
+    this.showPopup(el, x, y, submitCb)
+  }
+
+  unshoot(el) {
+    this.pointAndShoot.unshoot(el)
   }
 
   submit(submitCb) {
@@ -122,7 +151,7 @@ export class WebUI {
     cardInput.addEventListener("input", this.onCardInput)
 
     this.popup.style.left = `${x}px`
-    const popupTop = window.scrollY + y
+    const popupTop = this.win.scrollY + y
     this.popup.style.top = `${popupTop}px`
     this.cardInputEl().focus()
   }
@@ -223,24 +252,9 @@ export class WebUI {
     this.showProposals(this.cardsToProposals(this.existingCards, ""))
   }
 
-  cardInputId = `${this.prefix}-add-to`
-
   cardInputEl() {
     return document.getElementById(this.cardInputId)
   }
-
-  shoot(el, x, y, selected, submitCb) {
-    el.classList.remove(this.pointClass)
-    el.classList.add(this.shootClass)
-    const count = selected.length > 1 ? "" + selected.length : ""
-    for (const s of selected) {
-      s.style.cursor = `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="30" viewBox="20 0 30 55" style="stroke:rgb(165,165,165);stroke-linecap:round;stroke-width:3"><rect x="10" y="20" width="54" height="25" ry="10" style="stroke-width:1; fill:white"/><text x="15" y="39" style="font-size:20px;stroke-linecap:butt;stroke-width:1">${count}</text><line x1="35" y1="26" x2="50" y2="26"/><line x1="35" y1="32" x2="50" y2="32"/><line x1="35" y1="38" x2="45" y2="38"/><g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g id="notallowed"><path d="M8,17.4219 L8,1.4069 L19.591,13.0259 L12.55,13.0259 L12.399,13.1499 L8,17.4219 Z" id="point-border" fill="white"/><path d="M9,3.814 L9,15.002 L11.969,12.136 L12.129,11.997 L17.165,11.997 L9,3.814 Z" id="point" fill="black"/></g></g></svg>') 5 5, auto`
-    }
-    this.hidePopup()  // Hide previous, if any
-    this.showPopup(el, x, y, submitCb)
-  }
-
-  statusEl
 
   /**
    * Show the if a given was added to a card.
@@ -254,7 +268,7 @@ export class WebUI {
     this.popupAnchor.append(this.statusEl)
     const bounds = el.getBoundingClientRect()
     statusEl.style.left = `${bounds.x}px`
-    const statusTop = window.scrollY + bounds.bottom + this.outlineWidth
+    const statusTop = this.win.scrollY + bounds.bottom + this.outlineWidth
     statusEl.style.top = `${statusTop}px`
   }
 
@@ -265,67 +279,39 @@ export class WebUI {
     }
   }
 
-  enterSelection() {
-    if (!this.overlayEl) {
-      this.backdropEl = document.createElement("div")
-      this.backdropEl.id = this.backdropId
-      this.overlayEl = document.createElement("div")
-      this.overlayEl.id = this.overlayId
-      let body = document.body
-      body.appendChild(this.backdropEl)
-      body.appendChild(this.overlayEl)
-    }
-  }
-
-  leaveSelection() {
-    if (this.overlayEl) {
-      document.body.removeChild(this.overlayEl)
-      document.body.removeChild(this.backdropEl)
-      this.overlayEl = null
-    }
-  }
-
-  addTextSelection(selection) {
-    const textAreas = selection.areas
-    this.overlayEl.innerHTML = ""
-    const padding = 5
-    for (let r = 0; r < textAreas.length; r++) {
-      const rect = textAreas[r]
-      const rectSelection = document.createElement("div")
-      rectSelection.className = this.selectionClass
-      rectSelection.style.position = "absolute"
-      rectSelection.style.left = rect.x + "px"
-      rectSelection.style.top = rect.y - padding + "px"
-      rectSelection.style.width = rect.width + "px"
-      rectSelection.style.height = rect.height + padding * 2 + "px"
-      this.overlayEl.appendChild(rectSelection)
-    }
-  }
-
-  textSelected(selection) {
-    // TODO: Shoot selected areas
-  }
-
   setFramesInfo(framesInfo) {
     // Nothing to do in Web UI
   }
 
-  setScrollInfo(scrollInfo) {
+  setScrollInfo(_scrollInfo) {
     // Nothing to do in Web UI
   }
 
-  setResizeInfo(resizeInfo) {
+  setResizeInfo(_resizeInfo, _els) {
     // Nothing to do in Web UI
   }
 
-  static getInstance() {
+  pinched(pinchInfo) {
+    // Nothing to do in Web UI
+  }
+
+  /**
+   *
+   * @param win {BeamWindow}
+   * @returns {UI_web}
+   */
+  static getInstance(win) {
     let instance
     try {
-      instance = new WebUI()
+      instance = new UI_web(win)
     } catch (e) {
       console.error(e)
       instance = null
     }
     return instance
+  }
+
+  toString() {
+    return "WebUI"
   }
 }
