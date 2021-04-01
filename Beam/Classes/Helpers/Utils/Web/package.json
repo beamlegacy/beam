@@ -7,7 +7,10 @@
   "main": "PointAndShoot_prod.js",
   "scripts": {
     "prebuild": "yarn install && yarn test",
-    "build": "parcel build --no-content-hash index.js",
+    "build": "yarn run build_debug",
+    "build_native": "node_modules/.bin/sass --embed-source-map PointAndShoot.scss:PointAndShoot.css && parcel build --no-content-hash --no-optimize index_native.js",
+    "build_web": "node_modules/.bin/sass --embed-source-map PointAndShoot.scss:PointAndShoot.css && parcel build --no-content-hash --no-optimize index_web.js",
+    "build_debug": "node_modules/.bin/sass --embed-source-map PointAndShoot.scss:PointAndShoot.css && parcel build --no-content-hash --no-optimize index_debug.js",
     "test": "node --experimental-vm-modules node_modules/.bin/jest"
   },
   "targets": {
@@ -23,34 +26,18 @@
   ],
   "author": "frontend@beam.co",
   "devDependencies": {
-    "@parcel/transformer-sass": "^2.0.0-beta.2",
+    "@parcel/transformer-sass": "2.0.0-beta.2",
     "@types/jest": "26.0.20",
     "identity-obj-proxy": "^3.0.0",
     "jest": "26.6.3",
     "parcel": "2.0.0-beta.2",
     "sass": "1.32.8"
   },
-  "dependencies": {
-    "build": "^0.1.4"
-  },
   "jest": {
-    "verbose": true,
     "transform": {},
     "moduleNameMapper": {
       "^.+\\.(css|scss)$": "identity-obj-proxy",
       "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/fileMocks.js"
     }
-  },
-  "terser": {
-    "mangle": {
-      "safari10": true
-    },
-    "format": {
-      "safari10": true
-    },
-    "safari10": true
-  },
-  "sass": {
-    "sourceMap": false
   }
 }

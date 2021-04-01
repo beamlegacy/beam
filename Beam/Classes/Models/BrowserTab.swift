@@ -46,8 +46,9 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
     private(set) var scrollX: CGFloat = 0
     private(set) var scrollY: CGFloat = 0
+    private var visualScale: CGFloat = 1
     var zoomLevel: CGFloat {
-        webView.magnification
+        visualScale
     }
 
     private var pixelRatio: Double = 1
@@ -247,8 +248,12 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     // Add the current page to the current note and return the beam element (if the element already exist return it directly)
     func addCurrentPageToNote() -> BeamElement? {
         guard let elem = element else {
-            guard let url = url else { return nil }
-            guard !url.isSearchResult else { return nil } // Don't automatically add search results
+            guard let url = self.url else {
+                Logger.shared.logError("Cannot get current URL", category: .general)
+                return nil }
+            guard !url.isSearchResult else {
+                Logger.shared.logWarning("Adding search results is not allowed", category: .general)
+                return nil } // Don't automatically add search results
             let linkString = url.absoluteString
             guard !note.outLinks.contains(linkString) else {
                 element = note.elementContainingLink(to: linkString); return element
@@ -291,11 +296,11 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
     private func setupObservers() {
         Logger.shared.logInfo("setupObservers", category: .general)
-        webView.publisher(for: \.title).sink { v in
-            self.title = v ?? "loading..."; self.updateElementWithTitle()
+        webView.publisher(for: \.title).sink { v in self.title = v ?? "loading..."; self.updateElementWithTitle()
         }.store(in: &scope)
         webView.publisher(for: \.url).sink { v in
-            self.url = v; if v?.absoluteString != nil {
+            self.url = v
+            if v?.absoluteString != nil {
                 self.updateFavIcon()
                 // self.browsingTree.current.score.openIndex = self.navigationCount
                 // self.updateScore()
@@ -303,8 +308,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             }
         }.store(in: &scope)
         webView.publisher(for: \.isLoading).sink { v in withAnimation { self.isLoading = v } }.store(in: &scope)
-        webView.publisher(for: \.estimatedProgress).sink { v in
-            withAnimation { self.estimatedProgress = v }
+        webView.publisher(for: \.estimatedProgress).sink { v in withAnimation {self.estimatedProgress = v }
         }.store(in: &scope)
         webView.publisher(for: \.hasOnlySecureContent).sink { v in self.hasOnlySecureContent = v }.store(in: &scope)
         webView.publisher(for: \.serverTrust).sink { v in self.serverTrust = v }.store(in: &scope)
@@ -377,6 +381,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         case beam_textInputFocusIn
         case beam_textInputFocusOut
         case beam_resize
+        case beam_pinch
         case beam_frameBounds
     }
 
@@ -507,10 +512,9 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         case ScriptHandlers.beam_point.rawValue:
             guard let dict = messageBody,
                   let origin = dict["origin"] as? String ?? originalQuery,
-                  dict["location"] != nil,
                   let area = dict["area"],
-                  let data = dict["data"],
-                  let type = dict["type"]
+                  let html = dict["html"],
+                  dict["location"] != nil
                     else {
                 pointAndShoot.point(area: nil)
                 return
@@ -518,20 +522,22 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             let rectArea = jsToRect(jsArea: area)
             let pointArea = nativeArea(area: rectArea, origin: origin)
             pointAndShoot.point(area: pointArea)
-            Logger.shared.logInfo("Web block point: \(type), \(data), \(pointArea)", category: .web)
+            Logger.shared.logInfo("Web block point: \(pointArea)", category: .web)
 
         case ScriptHandlers.beam_shoot.rawValue:
             guard let dict = messageBody,
                   let origin = dict["origin"] as? String,
-                  dict["location"] != nil,
+                  let html = dict["html"] as? String,
                   let area = dict["area"],
-                  let data = dict["data"],
-                  let type = dict["type"]
+                  dict["location"] != nil
                     else {
+                Logger.shared.logError("Ignored shoot event: \(String(describing: messageBody))",
+                        category: .web)
                 return
             }
             shootAreas(areas: [area], origin: origin)
-            Logger.shared.logInfo("Web shoot point: \(type), \(data), \(area)", category: .web)
+            noteTextSelection(url: webView.url!, html: html)
+            Logger.shared.logInfo("Web shoot point: \(area)", category: .web)
 
         case ScriptHandlers.beam_textSelected.rawValue:
             guard let dict = messageBody,
@@ -564,17 +570,33 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             }
             shootAreas(areas: areas, origin: origin)
 
+        case ScriptHandlers.beam_pinch.rawValue:
+            guard let dict = messageBody,
+                  let offsetLeft = dict["offsetLeft"] as? CGFloat,
+                  let pageLeft = dict["pageLeft"] as? CGFloat,
+                  let offsetTop = dict["offsetTop"] as? CGFloat,
+                  let pageTop = dict["pageTop"] as? CGFloat,
+                  let width = dict["width"] as? CGFloat,
+                  let height = dict["height"] as? CGFloat,
+                  let scale = dict["scale"] as? CGFloat
+                    else {
+                return
+            }
+            visualScale = scale
+
         case ScriptHandlers.beam_onScrolled.rawValue:
             guard let dict = messageBody,
                   let x = dict["x"] as? CGFloat,
                   let y = dict["y"] as? CGFloat,
                   let width = dict["width"] as? CGFloat,
                   let height = dict["height"] as? CGFloat,
-                  let origin = dict["origin"] as? String
+                  let origin = dict["origin"] as? String,
+                  let scale = dict["scale"] as? CGFloat
                     else {
                 Logger.shared.logError("Ignored scroll event: \(String(describing: messageBody))", category: .web)
                 return
             }
+            visualScale = scale
             scrollX = x // nativeX(x: x, origin: origin)
             scrollY = y // nativeY(y: y, origin: origin)
             passwordOverlayController.updateScrollPosition(x: x, y: y, width: width, height: height)
@@ -590,15 +612,15 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
         case ScriptHandlers.beam_textInputFields.rawValue:
             guard let jsonString = message.body as? String else { break }
-            self.passwordOverlayController.updateInputFields(with: jsonString)
+            passwordOverlayController.updateInputFields(with: jsonString)
 
         case ScriptHandlers.beam_textInputFocusIn.rawValue:
             guard let elementId = message.body as? String else { break }
-            self.passwordOverlayController.updateInputFocus(for: elementId, becomingActive: true)
+            passwordOverlayController.updateInputFocus(for: elementId, becomingActive: true)
 
         case ScriptHandlers.beam_textInputFocusOut.rawValue:
             guard let elementId = message.body as? String else { break }
-            self.passwordOverlayController.updateInputFocus(for: elementId, becomingActive: false)
+            passwordOverlayController.updateInputFocus(for: elementId, becomingActive: false)
 
         case ScriptHandlers.beam_frameBounds.rawValue:
             guard let dict = messageBody,
@@ -632,7 +654,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                 return
             }
             pointAndShoot.drawAllShoots(origin: origin)
-            self.passwordOverlayController.updateViewSize(width: width, height: height)
+            passwordOverlayController.updateViewSize(width: width, height: height)
 
         default:
             break
@@ -688,7 +710,10 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             quote.addAttributes([.emphasis], to: quote.wholeRange)
 
             DispatchQueue.main.async {
-                guard let current = self.addCurrentPageToNote() else { return }
+                guard let current = self.addCurrentPageToNote() else {
+                    Logger.shared.logError("Ignored current note add", category: .general)
+                    return
+                }
                 let e = BeamElement()
                 e.kind = .quote(1, title, urlString)
                 e.text = quote
@@ -712,7 +737,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                     Logger.shared.logError("""
                                            Could not find frameInfo for origin \(currentOrigin)
                                            in \(framesInfo.map { $0.value.origin })
-                                           """, category: .general)
+                                           """, category: .web)
                     break
                 }
             } while framesInfo[currentOrigin]?.origin != currentOrigin
