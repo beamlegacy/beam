@@ -53,22 +53,17 @@ extension BeamText {
     }
 
     static func font(fontSize: CGFloat, strong: Bool, emphasis: Bool, elementKind: ElementKind) -> NSFont {
-        var quote = false
         var font = NSFont(name: "Inter-Regular", size: fontSize)
 
         switch elementKind {
-        case .bullet:
-            break
-        case .code:
+        case .bullet, .code, .quote:
             break
         case .heading:
-            font = NSFont(name: "Inter-Medium", size: fontSize)
-        case .quote:
-            quote = true
+            font = NSFont.beam_medium(ofSize: fontSize)
         }
 
         if strong {
-            font = NSFont(name: "Inter-Bold", size: fontSize)
+            font = NSFont.beam_bold(ofSize: fontSize)
             if font == nil {
                 font = NSFontManager.shared.convert(NSFont.systemFont(ofSize: fontSize), toHaveTrait: .boldFontMask)
             }
@@ -130,6 +125,9 @@ extension BeamText {
             stringAttributes[NSAttributedString.Key.hoverUnderlineColor] = NSColor.editorLinkColor
         } else if let link = internalLink {
             stringAttributes[.link] = link
+            stringAttributes[.underlineStyle] = NSUnderlineStyle.single.rawValue
+            stringAttributes[.underlineColor] = NSColor.clear
+            stringAttributes[NSAttributedString.Key.hoverUnderlineColor] = NSColor.editorBidirectionalLinkColor
         }
 
         if strikethrough {

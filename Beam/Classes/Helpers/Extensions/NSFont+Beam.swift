@@ -18,6 +18,9 @@ extension NSFont {
     static func beam_semibold(ofSize: CGFloat) -> NSFont {
         return NSFont(name: "Inter-SemiBold", size: ofSize)!
     }
+    static func beam_bold(ofSize: CGFloat) -> NSFont {
+        return NSFont(name: "Inter-Bold", size: ofSize)!
+    }
 
     func toSwiftUIFont() -> SwiftUI.Font {
         return SwiftUI.Font.custom(self.fontName, size: self.pointSize)
