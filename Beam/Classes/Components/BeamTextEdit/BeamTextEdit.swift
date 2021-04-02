@@ -253,7 +253,6 @@ public extension CALayer {
 
         if centerText {
             let x = (frame.width - textWidth) / 2
-            let textNodeWidth = textWidth + gutterWidth
 
             rect = NSRect(x: x, y: topOffsetActual + cardTopSpace, width: textNodeWidth, height: r.height)
 
@@ -279,10 +278,13 @@ public extension CALayer {
             }
 
         } else {
-            rootNode.availableWidth = rect.width
+            rootNode.availableWidth = textNodeWidth
             rootNode.setLayout(rect)
         }
+    }
 
+    var textNodeWidth: CGFloat {
+        return centerText ? textWidth + gutterWidth : CGFloat(isBig ? frame.width - 200 - leadingAlignment : 450)
     }
 
     // This is the root node of what we are editing:
@@ -446,12 +448,11 @@ public extension CALayer {
     }
 
     override public var intrinsicContentSize: NSSize {
-        let availableWidth = CGFloat(textWidth)
-        rootNode.availableWidth = availableWidth
+        rootNode.availableWidth = textNodeWidth
         let height = centerText ?
             rootNode.idealSize.height + topOffsetActual + footerHeight + cardTopSpace :
             rootNode.idealSize.height + topOffsetActual + footerHeight
-        return NSSize(width: availableWidth, height: height)
+        return NSSize(width: textNodeWidth, height: height)
     }
 
     public func setHotSpot(_ spot: NSRect) {
