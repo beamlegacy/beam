@@ -14,7 +14,7 @@ func loadFile(from fileName: String, fileType: String) -> String {
             fatalError("Could not find '\(fileName).\(fileType)'")
         }
         return try String(contentsOfFile: path!, encoding: String.Encoding.utf8)
-    } catch (let error) {
+    } catch let error {
         //
         fatalError("Error, could not load '\(fileName)': \(error)")
     }

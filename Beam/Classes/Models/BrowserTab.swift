@@ -308,7 +308,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             }
         }.store(in: &scope)
         webView.publisher(for: \.isLoading).sink { v in withAnimation { self.isLoading = v } }.store(in: &scope)
-        webView.publisher(for: \.estimatedProgress).sink { v in withAnimation {self.estimatedProgress = v }
+        webView.publisher(for: \.estimatedProgress).sink { v in withAnimation { self.estimatedProgress = v }
         }.store(in: &scope)
         webView.publisher(for: \.hasOnlySecureContent).sink { v in self.hasOnlySecureContent = v }.store(in: &scope)
         webView.publisher(for: \.serverTrust).sink { v in self.serverTrust = v }.store(in: &scope)
@@ -513,7 +513,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             guard let dict = messageBody,
                   let origin = dict["origin"] as? String ?? originalQuery,
                   let area = dict["area"],
-                  let html = dict["html"],
+                  dict["html"] != nil,
                   dict["location"] != nil
                     else {
                 pointAndShoot.point(area: nil)
@@ -572,12 +572,12 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
         case ScriptHandlers.beam_pinch.rawValue:
             guard let dict = messageBody,
-                  let offsetLeft = dict["offsetLeft"] as? CGFloat,
-                  let pageLeft = dict["pageLeft"] as? CGFloat,
-                  let offsetTop = dict["offsetTop"] as? CGFloat,
-                  let pageTop = dict["pageTop"] as? CGFloat,
-                  let width = dict["width"] as? CGFloat,
-                  let height = dict["height"] as? CGFloat,
+                  (dict["offsetLeft"] as? CGFloat) != nil,
+                  (dict["pageLeft"] as? CGFloat) != nil,
+                  (dict["offsetTop"] as? CGFloat) != nil,
+                  (dict["pageTop"] as? CGFloat) != nil,
+                  (dict["width"] as? CGFloat) != nil,
+                  (dict["height"] as? CGFloat) != nil,
                   let scale = dict["scale"] as? CGFloat
                     else {
                 return
@@ -632,16 +632,17 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             framesInfo.removeAll()
             for jsFrameInfo in jsFramesInfo {
                 let d = jsFrameInfo as AnyObject
-                let origin = d["origin"] as! String
-                let href = d["href"] as! String
                 let bounds = d["bounds"] as AnyObject
-                registerOrigin(origin: origin)
-                let rectArea = jsToRect(jsArea: bounds)
-                let nativeBounds = nativeArea(area: rectArea, origin: origin)
-                framesInfo[href] = FrameInfo(
-                        origin: origin, x: nativeBounds.minX, y: nativeBounds.minY,
-                        width: nativeBounds.width, height: nativeBounds.height
-                )
+                if let origin = d["origin"] as? String,
+                   let href = d["href"] as? String {
+                    registerOrigin(origin: origin)
+                    let rectArea = jsToRect(jsArea: bounds)
+                    let nativeBounds = nativeArea(area: rectArea, origin: origin)
+                    framesInfo[href] = FrameInfo(
+                            origin: origin, x: nativeBounds.minX, y: nativeBounds.minY,
+                            width: nativeBounds.width, height: nativeBounds.height
+                    )
+                }
             }
 
         case ScriptHandlers.beam_resize.rawValue:
@@ -685,11 +686,17 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
      - Returns:
      */
     private func jsToRect(jsArea: AnyObject) -> NSRect {
-        NSRect(
-                x: jsArea["x"] as! CGFloat,
-                y: jsArea["y"] as! CGFloat,
-                width: jsArea["width"] as! CGFloat,
-                height: jsArea["height"] as! CGFloat
+        guard let x = jsArea["x"] as? CGFloat,
+              let y = jsArea["y"] as? CGFloat,
+              let width = jsArea["width"] as? CGFloat,
+              let height = jsArea["height"] as? CGFloat else {
+            return .zero
+        }
+        return NSRect(
+            x: x,
+            y: y,
+            width: width,
+            height: height
         )
     }
 

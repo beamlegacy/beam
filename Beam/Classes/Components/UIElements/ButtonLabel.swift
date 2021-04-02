@@ -80,7 +80,7 @@ struct ButtonLabel: View {
             isHovering = hovering
         }
         .onTouchDown { touching in
-            guard defaultState != .disabled else { return }            
+            guard defaultState != .disabled else { return }
             isTouching = touching
         }
     }
