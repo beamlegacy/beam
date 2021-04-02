@@ -54,9 +54,13 @@ struct ModeView: View {
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
 
                     case .today:
-                        GeometryReader { geometry in
-                            JournalView(data: state.data, isFetching: state.data.isFetching, journal: state.data.journal, offset: geometry.size.height * 0.4)
-                        }
+                        JournalScrollView([.vertical], showsIndicators: false, data: state.data, dataSource: state.data.journal, proxy: geometry)
+                            .frame(width: geometry.size.width, alignment: .center)
+                            .clipped()
+                            .onDisappear {
+                                data.reloadJournal()
+                            }
+                            .accessibility(identifier: "journalView")
                     }
                 }
                 .frame(maxHeight: .infinity)

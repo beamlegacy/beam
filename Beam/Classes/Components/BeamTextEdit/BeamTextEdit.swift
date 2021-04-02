@@ -69,12 +69,16 @@ public extension CALayer {
     internal var currentTextRange: Range<Int> = 0..<0
 
     let cardHeaderLayer = CALayer()
+    let cardSeparatorLayer = CALayer()
     let cardTitleLayer = CATextLayer()
+    let cardTitleWeatherLayer = CALayer()
+    let cardSideLayer = CALayer()
+    let cardSideTitleLayer = CATextLayer()
     let cardOptionLayer = CALayer()
     let cardTimeLayer = CATextLayer()
 
     let gutterWidth: CGFloat = TextNode.actionLayerXOffset + TextNode.actionLayerWidth
-    var textWidth: CGFloat { isBig ? 704 : 544 }
+    var textWidth: CGFloat { 544 }
 
     private (set) var isResizing = false
     private (set) var journalMode: Bool
@@ -132,6 +136,8 @@ public extension CALayer {
 
         initBlinking()
         updateRoot(with: root)
+        setupSideLayer()
+        setupSeparatorLayer()
     }
 
     deinit {
@@ -265,11 +271,19 @@ public extension CALayer {
                 CATransaction.disableAnimations {
                     rootNode.availableWidth = textNodeWidth
                     updateCardHearderLayer(rect)
+                    if journalMode {
+                        updateSideLayer(rect)
+                        updateSeparatorLayer(rect)
+                    }
                     rootNode.setLayout(rect)
                 }
             } else {
                 rootNode.availableWidth = textNodeWidth
                 updateCardHearderLayer(rect)
+                if journalMode {
+                    updateSideLayer(rect)
+                    updateSeparatorLayer(rect)
+                }
                 rootNode.setLayout(rect)
             }
 
@@ -312,6 +326,11 @@ public extension CALayer {
         config.keepCursorMidScreen ? visibleRect.height / 2 : topOffset
     }
 
+    private func getWeatherIcon() -> NSImage? {
+        // Connect this to some kind of WeatherManager getter based on user IP
+        return NSImage(named: "today-weather")
+    }
+
     func setupCardHeader() {
         guard let cardNote = note as? BeamNote,
               let layer = layer else { return }
@@ -334,29 +353,105 @@ public extension CALayer {
         cardTitleLayer.fontSize = 26 // TODO: Change later (isBig ? 30 : 26)
         cardTitleLayer.string = cardNote.title
 
-        cardTimeLayer.foregroundColor = NSColor.cardTimeColor.cgColor
-        cardTimeLayer.font = NSFont(name: "Inter-Regular", size: 0)
-        cardTimeLayer.fontSize = 10 //  TODO: Change later (isBig ? 12 : 10)
-        cardTimeLayer.string = formatter.string(from: note.updateDate)
+        if cardNote.isTodaysNote, journalMode {
+
+            var weatherIcon = getWeatherIcon()
+            weatherIcon = weatherIcon?.fill(color: NSColor.cardTitleColor)
+            cardTitleWeatherLayer.contents = weatherIcon?.cgImage
+            cardTitleWeatherLayer.contentsGravity = .resizeAspect
+            cardHeaderLayer.addSublayer(cardTitleWeatherLayer)
+        }
 
         cardHeaderLayer.addSublayer(cardTitleLayer)
-
-        // TODO: show option layer later 
+        // TODO: show option layer later
         // cardHeaderLayer.addSublayer(cardOptionLayer)
 
         layer.addSublayer(cardHeaderLayer)
-        layer.addSublayer(cardTimeLayer)
+        if !journalMode {
+            cardTimeLayer.foregroundColor = NSColor.cardTimeColor.cgColor
+            cardTimeLayer.font = NSFont(name: "Inter-Regular", size: 0)
+            cardTimeLayer.fontSize = 10 //  TODO: Change later (isBig ? 12 : 10)
+            cardTimeLayer.string = formatter.string(from: note.updateDate)
+            layer.addSublayer(cardTimeLayer)
+        }
     }
 
     func updateCardHearderLayer(_ rect: NSRect) {
         cardHeaderLayer.frame = CGRect(origin: CGPoint(x: rect.origin.x, y: 60), size: NSSize(width: rect.width, height: cardTitleLayer.preferredFrameSize().height))
-        cardTitleLayer.frame = CGRect(origin: CGPoint(x: 0, y: 0), size: NSSize(width: rect.width, height: cardTitleLayer.preferredFrameSize().height))
+        cardTitleLayer.frame = CGRect(origin: CGPoint(x: 0, y: 0), size: NSSize(width: cardTitleLayer.preferredFrameSize().width, height: cardTitleLayer.preferredFrameSize().height))
         cardOptionLayer.frame = CGRect(origin: CGPoint(x: rect.width - 16, y: 10), size: NSSize(width: 16, height: 16))
-        cardTimeLayer.frame = CGRect(
-            // TODO: Change later (isBig ? 101 : 95)
-            origin: CGPoint(x: rect.origin.x, y: 95),
-            size: NSSize(width: rect.width, height: cardTimeLayer.preferredFrameSize().height)
-        )
+
+        if let cardNote = note as? BeamNote, cardNote.isTodaysNote {
+            cardTitleWeatherLayer.frame = CGRect(origin: CGPoint(x: cardTitleLayer.preferredFrameSize().width + 11, y: cardTitleLayer.preferredFrameSize().height / 2 - 9), size: NSSize(width: 22.5, height: 18.5))
+        }
+        if !journalMode {
+            cardTimeLayer.frame = CGRect(
+                // TODO: Change later (isBig ? 101 : 95)
+                origin: CGPoint(x: rect.origin.x, y: 95),
+                size: NSSize(width: rect.width, height: cardTimeLayer.preferredFrameSize().height)
+            )
+        }
+    }
+
+    func setupSeparatorLayer() {
+        guard let cardNote = note as? BeamNote,
+              let layer = layer, journalMode && !cardNote.isTodaysNote else { return }
+        cardSeparatorLayer.enableAnimations = true
+        cardSeparatorLayer.backgroundColor = NSColor.editorIndentBackgroundColor.cgColor
+
+        layer.addSublayer(cardSeparatorLayer)
+
+    }
+
+    func updateSeparatorLayer(_ rect: NSRect) {
+        let separatorLayerPos = CGPoint(x: self.bounds.width / 2 - 560 / 2, y: 0)
+        cardSeparatorLayer.frame = CGRect(origin: separatorLayerPos, size: NSSize(width: 560, height: 1))
+    }
+
+    func setupSideLayer() {
+        guard let cardNote = note as? BeamNote,
+              let layer = layer else { return }
+        cardSideLayer.enableAnimations = true
+
+        cardSideTitleLayer.foregroundColor = NSColor.cardTitleColor.cgColor
+        cardSideTitleLayer.font = NSFont.beam_semibold(ofSize: 0)
+        cardSideTitleLayer.fontSize = 15 // TODO: Change later (isBig ? 30 : 26)
+        cardSideTitleLayer.string = cardNote.title
+
+        cardSideLayer.addSublayer(cardSideTitleLayer)
+        cardSideLayer.opacity = 0
+
+        layer.addSublayer(cardSideLayer)
+    }
+
+    func updateSideLayer(_ rect: CGRect) {
+        let sideLayerPos = CGPoint(x: cardHeaderLayer.frame.origin.x - cardSideTitleLayer.preferredFrameSize().width - 46.5, y: topOffsetActual + cardTopSpace + sideLayerOffset)
+        cardSideLayer.frame = CGRect(origin: sideLayerPos, size: NSSize(width: cardSideLayer.preferredFrameSize().width, height: cardSideLayer.preferredFrameSize().height))
+        cardSideTitleLayer.frame = CGRect(origin: CGPoint(x: 0, y: 0), size: NSSize(width: cardSideTitleLayer.preferredFrameSize().width, height: cardSideTitleLayer.preferredFrameSize().height))
+    }
+
+    var sideLayerOffset: CGFloat = .zero {
+        didSet {
+            relayoutRoot()
+        }
+    }
+
+    func updateSideLayerVisibility(hide: Bool) {
+        if !hide && cardSideLayer.opacity == 0 || hide && cardSideLayer.opacity == 1 {
+            let oldValue = cardSideLayer.opacity
+            let newValue: Float = oldValue == 0 ? 1 : 0
+            let opacityAnimation = CABasicAnimation(keyPath: "opacity")
+            opacityAnimation.fromValue = oldValue
+            opacityAnimation.toValue = newValue
+            opacityAnimation.duration = 0.25
+            cardSideLayer.add(opacityAnimation, forKey: "opacity")
+            cardSideLayer.opacity = newValue
+        }
+    }
+
+    func updateSideLayerPosition(y: CGFloat, scrollingDown: Bool) {
+        sideLayerOffset += y
+        sideLayerOffset = sideLayerOffset < 0 ? 0 : sideLayerOffset
     }
 
     override public var intrinsicContentSize: NSSize {
@@ -1100,7 +1195,6 @@ public extension CALayer {
     // MARK: - Scroll Event
     public override func scrollWheel(with event: NSEvent) {
         super.scrollWheel(with: event)
-
         if popover != nil { cancelPopover() }
     }
 
@@ -1257,6 +1351,7 @@ public extension CALayer {
 
         cardTitleLayer.contentsScale = window.backingScaleFactor
         cardTimeLayer.contentsScale = window.backingScaleFactor
+        cardSideTitleLayer.contentsScale = window.backingScaleFactor
     }
 
     var onBlinkTime: Double = 0.7

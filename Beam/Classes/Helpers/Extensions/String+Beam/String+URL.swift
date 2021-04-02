@@ -30,7 +30,7 @@ public extension String {
     func validUrl() -> (isValid: Bool, url: String) {
         guard let url = URL(string: self) else { return (false, "") }
 
-        let isContainsScheme = ["http", "https"].contains(url.scheme)
+        let isContainsScheme = URL.urlSchemes.contains(url.scheme)
 
         if !url.pathExtension.isEmpty || isContainsScheme {
             return (true, isContainsScheme ? self : "http://\(url)")
