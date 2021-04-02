@@ -4,7 +4,6 @@
 
 import Foundation
 
-
 class PointAndShoot {
 
     private var page: WebPage

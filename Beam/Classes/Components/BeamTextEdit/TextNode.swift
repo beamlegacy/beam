@@ -728,7 +728,7 @@ public class TextNode: Widget {
         return false
     }
 
-    override func mouseMoved(mouseInfo: MouseInfo) -> Bool {
+    private func handleMouseHoverState(mouseInfo: MouseInfo) {
         let isMouseInContentFrame = contentsFrame.contains(mouseInfo.position)
         let isMouseInsideFormatter = editor.inlineFormatter?.isMouseInsideView == true
         let mouseHasChangedTextPosition = lastHoverMouseInfo?.position != mouseInfo.position
@@ -764,6 +764,11 @@ public class TextNode: Widget {
         if isMouseInsideFormatter {
             cursor = nil
         }
+    }
+
+    override func mouseMoved(mouseInfo: MouseInfo) -> Bool {
+        self.handleMouseHoverState(mouseInfo: mouseInfo)
+
         // action layer handling
         guard let actionLayer = actionLayer,
               root?.state.nodeSelection == nil else {
@@ -867,7 +872,7 @@ public class TextNode: Widget {
 
     public func positionAt(point: NSPoint) -> Int {
         guard let textFrame = textFrame else { return 0 }
-        guard textFrame != nil, !textFrame.lines.isEmpty else { return 0 }
+        guard !textFrame.lines.isEmpty else { return 0 }
         let line = lineAt(point: point)
         let lines = textFrame.lines
         let l = lines[line]

@@ -37,7 +37,7 @@ class InsertText: TextEditorCommand {
         // Update the UI if possible:
         guard let context = context,
               let root = context.root,
-              let node = context.nodeFor(elementInstance.element)
+              context.nodeFor(elementInstance.element) != nil
         else { return true }
         root.editor.detectFormatterType()
         return true

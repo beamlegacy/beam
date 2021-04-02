@@ -220,4 +220,3 @@ public class TextLine {
 
     var interlineFactor: CGFloat = 1.0
 }
-

@@ -125,7 +125,7 @@ extension TextRoot {
         }
 
         guard let node = focusedWidget as? TextNode, !node.readOnly,
-              let noteTitle = node.elementNoteTitle else { return }
+              node.elementNoteTitle != nil else { return }
 
         if !selectedTextRange.isEmpty {
             cmdManager.deleteText(in: node, for: selectedTextRange)
@@ -198,7 +198,7 @@ extension TextRoot {
     }
 
     public func setMarkedText(string: String, selectedRange: Range<Int>?, replacementRange: Range<Int>?) {
-        //print("setMarkedText(string: '\(string)', selectedRange: \(selectedRange), replacementRange: \(replacementRange)")
+        // Logger.shared.logDebug("setMarkedText(string: '\(string)', selectedRange: \(selectedRange), replacementRange: \(replacementRange)")
         guard let node = focusedWidget as? TextNode,
               !node.readOnly else { return }
 
@@ -213,7 +213,7 @@ extension TextRoot {
             }
         }
 
-        //print("   replace sub range \(range) wirth '\(string)'")
+        //Logger.shared.logDebug("   replace sub range \(range) wirth '\(string)'")
         node.text.replaceSubrange(range, with: string)
         cursorPosition = range.upperBound
         markedTextRange = range.lowerBound ..< range.lowerBound + string.count

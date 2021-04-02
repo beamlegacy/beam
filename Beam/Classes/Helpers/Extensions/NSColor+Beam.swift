@@ -349,5 +349,4 @@ extension NSColor {
         return color
     }
 
-
 }
