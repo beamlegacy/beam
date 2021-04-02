@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import BeamCore
 
 class InsertNode: TextEditorCommand {
     static let name: String = "InsertNode"

@@ -7,14 +7,9 @@
 
 import Foundation
 import CoreData
+import BeamCore
 
-public struct LinkStruct {
-    let bid: Int64
-    let url: String
-    let title: String?
-}
-
-class LinkManager {
+class LinkManager: LinkManagerBase {
     var coreDataManager: CoreDataManager
     let mainContext: NSManagedObjectContext
 

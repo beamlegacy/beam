@@ -2,6 +2,7 @@ import Foundation
 import os.log
 import CocoaLumberjack
 import CocoaLumberjackSwift
+import BeamCore
 
 enum PerformanceDebugCategory: String {
     case none = ""
@@ -32,7 +33,7 @@ class PerformanceDebug {
         DDLog.add(ddFileLogger)
     }
 
-    class func removeFiles() {
+    public class func removeFiles() {
         ddFileLogger.rollLogFile(withCompletion: {
             for filename: String in self.ddFileLogger.logFileManager.sortedLogFilePaths {
                 do {

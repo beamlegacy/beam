@@ -4,6 +4,7 @@ import Combine
 import PromiseKit
 import Promises
 import PMKFoundation
+import BeamCore
 
 // swiftlint:disable file_length
 
@@ -15,7 +16,7 @@ enum DocumentManagerError: Error, Equatable {
 }
 
 // swiftlint:disable:next type_body_length
-class DocumentManager {
+public class DocumentManager {
     var coreDataManager: CoreDataManager
     let mainContext: NSManagedObjectContext
     let backgroundContext: NSManagedObjectContext

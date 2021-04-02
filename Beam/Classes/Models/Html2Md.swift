@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftSoup
+import BeamCore
 
 class HtmlVisitor {
     var depth = 0

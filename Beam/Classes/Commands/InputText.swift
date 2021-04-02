@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import BeamCore
 
 class InputText: TextEditorCommand {
     static let name: String = "InputText"

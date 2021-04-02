@@ -1,5 +1,6 @@
 import Foundation
 import JWTDecode
+import BeamCore
 
 class AuthenticationManager {
     static var shared = AuthenticationManager()

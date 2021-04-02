@@ -1,6 +1,6 @@
 import Foundation
 
-extension String {
+public extension String {
     var asData: Data {
         return Data(utf8)
     }

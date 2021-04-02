@@ -8,6 +8,7 @@
 import Foundation
 import Combine
 import AppKit
+import BeamCore
 
 class BrowsingNodeWidget: Widget {
     var recursive: Bool

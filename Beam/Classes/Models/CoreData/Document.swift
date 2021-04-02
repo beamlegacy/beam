@@ -1,5 +1,6 @@
 import Foundation
 import CoreData
+import BeamCore
 
 class Document: NSManagedObject {
     override func awakeFromInsert() {

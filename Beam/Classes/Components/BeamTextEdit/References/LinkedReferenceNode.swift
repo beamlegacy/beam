@@ -8,6 +8,7 @@
 import Foundation
 import AppKit
 import Combine
+import BeamCore
 
 class ProxyElement: BeamElement {
     var proxy: BeamElement
@@ -182,7 +183,7 @@ class LinkedReferenceNode: TextNode {
 
         text.makeLinkToNoteExplicit(forNote: title)
 
-        let reference = NoteReference(noteTitle: element.note!.title, elementID: element.id)
+        let reference = BeamNoteReference(noteTitle: element.note!.title, elementID: element.id)
         note.addReference(reference)
 
         self.editor.showOrHidePersistentFormatter(isPresent: false)

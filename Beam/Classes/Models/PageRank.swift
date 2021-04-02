@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftSoup
+import BeamCore
 
 class PageRank: Codable {
     class Page: Codable {

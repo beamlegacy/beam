@@ -11,6 +11,8 @@ import PromiseKit
 import PMKFoundation
 
 @testable import Beam
+@testable import BeamCore
+
 // swiftlint:disable:next type_body_length
 class DocumentManagerNetworkTests: QuickSpec {
     // swiftlint:disable:next function_body_length

@@ -1,6 +1,6 @@
 import Foundation
 
-extension String {
+public extension String {
     var uuid: UUID? {
         return UUID(uuidString: self)
     }

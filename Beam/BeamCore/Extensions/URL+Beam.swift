@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension URL {
+public extension URL {
 
     private func removeWWWPrefix(in urlString: String) -> String {
         if urlString.hasPrefix("www.") {

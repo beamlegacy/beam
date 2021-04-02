@@ -1,5 +1,6 @@
 import Foundation
 import Fakery
+import BeamCore
 
 class BeamUITestsMenuGenerator {
     func executeCommand(_ command: MenuAvailableCommands) {

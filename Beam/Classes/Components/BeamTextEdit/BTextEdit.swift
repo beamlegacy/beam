@@ -9,6 +9,7 @@ import Foundation
 import SwiftUI
 import AppKit
 import Combine
+import BeamCore
 
 public struct BTextEdit: NSViewRepresentable {
     var note: BeamNote

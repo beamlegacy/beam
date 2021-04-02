@@ -8,15 +8,15 @@
 import Foundation
 import AppKit
 
-struct BID64: Codable, Hashable, Equatable {
-    var id: UInt64
+public struct BID64: Codable, Hashable, Equatable {
+    public var id: UInt64
 
     private static var baseTime = Double(1420070400000)
     private static let timeBits = 41
     private static let nodeBits = 10
     private static let seqBits = 12
     private static var sequence = 0
-    static var nodeId: Int {
+    public static var nodeId: Int {
         var uuidRef: CFUUID?
         var uuidBytes: [CUnsignedChar] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         var ts = timespec(tv_sec: 0, tv_nsec: 0)
@@ -50,20 +50,20 @@ struct BID64: Codable, Hashable, Equatable {
         return (value & ((1 << bits) - 1))
     }
 
-    init() {
+    public init() {
         id = 0
         Self.sequence += 1
         let t = mask(Int(CACurrentMediaTime() * 1000 - Self.baseTime), Self.timeBits)
         id = UInt64(t << (Self.nodeBits + Self.seqBits) | (mask(Self.nodeId, Self.nodeBits) << Self.seqBits) | mask(Self.sequence, Self.seqBits))
     }
 
-    init(id: UInt64) {
+    public init(id: UInt64) {
         self.id = id
     }
 }
 
-struct BID32: Codable, Hashable, Equatable {
-    var id: UInt32
+public struct BID32: Codable, Hashable, Equatable {
+    public var id: UInt32
 
     private static var baseTime = Double(1420070400000)
     private static let timeBits = 20
@@ -74,21 +74,21 @@ struct BID32: Codable, Hashable, Equatable {
         return (value & ((1 << bits) - 1))
     }
 
-    init() {
+    public init() {
         id = 0
         Self.sequence += 1
         let t = mask(Int(CACurrentMediaTime() * 1000 - Self.baseTime), Self.timeBits)
         id = UInt32(t << (Self.nodeBits + Self.seqBits) | (mask(BID64.nodeId, Self.nodeBits) << Self.seqBits) | mask(Self.sequence, Self.seqBits))
     }
 
-    init(id: UInt32) {
+    public init(id: UInt32) {
         self.id = id
     }
 }
 
-struct MonotonicIncreasingID32: Codable {
-    var value: UInt32 = 0
-    mutating func newValue() -> UInt32 {
+public struct MonotonicIncreasingID32: Codable {
+    public var value: UInt32 = 0
+    public mutating func newValue() -> UInt32 {
         defer {
             value += 1
         }
@@ -96,15 +96,15 @@ struct MonotonicIncreasingID32: Codable {
         return value
     }
 
-    static var shared = Self()
-    static var newValue: UInt32 {
+    public static var shared = Self()
+    public static var newValue: UInt32 {
         return Self.shared.newValue()
     }
 }
 
-struct MonotonicIncreasingID64: Codable {
-    var value: UInt64 = 0
-    mutating func newValue() -> UInt64 {
+public struct MonotonicIncreasingID64: Codable {
+    public var value: UInt64 = 0
+    public mutating func newValue() -> UInt64 {
         defer {
             value += 1
         }
@@ -112,8 +112,8 @@ struct MonotonicIncreasingID64: Codable {
         return value
     }
 
-    static var shared = Self()
-    static var newValue: UInt64 {
+    public static var shared = Self()
+    public static var newValue: UInt64 {
         return Self.shared.newValue()
     }
 }

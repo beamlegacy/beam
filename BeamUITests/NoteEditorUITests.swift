@@ -6,6 +6,7 @@ import Quick
 #if canImport(Nimble)
 import Nimble
 #endif
+import BeamCore
 
 class NoteEditorUITests: QuickSpec {
     override func spec() {

@@ -16,10 +16,12 @@ import Sparkle
 import Preferences
 import PromiseKit
 import PMKFoundation
+import BeamCore
 
 @objc(BeamApplication)
 public class BeamApplication: SentryCrashExceptionApplication {
     override init() {
+        Logger.setup(subsystem: Configuration.bundleIdentifier)
         super.init()
     }
 

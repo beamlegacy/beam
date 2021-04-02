@@ -1,5 +1,6 @@
 import SwiftUI
 import Preferences
+import BeamCore
 
 /**
 Function wrapping SwiftUI into `PreferencePane`, which is mimicking view controller's default construction syntax.

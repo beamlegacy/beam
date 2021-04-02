@@ -1,4 +1,5 @@
 import SwiftUI
+import BeamCore
 
 struct ConsoleContentView: View {
     @State private var logArray = Logger.shared.logFileString.split(separator: "\n")

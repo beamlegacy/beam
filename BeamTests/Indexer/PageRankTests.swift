@@ -8,6 +8,7 @@
 import Foundation
 import XCTest
 @testable import Beam
+@testable import BeamCore
 import NaturalLanguage
 import Accelerate
 import SwiftSoup

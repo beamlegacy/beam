@@ -1,4 +1,5 @@
 import Foundation
+import BeamCore
 
 enum APIRequestError: Error, Equatable {
     case forbidden

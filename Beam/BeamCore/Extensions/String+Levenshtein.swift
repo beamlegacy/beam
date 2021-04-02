@@ -1,12 +1,12 @@
 import Foundation
 
-extension String {
+public extension String {
     subscript(index: Int) -> Character {
         return self[self.index(self.startIndex, offsetBy: index)]
     }
 }
 
-extension String {
+public extension String {
     public func levenshtein(_ other: String) -> Int {
         let sCount = self.count
         let oCount = other.count

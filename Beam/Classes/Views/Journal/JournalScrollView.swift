@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import BeamCore
 
 struct JournalScrollView: NSViewRepresentable {
     typealias NSViewType = NSScrollView

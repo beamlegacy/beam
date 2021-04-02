@@ -7,6 +7,7 @@
 
 import Foundation
 import Cocoa
+import BeamCore
 
 extension BeamTextEdit {
     internal func toggleHeading(_ level: Int) {

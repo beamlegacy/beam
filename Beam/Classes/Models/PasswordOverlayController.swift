@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import BeamCore
 
 class PasswordOverlayController {
     private let webView: WKWebView

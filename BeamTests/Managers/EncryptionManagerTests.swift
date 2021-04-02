@@ -6,6 +6,8 @@ import Nimble
 import CryptoKit
 
 @testable import Beam
+@testable import BeamCore
+
 class EncryptionManagerTests: QuickSpec {
     override func spec() {
         let sut = EncryptionManager()

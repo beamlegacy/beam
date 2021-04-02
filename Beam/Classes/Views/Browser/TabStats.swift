@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import BeamCore
 
 struct TabStats: View {
     var score: Score

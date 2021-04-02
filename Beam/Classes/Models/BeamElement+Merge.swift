@@ -1,4 +1,5 @@
 import Foundation
+import BeamCore
 
 extension BeamElement {
     class func threeWayMerge(ancestor: Data, input1: Data, input2: Data) -> Data? {

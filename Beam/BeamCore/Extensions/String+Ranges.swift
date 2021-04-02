@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension String {
+public extension String {
     func range(_ start: Int, _ end: Int) -> Range<String.Index> {
         return Range<String.Index>(uncheckedBounds: (lower: index(at: start), upper: index(at: end)))
     }

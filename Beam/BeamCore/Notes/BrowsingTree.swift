@@ -8,7 +8,7 @@
 import Foundation
 import Combine
 
-enum ReadingEventType: String, Codable {
+public enum ReadingEventType: String, Codable {
     case creation
     case startReading
     case navigateToLink
@@ -21,50 +21,50 @@ enum ReadingEventType: String, Codable {
     case switchToNewSearch
 }
 
-struct ReadingEvent: Codable {
-    var type: ReadingEventType
-    var date: Date
+public struct ReadingEvent: Codable {
+    public var type: ReadingEventType
+    public var date: Date
 }
 
-struct ScoredLink: Hashable {
-    var link: UInt64
-    var score: Score
+public struct ScoredLink: Hashable {
+    public var link: UInt64
+    public var score: Score
 
-    static func == (lhs: ScoredLink, rhs: ScoredLink) -> Bool {
+    public static func == (lhs: ScoredLink, rhs: ScoredLink) -> Bool {
         lhs.link == rhs.link
     }
 
-    func hash(into hasher: inout Hasher) {
+    public func hash(into hasher: inout Hasher) {
         hasher.combine(link)
     }
 }
 
-class BrowsingNode: ObservableObject, Codable {
-    var link: UInt64
-    var parent: BrowsingNode?
-    var tree: BrowsingTree! {
+public class BrowsingNode: ObservableObject, Codable {
+    public var link: UInt64
+    public var parent: BrowsingNode?
+    public var tree: BrowsingTree! {
         didSet {
             for c in children {
                 c.tree = tree
             }
         }
     }
-    @Published var events = [ReadingEvent(type: .creation, date: Date())]
-    @Published var children = [BrowsingNode]()
-    var score: Score { tree.scoreFor(link: link) }
+    @Published public var events = [ReadingEvent(type: .creation, date: Date())]
+    @Published public var children = [BrowsingNode]()
+    public var score: Score { tree.scoreFor(link: link) }
 
-    var title: String {
+    public var title: String {
         LinkStore.linkFor(link)?.title ?? "<???>"
     }
-    var url: String {
+    public var url: String {
         LinkStore.linkFor(link)?.url ?? "<???>"
     }
 
-    func addEvent(_ type: ReadingEventType, date: Date = Date()) {
+    public func addEvent(_ type: ReadingEventType, date: Date = Date()) {
         events.append(ReadingEvent(type: type, date: date))
     }
 
-    init(tree: BrowsingTree, parent: BrowsingNode?, url: String, title: String?) {
+    public init(tree: BrowsingTree, parent: BrowsingNode?, url: String, title: String?) {
         self.link = LinkStore.createIdFor(url, title: title)
         self.parent = parent
         self.tree = tree
@@ -77,7 +77,7 @@ class BrowsingNode: ObservableObject, Codable {
         case children
     }
 
-    required init(from decoder: Decoder) throws {
+    public required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         link = try container.decode(UInt64.self, forKey: .link)
@@ -101,14 +101,14 @@ class BrowsingNode: ObservableObject, Codable {
         }
     }
 
-    func visit(_ block: @escaping (BrowsingNode) -> Void) {
+    public func visit(_ block: @escaping (BrowsingNode) -> Void) {
         block(self)
         for c in children {
             c.visit(block)
         }
     }
 
-    func dump(level: Int = 0) {
+    public func dump(level: Int = 0) {
         let tabs = String.tabs(level)
 
         Logger.shared.logDebug(tabs + "'\(title)' / '\(url)'")
@@ -118,11 +118,11 @@ class BrowsingNode: ObservableObject, Codable {
     }
 }
 
-class BrowsingTree: ObservableObject, Codable {
+public class BrowsingTree: ObservableObject, Codable {
     @Published public private(set) var root: BrowsingNode!
     @Published public private(set) var current: BrowsingNode!
 
-    init(_ originalQuery: String?) {
+    public init(_ originalQuery: String?) {
         self.root = BrowsingNode(tree: self, parent: nil, url: originalQuery ?? "<???>", title: nil)
         self.current = root
     }
@@ -133,7 +133,7 @@ class BrowsingTree: ObservableObject, Codable {
         case scores
     }
 
-    required init(from decoder: Decoder) throws {
+    public required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         root = try container.decode(BrowsingNode.self, forKey: .root)
@@ -158,16 +158,16 @@ class BrowsingTree: ObservableObject, Codable {
         try container.encode(scores, forKey: .scores)
     }
 
-    func startReading() {
+    public func startReading() {
         current.addEvent(.startReading)
     }
 
-    var currentLink: String {
+    public var currentLink: String {
         LinkStore.linkFor(current.link)?.url ?? "<???>"
     }
 
     @discardableResult
-    func goBack() -> BrowsingNode {
+    public func goBack() -> BrowsingNode {
         guard let parent = current.parent else { return current }
         current.addEvent(.exitBackward)
         current = parent
@@ -177,7 +177,7 @@ class BrowsingTree: ObservableObject, Codable {
     }
 
     @discardableResult
-    func goForward() -> BrowsingNode {
+    public func goForward() -> BrowsingNode {
         current.addEvent(.exitForward)
         guard let lastChild = current.children.last else { return current }
         current = lastChild
@@ -186,7 +186,7 @@ class BrowsingTree: ObservableObject, Codable {
         return current
     }
 
-    func navigateTo(url link: String, title: String?) {
+    public func navigateTo(url link: String, title: String?) {
         guard current.link != LinkStore.getIdFor(link) else { return }
         Logger.shared.logInfo("navigateFrom \(currentLink) to \(link)", category: .web)
         current.addEvent(.navigateToLink)
@@ -197,28 +197,28 @@ class BrowsingTree: ObservableObject, Codable {
         Logger.shared.logInfo("current now is \(currentLink)", category: .web)
     }
 
-    func closeTab() {
+    public func closeTab() {
         current.addEvent(.closeTab)
         Logger.shared.logInfo("Close tab \(currentLink)", category: .web)
     }
 
-    func switchToBackground() {
+    public func switchToBackground() {
         current.addEvent(.switchToBackground)
     }
 
-    func switchToOtherTab() {
+    public func switchToOtherTab() {
         current.addEvent(.switchToOtherTab)
     }
 
-    func switchToCard() {
+    public func switchToCard() {
         current.addEvent(.switchToCard)
     }
 
-    func switchToNewSearch() {
+    public func switchToNewSearch() {
         current.addEvent(.switchToNewSearch)
     }
 
-    var links: Set<UInt64> {
+    public var links: Set<UInt64> {
         var set = Set<UInt64>()
 
         root.visit { link in
@@ -228,7 +228,7 @@ class BrowsingTree: ObservableObject, Codable {
         return set
     }
 
-    var scoredLinks: Set<ScoredLink> {
+    public var scoredLinks: Set<ScoredLink> {
         var set = Set<ScoredLink>()
 
         root.visit { link in
@@ -238,13 +238,13 @@ class BrowsingTree: ObservableObject, Codable {
         return set
     }
 
-    var sortedLinks: [ScoredLink] {
+    public var sortedLinks: [ScoredLink] {
         scoredLinks.sorted { left, right -> Bool in
             left.score.score < right.score.score
         }
     }
 
-    func dump() {
+    public func dump() {
         Logger.shared.logDebug("BrowsingTree - current = '\(current.title)' / \(current.url)")
         root.dump()
     }

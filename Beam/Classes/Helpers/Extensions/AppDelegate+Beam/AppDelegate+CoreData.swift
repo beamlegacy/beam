@@ -1,5 +1,6 @@
 import Foundation
 import Cocoa
+import BeamCore
 
 extension AppDelegate {
     @IBAction func deleteLocalDocuments(_ sender: Any) {

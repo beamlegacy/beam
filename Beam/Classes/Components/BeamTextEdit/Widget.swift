@@ -8,6 +8,7 @@
 import Foundation
 import Cocoa
 import Combine
+import BeamCore
 
 // swiftlint:disable type_body_length
 // swiftlint:disable file_length

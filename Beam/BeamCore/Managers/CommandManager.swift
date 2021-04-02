@@ -7,43 +7,43 @@
 
 import Foundation
 
-class Command<Context> {
-    var name: String
-    func run(context: Context?) -> Bool { return false }
-    func undo(context: Context?) -> Bool { return false }
-    func coalesce(command: Command<Context>) -> Bool { return false }
+open class Command<Context> {
+    open var name: String
+    open func run(context: Context?) -> Bool { return false }
+    open func undo(context: Context?) -> Bool { return false }
+    open func coalesce(command: Command<Context>) -> Bool { return false }
 
-    init(name: String) {
+    public init(name: String) {
         self.name = name
     }
 }
 
-class BlockCommand<Context>: Command<Context> {
+public class BlockCommand<Context>: Command<Context> {
     var _run: (_ context: Context?) -> Bool
     var _undo: (_ context: Context?) -> Bool
     var _coalesce: (Command<Context>) -> Bool
 
-    init(name: String, run: @escaping (Context?) -> Bool, undo: @escaping (Context?) -> Bool, coalesce: @escaping (Command<Context>) -> Bool) {
+    public init(name: String, run: @escaping (Context?) -> Bool, undo: @escaping (Context?) -> Bool, coalesce: @escaping (Command<Context>) -> Bool) {
         self._run = run
         self._undo = undo
         self._coalesce = coalesce
         super.init(name: name)
     }
 
-    override func run(context: Context?) -> Bool {
+    public override func run(context: Context?) -> Bool {
         return _run(context)
     }
 
-    override func undo(context: Context?) -> Bool {
+    public override func undo(context: Context?) -> Bool {
         return _undo(context)
     }
 
-    override func coalesce(command: Command<Context>) -> Bool {
+    public override func coalesce(command: Command<Context>) -> Bool {
         return _coalesce(command)
     }
 }
 
-class GroupCommand<Context>: Command<Context> {
+public class GroupCommand<Context>: Command<Context> {
     var commands: [Command<Context>] = []
 
     func append(command: Command<Context>) {
@@ -55,14 +55,14 @@ class GroupCommand<Context>: Command<Context> {
         }
     }
 
-    override func run(context: Context?) -> Bool {
+    public override func run(context: Context?) -> Bool {
         for c in commands {
             guard c.run(context: context) else { return false }
         }
         return true
     }
 
-    override func undo(context: Context?) -> Bool {
+    public override func undo(context: Context?) -> Bool {
         for c in commands.reversed() {
             guard c.undo(context: context) else { return false }
         }
@@ -72,7 +72,7 @@ class GroupCommand<Context>: Command<Context> {
 
 // MARK: - CommandManager
 
-class CommandManager<Context> {
+public class CommandManager<Context> {
     private var doneQueue: [Command<Context>] = []
     private var undoneQueue: [Command<Context>] = []
 
@@ -81,8 +81,10 @@ class CommandManager<Context> {
 
     private var lastCmdDate: Date?
 
+    public init() {}
+    
     @discardableResult
-    func run(name: String, run: @escaping (Context?) -> Bool, undo: @escaping (Context?) -> Bool, coalesce: @escaping (Command<Context>) -> Bool, on context: Context) -> Bool {
+    public func run(name: String, run: @escaping (Context?) -> Bool, undo: @escaping (Context?) -> Bool, coalesce: @escaping (Command<Context>) -> Bool, on context: Context) -> Bool {
         self.run(command: BlockCommand(name: name, run: run, undo: undo, coalesce: coalesce), on: context)
     }
 
@@ -99,7 +101,7 @@ class CommandManager<Context> {
     }
 
     @discardableResult
-    func run(command: Command<Context>, on context: Context) -> Bool {
+    public func run(command: Command<Context>, on context: Context) -> Bool {
         Logger.shared.logDebug("Run: \(command.name)")
         let done = command.run(context: context)
 
@@ -116,7 +118,7 @@ class CommandManager<Context> {
         return done
     }
 
-    func undo(context: Context?) -> Bool {
+    public func undo(context: Context?) -> Bool {
         guard groupCmd.isEmpty else {
             fatalError("Cannot Undo with a GroupCommand active, it should be ended first.")
         }
@@ -134,7 +136,7 @@ class CommandManager<Context> {
         return true
     }
 
-    func redo(context: Context?) -> Bool {
+    public func redo(context: Context?) -> Bool {
         guard groupCmd.isEmpty else {
             fatalError("Cannot Redo with a GroupCommand active, it should be ended first.")
         }
@@ -153,20 +155,20 @@ class CommandManager<Context> {
     }
 
     // MARK: - Group Command
-    func beginGroup(with name: String) {
+    public func beginGroup(with name: String) {
         guard groupCmd.isEmpty else { return }
         groupFailed = false
         groupCmd.append(GroupCommand(name: name))
     }
 
-    func endGroup() {
+    public func endGroup() {
         guard let lastGrp = groupCmd.last else { return }
         doneQueue.append(lastGrp)
         groupCmd.removeLast()
     }
 
     // MARK: - Timer
-    func getTimeInterval() -> TimeInterval? {
+    public func getTimeInterval() -> TimeInterval? {
         guard let lastCmdDate = self.lastCmdDate else {
             self.lastCmdDate = Date()
             return nil

@@ -3,7 +3,7 @@ import os.log
 import CocoaLumberjack
 import CocoaLumberjackSwift
 
-enum LogCategory: String {
+public enum LogCategory: String {
     case general
     case tracking
     case network
@@ -26,10 +26,14 @@ enum LogCategory: String {
     case encryption
 }
 
-final class Logger {
-    static let shared = Logger()
+public final class Logger {
+    public static var shared: Logger!
 
-    private var subsystem = Configuration.bundleIdentifier
+    public static func setup(subsystem: String) {
+        shared = Logger(subsystem: subsystem)
+    }
+
+    private var subsystem = "beam"
     private let hideCategories: [LogCategory] = [.web, .coredataDebug, .documentDebug]
     private let hideLumberCategories: [LogCategory] = [.documentDebug]
 
@@ -39,7 +43,7 @@ final class Logger {
         DDLog.add(ddFileLogger)
     }
 
-    func removeFiles() {
+    public func removeFiles() {
         ddFileLogger.rollLogFile(withCompletion: {
             for filename: String in self.ddFileLogger.logFileManager.sortedLogFilePaths {
                 do {
@@ -52,7 +56,8 @@ final class Logger {
         configure()
     }
 
-    private init() {
+    private init(subsystem: String) {
+        self.subsystem = subsystem
         configure()
 
         // swiftlint:disable:next print
@@ -63,7 +68,7 @@ final class Logger {
         ddFileLogger.rollingFrequency = 3600 * 24 * 7 // 1 week
     }
 
-    var logFileData: Data {
+    public var logFileData: Data {
         let logFilePaths = ddFileLogger.logFileManager.sortedLogFilePaths
         var logFileDataArray = Data()
         for logFilePath in logFilePaths.reversed() {
@@ -75,11 +80,11 @@ final class Logger {
         return logFileDataArray
     }
 
-    var logFileString: String {
+    public var logFileString: String {
         return String(data: logFileData, encoding: .utf8) ?? "Couldn't parse logs data"
     }
 
-    func logInfo(_ message: String, category: LogCategory = .general) {
+    public func logInfo(_ message: String, category: LogCategory = .general) {
         if !hideLumberCategories.contains(category) {
             DDLogInfo("[\(category.rawValue)] \(message)")
         }
@@ -87,7 +92,7 @@ final class Logger {
         log(message, level: .info, category: category)
     }
 
-    func logDebug(_ message: String, category: LogCategory = .general) {
+    public func logDebug(_ message: String, category: LogCategory = .general) {
         if !hideLumberCategories.contains(category) {
             DDLogDebug("[\(category.rawValue)] \(message)")
         }
@@ -95,7 +100,7 @@ final class Logger {
         log(message, level: .debug, category: category)
     }
 
-    func logError(_ message: String, category: LogCategory) {
+    public func logError(_ message: String, category: LogCategory) {
         if !hideLumberCategories.contains(category) {
             DDLogError("[\(category.rawValue)] 🛑 \(message)")
         }
@@ -103,7 +108,7 @@ final class Logger {
         log("🛑 \(message)", level: .error, category: category)
     }
 
-    func logWarning(_ message: String, category: LogCategory) {
+    public func logWarning(_ message: String, category: LogCategory) {
         if !hideLumberCategories.contains(category) {
             DDLogWarn("[\(category.rawValue)] 🛑 \(message)")
         }

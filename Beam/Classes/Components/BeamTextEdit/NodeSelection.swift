@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import BeamCore
 
 class NodeSelection {
     var start: TextNode

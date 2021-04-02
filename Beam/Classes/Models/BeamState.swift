@@ -10,6 +10,7 @@ import Foundation
 import Combine
 import WebKit
 import SwiftSoup
+import BeamCore
 
 let NoteDisplayThreshold = Float(0.0)
 //swiftlint:disable:next type_body_length

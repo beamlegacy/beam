@@ -7,24 +7,50 @@
 
 import Foundation
 
-struct Link: Codable {
-    var url: String
-    var visits: [Date]
-    var title: String?
+public struct Link: Codable {
+    public var url: String
+    public var visits: [Date]
+    public var title: String?
 }
 
-class LinkStore: Codable {
-    var idGenerator = MonotonicIncreasingID64()
-    static var shared = LinkStore()
-    lazy var linkManager: LinkManager = { LinkManager() }()
+public struct LinkStruct {
+    public let bid: Int64
+    public let url: String
+    public let title: String?
+
+    public init(bid: Int64, url: String, title: String?) {
+        self.bid = bid
+        self.url = url
+        self.title = title
+    }
+}
+
+public protocol LinkManagerBase {
+    func loadLinks() -> [LinkStruct]
+    func saveLink(_ linkStruct: LinkStruct, completion: ((Result<Bool, Error>) -> Void)?)
+}
+
+public class FakeLinkManager: LinkManagerBase {
+    public func loadLinks() -> [LinkStruct] { return [] }
+    public func saveLink(_ linkStruct: LinkStruct, completion: ((Result<Bool, Error>) -> Void)?) {
+        //completion
+    }
+}
+
+public class LinkStore: Codable {
+    public var idGenerator = MonotonicIncreasingID64()
+    public static var shared = LinkStore(linkManager: FakeLinkManager())
+    public var linkManager: LinkManagerBase
 
     public private(set) var links = [UInt64: Link]()
     public private(set) var ids = [String: UInt64]()
 
-    init() {
+    public init(linkManager: LinkManagerBase) {
+        self.linkManager = linkManager
     }
 
-    func loadFromDB() -> Int {
+    public func loadFromDB(linkManager: LinkManagerBase) -> Int {
+        self.linkManager = linkManager
         let loadedLinks = linkManager.loadLinks()
         for link in loadedLinks {
             links[UInt64(bitPattern: link.bid)] = Link(url: link.url, visits: [])
@@ -33,6 +59,8 @@ class LinkStore: Codable {
     }
 
     required public init(from decoder: Decoder) throws {
+        linkManager = FakeLinkManager()
+
         let container = try decoder.container(keyedBy: CodingKeys.self)
         links = try container.decode([UInt64: Link].self, forKey: .links)
         for link in links {
@@ -55,7 +83,7 @@ class LinkStore: Codable {
         case idGenerator
     }
 
-    func getIdFor(link: String) -> UInt64? {
+    public func getIdFor(link: String) -> UInt64? {
         guard let id = ids[link] else {
             return nil
         }
@@ -63,20 +91,20 @@ class LinkStore: Codable {
         return id
     }
 
-    func createIdFor(link: String, title: String? = nil) -> UInt64 {
+    public func createIdFor(link: String, title: String? = nil) -> UInt64 {
         guard let id = getIdFor(link: link) else {
             let id = MonotonicIncreasingID64.newValue
             ids[link] = id
             links[id] = Link(url: link, visits: [], title: title)
             let linkStruct = LinkStruct(bid: Int64(bitPattern: id), url: link, title: title)
-            linkManager.saveLink(linkStruct)
+            linkManager.saveLink(linkStruct, completion: nil)
             return id
         }
 
         return id
     }
 
-    func linkFor(id: UInt64) -> Link? {
+    public func linkFor(id: UInt64) -> Link? {
         guard let link = links[id] else {
             return nil
         }
@@ -84,7 +112,7 @@ class LinkStore: Codable {
         return link
     }
 
-    func visit(link: String, title: String? = nil) {
+    public func visit(link: String, title: String? = nil) {
         let id = createIdFor(link: link, title: title)
         guard var linkStruct = linkFor(id: id) else {
             Logger.shared.logError("Unable to fetch Link Structure for link \(link)", category: .search)
@@ -97,34 +125,34 @@ class LinkStore: Codable {
         links[id] = linkStruct
     }
 
-    static func linkFor(_ id: UInt64) -> Link? {
+    public static func linkFor(_ id: UInt64) -> Link? {
         return shared.linkFor(id: id)
     }
 
-    static func createIdFor(_ link: String, title: String?) -> UInt64 {
+    public static func createIdFor(_ link: String, title: String?) -> UInt64 {
         return shared.createIdFor(link: link, title: title)
     }
 
-    static func getIdFor(_ link: String) -> UInt64? {
+    public static func getIdFor(_ link: String) -> UInt64? {
         return shared.getIdFor(link: link)
     }
 
-    static func isInternalLink(id: UInt64) -> Bool {
+    public static func isInternalLink(id: UInt64) -> Bool {
         guard let link = linkFor(id) else { return false }
         return isInternal(link: link.url)
     }
 
-    static func isInternal(link: String) -> Bool {
+    public static func isInternal(link: String) -> Bool {
         guard let url = URL(string: link) else { return false }
         return url.scheme == "beam"
     }
 
-    static func loadFrom(_ path: URL) throws {
+    public static func loadFrom(_ path: URL) throws {
         let decoder = JSONDecoder()
         shared = try decoder.decode(Self.self, from: Data(contentsOf: path))
     }
 
-    static func saveTo(_ path: URL) throws {
+    public static func saveTo(_ path: URL) throws {
         let encoder = JSONEncoder()
         let data = try encoder.encode(shared)
         try data.write(to: path)

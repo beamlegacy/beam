@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import BeamCore
 
 class DeleteText: TextEditorCommand {
     static let name: String = "DeleteText"

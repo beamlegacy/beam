@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import BeamCore
 
 class FormattingText: TextEditorCommand {
     static let name: String = "FormattingText"

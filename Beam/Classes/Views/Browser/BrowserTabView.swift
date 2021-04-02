@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import BeamCore
 
 struct BrowserTabView: View {
     @EnvironmentObject var state: BeamState

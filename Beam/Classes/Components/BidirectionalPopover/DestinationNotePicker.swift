@@ -8,6 +8,7 @@
 import AppKit
 import SwiftUI
 import Foundation
+import BeamCore
 
 struct DestinationNotePicker: View {
     let tab: BrowserTab
