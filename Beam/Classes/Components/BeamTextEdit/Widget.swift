@@ -107,8 +107,8 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
     var availableWidth: CGFloat = 1 {
         didSet {
-            updateChildren()
             if availableWidth != oldValue {
+                updateChildren()
                 invalidatedRendering = true
                 updateRendering()
             }
