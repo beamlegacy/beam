@@ -14,11 +14,10 @@ struct NoteView: View {
     var note: BeamNote
     var onStartEditing: () -> Void = {}
     var leadingAlignement = CGFloat(185)
+    var topOffset: CGFloat = CGFloat(45)
     var showTitle: Bool
     var scrollable: Bool
     var centerText: Bool
-
-    let urlSchemes: [String?] = ["http", "https"]
 
     var body: some View {
         ZStack {
@@ -27,25 +26,25 @@ struct NoteView: View {
                     note: note,
                     data: state.data,
                     openURL: { url, element in
-                    if urlSchemes.contains(url.scheme) {
-                        state.createTabFromNote(note, element: element, withURL: url)
-                    } else {
-                        if let noteTitle = url.absoluteString.removingPercentEncoding {
-                            state.navigateToNote(named: noteTitle)
+                        if URL.urlSchemes.contains(url.scheme) {
+                            state.createTabFromNote(note, element: element, withURL: url)
+                        } else {
+                            if let noteTitle = url.absoluteString.removingPercentEncoding {
+                                state.navigateToNote(named: noteTitle)
+                            }
                         }
-                    }
-                },
-                openCard: { cardName in
-                    state.navigateToNote(named: cardName)
-                },
-                onStartEditing: { onStartEditing() },
-                onStartQuery: { textNode in
-                    state.startQuery(textNode)
-                },
-                leadingAlignment: leadingAlignement,
-                footerHeight: 60,
-                centerText: centerText,
-                showTitle: showTitle
+                    },
+                    openCard: { cardName in
+                        state.navigateToNote(named: cardName)
+                    },
+                    onStartEditing: { onStartEditing() },
+                    onStartQuery: { textNode in
+                        state.startQuery(textNode)
+                    },
+                    leadingAlignment: leadingAlignement,
+                    footerHeight: 60,
+                    centerText: centerText,
+                    showTitle: showTitle
                 )
                 .accessibility(identifier: "noteView")
                 .animation(.none)
@@ -54,25 +53,26 @@ struct NoteView: View {
                     note: note,
                     data: state.data,
                     openURL: { url, element in
-                    if urlSchemes.contains(url.scheme) {
-                        state.createTabFromNote(note, element: element, withURL: url)
-                    } else {
-                        if let noteTitle = url.absoluteString.removingPercentEncoding {
-                            _ = state.navigateToNote(named: noteTitle)
+                        if URL.urlSchemes.contains(url.scheme) {
+                            state.createTabFromNote(note, element: element, withURL: url)
+                        } else {
+                            if let noteTitle = url.absoluteString.removingPercentEncoding {
+                                _ = state.navigateToNote(named: noteTitle)
+                            }
                         }
-                    }
-                },
-                openCard: { cardName in
-                    _ = state.navigateToNote(named: cardName)
-                },
-                onStartEditing: { onStartEditing() },
-                onStartQuery: { textNode in
-                    state.startQuery(textNode)
-                },
-                leadingAlignment: leadingAlignement,
-                footerHeight: 25,
-                centerText: centerText,
-                showTitle: showTitle
+                    },
+                    openCard: { cardName in
+                        _ = state.navigateToNote(named: cardName)
+                    },
+                    onStartEditing: { onStartEditing() },
+                    onStartQuery: { textNode in
+                        state.startQuery(textNode)
+                    },
+                    leadingAlignment: leadingAlignement,
+                    topOffset: topOffset,
+                    footerHeight: 25,
+                    centerText: centerText,
+                    showTitle: showTitle
                 )
             }
         }.frame(maxWidth: .infinity, maxHeight: .infinity)

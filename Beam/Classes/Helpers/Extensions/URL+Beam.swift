@@ -41,4 +41,9 @@ extension URL {
 
         return false
     }
+
+    static var urlSchemes: [String?] {
+        return ["http", "https"]
+    }
+
 }

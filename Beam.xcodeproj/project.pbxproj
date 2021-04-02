@@ -120,7 +120,6 @@
 		4181724E2581107C00317ED8 /* TabStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171D22581107C00317ED8 /* TabStats.swift */; };
 		4181724F2581107C00317ED8 /* WebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171D32581107C00317ED8 /* WebView.swift */; };
 		418172502581107C00317ED8 /* NoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171D52581107C00317ED8 /* NoteView.swift */; };
-		418172512581107C00317ED8 /* JournalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171D62581107C00317ED8 /* JournalView.swift */; };
 		418172522581107C00317ED8 /* OmniBarSearchField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171D82581107C00317ED8 /* OmniBarSearchField.swift */; };
 		418172532581107C00317ED8 /* Chevrons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171D92581107C00317ED8 /* Chevrons.swift */; };
 		418172542581107C00317ED8 /* OmniBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171DA2581107C00317ED8 /* OmniBar.swift */; };
@@ -314,9 +313,11 @@
 		A0AA693325C41C9B0038F9A3 /* MouseHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0AA693225C41C9B0038F9A3 /* MouseHandler.swift */; };
 		A0C0C2A725E5109F00BE34F0 /* InsertNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0C0C2A625E5109F00BE34F0 /* InsertNode.swift */; };
 		A0C63A6825FA249700FB4CCE /* BeamTextHolder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0C63A6725FA249700FB4CCE /* BeamTextHolder.swift */; };
+		A0D06CDB260A2D2700264926 /* JournalScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0D06CDA260A2D2700264926 /* JournalScrollView.swift */; };
 		A0D1731425E4FC2D00FDE73C /* ReplaceText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0D1731325E4FC2D00FDE73C /* ReplaceText.swift */; };
 		A0E15FFD25D1570D00F9D72F /* JournalUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0E15FFC25D1570D00F9D72F /* JournalUITests.swift */; };
 		A0E3150525ED1ECB001A5E55 /* FormattingText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0E3150425ED1ECB001A5E55 /* FormattingText.swift */; };
+		A0E7D98726139FCA00D70676 /* JournalStackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0E7D98626139FCA00D70676 /* JournalStackView.swift */; };
 		A0EE0B8F25E68EF3001F9D65 /* InsertEmptyNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0EE0B8E25E68EF3001F9D65 /* InsertEmptyNode.swift */; };
 		A50B372425FA180E00E5D34F /* NSApperance+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50B372325FA180E00E5D34F /* NSApperance+Beam.swift */; };
 		A5153EDD260CC4DC00C84902 /* ButtonLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5153EDC260CC4DC00C84902 /* ButtonLabel.swift */; };
@@ -675,7 +676,6 @@
 		418171D22581107C00317ED8 /* TabStats.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TabStats.swift; sourceTree = "<group>"; };
 		418171D32581107C00317ED8 /* WebView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebView.swift; sourceTree = "<group>"; };
 		418171D52581107C00317ED8 /* NoteView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NoteView.swift; sourceTree = "<group>"; };
-		418171D62581107C00317ED8 /* JournalView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JournalView.swift; sourceTree = "<group>"; };
 		418171D82581107C00317ED8 /* OmniBarSearchField.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OmniBarSearchField.swift; sourceTree = "<group>"; };
 		418171D92581107C00317ED8 /* Chevrons.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Chevrons.swift; sourceTree = "<group>"; };
 		418171DA2581107C00317ED8 /* OmniBar.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OmniBar.swift; sourceTree = "<group>"; };
@@ -870,9 +870,11 @@
 		A0AA693225C41C9B0038F9A3 /* MouseHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MouseHandler.swift; sourceTree = "<group>"; };
 		A0C0C2A625E5109F00BE34F0 /* InsertNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsertNode.swift; sourceTree = "<group>"; };
 		A0C63A6725FA249700FB4CCE /* BeamTextHolder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamTextHolder.swift; sourceTree = "<group>"; };
+		A0D06CDA260A2D2700264926 /* JournalScrollView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalScrollView.swift; sourceTree = "<group>"; };
 		A0D1731325E4FC2D00FDE73C /* ReplaceText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplaceText.swift; sourceTree = "<group>"; };
 		A0E15FFC25D1570D00F9D72F /* JournalUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalUITests.swift; sourceTree = "<group>"; };
 		A0E3150425ED1ECB001A5E55 /* FormattingText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormattingText.swift; sourceTree = "<group>"; };
+		A0E7D98626139FCA00D70676 /* JournalStackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalStackView.swift; sourceTree = "<group>"; };
 		A0EE0B8E25E68EF3001F9D65 /* InsertEmptyNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsertEmptyNode.swift; sourceTree = "<group>"; };
 		A50B372325FA180E00E5D34F /* NSApperance+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSApperance+Beam.swift"; sourceTree = "<group>"; };
 		A5153EDC260CC4DC00C84902 /* ButtonLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonLabel.swift; sourceTree = "<group>"; };
@@ -1548,7 +1550,8 @@
 		418173F7258128A500317ED8 /* Journal */ = {
 			isa = PBXGroup;
 			children = (
-				418171D62581107C00317ED8 /* JournalView.swift */,
+				A0D06CDA260A2D2700264926 /* JournalScrollView.swift */,
+				A0E7D98626139FCA00D70676 /* JournalStackView.swift */,
 			);
 			path = Journal;
 			sourceTree = "<group>";
@@ -2757,6 +2760,7 @@
 				4181721B2581107C00317ED8 /* Maths.swift in Sources */,
 				4181725D2581107C00317ED8 /* AuthenticationManager.swift in Sources */,
 				4181721F2581107C00317ED8 /* JSSourceLoader.swift in Sources */,
+				A0D06CDB260A2D2700264926 /* JournalScrollView.swift in Sources */,
 				A552DF3325F1741900570C85 /* GlobalCenteringContainer.swift in Sources */,
 				96E4CF76258EC88300D6DE22 /* BeamTextTools.swift in Sources */,
 				96F936632590FA59006D8E53 /* BTextEdit.swift in Sources */,
@@ -2789,6 +2793,7 @@
 				4181725F2581107C00317ED8 /* DocumentManager.swift in Sources */,
 				96F93618258CFDD2006D8E53 /* BeamText.swift in Sources */,
 				A050047525DA918A009CFEB6 /* NoteAutoSaveService.swift in Sources */,
+				A0E7D98726139FCA00D70676 /* JournalStackView.swift in Sources */,
 				524299E725A480A300F4DBF5 /* AccountsView.swift in Sources */,
 				418172072581107C00317ED8 /* Document.swift in Sources */,
 				4100D96B25AEFEEA00EF04CB /* BeamTextEdit+Shortcut.swift in Sources */,
@@ -2824,7 +2829,6 @@
 				521EEDE125937F5B00BA2485 /* DocumentsContentView.swift in Sources */,
 				A545D2FB25F7B1D800E68F94 /* DestinationNoteAutocompleteList.swift in Sources */,
 				A51ED9A72608D0CD00CA99E5 /* ContextMenuFormatterView.swift in Sources */,
-				418172512581107C00317ED8 /* JournalView.swift in Sources */,
 				521FEC662604B830009000F9 /* String+c99.swift in Sources */,
 				4105CE7525A60681009AB687 /* FormatterTypeButton.swift in Sources */,
 				961EC58625B7A75A009FA322 /* LinkManager.swift in Sources */,
