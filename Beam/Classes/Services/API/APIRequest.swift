@@ -3,6 +3,7 @@ import os.log
 import PromiseKit
 import PMKFoundation
 import Promises
+import BeamCore
 
 // swiftlint:disable file_length
 

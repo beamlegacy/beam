@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import BeamCore
 
 struct BeamElementInstance {
     var note: BeamNote

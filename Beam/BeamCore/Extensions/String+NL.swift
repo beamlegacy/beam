@@ -1,6 +1,6 @@
 import NaturalLanguage
 
-extension String {
+public extension String {
     private func token(unit tokenUnit: NLTokenUnit, at index: String.Index) -> String {
         let tokenizer = NLTokenizer(unit: tokenUnit)
         tokenizer.string = self

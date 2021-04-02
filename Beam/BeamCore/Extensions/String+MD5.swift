@@ -1,7 +1,7 @@
 import Foundation
 import CryptoKit
 
-extension String {
+public extension String {
     enum MD5Error: Error {
         case noData
     }
@@ -18,7 +18,7 @@ extension String {
     }
 }
 
-extension Data {
+public extension Data {
     var MD5: String {
         let digest = Insecure.MD5.hash(data: self)
 

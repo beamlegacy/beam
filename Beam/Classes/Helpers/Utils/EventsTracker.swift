@@ -1,5 +1,6 @@
 import Foundation
 import Sentry
+import BeamCore
 
 class EventsTracker {
     static let shared = EventsTracker()

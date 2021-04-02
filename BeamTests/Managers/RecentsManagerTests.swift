@@ -10,6 +10,8 @@ import Quick
 import Nimble
 
 @testable import Beam
+@testable import BeamCore
+
 class RecentsManagerTests: QuickSpec {
 
     var documentHelper: DocumentManagerTestsHelper?

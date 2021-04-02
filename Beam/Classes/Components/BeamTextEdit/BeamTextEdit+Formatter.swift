@@ -7,6 +7,7 @@
 // swiftlint:disable file_length
 
 import Cocoa
+import BeamCore
 
 extension BeamTextEdit {
 

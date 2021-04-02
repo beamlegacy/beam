@@ -1,6 +1,7 @@
 import Foundation
 import os.log
 import Sentry
+import BeamCore
 
 /// Hold all external librairies needing initialisation (ex: sentry, firebase, etc). Is also used to raise non fatal errors
 /// `configure()` is called on app launch.

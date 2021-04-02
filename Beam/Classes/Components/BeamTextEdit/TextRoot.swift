@@ -7,6 +7,7 @@
 
 import Foundation
 import AppKit
+import BeamCore
 
 public struct TextState {
     var text = BeamText()
@@ -288,8 +289,8 @@ public class TextRoot: TextNode {
         mapping.removeValue(forKey: node.element)
     }
 
-    private var breadCrumbs: [NoteReference: BreadCrumb] = [:]
-    func getBreadCrumb(for noteReference: NoteReference) -> BreadCrumb? {
+    private var breadCrumbs: [BeamNoteReference: BreadCrumb] = [:]
+    func getBreadCrumb(for noteReference: BeamNoteReference) -> BreadCrumb? {
         guard let breadCrumb = breadCrumbs[noteReference] else {
             guard let referencingNote = BeamNote.fetch(DocumentManager(), title: noteReference.noteTitle) else { return nil }
             guard let referencingElement = referencingNote.findElement(noteReference.elementID) else { return nil }

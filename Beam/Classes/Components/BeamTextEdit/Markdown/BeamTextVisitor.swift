@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import BeamCore
 
 class BeamTextVisitor {
     struct Configuration {

@@ -8,6 +8,7 @@
 
 import Foundation
 import AppKit
+import BeamCore
 
 // swiftlint:disable:next type_body_length
 class Parser {

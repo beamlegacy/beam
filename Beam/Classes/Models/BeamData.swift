@@ -7,6 +7,7 @@
 
 import Foundation
 import Combine
+import BeamCore
 
 public class BeamData: ObservableObject {
     var _todaysNote: BeamNote?
@@ -26,6 +27,7 @@ public class BeamData: ObservableObject {
     @Published var showTabStats = false
     @Published var isFetching = false
     var noteAutoSaveService: NoteAutoSaveService
+    var linkManager: LinkManager
 
     var cookies: HTTPCookieStorage
     var documentManager: DocumentManager
@@ -42,7 +44,8 @@ public class BeamData: ObservableObject {
     init() {
         documentManager = DocumentManager()
         noteAutoSaveService = NoteAutoSaveService()
-        let linkCount = LinkStore.shared.loadFromDB()
+        linkManager = LinkManager()
+        let linkCount = LinkStore.shared.loadFromDB(linkManager: linkManager)
         Logger.shared.logInfo("Loaded \(linkCount) links from DB", category: .document)
 
 //        if FileManager.default.fileExists(atPath: Self.linkStorePath.absoluteString) {

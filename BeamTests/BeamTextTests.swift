@@ -10,6 +10,7 @@ import XCTest
 import Nimble
 
 @testable import Beam
+@testable import BeamCore
 
 extension String {
     var toBeamText: BeamText? {

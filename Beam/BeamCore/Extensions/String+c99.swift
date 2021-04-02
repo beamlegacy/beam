@@ -2,7 +2,7 @@ import Foundation
 
 // Copied from Quick/Quick to store JSON DVR Cassettes with better filenames
 
-extension String {
+public extension String {
     private static var invalidCharactersInFilenames: CharacterSet = {
         var invalidCharacters = CharacterSet()
 

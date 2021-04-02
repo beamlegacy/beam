@@ -8,6 +8,7 @@
 
 import Foundation
 import AppKit
+import BeamCore
 
 class BreadCrumb: Widget {
 
@@ -231,7 +232,7 @@ class BreadCrumb: Widget {
             self.proxy.text.makeInternalLink(start..<end)
         }
 
-        let reference = NoteReference(noteTitle: proxy.note!.title, elementID: proxy.proxy.id)
+        let reference = BeamNoteReference(noteTitle: proxy.note!.title, elementID: proxy.proxy.id)
         rootNote.addReference(reference)
     }
 

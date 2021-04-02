@@ -2,7 +2,7 @@
 
 import Foundation
 
-extension String {
+public extension String {
     /// Splits a string into groups of `every` n characters, grouping from left-to-right by default. If `backwards` is true, right-to-left.
     public func split(every: Int, backwards: Bool = false) -> [String] {
         var result = [String]()

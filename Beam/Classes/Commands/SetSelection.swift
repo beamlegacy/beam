@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import BeamCore
 
 class SetSelection: TextEditorCommand {
     static let name: String = "SetSelection"

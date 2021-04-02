@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import BeamCore
 
 extension NSPasteboard.PasteboardType {
     static let bTextHolder = NSPasteboard.PasteboardType("co.beamapp.macos.textHolder")

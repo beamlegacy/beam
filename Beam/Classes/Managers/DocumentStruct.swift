@@ -1,10 +1,5 @@
 import Foundation
 
-enum NoteType: String, Codable {
-    case journal
-    case note
-}
-
 public struct DocumentStruct {
     var id: UUID
     var title: String

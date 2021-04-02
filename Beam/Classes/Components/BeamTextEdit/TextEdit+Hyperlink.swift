@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import BeamCore
 
 extension BeamTextEdit: HyperlinkFormatterViewDelegate {
     private static var isExitingLink = false

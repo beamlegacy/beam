@@ -1,5 +1,6 @@
 import Foundation
 import CryptoKit
+import BeamCore
 
 /*
  Used for interacting with Beam API

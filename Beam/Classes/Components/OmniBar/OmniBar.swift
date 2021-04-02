@@ -9,6 +9,7 @@ import Foundation
 import SwiftUI
 import Combine
 import AppKit
+import BeamCore
 
 struct OmniBar: View {
     @EnvironmentObject var state: BeamState

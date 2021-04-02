@@ -11,8 +11,9 @@ import Quick
 import Nimble
 
 @testable import Beam
-class CommandNodeTests: QuickSpec {
+@testable import BeamCore
 
+class CommandNodeTests: QuickSpec {
     // swiftlint:disable:next function_body_length
     override func spec() {
         var editor: BeamTextEdit!

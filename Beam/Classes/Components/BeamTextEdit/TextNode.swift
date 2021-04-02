@@ -10,6 +10,7 @@ import Foundation
 import AppKit
 import NaturalLanguage
 import Combine
+import BeamCore
 
 // swiftlint:disable:next type_body_length
 public class TextNode: Widget {
@@ -36,8 +37,6 @@ public class TextNode: Widget {
 
     var textFrame: TextFrame?
     var emptyTextFrame: TextFrame?
-    var frameAnimation: FrameAnimation?
-    var frameAnimationCancellable = Set<AnyCancellable>()
 
     var mouseIsDragged = false
     var lastHoverMouseInfo: MouseInfo?
@@ -542,11 +541,6 @@ public class TextNode: Widget {
         element.insert(node.element, at: pos)
         invalidateLayout()
         return true
-    }
-
-    func cancelFrameAnimation() {
-        frameAnimation = nil
-        frameAnimationCancellable.removeAll()
     }
 
     func sourceIndexFor(displayIndex: Int) -> Int {
@@ -1070,10 +1064,6 @@ public class TextNode: Widget {
     }
 
     override internal func drawDebug(in context: CGContext) {
-        if frameAnimation != nil {
-            context.setFillColor(NSColor.blue.cgColor.copy(alpha: 0.2)!)
-            context.fill(NSRect(origin: NSPoint(), size: contentsFrame.size))
-        }
         // draw debug:
         guard debug, hover || isEditing else { return }
 

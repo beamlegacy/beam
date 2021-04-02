@@ -1,5 +1,6 @@
 import Foundation
 import CryptoKit
+import BeamCore
 
 enum EncryptionManagerError: Error {
     case authenticationFailure

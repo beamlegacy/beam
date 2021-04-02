@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import BeamCore
 
 class NoteBackForwardList: Codable {
     enum Element: Codable {

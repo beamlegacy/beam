@@ -7,6 +7,7 @@
 
 import Foundation
 import AppKit
+import BeamCore
 
 extension NSAttributedString.Key {
     static let source = NSAttributedString.Key(rawValue: "beamSource")

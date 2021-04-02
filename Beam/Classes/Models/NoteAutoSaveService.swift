@@ -7,6 +7,7 @@
 
 import Foundation
 import Combine
+import BeamCore
 
 class NoteAutoSaveService: ObservableObject {
     private var scope = Set<AnyCancellable>()

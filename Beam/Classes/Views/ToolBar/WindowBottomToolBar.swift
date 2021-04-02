@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import BeamCore
 
 struct WindowBottomToolBar: View {
     @EnvironmentObject var state: BeamState

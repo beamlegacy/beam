@@ -9,11 +9,11 @@
 import Foundation
 import Combine
 
-enum ElementKindError: Error {
+public enum ElementKindError: Error {
     case typeNameUnknown(String)
 }
 
-enum ElementKind: Codable, Equatable {
+public enum ElementKind: Codable, Equatable {
     case bullet
     case heading(Int)
     case quote(Int, String, String)
@@ -26,7 +26,7 @@ enum ElementKind: Codable, Equatable {
         case title
     }
 
-    var rawValue: String {
+    public var rawValue: String {
        switch self {
        case .bullet:
            return "bullet"
@@ -79,30 +79,30 @@ enum ElementKind: Codable, Equatable {
     }
 }
 
-enum ElementChildrenFormat: String, Codable {
+public enum ElementChildrenFormat: String, Codable {
     case bullet
     case numbered
 }
 
 // Editable Text Data:
-public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, CustomDebugStringConvertible {
-    @Published public private(set) var id = UUID() { didSet { change(.meta) } }
-    @Published var text = BeamText() { didSet { change(.text) } }
-    @Published var open = true { didSet { change(.meta) } }
-    @Published public internal(set) var children = [BeamElement]() { didSet { change(.tree) } }
-    @Published var readOnly = false { didSet { change(.meta) } }
-    @Published var score: Float = 0 { didSet { change(.meta) } }
-    @Published var creationDate = Date() { didSet { change(.meta) } }
-    @Published var updateDate = Date()
-    @Published var kind: ElementKind = .bullet { didSet { change(.meta) } }
-    @Published var childrenFormat: ElementChildrenFormat = .bullet { didSet { change(.meta) } }
-    @Published var query: String?
+open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, CustomDebugStringConvertible {
+    @Published open private(set) var id = UUID() { didSet { change(.meta) } }
+    @Published open var text = BeamText() { didSet { change(.text) } }
+    @Published open var open = true { didSet { change(.meta) } }
+    @Published open var children = [BeamElement]() { didSet { change(.tree) } }
+    @Published open var readOnly = false { didSet { change(.meta) } }
+    @Published open var score: Float = 0 { didSet { change(.meta) } }
+    @Published open var creationDate = Date() { didSet { change(.meta) } }
+    @Published open var updateDate = Date()
+    @Published open var kind: ElementKind = .bullet { didSet { change(.meta) } }
+    @Published open var childrenFormat: ElementChildrenFormat = .bullet { didSet { change(.meta) } }
+    @Published open var query: String?
 
-    var note: BeamNote? {
+    open var note: BeamNote? {
         return parent?.note
     }
 
-    static let recursiveCoding = CodingUserInfoKey(rawValue: "recursiveCoding")!
+    public static let recursiveCoding = CodingUserInfoKey(rawValue: "recursiveCoding")!
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -117,18 +117,18 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
         case query
     }
 
-    init() {
+    public init() {
     }
 
-    init(_ text: String) {
+    public init(_ text: String) {
         self.text = BeamText(text: text, attributes: [])
     }
 
-    init(_ text: BeamText) {
+    public init(_ text: BeamText) {
         self.text = text
     }
 
-    required public init(from decoder: Decoder) throws {
+    public required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let recursive = decoder.userInfo[Self.recursiveCoding] as? Bool ?? true
 
@@ -170,7 +170,7 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
         }
     }
 
-    public func encode(to encoder: Encoder) throws {
+    open func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         let recursive = encoder.userInfo[Self.recursiveCoding] as? Bool ?? true
 
@@ -200,14 +200,14 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
         }
     }
 
-    func clearChildren() {
+    open func clearChildren() {
         for c in children {
             c.parent = nil
         }
         children = []
     }
 
-    func removeChild(_ child: BeamElement) {
+    open func removeChild(_ child: BeamElement) {
         guard let index = children.firstIndex(where: { (e) -> Bool in
             e === child
         }) else { return }
@@ -215,21 +215,21 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
         child.parent = nil
     }
 
-    func indexOfChild(_ child: BeamElement) -> Int? {
+    open func indexOfChild(_ child: BeamElement) -> Int? {
         return children.firstIndex(where: { (e) -> Bool in
             e === child
         })
     }
 
-    var indexInParent: Int? {
+    open var indexInParent: Int? {
         return parent?.indexOfChild(self)
     }
 
-    func addChild(_ child: BeamElement) {
+    open func addChild(_ child: BeamElement) {
         insert(child, after: children.last) // append
     }
 
-    func insert(_ child: BeamElement, after: BeamElement?) {
+    open func insert(_ child: BeamElement, after: BeamElement?) {
         if let oldParent = child.parent {
             oldParent.removeChild(child)
         }
@@ -243,7 +243,7 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
         children.insert(child, at: index + 1)
     }
 
-    func insert(_ child: BeamElement, at pos: Int) {
+    open func insert(_ child: BeamElement, at pos: Int) {
         if let oldParent = child.parent {
             oldParent.removeChild(child)
         }
@@ -252,59 +252,22 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
         children.insert(child, at: min(children.count, pos))
     }
 
-    weak var parent: BeamElement?
+    open weak var parent: BeamElement?
 
     public static func == (lhs: BeamElement, rhs: BeamElement) -> Bool {
         lhs.id == rhs.id
     }
 
-    public func hash(into hasher: inout Hasher) {
+    open func hash(into hasher: inout Hasher) {
         return hasher.combine(id)
     }
 
-    func getDeepUnlinkedReferences(_ thisNoteTitle: String, _ allNames: [String]) -> [String: [NoteReference]] {
-        var references = getUnlinkedReferences(thisNoteTitle, allNames)
-        for c in children {
-            for res in c.getDeepUnlinkedReferences(thisNoteTitle, allNames) {
-                references[res.key] = (references[res.key] ?? []) + res.value
-            }
-        }
-
-        return references
-    }
-
-    func getUnlinkedReferences(_ thisNoteTitle: String, _ allNames: [String]) -> [String: [NoteReference]] {
-        var references = [String: [NoteReference]]()
-        let existingLinks = text.internalLinks.map { range -> String in range.string }
-        let string = text.text
-
-        for noteTitle in allNames where thisNoteTitle != noteTitle {
-            if !existingLinks.contains(noteTitle), string.contains(noteTitle) {
-                let ref = NoteReference(noteTitle: thisNoteTitle, elementID: id)
-                references[noteTitle] = (references[noteTitle] ?? []) + [ref]
-//                Logger.shared.logInfo("New unlink \(thisNoteTitle) --> \(note.title)", category: .document)
-            }
-        }
-
-        return references
-    }
-
-    func connectUnlinkedElement(_ thisNoteTitle: String, _ allNames: [String]) {
-        let results = getUnlinkedReferences(thisNoteTitle, allNames)
-        for (name, refs) in results {
-            let note = BeamNote.fetchOrCreate(AppDelegate.main.data.documentManager, title: name)
-            for ref in refs {
-                note.addReference(ref)
-            }
-        }
-    }
-
-    @Published var changed: (BeamElement, ChangeType)?
-    var changePropagationEnabled = true
-    enum ChangeType {
+    @Published open var changed: (BeamElement, ChangeType)?
+    open var changePropagationEnabled = true
+    public enum ChangeType {
         case text, meta, tree
     }
-    func change(_ type: ChangeType) {
+    open func change(_ type: ChangeType) {
         guard changePropagationEnabled else { return }
         updateDate = Date()
         changed = (self, type)
@@ -312,7 +275,7 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
         parent?.childChanged(self, type)
     }
 
-    func childChanged(_ child: BeamElement, _ type: ChangeType) {
+    open func childChanged(_ child: BeamElement, _ type: ChangeType) {
         guard changePropagationEnabled else { return }
         updateDate = Date()
         changed = (child, type)
@@ -320,7 +283,7 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
         parent?.childChanged(self, type)
     }
 
-    func findElement(_ id: UUID) -> BeamElement? {
+    open func findElement(_ id: UUID) -> BeamElement? {
         guard id != self.id else { return self }
 
         for c in children {
@@ -332,34 +295,8 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
         return nil
     }
 
-    func detectLinkedNotes(_ documentManager: DocumentManager, async: Bool) {
-        guard let note = note else { return }
-        let sourceNote = note.title
-
-        for link in text.internalLinks where link.string != note.title {
-            let linkTitle = link.string
-            //            Logger.shared.logInfo("searching link \(linkTitle)", category: .document)
-            let reference = NoteReference(noteTitle: sourceNote, elementID: id)
-            //            Logger.shared.logInfo("New link \(note.title) <-> \(linkTitle)", category: .document)
-
-            if async {
-                DispatchQueue.main.async {
-                    let refnote = BeamNote.fetchOrCreate(documentManager, title: linkTitle)
-                    refnote.addReference(reference)
-                }
-            } else {
-                let refnote = BeamNote.fetchOrCreate(documentManager, title: linkTitle)
-                refnote.addReference(reference)
-            }
-        }
-
-        for c in children {
-            c.detectLinkedNotes(documentManager, async: async)
-        }
-    }
-
     // TODO: use this for smart merging
-    func recursiveUpdate(other: BeamElement) {
+    open func recursiveUpdate(other: BeamElement) {
         assert(other.id == id)
 
         changePropagationEnabled = false
@@ -394,11 +331,11 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
         children = newChildren
     }
 
-    public var debugDescription: String {
+    open var debugDescription: String {
         return "BeamElement(\(id) [\(children.count) children] \(kind) - \(childrenFormat) \(!open ? "[closed]" : ""): \(text.text)"
     }
 
-    var isHeader: Bool {
+    open var isHeader: Bool {
         switch kind {
         case .heading:
             return true
@@ -407,7 +344,7 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
         }
     }
 
-    var flatElements: [BeamElement] {
+    open var flatElements: [BeamElement] {
         var elems = children
         for c in children {
             elems += c.flatElements
@@ -416,40 +353,40 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
         return elems
     }
 
-    func readLock() {
+    open func readLock() {
         note?.readLock()
     }
 
-    func readUnlock() {
+    open func readUnlock() {
         note?.readUnlock()
     }
 
-    func writeLock() {
+    open func writeLock() {
         note?.writeLock()
     }
 
-    func writeUnlock() {
+    open func writeUnlock() {
         note?.writeUnlock()
     }
 
-    var depth: Int {
+    open var depth: Int {
         guard let depth = parent?.depth else { return 0 }
         return depth + 1
     }
 
-    func hasLinkToNote(named noteTitle: String) -> Bool {
+    open func hasLinkToNote(named noteTitle: String) -> Bool {
         text.hasLinkToNote(named: noteTitle)
     }
 
-    func hasReferenceToNote(named noteTitle: String) -> Bool {
+    open func hasReferenceToNote(named noteTitle: String) -> Bool {
         text.hasReferenceToNote(titled: noteTitle)
     }
 
-    public var outLinks: [String] {
+    open var outLinks: [String] {
         text.links + children.flatMap { $0.outLinks }
     }
 
-    func elementContainingLink(to link: String) -> BeamElement? {
+    open func elementContainingLink(to link: String) -> BeamElement? {
         if text.links.contains(link) {
             return self
         }
@@ -463,7 +400,7 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
         return nil
     }
 
-    public func nextSibbling() -> BeamElement? {
+    open func nextSibbling() -> BeamElement? {
         if let p = parent {
             let sibblings = p.children
             if let i = sibblings.firstIndex(of: self) {
@@ -475,7 +412,7 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
         return nil
     }
 
-    public func previousSibbling() -> BeamElement? {
+    open func previousSibbling() -> BeamElement? {
         if let p = parent {
             let sibblings = p.children
             if let i = sibblings.firstIndex(of: self) {
@@ -487,14 +424,14 @@ public class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Cus
         return nil
     }
 
-    public func highestNextSibbling() -> BeamElement? {
+    open func highestNextSibbling() -> BeamElement? {
         if let nextSibbling = self.parent?.nextSibbling() {
             return nextSibbling
         }
         return self.parent?.highestNextSibbling()
     }
 
-    public func deepestChildren() -> BeamElement? {
+    open func deepestChildren() -> BeamElement? {
         if let n = children.last {
             return n.deepestChildren()
         }

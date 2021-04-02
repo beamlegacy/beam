@@ -7,14 +7,14 @@
 
 import Foundation
 
-struct WeakReference<T> {
+public struct WeakReference<T> {
     private weak var privateRef: AnyObject?
-    var ref: T? {
+    public var ref: T? {
         get { return privateRef as? T }
         set { privateRef = newValue as AnyObject }
     }
 
-    init(_ ref: T) {
+    public init(_ ref: T) {
         self.ref = ref
     }
 }

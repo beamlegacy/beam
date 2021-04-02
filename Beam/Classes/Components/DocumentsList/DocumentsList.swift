@@ -1,5 +1,6 @@
 import SwiftUI
 import Combine
+import BeamCore
 
 struct DocumentsList: View {
     @ObservedObject var viewModel: ViewModel

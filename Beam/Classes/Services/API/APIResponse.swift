@@ -1,4 +1,5 @@
 import Foundation
+import BeamCore
 import os.log
 
 protocol Errorable {

@@ -2,6 +2,7 @@ import Foundation
 import CoreData
 import Promises
 import PromiseKit
+import BeamCore
 
 /*
  We can't use ordered relationships based on CloudKit and https://stackoverflow.com/questions/56967051/how-to-set-an-ordered-relationship-with-nspersistentcloudkitcontainer

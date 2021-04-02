@@ -10,7 +10,9 @@ import XCTest
 import Quick
 import Nimble
 
+@testable import BeamCore
 @testable import Beam
+
 class CommandsTextTests: QuickSpec {
 
     // swiftlint:disable:next function_body_length

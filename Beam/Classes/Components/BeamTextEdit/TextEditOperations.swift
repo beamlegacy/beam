@@ -8,6 +8,7 @@
 //TODO: [Seb] create an abstraction for UndoManager to be able to handle faillures and not register empty undo operations. Then replace all _ with the real test
 
 import Foundation
+import BeamCore
 
 extension TextRoot {
     var cmdContext: Widget {

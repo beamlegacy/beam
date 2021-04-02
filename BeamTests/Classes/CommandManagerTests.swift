@@ -8,6 +8,7 @@
 import Foundation
 import XCTest
 @testable import Beam
+@testable import BeamCore
 
 class OperationResult {
     var res: Int = 0

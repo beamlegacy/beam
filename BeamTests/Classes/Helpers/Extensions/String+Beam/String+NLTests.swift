@@ -2,6 +2,7 @@ import Foundation
 
 import XCTest
 @testable import Beam
+@testable import BeamCore
 
 class String_NLTests: XCTestCase {
     func testWordAndSentence() {

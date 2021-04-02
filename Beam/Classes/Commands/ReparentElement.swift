@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import BeamCore
 
 class ReparentElement: TextEditorCommand {
     static let name = "ReparentElement"

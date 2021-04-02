@@ -10,6 +10,7 @@
 import Foundation
 import AppKit
 import Combine
+import BeamCore
 
 public extension CALayer {
     var superlayers: [CALayer] {
@@ -120,15 +121,6 @@ public extension CALayer {
                 self.blinkTime = now + (self.blinkPhase ? self.onBlinkTime : self.offBlinkTime)
                 focusedWidget?.invalidate()
             }
-
-            // Prepare animation frame:
-            var t = tick
-            t.previous = tick.now
-            t.now = CACurrentMediaTime()
-            t.delta = t.now - t.previous
-            t.fdelta = Float(t.delta)
-            t.index += 1
-            tick = t
         }
         RunLoop.main.add(timer, forMode: .default)
 
@@ -170,7 +162,6 @@ public extension CALayer {
     }
 
     var timer: Timer!
-    @Published var tick = Tick()
 
     var minimumWidth: CGFloat = 300 {
         didSet {

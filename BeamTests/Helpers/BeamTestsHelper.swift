@@ -7,6 +7,7 @@ import Combine
 import Vinyl
 
 @testable import Beam
+@testable import BeamCore
 
 class BeamTestsHelper {
     var turntable: Turntable?

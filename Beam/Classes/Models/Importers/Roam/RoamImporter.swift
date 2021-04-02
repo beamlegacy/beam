@@ -1,5 +1,6 @@
 import Foundation
 import CoreData
+import BeamCore
 
 struct RoamBullet: Decodable {
     let string: String

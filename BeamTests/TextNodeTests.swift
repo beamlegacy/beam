@@ -10,6 +10,7 @@
 import Foundation
 import XCTest
 @testable import Beam
+@testable import BeamCore
 import NaturalLanguage
 import Fakery
 

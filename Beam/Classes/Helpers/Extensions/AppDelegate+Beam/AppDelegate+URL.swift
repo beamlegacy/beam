@@ -1,4 +1,5 @@
 import Foundation
+import BeamCore
 
 extension AppDelegate {
     @objc func handleURL(event: NSAppleEventDescriptor, reply: NSAppleEventDescriptor) {

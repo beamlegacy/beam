@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import BeamCore
 
 class FocusElement: TextEditorCommand {
     static let name: String = "FocusElement"

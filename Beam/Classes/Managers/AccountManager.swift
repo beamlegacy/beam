@@ -1,6 +1,7 @@
 import Foundation
 import PromiseKit
 import Promises
+import BeamCore
 
 class AccountManager {
 //    let safariDomains: [CFString] = [Configuration.publicHostnameDefault as CFString]

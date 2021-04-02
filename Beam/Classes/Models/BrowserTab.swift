@@ -10,6 +10,7 @@ import Foundation
 import SwiftUI
 import Combine
 import WebKit
+import BeamCore
 
 class FullScreenWKWebView: WKWebView {
 //    override var safeAreaInsets: NSEdgeInsets {

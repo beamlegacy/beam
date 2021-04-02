@@ -7,6 +7,7 @@
 
 import Foundation
 import FavIcon
+import BeamCore
 
 final class FaviconProvider {
 

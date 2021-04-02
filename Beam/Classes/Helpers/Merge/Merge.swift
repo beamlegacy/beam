@@ -1,4 +1,5 @@
 import Foundation
+import BeamCore
 
 class Merge {
     static private func stringToMergeFileInputPointer(_ string: String, _ filename: String? = nil) -> UnsafeMutablePointer<git_merge_file_input>? {

@@ -7,33 +7,33 @@
 
 import Foundation
 
-protocol RWLockable {
+public protocol RWLockable {
     func readLock()
     func readUnlock()
     func writeLock()
     func writeUnlock()
 }
 
-class RWLock: RWLockable {
+public class RWLock: RWLockable {
     private var lock = pthread_rwlock_t()
 
     init() {
         pthread_rwlock_init(&lock, nil)
     }
 
-    func readLock() {
+    public func readLock() {
         pthread_rwlock_rdlock(&lock)
     }
 
-    func readUnlock() {
+    public func readUnlock() {
         pthread_rwlock_unlock(&lock)
     }
 
-    func writeLock() {
+    public func writeLock() {
         pthread_rwlock_wrlock(&lock)
     }
 
-    func writeUnlock() {
+    public func writeUnlock() {
         pthread_rwlock_unlock(&lock)
     }
 
@@ -42,7 +42,7 @@ class RWLock: RWLockable {
     }
 }
 
-extension RWLockable {
+public extension RWLockable {
     func read<R>(_ block: @escaping () -> R) -> R {
         readLock()
         let res = block()

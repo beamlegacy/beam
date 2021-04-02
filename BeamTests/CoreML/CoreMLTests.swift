@@ -1,5 +1,6 @@
 import NaturalLanguage
 import XCTest
+@testable import BeamCore
 
 class NLPTests: XCTestCase {
     func testNLLanguageRecognizer() throws {

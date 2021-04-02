@@ -1,5 +1,6 @@
 import Foundation
 import KeychainAccess
+import BeamCore
 
 @propertyWrapper
 struct KeychainStorable<T> {

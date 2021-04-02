@@ -9,6 +9,7 @@ import Foundation
 
 import XCTest
 @testable import Beam
+@testable import BeamCore
 
 class String_URLTests: XCTestCase {
     func testMarkdownizedURL() {

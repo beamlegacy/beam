@@ -8,6 +8,7 @@
 import Foundation
 import Combine
 import AppKit
+import BeamCore
 
 class LinksSection: Widget {
     enum Mode {
@@ -89,7 +90,7 @@ class LinksSection: Widget {
         }
     }
 
-    func updateLinkedReferences(links: [NoteReference]) {
+    func updateLinkedReferences(links: [BeamNoteReference]) {
         var validRefs = 0
         var newrefs = [String: RefNoteTitle]()
         var toRemove = Set<RefNoteTitle>(titles.values)
@@ -171,7 +172,7 @@ class LinksSection: Widget {
                     guard let breadcrumb = child as? BreadCrumb else { return }
                     breadcrumb.proxy.text.makeLinkToNoteExplicit(forNote: rootNote.title)
 
-                    let reference = NoteReference(noteTitle: breadcrumb.proxy.note!.title, elementID: breadcrumb.proxy.proxy.id)
+                    let reference = BeamNoteReference(noteTitle: breadcrumb.proxy.note!.title, elementID: breadcrumb.proxy.proxy.id)
                     self.note.addReference(reference)
                 }
             }, hovered: {[weak self] isHover in

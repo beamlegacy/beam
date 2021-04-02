@@ -7,6 +7,7 @@
 
 import Foundation
 import CoreData
+import BeamCore
 
 class StoredLink: NSManagedObject {
     override func awakeFromInsert() {

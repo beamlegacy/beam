@@ -7,6 +7,7 @@
 
 import Foundation
 import NaturalLanguage
+import BeamCore
 
 extension NLLanguage: Codable {
 }

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import BeamCore
 
 class ReplaceText: TextEditorCommand {
     static let name: String = "ReplaceText"
