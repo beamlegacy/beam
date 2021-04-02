@@ -588,6 +588,7 @@ public extension CALayer {
             case KeyCode.enter.rawValue:
                 if command && rootNode.state.nodeSelection == nil, let node = rootNode.focusedWidget as? TextNode {
                     onStartQuery(node)
+                    return
                 }
             default:
                 break
