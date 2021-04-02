@@ -556,8 +556,6 @@ public extension CALayer {
             rootNode.insertNewline()
         } else if let popover = popover {
             popover.doCommand(.insertNewline)
-        } else if command && rootNode.state.nodeSelection == nil {
-            onStartQuery(node)
         } else {
             if node.text.isEmpty && node.isEmpty && node.parent !== rootNode {
                 rootNode.decreaseIndentation()
@@ -586,6 +584,10 @@ public extension CALayer {
                 rootNode.cancelSelection()
                 dismissPopoverOrFormatter()
                 return
+            case KeyCode.enter.rawValue:
+                if command && rootNode.state.nodeSelection == nil, let node = rootNode.focusedWidget as? TextNode {
+                    onStartQuery(node)
+                }
             default:
                 break
             }
