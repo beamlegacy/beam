@@ -165,7 +165,8 @@ class ScrollViewContentWatcher: NSObject {
         // Update position of todays item
         if let todaysNote = documentView.getTodaysView() {
             let newPosition = bounds.origin.y + documentView.topOffset
-            todaysNote.frame.origin.y = max(documentView.topOffset, min(newPosition, documentView.todaysMaxPosition))
+            // Magic number fix cause origin.y for clipView starts at -4
+            todaysNote.frame.origin.y = max(documentView.topOffset - 4, min(newPosition, documentView.todaysMaxPosition))
         }
         // Update visibility and position of side title layer
         documentView.updateSideLayer(scrollValue: diff, scrollingDown: scrollingDown, y: bounds.origin.y)
