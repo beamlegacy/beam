@@ -131,7 +131,7 @@ export const PointAndShoot = (win, ui) => {
       return
     }
     if (!multi && selectedEls.length > 0) {
-      unshoot(0, selectedEls[0]) // previous selection will be replaced
+      unshoot(selectedEls[0]) // previous selection will be replaced
     }
     selectedEls.push(el)
     // point(el, x, y)
@@ -240,10 +240,7 @@ export const PointAndShoot = (win, ui) => {
   }
 
   function onResize(_ev) {
-    const resizeInfo = {
-      width: win.innerWidth,
-      height: win.innerHeight
-    }
+    const resizeInfo = {width: win.innerWidth, height: win.innerHeight}
     ui.setResizeInfo(resizeInfo, selectedEls)
   }
 

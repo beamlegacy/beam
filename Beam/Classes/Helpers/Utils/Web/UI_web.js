@@ -101,8 +101,10 @@ export class UI_web extends UI {
   shoot(el, x, y, selected, submitCb) {
     this.pointAndShoot.shoot(el)
     const count = selected.length > 1 ? `${selected.length}` : ""
-    for (const s of selected) {
-      s.style.cursor = `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="30" viewBox="20 0 30 55" style="stroke:rgb(165,165,165);stroke-linecap:round;stroke-width:3"><rect x="10" y="20" width="54" height="25" ry="10" style="stroke-width:1; fill:white"/><text x="15" y="39" style="font-size:20px;stroke-linecap:butt;stroke-width:1">${count}</text><line x1="35" y1="26" x2="50" y2="26"/><line x1="35" y1="32" x2="50" y2="32"/><line x1="35" y1="38" x2="45" y2="38"/><g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g id="notallowed"><path d="M8,17.4219 L8,1.4069 L19.591,13.0259 L12.55,13.0259 L12.399,13.1499 L8,17.4219 Z" id="point-border" fill="white"/><path d="M9,3.814 L9,15.002 L11.969,12.136 L12.129,11.997 L17.165,11.997 L9,3.814 Z" id="point" fill="black"/></g></g></svg>') 5 5, auto`
+    for (let i = 0; i < selected.length; i++) {
+      const s = selected[i]
+      const sId = i
+      s.style.cursor = `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="30" viewBox="20 0 30 55" style="stroke:rgb(165,165,165);stroke-linecap:round;stroke-width:3"><rect x="10" y="20" width="54" height="25" ry="10" style="stroke-width:1; fill:white"/><text x="15" y="39" style="font-size:20px;stroke-linecap:butt;stroke-width:1">${count}</text><line x1="35" y1="26" x2="50" y2="26"/><line x1="35" y1="32" x2="50" y2="32"/><line x1="35" y1="38" x2="45" y2="38"/><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g><path d="M8,17.4219 L8,1.4069 L19.591,13.0259 L12.55,13.0259 L12.399,13.1499 L8,17.4219 Z" fill="white"/><path d="M9,3.814 L9,15.002 L11.969,12.136 L12.129,11.997 L17.165,11.997 L9,3.814 Z" fill="black"/></g></g></svg>') 5 5, auto`
     }
     this.hidePopup()  // Hide previous, if any
     this.showPopup(el, x, y, submitCb)
@@ -148,7 +150,7 @@ export class UI_web extends UI {
     form.addEventListener("submit", () => this.submit())
     const cardInput = this.popup.querySelector(`#${this.cardInputId}`)
     cardInput.addEventListener("keydown", (ev) => this.cardKeyDown(ev, submitCb))
-    cardInput.addEventListener("input", this.onCardInput)
+    cardInput.addEventListener("input", this.onCardInput.bind(this))
 
     this.popup.style.left = `${x}px`
     const popupTop = this.win.scrollY + y

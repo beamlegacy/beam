@@ -1,0 +1,8 @@
+@import "Beam";
+
+$paletteTransparent: rgba(0, 0, 0, 0);
+
+body.#{$prefix}-selecting ::selection {
+  background-color: $paletteTransparent;  // Don't show normal selection when seleting with Beam
+  color: black;
+}

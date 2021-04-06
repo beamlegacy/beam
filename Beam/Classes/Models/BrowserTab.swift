@@ -36,10 +36,6 @@ struct FrameInfo {
     let height: CGFloat
 }
 
-struct BeamShootMessage {
-    let origin: String
-}
-
 // swiftlint:disable:next type_body_length
 
 class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler, Codable, WebPage {
@@ -47,11 +43,6 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
     private(set) var scrollX: CGFloat = 0
     private(set) var scrollY: CGFloat = 0
-    private var visualScale: CGFloat = 1
-    var zoomLevel: CGFloat {
-        visualScale
-    }
-
     private var pixelRatio: Double = 1
 
     public func load(url: URL) {
@@ -93,10 +84,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
     lazy var passwordOverlayController: PasswordOverlayController = PasswordOverlayController(webView: webView)
 
-    /**
-     * Frame info by frame URL
-     */
-    var framesInfo = [String: FrameInfo]()
+    lazy var webPositions: WebPositions = WebPositions()
 
     var state: BeamState!
 
@@ -251,10 +239,12 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         guard let elem = element else {
             guard let url = self.url else {
                 Logger.shared.logError("Cannot get current URL", category: .general)
-                return nil }
+                return nil
+            }
             guard !url.isSearchResult else {
                 Logger.shared.logWarning("Adding search results is not allowed", category: .general)
-                return nil } // Don't automatically add search results
+                return nil
+            } // Don't automatically add search results
             let linkString = url.absoluteString
             guard !note.outLinks.contains(linkString) else {
                 element = note.elementContainingLink(to: linkString); return element
@@ -297,7 +287,9 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
     private func setupObservers() {
         Logger.shared.logInfo("setupObservers", category: .general)
-        webView.publisher(for: \.title).sink { v in self.title = v ?? "loading..."; self.updateElementWithTitle()
+        webView.publisher(for: \.title).sink { v in
+            self.title = v ?? "loading..."
+            self.updateElementWithTitle()
         }.store(in: &scope)
         webView.publisher(for: \.url).sink { v in
             self.url = v
@@ -309,7 +301,8 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             }
         }.store(in: &scope)
         webView.publisher(for: \.isLoading).sink { v in withAnimation { self.isLoading = v } }.store(in: &scope)
-        webView.publisher(for: \.estimatedProgress).sink { v in withAnimation { self.estimatedProgress = v }
+        webView.publisher(for: \.estimatedProgress).sink { v in
+            withAnimation { self.estimatedProgress = v }
         }.store(in: &scope)
         webView.publisher(for: \.hasOnlySecureContent).sink { v in self.hasOnlySecureContent = v }.store(in: &scope)
         webView.publisher(for: \.serverTrust).sink { v in self.serverTrust = v }.store(in: &scope)
@@ -487,21 +480,6 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         loadFile(from: "PasswordManager", fileType: "js")
     }()
 
-    /**
-     Resolve some area coords sent by JS to a NSRect with coords on the WebView frame.
-     - Parameters:
-       - area: The area coords as sent by JS.
-       - origin: URL where the text comes from. This helps resolving the position of a selection in iframes.
-     - Returns:
-     */
-    func nativeArea(area: NSRect, origin: String) -> NSRect {
-        let minX = nativeX(x: area.minX, origin: origin)
-        let minY = nativeY(y: area.minY, origin: origin)
-        let width = nativeWidth(width: area.width)
-        let height = nativeHeight(height: area.height)
-        return NSRect(x: minX, y: minY, width: width, height: height)
-    }
-
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         let messageBody = message.body as? [String: AnyObject]
         let messageKey = message.name
@@ -520,8 +498,8 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                 pointAndShoot.point(area: nil)
                 return
             }
-            let rectArea = jsToRect(jsArea: area)
-            let pointArea = nativeArea(area: rectArea, origin: origin)
+            let rectArea = webPositions.jsToRect(jsArea: area)
+            let pointArea = webPositions.nativeArea(area: rectArea, origin: origin)
             pointAndShoot.point(area: pointArea)
             Logger.shared.logInfo("Web block point: \(pointArea)", category: .web)
 
@@ -532,11 +510,10 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                   let area = dict["area"],
                   dict["location"] != nil
                     else {
-                Logger.shared.logError("Ignored shoot event: \(String(describing: messageBody))",
-                        category: .web)
+                Logger.shared.logError("Ignored shoot event: \(String(describing: messageBody))", category: .web)
                 return
             }
-            shootAreas(areas: [area], origin: origin)
+            pointAndShoot.shootAll(areas: [area], origin: origin)
             noteTextSelection(url: webView.url!, html: html)
             Logger.shared.logInfo("Web shoot point: \(area)", category: .web)
 
@@ -553,7 +530,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                         category: .web)
                 return
             }
-            shootAreas(areas: areas, origin: origin)
+            pointAndShoot.shootAll(areas: areas, origin: origin)
             noteTextSelection(url: webView.url!, html: html)
 
         case ScriptHandlers.beam_textSelection.rawValue:
@@ -569,7 +546,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                         category: .web)
                 return
             }
-            shootAreas(areas: areas, origin: origin)
+            pointAndShoot.shootAll(areas: areas, origin: origin)
 
         case ScriptHandlers.beam_pinch.rawValue:
             guard let dict = messageBody,
@@ -583,7 +560,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                     else {
                 return
             }
-            visualScale = scale
+            webPositions.scale = scale
 
         case ScriptHandlers.beam_onScrolled.rawValue:
             guard let dict = messageBody,
@@ -597,7 +574,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                 Logger.shared.logError("Ignored scroll event: \(String(describing: messageBody))", category: .web)
                 return
             }
-            visualScale = scale
+            webPositions.scale = scale
             scrollX = x // nativeX(x: x, origin: origin)
             scrollY = y // nativeY(y: y, origin: origin)
             passwordOverlayController.updateScrollPosition(x: x, y: y, width: width, height: height)
@@ -609,7 +586,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                 currentScore.area = Float(width * height)
                 updateScore()
             }
-            Logger.shared.logDebug("Web Scrolled: \(x), \(y)", category: .web)
+            Logger.shared.logDebug("Web Scrolled: \(scrollX), \(scrollY)", category: .web)
 
         case ScriptHandlers.beam_textInputFields.rawValue:
             guard let jsonString = message.body as? String else { break }
@@ -630,16 +607,16 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                 Logger.shared.logError("Ignored beam_frameBounds: \(String(describing: messageBody))", category: .web)
                 return
             }
-            framesInfo.removeAll()
+            webPositions.framesInfo.removeAll()
             for jsFrameInfo in jsFramesInfo {
                 let d = jsFrameInfo as AnyObject
                 let bounds = d["bounds"] as AnyObject
                 if let origin = d["origin"] as? String,
                    let href = d["href"] as? String {
-                    registerOrigin(origin: origin)
-                    let rectArea = jsToRect(jsArea: bounds)
-                    let nativeBounds = nativeArea(area: rectArea, origin: origin)
-                    framesInfo[href] = FrameInfo(
+                    webPositions.registerOrigin(origin: origin)
+                    let rectArea = webPositions.jsToRect(jsArea: bounds)
+                    let nativeBounds = webPositions.nativeArea(area: rectArea, origin: origin)
+                    webPositions.framesInfo[href] = FrameInfo(
                             origin: origin, x: nativeBounds.minX, y: nativeBounds.minY,
                             width: nativeBounds.width, height: nativeBounds.height
                     )
@@ -661,44 +638,6 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         default:
             break
         }
-    }
-
-    private func shootAreas(areas: NSArray, origin: String) {
-        pointAndShoot.clearAllShoots()
-        for area in areas {
-            let jsArea = area as AnyObject
-            let rectArea = jsToRect(jsArea: jsArea)
-            let textArea = nativeArea(area: rectArea, origin: origin)
-            pointAndShoot.addShoot(area: textArea)
-        }
-        pointAndShoot.drawAllShoots(origin: origin)
-    }
-
-    private func registerOrigin(origin: String) {
-        var originFrame = framesInfo[origin]
-        if originFrame == nil {
-            originFrame = FrameInfo(origin: origin, x: 0, y: 0, width: -1, height: -1)
-            framesInfo[origin] = originFrame
-        }
-    }
-
-    /**
-     - Parameter jsArea: a dictionary with x, y, width and height
-     - Returns:
-     */
-    private func jsToRect(jsArea: AnyObject) -> NSRect {
-        guard let x = jsArea["x"] as? CGFloat,
-              let y = jsArea["y"] as? CGFloat,
-              let width = jsArea["width"] as? CGFloat,
-              let height = jsArea["height"] as? CGFloat else {
-            return .zero
-        }
-        return NSRect(
-            x: x,
-            y: y,
-            width: width,
-            height: height
-        )
     }
 
     /**
@@ -729,45 +668,6 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                 current.addChild(e)
             }
         }
-    }
-
-    func absolutePosition(v: CGFloat, origin: String, prop: String) -> CGFloat {
-        var framePos: CGFloat = 0
-        if framesInfo.count > 0 {
-            var currentOrigin = origin
-            repeat {
-                let foundFrameInfo = framesInfo[currentOrigin]
-                if foundFrameInfo != nil {
-                    let frameInfo = foundFrameInfo!
-                    framePos += prop == "x" ? frameInfo.x : frameInfo.y
-                    currentOrigin = frameInfo.origin
-                } else {
-                    Logger.shared.logError("""
-                                           Could not find frameInfo for origin \(currentOrigin)
-                                           in \(framesInfo.map { $0.value.origin })
-                                           """, category: .web)
-                    break
-                }
-            } while framesInfo[currentOrigin]?.origin != currentOrigin
-        }
-        let pos = framePos + v
-        return pos * zoomLevel
-    }
-
-    func nativeX(x: CGFloat, origin: String) -> CGFloat {
-        absolutePosition(v: x, origin: origin, prop: "x")
-    }
-
-    func nativeY(y: CGFloat, origin: String) -> CGFloat {
-        absolutePosition(v: y, origin: origin, prop: "y")
-    }
-
-    func nativeWidth(width: CGFloat) -> CGFloat {
-        width * zoomLevel
-    }
-
-    func nativeHeight(height: CGFloat) -> CGFloat {
-        height * zoomLevel
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
