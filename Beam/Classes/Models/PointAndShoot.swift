@@ -80,7 +80,7 @@ class PointAndShoot {
             let jsArea = area as AnyObject
             let rectArea = webPositions.jsToRect(jsArea: jsArea)
             let textArea = webPositions.nativeArea(area: rectArea, origin: origin)
-            let scrolledArea = NSRect(x: textArea.minX + xDelta, y: textArea.minY + yDelta, width: textArea.width, height: textArea.height)
+            let scrolledArea = NSRect(x: textArea.minX + xDelta, y: textArea.minY, width: textArea.width, height: textArea.height)
             addShoot(area: scrolledArea)
         }
         drawAllShoots(origin: origin)
