@@ -146,6 +146,7 @@ public struct BTextEditScrollable: NSViewRepresentable {
         edit.showTitle = showTitle
 
         let scrollView = NSScrollView()
+        scrollView.automaticallyAdjustsContentInsets = false
 
         let clipView = NSClipView()
         clipView.translatesAutoresizingMaskIntoConstraints = false
