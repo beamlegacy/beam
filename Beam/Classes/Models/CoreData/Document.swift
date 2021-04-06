@@ -190,12 +190,14 @@ class Document: NSManagedObject {
 
     class func fetchAllWithTitleMatch(_ context: NSManagedObjectContext, _ title: String) -> [Document] {
         let predicate = NSPredicate(format: "title CONTAINS[cd] %@", title as CVarArg)
-        return fetchAll(context: context, predicate)
+        let sortDescriptor = NSSortDescriptor(key: "title", ascending: true)
+        return fetchAll(context: context, predicate, [sortDescriptor])
     }
 
     class func fetchAllWithLimitedTitleMatch(_ context: NSManagedObjectContext, _ title: String, _ limit: Int) -> [Document] {
         let predicate = NSPredicate(format: "title CONTAINS[cd] %@", title as CVarArg)
-        return fetchAllWithLimit(context: context, predicate, nil, limit)
+        let sortDescriptor = NSSortDescriptor(key: "title", ascending: true)
+        return fetchAllWithLimit(context: context, predicate, [sortDescriptor], limit)
     }
 
     class func fetchAllWithLimitResult(_ context: NSManagedObjectContext, _ limit: Int, _ sortDescriptors: [NSSortDescriptor]? = nil) -> [Document] {
