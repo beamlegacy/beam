@@ -78,7 +78,7 @@ class AutocompleteManager: ObservableObject {
     }
 
     private func autocompleteNotesResults(for query: String) -> [AutocompleteResult] {
-        return beamData.documentManager.documentsWithTitleMatch(title: query)
+        return beamData.documentManager.documentsWithLimitTitleMatch(title: query, limit: 6)
             // Eventually, we should not show notes under a certain score threshold
             // Disabling it for now until we have a better scoring system
             // .compactMap({ doc -> DocumentStruct? in

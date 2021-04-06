@@ -76,12 +76,16 @@ class DocumentTests: QuickSpec {
         describe(".fetchAllWithTitleMatch()") {
             it("fetches documents matching title") {
                 let times = 3
-                for index in 0..<times {
+                for index in 1..<times {
                     _ = helper.saveLocally(helper.createDocumentStruct(title: "foobar \(index)"))
                 }
                 _ = helper.saveLocally(helper.createDocumentStruct())
+                _ = helper.saveLocally(helper.createDocumentStruct(title: "foobar"))
 
-                expect(Document.fetchAllWithTitleMatch(mainContext, "foobar")).to(haveCount(times))
+                let result = Document.fetchAllWithTitleMatch(mainContext, "foobar")
+                expect(result).to(haveCount(times))
+                expect(result[0].title).to(equal("foobar"))
+                expect(result[1].title).to(equal("foobar 1"))
             }
         }
 
