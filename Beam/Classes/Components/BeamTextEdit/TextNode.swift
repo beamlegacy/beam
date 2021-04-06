@@ -608,6 +608,11 @@ public class TextNode: Widget {
         resetActionLayers()
     }
 
+    private func isHoveringText() -> Bool {
+        let isMouseInsideFormatter = editor.inlineFormatter?.isMouseInsideView == true || editor.popover != nil
+        return hover && !isMouseInsideFormatter
+    }
+
     // MARK: - Mouse Events
     // swiftlint:disable:next function_body_length cyclomatic_complexity
     override func mouseDown(mouseInfo: MouseInfo) -> Bool {
@@ -724,7 +729,7 @@ public class TextNode: Widget {
 
     private func handleMouseHoverState(mouseInfo: MouseInfo) {
         let isMouseInContentFrame = contentsFrame.contains(mouseInfo.position)
-        let isMouseInsideFormatter = editor.inlineFormatter?.isMouseInsideView == true
+        let isMouseInsideFormatter = editor.inlineFormatter?.isMouseInsideView == true || editor.popover != nil
         let mouseHasChangedTextPosition = lastHoverMouseInfo?.position != mouseInfo.position
         if mouseHasChangedTextPosition && isMouseInContentFrame {
             let link = linkAt(point: mouseInfo.position)
@@ -754,7 +759,7 @@ public class TextNode: Widget {
                 invalidateText()
             }
         }
-        lastHoverMouseInfo = !isMouseInsideFormatter ? mouseInfo : nil
+        lastHoverMouseInfo = mouseInfo
         if isMouseInsideFormatter {
             cursor = nil
         }
@@ -1088,7 +1093,7 @@ public class TextNode: Widget {
         }
 
         var mouseInteraction: MouseInteraction?
-        if let hoverMouse = lastHoverMouseInfo, hover {
+        if let hoverMouse = lastHoverMouseInfo, isHoveringText() {
             if let pos = indexAt(point: hoverMouse.position, limitToTextString: false) {
                 let nsrange = NSRange(location: pos, length: 1)
                 mouseInteraction = MouseInteraction(type: MouseInteractionType.hovered, range: nsrange)
