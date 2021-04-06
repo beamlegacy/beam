@@ -30,4 +30,9 @@ export class PointAndShootUI_debug extends PointAndShootUI {
     this.webUi.shoot(el, x, y, selected, submitCb)
     this.nativeUi.shoot(el, x, y, selected, submitCb)
   }
+
+  unshoot(el) {
+    this.webUi.unshoot(el)
+    this.nativeUi.unshoot(el)
+  }
 }

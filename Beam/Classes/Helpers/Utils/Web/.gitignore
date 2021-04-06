@@ -1,4 +1,3 @@
 .parcel-cache/
 *.js.map
-*_prod.js
-*.css
+*_prod.*

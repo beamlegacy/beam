@@ -1,7 +1,3 @@
-//
-// Created by Jérôme Beau on 26/03/2021.
-//
-
 import Foundation
 import SwiftUI
 
@@ -20,17 +16,13 @@ class PointAndShootUI: ObservableObject {
         return SelectionUI(rect: selection, animated: animated, color: color)
     }
 
-    let pointColor = Color(red: 50 / 255, green: 4 / 255, blue: 245 / 255, opacity: 1)
-
     func drawPoint(area: NSRect) {
-        pointSelection = drawSelection(selection: area, animated: true, color: pointColor)
+        pointSelection = drawSelection(selection: area, animated: true, color: Color(.pointColor))
     }
 
     func clearPoint() {
         pointSelection = nil
     }
-
-    let shootColor = Color(red: 1, green: 0, blue: 0, opacity: 0.1)
 
     func drawShoot(shootArea: NSRect, xDelta: CGFloat, yDelta: CGFloat) {
         let newX = shootArea.minX + xDelta
@@ -38,7 +30,7 @@ class PointAndShootUI: ObservableObject {
         let shootSelectionUI = SelectionUI(
                 rect: NSRect(x: newX, y: newY, width: shootArea.width, height: shootArea.height),
                 animated: false,
-                color: shootColor
+                color: Color(.shootColor)
         )
         shootSelections.append(shootSelectionUI)
     }

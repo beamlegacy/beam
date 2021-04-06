@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import BeamCore
 
 class PointAndShoot {
 
@@ -25,11 +26,11 @@ class PointAndShoot {
     var shootAreas: [NSRect] = []
 
     lazy var pointAndShoot: String = {
-        loadFile(from: "PointAndShoot_prod", fileType: "js")
+        loadFile(from: "index_prod", fileType: "js")
     }()
 
     lazy var pointAndShootStyle: String = {
-        loadFile(from: "PointAndShoot", fileType: "css")
+        loadFile(from: "index_prod", fileType: "css")
     }()
 
     func injectScripts() {
@@ -40,10 +41,12 @@ class PointAndShoot {
     func drawAllShoots(origin: String) {
         ui.clearShoots()
         if shootAreas.count > 0 {
-            let xDelta = -page.scrollX * page.zoomLevel
-            let yDelta = -page.scrollY * page.zoomLevel
+            let scale = page.webPositions.scale
+            let xDelta = -page.scrollX * scale
+            let yDelta = -page.scrollY * scale
+            Logger.shared.logError("drawallshoots: xDelta=\(xDelta), yDelta=\(yDelta)", category: .general)
             for shootArea in shootAreas {
-                let nativeArea = page.nativeArea(area: shootArea, origin: origin)
+                let nativeArea = page.webPositions.nativeArea(area: shootArea, origin: origin)
                 ui.drawShoot(shootArea: nativeArea, xDelta: xDelta, yDelta: yDelta)
             }
         }
@@ -65,5 +68,21 @@ class PointAndShoot {
     func clearAllShoots() {
         shootAreas.removeAll()
         ui.clear()
+    }
+
+    func shootAll(areas: NSArray, origin: String) {
+        clearAllShoots()
+        let webPositions = page.webPositions
+        let scale = page.webPositions.scale
+        let xDelta = page.scrollX * scale
+        let yDelta = page.scrollY * scale
+        for area in areas {
+            let jsArea = area as AnyObject
+            let rectArea = webPositions.jsToRect(jsArea: jsArea)
+            let textArea = webPositions.nativeArea(area: rectArea, origin: origin)
+            let scrolledArea = NSRect(x: textArea.minX + xDelta, y: textArea.minY + yDelta, width: textArea.width, height: textArea.height)
+            addShoot(area: scrolledArea)
+        }
+        drawAllShoots(origin: origin)
     }
 }

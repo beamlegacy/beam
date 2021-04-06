@@ -45,6 +45,10 @@ export class UI_debug extends UI {
     this.pointAndShoot.shoot(el, x, y, selected, submitCb)
   }
 
+  unshoot(el) {
+    this.pointAndShoot.unshoot(el)
+  }
+
   setFramesInfo(framesInfo) {
     this.nativeUi.setFramesInfo(framesInfo)
   }

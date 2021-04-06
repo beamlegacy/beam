@@ -204,6 +204,16 @@ extension NSColor {
         return loadColor(named: "LightStoneGray")
     }
 
+    // Point and shoot
+
+    static var pointColor: NSColor {
+        return loadColor(named: "PointColor")
+    }
+
+    static var shootColor: NSColor {
+        return loadColor(named: "ShootColor")
+    }
+
     // Other
 
     static var tableHeaderTextColor: NSColor {
