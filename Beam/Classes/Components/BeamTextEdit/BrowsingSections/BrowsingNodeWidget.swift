@@ -56,7 +56,6 @@ class BrowsingNodeWidget: Widget {
         let score = linkScore.score
         textLayer.string = "\(score) - \(linkText)"
 
-        editor.layer?.addSublayer(layer)
         layer.addSublayer(textLayer)
         textLayer.frame = CGRect(origin: CGPoint(x: 25, y: 0), size: textLayer.preferredFrameSize())
     }
@@ -90,7 +89,6 @@ class BrowsingLinkWidget: Widget {
 
         let url = LinkStore.linkFor(link.link)?.url ?? "<???>"
         addLayer(Layer.text(named: "link", "\(link.score.score) - \(url)", color: NSColor.red))
-        editor.layer?.addSublayer(layer)
     }
 
     override func updateRendering() {

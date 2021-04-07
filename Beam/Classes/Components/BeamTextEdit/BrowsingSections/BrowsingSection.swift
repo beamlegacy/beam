@@ -80,7 +80,6 @@ class BrowsingSection: Widget {
         textLayer.string = "Browsing sessions"
 
         updateLayerVisibility()
-        editor.layer?.addSublayer(layer)
         layer.addSublayer(textLayer)
         textLayer.frame = CGRect(origin: CGPoint(x: 100, y: 0), size: textLayer.preferredFrameSize())
     }

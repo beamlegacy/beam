@@ -1216,7 +1216,7 @@ public class TextNode: Widget {
 
     override func dumpWidgetTree(_ level: Int = 0) {
         let tabs = String.tabs(level)
-        Logger.shared.logDebug("\(tabs)\(String(describing: Self.self)) frame(\(frame)) \(layers.count) layers - element id: \(element.id) [\(elementText.text)]")
+        print("\(tabs)\(String(describing: Self.self)) frame(\(frame)) \(layers.count) layers - element id: \(element.id) [\(elementText.text)]")
         for c in children {
             c.dumpWidgetTree(level + 1)
         }

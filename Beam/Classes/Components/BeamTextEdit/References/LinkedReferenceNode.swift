@@ -124,7 +124,6 @@ class LinkedReferenceNode: TextNode {
         element.$text.sink { [unowned self] text in
             self.layers["LinkLayer"]?.layer.isHidden = self.isLinkToNote(text) || !shouldDisplayLinkButton
         }.store(in: &scope)
-
     }
 
     // MARK: - Setup UI

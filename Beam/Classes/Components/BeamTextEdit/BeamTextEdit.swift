@@ -704,6 +704,7 @@ public extension CALayer {
                 case "d":
                     if command, shift {
                         dumpWidgetTree()
+                        dumpLayers()
                         return
                     }
 
@@ -1504,6 +1505,17 @@ public extension CALayer {
 
     func dumpWidgetTree() {
         rootNode.dumpWidgetTree()
+    }
+
+    func dumpLayers() {
+        // swiftlint:disable print
+        print("================")
+        print("Dumping editor \(layer?.sublayers?.count ?? 0) layers:")
+        for (i, l) in (layer?.sublayers ?? []).enumerated() {
+            print("\(i) - '\(l.name ?? "unnamed")' - pos \(l.position) - bounds \(l.bounds) \(l.isHidden ? "[HIDDEN]" : "")")
+        }
+        print("================")
+        // swiftlint:enable print
     }
 
     public override func accessibilityChildren() -> [Any]? {

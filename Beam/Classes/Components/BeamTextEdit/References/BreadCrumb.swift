@@ -75,10 +75,7 @@ class BreadCrumb: Widget {
         setupLayers(with: note)
         updateCrumbLayers()
 
-        if children != [linkedReferenceNode] {
-            children = [linkedReferenceNode]
-            invalidateLayout()
-        }
+        children = [linkedReferenceNode]
     }
 
     func setupLayers(with note: BeamNote) {
@@ -371,7 +368,6 @@ class BreadCrumb: Widget {
         purgeDeadNodes()
 
         node.contentsScale = contentsScale
-        editor.layer?.addSublayer(node.layer)
 
         return node
     }

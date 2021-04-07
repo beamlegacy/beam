@@ -47,10 +47,14 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
     var visible = true {
         didSet {
-            layer.isHidden = !visible || !selfVisible
-            for l in layers where l.value.layer.superlayer == editor.layer {
-                l.value.layer.isHidden = !visible || !selfVisible
-            }
+            updateLayersVisibility()
+        }
+    }
+
+    func updateLayersVisibility() {
+        layer.isHidden = !visible || !selfVisible
+        for l in layers where l.value.layer.superlayer == editor.layer {
+            l.value.layer.isHidden = !visible || !selfVisible
         }
     }
 
@@ -200,7 +204,11 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         }
     }
 
-    public private(set) var editor: BeamTextEdit
+    public private(set) var editor: BeamTextEdit {
+        didSet {
+            editor.layer?.addSublayer(layer)
+        }
+    }
     internal var computedIdealSize = NSSize()
     private var _root: TextRoot?
     public private(set) var needLayout = true
@@ -455,6 +463,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     }
 
     func removeChild(_ child: Widget) {
+        guard children.contains(child) else { return }
         children.removeAll { w -> Bool in
             w === child
         }
@@ -868,7 +877,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
     func dumpWidgetTree(_ level: Int = 0) {
         let tabs = String.tabs(level)
-        Logger.shared.logDebug("\(tabs)\(String(describing: Self.self)) frame(\(frame)) \(layers.count) layers")
+        print("\(tabs)\(String(describing: Self.self)) frame(\(frame)) \(layers.count) layers")
         for c in children {
             c.dumpWidgetTree(level + 1)
         }
