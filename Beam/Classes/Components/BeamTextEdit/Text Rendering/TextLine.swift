@@ -94,16 +94,16 @@ public class TextLine {
     }
 
     func stringIndexFor(position: NSPoint) -> Int {
-        var previous = Float(0)
-        let range = CTLineGetStringRange(ctLine)
+        var previous = carets.first?.offset ?? Float(0)
         for caret in carets {
             let offset = caret.offset
             let middle = CGFloat(0.5 * (offset + previous))
             if middle > position.x {
-                return caret.indexInSource
+                return max(0, caret.indexInSource - 1)
             }
             previous = offset
         }
+        let range = CTLineGetStringRange(ctLine)
         return toSource(range.location + range.length)
     }
 

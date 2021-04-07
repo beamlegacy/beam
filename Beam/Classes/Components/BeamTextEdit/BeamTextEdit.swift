@@ -550,8 +550,7 @@ public extension CALayer {
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
     func pressEnter(_ option: Bool, _ command: Bool, _ shift: Bool) {
-        guard let node = focusedWidget as? TextNode, !node.readOnly,
-              let noteTitle = node.elementNoteTitle else { return }
+        guard let node = focusedWidget as? TextNode, !node.readOnly else { return }
 
         if option || shift {
             rootNode.insertNewline()
@@ -562,9 +561,39 @@ public extension CALayer {
                 rootNode.decreaseIndentation()
                 return
             }
+            cmdManager.beginGroup(with: "Insert line")
+            defer {
+                cmdManager.endGroup()
+            }
+
+            let insertAsChild = node.parent as? BreadCrumb != nil
             rootNode.cmdManager.deleteText(in: node, for: rootNode.selectedTextRange)
-            let insertNode = InsertNode(in: node.elementId, of: noteTitle, with: rootNode.cursorPosition, asChild: node.parent as? BreadCrumb != nil)
-            cmdManager.run(command: insertNode, on: rootNode.cmdContext)
+
+            let range = rootNode.cursorPosition ..< node.text.count
+            let str = node.text.extract(range: range)
+            cmdManager.deleteText(in: node, for: range)
+
+            let newElement = BeamElement(str)
+            if insertAsChild {
+                cmdManager.insertElement(newElement, in: node, after: nil)
+            } else {
+                guard let parent = node.parent as? TextNode else { return }
+                let children = node.element.children
+
+                cmdManager.insertElement(newElement, in: parent, after: node)
+                guard let newElement = node.nodeFor(newElement)?.element else { return }
+
+                // reparent all children of node to newElement
+                for child in children {
+                    cmdManager.reparentElement(child, to: newElement, atIndex: newElement.children.count)
+                }
+
+            }
+
+            if let toFocus = node.nodeFor(newElement) {
+                cmdManager.focusElement(toFocus, position: 0)
+            }
+
             scrollToCursorAtLayout = true
             cleanPersistentFormatter()
         }
@@ -901,8 +930,7 @@ public extension CALayer {
             } else {
                 guard let node = focusedWidget as? TextNode,
                       let noteTitle = node.root?.note?.title else { continue }
-                let insertNode = InsertNode(in: node.element.id, of: noteTitle, with: nil, asChild: false)
-                rootNode.note?.cmdManager.run(command: insertNode, on: rootNode.cmdContext)
+                rootNode.note?.cmdManager.insertElement(BeamElement(), in: node, after: nil)
                 guard let newNode = focusedWidget as? TextNode else { continue }
                 paste(element.text, in: newNode.element.id, for: noteTitle)
             }
@@ -921,8 +949,7 @@ public extension CALayer {
             } else {
                 guard let node = focusedWidget as? TextNode,
                       let noteTitle = node.root?.note?.title else { continue }
-                let insertNode = InsertNode(in: node.element.id, of: noteTitle, with: nil, asChild: false)
-                rootNode.note?.cmdManager.run(command: insertNode, on: rootNode.cmdContext)
+                rootNode.note?.cmdManager.insertElement(BeamElement(), in: node, after: nil)
                 guard let newNode = focusedWidget as? TextNode else { continue }
                 let bText = BeamText(text: str, attributes: [])
                 paste(bText, in: newNode.element.id, for: noteTitle)
@@ -968,8 +995,7 @@ public extension CALayer {
             } else {
                 guard let node = focusedWidget as? TextNode,
                       let noteTitle = node.root?.note?.title else { continue }
-                let insertNode = InsertNode(in: node.element.id, of: noteTitle, with: nil, asChild: false)
-                rootNode.note?.cmdManager.run(command: insertNode, on: rootNode.cmdContext)
+                rootNode.note?.cmdManager.insertElement(BeamElement(), in: node, after: nil)
                 guard let newNode = focusedWidget as? TextNode else { continue }
                 let bText = BeamText(text: str, attributes: [])
                 paste(bText, in: newNode.element.id, for: noteTitle)

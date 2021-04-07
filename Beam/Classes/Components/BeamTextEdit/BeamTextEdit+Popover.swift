@@ -59,6 +59,11 @@ extension BeamTextEdit {
         }
 
         let startPosition = popoverPrefix == 0 ? cursorStartPosition : cursorStartPosition + 1
+        if (command == .deleteBackward || command == .deleteForward) && startPosition > cursorPosition {
+            cancelPopover(leaveTextAsIs: true)
+            return
+        }
+
         let linkText = String(node.text.text[startPosition..<cursorPosition])
         if linkText.hasPrefix(" ") {
             // escape if the user type a space right after the start of the popover

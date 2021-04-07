@@ -17,7 +17,7 @@ class ReparentElement: TextEditorCommand {
     var previousParentId: UUID?
     var previousIndexInParent: Int?
 
-    init(for elementId: UUID, of noteTitle: String, to newParent: UUID, atIndex newIndexInParent: Int) {
+    init(_ elementId: UUID, of noteTitle: String, to newParent: UUID, atIndex newIndexInParent: Int) {
         self.elementId = elementId
         self.newParentId = newParent
         self.newIndexInParent = newIndexInParent
@@ -51,7 +51,7 @@ class ReparentElement: TextEditorCommand {
     override func undo(context: Widget?) -> Bool {
         guard let elementInstance = getElement(for: noteTitle, and: elementId),
               let previousParentId = self.previousParentId,
-              let indexInParent = self.previousIndexInParent,
+              let previousIndexInParent = self.previousIndexInParent,
               let previousElementInstance = getElement(for: noteTitle, and: previousParentId)
         else { return false }
 
@@ -60,12 +60,31 @@ class ReparentElement: TextEditorCommand {
             breadCrumb.removeChild(node)
         }
 
-        previousElementInstance.element.insert(elementInstance.element, at: indexInParent)
+        previousElementInstance.element.insert(elementInstance.element, at: previousIndexInParent)
 
         if let newParentNode = context?.nodeFor(previousElementInstance.element) {
             newParentNode.open = true
         }
 
         return true
+    }
+}
+
+extension CommandManager where Context == Widget {
+    @discardableResult
+    func reparentElement(_ node: TextNode, to parent: TextNode, atIndex newIndex: Int) -> Bool {
+        // make sure all elements are in the name note
+        guard let title = node.elementNoteTitle ?? parent.elementNoteTitle
+        else { return false }
+        let cmd = ReparentElement(node.elementId, of: title, to: parent.elementId, atIndex: newIndex)
+        return run(command: cmd, on: parent)
+    }
+
+    @discardableResult
+    func reparentElement(_ element: BeamElement, to parent: BeamElement, atIndex newIndex: Int) -> Bool {
+        // make sure all elements are in the name note
+        guard let title = element.note?.title ?? parent.note?.title else { return false }
+        let cmd = ReparentElement(element.id, of: title, to: parent.id, atIndex: newIndex)
+        return run(command: cmd, on: nil)
     }
 }
