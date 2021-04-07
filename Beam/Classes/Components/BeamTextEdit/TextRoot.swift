@@ -24,10 +24,10 @@ public struct TextConfig {
     var editable: Bool = true
     var keepCursorMidScreen = false //true
 
-    var color = NSColor.textColor
+    var color = BeamColor.Generic.text.nsColor
     var disabledColor = NSColor.disabledControlTextColor
-    var selectionColor = NSColor.editorTextSelectionColor
-    var markedColor = NSColor.editorTextSelectionColor
+    var selectionColor = BeamColor.Editor.textSelection.nsColor
+    var markedColor = BeamColor.Editor.textSelection.nsColor
     var alpha: Float = 1.0
     var blendMode: CGBlendMode = .normal
 }

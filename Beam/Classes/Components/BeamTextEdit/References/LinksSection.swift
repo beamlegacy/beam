@@ -57,7 +57,7 @@ class LinksSection: Widget {
 
         sectionTitleLayer.font = NSFont.systemFont(ofSize: 0, weight: .semibold)
         sectionTitleLayer.fontSize = 15
-        sectionTitleLayer.foregroundColor = NSColor.linkedSectionTitleColor.cgColor
+        sectionTitleLayer.foregroundColor = BeamColor.LinkedSection.sectionTitle.cgColor
 
         addLayer(ButtonLayer("sectionTitle", sectionTitleLayer, activated: {
             guard let chevron = self.layers["disclosure"] as? ChevronButton else { return }
@@ -69,9 +69,9 @@ class LinksSection: Widget {
 
         linkActionLayer.font = NSFont.systemFont(ofSize: 0, weight: .medium)
         linkActionLayer.fontSize = 13
-        linkActionLayer.foregroundColor = NSColor.linkedActionButtonColor.cgColor
+        linkActionLayer.foregroundColor = BeamColor.LinkedSection.actionButton.cgColor
 
-        separatorLayer.backgroundColor = NSColor.linkedSeparatorColor.withAlphaComponent(0.5).cgColor
+        separatorLayer.backgroundColor = BeamColor.LinkedSection.separator.nsColor.withAlphaComponent(0.5).cgColor
     }
 
     func setupSectionMode() {
@@ -178,7 +178,7 @@ class LinksSection: Widget {
             }, hovered: {[weak self] isHover in
                 guard let self = self else { return }
 
-                self.linkActionLayer.foregroundColor = isHover ? NSColor.linkedActionButtonHoverColor.cgColor : NSColor.linkedActionButtonColor.cgColor
+                self.linkActionLayer.foregroundColor = isHover ? BeamColor.LinkedSection.actionButtonHover.cgColor : BeamColor.LinkedSection.actionButton.cgColor
             })
 
         guard let linkLayer = linkLayer else { return }

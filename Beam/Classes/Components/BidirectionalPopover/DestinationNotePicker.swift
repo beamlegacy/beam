@@ -63,22 +63,22 @@ struct DestinationNotePicker: View {
         })
         return ZStack(alignment: .top) {
             RoundedRectangle(cornerRadius: 4)
-                .fill(Color(.destinationNoteBorderColor).opacity(isMouseDown ? 1.0 : 0.0))
+                .fill(BeamColor.NotePicker.border.swiftUI.opacity(isMouseDown ? 1.0 : 0.0))
                 .overlay(
                     RoundedRectangle(cornerRadius: 4)
-                        .strokeBorder(Color(.destinationNoteBorderColor))
+                        .strokeBorder(BeamColor.NotePicker.border.swiftUI)
                         .opacity(isEditing || isHovering ? 1.0 : 0.0)
                 )
                 .frame(minWidth: isEditing ? 230 : 0, maxHeight: boxHeight)
             ZStack(alignment: .topLeading) {
                 Text(title)
                     .font(.system(size: 12))
-                    .padding(8)
+                    .padding(BeamSpacing._80)
                     .frame(maxWidth: maxBoxWidth, alignment: .leading)
                     .frame(height: boxHeight)
                     .fixedSize(horizontal: true, vertical: false)
                     .foregroundColor(.white)
-                    .colorMultiply(isHovering || isMouseDown ? Color(.destinationNoteActiveTextColor) : Color(.destinationNoteTextColor))
+                    .colorMultiply(isHovering || isMouseDown ? BeamColor.Generic.text.swiftUI : BeamColor.Generic.placeholder.swiftUI)
                     .animation(animation)
                     .opacity(isEditing ? 0.0 : 1.0)
                     .accessibility(identifier: "DestinationNoteTitle")
@@ -89,8 +89,8 @@ struct DestinationNotePicker: View {
                             isEditing: isEditingBinding,
                             placeholder: placeholder,
                             font: .systemFont(ofSize: 12),
-                            textColor: isHovering || isMouseDown ? .destinationNoteActiveTextColor : .destinationNoteTextColor,
-                            placeholderColor: NSColor.omniboxPlaceholderTextColor,
+                            textColor: isHovering || isMouseDown || isEditing ? BeamColor.Generic.text.nsColor : BeamColor.Generic.placeholder.nsColor,
+                            placeholderColor: BeamColor.Generic.placeholder.nsColor,
                             selectedRanges: state.destinationCardNameSelectedRange
                         ) { newName in
                             Logger.shared.logInfo("[DestinationNotePicker] Searching '\(newName)'", category: .ui)
@@ -115,7 +115,7 @@ struct DestinationNotePicker: View {
                             cancelSearch()
                         }
                     }
-                    .padding(8)
+                    .padding(BeamSpacing._80)
                     .accessibility(addTraits: .isSearchField)
                     .accessibility(identifier: "DestinationNoteSearchField")
                     .onAppear(perform: {

@@ -93,9 +93,9 @@ class TextFormatterView: FormatterView {
         containerView.wantsLayer = true
         containerView.layer?.cornerRadius = corderRadius
         containerView.layer?.borderWidth = 0.7
-        containerView.layer?.borderColor = NSColor.formatterBorderColor.cgColor
+        containerView.layer?.borderColor = BeamColor.Formatter.border.cgColor
         containerView.layer?.backgroundColor = viewType == .persistent ?
-            NSColor.formatterViewBackgroundColor.cgColor : NSColor.formatterViewBackgroundHoverColor.cgColor
+            BeamColor.Formatter.background.cgColor : BeamColor.Formatter.backgroundHover.cgColor
 
     }
 
@@ -103,7 +103,7 @@ class TextFormatterView: FormatterView {
         self.layer?.allowsEdgeAntialiasing = true
         self.layer?.drawsAsynchronously = true
         self.shadow = NSShadow()
-        self.layer?.shadowColor = viewType == .inline ? NSColor.formatterViewShadowColor.cgColor : NSColor.clear.cgColor
+        self.layer?.shadowColor = viewType == .inline ? BeamColor.Formatter.shadow.cgColor : NSColor.clear.cgColor
         self.layer?.shadowOpacity = viewType == .inline ? 1.0 : 0
         self.layer?.shadowRadius = viewType == .inline ? shadowRadius : 0
         self.layer?.shadowOffset = viewType == .inline ? shadowOffset : NSSize.zero
@@ -116,11 +116,11 @@ class TextFormatterView: FormatterView {
             ctx.allowsImplicitAnimation = true
             ctx.duration = FormatterView.appearAnimationDuration
 
-            layer?.shadowColor = isHover ? NSColor.formatterViewShadowColor.cgColor : NSColor.clear.cgColor
+            layer?.shadowColor = isHover ? BeamColor.Formatter.shadow.cgColor : NSColor.clear.cgColor
             layer?.shadowOpacity = isHover ? 1.0 : 0
             layer?.shadowRadius = isHover ? shadowRadius : 0
             layer?.shadowOffset = isHover ? shadowOffset : NSSize.zero
-            containerView.layer?.backgroundColor = isHover ? NSColor.formatterViewBackgroundHoverColor.cgColor : NSColor.formatterViewBackgroundColor.cgColor
+            containerView.layer?.backgroundColor = isHover ? BeamColor.Formatter.backgroundHover.cgColor : BeamColor.Formatter.background.cgColor
         }
     }
 
@@ -129,7 +129,7 @@ class TextFormatterView: FormatterView {
             ctx.allowsImplicitAnimation = true
             ctx.duration = 0.3
 
-            button.contentTintColor = isHover ? NSColor.formatterIconHoverAndActiveColor : NSColor.formatterIconColor
+            button.contentTintColor = isHover ? BeamColor.Formatter.iconHoverAndActive.nsColor : BeamColor.Formatter.icon.nsColor
         }
     }
 
@@ -139,7 +139,7 @@ class TextFormatterView: FormatterView {
         if types.isEmpty {
             selectedTypes = []
             buttons.forEach { button in
-                button.value.contentTintColor = NSColor.formatterIconColor
+                button.value.contentTintColor = BeamColor.Formatter.icon.nsColor
                 button.value.layer?.backgroundColor = NSColor.clear.cgColor
             }
 
@@ -148,8 +148,8 @@ class TextFormatterView: FormatterView {
 
         types.forEach { type in
             guard let button = buttons[type] else { return }
-            button.contentTintColor = NSColor.formatterIconHoverAndActiveColor
-            button.layer?.backgroundColor = NSColor.formatterButtonBackgroudHoverColor.cgColor
+            button.contentTintColor = BeamColor.Formatter.iconHoverAndActive.nsColor
+            button.layer?.backgroundColor = BeamColor.Formatter.backgroundHover.cgColor
             selectedTypes.insert(type)
         }
     }
@@ -160,12 +160,12 @@ class TextFormatterView: FormatterView {
         removeState(type)
 
         if selectedTypes.contains(type) {
-            button.contentTintColor = NSColor.formatterIconColor
+            button.contentTintColor = BeamColor.Formatter.icon.nsColor
             button.layer?.backgroundColor = NSColor.clear.cgColor
             selectedTypes.remove(type)
         } else {
-            button.contentTintColor = NSColor.formatterIconHoverAndActiveColor
-            button.layer?.backgroundColor = NSColor.formatterButtonBackgroudHoverColor.cgColor
+            button.contentTintColor = BeamColor.Formatter.iconHoverAndActive.nsColor
+            button.layer?.backgroundColor = BeamColor.Formatter.buttonBackgroundHover.cgColor
             selectedTypes.insert(type)
         }
     }
@@ -173,7 +173,7 @@ class TextFormatterView: FormatterView {
     func resetSelectedItems() {
         self.selectedTypes = []
         buttons.forEach { button in
-            button.value.contentTintColor = NSColor.formatterIconColor
+            button.value.contentTintColor = BeamColor.Formatter.icon.nsColor
             button.value.layer?.backgroundColor = NSColor.clear.cgColor
         }
     }
@@ -203,7 +203,7 @@ class TextFormatterView: FormatterView {
         if isActive {
             guard let button = buttons[type] else { return }
 
-            button.contentTintColor = NSColor.formatterIconColor
+            button.contentTintColor = BeamColor.Formatter.icon.nsColor
             button.layer?.backgroundColor = NSColor.clear.cgColor
             selectedTypes.remove(type)
         }
@@ -223,7 +223,7 @@ class TextFormatterView: FormatterView {
             )
 
             button.layer?.cornerRadius = cornerRadius
-            button.contentTintColor = NSColor.formatterIconColor
+            button.contentTintColor = BeamColor.Formatter.icon.nsColor
             button.image = NSImage(named: "editor-format_\(item)")
             button.tag = index
             button.target = self
@@ -272,7 +272,7 @@ class TextFormatterView: FormatterView {
 
     private func removeActiveIndicator(to item: FormatterType) {
         guard let button = buttons[item] else { return }
-        button.contentTintColor = NSColor.formatterIconColor
+        button.contentTintColor = BeamColor.Formatter.icon.nsColor
         button.layer?.backgroundColor = NSColor.clear.cgColor
         selectedTypes.remove(item)
     }

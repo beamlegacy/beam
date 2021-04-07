@@ -15,9 +15,9 @@ struct OmniBarButton: View {
     @Environment(\.isEnabled) private var isEnabled: Bool
     @State private var isHovering: Bool = false
 
-    private let disabledContentColor = Color(.toolbarButtonIconDisabledColor)
-    private let contentColor = Color(.toolbarButtonIconColor)
-    private let activeContentColor = Color(.toolbarButtonActiveIconColor)
+    private let disabledContentColor = BeamColor.Button.text.swiftUI.opacity(0.13)
+    private let contentColor = BeamColor.Button.text.swiftUI
+    private let activeContentColor = BeamColor.Button.activeText.swiftUI
 
     var foregroundColor: Color {
         guard isEnabled else { return disabledContentColor }

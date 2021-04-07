@@ -22,7 +22,7 @@ enum ButtonLabelVariant {
 }
 
 struct ButtonLabelStyle {
-    var font: SwiftUI.Font = NSFont.beam_medium(ofSize: 12).toSwiftUIFont()
+    var font = BeamFont.medium(size: 12).swiftUI
     var horizontalPadding: CGFloat = 6
     var verticalPadding: CGFloat = 3
 }
@@ -45,17 +45,17 @@ struct ButtonLabel: View {
 
     private var foregroundColor: Color {
         guard defaultState != .disabled else {
-            return Color(.buttonTextColor).opacity(0.35)
+            return BeamColor.Button.text.swiftUI.opacity(0.35)
         }
         guard isHovering || isTouching || defaultState != .normal else {
-            return Color(.buttonTextColor)
+            return BeamColor.Button.text.swiftUI
         }
-        return Color(.buttonActiveTextColor)
+        return BeamColor.Button.activeText.swiftUI
     }
 
     private var backgroundColor: Color? {
         if isTouching || defaultState == .clicked {
-            return Color(.buttonActiveBackgroundColor)
+            return BeamColor.Button.activeBackground.swiftUI
         }
         return nil
     }

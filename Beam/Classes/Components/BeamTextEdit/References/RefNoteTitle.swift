@@ -43,7 +43,7 @@ class RefNoteTitle: Widget {
         titleLayer.string = noteTitle.capitalized
         titleLayer.font = NSFont.systemFont(ofSize: 0, weight: .semibold)
         titleLayer.fontSize = 17
-        titleLayer.foregroundColor = NSColor.linkedTitleColor.cgColor
+        titleLayer.foregroundColor = BeamColor.LinkedSection.title.cgColor
 
         cardTitleLayer = ButtonLayer("cardTitleLayer", titleLayer, activated: {[weak self] in
             guard let self = self, let title = self.titleLayer.string as? String else { return }
@@ -59,7 +59,7 @@ class RefNoteTitle: Widget {
         linkLayer.string = actionTitle
         linkLayer.font = NSFont.systemFont(ofSize: 0, weight: .medium)
         linkLayer.fontSize = 13
-        linkLayer.foregroundColor = NSColor.linkedActionButtonColor.cgColor
+        linkLayer.foregroundColor = BeamColor.LinkedSection.actionButton.cgColor
 
         let actionLayer = ButtonLayer(
                 "actionLinkLayer",
@@ -69,7 +69,7 @@ class RefNoteTitle: Widget {
                 },
                 hovered: { [weak self] isHover in
                     guard let self = self else { return }
-                    self.linkLayer.foregroundColor = isHover ? NSColor.linkedActionButtonHoverColor.cgColor : NSColor.linkedActionButtonColor.cgColor
+                    self.linkLayer.foregroundColor = isHover ? BeamColor.LinkedSection.actionButtonHover.cgColor : BeamColor.LinkedSection.actionButton.cgColor
                 }
             )
         addLayer(actionLayer)

@@ -60,9 +60,9 @@ struct WindowBottomToolBar: View {
                         ButtonLabel("All Cards")
                         Separator()
                     }
-                    ButtonLabel("?", customStyle: ButtonLabelStyle(font: NSFont.beam_medium(ofSize: 11).toSwiftUIFont(), horizontalPadding: 5, verticalPadding: 2))
+                    ButtonLabel("?", customStyle: ButtonLabelStyle(font: BeamFont.medium(size: 11).swiftUI, horizontalPadding: 5, verticalPadding: 2))
                         .overlay(
-                            Circle().stroke(Color(.buttonActiveBackgroundColor), lineWidth: 1)
+                            Circle().stroke(BeamColor.Button.activeBackground.swiftUI, lineWidth: 1)
                                 .frame(width: 16, height: 16)
                                 .offset(x: -0.5)
                         )
@@ -71,10 +71,10 @@ struct WindowBottomToolBar: View {
                 }
                 .fixedSize(horizontal: true, vertical: false)
             }
-            .padding(5)
+            .padding(BeamSpacing._50)
             .background(
-                Color(.bottomBarBackgroundColor)
-                    .shadow(color: Color(.bottomBarShadowColor), radius: 0, x: 0, y: -0.5)
+                BeamColor.Generic.background.swiftUI
+                    .shadow(color: BeamColor.BottomBar.shadow.swiftUI, radius: 0, x: 0, y: -0.5)
             )
             .frame(height: 30)
             .frame(maxWidth: .infinity)

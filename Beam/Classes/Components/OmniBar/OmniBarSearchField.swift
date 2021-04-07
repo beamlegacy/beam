@@ -85,7 +85,7 @@ struct OmniBarSearchField: View {
                     .opacity(shouldShowWebHost ? 0 : 1.0)
                     .frame(width: shouldShowWebHost ? 0 : 16)
             } else if let iconName = leadingIconName {
-                Icon(name: iconName, size: 16, color: isEditing ? Color(.omniboxTextColor) : Color(.omniboxPlaceholderTextColor) )
+                Icon(name: iconName, size: 16, color: isEditing ? BeamColor.Generic.text.swiftUI : BeamColor.Generic.placeholder.swiftUI )
                     .opacity(shouldShowWebHost ? 0 : 1.0)
                     .frame(width: shouldShowWebHost ? 0 : 16)
             }
@@ -94,9 +94,9 @@ struct OmniBarSearchField: View {
                     text: textFieldText,
                     isEditing: customEditingBinding,
                     placeholder: "Search Beam or the web",
-                    font: NSFont.beam_medium(ofSize: 13),
-                    textColor: isEditing ? NSColor.omniboxTextColor : NSColor.omniboxPlaceholderTextColor,
-                    placeholderColor: NSColor.omniboxPlaceholderTextColor,
+                    font: BeamFont.medium(size: 13).nsFont,
+                    textColor: isEditing ? BeamColor.Generic.text.nsColor : BeamColor.Generic.placeholder.nsColor,
+                    placeholderColor: BeamColor.Generic.placeholder.nsColor,
                     selectedRanges: autocompleteManager.searchQuerySelectedRanges,
                     onTextChanged: { _ in
                         autocompleteManager.resetAutocompleteSelection()
@@ -128,12 +128,12 @@ struct OmniBarSearchField: View {
                 if let subtitle = resultSubtitle {
                     HStack(spacing: 0) {
                         Text(textFieldText.wrappedValue)
-                            .font(NSFont.beam_medium(ofSize: 13).toSwiftUIFont())
+                            .font(BeamFont.medium(size: 13).swiftUI)
                             .foregroundColor(Color.purple)
                             .hidden()
                             Text(" — \(subtitle)")
-                                .font(NSFont.beam_regular(ofSize: 13).toSwiftUIFont())
-                                .foregroundColor(Color(.autocompleteLinkColor))
+                                .font(BeamFont.regular(size: 13).swiftUI)
+                                .foregroundColor(BeamColor.Autocomplete.link.swiftUI)
                                 .background(autocompleteManager.searchQuerySelectedRanges?.isEmpty == false ? Color(.selectedTextBackgroundColor) : nil)
                                 .offset(x: -0.5, y: 0)
                                 .animation(nil)

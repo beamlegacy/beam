@@ -26,7 +26,7 @@ struct ConsoleContentView: View {
                 Logs
             }
         }
-        .background(Color(.editorBackgroundColor))
+        .background(BeamColor.Generic.background.swiftUI)
     }
 
     private var BottomButton: some View {

@@ -45,7 +45,7 @@ struct JournalScrollView: NSViewRepresentable {
         scrollView.verticalScroller?.alphaValue = 0
         scrollView.horizontalScroller?.alphaValue = 0
         scrollView.borderType = .noBorder
-        scrollView.backgroundColor = NSColor.editorBackgroundColor
+        scrollView.backgroundColor = BeamColor.Generic.background.nsColor
 
         // Initial document view
         let journalStackView = JournalStackView(horizontalSpace: 40, topOffset: self.proxy.size.height * 0.2)

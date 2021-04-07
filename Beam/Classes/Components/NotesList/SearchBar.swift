@@ -19,7 +19,7 @@ struct SearchBar: View {
                 }, label: {
                     Text("Cancel")
                 })
-                .padding(.trailing, 10)
+                .padding(.trailing, BeamSpacing._100)
                 .transition(.move(edge: .trailing))
                 .animation(.default)
             }

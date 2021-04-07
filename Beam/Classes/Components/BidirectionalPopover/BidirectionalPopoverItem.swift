@@ -20,7 +20,7 @@ class BidirectionalPopoverItem: NSCollectionViewItem {
 
     override var isSelected: Bool {
         didSet {
-            containerView.layer?.backgroundColor = isSelected ? NSColor.bidirectionalPopoverBackgroundHoverColor.cgColor : NSColor.clear.cgColor
+            containerView.layer?.backgroundColor = isSelected ? BeamColor.BidirectionalPopover.backgroundHover.cgColor : NSColor.clear.cgColor
         }
     }
 
@@ -32,10 +32,10 @@ class BidirectionalPopoverItem: NSCollectionViewItem {
 
     // MARK: - Methods
     override func mouseEntered(with event: NSEvent) {
-        containerView.layer?.backgroundColor = NSColor.bidirectionalPopoverBackgroundHoverColor.cgColor
+        containerView.layer?.backgroundColor = BeamColor.BidirectionalPopover.backgroundHover.cgColor
     }
 
     override func mouseExited(with event: NSEvent) {
-        containerView.layer?.backgroundColor = isSelected ? NSColor.bidirectionalPopoverBackgroundHoverColor.cgColor : .clear
+        containerView.layer?.backgroundColor = isSelected ? BeamColor.BidirectionalPopover.backgroundHover.cgColor : .clear
     }
 }

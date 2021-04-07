@@ -14,10 +14,10 @@ struct FormatterViewBackground<Content: View>: View {
     private let boxCornerRadius: CGFloat = 6
 
     private var backgroundColor: Color {
-        Color(.formatterViewBackgroundColor)
+        BeamColor.Formatter.background.swiftUI
     }
     private var shadowColor: Color {
-        Color(.formatterViewShadowColor)
+        BeamColor.Formatter.shadow.swiftUI
     }
     private var shadowRadius: CGFloat {
         13

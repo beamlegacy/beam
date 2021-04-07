@@ -20,7 +20,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     var isEmpty: Bool { children.isEmpty }
     var selected: Bool = false {
         didSet {
-            layer.backgroundColor = selected ? NSColor.editorTextSelectionColor.cgColor : NSColor(white: 1, alpha: 0).cgColor
+            layer.backgroundColor = selected ? BeamColor.Editor.textSelection.cgColor : NSColor(white: 1, alpha: 0).cgColor
             invalidate()
         }
     }
@@ -390,7 +390,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         let height = size?.height ?? image.size.height
         let rect = CGRect(x: point.x, y: point.y, width: width, height: height)
 
-        image = image.fill(color: NSColor.editorIconColor)
+        image = image.fill(color: BeamColor.Editor.icon.nsColor)
 
         context.saveGState()
         context.translateBy(x: 0, y: image.size.height)

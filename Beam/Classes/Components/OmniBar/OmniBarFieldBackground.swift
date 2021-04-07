@@ -19,10 +19,10 @@ struct OmniBarFieldBackground<Content: View>: View {
     }
 
     private var backgroundColor: Color {
-        isEditing ? Color(.autocompleteFocusedBackgroundColor) : Color(.editorBackgroundColor)
+        isEditing ? BeamColor.Autocomplete.focusedBackground.swiftUI : BeamColor.Generic.background.swiftUI
     }
     private var shadowColor: Color {
-        isEditing ? Color(.autocompleteFocusedShadowColor) : Color(.autocompleteHoveredShadowColor)
+        isEditing ? BeamColor.Autocomplete.focusedShadow.swiftUI : BeamColor.Autocomplete.hoveredShadow.swiftUI
     }
     private var shadowOpacity: Double {
         return isHoveringBox || isEditing ? 1.0 : 0.0

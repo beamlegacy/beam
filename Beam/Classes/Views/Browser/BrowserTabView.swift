@@ -15,8 +15,6 @@ struct BrowserTabView: View {
     @State private var showButton = false
     let selected: Bool
 
-    static var tabFrameColor = Color(.tabFrame)
-
     var body: some View {
         HStack(alignment: .center, spacing: 5) {
             Rectangle()
@@ -26,7 +24,7 @@ struct BrowserTabView: View {
             .resizable()
             .frame(width: 12, height: 12, alignment: .leading)
             .opacity(showButton ? 1 : 0)
-                .foregroundColor(Color(.toolbarButtonIconColor))
+                .foregroundColor(BeamColor.Button.text.swiftUI)
             .buttonStyle(BorderlessButtonStyle())
             .padding(.leading, 8)
             .onTapGesture(count: 1) {
@@ -46,7 +44,7 @@ struct BrowserTabView: View {
 
                 Text(tab.title)
                     .font(.system(size: 11, weight: .regular))
-                    .foregroundColor(Color(.omniboxTextColor).opacity(selected ? 1.0 : 0.8))
+                    .foregroundColor(BeamColor.Generic.text.swiftUI.opacity(selected ? 1.0 : 0.8))
                     .allowsTightening(true)
                     .truncationMode(.tail)
                     .lineLimit(1)
@@ -64,7 +62,7 @@ struct BrowserTabView: View {
             showButton = v
         })
         .accessibility(identifier: "browserTabBarView")
-        .background(Rectangle().fill(selected ? Color(.tabBarBg) : Color(.tabFrame) ))
+        .background(Rectangle().fill(selected ? BeamColor.Tabs.tabBarBg.swiftUI : BeamColor.Tabs.tabFrame.swiftUI ))
     }
 
     func closeTab(id: UUID) {

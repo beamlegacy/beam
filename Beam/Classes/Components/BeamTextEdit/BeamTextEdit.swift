@@ -103,7 +103,7 @@ public extension CALayer {
 
         let l = CALayer()
         self.layer = l
-        l.backgroundColor = NSColor.editorBackgroundColor.cgColor
+        l.backgroundColor = BeamColor.Generic.background.cgColor
         l.masksToBounds = false
         l.addSublayer(titleLayer)
         //titleLayer.backgroundColor = NSColor.red.cgColor.copy(alpha: 0.2)
@@ -153,7 +153,7 @@ public extension CALayer {
 
     public override func viewDidChangeEffectiveAppearance() {
         super.viewDidChangeEffectiveAppearance()
-        layer?.backgroundColor = NSColor.editorBackgroundColor.cgColor
+        layer?.backgroundColor = BeamColor.Generic.background.cgColor
 
         layer?.setNeedsDisplay()
         titleLayer.setNeedsDisplay()
@@ -329,7 +329,7 @@ public extension CALayer {
               let layer = layer else { return }
 
         var icon = NSImage(named: "editor-options")
-        icon = icon?.fill(color: NSColor.cardOptionIconColor)
+        icon = icon?.fill(color: BeamColor.Card.optionIcon.nsColor)
 
         cardOptionLayer.contents = icon?.cgImage
         cardOptionLayer.contentsGravity = .resizeAspect
@@ -341,15 +341,15 @@ public extension CALayer {
         cardTimeLayer.enableAnimations = false
         cardHeaderLayer.enableAnimations = false
 
-        cardTitleLayer.foregroundColor = NSColor.cardTitleColor.cgColor
-        cardTitleLayer.font = NSFont(name: "Inter-SemiBold", size: 0)
+        cardTitleLayer.foregroundColor = BeamColor.Generic.text.cgColor
+        cardTitleLayer.font = BeamFont.semibold(size: 0).nsFont
         cardTitleLayer.fontSize = 26 // TODO: Change later (isBig ? 30 : 26)
         cardTitleLayer.string = cardNote.title
 
         if cardNote.isTodaysNote, journalMode {
 
             var weatherIcon = getWeatherIcon()
-            weatherIcon = weatherIcon?.fill(color: NSColor.cardTitleColor)
+            weatherIcon = weatherIcon?.fill(color: BeamColor.Generic.text.nsColor)
             cardTitleWeatherLayer.contents = weatherIcon?.cgImage
             cardTitleWeatherLayer.contentsGravity = .resizeAspect
             cardHeaderLayer.addSublayer(cardTitleWeatherLayer)
@@ -361,8 +361,8 @@ public extension CALayer {
 
         layer.addSublayer(cardHeaderLayer)
         if !journalMode {
-            cardTimeLayer.foregroundColor = NSColor.cardTimeColor.cgColor
-            cardTimeLayer.font = NSFont(name: "Inter-Regular", size: 0)
+            cardTimeLayer.foregroundColor = BeamColor.Generic.placeholder.cgColor
+            cardTimeLayer.font = BeamFont.regular(size: 0).nsFont
             cardTimeLayer.fontSize = 10 //  TODO: Change later (isBig ? 12 : 10)
             cardTimeLayer.string = formatter.string(from: note.updateDate)
             layer.addSublayer(cardTimeLayer)
@@ -390,7 +390,7 @@ public extension CALayer {
         guard let cardNote = note as? BeamNote,
               let layer = layer, journalMode && !cardNote.isTodaysNote else { return }
         cardSeparatorLayer.enableAnimations = true
-        cardSeparatorLayer.backgroundColor = NSColor.editorIndentBackgroundColor.cgColor
+        cardSeparatorLayer.backgroundColor = BeamColor.Editor.indentBackground.cgColor
 
         layer.addSublayer(cardSeparatorLayer)
 
@@ -406,8 +406,8 @@ public extension CALayer {
               let layer = layer else { return }
         cardSideLayer.enableAnimations = true
 
-        cardSideTitleLayer.foregroundColor = NSColor.cardTitleColor.cgColor
-        cardSideTitleLayer.font = NSFont.beam_semibold(ofSize: 0)
+        cardSideTitleLayer.foregroundColor = BeamColor.Generic.text.cgColor
+        cardSideTitleLayer.font = BeamFont.semibold(size: 0).nsFont
         cardSideTitleLayer.fontSize = 15 // TODO: Change later (isBig ? 30 : 26)
         cardSideTitleLayer.string = cardNote.title
 
@@ -1170,7 +1170,7 @@ public extension CALayer {
         // TODO: Change later (isBig ? 13 : 11)
         let f = NSFont.systemFont(ofSize: 11, weight: .semibold)
         titleString.addAttribute(.font, value: f, range: titleString.wholeRange)
-        titleString.addAttribute(.foregroundColor, value: NSColor.editorControlColor, range: titleString.wholeRange)
+        titleString.addAttribute(.foregroundColor, value: BeamColor.Editor.control.nsColor, range: titleString.wholeRange)
         _title = Font.draw(string: titleString, atPosition: NSPoint(x: 0, y: 0), textWidth: frame.width)
         return _title!
     }

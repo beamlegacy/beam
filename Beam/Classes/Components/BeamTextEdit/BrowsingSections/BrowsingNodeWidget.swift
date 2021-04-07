@@ -36,7 +36,7 @@ class BrowsingNodeWidget: Widget {
         super.init(parent: parent)
 
         // Append the linked references and unlinked references nodes
-        textLayer.foregroundColor = NSColor.editorIconColor.cgColor
+        textLayer.foregroundColor = BeamColor.Editor.icon.cgColor
         textLayer.fontSize = 14
 
         addLayer(ChevronButton("chevron", open: open, changed: { [unowned self] value in

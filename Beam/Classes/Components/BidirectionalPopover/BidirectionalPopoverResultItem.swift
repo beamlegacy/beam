@@ -36,7 +36,7 @@ class BidirectionalPopoverResultItem: BidirectionalPopoverItem {
 
     // MARK: - UI
     private func setupUI() {
-        titleLabel.textColor = NSColor.bidirectionalPopoverTextColor
+        titleLabel.textColor = BeamColor.Generic.text.nsColor
     }
 
     // MARK: - Methods
