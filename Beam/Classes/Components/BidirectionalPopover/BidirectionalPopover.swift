@@ -92,8 +92,8 @@ class BidirectionalPopover: Popover {
     }
 
     private func updateUI() {
-        containerView.layer?.backgroundColor = NSColor.bidirectionalPopoverBackgroundColor.cgColor
-        containerView.layer?.borderColor = NSColor.bidirectionalPopoverBackgroundColor.cgColor
+        containerView.layer?.backgroundColor = BeamColor.BidirectionalPopover.background.cgColor
+        containerView.layer?.borderColor = BeamColor.BidirectionalPopover.background.cgColor
     }
 
     private func setupCollectionView() {

@@ -15,7 +15,7 @@ struct DestinationNoteAutocompleteList: View {
 
     internal var onSelectAutocompleteResult: (() -> Void)?
     private let itemHeight: CGFloat = 32
-    private let colorPalette = AutocompleteItemColorPalette(selectedBackgroundColor: .destinationNoteSelectedColor, touchdownBackgroundColor: .destinationNoteActiveColor)
+    private let colorPalette = AutocompleteItemColorPalette(selectedBackgroundColor: BeamColor.NotePicker.selected.nsColor, touchdownBackgroundColor: BeamColor.NotePicker.active.nsColor)
     var body: some View {
         OmniBarFieldBackground(isEditing: true, enableAnimations: true) {
             VStack(spacing: 0) {

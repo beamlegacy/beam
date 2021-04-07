@@ -11,7 +11,7 @@ import SwiftUI
 struct Icon: View {
     var name: String
     var size: CGFloat = 16
-    var color = Color(.toolbarButtonIconColor)
+    var color = BeamColor.Button.text.swiftUI
 
     var body: some View {
         Image(name).renderingMode(.template)

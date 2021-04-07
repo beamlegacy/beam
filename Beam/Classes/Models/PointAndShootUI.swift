@@ -17,7 +17,7 @@ class PointAndShootUI: ObservableObject {
     }
 
     func drawPoint(area: NSRect) {
-        pointSelection = drawSelection(selection: area, animated: true, color: Color(.pointColor))
+        pointSelection = drawSelection(selection: area, animated: true, color: BeamColor.PointShoot.point.swiftUI)
     }
 
     func clearPoint() {
@@ -28,9 +28,9 @@ class PointAndShootUI: ObservableObject {
         let newX = shootArea.minX + xDelta
         let newY = shootArea.minY + yDelta
         let shootSelectionUI = SelectionUI(
-                rect: NSRect(x: newX, y: newY, width: shootArea.width, height: shootArea.height),
-                animated: false,
-                color: Color(.shootColor)
+            rect: NSRect(x: newX, y: newY, width: shootArea.width, height: shootArea.height),
+            animated: false,
+            color: BeamColor.PointShoot.shoot.swiftUI
         )
         shootSelections.append(shootSelectionUI)
     }

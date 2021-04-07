@@ -69,7 +69,7 @@ class Parser {
             guard decorate else { return "".attributed }
             let deco = decorations[decorationType]!
             let str = NSMutableAttributedString(string: deco.string)
-            str.addAttributes([NSAttributedString.Key.foregroundColor: NSColor.editorSyntaxColor], range: str.wholeRange)
+            str.addAttributes([NSAttributedString.Key.foregroundColor: BeamColor.Editor.syntax.nsColor], range: str.wholeRange)
             str.addAttribute(.font, value: font, range: str.wholeRange)
 
             return str

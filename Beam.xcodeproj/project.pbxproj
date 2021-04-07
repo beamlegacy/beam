@@ -333,9 +333,12 @@
 		A5153EE3260DD58A00C84902 /* RecentsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5153EE2260DD58A00C84902 /* RecentsManager.swift */; };
 		A5153EE7260DDC9D00C84902 /* RecentsManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5153EE6260DDC9D00C84902 /* RecentsManagerTests.swift */; };
 		A51ED9A72608D0CD00CA99E5 /* ContextMenuFormatterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51ED9A62608D0CD00CA99E5 /* ContextMenuFormatterView.swift */; };
+		A5208D76261D07E9006193AF /* BeamColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5208D75261D07E9006193AF /* BeamColor.swift */; };
+		A5208D80261D231B006193AF /* BeamColor+Contexts.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5208D7F261D231B006193AF /* BeamColor+Contexts.swift */; };
+		A5208D8F261D25F1006193AF /* BeamSpacing.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5208D8E261D25F1006193AF /* BeamSpacing.swift */; };
 		A520D8DF25F8DF8D00400720 /* TouchDownModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = A520D8DE25F8DF8D00400720 /* TouchDownModifier.swift */; };
 		A5233DE525FB682700BE6F05 /* FaviconProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5233DE425FB682700BE6F05 /* FaviconProvider.swift */; };
-		A52BFDF72608D6710028D3F3 /* NSFont+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52BFDF62608D6710028D3F3 /* NSFont+Beam.swift */; };
+		A52BFDF72608D6710028D3F3 /* BeamFont.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52BFDF62608D6710028D3F3 /* BeamFont.swift */; };
 		A52BFE63260901980028D3F3 /* Separator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52BFE62260901980028D3F3 /* Separator.swift */; };
 		A530D4E92609EB7B00DBD14E /* ContextMenuPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A530D4E82609EB7B00DBD14E /* ContextMenuPresenter.swift */; };
 		A545D2FB25F7B1D800E68F94 /* DestinationNoteAutocompleteList.swift in Sources */ = {isa = PBXBuildFile; fileRef = A545D2FA25F7B1D800E68F94 /* DestinationNoteAutocompleteList.swift */; };
@@ -895,9 +898,12 @@
 		A5153EE2260DD58A00C84902 /* RecentsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentsManager.swift; sourceTree = "<group>"; };
 		A5153EE6260DDC9D00C84902 /* RecentsManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentsManagerTests.swift; sourceTree = "<group>"; };
 		A51ED9A62608D0CD00CA99E5 /* ContextMenuFormatterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextMenuFormatterView.swift; sourceTree = "<group>"; };
+		A5208D75261D07E9006193AF /* BeamColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamColor.swift; sourceTree = "<group>"; };
+		A5208D7F261D231B006193AF /* BeamColor+Contexts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamColor+Contexts.swift"; sourceTree = "<group>"; };
+		A5208D8E261D25F1006193AF /* BeamSpacing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamSpacing.swift; sourceTree = "<group>"; };
 		A520D8DE25F8DF8D00400720 /* TouchDownModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TouchDownModifier.swift; sourceTree = "<group>"; };
 		A5233DE425FB682700BE6F05 /* FaviconProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaviconProvider.swift; sourceTree = "<group>"; };
-		A52BFDF62608D6710028D3F3 /* NSFont+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSFont+Beam.swift"; sourceTree = "<group>"; };
+		A52BFDF62608D6710028D3F3 /* BeamFont.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamFont.swift; sourceTree = "<group>"; };
 		A52BFE62260901980028D3F3 /* Separator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Separator.swift; sourceTree = "<group>"; };
 		A530D4E82609EB7B00DBD14E /* ContextMenuPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextMenuPresenter.swift; sourceTree = "<group>"; };
 		A545D2FA25F7B1D800E68F94 /* DestinationNoteAutocompleteList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DestinationNoteAutocompleteList.swift; sourceTree = "<group>"; };
@@ -1076,9 +1082,7 @@
 			isa = PBXGroup;
 			children = (
 				56A5BD1A25CC590500ED7C50 /* NaturalLanguage */,
-				41D1698625DBFDBB0018E5F2 /* Fonts */,
 				418171112581082200317ED8 /* Assets.xcassets */,
-				418170FE2581060A00317ED8 /* Colors.xcassets */,
 			);
 			path = Assets;
 			sourceTree = "<group>";
@@ -1297,8 +1301,6 @@
 				418171812581107C00317ED8 /* CoreDataManager+backupExtension.swift */,
 				418171802581107C00317ED8 /* NSManagedObject+initExtension.swift */,
 				418173B5258124D500317ED8 /* NSAttributedString+Beam.swift */,
-				4181744225812C5F00317ED8 /* NSColor+Beam.swift */,
-				A52BFDF62608D6710028D3F3 /* NSFont+Beam.swift */,
 				A50B372325FA180E00E5D34F /* NSApperance+Beam.swift */,
 				521EEDFA2593927100BA2485 /* Int+ByteSize.swift */,
 				416C09F2259C919200AF2903 /* CATransaction+Beam.swift */,
@@ -1577,6 +1579,7 @@
 		41D1698625DBFDBB0018E5F2 /* Fonts */ = {
 			isa = PBXGroup;
 			children = (
+				A52BFDF62608D6710028D3F3 /* BeamFont.swift */,
 				41D169A125DC07250018E5F2 /* Inter-Bold.otf */,
 				41D169A425DC07260018E5F2 /* Inter-Italic.otf */,
 				41D169A525DC07260018E5F2 /* Inter-Medium.otf */,
@@ -2037,6 +2040,7 @@
 		965A78272514F147009980D4 /* Beam */ = {
 			isa = PBXGroup;
 			children = (
+				A5208D5C261D0176006193AF /* BeamDesign */,
 				96319C9C261614CB00D1CF31 /* BeamCore */,
 				9611994725A279EC005BEC82 /* ObjCBridge */,
 				965A78282514F147009980D4 /* AppDelegate.swift */,
@@ -2161,6 +2165,27 @@
 				A5153EDC260CC4DC00C84902 /* ButtonLabel.swift */,
 			);
 			path = UIElements;
+			sourceTree = "<group>";
+		};
+		A5208D5C261D0176006193AF /* BeamDesign */ = {
+			isa = PBXGroup;
+			children = (
+				A5208D85261D25BC006193AF /* Colors */,
+				41D1698625DBFDBB0018E5F2 /* Fonts */,
+				A5208D8E261D25F1006193AF /* BeamSpacing.swift */,
+			);
+			path = BeamDesign;
+			sourceTree = "<group>";
+		};
+		A5208D85261D25BC006193AF /* Colors */ = {
+			isa = PBXGroup;
+			children = (
+				A5208D75261D07E9006193AF /* BeamColor.swift */,
+				A5208D7F261D231B006193AF /* BeamColor+Contexts.swift */,
+				4181744225812C5F00317ED8 /* NSColor+Beam.swift */,
+				418170FE2581060A00317ED8 /* Colors.xcassets */,
+			);
+			path = Colors;
 			sourceTree = "<group>";
 		};
 		A530D502260A19A600DBD14E /* ContextMenu */ = {
@@ -2857,6 +2882,7 @@
 				4131F16825BEC48C006473CD /* SpacerWidget.swift in Sources */,
 				4181723A2581107C00317ED8 /* Parser.swift in Sources */,
 				524520A425C8234500AC0007 /* BeamElement+Merge.swift in Sources */,
+				A5208D76261D07E9006193AF /* BeamColor.swift in Sources */,
 				4181724A2581107C00317ED8 /* TextView.swift in Sources */,
 				526017FC25AE081E00634695 /* AppDelegate+Console.swift in Sources */,
 				A567157125F66F8600B46110 /* StyledText.swift in Sources */,
@@ -2897,6 +2923,7 @@
 				96FACC8A26079C7E0088DD67 /* InputText.swift in Sources */,
 				418172002581107C00317ED8 /* NotificationName+Beam.swift in Sources */,
 				418172112581107C00317ED8 /* Readability.swift in Sources */,
+				A5208D80261D231B006193AF /* BeamColor+Contexts.swift in Sources */,
 				418171F12581107C00317ED8 /* UserSessionRequest.swift in Sources */,
 				A0689E6D25DE623D00B19CBB /* DeleteText.swift in Sources */,
 				526017F825AE078600634695 /* ConsoleContentView.swift in Sources */,
@@ -2914,7 +2941,7 @@
 				A0E3150525ED1ECB001A5E55 /* FormattingText.swift in Sources */,
 				4170C43125923B6A0072C781 /* Popover.swift in Sources */,
 				418171EC2581107C00317ED8 /* Me.swift in Sources */,
-				A52BFDF72608D6710028D3F3 /* NSFont+Beam.swift in Sources */,
+				A52BFDF72608D6710028D3F3 /* BeamFont.swift in Sources */,
 				96319D6D26163AAD00D1CF31 /* BeamNote+CommandManager.swift in Sources */,
 				4181724E2581107C00317ED8 /* TabStats.swift in Sources */,
 				4181724F2581107C00317ED8 /* WebView.swift in Sources */,
@@ -3028,6 +3055,7 @@
 				BAA67192B5EB78981741C311 /* WebPage.swift in Sources */,
 				BAA676BFF4B830E6A5CD5BEB /* PointFrame.swift in Sources */,
 				BAA67DCFEAB652474B00FF4F /* ShootFrame.swift in Sources */,
+				A5208D8F261D25F1006193AF /* BeamSpacing.swift in Sources */,
 				BAA67F2655955909590FECBB /* PointAndShootUI.swift in Sources */,
 				BAA67CE03D8FFB795346CD06 /* WebPositions.swift in Sources */,
 			);

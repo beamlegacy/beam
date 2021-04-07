@@ -12,7 +12,7 @@ struct AutocompleteItemColorPalette {
     let touchdownBackgroundColor: NSColor
 }
 
-private let defaultColorPalette = AutocompleteItemColorPalette(selectedBackgroundColor: .autocompleteSelectedBackgroundColor, touchdownBackgroundColor: .autocompleteClickedBackgroundColor)
+private let defaultColorPalette = AutocompleteItemColorPalette(selectedBackgroundColor: BeamColor.Autocomplete.selectedBackground.nsColor, touchdownBackgroundColor: BeamColor.Autocomplete.clickedBackground.nsColor)
 
 struct AutocompleteItem: View {
     @State var item: AutocompleteResult
@@ -42,9 +42,9 @@ struct AutocompleteItem: View {
         }
     }
 
-    private let textColor = Color(.autocompleteTextColor)
-    private let secondaryTextColor = Color(.autocompleteSubtitleTextColor)
-    private let subtitleLinkColor = Color(.autocompleteLinkColor)
+    private let textColor = BeamColor.Generic.text.swiftUI
+    private let secondaryTextColor = BeamColor.Autocomplete.subtitleText.swiftUI
+    private let subtitleLinkColor = BeamColor.Autocomplete.link.swiftUI
 
     private func boldTextRanges(in text: String) -> [Range<String.Index>] {
         guard let completingText = item.completingText else {
@@ -74,14 +74,14 @@ struct AutocompleteItem: View {
                 ZStack {
                     StyledText(verbatim: item.text)
                         .style(.semibold(), ranges: boldTextRanges)
-                        .font(NSFont.beam_regular(ofSize: 13).toSwiftUIFont())
+                        .font(BeamFont.regular(size: 13).swiftUI)
                         .foregroundColor(item.source == .url ? subtitleLinkColor : textColor)
                 }
                 if let info = item.information {
                     HStack {
                         StyledText(verbatim: "— \(info)")
                             .style(.semibold(), ranges: boldTextRanges)
-                            .font(NSFont.beam_regular(ofSize: 13).toSwiftUIFont())
+                            .font(BeamFont.regular(size: 13).swiftUI)
                             .foregroundColor(item.source == .history ? subtitleLinkColor : secondaryTextColor)
                     }
                 }
@@ -95,8 +95,8 @@ struct AutocompleteItem: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.vertical, 8)
-        .padding(.horizontal, 12)
+        .padding(.vertical, BeamSpacing._80)
+        .padding(.horizontal, BeamSpacing._120)
         .background(backgroundColor)
         .onTouchDown { t in
             isTouchDown = t

@@ -341,7 +341,7 @@ public class TextNode: Widget {
 
     func createIndentLayer() {
         let indentLayer = CALayer()
-        indentLayer.backgroundColor = NSColor.editorIndentBackgroundColor.cgColor
+        indentLayer.backgroundColor = BeamColor.Editor.indentBackground.cgColor
         indentLayer.enableAnimations = false
         addLayer(Layer(name: "indentLayer", layer: indentLayer))
         updateIndentLayer()
@@ -382,7 +382,7 @@ public class TextNode: Widget {
     }
 
     func addBulletPointLayer(at point: NSPoint) {
-        let bulletLayer = Layer(name: "bullet", layer: Layer.icon(named: "editor-bullet", color: NSColor.editorIconColor))
+        let bulletLayer = Layer(name: "bullet", layer: Layer.icon(named: "editor-bullet", color: BeamColor.Editor.icon.nsColor))
         bulletLayer.layer.isHidden = true
         addLayer(bulletLayer, origin: point, global: false)
     }
@@ -489,7 +489,7 @@ public class TextNode: Widget {
         actionLayer = CALayer()
         guard let actionLayer = actionLayer else { return }
 
-        icon = icon?.fill(color: .editorSearchNormal)
+        icon = icon?.fill(color: BeamColor.Editor.searchNormal.nsColor)
 
         actionImageLayer.opacity = 0
         actionImageLayer.frame = CGRect(x: 0, y: 2, width: 20, height: 16)
@@ -500,7 +500,7 @@ public class TextNode: Widget {
         actionTextLayer.fontSize = 10
         actionTextLayer.frame = CGRect(x: 15, y: 3.5, width: 100, height: 20)
         actionTextLayer.string = "to search"
-        actionTextLayer.foregroundColor = NSColor.editorSearchNormal.cgColor
+        actionTextLayer.foregroundColor = BeamColor.Editor.searchNormal.cgColor
 
         actionLayer.frame = CGRect(x: actionLayerFrame.minX, y: 0, width: actionLayerFrame.width, height: actionLayerFrame.height)
 
@@ -1126,18 +1126,18 @@ public class TextNode: Widget {
               root?.state.nodeSelection == nil else { return }
 
         actionLayerIsHovered = hovered
-        icon = icon?.fill(color: hovered ? .editorSearchHover : .editorSearchNormal)
+        icon = icon?.fill(color: hovered ? BeamColor.Editor.searchHover.nsColor : BeamColor.Editor.searchNormal.nsColor)
         actionImageLayer.contents = icon
         actionImageLayer.opacity = 1
         actionImageLayer.setAffineTransform(hovered ? CGAffineTransform(translationX: 1, y: 0) : CGAffineTransform.identity)
 
         actionTextLayer.opacity = hovered ? 1 : 0
-        actionTextLayer.foregroundColor = hovered ? NSColor.editorSearchHover.cgColor : NSColor.editorSearchNormal.cgColor
+        actionTextLayer.foregroundColor = hovered ? BeamColor.Editor.searchHover.cgColor : BeamColor.Editor.searchNormal.cgColor
         actionTextLayer.setAffineTransform(hovered ? CGAffineTransform(translationX: 11, y: 0) : CGAffineTransform.identity)
     }
 
     private func resetActionLayers() {
-        icon = icon?.fill(color: .editorSearchNormal)
+        icon = icon?.fill(color: BeamColor.Editor.searchNormal.nsColor)
         actionLayerIsHovered = false
         actionImageLayer.contents = icon
         actionImageLayer.opacity = 0

@@ -54,29 +54,24 @@ extension BeamText {
     }
 
     static func font(fontSize: CGFloat, strong: Bool, emphasis: Bool, elementKind: ElementKind) -> NSFont {
-        var font = NSFont(name: "Inter-Regular", size: fontSize)
+        var font = BeamFont.regular(size: fontSize).nsFont
 
         switch elementKind {
         case .bullet, .code, .quote:
             break
         case .heading:
-            font = NSFont.beam_medium(ofSize: fontSize)
+            font = BeamFont.medium(size: fontSize).nsFont
         }
 
         if strong {
-            font = NSFont.beam_bold(ofSize: fontSize)
-            if font == nil {
-                font = NSFontManager.shared.convert(NSFont.systemFont(ofSize: fontSize), toHaveTrait: .boldFontMask)
-            }
+            font = BeamFont.bold(size: fontSize).nsFont
         }
 
         if emphasis {
             font = NSFontManager.shared.convert(NSFont.systemFont(ofSize: fontSize), toHaveTrait: .italicFontMask)
         }
 
-        guard let actualFont = font else { return NSFont.systemFont(ofSize: fontSize) }
-
-        return actualFont
+        return font
     }
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
@@ -85,7 +80,7 @@ extension BeamText {
         var strong = false
         var emphasis = false
         var strikethrough = false
-        var color = NSColor.editorTextColor
+        var color = BeamColor.Generic.text.nsColor
 //        var quoteLevel: Int
 //        var quoteTitle: String?
 //        var quoteSource: String?
@@ -102,10 +97,10 @@ extension BeamText {
             case .source(let link):
                 source = link
             case .link(let link):
-                color = NSColor.editorLinkColor
+                color = BeamColor.Editor.link.nsColor
                 webLink = link
             case .internalLink(let link):
-                color = NSColor.editorBidirectionalLinkColor
+                color = BeamColor.Editor.bidirectionalLink.nsColor
                 internalLink = link
             case .strikethrough:
                 strikethrough = true
@@ -122,18 +117,18 @@ extension BeamText {
             }
 
             stringAttributes[.underlineStyle] = NSUnderlineStyle.single.rawValue
-            stringAttributes[.underlineColor] = NSColor.editorLinkDecorationColor
-            stringAttributes[NSAttributedString.Key.hoverUnderlineColor] = NSColor.editorLinkColor
+            stringAttributes[.underlineColor] = BeamColor.Editor.linkDecoration.nsColor
+            stringAttributes[NSAttributedString.Key.hoverUnderlineColor] = BeamColor.Editor.link.nsColor
         } else if let link = internalLink {
             stringAttributes[.link] = link
             stringAttributes[.underlineStyle] = NSUnderlineStyle.single.rawValue
             stringAttributes[.underlineColor] = NSColor.clear
-            stringAttributes[NSAttributedString.Key.hoverUnderlineColor] = NSColor.editorBidirectionalLinkColor
+            stringAttributes[NSAttributedString.Key.hoverUnderlineColor] = BeamColor.Editor.bidirectionalLink.nsColor
         }
 
         if strikethrough {
             stringAttributes[.strikethroughStyle] = NSUnderlineStyle.single.rawValue
-            stringAttributes[.strikethroughColor] = NSColor.underlineAndstrikethroughColor
+            stringAttributes[.strikethroughColor] = BeamColor.Editor.underlineAndStrikethrough.nsColor
         }
 
         if let source = source {
@@ -153,9 +148,9 @@ extension BeamText {
         let imageName = "editor-url"
         guard let image = NSImage(named: imageName) else { return }
 
-        var color = NSColor.editorLinkDecorationColor
+        var color = BeamColor.Editor.linkDecoration.nsColor
         if let mouseInt = mouseInteraction, mouseInt.type == .hovered, Self.isPositionOnLinkArrow(mouseInt.range.lowerBound, in: range) {
-            color = .editorLinkColor
+            color = BeamColor.Editor.link.nsColor
         }
         let extentBuffer = UnsafeMutablePointer<ImageRunStruct>.allocate(capacity: 1)
         extentBuffer.initialize(to: ImageRunStruct(ascent: image.size.height, descent: 0, width: image.size.width, image: imageName, color: color))

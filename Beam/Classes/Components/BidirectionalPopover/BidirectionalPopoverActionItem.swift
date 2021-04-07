@@ -30,8 +30,8 @@ class BidirectionalPopoverActionItem: BidirectionalPopoverItem {
     private func setupUI() {
         containerView.wantsLayer = true
         containerView.layer?.cornerRadius = 5
-        queryLabel.textColor = NSColor.bidirectionalPopoverTextColor
-        actionLabel.textColor = NSColor.bidirectionalPopoverActionTextColor
+        queryLabel.textColor = BeamColor.Generic.text.nsColor
+        actionLabel.textColor = BeamColor.BidirectionalPopover.actionText.nsColor
     }
 
     // MARK: - Methods

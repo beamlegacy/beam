@@ -14,7 +14,7 @@ struct Separator: View {
     static let width: CGFloat = 1.0
     var body: some View {
         Rectangle()
-            .fill(Color(.beamSeparatorColor))
+            .fill(BeamColor.Generic.separator.swiftUI)
             .frame(width: !horizontal ? Self.width : nil, height: horizontal ? Self.height : nil)
     }
 }

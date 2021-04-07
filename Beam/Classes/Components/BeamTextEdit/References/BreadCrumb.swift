@@ -87,13 +87,13 @@ class BreadCrumb: Widget {
 
         container = Layer(name: "containerLayer", layer: containerLayer, hovered: { [weak self] isHover in
             guard let self = self else { return }
-            self.containerLayer.backgroundColor = isHover ? NSColor.linkedContainerColor.cgColor : NSColor.clear.cgColor
+            self.containerLayer.backgroundColor = isHover ? BeamColor.LinkedSection.container.cgColor : NSColor.clear.cgColor
         })
 
         linkLayer.string = "Link"
         linkLayer.font = NSFont.systemFont(ofSize: 0, weight: .medium)
         linkLayer.fontSize = 13
-        linkLayer.foregroundColor = NSColor.linkedActionButtonColor.cgColor
+        linkLayer.foregroundColor = BeamColor.LinkedSection.actionButton.cgColor
 
         let actionLayer = ButtonLayer(
                 "actionLinkLayer",
@@ -105,7 +105,7 @@ class BreadCrumb: Widget {
                 },
                 hovered: { [weak self] isHover in
                     guard let self = self else { return }
-                    self.linkLayer.foregroundColor = isHover ? NSColor.linkedActionButtonHoverColor.cgColor : NSColor.linkedActionButtonColor.cgColor
+                    self.linkLayer.foregroundColor = isHover ? BeamColor.LinkedSection.actionButtonHover.cgColor : BeamColor.LinkedSection.actionButton.cgColor
                 }
             )
         actionLayer.layer.isHidden = !isReference
@@ -136,7 +136,7 @@ class BreadCrumb: Widget {
                 self.replaceNodeWithRootNode(by: index)
             },
             hovered: { isHover in
-                layer.foregroundColor = isHover ? NSColor.linkedBreadcrumbHoverColor.cgColor : NSColor.linkedBreadcrumbColor.cgColor
+                layer.foregroundColor = isHover ? BeamColor.LinkedSection.breadcrumbHover.cgColor : BeamColor.LinkedSection.breadcrumb.cgColor
             }
         ))
     }
@@ -184,9 +184,9 @@ class BreadCrumb: Widget {
 
             newLayer.font = NSFont.systemFont(ofSize: 0, weight: .medium)
             newLayer.fontSize = 10
-            newLayer.foregroundColor = NSColor.linkedBreadcrumbColor.cgColor
+            newLayer.foregroundColor = BeamColor.LinkedSection.breadcrumb.cgColor
 
-            breadcrumbArrowLayer = Layer.icon(named: "editor-breadcrumb_arrow", color: NSColor.linkedChevronIconColor)
+            breadcrumbArrowLayer = Layer.icon(named: "editor-breadcrumb_arrow", color: BeamColor.LinkedSection.chevronIcon.nsColor)
 
             if index != crumbChain.count - 1 {
                 createBreadcrumbArrowLayer(breadcrumbArrowLayer, index: index)

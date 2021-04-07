@@ -23,12 +23,12 @@ private struct ContextMenuItemView: View {
 
     var body: some View {
         ZStack(alignment: .leading) {
-            RoundedRectangle(cornerRadius: 3).fill(Color(.contextMenuHoverColor).opacity(isHovering ? 1.0 : 0.0))
+            RoundedRectangle(cornerRadius: 3).fill(BeamColor.ContextMenu.hover.swiftUI.opacity(isHovering ? 1.0 : 0.0))
             Text(item.title)
-                .font(NSFont.beam_medium(ofSize: 13).toSwiftUIFont())
-                .foregroundColor(Color(.editorTextColor))
-                .padding(.vertical, 4)
-                .padding(.horizontal, 5)
+                .font(BeamFont.medium(size: 13).swiftUI)
+                .foregroundColor(BeamColor.Generic.text.swiftUI)
+                .padding(.vertical, BeamSpacing._40)
+                .padding(.horizontal, BeamSpacing._50)
         }
         .frame(maxWidth: .infinity)
         .onHover { hovering in
@@ -72,7 +72,7 @@ private struct ContextMenuView: View {
                     }
                 }
             }
-            .padding(5)
+            .padding(BeamSpacing._50)
         }
         .zIndex(1000)
         .frame(minWidth: Self.defaultWidth)

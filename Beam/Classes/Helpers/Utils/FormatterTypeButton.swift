@@ -26,8 +26,8 @@ class FormatterTypeButton: NSButton {
     override func draw(_ dirtyRect: NSRect) {
         super.draw(dirtyRect)
         if isHighlighted {
-            contentTintColor = NSColor.formatterIconHoverAndActiveColor
-            layer?.backgroundColor = NSColor.formatterButtonBackgroudHoverColor.cgColor
+            contentTintColor = BeamColor.Formatter.iconHoverAndActive.nsColor
+            layer?.backgroundColor = BeamColor.Formatter.buttonBackgroundHover.cgColor
         }
     }
 

@@ -133,7 +133,7 @@ class LinkedReferenceNode: TextNode {
         linkTextLayer.string = "Link"
         linkTextLayer.font = NSFont.systemFont(ofSize: 0, weight: .medium)
         linkTextLayer.fontSize = 13
-        linkTextLayer.foregroundColor = NSColor.linkedActionButtonColor.cgColor
+        linkTextLayer.foregroundColor = BeamColor.LinkedSection.actionButton.cgColor
         linkTextLayer.contentsScale = contentsScale
 
         addLayer(ButtonLayer(
@@ -144,7 +144,7 @@ class LinkedReferenceNode: TextNode {
                 return
             },
             hovered: { (isHover) in
-                self.linkTextLayer.foregroundColor = isHover ? NSColor.linkedActionButtonHoverColor.cgColor : NSColor.linkedActionButtonColor.cgColor
+                self.linkTextLayer.foregroundColor = isHover ? BeamColor.LinkedSection.actionButtonHover.cgColor : BeamColor.LinkedSection.actionButton.cgColor
             }
         ))
     }

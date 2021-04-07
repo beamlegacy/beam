@@ -24,14 +24,14 @@ private struct HyperlinkEditorView: View {
     @State private var isEditingTitle = false
 
     private var titleTextColor: NSColor {
-        return isEditingTitle ? .hyperlinkTextFielColor : .hyperlinkTextFielPlaceholderColor
+        return isEditingTitle ? BeamColor.Generic.text.nsColor : BeamColor.Generic.placeholder.nsColor
     }
     private var urlTextColor: NSColor {
-        return isEditingUrl ? .hyperlinkTextFielColor : .hyperlinkTextFielPlaceholderColor
+        return isEditingUrl ? BeamColor.Generic.text.nsColor : BeamColor.Generic.placeholder.nsColor
     }
 
     func textField(_ textBinding: Binding<String>, editingBinding: Binding<Bool>, placeholder: String) -> some View {
-        return BeamTextField(text: textBinding, isEditing: editingBinding, placeholder: placeholder, font: NSFont.beam_regular(ofSize: 13), textColor: editingBinding.wrappedValue ? .hyperlinkTextFielColor : .hyperlinkTextFielPlaceholderColor, placeholderColor: .hyperlinkTextFielPlaceholderColor, onCommit: { _ in
+        return BeamTextField(text: textBinding, isEditing: editingBinding, placeholder: placeholder, font: BeamFont.regular(size: 13).nsFont, textColor: editingBinding.wrappedValue ? BeamColor.Generic.text.nsColor : BeamColor.Generic.placeholder.nsColor, placeholderColor: BeamColor.Generic.placeholder.nsColor, onCommit: { _ in
             onFinishEditing?(false)
         }, onEscape: {
             onFinishEditing?(true)
@@ -42,10 +42,10 @@ private struct HyperlinkEditorView: View {
         FormatterViewBackground {
             VStack {
                 HStack(spacing: 4) {
-                    Icon(name: "editor-url_title", size: 16, color: Color(.hyperlinkTextFielColor))
+                    Icon(name: "editor-url_title", size: 16, color: BeamColor.Generic.text.swiftUI)
                     textField(viewModel.title, editingBinding: $isEditingTitle, placeholder: "Title")
                     if isEditingTitle {
-                        Icon(name: "editor-format_enter", size: 12, color: Color(.hyperlinkTextFielPlaceholderColor))
+                        Icon(name: "editor-format_enter", size: 12, color: BeamColor.Generic.placeholder.swiftUI)
                             .onTapGesture {
                                 onFinishEditing?(false)
                             }
@@ -54,10 +54,10 @@ private struct HyperlinkEditorView: View {
                 Separator(horizontal: true)
                     .padding(.horizontal, 2)
                 HStack(spacing: 4) {
-                    Icon(name: "editor-url_link", size: 16, color: Color(.hyperlinkTextFielColor))
+                    Icon(name: "editor-url_link", size: 16, color: BeamColor.Generic.text.swiftUI)
                     textField(viewModel.url, editingBinding: $isEditingUrl, placeholder: "URL")
                     if isEditingUrl {
-                        Icon(name: "editor-format_enter", size: 12, color: Color(.hyperlinkTextFielPlaceholderColor))
+                        Icon(name: "editor-format_enter", size: 12, color: BeamColor.Generic.text.swiftUI)
                             .onTapGesture {
                                 onFinishEditing?(false)
                             }
@@ -65,7 +65,7 @@ private struct HyperlinkEditorView: View {
                 }
             }
             .animation(nil)
-            .padding(8)
+            .padding(BeamSpacing._80)
         }
         .frame(width: 272, height: 65)
         .scaleEffect(viewModel.visible ? 1.0 : 0.98)

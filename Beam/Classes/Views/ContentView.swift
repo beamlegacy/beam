@@ -70,7 +70,7 @@ struct ModeView: View {
                         .transition(.offset(x: 0, y: 30))
                 }
             }
-            .background(Color(.editorBackgroundColor))
+            .background(BeamColor.Generic.background.swiftUI)
         }.frame(minWidth: 800)
     }
 }
@@ -78,7 +78,7 @@ struct ModeView: View {
 struct ContentView: View {
     var body: some View {
         ModeView()
-            .background(Color(.editorBackgroundColor))
+            .background(BeamColor.Generic.background.swiftUI)
             .edgesIgnoringSafeArea(.top)
     }
 }

@@ -22,7 +22,7 @@ class JournalStackView: NSView {
         super.init(frame: NSRect())
         self.translatesAutoresizingMaskIntoConstraints = false
         self.wantsLayer = true
-        self.layer?.backgroundColor = NSColor.editorBackgroundColor.cgColor
+        self.layer?.backgroundColor = BeamColor.Generic.background.cgColor
     }
 
     required init?(coder: NSCoder) {
