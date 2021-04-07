@@ -101,7 +101,7 @@ public class CommandManager<Context> {
     }
 
     @discardableResult
-    public func run(command: Command<Context>, on context: Context) -> Bool {
+    public func run(command: Command<Context>, on context: Context?) -> Bool {
         Logger.shared.logDebug("Run: \(command.name)")
         let done = command.run(context: context)
 

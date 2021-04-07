@@ -320,7 +320,7 @@
 		A0689E6D25DE623D00B19CBB /* DeleteText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0689E6C25DE623D00B19CBB /* DeleteText.swift */; };
 		A0689E7125DE6B8700B19CBB /* CommandsTextTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0689E7025DE6B8700B19CBB /* CommandsTextTests.swift */; };
 		A0AA693325C41C9B0038F9A3 /* MouseHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0AA693225C41C9B0038F9A3 /* MouseHandler.swift */; };
-		A0C0C2A725E5109F00BE34F0 /* InsertNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0C0C2A625E5109F00BE34F0 /* InsertNode.swift */; };
+		A0C0C2A725E5109F00BE34F0 /* InsertElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0C0C2A625E5109F00BE34F0 /* InsertElement.swift */; };
 		A0C63A6825FA249700FB4CCE /* BeamTextHolder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0C63A6725FA249700FB4CCE /* BeamTextHolder.swift */; };
 		A0D06CDB260A2D2700264926 /* JournalScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0D06CDA260A2D2700264926 /* JournalScrollView.swift */; };
 		A0D1731425E4FC2D00FDE73C /* ReplaceText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0D1731325E4FC2D00FDE73C /* ReplaceText.swift */; };
@@ -885,7 +885,7 @@
 		A0689E7025DE6B8700B19CBB /* CommandsTextTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandsTextTests.swift; sourceTree = "<group>"; };
 		A06DF52525B7608000E2CB62 /* CommandManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CommandManagerTests.swift; path = Classes/CommandManagerTests.swift; sourceTree = "<group>"; };
 		A0AA693225C41C9B0038F9A3 /* MouseHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MouseHandler.swift; sourceTree = "<group>"; };
-		A0C0C2A625E5109F00BE34F0 /* InsertNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsertNode.swift; sourceTree = "<group>"; };
+		A0C0C2A625E5109F00BE34F0 /* InsertElement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsertElement.swift; sourceTree = "<group>"; };
 		A0C63A6725FA249700FB4CCE /* BeamTextHolder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamTextHolder.swift; sourceTree = "<group>"; };
 		A0D06CDA260A2D2700264926 /* JournalScrollView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalScrollView.swift; sourceTree = "<group>"; };
 		A0D1731325E4FC2D00FDE73C /* ReplaceText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplaceText.swift; sourceTree = "<group>"; };
@@ -2146,7 +2146,7 @@
 				A0689E6C25DE623D00B19CBB /* DeleteText.swift */,
 				A0D1731325E4FC2D00FDE73C /* ReplaceText.swift */,
 				A0E3150425ED1ECB001A5E55 /* FormattingText.swift */,
-				A0C0C2A625E5109F00BE34F0 /* InsertNode.swift */,
+				A0C0C2A625E5109F00BE34F0 /* InsertElement.swift */,
 				96FACC512604B0EE0088DD67 /* DeleteElement.swift */,
 				A0EE0B8E25E68EF3001F9D65 /* InsertEmptyNode.swift */,
 				A01030A925F149EA00D740C5 /* TextEditorCommand.swift */,
@@ -3009,7 +3009,7 @@
 				418172072581107C00317ED8 /* Document.swift in Sources */,
 				4100D96B25AEFEEA00EF04CB /* BeamTextEdit+Shortcut.swift in Sources */,
 				41EA89B825B838D40033EAB9 /* FormatterViewType.swift in Sources */,
-				A0C0C2A725E5109F00BE34F0 /* InsertNode.swift in Sources */,
+				A0C0C2A725E5109F00BE34F0 /* InsertElement.swift in Sources */,
 				41FAD34F25E5742800D78B36 /* CALayer+Animation.swift in Sources */,
 				524299EE25A488E000F4DBF5 /* AdvancedPreferencesView.swift in Sources */,
 				418171FC2581107C00317ED8 /* RoamImporter.swift in Sources */,

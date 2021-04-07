@@ -16,17 +16,15 @@ extension TextRoot {
     }
 
     func increaseNodeIndentation(_ node: TextNode) -> Bool {
-        guard let noteTitle = node.elementNoteTitle, !node.readOnly,
+        guard !node.readOnly,
               node.parent as? BreadCrumb == nil,
               let newParent = node.previousSibbling() as? TextNode
         else { return false }
-
-        let reparentElement = ReparentElement(for: node.elementId, of: noteTitle, to: newParent.elementId, atIndex: newParent.element.children.count)
-        return cmdManager.run(command: reparentElement, on: cmdContext)
+        return cmdManager.reparentElement(node, to: newParent, atIndex: newParent.element.children.count)
     }
 
     func decreaseNodeIndentation(_ node: TextNode) -> Bool {
-        guard let noteTitle = node.elementNoteTitle, !node.readOnly,
+        guard !node.readOnly,
               node.parent as? BreadCrumb == nil,
               node.parent?.parent as? BreadCrumb == nil,
               let prevParent = node.unproxyElement.parent,
@@ -34,8 +32,7 @@ extension TextRoot {
               let parentIndexInParent = newParent.id == node.elementId ? node.unproxyElement.children.count : prevParent.indexInParent
         else { return false }
 
-        let reparentElement = ReparentElement(for: node.elementId, of: noteTitle, to: newParent.id, atIndex: parentIndexInParent + 1)
-        return cmdManager.run(command: reparentElement, on: cmdContext)
+        return cmdManager.reparentElement(node.element, to: newParent, atIndex: parentIndexInParent + 1)
     }
 
     func increaseNodeSelectionIndentation() {
@@ -167,6 +164,9 @@ extension TextRoot {
                 let pos = prevVisibleNode.text.count
                 cmdManager.replaceText(in: prevVisibleNode, for: pos..<pos, with: node.text)
                 cmdManager.focusElement(prevVisibleNode, position: pos)
+                for (i, child) in node.unproxyElement.children.enumerated() {
+                    cmdManager.reparentElement(child, to: prevVisibleNode.unproxyElement, atIndex: i)
+                }
                 cmdManager.deleteElement(for: node)
             }
         } else {
