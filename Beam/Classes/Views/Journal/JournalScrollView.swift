@@ -37,6 +37,7 @@ struct JournalScrollView: NSViewRepresentable {
     func makeNSView(context: Context) -> NSScrollView {
         let scrollView = NSScrollView()
         scrollView.translatesAutoresizingMaskIntoConstraints = false
+        scrollView.automaticallyAdjustsContentInsets = false
         scrollView.hasVerticalScroller = axes.contains(.vertical)
         scrollView.hasHorizontalScroller = axes.contains(.horizontal)
         scrollView.verticalScrollElasticity = .none
@@ -165,8 +166,7 @@ class ScrollViewContentWatcher: NSObject {
         // Update position of todays item
         if let todaysNote = documentView.getTodaysView() {
             let newPosition = bounds.origin.y + documentView.topOffset
-            // Magic number fix cause origin.y for clipView starts at -4
-            todaysNote.frame.origin.y = max(documentView.topOffset - 4, min(newPosition, documentView.todaysMaxPosition))
+            todaysNote.frame.origin.y = max(documentView.topOffset, min(newPosition, documentView.todaysMaxPosition))
         }
         // Update visibility and position of side title layer
         documentView.updateSideLayer(scrollValue: diff, scrollingDown: scrollingDown, y: bounds.origin.y)
