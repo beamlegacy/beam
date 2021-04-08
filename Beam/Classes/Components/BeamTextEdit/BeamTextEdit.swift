@@ -69,6 +69,11 @@ public extension CALayer {
     internal var isInlineFormatterHidden = true
     internal var currentTextRange: Range<Int> = 0..<0
 
+    func addToMainLayer(_ layer: CALayer) {
+        //Logger.shared.logDebug("addToMainLayer: \(layer.name)")
+        self.layer?.addSublayer(layer)
+    }
+
     let cardHeaderLayer = CALayer()
     let cardSeparatorLayer = CALayer()
     let cardTitleLayer = CATextLayer()
@@ -325,18 +330,19 @@ public extension CALayer {
     }
 
     func setupCardHeader() {
-        guard let cardNote = note as? BeamNote,
-              let layer = layer else { return }
+        guard let cardNote = note as? BeamNote else { return }
 
         var icon = NSImage(named: "editor-options")
         icon = icon?.fill(color: BeamColor.Card.optionIcon.nsColor)
 
+        cardOptionLayer.name = "cardOptionLayer"
         cardOptionLayer.contents = icon?.cgImage
         cardOptionLayer.contentsGravity = .resizeAspect
 
         let formatter = DateFormatter()
         formatter.dateFormat = "MMMM dd yyyy, H:mm a"
 
+        cardTitleLayer.name = "cardTitleLayer"
         cardTitleLayer.enableAnimations = false
         cardTimeLayer.enableAnimations = false
         cardHeaderLayer.enableAnimations = false
@@ -359,13 +365,14 @@ public extension CALayer {
         // TODO: show option layer later
         // cardHeaderLayer.addSublayer(cardOptionLayer)
 
-        layer.addSublayer(cardHeaderLayer)
+        addToMainLayer(cardHeaderLayer)
         if !journalMode {
+            cardTimeLayer.name = "cardTimeLayer"
             cardTimeLayer.foregroundColor = BeamColor.Generic.placeholder.cgColor
             cardTimeLayer.font = BeamFont.regular(size: 0).nsFont
             cardTimeLayer.fontSize = 10 //  TODO: Change later (isBig ? 12 : 10)
             cardTimeLayer.string = formatter.string(from: note.updateDate)
-            layer.addSublayer(cardTimeLayer)
+            addToMainLayer(cardTimeLayer)
         }
     }
 
@@ -388,11 +395,12 @@ public extension CALayer {
 
     func setupSeparatorLayer() {
         guard let cardNote = note as? BeamNote,
-              let layer = layer, journalMode && !cardNote.isTodaysNote else { return }
+              journalMode && !cardNote.isTodaysNote else { return }
         cardSeparatorLayer.enableAnimations = true
         cardSeparatorLayer.backgroundColor = BeamColor.Editor.indentBackground.cgColor
+        cardSeparatorLayer.name = "cardSeparatorLayer"
 
-        layer.addSublayer(cardSeparatorLayer)
+        addToMainLayer(cardSeparatorLayer)
 
     }
 
@@ -402,19 +410,19 @@ public extension CALayer {
     }
 
     func setupSideLayer() {
-        guard let cardNote = note as? BeamNote,
-              let layer = layer else { return }
+        guard let cardNote = note as? BeamNote else { return }
         cardSideLayer.enableAnimations = true
 
         cardSideTitleLayer.foregroundColor = BeamColor.Generic.text.cgColor
         cardSideTitleLayer.font = BeamFont.semibold(size: 0).nsFont
         cardSideTitleLayer.fontSize = 15 // TODO: Change later (isBig ? 30 : 26)
         cardSideTitleLayer.string = cardNote.title
+        cardSideTitleLayer.name = "cardSideTitleLayer"
 
         cardSideLayer.addSublayer(cardSideTitleLayer)
         cardSideLayer.opacity = 0
 
-        layer.addSublayer(cardSideLayer)
+        addToMainLayer(cardSideLayer)
     }
 
     func updateSideLayer(_ rect: CGRect) {

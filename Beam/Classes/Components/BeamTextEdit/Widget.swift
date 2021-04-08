@@ -92,9 +92,9 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
             c.parent = self
             c.availableWidth = availableWidth - childInset
             c.contentsScale = contentsScale
-            editor.layer?.addSublayer(c.layer)
+            editor.addToMainLayer(c.layer)
             for l in c.layers where l.value.layer.superlayer == nil {
-                editor.layer?.addSublayer(l.value.layer)
+                editor.addToMainLayer(l.value.layer)
             }
         }
 
@@ -204,11 +204,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         }
     }
 
-    public private(set) var editor: BeamTextEdit {
-        didSet {
-            editor.layer?.addSublayer(layer)
-        }
-    }
+    public private(set) var editor: BeamTextEdit
     internal var computedIdealSize = NSSize()
     private var _root: TextRoot?
     public private(set) var needLayout = true
@@ -261,20 +257,6 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         if recursive {
             for c in children {
                 c.removeFromSuperlayer(recursive: recursive)
-            }
-        }
-    }
-
-    func addLayerTo(layer: CALayer, recursive: Bool) {
-        layer.addSublayer(self.layer)
-        layer.contentsScale = contentsScale
-        for subLayer in layers.values where subLayer.layer.superlayer != layer {
-            layer.addSublayer(subLayer.layer)
-        }
-
-        if recursive {
-            for c in children {
-                c.addLayerTo(layer: layer, recursive: recursive)
             }
         }
     }
@@ -519,10 +501,11 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         layer.frame = CGRect(origin: origin ?? layer.frame.origin, size: layer.frame.size)
 
         if global {
-            editor.layer?.addSublayer(layer.layer)
+            editor.addToMainLayer(layer.layer)
             layer.layer.isHidden = !inVisibleBranch
         } else if layer.layer.superlayer == nil {
             self.layer.addSublayer(layer.layer)
+            assert(layer.layer.superlayer == self.layer)
 
             layer.setAccessibilityParent(self)
 //            layer.setAccessibilityFrameInParentSpace(layer.frame)
