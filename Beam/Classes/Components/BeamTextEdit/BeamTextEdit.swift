@@ -1675,7 +1675,7 @@ public extension CALayer {
     }
 
     override public func selectAll(_ sender: Any?) {
-        cancelPopover()
+        cancelPopover(leaveTextAsIs: true)
         rootNode.selectAll()
     }
 
@@ -1727,7 +1727,7 @@ public extension CALayer {
         /* Selections */
 
     override public func selectParagraph(_ sender: Any?) {
-        rootNode.selectAll()
+        rootNode.selectAllNodesHierarchically()
     }
 
     override public func selectLine(_ sender: Any?) {
