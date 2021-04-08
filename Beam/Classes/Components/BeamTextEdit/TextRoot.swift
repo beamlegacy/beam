@@ -259,7 +259,7 @@ public class TextRoot: TextNode {
             node.contentsScale = w.backingScaleFactor
         }
 
-        editor.layer?.addSublayer(node.layer)
+        editor.addToMainLayer(node.layer)
 
         return node
     }

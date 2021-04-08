@@ -318,7 +318,6 @@ class BreadCrumb: Widget {
         guard let ref = nodeFor(crumb, withParent: self) as? LinkedReferenceNode else { return }
 
         linkedReferenceNode.removeFromSuperlayer(recursive: true)
-        ref.addLayerTo(layer: editor.layer!, recursive: true)
         linkedReferenceNode = ref
         linkedReferenceNode.unfold()
 

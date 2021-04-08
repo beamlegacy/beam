@@ -46,6 +46,7 @@ class Layer: NSAccessibilityElement, CALayerDelegate, MouseHandler {
          layout: @escaping () -> Void = { }
     ) {
         self.name = name
+        layer.name = layer.name ?? name
         self.layer = layer
         self.mouseDown = down
         self.mouseUp = up

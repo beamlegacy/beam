@@ -378,13 +378,13 @@ public class TextNode: Widget {
             layers["indentLayer"]?.layer.isHidden = !value
         })
         disclosureLayer.layer.isHidden = true
-        addLayer(disclosureLayer, origin: point, global: false)
+        addLayer(disclosureLayer, origin: point)
     }
 
     func addBulletPointLayer(at point: NSPoint) {
         let bulletLayer = Layer(name: "bullet", layer: Layer.icon(named: "editor-bullet", color: BeamColor.Editor.icon.nsColor))
         bulletLayer.layer.isHidden = true
-        addLayer(bulletLayer, origin: point, global: false)
+        addLayer(bulletLayer, origin: point)
     }
 
     func drawSelection(in context: CGContext) {
