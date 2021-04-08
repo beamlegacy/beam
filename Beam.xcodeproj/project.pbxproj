@@ -335,6 +335,8 @@
 		A5208D76261D07E9006193AF /* BeamColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5208D75261D07E9006193AF /* BeamColor.swift */; };
 		A5208D80261D231B006193AF /* BeamColor+Contexts.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5208D7F261D231B006193AF /* BeamColor+Contexts.swift */; };
 		A5208D8F261D25F1006193AF /* BeamSpacing.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5208D8E261D25F1006193AF /* BeamSpacing.swift */; };
+		A5208E05261F2156006193AF /* AllCardsContextualMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5208E04261F2156006193AF /* AllCardsContextualMenu.swift */; };
+		A5208E27261F7419006193AF /* String+Calculations.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5208E26261F7419006193AF /* String+Calculations.swift */; };
 		A520D8DF25F8DF8D00400720 /* TouchDownModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = A520D8DE25F8DF8D00400720 /* TouchDownModifier.swift */; };
 		A5233DE525FB682700BE6F05 /* FaviconProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5233DE425FB682700BE6F05 /* FaviconProvider.swift */; };
 		A52BFDF72608D6710028D3F3 /* BeamFont.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52BFDF62608D6710028D3F3 /* BeamFont.swift */; };
@@ -350,8 +352,15 @@
 		A552DF3325F1741900570C85 /* GlobalCenteringContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A552DF3225F1741900570C85 /* GlobalCenteringContainer.swift */; };
 		A5651A7726035D3A0035F12B /* AppDelegate+NSMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5651A7626035D3A0035F12B /* AppDelegate+NSMenu.swift */; };
 		A5651AA02603800C0035F12B /* TextFormatterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5651A9F2603800C0035F12B /* TextFormatterView.swift */; };
+		A56696B12614CF7F00B814D2 /* TableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A56696B02614CF7F00B814D2 /* TableView.swift */; };
 		A567157125F66F8600B46110 /* StyledText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A567157025F66F8600B46110 /* StyledText.swift */; };
 		A572629825FFADC5004416C0 /* MouseInteraction.swift in Sources */ = {isa = PBXBuildFile; fileRef = A572629725FFADC5004416C0 /* MouseInteraction.swift */; };
+		A57BFEA12615B45C00CFB646 /* TableCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57BFEA02615B45C00CFB646 /* TableCellView.swift */; };
+		A57BFEB92615B48300CFB646 /* CheckBoxTableCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57BFEB82615B48300CFB646 /* CheckBoxTableCellView.swift */; };
+		A57BFEBD2615B49C00CFB646 /* TableRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57BFEBC2615B49C00CFB646 /* TableRowView.swift */; };
+		A5C9F005261353420096380F /* WindowPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C9F004261353420096380F /* WindowPage.swift */; };
+		A5C9F00A261364F50096380F /* WindowPageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C9F009261364F50096380F /* WindowPageView.swift */; };
+		A5C9F01126136B5F0096380F /* AllCardsPageContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C9F01026136B5F0096380F /* AllCardsPageContentView.swift */; };
 		A5D6250A26034B1C00A3E676 /* FormatterViewBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5D6250926034B1C00A3E676 /* FormatterViewBackground.swift */; };
 		A5FE96CD2612469C002A2B73 /* AutocompleteManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5FE96CC2612469C002A2B73 /* AutocompleteManager.swift */; };
 		BAA67192B5EB78981741C311 /* WebPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67CEFFAFA38F29CF1C84F /* WebPage.swift */; };
@@ -504,13 +513,6 @@
 			remoteGlobalIDString = 724BB36B1D31D0B7005D534A;
 			remoteInfo = SparkleInstallerConnection;
 		};
-		52DD2451258B685E00651C84 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 52C60B82258B6332008B7C10 /* Sparkle.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 726E07AC1CAF08D6001A286B;
-			remoteInfo = SparkleInstallerLauncher;
-		};
 		52DD2453258B685E00651C84 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 52C60B82258B6332008B7C10 /* Sparkle.xcodeproj */;
@@ -552,6 +554,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 965A78242514F147009980D4;
 			remoteInfo = Beam;
+		};
+		A5C9EFE026134DC80096380F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 52C60B82258B6332008B7C10 /* Sparkle.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 726E07AC1CAF08D6001A286B;
+			remoteInfo = SparkleInstallerLauncher;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -899,6 +908,8 @@
 		A5208D75261D07E9006193AF /* BeamColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamColor.swift; sourceTree = "<group>"; };
 		A5208D7F261D231B006193AF /* BeamColor+Contexts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamColor+Contexts.swift"; sourceTree = "<group>"; };
 		A5208D8E261D25F1006193AF /* BeamSpacing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamSpacing.swift; sourceTree = "<group>"; };
+		A5208E04261F2156006193AF /* AllCardsContextualMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllCardsContextualMenu.swift; sourceTree = "<group>"; };
+		A5208E26261F7419006193AF /* String+Calculations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Calculations.swift"; sourceTree = "<group>"; };
 		A520D8DE25F8DF8D00400720 /* TouchDownModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TouchDownModifier.swift; sourceTree = "<group>"; };
 		A5233DE425FB682700BE6F05 /* FaviconProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaviconProvider.swift; sourceTree = "<group>"; };
 		A52BFDF62608D6710028D3F3 /* BeamFont.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamFont.swift; sourceTree = "<group>"; };
@@ -915,8 +926,15 @@
 		A552DF3225F1741900570C85 /* GlobalCenteringContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalCenteringContainer.swift; sourceTree = "<group>"; };
 		A5651A7626035D3A0035F12B /* AppDelegate+NSMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+NSMenu.swift"; sourceTree = "<group>"; };
 		A5651A9F2603800C0035F12B /* TextFormatterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextFormatterView.swift; sourceTree = "<group>"; };
+		A56696B02614CF7F00B814D2 /* TableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableView.swift; sourceTree = "<group>"; };
 		A567157025F66F8600B46110 /* StyledText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StyledText.swift; sourceTree = "<group>"; };
 		A572629725FFADC5004416C0 /* MouseInteraction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MouseInteraction.swift; sourceTree = "<group>"; };
+		A57BFEA02615B45C00CFB646 /* TableCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableCellView.swift; sourceTree = "<group>"; };
+		A57BFEB82615B48300CFB646 /* CheckBoxTableCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckBoxTableCellView.swift; sourceTree = "<group>"; };
+		A57BFEBC2615B49C00CFB646 /* TableRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableRowView.swift; sourceTree = "<group>"; };
+		A5C9F004261353420096380F /* WindowPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowPage.swift; sourceTree = "<group>"; };
+		A5C9F009261364F50096380F /* WindowPageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowPageView.swift; sourceTree = "<group>"; };
+		A5C9F01026136B5F0096380F /* AllCardsPageContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllCardsPageContentView.swift; sourceTree = "<group>"; };
 		A5D6250926034B1C00A3E676 /* FormatterViewBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatterViewBackground.swift; sourceTree = "<group>"; };
 		A5FE96CC2612469C002A2B73 /* AutocompleteManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutocompleteManager.swift; sourceTree = "<group>"; };
 		BAA67095D6C806CCF4915EEF /* TextSelectorUI_debug.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = TextSelectorUI_debug.js; sourceTree = "<group>"; };
@@ -1182,6 +1200,7 @@
 				418171742581107C00317ED8 /* NavigationContext.swift */,
 				418171752581107C00317ED8 /* Html2Md.swift */,
 				418171822581107C00317ED8 /* BrowserTab.swift */,
+				A5C9F004261353420096380F /* WindowPage.swift */,
 				87E39CF5260BDC2000E4A684 /* PasswordManager.swift */,
 				87E39CF4260BDC2000E4A684 /* PasswordOverlayController.swift */,
 				524520A325C8234500AC0007 /* BeamElement+Merge.swift */,
@@ -1307,6 +1326,7 @@
 		418171A92581107C00317ED8 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				A5C9F008261364E90096380F /* WindowPage */,
 				524299CC25A47EA900F4DBF5 /* Preferences */,
 				418171E02581107C00317ED8 /* ContentView.swift */,
 				418171AE2581107C00317ED8 /* BeamWindow.swift */,
@@ -1452,6 +1472,7 @@
 				521EEDC725937E7B00BA2485 /* DocumentsList */,
 				418171D72581107C00317ED8 /* OmniBar */,
 				418171C32581107C00317ED8 /* NotesList */,
+				A57BFEC02615B4AC00CFB646 /* TableView */,
 				418171B72581107C00317ED8 /* BeamTextEdit */,
 				A050049E25DAEE73009CFEB6 /* ProgressIndicator.swift */,
 			);
@@ -1953,6 +1974,7 @@
 				5287EC2E25C42B0100CE1DD9 /* String+UUID.swift */,
 				5242684C25ED408500DB1D05 /* String+Split.swift */,
 				521FEC652604B830009000F9 /* String+c99.swift */,
+				A5208E26261F7419006193AF /* String+Calculations.swift */,
 				418173BD2581251600317ED8 /* URL+Beam.swift */,
 			);
 			path = Extensions;
@@ -2177,6 +2199,15 @@
 			path = Colors;
 			sourceTree = "<group>";
 		};
+		A5208DEF261F2143006193AF /* AllCards */ = {
+			isa = PBXGroup;
+			children = (
+				A5C9F01026136B5F0096380F /* AllCardsPageContentView.swift */,
+				A5208E04261F2156006193AF /* AllCardsContextualMenu.swift */,
+			);
+			path = AllCards;
+			sourceTree = "<group>";
+		};
 		A530D502260A19A600DBD14E /* ContextMenu */ = {
 			isa = PBXGroup;
 			children = (
@@ -2209,6 +2240,26 @@
 				414B98F525A23A04002E81A3 /* TextFormatterView.xib */,
 			);
 			path = Text;
+			sourceTree = "<group>";
+		};
+		A57BFEC02615B4AC00CFB646 /* TableView */ = {
+			isa = PBXGroup;
+			children = (
+				A56696B02614CF7F00B814D2 /* TableView.swift */,
+				A57BFEA02615B45C00CFB646 /* TableCellView.swift */,
+				A57BFEBC2615B49C00CFB646 /* TableRowView.swift */,
+				A57BFEB82615B48300CFB646 /* CheckBoxTableCellView.swift */,
+			);
+			path = TableView;
+			sourceTree = "<group>";
+		};
+		A5C9F008261364E90096380F /* WindowPage */ = {
+			isa = PBXGroup;
+			children = (
+				A5C9F009261364F50096380F /* WindowPageView.swift */,
+				A5208DEF261F2143006193AF /* AllCards */,
+			);
+			path = WindowPage;
 			sourceTree = "<group>";
 		};
 		BAA679594309C4858C403757 /* PointAndShoot */ = {
@@ -2294,7 +2345,7 @@
 			);
 			dependencies = (
 				52DD2450258B685E00651C84 /* PBXTargetDependency */,
-				52DD2452258B685E00651C84 /* PBXTargetDependency */,
+				A5C9EFE126134DC80096380F /* PBXTargetDependency */,
 				52DD2454258B685E00651C84 /* PBXTargetDependency */,
 				96319D232616232700D1CF31 /* PBXTargetDependency */,
 			);
@@ -2675,7 +2726,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "export PATH=\"$PATH:/opt/homebrew/bin\"\n./scripts/build_js.sh\n";
+			shellScript = "if [ $ENABLE_PREVIEWS == \"NO\" ]\nthen\n    export PATH=\"$PATH:/opt/homebrew/bin\"\n    ./scripts/build_js.sh\n\nelse\n  echo \"Skipping the script because of SwiftUI preview mode\"\nfi\n";
 		};
 		520582C0257E351800E0533A /* Env variable Injector */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -2808,6 +2859,7 @@
 				96319D3E2616233E00D1CF31 /* String+c99.swift in Sources */,
 				96319D5D261626BE00D1CF31 /* Score.swift in Sources */,
 				96319D3A2616233E00D1CF31 /* CommandManager.swift in Sources */,
+				A5208E27261F7419006193AF /* String+Calculations.swift in Sources */,
 				96319D6226162F5C00D1CF31 /* LinkStore.swift in Sources */,
 				96319D3F2616233E00D1CF31 /* String+Ranges.swift in Sources */,
 				96319D3B2616233E00D1CF31 /* String+MD5.swift in Sources */,
@@ -2864,6 +2916,7 @@
 				4181722C2581107C00317ED8 /* AutocompleteList.swift in Sources */,
 				4181727B258110D100317ED8 /* AppDelegate+CoreData.swift in Sources */,
 				96988C8325BB0AF2000223A3 /* DestinationNotePicker.swift in Sources */,
+				A57BFEA12615B45C00CFB646 /* TableCellView.swift in Sources */,
 				A572629825FFADC5004416C0 /* MouseInteraction.swift in Sources */,
 				96E4CF72258E59F400D6DE22 /* BeamTextVisitor.swift in Sources */,
 				A5D6250A26034B1C00A3E676 /* FormatterViewBackground.swift in Sources */,
@@ -2903,6 +2956,7 @@
 				A01030AA25F149EA00D740C5 /* TextEditorCommand.swift in Sources */,
 				418172042581107C00317ED8 /* TemporaryFile.swift in Sources */,
 				523FF66125C31D8800B4BD6E /* Data+String.swift in Sources */,
+				A57BFEBD2615B49C00CFB646 /* TableRowView.swift in Sources */,
 				418172AA25811A3A00317ED8 /* BeamTextField.swift in Sources */,
 				96BBA79F25FBA573008276FC /* ReparentElement.swift in Sources */,
 				418172152581107C00317ED8 /* NSContainerView.swift in Sources */,
@@ -2933,6 +2987,8 @@
 				96319D6D26163AAD00D1CF31 /* BeamNote+CommandManager.swift in Sources */,
 				4181724E2581107C00317ED8 /* TabStats.swift in Sources */,
 				4181724F2581107C00317ED8 /* WebView.swift in Sources */,
+				A5208E05261F2156006193AF /* AllCardsContextualMenu.swift in Sources */,
+				A5C9F005261353420096380F /* WindowPage.swift in Sources */,
 				96C9AA5725901AA9007D3D98 /* LinksSection.swift in Sources */,
 				414B98FA25A23A4F002E81A3 /* NSView+Xib.swift in Sources */,
 				418171F02581107C00317ED8 /* APIResponse.swift in Sources */,
@@ -2969,6 +3025,7 @@
 				521EEDED2593803F00BA2485 /* DocumentDetail.swift in Sources */,
 				A520D8DF25F8DF8D00400720 /* TouchDownModifier.swift in Sources */,
 				418171ED2581107C00317ED8 /* Session.swift in Sources */,
+				A5C9F00A261364F50096380F /* WindowPageView.swift in Sources */,
 				4181713325810CDC00317ED8 /* Constants.swift in Sources */,
 				96FACC522604B0EE0088DD67 /* DeleteElement.swift in Sources */,
 				4181725E2581107C00317ED8 /* AccountManager.swift in Sources */,
@@ -2990,6 +3047,7 @@
 				418172502581107C00317ED8 /* NoteView.swift in Sources */,
 				414B989925A21BB0002E81A3 /* BeamTextEdit+Formatter.swift in Sources */,
 				4181725F2581107C00317ED8 /* DocumentManager.swift in Sources */,
+				A5C9F01126136B5F0096380F /* AllCardsPageContentView.swift in Sources */,
 				A050047525DA918A009CFEB6 /* NoteAutoSaveService.swift in Sources */,
 				96319C8626160E4A00D1CF31 /* BeamNote+LinkDetection.swift in Sources */,
 				A0E7D98726139FCA00D70676 /* JournalStackView.swift in Sources */,
@@ -3010,11 +3068,13 @@
 				961EC50B25B495DB009FA322 /* ButtonLayer.swift in Sources */,
 				418172542581107C00317ED8 /* OmniBar.swift in Sources */,
 				4181721D2581107C00317ED8 /* NSImage+Beam.swift in Sources */,
+				A56696B12614CF7F00B814D2 /* TableView.swift in Sources */,
 				414B987A259DE2E2002E81A3 /* BidirectionalPopoverActionItem.swift in Sources */,
 				524299C725A47D2600F4DBF5 /* AppDelegate+Preferences.swift in Sources */,
 				87E39CF7260BDC2000E4A684 /* PasswordManager.swift in Sources */,
 				418172452581107C00317ED8 /* SearchBar.swift in Sources */,
 				418172182581107C00317ED8 /* PerformanceDebug.swift in Sources */,
+				A57BFEB92615B48300CFB646 /* CheckBoxTableCellView.swift in Sources */,
 				4105CE2225A5ECA2009AB687 /* BidirectionalPopoverItem.swift in Sources */,
 				4181722F2581107C00317ED8 /* BeamWindow.swift in Sources */,
 				418172602581107C00317ED8 /* LibrairiesManager.swift in Sources */,
@@ -3115,11 +3175,6 @@
 			name = SparkleInstallerConnection;
 			targetProxy = 52DD244F258B685E00651C84 /* PBXContainerItemProxy */;
 		};
-		52DD2452258B685E00651C84 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = SparkleInstallerLauncher;
-			targetProxy = 52DD2451258B685E00651C84 /* PBXContainerItemProxy */;
-		};
 		52DD2454258B685E00651C84 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = SparkleInstallerStatus;
@@ -3157,6 +3212,11 @@
 		A0A6F2A325D1B73A00EFC4BE /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			productRef = A0A6F2A225D1B73A00EFC4BE /* Nimble */;
+		};
+		A5C9EFE126134DC80096380F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = SparkleInstallerLauncher;
+			targetProxy = A5C9EFE026134DC80096380F /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -3228,7 +3288,7 @@
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_CODE_SIGN_FLAGS = "--timestamp";
+				OTHER_CODE_SIGN_FLAGS = "--timestamp=none";
 				OTHER_SWIFT_FLAGS = "$(CUSTOM_OTHER_SWIFT_FLAGS)";
 				SDKROOT = macosx;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
@@ -3269,7 +3329,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MARKETING_VERSION = 0.1.0;
-				OTHER_CODE_SIGN_FLAGS = "--timestamp";
+				OTHER_CODE_SIGN_FLAGS = "--timestamp=none";
 				OTHER_LDFLAGS = "-liconv";
 				PRODUCT_BUNDLE_IDENTIFIER = co.beamapp.macos;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -3536,7 +3596,7 @@
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_CODE_SIGN_FLAGS = "--timestamp";
+				OTHER_CODE_SIGN_FLAGS = "--timestamp=none";
 				OTHER_SWIFT_FLAGS = "$(CUSTOM_OTHER_SWIFT_FLAGS)";
 				SDKROOT = macosx;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
@@ -3634,7 +3694,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MARKETING_VERSION = 0.1.0;
-				OTHER_CODE_SIGN_FLAGS = "--timestamp";
+				OTHER_CODE_SIGN_FLAGS = "--timestamp=none";
 				OTHER_LDFLAGS = "-liconv";
 				PRODUCT_BUNDLE_IDENTIFIER = co.beamapp.macos.dev;
 				PRODUCT_NAME = "$(TARGET_NAME)";

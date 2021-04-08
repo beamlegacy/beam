@@ -82,7 +82,7 @@ public class CommandManager<Context> {
     private var lastCmdDate: Date?
 
     public init() {}
-    
+
     @discardableResult
     public func run(name: String, run: @escaping (Context?) -> Bool, undo: @escaping (Context?) -> Bool, coalesce: @escaping (Command<Context>) -> Bool, on context: Context) -> Bool {
         self.run(command: BlockCommand(name: name, run: run, undo: undo, coalesce: coalesce), on: context)

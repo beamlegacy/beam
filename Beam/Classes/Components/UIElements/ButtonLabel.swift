@@ -28,19 +28,23 @@ struct ButtonLabelStyle {
 }
 
 struct ButtonLabel: View {
-    let text: String
+    let text: String?
+    let iconName: String?
     let defaultState: ButtonLabelState
     let variant: ButtonLabelVariant
     let style: ButtonLabelStyle
+    let action: (() -> Void)?
 
     @State private var isHovering = false
     @State private var isTouching = false
 
-    init(_ text: String, state: ButtonLabelState = .normal, variant: ButtonLabelVariant = .secondary, customStyle: ButtonLabelStyle = ButtonLabelStyle()) {
+    init(_ text: String? = nil, icon: String? = nil, state: ButtonLabelState = .normal, variant: ButtonLabelVariant = .secondary, customStyle: ButtonLabelStyle = ButtonLabelStyle(), action: (() -> Void)? = nil) {
         self.text = text
+        self.iconName = icon
         self.defaultState = state
         self.variant = variant
         self.style = customStyle
+        self.action = action
     }
 
     private var foregroundColor: Color {
@@ -62,10 +66,15 @@ struct ButtonLabel: View {
 
     var body: some View {
         HStack(spacing: 2) {
-            Text(text)
-                .foregroundColor(foregroundColor)
-                .font(style.font)
-                .underline(variant == .primary, color: foregroundColor)
+            if let icon = iconName {
+                Icon(name: icon, size: 16, color: foregroundColor)
+            }
+            if let text = text {
+                Text(text)
+                    .foregroundColor(foregroundColor)
+                    .font(style.font)
+                    .underline(variant == .primary, color: foregroundColor)
+            }
             if variant == .dropdown {
                 Icon(name: "editor-breadcrumb_down", size: 8, color: foregroundColor)
             }
@@ -83,6 +92,11 @@ struct ButtonLabel: View {
             guard defaultState != .disabled else { return }
             isTouching = touching
         }
+        .simultaneousGesture(action != nil ?
+            TapGesture(count: 1).onEnded {
+                action?()
+            } : nil
+        )
     }
 }
 

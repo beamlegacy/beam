@@ -8,6 +8,8 @@
 import Foundation
 
 enum BeamSpacing {
+    /** 20% = 2pt */
+    static let _20: CGFloat = 2
     /** 40% = 4pt */
     static let _40: CGFloat = 4
     /** 50% = 5pt */
@@ -22,4 +24,6 @@ enum BeamSpacing {
     static let _200: CGFloat = 20
     /** 400% = 40pt */
     static let _400: CGFloat = 40
+    /** 600% = 60pt */
+    static let _600: CGFloat = 60
 }

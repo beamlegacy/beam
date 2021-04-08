@@ -62,10 +62,14 @@ struct ModeView: View {
                                 data.reloadJournal()
                             }
                             .accessibility(identifier: "journalView")
+                    case .page:
+                        if let page = state.currentPage {
+                            WindowPageView(page: page)
+                        }
                     }
                 }
                 .frame(maxHeight: .infinity)
-                if [.note, .today].contains(state.mode) {
+                if state.mode != .web {
                     WindowBottomToolBar()
                         .transition(.offset(x: 0, y: 30))
                 }
