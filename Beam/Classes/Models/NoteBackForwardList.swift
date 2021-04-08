@@ -11,12 +11,14 @@ import BeamCore
 class NoteBackForwardList: Codable {
     enum Element: Codable {
         case note(BeamNote)
+        case page(WindowPage)
         case journal
 
         //swiftlint:disable:next nesting
         enum CodingKeys: String, CodingKey {
             case mode
             case note
+            case page
         }
 
         public init(from decoder: Decoder) throws {
@@ -42,6 +44,9 @@ class NoteBackForwardList: Codable {
             case .note(let note):
                 try container.encode(0, forKey: .mode)
                 try container.encode(note.title, forKey: .note)
+            case .page(let page):
+                try container.encode(0, forKey: .mode)
+                try container.encode(page.id.rawValue, forKey: .page)
             }
         }
     }

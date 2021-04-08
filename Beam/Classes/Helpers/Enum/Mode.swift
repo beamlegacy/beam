@@ -11,4 +11,5 @@ enum Mode: Int, Codable {
     case today = 1
     case note = 2
     case web = 4
+    case page = 8
 }

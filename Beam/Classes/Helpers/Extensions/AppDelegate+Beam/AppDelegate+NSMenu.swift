@@ -12,10 +12,11 @@ private enum MenuEnablingConditionTag: Int {
     case today = 1 // enable only for today mode
     case note = 2 // enable only for node mode
     case web = 4 // enable only for web mode
+    case page = 8 // enable only for page mode
     // use binary mask to combine modes
 
     // other conditions
-    case hasBrowserTab = 11 // enable only if browser tabs are open
+    case hasBrowserTab = 1001 // enable only if browser tabs are open
 }
 extension AppDelegate: NSMenuDelegate {
 

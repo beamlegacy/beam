@@ -437,4 +437,13 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
         }
         return self
     }
+
+    open func wordsCount() -> Int {
+        var count = children.reduce(0, { (r, el) -> Int in
+            return r + el.wordsCount()
+        })
+        let str = text.text
+        count += str.numberOfWords
+        return count
+    }
 }

@@ -75,7 +75,7 @@ public extension String {
         return 0
     }
 
-    public func description(_ range: Range<Index>) -> String {
+    func description(_ range: Range<Index>) -> String {
         return "Range from \(position(at: range.lowerBound)) to \(position(at: range.upperBound)) [\(position(at: range.upperBound) - position(at: range.lowerBound))]"
     }
 

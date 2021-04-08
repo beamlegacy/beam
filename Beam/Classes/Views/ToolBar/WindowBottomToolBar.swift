@@ -29,35 +29,36 @@ struct WindowBottomToolBar: View {
                     .fixedSize(horizontal: true, vertical: false)
                 }
                 Spacer(minLength: 20)
-                GlobalCenteringContainer(enabled: true, containerGeometry: geo) {
-                    HStack(spacing: 6) {
-                        ButtonLabel("Journal", state: state.mode == .today ? .active : .normal)
-                            .simultaneousGesture(
-                                TapGesture(count: 1).onEnded {
-                                    state.navigateToJournal()
-                                }
-                            )
+                if [.today, .note].contains(state.mode) {
+                    GlobalCenteringContainer(enabled: true, containerGeometry: geo) {
+                        HStack(spacing: 6) {
+                            ButtonLabel("Journal", state: state.mode == .today ? .active : .normal) {
+                                state.navigateToJournal()
+                            }
                             .fixedSize(horizontal: true, vertical: false)
-                        if state.recentsManager.recentNotes.count > 0 {
-                            Separator()
-                            ForEach(state.recentsManager.recentNotes) { note in
-                                let isToday = state.mode == .today
-                                let isActive = !isToday && note.id == state.currentNote?.id
-                                ButtonLabel(note.title, state: isActive ? .active : .normal)
-                                    .simultaneousGesture(
-                                        TapGesture(count: 1).onEnded {
-                                            state.navigateToNote(named: note.title)
-                                        }
-                                    )
+                            if state.recentsManager.recentNotes.count > 0 {
+                                Separator()
+                                ForEach(state.recentsManager.recentNotes) { note in
+                                    let isToday = state.mode == .today
+                                    let isActive = !isToday && note.id == state.currentNote?.id
+                                    ButtonLabel(note.title, state: isActive ? .active : .normal)
+                                        .simultaneousGesture(
+                                            TapGesture(count: 1).onEnded {
+                                                state.navigateToNote(named: note.title)
+                                            }
+                                        )
+                                }
                             }
                         }
                     }
+                    .animation(animationEnabled ? .easeInOut(duration: 0.3) : nil)
+                    Spacer(minLength: 20)
                 }
-                .animation(animationEnabled ? .easeInOut(duration: 0.3) : nil)
-                Spacer(minLength: 20)
                 HStack {
                     if state.mode == .today {
-                        ButtonLabel("All Cards")
+                        ButtonLabel("All Cards") {
+                            state.navigateToPage(WindowPage.allCardsWindowPage)
+                        }
                         Separator()
                     }
                     ButtonLabel("?", customStyle: ButtonLabelStyle(font: BeamFont.medium(size: 11).swiftUI, horizontalPadding: 5, verticalPadding: 2))

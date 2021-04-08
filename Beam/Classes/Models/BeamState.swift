@@ -49,7 +49,7 @@ let NoteDisplayThreshold = Float(0.0)
         didSet {
             switch oldValue {
             // swiftlint:disable:next fallthrough no_fallthrough_only
-            case .note: fallthrough
+            case .note, .page: fallthrough
             case .today:
                 if mode == .web {
                     currentTab?.startReading()
@@ -123,6 +123,8 @@ let NoteDisplayThreshold = Float(0.0)
         }
     }
 
+    @Published var currentPage: WindowPage?
+
     private var scope = Set<AnyCancellable>()
     private var tabScope = Set<AnyCancellable>()
 
@@ -130,7 +132,7 @@ let NoteDisplayThreshold = Float(0.0)
         guard canGoBack else { return }
         switch mode {
         // swiftlint:disable:next fallthrough no_fallthrough_only
-        case .note: fallthrough
+        case .note, .page: fallthrough
         case .today:
             if let back = backForwardList.goBack() {
                 switch back {
@@ -140,6 +142,9 @@ let NoteDisplayThreshold = Float(0.0)
                 case let .note(note):
                     mode = .note
                     currentNote = note
+                case let .page(page):
+                    mode = .page
+                    currentPage = page
                 }
             }
         case .web:
@@ -153,7 +158,7 @@ let NoteDisplayThreshold = Float(0.0)
         guard canGoForward else { return }
         switch mode {
         // swiftlint:disable:next fallthrough no_fallthrough_only
-        case .note: fallthrough
+        case .note, .page: fallthrough
         case .today:
             if let forward = backForwardList.goForward() {
                 switch forward {
@@ -163,6 +168,9 @@ let NoteDisplayThreshold = Float(0.0)
                 case let .note(note):
                     mode = .note
                     currentNote = note
+                case let .page(page):
+                    mode = .page
+                    currentPage = page
                 }
             }
         case .web:
@@ -178,9 +186,7 @@ let NoteDisplayThreshold = Float(0.0)
         switch mode {
         case .web:
             navigateToNote(note)
-        case .note:
-            mode = .web
-        case .today:
+        case .today, .note, .page:
             if !tabs.isEmpty { mode = .web }
         }
     }
@@ -189,7 +195,7 @@ let NoteDisplayThreshold = Float(0.0)
         switch mode {
         // swiftlint:disable:next fallthrough no_fallthrough_only
         case .today: fallthrough
-        case .note:
+        case .note, .page:
             canGoBack = !backForwardList.backList.isEmpty
             canGoForward = !backForwardList.forwardList.isEmpty
         case .web:
@@ -209,6 +215,7 @@ let NoteDisplayThreshold = Float(0.0)
 
         guard note != self.currentNote else { return true }
 
+        self.currentPage = nil
         self.currentNote = note
         autocompleteManager.resetQuery()
         autocompleteManager.autocompleteSelectedIndex = nil
@@ -221,6 +228,7 @@ let NoteDisplayThreshold = Float(0.0)
     @discardableResult func navigateToJournal() -> Bool {
         mode = .today
 
+        self.currentPage = nil
         self.currentNote = nil
         autocompleteManager.resetQuery()
         autocompleteManager.autocompleteSelectedIndex = nil
@@ -228,6 +236,18 @@ let NoteDisplayThreshold = Float(0.0)
         backForwardList.push(.journal)
         updateCanGoBackForward()
         return true
+    }
+
+    func navigateToPage(_ page: WindowPage) {
+        mode = .page
+
+        self.currentNote = nil
+        autocompleteManager.resetQuery()
+        autocompleteManager.autocompleteSelectedIndex = nil
+        focusOmniBox = false
+        self.currentPage = page
+        backForwardList.push(.page(page))
+        updateCanGoBackForward()
     }
 
     func navigateCurrentTab(toURL url: URL) {

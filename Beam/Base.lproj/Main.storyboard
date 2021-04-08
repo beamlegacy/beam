@@ -79,7 +79,7 @@
                                                 <action selector="newSearch:" target="Ady-hI-5gd" id="A5z-dM-XS8"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="New Search..." tag="-7" keyEquivalent="F" id="7bQ-0P-W15" userLabel="New Search...">
+                                        <menuItem title="New Search..." tag="-15" keyEquivalent="F" id="7bQ-0P-W15" userLabel="New Search...">
                                             <connections>
                                                 <action selector="newSearch:" target="Ady-hI-5gd" id="AAg-12-xc0"/>
                                             </connections>
@@ -696,7 +696,7 @@
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Navigation" autoenablesItems="NO" id="cCx-1g-tLY">
                                     <items>
-                                        <menuItem title="Toggle Web / Note" tag="11" keyEquivalent="d" id="wze-af-ouN">
+                                        <menuItem title="Toggle Web / Note" tag="1001" keyEquivalent="d" id="wze-af-ouN">
                                             <connections>
                                                 <action selector="toggleBetweenWebAndNote:" target="Voe-Tx-rLC" id="ni4-5e-0wF"/>
                                             </connections>

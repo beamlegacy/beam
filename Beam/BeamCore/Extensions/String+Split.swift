@@ -4,7 +4,7 @@ import Foundation
 
 public extension String {
     /// Splits a string into groups of `every` n characters, grouping from left-to-right by default. If `backwards` is true, right-to-left.
-    public func split(every: Int, backwards: Bool = false) -> [String] {
+    func split(every: Int, backwards: Bool = false) -> [String] {
         var result = [String]()
 
         for i in stride(from: 0, to: self.count, by: every) {
