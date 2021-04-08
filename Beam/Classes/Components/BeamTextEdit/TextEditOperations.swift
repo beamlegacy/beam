@@ -267,7 +267,7 @@ extension TextRoot {
             state.attributes = []
         case 1:
             guard let range = ranges.first else { return }
-            state.attributes = BeamText.removeLinks(from: range.attributes)
+            state.attributes = BeamText.removeInternalLinks(from: range.attributes)
         case 2:
             guard let range1 = ranges.first, let range2 = ranges.last else { return }
             if !range1.attributes.contains(where: { $0.isLink }) {
@@ -276,7 +276,7 @@ extension TextRoot {
                 state.attributes = range2.attributes
             } else {
                 // They both contain links, let's take the attributes from the left one and remove the link attribute
-                state.attributes = BeamText.removeLinks(from: range1.attributes)
+                state.attributes = BeamText.removeInternalLinks(from: range1.attributes)
             }
         default:
             fatalError() // NOPE!

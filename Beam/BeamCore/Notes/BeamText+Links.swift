@@ -59,6 +59,10 @@ public extension BeamText {
         return attributes.compactMap({ $0.isLink ? nil : $0 })
     }
 
+    static func removeInternalLinks(from attributes: [Attribute]) -> [Attribute] {
+        return attributes.compactMap({ $0.isInternalLink ? nil : $0 })
+    }
+
     func hasLinkToNote(named noteTitle: String) -> Bool {
         internalLinks.contains(where: { range -> Bool in
             range.attributes.contains(.internalLink(noteTitle))
