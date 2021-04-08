@@ -38,6 +38,17 @@ extension BeamTextEdit {
         guard let node = focusedWidget as? TextNode,
               let popover = popover else { return }
 
+        switch command {
+        case .moveUp:
+            popover.moveUp()
+            return
+        case .moveDown:
+            popover.moveDown()
+            return
+        default:
+            break
+        }
+
         let cursorPosition = rootNode.cursorPosition
 
         if command == .deleteForward && cursorStartPosition >= cursorPosition ||

@@ -47,7 +47,6 @@
 		4159EA0A259A3568005FD355 /* BidirectionalPopoverResultItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159EA08259A3568005FD355 /* BidirectionalPopoverResultItem.swift */; };
 		4159EA0B259A3568005FD355 /* BidirectionalPopoverResultItem.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4159EA09259A3568005FD355 /* BidirectionalPopoverResultItem.xib */; };
 		416C09F3259C919200AF2903 /* CATransaction+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416C09F2259C919200AF2903 /* CATransaction+Beam.swift */; };
-		4170C43125923B6A0072C781 /* Popover.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4170C43025923B6A0072C781 /* Popover.swift */; };
 		417628A525B05DFB0082FFDF /* NSBezierPath+CGPath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 417628A425B05DFB0082FFDF /* NSBezierPath+CGPath.swift */; };
 		418170FF2581060A00317ED8 /* Colors.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 418170FE2581060A00317ED8 /* Colors.xcassets */; };
 		418171122581082200317ED8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 418171112581082200317ED8 /* Assets.xcassets */; };
@@ -602,7 +601,6 @@
 		4159EA08259A3568005FD355 /* BidirectionalPopoverResultItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BidirectionalPopoverResultItem.swift; sourceTree = "<group>"; };
 		4159EA09259A3568005FD355 /* BidirectionalPopoverResultItem.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = BidirectionalPopoverResultItem.xib; sourceTree = "<group>"; };
 		416C09F2259C919200AF2903 /* CATransaction+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CATransaction+Beam.swift"; sourceTree = "<group>"; };
-		4170C43025923B6A0072C781 /* Popover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Popover.swift; sourceTree = "<group>"; };
 		417628A425B05DFB0082FFDF /* NSBezierPath+CGPath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSBezierPath+CGPath.swift"; sourceTree = "<group>"; };
 		418170FE2581060A00317ED8 /* Colors.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Colors.xcassets; sourceTree = "<group>"; };
 		418171112581082200317ED8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -1049,7 +1047,6 @@
 		4159E9BD259A1A4C005FD355 /* Core */ = {
 			isa = PBXGroup;
 			children = (
-				4170C41B25923ADA0072C781 /* Popover */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -1068,14 +1065,6 @@
 				A545D2FA25F7B1D800E68F94 /* DestinationNoteAutocompleteList.swift */,
 			);
 			path = BidirectionalPopover;
-			sourceTree = "<group>";
-		};
-		4170C41B25923ADA0072C781 /* Popover */ = {
-			isa = PBXGroup;
-			children = (
-				4170C43025923B6A0072C781 /* Popover.swift */,
-			);
-			path = Popover;
 			sourceTree = "<group>";
 		};
 		41816FD02581046F00317ED8 /* Assets */ = {
@@ -2939,7 +2928,6 @@
 				521EEDE525937F7F00BA2485 /* DocumentsList.swift in Sources */,
 				4159EA0A259A3568005FD355 /* BidirectionalPopoverResultItem.swift in Sources */,
 				A0E3150525ED1ECB001A5E55 /* FormattingText.swift in Sources */,
-				4170C43125923B6A0072C781 /* Popover.swift in Sources */,
 				418171EC2581107C00317ED8 /* Me.swift in Sources */,
 				A52BFDF72608D6710028D3F3 /* BeamFont.swift in Sources */,
 				96319D6D26163AAD00D1CF31 /* BeamNote+CommandManager.swift in Sources */,
