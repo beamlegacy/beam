@@ -173,11 +173,11 @@ class Document: NSManagedObject {
     }
 
     class func fetchWithTitle(_ context: NSManagedObjectContext, _ title: String) -> Document? {
-        return fetchFirst(context: context, NSPredicate(format: "title = %@", title as CVarArg))
+        return fetchFirst(context: context, NSPredicate(format: "title LIKE[cd] %@", title as CVarArg))
     }
 
     class func fetchOrCreateWithTitle(_ context: NSManagedObjectContext, _ title: String) -> Document {
-        return fetchFirst(context: context, NSPredicate(format: "title = %@", title as CVarArg)) ?? create(context, title: title)
+        return fetchFirst(context: context, NSPredicate(format: "title LIKE[cd] %@", title as CVarArg)) ?? create(context, title: title)
     }
 
     class func fetchAllWithType(_ context: NSManagedObjectContext, _ type: Int16) -> [Document] {

@@ -563,7 +563,8 @@ public extension CALayer {
         if option || shift {
             rootNode.insertNewline()
         } else if let popover = popover {
-            popover.doCommand(.insertNewline)
+            popover.selectItem()
+            return
         } else {
             if node.text.isEmpty && node.isEmpty && node.parent !== rootNode {
                 rootNode.decreaseIndentation()
@@ -1642,10 +1643,10 @@ public extension CALayer {
     }
 
     override public func moveUp(_ sender: Any?) {
-        rootNode.moveUp()
-
         if popover != nil {
-            updatePopover(with: .moveLeft)
+            updatePopover(with: .moveUp)
+        } else {
+            rootNode.moveUp()
         }
 
         if inlineFormatter != nil {
@@ -1658,10 +1659,10 @@ public extension CALayer {
     }
 
     override public func moveDown(_ sender: Any?) {
-        rootNode.moveDown()
-
         if popover != nil {
-            updatePopover(with: .moveLeft)
+            updatePopover(with: .moveDown)
+        } else {
+            rootNode.moveDown()
         }
 
         if inlineFormatter != nil {

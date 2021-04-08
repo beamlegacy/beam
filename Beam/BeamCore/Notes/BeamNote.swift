@@ -91,14 +91,14 @@ public class BeamNote: BeamElement {
         var refs = [BeamNoteReference]()
         // old references
         if container.contains(.linkedReferences) {
-            refs += try container.decode([BeamNoteReference].self, forKey: .linkedReferences)
+            refs += (try? container.decode([BeamNoteReference].self, forKey: .linkedReferences)) ?? []
         }
         if container.contains(.unlinkedReferences) {
-            refs += try container.decode([BeamNoteReference].self, forKey: .unlinkedReferences)
+            refs += (try? container.decode([BeamNoteReference].self, forKey: .unlinkedReferences)) ?? []
         }
         // new (unified) references
         if container.contains(.references) {
-            refs += try container.decode([BeamNoteReference].self, forKey: .references)
+            refs += (try? container.decode([BeamNoteReference].self, forKey: .references)) ?? []
         }
 
         references = refs

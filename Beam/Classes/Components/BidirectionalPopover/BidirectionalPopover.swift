@@ -7,7 +7,7 @@
 
 import Cocoa
 
-class BidirectionalPopover: Popover {
+class BidirectionalPopover: NSView {
 
     // MARK: - Properties
     @IBOutlet var containerView: NSView!
@@ -53,6 +53,10 @@ class BidirectionalPopover: Popover {
     // MARK: - Initializer
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
+
+        wantsLayer = true
+        layer?.cornerRadius = 7
+
         loadXib()
         setupView()
         setupCollectionView()
@@ -118,20 +122,7 @@ class BidirectionalPopover: Popover {
     }
 
     // MARK: - Methods
-    override func doCommand(_ key: BeamTextEdit.Command, _ command: Bool = false) {
-        switch key {
-        case .moveUp:
-            keyMoveUp()
-        case .moveDown:
-            keyMoveDown()
-        case .insertNewline:
-            selectItem()
-        default:
-            break
-        }
-    }
-
-    private func keyMoveUp() {
+    func moveUp() {
         if indexPath.section == 1 {
             collectionView.deselectItems(at: [indexPath])
             indexPath = IndexPath(item: items.count, section: 0)
@@ -144,7 +135,7 @@ class BidirectionalPopover: Popover {
         indexPath.item -= 1
     }
 
-    private func keyMoveDown() {
+    func moveDown() {
         if indexPath.item == items.count - 1 && !isMatchItem && !query.isEmpty {
             collectionView.deselectItems(at: [indexPath])
             indexPath = IndexPath(item: 0, section: 1)
@@ -170,7 +161,7 @@ class BidirectionalPopover: Popover {
         indexPath = IndexPath(item: 0, section: section)
     }
 
-    private func selectItem(with command: Bool = false) {
+    func selectItem() {
         let itemName = itemNameAt(index: indexPath.section)
 
         switch itemName {
