@@ -137,7 +137,7 @@ export const PointAndShoot = (win, ui) => {
     // point(el, x, y)
     ui.shoot(el, x, y, selectedEls, () => {
       for (const el of selectedEls) {
-        assignCard(el, datasetKey, this.selectedCard)
+        assignCard(el, datasetKey, selectedCard)
       }
     })
   }
@@ -200,8 +200,10 @@ export const PointAndShoot = (win, ui) => {
     if (hasFrames) {
       for (const frameEl of frameEls) {
         const bounds = frameEl.getBoundingClientRect()
+        const { origin } = new URL(frameEl.src)
         const frameInfo = {
-          href: frameEl.src,
+          origin:  win.origin,
+          href: origin,
           bounds: {
             x: bounds.x,
             y: bounds.y,
@@ -211,10 +213,10 @@ export const PointAndShoot = (win, ui) => {
         }
         framesInfo.push(frameInfo)
       }
+      ui.setFramesInfo(framesInfo)
     } else {
       console.log("No frames")
     }
-    ui.setFramesInfo(framesInfo)
     return hasFrames
   }
 
@@ -245,11 +247,22 @@ export const PointAndShoot = (win, ui) => {
   }
 
   function onLoad(_ev) {
-    console.log("Page load. Checking frames")
+    console.log("Page load.", win.origin)
+    console.log("Flushing frames.", win.origin);
+    ui.setOnLoadInfo()
+    
+    console.log("Checking frames.", win.origin);
     checkFrames()
+
+    // This timeout is here so SPA style sites have time to build the DOM
+    // TODO: Add reliable TTI eventlistener for JS heavy sites
+    setTimeout(() => {
+      console.log('After 500ms running checkFrames again', win.origin)
+      checkFrames()
+    }, 500);
   }
 
-  checkFrames()
+  console.log('Point and Shoot init.',  win.origin)
   onScroll()   // Init/refresh scroll info
 
   const textSelector = new TextSelector(win, ui.textSelector)

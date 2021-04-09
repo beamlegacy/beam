@@ -114,8 +114,7 @@ export class UI_native extends UI {
    * @param framesInfo {FrameInfo[]}
    */
   setFramesInfo(framesInfo) {
-    const framesWithOrigin = framesInfo.map(frameInfo => Object.assign(frameInfo, {origin: this.native.origin}))
-    this.native.sendMessage("frameBounds", {frames: framesWithOrigin})
+    this.native.sendMessage("frameBounds", {frames: framesInfo})
   }
 
   setScrollInfo(scrollInfo) {
@@ -129,7 +128,13 @@ export class UI_native extends UI {
     }
   }
 
+  setOnLoadInfo() {
+    this.native.sendMessage("onLoad", null)
+  }
+
   pinched(pinchInfo) {
     this.native.sendMessage("pinch", pinchInfo)
   }
 }
+
+
