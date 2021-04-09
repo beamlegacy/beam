@@ -13,12 +13,12 @@ class AllCardsContextualMenu {
 
     private let documentManager: DocumentManager
     private let selectedNotes: [BeamNote]
-    private let completionBlock: ((_ needReload: Bool) -> Void)?
+    private let onFinishBlock: ((_ needReload: Bool) -> Void)?
 
-    init(documentManager: DocumentManager, selectedNotes: [BeamNote], completionBlock: ((_ needReload: Bool) -> Void)?) {
+    init(documentManager: DocumentManager, selectedNotes: [BeamNote], onFinish: ((_ needReload: Bool) -> Void)?) {
         self.documentManager = documentManager
         self.selectedNotes = selectedNotes
-        self.completionBlock = completionBlock
+        self.onFinishBlock = onFinish
     }
 
     func presentMenuForNotes(at: CGPoint, allowImports: Bool = false) {
@@ -147,14 +147,18 @@ class AllCardsContextualMenu {
     }
 
     @objc private func makePublic() {
-        makeNotes(isPublic: true)
+        makeNotes(isPublic: true).then { _ in
+            self.onFinishBlock?(true)
+        }
     }
 
     @objc private func makePrivate() {
-        makeNotes(isPublic: false)
+        makeNotes(isPublic: false).then { _ in
+            self.onFinishBlock?(true)
+        }
     }
 
-    private func makeNotes(isPublic: Bool) {
+    private func makeNotes(isPublic: Bool) -> Promises.Promise<[Bool]> {
         let promises: [Promises.Promise<Bool>] = selectedNotes.map { note in
             note.isPublic = isPublic
             if let doc = note.documentStruct {
@@ -164,9 +168,7 @@ class AllCardsContextualMenu {
                 return Promises.Promise(error)
             }
         }
-        Promises.all(promises).then { _ in
-            self.completionBlock?(true)
-        }
+        return Promises.all(promises)
     }
 
     @objc private func deleteNotes() {
@@ -182,7 +184,7 @@ class AllCardsContextualMenu {
             if response == .alertFirstButtonReturn {
                 self.confirmedDeleteSelectedNotes()
             } else {
-                self.completionBlock?(false)
+                self.onFinishBlock?(false)
             }
         }
 
@@ -190,13 +192,13 @@ class AllCardsContextualMenu {
 
     private func confirmedDeleteSelectedNotes() {
         guard selectedNotes.count > 0 else {
-            self.documentManager.deleteAllDocuments(includedRemote: true) { _ in
-                self.completionBlock?(true)
+            self.documentManager.deleteAllDocuments().then { _ in
+                self.onFinishBlock?(true)
             }
             return
         }
-        self.documentManager.deleteDocuments(ids: selectedNotes.map { $0.id }) { _ in
-            self.completionBlock?(true)
+        self.documentManager.deleteDocuments(ids: selectedNotes.map { $0.id }).then { _ in
+            self.onFinishBlock?(true)
         }
     }
 
