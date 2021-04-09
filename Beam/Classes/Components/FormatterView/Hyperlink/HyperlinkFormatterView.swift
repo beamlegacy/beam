@@ -31,7 +31,7 @@ private struct HyperlinkEditorView: View {
     }
 
     func textField(_ textBinding: Binding<String>, editingBinding: Binding<Bool>, placeholder: String) -> some View {
-        return BeamTextField(text: textBinding, isEditing: editingBinding, placeholder: placeholder, font: BeamFont.regular(size: 13).nsFont, textColor: editingBinding.wrappedValue ? BeamColor.Generic.text.nsColor : BeamColor.Generic.placeholder.nsColor, placeholderColor: BeamColor.Generic.placeholder.nsColor, onCommit: { _ in
+        return BeamTextField(text: textBinding, isEditing: editingBinding, placeholder: placeholder, font: BeamFont.regular(size: 13).nsFont, textColor: BeamColor.Generic.text.nsColor, placeholderColor: BeamColor.Generic.placeholder.nsColor, onCommit: { _ in
             onFinishEditing?(false)
         }, onEscape: {
             onFinishEditing?(true)
@@ -43,7 +43,7 @@ private struct HyperlinkEditorView: View {
             VStack {
                 HStack(spacing: 4) {
                     Icon(name: "editor-url_title", size: 16, color: BeamColor.Generic.text.swiftUI)
-                    textField(viewModel.title, editingBinding: $isEditingTitle, placeholder: "Title")
+                    textField(viewModel.title, editingBinding: $isEditingTitle, placeholder: "Page title")
                     if isEditingTitle {
                         Icon(name: "editor-format_enter", size: 12, color: BeamColor.Generic.placeholder.swiftUI)
                             .onTapGesture {
@@ -55,7 +55,7 @@ private struct HyperlinkEditorView: View {
                     .padding(.horizontal, 2)
                 HStack(spacing: 4) {
                     Icon(name: "editor-url_link", size: 16, color: BeamColor.Generic.text.swiftUI)
-                    textField(viewModel.url, editingBinding: $isEditingUrl, placeholder: "URL")
+                    textField(viewModel.url, editingBinding: $isEditingUrl, placeholder: "Page's Address")
                     if isEditingUrl {
                         Icon(name: "editor-format_enter", size: 12, color: BeamColor.Generic.text.swiftUI)
                             .onTapGesture {
