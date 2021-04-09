@@ -94,6 +94,9 @@ export class UI {
   setResizeInfo(resizeInfo, els) {
   }
 
+  setOnLoadInfo() {
+  }
+
   pinched(pinchInfo) {
   }
 }

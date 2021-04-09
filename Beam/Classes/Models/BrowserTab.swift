@@ -370,6 +370,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         case beam_shootConfirmation
         case beam_textSelection
         case beam_textSelected
+        case beam_onLoad
         case beam_onScrolled
         case beam_logging
         case beam_textInputFields
@@ -512,6 +513,10 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         case ScriptHandlers.beam_logging.rawValue:
             Logger.shared.logInfo(String(describing: message.body), category: .javascript)
 
+        case ScriptHandlers.beam_onLoad.rawValue:
+            Logger.shared.logInfo("onLoad flushing frameInfo", category: .web)
+            webPositions.framesInfo.removeAll()
+
         case ScriptHandlers.beam_point.rawValue:
             guard webView.url?.isSearchResult != true else { return }
             guard let dict = messageBody,
@@ -648,7 +653,6 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                 Logger.shared.logError("Ignored beam_frameBounds: \(String(describing: messageBody))", category: .web)
                 return
             }
-            webPositions.framesInfo.removeAll()
             for jsFrameInfo in jsFramesInfo {
                 let d = jsFrameInfo as AnyObject
                 let bounds = d["bounds"] as AnyObject

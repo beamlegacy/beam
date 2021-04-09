@@ -293,6 +293,10 @@ export class UI_web extends UI {
     // Nothing to do in Web UI
   }
 
+  setOnLoadInfo() {
+    // Nothing to do in Web UI
+  }
+
   pinched(pinchInfo) {
     // Nothing to do in Web UI
   }

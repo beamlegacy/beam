@@ -18,6 +18,7 @@ class WebPositions {
                     let frameInfo = foundFrameInfo!
                     framePos += prop == "x" ? frameInfo.x : frameInfo.y
                     currentOrigin = frameInfo.origin
+                    break
                 } else {
                     Logger.shared.logError("""
                                            Could not find frameInfo for origin \(currentOrigin)
@@ -64,10 +65,13 @@ class WebPositions {
 
     func registerOrigin(origin: String) {
         var originFrame = framesInfo[origin]
+
         if originFrame == nil {
             originFrame = FrameInfo(origin: origin, x: 0, y: 0, width: -1, height: -1)
             framesInfo[origin] = originFrame
         }
+        
+        Logger.shared.logError("framesInfo: \(framesInfo)", category: .general)
     }
 
     /**

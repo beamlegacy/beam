@@ -61,6 +61,10 @@ export class UI_debug extends UI {
     this.nativeUi.setResizeInfo(resizeInfo, selected)
   }
 
+  setOnLoadInfo() {
+    this.nativeUi.setOnLoadInfo()
+  }
+
   enterSelection(scrollWidth) {
     this.textSelector.enterSelection(scrollWidth)
   }
