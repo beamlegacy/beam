@@ -95,6 +95,16 @@ extension TextRoot {
         for node in sortedNodes.reversed() {
             // Delete Selected Element:
             cmdManager.deleteElement(for: node)
+
+            // Yeah, this sucks, I know
+            if let ref = node as? LinkedReferenceNode,
+               let breadcrumb = ref.parent as? BreadCrumb,
+               let bcParent = breadcrumb.parent {
+                bcParent.removeChild(breadcrumb)
+                if bcParent.children.isEmpty {
+                    bcParent.parent?.removeChild(bcParent)
+                }
+            }
         }
 
         if createEmptyNodeInPlace || root.element.children.isEmpty {
