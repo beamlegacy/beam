@@ -90,6 +90,7 @@ class TextFormatterView: FormatterView {
     // MARK: - UI
     private func commonInitUI() {
         self.alphaValue = 0.0
+        self.wantsLayer = true
         containerView.wantsLayer = true
         containerView.layer?.cornerRadius = corderRadius
         containerView.layer?.borderWidth = 0.7
