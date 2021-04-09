@@ -83,4 +83,16 @@ class WebPositions {
         }
         return NSRect(x: x, y: y, width: width, height: height)
     }
+
+    /**
+  - Parameter jsPoint: a dictionary with x, y
+  - Returns:
+  */
+    func jsToPoint(jsPoint: AnyObject) -> NSPoint {
+        guard let x = jsPoint["x"] as? CGFloat,
+              let y = jsPoint["y"] as? CGFloat else {
+            return .zero
+        }
+        return NSPoint(x: x, y: y)
+    }
 }

@@ -35,6 +35,8 @@ struct BeamTextField: NSViewRepresentable {
 
     func makeNSView(context: Self.Context) -> Self.NSViewType {
         let textField = BeamTextFieldView()
+        textField.setContentCompressionResistancePriority(.defaultLow, for: .vertical)
+
         textField.delegate = context.coordinator
         textField.focusRingType = .none
 

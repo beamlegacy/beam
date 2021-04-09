@@ -337,6 +337,8 @@
 		A5208D8F261D25F1006193AF /* BeamSpacing.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5208D8E261D25F1006193AF /* BeamSpacing.swift */; };
 		A5208E05261F2156006193AF /* AllCardsContextualMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5208E04261F2156006193AF /* AllCardsContextualMenu.swift */; };
 		A5208E27261F7419006193AF /* String+Calculations.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5208E26261F7419006193AF /* String+Calculations.swift */; };
+		A5208DB7261E0222006193AF /* ShootCardPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5208DB6261E0222006193AF /* ShootCardPicker.swift */; };
+		A5208DD5261EE7FA006193AF /* ShootCardConfirmationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5208DD4261EE7FA006193AF /* ShootCardConfirmationView.swift */; };
 		A520D8DF25F8DF8D00400720 /* TouchDownModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = A520D8DE25F8DF8D00400720 /* TouchDownModifier.swift */; };
 		A5233DE525FB682700BE6F05 /* FaviconProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5233DE425FB682700BE6F05 /* FaviconProvider.swift */; };
 		A52BFDF72608D6710028D3F3 /* BeamFont.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52BFDF62608D6710028D3F3 /* BeamFont.swift */; };
@@ -910,6 +912,8 @@
 		A5208D8E261D25F1006193AF /* BeamSpacing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamSpacing.swift; sourceTree = "<group>"; };
 		A5208E04261F2156006193AF /* AllCardsContextualMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllCardsContextualMenu.swift; sourceTree = "<group>"; };
 		A5208E26261F7419006193AF /* String+Calculations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Calculations.swift"; sourceTree = "<group>"; };
+		A5208DB6261E0222006193AF /* ShootCardPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShootCardPicker.swift; sourceTree = "<group>"; };
+		A5208DD4261EE7FA006193AF /* ShootCardConfirmationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShootCardConfirmationView.swift; sourceTree = "<group>"; };
 		A520D8DE25F8DF8D00400720 /* TouchDownModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TouchDownModifier.swift; sourceTree = "<group>"; };
 		A5233DE425FB682700BE6F05 /* FaviconProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaviconProvider.swift; sourceTree = "<group>"; };
 		A52BFDF62608D6710028D3F3 /* BeamFont.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamFont.swift; sourceTree = "<group>"; };
@@ -2267,6 +2271,8 @@
 			children = (
 				BAA679F6C221431D64C46945 /* PointFrame.swift */,
 				BAA67FB11EF06A38E7E5EB36 /* ShootFrame.swift */,
+				A5208DB6261E0222006193AF /* ShootCardPicker.swift */,
+				A5208DD4261EE7FA006193AF /* ShootCardConfirmationView.swift */,
 			);
 			path = PointAndShoot;
 			sourceTree = "<group>";
@@ -2937,6 +2943,7 @@
 				414B98FE25A27930002E81A3 /* FormatterType.swift in Sources */,
 				5273C66D25DA857400B00EC3 /* BeamUITestsMenuGenerator.swift in Sources */,
 				4181720A2581107C00317ED8 /* BrowserTab.swift in Sources */,
+				A5208DB7261E0222006193AF /* ShootCardPicker.swift in Sources */,
 				5206283E25923EB500D7CD9E /* DocumentAPIType.swift in Sources */,
 				418172D625811B8700317ED8 /* RoundRectButtonStyle.swift in Sources */,
 				96FACC8626050B1E0088DD67 /* SetSelection.swift in Sources */,
@@ -3008,6 +3015,7 @@
 				96120D0E260C917600592546 /* TextLine.swift in Sources */,
 				A5233DE525FB682700BE6F05 /* FaviconProvider.swift in Sources */,
 				4181723D2581107C00317ED8 /* BeamTextEdit.swift in Sources */,
+				A5208DD5261EE7FA006193AF /* ShootCardConfirmationView.swift in Sources */,
 				9691E40225AE5D2C00A13080 /* NodeSelection.swift in Sources */,
 				5204FE3B25F128BD00FD22F8 /* DocumentStruct.swift in Sources */,
 				4181720F2581107C00317ED8 /* PageRank.swift in Sources */,

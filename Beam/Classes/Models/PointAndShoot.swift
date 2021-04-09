@@ -7,6 +7,21 @@ import BeamCore
 
 class PointAndShoot {
 
+    struct Target {
+        var area: NSRect
+        var mouseLocation: NSPoint
+        var html: String
+
+        func translateTarget(xDelta: CGFloat, yDelta: CGFloat) -> Target {
+            let shootArea = self.area
+            let newX = shootArea.minX + xDelta
+            let newY = shootArea.minY + yDelta
+            let newArea = NSRect(x: newX, y: newY, width: shootArea.width, height: shootArea.height)
+            let newLocation = NSPoint(x: self.mouseLocation.x + xDelta, y: self.mouseLocation.y + yDelta)
+            return Target(area: newArea, mouseLocation: newLocation, html: self.html)
+        }
+    }
+
     private var page: WebPage
 
     let ui: PointAndShootUI
@@ -21,9 +36,9 @@ class PointAndShoot {
      *
      * There is only one at a time.
      */
-    var pointArea: NSRect?
+    var pointTarget: Target?
 
-    var shootAreas: [NSRect] = []
+    var shootTargets: [Target] = []
 
     lazy var pointAndShoot: String = {
         loadFile(from: "index_prod", fileType: "js")
@@ -40,49 +55,60 @@ class PointAndShoot {
 
     func drawAllShoots(origin: String) {
         ui.clearShoots()
-        if shootAreas.count > 0 {
+        if shootTargets.count > 0 {
             let scale = page.webPositions.scale
             let xDelta = -page.scrollX * scale
             let yDelta = -page.scrollY * scale
             Logger.shared.logError("drawallshoots: xDelta=\(xDelta), yDelta=\(yDelta)", category: .general)
-            for shootArea in shootAreas {
-                let nativeArea = page.webPositions.nativeArea(area: shootArea, origin: origin)
-                ui.drawShoot(shootArea: nativeArea, xDelta: xDelta, yDelta: yDelta)
+            for shootTarget in shootTargets {
+                let area = shootTarget.area
+                let nativeArea = page.webPositions.nativeArea(area: area, origin: origin)
+                let target = Target(area: nativeArea, mouseLocation: shootTarget.mouseLocation, html: shootTarget.html)
+                ui.drawShoot(shootTarget: target, xDelta: xDelta, yDelta: yDelta)
             }
         }
     }
 
-    func point(area: NSRect?) {
-        pointArea = area
-        if pointArea != nil {
-            ui.drawPoint(area: pointArea!)
+    func point(target: Target?) {
+        pointTarget = target
+        if let t = target {
+            ui.drawPoint(target: t)
         } else {
             ui.clearPoint()
         }
     }
 
-    func addShoot(area: NSRect) {
-        shootAreas.append(area)
+    private func addShoot(target: Target) {
+        shootTargets.append(target)
     }
 
     func clearAllShoots() {
-        shootAreas.removeAll()
+        shootTargets.removeAll()
         ui.clear()
     }
 
-    func shootAll(areas: NSArray, origin: String) {
+    func shootAll(targets: [Target], origin: String) {
         clearAllShoots()
         let webPositions = page.webPositions
         let scale = page.webPositions.scale
         let xDelta = page.scrollX * scale
         let yDelta = page.scrollY * scale
-        for area in areas {
-            let jsArea = area as AnyObject
-            let rectArea = webPositions.jsToRect(jsArea: jsArea)
-            let textArea = webPositions.nativeArea(area: rectArea, origin: origin)
-            let scrolledArea = NSRect(x: textArea.minX + xDelta, y: textArea.minY, width: textArea.width, height: textArea.height)
-            addShoot(area: scrolledArea)
+        for t in targets {
+            let textArea = webPositions.nativeArea(area: t.area, origin: origin)
+            let scrolledArea = NSRect(x: textArea.minX + xDelta, y: textArea.minY + yDelta, width: textArea.width, height: textArea.height)
+            let scrolledMouseLocation = NSPoint(x: t.mouseLocation.x + xDelta, y: t.mouseLocation.y + yDelta)
+            let target = Target(area: scrolledArea, mouseLocation: scrolledMouseLocation, html: t.html)
+            addShoot(target: target)
         }
         drawAllShoots(origin: origin)
+    }
+
+    func shootConfirmation(target: Target, cardName: String, origin: String) {
+        clearAllShoots()
+        ui.drawShootConfirmation(shootTarget: target, cardName: cardName)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
+            guard let self = self else { return }
+            self.clearAllShoots()
+        }
     }
 }
