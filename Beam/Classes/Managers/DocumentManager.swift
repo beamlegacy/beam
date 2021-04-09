@@ -894,39 +894,6 @@ extension DocumentManager {
         }
     }
 
-    func deleteDocuments(ids: [UUID], completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
-        coreDataManager.persistentContainer.performBackgroundTask { context in
-            ids.forEach { (id) in
-                let document = Document.fetchWithId(context, id)
-                document?.delete(context)
-            }
-
-            do {
-                try Self.saveContext(context: context)
-            } catch {
-                completion?(.failure(error))
-                return
-            }
-
-            // If not authenticated
-            guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
-                completion?(.success(false))
-                return
-            }
-
-            let promises: [Promises.Promise<DocumentAPIType?>] = ids.map { (id) in
-                Self.networkRequests[id]?.cancel()
-                let documentRequest = DocumentRequest()
-                Self.networkRequests[id] = documentRequest
-                return documentRequest.deleteDocument(id.uuidString.lowercased())
-            }
-
-            Promises.all(promises)
-                .then { _ in completion?(.success(true)) }
-                .catch { error in completion?(.failure(error)) }
-        }
-    }
-
     func deleteAllDocuments(includedRemote: Bool = true, completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
         CoreDataManager.shared.destroyPersistentStore()
 
@@ -1289,6 +1256,33 @@ extension DocumentManager {
                     .then(on: self.backgroundQueue) { _ in
                         return true
                     }
+            }
+    }
+
+    func deleteDocuments(ids: [UUID]) -> Promises.Promise<Bool> {
+        return self.coreDataManager.background()
+            .then(on: backgroundQueue) { context in
+
+                context.performAndWait {
+                    ids.forEach { (id) in
+                        let document = Document.fetchWithId(context, id)
+                        document?.delete(context)
+                    }
+                }
+
+                // If not authenticated
+                guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+                    return Promise(true)
+                }
+
+                let promises: [Promises.Promise<DocumentAPIType?>] = ids.map { (id) in
+                    Self.networkRequests[id]?.cancel()
+                    let documentRequest = DocumentRequest()
+                    Self.networkRequests[id] = documentRequest
+                    return documentRequest.deleteDocument(id.uuidString.lowercased())
+                }
+
+                return Promises.all(promises).then { _ in return true }
             }
     }
 
