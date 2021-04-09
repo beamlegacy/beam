@@ -113,6 +113,15 @@ public struct BeamText: Codable {
                 return false
             }
         }
+
+        public var isInternalLink: Bool {
+            switch self {
+            case .internalLink:
+                return true
+            default:
+                return false
+            }
+        }
     }
 
     public struct Range: Codable, Equatable {
