@@ -208,8 +208,10 @@ extension TableViewCoordinator: NSTableViewDataSource {
             rowView.highlightOnSelection = false
         }
         rowView.onHover = { hovering in
+            guard rowView.frame.origin.y >= tableView.visibleRect.origin.y else { return }
+            let rowFrame = tableView.convert(rowView.frame, to: nil)
             self.hoveredRow = hovering ? row : nil
-            self.parent.onHover?(self.hoveredRow, hovering ? tableView.convert(rowView.frame, to: nil) : nil)
+            self.parent.onHover?(self.hoveredRow, hovering ? rowFrame : nil)
         }
         return rowView
     }
