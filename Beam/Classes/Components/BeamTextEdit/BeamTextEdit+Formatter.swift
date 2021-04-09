@@ -73,10 +73,6 @@ extension BeamTextEdit {
     // MARK: - Methods
     internal func showOrHidePersistentFormatter(isPresent: Bool) {
         guard let persistentFormatter = persistentFormatter else { return }
-
-        persistentFormatter.wantsLayer = true
-        persistentFormatter.layoutSubtreeIfNeeded()
-
         if isPresent {
             persistentFormatter.animateOnAppear()
         } else {
@@ -100,7 +96,6 @@ extension BeamTextEdit {
     internal func showOrHideInlineFormatter(isPresent: Bool, isDragged: Bool = false, completionHandler: (() -> Void)? = nil) {
         guard let inlineFormatter = inlineFormatter else { return }
 
-        inlineFormatter.wantsLayer = true
         if isPresent {
             inlineFormatter.animateOnAppear {
                 completionHandler?()
