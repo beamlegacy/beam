@@ -228,6 +228,11 @@ extension TextRoot {
 
     public func selectAll() {
         textIsSelected = true
+        _ = selectAllNodes()
+    }
+
+    public func selectAllText() {
+        textIsSelected = true
         guard root.state.nodeSelection == nil else {
             _ = selectAllNodes()
             return
