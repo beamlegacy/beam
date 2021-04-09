@@ -2,44 +2,59 @@ import Foundation
 import SwiftUI
 
 struct SelectionUI {
-    var rect: NSRect
+    var target: PointAndShoot.Target
+    var rect: NSRect {
+        target.area
+    }
     var animated: Bool
     var color: Color
+}
+
+struct SelectionConfirmationUI {
+    var target: PointAndShoot.Target
+    var cardName: String
+    var numberOfElements: Int
+    var isText: Bool
 }
 
 class PointAndShootUI: ObservableObject {
 
     @Published var pointSelection: SelectionUI?
     @Published var shootSelections: [SelectionUI] = []
+    @Published var shootConfirmation: SelectionConfirmationUI?
 
-    private func drawSelection(selection: NSRect, animated: Bool, color: Color) -> SelectionUI {
-        return SelectionUI(rect: selection, animated: animated, color: color)
+    private func drawSelection(target: PointAndShoot.Target, animated: Bool, color: Color) -> SelectionUI {
+        return SelectionUI(target: target, animated: animated, color: color)
     }
 
-    func drawPoint(area: NSRect) {
-        pointSelection = drawSelection(selection: area, animated: true, color: BeamColor.PointShoot.point.swiftUI)
+    func drawPoint(target: PointAndShoot.Target) {
+        pointSelection = drawSelection(target: target, animated: true, color: BeamColor.PointShoot.point.swiftUI)
     }
 
     func clearPoint() {
         pointSelection = nil
     }
 
-    func drawShoot(shootArea: NSRect, xDelta: CGFloat, yDelta: CGFloat) {
-        let newX = shootArea.minX + xDelta
-        let newY = shootArea.minY + yDelta
+    func drawShoot(shootTarget: PointAndShoot.Target, xDelta: CGFloat, yDelta: CGFloat) {
         let shootSelectionUI = SelectionUI(
-            rect: NSRect(x: newX, y: newY, width: shootArea.width, height: shootArea.height),
+            target: shootTarget.translateTarget(xDelta: xDelta, yDelta: yDelta),
             animated: false,
             color: BeamColor.PointShoot.shoot.swiftUI
         )
         shootSelections.append(shootSelectionUI)
     }
 
+    func drawShootConfirmation(shootTarget: PointAndShoot.Target, cardName: String) {
+        shootConfirmation = SelectionConfirmationUI(target: shootTarget, cardName: cardName, numberOfElements: 1, isText: true)
+    }
+
     func clearShoots() {
         shootSelections.removeAll()
+        shootConfirmation = nil
     }
 
     func clear() {
         shootSelections.removeAll()
+        shootConfirmation = nil
     }
 }

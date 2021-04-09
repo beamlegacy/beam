@@ -67,7 +67,7 @@ extension BeamColor {
 
 extension BeamColor {
     enum Formatter {
-        static let background = BeamColor.From(color: NSColor(withLightColor: NSColor.white.withAlphaComponent(0.92), darkColor: BeamColor.Nero.nsColor.withAlphaComponent(0.92)))
+        static let background = BeamColor.From(color: NSColor(withLightColor: NSColor.white.withAlphaComponent(0.98), darkColor: BeamColor.Nero.nsColor.withAlphaComponent(0.98)))
         static let backgroundHover = BeamColor.Custom(named: "FormatterBackgroundHoverColor")
         static let border = BeamColor.Custom(named: "FormatterBorderColor")
         static let shadow = BeamColor.From(color: NSColor(withLightColor: NSColor.black.withAlphaComponent(0.070), darkColor: NSColor.black.withAlphaComponent(0.4)))

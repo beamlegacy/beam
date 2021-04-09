@@ -35,7 +35,7 @@ private struct HyperlinkEditorView: View {
             onFinishEditing?(false)
         }, onEscape: {
             onFinishEditing?(true)
-        })
+        }).frame(minHeight: 16)
     }
 
     var body: some View {

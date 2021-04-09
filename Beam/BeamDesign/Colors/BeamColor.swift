@@ -27,6 +27,8 @@ indirect enum BeamColor {
     case Nero
     /** A dark gray in light mode. A fake whte in dark mode. Usually our main text color  */
     case Niobium
+    /** A powerful blue */
+    case Sonic
     /** A smoke white in light mode. A mid gray in dark mode */
     case Tundora
 

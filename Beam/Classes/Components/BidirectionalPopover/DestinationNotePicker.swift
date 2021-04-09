@@ -16,24 +16,17 @@ struct DestinationNotePicker: View {
     @State var isHovering = false
     @State var isMouseDown = false
 
-    @State private var selectedResultIndex: Int?
-    @State private var listResults = [AutocompleteResult]()
-
     private var enableAnimations: Bool {
         !state.windowIsResizing
     }
     private let boxHeight: CGFloat = 32
     private let maxBoxWidth: CGFloat = 230
-    private let todaysCardReplacementName = "Today"
     private var title: String {
-        displayNameForCardName(state.destinationCardName)
+        autocompleteModel.displayNameForCardName(state.destinationCardName)
     }
     private var placeholder: String {
-        let currentNote = displayNameForCardName(tab.note.title)
+        let currentNote = autocompleteModel.displayNameForCardName(tab.note.title)
         return !currentNote.isEmpty ? currentNote : "Destination Card"
-    }
-    private func displayNameForCardName(_ cardName: String) -> String {
-        return cardName == state.data.todaysName ? todaysCardReplacementName : cardName
     }
 
     private var isEditing: Bool {
@@ -47,6 +40,8 @@ struct DestinationNotePicker: View {
     private var animation: Animation? {
         enableAnimations ? .easeInOut(duration: 0.3) : nil
     }
+
+    @State private var autocompleteModel = DestinationNoteAutocompleteList.Model()
 
     var body: some View {
 
@@ -101,7 +96,7 @@ struct DestinationNotePicker: View {
                         } onEscape: {
                             cancelSearch()
                         } onCursorMovement: { move -> Bool in
-                            return handleCursorMovement(move)
+                            return autocompleteModel.handleCursorMovement(move)
                         } onStartEditing: {
                             Logger.shared.logInfo("[DestinationNotePicker] Start Editing", category: .ui)
                             if tab.note.isTodaysNote {
@@ -114,22 +109,26 @@ struct DestinationNotePicker: View {
                         } onStopEditing: {
                             cancelSearch()
                         }
+                        .frame(minHeight: isEditing ? 16 : 0)
                     }
                     .padding(BeamSpacing._80)
                     .accessibility(addTraits: .isSearchField)
                     .accessibility(identifier: "DestinationNoteSearchField")
                     .onAppear(perform: {
+                        autocompleteModel.data = state.data
                         state.destinationCardName = tab.note.title
                     })
                     .animation(animation)
                     .opacity(isEditing ? 1.0 : 0.01)
                     HStack {
-                        if isEditing && listResults.count > 0 {
-                            DestinationNoteAutocompleteList(selectedIndex: $selectedResultIndex, elements: $listResults)
-                                .onSelectAutocompleteResult {
-                                    selectedCurrentAutocompleteResult()
-                                }
-                                .frame(width: maxBoxWidth)
+                        if isEditing {
+                            OmniBarFieldBackground(isEditing: true, enableAnimations: true) {
+                                DestinationNoteAutocompleteList(model: autocompleteModel)
+                                    .onSelectAutocompleteResult {
+                                        selectedCurrentAutocompleteResult()
+                                    }
+                            }
+                            .frame(width: maxBoxWidth)
                         }
                     }
                     .animation(.easeInOut(duration: 0.1))
@@ -153,78 +152,42 @@ struct DestinationNotePicker: View {
         )
     }
 
-    func handleCursorMovement(_ move: CursorMovement) -> Bool {
-        switch move {
-        case .down, .up:
-            NSCursor.setHiddenUntilMouseMoves(true)
-            var newIndex = selectedResultIndex ?? -1
-            newIndex += (move == .up ? -1 : 1)
-            newIndex = newIndex.clampInLoop(0, listResults.count - 1)
-            selectedResultIndex = newIndex
-            return true
-        default:
-            return false
-        }
-    }
-
     func updateSearchResults() {
         Logger.shared.logInfo("Update Destination Picker Results for query \(state.destinationCardName)", category: .ui)
-        var allowCreateCard = false
-        var items = [DocumentStruct]()
-        let queryText = state.destinationCardName
-        let itemLimit = 4
-        if queryText.isEmpty {
-            items = state.data.documentManager.loadAllDocumentsWithLimit(itemLimit)
-        } else {
-            allowCreateCard = true
-            items = state.data.documentManager.documentsWithLimitTitleMatch(title: queryText, limit: itemLimit)
-        }
-        if (todaysCardReplacementName.lowercased().contains(queryText.lowercased()) && !items.contains(where: { $0.title == state.data.todaysName })) {
-            let todaysNotes = state.data.documentManager.documentsWithLimitTitleMatch(title: state.data.todaysName, limit: 1)
-            items.insert(contentsOf: todaysNotes, at: 0)
-            items = Array(items.prefix(itemLimit))
-        }
-        allowCreateCard = allowCreateCard && !items.contains(where: { $0.title.lowercased() == queryText.lowercased() })
-        selectedResultIndex = 0
-        var autocompleteItems = items.map { AutocompleteResult(text: displayNameForCardName($0.title), source: .note, uuid: $0.id) }
-        if allowCreateCard {
-            let createItem = AutocompleteResult(text: queryText, source: .createCard, information: "New Card")
-            if autocompleteItems.count >= itemLimit {
-                autocompleteItems[autocompleteItems.count - 1] = createItem
-            } else {
-                autocompleteItems.append(createItem)
-            }
-        }
-        listResults = autocompleteItems
+        autocompleteModel.searchText = state.destinationCardName
     }
 
-    func changeDestinationCard(to cardName: String) {
-        let cardName = cardName.lowercased() == todaysCardReplacementName.lowercased() ? state.data.todaysName : cardName
+    func changeDestinationCard(to cardName: String, note: BeamNote?) {
+        let cardName = autocompleteModel.realNameForCardName(cardName)
         state.destinationCardName = cardName
-        let note = BeamNote.fetchOrCreate(state.data.documentManager, title: cardName)
-        tab.setDestinationNote(note, rootElement: note)
+        if let finalNote = note ?? BeamNote.fetch(state.data.documentManager, title: cardName) {
+            tab.setDestinationNote(finalNote, rootElement: finalNote)
+        }
     }
 
-    func createNote(named name: String) {
-        _ = state.createNoteForQuery(name)
+    @discardableResult
+    func createNote(named name: String) -> BeamNote {
+        let note = BeamNote.fetchOrCreate(state.data.documentManager, title: name)
+        note.save(documentManager: state.data.documentManager)
+        return note
     }
 
     func selectedCurrentAutocompleteResult(withCommand: Bool = false) {
         let noteName: String
+        var note: BeamNote?
         if withCommand {
             noteName = state.destinationCardName
-            createNote(named: noteName)
+            note = createNote(named: noteName)
         } else {
-            guard let selectedResultIndex = selectedResultIndex, selectedResultIndex < listResults.count else {
+            guard let result = autocompleteModel.selectedResult else {
                 return
             }
-            let result = listResults[selectedResultIndex]
             if result.source == .createCard {
-                createNote(named: result.text)
+                note = createNote(named: result.text)
             }
             noteName = result.text
         }
-        changeDestinationCard(to: noteName)
+        changeDestinationCard(to: noteName, note: note)
         DispatchQueue.main.async {
             cancelSearch()
         }
@@ -232,7 +195,7 @@ struct DestinationNotePicker: View {
 
     func cancelSearch() {
         state.resetDestinationCard()
-        listResults = []
+        autocompleteModel.searchText = ""
     }
 }
 

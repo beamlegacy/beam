@@ -235,13 +235,13 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     }
 
     // Add the current page to the current note and return the beam element (if the element already exist return it directly)
-    func addCurrentPageToNote() -> BeamElement? {
+    func addCurrentPageToNote(allowSearchResult: Bool = false) -> BeamElement? {
         guard let elem = element else {
             guard let url = self.url else {
                 Logger.shared.logError("Cannot get current URL", category: .general)
                 return nil
             }
-            guard !url.isSearchResult else {
+            guard allowSearchResult || !url.isSearchResult else {
                 Logger.shared.logWarning("Adding search results is not allowed", category: .general)
                 return nil
             } // Don't automatically add search results
@@ -367,6 +367,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     private enum ScriptHandlers: String, CaseIterable {
         case beam_point
         case beam_shoot
+        case beam_shootConfirmation
         case beam_textSelection
         case beam_textSelected
         case beam_onScrolled
@@ -480,6 +481,29 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         loadFile(from: "PasswordManager", fileType: "js")
     }()
 
+    func pointAndShootTargetValues(from jsMessage: [String: AnyObject]) -> (location: NSPoint, html: String)? {
+        guard let html = jsMessage["html"] as? String,
+              let location = jsMessage["location"] else {
+            return nil
+        }
+        let position = webPositions.jsToPoint(jsPoint: location)
+        return (position, html)
+    }
+
+    func pointAndShootAreaValue(from jsMessage: [String: AnyObject]) -> NSRect? {
+        guard let area = jsMessage["area"] else {
+            return nil
+        }
+        return webPositions.jsToRect(jsArea: area)
+    }
+
+    func pointAndShootAreasValue(from jsMessage: [String: AnyObject]) -> [NSRect]? {
+        guard let areas = jsMessage["areas"] as? [AnyObject] else {
+            return nil
+        }
+        return areas.map { webPositions.jsToRect(jsArea: $0) }
+    }
+
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         let messageBody = message.body as? [String: AnyObject]
         let messageKey = message.name
@@ -489,64 +513,81 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             Logger.shared.logInfo(String(describing: message.body), category: .javascript)
 
         case ScriptHandlers.beam_point.rawValue:
+            guard webView.url?.isSearchResult != true else { return }
             guard let dict = messageBody,
                   let origin = dict["origin"] as? String ?? originalQuery,
-                  let area = dict["area"],
-                  dict["html"] != nil,
-                  dict["location"] != nil
-                    else {
-                pointAndShoot.point(area: nil)
+                  let area = pointAndShootAreaValue(from: dict),
+                  let (location, html) = pointAndShootTargetValues(from: dict) else {
+                pointAndShoot.point(target: nil)
                 return
             }
-            let rectArea = webPositions.jsToRect(jsArea: area)
-            let pointArea = webPositions.nativeArea(area: rectArea, origin: origin)
-            pointAndShoot.point(area: pointArea)
+            let pointArea = webPositions.nativeArea(area: area, origin: origin)
+            let target = PointAndShoot.Target(area: pointArea, mouseLocation: location, html: html)
+            pointAndShoot.point(target: target)
             Logger.shared.logInfo("Web block point: \(pointArea)", category: .web)
 
         case ScriptHandlers.beam_shoot.rawValue:
+            guard webView.url?.isSearchResult != true else { return }
             guard let dict = messageBody,
-                  let origin = dict["origin"] as? String,
-                  let html = dict["html"] as? String,
-                  let area = dict["area"],
-                  dict["location"] != nil
-                    else {
+                  let area = pointAndShootAreaValue(from: dict),
+                  let (location, html) = pointAndShootTargetValues(from: dict),
+                  let origin = dict["origin"] as? String else {
                 Logger.shared.logError("Ignored shoot event: \(String(describing: messageBody))", category: .web)
                 return
             }
-            pointAndShoot.shootAll(areas: [area], origin: origin)
-            noteTextSelection(url: webView.url!, html: html)
+            let target = PointAndShoot.Target(area: area, mouseLocation: location, html: html)
+            pointAndShoot.shootAll(targets: [target], origin: origin)
             Logger.shared.logInfo("Web shoot point: \(area)", category: .web)
 
-        case ScriptHandlers.beam_textSelected.rawValue:
+        case ScriptHandlers.beam_shootConfirmation.rawValue:
+            guard webView.url?.isSearchResult != true else { return }
             guard let dict = messageBody,
-                  dict["index"] as? Int != nil,
-                  dict["text"] as? String != nil,
-                  let html = dict["html"] as? String,
-                  let areas = dict["areas"] as? NSArray,
-                  let origin = dict["origin"] as? String,
-                  !html.isEmpty
-                    else {
-                Logger.shared.logError("Ignored text selected event: \(String(describing: messageBody))",
-                        category: .web)
+                  let area = pointAndShootAreaValue(from: dict),
+                  let (location, html) = pointAndShootTargetValues(from: dict),
+                  let origin = dict["origin"] as? String else {
+                Logger.shared.logError("Ignored shoot event: \(String(describing: messageBody))", category: .web)
                 return
             }
-            pointAndShoot.shootAll(areas: areas, origin: origin)
-            noteTextSelection(url: webView.url!, html: html)
+            let target = PointAndShoot.Target(area: area, mouseLocation: location, html: html)
+            pointAndShoot.shootConfirmation(target: target, cardName: "Card name?", origin: origin)
+            Logger.shared.logInfo("Web shoot confirmation: \(area)", category: .web)
 
-        case ScriptHandlers.beam_textSelection.rawValue:
+        case ScriptHandlers.beam_textSelected.rawValue:
+            guard webView.url?.isSearchResult != true else { return }
             guard let dict = messageBody,
                   dict["index"] as? Int != nil,
                   dict["text"] as? String != nil,
-                  let html = dict["html"] as? String,
-                  let areas = dict["areas"] as? NSArray,
                   let origin = dict["origin"] as? String,
+                  let html = dict["html"] as? String,
+                  let areas = pointAndShootAreasValue(from: dict),
+                  !html.isEmpty else {
+                Logger.shared.logError("Ignored text selected event: \(String(describing: messageBody))",
+                                       category: .web)
+                return
+            }
+            let targets = areas.map {
+                PointAndShoot.Target(area: $0, mouseLocation: CGPoint(x: $0.minX, y: $0.maxY), html: html)
+            }
+            print("LAST HTML:")
+            print(html)
+            pointAndShoot.shootAll(targets: targets, origin: origin)
+
+        case ScriptHandlers.beam_textSelection.rawValue:
+            guard webView.url?.isSearchResult != true else { return }
+            guard let dict = messageBody,
+                  dict["index"] as? Int != nil,
+                  dict["text"] as? String != nil,
+                  let origin = dict["origin"] as? String,
+                  let html = dict["html"] as? String,
+                  let areas = pointAndShootAreasValue(from: dict),
                   !html.isEmpty
                     else {
                 Logger.shared.logError("Ignored text selection event: \(String(describing: messageBody))",
                         category: .web)
                 return
             }
-            pointAndShoot.shootAll(areas: areas, origin: origin)
+            let targets = areas.map { PointAndShoot.Target(area: $0, mouseLocation: CGPoint(x: $0.minX, y: $0.maxY), html: html) }
+            pointAndShoot.shootAll(targets: targets, origin: origin)
 
         case ScriptHandlers.beam_pinch.rawValue:
             guard let dict = messageBody,
@@ -640,34 +681,46 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         }
     }
 
-    /**
-     What to do when some text chunk has been selected
-     - Parameters:
-       - url: The URL of the web page where text was selected
-       - html: The selected HTML
-     */
-    private func noteTextSelection(url: URL, html: String) {
+    func addSelectionToCard(cardName: String, target: PointAndShoot.Target, withNote additionalText: String? = nil) {
+        guard let url = webView.url,
+              let note = BeamNote.fetch(state.data.documentManager, title: cardName)
+        else { return }
+        state.destinationCardName = note.title
+        setDestinationNote(note, rootElement: note)
+        let html = target.html
         let text: BeamText = html2Text(url: url, html: html)
         browsingTree.current.score.textSelections += 1
         updateScore()
 
         // now add a bullet point with the quoted text:
-        if let urlString = webView.url?.absoluteString, let title = webView.title {
-            var quote = text
-            quote.addAttributes([.emphasis], to: quote.wholeRange)
+        guard let title = webView.title  else { return }
+        let urlString = url.absoluteString
+        var quote = text
+        quote.addAttributes([.emphasis], to: quote.wholeRange)
 
-            DispatchQueue.main.async {
-                guard let current = self.addCurrentPageToNote() else {
-                    Logger.shared.logError("Ignored current note add", category: .general)
-                    return
-                }
-                let e = BeamElement()
-                e.kind = .quote(1, title, urlString)
-                e.text = quote
-                e.query = self.originalQuery
-                current.addChild(e)
+        DispatchQueue.main.async {
+            guard let current = self.addCurrentPageToNote(allowSearchResult: true) else {
+                Logger.shared.logError("Ignored current note add", category: .general)
+                return
             }
+            var quoteParent = current
+            if let additionalText = additionalText, !additionalText.isEmpty {
+                let el = BeamElement()
+                el.kind = .quote(1, title, urlString)
+                el.text = BeamText(text: additionalText, attributes: [])
+                el.query = self.originalQuery
+                current.addChild(el)
+                quoteParent = el
+            }
+            let quoteE = BeamElement()
+            quoteE.kind = .quote(1, title, urlString)
+            quoteE.text = quote
+            quoteE.query = self.originalQuery
+            quoteParent.addChild(quoteE)
         }
+        // TODO: Send confirmation to JS.
+        // For now we trigger the UI manually
+        pointAndShoot.shootConfirmation(target: target, cardName: note.title, origin: "")
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
