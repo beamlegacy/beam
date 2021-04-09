@@ -258,8 +258,12 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>Beam requires access so that you can use video conferencing web services.</string>
 	<key>NSMainStoryboardFile</key>
 	<string>Main</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Beam requires access so that you can use audio conferencing web services.</string>
 	<key>NSPrincipalClass</key>
 	<string>BeamApplication</string>
 	<key>SUAllowsAutomaticUpdates</key>
