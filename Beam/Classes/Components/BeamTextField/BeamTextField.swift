@@ -23,6 +23,7 @@ struct BeamTextField: NSViewRepresentable {
     var onTextChanged: (String) -> Void = { _ in }
     var onCommit: (_ modifierFlags: NSEvent.ModifierFlags?) -> Void = { _ in }
     var onEscape: () -> Void = { }
+    var onTab: (() -> Void)?
     var onCursorMovement: (CursorMovement) -> Bool = { _ in false }
     var onModifierFlagPressed: ((_ modifierFlag: NSEvent) -> Void)?
     var onStartEditing: () -> Void = { }
@@ -145,6 +146,9 @@ struct BeamTextField: NSViewRepresentable {
                 return true
             } else if commandSelector == #selector(NSResponder.cancelOperation(_:)) {
                 parent.onEscape()
+                return true
+            } else if let onTab = parent.onTab, commandSelector == #selector(NSResponder.insertTab(_:)) {
+                onTab()
                 return true
             }
             return false

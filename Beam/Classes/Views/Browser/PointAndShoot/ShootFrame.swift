@@ -69,7 +69,7 @@ struct ShootFrame: View {
                 ShootAbsolutePositioning(location: selectionUI.target.mouseLocation, contentSize: ShootCardPicker.size) {
                     ShootCardPicker()
                         .onComplete { (cardName, note) in
-                            onSelectCard(cardName, withNote: note)
+                            onCompleteCardSelection(cardName, withNote: note)
                         }
                 }
             }
@@ -82,10 +82,12 @@ struct ShootFrame: View {
         .animation(nil)
     }
 
-    func onSelectCard(_ cardName: String?, withNote note: String?) {
+    func onCompleteCardSelection(_ cardName: String?, withNote note: String?) {
         if let cardName = cardName, let selection = pointAndShootUI.shootSelections.last {
             pointAndShootUI.clearShoots()
             state.currentTab?.addSelectionToCard(cardName: cardName, target: selection.target, withNote: note)
+        } else {
+            pointAndShootUI.clearShoots()
         }
     }
 
