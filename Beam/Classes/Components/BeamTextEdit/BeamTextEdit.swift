@@ -1375,7 +1375,10 @@ public extension CALayer {
     }
 
     public override func viewWillMove(toWindow newWindow: NSWindow?) {
-        guard let window = newWindow else { return }
+        guard let window = newWindow else {
+            self.resignFirstResponder()
+            return
+        }
         window.acceptsMouseMovedEvents = true
         rootNode.contentsScale = window.backingScaleFactor
         titleLayer.contentsScale = window.backingScaleFactor
