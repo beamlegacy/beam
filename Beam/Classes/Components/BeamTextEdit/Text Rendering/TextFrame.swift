@@ -22,7 +22,7 @@ public class TextFrame {
     var ctFrame: CTFrame
     var position: NSPoint
     var lines = [TextLine]()
-    var skippablePositions = Set<Int>()
+    var skippablePositions = [Int]()
 
     var visibleRange: Range<Int> {
         let r = CTFrameGetVisibleStringRange(ctFrame)
@@ -77,10 +77,10 @@ public class TextFrame {
 
     func layout() {
         if lines.isEmpty {
-            skippablePositions = Set<Int>()
+            skippablePositions = [Int]()
             attributedString.enumerateAttribute((kCTRunDelegateAttributeName as NSAttributedString.Key), in: attributedString.wholeRange, options: [], using: { value, range, _ in
                 if value != nil {
-                    skippablePositions.insert(range.location)
+                    skippablePositions.append(range.location)
                 }
             })
 
@@ -137,18 +137,18 @@ public class TextFrame {
         }
     }
 
-    lazy var carets: [TextLine.Caret] = {
+    var carets: [TextLine.Caret] {
         filterCarets(allCarets, sourceOffset: 0, skippablePositions: skippablePositions)
-    }()
+    }
 
     /// Returns all the carets from the low level CoreText API. There are sorted by offset, not by glyph and the indexOnScreen is counted in bytes in the source string so you will need to process this list before being able to use it for anything useful. The indexInSource is thus -1 for every position.
-    lazy var allCarets: [TextLine.Caret] = {
+    var allCarets: [TextLine.Caret] {
         var carets = [TextLine.Caret]()
         for line in lines {
             carets.append(contentsOf: line.allCarets)
         }
         return carets
-    }()
+    }
 
     public func position(before index: Int) -> Int {
         guard !lines.isEmpty, index > 0 else { return 0 }
