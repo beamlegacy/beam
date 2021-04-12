@@ -12,11 +12,12 @@ class PointAndShoot {
         var mouseLocation: NSPoint
         var html: String
 
-        func translateTarget(xDelta: CGFloat, yDelta: CGFloat) -> Target {
+        func translateTarget(xDelta: CGFloat, yDelta: CGFloat, scale: CGFloat) -> Target {
             let shootArea = self.area
             let newX = shootArea.minX + xDelta
             let newY = shootArea.minY + yDelta
-            let newArea = NSRect(x: newX, y: newY, width: shootArea.width, height: shootArea.height)
+            let newArea = NSRect(x: newX * scale, y: newY * scale,
+                                 width: shootArea.width * scale, height: shootArea.height * scale)
             let newLocation = NSPoint(x: self.mouseLocation.x + xDelta, y: self.mouseLocation.y + yDelta)
             return Target(area: newArea, mouseLocation: newLocation, html: self.html)
         }
@@ -56,15 +57,10 @@ class PointAndShoot {
     func drawAllShoots(origin: String) {
         ui.clearShoots()
         if shootTargets.count > 0 {
-            let scale = page.webPositions.scale
-            let xDelta = -page.scrollX * scale
-            let yDelta = -page.scrollY * scale
-            Logger.shared.logError("drawallshoots: xDelta=\(xDelta), yDelta=\(yDelta)", category: .general)
+            let xDelta = -page.scrollX
+            let yDelta = -page.scrollY
             for shootTarget in shootTargets {
-                let area = shootTarget.area
-                let nativeArea = page.webPositions.nativeArea(area: area, origin: origin)
-                let target = Target(area: nativeArea, mouseLocation: shootTarget.mouseLocation, html: shootTarget.html)
-                ui.drawShoot(shootTarget: target, xDelta: xDelta, yDelta: yDelta)
+                ui.drawShoot(shootTarget: shootTarget, xDelta: xDelta, yDelta: yDelta, scale: page.webPositions.scale)
             }
         }
     }
@@ -90,15 +86,14 @@ class PointAndShoot {
     func shootAll(targets: [Target], origin: String) {
         clearAllShoots()
         let webPositions = page.webPositions
-        let scale = page.webPositions.scale
-        let xDelta = page.scrollX * scale
-        let yDelta = page.scrollY * scale
+        let pageScrollX = page.scrollX
+        let pageScrollY = page.scrollY
         for t in targets {
-            let textArea = webPositions.nativeArea(area: t.area, origin: origin)
-            let scrolledArea = NSRect(x: textArea.minX + xDelta, y: textArea.minY + yDelta, width: textArea.width, height: textArea.height)
-            let scrolledMouseLocation = NSPoint(x: t.mouseLocation.x + xDelta, y: t.mouseLocation.y + yDelta)
-            let target = Target(area: scrolledArea, mouseLocation: scrolledMouseLocation, html: t.html)
-            addShoot(target: target)
+            let viewportArea = webPositions.viewportArea(area: t.area, origin: origin)
+            let pageArea = NSRect(x: viewportArea.minX + pageScrollX, y: viewportArea.minY + pageScrollY, width: viewportArea.width, height: viewportArea.height)
+            let pageMouseLocation = NSPoint(x: t.mouseLocation.x + pageScrollX, y: t.mouseLocation.y + pageScrollY)
+            let pageTarget = Target(area: pageArea, mouseLocation: pageMouseLocation, html: t.html)
+            addShoot(target: pageTarget)
         }
         drawAllShoots(origin: origin)
     }

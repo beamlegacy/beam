@@ -137,7 +137,7 @@ export const PointAndShoot = (win, ui) => {
     // point(el, x, y)
     ui.shoot(el, x, y, selectedEls, () => {
       for (const el of selectedEls) {
-        assignCard(el, datasetKey, selectedCard)
+       // assignCard(el, datasetKey, selectedCard)
       }
     })
   }
@@ -200,10 +200,10 @@ export const PointAndShoot = (win, ui) => {
     if (hasFrames) {
       for (const frameEl of frameEls) {
         const bounds = frameEl.getBoundingClientRect()
-        const { origin } = new URL(frameEl.src)
+        const href = frameEl.src
         const frameInfo = {
           origin:  win.origin,
-          href: origin,
+          href: href,
           bounds: {
             x: bounds.x,
             y: bounds.y,

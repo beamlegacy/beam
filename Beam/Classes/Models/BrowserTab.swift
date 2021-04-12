@@ -526,7 +526,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                 pointAndShoot.point(target: nil)
                 return
             }
-            let pointArea = webPositions.nativeArea(area: area, origin: origin)
+            let pointArea = webPositions.viewportArea(area: area, origin: origin)
             let target = PointAndShoot.Target(area: pointArea, mouseLocation: location, html: html)
             pointAndShoot.point(target: target)
             Logger.shared.logInfo("Web block point: \(pointArea)", category: .web)
@@ -573,8 +573,6 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             let targets = areas.map {
                 PointAndShoot.Target(area: $0, mouseLocation: CGPoint(x: $0.minX, y: $0.maxY), html: html)
             }
-            print("LAST HTML:")
-            print(html)
             pointAndShoot.shootAll(targets: targets, origin: origin)
 
         case ScriptHandlers.beam_textSelection.rawValue:
@@ -660,7 +658,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                    let href = d["href"] as? String {
                     webPositions.registerOrigin(origin: origin)
                     let rectArea = webPositions.jsToRect(jsArea: bounds)
-                    let nativeBounds = webPositions.nativeArea(area: rectArea, origin: origin)
+                    let nativeBounds = webPositions.viewportArea(area: rectArea, origin: origin)
                     webPositions.framesInfo[href] = FrameInfo(
                             origin: origin, x: nativeBounds.minX, y: nativeBounds.minY,
                             width: nativeBounds.width, height: nativeBounds.height

@@ -60,8 +60,8 @@ export class TextSelector {
       for (let r = 0; r < rangeRects.length; r++) {
         const rangeRect = rangeRects[r]
         const rect = {
-          x: this.win.scrollX + rangeRect.x,
-          y: this.win.scrollY + rangeRect.y,
+          x: rangeRect.x,
+          y: rangeRect.y,
           width: rangeRect.width,
           height: rangeRect.height
         }
