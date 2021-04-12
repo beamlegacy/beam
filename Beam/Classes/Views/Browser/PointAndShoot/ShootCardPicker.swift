@@ -37,17 +37,23 @@ struct ShootCardPicker: View {
                 HStack(spacing: BeamSpacing._40) {
                     Text("Add to")
                         .font(BeamFont.medium(size: 13).swiftUI)
-                    BeamTextField(text: $cardSearchField, isEditing: $isEditingCardName, placeholder: "Today", font: BeamFont.regular(size: 13).nsFont, textColor: currentCardName == nil ? BeamColor.Generic.text.nsColor : BeamColor.Sonic.nsColor, placeholderColor: BeamColor.Generic.placeholder.nsColor, selectedRanges: cardSearchFieldSelection) { (text) in
-                        autocompleteModel.searchText = text
-                        currentCardName = nil
+                    BeamTextField(text: $cardSearchField, isEditing: $isEditingCardName,
+                                  placeholder: autocompleteModel.todaysCardReplacementName,
+                                  font: BeamFont.regular(size: 13).nsFont,
+                                  textColor: currentCardName == nil ? BeamColor.Generic.text.nsColor : BeamColor.Sonic.nsColor,
+                                  placeholderColor: BeamColor.Generic.placeholder.nsColor,
+                                  selectedRanges: cardSearchFieldSelection) { (text) in
+                        onTextDidChange(text)
                     } onCommit: { _ in
-                        if currentCardName != nil {
+                        if currentCardName != nil || cardSearchField.isEmpty {
                             onFinishEditing(canceled: false)
                         } else {
                             selectSearchResult()
                         }
                     } onEscape: {
                         onFinishEditing(canceled: true)
+                    } onTab: {
+                        isEditingNote = true
                     } onCursorMovement: { move -> Bool in
                         return autocompleteModel.handleCursorMovement(move)
                     }
@@ -61,7 +67,7 @@ struct ShootCardPicker: View {
                                         Spacer()
                                     }
                     )
-                    if isEditingCardName && currentCardName != nil {
+                    if isEditingCardName && (currentCardName != nil || cardSearchField.isEmpty) {
                         Icon(name: "editor-format_enter", size: 12, color: BeamColor.Generic.placeholder.swiftUI)
                             .onTapGesture {
                                 onFinishEditing(canceled: false)
@@ -126,17 +132,37 @@ struct ShootCardPicker: View {
         }
     }
 
-    func onFinishEditing(canceled: Bool = false) {
-        guard !canceled, !cardSearchField.isEmpty else {
+    private func onTextDidChange(_ text: String) {
+        var searchText = text
+        if let currentCardName = self.currentCardName, text.count == currentCardName.count - 1 {
+            cardSearchField = ""
+            searchText = ""
+        }
+        autocompleteModel.searchText = searchText
+        currentCardName = nil
+    }
+
+    private func onFinishEditing(canceled: Bool = false) {
+        guard !canceled else {
             onComplete?(nil, nil)
             return
         }
-        selectSearchResult()
-        let finalCardName = autocompleteModel.realNameForCardName(cardSearchField)
-        onComplete?(finalCardName, addNoteField)
+        var finalCardName = cardSearchField
+        if !finalCardName.isEmpty {
+            selectSearchResult()
+            finalCardName = autocompleteModel.realNameForCardName(cardSearchField)
+        } else if let currentCardName = currentCardName {
+            finalCardName = currentCardName
+        } else {
+            finalCardName = data.todaysName
+        }
+
+        if !finalCardName.isEmpty {
+            onComplete?(finalCardName, addNoteField)
+        }
     }
 
-    func selectSearchResult(withCommand: Bool = false) {
+    private func selectSearchResult(withCommand: Bool = false) {
         guard !cardSearchField.isEmpty else { return }
         var finalCardName: String
         if withCommand {
@@ -156,7 +182,7 @@ struct ShootCardPicker: View {
     }
 
     @discardableResult
-    func createNote(named name: String) -> BeamNote {
+    private func createNote(named name: String) -> BeamNote {
         let note = BeamNote.fetchOrCreate(data.documentManager, title: name)
         note.save(documentManager: data.documentManager)
         return note

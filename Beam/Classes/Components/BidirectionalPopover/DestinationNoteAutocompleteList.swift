@@ -107,7 +107,7 @@ extension DestinationNoteAutocompleteList {
             return nil
         }
 
-        private let todaysCardReplacementName = "Today"
+        let todaysCardReplacementName = "Today"
         func displayNameForCardName(_ cardName: String) -> String {
             return cardName == data?.todaysName ? todaysCardReplacementName : cardName
         }
