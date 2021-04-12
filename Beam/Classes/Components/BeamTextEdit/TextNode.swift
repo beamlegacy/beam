@@ -54,6 +54,13 @@ public class TextNode: Widget {
         }
     }
 
+    override var availableWidth: CGFloat {
+        didSet {
+            if oldValue != availableWidth {
+                invalidateText()
+            }
+        }
+    }
     override var hover: Bool {
         didSet {
             if oldValue != hover {
@@ -354,12 +361,15 @@ public class TextNode: Widget {
         indentLayer.layer.isHidden = children.isEmpty || !open
     }
 
+    private var invalidatedText = true
+
     func invalidateText() {
         if parent == nil {
             _attributedString = nil
             return
         }
         if updateAttributedString() || elementText.isEmpty {
+            invalidatedText = true
             invalidateRendering()
         }
     }
@@ -440,7 +450,8 @@ public class TextNode: Widget {
     override func updateRendering() {
         guard availableWidth > 0 else { return }
 
-        if invalidatedRendering {
+        if invalidatedRendering { //&& invalidatedText {
+            invalidatedText = false
             contentsFrame = NSRect()
 
             if selfVisible {

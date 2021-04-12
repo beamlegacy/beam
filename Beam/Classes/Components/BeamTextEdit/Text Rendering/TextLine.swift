@@ -15,7 +15,7 @@ struct ImageRunStruct {
     let color: NSColor?
 }
 
-func filterCarets(_ carets: [TextLine.Caret], sourceOffset: Int, skippablePositions: [Int]) -> [TextLine.Caret] {
+func filterCarets(_ carets: [TextLine.Caret], sourceOffset: Int, skippablePositions: Set<Int>) -> [TextLine.Caret] {
     var count = sourceOffset
     let filtered = carets.sorted { (lhs, rhs) -> Bool in
         if lhs.indexOnScreen < rhs.indexOnScreen { return true }
@@ -38,19 +38,23 @@ func filterCarets(_ carets: [TextLine.Caret], sourceOffset: Int, skippablePositi
 }
 
 public class TextLine {
-    init(ctLine: CTLine, attributedString: NSAttributedString, sourceOffset: Int, skippablePositions: [Int]) {
+    init(ctLine: CTLine, attributedString: NSAttributedString, sourceOffset: Int, skippablePositions: Set<Int>) {
         self.ctLine = ctLine
         self.sourceOffset = sourceOffset
         self.skippablePositions = skippablePositions
     }
 
     var sourceOffset: Int
-    var skippablePositions: [Int] = []
-    var localSkippablePositions: [Int] {
-        skippablePositions.compactMap { pos -> Int? in
+    var skippablePositions = Set<Int>()
+    var localSkippablePositions: Set<Int> {
+        var local = Set<Int>()
+        for pos in skippablePositions {
             let p = pos - range.lowerBound
-            return p < 0 || p > range.count ? nil : p
+            if !(p < 0 || p > range.count) {
+                local.insert(p)
+            }
         }
+        return local
     }
 
     var ctLine: CTLine
@@ -141,19 +145,19 @@ public class TextLine {
         var isLeadingEdge: Bool
     }
 
-    var carets: [Caret] {
+    lazy var carets: [Caret] = {
         filterCarets(allCarets, sourceOffset: sourceOffset, skippablePositions: skippablePositions)
-    }
+    }()
 
     /// Returns all the carets from the low level CoreText API. There are sorted by offset, not by glyph and the indexOnScreen is counted in bytes in the source string so you will need to process this list before being able to use it for anything useful. The indexInSource is thus -1 for every position.
-    var allCarets: [Caret] {
+    lazy var allCarets: [Caret] = {
         var c = [Caret]()
         CTLineEnumerateCaretOffsets(ctLine) { (offset, index, leading, _) in
             c.append(Caret(offset: Float(self.frame.origin.x) + Float(offset), indexInSource: -1, indexOnScreen: index, isLeadingEdge: leading))
         }
 
         return c
-    }
+    }()
 
     var runs: [CTRun] {
         // swiftlint:disable:next force_cast
