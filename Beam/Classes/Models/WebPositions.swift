@@ -8,7 +8,7 @@ class WebPositions {
      */
     var framesInfo = [String: FrameInfo]()
 
-    func absolutePosition(v: CGFloat, origin: String, prop: String) -> CGFloat {
+    func viewportPos(v: CGFloat, origin: String, prop: String) -> CGFloat {
         var framePos: CGFloat = 0
         if framesInfo.count > 0 {
             var currentOrigin = origin
@@ -29,23 +29,23 @@ class WebPositions {
             } while framesInfo[currentOrigin]?.origin != currentOrigin
         }
         let pos = framePos + v
-        return pos * scale
+        return pos
     }
 
-    func nativeX(x: CGFloat, origin: String) -> CGFloat {
-        absolutePosition(v: x, origin: origin, prop: "x")
+    func viewportX(x: CGFloat, origin: String) -> CGFloat {
+        viewportPos(v: x, origin: origin, prop: "x")
     }
 
-    func nativeY(y: CGFloat, origin: String) -> CGFloat {
-        absolutePosition(v: y, origin: origin, prop: "y")
+    func viewportY(y: CGFloat, origin: String) -> CGFloat {
+        viewportPos(v: y, origin: origin, prop: "y")
     }
 
-    func nativeWidth(width: CGFloat) -> CGFloat {
-        width * scale
+    func viewportWidth(width: CGFloat) -> CGFloat {
+        width
     }
 
-    func nativeHeight(height: CGFloat) -> CGFloat {
-        height * scale
+    func viewportHeight(height: CGFloat) -> CGFloat {
+        height
     }
 
     /**
@@ -55,11 +55,11 @@ class WebPositions {
        - origin: URL where the text comes from. This helps resolving the position of a selection in iframes.
      - Returns:
      */
-    func nativeArea(area: NSRect, origin: String) -> NSRect {
-        let minX = nativeX(x: area.minX, origin: origin)
-        let minY = nativeY(y: area.minY, origin: origin)
-        let width = nativeWidth(width: area.width)
-        let height = nativeHeight(height: area.height)
+    func viewportArea(area: NSRect, origin: String) -> NSRect {
+        let minX = viewportX(x: area.minX, origin: origin)
+        let minY = viewportY(y: area.minY, origin: origin)
+        let width = viewportWidth(width: area.width)
+        let height = viewportHeight(height: area.height)
         return NSRect(x: minX, y: minY, width: width, height: height)
     }
 

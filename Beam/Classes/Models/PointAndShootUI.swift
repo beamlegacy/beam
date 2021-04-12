@@ -35,9 +35,9 @@ class PointAndShootUI: ObservableObject {
         pointSelection = nil
     }
 
-    func drawShoot(shootTarget: PointAndShoot.Target, xDelta: CGFloat, yDelta: CGFloat) {
+    func drawShoot(shootTarget: PointAndShoot.Target, xDelta: CGFloat, yDelta: CGFloat, scale: CGFloat) {
         let shootSelectionUI = SelectionUI(
-            target: shootTarget.translateTarget(xDelta: xDelta, yDelta: yDelta),
+            target: shootTarget.translateTarget(xDelta: xDelta, yDelta: yDelta, scale: scale),
             animated: false,
             color: BeamColor.PointShoot.shoot.swiftUI
         )
