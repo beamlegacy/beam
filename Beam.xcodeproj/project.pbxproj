@@ -1070,13 +1070,6 @@
 			path = FormatterView;
 			sourceTree = "<group>";
 		};
-		4159E9BD259A1A4C005FD355 /* Core */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Core;
-			sourceTree = "<group>";
-		};
 		4159E9D2259A1A56005FD355 /* BidirectionalPopover */ = {
 			isa = PBXGroup;
 			children = (
@@ -1106,7 +1099,6 @@
 			isa = PBXGroup;
 			children = (
 				A04E849325DD1CDD0066CD44 /* Commands */,
-				4159E9BD259A1A4C005FD355 /* Core */,
 				4181716B2581107C00317ED8 /* Models */,
 				418171A92581107C00317ED8 /* Views */,
 				418172A625811A3A00317ED8 /* Components */,
@@ -2436,7 +2428,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastSwiftUpdateCheck = 1240;
-				LastUpgradeCheck = 1230;
+				LastUpgradeCheck = 1240;
 				TargetAttributes = {
 					96319D0E2616232600D1CF31 = {
 						CreatedOnToolsVersion = 12.4;
@@ -3412,7 +3404,7 @@
 		96319D272616232700D1CF31 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEFINES_MODULE = YES;
@@ -3440,7 +3432,7 @@
 		96319D282616232700D1CF31 /* Test */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEFINES_MODULE = YES;
@@ -3468,7 +3460,7 @@
 		96319D292616232700D1CF31 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEFINES_MODULE = YES;

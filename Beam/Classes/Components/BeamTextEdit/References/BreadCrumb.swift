@@ -21,11 +21,7 @@ class BreadCrumb: Widget {
     var container: Layer?
     var actionLinkLayer: Layer?
 
-    var linkedReferenceNode: LinkedReferenceNode! {
-        didSet {
-            oldValue.delete()
-        }
-    }
+    var linkedReferenceNode: LinkedReferenceNode!
 
     override var open: Bool {
         didSet {
@@ -33,25 +29,17 @@ class BreadCrumb: Widget {
         }
     }
 
-    override var contentsScale: CGFloat {
-        didSet {
-            for l in crumbLayers {
-                l.contentsScale = contentsScale
-            }
-        }
-    }
-
     private var currentNote: BeamNote?
-    private var currentLinkedRefNode: LinkedReferenceNode?
+    private var currentLinkedRefNode: LinkedReferenceNode!
     private var firstBreadcrumbText = ""
     private var breadcrumbPlaceholder = "..."
 
     private let containerLayer = CALayer()
     private let linkLayer = CATextLayer()
 
-    private let limitCharacters: CGFloat = 100
+    private let maxBreadCrumbWidth: CGFloat = 100
     private let breadCrumbYPosition: CGFloat = 1
-    private let spaceBreadcrumbIcon: CGFloat = 15
+    private let spaceBreadcrumbIcon: CGFloat = 3
 
     init(parent: Widget, element: BeamElement) {
         self.proxy = ProxyElement(for: element)
@@ -61,21 +49,17 @@ class BreadCrumb: Widget {
         self.crumbChain = computeCrumbChain(from: element)
 
         guard let ref = nodeFor(element, withParent: self) as? LinkedReferenceNode else { fatalError() }
-        ref.parent = self
         ref.open = element.children.isEmpty // Yes, this is intentional
         self.linkedReferenceNode = ref
-        self.currentLinkedRefNode = self.linkedReferenceNode
+        self.currentLinkedRefNode = ref
 
         guard let note = self.crumbChain.first as? BeamNote else { return }
 
         currentNote = note
         self.crumbChain.removeFirst()
-        self.crumbChain.removeLast()
 
         setupLayers(with: note)
-        updateCrumbLayers()
-
-        children = [linkedReferenceNode]
+        selectCrumb(crumbChain.count - 1)
     }
 
     func setupLayers(with note: BeamNote) {
@@ -108,47 +92,10 @@ class BreadCrumb: Widget {
         actionLayer.layer.isHidden = !isReference
         addLayer(actionLayer)
 
+        createCrumbLayers()
+
         guard let container = container else { return }
-
         addLayer(container)
-    }
-
-    func createBreadcrumLayer(_ layer: CATextLayer, index: Int) {
-        addLayer(ButtonLayer("newLayer\(index)",
-            layer,
-            activated: {[weak self] in
-                guard let self = self,
-                      let textValue = self.crumbLayers[index].string as? String else { return }
-
-                if textValue == self.breadcrumbPlaceholder {
-                    self.selectedCrumb = self.crumbLayers.count
-                    self.updateCrumbLayersVisibility(by: index)
-                    self.replaceNodeWithRootNode(by: index, isUnfold: false)
-
-                    return
-                }
-
-                self.selectedCrumb = index
-                self.updateCrumbLayersVisibility(by: 0)
-                self.replaceNodeWithRootNode(by: index)
-            },
-            hovered: { isHover in
-                layer.foregroundColor = isHover ? BeamColor.LinkedSection.breadcrumbHover.cgColor : BeamColor.LinkedSection.breadcrumb.cgColor
-            }
-        ))
-    }
-
-    func createBreadcrumbArrowLayer(_ layer: CALayer, index: Int) {
-        addLayer(ButtonLayer("breadcrumbArrowLayer\(index)",
-            layer,
-            activated: {[weak self] in
-                guard let self = self else { return }
-
-                self.selectedCrumb = self.crumbLayers.count
-                self.updateCrumbLayersVisibility(by: index)
-                self.replaceNodeWithRootNode(by: index, isUnfold: false)
-            }
-        ))
     }
 
     func computeCrumbChain(from element: BeamElement) -> [BeamElement] {
@@ -163,60 +110,114 @@ class BreadCrumb: Widget {
         return chain.reversed()
     }
 
-    func updateCrumbLayers() {
-        for l in crumbLayers {
-            l.removeFromSuperlayer()
+    func createCrumbLayers() {
+        guard crumbChain.count > 1 else { return }
+
+        for index in 0 ..< crumbChain.count - 1 {
+            createBreadcrumLayer(index: index)
+            createBreadcrumbArrowLayer(index: index)
         }
 
-        crumbLayers.removeAll()
+        selectCrumb(crumbLayers.count)
+    }
 
-        var startXPositionBreadcrumb: CGFloat = 25
-        var textFrame = CGSize.zero
+    func selectCrumb(_ index: Int) {
+        selectedCrumb = index
+        let crumb = crumbChain[index]
+        guard let ref = nodeFor(crumb, withParent: self) as? LinkedReferenceNode else { return }
 
-        guard crumbChain.count > 0 else { return }
+        currentLinkedRefNode = ref
 
-        for index in 0 ..< crumbChain.count {
-            let newLayer = CATextLayer()
-            var breadcrumbArrowLayer = CALayer()
-
-            newLayer.font = NSFont.systemFont(ofSize: 0, weight: .medium)
-            newLayer.fontSize = 10
-            newLayer.foregroundColor = BeamColor.LinkedSection.breadcrumb.cgColor
-
-            breadcrumbArrowLayer = Layer.icon(named: "editor-breadcrumb_arrow", color: BeamColor.LinkedSection.chevronIcon.nsColor)
-
-            if index != crumbChain.count - 1 {
-                createBreadcrumbArrowLayer(breadcrumbArrowLayer, index: index)
+        for i in index ..< crumbChain.count {
+            let crumb = crumbChain[i]
+            guard let ref = nodeFor(crumb, withParent: self) as? LinkedReferenceNode else { return }
+            if crumbChain.last?.id != crumb.id {
+                ref.unfold()
             }
+        }
 
-            createBreadcrumLayer(newLayer, index: index)
-            crumbArrowLayers.append(breadcrumbArrowLayer)
-            crumbLayers.append(newLayer)
+        children = [currentLinkedRefNode]
 
+        layoutBreadCrumbs()
+        invalidateLayout()
+    }
+
+    func layoutBreadCrumbs() {
+        let startXPositionBreadcrumb: CGFloat = 25
+        var position = CGPoint(x: startXPositionBreadcrumb, y: breadCrumbYPosition)
+
+        for index in 0 ..< crumbChain.count - 1 {
             let crumb = crumbChain[index]
+            let crumbLayer = crumbLayers[index]
+            let arrowLayer = crumbArrowLayers[index]
+
             let note = crumb as? BeamNote
-            let text: String = (note != nil ? (note?.title ?? "???") : crumb.text.text)
+            let text: String = index == selectedCrumb ? "..." : note?.title ?? crumb.text.text
 
-            newLayer.string = text.capitalized
-            newLayer.truncationMode = .end
-            newLayer.contentsScale = contentsScale
+            crumbLayer.string = text.capitalized
 
-            textFrame = newLayer.preferredFrameSize()
-            let textWidth = textFrame.width > limitCharacters ? limitCharacters : textFrame.width
+            let textFrame = crumbLayer.preferredFrameSize()
+            let textWidth = min(textFrame.width, maxBreadCrumbWidth)
 
-            breadcrumbArrowLayer.frame = CGRect(origin: CGPoint(x: textWidth + startXPositionBreadcrumb + 2, y: textFrame.height + breadCrumbYPosition + 2), size: CGSize(width: 10, height: 10))
-
-            guard let layer = layers["newLayer\(index)"] else { return }
-
-            layer.frame = CGRect(
-                origin: CGPoint(x: startXPositionBreadcrumb, y: textFrame.height + breadCrumbYPosition),
+            crumbLayer.frame = CGRect(
+                origin: position,
                 size: CGSize(width: textWidth, height: textFrame.height)
             )
 
-            startXPositionBreadcrumb += layer.bounds.width + spaceBreadcrumbIcon
-        }
+            position.x += crumbLayer.bounds.width + spaceBreadcrumbIcon
+            arrowLayer.frame = CGRect(origin: CGPoint(x: position.x, y: position.y + 1), size: arrowLayer.frame.size)
+            position.x += arrowLayer.frame.width + spaceBreadcrumbIcon
 
-        selectedCrumb = crumbLayers.count
+            let show = index <= selectedCrumb
+            crumbLayer.isHidden = !show
+            arrowLayer.isHidden = !show
+
+            arrowLayer.setAffineTransform(CGAffineTransform(rotationAngle: index == selectedCrumb ? CGFloat.pi / 2 : 0))
+        }
+    }
+
+    func createBreadcrumLayer(index: Int) {
+        let crumblayer = CATextLayer()
+
+        let crumb = crumbChain[index]
+        let note = crumb as? BeamNote
+        let text: String = note?.title ?? crumb.text.text
+
+        crumblayer.string = text.capitalized
+        crumblayer.truncationMode = .end
+        crumblayer.contentsScale = contentsScale
+
+        crumblayer.font = NSFont.systemFont(ofSize: 0, weight: .medium)
+        crumblayer.fontSize = 10
+        crumblayer.foregroundColor = BeamColor.LinkedSection.breadcrumb.cgColor
+
+        addLayer(ButtonLayer("breadcrumb\(index)",
+                             crumblayer,
+                             activated: {[weak self] in
+                                guard let self = self else { return }
+                                self.selectCrumb(self.selectedCrumb == index ? self.crumbChain.count - 1 : index)
+                             },
+                             hovered: { isHover in
+                                crumblayer.foregroundColor = isHover ? BeamColor.LinkedSection.breadcrumbHover.cgColor : BeamColor.LinkedSection.breadcrumb.cgColor
+                             }
+        ))
+
+        crumbLayers.append(crumblayer)
+    }
+
+    func createBreadcrumbArrowLayer(index: Int) {
+        let arrowlayer = Layer.icon(named: "editor-breadcrumb_arrow", color: BeamColor.LinkedSection.chevronIcon.nsColor)
+        arrowlayer.bounds = CGRect(origin: .zero, size: CGSize(width: 10, height: 10))
+
+        addLayer(ButtonLayer("breadcrumbArrowLayer\(index)",
+                             arrowlayer,
+                             activated: {[weak self] in
+                                guard let self = self else { return }
+
+                                self.selectCrumb(self.selectedCrumb == index ? self.crumbChain.count - 1 : index)
+                             }
+        ))
+        crumbArrowLayers.append(arrowlayer)
     }
 
     func updateReferenceSection(_ text: String) {
@@ -233,51 +234,17 @@ class BreadCrumb: Widget {
         rootNote.addReference(reference)
     }
 
-    func updateCrumbLayersVisibility(by index: Int) {
-        for i in 0..<crumbLayers.count {
-            crumbLayers[i].isHidden = selectedCrumb == 0 ?  i != selectedCrumb : i >= selectedCrumb
-            crumbArrowLayers[i].isHidden = crumbLayers[i].isHidden
-            crumbArrowLayers[i].setAffineTransform(CGAffineTransform(rotationAngle: 0))
-        }
-
-        let selectedIndex = selectedCrumb == crumbLayers.count || selectedCrumb == 0 ? index : selectedCrumb - 1
-        let textLayer = crumbLayers[selectedIndex]
-        guard let textValue = textLayer.string as? String else { return }
-
-        if selectedCrumb == 0 {
-            firstBreadcrumbText = textValue
-            textLayer.string = breadcrumbPlaceholder
-
-            layers["breadcrumbArrowLayer\(selectedIndex)"]?.frame = CGRect(
-                origin: CGPoint(x: 40, y: textLayer.preferredFrameSize().height + breadCrumbYPosition + 2),
-                size: CGSize(width: 10, height: 10)
-            )
-        } else if textValue == breadcrumbPlaceholder {
-            textLayer.string = firstBreadcrumbText
-
-            layers["breadcrumbArrowLayer\(selectedIndex)"]?.frame = CGRect(
-                origin: CGPoint(x: textLayer.preferredFrameSize().width + 25 + 2, y: textLayer.preferredFrameSize().height + breadCrumbYPosition + 2),
-                size: CGSize(width: 10, height: 10)
-            )
-        }
-
-        if selectedCrumb == 0 || textValue == breadcrumbPlaceholder || textValue == firstBreadcrumbText {
-            layers["newLayer\(selectedIndex)"]?.frame = CGRect(
-                origin: CGPoint(x: 25, y: textLayer.preferredFrameSize().height + breadCrumbYPosition),
-                size: textLayer.preferredFrameSize()
-            )
-        }
-
-        crumbArrowLayers[selectedIndex].setAffineTransform(selectedCrumb == crumbLayers.count ? CGAffineTransform.identity : CGAffineTransform(rotationAngle: CGFloat.pi / 2))
+    var showCrumbs: Bool {
+        crumbChain.count > 1
     }
 
     override func updateRendering() {
-        contentsFrame = NSRect(x: 0, y: 0, width: availableWidth, height: crumbChain.isEmpty ? 0 : 25)
+        contentsFrame = NSRect(x: 0, y: 0, width: availableWidth, height: showCrumbs ? 25 : 0)
         actionLinkLayer?.layer.isHidden = !open
         computedIdealSize = contentsFrame.size
 
         CATransaction.disableAnimations {
-            if crumbChain.isEmpty {
+            if !showCrumbs {
                 layers["actionLinkLayer"]?.layer.isHidden = true
                 return
             }
@@ -289,40 +256,21 @@ class BreadCrumb: Widget {
         }
 
         if open {
-            for c in children {
-                computedIdealSize.height += c.idealSize.height
+            var childrenHeight = CGFloat(0)
 
-                CATransaction.disableAnimations {
-                    guard let container = container else { return }
-                    let containerHeight = crumbChain.isEmpty ? c.idealSize.height - 12 : computedIdealSize.height - 40
-                    container.frame = NSRect(x: 0, y: 10, width: contentsFrame.width, height: containerHeight)
-                }
+            for c in children {
+                childrenHeight += c.idealSize.height
+            }
+
+            computedIdealSize.height += childrenHeight
+
+            CATransaction.disableAnimations {
+                guard let container = container else { return }
+                let containerHeight = childrenHeight - (showCrumbs ? 40 : 12)
+                container.frame = NSRect(x: 0, y: 10, width: contentsFrame.width, height: containerHeight)
             }
         }
 
-    }
-
-    private func replaceNodeWithRootNode(by index: Int, isUnfold: Bool = true) {
-
-        guard isUnfold else {
-            linkedReferenceNode.removeFromSuperlayer(recursive: true)
-            linkedReferenceNode = currentLinkedRefNode
-            children = [linkedReferenceNode]
-            invalidateLayout()
-
-            return
-        }
-
-        let crumb = crumbChain[index]
-
-        guard let ref = nodeFor(crumb, withParent: self) as? LinkedReferenceNode else { return }
-
-        linkedReferenceNode.removeFromSuperlayer(recursive: true)
-        linkedReferenceNode = ref
-        linkedReferenceNode.unfold()
-
-        children = [linkedReferenceNode]
-        invalidateLayout()
     }
 
     override var mainLayerName: String {
@@ -330,7 +278,7 @@ class BreadCrumb: Widget {
     }
 
     var isLink: Bool {
-        linkedReferenceNode.isLink
+        currentLinkedRefNode.isLink
     }
 
     var isReference: Bool {

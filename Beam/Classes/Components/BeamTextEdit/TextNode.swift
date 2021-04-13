@@ -1216,7 +1216,8 @@ public class TextNode: Widget {
 
     override func dumpWidgetTree(_ level: Int = 0) {
         let tabs = String.tabs(level)
-        print("\(tabs)\(String(describing: Self.self)) frame(\(frame)) \(layers.count) layers - element id: \(element.id) [\(elementText.text)]")
+        //swiftlink:disable:next print
+        print("\(tabs)\(String(describing: Self.self)) frame(\(frame)) \(layers.count) layers - element id: \(element.id) [\(elementText.text)]\(layer.superlayer == nil ? " DETTACHED" : "")")
         for c in children {
             c.dumpWidgetTree(level + 1)
         }
