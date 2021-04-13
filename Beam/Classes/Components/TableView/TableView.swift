@@ -7,10 +7,6 @@
 
 import SwiftUI
 
-private enum CellIdentifiers {
-    static let DefaultCell = NSUserInterfaceItemIdentifier("DefaultCellID")
-}
-
 struct TableViewColumn {
     enum ColumnType {
         case Text
@@ -20,6 +16,7 @@ struct TableViewColumn {
     let title: String
     var type: ColumnType = .Text
     var editable = false
+    var isLink = false
     var sortable = true
     var resizable = true
     var width: CGFloat = 100
@@ -39,8 +36,9 @@ struct TableView: NSViewRepresentable {
     var creationRowTitle: String = "New Private Card"
     var onEditingText: ((String?, Int) -> Void)?
     var onSelectionChanged: ((IndexSet) -> Void)?
-    var onHover: ((Int?, NSRect?) -> Void)?
-    var onRightMouseDown: ((Int, NSPoint) -> Void)?
+    var onHover: ((_ row: Int?, _ location: NSRect?) -> Void)?
+    var onMouseDown: ((_ row: Int, _ column: TableViewColumn) -> Void)?
+    var onRightMouseDown: ((Int, _ column: TableViewColumn, NSPoint) -> Void)?
 
     typealias NSViewType = NSScrollView
 
@@ -51,7 +49,6 @@ struct TableView: NSViewRepresentable {
     func makeNSView(context: Self.Context) -> Self.NSViewType {
         let scrollView = NSScrollView()
         let view = BeamNSTableView()
-        view.onRightMouseDown = onRightMouseDown
         view.backgroundColor = .clear
         view.frame = scrollView.bounds
         view.autoresizingMask = [.width, .height]
@@ -64,6 +61,7 @@ struct TableView: NSViewRepresentable {
         scrollView.documentView = view
         context.coordinator.tableView = view
         view.delegate = context.coordinator
+        view.additionalDelegate = context.coordinator
         view.dataSource = context.coordinator
         setupColumns(in: view, context: context)
 
@@ -107,21 +105,6 @@ struct TableView: NSViewRepresentable {
     func updateNSView(_ view: Self.NSViewType, context: Self.Context) {
         context.coordinator.creationRowTitle = creationRowTitle
         context.coordinator.originalData = items
-    }
-}
-
-private class BeamNSTableView: NSTableView {
-
-    var onRightMouseDown: ((Int, NSPoint) -> Void)?
-
-    override func rightMouseDown(with event: NSEvent) {
-        super.rightMouseDown(with: event)
-
-        if let handler = onRightMouseDown {
-            let localLocation = convert(event.locationInWindow, from: nil)
-            let row = self.row(at: localLocation)
-            handler(row, event.locationInWindow)
-        }
     }
 }
 
@@ -293,9 +276,10 @@ extension TableViewCoordinator: NSTableViewDelegate {
             let item = sortedData[row]
             let value = item.value(forKey: column.key)
             let text = column.stringFromKeyValue(value)
-            let editable = column.editable
+            let editable = column.editable && !column.isLink
             textCell.textField?.stringValue = text
             textCell.textField?.isEditable = editable
+            textCell.isLink = column.isLink
             textCell.textField?.delegate = self
             cell = textCell
         }
@@ -361,5 +345,29 @@ extension TableViewCoordinator: NSTextFieldDelegate {
            let originalDataRow = row == sortedData.count ? originalData.count : getOriginalDataIndexes(for: [row]).first {
             parent.onEditingText?(value, originalDataRow)
         }
+    }
+}
+
+extension TableViewCoordinator: BeamNSTableViewDelegate {
+
+    func tableView(_ tableView: BeamNSTableView, mouseDownFor row: Int, column: Int, locationInWindow: NSPoint) {
+        guard let onMouseDown = parent.onMouseDown,
+              let cellView = tableView.view(atColumn: column, row: row, makeIfNecessary: false) as? BeamTableCellView,
+              let originalRow = getOriginalDataIndexes(for: [row]).first,
+              column < parent.columns.count,
+              cellView.shouldHandleMouseDown(at: cellView.convert(locationInWindow, from: nil))
+        else { return }
+        let columnData = parent.columns[column]
+        tableView.deselectRow(row)
+        onMouseDown(originalRow, columnData)
+    }
+
+    func tableView(_ tableView: BeamNSTableView, rightMouseDownFor row: Int, column: Int, locationInWindow: NSPoint) {
+        guard let onRightMouseDown = parent.onRightMouseDown,
+              let originalRow = getOriginalDataIndexes(for: [row]).first,
+              column < parent.columns.count
+        else { return }
+        let columnData = parent.columns[column]
+        onRightMouseDown(originalRow, columnData, locationInWindow)
     }
 }

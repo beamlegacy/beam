@@ -8,7 +8,13 @@
 import Foundation
 
 class BeamTableCellView: NSTableCellView {
+    var isLink = false
+
     private let _textField: NSTextField
+    private var textFieldFrame: NSRect {
+        let tf = _textField
+        return CGRect(origin: tf.frame.origin, size: tf.sizeThatFits(bounds.size))
+    }
     override init(frame frameRect: NSRect) {
         _textField = NSTextField(frame: frameRect)
         super.init(frame: frameRect)
@@ -30,6 +36,41 @@ class BeamTableCellView: NSTableCellView {
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        guard isLink else { return }
+        self.trackingAreas.forEach { self.removeTrackingArea($0) }
+        let newArea = NSTrackingArea(
+            rect: textFieldFrame,
+            options: [.activeAlways, .mouseEnteredAndExited],
+            owner: self, userInfo: nil
+        )
+        self.addTrackingArea(newArea)
+    }
+
+    override func mouseEntered(with event: NSEvent) {
+        super.mouseEntered(with: event)
+        if let tf = textField, isLink {
+            tf.attributedStringValue = NSAttributedString(string: tf.stringValue, attributes: [
+                .underlineStyle: NSUnderlineStyle.single.rawValue,
+                .underlineColor: tf.textColor ?? BeamColor.Generic.text.nsColor,
+                .cursor: NSCursor.pointingHand
+            ])
+            NSCursor.pointingHand.set()
+        }
+    }
+
+    override func mouseExited(with event: NSEvent) {
+        super.mouseExited(with: event)
+        if let tf = textField, isLink {
+            tf.attributedStringValue = NSAttributedString(string: tf.stringValue, attributes: [:])
+        }
+    }
+
+    func shouldHandleMouseDown(at point: CGPoint) -> Bool {
+        return isLink && textFieldFrame.contains(point)
     }
 }
 

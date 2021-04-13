@@ -37,22 +37,18 @@ class BeamTableRowView: NSTableRowView {
         linePath.fill()
     }
 
-    private var customTrackingArea: NSTrackingArea?
     override func updateTrackingAreas() {
         super.updateTrackingAreas()
-        if let previousArea = customTrackingArea {
-            self.removeTrackingArea(previousArea)
-        }
+        self.trackingAreas.forEach { self.removeTrackingArea($0) }
         var rect = bounds
         let x = -extraLeftHover
         rect.origin.x = x
-        rect.size.width += x
+        rect.size.width += -x
         let newArea = NSTrackingArea(
             rect: rect,
             options: [.activeAlways, .mouseEnteredAndExited],
             owner: self, userInfo: nil
         )
-        customTrackingArea = newArea
         self.addTrackingArea(newArea)
     }
 
