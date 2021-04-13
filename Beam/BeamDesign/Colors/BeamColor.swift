@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 
 indirect enum BeamColor {
-    /** A light gray. Unavailable on dark mode */
+    /** A light gray. */
     case AlphaGray
     /** Also known as Burple. A mix of blue and purple */
     case Beam

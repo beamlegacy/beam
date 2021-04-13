@@ -370,14 +370,15 @@ public extension CALayer {
             cardTimeLayer.name = "cardTimeLayer"
             cardTimeLayer.foregroundColor = BeamColor.Generic.placeholder.cgColor
             cardTimeLayer.font = BeamFont.regular(size: 0).nsFont
-            cardTimeLayer.fontSize = 10 //  TODO: Change later (isBig ? 12 : 10)
+            cardTimeLayer.fontSize = 12 //  TODO: Change later (isBig ? 12 : 10)
             cardTimeLayer.string = formatter.string(from: note.updateDate)
             addToMainLayer(cardTimeLayer)
         }
     }
 
     func updateCardHearderLayer(_ rect: NSRect) {
-        cardHeaderLayer.frame = CGRect(origin: CGPoint(x: rect.origin.x, y: 60), size: NSSize(width: rect.width, height: cardTitleLayer.preferredFrameSize().height))
+        let headerPosX = journalMode ? rect.origin.x : rect.origin.x + 18
+        cardHeaderLayer.frame = CGRect(origin: CGPoint(x: headerPosX, y: 88), size: NSSize(width: rect.width, height: cardTitleLayer.preferredFrameSize().height))
         cardTitleLayer.frame = CGRect(origin: CGPoint(x: 0, y: 0), size: NSSize(width: cardTitleLayer.preferredFrameSize().width, height: cardTitleLayer.preferredFrameSize().height))
         cardOptionLayer.frame = CGRect(origin: CGPoint(x: rect.width - 16, y: 10), size: NSSize(width: 16, height: 16))
 
@@ -387,7 +388,7 @@ public extension CALayer {
         if !journalMode {
             cardTimeLayer.frame = CGRect(
                 // TODO: Change later (isBig ? 101 : 95)
-                origin: CGPoint(x: rect.origin.x, y: 95),
+                origin: CGPoint(x: headerPosX, y: 70),
                 size: NSSize(width: rect.width, height: cardTimeLayer.preferredFrameSize().height)
             )
         }
