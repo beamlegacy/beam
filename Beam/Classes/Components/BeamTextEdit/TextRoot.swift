@@ -209,6 +209,7 @@ public class TextRoot: TextNode {
     var lastCommand: BeamTextEdit.Command = .none
 
     override func dumpWidgetTree(_ level: Int = 0) {
+        //swiftlink:disable:next print
         print("==================================================")
         super.dumpWidgetTree(level)
     }

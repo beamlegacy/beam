@@ -61,7 +61,6 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     var hover: Bool = false {
         didSet {
             invalidate()
-//            layer.backgroundColor = hover ? NSColor.red.withAlphaComponent(0.3).cgColor : nil
         }
     }
     var cursor: NSCursor?
@@ -87,6 +86,11 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
             }
         }
 
+        attachChildrenLayers()
+        updateChildrenVisibility(visible && open)
+    }
+
+    func attachChildrenLayers() {
         // Then make sure everything is correctly on screen
         for c in children {
             c.parent = self
@@ -96,9 +100,9 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
             for l in c.layers where l.value.layer.superlayer == nil {
                 editor.addToMainLayer(l.value.layer)
             }
-        }
 
-        updateChildrenVisibility(visible && open)
+            c.attachChildrenLayers()
+        }
     }
 
     var enabled: Bool { editor.enabled }
@@ -860,6 +864,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
     func dumpWidgetTree(_ level: Int = 0) {
         let tabs = String.tabs(level)
+        //swiftlink:disable:next print
         print("\(tabs)\(String(describing: Self.self)) frame(\(frame)) \(layers.count) layers")
         for c in children {
             c.dumpWidgetTree(level + 1)

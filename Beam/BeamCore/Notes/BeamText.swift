@@ -342,12 +342,17 @@ public struct BeamText: Codable {
         ranges[index].string.insert(contentsOf: text, at: ranges[index].string.index(at: offset))
 
         computePositions(from: index)
-        flattenInternalLinks()
+        flatten()
     }
 
     /// insert the given string at the given index, with given attributes
     public mutating func insert(_ text: String, at position: Int, withAttributes attributes: [Attribute]) {
-        guard position != ranges.last?.end else { ranges.append(Range(string: text, attributes: attributes, position: position)); return }
+        guard position != ranges.last?.end
+        else {
+            ranges.append(Range(string: text, attributes: attributes, position: position))
+            flatten()
+            computePositions()
+            return }
         let index = splitRangeAt(position: position, createEmptyRanges: false)
         let range = Range(string: text, attributes: attributes, position: position)
         ranges.insert(range, at: index)
@@ -362,7 +367,12 @@ public struct BeamText: Codable {
     }
 
     public mutating func append(_ text: String) {
-        guard var range = ranges.last else { append(text, withAttributes: []); return }
+        guard var range = ranges.last
+        else {
+            append(text, withAttributes: [])
+            computePositions()
+            return
+        }
         range.string += text
         ranges[ranges.endIndex - 1] = range
         flatten()
