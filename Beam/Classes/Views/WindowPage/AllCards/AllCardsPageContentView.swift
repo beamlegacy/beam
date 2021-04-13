@@ -52,7 +52,7 @@ struct AllCardsPageContentView: View {
 
     private var columns = [
         TableViewColumn(key: "checkbox", title: "", type: TableViewColumn.ColumnType.CheckBox, sortable: false, resizable: false, width: 16),
-        TableViewColumn(key: "title", title: "Title", editable: true, width: 200),
+        TableViewColumn(key: "title", title: "Title", editable: true, isLink: true, width: 200),
         TableViewColumn(key: "words", title: "Words", width: 50, stringFromKeyValue: { "\($0 ?? "")" }),
         TableViewColumn(key: "mentions", title: "Mentions", width: 70, stringFromKeyValue: { "\($0 ?? "")" }),
         TableViewColumn(key: "createdAt", title: "Created", stringFromKeyValue: { value in
@@ -103,21 +103,23 @@ struct AllCardsPageContentView: View {
             }
             .frame(height: 22)
             .padding(.vertical, 3)
-            TableView(items: currentNotesList, columns: columns, creationRowTitle: listType == .publicNotes ? "New Public Card" : "New Private Card", onEditingText: { (newText, row) in
+            TableView(items: currentNotesList, columns: columns, creationRowTitle: listType == .publicNotes ? "New Public Card" : "New Private Card") { (newText, row) in
                 onEditingText(newText, row: row, in: currentNotesList)
-            }, onSelectionChanged: { (selectedIndexes) in
+            } onSelectionChanged: { (selectedIndexes) in
                 Logger.shared.logDebug("selected: \(selectedIndexes.map { $0 })")
                 DispatchQueue.main.async {
                     selectedRowsIndexes = selectedIndexes
                 }
-            }, onHover: { (hoveredIndex, frame) in
+            } onHover: { (hoveredIndex, frame) in
                 let notesList = currentNotesList
                 hoveredRowIndex = (hoveredIndex ?? notesList.count) >= notesList.count ? nil : hoveredIndex
                 hoveredRowFrame = frame
-            }, onRightMouseDown: { (rowIndex, location) in
+            } onMouseDown: { (rowIndex, column) in
+                handleMouseDown(for: rowIndex, column: column)
+            } onRightMouseDown: { (rowIndex, _, location) in
                 let forRow = selectedRowsIndexes.contains(rowIndex) ? nil : rowIndex
                 showGlobalContextualMenu(at: location, for: forRow)
-            })
+            }
             .overlay(
                 GeometryReader { geo in
                     ButtonLabel(icon: "editor-options") {
@@ -133,6 +135,13 @@ struct AllCardsPageContentView: View {
         .onAppear {
             refreshAllNotes()
         }
+    }
+
+    func handleMouseDown(for row: Int, column: TableViewColumn) {
+        guard column.isLink else { return }
+        let items = currentNotesList
+        let item = items[row]
+        state.navigateToNote(named: item.title)
     }
 
     func showContextualMenuForHoveredRow(tableViewGeometry: GeometryProxy) {
