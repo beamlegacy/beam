@@ -350,7 +350,7 @@ public class TextNode: Widget {
     func updateIndentLayer() {
         guard let indentLayer = layers["indentLayer"] else { return }
         let y = firstLineHeight + 8
-        indentLayer.frame = NSRect(x: childInset - 1.5, y: y - 5, width: 1, height: frame.height - y - 5)
+        indentLayer.frame = NSRect(x: childInset - 0.5, y: y - 5, width: 1, height: frame.height - y - 5)
         indentLayer.layer.isHidden = children.isEmpty || !open
     }
 
@@ -382,7 +382,7 @@ public class TextNode: Widget {
     }
 
     func addBulletPointLayer(at point: NSPoint) {
-        let bulletLayer = Layer(name: "bullet", layer: Layer.icon(named: "editor-bullet", color: BeamColor.Editor.icon.nsColor))
+        let bulletLayer = Layer(name: "bullet", layer: Layer.icon(named: "editor-bullet", color: BeamColor.Editor.bullet.nsColor))
         bulletLayer.layer.isHidden = true
         addLayer(bulletLayer, origin: point)
     }

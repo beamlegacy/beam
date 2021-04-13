@@ -24,6 +24,8 @@ extension BeamColor {
 extension BeamColor {
     enum Editor {
         static let icon = BeamColor.LightStoneGray
+        static let bullet = BeamColor.AlphaGray
+        static let chevron = BeamColor.AlphaGray
         static let searchNormal = BeamColor.Custom(named: "EditorSearchNormal")
         static let searchHover = BeamColor.Bluetiful
         static let bidirectionalLink = BeamColor.Beam
