@@ -363,7 +363,7 @@ public extension CALayer {
         // cardHeaderLayer.addSublayer(cardOptionLayer)
 
         addToMainLayer(cardHeaderLayer)
-        if !journalMode {
+        if !journalMode && cardNote.type == .note {
 
             cardTimeLayer.name = "cardTimeLayer"
             cardTimeLayer.foregroundColor = BeamColor.Generic.placeholder.cgColor
@@ -383,10 +383,11 @@ public extension CALayer {
         cardTitleLayer.frame = CGRect(origin: CGPoint(x: 0, y: 0), size: NSSize(width: cardTitleLayer.preferredFrameSize().width, height: cardTitleLayer.preferredFrameSize().height))
         cardOptionLayer.frame = CGRect(origin: CGPoint(x: rect.width - 16, y: 10), size: NSSize(width: 16, height: 16))
 
-        if let cardNote = note as? BeamNote, cardNote.isTodaysNote {
+        guard let cardNote = note as? BeamNote else { return }
+        if cardNote.isTodaysNote {
             cardTitleWeatherLayer.frame = CGRect(origin: CGPoint(x: cardTitleLayer.preferredFrameSize().width + 11, y: cardTitleLayer.preferredFrameSize().height / 2 - 9), size: NSSize(width: 22.5, height: 18.5))
         }
-        if !journalMode {
+        if !journalMode && cardNote.type == .note {
             cardTimeLayer.frame = CGRect(
                 // TODO: Change later (isBig ? 101 : 95)
                 origin: CGPoint(x: headerPosX, y: 69),
