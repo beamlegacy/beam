@@ -351,7 +351,9 @@ extension BeamTextEdit {
 }
 
 extension BeamTextEdit: TextFormatterViewDelegate {
-    func textFormatterView(_ textFormatterView: TextFormatterView, didSelectFormatterType type: FormatterType, isActive: Bool) {
+    func textFormatterView(_ textFormatterView: TextFormatterView,
+                           didSelectFormatterType type: FormatterType,
+                           isActive: Bool) {
         self.selectFormatterAction(type, isActive)
     }
 }
