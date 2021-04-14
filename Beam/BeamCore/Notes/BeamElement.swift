@@ -96,6 +96,7 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
     @Published open var updateDate = Date()
     @Published open var kind: ElementKind = .bullet { didSet { change(.meta) } }
     @Published open var childrenFormat: ElementChildrenFormat = .bullet { didSet { change(.meta) } }
+    @Published open private(set) var textStats: ElementTextStats = ElementTextStats(wordsCount: 0)
     @Published open var query: String?
 
     open var note: BeamNote? {
@@ -115,6 +116,7 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
         case kind
         case childrenFormat
         case query
+        case textStats
     }
 
     public init() {
@@ -165,8 +167,14 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
             childrenFormat = try container.decode(ElementChildrenFormat.self, forKey: .childrenFormat)
         }
 
-        if container.contains(. query) {
+        if container.contains(.query) {
             query = try container.decode(String.self, forKey: .query)
+        }
+
+        if container.contains(.textStats) {
+            textStats = try container.decode(ElementTextStats.self, forKey: .textStats)
+        } else {
+            textStats = initializeTextStats()
         }
     }
 
@@ -180,6 +188,7 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
         try container.encode(readOnly, forKey: .readOnly)
         try container.encode(score, forKey: .score)
         try container.encode(creationDate, forKey: .creationDate)
+        try container.encode(textStats, forKey: .textStats)
         if recursive, !children.isEmpty {
             try container.encode(children, forKey: .children)
         }
@@ -272,6 +281,9 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
         updateDate = Date()
         changed = (self, type)
 
+        if type == .text || type == .tree {
+            updateTextStats()
+        }
         parent?.childChanged(self, type)
     }
 
@@ -279,7 +291,9 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
         guard changePropagationEnabled else { return }
         updateDate = Date()
         changed = (child, type)
-
+        if type == .text || type == .tree {
+            updateTextStats()
+        }
         parent?.childChanged(self, type)
     }
 
@@ -438,12 +452,33 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
         return self
     }
 
-    open func wordsCount() -> Int {
-        var count = children.reduce(0, { (r, el) -> Int in
-            return r + el.wordsCount()
-        })
+}
+
+// MARK: - Text Stats
+public struct ElementTextStats: Codable {
+    public var wordsCount: Int
+}
+
+extension BeamElement {
+
+    private func calculateWordsCount(includingChildren: Bool = true) -> Int {
         let str = text.text
-        count += str.numberOfWords
+        var count = str.numberOfWords
+        if includingChildren {
+            count += children.reduce(0, { (r, el) -> Int in
+                return r + el.textStats.wordsCount
+            })
+        }
         return count
+    }
+
+    private func initializeTextStats() -> ElementTextStats {
+        let wordsCount = self.calculateWordsCount()
+        return ElementTextStats(wordsCount: wordsCount)
+    }
+
+    private func updateTextStats() {
+        let wordsCount = self.calculateWordsCount()
+        textStats.wordsCount = wordsCount
     }
 }

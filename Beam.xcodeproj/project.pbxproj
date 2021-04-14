@@ -365,6 +365,9 @@
 		A5C9F00A261364F50096380F /* WindowPageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C9F009261364F50096380F /* WindowPageView.swift */; };
 		A5C9F01126136B5F0096380F /* AllCardsPageContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C9F01026136B5F0096380F /* AllCardsPageContentView.swift */; };
 		A5CA5DBA2624FF4A004E9D3E /* BeamNSTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5CA5DB92624FF4A004E9D3E /* BeamNSTableView.swift */; };
+		A5CA5DF52625C15D004E9D3E /* BeamElementTextStatsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5CA5DF42625C15D004E9D3E /* BeamElementTextStatsTests.swift */; };
+		A5CA5DFB2625C302004E9D3E /* Quick in Frameworks */ = {isa = PBXBuildFile; productRef = A5CA5DFA2625C302004E9D3E /* Quick */; };
+		A5CA5DFD2625C306004E9D3E /* Nimble in Frameworks */ = {isa = PBXBuildFile; productRef = A5CA5DFC2625C306004E9D3E /* Nimble */; };
 		A5D6250A26034B1C00A3E676 /* FormatterViewBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5D6250926034B1C00A3E676 /* FormatterViewBackground.swift */; };
 		A5FE96CD2612469C002A2B73 /* AutocompleteManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5FE96CC2612469C002A2B73 /* AutocompleteManager.swift */; };
 		BAA67192B5EB78981741C311 /* WebPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67CEFFAFA38F29CF1C84F /* WebPage.swift */; };
@@ -943,6 +946,7 @@
 		A5C9F009261364F50096380F /* WindowPageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowPageView.swift; sourceTree = "<group>"; };
 		A5C9F01026136B5F0096380F /* AllCardsPageContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllCardsPageContentView.swift; sourceTree = "<group>"; };
 		A5CA5DB92624FF4A004E9D3E /* BeamNSTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamNSTableView.swift; sourceTree = "<group>"; };
+		A5CA5DF42625C15D004E9D3E /* BeamElementTextStatsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamElementTextStatsTests.swift; sourceTree = "<group>"; };
 		A5D6250926034B1C00A3E676 /* FormatterViewBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatterViewBackground.swift; sourceTree = "<group>"; };
 		A5FE96CC2612469C002A2B73 /* AutocompleteManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutocompleteManager.swift; sourceTree = "<group>"; };
 		BAA67095D6C806CCF4915EEF /* TextSelectorUI_debug.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = TextSelectorUI_debug.js; sourceTree = "<group>"; };
@@ -999,6 +1003,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A5CA5DFD2625C306004E9D3E /* Nimble in Frameworks */,
+				A5CA5DFB2625C302004E9D3E /* Quick in Frameworks */,
 				96319D182616232700D1CF31 /* BeamCore.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2019,6 +2025,7 @@
 			isa = PBXGroup;
 			children = (
 				96319D1E2616232700D1CF31 /* BeamCoreTests.swift */,
+				A5CA5DF42625C15D004E9D3E /* BeamElementTextStatsTests.swift */,
 				96319D202616232700D1CF31 /* Info.plist */,
 			);
 			path = BeamCoreTests;
@@ -2325,6 +2332,10 @@
 				96319D1C2616232700D1CF31 /* PBXTargetDependency */,
 			);
 			name = BeamCoreTests;
+			packageProductDependencies = (
+				A5CA5DFA2625C302004E9D3E /* Quick */,
+				A5CA5DFC2625C306004E9D3E /* Nimble */,
+			);
 			productName = BeamCoreTests;
 			productReference = 96319D172616232700D1CF31 /* BeamCoreTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -2883,6 +2894,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A5CA5DF52625C15D004E9D3E /* BeamElementTextStatsTests.swift in Sources */,
 				96319D1F2616232700D1CF31 /* BeamCoreTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -4138,6 +4150,16 @@
 			productName = Quick;
 		};
 		A0A6F2A625D1B74800EFC4BE /* Nimble */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */;
+			productName = Nimble;
+		};
+		A5CA5DFA2625C302004E9D3E /* Quick */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick" */;
+			productName = Quick;
+		};
+		A5CA5DFC2625C306004E9D3E /* Nimble */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */;
 			productName = Nimble;
