@@ -31,11 +31,17 @@ private struct HyperlinkEditorView: View {
     }
 
     func textField(_ textBinding: Binding<String>, editingBinding: Binding<Bool>, placeholder: String) -> some View {
-        return BeamTextField(text: textBinding, isEditing: editingBinding, placeholder: placeholder, font: BeamFont.regular(size: 13).nsFont, textColor: BeamColor.Generic.text.nsColor, placeholderColor: BeamColor.Generic.placeholder.nsColor, onCommit: { _ in
-            onFinishEditing?(false)
-        }, onEscape: {
-            onFinishEditing?(true)
-        }).frame(minHeight: 16)
+        return BeamTextField(text: textBinding,
+                             isEditing: editingBinding,
+                             placeholder: placeholder,
+                             font: BeamFont.regular(size: 13).nsFont,
+                             textColor: BeamColor.Generic.text.nsColor,
+                             placeholderColor: BeamColor.Generic.placeholder.nsColor,
+                             onCommit: { _ in
+                                onFinishEditing?(false)
+                             }, onEscape: {
+                                onFinishEditing?(true)
+                             }).frame(minHeight: 16)
     }
 
     var body: some View {
@@ -95,7 +101,10 @@ struct HyperlinkEditorView_Previews: PreviewProvider {
 // MARK: - NSView Container
 
 protocol HyperlinkFormatterViewDelegate: class {
-    func hyperlinkFormatterView(_ hyperlinkFormatterView: HyperlinkFormatterView, didFinishEditing newUrl: String?, newTitle: String?, originalUrl: String?)
+    func hyperlinkFormatterView(_ hyperlinkFormatterView: HyperlinkFormatterView,
+                                didFinishEditing newUrl: String?,
+                                newTitle: String?,
+                                originalUrl: String?)
 }
 
 class HyperlinkFormatterView: FormatterView {
@@ -157,7 +166,9 @@ class HyperlinkFormatterView: FormatterView {
     private func sendFinishWithLinkEditing(canceled: Bool) {
         let newUrl = !canceled && editingUrl != originalUrlValue ? editingUrl : nil
         let newTitle = !canceled && editingTitle != originalTitleValue ? editingTitle : nil
-        delegate?.hyperlinkFormatterView(self, didFinishEditing: newUrl, newTitle: newTitle, originalUrl: originalUrlValue)
+        delegate?.hyperlinkFormatterView(self, didFinishEditing: newUrl,
+                                         newTitle: newTitle,
+                                         originalUrl: originalUrlValue)
     }
 }
 

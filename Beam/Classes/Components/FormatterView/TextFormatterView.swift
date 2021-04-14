@@ -1,5 +1,5 @@
 //
-//  TextFormatterViewSwiftUI.swift
+//  TextFormatterView.swift
 //  Beam
 //
 //  Created by Remi Santos on 13/04/2021.
@@ -25,7 +25,7 @@ private class TextFormatterViewModel: BaseFormatterViewViewModel, ObservableObje
     var onSelectFormatterItem: ((FormatterItem) -> Void)?
 }
 
-private struct TextFormatterView_SwiftUI: View {
+private struct TextFormatterViewSwiftUI: View {
     @ObservedObject var viewModel: TextFormatterViewModel
     var alwaysShowShadow = true
     @State private var isHovering = false
@@ -48,7 +48,9 @@ private struct TextFormatterView_SwiftUI: View {
         FormatterViewBackground(shadowOpacity: !alwaysShowShadow && !isHovering ? 0.5 : 1.0) {
             HStack {
                 ForEach(viewModel.formatterItems) { item in
-                    ButtonLabel(icon: "editor-format_\(item.type)", state: item.isActive ? .active : .normal, customStyle: buttonStyle) {
+                    ButtonLabel(icon: "editor-format_\(item.type)",
+                                state: item.isActive ? .active : .normal,
+                                customStyle: buttonStyle) {
                         viewModel.onSelectFormatterItem?(item)
                     }
                 }
@@ -74,14 +76,16 @@ struct TextFormatterView_Previews: PreviewProvider {
         let model = TextFormatterViewModel()
         model.formatterItems = [.h1, .h2, .bold, .strikethrough].map { FormatterItem(type: $0, isActive: false ) }
         model.visible = true
-        return TextFormatterView_SwiftUI(viewModel: model)
+        return TextFormatterViewSwiftUI(viewModel: model)
             .frame(width: 300, height: 90)
     }
 }
 
 // MARK: - NSView Container
 protocol TextFormatterViewDelegate: class {
-    func textFormatterView(_ textFormatterView: TextFormatterView, didSelectFormatterType type: FormatterType, isActive: Bool)
+    func textFormatterView(_ textFormatterView: TextFormatterView,
+                           didSelectFormatterType type: FormatterType,
+                           isActive: Bool)
 }
 
 class TextFormatterView: FormatterView {
@@ -91,12 +95,12 @@ class TextFormatterView: FormatterView {
         didSet { updateFormatterItems() }
     }
 
-    private var hostView: NSHostingView<TextFormatterView_SwiftUI>?
+    private var hostView: NSHostingView<TextFormatterViewSwiftUI>?
     private var subviewModel = TextFormatterViewModel()
     private var selectedTypes: Set<FormatterType> = []
 
     override var idealSize: NSSize {
-        return TextFormatterView_SwiftUI.idealSize(forNumberOfItems: items.count)
+        return TextFormatterViewSwiftUI.idealSize(forNumberOfItems: items.count)
     }
 
     override func animateOnAppear(completionHandler: (() -> Void)? = nil) {
@@ -118,7 +122,7 @@ class TextFormatterView: FormatterView {
     override func setupUI() {
         super.setupUI()
         subviewModel.onSelectFormatterItem = self.onSelectFormatterItem
-        let rootView = TextFormatterView_SwiftUI(viewModel: subviewModel, alwaysShowShadow: self.viewType == .inline)
+        let rootView = TextFormatterViewSwiftUI(viewModel: subviewModel, alwaysShowShadow: self.viewType == .inline)
         let hostingView = NSHostingView(rootView: rootView)
         hostingView.autoresizingMask = [.width, .height]
         hostingView.frame = self.bounds
