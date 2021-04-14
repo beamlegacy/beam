@@ -119,15 +119,6 @@ class ContextMenuFormatterView: FormatterView {
         setupUI()
     }
 
-    override init(frame frameRect: NSRect) {
-        super.init(frame: frameRect)
-        setupUI()
-    }
-
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
-    }
-
     override func animateOnAppear(completionHandler: (() -> Void)? = nil) {
         super.animateOnAppear()
         subviewModel.visible = true
@@ -144,10 +135,8 @@ class ContextMenuFormatterView: FormatterView {
         }
     }
 
-    // MARK: Private Methods
-
-    private func setupUI() {
-        setupLayer()
+    override func setupUI() {
+        super.setupUI()
 
         let rootView = ContextMenuView(viewModel: subviewModel, items: .constant(self.items))
         let hostingView = NSHostingView(rootView: rootView)

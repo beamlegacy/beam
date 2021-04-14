@@ -9,7 +9,7 @@ import Cocoa
 import SwiftUI
 
 // MARK: - SwiftUI View
-private class HyperlinkEditorViewModel: FormatterViewViewModel {
+private class HyperlinkEditorViewModel: BaseFormatterViewViewModel, ObservableObject {
     var url: Binding<String> = .constant("")
     var title: Binding<String> = .constant("")
     @Published var shouldFocusOnAppear: Bool = false
@@ -81,7 +81,7 @@ private struct HyperlinkEditorView: View {
     }
 }
 
-private struct HyperlinkEditorView_Previews: PreviewProvider {
+struct HyperlinkEditorView_Previews: PreviewProvider {
 
     static var previews: some View {
         let model = HyperlinkEditorViewModel()
@@ -111,21 +111,6 @@ class HyperlinkFormatterView: FormatterView {
         return NSSize(width: 272, height: 65)
     }
 
-    convenience init(viewType: FormatterViewType) {
-        self.init(frame: CGRect.zero)
-        self.viewType = viewType
-        setupUI()
-    }
-
-    override init(frame frameRect: NSRect) {
-        super.init(frame: frameRect)
-        setupUI()
-    }
-
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
-    }
-
     override func animateOnAppear(completionHandler: (() -> Void)? = nil) {
         super.animateOnAppear()
         subviewModel.visible = true
@@ -145,8 +130,8 @@ class HyperlinkFormatterView: FormatterView {
     // MARK: Private Methods
     private var editingUrl: String = "testing"
     private var editingTitle: String = "testing title"
-    private func setupUI() {
-        setupLayer()
+    override func setupUI() {
+        super.setupUI()
 
         subviewModel.url = Binding<String>(get: {
             self.editingUrl

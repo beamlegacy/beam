@@ -9,6 +9,7 @@ import SwiftUI
 
 struct FormatterViewBackground<Content: View>: View {
 
+    var shadowOpacity: Double?
     var content: () -> Content
 
     private let boxCornerRadius: CGFloat = 6
@@ -17,7 +18,9 @@ struct FormatterViewBackground<Content: View>: View {
         BeamColor.Formatter.background.swiftUI
     }
     private var shadowColor: Color {
-        BeamColor.Formatter.shadow.swiftUI
+        let color = BeamColor.Formatter.shadow.swiftUI
+        guard let shadowOpacity = shadowOpacity, shadowOpacity < 1.0 else { return color }
+        return color.opacity(shadowOpacity)
     }
     private var shadowRadius: CGFloat {
         13

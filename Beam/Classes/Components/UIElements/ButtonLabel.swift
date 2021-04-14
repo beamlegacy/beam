@@ -25,6 +25,9 @@ struct ButtonLabelStyle {
     var font = BeamFont.medium(size: 12).swiftUI
     var horizontalPadding: CGFloat = 6
     var verticalPadding: CGFloat = 3
+    var iconSize: CGFloat = 16
+    var foregroundColor: Color = BeamColor.Button.text.swiftUI
+    var activeForegroundColor: Color = BeamColor.Button.activeText.swiftUI
 }
 
 struct ButtonLabel: View {
@@ -49,12 +52,12 @@ struct ButtonLabel: View {
 
     private var foregroundColor: Color {
         guard defaultState != .disabled else {
-            return BeamColor.Button.text.swiftUI.opacity(0.35)
+            return style.foregroundColor.opacity(0.35)
         }
         guard isHovering || isTouching || defaultState != .normal else {
-            return BeamColor.Button.text.swiftUI
+            return style.foregroundColor
         }
-        return BeamColor.Button.activeText.swiftUI
+        return style.activeForegroundColor
     }
 
     private var backgroundColor: Color? {
@@ -67,7 +70,7 @@ struct ButtonLabel: View {
     var body: some View {
         HStack(spacing: 2) {
             if let icon = iconName {
-                Icon(name: icon, size: 16, color: foregroundColor)
+                Icon(name: icon, size: style.iconSize, color: foregroundColor)
             }
             if let text = text {
                 Text(text)
