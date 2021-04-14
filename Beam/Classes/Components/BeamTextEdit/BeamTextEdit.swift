@@ -23,7 +23,7 @@ public extension CALayer {
 @objc public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
     var data: BeamData?
-    var cardTopSpace: CGFloat = 148
+    var cardTopSpace: CGFloat = 124
     var centerText = false {
         didSet {
             setupCardHeader()
@@ -133,7 +133,6 @@ public extension CALayer {
         initBlinking()
         updateRoot(with: root)
         setupSideLayer()
-        setupSeparatorLayer()
     }
 
     deinit {
@@ -267,7 +266,6 @@ public extension CALayer {
                     updateCardHearderLayer(rect)
                     if journalMode {
                         updateSideLayer(rect)
-                        updateSeparatorLayer(rect)
                     }
                     rootNode.setLayout(rect)
                 }
@@ -276,7 +274,6 @@ public extension CALayer {
                 updateCardHearderLayer(rect)
                 if journalMode {
                     updateSideLayer(rect)
-                    updateSeparatorLayer(rect)
                 }
                 rootNode.setLayout(rect)
             }
@@ -378,7 +375,7 @@ public extension CALayer {
 
     func updateCardHearderLayer(_ rect: NSRect) {
         let headerPosX = rect.origin.x + 17
-        cardHeaderLayer.frame = CGRect(origin: CGPoint(x: headerPosX, y: 88), size: NSSize(width: rect.width, height: cardTitleLayer.preferredFrameSize().height))
+        cardHeaderLayer.frame = CGRect(origin: CGPoint(x: headerPosX, y: 63), size: NSSize(width: rect.width, height: cardTitleLayer.preferredFrameSize().height))
         cardTitleLayer.frame = CGRect(origin: CGPoint(x: 0, y: 0), size: NSSize(width: cardTitleLayer.preferredFrameSize().width, height: cardTitleLayer.preferredFrameSize().height))
         cardOptionLayer.frame = CGRect(origin: CGPoint(x: rect.width - 16, y: 10), size: NSSize(width: 16, height: 16))
 
@@ -389,25 +386,10 @@ public extension CALayer {
         if !journalMode && cardNote.type == .note {
             cardTimeLayer.frame = CGRect(
                 // TODO: Change later (isBig ? 101 : 95)
-                origin: CGPoint(x: headerPosX, y: 69),
+                origin: CGPoint(x: headerPosX, y: 44),
                 size: NSSize(width: rect.width, height: cardTimeLayer.preferredFrameSize().height)
             )
         }
-    }
-
-    func setupSeparatorLayer() {
-        guard let cardNote = note as? BeamNote,
-              journalMode && !cardNote.isTodaysNote else { return }
-        cardSeparatorLayer.enableAnimations = true
-        cardSeparatorLayer.backgroundColor = BeamColor.Editor.indentBackground.cgColor
-        cardSeparatorLayer.name = "cardSeparatorLayer"
-
-        addToMainLayer(cardSeparatorLayer)
-    }
-
-    func updateSeparatorLayer(_ rect: NSRect) {
-        let separatorLayerPos = CGPoint(x: self.bounds.width / 2 - 560 / 2, y: 0)
-        cardSeparatorLayer.frame = CGRect(origin: separatorLayerPos, size: NSSize(width: 560, height: 1))
     }
 
     func setupSideLayer() {
