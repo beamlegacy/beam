@@ -47,10 +47,8 @@ public class TextNode: Widget {
 
     override var contentsScale: CGFloat {
         didSet {
-            guard let actionLayer = actionLayer else { return }
-            actionLayer.contentsScale = contentsScale
-            actionTextLayer.contentsScale = contentsScale
-            actionImageLayer.contentsScale = contentsScale
+            guard let actionLayer = layers["CmdEnterLayer"] as? ShortcutLayer else { return }
+            actionLayer.set(contentsScale)
         }
     }
 
@@ -66,11 +64,8 @@ public class TextNode: Widget {
         get { element.text }
         set {
             guard element.text != newValue else { return }
-            if !newValue.isEmpty &&
-                root?.state.nodeSelection == nil &&
-                actionImageLayer.opacity == 0 { actionImageLayer.opacity = 1 }
 
-            if newValue.isEmpty { resetActionLayers() }
+            if newValue.isEmpty { updateActionLayerVisibility(hidden: true) }
 
             element.text = newValue
             element.note?.modifiedByUser()
@@ -186,18 +181,16 @@ public class TextNode: Widget {
         }
     }
 
-    var actionLayer: CALayer?
-
     private var debounceClickTimer: Timer?
     private var actionLayerIsHovered = false
     private var icon = NSImage(named: "editor-cmdreturn")
 
     private let debounceClickInterval = 0.23
-    private let actionImageLayer = CALayer()
-    private let actionTextLayer = CATextLayer()
-    public static var actionLayerWidth = CGFloat(80)
-    public static var actionLayerXOffset = CGFloat(30)
-    private var actionLayerFrame: CGRect { CGRect(x: Self.actionLayerXOffset, y: 0, width: Self.actionLayerWidth, height: 20) }
+//    public static var actionLayerWidth = CGFloat(80)
+//    public static var actionLayerXOffset = CGFloat(30)
+//    private var actionLayerFrame: CGRect { CGRect(x: Self.actionLayerXOffset, y: 0, width: Self.actionLayerWidth, height: 20) }
+    private var bulletLayerPositionX = CGFloat(14)
+    private var actionLayerPadding = CGFloat(3.5)
 
     public static func == (lhs: TextNode, rhs: TextNode) -> Bool {
         return lhs === rhs
@@ -220,8 +213,8 @@ public class TextNode: Widget {
 
         super.init(parent: parent)
 
-        addDisclosureLayer(at: NSPoint(x: 14, y: isHeader ? firstLineBaseline - 8 : firstLineBaseline - 13))
-        addBulletPointLayer(at: NSPoint(x: 14, y: isHeader ? firstLineBaseline - 8 : firstLineBaseline - 13))
+        addDisclosureLayer(at: NSPoint(x: bulletLayerPositionX, y: isHeader ? firstLineBaseline - 8 : firstLineBaseline - 13))
+        addBulletPointLayer(at: NSPoint(x: bulletLayerPositionX, y: isHeader ? firstLineBaseline - 8 : firstLineBaseline - 13))
 
         element.$children
             .sink { [unowned self] elements in
@@ -242,8 +235,8 @@ public class TextNode: Widget {
 
         super.init(editor: editor)
 
-        addDisclosureLayer(at: NSPoint(x: 14, y: isHeader ? firstLineBaseline - 8 : firstLineBaseline - 13))
-        addBulletPointLayer(at: NSPoint(x: 14, y: isHeader ? firstLineBaseline - 8 : firstLineBaseline - 13))
+        addDisclosureLayer(at: NSPoint(x: bulletLayerPositionX, y: isHeader ? firstLineBaseline - 8 : firstLineBaseline - 13))
+        addBulletPointLayer(at: NSPoint(x: bulletLayerPositionX, y: isHeader ? firstLineBaseline - 8 : firstLineBaseline - 13))
 
         element.$children
             .sink { [unowned self] elements in
@@ -302,12 +295,12 @@ public class TextNode: Widget {
             let markRect = NSRect(x: xStart, y: line1.frame.minY, width: xEnd - xStart, height: line1.bounds.height)
             context.addRect(markRect)
         } else {
-            let markRect1 = NSRect(x: xStart, y: line1.frame.minY, width: frame.width - xStart, height: line2.frame.minY - line1.frame.minY )
+            let markRect1 = NSRect(x: xStart, y: line1.frame.minY, width: textFrame.frame.width - xStart, height: line2.frame.minY - line1.frame.minY )
             context.addRect(markRect1)
 
             if startLine + 1 != endLine {
                 // bloc doesn't end on the line directly below the start line, so be need to joind the start and end lines with a big rectangle
-                let markRect2 = NSRect(x: 0, y: line1.frame.maxY, width: frame.width, height: line2.frame.minY - line1.frame.maxY)
+                let markRect2 = NSRect(x: 0, y: line1.frame.maxY, width: textFrame.frame.width, height: line2.frame.minY - line1.frame.maxY)
                 context.addRect(markRect2)
             }
 
@@ -446,13 +439,13 @@ public class TextNode: Widget {
             if selfVisible {
                 emptyTextFrame = nil
                 let attrStr = attributedString
-                let textFrame = Font.draw(string: attrStr, atPosition: NSPoint(x: indent, y: 0), textWidth: (availableWidth - actionLayerFrame.width) - actionLayerFrame.minX)
+                let textFrame = Font.draw(string: attrStr, atPosition: NSPoint(x: indent, y: 0), textWidth: availableWidth - childInset)
                 self.textFrame = textFrame
                 contentsFrame = textFrame.frame
 
                 if attrStr.string.isEmpty {
                     let dummyText = buildAttributedString(for: BeamText(text: "Dummy!"))
-                    let fakelayout = Font.draw(string: dummyText, atPosition: NSPoint(x: indent, y: 0), textWidth: (availableWidth - actionLayerFrame.width) - actionLayerFrame.minX)
+                    let fakelayout = Font.draw(string: dummyText, atPosition: NSPoint(x: indent, y: 0), textWidth: availableWidth - childInset)
 
                     self.emptyTextFrame = fakelayout
                     contentsFrame = fakelayout.frame
@@ -486,37 +479,21 @@ public class TextNode: Widget {
     }
 
     func createActionLayer() {
-        actionLayer = CALayer()
-        guard let actionLayer = actionLayer else { return }
-
-        icon = icon?.fill(color: BeamColor.Editor.searchNormal.nsColor)
-
-        actionImageLayer.opacity = 0
-        actionImageLayer.frame = CGRect(x: 0, y: 2, width: 20, height: 16)
-        actionImageLayer.contents = icon?.cgImage
-
-        actionTextLayer.opacity = 0
-        actionTextLayer.font = NSFont.systemFont(ofSize: 0, weight: .medium)
-        actionTextLayer.fontSize = 10
-        actionTextLayer.frame = CGRect(x: 15, y: 3.5, width: 100, height: 20)
-        actionTextLayer.string = "to search"
-        actionTextLayer.foregroundColor = BeamColor.Editor.searchNormal.cgColor
-
-        actionLayer.frame = CGRect(x: actionLayerFrame.minX, y: 0, width: actionLayerFrame.width, height: actionLayerFrame.height)
-
-        actionLayer.addSublayer(actionTextLayer)
-        actionLayer.addSublayer(actionImageLayer)
-
-        layer.addSublayer(actionLayer)
+        let actionLayer = ShortcutLayer(name: "CmdEnterLayer", text: "Search", icons: ["editor-cmdreturn"]) {
+            self.editor.onStartQuery(self)
+        }
+        actionLayer.layer.isHidden = true
+        addLayer(actionLayer, origin: CGPoint(x: availableWidth + childInset + actionLayerPadding, y: firstLineBaseline), global: false)
     }
 
     func updateActionLayer(animate: Bool) {
-        let actionLayerYPosition = isHeader ? (contentsFrame.height / 2) - actionLayerFrame.height : 0
+        guard let actionLayer = layers["CmdEnterLayer"] else { return }
+        let actionLayerYPosition = isHeader ? (contentsFrame.height / 2) - actionLayer.frame.height : 0
         if animate {
-                actionLayer?.frame = CGRect(x: availableWidth, y: actionLayerYPosition, width: actionLayerFrame.width, height: actionLayerFrame.height)
+            actionLayer.frame = CGRect(x: availableWidth + childInset + actionLayerPadding, y: actionLayerYPosition, width: actionLayer.frame.width, height: actionLayer.frame.height)
         } else {
             CATransaction.disableAnimations {
-                actionLayer?.frame = CGRect(x: availableWidth, y: actionLayerYPosition, width: actionLayerFrame.width, height: actionLayerFrame.height)
+                actionLayer.frame = CGRect(x: availableWidth + childInset + actionLayerPadding, y: actionLayerYPosition, width: actionLayer.frame.width, height: actionLayer.frame.height)
             }
         }
     }
@@ -600,12 +577,16 @@ public class TextNode: Widget {
     override func onFocus() {
         super.onFocus()
         guard !text.isEmpty else { return }
-        showHoveredActionLayers(false)
     }
 
     override func onUnfocus() {
         super.onUnfocus()
-        resetActionLayers()
+        updateActionLayerVisibility(hidden: true)
+    }
+
+    private func updateActionLayerVisibility(hidden: Bool) {
+        guard let actionLayer = layers["CmdEnterLayer"] else { return }
+        actionLayer.layer.isHidden = hidden
     }
 
     private func isHoveringText() -> Bool {
@@ -621,16 +602,9 @@ public class TextNode: Widget {
             return handleRightMouseDown(mouseInfo: mouseInfo)
         }
 
-        // Start new query when the action layer is pressed.
-        guard let actionLayer = actionLayer else { return false }
-        let position = actionLayerMousePosition(from: mouseInfo)
-
-        if isEditing && !actionLayer.isHidden && actionLayerIsHovered && actionLayer.frame.contains(position) {
-            editor.onStartQuery(self)
-            return true
-        }
-
         if contentsFrame.contains(mouseInfo.position) {
+            updateActionLayerVisibility(hidden: false)
+
             let clickPos = positionAt(point: mouseInfo.position)
 
             if let link = linkAt(point: mouseInfo.position) {
@@ -679,13 +653,11 @@ public class TextNode: Widget {
                 editor.detectFormatterType()
 
                 if root?.state.nodeSelection != nil {
-                    resetActionLayers()
                     editor.showInlineFormatterOnKeyEventsAndClick()
                 }
                 return true
             }
         }
-
         return false
     }
 
@@ -767,34 +739,6 @@ public class TextNode: Widget {
 
     override func mouseMoved(mouseInfo: MouseInfo) -> Bool {
         self.handleMouseHoverState(mouseInfo: mouseInfo)
-
-        // action layer handling
-        guard let actionLayer = actionLayer,
-              root?.state.nodeSelection == nil else {
-            resetActionLayers()
-            return false
-        }
-
-        let position = actionLayerMousePosition(from: mouseInfo)
-        let isMouseInContainerWithActionLayer = contentsFrame.contains(position)
-        let hasTextAndEditable = !text.isEmpty && isEditing && editor.hasFocus
-
-        // Show image & text layers
-        if hasTextAndEditable && isMouseInContainerWithActionLayer && actionLayer.frame.contains(position) {
-            showHoveredActionLayers(true)
-            cursor = .arrow
-            return true
-        } else if hasTextAndEditable && isMouseInContainerWithActionLayer {
-            showHoveredActionLayers(false)
-            return true
-        }
-
-        // Reset action layers
-        if !isMouseInContainerWithActionLayer && isEditing && editor.hasFocus {
-            showHoveredActionLayers(false)
-            return true
-        }
-
         return false
     }
 
@@ -809,8 +753,12 @@ public class TextNode: Widget {
             root?.selectedTextRange = text.clamp(p < o ? cursorPosition..<o : o..<cursorPosition)
             mouseIsDragged = root?.state.nodeSelection == nil
 
-            // When the bullet is selected hide & disable cmd+enter action
-            if root?.state.nodeSelection != nil { resetActionLayers() }
+            // When more than one bullet is selected hide & disable cmd+enter action
+            if let nodeSelection = root?.state.nodeSelection, nodeSelection.nodes.count > 1 {
+                updateActionLayerVisibility(hidden: true)
+            } else {
+                updateActionLayerVisibility(hidden: false)
+            }
 
             // Set cursor start position
             if editor.cursorStartPosition == 0 { editor.cursorStartPosition = cursorPosition }
@@ -1124,31 +1072,6 @@ public class TextNode: Widget {
     func openExternalLink(link: URL, element: BeamElement) {
         editor.cancelInternalLink()
         editor.openURL(link, element)
-    }
-
-    private func showHoveredActionLayers(_ hovered: Bool) {
-        guard !elementText.isEmpty,
-              root?.state.nodeSelection == nil else { return }
-
-        actionLayerIsHovered = hovered
-        icon = icon?.fill(color: hovered ? BeamColor.Editor.searchHover.nsColor : BeamColor.Editor.searchNormal.nsColor)
-        actionImageLayer.contents = icon
-        actionImageLayer.opacity = 1
-        actionImageLayer.setAffineTransform(hovered ? CGAffineTransform(translationX: 1, y: 0) : CGAffineTransform.identity)
-
-        actionTextLayer.opacity = hovered ? 1 : 0
-        actionTextLayer.foregroundColor = hovered ? BeamColor.Editor.searchHover.cgColor : BeamColor.Editor.searchNormal.cgColor
-        actionTextLayer.setAffineTransform(hovered ? CGAffineTransform(translationX: 11, y: 0) : CGAffineTransform.identity)
-    }
-
-    private func resetActionLayers() {
-        icon = icon?.fill(color: BeamColor.Editor.searchNormal.nsColor)
-        actionLayerIsHovered = false
-        actionImageLayer.contents = icon
-        actionImageLayer.opacity = 0
-        actionTextLayer.opacity = 0
-        actionImageLayer.setAffineTransform(CGAffineTransform.identity)
-        actionTextLayer.setAffineTransform(CGAffineTransform.identity)
     }
 
     func nextVisibleTextNode() -> TextNode? {

@@ -14,13 +14,14 @@ import BeamCore
 // swiftlint:disable file_length
 public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     let layer: CALayer
+    let selectionLayer: CALayer
     var debug = false
     var currentFrameInDocument = NSRect()
 
     var isEmpty: Bool { children.isEmpty }
     var selected: Bool = false {
         didSet {
-            layer.backgroundColor = selected ? BeamColor.Editor.textSelection.cgColor : NSColor(white: 1, alpha: 0).cgColor
+            selectionLayer.backgroundColor = selected ? BeamColor.Editor.textSelection.cgColor: NSColor(white: 1, alpha: 0).cgColor
             invalidate()
         }
     }
@@ -28,6 +29,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     var contentsScale = CGFloat(2) {
         didSet {
             layer.contentsScale = contentsScale
+            selectionLayer.contentsScale = contentsScale
 
             for layer in layers.values {
                 layer.layer.contentsScale = contentsScale
@@ -222,8 +224,10 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         self.parent = parent
         self.editor = parent.editor
         layer = CALayer()
+        selectionLayer = CALayer()
         super.init()
         configureLayer()
+        configureSelectionLayer()
 
         setAccessibilityIdentifier(String(describing: Self.self))
         setAccessibilityElement(true)
@@ -236,8 +240,10 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     init(editor: BeamTextEdit) {
         self.editor = editor
         layer = CALayer()
+        selectionLayer = CALayer()
         super.init()
         configureLayer()
+        configureSelectionLayer()
 
         setAccessibilityIdentifier(String(describing: Self.self))
         setAccessibilityElement(true)
@@ -295,6 +301,8 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         }
         layer.bounds = contentsFrame
         layer.position = frameInDocument.origin
+        selectionLayer.bounds = CGRect(x: 0, y: 0, width: selectionLayerWidth, height: contentsFrame.height)
+        selectionLayer.position = CGPoint(x: -offsetInRoot.x, y: 0)
         updateSubLayersLayout()
 
         if self.currentFrameInDocument != frame {
@@ -330,6 +338,20 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         }
     }
 
+    var selectionLayerWidth: CGFloat {
+        return isBig ? 560 : 560
+    }
+
+    private func configureSelectionLayer() {
+        selectionLayer.anchorPoint = CGPoint()
+        selectionLayer.frame = NSRect(x: 0, y: 0, width: layer.frame.width, height: layer.frame.height)
+        selectionLayer.setNeedsDisplay()
+        selectionLayer.backgroundColor = NSColor(white: 1, alpha: 0).cgColor
+        selectionLayer.name = "SelectionLayer"
+        selectionLayer.zPosition = -1
+        layer.addSublayer(selectionLayer)
+    }
+
     func configureLayer() {
         let newActions = [
                 "onOrderIn": NSNull(),
@@ -341,7 +363,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         layer.actions = newActions
         layer.anchorPoint = CGPoint()
         layer.setNeedsDisplay()
-        layer.backgroundColor = selected ? NSColor(white: 0.5, alpha: 0.1).cgColor : NSColor(white: 1, alpha: 0).cgColor
+        layer.backgroundColor = NSColor.clear.cgColor
         layer.delegate = self
         layer.name = mainLayerName
     }

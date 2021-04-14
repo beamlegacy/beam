@@ -28,6 +28,7 @@ extension BeamColor {
         static let chevron = BeamColor.AlphaGray
         static let searchNormal = BeamColor.Custom(named: "EditorSearchNormal")
         static let searchHover = BeamColor.Bluetiful
+        static let searchClicked = BeamColor.Custom(named: "EditorSearchClicked")
         static let bidirectionalLink = BeamColor.Beam
         static let control = BeamColor.Custom(named: "EditorControlColor")
         static let link = BeamColor.Niobium
