@@ -159,13 +159,18 @@ class AllCardsContextualMenu {
     }
 
     private func makeNotes(isPublic: Bool) -> Promises.Promise<[Bool]> {
+        let docManager = documentManager
         let promises: [Promises.Promise<Bool>] = selectedNotes.map { note in
             note.isPublic = isPublic
-            if let doc = note.documentStruct {
-                return documentManager.saveDocument(doc)
-            } else {
-                let error = NSError(domain: "", code: 0, userInfo: [NSLocalizedFailureReasonErrorKey: "Couldn't get document struct for note"])
-                return Promises.Promise(error)
+            return Promises.Promise { (done, error) in
+                note.save(documentManager: docManager) { (result) in
+                    switch result {
+                    case .failure(let e):
+                        error(e)
+                    case .success(let success):
+                        done(success)
+                    }
+                }
             }
         }
         return Promises.all(promises)

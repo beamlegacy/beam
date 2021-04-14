@@ -107,8 +107,14 @@ import BeamCore
         version = newDoc.version
     }
 
-    public static func instanciateNote(_ documentManager: DocumentManager, _ documentStruct: DocumentStruct, keepInMemory: Bool = true) throws -> BeamNote {
+    public static func instanciateNote(_ documentManager: DocumentManager,
+                                       _ documentStruct: DocumentStruct,
+                                       keepInMemory: Bool = true,
+                                       decodeChildren: Bool = true) throws -> BeamNote {
         let decoder = JSONDecoder()
+        if decodeChildren == false {
+            decoder.userInfo[BeamElement.recursiveCoding] = false
+        }
         let note = try decoder.decode(BeamNote.self, from: documentStruct.data)
         note.version = documentStruct.version
         note.savedVersion = note.version

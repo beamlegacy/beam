@@ -12,17 +12,11 @@ struct AllCardsPageContentView: View {
     @EnvironmentObject var state: BeamState
     @EnvironmentObject var data: BeamData
 
-    @State private var allNotes = [BeamNote]() {
+    @State private var allNotes = [DocumentStruct]() {
         didSet {
-            privateNotes = allNotes.filter({ !$0.isPublic })
-            publicNotes = allNotes.filter({ $0.isPublic })
-            allNotesItems = allNotes.map { NoteTableViewItem($0) }
-            publicNotesItems = publicNotes.map { NoteTableViewItem($0) }
-            privateNotesItems = privateNotes.map { NoteTableViewItem($0) }
+            updateNoteItemsFromAllNotes()
         }
     }
-    @State private var privateNotes = [BeamNote]()
-    @State private var publicNotes = [BeamNote]()
 
     @State private var allNotesItems = [NoteTableViewItem]()
     @State private var privateNotesItems = [NoteTableViewItem]()
@@ -80,15 +74,16 @@ struct AllCardsPageContentView: View {
         VStack(spacing: 20) {
             HStack(alignment: .center, spacing: BeamSpacing._20) {
                 Spacer()
-                ButtonLabel("All (\(allNotes.count))", state: listType == .allNotes ? .active : .normal) {
+                ButtonLabel("All (\(allNotesItems.count))", state: listType == .allNotes ? .active : .normal) {
                     listType = .allNotes
                 }
                 Separator()
-                ButtonLabel("Public (\(publicNotes.count))", state: listType == .publicNotes ? .active : .normal) {
+                ButtonLabel("Public (\(publicNotesItems.count))", state: listType == .publicNotes ? .active : .normal) {
                     listType = .publicNotes
                 }
                 Separator()
-                ButtonLabel("Private (\(privateNotes.count))", state: listType == .privateNotes ? .active : .normal) {
+                ButtonLabel("Private (\(privateNotesItems.count))",
+                            state: listType == .privateNotes ? .active : .normal) {
                     listType = .privateNotes
                 }
                 GeometryReader { geo in
@@ -169,7 +164,22 @@ struct AllCardsPageContentView: View {
     }
 
     private func refreshAllNotes() {
-        allNotes = data.documentManager.loadDocuments().map { BeamNote.fetchOrCreate(data.documentManager, title: $0.title) }
+        allNotes = data.documentManager.loadDocuments()
+    }
+
+    private func updateNoteItemsFromAllNotes() {
+        let documentManager = data.documentManager
+        allNotesItems = allNotes.map { doc in
+            var note: BeamNote
+            do {
+                note = try BeamNote.instanciateNote(documentManager, doc, keepInMemory: false, decodeChildren: false)
+            } catch {
+                note = BeamNote.fetchOrCreate(documentManager, title: doc.title)
+            }
+            return NoteTableViewItem(document: doc, note: note)
+        }
+        publicNotesItems = allNotesItems.filter({ $0.note.isPublic })//publicNotes.map { NoteTableViewItem($0) }
+        privateNotesItems = allNotesItems.filter({ !$0.note.isPublic })//privateNotes.map { NoteTableViewItem($0) }
     }
 
     private func onEditingText(_ text: String?, row: Int, in notesList: [NoteTableViewItem]) {
@@ -227,14 +237,12 @@ private class NoteTableViewItem: TableViewItem {
     var updatedAt: Date = Date()
     var words: Int = 0
     var mentions: Int = 0
-    init(_ note: BeamNote) {
+    init(document: DocumentStruct, note: BeamNote) {
         self.note = note
-        self.title = note.title
-        if let doc = note.documentStruct {
-            createdAt = doc.createdAt
-            updatedAt = doc.updatedAt
-        }
-        words = note.wordsCount()
+        title = note.title
+        createdAt = document.createdAt
+        updatedAt = document.updatedAt
+        words = note.textStats.wordsCount
         mentions = note.references.count
     }
 
