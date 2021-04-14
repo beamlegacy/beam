@@ -343,7 +343,7 @@ public class TextNode: Widget {
     func updateIndentLayer() {
         guard let indentLayer = layers["indentLayer"] else { return }
         let y = firstLineHeight + 8
-        indentLayer.frame = NSRect(x: childInset - 0.5, y: y - 5, width: 1, height: frame.height - y - 5)
+        indentLayer.frame = NSRect(x: childInset + 4.5, y: y - 5, width: 1, height: frame.height - y - 5)
         indentLayer.layer.isHidden = children.isEmpty || !open
     }
 
