@@ -20,7 +20,7 @@ class ChevronButton: ButtonLayer {
     init(_ name: String, icon: String = "editor-arrow_right", open: Bool, changed: @escaping (Bool) -> Void = { _ in }) {
         self.changed = changed
         self.open = open
-        chevron = Layer.icon(named: icon, color: BeamColor.Editor.icon.nsColor)
+        chevron = Layer.icon(named: icon, color: BeamColor.Editor.chevron.nsColor)
         super.init(name, CALayer())
         activated = { [unowned self] in
             self.open.toggle()
