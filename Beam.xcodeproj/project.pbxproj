@@ -39,7 +39,6 @@
 		414B987B259DE2E2002E81A3 /* BidirectionalPopoverActionItem.xib in Resources */ = {isa = PBXBuildFile; fileRef = 414B9879259DE2E2002E81A3 /* BidirectionalPopoverActionItem.xib */; };
 		414B989925A21BB0002E81A3 /* BeamTextEdit+Formatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414B989825A21BB0002E81A3 /* BeamTextEdit+Formatter.swift */; };
 		414B98F025A239F8002E81A3 /* FormatterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414B98EF25A239F8002E81A3 /* FormatterView.swift */; };
-		414B98F625A23A04002E81A3 /* TextFormatterView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 414B98F525A23A04002E81A3 /* TextFormatterView.xib */; };
 		414B98FA25A23A4F002E81A3 /* NSView+Xib.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414B98F925A23A4F002E81A3 /* NSView+Xib.swift */; };
 		414B98FE25A27930002E81A3 /* FormatterType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414B98FD25A27930002E81A3 /* FormatterType.swift */; };
 		4159E9D4259A1A81005FD355 /* BidirectionalPopover.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4159E9D3259A1A81005FD355 /* BidirectionalPopover.swift */; };
@@ -354,9 +353,9 @@
 		A552DF2D25F12A3600570C85 /* OmniBarButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A552DF2C25F12A3600570C85 /* OmniBarButton.swift */; };
 		A552DF3325F1741900570C85 /* GlobalCenteringContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A552DF3225F1741900570C85 /* GlobalCenteringContainer.swift */; };
 		A5651A7726035D3A0035F12B /* AppDelegate+NSMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5651A7626035D3A0035F12B /* AppDelegate+NSMenu.swift */; };
-		A5651AA02603800C0035F12B /* TextFormatterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5651A9F2603800C0035F12B /* TextFormatterView.swift */; };
 		A56696B12614CF7F00B814D2 /* TableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A56696B02614CF7F00B814D2 /* TableView.swift */; };
 		A567157125F66F8600B46110 /* StyledText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A567157025F66F8600B46110 /* StyledText.swift */; };
+		A56DF8F12625D27500F1CF55 /* TextFormatterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A56DF8F02625D27500F1CF55 /* TextFormatterView.swift */; };
 		A572629825FFADC5004416C0 /* MouseInteraction.swift in Sources */ = {isa = PBXBuildFile; fileRef = A572629725FFADC5004416C0 /* MouseInteraction.swift */; };
 		A57BFEA12615B45C00CFB646 /* TableCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57BFEA02615B45C00CFB646 /* TableCellView.swift */; };
 		A57BFEB92615B48300CFB646 /* CheckBoxTableCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57BFEB82615B48300CFB646 /* CheckBoxTableCellView.swift */; };
@@ -609,7 +608,6 @@
 		414B9879259DE2E2002E81A3 /* BidirectionalPopoverActionItem.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = BidirectionalPopoverActionItem.xib; sourceTree = "<group>"; };
 		414B989825A21BB0002E81A3 /* BeamTextEdit+Formatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamTextEdit+Formatter.swift"; sourceTree = "<group>"; };
 		414B98EF25A239F8002E81A3 /* FormatterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatterView.swift; sourceTree = "<group>"; };
-		414B98F525A23A04002E81A3 /* TextFormatterView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = TextFormatterView.xib; sourceTree = "<group>"; };
 		414B98F925A23A4F002E81A3 /* NSView+Xib.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSView+Xib.swift"; sourceTree = "<group>"; };
 		414B98FD25A27930002E81A3 /* FormatterType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatterType.swift; sourceTree = "<group>"; };
 		4159E9D3259A1A81005FD355 /* BidirectionalPopover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BidirectionalPopover.swift; sourceTree = "<group>"; };
@@ -935,9 +933,9 @@
 		A552DF2C25F12A3600570C85 /* OmniBarButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniBarButton.swift; sourceTree = "<group>"; };
 		A552DF3225F1741900570C85 /* GlobalCenteringContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalCenteringContainer.swift; sourceTree = "<group>"; };
 		A5651A7626035D3A0035F12B /* AppDelegate+NSMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+NSMenu.swift"; sourceTree = "<group>"; };
-		A5651A9F2603800C0035F12B /* TextFormatterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextFormatterView.swift; sourceTree = "<group>"; };
 		A56696B02614CF7F00B814D2 /* TableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableView.swift; sourceTree = "<group>"; };
 		A567157025F66F8600B46110 /* StyledText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StyledText.swift; sourceTree = "<group>"; };
+		A56DF8F02625D27500F1CF55 /* TextFormatterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextFormatterView.swift; sourceTree = "<group>"; };
 		A572629725FFADC5004416C0 /* MouseInteraction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MouseInteraction.swift; sourceTree = "<group>"; };
 		A57BFEA02615B45C00CFB646 /* TableCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableCellView.swift; sourceTree = "<group>"; };
 		A57BFEB82615B48300CFB646 /* CheckBoxTableCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckBoxTableCellView.swift; sourceTree = "<group>"; };
@@ -1070,8 +1068,8 @@
 			children = (
 				414B98EF25A239F8002E81A3 /* FormatterView.swift */,
 				A5D6250926034B1C00A3E676 /* FormatterViewBackground.swift */,
-				A5651AA9260382290035F12B /* Text */,
-				A5651A9E26037F5C0035F12B /* Hyperlink */,
+				A56DF8F02625D27500F1CF55 /* TextFormatterView.swift */,
+				418EA94125D696EA005894AA /* HyperlinkFormatterView.swift */,
 			);
 			path = FormatterView;
 			sourceTree = "<group>";
@@ -2233,23 +2231,6 @@
 			path = ToolBar;
 			sourceTree = "<group>";
 		};
-		A5651A9E26037F5C0035F12B /* Hyperlink */ = {
-			isa = PBXGroup;
-			children = (
-				418EA94125D696EA005894AA /* HyperlinkFormatterView.swift */,
-			);
-			path = Hyperlink;
-			sourceTree = "<group>";
-		};
-		A5651AA9260382290035F12B /* Text */ = {
-			isa = PBXGroup;
-			children = (
-				A5651A9F2603800C0035F12B /* TextFormatterView.swift */,
-				414B98F525A23A04002E81A3 /* TextFormatterView.xib */,
-			);
-			path = Text;
-			sourceTree = "<group>";
-		};
 		A57BFEC02615B4AC00CFB646 /* TableView */ = {
 			isa = PBXGroup;
 			children = (
@@ -2675,7 +2656,6 @@
 				41D169A725DC07260018E5F2 /* Inter-Regular.otf in Resources */,
 				5206281025922D6C00D7CD9E /* update_document.graphql in Resources */,
 				56A5BD3725CCAFA400ED7C50 /* english.stopwords in Resources */,
-				414B98F625A23A04002E81A3 /* TextFormatterView.xib in Resources */,
 				4159E9E2259A2575005FD355 /* BidirectionalPopover.xib in Resources */,
 				418171F42581107C00317ED8 /* sign_up.graphql in Resources */,
 				418171F62581107C00317ED8 /* sign_in.graphql in Resources */,
@@ -2919,6 +2899,7 @@
 				4181721A2581107C00317ED8 /* StandardStorable.swift in Sources */,
 				96C9AA3F259019E3007D3D98 /* LinkedReferenceNode.swift in Sources */,
 				4181731725811E1800317ED8 /* CursorMovement.swift in Sources */,
+				A56DF8F12625D27500F1CF55 /* TextFormatterView.swift in Sources */,
 				418172522581107C00317ED8 /* OmniBarSearchField.swift in Sources */,
 				418172392581107C00317ED8 /* Lexer.swift in Sources */,
 				521EEDF72593824100BA2485 /* AppDelegate+Document.swift in Sources */,
@@ -3100,7 +3081,6 @@
 				418172602581107C00317ED8 /* LibrairiesManager.swift in Sources */,
 				4181733225811F4800317ED8 /* KeyCode.swift in Sources */,
 				96A3067C25F698FB0078A453 /* RefNoteTitle.swift in Sources */,
-				A5651AA02603800C0035F12B /* TextFormatterView.swift in Sources */,
 				9691E3D825AD9F3300A13080 /* TextRoot.swift in Sources */,
 				A5651A7726035D3A0035F12B /* AppDelegate+NSMenu.swift in Sources */,
 				4181724C2581107C00317ED8 /* BrowserTabView.swift in Sources */,

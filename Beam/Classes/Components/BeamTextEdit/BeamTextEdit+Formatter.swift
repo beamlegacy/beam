@@ -31,22 +31,15 @@ extension BeamTextEdit {
         guard persistentFormatter == nil else { return }
 
         persistentFormatter = TextFormatterView(viewType: .persistent)
-        persistentFormatter?.alphaValue = 0
-
         guard let formatterView = persistentFormatter,
               let contentView = window?.contentView else { return }
 
         formatterView.translatesAutoresizingMaskIntoConstraints = false
         formatterView.items = BeamTextEdit.persistentFormatterType
-
+        formatterView.delegate = self
         addConstraint(to: formatterView, with: contentView)
         contentView.addSubview(formatterView)
         activateLayoutConstraint(for: formatterView)
-
-        formatterView.didSelectFormatterType = { [unowned self] (type, isActive) -> Void in
-            self.selectFormatterAction(type, isActive)
-        }
-
         showOrHidePersistentFormatter(isPresent: true)
     }
 
@@ -58,9 +51,7 @@ extension BeamTextEdit {
         } else {
             let formatterView = TextFormatterView(viewType: .inline)
             formatterView.items = BeamTextEdit.inlineFormatterType
-            formatterView.didSelectFormatterType = {[unowned self] (type, isActive) -> Void in
-                self.selectFormatterAction(type, isActive)
-            }
+            formatterView.delegate = self
             inlineFormatter = formatterView
         }
         guard let formatterView = inlineFormatter else { return }
@@ -140,9 +131,6 @@ extension BeamTextEdit {
         guard let node = focusedWidget as? TextNode else { return }
 
         var types: [FormatterType] = []
-
-        setActiveFormatters(types)
-
         switch node.element.kind {
         case .heading(1):
             types.append(.h1)
@@ -293,11 +281,11 @@ extension BeamTextEdit {
 
     private func setActiveFormatters(_ types: [FormatterType]) {
         if let inlineFormatter = inlineFormatter as? TextFormatterView {
-            inlineFormatter.setActiveFormmatters(types)
+            inlineFormatter.setActiveFormatters(types)
         }
 
         if let persistentFormatter = persistentFormatter {
-            persistentFormatter.setActiveFormmatters(types)
+            persistentFormatter.setActiveFormatters(types)
         }
     }
 
@@ -359,5 +347,11 @@ extension BeamTextEdit {
             debounce.invalidate()
             BeamTextEdit.debounceMouseEventTimer = nil
         }
+    }
+}
+
+extension BeamTextEdit: TextFormatterViewDelegate {
+    func textFormatterView(_ textFormatterView: TextFormatterView, didSelectFormatterType type: FormatterType, isActive: Bool) {
+        self.selectFormatterAction(type, isActive)
     }
 }

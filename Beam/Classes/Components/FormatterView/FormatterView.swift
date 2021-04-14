@@ -24,9 +24,10 @@ class FormatterView: NSView {
     convenience init(viewType: FormatterViewType) {
         self.init(frame: .zero)
         self.viewType = viewType
+        self.setupUI()
     }
 
-    func setupLayer() {
+    func setupUI() {
         self.wantsLayer = true
     }
 
@@ -60,6 +61,8 @@ class FormatterView: NSView {
     }
 }
 
-class FormatterViewViewModel: ObservableObject {
+class BaseFormatterViewViewModel {
     @Published var visible: Bool = false
 }
+
+class FormatterViewViewModel: BaseFormatterViewViewModel, ObservableObject { }
