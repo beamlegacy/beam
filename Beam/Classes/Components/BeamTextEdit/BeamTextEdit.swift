@@ -83,8 +83,7 @@ public extension CALayer {
     let cardOptionLayer = CALayer()
     let cardTimeLayer = CATextLayer()
 
-    let gutterWidth: CGFloat = TextNode.actionLayerXOffset + TextNode.actionLayerWidth
-    var textWidth: CGFloat { 544 }
+    var textWidth: CGFloat { 538 }
 
     private (set) var isResizing = false
     private (set) var journalMode: Bool
@@ -289,7 +288,7 @@ public extension CALayer {
     }
 
     var textNodeWidth: CGFloat {
-        return centerText ? textWidth + gutterWidth : CGFloat(isBig ? frame.width - 200 - leadingAlignment : 450)
+        return centerText ? textWidth : CGFloat(isBig ? frame.width - 200 - leadingAlignment : 450)
     }
 
     // This is the root node of what we are editing:
@@ -404,7 +403,6 @@ public extension CALayer {
         cardSeparatorLayer.name = "cardSeparatorLayer"
 
         addToMainLayer(cardSeparatorLayer)
-
     }
 
     func updateSeparatorLayer(_ rect: NSRect) {
@@ -536,6 +534,7 @@ public extension CALayer {
         hasFocus = true
         invalidate()
         onStartEditing()
+        focusedWidget?.focus()
         return true
     }
 
@@ -549,6 +548,7 @@ public extension CALayer {
         rootNode.cancelSelection()
         (focusedWidget as? TextNode)?.invalidateText() // force removing the syntax highlighting
         focusedWidget?.invalidate()
+        focusedWidget?.onUnfocus()
         if activateOnLostFocus { activated() }
 
         cancelInternalLink()

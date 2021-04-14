@@ -311,6 +311,7 @@
 		A01030AA25F149EA00D740C5 /* TextEditorCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = A01030A925F149EA00D740C5 /* TextEditorCommand.swift */; };
 		A01950AD25B838810025C5FD /* CommandManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A06DF52525B7608000E2CB62 /* CommandManagerTests.swift */; };
 		A0208F8225D6BB1C00CA054C /* AppDelegate+BeamTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0208F8125D6BB1C00CA054C /* AppDelegate+BeamTests.swift */; };
+		A032BD33261F4677009A3576 /* ShortcutLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A032BD32261F4677009A3576 /* ShortcutLayer.swift */; };
 		A03CE0EC25F954CB00D767B0 /* BeamElementHolder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A03CE0EB25F954CB00D767B0 /* BeamElementHolder.swift */; };
 		A0404F0C25E7ECDD00E347F3 /* CommandNodeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0404F0B25E7ECDD00E347F3 /* CommandNodeTests.swift */; };
 		A04E849525DD1CEF0066CD44 /* InsertText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A04E849425DD1CEF0066CD44 /* InsertText.swift */; };
@@ -889,6 +890,7 @@
 		A01030A925F149EA00D740C5 /* TextEditorCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEditorCommand.swift; sourceTree = "<group>"; };
 		A0137B3425B6DFE100E65208 /* CommandManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandManager.swift; sourceTree = "<group>"; usesTabs = 0; };
 		A0208F8125D6BB1C00CA054C /* AppDelegate+BeamTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+BeamTests.swift"; sourceTree = "<group>"; };
+		A032BD32261F4677009A3576 /* ShortcutLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutLayer.swift; sourceTree = "<group>"; };
 		A03CE0EB25F954CB00D767B0 /* BeamElementHolder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamElementHolder.swift; sourceTree = "<group>"; };
 		A0404F0B25E7ECDD00E347F3 /* CommandNodeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandNodeTests.swift; sourceTree = "<group>"; };
 		A04E849425DD1CEF0066CD44 /* InsertText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsertText.swift; sourceTree = "<group>"; };
@@ -1946,6 +1948,7 @@
 				961EC4F125B4511D009FA322 /* Layer.swift */,
 				961EC50A25B495DB009FA322 /* ButtonLayer.swift */,
 				961EC51625B5038E009FA322 /* ChevronButton.swift */,
+				A032BD32261F4677009A3576 /* ShortcutLayer.swift */,
 			);
 			path = Layers;
 			sourceTree = "<group>";
@@ -3101,6 +3104,7 @@
 				A5FE96CD2612469C002A2B73 /* AutocompleteManager.swift in Sources */,
 				BAA67A1C810FF7C28A282C8D /* PointAndShoot.swift in Sources */,
 				BAA67192B5EB78981741C311 /* WebPage.swift in Sources */,
+				A032BD33261F4677009A3576 /* ShortcutLayer.swift in Sources */,
 				BAA676BFF4B830E6A5CD5BEB /* PointFrame.swift in Sources */,
 				BAA67DCFEAB652474B00FF4F /* ShootFrame.swift in Sources */,
 				A5208D8F261D25F1006193AF /* BeamSpacing.swift in Sources */,

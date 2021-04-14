@@ -104,9 +104,9 @@ class LinkedReferenceNode: TextNode {
         guard let proxyElement = parent.proxyFor(element) else { fatalError("Can't create a LinkedReferenceNode without a proxy provider in the parent chain") }
         super.init(parent: parent, element: proxyElement)
 
-        actionLayer?.removeFromSuperlayer()
-
         createLinkActionLayer()
+        guard let actionLayer = layers["CmdEnterLayer"] else { return }
+        actionLayer.layer.removeFromSuperlayer()
 
         element.$children
             .receive(on: DispatchQueue.main)

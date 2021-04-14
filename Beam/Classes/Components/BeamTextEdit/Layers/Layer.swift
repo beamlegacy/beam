@@ -103,6 +103,10 @@ class Layer: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         handleHover(contains(mouseInfo.position))
         return mouseMoved(mouseInfo)
     }
+
+    func set(_ contentsScale: CGFloat) {
+        self.layer.contentsScale = contentsScale
+    }
 }
 
 extension Layer {
@@ -121,7 +125,7 @@ extension Layer {
     static func text(_ label: String, color: NSColor = BeamColor.Generic.text.nsColor, size: CGFloat = 12) -> CATextLayer {
         let textLayer = CATextLayer()
         textLayer.string = label
-        textLayer.foregroundColor = BeamColor.Editor.icon.cgColor
+        textLayer.foregroundColor = color.cgColor
         textLayer.fontSize = size
         textLayer.frame = CGRect(origin: CGPoint(), size: textLayer.preferredFrameSize())
 
