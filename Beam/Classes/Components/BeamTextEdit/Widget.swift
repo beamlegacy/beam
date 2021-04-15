@@ -324,7 +324,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     func updateLayout() {
     }
 
-    var childInset: CGFloat = 23
+    var childInset: CGFloat = 18
 
     func updateChildrenLayout() {
         var pos = NSPoint(x: childInset, y: self.contentsFrame.height)
