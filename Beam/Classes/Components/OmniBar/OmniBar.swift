@@ -7,22 +7,20 @@
 
 import Foundation
 import SwiftUI
-import Combine
-import AppKit
 import BeamCore
 
 struct OmniBar: View {
     @EnvironmentObject var state: BeamState
     @EnvironmentObject var autocompleteManager: AutocompleteManager
-    @State private var title = ""
-    var containerGeometry: GeometryProxy?
+    var isAboveContent: Bool = false
 
+    @State private var title = ""
     @State private var modifierFlagsPressed: NSEvent.ModifierFlags?
 
     private var enableAnimations: Bool {
         !state.windowIsResizing
     }
-
+    private let windowControlsWidth: CGFloat = 92
     private var boxHeight: CGFloat {
         return isEditing ? 40 : 32
     }
@@ -46,7 +44,6 @@ struct OmniBar: View {
     private var shouldShowAutocompleteResults: Bool {
         isEditing && !autocompleteManager.searchQuery.isEmpty && !autocompleteManager.autocompleteResults.isEmpty && autocompleteManager.searchQuery != state.currentTab?.url?.absoluteString
     }
-
     private var showDestinationNotePicker: Bool {
         state.mode == .web && state.currentTab != nil
     }
@@ -56,70 +53,81 @@ struct OmniBar: View {
     private var hasRightActions: Bool {
         return showPivotButton || showDestinationNotePicker
     }
+    private var barShadowColor: Color {
+        isAboveContent ? BeamColor.BottomBar.shadow.swiftUI : BeamColor.BottomBar.shadow.swiftUI.opacity(0.0)
+    }
 
     var body: some View {
-        HStack(alignment: .top, spacing: 2) {
-            OmniBarFieldBackground(isEditing: isEditing, enableAnimations: enableAnimations) {
-                VStack(spacing: 0) {
-                    HStack(spacing: 4) {
-                        if !isEditing {
-                            if state.mode != .today {
-                                OmniBarButton(icon: "nav-journal", accessibilityId: "journal", action: goToJournal)
-                            }
-                            Chevrons()
-                            if state.mode == .web {
-                                OmniBarButton(icon: "nav-refresh", accessibilityId: "refresh", action: refreshWeb)
-                            }
-                        }
-                        GlobalCenteringContainer(enabled: !isEditing && state.mode != .web, containerGeometry: containerGeometry) {
-                            OmniBarSearchField(isEditing: Binding<Bool>(get: {
-                                isEditing
-                            }, set: {
-                                setIsEditing($0)
-                            }), modifierFlagsPressed: $modifierFlagsPressed)
-                            .frame(maxHeight: .infinity)
-                            .onHover { (hover) in
-                                if hover {
-                                    NSCursor.iBeam.set()
-                                } else {
-                                    NSCursor.arrow.set()
+        GeometryReader { containerGeometry in
+            HStack(alignment: .top, spacing: 2) {
+                OmniBarFieldBackground(isEditing: isEditing, enableAnimations: enableAnimations) {
+                    VStack(spacing: 0) {
+                        HStack(spacing: 4) {
+                            if !isEditing {
+                                if state.mode != .today {
+                                    OmniBarButton(icon: "nav-journal", accessibilityId: "journal", action: goToJournal)
+                                }
+                                Chevrons()
+                                if state.mode == .web {
+                                    OmniBarButton(icon: "nav-refresh", accessibilityId: "refresh", action: refreshWeb)
                                 }
                             }
+                            GlobalCenteringContainer(enabled: !isEditing && state.mode != .web, containerGeometry: containerGeometry) {
+                                OmniBarSearchField(isEditing: Binding<Bool>(get: {
+                                    isEditing
+                                }, set: {
+                                    setIsEditing($0)
+                                }), modifierFlagsPressed: $modifierFlagsPressed)
+                                .frame(maxHeight: .infinity)
+                                .onHover { (hover) in
+                                    if hover {
+                                        NSCursor.iBeam.set()
+                                    } else {
+                                        NSCursor.arrow.set()
+                                    }
+                                }
+                            }
+                            .padding(.leading, !isEditing && state.mode == .web ? 8 : 7)
                         }
-                        .padding(.leading, !isEditing && state.mode == .web ? 8 : 7)
+                        .animation(enableAnimations ? .easeInOut(duration: 0.3) : nil)
+                        .padding(.horizontal, BeamSpacing._50)
+                        .frame(height: boxHeight)
+                        .frame(maxWidth: .infinity)
+                        if shouldShowAutocompleteResults {
+                            AutocompleteList(selectedIndex: $autocompleteManager.autocompleteSelectedIndex, elements: $autocompleteManager.autocompleteResults, modifierFlagsPressed: modifierFlagsPressed)
+                        }
                     }
-                    .animation(enableAnimations ? .easeInOut(duration: 0.3) : nil)
-                    .padding(.horizontal, BeamSpacing._50)
+                }
+                .onTapGesture(perform: {
+                    setIsEditing(true)
+                })
+                .padding(.trailing, isEditing ? 6 : 10)
+                .frame(maxWidth: .infinity)
+                .fixedSize(horizontal: false, vertical: true)
+                if hasRightActions {
+                    HStack(alignment: .center) {
+                        if showDestinationNotePicker {
+                            DestinationNotePicker(tab: state.currentTab!)
+                                .frame(height: 32, alignment: .top)
+                        }
+                        if showPivotButton {
+                            OmniBarButton(icon: state.mode == .web ? "nav-pivot_card" : "nav-pivot_web", accessibilityId: state.mode == .web ? "pivot-card" : "pivot-web", action: toggleMode, size: 32)
+                                .frame(height: 32, alignment: .top)
+                        }
+                    }
+                    .padding(.trailing, BeamSpacing._100)
                     .frame(height: boxHeight)
-                    .frame(maxWidth: .infinity)
-                    if shouldShowAutocompleteResults {
-                        AutocompleteList(selectedIndex: $autocompleteManager.autocompleteSelectedIndex, elements: $autocompleteManager.autocompleteResults, modifierFlagsPressed: modifierFlagsPressed)
-                    }
                 }
             }
-            .onTapGesture(perform: {
-                setIsEditing(true)
-            })
-            .padding(.trailing, isEditing ? 6 : 10)
-            .frame(maxWidth: .infinity)
-            .fixedSize(horizontal: false, vertical: true)
-            if hasRightActions {
-                HStack(alignment: .center) {
-                    if showDestinationNotePicker {
-                        DestinationNotePicker(tab: state.currentTab!)
-                            .frame(height: 32, alignment: .top)
-                    }
-                    if showPivotButton {
-                        OmniBarButton(icon: state.mode == .web ? "nav-pivot_card" : "nav-pivot_web", accessibilityId: state.mode == .web ? "pivot-card" : "pivot-web", action: toggleMode, size: 32)
-                            .frame(height: 32, alignment: .top)
-                    }
-                }
-                .padding(.trailing, BeamSpacing._100)
-                .frame(height: boxHeight)
-            }
+            .animation(enableAnimations ? .easeInOut(duration: 0.3) : nil)
+            .padding(.top, isEditing ? 6 : 10)
+            .padding(.leading, state.isFullScreen ? 0 : windowControlsWidth)
+            .frame(height: 52, alignment: .top)
+            .background(BeamColor.Generic.background.swiftUI
+                            .shadow(color: barShadowColor, radius: 0, x: 0, y: 0.5)
+            )
         }
-        .animation(enableAnimations ? .easeInOut(duration: 0.3) : nil)
-        .padding(.top, isEditing ? 6 : 10)
+        .frame(height: 52, alignment: .top)
     }
 
     func resetAutocompleteSelection() {
