@@ -94,7 +94,6 @@ class GRDBIndexer {
         do {
             let results = try dbQueue.read({ db -> [SearchResult] in
                 try BeamElementRecord.matching(pattern).fetchAll(db).map({ record -> SearchResult in
-                    //print("Search found: \(record.title) - \(record.text)")
                     return SearchResult(title: record.title, uid: record.uid)
                 })
             })
@@ -124,7 +123,7 @@ class GRDBIndexer {
         guard let noteTitle = element.note?.title else { return }
         do {
             try dbQueue.write { db in
-                try db.execute(sql: "DELETE FROM BeamElementRecord WHERE title = ?, uid = ?", arguments: [noteTitle, element.id.uuidString])
+                try db.execute(sql: "DELETE FROM BeamElementRecord WHERE title = ? AND uid = ?", arguments: [noteTitle, element.id.uuidString])
                 try db.execute(
                     sql: "INSERT INTO BeamElementRecord (title, uid, text) VALUES (?, ?, ?)",
                     arguments: [noteTitle, element.id.uuidString, element.text.text])
