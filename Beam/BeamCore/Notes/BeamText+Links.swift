@@ -64,12 +64,29 @@ public extension BeamText {
     }
 
     func hasLinkToNote(named noteTitle: String) -> Bool {
-        internalLinks.contains(where: { range -> Bool in
-            range.attributes.contains(.internalLink(noteTitle))
+        let titleLowercased = noteTitle.lowercased()
+        return internalLinks.contains(where: { range -> Bool in
+            range.string.lowercased() == titleLowercased
         })
     }
 
     func hasReferenceToNote(titled noteTitle: String) -> Bool {
-        text.contains(noteTitle)
+        textWithInternalLinksErased.lowercased().contains(noteTitle.lowercased())
+    }
+
+    var textWithInternalLinksErased: String {
+        ranges.compactMap({ range -> Range? in
+            for attribute in range.attributes {
+                switch attribute {
+                case .internalLink:
+                    return nil
+                default:
+                    break
+                }
+            }
+            return range
+        }).reduce(String()) { (string, range) -> String in
+            string + range.string
+        }
     }
 }

@@ -182,10 +182,6 @@ class LinkedReferenceNode: TextNode {
         let title = note.title
 
         text.makeLinkToNoteExplicit(forNote: title)
-
-        let reference = BeamNoteReference(noteTitle: element.note!.title, elementID: element.id)
-        note.addReference(reference)
-
         self.editor.showOrHidePersistentFormatter(isPresent: false)
     }
 

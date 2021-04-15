@@ -121,6 +121,7 @@ import BeamCore
         note.updateDate = documentStruct.updatedAt
         note.isPublic = documentStruct.isPublic
         if keepInMemory {
+            try? AppDelegate.main.data.indexer.append(note: note)
             appendToFetchedNotes(note)
         }
         return note
@@ -176,6 +177,9 @@ import BeamCore
     }
 
     public func autoSave(_ relink: Bool) {
+        if relink {
+            try? AppDelegate.main.data.indexer.append(note: self)
+        }
         AppDelegate.main.data.noteAutoSaveService.addNoteToSave(self, relink)
     }
 

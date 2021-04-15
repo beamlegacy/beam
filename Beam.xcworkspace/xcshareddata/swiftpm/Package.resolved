@@ -74,6 +74,15 @@
         }
       },
       {
+        "package": "GRDB",
+        "repositoryURL": "https://github.com/groue/GRDB.swift.git",
+        "state": {
+          "branch": null,
+          "revision": "31e2b01c10243399882eaf8cc6b5c974af93d21e",
+          "version": "5.7.4"
+        }
+      },
+      {
         "package": "JWTDecode",
         "repositoryURL": "https://github.com/auth0/JWTDecode.swift.git",
         "state": {

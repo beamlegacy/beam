@@ -229,9 +229,6 @@ class BreadCrumb: Widget {
             let end = text.position(at: range.upperBound)
             self.proxy.text.makeInternalLink(start..<end)
         }
-
-        let reference = BeamNoteReference(noteTitle: proxy.note!.title, elementID: proxy.proxy.id)
-        rootNote.addReference(reference)
     }
 
     var showCrumbs: Bool {

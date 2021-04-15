@@ -22,6 +22,7 @@ public class BeamData: ObservableObject {
     @Published var journal: [BeamNote] = []
 
     var index: Index
+    var indexer: GRDBIndexer
     @Published var noteCount = 0
     @Published var lastChangedElement: BeamElement?
     @Published var showTabStats = false
@@ -39,6 +40,7 @@ public class BeamData: ObservableObject {
     }
 
     static var indexPath: URL { return URL(fileURLWithPath: dataFolder + "/index.beamindex") }
+    static var indexerPath: String { return dataFolder + "/index.beamindexer" }
     static var linkStorePath: URL { return URL(fileURLWithPath: dataFolder + "/links.store") }
 
     init() {
@@ -57,18 +59,20 @@ public class BeamData: ObservableObject {
 //        }
         index = Index.loadOrCreate(Self.indexPath)
 
+        do {
+            indexer = try GRDBIndexer(path: Self.indexerPath)
+        } catch {
+            Logger.shared.logError("Error while creating the GRDB indexer", category: .search)
+            fatalError()
+        }
+
         cookies = HTTPCookieStorage()
 
         updateNoteCount()
 
-        self.$lastChangedElement
-            .receive(on: DispatchQueue.main)
-            .sink { element in
+        $lastChangedElement.sink { element in
             guard let element = element else { return }
-            guard let note = element.note else { return }
-
-            //BeamNote.detectLinks(self.documentManager)
-            element.connectUnlinkedElement(note.title, Array(BeamNote.fetchedNotes.keys))
+            try? self.indexer.append(element: element)
         }.store(in: &scope)
     }
 

@@ -71,8 +71,6 @@ class RoamImporter {
             newNote.save(documentManager: documentManager)
         }
 
-        BeamNote.requestLinkDetection()
-
         return roamNotes
     }
 

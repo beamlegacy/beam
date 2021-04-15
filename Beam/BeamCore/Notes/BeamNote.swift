@@ -49,8 +49,6 @@ public class BeamNote: BeamElement {
     @Published public var type: NoteType = .note { didSet { change(.meta) } }
     @Published public var isPublic: Bool = false
 
-    @Published public private(set) var references: [BeamNoteReference] = [] { didSet { change(.meta) } } ///< urls of the notes/bullet pointing to this note
-
     @Published public var searchQueries: [String] = [] { didSet { change(.meta) } } ///< Search queries whose results were used to populate this note
     @Published public var visitedSearchResults: [VisitedPage] = [] { didSet { change(.meta) } } ///< URLs whose content were used to create this note
     @Published public var browsingSessions = [BrowsingTree]() { didSet { change(.meta) } }
@@ -72,9 +70,6 @@ public class BeamNote: BeamElement {
         case searchQueries
         case visitedSearchResults
         case browsingSessions
-        case linkedReferences
-        case unlinkedReferences
-        case references
     }
 
     public required init(from decoder: Decoder) throws {
@@ -88,21 +83,6 @@ public class BeamNote: BeamElement {
             browsingSessions = try container.decode([BrowsingTree].self, forKey: .browsingSessions)
         }
 
-        var refs = [BeamNoteReference]()
-        // old references
-        if container.contains(.linkedReferences) {
-            refs += (try? container.decode([BeamNoteReference].self, forKey: .linkedReferences)) ?? []
-        }
-        if container.contains(.unlinkedReferences) {
-            refs += (try? container.decode([BeamNoteReference].self, forKey: .unlinkedReferences)) ?? []
-        }
-        // new (unified) references
-        if container.contains(.references) {
-            refs += (try? container.decode([BeamNoteReference].self, forKey: .references)) ?? []
-        }
-
-        references = refs
-
         try super.init(from: decoder)
     }
 
@@ -115,9 +95,6 @@ public class BeamNote: BeamElement {
         try container.encode(visitedSearchResults, forKey: .visitedSearchResults)
         if !browsingSessions.isEmpty {
             try container.encode(browsingSessions, forKey: .browsingSessions)
-        }
-        if !references.isEmpty {
-            try container.encode(references, forKey: .references)
         }
 
         try super.encode(to: encoder)
@@ -140,22 +117,6 @@ public class BeamNote: BeamElement {
                 oldElement.text = element.text
             }
         }
-    }
-
-    public func addReference(_ reference: BeamNoteReference) {
-        // don't add it twice
-        guard !references.contains(reference) else { return }
-        references.append(reference)
-    }
-
-    public func removeReference(_ reference: BeamNoteReference) {
-        references.removeAll(where: { ref -> Bool in
-            ref == reference
-        })
-    }
-
-    public func removeAllReferences() {
-        references = []
     }
 
     public static func getFetchedNote(_ title: String) -> BeamNote? {

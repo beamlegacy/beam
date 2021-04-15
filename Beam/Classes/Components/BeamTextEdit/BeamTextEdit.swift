@@ -92,13 +92,6 @@ public extension CALayer {
     public init(root: BeamElement, journalMode: Bool) {
         self.journalMode = journalMode
 
-        if !journalMode, let note = root as? BeamNote {
-            let start = CFAbsoluteTimeGetCurrent()
-            BeamNote.requestLinkDetection(for: note.title)
-            let diff = String(format: "%.2f", CFAbsoluteTimeGetCurrent() - start)
-            Logger.shared.logDebug("Links detection took \(diff)sec")
-        }
-
         note = root
         super.init(frame: NSRect())
 

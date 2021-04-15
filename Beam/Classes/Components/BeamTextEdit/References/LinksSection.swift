@@ -17,7 +17,6 @@ class LinksSection: Widget {
     }
 
     var mode: Mode
-    var linkedReferencesCancellable: Cancellable!
     var note: BeamNote
     var linkLayer: Layer?
 
@@ -76,13 +75,18 @@ class LinksSection: Widget {
 
     func setupSectionMode() {
         linkActionLayer.string = "Link All"
-        linkedReferencesCancellable = note.$references
-            .receive(on: DispatchQueue.main)
-            .sink { [unowned self] links in
-                Logger.shared.logDebug("Update \(links.count) Links and References for note '\(note.title)'")
-                updateLinkedReferences(links: links)
-            }
+        updateLinkedReferences(links: note.references)
 
+        AppDelegate.main.data.$lastChangedElement.sink { element in
+            guard let element = element,
+                  let refNoteTitle = element.note?.title
+            else { return }
+            let title = self.note.title
+            let ref = BeamNoteReference(noteTitle: refNoteTitle, elementID: element.id)
+            if self.currentReferences.contains(ref) || element.text.hasLinkToNote(named: title) || element.text.hasReferenceToNote(titled: title) {
+                self.updateLinkedReferences(links: self.note.references)
+            }
+        }.store(in: &scope)
         switch mode {
         case .references:
             createLinkAllLayer()
@@ -90,7 +94,10 @@ class LinksSection: Widget {
         }
     }
 
+    var currentReferences = [BeamNoteReference]()
     func updateLinkedReferences(links: [BeamNoteReference]) {
+        currentReferences = links
+
         var validRefs = 0
         var newrefs = [String: RefNoteTitle]()
         var toRemove = Set<RefNoteTitle>(titles.values)
@@ -171,9 +178,6 @@ class LinksSection: Widget {
                 self.children.forEach { child in
                     guard let breadcrumb = child as? BreadCrumb else { return }
                     breadcrumb.proxy.text.makeLinkToNoteExplicit(forNote: rootNote.title)
-
-                    let reference = BeamNoteReference(noteTitle: breadcrumb.proxy.note!.title, elementID: breadcrumb.proxy.proxy.id)
-                    self.note.addReference(reference)
                 }
             }, hovered: {[weak self] isHover in
                 guard let self = self else { return }

@@ -211,6 +211,7 @@ class PageRankTests: XCTestCase {
         XCTAssertGreaterThanOrEqual(search("perform").count, 5)
         XCTAssertGreaterThanOrEqual(search("wikipedia").count, 15)
         XCTAssertGreaterThanOrEqual(search("sport rules").count, 5)
+        XCTAssertGreaterThanOrEqual(search("spot ruls").count, 2)
         XCTAssertGreaterThanOrEqual(search("guitar").count, 0)
 
 //        Logger.shared.logDebug("LinkStore contains \(LinkStore.shared.links.count) different links")
@@ -240,11 +241,11 @@ class PageRankTests: XCTestCase {
     }
 
     private func search(_ string: String) -> [Index.SearchResult] {
-//        let start = CACurrentMediaTime()
-        let results = index.search(string: string)
-//        let now = CACurrentMediaTime()
+        let start = CACurrentMediaTime()
+        let results = index.search(string: string, options: [.levenshtein])
+        let now = CACurrentMediaTime()
 
-//        printResults(string, now - start, results)
+        printResults(string, now - start, results)
         return results
     }
 

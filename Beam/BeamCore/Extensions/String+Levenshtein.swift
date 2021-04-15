@@ -45,4 +45,13 @@ public extension String {
 
         return mat[sCount][oCount]
     }
+
+    var characterSet: CharacterSet {
+        var set = CharacterSet()
+        for ch in self.unicodeScalars {
+            set.insert(ch)
+        }
+
+        return set
+    }
 }
