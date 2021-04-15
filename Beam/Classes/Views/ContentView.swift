@@ -11,17 +11,15 @@ import BeamCore
 struct ModeView: View {
     @EnvironmentObject var state: BeamState
     @EnvironmentObject var data: BeamData
-    private let windowControlsWidth: CGFloat = 92
+
+    @State private var contentIsScrolled = false
 
     var body: some View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
-                OmniBar(containerGeometry: geometry)
+                OmniBar(isAboveContent: contentIsScrolled)
                     .environmentObject(state.autocompleteManager)
-                    .padding(.leading, state.isFullScreen ? 0 : windowControlsWidth)
                     .zIndex(10)
-                    .frame(height: 52, alignment: .top)
-
                 ZStack {
                     switch state.mode {
                     case .web:
@@ -48,20 +46,31 @@ struct ModeView: View {
 
                     case .note:
                         ZStack {
-                            NoteView(note: state.currentNote!, showTitle: false, scrollable: true, centerText: true)
+                            NoteView(note: state.currentNote!,
+                                     showTitle: false,
+                                     scrollable: true,
+                                     centerText: true) { scrollPoint in
+                                contentIsScrolled = scrollPoint.y > 10
+                            }
                         }
                         .transition(.opacity)
                         .animation(.easeInOut(duration: 0.3))
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
 
                     case .today:
-                        JournalScrollView([.vertical], showsIndicators: false, data: state.data, dataSource: state.data.journal, proxy: geometry)
-                            .frame(width: geometry.size.width, alignment: .center)
-                            .clipped()
-                            .onDisappear {
-                                data.reloadJournal()
-                            }
-                            .accessibility(identifier: "journalView")
+                        JournalScrollView([.vertical],
+                                          showsIndicators: false,
+                                          data: state.data,
+                                          dataSource: state.data.journal,
+                                          proxy: geometry) { scrollPoint in
+                            contentIsScrolled = scrollPoint.y > JournalScrollView.firstNoteTopOffset(forProxy: geometry)
+                        }
+                        .frame(width: geometry.size.width, alignment: .center)
+                        .clipped()
+                        .onDisappear {
+                            data.reloadJournal()
+                        }
+                        .accessibility(identifier: "journalView")
                     case .page:
                         if let page = state.currentPage {
                             WindowPageView(page: page)

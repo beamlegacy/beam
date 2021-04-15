@@ -19,6 +19,7 @@ struct NoteView: View {
     var showTitle: Bool
     var scrollable: Bool
     var centerText: Bool
+    var onScroll: ((CGPoint) -> Void)?
 
     var body: some View {
         ZStack {
@@ -42,6 +43,7 @@ struct NoteView: View {
                     onStartQuery: { textNode in
                         state.startQuery(textNode)
                     },
+                    onScroll: onScroll,
                     leadingAlignment: leadingAlignement,
                     footerHeight: 60,
                     centerText: centerText,

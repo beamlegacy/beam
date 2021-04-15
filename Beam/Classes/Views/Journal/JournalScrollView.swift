@@ -18,16 +18,22 @@ struct JournalScrollView: NSViewRepresentable {
     let data: BeamData
     let dataSource: [BeamNote]
     let proxy: GeometryProxy
-    @State var fetchedEntries: [BeamNote] = []
+    let onScroll: ((CGPoint) -> Void)?
+    @State private var fetchedEntries: [BeamNote] = []
     @State private var isEditing = false
     @EnvironmentObject var state: BeamState
 
-    public init(_ axes: Axis.Set = .vertical, showsIndicators: Bool = true, data: BeamData, dataSource: [BeamNote], proxy: GeometryProxy) {
+    public init(_ axes: Axis.Set = .vertical,
+                showsIndicators: Bool = true,
+                data: BeamData, dataSource: [BeamNote],
+                proxy: GeometryProxy,
+                onScroll: ((CGPoint) -> Void)? = nil) {
         self.axes = axes
         self.showsIndicators = showsIndicators
         self.data = data
         self.dataSource = dataSource
         self.proxy = proxy
+        self.onScroll = onScroll
     }
 
     public func makeCoordinator() -> JournalScrollViewCoordinator {
@@ -48,7 +54,8 @@ struct JournalScrollView: NSViewRepresentable {
         scrollView.backgroundColor = BeamColor.Generic.background.nsColor
 
         // Initial document view
-        let journalStackView = JournalStackView(horizontalSpace: 0, topOffset: self.proxy.size.height * 0.2)
+        let journalStackView = JournalStackView(horizontalSpace: 0,
+                                                topOffset: Self.firstNoteTopOffset(forProxy: proxy))
         journalStackView.frame = NSRect(x: 0, y: 0, width: proxy.size.width, height: proxy.size.height)
         scrollView.documentView = journalStackView
 
@@ -131,7 +138,14 @@ struct JournalScrollView: NSViewRepresentable {
 
         func watchScrollViewBounds(_ scrollView: NSScrollView) {
             scrollViewContentWatcher = ScrollViewContentWatcher(with: scrollView, data: data, dataSource: dataSource, fetchedEntries: $fetchedEntries)
+            scrollViewContentWatcher?.onScroll = parent.onScroll
         }
+    }
+}
+
+extension JournalScrollView {
+    static func firstNoteTopOffset(forProxy proxy: GeometryProxy) -> CGFloat {
+        return proxy.size.height * 0.2
     }
 }
 
@@ -139,6 +153,7 @@ class ScrollViewContentWatcher: NSObject {
     private var bounds: NSRect = .zero
     private let data: BeamData
     private var dataSource: [BeamNote]
+    var onScroll: ((CGPoint) -> Void)?
     @Binding var fetchedEntries: [BeamNote]
 
     init(with scrollView: NSScrollView, data: BeamData, dataSource: [BeamNote], fetchedEntries: Binding<[BeamNote]>) {
@@ -175,6 +190,7 @@ class ScrollViewContentWatcher: NSObject {
         if maxContentOffSetY - bounds.origin.y <= 5 {
             loadMore()
         }
+        onScroll?(clipView.bounds.origin)
     }
 
     private func loadMore() {

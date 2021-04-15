@@ -109,6 +109,7 @@ public struct BTextEditScrollable: NSViewRepresentable {
     var onStartEditing: () -> Void = { }
     var onEndEditing: () -> Void = { }
     var onStartQuery: (TextNode) -> Void = { _ in }
+    var onScroll: ((CGPoint) -> Void)?
     var minimumWidth: CGFloat = 800
     var maximumWidth: CGFloat = 1024
 
@@ -207,6 +208,7 @@ public struct BTextEditScrollable: NSViewRepresentable {
 
         func adjustScrollViewContentAutomatically(_ scrollView: NSScrollView) {
             scrollViewContentAdjuster = ScrollViewContentAdjuster(with: scrollView)
+            scrollViewContentAdjuster?.onScroll = parent.onScroll
         }
 
         deinit {
@@ -222,6 +224,7 @@ public struct BTextEditScrollable: NSViewRepresentable {
  Currently only support content height becoming smaller.
 */
 @objc class ScrollViewContentAdjuster: NSObject {
+    var onScroll: ((CGPoint) -> Void)?
     private var lastContentBounds: NSRect = .zero
 
     init(with scrollView: NSScrollView) {
@@ -256,6 +259,7 @@ public struct BTextEditScrollable: NSViewRepresentable {
             return
         }
         lastContentBounds.origin = clipView.bounds.origin
+        onScroll?(clipView.bounds.origin)
     }
 
     @objc private func contentSizeDidChange(notification: Notification) {
