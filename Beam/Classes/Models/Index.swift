@@ -52,6 +52,12 @@ extension IndexDocument {
     }
 }
 
+struct SearchOptions: OptionSet {
+    let rawValue: Int
+
+    static let levenshtein = SearchOptions(rawValue: 1 << 0)
+}
+
 class Index: Codable {
     typealias WordScore = Float
 
@@ -96,12 +102,12 @@ class Index: Codable {
     var partialResults: [String: [DocumentResult]] = [:]
 
     //swiftlint:disable:next cyclomatic_complexity
-    func search(string: String, maxResults: Int? = 10) -> [SearchResult] {
+    func search(string: String, maxResults: Int? = 10, options: SearchOptions) -> [SearchResult] {
         let inputWords = string.extractWords(useLemmas: gUseLemmas, removeDiacritics: gRemoveDiacritics)
 
         var results = [UInt64: DocumentResult]()
         let documents = inputWords.map { word -> [DocumentResult] in
-            documentsContaining(word: word, maxResults: maxResults)
+            documentsContaining(word: word, maxResults: maxResults, options: options)
         }
 
         for docs in documents {
@@ -123,7 +129,10 @@ class Index: Codable {
         }
     }
 
-    func documentsContaining(word: String, maxResults: Int?) -> [DocumentResult] {
+    var levenshteinCommonSize: Float = 0.8
+    var levenshteinCommonLetters: Float = 0.8
+
+    func documentsContaining(word: String, maxResults: Int?, options: SearchOptions) -> [DocumentResult] {
         if let partialResult = partialResults[word] {
             return partialResult
         }
@@ -151,12 +160,25 @@ class Index: Codable {
                     return DocumentResult(id: key, score: score) }
             }
 
+            guard options.contains(.levenshtein) else { return [] }
+
             // the key isn't contained, let's see if we should try levenshtein distance
             // don't try this costly estimation if the words are obviously too different:
             let keyLength = wordkey.count
-            guard Float(abs(wordLength - keyLength)) / Float(max(wordLength, keyLength)) < 0.2 else {
+            guard Float(abs(wordLength - keyLength)) / Float(max(wordLength, keyLength)) < (1.0 - levenshteinCommonSize) else {
                 return []
             }
+
+            // Try to see if we have enough similar letters in both words to really try costly levenshtein:
+            let set = wordkey.characterSet
+            let scoreCount = word.unicodeScalars.reduce(0) { (res, scalar) -> Int in
+                res + (set.contains(scalar) ? 1 : 0)
+            }
+            let score = Float(scoreCount) / Float(word.count)
+            if score < levenshteinCommonLetters {
+                return []
+            }
+
             let distance = word.levenshtein(wordkey)
             guard distance < 4, distance > 0 else { return [] }
             let ratio: [Float] = [0, 0.95, 0.70, 0.6, 0.3]

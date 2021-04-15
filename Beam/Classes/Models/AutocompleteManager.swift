@@ -92,8 +92,15 @@ class AutocompleteManager: ObservableObject {
             .map { AutocompleteResult(text: $0.title, source: .note, completingText: query, uuid: $0.id) }
     }
 
+    private func autocompleteNotesContentsResults(for query: String) -> [AutocompleteResult] {
+        return AppDelegate.main.data.indexer.search(matchingAllTokensIn: query, maxResults: 10)
+            .map { result -> AutocompleteResult in
+            return AutocompleteResult(text: result.title, source: .note, completingText: query, uuid: UUID(uuidString: result.uid) ?? UUID())
+        }
+    }
+
     private func autocompleteHistoryResults(for query: String) -> [AutocompleteResult] {
-        return self.beamData.index.search(string: query).map {
+        return self.beamData.index.search(string: query, options: [.levenshtein]).map {
             var urlString = $0.source
             let url = URL(string: urlString)
             if let url = url {
@@ -115,12 +122,21 @@ class AutocompleteManager: ObservableObject {
         var finalResults = [AutocompleteResult]()
 
         // #1 Exisiting Notes
-        let notesResults = autocompleteNotesResults(for: query)
+        var notesNamesResults = autocompleteNotesResults(for: query)
 
-        // #2 History results
+        // #2 Notes contents
+        let notesContentsResults = autocompleteNotesContentsResults(for: query)
+
+        for note in notesContentsResults {
+            if !notesNamesResults.contains(where: { res -> Bool in res.text == note.text }) {
+                notesNamesResults.append(note)
+            }
+        }
+
+        // #3 History results
         let historyResults = autocompleteHistoryResults(for: query)
 
-        finalResults = sortResults(notesResults: notesResults, historyResults: historyResults)
+        finalResults = sortResults(notesResults: notesNamesResults, historyResults: historyResults)
 
         // #3 Create Card
         let canCreateNote = BeamNote.fetch(beamData.documentManager, title: query) == nil && URL(string: query)?.scheme == nil

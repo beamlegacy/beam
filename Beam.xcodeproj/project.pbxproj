@@ -240,7 +240,6 @@
 		961EC58625B7A75A009FA322 /* LinkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 961EC58525B7A75A009FA322 /* LinkManager.swift */; };
 		96319C6E26160AB400D1CF31 /* BeamNode+DocumentManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96319C6D26160AB400D1CF31 /* BeamNode+DocumentManager.swift */; };
 		96319C8626160E4A00D1CF31 /* BeamNote+LinkDetection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96319C8526160E4A00D1CF31 /* BeamNote+LinkDetection.swift */; };
-		96319CCE2616175E00D1CF31 /* BeamElement+Links.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96319CCD2616175E00D1CF31 /* BeamElement+Links.swift */; };
 		96319D182616232700D1CF31 /* BeamCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96319D0F2616232600D1CF31 /* BeamCore.framework */; };
 		96319D1F2616232700D1CF31 /* BeamCoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96319D1E2616232700D1CF31 /* BeamCoreTests.swift */; };
 		96319D242616232700D1CF31 /* BeamCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96319D0F2616232600D1CF31 /* BeamCore.framework */; };
@@ -274,6 +273,8 @@
 		9639FB1D2616FCA300C85B95 /* BeamCore.h in Headers */ = {isa = PBXBuildFile; fileRef = 96319C91261614C000D1CF31 /* BeamCore.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		964548A02523B3550064D062 /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9645489F2523B3550064D062 /* CloudKit.framework */; };
 		964FE5B72624813E00966E03 /* RandomAccessCollection+BinarySearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 964FE5B62624813E00966E03 /* RandomAccessCollection+BinarySearch.swift */; };
+		964FE5E12625D8AA00966E03 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 964FE5E02625D8AA00966E03 /* GRDB */; };
+		964FE5FC2625E14500966E03 /* GRDBIndexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 964FE5FB2625E14500966E03 /* GRDBIndexer.swift */; };
 		965A78292514F147009980D4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965A78282514F147009980D4 /* AppDelegate.swift */; };
 		965A78332514F148009980D4 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 965A78322514F148009980D4 /* Preview Assets.xcassets */; };
 		965A78362514F148009980D4 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 965A78342514F148009980D4 /* Main.storyboard */; };
@@ -288,6 +289,7 @@
 		96988C8325BB0AF2000223A3 /* DestinationNotePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96988C8225BB0AF2000223A3 /* DestinationNotePicker.swift */; };
 		96A3067C25F698FB0078A453 /* RefNoteTitle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96A3067B25F698FB0078A453 /* RefNoteTitle.swift */; };
 		96BBA79F25FBA573008276FC /* ReparentElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96BBA78A25FBA573008276FC /* ReparentElement.swift */; };
+		96C1D7EB2624C0ED0085FD23 /* BeamElement+Text.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C1D7EA2624C0ED0085FD23 /* BeamElement+Text.swift */; };
 		96C9AA3F259019E3007D3D98 /* LinkedReferenceNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C9AA3E259019E3007D3D98 /* LinkedReferenceNode.swift */; };
 		96C9AA5725901AA9007D3D98 /* LinksSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C9AA5625901AA9007D3D98 /* LinksSection.swift */; };
 		96C9AAB92593BB67007D3D98 /* Widget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C9AAB82593BB67007D3D98 /* Widget.swift */; };
@@ -834,7 +836,6 @@
 		96319C91261614C000D1CF31 /* BeamCore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BeamCore.h; sourceTree = "<group>"; };
 		96319CB22616155300D1CF31 /* BeamText+String.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamText+String.swift"; sourceTree = "<group>"; };
 		96319CC8261616B300D1CF31 /* BeamText+Links.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamText+Links.swift"; sourceTree = "<group>"; };
-		96319CCD2616175E00D1CF31 /* BeamElement+Links.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamElement+Links.swift"; sourceTree = "<group>"; };
 		96319D0F2616232600D1CF31 /* BeamCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BeamCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		96319D122616232600D1CF31 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		96319D172616232700D1CF31 /* BeamCoreTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BeamCoreTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -843,6 +844,7 @@
 		96319D6C26163AAD00D1CF31 /* BeamNote+CommandManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamNote+CommandManager.swift"; sourceTree = "<group>"; };
 		9645489F2523B3550064D062 /* CloudKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CloudKit.framework; path = System/Library/Frameworks/CloudKit.framework; sourceTree = SDKROOT; };
 		964FE5B62624813E00966E03 /* RandomAccessCollection+BinarySearch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RandomAccessCollection+BinarySearch.swift"; sourceTree = "<group>"; };
+		964FE5FB2625E14500966E03 /* GRDBIndexer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GRDBIndexer.swift; sourceTree = "<group>"; };
 		965A78252514F147009980D4 /* Beam.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Beam.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		965A78282514F147009980D4 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		965A78322514F148009980D4 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
@@ -867,6 +869,7 @@
 		96A3067B25F698FB0078A453 /* RefNoteTitle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefNoteTitle.swift; sourceTree = "<group>"; };
 		96A8B1DC25A38A3B006F749C /* String+Levenshtein.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Levenshtein.swift"; sourceTree = "<group>"; };
 		96BBA78A25FBA573008276FC /* ReparentElement.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReparentElement.swift; sourceTree = "<group>"; };
+		96C1D7EA2624C0ED0085FD23 /* BeamElement+Text.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamElement+Text.swift"; sourceTree = "<group>"; };
 		96C9AA3E259019E3007D3D98 /* LinkedReferenceNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkedReferenceNode.swift; sourceTree = "<group>"; };
 		96C9AA5625901AA9007D3D98 /* LinksSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinksSection.swift; sourceTree = "<group>"; };
 		96C9AAB82593BB67007D3D98 /* Widget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Widget.swift; sourceTree = "<group>"; };
@@ -1015,6 +1018,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				964FE5E12625D8AA00966E03 /* GRDB in Frameworks */,
 				0228442B2617C87D001C062E /* Fakery in Frameworks */,
 				022844282617C87D001C062E /* Preferences in Frameworks */,
 				0228442D2617C87D001C062E /* Promises in Frameworks */,
@@ -1225,8 +1229,8 @@
 				BAA67CEFFAFA38F29CF1C84F /* WebPage.swift */,
 				BAA67F5FF48CE3C971FA1487 /* PointAndShootUI.swift */,
 				96319C8526160E4A00D1CF31 /* BeamNote+LinkDetection.swift */,
-				96319CCD2616175E00D1CF31 /* BeamElement+Links.swift */,
 				BAA67DD5764226E47DFA6F9E /* WebPositions.swift */,
+				964FE5FB2625E14500966E03 /* GRDBIndexer.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -2000,6 +2004,7 @@
 				96319CB22616155300D1CF31 /* BeamText+String.swift */,
 				96319CC8261616B300D1CF31 /* BeamText+Links.swift */,
 				4181716D2581107C00317ED8 /* Score.swift */,
+				96C1D7EA2624C0ED0085FD23 /* BeamElement+Text.swift */,
 			);
 			path = Notes;
 			sourceTree = "<group>";
@@ -2365,6 +2370,7 @@
 				523E91CB25D17004001124E0 /* PMKFoundation */,
 				524CF6D225F276D1007312F0 /* KeychainAccess */,
 				521FEC992604F9B4009000F9 /* Vinyl */,
+				964FE5E02625D8AA00966E03 /* GRDB */,
 			);
 			productName = Beam;
 			productReference = 965A78252514F147009980D4 /* Beam.app */;
@@ -2474,6 +2480,7 @@
 				523E91CA25D17004001124E0 /* XCRemoteSwiftPackageReference "Foundation" */,
 				524CF6D125F276D1007312F0 /* XCRemoteSwiftPackageReference "KeychainAccess" */,
 				521FEC982604F9B4009000F9 /* XCRemoteSwiftPackageReference "Vinyl" */,
+				964FE5DF2625D8AA00966E03 /* XCRemoteSwiftPackageReference "GRDB.swift" */,
 			);
 			productRefGroup = 965A78262514F147009980D4 /* Products */;
 			projectDirPath = "";
@@ -2866,6 +2873,7 @@
 				96319D3B2616233E00D1CF31 /* String+MD5.swift in Sources */,
 				96319D6726162F7800D1CF31 /* BID.swift in Sources */,
 				96319D392616233E00D1CF31 /* WeakReference.swift in Sources */,
+				96C1D7EB2624C0ED0085FD23 /* BeamElement+Text.swift in Sources */,
 				96319D452616233E00D1CF31 /* String+Regex.swift in Sources */,
 				96319D3C2616233E00D1CF31 /* String+NL.swift in Sources */,
 				96319D482616233E00D1CF31 /* BeamText.swift in Sources */,
@@ -2959,6 +2967,7 @@
 				87E39CF6260BDC2000E4A684 /* PasswordOverlayController.swift in Sources */,
 				A01030AA25F149EA00D740C5 /* TextEditorCommand.swift in Sources */,
 				418172042581107C00317ED8 /* TemporaryFile.swift in Sources */,
+				964FE5FC2625E14500966E03 /* GRDBIndexer.swift in Sources */,
 				523FF66125C31D8800B4BD6E /* Data+String.swift in Sources */,
 				A57BFEBD2615B49C00CFB646 /* TableRowView.swift in Sources */,
 				418172AA25811A3A00317ED8 /* BeamTextField.swift in Sources */,
@@ -3006,7 +3015,6 @@
 				418171F72581107C00317ED8 /* BeamData.swift in Sources */,
 				418172442581107C00317ED8 /* ScrollableTextView.swift in Sources */,
 				418171EB2581107C00317ED8 /* Autocompleter.swift in Sources */,
-				96319CCE2616175E00D1CF31 /* BeamElement+Links.swift in Sources */,
 				418172082581107C00317ED8 /* NSManagedObject+initExtension.swift in Sources */,
 				52F27FCB25B9B404006E09A2 /* ViewModelFetchedResults.swift in Sources */,
 				524CF6DB25F29119007312F0 /* SymmetricKey+Serialize.swift in Sources */,
@@ -4039,6 +4047,14 @@
 				minimumVersion = 3.1.0;
 			};
 		};
+		964FE5DF2625D8AA00966E03 /* XCRemoteSwiftPackageReference "GRDB.swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/groue/GRDB.swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.7.4;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -4121,6 +4137,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 96474E3D254D9ADB00A920B3 /* XCRemoteSwiftPackageReference "FavIcon" */;
 			productName = FavIcon;
+		};
+		964FE5E02625D8AA00966E03 /* GRDB */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 964FE5DF2625D8AA00966E03 /* XCRemoteSwiftPackageReference "GRDB.swift" */;
+			productName = GRDB;
 		};
 		A0A6F2A025D1B73400EFC4BE /* Quick */ = {
 			isa = XCSwiftPackageProductDependency;
