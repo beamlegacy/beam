@@ -64,12 +64,13 @@ class JournalStackView: NSView {
     }
 
     override public var intrinsicContentSize: NSSize {
-        var height: CGFloat = topOffset + bottomInset
+        guard let width: CGFloat = getTodaysView()?.intrinsicContentSize.width else { return .zero }
+        var height: CGFloat = topOffset * 2.5 + bottomInset
         for view in self.subviews {
           guard let textEditView = view as? BeamTextEdit else { continue }
           height += textEditView.intrinsicContentSize.height + horizontalSpace
         }
-        return NSSize(width: self.frame.width, height: height)
+        return NSSize(width: width, height: height)
     }
 
     public func addChildView(view: BeamTextEdit) {

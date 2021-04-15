@@ -107,6 +107,7 @@ class LinkedReferenceNode: TextNode {
         createLinkActionLayer()
         guard let actionLayer = layers["CmdEnterLayer"] else { return }
         actionLayer.layer.removeFromSuperlayer()
+        layers.removeValue(forKey: "CmdEnterLayer")
 
         element.$children
             .receive(on: DispatchQueue.main)

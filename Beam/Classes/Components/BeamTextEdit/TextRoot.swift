@@ -167,10 +167,9 @@ public class TextRoot: TextNode {
             element.addChild(BeamElement())
         }
 
-        if element.children.count == 1 && element.children.first?.text.isEmpty ?? false {
-            let istoday = note?.isTodaysNote ?? false
+        if let isTodaysNote = note?.isTodaysNote, isTodaysNote && element.children.count == 1 && element.children.first?.text.isEmpty ?? false {
             let first = children.first as? TextNode
-            first?.placeholder = BeamText(text: istoday ? "This is the journal, you can type anything here!" : "...")
+            first?.placeholder = BeamText(text: "You can write here and press ⌘⏎ to search the web")
         }
 
         focus(widget: children.first ?? self, cursorPosition: nil)

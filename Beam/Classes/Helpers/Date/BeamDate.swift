@@ -27,4 +27,16 @@ class BeamDate {
     static func reset() {
         currentDate = nil
     }
+
+    static func str(for date: Date, with style: DateFormatter.Style) -> String {
+        let fmt = DateFormatter()
+        if style == .short {
+            fmt.dateFormat = "MMM d, yy"
+        } else {
+            fmt.dateStyle = style
+            fmt.timeStyle = .none
+            fmt.doesRelativeDateFormatting = false
+        }
+        return fmt.string(from: date)
+    }
 }
