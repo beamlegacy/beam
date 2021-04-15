@@ -250,11 +250,17 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                 element = note.elementContainingLink(to: linkString); return element
             }
             Logger.shared.logDebug("add current page '\(title)' to note '\(note.title)'", category: .web)
-            let e = BeamElement()
-            element = e
+            if rootElement.children.count == 1,
+               let firstElement = rootElement.children.first,
+               firstElement.text.isEmpty {
+                element = firstElement
+            } else {
+                let e = BeamElement()
+                element = e
+                rootElement.addChild(e)
+            }
             updateElementWithTitle()
-            rootElement.addChild(e)
-            return e
+            return element
         }
         return elem
     }
