@@ -46,7 +46,7 @@ struct JournalScrollView: NSViewRepresentable {
         scrollView.automaticallyAdjustsContentInsets = false
         scrollView.hasVerticalScroller = axes.contains(.vertical)
         scrollView.hasHorizontalScroller = axes.contains(.horizontal)
-        scrollView.verticalScrollElasticity = .none
+        scrollView.verticalScrollElasticity = .allowed
         scrollView.horizontalScrollElasticity = .none
         scrollView.verticalScroller?.alphaValue = 0
         scrollView.horizontalScroller?.alphaValue = 0
