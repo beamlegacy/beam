@@ -576,7 +576,7 @@ public class TextNode: Widget {
 
     override func onFocus() {
         super.onFocus()
-        guard !text.isEmpty else { return }
+        updateActionLayerVisibility(hidden: false)
     }
 
     override func onUnfocus() {
@@ -603,7 +603,6 @@ public class TextNode: Widget {
         }
 
         if contentsFrame.contains(mouseInfo.position) {
-            updateActionLayerVisibility(hidden: false)
 
             let clickPos = positionAt(point: mouseInfo.position)
 
