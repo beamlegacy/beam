@@ -82,6 +82,7 @@ public extension CALayer {
     let cardSideTitleLayer = CATextLayer()
     let cardOptionLayer = CALayer()
     let cardTimeLayer = CATextLayer()
+    let titleUnderLine = CALayer()
 
     var textWidth: CGFloat { 538 }
 
@@ -322,7 +323,7 @@ public extension CALayer {
 
     private func getWeatherIcon() -> NSImage? {
         // Connect this to some kind of WeatherManager getter based on user IP
-        return NSImage(named: "today-weather")
+        return NSImage(named: BeamWeather.allCases.randomElement()?.imgName ?? "")
     }
 
     func setupCardHeader() {
@@ -344,6 +345,13 @@ public extension CALayer {
         cardTitleLayer.font = BeamFont.semibold(size: 0).nsFont
         cardTitleLayer.fontSize = 26 // TODO: Change later (isBig ? 30 : 26)
         cardTitleLayer.string = cardNote.title
+
+        if journalMode {
+            titleUnderLine.frame = NSRect(x: 0, y: cardTitleLayer.preferredFrameSize().height, width: cardTitleLayer.preferredFrameSize().width, height: 2)
+            titleUnderLine.backgroundColor = BeamColor.AlphaGray.cgColor
+            titleUnderLine.isHidden = true
+            cardTitleLayer.addSublayer(titleUnderLine)
+        }
 
         if cardNote.isTodaysNote, journalMode {
 
@@ -368,7 +376,7 @@ public extension CALayer {
             let formatter = DateFormatter()
             formatter.dateStyle = .long
             formatter.timeStyle = .none
-            cardTimeLayer.string = formatter.string(from: note.updateDate)
+            cardTimeLayer.string = formatter.string(from: note.creationDate)
             addToMainLayer(cardTimeLayer)
         }
     }
@@ -399,7 +407,7 @@ public extension CALayer {
         cardSideTitleLayer.foregroundColor = BeamColor.Generic.text.cgColor
         cardSideTitleLayer.font = BeamFont.semibold(size: 0).nsFont
         cardSideTitleLayer.fontSize = 15 // TODO: Change later (isBig ? 30 : 26)
-        cardSideTitleLayer.string = cardNote.title
+        cardSideTitleLayer.string = isBig ? cardNote.title : BeamDate.str(for: cardNote.creationDate, with: .short)
         cardSideTitleLayer.name = "cardSideTitleLayer"
 
         cardSideLayer.addSublayer(cardSideTitleLayer)
@@ -409,6 +417,8 @@ public extension CALayer {
     }
 
     func updateSideLayer(_ rect: CGRect) {
+        guard let cardNote = note as? BeamNote else { return }
+        cardSideTitleLayer.string = isBig ? cardNote.title : BeamDate.str(for: cardNote.creationDate, with: .short)
         let sideLayerPos = CGPoint(x: cardHeaderLayer.frame.origin.x - cardSideTitleLayer.preferredFrameSize().width - 46.5, y: topOffsetActual + cardTopSpace + sideLayerOffset)
         cardSideLayer.frame = CGRect(origin: sideLayerPos, size: NSSize(width: cardSideLayer.preferredFrameSize().width, height: cardSideLayer.preferredFrameSize().height))
         cardSideTitleLayer.frame = CGRect(origin: CGPoint(x: 0, y: 0), size: NSSize(width: cardSideTitleLayer.preferredFrameSize().width, height: cardSideTitleLayer.preferredFrameSize().height))
@@ -1277,6 +1287,16 @@ public extension CALayer {
     }
 
     override public func mouseMoved(with event: NSEvent) {
+        if journalMode {
+            let titleCoord = cardTitleLayer.convert(event.locationInWindow, from: nil)
+            titleUnderLine.isHidden = !cardTitleLayer.contains(titleCoord)
+            if cardTitleLayer.contains(titleCoord) {
+                let cursor: NSCursor = .pointingHand
+                cursor.set()
+                return
+            }
+        }
+
         if !(window?.contentView?.frame.contains(event.locationInWindow) ?? false) {
             super.mouseMoved(with: event)
             return
@@ -1342,6 +1362,15 @@ public extension CALayer {
 
     override public func mouseUp(with event: NSEvent) {
         guard !(inputContext?.handleEvent(event) ?? false) else { return }
+        
+        if journalMode {
+            let titleCoord = cardTitleLayer.convert(event.locationInWindow, from: nil)
+            if cardTitleLayer.contains(titleCoord) {
+                guard let cardNote = note as? BeamNote else { return }
+                self.openCard(cardNote.title)
+                return
+            }
+        }
 
         let point = convert(event.locationInWindow)
         let info = MouseInfo(rootNode, point, event)

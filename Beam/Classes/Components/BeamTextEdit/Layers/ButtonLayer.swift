@@ -45,5 +45,4 @@ class ButtonLayer: Layer {
         activated()
         return true
     }
-
 }
