@@ -171,8 +171,7 @@ public class TextRoot: TextNode {
             let first = children.first as? TextNode
             first?.placeholder = BeamText(text: "You can write here and press ⌘⏎ to search the web")
         }
-
-        focus(widget: children.first ?? self, cursorPosition: nil)
+        
         childInset = 0
 
         setAccessibilityLabel("TextRoot")
@@ -181,8 +180,11 @@ public class TextRoot: TextNode {
 
         referencesSection?.open = false
 
-        focusedWidget = nodeFor(element.children.first ?? element, withParent: self)
-        focusedWidget?.onFocus()
+        if !editor.journalMode {
+            focus(widget: children.first ?? self, cursorPosition: nil)
+            focusedWidget = nodeFor(element.children.first ?? element, withParent: self)
+            focusedWidget?.onFocus()
+        }
     }
 
     public override func printTree(level: Int = 0) -> String {
