@@ -1355,7 +1355,7 @@ public extension CALayer {
 
     override public func mouseUp(with event: NSEvent) {
         guard !(inputContext?.handleEvent(event) ?? false) else { return }
-        
+
         if journalMode {
             let titleCoord = cardTitleLayer.convert(event.locationInWindow, from: nil)
             if cardTitleLayer.contains(titleCoord) {

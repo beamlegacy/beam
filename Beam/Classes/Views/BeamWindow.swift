@@ -232,3 +232,19 @@ extension BeamWindow: NSWindowDelegate {
     }
 
 }
+
+// MARK: Custom Field Editor
+protocol CustomWindowFieldEditorProvider {
+    func fieldEditor(_ createFlag: Bool) -> NSText?
+}
+
+extension BeamWindow {
+    override func fieldEditor(_ createFlag: Bool, for object: Any?) -> NSText? {
+        if let obj = object as? CustomWindowFieldEditorProvider {
+            let editor = obj.fieldEditor(true)
+            editor?.isFieldEditor = true
+            return editor
+        }
+        return nil
+    }
+}
