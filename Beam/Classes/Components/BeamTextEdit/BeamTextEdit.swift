@@ -828,194 +828,6 @@ public extension CALayer {
         return positionAt(point: point)
     }
 
-    @IBAction func cut(_ sender: Any) {
-        let s = selectedText
-        let pasteboard = NSPasteboard.general
-        pasteboard.clearContents()
-        pasteboard.declareTypes([.string], owner: nil)
-        pasteboard.setString(s, forType: .string)
-        guard let node = rootNode.focusedWidget as? TextNode else { return }
-        rootNode.cmdManager.deleteText(in: node, for: rootNode.selectedTextRange)
-    }
-
-    func buildStringFrom(nodes: [TextNode]) -> NSAttributedString {
-        let strNodes = NSMutableAttributedString()
-        for node in nodes {
-            if nodes.count > 1 {
-                guard !node.text.text.isEmpty else { continue }
-                strNodes.append(NSAttributedString(string: String.tabs(node.element.depth - 1)))
-                strNodes.append(node.text.buildAttributedString(fontSize: node.fontSize, cursorPosition: node.cursorPosition, elementKind: node.elementKind, mouseInteraction: nil))
-                strNodes.append(NSAttributedString(string: "\n"))
-            } else {
-                strNodes.append(node.attributedString)
-            }
-        }
-
-        return strNodes
-    }
-
-    let supportedTypes: [NSPasteboard.PasteboardType] = [.elementHolder, .bTextHolder, .rtf, .string]
-    @IBAction func copy(_ sender: Any) {
-        let pasteboard = NSPasteboard.general
-        pasteboard.clearContents()
-        pasteboard.declareTypes(supportedTypes, owner: nil)
-        let strNodes = NSMutableAttributedString()
-        var beamText: BeamText?
-        var nodesElement: [BeamElement] = []
-
-        if let nodes = rootNode.state.nodeSelection?.sortedNodes, !nodes.isEmpty {
-            for node in nodes {
-                nodesElement.append(node.element)
-            }
-            strNodes.append(buildStringFrom(nodes: nodes))
-        } else {
-            if let node = focusedWidget as? TextNode {
-                let range = NSRange(location: selectedTextRange.lowerBound, length: selectedTextRange.count)
-                let attributedString = node.attributedString.attributedSubstring(from: range)
-                strNodes.append(attributedString)
-                if let range = Range(range) {
-                    beamText = node.element.text.extract(range: range)
-                }
-            }
-        }
-
-        do {
-            let elementHolder = BeamElementHolder(elements: nodesElement)
-            let elementHolderData = try PropertyListEncoder().encode(elementHolder)
-            pasteboard.setData(elementHolderData, forType: .elementHolder)
-
-            if let bText = beamText {
-                let bTextHolder = BeamTextHolder(bText: bText)
-                let beamTextData = try PropertyListEncoder().encode(bTextHolder)
-                pasteboard.setData(beamTextData, forType: .bTextHolder)
-            }
-
-            let docAttrRtf: [NSAttributedString.DocumentAttributeKey: Any] = [.documentType: NSAttributedString.DocumentType.rtf, .characterEncoding: String.Encoding.utf8]
-            let rtfData = try strNodes.data(from: NSRange(location: 0, length: strNodes.length), documentAttributes: docAttrRtf)
-            pasteboard.setData(rtfData, forType: .rtf)
-            pasteboard.setString(strNodes.string, forType: .string)
-        } catch {
-            Logger.shared.logError("Error creating RTF from Attributed String", category: .general)
-        }
-    }
-
-    // swiftlint:disable:next cyclomatic_complexity function_body_length
-    let supportedObjects = [BeamElementHolder.self, BeamTextHolder.self, NSAttributedString.self, NSString.self]
-    @IBAction func paste(_ sender: Any) {
-        if NSPasteboard.general.canReadObject(forClasses: supportedObjects, options: nil) {
-            let objects = NSPasteboard.general.readObjects(forClasses: supportedObjects, options: nil)
-            if let elementHolder: BeamElementHolder = objects?.first as? BeamElementHolder {
-                paste(elementHolder: elementHolder)
-            } else if let bTextHolder: BeamTextHolder = objects?.first as? BeamTextHolder {
-                guard let node = focusedWidget as? TextNode,
-                      let noteTitle = node.root?.note?.title else { return }
-                paste(bTextHolder.bText, in: node.element.id, for: noteTitle)
-            } else if let attributedStr = objects?.first as? NSAttributedString {
-                paste(attributedStrings: attributedStr.split(seperateBy: "\n"))
-            } else if let pastedStr: String = objects?.first as? String {
-                paste(str: pastedStr)
-            }
-        }
-    }
-
-    private func paste(elementHolder: BeamElementHolder) {
-        guard let node = focusedWidget as? TextNode,
-              let noteTitle = node.root?.note?.title else { return }
-        rootNode.note?.cmdManager.beginGroup(with: "PasteElementContent")
-        for (idx, element) in elementHolder.elements.enumerated() {
-            if idx == 0 {
-                paste(element.text, in: node.element.id, for: noteTitle)
-            } else {
-                guard let node = focusedWidget as? TextNode,
-                      let noteTitle = node.root?.note?.title else { continue }
-                rootNode.note?.cmdManager.insertElement(BeamElement(), in: node, after: nil)
-                guard let newNode = focusedWidget as? TextNode else { continue }
-                paste(element.text, in: newNode.element.id, for: noteTitle)
-            }
-        }
-        rootNode.note?.cmdManager.endGroup()
-    }
-
-    private func paste(attributedStrings: [NSAttributedString]) {
-        rootNode.note?.cmdManager.beginGroup(with: "PasteAttributedContent")
-        for (idx, attributedString) in attributedStrings.enumerated() {
-            let str = String(attributedString.string)
-            if idx == 0 {
-                disableInputDetector()
-                insertText(string: str, replacementRange: selectedTextRange)
-                enableInputDetector()
-            } else {
-                guard let node = focusedWidget as? TextNode,
-                      let noteTitle = node.root?.note?.title else { continue }
-                rootNode.note?.cmdManager.insertElement(BeamElement(), in: node, after: nil)
-                guard let newNode = focusedWidget as? TextNode else { continue }
-                let bText = BeamText(text: str, attributes: [])
-                paste(bText, in: newNode.element.id, for: noteTitle)
-            }
-            guard let node = focusedWidget as? TextNode,
-                  let ranges = node.text.text.urlRangesInside(),
-                  let noteTitle = node.root?.note?.title else { return }
-            ranges.compactMap { Range($0) }.forEach { range in
-                let linkStr = String(str[range.lowerBound..<range.upperBound])
-                let formatText = FormattingText(in: node.element.id, of: noteTitle, for: nil, with: .link(linkStr), for: range, isActive: false)
-                rootNode.note?.cmdManager.run(command: formatText, on: rootNode.cmdContext)
-            }
-
-            let boldRanges = attributedString.getRangesOfFont(for: .bold)
-            for boldRange in boldRanges {
-                let boldText = FormattingText(in: node.element.id, of: noteTitle, for: nil, with: .strong, for: Range(boldRange), isActive: false)
-                rootNode.note?.cmdManager.run(command: boldText, on: rootNode.cmdContext)
-            }
-            let emphasisRanges = attributedString.getRangesOfFont(for: .italic)
-            for emphasisRange in emphasisRanges {
-                let emphasisText = FormattingText(in: node.element.id, of: noteTitle, for: nil, with: .emphasis, for: Range(emphasisRange), isActive: false)
-                rootNode.note?.cmdManager.run(command: emphasisText, on: rootNode.cmdContext)
-            }
-
-            let linkRanges = attributedString.getLinks()
-            for linkRange in linkRanges {
-                let linkText = FormattingText(in: node.element.id, of: noteTitle, for: nil, with: .link(linkRange.key), for: Range(linkRange.value), isActive: false)
-                rootNode.note?.cmdManager.run(command: linkText, on: rootNode.cmdContext)
-            }
-        }
-        rootNode.note?.cmdManager.endGroup()
-    }
-
-    private func paste(str: String) {
-        let lines = str.split(whereSeparator: \.isNewline)
-        rootNode.note?.cmdManager.beginGroup(with: "PasteStringContent")
-        for (idx, line) in lines.enumerated() {
-            let str = String(line)
-            if idx == 0 {
-                disableInputDetector()
-                insertText(string: str, replacementRange: selectedTextRange)
-                enableInputDetector()
-            } else {
-                guard let node = focusedWidget as? TextNode,
-                      let noteTitle = node.root?.note?.title else { continue }
-                rootNode.note?.cmdManager.insertElement(BeamElement(), in: node, after: nil)
-                guard let newNode = focusedWidget as? TextNode else { continue }
-                let bText = BeamText(text: str, attributes: [])
-                paste(bText, in: newNode.element.id, for: noteTitle)
-            }
-            guard let node = focusedWidget as? TextNode,
-                  let ranges = node.text.text.urlRangesInside(),
-                  let noteTitle = node.root?.note?.title else { return }
-            ranges.compactMap { Range($0) }.forEach { range in
-                let linkStr = String(str[range.lowerBound..<range.upperBound])
-                let formatText = FormattingText(in: node.element.id, of: noteTitle, for: nil, with: .link(linkStr), for: range, isActive: false)
-                rootNode.note?.cmdManager.run(command: formatText, on: rootNode.cmdContext)
-            }
-        }
-        rootNode.note?.cmdManager.endGroup()
-    }
-
-    private func paste(_ text: BeamText, in id: UUID, for noteTitle: String) {
-        let insertText = InsertText(text: text, in: id, of: noteTitle, at: 0)
-        rootNode.note?.cmdManager.run(command: insertText, on: rootNode.cmdContext)
-        scrollToCursorAtLayout = true
-    }
-
     // these undo/redo methods override the subviews undoManagers behavior
     // if we're not actually the first responder, let's just forward it.
     @IBAction func undo(_ sender: Any) {
@@ -1031,22 +843,15 @@ public extension CALayer {
             undoManager.redo()
             return
         }
-        _ = rootNode.note?.cmdManager.redo(context: rootNode)
+        _ = rootNode.note?.cmdManager.redo(context: rootNode.cmdContext)
     }
 
     // State to detect shortcuts: @ / [[ ]]
-    private var inputDetectorState: Int = 0
-    private var inputDetectorEnabled: Bool { inputDetectorState >= 0 }
+    internal var inputDetectorState: Int = 0
+    internal var inputDetectorEnabled: Bool { inputDetectorState >= 0 }
 
-    // Disable detection during copy / paste
-    private func disableInputDetector() {
-        inputDetectorState -= 1
-    }
-
-    // Enable detection to show popover
-    private func enableInputDetector() {
-        inputDetectorState += 1
-    }
+    internal let supportedCopyTypes: [NSPasteboard.PasteboardType] = [.noteDataHolder, .bTextHolder, .rtf, .string]
+    internal let supportedPasteObjects = [BeamNoteDataHolder.self, BeamTextHolder.self, NSAttributedString.self, NSString.self]
 
     var lastInput: String = ""
 
