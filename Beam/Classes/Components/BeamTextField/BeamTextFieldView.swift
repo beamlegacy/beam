@@ -11,8 +11,16 @@ protocol BeamTextFieldViewDelegate: class {
     func controlTextDiStartEditing()
 }
 
-class BeamTextFieldView: NSTextField {
+class BeamTextFieldViewFieldEditor: NSTextView {
+    override func preferredPasteboardType(from availableTypes: [NSPasteboard.PasteboardType], restrictedToTypesFrom allowedTypes: [NSPasteboard.PasteboardType]?) -> NSPasteboard.PasteboardType? {
+        if availableTypes.contains(.string) {
+            return .string
+        }
+        return super.preferredPasteboardType(from: availableTypes, restrictedToTypesFrom: allowedTypes)
+    }
+}
 
+class BeamTextFieldView: NSTextField {
     weak var textFieldViewDelegate: BeamTextFieldViewDelegate?
 
     private var _currentText: String?
@@ -25,9 +33,8 @@ class BeamTextFieldView: NSTextField {
     var isFirstResponder: Bool {
         guard let window = window else { return false }
         guard let responder = window.firstResponder else { return false }
-        guard responder.isKind(of: NSTextView.self) else { return false }
-        guard window.fieldEditor(false, for: nil) != nil else { return false }
-        guard let tfResponder = responder as? NSTextView else { return false }
+        guard window.fieldEditor(false, for: self) != nil else { return false }
+        guard let tfResponder = responder as? BeamTextFieldViewFieldEditor else { return false }
         return self === tfResponder.delegate
     }
     var shouldUseIntrinsicContentSize: Bool = false {
@@ -151,5 +158,15 @@ class BeamTextFieldView: NSTextField {
         }
 
         return super.performKeyEquivalent(with: event)
+    }
+}
+
+extension BeamTextFieldView: CustomWindowFieldEditorProvider {
+    static let customFieldEditor: NSText = {
+        BeamTextFieldViewFieldEditor()
+    }()
+
+    func fieldEditor(_ createFlag: Bool) -> NSText? {
+        return Self.customFieldEditor
     }
 }

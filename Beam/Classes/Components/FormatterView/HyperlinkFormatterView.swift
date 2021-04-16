@@ -16,6 +16,7 @@ private class HyperlinkEditorViewModel: BaseFormatterViewViewModel, ObservableOb
 }
 
 private struct HyperlinkEditorView: View {
+    static let idealSize = CGSize(width: 240, height: 67)
     @ObservedObject var viewModel: HyperlinkEditorViewModel = HyperlinkEditorViewModel()
 
     var onFinishEditing : ((_ canceled: Bool) -> Void)?
@@ -29,51 +30,54 @@ private struct HyperlinkEditorView: View {
     private var urlTextColor: NSColor {
         return isEditingUrl ? BeamColor.Generic.text.nsColor : BeamColor.Generic.placeholder.nsColor
     }
+    private let textFieldHeight: CGFloat = 15
 
     func textField(_ textBinding: Binding<String>, editingBinding: Binding<Bool>, placeholder: String) -> some View {
         return BeamTextField(text: textBinding,
                              isEditing: editingBinding,
                              placeholder: placeholder,
-                             font: BeamFont.regular(size: 13).nsFont,
+                             font: BeamFont.regular(size: 12).nsFont,
                              textColor: BeamColor.Generic.text.nsColor,
                              placeholderColor: BeamColor.Generic.placeholder.nsColor,
                              onCommit: { _ in
                                 onFinishEditing?(false)
                              }, onEscape: {
                                 onFinishEditing?(true)
-                             }).frame(minHeight: 16)
+                             }).frame(height: textFieldHeight)
     }
 
     var body: some View {
         FormatterViewBackground {
             VStack {
                 HStack(spacing: 4) {
-                    Icon(name: "editor-url_title", size: 16, color: BeamColor.Generic.text.swiftUI)
-                    textField(viewModel.title, editingBinding: $isEditingTitle, placeholder: "Page title")
+                    textField(viewModel.title, editingBinding: $isEditingTitle, placeholder: "Title")
                     if isEditingTitle {
-                        Icon(name: "editor-format_enter", size: 12, color: BeamColor.Generic.placeholder.swiftUI)
+                        Icon(name: "editor-format_enter", size: 12, color: BeamColor.LightStoneGray.swiftUI)
+                            .padding(BeamSpacing._20)
                             .onTapGesture {
                                 onFinishEditing?(false)
                             }
                     }
                 }
+                .frame(height: textFieldHeight)
                 Separator(horizontal: true)
-                    .padding(.horizontal, 2)
                 HStack(spacing: 4) {
-                    Icon(name: "editor-url_link", size: 16, color: BeamColor.Generic.text.swiftUI)
-                    textField(viewModel.url, editingBinding: $isEditingUrl, placeholder: "Page's Address")
+                    textField(viewModel.url, editingBinding: $isEditingUrl, placeholder: "Link URL")
                     if isEditingUrl {
-                        Icon(name: "editor-format_enter", size: 12, color: BeamColor.Generic.text.swiftUI)
+                        Icon(name: "editor-format_enter", size: 12, color: BeamColor.LightStoneGray.swiftUI)
+                            .padding(BeamSpacing._20)
                             .onTapGesture {
                                 onFinishEditing?(false)
                             }
+
                     }
                 }
+                .frame(height: textFieldHeight)
             }
             .animation(nil)
-            .padding(BeamSpacing._80)
+            .padding(BeamSpacing._100)
         }
-        .frame(width: 272, height: 65)
+        .frame(width: Self.idealSize.width, height: Self.idealSize.height)
         .scaleEffect(viewModel.visible ? 1.0 : 0.98)
         .offset(x: 0, y: viewModel.visible ? 0.0 : 4.0)
         .animation(.spring(response: 0.4, dampingFraction: 0.6))
@@ -117,7 +121,7 @@ class HyperlinkFormatterView: FormatterView {
     private var subviewModel = HyperlinkEditorViewModel()
 
     override var idealSize: NSSize {
-        return NSSize(width: 272, height: 65)
+        HyperlinkEditorView.idealSize
     }
 
     override func animateOnAppear(completionHandler: (() -> Void)? = nil) {
