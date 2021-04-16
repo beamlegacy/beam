@@ -158,6 +158,16 @@ public class BrowsingTree: ObservableObject, Codable {
         try container.encode(scores, forKey: .scores)
     }
 
+    /// Carefull this isn't a proper deepCopy
+    /// BrowsingSessions contains BrowsingNode that are not properly cloned.
+    /// This is used and needed for copy&paste atm
+    public func deepCopy() -> BrowsingTree {
+        let browsingTree = BrowsingTree("<???>")
+        browsingTree.root = root
+        browsingTree.current = root
+        return browsingTree
+    }
+
     public func startReading() {
         current.addEvent(.startReading)
     }

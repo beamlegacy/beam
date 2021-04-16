@@ -209,6 +209,31 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
         }
     }
 
+    public func deepCopy(withNewId: Bool, selectedElements: [BeamElement]?) -> BeamElement {
+        let element = BeamElement()
+        element.id = withNewId ? UUID() : id
+        element.text = text
+        element.open = open
+        element.readOnly = readOnly
+        element.score = score
+        element.creationDate = creationDate
+        for child in children {
+            if selectedElements != nil {
+                if let isSelected = selectedElements?.contains(child), isSelected {
+                    element.children.append(child.deepCopy(withNewId: withNewId, selectedElements: selectedElements))
+                } else {
+                    element.children.append(contentsOf: child.deepCopy(withNewId: withNewId, selectedElements: selectedElements).children)
+                }
+            } else {
+                element.children.append(child.deepCopy(withNewId: withNewId, selectedElements: selectedElements))
+            }
+        }
+        element.kind = kind
+        element.childrenFormat = childrenFormat
+        element.query = query
+        return element
+    }
+
     open func clearChildren() {
         for c in children {
             c.parent = nil

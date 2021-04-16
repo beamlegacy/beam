@@ -1,5 +1,5 @@
 //
-//  BeamElementHolder.swift
+//  BeamNoteDataHolder.swift
 //  Beam
 //
 //  Created by Jean-Louis Darmon on 10/03/2021.
@@ -9,35 +9,35 @@ import Foundation
 import BeamCore
 
 extension NSPasteboard.PasteboardType {
-    static let elementHolder = NSPasteboard.PasteboardType("co.beamapp.macos.elementHolder")
+    static let noteDataHolder = NSPasteboard.PasteboardType("co.beamapp.macos.noteDataHolder")
 }
 
-class BeamElementHolder: NSObject, Codable {
+class BeamNoteDataHolder: NSObject, Codable {
 
-    var elements: [BeamElement]
+    var noteData: Data
 
-    init(elements: [BeamElement]) {
-        self.elements = elements
+    init(noteData: Data) {
+        self.noteData = noteData
     }
 
     required convenience init?(pasteboardPropertyList propertyList: Any, ofType type: NSPasteboard.PasteboardType) {
         guard let data = propertyList as? Data,
-            let elementHolder = try? PropertyListDecoder().decode(BeamElementHolder.self, from: data) else { return nil }
-        self.init(elements: elementHolder.elements)
+            let elementHolder = try? PropertyListDecoder().decode(BeamNoteDataHolder.self, from: data) else { return nil }
+        self.init(noteData: elementHolder.noteData)
     }
 }
 
-extension BeamElementHolder: NSPasteboardReading, NSPasteboardWriting {
+extension BeamNoteDataHolder: NSPasteboardReading, NSPasteboardWriting {
     static func readableTypes(for pasteboard: NSPasteboard) -> [NSPasteboard.PasteboardType] {
-        return [.elementHolder]
+        return [.noteDataHolder]
     }
 
     func writableTypes(for pasteboard: NSPasteboard) -> [NSPasteboard.PasteboardType] {
-        return [.elementHolder]
+        return [.noteDataHolder]
     }
 
     func pasteboardPropertyList(forType type: NSPasteboard.PasteboardType) -> Any? {
-        if type == .elementHolder {
+        if type == .noteDataHolder {
             return try? PropertyListEncoder().encode(self)
         }
         return nil
