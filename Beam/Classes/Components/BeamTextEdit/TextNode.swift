@@ -186,9 +186,6 @@ public class TextNode: Widget {
     private var icon = NSImage(named: "editor-cmdreturn")
 
     private let debounceClickInterval = 0.23
-//    public static var actionLayerWidth = CGFloat(80)
-//    public static var actionLayerXOffset = CGFloat(30)
-//    private var actionLayerFrame: CGRect { CGRect(x: Self.actionLayerXOffset, y: 0, width: Self.actionLayerWidth, height: 20) }
     private var bulletLayerPositionX = CGFloat(14)
     private var actionLayerPadding = CGFloat(3.5)
 
@@ -576,7 +573,9 @@ public class TextNode: Widget {
 
     override func onFocus() {
         super.onFocus()
-        updateActionLayerVisibility(hidden: false)
+        if editor.hasFocus && !text.isEmpty {
+            updateActionLayerVisibility(hidden: false)
+        }
     }
 
     override func onUnfocus() {
