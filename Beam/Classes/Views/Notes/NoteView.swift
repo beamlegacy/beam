@@ -11,11 +11,11 @@ import BeamCore
 
 struct NoteView: View {
     @EnvironmentObject var state: BeamState
+    static let topOffset: CGFloat = 45
 
     var note: BeamNote
     var onStartEditing: () -> Void = {}
-    var leadingAlignement = CGFloat(185)
-    var topOffset: CGFloat = CGFloat(45)
+    var leadingAlignement: CGFloat = 185
     var showTitle: Bool
     var scrollable: Bool
     var centerText: Bool
@@ -72,7 +72,7 @@ struct NoteView: View {
                         state.startQuery(textNode)
                     },
                     leadingAlignment: leadingAlignement,
-                    topOffset: topOffset,
+                    topOffset: Self.topOffset,
                     footerHeight: 25,
                     centerText: centerText,
                     showTitle: showTitle
