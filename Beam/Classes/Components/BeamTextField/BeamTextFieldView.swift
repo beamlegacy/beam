@@ -7,10 +7,6 @@
 
 import Cocoa
 
-protocol BeamTextFieldViewDelegate: class {
-    func controlTextDiStartEditing()
-}
-
 class BeamTextFieldViewFieldEditor: NSTextView {
     override func preferredPasteboardType(from availableTypes: [NSPasteboard.PasteboardType], restrictedToTypesFrom allowedTypes: [NSPasteboard.PasteboardType]?) -> NSPasteboard.PasteboardType? {
         if availableTypes.contains(.string) {
@@ -21,7 +17,6 @@ class BeamTextFieldViewFieldEditor: NSTextView {
 }
 
 class BeamTextFieldView: NSTextField {
-    weak var textFieldViewDelegate: BeamTextFieldViewDelegate?
 
     private var _currentText: String?
     private var _currentColor: NSColor?
@@ -133,14 +128,16 @@ class BeamTextFieldView: NSTextField {
         return resigned
     }
 
-    override func mouseDown(with event: NSEvent) {
-        let convertedLocation = self.convertFromBacking(event.locationInWindow)
-
-        // Find next view below self
-        if let viewBelow = self.superview?.subviews.lazy.compactMap({ $0.hitTest(convertedLocation) }).first {
-            self.window?.makeFirstResponder(viewBelow)
+    private var mouseLocation: CGPoint?
+    func placeCursorAtCurrentMouseLocation() {
+        if let location = mouseLocation, let tv = self.currentEditor() as? NSTextView {
+            let index = tv.characterIndexForInsertion(at: location)
+            self.currentEditor()?.selectedRange = NSRange(location: index, length: 0)
         }
+    }
 
+    override func mouseDown(with event: NSEvent) {
+        mouseLocation = self.convert(event.locationInWindow, from: nil)
         super.mouseDown(with: event)
     }
 

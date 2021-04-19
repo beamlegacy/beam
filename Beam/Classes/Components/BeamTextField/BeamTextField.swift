@@ -50,38 +50,10 @@ struct BeamTextField: NSViewRepresentable {
         }
 
         textField.setText(text, font: font)
-
+        textField.onPerformKeyEquivalent = self.performKeyEquivalentHandler
         textField.onFocusChanged = { isFocused in
-            self.isEditing = isFocused
-            if isFocused {
-                onStartEditing()
-            } else {
-                onStopEditing()
-            }
+            self.focusChangedHandler(isFocused: isFocused, context: context)
         }
-
-        textField.onPerformKeyEquivalent = { event in
-            switch event.keyCode {
-            case KeyCode.up.rawValue:
-                return onCursorMovement(.up)
-            case KeyCode.down.rawValue:
-                return onCursorMovement(.down)
-            case KeyCode.left.rawValue:
-                return onCursorMovement(.left)
-            case KeyCode.right.rawValue:
-                return onCursorMovement(.right)
-            case KeyCode.enter.rawValue where event.modifierFlags.contains(.command):
-                onCommit(.command)
-                return true
-            default:
-                break
-            }
-            if !event.modifierFlags.isEmpty {
-                onModifierFlagPressed?(event)
-            }
-            return false
-        }
-
         return textField
     }
 
@@ -92,6 +64,8 @@ struct BeamTextField: NSViewRepresentable {
         textField.setText(text, font: font)
         textField.setPlaceholder(placeholder, font: font)
         textField.shouldUseIntrinsicContentSize = centered
+
+        clearSelectionIfNeeded(textField, context: context)
 
         DispatchQueue.main.async {
             // Force focus on textField
@@ -116,18 +90,67 @@ struct BeamTextField: NSViewRepresentable {
         }
     }
 
-    func updateSelectedRange(_ textField: Self.NSViewType, range: NSRange) {
+    private func updateSelectedRange(_ textField: Self.NSViewType, range: NSRange) {
         let fieldeditor = textField.currentEditor()
         fieldeditor?.selectedRange = range
     }
 
+    private func focusChangedHandler(isFocused: Bool, context: Self.Context) {
+        if !self.isEditing && isFocused {
+            // text field could focus for 2 reasons: [user clicked | us programmatically].
+            // When user clicks, our callbacks will make the view re-render,
+            // causing the selection to be messy. We prevent this here.
+            // See Cursor Blip in https://linear.app/beamapp/issue/BE-661
+            context.coordinator.nextUpdateShouldClearSelection = true
+        }
+        self.isEditing = isFocused
+        if isFocused {
+            onStartEditing()
+        } else {
+            onStopEditing()
+        }
+    }
+
+    private func performKeyEquivalentHandler(event: NSEvent) -> Bool {
+        switch event.keyCode {
+        case KeyCode.up.rawValue:
+            return onCursorMovement(.up)
+        case KeyCode.down.rawValue:
+            return onCursorMovement(.down)
+        case KeyCode.left.rawValue:
+            return onCursorMovement(.left)
+        case KeyCode.right.rawValue:
+            return onCursorMovement(.right)
+        case KeyCode.enter.rawValue where event.modifierFlags.contains(.command):
+            onCommit(.command)
+            return true
+        default:
+            break
+        }
+        if !event.modifierFlags.isEmpty {
+            onModifierFlagPressed?(event)
+        }
+        return false
+    }
+
+    private func clearSelectionIfNeeded(_ textField: Self.NSViewType, context: Self.Context) {
+        if context.coordinator.nextUpdateShouldClearSelection &&
+            textField.isFirstResponder &&
+            selectedRanges?.isEmpty != false {
+            textField.placeCursorAtCurrentMouseLocation()
+        }
+        context.coordinator.nextUpdateShouldClearSelection = false
+    }
+
     class Coordinator: NSObject, NSTextFieldDelegate {
         let parent: BeamTextField
+        var nextUpdateShouldClearSelection = false
+
         init(_ textField: BeamTextField) {
             self.parent = textField
         }
 
-        // MARK: Protocol
+        // MARK: Delegates
         func controlTextDidEndEditing(_ obj: Notification) {
             guard let textField = obj.object as? NSViewType else { return }
             textField.onFocusChanged(false)
