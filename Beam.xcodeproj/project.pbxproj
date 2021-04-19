@@ -342,6 +342,7 @@
 		A04E849525DD1CEF0066CD44 /* InsertText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A04E849425DD1CEF0066CD44 /* InsertText.swift */; };
 		A050047525DA918A009CFEB6 /* NoteAutoSaveService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A050047425DA918A009CFEB6 /* NoteAutoSaveService.swift */; };
 		A050049F25DAEE73009CFEB6 /* ProgressIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A050049E25DAEE73009CFEB6 /* ProgressIndicator.swift */; };
+		A05B74782628701600A78A7C /* LinkButtonLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A05B74772628701600A78A7C /* LinkButtonLayer.swift */; };
 		A0689E6D25DE623D00B19CBB /* DeleteText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0689E6C25DE623D00B19CBB /* DeleteText.swift */; };
 		A0689E7125DE6B8700B19CBB /* CommandsTextTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0689E7025DE6B8700B19CBB /* CommandsTextTests.swift */; };
 		A08DE20D26160DC800F8ABB4 /* BeamTextEdit+CopyPaste.swift in Sources */ = {isa = PBXBuildFile; fileRef = A08DE20C26160DC800F8ABB4 /* BeamTextEdit+CopyPaste.swift */; };
@@ -925,6 +926,7 @@
 		A04E849425DD1CEF0066CD44 /* InsertText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsertText.swift; sourceTree = "<group>"; };
 		A050047425DA918A009CFEB6 /* NoteAutoSaveService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteAutoSaveService.swift; sourceTree = "<group>"; };
 		A050049E25DAEE73009CFEB6 /* ProgressIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressIndicator.swift; sourceTree = "<group>"; };
+		A05B74772628701600A78A7C /* LinkButtonLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkButtonLayer.swift; sourceTree = "<group>"; };
 		A0689E6C25DE623D00B19CBB /* DeleteText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteText.swift; sourceTree = "<group>"; };
 		A0689E7025DE6B8700B19CBB /* CommandsTextTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandsTextTests.swift; sourceTree = "<group>"; };
 		A06DF52525B7608000E2CB62 /* CommandManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CommandManagerTests.swift; path = Classes/CommandManagerTests.swift; sourceTree = "<group>"; };
@@ -1982,6 +1984,7 @@
 				961EC50A25B495DB009FA322 /* ButtonLayer.swift */,
 				961EC51625B5038E009FA322 /* ChevronButton.swift */,
 				A032BD32261F4677009A3576 /* ShortcutLayer.swift */,
+				A05B74772628701600A78A7C /* LinkButtonLayer.swift */,
 			);
 			path = Layers;
 			sourceTree = "<group>";
@@ -3002,6 +3005,7 @@
 				418172152581107C00317ED8 /* NSContainerView.swift in Sources */,
 				9691E44425B1091300A13080 /* BrowsingSection.swift in Sources */,
 				521EEDF12593819000BA2485 /* Document+ResultsController.swift in Sources */,
+				A05B74782628701600A78A7C /* LinkButtonLayer.swift in Sources */,
 				A04E849525DD1CEF0066CD44 /* InsertText.swift in Sources */,
 				96FACC8A26079C7E0088DD67 /* InputText.swift in Sources */,
 				418172002581107C00317ED8 /* NotificationName+Beam.swift in Sources */,

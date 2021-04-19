@@ -47,7 +47,7 @@ class ChevronButton: ButtonLayer {
     }
 
     override func setAccessibilityDisclosed(_ accessibilityDisclosed: Bool) {
-        guard !layer.isHidden else { return }
+        guard !layer.isHidden, open else { return }
         open = accessibilityDisclosed
         self.changed(self.open)
     }

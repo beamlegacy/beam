@@ -123,7 +123,7 @@ class LinkedReferenceNode: TextNode {
         }.store(in: &scope)
 
         element.$text.sink { [unowned self] text in
-            self.layers["LinkLayer"]?.layer.isHidden = self.isLinkToNote(text) || !shouldDisplayLinkButton
+//            self.layers["LinkLayer"]?.layer.isHidden = self.isLinkToNote(text) || !shouldDisplayLinkButton
         }.store(in: &scope)
     }
 
@@ -131,12 +131,15 @@ class LinkedReferenceNode: TextNode {
 
     func createLinkActionLayer() {
         linkTextLayer.string = "Link"
-        linkTextLayer.font = NSFont.systemFont(ofSize: 0, weight: .medium)
-        linkTextLayer.fontSize = 13
+        linkTextLayer.font = BeamFont.regular(size: 0).nsFont
+        linkTextLayer.fontSize = 12
         linkTextLayer.foregroundColor = BeamColor.LinkedSection.actionButton.cgColor
         linkTextLayer.contentsScale = contentsScale
+        linkTextLayer.alignmentMode = .center
+        linkTextLayer.borderColor = NSColor.green.cgColor
+        linkTextLayer.borderWidth = 1
 
-        addLayer(ButtonLayer(
+        let actionLayer = LinkButtonLayer(
             "LinkLayer",
             linkTextLayer,
             activated: { [weak self] in
@@ -146,13 +149,15 @@ class LinkedReferenceNode: TextNode {
             hovered: { (isHover) in
                 self.linkTextLayer.foregroundColor = isHover ? BeamColor.LinkedSection.actionButtonHover.cgColor : BeamColor.LinkedSection.actionButton.cgColor
             }
-        ))
+        )
+        addLayer(actionLayer)
+        actionLayer.layer.isHidden = isLink
     }
 
     override func updateSubLayersLayout() {
-        CATransaction.disableAnimations {
-            layers["LinkLayer"]?.frame = CGRect(origin: CGPoint(x: frame.width - 12, y: 0), size: linkTextLayer.preferredFrameSize())
-        }
+//        CATransaction.disableAnimations {
+//            layers["LinkLayer"]?.frame = CGRect(origin: CGPoint(x: frame.width, y: 0), size: NSSize(width: 36, height: 21))
+//        }
     }
 
     func isLinkToNote(_ text: BeamText) -> Bool {
@@ -165,6 +170,17 @@ class LinkedReferenceNode: TextNode {
     }
     var isLink: Bool {
         isLinkToNote(text)
+    }
+
+    func childrenIsLink() -> Bool {
+        for c in children {
+            guard let linkedRef = c as? LinkedReferenceNode else { return false }
+            if linkedRef.isLink {
+                return linkedRef.isLink
+            }
+            return linkedRef.childrenIsLink()
+        }
+        return isLink
     }
 
     var isReference: Bool {
