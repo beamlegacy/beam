@@ -12,24 +12,6 @@
 		022843372617C4C3001C062E /* OverrideConsole.js in Resources */ = {isa = PBXBuildFile; fileRef = 418171912581107C00317ED8 /* OverrideConsole.js */; };
 		0228441F2617C769001C062E /* index_prod.js in Resources */ = {isa = PBXBuildFile; fileRef = BAA677628D9A5877FDC75E72 /* index_prod.js */; };
 		022844202617C769001C062E /* index_prod.css in Resources */ = {isa = PBXBuildFile; fileRef = BAA6786907DEDBEE96622DDB /* index_prod.css */; };
-		022844262617C87D001C062E /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = 9631C746251CE997009B40C4 /* SwiftSoup */; };
-		022844272617C87D001C062E /* FavIcon in Frameworks */ = {isa = PBXBuildFile; productRef = 96474E3E254D9ADB00A920B3 /* FavIcon */; };
-		022844282617C87D001C062E /* Preferences in Frameworks */ = {isa = PBXBuildFile; productRef = 524299AE25A47CA500F4DBF5 /* Preferences */; };
-		022844292617C87D001C062E /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = 527FB71925B9A97A00959146 /* Sentry */; };
-		0228442A2617C87D001C062E /* JWTDecode in Frameworks */ = {isa = PBXBuildFile; productRef = 527FB71E25B9A9B600959146 /* JWTDecode */; };
-		0228442B2617C87D001C062E /* Fakery in Frameworks */ = {isa = PBXBuildFile; productRef = 527FB72325B9AAA200959146 /* Fakery */; };
-		0228442C2617C87D001C062E /* PromiseKit in Frameworks */ = {isa = PBXBuildFile; productRef = 52BB698A25CD4E1E007A1173 /* PromiseKit */; };
-		0228442D2617C87D001C062E /* Promises in Frameworks */ = {isa = PBXBuildFile; productRef = 52E5297125CD980B00307858 /* Promises */; };
-		0228442E2617C87D001C062E /* PromisesTestHelpers in Frameworks */ = {isa = PBXBuildFile; productRef = 52E5297325CD980B00307858 /* PromisesTestHelpers */; };
-		0228442F2617C87D001C062E /* PMKFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 523E91CB25D17004001124E0 /* PMKFoundation */; };
-		022844302617C87D001C062E /* KeychainAccess in Frameworks */ = {isa = PBXBuildFile; productRef = 524CF6D225F276D1007312F0 /* KeychainAccess */; };
-		022844312617C87D001C062E /* Vinyl in Frameworks */ = {isa = PBXBuildFile; productRef = 521FEC992604F9B4009000F9 /* Vinyl */; };
-		022844322617C87D001C062E /* CocoaLumberjackSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 96319D52261623BB00D1CF31 /* CocoaLumberjackSwift */; };
-		022844332617C87D001C062E /* Nimble in Frameworks */ = {isa = PBXBuildFile; productRef = 5239C11525C2C4AE009C51E1 /* Nimble */; };
-		022844342617C87D001C062E /* Quick in Frameworks */ = {isa = PBXBuildFile; productRef = 5239C12E25C2C4C6009C51E1 /* Quick */; };
-		022844352617C87D001C062E /* Quick in Frameworks */ = {isa = PBXBuildFile; productRef = A0A6F2A425D1B74200EFC4BE /* Quick */; };
-		022844362617C87D001C062E /* Nimble in Frameworks */ = {isa = PBXBuildFile; productRef = A0A6F2A625D1B74800EFC4BE /* Nimble */; };
-		022844372617C87D001C062E /* CocoaLumberjackSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 9639FAF42616614D00C85B95 /* CocoaLumberjackSwift */; };
 		4100D96B25AEFEEA00EF04CB /* BeamTextEdit+Shortcut.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4100D96A25AEFEEA00EF04CB /* BeamTextEdit+Shortcut.swift */; };
 		4105CE2225A5ECA2009AB687 /* BidirectionalPopoverItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4105CE2125A5ECA2009AB687 /* BidirectionalPopoverItem.swift */; };
 		4105CE7525A60681009AB687 /* FormatterTypeButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4105CE7425A60681009AB687 /* FormatterTypeButton.swift */; };
@@ -273,7 +255,6 @@
 		9639FB1D2616FCA300C85B95 /* BeamCore.h in Headers */ = {isa = PBXBuildFile; fileRef = 96319C91261614C000D1CF31 /* BeamCore.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		964548A02523B3550064D062 /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9645489F2523B3550064D062 /* CloudKit.framework */; };
 		964FE5B72624813E00966E03 /* RandomAccessCollection+BinarySearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 964FE5B62624813E00966E03 /* RandomAccessCollection+BinarySearch.swift */; };
-		964FE5E12625D8AA00966E03 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 964FE5E02625D8AA00966E03 /* GRDB */; };
 		964FE5FC2625E14500966E03 /* GRDBIndexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 964FE5FB2625E14500966E03 /* GRDBIndexer.swift */; };
 		965A78292514F147009980D4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965A78282514F147009980D4 /* AppDelegate.swift */; };
 		965A78332514F148009980D4 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 965A78322514F148009980D4 /* Preview Assets.xcassets */; };
@@ -392,16 +373,25 @@
 		A5C9F01126136B5F0096380F /* AllCardsPageContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C9F01026136B5F0096380F /* AllCardsPageContentView.swift */; };
 		A5CA5DBA2624FF4A004E9D3E /* BeamNSTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5CA5DB92624FF4A004E9D3E /* BeamNSTableView.swift */; };
 		A5CA5DF52625C15D004E9D3E /* BeamElementTextStatsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5CA5DF42625C15D004E9D3E /* BeamElementTextStatsTests.swift */; };
-		A5CA5DFB2625C302004E9D3E /* Quick in Frameworks */ = {isa = PBXBuildFile; productRef = A5CA5DFA2625C302004E9D3E /* Quick */; };
-		A5CA5DFD2625C306004E9D3E /* Nimble in Frameworks */ = {isa = PBXBuildFile; productRef = A5CA5DFC2625C306004E9D3E /* Nimble */; };
 		A5D6250A26034B1C00A3E676 /* FormatterViewBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5D6250926034B1C00A3E676 /* FormatterViewBackground.swift */; };
 		A5FE96CD2612469C002A2B73 /* AutocompleteManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5FE96CC2612469C002A2B73 /* AutocompleteManager.swift */; };
 		BAA67192B5EB78981741C311 /* WebPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67CEFFAFA38F29CF1C84F /* WebPage.swift */; };
+		BAA6720F5182946D13AF73B6 /* TestWindow.js in Sources */ = {isa = PBXBuildFile; fileRef = BAA67CD27449D9D48CD6BC13 /* TestWindow.js */; };
+		BAA6741A8232A41CFECDBF95 /* ShootFrameFusionRect.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67FFCA901195F33E7A9C7 /* ShootFrameFusionRect.swift */; };
+		BAA674F90924BE898DBDAB48 /* ShootAbsolutePositioning.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67B9BBE598397F4AF1639 /* ShootAbsolutePositioning.swift */; };
+		BAA674F9FC323A0E712F145F /* BeamTypes.js in Sources */ = {isa = PBXBuildFile; fileRef = BAA678B039D994F74D107D7F /* BeamTypes.js */; };
+		BAA6761C40F6C54B51BCEABC /* ShootFrameSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA679AED67876B39A358A78 /* ShootFrameSelectionView.swift */; };
+		BAA6767AEC09C6E511B03C28 /* BeamMocks.js in Sources */ = {isa = PBXBuildFile; fileRef = BAA677305578D4520AEE2912 /* BeamMocks.js */; };
+		BAA676BE3F8FCE1B31B1F427 /* Native.test.js in Sources */ = {isa = PBXBuildFile; fileRef = BAA67329B868E487F084BB6D /* Native.test.js */; };
 		BAA676BFF4B830E6A5CD5BEB /* PointFrame.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA679F6C221431D64C46945 /* PointFrame.swift */; };
 		BAA67A1C810FF7C28A282C8D /* PointAndShoot.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67913BA5B5E39B9EF7854 /* PointAndShoot.swift */; };
+		BAA67A661F30EB8E9C01DFD1 /* BeamWindowDecorator.js in Sources */ = {isa = PBXBuildFile; fileRef = BAA67EAAA446E7925E28EA9E /* BeamWindowDecorator.js */; };
+		BAA67A8E50BAC94AB616AB7D /* Frames.test.js in Sources */ = {isa = PBXBuildFile; fileRef = BAA67C350B3601503F009F11 /* Frames.test.js */; };
 		BAA67CE03D8FFB795346CD06 /* WebPositions.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67DD5764226E47DFA6F9E /* WebPositions.swift */; };
 		BAA67DC79E1BCAF3869F3DBB /* build_js.sh in Resources */ = {isa = PBXBuildFile; fileRef = BAA6740CED2A340CD3002907 /* build_js.sh */; };
 		BAA67DCFEAB652474B00FF4F /* ShootFrame.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67FB11EF06A38E7E5EB36 /* ShootFrame.swift */; };
+		BAA67E31ADCE5C6342F38E8F /* UIMock.js in Sources */ = {isa = PBXBuildFile; fileRef = BAA67B62CDE1CE1BE59584FE /* UIMock.js */; };
+		BAA67EAF4D7A840A2B37029D /* PointAndShootTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67F1A50CF582D4B0FF9AD /* PointAndShootTest.swift */; };
 		BAA67F2655955909590FECBB /* PointAndShootUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67F5FF48CE3C971FA1487 /* PointAndShootUI.swift */; };
 /* End PBXBuildFile section */
 
@@ -985,6 +975,7 @@
 		BAA67203DD1BE4F55B2834D8 /* DevTools.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = DevTools.js; sourceTree = "<group>"; };
 		BAA67235F68901D90DFE7E93 /* index_web.scss */ = {isa = PBXFileReference; lastKnownFileType = file.scss; path = index_web.scss; sourceTree = "<group>"; };
 		BAA672F564D2F2635CDDB836 /* TextSelectorUI_web.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = TextSelectorUI_web.js; sourceTree = "<group>"; };
+		BAA67329B868E487F084BB6D /* Native.test.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = Native.test.js; sourceTree = "<group>"; };
 		BAA6739D2A00727C1AB4E0FC /* TextSelectorUI.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = TextSelectorUI.js; sourceTree = "<group>"; };
 		BAA6740CED2A340CD3002907 /* build_js.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = build_js.sh; path = scripts/build_js.sh; sourceTree = "<group>"; };
 		BAA674BD69BF293BB15CA5BA /* package.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = package.json; sourceTree = "<group>"; };
@@ -993,31 +984,40 @@
 		BAA67648A0A64636B9864B0E /* PointAndShootUI_web.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = PointAndShootUI_web.js; sourceTree = "<group>"; };
 		BAA676767E6D11F8C940C662 /* TextSelectorUI_native.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = TextSelectorUI_native.js; sourceTree = "<group>"; };
 		BAA6770B2667D16672A1DA0C /* PointAndShootUI_web.scss */ = {isa = PBXFileReference; lastKnownFileType = file.scss; path = PointAndShootUI_web.scss; sourceTree = "<group>"; };
+		BAA677305578D4520AEE2912 /* BeamMocks.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = BeamMocks.js; sourceTree = "<group>"; };
 		BAA677628D9A5877FDC75E72 /* index_prod.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = index_prod.js; sourceTree = "<group>"; };
 		BAA6779D7351B3EE31F9471A /* index_debug.scss */ = {isa = PBXFileReference; lastKnownFileType = file.scss; path = index_debug.scss; sourceTree = "<group>"; };
 		BAA677F7175A2A537F69FFE6 /* UI_debug.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = UI_debug.js; sourceTree = "<group>"; };
 		BAA67800A0C375C6E1E4DD56 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		BAA6786907DEDBEE96622DDB /* index_prod.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; path = index_prod.css; sourceTree = "<group>"; };
-		BAA6788609E97B474E950964 /* Beam.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = Beam.js; sourceTree = "<group>"; };
+		BAA678B039D994F74D107D7F /* BeamTypes.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = BeamTypes.js; sourceTree = "<group>"; };
 		BAA678E187551BCA4D9447C6 /* PointAndShootUI_debug.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = PointAndShootUI_debug.js; sourceTree = "<group>"; };
 		BAA678FCBE68BFA05D1F8E79 /* PointAndShootUI.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = PointAndShootUI.js; sourceTree = "<group>"; };
 		BAA67913BA5B5E39B9EF7854 /* PointAndShoot.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PointAndShoot.swift; sourceTree = "<group>"; };
 		BAA67985EC2702FD80604994 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = file.gitignore; path = .gitignore; sourceTree = "<group>"; };
+		BAA679AED67876B39A358A78 /* ShootFrameSelectionView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShootFrameSelectionView.swift; sourceTree = "<group>"; };
 		BAA679F6C221431D64C46945 /* PointFrame.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PointFrame.swift; sourceTree = "<group>"; };
 		BAA67AA85F2FDD658F2AB4F1 /* index_native.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = index_native.js; sourceTree = "<group>"; };
 		BAA67B1EBC1750DD7C0B4ABD /* Util.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = Util.js; sourceTree = "<group>"; };
+		BAA67B62CDE1CE1BE59584FE /* UIMock.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = UIMock.js; sourceTree = "<group>"; };
 		BAA67B75F9F87262CB9DCACD /* PointAndShoot.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = PointAndShoot.js; sourceTree = "<group>"; };
+		BAA67B9BBE598397F4AF1639 /* ShootAbsolutePositioning.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShootAbsolutePositioning.swift; sourceTree = "<group>"; };
 		BAA67BCB325E41FC73668E60 /* index_debug.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = index_debug.js; sourceTree = "<group>"; };
 		BAA67C156A4397D1AC1058B5 /* UI_native.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = UI_native.js; sourceTree = "<group>"; };
+		BAA67C350B3601503F009F11 /* Frames.test.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = Frames.test.js; sourceTree = "<group>"; };
 		BAA67CBC9551C665AD5444AB /* TextSelectorUI.scss */ = {isa = PBXFileReference; lastKnownFileType = file.scss; path = TextSelectorUI.scss; sourceTree = "<group>"; };
+		BAA67CD27449D9D48CD6BC13 /* TestWindow.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = TestWindow.js; sourceTree = "<group>"; };
 		BAA67CEFFAFA38F29CF1C84F /* WebPage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebPage.swift; sourceTree = "<group>"; };
 		BAA67D94A674D915CF08B470 /* UI_web.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = UI_web.js; sourceTree = "<group>"; };
 		BAA67DC1C3F0813844D7736F /* UI.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = UI.js; sourceTree = "<group>"; };
 		BAA67DD5764226E47DFA6F9E /* WebPositions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebPositions.swift; sourceTree = "<group>"; };
 		BAA67DF91642C1603C5121E6 /* index_web.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = index_web.js; sourceTree = "<group>"; };
+		BAA67EAAA446E7925E28EA9E /* BeamWindowDecorator.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = BeamWindowDecorator.js; sourceTree = "<group>"; };
 		BAA67F0A50C5D129174BFCE4 /* index_native.scss */ = {isa = PBXFileReference; lastKnownFileType = file.scss; path = index_native.scss; sourceTree = "<group>"; };
+		BAA67F1A50CF582D4B0FF9AD /* PointAndShootTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PointAndShootTest.swift; sourceTree = "<group>"; };
 		BAA67F5FF48CE3C971FA1487 /* PointAndShootUI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PointAndShootUI.swift; sourceTree = "<group>"; };
 		BAA67FB11EF06A38E7E5EB36 /* ShootFrame.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShootFrame.swift; sourceTree = "<group>"; };
+		BAA67FFCA901195F33E7A9C7 /* ShootFrameFusionRect.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShootFrameFusionRect.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1025,7 +1025,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				022844322617C87D001C062E /* CocoaLumberjackSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1033,8 +1032,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A5CA5DFD2625C306004E9D3E /* Nimble in Frameworks */,
-				A5CA5DFB2625C302004E9D3E /* Quick in Frameworks */,
 				96319D182616232700D1CF31 /* BeamCore.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1043,23 +1040,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				964FE5E12625D8AA00966E03 /* GRDB in Frameworks */,
-				0228442B2617C87D001C062E /* Fakery in Frameworks */,
-				022844282617C87D001C062E /* Preferences in Frameworks */,
-				0228442D2617C87D001C062E /* Promises in Frameworks */,
-				0228442E2617C87D001C062E /* PromisesTestHelpers in Frameworks */,
 				525C233C25BAF8EF001B9625 /* libgit2.a in Frameworks */,
-				0228442C2617C87D001C062E /* PromiseKit in Frameworks */,
-				0228442A2617C87D001C062E /* JWTDecode in Frameworks */,
-				022844312617C87D001C062E /* Vinyl in Frameworks */,
 				96319D242616232700D1CF31 /* BeamCore.framework in Frameworks */,
-				0228442F2617C87D001C062E /* PMKFoundation in Frameworks */,
-				022844292617C87D001C062E /* Sentry in Frameworks */,
 				964548A02523B3550064D062 /* CloudKit.framework in Frameworks */,
-				022844272617C87D001C062E /* FavIcon in Frameworks */,
 				52C60BFA258B638F008B7C10 /* Sparkle.framework in Frameworks */,
-				022844262617C87D001C062E /* SwiftSoup in Frameworks */,
-				022844302617C87D001C062E /* KeychainAccess in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1067,8 +1051,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				022844342617C87D001C062E /* Quick in Frameworks */,
-				022844332617C87D001C062E /* Nimble in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1076,9 +1058,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				022844352617C87D001C062E /* Quick in Frameworks */,
-				022844362617C87D001C062E /* Nimble in Frameworks */,
-				022844372617C87D001C062E /* CocoaLumberjackSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1255,6 +1234,7 @@
 				BAA67F5FF48CE3C971FA1487 /* PointAndShootUI.swift */,
 				96319C8526160E4A00D1CF31 /* BeamNote+LinkDetection.swift */,
 				BAA67DD5764226E47DFA6F9E /* WebPositions.swift */,
+				BAA67F1A50CF582D4B0FF9AD /* PointAndShootTest.swift */,
 				964FE5FB2625E14500966E03 /* GRDBIndexer.swift */,
 			);
 			path = Models;
@@ -1563,7 +1543,6 @@
 				BAA67163900025DACFE96051 /* Native.js */,
 				BAA677F7175A2A537F69FFE6 /* UI_debug.js */,
 				BAA672F564D2F2635CDDB836 /* TextSelectorUI_web.js */,
-				BAA6788609E97B474E950964 /* Beam.js */,
 				BAA67648A0A64636B9864B0E /* PointAndShootUI_web.js */,
 				BAA67DF91642C1603C5121E6 /* index_web.js */,
 				BAA67AA85F2FDD658F2AB4F1 /* index_native.js */,
@@ -1575,6 +1554,10 @@
 				BAA6770B2667D16672A1DA0C /* PointAndShootUI_web.scss */,
 				BAA677628D9A5877FDC75E72 /* index_prod.js */,
 				BAA6786907DEDBEE96622DDB /* index_prod.css */,
+				BAA67DC67B6EC00B6B61FB42 /* Test */,
+				BAA67329B868E487F084BB6D /* Native.test.js */,
+				BAA67C350B3601503F009F11 /* Frames.test.js */,
+				BAA678B039D994F74D107D7F /* BeamTypes.js */,
 			);
 			path = Web;
 			sourceTree = "<group>";
@@ -2297,8 +2280,22 @@
 				BAA67FB11EF06A38E7E5EB36 /* ShootFrame.swift */,
 				A5208DB6261E0222006193AF /* ShootCardPicker.swift */,
 				A5208DD4261EE7FA006193AF /* ShootCardConfirmationView.swift */,
+				BAA679AED67876B39A358A78 /* ShootFrameSelectionView.swift */,
+				BAA67FFCA901195F33E7A9C7 /* ShootFrameFusionRect.swift */,
+				BAA67B9BBE598397F4AF1639 /* ShootAbsolutePositioning.swift */,
 			);
 			path = PointAndShoot;
+			sourceTree = "<group>";
+		};
+		BAA67DC67B6EC00B6B61FB42 /* Test */ = {
+			isa = PBXGroup;
+			children = (
+				BAA677305578D4520AEE2912 /* BeamMocks.js */,
+				BAA67CD27449D9D48CD6BC13 /* TestWindow.js */,
+				BAA67B62CDE1CE1BE59584FE /* UIMock.js */,
+				BAA67EAAA446E7925E28EA9E /* BeamWindowDecorator.js */,
+			);
+			path = Test;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -2330,7 +2327,7 @@
 			);
 			name = BeamCore;
 			packageProductDependencies = (
-				96319D52261623BB00D1CF31 /* CocoaLumberjackSwift */,
+				96319D52261623BB00D1CF31,
 			);
 			productName = BeamCore;
 			productReference = 96319D0F2616232600D1CF31 /* BeamCore.framework */;
@@ -2352,8 +2349,8 @@
 			);
 			name = BeamCoreTests;
 			packageProductDependencies = (
-				A5CA5DFA2625C302004E9D3E /* Quick */,
-				A5CA5DFC2625C306004E9D3E /* Nimble */,
+				A5CA5DFA2625C302004E9D3E,
+				A5CA5DFC2625C306004E9D3E,
 			);
 			productName = BeamCoreTests;
 			productReference = 96319D172616232700D1CF31 /* BeamCoreTests.xctest */;
@@ -2385,19 +2382,19 @@
 			);
 			name = Beam;
 			packageProductDependencies = (
-				9631C746251CE997009B40C4 /* SwiftSoup */,
-				96474E3E254D9ADB00A920B3 /* FavIcon */,
-				524299AE25A47CA500F4DBF5 /* Preferences */,
-				527FB71925B9A97A00959146 /* Sentry */,
-				527FB71E25B9A9B600959146 /* JWTDecode */,
-				527FB72325B9AAA200959146 /* Fakery */,
-				52BB698A25CD4E1E007A1173 /* PromiseKit */,
-				52E5297125CD980B00307858 /* Promises */,
-				52E5297325CD980B00307858 /* PromisesTestHelpers */,
-				523E91CB25D17004001124E0 /* PMKFoundation */,
-				524CF6D225F276D1007312F0 /* KeychainAccess */,
-				521FEC992604F9B4009000F9 /* Vinyl */,
-				964FE5E02625D8AA00966E03 /* GRDB */,
+				9631C746251CE997009B40C4,
+				96474E3E254D9ADB00A920B3,
+				524299AE25A47CA500F4DBF5,
+				527FB71925B9A97A00959146,
+				527FB71E25B9A9B600959146,
+				527FB72325B9AAA200959146,
+				52BB698A25CD4E1E007A1173,
+				52E5297125CD980B00307858,
+				52E5297325CD980B00307858,
+				523E91CB25D17004001124E0,
+				524CF6D225F276D1007312F0,
+				521FEC992604F9B4009000F9,
+				964FE5E02625D8AA00966E03,
 			);
 			productName = Beam;
 			productReference = 965A78252514F147009980D4 /* Beam.app */;
@@ -2419,8 +2416,8 @@
 			);
 			name = BeamTests;
 			packageProductDependencies = (
-				5239C11525C2C4AE009C51E1 /* Nimble */,
-				5239C12E25C2C4C6009C51E1 /* Quick */,
+				5239C11525C2C4AE009C51E1,
+				5239C12E25C2C4C6009C51E1,
 			);
 			productName = BeamTests;
 			productReference = 965A783D2514F149009980D4 /* BeamTests.xctest */;
@@ -2443,9 +2440,9 @@
 			);
 			name = BeamUITests;
 			packageProductDependencies = (
-				A0A6F2A425D1B74200EFC4BE /* Quick */,
-				A0A6F2A625D1B74800EFC4BE /* Nimble */,
-				9639FAF42616614D00C85B95 /* CocoaLumberjackSwift */,
+				A0A6F2A425D1B74200EFC4BE,
+				A0A6F2A625D1B74800EFC4BE,
+				9639FAF42616614D00C85B95,
 			);
 			productName = BeamUITests;
 			productReference = 965A78482514F149009980D4 /* BeamUITests.xctest */;
@@ -2493,21 +2490,21 @@
 			);
 			mainGroup = 965A781C2514F147009980D4;
 			packageReferences = (
-				9631C745251CE997009B40C4 /* XCRemoteSwiftPackageReference "SwiftSoup" */,
-				96474E3D254D9ADB00A920B3 /* XCRemoteSwiftPackageReference "FavIcon" */,
-				524299AD25A47CA500F4DBF5 /* XCRemoteSwiftPackageReference "Preferences" */,
-				527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */,
-				527FB71825B9A97A00959146 /* XCRemoteSwiftPackageReference "sentry-cocoa" */,
-				527FB71D25B9A9B600959146 /* XCRemoteSwiftPackageReference "JWTDecode.swift" */,
-				527FB72225B9AAA200959146 /* XCRemoteSwiftPackageReference "Fakery" */,
-				5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */,
-				5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick" */,
-				52BB698925CD4E1E007A1173 /* XCRemoteSwiftPackageReference "PromiseKit" */,
-				52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises" */,
-				523E91CA25D17004001124E0 /* XCRemoteSwiftPackageReference "Foundation" */,
-				524CF6D125F276D1007312F0 /* XCRemoteSwiftPackageReference "KeychainAccess" */,
-				521FEC982604F9B4009000F9 /* XCRemoteSwiftPackageReference "Vinyl" */,
-				964FE5DF2625D8AA00966E03 /* XCRemoteSwiftPackageReference "GRDB.swift" */,
+				9631C745251CE997009B40C4,
+				96474E3D254D9ADB00A920B3,
+				524299AD25A47CA500F4DBF5,
+				527FB71325B9A93400959146,
+				527FB71825B9A97A00959146,
+				527FB71D25B9A9B600959146,
+				527FB72225B9AAA200959146,
+				5239C11425C2C4AE009C51E1,
+				5239C12D25C2C4C6009C51E1,
+				52BB698925CD4E1E007A1173,
+				52E5297025CD980A00307858,
+				523E91CA25D17004001124E0,
+				524CF6D125F276D1007312F0,
+				521FEC982604F9B4009000F9,
+				964FE5DF2625D8AA00966E03,
 			);
 			productRefGroup = 965A78262514F147009980D4 /* Products */;
 			projectDirPath = "";
@@ -3151,6 +3148,11 @@
 				A5208D8F261D25F1006193AF /* BeamSpacing.swift in Sources */,
 				BAA67F2655955909590FECBB /* PointAndShootUI.swift in Sources */,
 				BAA67CE03D8FFB795346CD06 /* WebPositions.swift in Sources */,
+				BAA6761C40F6C54B51BCEABC /* ShootFrameSelectionView.swift in Sources */,
+				BAA6741A8232A41CFECDBF95 /* ShootFrameFusionRect.swift in Sources */,
+				BAA674F90924BE898DBDAB48 /* ShootAbsolutePositioning.swift in Sources */,
+				BAA676BE3F8FCE1B31B1F427 /* Native.test.js in Sources */,
+				BAA674F9FC323A0E712F145F /* BeamTypes.js in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3193,6 +3195,12 @@
 				5281B01825C962EF00DF66D9 /* DocumentManagerNetworkTests.swift in Sources */,
 				5273C65C25DA835500B00EC3 /* UserSessionRequestTests.swift in Sources */,
 				96E4CEF9258D7E8200D6DE22 /* BeamTextTests.swift in Sources */,
+				BAA67EAF4D7A840A2B37029D /* PointAndShootTest.swift in Sources */,
+				BAA6720F5182946D13AF73B6 /* TestWindow.js in Sources */,
+				BAA6767AEC09C6E511B03C28 /* BeamMocks.js in Sources */,
+				BAA67E31ADCE5C6342F38E8F /* UIMock.js in Sources */,
+				BAA67A661F30EB8E9C01DFD1 /* BeamWindowDecorator.js in Sources */,
+				BAA67A8E50BAC94AB616AB7D /* Frames.test.js in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3252,11 +3260,11 @@
 		};
 		A0A6F2A125D1B73400EFC4BE /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			productRef = A0A6F2A025D1B73400EFC4BE /* Quick */;
+			productRef = A0A6F2A025D1B73400EFC4BE;
 		};
 		A0A6F2A325D1B73A00EFC4BE /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			productRef = A0A6F2A225D1B73A00EFC4BE /* Nimble */;
+			productRef = A0A6F2A225D1B73A00EFC4BE;
 		};
 		A5C9EFE126134DC80096380F /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -3964,7 +3972,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		521FEC982604F9B4009000F9 /* XCRemoteSwiftPackageReference "Vinyl" */ = {
+		521FEC982604F9B4009000F9 = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/penso/Vinyl";
 			requirement = {
@@ -3972,7 +3980,7 @@
 				minimumVersion = 0.10.5;
 			};
 		};
-		5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */ = {
+		5239C11425C2C4AE009C51E1 = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Quick/Nimble.git";
 			requirement = {
@@ -3980,7 +3988,7 @@
 				minimumVersion = 9.0.0;
 			};
 		};
-		5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick" */ = {
+		5239C12D25C2C4C6009C51E1 = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Quick/Quick.git";
 			requirement = {
@@ -3988,7 +3996,7 @@
 				minimumVersion = 3.0.0;
 			};
 		};
-		523E91CA25D17004001124E0 /* XCRemoteSwiftPackageReference "Foundation" */ = {
+		523E91CA25D17004001124E0 = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/PromiseKit/Foundation.git";
 			requirement = {
@@ -3996,7 +4004,7 @@
 				minimumVersion = 3.3.4;
 			};
 		};
-		524299AD25A47CA500F4DBF5 /* XCRemoteSwiftPackageReference "Preferences" */ = {
+		524299AD25A47CA500F4DBF5 = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/sindresorhus/Preferences";
 			requirement = {
@@ -4004,7 +4012,7 @@
 				minimumVersion = 2.2.0;
 			};
 		};
-		524CF6D125F276D1007312F0 /* XCRemoteSwiftPackageReference "KeychainAccess" */ = {
+		524CF6D125F276D1007312F0 = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/kishikawakatsumi/KeychainAccess";
 			requirement = {
@@ -4012,7 +4020,7 @@
 				minimumVersion = 4.2.2;
 			};
 		};
-		527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */ = {
+		527FB71325B9A93400959146 = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/CocoaLumberjack/CocoaLumberjack.git";
 			requirement = {
@@ -4020,7 +4028,7 @@
 				minimumVersion = 3.7.0;
 			};
 		};
-		527FB71825B9A97A00959146 /* XCRemoteSwiftPackageReference "sentry-cocoa" */ = {
+		527FB71825B9A97A00959146 = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/getsentry/sentry-cocoa.git";
 			requirement = {
@@ -4028,7 +4036,7 @@
 				minimumVersion = 6.1.3;
 			};
 		};
-		527FB71D25B9A9B600959146 /* XCRemoteSwiftPackageReference "JWTDecode.swift" */ = {
+		527FB71D25B9A9B600959146 = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/auth0/JWTDecode.swift.git";
 			requirement = {
@@ -4036,7 +4044,7 @@
 				minimumVersion = 2.5.0;
 			};
 		};
-		527FB72225B9AAA200959146 /* XCRemoteSwiftPackageReference "Fakery" */ = {
+		527FB72225B9AAA200959146 = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/vadymmarkov/Fakery";
 			requirement = {
@@ -4044,7 +4052,7 @@
 				minimumVersion = 5.0.0;
 			};
 		};
-		52BB698925CD4E1E007A1173 /* XCRemoteSwiftPackageReference "PromiseKit" */ = {
+		52BB698925CD4E1E007A1173 = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/mxcl/PromiseKit";
 			requirement = {
@@ -4052,7 +4060,7 @@
 				minimumVersion = 6.13.3;
 			};
 		};
-		52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises" */ = {
+		52E5297025CD980A00307858 = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/google/promises.git";
 			requirement = {
@@ -4060,7 +4068,7 @@
 				minimumVersion = 1.2.12;
 			};
 		};
-		9631C745251CE997009B40C4 /* XCRemoteSwiftPackageReference "SwiftSoup" */ = {
+		9631C745251CE997009B40C4 = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/scinfu/SwiftSoup.git";
 			requirement = {
@@ -4068,7 +4076,7 @@
 				minimumVersion = 2.3.2;
 			};
 		};
-		96474E3D254D9ADB00A920B3 /* XCRemoteSwiftPackageReference "FavIcon" */ = {
+		96474E3D254D9ADB00A920B3 = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/leonbreedt/FavIcon.git";
 			requirement = {
@@ -4076,7 +4084,7 @@
 				minimumVersion = 3.1.0;
 			};
 		};
-		964FE5DF2625D8AA00966E03 /* XCRemoteSwiftPackageReference "GRDB.swift" */ = {
+		964FE5DF2625D8AA00966E03 = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/groue/GRDB.swift.git";
 			requirement = {
@@ -4087,119 +4095,119 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		521FEC992604F9B4009000F9 /* Vinyl */ = {
+		521FEC992604F9B4009000F9 = {
 			isa = XCSwiftPackageProductDependency;
-			package = 521FEC982604F9B4009000F9 /* XCRemoteSwiftPackageReference "Vinyl" */;
+			package = 521FEC982604F9B4009000F9;
 			productName = Vinyl;
 		};
-		5239C11525C2C4AE009C51E1 /* Nimble */ = {
+		5239C11525C2C4AE009C51E1 = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */;
+			package = 5239C11425C2C4AE009C51E1;
 			productName = Nimble;
 		};
-		5239C12E25C2C4C6009C51E1 /* Quick */ = {
+		5239C12E25C2C4C6009C51E1 = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick" */;
+			package = 5239C12D25C2C4C6009C51E1;
 			productName = Quick;
 		};
-		523E91CB25D17004001124E0 /* PMKFoundation */ = {
+		523E91CB25D17004001124E0 = {
 			isa = XCSwiftPackageProductDependency;
-			package = 523E91CA25D17004001124E0 /* XCRemoteSwiftPackageReference "Foundation" */;
+			package = 523E91CA25D17004001124E0;
 			productName = PMKFoundation;
 		};
-		524299AE25A47CA500F4DBF5 /* Preferences */ = {
+		524299AE25A47CA500F4DBF5 = {
 			isa = XCSwiftPackageProductDependency;
-			package = 524299AD25A47CA500F4DBF5 /* XCRemoteSwiftPackageReference "Preferences" */;
+			package = 524299AD25A47CA500F4DBF5;
 			productName = Preferences;
 		};
-		524CF6D225F276D1007312F0 /* KeychainAccess */ = {
+		524CF6D225F276D1007312F0 = {
 			isa = XCSwiftPackageProductDependency;
-			package = 524CF6D125F276D1007312F0 /* XCRemoteSwiftPackageReference "KeychainAccess" */;
+			package = 524CF6D125F276D1007312F0;
 			productName = KeychainAccess;
 		};
-		527FB71925B9A97A00959146 /* Sentry */ = {
+		527FB71925B9A97A00959146 = {
 			isa = XCSwiftPackageProductDependency;
-			package = 527FB71825B9A97A00959146 /* XCRemoteSwiftPackageReference "sentry-cocoa" */;
+			package = 527FB71825B9A97A00959146;
 			productName = Sentry;
 		};
-		527FB71E25B9A9B600959146 /* JWTDecode */ = {
+		527FB71E25B9A9B600959146 = {
 			isa = XCSwiftPackageProductDependency;
-			package = 527FB71D25B9A9B600959146 /* XCRemoteSwiftPackageReference "JWTDecode.swift" */;
+			package = 527FB71D25B9A9B600959146;
 			productName = JWTDecode;
 		};
-		527FB72325B9AAA200959146 /* Fakery */ = {
+		527FB72325B9AAA200959146 = {
 			isa = XCSwiftPackageProductDependency;
-			package = 527FB72225B9AAA200959146 /* XCRemoteSwiftPackageReference "Fakery" */;
+			package = 527FB72225B9AAA200959146;
 			productName = Fakery;
 		};
-		52BB698A25CD4E1E007A1173 /* PromiseKit */ = {
+		52BB698A25CD4E1E007A1173 = {
 			isa = XCSwiftPackageProductDependency;
-			package = 52BB698925CD4E1E007A1173 /* XCRemoteSwiftPackageReference "PromiseKit" */;
+			package = 52BB698925CD4E1E007A1173;
 			productName = PromiseKit;
 		};
-		52E5297125CD980B00307858 /* Promises */ = {
+		52E5297125CD980B00307858 = {
 			isa = XCSwiftPackageProductDependency;
-			package = 52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises" */;
+			package = 52E5297025CD980A00307858;
 			productName = Promises;
 		};
-		52E5297325CD980B00307858 /* PromisesTestHelpers */ = {
+		52E5297325CD980B00307858 = {
 			isa = XCSwiftPackageProductDependency;
-			package = 52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises" */;
+			package = 52E5297025CD980A00307858;
 			productName = PromisesTestHelpers;
 		};
-		96319D52261623BB00D1CF31 /* CocoaLumberjackSwift */ = {
+		96319D52261623BB00D1CF31 = {
 			isa = XCSwiftPackageProductDependency;
-			package = 527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */;
+			package = 527FB71325B9A93400959146;
 			productName = CocoaLumberjackSwift;
 		};
-		9631C746251CE997009B40C4 /* SwiftSoup */ = {
+		9631C746251CE997009B40C4 = {
 			isa = XCSwiftPackageProductDependency;
-			package = 9631C745251CE997009B40C4 /* XCRemoteSwiftPackageReference "SwiftSoup" */;
+			package = 9631C745251CE997009B40C4;
 			productName = SwiftSoup;
 		};
-		9639FAF42616614D00C85B95 /* CocoaLumberjackSwift */ = {
+		9639FAF42616614D00C85B95 = {
 			isa = XCSwiftPackageProductDependency;
-			package = 527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */;
+			package = 527FB71325B9A93400959146;
 			productName = CocoaLumberjackSwift;
 		};
-		96474E3E254D9ADB00A920B3 /* FavIcon */ = {
+		96474E3E254D9ADB00A920B3 = {
 			isa = XCSwiftPackageProductDependency;
-			package = 96474E3D254D9ADB00A920B3 /* XCRemoteSwiftPackageReference "FavIcon" */;
+			package = 96474E3D254D9ADB00A920B3;
 			productName = FavIcon;
 		};
-		964FE5E02625D8AA00966E03 /* GRDB */ = {
+		964FE5E02625D8AA00966E03 = {
 			isa = XCSwiftPackageProductDependency;
-			package = 964FE5DF2625D8AA00966E03 /* XCRemoteSwiftPackageReference "GRDB.swift" */;
+			package = 964FE5DF2625D8AA00966E03;
 			productName = GRDB;
 		};
-		A0A6F2A025D1B73400EFC4BE /* Quick */ = {
+		A0A6F2A025D1B73400EFC4BE = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick" */;
+			package = 5239C12D25C2C4C6009C51E1;
 			productName = Quick;
 		};
-		A0A6F2A225D1B73A00EFC4BE /* Nimble */ = {
+		A0A6F2A225D1B73A00EFC4BE = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */;
+			package = 5239C11425C2C4AE009C51E1;
 			productName = Nimble;
 		};
-		A0A6F2A425D1B74200EFC4BE /* Quick */ = {
+		A0A6F2A425D1B74200EFC4BE = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick" */;
+			package = 5239C12D25C2C4C6009C51E1;
 			productName = Quick;
 		};
-		A0A6F2A625D1B74800EFC4BE /* Nimble */ = {
+		A0A6F2A625D1B74800EFC4BE = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */;
+			package = 5239C11425C2C4AE009C51E1;
 			productName = Nimble;
 		};
-		A5CA5DFA2625C302004E9D3E /* Quick */ = {
+		A5CA5DFA2625C302004E9D3E = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick" */;
+			package = 5239C12D25C2C4C6009C51E1;
 			productName = Quick;
 		};
-		A5CA5DFC2625C306004E9D3E /* Nimble */ = {
+		A5CA5DFC2625C306004E9D3E = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */;
+			package = 5239C11425C2C4AE009C51E1;
 			productName = Nimble;
 		};
 /* End XCSwiftPackageProductDependency section */

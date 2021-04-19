@@ -11,7 +11,7 @@ export class UI_native extends UI {
   constructor(native) {
     super(new PointAndShootUI_native(), new TextSelectorUI_native(native))
     this.native = native
-    console.log(`${this} instantiated`)
+    console.log(`${this.toString()} instantiated`)
   }
 
   toString() {
@@ -70,7 +70,7 @@ export class UI_native extends UI {
   }
 
   /**
-   * @param el {HTMLElement}
+   * @param el {BeamHTMLElement}
    * @param x {number}
    * @param y {number}
    */
@@ -79,7 +79,7 @@ export class UI_native extends UI {
   }
 
   unpoint(_el) {
-    this.native.sendMessage("point", null)
+    // setStatus("none") is enough for native
   }
 
   unshoot(el) {
@@ -135,6 +135,8 @@ export class UI_native extends UI {
   pinched(pinchInfo) {
     this.native.sendMessage("pinch", pinchInfo)
   }
+
+  setStatus(status) {
+    this.native.sendMessage("setStatus", {status})
+  }
 }
-
-

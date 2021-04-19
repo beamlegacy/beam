@@ -45,6 +45,12 @@ public class TextNode: Widget {
     var indent: CGFloat { selfVisible ? 18 : 0 }
     var fontSize: CGFloat = 15
 
+    override var parent: Widget? {
+        didSet {
+            guard parent != nil else { return }
+            updateTextChildren(elements: element.children)
+        }
+    }
     override var contentsScale: CGFloat {
         didSet {
             guard let actionLayer = layers["CmdEnterLayer"] as? ShortcutLayer else { return }
@@ -215,6 +221,7 @@ public class TextNode: Widget {
 
         element.$children
             .sink { [unowned self] elements in
+                guard self.parent != nil else { return }
                 updateTextChildren(elements: elements)
             }.store(in: &scope)
 

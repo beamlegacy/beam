@@ -1,120 +1,222 @@
 import {TextSelector} from "./TextSelector"
+import {BeamMouseEvent} from "./Test/BeamMocks"
 
-/**
- *
- * @param win {(BeamWindow)}
- * @param ui {UI}
- * @constructor
- */
-export const PointAndShoot = (win, ui) => {
-  const prefix = "__ID__"
-  const vv = win.visualViewport
-  console.log("PointAndShoot initializing")
+export class PointAndShoot {
+  /**
+   * @type PointAndShoot
+   */
+  static instance
 
-  const datasetKey = `${prefix}Collect`
+  /**
+   * @type string
+   */
+  prefix = "__ID__"
 
-  let scrollWidth
+  /**
+   * @type string
+   */
+  datasetKey
+
+  /**
+   * @type number
+   */
+  scrollWidth
+
+  /**
+   * @type string
+   */
+  status = "none"
 
   /**
    * Shoot elements.
    *
-   * @type {HTMLElement[]}
+   * @type {BeamHTMLElement[]}
    */
-  const selectedEls = []
+  selectedEls = []
 
   /**
-   * @param el {HTMLElement}
-   * @param x {number}
-   * @param y {number}
+   * The currently hovered element.
+   *
+   * This allows to remember what the cursor is pointing when entering in collect mode
+   * just by hitting the Option key (not moving the mouse cursor).
+   *
+   * @type {BeamMouseEvent}
    */
-  function point(el, x, y) {
-    ui.point(el, x, y)
+  pointingEv
+
+  /**
+   * The currently highlighted element.
+   * @type {BeamHTMLElement}
+   */
+  pointedEl
+
+  timer
+
+  /**
+   * Amount of time we want the user to touch before we do something
+   *
+   * @type {number}
+   */
+  touchDuration = 2500
+
+  /**
+   *
+   * @param win {BeamWindow}
+   * @param ui {UI}
+   * @return {PointAndShoot}
+   */
+  static getInstance(win, ui) {
+    if (!PointAndShoot.instance) {
+      PointAndShoot.instance = new PointAndShoot(win, ui)
+    }
+    return PointAndShoot.instance
   }
 
   /**
-   * @param el {HTMLElement}
+   * @param win {(BeamWindow)}
+   * @param ui {UI}
    */
-  function unpoint(el) {
-    ui.unpoint(el)
-    pointed = null
+  constructor(win, ui) {
+    this.log("initializing")
+    this.datasetKey = `${this.prefix}Collect`
+    this.ui = ui
+    this.setWindow(win)
+    this.textSelector = new TextSelector(win, ui.textSelector)
+  }
+
+  setWindow(win) {
+    this.log("setWindow")
+    this.win = win
+    this.onScroll()   // Init/refresh scroll info
+
+    win.addEventListener("load", this.onLoad.bind(this))
+    win.addEventListener("resize", this.onResize.bind(this))
+    win.addEventListener("mousemove", this.onMouseMove.bind(this))
+    win.addEventListener("click", this.onClick.bind(this))
+    win.addEventListener("scroll", this.onScroll.bind(this))
+    win.addEventListener("touchstart", this.onTouchstart.bind(this), false)
+    win.addEventListener("touchend", this.onTouchend.bind(this), false)
+    win.addEventListener("keydown", this.onKeyDown.bind(this), false)
+    win.addEventListener("keyup", this.onKeyUp.bind(this), false)
+
+    win.document.addEventListener("keypress", this.onKeyPress.bind(this))
+
+    const vv = win.visualViewport
+    vv.addEventListener("onresize", this.onPinch.bind(this))
+    vv.addEventListener("scroll", this.onPinch.bind(this))
+    this.log("events registered")
+  }
+
+  log(...args) {
+    console.log(this.toString(), args)
+  }
+
+  /**
+   * @param el {BeamHTMLElement}
+   * @param x {number}
+   * @param y {number}
+   */
+  point(el, x, y) {
+    this.ui.point(el, x, y)
+  }
+
+  /**
+   */
+  unpoint(_el) {
+    const changed = this.isPointing()
+    if (changed) {
+      this.ui.unpoint()
+      this.pointedEl = null
+    }
+   // this.log("unpoint", changed ? "changed" : "did not change")
+    return changed
   }
 
   /**
    * Unselect an element.
    *
-   * @param el {HTMLElement}
+   * @param el {BeamHTMLElement}
    * @return If the element has changed.
    */
-  function unshoot(el) {
-    const selectedIndex = selectedEls.indexOf(el)
+  unshoot(el = this.pointingEv.target) {
+    const selectedIndex = this.selectedEls.indexOf(el)
     const alreadySelected = selectedIndex >= 0
     if (alreadySelected) {
-      selectedEls.splice(selectedIndex, 1)
-      ui.unshoot(el)
-      delete el.dataset[datasetKey]
+      this.selectedEls.splice(selectedIndex, 1)
+      this.ui.unshoot(el)
+      delete el.dataset[this.datasetKey]
+      this.setStatus("none")
     }
     return alreadySelected
   }
 
-  /**
-   * The currently highlighted element
-   * @type {HTMLElement}
-   */
-  let pointed
-
-  function hidePopup() {
-    ui.hidePopup()
+  hidePopup() {
+    this.ui.hidePopup()
   }
 
-  function onMouseMove(ev) {
-    if (ev.altKey) {
+  isPointing() {
+    return this.status === "pointing"
+  }
+
+  /**
+   * @param ev {BeamMouseEvent}
+   */
+  onMouseMove(ev) {
+    const withOption = ev.altKey
+    // this.log("onMouseMove", withOption)
+    this.pointingEv = ev
+    // if (withOption) { // Don't unpoint if no alt, as for some reason it returns false when always pressed
+    this.setPointing(withOption)
+    // }
+    if (this.isPointing()) {
       ev.preventDefault()
       ev.stopPropagation()
-      const el = ev.target
-      if (pointed !== el) {
-        if (pointed) {
-          unpoint(pointed) // Remove previous
+      if (this.pointedEl !== this.pointingEv.target) {
+        if (this.pointedEl) {
+          this.log("pointed is changing from", this.pointedEl, "to", this.pointingEv.target)
+          this.unpoint(this.pointedEl) // Remove previous
         }
-        pointed = el
-        point(pointed, ev.clientX, ev.clientY)
-        let collected = pointed.dataset[datasetKey]
+        this.pointedEl = this.pointingEv.target
+        this.point(this.pointedEl, ev.clientX, ev.clientY)
+        let collected = this.pointedEl.dataset[this.datasetKey]
         if (collected) {
-          showStatus(pointed)
+          this.showStatus(this.pointedEl)
         } else {
-          hideStatus()
+          this.hideStatus()
         }
       } else {
-        hidePopup()
+        this.hidePopup()
       }
     } else {
-      hideStatus()
-      if (pointed) {
-        unpoint(pointed)
-      }
+      this.hideStatus()
     }
   }
 
   /**
    * @param el {HTMLElement}
    */
-  function showStatus(el) {
-    const data = el.dataset[datasetKey]
+  showStatus(el) {
+    const data = el.dataset[this.datasetKey]
     const collected = JSON.parse(data)
-    ui.showStatus(el, collected)
+    this.ui.showStatus(el, collected)
   }
 
   /**
    *
    */
-  function hideStatus() {
-    ui.hideStatus()
+  hideStatus() {
+    this.ui.hideStatus()
   }
 
   /**
-   * Remember shoots in DOM
+   * Remember shoots in DOM.
+   *
+   * @param note {object} The Note info
+   * @param el {BeamHTMLElement} The element to assign the Note to.
    */
-  function assignCard(el, datasetKey, selectedCard) {
-    el.dataset[datasetKey] = JSON.stringify(selectedCard)
+  assignNote(note, el = this.selectedEls[this.selectedEls.length - 1]) {
+    this.log("assignNoteToElement()", "note", note, "el", el, "datasetKey", this.datasetKey)
+    el.dataset[this.datasetKey] = JSON.stringify(note)
   }
 
   /**
@@ -125,20 +227,19 @@ export const PointAndShoot = (win, ui) => {
    * @param y {number} Vertical coordinate of click/touch
    * @param multi {boolean} If this is a multiple-selection action.
    */
-  function shoot(el, x, y, multi) {
-    const alreadySelected = unshoot(el)
+  shoot(el, x, y, multi) {
+    const alreadySelected = this.unshoot(el)
     if (alreadySelected) {
       return
     }
-    if (!multi && selectedEls.length > 0) {
-      unshoot(selectedEls[0]) // previous selection will be replaced
+    if (!multi && this.selectedEls.length > 0) {
+      this.unshoot(this.selectedEls[0]) // previous selection will be replaced
     }
-    selectedEls.push(el)
-    // point(el, x, y)
-    ui.shoot(el, x, y, selectedEls, () => {
-      for (const el of selectedEls) {
-       // assignCard(el, datasetKey, selectedCard)
-      }
+    this.selectedEls.push(el)
+    this.log("shoot()", "selected.length", this.selectedEls.length)
+    this.status = "shooting"
+    this.ui.shoot(el, x, y, this.selectedEls, (selectedNote) => {
+       this.assignNote(selectedNote, el)
     })
   }
 
@@ -149,49 +250,93 @@ export const PointAndShoot = (win, ui) => {
    * @param x {number} Horizontal coordinate of click/touch
    * @param y {number} Vertical coordinate of click/touch
    */
-  function onShoot(ev, x, y) {
+  onShoot(ev, x, y) {
     const el = ev.target
     ev.preventDefault()
     ev.stopPropagation()
     const multi = ev.metaKey
-    shoot(el, x, y, multi)
+    this.shoot(el, x, y, multi)
   }
 
-  function onClick(ev) {
-    if (ev.altKey) {
-      onShoot(ev, ev.clientX, ev.clientY)
+  onClick(ev) {
+    this.setPointing(ev.altKey)
+    if (this.isPointing()) {
+      this.pointingEv = ev
+      this.onShoot(ev, ev.clientX, ev.clientY)
     }
   }
 
-  function onlongtouch(ev) {
+  onlongtouch(ev) {
     const touch = ev.touches[0]
-    onShoot(ev, touch.clientX, touch.clientY)
+    this.onShoot(ev, touch.clientX, touch.clientY)
   }
 
-  let timer
-  const touchDuration = 2500 //length of time we want the user to touch before we do something
-
-  function touchstart(ev) {
-    if (!timer) {
-      timer = setTimeout(() => onlongtouch(ev), touchDuration)
+  onTouchstart(ev) {
+    if (!this.timer) {
+      this.timer = setTimeout(() => this.onlongtouch(ev), this.touchDuration)
     }
   }
 
-  function touchend(_ev) {
-    if (timer) {
-      clearTimeout(timer)
-      timer = null
+  onTouchend(_ev) {
+    if (this.timer) {
+      clearTimeout(this.timer)
+      this.timer = null
     }
   }
 
-  function onKeyPress(ev) {
+  onKeyPress(ev) {
     if (ev.code === "Escape") {
-      ui.hidePopup()
+      this.ui.hidePopup()
     }
   }
 
-  function checkFrames() {
-    const frameEls = win.document.querySelectorAll("iframe")
+  setStatus(s) {
+    this.status = s
+    this.ui.setStatus(this.status)
+  }
+
+  /**
+   * @param c {boolean}
+   */
+  setPointing(c) {
+    let changed
+    if (c) {
+      changed = this.status === "none"
+      if (changed) {
+        this.setStatus("pointing")
+      }
+    } else {
+      changed = this.status !== "none"
+      if (changed) {
+        this.pointedEl = null
+        this.setStatus("none")
+      }
+    }
+    // this.log("setPointing", c, changed ? "changed" : "did not change")
+    return changed
+  }
+
+  onKeyDown(ev) {
+    this.log("onKeyDown", ev.key)
+    if (ev.key === "Alt") {
+      this.setPointing(true)
+      const pointingEv = this.pointingEv
+      if (pointingEv) {
+        this.point(pointingEv.target, pointingEv.clientX, pointingEv.clientY)
+      }
+    }
+  }
+
+  onKeyUp(ev) {
+    this.log("onKeyUp", ev.key)
+    if (ev.key === "Alt") {
+      this.setPointing(false)
+      this.unpoint()
+    }
+  }
+
+  checkFrames() {
+    const frameEls = this.win.document.querySelectorAll("iframe")
     const hasFrames = frameEls.length > 0
     /**
      * @type {FrameInfo[]}
@@ -202,7 +347,6 @@ export const PointAndShoot = (win, ui) => {
         const bounds = frameEl.getBoundingClientRect()
         const href = frameEl.src
         const frameInfo = {
-          origin:  win.origin,
           href: href,
           bounds: {
             x: bounds.x,
@@ -213,19 +357,19 @@ export const PointAndShoot = (win, ui) => {
         }
         framesInfo.push(frameInfo)
       }
-      ui.setFramesInfo(framesInfo)
+      this.ui.setFramesInfo(framesInfo)
     } else {
       console.log("No frames")
     }
     return hasFrames
   }
 
-  function onScroll(_ev) {
+  onScroll(_ev) {
     // TODO: Throttle
-    const doc = win.document
+    const doc = this.win.document
     const body = doc.body
     const documentEl = doc.documentElement
-    scrollWidth = Math.max(
+    const scrollWidth = this.scrollWidth = Math.max(
         body.scrollWidth, documentEl.scrollWidth,
         body.offsetWidth, documentEl.offsetWidth,
         body.clientWidth, documentEl.clientWidth
@@ -235,40 +379,42 @@ export const PointAndShoot = (win, ui) => {
         body.offsetHeight, documentEl.offsetHeight,
         body.clientHeight, documentEl.clientHeight
     )
-    const scrollInfo = {x: win.scrollX, y: win.scrollY, width: scrollWidth, height: scrollHeight, scale: vv.scale}
-    ui.setScrollInfo(scrollInfo)
-    const hasFrames = checkFrames()
-    console.log(hasFrames ? "Scroll updated frames info" : "Scroll did not update frames info since there is none")
+    const scrollInfo = {
+      x: this.win.scrollX,
+      y: this.win.scrollY,
+      width: scrollWidth,
+      height: scrollHeight,
+      scale: this.win.visualViewport.scale
+    }
+    this.ui.setScrollInfo(scrollInfo)
+    const hasFrames = this.checkFrames()
+    this.log(hasFrames ? "Scroll updated frames info" : "Scroll did not update frames info since there is none")
   }
 
-  function onResize(_ev) {
-    const resizeInfo = {width: win.innerWidth, height: win.innerHeight}
-    ui.setResizeInfo(resizeInfo, selectedEls)
+  onResize(_ev) {
+    const resizeInfo = {width: this.win.innerWidth, height: this.win.innerHeight}
+    this.ui.setResizeInfo(resizeInfo, this.selectedEls)
   }
 
-  function onLoad(_ev) {
-    console.log("Page load.", win.origin)
-    console.log("Flushing frames.", win.origin);
-    ui.setOnLoadInfo()
-    
-    console.log("Checking frames.", win.origin);
-    checkFrames()
+  onLoad(_ev) {
+    this.log("Page load.", this.win.origin)
+    this.log("Flushing frames.", this.win.origin)
+    this.ui.setOnLoadInfo()
+
+    this.log("Checking frames.", this.win.origin)
+    this.checkFrames()
 
     // This timeout is here so SPA style sites have time to build the DOM
     // TODO: Add reliable TTI eventlistener for JS heavy sites
     setTimeout(() => {
-      console.log('After 500ms running checkFrames again', win.origin)
-      checkFrames()
-    }, 500);
+      this.log('After 500ms running checkFrames again', this.win.origin)
+      this.checkFrames()
+    }, 500)
   }
 
-  console.log('Point and Shoot init.',  win.origin)
-  onScroll()   // Init/refresh scroll info
-
-  const textSelector = new TextSelector(win, ui.textSelector)
-
-  function onPinch(ev) {
-    ui.pinched({
+  onPinch(ev) {
+    const vv = this.win.visualViewport
+    this.ui.pinched({
       offsetTop: vv.offsetTop,
       pageTop: vv.pageTop,
       offsetLeft: vv.offsetLeft,
@@ -279,15 +425,7 @@ export const PointAndShoot = (win, ui) => {
     })
   }
 
-  vv.addEventListener("onresize", onPinch);
-  vv.addEventListener("scroll", onPinch);
-
-  win.addEventListener("load", onLoad)
-  win.addEventListener("resize", onResize)
-  win.addEventListener("mousemove", onMouseMove)
-  win.addEventListener("click", onClick)
-  win.addEventListener("scroll", onScroll)
-  win.addEventListener("touchstart", touchstart, false)
-  win.addEventListener("touchend", touchend, false)
-  win.document.addEventListener("keypress", onKeyPress)
+  toString() {
+    return this.constructor.name
+  }
 }

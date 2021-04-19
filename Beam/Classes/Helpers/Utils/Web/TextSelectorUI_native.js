@@ -8,19 +8,20 @@ export class TextSelectorUI_native extends TextSelectorUI {
   constructor(native) {
     super()
     this.native = native
-    console.log(`${this} instantiated`)
+    this.log('instantiated')
   }
 
-  toString() {
-    return this.constructor.name
+  log(...args) {
+    console.log(this.toString(), args)
   }
 
   enterSelection(scrollWidth) {
-    // TODO: enter selction message
+    // TODO: enterSelection message?
   }
 
   leaveSelection() {
-    // TODO:
+    this.log("leaveSelection")
+    // TODO: leaveSelection message?
   }
 
   addTextSelection(selection) {
@@ -30,5 +31,9 @@ export class TextSelectorUI_native extends TextSelectorUI {
 
   textSelected(selection) {
     this.native.sendMessage("textSelected", selection)
+  }
+
+  toString() {
+    return this.constructor.name
   }
 }

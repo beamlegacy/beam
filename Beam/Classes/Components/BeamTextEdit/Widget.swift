@@ -85,6 +85,9 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
             for c in set {
                 c.removeFromSuperlayer(recursive: true)
+                if c.parent == self {
+                    c.parent = nil
+                }
             }
         }
 

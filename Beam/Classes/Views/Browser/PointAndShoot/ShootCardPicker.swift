@@ -29,7 +29,9 @@ struct ShootCardPicker: View {
 
     @State private var isVisible = false
 
-    private let searchColorPalette = AutocompleteItemColorPalette(selectedBackgroundColor: BeamColor.NotePicker.selected.nsColor, touchdownBackgroundColor: BeamColor.NotePicker.active.nsColor)
+    private let searchColorPalette = AutocompleteItemColorPalette(
+            selectedBackgroundColor: BeamColor.NotePicker.selected.nsColor,
+            touchdownBackgroundColor: BeamColor.NotePicker.active.nsColor)
 
     var body: some View {
         FormatterViewBackground {
@@ -40,7 +42,8 @@ struct ShootCardPicker: View {
                     BeamTextField(text: $cardSearchField, isEditing: $isEditingCardName,
                                   placeholder: autocompleteModel.todaysCardReplacementName,
                                   font: BeamFont.regular(size: 13).nsFont,
-                                  textColor: currentCardName == nil ? BeamColor.Generic.text.nsColor : BeamColor.Sonic.nsColor,
+                                  textColor: currentCardName == nil ? BeamColor.Generic.text.nsColor
+                                          : BeamColor.Sonic.nsColor,
                                   placeholderColor: BeamColor.Generic.placeholder.nsColor,
                                   selectedRanges: cardSearchFieldSelection) { (text) in
                         onTextDidChange(text)
@@ -55,7 +58,7 @@ struct ShootCardPicker: View {
                     } onTab: {
                         isEditingNote = true
                     } onCursorMovement: { move -> Bool in
-                        return autocompleteModel.handleCursorMovement(move)
+                        autocompleteModel.handleCursorMovement(move)
                     }
                     .frame(minHeight: 16)
                     .padding(BeamSpacing._40)
@@ -86,7 +89,9 @@ struct ShootCardPicker: View {
                 Separator(horizontal: true)
                     .padding(.horizontal, BeamSpacing._120)
                 HStack(spacing: 4) {
-                    BeamTextField(text: $addNoteField, isEditing: $isEditingNote, placeholder: "Add note", font: BeamFont.regular(size: 13).nsFont, textColor: BeamColor.Generic.text.nsColor, placeholderColor: BeamColor.Generic.placeholder.nsColor) { _ in
+                    BeamTextField(text: $addNoteField, isEditing: $isEditingNote, placeholder: "Add note",
+                                  font: BeamFont.regular(size: 13).nsFont, textColor: BeamColor.Generic.text.nsColor,
+                                  placeholderColor: BeamColor.Generic.placeholder.nsColor) { _ in
                     } onCommit: { _ in
                         onFinishEditing(canceled: false)
                     } onEscape: {
@@ -134,7 +139,7 @@ struct ShootCardPicker: View {
 
     private func onTextDidChange(_ text: String) {
         var searchText = text
-        if let currentCardName = self.currentCardName, text.count == currentCardName.count - 1 {
+        if let currentCardName = currentCardName, text.count == currentCardName.count - 1 {
             cardSearchField = ""
             searchText = ""
         }

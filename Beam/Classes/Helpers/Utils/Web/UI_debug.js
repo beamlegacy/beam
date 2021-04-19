@@ -14,30 +14,30 @@ export class UI_debug extends UI {
   /**
    * @type UI_web
    */
-  webUi
+  web
 
   /**
    * @type UI_native
    */
-  nativeUi
+  native
 
   /**
    *
-   * @param nativeUI {UI_native}
-   * @param webUi {UI_web}
+   * @param native {UI_native}
+   * @param web {UI_web}
    */
-  constructor(nativeUI, webUi) {
-    super(new PointAndShootUI_debug(nativeUI, webUi), new TextSelectorUI_debug(nativeUI, webUi))
-    this.nativeUi = nativeUI
-    this.webUi = webUi
-    console.log(`Instantiated ${this}`)
+  constructor(native, web) {
+    super(new PointAndShootUI_debug(native, web), new TextSelectorUI_debug(native, web))
+    this.native = native
+    this.web = web
+    console.log(`${this.toString()} instantiated`)
   }
 
   point(el, x, y) {
     this.pointAndShoot.point(el, x, y)
   }
 
-  unpoint(el) {
+  unpoint() {
     this.pointAndShoot.unpoint(el)
   }
 
@@ -50,19 +50,23 @@ export class UI_debug extends UI {
   }
 
   setFramesInfo(framesInfo) {
-    this.nativeUi.setFramesInfo(framesInfo)
+    this.native.setFramesInfo(framesInfo)
+    this.web.setFramesInfo(framesInfo)
   }
 
   setScrollInfo(scrollInfo) {
-    this.nativeUi.setScrollInfo(scrollInfo)
+    this.native.setScrollInfo(scrollInfo)
+    this.web.setScrollInfo(scrollInfo)
   }
 
   setResizeInfo(resizeInfo, selected) {
-    this.nativeUi.setResizeInfo(resizeInfo, selected)
+    this.native.setResizeInfo(resizeInfo, selected)
+    this.web.setResizeInfo(resizeInfo, selected)
   }
 
   setOnLoadInfo() {
-    this.nativeUi.setOnLoadInfo()
+    this.native.setOnLoadInfo()
+    this.web.setOnLoadInfo()
   }
 
   enterSelection(scrollWidth) {
@@ -82,17 +86,17 @@ export class UI_debug extends UI {
   }
 
   hideStatus() {
-    this.webUi.hideStatus()
-    this.nativeUi.hideStatus()
+    this.native.hideStatus()
+    this.web.hideStatus()
   }
 
   hidePopup() {
-    this.webUi.hidePopup()
-    this.nativeUi.hidePopup()
+    this.native.hidePopup()
+    this.web.hidePopup()
   }
 
   toString() {
-    return "" + this.webUi ? this.nativeUi ? this.webUi + "+" + this.nativeUi : this.webUi : this.nativeUi
+    return "" + this.web ? this.native ? this.web + "+" + this.native : this.web : this.native
   }
 
   /**
@@ -112,5 +116,10 @@ export class UI_debug extends UI {
       instance = null
     }
     return instance
+  }
+
+  setStatus(status) {
+    this.native.setStatus(status)
+    this.web.setStatus(status)
   }
 }

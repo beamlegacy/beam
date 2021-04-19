@@ -1,10 +1,3 @@
-//
-//  PointAndShootFrame.swift
-//  Beam
-//
-//  Created by Sebastien Metrot on 17/03/2021.
-//
-
 import Foundation
 import SwiftUI
 

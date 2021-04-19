@@ -24,6 +24,7 @@ public enum LogCategory: String {
     case noteEditor
     case keychain
     case encryption
+    case pointAndShoot
 }
 
 public final class Logger {

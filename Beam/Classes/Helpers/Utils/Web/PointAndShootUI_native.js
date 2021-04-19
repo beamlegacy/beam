@@ -8,7 +8,7 @@ export class PointAndShootUI_native extends PointAndShootUI {
    */
   constructor(win) {
     super()
-    console.log(`${this} instantiated`)
+    console.log(`${this.toString()} instantiated`)
   }
 
   point(el, _x, _y) {

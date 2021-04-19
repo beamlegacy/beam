@@ -20,7 +20,7 @@ export class TextSelectorUI_web extends TextSelectorUI {
     super()
     this.win = win
     this.pointAndShoot = pointAndShoot
-    console.log(`${this} instantiated`)
+    console.log(`${this.toString()} instantiated`)
   }
 
   enterSelection() {

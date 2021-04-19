@@ -1,28 +1,41 @@
-export class BeamSize {
+export class BeamDOMTokenList {
+  list = []
+  add(...tokens) {
+    this.list.push(tokens)
+  }
+}
+
+export class BeamHTMLElement {
   /**
-   * @type {number}
+   * @type string
+   */
+  name
+
+  classList = new BeamDOMTokenList()
+
+  dataset = {}
+
+  /**
+   * @type number
+   */
+  clientTop
+
+  /**
+   * @type number
+   */
+  clientLeft
+
+  /**
+   * @type number
    */
   width
 
   /**
-   * @type {number}
+   * @type number
    */
   height
-}
 
-export class BeamRect extends BeamSize {
-  /**
-   * @type {number}
-   */
-  x
-
-  /**
-   * @type {number}
-   */
-  y
-}
-export class BeamElement {
-  classList
+  getBoundingClientRect() {}
 
   /**
    * @param el {HTMLElement}
@@ -33,10 +46,11 @@ export class BeamElement {
   /**
    * @param el {HTMLElement}
    */
-  removeChild(el) {}
+  removeChild(el) {
+  }
 }
 
-export class BeamBody extends BeamElement {
+export class BeamBody extends BeamHTMLElement {
   /**
    * @type String
    */
@@ -83,6 +97,12 @@ export class BeamDocument {
    * @type BeamBody
    */
   body
+
+  constructor(attributes = {}) {
+    this.body = {}
+    this.documentElement = {}
+    Object.assign(this, attributes)
+  }
 
   /**
    * @param tag {string}
@@ -152,6 +172,18 @@ export class BeamVisualViewport {
   }
 }
 
+export class BeamMessageHandler {
+  postMessage(payload) {
+  }
+}
+
+export class BeamWebkit {
+  /**
+   *
+   */
+  messageHandlers = {}
+}
+
 export class BeamWindow {
   /**
    * @type string
@@ -188,6 +220,15 @@ export class BeamWindow {
    */
   visualViewport
 
+  location
+
+  /**
+   * @type BeamWebkit
+   */
+  webkit = new BeamWebkit()
+
+  eventListeners
+
   /**
    *
    * @param eventName {String}
@@ -195,4 +236,60 @@ export class BeamWindow {
    */
   addEventListener(eventName, cb) {
   }
+}
+
+/**
+ * We need this for tests as some properties of UIEvent (target) are readonly.
+ */
+export class BeamUIEvent {
+  /**
+   * @type BeamHTMLElement
+   */
+  target
+
+  preventDefault() {
+  }
+
+  stopPropagation() {
+  }
+}
+
+export class BeamMouseEvent extends BeamUIEvent {
+
+  constructor(attributes = {}) {
+    super()
+    Object.assign(this, attributes)
+  }
+
+  /**
+   * If the Option key was down during the event.
+   *
+   * @type boolean
+   */
+  altKey
+
+  /**
+   * @type number
+   */
+  clientX
+
+  /**
+   * @type number
+   */
+  clientY
+}
+
+export class BeamKeyEvent extends BeamUIEvent {
+
+  constructor(attributes = {}) {
+    super()
+    Object.assign(this, attributes)
+  }
+
+  /**
+   * The key name
+   *
+   * @type String
+   */
+  key
 }

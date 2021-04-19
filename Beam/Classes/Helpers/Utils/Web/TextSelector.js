@@ -12,7 +12,11 @@ export class TextSelector {
     this.win = win
     win.addEventListener("mouseup", this.onMouseUp.bind(this))
     win.document.addEventListener("selectionchange", (ev) => this.onSelectionChange(ev))
-    console.log(`Initialized ${this}`)
+    this.log('Initialized')
+  }
+
+  log(...args) {
+    console.log(this.toString(), args)
   }
 
   enterSelection() {
@@ -21,6 +25,7 @@ export class TextSelector {
   }
 
   leaveSelection() {
+    this.log("leaveSelection")
     this.ui.leaveSelection()
     this.selectionsList = []
   }
@@ -37,7 +42,7 @@ export class TextSelector {
   }
 
   onSelectionChange(_ev) {
-    console.log("this", this)
+    this.log("onSelectionChange")
     const docSelection = this.getSelection()
     if (docSelection.isCollapsed) {
       this.leaveSelection()
@@ -78,6 +83,6 @@ export class TextSelector {
   }
 
   toString() {
-    return "Text selector"
+    return this.constructor.name
   }
 }

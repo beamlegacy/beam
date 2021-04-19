@@ -1,5 +1,8 @@
 export class Native {
 
+  /**
+   * @type Native
+   */
   static instance
 
   /**
@@ -12,6 +15,10 @@ export class Native {
     return Native.instance
   }
 
+  log(...args) {
+    console.log(this.toString(), args)
+  }
+
   /**
    * @param win {BeamWindow}
    */
@@ -22,7 +29,7 @@ export class Native {
     if (!this.messageHandlers) {
       throw Error("Could not find webkit message handlers")
     }
-    console.log(`${this} instantiated`)
+    this.log(`${this.toString()} instantiated`)
   }
 
   /**
@@ -34,13 +41,18 @@ export class Native {
    *        An "origin" property will always be added as the base URI of the current frame.
    */
   sendMessage(name, payload) {
-    console.log("sendMessage", name, payload)
+    this.log("sendMessage", name, payload)
     const messageKey = `beam_${name}`
     const messageHandler = this.messageHandlers[messageKey]
     if (messageHandler) {
+      const origin = this.origin
       messageHandler.postMessage({origin, ...payload}, origin)
     } else {
       throw Error(`No message handler for message "${name}"`)
     }
+  }
+
+  toString() {
+    return this.constructor.name
   }
 }

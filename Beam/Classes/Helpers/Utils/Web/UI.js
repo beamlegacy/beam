@@ -31,7 +31,7 @@ export class UI {
   }
 
   /**
-   * @param el {HTMLElement}
+   * @param el {BeamHTMLElement}
    * @param x {number}
    * @param y {number}
    */
@@ -39,13 +39,13 @@ export class UI {
   }
 
   /**
-   * @param el {HTMLElement}
+   * @param el {BeamHTMLElement} The element to unpoint (required for web UI)
    */
   unpoint(el) {
   }
 
   /**
-   * @param el {HTMLElement}
+   * @param el {BeamHTMLElement}
    */
   unshoot(el) {
   }
@@ -54,7 +54,7 @@ export class UI {
   }
 
   /**
-   * @param el {HTMLElement}
+   * @param el {BeamHTMLElement}
    * @param collected {any}
    */
   showStatus(el, collected) {
@@ -66,11 +66,11 @@ export class UI {
   /**
    * Select an HTML element to be added to a card.
    *
-   * @param el {HTMLElement} The selection event (click or touch).
+   * @param el {BeamHTMLElement} The selection event (click or touch).
    * @param x {number} Horizontal coordinate of click/touch
    * @param y {number} Vertical coordinate of click/touch
-   * @param selectedEls {HTMLElement[]}
-   * @param submitCb {Function}
+   * @param selectedEls {BeamHTMLElement[]}
+   * @param submitCb {Function({string})}
    */
   shoot(el, x, y, selectedEls, submitCb) {
   }
@@ -82,14 +82,14 @@ export class UI {
   }
 
   /**
-   * @param scrollInfo
+   * @param scrollInfo {}
    */
   setScrollInfo(scrollInfo) {
   }
 
   /**
    * @param resizeInfo {BeamSize}
-   * @param els {HTMLElement[]}
+   * @param els {BeamHTMLElement[]}
    */
   setResizeInfo(resizeInfo, els) {
   }
@@ -98,5 +98,11 @@ export class UI {
   }
 
   pinched(pinchInfo) {
+  }
+
+  /**
+   * @param status {"pointing"|"shooting"|"none"}
+   */
+  setStatus(status) {
   }
 }

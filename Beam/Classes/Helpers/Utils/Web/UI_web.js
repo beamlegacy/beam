@@ -87,7 +87,7 @@ export class UI_web extends UI {
   constructor(win, pointAndShoot = new PointAndShootUI_web(win)) {
     super(pointAndShoot, new TextSelectorUI_web(win, pointAndShoot))
     this.win = win
-    console.log(`${this} instantiated`)
+    console.log(`${this.toString()} instantiated`)
   }
 
   point(el, x, y) {
@@ -95,14 +95,14 @@ export class UI_web extends UI {
   }
 
   unpoint(el) {
-    this.pointAndShoot.unpoint(el)
+    this.pointAndShoot.unpoint()
   }
 
-  shoot(el, x, y, selected, submitCb) {
+  shoot(el, x, y, selectedEl, submitCb) {
     this.pointAndShoot.shoot(el)
-    const count = selected.length > 1 ? `${selected.length}` : ""
-    for (let i = 0; i < selected.length; i++) {
-      const s = selected[i]
+    const count = selectedEl.length > 1 ? `${selectedEl.length}` : ""
+    for (let i = 0; i < selectedEl.length; i++) {
+      const s = selectedEl[i]
       const sId = i
       s.style.cursor = `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="30" viewBox="20 0 30 55" style="stroke:rgb(165,165,165);stroke-linecap:round;stroke-width:3"><rect x="10" y="20" width="54" height="25" ry="10" style="stroke-width:1; fill:white"/><text x="15" y="39" style="font-size:20px;stroke-linecap:butt;stroke-width:1">${count}</text><line x1="35" y1="26" x2="50" y2="26"/><line x1="35" y1="32" x2="50" y2="32"/><line x1="35" y1="38" x2="45" y2="38"/><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g><path d="M8,17.4219 L8,1.4069 L19.591,13.0259 L12.55,13.0259 L12.399,13.1499 L8,17.4219 Z" fill="white"/><path d="M9,3.814 L9,15.002 L11.969,12.136 L12.129,11.997 L17.165,11.997 L9,3.814 Z" fill="black"/></g></g></svg>') 5 5, auto`
     }
@@ -116,7 +116,7 @@ export class UI_web extends UI {
 
   submit(submitCb) {
     this.hidePopup()
-    submitCb()
+    submitCb(this.selectedNote)
   }
 
   showPopup(el, x, y, submitCb) {
@@ -126,8 +126,8 @@ export class UI_web extends UI {
     this.popup.classList.add(this.prefixClass)
     this.popup.classList.add(this.popupClass)
     this.newCard = {id: 0, title: "", hint: "– New card"}
-    this.selectedCard = this.existingCards.length > 0 ? this.existingCards[0] : this.newCard
-    const value = this.selectedCard.title
+    this.selectedNote = this.existingCards.length > 0 ? this.existingCards[0] : this.newCard
+    const value = this.selectedNote.title
     this.inputTouched = false
     this.popup.innerHTML = `
     <form>
@@ -210,6 +210,8 @@ export class UI_web extends UI {
     this.inputTouched = true
   }
 
+  selectedNote
+
   cardKeyDown(ev, submitCb) {
     console.log(ev.key)
     switch (ev.key) {
@@ -226,11 +228,12 @@ export class UI_web extends UI {
     }
   }
 
-  selectedCard
-
+  /**
+   * @param id {string} The Note unique id
+   */
   selectProposal(id) {
-    this.selectedCard = this.existingCards.find((c) => c.id === id)
-    this.cardInputEl().value = this.selectedCard.title
+    this.selectedNote = this.existingCards.find((c) => c.id === id)
+    this.cardInputEl().value = this.selectedNote.title
     this.proposalsEl().innerHTML = ""
   }
 
@@ -319,5 +322,9 @@ export class UI_web extends UI {
 
   toString() {
     return "WebUI"
+  }
+
+  setStatus(status) {
+    // No impact on web UI
   }
 }
