@@ -25,7 +25,7 @@ struct ModeView: View {
                     case .web:
                         VStack(spacing: 0) {
                             BrowserTabBar(tabs: $state.tabs, currentTab: $state.currentTab)
-                                .frame(width: geometry.size.width, height: 28)
+                                .zIndex(9)
 
                             if let tab = state.currentTab {
                                 ZStack {

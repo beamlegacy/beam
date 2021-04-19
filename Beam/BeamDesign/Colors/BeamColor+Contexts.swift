@@ -88,13 +88,6 @@ extension BeamColor {
 }
 
 extension BeamColor {
-    enum Tabs {
-        static let tabBarBg = BeamColor.Custom(named: "TabBarBg")
-        static let tabFrame = BeamColor.Custom(named: "TabFrame")
-    }
-}
-
-extension BeamColor {
     enum Autocomplete {
         static let link = BeamColor.Bluetiful
         static let subtitleText = BeamColor.LightStoneGray

@@ -12,57 +12,63 @@ import BeamCore
 struct BrowserTabView: View {
     @EnvironmentObject var state: BeamState
     @ObservedObject var tab: BrowserTab
-    @State private var showButton = false
-    let selected: Bool
+    @State private var isHovering = false
+    let isSelected: Bool
+
+    private var foregroundColor: Color {
+        isSelected ? BeamColor.Generic.text.swiftUI : BeamColor.Corduroy.swiftUI
+    }
+
+    private let tabIconStyle: ButtonLabelStyle = {
+        ButtonLabelStyle.tinyIconStyle
+    }()
+
+    private let selectedHoverTabIconStyle: ButtonLabelStyle = {
+        var style = ButtonLabelStyle.tinyIconStyle
+        style.foregroundColor = BeamColor.Niobium.swiftUI
+        return style
+    }()
+
+    private var closeIconStyle: ButtonLabelStyle {
+        isSelected && isHovering ? selectedHoverTabIconStyle : tabIconStyle
+    }
 
     var body: some View {
-        HStack(alignment: .center, spacing: 5) {
-            Rectangle()
-                .frame(width: 1, height: 28, alignment: .leading)
-                .foregroundColor(Color(.separatorColor))
-            Image("browser-tab-close")
-            .resizable()
-            .frame(width: 12, height: 12, alignment: .leading)
-            .opacity(showButton ? 1 : 0)
-                .foregroundColor(BeamColor.Button.text.swiftUI)
-            .buttonStyle(BorderlessButtonStyle())
-            .padding(.leading, 8)
-            .onTapGesture(count: 1) {
-                closeTab(id: tab.id)
-            }
-
-            // fav icon:
-            HStack(spacing: 8) {
-                Spacer()
-
+        HStack(alignment: .center, spacing: 0) {
+            Spacer(minLength: 32)
+            HStack(spacing: BeamSpacing._40) {
                 if let icon = tab.favIcon {
                     Image(nsImage: icon)
                         .resizable()
                         .scaledToFit()
-                        .frame(maxWidth: 16, maxHeight: 16, alignment: .center)
+                        .frame(width: 16, height: 16)
+                } else {
+                    Icon(name: "field-web", size: 16, color: foregroundColor)
                 }
 
                 Text(tab.title)
-                    .font(.system(size: 11, weight: .regular))
-                    .foregroundColor(BeamColor.Generic.text.swiftUI.opacity(selected ? 1.0 : 0.8))
-                    .allowsTightening(true)
-                    .truncationMode(.tail)
+                    .font(BeamFont.medium(size: 11).swiftUI)
+                    .foregroundColor(foregroundColor)
                     .lineLimit(1)
-
-                Spacer(minLength: 16)
-            }.frame(maxWidth: .infinity, alignment: .center)
-
-            Rectangle()
-                .frame(width: 1, height: 28, alignment: .trailing)
-                .foregroundColor( selected ? Color.clear : Color(.separatorColor))
+            }.frame(maxWidth: .infinity)
+            .animation(nil)
+            HStack {
+                Spacer(minLength: 0)
+                if isHovering || isSelected {
+                    ButtonLabel(icon: "tabs-close", customStyle: closeIconStyle) {
+                        closeTab(id: tab.id)
+                    }
+                    .padding(.horizontal, BeamSpacing._60)
+                }
+            }
+            .frame(width: 32)
         }
-        .frame(height: 26)
-        .contentShape(Rectangle())
-        .onHover(perform: { v in
-            showButton = v
-        })
+        .onHover { hovering in
+            isHovering = hovering
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(BeamColor.Generic.background.swiftUI)
         .accessibility(identifier: "browserTabBarView")
-        .background(Rectangle().fill(selected ? BeamColor.Tabs.tabBarBg.swiftUI : BeamColor.Tabs.tabFrame.swiftUI ))
     }
 
     func closeTab(id: UUID) {
@@ -87,14 +93,25 @@ struct BrowserTabView: View {
 
 struct BrowserTabView_Previews: PreviewProvider {
     static var state = BeamState()
-    static var tab = BrowserTab(state: state, originalQuery: "test tab1", note: BeamNote(title: "test"))
+    static var tab: BrowserTab = {
+        let t = BrowserTab(state: state, originalQuery: "", note: BeamNote(title: "test"))
+        t.title = "Tab Title"
+        return t
+    }()
+    static var longTab: BrowserTab = {
+        let t = BrowserTab(state: state, originalQuery: "", note: BeamNote(title: "test2"))
+        t.title = "Very Very Very Very Very Very Very Very Very Long Tab"
+        return t
+    }()
     static var previews: some View {
-        Group {
-            HStack {
-                BrowserTabView(tab: tab, selected: false)
-                BrowserTabView(tab: tab, selected: true)
-                BrowserTabView(tab: tab, selected: false)
-            }
-        }
+            VStack {
+                BrowserTabView(tab: tab, isSelected: false)
+                    .frame(height: 28)
+                BrowserTabView(tab: tab, isSelected: true)
+                    .frame(height: 28)
+                BrowserTabView(tab: longTab, isSelected: false)
+                    .frame(height: 28)
+            }.padding()
+            .frame(width: 360)
     }
 }
