@@ -264,6 +264,14 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         return elem
     }
 
+    private func receivedWebviewTitle(_ title: String? = nil) {
+        updateElementWithTitle(title)
+        guard title?.isEmpty == false || !isLoading else {
+            return
+        }
+        self.title = title ?? ""
+    }
+
     private func updateElementWithTitle(_ title: String? = nil) {
         if let url = url, let element = element {
             let name = title ?? (self.title.isEmpty ? url.absoluteString : self.title)
@@ -293,8 +301,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     private func setupObservers() {
         Logger.shared.logInfo("setupObservers", category: .general)
         webView.publisher(for: \.title).sink { v in
-            self.title = v ?? "loading..."
-            self.updateElementWithTitle()
+            self.receivedWebviewTitle(v)
         }.store(in: &scope)
         webView.publisher(for: \.url).sink { v in
             self.url = v
