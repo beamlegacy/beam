@@ -64,7 +64,8 @@ struct ModeView: View {
                                           data: state.data,
                                           dataSource: state.data.journal,
                                           proxy: geometry) { scrollPoint in
-                            contentIsScrolled = scrollPoint.y > JournalScrollView.firstNoteTopOffset(forProxy: geometry) + NoteView.topOffset
+                            contentIsScrolled = scrollPoint.y >
+                                JournalScrollView.firstNoteTopOffset(forProxy: geometry) + NoteView.topOffset
                         }
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .clipped()
