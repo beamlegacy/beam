@@ -76,6 +76,12 @@ struct OmniBarSearchField: View {
         return nil
     }
 
+    private var textColor: BeamColor {
+        guard !isEditing else { return BeamColor.Generic.text }
+        guard textFieldText.wrappedValue.isEmpty else { return BeamColor.LightStoneGray }
+        return BeamColor.Generic.placeholder
+    }
+
     var body: some View {
         return HStack(spacing: 8) {
             if let icon = favicon {
@@ -85,7 +91,7 @@ struct OmniBarSearchField: View {
                     .opacity(shouldShowWebHost ? 0 : 1.0)
                     .frame(width: shouldShowWebHost ? 0 : 16)
             } else if let iconName = leadingIconName {
-                Icon(name: iconName, size: 16, color: isEditing ? BeamColor.Generic.text.swiftUI : BeamColor.Generic.placeholder.swiftUI )
+                Icon(name: iconName, size: 16, color: textColor.swiftUI)
                     .opacity(shouldShowWebHost ? 0 : 1.0)
                     .frame(width: shouldShowWebHost ? 0 : 16)
             }
@@ -95,7 +101,7 @@ struct OmniBarSearchField: View {
                     isEditing: customEditingBinding,
                     placeholder: "Search Beam or the web",
                     font: BeamFont.medium(size: 13).nsFont,
-                    textColor: isEditing ? BeamColor.Generic.text.nsColor : BeamColor.Generic.placeholder.nsColor,
+                    textColor: textColor.nsColor,
                     placeholderColor: BeamColor.Generic.placeholder.nsColor,
                     selectedRanges: autocompleteManager.searchQuerySelectedRanges,
                     onTextChanged: { _ in

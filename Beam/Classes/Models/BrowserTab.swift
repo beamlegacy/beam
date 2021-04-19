@@ -37,7 +37,6 @@ struct FrameInfo {
 }
 
 // swiftlint:disable:next type_body_length
-
 class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler, Codable, WebPage {
     var id: UUID
 

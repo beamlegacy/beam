@@ -28,6 +28,16 @@ struct ButtonLabelStyle {
     var iconSize: CGFloat = 16
     var foregroundColor: Color = BeamColor.Button.text.swiftUI
     var activeForegroundColor: Color = BeamColor.Button.activeText.swiftUI
+
+    static let tinyIconStyle: ButtonLabelStyle = {
+        var style = ButtonLabelStyle()
+        style.iconSize = 16
+        style.verticalPadding = 0
+        style.horizontalPadding = 0
+        style.foregroundColor = BeamColor.LightStoneGray.swiftUI
+        style.activeForegroundColor = BeamColor.Niobium.swiftUI
+        return style
+    }()
 }
 
 struct ButtonLabel: View {
