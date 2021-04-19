@@ -18,6 +18,8 @@ struct TableViewColumn {
     var editable = false
     var isLink = false
     var sortable = true
+    var sortableDefaultAscending = false
+    var isInitialSortDescriptor = false
     var resizable = true
     var width: CGFloat = 100
     var stringFromKeyValue: ((Any?) -> String) = { value in
@@ -30,6 +32,7 @@ class TableViewItem: NSObject { }
 struct TableView: NSViewRepresentable {
 
     static let rowHeight: CGFloat = 32.0
+    static let headerHeight: CGFloat = 32.0
 
     var items: [TableViewItem] = []
     var columns: [TableViewColumn] = []
@@ -75,6 +78,7 @@ struct TableView: NSViewRepresentable {
     }
 
     private func setupColumns(in tableView: NSTableView, context: Self.Context) {
+        var initialSortDescriptor: NSSortDescriptor?
         // Columns setup
         columns.forEach { (column) in
             let tableColumn = NSTableColumn(identifier: NSUserInterfaceItemIdentifier(column.key))
@@ -85,7 +89,11 @@ struct TableView: NSViewRepresentable {
                 tableColumn.resizingMask = .userResizingMask
             }
             if column.sortable {
-                tableColumn.sortDescriptorPrototype = NSSortDescriptor(key: column.key, ascending: true)
+                tableColumn.sortDescriptorPrototype = NSSortDescriptor(key: column.key,
+                                                                       ascending: column.sortableDefaultAscending)
+                if column.isInitialSortDescriptor {
+                    initialSortDescriptor = tableColumn.sortDescriptorPrototype
+                }
             }
             if column.type == .CheckBox {
                 let headerCell = CheckBoxTableHeaderCell(textCell: tableColumn.headerCell.title)
@@ -99,6 +107,9 @@ struct TableView: NSViewRepresentable {
                 tableColumn.headerCell.attributedStringValue = attrs
             }
             tableView.addTableColumn(tableColumn)
+        }
+        if let sortDescriptor = initialSortDescriptor {
+            tableView.sortDescriptors = [sortDescriptor]
         }
     }
 
@@ -131,9 +142,11 @@ class TableViewCoordinator: NSObject {
     let parent: TableView
     init(_ tableView: TableView) {
         self.parent = tableView
-        sortedData = originalData
         super.init()
         reloadData()
+        DispatchQueue.main.async {
+            self.tableView?.scroll(CGPoint(x: 0, y: -TableView.headerHeight))
+        }
     }
 
     func reloadData() {

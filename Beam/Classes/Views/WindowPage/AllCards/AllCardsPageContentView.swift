@@ -45,8 +45,10 @@ struct AllCardsPageContentView: View {
     }()
 
     private var columns = [
-        TableViewColumn(key: "checkbox", title: "", type: TableViewColumn.ColumnType.CheckBox, sortable: false, resizable: false, width: 16),
-        TableViewColumn(key: "title", title: "Title", editable: true, isLink: true, width: 200),
+        TableViewColumn(key: "checkbox", title: "", type: TableViewColumn.ColumnType.CheckBox,
+                        sortable: false, resizable: false, width: 16),
+        TableViewColumn(key: "title", title: "Title", editable: true,
+                        isLink: true, sortableDefaultAscending: true, width: 200),
         TableViewColumn(key: "words", title: "Words", width: 50, stringFromKeyValue: { "\($0 ?? "")" }),
         TableViewColumn(key: "mentions", title: "Mentions", width: 70, stringFromKeyValue: { "\($0 ?? "")" }),
         TableViewColumn(key: "createdAt", title: "Created", stringFromKeyValue: { value in
@@ -55,7 +57,10 @@ struct AllCardsPageContentView: View {
             }
             return ""
         }),
-        TableViewColumn(key: "updatedAt", title: "Updated", stringFromKeyValue: { value in
+        TableViewColumn(key: "updatedAt",
+                        title: "Updated",
+                        isInitialSortDescriptor: true,
+                        stringFromKeyValue: { value in
             if let date = value as? Date {
                 return AllCardsPageContentView.dateFormatter.string(from: date)
             }
