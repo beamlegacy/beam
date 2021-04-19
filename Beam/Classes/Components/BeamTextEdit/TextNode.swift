@@ -573,8 +573,8 @@ public class TextNode: Widget {
 
     override func onFocus() {
         super.onFocus()
-        if editor.hasFocus && !text.isEmpty {
-            updateActionLayerVisibility(hidden: false)
+        if editor.hasFocus {
+            updateActionLayerVisibility(hidden: text.isEmpty)
         }
     }
 
@@ -583,7 +583,7 @@ public class TextNode: Widget {
         updateActionLayerVisibility(hidden: true)
     }
 
-    private func updateActionLayerVisibility(hidden: Bool) {
+    func updateActionLayerVisibility(hidden: Bool) {
         guard let actionLayer = layers["CmdEnterLayer"] else { return }
         actionLayer.layer.isHidden = hidden
     }
@@ -1296,6 +1296,7 @@ public class TextNode: Widget {
             .dropFirst()
             .sink { [unowned self] newValue in
                 elementText = newValue
+                self.updateActionLayerVisibility(hidden: elementText.isEmpty)
                 self.invalidateText()
             }.store(in: &elementScope)
 
