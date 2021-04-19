@@ -18,6 +18,7 @@ struct OmniBarSearchField: View {
         }
     }
     @Binding var modifierFlagsPressed: NSEvent.ModifierFlags?
+    var enableAnimations: Bool = true
 
     // this enables the call of didSet
     private var customEditingBinding: Binding<Bool> {
@@ -141,7 +142,7 @@ struct OmniBarSearchField: View {
                 }
             }
         }
-        .animation(.timingCurve(0.25, 0.1, 0.25, 1.0, duration: 0.3))
+        .animation(enableAnimations ? .timingCurve(0.25, 0.1, 0.25, 1.0, duration: 0.3) : nil)
     }
 
     func onEnterPressed(withCommand: Bool) {

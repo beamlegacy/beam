@@ -77,7 +77,7 @@ struct OmniBar: View {
                                     isEditing
                                 }, set: {
                                     setIsEditing($0)
-                                }), modifierFlagsPressed: $modifierFlagsPressed)
+                                }), modifierFlagsPressed: $modifierFlagsPressed, enableAnimations: enableAnimations)
                                 .frame(maxHeight: .infinity)
                                 .onHover { (hover) in
                                     if hover {
