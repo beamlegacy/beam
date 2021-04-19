@@ -61,6 +61,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         #endif
 
         data = BeamData()
+
+        for arg in ProcessInfo.processInfo.arguments {
+            switch arg {
+            case "--export-all-browsing-sessions":
+                export_all_browsing_sessions()
+                exit(0)
+            default:
+                break
+            }
+        }
+
         updateBadge()
         createWindow(reloadState: Configuration.stateRestorationEnabled)
 
