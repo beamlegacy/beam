@@ -127,7 +127,7 @@ import BeamCore
         return note
     }
 
-    public static func fetch(_ documentManager: DocumentManager, title: String) -> BeamNote? {
+    public static func fetch(_ documentManager: DocumentManager, title: String, keepInMemory: Bool = true) -> BeamNote? {
         // Is the note in the cache?
         if let note = getFetchedNote(title) {
             return note
@@ -141,7 +141,7 @@ import BeamCore
 //        Logger.shared.logDebug("Note loaded:\n\(String(data: doc.data, encoding: .utf8)!)\n", category: .document)
 
         do {
-            return try instanciateNote(documentManager, doc)
+            return try instanciateNote(documentManager, doc, keepInMemory: keepInMemory)
         } catch {
             Logger.shared.logError("Unable to decode today's note", category: .document)
         }
