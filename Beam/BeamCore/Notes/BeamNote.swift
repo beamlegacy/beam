@@ -121,9 +121,6 @@ public class BeamNote: BeamElement {
                 note.browsingSessions.append(browsingSession.deepCopy())
             }
         }
-        if !references.isEmpty {
-            note.references = references
-        }
         for child in children {
             if let isSelected = selectedElements?.contains(child), isSelected {
                 note.children.append(child.deepCopy(withNewId: withNewId, selectedElements: selectedElements))
