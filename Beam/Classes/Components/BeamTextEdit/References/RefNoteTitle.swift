@@ -20,6 +20,7 @@ class RefNoteTitle: Widget {
     // MARK: - Properties
     var cardTitleLayer: Layer?
     var actionLinkLayer: Layer?
+    var titleUnderLine = CALayer()
     var action: () -> Void
     var showActionButton: Bool = true {
         didSet {
@@ -41,15 +42,24 @@ class RefNoteTitle: Widget {
         super.init(parent: parent)
 
         titleLayer.string = noteTitle.capitalized
-        titleLayer.font = NSFont.systemFont(ofSize: 0, weight: .semibold)
-        titleLayer.fontSize = 17
+        titleLayer.font = BeamFont.regular(size: 0).nsFont
+        titleLayer.fontSize = 18
         titleLayer.foregroundColor = BeamColor.LinkedSection.title.cgColor
+
+        titleUnderLine.frame = NSRect(x: 0, y: titleLayer.preferredFrameSize().height, width: titleLayer.preferredFrameSize().width, height: 2)
+        titleUnderLine.backgroundColor = BeamColor.LinkedSection.title.cgColor
+        titleUnderLine.isHidden = true
+        titleLayer.addSublayer(titleUnderLine)
 
         cardTitleLayer = ButtonLayer("cardTitleLayer", titleLayer, activated: {[weak self] in
             guard let self = self, let title = self.titleLayer.string as? String else { return }
 
             self.editor.openCard(title)
         })
+        cardTitleLayer?.cursor = .pointingHand
+        cardTitleLayer?.hovered = { [weak self] hover in
+            self?.titleUnderLine.isHidden = !hover
+        }
 
         addLayer(ChevronButton("chevron", open: open, changed: { [unowned self] value in
             self.open = value

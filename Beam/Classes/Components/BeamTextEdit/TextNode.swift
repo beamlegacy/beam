@@ -1061,9 +1061,7 @@ public class TextNode: Widget {
 
     private func buildAttributedString() -> NSAttributedString {
         if elementText.isEmpty {
-            let placeholderAttributedStr = buildAttributedString(for: placeholder)
-            placeholderAttributedStr.addAttributes([NSAttributedString.Key.foregroundColor: BeamColor.Generic.placeholder.cgColor])
-            return placeholderAttributedStr
+            return buildAttributedString(for: placeholder).addAttributes([NSAttributedString.Key.foregroundColor: BeamColor.Generic.placeholder.cgColor])
         }
         return buildAttributedString(for: elementText)
     }

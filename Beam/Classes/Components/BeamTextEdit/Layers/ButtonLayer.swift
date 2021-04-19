@@ -16,7 +16,6 @@ class ButtonLayer: Layer {
     init(_ name: String, _ layer: CALayer,
          activated: @escaping () -> Void = { },
          hovered: @escaping (Bool) -> Void = { _ in }) {
-
         self.activated = activated
         super.init(name: name, layer: layer, hovered: hovered)
 
@@ -36,7 +35,6 @@ class ButtonLayer: Layer {
             self.pressed = layer.contains(info.position)
             return true
         }
-
         setAccessibilityRole(.button)
     }
 

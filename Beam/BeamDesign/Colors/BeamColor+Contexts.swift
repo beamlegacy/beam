@@ -49,14 +49,15 @@ extension BeamColor {
 extension BeamColor {
     enum LinkedSection {
         static let sectionTitle = BeamColor.LightStoneGray
-        static let actionButtonHover = BeamColor.Beam
+        static let actionButtonBackgroundHover = BeamColor.Mercury
+        static let actionButtonHover = BeamColor.Niobium
         static let actionButton = BeamColor.LightStoneGray
         static let chevronIcon = BeamColor.LightStoneGray
         static let breadcrumb = BeamColor.LightStoneGray
         static let breadcrumbHover = BeamColor.Niobium
         static let separator = BeamColor.Tundora
         static let title = BeamColor.Beam
-        static let container = BeamColor.Niobium
+        static let container = BeamColor.Custom(named: "EditorLinkContainer")
     }
 }
 

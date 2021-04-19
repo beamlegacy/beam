@@ -54,8 +54,8 @@ class LinksSection: Widget {
             self.open = value
         }))
 
-        sectionTitleLayer.font = NSFont.systemFont(ofSize: 0, weight: .semibold)
-        sectionTitleLayer.fontSize = 15
+        sectionTitleLayer.font = BeamFont.regular(size: 0).nsFont
+        sectionTitleLayer.fontSize = 12
         sectionTitleLayer.foregroundColor = BeamColor.LinkedSection.sectionTitle.cgColor
 
         addLayer(ButtonLayer("sectionTitle", sectionTitleLayer, activated: {
@@ -66,11 +66,14 @@ class LinksSection: Widget {
             chevron.open = self.open
         }))
 
-        linkActionLayer.font = NSFont.systemFont(ofSize: 0, weight: .medium)
-        linkActionLayer.fontSize = 13
+        linkActionLayer.font = BeamFont.regular(size: 0).nsFont
+        linkActionLayer.fontSize = 12
         linkActionLayer.foregroundColor = BeamColor.LinkedSection.actionButton.cgColor
+        linkActionLayer.contentsScale = contentsScale
+        linkActionLayer.alignmentMode = .center
 
-        separatorLayer.backgroundColor = BeamColor.LinkedSection.separator.nsColor.withAlphaComponent(0.5).cgColor
+        separatorLayer.backgroundColor = BeamColor.Mercury.cgColor
+        self.layer.addSublayer(separatorLayer)
     }
 
     func setupSectionMode() {
@@ -165,7 +168,7 @@ class LinksSection: Widget {
     }
 
     func createLinkAllLayer() {
-        linkLayer = ButtonLayer(
+        linkLayer = LinkButtonLayer(
             "linkAllLayer",
             linkActionLayer,
             activated: { [weak self] in
@@ -199,11 +202,11 @@ class LinksSection: Widget {
         )
 
         layers["disclosure"]?.frame = CGRect(origin: CGPoint(x: 0, y: sectionTitleLayer.preferredFrameSize().height - 15), size: CGSize(width: 20, height: 20))
-        linkActionLayer.frame = CGRect(origin: CGPoint(x: 0, y: 0), size: linkActionLayer.preferredFrameSize())
+        linkActionLayer.frame = CGRect(origin: CGPoint(x: frame.width - linkActionLayer.frame.width / 2, y: 0), size: NSSize(width: 54, height: 21))
     }
 
     override func updateRendering() {
-        contentsFrame = NSRect(x: 0, y: 0, width: availableWidth, height: selfVisible ? 30 : 0)
+        contentsFrame = NSRect(x: -8, y: 8, width: availableWidth, height: selfVisible ? 30 : 0)
 
         computedIdealSize = contentsFrame.size
         computedIdealSize.width = frame.width
@@ -218,10 +221,10 @@ class LinksSection: Widget {
     override func updateSubLayersLayout() {
         CATransaction.disableAnimations {
             setupLayerFrame()
-            separatorLayer.frame = CGRect(x: 0, y: sectionTitleLayer.frame.maxY + 7, width: frame.width, height: 2)
+            separatorLayer.frame = CGRect(x: 0, y: sectionTitleLayer.frame.maxY + 12, width: 560, height: 2)
 
             guard let linkLayer = linkLayer else { return }
-            linkLayer.frame = CGRect(origin: CGPoint(x: frame.width - linkActionLayer.frame.width, y: 0), size: linkActionLayer.preferredFrameSize())
+            linkLayer.frame = CGRect(origin: CGPoint(x: frame.width - linkActionLayer.frame.width / 2, y: 0), size: NSSize(width: 54, height: 21))
         }
     }
 
