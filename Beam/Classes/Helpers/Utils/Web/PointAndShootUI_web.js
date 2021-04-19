@@ -22,7 +22,7 @@ export class PointAndShootUI_web extends PointAndShootUI {
   constructor(win) {
     super()
     this.win = win
-    console.log(`${this} instantiated`)
+    console.log(`${this.toString()} instantiated`)
   }
 
   point(el, _x, _y) {

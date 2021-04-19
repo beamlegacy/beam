@@ -14,11 +14,14 @@ struct DestinationNoteAutocompleteList: View {
 
     internal var onSelectAutocompleteResult: (() -> Void)?
     private let itemHeight: CGFloat = 32
-    private let colorPalette = AutocompleteItemColorPalette(selectedBackgroundColor: BeamColor.NotePicker.selected.nsColor, touchdownBackgroundColor: BeamColor.NotePicker.active.nsColor)
+    private let colorPalette = AutocompleteItemColorPalette(
+            selectedBackgroundColor: BeamColor.NotePicker.selected.nsColor,
+            touchdownBackgroundColor: BeamColor.NotePicker.active.nsColor)
     var body: some View {
         VStack(spacing: 0) {
             ForEach(model.results) { i in
-                return AutocompleteItem(item: i, selected: model.isSelected(i), displayIcon: false, colorPalette: colorPalette)
+                return AutocompleteItem(item: i, selected: model.isSelected(i), displayIcon: false,
+                                        colorPalette: colorPalette)
                     .frame(height: itemHeight)
                     .simultaneousGesture(
                         TapGesture(count: 1).onEnded {
@@ -109,7 +112,7 @@ extension DestinationNoteAutocompleteList {
 
         let todaysCardReplacementName = "Today"
         func displayNameForCardName(_ cardName: String) -> String {
-            return cardName == data?.todaysName ? todaysCardReplacementName : cardName
+            cardName == data?.todaysName ? todaysCardReplacementName : cardName
         }
         func realNameForCardName(_ cardName: String) -> String {
             guard let data = data, cardName.lowercased() == todaysCardReplacementName.lowercased() else {
@@ -129,12 +132,14 @@ extension DestinationNoteAutocompleteList {
             } else if useRecents {
                 items = data.documentManager.loadAllDocumentsWithLimit(itemLimit)
             }
-            if (todaysCardReplacementName.lowercased().contains(searchText.lowercased()) && !items.contains(where: { $0.title == data.todaysName })) {
+            if (todaysCardReplacementName.lowercased().contains(searchText.lowercased())
+                    && !items.contains(where: { $0.title == data.todaysName })) {
                 let todaysNotes = data.documentManager.documentsWithLimitTitleMatch(title: data.todaysName, limit: 1)
                 items.insert(contentsOf: todaysNotes, at: 0)
                 items = Array(items.prefix(itemLimit))
             }
-            allowCreateCard = allowCreateCard && !items.contains(where: { $0.title.lowercased() == searchText.lowercased() })
+            allowCreateCard = allowCreateCard
+                    && !items.contains(where: { $0.title.lowercased() == searchText.lowercased() })
             selectedIndex = 0
             var autocompleteItems = items.map { doc -> AutocompleteResult in
                 var title = doc.title

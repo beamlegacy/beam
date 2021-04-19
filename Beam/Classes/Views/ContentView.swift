@@ -38,7 +38,7 @@ struct ModeView: View {
 
                                     PointFrame(pointAndShootUI: tab.pointAndShoot.ui)
                                     ShootFrame(pointAndShootUI: tab.pointAndShoot.ui)
-                                }
+                                }.clipped()
                             }
                         }
                         .transition(.move(edge: .bottom))

@@ -1,10 +1,3 @@
-//
-//  ShootCardConfirmationView.swift
-//  Beam
-//
-//  Created by Remi Santos on 08/04/2021.
-//
-
 import SwiftUI
 
 struct ShootCardConfirmationView: View {
@@ -12,10 +5,10 @@ struct ShootCardConfirmationView: View {
 
     static let size = CGSize(width: 170, height: 42)
 
-    var cardName = ""
+    var noteTitle = ""
     var numberOfElements = 1
     var isText = true
-    @State private var isVisible = false
+    @State var isVisible = false
 
     private var iconName: String {
         return isText ? "collect-text" : "collect-generic"
@@ -31,14 +24,14 @@ struct ShootCardConfirmationView: View {
                     .foregroundColor(BeamColor.Generic.text.swiftUI)
                     .font(BeamFont.medium(size: 13).swiftUI)
                     +
-                Text(cardName)
+                Text(noteTitle)
                     .foregroundColor(BeamColor.Beam.swiftUI)
                     .font(BeamFont.regular(size: 13).swiftUI)
             }
             .lineLimit(1)
             .padding(BeamSpacing._100)
             .onTapGesture {
-                state.navigateToNote(named: cardName)
+                state.navigateToNote(named: noteTitle)
             }
         }
         .fixedSize(horizontal: true, vertical: true)
@@ -60,7 +53,7 @@ struct ShootCardConfirmationView: View {
 
 struct ShootCardConfirmationView_Previews: PreviewProvider {
     static var previews: some View {
-        ShootCardConfirmationView(cardName: "A Long Card Name", numberOfElements: 4, isText: false)
+        ShootCardConfirmationView(noteTitle: "A Long Card Name", numberOfElements: 4, isText: false)
             .frame(width: 300, height: 70)
     }
 }

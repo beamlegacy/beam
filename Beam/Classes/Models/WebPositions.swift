@@ -65,13 +65,11 @@ class WebPositions {
 
     func registerOrigin(origin: String) {
         var originFrame = framesInfo[origin]
-
         if originFrame == nil {
             originFrame = FrameInfo(origin: origin, x: 0, y: 0, width: -1, height: -1)
             framesInfo[origin] = originFrame
         }
-        
-        Logger.shared.logError("framesInfo: \(framesInfo)", category: .general)
+        Logger.shared.logInfo("registerOrigin: framesInfo=\(framesInfo)", category: .pointAndShoot)
     }
 
     /**

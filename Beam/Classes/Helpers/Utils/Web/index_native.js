@@ -3,4 +3,4 @@ import {UI_native} from "./UI_native"
 
 const ui = UI_native.getInstance(window)
 
-var pointAndShoot = PointAndShoot(window, ui)
+export const __ID__PointAndShoot = PointAndShoot.getInstance(window, ui)
