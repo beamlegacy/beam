@@ -17,7 +17,7 @@ struct ModeView: View {
     var body: some View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
-                OmniBar(isAboveContent: contentIsScrolled)
+                OmniBar(isAboveContent: contentIsScrolled && [.note, .today].contains(state.mode))
                     .environmentObject(state.autocompleteManager)
                     .zIndex(10)
                 ZStack {
@@ -43,30 +43,34 @@ struct ModeView: View {
                         }
                         .transition(.move(edge: .bottom))
                         .animation(.easeInOut(duration: 0.3))
-
                     case .note:
                         ZStack {
                             NoteView(note: state.currentNote!,
                                      showTitle: false,
                                      scrollable: true,
                                      centerText: true) { scrollPoint in
-                                contentIsScrolled = scrollPoint.y > 10
+                                contentIsScrolled = scrollPoint.y > NoteView.topOffset
                             }
                         }
                         .transition(.opacity)
                         .animation(.easeInOut(duration: 0.3))
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
-
+                        .onAppear {
+                            contentIsScrolled = false
+                        }
                     case .today:
                         JournalScrollView([.vertical],
                                           showsIndicators: false,
                                           data: state.data,
                                           dataSource: state.data.journal,
                                           proxy: geometry) { scrollPoint in
-                            contentIsScrolled = scrollPoint.y > JournalScrollView.firstNoteTopOffset(forProxy: geometry)
+                            contentIsScrolled = scrollPoint.y > JournalScrollView.firstNoteTopOffset(forProxy: geometry) + NoteView.topOffset
                         }
-                        .frame(width: geometry.size.width, alignment: .center)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .clipped()
+                        .onAppear {
+                            contentIsScrolled = false
+                        }
                         .onDisappear {
                             data.reloadJournal()
                         }
@@ -78,6 +82,7 @@ struct ModeView: View {
                     }
                 }
                 .frame(maxHeight: .infinity)
+
                 if state.mode != .web {
                     WindowBottomToolBar()
                         .transition(.offset(x: 0, y: 30))
