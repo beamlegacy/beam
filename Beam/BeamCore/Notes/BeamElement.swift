@@ -264,6 +264,8 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
     }
 
     open func insert(_ child: BeamElement, after: BeamElement?) {
+        guard child.parent != self else { return }
+
         if let oldParent = child.parent {
             oldParent.removeChild(child)
         }
