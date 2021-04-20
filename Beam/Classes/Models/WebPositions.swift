@@ -1,5 +1,9 @@
 import BeamCore
 
+/**
+ Computes blocks positions on the native web view
+ from the frame-relative positions provided by JavaScript in a web frame.
+ */
 class WebPositions {
     var scale: CGFloat = 1
 
@@ -8,7 +12,7 @@ class WebPositions {
      */
     var framesInfo = [String: FrameInfo]()
 
-    func viewportPos(v: CGFloat, origin: String, prop: String) -> CGFloat {
+    func viewportPos(value: CGFloat, origin: String, prop: String) -> CGFloat {
         var framePos: CGFloat = 0
         if framesInfo.count > 0 {
             var currentOrigin = origin
@@ -28,16 +32,16 @@ class WebPositions {
                 }
             } while framesInfo[currentOrigin]?.origin != currentOrigin
         }
-        let pos = framePos + v
+        let pos = framePos + value
         return pos
     }
 
-    func viewportX(x: CGFloat, origin: String) -> CGFloat {
-        viewportPos(v: x, origin: origin, prop: "x")
+    func viewportX(frameX: CGFloat, origin: String) -> CGFloat {
+        viewportPos(value: frameX, origin: origin, prop: "x")
     }
 
-    func viewportY(y: CGFloat, origin: String) -> CGFloat {
-        viewportPos(v: y, origin: origin, prop: "y")
+    func viewportY(frameY: CGFloat, origin: String) -> CGFloat {
+        viewportPos(value: frameY, origin: origin, prop: "y")
     }
 
     func viewportWidth(width: CGFloat) -> CGFloat {
@@ -56,8 +60,8 @@ class WebPositions {
      - Returns:
      */
     func viewportArea(area: NSRect, origin: String) -> NSRect {
-        let minX = viewportX(x: area.minX, origin: origin)
-        let minY = viewportY(y: area.minY, origin: origin)
+        let minX = viewportX(frameX: area.minX, origin: origin)
+        let minY = viewportY(frameY: area.minY, origin: origin)
         let width = viewportWidth(width: area.width)
         let height = viewportHeight(height: area.height)
         return NSRect(x: minX, y: minY, width: width, height: height)
@@ -77,13 +81,13 @@ class WebPositions {
   - Returns:
   */
     func jsToRect(jsArea: AnyObject) -> NSRect {
-        guard let x = jsArea["x"] as? CGFloat,
-              let y = jsArea["y"] as? CGFloat,
+        guard let frameX = jsArea["x"] as? CGFloat,
+              let frameY = jsArea["y"] as? CGFloat,
               let width = jsArea["width"] as? CGFloat,
               let height = jsArea["height"] as? CGFloat else {
             return .zero
         }
-        return NSRect(x: x, y: y, width: width, height: height)
+        return NSRect(x: frameX, y: frameY, width: width, height: height)
     }
 
     /**
@@ -91,10 +95,10 @@ class WebPositions {
   - Returns:
   */
     func jsToPoint(jsPoint: AnyObject) -> NSPoint {
-        guard let x = jsPoint["x"] as? CGFloat,
-              let y = jsPoint["y"] as? CGFloat else {
+        guard let frameX = jsPoint["x"] as? CGFloat,
+              let frameY = jsPoint["y"] as? CGFloat else {
             return .zero
         }
-        return NSPoint(x: x, y: y)
+        return NSPoint(x: frameX, y: frameY)
     }
 }

@@ -401,6 +401,7 @@
 		A5CA5DF52625C15D004E9D3E /* BeamElementTextStatsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5CA5DF42625C15D004E9D3E /* BeamElementTextStatsTests.swift */; };
 		A5D6250A26034B1C00A3E676 /* FormatterViewBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5D6250926034B1C00A3E676 /* FormatterViewBackground.swift */; };
 		A5FE96CD2612469C002A2B73 /* AutocompleteManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5FE96CC2612469C002A2B73 /* AutocompleteManager.swift */; };
+		BAA670DD5A20C7D9FD0DDFAE /* WebMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67DEA0FD60B07295A5212 /* WebMessageHandler.swift */; };
 		BAA67192B5EB78981741C311 /* WebPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67CEFFAFA38F29CF1C84F /* WebPage.swift */; };
 		BAA6720F5182946D13AF73B6 /* TestWindow.js in Sources */ = {isa = PBXBuildFile; fileRef = BAA67CD27449D9D48CD6BC13 /* TestWindow.js */; };
 		BAA6741A8232A41CFECDBF95 /* ShootFrameFusionRect.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67FFCA901195F33E7A9C7 /* ShootFrameFusionRect.swift */; };
@@ -419,6 +420,7 @@
 		BAA67E31ADCE5C6342F38E8F /* UIMock.js in Sources */ = {isa = PBXBuildFile; fileRef = BAA67B62CDE1CE1BE59584FE /* UIMock.js */; };
 		BAA67EAF4D7A840A2B37029D /* PointAndShootTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67F1A50CF582D4B0FF9AD /* PointAndShootTest.swift */; };
 		BAA67F2655955909590FECBB /* PointAndShootUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67F5FF48CE3C971FA1487 /* PointAndShootUI.swift */; };
+		BAA67F720B9569BA68F28A3C /* BrowsingScorer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA6755ADB1E0910E7A47FDA /* BrowsingScorer.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -1032,6 +1034,7 @@
 		BAA6739D2A00727C1AB4E0FC /* TextSelectorUI.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = TextSelectorUI.js; sourceTree = "<group>"; };
 		BAA6740CED2A340CD3002907 /* build_js.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = build_js.sh; path = scripts/build_js.sh; sourceTree = "<group>"; };
 		BAA674BD69BF293BB15CA5BA /* package.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = package.json; sourceTree = "<group>"; };
+		BAA6755ADB1E0910E7A47FDA /* BrowsingScorer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BrowsingScorer.swift; sourceTree = "<group>"; };
 		BAA67592CAB90F7E78C4AFF4 /* TextSelector.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = TextSelector.js; sourceTree = "<group>"; };
 		BAA67607F83AA23927951015 /* PointAndShootUI_native.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = PointAndShootUI_native.js; sourceTree = "<group>"; };
 		BAA67648A0A64636B9864B0E /* PointAndShootUI_web.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = PointAndShootUI_web.js; sourceTree = "<group>"; };
@@ -1064,6 +1067,7 @@
 		BAA67D94A674D915CF08B470 /* UI_web.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = UI_web.js; sourceTree = "<group>"; };
 		BAA67DC1C3F0813844D7736F /* UI.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = UI.js; sourceTree = "<group>"; };
 		BAA67DD5764226E47DFA6F9E /* WebPositions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebPositions.swift; sourceTree = "<group>"; };
+		BAA67DEA0FD60B07295A5212 /* WebMessageHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebMessageHandler.swift; sourceTree = "<group>"; };
 		BAA67DF91642C1603C5121E6 /* index_web.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = index_web.js; sourceTree = "<group>"; };
 		BAA67EAAA446E7925E28EA9E /* BeamWindowDecorator.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = BeamWindowDecorator.js; sourceTree = "<group>"; };
 		BAA67F0A50C5D129174BFCE4 /* index_native.scss */ = {isa = PBXFileReference; lastKnownFileType = file.scss; path = index_native.scss; sourceTree = "<group>"; };
@@ -1313,6 +1317,8 @@
 				BAA67DD5764226E47DFA6F9E /* WebPositions.swift */,
 				BAA67F1A50CF582D4B0FF9AD /* PointAndShootTest.swift */,
 				964FE5FB2625E14500966E03 /* GRDBIndexer.swift */,
+				BAA67DEA0FD60B07295A5212 /* WebMessageHandler.swift */,
+				BAA6755ADB1E0910E7A47FDA /* BrowsingScorer.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -3308,6 +3314,8 @@
 				BAA674F90924BE898DBDAB48 /* ShootAbsolutePositioning.swift in Sources */,
 				BAA676BE3F8FCE1B31B1F427 /* Native.test.js in Sources */,
 				BAA674F9FC323A0E712F145F /* BeamTypes.js in Sources */,
+				BAA670DD5A20C7D9FD0DDFAE /* WebMessageHandler.swift in Sources */,
+				BAA67F720B9569BA68F28A3C /* BrowsingScorer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
