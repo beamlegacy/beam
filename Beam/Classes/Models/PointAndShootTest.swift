@@ -1,23 +1,49 @@
 import XCTest
 @testable import Beam
+@testable import BeamCore
 
 class WebPositionsMock: WebPositions {
-
 }
 
 class TestWebPage: WebPage {
 
-    init() {}
+    var scrollX: CGFloat = 0
+    var scrollY: CGFloat = 0
+    private(set) var originalQuery: String?
+    private(set) var pointAndShootAllowed: Bool = true
+    private(set) var title: String = ""
+    private(set) var url: URL?
 
-    func addCSS(source: String, when: WKUserScriptInjectionTime) {}
+    var events: [String] = []
 
-    func addJS(source: String, when: WKUserScriptInjectionTime) {}
+    init() {
+    }
 
-    func executeJS(objectName: String, jsCode: String) {}
+    func addCSS(source: String, when: WKUserScriptInjectionTime) {
+        events.append("addCSS \(source.hashValue) \(String(describing: when))")
+    }
 
-    private(set) var scrollX: CGFloat = 0
-    private(set) var scrollY: CGFloat = 0
-    private(set) var webPositions: WebPositions = WebPositionsMock()
+    func addJS(source: String, when: WKUserScriptInjectionTime) {
+        events.append("addJS \(source.hashValue) \(String(describing: when))")
+    }
+
+    func executeJS(objectName: String, jsCode: String) {
+        events.append("executeJS \(objectName).\(jsCode)")
+    }
+
+    func addToNote(allowSearchResult: Bool) -> BeamCore.BeamElement? {
+        events.append("addToNote \(allowSearchResult)")
+        return nil
+    }
+
+    func setDestinationNote(_ note: BeamCore.BeamNote, rootElement: BeamCore.BeamElement?) {
+        events.append("setDestinationNote \(note) \(rootElement)")
+    }
+
+    func getNote(fromTitle: String) -> BeamCore.BeamNote? {
+        events.append("getNote \(fromTitle)")
+        return nil
+    }
 }
 
 class PointAndShootUIMock: PointAndShootUI {
@@ -37,12 +63,25 @@ class PointAndShootUIMock: PointAndShootUI {
     }
 }
 
+class BrowsingScorerMock: BrowsingScorer {
+    init() {}
+
+    private(set) var currentScore: BeamCore.Score = Score()
+
+    func updateScore() {}
+
+    func addTextSelection() {}
+}
+
 class PointAndShootTest: XCTestCase {
 
     func testBed() -> (PointAndShoot, PointAndShootUIMock) {
         let testPage = TestWebPage()
         let testUI = PointAndShootUIMock()
-        let pns = PointAndShoot(page: testPage, ui: testUI)
+        let testBrowsingScorer = BrowsingScorerMock()
+        let testWebPositions = WebPositions()
+        let pns = PointAndShoot(page: testPage, ui: testUI, browsingScorer: testBrowsingScorer,
+                                webPositions: testWebPositions)
         return (pns, testUI)
     }
 
@@ -57,7 +96,8 @@ class PointAndShootTest: XCTestCase {
         pns.point(target: target)
         XCTAssertEqual(pns.isPointing, true)
         XCTAssertEqual(testUI.events.count, 1)
-        XCTAssertEqual(testUI.events[0], "drawPoint Target(area: (101.0, 102.0, 301.0, 302.0), mouseLocation: (201.0, 202.0), html: \"<p>Pointed text</p>\")")
+        XCTAssertEqual(testUI.events[0], "drawPoint Target(area: (101.0, 102.0, 301.0, 302.0), "
+                + "mouseLocation: (201.0, 202.0), html: \"<p>Pointed text</p>\")")
 
         pns.unpoint()
         XCTAssertEqual(pns.isPointing, false)
@@ -100,7 +140,7 @@ class PointAndShootTest: XCTestCase {
         XCTAssertEqual(pns.groups.count, 0)         // Not validated yet
 
         // Validate shoot
-        try pns.complete(target: target1, noteInfo: NoteInfo(id: nil, title: "My note"))
+        try pns.complete(noteInfo: NoteInfo(id: nil, title: "My note"))
         XCTAssertEqual(pns.status, .none)       // Disallow unpoint while shooting
         XCTAssertEqual(testUI.events.count, 5)
         XCTAssertEqual(testUI.groupsUI.count, 0)    // No more shoot UI
@@ -117,7 +157,7 @@ class PointAndShootTest: XCTestCase {
         XCTAssertEqual(pns.groups.count, 1)         // Second one not validated yet
 
         // Validate second shoot
-        try pns.complete(target: target2, noteInfo: NoteInfo(id: nil, title: "Other note"))
+        try pns.complete(noteInfo: NoteInfo(id: nil, title: "Other note"))
         XCTAssertEqual(testUI.events.count, 7)
         XCTAssertEqual(testUI.groupsUI.count, 0)    // No more shoot UI
         XCTAssertEqual(pns.groups.count, 2)         // Two shoot groups memorized

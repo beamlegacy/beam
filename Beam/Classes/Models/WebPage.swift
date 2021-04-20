@@ -1,9 +1,11 @@
-//
-// Created by Jérôme Beau on 19/03/2021.
-//
+import BeamCore
 
+/**
+ The expected API for a WebPage to work (received messages, point and shoot) with.
+
+ Defining this protocol allows to provide a mock implementation for testing.
+ */
 protocol WebPage {
-
     /**
      Injects CSS source code into the web page.
       As this will create a `<style>` tag, the style will be implicitly executed.
@@ -24,9 +26,27 @@ protocol WebPage {
 
     func executeJS(objectName: String, jsCode: String)
 
-    var scrollX: CGFloat { get }
+    var scrollX: CGFloat { get set }
 
-    var scrollY: CGFloat { get }
+    var scrollY: CGFloat { get set }
 
-    var webPositions: WebPositions { get }
+    var originalQuery: String? { get }
+
+    var pointAndShootAllowed: Bool { get }
+
+    var title: String { get }
+
+    var url: URL? { get }
+
+    /**
+ Add current page to a Note.
+
+ - Parameter allowSearchResult:
+ - Returns:
+ */
+    func addToNote(allowSearchResult: Bool) -> BeamElement?
+
+    func setDestinationNote(_ note: BeamNote, rootElement: BeamElement?)
+
+    func getNote(fromTitle: String) -> BeamNote?
 }

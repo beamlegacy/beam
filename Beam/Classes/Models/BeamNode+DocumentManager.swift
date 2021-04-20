@@ -130,7 +130,8 @@ extension BeamNote: BeamNoteDocument {
         return note
     }
 
-    public static func fetch(_ documentManager: DocumentManager, title: String, keepInMemory: Bool = true) -> BeamNote? {
+    public static func fetch(_ documentManager: DocumentManager, title: String,
+                             keepInMemory: Bool = true) -> BeamNote? {
         // Is the note in the cache?
         if let note = getFetchedNote(title) {
             return note

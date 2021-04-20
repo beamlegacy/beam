@@ -76,6 +76,12 @@ class PointAndShoot {
         var noteInfo: NoteInfo = NoteInfo(id: nil, title: "")
 
         init() {}
+
+        func html() -> String {
+           return targets.reduce("", {
+               return $1.html.count > $0.count ? $1.html : $0
+           })
+        }
     }
 
     struct Target {
@@ -96,10 +102,14 @@ class PointAndShoot {
     private var page: WebPage
 
     let ui: PointAndShootUI
+    let browsingScorer: BrowsingScorer
+    let webPositions: WebPositions
 
-    init(page: WebPage, ui: PointAndShootUI) {
+    init(page: WebPage, ui: PointAndShootUI, browsingScorer: BrowsingScorer, webPositions: WebPositions) {
         self.page = page
         self.ui = ui
+        self.browsingScorer = browsingScorer
+        self.webPositions = webPositions
     }
 
     /**
@@ -146,7 +156,7 @@ class PointAndShoot {
                 let shootUIGroup = ui.createGroup(noteInfo: group.noteInfo, edited: false)
                 for shootTarget in shootTargets {
                     let selectionUI = ui.createUI(shootTarget: shootTarget, xDelta: xDelta, yDelta: yDelta,
-                                                  scale: page.webPositions.scale)
+                                                  scale: webPositions.scale)
                     shootUIGroup.uis.append(selectionUI)
                 }
             }
@@ -163,7 +173,7 @@ class PointAndShoot {
             let shootUIGroup = ui.createGroup(noteInfo: group.noteInfo, edited: true)
             for shootTarget in shootTargets {
                 let selectionUI = ui.createUI(shootTarget: shootTarget, xDelta: xDelta, yDelta: yDelta,
-                                              scale: page.webPositions.scale)
+                                              scale: webPositions.scale)
                 shootUIGroup.uis.append(selectionUI)
             }
         }
@@ -214,7 +224,6 @@ class PointAndShoot {
             Logger.shared.logInfo("shoopGroups.count \(groups.count)", category: .pointAndShoot)
         }
         status = .shooting
-        let webPositions = page.webPositions
         let pageScrollX = page.scrollX
         let pageScrollY = page.scrollY
         for target in targets {
@@ -229,7 +238,7 @@ class PointAndShoot {
         drawCurrentGroup()
     }
 
-    func complete(target: Target, noteInfo: NoteInfo) throws {
+    func complete(noteInfo: NoteInfo) throws {
         guard let group = currentGroup else {
             Logger.shared.logWarning("Should have a current group", category: .pointAndShoot)
             return
@@ -264,5 +273,55 @@ class PointAndShoot {
         case .none:
             ui.clear()
         }
+    }
+
+    /**
+     - Parameters:
+       - noteTitle:
+       - target:
+       - additionalText:
+     - Throws:
+     */
+    func addShootToNote(noteTitle: String, withNote additionalText: String? = nil) throws {
+        guard let url = page.url,
+              let note = page.getNote(fromTitle: noteTitle)
+                else {
+            Logger.shared.logError("Could not find note with title \(noteTitle)", category: .pointAndShoot)
+            return
+        }
+        page.setDestinationNote(note, rootElement: note)
+        let html = currentGroup!.html()
+        let text: BeamText = html2Text(url: url, html: html)
+        browsingScorer.addTextSelection()
+        browsingScorer.updateScore()
+
+        // now add a bullet point with the quoted text:
+        let title = page.title
+        let urlString = url.absoluteString
+        var quote = text
+        quote.addAttributes([.emphasis], to: quote.wholeRange)
+
+        DispatchQueue.main.async {
+            guard let current = self.page.addToNote(allowSearchResult: true) else {
+                Logger.shared.logError("Ignored current note add", category: .general)
+                return
+            }
+            var quoteParent = current
+            if let additionalText = additionalText, !additionalText.isEmpty {
+                let quoteElement = BeamElement()
+                quoteElement.kind = .quote(1, title, urlString)
+                quoteElement.text = BeamText(text: additionalText, attributes: [])
+                quoteElement.query = self.page.originalQuery
+                current.addChild(quoteElement)
+                quoteParent = quoteElement
+            }
+            let quoteE = BeamElement()
+            quoteE.kind = .quote(1, title, urlString)
+            quoteE.text = quote
+            quoteE.query = self.page.originalQuery
+            quoteParent.addChild(quoteE)
+        }
+        let noteInfo = NoteInfo(id: note.id, title: note.title)
+        try complete(noteInfo: noteInfo)
     }
 }

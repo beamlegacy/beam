@@ -17,7 +17,7 @@ class FullScreenWKWebView: WKWebView {
 //        return NSEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
 //    }
 
-    //Catching those event to avoid funk sound
+    // Catching those event to avoid funk sound
     override func keyDown(with event: NSEvent) {
         if let key = event.specialKey {
             if key == .leftArrow || key == .rightArrow {
@@ -28,20 +28,13 @@ class FullScreenWKWebView: WKWebView {
     }
 }
 
-struct FrameInfo {
-    let origin: String
-    let x: CGFloat
-    let y: CGFloat
-    let width: CGFloat
-    let height: CGFloat
-}
-
 // swiftlint:disable:next type_body_length
-class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler, Codable, WebPage {
+class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, WKUIDelegate, Codable,
+        WebPage, BrowsingScorer {
     var id: UUID
 
-    private(set) var scrollX: CGFloat = 0
-    private(set) var scrollY: CGFloat = 0
+    var scrollX: CGFloat = 0
+    var scrollY: CGFloat = 0
     private var pixelRatio: Double = 1
 
     public func load(url: URL) {
@@ -78,38 +71,42 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     @Published var browsingTree: BrowsingTree
     @Published var privateMode = false
 
-    lazy var pointAndShoot: PointAndShoot = {
-        // Avoid instantiate if !pointAndShootEnabled
-        PointAndShoot(page: self, ui: PointAndShootUI())
-    }()
+    var pointAndShootAllowed: Bool {
+        url?.isSearchResult != true
+    }
+
+    var currentScore: Score { self.browsingTree.current.score }
 
     lazy var passwordOverlayController: PasswordOverlayController = PasswordOverlayController(webView: webView)
 
-    lazy var webPositions: WebPositions = WebPositions()
+    lazy var webPositions: WebPositions = messageHandler!.webPositions
 
     var state: BeamState!
-
     public private(set) var note: BeamNote
     public private(set) var rootElement: BeamElement
+
     public private(set) var element: BeamElement?
+
+    var messageHandler: WebMessageHandler?
 
     func setDestinationNote(_ note: BeamNote, rootElement: BeamElement? = nil) {
         self.note = note
         self.rootElement = rootElement ?? note
         self.note.browsingSessions.append(browsingTree)
+        state.destinationCardName = note.title
 
         if let elem = element {
             // reparent the element that has alreay been created
             self.rootElement.addChild(elem)
         } else {
-            _ = addCurrentPageToNote()
+            _ = addToNote()
         }
     }
 
     var appendToIndexer: (URL, Readability) -> Void = { _, _ in
     }
-
     var creationDate: Date = Date()
+
     var lastViewDate: Date = Date()
 
     public var onNewTabCreated: (BrowserTab) -> Void = { _ in
@@ -119,7 +116,8 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
     class var webViewConfiguration: WKWebViewConfiguration {
         let config = WKWebViewConfiguration()
-        config.applicationNameForUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_0) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Safari/605.1.15"
+        config.applicationNameForUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_0) "
+                + "AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Safari/605.1.15"
         config.preferences.javaScriptEnabled = true
         config.preferences.javaScriptCanOpenWindowsAutomatically = false
         config.preferences.tabFocusesLinks = true
@@ -188,7 +186,8 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         privateMode = try container.decode(Bool.self, forKey: .privateMode)
 
         let noteTitle = try container.decode(String.self, forKey: .note)
-        let loadedNote = BeamNote.fetch(AppDelegate.main.documentManager, title: noteTitle) ?? AppDelegate.main.data.todaysNote
+        let loadedNote = BeamNote.fetch(AppDelegate.main.documentManager, title: noteTitle)
+                ?? AppDelegate.main.data.todaysNote
         note = loadedNote
         let rootId = try? container.decode(UUID.self, forKey: .rootElement)
         rootElement = note.findElement(rootId ?? loadedNote.id) ?? loadedNote.children.first!
@@ -238,7 +237,8 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
     // Add the current page to the current note and return the beam element
     // (if the element already exist return it directly)
-    func addCurrentPageToNote(allowSearchResult: Bool = false) -> BeamElement? {
+
+    func addToNote(allowSearchResult: Bool = false) -> BeamElement? {
         guard let elem = element else {
             guard let url = self.url else {
                 Logger.shared.logError("Cannot get current URL", category: .general)
@@ -291,21 +291,29 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         }
     }
 
-    private func updateScore() {
+    func updateScore() {
         let score = browsingTree.current.score.score
 //            Logger.shared.logDebug("updated score[\(url!.absoluteString)] = \(s)", category: .general)
         element?.score = score
         if score > 0.0 {
-            _ = addCurrentPageToNote() // Automatically add current page to note over a certain threshold
+            _ = addToNote() // Automatically add current page to note over a certain threshold
         }
+    }
+
+    func addTextSelection() {
+        browsingTree.current.score.textSelections += 1
+    }
+
+    func getNote(fromTitle noteTitle: String) -> BeamNote? {
+        BeamNote.fetch(state.data.documentManager, title: noteTitle)
     }
 
     var backListSize = 0
 
     private func setupObservers() {
-        Logger.shared.logInfo("setupObservers", category: .general)
-        webView.publisher(for: \.title).sink { v in
-            self.receivedWebviewTitle(v)
+        Logger.shared.logDebug("setupObservers")
+        webView.publisher(for: \.title).sink { value in
+            self.receivedWebviewTitle(value)
         }.store(in: &scope)
         webView.publisher(for: \.url).sink { value in
             self.url = value
@@ -330,10 +338,18 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         webView.navigationDelegate = self
         webView.uiDelegate = self
 
-        removeScriptHandlers()
         removeUserScripts()
 
-        addScriptHandlers()
+        if messageHandler != nil {
+            messageHandler!.destroy(for: webView)
+        }
+        let webPositions: WebPositions = WebPositions()
+        // Avoid instantiate if !pointAndShootEnabled
+        let pointAndShoot = PointAndShoot(page: self, ui: PointAndShootUI(), browsingScorer: self,
+                                          webPositions: webPositions)
+        messageHandler = WebMessageHandler(page: self, webPositions: webPositions, browsingScorer: self, pointAndShoot: pointAndShoot, passwordOverlayController: passwordOverlayController)
+        messageHandler!.addScriptHandlers(to: webView)
+
         addUserScripts()
     }
 
@@ -342,11 +358,11 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         webView.navigationDelegate = nil
         webView.uiDelegate = nil
 
-        removeScriptHandlers()
+        messageHandler?.destroy(for: webView)
     }
 
     private func removeUserScripts() {
-        webView.configuration.userContentController.removeAllUserScripts()
+        messageHandler?.removeScriptHandlers(from: webView)
     }
 
     lazy var devTools: String = {
@@ -355,7 +371,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
     private func addUserScripts() {
         addJS(source: overrideConsole, when: .atDocumentStart)
-        pointAndShoot.injectScripts()
+        messageHandler!.pointAndShoot.injectScripts()
         addJS(source: jsPasswordManager, when: .atDocumentEnd)
         //    addJS(source: devTools, when: .atDocumentEnd)
     }
@@ -400,38 +416,6 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         addJS(source: styleSrc, when: when)
     }
 
-    private enum ScriptHandlers: String, CaseIterable {
-        case beam_point
-        case beam_shoot
-        case beam_shootConfirmation
-        case beam_textSelection
-        case beam_textSelected
-        case beam_onLoad
-        case beam_onScrolled
-        case beam_logging
-        case beam_textInputFields
-        case beam_textInputFocusIn
-        case beam_textInputFocusOut
-        case beam_resize
-        case beam_pinch
-        case beam_frameBounds
-        case beam_setStatus
-    }
-
-    private func removeScriptHandlers() {
-        ScriptHandlers.allCases.forEach {
-            webView.configuration.userContentController.removeScriptMessageHandler(forName: $0.rawValue)
-        }
-    }
-
-    private func addScriptHandlers() {
-        ScriptHandlers.allCases.forEach {
-            let handler = $0.rawValue
-            webView.configuration.userContentController.add(self, name: handler)
-            Logger.shared.logDebug("Added Script handler: \(handler)", category: .web)
-        }
-    }
-
     private var currentBackForwardItem: WKBackForwardListItem?
 
     private func handleBackForwardWebView(navigationAction: WKNavigationAction) {
@@ -448,7 +432,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                 browsingTree.goForward()
             }
         }
-        pointAndShoot.removeAll()
+        messageHandler!.pointAndShoot.removeAll()
         currentBackForwardItem = webView.backForwardList.currentItem
     }
 
@@ -456,7 +440,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction,
                  decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         element = nil
-        pointAndShoot.removeAll()
+        messageHandler!.pointAndShoot.removeAll()
         decisionHandler(.allow)
     }
 
@@ -514,7 +498,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
     func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
         element = nil
-        _ = addCurrentPageToNote()
+        _ = addToNote()
     }
 
     lazy var overrideConsole: String = {
@@ -524,286 +508,13 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         loadFile(from: "PasswordManager", fileType: "js")
     }()
 
-    func pointAndShootTargetValues(from jsMessage: [String: AnyObject]) -> (location: NSPoint, html: String)? {
-        guard let html = jsMessage["html"] as? String,
-              let location = jsMessage["location"] else {
-            return nil
-        }
-        let position = webPositions.jsToPoint(jsPoint: location)
-        return (position, html)
-    }
-
-    func pointAndShootAreaValue(from jsMessage: [String: AnyObject]) -> NSRect? {
-        guard let area = jsMessage["area"] else {
-            return nil
-        }
-        return webPositions.jsToRect(jsArea: area)
-    }
-
-    func pointAndShootAreasValue(from jsMessage: [String: AnyObject]) -> [NSRect]? {
-        guard let areas = jsMessage["areas"] as? [AnyObject] else {
-            return nil
-        }
-        return areas.map { webPositions.jsToRect(jsArea: $0) }
-    }
-
-    // swiftlint:disable:next cyclomatic_complexity function_body_length
-    func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-        let messageBody = message.body as? [String: AnyObject]
-        let messageKey = message.name
-        let messageName = messageKey //.components(separatedBy: "_beam_")[1]
-        switch messageName {
-        case ScriptHandlers.beam_logging.rawValue:
-            guard let dict = messageBody,
-                  let type = dict["type"] as? String,
-                  let message = dict["message"] as? String
-                    else {
-                Logger.shared.logError("Ignored log event: \(String(describing: messageBody))",
-                                       category: .web)
-                return
-            }
-            if type == "error" {
-                Logger.shared.logError(message, category: .javascript)
-            } else if type == "warning" {
-                Logger.shared.logWarning(message, category: .javascript)
-            } else if type == "log" {
-                Logger.shared.logInfo(message, category: .javascript)
-            }
-
-        case ScriptHandlers.beam_onLoad.rawValue:
-            Logger.shared.logInfo("onLoad flushing frameInfo", category: .web)
-            webPositions.framesInfo.removeAll()
-
-        case ScriptHandlers.beam_point.rawValue:
-            guard webView.url?.isSearchResult != true else { return }
-            guard let dict = messageBody,
-                  let origin = dict["origin"] as? String ?? originalQuery,
-                  let area = pointAndShootAreaValue(from: dict),
-                  let (location, html) = pointAndShootTargetValues(from: dict) else {
-                pointAndShoot.unpoint()
-                return
-            }
-            let pointArea = webPositions.viewportArea(area: area, origin: origin)
-            let target = PointAndShoot.Target(area: pointArea, mouseLocation: location, html: html)
-            pointAndShoot.point(target: target)
-            Logger.shared.logInfo("Web block point: \(pointArea)", category: .web)
-
-        case ScriptHandlers.beam_shoot.rawValue:
-            guard webView.url?.isSearchResult != true else { return }
-            guard let dict = messageBody,
-                  let area = pointAndShootAreaValue(from: dict),
-                  let (location, html) = pointAndShootTargetValues(from: dict),
-                  let origin = dict["origin"] as? String else {
-                Logger.shared.logError("Ignored shoot event: \(String(describing: messageBody))", category: .web)
-                return
-            }
-            let target = PointAndShoot.Target(area: area, mouseLocation: location, html: html)
-            pointAndShoot.shoot(targets: [target], origin: origin)
-            Logger.shared.logInfo("Web shoot point: \(area)", category: .web)
-
-        case ScriptHandlers.beam_shootConfirmation.rawValue:
-            guard webView.url?.isSearchResult != true else { return }
-            guard let dict = messageBody,
-                  let area = pointAndShootAreaValue(from: dict),
-                  // let (location, html) = pointAndShootTargetValues(from: dict),
-                  let _ = dict["origin"] as? String else {
-                Logger.shared.logError("Ignored shoot event: \(String(describing: messageBody))", category: .web)
-                return
-            }
-            // let target = PointAndShoot.Target(area: area, mouseLocation: location, html: html)
-            pointAndShoot.showShootInfo(group: pointAndShoot.currentGroup!)
-            Logger.shared.logInfo("Web shoot confirmation: \(area)", category: .web)
-
-        case ScriptHandlers.beam_textSelected.rawValue:
-            guard webView.url?.isSearchResult != true else { return }
-            guard let dict = messageBody,
-                  dict["index"] as? Int != nil,
-                  dict["text"] as? String != nil,
-                  let origin = dict["origin"] as? String,
-                  let html = dict["html"] as? String,
-                  let areas = pointAndShootAreasValue(from: dict),
-                  !html.isEmpty else {
-                Logger.shared.logError("Ignored text selected event: \(String(describing: messageBody))",
-                                       category: .web)
-                return
-            }
-            let targets = areas.map {
-                PointAndShoot.Target(area: $0, mouseLocation: CGPoint(x: $0.minX, y: $0.maxY), html: html)
-            }
-            pointAndShoot.shoot(targets: targets, origin: origin)
-
-        case ScriptHandlers.beam_textSelection.rawValue:
-            guard webView.url?.isSearchResult != true else { return }
-            guard let dict = messageBody,
-                  dict["index"] as? Int != nil,
-                  dict["text"] as? String != nil,
-                  let origin = dict["origin"] as? String,
-                  let html = dict["html"] as? String,
-                  let areas = pointAndShootAreasValue(from: dict),
-                  !html.isEmpty
-                    else {
-                Logger.shared.logError("Ignored text selection event: \(String(describing: messageBody))",
-                                       category: .web)
-                return
-            }
-            let targets = areas.map { PointAndShoot.Target(area: $0, mouseLocation: CGPoint(x: $0.minX, y: $0.maxY), html: html) }
-            pointAndShoot.shoot(targets: targets, origin: origin)
-
-        case ScriptHandlers.beam_pinch.rawValue:
-            guard let dict = messageBody,
-                  (dict["offsetLeft"] as? CGFloat) != nil,
-                  (dict["pageLeft"] as? CGFloat) != nil,
-                  (dict["offsetTop"] as? CGFloat) != nil,
-                  (dict["pageTop"] as? CGFloat) != nil,
-                  (dict["width"] as? CGFloat) != nil,
-                  (dict["height"] as? CGFloat) != nil,
-                  let scale = dict["scale"] as? CGFloat
-                    else {
-                return
-            }
-            webPositions.scale = scale
-
-        case ScriptHandlers.beam_onScrolled.rawValue:
-            guard let dict = messageBody,
-                  let x = dict["x"] as? CGFloat,
-                  let y = dict["y"] as? CGFloat,
-                  let width = dict["width"] as? CGFloat,
-                  let height = dict["height"] as? CGFloat,
-                  let _ = dict["origin"] as? String,
-                  let scale = dict["scale"] as? CGFloat
-                    else {
-                Logger.shared.logError("Ignored scroll event: \(String(describing: messageBody))", category: .web)
-                return
-            }
-            webPositions.scale = scale
-            scrollX = x // nativeX(x: x, origin: origin)
-            scrollY = y // nativeY(y: y, origin: origin)
-            passwordOverlayController.updateScrollPosition(x: x, y: y, width: width, height: height)
-            if (pointAndShoot.isPointing) {
-                // Logger.shared.logDebug("scroll redraw because pointing", pointAndShoot)
-                pointAndShoot.drawAllGroups()
-            } else {
-                Logger.shared.logDebug("scroll NOT redraw because pointing=\(pointAndShoot.status)", category: .pointAndShoot)
-            }
-            if width > 0, height > 0 {
-                let currentScore = browsingTree.current.score
-                currentScore.scrollRatioX = max(Float(x / width), currentScore.scrollRatioX)
-                currentScore.scrollRatioY = max(Float(y / height), currentScore.scrollRatioY)
-                currentScore.area = Float(width * height)
-                updateScore()
-            }
-            Logger.shared.logDebug("Web Scrolled: \(scrollX), \(scrollY)", category: .web)
-
-        case ScriptHandlers.beam_textInputFields.rawValue:
-            guard let jsonString = message.body as? String else { break }
-            passwordOverlayController.updateInputFields(with: jsonString)
-
-        case ScriptHandlers.beam_textInputFocusIn.rawValue:
-            guard let elementId = message.body as? String else { break }
-            passwordOverlayController.updateInputFocus(for: elementId, becomingActive: true)
-
-        case ScriptHandlers.beam_textInputFocusOut.rawValue:
-            guard let elementId = message.body as? String else { break }
-            passwordOverlayController.updateInputFocus(for: elementId, becomingActive: false)
-
-        case ScriptHandlers.beam_frameBounds.rawValue:
-            guard let dict = messageBody,
-                  let jsFramesInfo = dict["frames"] as? NSArray
-                    else {
-                Logger.shared.logError("Ignored beam_frameBounds: \(String(describing: messageBody))", category: .web)
-                return
-            }
-            for jsFrameInfo in jsFramesInfo {
-                let d = jsFrameInfo as AnyObject
-                let bounds = d["bounds"] as AnyObject
-                if let origin = d["origin"] as? String,
-                   let href = d["href"] as? String {
-                    webPositions.registerOrigin(origin: origin)
-                    let rectArea = webPositions.jsToRect(jsArea: bounds)
-                    let nativeBounds = webPositions.viewportArea(area: rectArea, origin: origin)
-                    webPositions.framesInfo[href] = FrameInfo(
-                            origin: origin, x: nativeBounds.minX, y: nativeBounds.minY,
-                            width: nativeBounds.width, height: nativeBounds.height
-                    )
-                }
-            }
-
-        case ScriptHandlers.beam_resize.rawValue:
-            guard let dict = messageBody,
-                  let width = dict["width"] as? CGFloat,
-                  let height = dict["height"] as? CGFloat,
-                  let origin = dict["origin"] as? String
-                    else {
-                Logger.shared.logError("Ignored beam_resize: \(String(describing: messageBody))", category: .web)
-                return
-            }
-            // pointAndShoot.drawCurrentGroup()
-            passwordOverlayController.updateViewSize(width: width, height: height)
-
-        case ScriptHandlers.beam_setStatus.rawValue:
-            guard let dict = messageBody,
-                  let status = dict["status"] as? String,
-                  let _ = dict["origin"] as? String
-                    else {
-                Logger.shared.logError("Ignored beam_status: \(String(describing: messageBody))", category: .web)
-                return
-            }
-            pointAndShoot.status = PointAndShootStatus(rawValue: status)!
-
-        default:
-            break
-        }
-    }
-
-    func addSelectionToNote(noteTitle: String, target: PointAndShoot.Target,
-                            withNote additionalText: String? = nil) throws {
-        guard let url = webView.url,
-              let note = BeamNote.fetch(state.data.documentManager, title: noteTitle)
-                else { return }
-        state.destinationCardName = note.title
-        setDestinationNote(note, rootElement: note)
-        let html = target.html
-        let text: BeamText = html2Text(url: url, html: html)
-        browsingTree.current.score.textSelections += 1
-        updateScore()
-
-        // now add a bullet point with the quoted text:
-        guard let title = webView.title else { return }
-        let urlString = url.absoluteString
-        var quote = text
-        quote.addAttributes([.emphasis], to: quote.wholeRange)
-
-        DispatchQueue.main.async {
-            guard let current = self.addCurrentPageToNote(allowSearchResult: true) else {
-                Logger.shared.logError("Ignored current note add", category: .general)
-                return
-            }
-            var quoteParent = current
-            if let additionalText = additionalText, !additionalText.isEmpty {
-                let quoteElement = BeamElement()
-                quoteElement.kind = .quote(1, title, urlString)
-                quoteElement.text = BeamText(text: additionalText, attributes: [])
-                quoteElement.query = self.originalQuery
-                current.addChild(quoteElement)
-                quoteParent = quoteElement
-            }
-            let quoteE = BeamElement()
-            quoteE.kind = .quote(1, title, urlString)
-            quoteE.text = quote
-            quoteE.query = self.originalQuery
-            quoteParent.addChild(quoteE)
-        }
-        let noteInfo = NoteInfo(id: note.id, title: note.title)
-        try pointAndShoot.complete(target: target, noteInfo: noteInfo)
-    }
-
     func cancelShoot() {
-        pointAndShoot.resetStatus()
+        messageHandler!.pointAndShoot.resetStatus()
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         guard let url = webView.url else { return }
-        _ = addCurrentPageToNote()
+        _ = addToNote()
         browsingTree.navigateTo(url: url.absoluteString, title: webView.title)
         Readability.read(webView) { [weak self] result in
             guard let self = self else { return }
@@ -870,7 +581,8 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         completionHandler(nil)
     }
 
-    func webView(_ webView: WKWebView, runOpenPanelWith parameters: WKOpenPanelParameters, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping ([URL]?) -> Void) {
+    func webView(_ webView: WKWebView, runOpenPanelWith parameters: WKOpenPanelParameters,
+                 initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping ([URL]?) -> Void) {
         Logger.shared.logDebug("webView runOpenPanel", category: .web)
         completionHandler(nil)
     }

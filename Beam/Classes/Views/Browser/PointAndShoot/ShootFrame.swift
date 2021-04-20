@@ -37,10 +37,10 @@ struct ShootFrame: View {
     }
 
     func onCompleteCardSelection(_ noteTitle: String?, withNote note: String?) {
-        if let noteTitle = noteTitle, let selection = pointAndShootUI.groupsUI.last?.uis.last {
+        if let noteTitle = noteTitle {
             pointAndShootUI.groupsUI.last!.edited = false   // Find edited one instead of assuming last
             do {
-                try state.currentTab?.addSelectionToNote(noteTitle: noteTitle, target: selection.target, withNote: note)
+                try state.currentTab?.messageHandler?.pointAndShoot.addShootToNote(noteTitle: noteTitle, withNote: note)
             } catch let error {
                 Logger.shared.logError("Could not add selection to card: \(error.localizedDescription)",
                                        category: .pointAndShoot)
