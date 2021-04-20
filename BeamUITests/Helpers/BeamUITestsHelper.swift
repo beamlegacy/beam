@@ -45,6 +45,11 @@ class BeamUITestsHelper {
         menu.tap()
     }
 
+    func showJournal() {
+        let journal = XCUIApplication().menuItems["Show journal"]
+        journal.tap()
+    }
+
     // Doesn't work 
     func logsValue() -> String? {
         let allLogsWindow = XCUIApplication().windows["All Logs"]

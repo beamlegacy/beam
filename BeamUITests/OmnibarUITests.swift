@@ -23,6 +23,12 @@ class OmniBarUITestsHelper : BeamUITestsHelper {
     func inputHasFocus(_ input: XCUIElement) -> Bool {
         return input.value(forKey: "hasKeyboardFocus") as? Bool ?? false
     }
+
+    func navigateTo(text: String) {
+        XCUIApplication().menuItems["Open Location"].tap()
+        self.searchField.typeText(text)
+        self.searchField.typeText("\r")
+    }
 }
 
 class OmniBarUITests: QuickSpec {
