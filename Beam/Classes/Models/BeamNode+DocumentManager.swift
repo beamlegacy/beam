@@ -7,9 +7,8 @@
 
 import Foundation
 import BeamCore
-import BeamCore
 
- extension BeamNote: BeamNoteDocument {
+extension BeamNote: BeamNoteDocument {
     public var documentStruct: DocumentStruct? {
         do {
             let encoder = JSONEncoder()
@@ -19,6 +18,7 @@ import BeamCore
             let data = try encoder.encode(self)
 
             return DocumentStruct(id: id,
+                                  databaseId: databaseId ?? DatabaseManager.defaultDatabase.id,
                                   title: title.lowercased(),
                                   createdAt: creationDate,
                                   updatedAt: updateDate,
@@ -63,6 +63,7 @@ import BeamCore
                 self.visitedSearchResults = newSelf.visitedSearchResults
                 self.browsingSessions = newSelf.browsingSessions
                 self.version = docStruct.version
+                self.databaseId = docStruct.databaseId
                 self.savedVersion = self.version
                 self.isPublic = docStruct.isPublic
                 recursiveUpdate(other: newSelf)
@@ -86,16 +87,17 @@ import BeamCore
         let newDoc = documentManager.saveDocument(documentStruct, completion: { [weak self] result in
             if let self = self {
                 switch result {
-                case .success(true):
+                case .success(let success):
+                    guard success else { break }
                     self.savedVersion = self.version
                     self.pendingSave = 0
 
                 case .failure(BeamNoteError.saveAlreadyRunning):
                     self.pendingSave += 1
 
-                default:
+                case .failure(let error):
                     self.version = self.savedVersion
-                    Logger.shared.logError("Saving note \(self.title) failed", category: .document)
+                    Logger.shared.logError("Saving note \(self.title) failed: \(error)", category: .document)
                     if self.pendingSave > 0 {
                         Logger.shared.logDebug("Trying again: Saving note \(self.title) as there were \(self.pendingSave) pending save operations", category: .document)
                         self.save(documentManager: documentManager, completion: completion)
@@ -117,6 +119,7 @@ import BeamCore
         }
         let note = try decoder.decode(BeamNote.self, from: documentStruct.data)
         note.version = documentStruct.version
+        note.databaseId = documentStruct.databaseId
         note.savedVersion = note.version
         note.updateDate = documentStruct.updatedAt
         note.isPublic = documentStruct.isPublic

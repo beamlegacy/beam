@@ -188,6 +188,7 @@ public class DocumentManager {
 
     private func parseDocumentBody(_ document: Document) -> DocumentStruct {
         return DocumentStruct(id: document.id,
+                              databaseId: document.database_id,
                               title: document.title,
                               createdAt: document.created_at,
                               updatedAt: document.updated_at,
@@ -261,6 +262,10 @@ public class DocumentManager {
         document.updated_at = documentType.updatedAt ?? document.updated_at
         document.deleted_at = documentType.deletedAt ?? document.deleted_at
         document.document_type = documentType.documentType ?? document.document_type
+        if let databaseIdString = documentType.database?.id,
+           let databaseId = UUID(uuidString: databaseIdString) {
+            document.database_id = databaseId
+        }
         document.version += 1
 
         return true
@@ -330,7 +335,7 @@ public class DocumentManager {
             }
             remoteDocumentsIds.append(uuid)
 
-            let document = Document.fetchOrCreateWithId(context, uuid)
+            let document = Document.rawFetchOrCreateWithId(context, uuid)
 
             // Making sure we had no local updates, and simply overwritten the local version
             if !self.updateDocumentWithDocumentAPIType(document, documentAPIType) {
@@ -407,7 +412,7 @@ public class DocumentManager {
         guard error.domain == NSCocoaErrorDomain, let conflicts = error.userInfo["conflictList"] as? [NSMergeConflict] else { return }
 
         for conflict in conflicts {
-            let title = (conflict.sourceObject as? Document)?.title ?? ":( Not found"
+            let title = (conflict.sourceObject as? Document)?.title ?? ":( Document Not found"
             Logger.shared.logError("Old version: \(conflict.oldVersionNumber), new version: \(conflict.newVersionNumber), title: \(title)", category: .coredata)
         }
     }
@@ -422,11 +427,15 @@ public class DocumentManager {
         // If document is deleted, we don't need to check title uniqueness
         guard document.deleted_at == nil else { return }
 
-        let predicate = NSPredicate(format: "title = %@ AND id != %@", document.title, document.id as CVarArg)
-
-        if Document.countWithPredicate(context, predicate) > 0 {
-            let errString = "Title is already used in another document"
-            let userInfo: [String: Any] = [NSLocalizedFailureReasonErrorKey: errString, NSValidationObjectErrorKey: self]
+        let predicate = NSPredicate(format: "title = %@ AND id != %@", document.title,
+                                    document.id as CVarArg)
+        let count = Document.countWithPredicate(context, predicate, document.database_id)
+        if count > 0 {
+            let errString = "Title is already used in \(count) other documents"
+            let documents = Document.fetchAll(context: context, predicate).map { DocumentStruct(document: $0) }
+            let userInfo: [String: Any] = [NSLocalizedFailureReasonErrorKey: errString,
+                                           NSValidationObjectErrorKey: self,
+                                           "documents": documents]
             throw NSError(domain: "DOCUMENT_ERROR_DOMAIN", code: 1001, userInfo: userInfo)
         }
     }
@@ -457,7 +466,7 @@ extension DocumentManager {
                 for document in documents where document.id == documentStruct.id {
                     // We don't want to get updates if we only changed internal values
                     let keys = Array(document.changedValues().keys)
-                    guard keys.contains("data") else {
+                    guard keys.contains("data") || keys.contains("database_id") else {
                         return
                     }
 
@@ -481,7 +490,7 @@ extension DocumentManager {
             do {
                 try self.checkValidations(context, document)
 
-                result = self.parseDocumentBody( document)
+                result = self.parseDocumentBody(document)
                 try Self.saveContext(context: context)
             } catch {
                 Logger.shared.logError(error.localizedDescription, category: .coredata)
@@ -531,11 +540,9 @@ extension DocumentManager {
     // we are in the process of a sync
     func syncDocuments(completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
         uploadAllDocuments { result in
-            if case .success(let success) = result {
-                if success == true {
-                    self.refreshDocuments(delete: false, completion: completion)
-                    return
-                }
+            if case .success(let success) = result, success == true {
+                self.refreshDocuments(delete: false, completion: completion)
+                return
             }
 
             completion?(result)
@@ -672,7 +679,7 @@ extension DocumentManager {
     /// If the user is authenticated, and network is enabled, it will also call the BeamAPI (async) to save the document remotely
     /// but will not trigger the completion handler. If the network callbacks updates the coredata object, it is expected the
     /// updates to be fetched through `onDocumentUpdate`
-    // swiftlint:disable:next function_body_length
+    // swiftlint:disable:next function_body_length cyclomatic_complexity
     func saveDocument(_ documentStruct: DocumentStruct,
                       _ networkSave: Bool = true,
                       _ networkCompletion: ((Swift.Result<Bool, Error>) -> Void)? = nil,
@@ -701,7 +708,7 @@ extension DocumentManager {
                     return
                 }
 
-                let document = Document.fetchOrCreateWithId(context, documentStruct.id)
+                let document = Document.rawFetchOrCreateWithId(context, documentStruct.id)
                 document.update(documentStruct)
 
                 do {
@@ -713,6 +720,13 @@ extension DocumentManager {
                     return
                 }
                 document.version = newVersion
+
+                if let database = try? Database.rawFetchWithId(context, document.database_id) {
+                    database.updated_at = BeamDate.now
+                } else {
+                    // We should always have a connected database
+                    Logger.shared.logError("Didn't find database \(document.database_id)", category: .document)
+                }
 
                 if blockOperation.isCancelled {
                     completion?(.failure(DocumentManagerError.operationCancelled))
@@ -785,6 +799,7 @@ extension DocumentManager {
                         completion?(.failure(error))
                         return
                     }
+                    Logger.shared.logError(error.localizedDescription, category: .document)
                     self.saveDocumentStructOnAPIFailure(documentStruct, error, completion)
                 case .success(let sentDocumentApiType):
                     // `previousChecksum` stores the checksum we sent to the API
@@ -860,11 +875,20 @@ extension DocumentManager {
     func deleteDocument(id: UUID, completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
         coreDataManager.persistentContainer.performBackgroundTask { context in
             let document = Document.fetchWithId(context, id)
+
+            if let database_id = document?.database_id, let database = try? Database.rawFetchWithId(context, database_id) {
+                database.updated_at = BeamDate.now
+            } else {
+                // We should always have a connected database
+                Logger.shared.logError("No connected database", category: .document)
+            }
+
             document?.delete(context)
 
             do {
                 try Self.saveContext(context: context)
             } catch {
+                Logger.shared.logError(error.localizedDescription, category: .document)
                 completion?(.failure(error))
                 return
             }
@@ -895,7 +919,11 @@ extension DocumentManager {
     }
 
     func deleteAllDocuments(includedRemote: Bool = true, completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
-        CoreDataManager.shared.destroyPersistentStore()
+        do {
+            try Document.deleteBatchWithPredicate(CoreDataManager.shared.mainContext)
+        } catch {
+            Logger.shared.logError(error.localizedDescription, category: .coredata)
+        }
 
         guard includedRemote else {
             completion?(.success(true))
@@ -1007,11 +1035,11 @@ extension DocumentManager {
         }
 
         CoreDataManager.shared.persistentContainer.performBackgroundTask { context in
-            let documents = Document.fetchAll(context: context)
-            let documentsArray: [DocumentAPIType] = documents.map { document in document.asApiType() }
-            let documentRequest = DocumentRequest()
-
             do {
+                let documents = Document.rawFetchAll(context: context)
+                let documentsArray: [DocumentAPIType] = documents.map { document in document.asApiType(context) }
+                let documentRequest = DocumentRequest()
+
                 try documentRequest.importDocuments(documentsArray) { result in
                     switch result {
                     case .failure(let error):
@@ -1121,7 +1149,7 @@ extension DocumentManager {
         saveDocumentPromiseCancels[documentStruct.id] = cancel
 
         let result = promise
-            .then(on: self.backgroundQueue) { context -> Bool in
+            .then(on: self.backgroundQueue) { context -> Promises.Promise<Bool>  in
                 Logger.shared.logDebug("Saving \(documentStruct.title)", category: .document)
                 Logger.shared.logDebug(documentStruct.data.asString ?? "-", category: .documentDebug)
 
@@ -1139,17 +1167,14 @@ extension DocumentManager {
 
                     guard AuthenticationManager.shared.isAuthenticated,
                           Configuration.networkEnabled else {
-                        return true
+                        return Promise(true)
                     }
 
                     // We want to fetch back the document, to update it's previousChecksum
                     context.refresh(document, mergeChanges: false)
                     let promise: Promises.Promise<Bool> = self.saveDocumentOnApi(DocumentStruct(document: document))
-                    promise
-                        .then { _ in }
-                        .catch { _ in }
 
-                    return true
+                    return promise
                 }
             }.always {
                 self.saveDocumentPromiseCancels[documentStruct.id] = nil
@@ -1160,11 +1185,11 @@ extension DocumentManager {
 
     func saveDocumentOnApi(_ documentStruct: DocumentStruct) -> Promises.Promise<Bool> {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
-            return Promises.Promise(true)
+            return Promise(true)
         }
 
         guard documentStruct.deletedAt == nil else {
-            return Promises.Promise(true)
+            return Promise(true)
         }
 
         Self.networkRequests[documentStruct.id]?.cancel()
@@ -1189,7 +1214,7 @@ extension DocumentManager {
                 try Self.saveContext(context: context)
             }
 
-            return Promises.Promise(true)
+            return Promise(true)
         }.recover(on: backgroundQueue) { error throws -> Promises.Promise<Bool> in
             guard !documentRequest.isCancelled else { throw DocumentManagerError.operationCancelled }
 
@@ -1244,6 +1269,15 @@ extension DocumentManager {
             .then(on: backgroundQueue) { context in
                 context.performAndWait {
                     let document = Document.fetchWithId(context, id)
+
+                    if let database_id = document?.database_id,
+                       let database = try? Database.rawFetchWithId(context, database_id) {
+                        database.updated_at = BeamDate.now
+                    } else {
+                        // We should always have a connected database
+                        Logger.shared.logError("No connected database", category: .document)
+                    }
+
                     document?.delete(context)
                 }
 
@@ -1287,12 +1321,17 @@ extension DocumentManager {
     }
 
     func deleteAllDocuments(includedRemote: Bool = true) -> Promises.Promise<Bool> {
-        CoreDataManager.shared.destroyPersistentStore()
+        do {
+            try Document.deleteBatchWithPredicate(CoreDataManager.shared.mainContext)
+        } catch {
+            Logger.shared.logError(error.localizedDescription, category: .coredata)
+            return Promise(error)
+        }
 
         guard includedRemote,
               AuthenticationManager.shared.isAuthenticated,
               Configuration.networkEnabled else {
-            return Promises.Promise(true)
+            return Promise(true)
         }
 
         let documentRequest = DocumentRequest()
@@ -1302,17 +1341,42 @@ extension DocumentManager {
 
     // MARK: Bulk calls
     func uploadAllDocuments() -> Promises.Promise<Bool> {
-        let documentRequest = DocumentRequest()
+        coreDataManager.background()
+            .then(on: backgroundQueue) { context -> Promises.Promise<[DatabaseAPIType]> in
+                try context.performAndWait {
+                    let databaseRequest = DatabaseRequest()
 
-        return self.coreDataManager.background()
-            .then(on: backgroundQueue) { context in
-                let documents = context.performAndWait {
-                    Document.fetchAll(context: context)
+                    let databases = try Database.fetchAll(context: context)
+                    let databasesArray: [DatabaseAPIType] = databases.map { database in database.asApiType() }
+
+                    let saveDBPromise: Promises.Promise<[DatabaseAPIType]> = databaseRequest.saveDatabases(databasesArray)
+
+                    /*
+                     Can't use this, both network request will happen in random orders and
+                     doesn't work well with our tests and Vinyl.
+
+                     let saveDBPromise: Promises.Promise<[DatabaseAPIType]> = databaseRequest.saveDatabases(databasesArray)
+                     let saveDocumentsPromise: Promises.Promise<DocumentRequest.ImportDocuments> = documentRequest.importDocuments(documentsArray)
+
+                     return all(saveDBPromise, saveDocumentsPromise)
+                     */
+                    return saveDBPromise
                 }
-                let documentsArray: [DocumentAPIType] = documents.map { document in document.asApiType() }
+            }
+            .then(on: backgroundQueue) { _ -> Promises.Promise<DocumentRequest.ImportDocuments> in
+                self.coreDataManager.backgroundContext.performAndWait {
+                    let documentRequest = DocumentRequest()
 
-                return documentRequest.importDocuments(documentsArray)
-                    .then(on: self.backgroundQueue) { _ in true }
+                    let documents = Document.fetchAll(context: self.coreDataManager.backgroundContext)
+                    let documentsArray: [DocumentAPIType] = documents.map { document in document.asApiType() }
+
+                    let saveDocumentsPromise: Promises.Promise<DocumentRequest.ImportDocuments> = documentRequest.importDocuments(documentsArray)
+
+                    return saveDocumentsPromise
+                }
+            }
+            .then (on: backgroundQueue) { _ in
+                true
             }
     }
 }
@@ -1567,6 +1631,13 @@ extension DocumentManager {
             .then(on: backgroundQueue) { context -> PromiseKit.Promise<Bool> in
                 context.performAndWait {
                     let document = Document.fetchWithId(context, id)
+                    if let database_id = document?.database_id,
+                       let database = try? Database.rawFetchWithId(context, database_id) {
+                        database.updated_at = BeamDate.now
+                    } else {
+                        // We should always have a connected database
+                        Logger.shared.logError("No connected database", category: .document)
+                    }
                     document?.delete(context)
                 }
 
@@ -1581,7 +1652,11 @@ extension DocumentManager {
     }
 
     func deleteAllDocuments(includedRemote: Bool = true) -> PromiseKit.Promise<Bool> {
-        CoreDataManager.shared.destroyPersistentStore()
+        do {
+            try Document.deleteBatchWithPredicate(CoreDataManager.shared.mainContext)
+        } catch {
+            return Promise(error: error)
+        }
 
         guard includedRemote,
               AuthenticationManager.shared.isAuthenticated,
@@ -1590,24 +1665,30 @@ extension DocumentManager {
         }
 
         let documentRequest = DocumentRequest()
-        return documentRequest.deleteAllDocuments()
-            .map { _ in true }
+        let promise: PromiseKit.Promise<Bool> = documentRequest.deleteAllDocuments()
+        return promise
     }
 
     // MARK: Bulk calls
     func uploadAllDocuments() -> PromiseKit.Promise<Bool> {
-        let documentRequest = DocumentRequest()
+        self.coreDataManager.background()
+            .then(on: backgroundQueue) { context -> PromiseKit.Promise<([DatabaseAPIType], DocumentRequest.ImportDocuments)> in
+                try context.performAndWait {
+                    let documentRequest = DocumentRequest()
+                    let databaseRequest = DatabaseRequest()
 
-        return self.coreDataManager.background()
-            .then(on: backgroundQueue) { context -> PromiseKit.Promise<Bool> in
-                let documents = context.performAndWait {
-                    Document.fetchAll(context: context)
+                    let documents = Document.fetchAll(context: context)
+                    let documentsArray: [DocumentAPIType] = documents.map { document in document.asApiType() }
+
+                    let databases = try Database.fetchAll(context: context)
+                    let databasesArray: [DatabaseAPIType] = databases.map { database in database.asApiType() }
+
+                    let saveDBPromise: PromiseKit.Promise<[DatabaseAPIType]> = databaseRequest.saveDatabases(databasesArray)
+                    let saveDocumentsPromise: PromiseKit.Promise<DocumentRequest.ImportDocuments> = documentRequest.importDocuments(documentsArray)
+
+                    return PromiseKit.when(fulfilled: saveDBPromise, saveDocumentsPromise)
                 }
-                let documentsArray: [DocumentAPIType] = documents.map { document in document.asApiType() }
-
-                let result: PromiseKit.Promise<DocumentRequest.ImportDocuments> = documentRequest.importDocuments(documentsArray)
-                return result.map(on: self.backgroundQueue) { _ in true }
-            }
+            }.map(on: backgroundQueue) { _ in true }
     }
 }
 // swiftlint:enable file_length

@@ -1,6 +1,6 @@
 custom_rules:
   print:
-    name: "print()"
+    name: "print"
     regex: 'print\(([^\)]*)\)'
     message: "Use Logger.shared.logDebug() instead"
     severity: warning

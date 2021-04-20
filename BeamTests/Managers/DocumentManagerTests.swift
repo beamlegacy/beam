@@ -200,11 +200,14 @@ class DocumentManagerTests: QuickSpec {
                         waitUntil(timeout: .seconds(10)) { done in
                             let promise: PromiseKit.Promise<Bool> = sut.saveDocument(docStruct2)
 
-                            promise.done { _ in }
-                                .catch { error in
-                                    expect((error as NSError).code) == 1001
-                                    done()
-                                }
+                            promise.done { _ in
+                                fail("Shouldn't happen")
+                                done()
+                            }
+                            .catch { error in
+                                expect((error as NSError).code) == 1001
+                                done()
+                            }
                         }
 
                         docStruct2.deletedAt = Date()
@@ -284,11 +287,14 @@ class DocumentManagerTests: QuickSpec {
                         waitUntil(timeout: .seconds(10)) { done in
                             let promise: Promises.Promise<Bool> = sut.saveDocument(docStruct2)
 
-                            promise.then { _ in }
-                                .catch { error in
-                                    expect((error as NSError).code) == 1001
-                                    done()
-                                }
+                            promise.then { _ in
+                                fail("Shouldn't happen")
+                                done()
+                            }
+                            .catch { error in
+                                expect((error as NSError).code) == 1001
+                                done()
+                            }
                         }
 
                         docStruct2.deletedAt = Date()
@@ -394,11 +400,13 @@ class DocumentManagerTests: QuickSpec {
             it("creates document") {
                 let title = String.randomTitle()
                 let docStruct = sut.create(title: title)!
-                expect(docStruct.title).to(equal(title))
-                let count = Document.countWithPredicate(mainContext,
-                                                        NSPredicate(format: "id = %@", docStruct.id as CVarArg))
+                expect(docStruct.title) == title
 
-                expect(count).to(equal(1))
+                let count = Document.countWithPredicate(mainContext,
+                                                        NSPredicate(format: "id = %@", docStruct.id as CVarArg),
+                                                        docStruct.databaseId)
+
+                expect(count) == 1
             }
 
             it("fails creating document") {
@@ -446,7 +454,8 @@ class DocumentManagerTests: QuickSpec {
                         sut
                             .create(title: title)
                             .done { docStruct in
-                                expect(docStruct.title).to(equal(title))
+                                fail("Shouldn't happen")
+                                done()
                             }
                             .catch { error in
                                 expect((error as NSError).code).to(equal(1001))
@@ -495,7 +504,8 @@ class DocumentManagerTests: QuickSpec {
                         sut
                             .create(title: title)
                             .then { docStruct in
-                                expect(docStruct.title).to(equal(title))
+                                fail("Shouldn't happen")
+                                done()
                             }
                             .catch { error in
                                 expect((error as NSError).code).to(equal(1001))
@@ -653,7 +663,6 @@ class DocumentManagerTests: QuickSpec {
         }
 
         describe("document.version") {
-            let faker = Faker()
             var docStruct: DocumentStruct!
 
             it("sets document version at creation and after a save") {
@@ -684,8 +693,8 @@ class DocumentManagerTests: QuickSpec {
                 //swiftlint:disable:next force_try
                 let jsonData = try! JSONEncoder().encode(document)
 
-                let id = UUID()
-                docStruct = DocumentStruct(id: id,
+                docStruct = DocumentStruct(id: UUID(),
+                                           databaseId: UUID(),
                                            title: title,
                                            createdAt: Date(),
                                            updatedAt: Date(),

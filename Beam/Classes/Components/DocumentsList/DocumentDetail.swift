@@ -1,91 +1,112 @@
 import SwiftUI
+import Combine
+import BeamCore
 
 struct DocumentDetail: View {
     @State private var refreshing = false
 
-    let document: Document
+    @ObservedObject var document: Document
     let documentManager = DocumentManager()
+    let databaseManager = DatabaseManager()
 
     var body: some View {
-        ScrollView {
-            HStack(alignment: VerticalAlignment.center, spacing: 10.0) {
-                RefreshButton
-                DeleteButton
-                PublicButton
-            }
+        if document.managedObjectContext != nil {
+            ScrollView {
+                HStack(alignment: VerticalAlignment.center, spacing: 10.0) {
+                    RefreshButton
+                    DeleteButton
+                    PublicButton
+                    DatabasePicker
+                    Spacer()
+                }.padding()
 
-            HStack {
-                VStack {
-                    HStack {
-                        Text("ID:").bold()
-                        Text(document.uuidString)
+                HStack {
+                    VStack {
+                        VStack {
+                            HStack {
+                                Text("ID:").bold()
+                                Text(document.uuidString)
+                                Spacer()
+                            }
+                            HStack {
+                                Text("Database:").bold()
+                                Text((try? Database.fetchWithId(CoreDataManager.shared.mainContext,
+                                                                document.database_id))?.title ?? "no database")
+                                Text(document.database_id.uuidString)
+                                Spacer()
+                            }
+                            HStack {
+                                Text("Title:").bold()
+                                Text(document.title)
+                                Spacer()
+                            }
+                            HStack {
+                                Text("Created At:").bold()
+                                Text("\(document.created_at, formatter: Self.dateFormat)")
+                                Spacer()
+                            }
+                            HStack {
+                                Text("Updated At:").bold()
+                                Text("\(document.updated_at, formatter: Self.dateFormat)")
+                                Spacer()
+                            }
+                            if let deleted_at = document.deleted_at {
+                                HStack {
+                                    Text("Deleted At:").bold()
+                                    Text("\(deleted_at, formatter: Self.dateFormat)")
+                                    Spacer()
+                                }
+                            }
+                            HStack {
+                                Text("Public:").bold()
+                                Text(document.is_public ? "Yes" : "No")
+                                Spacer()
+                            }
+                        }
+
+                        Divider()
+
                         Spacer()
-                    }
-                    HStack {
-                        Text("Title:").bold()
-                        Text(document.title)
-                        Spacer()
-                    }
-                    HStack {
-                        Text("Created At:").bold()
-                        Text("\(document.created_at, formatter: Self.dateFormat)")
-                        Spacer()
-                    }
-                    HStack {
-                        Text("Updated At:").bold()
-                        Text("\(document.updated_at, formatter: Self.dateFormat)")
-                        Spacer()
-                    }
-                    if let deleted_at = document.deleted_at {
-                        HStack {
-                            Text("Deleted At:").bold()
-                            Text("\(deleted_at, formatter: Self.dateFormat)")
+
+                        HStack(alignment: .top) {
+                            VStack(alignment: HorizontalAlignment.leading) {
+                                Text(document.data?.MD5 ?? "No MD5")
+                                    .font(.caption)
+                                    .fontWeight(.light)
+                                    .background(Color.white)
+                                Text(document.data?.asString ?? "No data")
+                                    .font(.caption)
+                                    .fontWeight(.light)
+                                    .background(Color.white)
+                            }
+                            Spacer()
+
+                            VStack(alignment: HorizontalAlignment.leading) {
+                                Text(document.beam_api_checksum ?? "No MD5")
+                                    .font(.caption)
+                                    .fontWeight(.light)
+                                    .background(Color.white)
+                                Text(document.beam_api_data?.asString ?? "No ancestor data")
+                                    .font(.caption)
+                                    .fontWeight(.light)
+                                    .background(Color.white)
+                            }
                             Spacer()
                         }
-                    }
-                    HStack {
-                        Text("Public:").bold()
-                        Text(document.is_public ? "Yes" : "No")
-                        Spacer()
-                    }
 
-                    Divider()
-
+                        Divider()
+                    }.background(Color.white).padding()
                     Spacer()
-
-                    HStack(alignment: .top) {
-                        VStack(alignment: HorizontalAlignment.leading) {
-                            Text(document.data?.MD5 ?? "No MD5")
-                                .font(.caption)
-                                .fontWeight(.light)
-                                .background(Color.white)
-                            Text(document.data?.asString ?? "No data")
-                                .font(.caption)
-                                .fontWeight(.light)
-                                .background(Color.white)
-                        }
-                        Spacer()
-
-                        VStack(alignment: HorizontalAlignment.leading) {
-                            Text(document.beam_api_checksum ?? "No MD5")
-                                .font(.caption)
-                                .fontWeight(.light)
-                                .background(Color.white)
-                            Text(document.beam_api_data?.asString ?? "No ancestor data")
-                                .font(.caption)
-                                .fontWeight(.light)
-                                .background(Color.white)
-                        }
-                        Spacer()
-                    }
-
-                    Divider()
-                }.background(Color.white).padding()
+                }
                 Spacer()
+            }.onAppear {
+                refresh()
+                if let database = try? Database.fetchWithId(CoreDataManager.shared.mainContext, document.database_id) {
+                    selectedDatabase = database
+                }
             }
-            Spacer()
-        }.onAppear {
-            refresh()
+        } else {
+            EmptyView()
         }
     }
 
@@ -135,6 +156,30 @@ struct DocumentDetail: View {
             togglePublic()
         }, label: {
             Text(document.is_public ? "Make Private" : "Make Public").frame(minWidth: 100)
+        })
+    }
+
+    @State private var selectedDatabase = Database.defaultDatabase()
+    private var DatabasePicker: some View {
+        Picker("", selection: $selectedDatabase.onChange(dbChange), content: {
+            ForEach(databaseManager.allDatabases(), id: \.title) {
+                Text($0.title).tag($0)
+            }
+        })
+    }
+
+    private func dbChange(_ db: Database) {
+        guard document.database_id != db.id else { return }
+
+        document.database_id = db.id
+
+        _ = documentManager.saveDocument(DocumentStruct(document: document), completion: { result in
+            switch result {
+            case .failure(let error):
+                Logger.shared.logError(error.localizedDescription, category: .document)
+            case .success:
+                Logger.shared.logDebug("Document saved")
+            }
         })
     }
 

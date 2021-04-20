@@ -2,6 +2,7 @@ import Foundation
 
 public struct DocumentStruct {
     var id: UUID
+    var databaseId: UUID
     var title: String
     let createdAt: Date
     var updatedAt: Date
@@ -24,6 +25,7 @@ public struct DocumentStruct {
 
     func copy() -> DocumentStruct {
         let copy = DocumentStruct(id: id,
+                                  databaseId: databaseId,
                                   title: title,
                                   createdAt: createdAt,
                                   updatedAt: updatedAt,
@@ -51,6 +53,7 @@ extension DocumentStruct {
         self.previousChecksum = document.beam_api_checksum
         self.version = document.version
         self.isPublic = document.is_public
+        self.databaseId = document.database_id
     }
 
     func asApiType() -> DocumentAPIType {

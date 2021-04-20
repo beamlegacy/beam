@@ -63,8 +63,15 @@ extension AppDelegate {
                 Logger.shared.logError("startAccessingSecurityScopedResource returned false. This directory might not need it, or this URL might not be a security scoped URL, or maybe something's wrong?", category: .general)
             }
 
-            CoreDataManager.shared.backup(url)
-
+            do {
+                try CoreDataManager.shared.backup(url)
+            } catch {
+                let alert = NSAlert()
+                alert.alertStyle = .critical
+                alert.messageText = "Could not import backup: \(error.localizedDescription)"
+                alert.informativeText = error.localizedDescription
+                alert.runModal()
+            }
             url.stopAccessingSecurityScopedResource()
         }
     }
@@ -84,17 +91,24 @@ extension AppDelegate {
         openPanel.begin { [weak openPanel] result in
             guard result == .OK, let url = openPanel?.url else { openPanel?.close(); return }
 
-            CoreDataManager.shared.importBackup(url)
-            self.updateBadge()
-
             let alert = NSAlert()
             alert.alertStyle = .critical
 
-            let documentsCount = Document.countWithPredicate(CoreDataManager.shared.mainContext)
+            do {
+                try CoreDataManager.shared.importBackup(url)
 
-            // TODO: i18n
-            alert.messageText = "Backup file has been imported"
-            alert.informativeText = "\(documentsCount) notes have been imported"
+                let documentsCount = Document.countWithPredicate(CoreDataManager.shared.mainContext)
+
+                // TODO: i18n
+                alert.messageText = "Backup file has been imported"
+                alert.informativeText = "\(documentsCount) notes have been imported"
+            } catch {
+                alert.messageText = "Could not import backup"
+                alert.informativeText = error.localizedDescription
+                alert.alertStyle = .critical
+            }
+            self.updateBadge()
+
             alert.runModal()
 
             openPanel?.close()

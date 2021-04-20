@@ -3,14 +3,18 @@ import Combine
 import BeamCore
 
 struct DocumentsList: View {
-    @ObservedObject var viewModel: ViewModel
+    @Environment(\.managedObjectContext) var moc
+    @FetchRequest(entity: Document.entity(),
+                  sortDescriptors: [NSSortDescriptor(keyPath: \Document.title, ascending: true)])
+    var documents: FetchedResults<Document>
+
     @State private var searchText: String = ""
     @Binding var selectedDocument: Document?
 
     var body: some View {
         NavigationView {
             VStack {
-                List(viewModel.documents, selection: $selectedDocument) { document in
+                List(documents, selection: $selectedDocument) { document in
                     NavigationLink(destination: DocumentDetail(document: document).background(Color.white)) {
                         DocumentRow(document: document)
                     }
@@ -19,54 +23,16 @@ struct DocumentsList: View {
                 .frame(minWidth: 200, idealWidth: 280)
             }
 
-            if let selectedDocument = selectedDocument {
+            if let selectedDocument = selectedDocument, selectedDocument.managedObjectContext != nil {
                 DocumentDetail(document: selectedDocument)
             }
         }
     }
 }
 
-extension DocumentsList {
-    final class ViewModel: NSObject, NSFetchedResultsControllerDelegate, ObservableObject {
-        private let managedObjectContext: NSManagedObjectContext
-        private let documentsController: NSFetchedResultsController<Document>
-
-        init(managedObjectContext: NSManagedObjectContext) {
-            self.managedObjectContext = managedObjectContext
-            let sortDescriptors = [NSSortDescriptor(keyPath: \Document.title, ascending: true)]
-            documentsController = Document.resultsController(context: managedObjectContext, sortDescriptors: sortDescriptors)
-            super.init()
-            documentsController.delegate = self
-            try? documentsController.performFetch()
-            observeChangeNotification()
-        }
-
-        func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-            objectWillChange.send()
-        }
-
-        var documents: [Document] {
-            return documentsController.fetchedObjects ?? []
-        }
-
-        private var cancellables = [AnyCancellable]()
-
-        private func observeChangeNotification() {
-            NotificationCenter.default.publisher(for: .NSManagedObjectContextObjectsDidChange,
-                                                 object: managedObjectContext)
-                .compactMap({ ManagedObjectContextChanges<Document>(notification: $0) })
-                .sink { changes in
-                    Logger.shared.logDebug("\(changes)", category: .coredata)
-                }
-                .store(in: &cancellables)
-        }
-    }
-}
-
 struct DocumentsList_Previews: PreviewProvider {
     static var previews: some View {
-        let viewModel = DocumentsList.ViewModel(managedObjectContext: CoreDataManager.shared.mainContext)
-        let document = viewModel.documents.first
-        return DocumentsList(viewModel: viewModel, selectedDocument: .constant(document))
+        let document = Document.fetchFirst(context: CoreDataManager.shared.mainContext)
+        return DocumentsList(selectedDocument: .constant(document))
     }
 }

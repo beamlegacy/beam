@@ -21,6 +21,8 @@ public enum LogCategory: String {
     case javascript
     case documentMerge
     case documentDebug
+    case database
+    case databaseDebug
     case noteEditor
     case keychain
     case encryption

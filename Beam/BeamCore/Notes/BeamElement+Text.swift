@@ -14,7 +14,7 @@ public extension BeamElement {
         }
         if let note = self as? BeamNote {
             return [(id, BeamText(text: note.title))] + childrenText
-       }
+        }
 
         return [(id, text)] + childrenText
     }

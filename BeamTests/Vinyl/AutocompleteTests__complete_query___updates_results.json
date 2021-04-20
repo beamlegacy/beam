@@ -7,20 +7,20 @@
     "response" : {
       "headers" : {
         "Cache-Control" : "no-cache, must-revalidate",
-        "x-frame-options" : "SAMEORIGIN",
-        "Date" : "Wed, 24 Mar 2021 12:44:29 GMT",
-        "Content-Disposition" : "attachment; filename=\"f.txt\"",
-        "Pragma" : "no-cache",
+        "Expires" : "-1",
         "Content-Type" : "text\/javascript; charset=ISO-8859-1",
-        "Server" : "gws",
         "Alt-Svc" : "h3-29=\":443\"; ma=2592000,h3-T051=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\"",
+        "x-frame-options" : "SAMEORIGIN",
+        "Date" : "Fri, 16 Apr 2021 11:04:52 GMT",
         "Content-Encoding" : "gzip",
+        "Content-Disposition" : "attachment; filename=\"f.txt\"",
         "x-xss-protection" : "0",
-        "Expires" : "-1"
+        "Pragma" : "no-cache",
+        "Server" : "gws"
       },
       "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=Beam",
       "status" : 200,
-      "body" : "[\"Beam\",[\"beam\",\"beamng drive\",\"beamy\",\"beamer\",\"beams plus\",\"beam traduction\",\"beam app\",\"beamer boy lyrics\",\"beamforming\",\"beam stock\"],[],{\"google:suggestsubtypes\":[[433],[433],[],[433],[],[],[],[],[],[]]}]"
+      "body" : "[\"Beam\",[\"beam\",\"beamng drive\",\"beamy\",\"beamer\",\"beam traduction\",\"beam me up\",\"beams plus\",\"beam agency\",\"beamng drive ps4\",\"beam app\"],[],{\"google:suggestsubtypes\":[[433],[433,131],[],[433],[],[],[],[],[433,131],[]]}]"
     }
   }
 ]

@@ -42,6 +42,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var cancellableScope = Set<AnyCancellable>()
 
     let documentManager = DocumentManager()
+    let databaseManager = DatabaseManager()
+
     #if DEBUG
     var beamUIMenuGenerator: BeamUITestsMenuGenerator!
     #endif
@@ -85,26 +87,41 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         prepareMenuForTestEnv()
         #endif
 
-        syncDocuments()
+        syncData()
     }
 
-    private func syncDocuments() {
+    func syncData() {
         guard Configuration.env != "test" else { return }
         guard AuthenticationManager.shared.isAuthenticated else { return }
 
         // With Vinyl and Network test recording, and this executing, it generates async network
         // calls and randomly fails.
+
         // My feeling is we should sync + trigger notification and only start network calls when
         // this sync has finished.
-        documentManager.syncDocuments { result in
+
+        databaseManager.syncDatabases { result in
             switch result {
             case .failure(let error):
-                Logger.shared.logError("Couldn't sync document: \(error.localizedDescription)",
+                Logger.shared.logError("Couldn't sync databases: \(error.localizedDescription)",
                                        category: .document)
             case .success(let success):
                 if !success {
-                    Logger.shared.logError("Couldn't sync document",
+                    Logger.shared.logError("Couldn't sync databases",
                                            category: .document)
+                } else {
+                    self.documentManager.syncDocuments { result in
+                        switch result {
+                        case .failure(let error):
+                            Logger.shared.logError("Couldn't sync documents: \(error.localizedDescription)",
+                                                   category: .document)
+                        case .success(let success):
+                            if !success {
+                                Logger.shared.logError("Couldn't sync documents",
+                                                       category: .document)
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -172,6 +189,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     var consoleWindow: ConsoleWindow?
     var documentsWindow: DocumentsWindow?
+    var databasesWindow: DatabasesWindow?
 
     // MARK: -
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {

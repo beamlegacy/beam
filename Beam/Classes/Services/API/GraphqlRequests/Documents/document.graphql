@@ -7,5 +7,6 @@ query document($id: ID!) {
     createdAt
     updatedAt
     isPublic
+    database { title id }
   }
 }

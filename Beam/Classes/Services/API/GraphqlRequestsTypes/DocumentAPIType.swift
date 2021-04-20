@@ -24,8 +24,9 @@ class DocumentAPIType: Codable {
     var dataChecksum: String?
     var documentType: Int16?
     var previousChecksum: String?
+    var database: DatabaseAPIType?
 
-    init(document: Document) {
+    init(document: Document, context: NSManagedObjectContext) {
         title = document.title
         id = document.uuidString
         createdAt = document.created_at
@@ -35,6 +36,11 @@ class DocumentAPIType: Codable {
         previousChecksum = document.beam_api_checksum
         data = document.data?.asString
         isPublic = document.is_public
+
+        let dbDatabase = try? Database.rawFetchWithId(context, document.database_id)
+
+        database = DatabaseAPIType(id: document.database_id.uuidString.lowercased())
+        database?.title = dbDatabase?.title
     }
 
     init(document: DocumentStruct) {
@@ -47,6 +53,12 @@ class DocumentAPIType: Codable {
         previousChecksum = document.previousChecksum
         data = document.data.asString
         isPublic = document.isPublic
+        database = DatabaseAPIType(id: document.databaseId.uuidString.lowercased())
+        let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
+        context.performAndWait {
+            guard let dbDatabase = try? Database.rawFetchWithId(context, document.databaseId) else { return }
+            database = DatabaseAPIType(database: dbDatabase)
+        }
     }
 
     init(id: String) {

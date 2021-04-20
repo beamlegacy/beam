@@ -23,6 +23,9 @@ class CoreDataManager {
     private var storeType = NSSQLiteStoreType
     private(set) var storeURL: URL?
 
+    // Progressive migrations is based on https://williamboles.me/progressive-core-data-migration/
+    let migrator: CoreDataMigratorProtocol
+
     lazy var backgroundContext: NSManagedObjectContext = {
         let context = self.persistentContainer.newBackgroundContext()
         context.mergePolicy = NSMergePolicy(merge: NSMergePolicyType.mergeByPropertyObjectTrumpMergePolicyType)
@@ -37,6 +40,11 @@ class CoreDataManager {
         return context
     }()
 
+    init(storeType: String = NSSQLiteStoreType, migrator: CoreDataMigratorProtocol = CoreDataMigrator()) {
+        self.storeType = storeType
+        self.migrator = migrator
+    }
+
     func setup() {
         let semaphore = DispatchSemaphore(value: 0)
 
@@ -48,60 +56,35 @@ class CoreDataManager {
     }
 
     private func loadPersistentStore(completion: @escaping () -> Void) {
-        persistentContainer.loadPersistentStores { (storeDescription, error) in
-            self.storeURL = storeDescription.url
+        migrateStoreIfNeeded {
+            self.persistentContainer.loadPersistentStores { description, error in
+                self.storeURL = description.url
 
-            if let fileUrl = self.storeURL {
-                Logger.shared.logDebug("sqlite file: \(fileUrl)", category: .coredata)
+                if let fileUrl = self.storeURL {
+                    Logger.shared.logDebug("sqlite file: \(fileUrl)", category: .coredata)
+                }
+
+                guard error == nil else {
+                    fatalError("was unable to load store \(error!)")
+                }
+
+                completion()
             }
-
-            if let error = error {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate.
-                // You should not use this function in a shipping application, although it may
-                // be useful during development.
-
-                /*
-                 Typical reasons for an error here include:
-                 * The parent directory does not exist, cannot be created, or disallows writing.
-                 * The persistent store is not accessible, due to permissions or data protection when the device is locked.
-                 * The device is out of space.
-                 * The store could not be migrated to the current model version.
-                 Check the error message to determine what the actual problem was.
-                 */
-                fatalError("Unresolved error \(error)")
-            }
-
-            completion()
         }
     }
 
-    func destroyPersistentStore(setup runSetup: Bool = true) {
-        Logger.shared.logInfo("Destroying persistent store")
-        guard let storeURL = storeURL, let persistentStoreCoordinator = mainContext.persistentStoreCoordinator else { return }
-
-        do {
-            mainContext.commitEditing()
-            try mainContext.save()
-
-            for store in persistentStoreCoordinator.persistentStores {
-                try persistentStoreCoordinator.remove(store)
-            }
-
-            Logger.shared.logDebug("Destroying \(storeURL)")
-
-            try persistentStoreCoordinator.destroyPersistentStore(at: storeURL,
-                                                                  ofType: storeType,
-                                                                  options: nil)
-
-            NotificationCenter.default.post(name: .coredataDestroyed, object: self)
-        } catch {
-            fatalError("Can't run destroyPersistentStore")
-            // Error Handling
+    private func migrateStoreIfNeeded(completion: @escaping () -> Void) {
+        guard let storeURL = persistentContainer.persistentStoreDescriptions.first?.url else {
+            fatalError("persistentContainer was not set up properly")
         }
 
-        if runSetup {
-            setup()
+        if migrator.requiresMigration(at: storeURL, toVersion: CoreDataMigrationVersion.current) {
+            DispatchQueue.global(qos: .userInitiated).async {
+                self.migrator.migrateStore(at: storeURL, toVersion: CoreDataMigrationVersion.current)
+                completion()
+            }
+        } else {
+            completion()
         }
     }
 
@@ -124,43 +107,30 @@ class CoreDataManager {
         }
     }
 
-    func backup(_ url: URL) {
+    func backup(_ url: URL) throws {
         guard let storeCoordinator = mainContext.persistentStoreCoordinator else { return }
         do {
+            let fileManager = FileManager()
             let backupFile = try storeCoordinator.backupPersistentStore(atIndex: 0)
             defer {
-                // Delete temporary directory when done
-                do {
-                    try backupFile.deleteDirectory()
-                } catch {
-                    // TODO: raise error?
-                    Logger.shared.logError("Can't backup: \(error)", category: .coredata)
-                }
+                try? backupFile.deleteDirectory()
             }
 
-            try FileManager().copyItem(at: backupFile.fileURL, to: url)
+            try fileManager.copyItem(at: backupFile.fileURL, to: url)
         } catch {
-            // TODO: raise error?
             Logger.shared.logError("Can't backup: \(error)", category: .coredata)
+            throw error
         }
     }
 
-    func importBackup(_ url: URL) {
-        guard let storeURL = self.storeURL else { return }
+    func importBackup(_ url: URL) throws {
+        guard let storeURL = storeURL else { return }
 
-        destroyPersistentStore(setup: false)
-
-        let fileManager = FileManager()
-
-        do {
-            if fileManager.fileExists(atPath: storeURL.path) {
-                try fileManager.removeItem(at: storeURL)
-            }
-            try fileManager.copyItem(at: url, to: storeURL)
-        } catch {
-            // TODO: raise error?
-            Logger.shared.logError("Can't import backup: \(error)", category: .coredata)
-        }
+        try persistentContainer.persistentStoreCoordinator.replacePersistentStore(at: storeURL,
+                                                                                  destinationOptions: nil,
+                                                                                  withPersistentStoreFrom: url,
+                                                                                  sourceOptions: nil,
+                                                                                  ofType: NSSQLiteStoreType)
 
         setup()
     }
@@ -227,16 +197,27 @@ class CoreDataManager {
         return directory.appendingPathComponent("Beam/\(name).sqlite")
     }
 
-    lazy var persistentContainer: NSPersistentCloudKitContainer! = {
-        let container = NSPersistentCloudKitContainer(name: "Beam")
+    lazy var persistentContainer: NSPersistentContainer! = {
+        let container = NSPersistentContainer(name: "Beam")
 
         guard let containerURL = Self.storeURLFromEnv() else { return container }
 
-        let storeDescription = NSPersistentStoreDescription(url: storeURL ?? containerURL)
-        container.persistentStoreDescriptions = [storeDescription]
+        let description = NSPersistentStoreDescription(url: storeURL ?? containerURL)
+
+        // Supposed to enable automatic migration, but default is `true`
+        // inferred mapping will be handled else where
+        description.shouldInferMappingModelAutomatically = false
+        description.shouldMigrateStoreAutomatically = false
+        description.type = storeType
+
+        // This is to disable iCloud sync, which could be offered
+        // as an option to the user through our settings.
+        description.cloudKitContainerOptions = nil
+
+        container.persistentStoreDescriptions = [description]
 
         storeURL = containerURL
-        storeType = storeDescription.type
+        storeType = description.type
         return container
     }()
 }

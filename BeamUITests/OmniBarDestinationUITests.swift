@@ -146,7 +146,7 @@ class OmniBarDestinationUITests: QuickSpec {
             it("can create note and pivot") {
                 goToWebMode()
 
-                let secondTitle = "Second Destination"
+                let secondTitle = "Seond Destination"
                 let title = self.app.staticTexts["DestinationNoteTitle"]
                 expect(title.waitForExistence(timeout: 2)).to(beTrue())
                 expect(title.value as? String).to(equal(todayName))

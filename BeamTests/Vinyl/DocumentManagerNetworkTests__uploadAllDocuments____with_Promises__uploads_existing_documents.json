@@ -1,0 +1,341 @@
+[
+  {
+    "response" : {
+      "status" : 200,
+      "body" : {
+        "data" : {
+          "deleteAllDatabases" : {
+            "success" : true,
+            "errors" : [
+
+            ]
+          }
+        }
+      },
+      "url" : "https:\/\/api.beamapp.co\/graphql",
+      "headers" : {
+        "Strict-Transport-Security" : "max-age=63072000; includeSubDomains",
+        "X-Download-Options" : "noopen",
+        "X-Runtime" : "0.010172",
+        "Cache-Control" : "max-age=0, private, must-revalidate",
+        "Vary" : "Accept, Origin",
+        "Connection" : "keep-alive",
+        "X-Content-Type-Options" : "nosniff",
+        "Referrer-Policy" : "strict-origin-when-cross-origin",
+        "Transfer-Encoding" : "Identity",
+        "Via" : "1.1 vegur",
+        "X-Xss-Protection" : "1; mode=block",
+        "X-Permitted-Cross-Domain-Policies" : "none",
+        "Content-Type" : "application\/json; charset=utf-8",
+        "Etag" : "W\/\"253d6a04fc08b22a773331dc146b9a54\"",
+        "X-Request-Id" : "40b932ba-50ec-40d0-9244-5844b287056e",
+        "Server" : "Cowboy",
+        "Date" : "Fri, 16 Apr 2021 11:05:14 GMT",
+        "X-Frame-Options" : "SAMEORIGIN"
+      }
+    },
+    "request" : {
+      "headers" : {
+        "Accept-Language" : "en",
+        "Accept" : "application\/json",
+        "User-Agent" : "Beam client, 0.1.0 (1)",
+        "Content-Type" : "application\/json",
+        "Authorization" : "Bearer eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJmZWNkMTFkMy0yZDZmLTQ3OTgtYTM4YS1lMjkzN2JmZGZmNjIiLCJzdWIiOiJlMTQwYzU5YS1lYmIyLTQ3YjEtYmU3OC05ZDJkNTYyNWRjYWQiLCJzY3AiOiJ1c2VyIiwiYXVkIjpudWxsLCJpYXQiOjE2MTg1NzExMTMsImV4cCI6MTYyMTIwMDg1OX0.MEcPfF-njQygqNgbSrFOsXw4HCcVvptxG1sNIf406lU"
+      },
+      "method" : "POST",
+      "body" : {
+        "query" : "mutation DeleteAllDatabases {\n  deleteAllDatabases(input: {}) {\n    success\n    errors {\n      path\n      message\n    }\n  }\n}\n\n",
+        "variables" : {
+
+        }
+      },
+      "url" : "https:\/\/api.beamapp.co\/graphql"
+    }
+  },
+  {
+    "request" : {
+      "method" : "POST",
+      "url" : "https:\/\/api.beamapp.co\/graphql",
+      "body" : {
+        "query" : "mutation DeleteAllDocuments {\n  deleteAllDocuments(input: {}) {\n    success\n    errors {\n      path\n      message\n    }\n  }\n}\n",
+        "variables" : {
+
+        }
+      },
+      "headers" : {
+        "Content-Type" : "application\/json",
+        "Accept" : "application\/json",
+        "Accept-Language" : "en",
+        "User-Agent" : "Beam client, 0.1.0 (1)",
+        "Authorization" : "Bearer eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJmZWNkMTFkMy0yZDZmLTQ3OTgtYTM4YS1lMjkzN2JmZGZmNjIiLCJzdWIiOiJlMTQwYzU5YS1lYmIyLTQ3YjEtYmU3OC05ZDJkNTYyNWRjYWQiLCJzY3AiOiJ1c2VyIiwiYXVkIjpudWxsLCJpYXQiOjE2MTg1NzExMTMsImV4cCI6MTYyMTIwMDg1OX0.MEcPfF-njQygqNgbSrFOsXw4HCcVvptxG1sNIf406lU"
+      }
+    },
+    "response" : {
+      "status" : 200,
+      "body" : {
+        "data" : {
+          "deleteAllDocuments" : {
+            "success" : true,
+            "errors" : [
+
+            ]
+          }
+        }
+      },
+      "headers" : {
+        "X-Xss-Protection" : "1; mode=block",
+        "Vary" : "Accept, Origin",
+        "Cache-Control" : "max-age=0, private, must-revalidate",
+        "Content-Type" : "application\/json; charset=utf-8",
+        "Date" : "Fri, 16 Apr 2021 11:05:15 GMT",
+        "X-Request-Id" : "295387eb-87fd-4de9-bd4c-cbf1dda67c89",
+        "X-Download-Options" : "noopen",
+        "Transfer-Encoding" : "Identity",
+        "Referrer-Policy" : "strict-origin-when-cross-origin",
+        "Server" : "Cowboy",
+        "X-Frame-Options" : "SAMEORIGIN",
+        "Etag" : "W\/\"9bba80adfb700df0be0bcaaa6095cb4e\"",
+        "X-Runtime" : "0.010348",
+        "Connection" : "keep-alive",
+        "Via" : "1.1 vegur",
+        "Strict-Transport-Security" : "max-age=63072000; includeSubDomains",
+        "X-Permitted-Cross-Domain-Policies" : "none",
+        "X-Content-Type-Options" : "nosniff"
+      },
+      "url" : "https:\/\/api.beamapp.co\/graphql"
+    }
+  },
+  {
+    "request" : {
+      "url" : "https:\/\/api.beamapp.co\/graphql",
+      "headers" : {
+        "Content-Type" : "application\/json",
+        "Accept-Language" : "en",
+        "Accept" : "application\/json",
+        "User-Agent" : "Beam client, 0.1.0 (1)",
+        "Authorization" : "Bearer eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJmZWNkMTFkMy0yZDZmLTQ3OTgtYTM4YS1lMjkzN2JmZGZmNjIiLCJzdWIiOiJlMTQwYzU5YS1lYmIyLTQ3YjEtYmU3OC05ZDJkNTYyNWRjYWQiLCJzY3AiOiJ1c2VyIiwiYXVkIjpudWxsLCJpYXQiOjE2MTg1NzExMTMsImV4cCI6MTYyMTIwMDg1OX0.MEcPfF-njQygqNgbSrFOsXw4HCcVvptxG1sNIf406lU"
+      },
+      "body" : {
+        "query" : "mutation UpdateDatabase($title: String!, $id: ID, $updatedAt: ISO8601DateTime, $createdAt: ISO8601DateTime) {\n  updateDatabase(input: {database: {title: $title, id: $id, updatedAt: $updatedAt, createdAt: $createdAt}}) {\n    database {\n      id\n      title\n      createdAt\n      updatedAt\n    }\n    errors {\n      path\n      message\n    }\n  }\n}\n",
+        "variables" : {
+          "id" : "00000000-e0df-4eca-93e6-8778984bcd18",
+          "title" : "Default",
+          "updatedAt" : "2021-04-16T11:05:15Z",
+          "createdAt" : "2021-04-16T11:05:15Z"
+        }
+      },
+      "method" : "POST"
+    },
+    "response" : {
+      "url" : "https:\/\/api.beamapp.co\/graphql",
+      "headers" : {
+        "Etag" : "W\/\"d573f3030e2548cf052a7cad4c49e776\"",
+        "X-Permitted-Cross-Domain-Policies" : "none",
+        "Content-Type" : "application\/json; charset=utf-8",
+        "X-Download-Options" : "noopen",
+        "X-Xss-Protection" : "1; mode=block",
+        "X-Runtime" : "0.026487",
+        "Strict-Transport-Security" : "max-age=63072000; includeSubDomains",
+        "Connection" : "keep-alive",
+        "X-Content-Type-Options" : "nosniff",
+        "Referrer-Policy" : "strict-origin-when-cross-origin",
+        "Cache-Control" : "max-age=0, private, must-revalidate",
+        "X-Frame-Options" : "SAMEORIGIN",
+        "X-Request-Id" : "188a83e0-9b78-4bfe-ba67-4f0d58fc345f",
+        "Via" : "1.1 vegur",
+        "Transfer-Encoding" : "Identity",
+        "Vary" : "Accept, Origin",
+        "Date" : "Fri, 16 Apr 2021 11:05:15 GMT",
+        "Server" : "Cowboy"
+      },
+      "status" : 200,
+      "body" : {
+        "data" : {
+          "updateDatabase" : {
+            "database" : {
+              "id" : "00000000-e0df-4eca-93e6-8778984bcd18",
+              "title" : "Default",
+              "updatedAt" : "2021-04-16T11:05:15Z",
+              "createdAt" : "2021-04-16T11:05:15Z"
+            },
+            "errors" : [
+
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    "request" : {
+      "method" : "POST",
+      "headers" : {
+        "User-Agent" : "Beam client, 0.1.0 (1)",
+        "Content-Type" : "application\/json",
+        "Accept-Language" : "en",
+        "Accept" : "application\/json",
+        "Authorization" : "Bearer eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJmZWNkMTFkMy0yZDZmLTQ3OTgtYTM4YS1lMjkzN2JmZGZmNjIiLCJzdWIiOiJlMTQwYzU5YS1lYmIyLTQ3YjEtYmU3OC05ZDJkNTYyNWRjYWQiLCJzY3AiOiJ1c2VyIiwiYXVkIjpudWxsLCJpYXQiOjE2MTg1NzExMTMsImV4cCI6MTYyMTIwMDg1OX0.MEcPfF-njQygqNgbSrFOsXw4HCcVvptxG1sNIf406lU"
+      },
+      "body" : {
+        "query" : "mutation ImportDocuments($documentsInput: JSON!) {\n  importDocuments(input: {documentsInput: $documentsInput}) {\n    documents {\n      id\n    }\n    errors {\n      path\n      message\n    }\n  }\n}\n",
+        "variables" : {
+          "documentsInput" : "[{\"id\":\"995d94e1-e0df-4eca-93e6-8778984bcd18\",\"data\":\"whatever binary data\",\"title\":\"Incredible Plastic Pants jKNmChfwoYqqxg4vimrDyTB5qqUPduZEOoNuDBio\",\"documentType\":1,\"database\":{\"id\":\"00000000-e0df-4eca-93e6-8778984bcd18\",\"title\":\"Default\"},\"updatedAt\":640263915.91212296,\"createdAt\":640263915.91141796,\"isPublic\":false}]"
+        }
+      },
+      "url" : "https:\/\/api.beamapp.co\/graphql"
+    },
+    "response" : {
+      "body" : {
+        "data" : {
+          "importDocuments" : {
+            "documents" : [
+              {
+                "id" : "995d94e1-e0df-4eca-93e6-8778984bcd18"
+              }
+            ],
+            "errors" : [
+
+            ]
+          }
+        }
+      },
+      "url" : "https:\/\/api.beamapp.co\/graphql",
+      "status" : 200,
+      "headers" : {
+        "Cache-Control" : "max-age=0, private, must-revalidate",
+        "X-Request-Id" : "ef9ec3e0-61b3-4d47-a9d5-49bf518c107e",
+        "Via" : "1.1 vegur",
+        "Date" : "Fri, 16 Apr 2021 11:05:15 GMT",
+        "X-Content-Type-Options" : "nosniff",
+        "Transfer-Encoding" : "Identity",
+        "X-Runtime" : "0.057311",
+        "Strict-Transport-Security" : "max-age=63072000; includeSubDomains",
+        "Referrer-Policy" : "strict-origin-when-cross-origin",
+        "X-Frame-Options" : "SAMEORIGIN",
+        "X-Xss-Protection" : "1; mode=block",
+        "X-Permitted-Cross-Domain-Policies" : "none",
+        "X-Download-Options" : "noopen",
+        "Etag" : "W\/\"6a5f105903f085b52b5e8cdaee9825bc\"",
+        "Vary" : "Accept, Origin",
+        "Connection" : "keep-alive",
+        "Content-Type" : "application\/json; charset=utf-8",
+        "Server" : "Cowboy"
+      }
+    }
+  },
+  {
+    "request" : {
+      "headers" : {
+        "Authorization" : "Bearer eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJmZWNkMTFkMy0yZDZmLTQ3OTgtYTM4YS1lMjkzN2JmZGZmNjIiLCJzdWIiOiJlMTQwYzU5YS1lYmIyLTQ3YjEtYmU3OC05ZDJkNTYyNWRjYWQiLCJzY3AiOiJ1c2VyIiwiYXVkIjpudWxsLCJpYXQiOjE2MTg1NzExMTMsImV4cCI6MTYyMTIwMDg1OX0.MEcPfF-njQygqNgbSrFOsXw4HCcVvptxG1sNIf406lU",
+        "Accept-Language" : "en",
+        "Accept" : "application\/json",
+        "User-Agent" : "Beam client, 0.1.0 (1)",
+        "Content-Type" : "application\/json"
+      },
+      "url" : "https:\/\/api.beamapp.co\/graphql",
+      "body" : {
+        "query" : "query document($id: ID!) {\n  document(id: $id) {\n    id\n    title\n    slug\n    data\n    createdAt\n    updatedAt\n    isPublic\n    database { title id }\n  }\n}\n",
+        "variables" : {
+          "id" : "995d94e1-e0df-4eca-93e6-8778984bcd18"
+        }
+      },
+      "method" : "POST"
+    },
+    "response" : {
+      "status" : 200,
+      "url" : "https:\/\/api.beamapp.co\/graphql",
+      "headers" : {
+        "X-Permitted-Cross-Domain-Policies" : "none",
+        "Cache-Control" : "max-age=0, private, must-revalidate",
+        "Transfer-Encoding" : "Identity",
+        "Server" : "Cowboy",
+        "Date" : "Fri, 16 Apr 2021 11:05:15 GMT",
+        "Connection" : "close",
+        "X-Download-Options" : "noopen",
+        "X-Request-Id" : "80036ef4-38fb-4a00-a919-9ae819582c84",
+        "X-Xss-Protection" : "1; mode=block",
+        "Content-Type" : "application\/json; charset=utf-8",
+        "X-Content-Type-Options" : "nosniff",
+        "Via" : "1.1 vegur",
+        "Vary" : "Accept, Origin",
+        "Strict-Transport-Security" : "max-age=63072000; includeSubDomains",
+        "X-Runtime" : "0.012912",
+        "X-Frame-Options" : "SAMEORIGIN",
+        "Etag" : "W\/\"1431775a2dbb51001649646c01991a15\"",
+        "Referrer-Policy" : "strict-origin-when-cross-origin"
+      },
+      "body" : {
+        "data" : {
+          "document" : {
+            "slug" : "incredible-plastic-pants-jknmchfwoyqqxg4vimrdytb5qqupduzeoonudbio",
+            "id" : "995d94e1-e0df-4eca-93e6-8778984bcd18",
+            "data" : "whatever binary data",
+            "title" : "Incredible Plastic Pants jKNmChfwoYqqxg4vimrDyTB5qqUPduZEOoNuDBio",
+            "database" : {
+              "title" : "Default",
+              "id" : "00000000-e0df-4eca-93e6-8778984bcd18"
+            },
+            "updatedAt" : "2021-04-16T11:05:16Z",
+            "createdAt" : "2021-04-16T11:05:16Z",
+            "isPublic" : false
+          }
+        }
+      }
+    }
+  },
+  {
+    "request" : {
+      "method" : "POST",
+      "body" : {
+        "query" : "mutation DeleteDocument($id: ID!) {\n  deleteDocument(input: {document: {id: $id}}) {\n    document {\n      id\n    }\n    errors {\n      path\n      message\n    }\n  }\n}\n",
+        "variables" : {
+          "id" : "995d94e1-e0df-4eca-93e6-8778984bcd18"
+        }
+      },
+      "headers" : {
+        "Authorization" : "Bearer eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJmZWNkMTFkMy0yZDZmLTQ3OTgtYTM4YS1lMjkzN2JmZGZmNjIiLCJzdWIiOiJlMTQwYzU5YS1lYmIyLTQ3YjEtYmU3OC05ZDJkNTYyNWRjYWQiLCJzY3AiOiJ1c2VyIiwiYXVkIjpudWxsLCJpYXQiOjE2MTg1NzExMTMsImV4cCI6MTYyMTIwMDg1OX0.MEcPfF-njQygqNgbSrFOsXw4HCcVvptxG1sNIf406lU",
+        "Accept" : "application\/json",
+        "Accept-Language" : "en",
+        "User-Agent" : "Beam client, 0.1.0 (1)",
+        "Content-Type" : "application\/json"
+      },
+      "url" : "https:\/\/api.beamapp.co\/graphql"
+    },
+    "response" : {
+      "headers" : {
+        "Connection" : "keep-alive",
+        "Content-Type" : "application\/json; charset=utf-8",
+        "Date" : "Fri, 16 Apr 2021 11:05:15 GMT",
+        "Strict-Transport-Security" : "max-age=63072000; includeSubDomains",
+        "Referrer-Policy" : "strict-origin-when-cross-origin",
+        "Transfer-Encoding" : "Identity",
+        "X-Runtime" : "0.019714",
+        "Server" : "Cowboy",
+        "X-Permitted-Cross-Domain-Policies" : "none",
+        "Etag" : "W\/\"276bf2cfd4e3cd57c640f9fb108817a7\"",
+        "X-Content-Type-Options" : "nosniff",
+        "Cache-Control" : "max-age=0, private, must-revalidate",
+        "X-Frame-Options" : "SAMEORIGIN",
+        "X-Xss-Protection" : "1; mode=block",
+        "Via" : "1.1 vegur",
+        "Vary" : "Accept, Origin",
+        "X-Request-Id" : "dabfbf94-0d0b-498a-8273-39ab10f587c1",
+        "X-Download-Options" : "noopen"
+      },
+      "status" : 200,
+      "body" : {
+        "data" : {
+          "deleteDocument" : {
+            "document" : {
+              "id" : "995d94e1-e0df-4eca-93e6-8778984bcd18"
+            },
+            "errors" : [
+
+            ]
+          }
+        }
+      },
+      "url" : "https:\/\/api.beamapp.co\/graphql"
+    }
+  }
+]

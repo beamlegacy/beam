@@ -547,6 +547,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         return areas.map { webPositions.jsToRect(jsArea: $0) }
     }
 
+    // swiftlint:disable:next cyclomatic_complexity function_body_length
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         let messageBody = message.body as? [String: AnyObject]
         let messageKey = message.name

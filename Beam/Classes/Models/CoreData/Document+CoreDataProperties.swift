@@ -28,6 +28,7 @@ extension Document {
     @NSManaged public var score: Int16
     @NSManaged public var version: Int64
     @NSManaged public var is_public: Bool
+    @NSManaged public var database_id: UUID
     //swiftlint:enable identifier_name
 
     public var documentType: DocumentType {

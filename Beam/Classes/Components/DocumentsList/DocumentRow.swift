@@ -11,20 +11,22 @@ struct DocumentRow: View {
 
     var body: some View {
         VStack {
-            HStack {
-                Text(document.title)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .font(.callout)
+            if document.managedObjectContext != nil {
+                HStack {
+                    Text("\(document.database()?.title ?? "") > \(document.title)")
+                        .fixedSize(horizontal: false, vertical: true)
+                        .font(.callout)
 
-                Spacer()
-            }
-
-            HStack {
-                Text("\(document.updated_at, formatter: Self.taskDateFormat)").font(.footnote)
-                if document.isDeleted || document.deleted_at != nil {
-                    Text("deleted").font(.footnote)
+                    Spacer()
                 }
-                Spacer()
+
+                HStack {
+                    Text("\(document.updated_at, formatter: Self.taskDateFormat)").font(.footnote)
+                    if document.isDeleted || document.deleted_at != nil {
+                        Text("deleted").font(.footnote)
+                    }
+                    Spacer()
+                }
             }
         }.padding(.bottom).padding(.top)
     }

@@ -331,6 +331,7 @@ extension APIRequest {
         #endif
     }
 
+    // swiftlint:disable:next cyclomatic_complexity
     private func manageResponse<T: Decodable & Errorable>(_ data: Data?,
                                                           _ response: URLResponse?) throws -> T {
         guard let httpResponse = response as? HTTPURLResponse else {
@@ -365,6 +366,11 @@ extension APIRequest {
             let jsonStruct = try self.defaultDecoder().decode(APIRequest.APIResult<T>.self, from: data)
 
             guard let value = jsonStruct.data?.value else {
+                // When the API returns top level errors
+                if let errors = jsonStruct.errors {
+                    throw APIRequestError.apiError(extractErrorMessages(errors))
+                }
+
                 throw APIRequestError.parserError
             }
 
@@ -398,7 +404,7 @@ extension APIRequest {
     /// Make a performRequest which can be cancelled later on calling the tuple
     func performRequest<T: Decodable & Errorable, E: GraphqlParametersProtocol>(bodyParamsRequest: E,
                                                                                 authenticatedCall: Bool? = nil) -> PromiseKit.Promise<T> {
-        return PromiseKit.Promise<T> { seal in
+        PromiseKit.Promise<T> { seal in
             do {
                 guard !self.cancelRequest else { throw APIRequestError.operationCancelled }
 
@@ -430,7 +436,7 @@ extension APIRequest {
                                     authenticatedCall: authenticatedCall,
                                     completionHandler: handler)
         }.then(on: backgroundQueue) { result -> Promises.Promise<T> in
-            return Promises.Promise(try result.get())
+            return Promise(try result.get())
         }
     }
 }

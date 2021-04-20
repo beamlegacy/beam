@@ -23,12 +23,13 @@ class DocumentTests: QuickSpec {
             coreDataManager.setup()
             //CoreDataManager.shared = coreDataManager
 
-            coreDataManager.destroyPersistentStore()
             mainContext = coreDataManager.mainContext
             backgroundContext = coreDataManager.backgroundContext
             sut = DocumentManager(coreDataManager: coreDataManager)
             helper = DocumentManagerTestsHelper(documentManager: sut,
                                                      coreDataManager: coreDataManager)
+
+            helper.deleteAllDocuments()
         }
 
         afterEach {

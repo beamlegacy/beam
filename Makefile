@@ -133,6 +133,10 @@ install_js:
 git_checkout:
 	git submodule sync && git submodule update --init --recursive
 
+delete_db_files:
+	rm -f ${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application\ Support/Beam/Beam-*.sqlite*
+	rm -f ${HOME}/Library/Containers/co.beamapp.macos.dev/Data/Library/Application\ Support/Beam/Beam-*.sqlite*
+
 copy_vinyl_files:
 	cp ${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Logs/Beam/Vinyl/*.json BeamTests/Vinyl/
 

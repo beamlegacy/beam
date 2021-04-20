@@ -31,6 +31,12 @@ extension AccountManager {
                     Persistence.Authentication.password = password
                     LibrariesManager.shared.setSentryUser()
 
+                    // Syncing with remote API, AppDelegate needs to be called in mainthread
+                    // TODO: move this syncData to a manager instead.
+                    DispatchQueue.main.async {
+                        AppDelegate.main.syncData()
+                    }
+
                     Logger.shared.logInfo("signIn succeeded: \(signIn.accessToken ?? "-")", category: .network)
                     completionHandler?(.success(true))
                 }

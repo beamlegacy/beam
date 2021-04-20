@@ -1,0 +1,14 @@
+mutation UpdateDatabase($title: String!, $id: ID, $updatedAt: ISO8601DateTime, $createdAt: ISO8601DateTime) {
+  updateDatabase(input: {database: {title: $title, id: $id, updatedAt: $updatedAt, createdAt: $createdAt}}) {
+    database {
+      id
+      title
+      createdAt
+      updatedAt
+    }
+    errors {
+      path
+      message
+    }
+  }
+}
