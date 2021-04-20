@@ -197,12 +197,12 @@ class AllCardsContextualMenu {
 
     private func confirmedDeleteSelectedNotes() {
         guard selectedNotes.count > 0 else {
-            self.documentManager.deleteAllDocuments().then { _ in
+            self.documentManager.deleteAll().then { _ in
                 self.onFinishBlock?(true)
             }
             return
         }
-        self.documentManager.deleteDocuments(ids: selectedNotes.map { $0.id }).then { _ in
+        self.documentManager.delete(ids: selectedNotes.map { $0.id }).then { _ in
             self.onFinishBlock?(true)
         }
     }

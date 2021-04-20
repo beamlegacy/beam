@@ -169,7 +169,7 @@ struct AllCardsPageContentView: View {
     }
 
     private func refreshAllNotes() {
-        allNotes = data.documentManager.loadDocuments()
+        allNotes = data.documentManager.loadAll()
     }
 
     private func updateNoteItemsFromAllNotes() {

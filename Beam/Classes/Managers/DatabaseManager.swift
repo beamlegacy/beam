@@ -137,7 +137,8 @@ class DatabaseManager {
                 logConstraintConflict(error)
             case 133020:
                 // Saving a version of NSManagedObject which is outdated
-                Logger.shared.logError("Couldn't save context because the object is outdated and more recent in CoreData: \(error)", category: .coredata)
+                Logger.shared.logError("Couldn't save context because the object is outdated and more recent in CoreData: \(error)",
+                                       category: .coredata)
                 logMergeConflict(error)
             default:
                 Logger.shared.logError("Couldn't save context: \(error)", category: .coredata)
@@ -148,7 +149,8 @@ class DatabaseManager {
     }
 
     static private func logConstraintConflict(_ error: NSError) {
-        guard error.domain == NSCocoaErrorDomain, let conflicts = error.userInfo["conflictList"] as? [NSConstraintConflict] else { return }
+        guard error.domain == NSCocoaErrorDomain,
+              let conflicts = error.userInfo["conflictList"] as? [NSConstraintConflict] else { return }
 
         for conflict in conflicts {
             let conflictingDatabases: [Database] = conflict.conflictingObjects.compactMap { database in
@@ -168,11 +170,13 @@ class DatabaseManager {
     }
 
     static private func logMergeConflict(_ error: NSError) {
-        guard error.domain == NSCocoaErrorDomain, let conflicts = error.userInfo["conflictList"] as? [NSMergeConflict] else { return }
+        guard error.domain == NSCocoaErrorDomain,
+              let conflicts = error.userInfo["conflictList"] as? [NSMergeConflict] else { return }
 
         for conflict in conflicts {
             let title = (conflict.sourceObject as? Database)?.title ?? ":( DB Not found"
-            Logger.shared.logError("Old version: \(conflict.oldVersionNumber), new version: \(conflict.newVersionNumber), title: \(title)", category: .coredata)
+            Logger.shared.logError("Old version: \(conflict.oldVersionNumber), new version: \(conflict.newVersionNumber), title: \(title)",
+                                   category: .coredata)
         }
     }
 
@@ -203,14 +207,14 @@ class DatabaseManager {
 
     // MARK: -
     // MARK: loading
-    func allDatabasesTitles() -> [String] {
+    func allTitles() -> [String] {
         do {
             if Thread.isMainThread {
-                return try Database.fetchAll(context: mainContext).map { $0.title }
+                return try Database.fetchAll(mainContext).map { $0.title }
             } else {
                 let context = coreDataManager.persistentContainer.newBackgroundContext()
                 return try context.performAndWait {
-                    try Database.fetchAll(context: context).map { $0.title }
+                    try Database.fetchAll(context).map { $0.title }
                 }
             }
         } catch {
@@ -218,15 +222,15 @@ class DatabaseManager {
         }
     }
 
-    func allDatabases() -> [DatabaseStruct] {
+    func all() -> [DatabaseStruct] {
         do {
             if Thread.isMainThread {
-                return try Database.fetchAll(context: mainContext).map { DatabaseStruct(database: $0) }
+                return try Database.fetchAll(mainContext).map { DatabaseStruct(database: $0) }
             } else {
                 let context = coreDataManager.persistentContainer.newBackgroundContext()
                 return try context.performAndWait {
                     try Database
-                        .fetchAll(context: context)
+                        .fetchAll(context)
                         .map { DatabaseStruct(database: $0) }
                 }
             }
@@ -295,7 +299,9 @@ class DatabaseManager {
 extension DatabaseManager {
     // MARK: -
     // MARK: Deletes
-    func deleteDatabase(_ database: DatabaseStruct, includedRemote: Bool = true, completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
+    func delete(_ database: DatabaseStruct,
+                includedRemote: Bool = true,
+                completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
         let context = CoreDataManager.shared.mainContext
         guard let coredataDb = try? Database.fetchWithId(context, database.id) else {
             completion?(.failure(DatabaseManagerError.localDatabaseNotFound))
@@ -313,7 +319,8 @@ extension DatabaseManager {
         coredataDb.delete(context)
 
         // Trigger updates for Advanced Settings
-        NotificationCenter.default.post(name: .defaultDatabaseUpdate, object: DatabaseManager.defaultDatabase)
+        NotificationCenter.default.post(name: .defaultDatabaseUpdate,
+                                        object: DatabaseManager.defaultDatabase)
 
         guard includedRemote else {
             completion?(.success(true))
@@ -329,7 +336,7 @@ extension DatabaseManager {
 
         do {
             // Remotely, deleting a database will delete all related documents
-            try databaseRequest.deleteDatabase(database.id.uuidString.lowercased()) { result in
+            try databaseRequest.delete(database.id.uuidString.lowercased()) { result in
                 switch result {
                 case .failure(let error):
                     Logger.shared.logError(error.localizedDescription, category: .database)
@@ -344,7 +351,8 @@ extension DatabaseManager {
         }
     }
 
-    func deleteAllDatabases(includedRemote: Bool = true, completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
+    func deleteAll(includedRemote: Bool = true,
+                   completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
         do {
             try Database.deleteWithPredicate(CoreDataManager.shared.mainContext)
         } catch {
@@ -356,7 +364,8 @@ extension DatabaseManager {
             return
         }
 
-        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+        guard AuthenticationManager.shared.isAuthenticated,
+              Configuration.networkEnabled else {
             completion?(.success(false))
             return
         }
@@ -364,7 +373,7 @@ extension DatabaseManager {
         let databaseRequest = DatabaseRequest()
 
         do {
-            try databaseRequest.deleteAllDatabases { result in
+            try databaseRequest.deleteAll { result in
                 switch result {
                 case .failure(let error):
                     Logger.shared.logError(error.localizedDescription, category: .database)
@@ -381,10 +390,10 @@ extension DatabaseManager {
 
     // MARK: -
     // MARK: Bulk calls
-    func syncDatabases(completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
-        uploadAllDatabases { result in
+    func syncAll(completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
+        uploadAll { result in
             if case .success(let success) = result, success == true {
-                self.fetchDatabases(completion)
+                self.fetchAll(completion)
                 return
             }
 
@@ -392,19 +401,20 @@ extension DatabaseManager {
         }
     }
 
-    func uploadAllDatabases(_ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
-        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+    func uploadAll(_ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
+        guard AuthenticationManager.shared.isAuthenticated,
+              Configuration.networkEnabled else {
             completion?(.success(false))
             return
         }
 
         CoreDataManager.shared.persistentContainer.performBackgroundTask { context in
             do {
-                let databases = try Database.fetchAll(context: context)
+                let databases = try Database.fetchAll(context)
                 let databasesArray: [DatabaseAPIType] = databases.map { database in database.asApiType() }
                 let databaseRequest = DatabaseRequest()
 
-                let result: Bool = try databaseRequest.saveDatabases(databasesArray)
+                let result: Bool = try databaseRequest.save(databasesArray)
 
                 completion?(.success(result))
             } catch {
@@ -413,7 +423,7 @@ extension DatabaseManager {
         }
     }
 
-    func fetchDatabases(_ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
+    func fetchAll(_ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             completion?(.success(false))
             return
@@ -422,14 +432,16 @@ extension DatabaseManager {
         let databaseRequest = DatabaseRequest()
 
         do {
-            try databaseRequest.fetchDatabases { result in
+            try databaseRequest.fetchAll { result in
                 switch result {
                 case .failure(let error): completion?(.failure(error))
                 case .success(let databases):
                     self.coreDataManager.backgroundContext.performAndWait {
                         for database in databases {
-                            guard let database_id = database.id, let databaseId = UUID(uuidString: database_id) else { continue }
-                            let localDatabase = Database.fetchOrCreateWithId(self.coreDataManager.backgroundContext, databaseId)
+                            guard let database_id = database.id,
+                                  let databaseId = UUID(uuidString: database_id) else { continue }
+                            let localDatabase = Database.fetchOrCreateWithId(self.coreDataManager.backgroundContext,
+                                                                             databaseId)
                             self.updateDatabaseWithDatabaseAPIType(localDatabase, database)
                         }
 
@@ -447,10 +459,10 @@ extension DatabaseManager {
         }
     }
 
-    func saveDatabase(_ databaseStruct: DatabaseStruct,
-                      _ networkSave: Bool = true,
-                      _ networkCompletion: ((Swift.Result<Bool, Error>) -> Void)? = nil,
-                      completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
+    func save(_ databaseStruct: DatabaseStruct,
+              _ networkSave: Bool = true,
+              _ networkCompletion: ((Swift.Result<Bool, Error>) -> Void)? = nil,
+              completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
         Logger.shared.logDebug("Saving \(databaseStruct.title)", category: .database)
         var blockOperation: BlockOperation!
         blockOperation = BlockOperation { [weak self] in
@@ -534,7 +546,7 @@ extension DatabaseManager {
 
         do {
             let databaseApiType = databaseStruct.asApiType()
-            try databaseRequest.saveDatabase(databaseApiType) { result in
+            try databaseRequest.save(databaseApiType) { result in
                 switch result {
                 case .failure(let error):
                     Logger.shared.logError(error.localizedDescription, category: .database)
@@ -554,7 +566,7 @@ extension DatabaseManager {
 extension DatabaseManager {
     // MARK: -
     // MARK: Deletes
-    func deleteDatabase(_ database: DatabaseStruct, includedRemote: Bool = true) -> PromiseKit.Promise<Bool> {
+    func delete(_ database: DatabaseStruct, includedRemote: Bool = true) -> PromiseKit.Promise<Bool> {
         let promise: PromiseKit.Guarantee<NSManagedObjectContext> = coreDataManager.background()
         let databaseRequest = DatabaseRequest()
 
@@ -578,13 +590,14 @@ extension DatabaseManager {
                         return .value(false)
                     }
 
-                    let result: PromiseKit.Promise<DatabaseAPIType?> = databaseRequest.deleteDatabase(database.id.uuidString.lowercased())
+                    let dbId = database.id.uuidString.lowercased()
+                    let result: PromiseKit.Promise<DatabaseAPIType?> = databaseRequest.delete(dbId)
                     return result.map(on: self.backgroundQueue) { _ in true }
                 }
             }
     }
 
-    func deleteAllDatabases(includedRemote: Bool = true) -> PromiseKit.Promise<Bool> {
+    func deleteAll(includedRemote: Bool = true) -> PromiseKit.Promise<Bool> {
         do {
             try Database.deleteWithPredicate(CoreDataManager.shared.mainContext)
         } catch {
@@ -601,50 +614,52 @@ extension DatabaseManager {
 
         let databaseRequest = DatabaseRequest()
 
-        let promise: PromiseKit.Promise<Bool> = databaseRequest.deleteAllDatabases()
+        let promise: PromiseKit.Promise<Bool> = databaseRequest.deleteAll()
 
         return promise
     }
 
     // MARK: -
     // MARK: Bulk calls
-    func syncDatabases() -> PromiseKit.Promise<Bool> {
-        let promise: PromiseKit.Promise<Bool> = uploadAllDatabases()
+    func syncAll() -> PromiseKit.Promise<Bool> {
+        let promise: PromiseKit.Promise<Bool> = uploadAll()
 
         return promise.then { result -> PromiseKit.Promise<Bool> in
             guard result == true else { return .value(result) }
 
-            return self.fetchDatabases()
+            return self.fetchAll()
         }
     }
 
-    func uploadAllDatabases() -> PromiseKit.Promise<Bool> {
+    func uploadAll() -> PromiseKit.Promise<Bool> {
         self.coreDataManager.background()
             .then(on: backgroundQueue) { context -> PromiseKit.Promise<[DatabaseAPIType]> in
                 try context.performAndWait {
                     let databaseRequest = DatabaseRequest()
 
-                    let databases = try Database.fetchAll(context: context)
+                    let databases = try Database.fetchAll(context)
                     let databasesArray: [DatabaseAPIType] = databases.map { database in database.asApiType() }
 
-                    let saveDBPromise: PromiseKit.Promise<[DatabaseAPIType]> = databaseRequest.saveDatabases(databasesArray)
+                    let saveDBPromise: PromiseKit.Promise<[DatabaseAPIType]> = databaseRequest.save(databasesArray)
 
                     return saveDBPromise
                 }
             }.map(on: backgroundQueue) { _ in true }
     }
 
-    func fetchDatabases() -> PromiseKit.Promise<Bool> {
+    func fetchAll() -> PromiseKit.Promise<Bool> {
         let databaseRequest = DatabaseRequest()
 
-        let promise: PromiseKit.Promise<[DatabaseAPIType]> = databaseRequest.fetchDatabases()
+        let promise: PromiseKit.Promise<[DatabaseAPIType]> = databaseRequest.fetchAll()
 
         return promise
             .then(on: backgroundQueue) { databases -> PromiseKit.Promise<Bool> in
                 try self.coreDataManager.backgroundContext.performAndWait {
                     for database in databases {
-                        guard let database_id = database.id, let databaseId = UUID(uuidString: database_id) else { continue }
-                        let localDatabase = Database.fetchOrCreateWithId(self.coreDataManager.backgroundContext, databaseId)
+                        guard let database_id = database.id,
+                              let databaseId = UUID(uuidString: database_id) else { continue }
+                        let localDatabase = Database.fetchOrCreateWithId(self.coreDataManager.backgroundContext,
+                                                                         databaseId)
                         self.updateDatabaseWithDatabaseAPIType(localDatabase, database)
                     }
 
@@ -655,7 +670,7 @@ extension DatabaseManager {
             }
     }
 
-    func saveDatabaseOnApi(_ databaseStruct: DatabaseStruct) -> PromiseKit.Promise<Bool> {
+    func saveOnApi(_ databaseStruct: DatabaseStruct) -> PromiseKit.Promise<Bool> {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             return .value(false)
         }
@@ -668,12 +683,12 @@ extension DatabaseManager {
         let databaseRequest = DatabaseRequest()
         Self.networkRequests[databaseStruct.id] = databaseRequest
 
-        let promise: PromiseKit.Promise<DatabaseAPIType> = databaseRequest.saveDatabase(databaseStruct.asApiType())
+        let promise: PromiseKit.Promise<DatabaseAPIType> = databaseRequest.save(databaseStruct.asApiType())
 
         return promise.map(on: backgroundQueue) { _ in true }
     }
 
-    func saveDatabase(_ databaseStruct: DatabaseStruct) -> PromiseKit.Promise<Bool> {
+    func save(_ databaseStruct: DatabaseStruct) -> PromiseKit.Promise<Bool> {
         let promise: PromiseKit.Guarantee<NSManagedObjectContext> = coreDataManager.background()
         var cancelme = false
 
@@ -701,7 +716,7 @@ extension DatabaseManager {
                     context.refresh(database, mergeChanges: false)
 
                     let updatedDatabaseStruct = DatabaseStruct(database: database)
-                    return self.saveDatabaseOnApi(updatedDatabaseStruct)
+                    return self.saveOnApi(updatedDatabaseStruct)
                 }
             }.ensure {
                 self.saveDatabasePromiseCancels[databaseStruct.id] = nil
@@ -719,7 +734,7 @@ extension DatabaseManager {
 extension DatabaseManager {
     // MARK: -
     // MARK: Deletes
-    func deleteDatabase(_ database: DatabaseStruct, includedRemote: Bool = true) -> Promises.Promise<Bool> {
+    func delete(_ database: DatabaseStruct, includedRemote: Bool = true) -> Promises.Promise<Bool> {
         let promise: Promises.Promise<NSManagedObjectContext> = coreDataManager.background()
         let databaseRequest = DatabaseRequest()
 
@@ -735,7 +750,8 @@ extension DatabaseManager {
                     coreDataDatabase.delete(context)
 
                     // Trigger updates for Advanced Settings
-                    NotificationCenter.default.post(name: .defaultDatabaseUpdate, object: DatabaseManager.defaultDatabase)
+                    NotificationCenter.default.post(name: .defaultDatabaseUpdate,
+                                                    object: DatabaseManager.defaultDatabase)
 
                     guard AuthenticationManager.shared.isAuthenticated,
                           Configuration.networkEnabled,
@@ -743,13 +759,14 @@ extension DatabaseManager {
                         return Promise(false)
                     }
 
-                    let result: Promises.Promise<DatabaseAPIType?> = databaseRequest.deleteDatabase(database.id.uuidString.lowercased())
+                    let dbId = database.id.uuidString.lowercased()
+                    let result: Promises.Promise<DatabaseAPIType?> = databaseRequest.delete(dbId)
                     return result.then(on: self.backgroundQueue) { _ in true }
                 }
             }
     }
 
-    func deleteAllDatabases(includedRemote: Bool = true) -> Promises.Promise<Bool> {
+    func deleteAll(includedRemote: Bool = true) -> Promises.Promise<Bool> {
         do {
             try Database.deleteWithPredicate(CoreDataManager.shared.mainContext)
         } catch {
@@ -766,50 +783,52 @@ extension DatabaseManager {
 
         let databaseRequest = DatabaseRequest()
 
-        let promise: Promises.Promise<Bool> = databaseRequest.deleteAllDatabases()
+        let promise: Promises.Promise<Bool> = databaseRequest.deleteAll()
 
         return promise
     }
 
     // MARK: -
     // MARK: Bulk calls
-    func syncDatabases() -> Promises.Promise<Bool> {
-        let promise: Promises.Promise<Bool> = uploadAllDatabases()
+    func syncAll() -> Promises.Promise<Bool> {
+        let promise: Promises.Promise<Bool> = uploadAll()
 
         return promise.then { result -> Promises.Promise<Bool> in
             guard result == true else { return Promise(result) }
 
-            return self.fetchDatabases()
+            return self.fetchAll()
         }
     }
 
-    func uploadAllDatabases() -> Promises.Promise<Bool> {
+    func uploadAll() -> Promises.Promise<Bool> {
         self.coreDataManager.background()
             .then(on: backgroundQueue) { context -> Promises.Promise<[DatabaseAPIType]> in
                 try context.performAndWait {
                     let databaseRequest = DatabaseRequest()
 
-                    let databases = try Database.fetchAll(context: context)
+                    let databases = try Database.fetchAll(context)
                     let databasesArray: [DatabaseAPIType] = databases.map { database in database.asApiType() }
 
-                    let saveDBPromise: Promises.Promise<[DatabaseAPIType]> = databaseRequest.saveDatabases(databasesArray)
+                    let saveDBPromise: Promises.Promise<[DatabaseAPIType]> = databaseRequest.save(databasesArray)
 
                     return saveDBPromise
                 }
             }.then(on: backgroundQueue) { _ in true }
     }
 
-    func fetchDatabases() -> Promises.Promise<Bool> {
+    func fetchAll() -> Promises.Promise<Bool> {
         let databaseRequest = DatabaseRequest()
 
-        let promise: Promises.Promise<[DatabaseAPIType]> = databaseRequest.fetchDatabases()
+        let promise: Promises.Promise<[DatabaseAPIType]> = databaseRequest.fetchAll()
 
         return promise
             .then(on: backgroundQueue) { databases -> Promises.Promise<Bool> in
                 try self.coreDataManager.backgroundContext.performAndWait {
                     for database in databases {
-                        guard let database_id = database.id, let databaseId = UUID(uuidString: database_id) else { continue }
-                        let localDatabase = Database.fetchOrCreateWithId(self.coreDataManager.backgroundContext, databaseId)
+                        guard let database_id = database.id,
+                              let databaseId = UUID(uuidString: database_id) else { continue }
+                        let localDatabase = Database.fetchOrCreateWithId(self.coreDataManager.backgroundContext,
+                                                                         databaseId)
                         self.updateDatabaseWithDatabaseAPIType(localDatabase, database)
                     }
 
@@ -820,7 +839,7 @@ extension DatabaseManager {
             }
     }
 
-    func saveDatabaseOnApi(_ databaseStruct: DatabaseStruct) -> Promises.Promise<Bool> {
+    func saveOnApi(_ databaseStruct: DatabaseStruct) -> Promises.Promise<Bool> {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             return Promise(false)
         }
@@ -833,12 +852,12 @@ extension DatabaseManager {
         let databaseRequest = DatabaseRequest()
         Self.networkRequests[databaseStruct.id] = databaseRequest
 
-        let promise: Promises.Promise<DatabaseAPIType> = databaseRequest.saveDatabase(databaseStruct.asApiType())
+        let promise: Promises.Promise<DatabaseAPIType> = databaseRequest.save(databaseStruct.asApiType())
 
         return promise.then(on: backgroundQueue) { _ in true }
     }
 
-    func saveDatabase(_ databaseStruct: DatabaseStruct) -> Promises.Promise<Bool> {
+    func save(_ databaseStruct: DatabaseStruct) -> Promises.Promise<Bool> {
         let promise: Promises.Promise<NSManagedObjectContext> = coreDataManager.background()
         var cancelme = false
 
@@ -866,7 +885,7 @@ extension DatabaseManager {
                     context.refresh(database, mergeChanges: false)
 
                     let updatedDatabaseStruct = DatabaseStruct(database: database)
-                    return self.saveDatabaseOnApi(updatedDatabaseStruct)
+                    return self.saveOnApi(updatedDatabaseStruct)
                 }
             }.always {
                 self.saveDatabasePromiseCancels[databaseStruct.id] = nil

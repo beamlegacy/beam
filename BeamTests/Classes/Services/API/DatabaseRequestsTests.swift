@@ -41,15 +41,15 @@ class DatabaseRequestTests: QuickSpec {
             beamHelper.endNetworkRecording()
         }
 
-        describe(".saveDatabase()") {
+        describe(".save()") {
             let databaseApiStruct = self.buildDatabase(id: "c2460fd4-79b7-4271-946e-e973b513d649", title: "Practical Wooden Chair 8Kif0oSgWv1lR8GAneWq9zIOK5LCIW3Occ3v7zbh")
-            afterEach { self.deleteDatabase(databaseApiStruct) }
+            afterEach { self.delete(databaseApiStruct) }
 
             context("with Foundation") {
                 it("creates database") {
                     waitUntil(timeout: .seconds(10)) { done in
                         do {
-                            _ = try sut.saveDatabase(databaseApiStruct) { result in
+                            _ = try sut.save(databaseApiStruct) { result in
                                 expect { try result.get() }.toNot(throwError())
                                 expect { try result.get().database?.id }.to(equal(databaseApiStruct.id))
                                 expect { try result.get().database?.title }.to(equal(databaseApiStruct.title))
@@ -66,7 +66,7 @@ class DatabaseRequestTests: QuickSpec {
 
             context("with PromiseKit") {
                 it("creates database") {
-                    let promise: PromiseKit.Promise<DatabaseAPIType> = sut.saveDatabase(databaseApiStruct)
+                    let promise: PromiseKit.Promise<DatabaseAPIType> = sut.save(databaseApiStruct)
                     
                     waitUntil(timeout: .seconds(10)) { done in
                         promise.done { result in
@@ -80,7 +80,7 @@ class DatabaseRequestTests: QuickSpec {
 
             context("with Promises") {
                 it("creates database") {
-                    let promise: Promises.Promise<DatabaseAPIType> = sut.saveDatabase(databaseApiStruct)
+                    let promise: Promises.Promise<DatabaseAPIType> = sut.save(databaseApiStruct)
 
                     waitUntil(timeout: .seconds(10)) { done in
                         promise.then { result in
@@ -93,15 +93,15 @@ class DatabaseRequestTests: QuickSpec {
             }
         }
 
-        describe(".deleteDatabase()") {
+        describe(".delete()") {
             let databaseApiStruct = self.buildDatabase(id: "c2460fd4-79b7-4271-946e-e973b513d649", title: "Practical Wooden Chair 8Kif0oSgWv1lR8GAneWq9zIOK5LCIW3Occ3v7zbh")
-            beforeEach { self.saveDatabase(databaseApiStruct) }
+            beforeEach { self.save(databaseApiStruct) }
 
             context("with Foundation") {
                 it("deletes database") {
                     waitUntil(timeout: .seconds(10)) { done in
                         do {
-                            _ = try sut.deleteDatabase(databaseApiStruct.id!) { result in
+                            _ = try sut.delete(databaseApiStruct.id!) { result in
                                 expect { try result.get() }.toNot(throwError())
                                 expect { try result.get().database?.id }.to(equal(databaseApiStruct.id))
 
@@ -117,7 +117,7 @@ class DatabaseRequestTests: QuickSpec {
 
             context("with PromisesKit") {
                 it("deletes database") {
-                    let promise: PromiseKit.Promise<DatabaseAPIType?> = sut.deleteDatabase(databaseApiStruct.id!)
+                    let promise: PromiseKit.Promise<DatabaseAPIType?> = sut.delete(databaseApiStruct.id!)
 
                     waitUntil(timeout: .seconds(10)) { done in
                         promise.done { result in
@@ -130,7 +130,7 @@ class DatabaseRequestTests: QuickSpec {
 
             context("with Promises") {
                 it("deletes database") {
-                    let promise: Promises.Promise<DatabaseAPIType?> = sut.deleteDatabase(databaseApiStruct.id!)
+                    let promise: Promises.Promise<DatabaseAPIType?> = sut.delete(databaseApiStruct.id!)
 
                     waitUntil(timeout: .seconds(10)) { done in
                         promise.then { result in
@@ -142,16 +142,16 @@ class DatabaseRequestTests: QuickSpec {
             }
         }
 
-        describe(".fetchDatabases()") {
+        describe(".fetchAll()") {
             let databaseApiStruct = self.buildDatabase(id: "c2460fd4-79b7-4271-946e-e973b513d649", title: "Practical Wooden Chair 8Kif0oSgWv1lR8GAneWq9zIOK5LCIW3Occ3v7zbh")
-            beforeEach { self.saveDatabase(databaseApiStruct) }
-            afterEach { self.deleteDatabase(databaseApiStruct) }
+            beforeEach { self.save(databaseApiStruct) }
+            afterEach { self.delete(databaseApiStruct) }
 
             context("with Foundation") {
                 it("fetches all databases") {
                     waitUntil(timeout: .seconds(10)) { done in
                         do {
-                            _ = try sut.fetchDatabases() { result in
+                            _ = try sut.fetchAll() { result in
                                 let databases = try! result.get()
                                 expect(databases.contains(databaseApiStruct)) == true
 
@@ -167,7 +167,7 @@ class DatabaseRequestTests: QuickSpec {
 
             context("with PromiseKit") {
                 it("fetches all databases") {
-                    let promise: PromiseKit.Promise<[DatabaseAPIType]> = sut.fetchDatabases()
+                    let promise: PromiseKit.Promise<[DatabaseAPIType]> = sut.fetchAll()
 
                     waitUntil(timeout: .seconds(10)) { done in
                         promise.done { result in
@@ -180,7 +180,7 @@ class DatabaseRequestTests: QuickSpec {
 
             context("with Promises") {
                 it("fetches all databases") {
-                    let promise: Promises.Promise<[DatabaseAPIType]> = sut.fetchDatabases()
+                    let promise: Promises.Promise<[DatabaseAPIType]> = sut.fetchAll()
 
                     waitUntil(timeout: .seconds(10)) { done in
                         promise.then { result in
@@ -199,10 +199,10 @@ class DatabaseRequestTests: QuickSpec {
         return databaseApiStruct
     }
 
-    private func saveDatabase(_ databaseApiStruct: DatabaseAPIType) {
+    private func save(_ databaseApiStruct: DatabaseAPIType) {
         waitUntil(timeout: .seconds(10)) { done in
             do {
-                _ = try DatabaseRequest().saveDatabase(databaseApiStruct) { result in
+                _ = try DatabaseRequest().save(databaseApiStruct) { result in
                     expect { try result.get() }.toNot(throwError())
                     expect { try result.get().database?.id }.to(equal(databaseApiStruct.id))
                     expect { try result.get().database?.title }.to(equal(databaseApiStruct.title))
@@ -216,10 +216,10 @@ class DatabaseRequestTests: QuickSpec {
         }
     }
 
-    private func deleteDatabase(_ databaseApiStruct: DatabaseAPIType) {
+    private func delete(_ databaseApiStruct: DatabaseAPIType) {
         waitUntil(timeout: .seconds(10)) { done in
             do {
-                _ = try DatabaseRequest().deleteDatabase(databaseApiStruct.id!) { result in
+                _ = try DatabaseRequest().delete(databaseApiStruct.id!) { result in
                     expect { try result.get() }.toNot(throwError())
                     expect { try result.get().database?.id }.to(equal(databaseApiStruct.id))
 

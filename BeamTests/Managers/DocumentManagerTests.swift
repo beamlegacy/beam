@@ -36,7 +36,7 @@ class DocumentManagerTests: QuickSpec {
             context("with Foundation") {
                 it("deletes all") {
                     waitUntil(timeout: .seconds(10)) { done in
-                        sut.deleteAllDocuments(includedRemote: false) { _ in
+                        sut.deleteAll(includedRemote: false) { _ in
                             done()
                         }
                     }
@@ -47,7 +47,7 @@ class DocumentManagerTests: QuickSpec {
             context("with PromiseKit") {
                 it("deletes all") {
                     waitUntil(timeout: .seconds(10)) { done in
-                        let promise: PromiseKit.Promise<Bool> = sut.deleteAllDocuments(includedRemote: false)
+                        let promise: PromiseKit.Promise<Bool> = sut.deleteAll(includedRemote: false)
 
                         promise.done { success in
                             expect(success) == true
@@ -61,7 +61,7 @@ class DocumentManagerTests: QuickSpec {
             context("with Promises") {
                 it("deletes all") {
                     waitUntil(timeout: .seconds(10)) { done in
-                        let promise: Promises.Promise<Bool> = sut.deleteAllDocuments(includedRemote: false)
+                        let promise: Promises.Promise<Bool> = sut.deleteAll(includedRemote: false)
 
                         promise.then { success in
                             expect(success) == true
@@ -74,12 +74,12 @@ class DocumentManagerTests: QuickSpec {
             }
         }
 
-        describe(".saveDocument()") {
+        describe(".save()") {
             context("with Foundation") {
                 it("saves document") {
                     var docStruct = helper.createDocumentStruct()
                     waitUntil(timeout: .seconds(10)) { done in
-                        docStruct = sut.saveDocument(docStruct, completion:  { _ in
+                        docStruct = sut.save(docStruct, completion:  { _ in
                             done()
                         })
                     }
@@ -94,11 +94,11 @@ class DocumentManagerTests: QuickSpec {
                     let before = DocumentManager.savedCount
 
                     for _ in 0..<5 {
-                        docStruct = sut.saveDocument(docStruct, completion: { _ in })
+                        docStruct = sut.save(docStruct, completion: { _ in })
                     }
 
                     waitUntil(timeout: .seconds(10)) { done in
-                        docStruct = sut.saveDocument(docStruct, completion: { _ in done() })
+                        docStruct = sut.save(docStruct, completion: { _ in done() })
                     }
 
                     // Testing `== 1` might sometimes fail because of speed issue. We want to
@@ -116,7 +116,7 @@ class DocumentManagerTests: QuickSpec {
                         docStruct2.title = docStruct.title
 
                         waitUntil(timeout: .seconds(10)) { done in
-                            docStruct2 = sut.saveDocument(docStruct2, completion: { result in
+                            docStruct2 = sut.save(docStruct2, completion: { result in
                                 expect { try result.get() }.to(throwError())
                                 done()
                             })
@@ -125,15 +125,14 @@ class DocumentManagerTests: QuickSpec {
                         docStruct2.deletedAt = Date()
 
                         waitUntil(timeout: .seconds(10)) { done in
-                            docStruct2 = sut.saveDocument(docStruct2, completion: { result in
+                            docStruct2 = sut.save(docStruct2, completion: { result in
                                 expect { try result.get() }.toNot(throwError())
                                 done()
                             })
                         }
 
                         let count = Document.rawCountWithPredicate(mainContext,
-                                                                   NSPredicate(format: "title = %@", docStruct.title),
-                                                                   onlyNonDeleted: false)
+                                                                   NSPredicate(format: "title = %@", docStruct.title))
                         expect(count) == 2
                     }
                 }
@@ -144,7 +143,7 @@ class DocumentManagerTests: QuickSpec {
                     let docStruct = helper.createDocumentStruct()
 
                     waitUntil(timeout: .seconds(10)) { done in
-                        let promise: PromiseKit.Promise<Bool> = sut.saveDocument(docStruct)
+                        let promise: PromiseKit.Promise<Bool> = sut.save(docStruct)
 
                         promise.done { success in
                                 expect(success) == true
@@ -165,7 +164,7 @@ class DocumentManagerTests: QuickSpec {
                     let times = 15
                     var error = false
                     for _ in 0..<times {
-                        let promise: PromiseKit.Promise<Bool> = sut.saveDocument(docStruct)
+                        let promise: PromiseKit.Promise<Bool> = sut.save(docStruct)
                         promise
                             .done { _ in count += 1 }
                             .catch(policy: .allErrors) { _ in
@@ -174,7 +173,7 @@ class DocumentManagerTests: QuickSpec {
                     }
 
                     waitUntil(timeout: .seconds(10)) { done in
-                        let promise: PromiseKit.Promise<Bool> = sut.saveDocument(docStruct)
+                        let promise: PromiseKit.Promise<Bool> = sut.save(docStruct)
 
                         promise.done { success in
                             expect(success) == true
@@ -198,7 +197,7 @@ class DocumentManagerTests: QuickSpec {
                         docStruct2.title = docStruct.title
 
                         waitUntil(timeout: .seconds(10)) { done in
-                            let promise: PromiseKit.Promise<Bool> = sut.saveDocument(docStruct2)
+                            let promise: PromiseKit.Promise<Bool> = sut.save(docStruct2)
 
                             promise.done { _ in
                                 fail("Shouldn't happen")
@@ -213,7 +212,7 @@ class DocumentManagerTests: QuickSpec {
                         docStruct2.deletedAt = Date()
 
                         waitUntil(timeout: .seconds(10)) { done in
-                            let promise: PromiseKit.Promise<Bool> = sut.saveDocument(docStruct2)
+                            let promise: PromiseKit.Promise<Bool> = sut.save(docStruct2)
 
                             promise.done { success in
                                     expect(success) == true
@@ -223,8 +222,7 @@ class DocumentManagerTests: QuickSpec {
                         }
 
                         let count = Document.rawCountWithPredicate(mainContext,
-                                                                   NSPredicate(format: "title = %@", docStruct.title),
-                                                                   onlyNonDeleted: false)
+                                                                   NSPredicate(format: "title = %@", docStruct.title))
                         expect(count) == 2
                     }
                 }
@@ -235,7 +233,7 @@ class DocumentManagerTests: QuickSpec {
                     let docStruct = helper.createDocumentStruct()
 
                     waitUntil(timeout: .seconds(10)) { done in
-                        let promise: Promises.Promise<Bool> = sut.saveDocument(docStruct)
+                        let promise: Promises.Promise<Bool> = sut.save(docStruct)
 
                         promise.then { success in
                                 expect(success) == true
@@ -256,11 +254,11 @@ class DocumentManagerTests: QuickSpec {
                     let times = 15
                     var error = false
                     for _ in 0..<times {
-                        let promise: Promises.Promise<Bool> = sut.saveDocument(docStruct)
+                        let promise: Promises.Promise<Bool> = sut.save(docStruct)
                         promise.then { _ in count += 1 }.catch { _ in error = true }
                     }
 
-                    let promise: Promises.Promise<Bool> = sut.saveDocument(docStruct)
+                    let promise: Promises.Promise<Bool> = sut.save(docStruct)
 
                     waitUntil(timeout: .seconds(10)) { done in
                         promise.then { success in
@@ -285,7 +283,7 @@ class DocumentManagerTests: QuickSpec {
                         docStruct2.title = docStruct.title
 
                         waitUntil(timeout: .seconds(10)) { done in
-                            let promise: Promises.Promise<Bool> = sut.saveDocument(docStruct2)
+                            let promise: Promises.Promise<Bool> = sut.save(docStruct2)
 
                             promise.then { _ in
                                 fail("Shouldn't happen")
@@ -300,7 +298,7 @@ class DocumentManagerTests: QuickSpec {
                         docStruct2.deletedAt = Date()
 
                         waitUntil(timeout: .seconds(10)) { done in
-                            let promise: Promises.Promise<Bool> = sut.saveDocument(docStruct2)
+                            let promise: Promises.Promise<Bool> = sut.save(docStruct2)
 
                             promise.then { success in
                                     expect(success) == true
@@ -310,20 +308,19 @@ class DocumentManagerTests: QuickSpec {
                         }
 
                         let count = Document.rawCountWithPredicate(mainContext,
-                                                                   NSPredicate(format: "title = %@", docStruct.title),
-                                                                   onlyNonDeleted: false)
+                                                                   NSPredicate(format: "title = %@", docStruct.title))
                         expect(count) == 2
                     }
                 }
             }
         }
 
-        describe(".loadDocumentById()") {
+        describe(".loadById()") {
             it("loads document") {
                 var docStruct = helper.createDocumentStruct()
                 docStruct = helper.saveLocally(docStruct)
 
-                let document = sut.loadDocumentById(id: docStruct.id)
+                let document = sut.loadById(id: docStruct.id)
                 expect(document).toNot(beNil())
                 expect(document?.title).to(equal(docStruct.title))
                 expect(document?.data).to(equal(docStruct.data))
@@ -348,7 +345,7 @@ class DocumentManagerTests: QuickSpec {
                     var docStruct = helper.createDocumentStruct()
                     docStruct = helper.saveLocally(docStruct)
                     waitUntil(timeout: .seconds(10)) { done in
-                        sut.deleteDocument(id: docStruct.id) { _ in
+                        sut.delete(id: docStruct.id) { _ in
                             done()
                         }
                     }
@@ -365,7 +362,7 @@ class DocumentManagerTests: QuickSpec {
                     var docStruct = helper.createDocumentStruct()
                     docStruct = helper.saveLocally(docStruct)
                     waitUntil(timeout: .seconds(10)) { done in
-                        let promise: PromiseKit.Promise<Bool> = sut.deleteDocument(id: docStruct.id)
+                        let promise: PromiseKit.Promise<Bool> = sut.delete(id: docStruct.id)
                         promise
                             .done { _ in done() }
                             .catch { _ in }
@@ -383,7 +380,7 @@ class DocumentManagerTests: QuickSpec {
                     var docStruct = helper.createDocumentStruct()
                     docStruct = helper.saveLocally(docStruct)
                     waitUntil(timeout: .seconds(10)) { done in
-                        let promise: Promises.Promise<Bool> = sut.deleteDocument(id: docStruct.id)
+                        let promise: Promises.Promise<Bool> = sut.delete(id: docStruct.id)
                         promise.then { _ in done() }
                     }
 
@@ -626,7 +623,7 @@ class DocumentManagerTests: QuickSpec {
 
                     docStruct.title = newTitle
                     docStruct.data = newTitle.asData // to force the callback
-                    docStruct = sut.saveDocument(docStruct, completion: { result in
+                    docStruct = sut.save(docStruct, completion: { result in
                         expect { try result.get() }.toNot(throwError())
                         expect { try result.get() }.to(beTrue())
                     })
@@ -647,7 +644,8 @@ class DocumentManagerTests: QuickSpec {
                         done()
                     }
 
-                    let document = Document.fetchWithId(mainContext, docStruct.id)!
+                    //swiftlint:disable:next force_try
+                    let document = try! Document.fetchWithId(mainContext, docStruct.id)!
                     document.beam_api_data = newData.asData
                     //swiftlint:disable:next force_try
                     try! mainContext.save()
@@ -678,7 +676,7 @@ class DocumentManagerTests: QuickSpec {
 
                 // Semaphore is needed or the afterEach deleteDocument might be called *before* this saveDocument is finished
                 let semaphore = DispatchSemaphore(value: 0)
-                docStruct = sut.saveDocument(docStruct, completion: { _ in
+                docStruct = sut.save(docStruct, completion: { _ in
                     semaphore.signal()
                 })
                 semaphore.wait()
@@ -703,7 +701,7 @@ class DocumentManagerTests: QuickSpec {
                                            version: 0)
 
                 waitUntil(timeout: .seconds(2)) { done in
-                    docStruct = sut.saveDocument(docStruct, completion:  { _ in
+                    docStruct = sut.save(docStruct, completion:  { _ in
                         done()
                     })
                     // This is done by BeamNote (the caller), it saves the returned version
@@ -712,7 +710,7 @@ class DocumentManagerTests: QuickSpec {
                 }
 
                 waitUntil(timeout: .seconds(2)) { done in
-                    docStruct = sut.saveDocument(docStruct, completion:  { _ in
+                    docStruct = sut.save(docStruct, completion:  { _ in
                         done()
                     })
                     expect(docStruct.version).to(equal(2))
@@ -733,7 +731,7 @@ class DocumentManagerTests: QuickSpec {
 
                 for index in 0...3 {
                     waitUntil(timeout: .seconds(2)) { done in
-                        docStruct = sut.saveDocument(docStruct, completion:  { _ in
+                        docStruct = sut.save(docStruct, completion:  { _ in
                             done()
                         })
                         // This is done by BeamNote (the caller), it saves the returned version
@@ -746,7 +744,7 @@ class DocumentManagerTests: QuickSpec {
                 // Try to save a previous version
                 docStruct.version = 1
                 waitUntil(timeout: .seconds(2)) { done in
-                    docStruct = sut.saveDocument(docStruct, completion:  { result in
+                    docStruct = sut.save(docStruct, completion:  { result in
                         expect { try result.get() }.to(throwError { (error: NSError) in
                             expect(error.code).to(equal(1002))
                         })

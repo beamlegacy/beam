@@ -130,7 +130,7 @@ extension DestinationNoteAutocompleteList {
                 allowCreateCard = true
                 items = data.documentManager.documentsWithLimitTitleMatch(title: searchText, limit: itemLimit)
             } else if useRecents {
-                items = data.documentManager.loadAllDocumentsWithLimit(itemLimit)
+                items = data.documentManager.loadAllWithLimit(itemLimit)
             }
             if (todaysCardReplacementName.lowercased().contains(searchText.lowercased())
                     && !items.contains(where: { $0.title == data.todaysName })) {

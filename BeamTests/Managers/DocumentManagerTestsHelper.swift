@@ -24,7 +24,7 @@ class DocumentManagerTestsHelper {
     func deleteAllDocuments() {
         let semaphore = DispatchSemaphore(value: 0)
 
-        documentManager.deleteAllDocuments { _ in
+        documentManager.deleteAll { _ in
             semaphore.signal()
         }
         semaphore.wait()
@@ -33,7 +33,7 @@ class DocumentManagerTestsHelper {
     func deleteAllDatabases() {
         let semaphore = DispatchSemaphore(value: 0)
 
-        databaseManager.deleteAllDatabases { _ in
+        databaseManager.deleteAll { _ in
             semaphore.signal()
         }
         semaphore.wait()
@@ -44,7 +44,7 @@ class DocumentManagerTestsHelper {
         var newVersion = docStruct
         waitUntil(timeout: .seconds(10)) { done in
             // To force a local save only, while using the standard code
-            newVersion = self.documentManager.saveDocument(docStruct, true, { result in
+            newVersion = self.documentManager.save(docStruct, true, { result in
                 expect { try result.get() }.toNot(throwError())
                 done()
             }, completion: nil)
@@ -58,7 +58,7 @@ class DocumentManagerTestsHelper {
         var newVersion = docStruct
         waitUntil(timeout: .seconds(10)) { done in
             // To force a local save only, while using the standard code
-            newVersion = self.documentManager.saveDocument(docStruct, false, completion:  { result in
+            newVersion = self.documentManager.save(docStruct, false, completion:  { result in
                 expect { try result.get() }.toNot(throwError())
                 if case .failure(let error) = result {
                     fail(error.localizedDescription)
@@ -92,7 +92,7 @@ class DocumentManagerTestsHelper {
         let documentRequest = DocumentRequest()
 
         waitUntil(timeout: .seconds(10)) { done in
-            _ = try? documentRequest.saveDocument(docStruct.asApiType()) { result in
+            _ = try? documentRequest.save(docStruct.asApiType()) { result in
                 expect { try result.get() }.toNot(throwError())
                 done()
             }
@@ -119,7 +119,7 @@ class DocumentManagerTestsHelper {
 
         let semaphore = DispatchSemaphore(value: 0)
         // TODO: Add a `fetchDatabase` request for faster GET
-        _ = try? databaseRequest.fetchDatabases { result in
+        _ = try? databaseRequest.fetchAll { result in
             if let databaseAPITypes = try? result.get() {
                 for databaseAPIType in databaseAPITypes {
                     if databaseAPIType.id == dbStruct.uuidString {
@@ -149,7 +149,7 @@ class DocumentManagerTestsHelper {
 
     func deleteDocumentStruct(_ docStruct: DocumentStruct) {
         waitUntil(timeout: .seconds(10)) { done in
-            self.documentManager.deleteDocument(id: docStruct.id) { result in
+            self.documentManager.delete(id: docStruct.id) { result in
                 expect { try result.get() }.toNot(throwError())
                 expect { try result.get() }.to(beTrue())
                 if case .failure(let error) = result {
@@ -165,7 +165,7 @@ class DocumentManagerTestsHelper {
 
     func deleteDatabaseStruct(_ dbStruct: DatabaseStruct, includedRemote: Bool = true) {
         waitUntil(timeout: .seconds(10)) { done in
-            self.databaseManager.deleteDatabase(dbStruct, includedRemote: includedRemote) { result in
+            self.databaseManager.delete(dbStruct, includedRemote: includedRemote) { result in
                 expect { try result.get() }.toNot(throwError())
                 expect { try result.get() }.to(beTrue())
                 if case .failure(let error) = result {
@@ -226,7 +226,7 @@ class DocumentManagerTestsHelper {
 
         // We'll use saveDocumentOnAPI() later, I need to update the result
         // DocumentStruct to add its previousChecksum
-        guard let localDocument = Document.fetchWithId(mainContext, docStruct.id) else {
+        guard let localDocument = try? Document.fetchWithId(mainContext, docStruct.id) else {
             throw DocumentManagerError.localDocumentNotFound
         }
         docStruct.previousChecksum = localDocument.beam_api_checksum
@@ -282,7 +282,7 @@ class DocumentManagerTestsHelper {
 
     func saveDatabaseLocally(_ dbStruct: DatabaseStruct) {
         waitUntil(timeout: .seconds(10)) { done in
-            self.databaseManager.saveDatabase(dbStruct, false, completion:  { result in
+            self.databaseManager.save(dbStruct, false, completion:  { result in
                 expect { try result.get() }.toNot(throwError())
                 if case .failure(let error) = result {
                     fail(error.localizedDescription)

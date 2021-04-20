@@ -12,7 +12,7 @@ extension AppDelegate {
     }
 
     private func deleteDocuments(includedRemote: Bool) {
-        documentManager.deleteAllDocuments(includedRemote: includedRemote) { result in
+        documentManager.deleteAll(includedRemote: includedRemote) { result in
             DispatchQueue.main.async {
                 self.updateBadge()
 
@@ -153,7 +153,7 @@ extension AppDelegate {
 
     // MARK: - Send to API
     @IBAction func sendAllNotesToAPI(_ sender: Any) {
-        documentManager.uploadAllDocuments { result in
+        documentManager.uploadAll { result in
             DispatchQueue.main.async {
                 let alert = NSAlert()
                 switch result {
@@ -172,7 +172,7 @@ extension AppDelegate {
 
     // MARK: - Fetch from API
     @IBAction func refreshNotesFromAPI(_ sender: Any) {
-        documentManager.refreshDocuments { result in
+        documentManager.refreshAll { result in
             DispatchQueue.main.async {
                 let alert = NSAlert()
                 switch result {

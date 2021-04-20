@@ -49,7 +49,7 @@ struct DatabaseRow: View {
                 Button("Delete") {
                     showingAlert = true
                     let dbStruct = DatabaseStruct(database: database)
-                    databaseManager.deleteDatabase(dbStruct) { _ in
+                    databaseManager.delete(dbStruct) { _ in
                         Logger.shared.logInfo("database \(dbStruct.title) deleted")
                     }
                 }
@@ -61,7 +61,7 @@ struct DatabaseRow: View {
             //                    message: Text("Deleting database will delete all data related to it. There is no undo"),
             //                    primaryButton: .destructive(Text("Delete")) {
             //                        let dbStruct = DatabaseStruct(database: database)
-            //                        databaseManager.deleteDatabase(dbStruct) { _ in
+            //                        databaseManager.delete(dbStruct) { _ in
             //                            Logger.shared.logInfo("database \(dbStruct.title) deleted")
             //                        }
             //                    },
@@ -74,11 +74,11 @@ struct DatabaseRow: View {
 }
 
 struct DatabaseRow_Previews: PreviewProvider {
+
     static var previews: some View {
         Group {
-            if let database = try? Database.fetchFirst(context: CoreDataManager.shared.mainContext) {
-                DatabaseRow(database: database)
-            }
+            //swiftlint:disable:next force_try
+            DatabaseRow(database: try! Database.fetchFirst(CoreDataManager.shared.mainContext)!)
         }.previewLayout(.fixed(width: 400, height: 100))
     }
 }

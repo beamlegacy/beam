@@ -22,7 +22,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
 
             sut = DatabaseManager()
             BeamTestsHelper.logout()
-            sut.deleteAllDatabases(includedRemote: false) { _ in }
+            sut.deleteAll(includedRemote: false) { _ in }
 
             beamHelper.beginNetworkRecording()
             helper = DocumentManagerTestsHelper(documentManager: DocumentManager(),
@@ -40,7 +40,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
             Configuration.encryptionEnabled = false
         }
 
-        describe(".syncDatabases()") {
+        describe(".syncAll()") {
             var dbStruct: DatabaseStruct!
             beforeEach {
                 dbStruct = helper.createDatabaseStruct("995d94e1-e0df-4eca-93e6-8778984bcd29")
@@ -55,7 +55,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
                         let networkCalls = APIRequest.callsCount
 
                         waitUntil(timeout: .seconds(10)) { done in
-                            sut.syncDatabases { result in
+                            sut.syncAll { result in
                                 expect { try result.get() }.toNot(throwError())
                                 expect { try result.get() } == true
                                 done()
@@ -72,7 +72,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
                     it("creates remote database") {
                         let networkCalls = APIRequest.callsCount
 
-                        let promise: PromiseKit.Promise<Bool> = sut.syncDatabases()
+                        let promise: PromiseKit.Promise<Bool> = sut.syncAll()
 
                         waitUntil(timeout: .seconds(10)) { done in
                             promise.done { success in
@@ -91,7 +91,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
                     it("creates remote database") {
                         let networkCalls = APIRequest.callsCount
 
-                        let promise: Promises.Promise<Bool> = sut.syncDatabases()
+                        let promise: Promises.Promise<Bool> = sut.syncAll()
 
                         waitUntil(timeout: .seconds(10)) { done in
                             promise.then { success in
@@ -119,7 +119,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
                         let networkCalls = APIRequest.callsCount
 
                         waitUntil(timeout: .seconds(10)) { done in
-                            sut.syncDatabases { result in
+                            sut.syncAll { result in
                                 expect { try result.get() }.toNot(throwError())
                                 expect { try result.get() } == true
                                 done()
@@ -137,7 +137,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
                     it("creates local database") {
                         let networkCalls = APIRequest.callsCount
 
-                        let promise: PromiseKit.Promise<Bool> = sut.syncDatabases()
+                        let promise: PromiseKit.Promise<Bool> = sut.syncAll()
 
                         waitUntil(timeout: .seconds(10)) { done in
                             promise.done { success in
@@ -157,7 +157,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
                     it("creates local database") {
                         let networkCalls = APIRequest.callsCount
 
-                        let promise: Promises.Promise<Bool> = sut.syncDatabases()
+                        let promise: Promises.Promise<Bool> = sut.syncAll()
 
                         waitUntil(timeout: .seconds(10)) { done in
                             promise.then { success in
@@ -175,7 +175,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
             }
         }
 
-        describe(".saveDatabase()") {
+        describe(".save()") {
             var dbStruct: DatabaseStruct!
             beforeEach {
                 dbStruct = helper.createDatabaseStruct("995d94e1-e0df-4eca-93e6-8778984bcd29")
@@ -186,7 +186,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
                     let networkCalls = APIRequest.callsCount
 
                     waitUntil(timeout: .seconds(10)) { done in
-                        sut.saveDatabase(dbStruct, true, { result in
+                        sut.save(dbStruct, true, { result in
                             expect { try result.get() }.toNot(throwError())
                             expect { try result.get() } == true
                             done()
@@ -207,7 +207,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
                 it("saves database") {
                     let networkCalls = APIRequest.callsCount
 
-                    let promise: PromiseKit.Promise<Bool> = sut.saveDatabase(dbStruct)
+                    let promise: PromiseKit.Promise<Bool> = sut.save(dbStruct)
 
                     waitUntil(timeout: .seconds(10)) { done in
                         promise.done { success in
@@ -230,7 +230,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
                 it("saves database") {
                     let networkCalls = APIRequest.callsCount
 
-                    let promise: Promises.Promise<Bool> = sut.saveDatabase(dbStruct)
+                    let promise: Promises.Promise<Bool> = sut.save(dbStruct)
 
                     waitUntil(timeout: .seconds(10)) { done in
                         promise.then { success in
@@ -250,7 +250,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
             }
         }
 
-        describe(".deleteDatabase()") {
+        describe(".delete()") {
             var dbStruct: DatabaseStruct!
             beforeEach {
                 dbStruct = helper.createDatabaseStruct("995d94e1-e0df-4eca-93e6-8778984bcd29")
@@ -263,7 +263,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
                     let networkCalls = APIRequest.callsCount
 
                     waitUntil(timeout: .seconds(10)) { done in
-                        sut.deleteDatabase(dbStruct) { result in
+                        sut.delete(dbStruct) { result in
                             expect { try result.get() }.toNot(throwError())
                             expect { try result.get() } == true
                             done()
@@ -280,7 +280,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
                 it("deletes database") {
                     let networkCalls = APIRequest.callsCount
 
-                    let promise: PromiseKit.Promise<Bool> = sut.deleteDatabase(dbStruct)
+                    let promise: PromiseKit.Promise<Bool> = sut.delete(dbStruct)
 
                     waitUntil(timeout: .seconds(10)) { done in
                         promise.done { success in
@@ -299,7 +299,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
                 it("deletes database") {
                     let networkCalls = APIRequest.callsCount
 
-                    let promise: Promises.Promise<Bool> = sut.deleteDatabase(dbStruct)
+                    let promise: Promises.Promise<Bool> = sut.delete(dbStruct)
 
                     waitUntil(timeout: .seconds(10)) { done in
                         promise.then { success in
@@ -315,7 +315,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
             }
         }
 
-        describe(".deleteAllDatabases()") {
+        describe(".deleteAll()") {
             var dbStruct: DatabaseStruct!
             beforeEach {
                 dbStruct = helper.createDatabaseStruct("995d94e1-e0df-4eca-93e6-8778984bcd29")
@@ -328,7 +328,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
                     let networkCalls = APIRequest.callsCount
 
                     waitUntil(timeout: .seconds(10)) { done in
-                        sut.deleteAllDatabases { result in
+                        sut.deleteAll { result in
                             expect { try result.get() }.toNot(throwError())
                             expect { try result.get() } == true
                             done()
@@ -345,7 +345,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
                 it("deletes databases") {
                     let networkCalls = APIRequest.callsCount
 
-                    let promise: PromiseKit.Promise<Bool> = sut.deleteAllDatabases()
+                    let promise: PromiseKit.Promise<Bool> = sut.deleteAll()
 
                     waitUntil(timeout: .seconds(10)) { done in
                         promise.done { success in
@@ -364,7 +364,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
                 it("deletes databases") {
                     let networkCalls = APIRequest.callsCount
 
-                    let promise: Promises.Promise<Bool> = sut.deleteAllDatabases()
+                    let promise: Promises.Promise<Bool> = sut.deleteAll()
 
                     waitUntil(timeout: .seconds(10)) { done in
                         promise.then { success in
@@ -380,7 +380,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
             }
         }
 
-        describe(".uploadAllDatabases()") {
+        describe(".uploadAll()") {
             var dbStruct: DatabaseStruct!
             beforeEach {
                 dbStruct = helper.createDatabaseStruct("995d94e1-e0df-4eca-93e6-8778984bcd29")
@@ -397,7 +397,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
                     let networkCalls = APIRequest.callsCount
 
                     waitUntil(timeout: .seconds(10)) { done in
-                        sut.uploadAllDatabases { result in
+                        sut.uploadAll { result in
                             expect { try result.get() }.toNot(throwError())
                             expect { try result.get() } == true
                             done()
@@ -414,7 +414,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
                 it("uploads existing databases") {
                     let networkCalls = APIRequest.callsCount
 
-                    let promise: PromiseKit.Promise<Bool> = sut.uploadAllDatabases()
+                    let promise: PromiseKit.Promise<Bool> = sut.uploadAll()
 
                     waitUntil(timeout: .seconds(10)) { done in
                         promise.done { success in
@@ -433,7 +433,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
                 it("uploads existing databases") {
                     let networkCalls = APIRequest.callsCount
 
-                    let promise: Promises.Promise<Bool> = sut.uploadAllDatabases()
+                    let promise: Promises.Promise<Bool> = sut.uploadAll()
 
                     waitUntil(timeout: .seconds(10)) { done in
                         promise.then { success in
@@ -449,7 +449,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
             }
         }
 
-        describe(".fetchDatabases()") {
+        describe(".fetchAll()") {
             var dbStruct: DatabaseStruct!
             beforeEach {
                 dbStruct = helper.createDatabaseStruct("995d94e1-e0df-4eca-93e6-8778984bcd29")
@@ -466,7 +466,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
                 it("fetches all databases") {
                     let networkCalls = APIRequest.callsCount
                     waitUntil(timeout: .seconds(10)) { done in
-                        sut.fetchDatabases { result in
+                        sut.fetchAll { result in
                             expect { try result.get() }.toNot(throwError())
                             expect { try result.get() } == true
                             done()
@@ -482,7 +482,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
             context("with PromiseKit") {
                 it("fetches all databases") {
                     let networkCalls = APIRequest.callsCount
-                    let promise: PromiseKit.Promise<Bool> = sut.fetchDatabases()
+                    let promise: PromiseKit.Promise<Bool> = sut.fetchAll()
 
                     waitUntil(timeout: .seconds(10)) { done in
                         promise.done { success in
@@ -500,7 +500,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
             context("with Promises") {
                 it("fetches all databases") {
                     let networkCalls = APIRequest.callsCount
-                    let promise: Promises.Promise<Bool> = sut.fetchDatabases()
+                    let promise: Promises.Promise<Bool> = sut.fetchAll()
 
                     waitUntil(timeout: .seconds(10)) { done in
                         promise.then { success in

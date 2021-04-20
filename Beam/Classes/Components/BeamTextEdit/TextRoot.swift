@@ -171,7 +171,7 @@ public class TextRoot: TextNode {
             let first = children.first as? TextNode
             first?.placeholder = BeamText(text: "You can write here and press ⌘⏎ to search the web")
         }
-        
+
         childInset = 0
 
         setAccessibilityLabel("TextRoot")

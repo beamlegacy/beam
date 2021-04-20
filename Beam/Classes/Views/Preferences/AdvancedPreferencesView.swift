@@ -122,7 +122,7 @@ struct AdvancedPreferencesView: View {
                         Button(action: {
                             if !newDatabaseTitle.isEmpty {
                                 let database = DatabaseStruct(title: newDatabaseTitle)
-                                databaseManager.saveDatabase(database, completion: { result in
+                                databaseManager.save(database, completion: { result in
                                     if case .success(let done) = result, done {
 
                                         if let database = try? Database.fetchWithId(CoreDataManager.shared.mainContext, database.id) {

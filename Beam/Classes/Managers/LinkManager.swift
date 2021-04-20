@@ -127,7 +127,7 @@ class LinkManager: LinkManagerBase {
 //            }
     }
 
-//    func uploadAllDocuments(_ completionHandler: ((Result<Bool, Error>) -> Void)? = nil) {
+//    func uploadAll(_ completionHandler: ((Result<Bool, Error>) -> Void)? = nil) {
 //        CoreDataManager.shared.persistentContainer.performBackgroundTask { context in
 //            let documents = Document.fetchAll(context: context)
 //            let documentsArray: [DocumentAPIType] = documents.map { document in document.asApiType() }

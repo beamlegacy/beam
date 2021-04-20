@@ -23,8 +23,8 @@ class BeamUITestsMenuGenerator {
     }
 
     private func destroyDatabase() {
-        DocumentManager().deleteAllDocuments { _ in }
-        DatabaseManager().deleteAllDatabases { _ in }
+        DocumentManager().deleteAll { _ in }
+        DatabaseManager().deleteAll { _ in }
     }
 
     let faker = Faker(locale: "en-US")
@@ -38,7 +38,7 @@ class BeamUITestsMenuGenerator {
             note.creationDate = date
             note.updateDate = date
             guard let docStruct = note.documentStruct else { return }
-            _ = self.documentManager.saveDocument(docStruct, completion: nil)
+            _ = self.documentManager.save(docStruct, completion: nil)
             nbrOfJournal -= 1
         }
     }

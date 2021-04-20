@@ -100,7 +100,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // My feeling is we should sync + trigger notification and only start network calls when
         // this sync has finished.
 
-        databaseManager.syncDatabases { result in
+        databaseManager.syncAll { result in
             switch result {
             case .failure(let error):
                 Logger.shared.logError("Couldn't sync databases: \(error.localizedDescription)",
@@ -110,7 +110,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     Logger.shared.logError("Couldn't sync databases",
                                            category: .document)
                 } else {
-                    self.documentManager.syncDocuments { result in
+                    self.documentManager.syncAll { result in
                         switch result {
                         case .failure(let error):
                             Logger.shared.logError("Couldn't sync documents: \(error.localizedDescription)",
