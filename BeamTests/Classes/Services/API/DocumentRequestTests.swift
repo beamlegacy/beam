@@ -40,6 +40,7 @@ class DocumentRequestTests: QuickSpec {
              */
             BeamTestsHelper.logout()
             BeamTestsHelper.login()
+            helper.deleteAllDatabases()
         }
 
         afterEach {

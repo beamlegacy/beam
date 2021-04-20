@@ -54,6 +54,7 @@ public class BeamNote: BeamElement {
     @Published public var browsingSessions = [BrowsingTree]() { didSet { change(.meta) } }
     public var version: Int64 = 0
     public var savedVersion: Int64 = 0
+    public var databaseId: UUID?
 
     public override var note: BeamNote? {
         return self

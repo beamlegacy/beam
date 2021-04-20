@@ -23,7 +23,8 @@ class BeamUITestsMenuGenerator {
     }
 
     private func destroyDatabase() {
-        CoreDataManager.shared.destroyPersistentStore()
+        DocumentManager().deleteAllDocuments { _ in }
+        DatabaseManager().deleteAllDatabases { _ in }
     }
 
     let faker = Faker(locale: "en-US")

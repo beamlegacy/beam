@@ -836,6 +836,12 @@ CQ
                                                 <action selector="showAllDocuments:" target="Voe-Tx-rLC" id="sgR-1m-YeG"/>
                                             </connections>
                                         </menuItem>
+                                        <menuItem title="Show all databases" id="6Q8-7J-bID">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="showAllDatabases:" target="Voe-Tx-rLC" id="GNb-Q0-YKA"/>
+                                            </connections>
+                                        </menuItem>
                                         <menuItem title="Show Logs" id="fn4-OZ-WHS">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>

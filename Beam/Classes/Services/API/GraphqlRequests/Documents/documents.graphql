@@ -8,6 +8,7 @@ query documents {
       createdAt
       updatedAt
       isPublic
+      database { title id }
     }
   }
 }

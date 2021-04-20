@@ -1,0 +1,11 @@
+mutation DeleteDatabase($id: ID!) {
+  deleteDatabase(input: {database: {id: $id}}) {
+    database {
+      id
+    }
+    errors {
+      path
+      message
+    }
+  }
+}

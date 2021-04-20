@@ -1,6 +1,7 @@
 import SwiftUI
 import Preferences
 import Sentry
+import Combine
 
 /**
 Function wrapping SwiftUI into `PreferencePane`, which is mimicking view controller's default construction syntax.
@@ -13,6 +14,7 @@ let AdvancedPreferencesViewController: () -> PreferencePane = {
         toolbarIcon: NSImage(named: "gearshape.2")!
     ) {
         AdvancedPreferencesView()
+            .environment(\.managedObjectContext, CoreDataManager.shared.mainContext)
     }
 
     return Preferences.PaneHostingController(pane: paneView)
@@ -32,6 +34,14 @@ struct AdvancedPreferencesView: View {
     @State private var privateKey = EncryptionManager.shared.privateKey().asString()
     @State private var stateRestorationEnabled = Configuration.stateRestorationEnabled
 
+    // Database
+    @State private var newDatabaseTitle = ""
+    @State private var selectedDatabase = Database.defaultDatabase()
+    private let databaseManager = DatabaseManager()
+    @FetchRequest(entity: Database.entity(),
+                  sortDescriptors: [NSSortDescriptor(keyPath: \Database.title, ascending: true)])
+    var databases: FetchedResults<Database>
+
     private let contentWidth: Double = 650.0
 
     var body: some View {
@@ -41,6 +51,7 @@ struct AdvancedPreferencesView: View {
             self.apiHostname = $0
             Configuration.apiHostname = $0
         })
+
         let privateKeyBinding = Binding<String>(get: {
             privateKey
         }, set: {
@@ -95,8 +106,49 @@ struct AdvancedPreferencesView: View {
             Preferences.Section(title: "State Restoration Enabled") {
                 StateRestorationEnabledButton
             }
+            Preferences.Section(title: "Database") {
+                DatabasePicker
+                Button(action: {
+                    showNewDatabase = true
+                }, label: {
+                    Text("New Database").frame(minWidth: 100)
+                })
+                .popover(isPresented: $showNewDatabase) {
+                    HStack {
+                        TextField("title", text: $newDatabaseTitle)
+                            .textFieldStyle(RoundedBorderTextFieldStyle()).frame(minWidth: 100, maxWidth: 400)
+                            .padding()
+
+                        Button(action: {
+                            if !newDatabaseTitle.isEmpty {
+                                let database = DatabaseStruct(title: newDatabaseTitle)
+                                databaseManager.saveDatabase(database, completion: { result in
+                                    if case .success(let done) = result, done {
+
+                                        if let database = try? Database.fetchWithId(CoreDataManager.shared.mainContext, database.id) {
+                                            DatabaseManager.defaultDatabase = DatabaseStruct(database: database)
+                                            selectedDatabase = database
+                                            try? CoreDataManager.shared.save()
+                                        }
+                                    }
+                                    showNewDatabase = false
+                                })
+                            } else {
+                                showNewDatabase = false
+                            }
+                            newDatabaseTitle = ""
+                        }, label: {
+                            Text("Create")
+                        }).padding()
+                    }
+                }
+            }
+        }.onAppear {
+            observeDefaultDatabase()
         }
     }
+
+    @State private var showNewDatabase = false
 
     private var NetworkEnabledButton: some View {
         Button(action: {
@@ -166,6 +218,27 @@ struct AdvancedPreferencesView: View {
         })
     }
 
+    private var DatabasePicker: some View {
+        return Picker("", selection: $selectedDatabase.onChange(dbChange), content: {
+            ForEach(databases, id: \.id) {
+                Text($0.title).tag($0)
+            }
+        }).frame(idealWidth: 100, maxWidth: 400)
+    }
+
+    private func dbChange(_ database: Database) {
+        DatabaseManager.defaultDatabase = DatabaseStruct(database: database)
+    }
+
+    @State private var cancellables = [AnyCancellable]()
+    private func observeDefaultDatabase() {
+        NotificationCenter.default
+            .publisher(for: .defaultDatabaseUpdate, object: nil)
+            .sink { _ in
+                selectedDatabase = Database.defaultDatabase()
+            }
+            .store(in: &cancellables)
+    }
 }
 
 struct AdvancedPreferencesView_Previews: PreviewProvider {

@@ -21,8 +21,8 @@ class Document: NSManagedObject {
         return beam_api_data != data
     }
 
-    func asApiType() -> DocumentAPIType {
-        let result = DocumentAPIType(document: self)
+    func asApiType(_ context: NSManagedObjectContext = CoreDataManager.shared.mainContext) -> DocumentAPIType {
+        let result = DocumentAPIType(document: self, context: context)
         return result
     }
 
@@ -45,9 +45,64 @@ class Document: NSManagedObject {
         }
     }
 
-    class func create(_ context: NSManagedObjectContext = CoreDataManager.shared.mainContext, title: String? = nil) -> Document {
+    func database(_ context: NSManagedObjectContext = CoreDataManager.shared.mainContext) -> Database? {
+        try? Database.rawFetchWithId(context, database_id)
+    }
+
+    /// Slower than `deleteBatchWithPredicate` but I can't get `deleteBatchWithPredicate` to properly propagate changes to other contexts :(
+    class func deleteWithPredicate(_ context: NSManagedObjectContext, _ predicate: NSPredicate? = nil) throws {
+        let deleteFetch = NSFetchRequest<NSFetchRequestResult>(entityName: "Document")
+        deleteFetch.predicate = predicate
+
+        context.performAndWait {
+            for document in Document.rawFetchAllWithLimit(context: context, predicate) {
+                context.delete(document)
+            }
+        }
+    }
+
+    class func deleteBatchWithPredicate(_ context: NSManagedObjectContext, _ predicate: NSPredicate? = nil) throws {
+        let deleteFetch = NSFetchRequest<NSFetchRequestResult>(entityName: "Document")
+        deleteFetch.predicate = predicate
+        let deleteRequest = NSBatchDeleteRequest(fetchRequest: deleteFetch)
+
+        deleteRequest.resultType = .resultTypeObjectIDs
+
+        try context.performAndWait {
+            for document in Document.rawFetchAllWithLimit(context: context) {
+                Logger.shared.logDebug("title: \(document.title) database_id: \(document.database_id)", category: .document)
+            }
+
+            Logger.shared.logDebug("About to delete \(rawCountWithPredicate(context, predicate)) documents", category: .document)
+
+            try context.execute(deleteRequest)
+
+            let result = try context.execute(deleteRequest) as? NSBatchDeleteResult
+
+            // Retrieves the IDs deleted
+            guard let objectIDs = result?.result as? [NSManagedObjectID] else { return }
+
+            Logger.shared.logDebug("objectIDs: \(objectIDs)", category: .document)
+            Logger.shared.logDebug("predicate: \(String(describing: predicate))", category: .document)
+
+            // We don't need to propagate changes if already main context
+//            guard CoreDataManager.shared.mainContext != context else { return }
+
+            // Note: this seems to be propagating the deletes to the main managedContext
+            // even without this, but documentation says we should do it so...
+
+            // Updates the main context
+            let changes = [NSDeletedObjectsKey: objectIDs]
+            NSManagedObjectContext.mergeChanges(fromRemoteContextSave: changes,
+                                                into: [CoreDataManager.shared.mainContext])
+        }
+    }
+
+    class func create(_ context: NSManagedObjectContext = CoreDataManager.shared.mainContext,
+                      title: String? = nil) -> Document {
         let document = Document(context: context)
         document.id = UUID()
+        document.database_id = DatabaseManager.defaultDatabase.id
         document.version = 0
         if let title = title {
             document.title = title
@@ -57,36 +112,33 @@ class Document: NSManagedObject {
     }
 
     func update(_ documentStruct: DocumentStruct) {
+        database_id = documentStruct.databaseId
         data = documentStruct.data
         title = documentStruct.title
         document_type = documentStruct.documentType.rawValue
         created_at = documentStruct.createdAt
         updated_at = BeamDate.now
-        if documentStruct.documentType == .journal {
-            do {
-                let note = try JSONDecoder().decode(BeamNote.self, from: documentStruct.data)
-                deleted_at = note.isEntireNoteEmpty() ? BeamDate.now : documentStruct.deletedAt
-            } catch {
-                Logger.shared.logError("Unable to decode journal's note", category: .document)
-            }
-        } else {
-            deleted_at = documentStruct.deletedAt
-        }
+        deleted_at = documentStruct.deletedAt
         is_public = documentStruct.isPublic
     }
 
     class func countWithPredicate(_ context: NSManagedObjectContext,
-                                  _ predicate: NSPredicate? = nil) -> Int {
-        return rawCountWithPredicate(context, predicate, onlyNonDeleted: true)
+                                  _ predicate: NSPredicate? = nil,
+                                  _ databaseId: UUID? = nil) -> Int {
+        return rawCountWithPredicate(context,
+                                     predicate,
+                                     databaseId ?? DatabaseManager.defaultDatabase.id,
+                                     onlyNonDeleted: true)
     }
 
     class func rawCountWithPredicate(_ context: NSManagedObjectContext,
                                      _ predicate: NSPredicate? = nil,
+                                     _ databaseId: UUID? = nil,
                                      onlyNonDeleted: Bool = false) -> Int {
         // Fetch existing if any
         let fetchRequest: NSFetchRequest<Document> = Document.fetchRequest()
 
-        fetchRequest.predicate = onlyNonDeleted ? onlyNonDeletedPredicate(predicate) : predicate
+        fetchRequest.predicate = processPredicate(predicate, databaseId, onlyNonDeleted: onlyNonDeleted)
 
         do {
             let fetchedTransactions = try context.count(for: fetchRequest)
@@ -102,9 +154,32 @@ class Document: NSManagedObject {
     class func fetchFirst(context: NSManagedObjectContext,
                           _ predicate: NSPredicate? = nil,
                           _ sortDescriptors: [NSSortDescriptor]? = nil,
-                          onlyNonDeleted: Bool = true) -> Document? {
+                          onlyNonDeleted: Bool = true,
+                          onlyDefaultDatabase: Bool = true) -> Document? {
         let fetchRequest: NSFetchRequest<Document> = Document.fetchRequest()
-        fetchRequest.predicate = onlyNonDeleted ? onlyNonDeletedPredicate(predicate) : predicate
+
+        fetchRequest.predicate = processPredicate(predicate,
+                                                  onlyDefaultDatabase ? DatabaseManager.defaultDatabase.id : nil,
+                                                  onlyNonDeleted: onlyNonDeleted)
+        fetchRequest.fetchLimit = 1
+        fetchRequest.sortDescriptors = sortDescriptors
+
+        do {
+            let fetchedDocument = try context.fetch(fetchRequest)
+            return fetchedDocument.first
+        } catch {
+            Logger.shared.logError("Error fetching note: \(error.localizedDescription)", category: .coredata)
+        }
+
+        return nil
+    }
+
+    class func rawFetchFirst(context: NSManagedObjectContext,
+                             _ predicate: NSPredicate? = nil,
+                             _ sortDescriptors: [NSSortDescriptor]? = nil) -> Document? {
+        let fetchRequest: NSFetchRequest<Document> = Document.fetchRequest()
+
+        fetchRequest.predicate = predicate
         fetchRequest.fetchLimit = 1
         fetchRequest.sortDescriptors = sortDescriptors
 
@@ -122,9 +197,17 @@ class Document: NSManagedObject {
         return fetchAllWithLimit(context: context, predicate, sortDescriptors)
     }
 
-    class func fetchAllWithLimit(context: NSManagedObjectContext, _ predicate: NSPredicate? = nil, _ sortDescriptors: [NSSortDescriptor]? = nil, _ limit: Int = 0, _ fetchOffset: Int = 0) -> [Document] {
+    class func rawFetchAll(context: NSManagedObjectContext, _ predicate: NSPredicate? = nil, _ sortDescriptors: [NSSortDescriptor]? = nil) -> [Document] {
+        return rawFetchAllWithLimit(context: context, predicate, sortDescriptors)
+    }
+
+    class func fetchAllWithLimit(context: NSManagedObjectContext,
+                                 _ predicate: NSPredicate? = nil,
+                                 _ sortDescriptors: [NSSortDescriptor]? = nil,
+                                 _ limit: Int = 0,
+                                 _ fetchOffset: Int = 0) -> [Document] {
         let fetchRequest: NSFetchRequest<Document> = Document.fetchRequest()
-        fetchRequest.predicate = onlyNonDeletedPredicate(predicate)
+        fetchRequest.predicate = processPredicate(predicate, DatabaseManager.defaultDatabase.id, onlyNonDeleted: true)
         fetchRequest.fetchLimit = limit
         fetchRequest.sortDescriptors = sortDescriptors
         fetchRequest.fetchOffset = fetchOffset
@@ -140,13 +223,38 @@ class Document: NSManagedObject {
         return []
     }
 
+    class func rawFetchAllWithLimit(context: NSManagedObjectContext,
+                                    _ predicate: NSPredicate? = nil,
+                                    _ sortDescriptors: [NSSortDescriptor]? = nil,
+                                    _ limit: Int = 0,
+                                    _ fetchOffset: Int = 0) -> [Document] {
+        let fetchRequest: NSFetchRequest<Document> = Document.fetchRequest()
+        fetchRequest.predicate = predicate
+        fetchRequest.fetchLimit = limit
+        fetchRequest.sortDescriptors = sortDescriptors
+        fetchRequest.fetchOffset = fetchOffset
+
+        do {
+            let fetchedDocuments = try context.fetch(fetchRequest)
+            return fetchedDocuments
+        } catch {
+            // TODO: raise error?
+            Logger.shared.logError("Can't fetch: \(error)", category: .coredata)
+        }
+
+        return []
+    }
+
     class func fetchAllNames(context: NSManagedObjectContext, _ predicate: NSPredicate? = nil, _ sortDescriptors: [NSSortDescriptor]? = nil) -> [String] {
         return fetchAllNamesWithLimit(context: context, predicate, sortDescriptors)
     }
 
-    class func fetchAllNamesWithLimit(context: NSManagedObjectContext, _ predicate: NSPredicate? = nil, _ sortDescriptors: [NSSortDescriptor]? = nil, _ limit: Int = 0) -> [String] {
+    class func fetchAllNamesWithLimit(context: NSManagedObjectContext,
+                                      _ predicate: NSPredicate? = nil,
+                                      _ sortDescriptors: [NSSortDescriptor]? = nil,
+                                      _ limit: Int = 0) -> [String] {
         let fetchRequest: NSFetchRequest<Document> = Document.fetchRequest()
-        fetchRequest.predicate = onlyNonDeletedPredicate(predicate)
+        fetchRequest.predicate = processPredicate(predicate, DatabaseManager.defaultDatabase.id, onlyNonDeleted: true)
         fetchRequest.fetchLimit = limit
         fetchRequest.sortDescriptors = sortDescriptors
         fetchRequest.propertiesToFetch = ["title"]
@@ -163,11 +271,19 @@ class Document: NSManagedObject {
     }
 
     class func fetchWithId(_ context: NSManagedObjectContext, _ id: UUID) -> Document? {
-        return fetchFirst(context: context, NSPredicate(format: "id = %@", id as CVarArg), onlyNonDeleted: false)
+        return fetchFirst(context: context, NSPredicate(format: "id = %@", id as CVarArg),
+                          onlyNonDeleted: false,
+                          onlyDefaultDatabase: false)
     }
 
     class func fetchOrCreateWithId(_ context: NSManagedObjectContext, _ id: UUID) -> Document {
         let document = fetchFirst(context: context, NSPredicate(format: "id = %@", id as CVarArg)) ?? create(context)
+        document.id = id
+        return document
+    }
+
+    class func rawFetchOrCreateWithId(_ context: NSManagedObjectContext, _ id: UUID) -> Document {
+        let document = rawFetchFirst(context: context, NSPredicate(format: "id = %@", id as CVarArg)) ?? create(context)
         document.id = id
         return document
     }
@@ -204,13 +320,28 @@ class Document: NSManagedObject {
         return fetchAllWithLimit(context: context, nil, sortDescriptors, limit)
     }
 
-    class func onlyNonDeletedPredicate(_ predicate: NSPredicate? = nil) -> NSPredicate {
-        // We don't want deleted documents
-        var fetchPredicate = NSPredicate(format: "deleted_at == nil")
-        if let predicate = predicate {
-            fetchPredicate = NSCompoundPredicate(andPredicateWithSubpredicates: [fetchPredicate, predicate])
+    /// Will add the following predicates:
+    /// - Add filter to only list non-deleted notes
+    /// - Add filter to list only the default database
+    class func processPredicate(_ predicate: NSPredicate? = nil,
+                                _ databaseId: UUID? = nil,
+                                onlyNonDeleted: Bool = true) -> NSPredicate {
+        var predicates: [NSPredicate] = []
+
+        if onlyNonDeleted {
+            predicates.append(NSPredicate(format: "deleted_at == nil"))
         }
-        return fetchPredicate
+
+        if let databaseId = databaseId {
+            predicates.append(NSPredicate(format: "database_id = %@",
+                                          databaseId as CVarArg))
+        }
+
+        if let predicate = predicate {
+            predicates.append(predicate)
+        }
+
+        return NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
     }
 
     // MARK: -

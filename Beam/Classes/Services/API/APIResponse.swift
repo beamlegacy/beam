@@ -60,8 +60,6 @@ extension APIRequest {
 
             if T.self == FetchDocument.self {
                 finalName = FetchDocument.codingKey
-            } else if T.self == Me.self {
-                finalName = Me.codingKey
             } else {
                 finalName = name.prefix(1).lowercased() + name.dropFirst()
             }

@@ -64,6 +64,18 @@ struct Configuration {
         }
     }
 
+    static private var databaseIdKey = "databaseId"
+    static var databaseId: String? {
+        get {
+            UserDefaults.standard.string(forKey: databaseIdKey)
+        }
+        set {
+            if newValue != databaseId {
+                UserDefaults.standard.set(newValue, forKey: databaseIdKey)
+            }
+        }
+    }
+
     static private var publicHostnameKey = "publicHostname"
     static var publicHostname: String {
         get {

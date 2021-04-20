@@ -38,6 +38,10 @@ class DocumentManagerNetworkTests: QuickSpec {
             // Try to avoid issues with BeamTextTests creating documents when parsing links
             BeamNote.clearCancellables()
             BeamTestsHelper.login()
+            helper.deleteAllDatabases()
+            helper.deleteAllDocuments()
+
+            helper.createDefaultDatabase("00000000-e0df-4eca-93e6-8778984bcd18")
 
             try? EncryptionManager.shared.replacePrivateKey("j6tifPZTjUtGoz+1RJkO8dOMlu48MUUSlwACw/fCBw0=")
         }
@@ -103,9 +107,33 @@ class DocumentManagerNetworkTests: QuickSpec {
                         Configuration.encryptionEnabled = false
                     }
                 }
+            }
 
-                context("with PromiseKit") {
+            context("with PromiseKit") {
+                it("uploads existing documents") {
+                    let networkCalls = APIRequest.callsCount
+                    let promise: PromiseKit.Promise<Bool> = sut.uploadAllDocuments()
+
+                    waitUntil(timeout: .seconds(10)) { done in
+                        promise.done { success in
+                            expect(success) == true
+                            done()
+                        }.catch { error in
+                            fail("Should not happen: \(error)")
+                        }
+                    }
+
+                    expect(APIRequest.callsCount - networkCalls) == 2
+
+                    let remoteStruct = helper.fetchOnAPI(docStruct)
+                    expect(remoteStruct?.id) == docStruct.uuidString
+                    expect(remoteStruct?.data) == docStruct.data.asString
+                }
+
+                context("with encryption") {
                     it("uploads existing documents") {
+                        Configuration.encryptionEnabled = true
+
                         let networkCalls = APIRequest.callsCount
                         let promise: PromiseKit.Promise<Bool> = sut.uploadAllDocuments()
 
@@ -118,43 +146,44 @@ class DocumentManagerNetworkTests: QuickSpec {
                             }
                         }
 
-                        expect(APIRequest.callsCount - networkCalls) == 1
+                        expect(APIRequest.callsCount - networkCalls) == 2
 
                         let remoteStruct = helper.fetchOnAPI(docStruct)
                         expect(remoteStruct?.id) == docStruct.uuidString
                         expect(remoteStruct?.data) == docStruct.data.asString
-                    }
+                        expect(remoteStruct?.encryptedData).to(match("encryptionName\":\"AES_GCM"))
 
-                    context("with encryption") {
-                        it("uploads existing documents") {
-                            Configuration.encryptionEnabled = true
-
-                            let networkCalls = APIRequest.callsCount
-                            let promise: PromiseKit.Promise<Bool> = sut.uploadAllDocuments()
-
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.done { success in
-                                    expect(success) == true
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                }
-                            }
-
-                            expect(APIRequest.callsCount - networkCalls) == 1
-
-                            let remoteStruct = helper.fetchOnAPI(docStruct)
-                            expect(remoteStruct?.id) == docStruct.uuidString
-                            expect(remoteStruct?.data) == docStruct.data.asString
-                            expect(remoteStruct?.encryptedData).to(match("encryptionName\":\"AES_GCM"))
-
-                            Configuration.encryptionEnabled = false
-                        }
+                        Configuration.encryptionEnabled = false
                     }
                 }
+            }
 
-                context("with Promises") {
+            context("with Promises") {
+                it("uploads existing documents") {
+                    let networkCalls = APIRequest.callsCount
+                    let promise: Promises.Promise<Bool> = sut.uploadAllDocuments()
+
+                    waitUntil(timeout: .seconds(10)) { done in
+                        promise.then { success in
+                            expect(success) == true
+                            done()
+                        }.catch { error in
+                            fail("Should not happen: \(error)")
+                            done()
+                        }
+                    }
+
+                    expect(APIRequest.callsCount - networkCalls) == 2
+
+                    let remoteStruct = helper.fetchOnAPI(docStruct)
+                    expect(remoteStruct?.id) == docStruct.uuidString
+                    expect(remoteStruct?.data) == docStruct.data.asString
+                }
+
+                context("with encryption") {
                     it("uploads existing documents") {
+                        Configuration.encryptionEnabled = true
+
                         let networkCalls = APIRequest.callsCount
                         let promise: Promises.Promise<Bool> = sut.uploadAllDocuments()
 
@@ -167,38 +196,14 @@ class DocumentManagerNetworkTests: QuickSpec {
                             }
                         }
 
-                        expect(APIRequest.callsCount - networkCalls) == 1
+                        expect(APIRequest.callsCount - networkCalls) == 2
 
                         let remoteStruct = helper.fetchOnAPI(docStruct)
                         expect(remoteStruct?.id) == docStruct.uuidString
                         expect(remoteStruct?.data) == docStruct.data.asString
-                    }
+                        expect(remoteStruct?.encryptedData).to(match("encryptionName\":\"AES_GCM"))
 
-                    context("with encryption") {
-                        it("uploads existing documents") {
-                            Configuration.encryptionEnabled = true
-
-                            let networkCalls = APIRequest.callsCount
-                            let promise: Promises.Promise<Bool> = sut.uploadAllDocuments()
-
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.then { success in
-                                    expect(success) == true
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                }
-                            }
-
-                            expect(APIRequest.callsCount - networkCalls) == 1
-
-                            let remoteStruct = helper.fetchOnAPI(docStruct)
-                            expect(remoteStruct?.id) == docStruct.uuidString
-                            expect(remoteStruct?.data) == docStruct.data.asString
-                            expect(remoteStruct?.encryptedData).to(match("encryptionName\":\"AES_GCM"))
-
-                            Configuration.encryptionEnabled = false
-                        }
+                        Configuration.encryptionEnabled = false
                     }
                 }
             }
@@ -899,11 +904,10 @@ class DocumentManagerNetworkTests: QuickSpec {
             context("with network") {
                 context("without conflict") {
                     it("saves the document locally") {
-
                         waitUntil(timeout: .seconds(10)) { done in
-                            _ = sut.saveDocument(docStruct, completion:  { _ in
-                                done()
-                            })
+                            _ = sut.saveDocument(docStruct,
+                                                 true,
+                                                 { _ in done() })
                         }
 
                         let count = Document.countWithPredicate(coreDataManager.mainContext,
@@ -930,8 +934,35 @@ class DocumentManagerNetworkTests: QuickSpec {
                             expect(remoteStruct?.isPublic) == false
                         }
 
+                        it("updates the database on the API") {
+                            helper.saveRemotely(docStruct)
+                            expect(docStruct.databaseId) == DatabaseManager.defaultDatabase.id
+                            print(docStruct.databaseId)
+                            var remoteStruct = helper.fetchOnAPI(docStruct)
+                            expect(remoteStruct?.database?.id) == DatabaseManager.defaultDatabase.uuidString
+
+                            let newDatabase = helper.createDatabaseStruct("11111111-e0df-4eca-93e6-8778984bcd18")
+                            helper.saveDatabaseLocally(newDatabase)
+                            docStruct.databaseId = newDatabase.id
+
+                            waitUntil(timeout: .seconds(10)) { done in
+                                sut.saveDocumentStructOnAPI(docStruct) { result in
+                                    expect { try result.get() }.toNot(throwError())
+                                    expect { try result.get() } == true
+                                    done()
+                                }
+                            }
+
+                            remoteStruct = helper.fetchOnAPI(docStruct)
+                            expect(remoteStruct?.database?.id) == newDatabase.uuidString
+                        }
+
                         it("cancels previous unfinished saves") {
                             beamHelper.disableNetworkRecording()
+                            helper.deleteAllDatabases()
+                            docStruct = helper.createDocumentStruct()
+                            docStruct = helper.saveLocally(docStruct)
+
                             let previousNetworkCall = APIRequest.callsCount
                             let times = 10
                             let title = docStruct.title
@@ -961,6 +992,7 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                             let remoteStruct = helper.fetchOnAPI(docStruct)
                             expect(remoteStruct?.title) == newTitle
+                            helper.deleteDocumentStruct(docStruct)
                         }
 
                         context("with deleted notes") {
@@ -1062,8 +1094,32 @@ class DocumentManagerNetworkTests: QuickSpec {
                             expect(remoteStruct?.isPublic) == false
                         }
 
+                        it("updates the database on the API") {
+                            helper.saveRemotely(docStruct)
+                            var remoteStruct = helper.fetchOnAPI(docStruct)
+                            expect(remoteStruct?.database?.id) == DatabaseManager.defaultDatabase.uuidString
+
+                            let newDatabase = helper.createDatabaseStruct("11111111-e0df-4eca-93e6-8778984bcd18")
+                            helper.saveDatabaseLocally(newDatabase)
+                            docStruct.databaseId = newDatabase.id
+
+                            let promise: PromiseKit.Promise<Bool> = sut.saveDocumentOnApi(docStruct)
+                            waitUntil(timeout: .seconds(10)) { done in
+                                promise.done { success in
+                                    expect(success) == true
+                                    done()
+                                }.catch { fail("Should not be called: \($0)"); done() }
+                            }
+
+                            remoteStruct = helper.fetchOnAPI(docStruct)
+                            expect(remoteStruct?.database?.id) == newDatabase.uuidString
+                        }
+
                         it("cancels previous unfinished saves") {
                             beamHelper.disableNetworkRecording()
+                            helper.deleteAllDatabases()
+                            docStruct = helper.createDocumentStruct()
+                            docStruct = helper.saveLocally(docStruct)
 
                             let previousNetworkCall = APIRequest.callsCount
                             let times = 10
@@ -1088,13 +1144,17 @@ class DocumentManagerNetworkTests: QuickSpec {
                                 promise.done { success in
                                     expect(success) == true
                                     done()
-                                }.catch { fail("Should not be called: \($0)"); done() }
+                                }.catch {
+                                    fail("Should not be called: \($0) with title \(newTitle)")
+                                    done()
+                                }
                             }
 
                             expect(APIRequest.callsCount - previousNetworkCall) == 1
 
                             let remoteStruct = helper.fetchOnAPI(docStruct)
                             expect(remoteStruct?.title) == newTitle
+                            helper.deleteDocumentStruct(docStruct)
                         }
 
                         context("with encryption") {
@@ -1185,8 +1245,32 @@ class DocumentManagerNetworkTests: QuickSpec {
                             expect(remoteStruct?.isPublic) == false
                         }
 
+                        it("updates the database on the API") {
+                            helper.saveRemotely(docStruct)
+                            var remoteStruct = helper.fetchOnAPI(docStruct)
+                            expect(remoteStruct?.database?.id) == DatabaseManager.defaultDatabase.uuidString
+
+                            let newDatabase = helper.createDatabaseStruct("11111111-e0df-4eca-93e6-8778984bcd18")
+                            helper.saveDatabaseLocally(newDatabase)
+                            docStruct.databaseId = newDatabase.id
+
+                            let promise: Promises.Promise<Bool> = sut.saveDocumentOnApi(docStruct)
+                            waitUntil(timeout: .seconds(10)) { done in
+                                promise.then { success in
+                                    expect(success) == true
+                                    done()
+                                }.catch { fail("Should not be called: \($0)"); done() }
+                            }
+
+                            remoteStruct = helper.fetchOnAPI(docStruct)
+                            expect(remoteStruct?.database?.id) == newDatabase.uuidString
+                        }
+
                         it("cancels previous unfinished saves") {
                             beamHelper.disableNetworkRecording()
+                            helper.deleteAllDatabases()
+                            docStruct = helper.createDocumentStruct()
+                            docStruct = helper.saveLocally(docStruct)
 
                             let previousNetworkCall = APIRequest.callsCount
                             let times = 10
@@ -1218,6 +1302,7 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                             let remoteStruct = helper.fetchOnAPI(docStruct)
                             expect(remoteStruct?.title) == newTitle
+                            helper.deleteDocumentStruct(docStruct)
                         }
 
                         context("with encryption") {

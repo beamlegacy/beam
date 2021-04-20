@@ -1,0 +1,10 @@
+mutation DeleteAllDatabases {
+  deleteAllDatabases(input: {}) {
+    success
+    errors {
+      path
+      message
+    }
+  }
+}
+

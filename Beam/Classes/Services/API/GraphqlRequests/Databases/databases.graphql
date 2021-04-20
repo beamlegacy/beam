@@ -1,0 +1,10 @@
+query {
+  me {
+    databases {
+      id
+      title
+      createdAt
+      updatedAt
+    }
+  }
+}

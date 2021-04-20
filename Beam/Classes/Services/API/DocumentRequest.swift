@@ -36,6 +36,8 @@ class DocumentRequest: APIRequest {
 
     struct UpdateDocumentParameters: Encodable {
         let id: String?
+        let databaseId: String?
+        let databaseTitle: String?
         let title: String
         let data: String?
         let previousChecksum: String?
@@ -61,6 +63,8 @@ class DocumentRequest: APIRequest {
         try document.encrypt()
 
         let parameters = UpdateDocumentParameters(id: document.id,
+                                                  databaseId: document.database?.id,
+                                                  databaseTitle: document.database?.title,
                                                   title: title,
                                                   data: document.shouldEncrypt ? document.encryptedData : document.data,
                                                   previousChecksum: document.previousChecksum,
@@ -176,14 +180,14 @@ extension DocumentRequest {
         do {
             try encryptAllNotes(notes)
         } catch {
-            return PromiseKit.Promise(error: DocumentRequestError.parserError)
+            return Promise(error: DocumentRequestError.parserError)
         }
 
         notes.forEach { $0.clearForImports() }
 
         let jsonDataEncoded = try? JSONEncoder().encode(notes)
         guard let jsonData = jsonDataEncoded, let jsonString = String(data: jsonData, encoding: .utf8) else {
-            return PromiseKit.Promise(error: DocumentRequestError.parserError)
+            return Promise(error: DocumentRequestError.parserError)
         }
 
         let variables = importAllParameters(documentsInput: jsonString)
@@ -217,11 +221,11 @@ extension DocumentRequest {
             .then(on: self.backgroundQueue) { $0 as DocumentAPIType }
             .then(on: self.backgroundQueue) { (documentAPIType: DocumentAPIType) -> Promises.Promise<DocumentAPIType> in
                 guard Configuration.encryptionEnabled else {
-                    return Promises.Promise(documentAPIType)
+                    return Promise(documentAPIType)
                 }
 
                 try documentAPIType.decrypt()
-                return Promises.Promise(documentAPIType)
+                return Promise(documentAPIType)
             }
     }
 
@@ -240,7 +244,7 @@ extension DocumentRequest {
 
             try documents.forEach { try $0.decrypt() }
 
-            return Promises.Promise(documents)
+            return Promise(documents)
         }
     }
 
@@ -261,7 +265,7 @@ extension DocumentRequest {
         return promise.then(on: self.backgroundQueue) {
             if let updateDocument = $0.document {
                 updateDocument.previousChecksum = document.dataChecksum
-                return Promises.Promise(updateDocument)
+                return Promise(updateDocument)
             }
             throw DocumentRequestError.parserError
         }
@@ -291,14 +295,14 @@ extension DocumentRequest {
         do {
             try encryptAllNotes(notes)
         } catch {
-            return Promises.Promise(DocumentRequestError.parserError)
+            return Promise(DocumentRequestError.parserError)
         }
 
         notes.forEach { $0.clearForImports() }
 
         let jsonDataEncoded = try? JSONEncoder().encode(notes)
         guard let jsonData = jsonDataEncoded, let jsonString = String(data: jsonData, encoding: .utf8) else {
-            return Promises.Promise(DocumentRequestError.parserError)
+            return Promise(DocumentRequestError.parserError)
         }
 
         let variables = importAllParameters(documentsInput: jsonString)

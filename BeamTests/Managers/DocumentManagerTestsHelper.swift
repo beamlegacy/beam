@@ -10,6 +10,8 @@ import Combine
 class DocumentManagerTestsHelper {
     var documentManager: DocumentManager!
     var coreDataManager: CoreDataManager!
+    let databaseManager = DatabaseManager()
+
     lazy var mainContext = {
         coreDataManager.mainContext
     }()
@@ -22,7 +24,16 @@ class DocumentManagerTestsHelper {
     func deleteAllDocuments() {
         let semaphore = DispatchSemaphore(value: 0)
 
-        documentManager.deleteAllDocuments() { _ in
+        documentManager.deleteAllDocuments { _ in
+            semaphore.signal()
+        }
+        semaphore.wait()
+    }
+
+    func deleteAllDatabases() {
+        let semaphore = DispatchSemaphore(value: 0)
+
+        databaseManager.deleteAllDatabases { _ in
             semaphore.signal()
         }
         semaphore.wait()
@@ -68,6 +79,15 @@ class DocumentManagerTestsHelper {
         }
     }
 
+    func saveDatabaseRemotely(_ dbStruct: DatabaseStruct) {
+        waitUntil(timeout: .seconds(10)) { done in
+            self.databaseManager.saveDatabaseStructOnAPI(dbStruct) { result in
+                expect { try result.get() }.toNot(throwError())
+                done()
+            }
+        }
+    }
+
     func saveRemotelyOnly(_ docStruct: DocumentStruct) {
         let documentRequest = DocumentRequest()
 
@@ -91,6 +111,28 @@ class DocumentManagerTestsHelper {
         _ = semaphore.wait(timeout: DispatchTime.now() + .seconds(5))
 
         return documentAPIType
+    }
+
+    func fetchDatabaseOnAPI(_ dbStruct: DatabaseStruct) -> DatabaseAPIType? {
+        var dbAPIType: DatabaseAPIType?
+        let databaseRequest = DatabaseRequest()
+
+        let semaphore = DispatchSemaphore(value: 0)
+        // TODO: Add a `fetchDatabase` request for faster GET
+        _ = try? databaseRequest.fetchDatabases { result in
+            if let databaseAPITypes = try? result.get() {
+                for databaseAPIType in databaseAPITypes {
+                    if databaseAPIType.id == dbStruct.uuidString {
+                        dbAPIType = databaseAPIType
+                        break
+                    }
+                }
+            }
+            semaphore.signal()
+        }
+        _ = semaphore.wait(timeout: DispatchTime.now() + .seconds(5))
+
+        return dbAPIType
     }
 
     func fetchOnAPIWithLatency(_ docStruct: DocumentStruct, _ newLocal: String) -> Bool {
@@ -121,11 +163,28 @@ class DocumentManagerTestsHelper {
         }
     }
 
+    func deleteDatabaseStruct(_ dbStruct: DatabaseStruct, includedRemote: Bool = true) {
+        waitUntil(timeout: .seconds(10)) { done in
+            self.databaseManager.deleteDatabase(dbStruct, includedRemote: includedRemote) { result in
+                expect { try result.get() }.toNot(throwError())
+                expect { try result.get() }.to(beTrue())
+                if case .failure(let error) = result {
+                    fail(error.localizedDescription)
+                }
+                if case .success(let success) = result, success == false {
+                    fail("Should not happen")
+                }
+                done()
+            }
+        }
+    }
+
     private let faker = Faker(locale: "en-US")
     func createDocumentStruct(_ dataString: String? = nil, title titleParam: String? = nil, id: String? = nil) -> DocumentStruct {
         let dataString = dataString ?? "whatever binary data"
 
         var docStruct = DocumentStruct(id: UUID(),
+                                       databaseId: DatabaseManager.defaultDatabase.id,
                                        title: titleParam ?? String.randomTitle(),
                                        createdAt: BeamDate.now,
                                        updatedAt: BeamDate.now,
@@ -138,6 +197,16 @@ class DocumentManagerTestsHelper {
         }
 
         return docStruct
+    }
+
+    func createDefaultDatabase(_ id: String? = nil) {
+        coreDataManager.mainContext.performAndWait {
+            let database = Database.create(title: "Default")
+            if let id = id, let uuid = UUID(uuidString: id) {
+                database.id = uuid
+            }
+            try! CoreDataManager.save(coreDataManager.mainContext)
+        }
     }
 
     func createLocalAndRemoteVersions(_ ancestor: String,
@@ -195,5 +264,31 @@ class DocumentManagerTestsHelper {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
         return encoder
+    }
+
+    // MARK: Database
+    func createDatabaseStruct(_ id: String? = nil) -> DatabaseStruct {
+        var databaseStruct = DatabaseStruct(id: UUID(),
+                                            title: String.randomTitle(),
+                                            createdAt: BeamDate.now,
+                                            updatedAt: BeamDate.now)
+
+        if let id = id {
+            databaseStruct.id = UUID(uuidString: id) ?? databaseStruct.id
+        }
+
+        return databaseStruct
+    }
+
+    func saveDatabaseLocally(_ dbStruct: DatabaseStruct) {
+        waitUntil(timeout: .seconds(10)) { done in
+            self.databaseManager.saveDatabase(dbStruct, false, completion:  { result in
+                expect { try result.get() }.toNot(throwError())
+                if case .failure(let error) = result {
+                    fail(error.localizedDescription)
+                }
+                done()
+            })
+        }
     }
 }
