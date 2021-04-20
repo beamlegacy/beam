@@ -23,7 +23,7 @@ class DatabaseManagerTests: QuickSpec {
                                                 coreDataManager: CoreDataManager.shared)
             sut = DatabaseManager()
             BeamTestsHelper.logout()
-            sut.deleteAllDatabases(includedRemote: false) { _ in }
+            sut.deleteAll(includedRemote: false) { _ in }
         }
 
         describe(".defaultDatabase()") {
@@ -38,13 +38,13 @@ class DatabaseManagerTests: QuickSpec {
             }
         }
 
-        describe(".saveDatabase()") {
+        describe(".save()") {
             context("with Foundation") {
                 it("saves database") {
                     let dbStruct = helper.createDatabaseStruct()
 
                     waitUntil(timeout: .seconds(10)) { done in
-                        sut.saveDatabase(dbStruct, completion:  { _ in
+                        sut.save(dbStruct, completion:  { _ in
                             done()
                         })
                     }
@@ -58,7 +58,7 @@ class DatabaseManagerTests: QuickSpec {
             context("with PromiseKit") {
                 it("saves database") {
                     let dbStruct = helper.createDatabaseStruct()
-                    let promise: PromiseKit.Promise<Bool> = sut.saveDatabase(dbStruct)
+                    let promise: PromiseKit.Promise<Bool> = sut.save(dbStruct)
 
                     waitUntil(timeout: .seconds(10)) { done in
                         promise.done { success in
@@ -76,7 +76,7 @@ class DatabaseManagerTests: QuickSpec {
             context("with Promises") {
                 it("saves database") {
                     let dbStruct = helper.createDatabaseStruct()
-                    let promise: Promises.Promise<Bool> = sut.saveDatabase(dbStruct)
+                    let promise: Promises.Promise<Bool> = sut.save(dbStruct)
 
                     waitUntil(timeout: .seconds(10)) { done in
                         promise.then { success in
@@ -99,7 +99,7 @@ class DatabaseManagerTests: QuickSpec {
             }
 
             it("returns all databases") {
-                expect(sut.allDatabases) == [DatabaseManager.defaultDatabase]
+                expect(sut.all) == [DatabaseManager.defaultDatabase]
             }
         }
 
@@ -110,11 +110,11 @@ class DatabaseManagerTests: QuickSpec {
             }
 
             it("returns all titles") {
-                expect(sut.allDatabasesTitles()) == ["Default"]
+                expect(sut.allTitles()) == ["Default"]
             }
         }
 
-        describe(".deleteDatabase()") {
+        describe(".delete()") {
             var dbStruct: DatabaseStruct!
             beforeEach {
                 dbStruct = helper.createDatabaseStruct("995d94e1-e0df-4eca-93e6-8778984bcd29")
@@ -124,7 +124,7 @@ class DatabaseManagerTests: QuickSpec {
             context("with Foundation") {
                 it("deletes database") {
                     waitUntil(timeout: .seconds(10)) { done in
-                        sut.deleteDatabase(dbStruct) { result in
+                        sut.delete(dbStruct) { result in
                             expect { try result.get() }.toNot(throwError())
                             expect { try result.get() } == false
                             done()
@@ -139,7 +139,7 @@ class DatabaseManagerTests: QuickSpec {
 
             context("with PromiseKit") {
                 it("deletes database") {
-                    let promise: PromiseKit.Promise<Bool> = sut.deleteDatabase(dbStruct)
+                    let promise: PromiseKit.Promise<Bool> = sut.delete(dbStruct)
 
                     waitUntil(timeout: .seconds(10)) { done in
                         promise.done { success in
@@ -156,7 +156,7 @@ class DatabaseManagerTests: QuickSpec {
 
             context("with Promises") {
                 it("deletes database") {
-                    let promise: Promises.Promise<Bool> = sut.deleteDatabase(dbStruct)
+                    let promise: Promises.Promise<Bool> = sut.delete(dbStruct)
 
                     waitUntil(timeout: .seconds(10)) { done in
                         promise.then { success in

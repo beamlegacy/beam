@@ -54,7 +54,7 @@ class DatabaseRequest: APIRequest {
 // MARK: Foundation
 extension DatabaseRequest {
     @discardableResult
-    func deleteDatabase(_ id: String, _ completionHandler: @escaping (Swift.Result<DeleteDatabase, Error>) -> Void) throws  -> URLSessionDataTask {
+    func delete(_ id: String, _ completionHandler: @escaping (Swift.Result<DeleteDatabase, Error>) -> Void) throws  -> URLSessionDataTask {
         let parameters = DeleteDatabaseParameters(id: id)
         let bodyParamsRequest = GraphqlParameters(fileName: "delete_database", variables: parameters)
 
@@ -62,40 +62,41 @@ extension DatabaseRequest {
     }
 
     @discardableResult
-    func deleteAllDatabases(_ completionHandler: @escaping (Swift.Result<DeleteAllDatabases, Error>) -> Void) throws -> URLSessionDataTask {
+    func deleteAll(_ completion: @escaping (Swift.Result<DeleteAllDatabases, Error>) -> Void) throws -> URLSessionDataTask {
         let bodyParamsRequest = GraphqlParameters(fileName: "delete_all_databases", variables: EmptyVariable())
 
-        return try performRequest(bodyParamsRequest: bodyParamsRequest, completionHandler: completionHandler)
+        return try performRequest(bodyParamsRequest: bodyParamsRequest, completionHandler: completion)
     }
 
     @discardableResult
     // return multiple errors, as the API might return more than one.
-    func saveDatabase(_ database: DatabaseAPIType, _ completionHandler: @escaping (Swift.Result<UpdateDatabase, Error>) -> Void) throws -> URLSessionDataTask {
+    func save(_ database: DatabaseAPIType,
+              _ completion: @escaping (Swift.Result<UpdateDatabase, Error>) -> Void) throws -> URLSessionDataTask {
         let parameters = try saveDatabaseParameters(database)
         let bodyParamsRequest = GraphqlParameters(fileName: "update_database", variables: parameters)
 
-        return try performRequest(bodyParamsRequest: bodyParamsRequest, completionHandler: completionHandler)
+        return try performRequest(bodyParamsRequest: bodyParamsRequest, completionHandler: completion)
     }
 
     @discardableResult
-    func fetchDatabases(_ completionHandler: @escaping (Swift.Result<[DatabaseAPIType], Error>) -> Void) throws -> URLSessionDataTask {
+    func fetchAll(_ completion: @escaping (Swift.Result<[DatabaseAPIType], Error>) -> Void) throws -> URLSessionDataTask {
         let bodyParamsRequest = GraphqlParameters(fileName: "databases", variables: EmptyVariable())
 
         return try performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<Me, Error>) in
             switch result {
             case .failure(let error):
-                completionHandler(.failure(error))
+                completion(.failure(error))
             case .success(let me):
                 if let databases = me.databases {
-                    completionHandler(.success(databases))
+                    completion(.success(databases))
                 } else {
-                    completionHandler(.failure(APIRequestError.parserError))
+                    completion(.failure(APIRequestError.parserError))
                 }
             }
         }
     }
 
-    func saveDatabases(_ databases: [DatabaseAPIType]) throws -> Bool {
+    func save(_ databases: [DatabaseAPIType]) throws -> Bool {
         let group = DispatchGroup()
         var errors: [Error] = []
 
@@ -117,7 +118,7 @@ extension DatabaseRequest {
     private func saveDatabaseAndManageTitleConflict(_ database: DatabaseAPIType,
                                                     _ completion: @escaping (Error?) -> Void) throws {
 
-        try saveDatabase(database) { result in
+        try save(database) { result in
             switch result {
             case .failure(let error):
                 // TODO: Add a `titleConflict` error for easier management
@@ -126,7 +127,8 @@ extension DatabaseRequest {
                     var title = database.title ?? "no title"
                     title += " \(BeamDate.now)"
 
-                    Logger.shared.logInfo("Can't save database \(database.title ?? ""), will retry with \(title)", category: .database)
+                    Logger.shared.logInfo("Can't save database \(database.title ?? ""), will retry with \(title)",
+                                          category: .database)
 
                     database.title = title
 
@@ -150,7 +152,7 @@ extension DatabaseRequest {
 // MARK: -
 // MARK: PromiseKit
 extension DatabaseRequest {
-    func deleteDatabase(_ id: String) -> PromiseKit.Promise<DatabaseAPIType?> {
+    func delete(_ id: String) -> PromiseKit.Promise<DatabaseAPIType?> {
         let parameters = DeleteDatabaseParameters(id: id)
         let bodyParamsRequest = GraphqlParameters(fileName: "delete_database", variables: parameters)
         let promise: PromiseKit.Promise<DeleteDatabase> = performRequest(bodyParamsRequest: bodyParamsRequest,
@@ -158,7 +160,7 @@ extension DatabaseRequest {
         return promise.map(on: self.backgroundQueue) { $0.database }
     }
 
-    func deleteAllDatabases() -> PromiseKit.Promise<Bool> {
+    func deleteAll() -> PromiseKit.Promise<Bool> {
         let bodyParamsRequest = GraphqlParameters(fileName: "delete_all_databases", variables: EmptyVariable())
 
         let promise: PromiseKit.Promise<DeleteAllDatabases> = performRequest(bodyParamsRequest: bodyParamsRequest,
@@ -172,7 +174,7 @@ extension DatabaseRequest {
     }
 
     // return multiple errors, as the API might return more than one.
-    func saveDatabase(_ database: DatabaseAPIType) -> PromiseKit.Promise<DatabaseAPIType> {
+    func save(_ database: DatabaseAPIType) -> PromiseKit.Promise<DatabaseAPIType> {
         var parameters: UpdateDatabaseParameters
         do {
             parameters = try saveDatabaseParameters(database)
@@ -192,7 +194,7 @@ extension DatabaseRequest {
         }
     }
 
-    func fetchDatabases() -> PromiseKit.Promise<[DatabaseAPIType]> {
+    func fetchAll() -> PromiseKit.Promise<[DatabaseAPIType]> {
         let bodyParamsRequest = GraphqlParameters(fileName: "databases", variables: EmptyVariable())
 
         let promise: PromiseKit.Promise<Me> = performRequest(bodyParamsRequest: bodyParamsRequest,
@@ -206,9 +208,9 @@ extension DatabaseRequest {
         }
     }
 
-    func saveDatabases(_ databases: [DatabaseAPIType]) -> PromiseKit.Promise<[DatabaseAPIType]> {
+    func save(_ databases: [DatabaseAPIType]) -> PromiseKit.Promise<[DatabaseAPIType]> {
         let promises: [PromiseKit.Promise<DatabaseAPIType>] = databases.map {
-            saveDatabase($0)
+            save($0)
         }
 
         return firstly {
@@ -220,7 +222,7 @@ extension DatabaseRequest {
 // MARK: -
 // MARK: Promises
 extension DatabaseRequest {
-    func deleteDatabase(_ id: String) -> Promises.Promise<DatabaseAPIType?> {
+    func delete(_ id: String) -> Promises.Promise<DatabaseAPIType?> {
         let parameters = DeleteDatabaseParameters(id: id)
         let bodyParamsRequest = GraphqlParameters(fileName: "delete_database", variables: parameters)
         let promise: Promises.Promise<DeleteDatabase> = performRequest(bodyParamsRequest: bodyParamsRequest,
@@ -228,11 +230,11 @@ extension DatabaseRequest {
         return promise.then(on: self.backgroundQueue) { $0.database }
     }
 
-    func deleteAllDatabases() -> Promises.Promise<Bool> {
+    func deleteAll() -> Promises.Promise<Bool> {
         let bodyParamsRequest = GraphqlParameters(fileName: "delete_all_databases", variables: EmptyVariable())
 
         let promise: Promises.Promise<DeleteAllDatabases> = performRequest(bodyParamsRequest: bodyParamsRequest,
-                                                                           authenticatedCall: true)
+                                                                          authenticatedCall: true)
         return promise.then(on: self.backgroundQueue) {
             guard let success = $0.success else {
                 throw DocumentRequestError.parserError
@@ -242,7 +244,7 @@ extension DatabaseRequest {
     }
 
     // return multiple errors, as the API might return more than one.
-    func saveDatabase(_ database: DatabaseAPIType) -> Promises.Promise<DatabaseAPIType> {
+    func save(_ database: DatabaseAPIType) -> Promises.Promise<DatabaseAPIType> {
         var parameters: UpdateDatabaseParameters
         do {
             parameters = try saveDatabaseParameters(database)
@@ -252,7 +254,7 @@ extension DatabaseRequest {
         let bodyParamsRequest = GraphqlParameters(fileName: "update_database", variables: parameters)
 
         let promise: Promises.Promise<UpdateDatabase> = performRequest(bodyParamsRequest: bodyParamsRequest,
-                                                                         authenticatedCall: true)
+                                                                       authenticatedCall: true)
 
         return promise.then(on: self.backgroundQueue) {
             if let updateDatabase = $0.database {
@@ -262,7 +264,7 @@ extension DatabaseRequest {
         }
     }
 
-    func fetchDatabases() -> Promises.Promise<[DatabaseAPIType]> {
+    func fetchAll() -> Promises.Promise<[DatabaseAPIType]> {
         let bodyParamsRequest = GraphqlParameters(fileName: "databases", variables: EmptyVariable())
 
         let promise: Promises.Promise<Me> = performRequest(bodyParamsRequest: bodyParamsRequest,
@@ -276,9 +278,9 @@ extension DatabaseRequest {
         }
     }
 
-    func saveDatabases(_ databases: [DatabaseAPIType]) -> Promises.Promise<[DatabaseAPIType]> {
+    func save(_ databases: [DatabaseAPIType]) -> Promises.Promise<[DatabaseAPIType]> {
         let promises: [Promises.Promise<DatabaseAPIType>] = databases.map {
-            saveDatabase($0)
+            save($0)
         }
 
         return Promises.all(promises)

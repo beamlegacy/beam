@@ -84,7 +84,7 @@ extension BeamNote: BeamNoteDocument {
         }
 
         Logger.shared.logInfo("BeamNote wants to save: \(title)", category: .document)
-        let newDoc = documentManager.saveDocument(documentStruct, completion: { [weak self] result in
+        let newDoc = documentManager.save(documentStruct, completion: { [weak self] result in
             if let self = self {
                 switch result {
                 case .success(let success):

@@ -2,30 +2,28 @@
   {
     "request" : {
       "url" : "https:\/\/api.beamapp.co\/graphql",
-      "headers" : {
-        "Content-Type" : "application\/json",
-        "Accept-Language" : "en",
-        "Accept" : "application\/json",
-        "User-Agent" : "Beam client, 0.1.0 (1)"
-      },
+      "method" : "POST",
       "body" : {
         "query" : "mutation SignUp($email: Email!, $password: String!) {\n  signUp(input: {email: $email, password: $password}) {\n    user {\n      unconfirmedEmail\n      email\n      id\n    }\n    errors {\n      path\n      message\n    }\n  }\n}\n",
         "variables" : {
-          "email" : "fabien+test-D25ED719-037E-4E82-919C-7E9123E92481@beamapp.co",
-          "password" : "phelR0J2XKts"
+          "email" : "fabien+test-858F19AA-459E-4135-925A-9B458E4103B6@beamapp.co",
+          "password" : "liEDbwr5ECJd"
         }
       },
-      "method" : "POST"
+      "headers" : {
+        "Accept-Language" : "en",
+        "User-Agent" : "Beam client, 0.1.0 (1)",
+        "Content-Type" : "application\/json",
+        "Accept" : "application\/json"
+      }
     },
     "response" : {
-      "status" : 200,
-      "url" : "https:\/\/api.beamapp.co\/graphql",
       "body" : {
         "data" : {
           "signUp" : {
             "user" : {
-              "email" : "fabien+test-d25ed719-037e-4e82-919c-7e9123e92481@beamapp.co",
-              "id" : "3459d0a6-fd33-4ee7-9a72-a40a2a838e85",
+              "email" : "fabien+test-858f19aa-459e-4135-925a-9b458e4103b6@beamapp.co",
+              "id" : "c1369ea0-9e92-4ebd-8211-7a8ba3c58890",
               "unconfirmedEmail" : null
             },
             "errors" : [
@@ -34,25 +32,27 @@
           }
         }
       },
+      "url" : "https:\/\/api.beamapp.co\/graphql",
+      "status" : 200,
       "headers" : {
-        "Connection" : "keep-alive",
-        "X-Frame-Options" : "SAMEORIGIN",
-        "Etag" : "W\/\"ff93046bae97a9f55bc44ff839496d6e\"",
-        "X-Request-Id" : "a5e3bdb8-0b7b-476c-ba0b-70ea905b1863",
-        "X-Content-Type-Options" : "nosniff",
-        "X-Download-Options" : "noopen",
-        "Server" : "Cowboy",
-        "Referrer-Policy" : "strict-origin-when-cross-origin",
-        "Date" : "Fri, 16 Apr 2021 11:04:48 GMT",
-        "X-Runtime" : "0.329596",
-        "Transfer-Encoding" : "Identity",
-        "Cache-Control" : "max-age=0, private, must-revalidate",
-        "Via" : "1.1 vegur",
-        "Content-Type" : "application\/json; charset=utf-8",
+        "X-Runtime" : "0.351828",
         "X-Xss-Protection" : "1; mode=block",
-        "Vary" : "Accept, Origin",
+        "X-Permitted-Cross-Domain-Policies" : "none",
+        "Via" : "1.1 vegur",
+        "Referrer-Policy" : "strict-origin-when-cross-origin",
+        "Transfer-Encoding" : "Identity",
         "Strict-Transport-Security" : "max-age=63072000; includeSubDomains",
-        "X-Permitted-Cross-Domain-Policies" : "none"
+        "Content-Type" : "application\/json; charset=utf-8",
+        "Date" : "Tue, 20 Apr 2021 10:10:52 GMT",
+        "Cache-Control" : "max-age=0, private, must-revalidate",
+        "X-Download-Options" : "noopen",
+        "X-Content-Type-Options" : "nosniff",
+        "Vary" : "Accept, Origin",
+        "X-Request-Id" : "4938f684-3a15-424a-9bce-a58d48bbb894",
+        "Server" : "Cowboy",
+        "Etag" : "W\/\"ff59bbe00a3331adc123032781782dec\"",
+        "Connection" : "keep-alive",
+        "X-Frame-Options" : "SAMEORIGIN"
       }
     }
   }

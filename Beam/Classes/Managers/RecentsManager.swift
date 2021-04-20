@@ -22,7 +22,7 @@ class RecentsManager {
     }
 
     private func fetchRecents() {
-        recentNotes = documentManager.loadAllDocumentsWithLimit(maxNumberOfRecents, [NSSortDescriptor(key: "updated_at", ascending: false)]).map {
+        recentNotes = documentManager.loadAllWithLimit(maxNumberOfRecents, [NSSortDescriptor(key: "updated_at", ascending: false)]).map {
             BeamNote.fetchOrCreate(documentManager, title: $0.title)
         }
     }

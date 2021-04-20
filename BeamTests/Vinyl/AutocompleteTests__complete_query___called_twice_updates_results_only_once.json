@@ -5,22 +5,22 @@
       "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=Hello+world"
     },
     "response" : {
+      "status" : 200,
+      "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=Hello+world",
       "headers" : {
         "Content-Encoding" : "gzip",
-        "Date" : "Fri, 16 Apr 2021 11:04:52 GMT",
-        "Server" : "gws",
-        "Expires" : "-1",
-        "Alt-Svc" : "h3-29=\":443\"; ma=2592000,h3-T051=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\"",
-        "Pragma" : "no-cache",
-        "x-frame-options" : "SAMEORIGIN",
-        "x-xss-protection" : "0",
-        "Content-Disposition" : "attachment; filename=\"f.txt\"",
         "Content-Type" : "text\/javascript; charset=ISO-8859-1",
-        "Cache-Control" : "no-cache, must-revalidate"
+        "Content-Disposition" : "attachment; filename=\"f.txt\"",
+        "Expires" : "-1",
+        "x-xss-protection" : "0",
+        "Server" : "gws",
+        "Date" : "Tue, 20 Apr 2021 10:10:55 GMT",
+        "Pragma" : "no-cache",
+        "Cache-Control" : "no-cache, must-revalidate",
+        "Alt-Svc" : "h3-29=\":443\"; ma=2592000,h3-T051=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\"",
+        "x-frame-options" : "SAMEORIGIN"
       },
-      "body" : "[\"Hello world\",[\"hello world\",\"hello world anime\",\"hello world this is me\",\"hello world c\",\"hello world java\",\"hello world python\",\"hello world vostfr\",\"hello world html\",\"hello world film\",\"hello world cpp\"],[],{\"google:suggestsubtypes\":[[433],[433],[],[],[],[],[],[],[],[]]}]",
-      "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=Hello+world",
-      "status" : 200
+      "body" : "[\"Hello world\",[\"hello world\",\"hello world this is me\",\"hello world c\",\"hello world python\",\"hello world java\",\"hello world vostfr\",\"hello world html\",\"hello world film\",\"hello world cpp\",\"hello world javascript\"],[],{\"google:suggestsubtypes\":[[433],[],[],[],[],[],[],[],[],[]]}]"
     }
   }
 ]

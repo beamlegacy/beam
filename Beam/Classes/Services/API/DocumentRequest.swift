@@ -133,7 +133,7 @@ extension DocumentRequest {
         }
     }
 
-    func saveDocument(_ document: DocumentAPIType) -> PromiseKit.Promise<DocumentAPIType> {
+    func save(_ document: DocumentAPIType) -> PromiseKit.Promise<DocumentAPIType> {
         var parameters: UpdateDocumentParameters
 
         do {
@@ -156,7 +156,7 @@ extension DocumentRequest {
         }
     }
 
-    func deleteAllDocuments() -> PromiseKit.Promise<Bool> {
+    func deleteAll() -> PromiseKit.Promise<Bool> {
         let bodyParamsRequest = GraphqlParameters(fileName: "delete_all_documents", variables: EmptyVariable())
         let promise: PromiseKit.Promise<DeleteAllDocuments> = performRequest(bodyParamsRequest: bodyParamsRequest,
                                                                              authenticatedCall: true)
@@ -168,7 +168,7 @@ extension DocumentRequest {
         }
     }
 
-    func deleteDocument(_ id: String) -> PromiseKit.Promise<DocumentAPIType?> {
+    func delete(_ id: String) -> PromiseKit.Promise<DocumentAPIType?> {
         let parameters = DeleteDocumentParameters(id: id)
         let bodyParamsRequest = GraphqlParameters(fileName: "delete_document", variables: parameters)
         let promise: PromiseKit.Promise<DeleteDocument> = performRequest(bodyParamsRequest: bodyParamsRequest,
@@ -176,7 +176,7 @@ extension DocumentRequest {
         return promise.map(on: self.backgroundQueue) { $0.document }
     }
 
-    func importDocuments(_ notes: [DocumentAPIType]) -> PromiseKit.Promise<ImportDocuments> {
+    func importAll(_ notes: [DocumentAPIType]) -> PromiseKit.Promise<ImportDocuments> {
         do {
             try encryptAllNotes(notes)
         } catch {
@@ -229,7 +229,7 @@ extension DocumentRequest {
             }
     }
 
-    func fetchDocuments() -> Promises.Promise<[DocumentAPIType]> {
+    func fetchAll() -> Promises.Promise<[DocumentAPIType]> {
         let bodyParamsRequest = GraphqlParameters(fileName: "documents", variables: EmptyVariable())
 
         let promise: Promises.Promise<Me> = performRequest(bodyParamsRequest: bodyParamsRequest,
@@ -248,7 +248,7 @@ extension DocumentRequest {
         }
     }
 
-    func saveDocument(_ document: DocumentAPIType) -> Promises.Promise<DocumentAPIType> {
+    func save(_ document: DocumentAPIType) -> Promises.Promise<DocumentAPIType> {
         var parameters: UpdateDocumentParameters
 
         do {
@@ -271,7 +271,7 @@ extension DocumentRequest {
         }
     }
 
-    func deleteAllDocuments() -> Promises.Promise<Bool> {
+    func deleteAll() -> Promises.Promise<Bool> {
         let bodyParamsRequest = GraphqlParameters(fileName: "delete_all_documents", variables: EmptyVariable())
         let promise: Promises.Promise<DeleteAllDocuments> = performRequest(bodyParamsRequest: bodyParamsRequest,
                                                                            authenticatedCall: true)
@@ -283,7 +283,7 @@ extension DocumentRequest {
         }
     }
 
-    func deleteDocument(_ id: String) -> Promises.Promise<DocumentAPIType?> {
+    func delete(_ id: String) -> Promises.Promise<DocumentAPIType?> {
         let parameters = DeleteDocumentParameters(id: id)
         let bodyParamsRequest = GraphqlParameters(fileName: "delete_document", variables: parameters)
         let promise: Promises.Promise<DeleteDocument> = performRequest(bodyParamsRequest: bodyParamsRequest,
@@ -291,7 +291,7 @@ extension DocumentRequest {
         return promise.then(on: self.backgroundQueue) { $0.document }
     }
 
-    func importDocuments(_ notes: [DocumentAPIType]) -> Promises.Promise<ImportDocuments> {
+    func importAll(_ notes: [DocumentAPIType]) -> Promises.Promise<ImportDocuments> {
         do {
             try encryptAllNotes(notes)
         } catch {
@@ -318,8 +318,8 @@ extension DocumentRequest {
 // MARK: Foundation
 extension DocumentRequest {
     @discardableResult
-    func importDocuments(_ notes: [DocumentAPIType],
-                         _ completionHandler: @escaping (Swift.Result<ImportDocuments, Error>) -> Void) throws -> URLSessionDataTask? {
+    func importAll(_ notes: [DocumentAPIType],
+                   _ completionHandler: @escaping (Swift.Result<ImportDocuments, Error>) -> Void) throws -> URLSessionDataTask? {
         var jsonString: String!
 
         try encryptAllNotes(notes)
@@ -346,23 +346,25 @@ extension DocumentRequest {
     }
 
     @discardableResult
-    func deleteAllDocuments(_ completionHandler: @escaping (Swift.Result<DeleteAllDocuments, Error>) -> Void) throws -> URLSessionDataTask {
+    func deleteAll(_ completion: @escaping (Swift.Result<DeleteAllDocuments, Error>) -> Void) throws -> URLSessionDataTask {
         let bodyParamsRequest = GraphqlParameters(fileName: "delete_all_documents", variables: EmptyVariable())
 
-        return try performRequest(bodyParamsRequest: bodyParamsRequest, completionHandler: completionHandler)
+        return try performRequest(bodyParamsRequest: bodyParamsRequest, completionHandler: completion)
     }
 
     @discardableResult
-    func deleteDocument(_ id: String, _ completionHandler: @escaping (Swift.Result<DeleteDocument, Error>) -> Void) throws  -> URLSessionDataTask {
+    func delete(_ id: String,
+                _ completion: @escaping (Swift.Result<DeleteDocument, Error>) -> Void) throws  -> URLSessionDataTask {
         let parameters = DeleteDocumentParameters(id: id)
         let bodyParamsRequest = GraphqlParameters(fileName: "delete_document", variables: parameters)
 
-        return try performRequest(bodyParamsRequest: bodyParamsRequest, completionHandler: completionHandler)
+        return try performRequest(bodyParamsRequest: bodyParamsRequest, completionHandler: completion)
     }
 
     @discardableResult
     // return multiple errors, as the API might return more than one.
-    func saveDocument(_ document: DocumentAPIType, _ completionHandler: @escaping (Swift.Result<UpdateDocument, Error>) -> Void) throws -> URLSessionDataTask {
+    func save(_ document: DocumentAPIType,
+              _ completion: @escaping (Swift.Result<UpdateDocument, Error>) -> Void) throws -> URLSessionDataTask {
         let parameters = try saveDocumentParameters(document)
         let bodyParamsRequest = GraphqlParameters(fileName: "update_document", variables: parameters)
 
@@ -370,18 +372,18 @@ extension DocumentRequest {
             if case .success(let updateDocument) = result {
                 updateDocument.document?.previousChecksum = document.dataChecksum
             }
-            completionHandler(result)
+            completion(result)
         }
     }
 
     @discardableResult
-    func fetchDocuments(_ completionHandler: @escaping (Swift.Result<[DocumentAPIType], Error>) -> Void) throws -> URLSessionDataTask {
+    func fetchAll(_ completion: @escaping (Swift.Result<[DocumentAPIType], Error>) -> Void) throws -> URLSessionDataTask {
         let bodyParamsRequest = GraphqlParameters(fileName: "documents", variables: EmptyVariable())
 
         return try performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<Me, Error>) in
             switch result {
             case .failure(let error):
-                completionHandler(.failure(error))
+                completion(.failure(error))
             case .success(let me):
                 if let documents = me.documents {
                     do {
@@ -390,13 +392,13 @@ extension DocumentRequest {
                         }
                     } catch {
                         // Will catch uncrypting errors
-                        completionHandler(.failure(error))
+                        completion(.failure(error))
                         return
                     }
 
-                    completionHandler(.success(documents))
+                    completion(.success(documents))
                 } else {
-                    completionHandler(.failure(APIRequestError.parserError))
+                    completion(.failure(APIRequestError.parserError))
                 }
             }
         }

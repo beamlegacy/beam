@@ -140,4 +140,8 @@ delete_db_files:
 copy_vinyl_files:
 	cp ${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Logs/Beam/Vinyl/*.json BeamTests/Vinyl/
 
+reset_vinyl_files:
+	rm -r ${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Logs/Beam/Vinyl/*.json
+	rm -r BeamTests/Vinyl/*.json
+
 setup: git_checkout install_dependencies install_direnv install_swiftlint install_cmake variable_injector build_libgit2 install_js

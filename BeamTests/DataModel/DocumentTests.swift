@@ -83,7 +83,7 @@ class DocumentTests: QuickSpec {
                 _ = helper.saveLocally(helper.createDocumentStruct())
                 _ = helper.saveLocally(helper.createDocumentStruct(title: "foobar"))
 
-                let result = Document.fetchAllWithTitleMatch(mainContext, "foobar")
+                let result = try! Document.fetchAllWithTitleMatch(mainContext, "foobar")
                 expect(result).to(haveCount(times))
                 expect(result[0].title).to(equal("foobar"))
                 expect(result[1].title).to(equal("foobar 1"))

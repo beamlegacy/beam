@@ -20,4 +20,3 @@
 * In the `Makefile`, remove the dependency to `variable_injector`, and install `variable_injector` manually into `/usr/local/bin`:
 	- download and unzip `https://github.com/LucianoPAlmeida/variable-injector/releases/download/0.3.3/x86_64-apple-macosx.zip`
 	- copy `release/variable-injector` to `/usr/local/bin`.
-

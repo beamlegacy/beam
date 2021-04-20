@@ -32,7 +32,8 @@ struct DocumentsList: View {
 
 struct DocumentsList_Previews: PreviewProvider {
     static var previews: some View {
-        let document = Document.fetchFirst(context: CoreDataManager.shared.mainContext)
+        //swiftlint:disable:next force_try
+        let document = try! Document.fetchFirst(CoreDataManager.shared.mainContext)
         return DocumentsList(selectedDocument: .constant(document))
     }
 }

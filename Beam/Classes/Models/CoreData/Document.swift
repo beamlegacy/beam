@@ -2,7 +2,7 @@ import Foundation
 import CoreData
 import BeamCore
 
-class Document: NSManagedObject {
+class Document: NSManagedObject, BeamCoreDataObject {
     override func awakeFromInsert() {
         super.awakeFromInsert()
         created_at = BeamDate.now
@@ -49,19 +49,21 @@ class Document: NSManagedObject {
         try? Database.rawFetchWithId(context, database_id)
     }
 
-    /// Slower than `deleteBatchWithPredicate` but I can't get `deleteBatchWithPredicate` to properly propagate changes to other contexts :(
+    /// Slower than `deleteBatchWithPredicate` but I can't get `deleteBatchWithPredicate`
+    /// to properly propagate changes to other contexts :(
     class func deleteWithPredicate(_ context: NSManagedObjectContext, _ predicate: NSPredicate? = nil) throws {
         let deleteFetch = NSFetchRequest<NSFetchRequestResult>(entityName: "Document")
         deleteFetch.predicate = predicate
 
-        context.performAndWait {
-            for document in Document.rawFetchAllWithLimit(context: context, predicate) {
+        try context.performAndWait {
+            for document in try Document.rawFetchAllWithLimit(context, predicate) {
                 context.delete(document)
             }
         }
     }
 
-    class func deleteBatchWithPredicate(_ context: NSManagedObjectContext, _ predicate: NSPredicate? = nil) throws {
+    class func deleteBatchWithPredicate(_ context: NSManagedObjectContext,
+                                        _ predicate: NSPredicate? = nil) throws {
         let deleteFetch = NSFetchRequest<NSFetchRequestResult>(entityName: "Document")
         deleteFetch.predicate = predicate
         let deleteRequest = NSBatchDeleteRequest(fetchRequest: deleteFetch)
@@ -69,11 +71,13 @@ class Document: NSManagedObject {
         deleteRequest.resultType = .resultTypeObjectIDs
 
         try context.performAndWait {
-            for document in Document.rawFetchAllWithLimit(context: context) {
-                Logger.shared.logDebug("title: \(document.title) database_id: \(document.database_id)", category: .document)
+            for document in try Document.rawFetchAllWithLimit(context) {
+                Logger.shared.logDebug("title: \(document.title) database_id: \(document.database_id)",
+                                       category: .document)
             }
 
-            Logger.shared.logDebug("About to delete \(rawCountWithPredicate(context, predicate)) documents", category: .document)
+            Logger.shared.logDebug("About to delete \(rawCountWithPredicate(context, predicate)) documents",
+                                   category: .document)
 
             try context.execute(deleteRequest)
 
@@ -123,18 +127,31 @@ class Document: NSManagedObject {
     }
 
     class func countWithPredicate(_ context: NSManagedObjectContext,
+                                  _ predicate: NSPredicate? = nil) -> Int {
+        countWithPredicate(context,
+                           predicate,
+                           DatabaseManager.defaultDatabase.id,
+                           onlyNonDeleted: true)
+    }
+
+    class func countWithPredicate(_ context: NSManagedObjectContext,
                                   _ predicate: NSPredicate? = nil,
                                   _ databaseId: UUID? = nil) -> Int {
-        return rawCountWithPredicate(context,
-                                     predicate,
-                                     databaseId ?? DatabaseManager.defaultDatabase.id,
-                                     onlyNonDeleted: true)
+        return countWithPredicate(context,
+                                  predicate,
+                                  databaseId ?? DatabaseManager.defaultDatabase.id,
+                                  onlyNonDeleted: true)
     }
 
     class func rawCountWithPredicate(_ context: NSManagedObjectContext,
-                                     _ predicate: NSPredicate? = nil,
-                                     _ databaseId: UUID? = nil,
-                                     onlyNonDeleted: Bool = false) -> Int {
+                                     _ predicate: NSPredicate? = nil) -> Int {
+        countWithPredicate(context, predicate, nil, onlyNonDeleted: false)
+    }
+
+    class private func countWithPredicate(_ context: NSManagedObjectContext,
+                                          _ predicate: NSPredicate? = nil,
+                                          _ databaseId: UUID? = nil,
+                                          onlyNonDeleted: Bool = false) -> Int {
         // Fetch existing if any
         let fetchRequest: NSFetchRequest<Document> = Document.fetchRequest()
 
@@ -151,11 +168,31 @@ class Document: NSManagedObject {
         return 0
     }
 
-    class func fetchFirst(context: NSManagedObjectContext,
+    class func fetchFirst(_ context: NSManagedObjectContext,
                           _ predicate: NSPredicate? = nil,
-                          _ sortDescriptors: [NSSortDescriptor]? = nil,
-                          onlyNonDeleted: Bool = true,
-                          onlyDefaultDatabase: Bool = true) -> Document? {
+                          _ sortDescriptors: [NSSortDescriptor]? = nil) throws -> Document? {
+        try fetchFirst(context,
+                       predicate,
+                       sortDescriptors,
+                       onlyNonDeleted: true,
+                       onlyDefaultDatabase: true)
+    }
+
+    class func rawFetchFirst(_ context: NSManagedObjectContext,
+                             _ predicate: NSPredicate? = nil,
+                             _ sortDescriptors: [NSSortDescriptor]? = nil) throws -> Document? {
+        try fetchFirst(context,
+                       predicate,
+                       sortDescriptors,
+                       onlyNonDeleted: false,
+                       onlyDefaultDatabase: false)
+    }
+
+    class private func fetchFirst(_ context: NSManagedObjectContext,
+                                  _ predicate: NSPredicate? = nil,
+                                  _ sortDescriptors: [NSSortDescriptor]? = nil,
+                                  onlyNonDeleted: Bool,
+                                  onlyDefaultDatabase: Bool) throws -> Document? {
         let fetchRequest: NSFetchRequest<Document> = Document.fetchRequest()
 
         fetchRequest.predicate = processPredicate(predicate,
@@ -164,97 +201,68 @@ class Document: NSManagedObject {
         fetchRequest.fetchLimit = 1
         fetchRequest.sortDescriptors = sortDescriptors
 
-        do {
-            let fetchedDocument = try context.fetch(fetchRequest)
-            return fetchedDocument.first
-        } catch {
-            Logger.shared.logError("Error fetching note: \(error.localizedDescription)", category: .coredata)
-        }
-
-        return nil
+        let fetchedDocument = try context.fetch(fetchRequest)
+        return fetchedDocument.first
     }
 
-    class func rawFetchFirst(context: NSManagedObjectContext,
-                             _ predicate: NSPredicate? = nil,
-                             _ sortDescriptors: [NSSortDescriptor]? = nil) -> Document? {
-        let fetchRequest: NSFetchRequest<Document> = Document.fetchRequest()
-
-        fetchRequest.predicate = predicate
-        fetchRequest.fetchLimit = 1
-        fetchRequest.sortDescriptors = sortDescriptors
-
-        do {
-            let fetchedDocument = try context.fetch(fetchRequest)
-            return fetchedDocument.first
-        } catch {
-            Logger.shared.logError("Error fetching note: \(error.localizedDescription)", category: .coredata)
-        }
-
-        return nil
+    class func fetchAll(_ context: NSManagedObjectContext,
+                        _ predicate: NSPredicate? = nil,
+                        _ sortDescriptors: [NSSortDescriptor]? = nil) throws -> [Document] {
+        try fetchAllWithLimit(context, predicate, sortDescriptors)
     }
 
-    class func fetchAll(context: NSManagedObjectContext, _ predicate: NSPredicate? = nil, _ sortDescriptors: [NSSortDescriptor]? = nil) -> [Document] {
-        return fetchAllWithLimit(context: context, predicate, sortDescriptors)
+    class func rawFetchAll(_ context: NSManagedObjectContext,
+                           _ predicate: NSPredicate? = nil,
+                           _ sortDescriptors: [NSSortDescriptor]? = nil) throws -> [Document] {
+        try rawFetchAllWithLimit(context, predicate, sortDescriptors)
     }
 
-    class func rawFetchAll(context: NSManagedObjectContext, _ predicate: NSPredicate? = nil, _ sortDescriptors: [NSSortDescriptor]? = nil) -> [Document] {
-        return rawFetchAllWithLimit(context: context, predicate, sortDescriptors)
-    }
-
-    class func fetchAllWithLimit(context: NSManagedObjectContext,
+    class func fetchAllWithLimit(_ context: NSManagedObjectContext,
                                  _ predicate: NSPredicate? = nil,
                                  _ sortDescriptors: [NSSortDescriptor]? = nil,
                                  _ limit: Int = 0,
-                                 _ fetchOffset: Int = 0) -> [Document] {
+                                 _ fetchOffset: Int = 0) throws -> [Document] {
         let fetchRequest: NSFetchRequest<Document> = Document.fetchRequest()
-        fetchRequest.predicate = processPredicate(predicate, DatabaseManager.defaultDatabase.id, onlyNonDeleted: true)
+        fetchRequest.predicate = processPredicate(predicate,
+                                                  DatabaseManager.defaultDatabase.id,
+                                                  onlyNonDeleted: true)
         fetchRequest.fetchLimit = limit
         fetchRequest.sortDescriptors = sortDescriptors
         fetchRequest.fetchOffset = fetchOffset
 
-        do {
-            let fetchedDocuments = try context.fetch(fetchRequest)
-            return fetchedDocuments
-        } catch {
-            // TODO: raise error?
-            Logger.shared.logError("Can't fetch all: \(error)", category: .coredata)
-        }
-
-        return []
+        let fetchedDocuments = try context.fetch(fetchRequest)
+        return fetchedDocuments
     }
 
-    class func rawFetchAllWithLimit(context: NSManagedObjectContext,
+    class func rawFetchAllWithLimit(_ context: NSManagedObjectContext,
                                     _ predicate: NSPredicate? = nil,
                                     _ sortDescriptors: [NSSortDescriptor]? = nil,
                                     _ limit: Int = 0,
-                                    _ fetchOffset: Int = 0) -> [Document] {
+                                    _ fetchOffset: Int = 0) throws -> [Document] {
         let fetchRequest: NSFetchRequest<Document> = Document.fetchRequest()
         fetchRequest.predicate = predicate
         fetchRequest.fetchLimit = limit
         fetchRequest.sortDescriptors = sortDescriptors
         fetchRequest.fetchOffset = fetchOffset
 
-        do {
-            let fetchedDocuments = try context.fetch(fetchRequest)
-            return fetchedDocuments
-        } catch {
-            // TODO: raise error?
-            Logger.shared.logError("Can't fetch: \(error)", category: .coredata)
-        }
-
-        return []
+        let fetchedDocuments = try context.fetch(fetchRequest)
+        return fetchedDocuments
     }
 
-    class func fetchAllNames(context: NSManagedObjectContext, _ predicate: NSPredicate? = nil, _ sortDescriptors: [NSSortDescriptor]? = nil) -> [String] {
-        return fetchAllNamesWithLimit(context: context, predicate, sortDescriptors)
+    class func fetchAllNames(_ context: NSManagedObjectContext,
+                             _ predicate: NSPredicate? = nil,
+                             _ sortDescriptors: [NSSortDescriptor]? = nil) -> [String] {
+        return fetchAllNamesWithLimit(context, predicate, sortDescriptors)
     }
 
-    class func fetchAllNamesWithLimit(context: NSManagedObjectContext,
+    class func fetchAllNamesWithLimit(_ context: NSManagedObjectContext,
                                       _ predicate: NSPredicate? = nil,
                                       _ sortDescriptors: [NSSortDescriptor]? = nil,
                                       _ limit: Int = 0) -> [String] {
         let fetchRequest: NSFetchRequest<Document> = Document.fetchRequest()
-        fetchRequest.predicate = processPredicate(predicate, DatabaseManager.defaultDatabase.id, onlyNonDeleted: true)
+        fetchRequest.predicate = processPredicate(predicate,
+                                                  DatabaseManager.defaultDatabase.id,
+                                                  onlyNonDeleted: true)
         fetchRequest.fetchLimit = limit
         fetchRequest.sortDescriptors = sortDescriptors
         fetchRequest.propertiesToFetch = ["title"]
@@ -270,62 +278,71 @@ class Document: NSManagedObject {
         return []
     }
 
-    class func fetchWithId(_ context: NSManagedObjectContext, _ id: UUID) -> Document? {
-        return fetchFirst(context: context, NSPredicate(format: "id = %@", id as CVarArg),
-                          onlyNonDeleted: false,
-                          onlyDefaultDatabase: false)
+    class func fetchWithId(_ context: NSManagedObjectContext, _ id: UUID) throws -> Document? {
+        try rawFetchFirst(context, NSPredicate(format: "id = %@", id as CVarArg))
     }
 
     class func fetchOrCreateWithId(_ context: NSManagedObjectContext, _ id: UUID) -> Document {
-        let document = fetchFirst(context: context, NSPredicate(format: "id = %@", id as CVarArg)) ?? create(context)
-        document.id = id
-        return document
+        rawFetchOrCreateWithId(context, id)
     }
 
     class func rawFetchOrCreateWithId(_ context: NSManagedObjectContext, _ id: UUID) -> Document {
-        let document = rawFetchFirst(context: context, NSPredicate(format: "id = %@", id as CVarArg)) ?? create(context)
+        let document = (try? rawFetchFirst(context, NSPredicate(format: "id = %@", id as CVarArg)))
+            ?? create(context)
         document.id = id
         return document
     }
 
-    class func fetchWithTitle(_ context: NSManagedObjectContext, _ title: String) -> Document? {
-        return fetchFirst(context: context, NSPredicate(format: "title LIKE[cd] %@", title as CVarArg))
+    class func fetchWithTitle(_ context: NSManagedObjectContext, _ title: String) throws -> Document? {
+        try fetchFirst(context, NSPredicate(format: "title LIKE[cd] %@", title as CVarArg))
     }
 
     class func fetchOrCreateWithTitle(_ context: NSManagedObjectContext, _ title: String) -> Document {
-        return fetchFirst(context: context, NSPredicate(format: "title LIKE[cd] %@", title as CVarArg)) ?? create(context, title: title)
+        (try? fetchFirst(context, NSPredicate(format: "title LIKE[cd] %@", title as CVarArg)))
+            ?? create(context, title: title)
     }
 
-    class func fetchAllWithType(_ context: NSManagedObjectContext, _ type: Int16) -> [Document] {
-        return fetchAll(context: context, NSPredicate(format: "document_type = \(type)"))
+    class func fetchAllWithType(_ context: NSManagedObjectContext, _ type: Int16) throws -> [Document] {
+        try fetchAll(context, NSPredicate(format: "document_type = \(type)"))
     }
 
-    class func fetchWithTypeAndLimit(context: NSManagedObjectContext, _ type: Int16, _ limit: Int, _ fetchOffset: Int) -> [Document] {
-        return fetchAllWithLimit(context: context, NSPredicate(format: "document_type = \(type)"), [NSSortDescriptor(key: "created_at", ascending: false)], limit, fetchOffset)
+    class func fetchWithTypeAndLimit(context: NSManagedObjectContext,
+                                     _ type: Int16,
+                                     _ limit: Int,
+                                     _ fetchOffset: Int) throws -> [Document] {
+        try fetchAllWithLimit(context,
+                              NSPredicate(format: "document_type = \(type)"),
+                              [NSSortDescriptor(key: "created_at", ascending: false)],
+                              limit,
+                              fetchOffset)
     }
 
-    class func fetchAllWithTitleMatch(_ context: NSManagedObjectContext, _ title: String) -> [Document] {
+    class func fetchAllWithTitleMatch(_ context: NSManagedObjectContext, _ title: String) throws -> [Document] {
         let predicate = NSPredicate(format: "title CONTAINS[cd] %@", title as CVarArg)
         let sortDescriptor = NSSortDescriptor(key: "title", ascending: true)
-        return fetchAll(context: context, predicate, [sortDescriptor])
+        return try fetchAll(context, predicate, [sortDescriptor])
     }
 
-    class func fetchAllWithLimitedTitleMatch(_ context: NSManagedObjectContext, _ title: String, _ limit: Int) -> [Document] {
+    class func fetchAllWithLimitedTitleMatch(_ context: NSManagedObjectContext,
+                                             _ title: String,
+                                             _ limit: Int) throws -> [Document] {
         let predicate = NSPredicate(format: "title CONTAINS[cd] %@", title as CVarArg)
         let sortDescriptor = NSSortDescriptor(key: "title", ascending: true)
-        return fetchAllWithLimit(context: context, predicate, [sortDescriptor], limit)
+        return try fetchAllWithLimit(context, predicate, [sortDescriptor], limit)
     }
 
-    class func fetchAllWithLimitResult(_ context: NSManagedObjectContext, _ limit: Int, _ sortDescriptors: [NSSortDescriptor]? = nil) -> [Document] {
-        return fetchAllWithLimit(context: context, nil, sortDescriptors, limit)
+    class func fetchAllWithLimitResult(_ context: NSManagedObjectContext,
+                                       _ limit: Int,
+                                       _ sortDescriptors: [NSSortDescriptor]? = nil) throws -> [Document] {
+        try fetchAllWithLimit(context, nil, sortDescriptors, limit)
     }
 
     /// Will add the following predicates:
     /// - Add filter to only list non-deleted notes
     /// - Add filter to list only the default database
-    class func processPredicate(_ predicate: NSPredicate? = nil,
-                                _ databaseId: UUID? = nil,
-                                onlyNonDeleted: Bool = true) -> NSPredicate {
+    class private func processPredicate(_ predicate: NSPredicate? = nil,
+                                        _ databaseId: UUID? = nil,
+                                        onlyNonDeleted: Bool = true) -> NSPredicate {
         var predicates: [NSPredicate] = []
 
         if onlyNonDeleted {

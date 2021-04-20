@@ -115,7 +115,7 @@ struct DocumentDetail: View {
             refreshing = true
         }
 
-        documentManager.refreshDocument(DocumentStruct(document: document)) { _ in
+        documentManager.refresh(DocumentStruct(document: document)) { _ in
             DispatchQueue.main.async {
                 timer.invalidate()
                 refreshing = false
@@ -124,14 +124,14 @@ struct DocumentDetail: View {
     }
 
     private func delete() {
-        documentManager.deleteDocument(id: document.id, completion: nil)
+        documentManager.delete(id: document.id, completion: nil)
     }
 
     private func togglePublic() {
         var documentStruct = DocumentStruct(document: document)
         documentStruct.isPublic = !documentStruct.isPublic
 
-        _ = documentManager.saveDocument(documentStruct, completion: { _ in
+        _ = documentManager.save(documentStruct, completion: { _ in
         })
     }
 
@@ -162,7 +162,7 @@ struct DocumentDetail: View {
     @State private var selectedDatabase = Database.defaultDatabase()
     private var DatabasePicker: some View {
         Picker("", selection: $selectedDatabase.onChange(dbChange), content: {
-            ForEach(databaseManager.allDatabases(), id: \.title) {
+            ForEach(databaseManager.all(), id: \.title) {
                 Text($0.title).tag($0)
             }
         })
@@ -173,7 +173,7 @@ struct DocumentDetail: View {
 
         document.database_id = db.id
 
-        _ = documentManager.saveDocument(DocumentStruct(document: document), completion: { result in
+        _ = documentManager.save(DocumentStruct(document: document), completion: { result in
             switch result {
             case .failure(let error):
                 Logger.shared.logError(error.localizedDescription, category: .document)
@@ -194,7 +194,8 @@ struct DocumentDetail: View {
 struct DocumentDetail_Previews: PreviewProvider {
     static var previews: some View {
         let context = CoreDataManager.shared.mainContext
-        let document = Document.fetchFirst(context: context)!
+        //swiftlint:disable:next force_try
+        let document = try! Document.fetchFirst(context)!
 
         return DocumentDetail(document: document).background(Color.white)
     }
