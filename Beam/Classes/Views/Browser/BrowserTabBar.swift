@@ -45,17 +45,14 @@ struct BrowserTabBar: View {
                             )
                             .frame(minWidth: isSelected(tab) ? maxTabWidth : minTabWidth, maxWidth: .infinity, alignment: .leading)
                             .zIndex(currentTab === tab ? 1 : 0)
-                        Separator()
-                            .padding(.vertical, 6)
+                        Separator(hairline: true)
                     }
                 }
                 .animation(nil)
             }
-            ButtonLabel(icon: "tabs-new", customStyle: ButtonLabelStyle.tinyIconStyle) {
+            BrowserNewTabView {
                 state.startNewSearch()
             }
-            .padding(.horizontal, BeamSpacing._100)
-            .padding(.vertical, BeamSpacing._60)
         }
         .frame(height: 28)
         .background(
@@ -107,5 +104,32 @@ struct BrowserTabBar: View {
     private func moveTabs(from currentIndex: Int, by index: Int, with tab: BrowserTab) {
         tabs.remove(at: currentIndex)
         tabs.insert(tab, at: currentIndex.advanced(by: index).clamp(0, tabs.count))
+    }
+}
+
+private struct BrowserNewTabView: View {
+
+    var action: (() -> Void)?
+    @State private var isHovering = false
+    @State private var isTouchDown = false
+
+    private var buttonState: ButtonLabelState {
+        guard !isTouchDown else { return .clicked }
+        return isHovering ? .hovered : .normal
+    }
+
+    var body: some View {
+        ButtonLabel(icon: "tabs-new",
+                    state: buttonState,
+                    customStyle: ButtonLabelStyle.tinyIconStyle,
+                    action: action)
+            .padding(.horizontal, BeamSpacing._100)
+            .padding(.vertical, BeamSpacing._60)
+            .background(BeamColor.Nero.swiftUI)
+            .onHover { isHovering = $0 }
+            .onTouchDown { isTouchDown = $0 }
+            .simultaneousGesture(TapGesture(count: 1).onEnded {
+                action?()
+            })
     }
 }
