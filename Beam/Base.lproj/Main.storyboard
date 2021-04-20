@@ -727,7 +727,7 @@
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" tag="-3" id="nTu-5u-Dge"/>
-                                        <menuItem title="Show journal" tag="-3" keyEquivalent="0" id="tjl-Q9-d8d">
+                                        <menuItem title="Show Journal [0]" tag="-3" keyEquivalent="0" id="tjl-Q9-d8d">
                                             <connections>
                                                 <action selector="showJournal:" target="Ady-hI-5gd" id="zpT-Kn-hB1"/>
                                             </connections>

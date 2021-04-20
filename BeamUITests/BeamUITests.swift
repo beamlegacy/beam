@@ -41,5 +41,4 @@ class BeamUITests: XCTestCase {
         }
     }
     #endif
-
 }

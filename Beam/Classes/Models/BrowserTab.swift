@@ -277,10 +277,17 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     }
 
     private func updateElementWithTitle(_ title: String? = nil) {
-        if let url = url, let element = element {
-            let name = title ?? (self.title.isEmpty ? url.absoluteString : self.title)
-            element.text = BeamText(text: name, attributes: [.link(url.absoluteString)])
+        guard let url = url, let element = element else {
+            return
         }
+        // only change element text if it contains only this link
+        guard element.text.ranges.count == 1,
+              let range = element.text.ranges.first,
+              range.attributes.count <= 1 else {
+            return
+        }
+        let name = title ?? (self.title.isEmpty ? url.absoluteString : self.title)
+        element.text = BeamText(text: name, attributes: [.link(url.absoluteString)])
     }
 
     private func updateFavIcon() {
