@@ -19,18 +19,9 @@ struct BrowserTabView: View {
         isSelected ? BeamColor.Generic.text.swiftUI : BeamColor.Corduroy.swiftUI
     }
 
-    private let tabIconStyle: ButtonLabelStyle = {
-        ButtonLabelStyle.tinyIconStyle
-    }()
-
-    private let selectedHoverTabIconStyle: ButtonLabelStyle = {
-        var style = ButtonLabelStyle.tinyIconStyle
-        style.foregroundColor = BeamColor.Niobium.swiftUI
-        return style
-    }()
-
-    private var closeIconStyle: ButtonLabelStyle {
-        isSelected && isHovering ? selectedHoverTabIconStyle : tabIconStyle
+    private var backgroundColor: Color {
+        guard !isSelected else { return BeamColor.Generic.background.swiftUI }
+        return isHovering ? BeamColor.Mercury.swiftUI : BeamColor.Nero.swiftUI
     }
 
     var body: some View {
@@ -54,20 +45,22 @@ struct BrowserTabView: View {
             .animation(nil)
             HStack {
                 Spacer(minLength: 0)
-                if isHovering || isSelected {
-                    ButtonLabel(icon: "tabs-close", customStyle: closeIconStyle) {
+                if isHovering {
+                    ButtonLabel(icon: "tabs-close_xs", customStyle: ButtonLabelStyle.tinyIconStyle) {
                         closeTab(id: tab.id)
                     }
                     .padding(.horizontal, BeamSpacing._60)
                 }
             }
+            .transition(.opacity)
+            .animation(.easeInOut(duration: 0.3))
             .frame(width: 32)
         }
         .onHover { hovering in
             isHovering = hovering
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(BeamColor.Generic.background.swiftUI)
+        .background(backgroundColor)
         .accessibility(identifier: "browserTabBarView")
     }
 

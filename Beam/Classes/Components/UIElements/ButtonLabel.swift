@@ -28,16 +28,9 @@ struct ButtonLabelStyle {
     var iconSize: CGFloat = 16
     var foregroundColor: Color = BeamColor.Button.text.swiftUI
     var activeForegroundColor: Color = BeamColor.Button.activeText.swiftUI
-
-    static let tinyIconStyle: ButtonLabelStyle = {
-        var style = ButtonLabelStyle()
-        style.iconSize = 16
-        style.verticalPadding = 0
-        style.horizontalPadding = 0
-        style.foregroundColor = BeamColor.LightStoneGray.swiftUI
-        style.activeForegroundColor = BeamColor.Niobium.swiftUI
-        return style
-    }()
+    var backgroundColor: Color?
+    var hoveredBackgroundColor: Color?
+    var activeBackgroundColor: Color = BeamColor.Button.activeBackground.swiftUI
 }
 
 struct ButtonLabel: View {
@@ -61,20 +54,21 @@ struct ButtonLabel: View {
     }
 
     private var foregroundColor: Color {
-        guard defaultState != .disabled else {
+        if defaultState == .disabled {
             return style.foregroundColor.opacity(0.35)
+        } else if isHovering || isTouching || defaultState != .normal {
+            return style.activeForegroundColor
         }
-        guard isHovering || isTouching || defaultState != .normal else {
-            return style.foregroundColor
-        }
-        return style.activeForegroundColor
+        return style.foregroundColor
     }
 
     private var backgroundColor: Color? {
         if isTouching || defaultState == .clicked {
-            return BeamColor.Button.activeBackground.swiftUI
+            return style.activeBackgroundColor
+        } else if isHovering || defaultState == .hovered {
+            return style.hoveredBackgroundColor
         }
-        return nil
+        return style.backgroundColor
     }
 
     var body: some View {
@@ -134,4 +128,18 @@ struct ButtonLabel_Previews: PreviewProvider {
         .padding()
         .background(Color.white)
     }
+}
+
+extension ButtonLabelStyle {
+    static let tinyIconStyle: ButtonLabelStyle = {
+        var style = ButtonLabelStyle()
+        style.iconSize = 16
+        style.verticalPadding = 0
+        style.horizontalPadding = 0
+        style.foregroundColor = BeamColor.LightStoneGray.swiftUI
+        style.activeForegroundColor = BeamColor.Niobium.swiftUI
+        style.hoveredBackgroundColor = BeamColor.Mercury.swiftUI
+        style.activeBackgroundColor = BeamColor.AlphaGray.swiftUI
+        return style
+    }()
 }

@@ -14,10 +14,13 @@ struct ModeView: View {
 
     @State private var contentIsScrolled = false
 
+    var showOmnibarBorder: Bool {
+        state.mode == .web || (contentIsScrolled && [.note, .today].contains(state.mode))
+    }
     var body: some View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
-                OmniBar(isAboveContent: contentIsScrolled && [.note, .today].contains(state.mode))
+                OmniBar(isAboveContent: showOmnibarBorder)
                     .environmentObject(state.autocompleteManager)
                     .zIndex(10)
                 ZStack {
