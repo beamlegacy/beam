@@ -105,6 +105,11 @@ class NodeSelection {
     func append(_ node: TextNode) {
         node.selected = true
         nodes.insert(node)
+        if nodes.count > 1 {
+            nodes.forEach { (node) in
+                node.selectedAlone = false
+            }
+        }
 
         if !node.open {
             appendChildren(of: node)
@@ -113,7 +118,13 @@ class NodeSelection {
 
     func remove(_ node: TextNode) {
         node.selected = false
+        node.selectedAlone = true
         nodes.remove(node)
+        if nodes.count < 2 {
+            nodes.forEach { (node) in
+                node.selectedAlone = true
+            }
+        }
 
         if !node.open {
             removeChildren(of: node)
@@ -123,6 +134,7 @@ class NodeSelection {
     func appendChildren(of node: TextNode) {
         for child in node.children {
             guard let child = child as? TextNode else { continue }
+            child.selectedAlone = false
             child.selected = true
             nodes.insert(child)
 
@@ -133,7 +145,7 @@ class NodeSelection {
     func removeChildren(of node: TextNode) {
         for child in node.children {
             guard let child = child as? TextNode else { continue }
-            child.selected = true
+            child.selected = false
             nodes.insert(child)
 
             removeChildren(of: child)
@@ -143,6 +155,7 @@ class NodeSelection {
     func cancelSelection() {
         for node in nodes {
             node.selected = false
+            node.selectedAlone = true
         }
         nodes.removeAll()
     }

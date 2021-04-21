@@ -317,6 +317,7 @@ extension TextRoot {
 
     func startNodeSelection() {
         guard let node = focusedWidget as? TextNode else { return }
+        node.updateActionLayerVisibility(hidden: true)
         root.state.nodeSelection = NodeSelection(start: node, end: node)
         cancelSelection()
     }
