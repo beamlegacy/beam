@@ -1,15 +1,21 @@
+import {BeamWindow} from "./BeamTypes"
+import {TextSelectorUI} from "./TextSelectorUI"
+
+/**
+ * Listen to events that select text with Option.
+ *
+ * @see PointAndShoot for block selection.
+ */
 export class TextSelector {
 
-  selectionsList = []
+  private selectionsList = []
 
   /**
    *
    * @param win {(BeamWindow)}
    * @param ui {TextSelectorUI}
    */
-  constructor(win, ui) {
-    this.ui = ui
-    this.win = win
+  constructor(protected win: BeamWindow, protected ui: TextSelectorUI) {
     win.addEventListener("mouseup", this.onMouseUp.bind(this))
     win.document.addEventListener("selectionchange", (ev) => this.onSelectionChange(ev))
     this.log('Initialized')

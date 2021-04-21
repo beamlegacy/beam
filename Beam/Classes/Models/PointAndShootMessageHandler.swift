@@ -9,57 +9,49 @@ struct FrameInfo {
     let height: CGFloat
 }
 
-enum ScriptHandlers: String, CaseIterable {
+enum PointAndShootMessages: String, CaseIterable {
     /**
      Hover a block with Option key.
      */
-    case beam_point
+    case pointAndShoot_point
     /**
      Validate a pointed block for selection.
      */
-    case beam_shoot
-    case beam_shootConfirmation
+    case pointAndShoot_shoot
+    case pointAndShoot_shootConfirmation
     /**
      Ongoing text highlighting
      */
-    case beam_textSelection
+    case pointAndShoot_textSelection
     /**
      Completed text highlight
      */
-    case beam_textSelected
-    case beam_onLoad
-    case beam_onScrolled
-    case beam_logging
-    case beam_textInputFields
-    case beam_textInputFocusIn
-    case beam_textInputFocusOut
-    case beam_formSubmit
-    case beam_resize
-    case beam_pinch
-    case beam_frameBounds
-    case beam_setStatus
+    case pointAndShoot_textSelected
+    case pointAndShoot_onLoad
+    case pointAndShoot_scroll
+    case pointAndShoot_resize
+    case pointAndShoot_pinch
+    case pointAndShoot_frameBounds
+    case pointAndShoot_setStatus
 }
 
 /**
  Handles messages sent from web page's javascript.
  */
-class WebMessageHandler: NSObject, WKScriptMessageHandler {
+class PointAndShootMessageHandler: NSObject, WKScriptMessageHandler {
 
     let webPositions: WebPositions
 
     var pointAndShoot: PointAndShoot
-    var passwordOverlayController: PasswordOverlayController
     var page: WebPage
 
     var browsingScorer: BrowsingScorer
 
-    init(page: WebPage, webPositions: WebPositions, browsingScorer: BrowsingScorer,
-         pointAndShoot: PointAndShoot, passwordOverlayController: PasswordOverlayController) {
+    init(page: WebPage, webPositions: WebPositions, browsingScorer: BrowsingScorer, pointAndShoot: PointAndShoot) {
         self.page = page
         self.browsingScorer = browsingScorer
         self.webPositions = webPositions
         self.pointAndShoot = pointAndShoot
-        self.passwordOverlayController = passwordOverlayController
     }
 
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
@@ -67,28 +59,12 @@ class WebMessageHandler: NSObject, WKScriptMessageHandler {
         let messageKey = message.name
         let messageName = messageKey // .components(separatedBy: "_beam_")[1]
         switch messageName {
-        case ScriptHandlers.beam_logging.rawValue:
-            guard let dict = messageBody,
-                  let type = dict["type"] as? String,
-                  let message = dict["message"] as? String
-                    else {
-                Logger.shared.logError("Ignored log event: \(String(describing: messageBody))",
-                                       category: .web)
-                return
-            }
-            if type == "error" {
-                Logger.shared.logError(message, category: .javascript)
-            } else if type == "warning" {
-                Logger.shared.logWarning(message, category: .javascript)
-            } else if type == "log" {
-                Logger.shared.logInfo(message, category: .javascript)
-            }
 
-        case ScriptHandlers.beam_onLoad.rawValue:
+        case PointAndShootMessages.pointAndShoot_onLoad.rawValue:
             Logger.shared.logInfo("onLoad flushing frameInfo", category: .web)
             webPositions.framesInfo.removeAll()
 
-        case ScriptHandlers.beam_point.rawValue:
+        case PointAndShootMessages.pointAndShoot_point.rawValue:
             guard page.pointAndShootAllowed else { return }
             guard let dict = messageBody,
                   let origin = dict["origin"] as? String,
@@ -102,7 +78,7 @@ class WebMessageHandler: NSObject, WKScriptMessageHandler {
             pointAndShoot.point(target: target)
             Logger.shared.logInfo("Web block point: \(pointArea)", category: .web)
 
-        case ScriptHandlers.beam_shoot.rawValue:
+        case PointAndShootMessages.pointAndShoot_shoot.rawValue:
             guard page.pointAndShootAllowed == true else { return }
             guard let dict = messageBody,
                   let area = pointAndShootAreaValue(from: dict),
@@ -115,7 +91,7 @@ class WebMessageHandler: NSObject, WKScriptMessageHandler {
             pointAndShoot.shoot(targets: [target], origin: origin)
             Logger.shared.logInfo("Web shoot point: \(area)", category: .web)
 
-        case ScriptHandlers.beam_shootConfirmation.rawValue:
+        case PointAndShootMessages.pointAndShoot_shootConfirmation.rawValue:
             guard page.pointAndShootAllowed == true else { return }
             guard let dict = messageBody,
                   let area = pointAndShootAreaValue(from: dict),
@@ -128,7 +104,7 @@ class WebMessageHandler: NSObject, WKScriptMessageHandler {
             pointAndShoot.showShootInfo(group: pointAndShoot.currentGroup!)
             Logger.shared.logInfo("Web shoot confirmation: \(area)", category: .web)
 
-        case ScriptHandlers.beam_textSelected.rawValue:
+        case PointAndShootMessages.pointAndShoot_textSelected.rawValue:
             guard page.pointAndShootAllowed == true else { return }
             guard let dict = messageBody,
                   dict["index"] as? Int != nil,
@@ -146,7 +122,7 @@ class WebMessageHandler: NSObject, WKScriptMessageHandler {
             }
             pointAndShoot.shoot(targets: targets, origin: origin, done: true)
 
-        case ScriptHandlers.beam_textSelection.rawValue:
+        case PointAndShootMessages.pointAndShoot_textSelection.rawValue:
             guard page.pointAndShootAllowed == true else { return }
             guard let dict = messageBody,
                   dict["index"] as? Int != nil,
@@ -160,12 +136,11 @@ class WebMessageHandler: NSObject, WKScriptMessageHandler {
                                        category: .web)
                 return
             }
-            pointAndShoot.removeAll()
             let targets = areas.map { PointAndShoot.Target(area: $0,
                                                            mouseLocation: CGPoint(x: $0.minX, y: $0.maxY), html: html) }
             pointAndShoot.shoot(targets: targets, origin: origin, done: false)
 
-        case ScriptHandlers.beam_pinch.rawValue:
+        case PointAndShootMessages.pointAndShoot_pinch.rawValue:
             guard let dict = messageBody,
                   (dict["offsetLeft"] as? CGFloat) != nil,
                   (dict["pageLeft"] as? CGFloat) != nil,
@@ -179,7 +154,7 @@ class WebMessageHandler: NSObject, WKScriptMessageHandler {
             }
             webPositions.scale = scale
 
-        case ScriptHandlers.beam_onScrolled.rawValue:
+        case PointAndShootMessages.pointAndShoot_scroll.rawValue:
             guard let dict = messageBody,
                   let x = dict["x"] as? CGFloat,
                   let y = dict["y"] as? CGFloat,
@@ -194,7 +169,6 @@ class WebMessageHandler: NSObject, WKScriptMessageHandler {
             webPositions.scale = scale
             page.scrollX = x // nativeX(x: x, origin: origin)
             page.scrollY = y // nativeY(y: y, origin: origin)
-            passwordOverlayController.updateScrollPosition(x: x, y: y, width: width, height: height)
             if pointAndShoot.isPointing {
                 // Logger.shared.logDebug("scroll redraw because pointing", pointAndShoot)
                 pointAndShoot.drawAllGroups()
@@ -211,22 +185,7 @@ class WebMessageHandler: NSObject, WKScriptMessageHandler {
             }
             Logger.shared.logDebug("Web Scrolled: \(page.scrollX), \(page.scrollY)", category: .web)
 
-        case ScriptHandlers.beam_textInputFields.rawValue:
-            guard let jsonString = message.body as? String else { break }
-            passwordOverlayController.updateInputFields(with: jsonString)
-
-        case ScriptHandlers.beam_textInputFocusIn.rawValue:
-            guard let elementId = message.body as? String else { break }
-            passwordOverlayController.updateInputFocus(for: elementId, becomingActive: true)
-
-        case ScriptHandlers.beam_textInputFocusOut.rawValue:
-            guard let elementId = message.body as? String else { break }
-            passwordOverlayController.updateInputFocus(for: elementId, becomingActive: false)
-
-        case ScriptHandlers.beam_formSubmit.rawValue:
-            passwordOverlayController.handleWebFormSubmit()
-
-        case ScriptHandlers.beam_frameBounds.rawValue:
+        case PointAndShootMessages.pointAndShoot_frameBounds.rawValue:
             guard let dict = messageBody,
                   let jsFramesInfo = dict["frames"] as? NSArray
                     else {
@@ -248,7 +207,7 @@ class WebMessageHandler: NSObject, WKScriptMessageHandler {
                 }
             }
 
-        case ScriptHandlers.beam_resize.rawValue:
+        case PointAndShootMessages.pointAndShoot_resize.rawValue:
             guard let dict = messageBody,
                   let width = dict["width"] as? CGFloat,
                   let height = dict["height"] as? CGFloat,
@@ -258,9 +217,8 @@ class WebMessageHandler: NSObject, WKScriptMessageHandler {
                 return
             }
             // pointAndShoot.drawCurrentGroup()
-            passwordOverlayController.updateViewSize(width: width, height: height)
 
-        case ScriptHandlers.beam_setStatus.rawValue:
+        case PointAndShootMessages.pointAndShoot_setStatus.rawValue:
             guard let dict = messageBody,
                   let status = dict["status"] as? String,
                   let _ = dict["origin"] as? String
@@ -275,17 +233,18 @@ class WebMessageHandler: NSObject, WKScriptMessageHandler {
         }
     }
 
-    func removeScriptHandlers(from webView: WKWebView) {
-        ScriptHandlers.allCases.forEach {
-            webView.configuration.userContentController.removeScriptMessageHandler(forName: $0.rawValue)
-        }
-    }
-
-    func addScriptHandlers(to webView: WKWebView) {
-        ScriptHandlers.allCases.forEach {
+    func register(to webView: WKWebView) {
+        PointAndShootMessages.allCases.forEach {
             let handler = $0.rawValue
             webView.configuration.userContentController.add(self, name: handler)
-            Logger.shared.logDebug("Added Script handler: \(handler)", category: .web)
+            Logger.shared.logDebug("Added point and shoot cript handler: \(handler)", category: .web)
+        }
+        pointAndShoot.injectScripts()
+    }
+
+    func unregister(from webView: WKWebView) {
+        PointAndShootMessages.allCases.forEach {
+            webView.configuration.userContentController.removeScriptMessageHandler(forName: $0.rawValue)
         }
     }
 
@@ -313,6 +272,6 @@ class WebMessageHandler: NSObject, WKScriptMessageHandler {
     }
 
     func destroy(for webView: WKWebView) {
-        self.removeScriptHandlers(from: webView)
+        self.unregister(from: webView)
     }
 }

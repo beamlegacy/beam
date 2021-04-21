@@ -75,11 +75,10 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         url?.isSearchResult != true
     }
 
-    var currentScore: Score { self.browsingTree.current.score }
+    var currentScore: Score { browsingTree.current.score }
 
-    lazy var passwordOverlayController: PasswordOverlayController = PasswordOverlayController(webView: webView, passwordStore: MockPasswordStore.shared)
-
-    lazy var webPositions: WebPositions = messageHandler!.webPositions
+    lazy var passwordOverlayController: PasswordOverlayController
+            = PasswordOverlayController(webView: webView, passwordStore: MockPasswordStore.shared)
 
     var state: BeamState!
     public private(set) var note: BeamNote
@@ -87,7 +86,9 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
     public private(set) var element: BeamElement?
 
-    var messageHandler: WebMessageHandler?
+    var loggingMessageHandler: LoggingMessageHandler?
+    var passwordMessageHandler: PasswordMessageHandler?
+    var pointAndShootMessageHandler: PointAndShootMessageHandler?
 
     func setDestinationNote(_ note: BeamNote, rootElement: BeamElement? = nil) {
         self.note = note
@@ -240,7 +241,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
     func addToNote(allowSearchResult: Bool = false) -> BeamElement? {
         guard let elem = element else {
-            guard let url = self.url else {
+            guard let url = url else {
                 Logger.shared.logError("Cannot get current URL", category: .general)
                 return nil
             }
@@ -347,22 +348,40 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
         removeUserScripts()
 
-        if messageHandler != nil {
-            messageHandler!.destroy(for: webView)
+        initLogging()
+        initPasswordManager()
+        initPointAndShoot()
+
+        addUserScripts()
+    }
+
+    private func initLogging() {
+        if loggingMessageHandler != nil {
+            loggingMessageHandler!.unregister(from: webView)
+        }
+        loggingMessageHandler = LoggingMessageHandler()
+        loggingMessageHandler!.register(to: webView, page: self)
+    }
+
+    private func initPasswordManager() {
+        if passwordMessageHandler != nil {
+            passwordMessageHandler!.destroy(for: webView)
+        }
+        passwordMessageHandler = PasswordMessageHandler(passwordOverlayController: passwordOverlayController)
+        passwordMessageHandler!.register(to: webView)
+    }
+
+    private func initPointAndShoot() {
+        if pointAndShootMessageHandler != nil {
+            pointAndShootMessageHandler!.destroy(for: webView)
         }
         let webPositions: WebPositions = WebPositions()
         // Avoid instantiate if !pointAndShootEnabled
-        let pointAndShoot = PointAndShoot(page: self, ui: PointAndShootUI(),
-                                          browsingScorer: self,
+        let pointAndShoot = PointAndShoot(page: self, ui: PointAndShootUI(), browsingScorer: self,
                                           webPositions: webPositions)
-        messageHandler = WebMessageHandler(page: self,
-                                           webPositions: webPositions,
-                                           browsingScorer: self,
-                                           pointAndShoot: pointAndShoot,
-                                           passwordOverlayController: passwordOverlayController)
-        messageHandler!.addScriptHandlers(to: webView)
-
-        addUserScripts()
+        pointAndShootMessageHandler = PointAndShootMessageHandler(page: self, webPositions: webPositions, browsingScorer: self,
+                                                                  pointAndShoot: pointAndShoot)
+        pointAndShootMessageHandler!.register(to: webView)
     }
 
     func cancelObservers() {
@@ -370,11 +389,11 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         webView.navigationDelegate = nil
         webView.uiDelegate = nil
 
-        messageHandler?.destroy(for: webView)
+        pointAndShootMessageHandler?.destroy(for: webView)
     }
 
     private func removeUserScripts() {
-        messageHandler?.removeScriptHandlers(from: webView)
+        pointAndShootMessageHandler?.unregister(from: webView)
     }
 
     lazy var devTools: String = {
@@ -382,8 +401,6 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     }()
 
     private func addUserScripts() {
-        addJS(source: overrideConsole, when: .atDocumentStart)
-        messageHandler!.pointAndShoot.injectScripts()
         addJS(source: jsPasswordManager, when: .atDocumentEnd)
         //    addJS(source: devTools, when: .atDocumentEnd)
     }
@@ -401,7 +418,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     }
 
     func executeJS(objectName: String, jsCode: String) {
-        let parameterized = "__ID__\(objectName)." + jsCode
+        let parameterized = "exports.__ID__\(objectName)." + jsCode
         let obfuscatedCommand = obfuscate(parameterized: parameterized)
         webView.evaluateJavaScript(obfuscatedCommand) { (result, error) in
             if error == nil {
@@ -444,7 +461,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                 browsingTree.goForward()
             }
         }
-        messageHandler!.pointAndShoot.removeAll()
+        pointAndShootMessageHandler!.pointAndShoot.removeAll()
         currentBackForwardItem = webView.backForwardList.currentItem
     }
 
@@ -452,7 +469,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction,
                  decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         element = nil
-        messageHandler!.pointAndShoot.removeAll()
+        pointAndShootMessageHandler!.pointAndShoot.removeAll()
         decisionHandler(.allow)
     }
 
@@ -513,15 +530,12 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         _ = addToNote()
     }
 
-    lazy var overrideConsole: String = {
-        loadFile(from: "OverrideConsole", fileType: "js")
-    }()
     lazy var jsPasswordManager: String = {
         loadFile(from: "PasswordManager", fileType: "js")
     }()
 
     func cancelShoot() {
-        messageHandler!.pointAndShoot.resetStatus()
+        pointAndShootMessageHandler!.pointAndShoot.resetStatus()
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {

@@ -45,7 +45,7 @@ class PasswordOverlayController {
     }
 
     func detectInputFields() {
-        webView.evaluateJavaScript("beam_sendTextFields();") { _, error in
+        webView.evaluateJavaScript("password_sendTextFields();") { _, error in
             if let error = error {
                 Logger.shared.logError(String(describing: error), category: .javascript)
             }

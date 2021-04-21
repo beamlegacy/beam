@@ -1,7 +1,6 @@
 {
-  "type": "module",
-  "private": "true",
   "name": "beam-collect",
+  "private": true,
   "version": "0.1.0",
   "description": "Beam web collect",
   "main": "index_prod.js",
@@ -22,17 +21,38 @@
       }
     }
   },
+  "author": "frontend@beam.co",
+  "devDependencies": {
+    "@babel/preset-env": "^7.13.15",
+    "@babel/plugin-proposal-class-properties": "^7.13.0",
+    "@babel/core": "^7.13.10",
+    "@babel/plugin-transform-runtime": "^7.13.10",
+    "@babel/preset-typescript": "^7.13.0",
+    "@babel/runtime-corejs3": "^7.13.10",
+    "@parcel/transformer-sass": "^2.0.0-nightly.641",
+    "@parcel/transformer-typescript-tsc": "^2.0.0-alpha.3.1",
+    "@parcel/validator-eslint": "^2.0.0-alpha.3",
+    "@parcel/validator-typescript": "^2.0.0-beta.2",
+    "@types/jest": "^26.0.22",
+    "@types/uuid": "^8.3.0",
+    "identity-obj-proxy": "^3.0.0",
+    "jest": "27.0.0-next.8",
+    "parcel": "2.0.0-nightly.643",
+    "posthtml-expressions": "^1.7.1",
+    "sass": "1.32.8",
+    "typescript": "^3.0.0",
+    "uuid": "^8.3.2"
+  },
   "browserslist": [
     "safari 13"
   ],
-  "author": "frontend@beam.co",
-  "devDependencies": {
-    "@parcel/transformer-sass": "2.0.0-beta.2",
-    "@types/jest": "26.0.20",
-    "identity-obj-proxy": "^3.0.0",
-    "jest": "26.6.3",
-    "parcel": "2.0.0-beta.2",
-    "sass": "1.32.8"
+  "babel": {
+    "presets": [
+      "@babel/preset-env"
+    ],
+    "plugins": [
+      "@babel/plugin-proposal-class-properties"
+    ]
   },
   "jest": {
     "transform": {},

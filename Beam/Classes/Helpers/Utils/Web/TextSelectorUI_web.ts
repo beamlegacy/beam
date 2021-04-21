@@ -1,26 +1,17 @@
 import {TextSelectorUI} from "./TextSelectorUI"
+import {PointAndShootUI_web} from "./PointAndShootUI_web";
 
-export class TextSelectorUI_web extends TextSelectorUI {
-  prefix = "__ID__"
+export class TextSelectorUI_web implements TextSelectorUI {
+  private prefix = "__ID__"
 
-  textPointClass = `${this.prefix}-point`
+  private textPointClass = `${this.prefix}-point`
 
-  textShootClass = `${this.prefix}-shoot`
-
-  /**
-   * @type {(BeamWindow)}
-   */
-  win
+  private textShootClass = `${this.prefix}-shoot`
 
   /**
-   * @param win {BeamWindow}
-   * @param pointAndShoot {PointAndShootUI_web}
    */
-  constructor(win, pointAndShoot) {
-    super()
-    this.win = win
-    this.pointAndShoot = pointAndShoot
-    console.log(`${this.toString()} instantiated`)
+  constructor(private pointAndShoot: PointAndShootUI_web) {
+    this.log(`${this.toString()} instantiated`)
   }
 
   enterSelection() {
@@ -37,6 +28,10 @@ export class TextSelectorUI_web extends TextSelectorUI {
 
   textSelected(selection) {
     this.pointAndShoot.paintSelection(selection, this.textShootClass)
+  }
+
+  log(...args) {
+    console.log(this.toString(), args)
   }
 
   toString() {

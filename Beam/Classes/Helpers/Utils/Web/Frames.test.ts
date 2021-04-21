@@ -1,71 +1,22 @@
 import {PointAndShoot} from "./PointAndShoot"
-import {
-  BeamDocument,
-  BeamHTMLElement,
-  BeamMouseEvent,
-  BeamUIEvent
-} from "./Test/BeamMocks"
+import {BeamDocumentMock, BeamMouseEvent, BeamHTMLIFrameElementMock} from "./Test/BeamMocks"
 import {TestWindow} from "./Test/TestWindow"
-import {UIMock} from "./Test/UIMock"
-
-export class MockBeamHTMLElement extends BeamHTMLElement {
-
-  constructor(attributes = {}) {
-    super()
-    Object.assign(this, attributes)
-  }
-
-  getBoundingClientRect() {
-    const x = this.clientLeft
-    const y = this.clientTop
-    const width = this.width
-    const height = this.height
-    const top = this.clientTop
-    const right = this.clientLeft + this.width
-    const bottom = this.clientTop + this.height
-    const left = this.clientLeft
-    return {x, y, width, height, top, right, bottom, left}
-  }
-}
-
-class MockIFrameElement extends MockBeamHTMLElement {
-
-  /**
-   * @type pns {PointAndShoot}
-   */
-  pns
-
-  constructor(attributes) {
-    super()
-    Object.assign(this, attributes)
-  }
-
-  /**
-   *
-   * @param delta {number} positive or negative scroll delta
-   */
-  scrollY(delta) {
-    this.clientTop += delta
-    const win = this.pns.win
-    win.scrollY += delta
-    const scrollEvent = new BeamUIEvent()
-    Object.assign(scrollEvent, {name: "scroll"})
-    this.pns.onScroll(scrollEvent)
-  }
-}
+import {PointAndShootUIMock} from "./Test/PointAndShootUIMock"
+import {TextSelector} from "./TextSelector";
+import {TextSelectorUI_mock} from "./Test/TextSelectorUI_mock";
 
 /**
  * @param frameEls {BeamHTMLElement[]}
- * @return {{pns: PointAndShoot, testUI: UIMock}}
+ * @return {{pns: PointAndShoot, testUI: PointAndShootUIMock}}
  */
 function pointAndShootTestBed(frameEls = []) {
-  const testUI = new UIMock()
+  const testUI = new PointAndShootUIMock()
   const scrollData = {
     scrollWidth: 800, scrollHeight: 0,
     offsetWidth: 800, offsetHeight: 0,
     clientWidth: 800, clientHeight: 0
   }
-  const testDocument = new BeamDocument({
+  const testDocument = new BeamDocumentMock({
     body: scrollData,
     documentElement: scrollData,
     querySelectorAll: (selector) => {
@@ -76,6 +27,7 @@ function pointAndShootTestBed(frameEls = []) {
   })
   const win = new TestWindow({scrollX: 0, scrollY: 0, document: testDocument})
   PointAndShoot.instance = null  // Allow test suite to instantiate multiple PointAndShoots
+  const textSelector = new TextSelector(win, new TextSelectorUI_mock())
   const pns = new PointAndShoot(win, testUI)
 
   // Check registered event listeners
@@ -92,7 +44,7 @@ function pointAndShootTestBed(frameEls = []) {
 }
 
 test("single iframe point", () => {
-  const iframe1El = new MockIFrameElement({
+  const iframe1El = new BeamHTMLIFrameElementMock({
     name: "iframe",
     src: "https://iframe1.com",
     width: 800,
@@ -116,9 +68,10 @@ test("single iframe point", () => {
     rootPns.onMouseMove(outsideFrame1PointEvent)
 
     expect(rootPns.isPointing()).toEqual(true)
-    expect(testUI.eventsCount).toEqual(2)
+    expect(testUI.eventsCount).toEqual(3)
     expect(testUI.events[0]).toEqual({name: "setStatus", status: "pointing"})
     expect(testUI.events[1]).toEqual({name: "point", el: iframe1El, x: 51, y: 52})
+    expect(testUI.events[2]).toEqual("hideStatus")
   }
   {
     const insideFrame1PointEvent = new BeamMouseEvent({
@@ -131,14 +84,15 @@ test("single iframe point", () => {
     iframe1Pns.onMouseMove(insideFrame1PointEvent)
 
     expect(iframe1Pns.isPointing()).toEqual(true)
-    expect(iframe1testUI.eventsCount).toEqual(2)
+    expect(iframe1testUI.eventsCount).toEqual(3)
     expect(iframe1testUI.events[0]).toEqual({name: "setStatus", status: "pointing"})
     expect(iframe1testUI.events[1]).toEqual({name: "point", el: iframe1El, x: 61, y: 62})
+    expect(testUI.events[2]).toEqual("hideStatus")
 
     const delta = 50
     iframe1El.scrollY(delta)
-    expect(iframe1testUI.eventsCount).toEqual(3)
+    expect(iframe1testUI.eventsCount).toEqual(4)
     const iframe1Body = iframe1Pns.win.document.body
-    expect(iframe1testUI.events[2]).toEqual({name: "scroll", x: 0, y: delta, width: iframe1Body.scrollWidth, height: iframe1Body.scrollHeight, scale: 1})
+    expect(iframe1testUI.events[3]).toEqual({name: "scroll", x: 0, y: delta, width: iframe1Body.scrollWidth, height: iframe1Body.scrollHeight, scale: 1})
   }
 })

@@ -1,6 +1,15 @@
 import {PointAndShoot} from "./PointAndShoot"
-import {UI_native} from "./UI_native"
+import {PointAndShootUI_native} from "./PointAndShootUI_native"
+import {TextSelectorUI_native} from "./TextSelectorUI_native"
+import {Native} from "./Native"
+import {TextSelector} from "./TextSelector"
 
-const ui = UI_native.getInstance(window)
+const win = window
 
-export const __ID__PointAndShoot = PointAndShoot.getInstance(window, ui)
+const native = Native.getInstance(win)
+
+const pointAndShootUI = new PointAndShootUI_native(native)
+export const __ID__PointAndShoot = PointAndShoot.getInstance(win, pointAndShootUI)
+
+const textSelectorUI = new TextSelectorUI_native(native)
+new TextSelector(win, textSelectorUI)

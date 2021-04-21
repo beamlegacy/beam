@@ -2,43 +2,43 @@ import {TextSelectorUI} from "./TextSelectorUI"
 
 export class TextSelectorUI_debug extends TextSelectorUI {
   /**
-   * @type UI_web
+   * @type TextSelectorUI_native
    */
-  webUi
+  native
 
   /**
-   * @type UI_native
+   * @type TextSelectorUI_web
    */
-  nativeUi
+  web
 
   /**
    *
-   * @param nativeUI {UI_native}
-   * @param webUi {UI_web}
+   * @param native {TextSelectorUI_native}
+   * @param web {TextSelectorUI_web}
    */
-  constructor(nativeUI, webUi) {
+  constructor(native, web) {
     super()
-    this.webUi = webUi
-    this.nativeUi = nativeUI
+    this.native = native
+    this.web = web
   }
 
   enterSelection(scrollWidth) {
-    this.webUi.textSelector.enterSelection(scrollWidth)
-    this.nativeUi.textSelector.enterSelection()
+    this.web.enterSelection()
+    this.native.enterSelection()
   }
 
   leaveSelection() {
-    this.webUi.textSelector.leaveSelection()
-    this.nativeUi.textSelector.leaveSelection()
+    this.web.leaveSelection()
+    this.native.leaveSelection()
   }
 
   addTextSelection(selection) {
-    this.webUi.textSelector.addTextSelection(selection)
-    this.nativeUi.textSelector.addTextSelection(selection)
+    this.web.addTextSelection(selection)
+    this.native.addTextSelection(selection)
   }
 
   textSelected(selection) {
-    this.webUi.textSelector.textSelected(selection)
-    this.nativeUi.textSelector.textSelected(selection)
+    this.web.textSelected(selection)
+    this.native.textSelected(selection)
   }
 }

@@ -31,21 +31,52 @@ function beam_getTextFieldsInDocument(_doc, _frame) {
 
 function beam_elementDidGainFocus(event) {
   if (event.target !== null && beam_isTextField(event.target)) {
-    window.webkit.messageHandlers.beam_textInputFocusIn.postMessage(event.target.id)
+    window.webkit.messageHandlers.password_textInputFocusIn.postMessage(event.target.id)
   }
+}
+
+function beam_resize(event) {
+  if (event.target !== null ) {
+    window.webkit.messageHandlers.password_resize.postMessage({width: window.innerWidth, height: window.innerHeight})
+  }
+}
+
+function beam_scroll(_ev) {
+  const win = window
+  const doc = win.document
+  const body = doc.body
+  const documentEl = doc.documentElement
+  const scrollWidth = this.scrollWidth = Math.max(
+      body.scrollWidth, documentEl.scrollWidth,
+      body.offsetWidth, documentEl.offsetWidth,
+      body.clientWidth, documentEl.clientWidth
+  )
+  const scrollHeight = Math.max(
+      body.scrollHeight, documentEl.scrollHeight,
+      body.offsetHeight, documentEl.offsetHeight,
+      body.clientHeight, documentEl.clientHeight
+  )
+  const scrollInfo = {
+    x: win.scrollX,
+    y: win.scrollY,
+    width: scrollWidth,
+    height: scrollHeight,
+    scale: win.visualViewport.scale
+  }
+  window.webkit.messageHandlers.password_scroll.postMessage(scrollInfo)
 }
 
 function beam_elementDidLoseFocus(event) {
   if (event.target !== null && beam_isTextField(event.target)) {
-    window.webkit.messageHandlers.beam_textInputFocusOut.postMessage(event.target.id)
+    window.webkit.messageHandlers.password_textInputFocusOut.postMessage(event.target.id)
   }
 }
 
 function beam_postSubmitMessage(event) {
-  window.webkit.messageHandlers.beam_formSubmit.postMessage(event.target.id)
+  window.webkit.messageHandlers.password_formSubmit.postMessage(event.target.id)
 }
 
-function beam_sendTextFields() {
+function password_sendTextFields() {
   let textFields = beam_getTextFieldsInDocument(document, null)
   for (f = 0; f < window.frames.length; f++) {
     let frame = window.frames[f]
@@ -54,7 +85,7 @@ function beam_sendTextFields() {
     } catch {
     }
   }
-  window.webkit.messageHandlers.beam_textInputFields.postMessage(JSON.stringify(textFields))
+  window.webkit.messageHandlers.password_textInputFields.postMessage(JSON.stringify(textFields))
 }
 
 function beam_getElementRects(ids_json) {
@@ -91,6 +122,8 @@ function beam_installFocusHandlers(ids_json) {
   for (id of ids) {
     document.getElementById(id)?.addEventListener('focus', beam_elementDidGainFocus, false)
     document.getElementById(id)?.addEventListener('focusout', beam_elementDidLoseFocus, false)
+    window.addEventListener("resize", beam_resize)
+    window.addEventListener("scroll", beam_scroll)
   }
 }
 
