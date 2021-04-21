@@ -13,7 +13,7 @@ enum DOMInputElementType: String, Codable {
     case password
 }
 
-struct DOMInputElement: Codable {
+struct DOMInputElement: Codable, Equatable, Hashable {
     var type: DOMInputElementType?
     var id: String
     var autocomplete: String?
@@ -60,7 +60,7 @@ extension DOMRect {
 enum InputType {
     case login
     case password
-    case passwordConfirm
+    case newPassword
     case creditCard
 }
 
@@ -79,6 +79,8 @@ struct AutofillInputField {
             type = .login
         case .currentPassword:
             type = .password
+        case .newPassword:
+            type = .newPassword
         default:
             return nil
         }
@@ -98,8 +100,11 @@ class PasswordManager {
             // If any field has a known autocomplete property, we can assume all password-related fields do.
             return fields.compactMap(AutofillInputField.init)
         }
-        if let passwordIndex = fields.firstIndex(where: { $0.type == .password }) {
+        let passwordFields = fields.filter { $0.type == .password }
+        switch passwordFields.count {
+        case 1:
             // If any field is a password entry field, let's assume the login field is either right before or after it.
+            guard let passwordIndex = fields.firstIndex(where: { $0.type == .password }) else { return [] }
             let passwordField = AutofillInputField(inputField: fields[passwordIndex], type: .password)
             let loginField: AutofillInputField?
             if passwordIndex > 0 {
@@ -113,8 +118,14 @@ class PasswordManager {
                 return [loginField, passwordField]
             }
             return [passwordField]
+        case 2:
+            // Two password fields: let's assume account creation with new password and password confirm.
+            return passwordFields.map {
+                AutofillInputField(inputField: $0, type: .newPassword)
+            }
+        default:
+            // No password field, or too many
+            return []
         }
-        // No password field
-        return []
     }
 }

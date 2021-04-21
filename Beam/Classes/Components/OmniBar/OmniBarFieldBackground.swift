@@ -10,6 +10,7 @@ import SwiftUI
 struct OmniBarFieldBackground<Content: View>: View {
     var isEditing = false
     var enableAnimations = true
+    var alignment: Alignment = .center
     var content: () -> Content
 
     @State private var isHoveringBox = false
@@ -36,7 +37,7 @@ struct OmniBarFieldBackground<Content: View>: View {
     private let animationDuration = 0.3
 
     var body: some View {
-        ZStack {
+        ZStack(alignment: alignment) {
             RoundedRectangle(cornerRadius: boxCornerRadius)
                 .fill(backgroundColor)
                 .animation(enableAnimations ? .timingCurve(0.42, 0.0, 0.58, 1.0, duration: animationDuration) : nil)
