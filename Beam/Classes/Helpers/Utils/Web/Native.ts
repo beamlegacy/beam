@@ -1,14 +1,18 @@
-export class Native {
+import {BeamMessageHandler, BeamWindow} from "./BeamTypes";
 
+export class Native {
   /**
    * @type Native
    */
-  static instance
+  static instance: Native
+
+  readonly origin: string;
+  protected readonly messageHandlers: BeamMessageHandler[];
 
   /**
    * @param win {BeamWindow}
    */
-  static getInstance(win) {
+  static getInstance(win: BeamWindow) {
     if (!Native.instance) {
       Native.instance = new Native(win)
     }
@@ -22,7 +26,7 @@ export class Native {
   /**
    * @param win {BeamWindow}
    */
-  constructor(win) {
+  constructor(win: BeamWindow) {
     this.origin = win.origin
     console.log("origin", this.origin)
     this.messageHandlers = win.webkit && win.webkit.messageHandlers
@@ -42,7 +46,7 @@ export class Native {
    */
   sendMessage(name, payload) {
     this.log("sendMessage", name, payload)
-    const messageKey = `beam_${name}`
+    const messageKey = `pointAndShoot_${name}`
     const messageHandler = this.messageHandlers[messageKey]
     if (messageHandler) {
       const origin = this.origin

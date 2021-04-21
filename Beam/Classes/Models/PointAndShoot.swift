@@ -133,17 +133,13 @@ class PointAndShoot {
      */
     var currentGroup: ShootGroup?
 
-    lazy var pointAndShoot: String = {
-        loadFile(from: "index_prod", fileType: "js")
-    }()
-
-    lazy var pointAndShootStyle: String = {
-        loadFile(from: "index_prod", fileType: "css")
-    }()
-
     func injectScripts() {
-        page.addJS(source: pointAndShoot, when: .atDocumentEnd)
-        page.addCSS(source: pointAndShootStyle, when: .atDocumentEnd)
+        var jsCode = loadFile(from: "index_prod", fileType: "js")
+        jsCode = "exports={};"+jsCode   // Hack to avoid commonJS code generation bug
+        page.addJS(source: jsCode, when: .atDocumentEnd)
+
+        let cssCode = loadFile(from: "index_prod", fileType: "css")
+        page.addCSS(source: cssCode, when: .atDocumentEnd)
     }
 
     func drawAllGroups(someGroup: ShootGroup? = nil) {

@@ -1,5 +1,5 @@
 import {Native} from "./Native"
-import {BeamDocument, BeamHTMLElement} from "./Test/BeamMocks"
+import {BeamDocumentMock, BeamHTMLIFrameElementMock} from "./Test/BeamMocks"
 import {TestWindow} from "./Test/TestWindow"
 
 /**
@@ -14,7 +14,7 @@ function nativeTestBed(origin, frameEls = []) {
     offsetWidth: 800, offsetHeight: 0,
     clientWidth: 800, clientHeight: 0,
   }
-  const testDocument = new BeamDocument({
+  const testDocument = new BeamDocumentMock({
     body: scrollData,
     documentElement: scrollData,
     querySelectorAll: (selector) => {
@@ -27,7 +27,7 @@ function nativeTestBed(origin, frameEls = []) {
 }
 
 test("send frame href in message", () => {
-  const iframe1 = new BeamHTMLElement({name: "iframe", src: "https://iframe1.com", clientLeft: 101, clientTop: 102, width: 800, height: 600})
+  const iframe1 = new BeamHTMLIFrameElementMock({src: "https://iframe1.com", clientLeft: 101, clientTop: 102, width: 800, height: 600})
   const iframes = [iframe1]
   const win = nativeTestBed(iframe1.src, iframes)
   const native = new Native(win)
@@ -36,6 +36,6 @@ test("send frame href in message", () => {
   let frameInfo = {href: iframe1.src, bounds: {x: iframe1.clientLeft, y: iframe1.clientTop, width: iframe1.width}}
   native.sendMessage("frameBounds", frameInfo)
   const mockMessageHandlers = win.webkit.messageHandlers
-  expect(mockMessageHandlers.beam_frameBounds.events.length).toEqual(1)
-  expect(mockMessageHandlers.beam_frameBounds.events[0]).toEqual({name: "postMessage", payload: {...frameInfo, origin: iframe1.src}})
+  expect(mockMessageHandlers.pointAndShoot_frameBounds.events.length).toEqual(1)
+  expect(mockMessageHandlers.pointAndShoot_frameBounds.events[0]).toEqual({name: "postMessage", payload: {...frameInfo, origin: iframe1.src}})
 })

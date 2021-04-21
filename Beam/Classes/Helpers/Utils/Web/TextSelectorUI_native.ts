@@ -1,21 +1,16 @@
 import {TextSelectorUI} from "./TextSelectorUI"
+import {Native} from "./Native";
 
-export class TextSelectorUI_native extends TextSelectorUI {
+export class TextSelectorUI_native implements TextSelectorUI {
 
   /**
    * @param native {Native}
    */
-  constructor(native) {
-    super()
-    this.native = native
+  constructor(protected native: Native) {
     this.log('instantiated')
   }
 
-  log(...args) {
-    console.log(this.toString(), args)
-  }
-
-  enterSelection(scrollWidth) {
+  enterSelection() {
     // TODO: enterSelection message?
   }
 
@@ -33,7 +28,7 @@ export class TextSelectorUI_native extends TextSelectorUI {
     this.native.sendMessage("textSelected", selection)
   }
 
-  toString() {
-    return this.constructor.name
+  log(...args) {
+    console.log(this.toString(), args)
   }
 }

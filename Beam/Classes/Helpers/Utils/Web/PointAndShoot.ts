@@ -1,16 +1,20 @@
-import {TextSelector} from "./TextSelector"
 import {BeamMouseEvent} from "./Test/BeamMocks"
+import {WebEvents} from "./WebEvents"
+import {PointAndShootUI} from "./PointAndShootUI";
+import {BeamWindow, BeamHTMLElement} from "./BeamTypes";
 
-export class PointAndShoot {
+/**
+ * Listen to events that hover and select web blocks with Option.
+ *
+ * @see TextSelector for text selection.
+ */
+export class PointAndShoot extends WebEvents<PointAndShootUI> {
   /**
+   * Singleton.
+   *
    * @type PointAndShoot
    */
-  static instance
-
-  /**
-   * @type string
-   */
-  prefix = "__ID__"
+  static instance: PointAndShoot
 
   /**
    * @type string
@@ -32,7 +36,7 @@ export class PointAndShoot {
    *
    * @type {BeamHTMLElement[]}
    */
-  selectedEls = []
+  selectedEls: BeamHTMLElement[] = []
 
   /**
    * The currently hovered element.
@@ -62,10 +66,10 @@ export class PointAndShoot {
   /**
    *
    * @param win {BeamWindow}
-   * @param ui {UI}
+   * @param ui {PointAndShootUI}
    * @return {PointAndShoot}
    */
-  static getInstance(win, ui) {
+  static getInstance(win: BeamWindow, ui: PointAndShootUI) {
     if (!PointAndShoot.instance) {
       PointAndShoot.instance = new PointAndShoot(win, ui)
     }
@@ -74,36 +78,25 @@ export class PointAndShoot {
 
   /**
    * @param win {(BeamWindow)}
-   * @param ui {UI}
+   * @param ui {PointAndShootUI}
    */
-  constructor(win, ui) {
-    this.log("initializing")
+  constructor(win: BeamWindow, ui: PointAndShootUI) {
+    super(win, ui)
     this.datasetKey = `${this.prefix}Collect`
-    this.ui = ui
-    this.setWindow(win)
-    this.textSelector = new TextSelector(win, ui.textSelector)
   }
 
   setWindow(win) {
+    super.setWindow(win)
     this.log("setWindow")
-    this.win = win
-    this.onScroll()   // Init/refresh scroll info
 
-    win.addEventListener("load", this.onLoad.bind(this))
-    win.addEventListener("resize", this.onResize.bind(this))
     win.addEventListener("mousemove", this.onMouseMove.bind(this))
     win.addEventListener("click", this.onClick.bind(this))
-    win.addEventListener("scroll", this.onScroll.bind(this))
     win.addEventListener("touchstart", this.onTouchstart.bind(this), false)
     win.addEventListener("touchend", this.onTouchend.bind(this), false)
     win.addEventListener("keydown", this.onKeyDown.bind(this), false)
     win.addEventListener("keyup", this.onKeyUp.bind(this), false)
 
     win.document.addEventListener("keypress", this.onKeyPress.bind(this))
-
-    const vv = win.visualViewport
-    vv.addEventListener("onresize", this.onPinch.bind(this))
-    vv.addEventListener("scroll", this.onPinch.bind(this))
     this.log("events registered")
   }
 
@@ -122,10 +115,10 @@ export class PointAndShoot {
 
   /**
    */
-  unpoint(_el) {
+  unpoint(el = this.pointingEv.target) {
     const changed = this.isPointing()
     if (changed) {
-      this.ui.unpoint()
+      this.ui.unpoint(el)
       this.pointedEl = null
     }
    // this.log("unpoint", changed ? "changed" : "did not change")
@@ -327,105 +320,16 @@ export class PointAndShoot {
     }
   }
 
+  protected resizeInfo(): any {
+    const resizeInfo = super.resizeInfo();
+    return {...resizeInfo, selected: this.selectedEls};
+  }
+
   onKeyUp(ev) {
     this.log("onKeyUp", ev.key)
     if (ev.key === "Alt") {
       this.setPointing(false)
       this.unpoint()
     }
-  }
-
-  checkFrames() {
-    const frameEls = this.win.document.querySelectorAll("iframe")
-    const hasFrames = frameEls.length > 0
-    /**
-     * @type {FrameInfo[]}
-     */
-    const framesInfo = []
-    if (hasFrames) {
-      for (const frameEl of frameEls) {
-        const bounds = frameEl.getBoundingClientRect()
-        const href = frameEl.src
-        const frameInfo = {
-          href: href,
-          bounds: {
-            x: bounds.x,
-            y: bounds.y,
-            width: bounds.width,
-            height: bounds.height
-          }
-        }
-        framesInfo.push(frameInfo)
-      }
-      this.ui.setFramesInfo(framesInfo)
-    } else {
-      console.log("No frames")
-    }
-    return hasFrames
-  }
-
-  onScroll(_ev) {
-    // TODO: Throttle
-    const doc = this.win.document
-    const body = doc.body
-    const documentEl = doc.documentElement
-    const scrollWidth = this.scrollWidth = Math.max(
-        body.scrollWidth, documentEl.scrollWidth,
-        body.offsetWidth, documentEl.offsetWidth,
-        body.clientWidth, documentEl.clientWidth
-    )
-    const scrollHeight = Math.max(
-        body.scrollHeight, documentEl.scrollHeight,
-        body.offsetHeight, documentEl.offsetHeight,
-        body.clientHeight, documentEl.clientHeight
-    )
-    const scrollInfo = {
-      x: this.win.scrollX,
-      y: this.win.scrollY,
-      width: scrollWidth,
-      height: scrollHeight,
-      scale: this.win.visualViewport.scale
-    }
-    this.ui.setScrollInfo(scrollInfo)
-    const hasFrames = this.checkFrames()
-    this.log(hasFrames ? "Scroll updated frames info" : "Scroll did not update frames info since there is none")
-  }
-
-  onResize(_ev) {
-    const resizeInfo = {width: this.win.innerWidth, height: this.win.innerHeight}
-    this.ui.setResizeInfo(resizeInfo, this.selectedEls)
-  }
-
-  onLoad(_ev) {
-    this.log("Page load.", this.win.origin)
-    this.log("Flushing frames.", this.win.origin)
-    this.ui.setOnLoadInfo()
-
-    this.log("Checking frames.", this.win.origin)
-    this.checkFrames()
-
-    // This timeout is here so SPA style sites have time to build the DOM
-    // TODO: Add reliable TTI eventlistener for JS heavy sites
-    setTimeout(() => {
-      this.log('After 500ms running checkFrames again', this.win.origin)
-      this.checkFrames()
-    }, 500)
-  }
-
-  onPinch(ev) {
-    const vv = this.win.visualViewport
-    this.ui.pinched({
-      offsetTop: vv.offsetTop,
-      pageTop: vv.pageTop,
-      offsetLeft: vv.offsetLeft,
-      pageLeft: vv.pageLeft,
-      width: vv.width,
-      height: vv.height,
-      scale: vv.scale
-    })
-  }
-
-  toString() {
-    return this.constructor.name
   }
 }

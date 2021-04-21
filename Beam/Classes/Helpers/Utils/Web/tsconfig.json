@@ -1,0 +1,17 @@
+{
+  "include": [
+    "**/*"
+  ],
+  "compilerOptions": {
+    "target": "ES2018"
+  },
+  "types": [
+    "jest"
+  ],
+  "typeRoots": [
+    "node_modules/@types"
+  ],
+  "exclude": [
+    "**/*.test.ts"
+  ]
+}
