@@ -144,14 +144,18 @@ extension BeamTextEdit {
                       let parent = node.parent as? TextNode else { continue }
                 if idx == 0 {
                     cmdManager.insertText(newElement.text, in: node, at: node.elementText.count)
+                    cmdManager.focusElement(node, position: node.elementText.count)
                     for child in newElement.children {
-                        cmdManager.insertElement(child, in: node, after: node)
+                        guard let focusNode = focusedWidget as? TextNode else { continue }
+                        cmdManager.insertElement(child, in: node, after: focusNode)
+                        cmdManager.focus(child, in: focusNode)
+                        if let deepestChild = child.deepestChildren() {
+                            cmdManager.focus(deepestChild, in: focusNode)
+                        }
                     }
                 } else {
                     cmdManager.insertElement(newElement, in: parent, after: node)
-                    if let toFocus = node.nodeFor(newElement) {
-                        cmdManager.focusElement(toFocus, position: 0)
-                    }
+                    cmdManager.focus(newElement, in: node)
                 }
             }
             cmdManager.endGroup()
