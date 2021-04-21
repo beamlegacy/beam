@@ -19,6 +19,12 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     var currentFrameInDocument = NSRect()
 
     var isEmpty: Bool { children.isEmpty }
+    private let selectionInset: CGFloat = 5
+    var selectedAlone: Bool = true {
+        didSet {
+            invalidateLayout()
+        }
+    }
     var selected: Bool = false {
         didSet {
             selectionLayer.backgroundColor = selected ? BeamColor.Editor.textSelection.cgColor: NSColor(white: 1, alpha: 0).cgColor
@@ -228,6 +234,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         self.editor = parent.editor
         layer = CALayer()
         selectionLayer = CALayer()
+        selectionLayer.enableAnimations = false
         super.init()
         configureLayer()
         configureSelectionLayer()
@@ -244,6 +251,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         self.editor = editor
         layer = CALayer()
         selectionLayer = CALayer()
+        selectionLayer.enableAnimations = false
         super.init()
         configureLayer()
         configureSelectionLayer()
@@ -304,8 +312,13 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         }
         layer.bounds = contentsFrame
         layer.position = frameInDocument.origin
-        selectionLayer.bounds = CGRect(x: 0, y: 0, width: selectionLayerWidth, height: contentsFrame.height)
-        selectionLayer.position = CGPoint(x: -offsetInRoot.x, y: 0)
+        selectionLayer.bounds = CGRect(x: selectionInset, y: 0, width: selectionLayerWidth - selectionInset, height: contentsFrame.height)
+        if selectedAlone {
+            selectionLayer.position = CGPoint(x: selectionInset, y: 0)
+            selectionLayer.bounds = CGRect(x: 0, y: 0, width: selectionLayerWidth - offsetInRoot.x - selectionInset, height: contentsFrame.height)
+        } else {
+            selectionLayer.position = CGPoint(x: -offsetInRoot.x, y: 0)
+        }
         updateSubLayersLayout()
 
         if self.currentFrameInDocument != frame {
