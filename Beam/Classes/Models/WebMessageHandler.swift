@@ -144,7 +144,7 @@ class WebMessageHandler: NSObject, WKScriptMessageHandler {
             let targets = areas.map {
                 PointAndShoot.Target(area: $0, mouseLocation: CGPoint(x: $0.minX, y: $0.maxY), html: html)
             }
-            pointAndShoot.shoot(targets: targets, origin: origin)
+            pointAndShoot.shoot(targets: targets, origin: origin, done: true)
 
         case ScriptHandlers.beam_textSelection.rawValue:
             guard page.pointAndShootAllowed == true else { return }
@@ -160,9 +160,10 @@ class WebMessageHandler: NSObject, WKScriptMessageHandler {
                                        category: .web)
                 return
             }
+            pointAndShoot.removeAll()
             let targets = areas.map { PointAndShoot.Target(area: $0,
                                                            mouseLocation: CGPoint(x: $0.minX, y: $0.maxY), html: html) }
-            pointAndShoot.shoot(targets: targets, origin: origin)
+            pointAndShoot.shoot(targets: targets, origin: origin, done: false)
 
         case ScriptHandlers.beam_pinch.rawValue:
             guard let dict = messageBody,

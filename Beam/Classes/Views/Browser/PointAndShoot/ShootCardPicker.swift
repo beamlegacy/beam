@@ -16,6 +16,7 @@ struct ShootCardPicker: View {
     @EnvironmentObject var data: BeamData
     @EnvironmentObject var state: BeamState
 
+    var focusOnAppear = false
     var onComplete: ((_ cardName: String?, _ note: String?) -> Void)?
 
     @State private var autocompleteModel = DestinationNoteAutocompleteList.Model()
@@ -126,12 +127,14 @@ struct ShootCardPicker: View {
             autocompleteModel.useRecents = false
             isVisible = true
 
-            isEditingCardName = true
             if !cardSearchField.isEmpty {
                 let range = [cardSearchField.count..<cardSearchField.count]
                 cardSearchFieldSelection = range
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                if focusOnAppear {
+                    isEditingCardName = true
+                }
                 cardSearchFieldSelection = nil
             }
         }
