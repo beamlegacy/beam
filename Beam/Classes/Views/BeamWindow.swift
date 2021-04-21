@@ -245,6 +245,6 @@ extension BeamWindow {
             editor?.isFieldEditor = true
             return editor
         }
-        return nil
+        return super.fieldEditor(createFlag, for: object)
     }
 }
