@@ -7,8 +7,12 @@
 
 import Foundation
 import XCTest
+#if canImport(Quick)
 import Quick
+#endif
+#if canImport(Nimble)
 import Nimble
+#endif
 
 class OmniBarAutocompleteUITests: QuickSpec {
     let app = XCUIApplication()
@@ -114,7 +118,7 @@ class OmniBarAutocompleteUITests: QuickSpec {
                 self.helper.restart()
 
                 self.helper.searchField.typeText("Autocomplete Note Creation")
-                let createNoteResult = self.helper.allAutocompleteResults.matching(NSPredicate(format: "identifier CONTAINS '-createCard'")).firstMatch
+                let createNoteResult = self.helper.allAutocompleteResults.matching(self.helper.autocompleteCreateCardPredicate).firstMatch
                 expect(createNoteResult.exists).to(beTrue())
                 createNoteResult.tap()
 
@@ -133,7 +137,7 @@ class OmniBarAutocompleteUITests: QuickSpec {
 
             it("can press cmd+enter to create note") {
                 self.helper.searchField.typeText("Command Enter Note")
-                let createNoteResult = self.helper.allAutocompleteResults.matching(NSPredicate(format: "identifier CONTAINS '-createCard'")).firstMatch
+                let createNoteResult = self.helper.allAutocompleteResults.matching(self.helper.autocompleteCreateCardPredicate).firstMatch
                 expect(createNoteResult.exists).to(beTrue())
                 self.helper.searchField.typeKey("\r", modifierFlags: XCUIElement.KeyModifierFlags.command)
 

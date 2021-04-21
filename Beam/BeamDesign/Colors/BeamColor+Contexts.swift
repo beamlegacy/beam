@@ -14,6 +14,7 @@ extension BeamColor {
         static let placeholder = BeamColor.AlphaGray
         static let transparent = BeamColor.Custom(named: "Transparent")
         static let separator = BeamColor.Mercury
+        static let textSelection = BeamColor.From(color: BeamColor.Bluetiful.nsColor.withAlphaComponent(0.1))
     }
 
     enum ContextMenu {
@@ -34,7 +35,6 @@ extension BeamColor {
         static let link = BeamColor.Niobium
         static var linkDecoration = BeamColor.Combining(lightColor: BeamColor.AlphaGray, darkColor: BeamColor.LightStoneGray)
         static let syntax = BeamColor.Custom(named: "EditorSyntaxColor")
-        static let textSelection = BeamColor.Custom(named: "EditorTextSelectionColor")
         static let indentBackground = BeamColor.Mercury
         static let underlineAndStrikethrough = BeamColor.Niobium
     }
@@ -93,8 +93,8 @@ extension BeamColor {
     enum Autocomplete {
         static let link = BeamColor.Bluetiful
         static let subtitleText = BeamColor.LightStoneGray
-        static let selectedBackground = BeamColor.Custom(named: "AutocompleteSelectedBackgroundColor")
-        static let clickedBackground = BeamColor.Custom(named: "AutocompleteClickedBackgroundColor")
+        static let selectedBackground = BeamColor.Generic.textSelection
+        static let clickedBackground = BeamColor.From(color: BeamColor.Bluetiful.nsColor.withAlphaComponent(0.14))
         static let focusedBackground = BeamColor.From(color: NSColor(withLightColor: NSColor.white, darkColor: BeamColor.Nero.nsColor))
         static let focusedShadow = BeamColor.From(color: NSColor(withLightColor: NSColor.black.withAlphaComponent(0.1), darkColor: NSColor.black.withAlphaComponent(0.6)))
         static let hoveredShadow = BeamColor.From(color: NSColor(withLightColor: NSColor.black.withAlphaComponent(0.05), darkColor: NSColor.black.withAlphaComponent(0.4)))

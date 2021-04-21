@@ -31,9 +31,10 @@ struct AutocompleteResult: Identifiable {
     var uuid = UUID()
 }
 
-class Completer: ObservableObject {
+class Autocompleter: ObservableObject {
     @Published var results: [AutocompleteResult] = []
 
+    static let autocompleteResultDescription = "Google Search"
     private var searchEngine = GoogleSearch()
     private var lastDataTask: URLSessionDataTask?
 
@@ -56,15 +57,19 @@ class Completer: ObservableObject {
 
             if let array = obj as? [Any], let r = array[1] as? [String] {
                 var res = [AutocompleteResult]()
-                for str in r {
+                for (index, str) in r.enumerated() {
                     let isURL = str.urlString != nil
                     let source: AutocompleteResult.Source = isURL ? .url : .autocomplete
                     let url = isURL ? URL(string: str) : nil
                     var text = str
+                    let info = index == 0 ? Self.autocompleteResultDescription : nil
                     if let url = url {
                         text = url.urlStringWithoutScheme
                     }
-                    res.append(AutocompleteResult(text: text, source: source, url: url, completingText: query))
+                    res.append(AutocompleteResult(text: text,
+                                                  source: source,
+                                                  url: url, information: info,
+                                                  completingText: query))
                 }
                 self.results = res
             }

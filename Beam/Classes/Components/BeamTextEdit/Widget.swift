@@ -27,7 +27,9 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     }
     var selected: Bool = false {
         didSet {
-            selectionLayer.backgroundColor = selected ? BeamColor.Editor.textSelection.cgColor: NSColor(white: 1, alpha: 0).cgColor
+            selectionLayer.backgroundColor = selected ?
+                BeamColor.Generic.textSelection.cgColor :
+                NSColor(white: 1, alpha: 0).cgColor
             invalidate()
         }
     }

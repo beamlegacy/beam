@@ -70,20 +70,22 @@ struct AutocompleteItem: View {
                     Icon(name: iconNameSource(item.source), size: 16, color: secondaryTextColor)
                 }
             }
-            HStack(alignment: .firstTextBaseline, spacing: 2) {
+            HStack(alignment: .firstTextBaseline, spacing: 0) {
                 ZStack {
                     StyledText(verbatim: item.text)
                         .style(.semibold(), ranges: boldTextRanges)
                         .font(BeamFont.regular(size: 13).swiftUI)
                         .foregroundColor(item.source == .url ? subtitleLinkColor : textColor)
                 }
+                .layoutPriority(10)
                 if let info = item.information {
                     HStack {
-                        StyledText(verbatim: "— \(info)")
+                        StyledText(verbatim: " – \(info)")
                             .style(.semibold(), ranges: boldTextRanges)
                             .font(BeamFont.regular(size: 13).swiftUI)
                             .foregroundColor(item.source == .history ? subtitleLinkColor : secondaryTextColor)
                     }
+                    .layoutPriority(0)
                 }
             }
             if item.source == .createCard {
@@ -108,6 +110,7 @@ struct AutocompleteItem: View {
                 }
             }
         }
+        .accessibilityElement()
         .accessibility(identifier: "autocompleteResult\(selected ? "-selected":"")-\(item.text)-\(item.source)")
     }
 }
