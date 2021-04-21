@@ -33,6 +33,7 @@ enum ScriptHandlers: String, CaseIterable {
     case beam_textInputFields
     case beam_textInputFocusIn
     case beam_textInputFocusOut
+    case beam_formSubmit
     case beam_resize
     case beam_pinch
     case beam_frameBounds
@@ -220,6 +221,9 @@ class WebMessageHandler: NSObject, WKScriptMessageHandler {
         case ScriptHandlers.beam_textInputFocusOut.rawValue:
             guard let elementId = message.body as? String else { break }
             passwordOverlayController.updateInputFocus(for: elementId, becomingActive: false)
+
+        case ScriptHandlers.beam_formSubmit.rawValue:
+            passwordOverlayController.handleWebFormSubmit()
 
         case ScriptHandlers.beam_frameBounds.rawValue:
             guard let dict = messageBody,

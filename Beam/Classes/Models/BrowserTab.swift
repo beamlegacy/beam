@@ -77,7 +77,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
     var currentScore: Score { self.browsingTree.current.score }
 
-    lazy var passwordOverlayController: PasswordOverlayController = PasswordOverlayController(webView: webView)
+    lazy var passwordOverlayController: PasswordOverlayController = PasswordOverlayController(webView: webView, passwordStore: MockPasswordStore.shared)
 
     lazy var webPositions: WebPositions = messageHandler!.webPositions
 
@@ -352,9 +352,14 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         }
         let webPositions: WebPositions = WebPositions()
         // Avoid instantiate if !pointAndShootEnabled
-        let pointAndShoot = PointAndShoot(page: self, ui: PointAndShootUI(), browsingScorer: self,
+        let pointAndShoot = PointAndShoot(page: self, ui: PointAndShootUI(),
+                                          browsingScorer: self,
                                           webPositions: webPositions)
-        messageHandler = WebMessageHandler(page: self, webPositions: webPositions, browsingScorer: self, pointAndShoot: pointAndShoot, passwordOverlayController: passwordOverlayController)
+        messageHandler = WebMessageHandler(page: self,
+                                           webPositions: webPositions,
+                                           browsingScorer: self,
+                                           pointAndShoot: pointAndShoot,
+                                           passwordOverlayController: passwordOverlayController)
         messageHandler!.addScriptHandlers(to: webView)
 
         addUserScripts()
