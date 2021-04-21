@@ -20,6 +20,7 @@ export class TextSelector {
   }
 
   enterSelection() {
+    this.log("enterSelection")
     this.selectionsList = []
     this.ui.enterSelection()
   }

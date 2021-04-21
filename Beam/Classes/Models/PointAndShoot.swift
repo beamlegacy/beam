@@ -218,12 +218,13 @@ class PointAndShoot {
         status = .none
     }
 
-    func shoot(targets: [Target], origin: String) {
+    func shoot(targets: [Target], origin: String, done: Bool = true) {
         if currentGroup == nil {
             currentGroup = ShootGroup()
             Logger.shared.logInfo("shoopGroups.count \(groups.count)", category: .pointAndShoot)
         }
         status = .shooting
+        ui.isTextSelectionFinished = done
         let pageScrollX = page.scrollX
         let pageScrollY = page.scrollY
         for target in targets {

@@ -16,7 +16,7 @@ struct ShootFrame: View {
                     if let selectionUI = group.uis.last {
                         ShootAbsolutePositioning(location: selectionUI.target.mouseLocation,
                                                  contentSize: ShootCardPicker.size) {
-                            ShootCardPicker()
+                            ShootCardPicker(focusOnAppear: pointAndShootUI.isTextSelectionFinished)
                                     .onComplete { (noteTitle, note) in
                                         onCompleteCardSelection(noteTitle, withNote: note)
                                     }

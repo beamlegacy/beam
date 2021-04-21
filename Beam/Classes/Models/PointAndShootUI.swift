@@ -47,6 +47,7 @@ class PointAndShootUI: ObservableObject {
     @Published var pointSelection: SelectionUI?
     @Published var groupsUI: [ShootGroupUI] = []
     @Published var shootConfirmation: SelectionConfirmationUI?
+    @Published var isTextSelectionFinished = true
 
     private func drawSelection(target: PointAndShoot.Target, animated: Bool,
                                color: Color, bgColor: Color) -> SelectionUI {
