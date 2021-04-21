@@ -41,8 +41,7 @@ enum PointAndShootMessages: String, CaseIterable {
 class PointAndShootMessageHandler: NSObject, WKScriptMessageHandler {
 
     let webPositions: WebPositions
-
-    var pointAndShoot: PointAndShoot
+    let pointAndShoot: PointAndShoot
     var page: WebPage
 
     var browsingScorer: BrowsingScorer
