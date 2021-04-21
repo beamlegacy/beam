@@ -89,7 +89,9 @@ extension TextRoot {
         if let prevWidget = sortedNodes.first?.previousVisibleTextNode() {
             cmdManager.focusElement(prevWidget, position: prevWidget.text.count)
         } else if let nextVisibleNode = sortedNodes.last?.nextVisibleTextNode() {
-            cmdManager.focusElement(nextVisibleNode, position: 0)
+            if (nextVisibleNode as? LinkedReferenceNode) == nil {
+                cmdManager.focusElement(nextVisibleNode, position: 0)
+            }
         }
 
         for node in sortedNodes.reversed() {
