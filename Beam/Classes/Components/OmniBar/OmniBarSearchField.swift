@@ -72,7 +72,7 @@ struct OmniBarSearchField: View {
         if let info = autocompleteResult.information {
             return info
         } else if autocompleteResult.source == .autocomplete {
-            return "Google Search"
+            return Autocompleter.autocompleteResultDescription
         }
         return nil
     }
@@ -138,13 +138,19 @@ struct OmniBarSearchField: View {
                             .font(BeamFont.medium(size: 13).swiftUI)
                             .foregroundColor(Color.purple)
                             .hidden()
-                            Text(" — \(subtitle)")
-                                .font(BeamFont.regular(size: 13).swiftUI)
-                                .foregroundColor(BeamColor.Autocomplete.link.swiftUI)
-                                .background(autocompleteManager.searchQuerySelectedRanges?.isEmpty == false ? Color(.selectedTextBackgroundColor) : nil)
-                                .offset(x: -0.5, y: 0)
-                                .animation(nil)
+                            .layoutPriority(10)
+                        Text(" – \(subtitle)")
+                            .font(BeamFont.regular(size: 13).swiftUI)
+                            .foregroundColor(BeamColor.Autocomplete.link.swiftUI)
+                            .background(autocompleteManager.searchQuerySelectedRanges?.isEmpty == false ?
+                                            BeamColor.Generic.textSelection.swiftUI :
+                                            nil)
+                            .offset(x: -0.5, y: 0)
+                            .animation(nil)
+                            .layoutPriority(0)
                     }
+                    .lineLimit(1)
+
                 }
             }
         }

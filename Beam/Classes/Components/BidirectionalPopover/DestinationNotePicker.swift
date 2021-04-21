@@ -41,6 +41,10 @@ struct DestinationNotePicker: View {
         enableAnimations ? .easeInOut(duration: 0.3) : nil
     }
 
+    private var textColor: BeamColor {
+        isHovering || isMouseDown || isEditing ? BeamColor.Generic.text : BeamColor.LightStoneGray
+    }
+
     @State private var autocompleteModel = DestinationNoteAutocompleteList.Model()
 
     var body: some View {
@@ -73,7 +77,7 @@ struct DestinationNotePicker: View {
                     .frame(height: boxHeight)
                     .fixedSize(horizontal: true, vertical: false)
                     .foregroundColor(.white)
-                    .colorMultiply(isHovering || isMouseDown ? BeamColor.Generic.text.swiftUI : BeamColor.Generic.placeholder.swiftUI)
+                    .colorMultiply(textColor.swiftUI)
                     .animation(animation)
                     .opacity(isEditing ? 0.0 : 1.0)
                     .accessibility(identifier: "DestinationNoteTitle")
@@ -84,7 +88,7 @@ struct DestinationNotePicker: View {
                             isEditing: isEditingBinding,
                             placeholder: placeholder,
                             font: .systemFont(ofSize: 12),
-                            textColor: isHovering || isMouseDown || isEditing ? BeamColor.Generic.text.nsColor : BeamColor.Generic.placeholder.nsColor,
+                            textColor: textColor.nsColor,
                             placeholderColor: BeamColor.Generic.placeholder.nsColor,
                             selectedRanges: state.destinationCardNameSelectedRange
                         ) { newName in

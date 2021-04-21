@@ -8,11 +8,11 @@ import Combine
 class AutocompleteTests: QuickSpec {
     override func spec() {
         var scope = Set<AnyCancellable>()
-        var sut: Completer!
+        var sut: Autocompleter!
         let beamHelper = BeamTestsHelper()
 
         beforeEach {
-            sut = Completer()
+            sut = Autocompleter()
         }
 
         describe(".complete(query)") {

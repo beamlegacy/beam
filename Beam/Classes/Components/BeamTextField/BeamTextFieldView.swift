@@ -110,12 +110,21 @@ class BeamTextFieldView: NSTextField {
         return attrs
     }
 
+    private func updateTextSelectionColor() {
+        if let textView = currentEditor() as? NSTextView {
+            textView.selectedTextAttributes = [
+                .backgroundColor: BeamColor.Generic.textSelection.nsColor
+            ]
+        }
+    }
+
     @discardableResult
     override func becomeFirstResponder() -> Bool {
         let became = super.becomeFirstResponder()
         if became {
             onFocusChanged(true)
         }
+        updateTextSelectionColor()
         return became
     }
 

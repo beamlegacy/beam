@@ -7,17 +7,19 @@ class OmniBarUITestsHelper : BeamUITestsHelper {
     let searchField: XCUIElement
     let autocompleteResultPredicate = NSPredicate(format: "identifier CONTAINS 'autocompleteResult'")
     let autocompleteSelectedPredicate = NSPredicate(format: "identifier CONTAINS '-selected'")
+    let autocompleteCreateCardPredicate = NSPredicate(format: "identifier CONTAINS '-createCard'")
+
     let allAutocompleteResults: XCUIElementQuery
 
     override init(_ app: XCUIApplication) {
         searchField = app.searchFields["OmniBarSearchField"]
-        allAutocompleteResults = app.staticTexts.matching(self.autocompleteResultPredicate)
+        allAutocompleteResults = app.otherElements.matching(self.autocompleteResultPredicate)
         super.init(app)
     }
 
     func cleanupDB() {
+        self.tapCommand(.logout)
         self.tapCommand(.destroyDB)
-        self.restart()
     }
 
     func inputHasFocus(_ input: XCUIElement) -> Bool {

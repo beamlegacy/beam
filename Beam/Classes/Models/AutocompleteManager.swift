@@ -24,7 +24,7 @@ class AutocompleteManager: ObservableObject {
     private var autocompleteSearchGuessesHandler: (([AutocompleteResult]) -> Void)?
     private var autocompleteTimeoutBlock: DispatchWorkItem?
     private let beamData: BeamData
-    private let searchCompleter = Completer()
+    private let searchCompleter = Autocompleter()
     private var scope = Set<AnyCancellable>()
 
     init(with data: BeamData) {

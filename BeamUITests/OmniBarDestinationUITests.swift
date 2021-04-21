@@ -28,8 +28,10 @@ class OmniBarDestinationUITests: QuickSpec {
     }
 
     func createDestinationNote() {
+        self.app.terminate()
+        self.app.launch()
         self.helper.searchField.typeText(destinationNoteTitle)
-        let createNoteResult = self.helper.allAutocompleteResults.matching(NSPredicate(format: "identifier CONTAINS '-createCard'")).firstMatch
+        let createNoteResult = self.helper.allAutocompleteResults.matching(self.helper.autocompleteCreateCardPredicate).firstMatch
         createNoteResult.tap()
         sleep(1) // wait for new note to be saved
         let journalButton = self.app.buttons["journal"]
@@ -153,7 +155,7 @@ class OmniBarDestinationUITests: QuickSpec {
                 title.tap()
 
                 noteSearchField.typeText(secondTitle)
-                let createNoteItem = self.app.staticTexts.matching(NSPredicate(format: "identifier CONTAINS 'autocompleteResult'")).matching(NSPredicate(format: "identifier CONTAINS '-createCard'")).firstMatch
+                let createNoteItem = self.helper.allAutocompleteResults.matching(self.helper.autocompleteCreateCardPredicate).firstMatch
                 expect(createNoteItem.exists).to(beTrue())
                 noteSearchField.typeText("\r")
                 expect(title.value as? String).to(equal(secondTitle))
