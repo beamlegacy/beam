@@ -252,6 +252,7 @@ extension TextRoot {
     public func moveUpAndModifySelection() {
         guard root.state.nodeSelection == nil else {
             extendNodeSelectionUp()
+            editor.hideInlineFormatter()
             return
         }
 
@@ -267,6 +268,7 @@ extension TextRoot {
     public func moveDownAndModifySelection() {
         guard root.state.nodeSelection == nil else {
             extendNodeSelectionDown()
+            editor.hideInlineFormatter()
             return
         }
 

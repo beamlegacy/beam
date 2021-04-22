@@ -22,6 +22,10 @@ class NodeSelection {
         }
     }
 
+    private var minOffset: CGFloat {
+        nodes.min { $0.offsetInRoot.x < $1.offsetInRoot.x }?.offsetInRoot.x ?? 0
+    }
+
     /// Return the nodes that are selected and for which the parent isn't in the list of selected nodes
     public var roots: [TextNode] {
         nodes.compactMap({ (node) -> TextNode? in
@@ -107,6 +111,7 @@ class NodeSelection {
         nodes.insert(node)
         if nodes.count > 1 {
             nodes.forEach { (node) in
+                node.selectionLayerPosX = minOffset - node.offsetInRoot.x
                 node.selectedAlone = false
             }
         }
@@ -124,6 +129,10 @@ class NodeSelection {
             nodes.forEach { (node) in
                 node.selectedAlone = true
             }
+        } else {
+            nodes.forEach { (node) in
+                node.selectionLayerPosX = minOffset - node.offsetInRoot.x
+            }
         }
 
         if !node.open {
@@ -134,6 +143,7 @@ class NodeSelection {
     func appendChildren(of node: TextNode) {
         for child in node.children {
             guard let child = child as? TextNode else { continue }
+            child.selectionLayerPosX = minOffset - child.offsetInRoot.x
             child.selectedAlone = false
             child.selected = true
             nodes.insert(child)

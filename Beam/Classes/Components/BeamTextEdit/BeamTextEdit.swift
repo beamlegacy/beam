@@ -1497,13 +1497,17 @@ public extension CALayer {
     override public func moveUpAndModifySelection(_ sender: Any?) {
         cancelPopover()
         rootNode.moveUpAndModifySelection()
-        showInlineFormatterOnKeyEventsAndClick(isKeyEvent: true)
+        if rootNode.state.nodeSelection?.nodes.count == 1 {
+            showInlineFormatterOnKeyEventsAndClick(isKeyEvent: true)
+        }
     }
 
     override public func moveDownAndModifySelection(_ sender: Any?) {
         cancelPopover()
         rootNode.moveDownAndModifySelection()
-        showInlineFormatterOnKeyEventsAndClick(isKeyEvent: true)
+        if rootNode.state.nodeSelection?.nodes.count == 1 {
+            showInlineFormatterOnKeyEventsAndClick(isKeyEvent: true)
+        }
     }
 
     override public func insertNewline(_ sender: Any?) {
