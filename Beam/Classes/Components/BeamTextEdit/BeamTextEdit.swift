@@ -519,7 +519,6 @@ public extension CALayer {
         hasFocus = true
         invalidate()
         onStartEditing()
-        focusedWidget?.focus()
         return true
     }
 
