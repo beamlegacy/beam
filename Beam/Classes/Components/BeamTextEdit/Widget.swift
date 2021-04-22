@@ -20,6 +20,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
     var isEmpty: Bool { children.isEmpty }
     private let selectionInset: CGFloat = 5
+    var selectionLayerPosX: CGFloat = 0
     var selectedAlone: Bool = true {
         didSet {
             invalidateLayout()
@@ -317,9 +318,10 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         selectionLayer.bounds = CGRect(x: selectionInset, y: 0, width: selectionLayerWidth - selectionInset, height: contentsFrame.height)
         if selectedAlone {
             selectionLayer.position = CGPoint(x: selectionInset, y: 0)
-            selectionLayer.bounds = CGRect(x: 0, y: 0, width: selectionLayerWidth - offsetInRoot.x - selectionInset, height: contentsFrame.height)
+            selectionLayer.bounds.size = CGSize(width: selectionLayerWidth - offsetInRoot.x - selectionInset, height: contentsFrame.height)
         } else {
-            selectionLayer.position = CGPoint(x: -offsetInRoot.x, y: 0)
+            selectionLayer.position = CGPoint(x: selectionLayerPosX + selectionInset, y: 0)
+            selectionLayer.bounds.size = CGSize(width: selectionLayerWidth - offsetInRoot.x - selectionLayerPosX - selectionInset, height: contentsFrame.height)
         }
         updateSubLayersLayout()
 
