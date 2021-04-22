@@ -15,7 +15,7 @@ struct ModeView: View {
     @State private var contentIsScrolled = false
 
     var showOmnibarBorder: Bool {
-        state.mode == .web || (contentIsScrolled && [.note, .today].contains(state.mode))
+        contentIsScrolled && [.note, .today].contains(state.mode)
     }
     var body: some View {
         GeometryReader { geometry in

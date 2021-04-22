@@ -70,11 +70,13 @@ class AutocompleteManager: ObservableObject {
     func cancelAutocomplete() {
         resetAutocompleteSelection()
         autocompleteResults = []
+        autocompleteTimeoutBlock?.cancel()
     }
 
     func resetQuery() {
         searchQuery = ""
         autocompleteResults = []
+        autocompleteTimeoutBlock?.cancel()
     }
 
     private func autocompleteNotesResults(for query: String) -> [AutocompleteResult] {

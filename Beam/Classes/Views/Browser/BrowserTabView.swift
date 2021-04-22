@@ -16,7 +16,7 @@ struct BrowserTabView: View {
     let isSelected: Bool
 
     private var foregroundColor: Color {
-        isSelected ? BeamColor.Generic.text.swiftUI : BeamColor.Corduroy.swiftUI
+        isSelected ? BeamColor.Corduroy.swiftUI : BeamColor.LightStoneGray.swiftUI
     }
 
     private var backgroundColor: Color {
@@ -53,14 +53,21 @@ struct BrowserTabView: View {
                 }
             }
             .transition(.opacity)
-            .animation(.easeInOut(duration: 0.3))
+            .animation(.easeInOut(duration: 0.15))
             .frame(width: 32)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(backgroundColor
+                        .overlay(Rectangle()
+                                    .fill(BeamColor.BottomBar.shadow.swiftUI)
+                                    .frame(height: 0.5)
+                                    .opacity(isSelected ? 0 : 1.0),
+                                 alignment: .top)
+        )
         .onHover { hovering in
             isHovering = hovering
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(backgroundColor)
+        .animation(.easeInOut(duration: 0.15))
         .accessibility(identifier: "browserTabBarView")
     }
 
@@ -99,11 +106,11 @@ struct BrowserTabView_Previews: PreviewProvider {
     static var previews: some View {
             VStack {
                 BrowserTabView(tab: tab, isSelected: false)
-                    .frame(height: 28)
+                    .frame(height: 30)
                 BrowserTabView(tab: tab, isSelected: true)
-                    .frame(height: 28)
+                    .frame(height: 30)
                 BrowserTabView(tab: longTab, isSelected: false)
-                    .frame(height: 28)
+                    .frame(height: 30)
             }.padding()
             .frame(width: 360)
     }

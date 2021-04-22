@@ -19,12 +19,17 @@ final class FaviconProvider {
         cache.countLimit = 100
     }
 
-    private func cacheKeyForURL(_ url: URL) -> NSString {
-        return NSString(string: url.host ?? url.urlStringWithoutScheme)
+    private var screenScale: CGFloat {
+        NSScreen.main?.backingScaleFactor ?? 2
     }
 
-    func imageForUrl(_ url: URL, cacheOnly: Bool = false, handler: @escaping(NSImage?) -> Void) {
-        let cacheKey = cacheKeyForURL(url)
+    private func cacheKeyForURL(_ url: URL, size: Int) -> NSString {
+        return NSString(string: url.host ?? url.urlStringWithoutScheme).appendingFormat("-%d", size)
+    }
+
+    func imageForUrl(_ url: URL, size: Int = 16, cacheOnly: Bool = false, handler: @escaping(NSImage?) -> Void) {
+        let scaledSize = Int(CGFloat(size) * screenScale)
+        let cacheKey = cacheKeyForURL(url, size: scaledSize)
         if let cached = cache.object(forKey: cacheKey) {
             handler(cached)
             return
@@ -33,7 +38,7 @@ final class FaviconProvider {
             return
         }
         do {
-            try FavIcon.downloadPreferred(url, width: 16, height: 16) { [weak self] result in
+            try FavIcon.downloadPreferred(url, width: scaledSize, height: scaledSize) { [weak self] result in
                 if case let .success(image) = result {
                     guard let self = self else {
                         return
