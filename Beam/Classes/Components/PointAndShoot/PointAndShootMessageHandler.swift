@@ -44,11 +44,8 @@ class PointAndShootMessageHandler: NSObject, WKScriptMessageHandler {
     let pointAndShoot: PointAndShoot
     var page: WebPage
 
-    var browsingScorer: BrowsingScorer
-
-    init(page: WebPage, webPositions: WebPositions, browsingScorer: BrowsingScorer, pointAndShoot: PointAndShoot) {
+    init(page: WebPage, webPositions: WebPositions, pointAndShoot: PointAndShoot) {
         self.page = page
-        self.browsingScorer = browsingScorer
         self.webPositions = webPositions
         self.pointAndShoot = pointAndShoot
     }
@@ -135,8 +132,10 @@ class PointAndShootMessageHandler: NSObject, WKScriptMessageHandler {
                                        category: .web)
                 return
             }
-            let targets = areas.map { PointAndShoot.Target(area: $0,
-                                                           mouseLocation: CGPoint(x: $0.minX, y: $0.maxY), html: html) }
+            let targets = areas.map {
+                PointAndShoot.Target(area: $0,
+                                     mouseLocation: CGPoint(x: $0.minX, y: $0.maxY), html: html)
+            }
             pointAndShoot.shoot(targets: targets, origin: origin, done: false)
 
         case PointAndShootMessages.pointAndShoot_pinch.rawValue:
@@ -174,13 +173,6 @@ class PointAndShootMessageHandler: NSObject, WKScriptMessageHandler {
             } else {
                 Logger.shared.logDebug("scroll NOT redraw because pointing=\(pointAndShoot.status)",
                                        category: .pointAndShoot)
-            }
-            if width > 0, height > 0 {
-                let currentScore = browsingScorer.currentScore
-                currentScore.scrollRatioX = max(Float(x / width), currentScore.scrollRatioX)
-                currentScore.scrollRatioY = max(Float(y / height), currentScore.scrollRatioY)
-                currentScore.area = Float(width * height)
-                browsingScorer.updateScore()
             }
             Logger.shared.logDebug("Web Scrolled: \(page.scrollX), \(page.scrollY)", category: .web)
 
@@ -238,7 +230,16 @@ class PointAndShootMessageHandler: NSObject, WKScriptMessageHandler {
             webView.configuration.userContentController.add(self, name: handler)
             Logger.shared.logDebug("Added point and shoot cript handler: \(handler)", category: .web)
         }
-        pointAndShoot.injectScripts()
+        injectScripts()
+    }
+
+    private func injectScripts() {
+        var jsCode = loadFile(from: "index_prod", fileType: "js")
+        jsCode = "exports={};" + jsCode   // Hack to avoid commonJS code generation bug
+        page.addJS(source: jsCode, when: .atDocumentEnd)
+
+        let cssCode = loadFile(from: "index_prod", fileType: "css")
+        page.addCSS(source: cssCode, when: .atDocumentEnd)
     }
 
     func unregister(from webView: WKWebView) {

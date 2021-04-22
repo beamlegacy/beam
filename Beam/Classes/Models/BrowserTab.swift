@@ -29,8 +29,8 @@ class FullScreenWKWebView: WKWebView {
 }
 
 // swiftlint:disable:next type_body_length
-class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, WKUIDelegate, Codable,
-        WebPage, BrowsingScorer {
+class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, WKUIDelegate, Codable, WebPage, Scorable {
+
     var id: UUID
 
     var scrollX: CGFloat = 0
@@ -75,8 +75,6 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         url?.isSearchResult != true
     }
 
-    var currentScore: Score { browsingTree.current.score }
-
     lazy var passwordOverlayController: PasswordOverlayController
             = PasswordOverlayController(webView: webView, passwordStore: MockPasswordStore.shared)
 
@@ -86,7 +84,13 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
     public private(set) var element: BeamElement?
 
+    public var score: Float {
+        get {element?.score ?? 0 }
+        set {element?.score = newValue }
+    }
+
     var loggingMessageHandler: LoggingMessageHandler?
+    var scorerMessageHandler: ScorerMessageHandler?
     var passwordMessageHandler: PasswordMessageHandler?
     var pointAndShootMessageHandler: PointAndShootMessageHandler?
 
@@ -153,6 +157,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         browsingTree = BrowsingTree(originalQuery ?? webView?.url?.absoluteString)
 
         super.init(frame: .zero)
+
         note.browsingSessions.append(browsingTree)
         setupObservers()
     }
@@ -238,7 +243,6 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
     // Add the current page to the current note and return the beam element
     // (if the element already exist return it directly)
-
     func addToNote(allowSearchResult: Bool = false) -> BeamElement? {
         guard let elem = element else {
             guard let url = url else {
@@ -308,10 +312,6 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         }
     }
 
-    func addTextSelection() {
-        browsingTree.current.score.textSelections += 1
-    }
-
     func getNote(fromTitle noteTitle: String) -> BeamNote? {
         BeamNote.fetch(state.data.documentManager, title: noteTitle)
     }
@@ -346,13 +346,10 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         webView.navigationDelegate = self
         webView.uiDelegate = self
 
-        removeUserScripts()
-
         initLogging()
+        let scorer = initScorer()
         initPasswordManager()
-        initPointAndShoot()
-
-        addUserScripts()
+        initPointAndShoot(scorer: scorer)
     }
 
     private func initLogging() {
@@ -363,23 +360,33 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         loggingMessageHandler!.register(to: webView, page: self)
     }
 
+    private func initScorer() -> BrowsingScorer {
+        if scorerMessageHandler != nil {
+            scorerMessageHandler!.unregister(from: webView)
+        }
+        let scorer = BrowsingTreeScorer(browsingTree: browsingTree, page: self)
+        scorerMessageHandler = ScorerMessageHandler(browsingScorer: scorer)
+        scorerMessageHandler!.register(to: webView, page: self)
+        return scorer
+    }
+
     private func initPasswordManager() {
         if passwordMessageHandler != nil {
             passwordMessageHandler!.destroy(for: webView)
         }
         passwordMessageHandler = PasswordMessageHandler(passwordOverlayController: passwordOverlayController)
-        passwordMessageHandler!.register(to: webView)
+        passwordMessageHandler!.register(to: webView, page: self)
     }
 
-    private func initPointAndShoot() {
+    private func initPointAndShoot(scorer: BrowsingScorer) {
+        // Avoid instantiate if !pointAndShootEnabled
         if pointAndShootMessageHandler != nil {
             pointAndShootMessageHandler!.destroy(for: webView)
         }
         let webPositions: WebPositions = WebPositions()
-        // Avoid instantiate if !pointAndShootEnabled
-        let pointAndShoot = PointAndShoot(page: self, ui: PointAndShootUI(), browsingScorer: self,
+        let pointAndShoot = PointAndShoot(page: self, ui: PointAndShootUI(), scorer: scorer,
                                           webPositions: webPositions)
-        pointAndShootMessageHandler = PointAndShootMessageHandler(page: self, webPositions: webPositions, browsingScorer: self,
+        pointAndShootMessageHandler = PointAndShootMessageHandler(page: self, webPositions: webPositions,
                                                                   pointAndShoot: pointAndShoot)
         pointAndShootMessageHandler!.register(to: webView)
     }
@@ -390,19 +397,8 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         webView.uiDelegate = nil
 
         pointAndShootMessageHandler?.destroy(for: webView)
-    }
-
-    private func removeUserScripts() {
-        pointAndShootMessageHandler?.unregister(from: webView)
-    }
-
-    lazy var devTools: String = {
-        loadFile(from: "DevTools", fileType: "js")
-    }()
-
-    private func addUserScripts() {
-        addJS(source: jsPasswordManager, when: .atDocumentEnd)
-        //    addJS(source: devTools, when: .atDocumentEnd)
+        passwordMessageHandler?.destroy(for: webView)
+        loggingMessageHandler?.unregister(from: webView)
     }
 
     private func obfuscate(parameterized: String) -> String {
@@ -529,10 +525,6 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         element = nil
         _ = addToNote()
     }
-
-    lazy var jsPasswordManager: String = {
-        loadFile(from: "PasswordManager", fileType: "js")
-    }()
 
     func cancelShoot() {
         pointAndShootMessageHandler!.pointAndShoot.resetStatus()

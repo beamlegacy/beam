@@ -7,14 +7,15 @@ class WebPositionsMock: WebPositions {
 
 class TestWebPage: WebPage {
 
+    var events: [String] = []
+
     var scrollX: CGFloat = 0
     var scrollY: CGFloat = 0
     private(set) var originalQuery: String?
     private(set) var pointAndShootAllowed: Bool = true
     private(set) var title: String = ""
     private(set) var url: URL?
-
-    var events: [String] = []
+    var score: Float = 0
 
     init() {
     }
@@ -80,7 +81,7 @@ class PointAndShootTest: XCTestCase {
         let testUI = PointAndShootUIMock()
         let testBrowsingScorer = BrowsingScorerMock()
         let testWebPositions = WebPositions()
-        let pns = PointAndShoot(page: testPage, ui: testUI, browsingScorer: testBrowsingScorer,
+        let pns = PointAndShoot(page: testPage, ui: testUI, scorer: testBrowsingScorer,
                                 webPositions: testWebPositions)
         return (pns, testUI)
     }
