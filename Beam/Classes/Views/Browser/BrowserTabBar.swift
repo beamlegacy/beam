@@ -54,7 +54,7 @@ struct BrowserTabBar: View {
                 state.startNewSearch()
             }
         }
-        .frame(height: 28)
+        .frame(height: 30)
         .background(
             BeamColor.Generic.background.swiftUI
                 .shadow(color: Color.black.opacity(0.1), radius: 0, x: 0, y: 0.5)
@@ -125,7 +125,13 @@ private struct BrowserNewTabView: View {
                     action: action)
             .padding(.horizontal, BeamSpacing._100)
             .padding(.vertical, BeamSpacing._60)
-            .background(BeamColor.Nero.swiftUI)
+            .frame(maxHeight: .infinity)
+            .background(BeamColor.Nero.swiftUI
+                            .overlay(Rectangle()
+                                        .fill(BeamColor.BottomBar.shadow.swiftUI)
+                                        .frame(height: 0.5),
+                                     alignment: .top)
+            )
             .onHover { isHovering = $0 }
             .onTouchDown { isTouchDown = $0 }
             .simultaneousGesture(TapGesture(count: 1).onEnded {
