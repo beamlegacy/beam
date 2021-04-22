@@ -29,19 +29,19 @@ function beam_getTextFieldsInDocument(_doc, _frame) {
   return textFields
 }
 
-function beam_elementDidGainFocus(event) {
+function password_elementDidGainFocus(event) {
   if (event.target !== null && beam_isTextField(event.target)) {
     window.webkit.messageHandlers.password_textInputFocusIn.postMessage(event.target.id)
   }
 }
 
-function beam_resize(event) {
+function password_resize(event) {
   if (event.target !== null ) {
     window.webkit.messageHandlers.password_resize.postMessage({width: window.innerWidth, height: window.innerHeight})
   }
 }
 
-function beam_scroll(_ev) {
+function password_scroll(_ev) {
   const win = window
   const doc = win.document
   const body = doc.body
@@ -66,7 +66,7 @@ function beam_scroll(_ev) {
   window.webkit.messageHandlers.password_scroll.postMessage(scrollInfo)
 }
 
-function beam_elementDidLoseFocus(event) {
+function password_elementDidLoseFocus(event) {
   if (event.target !== null && beam_isTextField(event.target)) {
     window.webkit.messageHandlers.password_textInputFocusOut.postMessage(event.target.id)
   }
@@ -120,10 +120,10 @@ function beam_setTextFieldValues(fields_json) {
 function beam_installFocusHandlers(ids_json) {
   let ids = JSON.parse(ids_json)
   for (id of ids) {
-    document.getElementById(id)?.addEventListener('focus', beam_elementDidGainFocus, false)
-    document.getElementById(id)?.addEventListener('focusout', beam_elementDidLoseFocus, false)
-    window.addEventListener("resize", beam_resize)
-    window.addEventListener("scroll", beam_scroll)
+    document.getElementById(id)?.addEventListener('focus', password_elementDidGainFocus, false)
+    document.getElementById(id)?.addEventListener('focusout', password_elementDidLoseFocus, false)
+    window.addEventListener("resize", password_resize)
+    window.addEventListener("scroll", password_scroll)
   }
 }
 

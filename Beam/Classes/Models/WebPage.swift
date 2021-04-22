@@ -5,7 +5,7 @@ import BeamCore
 
  Defining this protocol allows to provide a mock implementation for testing.
  */
-protocol WebPage {
+protocol WebPage: Scorable {
     /**
      Injects CSS source code into the web page.
       As this will create a `<style>` tag, the style will be implicitly executed.

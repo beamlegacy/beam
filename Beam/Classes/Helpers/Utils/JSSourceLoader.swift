@@ -1,10 +1,3 @@
-//
-//  JSSourceLoader.swift
-//  Beam
-//
-//  Created by Sebastien Metrot on 05/11/2020.
-//
-
 import Foundation
 
 func loadFile(from fileName: String, fileType: String) -> String {

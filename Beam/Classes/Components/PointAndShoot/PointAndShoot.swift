@@ -102,13 +102,13 @@ class PointAndShoot {
     private var page: WebPage
 
     let ui: PointAndShootUI
-    let browsingScorer: BrowsingScorer
+    let scorer: BrowsingScorer
     let webPositions: WebPositions
 
-    init(page: WebPage, ui: PointAndShootUI, browsingScorer: BrowsingScorer, webPositions: WebPositions) {
+    init(page: WebPage, ui: PointAndShootUI, scorer: BrowsingScorer, webPositions: WebPositions) {
         self.page = page
         self.ui = ui
-        self.browsingScorer = browsingScorer
+        self.scorer = scorer
         self.webPositions = webPositions
     }
 
@@ -132,15 +132,6 @@ class PointAndShoot {
       It will added to groups once the card has been validated.
      */
     var currentGroup: ShootGroup?
-
-    func injectScripts() {
-        var jsCode = loadFile(from: "index_prod", fileType: "js")
-        jsCode = "exports={};"+jsCode   // Hack to avoid commonJS code generation bug
-        page.addJS(source: jsCode, when: .atDocumentEnd)
-
-        let cssCode = loadFile(from: "index_prod", fileType: "css")
-        page.addCSS(source: cssCode, when: .atDocumentEnd)
-    }
 
     func drawAllGroups(someGroup: ShootGroup? = nil) {
         ui.clear()
@@ -289,8 +280,7 @@ class PointAndShoot {
         page.setDestinationNote(note, rootElement: note)
         let html = currentGroup!.html()
         let text: BeamText = html2Text(url: url, html: html)
-        browsingScorer.addTextSelection()
-        browsingScorer.updateScore()
+        scorer.addTextSelection()
 
         // now add a bullet point with the quoted text:
         let title = page.title

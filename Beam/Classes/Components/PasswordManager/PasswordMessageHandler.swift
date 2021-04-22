@@ -65,7 +65,6 @@ class PasswordMessageHandler: NSObject, WKScriptMessageHandler {
                 Logger.shared.logError("Password controller ignored resize: \(String(describing: messageBody))", category: .web)
                 return
             }
-            // pointAndShoot.drawCurrentGroup()
             passwordOverlayController.updateViewSize(width: width, height: height)
 
         default:
@@ -73,12 +72,18 @@ class PasswordMessageHandler: NSObject, WKScriptMessageHandler {
         }
     }
 
-    func register(to webView: WKWebView) {
+    func register(to webView: WKWebView, page: WebPage) {
         PasswordMessages.allCases.forEach {
             let handler = $0.rawValue
             webView.configuration.userContentController.add(self, name: handler)
             Logger.shared.logDebug("Added password script handler: \(handler)", category: .web)
         }
+        injectScripts(into: page)
+    }
+
+    private func injectScripts(into page: WebPage) {
+        var jsCode = loadFile(from: "PasswordManager", fileType: "js")
+        page.addJS(source: jsCode, when: .atDocumentEnd)
     }
 
     func unregister(from webView: WKWebView) {
