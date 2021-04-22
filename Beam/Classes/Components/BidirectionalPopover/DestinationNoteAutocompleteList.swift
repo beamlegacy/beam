@@ -39,7 +39,7 @@ struct DestinationNoteAutocompleteList: View {
         .animation(nil)
         .onHover { hovering in
             if !hovering {
-                model.selectedIndex = nil
+                model.selectedIndex = 0
             }
         }
         .frame(maxWidth: .infinity)

@@ -25,6 +25,7 @@ class BeamUITestsMenuGenerator {
     private func destroyDatabase() {
         DocumentManager().deleteAll { _ in }
         DatabaseManager().deleteAll { _ in }
+        try? AppDelegate.main.data.indexer.clear()
     }
 
     let faker = Faker(locale: "en-US")
