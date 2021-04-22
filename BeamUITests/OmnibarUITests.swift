@@ -22,6 +22,10 @@ class OmniBarUITestsHelper : BeamUITestsHelper {
         self.tapCommand(.destroyDB)
     }
 
+    func focusSearchField() {
+        self.searchField.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+    }
+
     func inputHasFocus(_ input: XCUIElement) -> Bool {
         return input.value(forKey: "hasKeyboardFocus") as? Bool ?? false
     }

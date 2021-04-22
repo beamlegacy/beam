@@ -33,7 +33,7 @@ class OmniBarDestinationUITests: QuickSpec {
         self.helper.searchField.typeText(destinationNoteTitle)
         let createNoteResult = self.helper.allAutocompleteResults.matching(self.helper.autocompleteCreateCardPredicate).firstMatch
         createNoteResult.tap()
-        sleep(1) // wait for new note to be saved
+        sleep(2) // wait for new note to be saved
         let journalButton = self.app.buttons["journal"]
         journalButton.tap()
     }

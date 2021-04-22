@@ -78,6 +78,7 @@ class OmniBarAutocompleteUITests: QuickSpec {
             }
 
             it("can be navigated") {
+                self.helper.focusSearchField()
                 self.helper.searchField.typeText("Testing navigation")
                 // Selected 1st result
                 self.helper.searchField.typeKey(.downArrow, modifierFlags: .function)
@@ -102,7 +103,7 @@ class OmniBarAutocompleteUITests: QuickSpec {
 
                 expect(self.app.groups["webView"].exists).to(beTrue())
 
-                self.helper.searchField.tap()
+                self.helper.focusSearchField()
                 expect(self.helper.inputHasFocus(self.helper.searchField)).to(beTrue())
                 self.helper.searchField.typeText("hello world")
                 expect(results.count) > 2
@@ -129,7 +130,7 @@ class OmniBarAutocompleteUITests: QuickSpec {
                 let journalButton = self.app.buttons["journal"]
                 journalButton.tap()
 
-                self.helper.searchField.tap()
+                self.helper.focusSearchField()
                 self.helper.searchField.typeText("Autocomplete Not")
                 let noteResults = self.helper.allAutocompleteResults.matching(NSPredicate(format: "identifier CONTAINS '-note'"))
                 expect(noteResults.firstMatch.waitForExistence(timeout: 2)).to(beTrue())

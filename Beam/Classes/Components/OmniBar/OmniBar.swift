@@ -79,13 +79,6 @@ struct OmniBar: View {
                                     setIsEditing($0)
                                 }), modifierFlagsPressed: $modifierFlagsPressed, enableAnimations: enableAnimations)
                                 .frame(maxHeight: .infinity)
-                                .onHover { (hover) in
-                                    if hover {
-                                        NSCursor.iBeam.set()
-                                    } else {
-                                        NSCursor.arrow.set()
-                                    }
-                                }
                             }
                             .padding(.leading, !isEditing && state.mode == .web ? 8 : 7)
                         }
@@ -98,7 +91,12 @@ struct OmniBar: View {
                         }
                     }
                 }
-                .onTapGesture(perform: {
+                .gesture(DragGesture(minimumDistance: 0).onEnded { (value) in
+                    // onTapGesture is triggered when moving NSWindow quickly.
+                    // Using a drag gesture instead to make sure the cursor hasn't moved.
+                    guard value.translation.width == 0.0 && value.translation.height == 0.0 else {
+                        return
+                    }
                     setIsEditing(true)
                 })
                 .padding(.trailing, isEditing ? 6 : 10)

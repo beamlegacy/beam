@@ -130,6 +130,7 @@ struct OmniBarSearchField: View {
                     }
                 )
                 .centered(shouldCenter && state.mode != .web)
+                .disabled(!isEditing) // Allow Window dragging
                 .accessibility(addTraits: .isSearchField)
                 .accessibility(identifier: "OmniBarSearchField")
                 if let subtitle = resultSubtitle {

@@ -40,7 +40,7 @@ xctests:
   interruptible: true
 
 xctests UI:
-  timeout: 10 minutes
+  timeout: 15 minutes
   dependencies: []
   stage: test
   artifacts:
