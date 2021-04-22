@@ -16,24 +16,27 @@ class BeamNSTableView: NSTableView {
 
     weak var additionalDelegate: BeamNSTableViewDelegate?
 
+    private func rowAndColumngForWindowLocation(_ locationInWindow: NSPoint) -> (Int, Int)? {
+        let localLocation = convert(locationInWindow, from: nil)
+        let row = self.row(at: localLocation)
+        let column = self.column(at: localLocation)
+        guard row >= 0 && column >= 0 else { return nil }
+        return (row, column)
+    }
+
     override func rightMouseDown(with event: NSEvent) {
         super.rightMouseDown(with: event)
-
-        if let additionalDelegate = additionalDelegate {
-            let localLocation = convert(event.locationInWindow, from: nil)
-            let row = self.row(at: localLocation)
-            let column = self.column(at: localLocation)
-            additionalDelegate.tableView(self, rightMouseDownFor: row, column: column, locationInWindow: event.locationInWindow)
-        }
+        guard let additionalDelegate = additionalDelegate,
+              let (row, column) = rowAndColumngForWindowLocation(event.locationInWindow)
+        else { return }
+        additionalDelegate.tableView(self, rightMouseDownFor: row, column: column, locationInWindow: event.locationInWindow)
     }
 
     override func mouseDown(with event: NSEvent) {
         super.mouseDown(with: event)
-        if let additionalDelegate = additionalDelegate {
-            let localLocation = convert(event.locationInWindow, from: nil)
-            let row = self.row(at: localLocation)
-            let column = self.column(at: localLocation)
-            additionalDelegate.tableView(self, mouseDownFor: row, column: column, locationInWindow: event.locationInWindow)
-        }
+        guard let additionalDelegate = additionalDelegate,
+              let (row, column) = rowAndColumngForWindowLocation(event.locationInWindow)
+        else { return }
+        additionalDelegate.tableView(self, mouseDownFor: row, column: column, locationInWindow: event.locationInWindow)
     }
 }

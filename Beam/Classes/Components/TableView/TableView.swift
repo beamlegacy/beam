@@ -310,6 +310,7 @@ extension TableViewCoordinator: NSTableViewDelegate {
             if let tf = creationgRowTextField {
                 tf.becomeFirstResponder()
             }
+            return false
         }
         return true
     }
