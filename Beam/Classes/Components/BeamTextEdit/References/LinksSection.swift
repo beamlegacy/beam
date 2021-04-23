@@ -54,7 +54,7 @@ class LinksSection: Widget {
             self.open = value
         }))
 
-        sectionTitleLayer.font = BeamFont.regular(size: 0).nsFont
+        sectionTitleLayer.font = BeamFont.medium(size: 0).nsFont
         sectionTitleLayer.fontSize = 12
         sectionTitleLayer.foregroundColor = BeamColor.LinkedSection.sectionTitle.cgColor
 
@@ -66,7 +66,7 @@ class LinksSection: Widget {
             chevron.open = self.open
         }))
 
-        linkActionLayer.font = BeamFont.regular(size: 0).nsFont
+        linkActionLayer.font = BeamFont.medium(size: 0).nsFont
         linkActionLayer.fontSize = 12
         linkActionLayer.foregroundColor = BeamColor.LinkedSection.actionButton.cgColor
         linkActionLayer.contentsScale = contentsScale
@@ -221,7 +221,7 @@ class LinksSection: Widget {
     override func updateSubLayersLayout() {
         CATransaction.disableAnimations {
             setupLayerFrame()
-            separatorLayer.frame = CGRect(x: 0, y: sectionTitleLayer.frame.maxY + 12, width: 560, height: 2)
+            separatorLayer.frame = CGRect(x: 0, y: sectionTitleLayer.frame.maxY + 14, width: 560, height: 1)
 
             guard let linkLayer = linkLayer else { return }
             linkLayer.frame = CGRect(origin: CGPoint(x: frame.width - linkActionLayer.frame.width / 2, y: 0), size: NSSize(width: 54, height: 21))

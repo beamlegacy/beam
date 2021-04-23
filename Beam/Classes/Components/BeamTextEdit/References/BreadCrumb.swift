@@ -68,7 +68,7 @@ class BreadCrumb: Widget {
         container = Layer(name: "containerLayer", layer: containerLayer, hovered: { _ in })
 
         linkLayer.string = "Link"
-        linkLayer.font = BeamFont.regular(size: 0).nsFont
+        linkLayer.font = BeamFont.medium(size: 0).nsFont
         linkLayer.fontSize = 12
         linkLayer.foregroundColor = BeamColor.LinkedSection.actionButton.cgColor
         linkLayer.alignmentMode = .center
@@ -161,7 +161,8 @@ class BreadCrumb: Widget {
             )
 
             position.x += crumbLayer.bounds.width + spaceBreadcrumbIcon
-            arrowLayer.frame = CGRect(origin: CGPoint(x: position.x, y: position.y + 2), size: CGSize(width: 10, height: 10))
+            arrowLayer.frame = CGRect(origin: CGPoint(x: position.x, y: position.y + breadCrumbYPosition),
+                                      size: CGSize(width: 10, height: 10))
             position.x += arrowLayer.frame.width + spaceBreadcrumbIcon
 
             let show = index <= selectedCrumb ?? 0
@@ -185,7 +186,7 @@ class BreadCrumb: Widget {
         crumblayer.truncationMode = .end
         crumblayer.contentsScale = contentsScale
 
-        crumblayer.font = BeamFont.regular(size: 0).nsFont
+        crumblayer.font = BeamFont.medium(size: 0).nsFont
         crumblayer.fontSize = 12
         crumblayer.foregroundColor = BeamColor.LinkedSection.breadcrumb.cgColor
 
@@ -236,13 +237,13 @@ class BreadCrumb: Widget {
     }
 
     override func updateRendering() {
-        contentsFrame = NSRect(x: 0, y: 0, width: availableWidth, height: showCrumbs ? 25 : 0)
+        contentsFrame = NSRect(x: 0, y: -10, width: availableWidth, height: showCrumbs ? 25 : 0)
         actionLinkLayer?.layer.isHidden = isLink
         computedIdealSize = contentsFrame.size
 
         CATransaction.disableAnimations {
             layers["actionLinkLayer"]?.frame = CGRect(
-                origin: CGPoint(x: (availableWidth - linkLayer.frame.width / 2), y: breadCrumbYPosition),
+                origin: CGPoint(x: availableWidth, y: 0),
                 size: NSSize(width: 36, height: 21)
             )
         }
@@ -260,8 +261,8 @@ class BreadCrumb: Widget {
             }
             CATransaction.disableAnimations {
                 guard let container = container else { return }
-                let containerWidth: CGFloat = hasLink ? 538 : 492 - 16
-                container.frame = NSRect(x: 0, y: -2.5, width: containerWidth, height: childrenHeight + 22)
+                let containerWidth: CGFloat = hasLink ? 538 : 492
+                container.frame = NSRect(x: 0, y: 0, width: containerWidth, height: childrenHeight + 22)
             }
         }
 
