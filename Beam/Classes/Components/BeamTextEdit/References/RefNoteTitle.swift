@@ -42,7 +42,7 @@ class RefNoteTitle: Widget {
         super.init(parent: parent)
 
         titleLayer.string = noteTitle.capitalized
-        titleLayer.font = BeamFont.regular(size: 0).nsFont
+        titleLayer.font = BeamFont.medium(size: 0).nsFont
         titleLayer.fontSize = 18
         titleLayer.foregroundColor = BeamColor.LinkedSection.title.cgColor
 
@@ -63,26 +63,7 @@ class RefNoteTitle: Widget {
 
         addLayer(ChevronButton("chevron", open: open, changed: { [unowned self] value in
             self.open = value
-            layers["actionLinkLayer"]?.layer.isHidden = !value
         }))
-
-        linkLayer.string = actionTitle
-        linkLayer.font = NSFont.systemFont(ofSize: 0, weight: .medium)
-        linkLayer.fontSize = 13
-        linkLayer.foregroundColor = BeamColor.LinkedSection.actionButton.cgColor
-
-        let actionLayer = ButtonLayer(
-                "actionLinkLayer",
-                linkLayer,
-                activated: {
-                    action()
-                },
-                hovered: { [weak self] isHover in
-                    guard let self = self else { return }
-                    self.linkLayer.foregroundColor = isHover ? BeamColor.LinkedSection.actionButtonHover.cgColor : BeamColor.LinkedSection.actionButton.cgColor
-                }
-            )
-        addLayer(actionLayer)
 
         guard let cardTitleLayer = cardTitleLayer else { return }
 
@@ -94,7 +75,6 @@ class RefNoteTitle: Widget {
 
     override func updateRendering() {
         contentsFrame = NSRect(x: 0, y: 0, width: availableWidth, height: 35)
-        actionLinkLayer?.layer.isHidden = !(open && showActionButton)
         computedIdealSize = contentsFrame.size
 
         if open {

@@ -104,10 +104,8 @@ class LinkedReferenceNode: TextNode {
         guard let proxyElement = parent.proxyFor(element) else { fatalError("Can't create a LinkedReferenceNode without a proxy provider in the parent chain") }
         super.init(parent: parent, element: proxyElement)
 
-        createLinkActionLayer()
         guard let actionLayer = layers["CmdEnterLayer"] else { return }
         actionLayer.layer.removeFromSuperlayer()
-        layers.removeValue(forKey: "CmdEnterLayer")
 
         element.$children
             .receive(on: DispatchQueue.main)
@@ -121,43 +119,13 @@ class LinkedReferenceNode: TextNode {
                 self.invalidateRendering()
                 updateChildrenVisibility(visible && open)
         }.store(in: &scope)
-
-        element.$text.sink { [unowned self] text in
-//            self.layers["LinkLayer"]?.layer.isHidden = self.isLinkToNote(text) || !shouldDisplayLinkButton
-        }.store(in: &scope)
     }
 
     // MARK: - Setup UI
-
-    func createLinkActionLayer() {
-        linkTextLayer.string = "Link"
-        linkTextLayer.font = BeamFont.regular(size: 0).nsFont
-        linkTextLayer.fontSize = 12
-        linkTextLayer.foregroundColor = BeamColor.LinkedSection.actionButton.cgColor
-        linkTextLayer.contentsScale = contentsScale
-        linkTextLayer.alignmentMode = .center
-        linkTextLayer.borderColor = NSColor.green.cgColor
-        linkTextLayer.borderWidth = 1
-
-        let actionLayer = LinkButtonLayer(
-            "LinkLayer",
-            linkTextLayer,
-            activated: { [weak self] in
-                self?.makeInternalLink()
-                return
-            },
-            hovered: { (isHover) in
-                self.linkTextLayer.foregroundColor = isHover ? BeamColor.LinkedSection.actionButtonHover.cgColor : BeamColor.LinkedSection.actionButton.cgColor
-            }
-        )
-        addLayer(actionLayer)
-        actionLayer.layer.isHidden = isLink
-    }
-
-    override func updateSubLayersLayout() {
-//        CATransaction.disableAnimations {
-//            layers["LinkLayer"]?.frame = CGRect(origin: CGPoint(x: frame.width, y: 0), size: NSSize(width: 36, height: 21))
-//        }
+    override func updateRendering() {
+        super.updateRendering()
+        contentsFrame = NSRect(x: contentsFrame.origin.x, y: -10,
+                               width: contentsFrame.width, height: contentsFrame.height)
     }
 
     func isLinkToNote(_ text: BeamText) -> Bool {
@@ -173,32 +141,17 @@ class LinkedReferenceNode: TextNode {
     }
 
     func childrenIsLink() -> Bool {
+        if isLink { return true }
         for c in children {
             guard let linkedRef = c as? LinkedReferenceNode else { return false }
             if linkedRef.isLink {
                 return linkedRef.isLink
             }
-            return linkedRef.childrenIsLink()
+            if linkedRef.childrenIsLink() {
+                return linkedRef.childrenIsLink()
+            }
         }
         return isLink
-    }
-
-    var isReference: Bool {
-        !isLink
-    }
-
-    var shouldDisplayLinkButton: Bool {
-        guard let proxy = element as? ProxyElement else { return false }
-        return proxy.proxy.depth < 2
-    }
-
-    func makeInternalLink() {
-        guard let note = editor.note as? BeamNote else { return }
-        guard !isLink else { return }
-        let title = note.title
-
-        text.makeLinkToNoteExplicit(forNote: title)
-        self.editor.showOrHidePersistentFormatter(isPresent: false)
     }
 
     override var mainLayerName: String {
