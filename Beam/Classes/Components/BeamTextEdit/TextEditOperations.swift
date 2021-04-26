@@ -10,6 +10,16 @@
 import Foundation
 import BeamCore
 
+public extension BeamElement {
+    var treeDepth: Int {
+        return (children.map({ child -> Int in
+            child.treeDepth + 1
+        }).max() ?? 0)
+    }
+    var canIncreaseIndentation: Bool {
+        return depth + treeDepth < 10
+    }
+}
 extension TextRoot {
     var cmdContext: Widget {
         editor.focusedWidget ?? editor.rootNode
@@ -17,6 +27,7 @@ extension TextRoot {
 
     func increaseNodeIndentation(_ node: TextNode) -> Bool {
         guard !node.readOnly,
+              node.element.canIncreaseIndentation,
               node.parent as? BreadCrumb == nil,
               let newParent = node.previousSibbling() as? TextNode
         else { return false }
