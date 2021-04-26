@@ -208,6 +208,10 @@ class BeamWindow: NSWindow {
         }
     }
 
+    @IBAction func dumpBrowsingTree(_ sender: Any?) {
+        state.currentTab?.dumpBrowsingTree()
+    }
+
     static let savedTabsKey = "savedTabs"
 
     func saveDefaults() {
