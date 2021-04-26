@@ -910,6 +910,23 @@ public extension CALayer {
             "\"": {
                 insertPair("\"", "\"")
                 return false
+            },
+            " ": { [unowned self] in
+                guard popover == nil,
+                      self.selectedTextRange.isEmpty
+                else { return true }
+
+                let pos = self.selectedTextRange.isEmpty ? rootNode.cursorPosition : self.selectedTextRange.lowerBound
+                let range = max(0, pos - 1) ..< pos
+                let substr = node.text.extract(range: range)
+                let left = substr.text // capture the left of the cursor to check for an existing [
+
+                if pos > 0 && left == " " && !substr.links.isEmpty {
+                    rootNode.state.attributes = BeamText.removeLinks(from: rootNode.state.attributes)
+                    rootNode.cmdManager.replaceText(in: node, for: range, with: BeamText(text: " ", attributes: rootNode.state.attributes))
+                    return false
+                }
+                return true
             }
         ]
 
