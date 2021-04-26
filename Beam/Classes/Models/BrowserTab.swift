@@ -17,6 +17,17 @@ class FullScreenWKWebView: WKWebView {
 //        return NSEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
 //    }
 
+    override init(frame: CGRect, configuration: WKWebViewConfiguration) {
+        super.init(frame: frame, configuration: configuration)
+        self.allowsBackForwardNavigationGestures = true
+        self.allowsLinkPreview = true
+        self.allowsMagnification = true
+    }
+
+    override required init?(coder: NSCoder) {
+        super.init(coder: coder)
+    }
+
     // Catching those event to avoid funk sound
     override func keyDown(with event: NSEvent) {
         if let key = event.specialKey {
@@ -446,10 +457,10 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     private func handleBackForwardWebView(navigationAction: WKNavigationAction) {
         if navigationAction.navigationType == .backForward {
             let isBack = webView.backForwardList.backList
-                    .filter {
-                $0 == currentBackForwardItem
-            }
-                    .count == 0
+                .filter {
+                    $0 == currentBackForwardItem
+                }
+                .count == 0
 
             if isBack {
                 browsingTree.goBack()
@@ -623,16 +634,18 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     }
 
     func goBack() {
-        browsingTree.goBack()
         webView.goBack()
     }
 
     func goForward() {
-        browsingTree.goForward()
         webView.goForward()
     }
 
     func switchToBackground() {
         browsingTree.switchToBackground()
+    }
+
+    func dumpBrowsingTree() {
+        browsingTree.dump()
     }
 }

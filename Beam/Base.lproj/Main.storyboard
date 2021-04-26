@@ -823,10 +823,10 @@ CQ
                                                 <action selector="toggleScoreCard:" target="Ady-hI-5gd" id="RTT-Uf-Jy7"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Toggle browsing tree card" tag="4" id="Fu6-WY-AjE" userLabel="Toggle browsing tree card">
+                                        <menuItem title="Dump browsing tree" tag="4" id="Fu6-WY-AjE">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
-                                                <action selector="toggleBrowsingTreeCard:" target="Ady-hI-5gd" id="Znw-6l-Fwo"/>
+                                                <action selector="dumpBrowsingTree:" target="Ady-hI-5gd" id="syH-w2-mx5"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="8CZ-9R-gka"/>
