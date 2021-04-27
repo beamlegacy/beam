@@ -2,18 +2,11 @@
  * Types used by Beam API (to exchange messages, typically).
  */
 
-import {BeamDOMTokenList} from "./Test/BeamMocks"
+import {BeamHTMLCollection} from "./Test/BeamMocks"
 
 export class BeamSize {
-  /**
-   * @type {number}
-   */
-  width
-
-  /**
-   * @type {number}
-   */
-  height
+  constructor(public width = 0, public height = 0) {
+  }
 }
 
 export interface BeamVisualViewport {
@@ -56,15 +49,9 @@ export interface BeamVisualViewport {
 }
 
 export class BeamRect extends BeamSize {
-  /**
-   * @type {number}
-   */
-  x
-
-  /**
-   * @type {number}
-   */
-  y
+  constructor(public x = 0, public y = 0) {
+    super()
+  }
 }
 
 export class NoteInfo {
@@ -90,7 +77,7 @@ export interface BeamWebkit {
   messageHandlers: {}
 }
 
-export interface BeamWindow {
+export interface BeamWindow extends BeamEventTarget {
   /**
    * @type string
    */
@@ -133,60 +120,136 @@ export interface BeamWindow {
    */
   webkit
 
-  eventListeners
-
-  /**
-   *
-   * @param eventName {String}
-   * @param cb {Function}
-   */
-  addEventListener(eventName: string, cb: Function)
+  scroll(xCoord: number, yCoord: number): void
 }
 
-export interface BeamHTMLElement {
+export enum BeamNodeType {
+  element = 1,
+  text = 3,
+  processing_instruction = 7,
+  comment = 8,
+  document = 9,
+  document_type = 10,
+  document_fragment = 11
+}
+
+export interface BeamEvent {
+  readonly type: string
+  readonly defaultPrevented: boolean
+}
+
+export interface BeamEventTarget<E extends BeamEvent = BeamEvent> {
+
+  addEventListener(type: string, callback: (e: E) => any)
+
+  removeEventListener(type: string, callback: (e: E) => any)
+
+  dispatchEvent(e: E)
+}
+
+export interface BeamDOMRect extends DOMRect {
+}
+
+export interface BeamNode extends BeamEventTarget {
+
+  nodeName: string
+  nodeType: BeamNodeType
+  childNodes: BeamNode[]
+  parentNode?: BeamNode
+
   /**
-   * @type string
+   * Mock-specific property
+   * @deprecated Not because it will be removed, but to warn about non-standard.
    */
-  name: string
-
-  children: BeamHTMLElement[]
-
-  classList: BeamDOMTokenList
-
-  dataset: {}
-
-  /**
-   * @type number
-   */
-  clientTop
-
-  /**
-   * @type number
-   */
-  clientLeft
-
-  /**
-   * @type number
-   */
-  width
-
-  /**
-   * @type number
-   */
-  height
-
-  getBoundingClientRect()
+  bounds: BeamRect
 
   /**
    * @param el {HTMLElement}
    */
-  appendChild(el: BeamHTMLElement)
+  appendChild(el: BeamHTMLElement): BeamNode
 
   /**
    * @param el {HTMLElement}
    */
   removeChild(el: BeamHTMLElement)
 }
+
+export interface BeamParentNode extends BeamNode {
+  children: BeamHTMLCollection
+}
+
+export interface BeamCharacterData extends BeamNode {
+  data: string
+}
+
+export interface BeamText extends BeamCharacterData {
+}
+
+export interface BeamElement extends BeamParentNode {
+  attributes: {}
+
+  /**
+   * @type string
+   */
+  innerHTML: string
+
+  outerHTML: string
+
+  classList: DOMTokenList
+
+  readonly offsetParent: BeamElement
+
+  readonly parentNode?: BeamElement
+
+  /**
+   * Parent padding-relative x coordinate.
+   */
+  offsetLeft: number
+
+  /**
+   * Parent padding-relative y coordinate.
+   */
+  offsetTop: number
+
+  /**
+   * Left border width
+   */
+  clientLeft: number
+
+  /**
+   * Top border width
+   */
+  clientTop: number
+  height: number
+  width: number
+  scrollLeft: number
+  scrollTop: number
+  scrollHeight: number
+  scrollWidth: number
+  tagName: string
+
+  getClientRects(): DOMRectList
+
+  /**
+   * Viewport-relative position.
+   */
+  getBoundingClientRect(): DOMRect
+}
+
+export interface BeamElementCSSInlineStyle {
+  style: string
+}
+
+export interface BeamHTMLElement extends BeamElement, BeamElementCSSInlineStyle {
+
+  dataset: {}
+}
+
+export interface BeamHTMLIFrameElement extends BeamHTMLElement {
+
+  src: string
+}
+
 export interface BeamBody extends BeamHTMLElement {
   /**
    * @type String
@@ -224,7 +287,14 @@ export interface BeamBody extends BeamHTMLElement {
   clientHeight
 }
 
-export interface BeamDocument {
+export interface BeamRange {
+
+  selectNode(node: BeamNode): void
+
+  getBoundingClientRect(): BeamRect
+}
+
+export interface BeamDocument extends BeamNode {
   /**
    * @type {HTMLHtmlElement}
    */
@@ -241,13 +311,6 @@ export interface BeamDocument {
   createElement(tag)
 
   /**
-   *
-   * @param eventName {String}
-   * @param cb {Function}
-   */
-  addEventListener(eventName, cb)
-
-  /**
    * @return {Selection}
    */
   getSelection()
@@ -256,5 +319,7 @@ export interface BeamDocument {
    * @param selector {string}
    * @return {HTMLElement[]}
    */
-  querySelectorAll(selector)
+  querySelectorAll(selector: string): BeamNode[]
+
+  createRange(): BeamRange
 }

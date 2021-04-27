@@ -1,12 +1,12 @@
 import {Native} from "./Native"
 import {BeamDocumentMock, BeamHTMLIFrameElementMock} from "./Test/BeamMocks"
-import {TestWindow} from "./Test/TestWindow"
+import {BeamWindowMock} from "./Test/BeamWindowMock"
 
 /**
  *
  * @param origin {string}
  * @param frameEls {BeamHTMLElement[]}
- * @return {TestWindow}
+ * @return {BeamWindowMock}
  */
 function nativeTestBed(origin, frameEls = []) {
   const scrollData = {
@@ -23,7 +23,7 @@ function nativeTestBed(origin, frameEls = []) {
       }
     }
   })
-  return new TestWindow({origin, scrollX: 0, scrollY: 0, document: testDocument})
+  return new BeamWindowMock({origin, scrollX: 0, scrollY: 0, document: testDocument})
 }
 
 test("send frame href in message", () => {

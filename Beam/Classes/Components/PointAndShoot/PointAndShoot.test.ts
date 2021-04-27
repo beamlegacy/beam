@@ -1,6 +1,6 @@
 import {PointAndShoot} from "./PointAndShoot"
 import {BeamDocumentMock, BeamHTMLElementMock, BeamKeyEvent, BeamMouseEvent, BeamUIEvent} from "./Test/BeamMocks"
-import {TestWindow} from "./Test/TestWindow"
+import {BeamWindowMock} from "./Test/BeamWindowMock"
 import {PointAndShootUIMock} from "./Test/PointAndShootUIMock"
 import {TextSelectorUI_mock} from "./Test/TextSelectorUI_mock";
 import {TextSelector} from "./TextSelector";
@@ -25,7 +25,7 @@ function pointAndShootTestBed(frameEls = []) {
             }
         }
     })
-    const win = new TestWindow({scrollX: 0, scrollY: 0, document: testDocument})
+    const win = new BeamWindowMock(testDocument)
     PointAndShoot.instance = null  // Allow test suite to instantiate multiple PointAndShoots
     const textSelector = new TextSelector(win, new TextSelectorUI_mock())
     const pns = PointAndShoot.getInstance(win, testUI)
@@ -46,7 +46,7 @@ function pointAndShootTestBed(frameEls = []) {
 test("move mouse without Option", () => {
     const {pns, testUI} = pointAndShootTestBed()
 
-    const hoveredElement = new BeamHTMLElementMock()
+    const hoveredElement = new BeamHTMLElementMock("p")
     const pointEvent = new BeamMouseEvent({name: "mousemove", target: hoveredElement, clientX: 101, clientY: 102})
     pns.onMouseMove(pointEvent)
     expect(pns.status).toEqual("none")
@@ -57,7 +57,7 @@ test("move mouse without Option", () => {
 test("point with mouse move + Option", () => {
     const {pns, testUI} = pointAndShootTestBed()
 
-    const pointedElement = new BeamHTMLElementMock()
+    const pointedElement = new BeamHTMLElementMock("p")
     const pointEvent = new BeamMouseEvent({
         name: "mousemove",
         target: pointedElement,
@@ -81,7 +81,7 @@ test("point with Option key down then mouse move", () => {
     const keyEvent = new BeamKeyEvent({key: "Alt"})
     pns.onKeyDown(keyEvent)
 
-    const pointedElement = new BeamHTMLElementMock()
+    const pointedElement = new BeamHTMLElementMock("p")
     const pointEvent = new BeamMouseEvent({
         name: "mousemove",
         target: pointedElement,
@@ -102,7 +102,7 @@ test("point with Option key down then mouse move", () => {
 test("point with mouse move then key down", () => {
     const {pns, testUI} = pointAndShootTestBed()
 
-    const pointedElement = new BeamHTMLElementMock()
+    const pointedElement = new BeamHTMLElementMock("p")
     const pointEvent = new BeamMouseEvent({
         name: "mousemove",
         target: pointedElement,
@@ -125,7 +125,7 @@ test("point with mouse move then key down", () => {
 test("point then release Option", () => {
     const {pns, testUI} = pointAndShootTestBed()
 
-    const pointedElement = new BeamHTMLElementMock()
+    const pointedElement = new BeamHTMLElementMock("p")
     const pointEvent = new BeamMouseEvent({
         name: "mousemove",
         altKey: true,
@@ -156,7 +156,7 @@ test("point then release Option", () => {
 test("point with mouse move + Option, then scroll", () => {
     const {pns, testUI} = pointAndShootTestBed()
 
-    const pointedElement = new BeamHTMLElementMock()
+    const pointedElement = new BeamHTMLElementMock("p")
     const pointEvent = new BeamMouseEvent({
         name: "mousemove",
         target: pointedElement,
@@ -178,7 +178,7 @@ test("point with mouse move + Option, then scroll", () => {
 test("point then shoot, then cancel", () => {
     const {pns, testUI} = pointAndShootTestBed()
 
-    const pointedElement = new BeamHTMLElementMock()
+    const pointedElement = new BeamHTMLElementMock("p")
     const pointEvent = new BeamMouseEvent({
         name: "mousemove",
         target: pointedElement,
@@ -192,7 +192,7 @@ test("point then shoot, then cancel", () => {
     expect(testUI.events[1]).toEqual({name: "point", el: pointedElement, x: 101, y: 102})
 
     // Shoot
-    const shotElement = new BeamHTMLElementMock()
+    const shotElement = new BeamHTMLElementMock("p")
     const clickEvent = new BeamMouseEvent()
     Object.assign(clickEvent, {name: "mouseclick", clientX: 103, clientY: 104, target: shotElement, altKey: true})
     pns.onClick(clickEvent)
