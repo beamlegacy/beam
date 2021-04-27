@@ -270,6 +270,13 @@ let NoteDisplayThreshold = Float(0.0)
         mode = .web
     }
 
+    func createEmptyTab() {
+        let tab = BrowserTab(state: self, originalQuery: nil, note: data.todaysNote)
+        currentTab = tab
+        tabs.append(tab)
+        mode = .web
+    }
+
     func createTabFromNode(_ node: TextNode, withURL url: URL) {
         guard let note = node.root?.note else { return }
         let tab = BrowserTab(state: self, originalQuery: node.strippedText, note: note, rootElement: node.element, createBullet: false)
@@ -450,9 +457,10 @@ let NoteDisplayThreshold = Float(0.0)
 
     func startNewSearch() {
         autocompleteManager.cancelAutocomplete()
-        currentNote = nil
         autocompleteManager.resetQuery()
-        navigateToJournal()
+        if mode == .web {
+            createEmptyTab()
+        }
         focusOmniBox = true
     }
 
