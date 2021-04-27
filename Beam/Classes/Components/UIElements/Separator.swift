@@ -14,8 +14,8 @@ struct Separator: View {
     static let height: CGFloat = 1.0
     static let width: CGFloat = 1.0
 
-    static private let hairlineHeight: CGFloat = 0.5
-    static private let hairlineWidth: CGFloat = 0.5
+    static let hairlineHeight: CGFloat = 0.5
+    static let hairlineWidth: CGFloat = 0.5
 
     private var width: CGFloat? {
         guard !horizontal else { return nil }

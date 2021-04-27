@@ -96,8 +96,8 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     public private(set) var element: BeamElement?
 
     public var score: Float {
-        get {element?.score ?? 0 }
-        set {element?.score = newValue }
+        get { element?.score ?? 0 }
+        set { element?.score = newValue }
     }
 
     var loggingMessageHandler: LoggingMessageHandler?
