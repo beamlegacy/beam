@@ -90,7 +90,6 @@ extension TextRoot {
 
         // This will be used to create an empty node in place:
         let firstParent = sortedNodes.first?.parent as? TextNode ?? root
-        let firstIndexInParent = sortedNodes.first?.indexInParent ?? 0
 
         cancelNodeSelection()
 
@@ -121,9 +120,11 @@ extension TextRoot {
         }
 
         if createEmptyNodeInPlace || root.element.children.isEmpty {
-            guard let noteTitle = root.note?.title else { return }
-            let insertEmptyNode = InsertEmptyNode(with: firstParent.element.id, of: noteTitle, at: firstIndexInParent)
-            cmdManager.run(command: insertEmptyNode, on: cmdContext)
+            cmdManager.beginGroup(with: "Insert empty element")
+            let newElement = BeamElement()
+            cmdManager.insertElement(newElement, in: firstParent, after: nil)
+            cmdManager.focus(newElement, in: firstParent)
+            cmdManager.endGroup()
         }
     }
 
@@ -132,7 +133,7 @@ extension TextRoot {
         else { return }
 
         let bText = BeamText(text: str, attributes: root.state.attributes)
-        cmdManager.beginGroup(with: "erase selection")
+        cmdManager.beginGroup(with: "Erase selection")
         defer { cmdManager.endGroup() }
         cmdManager.replaceText(in: node, for: selectedTextRange, with: bText)
         cmdManager.cancelSelection(node)

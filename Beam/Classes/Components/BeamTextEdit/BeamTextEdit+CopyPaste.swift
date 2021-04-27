@@ -46,9 +46,8 @@ extension BeamTextEdit {
                 cmdManager.deleteElement(for: node)
             }
             if insertEmptyNode {
-                guard let noteTitle = rootNode.note?.title else { return }
-                let insertEmptyNode = InsertEmptyNode(with: rootNode.element.id, of: noteTitle, at: 0)
-                cmdManager.run(command: insertEmptyNode, on: rootNode.cmdContext)
+                let newElement = BeamElement()
+                cmdManager.insertElement(newElement, in: rootNode, after: nil)
             }
             cmdManager.endGroup()
         } else {
