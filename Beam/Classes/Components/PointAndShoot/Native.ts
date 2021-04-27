@@ -26,7 +26,7 @@ export class Native {
   /**
    * @param win {BeamWindow}
    */
-  constructor(win: BeamWindow) {
+  constructor(readonly win: BeamWindow) {
     this.origin = win.origin
     console.log("origin", this.origin)
     this.messageHandlers = win.webkit && win.webkit.messageHandlers
@@ -44,7 +44,7 @@ export class Native {
    * @param payload {any} The message data.
    *        An "origin" property will always be added as the base URI of the current frame.
    */
-  sendMessage(name, payload) {
+  sendMessage(name: string, payload: {}) {
     this.log("sendMessage", name, payload)
     const messageKey = `pointAndShoot_${name}`
     const messageHandler = this.messageHandlers[messageKey]

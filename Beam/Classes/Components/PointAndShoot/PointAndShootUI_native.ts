@@ -1,6 +1,19 @@
 import {PointAndShootUI} from "./PointAndShootUI"
-import {Native} from "./Native";
-import {WebEventsUI_native} from "./WebEventsUI_native";
+import {Native} from "./Native"
+import {WebEventsUI_native} from "./WebEventsUI_native"
+import {BeamElement, BeamHTMLElement, BeamNodeType, BeamRect} from "./BeamTypes"
+
+interface AreaMessage {
+  area: BeamRect  // Should be a polygon later
+  html: string
+  location: { x: number, y: number }
+}
+
+export interface PointMessagePayload extends AreaMessage {
+}
+
+export interface ShootMessagePayload extends AreaMessage {
+}
 
 export class PointAndShootUI_native extends WebEventsUI_native implements PointAndShootUI {
   /**
@@ -10,18 +23,41 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
     super(native)
   }
 
-  pointMessage(el, x, y) {
-    const pointBounds = el.getBoundingClientRect()
-    const pointPayload = {
-      area: {
-        x: pointBounds.x,
-        y: pointBounds.y,
-        width: pointBounds.width,
-        height: pointBounds.height
-      },
-      html: el.innerHTML,
+  private elementBounds(el: BeamElement) {
+    const containerBounds = el.getBoundingClientRect()
+    const area = new BeamRect(containerBounds.x, containerBounds.y) // Init with container offset
+    // We only need to get first-level children
+    for (const child of el.childNodes) {
+      let childBounds: any
+      switch (child.nodeType) {
+        case BeamNodeType.element:
+          childBounds = (child as BeamElement).getBoundingClientRect()
+          break
+        case BeamNodeType.text:
+          const nodeRange = this.native.win.document.createRange()
+          nodeRange.selectNode(child)
+          childBounds = nodeRange.getBoundingClientRect()
+          break
+      }
+      area.x = Math.min(area.x, area.x + childBounds.x)
+      area.y = Math.min(area.y, area.y + childBounds.y)
+      area.width = Math.max(area.width, childBounds.x - containerBounds.x + childBounds.width)
+      area.height = Math.max(area.height, childBounds.y - containerBounds.y + childBounds.height)
+    }
+    return area
+  }
+
+  private areaMessage(el: BeamElement, x: number, y: number) {
+    const pointPayload: PointMessagePayload = {
+      area: this.elementBounds(el),
+      html: el.outerHTML,
       location: {x, y}
     }
+    return pointPayload
+  }
+
+  pointMessage(el: BeamElement, x: number, y: number) {
+    const pointPayload: PointMessagePayload = this.areaMessage(el, x, y)
     this.native.sendMessage("point", pointPayload)
   }
 
@@ -30,19 +66,9 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
    * @param x {number}
    * @param y {number}
    */
-  shootMessage(el, x, y) {
-    const shootBounds = el.getBoundingClientRect()
-    const shootMessage = {
-      area: {
-        x: shootBounds.x,
-        y: shootBounds.y,
-        width: shootBounds.width,
-        height: shootBounds.height
-      },
-      html: el.innerHTML,
-      location: {x, y}
-    }
-    this.native.sendMessage("shoot", shootMessage)
+  shootMessage(el: BeamHTMLElement, x: number, y: number) {
+    const shootPayload: ShootMessagePayload = this.areaMessage(el, x, y)
+    this.native.sendMessage("shoot", shootPayload)
   }
 
   point(el, x, y) {

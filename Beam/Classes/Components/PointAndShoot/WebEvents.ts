@@ -1,6 +1,7 @@
-import type {BeamWindow} from "./BeamTypes"
+import type {BeamElement, BeamHTMLIFrameElement, BeamWindow} from "./BeamTypes"
 import type {WebEventsUI} from "./WebEventsUI"
 import {FrameInfo} from "./WebEventsUI";
+import {BeamHTMLIFrameElementMock} from "./Test/BeamMocks"
 
 export class WebEvents<UI extends WebEventsUI> {
 
@@ -61,7 +62,7 @@ export class WebEvents<UI extends WebEventsUI> {
   }
 
   checkFrames() {
-    const frameEls = this.win.document.querySelectorAll("iframe")
+    const frameEls = this.win.document.querySelectorAll("iframe") as BeamHTMLIFrameElement[]
     const hasFrames = frameEls.length > 0
     const framesInfo: FrameInfo[] = []
     if (hasFrames) {

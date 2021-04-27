@@ -423,19 +423,20 @@
 		BAA67259A3927FBE4C92280B /* BrowsingTreeScorer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA6777EB9326511BE7FD0DC /* BrowsingTreeScorer.swift */; };
 		BAA6727EF82F6230E9323768 /* PasswordProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67F4C6AB3946D6146DA71 /* PasswordProvider.swift */; };
 		BAA672CAA5FC59A47CDC498E /* PopupUI_web.js in Sources */ = {isa = PBXBuildFile; fileRef = BAA679D78927DFBF9EB1B0E5 /* PopupUI_web.js */; };
+		BAA672E9AF7741DB2798866B /* BeamNode.test.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA674383059F4C483992235 /* BeamNode.test.ts */; };
 		BAA67380A92BBC1FB039AA3F /* WebEventsUI.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA67032568FA8B5DDE5841B /* WebEventsUI.ts */; };
-		BAA67473B64126D0D6C05B40 /* TestWindow.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA67641C3624DA503CB21CF /* TestWindow.ts */; };
+		BAA67473B64126D0D6C05B40 /* BeamWindowMock.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA67641C3624DA503CB21CF /* BeamWindowMock.ts */; };
 		BAA6750B78E3812C7DA5DF7C /* tsconfig.json in Resources */ = {isa = PBXBuildFile; fileRef = BAA6738E9DD9D41F95BB1602 /* tsconfig.json */; };
 		BAA6752DE7059916C591BC01 /* jest.config.js in Sources */ = {isa = PBXBuildFile; fileRef = BAA670DDAA16ED17F69AA6C4 /* jest.config.js */; };
+		BAA675A0EEE5F4636AECCE5D /* ShootCardPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA670FA9720D0BD2011EC10 /* ShootCardPicker.swift */; };
 		BAA675AE9C103046AC022CBA /* .sassrc in Resources */ = {isa = PBXBuildFile; fileRef = BAA679E2DF3556E0E444844D /* .sassrc */; };
 		BAA675F08AFBE3FA1F741F76 /* TextSelectorUI_mock.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA67EF8F26A26B69B6690AA /* TextSelectorUI_mock.ts */; };
-		BAA6766CD39AF69EECD003BB /* ShootCardPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA670FA9720D0BD2011EC10 /* ShootCardPicker.swift */; };
+		BAA6760269415BA47D933E97 /* PointAndShootUI_native.test.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA676AA87963F568B000616 /* PointAndShootUI_native.test.ts */; };
 		BAA67697525FDFD1242FF4F1 /* TextSelection.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA67671C847924A15E55F0C /* TextSelection.ts */; };
 		BAA676E150F611C14CE79EF9 /* index_prod.css in Resources */ = {isa = PBXBuildFile; fileRef = BAA67DFA2629E03B1860BB36 /* index_prod.css */; };
 		BAA676F2C83EBA770CB34F36 /* Scorable.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA6755F00C445E4C93AF3AA /* Scorable.swift */; };
 		BAA677E962485A7EDFAF72AC /* PointAndShoot.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67E198CBE7B676642992F /* PointAndShoot.swift */; };
 		BAA678598CE0C4FA158153A7 /* index.html in Resources */ = {isa = PBXBuildFile; fileRef = BAA67168F93FFC9281A6D8A5 /* index.html */; };
-		BAA6788FEDF593A0D416A2C3 /* ShootFrameFusionRect.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA672EB45D1310AC12F6751 /* ShootFrameFusionRect.swift */; };
 		BAA678915DE6AEEE71A1BC1E /* PointAndShootUIMock.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA67425D94953DB6EED0FB3 /* PointAndShootUIMock.ts */; };
 		BAA6792F5CF42C0D8FEC2A9B /* WebEvents.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA674235D786C984B68A49A /* WebEvents.ts */; };
 		BAA67958DEBA77F2BE94F617 /* Native.test.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA6768EED1949F79C1C7B3C /* Native.test.ts */; };
@@ -445,6 +446,8 @@
 		BAA67A54C1D488CD065A7688 /* BeamMocks.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA670B42D1D6F585D0EF013 /* BeamMocks.ts */; };
 		BAA67A72C76AE25BF2FC60BD /* BrowsingScorer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67D3D273F24009F3AE570 /* BrowsingScorer.swift */; };
 		BAA67A80187509C17C3BE040 /* EventsMock.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA67218A94BBEE8A4B055AD /* EventsMock.ts */; };
+		BAA67AA1FFC6C586C8811D22 /* NativeMock.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA672ED83D75722F6988D7B /* NativeMock.ts */; };
+		BAA67AB77852A4EE310BF552 /* ShootFrameFusionRect.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA674C683DA5DEC733F4746 /* ShootFrameFusionRect.swift */; };
 		BAA67ABB1161A5AF2C2BD195 /* babel.config.js in Sources */ = {isa = PBXBuildFile; fileRef = BAA67A87B25E7862DF988584 /* babel.config.js */; };
 		BAA67AEDAE0EACFDFC1F4E28 /* ShootCardConfirmationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67F51F639D48AD4ABAACB /* ShootCardConfirmationView.swift */; };
 		BAA67AF4FC4809A4B37353AD /* ScorerMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA671BF2E38E5B7F5764244 /* ScorerMessageHandler.swift */; };
@@ -1099,7 +1102,7 @@
 		BAA672B83C933052676D43C2 /* index_web.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = index_web.js; sourceTree = "<group>"; };
 		BAA672CF20D1E4A0227F8885 /* TextSelectorUI.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = TextSelectorUI.ts; sourceTree = "<group>"; };
 		BAA672D65AB9D06DFEBA3EF2 /* index_web.scss */ = {isa = PBXFileReference; lastKnownFileType = file.scss; path = index_web.scss; sourceTree = "<group>"; };
-		BAA672EB45D1310AC12F6751 /* ShootFrameFusionRect.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShootFrameFusionRect.swift; sourceTree = "<group>"; };
+		BAA672ED83D75722F6988D7B /* NativeMock.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = NativeMock.ts; sourceTree = "<group>"; };
 		BAA67382F8DB4EC0FF65F11F /* .parcelrc */ = {isa = PBXFileReference; lastKnownFileType = file.parcelrc; path = .parcelrc; sourceTree = "<group>"; };
 		BAA6738E9DD9D41F95BB1602 /* tsconfig.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = tsconfig.json; sourceTree = "<group>"; };
 		BAA673EAA75F31F568CEFEE0 /* WebEventsUIMock.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = WebEventsUIMock.ts; sourceTree = "<group>"; };
@@ -1107,17 +1110,20 @@
 		BAA674235D786C984B68A49A /* WebEvents.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = WebEvents.ts; sourceTree = "<group>"; };
 		BAA67425D94953DB6EED0FB3 /* PointAndShootUIMock.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = PointAndShootUIMock.ts; sourceTree = "<group>"; };
 		BAA67429E31F093002EE2693 /* BeamTypes.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = BeamTypes.ts; sourceTree = "<group>"; };
+		BAA674383059F4C483992235 /* BeamNode.test.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = BeamNode.test.ts; sourceTree = "<group>"; };
 		BAA6744080689FD1BE1789B1 /* BeamWindowDecorator.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = BeamWindowDecorator.js; sourceTree = "<group>"; };
 		BAA67494A353CE9F59952C32 /* PointAndShootUI_web.scss */ = {isa = PBXFileReference; lastKnownFileType = file.scss; path = PointAndShootUI_web.scss; sourceTree = "<group>"; };
 		BAA6749F641AF1F1CF80FC5F /* PointAndShoot.test.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = PointAndShoot.test.ts; sourceTree = "<group>"; };
+		BAA674C683DA5DEC733F4746 /* ShootFrameFusionRect.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShootFrameFusionRect.swift; sourceTree = "<group>"; };
 		BAA675190ACFCE6361AC531B /* PointAndShootUI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PointAndShootUI.swift; sourceTree = "<group>"; };
 		BAA6755F00C445E4C93AF3AA /* Scorable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Scorable.swift; path = BrowsingScorer/Scorable.swift; sourceTree = "<group>"; };
 		BAA6756C6F2D22423B668BAF /* index_prod.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = index_prod.js; sourceTree = "<group>"; };
 		BAA675B80B855A4B2886805B /* PasswordMessageHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PasswordMessageHandler.swift; path = PasswordManager/PasswordMessageHandler.swift; sourceTree = "<group>"; };
-		BAA67641C3624DA503CB21CF /* TestWindow.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = TestWindow.ts; sourceTree = "<group>"; };
+		BAA67641C3624DA503CB21CF /* BeamWindowMock.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = BeamWindowMock.ts; sourceTree = "<group>"; };
 		BAA67671C847924A15E55F0C /* TextSelection.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = TextSelection.ts; sourceTree = "<group>"; };
 		BAA6768EED1949F79C1C7B3C /* Native.test.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = Native.test.ts; sourceTree = "<group>"; };
 		BAA676A6408390EB6F10B7D6 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		BAA676AA87963F568B000616 /* PointAndShootUI_native.test.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = PointAndShootUI_native.test.ts; sourceTree = "<group>"; };
 		BAA6772BF9D60F0FCD08D9D7 /* TextSelectorUI_web.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = TextSelectorUI_web.ts; sourceTree = "<group>"; };
 		BAA6776CE80053F1F17A2909 /* ShootFrame.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShootFrame.swift; sourceTree = "<group>"; };
 		BAA6777EB9326511BE7FD0DC /* BrowsingTreeScorer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = BrowsingTreeScorer.swift; path = BrowsingScorer/BrowsingTreeScorer.swift; sourceTree = "<group>"; };
@@ -2484,10 +2490,11 @@
 				BAA671DD680C70E02FD3ED32 /* ShootFrameSelectionView.swift */,
 				BAA67F51F639D48AD4ABAACB /* ShootCardConfirmationView.swift */,
 				BAA6776CE80053F1F17A2909 /* ShootFrame.swift */,
-				BAA672EB45D1310AC12F6751 /* ShootFrameFusionRect.swift */,
+				BAA672EB45D1310AC12F6751,
 				BAA6719DA7B5A8574E64AE71 /* ShootAbsolutePositioning.swift */,
 				BAA6779A8E69417A47D041B5 /* PointFrame.swift */,
 				BAA670FA9720D0BD2011EC10 /* ShootCardPicker.swift */,
+				BAA674C683DA5DEC733F4746 /* ShootFrameFusionRect.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -2546,6 +2553,7 @@
 				BAA67671C847924A15E55F0C /* TextSelection.ts */,
 				BAA67895F15325CD8242458B /* package-lock.json */,
 				BAA678F0976FD26A8BF9B2CA /* PopupUI_web.scss */,
+				BAA676AA87963F568B000616 /* PointAndShootUI_native.test.ts */,
 				BAA6754D043D1DD6321A8F80 /* Views */,
 			);
 			path = PointAndShoot;
@@ -2555,12 +2563,14 @@
 			isa = PBXGroup;
 			children = (
 				BAA670B42D1D6F585D0EF013 /* BeamMocks.ts */,
-				BAA67641C3624DA503CB21CF /* TestWindow.ts */,
+				BAA67641C3624DA503CB21CF /* BeamWindowMock.ts */,
 				BAA67425D94953DB6EED0FB3 /* PointAndShootUIMock.ts */,
 				BAA6744080689FD1BE1789B1 /* BeamWindowDecorator.js */,
 				BAA673EAA75F31F568CEFEE0 /* WebEventsUIMock.ts */,
 				BAA67218A94BBEE8A4B055AD /* EventsMock.ts */,
 				BAA67EF8F26A26B69B6690AA /* TextSelectorUI_mock.ts */,
+				BAA672ED83D75722F6988D7B /* NativeMock.ts */,
+				BAA674383059F4C483992235 /* BeamNode.test.ts */,
 			);
 			path = Test;
 			sourceTree = "<group>";
@@ -2757,21 +2767,21 @@
 			);
 			mainGroup = 965A781C2514F147009980D4;
 			packageReferences = (
-				9631C745251CE997009B40C4 /* XCRemoteSwiftPackageReference "SwiftSoup" */,
-				96474E3D254D9ADB00A920B3 /* XCRemoteSwiftPackageReference "FavIcon" */,
+				9631C745251CE997009B40C4 /* XCRemoteSwiftPackageReference "SwiftSoup.git" */,
+				96474E3D254D9ADB00A920B3 /* XCRemoteSwiftPackageReference "FavIcon.git" */,
 				524299AD25A47CA500F4DBF5 /* XCRemoteSwiftPackageReference "Preferences" */,
-				527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */,
-				527FB71825B9A97A00959146 /* XCRemoteSwiftPackageReference "sentry-cocoa" */,
-				527FB71D25B9A9B600959146 /* XCRemoteSwiftPackageReference "JWTDecode.swift" */,
+				527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack.git" */,
+				527FB71825B9A97A00959146 /* XCRemoteSwiftPackageReference "sentry-cocoa.git" */,
+				527FB71D25B9A9B600959146 /* XCRemoteSwiftPackageReference "JWTDecode.swift.git" */,
 				527FB72225B9AAA200959146 /* XCRemoteSwiftPackageReference "Fakery" */,
-				5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */,
-				5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick" */,
+				5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble.git" */,
+				5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick.git" */,
 				52BB698925CD4E1E007A1173 /* XCRemoteSwiftPackageReference "PromiseKit" */,
-				52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises" */,
-				523E91CA25D17004001124E0 /* XCRemoteSwiftPackageReference "Foundation" */,
+				52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises.git" */,
+				523E91CA25D17004001124E0 /* XCRemoteSwiftPackageReference "Foundation.git" */,
 				524CF6D125F276D1007312F0 /* XCRemoteSwiftPackageReference "KeychainAccess" */,
 				521FEC982604F9B4009000F9 /* XCRemoteSwiftPackageReference "Vinyl" */,
-				964FE5DF2625D8AA00966E03 /* XCRemoteSwiftPackageReference "GRDB.swift" */,
+				964FE5DF2625D8AA00966E03 /* XCRemoteSwiftPackageReference "GRDB.swift.git" */,
 			);
 			productRefGroup = 965A78262514F147009980D4 /* Products */;
 			projectDirPath = "";
@@ -3019,10 +3029,13 @@
 				52E04FD6252C7A4600AD9F56 /* writing_space.json in Resources */,
 				BAA67FC2BABDCB5F962CDE22 /* Frames.test.ts in Resources */,
 				BAA67A54C1D488CD065A7688 /* BeamMocks.ts in Resources */,
-				BAA67473B64126D0D6C05B40 /* TestWindow.ts in Resources */,
+				BAA67473B64126D0D6C05B40 /* BeamWindowMock.ts in Resources */,
 				BAA678915DE6AEEE71A1BC1E /* PointAndShootUIMock.ts in Resources */,
 				BAA679F30E3171511E32341B /* WebEventsUIMock.ts in Resources */,
 				BAA67A80187509C17C3BE040 /* EventsMock.ts in Resources */,
+				BAA67AA1FFC6C586C8811D22 /* NativeMock.ts in Resources */,
+				BAA672E9AF7741DB2798866B /* BeamNode.test.ts in Resources */,
+				BAA6760269415BA47D933E97 /* PointAndShootUI_native.test.ts in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3489,10 +3502,11 @@
 				BAA671B407D2F6AD8F8704A3 /* ShootFrameSelectionView.swift in Sources */,
 				BAA67AEDAE0EACFDFC1F4E28 /* ShootCardConfirmationView.swift in Sources */,
 				BAA67A090213331E925B0682 /* ShootFrame.swift in Sources */,
-				BAA6788FEDF593A0D416A2C3 /* ShootFrameFusionRect.swift in Sources */,
 				BAA670C2CFE33BC83DF12343 /* ShootAbsolutePositioning.swift in Sources */,
 				BAA67AFAB13DE4A1378E312B /* PointFrame.swift in Sources */,
-				BAA6766CD39AF69EECD003BB /* ShootCardPicker.swift in Sources */,
+				BAA6766CD39AF69EECD003BB,
+				BAA67AB77852A4EE310BF552 /* ShootFrameFusionRect.swift in Sources */,
+				BAA675A0EEE5F4636AECCE5D /* ShootCardPicker.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4320,7 +4334,7 @@
 				minimumVersion = 0.10.5;
 			};
 		};
-		5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */ = {
+		5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble.git" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Quick/Nimble.git";
 			requirement = {
@@ -4328,7 +4342,7 @@
 				minimumVersion = 9.0.0;
 			};
 		};
-		5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick" */ = {
+		5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick.git" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Quick/Quick.git";
 			requirement = {
@@ -4336,7 +4350,7 @@
 				minimumVersion = 3.0.0;
 			};
 		};
-		523E91CA25D17004001124E0 /* XCRemoteSwiftPackageReference "Foundation" */ = {
+		523E91CA25D17004001124E0 /* XCRemoteSwiftPackageReference "Foundation.git" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/PromiseKit/Foundation.git";
 			requirement = {
@@ -4360,7 +4374,7 @@
 				minimumVersion = 4.2.2;
 			};
 		};
-		527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */ = {
+		527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack.git" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/CocoaLumberjack/CocoaLumberjack.git";
 			requirement = {
@@ -4368,7 +4382,7 @@
 				minimumVersion = 3.7.0;
 			};
 		};
-		527FB71825B9A97A00959146 /* XCRemoteSwiftPackageReference "sentry-cocoa" */ = {
+		527FB71825B9A97A00959146 /* XCRemoteSwiftPackageReference "sentry-cocoa.git" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/getsentry/sentry-cocoa.git";
 			requirement = {
@@ -4376,7 +4390,7 @@
 				minimumVersion = 6.1.3;
 			};
 		};
-		527FB71D25B9A9B600959146 /* XCRemoteSwiftPackageReference "JWTDecode.swift" */ = {
+		527FB71D25B9A9B600959146 /* XCRemoteSwiftPackageReference "JWTDecode.swift.git" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/auth0/JWTDecode.swift.git";
 			requirement = {
@@ -4400,7 +4414,7 @@
 				minimumVersion = 6.13.3;
 			};
 		};
-		52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises" */ = {
+		52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises.git" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/google/promises.git";
 			requirement = {
@@ -4408,7 +4422,7 @@
 				minimumVersion = 1.2.12;
 			};
 		};
-		9631C745251CE997009B40C4 /* XCRemoteSwiftPackageReference "SwiftSoup" */ = {
+		9631C745251CE997009B40C4 /* XCRemoteSwiftPackageReference "SwiftSoup.git" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/scinfu/SwiftSoup.git";
 			requirement = {
@@ -4416,7 +4430,7 @@
 				minimumVersion = 2.3.2;
 			};
 		};
-		96474E3D254D9ADB00A920B3 /* XCRemoteSwiftPackageReference "FavIcon" */ = {
+		96474E3D254D9ADB00A920B3 /* XCRemoteSwiftPackageReference "FavIcon.git" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/leonbreedt/FavIcon.git";
 			requirement = {
@@ -4424,7 +4438,7 @@
 				minimumVersion = 3.1.0;
 			};
 		};
-		964FE5DF2625D8AA00966E03 /* XCRemoteSwiftPackageReference "GRDB.swift" */ = {
+		964FE5DF2625D8AA00966E03 /* XCRemoteSwiftPackageReference "GRDB.swift.git" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/groue/GRDB.swift.git";
 			requirement = {
@@ -4442,17 +4456,17 @@
 		};
 		5239C11525C2C4AE009C51E1 /* Nimble */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */;
+			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble.git" */;
 			productName = Nimble;
 		};
 		5239C12E25C2C4C6009C51E1 /* Quick */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick" */;
+			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick.git" */;
 			productName = Quick;
 		};
 		523E91CB25D17004001124E0 /* PMKFoundation */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 523E91CA25D17004001124E0 /* XCRemoteSwiftPackageReference "Foundation" */;
+			package = 523E91CA25D17004001124E0 /* XCRemoteSwiftPackageReference "Foundation.git" */;
 			productName = PMKFoundation;
 		};
 		524299AE25A47CA500F4DBF5 /* Preferences */ = {
@@ -4467,12 +4481,12 @@
 		};
 		527FB71925B9A97A00959146 /* Sentry */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 527FB71825B9A97A00959146 /* XCRemoteSwiftPackageReference "sentry-cocoa" */;
+			package = 527FB71825B9A97A00959146 /* XCRemoteSwiftPackageReference "sentry-cocoa.git" */;
 			productName = Sentry;
 		};
 		527FB71E25B9A9B600959146 /* JWTDecode */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 527FB71D25B9A9B600959146 /* XCRemoteSwiftPackageReference "JWTDecode.swift" */;
+			package = 527FB71D25B9A9B600959146 /* XCRemoteSwiftPackageReference "JWTDecode.swift.git" */;
 			productName = JWTDecode;
 		};
 		527FB72325B9AAA200959146 /* Fakery */ = {
@@ -4487,67 +4501,67 @@
 		};
 		52E5297125CD980B00307858 /* Promises */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises" */;
+			package = 52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises.git" */;
 			productName = Promises;
 		};
 		52E5297325CD980B00307858 /* PromisesTestHelpers */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises" */;
+			package = 52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises.git" */;
 			productName = PromisesTestHelpers;
 		};
 		96319D52261623BB00D1CF31 /* CocoaLumberjackSwift */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */;
+			package = 527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack.git" */;
 			productName = CocoaLumberjackSwift;
 		};
 		9631C746251CE997009B40C4 /* SwiftSoup */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 9631C745251CE997009B40C4 /* XCRemoteSwiftPackageReference "SwiftSoup" */;
+			package = 9631C745251CE997009B40C4 /* XCRemoteSwiftPackageReference "SwiftSoup.git" */;
 			productName = SwiftSoup;
 		};
 		9639FAF42616614D00C85B95 /* CocoaLumberjackSwift */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */;
+			package = 527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack.git" */;
 			productName = CocoaLumberjackSwift;
 		};
 		96474E3E254D9ADB00A920B3 /* FavIcon */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 96474E3D254D9ADB00A920B3 /* XCRemoteSwiftPackageReference "FavIcon" */;
+			package = 96474E3D254D9ADB00A920B3 /* XCRemoteSwiftPackageReference "FavIcon.git" */;
 			productName = FavIcon;
 		};
 		964FE5E02625D8AA00966E03 /* GRDB */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 964FE5DF2625D8AA00966E03 /* XCRemoteSwiftPackageReference "GRDB.swift" */;
+			package = 964FE5DF2625D8AA00966E03 /* XCRemoteSwiftPackageReference "GRDB.swift.git" */;
 			productName = GRDB;
 		};
 		A0A6F2A025D1B73400EFC4BE /* Quick */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick" */;
+			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick.git" */;
 			productName = Quick;
 		};
 		A0A6F2A225D1B73A00EFC4BE /* Nimble */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */;
+			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble.git" */;
 			productName = Nimble;
 		};
 		A0A6F2A425D1B74200EFC4BE /* Quick */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick" */;
+			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick.git" */;
 			productName = Quick;
 		};
 		A0A6F2A625D1B74800EFC4BE /* Nimble */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */;
+			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble.git" */;
 			productName = Nimble;
 		};
 		A5CA5DFA2625C302004E9D3E /* Quick */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick" */;
+			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick.git" */;
 			productName = Quick;
 		};
 		A5CA5DFC2625C306004E9D3E /* Nimble */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */;
+			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble.git" */;
 			productName = Nimble;
 		};
 /* End XCSwiftPackageProductDependency section */
