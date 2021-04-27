@@ -182,7 +182,7 @@ class BeamWindow: NSWindow {
     }
 
     @IBAction func showJournal(_ sender: Any?) {
-        state.startNewSearch()
+        state.navigateToJournal()
     }
 
     @IBAction func toggleScoreCard(_ sender: Any?) {
