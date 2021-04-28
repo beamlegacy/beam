@@ -14,13 +14,13 @@ struct BrowserTabView: View {
     static let minimumWidth: CGFloat = 26
     static let minimumActiveWidth: CGFloat = 120
 
-    @EnvironmentObject var state: BeamState
     @Environment(\.isEnabled) private var isEnabled
     @ObservedObject var tab: BrowserTab
     @State var isHovering = false
 
     var isSelected: Bool = false
     var isDragging: Bool = false
+    var onClose: ((BrowserTab) -> Void)?
 
     private var foregroundColor: Color {
         isSelected ? BeamColor.Corduroy.swiftUI : BeamColor.LightStoneGray.swiftUI
@@ -66,7 +66,7 @@ struct BrowserTabView: View {
                     HStack {
                         if isHovering && !isDragging && sideSpace >= 20 {
                             ButtonLabel(icon: "tabs-close_xs", customStyle: ButtonLabelStyle.tinyIconStyle) {
-                                closeTab(id: tab.id)
+                                onClose?(tab)
                             }
                             .padding(.horizontal, BeamSpacing._60)
                             .frame(alignment: .trailing)
@@ -99,25 +99,6 @@ struct BrowserTabView: View {
         .frame(minWidth: isSelected ? Self.minimumActiveWidth : Self.minimumWidth,
                maxWidth: .infinity,
                maxHeight: .infinity)
-    }
-
-    func closeTab(id: UUID) {
-        for (i, t) in state.tabs.enumerated() where t.id == id {
-            if i > 0 {
-                state.currentTab = state.tabs[i - 1]
-            } else if state.tabs.count > 1 {
-                state.currentTab = state.tabs[i + 1]
-            } else {
-                state.currentTab = nil
-                if let note = state.currentNote {
-                    state.navigateToNote(note)
-                } else {
-                    state.navigateToJournal()
-                }
-            }
-            _ = state.removeTab(i)
-        }
-
     }
 }
 

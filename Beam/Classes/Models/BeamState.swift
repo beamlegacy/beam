@@ -501,6 +501,7 @@ let NoteDisplayThreshold = Float(0.0)
         return false
     }
 
+    @discardableResult
     func removeTab(_ index: Int) -> Bool {
         let tab = tabs[index]
         guard currentTab !== tab else { return closeCurrentTab() }

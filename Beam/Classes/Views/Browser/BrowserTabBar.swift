@@ -132,11 +132,15 @@ struct BrowserTabBar: View {
                                 if index == dragModel.draggingOverIndex && index <= dragStartIndex {
                                     emptySpacer.frame(width: dragModel.activeTabWidth)
                                 }
-                                BrowserTabView(tab: tab, isSelected: selected, isDragging: isTheDraggedTab)
+                                BrowserTabView(tab: tab,
+                                               isSelected: selected,
+                                               isDragging: isTheDraggedTab,
+                                               onClose: onTabClose)
                                     .zIndex(selected ? 1 : 0)
                                     .frame(width: isTheDraggedTab ? 0 :
                                             widthForTab(selected: selected, containerGeometry: geometry))
-                                    .animation(disableAnimation ? nil : .easeInOut(duration: 0.15))
+                                    .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .identity))
+                                    .animation(disableAnimation ? nil : .easeInOut(duration: 0.3))
                                     .disabled(isDraggingATab && !selected)
                                     .opacity(isTheDraggedTab ? 0 : 1)
                                 if index == dragModel.draggingOverIndex && index > dragStartIndex {
@@ -224,6 +228,11 @@ struct BrowserTabBar: View {
                 }
             }
         }
+    }
+
+    private func onTabClose(_ tab: BrowserTab) {
+        let tabIndex = position(of: tab)
+        state.removeTab(tabIndex)
     }
 
     private func isSelected(_ tab: BrowserTab) -> Bool {
