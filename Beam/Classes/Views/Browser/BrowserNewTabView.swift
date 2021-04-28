@@ -21,8 +21,7 @@ struct BrowserNewTabView: View {
     var body: some View {
         ButtonLabel(icon: "tabs-new",
                     state: buttonState,
-                    customStyle: ButtonLabelStyle.tinyIconStyle,
-                    action: action)
+                    customStyle: ButtonLabelStyle.tinyIconStyle)
             .padding(.horizontal, BeamSpacing._100)
             .padding(.vertical, BeamSpacing._60)
             .frame(maxHeight: .infinity)
