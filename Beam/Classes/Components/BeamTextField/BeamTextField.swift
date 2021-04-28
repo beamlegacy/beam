@@ -78,6 +78,7 @@ struct BeamTextField: NSViewRepresentable {
                 // Otherwise the cursor is not completely removed from the field.
                 textField.window?.makeFirstResponder(nil)
             } else if !isEditing {
+                textField.resignFirstResponder()
                 textField.invalidateIntrinsicContentSize()
             }
 

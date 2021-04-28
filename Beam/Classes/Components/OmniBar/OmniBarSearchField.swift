@@ -14,20 +14,11 @@ struct OmniBarSearchField: View {
 
     @Binding var isEditing: Bool {
         didSet {
-            shouldCenter = !isEditing
+            editingDidChange(isEditing)
         }
     }
     @Binding var modifierFlagsPressed: NSEvent.ModifierFlags?
     var enableAnimations: Bool = true
-
-    // this enables the call of didSet
-    private var customEditingBinding: Binding<Bool> {
-        return Binding<Bool>(get: {
-            isEditing
-        }, set: {
-            isEditing  = $0
-        })
-    }
 
     @State private var shouldCenter: Bool = false
 
@@ -99,7 +90,7 @@ struct OmniBarSearchField: View {
             ZStack(alignment: .leading) {
                 BeamTextField(
                     text: textFieldText,
-                    isEditing: customEditingBinding,
+                    isEditing: $isEditing.onChange(editingDidChange),
                     placeholder: "Search Beam or the web",
                     font: BeamFont.medium(size: 13).nsFont,
                     textColor: textColor.nsColor,
@@ -156,6 +147,12 @@ struct OmniBarSearchField: View {
             }
         }
         .animation(enableAnimations ? .timingCurve(0.25, 0.1, 0.25, 1.0, duration: 0.3) : nil)
+    }
+
+    private func editingDidChange(_ isNowEditing: Bool) {
+        // using an additional state var to avoid changing the centering too early
+        // when first responder is stolen by another input, breaking the animations
+        shouldCenter = !isNowEditing
     }
 
     func onEnterPressed(withCommand: Bool) {

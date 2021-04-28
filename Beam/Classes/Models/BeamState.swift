@@ -352,10 +352,11 @@ let NoteDisplayThreshold = Float(0.0)
 
     func startQuery() {
         let queryString = autocompleteManager.searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
-        autocompleteManager.searchQuery = ""
+
         focusOmniBox = false
         if let index = autocompleteManager.autocompleteSelectedIndex {
             let result = autocompleteManager.autocompleteResults[index]
+            autocompleteManager.resetQuery()
             selectAutocompleteResult(result)
             return
         }
@@ -371,6 +372,7 @@ let NoteDisplayThreshold = Float(0.0)
             createTab(withURL: url, originalQuery: queryString, createNote: createNote)
         }
         autocompleteManager.cancelAutocomplete()
+        autocompleteManager.resetQuery()
         mode = .web
     }
 
