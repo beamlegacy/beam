@@ -70,6 +70,7 @@ struct BeamTextField: NSViewRepresentable {
         DispatchQueue.main.async {
             // Force focus on textField
             let isCurrentlyFirstResponder = textField.isFirstResponder
+            let wasEditing = context.coordinator.lastUpdateWasEditing
             if isEditing && !isCurrentlyFirstResponder {
                 textField.becomeFirstResponder()
             } else if !isEditing && isCurrentlyFirstResponder {
@@ -77,10 +78,11 @@ struct BeamTextField: NSViewRepresentable {
                 // If no other field is a first responder, we can safely clear the window's responder.
                 // Otherwise the cursor is not completely removed from the field.
                 textField.window?.makeFirstResponder(nil)
-            } else if !isEditing {
+            } else if !isEditing && wasEditing {
                 textField.resignFirstResponder()
                 textField.invalidateIntrinsicContentSize()
             }
+            context.coordinator.lastUpdateWasEditing = isEditing
 
             // Set the range on the textField
             if let range = self.selectedRanges?.first {
@@ -146,6 +148,7 @@ struct BeamTextField: NSViewRepresentable {
     class Coordinator: NSObject, NSTextFieldDelegate {
         let parent: BeamTextField
         var nextUpdateShouldClearSelection = false
+        var lastUpdateWasEditing = false
 
         init(_ textField: BeamTextField) {
             self.parent = textField
