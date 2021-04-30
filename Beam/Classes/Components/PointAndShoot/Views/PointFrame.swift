@@ -15,6 +15,7 @@ struct PointFrame: View {
                     .frame(width: rect.width + (padding * 4), height: rect.height + (padding * 4))
                     .position(x: rect.width / 2, y: rect.height / 2)
                     .allowsHitTesting(false)
+                    .accessibility(identifier: "PointFrame")
         }
     }
 }

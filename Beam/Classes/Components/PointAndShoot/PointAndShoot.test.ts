@@ -23,6 +23,9 @@ function pointAndShootTestBed(frameEls = []) {
             if (selector === "iframe") {
                 return frameEls
             }
+        },
+        querySelector: (selector) => {
+            return
         }
     })
     const win = new BeamWindowMock(testDocument)
@@ -197,14 +200,14 @@ test("point then shoot, then cancel", () => {
     Object.assign(clickEvent, {name: "mouseclick", clientX: 103, clientY: 104, target: shotElement, altKey: true})
     pns.onClick(clickEvent)
     expect(pns.status).toEqual("shooting")
-    expect(testUI.eventsCount).toEqual(4)
-    expect(testUI.latestEvent).toEqual({name: "shoot", el: pointedElement, x: 103, y: 104, selectedEls: [shotElement]})
+    expect(testUI.eventsCount).toEqual(5)
+    expect(testUI.events[3]).toEqual({name: "shoot", el: pointedElement, x: 103, y: 104, selectedEls: []})
+    expect(pns.selectedEls).toEqual([])
 
     // Cancel shoot
-    pns.unshoot()
+    pns.setStatus("none")
     expect(pns.status).toEqual("none")
     expect(testUI.eventsCount).toEqual(6)
-    expect(testUI.events[4]).toEqual({name: "unshoot", el: pointedElement})
     expect(testUI.events[5]).toEqual({name: "setStatus", status: "none"})
-
+    expect(pns.selectedEls).toEqual([])
 })

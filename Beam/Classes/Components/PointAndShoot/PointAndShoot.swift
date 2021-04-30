@@ -21,36 +21,49 @@ class PointAndShoot {
             return _status
         }
         set {
-            Logger.shared.logDebug("setStatus(\(newValue))", category: .pointAndShoot)
             if newValue != _status {
+                Logger.shared.logDebug("setStatus(): from \(_status.rawValue) to \(newValue.rawValue)", category: .pointAndShoot)
                 switch newValue {
                 case .none:
-                    if _status == .pointing {   // Allow none from pointing only
+                    if _status == .pointing {
                         leavePointing()
+                        leaveShoot()
+                    }
+
+                    if _status == .shooting {
+                        leavePointing()
+                        leaveShoot()
                     }
                 default:
                     if _status == .shooting {
-                        Logger.shared.logDebug("setStatus(): from .shooting to \(newValue)", category: .pointAndShoot)
+                        Logger.shared.logDebug("setStatus(): from .shooting to \(newValue.rawValue)", category: .pointAndShoot)
                         leaveShoot()
                     }
-                    _status = newValue
+                }
+                _status = newValue
+                executeJS("setStatus('\(newValue.rawValue)')")
+                if Configuration.pnsStatus {
+                    ui.swiftPointStatus = _status.rawValue
                 }
             }
+
+            if _status == .shooting {
+                drawCurrentGroup()
+            }
+
         }
     }
 
     private func leavePointing() {
         Logger.shared.logDebug("leavePointing()", category: .pointAndShoot)
-        clearPoint()
-        leaveShoot()    // Pointing mode also displays current shoots
-        _status = .none
+        pointTarget = nil
+        ui.clearPoint()
     }
 
     private func leaveShoot() {
         Logger.shared.logDebug("leaveShoot()", category: .pointAndShoot)
         ui.clear()
         currentGroup = nil
-        executeJS("setStatus('none')")
     }
 
     private func executeJS(_ method: String) {
@@ -151,7 +164,16 @@ class PointAndShoot {
     }
 
     private func drawCurrentGroup() {
-        guard let group = currentGroup else { return }
+        guard let group = currentGroup else {
+            Logger.shared.logInfo("\(String(describing: currentGroup)), Skipping drawCurrentGroup() currentGroup not defined", category: .pointAndShoot)
+            return
+        }
+
+        if status != .shooting {
+            Logger.shared.logInfo("PNS status is \(status.rawValue), Skipping drawCurrentGroup()", category: .pointAndShoot)
+            return
+        }
+
         ui.clear()
         let shootTargets = group.targets
         if shootTargets.count > 0 {
@@ -175,13 +197,8 @@ class PointAndShoot {
 
     func unpoint() {
         if status == .pointing {
-            status = .none
+            resetStatus()
         }
-    }
-
-    private func clearPoint() {
-        pointTarget = nil
-        ui.clearPoint()
     }
 
     /**
@@ -202,15 +219,14 @@ class PointAndShoot {
      */
     func removeAll() {
         groups.removeAll()
-        status = .none
+        resetStatus()
     }
 
     func shoot(targets: [Target], origin: String, done: Bool = true) {
         if currentGroup == nil {
             currentGroup = ShootGroup()
-            Logger.shared.logInfo("shoopGroups.count \(groups.count)", category: .pointAndShoot)
+            Logger.shared.logInfo("shootGroups.count \(groups.count)", category: .pointAndShoot)
         }
-        status = .shooting
         ui.isTextSelectionFinished = done
         let pageScrollX = page.scrollX
         let pageScrollY = page.scrollY
@@ -223,7 +239,12 @@ class PointAndShoot {
             let pageTarget = Target(area: pageArea, mouseLocation: pageMouseLocation, html: target.html)
             addShoot(target: pageTarget)
         }
-        drawCurrentGroup()
+
+        if status == .pointing {
+            status = .shooting
+            drawCurrentGroup()
+            return
+        }
     }
 
     func complete(noteInfo: NoteInfo) throws {
@@ -240,7 +261,6 @@ class PointAndShoot {
     }
 
     func resetStatus() {
-        status = .pointing  // Exit from shoot first
         status = .none
     }
 

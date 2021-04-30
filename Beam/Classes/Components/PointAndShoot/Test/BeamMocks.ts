@@ -33,6 +33,8 @@ export class BeamNodeMock extends BeamEventTargetMock implements BeamNode {
   static readonly DOCUMENT_TYPE_NODE = BeamNodeType.document_type
   static readonly DOCUMENT_FRAGMENT_NODE = BeamNodeType.document_fragment
 
+  innerText: string
+
   childNodes: BeamNode[] = []
   parentNode?: BeamNode
 
@@ -472,6 +474,11 @@ export class BeamDocumentMock extends BeamNodeMock implements BeamDocument {
    * @return {Selection}
    */
   getSelection() {
+      return {
+        toString: () => {
+          return ""
+      }
+    }
   }
 
   /**
@@ -484,6 +491,14 @@ export class BeamDocumentMock extends BeamNodeMock implements BeamDocument {
 
   createRange(): BeamRange {
     return new BeamRangeMock()
+  }
+
+  /**
+   * @param selector {string}
+   * @return {HTMLElement[]}
+   */
+  querySelector(selector): BeamNode {
+    return
   }
 }
 

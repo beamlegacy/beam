@@ -30,6 +30,7 @@ struct AdvancedPreferencesView: View {
     @State private var sentryEnabled = Configuration.sentryEnabled
     @State private var loggedIn: Bool = AccountManager().loggedIn
     @State private var networkEnabled: Bool = Configuration.networkEnabled
+    @State private var pnsStatus: Bool = Configuration.pnsStatus
     @State private var encryptionEnabled = Configuration.encryptionEnabled
     @State private var privateKey = EncryptionManager.shared.privateKey().asString()
     @State private var stateRestorationEnabled = Configuration.stateRestorationEnabled
@@ -89,6 +90,9 @@ struct AdvancedPreferencesView: View {
             }
             Preferences.Section(title: "Network Enabled") {
                 NetworkEnabledButton
+            }
+            Preferences.Section(title: "Show PNS status") {
+                PnsStatusButton
             }
             Preferences.Section(title: "Encryption Enabled") {
                 EncryptionEnabledButton
@@ -156,6 +160,15 @@ struct AdvancedPreferencesView: View {
             networkEnabled = Configuration.networkEnabled
         }, label: {
             Text(String(describing: networkEnabled)).frame(minWidth: 100)
+        })
+    }
+    
+    private var PnsStatusButton: some View {
+        Button(action: {
+            Configuration.pnsStatus = !Configuration.pnsStatus
+            pnsStatus = Configuration.pnsStatus
+        }, label: {
+            Text(String(describing: pnsStatus)).frame(minWidth: 100)
         })
     }
 

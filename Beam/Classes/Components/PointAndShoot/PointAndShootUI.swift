@@ -48,6 +48,7 @@ class PointAndShootUI: ObservableObject {
     @Published var groupsUI: [ShootGroupUI] = []
     @Published var shootConfirmation: SelectionConfirmationUI?
     @Published var isTextSelectionFinished = true
+    @Published var swiftPointStatus: String = ""
 
     private func drawSelection(target: PointAndShoot.Target, animated: Bool,
                                color: Color, bgColor: Color) -> SelectionUI {

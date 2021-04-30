@@ -28,6 +28,7 @@ struct Configuration {
     static private(set) var sentryEnabled = NSString("$(SENTRY_ENABLED)").boolValue
     static var networkEnabled = NSString("$(NETWORK_ENABLED)").boolValue
     static var encryptionEnabledDefault = NSString("$(ENCRYPTION_ENABLED)").boolValue
+    static var pnsStatus = NSString("$(PNS_STATUS)").boolValue
 
     static private(set) var sentryDsn = "https://\(sentryKey)@\(sentryHostname)/\(sentryProject)"
 

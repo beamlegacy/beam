@@ -3,6 +3,8 @@ import {WebEvents} from "./WebEvents"
 import {PointAndShootUI} from "./PointAndShootUI";
 import {BeamWindow, BeamHTMLElement} from "./BeamTypes";
 
+const PNS_STATUS = Number(process.env.PNS_STATUS)
+
 /**
  * Listen to events that hover and select web blocks with Option.
  *
@@ -98,6 +100,9 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
 
     win.document.addEventListener("keypress", this.onKeyPress.bind(this))
     this.log("events registered")
+    if (PNS_STATUS) {
+      win.document.body.innerHTML = win.document.body.innerHTML + `<div id="debug-beam" style="position: fixed;bottom: 0px;right: 0;padding: 1rem;background: #7373FF; color: white;">JS ${this.status}</div>`;
+    }
   }
 
   log(...args) {
@@ -110,7 +115,10 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
    * @param y {number}
    */
   point(el, x, y) {
-    this.ui.point(el, x, y)
+    if (!this.hasSelection()) {
+      this.log("KeyDown sending this.ui.point")
+      this.ui.point(el, x, y)
+    }
   }
 
   /**
@@ -151,37 +159,47 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
     return this.status === "pointing"
   }
 
+  isShooting() {
+    return this.status === "shooting"
+  }
+
+  hasSelection() {
+    return  Boolean( this.win.document.getSelection().toString() )
+  }
+
   /**
    * @param ev {BeamMouseEvent}
    */
   onMouseMove(ev) {
-    const withOption = ev.altKey
-    // this.log("onMouseMove", withOption)
-    this.pointingEv = ev
-    // if (withOption) { // Don't unpoint if no alt, as for some reason it returns false when always pressed
-    this.setPointing(withOption)
-    // }
-    if (this.isPointing()) {
-      ev.preventDefault()
-      ev.stopPropagation()
-      if (this.pointedEl !== this.pointingEv.target) {
-        if (this.pointedEl) {
-          this.log("pointed is changing from", this.pointedEl, "to", this.pointingEv.target)
-          this.unpoint(this.pointedEl) // Remove previous
-        }
-        this.pointedEl = this.pointingEv.target
-        this.point(this.pointedEl, ev.clientX, ev.clientY)
-        let collected = this.pointedEl.dataset[this.datasetKey]
-        if (collected) {
-          this.showStatus(this.pointedEl)
+    if (!this.hasSelection()) {
+      const withOption = ev.altKey
+      // this.log("onMouseMove", withOption)
+      this.pointingEv = ev
+      // if (withOption) { // Don't unpoint if no alt, as for some reason it returns false when always pressed
+      this.setPointing(withOption)
+      // }
+      if (this.isPointing()) {
+        ev.preventDefault()
+        ev.stopPropagation()
+        if (this.pointedEl !== this.pointingEv.target) {
+          if (this.pointedEl) {
+            this.log("pointed is changing from", this.pointedEl, "to", this.pointingEv.target)
+            this.unpoint(this.pointedEl) // Remove previous
+          }
+          this.pointedEl = this.pointingEv.target
+          this.point(this.pointedEl, ev.clientX, ev.clientY)
+          let collected = this.pointedEl.dataset[this.datasetKey]
+          if (collected) {
+            this.showStatus(this.pointedEl)
+          } else {
+            this.hideStatus()
+          }
         } else {
-          this.hideStatus()
+          this.hidePopup()
         }
       } else {
-        this.hidePopup()
+        this.hideStatus()
       }
-    } else {
-      this.hideStatus()
     }
   }
 
@@ -228,12 +246,11 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
     if (!multi && this.selectedEls.length > 0) {
       this.unshoot(this.selectedEls[0]) // previous selection will be replaced
     }
-    this.selectedEls.push(el)
-    this.log("shoot()", "selected.length", this.selectedEls.length)
-    this.status = "shooting"
     this.ui.shoot(el, x, y, this.selectedEls, (selectedNote) => {
-       this.assignNote(selectedNote, el)
+      this.selectedEls.push(el)
+      this.assignNote(selectedNote, el)
     })
+    this.setShooting()
   }
 
   /**
@@ -251,7 +268,20 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
     this.shoot(el, x, y, multi)
   }
 
+  /**
+   * Set status to "shooting"
+   *
+   * @param {Boolean} [bool=true]
+   * @memberof PointAndShoot
+   */
+  setShooting(bool: Boolean = true) {
+    if (bool) {
+      this.setStatus("shooting");
+    }
+  }
+
   onClick(ev) {
+    this.log("onClick called!", ev.altKey, this.status)
     this.setPointing(ev.altKey)
     if (this.isPointing()) {
       this.pointingEv = ev
@@ -284,8 +314,18 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
   }
 
   setStatus(s) {
-    this.status = s
-    this.ui.setStatus(this.status)
+    if (this.status != s) {
+      this.status = s
+      this.ui.setStatus(s)
+      
+      if (PNS_STATUS) {
+        let debugEl = this.win.document.querySelector("#debug-beam")
+        
+        if (debugEl) {
+          debugEl.innerText = `JS ${this.status}`
+        }
+      }
+    }
   }
 
   /**
@@ -302,7 +342,9 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
       changed = this.status !== "none"
       if (changed) {
         this.pointedEl = null
-        this.setStatus("none")
+        if (this.isPointing()) {
+          this.setStatus("none")
+        }
       }
     }
     // this.log("setPointing", c, changed ? "changed" : "did not change")
@@ -312,10 +354,15 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
   onKeyDown(ev) {
     this.log("onKeyDown", ev.key)
     if (ev.key === "Alt") {
-      this.setPointing(true)
-      const pointingEv = this.pointingEv
-      if (pointingEv) {
-        this.point(pointingEv.target, pointingEv.clientX, pointingEv.clientY)
+      if (this.hasSelection()) {
+        this.setShooting();
+      } else {
+        this.setPointing(true)
+        const pointingEv = this.pointingEv
+        if (pointingEv) {
+          this.log("KeyDown sending point")
+          this.point(pointingEv.target, pointingEv.clientX, pointingEv.clientY)
+        }
       }
     }
   }
@@ -326,10 +373,11 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
   }
 
   onKeyUp(ev) {
-    this.log("onKeyUp", ev.key)
     if (ev.key === "Alt") {
-      this.setPointing(false)
-      this.unpoint()
+      if (this.hasSelection() || this.isShooting()) {
+        this.unpoint()
+     }
+     this.setPointing(false)
     }
   }
 }

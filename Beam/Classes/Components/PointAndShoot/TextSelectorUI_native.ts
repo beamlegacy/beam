@@ -15,7 +15,7 @@ export class TextSelectorUI_native implements TextSelectorUI {
   }
 
   leaveSelection() {
-    this.log("leaveSelection")
+    // this.log("leaveSelection")
     // TODO: leaveSelection message?
   }
 
