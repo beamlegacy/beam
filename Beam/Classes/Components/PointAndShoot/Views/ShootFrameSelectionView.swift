@@ -23,6 +23,7 @@ struct ShootFrameSelectionView: View {
                 .onHover { hovering in
                     isHovering = hovering
                 }
+                .accessibility(identifier: "ShootFrameSelection")
             Text(text)
                 .foregroundColor(Color.white)
         }

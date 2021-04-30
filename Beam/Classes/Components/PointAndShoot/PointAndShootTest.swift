@@ -54,10 +54,6 @@ class PointAndShootUIMock: PointAndShootUI {
         events.append("drawPoint \(target)")
     }
 
-    override func clearPoint() {
-        events.append("clearPoint")
-    }
-
     override func createGroup(noteInfo: NoteInfo, edited: Bool) -> ShootGroupUI {
         events.append("createGroup \(String(describing: noteInfo)) \(edited)")
         return super.createGroup(noteInfo: noteInfo, edited: edited)
@@ -102,8 +98,7 @@ class PointAndShootTest: XCTestCase {
 
         pns.unpoint()
         XCTAssertEqual(pns.isPointing, false)
-        XCTAssertEqual(testUI.events.count, 2)
-        XCTAssertEqual(testUI.events[1], "clearPoint")
+        XCTAssertEqual(testUI.events.count, 1)
     }
 
     func testPointAndShootBlock() throws {
@@ -114,12 +109,12 @@ class PointAndShootTest: XCTestCase {
                 mouseLocation: NSPoint(x: 201, y: 202),
                 html: "<p>Pointed text</p>"
         )
+        // Shoot
         pns.point(target: target1)
         pns.shoot(targets: [target1], origin: "https://rr0.org")
 
-        pns.status = .none
-        XCTAssertEqual(pns.status, .shooting)       // Disallow unpoint while shooting
-        XCTAssertEqual(testUI.events.count, 2)
+        XCTAssertEqual(pns.status, .shooting)
+        XCTAssertEqual(testUI.events.count, 3)
         XCTAssertEqual(testUI.groupsUI.count, 1)    // One shoot UI
         XCTAssertEqual(pns.currentGroup?.targets.count, 1)   // One current shoot
         XCTAssertEqual(pns.groups.count, 0)         // But not validated yet
@@ -128,22 +123,22 @@ class PointAndShootTest: XCTestCase {
         pns.resetStatus()
         XCTAssertEqual(pns.status, .none)           // Disallow unpoint while shooting
         XCTAssertEqual(testUI.events.count, 3)
-        XCTAssertEqual(testUI.events[2], "clearPoint")
         XCTAssertEqual(testUI.groupsUI.count, 0)    // No more shoot UI
         XCTAssertEqual(pns.currentGroup == nil, true)       // No current shoot
         XCTAssertEqual(pns.groups.count, 0)         // No shoot group memorized
 
         // Shoot again
-        pns.shoot(targets: [target1], origin: "https://rr0.org")
+        pns.point(target: target1) // first point
+        pns.shoot(targets: [target1], origin: "https://rr0.org") // then shoot
         XCTAssertEqual(pns.status, .shooting)       // Disallow unpoint while shooting
-        XCTAssertEqual(testUI.events.count, 4)
+        XCTAssertEqual(testUI.events.count, 6)
         XCTAssertEqual(testUI.groupsUI.count, 1)    // One shoot UI
         XCTAssertEqual(pns.groups.count, 0)         // Not validated yet
 
         // Validate shoot
         try pns.complete(noteInfo: NoteInfo(id: nil, title: "My note"))
         XCTAssertEqual(pns.status, .none)       // Disallow unpoint while shooting
-        XCTAssertEqual(testUI.events.count, 5)
+        XCTAssertEqual(testUI.events.count, 6)
         XCTAssertEqual(testUI.groupsUI.count, 0)    // No more shoot UI
         XCTAssertEqual(pns.groups.count, 1)         // One shoot group memorized
 
@@ -153,13 +148,14 @@ class PointAndShootTest: XCTestCase {
                 html: "<p>Pointed text</p>"
         )
         // Shoot twice
+        pns.point(target: target2) // first point
         pns.shoot(targets: [target2], origin: "https://javarome.com")
         XCTAssertEqual(testUI.groupsUI.count, 1)    // Seeing the current shoot only
         XCTAssertEqual(pns.groups.count, 1)         // Second one not validated yet
 
         // Validate second shoot
         try pns.complete(noteInfo: NoteInfo(id: nil, title: "Other note"))
-        XCTAssertEqual(testUI.events.count, 7)
+        XCTAssertEqual(testUI.events.count, 10)
         XCTAssertEqual(testUI.groupsUI.count, 0)    // No more shoot UI
         XCTAssertEqual(pns.groups.count, 2)         // Two shoot groups memorized
     }

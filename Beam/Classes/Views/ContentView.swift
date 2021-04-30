@@ -31,6 +31,7 @@ struct ModeView: View {
                                 .zIndex(9)
 
                             if let tab = state.currentTab {
+
                                 ZStack {
                                     WebView(webView: tab.webView)
                                             .accessibility(identifier: "webView")

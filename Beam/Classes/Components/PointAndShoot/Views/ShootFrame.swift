@@ -9,6 +9,12 @@ struct ShootFrame: View {
 
     var body: some View {
         ZStack {
+            if Configuration.pnsStatus {
+                Text("Swift: \(pointAndShootUI.swiftPointStatus)")
+                    .padding(5)
+                    .background(Color(BeamColor.Beam.nsColor))
+                    .foregroundColor(Color.white)
+            }
             let groups = pointAndShootUI.groupsUI
             ForEach(groups, id: \.id) { group in
                 ShootFrameSelectionView(group: group)
@@ -16,7 +22,7 @@ struct ShootFrame: View {
                     if let selectionUI = group.uis.last {
                         ShootAbsolutePositioning(location: selectionUI.target.mouseLocation,
                                                  contentSize: ShootCardPicker.size) {
-                            ShootCardPicker(focusOnAppear: pointAndShootUI.isTextSelectionFinished)
+                            ShootCardPicker(allowFocus: pointAndShootUI.isTextSelectionFinished)
                                     .onComplete { (noteTitle, note) in
                                         onCompleteCardSelection(noteTitle, withNote: note)
                                     }

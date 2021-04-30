@@ -43,7 +43,6 @@ export class TextSelector {
       for (let i = 0; i < selectionsCount; ++i) {
         this.ui.textSelected(this.selectionsList[i])
       }
-      getSelection().removeAllRanges()
       this.leaveSelection()
     }
   }

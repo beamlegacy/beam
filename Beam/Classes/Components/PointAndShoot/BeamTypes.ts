@@ -151,7 +151,7 @@ export interface BeamDOMRect extends DOMRect {
 }
 
 export interface BeamNode extends BeamEventTarget {
-
+  innerText: string
   nodeName: string
   nodeType: BeamNodeType
   childNodes: BeamNode[]
@@ -288,9 +288,9 @@ export interface BeamBody extends BeamHTMLElement {
 }
 
 export interface BeamRange {
-
+  
   selectNode(node: BeamNode): void
-
+  
   getBoundingClientRect(): BeamRect
 }
 
@@ -320,6 +320,12 @@ export interface BeamDocument extends BeamNode {
    * @return {HTMLElement[]}
    */
   querySelectorAll(selector: string): BeamNode[]
+
+  /**
+   * @param selector {string}
+   * @return {HTMLElement}
+   */
+  querySelector(selector: string): BeamNode
 
   createRange(): BeamRange
 }

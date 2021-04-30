@@ -133,10 +133,10 @@ export class WebEvents<UI extends WebEventsUI> {
 
     // This timeout is here so SPA style sites have time to build the DOM
     // TODO: Add reliable TTI eventlistener for JS heavy sites
-    setTimeout(() => {
-      this.log('After 500ms running checkFrames again', this.win.origin)
-      this.checkFrames()
-    }, 500)
+    // setTimeout(() => {
+    //   this.log('After 500ms running checkFrames again', this.win.origin)
+    //   this.checkFrames()
+    // }, 5000)
   }
 
   onPinch(ev) {

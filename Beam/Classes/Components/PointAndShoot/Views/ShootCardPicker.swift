@@ -21,7 +21,14 @@ struct ShootCardPicker: View {
 
     @State private var autocompleteModel = DestinationNoteAutocompleteList.Model()
 
-    @State private var isEditingCardName = false
+    var allowFocus = false
+    @State private var isEditingCardName = true
+    private var customEditingBinding: Binding<Bool> {
+        Binding<Bool> {
+            allowFocus && isEditingCardName
+        } set: { isEditingCardName = $0 }
+    }
+    
     @State private var isEditingNote = false
     @State private var currentCardName: String?
     @State private var cardSearchField = ""
@@ -40,7 +47,7 @@ struct ShootCardPicker: View {
                 HStack(spacing: BeamSpacing._40) {
                     Text("Add to")
                         .font(BeamFont.medium(size: 13).swiftUI)
-                    BeamTextField(text: $cardSearchField, isEditing: $isEditingCardName,
+                    BeamTextField(text: $cardSearchField, isEditing: customEditingBinding,
                                   placeholder: autocompleteModel.todaysCardReplacementName,
                                   font: BeamFont.regular(size: 13).nsFont,
                                   textColor: currentCardName == nil ? BeamColor.Generic.text.nsColor
@@ -132,6 +139,7 @@ struct ShootCardPicker: View {
                 cardSearchFieldSelection = range
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                Logger.shared.logError("isEditingCardName: \(isEditingCardName) focusOnAppear: \(focusOnAppear)", category: .general)
                 if focusOnAppear {
                     isEditingCardName = true
                 }

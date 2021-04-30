@@ -116,6 +116,7 @@ class PointAndShootMessageHandler: NSObject, WKScriptMessageHandler {
             let targets = areas.map {
                 PointAndShoot.Target(area: $0, mouseLocation: CGPoint(x: $0.minX, y: $0.maxY), html: html)
             }
+            Logger.shared.logInfo("Web text selected, shooting targets: \(targets)", category: .web)
             pointAndShoot.shoot(targets: targets, origin: origin, done: true)
 
         case PointAndShootMessages.pointAndShoot_textSelection.rawValue:
@@ -136,6 +137,7 @@ class PointAndShootMessageHandler: NSObject, WKScriptMessageHandler {
                 PointAndShoot.Target(area: $0,
                                      mouseLocation: CGPoint(x: $0.minX, y: $0.maxY), html: html)
             }
+            Logger.shared.logInfo("Web text selection, shooting targets: \(targets)", category: .web)
             pointAndShoot.shoot(targets: targets, origin: origin, done: false)
 
         case PointAndShootMessages.pointAndShoot_pinch.rawValue:
