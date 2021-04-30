@@ -104,9 +104,6 @@ class LinkedReferenceNode: TextNode {
         guard let proxyElement = parent.proxyFor(element) else { fatalError("Can't create a LinkedReferenceNode without a proxy provider in the parent chain") }
         super.init(parent: parent, element: proxyElement)
 
-        guard let actionLayer = layers["CmdEnterLayer"] else { return }
-        actionLayer.layer.removeFromSuperlayer()
-
         element.$children
             .receive(on: DispatchQueue.main)
             .sink { [unowned self] newChildren in
@@ -122,33 +119,27 @@ class LinkedReferenceNode: TextNode {
     }
 
     // MARK: - Setup UI
-    override func updateRendering() {
-        super.updateRendering()
-        contentsFrame = NSRect(x: contentsFrame.origin.x, y: -10,
-                               width: contentsFrame.width, height: contentsFrame.height)
-    }
-
     func isLinkToNote(_ text: BeamText) -> Bool {
         guard let note = editor.note as? BeamNote else { return false }
         let links = text.internalLinks
         let title = note.title
         return links.contains { range -> Bool in
-            range.string == title
+            range.string.lowercased() == title.lowercased()
         }
     }
+
     var isLink: Bool {
         isLinkToNote(text)
     }
 
     func childrenIsLink() -> Bool {
-        if isLink { return true }
         for c in children {
             guard let linkedRef = c as? LinkedReferenceNode else { return false }
             if linkedRef.isLink {
                 return linkedRef.isLink
             }
             if linkedRef.childrenIsLink() {
-                return linkedRef.childrenIsLink()
+                return true
             }
         }
         return isLink

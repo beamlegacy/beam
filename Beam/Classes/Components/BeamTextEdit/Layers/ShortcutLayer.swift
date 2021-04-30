@@ -8,7 +8,7 @@
 import Foundation
 
 class ShortcutLayer: Layer {
-    var activated: () -> Void
+    var activated: (Bool) -> Void
     var text: String
     var textLayer: CATextLayer?
     var icons: [String]
@@ -16,7 +16,7 @@ class ShortcutLayer: Layer {
     var iconSpacing: CGFloat = 3.5
     var textSpacing: CGFloat = 5
 
-    init(name: String, text: String, icons: [String], activated: @escaping () -> Void = { }) {
+    init(name: String, text: String, icons: [String], activated: @escaping (Bool) -> Void = { _ in }) {
         self.text = text
         self.icons = icons
         self.activated = activated
@@ -28,7 +28,7 @@ class ShortcutLayer: Layer {
         mouseUp = { [unowned self] info -> Bool in
             let p = layer.contains(info.position)
             if p {
-                self.activated()
+                self.activated(true)
             }
             return true
         }
