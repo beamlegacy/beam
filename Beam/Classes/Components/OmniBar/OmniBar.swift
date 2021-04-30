@@ -83,7 +83,8 @@ struct OmniBar: View {
                             .padding(.leading, !isEditing && state.mode == .web ? 8 : 7)
                         }
                         .animation(enableAnimations ? .easeInOut(duration: 0.3) : nil)
-                        .padding(.horizontal, BeamSpacing._50)
+                        .padding(.leading, BeamSpacing._50)
+                        .padding(.trailing, BeamSpacing._120)
                         .frame(height: boxHeight)
                         .frame(maxWidth: .infinity)
                         if shouldShowAutocompleteResults {

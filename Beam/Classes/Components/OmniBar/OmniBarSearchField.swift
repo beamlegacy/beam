@@ -35,9 +35,12 @@ struct OmniBarSearchField: View {
 
     private var leadingIconName: String? {
         if let tab = state.currentTab, let url = tab.url, state.mode == .web, autocompleteManager.searchQuery == url.absoluteString {
-            return "field-web"
+            return AutocompleteResult.Source.url.iconName
         }
-        return "field-search"
+        if let autocompleteResult = selectedAutocompleteResult {
+            return autocompleteResult.source.iconName
+        }
+        return AutocompleteResult.Source.autocomplete.iconName
     }
 
     private var selectedAutocompleteResult: AutocompleteResult? {
@@ -74,6 +77,13 @@ struct OmniBarSearchField: View {
         return BeamColor.Generic.placeholder
     }
 
+    private var subtitleColor: BeamColor {
+        if let result = selectedAutocompleteResult, result.source == .createCard {
+            return BeamColor.Autocomplete.newCardSubtitle
+        }
+        return BeamColor.Autocomplete.link
+    }
+
     var body: some View {
         return HStack(spacing: 8) {
             if let icon = favicon {
@@ -82,10 +92,12 @@ struct OmniBarSearchField: View {
                     .scaledToFit()
                     .opacity(shouldShowWebHost ? 0 : 1.0)
                     .frame(width: shouldShowWebHost ? 0 : 16)
+                    .transition(.identity)
             } else if let iconName = leadingIconName {
                 Icon(name: iconName, size: 16, color: textColor.swiftUI)
                     .opacity(shouldShowWebHost ? 0 : 1.0)
                     .frame(width: shouldShowWebHost ? 0 : 16)
+                    .transition(.identity)
             }
             ZStack(alignment: .leading) {
                 BeamTextField(
@@ -131,18 +143,26 @@ struct OmniBarSearchField: View {
                             .foregroundColor(Color.purple)
                             .hidden()
                             .layoutPriority(10)
-                        Text(" – \(subtitle)")
-                            .font(BeamFont.regular(size: 13).swiftUI)
-                            .foregroundColor(BeamColor.Autocomplete.link.swiftUI)
-                            .background(autocompleteManager.searchQuerySelectedRanges?.isEmpty == false ?
-                                            BeamColor.Generic.textSelection.swiftUI :
-                                            nil)
-                            .offset(x: -0.5, y: 0)
                             .animation(nil)
-                            .layoutPriority(0)
+                        GeometryReader { geo in
+                            HStack {
+                            let pixelRoundUp = geo.frame(in: .global).minX.truncatingRemainder(dividingBy: 1)
+                            Text(" – \(subtitle)")
+                                .font(BeamFont.regular(size: 13).swiftUI)
+                                .foregroundColor(subtitleColor.swiftUI)
+                                .background(autocompleteManager.searchQuerySelectedRanges?.isEmpty == false ?
+                                                BeamColor.Generic.textSelection.swiftUI :
+                                                nil)
+                                // We need to stick the subtitle exactly after the text selection
+                                // text length might end up "in between pixels", so we need to offset that point-pixel roundup.
+                                .offset(x: pixelRoundUp, y: 0)
+                                .layoutPriority(0)
+                                .animation(nil)
+                            }
+                            .frame(maxHeight: .infinity)
+                        }
                     }
                     .lineLimit(1)
-
                 }
             }
         }

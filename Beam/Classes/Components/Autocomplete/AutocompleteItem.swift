@@ -45,6 +45,16 @@ struct AutocompleteItem: View {
     private let textColor = BeamColor.Generic.text.swiftUI
     private let secondaryTextColor = BeamColor.Autocomplete.subtitleText.swiftUI
     private let subtitleLinkColor = BeamColor.Autocomplete.link.swiftUI
+    private var informationColor: Color {
+        switch item.source {
+        case .history:
+            return subtitleLinkColor
+        case .createCard:
+            return BeamColor.Autocomplete.newCardSubtitle.swiftUI
+        default:
+            return secondaryTextColor
+        }
+    }
 
     private func boldTextRanges(in text: String) -> [Range<String.Index>] {
         guard let completingText = item.completingText else {
@@ -67,7 +77,7 @@ struct AutocompleteItem: View {
                         .scaledToFit()
                         .frame(maxWidth: 16, maxHeight: 16)
                 } else {
-                    Icon(name: iconNameSource(item.source), size: 16, color: secondaryTextColor)
+                    Icon(name: item.source.iconName, size: 16, color: secondaryTextColor)
                 }
             }
             HStack(alignment: .firstTextBaseline, spacing: 0) {
@@ -83,14 +93,14 @@ struct AutocompleteItem: View {
                         StyledText(verbatim: " – \(info)")
                             .style(.semibold(), ranges: boldTextRanges)
                             .font(BeamFont.regular(size: 13).swiftUI)
-                            .foregroundColor(item.source == .history ? subtitleLinkColor : secondaryTextColor)
+                            .foregroundColor(informationColor)
                     }
                     .layoutPriority(0)
                 }
             }
             if item.source == .createCard {
                 Spacer()
-                Icon(name: "shortcut-cmd+return", size: 12, color: selected ? subtitleLinkColor : secondaryTextColor)
+                Icon(name: "shortcut-cmd+return", size: 12, color: secondaryTextColor)
             } else if selected {
                 Spacer()
                 Icon(name: "editor-format_enter", size: 12, color: secondaryTextColor)

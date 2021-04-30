@@ -93,6 +93,7 @@ extension BeamColor {
     enum Autocomplete {
         static let link = BeamColor.Bluetiful
         static let subtitleText = BeamColor.LightStoneGray
+        static let newCardSubtitle = BeamColor.From(color: NSColor(withLightColor: BeamColor.Beam.nsColor.withAlphaComponent(0.7), darkColor: BeamColor.Beam.nsColor))
         static let selectedBackground = BeamColor.Generic.textSelection
         static let clickedBackground = BeamColor.From(color: BeamColor.Bluetiful.nsColor.withAlphaComponent(0.14))
         static let focusedBackground = BeamColor.From(color: NSColor(withLightColor: NSColor.white, darkColor: BeamColor.Nero.nsColor))
