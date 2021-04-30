@@ -18,6 +18,19 @@ struct AutocompleteResult: Identifiable {
         case autocomplete
         case url
         case createCard
+
+        var iconName: String {
+            switch self {
+            case .history:
+                return "field-history"
+            case .autocomplete, .url:
+                return "field-search"
+            case .createCard:
+                return "field-card_new"
+            case .note:
+                return "field-card"
+            }
+        }
     }
 
     var id: String {
