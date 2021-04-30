@@ -19,6 +19,7 @@ public enum ReadingEventType: String, Codable {
     case switchToOtherTab
     case switchToCard
     case switchToNewSearch
+    case openLinkInNewTab
 }
 
 public struct ReadingEvent: Codable {
@@ -196,14 +197,16 @@ public class BrowsingTree: ObservableObject, Codable {
         return current
     }
 
-    public func navigateTo(url link: String, title: String?) {
+    public func navigateTo(url link: String, title: String?, startReading: Bool) {
         guard current.link != LinkStore.getIdFor(link) else { return }
         Logger.shared.logInfo("navigateFrom \(currentLink) to \(link)", category: .web)
         current.addEvent(.navigateToLink)
         let node = BrowsingNode(tree: self, parent: current, url: link, title: title)
         current.children.append(node)
         current = node
-        current.addEvent(.startReading)
+        if startReading {
+            current.addEvent(.startReading)
+        }
         Logger.shared.logInfo("current now is \(currentLink)", category: .web)
     }
 
@@ -226,6 +229,10 @@ public class BrowsingTree: ObservableObject, Codable {
 
     public func switchToNewSearch() {
         current.addEvent(.switchToNewSearch)
+    }
+    
+    public func openLinkInNewTab() {
+        current.addEvent(.openLinkInNewTab)
     }
 
     public var links: Set<UInt64> {

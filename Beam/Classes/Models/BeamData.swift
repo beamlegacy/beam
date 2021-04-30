@@ -49,14 +49,12 @@ public class BeamData: ObservableObject {
         linkManager = LinkManager()
         let linkCount = LinkStore.shared.loadFromDB(linkManager: linkManager)
         Logger.shared.logInfo("Loaded \(linkCount) links from DB", category: .document)
+        do {
+            try LinkStore.loadFrom(Self.linkStorePath)
+        } catch {
+            Logger.shared.logError("Unable to load link store from \(Self.linkStorePath)", category: .search)
+        }
 
-//        if FileManager.default.fileExists(atPath: Self.linkStorePath.absoluteString) {
-//        do {
-//            try LinkStore.loadFrom(Self.linkStorePath)
-//        } catch {
-//            Logger.shared.logError("Unable to load link store from \(Self.linkStorePath)", category: .search)
-//        }
-//        }
         index = Index.loadOrCreate(Self.indexPath)
 
         do {
@@ -78,12 +76,12 @@ public class BeamData: ObservableObject {
 
     func saveData() {
         // save search index
-//        do {
-//            Logger.shared.logInfo("Save link store to \(Self.linkStorePath)", category: .search)
-//            try LinkStore.saveTo(Self.linkStorePath)
-//        } catch {
-//            Logger.shared.logError("Unable to save link store to \(Self.linkStorePath): \(error)", category: .search)
-//        }
+        do {
+            Logger.shared.logInfo("Save link store to \(Self.linkStorePath)", category: .search)
+            try LinkStore.saveTo(Self.linkStorePath)
+        } catch {
+            Logger.shared.logError("Unable to save link store to \(Self.linkStorePath): \(error)", category: .search)
+        }
 
         noteAutoSaveService.saveNotes()
         // save search index

@@ -86,6 +86,9 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         url?.isSearchResult != true
     }
 
+    private var isCurrent: Bool {
+        self == state.currentTab
+    }
     lazy var passwordOverlayController: PasswordOverlayController
             = PasswordOverlayController(webView: webView, passwordStore: MockPasswordStore.shared)
 
@@ -500,8 +503,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                 navigationCount += 1
                 onNewTabCreated(newTab)
                 decisionHandler(.cancel, preferences)
-                browsingTree.switchToOtherTab()
-
+                browsingTree.openLinkInNewTab()
                 return
             }
 
@@ -544,7 +546,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         guard let url = webView.url else { return }
         _ = addToNote()
-        browsingTree.navigateTo(url: url.absoluteString, title: webView.title)
+        browsingTree.navigateTo(url: url.absoluteString, title: webView.title, startReading: isCurrent)
         Readability.read(webView) { [weak self] result in
             guard let self = self else { return }
             switch result {
@@ -589,6 +591,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
     func webViewDidClose(_ webView: WKWebView) {
         Logger.shared.logDebug("webView webDidClose", category: .web)
+        browsingTree.closeTab()
     }
 
     func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String,

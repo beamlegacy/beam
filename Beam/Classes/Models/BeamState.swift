@@ -49,8 +49,8 @@ let NoteDisplayThreshold = Float(0.0)
         didSet {
             switch oldValue {
             // swiftlint:disable:next fallthrough no_fallthrough_only
-            case .note, .page: fallthrough
-            case .today:
+            case .page: fallthrough
+            case .note, .today:
                 if mode == .web {
                     currentTab?.startReading()
                 }

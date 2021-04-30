@@ -93,7 +93,7 @@ public class LinkStore: Codable {
 
     public func createIdFor(link: String, title: String? = nil) -> UInt64 {
         guard let id = getIdFor(link: link) else {
-            let id = MonotonicIncreasingID64.newValue
+            let id = idGenerator.newValue()
             ids[link] = id
             links[id] = Link(url: link, visits: [], title: title)
             let linkStruct = LinkStruct(bid: Int64(bitPattern: id), url: link, title: title)
