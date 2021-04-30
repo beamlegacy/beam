@@ -65,7 +65,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         }
     }
 
-    @Published var title: String = ""
+    @Published var title: String = "New Tab"
     @Published var originalQuery: String?
     @Published var url: URL?
     @Published var isLoading: Bool = false
@@ -286,7 +286,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
     private func receivedWebviewTitle(_ title: String? = nil) {
         updateElementWithTitle(title)
-        guard title?.isEmpty == false || !isLoading else {
+        guard title?.isEmpty == false || (!isLoading && url != nil) else {
             return
         }
         self.title = title ?? ""
