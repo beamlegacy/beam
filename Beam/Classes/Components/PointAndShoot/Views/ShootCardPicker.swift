@@ -14,7 +14,7 @@ struct ShootCardPicker: View {
     private static let rowHeight: CGFloat = 24
 
     @EnvironmentObject var data: BeamData
-    @EnvironmentObject var state: BeamState
+    @EnvironmentObject var browserTabsManager: BrowserTabsManager
 
     var focusOnAppear = false
     var onComplete: ((_ cardName: String?, _ note: String?) -> Void)?
@@ -126,7 +126,7 @@ struct ShootCardPicker: View {
         .opacity(isVisible ? 1.0 : 0.0)
         .animation(.easeInOut(duration: 0.3))
         .onAppear {
-            if let currentNote = state.currentTab?.note, !currentNote.isTodaysNote {
+            if let currentNote = browserTabsManager.currentTab?.note, !currentNote.isTodaysNote {
                 currentCardName = currentNote.title
                 cardSearchField = currentNote.title
             }

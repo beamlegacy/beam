@@ -11,6 +11,7 @@ import SwiftUI
 struct OmniBarSearchField: View {
     @EnvironmentObject var state: BeamState
     @EnvironmentObject var autocompleteManager: AutocompleteManager
+    @EnvironmentObject var browserTabsManager: BrowserTabsManager
 
     @Binding var isEditing: Bool {
         didSet {
@@ -23,18 +24,18 @@ struct OmniBarSearchField: View {
     @State private var shouldCenter: Bool = false
 
     private var shouldShowWebHost: Bool {
-        return state.mode == .web && !isEditing && state.currentTab != nil
+        return state.mode == .web && !isEditing && browserTabsManager.currentTab != nil
     }
 
     private var textFieldText: Binding<String> {
-        guard let tab = state.currentTab, let url = tab.url, shouldShowWebHost else {
+        guard let tab = browserTabsManager.currentTab, let url = tab.url, shouldShowWebHost else {
             return $autocompleteManager.searchQuery
         }
         return .constant(url.minimizedHost)
     }
 
     private var leadingIconName: String? {
-        if let tab = state.currentTab, let url = tab.url, state.mode == .web, autocompleteManager.searchQuery == url.absoluteString {
+        if let tab = browserTabsManager.currentTab, let url = tab.url, state.mode == .web, autocompleteManager.searchQuery == url.absoluteString {
             return AutocompleteResult.Source.url.iconName
         }
         if let autocompleteResult = selectedAutocompleteResult {

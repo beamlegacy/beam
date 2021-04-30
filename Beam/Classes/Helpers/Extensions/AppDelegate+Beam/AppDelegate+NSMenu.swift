@@ -55,7 +55,7 @@ extension AppDelegate: NSMenuDelegate {
         if rawTag < 10 {
             return rawTag & mode.rawValue != 0
         } else if tagEnum == .hasBrowserTab {
-            return state.tabs.count > 0
+            return state.hasBrowserTabs
         }
         return false
     }

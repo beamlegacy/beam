@@ -12,6 +12,8 @@ import BeamCore
 struct OmniBar: View {
     @EnvironmentObject var state: BeamState
     @EnvironmentObject var autocompleteManager: AutocompleteManager
+    @EnvironmentObject var browserTabsManager: BrowserTabsManager
+
     var isAboveContent: Bool = false
 
     @State private var title = ""
@@ -32,7 +34,7 @@ struct OmniBar: View {
     private func setIsEditing(_ editing: Bool) {
         state.focusOmniBox = editing
         if editing {
-            if let url = state.currentTab?.url?.absoluteString, state.mode == .web {
+            if let url = browserTabsManager.currentTab?.url?.absoluteString, state.mode == .web {
                 autocompleteManager.searchQuerySelectedRanges = [url.wholeRange]
                 autocompleteManager.searchQuery = url
             }
@@ -42,13 +44,16 @@ struct OmniBar: View {
     }
 
     private var shouldShowAutocompleteResults: Bool {
-        isEditing && !autocompleteManager.searchQuery.isEmpty && !autocompleteManager.autocompleteResults.isEmpty && autocompleteManager.searchQuery != state.currentTab?.url?.absoluteString
+        isEditing &&
+            !autocompleteManager.searchQuery.isEmpty &&
+            !autocompleteManager.autocompleteResults.isEmpty &&
+            autocompleteManager.searchQuery != browserTabsManager.currentTab?.url?.absoluteString
     }
     private var showDestinationNotePicker: Bool {
-        state.mode == .web && state.currentTab != nil
+        state.mode == .web && browserTabsManager.currentTab != nil
     }
     private var showPivotButton: Bool {
-        !state.tabs.isEmpty && !state.destinationCardIsFocused
+        state.hasBrowserTabs && !state.destinationCardIsFocused
     }
     private var hasRightActions: Bool {
         return showPivotButton || showDestinationNotePicker
@@ -106,7 +111,7 @@ struct OmniBar: View {
                 if hasRightActions {
                     HStack(alignment: .center) {
                         if showDestinationNotePicker {
-                            DestinationNotePicker(tab: state.currentTab!)
+                            DestinationNotePicker(tab: browserTabsManager.currentTab!)
                                 .frame(height: 32, alignment: .top)
                         }
                         if showPivotButton {
@@ -138,12 +143,12 @@ struct OmniBar: View {
     }
 
     func refreshWeb() {
-        state.currentTab?.webView.reload()
+        browserTabsManager.reloadCurrentTab()
     }
 
     func toggleMode() {
         if state.mode == .web {
-            guard let tab = state.currentTab else { return }
+            guard let tab = browserTabsManager.currentTab else { return }
             state.navigateToNote(tab.note)
             autocompleteManager.resetQuery()
         } else {
@@ -161,7 +166,7 @@ struct OmniBar_Previews: PreviewProvider {
         state.focusOmniBox = false
         focusedState.focusOmniBox = true
         focusedState.mode = .web
-        focusedState.currentTab = BrowserTab(state: focusedState, originalQuery: "query", note: BeamNote(title: "Note title"))
+        focusedState.browserTabsManager.currentTab = BrowserTab(state: focusedState, originalQuery: "query", note: BeamNote(title: "Note title"))
         return Group {
             OmniBar().environmentObject(state)
             OmniBar().environmentObject(focusedState)

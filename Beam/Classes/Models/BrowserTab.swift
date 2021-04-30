@@ -24,7 +24,7 @@ class FullScreenWKWebView: WKWebView {
         self.allowsMagnification = true
     }
 
-    override required init?(coder: NSCoder) {
+    required init?(coder: NSCoder) {
         super.init(coder: coder)
     }
 
@@ -87,7 +87,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     }
 
     private var isCurrent: Bool {
-        self == state.currentTab
+        self == state.browserTabsManager.currentTab
     }
     lazy var passwordOverlayController: PasswordOverlayController
             = PasswordOverlayController(webView: webView, passwordStore: MockPasswordStore.shared)
@@ -122,14 +122,12 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         }
     }
 
-    var appendToIndexer: (URL, Readability) -> Void = { _, _ in
-    }
+    var appendToIndexer: ((URL, Readability) -> Void)?
     var creationDate: Date = Date()
 
     var lastViewDate: Date = Date()
 
-    public var onNewTabCreated: (BrowserTab) -> Void = { _ in
-    }
+    public var onNewTabCreated: ((BrowserTab) -> Void)?
 
     private var scope = Set<AnyCancellable>()
 
@@ -501,7 +499,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                 newTab.load(url: targetURL)
                 newTab.browsingTree.current.score.openIndex = navigationCount
                 navigationCount += 1
-                onNewTabCreated(newTab)
+                onNewTabCreated?(newTab)
                 decisionHandler(.cancel, preferences)
                 browsingTree.openLinkInNewTab()
                 return
@@ -551,7 +549,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             guard let self = self else { return }
             switch result {
             case let .success(read):
-                self.appendToIndexer(url, read)
+                self.appendToIndexer?(url, read)
                 self.updateElementWithTitle(webView.title)
                 self.browsingTree.current.score.textAmount = read.content.count
                 self.updateScore()
@@ -584,7 +582,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         state.setup(webView: newWebView)
         let newTab = BrowserTab(state: state, originalQuery: originalQuery, note: note, rootElement: rootElement,
                                 webView: newWebView)
-        onNewTabCreated(newTab)
+        onNewTabCreated?(newTab)
 
         return newTab.webView
     }

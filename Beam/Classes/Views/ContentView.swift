@@ -11,6 +11,7 @@ import BeamCore
 struct ModeView: View {
     @EnvironmentObject var state: BeamState
     @EnvironmentObject var data: BeamData
+    @EnvironmentObject var browserTabsManager: BrowserTabsManager
 
     @State private var contentIsScrolled = false
 
@@ -27,11 +28,9 @@ struct ModeView: View {
                     switch state.mode {
                     case .web:
                         VStack(spacing: 0) {
-                            BrowserTabBar(tabs: $state.tabs, currentTab: $state.currentTab)
+                            BrowserTabBar(tabs: $browserTabsManager.tabs, currentTab: $browserTabsManager.currentTab)
                                 .zIndex(9)
-
-                            if let tab = state.currentTab {
-
+                            if let tab = browserTabsManager.currentTab {
                                 ZStack {
                                     WebView(webView: tab.webView)
                                             .accessibility(identifier: "webView")
