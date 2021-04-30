@@ -19,13 +19,22 @@ class BreadCrumb: Widget {
     var crumbArrowLayers = [CALayer]()
     var selectedCrumb: Int?
     var container: Layer?
-    var actionLinkLayer: Layer?
 
     var linkedReferenceNode: LinkedReferenceNode!
 
     override var open: Bool {
         didSet {
             containerLayer.isHidden = !open
+        }
+    }
+
+    override var contentsScale: CGFloat {
+        didSet {
+            linkLayer.contentsScale = contentsScale
+            containerLayer.contentsScale = contentsScale
+            if let actionLinkLayer = layers["actionLinkLayer"] as? LinkButtonLayer {
+                actionLinkLayer.set(contentsScale)
+            }
         }
     }
 
@@ -73,9 +82,15 @@ class BreadCrumb: Widget {
         linkLayer.foregroundColor = BeamColor.LinkedSection.actionButton.cgColor
         linkLayer.alignmentMode = .center
 
+        let linkContentLayer = CALayer()
+        linkContentLayer.frame = CGRect(
+                origin: CGPoint(x: availableWidth, y: 0),
+                size: NSSize(width: 36, height: 21))
+        linkContentLayer.addSublayer(linkLayer)
+
         let actionLayer = LinkButtonLayer(
                 "actionLinkLayer",
-                linkLayer,
+            linkContentLayer,
                 activated: {[weak self] in
                     guard let self = self else { return }
                     self.updateReferenceSection(self.proxy.text.text)
@@ -89,7 +104,6 @@ class BreadCrumb: Widget {
         addLayer(actionLayer)
 
         createCrumbLayers()
-
         guard let container = container else { return }
         addLayer(container)
     }
@@ -236,16 +250,35 @@ class BreadCrumb: Widget {
         crumbChain.count > 1
     }
 
+    override func updateChildrenLayout() {
+        super.updateChildrenLayout()
+        layout(children: children)
+    }
+
+    private func layout(children: [Widget]) {
+        for child in children {
+            child.layer.frame.origin = CGPoint(x: child.layer.frame.origin.x, y: child.frameInDocument.origin.y + 10)
+            layout(children: child.children)
+        }
+    }
+
     override func updateRendering() {
         contentsFrame = NSRect(x: 0, y: -10, width: availableWidth, height: showCrumbs ? 25 : 0)
-        actionLinkLayer?.layer.isHidden = isLink
+
         computedIdealSize = contentsFrame.size
 
         CATransaction.disableAnimations {
-            layers["actionLinkLayer"]?.frame = CGRect(
-                origin: CGPoint(x: availableWidth, y: 0),
-                size: NSSize(width: 36, height: 21)
-            )
+            if let actionLinkLayer = layers["actionLinkLayer"] as? LinkButtonLayer {
+                actionLinkLayer.frame = CGRect(
+                    origin: CGPoint(x: availableWidth, y: 0),
+                    size: NSSize(width: 36, height: 21)
+                )
+                let linkLayerFrameSize = linkLayer.preferredFrameSize()
+                let linkLayerXPosition = actionLinkLayer.bounds.width / 2 - linkLayerFrameSize.width / 2
+                let linkLayerYPosition = actionLinkLayer.bounds.height / 2 - linkLayerFrameSize.height / 2
+                linkLayer.frame = CGRect(x: linkLayerXPosition, y: linkLayerYPosition,
+                                         width: linkLayerFrameSize.width, height: linkLayerFrameSize.height)
+            }
         }
 
         if open {
@@ -265,7 +298,6 @@ class BreadCrumb: Widget {
                 container.frame = NSRect(x: 0, y: 0, width: containerWidth, height: childrenHeight + 22)
             }
         }
-
     }
 
     override var mainLayerName: String {

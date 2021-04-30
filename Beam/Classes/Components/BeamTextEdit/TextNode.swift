@@ -483,7 +483,8 @@ public class TextNode: Widget {
     }
 
     func createActionLayer() {
-        let actionLayer = ShortcutLayer(name: "CmdEnterLayer", text: "Search", icons: ["editor-cmdreturn"]) {
+        guard element as? ProxyElement == nil else { return }
+        let actionLayer = ShortcutLayer(name: "CmdEnterLayer", text: "Search", icons: ["editor-cmdreturn"]) { [unowned self] _ in
             self.editor.onStartQuery(self)
         }
         actionLayer.layer.isHidden = true

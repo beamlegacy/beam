@@ -280,7 +280,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         }
 
         if recursive {
-            for c in children {
+            for c in children where c.parent == self {
                 c.removeFromSuperlayer(recursive: recursive)
             }
         }

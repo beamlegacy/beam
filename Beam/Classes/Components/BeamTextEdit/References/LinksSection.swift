@@ -71,13 +71,13 @@ class LinksSection: Widget {
         linkActionLayer.foregroundColor = BeamColor.LinkedSection.actionButton.cgColor
         linkActionLayer.contentsScale = contentsScale
         linkActionLayer.alignmentMode = .center
+        linkActionLayer.string = "Link All"
 
         separatorLayer.backgroundColor = BeamColor.Mercury.cgColor
         self.layer.addSublayer(separatorLayer)
     }
 
     func setupSectionMode() {
-        linkActionLayer.string = "Link All"
         updateLinkedReferences(links: note.references)
 
         AppDelegate.main.data.$lastChangedElement.sink { element in
@@ -168,9 +168,12 @@ class LinksSection: Widget {
     }
 
     func createLinkAllLayer() {
+        let linkContentLayer = CALayer()
+        linkContentLayer.addSublayer(linkActionLayer)
+
         linkLayer = LinkButtonLayer(
             "linkAllLayer",
-            linkActionLayer,
+            linkContentLayer,
             activated: { [weak self] in
                 guard let self = self,
                       let rootNote = self.editor.note.note else { return }
@@ -196,13 +199,12 @@ class LinksSection: Widget {
         sectionTitleLayer.frame = CGRect(
             origin: CGPoint(x: 25, y: 0),
             size: CGSize(
-                width: availableWidth - (linkActionLayer.frame.width + (mode == .references ? 30 : 25)),
+                width: availableWidth - (linkLayer?.layer.frame.width ?? 0 + (mode == .references ? 30 : 25)),
                 height: sectionTitleLayer.preferredFrameSize().height
             )
         )
 
         layers["disclosure"]?.frame = CGRect(origin: CGPoint(x: 0, y: sectionTitleLayer.preferredFrameSize().height - 15), size: CGSize(width: 20, height: 20))
-        linkActionLayer.frame = CGRect(origin: CGPoint(x: frame.width - linkActionLayer.frame.width / 2, y: 0), size: NSSize(width: 54, height: 21))
     }
 
     override func updateRendering() {
@@ -223,8 +225,14 @@ class LinksSection: Widget {
             setupLayerFrame()
             separatorLayer.frame = CGRect(x: 0, y: sectionTitleLayer.frame.maxY + 14, width: 560, height: 1)
 
-            guard let linkLayer = linkLayer else { return }
-            linkLayer.frame = CGRect(origin: CGPoint(x: frame.width - linkActionLayer.frame.width / 2, y: 0), size: NSSize(width: 54, height: 21))
+            guard let linkAllLayer = linkLayer else { return }
+            linkAllLayer.frame = CGRect(origin: CGPoint(x: frame.width - linkAllLayer.frame.width / 2, y: 0), size: NSSize(width: 54, height: 21))
+
+            let linkActionLayerFrameSize = linkActionLayer.preferredFrameSize()
+            let linkActionLayerXPosition = linkAllLayer.bounds.width / 2 - linkActionLayerFrameSize.width / 2
+            let linkActionLayerYPosition = linkAllLayer.bounds.height / 2 - linkActionLayerFrameSize.height / 2
+            linkActionLayer.frame = CGRect(x: linkActionLayerXPosition, y: linkActionLayerYPosition,
+                                     width: linkActionLayerFrameSize.width, height: linkActionLayerFrameSize.height)
         }
     }
 
