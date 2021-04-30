@@ -254,8 +254,12 @@ struct BrowserTabBar: View {
     }
 
     private func moveTabs(from currentIndex: Int, to index: Int, with tab: BrowserTab) {
-        tabs.remove(at: currentIndex)
-        tabs.insert(tab, at: index.clamp(0, tabs.count))
+        guard currentIndex != index else { return }
+        // copying the array to trigger only one change
+        var tabsArray = tabs
+        tabsArray.remove(at: currentIndex)
+        tabsArray.insert(tab, at: index.clamp(0, tabsArray.count))
+        tabs = tabsArray
     }
 }
 
