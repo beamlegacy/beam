@@ -137,8 +137,8 @@ public class TextNode: Widget {
 
     var selectedTextRange: Range<Int> { root?.selectedTextRange ?? 0..<0 }
     var markedTextRange: Range<Int>? { root?.markedTextRange }
-    var cursorsStartPosition: Int { root?.cursorPosition ?? 0 }
     var cursorPosition: Int { root?.cursorPosition ?? 0 }
+    var caretIndex: Int { root?.caretIndex ?? 0 }
 
     var showDisclosureButton: Bool {
         !children.isEmpty
@@ -357,8 +357,30 @@ public class TextNode: Widget {
             return
         }
         if updateAttributedString() || elementText.isEmpty {
+            updateTextFrame()
             invalidateRendering()
         }
+    }
+
+    func updateTextFrame() {
+        if selfVisible {
+            emptyTextFrame = nil
+            let attrStr = attributedString
+            let textFrame = TextFrame.create(string: attrStr, atPosition: NSPoint(x: indent, y: 0), textWidth: availableWidth - childInset)
+            self.textFrame = textFrame
+
+            if attrStr.string.isEmpty {
+                let dummyText = buildAttributedString(for: BeamText(text: "Dummy!"))
+                let fakelayout = TextFrame.create(string: dummyText, atPosition: NSPoint(x: indent, y: 0), textWidth: availableWidth - childInset)
+
+                self.emptyTextFrame = fakelayout
+            }
+        }
+    }
+
+    var textRect: NSRect {
+        guard let tFrame = emptyTextFrame ?? textFrame else { return .zero }
+        return tFrame.frame
     }
 
     func deepInvalidateText() {
@@ -423,7 +445,7 @@ public class TextNode: Widget {
 
     func drawCursor(in context: CGContext) {
         guard !readOnly, editor.hasFocus, editor.blinkPhase else { return }
-        let cursorRect = rectAt(cursorPosition)
+        let cursorRect = rectAt(caretIndex: caretIndex)
 
         context.beginPath()
         context.addRect(cursorRect)
@@ -441,19 +463,7 @@ public class TextNode: Widget {
             contentsFrame = NSRect()
 
             if selfVisible {
-                emptyTextFrame = nil
-                let attrStr = attributedString
-                let textFrame = Font.draw(string: attrStr, atPosition: NSPoint(x: indent, y: 0), textWidth: availableWidth - childInset)
-                self.textFrame = textFrame
-                contentsFrame = textFrame.frame
-
-                if attrStr.string.isEmpty {
-                    let dummyText = buildAttributedString(for: BeamText(text: "Dummy!"))
-                    let fakelayout = Font.draw(string: dummyText, atPosition: NSPoint(x: indent, y: 0), textWidth: availableWidth - childInset)
-
-                    self.emptyTextFrame = fakelayout
-                    contentsFrame = fakelayout.frame
-                }
+                contentsFrame = textRect
 
                 if self as? TextRoot == nil {
                     switch elementKind {
@@ -626,7 +636,7 @@ public class TextNode: Widget {
 
             if mouseInfo.event.clickCount == 1 && editor.inlineFormatter != nil {
                 root?.cancelSelection()
-                focus(cursorPosition: clickPos)
+                focus(position: clickPos)
                 dragMode = .select(cursorPosition)
 
                 debounceClickTimer = Timer.scheduledTimer(withTimeInterval: debounceClickInterval, repeats: false, block: { [weak self] (_) in
@@ -641,7 +651,7 @@ public class TextNode: Widget {
                 return true
             } else if mouseInfo.event.clickCount == 1 {
                 root?.cancelSelection()
-                focus(cursorPosition: clickPos)
+                focus(position: clickPos)
                 dragMode = .select(cursorPosition)
                 editor.initAndShowPersistentFormatter()
                 return true
@@ -676,13 +686,13 @@ public class TextNode: Widget {
             let (linkRange, _) = linkRangeAt(point: mouseInfo.position)
             if let linkRange = linkRange {
                 // open link right menu
-                focus(cursorPosition: linkRange.end)
+                focus(position: linkRange.end)
                 let selectRange = linkRange.position..<linkRange.end
                 root?.selectedTextRange = selectRange
                 cursor = .arrow
                 editor.showLinkFormatterForSelection(mousePosition: mouseInfo.position, showMenu: true)
             } else {
-                focus(cursorPosition: clickPos)
+                focus(position: clickPos)
                 root?.wordSelection(from: clickPos)
                 if !selectedTextRange.isEmpty {
                     editor.cursorStartPosition = cursorPosition
@@ -902,6 +912,13 @@ public class TextNode: Widget {
         return attributedString.attribute(.link, at: pos, effectiveRange: nil) as? String
     }
 
+    public func offsetAt(caretIndex: Int) -> CGFloat {
+        guard let textFrame = emptyTextFrame ?? self.textFrame else { return 0 }
+        guard !textFrame.lines.isEmpty else { return 0 }
+        let caret = textFrame.carets[caretIndex]
+        return caret.offset.x
+    }
+
     public func offsetAt(index: Int) -> CGFloat {
         guard let textFrame = emptyTextFrame ?? self.textFrame else { return 0 }
         guard !textFrame.lines.isEmpty else { return 0 }
@@ -925,6 +942,19 @@ public class TextNode: Widget {
         let result = textLine.offsetFor(index: positionInLine)
 
         return (CGFloat(result), textLine.frame)
+    }
+
+    public func offsetAndFrameAt(caretIndex: Int) -> (CGFloat, NSRect) {
+        guard let textFrame = textFrame else { return (0, .zero) }
+        let caret = textFrame.carets[caretIndex]
+        let displayIndex = displayIndexFor(sourceIndex: caret.indexInSource)
+
+        guard !textFrame.lines.isEmpty,
+              let line = lineAt(index: displayIndex) else { return (0, .zero) }
+
+        let textLine = textFrame.lines[line]
+
+        return (caret.offset.x, textLine.frame)
     }
 
     public func positionAbove(_ position: Int) -> Int {
@@ -955,20 +985,42 @@ public class TextNode: Widget {
         return l == textFrame.lines.count - 1
     }
 
-    public func rectAt(_ position: Int) -> NSRect {
+    public func rectAt(sourcePosition: Int) -> NSRect {
         updateRendering()
         let textLine: TextLine? = {
             if let emptyLayout = emptyTextFrame {
                 return emptyLayout.lines[0]
             }
 
-            guard let cursorLine = lineAt(index: position <= 0 ? 0 : position) else { fatalError() }
+            guard let cursorLine = lineAt(index: sourcePosition <= 0 ? 0 : sourcePosition) else { fatalError() }
             return textFrame?.lines[cursorLine] ?? nil
         }()
 
         guard let line = textLine else { return NSRect.zero }
-        let pos = position
+        let pos = sourcePosition
         let x1 = offsetAt(index: pos)
+        let cursorRect = NSRect(x: x1, y: line.frame.minY, width: sourcePosition == text.count ? bigCursorWidth : smallCursorWidth, height: line.bounds.height)
+
+        return cursorRect
+    }
+
+    public func rectAt(caretIndex: Int) -> NSRect {
+        updateRendering()
+        guard let textFrame = textFrame else { return .zero }
+        let caret = textFrame.carets.isEmpty ? Caret.zero : textFrame.carets[caretIndex]
+        let position = caret.positionInSource
+
+        let textLine: TextLine? = {
+            if let emptyLayout = emptyTextFrame {
+                return emptyLayout.lines[0]
+            }
+
+            guard let cursorLine = lineAt(index: position <= 0 ? 0 : position) else { fatalError() }
+            return textFrame.lines[cursorLine]
+        }()
+
+        guard let line = textLine else { return NSRect.zero }
+        let x1 = caret.offset.x
         let cursorRect = NSRect(x: x1, y: line.frame.minY, width: position == text.count ? bigCursorWidth : smallCursorWidth, height: line.bounds.height)
 
         return cursorRect
@@ -1322,5 +1374,24 @@ public class TextNode: Widget {
 
         elementText = element.text
         elementKind = element.kind
+    }
+
+    func caretAtIndex(_ index: Int) -> Caret {
+        guard let textFrame = textFrame else {
+            return Caret.zero
+        }
+
+        guard index < textFrame.carets.count else {
+            return textFrame.carets.last ?? .zero
+        }
+        return textFrame.carets[index]
+    }
+
+    func caretForSourcePosition(_ index: Int) -> Caret? {
+        return textFrame?.caretForSourcePosition(index)
+    }
+
+    func caretIndexForSourcePosition(_ index: Int) -> Int? {
+        return textFrame?.caretIndexForSourcePosition(index)
     }
 }

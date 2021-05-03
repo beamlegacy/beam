@@ -8,69 +8,47 @@
 import Foundation
 import BeamCore
 
-struct ImageRunStruct {
-    let ascent: CGFloat
-    let descent: CGFloat
-    let width: CGFloat
-    let image: String
-    let color: NSColor?
-}
-
-func filterCarets(_ carets: [TextLine.Caret], sourceOffset: Int, skippablePositions: [Int]) -> [TextLine.Caret] {
-    var count = sourceOffset
-    let filtered = carets.sorted { (lhs, rhs) -> Bool in
-        if lhs.indexOnScreen < rhs.indexOnScreen { return true }
-        if (lhs.indexOnScreen == rhs.indexOnScreen) && (lhs.offset < rhs.offset) { return true }
-
-        return false
-    }.compactMap { caret -> TextLine.Caret? in
-        if caret.isLeadingEdge && !skippablePositions.binaryContains(caret.indexOnScreen) {
-            var c = caret
-            c.indexInSource = count
-            count += 1
-            return c
-        }
-        return nil
-    }
-
-    guard var last = carets.last else { return filtered }
-    last.indexInSource = count
-    return filtered + [last]
+public struct ImageRunStruct {
+    public let ascent: CGFloat
+    public let descent: CGFloat
+    public let width: CGFloat
+    public let image: String
+    public let color: NSColor?
 }
 
 public class TextLine {
-    init(ctLine: CTLine, attributedString: NSAttributedString, sourceOffset: Int, skippablePositions: [Int]) {
+    public init(ctLine: CTLine, attributedString: NSAttributedString, sourceOffset: Int, notInSourcePositions: [Int]) {
         self.ctLine = ctLine
         self.sourceOffset = sourceOffset
-        self.skippablePositions = skippablePositions
+        self.notInSourcePositions = notInSourcePositions
     }
 
-    var sourceOffset: Int
-    var skippablePositions: [Int] = []
-    var localSkippablePositions: [Int] {
-        skippablePositions.compactMap { pos -> Int? in
+    public var sourceOffset: Int
+    public var notInSourcePositions: [Int] = []
+    public var localNotInSourcePositions: [Int] {
+        notInSourcePositions.compactMap { pos -> Int? in
             let p = pos - range.lowerBound
             return p < 0 || p > range.count ? nil : p
         }
     }
 
-    var ctLine: CTLine
-    var range: Range<Int> {
+    public var ctLine: CTLine
+    public var range: Range<Int> {
         let r = CTLineGetStringRange(ctLine)
         return toSource(r.location) ..< toSource(r.location + r.length)
     }
-    var glyphCount: Int {
+    public var glyphCount: Int {
         CTLineGetGlyphCount(ctLine)
     }
 
-    struct Bounds {
+    public struct Bounds {
         var ascent: Float
         var descent: Float
         var leading: Float
         var width: Float
     }
 
-    var typographicBounds: Bounds {
+    public var typographicBounds: Bounds {
         var ascent: CGFloat = 0
         var descent: CGFloat = 0
         var leading: CGFloat = 0
@@ -78,90 +56,79 @@ public class TextLine {
         return Bounds(ascent: Float(ascent), descent: Float(descent), leading: Float(leading), width: Float(w))
     }
 
-    var frame = NSRect()
+    public var frame = NSRect()
 
-    var bounds: NSRect { bounds() }
-    func bounds(options: CTLineBoundsOptions = []) -> NSRect {
+    public var bounds: NSRect { bounds() }
+    public func bounds(options: CTLineBoundsOptions = []) -> NSRect {
         return CTLineGetBoundsWithOptions(ctLine, options)
     }
 
-    var traillingWhiteSpaceWidth: Float {
+    public var traillingWhiteSpaceWidth: Float {
         Float(CTLineGetTrailingWhitespaceWidth(ctLine))
     }
 
-    var imageBounds: NSRect {
+    public var imageBounds: NSRect {
         return CTLineGetImageBounds(ctLine, nil)
             .offsetBy(dx: frame.origin.x, dy: frame.origin.y)
     }
 
-    func stringIndexFor(position: NSPoint) -> Int {
-        var previous = carets.first?.offset ?? Float(0)
-        for caret in carets {
-            let offset = caret.offset
+    public func stringIndexFor(position: CGPoint) -> Int {
+        var previous = (carets.first?.offset ?? CGPoint.zero).x
+        for caret in carets where caret.edge.isLeading {
+            let offset = caret.offset.x
             let middle = CGFloat(0.5 * (offset + previous))
             if middle > position.x {
-                return max(0, caret.indexInSource - 1)
+                return max(0, caret.positionInSource - 1)
             }
             previous = offset
         }
-        let range = CTLineGetStringRange(ctLine)
-        return toSource(range.location + range.length)
+        return carets.last?.positionInSource ?? 0
     }
 
-    func fromSource(_ index: Int) -> Int {
-        let skipped = skippablePositions.compactMap { pos -> Int? in
+    public func fromSource(_ index: Int) -> Int {
+        let skipped = notInSourcePositions.compactMap { pos -> Int? in
             pos < index ? pos : nil
         }.count
         return index + skipped
     }
 
-    func toSource(_ index: Int) -> Int {
-        let toSkip = skippablePositions.compactMap { pos -> Int? in
+    public func toSource(_ index: Int) -> Int {
+        let toSkip = notInSourcePositions.compactMap { pos -> Int? in
             pos < index ? pos : nil
         }.count
         return index - toSkip
     }
 
-    func isAfterEndOfLine(_ point: NSPoint) -> Bool {
+    public func isAfterEndOfLine(_ point: NSPoint) -> Bool {
         return (point.x - frame.origin.x) >= frame.maxX
     }
 
-    func isBeforeStartOfLine(_ point: NSPoint) -> Bool {
+    public func isBeforeStartOfLine(_ point: NSPoint) -> Bool {
         return (point.x - frame.origin.x) <= frame.minX
     }
 
-    func offsetFor(index: Int) -> Float {
-        guard let position = carets.firstIndex(where: { caret -> Bool in caret.indexInSource >= index }) else { return allCarets.last?.offset ?? Float(frame.minX) }
-        return carets[position].offset
+    public func offsetFor(index: Int) -> CGFloat {
+        guard let position = carets.firstIndex(where: { caret -> Bool in caret.positionInSource >= index }) else { return (carets.last?.offset ?? CGPoint(x: frame.minX, y: 0)).x }
+        return carets[position].offset.x
     }
 
-    struct Caret {
-        var offset: Float
-        var indexInSource: Int
-        var indexOnScreen: Int
-        var isLeadingEdge: Bool
-    }
-
-    var carets: [Caret] {
-        filterCarets(allCarets, sourceOffset: sourceOffset, skippablePositions: skippablePositions)
-    }
-
-    /// Returns all the carets from the low level CoreText API. There are sorted by offset, not by glyph and the indexOnScreen is counted in bytes in the source string so you will need to process this list before being able to use it for anything useful. The indexInSource is thus -1 for every position.
-    var allCarets: [Caret] {
+    lazy public var carets: [Caret] = {
         var c = [Caret]()
+        let y = frame.minY
+
         CTLineEnumerateCaretOffsets(ctLine) { (offset, index, leading, _) in
-            c.append(Caret(offset: Float(self.frame.origin.x) + Float(offset), indexInSource: -1, indexOnScreen: index, isLeadingEdge: leading))
+            c.append(Caret(offset: CGPoint(x: self.frame.origin.x + CGFloat(offset), y: y), indexInSource: -1, indexOnScreen: index, edge: leading ? .leading : .trailing, inSource: true))
         }
 
-        return c
-    }
+        return sortAndSourceCarets(c, sourceOffset: sourceOffset, notInSourcePositions: notInSourcePositions)
+    }()
 
-    var runs: [CTRun] {
+    public var runs: [CTRun] {
         // swiftlint:disable:next force_cast
         CTLineGetGlyphRuns(ctLine) as! [CTRun]
     }
 
-    func draw(_ context: CGContext) {
+    public func draw(_ context: CGContext) {
         context.saveGState()
         context.textPosition = NSPoint()//line.frame.origin
         context.translateBy(x: frame.origin.x, y: frame.origin.y)
@@ -219,5 +186,5 @@ public class TextLine {
         context.restoreGState()
     }
 
-    var interlineFactor: CGFloat = 1.0
+    public var interlineFactor: CGFloat = 1.0
 }

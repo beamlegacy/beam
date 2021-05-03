@@ -704,8 +704,8 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         return nil
     }
 
-    func focus(cursorPosition: Int? = 0) {
-        root?.focus(widget: self, cursorPosition: cursorPosition)
+    func focus(position: Int? = 0) {
+        root?.focus(widget: self, position: position)
     }
 
     func onFocus() {

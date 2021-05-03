@@ -15,14 +15,14 @@ extension NSEvent {
     }
 }
 
-enum MouseInteractionType {
+public enum MouseInteractionType {
     case hovered
     case clicked
     case unknown
 }
 
 // Mouse Interaction within text range
-struct MouseInteraction {
+public struct MouseInteraction {
     let type: MouseInteractionType
     let range: NSRange
 }

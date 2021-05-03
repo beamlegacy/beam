@@ -209,6 +209,6 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
         }
         window?.makeFirstResponder(self)
         rootNode.cancelSelection()
-        rootNode.focus(widget: node, cursorPosition: newCursorPosition)
+        rootNode.focus(widget: node, position: newCursorPosition)
     }
 }

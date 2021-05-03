@@ -8,7 +8,7 @@
 import Foundation
 
 public class TextFrame {
-    init(ctFrame: CTFrame, position: NSPoint, attributedString: NSAttributedString) {
+    private init(ctFrame: CTFrame, position: NSPoint, attributedString: NSAttributedString) {
         self.ctFrame = ctFrame
         self.position = position
         self.attributedString = attributedString
@@ -16,20 +16,20 @@ public class TextFrame {
         layout()
     }
 
-    var attributedString: NSAttributedString
+    public var attributedString: NSAttributedString
 
-    var debug: Bool { lines.count > 1 }
-    var ctFrame: CTFrame
-    var position: NSPoint
-    var lines = [TextLine]()
-    var skippablePositions = [Int]()
+    public var debug: Bool { lines.count > 1 }
+    public var ctFrame: CTFrame
+    public var position: NSPoint
+    public var lines = [TextLine]()
+    public var notInSourcePositions = [Int]()
 
-    var visibleRange: Range<Int> {
+    public var visibleRange: Range<Int> {
         let r = CTFrameGetVisibleStringRange(ctFrame)
         return r.location ..< r.location + r.length
     }
 
-    var path: CGPath {
+    public var path: CGPath {
         CTFrameGetPath(ctFrame)
     }
 
@@ -53,7 +53,7 @@ public class TextFrame {
         return 0
     }
 
-    var frame: NSRect {
+    public var frame: NSRect {
         var minX = CGFloat(0)
         var maxX = CGFloat(0)
         var minY = CGFloat(0)
@@ -75,41 +75,31 @@ public class TextFrame {
         return NSRect(x: position.x + minX, y: position.y + minY, width: maxX - minX, height: maxY - minY)
     }
 
-    func layout() {
-        if lines.isEmpty {
-            skippablePositions = [Int]()
-            attributedString.enumerateAttribute((kCTRunDelegateAttributeName as NSAttributedString.Key), in: attributedString.wholeRange, options: [], using: { value, range, _ in
-                if value != nil {
-                    skippablePositions.append(range.location)
-                }
-            })
-
-            var sourceOffset = 0
-            // swiftlint:disable:next force_cast
-            lines = (CTFrameGetLines(ctFrame) as! [CTLine]).map {
-                let cfRange = CTLineGetStringRange($0)
-                let range = NSRange(location: cfRange.location, length: cfRange.length)
-                let line = TextLine(ctLine: $0, attributedString: attributedString, sourceOffset: sourceOffset, skippablePositions: skippablePositions)
-                sourceOffset += line.carets.count - 1
-                if let paragraphStyle = attributedString.attribute(.paragraphStyle, at: line.range.lowerBound, longestEffectiveRange: nil, in: range) as? NSParagraphStyle {
-                    line.interlineFactor = paragraphStyle.lineHeightMultiple
-                }
-                return line
+    private func layout() {
+        notInSourcePositions = [Int]()
+        attributedString.enumerateAttribute((kCTRunDelegateAttributeName as NSAttributedString.Key), in: attributedString.wholeRange, options: [], using: { value, range, _ in
+            if value != nil {
+                notInSourcePositions.append(range.location)
             }
-        }
-        if debug {
-            //            Logger.shared.logDebug("start layout for \(lines.count) lines")
-        }
-        var lineOrigins = [CGPoint](repeating: CGPoint(), count: lines.count)
+        })
+
+        var sourceOffset = 0
+
+        // swiftlint:disable:next force_cast
+        let ctLines = (CTFrameGetLines(ctFrame) as! [CTLine])
+        var lineOrigins = [CGPoint](repeating: CGPoint(), count: ctLines.count)
         CTFrameGetLineOrigins(ctFrame, CFRangeMake(0, 0), &lineOrigins)
 
         var Y = CGFloat(0)
-
         Y += paragraphSpacingBefore
+        var index = 0
 
-        for i in lines.indices {
-            let line = lines[i]
-            let textPos = lineOrigins[i]
+        lines = ctLines.map {
+            let cfRange = CTLineGetStringRange($0)
+            let range = NSRange(location: cfRange.location, length: cfRange.length)
+            let line = TextLine(ctLine: $0, attributedString: attributedString, sourceOffset: sourceOffset, notInSourcePositions: notInSourcePositions)
+
+            let textPos = lineOrigins[index]
             let x = textPos.x
             //let y = f.maxY - textPos.y + CGFloat(line.bounds.descent)
 
@@ -121,6 +111,17 @@ public class TextFrame {
             //if debug {
             //Logger.shared.logDebug("     line[\(i)] frame \(line.frame) (textPos \(textPos)")
             //}
+            sourceOffset = line.carets.last?.positionInSource ?? sourceOffset
+            if let paragraphStyle = attributedString.attribute(.paragraphStyle, at: line.range.lowerBound, longestEffectiveRange: nil, in: range) as? NSParagraphStyle {
+                line.interlineFactor = paragraphStyle.lineHeightMultiple
+            }
+
+            index += 1
+            return line
+        }
+
+        if debug {
+            //            Logger.shared.logDebug("start layout for \(lines.count) lines")
         }
 
         if debug {
@@ -128,7 +129,7 @@ public class TextFrame {
         }
     }
 
-    func draw(_ context: CGContext) {
+    public func draw(_ context: CGContext) {
         if debug {
             //Logger.shared.logDebug("draw frame \(ctFrame)")
         }
@@ -137,37 +138,56 @@ public class TextFrame {
         }
     }
 
-    var carets: [TextLine.Caret] {
-        filterCarets(allCarets, sourceOffset: 0, skippablePositions: skippablePositions)
-    }
-
-    /// Returns all the carets from the low level CoreText API. There are sorted by offset, not by glyph and the indexOnScreen is counted in bytes in the source string so you will need to process this list before being able to use it for anything useful. The indexInSource is thus -1 for every position.
-    var allCarets: [TextLine.Caret] {
-        var carets = [TextLine.Caret]()
+    lazy public var carets: [Caret] = {
+        var carets = [Caret]()
         for line in lines {
-            carets.append(contentsOf: line.allCarets)
+            carets.append(contentsOf: line.carets)
         }
         return carets
+    }()
+
+    public func caretForSourcePosition(_ index: Int) -> Caret? {
+        guard let caretIndex = caretIndexForSourcePosition(index) else { return nil }
+        return carets[caretIndex]
+    }
+
+    public func caretIndexForSourcePosition(_ index: Int) -> Int? {
+        guard carets.last?.positionInSource != index else { return carets.count - 1 }
+        return carets.firstIndex(where: { caret -> Bool in
+            caret.positionInSource == index && (caret.edge.isLeading || !caret.inSource)
+        })
     }
 
     public func position(before index: Int) -> Int {
         guard !lines.isEmpty, index > 0 else { return 0 }
-
-        var carets = self.carets
-        guard var last = allCarets.last else { return index }
-        last.indexInSource += 1
-        carets.append(last)
-        guard let position = carets.firstIndex(where: { caret -> Bool in caret.indexInSource >= index }) else { return index }
-        guard position > 0 else { return index }
-        return carets[position - 1].indexInSource
+        return previousCaret(for: index, in: carets)
     }
 
     public func position(after index: Int) -> Int {
         guard !lines.isEmpty else { return 0 }
+        return nextCaret(for: index, in: carets)
+    }
 
-        guard let position = carets.firstIndex(where: { caret -> Bool in caret.indexInSource >= index })
-        else { return index }
-        guard position + 1 < carets.count else { return index + 1 }
-        return carets[position + 1].indexInSource
+    public class func create(string: NSAttributedString, atPosition position: NSPoint, textWidth: CGFloat) -> TextFrame {
+        assert(textWidth != 0)
+        let framesetter = CTFramesetterCreateWithAttributedString(string)
+        let frameSize = CTFramesetterSuggestFrameSizeWithConstraints(
+            framesetter,
+            CFRangeMake (0, 0),
+            nil,
+            CGSize(width: CGFloat(textWidth), height: CGFloat.greatestFiniteMagnitude),
+            nil)
+        //        Logger.shared.logDebug("TextFrame suggested size \(frameSize)")
+        let path = CGPath(rect: CGRect(origin: position, size: frameSize), transform: nil)
+
+        let frameAttributes: [String: Any] = [:]
+        let frame = CTFramesetterCreateFrame(framesetter,
+                                             CFRange(),
+                                             path,
+                                             frameAttributes as CFDictionary)
+
+        let f = TextFrame(ctFrame: frame, position: position, attributedString: string)
+
+        return f
     }
 }

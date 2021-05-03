@@ -37,7 +37,7 @@ class FocusElement: TextEditorCommand {
             oldCursorPosition = root.cursorPosition
         }
 
-        node.focus(cursorPosition: cursorPosition)
+        node.focus(position: cursorPosition)
         context?.editor.detectFormatterType()
 
         return true
@@ -48,8 +48,8 @@ class FocusElement: TextEditorCommand {
            let elementId = oldElementId,
            let elementInstance = getElement(for: noteTitle, and: elementId),
            let node = context?.nodeFor(elementInstance.element),
-           let position = oldCursorPosition {
-            node.focus(cursorPosition: position)
+           let cursorPosition = oldCursorPosition {
+            node.focus(position: cursorPosition)
             context?.editor.detectFormatterType()
         }
         return true
@@ -67,15 +67,15 @@ class FocusElement: TextEditorCommand {
 
 extension CommandManager where Context == Widget {
     @discardableResult
-    func focusElement(_ node: TextNode, position: Int) -> Bool {
+    func focusElement(_ node: TextNode, cursorPosition: Int) -> Bool {
         guard let title = node.elementNoteTitle else { return false }
-        let cmd = FocusElement(element: node.elementId, from: title, at: position)
+        let cmd = FocusElement(element: node.elementId, from: title, at: cursorPosition)
         return run(command: cmd, on: node)
     }
 
     func focus(_ element: BeamElement, in node: TextNode) {
         if let toFocus = node.nodeFor(element) {
-            focusElement(toFocus, position: element.text.count)
+            focusElement(toFocus, cursorPosition: element.text.count)
         }
     }
 }

@@ -223,7 +223,7 @@ class BeamTextTests: XCTestCase {
 
         let text = BeamText(text: string)
         let attributedString = text.buildAttributedString(fontSize: 12, cursorPosition: 0, elementKind: .bullet)
-        let textFrame = Font.draw(string: attributedString, atPosition: NSPoint(), textWidth: 500)
+        let textFrame = TextFrame.create(string: attributedString, atPosition: NSPoint(), textWidth: 500)
         guard let line = textFrame.lines.first else { fatalError() }
         let carets = line.carets
 
@@ -231,7 +231,7 @@ class BeamTextTests: XCTestCase {
 //            Logger.shared.logDebug("caret[\(i)] -> \(caret)")
 //        }
 
-        expect(carets[5].indexInSource).to(equal(5))
+        expect(carets[10].indexInSource).to(equal(5))
 
 //        for i in 0..<string.count {
 //            let r = i..<i + 1
@@ -243,6 +243,6 @@ class BeamTextTests: XCTestCase {
         // Now we are using a custom font the emplacement of the emoticon is changed.
         // old value : 17.982422
         // new value : 18.272728
-        expect(line.offsetFor(index: 3)).to(equal(18.272728))
+        expect(line.offsetFor(index: 3)).to(beCloseTo(18.272728))
     }
 }

@@ -44,7 +44,7 @@ class CancelSelection: TextEditorCommand {
     static let name: String = "CancelSelection"
 
     var oldSelection: Range<Int>?
-    var oldPosition: Int?
+    var oldCursorPosition: Int?
 
     init() {
         super.init(name: Self.name)
@@ -52,7 +52,7 @@ class CancelSelection: TextEditorCommand {
 
     override func run(context: Widget?) -> Bool {
         oldSelection = context?.root?.selectedTextRange
-        oldPosition = context?.root?.cursorPosition
+        oldCursorPosition = context?.root?.cursorPosition
         context?.root?.cancelSelection()
 
         return true
@@ -60,10 +60,10 @@ class CancelSelection: TextEditorCommand {
 
     override func undo(context: Widget?) -> Bool {
         guard let oldSelection = oldSelection,
-              let oldPosition = oldPosition
+              let oldCursorPosition = oldCursorPosition
         else { return true }
         context?.root?.selectedTextRange = oldSelection
-        context?.root?.cursorPosition = oldPosition
+        context?.root?.cursorPosition = oldCursorPosition
         return true
     }
 

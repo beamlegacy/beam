@@ -33,11 +33,17 @@ class DeleteText: TextEditorCommand {
     override func run(context: Widget?) -> Bool {
         guard let elementInstance = getElement(for: noteTitle, and: elementId) else { return false }
 
+        let cursor = (context as? TextNode)?.cursorPosition
         self.oldText = elementInstance.element.text.extract(range: range)
         elementInstance.element.text.remove(count: range.count, at: range.lowerBound)
 
         _ = cancelSelection.run(context: context)
         _ = focusElement.run(context: context)
+        // we need to cheat, this is ugly but the previous operations may have changed the original position of the cursor
+        if let cursor = cursor {
+            cancelSelection.oldCursorPosition = cursor
+            focusElement.oldCursorPosition = cursor
+        }
 
         return true
     }

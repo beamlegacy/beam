@@ -97,10 +97,10 @@ extension TextRoot {
         defer { root.note?.cmdManager.endGroup() }
 
         if let prevWidget = sortedNodes.first?.previousVisibleTextNode() {
-            cmdManager.focusElement(prevWidget, position: prevWidget.text.count)
+            cmdManager.focusElement(prevWidget, cursorPosition: prevWidget.text.count)
         } else if let nextVisibleNode = sortedNodes.last?.nextVisibleTextNode() {
             if (nextVisibleNode as? LinkedReferenceNode) == nil {
-                cmdManager.focusElement(nextVisibleNode, position: 0)
+                cmdManager.focusElement(nextVisibleNode, cursorPosition: 0)
             }
         }
 
@@ -137,7 +137,7 @@ extension TextRoot {
         defer { cmdManager.endGroup() }
         cmdManager.replaceText(in: node, for: selectedTextRange, with: bText)
         cmdManager.cancelSelection(node)
-        cmdManager.focusElement(node, position: selectedTextRange.lowerBound + bText.count)
+        cmdManager.focusElement(node, cursorPosition: selectedTextRange.lowerBound + bText.count)
     }
 
     func deleteForward() {
@@ -161,7 +161,7 @@ extension TextRoot {
                 let pos = cursorPosition
                 cmdManager.replaceText(in: node, for: cursorPosition..<cursorPosition, with: nextVisibleNode.text)
                 cmdManager.cancelSelection(node)
-                cmdManager.focusElement(node, position: pos)
+                cmdManager.focusElement(node, cursorPosition: pos)
                 cmdManager.deleteElement(for: nextVisibleNode)
             }
         }
@@ -187,7 +187,7 @@ extension TextRoot {
             if let prevVisibleNode = node.previousVisibleTextNode() {
                 let pos = prevVisibleNode.text.count
                 cmdManager.replaceText(in: prevVisibleNode, for: pos..<pos, with: node.text)
-                cmdManager.focusElement(prevVisibleNode, position: pos)
+                cmdManager.focusElement(prevVisibleNode, cursorPosition: pos)
                 for (i, child) in node.unproxyElement.children.enumerated() {
                     cmdManager.reparentElement(child, to: prevVisibleNode.unproxyElement, atIndex: i)
                 }
@@ -278,22 +278,40 @@ extension TextRoot {
     }
 
     public func firstRect(forCharacterRange range: Range<Int>) -> (NSRect, Range<Int>) {
-        let r1 = rectAt(range.lowerBound)
-        let r2 = rectAt(range.upperBound)
+        let r1 = rectAt(sourcePosition: range.lowerBound)
+        let r2 = rectAt(sourcePosition: range.upperBound)
         return (r1.union(r2), range)
     }
 
+    // swiftlint:disable:next cyclomatic_complexity
     public func updateTextAttributesAtCursorPosition() {
         guard let node = focusedWidget as? TextNode else { return }
         let ranges = node.text.rangesAt(position: cursorPosition)
+        var caretIsAfterLink = false
+        if caretIndex > 0,
+           let caret = node.textFrame?.carets[caretIndex - 1],
+           !caret.inSource && caret.edge.isTrailing {
+            caretIsAfterLink = true
+        }
+
         switch ranges.count {
         case 0:
             state.attributes = []
         case 1:
             guard let range = ranges.first else { return }
-            state.attributes = BeamText.removeInternalLinks(from: range.attributes)
+            // ignore the link attributes if we are to the right of a link, otherwise only ignore the internalLinks attributes
+            state.attributes = caretIsAfterLink
+                ? BeamText.removeLinks(from: range.attributes)
+                : BeamText.removeInternalLinks(from: range.attributes)
         case 2:
-            guard let range1 = ranges.first, let range2 = ranges.last else { return }
+            guard let range1 = ranges.first, let range2 = ranges.last
+            else { return }
+
+            if caretIsAfterLink {
+                // ignore the left part as we are to the right of a link
+                state.attributes = BeamText.removeLinks(from: range2.attributes)
+                return
+            }
             if !range1.attributes.contains(where: { $0.isInternalLink }) {
                 state.attributes = range1.attributes
             } else if !range2.attributes.contains(where: { $0.isInternalLink }) {

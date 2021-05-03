@@ -15,12 +15,12 @@ extension TextRoot {
             if cursorPosition == 0 {
                 if let next = node.previousVisibleTextNode() {
                     node.invalidateText()
-                    next.focus(cursorPosition: node.text.count)
+                    next.focus(position: node.text.count)
                 } else {
                     cursorPosition = 0
                 }
             } else {
-                cursorPosition = node.position(before: cursorPosition)
+                caretIndex = node.position(before: caretIndex)
             }
         }
         cancelSelection()
@@ -37,7 +37,7 @@ extension TextRoot {
                     next.focus()
                 }
             } else {
-                cursorPosition = node.position(after: cursorPosition)
+                caretIndex = node.position(after: caretIndex)
             }
         }
         cancelSelection()
@@ -48,13 +48,14 @@ extension TextRoot {
         guard root.state.nodeSelection == nil else { return }
         guard let node = focusedWidget as? TextNode else { return }
         if cursorPosition != 0 {
-            let newCursorPosition = node.position(before: cursorPosition)
-            if cursorPosition == selectedTextRange.lowerBound {
-                selectedTextRange = node.text.clamp(newCursorPosition..<selectedTextRange.upperBound)
+            let newCaretIndex = node.position(before: caretIndex)
+            let newCursorPosition = node.textFrame?.carets[newCaretIndex].positionInSource ?? 0
+            if newCursorPosition <= selectedTextRange.lowerBound {
+                selectedTextRange = node.text.clamp(newCursorPosition ..< selectedTextRange.upperBound)
             } else {
-                selectedTextRange = node.text.clamp(selectedTextRange.lowerBound..<newCursorPosition)
+                selectedTextRange = node.text.clamp(selectedTextRange.lowerBound ..< newCursorPosition)
             }
-            cursorPosition = newCursorPosition
+            caretIndex = newCaretIndex
             node.invalidateText()
         }
     }
@@ -153,7 +154,7 @@ extension TextRoot {
             if let newNode = node.previousVisibleTextNode() {
                 let offset = node.offsetAt(index: cursorPosition) + node.offsetInDocument.x - newNode.offsetInDocument.x
                 node.invalidateText()
-                newNode.focus(cursorPosition: newNode.indexOnLastLine(atOffset: offset))
+                newNode.focus(position: newNode.indexOnLastLine(atOffset: offset))
             } else {
                 cursorPosition = 0
             }
@@ -171,7 +172,7 @@ extension TextRoot {
             if let newNode = node.nextVisibleTextNode() {
                 let offset = node.offsetAt(index: cursorPosition) + node.offsetInDocument.x - newNode.offsetInDocument.x
                 node.invalidateText()
-                newNode.focus(cursorPosition: newNode.indexOnFirstLine(atOffset: offset))
+                newNode.focus(position: newNode.indexOnFirstLine(atOffset: offset))
             } else {
                 cursorPosition = node.text.count
             }

@@ -15,10 +15,10 @@ class InputText: TextEditorCommand {
     var cancelSelection: CancelSelection
     var focusElement: FocusElement
 
-    init(text: BeamText, in elementId: UUID, of noteTitle: String, at cursorPosition: Int) {
-        insertText = InsertText(text: text, in: elementId, of: noteTitle, at: cursorPosition)
+    init(text: BeamText, in elementId: UUID, of noteTitle: String, at position: Int) {
+        insertText = InsertText(text: text, in: elementId, of: noteTitle, at: position)
         cancelSelection = CancelSelection()
-        focusElement = FocusElement(element: elementId, from: noteTitle, at: cursorPosition + text.count)
+        focusElement = FocusElement(element: elementId, from: noteTitle, at: position + text.count)
         super.init(name: Self.name)
     }
 
