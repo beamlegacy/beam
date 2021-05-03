@@ -587,7 +587,7 @@ public extension CALayer {
             }
 
             if let toFocus = node.nodeFor(newElement) {
-                cmdManager.focusElement(toFocus, position: 0)
+                cmdManager.focusElement(toFocus, cursorPosition: 0)
             }
 
             scrollToCursorAtLayout = true
@@ -1016,7 +1016,7 @@ public extension CALayer {
         let f = NSFont.systemFont(ofSize: 11, weight: .semibold)
         titleString.addAttribute(.font, value: f, range: titleString.wholeRange)
         titleString.addAttribute(.foregroundColor, value: BeamColor.Editor.control.nsColor, range: titleString.wholeRange)
-        _title = Font.draw(string: titleString, atPosition: NSPoint(x: 0, y: 0), textWidth: frame.width)
+        _title = TextFrame.create(string: titleString, atPosition: NSPoint(x: 0, y: 0), textWidth: frame.width)
         return _title!
     }
 
@@ -1073,17 +1073,17 @@ public extension CALayer {
     var scrollToCursorAtLayout = false
     public func setHotSpotToCursorPosition() {
         guard focusedWidget as? TextNode != nil else { return }
-        setHotSpot(rectAt(rootNode.cursorPosition).insetBy(dx: -30, dy: -30))
+        setHotSpot(rectAt(caretIndex: rootNode.caretIndex).insetBy(dx: -30, dy: -30))
     }
 
     public func setHotSpotToNode(_ node: Widget) {
         setHotSpot(node.frameInDocument.insetBy(dx: -30, dy: -30))
     }
 
-    public func rectAt(_ position: Int) -> NSRect {
+    public func rectAt(caretIndex position: Int) -> NSRect {
         guard let node = focusedWidget as? TextNode else { return NSRect() }
         let origin = node.offsetInDocument
-        return node.rectAt(position).offsetBy(dx: origin.x, dy: origin.y)
+        return node.rectAt(caretIndex: position).offsetBy(dx: origin.x, dy: origin.y)
     }
 
     override public func mouseDragged(with event: NSEvent) {

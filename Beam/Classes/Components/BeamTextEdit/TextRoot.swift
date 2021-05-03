@@ -13,7 +13,7 @@ public struct TextState {
     var text = BeamText()
     var selectedTextRange: Range<Int> = 0..<0
     var markedTextRange: Range<Int>?
-    var cursorPosition: Int = 0
+    var caretIndex: Int = 0
 
     var attributes: [BeamText.Attribute] = []
 
@@ -60,23 +60,43 @@ public class TextRoot: TextNode {
     }
     override var cursorPosition: Int {
         get {
-            state.cursorPosition
+            guard let n = focusedWidget as? TextNode else {
+                return 0
+            }
+            return n.caretAtIndex(state.caretIndex).positionInSource
         }
         set {
             assert(newValue >= 0)
             let n = focusedWidget as? TextNode
             let textCount = n?.element.text.count ?? 0
-            state.cursorPosition = newValue > textCount ? textCount : newValue
-            if state.selectedTextRange.isEmpty {
-                state.selectedTextRange = newValue ..< newValue
-            }
-            updateTextAttributesAtCursorPosition()
-            n?.invalidateText()
-            focusedWidget?.invalidate()
-            editor.reBlink()
-            if state.nodeSelection == nil && !editor.scrollToCursorAtLayout {
-                editor.setHotSpotToCursorPosition()
-            }
+            let position = newValue > textCount ? textCount : newValue
+            let caretIndex = n?.caretIndexForSourcePosition(position) ?? 0
+            state.caretIndex = caretIndex
+            updateCursor()
+        }
+    }
+
+    func updateCursor() {
+        let n = focusedWidget as? TextNode
+        if state.selectedTextRange.isEmpty {
+            state.selectedTextRange = cursorPosition ..< cursorPosition
+        }
+        updateTextAttributesAtCursorPosition()
+        n?.invalidateText()
+        focusedWidget?.invalidate()
+        editor.reBlink()
+        if state.nodeSelection == nil && !editor.scrollToCursorAtLayout {
+            editor.setHotSpotToCursorPosition()
+        }
+
+    }
+    override var caretIndex: Int {
+        get {
+            return state.caretIndex
+        }
+        set {
+            state.caretIndex = newValue
+            updateCursor()
         }
     }
 
@@ -181,7 +201,7 @@ public class TextRoot: TextNode {
         referencesSection?.open = false
 
         if !editor.journalMode {
-            focus(widget: children.first ?? self, cursorPosition: nil)
+            focus(widget: children.first ?? self, position: nil)
             focusedWidget = nodeFor(element.children.first ?? element, withParent: self)
             focusedWidget?.onFocus()
         }
@@ -200,7 +220,7 @@ public class TextRoot: TextNode {
         }
     }
 
-    func focus(widget: Widget, cursorPosition newPosition: Int? = 0) {
+    func focus(widget: Widget, position newPosition: Int? = 0) {
         self.focusedWidget = widget
         if let position = newPosition {
             self.cursorPosition = position

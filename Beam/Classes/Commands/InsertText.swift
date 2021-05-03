@@ -54,7 +54,7 @@ class InsertText: TextEditorCommand {
               let root = context.root,
               let node = context.nodeFor(elementInstance.element) else { return true }
 
-        root.focus(widget: node, cursorPosition: cursorPosition)
+        root.focus(widget: node, position: cursorPosition)
         root.editor.detectFormatterType()
         return true
     }
@@ -74,9 +74,9 @@ class InsertText: TextEditorCommand {
 
 extension CommandManager where Context == Widget {
     @discardableResult
-    func insertText(_ text: BeamText, in node: TextNode, at position: Int) -> Bool {
+    func insertText(_ text: BeamText, in node: TextNode, at cursorPosition: Int) -> Bool {
         guard let title = node.elementNoteTitle else { return false }
-        let cmd = InsertText(text: text, in: node.elementId, of: title, at: position)
+        let cmd = InsertText(text: text, in: node.elementId, of: title, at: cursorPosition)
         return run(command: cmd, on: node)
     }
 }
