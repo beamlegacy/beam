@@ -1007,7 +1007,7 @@ public class TextNode: Widget {
     public func rectAt(caretIndex: Int) -> NSRect {
         updateRendering()
         guard let textFrame = textFrame else { return .zero }
-        let caret = textFrame.carets.isEmpty ? Caret.zero : textFrame.carets[caretIndex]
+        let caret = textFrame.carets.isEmpty ? initialCaret : textFrame.carets[caretIndex]
         let position = caret.positionInSource
 
         let textLine: TextLine? = {
@@ -1378,11 +1378,11 @@ public class TextNode: Widget {
 
     func caretAtIndex(_ index: Int) -> Caret {
         guard let textFrame = textFrame else {
-            return Caret.zero
+            return initialCaret
         }
 
         guard index < textFrame.carets.count else {
-            return textFrame.carets.last ?? .zero
+            return textFrame.carets.last ?? initialCaret
         }
         return textFrame.carets[index]
     }
@@ -1393,5 +1393,9 @@ public class TextNode: Widget {
 
     func caretIndexForSourcePosition(_ index: Int) -> Int? {
         return textFrame?.caretIndexForSourcePosition(index)
+    }
+
+    var initialCaret: Caret {
+        Caret(offset: NSPoint(x: indent, y: 0), indexInSource: 0, indexOnScreen: 0, edge: .leading, inSource: true)
     }
 }
