@@ -96,7 +96,7 @@ class OmniBarUITests: QuickSpec {
                     expect(self.helper.searchField.value as? String).to(equal(subString))
                 }
 
-                fit("can delete whole input") {
+                it("can delete whole input") {
                     expect(self.helper.searchField.value as? String).to(equal(textInputDumb))
                     self.selectAllShorcut()
                     self.helper.searchField.typeText(XCUIKeyboardKey.delete.rawValue)
