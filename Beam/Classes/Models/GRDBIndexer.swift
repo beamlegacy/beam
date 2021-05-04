@@ -141,7 +141,7 @@ class GRDBIndexer {
 
     func clear() throws {
         try dbQueue.write { db in
-            try db.execute(sql: "DELETE * FROM BeamElementRecord")
+            try db.execute(sql: "DELETE FROM BeamElementRecord")
         }
     }
 

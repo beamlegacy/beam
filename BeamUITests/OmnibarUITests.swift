@@ -51,6 +51,9 @@ class OmniBarUITests: QuickSpec {
         self.helper = OmniBarUITestsHelper(self.app)
     }
 
+    func selectAllShorcut() {
+        self.helper.searchField.typeKey("a", modifierFlags: .command)
+    }
 
     //swiftlint:disable:next function_body_length
     override func spec() {
@@ -65,7 +68,6 @@ class OmniBarUITests: QuickSpec {
 
         describe("Search Field") {
 
-            let selectAll = XCUIApplication().menuItems["Select All"]
 
             afterEach {
                 self.helper.makeElementScreenShot(self.helper.searchField)
@@ -94,9 +96,9 @@ class OmniBarUITests: QuickSpec {
                     expect(self.helper.searchField.value as? String).to(equal(subString))
                 }
 
-                it("can delete whole input") {
+                fit("can delete whole input") {
                     expect(self.helper.searchField.value as? String).to(equal(textInputDumb))
-                    selectAll.tap()
+                    self.selectAllShorcut()
                     self.helper.searchField.typeText(XCUIKeyboardKey.delete.rawValue)
                     expect(self.helper.searchField.value as? String).to(equal(textEmpty))
                 }
@@ -105,7 +107,7 @@ class OmniBarUITests: QuickSpec {
             context("without user input") {
                 it("deleting all doesnt change input") {
                     expect(self.helper.searchField.value as? String).to(equal(textEmpty))
-                    selectAll.tap()
+                    self.selectAllShorcut()
                     self.helper.searchField.typeText(XCUIKeyboardKey.delete.rawValue)
                     expect(self.helper.searchField.value as? String).to(equal(textEmpty))
                 }
@@ -119,6 +121,7 @@ class OmniBarUITests: QuickSpec {
             }
 
             it("can toggle web and note") {
+                self.helper.focusSearchField()
                 self.helper.searchField.typeText("hello")
                 self.helper.searchField.typeText("\r")
                 expect(self.app.images["browserTabBarView"].waitForExistence(timeout: 2)).to(beTrue())

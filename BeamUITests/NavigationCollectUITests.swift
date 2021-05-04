@@ -217,7 +217,7 @@ class NavigationCollectUITests: QuickSpec {
             }
             
             it("shooting test, then pressing and releasing option, shouldn't keep shoot frames visible") {
-                self.omnibarHelper.navigateTo(text: "https://en.wikipedia.org/wiki/Point-and-shoot_camera")
+                self.omnibarHelper.navigateTo(text: "en.wikipedia.org/wiki/Point-and-shoot_camera")
                 // Great exemple of complex selction.
                 let searchText = "Point-and-shoot camera"
                 let parent = self.app.webViews.containing(.staticText,
