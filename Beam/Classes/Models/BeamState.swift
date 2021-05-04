@@ -12,8 +12,6 @@ import WebKit
 import SwiftSoup
 import BeamCore
 
-let NoteDisplayThreshold = Float(0.0)
-//swiftlint:disable:next type_body_length
 @objc class BeamState: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Codable {
     var data: BeamData
     public var searchEngine: SearchEngine = GoogleSearch()
@@ -31,6 +29,11 @@ let NoteDisplayThreshold = Float(0.0)
     private(set) lazy var autocompleteManager: AutocompleteManager = {
         return AutocompleteManager(with: data)
     }()
+    private(set) lazy var browserTabsManager: BrowserTabsManager = {
+        let manager = BrowserTabsManager(with: data)
+        manager.delegate = self
+        return manager
+    }()
 
     @Published var backForwardList = NoteBackForwardList()
     @Published var canGoBack: Bool = false
@@ -47,86 +50,14 @@ let NoteDisplayThreshold = Float(0.0)
 
     @Published var mode: Mode = .today {
         didSet {
-            switch oldValue {
-            // swiftlint:disable:next fallthrough no_fallthrough_only
-            case .page: fallthrough
-            case .note, .today:
-                if mode == .web {
-                    currentTab?.startReading()
-                }
-
-            case .web:
-                switch mode {
-                case .note:
-                    currentTab?.switchToCard()
-                case .today:
-                    currentTab?.switchToNewSearch()
-                default:
-                    break
-                }
-            }
+            browserTabsManager.updateTabsForStateModeChange(mode, previousMode: oldValue)
             updateCanGoBackForward()
-        }
-    }
-
-    @Published public var tabs: [BrowserTab] = [] {
-        didSet {
-            for tab in tabs {
-                tab.onNewTabCreated = { [weak self] newTab in
-                    guard let self = self else { return }
-                    self.tabs.append(newTab)
-                    // if var note = self.currentNote {
-                    // TODO bind visited sites with note contents:
-                    //                        if note.searchQueries.contains(newTab.originalQuery) {
-                    //                            if let url = newTab.url {
-                    //                                note.visitedSearchResults.append(VisitedPage(originalSearchQuery: newTab.originalQuery, url: url, date: Date(), duration: 0))
-                    //                                self.currentNote = note
-                    //                            }
-                    //                        }
-                    //                    }
-                }
-
-                tab.appendToIndexer = { [weak self] url, read in
-                    guard let self = self else { return }
-                    guard let doc = try? SwiftSoup.parse(read.content, url.absoluteString) else { return }
-                    let text: String = html2Text(url: url, doc: doc)
-                    self.data.index.append(document: IndexDocument(source: url.absoluteString, title: read.title, contents: text))
-                }
-            }
-
-            if tabs.isEmpty {
-                if let note = currentNote {
-                    navigateToNote(note)
-                } else {
-                    navigateToJournal()
-                }
-            }
-        }
-    }
-
-    @Published var currentTab: BrowserTab? {
-        didSet {
-            if self.mode == .web {
-                oldValue?.switchToOtherTab()
-                currentTab?.startReading()
-            }
-
-            tabScope.removeAll()
-            currentTab?.$canGoBack.sink { v in
-                self.canGoBack = v
-            }.store(in: &tabScope)
-            currentTab?.$canGoForward.sink { v in
-                self.canGoForward = v
-            }.store(in: &tabScope)
-
-            resetDestinationCard()
         }
     }
 
     @Published var currentPage: WindowPage?
 
     private var scope = Set<AnyCancellable>()
-    private var tabScope = Set<AnyCancellable>()
 
     func goBack() {
         guard canGoBack else { return }
@@ -187,7 +118,7 @@ let NoteDisplayThreshold = Float(0.0)
         case .web:
             navigateToNote(note)
         case .today, .note, .page:
-            if !tabs.isEmpty { mode = .web }
+            if self.hasBrowserTabs { mode = .web }
         }
     }
 
@@ -256,33 +187,26 @@ let NoteDisplayThreshold = Float(0.0)
 
     func createTabFromNote(_ note: BeamNote, element: BeamElement, withURL url: URL) {
         let tab = BrowserTab(state: self, originalQuery: note.title, note: note, rootElement: element)
-        tab.load(url: url)
-        currentTab = tab
-        tabs.append(tab)
+        browserTabsManager.addNewTab(tab, withURL: url)
         mode = .web
     }
 
     func createTab(withURL url: URL, originalQuery: String, createNote: Bool = true) {
         let tab = BrowserTab(state: self, originalQuery: originalQuery, note: data.todaysNote)
-        tab.load(url: url)
-        currentTab = tab
-        tabs.append(tab)
+        browserTabsManager.addNewTab(tab, withURL: url)
         mode = .web
     }
 
     func createEmptyTab() {
         let tab = BrowserTab(state: self, originalQuery: nil, note: data.todaysNote)
-        currentTab = tab
-        tabs.append(tab)
+        browserTabsManager.addNewTab(tab)
         mode = .web
     }
 
     func createTabFromNode(_ node: TextNode, withURL url: URL) {
         guard let note = node.root?.note else { return }
         let tab = BrowserTab(state: self, originalQuery: node.strippedText, note: note, rootElement: node.element, createBullet: false)
-        tab.load(url: url)
-        currentTab = tab
-        tabs.append(tab)
+        browserTabsManager.addNewTab(tab, withURL: url)
         mode = .web
     }
 
@@ -401,15 +325,15 @@ let NoteDisplayThreshold = Float(0.0)
         }
         backForwardList = try container.decode(NoteBackForwardList.self, forKey: .backForwardList)
 
-        tabs = try container.decode([BrowserTab].self, forKey: .tabs)
-        if let tabIndex = try? container.decode(Int.self, forKey: .currentTab), tabIndex < tabs.count {
-            currentTab = tabs[tabIndex]
+        browserTabsManager.tabs = try container.decode([BrowserTab].self, forKey: .tabs)
+        if let tabIndex = try? container.decode(Int.self, forKey: .currentTab), tabIndex < browserTabsManager.tabs.count {
+            browserTabsManager.currentTab = browserTabsManager.tabs[tabIndex]
         }
 
         setup(data: data)
         mode = try container.decode(Mode.self, forKey: .mode)
 
-        for tab in tabs {
+        for tab in browserTabsManager.tabs {
             tab.postLoadSetup(state: self)
         }
     }
@@ -422,9 +346,9 @@ let NoteDisplayThreshold = Float(0.0)
         }
         try container.encode(backForwardList, forKey: .backForwardList)
         try container.encode(mode, forKey: .mode)
-        try container.encode(tabs, forKey: .tabs)
+        try container.encode(browserTabsManager.tabs, forKey: .tabs)
         if let tab = currentTab {
-            try container.encode(tabs.firstIndex(of: tab), forKey: .currentTab)
+            try container.encode(browserTabsManager.tabs.firstIndex(of: tab), forKey: .currentTab)
         }
     }
 
@@ -466,57 +390,45 @@ let NoteDisplayThreshold = Float(0.0)
         focusOmniBox = true
     }
 
-    func showNextTab() {
-        guard let tab = currentTab, let i = tabs.firstIndex(of: tab) else { return }
-        let index = (i + 1) % tabs.count
-        currentTab = tabs[index]
-    }
-
-    func showPreviousTab() {
-        guard let tab = currentTab, let i = tabs.firstIndex(of: tab) else { return }
-        let index = i - 1 < 0 ? tabs.count - 1 : i - 1
-        currentTab = tabs[index]
-    }
-
-    func closeCurrentTab() -> Bool {
-        guard mode == .web, let tab = currentTab else { return false }
-        tab.cancelObservers()
-
-        if let i = tabs.firstIndex(of: tab) {
-            tabs.remove(at: i)
-            let nextTabIndex = min(i, tabs.count - 1)
-            if nextTabIndex >= 0 {
-                currentTab = tabs[nextTabIndex]
-            }
-
-            if tabs.isEmpty {
-                if let note = currentNote {
-                    navigateToNote(note)
-                } else {
-                    navigateToJournal()
-                }
-                currentTab = nil
-            }
-            return true
-        }
-
-        return false
-    }
-
-    @discardableResult
-    func removeTab(_ index: Int) -> Bool {
-        let tab = tabs[index]
-        guard currentTab !== tab else { return closeCurrentTab() }
-
-        tab.cancelObservers()
-        tabs.remove(at: index)
-
-        return true
-    }
-
     func resetDestinationCard() {
         destinationCardName = currentTab?.note.title ?? data.todaysName
         destinationCardNameSelectedRange = nil
         destinationCardIsFocused = false
+    }
+}
+
+// MARK: - Browser Tabs
+extension BeamState: BrowserTabsManagerDelegate {
+
+    // convenient vars
+    var hasBrowserTabs: Bool {
+        return !browserTabsManager.tabs.isEmpty
+    }
+    private var currentTab: BrowserTab? {
+        return browserTabsManager.currentTab
+    }
+
+    // MARK: BrowserTabsManagerDelegate
+    func areTabsVisible(for manager: BrowserTabsManager) -> Bool {
+        return mode == .web
+    }
+
+    func tabsManagerDidUpdateTabs(_ tabs: [BrowserTab]) {
+        if tabs.isEmpty {
+            if let note = currentNote {
+                navigateToNote(note)
+            } else {
+                navigateToJournal()
+            }
+        }
+    }
+    func tabsManagerDidChangeCurrentTab(_ currentTab: BrowserTab?) {
+        resetDestinationCard()
+        focusOmniBox = false
+    }
+
+    func tabsManagerBrowsingHistoryChanged(canGoBack: Bool, canGoForward: Bool) {
+        self.canGoBack = canGoBack
+        self.canGoForward = canGoForward
     }
 }

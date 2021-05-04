@@ -261,25 +261,25 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationWillHide(_ notification: Notification) {
         for window in windows {
-            window.state.currentTab?.switchToBackground()
+            window.state.browserTabsManager.currentTab?.switchToBackground()
         }
     }
 
     func applicationDidUnhide(_ notification: Notification) {
         for window in windows where window.isMainWindow {
-            window.state.currentTab?.startReading()
+            window.state.browserTabsManager.currentTab?.startReading()
         }
     }
 
     func applicationDidBecomeActive(_ notification: Notification) {
         for window in windows where window.isMainWindow {
-            window.state.currentTab?.startReading()
+            window.state.browserTabsManager.currentTab?.startReading()
         }
     }
 
     func applicationWillResignActive(_ notification: Notification) {
         for window in windows {
-            window.state.currentTab?.switchToBackground()
+            window.state.browserTabsManager.currentTab?.switchToBackground()
         }
     }
 

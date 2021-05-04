@@ -73,6 +73,7 @@ class BeamWindow: NSWindow {
         let mainView = ContentView()
             .environmentObject(state)
             .environmentObject(data)
+            .environmentObject(state.browserTabsManager)
             .frame(minWidth: contentRect.width, maxWidth: .infinity, minHeight: contentRect.height, maxHeight: .infinity)
 
         let hostingView = BeamHostingView(rootView: mainView)
@@ -102,11 +103,11 @@ class BeamWindow: NSWindow {
     }
 
     override func performClose(_ sender: Any?) {
-        if state.mode != .web, !state.tabs.isEmpty {
+        if state.mode != .web, state.hasBrowserTabs {
             state.mode = .web
             return
         }
-        if state.closeCurrentTab() { return }
+        if state.browserTabsManager.closeCurrentTab() { return }
         super.performClose(sender)
     }
 
@@ -174,11 +175,11 @@ class BeamWindow: NSWindow {
     }
 
     @IBAction func showPreviousTab(_ sender: Any?) {
-        state.showPreviousTab()
+        state.browserTabsManager.showPreviousTab()
     }
 
     @IBAction func showNextTab(_ sender: Any?) {
-        state.showNextTab()
+        state.browserTabsManager.showNextTab()
     }
 
     @IBAction func showJournal(_ sender: Any?) {
@@ -209,7 +210,7 @@ class BeamWindow: NSWindow {
     }
 
     @IBAction func dumpBrowsingTree(_ sender: Any?) {
-        state.currentTab?.dumpBrowsingTree()
+        state.browserTabsManager.currentTab?.dumpBrowsingTree()
     }
 
     static let savedTabsKey = "savedTabs"
