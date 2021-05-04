@@ -116,12 +116,11 @@ class OmniBarAutocompleteUITests: QuickSpec {
             }
 
             it("can create and search note") {
-                self.helper.restart()
-
+                self.helper.focusSearchField()
                 self.helper.searchField.typeText("Autocomplete Note Creation")
                 let createNoteResult = self.helper.allAutocompleteResults.matching(self.helper.autocompleteCreateCardPredicate).firstMatch
                 expect(createNoteResult.exists).to(beTrue())
-                createNoteResult.tap()
+                createNoteResult.tapInTheMiddle()
 
                 expect(self.app.scrollViews["noteView"].waitForExistence(timeout: 2)).to(beTrue())
                 expect(self.helper.inputHasFocus(self.helper.searchField)).to(beFalse())
