@@ -32,10 +32,7 @@ class NoteEditorUITests: QuickSpec {
 
         describe("Editing") {
             it("adds text inputs") {
-                for text in textInput.split(every: 1) {
-                    app.typeText(text)
-                    usleep(100000) // 0.5sec
-                }
+                app.typeSlowly(textInput, everyNChar: 1)
                 expect(firstJournalEntry.value as? String) == textInput
                 // Leave a bit of time for Coredata to save
                 sleep(1)

@@ -90,7 +90,7 @@ struct DestinationNotePicker: View {
                             font: .systemFont(ofSize: 12),
                             textColor: textColor.nsColor,
                             placeholderColor: BeamColor.Generic.placeholder.nsColor,
-                            selectedRanges: state.destinationCardNameSelectedRange
+                            selectedRange: state.destinationCardNameSelectedRange
                         ) { newName in
                             Logger.shared.logInfo("[DestinationNotePicker] Searching '\(newName)'", category: .ui)
                             state.destinationCardNameSelectedRange = nil
@@ -107,7 +107,7 @@ struct DestinationNotePicker: View {
                                 state.destinationCardName = ""
                                 state.destinationCardNameSelectedRange = nil
                             } else {
-                                state.destinationCardNameSelectedRange = [state.destinationCardName.wholeRange]
+                                state.destinationCardNameSelectedRange = state.destinationCardName.wholeRange
                             }
                             updateSearchResults()
                         } onStopEditing: {

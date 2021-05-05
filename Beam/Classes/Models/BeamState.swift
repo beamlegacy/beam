@@ -43,7 +43,7 @@ import BeamCore
 
     @Published var destinationCardIsFocused: Bool = false
     @Published var destinationCardName: String = ""
-    @Published var destinationCardNameSelectedRange: [Range<Int>]?
+    @Published var destinationCardNameSelectedRange: Range<Int>?
     var bidirectionalPopover: BidirectionalPopover?
 
     @Published var windowIsResizing = false

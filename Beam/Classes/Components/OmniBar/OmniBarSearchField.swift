@@ -108,10 +108,8 @@ struct OmniBarSearchField: View {
                     font: BeamFont.medium(size: 13).nsFont,
                     textColor: textColor.nsColor,
                     placeholderColor: BeamColor.Generic.placeholder.nsColor,
-                    selectedRanges: autocompleteManager.searchQuerySelectedRanges,
-                    onTextChanged: { _ in
-                        autocompleteManager.resetAutocompleteSelection()
-                    },
+                    selectedRange: autocompleteManager.searchQuerySelectedRange,
+                    textWillChange: { autocompleteManager.replacementTextForProposedText($0) },
                     onCommit: { modifierFlags in
                         onEnterPressed(withCommand: modifierFlags?.contains(.command) ?? false)
                     },
@@ -126,9 +124,7 @@ struct OmniBarSearchField: View {
                             autocompleteManager.cancelAutocomplete()
                         }
                     },
-                    onCursorMovement: { cursorMovement in
-                        return handleCursorMovement(cursorMovement)
-                    },
+                    onCursorMovement: { handleCursorMovement($0) },
                     onModifierFlagPressed: { event in
                         modifierFlagsPressed = event.modifierFlags.contains(.command) ? .command : nil
                     }
@@ -148,10 +144,10 @@ struct OmniBarSearchField: View {
                         GeometryReader { geo in
                             HStack {
                             let pixelRoundUp = geo.frame(in: .global).minX.truncatingRemainder(dividingBy: 1)
-                            Text(" – \(subtitle)")
+                                Text(" – \(subtitle)")
                                 .font(BeamFont.regular(size: 13).swiftUI)
                                 .foregroundColor(subtitleColor.swiftUI)
-                                .background(autocompleteManager.searchQuerySelectedRanges?.isEmpty == false ?
+                                .background(autocompleteManager.searchQuerySelectedRange?.isEmpty == false ?
                                                 BeamColor.Generic.textSelection.swiftUI :
                                                 nil)
                                 // We need to stick the subtitle exactly after the text selection

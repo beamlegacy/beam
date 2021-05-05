@@ -32,7 +32,7 @@ struct ShootCardPicker: View {
     @State private var isEditingNote = false
     @State private var currentCardName: String?
     @State private var cardSearchField = ""
-    @State private var cardSearchFieldSelection: [Range<Int>]? = []
+    @State private var cardSearchFieldSelection: Range<Int>?
     @State private var addNoteField = ""
 
     @State private var isVisible = false
@@ -53,7 +53,7 @@ struct ShootCardPicker: View {
                                   textColor: currentCardName == nil ? BeamColor.Generic.text.nsColor
                                           : BeamColor.Sonic.nsColor,
                                   placeholderColor: BeamColor.Generic.placeholder.nsColor,
-                                  selectedRanges: cardSearchFieldSelection) { (text) in
+                                  selectedRange: cardSearchFieldSelection) { (text) in
                         onTextDidChange(text)
                     } onCommit: { _ in
                         if currentCardName != nil || cardSearchField.isEmpty {
@@ -135,7 +135,7 @@ struct ShootCardPicker: View {
             isVisible = true
 
             if !cardSearchField.isEmpty {
-                let range = [cardSearchField.count..<cardSearchField.count]
+                let range = cardSearchField.count..<cardSearchField.count
                 cardSearchFieldSelection = range
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
