@@ -103,17 +103,17 @@ class OmniBarDestinationUITests: QuickSpec {
                 // down arrow
                 let selectedResultQuery = self.helper.allAutocompleteResults.matching(self.helper.autocompleteSelectedPredicate)
                 let firstResult = selectedResultQuery.firstMatch.identifier
-                noteSearchField.typeKey(.downArrow, modifierFlags: .function)
+                noteSearchField.typeKey(.downArrow, modifierFlags: [])
                 let secondResult = selectedResultQuery.firstMatch.identifier
                 expect(secondResult).toNot(equal(firstResult))
 
                 // up arrow
-                noteSearchField.typeKey(.upArrow, modifierFlags: .function)
+                noteSearchField.typeKey(.upArrow, modifierFlags: [])
                 let thirdResult = selectedResultQuery.firstMatch.identifier
                 expect(thirdResult).to(equal(firstResult))
 
                 // escape
-                noteSearchField.typeKey(.escape, modifierFlags: .function)
+                noteSearchField.typeKey(.escape, modifierFlags: [])
                 expect(self.helper.inputHasFocus(noteSearchField)).to(beFalse())
                 expect(title.exists).to(beTrue())
             }

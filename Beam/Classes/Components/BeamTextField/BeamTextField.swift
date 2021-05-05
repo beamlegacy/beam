@@ -18,9 +18,12 @@ struct BeamTextField: NSViewRepresentable {
     var font: NSFont?
     var textColor: NSColor?
     var placeholderColor: NSColor?
-    var selectedRanges: [Range<Int>]?
+    var selectedRange: Range<Int>?
 
     var onTextChanged: (String) -> Void = { _ in }
+    // Return a replacement text and selection
+    var textWillChange: ((_ proposedText: String) -> (String, Range<Int>)?)?
+
     var onCommit: (_ modifierFlags: NSEvent.ModifierFlags?) -> Void = { _ in }
     var onEscape: () -> Void = { }
     var onTab: (() -> Void)?
@@ -28,6 +31,7 @@ struct BeamTextField: NSViewRepresentable {
     var onModifierFlagPressed: ((_ modifierFlag: NSEvent) -> Void)?
     var onStartEditing: () -> Void = { }
     var onStopEditing: () -> Void = { }
+
     internal var centered: Bool = false
 
     func makeCoordinator() -> Coordinator {
@@ -68,9 +72,10 @@ struct BeamTextField: NSViewRepresentable {
         clearSelectionIfNeeded(textField, context: context)
 
         DispatchQueue.main.async {
+            let coordinator = context.coordinator
             // Force focus on textField
             let isCurrentlyFirstResponder = textField.isFirstResponder
-            let wasEditing = context.coordinator.lastUpdateWasEditing
+            let wasEditing = coordinator.lastUpdateWasEditing
             if isEditing && !isCurrentlyFirstResponder {
                 textField.becomeFirstResponder()
             } else if !isEditing && isCurrentlyFirstResponder {
@@ -82,13 +87,16 @@ struct BeamTextField: NSViewRepresentable {
                 textField.resignFirstResponder()
                 textField.invalidateIntrinsicContentSize()
             }
-            context.coordinator.lastUpdateWasEditing = isEditing
+            coordinator.lastUpdateWasEditing = isEditing
 
-            // Set the range on the textField
-            if let range = self.selectedRanges?.first {
-                let pos = Int(range.startIndex)
-                let len = Int(range.endIndex - range.startIndex)
-                self.updateSelectedRange(textField, range: NSRange(location: pos, length: len))
+            // Set the selected range on the textField
+            if self.selectedRange != coordinator.lastSelectedRange {
+                if let range = self.selectedRange {
+                    let pos = Int(range.startIndex)
+                    let len = Int(range.endIndex - range.startIndex)
+                    self.updateSelectedRange(textField, range: NSRange(location: pos, length: len))
+                }
+                context.coordinator.lastSelectedRange = self.selectedRange
             }
         }
     }
@@ -139,16 +147,17 @@ struct BeamTextField: NSViewRepresentable {
     private func clearSelectionIfNeeded(_ textField: Self.NSViewType, context: Self.Context) {
         if context.coordinator.nextUpdateShouldClearSelection &&
             textField.isFirstResponder &&
-            selectedRanges?.isEmpty != false {
+            selectedRange?.isEmpty != false {
             textField.placeCursorAtCurrentMouseLocation()
         }
         context.coordinator.nextUpdateShouldClearSelection = false
     }
 
-    class Coordinator: NSObject, NSTextFieldDelegate {
+    class Coordinator: NSObject, NSTextFieldDelegate, NSControlTextEditingDelegate {
         let parent: BeamTextField
         var nextUpdateShouldClearSelection = false
         var lastUpdateWasEditing = false
+        var lastSelectedRange: Range<Int>?
 
         init(_ textField: BeamTextField) {
             self.parent = textField
@@ -163,7 +172,15 @@ struct BeamTextField: NSViewRepresentable {
         func controlTextDidChange(_ obj: Notification) {
             guard let textField = obj.object as? NSViewType else { return }
 
-            parent.text = textField.stringValue
+            var finalText = textField.stringValue
+
+            if let (newText, newRange) = parent.textWillChange?(finalText) {
+                // Changing the replacement text here instantaneously, faster than waiting for SwiftUI update
+                textField.setText(newText, font: parent.font, skipGuards: true)
+                parent.updateSelectedRange(textField, range: NSRange(location: newRange.lowerBound, length: newRange.count))
+                finalText = newText
+            }
+            parent.text = finalText
             parent.onTextChanged(textField.stringValue)
         }
 

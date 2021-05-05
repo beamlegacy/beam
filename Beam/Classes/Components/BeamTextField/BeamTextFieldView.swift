@@ -42,6 +42,7 @@ class BeamTextFieldView: NSTextField {
 
     var onPerformKeyEquivalent: (NSEvent) -> Bool = { _ in return false }
     var onFocusChanged: (Bool) -> Void = { _ in }
+    var onSelectionChanged: (() -> Void)?
 
     public init() {
         super.init(frame: NSRect())
@@ -57,8 +58,8 @@ class BeamTextFieldView: NSTextField {
         super.draw(dirtyRect)
     }
 
-    internal func setText(_ text: String, font: NSFont?, icon: NSImage? = nil) {
-        guard text != _currentText || textColor != _currentColor else {
+    internal func setText(_ text: String, font: NSFont?, icon: NSImage? = nil, skipGuards: Bool = false) {
+        guard skipGuards || text != _currentText || textColor != _currentColor else {
             return
         }
         _currentText = text
@@ -164,6 +165,12 @@ class BeamTextFieldView: NSTextField {
         }
 
         return super.performKeyEquivalent(with: event)
+    }
+}
+
+extension BeamTextFieldView: NSTextViewDelegate {
+    func textViewDidChangeSelection(_ notification: Notification) {
+        onSelectionChanged?()
     }
 }
 
