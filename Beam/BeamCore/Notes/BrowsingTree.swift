@@ -41,6 +41,7 @@ public struct ScoredLink: Hashable {
 }
 
 public class BrowsingNode: ObservableObject, Codable {
+    public let id: UUID
     public var link: UInt64
     public var parent: BrowsingNode?
     public var tree: BrowsingTree! {
@@ -66,6 +67,7 @@ public class BrowsingNode: ObservableObject, Codable {
     }
 
     public init(tree: BrowsingTree, parent: BrowsingNode?, url: String, title: String?) {
+        id = UUID()
         self.link = LinkStore.createIdFor(url, title: title)
         self.parent = parent
         self.tree = tree
@@ -76,12 +78,14 @@ public class BrowsingNode: ObservableObject, Codable {
         case link
         case events
         case children
+        case id
     }
 
     public required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         link = try container.decode(UInt64.self, forKey: .link)
+        id = try container.decode(UUID.self, forKey: .id)
         if container.contains(.events) {
             events = try container.decode([ReadingEvent].self, forKey: .events)
         }
@@ -94,6 +98,7 @@ public class BrowsingNode: ObservableObject, Codable {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
         try container.encode(link, forKey: .link)
+        try container.encode(id, forKey: .id)
         if !events.isEmpty {
             try container.encode(events, forKey: .events)
         }

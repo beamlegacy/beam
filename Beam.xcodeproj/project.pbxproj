@@ -471,6 +471,7 @@
 		BAA67F19308A38C387C47D6E /* PointAndShootUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA675190ACFCE6361AC531B /* PointAndShootUI.swift */; };
 		BAA67F44FDFA2FFBC5FE8245 /* .parcelrc in Resources */ = {isa = PBXBuildFile; fileRef = BAA67382F8DB4EC0FF65F11F /* .parcelrc */; };
 		BAA67FC2BABDCB5F962CDE22 /* Frames.test.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA678F7FE18AF760346FB0B /* Frames.test.ts */; };
+		DA3E41D42642CC7900BA3952 /* TextSaver.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3E41BF2642CC7900BA3952 /* TextSaver.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -1168,6 +1169,7 @@
 		BAA67F51F639D48AD4ABAACB /* ShootCardConfirmationView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShootCardConfirmationView.swift; sourceTree = "<group>"; };
 		BAA67F65A4275DE0B884B933 /* index_native.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = index_native.js; sourceTree = "<group>"; };
 		BAA67FFE49752420EA6C9833 /* Native.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = Native.ts; sourceTree = "<group>"; };
+		DA3E41BF2642CC7900BA3952 /* TextSaver.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TextSaver.swift; path = Classes/Helpers/Utils/TextSaver.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -2292,6 +2294,7 @@
 		965A78272514F147009980D4 /* Beam */ = {
 			isa = PBXGroup;
 			children = (
+				DA3E41BF2642CC7900BA3952 /* TextSaver.swift */,
 				A5208D5C261D0176006193AF /* BeamDesign */,
 				96319C9C261614CB00D1CF31 /* BeamCore */,
 				9611994725A279EC005BEC82 /* ObjCBridge */,
@@ -3354,6 +3357,7 @@
 				A5CA5DBA2624FF4A004E9D3E /* BeamNSTableView.swift in Sources */,
 				521EEDE525937F7F00BA2485 /* DocumentsList.swift in Sources */,
 				87C539D12618B93A00D51877 /* PasswordGeneratorCellGroup.swift in Sources */,
+				DA3E41D42642CC7900BA3952 /* TextSaver.swift in Sources */,
 				4159EA0A259A3568005FD355 /* BidirectionalPopoverResultItem.swift in Sources */,
 				964FE5B72624813E00966E03 /* RandomAccessCollection+BinarySearch.swift in Sources */,
 				A0E3150525ED1ECB001A5E55 /* FormattingText.swift in Sources */,
