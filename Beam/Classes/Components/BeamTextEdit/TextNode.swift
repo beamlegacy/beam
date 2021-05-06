@@ -1201,7 +1201,7 @@ public class TextNode: Widget {
     override func dumpWidgetTree(_ level: Int = 0) {
         let tabs = String.tabs(level)
         //swiftlint:disable:next print
-        print("\(tabs)\(String(describing: Self.self)) frame(\(frame)) \(layers.count) layers - element id: \(element.id) [\(elementText.text)]\(layer.superlayer == nil ? " DETTACHED" : "")")
+        print("\(tabs)\(String(describing: Self.self)) frame(\(frame)) \(layers.count) layers - element id: \(element.id) [\(elementText.text)]\(layer.superlayer == nil ? " DETTACHED" : "") \(needLayout ? "NeedLayout":"")")
         for c in children {
             c.dumpWidgetTree(level + 1)
         }
@@ -1351,15 +1351,13 @@ public class TextNode: Widget {
         elementScope.removeAll()
 
         element.$text
-            .dropFirst()
             .sink { [unowned self] newValue in
                 elementText = newValue
-                self.updateActionLayerVisibility(hidden: elementText.isEmpty)
+                self.updateActionLayerVisibility(hidden: elementText.isEmpty || !isFocused)
                 self.invalidateText()
             }.store(in: &elementScope)
 
         element.$kind
-            .dropFirst()
             .sink { [unowned self] newValue in
                 elementKind = newValue
                 self.invalidateText()
