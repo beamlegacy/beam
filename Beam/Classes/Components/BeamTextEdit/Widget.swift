@@ -714,6 +714,10 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     func onUnfocus() {
     }
 
+    var isFocused: Bool {
+        root?.focusedWidget == self
+    }
+    
     // MARK: - Mouse Events
     enum DragMode {
         case none
