@@ -553,6 +553,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                 self.updateElementWithTitle(webView.title)
                 self.browsingTree.current.score.textAmount = read.content.count
                 self.updateScore()
+                try? TextSaver.shared?.save(nodeId: self.browsingTree.current.id, text: read)
             case let .failure(error):
                 Logger.shared.logError("Error while indexing web page: \(error)", category: .javascript)
             }
