@@ -66,6 +66,17 @@ public class TextNode: Widget {
         }
     }
 
+    override var availableWidth: CGFloat {
+        didSet {
+            if availableWidth != oldValue {
+                updateChildren()
+                updateTextFrame()
+                invalidatedRendering = true
+                updateRendering()
+            }
+        }
+    }
+
     var text: BeamText {
         get { element.text }
         set {

@@ -242,6 +242,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         super.init()
         configureLayer()
         configureSelectionLayer()
+        availableWidth = parent.availableWidth - parent.childInset
 
         setAccessibilityIdentifier(String(describing: Self.self))
         setAccessibilityElement(true)
