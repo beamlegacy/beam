@@ -1010,18 +1010,16 @@ public class TextNode: Widget {
         let caret = textFrame.carets.isEmpty ? initialCaret : textFrame.carets[caretIndex]
         let position = caret.positionInSource
 
-        let textLine: TextLine? = {
+        let textLine: TextLine = {
             if let emptyLayout = emptyTextFrame {
                 return emptyLayout.lines[0]
             }
 
-            guard let cursorLine = lineAt(index: position <= 0 ? 0 : position) else { fatalError() }
-            return textFrame.lines[cursorLine]
+            return textFrame.lines[caret.line]
         }()
 
-        guard let line = textLine else { return NSRect.zero }
         let x1 = caret.offset.x
-        let cursorRect = NSRect(x: x1, y: line.frame.minY, width: position == text.count ? bigCursorWidth : smallCursorWidth, height: line.bounds.height)
+        let cursorRect = NSRect(x: x1, y: textLine.frame.minY, width: position == text.count ? bigCursorWidth : smallCursorWidth, height: textLine.bounds.height)
 
         return cursorRect
     }
@@ -1394,6 +1392,6 @@ public class TextNode: Widget {
     }
 
     var initialCaret: Caret {
-        Caret(offset: NSPoint(x: indent, y: 0), indexInSource: 0, indexOnScreen: 0, edge: .leading, inSource: true)
+        Caret(offset: NSPoint(x: indent, y: 0), indexInSource: 0, indexOnScreen: 0, edge: .leading, inSource: true, line: 0)
     }
 }

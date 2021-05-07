@@ -38,6 +38,8 @@ extension TextRoot {
                 }
             } else {
                 caretIndex = node.position(after: caretIndex)
+                //swiftlint:disable:next print
+//                print("new position in source: \(cursorPosition) (attributes \(state.attributes))")
             }
         }
         cancelSelection()

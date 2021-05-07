@@ -17,12 +17,14 @@ public struct ImageRunStruct {
 }
 
 public class TextLine {
-    public init(ctLine: CTLine, attributedString: NSAttributedString, sourceOffset: Int, notInSourcePositions: [Int]) {
+    public init(indexInFrame: Int, ctLine: CTLine, attributedString: NSAttributedString, sourceOffset: Int, notInSourcePositions: [Int]) {
+        self.indexInFrame = indexInFrame
         self.ctLine = ctLine
         self.sourceOffset = sourceOffset
         self.notInSourcePositions = notInSourcePositions
     }
 
+    public var indexInFrame: Int
     public var sourceOffset: Int
     public var notInSourcePositions: [Int] = []
     public var localNotInSourcePositions: [Int] {
@@ -116,8 +118,8 @@ public class TextLine {
         var c = [Caret]()
         let y = frame.minY
 
-        CTLineEnumerateCaretOffsets(ctLine) { (offset, index, leading, _) in
-            c.append(Caret(offset: CGPoint(x: self.frame.origin.x + CGFloat(offset), y: y), indexInSource: -1, indexOnScreen: index, edge: leading ? .leading : .trailing, inSource: true))
+        CTLineEnumerateCaretOffsets(ctLine) { [self] (offset, index, leading, _) in
+            c.append(Caret(offset: CGPoint(x: self.frame.origin.x + CGFloat(offset), y: y), indexInSource: -1, indexOnScreen: index, edge: leading ? .leading : .trailing, inSource: true, line: self.indexInFrame))
         }
 
         return sortAndSourceCarets(c, sourceOffset: sourceOffset, notInSourcePositions: notInSourcePositions)

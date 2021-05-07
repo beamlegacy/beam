@@ -34,7 +34,7 @@ public extension RandomAccessCollection {
     func binaryContains(_ element: Element) -> Bool where Element: Comparable {
         guard !isEmpty else { return false }
         guard let index = binarySearch(predicate: { elem -> Bool in
-            element < elem
+            element > elem
         }) else { return false }
         return self[index] == element
     }
