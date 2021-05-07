@@ -7,8 +7,12 @@
 
 import Foundation
 import XCTest
+#if canImport(Quick)
 import Quick
+#endif
+#if canImport(Nimble)
 import Nimble
+#endif
 
 class OmniBarDestinationUITests: QuickSpec {
     let app = XCUIApplication()
@@ -30,9 +34,9 @@ class OmniBarDestinationUITests: QuickSpec {
     func createDestinationNote() {
         self.app.terminate()
         self.app.launch()
-        self.helper.searchField.typeText(destinationNoteTitle)
+        self.helper.typeInSearchAndWait(destinationNoteTitle)
         let createNoteResult = self.helper.allAutocompleteResults.matching(self.helper.autocompleteCreateCardPredicate).firstMatch
-        createNoteResult.tap()
+        createNoteResult.tapInTheMiddle()
         sleep(2) // wait for new note to be saved
         let journalButton = self.app.buttons["journal"]
         journalButton.tap()
@@ -148,17 +152,17 @@ class OmniBarDestinationUITests: QuickSpec {
             it("can create note and pivot") {
                 goToWebMode()
 
-                let secondTitle = "Seond Destination"
+                let anotherTitle = "Another Destination"
                 let title = self.app.staticTexts["DestinationNoteTitle"]
                 expect(title.waitForExistence(timeout: 2)).to(beTrue())
                 expect(title.value as? String).to(equal(todayName))
                 title.tap()
 
-                noteSearchField.typeText(secondTitle)
+                noteSearchField.typeText(anotherTitle)
                 let createNoteItem = self.helper.allAutocompleteResults.matching(self.helper.autocompleteCreateCardPredicate).firstMatch
                 expect(createNoteItem.exists).to(beTrue())
                 noteSearchField.typeText("\r")
-                expect(title.value as? String).to(equal(secondTitle))
+                expect(title.value as? String).to(equal(anotherTitle))
 
                 expect(self.app.buttons["pivot-card"].exists).to(beTrue())
                 self.app.buttons["pivot-card"].tap()
@@ -169,10 +173,10 @@ class OmniBarDestinationUITests: QuickSpec {
                 expect(self.app.buttons["pivot-web"].exists).to(beTrue())
                 self.app.buttons["pivot-web"].tap()
                 expect(title.exists).to(beTrue())
-                expect(title.value as? String).to(equal(secondTitle))
+                expect(title.value as? String).to(equal(anotherTitle))
                 title.tap()
                 expect(noteSearchField.waitForExistence(timeout: 2)).to(beTrue())
-                expect(noteSearchField.value as? String).to(equal(secondTitle))
+                expect(noteSearchField.value as? String).to(equal(anotherTitle))
             }
         }
     }

@@ -1,41 +1,11 @@
 import Foundation
 import XCTest
+#if canImport(Quick)
 import Quick
+#endif
+#if canImport(Nimble)
 import Nimble
-
-class OmniBarUITestsHelper : BeamUITestsHelper {
-    let searchField: XCUIElement
-    let autocompleteResultPredicate = NSPredicate(format: "identifier CONTAINS 'autocompleteResult'")
-    let autocompleteSelectedPredicate = NSPredicate(format: "identifier CONTAINS '-selected'")
-    let autocompleteCreateCardPredicate = NSPredicate(format: "identifier CONTAINS '-createCard'")
-
-    let allAutocompleteResults: XCUIElementQuery
-
-    override init(_ app: XCUIApplication) {
-        searchField = app.searchFields["OmniBarSearchField"]
-        allAutocompleteResults = app.otherElements.matching(self.autocompleteResultPredicate)
-        super.init(app)
-    }
-
-    func cleanupDB() {
-        self.tapCommand(.logout)
-        self.tapCommand(.destroyDB)
-    }
-
-    func focusSearchField() {
-        self.searchField.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
-    }
-
-    func inputHasFocus(_ input: XCUIElement) -> Bool {
-        return input.value(forKey: "hasKeyboardFocus") as? Bool ?? false
-    }
-
-    func navigateTo(text: String) {
-        XCUIApplication().menuItems["Open Location"].tap()
-        self.searchField.typeText(text)
-        self.searchField.typeText("\r")
-    }
-}
+#endif
 
 class OmniBarUITests: QuickSpec {
     let app = XCUIApplication()

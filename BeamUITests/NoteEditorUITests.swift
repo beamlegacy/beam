@@ -18,7 +18,7 @@ class NoteEditorUITests: QuickSpec {
         beforeEach {
             let dateFormatter = DateFormatter()
             // some CI macs don't like to input ":"
-            dateFormatter.dateFormat = "dd-MM-yyyy HHhmm Z"
+            dateFormatter.dateFormat = "dd-MM-yyyy HH-mm Z"
             textInput = "Testing typing date \(dateFormatter.string(from: Date())) ok"
             self.continueAfterFailure = false
         }

@@ -369,6 +369,7 @@
 		A52BFDF72608D6710028D3F3 /* BeamFont.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52BFDF62608D6710028D3F3 /* BeamFont.swift */; };
 		A52BFE63260901980028D3F3 /* Separator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52BFE62260901980028D3F3 /* Separator.swift */; };
 		A530D4E92609EB7B00DBD14E /* ContextMenuPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A530D4E82609EB7B00DBD14E /* ContextMenuPresenter.swift */; };
+		A53C8F532644B22B003A5DF8 /* OmniBarUITestsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53C8F522644B22B003A5DF8 /* OmniBarUITestsHelper.swift */; };
 		A545D2FB25F7B1D800E68F94 /* DestinationNoteAutocompleteList.swift in Sources */ = {isa = PBXBuildFile; fileRef = A545D2FA25F7B1D800E68F94 /* DestinationNoteAutocompleteList.swift */; };
 		A545D30625F7D93B00E68F94 /* MathsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A545D30525F7D93B00E68F94 /* MathsTests.swift */; };
 		A54936C6260B721600EF7622 /* WindowBottomToolBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = A54936C5260B721600EF7622 /* WindowBottomToolBar.swift */; };
@@ -1062,6 +1063,7 @@
 		A52BFDF62608D6710028D3F3 /* BeamFont.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamFont.swift; sourceTree = "<group>"; };
 		A52BFE62260901980028D3F3 /* Separator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Separator.swift; sourceTree = "<group>"; };
 		A530D4E82609EB7B00DBD14E /* ContextMenuPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextMenuPresenter.swift; sourceTree = "<group>"; };
+		A53C8F522644B22B003A5DF8 /* OmniBarUITestsHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniBarUITestsHelper.swift; sourceTree = "<group>"; };
 		A545D2FA25F7B1D800E68F94 /* DestinationNoteAutocompleteList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DestinationNoteAutocompleteList.swift; sourceTree = "<group>"; };
 		A545D2FE25F7D92700E68F94 /* BeamTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "BeamTests-Bridging-Header.h"; sourceTree = "<group>"; };
 		A545D30525F7D93B00E68F94 /* MathsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MathsTests.swift; sourceTree = "<group>"; };
@@ -2056,6 +2058,7 @@
 			children = (
 				52A94E2625E90084004BAC93 /* Extensions */,
 				52DF49A525E42110009A651E /* BeamUITestsHelper.swift */,
+				A53C8F522644B22B003A5DF8 /* OmniBarUITestsHelper.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -3585,6 +3588,7 @@
 				52DF49A625E42110009A651E /* BeamUITestsHelper.swift in Sources */,
 				52BB69A925CD5A49007A1173 /* OmniBarUITests.swift in Sources */,
 				965A784D2514F149009980D4 /* BeamUITests.swift in Sources */,
+				A53C8F532644B22B003A5DF8 /* OmniBarUITestsHelper.swift in Sources */,
 				528286B625E806CD00C0CCEE /* NoteEditorUITests.swift in Sources */,
 				52A94E3C25E90094004BAC93 /* XCUIElement+Beam.swift in Sources */,
 				A5679CE2262ECB9500E7FA69 /* NavigationCollectUITests.swift in Sources */,

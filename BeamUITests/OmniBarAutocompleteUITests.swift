@@ -49,7 +49,7 @@ class OmniBarAutocompleteUITests: QuickSpec {
         describe("Autocomplete") {
 
             it("displays results") {
-                self.helper.searchField.typeText(textInputSearch)
+                self.helper.typeInSearchAndWait(textInputSearch)
                 let results = self.helper.allAutocompleteResults
                 expect(results.count) > 0
                 expect(results.matching(self.helper.autocompleteSelectedPredicate).count).to(equal(0))
@@ -79,7 +79,7 @@ class OmniBarAutocompleteUITests: QuickSpec {
 
             it("can be navigated") {
                 self.helper.focusSearchField()
-                self.helper.searchField.typeText("Testing navigation")
+                self.helper.typeInSearchAndWait("Testing navigation")
                 // Selected 1st result
                 self.helper.searchField.typeKey(.downArrow, modifierFlags: [])
                 let selectedResultQuery = self.helper.allAutocompleteResults.matching(self.helper.autocompleteSelectedPredicate)
@@ -93,7 +93,7 @@ class OmniBarAutocompleteUITests: QuickSpec {
 
 
             it("can go to web on enter") {
-                self.helper.searchField.typeText(textInputSearch)
+                self.helper.typeInSearchAndWait(textInputSearch)
                 self.helper.searchField.typeKey(.enter, modifierFlags: [])
                 expect(self.app.images["browserTabBarView"].waitForExistence(timeout: 2)).to(beTrue())
                 expect(self.helper.inputHasFocus(self.helper.searchField)).to(beFalse())
@@ -105,7 +105,7 @@ class OmniBarAutocompleteUITests: QuickSpec {
 
                 self.helper.focusSearchField()
                 expect(self.helper.inputHasFocus(self.helper.searchField)).to(beTrue())
-                self.helper.searchField.typeText("hello world")
+                self.helper.typeInSearchAndWait("hello world")
                 expect(results.count) > 2
                 for _ in 0...2 {
                     self.helper.searchField.typeKey(.downArrow, modifierFlags: [])
@@ -117,7 +117,7 @@ class OmniBarAutocompleteUITests: QuickSpec {
 
             it("can create and search note") {
                 self.helper.focusSearchField()
-                self.helper.searchField.typeText("Autocomplete Note Creation")
+                self.helper.typeInSearchAndWait("Autocomplete Note Creation")
                 let createNoteResult = self.helper.allAutocompleteResults.matching(self.helper.autocompleteCreateCardPredicate).firstMatch
                 expect(createNoteResult.exists).to(beTrue())
                 createNoteResult.tapInTheMiddle()
@@ -130,13 +130,13 @@ class OmniBarAutocompleteUITests: QuickSpec {
                 journalButton.tap()
 
                 self.helper.focusSearchField()
-                self.helper.searchField.typeText("Autocomplete Not")
+                self.helper.typeInSearchAndWait("Autocomplete Not")
                 let noteResults = self.helper.allAutocompleteResults.matching(NSPredicate(format: "identifier CONTAINS '-note'"))
                 expect(noteResults.firstMatch.waitForExistence(timeout: 2)).to(beTrue())
             }
 
             it("can press cmd+enter to create note") {
-                self.helper.searchField.typeText("Command Enter Note")
+                self.helper.typeInSearchAndWait("Command Enter Note")
                 let createNoteResult = self.helper.allAutocompleteResults.matching(self.helper.autocompleteCreateCardPredicate).firstMatch
                 expect(createNoteResult.exists).to(beTrue())
                 XCUIElement.perform(withKeyModifiers: .command) {
