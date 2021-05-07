@@ -63,10 +63,12 @@ class BrowserTabsManager: ObservableObject {
         }.store(in: &tabScope)
     }
 
+    private var indexingQueue = DispatchQueue(label: "indexing")
+
     private func updateTabsHandlers() {
         for tab in tabs {
             guard tab.onNewTabCreated == nil else { continue }
-            
+
             tab.onNewTabCreated = { [weak self] newTab in
                 guard let self = self else { return }
                 self.tabs.append(newTab)
@@ -83,9 +85,15 @@ class BrowserTabsManager: ObservableObject {
 
             tab.appendToIndexer = { [weak self] url, read in
                 guard let self = self else { return }
-                guard let doc = try? SwiftSoup.parse(read.content, url.absoluteString) else { return }
-                let text: String = html2Text(url: url, doc: doc)
-                self.index.append(document: IndexDocument(source: url.absoluteString, title: read.title, contents: text))
+                var text = ""
+                self.indexingQueue.async {
+                    guard let doc = try? SwiftSoup.parse(read.content, url.absoluteString) else { return }
+                    text = html2Text(url: url, doc: doc)
+
+                    DispatchQueue.main.async {
+                        self.index.append(document: IndexDocument(source: url.absoluteString, title: read.title, contents: text))
+                    }
+                }
             }
         }
     }
