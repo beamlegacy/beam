@@ -38,7 +38,9 @@ struct ButtonLabel: View {
     let iconName: String?
     let defaultState: ButtonLabelState
     let variant: ButtonLabelVariant
+    // TODO replace style by a custom modifier like .buttonLabelStyle()
     let style: ButtonLabelStyle
+
     let action: (() -> Void)?
 
     @State private var isHovering = false

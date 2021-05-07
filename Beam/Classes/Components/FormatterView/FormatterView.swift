@@ -6,6 +6,7 @@
 //
 
 import Cocoa
+import SwiftUI
 
 // Base Class for any formatting view
 class FormatterView: NSView {
@@ -63,6 +64,7 @@ class FormatterView: NSView {
 
 class BaseFormatterViewViewModel {
     @Published var visible: Bool = false
+    var animationDirection: Edge = .bottom
 }
 
 class FormatterViewViewModel: BaseFormatterViewViewModel, ObservableObject { }
