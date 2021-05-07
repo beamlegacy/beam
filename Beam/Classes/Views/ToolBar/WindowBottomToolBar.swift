@@ -11,7 +11,7 @@ import BeamCore
 struct WindowBottomToolBar: View {
     @EnvironmentObject var state: BeamState
 
-    var isJournal: Bool {
+    private var isJournal: Bool {
         return state.mode == .today
     }
 
@@ -19,39 +19,44 @@ struct WindowBottomToolBar: View {
         return !state.windowIsResizing
     }
 
+    private var currentNote: BeamNote? {
+        return state.currentNote
+    }
+
+    private func recentsStack(containerGeometry: GeometryProxy) -> some View {
+        GlobalCenteringContainer(enabled: true, containerGeometry: containerGeometry) {
+            HStack(spacing: 6) {
+                ButtonLabel("Journal", state: state.mode == .today ? .active : .normal) {
+                    state.navigateToJournal()
+                }
+                .fixedSize(horizontal: true, vertical: false)
+                if state.recentsManager.recentNotes.count > 0 {
+                    Separator()
+                    ForEach(state.recentsManager.recentNotes) { note in
+                        let isToday = state.mode == .today
+                        let isActive = !isToday && note.id == currentNote?.id
+                        ButtonLabel(note.title, state: isActive ? .active : .normal)
+                            .simultaneousGesture(
+                                TapGesture(count: 1).onEnded {
+                                    state.navigateToNote(named: note.title)
+                                }
+                            )
+                    }
+                }
+            }
+        }
+        .animation(animationEnabled ? .easeInOut(duration: 0.3) : nil)
+    }
+
     var body: some View {
         GeometryReader { geo in
             HStack {
-                if let currentNote = state.currentNote, state.mode == .note {
-                    HStack(spacing: 4) {
-                        ButtonLabel(currentNote.isPublic ? "Public" : "Private", variant: .dropdown)
-                    }
-                    .fixedSize(horizontal: true, vertical: false)
+                if let note = currentNote, state.mode == .note {
+                    SharingStatusView(model: SharingStatusViewModel(note: note, documentManager: state.data.documentManager))
                 }
                 Spacer(minLength: 20)
                 if [.today, .note].contains(state.mode) {
-                    GlobalCenteringContainer(enabled: true, containerGeometry: geo) {
-                        HStack(spacing: 6) {
-                            ButtonLabel("Journal", state: state.mode == .today ? .active : .normal) {
-                                state.navigateToJournal()
-                            }
-                            .fixedSize(horizontal: true, vertical: false)
-                            if state.recentsManager.recentNotes.count > 0 {
-                                Separator()
-                                ForEach(state.recentsManager.recentNotes) { note in
-                                    let isToday = state.mode == .today
-                                    let isActive = !isToday && note.id == state.currentNote?.id
-                                    ButtonLabel(note.title, state: isActive ? .active : .normal)
-                                        .simultaneousGesture(
-                                            TapGesture(count: 1).onEnded {
-                                                state.navigateToNote(named: note.title)
-                                            }
-                                        )
-                                }
-                            }
-                        }
-                    }
-                    .animation(animationEnabled ? .easeInOut(duration: 0.3) : nil)
+                    recentsStack(containerGeometry: geo)
                     Spacer(minLength: 20)
                 }
                 HStack {
@@ -71,8 +76,9 @@ struct WindowBottomToolBar: View {
                         .cornerRadius(9)
                 }
                 .fixedSize(horizontal: true, vertical: false)
+                .padding(.trailing, BeamSpacing._50)
             }
-            .padding(BeamSpacing._50)
+            .padding(.vertical, BeamSpacing._50)
             .background(
                 BeamColor.Generic.background.swiftUI
                     .shadow(color: BeamColor.BottomBar.shadow.swiftUI, radius: 0, x: 0, y: -0.5)

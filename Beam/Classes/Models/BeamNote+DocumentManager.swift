@@ -1,5 +1,5 @@
 //
-//  BeamNode+DocumentManager.swift
+//  BeamNote+DocumentManager.swift
 //  Beam
 //
 //  Created by Sebastien Metrot on 01/04/2021.
