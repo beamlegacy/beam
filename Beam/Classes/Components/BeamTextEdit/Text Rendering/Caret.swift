@@ -8,7 +8,6 @@
 // Carets have 2 edges (leading = before the character, trailing = after it)
 // Some Carets are skipable, they represent virtual characters such as images/icons inserted into the text that have no actual existance in the source string and we must skip over them when moving the caret with the curso keys
 
-
 import Foundation
 
 public struct CaretFilter: OptionSet {
@@ -38,6 +37,7 @@ public struct Caret {
     public var indexOnScreen: Int
     public var edge: CaretEdge
     public var inSource: Bool
+    public var line: Int
 
     /// positionInSource is the index in the source string adjusted for edge position (before or after the character)
     public var positionInSource: Int {
@@ -49,7 +49,12 @@ public struct Caret {
         return indexOnScreen + ((edge == .trailing) ? 1 : 0)
     }
 
-    public static let zero = Caret(offset: .zero, indexInSource: 0, indexOnScreen: 0, edge: .leading, inSource: true)
+    public static let zero = Caret(offset: .zero, indexInSource: 0, indexOnScreen: 0, edge: .leading, inSource: true, line: 0)
+
+    public var debugDescription: String {
+        "Caret src: \(indexInSource) -> \(positionInSource) scrn(\(edge)): \(indexOnScreen) -> \(positionOnScreen) [\(line)] xy\(offset) \(inSource ? "" : "[X]")"
+    }
+
 }
 
 public func filterCarets(_ carets: [Caret], filter: CaretFilter) -> [Caret] {
@@ -82,21 +87,35 @@ public func sortAndSourceCarets(_ carets: [Caret], sourceOffset: Int, notInSourc
 }
 
 public func nextCaret(for index: Int, in carets: [Caret]) -> Int {
-    let position = carets[index].indexOnScreen
-    var newIndex = index
-    while (carets[newIndex].indexOnScreen <= position || carets[newIndex].edge == .trailing)
-            && (newIndex + 1 < carets.count) {
+    guard index < carets.count - 1 else {
+        //swiftlint:disable:next print
+//        print("[1]nextCaret \(index) -> \(index) \(carets[index].debugDescription)")
+        return index
+    }
+
+    let position = carets[index].positionOnScreen
+    var newIndex = index + 1
+    while newIndex + 1 < carets.count {
+        let caret = carets[newIndex]
+        if caret.positionOnScreen > position && caret.edge.isLeading {
+            //swiftlint:disable:next print
+//            print("[2]nextCaret \(index) -> \(newIndex) \(carets[newIndex].debugDescription)")
+            return newIndex
+        }
+
         newIndex += 1
     }
 
+    //swiftlint:disable:next print
+//    print("[3]nextCaret \(index) -> \(newIndex) \(carets[newIndex].debugDescription)")
     return newIndex
 }
 
 public func previousCaret(for index: Int, in carets: [Caret]) -> Int {
     let position = carets[index].positionOnScreen
     var newIndex = index
-    while (carets[newIndex].positionOnScreen >= position)
-            && (newIndex - 1 >= 0) {
+    while (carets[newIndex].positionOnScreen >= position) &&
+          (newIndex - 1 >= 0) {
         newIndex -= 1
     }
 

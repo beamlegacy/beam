@@ -290,7 +290,7 @@ extension TextRoot {
         var caretIsAfterLink = false
         if caretIndex > 0,
            let caret = node.textFrame?.carets[caretIndex - 1],
-           !caret.inSource && caret.edge.isTrailing {
+           !caret.inSource {
             caretIsAfterLink = true
         }
 

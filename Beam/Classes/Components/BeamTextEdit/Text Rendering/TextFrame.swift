@@ -97,7 +97,7 @@ public class TextFrame {
         lines = ctLines.map {
             let cfRange = CTLineGetStringRange($0)
             let range = NSRange(location: cfRange.location, length: cfRange.length)
-            let line = TextLine(ctLine: $0, attributedString: attributedString, sourceOffset: sourceOffset, notInSourcePositions: notInSourcePositions)
+            let line = TextLine(indexInFrame: index, ctLine: $0, attributedString: attributedString, sourceOffset: sourceOffset, notInSourcePositions: notInSourcePositions)
 
             let textPos = lineOrigins[index]
             let x = textPos.x
