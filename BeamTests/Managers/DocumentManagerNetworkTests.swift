@@ -324,10 +324,6 @@ class DocumentManagerNetworkTests: QuickSpec {
                     docStruct = self.createStruct("995d94e1-e0df-4eca-93e6-8778984bcd18", helper)
                 }
 
-                afterEach {
-                    helper.deleteDocumentStruct(docStruct)
-                }
-
                 it("flags the local document as deleted") {
                     let networkCalls = APIRequest.callsCount
 
@@ -647,7 +643,6 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                     afterEach {
                         BeamDate.reset()
-                        helper.deleteDocumentStruct(docStruct)
                     }
 
                     context("with Foundation") {
@@ -736,10 +731,6 @@ class DocumentManagerNetworkTests: QuickSpec {
                                                                              newLocal: newLocal,
                                                                              newRemote: newRemote,
                                                                              "995d94e1-e0df-4eca-93e6-8778984bcd18")
-                    }
-
-                    afterEach {
-                        helper.deleteDocumentStruct(docStruct)
                     }
 
                     context("with Foundation") {
@@ -992,7 +983,6 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                             let remoteStruct = helper.fetchOnAPI(docStruct)
                             expect(remoteStruct?.title) == newTitle
-                            helper.deleteDocumentStruct(docStruct)
                         }
 
                         context("with deleted notes") {
@@ -1017,7 +1007,6 @@ class DocumentManagerNetworkTests: QuickSpec {
                             beforeEach { Configuration.encryptionEnabled = true }
                             afterEach {
                                 Configuration.encryptionEnabled = false
-                                helper.deleteDocumentStruct(docStruct)
                             }
                             
                             it("saves the document on the API") {
@@ -1154,7 +1143,6 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                             let remoteStruct = helper.fetchOnAPI(docStruct)
                             expect(remoteStruct?.title) == newTitle
-                            helper.deleteDocumentStruct(docStruct)
                         }
 
                         context("with encryption") {
@@ -1224,10 +1212,6 @@ class DocumentManagerNetworkTests: QuickSpec {
                     context("with Promises") {
                         beforeEach {
                             docStruct = helper.saveLocally(docStruct)
-                        }
-
-                        afterEach {
-                            helper.deleteDocumentStruct(docStruct)
                         }
 
                         it("saves the document on the API") {
@@ -1309,7 +1293,6 @@ class DocumentManagerNetworkTests: QuickSpec {
                             beforeEach { Configuration.encryptionEnabled = true }
                             afterEach {
                                 Configuration.encryptionEnabled = false
-                                helper.deleteDocumentStruct(docStruct)
                             }
 
                             it("saves the document on the API") {
@@ -1380,10 +1363,6 @@ class DocumentManagerNetworkTests: QuickSpec {
                                                                              newLocal: newLocal,
                                                                              newRemote: newRemote,
                                                                              "995d94e1-e0df-4eca-93e6-8778984bcd18")
-                    }
-
-                    afterEach {
-                        helper.deleteDocumentStruct(docStruct)
                     }
 
                     context("with Foundation") {
@@ -1558,10 +1537,6 @@ class DocumentManagerNetworkTests: QuickSpec {
                                                                              newLocal: newLocal,
                                                                              newRemote: newRemote,
                                                                              "995d94e1-e0df-4eca-93e6-8778984bcd18")
-                    }
-
-                    afterEach {
-                        helper.deleteDocumentStruct(docStruct)
                     }
 
                     context("with Foundation") {
