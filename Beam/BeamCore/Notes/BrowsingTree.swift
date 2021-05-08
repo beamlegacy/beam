@@ -85,7 +85,7 @@ public class BrowsingNode: ObservableObject, Codable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         link = try container.decode(UInt64.self, forKey: .link)
-        id = try container.decode(UUID.self, forKey: .id)
+        id = (try? container.decode(UUID.self, forKey: .id)) ?? UUID()
         if container.contains(.events) {
             events = try container.decode([ReadingEvent].self, forKey: .events)
         }

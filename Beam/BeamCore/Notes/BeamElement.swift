@@ -103,6 +103,13 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
         return parent?.note
     }
 
+    public func resetIds() {
+        id = UUID()
+        for c in children {
+            c.resetIds()
+        }
+    }
+
     public static let recursiveCoding = CodingUserInfoKey(rawValue: "recursiveCoding")!
 
     enum CodingKeys: String, CodingKey {

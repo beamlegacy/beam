@@ -8,6 +8,7 @@
 import Cocoa
 import Combine
 import SwiftUI
+import BeamCore
 
 class BeamHostingView<Content>: NSHostingView<Content> where Content: View {
     required public init(rootView: Content) {
@@ -22,7 +23,7 @@ class BeamHostingView<Content>: NSHostingView<Content> where Content: View {
     public override var allowsVibrancy: Bool { false }
 }
 
-class BeamWindow: NSWindow {
+class BeamWindow: NSWindow, NSDraggingDestination {
     var state: BeamState!
     var data: BeamData
 
@@ -93,6 +94,8 @@ class BeamWindow: NSWindow {
             hostingView.topAnchor.constraint(equalTo: contentView.topAnchor),
             hostingView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
         ])
+
+        registerForDraggedTypes([.fileURL])
     }
 
     deinit {
@@ -220,6 +223,68 @@ class BeamWindow: NSWindow {
         guard let data = try? encoder.encode(state) else { return }
         UserDefaults.standard.set(data, forKey: Self.savedTabsKey)
     }
+
+    // Drag and drop:
+    public func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
+        if sender.draggingPasteboard.availableType(from: [.fileURL]) != nil {
+            return .copy
+        } else {
+            return NSDragOperation()
+        }
+    }
+
+    public func draggingExited(_ sender: NSDraggingInfo?) {
+    }
+
+    public func draggingEnded(_ sender: NSDraggingInfo) {
+    }
+
+    public func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
+        guard let files = sender.draggingPasteboard.readObjects(forClasses: [NSURL.self], options: nil)
+        else {
+            Logger.shared.logError("unable to get files from drag operation", category: .document)
+            return false
+        }
+
+        for url in files {
+            guard let url = url as? URL,
+                  let data = try? Data(contentsOf: url)
+            else { continue }
+            Logger.shared.logInfo("File dropped: \(url) - \(data) - \(data.MD5)")
+
+            do {
+                let decoder = JSONDecoder()
+                let note = try decoder.decode(BeamNote.self, from: data)
+                note.resetIds() // use a new UUID to be sure not to overwrite an existing note
+                let titleBase = note.title
+                var i = 0
+                while DocumentManager().allDocumentsTitles().contains(note.title.lowercased()) {
+                    note.title = titleBase + " #\(i)"
+                    i += 1
+                }
+
+                Logger.shared.logError("Saving imported note '\(note.title)' from \(url)", category: .document)
+                note.autoSave(false)
+
+                let alert = NSAlert()
+                alert.addButton(withTitle: "OK")
+                alert.informativeText = "Note '\(note.title)' was imported succesfully"
+                alert.messageText = "Note Imported"
+                alert.runModal()
+            } catch let error {
+                let alert = NSAlert()
+                alert.addButton(withTitle: "OK")
+                alert.informativeText = "Unable to import '\(url)'"
+                alert.messageText = "Note Not Imported"
+                alert.runModal()
+                Logger.shared.logError("Unable to decode dropped BeamNode '\(url)': \(error)", category: .document)
+            }
+
+        }
+
+        return true
+    }
+
 }
 
 extension BeamWindow: NSWindowDelegate {
