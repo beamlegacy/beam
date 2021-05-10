@@ -1125,6 +1125,11 @@ public class TextNode: Widget {
         paragraphStyle.paragraphSpacing = 10
 
         str.addAttribute(.paragraphStyle, value: paragraphStyle, range: str.wholeRange)
+        str.addAttribute(.kern, value: NSNumber(value: 0), range: str.wholeRange)
+        str.addAttribute(.ligature, value: NSNumber(value: 1), range: str.wholeRange)
+        if #available(macOS 11.0, *) {
+//            str.addAttribute(.tracking, value: NSNumber(value: 1), range: str.wholeRange)
+        }
         return str
     }
 
