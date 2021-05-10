@@ -1,4 +1,5 @@
 import BeamCore
+import Promises
 
 /**
  The expected API for a WebPage to work (received messages, point and shoot) with.
@@ -6,25 +7,12 @@ import BeamCore
  Defining this protocol allows to provide a mock implementation for testing.
  */
 protocol WebPage: Scorable {
-    /**
-     Injects CSS source code into the web page.
-      As this will create a `<style>` tag, the style will be implicitly executed.
-     - Parameters:
-       - source: The CSS source code to inject
-       - when: the injection location
-     */
-    func addCSS(source: String, when: WKUserScriptInjectionTime)
 
-    /**
-     Injects javascript source code into the web page.
-      As this will create a `<script>` tag, the code will be implicitly executed.
-     - Parameters:
-       - source: The JavaScript code to inject
-       - when: the injection location (usually at document end so that the DOM is there)
-     */
-    func addJS(source: String, when: WKUserScriptInjectionTime)
+    var window: NSWindow? { get }
 
-    func executeJS(objectName: String, jsCode: String)
+    var frame: NSRect { get }
+
+    func executeJS(_ jsCode: String, objectName: String?) -> Promise<Any?>
 
     var scrollX: CGFloat { get set }
 
@@ -49,4 +37,12 @@ protocol WebPage: Scorable {
     func setDestinationNote(_ note: BeamNote, rootElement: BeamElement?)
 
     func getNote(fromTitle: String) -> BeamNote?
+
+    var pointAndShoot: PointAndShoot? { get }
+    var browsingScorer: BrowsingScorer? { get }
+    var passwordOverlayController: PasswordOverlayController? { get }
+}
+
+protocol WebPageRelated {
+    var page: WebPage? { get set }
 }

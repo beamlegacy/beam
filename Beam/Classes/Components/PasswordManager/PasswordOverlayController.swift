@@ -8,6 +8,7 @@
 import Foundation
 import BeamCore
 import SwiftUI
+import Promises
 
 struct WebFieldAutofill: Codable {
     var id: String
@@ -15,8 +16,8 @@ struct WebFieldAutofill: Codable {
     var background: String?
 }
 
-class PasswordOverlayController {
-    private let webView: WKWebView
+class PasswordOverlayController: WebPageRelated {
+    var page: WebPage?
     private let passwordStore: PasswordStore
     private let passwordManager: PasswordManager
     private var passwordMenuWindow: NSWindow?
@@ -35,8 +36,7 @@ class PasswordOverlayController {
         inputFields.filter { $0.value.type == .password || $0.value.type == .newPassword }
     }
 
-    init(webView: WKWebView, passwordStore: PasswordStore, passwordManager: PasswordManager = .shared) {
-        self.webView = webView
+    init(passwordStore: PasswordStore, passwordManager: PasswordManager = .shared) {
         self.passwordStore = passwordStore
         self.passwordManager = passwordManager
         encoder = JSONEncoder()
@@ -45,14 +45,11 @@ class PasswordOverlayController {
     }
 
     func detectInputFields() {
-        webView.evaluateJavaScript("password_sendTextFields();") { _, error in
-            if let error = error {
-                Logger.shared.logError(String(describing: error), category: .javascript)
-            }
-        }
+        page!.executeJS("password_sendTextFields();", objectName: nil)
     }
 
     func updateInputFields(with jsResult: String) {
+        let webPage = page!
         guard let jsonData = jsResult.data(using: .utf8) else { return }
         let elements: [DOMInputElement]
         do {
@@ -79,18 +76,26 @@ class PasswordOverlayController {
 
         // TODO: move evaluateJavaScript strings to constants
         if !addedIds.isEmpty {
-            if inputFields.isEmpty {
-                webView.evaluateJavaScript("beam_installSubmitHandler()")
-            }
-            let formattedList = addedIds.map { "\"\($0)\"" }.joined(separator: ",")
-            let focusScript = "beam_installFocusHandlers('[\(formattedList)]');"
-            webView.evaluateJavaScript(focusScript)
-            let addedInputFields = passwordRelatedFields.reduce(into: [String: AutofillInputField]()) { (dict, field) in
-                if addedIds.contains(field.id) {
-                    dict[field.id] = field
+            let ready = Promise<Void> { [unowned self] fulfill, reject in
+                if inputFields.isEmpty {
+                    webPage.executeJS("beam_installSubmitHandler()", objectName: nil)
+                            .then { _ in { fulfill(()) } }
+                } else {
+                    fulfill(())
                 }
             }
-            self.inputFields.merge(addedInputFields) { (_, new) in new }
+            ready.then { _ in
+                let formattedList = addedIds.map { "\"\($0)\"" }.joined(separator: ",")
+                let focusScript = "beam_installFocusHandlers('[\(formattedList)]');"
+                webPage.executeJS(focusScript, objectName: nil).then { _ in
+                    let addedInputFields = passwordRelatedFields.reduce(into: [String: AutofillInputField]()) { (dict, field) in
+                        if addedIds.contains(field.id) {
+                            dict[field.id] = field
+                        }
+                    }
+                    self.inputFields.merge(addedInputFields) { (_, new) in new }
+                }
+            }
         }
     }
 
@@ -118,7 +123,7 @@ class PasswordOverlayController {
     }
 
     private func showPasswordManagerMenu(at location: CGRect, withPasswordGenerator passwordGenerator: Bool) {
-        guard let host = webView.url else { return }
+        guard let host = page!.url else { return }
         if passwordMenuWindow != nil {
             dismissPasswordManagerMenu()
         }
@@ -127,7 +132,7 @@ class PasswordOverlayController {
         let rootView = PasswordManagerMenu(width: location.size.width, viewModel: viewModel)
         let window = FirstResponderWindow(contentRect: .zero, styleMask: .borderless, backing: .buffered, defer: true)
         window.contentViewController = NSHostingController(rootView: rootView)
-        webView.window?.addChildWindow(window, ordered: .above)
+        page!.window?.addChildWindow(window, ordered: .above)
         passwordMenuPosition = bottomLeftOnScreen(for: location)
         window.setFrameTopLeftPoint(passwordMenuPosition)
         window.makeKeyAndOrderFront(nil)
@@ -136,7 +141,7 @@ class PasswordOverlayController {
 
     private func dismissPasswordManagerMenu() {
         guard let window = passwordMenuWindow else { return }
-        webView.window?.removeChildWindow(window)
+        page!.window?.removeChildWindow(window)
         window.setIsVisible(false)
         passwordMenuWindow = nil
     }
@@ -177,7 +182,7 @@ class PasswordOverlayController {
 
     private func requestWebFieldFrame(elementId: String, completion: @escaping (CGRect?) -> Void) {
         let script = "beam_getElementRects('[\"\(elementId)\"]');"
-        webView.evaluateJavaScript(script) { jsResult, _ in
+        page!.executeJS(script, objectName: nil).then { jsResult in
             if let jsonString = jsResult as? String, let jsonData = jsonString.data(using: .utf8), let rects = try? self.decoder.decode([DOMRect?].self, from: jsonData), let rect = rects.first??.rect {
                 let frame = CGRect(x: rect.minX, y: rect.minY + rect.height, width: rect.width, height: 0)
                 completion(frame)
@@ -188,10 +193,11 @@ class PasswordOverlayController {
     }
 
     private func bottomLeftOnScreen(for windowRect: CGRect) -> CGPoint {
-        guard let window = webView.window else {
+        let webPage = page!
+        guard let window = webPage.window else {
             fatalError()
         }
-        let windowHeight = window.contentRect(forFrameRect: webView.frame).size.height
+        let windowHeight = window.contentRect(forFrameRect: webPage.frame).size.height
         let localPoint = CGPoint(x: windowRect.origin.x, y: windowHeight - windowRect.origin.y)
         return window.convertPoint(toScreen: localPoint)
     }
@@ -200,7 +206,7 @@ class PasswordOverlayController {
         let ids = inputFields.keys
         let formattedList = ids.map { "\"\($0)\"" }.joined(separator: ",")
         let script = "beam_getTextFieldValues('[\(formattedList)]');"
-        webView.evaluateJavaScript(script) { jsResult, _ in
+        page!.executeJS(script, objectName: nil).then { jsResult in
             if let jsonString = jsResult as? String, let jsonData = jsonString.data(using: .utf8), let values = try? self.decoder.decode([String].self, from: jsonData) {
                 let dict = Dictionary(uniqueKeysWithValues: zip(ids, values))
                 self.updateStoredValues(dict)
@@ -211,7 +217,7 @@ class PasswordOverlayController {
     }
 
     private func updateStoredValues(_ values: [String: String]) {
-        guard let host = webView.url else { return }
+        guard let host = page!.url else { return }
         guard let login = values.valuesMatchingKeys(in: Array(loginFields.keys)).first, let password = values.valuesMatchingKeys(in: Array(passwordFields.keys)).first else {
             Logger.shared.logDebug("No field match for submitted values in \(values)")
             return
@@ -252,10 +258,10 @@ extension PasswordOverlayController: PasswordManagerMenuDelegate {
     }
 
     func fillNewPassword(_ password: String) {
-        let passwordParams = self.passwordFields.keys.map { id in
+        let passwordParams = passwordFields.keys.map { id in
             WebFieldAutofill(id: id, value: password, background: nil)
         }
-        self.fillWebTextFields(passwordParams)
+        fillWebTextFields(passwordParams)
         DispatchQueue.main.async {
             self.dismissPasswordManagerMenu()
         }
@@ -266,7 +272,9 @@ extension PasswordOverlayController: PasswordManagerMenuDelegate {
             let data = try encoder.encode(params)
             guard let jsonString = String(data: data, encoding: .utf8) else { return }
             let script = "beam_setTextFieldValues('\(jsonString)')"
-            webView.evaluateJavaScript(script)
+            page!.executeJS(script, objectName: nil).then { _ in
+                Logger.shared.logDebug("passwordOverlay text fields set.")
+            }
         } catch {
             Logger.shared.logError("JSON encoding failure: \(error.localizedDescription))", category: .general)
         }

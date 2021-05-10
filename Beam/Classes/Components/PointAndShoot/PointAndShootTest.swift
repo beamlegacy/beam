@@ -1,9 +1,7 @@
 import XCTest
 @testable import Beam
 @testable import BeamCore
-
-class WebPositionsMock: WebPositions {
-}
+import Promises
 
 class TestWebPage: WebPage {
 
@@ -16,8 +14,19 @@ class TestWebPage: WebPage {
     private(set) var title: String = ""
     private(set) var url: URL?
     var score: Float = 0
+    var pointAndShoot: PointAndShoot?
+    var browsingScorer: BrowsingScorer?
+    var passwordOverlayController: PasswordOverlayController?
+    private(set) var window: NSWindow? = nil
+    private(set) var frame: NSRect = NSRect()
 
-    init() {
+    init(browsingScorer: BrowsingScorer, passwordOverlayController: PasswordOverlayController, pns: PointAndShoot) {
+        self.browsingScorer = browsingScorer
+        self.browsingScorer!.page = self
+        self.passwordOverlayController = passwordOverlayController
+        self.passwordOverlayController!.page = self
+        self.pointAndShoot = pns
+        self.pointAndShoot!.page = self
     }
 
     func addCSS(source: String, when: WKUserScriptInjectionTime) {
@@ -28,8 +37,11 @@ class TestWebPage: WebPage {
         events.append("addJS \(source.hashValue) \(String(describing: when))")
     }
 
-    func executeJS(objectName: String, jsCode: String) {
+    func executeJS(_ jsCode: String, objectName: String?) -> Promise<Any?> {
         events.append("executeJS \(objectName).\(jsCode)")
+        return Promise { fulfill, reject in
+            fulfill(())
+        }
     }
 
     func addToNote(allowSearchResult: Bool) -> BeamCore.BeamElement? {
@@ -60,7 +72,21 @@ class PointAndShootUIMock: PointAndShootUI {
     }
 }
 
+class PasswordStoreMock: PasswordStore {
+    func entries(for host: URL, completion: @escaping ([PasswordManagerEntry]) -> ()) {}
+
+    func find(_ searchString: String, completion: @escaping ([PasswordManagerEntry]) -> ()) {}
+
+    func password(host: URL, username: String, completion: @escaping (String?) -> ()) {}
+
+    func save(host: URL, username: String, password: String) {}
+
+    func delete(host: URL, username: String) {}
+}
+
 class BrowsingScorerMock: BrowsingScorer {
+    var page: WebPage?
+
     init() {}
 
     private(set) var currentScore: BeamCore.Score = Score()
@@ -73,12 +99,12 @@ class BrowsingScorerMock: BrowsingScorer {
 class PointAndShootTest: XCTestCase {
 
     func testBed() -> (PointAndShoot, PointAndShootUIMock) {
-        let testPage = TestWebPage()
-        let testUI = PointAndShootUIMock()
+        let testPasswordStore = PasswordStoreMock()
+        let testPasswordOverlayController = PasswordOverlayController(passwordStore: testPasswordStore, passwordManager: .shared)
         let testBrowsingScorer = BrowsingScorerMock()
-        let testWebPositions = WebPositions()
-        let pns = PointAndShoot(page: testPage, ui: testUI, scorer: testBrowsingScorer,
-                                webPositions: testWebPositions)
+        let testUI = PointAndShootUIMock()
+        let pns = PointAndShoot(ui: testUI, scorer: testBrowsingScorer)
+        let testPage = TestWebPage(browsingScorer: testBrowsingScorer, passwordOverlayController: testPasswordOverlayController, pns: pns)
         return (pns, testUI)
     }
 

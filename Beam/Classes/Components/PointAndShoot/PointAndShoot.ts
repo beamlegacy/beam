@@ -225,8 +225,8 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
    * @param note {object} The Note info
    * @param el {BeamHTMLElement} The element to assign the Note to.
    */
-  assignNote(note, el = this.selectedEls[this.selectedEls.length - 1]) {
-    this.log("assignNoteToElement()", "note", note, "el", el, "datasetKey", this.datasetKey)
+  assignNote(note, el = this.pointedEl) {
+    this.log("assignNote()", "note", note, "el", el, "datasetKey", this.datasetKey)
     el.dataset[this.datasetKey] = JSON.stringify(note)
   }
 

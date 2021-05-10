@@ -1,25 +1,20 @@
 import Foundation
 import BeamCore
 
-private enum ScorerMessages: String, CaseIterable {
+enum ScorerMessages: String, CaseIterable {
     case score_scroll
 }
 
 /**
- Handles messages sent from web page's javascript.
+ Handles browsing scoring messages sent from web page's javascript.
  */
-class ScorerMessageHandler: NSObject, WKScriptMessageHandler {
+class ScorerMessageHandler: BeamMessageHandler<ScorerMessages> {
 
-    var browsingScorer: BrowsingScorer
-
-    init(browsingScorer: BrowsingScorer) {
-        self.browsingScorer = browsingScorer
+    init(page: BeamWebViewConfiguration) {
+        super.init(config: page, messages: ScorerMessages.self, jsFileName: "Scorer")
     }
 
-    func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-        let messageBody = message.body as? [String: AnyObject]
-        let messageKey = message.name
-        let messageName = messageKey // .components(separatedBy: "_beam_")[1]
+    override func onMessage(messageName: String, messageBody: [String: AnyObject]?, from webPage: WebPage) {
         switch messageName {
 
         case ScorerMessages.score_scroll.rawValue:
@@ -34,40 +29,16 @@ class ScorerMessageHandler: NSObject, WKScriptMessageHandler {
                 return
             }
             if width > 0, height > 0 {
-                let currentScore = browsingScorer.currentScore
+                let currentScore = webPage.browsingScorer!.currentScore
                 currentScore.scrollRatioX = max(Float(x / width), currentScore.scrollRatioX)
                 currentScore.scrollRatioY = max(Float(y / height), currentScore.scrollRatioY)
                 currentScore.area = Float(width * height)
-                browsingScorer.updateScore()
+                webPage.browsingScorer!.updateScore()
             }
             Logger.shared.logDebug("Scorer handled scroll: \(x), \(y)", category: .web)
 
         default:
             break
         }
-    }
-
-    func register(to webView: WKWebView, page: WebPage) {
-        ScorerMessages.allCases.forEach {
-            let handler = $0.rawValue
-            webView.configuration.userContentController.add(self, name: handler)
-            Logger.shared.logDebug("Added scorer script handler: \(handler)", category: .web)
-        }
-        injectScripts(into: page)
-    }
-
-    private func injectScripts(into page: WebPage) {
-        var jsCode = loadFile(from: "Scorer", fileType: "js")
-        page.addJS(source: jsCode, when: .atDocumentEnd)
-    }
-
-    func unregister(from webView: WKWebView) {
-        ScorerMessages.allCases.forEach {
-            webView.configuration.userContentController.removeScriptMessageHandler(forName: $0.rawValue)
-        }
-    }
-
-    func destroy(for webView: WKWebView) {
-        self.unregister(from: webView)
     }
 }

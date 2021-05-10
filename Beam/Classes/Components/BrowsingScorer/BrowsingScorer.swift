@@ -1,7 +1,7 @@
 import Foundation
 import BeamCore
 
-protocol BrowsingScorer {
+protocol BrowsingScorer: WebPageRelated {
     var currentScore: Score { get }
     func updateScore()
     func addTextSelection()

@@ -191,10 +191,11 @@ import BeamCore
         mode = .web
     }
 
-    func createTab(withURL url: URL, originalQuery: String, createNote: Bool = true) {
-        let tab = BrowserTab(state: self, originalQuery: originalQuery, note: data.todaysNote)
-        browserTabsManager.addNewTab(tab, withURL: url)
+    func createTab(withURL url: URL, originalQuery: String?, setCurrent: Bool = true, note: BeamNote? = nil, rootElement: BeamElement? = nil, webView: WKWebView? = nil) -> BrowserTab {
+        let tab = BrowserTab(state: self, originalQuery: originalQuery, note: note ?? data.todaysNote, rootElement: rootElement, webView: webView)
+        browserTabsManager.addNewTab(tab, setCurrent: setCurrent, withURL: url)
         mode = .web
+        return tab
     }
 
     func createEmptyTab() {
@@ -285,7 +286,7 @@ import BeamCore
             return
         }
 
-        let createNote = !queryString.maybeURL
+        // let createNote = !queryString.maybeURL
         let url: URL = urlFor(query: queryString)
 
         // Logger.shared.logDebug("Start query: \(url)")
@@ -293,7 +294,7 @@ import BeamCore
         if mode == .web, currentTab != nil {
             navigateCurrentTab(toURL: url)
         } else {
-            createTab(withURL: url, originalQuery: queryString, createNote: createNote)
+            createTab(withURL: url, originalQuery: queryString)
         }
         autocompleteManager.cancelAutocomplete()
         autocompleteManager.resetQuery()
