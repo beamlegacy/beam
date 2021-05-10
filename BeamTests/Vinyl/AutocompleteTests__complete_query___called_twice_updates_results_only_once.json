@@ -5,22 +5,23 @@
       "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=Hello+world"
     },
     "response" : {
+      "body" : "[\"Hello world\",[\"hello world\",\"hello world anime\",\"hello world this is me\",\"hello world python\",\"hello world c\",\"hello world java\",\"hello world vostfr\",\"hello world html\",\"hello world film\",\"hello world cpp\"],[],{\"google:suggestsubtypes\":[[433],[433],[],[],[],[],[],[],[],[]]}]",
       "status" : 200,
-      "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=Hello+world",
       "headers" : {
-        "Content-Encoding" : "gzip",
-        "Content-Type" : "text\/javascript; charset=ISO-8859-1",
-        "Content-Disposition" : "attachment; filename=\"f.txt\"",
-        "Expires" : "-1",
         "x-xss-protection" : "0",
-        "Server" : "gws",
-        "Date" : "Tue, 20 Apr 2021 10:10:55 GMT",
-        "Pragma" : "no-cache",
+        "Content-Disposition" : "attachment; filename=\"f.txt\"",
+        "Content-Type" : "text\/javascript; charset=ISO-8859-1",
         "Cache-Control" : "no-cache, must-revalidate",
+        "Server" : "gws",
+        "x-frame-options" : "SAMEORIGIN",
+        "Content-Encoding" : "gzip",
         "Alt-Svc" : "h3-29=\":443\"; ma=2592000,h3-T051=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\"",
-        "x-frame-options" : "SAMEORIGIN"
+        "Content-Length" : "139",
+        "Date" : "Thu, 29 Apr 2021 12:56:04 GMT",
+        "Expires" : "-1",
+        "Pragma" : "no-cache"
       },
-      "body" : "[\"Hello world\",[\"hello world\",\"hello world this is me\",\"hello world c\",\"hello world python\",\"hello world java\",\"hello world vostfr\",\"hello world html\",\"hello world film\",\"hello world cpp\",\"hello world javascript\"],[],{\"google:suggestsubtypes\":[[433],[],[],[],[],[],[],[],[],[]]}]"
+      "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=Hello+world"
     }
   }
 ]

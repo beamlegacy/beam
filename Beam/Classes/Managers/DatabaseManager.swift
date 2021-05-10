@@ -22,6 +22,7 @@ extension DatabaseStruct {
         self.id = database.id
         self.createdAt = database.created_at
         self.updatedAt = database.updated_at
+        self.deletedAt = database.deleted_at
         self.title = database.title
     }
 
@@ -391,9 +392,9 @@ extension DatabaseManager {
     // MARK: -
     // MARK: Bulk calls
     func syncAll(completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
-        uploadAll { result in
+        saveAllOnApi { result in
             if case .success(let success) = result, success == true {
-                self.fetchAll(completion)
+                self.fetchAllOnApi(completion)
                 return
             }
 
@@ -401,7 +402,35 @@ extension DatabaseManager {
         }
     }
 
-    func uploadAll(_ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
+    // When saving multiple databases at once, one might raise issue (title)
+    // If title is already used, we update it to another unique title
+    private func saveAllOnApiErrors(_ errors: [UserErrorData]) throws -> Bool {
+        var fixedAnyError = false
+        let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
+
+        try context.performAndWait {
+            for error in errors {
+                if error.message == "Title has already been taken",
+                   error.path == ["attributes", "title"],
+                   let objectId = error.objectid,
+                   let uuid = UUID(uuidString: objectId) {
+
+                    Logger.shared.logDebug("Changing database title", category: .database)
+                    if let database = try Database.fetchWithId(context, uuid) {
+                        database.title = "\(database.title) \(uuid)"
+                        try Self.saveContext(context: context)
+
+                        fixedAnyError = true
+                    }
+                    Logger.shared.logDebug("Changed database title", category: .databaseDebug)
+                }
+            }
+        }
+
+        return fixedAnyError
+    }
+
+    func saveAllOnApi(_ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil, _ nested: Int = 1) {
         guard AuthenticationManager.shared.isAuthenticated,
               Configuration.networkEnabled else {
             completion?(.success(false))
@@ -410,20 +439,43 @@ extension DatabaseManager {
 
         CoreDataManager.shared.persistentContainer.performBackgroundTask { context in
             do {
-                let databases = try Database.fetchAll(context)
+                let databases = try Database.rawFetchAll(context)
                 let databasesArray: [DatabaseAPIType] = databases.map { database in database.asApiType() }
                 let databaseRequest = DatabaseRequest()
 
-                let result: Bool = try databaseRequest.save(databasesArray)
-
-                completion?(.success(result))
+                try databaseRequest.saveAll(databasesArray) { result in
+                    switch result {
+                    case .failure(let error):
+                        // Server returns errors when uploaded few databases at once, we try to correct
+                        // errors and reupload if possible
+                        do {
+                            if case APIRequestError.apiErrors(let errors) = error,
+                               try self.saveAllOnApiErrors(errors),
+                               nested > 0 {
+                                self.saveAllOnApi(completion, nested - 1)
+                            } else {
+                                // error: from request
+                                completion?(.failure(error))
+                            }
+                        } catch {
+                            // error: from catch
+                            completion?(.failure(error))
+                        }
+                    case .success(let databasesApiType):
+                        guard databasesApiType.databases?.count == databases.count else {
+                            completion?(.success(false))
+                            return
+                        }
+                        completion?(.success(true))
+                    }
+                }
             } catch {
                 completion?(.failure(error))
             }
         }
     }
 
-    func fetchAll(_ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
+    func fetchAllOnApi(_ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             completion?(.success(false))
             return
@@ -431,12 +483,33 @@ extension DatabaseManager {
 
         let databaseRequest = DatabaseRequest()
 
+        // When fetching all databases, we only fetch updates since last call,
+        // to prevent downloading all of them
+        let lastUpdatedAt = Persistence.Sync.Databases.updated_at
+        if let lastUpdatedAt = lastUpdatedAt {
+            Logger.shared.logDebug("Using updatedAt for databases API call: \(lastUpdatedAt)", category: .database)
+        }
+
         do {
-            try databaseRequest.fetchAll { result in
+            try databaseRequest.fetchAll(lastUpdatedAt) { result in
                 switch result {
                 case .failure(let error): completion?(.failure(error))
                 case .success(let databases):
                     self.coreDataManager.backgroundContext.performAndWait {
+                        // exit early, no need to process further without any objects back
+                        guard databases.count > 0 else {
+                            Logger.shared.logDebug("0 database fetched.", category: .document)
+                            completion?(.success(true))
+                            return
+                        }
+
+                        let mostRecentUpdatedAt = databases.compactMap({ $0.updatedAt }).sorted().last
+
+                        if let mostRecentUpdatedAt = mostRecentUpdatedAt {
+                            Logger.shared.logDebug("new updatedAt: \(mostRecentUpdatedAt). \(databases.count) databases fetched.",
+                                                   category: .document)
+                        }
+
                         for database in databases {
                             guard let database_id = database.id,
                                   let databaseId = UUID(uuidString: database_id) else { continue }
@@ -447,11 +520,14 @@ extension DatabaseManager {
 
                         do {
                             try Self.saveContext(context: self.coreDataManager.backgroundContext)
+                            // Will be used for the next `fetchAllOnApi` call
+                            Persistence.Sync.Databases.updated_at = mostRecentUpdatedAt
+
+                            completion?(.success(true))
                         } catch {
                             completion?(.failure(error))
                         }
                     }
-                    completion?(.success(true))
                 }
             }
         } catch {
@@ -531,11 +607,6 @@ extension DatabaseManager {
     internal func saveDatabaseStructOnAPI(_ databaseStruct: DatabaseStruct,
                                           _ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) -> URLSessionTask? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
-            completion?(.success(false))
-            return nil
-        }
-
-        guard databaseStruct.deletedAt == nil else {
             completion?(.success(false))
             return nil
         }
@@ -622,39 +693,60 @@ extension DatabaseManager {
     // MARK: -
     // MARK: Bulk calls
     func syncAll() -> PromiseKit.Promise<Bool> {
-        let promise: PromiseKit.Promise<Bool> = uploadAll()
+        let promise: PromiseKit.Promise<Bool> = saveAllOnApi()
 
         return promise.then { result -> PromiseKit.Promise<Bool> in
             guard result == true else { return .value(result) }
 
-            return self.fetchAll()
+            return self.fetchAllOnApi()
         }
     }
 
-    func uploadAll() -> PromiseKit.Promise<Bool> {
+    func saveAllOnApi(_ nested: Int = 1) -> PromiseKit.Promise<Bool> {
         self.coreDataManager.background()
-            .then(on: backgroundQueue) { context -> PromiseKit.Promise<[DatabaseAPIType]> in
+            .then(on: backgroundQueue) { context -> PromiseKit.Promise<Bool> in
                 try context.performAndWait {
                     let databaseRequest = DatabaseRequest()
 
-                    let databases = try Database.fetchAll(context)
+                    let databases = try Database.rawFetchAll(context)
                     let databasesArray: [DatabaseAPIType] = databases.map { database in database.asApiType() }
 
-                    let saveDBPromise: PromiseKit.Promise<[DatabaseAPIType]> = databaseRequest.save(databasesArray)
+                    let saveDBPromise: PromiseKit.Promise<[DatabaseAPIType]> = databaseRequest.saveAll(databasesArray)
 
-                    return saveDBPromise
+                    return saveDBPromise.map { _ in true }
                 }
-            }.map(on: backgroundQueue) { _ in true }
+            }.recover(on: backgroundQueue) { error throws -> PromiseKit.Promise<Bool> in
+                guard case APIRequestError.apiErrors(let errors) = error,
+                   try self.saveAllOnApiErrors(errors),
+                   nested > 0 else {
+                    throw error
+                }
+
+                return self.saveAllOnApi(nested - 1)
+            }
     }
 
-    func fetchAll() -> PromiseKit.Promise<Bool> {
+    func fetchAllOnApi() -> PromiseKit.Promise<Bool> {
         let databaseRequest = DatabaseRequest()
 
-        let promise: PromiseKit.Promise<[DatabaseAPIType]> = databaseRequest.fetchAll()
+        let promise: PromiseKit.Promise<[DatabaseAPIType]> =
+            databaseRequest.fetchAll(Persistence.Sync.Databases.updated_at)
 
         return promise
             .then(on: backgroundQueue) { databases -> PromiseKit.Promise<Bool> in
                 try self.coreDataManager.backgroundContext.performAndWait {
+                    guard databases.count > 0 else {
+                        Logger.shared.logDebug("0 database fetched.", category: .document)
+                        return .value(true)
+                    }
+
+                    let mostRecentUpdatedAt = databases.compactMap({ $0.updatedAt }).sorted().last
+
+                    if let mostRecentUpdatedAt = mostRecentUpdatedAt {
+                        Logger.shared.logDebug("new updatedAt: \(mostRecentUpdatedAt). \(databases.count) databases fetched.",
+                                               category: .document)
+                    }
+
                     for database in databases {
                         guard let database_id = database.id,
                               let databaseId = UUID(uuidString: database_id) else { continue }
@@ -665,6 +757,8 @@ extension DatabaseManager {
 
                     try Self.saveContext(context: self.coreDataManager.backgroundContext)
 
+                    Persistence.Sync.Databases.updated_at = mostRecentUpdatedAt
+
                     return .value(true)
                 }
             }
@@ -672,10 +766,6 @@ extension DatabaseManager {
 
     func saveOnApi(_ databaseStruct: DatabaseStruct) -> PromiseKit.Promise<Bool> {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
-            return .value(false)
-        }
-
-        guard databaseStruct.deletedAt == nil else {
             return .value(false)
         }
 
@@ -791,39 +881,61 @@ extension DatabaseManager {
     // MARK: -
     // MARK: Bulk calls
     func syncAll() -> Promises.Promise<Bool> {
-        let promise: Promises.Promise<Bool> = uploadAll()
+        let promise: Promises.Promise<Bool> = saveAllOnApi()
 
         return promise.then { result -> Promises.Promise<Bool> in
             guard result == true else { return Promise(result) }
 
-            return self.fetchAll()
+            return self.fetchAllOnApi()
         }
     }
 
-    func uploadAll() -> Promises.Promise<Bool> {
+    func saveAllOnApi(_ nested: Int = 1) -> Promises.Promise<Bool> {
         self.coreDataManager.background()
-            .then(on: backgroundQueue) { context -> Promises.Promise<[DatabaseAPIType]> in
+            .then(on: backgroundQueue) { context in
                 try context.performAndWait {
                     let databaseRequest = DatabaseRequest()
 
-                    let databases = try Database.fetchAll(context)
+                    let databases = try Database.rawFetchAll(context)
                     let databasesArray: [DatabaseAPIType] = databases.map { database in database.asApiType() }
 
-                    let saveDBPromise: Promises.Promise<[DatabaseAPIType]> = databaseRequest.save(databasesArray)
+                    let saveDBPromise: Promises.Promise<[DatabaseAPIType]> = databaseRequest.saveAll(databasesArray)
 
-                    return saveDBPromise
+                    return saveDBPromise.then { _ in true }
                 }
-            }.then(on: backgroundQueue) { _ in true }
+            }.recover(on: backgroundQueue) { error throws in
+                // We might have fixable errors like title conflicts
+                guard case APIRequestError.apiErrors(let errors) = error,
+                   try self.saveAllOnApiErrors(errors),
+                   nested > 0 else {
+                    throw error
+                }
+
+                return self.saveAllOnApi(nested - 1)
+            }
     }
 
-    func fetchAll() -> Promises.Promise<Bool> {
+    func fetchAllOnApi() -> Promises.Promise<Bool> {
         let databaseRequest = DatabaseRequest()
 
-        let promise: Promises.Promise<[DatabaseAPIType]> = databaseRequest.fetchAll()
+        let promise: Promises.Promise<[DatabaseAPIType]> =
+            databaseRequest.fetchAll(Persistence.Sync.Databases.updated_at)
 
         return promise
             .then(on: backgroundQueue) { databases -> Promises.Promise<Bool> in
                 try self.coreDataManager.backgroundContext.performAndWait {
+                    guard databases.count > 0 else {
+                        Logger.shared.logDebug("0 database fetched.", category: .document)
+                        return Promise(true)
+                    }
+
+                    let mostRecentUpdatedAt = databases.compactMap({ $0.updatedAt }).sorted().last
+
+                    if let mostRecentUpdatedAt = mostRecentUpdatedAt {
+                        Logger.shared.logDebug("new updatedAt: \(mostRecentUpdatedAt). \(databases.count) databases fetched.",
+                                               category: .document)
+                    }
+
                     for database in databases {
                         guard let database_id = database.id,
                               let databaseId = UUID(uuidString: database_id) else { continue }
@@ -834,6 +946,8 @@ extension DatabaseManager {
 
                     try Self.saveContext(context: self.coreDataManager.backgroundContext)
 
+                    Persistence.Sync.Databases.updated_at = mostRecentUpdatedAt
+
                     return Promise(true)
                 }
             }
@@ -841,10 +955,6 @@ extension DatabaseManager {
 
     func saveOnApi(_ databaseStruct: DatabaseStruct) -> Promises.Promise<Bool> {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
-            return Promise(false)
-        }
-
-        guard databaseStruct.deletedAt == nil else {
             return Promise(false)
         }
 

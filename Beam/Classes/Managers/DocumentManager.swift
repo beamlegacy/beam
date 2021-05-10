@@ -364,6 +364,12 @@ public class DocumentManager {
             }
         }
 
+        // This will be used in the next refresh, to only fetch delta
+        if errors == false,
+           let updatedAt = documentAPITypes.compactMap({ $0.updatedAt }).sorted().last {
+            Persistence.Sync.Documents.updated_at = updatedAt
+        }
+
         // Deleting local documents we haven't found remotely
         if delete {
             self.deleteNonExistingIds(context, remoteDocumentsIds)
@@ -469,6 +475,19 @@ public class DocumentManager {
             throw NSError(domain: "DOCUMENT_ERROR_DOMAIN", code: 1002, userInfo: userInfo)
         }
     }
+
+    // MARK: Shared
+    private func predicateForSaveAll() -> NSPredicate? {
+        var result: NSPredicate?
+
+        // We only upload the documents we didn't yet send
+        if let last_sent_at = Persistence.Sync.Documents.sent_all_at {
+            result = NSPredicate(format: "(updated_at > %@ AND beam_api_sent_at < %@) OR updated_at > beam_api_sent_at",
+                                 last_sent_at as NSDate,
+                                 last_sent_at as NSDate)
+        }
+        return result
+    }
 }
 
 // MARK: Foundation
@@ -556,9 +575,9 @@ extension DocumentManager {
     // TODO: A better way would be adding a "lock" mechanism to prevent all network calls when
     // we are in the process of a sync
     func syncAll(completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
-        uploadAll { result in
+        saveAllOnAPI { result in
             if case .success(let success) = result, success == true {
-                self.refreshAll(delete: false, completion: completion)
+                self.refreshAllFromAPI(delete: false, completion: completion)
                 return
             }
 
@@ -567,7 +586,7 @@ extension DocumentManager {
     }
 
     /// Fetch all remote documents from API
-    func refreshAll(delete: Bool = true, completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
+    func refreshAllFromAPI(delete: Bool = true, completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
         // If not authenticated
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             completion?(.success(false))
@@ -576,13 +595,30 @@ extension DocumentManager {
 
         let documentRequest = DocumentRequest()
 
+        let lastUpdatedAt = Persistence.Sync.Documents.updated_at
+        if let lastUpdatedAt = lastUpdatedAt {
+            Logger.shared.logDebug("Using updatedAt for documents API call: \(lastUpdatedAt)", category: .document)
+        }
+
         do {
-            try documentRequest.fetchAll { result in
+            try documentRequest.fetchAll(lastUpdatedAt) { result in
                 switch result {
                 case .failure(let error):
                     completion?(.failure(error))
                 case .success(let documentAPITypes):
-                    self.refreshAllSuccess(delete, documentAPITypes, completion)
+                    // If we are doing a delta refreshAll, and 0 document is fetched, we exit early
+                    // If not doing a delta sync, we don't as we want to update local document as `deleted`
+                    if lastUpdatedAt != nil && documentAPITypes.count == 0 {
+                        Logger.shared.logDebug("0 document fetched.", category: .document)
+                        completion?(.success(true))
+                        return
+                    }
+
+                    if let mostRecentUpdatedAt = documentAPITypes.compactMap({ $0.updatedAt }).sorted().last {
+                        Logger.shared.logDebug("new updatedAt: \(mostRecentUpdatedAt). \(documentAPITypes.count) documents fetched.",
+                                               category: .document)
+                    }
+                    self.refreshAllSuccess(lastUpdatedAt == nil ? delete : false, documentAPITypes, completion)
                 }
             }
         } catch {
@@ -797,17 +833,16 @@ extension DocumentManager {
             return nil
         }
 
-        guard documentStruct.deletedAt == nil else {
-            completion?(.success(false))
-            return nil
-        }
-
         Self.networkRequests[documentStruct.id]?.cancel()
         let documentRequest = DocumentRequest()
         Self.networkRequests[documentStruct.id] = documentRequest
 
         do {
             let documentApiType = documentStruct.asApiType()
+            // Network call can take a while, if this document gets updated in the meantime it might not
+            // be reuploaded in the next saveAll if this timestamp is after the new updated_at
+            let beam_api_sent_at = BeamDate.now
+
             try documentRequest.save(documentApiType) { result in
                 switch result {
                 case .failure(let error):
@@ -821,7 +856,9 @@ extension DocumentManager {
                     // `previousChecksum` stores the checksum we sent to the API
                     var sentDocumentStruct = documentStruct.copy()
                     sentDocumentStruct.previousChecksum = sentDocumentApiType.document?.previousChecksum
-                    self.saveDocumentStructOnAPISuccess(sentDocumentStruct, completion)
+                    self.saveDocumentStructOnAPISuccess(sentDocumentStruct,
+                                                        beam_api_sent_at,
+                                                        completion)
                 }
             }
         } catch {
@@ -864,6 +901,7 @@ extension DocumentManager {
     }
 
     private func saveDocumentStructOnAPISuccess(_ documentStruct: DocumentStruct,
+                                                _ beam_api_sent_at: Date,
                                                 _ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
         coreDataManager.persistentContainer.performBackgroundTask { context in
             guard let documentCoreData = try? Document.fetchWithId(context, documentStruct.id) else {
@@ -876,6 +914,7 @@ extension DocumentManager {
             // `beam_api_checksum` stores the checksum we sent to the API
             documentCoreData.beam_api_data = documentStruct.data
             documentCoreData.beam_api_checksum = documentStruct.previousChecksum
+            documentCoreData.beam_api_sent_at = beam_api_sent_at
 
             do {
                 let success = try Self.saveContext(context: context)
@@ -1044,7 +1083,7 @@ extension DocumentManager {
 
     // MARK: -
     // MARK: Bulk calls
-    func uploadAll(_ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
+    func saveAllOnAPI(_ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             completion?(.success(false))
             return
@@ -1052,17 +1091,30 @@ extension DocumentManager {
 
         CoreDataManager.shared.persistentContainer.performBackgroundTask { context in
             do {
-                let documents = (try? Document.rawFetchAll(context)) ?? []
+                let sent_all_at = BeamDate.now
+                let documents = (try? Document.rawFetchAll(context, self.predicateForSaveAll())) ?? []
                 let documentsArray: [DocumentAPIType] = documents.map { document in document.asApiType(context) }
                 let documentRequest = DocumentRequest()
 
-                try documentRequest.importAll(documentsArray) { result in
+                Logger.shared.logDebug("Uploading \(documents.count) documents", category: .document)
+                if documents.count == 0 {
+                    completion?(.success(true))
+                    return
+                }
+
+                try documentRequest.saveAll(documentsArray) { result in
                     switch result {
                     case .failure(let error):
                         Logger.shared.logError(error.localizedDescription, category: .network)
                         completion?(.failure(error))
                     case .success:
-                        Logger.shared.logDebug("Documents imported", category: .network)
+                        Logger.shared.logDebug("Documents uploaded", category: .network)
+                        Persistence.Sync.Documents.sent_all_at = sent_all_at
+                        context.performAndWait {
+                            // TODO: do this with `NSBatchUpdateRequest` for performance
+                            for document in documents { document.beam_api_sent_at = sent_all_at }
+                            try? CoreDataManager.save(context)
+                        }
                         completion?(.success(true))
                     }
                 }
@@ -1133,20 +1185,25 @@ extension DocumentManager {
     }
 
     func syncAll() -> Promises.Promise<Bool> {
-        let promise: Promises.Promise<Bool> = uploadAll()
+        let promise: Promises.Promise<Bool> = saveAllOnAPI()
 
         return promise.then { result -> Promises.Promise<Bool> in
             guard result == true else { return Promise(result) }
 
-            return self.refreshAll()
+            return self.refreshAllFromAPI()
         }
     }
 
     /// Fetch all remote documents from API
-    func refreshAll(_ delete: Bool = true) -> Promises.Promise<Bool> {
+    func refreshAllFromAPI(_ delete: Bool = true) -> Promises.Promise<Bool> {
         let documentRequest = DocumentRequest()
-        return documentRequest.fetchAll()
+        return documentRequest.fetchAll(Persistence.Sync.Documents.updated_at)
                 .then(on: self.backgroundQueue) { documents -> Bool in
+                    if let mostRecentUpdatedAt = documents.compactMap({ $0.updatedAt }).sorted().last {
+                        Logger.shared.logDebug("new updatedAt: \(mostRecentUpdatedAt). \(documents.count) documents fetched.",
+                                               category: .document)
+                    }
+
                     let context = self.coreDataManager.persistentContainer.newBackgroundContext()
                     return try context.performAndWait {
                         try self.refreshAllAndSave(delete, context, documents)
@@ -1179,6 +1236,7 @@ extension DocumentManager {
                     try self.checkValidations(context, document)
 
                     guard !cancelme else { throw DocumentManagerError.operationCancelled }
+
                     try Self.saveContext(context: context)
 
                     guard AuthenticationManager.shared.isAuthenticated,
@@ -1204,14 +1262,13 @@ extension DocumentManager {
             return Promise(true)
         }
 
-        guard documentStruct.deletedAt == nil else {
-            return Promise(true)
-        }
-
         Self.networkRequests[documentStruct.id]?.cancel()
         let documentRequest = DocumentRequest()
         Self.networkRequests[documentStruct.id] = documentRequest
 
+        // Network call can take a while, if this document gets updated in the meantime it might not
+        // be reuploaded in the next saveAll if this timestamp is after the new updated_at
+        let beam_api_sent_at = BeamDate.now
         let promise: Promises.Promise<DocumentAPIType> = documentRequest.save(documentStruct.asApiType())
 
         return promise.then(on: backgroundQueue) { documentApiType in
@@ -1226,6 +1283,7 @@ extension DocumentManager {
                 }
                 documentCoreData.beam_api_data = documentStruct.data
                 documentCoreData.beam_api_checksum = documentApiType.previousChecksum
+                documentCoreData.beam_api_sent_at = beam_api_sent_at
 
                 try Self.saveContext(context: context)
             }
@@ -1356,43 +1414,33 @@ extension DocumentManager {
     }
 
     // MARK: Bulk calls
-    func uploadAll() -> Promises.Promise<Bool> {
+    func saveAllOnAPI() -> Promises.Promise<Bool> {
         coreDataManager.background()
-            .then(on: backgroundQueue) { context -> Promises.Promise<[DatabaseAPIType]> in
-                try context.performAndWait {
-                    let databaseRequest = DatabaseRequest()
-
-                    let databases = try Database.fetchAll(context)
-                    let databasesArray: [DatabaseAPIType] = databases.map { database in database.asApiType() }
-
-                    let saveDBPromise: Promises.Promise<[DatabaseAPIType]> = databaseRequest.save(databasesArray)
-
-                    /*
-                     Can't use this, both network request will happen in random orders and
-                     doesn't work well with our tests and Vinyl.
-
-                     let saveDBPromise: Promises.Promise<[DatabaseAPIType]> = databaseRequest.saveDatabases(databasesArray)
-                     let saveDocumentsPromise: Promises.Promise<DocumentRequest.ImportDocuments> = documentRequest.importDocuments(documentsArray)
-
-                     return all(saveDBPromise, saveDocumentsPromise)
-                     */
-                    return saveDBPromise
-                }
-            }
-            .then(on: backgroundQueue) { _ -> Promises.Promise<DocumentRequest.ImportDocuments> in
-                self.coreDataManager.backgroundContext.performAndWait {
+            .then(on: backgroundQueue) { _ -> Promises.Promise<Bool> in
+                let context = self.coreDataManager.backgroundContext
+                return context.performAndWait {
                     let documentRequest = DocumentRequest()
-
-                    let documents = (try? Document.fetchAll(self.coreDataManager.backgroundContext)) ?? []
+                    let sent_all_at = BeamDate.now
+                    let documents = (try? Document.fetchAll(context, self.predicateForSaveAll())) ?? []
                     let documentsArray: [DocumentAPIType] = documents.map { document in document.asApiType() }
 
-                    let saveDocumentsPromise: Promises.Promise<DocumentRequest.ImportDocuments> = documentRequest.importAll(documentsArray)
+                    Logger.shared.logDebug("Uploading \(documents.count) documents", category: .document)
+                    if documents.count == 0 {
+                        return Promise(true)
+                    }
 
-                    return saveDocumentsPromise
+                    let saveDocumentsPromise: Promises.Promise<DocumentRequest.UpdateDocuments> =
+                        documentRequest.saveAll(documentsArray)
+
+                    return saveDocumentsPromise.then { _ in
+                        Persistence.Sync.Documents.sent_all_at = sent_all_at
+                        context.performAndWait {
+                            // TODO: do this with `NSBatchUpdateRequest` for performance
+                            for document in documents { document.beam_api_sent_at = sent_all_at }
+                            try? CoreDataManager.save(context)
+                        }
+                    }.then(on: self.backgroundQueue) { _ in true }
                 }
-            }
-            .then (on: backgroundQueue) { _ in
-                true
             }
     }
 }
@@ -1460,23 +1508,28 @@ extension DocumentManager {
     }
 
     func syncDocuments() -> PromiseKit.Promise<Bool> {
-        let promise: PromiseKit.Promise<Bool> = uploadAll()
+        let promise: PromiseKit.Promise<Bool> = saveAllOnAPI()
 
         return promise.then { result -> PromiseKit.Promise<Bool> in
             guard result == true else { return .value(result) }
 
-            return self.refreshAll()
+            return self.refreshAllFromAPI()
         }
     }
 
     /// Fetch all remote documents from API
-    func refreshAll(_ delete: Bool = true) -> PromiseKit.Promise<Bool> {
+    func refreshAllFromAPI(_ delete: Bool = true) -> PromiseKit.Promise<Bool> {
         let documentRequest = DocumentRequest()
 
-        let promise: PromiseKit.Promise<[DocumentAPIType]> = documentRequest.fetchDocuments()
+        let promise: PromiseKit.Promise<[DocumentAPIType]> =
+            documentRequest.fetchAll(Persistence.Sync.Documents.updated_at)
 
         return promise
             .then(on: backgroundQueue) { documents -> PromiseKit.Promise<Bool> in
+                if let mostRecentUpdatedAt = documents.compactMap({ $0.updatedAt }).sorted().last {
+                    Logger.shared.logDebug("new updatedAt: \(mostRecentUpdatedAt). \(documents.count) documents fetched.",
+                                           category: .document)
+                }
                 let context = self.coreDataManager.persistentContainer.newBackgroundContext()
                 let result = try context.performAndWait {
                     try self.refreshAllAndSave(delete, context, documents)
@@ -1508,6 +1561,7 @@ extension DocumentManager {
                     try self.checkValidations(context, document)
 
                     guard !cancelme else { throw PMKError.cancelled }
+
                     try Self.saveContext(context: context)
 
                     guard AuthenticationManager.shared.isAuthenticated,
@@ -1538,14 +1592,13 @@ extension DocumentManager {
             return .value(true)
         }
 
-        guard documentStruct.deletedAt == nil else {
-            return .value(true)
-        }
-
         Self.networkRequests[documentStruct.id]?.cancel()
         let documentRequest = DocumentRequest()
         Self.networkRequests[documentStruct.id] = documentRequest
 
+        // Network call can take a while, if this document gets updated in the meantime it might not
+        // be reuploaded in the next saveAll if this timestamp is after the new updated_at
+        let beam_api_sent_at = BeamDate.now
         let promise: PromiseKit.Promise<DocumentAPIType> = documentRequest.save(documentStruct.asApiType())
 
         return promise.then(on: backgroundQueue) { documentApiType -> PromiseKit.Promise<Bool> in
@@ -1564,6 +1617,8 @@ extension DocumentManager {
                 // `beam_api_checksum` stores the checksum we sent to the API
                 documentCoreData.beam_api_data = documentStruct.data
                 documentCoreData.beam_api_checksum = documentApiType.previousChecksum
+                documentCoreData.beam_api_sent_at = beam_api_sent_at
+
                 try Self.saveContext(context: context)
             }
 
@@ -1686,25 +1741,34 @@ extension DocumentManager {
     }
 
     // MARK: Bulk calls
-    func uploadAll() -> PromiseKit.Promise<Bool> {
+    func saveAllOnAPI() -> PromiseKit.Promise<Bool> {
         self.coreDataManager.background()
-            .then(on: backgroundQueue) { context -> PromiseKit.Promise<([DatabaseAPIType], DocumentRequest.ImportDocuments)> in
-                try context.performAndWait {
+            .then(on: backgroundQueue) { context -> PromiseKit.Promise<Bool> in
+                context.performAndWait {
                     let documentRequest = DocumentRequest()
-                    let databaseRequest = DatabaseRequest()
 
-                    let documents = (try? Document.fetchAll(context)) ?? []
+                    let sent_all_at = BeamDate.now
+                    let documents = (try? Document.rawFetchAll(context, self.predicateForSaveAll())) ?? []
                     let documentsArray: [DocumentAPIType] = documents.map { document in document.asApiType() }
 
-                    let databases = try Database.fetchAll(context)
-                    let databasesArray: [DatabaseAPIType] = databases.map { database in database.asApiType() }
+                    Logger.shared.logDebug("Uploading \(documents.count) documents", category: .document)
+                    if documents.count == 0 {
+                        return .value(true)
+                    }
 
-                    let saveDBPromise: PromiseKit.Promise<[DatabaseAPIType]> = databaseRequest.save(databasesArray)
-                    let saveDocumentsPromise: PromiseKit.Promise<DocumentRequest.ImportDocuments> = documentRequest.importAll(documentsArray)
+                    let saveDocumentsPromise: PromiseKit.Promise<DocumentRequest.UpdateDocuments> =
+                        documentRequest.saveAll(documentsArray)
 
-                    return PromiseKit.when(fulfilled: saveDBPromise, saveDocumentsPromise)
+                    return saveDocumentsPromise.get(on: self.backgroundQueue) { _ in
+                        Persistence.Sync.Documents.sent_all_at = sent_all_at
+                        context.performAndWait {
+                            // TODO: do this with `NSBatchUpdateRequest` for performance
+                            for document in documents { document.beam_api_sent_at = sent_all_at }
+                            try? CoreDataManager.save(context)
+                        }
+                    }.map { _ in true }
                 }
-            }.map(on: backgroundQueue) { _ in true }
+            }
     }
 }
 // swiftlint:enable file_length

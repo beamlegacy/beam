@@ -46,6 +46,7 @@ extension DocumentStruct {
         self.id = document.id
         self.createdAt = document.created_at
         self.updatedAt = document.updated_at
+        self.deletedAt = document.deleted_at
         self.title = document.title
         self.documentType = DocumentType(rawValue: document.document_type) ?? .note
         self.data = document.data ?? Data()

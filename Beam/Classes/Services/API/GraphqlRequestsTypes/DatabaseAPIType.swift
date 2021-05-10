@@ -27,7 +27,7 @@ class DatabaseAPIType: Codable, Equatable {
         title = database.title
         id = database.uuidString
         createdAt = database.created_at
-        deletedAt = database.deleted_at
         updatedAt = database.updated_at
+        deletedAt = database.deleted_at
     }
 }

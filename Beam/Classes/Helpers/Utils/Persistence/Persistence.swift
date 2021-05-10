@@ -21,10 +21,29 @@ enum Persistence {
         @KeychainStorable("encryption.privateKey") static var privateKey: String?
     }
 
+    // swiftlint:disable nesting
+    enum Sync {
+        enum Databases {
+            @StandardStorable("sync.databases.updated_at") static var updated_at: Date?
+        }
+        enum Documents {
+            @StandardStorable("sync.documents.updated_at") static var updated_at: Date?
+            @StandardStorable("sync.documents.sent_all_at") static var sent_all_at: Date?
+        }
+
+        /// Clean all stored informations on logout
+        static func cleanUp() {
+            Persistence.Sync.Databases.updated_at = nil
+            Persistence.Sync.Documents.updated_at = nil
+            Persistence.Sync.Documents.sent_all_at = nil
+        }
+    }
+
     /// Clean all stored informations on logout
     static func cleanUp() {
         Persistence.Authentication.accessToken = nil
         Persistence.Authentication.refreshToken = nil
         Persistence.Authentication.userId = nil
+        Sync.cleanUp()
     }
 }

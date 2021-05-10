@@ -81,6 +81,7 @@ class CoreDataManager {
         if migrator.requiresMigration(at: storeURL, toVersion: CoreDataMigrationVersion.current) {
             DispatchQueue.global(qos: .userInitiated).async {
                 self.migrator.migrateStore(at: storeURL, toVersion: CoreDataMigrationVersion.current)
+
                 completion()
             }
         } else {

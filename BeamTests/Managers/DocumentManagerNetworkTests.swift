@@ -41,6 +41,8 @@ class DocumentManagerNetworkTests: QuickSpec {
             helper.deleteAllDatabases()
             helper.deleteAllDocuments()
 
+            Persistence.Sync.cleanUp()
+
             helper.createDefaultDatabase("00000000-e0df-4eca-93e6-8778984bcd18")
 
             try? EncryptionManager.shared.replacePrivateKey("j6tifPZTjUtGoz+1RJkO8dOMlu48MUUSlwACw/fCBw0=")
@@ -52,7 +54,7 @@ class DocumentManagerNetworkTests: QuickSpec {
             sut.clearNetworkCalls()
         }
 
-        describe(".uploadAll()") {
+        describe(".saveAllOnAPI()") {
             var docStruct: DocumentStruct!
             beforeEach {
                 docStruct = self.createStruct("995d94e1-e0df-4eca-93e6-8778984bcd18", helper)
@@ -71,13 +73,14 @@ class DocumentManagerNetworkTests: QuickSpec {
                     let networkCalls = APIRequest.callsCount
 
                     waitUntil(timeout: .seconds(10)) { done in
-                        sut.uploadAll { result in
+                        sut.saveAllOnAPI { result in
                             expect { try result.get() }.toNot(throwError())
                             expect { try result.get() } == true
-                            expect(APIRequest.callsCount - networkCalls) == 1
                             done()
                         }
                     }
+
+                    expect(APIRequest.callsCount - networkCalls) == 1
 
                     let remoteStruct = helper.fetchOnAPI(docStruct)
                     expect(remoteStruct?.id) == docStruct.uuidString
@@ -91,13 +94,14 @@ class DocumentManagerNetworkTests: QuickSpec {
                         let networkCalls = APIRequest.callsCount
 
                         waitUntil(timeout: .seconds(10)) { done in
-                            sut.uploadAll { result in
+                            sut.saveAllOnAPI { result in
                                 expect { try result.get() }.toNot(throwError())
                                 expect { try result.get() } == true
-                                expect(APIRequest.callsCount - networkCalls) == 1
                                 done()
                             }
                         }
+
+                        expect(APIRequest.callsCount - networkCalls) == 1
 
                         let remoteStruct = helper.fetchOnAPI(docStruct)
                         expect(remoteStruct?.id) == docStruct.uuidString
@@ -112,7 +116,7 @@ class DocumentManagerNetworkTests: QuickSpec {
             context("with PromiseKit") {
                 it("uploads existing documents") {
                     let networkCalls = APIRequest.callsCount
-                    let promise: PromiseKit.Promise<Bool> = sut.uploadAll()
+                    let promise: PromiseKit.Promise<Bool> = sut.saveAllOnAPI()
 
                     waitUntil(timeout: .seconds(10)) { done in
                         promise.done { success in
@@ -123,7 +127,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                         }
                     }
 
-                    expect(APIRequest.callsCount - networkCalls) == 2
+                    expect(APIRequest.callsCount - networkCalls) == 1
 
                     let remoteStruct = helper.fetchOnAPI(docStruct)
                     expect(remoteStruct?.id) == docStruct.uuidString
@@ -135,7 +139,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                         Configuration.encryptionEnabled = true
 
                         let networkCalls = APIRequest.callsCount
-                        let promise: PromiseKit.Promise<Bool> = sut.uploadAll()
+                        let promise: PromiseKit.Promise<Bool> = sut.saveAllOnAPI()
 
                         waitUntil(timeout: .seconds(10)) { done in
                             promise.done { success in
@@ -143,10 +147,11 @@ class DocumentManagerNetworkTests: QuickSpec {
                                 done()
                             }.catch { error in
                                 fail("Should not happen: \(error)")
+                                done()
                             }
                         }
 
-                        expect(APIRequest.callsCount - networkCalls) == 2
+                        expect(APIRequest.callsCount - networkCalls) == 1
 
                         let remoteStruct = helper.fetchOnAPI(docStruct)
                         expect(remoteStruct?.id) == docStruct.uuidString
@@ -161,7 +166,7 @@ class DocumentManagerNetworkTests: QuickSpec {
             context("with Promises") {
                 it("uploads existing documents") {
                     let networkCalls = APIRequest.callsCount
-                    let promise: Promises.Promise<Bool> = sut.uploadAll()
+                    let promise: Promises.Promise<Bool> = sut.saveAllOnAPI()
 
                     waitUntil(timeout: .seconds(10)) { done in
                         promise.then { success in
@@ -173,7 +178,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                         }
                     }
 
-                    expect(APIRequest.callsCount - networkCalls) == 2
+                    expect(APIRequest.callsCount - networkCalls) == 1
 
                     let remoteStruct = helper.fetchOnAPI(docStruct)
                     expect(remoteStruct?.id) == docStruct.uuidString
@@ -185,7 +190,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                         Configuration.encryptionEnabled = true
 
                         let networkCalls = APIRequest.callsCount
-                        let promise: Promises.Promise<Bool> = sut.uploadAll()
+                        let promise: Promises.Promise<Bool> = sut.saveAllOnAPI()
 
                         waitUntil(timeout: .seconds(10)) { done in
                             promise.then { success in
@@ -196,7 +201,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                             }
                         }
 
-                        expect(APIRequest.callsCount - networkCalls) == 2
+                        expect(APIRequest.callsCount - networkCalls) == 1
 
                         let remoteStruct = helper.fetchOnAPI(docStruct)
                         expect(remoteStruct?.id) == docStruct.uuidString
@@ -209,7 +214,7 @@ class DocumentManagerNetworkTests: QuickSpec {
             }
         }
 
-        describe(".refreshAll()") {
+        describe(".refreshAllFromAPI()") {
             var docStruct: DocumentStruct!
             afterEach {
                 assert(AuthenticationManager.shared.isAuthenticated)
@@ -232,7 +237,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                     let networkCalls = APIRequest.callsCount
 
                     waitUntil(timeout: .seconds(10)) { done in
-                        sut.refreshAll { result in
+                        sut.refreshAllFromAPI { result in
                             expect { try result.get() }.toNot(throwError())
                             expect { try result.get() } == true
                             done()
@@ -258,7 +263,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                     Configuration.encryptionEnabled = true
 
                     waitUntil(timeout: .seconds(10)) { done in
-                        sut.refreshAll { result in
+                        sut.refreshAllFromAPI { result in
                             expect { try result.get() }.toNot(throwError())
                             expect { try result.get() } == true
 
@@ -292,7 +297,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                     let networkCalls = APIRequest.callsCount
 
                     waitUntil(timeout: .seconds(10)) { done in
-                        sut.refreshAll { result in
+                        sut.refreshAllFromAPI { result in
                             expect { try result.get() }.toNot(throwError())
                             expect { try result.get() } == true
                             done()
@@ -307,7 +312,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                         let networkCalls = APIRequest.callsCount
 
                         waitUntil(timeout: .seconds(10)) { done in
-                            sut.refreshAll { result in
+                            sut.refreshAllFromAPI { result in
                                 expect { try result.get() }.toNot(throwError())
                                 expect { try result.get() } == true
                                 done()
@@ -328,7 +333,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                     let networkCalls = APIRequest.callsCount
 
                     waitUntil(timeout: .seconds(10)) { done in
-                        sut.refreshAll { result in
+                        sut.refreshAllFromAPI { result in
                             expect { try result.get() }.toNot(throwError())
                             expect { try result.get() } == true
                             done()
@@ -343,6 +348,33 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                     let document = try? Document.fetchWithId(coreDataManager.mainContext, docStruct.id)
                     expect(document?.deleted_at).toNot(beNil())
+                }
+
+                context("when doing a delta sync") {
+                    beforeEach {
+                        Persistence.Sync.Documents.updated_at = BeamDate.now
+                    }
+
+                    it("does not flag the local document as deleted") {
+                        let networkCalls = APIRequest.callsCount
+
+                        waitUntil(timeout: .seconds(10)) { done in
+                            sut.refreshAllFromAPI { result in
+                                expect { try result.get() }.toNot(throwError())
+                                expect { try result.get() } == true
+                                done()
+                            }
+                        }
+                        expect(APIRequest.callsCount - networkCalls) == 1
+
+                        let newDocStruct = sut.loadById(id: docStruct.id)
+                        expect(newDocStruct).toNot(beNil())
+
+                        expect(newDocStruct?.deletedAt).to(beNil())
+
+                        let document = try? Document.fetchWithId(coreDataManager.mainContext, docStruct.id)
+                        expect(document?.deleted_at).to(beNil())
+                    }
                 }
             }
 
@@ -363,7 +395,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                     it("refreshes the local document") {
                         let networkCalls = APIRequest.callsCount
                         waitUntil(timeout: .seconds(10)) { done in
-                            sut.refreshAll { result in
+                            sut.refreshAllFromAPI { result in
                                 expect { try result.get() }.toNot(throwError())
                                 expect { try result.get() } == true
                                 done()
@@ -379,7 +411,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                             Configuration.encryptionEnabled = true
                             let networkCalls = APIRequest.callsCount
                             waitUntil(timeout: .seconds(10)) { done in
-                                sut.refreshAll { result in
+                                sut.refreshAllFromAPI { result in
                                     expect { try result.get() }.toNot(throwError())
                                     expect { try result.get() } == true
                                     done()
@@ -414,7 +446,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                     it("refreshes the local document") {
                         let networkCalls = APIRequest.callsCount
                         waitUntil(timeout: .seconds(10)) { done in
-                            sut.refreshAll { result in
+                            sut.refreshAllFromAPI { result in
                                 expect { try result.get() }.toNot(throwError())
                                 expect { try result.get() } == true
                                 done()
@@ -431,7 +463,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                             Configuration.encryptionEnabled = true
                             let networkCalls = APIRequest.callsCount
                             waitUntil(timeout: .seconds(10)) { done in
-                                sut.refreshAll { result in
+                                sut.refreshAllFromAPI { result in
                                     expect { try result.get() }.toNot(throwError())
                                     expect { try result.get() } == true
                                     done()
@@ -467,7 +499,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                     it("doesn't update the local document, returns error") {
                         let networkCalls = APIRequest.callsCount
                         waitUntil(timeout: .seconds(10)) { done in
-                            sut.refreshAll { result in
+                            sut.refreshAllFromAPI { result in
                                 expect { try result.get() }.to(throwError { (error: DocumentManagerError) in
                                     expect(error) == DocumentManagerError.unresolvedConflict
                                 })
@@ -486,7 +518,7 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                             let networkCalls = APIRequest.callsCount
                             waitUntil(timeout: .seconds(10)) { done in
-                                sut.refreshAll { result in
+                                sut.refreshAllFromAPI { result in
                                     expect { try result.get() }.to(throwError { (error: DocumentManagerError) in
                                         expect(error) == DocumentManagerError.unresolvedConflict
                                     })
@@ -988,18 +1020,18 @@ class DocumentManagerNetworkTests: QuickSpec {
                         context("with deleted notes") {
                             beforeEach { docStruct.deletedAt = BeamDate.now }
 
-                            it("does not save the document on the API") {
+                            it("saves the document on the API") {
                                 let previousNetworkCall = APIRequest.callsCount
 
                                 waitUntil(timeout: .seconds(10)) { done in
                                     sut.saveDocumentStructOnAPI(docStruct) { result in
                                         expect { try result.get() }.toNot(throwError())
-                                        expect { try result.get() } == false
+                                        expect { try result.get() } == true
                                         done()
                                     }
                                 }
 
-                                expect(APIRequest.callsCount - previousNetworkCall) == 0
+                                expect(APIRequest.callsCount - previousNetworkCall) == 1
                             }
                         }
 

@@ -20,6 +20,7 @@ extension Document {
     @NSManaged public var data: Data?
     @NSManaged public var beam_api_data: Data?
     @NSManaged public var beam_api_checksum: String?
+    @NSManaged public var beam_api_sent_at: Date?
     @NSManaged public var deleted_at: Date?
     @NSManaged public var created_at: Date
     @NSManaged public var updated_at: Date

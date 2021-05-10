@@ -268,9 +268,9 @@ class DocumentManagerTestsHelper {
     }
 
     // MARK: Database
-    func createDatabaseStruct(_ id: String? = nil) -> DatabaseStruct {
+    func createDatabaseStruct(_ id: String? = nil, _ title: String? = "Foobar DB") -> DatabaseStruct {
         var databaseStruct = DatabaseStruct(id: UUID(),
-                                            title: String.randomTitle(),
+                                            title: title ?? String.randomTitle(),
                                             createdAt: BeamDate.now,
                                             updatedAt: BeamDate.now)
 

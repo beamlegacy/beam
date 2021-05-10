@@ -61,6 +61,23 @@ class DocumentAPIType: Codable {
         }
     }
 
+    // Used to recreate an instance *before* doing the network call
+    // Not all attributes should be used, and we'll use encryptedData
+    // if needed
+    init(document: DocumentAPIType) {
+        title = document.title
+        id = document.id
+        createdAt = document.createdAt
+        updatedAt = document.updatedAt
+        deletedAt = document.deletedAt
+        // For next API update
+        // documentType = document.documentType
+        previousChecksum = document.previousChecksum
+        data = document.shouldEncrypt ? document.encryptedData : document.data
+        isPublic = document.isPublic
+        database = document.database
+    }
+
     init(id: String) {
         self.id = id
     }

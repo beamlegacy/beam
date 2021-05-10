@@ -113,7 +113,8 @@ class AccountManagerTests: QuickSpec {
                         waitUntil(timeout: .seconds(10)) { done in
                             sut.signUp(existingAccountEmail, password) { result in
                                 expect { try result.get() }.to(throwError { (error: APIRequestError) in
-                                    expect(error.errorDescription).to(equal("A user already exists with this email"))
+                                    expect(error).to(matchError(APIRequestError.apiErrors([UserErrorData(message: "A user already exists with this email",
+                                                                                                         path: ["arguments", "email"])])))
                                 })
                                 done()
                             }
@@ -140,7 +141,9 @@ class AccountManagerTests: QuickSpec {
                         waitUntil(timeout: .seconds(10)) { done in
                             let promise: PromiseKit.Promise<Bool> = sut.signUp(existingAccountEmail, password)
                             promise.catch { error in
-                                expect(error).to(matchError(APIRequestError.apiError(["A user already exists with this email"])))
+                                expect(error).to(matchError(APIRequestError.apiErrors([UserErrorData(message: "A user already exists with this email",
+                                                                                                     path: ["arguments", "email"])])))
+
                                 done()
                             }
                         }
@@ -167,7 +170,8 @@ class AccountManagerTests: QuickSpec {
                         waitUntil(timeout: .seconds(10)) { done in
                             let promise: Promises.Promise<Bool> = sut.signUp(existingAccountEmail, password)
                             promise.catch { error in
-                                expect(error).to(matchError(APIRequestError.apiError(["A user already exists with this email"])))
+                                expect(error).to(matchError(APIRequestError.apiErrors([UserErrorData(message: "A user already exists with this email",
+                                                                                                     path: ["arguments", "email"])])))
                                 done()
                             }
                         }
@@ -215,7 +219,8 @@ class AccountManagerTests: QuickSpec {
                         waitUntil(timeout: .seconds(10)) { done in
                             sut.signIn(existingAccountEmail, password) { result in
                                 expect { try result.get() }.to(throwError { (error: APIRequestError) in
-                                    expect(error.errorDescription).to(equal("Invalid password"))
+                                    expect(error).to(matchError(APIRequestError.apiErrors([UserErrorData(message: "Invalid password",
+                                                                                                         path: ["arguments", "password"])])))
                                 })
                                 done()
                             }
@@ -249,7 +254,8 @@ class AccountManagerTests: QuickSpec {
                         waitUntil(timeout: .seconds(10)) { done in
                             let promise: PromiseKit.Promise<Bool> = sut.signIn(existingAccountEmail, password)
                             promise.catch { error in
-                                expect(error).to(matchError(APIRequestError.apiError(["Invalid password"])))
+                                expect(error).to(matchError(APIRequestError.apiErrors([UserErrorData(message: "Invalid password",
+                                                                                                     path: ["arguments", "password"])])))
                                 done()
                             }
                         }
@@ -282,7 +288,8 @@ class AccountManagerTests: QuickSpec {
                         waitUntil(timeout: .seconds(10)) { done in
                             let promise: Promises.Promise<Bool> = sut.signIn(existingAccountEmail, password)
                             promise.catch { error in
-                                expect(error).to(matchError(APIRequestError.apiError(["Invalid password"])))
+                                expect(error).to(matchError(APIRequestError.apiErrors([UserErrorData(message: "Invalid password",
+                                                                                                     path: ["arguments", "password"])])))
                                 done()
                             }
                         }

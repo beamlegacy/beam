@@ -153,7 +153,7 @@ extension AppDelegate {
 
     // MARK: - Send to API
     @IBAction func sendAllNotesToAPI(_ sender: Any) {
-        documentManager.uploadAll { result in
+        documentManager.saveAllOnAPI { result in
             DispatchQueue.main.async {
                 let alert = NSAlert()
                 switch result {
@@ -172,7 +172,7 @@ extension AppDelegate {
 
     // MARK: - Fetch from API
     @IBAction func refreshNotesFromAPI(_ sender: Any) {
-        documentManager.refreshAll { result in
+        documentManager.refreshAllFromAPI { result in
             DispatchQueue.main.async {
                 let alert = NSAlert()
                 switch result {
@@ -183,6 +183,46 @@ extension AppDelegate {
                     alert.alertStyle = success ? .informational : .critical
                     // TODO: i18n
                     alert.messageText = success ? "All documents fetched from API" : "Some notes couldn't be fetched"
+                }
+                alert.runModal()
+            }
+        }
+    }
+
+    // MARK: - Fetch from API
+    @IBAction func refreshDatabasesFromAPI(_ sender: Any) {
+        databaseManager.fetchAllOnApi { result in
+            DispatchQueue.main.async {
+                let alert = NSAlert()
+                switch result {
+                case .failure(let error):
+                    alert.alertStyle = .critical
+                    alert.messageText = error.localizedDescription
+                case .success(let success):
+                    alert.alertStyle = success ? .informational : .critical
+                    // TODO: i18n
+                    alert.messageText = success ?
+                        "All databases fetched from API" :
+                        "Some databases couldn't be fetched"
+                }
+                alert.runModal()
+            }
+        }
+    }
+
+    // MARK: - Send to API
+    @IBAction func sendAllDatabasesToAPI(_ sender: Any) {
+        databaseManager.saveAllOnApi { result in
+            DispatchQueue.main.async {
+                let alert = NSAlert()
+                switch result {
+                case .failure(let error):
+                    alert.alertStyle = .critical
+                    alert.messageText = error.localizedDescription
+                case .success:
+                    alert.alertStyle = .informational
+                    // TODO: i18n
+                    alert.messageText = "All databases sent to API"
                 }
                 alert.runModal()
             }
