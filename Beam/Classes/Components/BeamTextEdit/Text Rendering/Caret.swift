@@ -30,7 +30,11 @@ public enum CaretEdge {
     var isTrailing: Bool { self == .trailing }
 }
 
-public struct Caret {
+public struct Caret: Comparable {
+    public static func < (lhs: Caret, rhs: Caret) -> Bool {
+        (lhs.indexOnScreen < rhs.indexOnScreen) || ((lhs.indexOnScreen == rhs.indexOnScreen) && (lhs.offset.x < rhs.offset.x))
+    }
+
     public var offset: CGPoint
     /// indexInSource is the index of the character in source string
     public var indexInSource: Int
@@ -63,27 +67,6 @@ public func filterCarets(_ carets: [Caret], filter: CaretFilter) -> [Caret] {
             && (!filter.contains(.notInSource) || caret.inSource)
             ? caret : nil
     }
-}
-
-public func sortAndSourceCarets(_ carets: [Caret], sourceOffset: Int, notInSourcePositions: [Int]) -> [Caret] {
-    var count = sourceOffset
-    let sorted = carets.sorted { (lhs, rhs) -> Bool in
-        if lhs.indexOnScreen < rhs.indexOnScreen { return true }
-        if (lhs.indexOnScreen == rhs.indexOnScreen) && (lhs.offset.x < rhs.offset.x) { return true }
-
-        return false
-    }
-
-    let indexed = sorted.map { caret -> Caret in
-        let inSource = !notInSourcePositions.binaryContains(caret.indexOnScreen)
-        var c = caret
-        c.indexInSource = count
-        c.inSource = inSource
-        count += (!inSource || caret.edge.isLeading) ? 0 : 1
-        return c
-    }
-
-    return indexed
 }
 
 public func nextCaret(for index: Int, in carets: [Caret]) -> Int {

@@ -116,13 +116,26 @@ public class TextLine {
 
     lazy public var carets: [Caret] = {
         var c = [Caret]()
+        c.reserveCapacity(CTLineGetGlyphCount(ctLine))
         let y = frame.minY
 
         CTLineEnumerateCaretOffsets(ctLine) { [self] (offset, index, leading, _) in
-            c.append(Caret(offset: CGPoint(x: self.frame.origin.x + CGFloat(offset), y: y), indexInSource: -1, indexOnScreen: index, edge: leading ? .leading : .trailing, inSource: true, line: self.indexInFrame))
+            let inSource = !self.notInSourcePositions.binaryContains(index)
+            let caret = Caret(offset: CGPoint(x: self.frame.origin.x + CGFloat(offset), y: y), indexInSource: -1, indexOnScreen: index, edge: leading ? .leading : .trailing, inSource: inSource, line: self.indexInFrame)
+            var insertionIndex = c.count - 1
+            while insertionIndex > 0 && c[insertionIndex] > caret {
+                insertionIndex -= 1
+            }
+            c.insert(caret, at: insertionIndex + 1)
         }
 
-        return sortAndSourceCarets(c, sourceOffset: sourceOffset, notInSourcePositions: notInSourcePositions)
+        var count = sourceOffset
+        for i in 0 ..< c.count {
+            c[i].indexInSource = count
+            count += (!c[i].inSource || c[i].edge.isLeading) ? 0 : 1
+        }
+
+        return c
     }()
 
     public var runs: [CTRun] {
