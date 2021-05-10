@@ -18,7 +18,8 @@ private enum MenuEnablingConditionTag: Int {
     // other conditions
     case hasBrowserTab = 1001 // enable only if browser tabs are open
 }
-extension AppDelegate: NSMenuDelegate {
+
+extension AppDelegate: NSMenuDelegate, NSMenuItemValidation {
 
     func subscribeToStateChanges(for state: BeamState) {
         state.$mode
@@ -52,7 +53,7 @@ extension AppDelegate: NSMenuDelegate {
         let mode = state.mode
         let rawTag = abs(tag)
         let tagEnum = MenuEnablingConditionTag(rawValue: rawTag)
-        if rawTag < 10 {
+        if rawTag < 1000 {
             return rawTag & mode.rawValue != 0
         } else if tagEnum == .hasBrowserTab {
             return state.hasBrowserTabs
@@ -77,5 +78,30 @@ extension AppDelegate: NSMenuDelegate {
 
     func menuDidClose(_ menu: NSMenu) {
         toggleVisibility(true, ofAlternatesKeyEquivalentsItems: menu.items)
+    }
+
+    // MARK: - NSMenuItemValidation Delegate
+    // Support for native auto-enable menu items
+    func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
+        guard menuItem.tag != 0 else { return true }
+        let value = abs(menuItem.tag)
+        return passConditionTag(tag: value, for: window.state)
+    }
+}
+
+// MARK: - Menu Bar items selectors
+extension AppDelegate {
+
+    // MARK: Webview Zoom
+    @IBAction func resetZoom(_ sender: Any) {
+        window.state.browserTabsManager.currentTab?.webView.zoomReset()
+    }
+
+    @IBAction func zoomIn(_ sender: Any) {
+        window.state.browserTabsManager.currentTab?.webView.zoomIn()
+    }
+
+    @IBAction func zoomOut(_ sender: Any) {
+        window.state.browserTabsManager.currentTab?.webView.zoomOut()
     }
 }
