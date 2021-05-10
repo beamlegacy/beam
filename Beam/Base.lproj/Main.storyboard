@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="17701" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="18122" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17701"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="18122"/>
     </dependencies>
     <scenes>
         <!--Beam Application-->
@@ -447,11 +447,13 @@
                                                     </menuItem>
                                                     <menuItem isSeparatorItem="YES" id="5gT-KC-WSO"/>
                                                     <menuItem title="Bigger" tag="3" keyEquivalent="+" id="Ptp-SP-VEL">
+                                                        <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
                                                         <connections>
                                                             <action selector="modifyFont:" target="YLy-65-1bz" id="Uc7-di-UnL"/>
                                                         </connections>
                                                     </menuItem>
-                                                    <menuItem title="Smaller" tag="4" keyEquivalent="-" id="i1d-Er-qST">
+                                                    <menuItem title="Smaller" tag="3" keyEquivalent="-" id="i1d-Er-qST">
+                                                        <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
                                                         <connections>
                                                             <action selector="modifyFont:" target="YLy-65-1bz" id="HcX-Lf-eNd"/>
                                                         </connections>
@@ -687,6 +689,22 @@
                                             <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
                                             <connections>
                                                 <action selector="toggleFullScreen:" target="Ady-hI-5gd" id="eha-6e-Nsv"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="jze-PA-szA"/>
+                                        <menuItem title="Actual Size" tag="4" keyEquivalent="0" id="sRD-PD-0pk">
+                                            <connections>
+                                                <action selector="resetZoom:" target="Ady-hI-5gd" id="WOS-GY-FtI"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Zoom In" tag="4" keyEquivalent="+" id="KIP-BY-goS">
+                                            <connections>
+                                                <action selector="zoomIn:" target="Ady-hI-5gd" id="QAh-Iz-Efj"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Zoom Out" tag="4" keyEquivalent="-" id="Rhl-Ui-Pg1">
+                                            <connections>
+                                                <action selector="zoomOut:" target="Ady-hI-5gd" id="s1X-bM-fCG"/>
                                             </connections>
                                         </menuItem>
                                     </items>
