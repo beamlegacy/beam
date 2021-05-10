@@ -14,6 +14,7 @@ struct DocumentDetail: View {
             ScrollView {
                 HStack(alignment: VerticalAlignment.center, spacing: 10.0) {
                     RefreshButton
+                    SoftDeleteButton
                     DeleteButton
                     PublicButton
                     DatabasePicker
@@ -127,6 +128,14 @@ struct DocumentDetail: View {
         documentManager.delete(id: document.id, completion: nil)
     }
 
+    private func softDelete() {
+        var documentStruct = DocumentStruct(document: document)
+        documentStruct.deletedAt = BeamDate.now
+
+        _ = documentManager.save(documentStruct, completion: { _ in
+        })
+    }
+
     private func togglePublic() {
         var documentStruct = DocumentStruct(document: document)
         documentStruct.isPublic = !documentStruct.isPublic
@@ -148,6 +157,14 @@ struct DocumentDetail: View {
             delete()
         }, label: {
             Text("Delete").frame(minWidth: 100)
+        })
+    }
+
+    private var SoftDeleteButton: some View {
+        Button(action: {
+            softDelete()
+        }, label: {
+            Text("Soft Delete").frame(minWidth: 100)
         })
     }
 

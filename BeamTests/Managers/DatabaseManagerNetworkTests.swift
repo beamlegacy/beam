@@ -380,7 +380,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
             }
         }
 
-        describe(".uploadAll()") {
+        describe(".saveAllOnApi()") {
             var dbStruct: DatabaseStruct!
             beforeEach {
                 dbStruct = helper.createDatabaseStruct("995d94e1-e0df-4eca-93e6-8778984bcd29")
@@ -397,7 +397,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
                     let networkCalls = APIRequest.callsCount
 
                     waitUntil(timeout: .seconds(10)) { done in
-                        sut.uploadAll { result in
+                        sut.saveAllOnApi { result in
                             expect { try result.get() }.toNot(throwError())
                             expect { try result.get() } == true
                             done()
@@ -414,7 +414,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
                 it("uploads existing databases") {
                     let networkCalls = APIRequest.callsCount
 
-                    let promise: PromiseKit.Promise<Bool> = sut.uploadAll()
+                    let promise: PromiseKit.Promise<Bool> = sut.saveAllOnApi()
 
                     waitUntil(timeout: .seconds(10)) { done in
                         promise.done { success in
@@ -433,7 +433,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
                 it("uploads existing databases") {
                     let networkCalls = APIRequest.callsCount
 
-                    let promise: Promises.Promise<Bool> = sut.uploadAll()
+                    let promise: Promises.Promise<Bool> = sut.saveAllOnApi()
 
                     waitUntil(timeout: .seconds(10)) { done in
                         promise.then { success in
@@ -449,7 +449,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
             }
         }
 
-        describe(".fetchAll()") {
+        describe(".fetchAllOnApi()") {
             var dbStruct: DatabaseStruct!
             beforeEach {
                 dbStruct = helper.createDatabaseStruct("995d94e1-e0df-4eca-93e6-8778984bcd29")
@@ -466,7 +466,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
                 it("fetches all databases") {
                     let networkCalls = APIRequest.callsCount
                     waitUntil(timeout: .seconds(10)) { done in
-                        sut.fetchAll { result in
+                        sut.fetchAllOnApi { result in
                             expect { try result.get() }.toNot(throwError())
                             expect { try result.get() } == true
                             done()
@@ -482,7 +482,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
             context("with PromiseKit") {
                 it("fetches all databases") {
                     let networkCalls = APIRequest.callsCount
-                    let promise: PromiseKit.Promise<Bool> = sut.fetchAll()
+                    let promise: PromiseKit.Promise<Bool> = sut.fetchAllOnApi()
 
                     waitUntil(timeout: .seconds(10)) { done in
                         promise.done { success in
@@ -500,7 +500,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
             context("with Promises") {
                 it("fetches all databases") {
                     let networkCalls = APIRequest.callsCount
-                    let promise: Promises.Promise<Bool> = sut.fetchAll()
+                    let promise: Promises.Promise<Bool> = sut.fetchAllOnApi()
 
                     waitUntil(timeout: .seconds(10)) { done in
                         promise.then { success in

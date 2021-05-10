@@ -27,8 +27,11 @@ struct DocumentRow: View {
                     }
                     Spacer()
                 }
+
+                Spacer()
             }
-        }.padding(.bottom).padding(.top)
+        }
+        .padding(.vertical)
     }
 }
 

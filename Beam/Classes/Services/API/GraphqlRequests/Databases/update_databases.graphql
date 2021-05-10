@@ -1,0 +1,13 @@
+mutation UpdateDatabases($databases: [DatabaseInput!]!) {
+  updateDatabases(input: {databasesInput: $databases}) {
+    databases {
+      id
+      title
+    }
+    errors {
+      objectid
+      path
+      message
+    }
+  }
+}

@@ -1,10 +1,11 @@
-query {
+query ($updatedAtAfter: ISO8601DateTime) {
   me {
-    databases {
+    databases(updatedAtAfter: $updatedAtAfter) {
       id
       title
       createdAt
       updatedAt
+      deletedAt
     }
   }
 }

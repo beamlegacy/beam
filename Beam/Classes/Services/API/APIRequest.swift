@@ -153,7 +153,7 @@ class APIRequest {
         if let errors = result.errors, !errors.isEmpty {
             error = handleTopLevelErrors(errors)
         } else if let errors = result.data?.errors, !errors.isEmpty {
-            error = APIRequestError.apiError(extractUserErrorMessages(errors))
+            error = APIRequestError.apiErrors(errors)
         } else {
             error = APIRequestError.parserError
         }
@@ -195,7 +195,7 @@ class APIRequest {
         if errors.count == 1, errors[0].message == "Differs from current checksum" {
             error = APIRequestError.documentConflict
         } else {
-            error = APIRequestError.apiError(extractUserErrorMessages(errors))
+            error = APIRequestError.apiErrors(errors)
         }
 
         Logger.shared.logError(error.localizedDescription, category: .network)
@@ -206,7 +206,8 @@ class APIRequest {
     private func extractUserErrorMessages(_ errors: [UserErrorData]) -> [String] {
         return errors.compactMap {
             var errorMessage: String = ""
-            if let message = $0.message { errorMessage.append(message) }
+            errorMessage.append("[\($0.path?.joined(separator: ", ") ?? "no path")]: ")
+            errorMessage.append($0.message ?? "No error message")
 
             return errorMessage
         } as [String]

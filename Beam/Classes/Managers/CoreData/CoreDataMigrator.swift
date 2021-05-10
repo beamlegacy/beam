@@ -105,7 +105,9 @@ class CoreDataMigrator: CoreDataMigratorProtocol {
             let persistentStoreCoordinator = NSPersistentStoreCoordinator(managedObjectModel: currentModel)
 
             let options = [NSSQLitePragmasOption: ["journal_mode": "DELETE"]]
+            // Note: sometimes this hangs when trying to import previous version backup to current DB
             let store = persistentStoreCoordinator.addPersistentStore(at: storeURL, options: options)
+
             try persistentStoreCoordinator.remove(store)
         } catch let error {
             fatalError("failed to force WAL checkpointing, error: \(error)")

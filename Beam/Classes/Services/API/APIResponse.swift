@@ -6,9 +6,10 @@ protocol Errorable {
     var errors: [UserErrorData]? { get }
 }
 
-struct UserErrorData: Decodable {
-    let message: String?
-    let path: [String]?
+struct UserErrorData: Codable, Equatable {
+    var objectid: String?
+    var message: String?
+    var path: [String]?
 }
 
 extension APIRequest {

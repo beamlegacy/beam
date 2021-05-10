@@ -1,6 +1,6 @@
-query documents {
+query ($updatedAtAfter: ISO8601DateTime) {
   me {
-    documents {
+    documents(updatedAtAfter: $updatedAtAfter) {
       id
       checksum
       title

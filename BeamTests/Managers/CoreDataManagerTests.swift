@@ -40,8 +40,9 @@ class CoreDataManagerTests: QuickSpec {
                     fail("failed creating backup: \(error.localizedDescription)")
                 }
 
+
+                // I use this when I need to copy a new backup and know one of the note's title
                 /*
-                 I use this when I need to copy a new backup and know one of the note's title
                 print(backupURL)
                 print(docStruct.title)
                  */
@@ -64,7 +65,7 @@ class CoreDataManagerTests: QuickSpec {
 
         describe(".importBackup(url)") {
             let url = Bundle(for: type(of: self)).url(forResource: "BeamExport", withExtension: "sqlite")!
-            let backupStructTitle = "Rustic Granite Computer EYXA2XhvkUUQCkm5fPVF8yq8mTtTwizINzNkM9Y9"
+            let backupStructTitle = "Awesome Cotton Hat Nck9sefqhh50ItopCfCErGZ2UetLQhu7oxY27SyF"
             var docStruct: DocumentStruct!
             beforeEach {
                 helper.deleteAllDocuments()

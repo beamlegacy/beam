@@ -46,8 +46,8 @@ class UserSessionRequestTests: QuickSpec {
                         waitUntil(timeout: .seconds(10)) { done in
                             let _: URLSessionDataTask? = try? sut.signIn(email: existingAccountEmail, password: password) { result in
                                 expect { try result.get() }.to(throwError { (error: APIRequestError) in
-                                    expect(error.errorDescription).to(equal("Invalid password"))
-                                    expect(error).to(matchError(APIRequestError.apiError(["Invalid password"])))
+                                    expect(error).to(matchError(APIRequestError.apiErrors([UserErrorData(message: "Invalid password",
+                                                                                                         path: ["arguments", "password"])])))
                                 })
                                 done()
                             }
@@ -81,7 +81,8 @@ class UserSessionRequestTests: QuickSpec {
                                 .done { _ in }
                                 .catch { error in
                                     expect(error).to(beAnInstanceOf(APIRequestError.self))
-                                    expect(error).to(matchError(APIRequestError.apiError(["Invalid password"])))
+                                    expect(error).to(matchError(APIRequestError.apiErrors([UserErrorData(message: "Invalid password",
+                                                                                                         path: ["arguments", "password"])])))
                                     done()
                                 }
                         }
@@ -114,7 +115,8 @@ class UserSessionRequestTests: QuickSpec {
                                 .then { _ in }
                                 .catch { error in
                                     expect(error).to(beAnInstanceOf(APIRequestError.self))
-                                    expect(error).to(matchError(APIRequestError.apiError(["Invalid password"])))
+                                    expect(error).to(matchError(APIRequestError.apiErrors([UserErrorData(message: "Invalid password",
+                                                                                                         path: ["arguments", "password"])])))
                                     done()
                                 }
                         }

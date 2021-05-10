@@ -40,7 +40,8 @@ struct AdvancedPreferencesView: View {
     @State private var selectedDatabase = Database.defaultDatabase()
     private let databaseManager = DatabaseManager()
     @FetchRequest(entity: Database.entity(),
-                  sortDescriptors: [NSSortDescriptor(keyPath: \Database.title, ascending: true)])
+                  sortDescriptors: [NSSortDescriptor(keyPath: \Database.title, ascending: true)],
+                  predicate: NSPredicate(format: "deleted_at == nil"))
     var databases: FetchedResults<Database>
 
     private let contentWidth: Double = 650.0

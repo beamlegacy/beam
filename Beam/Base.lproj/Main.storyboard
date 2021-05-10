@@ -117,6 +117,7 @@
                                                             <action selector="importRoam:" target="Voe-Tx-rLC" id="8Ni-tq-Xk9"/>
                                                         </connections>
                                                     </menuItem>
+                                                    <menuItem isSeparatorItem="YES" id="p48-Cr-YKh"/>
                                                     <menuItem title="Send all notes to API" id="hvj-Zt-QCz">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
                                                         <connections>
@@ -129,6 +130,7 @@
                                                             <action selector="refreshNotesFromAPI:" target="Voe-Tx-rLC" id="pVk-C4-CGO"/>
                                                         </connections>
                                                     </menuItem>
+                                                    <menuItem isSeparatorItem="YES" id="ITV-pu-Qpw"/>
                                                     <menuItem title="Delete all notes" id="4e7-0u-pUE">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
                                                         <connections>
@@ -141,6 +143,20 @@
                                                             <action selector="deleteLocalDocuments:" target="Voe-Tx-rLC" id="RoE-cB-YGe"/>
                                                         </connections>
                                                     </menuItem>
+                                                    <menuItem isSeparatorItem="YES" id="9I3-kZ-pf6"/>
+                                                    <menuItem title="Send all databases to API" id="wLk-2d-Sjr">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="sendAllDatabasesToAPI:" target="Voe-Tx-rLC" id="6Md-VS-tVK"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                    <menuItem title="Fetch all databases from API" id="7g3-Yd-w8e">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="refreshDatabasesFromAPI:" target="Voe-Tx-rLC" id="uaV-Rh-JFZ"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                    <menuItem isSeparatorItem="YES" id="EDR-BD-fNS"/>
                                                     <menuItem title="Backup all notes" id="XvI-yN-rpy">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
                                                         <connections>
