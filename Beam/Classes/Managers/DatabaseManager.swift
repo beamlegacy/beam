@@ -903,7 +903,7 @@ extension DatabaseManager {
 
                     return saveDBPromise.then { _ in true }
                 }
-            }.recover(on: backgroundQueue) { error throws in
+            }.recover(on: backgroundQueue) { error throws -> Promises.Promise<Bool> in
                 // We might have fixable errors like title conflicts
                 guard case APIRequestError.apiErrors(let errors) = error,
                    try self.saveAllOnApiErrors(errors),
