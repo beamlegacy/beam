@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import BeamCore
 
 class JournalStackView: NSView {
     public var horizontalSpace: CGFloat
@@ -73,6 +74,10 @@ class JournalStackView: NSView {
         return NSSize(width: width, height: height)
     }
 
+    public func hasChildViews(for note: BeamElement) -> Bool {
+       return views.values.contains(where: { $0.note == note })
+    }
+
     public func addChildView(view: BeamTextEdit) {
         if self.subviews.isEmpty {
             view.frame.origin = CGPoint(x: 0, y: topOffset)
@@ -86,6 +91,15 @@ class JournalStackView: NSView {
         self.addSubview(view)
         views[viewCount] = view
         viewCount += 1
+    }
+
+    public func removeChildViews() {
+        views.forEach { (_, value) in
+            value.removeFromSuperview()
+        }
+        views.removeAll()
+        viewCount = 0
+        invalidateLayout()
     }
 
     private func getBottomInsetForTodays(_ view: BeamTextEdit) -> CGFloat {

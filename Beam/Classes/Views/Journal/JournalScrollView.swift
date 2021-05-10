@@ -12,32 +12,16 @@ import BeamCore
 struct JournalScrollView: NSViewRepresentable {
     typealias NSViewType = NSScrollView
 
-    private var axes: Axis.Set
-    private var showsIndicators: Bool
-
-    let data: BeamData
-    let dataSource: [BeamNote]
+    var axes: Axis.Set
+    var showsIndicators: Bool
     let proxy: GeometryProxy
     let onScroll: ((CGPoint) -> Void)?
-    @State private var fetchedEntries: [BeamNote] = []
+
     @State private var isEditing = false
     @EnvironmentObject var state: BeamState
 
-    public init(_ axes: Axis.Set = .vertical,
-                showsIndicators: Bool = true,
-                data: BeamData, dataSource: [BeamNote],
-                proxy: GeometryProxy,
-                onScroll: ((CGPoint) -> Void)? = nil) {
-        self.axes = axes
-        self.showsIndicators = showsIndicators
-        self.data = data
-        self.dataSource = dataSource
-        self.proxy = proxy
-        self.onScroll = onScroll
-    }
-
     public func makeCoordinator() -> JournalScrollViewCoordinator {
-        return JournalScrollViewCoordinator(scrollView: self, data: self.data, dataSource: self.dataSource, fetchedEntries: $fetchedEntries)
+        return JournalScrollViewCoordinator(scrollView: self, data: state.data, dataSource: state.data.journal)
     }
 
     func makeNSView(context: Context) -> NSScrollView {
@@ -63,10 +47,7 @@ struct JournalScrollView: NSViewRepresentable {
         scrollView.contentView.addConstraint(NSLayoutConstraint(item: journalStackView, attribute: .leading, relatedBy: .equal, toItem: scrollView.contentView, attribute: .leading, multiplier: 1.0, constant: 0))
         scrollView.contentView.addConstraint(NSLayoutConstraint(item: journalStackView, attribute: .trailing, relatedBy: .equal, toItem: scrollView.contentView, attribute: .trailing, multiplier: 1.0, constant: 0))
 
-        for note in dataSource {
-            let textEditView = getTextEditView(for: note)
-            journalStackView.addChildView(view: textEditView)
-        }
+        set(data: state.data.journal, in: journalStackView)
 
         context.coordinator.watchScrollViewBounds(scrollView)
         return scrollView
@@ -76,21 +57,28 @@ struct JournalScrollView: NSViewRepresentable {
     func updateNSView(_ nsView: NSScrollView, context: Context) {
         guard let journalStackView = nsView.documentView as? JournalStackView else { return }
         journalStackView.invalidateLayout()
-        if !fetchedEntries.isEmpty {
-            for note in fetchedEntries {
+        if state.data.newDay {
+            journalStackView.removeChildViews()
+            state.data.reloadJournal()
+        }
+        set(data: state.data.journal, in: journalStackView)
+
+        journalStackView.layout()
+    }
+
+    private func set(data: [BeamNote], in journalStackView: JournalStackView) {
+        for note in data {
+            guard !journalStackView.hasChildViews(for: note) else { continue }
+            if !note.isEntireNoteEmpty() || note.isTodaysNote {
                 let textEditView = getTextEditView(for: note)
                 journalStackView.addChildView(view: textEditView)
             }
-            DispatchQueue.main.async {
-                fetchedEntries = []
-            }
         }
-        journalStackView.layout()
     }
 
     private func getTextEditView(for note: BeamNote) -> BeamTextEdit {
         let textEditView = BeamTextEdit(root: note, journalMode: true)
-        textEditView.data = data
+        textEditView.data = state.data
         textEditView.onStartEditing = {
             self.isEditing = true
         }
@@ -127,17 +115,15 @@ struct JournalScrollView: NSViewRepresentable {
 
         private let data: BeamData
         private let dataSource: [BeamNote]
-        @Binding var fetchedEntries: [BeamNote]
 
-        public init(scrollView: JournalScrollView, data: BeamData, dataSource: [BeamNote], fetchedEntries: Binding<[BeamNote]>) {
+        public init(scrollView: JournalScrollView, data: BeamData, dataSource: [BeamNote]) {
             self.parent = scrollView
             self.data = data
             self.dataSource = dataSource
-            self._fetchedEntries = fetchedEntries
         }
 
         func watchScrollViewBounds(_ scrollView: NSScrollView) {
-            scrollViewContentWatcher = ScrollViewContentWatcher(with: scrollView, data: data, dataSource: dataSource, fetchedEntries: $fetchedEntries)
+            scrollViewContentWatcher = ScrollViewContentWatcher(with: scrollView, data: data, dataSource: dataSource)
             scrollViewContentWatcher?.onScroll = parent.onScroll
         }
     }
@@ -154,12 +140,10 @@ class ScrollViewContentWatcher: NSObject {
     private let data: BeamData
     private var dataSource: [BeamNote]
     var onScroll: ((CGPoint) -> Void)?
-    @Binding var fetchedEntries: [BeamNote]
 
-    init(with scrollView: NSScrollView, data: BeamData, dataSource: [BeamNote], fetchedEntries: Binding<[BeamNote]>) {
+    init(with scrollView: NSScrollView, data: BeamData, dataSource: [BeamNote]) {
         self.data = data
         self.dataSource = dataSource
-        self._fetchedEntries = fetchedEntries
 
         super.init()
         let contentView = scrollView.contentView
@@ -197,7 +181,6 @@ class ScrollViewContentWatcher: NSObject {
         let totalJournal = data.documentManager.countDocumentsWithType(type: .journal)
         if totalJournal != self.dataSource.count {
             data.updateJournal(with: 2, and: dataSource.count)
-            fetchedEntries = data.journal.filter({ !dataSource.contains($0) })
             dataSource = data.journal
         }
         // Imo we shouldn't have a case were totalJournal == 0, but alway >= 1
