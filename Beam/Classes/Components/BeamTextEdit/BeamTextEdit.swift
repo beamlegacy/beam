@@ -23,7 +23,10 @@ public extension CALayer {
 @objc public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
     var data: BeamData?
-    var cardTopSpace: CGFloat = 124
+    var cardTopSpace: CGFloat {
+        return journalMode ? 135 : 198
+    }
+
     var centerText = false {
         didSet {
             setupCardHeader()
@@ -374,9 +377,17 @@ public extension CALayer {
         }
     }
 
+    private var cardHeaderPosY: CGFloat {
+        return journalMode ? 63 : 127
+    }
+
+    private var cardTimePosY: CGFloat {
+        return journalMode ? 44 : 104
+    }
+
     func updateCardHearderLayer(_ rect: NSRect) {
-        let headerPosX = rect.origin.x + 17
-        cardHeaderLayer.frame = CGRect(origin: CGPoint(x: headerPosX, y: 63), size: NSSize(width: rect.width, height: cardTitleLayer.preferredFrameSize().height))
+        let cardHeaderPosX = rect.origin.x + 17
+        cardHeaderLayer.frame = CGRect(origin: CGPoint(x: cardHeaderPosX, y: cardHeaderPosY), size: NSSize(width: rect.width, height: cardTitleLayer.preferredFrameSize().height))
         cardTitleLayer.frame = CGRect(origin: CGPoint(x: 0, y: 0), size: NSSize(width: cardTitleLayer.preferredFrameSize().width, height: cardTitleLayer.preferredFrameSize().height))
         cardOptionLayer.frame = CGRect(origin: CGPoint(x: rect.width - 16, y: 10), size: NSSize(width: 16, height: 16))
 
@@ -387,7 +398,7 @@ public extension CALayer {
         if !journalMode && cardNote.type == .note {
             cardTimeLayer.frame = CGRect(
                 // TODO: Change later (isBig ? 101 : 95)
-                origin: CGPoint(x: headerPosX, y: 44),
+                origin: CGPoint(x: cardHeaderPosX, y: cardTimePosY),
                 size: NSSize(width: rect.width, height: cardTimeLayer.preferredFrameSize().height)
             )
         }
