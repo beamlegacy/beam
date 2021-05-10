@@ -1,43 +1,9 @@
-//
-//  BrowserTab.swift
-//  Beam
-//
-//  Created by Sebastien Metrot on 21/09/2020.
-//
-// swiftlint:disable file_length
-
 import Foundation
 import SwiftUI
 import Combine
 import WebKit
 import BeamCore
-
-class FullScreenWKWebView: WKWebView {
-//    override var safeAreaInsets: NSEdgeInsets {
-//        return NSEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
-//    }
-
-    override init(frame: CGRect, configuration: WKWebViewConfiguration) {
-        super.init(frame: frame, configuration: configuration)
-        self.allowsBackForwardNavigationGestures = true
-        self.allowsLinkPreview = true
-        self.allowsMagnification = true
-    }
-
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
-    }
-
-    // Catching those event to avoid funk sound
-    override func keyDown(with event: NSEvent) {
-        if let key = event.specialKey {
-            if key == .leftArrow || key == .rightArrow {
-                return
-            }
-        }
-        super.keyDown(with: event)
-    }
-}
+import Promises
 
 // swiftlint:disable:next type_body_length
 class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, WKUIDelegate, Codable, WebPage, Scorable {
@@ -89,8 +55,10 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     private var isCurrent: Bool {
         self == state.browserTabsManager.currentTab
     }
-    lazy var passwordOverlayController: PasswordOverlayController
-            = PasswordOverlayController(webView: webView, passwordStore: MockPasswordStore.shared)
+
+    var passwordOverlayController: PasswordOverlayController?
+    var browsingScorer: BrowsingScorer?
+    var pointAndShoot: PointAndShoot?
 
     var state: BeamState!
     public private(set) var note: BeamNote
@@ -103,11 +71,6 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         set { element?.score = newValue }
     }
 
-    var loggingMessageHandler: LoggingMessageHandler?
-    var scorerMessageHandler: ScorerMessageHandler?
-    var passwordMessageHandler: PasswordMessageHandler?
-    var pointAndShootMessageHandler: PointAndShootMessageHandler?
-
     func setDestinationNote(_ note: BeamNote, rootElement: BeamElement? = nil) {
         self.note = note
         self.rootElement = rootElement ?? note
@@ -115,7 +78,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         state.destinationCardName = note.title
 
         if let elem = element {
-            // reparent the element that has alreay been created
+            // re-parent the element that has already been created
             self.rootElement.addChild(elem)
         } else {
             _ = addToNote()
@@ -131,19 +94,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
     private var scope = Set<AnyCancellable>()
 
-    class var webViewConfiguration: WKWebViewConfiguration {
-        let config = WKWebViewConfiguration()
-        config.applicationNameForUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_0) "
-                + "AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Safari/605.1.15"
-        config.preferences.javaScriptEnabled = true
-        config.preferences.javaScriptCanOpenWindowsAutomatically = false
-        config.preferences.tabFocusesLinks = true
-//        config.preferences.plugInsEnabled = true
-        config.preferences._setFullScreenEnabled(true)
-        config.preferences.isFraudulentWebsiteWarningEnabled = true
-        config.defaultWebpagePreferences.preferredContentMode = .desktop
-        return config
-    }
+    static var webViewConfiguration: BeamWebViewConfiguration = BrowserTabConfiguration()
 
     init(state: BeamState, originalQuery: String?, note: BeamNote, rootElement: BeamElement? = nil, id: UUID = UUID(),
          webView: WKWebView? = nil, createBullet: Bool = true) {
@@ -157,7 +108,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             self.webView = suppliedWebView
             backForwardList = suppliedWebView.backForwardList
         } else {
-            let web = FullScreenWKWebView(frame: NSRect(), configuration: Self.webViewConfiguration)
+            let web = BeamWebView(frame: NSRect(), configuration: Self.webViewConfiguration as! WKWebViewConfiguration)
             web.wantsLayer = true
             web.allowsMagnification = true
 
@@ -169,6 +120,15 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         browsingTree = BrowsingTree(originalQuery ?? webView?.url?.absoluteString)
 
         super.init(frame: .zero)
+
+        browsingScorer = BrowsingTreeScorer(browsingTree: browsingTree)
+        browsingScorer!.page = self
+        passwordOverlayController = PasswordOverlayController(passwordStore: MockPasswordStore.shared)
+        passwordOverlayController!.page = self
+        pointAndShoot = PointAndShoot(ui: PointAndShootUI(), scorer: browsingScorer!)
+        pointAndShoot!.page = self
+
+        (self.webView as! BeamWebView).page = self
 
         note.browsingSessions.append(browsingTree)
         setupObservers()
@@ -219,7 +179,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
     func postLoadSetup(state: BeamState) {
         self.state = state
-        let web = FullScreenWKWebView(frame: NSRect(), configuration: Self.webViewConfiguration)
+        let web = BeamWebView(frame: NSRect(), configuration: Self.webViewConfiguration as! WKWebViewConfiguration)
         web.wantsLayer = true
         web.allowsMagnification = true
 
@@ -357,84 +317,28 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
         webView.navigationDelegate = self
         webView.uiDelegate = self
-
-        initLogging()
-        let scorer = initScorer()
-        initPasswordManager()
-        initPointAndShoot(scorer: scorer)
-    }
-
-    private func initLogging() {
-        if loggingMessageHandler != nil {
-            loggingMessageHandler!.unregister(from: webView)
-        }
-        loggingMessageHandler = LoggingMessageHandler()
-        loggingMessageHandler!.register(to: webView, page: self)
-    }
-
-    private func initScorer() -> BrowsingScorer {
-        if scorerMessageHandler != nil {
-            scorerMessageHandler!.unregister(from: webView)
-        }
-        let scorer = BrowsingTreeScorer(browsingTree: browsingTree, page: self)
-        scorerMessageHandler = ScorerMessageHandler(browsingScorer: scorer)
-        scorerMessageHandler!.register(to: webView, page: self)
-        return scorer
-    }
-
-    private func initPasswordManager() {
-        if passwordMessageHandler != nil {
-            passwordMessageHandler!.destroy(for: webView)
-        }
-        passwordMessageHandler = PasswordMessageHandler(passwordOverlayController: passwordOverlayController)
-        passwordMessageHandler!.register(to: webView, page: self)
-    }
-
-    private func initPointAndShoot(scorer: BrowsingScorer) {
-        // Avoid instantiate if !pointAndShootEnabled
-        if pointAndShootMessageHandler != nil {
-            pointAndShootMessageHandler!.destroy(for: webView)
-        }
-        let webPositions: WebPositions = WebPositions()
-        let pointAndShoot = PointAndShoot(page: self, ui: PointAndShootUI(), scorer: scorer,
-                                          webPositions: webPositions)
-        pointAndShootMessageHandler = PointAndShootMessageHandler(page: self, webPositions: webPositions,
-                                                                  pointAndShoot: pointAndShoot)
-        pointAndShootMessageHandler!.register(to: webView)
     }
 
     func cancelObservers() {
         scope.removeAll()
         webView.navigationDelegate = nil
         webView.uiDelegate = nil
-
-        pointAndShootMessageHandler?.destroy(for: webView)
-        passwordMessageHandler?.destroy(for: webView)
-        loggingMessageHandler?.unregister(from: webView)
     }
 
-    private func obfuscate(parameterized: String) -> String {
-        parameterized.replacingOccurrences(of: "__ID__",
-                                           with: "beam" + id.uuidString.replacingOccurrences(of: "-", with: "_"))
-    }
-
-    func addJS(source: String, when: WKUserScriptInjectionTime) {
-        let parameterized = source.replacingOccurrences(of: "__ENABLED__", with: "true")
-        let obfuscated = obfuscate(parameterized: parameterized)
-        let script = WKUserScript(source: obfuscated, injectionTime: when, forMainFrameOnly: false)
-        webView.configuration.userContentController.addUserScript(script)
-    }
-
-    func executeJS(objectName: String, jsCode: String) {
-        let parameterized = "exports.__ID__\(objectName)." + jsCode
-        let obfuscatedCommand = obfuscate(parameterized: parameterized)
-        webView.evaluateJavaScript(obfuscatedCommand) { (result, error) in
-            if error == nil {
-                Logger.shared.logInfo("(\(obfuscatedCommand) succeeded: \(String(describing: result))",
-                                      category: .javascript)
-            } else {
-                Logger.shared.logError("(\(obfuscatedCommand) failed: \(String(describing: error))",
-                                       category: .javascript)
+    func executeJS(_ jsCode: String, objectName: String?) -> Promise<Any?> {
+        Promise<Any?> { [unowned self] fulfill, reject in
+            let parameterized = objectName != nil ? "exports.__ID__\(objectName!)." + jsCode : jsCode
+            let obfuscatedCommand = Self.webViewConfiguration.obfuscate(str: parameterized)
+            webView.evaluateJavaScript(obfuscatedCommand) { (result, error: Error?) in
+                if error == nil {
+                    Logger.shared.logInfo("(\(obfuscatedCommand) succeeded: \(String(describing: result))",
+                                          category: .javascript)
+                    fulfill(result)
+                } else {
+                    Logger.shared.logError("(\(obfuscatedCommand) failed: \(String(describing: error))",
+                                           category: .javascript)
+                    reject(error!)
+                }
             }
         }
     }
@@ -444,24 +348,15 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         return plainData?.base64EncodedString(options: [])
     }
 
-    func addCSS(source: String, when: WKUserScriptInjectionTime) {
-        let styleSrc = """
-                       var style = document.createElement('style');
-                       style.innerHTML = `\(source)`;
-                       document.head.appendChild(style);
-                       """
-        addJS(source: styleSrc, when: when)
-    }
-
     private var currentBackForwardItem: WKBackForwardListItem?
 
     private func handleBackForwardWebView(navigationAction: WKNavigationAction) {
         if navigationAction.navigationType == .backForward {
             let isBack = webView.backForwardList.backList
-                .filter {
-                    $0 == currentBackForwardItem
-                }
-                .count == 0
+                    .filter {
+                $0 == currentBackForwardItem
+            }
+                    .count == 0
 
             if isBack {
                 browsingTree.goBack()
@@ -469,7 +364,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                 browsingTree.goForward()
             }
         }
-        pointAndShootMessageHandler!.pointAndShoot.removeAll()
+        pointAndShoot?.removeAll()
         currentBackForwardItem = webView.backForwardList.currentItem
     }
 
@@ -477,7 +372,6 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction,
                  decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         element = nil
-        pointAndShootMessageHandler!.pointAndShoot.removeAll()
         decisionHandler(.allow)
     }
 
@@ -488,27 +382,26 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         handleBackForwardWebView(navigationAction: navigationAction)
         if let targetURL = navigationAction.request.url {
             if navigationAction.modifierFlags.contains(.command) {
-                // Create new tab
-                let newWebView = FullScreenWKWebView(frame: NSRect(), configuration: Self.webViewConfiguration)
-                newWebView.wantsLayer = true
-                newWebView.allowsMagnification = true
-
-                state.setup(webView: newWebView)
-                let newTab = BrowserTab(state: state, originalQuery: originalQuery, note: note,
-                                        rootElement: rootElement, webView: newWebView)
-                newTab.load(url: targetURL)
-                newTab.browsingTree.current.score.openIndex = navigationCount
-                navigationCount += 1
-                onNewTabCreated?(newTab)
+                createNewTab(targetURL, nil, setCurrent: false)
                 decisionHandler(.cancel, preferences)
-                browsingTree.openLinkInNewTab()
                 return
             }
-
             visitedURLs.insert(targetURL)
         }
-
         decisionHandler(.allow, preferences)
+    }
+
+    func createNewTab(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, setCurrent: Bool) -> BrowserTab {
+        let newWebView = BeamWebView(frame: NSRect(), configuration: configuration ?? Self.webViewConfiguration as! WKWebViewConfiguration)
+        newWebView.wantsLayer = true
+        newWebView.allowsMagnification = true
+
+        state.setup(webView: newWebView)
+        let newTab = state.createTab(withURL: targetURL, originalQuery: originalQuery, setCurrent: setCurrent, note: note, rootElement: rootElement, webView: newWebView)
+        newTab.browsingTree.current.score.openIndex = navigationCount
+        navigationCount += 1
+        browsingTree.openLinkInNewTab()
+        return newTab
     }
 
     var navigationCount: Int = 0
@@ -529,7 +422,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
         element = nil
-        Logger.shared.logError("didfail: \(error)", category: .javascript)
+        Logger.shared.logError("didFail: \(error)", category: .javascript)
     }
 
     func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
@@ -538,7 +431,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     }
 
     func cancelShoot() {
-        pointAndShootMessageHandler!.pointAndShoot.resetStatus()
+        pointAndShoot!.resetStatus()
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
@@ -576,15 +469,8 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     // WKUIDelegate
     func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration,
                  for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
-        let newWebView = FullScreenWKWebView(frame: NSRect(), configuration: configuration)
-        newWebView.wantsLayer = true
-        newWebView.allowsMagnification = true
-
-        state.setup(webView: newWebView)
-        let newTab = BrowserTab(state: state, originalQuery: originalQuery, note: note, rootElement: rootElement,
-                                webView: newWebView)
-        onNewTabCreated?(newTab)
-
+        guard let url = navigationAction.request.url else { return nil }
+        let newTab = createNewTab(url, configuration, setCurrent: true)
         return newTab.webView
     }
 

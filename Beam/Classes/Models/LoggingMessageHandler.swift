@@ -6,14 +6,15 @@ enum LogMessages: String, CaseIterable {
 }
 
 /**
- Handles messages sent from web page's javascript.
+ Handles logging messages sent from web page's javascript.
  */
-class LoggingMessageHandler: NSObject, WKScriptMessageHandler {
+class LoggingMessageHandler: BeamMessageHandler<LogMessages> {
 
-    func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-        let messageBody = message.body as? [String: AnyObject]
-        let messageKey = message.name
-        let messageName = messageKey // .components(separatedBy: "_beam_")[1]
+    init(page: BeamWebViewConfiguration) {
+        super.init(config: page, messages: LogMessages.self, jsFileName: "OverrideConsole", jsCodePosition: .atDocumentStart)
+    }
+
+    override func onMessage(messageName: String, messageBody: [String: AnyObject]?, from: WebPage) {
         switch messageName {
         case LogMessages.beam_logging.rawValue:
             guard let dict = messageBody,
@@ -35,21 +36,5 @@ class LoggingMessageHandler: NSObject, WKScriptMessageHandler {
         default:
             break
         }
-    }
-
-    func unregister(from webView: WKWebView) {
-        LogMessages.allCases.forEach {
-            webView.configuration.userContentController.removeScriptMessageHandler(forName: $0.rawValue)
-        }
-    }
-
-    func register(to webView: WKWebView, page: WebPage) {
-        LogMessages.allCases.forEach {
-            let handler = $0.rawValue
-            webView.configuration.userContentController.add(self, name: handler)
-            Logger.shared.logDebug("Added Script handler: \(handler)", category: .web)
-        }
-        let jsCode = loadFile(from: "OverrideConsole", fileType: "js")
-        page.addJS(source: jsCode, when: .atDocumentStart)
     }
 }
