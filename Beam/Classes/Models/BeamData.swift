@@ -27,6 +27,7 @@ public class BeamData: ObservableObject {
     @Published var lastChangedElement: BeamElement?
     @Published var showTabStats = false
     @Published var isFetching = false
+    @Published var newDay: Bool = false
     var noteAutoSaveService: NoteAutoSaveService
     var linkManager: LinkManager
 
@@ -72,6 +73,11 @@ public class BeamData: ObservableObject {
             guard let element = element else { return }
             try? self.indexer.append(element: element)
         }.store(in: &scope)
+
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(calendarDayDidChange(notification:)),
+                                               name: NSNotification.Name.NSCalendarDayChanged,
+                                               object: nil)
     }
 
     func saveData() {
@@ -90,6 +96,12 @@ public class BeamData: ObservableObject {
             try index.saveTo(Self.indexPath)
         } catch {
             Logger.shared.logError("Unable to save index to \(Self.indexPath)", category: .search)
+        }
+    }
+
+    @objc func calendarDayDidChange(notification: Notification) {
+        DispatchQueue.main.async {
+            self.newDay = true
         }
     }
 
@@ -127,6 +139,6 @@ public class BeamData: ObservableObject {
     func reloadJournal() {
         journal = []
         setupJournal()
+        if newDay { newDay.toggle() }
     }
-
 }

@@ -18,6 +18,7 @@ struct ModeView: View {
     var showOmnibarBorder: Bool {
         contentIsScrolled && [.note, .today].contains(state.mode)
     }
+
     var body: some View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
@@ -62,10 +63,8 @@ struct ModeView: View {
                             contentIsScrolled = false
                         }
                     case .today:
-                        JournalScrollView([.vertical],
+                        JournalScrollView(axes: [.vertical],
                                           showsIndicators: false,
-                                          data: state.data,
-                                          dataSource: state.data.journal,
                                           proxy: geometry) { scrollPoint in
                             contentIsScrolled = scrollPoint.y >
                                 JournalScrollView.firstNoteTopOffset(forProxy: geometry) + NoteView.topOffset
