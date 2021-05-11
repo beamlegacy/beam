@@ -1,10 +1,9 @@
 import Foundation
 import BeamCore
 
-class BrowsingTreeScorer: BrowsingScorer {
+class BrowsingTreeScorer: WebPageHolder, BrowsingScorer {
 
     let browsingTree: BrowsingTree
-    var page: WebPage?
 
     init(browsingTree: BrowsingTree) {
         self.browsingTree = browsingTree
@@ -15,9 +14,9 @@ class BrowsingTreeScorer: BrowsingScorer {
     func updateScore() {
         let score = browsingTree.current.score.score
 //      Logger.shared.logDebug("updated score[\(url!.absoluteString)] = \(s)", category: .general)
-        page!.score = score
+        page.score = score
         if score > 0.0 {    // Automatically add current page to note over a certain threshold
-            page!.addToNote(allowSearchResult: false) as? Scorable
+            page.addToNote(allowSearchResult: false) as? Scorable
         }
     }
 

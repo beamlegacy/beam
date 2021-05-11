@@ -45,7 +45,7 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
     }
 
     override func onMessage(messageName: String, messageBody: [String: AnyObject]?, from webPage: WebPage) {
-        let pointAndShoot = webPage.pointAndShoot!
+        let pointAndShoot = webPage.pointAndShoot
         let positions = pointAndShoot.webPositions
         switch messageName {
 
@@ -225,7 +225,7 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
               let location = jsMessage["location"] else {
             return nil
         }
-        let position = webPage.pointAndShoot!.webPositions.jsToPoint(jsPoint: location)
+        let position = webPage.pointAndShoot.webPositions.jsToPoint(jsPoint: location)
         return (position, html)
     }
 
@@ -233,13 +233,13 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
         guard let area = jsMessage["area"] else {
             return nil
         }
-        return webPage.pointAndShoot!.webPositions.jsToRect(jsArea: area)
+        return webPage.pointAndShoot.webPositions.jsToRect(jsArea: area)
     }
 
     func areasValue(of jsMessage: [String: AnyObject], from webPage: WebPage) -> [NSRect]? {
         guard let areas = jsMessage["areas"] as? [AnyObject] else {
             return nil
         }
-        return areas.map { webPage.pointAndShoot!.webPositions.jsToRect(jsArea: $0) }
+        return areas.map { webPage.pointAndShoot.webPositions.jsToRect(jsArea: $0) }
     }
 }
