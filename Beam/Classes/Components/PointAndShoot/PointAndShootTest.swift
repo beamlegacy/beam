@@ -35,10 +35,8 @@ class TestWebPage: WebPage {
     }
 
     func executeJS(_ jsCode: String, objectName: String?) -> Promise<Any?> {
-        events.append("executeJS \(objectName).\(jsCode)")
-        return Promise { fulfill, _reject in
-            fulfill(())
-        }
+        events.append("executeJS \(objectName ?? "").\(jsCode)")
+        return Promise(true)
     }
 
     func addToNote(allowSearchResult: Bool) -> BeamCore.BeamElement? {
@@ -47,7 +45,7 @@ class TestWebPage: WebPage {
     }
 
     func setDestinationNote(_ note: BeamCore.BeamNote, rootElement: BeamCore.BeamElement?) {
-        events.append("setDestinationNote \(note) \(rootElement)")
+        events.append("setDestinationNote \(note) \(String(describing: rootElement))")
     }
 
     func getNote(fromTitle: String) -> BeamCore.BeamNote? {
@@ -128,6 +126,7 @@ class PointAndShootTest: XCTestCase {
         XCTAssertEqual(testUI.events.count, 1)
     }
 
+    // swiftlint:disable:next function_body_length
     func testPointAndShootBlock() throws {
         let (pns, testUI) = testBed()
 

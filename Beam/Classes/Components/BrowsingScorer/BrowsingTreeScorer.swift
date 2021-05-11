@@ -16,7 +16,7 @@ class BrowsingTreeScorer: WebPageHolder, BrowsingScorer {
 //      Logger.shared.logDebug("updated score[\(url!.absoluteString)] = \(s)", category: .general)
         page.score = score
         if score > 0.0 {    // Automatically add current page to note over a certain threshold
-            page.addToNote(allowSearchResult: false) as? Scorable
+            _ = page.addToNote(allowSearchResult: false) as? Scorable
         }
     }
 

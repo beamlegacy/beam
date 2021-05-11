@@ -1215,7 +1215,7 @@ public extension CALayer {
 
     public override func viewWillMove(toWindow newWindow: NSWindow?) {
         guard let window = newWindow else {
-            self.resignFirstResponder()
+            _ = self.resignFirstResponder()
             return
         }
         window.acceptsMouseMovedEvents = true

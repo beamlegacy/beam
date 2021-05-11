@@ -163,7 +163,7 @@ struct AdvancedPreferencesView: View {
             Text(String(describing: networkEnabled)).frame(minWidth: 100)
         })
     }
-    
+
     private var PnsStatusButton: some View {
         Button(action: {
             Configuration.pnsStatus = !Configuration.pnsStatus

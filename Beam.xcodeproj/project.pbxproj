@@ -163,27 +163,6 @@
 		524CF6CE25F27609007312F0 /* KeychainStorable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524CF6CD25F27609007312F0 /* KeychainStorable.swift */; };
 		524CF6D725F28F97007312F0 /* EncryptionManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524CF6D625F28F97007312F0 /* EncryptionManagerTests.swift */; };
 		524CF6DB25F29119007312F0 /* SymmetricKey+Serialize.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524CF6DA25F29119007312F0 /* SymmetricKey+Serialize.swift */; };
-		52549E082631DA7300EED461 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = 9631C746251CE997009B40C4 /* SwiftSoup */; };
-		52549E092631DA7300EED461 /* FavIcon in Frameworks */ = {isa = PBXBuildFile; productRef = 96474E3E254D9ADB00A920B3 /* FavIcon */; };
-		52549E0A2631DA7300EED461 /* Preferences in Frameworks */ = {isa = PBXBuildFile; productRef = 524299AE25A47CA500F4DBF5 /* Preferences */; };
-		52549E0B2631DA7300EED461 /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = 527FB71925B9A97A00959146 /* Sentry */; };
-		52549E0C2631DA7300EED461 /* JWTDecode in Frameworks */ = {isa = PBXBuildFile; productRef = 527FB71E25B9A9B600959146 /* JWTDecode */; };
-		52549E0D2631DA7300EED461 /* Fakery in Frameworks */ = {isa = PBXBuildFile; productRef = 527FB72325B9AAA200959146 /* Fakery */; };
-		52549E0E2631DA7300EED461 /* PromiseKit in Frameworks */ = {isa = PBXBuildFile; productRef = 52BB698A25CD4E1E007A1173 /* PromiseKit */; };
-		52549E0F2631DA7300EED461 /* Promises in Frameworks */ = {isa = PBXBuildFile; productRef = 52E5297125CD980B00307858 /* Promises */; };
-		52549E102631DA7300EED461 /* PromisesTestHelpers in Frameworks */ = {isa = PBXBuildFile; productRef = 52E5297325CD980B00307858 /* PromisesTestHelpers */; };
-		52549E112631DA7300EED461 /* PMKFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 523E91CB25D17004001124E0 /* PMKFoundation */; };
-		52549E122631DA7300EED461 /* KeychainAccess in Frameworks */ = {isa = PBXBuildFile; productRef = 524CF6D225F276D1007312F0 /* KeychainAccess */; };
-		52549E132631DA7300EED461 /* Vinyl in Frameworks */ = {isa = PBXBuildFile; productRef = 521FEC992604F9B4009000F9 /* Vinyl */; };
-		52549E142631DA7300EED461 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 964FE5E02625D8AA00966E03 /* GRDB */; };
-		52549E152631DA7300EED461 /* CocoaLumberjackSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 96319D52261623BB00D1CF31 /* CocoaLumberjackSwift */; };
-		52549E162631DA7300EED461 /* Nimble in Frameworks */ = {isa = PBXBuildFile; productRef = 5239C11525C2C4AE009C51E1 /* Nimble */; };
-		52549E172631DA7300EED461 /* Quick in Frameworks */ = {isa = PBXBuildFile; productRef = 5239C12E25C2C4C6009C51E1 /* Quick */; };
-		52549E182631DA7300EED461 /* Quick in Frameworks */ = {isa = PBXBuildFile; productRef = A0A6F2A425D1B74200EFC4BE /* Quick */; };
-		52549E192631DA7300EED461 /* Nimble in Frameworks */ = {isa = PBXBuildFile; productRef = A0A6F2A625D1B74800EFC4BE /* Nimble */; };
-		52549E1A2631DA7300EED461 /* CocoaLumberjackSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 9639FAF42616614D00C85B95 /* CocoaLumberjackSwift */; };
-		52549E1B2631DA7300EED461 /* Quick in Frameworks */ = {isa = PBXBuildFile; productRef = A5CA5DFA2625C302004E9D3E /* Quick */; };
-		52549E1C2631DA7300EED461 /* Nimble in Frameworks */ = {isa = PBXBuildFile; productRef = A5CA5DFC2625C306004E9D3E /* Nimble */; };
 		525C233C25BAF8EF001B9625 /* libgit2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 525C233B25BAF8EF001B9625 /* libgit2.a */; };
 		525C235125BAFC6B001B9625 /* Merge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 525C235025BAFC6B001B9625 /* Merge.swift */; };
 		525C235825BAFCAA001B9625 /* MergeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 525C235725BAFCAA001B9625 /* MergeTests.swift */; };
@@ -365,27 +344,6 @@
 		A05B74782628701600A78A7C /* LinkButtonLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A05B74772628701600A78A7C /* LinkButtonLayer.swift */; };
 		A0689E6D25DE623D00B19CBB /* DeleteText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0689E6C25DE623D00B19CBB /* DeleteText.swift */; };
 		A0689E7125DE6B8700B19CBB /* CommandsTextTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0689E7025DE6B8700B19CBB /* CommandsTextTests.swift */; };
-		A07722BE26330C1D00823193 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = 9631C746251CE997009B40C4 /* SwiftSoup */; };
-		A07722BF26330C1D00823193 /* FavIcon in Frameworks */ = {isa = PBXBuildFile; productRef = 96474E3E254D9ADB00A920B3 /* FavIcon */; };
-		A07722C026330C1D00823193 /* Preferences in Frameworks */ = {isa = PBXBuildFile; productRef = 524299AE25A47CA500F4DBF5 /* Preferences */; };
-		A07722C126330C1D00823193 /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = 527FB71925B9A97A00959146 /* Sentry */; };
-		A07722C226330C1D00823193 /* JWTDecode in Frameworks */ = {isa = PBXBuildFile; productRef = 527FB71E25B9A9B600959146 /* JWTDecode */; };
-		A07722C326330C1D00823193 /* Fakery in Frameworks */ = {isa = PBXBuildFile; productRef = 527FB72325B9AAA200959146 /* Fakery */; };
-		A07722C426330C1D00823193 /* PromiseKit in Frameworks */ = {isa = PBXBuildFile; productRef = 52BB698A25CD4E1E007A1173 /* PromiseKit */; };
-		A07722C526330C1D00823193 /* Promises in Frameworks */ = {isa = PBXBuildFile; productRef = 52E5297125CD980B00307858 /* Promises */; };
-		A07722C626330C1D00823193 /* PromisesTestHelpers in Frameworks */ = {isa = PBXBuildFile; productRef = 52E5297325CD980B00307858 /* PromisesTestHelpers */; };
-		A07722C726330C1D00823193 /* PMKFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 523E91CB25D17004001124E0 /* PMKFoundation */; };
-		A07722C826330C1D00823193 /* KeychainAccess in Frameworks */ = {isa = PBXBuildFile; productRef = 524CF6D225F276D1007312F0 /* KeychainAccess */; };
-		A07722C926330C1D00823193 /* Vinyl in Frameworks */ = {isa = PBXBuildFile; productRef = 521FEC992604F9B4009000F9 /* Vinyl */; };
-		A07722CA26330C1D00823193 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 964FE5E02625D8AA00966E03 /* GRDB */; };
-		A07722CB26330C1D00823193 /* CocoaLumberjackSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 96319D52261623BB00D1CF31 /* CocoaLumberjackSwift */; };
-		A07722CC26330C1D00823193 /* Nimble in Frameworks */ = {isa = PBXBuildFile; productRef = 5239C11525C2C4AE009C51E1 /* Nimble */; };
-		A07722CD26330C1D00823193 /* Quick in Frameworks */ = {isa = PBXBuildFile; productRef = 5239C12E25C2C4C6009C51E1 /* Quick */; };
-		A07722CE26330C1D00823193 /* Quick in Frameworks */ = {isa = PBXBuildFile; productRef = A0A6F2A425D1B74200EFC4BE /* Quick */; };
-		A07722CF26330C1D00823193 /* Nimble in Frameworks */ = {isa = PBXBuildFile; productRef = A0A6F2A625D1B74800EFC4BE /* Nimble */; };
-		A07722D026330C1D00823193 /* CocoaLumberjackSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 9639FAF42616614D00C85B95 /* CocoaLumberjackSwift */; };
-		A07722D126330C1D00823193 /* Quick in Frameworks */ = {isa = PBXBuildFile; productRef = A5CA5DFA2625C302004E9D3E /* Quick */; };
-		A07722D226330C1D00823193 /* Nimble in Frameworks */ = {isa = PBXBuildFile; productRef = A5CA5DFC2625C306004E9D3E /* Nimble */; };
 		A08DE20D26160DC800F8ABB4 /* BeamTextEdit+CopyPaste.swift in Sources */ = {isa = PBXBuildFile; fileRef = A08DE20C26160DC800F8ABB4 /* BeamTextEdit+CopyPaste.swift */; };
 		A0AA693325C41C9B0038F9A3 /* MouseHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0AA693225C41C9B0038F9A3 /* MouseHandler.swift */; };
 		A0C0C2A725E5109F00BE34F0 /* InsertElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0C0C2A625E5109F00BE34F0 /* InsertElement.swift */; };
@@ -472,15 +430,12 @@
 		BAA671B36B54CF95A2D162CB /* BrowserTabConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67F4FA344471FF8691E1A /* BrowserTabConfiguration.swift */; };
 		BAA671B407D2F6AD8F8704A3 /* ShootFrameSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA671DD680C70E02FD3ED32 /* ShootFrameSelectionView.swift */; };
 		BAA671BC1FD82D27BA44112E /* package-lock.json in Resources */ = {isa = PBXBuildFile; fileRef = BAA67895F15325CD8242458B /* package-lock.json */; };
-		BAA6723758FE3375749400F4 /* Scorer.js in Sources */ = {isa = PBXBuildFile; fileRef = BAA6705B2A0906FB4C068502 /* Scorer.js */; };
 		BAA67259A3927FBE4C92280B /* BrowsingTreeScorer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA6777EB9326511BE7FD0DC /* BrowsingTreeScorer.swift */; };
 		BAA6727EF82F6230E9323768 /* PasswordProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67F4C6AB3946D6146DA71 /* PasswordProvider.swift */; };
-		BAA672CAA5FC59A47CDC498E /* PopupUI_web.js in Sources */ = {isa = PBXBuildFile; fileRef = BAA679D78927DFBF9EB1B0E5 /* PopupUI_web.js */; };
 		BAA672E9AF7741DB2798866B /* BeamNode.test.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA674383059F4C483992235 /* BeamNode.test.ts */; };
 		BAA67380A92BBC1FB039AA3F /* WebEventsUI.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA67032568FA8B5DDE5841B /* WebEventsUI.ts */; };
 		BAA67473B64126D0D6C05B40 /* BeamWindowMock.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA67641C3624DA503CB21CF /* BeamWindowMock.ts */; };
 		BAA6750B78E3812C7DA5DF7C /* tsconfig.json in Resources */ = {isa = PBXBuildFile; fileRef = BAA6738E9DD9D41F95BB1602 /* tsconfig.json */; };
-		BAA6752DE7059916C591BC01 /* jest.config.js in Sources */ = {isa = PBXBuildFile; fileRef = BAA670DDAA16ED17F69AA6C4 /* jest.config.js */; };
 		BAA675A0EEE5F4636AECCE5D /* ShootCardPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA670FA9720D0BD2011EC10 /* ShootCardPicker.swift */; };
 		BAA675AE9C103046AC022CBA /* .sassrc in Resources */ = {isa = PBXBuildFile; fileRef = BAA679E2DF3556E0E444844D /* .sassrc */; };
 		BAA675F08AFBE3FA1F741F76 /* TextSelectorUI_mock.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA67EF8F26A26B69B6690AA /* TextSelectorUI_mock.ts */; };
@@ -502,7 +457,6 @@
 		BAA67A80187509C17C3BE040 /* EventsMock.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA67218A94BBEE8A4B055AD /* EventsMock.ts */; };
 		BAA67AA1FFC6C586C8811D22 /* NativeMock.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA672ED83D75722F6988D7B /* NativeMock.ts */; };
 		BAA67AB77852A4EE310BF552 /* ShootFrameFusionRect.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA674C683DA5DEC733F4746 /* ShootFrameFusionRect.swift */; };
-		BAA67ABB1161A5AF2C2BD195 /* babel.config.js in Sources */ = {isa = PBXBuildFile; fileRef = BAA67A87B25E7862DF988584 /* babel.config.js */; };
 		BAA67AEDAE0EACFDFC1F4E28 /* ShootCardConfirmationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67F51F639D48AD4ABAACB /* ShootCardConfirmationView.swift */; };
 		BAA67AF4FC4809A4B37353AD /* ScorerMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA671BF2E38E5B7F5764244 /* ScorerMessageHandler.swift */; };
 		BAA67AFAB13DE4A1378E312B /* PointFrame.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA6779A8E69417A47D041B5 /* PointFrame.swift */; };
@@ -511,16 +465,13 @@
 		BAA67B681D12191FE57E7807 /* PopupUI_web.scss in Resources */ = {isa = PBXBuildFile; fileRef = BAA678F0976FD26A8BF9B2CA /* PopupUI_web.scss */; };
 		BAA67C4B9FEFA984D58B802F /* PointAndShootMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67B138DFC6DBC31D184E0 /* PointAndShootMessageHandler.swift */; };
 		BAA67C5AEE52409E39DB25C8 /* BeamWebViewConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67765B4D27F2D4F2B8562 /* BeamWebViewConfiguration.swift */; };
-		BAA67C99E868459D5F7DB070 /* PasswordManager.js in Sources */ = {isa = PBXBuildFile; fileRef = BAA67AD6C73B8B9546778E72 /* PasswordManager.js */; };
 		BAA67C9D1849C8B7A045A51F /* PointAndShootTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA670D8E6A58A6836DA2794 /* PointAndShootTest.swift */; };
 		BAA67CB7B8DE8FC709C996B3 /* PasswordManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA678E2B362F5D8A1A801D4 /* PasswordManager.swift */; };
 		BAA67CE03D8FFB795346CD06 /* WebPositions.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67DD5764226E47DFA6F9E /* WebPositions.swift */; };
-		BAA67CF219621E63E9FD54CD /* BeamWindowDecorator.js in Sources */ = {isa = PBXBuildFile; fileRef = BAA6744080689FD1BE1789B1 /* BeamWindowDecorator.js */; };
 		BAA67D3C5D44656448093D73 /* LoggingMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67CDE485E5E7774A978D2 /* LoggingMessageHandler.swift */; };
 		BAA67DC79E1BCAF3869F3DBB /* build_js.sh in Resources */ = {isa = PBXBuildFile; fileRef = BAA6740CED2A340CD3002907 /* build_js.sh */; };
 		BAA67DDD4452566DFF99171E /* PasswordOverlayController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA670958C9BAC6322CDA80A /* PasswordOverlayController.swift */; };
 		BAA67E2CEDBE8BF2696AB646 /* BeamWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA670D131DF7CAE7FA6664E /* BeamWebView.swift */; };
-		BAA67EB10D1FC8746CAFF3B5 /* index_prod.js in Sources */ = {isa = PBXBuildFile; fileRef = BAA6756C6F2D22423B668BAF /* index_prod.js */; };
 		BAA67EC2B781F8A78CD5A6B0 /* Beam.scss in Resources */ = {isa = PBXBuildFile; fileRef = BAA67EA80CD97EDF95F98D66 /* Beam.scss */; };
 		BAA67F19308A38C387C47D6E /* PointAndShootUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA675190ACFCE6361AC531B /* PointAndShootUI.swift */; };
 		BAA67F44FDFA2FFBC5FE8245 /* .parcelrc in Resources */ = {isa = PBXBuildFile; fileRef = BAA67382F8DB4EC0FF65F11F /* .parcelrc */; };
@@ -2870,21 +2821,21 @@
 			);
 			mainGroup = 965A781C2514F147009980D4;
 			packageReferences = (
-				9631C745251CE997009B40C4 /* XCRemoteSwiftPackageReference "SwiftSoup.git" */,
-				96474E3D254D9ADB00A920B3 /* XCRemoteSwiftPackageReference "FavIcon.git" */,
+				9631C745251CE997009B40C4 /* XCRemoteSwiftPackageReference "SwiftSoup" */,
+				96474E3D254D9ADB00A920B3 /* XCRemoteSwiftPackageReference "FavIcon" */,
 				524299AD25A47CA500F4DBF5 /* XCRemoteSwiftPackageReference "Preferences" */,
-				527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack.git" */,
-				527FB71825B9A97A00959146 /* XCRemoteSwiftPackageReference "sentry-cocoa.git" */,
-				527FB71D25B9A9B600959146 /* XCRemoteSwiftPackageReference "JWTDecode.swift.git" */,
+				527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */,
+				527FB71825B9A97A00959146 /* XCRemoteSwiftPackageReference "sentry-cocoa" */,
+				527FB71D25B9A9B600959146 /* XCRemoteSwiftPackageReference "JWTDecode.swift" */,
 				527FB72225B9AAA200959146 /* XCRemoteSwiftPackageReference "Fakery" */,
-				5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble.git" */,
-				5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick.git" */,
+				5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */,
+				5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick" */,
 				52BB698925CD4E1E007A1173 /* XCRemoteSwiftPackageReference "PromiseKit" */,
-				52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises.git" */,
-				523E91CA25D17004001124E0 /* XCRemoteSwiftPackageReference "Foundation.git" */,
+				52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises" */,
+				523E91CA25D17004001124E0 /* XCRemoteSwiftPackageReference "Foundation" */,
 				524CF6D125F276D1007312F0 /* XCRemoteSwiftPackageReference "KeychainAccess" */,
 				521FEC982604F9B4009000F9 /* XCRemoteSwiftPackageReference "Vinyl" */,
-				964FE5DF2625D8AA00966E03 /* XCRemoteSwiftPackageReference "GRDB.swift.git" */,
+				964FE5DF2625D8AA00966E03 /* XCRemoteSwiftPackageReference "GRDB.swift" */,
 			);
 			productRefGroup = 965A78262514F147009980D4 /* Products */;
 			projectDirPath = "";
@@ -3596,17 +3547,11 @@
 				BAA67C4B9FEFA984D58B802F /* PointAndShootMessageHandler.swift in Sources */,
 				BAA67F19308A38C387C47D6E /* PointAndShootUI.swift in Sources */,
 				BAA677E962485A7EDFAF72AC /* PointAndShoot.swift in Sources */,
-				BAA67EB10D1FC8746CAFF3B5 /* index_prod.js in Sources */,
-				BAA67ABB1161A5AF2C2BD195 /* babel.config.js in Sources */,
-				BAA6752DE7059916C591BC01 /* jest.config.js in Sources */,
-				BAA672CAA5FC59A47CDC498E /* PopupUI_web.js in Sources */,
 				BAA67DDD4452566DFF99171E /* PasswordOverlayController.swift in Sources */,
 				BAA6727EF82F6230E9323768 /* PasswordProvider.swift in Sources */,
 				BAA6703B2414F077ED3A09D8 /* PasswordMessageHandler.swift in Sources */,
 				BAA67CB7B8DE8FC709C996B3 /* PasswordManager.swift in Sources */,
-				BAA67C99E868459D5F7DB070 /* PasswordManager.js in Sources */,
 				BAA67A72C76AE25BF2FC60BD /* BrowsingScorer.swift in Sources */,
-				BAA6723758FE3375749400F4 /* Scorer.js in Sources */,
 				BAA67259A3927FBE4C92280B /* BrowsingTreeScorer.swift in Sources */,
 				BAA676F2C83EBA770CB34F36 /* Scorable.swift in Sources */,
 				BAA67AF4FC4809A4B37353AD /* ScorerMessageHandler.swift in Sources */,
@@ -3669,7 +3614,6 @@
 				5273C65C25DA835500B00EC3 /* UserSessionRequestTests.swift in Sources */,
 				96E4CEF9258D7E8200D6DE22 /* BeamTextTests.swift in Sources */,
 				BAA67C9D1849C8B7A045A51F /* PointAndShootTest.swift in Sources */,
-				BAA67CF219621E63E9FD54CD /* BeamWindowDecorator.js in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4451,7 +4395,7 @@
 				minimumVersion = 0.10.5;
 			};
 		};
-		5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble.git" */ = {
+		5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Quick/Nimble.git";
 			requirement = {
@@ -4459,7 +4403,7 @@
 				minimumVersion = 9.0.0;
 			};
 		};
-		5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick.git" */ = {
+		5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Quick/Quick.git";
 			requirement = {
@@ -4467,7 +4411,7 @@
 				minimumVersion = 3.0.0;
 			};
 		};
-		523E91CA25D17004001124E0 /* XCRemoteSwiftPackageReference "Foundation.git" */ = {
+		523E91CA25D17004001124E0 /* XCRemoteSwiftPackageReference "Foundation" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/PromiseKit/Foundation.git";
 			requirement = {
@@ -4491,7 +4435,7 @@
 				minimumVersion = 4.2.2;
 			};
 		};
-		527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack.git" */ = {
+		527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/CocoaLumberjack/CocoaLumberjack.git";
 			requirement = {
@@ -4499,7 +4443,7 @@
 				minimumVersion = 3.7.0;
 			};
 		};
-		527FB71825B9A97A00959146 /* XCRemoteSwiftPackageReference "sentry-cocoa.git" */ = {
+		527FB71825B9A97A00959146 /* XCRemoteSwiftPackageReference "sentry-cocoa" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/getsentry/sentry-cocoa.git";
 			requirement = {
@@ -4507,7 +4451,7 @@
 				minimumVersion = 6.1.3;
 			};
 		};
-		527FB71D25B9A9B600959146 /* XCRemoteSwiftPackageReference "JWTDecode.swift.git" */ = {
+		527FB71D25B9A9B600959146 /* XCRemoteSwiftPackageReference "JWTDecode.swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/auth0/JWTDecode.swift.git";
 			requirement = {
@@ -4531,7 +4475,7 @@
 				minimumVersion = 6.13.3;
 			};
 		};
-		52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises.git" */ = {
+		52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/google/promises.git";
 			requirement = {
@@ -4539,7 +4483,7 @@
 				minimumVersion = 1.2.12;
 			};
 		};
-		9631C745251CE997009B40C4 /* XCRemoteSwiftPackageReference "SwiftSoup.git" */ = {
+		9631C745251CE997009B40C4 /* XCRemoteSwiftPackageReference "SwiftSoup" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/scinfu/SwiftSoup.git";
 			requirement = {
@@ -4547,7 +4491,7 @@
 				minimumVersion = 2.3.2;
 			};
 		};
-		96474E3D254D9ADB00A920B3 /* XCRemoteSwiftPackageReference "FavIcon.git" */ = {
+		96474E3D254D9ADB00A920B3 /* XCRemoteSwiftPackageReference "FavIcon" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/leonbreedt/FavIcon.git";
 			requirement = {
@@ -4555,7 +4499,7 @@
 				minimumVersion = 3.1.0;
 			};
 		};
-		964FE5DF2625D8AA00966E03 /* XCRemoteSwiftPackageReference "GRDB.swift.git" */ = {
+		964FE5DF2625D8AA00966E03 /* XCRemoteSwiftPackageReference "GRDB.swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/groue/GRDB.swift.git";
 			requirement = {
@@ -4573,17 +4517,17 @@
 		};
 		5239C11525C2C4AE009C51E1 /* Nimble */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble.git" */;
+			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */;
 			productName = Nimble;
 		};
 		5239C12E25C2C4C6009C51E1 /* Quick */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick.git" */;
+			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick" */;
 			productName = Quick;
 		};
 		523E91CB25D17004001124E0 /* PMKFoundation */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 523E91CA25D17004001124E0 /* XCRemoteSwiftPackageReference "Foundation.git" */;
+			package = 523E91CA25D17004001124E0 /* XCRemoteSwiftPackageReference "Foundation" */;
 			productName = PMKFoundation;
 		};
 		524299AE25A47CA500F4DBF5 /* Preferences */ = {
@@ -4598,12 +4542,12 @@
 		};
 		527FB71925B9A97A00959146 /* Sentry */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 527FB71825B9A97A00959146 /* XCRemoteSwiftPackageReference "sentry-cocoa.git" */;
+			package = 527FB71825B9A97A00959146 /* XCRemoteSwiftPackageReference "sentry-cocoa" */;
 			productName = Sentry;
 		};
 		527FB71E25B9A9B600959146 /* JWTDecode */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 527FB71D25B9A9B600959146 /* XCRemoteSwiftPackageReference "JWTDecode.swift.git" */;
+			package = 527FB71D25B9A9B600959146 /* XCRemoteSwiftPackageReference "JWTDecode.swift" */;
 			productName = JWTDecode;
 		};
 		527FB72325B9AAA200959146 /* Fakery */ = {
@@ -4618,67 +4562,67 @@
 		};
 		52E5297125CD980B00307858 /* Promises */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises.git" */;
+			package = 52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises" */;
 			productName = Promises;
 		};
 		52E5297325CD980B00307858 /* PromisesTestHelpers */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises.git" */;
+			package = 52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises" */;
 			productName = PromisesTestHelpers;
 		};
 		96319D52261623BB00D1CF31 /* CocoaLumberjackSwift */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack.git" */;
+			package = 527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */;
 			productName = CocoaLumberjackSwift;
 		};
 		9631C746251CE997009B40C4 /* SwiftSoup */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 9631C745251CE997009B40C4 /* XCRemoteSwiftPackageReference "SwiftSoup.git" */;
+			package = 9631C745251CE997009B40C4 /* XCRemoteSwiftPackageReference "SwiftSoup" */;
 			productName = SwiftSoup;
 		};
 		9639FAF42616614D00C85B95 /* CocoaLumberjackSwift */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack.git" */;
+			package = 527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */;
 			productName = CocoaLumberjackSwift;
 		};
 		96474E3E254D9ADB00A920B3 /* FavIcon */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 96474E3D254D9ADB00A920B3 /* XCRemoteSwiftPackageReference "FavIcon.git" */;
+			package = 96474E3D254D9ADB00A920B3 /* XCRemoteSwiftPackageReference "FavIcon" */;
 			productName = FavIcon;
 		};
 		964FE5E02625D8AA00966E03 /* GRDB */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 964FE5DF2625D8AA00966E03 /* XCRemoteSwiftPackageReference "GRDB.swift.git" */;
+			package = 964FE5DF2625D8AA00966E03 /* XCRemoteSwiftPackageReference "GRDB.swift" */;
 			productName = GRDB;
 		};
 		A0A6F2A025D1B73400EFC4BE /* Quick */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick.git" */;
+			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick" */;
 			productName = Quick;
 		};
 		A0A6F2A225D1B73A00EFC4BE /* Nimble */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble.git" */;
+			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */;
 			productName = Nimble;
 		};
 		A0A6F2A425D1B74200EFC4BE /* Quick */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick.git" */;
+			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick" */;
 			productName = Quick;
 		};
 		A0A6F2A625D1B74800EFC4BE /* Nimble */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble.git" */;
+			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */;
 			productName = Nimble;
 		};
 		A5CA5DFA2625C302004E9D3E /* Quick */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick.git" */;
+			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick" */;
 			productName = Quick;
 		};
 		A5CA5DFC2625C306004E9D3E /* Nimble */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble.git" */;
+			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */;
 			productName = Nimble;
 		};
 /* End XCSwiftPackageProductDependency section */

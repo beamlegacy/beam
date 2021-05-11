@@ -34,7 +34,7 @@ class BeamMessageHandler<T: RawRepresentable & CaseIterable> : NSObject, WKScrip
             let cssCode = loadFile(from: cssFileName!, fileType: "css")
             config.addCSS(source: cssCode, when: .atDocumentEnd)
         }
-        var jsCode = "exports={};"  // Hack to avoid commonJS code generation bug
+        let jsCode = "exports={};"  // Hack to avoid commonJS code generation bug
                 + loadFile(from: jsFileName, fileType: "js")
         config.addJS(source: jsCode, when: jsCodePosition)
     }
@@ -45,20 +45,19 @@ class BeamMessageHandler<T: RawRepresentable & CaseIterable> : NSObject, WKScrip
         }
     }
 
-    func onMessage(messageName: String, messageBody: [String: AnyObject]?, from webPage: WebPage) {
+    func onMessage(messageName: String, messageBody: Any?, from webPage: WebPage) {
         fatalError("onMessage must be overridden in subclass")
     }
 
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-        guard let webView = message.webView as! BeamWebView? else {
-            Logger.shared.logError("WebView is not a Beam one", category: .web)
-            return
+        guard let webView = message.webView as? BeamWebView else {
+            fatalError("WebView is not a BeamWebview")
         }
-        let messageBody = message.body as? [String: AnyObject]
-        let messageKey = message.name
-        let webPage = webView.page as! WebPage
-        let messageName = messageKey // .components(separatedBy: "_beam_")[1]
-        onMessage(messageName: messageName, messageBody: messageBody, from: webPage)
+        guard let webPage = webView.page else {
+            fatalError("WebView has no associated page")
+        }
+
+        onMessage(messageName: message.name, messageBody: message.body, from: webPage)
     }
 
     func destroy(for webView: WKWebView) {

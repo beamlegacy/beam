@@ -5,6 +5,8 @@ import WebKit
 import BeamCore
 import Promises
 
+// swiftlint:disable file_length
+
 // swiftlint:disable:next type_body_length
 class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, WKUIDelegate, Codable, WebPage, Scorable {
 
@@ -126,7 +128,11 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             self.webView = suppliedWebView
             backForwardList = suppliedWebView.backForwardList
         } else {
-            let web = BeamWebView(frame: NSRect(), configuration: Self.webViewConfiguration as! WKWebViewConfiguration)
+            guard let configuration = Self.webViewConfiguration as? WKWebViewConfiguration else {
+                fatalError("Should not happen")
+            }
+
+            let web = BeamWebView(frame: NSRect(), configuration: configuration)
             web.wantsLayer = true
             web.allowsMagnification = true
 
@@ -139,7 +145,10 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
         super.init(frame: .zero)
 
-        (self.webView as! BeamWebView).page = self
+        guard let beamWebView = self.webView as? BeamWebView else {
+            fatalError("Should not happen")
+        }
+        beamWebView.page = self
 
         note.browsingSessions.append(browsingTree)
         setupObservers()
@@ -190,7 +199,10 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
     func postLoadSetup(state: BeamState) {
         self.state = state
-        let web = BeamWebView(frame: NSRect(), configuration: Self.webViewConfiguration as! WKWebViewConfiguration)
+        guard let configuration = Self.webViewConfiguration as? WKWebViewConfiguration else {
+            fatalError("Should not happen")
+        }
+        let web = BeamWebView(frame: NSRect(), configuration: configuration)
         web.wantsLayer = true
         web.allowsMagnification = true
 
@@ -403,7 +415,10 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     }
 
     func createNewTab(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, setCurrent: Bool) -> BrowserTab {
-        let newWebView = BeamWebView(frame: NSRect(), configuration: configuration ?? Self.webViewConfiguration as! WKWebViewConfiguration)
+        guard let configuration = configuration ?? Self.webViewConfiguration as? WKWebViewConfiguration else {
+            fatalError("Should not happen")
+        }
+        let newWebView = BeamWebView(frame: NSRect(), configuration: configuration)
         newWebView.wantsLayer = true
         newWebView.allowsMagnification = true
 

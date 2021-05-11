@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol BeamNSTableViewDelegate: class {
+protocol BeamNSTableViewDelegate: AnyObject {
     func tableView(_ tableView: BeamNSTableView, mouseDownFor row: Int, column: Int, locationInWindow: NSPoint)
     func tableView(_ tableView: BeamNSTableView, rightMouseDownFor row: Int, column: Int, locationInWindow: NSPoint)
 }

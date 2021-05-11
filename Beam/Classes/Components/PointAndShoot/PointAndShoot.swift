@@ -68,7 +68,7 @@ class PointAndShoot: WebPageHolder {
     }
 
     private func executeJS(_ method: String) {
-        page.executeJS(method, objectName: "PointAndShoot")
+        _ = page.executeJS(method, objectName: "PointAndShoot")
     }
 
     var isPointing: Bool {
@@ -252,7 +252,7 @@ class PointAndShoot: WebPageHolder {
         groups.append(group)
         resetStatus()
         let noteJSON = try JSONEncoder().encode(noteInfo)
-        executeJS("assignNote('\(noteInfo)')")
+        executeJS("assignNote('\(noteJSON)')")
         showShootInfo(group: group)
     }
 
