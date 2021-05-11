@@ -15,6 +15,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     private var pixelRatio: Double = 1
 
     public func load(url: URL) {
+        isNavigatingFromSearchBar = true
         self.url = url
         navigationCount = 0
         webView.load(URLRequest(url: url))
@@ -59,6 +60,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     var passwordOverlayController: PasswordOverlayController?
     var browsingScorer: BrowsingScorer?
     var pointAndShoot: PointAndShoot?
+    private var isNavigatingFromSearchBar: Bool = false
 
     var state: BeamState!
     public private(set) var note: BeamNote
@@ -95,14 +97,15 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     private var scope = Set<AnyCancellable>()
 
     static var webViewConfiguration: BeamWebViewConfiguration = BrowserTabConfiguration()
+    var browsingTreeOrigin: BrowsingTreeOrigin?
 
-    init(state: BeamState, originalQuery: String?, note: BeamNote, rootElement: BeamElement? = nil, id: UUID = UUID(),
-         webView: WKWebView? = nil, createBullet: Bool = true) {
+    init(state: BeamState, browsingTreeOrigin: BrowsingTreeOrigin?, note: BeamNote, rootElement: BeamElement? = nil, id: UUID = UUID(),
+         webView: WKWebView? = nil) {
         self.state = state
         self.id = id
         self.note = note
         self.rootElement = rootElement ?? note
-        self.originalQuery = originalQuery
+        self.browsingTreeOrigin = browsingTreeOrigin
 
         if let suppliedWebView = webView {
             self.webView = suppliedWebView
@@ -117,7 +120,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             self.webView = web
         }
 
-        browsingTree = BrowsingTree(originalQuery ?? webView?.url?.absoluteString)
+        browsingTree = BrowsingTree(browsingTreeOrigin)
 
         super.init(frame: .zero)
 
@@ -382,7 +385,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         handleBackForwardWebView(navigationAction: navigationAction)
         if let targetURL = navigationAction.request.url {
             if navigationAction.modifierFlags.contains(.command) {
-                createNewTab(targetURL, nil, setCurrent: false)
+                _ = createNewTab(targetURL, nil, setCurrent: false)
                 decisionHandler(.cancel, preferences)
                 return
             }
@@ -397,7 +400,8 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         newWebView.allowsMagnification = true
 
         state.setup(webView: newWebView)
-        let newTab = state.createTab(withURL: targetURL, originalQuery: originalQuery, setCurrent: setCurrent, note: note, rootElement: rootElement, webView: newWebView)
+        let origin = BrowsingTreeOrigin.browsingNode(id: browsingTree.current.id)
+        let newTab = state.addNewTab(origin: origin, setCurrent: setCurrent, note: note, element: rootElement, url: targetURL, webView: newWebView)
         newTab.browsingTree.current.score.openIndex = navigationCount
         navigationCount += 1
         browsingTree.openLinkInNewTab()
@@ -437,7 +441,9 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         guard let url = webView.url else { return }
         _ = addToNote()
-        browsingTree.navigateTo(url: url.absoluteString, title: webView.title, startReading: isCurrent)
+        let isLinkActivation = !isNavigatingFromSearchBar
+        browsingTree.navigateTo(url: url.absoluteString, title: webView.title, startReading: isCurrent, isLinkActivation: isLinkActivation)
+        isNavigatingFromSearchBar = false
         Readability.read(webView) { [weak self] result in
             guard let self = self else { return }
             switch result {

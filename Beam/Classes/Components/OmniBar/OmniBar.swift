@@ -166,7 +166,8 @@ struct OmniBar_Previews: PreviewProvider {
         state.focusOmniBox = false
         focusedState.focusOmniBox = true
         focusedState.mode = .web
-        focusedState.browserTabsManager.currentTab = BrowserTab(state: focusedState, originalQuery: "query", note: BeamNote(title: "Note title"))
+        let origin = BrowsingTreeOrigin.searchBar(query: "query")
+        focusedState.browserTabsManager.currentTab = BrowserTab(state: focusedState, browsingTreeOrigin: origin, note: BeamNote(title: "Note title"))
         return Group {
             OmniBar().environmentObject(state)
             OmniBar().environmentObject(focusedState)

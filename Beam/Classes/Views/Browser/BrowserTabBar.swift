@@ -267,7 +267,7 @@ struct BrowserTabBar_Preview: PreviewProvider {
     static var state = BeamState()
 
     static func tab(_ title: String) -> BrowserTab {
-        let t = BrowserTab(state: state, originalQuery: "", note: BeamNote(title: "note"))
+        let t = BrowserTab(state: state, browsingTreeOrigin: nil, note: BeamNote(title: "note"))
         t.title = title
         return t
     }

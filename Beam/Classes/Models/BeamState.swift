@@ -185,30 +185,31 @@ import BeamCore
         currentTab?.load(url: url)
     }
 
-    func createTabFromNote(_ note: BeamNote, element: BeamElement, withURL url: URL) {
-        let tab = BrowserTab(state: self, originalQuery: note.title, note: note, rootElement: element)
-        browserTabsManager.addNewTab(tab, withURL: url)
-        mode = .web
-    }
-
-    func createTab(withURL url: URL, originalQuery: String?, setCurrent: Bool = true, note: BeamNote? = nil, rootElement: BeamElement? = nil, webView: WKWebView? = nil) -> BrowserTab {
-        let tab = BrowserTab(state: self, originalQuery: originalQuery, note: note ?? data.todaysNote, rootElement: rootElement, webView: webView)
+    func addNewTab(origin: BrowsingTreeOrigin?, setCurrent: Bool = true, note: BeamNote, element: BeamElement? = nil, url: URL? = nil, webView: WKWebView? = nil) -> BrowserTab {
+        let tab = BrowserTab(state: self, browsingTreeOrigin: origin, note: note, rootElement: element, webView: webView)
         browserTabsManager.addNewTab(tab, setCurrent: setCurrent, withURL: url)
         mode = .web
         return tab
     }
 
+    func createTab(withURL url: URL, originalQuery: String?, setCurrent: Bool = true, note: BeamNote? = nil, rootElement: BeamElement? = nil, webView: WKWebView? = nil) -> BrowserTab {
+        let origin = BrowsingTreeOrigin.searchBar(query: originalQuery ?? "<???>")
+        return addNewTab(origin: origin, setCurrent: setCurrent, note: note ?? data.todaysNote, element: rootElement, url: url, webView: webView)
+    }
+
+    func createTabFromNote(_ note: BeamNote, element: BeamElement, withURL url: URL) {
+        let origin = BrowsingTreeOrigin.linkFromNote(noteName: note.title)
+        _ = addNewTab(origin: origin, note: note, element: element, url: url)
+    }
+
     func createEmptyTab() {
-        let tab = BrowserTab(state: self, originalQuery: nil, note: data.todaysNote)
-        browserTabsManager.addNewTab(tab)
-        mode = .web
+        _ = addNewTab(origin: nil, note: data.todaysNote)
     }
 
     func createTabFromNode(_ node: TextNode, withURL url: URL) {
         guard let note = node.root?.note else { return }
-        let tab = BrowserTab(state: self, originalQuery: node.strippedText, note: note, rootElement: node.element, createBullet: false)
-        browserTabsManager.addNewTab(tab, withURL: url)
-        mode = .web
+        let origin = BrowsingTreeOrigin.searchFromNode(nodeText: node.strippedText)
+        addNewTab(origin: origin, note: note, element: node.element, url: url)
     }
 
     func createNoteForQuery(_ query: String) -> BeamNote {

@@ -8,6 +8,57 @@
 import Foundation
 import Combine
 
+public enum BrowsingTreeOrigin: Codable {
+    case searchBar(query: String)
+    case searchFromNode(nodeText: String)
+    case linkFromNote(noteName: String)
+    case browsingNode(id: UUID)
+
+    enum CodingKeys: CodingKey {
+           case type, value
+       }
+
+    public func encode(to encoder: Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+        switch self {
+        case .searchBar(let query):
+            try container.encode("searchBar", forKey: .type)
+            try container.encode(query, forKey: .value)
+        case .searchFromNode(let nodeText):
+            try container.encode("searchFromNode", forKey: .type)
+            try container.encode(nodeText, forKey: .value)
+        case .linkFromNote(let noteName):
+            try container.encode("linkFromNote", forKey: .type)
+            try container.encode(noteName, forKey: .value)
+        case .browsingNode(let id):
+            try container.encode("browsingNode", forKey: .type)
+            try container.encode(id, forKey: .value)
+        }
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let type = try container.decode(String.self, forKey: .type)
+        switch type {
+        case "searchBar":
+            self = .searchBar(query: try container.decode(String.self, forKey: .value))
+        case "searchFromNode":
+            self = .searchFromNode(nodeText: try container.decode(String.self, forKey: .value))
+        case "linkFromNote":
+            self = .linkFromNote(noteName: try container.decode(String.self, forKey: .value))
+        case "browsingNode":
+            self = .browsingNode(id: try container.decode(UUID.self, forKey: .value))
+        default:
+            throw DecodingError.dataCorrupted(
+                        DecodingError.Context(
+                            codingPath: container.codingPath,
+                            debugDescription: "Unabled to decode enum. Case \(type) does not exist."
+                        )
+            )
+        }
+    }
+}
+
 public enum ReadingEventType: String, Codable {
     case creation
     case startReading
@@ -20,6 +71,7 @@ public enum ReadingEventType: String, Codable {
     case switchToCard
     case switchToNewSearch
     case openLinkInNewTab
+    case searchBarNavigation
 }
 
 public struct ReadingEvent: Codable {
@@ -124,24 +176,32 @@ public class BrowsingNode: ObservableObject, Codable {
     }
 }
 
+private let defaultOrigin = BrowsingTreeOrigin.searchBar(query: "<???>")
+
 public class BrowsingTree: ObservableObject, Codable {
     @Published public private(set) var root: BrowsingNode!
     @Published public private(set) var current: BrowsingNode!
 
-    public init(_ originalQuery: String?) {
-        self.root = BrowsingNode(tree: self, parent: nil, url: originalQuery ?? "<???>", title: nil)
+    public let origin: BrowsingTreeOrigin
+
+    public init(_ origin: BrowsingTreeOrigin?) {
+        self.origin = origin ?? defaultOrigin
+        self.root = BrowsingNode(tree: self, parent: nil, url: "<???>", title: nil)
         self.current = root
+
     }
 
     // Codable:
     enum CodingKeys: String, CodingKey {
         case root
         case scores
+        case origin
     }
 
     public required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
+        origin = (try? container.decode(BrowsingTreeOrigin.self, forKey: .origin)) ?? defaultOrigin
         root = try container.decode(BrowsingNode.self, forKey: .root)
         current = root
 
@@ -162,13 +222,14 @@ public class BrowsingTree: ObservableObject, Codable {
 
         try container.encode(root, forKey: .root)
         try container.encode(scores, forKey: .scores)
+        try container.encode(origin, forKey: .origin)
     }
 
     /// Carefull this isn't a proper deepCopy
     /// BrowsingSessions contains BrowsingNode that are not properly cloned.
     /// This is used and needed for copy&paste atm
     public func deepCopy() -> BrowsingTree {
-        let browsingTree = BrowsingTree("<???>")
+        let browsingTree = BrowsingTree(nil)
         browsingTree.root = root
         browsingTree.current = root
         return browsingTree
@@ -202,10 +263,11 @@ public class BrowsingTree: ObservableObject, Codable {
         return current
     }
 
-    public func navigateTo(url link: String, title: String?, startReading: Bool) {
+    public func navigateTo(url link: String, title: String?, startReading: Bool, isLinkActivation: Bool) {
         guard current.link != LinkStore.getIdFor(link) else { return }
         Logger.shared.logInfo("navigateFrom \(currentLink) to \(link)", category: .web)
-        current.addEvent(.navigateToLink)
+        let event = isLinkActivation ? ReadingEventType.navigateToLink : ReadingEventType.searchBarNavigation
+        current.addEvent(event)
         let node = BrowsingNode(tree: self, parent: current, url: link, title: title)
         current.children.append(node)
         current = node
