@@ -19,7 +19,7 @@ extension BeamNote: BeamNoteDocument {
 
             return DocumentStruct(id: id,
                                   databaseId: databaseId ?? DatabaseManager.defaultDatabase.id,
-                                  title: title.lowercased(),
+                                  title: title,
                                   createdAt: creationDate,
                                   updatedAt: updateDate,
                                   data: data,
@@ -138,7 +138,7 @@ extension BeamNote: BeamNoteDocument {
         }
 
         // Is the note in the document store?
-        guard let doc = documentManager.loadDocumentByTitle(title: title.lowercased()) else {
+        guard let doc = documentManager.loadDocumentByTitle(title: title) else {
             return nil
         }
 

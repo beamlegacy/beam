@@ -61,7 +61,7 @@ public class BeamNote: BeamElement {
     }
 
     public init(title: String) {
-        self.title = title
+        self.title = Self.validTitle(fromTitle: title)
         super.init()
     }
 
@@ -151,8 +151,16 @@ public class BeamNote: BeamElement {
         }
     }
 
+    private static func cacheKeyFromTitle(_ title: String) -> String {
+        validTitle(fromTitle: title).lowercased()
+    }
+
+    private static func validTitle(fromTitle title: String) -> String {
+        title.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
     public static func getFetchedNote(_ title: String) -> BeamNote? {
-        return Self.fetchedNotes[title.lowercased()]?.ref
+        return Self.fetchedNotes[cacheKeyFromTitle(title)]?.ref
     }
 
     public func getFetchedNote(_ title: String) -> BeamNote? {
@@ -162,7 +170,7 @@ public class BeamNote: BeamElement {
     public var pendingSave: Int = 0
 
     public static func appendToFetchedNotes(_ note: BeamNote) {
-        fetchedNotes[note.title.lowercased()] = WeakReference<BeamNote>(note)
+        fetchedNotes[cacheKeyFromTitle(note.title)] = WeakReference<BeamNote>(note)
         fetchedNotesCancellables.removeValue(forKey: note.title)
 
         fetchedNotesCancellables[note.title] =
@@ -180,7 +188,7 @@ public class BeamNote: BeamElement {
             note.observeDocumentChange()
         }
 
-        fetchedNotes[note.title.lowercased()] = WeakReference(note)
+        fetchedNotes[cacheKeyFromTitle(note.title)] = WeakReference(note)
     }
 
     public static func clearCancellables() {

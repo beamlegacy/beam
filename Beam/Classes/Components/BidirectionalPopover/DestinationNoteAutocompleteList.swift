@@ -141,12 +141,8 @@ extension DestinationNoteAutocompleteList {
             allowCreateCard = allowCreateCard
                     && !items.contains(where: { $0.title.lowercased() == searchText.lowercased() })
             selectedIndex = 0
-            var autocompleteItems = items.map { doc -> AutocompleteResult in
-                var title = doc.title
-                if let note = BeamNote.getFetchedNote(title) {
-                    title = note.title
-                }
-                return AutocompleteResult(text: displayNameForCardName(title), source: .note, uuid: doc.id)
+            var autocompleteItems = items.map {
+                AutocompleteResult(text: displayNameForCardName($0.title), source: .note, uuid: $0.id)
             }
             if allowCreateCard && !searchText.isEmpty {
                 let createItem = AutocompleteResult(text: searchText, source: .createCard, information: "New Card")
