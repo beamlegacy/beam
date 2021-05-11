@@ -20,7 +20,7 @@ class PasswordMessageHandler: BeamMessageHandler<PasswordMessages> {
     }
 
     override func onMessage(messageName: String, messageBody: [String: AnyObject]?, from webPage: WebPage) {
-        let passwordOverlayController = webPage.passwordOverlayController!
+        let passwordOverlayController = webPage.passwordOverlayController
         switch messageName {
 
         case PasswordMessages.password_textInputFields.rawValue:

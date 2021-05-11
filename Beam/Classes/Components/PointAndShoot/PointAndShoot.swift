@@ -12,7 +12,7 @@ public struct NoteInfo: Encodable {
     let title: String
 }
 
-class PointAndShoot: WebPageRelated {
+class PointAndShoot: WebPageHolder {
 
     var webPositions: WebPositions = WebPositions()
 
@@ -68,7 +68,7 @@ class PointAndShoot: WebPageRelated {
     }
 
     private func executeJS(_ method: String) {
-        page!.executeJS(method, objectName: "PointAndShoot")
+        page.executeJS(method, objectName: "PointAndShoot")
     }
 
     var isPointing: Bool {
@@ -92,8 +92,8 @@ class PointAndShoot: WebPageRelated {
         init() {}
 
         func html() -> String {
-            return targets.reduce("", {
-                return $1.html.count > $0.count ? $1.html : $0
+            targets.reduce("", {
+                $1.html.count > $0.count ? $1.html : $0
             })
         }
     }
@@ -112,8 +112,6 @@ class PointAndShoot: WebPageRelated {
             return Target(area: newArea, mouseLocation: newLocation, html: html)
         }
     }
-
-    var page: WebPage?
 
     let ui: PointAndShootUI
     let scorer: BrowsingScorer
@@ -149,8 +147,8 @@ class PointAndShoot: WebPageRelated {
         for group in groups {
             let shootTargets = group.targets
             if shootTargets.count > 0 {
-                let xDelta = -page!.scrollX
-                let yDelta = -page!.scrollY
+                let xDelta = -page.scrollX
+                let yDelta = -page.scrollY
                 let shootUIGroup = ui.createGroup(noteInfo: group.noteInfo, edited: false)
                 for shootTarget in shootTargets {
                     let selectionUI = ui.createUI(shootTarget: shootTarget, xDelta: xDelta, yDelta: yDelta,
@@ -175,8 +173,8 @@ class PointAndShoot: WebPageRelated {
         ui.clear()
         let shootTargets = group.targets
         if shootTargets.count > 0 {
-            let xDelta = -page!.scrollX
-            let yDelta = -page!.scrollY
+            let xDelta = -page.scrollX
+            let yDelta = -page.scrollY
             let shootUIGroup = ui.createGroup(noteInfo: group.noteInfo, edited: true)
             for shootTarget in shootTargets {
                 let selectionUI = ui.createUI(shootTarget: shootTarget, xDelta: xDelta, yDelta: yDelta,
@@ -226,8 +224,8 @@ class PointAndShoot: WebPageRelated {
             Logger.shared.logInfo("shootGroups.count \(groups.count)", category: .pointAndShoot)
         }
         ui.isTextSelectionFinished = done
-        let pageScrollX = page!.scrollX
-        let pageScrollY = page!.scrollY
+        let pageScrollX = page.scrollX
+        let pageScrollY = page.scrollY
         for target in targets {
             let viewportArea = webPositions.viewportArea(area: target.area, origin: origin)
             let pageArea = NSRect(x: viewportArea.minX + pageScrollX, y: viewportArea.minY + pageScrollY,
@@ -289,25 +287,25 @@ class PointAndShoot: WebPageRelated {
      - Throws:
      */
     func addShootToNote(noteTitle: String, withNote additionalText: String? = nil) throws {
-        guard let url = page!.url,
-              let note = page!.getNote(fromTitle: noteTitle)
+        guard let url = page.url,
+              let note = page.getNote(fromTitle: noteTitle)
                 else {
             Logger.shared.logError("Could not find note with title \(noteTitle)", category: .pointAndShoot)
             return
         }
-        page!.setDestinationNote(note, rootElement: note)
+        page.setDestinationNote(note, rootElement: note)
         let html = currentGroup!.html()
         let text: BeamText = html2Text(url: url, html: html)
         scorer.addTextSelection()
 
         // now add a bullet point with the quoted text:
-        let title = page!.title
+        let title = page.title
         let urlString = url.absoluteString
         var quote = text
         quote.addAttributes([.emphasis], to: quote.wholeRange)
 
         DispatchQueue.main.async {
-            guard let current = self.page!.addToNote(allowSearchResult: true) else {
+            guard let current = self.page.addToNote(allowSearchResult: true) else {
                 Logger.shared.logError("Ignored current note add", category: .general)
                 return
             }
@@ -316,14 +314,14 @@ class PointAndShoot: WebPageRelated {
                 let quoteElement = BeamElement()
                 quoteElement.kind = .quote(1, title, urlString)
                 quoteElement.text = BeamText(text: additionalText, attributes: [])
-                quoteElement.query = self.page!.originalQuery
+                quoteElement.query = self.page.originalQuery
                 current.addChild(quoteElement)
                 quoteParent = quoteElement
             }
             let quoteE = BeamElement()
             quoteE.kind = .quote(1, title, urlString)
             quoteE.text = quote
-            quoteE.query = self.page!.originalQuery
+            quoteE.query = self.page.originalQuery
             quoteParent.addChild(quoteE)
         }
         let noteInfo = NoteInfo(id: note.id, title: note.title)

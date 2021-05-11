@@ -38,11 +38,27 @@ protocol WebPage: Scorable {
 
     func getNote(fromTitle: String) -> BeamNote?
 
-    var pointAndShoot: PointAndShoot? { get }
-    var browsingScorer: BrowsingScorer? { get }
-    var passwordOverlayController: PasswordOverlayController? { get }
+    var pointAndShoot: PointAndShoot { get }
+    var browsingScorer: BrowsingScorer { get }
+    var passwordOverlayController: PasswordOverlayController { get }
 }
 
 protocol WebPageRelated {
-    var page: WebPage? { get set }
+    var page: WebPage { get set }
+}
+
+class WebPageHolder: WebPageRelated {
+    private var _page: WebPage?
+
+    var page: WebPage {
+        get {
+            guard let definedPage = _page else {
+                fatalError("\(self) must have an associated WebPage")
+            }
+            return definedPage
+        }
+        set {
+            _page = newValue
+        }
+    }
 }

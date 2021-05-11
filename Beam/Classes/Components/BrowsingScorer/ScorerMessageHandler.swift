@@ -29,11 +29,11 @@ class ScorerMessageHandler: BeamMessageHandler<ScorerMessages> {
                 return
             }
             if width > 0, height > 0 {
-                let currentScore = webPage.browsingScorer!.currentScore
+                let currentScore = webPage.browsingScorer.currentScore
                 currentScore.scrollRatioX = max(Float(x / width), currentScore.scrollRatioX)
                 currentScore.scrollRatioY = max(Float(y / height), currentScore.scrollRatioY)
                 currentScore.area = Float(width * height)
-                webPage.browsingScorer!.updateScore()
+                webPage.browsingScorer.updateScore()
             }
             Logger.shared.logDebug("Scorer handled scroll: \(x), \(y)", category: .web)
 

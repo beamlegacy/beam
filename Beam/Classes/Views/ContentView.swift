@@ -40,8 +40,8 @@ struct ModeView: View {
                                         TabStats(score: score)
                                     }
 
-                                    PointFrame(pointAndShootUI: tab.pointAndShoot!.ui)
-                                    ShootFrame(pointAndShootUI: tab.pointAndShoot!.ui)
+                                    PointFrame(pointAndShootUI: tab.pointAndShoot.ui)
+                                    ShootFrame(pointAndShootUI: tab.pointAndShoot.ui)
                                 }.clipped()
                             }
                         }

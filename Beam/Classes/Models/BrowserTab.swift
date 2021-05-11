@@ -57,9 +57,24 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         self == state.browserTabsManager.currentTab
     }
 
-    var passwordOverlayController: PasswordOverlayController?
-    var browsingScorer: BrowsingScorer?
-    var pointAndShoot: PointAndShoot?
+    lazy var passwordOverlayController: PasswordOverlayController = {
+        let controller = PasswordOverlayController(passwordStore: MockPasswordStore.shared)
+        controller.page = self
+        return controller
+    }()
+
+    lazy var browsingScorer: BrowsingScorer = {
+        let scorer = BrowsingTreeScorer(browsingTree: browsingTree)
+        scorer.page = self
+        return scorer
+    }()
+
+    lazy var pointAndShoot: PointAndShoot = {
+        let pns = PointAndShoot(ui: PointAndShootUI(), scorer: browsingScorer)
+        pns.page = self
+        return pns
+    }()
+
     private var isNavigatingFromSearchBar: Bool = false
 
     var state: BeamState!
@@ -123,13 +138,6 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         browsingTree = BrowsingTree(browsingTreeOrigin)
 
         super.init(frame: .zero)
-
-        browsingScorer = BrowsingTreeScorer(browsingTree: browsingTree)
-        browsingScorer!.page = self
-        passwordOverlayController = PasswordOverlayController(passwordStore: MockPasswordStore.shared)
-        passwordOverlayController!.page = self
-        pointAndShoot = PointAndShoot(ui: PointAndShootUI(), scorer: browsingScorer!)
-        pointAndShoot!.page = self
 
         (self.webView as! BeamWebView).page = self
 
@@ -367,7 +375,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                 browsingTree.goForward()
             }
         }
-        pointAndShoot?.removeAll()
+        pointAndShoot.removeAll()
         currentBackForwardItem = webView.backForwardList.currentItem
     }
 
@@ -435,7 +443,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     }
 
     func cancelShoot() {
-        pointAndShoot!.resetStatus()
+        pointAndShoot.resetStatus()
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
