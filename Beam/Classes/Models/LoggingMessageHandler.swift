@@ -14,14 +14,15 @@ class LoggingMessageHandler: BeamMessageHandler<LogMessages> {
         super.init(config: page, messages: LogMessages.self, jsFileName: "OverrideConsole", jsCodePosition: .atDocumentStart)
     }
 
-    override func onMessage(messageName: String, messageBody: [String: AnyObject]?, from: WebPage) {
+    override func onMessage(messageName: String, messageBody: Any?, from: WebPage) {
+        let loggingBody = messageBody as? [String: AnyObject]
         switch messageName {
         case LogMessages.beam_logging.rawValue:
-            guard let dict = messageBody,
+            guard let dict = loggingBody,
                   let type = dict["type"] as? String,
                   let message = dict["message"] as? String
                     else {
-                Logger.shared.logError("Ignored log event: \(String(describing: messageBody))",
+                Logger.shared.logError("Ignored log event: \(String(describing: loggingBody))",
                                        category: .web)
                 return
             }

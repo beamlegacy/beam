@@ -81,8 +81,10 @@ function password_sendTextFields() {
   for (f = 0; f < window.frames.length; f++) {
     let frame = window.frames[f]
     try {
-      textFields = textFields.concat(beam_getTextFieldsInDocument(frame.contentDocument, frame.name))
-    } catch {
+      const frameTextFields = beam_getTextFieldsInDocument(frame.contentDocument, frame.name)
+      textFields = textFields.concat(frameTextFields)
+    } catch (e) {
+      console.error(e)
     }
   }
   window.webkit.messageHandlers.password_textInputFields.postMessage(JSON.stringify(textFields))

@@ -82,7 +82,7 @@ struct TextFormatterView_Previews: PreviewProvider {
 }
 
 // MARK: - NSView Container
-protocol TextFormatterViewDelegate: class {
+protocol TextFormatterViewDelegate: AnyObject {
     func textFormatterView(_ textFormatterView: TextFormatterView,
                            didSelectFormatterType type: FormatterType,
                            isActive: Bool)

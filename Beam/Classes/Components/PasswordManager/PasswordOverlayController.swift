@@ -44,7 +44,7 @@ class PasswordOverlayController: WebPageHolder {
     }
 
     func detectInputFields() {
-        page.executeJS("password_sendTextFields();", objectName: nil)
+        _ = page.executeJS("password_sendTextFields();", objectName: nil)
     }
 
     func updateInputFields(with jsResult: String) {

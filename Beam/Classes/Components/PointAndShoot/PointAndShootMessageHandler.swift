@@ -44,7 +44,9 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
         super.init(config: config, messages: PointAndShootMessages.self, jsFileName: "index_prod", cssFileName: "index_prod")
     }
 
-    override func onMessage(messageName: String, messageBody: [String: AnyObject]?, from webPage: WebPage) {
+    // swiftlint:disable:next function_body_length cyclomatic_complexity
+    override func onMessage(messageName: String, messageBody: Any?, from webPage: WebPage) {
+        let pnsBody = messageBody as? [String: AnyObject]
         let pointAndShoot = webPage.pointAndShoot
         let positions = pointAndShoot.webPositions
         switch messageName {
@@ -55,7 +57,7 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
 
         case PointAndShootMessages.pointAndShoot_point.rawValue:
             guard webPage.pointAndShootAllowed else { return }
-            guard let dict = messageBody,
+            guard let dict = pnsBody,
                   let origin = dict["origin"] as? String,
                   let area = areaValue(of: dict, from: webPage),
                   let (location, html) = targetValues(of: dict, from: webPage) else {
@@ -69,11 +71,11 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
 
         case PointAndShootMessages.pointAndShoot_shoot.rawValue:
             guard webPage.pointAndShootAllowed == true else { return }
-            guard let dict = messageBody,
+            guard let dict = pnsBody,
                   let area = areaValue(of: dict, from: webPage),
                   let (location, html) = targetValues(of: dict, from: webPage),
                   let origin = dict["origin"] as? String else {
-                Logger.shared.logError("Ignored shoot event: \(String(describing: messageBody))", category: .web)
+                Logger.shared.logError("Ignored shoot event: \(String(describing: pnsBody))", category: .web)
                 return
             }
             let target = PointAndShoot.Target(area: area, mouseLocation: location, html: html)
@@ -82,11 +84,10 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
 
         case PointAndShootMessages.pointAndShoot_shootConfirmation.rawValue:
             guard webPage.pointAndShootAllowed == true else { return }
-            guard let dict = messageBody,
+            guard let dict = pnsBody,
                   let area = areaValue(of: dict, from: webPage),
-                  // let (location, html) = pointAndShootTargetValues(from: dict),
-                  let _ = dict["origin"] as? String else {
-                Logger.shared.logError("Ignored shoot event: \(String(describing: messageBody))", category: .web)
+                  dict["origin"] as? String != nil else {
+                Logger.shared.logError("Ignored shoot event: \(String(describing: pnsBody))", category: .web)
                 return
             }
             // let target = PointAndShoot.Target(area: area, mouseLocation: location, html: html)
@@ -95,14 +96,14 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
 
         case PointAndShootMessages.pointAndShoot_textSelected.rawValue:
             guard webPage.pointAndShootAllowed == true else { return }
-            guard let dict = messageBody,
+            guard let dict = pnsBody,
                   dict["index"] as? Int != nil,
                   dict["text"] as? String != nil,
                   let origin = dict["origin"] as? String,
                   let html = dict["html"] as? String,
                   let areas = areasValue(of: dict, from: webPage),
                   !html.isEmpty else {
-                Logger.shared.logError("Ignored text selected event: \(String(describing: messageBody))",
+                Logger.shared.logError("Ignored text selected event: \(String(describing: pnsBody))",
                                        category: .web)
                 return
             }
@@ -114,7 +115,7 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
 
         case PointAndShootMessages.pointAndShoot_textSelection.rawValue:
             guard webPage.pointAndShootAllowed == true else { return }
-            guard let dict = messageBody,
+            guard let dict = pnsBody,
                   dict["index"] as? Int != nil,
                   dict["text"] as? String != nil,
                   let origin = dict["origin"] as? String,
@@ -122,7 +123,7 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
                   let areas = areasValue(of: dict, from: webPage),
                   !html.isEmpty
                     else {
-                Logger.shared.logError("Ignored text selection event: \(String(describing: messageBody))",
+                Logger.shared.logError("Ignored text selection event: \(String(describing: pnsBody))",
                                        category: .web)
                 return
             }
@@ -134,7 +135,7 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
             pointAndShoot.shoot(targets: targets, origin: origin, done: false)
 
         case PointAndShootMessages.pointAndShoot_pinch.rawValue:
-            guard let dict = messageBody,
+            guard let dict = pnsBody,
                   (dict["offsetLeft"] as? CGFloat) != nil,
                   (dict["pageLeft"] as? CGFloat) != nil,
                   (dict["offsetTop"] as? CGFloat) != nil,
@@ -148,15 +149,15 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
             positions.scale = scale
 
         case PointAndShootMessages.pointAndShoot_scroll.rawValue:
-            guard let dict = messageBody,
+            guard let dict = pnsBody,
                   let x = dict["x"] as? CGFloat,
                   let y = dict["y"] as? CGFloat,
-                  let width = dict["width"] as? CGFloat,
-                  let height = dict["height"] as? CGFloat,
-                  let _ = dict["origin"] as? String,
+                  dict["width"] as? CGFloat != nil,
+                  dict["height"] as? CGFloat != nil,
+                  dict["origin"] as? String != nil,
                   let scale = dict["scale"] as? CGFloat
                     else {
-                Logger.shared.logError("Ignored scroll event: \(String(describing: messageBody))", category: .web)
+                Logger.shared.logError("Ignored scroll event: \(String(describing: pnsBody))", category: .web)
                 return
             }
             positions.scale = scale
@@ -173,10 +174,10 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
             Logger.shared.logDebug("Web Scrolled: \(webPage.scrollX), \(webPage.scrollY)", category: .web)
 
         case PointAndShootMessages.pointAndShoot_frameBounds.rawValue:
-            guard let dict = messageBody,
+            guard let dict = pnsBody,
                   let jsFramesInfo = dict["frames"] as? NSArray
                     else {
-                Logger.shared.logError("Ignored beam_frameBounds: \(String(describing: messageBody))", category: .web)
+                Logger.shared.logError("Ignored beam_frameBounds: \(String(describing: pnsBody))", category: .web)
                 return
             }
             for jsFrameInfo in jsFramesInfo {
@@ -195,22 +196,22 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
             }
 
         case PointAndShootMessages.pointAndShoot_resize.rawValue:
-            guard let dict = messageBody,
-                  let width = dict["width"] as? CGFloat,
-                  let height = dict["height"] as? CGFloat,
-                  let origin = dict["origin"] as? String
+            guard let dict = pnsBody,
+                  dict["width"] as? CGFloat != nil,
+                  dict["height"] as? CGFloat != nil,
+                  dict["origin"] as? String != nil
                     else {
-                Logger.shared.logError("Ignored beam_resize: \(String(describing: messageBody))", category: .web)
+                Logger.shared.logError("Ignored beam_resize: \(String(describing: pnsBody))", category: .web)
                 return
             }
             // pointAndShoot.drawCurrentGroup()
 
         case PointAndShootMessages.pointAndShoot_setStatus.rawValue:
-            guard let dict = messageBody,
+            guard let dict = pnsBody,
                   let status = dict["status"] as? String,
-                  let _ = dict["origin"] as? String
+                  dict["origin"] as? String != nil
                     else {
-                Logger.shared.logError("Ignored beam_status: \(String(describing: messageBody))", category: .web)
+                Logger.shared.logError("Ignored beam_status: \(String(describing: pnsBody))", category: .web)
                 return
             }
             pointAndShoot.status = PointAndShootStatus(rawValue: status)!

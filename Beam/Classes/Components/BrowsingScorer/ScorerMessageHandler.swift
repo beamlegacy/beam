@@ -14,16 +14,16 @@ class ScorerMessageHandler: BeamMessageHandler<ScorerMessages> {
         super.init(config: page, messages: ScorerMessages.self, jsFileName: "Scorer")
     }
 
-    override func onMessage(messageName: String, messageBody: [String: AnyObject]?, from webPage: WebPage) {
+    override func onMessage(messageName: String, messageBody: Any?, from webPage: WebPage) {
+        let scorerBody = messageBody as? [String: AnyObject]
         switch messageName {
-
         case ScorerMessages.score_scroll.rawValue:
-            guard let dict = messageBody,
+            guard let dict = scorerBody,
                   let x = dict["x"] as? CGFloat,
                   let y = dict["y"] as? CGFloat,
                   let width = dict["width"] as? CGFloat,
                   let height = dict["height"] as? CGFloat,
-                  let scale = dict["scale"] as? CGFloat
+                  dict["scale"] as? CGFloat != nil
                     else {
                 Logger.shared.logError("Scorer ignored scroll event: \(String(describing: messageBody))", category: .web)
                 return

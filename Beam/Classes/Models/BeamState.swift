@@ -211,7 +211,7 @@ import BeamCore
     func createTabFromNode(_ node: TextNode, withURL url: URL) {
         guard let note = node.root?.note else { return }
         let origin = BrowsingTreeOrigin.searchFromNode(nodeText: node.strippedText)
-        addNewTab(origin: origin, note: note, element: node.element, url: url)
+        _ = addNewTab(origin: origin, note: note, element: node.element, url: url)
     }
 
     func createNoteForQuery(_ query: String) -> BeamNote {
@@ -260,13 +260,13 @@ import BeamCore
             if mode == .web, currentTab != nil {
                 navigateCurrentTab(toURL: url)
             } else {
-                createTab(withURL: url, originalQuery: result.text)
+                _ = createTab(withURL: url, originalQuery: result.text)
                 mode = .web
             }
 
         case .history, .url:
             let url = result.url?.urlWithScheme ?? urlFor(query: result.text)
-            createTab(withURL: url, originalQuery: "")
+            _ = createTab(withURL: url, originalQuery: "")
             mode = .web
 
         case .note:
@@ -297,7 +297,7 @@ import BeamCore
         if mode == .web, currentTab != nil {
             navigateCurrentTab(toURL: url)
         } else {
-            createTab(withURL: url, originalQuery: queryString)
+            _ = createTab(withURL: url, originalQuery: queryString)
         }
         autocompleteManager.cancelAutocomplete()
         autocompleteManager.resetQuery()
@@ -381,7 +381,7 @@ import BeamCore
 
     func generateTabs(_ number: Int = 100) {
         for _ in 0..<number {
-            createTab(withURL: URL(string: "https://beamapp.co")!, originalQuery: "beamapp.co")
+            _ = createTab(withURL: URL(string: "https://beamapp.co")!, originalQuery: "beamapp.co")
         }
     }
 

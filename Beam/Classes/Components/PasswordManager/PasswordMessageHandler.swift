@@ -19,32 +19,41 @@ class PasswordMessageHandler: BeamMessageHandler<PasswordMessages> {
         super.init(config: page, messages: PasswordMessages.self, jsFileName: "PasswordManager")
     }
 
-    override func onMessage(messageName: String, messageBody: [String: AnyObject]?, from webPage: WebPage) {
+    override func onMessage(messageName: String, messageBody: Any?, from webPage: WebPage) {
         let passwordOverlayController = webPage.passwordOverlayController
         switch messageName {
 
         case PasswordMessages.password_textInputFields.rawValue:
-            guard let jsonString = messageBody as? String else { break }
+            guard let jsonString = messageBody as? String else {
+                Logger.shared.logError("Ignoring message as body is not a String", category: .web)
+                return
+            }
             passwordOverlayController.updateInputFields(with: jsonString)
 
         case PasswordMessages.password_textInputFocusIn.rawValue:
-            guard let elementId = messageBody as? String else { break }
+            guard let elementId = messageBody as? String else {
+                Logger.shared.logError("Ignoring message as body is not a String", category: .web)
+                return
+            }
             passwordOverlayController.updateInputFocus(for: elementId, becomingActive: true)
 
         case PasswordMessages.password_textInputFocusOut.rawValue:
-            guard let elementId = messageBody as? String else { break }
+            guard let elementId = messageBody as? String else {
+                Logger.shared.logError("Ignoring message as body is not a String", category: .web)
+                return
+            }
             passwordOverlayController.updateInputFocus(for: elementId, becomingActive: false)
 
         case PasswordMessages.password_formSubmit.rawValue:
             passwordOverlayController.handleWebFormSubmit()
 
         case PasswordMessages.password_scroll.rawValue:
-            guard let dict = messageBody,
+            let passwordBody = messageBody as? [String: AnyObject]
+            guard let dict = passwordBody,
                   let x = dict["x"] as? CGFloat,
                   let y = dict["y"] as? CGFloat,
                   let width = dict["width"] as? CGFloat,
-                  let height = dict["height"] as? CGFloat,
-                  let scale = dict["scale"] as? CGFloat
+                  let height = dict["height"] as? CGFloat
                     else {
                 Logger.shared.logError("Ignored scroll event: \(String(describing: messageBody))", category: .web)
                 return
@@ -53,10 +62,10 @@ class PasswordMessageHandler: BeamMessageHandler<PasswordMessages> {
             Logger.shared.logDebug("Password controller handled scroll: \(x), \(y)", category: .web)
 
         case PasswordMessages.password_resize.rawValue:
-            guard let dict = messageBody,
+            let passwordBody = messageBody as? [String: AnyObject]
+            guard let dict = passwordBody,
                   let width = dict["width"] as? CGFloat,
-                  let height = dict["height"] as? CGFloat,
-                  let origin = dict["origin"] as? String
+                  let height = dict["height"] as? CGFloat
                     else {
                 Logger.shared.logError("Password controller ignored resize: \(String(describing: messageBody))", category: .web)
                 return

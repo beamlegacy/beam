@@ -104,7 +104,7 @@ struct HyperlinkEditorView_Previews: PreviewProvider {
 
 // MARK: - NSView Container
 
-protocol HyperlinkFormatterViewDelegate: class {
+protocol HyperlinkFormatterViewDelegate: AnyObject {
     func hyperlinkFormatterView(_ hyperlinkFormatterView: HyperlinkFormatterView,
                                 didFinishEditing newUrl: String?,
                                 newTitle: String?,

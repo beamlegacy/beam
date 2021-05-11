@@ -297,7 +297,7 @@ public class BrowsingTree: ObservableObject, Codable {
     public func switchToNewSearch() {
         current.addEvent(.switchToNewSearch)
     }
-    
+
     public func openLinkInNewTab() {
         current.addEvent(.openLinkInNewTab)
     }

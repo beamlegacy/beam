@@ -28,7 +28,7 @@ struct ShootCardPicker: View {
             allowFocus && isEditingCardName
         } set: { isEditingCardName = $0 }
     }
-    
+
     @State private var isEditingNote = false
     @State private var currentCardName: String?
     @State private var cardSearchField = ""
