@@ -21,6 +21,7 @@ import BeamCore
             if let note = currentNote {
                 recentsManager.currentNoteChanged(note)
             }
+            focusOmniBox = false
         }
     }
     private(set) lazy var recentsManager: RecentsManager = {
@@ -52,6 +53,7 @@ import BeamCore
         didSet {
             browserTabsManager.updateTabsForStateModeChange(mode, previousMode: oldValue)
             updateCanGoBackForward()
+            focusOmniBox = false
         }
     }
 
