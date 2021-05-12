@@ -1,6 +1,7 @@
 import SwiftUI
 import Preferences
 import BeamCore
+import OAuthSwift
 
 /**
 Function wrapping SwiftUI into `PreferencePane`, which is mimicking view controller's default construction syntax.
@@ -28,13 +29,14 @@ struct AccountsView: View {
     @State private var loggedIn: Bool = AccountManager().loggedIn
     @State private var errorMessage: Error!
     @State private var loading: Bool = false
+    @State private var identities: [IdentityType] = []
 
     private let accountManager = AccountManager()
     private let contentWidth: Double = 450.0
 
 	var body: some View {
         Preferences.Container(contentWidth: contentWidth) {
-            Preferences.Section(title: "Beam Account:") {
+            Preferences.Section(title: "Account") {
                 // TODO: loc
                 if #available(OSX 11.0, *) {
                     TextField("johnnyappleseed@apple.com", text: $email)
@@ -62,6 +64,9 @@ struct AccountsView: View {
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .frame(maxWidth: 200)
                 }
+            }
+
+            Preferences.Section(title: "Actions") {
                 HStack {
                     SignInButton
                     SignUpButton
@@ -71,7 +76,57 @@ struct AccountsView: View {
                     LogoutButton
                 }
             }
+
+            Preferences.Section(title: "Login with") {
+                GithubButton(buttonType: .signin, onClick: {
+                    loading = true
+                }, onConnect: {
+                    loggedIn = AccountManager().loggedIn
+                    fetchIdentities()
+                    loading = false
+                }, onFailure: {
+                    loading = false
+                }).disabled(loggedIn || loading)
+
+                GoogleButton(buttonType: .signin, onClick: {
+                    loading = true
+                }, onConnect: {
+                    loggedIn = AccountManager().loggedIn
+                    fetchIdentities()
+                    loading = false
+                }, onFailure: {
+                    loading = false
+                }).disabled(loggedIn || loading)
+            }
+
+            Preferences.Section(title: "Connected Providers") {
+                ForEach(identities, id: \.id) { identity in
+                    disconnectButton(identity)
+                }
+            }
+
+            Preferences.Section(title: "Connect Providers") {
+                GithubButton(buttonType: .connect, onClick: {
+                    loading = true
+                }, onConnect: {
+                    fetchIdentities()
+                    loading = false
+                }, onFailure: {
+                    loading = false
+                }).disabled(!loggedIn || loading || identities.compactMap { $0.provider }.contains("github"))
+
+                GoogleButton(buttonType: .connect, onClick: {
+                    loading = true
+                }, onConnect: {
+                    fetchIdentities()
+                    loading = false
+                }, onFailure: {
+                    loading = false
+                }).disabled(!loggedIn || loading || identities.compactMap { $0.provider }.contains("google"))
+            }
         }.onAppear(perform: {
+            self.fetchIdentities()
+
             // Fetch Safari credentials if not already logged in
             guard !self.loggedIn else { return }
 
@@ -83,6 +138,8 @@ struct AccountsView: View {
             }
              */
         })
+
+        ProgressIndicator(isAnimated: loading, controlSize: .small).padding()
 	}
 
     @State private var showingSignInAlert = false
@@ -99,6 +156,7 @@ struct AccountsView: View {
                     Logger.shared.logInfo("Could not signin: \(error.localizedDescription)", category: .network)
                 case .success:
                     Logger.shared.logInfo("signIn succeeded", category: .network)
+                    self.fetchIdentities()
                 }
             }
         }, label: {
@@ -125,6 +183,7 @@ struct AccountsView: View {
                     Logger.shared.logInfo("Could not sign up: \(error.localizedDescription)", category: .network)
                 case .success:
                     Logger.shared.logInfo("signUp succeeded", category: .network)
+                    self.fetchIdentities()
                 }
             }
         }, label: {
@@ -166,12 +225,37 @@ struct AccountsView: View {
 
     private var LogoutButton: some View {
         Button(action: {
+            self.identities = []
             AccountManager.logout()
             loggedIn = AccountManager().loggedIn
         }, label: {
             // TODO: loc
             Text("Logout").frame(minWidth: 100)
         }).disabled(!loggedIn)
+    }
+
+    private func disconnectButton(_ identity: IdentityType) -> some View {
+        guard let id = identity.id else { return AnyView(EmptyView()) }
+
+        return AnyView(Button(action: {
+            IdentityRequest().delete(id).then { _ in
+                self.fetchIdentities()
+            }
+        }, label: {
+            Text("Disconnect \(identity.provider ?? "-") (\(identity.email ?? "-"))")
+                .frame(minWidth: 100)
+        }).disabled(!loggedIn))
+    }
+
+    private func fetchIdentities() {
+        guard AuthenticationManager.shared.isAuthenticated else { return }
+
+        email = Persistence.Authentication.email ?? ""
+        password = Persistence.Authentication.password ?? ""
+
+        IdentityRequest().fetchAll().then { identities in
+            self.identities = identities
+        }
     }
 }
 

@@ -11,22 +11,24 @@ class DocumentsWindow: NSWindow, NSWindowDelegate {
         title = "All Documents"
 
         let documentsContentView = DocumentsContentView()
-        self.contentView = BeamHostingView(rootView: documentsContentView)
-        self.isMovableByWindowBackground = false
+        contentView = BeamHostingView(rootView: documentsContentView)
+        isMovableByWindowBackground = false
+        delegate = self
         observeCoredataDestroyedNotification()
     }
 
     deinit {
-        guard let delegate = NSApplication.shared.delegate as? AppDelegate else { return }
-
-        if delegate.documentsWindow == self {
-            delegate.documentsWindow = nil
-        }
+        AppDelegate.main.documentsWindow = nil
     }
 
-    private var cancellables = [AnyCancellable]()
+    func windowWillClose(_ notification: Notification) {
+        cancellables.removeAll()
+    }
+
+    private var cancellables: [AnyCancellable] = []
     private func observeCoredataDestroyedNotification() {
-        NotificationCenter.default.publisher(for: .coredataDestroyed, object: nil)
+        NotificationCenter.default
+            .publisher(for: .coredataDestroyed, object: nil)
             .sink { _ in
                 self.contentView = BeamHostingView(rootView: DocumentsContentView())
             }

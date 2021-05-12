@@ -1,0 +1,12 @@
+mutation DeleteIdentity($identity: IdentityMinimalInput!) {
+  deleteIdentity(input: {identity: $identity}) {
+    identity {
+      id
+    }
+    errors {
+      objectid
+      path
+      message
+    }
+  }
+}

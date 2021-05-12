@@ -99,8 +99,7 @@ class BeamWindow: NSWindow, NSDraggingDestination {
     }
 
     deinit {
-        guard let delegate = NSApplication.shared.delegate as? AppDelegate else { return }
-        delegate.windows.removeAll { window in
+        AppDelegate.main.windows.removeAll { window in
             window === self
         }
     }
@@ -173,8 +172,7 @@ class BeamWindow: NSWindow, NSDraggingDestination {
     // MARK: - IBAction
 
     @IBAction func newDocument(_ sender: Any?) {
-        guard let delegate = NSApplication.shared.delegate as? AppDelegate else { return }
-        delegate.createWindow(reloadState: false)
+        AppDelegate.main.createWindow(reloadState: false)
     }
 
     @IBAction func showPreviousTab(_ sender: Any?) {

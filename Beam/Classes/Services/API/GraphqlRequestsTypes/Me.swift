@@ -8,4 +8,5 @@ class Me: Decodable, Errorable {
     var documents: [DocumentAPIType]?
     var databases: [DatabaseAPIType]?
     var errors: [UserErrorData]?
+    var identities: [IdentityType]?
 }

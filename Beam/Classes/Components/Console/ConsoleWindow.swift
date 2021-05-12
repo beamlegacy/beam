@@ -16,10 +16,8 @@ class ConsoleWindow: NSWindow, NSWindowDelegate {
     }
 
     deinit {
-        guard let delegate = NSApplication.shared.delegate as? AppDelegate else { return }
-
-        if delegate.consoleWindow == self {
-            delegate.consoleWindow = nil
+        if AppDelegate.main.consoleWindow == self {
+            AppDelegate.main.consoleWindow = nil
         }
     }
 }

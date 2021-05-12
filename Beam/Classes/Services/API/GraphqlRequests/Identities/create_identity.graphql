@@ -1,0 +1,13 @@
+mutation CreateIdentity($identity: IdentityInput!) {
+  createIdentity(input: {identity: $identity}) {
+    identity {
+      uid
+      email
+    }
+    errors {
+      objectid
+      path
+      message
+    }
+  }
+}

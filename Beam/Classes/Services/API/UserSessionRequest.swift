@@ -6,6 +6,7 @@ enum UserSessionRequestError: Error, Equatable {
     case signInFailed
     case forgotPasswordFailed
 }
+
 class UserSessionRequest: APIRequest {
     override init() {
         super.init()
@@ -27,10 +28,21 @@ class UserSessionRequest: APIRequest {
         let password: String
     }
 
-    class SignIn: Decodable, Errorable {
+    struct SignInWithProviderParameters: Encodable {
+        let identity: IdentityType
+    }
+
+    struct SignIn: Decodable, Errorable {
         let accessToken: String?
         let refreshToken: String?
         let errors: [UserErrorData]?
+    }
+
+    struct SignInWithProvider: Decodable, Errorable {
+        let accessToken: String?
+        let refreshToken: String?
+        let errors: [UserErrorData]?
+        let me: Me?
     }
 
     struct ForgotPasswordParameters: Encodable {
@@ -47,11 +59,31 @@ class UserSessionRequest: APIRequest {
         let refreshToken: String
     }
 
-    class RenewCredentials: SignIn {}
+    struct RenewCredentials {
+        let accessToken: String?
+        let refreshToken: String?
+        let errors: [UserErrorData]?
+    }
 }
 
 // MARK: PromiseKit
 extension UserSessionRequest {
+    func signInWithProvider(provider: IdentityRequest.Provider,
+                            accessToken: String) -> PromiseKit.Promise<SignInWithProvider> {
+        let identity = IdentityType(id: nil, provider: provider.rawValue, accessToken: accessToken)
+        let variables = SignInWithProviderParameters(identity: identity)
+
+        let bodyParamsRequest = GraphqlParameters(fileName: "sign_in_with_provider", variables: variables)
+
+        let promise: PromiseKit.Promise<SignInWithProvider> = performRequest(bodyParamsRequest: bodyParamsRequest,
+                                                                             authenticatedCall: false)
+        return promise.get { signIn in
+            guard signIn.accessToken != nil else {
+                throw UserSessionRequestError.signInFailed
+            }
+        }
+    }
+
     func signIn(email: String, password: String) -> PromiseKit.Promise<SignIn> {
         let variables = SignInParameters(email: email,
                                          password: password)
@@ -97,6 +129,22 @@ extension UserSessionRequest {
 
 // MARK: Promises
 extension UserSessionRequest {
+    func signInWithProvider(provider: IdentityRequest.Provider,
+                            accessToken: String) -> Promises.Promise<SignInWithProvider> {
+        let identity = IdentityType(id: nil, provider: provider.rawValue, accessToken: accessToken)
+        let variables = SignInWithProviderParameters(identity: identity)
+
+        let bodyParamsRequest = GraphqlParameters(fileName: "sign_in_with_provider", variables: variables)
+
+        let promise: Promises.Promise<SignInWithProvider> = performRequest(bodyParamsRequest: bodyParamsRequest,
+                                                                           authenticatedCall: false)
+        return promise.then { signIn in
+            guard signIn.accessToken != nil else {
+                throw UserSessionRequestError.signInFailed
+            }
+        }
+    }
+
     func signIn(email: String, password: String) -> Promises.Promise<SignIn> {
         let variables = SignInParameters(email: email,
                                          password: password)
@@ -141,6 +189,29 @@ extension UserSessionRequest {
 
 // MARK: Foundation
 extension UserSessionRequest {
+    func signInWithProvider(provider: IdentityRequest.Provider,
+                            accessToken: String,
+                            _ completionHandler: @escaping (Swift.Result<SignInWithProvider, Error>) -> Void) throws -> URLSessionDataTask? {
+        let identity = IdentityType(id: nil, provider: provider.rawValue, accessToken: accessToken)
+        let variables = SignInWithProviderParameters(identity: identity)
+
+        let bodyParamsRequest = GraphqlParameters(fileName: "sign_in_with_provider", variables: variables)
+
+        return try performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<SignInWithProvider, Error>) in
+            switch result {
+            case .failure(let error):
+                completionHandler(.failure(error))
+            case .success(let signIn):
+                guard signIn.accessToken != nil else {
+                    completionHandler(.failure(UserSessionRequestError.signInFailed))
+                    return
+                }
+
+                completionHandler(.success(signIn))
+            }
+        }
+    }
+
     func signIn(email: String,
                 password: String,
                 _ completionHandler: @escaping (Swift.Result<SignIn, Error>) -> Void) throws -> URLSessionDataTask? {

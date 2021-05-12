@@ -1,27 +1,28 @@
 [
   {
     "request" : {
-      "method" : "GET",
-      "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=Beam"
+      "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=Beam",
+      "method" : "GET"
     },
     "response" : {
-      "status" : 200,
       "headers" : {
-        "Date" : "Thu, 29 Apr 2021 12:56:03 GMT",
-        "Content-Length" : "135",
-        "Content-Disposition" : "attachment; filename=\"f.txt\"",
-        "Cache-Control" : "no-cache, must-revalidate",
-        "Content-Encoding" : "gzip",
-        "x-frame-options" : "SAMEORIGIN",
-        "x-xss-protection" : "0",
-        "Server" : "gws",
-        "Pragma" : "no-cache",
         "Expires" : "-1",
+        "Set-Cookie" : "SIDCC=AJi4QfHizp0c3uTzBPFtgz3-m9GBVvMtXk8KKuTt5x0Gle13EobW7vHD20s-Ky8Rq5xXN1oOIw; expires=Wed, 11-May-2022 16:07:34 GMT; path=\/; domain=.google.com; priority=high, __Secure-3PSIDCC=AJi4QfG5XoqPFEgZGiauXKS69HEwIx4OSdDLSjnnqQx9XUofP5z3GsxHJijPi6urhaufioD2; expires=Wed, 11-May-2022 16:07:34 GMT; path=\/; domain=.google.com; Secure; HttpOnly; priority=high; SameSite=none",
         "Alt-Svc" : "h3-29=\":443\"; ma=2592000,h3-T051=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\"",
-        "Content-Type" : "text\/javascript; charset=ISO-8859-1"
+        "Cache-Control" : "no-cache, must-revalidate",
+        "x-xss-protection" : "0",
+        "Date" : "Tue, 11 May 2021 16:07:34 GMT",
+        "Content-Length" : "99",
+        "Pragma" : "no-cache",
+        "Server" : "gws",
+        "Content-Type" : "text\/javascript; charset=ISO-8859-1",
+        "Content-Disposition" : "attachment; filename=\"f.txt\"",
+        "x-frame-options" : "SAMEORIGIN",
+        "Content-Encoding" : "gzip"
       },
-      "body" : "[\"Beam\",[\"beam\",\"beamng drive\",\"beamer\",\"beamy\",\"beamng\",\"beams plus\",\"beam traduction\",\"beam me up\",\"beam agency\",\"beam stock\"],[],{\"google:suggestsubtypes\":[[433],[433],[433],[],[433],[],[],[],[],[]]}]",
-      "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=Beam"
+      "url" : "https:\/\/suggestqueries.google.com\/complete\/search?client=firefox&output=toolbar&q=Beam",
+      "body" : "[\"Beam\",[\"beam\",\"beamer\",\"beamy\",\"beamng drive\",\"beam suntory\",\"beam meaning\",\"beam traduction\",\"beam search\",\"beamery\",\"beamer latex\"]]",
+      "status" : 200
     }
   }
 ]

@@ -1181,7 +1181,6 @@ class DocumentManagerNetworkTests: QuickSpec {
                             beforeEach { Configuration.encryptionEnabled = true }
                             afterEach {
                                 Configuration.encryptionEnabled = false
-                                helper.deleteDocumentStruct(docStruct)
                             }
 
                             it("saves the document on the API") {
@@ -1318,7 +1317,6 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                             let remoteStruct = helper.fetchOnAPI(docStruct)
                             expect(remoteStruct?.title) == newTitle
-                            helper.deleteDocumentStruct(docStruct)
                         }
 
                         context("with encryption") {
