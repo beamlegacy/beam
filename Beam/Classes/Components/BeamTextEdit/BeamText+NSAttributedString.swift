@@ -15,6 +15,36 @@ extension NSAttributedString.Key {
 }
 
 extension BeamText {
+    init(_ attributedString: NSAttributedString) {
+        self.init()
+        append(attributedString.string)
+
+        if let ranges = text.urlRangesInside() {
+            ranges.forEach { range in
+                let r = range.lowerBound..<range.upperBound
+                let linkStr: String = self.extract(range: r).text
+                self.addAttributes([.link(linkStr)], to: r)
+            }
+        }
+        let boldRanges = attributedString.getRangesOfFont(for: .bold)
+        for range in boldRanges {
+            let r = range.lowerBound..<range.upperBound
+            self.addAttributes([.strong], to: r)
+        }
+        let emphasisRanges = attributedString.getRangesOfFont(for: .italic)
+        for range in emphasisRanges {
+            let r = range.lowerBound..<range.upperBound
+            self.addAttributes([.emphasis], to: r)
+        }
+
+        let linkRanges = attributedString.getLinks()
+        for linkRange in linkRanges {
+            let range = linkRange.value
+            let r = range.lowerBound..<range.upperBound
+            self.addAttributes([.link(linkRange.key)], to: r)
+        }
+    }
+
     func buildAttributedString(fontSize: CGFloat, cursorPosition: Int, elementKind: ElementKind, mouseInteraction: MouseInteraction? = nil) -> NSMutableAttributedString {
         let string = NSMutableAttributedString()
         for range in ranges {
@@ -61,6 +91,8 @@ extension BeamText {
             break
         case .heading:
             font = BeamFont.medium(size: fontSize).nsFont
+        case .image, .embed:
+            break
         }
 
         if strong {

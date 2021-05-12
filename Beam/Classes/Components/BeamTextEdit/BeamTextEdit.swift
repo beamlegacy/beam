@@ -17,6 +17,18 @@ public extension CALayer {
         guard let superlayer = superlayer else { return [] }
         return superlayer.superlayers + [superlayer]
     }
+
+    var deepContentsScale: CGFloat {
+        get {
+            contentsScale
+        }
+        set {
+            contentsScale = newValue
+            for l in sublayers ?? [] {
+                l.deepContentsScale = newValue
+            }
+        }
+    }
 }
 
 // swiftlint:disable:next type_body_length
@@ -34,6 +46,10 @@ public extension CALayer {
         }
     }
 
+    private var _isTodaysNote: Bool = false
+    var isTodaysNote: Bool {
+        _isTodaysNote
+    }
     var note: BeamElement! {
         didSet {
             DispatchQueue.main.async {
@@ -45,10 +61,16 @@ public extension CALayer {
 
     func updateRoot(with note: BeamElement) {
         guard note != rootNode?.element else { return }
+        _isTodaysNote = note.note?.isTodaysNote ?? false
+
         if let layers = layer?.sublayers {
             for l in layers where ![cardHeaderLayer, cardTimeLayer].contains(l) {
                 l.removeFromSuperlayer()
             }
+        }
+
+        for c in subviews {
+            c.removeFromSuperview()
         }
 
         //        guard mapping[note] == nil else { return }
@@ -125,6 +147,8 @@ public extension CALayer {
         initBlinking()
         updateRoot(with: root)
         setupSideLayer()
+
+        registerForDraggedTypes([.fileURL])
     }
 
     deinit {
@@ -337,14 +361,14 @@ public extension CALayer {
             titleUnderLine.backgroundColor = BeamColor.AlphaGray.cgColor
             titleUnderLine.isHidden = true
             cardTitleLayer.addSublayer(titleUnderLine)
+        }
 
-            if cardNote.isTodaysNote {
+        if isTodaysNote, journalMode {
                 var weatherIcon = getWeatherIcon()
                 weatherIcon = weatherIcon?.fill(color: BeamColor.Generic.text.nsColor)
                 cardTitleWeatherLayer.contents = weatherIcon?.cgImage
                 cardTitleWeatherLayer.contentsGravity = .resizeAspect
                 cardHeaderLayer.addSublayer(cardTitleWeatherLayer)
-            }
         }
 
         cardHeaderLayer.addSublayer(cardTitleLayer)
@@ -364,8 +388,7 @@ public extension CALayer {
         cardHeaderLayer.frame = CGRect(origin: CGPoint(x: cardHeaderPosX, y: cardHeaderPosY), size: NSSize(width: rect.width, height: cardTitleLayer.preferredFrameSize().height))
         cardTitleLayer.frame = CGRect(origin: CGPoint(x: 0, y: 0), size: NSSize(width: cardTitleLayer.preferredFrameSize().width, height: cardTitleLayer.preferredFrameSize().height))
 
-        guard let cardNote = note as? BeamNote else { return }
-        if cardNote.isTodaysNote {
+        if isTodaysNote {
             cardTitleWeatherLayer.frame = CGRect(origin: CGPoint(x: cardTitleLayer.preferredFrameSize().width + 11, y: cardTitleLayer.preferredFrameSize().height / 2 - 9), size: NSSize(width: 22.5, height: 18.5))
         }
     }
@@ -467,7 +490,7 @@ public extension CALayer {
     }
 
     public func insertText(string: String, replacementRange: Range<Int>?) {
-        guard let node = focusedWidget as? TextNode else { return }
+        guard let node = focusedWidget as? ElementNode else { return }
         guard !node.readOnly else { return }
         defer { lastInput = string }
         guard preDetectInput(string) else { return }
@@ -522,7 +545,7 @@ public extension CALayer {
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
     func pressEnter(_ option: Bool, _ command: Bool, _ shift: Bool) {
-        guard let node = focusedWidget as? TextNode, !node.readOnly else { return }
+        guard let node = focusedWidget as? ElementNode, !node.readOnly else { return }
 
         if option || shift {
             rootNode.insertNewline()
@@ -530,27 +553,36 @@ public extension CALayer {
             popover.selectItem()
             return
         } else {
-            if node.text.isEmpty && node.isEmpty && node.parent !== rootNode {
-                rootNode.decreaseIndentation()
-                return
-            }
             cmdManager.beginGroup(with: "Insert line")
             defer {
                 cmdManager.endGroup()
             }
 
+            guard let node = node as? TextNode else {
+                rootNode.insertElementNearNonTextElement()
+                return
+            }
+            if node.text.isEmpty && node.isEmpty && node.parent !== rootNode {
+                rootNode.decreaseIndentation()
+                return
+            }
+
             let insertAsChild = node.parent as? BreadCrumb != nil
-            rootNode.cmdManager.deleteText(in: node, for: rootNode.selectedTextRange)
+            if !rootNode.selectedTextRange.isEmpty {
+                rootNode.cmdManager.deleteText(in: node, for: rootNode.selectedTextRange)
+            }
 
             let range = rootNode.cursorPosition ..< node.text.count
             let str = node.text.extract(range: range)
-            cmdManager.deleteText(in: node, for: range)
+            if !range.isEmpty {
+                cmdManager.deleteText(in: node, for: range)
+            }
 
             let newElement = BeamElement(str)
             if insertAsChild {
                 cmdManager.insertElement(newElement, in: node, after: nil)
             } else {
-                guard let parent = node.parent as? TextNode else { return }
+                guard let parent = node.parent as? ElementNode else { return }
                 let children = node.element.children
 
                 cmdManager.insertElement(newElement, in: parent, after: node)
@@ -1049,7 +1081,7 @@ public extension CALayer {
 
     var scrollToCursorAtLayout = false
     public func setHotSpotToCursorPosition() {
-        guard focusedWidget as? TextNode != nil else { return }
+        guard focusedWidget as? ElementNode != nil else { return }
         setHotSpot(rectAt(caretIndex: rootNode.caretIndex).insetBy(dx: -30, dy: -30))
     }
 
@@ -1058,7 +1090,7 @@ public extension CALayer {
     }
 
     public func rectAt(caretIndex position: Int) -> NSRect {
-        guard let node = focusedWidget as? TextNode else { return NSRect() }
+        guard let node = focusedWidget as? ElementNode else { return NSRect() }
         let origin = node.offsetInDocument
         return node.rectAt(caretIndex: position).offsetBy(dx: origin.x, dy: origin.y)
     }
@@ -1104,8 +1136,8 @@ public extension CALayer {
         let eventPoint = convert(event.locationInWindow)
         let widgets = rootNode.getWidgetsBetween(startPos, eventPoint)
 
-        if let selection = rootNode?.state.nodeSelection, let focussedNode = focusedWidget as? TextNode {
-            var textNodes = widgets.compactMap { $0 as? TextNode }
+        if let selection = rootNode?.state.nodeSelection, let focussedNode = focusedWidget as? ElementNode {
+            var textNodes = widgets.compactMap { $0 as? ElementNode }
             if eventPoint.y < startPos.y {
                 textNodes = textNodes.reversed()
             }
@@ -1113,9 +1145,7 @@ public extension CALayer {
             selection.append(focussedNode)
             for textNode in textNodes {
                 if !selection.nodes.contains(textNode) {
-                    if type(of: focussedNode) == type(of: textNode) {
-                        selection.append(textNode)
-                    }
+                    selection.append(textNode)
                 }
             }
             for selectedNode in selection.nodes {
@@ -1301,12 +1331,22 @@ public extension CALayer {
         rootNode.dumpWidgetTree()
     }
 
+    func dumpSubLayers(_ layer: CALayer, _ level: Int) {
+        // swiftlint:disable print
+        let tabs = String.tabs(level)
+        for (i, l) in (layer.sublayers ?? []).enumerated() {
+            print("\(tabs)\(i) - '\(l.name ?? "unnamed")' - pos \(l.position) - bounds \(l.bounds) \(l.isHidden ? "[HIDDEN]" : "")")
+            dumpSubLayers(l, level + 1)
+        }
+        // swiftlint:enable print
+    }
+
     func dumpLayers() {
         // swiftlint:disable print
         print("================")
         print("Dumping editor \(layer?.sublayers?.count ?? 0) layers:")
-        for (i, l) in (layer?.sublayers ?? []).enumerated() {
-            print("\(i) - '\(l.name ?? "unnamed")' - pos \(l.position) - bounds \(l.bounds) \(l.isHidden ? "[HIDDEN]" : "")")
+        if let layer = layer {
+            dumpSubLayers(layer, 0)
         }
         print("================")
         // swiftlint:enable print
@@ -1325,7 +1365,7 @@ public extension CALayer {
     /// NSResponder:
     override public func moveLeft(_ sender: Any?) {
         if control && option && command {
-            guard let node = focusedWidget as? TextNode else { return }
+            guard let node = focusedWidget as? ElementNode else { return }
             node.fold()
             return
         }
@@ -1347,7 +1387,7 @@ public extension CALayer {
 
     override public func moveRight(_ sender: Any?) {
         if control && option && command {
-            guard let node = focusedWidget as? TextNode else { return }
+            guard let node = focusedWidget as? ElementNode else { return }
             node.unfold()
             return
         }
@@ -1580,7 +1620,9 @@ public extension CALayer {
         rootNode.deleteForward()
         updatePopover(with: .deleteForward)
 
-        guard let node = focusedWidget as? TextNode else { return }
+        guard let node = focusedWidget as? TextNode else {
+            return
+        }
         if node.text.isEmpty || !rootNode.textIsSelected { hideInlineFormatter() }
         detectFormatterType()
     }
@@ -1668,4 +1710,100 @@ public extension CALayer {
     */
 //    override public func quickLookPreviewItems(_ sender: Any?) {
 //    }
+
+    // Drag and drop:
+    var dragIndicator = CALayer()
+//    weak var lastDragNode: ElementNode?
+    @discardableResult private func updateDragIndicator(at point: CGPoint?) -> (ElementNode, Bool)? {
+        guard let point = point,
+              let node = rootNode.widgetAt(point: CGPoint(x: point.x, y: point.y - rootNode.frame.minY)) as? ElementNode
+        else {
+            dragIndicator.isHidden = true
+            return nil
+        }
+
+        if dragIndicator.superlayer == nil {
+            layer?.addSublayer(dragIndicator)
+        }
+        dragIndicator.backgroundColor = .black
+        dragIndicator.borderWidth = 0
+        dragIndicator.isHidden = false
+        if point.y < (node.offsetInDocument.y + node.contentsFrame.height / 2) {
+            dragIndicator.frame = CGRect(x: rootNode.frame.minX, y: node.offsetInDocument.y, width: rootNode.frame.width, height: 1)
+            return (node, false)
+        } else {
+            dragIndicator.frame = CGRect(x: rootNode.frame.minX, y: node.offsetInDocument.y + node.contentsFrame.maxY, width: rootNode.frame.width, height: 1)
+            return (node, true)
+        }
+    }
+
+    public override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
+        if NSImage.canInit(with: sender.draggingPasteboard) {
+//            self.layer?.backgroundColor = NSColor.blue.cgColor
+            updateDragIndicator(at: convert(sender.draggingLocation))
+            return .copy
+        } else {
+            return NSDragOperation()
+        }
+    }
+
+    public override func draggingUpdated(_ sender: NSDraggingInfo) -> NSDragOperation {
+        updateDragIndicator(at: convert(sender.draggingLocation, from: nil))
+        return .copy
+    }
+
+    public override func draggingExited(_ sender: NSDraggingInfo?) {
+//        self.layer?.backgroundColor = NSColor.white.cgColor
+        updateDragIndicator(at: nil)
+    }
+
+    public override func draggingEnded(_ sender: NSDraggingInfo) {
+//        self.layer?.backgroundColor = NSColor.white.cgColor
+        updateDragIndicator(at: nil)
+    }
+
+    public override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
+        defer {
+            updateDragIndicator(at: nil)
+        }
+        guard let (element, after) = updateDragIndicator(at: convert(sender.draggingLocation)) else {
+            return false
+        }
+
+        guard let files = sender.draggingPasteboard.readObjects(forClasses: [NSURL.self], options: nil)
+        else {
+            Logger.shared.logError("unable to get files from drag operation", category: .noteEditor)
+            return false
+        }
+
+        let newParent: ElementNode = after ? element : element.previousVisibleNode(ElementNode.self) ?? rootNode
+        let afterNode: ElementNode? = after ? nil : element.previousSibbling() as? ElementNode
+        for url in files.reversed() {
+            guard let url = url as? URL,
+                  let data = try? Data(contentsOf: url)
+            else { continue }
+            //Logger.shared.logInfo("File dropped: \(url) - \(data) - \(data.MD5)")
+
+            let uid = data.MD5
+            do {
+                try self.data?.fileDB.insert(name: url.lastPathComponent, uid: uid, data: data, type: "")
+            } catch let error {
+                Logger.shared.logError("Error while inserting file in database \(error)", category: .noteEditor)
+            }
+
+            guard let image = NSImage(contentsOf: url)
+            else {
+                Logger.shared.logError("Unable to load image from url \(url)", category: .noteEditor)
+                return false
+            }
+
+            // swiftlint:disable:next print
+            let newElement = BeamElement()
+            newElement.kind = .image(uid)
+            rootNode.cmdManager.insertElement(newElement, in: newParent, after: afterNode)
+            Logger.shared.logInfo("Added Image to note \(String(describing: rootNode.element.note)) with uid \(uid) from dropped file (\(image))", category: .noteEditor)
+        }
+
+        return true
+    }
 }

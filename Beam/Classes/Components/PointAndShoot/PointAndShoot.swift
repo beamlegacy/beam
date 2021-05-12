@@ -295,7 +295,14 @@ class PointAndShoot: WebPageHolder {
         }
         page.setDestinationNote(note, rootElement: note)
         let html = currentGroup!.html()
-        let text: BeamText = html2Text(url: url, html: html)
+        var text = BeamText()
+        var embed: String?
+        if let host = url.host,
+           ["www.youtube.com", "youtube.com"].contains(host),
+           html.hasPrefix("<video") {
+            embed = url.absoluteString
+        }
+        text = html2Text(url: url, html: html)
         scorer.addTextSelection()
 
         // now add a bullet point with the quoted text:
@@ -312,7 +319,11 @@ class PointAndShoot: WebPageHolder {
             var quoteParent = current
             if let additionalText = additionalText, !additionalText.isEmpty {
                 let quoteElement = BeamElement()
-                quoteElement.kind = .quote(1, title, urlString)
+                if let embed = embed {
+                    quoteElement.kind = .embed(embed)
+                } else {
+                    quoteElement.kind = .quote(1, title, urlString)
+                }
                 quoteElement.text = BeamText(text: additionalText, attributes: [])
                 quoteElement.query = self.page.originalQuery
                 current.addChild(quoteElement)

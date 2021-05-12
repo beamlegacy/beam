@@ -183,4 +183,16 @@ public class TextFrame {
 
         return f
     }
+
+    private var _layer: CALayer?
+    var layerTree: CALayer {
+        if let layer = _layer {
+            return layer
+        }
+
+        let layer = TextFrameLayer(self)
+
+        _layer = layer
+        return layer
+    }
 }

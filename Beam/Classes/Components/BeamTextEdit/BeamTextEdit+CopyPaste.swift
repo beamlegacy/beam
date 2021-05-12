@@ -20,12 +20,13 @@ extension BeamTextEdit {
         inputDetectorState += 1
     }
 
-    func buildStringFrom(nodes: [TextNode]) -> NSAttributedString {
+    func buildStringFrom(nodes: [ElementNode]) -> NSAttributedString {
         let strNodes = NSMutableAttributedString()
         for node in nodes {
+            guard let node = node as? TextNode else { continue }
             if nodes.count > 1 {
-                guard !node.text.text.isEmpty else { continue }
-                strNodes.append(NSAttributedString(string: String.tabs(node.element.depth - 1)))
+                guard node.text.text.isEmpty else { continue }
+                strNodes.append(NSAttributedString(string: String.tabs(max(0, node.element.depth - 1))))
                 strNodes.append(node.text.buildAttributedString(fontSize: node.fontSize, cursorPosition: node.cursorPosition, elementKind: node.elementKind, mouseInteraction: nil))
                 strNodes.append(NSAttributedString(string: "\n"))
             } else {
@@ -128,7 +129,11 @@ extension BeamTextEdit {
             } else if let attributedStr = objects?.first as? NSAttributedString {
                 paste(attributedStrings: attributedStr.split(seperateBy: "\n"))
             } else if let pastedStr: String = objects?.first as? String {
-                paste(str: pastedStr)
+                var lines = [NSAttributedString]()
+                pastedStr.enumerateLines { line, _ in
+                    lines.append(NSAttributedString(string: line))
+                }
+                paste(attributedStrings: lines)
             }
         }
     }
@@ -165,73 +170,22 @@ extension BeamTextEdit {
 
     private func paste(attributedStrings: [NSAttributedString]) {
         cmdManager.beginGroup(with: "PasteAttributedContent")
+        guard let node = focusedWidget as? TextNode else { return }
+        var lastInserted: ElementNode? = node
+        let parent = node.parent as? ElementNode ?? node
         for (idx, attributedString) in attributedStrings.enumerated() {
-            let str = String(attributedString.string)
+            guard !attributedString.string.isEmpty else { continue }
+            let beamText = BeamText(attributedString)
             if idx == 0 {
                 disableInputDetector()
-                insertText(string: str, replacementRange: selectedTextRange)
+                rootNode.insertText(text: beamText, replacementRange: selectedTextRange)
                 enableInputDetector()
             } else {
-                guard let node = focusedWidget as? TextNode else { continue }
-                cmdManager.insertElement(BeamElement(), in: node, after: nil)
-                guard let newNode = focusedWidget as? TextNode else { continue }
-                let bText = BeamText(text: str, attributes: [])
-                cmdManager.inputText(bText, in: newNode, at: 0)
+                let element = BeamElement(beamText)
+                cmdManager.insertElement(element, in: parent, after: lastInserted)
+                cmdManager.focus(element, in: node)
+                lastInserted = focusedWidget as? ElementNode
                 scrollToCursorAtLayout = true
-            }
-            guard let node = focusedWidget as? TextNode,
-                  let ranges = node.text.text.urlRangesInside(),
-                  let noteTitle = node.root?.note?.title else { return }
-            ranges.compactMap { Range($0) }.forEach { range in
-                let linkStr = String(str[range.lowerBound..<range.upperBound])
-                let formatText = FormattingText(in: node.element.id, of: noteTitle, for: nil, with: .link(linkStr), for: range, isActive: false)
-                cmdManager.run(command: formatText, on: rootNode.cmdContext)
-            }
-
-            let boldRanges = attributedString.getRangesOfFont(for: .bold)
-            for boldRange in boldRanges {
-                let boldText = FormattingText(in: node.element.id, of: noteTitle, for: nil, with: .strong, for: Range(boldRange), isActive: false)
-                cmdManager.run(command: boldText, on: rootNode.cmdContext)
-            }
-            let emphasisRanges = attributedString.getRangesOfFont(for: .italic)
-            for emphasisRange in emphasisRanges {
-                let emphasisText = FormattingText(in: node.element.id, of: noteTitle, for: nil, with: .emphasis, for: Range(emphasisRange), isActive: false)
-                cmdManager.run(command: emphasisText, on: rootNode.cmdContext)
-            }
-
-            let linkRanges = attributedString.getLinks()
-            for linkRange in linkRanges {
-                let linkText = FormattingText(in: node.element.id, of: noteTitle, for: nil, with: .link(linkRange.key), for: Range(linkRange.value), isActive: false)
-                cmdManager.run(command: linkText, on: rootNode.cmdContext)
-            }
-        }
-        cmdManager.endGroup()
-    }
-
-    private func paste(str: String) {
-        let lines = str.split(whereSeparator: \.isNewline)
-        cmdManager.beginGroup(with: "PasteStringContent")
-        for (idx, line) in lines.enumerated() {
-            let str = String(line)
-            if idx == 0 {
-                disableInputDetector()
-                insertText(string: str, replacementRange: selectedTextRange)
-                enableInputDetector()
-            } else {
-                guard let node = focusedWidget as? TextNode else { continue }
-                cmdManager.insertElement(BeamElement(), in: node, after: nil)
-                guard let newNode = focusedWidget as? TextNode else { continue }
-                let bText = BeamText(text: str, attributes: [])
-                cmdManager.inputText(bText, in: newNode, at: 0)
-                scrollToCursorAtLayout = true
-            }
-            guard let node = focusedWidget as? TextNode,
-                  let ranges = node.text.text.urlRangesInside(),
-                  let noteTitle = node.root?.note?.title else { return }
-            ranges.compactMap { Range($0) }.forEach { range in
-                let linkStr = String(str[range.lowerBound..<range.upperBound])
-                let formatText = FormattingText(in: node.element.id, of: noteTitle, for: nil, with: .link(linkStr), for: range, isActive: false)
-                cmdManager.run(command: formatText, on: rootNode.cmdContext)
             }
         }
         cmdManager.endGroup()

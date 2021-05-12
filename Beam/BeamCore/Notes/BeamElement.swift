@@ -18,6 +18,8 @@ public enum ElementKind: Codable, Equatable {
     case heading(Int)
     case quote(Int, String, String)
     case code
+    case image(String)
+    case embed(String)
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -27,17 +29,21 @@ public enum ElementKind: Codable, Equatable {
     }
 
     public var rawValue: String {
-       switch self {
-       case .bullet:
-           return "bullet"
-       case .heading(let level):
-           return "heading \(level)"
-       case .quote:
-           return "quote"
-       case .code:
-           return "code"
-       }
-   }
+        switch self {
+        case .bullet:
+            return "bullet"
+        case .heading(let level):
+            return "heading \(level)"
+        case .quote:
+            return "quote"
+        case .code:
+            return "code"
+        case .image(let source):
+            return "image '\(source)'"
+        case .embed(let source):
+            return "embed '\(source)'"
+        }
+    }
 
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -54,6 +60,12 @@ public enum ElementKind: Codable, Equatable {
                             try container.decode(String.self, forKey: .title))
         case "code":
             self = .code
+
+        case "image":
+            self = .image(try container.decode(String.self, forKey: .source))
+
+        case "embed":
+            self = .embed(try container.decode(String.self, forKey: .source))
         default:
             throw ElementKindError.typeNameUnknown(typeName)
         }
@@ -75,6 +87,12 @@ public enum ElementKind: Codable, Equatable {
             try container.encode(title, forKey: .title)
         case .code:
             try container.encode("code", forKey: .type)
+        case let .image(source):
+            try container.encode("image", forKey: .type)
+            try container.encode(source, forKey: .source)
+        case let .embed(source):
+            try container.encode("embed", forKey: .type)
+            try container.encode(source, forKey: .source)
         }
     }
 }

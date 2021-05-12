@@ -41,7 +41,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
             selectionLayer.contentsScale = contentsScale
 
             for layer in layers.values {
-                layer.layer.contentsScale = contentsScale
+                layer.layer.deepContentsScale = contentsScale
             }
 
             for c in children {
@@ -548,6 +548,8 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     func addLayer(_ layer: Layer, origin: CGPoint? = nil, global: Bool = false) {
         layer.frame = CGRect(origin: origin ?? layer.frame.origin, size: layer.frame.size)
 
+        layer.layer.deepContentsScale = self.layer.contentsScale
+
         if global {
             editor.addToMainLayer(layer.layer)
             layer.layer.isHidden = !inVisibleBranch
@@ -923,16 +925,16 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         return parent?.proxyFor(element)
     }
 
-    func nodeFor(_ element: BeamElement) -> TextNode? {
+    func nodeFor(_ element: BeamElement) -> ElementNode? {
         return parent?.nodeFor(element)
     }
 
-    func nodeFor(_ element: BeamElement, withParent: Widget) -> TextNode {
+    func nodeFor(_ element: BeamElement, withParent: Widget) -> ElementNode {
         guard let parent = parent else { fatalError("Trying to access element that is not connected to root") }
         return parent.nodeFor(element, withParent: withParent)
     }
 
-    func removeNode(_ node: TextNode) {
+    func removeNode(_ node: ElementNode) {
         guard let parent = parent else { Logger.shared.logError("Trying to access element that is not connected to root", category: .document); return }
         parent.removeNode(node)
     }

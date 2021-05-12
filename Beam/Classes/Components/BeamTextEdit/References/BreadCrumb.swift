@@ -324,11 +324,11 @@ class BreadCrumb: Widget {
         return proxy
     }
 
-    override func nodeFor(_ element: BeamElement) -> TextNode? {
+    override func nodeFor(_ element: BeamElement) -> ElementNode? {
         return mapping[element]?.ref
     }
 
-    override func nodeFor(_ element: BeamElement, withParent: Widget) -> TextNode {
+    override func nodeFor(_ element: BeamElement, withParent: Widget) -> ElementNode {
         if let node = mapping[element]?.ref {
             return node
         }
@@ -352,8 +352,8 @@ class BreadCrumb: Widget {
     }
 
     private var accessingMapping = false
-    private var mapping: [BeamElement: WeakReference<TextNode>] = [:]
-    private var deadNodes: [TextNode] = []
+    private var mapping: [BeamElement: WeakReference<ElementNode>] = [:]
+    private var deadNodes: [ElementNode] = []
 
     func purgeDeadNodes() {
         guard !accessingMapping else { return }
@@ -363,7 +363,7 @@ class BreadCrumb: Widget {
         deadNodes.removeAll()
     }
 
-    override func removeNode(_ node: TextNode) {
+    override func removeNode(_ node: ElementNode) {
         guard !accessingMapping else {
             deadNodes.append(node)
             return

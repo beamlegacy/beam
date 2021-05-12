@@ -9,7 +9,7 @@ import Foundation
 import Combine
 import BeamCore
 
-public class BeamData: ObservableObject {
+public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var _todaysNote: BeamNote?
     var todaysNote: BeamNote {
         if let note = _todaysNote, note.title == todaysName {
@@ -23,6 +23,7 @@ public class BeamData: ObservableObject {
 
     var index: Index
     var indexer: GRDBIndexer
+    var fileDB: BeamFileDB
     @Published var noteCount = 0
     @Published var lastChangedElement: BeamElement?
     @Published var showTabStats = false
@@ -42,9 +43,10 @@ public class BeamData: ObservableObject {
 
     static var indexPath: URL { return URL(fileURLWithPath: dataFolder + "/index.beamindex") }
     static var indexerPath: String { return dataFolder + "/index.beamindexer" }
+    static var fileDBPath: String { return dataFolder + "/files.db" }
     static var linkStorePath: URL { return URL(fileURLWithPath: dataFolder + "/links.store") }
 
-    init() {
+    override init() {
         documentManager = DocumentManager()
         noteAutoSaveService = NoteAutoSaveService()
         linkManager = LinkManager()
@@ -65,7 +67,16 @@ public class BeamData: ObservableObject {
             fatalError()
         }
 
+        do {
+            fileDB = try BeamFileDB(path: Self.fileDBPath)
+        } catch let error {
+            Logger.shared.logError("Error while creating the File Database [\(error)]", category: .fileDB)
+            fatalError()
+        }
+
         cookies = HTTPCookieStorage()
+
+        super.init()
 
         updateNoteCount()
 
@@ -140,5 +151,23 @@ public class BeamData: ObservableObject {
         journal = []
         setupJournal()
         if newDay { newDay.toggle() }
+    }
+
+    public func cookiesDidChange(in cookieStore: WKHTTPCookieStore) {
+        cookieStore.getAllCookies({ [weak self] cookies in
+            guard let self = self else { return }
+
+            for cookie in cookies {
+                self.cookies.setCookie(cookie)
+            }
+        })
+    }
+
+    func setup(webView: WKWebView) {
+        for cookie in cookies.cookies ?? [] {
+            webView.configuration.websiteDataStore.httpCookieStore.setCookie(cookie)
+        }
+
+        webView.configuration.websiteDataStore.httpCookieStore.add(self)
     }
 }

@@ -135,4 +135,18 @@ extension Layer {
     static func text(named: String, _ label: String, color: NSColor = BeamColor.Generic.text.nsColor, size: CGFloat = 12) -> Layer {
         Layer(name: named, layer: text(label, color: color, size: size))
     }
+
+    static func image(image: NSImage, size: CGSize? = nil) -> CALayer {
+        let imageLayer = CALayer()
+        imageLayer.contents = image
+        imageLayer.frame = CGRect(origin: .zero, size: size ?? image.size)
+        imageLayer.position = .zero
+        imageLayer.anchorPoint = .zero
+        return imageLayer
+    }
+
+    static func image(named: String, image: NSImage, size: CGSize? = nil) -> Layer {
+        Layer(name: named, layer: Self.image(image: image, size: size))
+    }
+
 }
