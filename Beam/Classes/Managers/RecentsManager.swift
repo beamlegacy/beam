@@ -6,15 +6,18 @@
 //
 
 import Foundation
+import Combine
 import BeamCore
 
-class RecentsManager {
+class RecentsManager: ObservableObject {
 
     private let maxNumberOfRecents = 5
     private let documentManager: DocumentManager
     private var recentsScores = [UUID: Int]()
-
-    @Published private(set) var recentNotes = [BeamNote]()
+    private var cancellables = Set<AnyCancellable>()
+    @Published private(set) var recentNotes = [BeamNote]() {
+        didSet { updateNotesObservers() }
+    }
 
     init(with documentManager: DocumentManager) {
         self.documentManager = documentManager
@@ -52,5 +55,14 @@ class RecentsManager {
             result.removeAll { $0.id == noteId }
         }
         return result
+    }
+
+    private func updateNotesObservers() {
+        cancellables.removeAll()
+        recentNotes.forEach { n in
+            n.objectWillChange
+                .sink { _ in self.objectWillChange.send() }
+                .store(in: &cancellables)
+        }
     }
 }

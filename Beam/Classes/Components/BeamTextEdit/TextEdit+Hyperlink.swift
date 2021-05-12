@@ -104,11 +104,9 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
               let link = node.linkAt(index: selectedTextRange.upperBound),
               isInlineFormatterHidden else { return }
         let atPoint = CGPoint(x: frame.origin.x + node.offsetInDocument.x - 10, y: frame.maxY + node.offsetInDocument.y + 7)
-        let menuView = ContextMenuFormatterView(viewType: .inline, items: self.getDefaultItemsForLink(for: node, link: link))
+        let menuView = ContextMenuFormatterView(items: self.getDefaultItemsForLink(for: node, link: link))
         inlineFormatter = menuView
-        let idealSize = menuView.idealSize
-        menuView.frame = NSRect(x: 0, y: 0, width: idealSize.width, height: idealSize.height)
-        ContextMenuPresenter.shared.presentMenu(menuView, from: self, atPoint: atPoint)
+        ContextMenuPresenter.shared.presentMenu(menuView, atPoint: atPoint, from: self, animated: false)
 
         formatterTargetRange = targetRange
         formatterTargetNode = targetNode

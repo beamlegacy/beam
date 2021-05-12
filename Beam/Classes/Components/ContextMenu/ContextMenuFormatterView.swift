@@ -8,23 +8,24 @@
 import SwiftUI
 
 // MARK: - NSView Container
-
 class ContextMenuFormatterView: FormatterView {
 
     private var hostView: NSHostingView<ContextMenuView>?
     private var items: [[ContextMenuItem]] = []
-    private var subviewModel = FormatterViewViewModel()
+    private var subviewModel = ContextMenuViewModel()
     private var direction: Edge = .bottom
+    private var onSelectMenuItem: (() -> Void)?
 
     override var idealSize: NSSize {
         return ContextMenuView.idealSizeForItems(items)
     }
 
-    convenience init(viewType: FormatterViewType, items: [[ContextMenuItem]], direction: Edge = .bottom) {
+    convenience init(items: [[ContextMenuItem]], direction: Edge = .bottom, onSelectHandler: (() -> Void)? = nil) {
         self.init(frame: CGRect.zero)
-        self.viewType = viewType
+        self.viewType = .inline
         self.items = items
         self.direction = direction
+        self.onSelectMenuItem = onSelectHandler
         setupUI()
     }
 
@@ -47,6 +48,7 @@ class ContextMenuFormatterView: FormatterView {
     override func setupUI() {
         super.setupUI()
         subviewModel.animationDirection = direction
+        subviewModel.onSelectMenuItem = onSelectMenuItem
         let rootView = ContextMenuView(viewModel: subviewModel, items: .constant(self.items))
         let hostingView = NSHostingView(rootView: rootView)
         hostingView.autoresizingMask = [.width, .height]

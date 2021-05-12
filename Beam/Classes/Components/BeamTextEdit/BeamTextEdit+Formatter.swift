@@ -297,7 +297,7 @@ extension BeamTextEdit {
               let currentLine = node.lineAt(index: cursorStartPosition) else { return }
 
         let leftMargin: CGFloat = centerText ? 145 : 200 // Value to move the inline formatter to the left
-        let middleFrame = (frame.width - textWidth) / 2
+        let middleFrame = (frame.width - Self.textWidth) / 2
         let idealSize = view.idealSize
         let (xOffset, rect) = node.offsetAndFrameAt(index: node.cursorPosition)
         let yPos = rect.maxY + node.offsetInDocument.y - idealSize.height - BeamTextEdit.yPosInlineFormatter

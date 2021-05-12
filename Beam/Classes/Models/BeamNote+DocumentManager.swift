@@ -71,6 +71,24 @@ extension BeamNote: BeamNoteDocument {
         }
     }
 
+    public func updateTitle(_ newTitle: String, documentManager: DocumentManager, completion: ((Result<Bool, Error>) -> Void)? = nil) {
+        let previousTitle = self.title
+        self.title = newTitle
+        self.save(documentManager: documentManager) { [weak self] result in
+            guard let self = self else { return }
+
+            switch result {
+                case .success(_):
+                    DispatchQueue.main.async {
+                        self.updatedNotesWithLinkedReferences(afterChangingTitleFrom: previousTitle, documentManager: documentManager)
+                    }
+                case .failure(_):
+                    break
+            }
+            completion?(result)
+        }
+    }
+
     public func save(documentManager: DocumentManager, completion: ((Result<Bool, Error>) -> Void)? = nil) {
         guard version == savedVersion else {
             Logger.shared.logError("Still wating for the result from the last save [\(title) {\(id)} - saved version \(savedVersion) / current \(version)]", category: .document)

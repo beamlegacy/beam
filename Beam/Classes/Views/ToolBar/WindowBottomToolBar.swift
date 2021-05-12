@@ -25,25 +25,8 @@ struct WindowBottomToolBar: View {
 
     private func recentsStack(containerGeometry: GeometryProxy) -> some View {
         GlobalCenteringContainer(enabled: true, containerGeometry: containerGeometry) {
-            HStack(spacing: 6) {
-                ButtonLabel("Journal", state: state.mode == .today ? .active : .normal) {
-                    state.navigateToJournal()
-                }
-                .fixedSize(horizontal: true, vertical: false)
-                if state.recentsManager.recentNotes.count > 0 {
-                    Separator()
-                    ForEach(state.recentsManager.recentNotes) { note in
-                        let isToday = state.mode == .today
-                        let isActive = !isToday && note.id == currentNote?.id
-                        ButtonLabel(note.title, state: isActive ? .active : .normal)
-                            .simultaneousGesture(
-                                TapGesture(count: 1).onEnded {
-                                    state.navigateToNote(named: note.title)
-                                }
-                            )
-                    }
-                }
-            }
+            RecentsListView(currentNote: currentNote)
+                .environmentObject(state.recentsManager)
         }
         .animation(animationEnabled ? .easeInOut(duration: 0.3) : nil)
     }

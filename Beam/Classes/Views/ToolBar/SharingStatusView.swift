@@ -128,15 +128,12 @@ class SharingStatusViewModel: ObservableObject {
             ])
         }
         items.append([ContextMenuItem(title: note.isPublic ? "Unpublish" : "Publish", action: togglePublish)])
-        let menuView = ContextMenuFormatterView(viewType: .inline, items: items, direction: .top)
-        // TODO: this size calculation + main view getter should be automatic by ContextMenuPresenter
-        let idealSize = menuView.idealSize
-        menuView.frame = NSRect(x: 0, y: 0, width: idealSize.width, height: idealSize.height)
-        let atPoint = CGPoint(x: 5, y: idealSize.height + 27) // Fix this with OverlayViewCenter + geometry reader
-        ContextMenuPresenter.shared.presentMenu(menuView, from: AppDelegate.main.window.contentView!, atPoint: atPoint)
-        DispatchQueue.main.async {
-            menuView.animateOnAppear()
+        let menuView = ContextMenuFormatterView(items: items, direction: .top) {
+            ContextMenuPresenter.shared.dismissMenu()
         }
+        // Temporarily fixed position, will be replaced by a "toast" implementation
+        let atPoint = CGPoint(x: 5, y: menuView.idealSize.height + 27)
+        ContextMenuPresenter.shared.presentMenu(menuView, atPoint: atPoint)
     }
 
     func cancelChange() {
@@ -153,7 +150,6 @@ class SharingStatusViewModel: ObservableObject {
     }
 
     func copyLink() {
-        ContextMenuPresenter.shared.dismissMenu()
         sharingUtils.copyLinkToClipboard(completion: { [weak self] _ in
             guard let self = self else { return }
             self.toastInformation = "Link copied"
@@ -187,6 +183,5 @@ class SharingStatusViewModel: ObservableObject {
                 }
             }
         }
-        ContextMenuPresenter.shared.dismissMenu()
     }
 }
