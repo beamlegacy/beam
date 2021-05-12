@@ -128,7 +128,7 @@ class PasswordOverlayController: WebPageHolder {
         let rootView = PasswordManagerMenu(width: location.size.width, viewModel: viewModel)
         let window = FirstResponderWindow(contentRect: .zero, styleMask: .borderless, backing: .buffered, defer: true)
         window.contentViewController = NSHostingController(rootView: rootView)
-        page.window?.addChildWindow(window, ordered: .above)
+        page.webviewWindow?.addChildWindow(window, ordered: .above)
         passwordMenuPosition = bottomLeftOnScreen(for: location)
         window.setFrameTopLeftPoint(passwordMenuPosition)
         window.makeKeyAndOrderFront(nil)
@@ -137,7 +137,7 @@ class PasswordOverlayController: WebPageHolder {
 
     private func dismissPasswordManagerMenu() {
         guard let window = passwordMenuWindow else { return }
-        page.window?.removeChildWindow(window)
+        page.webviewWindow?.removeChildWindow(window)
         window.setIsVisible(false)
         passwordMenuWindow = nil
     }
@@ -189,7 +189,7 @@ class PasswordOverlayController: WebPageHolder {
     }
 
     private func bottomLeftOnScreen(for windowRect: CGRect) -> CGPoint {
-        guard let window = page.window else {
+        guard let window = page.webviewWindow else {
             fatalError()
         }
         let windowHeight = window.contentRect(forFrameRect: page.frame).size.height

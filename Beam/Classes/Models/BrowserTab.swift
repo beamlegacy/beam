@@ -90,6 +90,10 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         set { element?.score = newValue }
     }
 
+    var webviewWindow: NSWindow? {
+        self.webView.window
+    }
+
     func setDestinationNote(_ note: BeamNote, rootElement: BeamElement? = nil) {
         self.note = note
         self.rootElement = rootElement ?? note

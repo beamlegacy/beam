@@ -17,7 +17,7 @@ class TestWebPage: WebPage {
     var pointAndShoot: PointAndShoot
     var browsingScorer: BrowsingScorer
     var passwordOverlayController: PasswordOverlayController
-    private(set) var window: NSWindow?
+    private(set) var webviewWindow: NSWindow?
     private(set) var frame: NSRect = NSRect()
 
     init(browsingScorer: BrowsingScorer, passwordOverlayController: PasswordOverlayController, pns: PointAndShoot) {
