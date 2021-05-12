@@ -8,7 +8,7 @@ import Promises
  */
 protocol WebPage: Scorable {
 
-    var window: NSWindow? { get }
+    var webviewWindow: NSWindow? { get }
 
     var frame: NSRect { get }
 
