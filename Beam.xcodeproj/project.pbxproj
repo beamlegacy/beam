@@ -417,6 +417,7 @@
 		A5C9F01126136B5F0096380F /* AllCardsPageContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C9F01026136B5F0096380F /* AllCardsPageContentView.swift */; };
 		A5CA5DBA2624FF4A004E9D3E /* BeamNSTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5CA5DB92624FF4A004E9D3E /* BeamNSTableView.swift */; };
 		A5CA5DF52625C15D004E9D3E /* BeamElementTextStatsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5CA5DF42625C15D004E9D3E /* BeamElementTextStatsTests.swift */; };
+		A5D53697264BE2F50011A095 /* RetroCompatibleScrollViewReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5D53696264BE2F50011A095 /* RetroCompatibleScrollViewReader.swift */; };
 		A5D6250A26034B1C00A3E676 /* FormatterViewBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5D6250926034B1C00A3E676 /* FormatterViewBackground.swift */; };
 		A5DE141C26491F840023F753 /* WKWebview+Zoom.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5DE141B26491F840023F753 /* WKWebview+Zoom.swift */; };
 		A5DE143226496F250023F753 /* NoteHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5DE143126496F250023F753 /* NoteHeaderView.swift */; };
@@ -1137,6 +1138,7 @@
 		A5C9F01026136B5F0096380F /* AllCardsPageContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllCardsPageContentView.swift; sourceTree = "<group>"; };
 		A5CA5DB92624FF4A004E9D3E /* BeamNSTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamNSTableView.swift; sourceTree = "<group>"; };
 		A5CA5DF42625C15D004E9D3E /* BeamElementTextStatsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamElementTextStatsTests.swift; sourceTree = "<group>"; };
+		A5D53696264BE2F50011A095 /* RetroCompatibleScrollViewReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RetroCompatibleScrollViewReader.swift; sourceTree = "<group>"; };
 		A5D6250926034B1C00A3E676 /* FormatterViewBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatterViewBackground.swift; sourceTree = "<group>"; };
 		A5DE141B26491F840023F753 /* WKWebview+Zoom.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WKWebview+Zoom.swift"; sourceTree = "<group>"; };
 		A5DE143126496F250023F753 /* NoteHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteHeaderView.swift; sourceTree = "<group>"; };
@@ -1684,7 +1686,6 @@
 				A514401A2638038C0021DD56 /* BrowserNewTabView.swift */,
 				418171D22581107C00317ED8 /* TabStats.swift */,
 				418171D32581107C00317ED8 /* WebView.swift */,
-				A5144000263803600021DD56 /* TrackableScrollView.swift */,
 			);
 			path = Browser;
 			sourceTree = "<group>";
@@ -1794,6 +1795,8 @@
 				418172D525811B8700317ED8 /* RoundRectButtonStyle.swift */,
 				A567157025F66F8600B46110 /* StyledText.swift */,
 				A520D8DE25F8DF8D00400720 /* TouchDownModifier.swift */,
+				A5144000263803600021DD56 /* TrackableScrollView.swift */,
+				A5D53696264BE2F50011A095 /* RetroCompatibleScrollViewReader.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -3385,6 +3388,7 @@
 				A580D5EE26427BCB00EB2E24 /* ContextMenuView.swift in Sources */,
 				A530D4E92609EB7B00DBD14E /* ContextMenuPresenter.swift in Sources */,
 				87C539BD26162C3400D51877 /* PasswordManagerMenuCell.swift in Sources */,
+				A5D53697264BE2F50011A095 /* RetroCompatibleScrollViewReader.swift in Sources */,
 				872644772619903B0070E83D /* StepperControl.swift in Sources */,
 				4181721A2581107C00317ED8 /* StandardStorable.swift in Sources */,
 				96C9AA3F259019E3007D3D98 /* LinkedReferenceNode.swift in Sources */,

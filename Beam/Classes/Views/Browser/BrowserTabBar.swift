@@ -118,34 +118,47 @@ struct BrowserTabBar: View {
     }
 
     @State private var scrollOffset: CGFloat = 0
+    private let animationDuration = 0.3
 
     var body: some View {
         HStack(spacing: 0) {
             GeometryReader { geometry in
                 ZStack(alignment: .leading) {
                     TrackableScrollView(.horizontal, showIndicators: false, contentOffset: $scrollOffset) {
-                        HStack(spacing: 0) {
-                            ForEach(Array(zip(tabs.indices, tabs)), id: \.1) { (index, tab) in
-                                let selected = isSelected(tab)
-                                let isTheDraggedTab = selected && isDraggingATab
-                                let dragStartIndex = dragModel.dragStartIndex ?? 0
-                                if index == dragModel.draggingOverIndex && index <= dragStartIndex {
-                                    emptySpacer.frame(width: dragModel.activeTabWidth)
+                        RetroCompatibleScrollViewReader { retroProxy in
+                            HStack(spacing: 0) {
+                                ForEach(Array(zip(tabs.indices, tabs)), id: \.1) { (index, tab) in
+                                    let selected = isSelected(tab)
+                                    let isTheDraggedTab = selected && isDraggingATab
+                                    let dragStartIndex = dragModel.dragStartIndex ?? 0
+                                    if index == dragModel.draggingOverIndex && index <= dragStartIndex {
+                                        emptySpacer.frame(width: dragModel.activeTabWidth)
+                                    }
+                                    BrowserTabView(tab: tab,
+                                                   isSelected: selected,
+                                                   isDragging: isTheDraggedTab,
+                                                   onClose: onTabClose)
+                                        .zIndex(selected ? 1 : 0)
+                                        .frame(width: isTheDraggedTab ? 0 :
+                                                widthForTab(selected: selected, containerGeometry: geometry))
+                                        .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .identity))
+                                        .animation(disableAnimation ? nil : .easeInOut(duration: animationDuration))
+                                        .disabled(isDraggingATab && !selected)
+                                        .opacity(isTheDraggedTab ? 0 : 1)
+                                        .onAppear {
+                                            guard selected else { return }
+                                            DispatchQueue.main.asyncAfter(deadline: .now() + animationDuration) {
+                                                scrollToTabIfNeeded(tab, containerGeometry: geometry, scrollViewProxy: retroProxy)
+                                            }
+                                        }
+                                    if index == dragModel.draggingOverIndex && index > dragStartIndex {
+                                        emptySpacer.frame(width: dragModel.activeTabWidth)
+                                    }
                                 }
-                                BrowserTabView(tab: tab,
-                                               isSelected: selected,
-                                               isDragging: isTheDraggedTab,
-                                               onClose: onTabClose)
-                                    .zIndex(selected ? 1 : 0)
-                                    .frame(width: isTheDraggedTab ? 0 :
-                                            widthForTab(selected: selected, containerGeometry: geometry))
-                                    .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .identity))
-                                    .animation(disableAnimation ? nil : .easeInOut(duration: 0.3))
-                                    .disabled(isDraggingATab && !selected)
-                                    .opacity(isTheDraggedTab ? 0 : 1)
-                                if index == dragModel.draggingOverIndex && index > dragStartIndex {
-                                    emptySpacer.frame(width: dragModel.activeTabWidth)
-                                }
+                            }
+                            .onAppear {
+                                guard let currentTab = currentTab else { return }
+                                scrollToTabIfNeeded(currentTab, containerGeometry: geometry, scrollViewProxy: retroProxy, animated: false)
                             }
                         }
                     }
@@ -175,7 +188,7 @@ struct BrowserTabBar: View {
                 .shadow(color: Color.black.opacity(0.1), radius: 0, x: 0, y: 0.5)
                 .shadow(color: Color.black.opacity(0.04), radius: 7, x: 0, y: 2)
         )
-        .animation(!state.windowIsResizing && !disableAnimation ? .easeInOut(duration: 0.3) : nil)
+        .animation(!state.windowIsResizing && !disableAnimation ? .easeInOut(duration: animationDuration) : nil)
     }
 
     private func dragGestureOnChange(gestureValue: DragGesture.Value,
@@ -216,10 +229,10 @@ struct BrowserTabBar: View {
             // it was just a quick tap
             self.dragModel.cleanAfterDrag()
         } else {
-            withAnimation(.easeInOut(duration: 0.3)) {
+            withAnimation(.easeInOut(duration: animationDuration)) {
                 self.dragModel.dragGestureEnded(contentOffset: scrollOffset)
             }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + animationDuration) {
                 self.disableAnimation = true
                 self.moveTabs(from: dragStartIndex, to: draggingOverIndex, with: currentTab)
                 self.dragModel.cleanAfterDrag()
@@ -261,6 +274,26 @@ struct BrowserTabBar: View {
         tabsArray.insert(tab, at: index.clamp(0, tabsArray.count))
         tabs = tabsArray
     }
+
+    private func scrollToTabIfNeeded(_ tab: BrowserTab,
+                                     containerGeometry: GeometryProxy,
+                                     scrollViewProxy: RetroCompatibleScrollViewProxy,
+                                     animated: Bool = true) {
+        let index = position(of: tab)
+        let tabWidth = widthForTab(selected: isSelected(tab), containerGeometry: containerGeometry)
+        let tabOriginX = CGFloat(index) * widthForTab(selected: false, containerGeometry: containerGeometry)
+        let point = CGPoint(x: tabOriginX + tabWidth, y: 0)
+        let outOfBoundsWidth = point.x - (containerGeometry.size.width + scrollOffset)
+        guard outOfBoundsWidth > 0 else { return }
+        if animated {
+            withAnimation {
+                scrollViewProxy.scrollTo(point)
+            }
+        } else {
+            scrollViewProxy.scrollTo(point)
+        }
+    }
+
 }
 
 struct BrowserTabBar_Preview: PreviewProvider {
