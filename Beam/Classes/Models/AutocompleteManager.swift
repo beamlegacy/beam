@@ -55,18 +55,19 @@ class AutocompleteManager: ObservableObject {
 
     private func autocompleteNotesContentsResults(for query: String, excludingNotes: [AutocompleteResult]) -> [AutocompleteResult] {
         var resultsToExclude = excludingNotes
-        return AppDelegate.main.data.indexer.search(matchingAllTokensIn: query, maxResults: 10)
-            .compactMap { result -> AutocompleteResult? in
-                guard !resultsToExclude.contains(where: { res -> Bool in res.text == result.title }) else {
-                    return nil
-                }
-                let result = AutocompleteResult(text: result.title,
-                                                source: .note,
-                                                completingText: query,
-                                                uuid: UUID(uuidString: result.uid) ?? UUID())
-                resultsToExclude.append(result)
-                return result
+        let searchResults = beamData.indexer.search(matchingAllTokensIn: query, maxResults: 10)
+        return searchResults.compactMap { result -> AutocompleteResult? in
+            guard !resultsToExclude.contains(where: { $0.text == result.title || $0.uuid.uuidString == result.uid }) else {
+                return nil
             }
+            guard beamData.documentManager.loadDocumentByTitle(title: result.title) != nil else { return nil }
+            let autocompleteResult = AutocompleteResult(text: result.title,
+                                                        source: .note,
+                                                        completingText: query,
+                                                        uuid: UUID(uuidString: result.uid) ?? UUID())
+            resultsToExclude.append(autocompleteResult)
+            return autocompleteResult
+        }
     }
 
     private func autocompleteHistoryResults(for query: String) -> [AutocompleteResult] {
@@ -128,7 +129,7 @@ class AutocompleteManager: ObservableObject {
         finalResults = sortResults(notesResults: notesNamesResults, historyResults: historyResults)
 
         // #5 Create Card
-        let canCreateNote = BeamNote.fetch(beamData.documentManager, title: searchText) == nil && URL(string: searchText)?.scheme == nil
+        let canCreateNote = beamData.documentManager.loadDocumentByTitle(title: searchText) == nil && URL(string: searchText)?.scheme == nil
         if canCreateNote {
             // if the card doesn't exist, propose to create it
             finalResults.append(AutocompleteResult(text: searchText, source: .createCard, information: "New card", completingText: searchText))
