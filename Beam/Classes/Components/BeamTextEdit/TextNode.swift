@@ -13,28 +13,7 @@ import Combine
 import BeamCore
 
 // swiftlint:disable:next type_body_length
-public class TextNode: Widget {
-    var element: BeamElement { didSet {
-        subscribeToElement(element)
-    }}
-
-    var elementId: UUID {
-        unproxyElement.id
-    }
-
-    var elementNoteTitle: String? {
-        unproxyElement.note?.title
-    }
-
-    var unproxyElement: BeamElement {
-        guard let elem = element as? ProxyElement else { return element }
-        return elem.proxy
-    }
-
-    var elementScope = Set<AnyCancellable>()
-    var elementText = BeamText()
-    var elementKind = ElementKind.bullet
-
+public class TextNode: ElementNode {
     var textFrame: TextFrame?
     var emptyTextFrame: TextFrame?
 
@@ -42,7 +21,7 @@ public class TextNode: Widget {
     var lastHoverMouseInfo: MouseInfo?
     var interlineFactor = CGFloat(1.3)
     var interNodeSpacing = CGFloat(0)
-    var indent: CGFloat { selfVisible ? 18 : 0 }
+    override var indent: CGFloat { selfVisible ? 18 : 0 }
     var fontSize: CGFloat = 15
 
     override var parent: Widget? {
@@ -104,11 +83,11 @@ public class TextNode: Widget {
         }
     }
 
-    var strippedText: String {
+    override var strippedText: String {
         text.text
     }
 
-    var fullStrippedText: String {
+    override var fullStrippedText: String {
         children.reduce(text.text) { partial, node -> String in
             guard let node = node as? TextNode else { return partial }
             return partial + " " + node.fullStrippedText
@@ -135,41 +114,14 @@ public class TextNode: Widget {
         return _attributedString!
     }
 
-    var config: TextConfig {
-        root?.config ?? TextConfig()
-    }
-
-    var color: NSColor { config.color }
-    var disabledColor: NSColor { config.disabledColor }
-    var selectionColor: NSColor { config.selectionColor }
-    var markedColor: NSColor { config.markedColor }
-    var alpha: Float { config.alpha }
-    var blendMode: CGBlendMode { config.blendMode }
-
     var selectedTextRange: Range<Int> { root?.selectedTextRange ?? 0..<0 }
     var markedTextRange: Range<Int>? { root?.markedTextRange }
-    var cursorPosition: Int { root?.cursorPosition ?? 0 }
-    var caretIndex: Int { root?.caretIndex ?? 0 }
 
-    var showDisclosureButton: Bool {
-        !children.isEmpty
-    }
-
-    var showIdentationLine: Bool {
-        return depth == 1
-    }
-
-    var readOnly: Bool = false
-    var isEditing: Bool {
-        guard let r = root else { return false }
-        return r.focusedWidget === self && r.state.nodeSelection == nil
-    }
-
-    var firstLineHeight: CGFloat {
+    override var firstLineHeight: CGFloat {
         let textFrame = emptyTextFrame ?? self.textFrame
         return textFrame?.lines.first?.bounds.height ?? CGFloat(fontSize * interlineFactor)
     }
-    var firstLineBaseline: CGFloat {
+    override var firstLineBaseline: CGFloat {
         let textFrame = emptyTextFrame ?? self.textFrame
         if let firstLine = textFrame?.lines.first {
             let h = firstLine.typographicBounds.ascent
@@ -179,79 +131,40 @@ public class TextNode: Widget {
         return f.ascender
     }
 
-    let smallCursorWidth = CGFloat(2)
-    let bigCursorWidth = CGFloat(7)
-    var maxCursorWidth: CGFloat { max(smallCursorWidth, bigCursorWidth) }
-
-    // walking the node tree:
-    var inOpenBranch: Bool {
-        guard let p = parent as? TextNode else { return true }
-        return p.open && p.inOpenBranch
-    }
-
-    var isHeader: Bool {
-        switch elementKind {
-        case .heading:
-            return true
-        default:
-            return false
-        }
-    }
-
     private var debounceClickTimer: Timer?
     private var actionLayerIsHovered = false
     private var icon = NSImage(named: "editor-cmdreturn")
 
     private let debounceClickInterval = 0.23
-    private var bulletLayerPositionX = CGFloat(14)
     private var actionLayerPadding = CGFloat(3.5)
 
     public static func == (lhs: TextNode, rhs: TextNode) -> Bool {
         return lhs === rhs
     }
 
-    func buildTextChildren(elements: [BeamElement]) -> [Widget] {
-        elements.map { childElement -> TextNode in
+    override func buildTextChildren(elements: [BeamElement]) -> [Widget] {
+        elements.map { childElement -> ElementNode in
             nodeFor(childElement, withParent: self)
         }
     }
 
-    func updateTextChildren(elements: [BeamElement]) {
+    override func updateTextChildren(elements: [BeamElement]) {
         children = buildTextChildren(elements: elements)
     }
 
     // MARK: - Initializer
 
-    init(parent: Widget, element: BeamElement) {
-        self.element = element
-
-        super.init(parent: parent)
-
-        addDisclosureLayer(at: NSPoint(x: bulletLayerPositionX, y: isHeader ? firstLineBaseline - 8 : firstLineBaseline - 13))
-        addBulletPointLayer(at: NSPoint(x: bulletLayerPositionX, y: isHeader ? firstLineBaseline - 8 : firstLineBaseline - 13))
-
-        element.$children
-            .sink { [unowned self] elements in
-                guard self.parent != nil else { return }
-                updateTextChildren(elements: elements)
-            }.store(in: &scope)
+    override init(parent: Widget, element: BeamElement) {
+        super.init(parent: parent, element: element)
 
         createActionLayer()
-        createIndentLayer()
-
-        subscribeToElement(element)
 
         setAccessibilityLabel("TextNode")
         setAccessibilityRole(.textArea)
     }
 
-    init(editor: BeamTextEdit, element: BeamElement) {
-        self.element = element
-
-        super.init(editor: editor)
-
-        addDisclosureLayer(at: NSPoint(x: bulletLayerPositionX, y: isHeader ? firstLineBaseline - 8 : firstLineBaseline - 13))
-        addBulletPointLayer(at: NSPoint(x: bulletLayerPositionX, y: isHeader ? firstLineBaseline - 8 : firstLineBaseline - 13))
+    override init(editor: BeamTextEdit, element: BeamElement) {
+        super.init(editor: editor, element: element)
 
         element.$children
             .sink { [unowned self] elements in
@@ -259,9 +172,6 @@ public class TextNode: Widget {
             }.store(in: &scope)
 
         createActionLayer()
-        createIndentLayer()
-
-        subscribeToElement(element)
 
         setAccessibilityLabel("TextNode")
         setAccessibilityRole(.textArea)
@@ -270,73 +180,49 @@ public class TextNode: Widget {
     // MARK: - Setup UI
 
     override public func draw(in context: CGContext) {
-        context.saveGState()
-        context.translateBy(x: indent, y: 0)
-
         updateRendering()
 
-        drawDebug(in: context)
-
-        if selfVisible {
-            context.saveGState(); defer { context.restoreGState() }
-
-            drawSelection(in: context)
-            drawText(in: context)
-
-            if isEditing {
-                drawCursor(in: context)
-            }
-        }
-        context.restoreGState()
+//        drawDebug(in: context)
+        updateSelection()
+        updateCursor()
     }
 
-    public func drawMarkee(_ context: CGContext, _ start: Int, _ end: Int, _ color: NSColor) {
-        guard let textFrame = textFrame else { return }
+    func buildMarkeeShape(_ start: Int, _ end: Int) -> CGPath? {
+        guard let textFrame = textFrame else { return nil }
 
-        context.beginPath()
+        let path = CGMutablePath()
         let startLine = lineAt(index: start)!
         let endLine = lineAt(index: end)!
         let lineCount = textFrame.lines.count
-        guard lineCount > startLine, lineCount > endLine else { return }
+        guard lineCount > startLine, lineCount > endLine else { return nil }
         let line1 = textFrame.lines[startLine]
         let line2 = textFrame.lines[endLine]
         let xStart = offsetAt(index: start)
         let xEnd = offsetAt(index: end)
 
-        context.setFillColor(color.cgColor)
-
         if startLine == endLine {
             // Selection begins and ends on the same line:
             let markRect = NSRect(x: xStart, y: line1.frame.minY, width: xEnd - xStart, height: line1.bounds.height)
-            context.addRect(markRect)
+            path.addRect(markRect)
         } else {
             let markRect1 = NSRect(x: xStart, y: line1.frame.minY, width: textFrame.frame.width - xStart, height: line2.frame.minY - line1.frame.minY )
-            context.addRect(markRect1)
+            path.addRect(markRect1)
 
             if startLine + 1 != endLine {
                 // bloc doesn't end on the line directly below the start line, so be need to joind the start and end lines with a big rectangle
                 let markRect2 = NSRect(x: 0, y: line1.frame.maxY, width: textFrame.frame.width, height: line2.frame.minY - line1.frame.maxY)
-                context.addRect(markRect2)
+                path.addRect(markRect2)
             }
 
             let markRect3 = NSRect(x: 0, y: line1.frame.maxY, width: xEnd, height: CGFloat(line2.frame.maxY - line1.frame.maxY) + 1)
-            context.addRect(markRect3)
+            path.addRect(markRect3)
         }
 
-        context.drawPath(using: .fill)
+        return path
     }
 
     override func updateChildrenLayout() {
-        updateIndentLayer()
-        var pos = NSPoint(x: childInset, y: self.contentsFrame.height)
-
-        for c in children {
-            var childSize = c.idealSize
-            childSize.width = frame.width - childInset
-            let childFrame = NSRect(origin: pos, size: childSize)
-            c.setLayout(childFrame)
-            pos.y += childSize.height
-        }
+        super.updateChildrenLayout()
 
         // Disable action layer update to avoid motion glitch
         // when the global layer width is changed
@@ -347,22 +233,7 @@ public class TextNode: Widget {
         }
     }
 
-    func createIndentLayer() {
-        let indentLayer = CALayer()
-        indentLayer.backgroundColor = BeamColor.Editor.indentBackground.cgColor
-        indentLayer.enableAnimations = false
-        addLayer(Layer(name: "indentLayer", layer: indentLayer))
-        updateIndentLayer()
-    }
-
-    func updateIndentLayer() {
-        guard let indentLayer = layers["indentLayer"] else { return }
-        let y = firstLineHeight + 8
-        indentLayer.frame = NSRect(x: childInset + 4.5, y: y - 5, width: 1, height: frame.height - y - 5)
-        indentLayer.layer.isHidden = children.isEmpty || !open
-    }
-
-    func invalidateText() {
+    override public func invalidateText() {
         if parent == nil {
             _attributedString = nil
             return
@@ -379,6 +250,8 @@ public class TextNode: Widget {
             let attrStr = attributedString
             let textFrame = TextFrame.create(string: attrStr, atPosition: NSPoint(x: indent, y: 0), textWidth: availableWidth - childInset)
             self.textFrame = textFrame
+            let textLayer = Layer(name: "text", layer: textFrame.layerTree)
+            addLayer(textLayer)
 
             if attrStr.string.isEmpty {
                 let dummyText = buildAttributedString(for: BeamText(text: "Dummy!"))
@@ -394,77 +267,111 @@ public class TextNode: Widget {
         return tFrame.frame
     }
 
-    func deepInvalidateText() {
+    override func deepInvalidateText() {
         invalidateText()
-        for c in children {
-            guard let c = c as? TextNode else { continue }
-            c.deepInvalidateText()
+        super.deepInvalidateText()
+    }
+
+    var _markedTextLayer: ShapeLayer?
+    var markedTextLayer: ShapeLayer {
+        if let layer = _markedTextLayer {
+            return layer
         }
+
+        let layer = ShapeLayer(name: "markedText")
+        layer.layer.actions = [
+            "onOrderIn": NSNull(),
+            "onOrderOut": NSNull(),
+            "sublayers": NSNull(),
+            "contents": NSNull(),
+            "bounds": NSNull()
+        ]
+
+        layer.layer.zPosition = -1
+        layer.layer.position = CGPoint(x: indent, y: 0)
+        layer.shapeLayer.fillColor = markedColor.cgColor
+
+        _markedTextLayer = layer
+        addLayer(layer)
+        return layer
     }
 
-    func addDisclosureLayer(at point: NSPoint) {
-        let disclosureLayer = ChevronButton("disclosure", open: open, changed: { [unowned self] value in
-            self.open = value
-            layers["indentLayer"]?.layer.isHidden = !value
-        })
-        disclosureLayer.layer.isHidden = true
-        addLayer(disclosureLayer, origin: point)
+    var _selectedTextLayer: ShapeLayer?
+    var selectedTextLayer: ShapeLayer {
+        if let layer = _selectedTextLayer {
+            return layer
+        }
+
+        let layer = ShapeLayer(name: "selectedText")
+        layer.layer.actions = [
+            "onOrderIn": NSNull(),
+            "onOrderOut": NSNull(),
+            "sublayers": NSNull(),
+            "contents": NSNull(),
+            "bounds": NSNull()
+        ]
+
+        layer.layer.zPosition = -1
+        layer.layer.position = CGPoint(x: indent, y: 0)
+        layer.shapeLayer.fillColor = selectionColor.cgColor
+        _selectedTextLayer = layer
+        addLayer(layer)
+        return layer
     }
 
-    func addBulletPointLayer(at point: NSPoint) {
-        let bulletLayer = Layer(name: "bullet", layer: Layer.icon(named: "editor-bullet", color: BeamColor.Editor.bullet.nsColor))
-        bulletLayer.layer.isHidden = true
-        addLayer(bulletLayer, origin: point)
-    }
+    func updateSelection() {
+        markedTextLayer.layer.isHidden = true
+        selectedTextLayer.layer.isHidden = true
 
-    func drawSelection(in context: CGContext) {
         guard !readOnly else { return }
 
+        let rect = CGRect(origin: .zero, size: contentsFrame.size)
         //Draw Selection:
         if isEditing {
             if let range = markedTextRange {
-                drawMarkee(context, range.lowerBound, range.upperBound, markedColor)
+                markedTextLayer.shapeLayer.path = buildMarkeeShape(range.lowerBound, range.upperBound)
             }
+            markedTextLayer.frame = rect
+            markedTextLayer.layer.isHidden = selectedTextRange.isEmpty
 
             if !selectedTextRange.isEmpty {
-                drawMarkee(context, selectedTextRange.lowerBound, selectedTextRange.upperBound, selectionColor)
+                selectedTextLayer.shapeLayer.path = buildMarkeeShape(selectedTextRange.lowerBound, selectedTextRange.upperBound)
             }
+            markedTextLayer.frame = rect
+            selectedTextLayer.layer.isHidden = selectedTextRange.isEmpty
         }
     }
 
-    func drawText(in context: CGContext) {
-        // Draw the text:
-        context.saveGState()
-
-        guard let bulletLayer = self.layers["bullet"] else { return }
-        guard let disclosureLayer = self.layers["disclosure"] as? ChevronButton else { return }
-
-        if showDisclosureButton {
-            bulletLayer.layer.isHidden = true
-            disclosureLayer.layer.isHidden = false
-        } else {
-            bulletLayer.layer.isHidden = false
-            disclosureLayer.layer.isHidden = true
+    var _cursorLayer: ShapeLayer?
+    var cursorLayer: ShapeLayer {
+        if let layer = _cursorLayer {
+            return layer
         }
 
-        context.textMatrix = CGAffineTransform.identity
-        context.translateBy(x: 0, y: firstLineBaseline)
+        let layer = ShapeLayer(name: "cursor")
+        layer.layer.actions = [
+            "onOrderIn": NSNull(),
+            "onOrderOut": NSNull(),
+            "sublayers": NSNull(),
+            "contents": NSNull(),
+            "bounds": NSNull()
+        ]
 
-        textFrame?.draw(context)
-        context.restoreGState()
+        layer.layer.zPosition = 1
+        layer.layer.position = CGPoint(x: indent, y: 0)
+        _cursorLayer = layer
+        addLayer(layer)
+        return layer
     }
 
-    func drawCursor(in context: CGContext) {
-        guard !readOnly, editor.hasFocus, editor.blinkPhase else { return }
+    public func updateCursor() {
+        let on = !readOnly && editor.hasFocus && isFocused && editor.blinkPhase
         let cursorRect = rectAt(caretIndex: caretIndex)
+        let layer = self.cursorLayer
 
-        context.beginPath()
-        context.addRect(cursorRect)
-        //let fill = RBFill()
-        context.setFillColor(enabled ? color.cgColor : disabledColor.cgColor)
-
-        //list.draw(shape: shape, fill: fill, alpha: 1.0, blendMode: .normal)
-        context.drawPath(using: .fill)
+        layer.shapeLayer.fillColor = enabled ? color.cgColor : disabledColor.cgColor
+        layer.layer.isHidden = !on
+        layer.shapeLayer.path = CGPath(rect: cursorRect, transform: nil)
     }
 
     override func updateRendering() {
@@ -584,24 +491,9 @@ public class TextNode: Widget {
         return text.text.sentences(around: selectionStringRange)
     }
 
-    func fold() {
-        if children.isEmpty {
-            guard let p = parent as? TextNode else { return }
-            p.fold()
-            p.focus()
-            return
-        }
-
-        open = false
-    }
-
-    func unfold() {
-        guard !children.isEmpty else { return }
-        open = true
-    }
-
     override func onFocus() {
         super.onFocus()
+        updateCursor()
         if editor.hasFocus {
             updateActionLayerVisibility(hidden: text.isEmpty)
         }
@@ -609,6 +501,7 @@ public class TextNode: Widget {
 
     override func onUnfocus() {
         super.onUnfocus()
+        updateCursor()
         updateActionLayerVisibility(hidden: true)
     }
 
@@ -930,7 +823,7 @@ public class TextNode: Widget {
         return caret.offset.x
     }
 
-    public func offsetAt(index: Int) -> CGFloat {
+    override public func offsetAt(index: Int) -> CGFloat {
         guard let textFrame = emptyTextFrame ?? self.textFrame else { return 0 }
         guard !textFrame.lines.isEmpty else { return 0 }
         let displayIndex = displayIndexFor(sourceIndex: index)
@@ -984,12 +877,12 @@ public class TextNode: Widget {
         return sourceIndexFor(displayIndex: indexBelow)
     }
 
-    public func isOnFirstLine(_ position: Int) -> Bool {
+    override public func isOnFirstLine(_ position: Int) -> Bool {
         guard let l = lineAt(index: position) else { return false }
         return l == 0
     }
 
-    public func isOnLastLine(_ position: Int) -> Bool {
+    override public func isOnLastLine(_ position: Int) -> Bool {
         guard let textFrame = textFrame else { return true }
         guard textFrame.lines.count > 1 else { return true }
         guard let l = lineAt(index: position) else { return false }
@@ -1015,10 +908,10 @@ public class TextNode: Widget {
         return cursorRect
     }
 
-    public func rectAt(caretIndex: Int) -> NSRect {
+    override public func rectAt(caretIndex: Int) -> NSRect {
         updateRendering()
         guard let textFrame = textFrame else { return .zero }
-        let caret = textFrame.carets.isEmpty ? initialCaret : textFrame.carets[caretIndex]
+        let caret = caretIndex >= textFrame.carets.count ? initialCaret : textFrame.carets[caretIndex]
         let position = caret.positionInSource
 
         let textLine: TextLine = {
@@ -1035,7 +928,7 @@ public class TextNode: Widget {
         return cursorRect
     }
 
-    public func indexOnLastLine(atOffset x: CGFloat) -> Int {
+    override public func indexOnLastLine(atOffset x: CGFloat) -> Int {
         guard let lines = textFrame?.lines else { return 0 }
         guard !lines.isEmpty else { return 0 }
         guard let line = lines.last else { return 0 }
@@ -1047,7 +940,7 @@ public class TextNode: Widget {
         return sourceIndex
     }
 
-    public func indexOnFirstLine(atOffset x: CGFloat) -> Int {
+    override public func indexOnFirstLine(atOffset x: CGFloat) -> Int {
         guard let lines = textFrame?.lines else { return 0 }
         guard !lines.isEmpty else { return 0 }
         guard let line = lines.first else { return 0 }
@@ -1144,74 +1037,6 @@ public class TextNode: Widget {
         return NSPoint(x: indent + mouseInfo.position.x, y: mouseInfo.position.y)
     }
 
-    func openExternalLink(link: URL, element: BeamElement) {
-        editor.cancelInternalLink()
-        editor.openURL(link, element)
-    }
-
-    func nextVisibleTextNode() -> TextNode? {
-        var node = nextVisible()
-        while node != nil {
-            if let textNode = node as? TextNode {
-                return textNode
-            }
-            let next = node?.nextVisible()
-            assert(next != node)
-            node = next
-        }
-
-        return nil
-    }
-
-    func previousVisibleTextNode() -> TextNode? {
-        var node = previousVisible()
-        while node != nil {
-            if let textNode = node as? TextNode {
-                return textNode
-            }
-            let previous = node?.previousVisible()
-            assert(previous != node)
-            node = previous
-        }
-
-        return nil
-    }
-
-    func isAbove(node: TextNode) -> Bool {
-        guard !(node == self) else { return false }
-        let allParents1 = [Widget](allParents.reversed()) + [self]
-        guard !allParents1.contains(node) else { return false }
-        let allParents2 = [Widget](node.allParents.reversed()) + [node]
-        guard !allParents2.contains(self) else { return true }
-
-        // Both nodes must share the same root. If you crash here, you are comparing nodes that are NOT in the same tree...
-        assert(allParents1.first == allParents2.first)
-
-        var index = 0
-        // find first common parent:
-        let count = min(allParents1.count, allParents2.count)
-
-        while allParents1[index] == allParents2[index] {
-            let nextIndex = index + 1
-
-            guard nextIndex < count else {
-                return (allParents1[index].indexInParent!) < (allParents2[index].indexInParent!)
-            }
-            index = nextIndex
-        }
-
-        return (allParents1[index].indexInParent ?? -1) < (allParents2[index].indexInParent ?? -1)
-    }
-
-    public func deepestTextNodeChild() -> TextNode {
-        for c in children.reversed() {
-            if let c = c as? TextNode {
-                return c.deepestTextNodeChild()
-            }
-        }
-        return self
-    }
-
     override func dumpWidgetTree(_ level: Int = 0) {
         let tabs = String.tabs(level)
         //swiftlint:disable:next print
@@ -1219,10 +1044,6 @@ public class TextNode: Widget {
         for c in children {
             c.dumpWidgetTree(level + 1)
         }
-    }
-
-    override var mainLayerName: String {
-        "TextNode - \(element.id.uuidString)"
     }
 
     public override func accessibilityString(for range: NSRange) -> String? {
@@ -1361,7 +1182,7 @@ public class TextNode: Widget {
     }
 */
 
-    func subscribeToElement(_ element: BeamElement) {
+    override func subscribeToElement(_ element: BeamElement) {
         elementScope.removeAll()
 
         element.$text
@@ -1403,11 +1224,16 @@ public class TextNode: Widget {
         return textFrame?.caretForSourcePosition(index)
     }
 
-    func caretIndexForSourcePosition(_ index: Int) -> Int? {
+    override public func caretIndexForSourcePosition(_ index: Int) -> Int? {
         return textFrame?.caretIndexForSourcePosition(index)
     }
 
     var initialCaret: Caret {
         Caret(offset: NSPoint(x: indent, y: 0), indexInSource: 0, indexOnScreen: 0, edge: .leading, inSource: true, line: 0)
     }
+
+    override public var textCount: Int {
+        element.text.count
+    }
+
 }

@@ -13,7 +13,7 @@ extension TextRoot {
         guard let node = focusedWidget as? TextNode else { return }
         if selectedTextRange.isEmpty {
             if cursorPosition == 0 {
-                if let next = node.previousVisibleTextNode() {
+                if let next = node.previousVisibleNode(ElementNode.self) {
                     node.invalidateText()
                     next.focus(position: node.text.count)
                 } else {
@@ -32,7 +32,7 @@ extension TextRoot {
         guard let node = focusedWidget as? TextNode else { return }
         if selectedTextRange.isEmpty {
             if cursorPosition == node.text.count {
-                if let next = node.nextVisibleTextNode() {
+                if let next = node.nextVisibleNode(ElementNode.self) {
                     node.invalidateText()
                     next.focus()
                 }
@@ -151,9 +151,9 @@ extension TextRoot {
 
     func moveUp() {
         cancelNodeSelection()
-        guard let node = focusedWidget as? TextNode else { return }
+        guard let node = focusedWidget as? ElementNode else { return }
         if node.isOnFirstLine(cursorPosition) {
-            if let newNode = node.previousVisibleTextNode() {
+            if let newNode = node.previousVisibleNode(ElementNode.self) {
                 let offset = node.offsetAt(index: cursorPosition) + node.offsetInDocument.x - newNode.offsetInDocument.x
                 node.invalidateText()
                 newNode.focus(position: newNode.indexOnLastLine(atOffset: offset))
@@ -161,7 +161,9 @@ extension TextRoot {
                 cursorPosition = 0
             }
         } else {
-            cursorPosition = node.positionAbove(cursorPosition)
+            if let node = focusedWidget as? TextNode {
+                cursorPosition = node.positionAbove(cursorPosition)
+            }
         }
         cancelSelection()
         node.invalidateText()
@@ -169,16 +171,18 @@ extension TextRoot {
 
     func moveDown() {
         cancelNodeSelection()
-        guard let node = focusedWidget as? TextNode else { return }
+        guard let node = focusedWidget as? ElementNode else { return }
         if node.isOnLastLine(cursorPosition) {
-            if let newNode = node.nextVisibleTextNode() {
+            if let newNode = node.nextVisibleNode(ElementNode.self) {
                 let offset = node.offsetAt(index: cursorPosition) + node.offsetInDocument.x - newNode.offsetInDocument.x
                 node.invalidateText()
                 newNode.focus(position: newNode.indexOnFirstLine(atOffset: offset))
             } else {
+                guard let node = focusedWidget as? TextNode else { return }
                 cursorPosition = node.text.count
             }
         } else {
+            guard let node = focusedWidget as? TextNode else { return }
             cursorPosition = node.positionBelow(cursorPosition)
         }
         cancelSelection()
@@ -202,7 +206,7 @@ extension TextRoot {
         selection.append(parent)
         selection.appendChildren(of: parent)
         selection.start = parent
-        selection.end = parent.deepestTextNodeChild()
+        selection.end = parent.deepestElementNodeChild()
         return true
     }
 
@@ -223,7 +227,7 @@ extension TextRoot {
             selection.append(parent)
             selection.appendChildren(of: parent)
             selection.start = parent
-            selection.end = parent.deepestTextNodeChild()
+            selection.end = parent.deepestElementNodeChild()
             return true
         }
         return false
@@ -336,6 +340,7 @@ extension TextRoot {
     func wordSelection(from pos: Int) {
         guard let node = focusedWidget as? TextNode else { return }
         let str = node.text.text
+        guard str.count >= pos else { return }
         let index = str.index(str.startIndex, offsetBy: pos)
         str.enumerateSubstrings(in: str.startIndex..<str.endIndex, options: .byWords) { [self] (_, r1, _, stop) in
             if r1.contains(index) {

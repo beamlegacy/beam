@@ -67,8 +67,8 @@ public class TextRoot: TextNode {
         }
         set {
             assert(newValue >= 0)
-            let n = focusedWidget as? TextNode
-            let textCount = n?.element.text.count ?? 0
+            let n = focusedWidget as? ElementNode
+            let textCount = n?.textCount ?? 0
             let position = newValue > textCount ? textCount : newValue
             let caretIndex = n?.caretIndexForSourcePosition(position) ?? 0
             state.caretIndex = caretIndex
@@ -76,7 +76,7 @@ public class TextRoot: TextNode {
         }
     }
 
-    func updateCursor() {
+    func updateCursorPosition() {
         let n = focusedWidget as? TextNode
         if state.selectedTextRange.isEmpty {
             state.selectedTextRange = cursorPosition ..< cursorPosition
@@ -96,7 +96,7 @@ public class TextRoot: TextNode {
         }
         set {
             state.caretIndex = newValue
-            updateCursor()
+            updateCursorPosition()
         }
     }
 
@@ -241,7 +241,7 @@ public class TextRoot: TextNode {
 
     override var mainLayerName: String {
         guard let note = note else {
-            return "TextRoot - \(element.id.uuidString)"
+            return super.mainLayerName
 
         }
         return "TextRoot - [\(note.title)] - \(element.id.uuidString)"
@@ -253,21 +253,29 @@ public class TextRoot: TextNode {
     }
 
     // Mapping of elements to nodes and breadcrumbs:
-    override func nodeFor(_ element: BeamElement) -> TextNode? {
+    override func nodeFor(_ element: BeamElement) -> ElementNode? {
         return mapping[element]?.ref
     }
 
-    override func nodeFor(_ element: BeamElement, withParent: Widget) -> TextNode {
+    override func nodeFor(_ element: BeamElement, withParent: Widget) -> ElementNode {
         if let node = mapping[element]?.ref {
             return node
         }
 
-        let node: TextNode = {
+        let node: ElementNode = {
             guard let note = element as? BeamNote else {
                 guard element.note == nil || element.note == self.note else {
                     return LinkedReferenceNode(parent: withParent, element: element)
                 }
-                return TextNode(parent: withParent, element: element)
+
+                switch element.kind {
+                case .image:
+                    return ImageNode(parent: withParent, element: element)
+                case .embed:
+                    return EmbedNode(parent: withParent, element: element)
+                default:
+                    return TextNode(parent: withParent, element: element)
+                }
             }
             return TextRoot(editor: editor, element: note)
         }()
@@ -292,8 +300,8 @@ public class TextRoot: TextNode {
     }
 
     private var accessingMapping = false
-    private var mapping: [BeamElement: WeakReference<TextNode>] = [:]
-    private var deadNodes: [TextNode] = []
+    private var mapping: [BeamElement: WeakReference<ElementNode>] = [:]
+    private var deadNodes: [ElementNode] = []
 
     func purgeDeadNodes() {
         guard !accessingMapping else { return }
@@ -303,7 +311,7 @@ public class TextRoot: TextNode {
         deadNodes.removeAll()
     }
 
-    override func removeNode(_ node: TextNode) {
+    override func removeNode(_ node: ElementNode) {
         guard !accessingMapping else {
             deadNodes.append(node)
             return
@@ -328,4 +336,18 @@ public class TextRoot: TextNode {
         return note.cmdManager
     }
 
+    func insertElementNearNonTextElement(_ string: String = "") {
+        insertElementNearNonTextElement(BeamText(text: string))
+    }
+
+    func insertElementNearNonTextElement(_ string: BeamText) {
+        cmdManager.beginGroup(with: "Insert Element")
+        defer { cmdManager.endGroup() }
+        guard let node = focusedWidget as? ElementNode else { return }
+        let newElement = BeamElement(string)
+        let parent = node.parent as? ElementNode ?? node
+        let previous = node.previousSibbling() as? ElementNode
+        cmdManager.insertElement(newElement, in: parent, after: caretIndex == 0 ? previous : node)
+        cmdManager.focus(newElement, in: node)
+    }
 }

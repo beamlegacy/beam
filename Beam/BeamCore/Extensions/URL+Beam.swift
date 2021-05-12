@@ -46,4 +46,19 @@ public extension URL {
         return ["http", "https"]
     }
 
+    var embed: URL? {
+        guard let scheme = self.scheme,
+              let host = self.host,
+              let youtubeID = self.query?.capturedGroups(withRegex: "v=([\\w|\\d]+)&?.*").first
+        else {
+            return nil
+        }
+
+        return URL(string: "\(scheme)://\(host)/embed/\(youtubeID)")
+    }
+
+    var tld: String? {
+        return host?.tld
+    }
+
 }

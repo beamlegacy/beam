@@ -12,7 +12,7 @@ import WebKit
 import SwiftSoup
 import BeamCore
 
-@objc class BeamState: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Codable {
+@objc class BeamState: NSObject, ObservableObject, Codable {
     var data: BeamData
     public var searchEngine: SearchEngine = GoogleSearch()
 
@@ -187,14 +187,14 @@ import BeamCore
         currentTab?.load(url: url)
     }
 
-    func addNewTab(origin: BrowsingTreeOrigin?, setCurrent: Bool = true, note: BeamNote, element: BeamElement? = nil, url: URL? = nil, webView: WKWebView? = nil) -> BrowserTab {
+    func addNewTab(origin: BrowsingTreeOrigin?, setCurrent: Bool = true, note: BeamNote, element: BeamElement? = nil, url: URL? = nil, webView: BeamWebView? = nil) -> BrowserTab {
         let tab = BrowserTab(state: self, browsingTreeOrigin: origin, note: note, rootElement: element, webView: webView)
         browserTabsManager.addNewTab(tab, setCurrent: setCurrent, withURL: url)
         mode = .web
         return tab
     }
 
-    func createTab(withURL url: URL, originalQuery: String?, setCurrent: Bool = true, note: BeamNote? = nil, rootElement: BeamElement? = nil, webView: WKWebView? = nil) -> BrowserTab {
+    func createTab(withURL url: URL, originalQuery: String?, setCurrent: Bool = true, note: BeamNote? = nil, rootElement: BeamElement? = nil, webView: BeamWebView? = nil) -> BrowserTab {
         let origin = BrowsingTreeOrigin.searchBar(query: originalQuery ?? "<???>")
         return addNewTab(origin: origin, setCurrent: setCurrent, note: note ?? data.todaysNote, element: rootElement, url: url, webView: webView)
     }
@@ -361,22 +361,8 @@ import BeamCore
         backForwardList.push(.journal)
     }
 
-    func cookiesDidChange(in cookieStore: WKHTTPCookieStore) {
-        cookieStore.getAllCookies({ [weak self] cookies in
-            guard let self = self else { return }
-
-            for cookie in cookies {
-                self.data.cookies.setCookie(cookie)
-            }
-        })
-    }
-
     func setup(webView: WKWebView) {
-        for cookie in self.data.cookies.cookies ?? [] {
-            webView.configuration.websiteDataStore.httpCookieStore.setCookie(cookie)
-        }
-
-        webView.configuration.websiteDataStore.httpCookieStore.add(self)
+        data.setup(webView: webView)
     }
 
     func generateTabs(_ number: Int = 100) {

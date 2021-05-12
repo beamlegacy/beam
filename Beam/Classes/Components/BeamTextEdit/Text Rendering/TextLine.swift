@@ -143,10 +143,12 @@ public class TextLine {
         CTLineGetGlyphRuns(ctLine) as! [CTRun]
     }
 
-    public func draw(_ context: CGContext) {
+    public func draw(_ context: CGContext, translate: Bool = true) {
         context.saveGState()
         context.textPosition = NSPoint()//line.frame.origin
-        context.translateBy(x: frame.origin.x, y: frame.origin.y)
+        if translate {
+            context.translateBy(x: frame.origin.x, y: frame.origin.y)
+        }
         context.scaleBy(x: 1, y: -1)
 
         CTLineDraw(ctLine, context)
@@ -202,4 +204,16 @@ public class TextLine {
     }
 
     public var interlineFactor: CGFloat = 1.0
+
+    private var _layer: CALayer?
+    var layer: CALayer {
+        if let layer = _layer {
+            return layer
+        }
+
+        let layer = TextLineLayer(self)
+
+        _layer = layer
+        return layer
+    }
 }

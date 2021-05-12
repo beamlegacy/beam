@@ -6,7 +6,6 @@ import BeamCore
 import Promises
 
 // swiftlint:disable file_length
-
 // swiftlint:disable:next type_body_length
 class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, WKUIDelegate, Codable, WebPage, Scorable {
 
@@ -28,7 +27,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         }.store(in: &scope)
     }
 
-    @Published public var webView: WKWebView! {
+    @Published public var webView: BeamWebView! {
         didSet {
             setupObservers()
         }
@@ -117,11 +116,11 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
     private var scope = Set<AnyCancellable>()
 
-    static var webViewConfiguration: BeamWebViewConfiguration = BrowserTabConfiguration()
+    static var webViewConfiguration = BrowserTabConfiguration()
     var browsingTreeOrigin: BrowsingTreeOrigin?
 
     init(state: BeamState, browsingTreeOrigin: BrowsingTreeOrigin?, note: BeamNote, rootElement: BeamElement? = nil, id: UUID = UUID(),
-         webView: WKWebView? = nil) {
+         webView: BeamWebView? = nil) {
         self.state = state
         self.id = id
         self.note = note
@@ -132,11 +131,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             self.webView = suppliedWebView
             backForwardList = suppliedWebView.backForwardList
         } else {
-            guard let configuration = Self.webViewConfiguration as? WKWebViewConfiguration else {
-                fatalError("Should not happen")
-            }
-
-            let web = BeamWebView(frame: NSRect(), configuration: configuration)
+            let web = BeamWebView(frame: NSRect(), configuration: Self.webViewConfiguration)
             web.wantsLayer = true
             web.allowsMagnification = true
 
@@ -149,10 +144,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
         super.init(frame: .zero)
 
-        guard let beamWebView = self.webView as? BeamWebView else {
-            fatalError("Should not happen")
-        }
-        beamWebView.page = self
+        self.webView.page = self
 
         note.browsingSessions.append(browsingTree)
         setupObservers()
@@ -203,10 +195,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
     func postLoadSetup(state: BeamState) {
         self.state = state
-        guard let configuration = Self.webViewConfiguration as? WKWebViewConfiguration else {
-            fatalError("Should not happen")
-        }
-        let web = BeamWebView(frame: NSRect(), configuration: configuration)
+        let web = BeamWebView(frame: NSRect(), configuration: Self.webViewConfiguration)
         web.wantsLayer = true
         web.allowsMagnification = true
 
@@ -419,10 +408,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
     }
 
     func createNewTab(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, setCurrent: Bool) -> BrowserTab {
-        guard let configuration = configuration ?? Self.webViewConfiguration as? WKWebViewConfiguration else {
-            fatalError("Should not happen")
-        }
-        let newWebView = BeamWebView(frame: NSRect(), configuration: configuration)
+        let newWebView = BeamWebView(frame: NSRect(), configuration: configuration ?? Self.webViewConfiguration)
         newWebView.wantsLayer = true
         newWebView.allowsMagnification = true
 

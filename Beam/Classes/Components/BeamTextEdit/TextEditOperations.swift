@@ -25,16 +25,16 @@ extension TextRoot {
         editor.focusedWidget ?? editor.rootNode
     }
 
-    func increaseNodeIndentation(_ node: TextNode) -> Bool {
+    func increaseNodeIndentation(_ node: ElementNode) -> Bool {
         guard !node.readOnly,
               node.element.canIncreaseIndentation,
               node.parent as? BreadCrumb == nil,
-              let newParent = node.previousSibbling() as? TextNode
+              let newParent = node.previousSibbling() as? ElementNode
         else { return false }
         return cmdManager.reparentElement(node, to: newParent, atIndex: newParent.element.children.count)
     }
 
-    func decreaseNodeIndentation(_ node: TextNode) -> Bool {
+    func decreaseNodeIndentation(_ node: ElementNode) -> Bool {
         guard !node.readOnly,
               node.parent as? BreadCrumb == nil,
               node.parent?.parent as? BreadCrumb == nil,
@@ -71,7 +71,7 @@ extension TextRoot {
             increaseNodeSelectionIndentation()
             return
         }
-        guard let node = focusedWidget as? TextNode else { return }
+        guard let node = focusedWidget as? ElementNode else { return }
         _ = increaseNodeIndentation(node)
     }
 
@@ -80,7 +80,7 @@ extension TextRoot {
             decreaseNodeSelectionIndentation()
             return
         }
-        guard let node = focusedWidget as? TextNode else { return }
+        guard let node = focusedWidget as? ElementNode else { return }
         _ = decreaseNodeIndentation(node)
     }
 
@@ -96,9 +96,9 @@ extension TextRoot {
         root.note?.cmdManager.beginGroup(with: "Delete selected nodes")
         defer { root.note?.cmdManager.endGroup() }
 
-        if let prevWidget = sortedNodes.first?.previousVisibleTextNode() {
+        if let prevWidget = sortedNodes.first?.previousVisibleNode(TextNode.self) {
             cmdManager.focusElement(prevWidget, cursorPosition: prevWidget.text.count)
-        } else if let nextVisibleNode = sortedNodes.last?.nextVisibleTextNode() {
+        } else if let nextVisibleNode = sortedNodes.last?.nextVisibleNode(TextNode.self) {
             if (nextVisibleNode as? LinkedReferenceNode) == nil {
                 cmdManager.focusElement(nextVisibleNode, cursorPosition: 0)
             }
@@ -147,7 +147,18 @@ extension TextRoot {
         }
 
         guard let node = focusedWidget as? TextNode, !node.readOnly,
-              node.elementNoteTitle != nil else { return }
+              node.elementNoteTitle != nil else {
+            if let node = focusedWidget as? ElementNode {
+                cmdManager.beginGroup(with: "Delete forward")
+                if let nextVisibleNode = node.nextVisibleNode(ElementNode.self) {
+                    cmdManager.focusElement(nextVisibleNode, cursorPosition: 0)
+                }
+                cmdManager.deleteElement(for: node)
+                cmdManager.endGroup()
+            }
+            return
+
+        }
 
         if !selectedTextRange.isEmpty {
             cmdManager.deleteText(in: node, for: selectedTextRange)
@@ -157,9 +168,11 @@ extension TextRoot {
             // Delete element forward
             cmdManager.beginGroup(with: "Delete forward")
             defer { cmdManager.endGroup() }
-            if let nextVisibleNode = node.nextVisibleTextNode() {
+            if let nextVisibleNode = node.nextVisibleNode(ElementNode.self) {
                 let pos = cursorPosition
-                cmdManager.replaceText(in: node, for: cursorPosition..<cursorPosition, with: nextVisibleNode.text)
+                if let nextVisibleNode = nextVisibleNode as? TextNode {
+                    cmdManager.replaceText(in: node, for: cursorPosition..<cursorPosition, with: nextVisibleNode.text)
+                }
                 cmdManager.cancelSelection(node)
                 cmdManager.focusElement(node, cursorPosition: pos)
                 cmdManager.deleteElement(for: nextVisibleNode)
@@ -174,7 +187,17 @@ extension TextRoot {
             return
         }
 
-        guard let node = focusedWidget as? TextNode, !node.readOnly else { return }
+        guard let node = focusedWidget as? TextNode, !node.readOnly else {
+            if let node = focusedWidget as? ElementNode {
+                cmdManager.beginGroup(with: "Delete backward")
+                if let nextVisibleNode = node.nextVisibleNode(ElementNode.self) {
+                    cmdManager.focusElement(nextVisibleNode, cursorPosition: 0)
+                }
+                cmdManager.deleteElement(for: node)
+                cmdManager.endGroup()
+            }
+            return
+        }
 
         if cursorPosition == 0, selectedTextRange.isEmpty {
             if node.element == node.element.note?.children.first {
@@ -184,14 +207,18 @@ extension TextRoot {
 
             cmdManager.beginGroup(with: "Delete backward")
             defer { cmdManager.endGroup() }
-            if let prevVisibleNode = node.previousVisibleTextNode() {
-                let pos = prevVisibleNode.text.count
-                cmdManager.replaceText(in: prevVisibleNode, for: pos..<pos, with: node.text)
-                cmdManager.focusElement(prevVisibleNode, cursorPosition: pos)
-                for (i, child) in node.unproxyElement.children.enumerated() {
-                    cmdManager.reparentElement(child, to: prevVisibleNode.unproxyElement, atIndex: i)
+            if let prevVisibleNode = node.previousVisibleNode(ElementNode.self) {
+                if let prevVisibleNode = prevVisibleNode as? TextNode {
+                    let pos = prevVisibleNode.text.count
+                    cmdManager.replaceText(in: prevVisibleNode, for: pos..<pos, with: node.text)
+                    cmdManager.focusElement(prevVisibleNode, cursorPosition: pos)
+                    for (i, child) in node.unproxyElement.children.enumerated() {
+                        cmdManager.reparentElement(child, to: prevVisibleNode.unproxyElement, atIndex: i)
+                    }
+                    cmdManager.deleteElement(for: node)
+                } else {
+                    cmdManager.deleteElement(for: prevVisibleNode)
                 }
-                cmdManager.deleteElement(for: node)
             }
         } else {
             if selectedTextRange.isEmpty {
@@ -253,8 +280,15 @@ extension TextRoot {
 
     public func insertText(string: String, replacementRange: Range<Int>?) {
         eraseNodeSelection(createEmptyNodeInPlace: true)
-        guard let node = focusedWidget as? TextNode,
-              !node.readOnly else { return }
+        guard let node = focusedWidget as? TextNode, !node.readOnly
+        else {
+            guard focusedWidget as? ElementNode != nil else {
+                return
+            }
+
+            insertElementNearNonTextElement(string)
+            return
+        }
 
         var range = cursorPosition..<cursorPosition
         if let r = replacementRange {
@@ -273,6 +307,38 @@ extension TextRoot {
 
         let bText = BeamText(text: string, attributes: root.state.attributes)
         cmdManager.inputText(bText, in: node, at: cursorPosition)
+
+        unmarkText()
+    }
+
+    public func insertText(text: BeamText, replacementRange: Range<Int>?) {
+        eraseNodeSelection(createEmptyNodeInPlace: true)
+        guard let node = focusedWidget as? TextNode, !node.readOnly
+        else {
+            guard focusedWidget as? ElementNode != nil else {
+                return
+            }
+
+            insertElementNearNonTextElement(text)
+            return
+        }
+
+        var range = cursorPosition..<cursorPosition
+        if let r = replacementRange {
+            range = r
+        } else {
+            if let markedRange = markedTextRange {
+                range = markedRange
+            } else {
+                range = selectedTextRange
+            }
+        }
+
+        if !range.isEmpty {
+            cmdManager.deleteText(in: node, for: range)
+        }
+
+        cmdManager.inputText(text, in: node, at: cursorPosition)
 
         unmarkText()
     }

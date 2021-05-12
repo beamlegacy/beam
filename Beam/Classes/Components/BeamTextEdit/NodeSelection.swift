@@ -9,14 +9,14 @@ import Foundation
 import BeamCore
 
 class NodeSelection {
-    var start: TextNode
-    var end: TextNode
+    var start: ElementNode
+    var end: ElementNode
 
     /// All the selected nodes
-    public private(set) var nodes: Set<TextNode>
+    public private(set) var nodes: Set<ElementNode>
 
     /// All the selected nodes, sorted from top to bottom
-    public var sortedNodes: [TextNode] {
+    public var sortedNodes: [ElementNode] {
         nodes.sorted { (node1, node2) -> Bool in
             node1.isAbove(node: node2)
         }
@@ -27,10 +27,10 @@ class NodeSelection {
     }
 
     /// Return the nodes that are selected and for which the parent isn't in the list of selected nodes
-    public var roots: [TextNode] {
-        nodes.compactMap({ (node) -> TextNode? in
+    public var roots: [ElementNode] {
+        nodes.compactMap({ (node) -> ElementNode? in
             for p in node.allParents {
-                guard let p = p as? TextNode else { continue }
+                guard let p = p as? ElementNode else { continue }
                 if nodes.contains(p) {
                     return nil
                 }
@@ -40,13 +40,13 @@ class NodeSelection {
     }
 
     /// All the selected roots, sorted from top to bottom
-    public var sortedRoots: [TextNode] {
+    public var sortedRoots: [ElementNode] {
          roots.sorted { (node1, node2) -> Bool in
             node1.isAbove(node: node2)
         }
     }
 
-    init(start: TextNode, end: TextNode, elements: Set<TextNode> = Set<TextNode>()) {
+    init(start: ElementNode, end: ElementNode, elements: Set<ElementNode> = Set<ElementNode>()) {
         self.start = start
         self.end = end
         self.nodes = elements
@@ -54,11 +54,11 @@ class NodeSelection {
         selectRange(start: start, end: end)
     }
 
-    private func _selectRange(start: TextNode, end: TextNode) {
+    private func _selectRange(start: ElementNode, end: ElementNode) {
         var node = start
         while node != end {
             append(node)
-            if let nextVisible = node.nextVisibleTextNode() {
+            if let nextVisible = node.nextVisibleNode(ElementNode.self) {
                 node = nextVisible
             } else {
                 Logger.shared.logError("unable to select node range", category: .document)
@@ -68,7 +68,7 @@ class NodeSelection {
         append(end)
     }
 
-    func selectRange(start: TextNode, end: TextNode) {
+    func selectRange(start: ElementNode, end: ElementNode) {
         if start.isAbove(node: end) {
             _selectRange(start: start, end: end)
         } else {
@@ -77,8 +77,7 @@ class NodeSelection {
     }
 
     func extendUp() {
-        guard let next = end.previousVisibleTextNode(),
-              type(of: end) == type(of: next) else { return }
+        guard let next = end.previousVisibleNode(ElementNode.self) else { return }
 
         if next.isAbove(node: start) {
             end = next
@@ -92,8 +91,7 @@ class NodeSelection {
     }
 
     func extendDown() {
-        guard let next = end.nextVisibleTextNode(),
-              type(of: end) == type(of: next) else { return }
+        guard let next = end.nextVisibleNode(ElementNode.self) else { return }
 
         if next.isAbove(node: start) || next == start {
             if start != end {
@@ -106,7 +104,7 @@ class NodeSelection {
         }
     }
 
-    func append(_ node: TextNode) {
+    func append(_ node: ElementNode) {
         node.selected = true
         nodes.insert(node)
         if nodes.count > 1 {
@@ -121,7 +119,7 @@ class NodeSelection {
         }
     }
 
-    func remove(_ node: TextNode) {
+    func remove(_ node: ElementNode) {
         node.selected = false
         node.selectedAlone = true
         nodes.remove(node)
@@ -140,9 +138,9 @@ class NodeSelection {
         }
     }
 
-    func appendChildren(of node: TextNode) {
+    func appendChildren(of node: ElementNode) {
         for child in node.children {
-            guard let child = child as? TextNode else { continue }
+            guard let child = child as? ElementNode else { continue }
             child.selectionLayerPosX = minOffset - child.offsetInRoot.x
             child.selectedAlone = false
             child.selected = true
@@ -152,9 +150,9 @@ class NodeSelection {
         }
     }
 
-    func removeChildren(of node: TextNode) {
+    func removeChildren(of node: ElementNode) {
         for child in node.children {
-            guard let child = child as? TextNode else { continue }
+            guard let child = child as? ElementNode else { continue }
             child.selected = false
             nodes.insert(child)
 

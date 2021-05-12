@@ -72,7 +72,7 @@ class ReparentElement: TextEditorCommand {
 
 extension CommandManager where Context == Widget {
     @discardableResult
-    func reparentElement(_ node: TextNode, to parent: TextNode, atIndex newIndex: Int) -> Bool {
+    func reparentElement(_ node: ElementNode, to parent: ElementNode, atIndex newIndex: Int) -> Bool {
         // make sure all elements are in the name note
         guard let title = node.elementNoteTitle ?? parent.elementNoteTitle
         else { return false }

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import TLDExtract
 
 public extension String {
     var markdownizedURL: String? {
@@ -39,4 +40,12 @@ public extension String {
         return (false, "")
     }
 
+    private static var TLDextractor : TLDExtract = {
+        //swiftlint:disable:next force_cast
+        try! TLDExtract(useFrozenData: true)
+    }()
+
+    var tld: String? {
+        Self.TLDextractor.parse(self)?.rootDomain
+    }
 }

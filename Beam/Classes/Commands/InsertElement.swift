@@ -51,7 +51,7 @@ class InsertElement: TextEditorCommand {
 
 extension CommandManager where Context == Widget {
     @discardableResult
-    func insertElement(_ element: BeamElement, in node: TextNode, after: TextNode?) -> Bool {
+    func insertElement(_ element: BeamElement, in node: ElementNode, after: ElementNode?) -> Bool {
         guard let title = node.elementNoteTitle else { return false }
         let cmd = InsertElement(element, in: node.elementId, of: title, after: after?.elementId)
         return run(command: cmd, on: node)
