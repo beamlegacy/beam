@@ -47,7 +47,7 @@ struct NoteHeaderView: View {
 
     private var titleView: some View {
         ZStack(alignment: .leading) {
-            if canEditTitle && isEditingTitle {
+            if canEditTitle {
                 BeamTextField(text: $titleValue,
                               isEditing: $isEditingTitle,
                               placeholder: "Card's title",
@@ -194,11 +194,14 @@ struct NoteHeaderView: View {
             ])
         }
         items.append([ContextMenuItem(title: note.isPublic ? "Unpublish" : "Publish", action: nil)])
-        items.append([
-            canEditTitle ? ContextMenuItem(title: "Rename", action: focusTitle) : ContextMenuItem(title: "Cannot be renamed", action: nil),
+        var thirdGroup = [
             ContextMenuItem(title: "Favorite", action: nil),
             ContextMenuItem(title: "Export", action: nil)
-        ])
+        ]
+        if canEditTitle {
+            thirdGroup.insert(ContextMenuItem(title: "Rename", action: focusTitle), at: 0)
+        }
+        items.append(thirdGroup)
         items.append([ContextMenuItem(title: "Delete", action: nil)])
 
         let menuView = ContextMenuFormatterView(items: items, direction: .bottom) {
