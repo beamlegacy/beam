@@ -66,6 +66,9 @@ class BeamTextFieldView: NSTextField {
         _currentColor = textColor
         let attrs = attributedStringAttributes(textColor ?? NSColor.white, font)
         let textString = NSAttributedString(string: text, attributes: attrs)
+        if self.font != font {
+            self.font = font
+        }
         self.attributedStringValue = textString
     }
 

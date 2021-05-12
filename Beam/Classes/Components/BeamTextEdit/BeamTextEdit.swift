@@ -22,11 +22,12 @@ public extension CALayer {
 // swiftlint:disable:next type_body_length
 @objc public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
 
+    static let textWidth: CGFloat = 550
+
     var data: BeamData?
     var cardTopSpace: CGFloat {
-        return journalMode ? 135 : 198
+        journalMode ? 135 : 0
     }
-
     var centerText = false {
         didSet {
             setupCardHeader()
@@ -35,7 +36,9 @@ public extension CALayer {
 
     var note: BeamElement! {
         didSet {
-            scroll(.zero)
+            DispatchQueue.main.async {
+                self.scroll(.zero)
+            }
             updateRoot(with: note)
         }
     }
@@ -43,7 +46,7 @@ public extension CALayer {
     func updateRoot(with note: BeamElement) {
         guard note != rootNode?.element else { return }
         if let layers = layer?.sublayers {
-            for l in layers where ![cardHeaderLayer, cardTimeLayer, titleLayer].contains(l) {
+            for l in layers where ![cardHeaderLayer, cardTimeLayer].contains(l) {
                 l.removeFromSuperlayer()
             }
         }
@@ -83,11 +86,8 @@ public extension CALayer {
     let cardTitleWeatherLayer = CALayer()
     let cardSideLayer = CALayer()
     let cardSideTitleLayer = CATextLayer()
-    let cardOptionLayer = CALayer()
     let cardTimeLayer = CATextLayer()
     let titleUnderLine = CALayer()
-
-    var textWidth: CGFloat { 538 }
 
     private (set) var isResizing = false
     private (set) var journalMode: Bool
@@ -106,13 +106,8 @@ public extension CALayer {
         self.layer = l
         l.backgroundColor = BeamColor.Generic.background.cgColor
         l.masksToBounds = false
-        l.addSublayer(titleLayer)
-        //titleLayer.backgroundColor = NSColor.red.cgColor.copy(alpha: 0.2)
-        titleLayer.backgroundColor = NSColor(white: 1, alpha: 0).cgColor
-        titleLayer.setNeedsDisplay()
 
         layer?.delegate = self
-        titleLayer.delegate = self
         // self.wantsLayer = true
 
         timer = Timer.init(timeInterval: 1.0 / 60.0, repeats: true) { [unowned self] _ in
@@ -156,7 +151,6 @@ public extension CALayer {
         layer?.backgroundColor = BeamColor.Generic.background.cgColor
 
         layer?.setNeedsDisplay()
-        titleLayer.setNeedsDisplay()
         rootNode.deepInvalidateRendering()
         rootNode.deepInvalidateText()
     }
@@ -195,10 +189,9 @@ public extension CALayer {
 
     var showTitle = true {
         didSet {
-            titleLayer.isHidden = !showTitle
+            cardHeaderLayer.isHidden = !showTitle
         }
     }
-    var titleLayer = CALayer()
 
     public var activated: () -> Void = { }
     public var activateOnLostFocus = true
@@ -252,7 +245,7 @@ public extension CALayer {
         var rect = NSRect(x: leadingAlignment, y: topOffsetActual, width: width, height: r.height)
 
         if centerText {
-            let x = (frame.width - textWidth) / 2
+            let x = (frame.width - Self.textWidth) / 2
 
             rect = NSRect(x: x, y: topOffsetActual + cardTopSpace, width: textNodeWidth, height: r.height)
 
@@ -282,7 +275,7 @@ public extension CALayer {
     }
 
     var textNodeWidth: CGFloat {
-        return centerText ? textWidth : CGFloat(isBig ? frame.width - 200 - leadingAlignment : 450)
+        return centerText ? Self.textWidth : CGFloat(isBig ? frame.width - 200 - leadingAlignment : 450)
     }
 
     // This is the root node of what we are editing:
@@ -328,14 +321,11 @@ public extension CALayer {
         var icon = NSImage(named: "editor-options")
         icon = icon?.fill(color: BeamColor.Card.optionIcon.nsColor)
 
-        cardOptionLayer.name = "cardOptionLayer"
-        cardOptionLayer.contents = icon?.cgImage
-        cardOptionLayer.contentsGravity = .resizeAspect
-
         cardTitleLayer.name = "cardTitleLayer"
         cardTitleLayer.enableAnimations = false
         cardTimeLayer.enableAnimations = false
         cardHeaderLayer.enableAnimations = false
+        cardHeaderLayer.isHidden = !showTitle
 
         cardTitleLayer.foregroundColor = BeamColor.Generic.text.cgColor
         cardTitleLayer.font = BeamFont.semibold(size: 0).nsFont
@@ -347,34 +337,18 @@ public extension CALayer {
             titleUnderLine.backgroundColor = BeamColor.AlphaGray.cgColor
             titleUnderLine.isHidden = true
             cardTitleLayer.addSublayer(titleUnderLine)
-        }
 
-        if cardNote.isTodaysNote, journalMode {
-
-            var weatherIcon = getWeatherIcon()
-            weatherIcon = weatherIcon?.fill(color: BeamColor.Generic.text.nsColor)
-            cardTitleWeatherLayer.contents = weatherIcon?.cgImage
-            cardTitleWeatherLayer.contentsGravity = .resizeAspect
-            cardHeaderLayer.addSublayer(cardTitleWeatherLayer)
+            if cardNote.isTodaysNote {
+                var weatherIcon = getWeatherIcon()
+                weatherIcon = weatherIcon?.fill(color: BeamColor.Generic.text.nsColor)
+                cardTitleWeatherLayer.contents = weatherIcon?.cgImage
+                cardTitleWeatherLayer.contentsGravity = .resizeAspect
+                cardHeaderLayer.addSublayer(cardTitleWeatherLayer)
+            }
         }
 
         cardHeaderLayer.addSublayer(cardTitleLayer)
-        // TODO: show option layer later
-        // cardHeaderLayer.addSublayer(cardOptionLayer)
-
         addToMainLayer(cardHeaderLayer)
-        if !journalMode && cardNote.type == .note {
-
-            cardTimeLayer.name = "cardTimeLayer"
-            cardTimeLayer.foregroundColor = BeamColor.Generic.placeholder.cgColor
-            cardTimeLayer.font = BeamFont.medium(size: 0).nsFont
-            cardTimeLayer.fontSize = 12 //  TODO: Change later (isBig ? 12 : 10)
-            let formatter = DateFormatter()
-            formatter.dateStyle = .long
-            formatter.timeStyle = .none
-            cardTimeLayer.string = formatter.string(from: note.creationDate)
-            addToMainLayer(cardTimeLayer)
-        }
     }
 
     private var cardHeaderPosY: CGFloat {
@@ -389,18 +363,10 @@ public extension CALayer {
         let cardHeaderPosX = rect.origin.x + 17
         cardHeaderLayer.frame = CGRect(origin: CGPoint(x: cardHeaderPosX, y: cardHeaderPosY), size: NSSize(width: rect.width, height: cardTitleLayer.preferredFrameSize().height))
         cardTitleLayer.frame = CGRect(origin: CGPoint(x: 0, y: 0), size: NSSize(width: cardTitleLayer.preferredFrameSize().width, height: cardTitleLayer.preferredFrameSize().height))
-        cardOptionLayer.frame = CGRect(origin: CGPoint(x: rect.width - 16, y: 10), size: NSSize(width: 16, height: 16))
 
         guard let cardNote = note as? BeamNote else { return }
         if cardNote.isTodaysNote {
             cardTitleWeatherLayer.frame = CGRect(origin: CGPoint(x: cardTitleLayer.preferredFrameSize().width + 11, y: cardTitleLayer.preferredFrameSize().height / 2 - 9), size: NSSize(width: 22.5, height: 18.5))
-        }
-        if !journalMode && cardNote.type == .note {
-            cardTimeLayer.frame = CGRect(
-                // TODO: Change later (isBig ? 101 : 95)
-                origin: CGPoint(x: cardHeaderPosX, y: cardTimePosY),
-                size: NSSize(width: rect.width, height: cardTimeLayer.preferredFrameSize().height)
-            )
         }
     }
 
@@ -1220,7 +1186,6 @@ public extension CALayer {
         }
         window.acceptsMouseMovedEvents = true
         rootNode.contentsScale = window.backingScaleFactor
-        titleLayer.contentsScale = window.backingScaleFactor
 
         cardTitleLayer.contentsScale = window.backingScaleFactor
         cardTimeLayer.contentsScale = window.backingScaleFactor
@@ -1241,29 +1206,7 @@ public extension CALayer {
     public func layoutSublayers(of layer: CALayer) {
         inRelayout = true; defer { inRelayout = false }
         guard layer === self.layer else { return }
-        let h = title.frame.height
-        titleLayer.bounds = CGRect(x: 0, y: 0, width: leadingAlignment, height: h + 15)
-        //        let x = leadingAlignment - title.frame.width - titlePadding
-        let y = topOffset
-        titleLayer.anchorPoint = NSPoint()
-        titleLayer.position = NSPoint(x: 0, y: y)
-        //        Logger.shared.logDebug("titleFrame: \(titleLayer.bounds) / \(titleLayer.position) (hidden: \(titleLayer.isHidden))")
-
         relayoutRoot()
-    }
-
-    public func draw(_ layer: CALayer, in context: CGContext) {
-        guard layer === self.titleLayer else { return }
-
-        //        Logger.shared.logDebug("draw title into titleLayer: \(titleLayer.bounds) / \(titleLayer.position) (hidden: \(titleLayer.isHidden))")
-        context.saveGState()
-        context.textMatrix = CGAffineTransform.identity
-        let x = leadingAlignment - title.frame.width - titlePadding
-        let n = rootNode.children.first as? TextNode
-        let y = n?.firstLineBaseline ?? 0
-        context.translateBy(x: x, y: y)
-        title.draw(context)
-        context.restoreGState()
     }
 
     let documentManager = DocumentManager(coreDataManager: CoreDataManager.shared)

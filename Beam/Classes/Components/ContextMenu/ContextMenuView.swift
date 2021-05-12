@@ -37,9 +37,13 @@ struct ContextMenuItemView: View {
 
 }
 
+class ContextMenuViewModel: BaseFormatterViewViewModel, ObservableObject {
+    var onSelectMenuItem: (() -> Void)?
+}
+
 struct ContextMenuView: View {
 
-    @ObservedObject var viewModel = FormatterViewViewModel()
+    @ObservedObject var viewModel = ContextMenuViewModel()
     static let itemHeight: CGFloat = 23
     static let defaultWidth: CGFloat = 160
 
@@ -65,6 +69,7 @@ struct ContextMenuView: View {
                             .disabled(item.action == nil)
                             .onTapGesture {
                                 item.action?()
+                                viewModel.onSelectMenuItem?()
                             }
                     }
                     if i != items.count - 1 {

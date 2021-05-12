@@ -49,11 +49,8 @@ struct ModeView: View {
                         .animation(.easeInOut(duration: 0.3))
                     case .note:
                         ZStack {
-                            NoteView(note: state.currentNote!,
-                                     showTitle: false,
-                                     scrollable: true,
-                                     centerText: true) { scrollPoint in
-                                contentIsScrolled = scrollPoint.y > NoteView.topOffset
+                            NoteView(note: state.currentNote!, centerText: true) { scrollPoint in
+                                contentIsScrolled = scrollPoint.y > NoteView.topSpacingBeforeTitle
                             }
                         }
                         .transition(.opacity)
@@ -67,7 +64,7 @@ struct ModeView: View {
                                           showsIndicators: false,
                                           proxy: geometry) { scrollPoint in
                             contentIsScrolled = scrollPoint.y >
-                                JournalScrollView.firstNoteTopOffset(forProxy: geometry) + NoteView.topOffset
+                                JournalScrollView.firstNoteTopOffset(forProxy: geometry)
                         }
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .clipped()

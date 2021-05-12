@@ -201,8 +201,7 @@ struct AllCardsPageContentView: View {
             let item = notesList[row]
             let note = BeamNote.fetchOrCreate(data.documentManager, title: item.title)
             if note.title != title {
-                note.title = title
-                note.save(documentManager: data.documentManager) { _ in
+                note.updateTitle(title, documentManager: data.documentManager) { _ in                
                     refreshAllNotes()
                 }
             }

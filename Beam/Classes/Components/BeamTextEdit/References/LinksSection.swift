@@ -80,16 +80,21 @@ class LinksSection: Widget {
     func setupSectionMode() {
         updateLinkedReferences(links: note.references)
 
-        AppDelegate.main.data.$lastChangedElement.sink { element in
-            guard let element = element,
-                  let refNoteTitle = element.note?.title
-            else { return }
-            let title = self.note.title
-            let ref = BeamNoteReference(noteTitle: refNoteTitle, elementID: element.id)
-            if self.currentReferences.contains(ref) || element.text.hasLinkToNote(named: title) || element.text.hasReferenceToNote(titled: title) {
+        AppDelegate.main.data.$lastChangedElement
+            .filter({ element in
+                guard let element = element,
+                      let refNoteTitle = element.note?.title
+                else { return false }
+                let title = self.note.title
+                let ref = BeamNoteReference(noteTitle: refNoteTitle, elementID: element.id)
+                return self.currentReferences.contains(ref)
+                    || element.text.hasLinkToNote(named: title)
+                    || element.text.hasReferenceToNote(titled: title)
+            })
+            .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
+            .sink { _ in
                 self.updateLinkedReferences(links: self.note.references)
-            }
-        }.store(in: &scope)
+            }.store(in: &scope)
         switch mode {
         case .references:
             createLinkAllLayer()

@@ -104,7 +104,7 @@ struct JournalScrollView: NSViewRepresentable {
         textEditView.leadingAlignment = 160
         textEditView.traillingPadding = 80
         textEditView.centerText = true
-        textEditView.showTitle = false
+        textEditView.showTitle = true
 
         return textEditView
     }

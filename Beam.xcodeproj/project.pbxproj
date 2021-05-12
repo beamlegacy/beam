@@ -399,6 +399,7 @@
 		A5CA5DF52625C15D004E9D3E /* BeamElementTextStatsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5CA5DF42625C15D004E9D3E /* BeamElementTextStatsTests.swift */; };
 		A5D6250A26034B1C00A3E676 /* FormatterViewBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5D6250926034B1C00A3E676 /* FormatterViewBackground.swift */; };
 		A5DE141C26491F840023F753 /* WKWebview+Zoom.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5DE141B26491F840023F753 /* WKWebview+Zoom.swift */; };
+		A5DE143226496F250023F753 /* NoteHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5DE143126496F250023F753 /* NoteHeaderView.swift */; };
 		A5E04DEB263BEDA600BFB4C1 /* BrowserTabsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E04DEA263BEDA600BFB4C1 /* BrowserTabsManager.swift */; };
 		A5E917FF2631C62200790D31 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = 9631C746251CE997009B40C4 /* SwiftSoup */; };
 		A5E918002631C62200790D31 /* FavIcon in Frameworks */ = {isa = PBXBuildFile; productRef = 96474E3E254D9ADB00A920B3 /* FavIcon */; };
@@ -422,6 +423,7 @@
 		A5E918122631C62200790D31 /* Quick in Frameworks */ = {isa = PBXBuildFile; productRef = A5CA5DFA2625C302004E9D3E /* Quick */; };
 		A5E918132631C62200790D31 /* Nimble in Frameworks */ = {isa = PBXBuildFile; productRef = A5CA5DFC2625C306004E9D3E /* Nimble */; };
 		A5F1F6262643EDA600D41505 /* BeamNoteSharingUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F1F6252643EDA600D41505 /* BeamNoteSharingUtils.swift */; };
+		A5FE1615264AD64900B7526D /* RecentsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5FE1614264AD64900B7526D /* RecentsListView.swift */; };
 		A5FE96CD2612469C002A2B73 /* AutocompleteManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5FE96CC2612469C002A2B73 /* AutocompleteManager.swift */; };
 		BAA6703B2414F077ED3A09D8 /* PasswordMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA675B80B855A4B2886805B /* PasswordMessageHandler.swift */; };
 		BAA6704409BDC8AB92E95F8D /* WebEventsUI_native.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA67EEADE1294572893B487 /* WebEventsUI_native.ts */; };
@@ -1099,8 +1101,10 @@
 		A5CA5DF42625C15D004E9D3E /* BeamElementTextStatsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamElementTextStatsTests.swift; sourceTree = "<group>"; };
 		A5D6250926034B1C00A3E676 /* FormatterViewBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatterViewBackground.swift; sourceTree = "<group>"; };
 		A5DE141B26491F840023F753 /* WKWebview+Zoom.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WKWebview+Zoom.swift"; sourceTree = "<group>"; };
+		A5DE143126496F250023F753 /* NoteHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteHeaderView.swift; sourceTree = "<group>"; };
 		A5E04DEA263BEDA600BFB4C1 /* BrowserTabsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserTabsManager.swift; sourceTree = "<group>"; };
 		A5F1F6252643EDA600D41505 /* BeamNoteSharingUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamNoteSharingUtils.swift; sourceTree = "<group>"; };
+		A5FE1614264AD64900B7526D /* RecentsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentsListView.swift; sourceTree = "<group>"; };
 		A5FE96CC2612469C002A2B73 /* AutocompleteManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutocompleteManager.swift; sourceTree = "<group>"; };
 		BAA67032568FA8B5DDE5841B /* WebEventsUI.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = WebEventsUI.ts; sourceTree = "<group>"; };
 		BAA6705B2A0906FB4C068502 /* Scorer.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; name = Scorer.js; path = BrowsingScorer/Scorer.js; sourceTree = "<group>"; };
@@ -1640,6 +1644,7 @@
 			isa = PBXGroup;
 			children = (
 				418171D52581107C00317ED8 /* NoteView.swift */,
+				A5DE143126496F250023F753 /* NoteHeaderView.swift */,
 			);
 			path = Notes;
 			sourceTree = "<group>";
@@ -2512,6 +2517,7 @@
 			isa = PBXGroup;
 			children = (
 				A54936C5260B721600EF7622 /* WindowBottomToolBar.swift */,
+				A5FE1614264AD64900B7526D /* RecentsListView.swift */,
 				A53C8F37264440E4003A5DF8 /* SharingStatusView.swift */,
 				A53C8F4D26446C6C003A5DF8 /* SharingBannerInfo.swift */,
 			);
@@ -3325,7 +3331,9 @@
 				A572629825FFADC5004416C0 /* MouseInteraction.swift in Sources */,
 				96E4CF72258E59F400D6DE22 /* BeamTextVisitor.swift in Sources */,
 				A5D6250A26034B1C00A3E676 /* FormatterViewBackground.swift in Sources */,
+				A5DE143226496F250023F753 /* NoteHeaderView.swift in Sources */,
 				418172272581107C00317ED8 /* NSMutableAttributedString+Range.swift in Sources */,
+				A5FE1615264AD64900B7526D /* RecentsListView.swift in Sources */,
 				4131F16825BEC48C006473CD /* SpacerWidget.swift in Sources */,
 				4181723A2581107C00317ED8 /* Parser.swift in Sources */,
 				524520A425C8234500AC0007 /* BeamElement+Merge.swift in Sources */,

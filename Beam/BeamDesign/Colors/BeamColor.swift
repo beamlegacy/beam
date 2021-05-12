@@ -29,6 +29,10 @@ indirect enum BeamColor {
     case Niobium
     /** A powerful blue */
     case Sonic
+    /** A halloweenish orange */
+    case Sanskrit
+    /** A dangerous red */
+    case Shiraz
     /** A smoke white in light mode. A mid gray in dark mode */
     case Tundora
 

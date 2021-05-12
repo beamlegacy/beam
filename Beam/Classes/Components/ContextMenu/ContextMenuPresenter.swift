@@ -48,8 +48,14 @@ class ContextMenuPresenter {
         return window
     }
 
-    func dismissMenu() {
-        dismissMenu(removeWindow: true)
+    func dismissMenu(animated: Bool = true) {
+        if animated {
+            currentMenu?.animateOnDisappear(completionHandler: {
+                self.dismissMenu(removeWindow: true)
+            })
+        } else {
+            dismissMenu(removeWindow: true)
+        }
     }
 
     private func dismissMenu(removeWindow: Bool = false) {
@@ -62,11 +68,13 @@ class ContextMenuPresenter {
         currentMenu?.removeFromSuperview()
     }
 
-    func presentMenu(_ menu: FormatterView, from view: NSView, atPoint: CGPoint) {
-
+    func presentMenu(_ menu: FormatterView, atPoint: CGPoint, from fromView: NSView? = nil, animated: Bool = true) {
+        guard let view = fromView ?? AppDelegate.main.window.contentView else { return }
         if currentMenu != nil {
             dismissMenu(removeWindow: true)
         }
+        let idealSize = menu.idealSize
+        menu.frame = NSRect(x: 0, y: 0, width: idealSize.width, height: idealSize.height)
         currentMenu = menu
         guard let parentWindow = view.window else {
             return
@@ -77,5 +85,11 @@ class ContextMenuPresenter {
         var position = view.convert(atPoint, to: window.contentView!)
         position.y -= menu.bounds.height
         menu.setFrameOrigin(position)
+
+        if animated {
+            DispatchQueue.main.async {
+                menu.animateOnAppear()
+            }
+        }
     }
 }
