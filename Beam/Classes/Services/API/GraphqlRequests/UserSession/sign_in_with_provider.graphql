@@ -1,0 +1,12 @@
+mutation SignInWithProvider($identity: IdentityInput!) {
+  signInWithProvider(input: {identity: $identity}) {
+    errors {
+      path
+      message
+    }
+    accessToken
+    me {
+      email
+    }
+  }
+}

@@ -185,6 +185,7 @@ struct AdvancedPreferencesView: View {
     private var ResetAPIEndpointsButton: some View {
         Button(action: {
             Configuration.reset()
+            apiHostname = Configuration.apiHostname
         }, label: {
             // TODO: loc
             Text("Reset API Endpoints").frame(minWidth: 100)

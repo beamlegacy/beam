@@ -11,20 +11,21 @@ class DatabasesWindow: NSWindow, NSWindowDelegate {
         title = "All Databases"
 
         let databasesContentView = DatabasesContentView()
-        self.contentView = BeamHostingView(rootView: databasesContentView)
-        self.isMovableByWindowBackground = false
+        contentView = BeamHostingView(rootView: databasesContentView)
+        isMovableByWindowBackground = false
+        delegate = self
         observeCoredataDestroyedNotification()
     }
 
     deinit {
-        guard let delegate = NSApplication.shared.delegate as? AppDelegate else { return }
-
-        if delegate.databasesWindow == self {
-            delegate.databasesWindow = nil
-        }
+        AppDelegate.main.databasesWindow = nil
     }
 
-    private var cancellables = [AnyCancellable]()
+    func windowWillClose(_ notification: Notification) {
+        cancellables.removeAll()
+    }
+
+    private var cancellables: [AnyCancellable] = []
     private func observeCoredataDestroyedNotification() {
         NotificationCenter.default.publisher(for: .coredataDestroyed, object: nil)
             .sink { _ in

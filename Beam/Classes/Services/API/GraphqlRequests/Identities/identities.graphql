@@ -1,0 +1,10 @@
+query identities {
+  me {
+    identities {
+      id
+      provider
+      email
+      uid
+    }
+  }
+}

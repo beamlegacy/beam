@@ -1,34 +1,21 @@
 import Foundation
 
-// This file handles any configuration parameters
-// Build configuration variables are defined in xcconfig files, feed Info.plist then accessed from here
-// File is parsed by https://github.com/penso/variable-injector
-
-/*
- *
- * * * * * * * * *
-  IMPORTANT: Save this file and commit when you change it before building or you will lose your changes.
- 
-  Building will overwrite this file to inject the ENV variables.
- * * * * * * * * *
- */
-
 struct Configuration {
     // Build configuration
     static private(set) var bundleIdentifier: String = Configuration.value(for: "CFBundleIdentifier")
-    static private(set) var sentryKey = "$(SENTRY_KEY)"
+    static private(set) var sentryKey = EnvironmentVariables.Sentry.key
     static private(set) var sentryHostname = "o477543.ingest.sentry.io"
     static private(set) var sentryProject = "5518785"
-    static private(set) var env = "$(ENV)"
+    static private(set) var env = EnvironmentVariables.env
     static private(set) var testAccountEmail = "fabien+test@beamapp.co"
-    static private(set) var testAccountPassword = "$(TEST_ACCOUNT_PASSWORD)"
-    static private(set) var sparkleUpdate = NSString("$(SPARKLE_AUTOMATIC_UPDATE)").boolValue
-    static private(set) var networkStubs = NSString("$(NETWORK_STUBS)").boolValue
+    static private(set) var testAccountPassword = EnvironmentVariables.Account.testPassword
+    static private(set) var sparkleUpdate = EnvironmentVariables.sparkleUpdate
+    static private(set) var networkStubs = EnvironmentVariables.networkStubs
     static private(set) var sparkleFeedURL: String = Configuration.value(for: "SUFeedURL")
-    static private(set) var sentryEnabled = NSString("$(SENTRY_ENABLED)").boolValue
-    static var networkEnabled = NSString("$(NETWORK_ENABLED)").boolValue
-    static var encryptionEnabledDefault = NSString("$(ENCRYPTION_ENABLED)").boolValue
-    static var pnsStatus = NSString("$(PNS_STATUS)").boolValue
+    static private(set) var sentryEnabled = EnvironmentVariables.sentryEnabled
+    static var networkEnabled = EnvironmentVariables.networkEnabled
+    static var encryptionEnabledDefault = EnvironmentVariables.encryptionEnabled
+    static var pnsStatus = EnvironmentVariables.pnsStatus
 
     static private(set) var sentryDsn = "https://\(sentryKey)@\(sentryHostname)/\(sentryProject)"
 
@@ -110,6 +97,7 @@ struct Configuration {
     static func reset() {
         UserDefaults.standard.removeObject(forKey: publicHostnameKey)
         UserDefaults.standard.removeObject(forKey: apiHostnameKey)
+        AccountManager.logout()
     }
 
     static private func value<T>(for key: String) -> T {

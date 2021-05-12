@@ -189,6 +189,8 @@
 		528286B625E806CD00C0CCEE /* NoteEditorUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 528286B525E806CD00C0CCEE /* NoteEditorUITests.swift */; };
 		5285672A26275A8D00DDBE45 /* BeamToBeam2Migration.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 5285672926275A8D00DDBE45 /* BeamToBeam2Migration.xcmappingmodel */; };
 		528910ED25FBBDE800492969 /* DocumentAPITypeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 528910EC25FBBDE800492969 /* DocumentAPITypeTests.swift */; };
+		5298268C2641A37500E9448C /* GithubButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5298268B2641A37500E9448C /* GithubButton.swift */; };
+		529826A62641A46E00E9448C /* GoogleButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 529826A52641A46E00E9448C /* GoogleButton.swift */; };
 		5298649125D151D300D27A80 /* AutocompleteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5298649025D151D300D27A80 /* AutocompleteTests.swift */; };
 		5298EAF426272C720033862C /* CoreDataMigrationVersion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5298EAF326272C720033862C /* CoreDataMigrationVersion.swift */; };
 		5298EAF926272CA90033862C /* CoreDataMigrationStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5298EAF826272CA90033862C /* CoreDataMigrationStep.swift */; };
@@ -206,12 +208,16 @@
 		52B17AC3262446B200CB4728 /* AppDelegate+Database.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52B17AC2262446B200CB4728 /* AppDelegate+Database.swift */; };
 		52B17AC7262449DA00CB4728 /* DatabaseDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52B17AC6262449DA00CB4728 /* DatabaseDetail.swift */; };
 		52B5EF78252F520100914D52 /* CoreDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52B5EF77252F520100914D52 /* CoreDataTests.swift */; };
+		52B9A370264546570063AEEF /* OauthWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52B9A36F264546570063AEEF /* OauthWindow.swift */; };
+		52B9A38C264562E60063AEEF /* EnvironmentVariables.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52B9A38B264562E60063AEEF /* EnvironmentVariables.swift */; };
+		52B9A39A264566D60063AEEF /* OauthButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52B9A399264566D60063AEEF /* OauthButton.swift */; };
 		52BB69A925CD5A49007A1173 /* OmniBarUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52BB69A825CD5A49007A1173 /* OmniBarUITests.swift */; };
 		52C3077B25C311950027C4B1 /* BeamDate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52C3077A25C311950027C4B1 /* BeamDate.swift */; };
 		52C3078225C311B00027C4B1 /* BeamDateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52C3078125C311B00027C4B1 /* BeamDateTests.swift */; };
 		52C3294225AC7A8E00EF11E7 /* DocumentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52C3294125AC7A8E00EF11E7 /* DocumentTests.swift */; };
 		52C60BFA258B638F008B7C10 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52C60B9D258B6333008B7C10 /* Sparkle.framework */; };
 		52C60BFB258B638F008B7C10 /* Sparkle.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 52C60B9D258B6333008B7C10 /* Sparkle.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		52CA277C26401D7000146A00 /* OAuthSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 52CA277B26401D7000146A00 /* OAuthSwift */; };
 		52DD2457258B687200651C84 /* org.sparkle-project.InstallerConnection.xpc in Embed XPC Services */ = {isa = PBXBuildFile; fileRef = 52DD2442258B681500651C84 /* org.sparkle-project.InstallerConnection.xpc */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		52DD2458258B687200651C84 /* org.sparkle-project.InstallerLauncher.xpc in Embed XPC Services */ = {isa = PBXBuildFile; fileRef = 52DD2440258B681500651C84 /* org.sparkle-project.InstallerLauncher.xpc */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		52DD2459258B687200651C84 /* org.sparkle-project.InstallerStatus.xpc in Embed XPC Services */ = {isa = PBXBuildFile; fileRef = 52DD2444258B681500651C84 /* org.sparkle-project.InstallerStatus.xpc */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -225,6 +231,12 @@
 		52E2528426173FA800E54C45 /* databases.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 52E2528326173FA800E54C45 /* databases.graphql */; };
 		52E2528826175F1C00E54C45 /* DatabaseAPIType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52E2528726175F1C00E54C45 /* DatabaseAPIType.swift */; };
 		52F27FCB25B9B404006E09A2 /* ViewModelFetchedResults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52F27FB625B9B404006E09A2 /* ViewModelFetchedResults.swift */; };
+		52F4E49826417EF00067B017 /* create_identity.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 52F4E49726417EF00067B017 /* create_identity.graphql */; };
+		52F4E4A226417F210067B017 /* sign_in_with_provider.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 52F4E4A126417F210067B017 /* sign_in_with_provider.graphql */; };
+		52F4E4A8264180000067B017 /* Identity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52F4E4A7264180000067B017 /* Identity.swift */; };
+		52F4E4AE264182E00067B017 /* IdentityRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52F4E4AD264182E00067B017 /* IdentityRequest.swift */; };
+		52F4E4B42641844E0067B017 /* delete_identity.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 52F4E4B32641844E0067B017 /* delete_identity.graphql */; };
+		52F4E4BA264185FC0067B017 /* identities.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 52F4E4B9264185FC0067B017 /* identities.graphql */; };
 		52FB30CA25E3D7B3001BF098 /* String+Title.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52FB30C925E3D7B3001BF098 /* String+Title.swift */; };
 		52FB84CE263812060085A444 /* update_databases.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 52FB84CD263812060085A444 /* update_databases.graphql */; };
 		52FB84E42638124A0085A444 /* update_documents.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 52FB84E32638124A0085A444 /* update_documents.graphql */; };
@@ -903,6 +915,8 @@
 		5285672926275A8D00DDBE45 /* BeamToBeam2Migration.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = BeamToBeam2Migration.xcmappingmodel; sourceTree = "<group>"; };
 		5287EC2E25C42B0100CE1DD9 /* String+UUID.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+UUID.swift"; sourceTree = "<group>"; };
 		528910EC25FBBDE800492969 /* DocumentAPITypeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentAPITypeTests.swift; sourceTree = "<group>"; };
+		5298268B2641A37500E9448C /* GithubButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GithubButton.swift; sourceTree = "<group>"; };
+		529826A52641A46E00E9448C /* GoogleButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleButton.swift; sourceTree = "<group>"; };
 		5298649025D151D300D27A80 /* AutocompleteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutocompleteTests.swift; sourceTree = "<group>"; };
 		5298EAF326272C720033862C /* CoreDataMigrationVersion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataMigrationVersion.swift; sourceTree = "<group>"; };
 		5298EAF826272CA90033862C /* CoreDataMigrationStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataMigrationStep.swift; sourceTree = "<group>"; };
@@ -921,6 +935,9 @@
 		52B17AC2262446B200CB4728 /* AppDelegate+Database.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+Database.swift"; sourceTree = "<group>"; };
 		52B17AC6262449DA00CB4728 /* DatabaseDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseDetail.swift; sourceTree = "<group>"; };
 		52B5EF77252F520100914D52 /* CoreDataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataTests.swift; sourceTree = "<group>"; };
+		52B9A36F264546570063AEEF /* OauthWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OauthWindow.swift; sourceTree = "<group>"; };
+		52B9A38B264562E60063AEEF /* EnvironmentVariables.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvironmentVariables.swift; sourceTree = "<group>"; };
+		52B9A399264566D60063AEEF /* OauthButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OauthButton.swift; sourceTree = "<group>"; };
 		52BB69A825CD5A49007A1173 /* OmniBarUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniBarUITests.swift; sourceTree = "<group>"; };
 		52C3077A25C311950027C4B1 /* BeamDate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamDate.swift; sourceTree = "<group>"; };
 		52C3078125C311B00027C4B1 /* BeamDateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamDateTests.swift; sourceTree = "<group>"; };
@@ -936,6 +953,12 @@
 		52E2528326173FA800E54C45 /* databases.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = databases.graphql; sourceTree = "<group>"; };
 		52E2528726175F1C00E54C45 /* DatabaseAPIType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseAPIType.swift; sourceTree = "<group>"; };
 		52F27FB625B9B404006E09A2 /* ViewModelFetchedResults.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewModelFetchedResults.swift; sourceTree = "<group>"; };
+		52F4E49726417EF00067B017 /* create_identity.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = create_identity.graphql; sourceTree = "<group>"; };
+		52F4E4A126417F210067B017 /* sign_in_with_provider.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = sign_in_with_provider.graphql; sourceTree = "<group>"; };
+		52F4E4A7264180000067B017 /* Identity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Identity.swift; sourceTree = "<group>"; };
+		52F4E4AD264182E00067B017 /* IdentityRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentityRequest.swift; sourceTree = "<group>"; };
+		52F4E4B32641844E0067B017 /* delete_identity.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = delete_identity.graphql; sourceTree = "<group>"; };
+		52F4E4B9264185FC0067B017 /* identities.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = identities.graphql; sourceTree = "<group>"; };
 		52FB30C925E3D7B3001BF098 /* String+Title.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Title.swift"; sourceTree = "<group>"; };
 		52FB84CD263812060085A444 /* update_databases.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = update_databases.graphql; sourceTree = "<group>"; };
 		52FB84E32638124A0085A444 /* update_documents.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = update_documents.graphql; sourceTree = "<group>"; };
@@ -1219,6 +1242,7 @@
 			files = (
 				A5E9180B2631C62200790D31 /* GRDB in Frameworks */,
 				A5E918042631C62200790D31 /* Fakery in Frameworks */,
+				52CA277C26401D7000146A00 /* OAuthSwift in Frameworks */,
 				A5E918012631C62200790D31 /* Preferences in Frameworks */,
 				A5E918062631C62200790D31 /* Promises in Frameworks */,
 				A5E918072631C62200790D31 /* PromisesTestHelpers in Frameworks */,
@@ -1334,6 +1358,7 @@
 			children = (
 				4181713125810CDC00317ED8 /* Info.plist */,
 				41A969FE2581394300E6594B /* Configuration.swift */,
+				52B9A38B264562E60063AEEF /* EnvironmentVariables.swift */,
 				4181712B25810CDC00317ED8 /* Constants.swift */,
 				4181712D25810CDC00317ED8 /* Debug.xcconfig */,
 				4181713025810CDC00317ED8 /* Release.xcconfig */,
@@ -1368,6 +1393,7 @@
 				418171662581107C00317ED8 /* GraphqlRequests */,
 				418171622581107C00317ED8 /* APIResponse.swift */,
 				418171632581107C00317ED8 /* UserSessionRequest.swift */,
+				52F4E4AD264182E00067B017 /* IdentityRequest.swift */,
 				418171642581107C00317ED8 /* APIRequest.swift */,
 				529E1AD325D45CFA00DD25B8 /* APIRequestError.swift */,
 				5206282525923B6800D7CD9E /* DocumentRequest.swift */,
@@ -1381,6 +1407,7 @@
 			isa = PBXGroup;
 			children = (
 				4181715E2581107C00317ED8 /* Me.swift */,
+				52F4E4A7264180000067B017 /* Identity.swift */,
 				4181715F2581107C00317ED8 /* Session.swift */,
 				418171602581107C00317ED8 /* GraphqlParametersProtocol.swift */,
 				418171612581107C00317ED8 /* User.swift */,
@@ -1393,6 +1420,7 @@
 		418171662581107C00317ED8 /* GraphqlRequests */ = {
 			isa = PBXGroup;
 			children = (
+				52F4E48226417ED90067B017 /* Identities */,
 				52E2526626173F7A00E54C45 /* Databases */,
 				520627F625922D4900D7CD9E /* Documents */,
 				418171672581107C00317ED8 /* UserSession */,
@@ -1406,6 +1434,7 @@
 				418171682581107C00317ED8 /* sign_up.graphql */,
 				418171692581107C00317ED8 /* forgot_password.graphql */,
 				4181716A2581107C00317ED8 /* sign_in.graphql */,
+				52F4E4A126417F210067B017 /* sign_in_with_provider.graphql */,
 			);
 			path = UserSession;
 			sourceTree = "<group>";
@@ -1858,6 +1887,10 @@
 			children = (
 				524299E225A480A300F4DBF5 /* AccountsView.swift */,
 				524299ED25A488E000F4DBF5 /* AdvancedPreferencesView.swift */,
+				5298268B2641A37500E9448C /* GithubButton.swift */,
+				52B9A399264566D60063AEEF /* OauthButton.swift */,
+				529826A52641A46E00E9448C /* GoogleButton.swift */,
+				52B9A36F264546570063AEEF /* OauthWindow.swift */,
 			);
 			path = Preferences;
 			sourceTree = "<group>";
@@ -2108,6 +2141,16 @@
 				52FB936526209CA900FEF632 /* delete_all_databases.graphql */,
 			);
 			path = Databases;
+			sourceTree = "<group>";
+		};
+		52F4E48226417ED90067B017 /* Identities */ = {
+			isa = PBXGroup;
+			children = (
+				52F4E49726417EF00067B017 /* create_identity.graphql */,
+				52F4E4B32641844E0067B017 /* delete_identity.graphql */,
+				52F4E4B9264185FC0067B017 /* identities.graphql */,
+			);
+			path = Identities;
 			sourceTree = "<group>";
 		};
 		52FC003B25E426F100ABECB0 /* UITests */ = {
@@ -2732,6 +2775,7 @@
 				524CF6D225F276D1007312F0 /* KeychainAccess */,
 				521FEC992604F9B4009000F9 /* Vinyl */,
 				964FE5E02625D8AA00966E03 /* GRDB */,
+				52CA277B26401D7000146A00 /* OAuthSwift */,
 			);
 			productName = Beam;
 			productReference = 965A78252514F147009980D4 /* Beam.app */;
@@ -2842,6 +2886,7 @@
 				524CF6D125F276D1007312F0 /* XCRemoteSwiftPackageReference "KeychainAccess" */,
 				521FEC982604F9B4009000F9 /* XCRemoteSwiftPackageReference "Vinyl" */,
 				964FE5DF2625D8AA00966E03 /* XCRemoteSwiftPackageReference "GRDB.swift" */,
+				52CA277A26401D7000146A00 /* XCRemoteSwiftPackageReference "OAuthSwift" */,
 			);
 			productRefGroup = 965A78262514F147009980D4 /* Products */;
 			projectDirPath = "";
@@ -3025,6 +3070,8 @@
 				965A78362514F148009980D4 /* Main.storyboard in Resources */,
 				5204290B25A4B3D300DD677C /* document_updated_at.graphql in Resources */,
 				52E2528426173FA800E54C45 /* databases.graphql in Resources */,
+				52F4E4BA264185FC0067B017 /* identities.graphql in Resources */,
+				5206281C25922D9700D7CD9E /* import_documents.graphql in Resources */,
 				5206280C25922D6300D7CD9E /* delete_document.graphql in Resources */,
 				5206281825922D8A00D7CD9E /* delete_all_documents.graphql in Resources */,
 				41D169A725DC07260018E5F2 /* Inter-Regular.otf in Resources */,
@@ -3032,13 +3079,16 @@
 				56A5BD3725CCAFA400ED7C50 /* english.stopwords in Resources */,
 				4159E9E2259A2575005FD355 /* BidirectionalPopover.xib in Resources */,
 				418171F42581107C00317ED8 /* sign_up.graphql in Resources */,
+				52F4E4B42641844E0067B017 /* delete_identity.graphql in Resources */,
 				418171F62581107C00317ED8 /* sign_in.graphql in Resources */,
 				41D169A925DC07260018E5F2 /* Inter-Italic.otf in Resources */,
 				4159EA0B259A3568005FD355 /* BidirectionalPopoverResultItem.xib in Resources */,
 				418170FF2581060A00317ED8 /* Colors.xcassets in Resources */,
 				41D169A825DC07260018E5F2 /* Inter-SemiBold.otf in Resources */,
+				52F4E49826417EF00067B017 /* create_identity.graphql in Resources */,
 				41D169AA25DC07260018E5F2 /* Inter-Medium.otf in Resources */,
 				414B987B259DE2E2002E81A3 /* BidirectionalPopoverActionItem.xib in Resources */,
+				52F4E4A226417F210067B017 /* sign_in_with_provider.graphql in Resources */,
 				41D169A625DC07260018E5F2 /* Inter-Bold.otf in Resources */,
 				418171122581082200317ED8 /* Assets.xcassets in Resources */,
 				56A5BD3125CC680E00ED7C50 /* url.stopwords in Resources */,
@@ -3144,7 +3194,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ $ENABLE_PREVIEWS == \"NO\" ]\nthen\n    # your code to execute here\n    PATH=${PATH}:/opt/homebrew/bin\n    direnv allow ..\n    eval \"$(direnv export bash)\"\n\n    git checkout ${SRCROOT}/Beam/Configuration/Configuration.swift\n\n    if which variable-injector >/dev/null; then\n      variable-injector --file ${SRCROOT}/Beam/Configuration/Configuration.swift # --verbose # Pass your paramenters\n    else\n      echo \"Warning: Swift Variable Injector not installed, download from https://github.com/penso/variable-injector\"\n    fi\n\nelse\n  echo \"Skipping the script because of SwiftUI preview mode\"\nfi\n";
+			shellScript = "if [ $ENABLE_PREVIEWS == \"NO\" ]\nthen\n    # your code to execute here\n    PATH=${PATH}:/opt/homebrew/bin\n    direnv allow ..\n    eval \"$(direnv export bash)\"\n\n    git checkout ${SRCROOT}/Beam/Configuration/EnvironmentVariables.swift\n\n    if which variable-injector >/dev/null; then\n      variable-injector --file ${SRCROOT}/Beam/Configuration/EnvironmentVariables.swift # --verbose # Pass your paramenters\n    else\n      echo \"Warning: Swift Variable Injector not installed, download from https://github.com/penso/variable-injector\"\n    fi\n\nelse\n  echo \"Skipping the script because of SwiftUI preview mode\"\nfi\n";
 			showEnvVarsInLog = 0;
 		};
 		5205F34425BB1BFE00D3CDB4 /* Build libgit2 */ = {
@@ -3181,7 +3231,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "git checkout ${SRCROOT}/Beam/Configuration/Configuration.swift\n";
+			shellScript = "git checkout ${SRCROOT}/Beam/Configuration/EnvironmentVariables.swift\n";
 			showEnvVarsInLog = 0;
 		};
 		521ED51025B9E43F00FBFA99 /* SwiftLint */ = {
@@ -3292,6 +3342,7 @@
 			files = (
 				96FD761B25B1C43500B04ED3 /* BrowsingNodeWidget.swift in Sources */,
 				521EEDFB2593927100BA2485 /* Int+ByteSize.swift in Sources */,
+				5298268C2641A37500E9448C /* GithubButton.swift in Sources */,
 				4181720E2581107C00317ED8 /* NoteBackForwardList.swift in Sources */,
 				A552DF2925F0E22B00570C85 /* OmniBarFieldBackground.swift in Sources */,
 				87C539B92616297300D51877 /* SearchPasswordsCell.swift in Sources */,
@@ -3384,6 +3435,8 @@
 				9691E44425B1091300A13080 /* BrowsingSection.swift in Sources */,
 				A05B74782628701600A78A7C /* LinkButtonLayer.swift in Sources */,
 				A04E849525DD1CEF0066CD44 /* InsertText.swift in Sources */,
+				52F4E4AE264182E00067B017 /* IdentityRequest.swift in Sources */,
+				52B9A39A264566D60063AEEF /* OauthButton.swift in Sources */,
 				96FACC8A26079C7E0088DD67 /* InputText.swift in Sources */,
 				418172002581107C00317ED8 /* NotificationName+Beam.swift in Sources */,
 				8726448F26199B8F0070E83D /* OptionSelector.swift in Sources */,
@@ -3393,6 +3446,7 @@
 				A0689E6D25DE623D00B19CBB /* DeleteText.swift in Sources */,
 				526017F825AE078600634695 /* ConsoleContentView.swift in Sources */,
 				52B17AB62624422800CB4728 /* DatabasesContentView.swift in Sources */,
+				529826A62641A46E00E9448C /* GoogleButton.swift in Sources */,
 				A050049F25DAEE73009CFEB6 /* ProgressIndicator.swift in Sources */,
 				418172192581107C00317ED8 /* Persistence.swift in Sources */,
 				418172282581107C00317ED8 /* ClosedRange+Beam.swift in Sources */,
@@ -3465,6 +3519,7 @@
 				418171ED2581107C00317ED8 /* Session.swift in Sources */,
 				A5C9F00A261364F50096380F /* WindowPageView.swift in Sources */,
 				4181713325810CDC00317ED8 /* Constants.swift in Sources */,
+				52F4E4A8264180000067B017 /* Identity.swift in Sources */,
 				96FACC522604B0EE0088DD67 /* DeleteElement.swift in Sources */,
 				4181725E2581107C00317ED8 /* AccountManager.swift in Sources */,
 				418171FF2581107C00317ED8 /* CoreDataManager.swift in Sources */,
@@ -3492,6 +3547,7 @@
 				A0E7D98726139FCA00D70676 /* JournalStackView.swift in Sources */,
 				524299E725A480A300F4DBF5 /* AccountsView.swift in Sources */,
 				5298EB0126272D230033862C /* NSPersistentStoreCoordinator+Extension.swift in Sources */,
+				52B9A370264546570063AEEF /* OauthWindow.swift in Sources */,
 				418172072581107C00317ED8 /* Document.swift in Sources */,
 				4100D96B25AEFEEA00EF04CB /* BeamTextEdit+Shortcut.swift in Sources */,
 				41EA89B825B838D40033EAB9 /* FormatterViewType.swift in Sources */,
@@ -3534,6 +3590,7 @@
 				4105CE7525A60681009AB687 /* FormatterTypeButton.swift in Sources */,
 				961EC58625B7A75A009FA322 /* LinkManager.swift in Sources */,
 				418171FD2581107C00317ED8 /* NavigationContext.swift in Sources */,
+				52B9A38C264562E60063AEEF /* EnvironmentVariables.swift in Sources */,
 				418172372581107C00317ED8 /* TextEditOperations.swift in Sources */,
 				52E2528826175F1C00E54C45 /* DatabaseAPIType.swift in Sources */,
 				521EEDE925937FAD00BA2485 /* DocumentRow.swift in Sources */,
@@ -4483,6 +4540,14 @@
 				minimumVersion = 6.13.3;
 			};
 		};
+		52CA277A26401D7000146A00 /* XCRemoteSwiftPackageReference "OAuthSwift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/OAuthSwift/OAuthSwift.git";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
 		52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/google/promises.git";
@@ -4567,6 +4632,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 52BB698925CD4E1E007A1173 /* XCRemoteSwiftPackageReference "PromiseKit" */;
 			productName = PromiseKit;
+		};
+		52CA277B26401D7000146A00 /* OAuthSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 52CA277A26401D7000146A00 /* XCRemoteSwiftPackageReference "OAuthSwift" */;
+			productName = OAuthSwift;
 		};
 		52E5297125CD980B00307858 /* Promises */ = {
 			isa = XCSwiftPackageProductDependency;

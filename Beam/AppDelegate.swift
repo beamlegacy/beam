@@ -17,6 +17,7 @@ import Preferences
 import PromiseKit
 import PMKFoundation
 import BeamCore
+import OAuthSwift
 
 @objc(BeamApplication)
 public class BeamApplication: SentryCrashExceptionApplication {
@@ -88,6 +89,36 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         #endif
 
         syncData()
+
+        // For oauth and external Safari
+        NSAppleEventManager.shared().setEventHandler(self,
+                                                     andSelector: #selector(AppDelegate.handleGetURL(event:withReplyEvent:)),
+                                                     forEventClass: AEEventClass(kInternetEventClass),
+                                                     andEventID: AEEventID(kAEGetURL))
+    }
+
+    @objc func handleGetURL(event: NSAppleEventDescriptor!, withReplyEvent: NSAppleEventDescriptor!) {
+        if let urlString = event.paramDescriptor(forKeyword: AEKeyword(keyDirectObject))?.stringValue, let url = URL(string: urlString) {
+            OAuthSwift.handle(url: url)
+        }
+    }
+
+    // MARK: -
+    // MARK: Oauth window
+    var oauthWindow: OauthWindow?
+    func openOauthWindow(title: String?) -> OauthWindow {
+        if let oauthWindow = oauthWindow { return oauthWindow }
+
+        oauthWindow = OauthWindow(contentRect: NSRect(x: 0, y: 0, width: 450, height: 500))
+        guard let oauthWindow = oauthWindow else { fatalError("Can't create oauthwindow") }
+
+        if let title = title {
+            oauthWindow.title = title
+        }
+        oauthWindow.center()
+        oauthWindow.makeKeyAndOrderFront(window)
+
+        return oauthWindow
     }
 
     func syncData() {
@@ -134,7 +165,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func createWindow(reloadState: Bool) {
         // Create the window and set the content view.
-        window = BeamWindow(contentRect: NSRect(x: 0, y: 0, width: 800, height: 600), data: data, reloadState: reloadState)
+        window = BeamWindow(contentRect: NSRect(x: 0, y: 0, width: 800, height: 600),
+                            data: data,
+                            reloadState: reloadState)
         window.center()
         window.makeKeyAndOrderFront(nil)
         windows.append(window)

@@ -49,6 +49,41 @@ extension AccountManager {
     }
 
     @discardableResult
+    func signInWithProvider(_ provider: IdentityRequest.Provider,
+                            _ accessToken: String,
+                            _ completionHandler: ((Swift.Result<Bool, Error>) -> Void)? = nil) -> URLSessionTask? {
+        do {
+            return try userSessionRequest.signInWithProvider(provider: provider, accessToken: accessToken) { result in
+                switch result {
+                case .failure(let error):
+                    Logger.shared.logInfo("Could not signin: \(error.localizedDescription)", category: .network)
+                    completionHandler?(.failure(error))
+                case .success(let signIn):
+                    Persistence.Authentication.accessToken = signIn.accessToken
+                    if Persistence.Authentication.email != signIn.me?.email {
+                        Persistence.Authentication.email = signIn.me?.email
+                        Persistence.Authentication.password = nil
+                    }
+                    LibrariesManager.shared.setSentryUser()
+
+                    // Syncing with remote API, AppDelegate needs to be called in mainthread
+                    // TODO: move this syncData to a manager instead.
+                    DispatchQueue.main.async {
+                        AppDelegate.main.syncData()
+                    }
+
+                    Logger.shared.logInfo("signIn succeeded: \(signIn.accessToken ?? "-")", category: .network)
+                    completionHandler?(.success(true))
+                }
+            }
+        } catch {
+            Logger.shared.logInfo("Could not signin: \(error.localizedDescription)", category: .network)
+            completionHandler?(.failure(error))
+        }
+        return nil
+    }
+
+    @discardableResult
     func signUp(_ email: String,
                 _ password: String,
                 _ completionHandler: ((Swift.Result<Bool, Error>) -> Void)? = nil) -> URLSessionTask? {
@@ -113,6 +148,22 @@ extension AccountManager {
         }
     }
 
+    func signInWithProvider(_ provider: IdentityRequest.Provider, _ accessToken: String) -> PromiseKit.Promise<Bool> {
+        let promise: PromiseKit.Promise<UserSessionRequest.SignInWithProvider> = userSessionRequest.signInWithProvider(provider: provider, accessToken: accessToken)
+
+        return promise.then { signIn -> PromiseKit.Promise<Bool> in
+            Persistence.Authentication.accessToken = signIn.accessToken
+            if Persistence.Authentication.email != signIn.me?.email {
+                Persistence.Authentication.email = signIn.me?.email
+                Persistence.Authentication.password = nil
+            }
+            LibrariesManager.shared.setSentryUser()
+
+            Logger.shared.logInfo("signIn succeeded: \(signIn.accessToken ?? "-")", category: .network)
+            return .value(true)
+        }
+    }
+
     func signUp(_ email: String, _ password: String) -> PromiseKit.Promise<Bool> {
         let promise: PromiseKit.Promise<UserSessionRequest.SignUp> = userSessionRequest.signUp(email, password)
 
@@ -135,6 +186,21 @@ extension AccountManager {
             Persistence.Authentication.accessToken = signIn.accessToken
             Persistence.Authentication.email = email
             Persistence.Authentication.password = password
+            LibrariesManager.shared.setSentryUser()
+            Logger.shared.logInfo("signIn succeeded: \(signIn.accessToken ?? "-")", category: .network)
+            return Promise(true)
+        }
+    }
+
+    func signInWithProvider(_ provider: IdentityRequest.Provider, _ accessToken: String) -> Promises.Promise<Bool> {
+        let promise: Promises.Promise<UserSessionRequest.SignInWithProvider> = userSessionRequest.signInWithProvider(provider: provider, accessToken: accessToken)
+
+        return promise.then { signIn in
+            Persistence.Authentication.accessToken = signIn.accessToken
+            if Persistence.Authentication.email != signIn.me?.email {
+                Persistence.Authentication.email = signIn.me?.email
+                Persistence.Authentication.password = nil
+            }
             LibrariesManager.shared.setSentryUser()
             Logger.shared.logInfo("signIn succeeded: \(signIn.accessToken ?? "-")", category: .network)
             return Promise(true)
