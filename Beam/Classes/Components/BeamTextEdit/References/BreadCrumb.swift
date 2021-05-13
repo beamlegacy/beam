@@ -20,7 +20,7 @@ class BreadCrumb: Widget {
     var selectedCrumb: Int?
     var container: Layer?
 
-    var linkedReferenceNode: LinkedReferenceNode!
+    var proxyTextNode: ProxyTextNode!
 
     override var open: Bool {
         didSet {
@@ -39,7 +39,7 @@ class BreadCrumb: Widget {
     }
 
     private var currentNote: BeamNote?
-    private var currentLinkedRefNode: LinkedReferenceNode!
+    private var currentLinkedRefNode: ProxyTextNode!
     private var firstBreadcrumbText = ""
     private var breadcrumbPlaceholder = "..."
 
@@ -57,9 +57,9 @@ class BreadCrumb: Widget {
 
         self.crumbChain = computeCrumbChain(from: element)
 
-        guard let ref = nodeFor(element, withParent: self) as? LinkedReferenceNode else { fatalError() }
+        guard let ref = nodeFor(element, withParent: self) as? ProxyTextNode else { fatalError() }
         ref.open = element.children.isEmpty // Yes, this is intentional
-        self.linkedReferenceNode = ref
+        self.proxyTextNode = ref
         self.currentLinkedRefNode = ref
 
         guard let note = self.crumbChain.first as? BeamNote else { return }
@@ -134,13 +134,13 @@ class BreadCrumb: Widget {
     func selectCrumb(_ index: Int) {
         selectedCrumb = index
         let crumb = crumbChain[index]
-        guard let ref = nodeFor(crumb, withParent: self) as? LinkedReferenceNode else { return }
+        guard let ref = nodeFor(crumb, withParent: self) as? ProxyTextNode else { return }
 
         currentLinkedRefNode = ref
 
         for i in index ..< crumbChain.count {
             let crumb = crumbChain[i]
-            guard let ref = nodeFor(crumb, withParent: self) as? LinkedReferenceNode else { return }
+            guard let ref = nodeFor(crumb, withParent: self) as? ProxyTextNode else { return }
             if crumbChain.last?.id != crumb.id {
                 ref.unfold()
             }
@@ -333,8 +333,20 @@ class BreadCrumb: Widget {
             return node
         }
 
-        // BreadCrumbs can't create TextNodes, only LinkedReferenceNodes
-        let node: TextNode = LinkedReferenceNode(parent: withParent, element: element)
+        // BreadCrumbs can't create TextNodes, only ProxyTextNodes
+        let node: ElementNode = {
+            guard let note = element as? BeamNote else {
+                switch element.kind {
+                case .image:
+                    return ProxyImageNode(parent: withParent, element: element)
+                case .embed:
+                    return ProxyEmbedNode(parent: withParent, element: element)
+                default:
+                    return ProxyTextNode(parent: withParent, element: element)
+                }
+            }
+            return TextRoot(editor: editor, element: note)
+        }()
 
         accessingMapping = true
         mapping[element] = WeakReference(node)
