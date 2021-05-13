@@ -9,7 +9,8 @@ variables:
   LC_ALL: "en_US.UTF-8"
   LANG: "en_US.UTF-8"
   GIT_STRATEGY: fetch
-  GIT_SUBMODULE_STRATEGY: recursive
+  # We do this manually instead, for private repos
+  # GIT_SUBMODULE_STRATEGY: recursive
   GIT_BRANCH: "$CI_COMMIT_REF_NAME"
   GIT_DEPTH: 10
   # Need to enable custom_build_dir feature
@@ -24,6 +25,7 @@ cache:
     - Extern/libgit2/build/libgit2.a
 
 include:
+  - '.gitlab/ci/before-script-template.yml'
   - local: '.gitlab/ci/gitlab-ci-test.yml'
   - local: '.gitlab/ci/gitlab-ci-dmg.yml'
   - local: '.gitlab/ci/gitlab-ci-build.yml'
@@ -45,10 +47,3 @@ code_quality:
     paths: [gl-code-quality-report.json]
   tags:
     - intel
-
-#code_quality_html:
-#  extends: code_quality
-#  variables:
-#    REPORT_FORMAT: html
-#  artifacts:
-#    paths: [gl-code-quality-report.html]

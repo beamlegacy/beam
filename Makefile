@@ -89,6 +89,9 @@ install_gitlab_runner:
   # Screenshots
 	brew install chargepoint/xcparse/xcparse
 
+	# Deno for installing blocklists
+	brew install deno
+
 install_swiftlint:
 	brew install swiftlint
 	sudo xcode-select -s /Applications/Xcode.app/Contents/Developer

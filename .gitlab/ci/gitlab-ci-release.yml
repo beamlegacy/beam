@@ -10,13 +10,6 @@ release:
     - master
     - develop
     - merge_requests
-  before_script:
-    - echo "${PATH}"
-    - pwd
-    - unset cd
-    - direnv allow
-    - eval "$(direnv export bash)"
-    - eval "$(rbenv init -)"
   script:
     - bundle exec fastlane publish_release
   tags:

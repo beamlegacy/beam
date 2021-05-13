@@ -10,16 +10,6 @@ notarize:
     - merge_requests
     - master
     - develop
-  before_script:
-    - echo "${PATH}"
-    - pwd
-    - unset cd
-    - direnv allow
-    - eval "$(direnv export bash)"
-    - eval "$(rbenv init -)"
-    - xcversion update
-    - xcversion install ${XCODE_VERSION}
-    - bundle install
   script:
     - bundle exec fastlane notarize_build
   tags:
