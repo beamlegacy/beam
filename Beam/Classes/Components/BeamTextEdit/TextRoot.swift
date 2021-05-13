@@ -265,7 +265,7 @@ public class TextRoot: TextNode {
         let node: ElementNode = {
             guard let note = element as? BeamNote else {
                 guard element.note == nil || element.note == self.note else {
-                    return LinkedReferenceNode(parent: withParent, element: element)
+                    return ProxyTextNode(parent: withParent, element: element)
                 }
 
                 switch element.kind {

@@ -10,7 +10,7 @@ import BeamCore
 import AppKit
 import WebKit
 
-class EmbedNode: ElementNode {
+public class EmbedNode: ElementNode {
     var webView = WKWebView()
 
     override init(parent: Widget, element: BeamElement) {

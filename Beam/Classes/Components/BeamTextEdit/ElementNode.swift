@@ -11,6 +11,9 @@ import NaturalLanguage
 import Combine
 import BeamCore
 
+public protocol ProxyNode: ElementNode {
+}
+
 // swiftlint:disable file_length
 // swiftlint:disable:next type_body_length
 public class ElementNode: Widget {
@@ -497,4 +500,29 @@ public class ElementNode: Widget {
         }
         context.restoreGState()
     }
+
+    // MARK: needed for proxied nodes
+
+    // override the following 2 methods in the proxies:
+    func isLinkToNote(_ text: BeamText) -> Bool {
+        false
+    }
+
+    var isLink: Bool {
+        false
+    }
+
+    func childrenIsLink() -> Bool {
+        for c in children {
+            guard let linkedRef = c as? ElementNode else { return false }
+            if linkedRef.isLink {
+                return linkedRef.isLink
+            }
+            if linkedRef.childrenIsLink() {
+                return true
+            }
+        }
+        return isLink
+    }
+
 }

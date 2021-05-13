@@ -99,7 +99,7 @@ extension TextRoot {
         if let prevWidget = sortedNodes.first?.previousVisibleNode(TextNode.self) {
             cmdManager.focusElement(prevWidget, cursorPosition: prevWidget.text.count)
         } else if let nextVisibleNode = sortedNodes.last?.nextVisibleNode(TextNode.self) {
-            if (nextVisibleNode as? LinkedReferenceNode) == nil {
+            if (nextVisibleNode as? ProxyTextNode) == nil {
                 cmdManager.focusElement(nextVisibleNode, cursorPosition: 0)
             }
         }
@@ -109,7 +109,7 @@ extension TextRoot {
             cmdManager.deleteElement(for: node)
 
             // Yeah, this sucks, I know
-            if let ref = node as? LinkedReferenceNode,
+            if let ref = node as? ProxyTextNode,
                let breadcrumb = ref.parent as? BreadCrumb,
                let bcParent = breadcrumb.parent {
                 bcParent.removeChild(breadcrumb)
