@@ -15,7 +15,7 @@ extension TextRoot {
             if cursorPosition == 0 {
                 if let next = node.previousVisibleNode(ElementNode.self) {
                     node.invalidateText()
-                    next.focus(position: node.text.count)
+                    next.focus(position: next.textCount)
                 } else {
                     cursorPosition = 0
                 }
