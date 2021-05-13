@@ -1,0 +1,14 @@
+default:
+  before_script:
+    - echo "${PATH}"
+    - pwd
+    - unset cd
+    - direnv allow
+    - eval "$(direnv export bash)"
+    - eval "$(rbenv init -)"
+    - xcversion update
+    - xcversion install ${XCODE_VERSION}
+    - bundle install
+    # This is actually to be done once per CI or ~/.gitconfig gets messed up
+    # - git config --global url."https://${GITLAB_USERNAME}:${GITLAB_ACCESS_TOKEN}@gitlab.com/".insteadOf "git@gitlab.com:"
+    - git submodule sync && git submodule update --init

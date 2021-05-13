@@ -4,6 +4,9 @@
 
 #import <WebKit/WebKit.h>
 #import "git2.h"
+#import "RadBlockKit.h"
+#import "RBFilterGroup.h"
+#import "RBContentBlocker.h"
 #import <Foundation/Foundation.h>
 
 @interface WKPreferences ()

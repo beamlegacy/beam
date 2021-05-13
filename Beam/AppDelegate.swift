@@ -52,6 +52,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         CoreDataManager.shared.setup()
         LibrariesManager.shared.configure()
+        ContentBlockingManager.shared.setup()
 
         #if canImport(Sparkle)
         if Configuration.sparkleUpdate {

@@ -17,16 +17,6 @@ xctests:
     - merge_requests
     - master
     - develop
-  before_script:
-    - echo "${PATH}"
-    - pwd
-    - unset cd
-    - direnv allow
-    - eval "$(direnv export bash)"
-    - eval "$(rbenv init -)"
-    - xcversion update
-    - xcversion install ${XCODE_VERSION}
-    - bundle install
   script:
     - pwd
     - time bundle exec fastlane tests
@@ -59,16 +49,6 @@ xctests UI:
     - merge_requests
     - master
     - develop
-  before_script:
-    - echo "${PATH}"
-    - pwd
-    - unset cd
-    - direnv allow
-    - eval "$(direnv export bash)"
-    - eval "$(rbenv init -)"
-    - xcversion update
-    - xcversion install ${XCODE_VERSION}
-    - bundle install
   script:
     - time bundle exec fastlane uitests
   after_script:

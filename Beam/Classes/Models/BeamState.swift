@@ -363,6 +363,7 @@ import BeamCore
 
     func setup(webView: WKWebView) {
         data.setup(webView: webView)
+        ContentBlockingManager.shared.configure(webView: webView)
     }
 
     func generateTabs(_ number: Int = 100) {

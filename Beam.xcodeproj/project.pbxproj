@@ -7,6 +7,46 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0325628E26051D3B006513E4 /* RBZip.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325624A26051D3A006513E4 /* RBZip.m */; };
+		0325628F26051D3B006513E4 /* RBSQLite.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325624B26051D3A006513E4 /* RBSQLite.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		0325629026051D3B006513E4 /* RBCodeSignature.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325624D26051D3A006513E4 /* RBCodeSignature.m */; };
+		0325629126051D3B006513E4 /* RBDigest.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325624E26051D3A006513E4 /* RBDigest.m */; };
+		0325629226051D3B006513E4 /* RBUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325624F26051D3A006513E4 /* RBUtils.m */; };
+		0325629326051D3B006513E4 /* RBKVO.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325625226051D3A006513E4 /* RBKVO.m */; };
+		0325629426051D3B006513E4 /* NSString+IDNA.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325625326051D3A006513E4 /* NSString+IDNA.m */; };
+		0325629526051D3B006513E4 /* RBContentBlocker.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325625726051D3A006513E4 /* RBContentBlocker.m */; };
+		032562A026051D3B006513E4 /* RBFilter+Mock.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325626526051D3A006513E4 /* RBFilter+Mock.m */; };
+		032562A626051D3B006513E4 /* RBFilterManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325626C26051D3A006513E4 /* RBFilterManager.m */; };
+		032562A726051D3B006513E4 /* RBFilterManagerState.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325626D26051D3A006513E4 /* RBFilterManagerState.m */; };
+		032562A826051D3B006513E4 /* blockerList.json in Resources */ = {isa = PBXBuildFile; fileRef = 0325627026051D3A006513E4 /* blockerList.json */; };
+		032562A926051D3B006513E4 /* RBDatabase.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325627126051D3A006513E4 /* RBDatabase.m */; };
+		032562AA26051D3B006513E4 /* RBClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325627426051D3A006513E4 /* RBClient.m */; };
+		032562AB26051D3B006513E4 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 0325627626051D3A006513E4 /* Info.plist */; };
+		032562AC26051D3B006513E4 /* punycode.c in Sources */ = {isa = PBXBuildFile; fileRef = 0325627826051D3B006513E4 /* punycode.c */; };
+		032562AD26051D3B006513E4 /* RBFilterBuilder.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325627B26051D3B006513E4 /* RBFilterBuilder.m */; };
+		032562AE26051D3B006513E4 /* RBFilterGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325627E26051D3B006513E4 /* RBFilterGroup.m */; };
+		032562AF26051D3B006513E4 /* RBFilter.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325627F26051D3B006513E4 /* RBFilter.m */; };
+		032562B026051D3B006513E4 /* RBSynchronizeInterval.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325628126051D3B006513E4 /* RBSynchronizeInterval.m */; };
+		032562B126051D3B006513E4 /* RBStat.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325628326051D3B006513E4 /* RBStat.m */; };
+		032562B226051D3B006513E4 /* RBWhitelistEntry.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325628926051D3B006513E4 /* RBWhitelistEntry.m */; };
+		032562B326051D3B006513E4 /* RBDateRange.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325628B26051D3B006513E4 /* RBDateRange.m */; };
+		032562B626051D40006513E4 /* RBMockExtensionContext.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325625926051D3A006513E4 /* RBMockExtensionContext.m */; };
+		032562BB26051D45006513E4 /* RBFilterManagerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325625B26051D3A006513E4 /* RBFilterManagerTests.m */; };
+		032562C026051D48006513E4 /* kith.gz in Resources */ = {isa = PBXBuildFile; fileRef = 0325625C26051D3A006513E4 /* kith.gz */; };
+		032562C726051D4B006513E4 /* RBMockClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325625D26051D3A006513E4 /* RBMockClient.m */; };
+		032562CC26051D4D006513E4 /* RBFilterGroupTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325625E26051D3A006513E4 /* RBFilterGroupTests.m */; };
+		032562CF26051D50006513E4 /* RBZipTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325625F26051D3A006513E4 /* RBZipTests.m */; };
+		032562D426051D52006513E4 /* RBDatabaseTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325626026051D3A006513E4 /* RBDatabaseTests.m */; };
+		032562D926051D55006513E4 /* RBClientTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325626226051D3A006513E4 /* RBClientTests.m */; };
+		032562DC26051D57006513E4 /* RBContentBlockerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325626326051D3A006513E4 /* RBContentBlockerTests.m */; };
+		032562E126051D5A006513E4 /* RBFilterManagerStateTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325626426051D3A006513E4 /* RBFilterManagerStateTests.m */; };
+		032562E626051D5D006513E4 /* RBFilterBuilderTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325626626051D3A006513E4 /* RBFilterBuilderTests.m */; };
+		032562E726051D5F006513E4 /* blockerList.json in Resources */ = {isa = PBXBuildFile; fileRef = 0325626726051D3A006513E4 /* blockerList.json */; };
+		032562EE26051D62006513E4 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 0325626826051D3A006513E4 /* Info.plist */; };
+		032562F126051D65006513E4 /* NSString+IDNATests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325626926051D3A006513E4 /* NSString+IDNATests.m */; };
+		032562F426051D67006513E4 /* RBSQLiteTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325626A26051D3A006513E4 /* RBSQLiteTests.m */; };
+		032562FD26051DCB006513E4 /* RBMockClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325625D26051D3A006513E4 /* RBMockClient.m */; };
+		03CA9A9725CC61BF00E7CFA2 /* ContentBlockingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03CA9A9625CC61BF00E7CFA2 /* ContentBlockingManager.swift */; };
 		022843362617C4C3001C062E /* Readability.js in Resources */ = {isa = PBXBuildFile; fileRef = 418172FD25811DB200317ED8 /* Readability.js */; };
 		022843372617C4C3001C062E /* OverrideConsole.js in Resources */ = {isa = PBXBuildFile; fileRef = 418171912581107C00317ED8 /* OverrideConsole.js */; };
 		027CB665263163AC001311A0 /* PasswordManager.js in Resources */ = {isa = PBXBuildFile; fileRef = BAA67AD6C73B8B9546778E72 /* PasswordManager.js */; };
@@ -726,6 +766,76 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0325624726051D3A006513E4 /* RBCodeSignature.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RBCodeSignature.h; sourceTree = "<group>"; };
+		0325624826051D3A006513E4 /* RBUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RBUtils.h; sourceTree = "<group>"; };
+		0325624926051D3A006513E4 /* RBDigest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RBDigest.h; sourceTree = "<group>"; };
+		0325624A26051D3A006513E4 /* RBZip.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RBZip.m; sourceTree = "<group>"; };
+		0325624B26051D3A006513E4 /* RBSQLite.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RBSQLite.m; sourceTree = "<group>"; };
+		0325624C26051D3A006513E4 /* RBKVO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RBKVO.h; sourceTree = "<group>"; };
+		0325624D26051D3A006513E4 /* RBCodeSignature.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RBCodeSignature.m; sourceTree = "<group>"; };
+		0325624E26051D3A006513E4 /* RBDigest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RBDigest.m; sourceTree = "<group>"; };
+		0325624F26051D3A006513E4 /* RBUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RBUtils.m; sourceTree = "<group>"; };
+		0325625026051D3A006513E4 /* RBSQLite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RBSQLite.h; sourceTree = "<group>"; };
+		0325625126051D3A006513E4 /* RBZip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RBZip.h; sourceTree = "<group>"; };
+		0325625226051D3A006513E4 /* RBKVO.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RBKVO.m; sourceTree = "<group>"; };
+		0325625326051D3A006513E4 /* NSString+IDNA.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSString+IDNA.m"; path = "Extern/RadBlock/NSString+IDNA.m"; sourceTree = "<group>"; };
+		0325625426051D3A006513E4 /* RBContentBlocker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RBContentBlocker.h; path = Extern/RadBlock/RBContentBlocker.h; sourceTree = "<group>"; };
+		0325625526051D3A006513E4 /* RBFilterManagerState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RBFilterManagerState.h; path = Extern/RadBlock/RBFilterManagerState.h; sourceTree = "<group>"; };
+		0325625626051D3A006513E4 /* RBDatabase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RBDatabase.h; path = Extern/RadBlock/RBDatabase.h; sourceTree = "<group>"; };
+		0325625726051D3A006513E4 /* RBContentBlocker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RBContentBlocker.m; path = Extern/RadBlock/RBContentBlocker.m; sourceTree = "<group>"; };
+		0325625926051D3A006513E4 /* RBMockExtensionContext.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RBMockExtensionContext.m; sourceTree = "<group>"; };
+		0325625A26051D3A006513E4 /* RBFilter+Mock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "RBFilter+Mock.h"; sourceTree = "<group>"; };
+		0325625B26051D3A006513E4 /* RBFilterManagerTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RBFilterManagerTests.m; sourceTree = "<group>"; };
+		0325625C26051D3A006513E4 /* kith.gz */ = {isa = PBXFileReference; lastKnownFileType = archive.gzip; path = kith.gz; sourceTree = "<group>"; };
+		0325625D26051D3A006513E4 /* RBMockClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RBMockClient.m; sourceTree = "<group>"; };
+		0325625E26051D3A006513E4 /* RBFilterGroupTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RBFilterGroupTests.m; sourceTree = "<group>"; };
+		0325625F26051D3A006513E4 /* RBZipTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RBZipTests.m; sourceTree = "<group>"; };
+		0325626026051D3A006513E4 /* RBDatabaseTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RBDatabaseTests.m; sourceTree = "<group>"; };
+		0325626126051D3A006513E4 /* RBMockExtensionContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RBMockExtensionContext.h; sourceTree = "<group>"; };
+		0325626226051D3A006513E4 /* RBClientTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RBClientTests.m; sourceTree = "<group>"; };
+		0325626326051D3A006513E4 /* RBContentBlockerTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RBContentBlockerTests.m; sourceTree = "<group>"; };
+		0325626426051D3A006513E4 /* RBFilterManagerStateTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RBFilterManagerStateTests.m; sourceTree = "<group>"; };
+		0325626526051D3A006513E4 /* RBFilter+Mock.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "RBFilter+Mock.m"; sourceTree = "<group>"; };
+		0325626626051D3A006513E4 /* RBFilterBuilderTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RBFilterBuilderTests.m; sourceTree = "<group>"; };
+		0325626726051D3A006513E4 /* blockerList.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = blockerList.json; sourceTree = "<group>"; };
+		0325626826051D3A006513E4 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		0325626926051D3A006513E4 /* NSString+IDNATests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+IDNATests.m"; sourceTree = "<group>"; };
+		0325626A26051D3A006513E4 /* RBSQLiteTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RBSQLiteTests.m; sourceTree = "<group>"; };
+		0325626B26051D3A006513E4 /* RBMockClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RBMockClient.h; sourceTree = "<group>"; };
+		0325626C26051D3A006513E4 /* RBFilterManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RBFilterManager.m; path = Extern/RadBlock/RBFilterManager.m; sourceTree = "<group>"; };
+		0325626D26051D3A006513E4 /* RBFilterManagerState.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RBFilterManagerState.m; path = Extern/RadBlock/RBFilterManagerState.m; sourceTree = "<group>"; };
+		0325626E26051D3A006513E4 /* RBFilterManager-Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "RBFilterManager-Private.h"; path = "Extern/RadBlock/RBFilterManager-Private.h"; sourceTree = "<group>"; };
+		0325626F26051D3A006513E4 /* RadBlockKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RadBlockKit.h; path = Extern/RadBlock/RadBlockKit.h; sourceTree = "<group>"; };
+		0325627026051D3A006513E4 /* blockerList.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = blockerList.json; path = Extern/RadBlock/blockerList.json; sourceTree = "<group>"; };
+		0325627126051D3A006513E4 /* RBDatabase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RBDatabase.m; path = Extern/RadBlock/RBDatabase.m; sourceTree = "<group>"; };
+		0325627226051D3A006513E4 /* RBFilterManagerState-Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "RBFilterManagerState-Private.h"; path = "Extern/RadBlock/RBFilterManagerState-Private.h"; sourceTree = "<group>"; };
+		0325627326051D3A006513E4 /* RBDatabase-Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "RBDatabase-Private.h"; path = "Extern/RadBlock/RBDatabase-Private.h"; sourceTree = "<group>"; };
+		0325627426051D3A006513E4 /* RBClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RBClient.m; path = Extern/RadBlock/RBClient.m; sourceTree = "<group>"; };
+		0325627526051D3A006513E4 /* RBFilterManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RBFilterManager.h; path = Extern/RadBlock/RBFilterManager.h; sourceTree = "<group>"; };
+		0325627626051D3A006513E4 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Extern/RadBlock/Info.plist; sourceTree = "<group>"; };
+		0325627726051D3B006513E4 /* punycode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = punycode.h; path = Extern/RadBlock/punycode.h; sourceTree = "<group>"; };
+		0325627826051D3B006513E4 /* punycode.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = punycode.c; path = Extern/RadBlock/punycode.c; sourceTree = "<group>"; };
+		0325627926051D3B006513E4 /* RBClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RBClient.h; path = Extern/RadBlock/RBClient.h; sourceTree = "<group>"; };
+		0325627A26051D3B006513E4 /* NSString+IDNA.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSString+IDNA.h"; path = "Extern/RadBlock/NSString+IDNA.h"; sourceTree = "<group>"; };
+		0325627B26051D3B006513E4 /* RBFilterBuilder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RBFilterBuilder.m; path = Extern/RadBlock/RBFilterBuilder.m; sourceTree = "<group>"; };
+		0325627D26051D3B006513E4 /* RBWhitelistEntry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RBWhitelistEntry.h; sourceTree = "<group>"; };
+		0325627E26051D3B006513E4 /* RBFilterGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RBFilterGroup.m; sourceTree = "<group>"; };
+		0325627F26051D3B006513E4 /* RBFilter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RBFilter.m; sourceTree = "<group>"; };
+		0325628026051D3B006513E4 /* RBWhitelistEntry-Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "RBWhitelistEntry-Private.h"; sourceTree = "<group>"; };
+		0325628126051D3B006513E4 /* RBSynchronizeInterval.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RBSynchronizeInterval.m; sourceTree = "<group>"; };
+		0325628226051D3B006513E4 /* RBDateRange.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RBDateRange.h; sourceTree = "<group>"; };
+		0325628326051D3B006513E4 /* RBStat.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RBStat.m; sourceTree = "<group>"; };
+		0325628426051D3B006513E4 /* RBStat-Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "RBStat-Private.h"; sourceTree = "<group>"; };
+		0325628526051D3B006513E4 /* RBFilterGroup-Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "RBFilterGroup-Private.h"; sourceTree = "<group>"; };
+		0325628626051D3B006513E4 /* RBSynchronizeInterval.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RBSynchronizeInterval.h; sourceTree = "<group>"; };
+		0325628726051D3B006513E4 /* RBFilter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RBFilter.h; sourceTree = "<group>"; };
+		0325628826051D3B006513E4 /* RBFilterGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RBFilterGroup.h; sourceTree = "<group>"; };
+		0325628926051D3B006513E4 /* RBWhitelistEntry.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RBWhitelistEntry.m; sourceTree = "<group>"; };
+		0325628A26051D3B006513E4 /* RBStat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RBStat.h; sourceTree = "<group>"; };
+		0325628B26051D3B006513E4 /* RBDateRange.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RBDateRange.m; sourceTree = "<group>"; };
+		0325628C26051D3B006513E4 /* RBClient-Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "RBClient-Private.h"; path = "Extern/RadBlock/RBClient-Private.h"; sourceTree = "<group>"; };
+		0325628D26051D3B006513E4 /* RBFilterBuilder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RBFilterBuilder.h; path = Extern/RadBlock/RBFilterBuilder.h; sourceTree = "<group>"; };
+		03CA9A9625CC61BF00E7CFA2 /* ContentBlockingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentBlockingManager.swift; sourceTree = "<group>"; };
 		0DEE978C2642965600AB95AE /* GRDBIndexerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GRDBIndexerTests.swift; sourceTree = "<group>"; };
 		4100D96A25AEFEEA00EF04CB /* BeamTextEdit+Shortcut.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamTextEdit+Shortcut.swift"; sourceTree = "<group>"; };
 		4105CE2125A5ECA2009AB687 /* BidirectionalPopoverItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BidirectionalPopoverItem.swift; sourceTree = "<group>"; };
@@ -1307,6 +1417,110 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0325624626051D3A006513E4 /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				0325624726051D3A006513E4 /* RBCodeSignature.h */,
+				0325624826051D3A006513E4 /* RBUtils.h */,
+				0325624926051D3A006513E4 /* RBDigest.h */,
+				0325624A26051D3A006513E4 /* RBZip.m */,
+				0325624B26051D3A006513E4 /* RBSQLite.m */,
+				0325624C26051D3A006513E4 /* RBKVO.h */,
+				0325624D26051D3A006513E4 /* RBCodeSignature.m */,
+				0325624E26051D3A006513E4 /* RBDigest.m */,
+				0325624F26051D3A006513E4 /* RBUtils.m */,
+				0325625026051D3A006513E4 /* RBSQLite.h */,
+				0325625126051D3A006513E4 /* RBZip.h */,
+				0325625226051D3A006513E4 /* RBKVO.m */,
+			);
+			name = Utils;
+			path = Extern/RadBlock/Utils;
+			sourceTree = "<group>";
+		};
+		0325625826051D3A006513E4 /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				0325625926051D3A006513E4 /* RBMockExtensionContext.m */,
+				0325625A26051D3A006513E4 /* RBFilter+Mock.h */,
+				0325625B26051D3A006513E4 /* RBFilterManagerTests.m */,
+				0325625C26051D3A006513E4 /* kith.gz */,
+				0325625D26051D3A006513E4 /* RBMockClient.m */,
+				0325625E26051D3A006513E4 /* RBFilterGroupTests.m */,
+				0325625F26051D3A006513E4 /* RBZipTests.m */,
+				0325626026051D3A006513E4 /* RBDatabaseTests.m */,
+				0325626126051D3A006513E4 /* RBMockExtensionContext.h */,
+				0325626226051D3A006513E4 /* RBClientTests.m */,
+				0325626326051D3A006513E4 /* RBContentBlockerTests.m */,
+				0325626426051D3A006513E4 /* RBFilterManagerStateTests.m */,
+				0325626526051D3A006513E4 /* RBFilter+Mock.m */,
+				0325626626051D3A006513E4 /* RBFilterBuilderTests.m */,
+				0325626726051D3A006513E4 /* blockerList.json */,
+				0325626826051D3A006513E4 /* Info.plist */,
+				0325626926051D3A006513E4 /* NSString+IDNATests.m */,
+				0325626A26051D3A006513E4 /* RBSQLiteTests.m */,
+				0325626B26051D3A006513E4 /* RBMockClient.h */,
+			);
+			name = Tests;
+			path = Extern/RadBlock/Tests;
+			sourceTree = "<group>";
+		};
+		0325627C26051D3B006513E4 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				0325627D26051D3B006513E4 /* RBWhitelistEntry.h */,
+				0325627E26051D3B006513E4 /* RBFilterGroup.m */,
+				0325627F26051D3B006513E4 /* RBFilter.m */,
+				0325628026051D3B006513E4 /* RBWhitelistEntry-Private.h */,
+				0325628126051D3B006513E4 /* RBSynchronizeInterval.m */,
+				0325628226051D3B006513E4 /* RBDateRange.h */,
+				0325628326051D3B006513E4 /* RBStat.m */,
+				0325628426051D3B006513E4 /* RBStat-Private.h */,
+				0325628526051D3B006513E4 /* RBFilterGroup-Private.h */,
+				0325628626051D3B006513E4 /* RBSynchronizeInterval.h */,
+				0325628726051D3B006513E4 /* RBFilter.h */,
+				0325628826051D3B006513E4 /* RBFilterGroup.h */,
+				0325628926051D3B006513E4 /* RBWhitelistEntry.m */,
+				0325628A26051D3B006513E4 /* RBStat.h */,
+				0325628B26051D3B006513E4 /* RBDateRange.m */,
+			);
+			name = Models;
+			path = Extern/RadBlock/Models;
+			sourceTree = "<group>";
+		};
+		0353852926051A6600691BB4 /* Ad blocker */ = {
+			isa = PBXGroup;
+			children = (
+				0325627026051D3A006513E4 /* blockerList.json */,
+				0325627626051D3A006513E4 /* Info.plist */,
+				0325627C26051D3B006513E4 /* Models */,
+				0325627A26051D3B006513E4 /* NSString+IDNA.h */,
+				0325625326051D3A006513E4 /* NSString+IDNA.m */,
+				0325627826051D3B006513E4 /* punycode.c */,
+				0325627726051D3B006513E4 /* punycode.h */,
+				0325626F26051D3A006513E4 /* RadBlockKit.h */,
+				0325628C26051D3B006513E4 /* RBClient-Private.h */,
+				0325627926051D3B006513E4 /* RBClient.h */,
+				0325627426051D3A006513E4 /* RBClient.m */,
+				0325625426051D3A006513E4 /* RBContentBlocker.h */,
+				0325625726051D3A006513E4 /* RBContentBlocker.m */,
+				0325627326051D3A006513E4 /* RBDatabase-Private.h */,
+				0325625626051D3A006513E4 /* RBDatabase.h */,
+				0325627126051D3A006513E4 /* RBDatabase.m */,
+				0325628D26051D3B006513E4 /* RBFilterBuilder.h */,
+				0325627B26051D3B006513E4 /* RBFilterBuilder.m */,
+				0325626E26051D3A006513E4 /* RBFilterManager-Private.h */,
+				0325627526051D3A006513E4 /* RBFilterManager.h */,
+				0325626C26051D3A006513E4 /* RBFilterManager.m */,
+				0325627226051D3A006513E4 /* RBFilterManagerState-Private.h */,
+				0325625526051D3A006513E4 /* RBFilterManagerState.h */,
+				0325626D26051D3A006513E4 /* RBFilterManagerState.m */,
+				0325625826051D3A006513E4 /* Tests */,
+				0325624626051D3A006513E4 /* Utils */,
+			);
+			name = "Ad blocker";
+			path = ../..;
+			sourceTree = "<group>";
+		};
 		0DEE97A3264296E000AB95AE /* Models */ = {
 			isa = PBXGroup;
 			children = (
@@ -1372,6 +1586,7 @@
 				418171E62581107C00317ED8 /* Managers */,
 				418171592581107C00317ED8 /* Services */,
 				4181734C2581204900317ED8 /* Stores */,
+				0353852926051A6600691BB4 /* Ad blocker */,
 				418171882581107C00317ED8 /* Helpers */,
 			);
 			path = Classes;
@@ -1732,6 +1947,7 @@
 				A0AA693225C41C9B0038F9A3 /* MouseHandler.swift */,
 				5204FE3A25F128BD00FD22F8 /* DocumentStruct.swift */,
 				524CF6C925F2735D007312F0 /* EncryptionManager.swift */,
+				03CA9A9625CC61BF00E7CFA2 /* ContentBlockingManager.swift */,
 				A5153EE2260DD58A00C84902 /* RecentsManager.swift */,
 			);
 			path = Managers;
@@ -3117,6 +3333,7 @@
 				56A5BD3725CCAFA400ED7C50 /* english.stopwords in Resources */,
 				4159E9E2259A2575005FD355 /* BidirectionalPopover.xib in Resources */,
 				418171F42581107C00317ED8 /* sign_up.graphql in Resources */,
+				032562AB26051D3B006513E4 /* Info.plist in Resources */,
 				52F4E4B42641844E0067B017 /* delete_identity.graphql in Resources */,
 				418171F62581107C00317ED8 /* sign_in.graphql in Resources */,
 				41D169A925DC07260018E5F2 /* Inter-Italic.otf in Resources */,
@@ -3128,6 +3345,7 @@
 				414B987B259DE2E2002E81A3 /* BidirectionalPopoverActionItem.xib in Resources */,
 				52F4E4A226417F210067B017 /* sign_in_with_provider.graphql in Resources */,
 				41D169A625DC07260018E5F2 /* Inter-Bold.otf in Resources */,
+				032562A826051D3B006513E4 /* blockerList.json in Resources */,
 				418171122581082200317ED8 /* Assets.xcassets in Resources */,
 				56A5BD3125CC680E00ED7C50 /* url.stopwords in Resources */,
 				41B4277B25E52DCA00A8243F /* Localizable.stringsdict in Resources */,
@@ -3169,13 +3387,16 @@
 				5281B09425C99D3300DF66D9 /* 2_local.json in Resources */,
 				5281B08A25C998E700DF66D9 /* 1_ancestor.json in Resources */,
 				96CDA7282582736600BC375C /* PageRankFixtures.json in Resources */,
+				032562C026051D48006513E4 /* kith.gz in Resources */,
 				5281B08625C998A900DF66D9 /* 1_merged.json in Resources */,
 				5281B08225C9989E00DF66D9 /* 1_remote.json in Resources */,
+				032562E726051D5F006513E4 /* blockerList.json in Resources */,
 				5281B09025C99D1C00DF66D9 /* 2_ancestor.json in Resources */,
 				52DD53F125F1122F004F7EC8 /* BeamExport.sqlite in Resources */,
 				5281B09825C99D4B00DF66D9 /* 2_remote.json in Resources */,
 				5281B07C25C9989300DF66D9 /* 1_local.json in Resources */,
 				52E04FD6252C7A4600AD9F56 /* writing_space.json in Resources */,
+				032562EE26051D62006513E4 /* Info.plist in Resources */,
 				BAA67FC2BABDCB5F962CDE22 /* Frames.test.ts in Resources */,
 				BAA67A54C1D488CD065A7688 /* BeamMocks.ts in Resources */,
 				BAA67473B64126D0D6C05B40 /* BeamWindowMock.ts in Resources */,
@@ -3378,6 +3599,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0325629326051D3B006513E4 /* RBKVO.m in Sources */,
+				032562FD26051DCB006513E4 /* RBMockClient.m in Sources */,
 				96FD761B25B1C43500B04ED3 /* BrowsingNodeWidget.swift in Sources */,
 				521EEDFB2593927100BA2485 /* Int+ByteSize.swift in Sources */,
 				5298268C2641A37500E9448C /* GithubButton.swift in Sources */,
@@ -3385,6 +3608,7 @@
 				A552DF2925F0E22B00570C85 /* OmniBarFieldBackground.swift in Sources */,
 				87C539B92616297300D51877 /* SearchPasswordsCell.swift in Sources */,
 				417628A525B05DFB0082FFDF /* NSBezierPath+CGPath.swift in Sources */,
+				032562A726051D3B006513E4 /* RBFilterManagerState.m in Sources */,
 				418172592581107C00317ED8 /* ContentView.swift in Sources */,
 				52B17AC7262449DA00CB4728 /* DatabaseDetail.swift in Sources */,
 				525C5472261F619D00378FAA /* Binding+onChange.swift in Sources */,
@@ -3400,6 +3624,8 @@
 				A5D53697264BE2F50011A095 /* RetroCompatibleScrollViewReader.swift in Sources */,
 				872644772619903B0070E83D /* StepperControl.swift in Sources */,
 				4181721A2581107C00317ED8 /* StandardStorable.swift in Sources */,
+				032562A026051D3B006513E4 /* RBFilter+Mock.m in Sources */,
+				96C9AA3F259019E3007D3D98 /* LinkedReferenceNode.swift in Sources */,
 				96C9AA3F259019E3007D3D98 /* ProxyTextNode.swift in Sources */,
 				4181731725811E1800317ED8 /* CursorMovement.swift in Sources */,
 				A56DF8F12625D27500F1CF55 /* TextFormatterView.swift in Sources */,
@@ -3409,6 +3635,7 @@
 				418172532581107C00317ED8 /* Chevrons.swift in Sources */,
 				5206282625923B6800D7CD9E /* DocumentRequest.swift in Sources */,
 				A0208F8225D6BB1C00CA054C /* AppDelegate+BeamTests.swift in Sources */,
+				03CA9A9725CC61BF00E7CFA2 /* ContentBlockingManager.swift in Sources */,
 				96120D12260C91C600592546 /* TextFrame.swift in Sources */,
 				9634DD8F264AF7940065383E /* TextLineLayer.swift in Sources */,
 				4181733725811F6300317ED8 /* Mode.swift in Sources */,
@@ -3432,6 +3659,8 @@
 				A5208D76261D07E9006193AF /* BeamColor.swift in Sources */,
 				4181724A2581107C00317ED8 /* TextView.swift in Sources */,
 				526017FC25AE081E00634695 /* AppDelegate+Console.swift in Sources */,
+				0325628F26051D3B006513E4 /* RBSQLite.m in Sources */,
+				4181722B2581107C00317ED8 /* String+Localization.swift in Sources */,
 				A567157125F66F8600B46110 /* StyledText.swift in Sources */,
 				418172012581107C00317ED8 /* Document+CoreDataProperties.swift in Sources */,
 				A54936C6260B721600EF7622 /* WindowBottomToolBar.swift in Sources */,
@@ -3443,6 +3672,8 @@
 				414B98FE25A27930002E81A3 /* FormatterType.swift in Sources */,
 				5273C66D25DA857400B00EC3 /* BeamUITestsMenuGenerator.swift in Sources */,
 				4181720A2581107C00317ED8 /* BrowserTab.swift in Sources */,
+				523FF67925C31D9D00B4BD6E /* String+Data.swift in Sources */,
+				032562A926051D3B006513E4 /* RBDatabase.m in Sources */,
 				5206283E25923EB500D7CD9E /* DocumentAPIType.swift in Sources */,
 				418172D625811B8700317ED8 /* RoundRectButtonStyle.swift in Sources */,
 				96FACC8626050B1E0088DD67 /* SetSelection.swift in Sources */,
@@ -3480,6 +3711,7 @@
 				52B9A39A264566D60063AEEF /* OauthButton.swift in Sources */,
 				96FACC8A26079C7E0088DD67 /* InputText.swift in Sources */,
 				418172002581107C00317ED8 /* NotificationName+Beam.swift in Sources */,
+				0325629226051D3B006513E4 /* RBUtils.m in Sources */,
 				8726448F26199B8F0070E83D /* OptionSelector.swift in Sources */,
 				418172112581107C00317ED8 /* Readability.swift in Sources */,
 				A5208D80261D231B006193AF /* BeamColor+Contexts.swift in Sources */,
@@ -3530,10 +3762,13 @@
 				9634DD79264AA1A10065383E /* TextFrameLayer.swift in Sources */,
 				418172442581107C00317ED8 /* ScrollableTextView.swift in Sources */,
 				418171EB2581107C00317ED8 /* Autocompleter.swift in Sources */,
+				418172212581107C00317ED8 /* String+LoremIpsum.swift in Sources */,
+				032562B226051D3B006513E4 /* RBWhitelistEntry.m in Sources */,
 				418172082581107C00317ED8 /* NSManagedObject+initExtension.swift in Sources */,
 				9691C2A62645F90600F70DA1 /* ImageNode.swift in Sources */,
 				52F27FCB25B9B404006E09A2 /* ViewModelFetchedResults.swift in Sources */,
 				524CF6DB25F29119007312F0 /* SymmetricKey+Serialize.swift in Sources */,
+				0325629426051D3B006513E4 /* NSString+IDNA.m in Sources */,
 				418173C32581276F00317ED8 /* String+NSMutableAttributedString.swift in Sources */,
 				96120D0E260C917600592546 /* TextLine.swift in Sources */,
 				A5233DE525FB682700BE6F05 /* FaviconProvider.swift in Sources */,
@@ -3566,31 +3801,41 @@
 				52F4E4A8264180000067B017 /* Identity.swift in Sources */,
 				96FACC522604B0EE0088DD67 /* DeleteElement.swift in Sources */,
 				4181725E2581107C00317ED8 /* AccountManager.swift in Sources */,
+				032562AF26051D3B006513E4 /* RBFilter.m in Sources */,
 				418171FF2581107C00317ED8 /* CoreDataManager.swift in Sources */,
+				0325629526051D3B006513E4 /* RBContentBlocker.m in Sources */,
 				A0D1731425E4FC2D00FDE73C /* ReplaceText.swift in Sources */,
 				A0AA693325C41C9B0038F9A3 /* MouseHandler.swift in Sources */,
 				A0C63A6825FA249700FB4CCE /* BeamTextHolder.swift in Sources */,
 				418171F22581107C00317ED8 /* APIRequest.swift in Sources */,
 				529E1AD425D45CFA00DD25B8 /* APIRequestError.swift in Sources */,
+				032562B026051D3B006513E4 /* RBSynchronizeInterval.m in Sources */,
 				524CF6B225F27318007312F0 /* DocumentRequest+Encryption.swift in Sources */,
+				032562AD26051D3B006513E4 /* RBFilterBuilder.m in Sources */,
 				524CF6CA25F2735D007312F0 /* EncryptionManager.swift in Sources */,
 				96F673D225B7207100E8175B /* StoredLink.swift in Sources */,
+				032562AC26051D3B006513E4 /* punycode.c in Sources */,
+				418EA94225D696EA005894AA /* HyperlinkFormatterView.swift in Sources */,
 				418EA94225D696EA005894AA /* HyperlinkFormatterView.swift in Sources */,
 				96120D4B260CD5E100592546 /* TextEdit+Hyperlink.swift in Sources */,
 				9634DD91264B203E0065383E /* ShapeLayer.swift in Sources */,
 				4181713525810CDC00317ED8 /* Beam.xcdatamodeld in Sources */,
 				9611995E25A27A17005BEC82 /* BeamObjCBridge.m in Sources */,
+				0325629126051D3B006513E4 /* RBDigest.m in Sources */,
 				416C09F3259C919200AF2903 /* CATransaction+Beam.swift in Sources */,
 				418172382581107C00317ED8 /* TextNode.swift in Sources */,
 				418172502581107C00317ED8 /* NoteView.swift in Sources */,
 				414B989925A21BB0002E81A3 /* BeamTextEdit+Formatter.swift in Sources */,
 				4181725F2581107C00317ED8 /* DocumentManager.swift in Sources */,
+				96F93618258CFDD2006D8E53 /* BeamText.swift in Sources */,
+				032562B326051D3B006513E4 /* RBDateRange.m in Sources */,
 				520088B82613265900AED835 /* Database.swift in Sources */,
 				A5C9F01126136B5F0096380F /* AllCardsPageContentView.swift in Sources */,
 				A050047525DA918A009CFEB6 /* NoteAutoSaveService.swift in Sources */,
 				96319C8626160E4A00D1CF31 /* BeamNote+LinkDetection.swift in Sources */,
 				A0E7D98726139FCA00D70676 /* JournalStackView.swift in Sources */,
 				524299E725A480A300F4DBF5 /* AccountsView.swift in Sources */,
+				032562AE26051D3B006513E4 /* RBFilterGroup.m in Sources */,
 				5298EB0126272D230033862C /* NSPersistentStoreCoordinator+Extension.swift in Sources */,
 				52B9A370264546570063AEEF /* OauthWindow.swift in Sources */,
 				418172072581107C00317ED8 /* Document.swift in Sources */,
@@ -3600,6 +3845,7 @@
 				41FAD34F25E5742800D78B36 /* CALayer+Animation.swift in Sources */,
 				524299EE25A488E000F4DBF5 /* AdvancedPreferencesView.swift in Sources */,
 				418171FC2581107C00317ED8 /* RoamImporter.swift in Sources */,
+				0325628E26051D3B006513E4 /* RBZip.m in Sources */,
 				41A969FF2581394300E6594B /* Configuration.swift in Sources */,
 				4181723C2581107C00317ED8 /* TextEditMovements.swift in Sources */,
 				A52BFE63260901980028D3F3 /* Separator.swift in Sources */,
@@ -3622,6 +3868,8 @@
 				4105CE2225A5ECA2009AB687 /* BidirectionalPopoverItem.swift in Sources */,
 				4181722F2581107C00317ED8 /* BeamWindow.swift in Sources */,
 				418172602581107C00317ED8 /* LibrairiesManager.swift in Sources */,
+				032562B126051D3B006513E4 /* RBStat.m in Sources */,
+				0325629026051D3B006513E4 /* RBCodeSignature.m in Sources */,
 				A041848126258C16006DC170 /* BeamWeather.swift in Sources */,
 				4181733225811F4800317ED8 /* KeyCode.swift in Sources */,
 				96A3067C25F698FB0078A453 /* RefNoteTitle.swift in Sources */,
@@ -3629,12 +3877,15 @@
 				A5651A7726035D3A0035F12B /* AppDelegate+NSMenu.swift in Sources */,
 				4181724C2581107C00317ED8 /* BrowserTabView.swift in Sources */,
 				521EEDE125937F5B00BA2485 /* DocumentsContentView.swift in Sources */,
+				032562AA26051D3B006513E4 /* RBClient.m in Sources */,
 				A545D2FB25F7B1D800E68F94 /* DestinationNoteAutocompleteList.swift in Sources */,
 				5285672A26275A8D00DDBE45 /* BeamToBeam2Migration.xcmappingmodel in Sources */,
 				A51ED9A72608D0CD00CA99E5 /* ContextMenuFormatterView.swift in Sources */,
 				4105CE7525A60681009AB687 /* FormatterTypeButton.swift in Sources */,
 				961EC58625B7A75A009FA322 /* LinkManager.swift in Sources */,
 				418171FD2581107C00317ED8 /* NavigationContext.swift in Sources */,
+				032562A626051D3B006513E4 /* RBFilterManager.m in Sources */,
+				A0137B3525B6DFE100E65208 /* CommandManager.swift in Sources */,
 				52B9A38C264562E60063AEEF /* EnvironmentVariables.swift in Sources */,
 				418172372581107C00317ED8 /* TextEditOperations.swift in Sources */,
 				52E2528826175F1C00E54C45 /* DatabaseAPIType.swift in Sources */,
@@ -3687,21 +3938,30 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				032562D926051D55006513E4 /* RBClientTests.m in Sources */,
 				525C235825BAFCAA001B9625 /* MergeTests.swift in Sources */,
+				032562BB26051D45006513E4 /* RBFilterManagerTests.m in Sources */,
+				032562CF26051D50006513E4 /* RBZipTests.m in Sources */,
 				965A78422514F149009980D4 /* BeamTests.swift in Sources */,
 				529E1EE625D3EDA300F8B500 /* BeamTestsHelper.swift in Sources */,
 				52FC003D25E426FE00ABECB0 /* BeamUITestsMenuGeneratorTests.swift in Sources */,
+				032562F126051D65006513E4 /* NSString+IDNATests.m in Sources */,
 				5298649125D151D300D27A80 /* AutocompleteTests.swift in Sources */,
+				032562DC26051D57006513E4 /* RBContentBlockerTests.m in Sources */,
 				562A8B7925B6ED03004D3D8A /* CoreMLTests.swift in Sources */,
 				52E04FED252C814D00AD9F56 /* RoamImporterTests.swift in Sources */,
 				52B5EF78252F520100914D52 /* CoreDataTests.swift in Sources */,
+				032562CC26051D4D006513E4 /* RBFilterGroupTests.m in Sources */,
 				520303D9261CAEF10028BC8E /* DatabaseManagerTests.swift in Sources */,
 				5281B06425C98D2600DF66D9 /* PersistenceTests.swift in Sources */,
 				9674080625F237B2000AC2B8 /* String+URLTests.swift in Sources */,
 				524B110226283F2D00E3C61B /* DatabaseManagerNetworkTests.swift in Sources */,
 				52DEF1CA252B259700561493 /* CoreDataManagerTests.swift in Sources */,
 				52C3294225AC7A8E00EF11E7 /* DocumentTests.swift in Sources */,
+				032562E626051D5D006513E4 /* RBFilterBuilderTests.m in Sources */,
+				032562E126051D5A006513E4 /* RBFilterManagerStateTests.m in Sources */,
 				967B2685255465C5003F40E3 /* Html2MdTests.swift in Sources */,
+				032562D426051D52006513E4 /* RBDatabaseTests.m in Sources */,
 				528910ED25FBBDE800492969 /* DocumentAPITypeTests.swift in Sources */,
 				562A8B5225B5E3D8004D3D8A /* String+NLTests.swift in Sources */,
 				A0404F0C25E7ECDD00E347F3 /* CommandNodeTests.swift in Sources */,
@@ -3711,6 +3971,7 @@
 				527DF48725710ECB00A0A56D /* DocumentManagerTests.swift in Sources */,
 				A01950AD25B838810025C5FD /* CommandManagerTests.swift in Sources */,
 				524425F125C832110095422A /* AccountManagerTests.swift in Sources */,
+				032562B626051D40006513E4 /* RBMockExtensionContext.m in Sources */,
 				96E1356F2546F03900133A24 /* TextNodeTests.swift in Sources */,
 				0DEE978D2642965600AB95AE /* GRDBIndexerTests.swift in Sources */,
 				522AFB2825CBFAB100F60647 /* DocumentManagerTestsHelper.swift in Sources */,
@@ -3723,6 +3984,8 @@
 				5273C65B25DA835500B00EC3 /* APIRequestTests.swift in Sources */,
 				A545D30625F7D93B00E68F94 /* MathsTests.swift in Sources */,
 				52C3078225C311B00027C4B1 /* BeamDateTests.swift in Sources */,
+				032562F426051D67006513E4 /* RBSQLiteTests.m in Sources */,
+				032562C726051D4B006513E4 /* RBMockClient.m in Sources */,
 				968A2DCA263973540021107F /* TextFrameTests.swift in Sources */,
 				5281B01825C962EF00DF66D9 /* DocumentManagerNetworkTests.swift in Sources */,
 				5273C65C25DA835500B00EC3 /* UserSessionRequestTests.swift in Sources */,
@@ -3906,7 +4169,10 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)",
 				);
-				HEADER_SEARCH_PATHS = Extern/libgit2/include;
+				HEADER_SEARCH_PATHS = (
+					Extern/libgit2/include,
+					"Extern/RadBlock/**",
+				);
 				INFOPLIST_FILE = Beam/Configuration/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -3942,7 +4208,10 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = X87W5M786F;
-				HEADER_SEARCH_PATHS = Extern/libgit2/include;
+				HEADER_SEARCH_PATHS = (
+					Extern/libgit2/include,
+					"Extern/RadBlock/**",
+				);
 				INFOPLIST_FILE = BeamTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -4271,7 +4540,10 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)",
 				);
-				HEADER_SEARCH_PATHS = Extern/libgit2/include;
+				HEADER_SEARCH_PATHS = (
+					Extern/libgit2/include,
+					"Extern/RadBlock/**",
+				);
 				INFOPLIST_FILE = Beam/Configuration/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -4316,7 +4588,10 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)",
 				);
-				HEADER_SEARCH_PATHS = Extern/libgit2/include;
+				HEADER_SEARCH_PATHS = (
+					Extern/libgit2/include,
+					"Extern/RadBlock/**",
+				);
 				INFOPLIST_FILE = Beam/Configuration/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -4351,7 +4626,10 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = X87W5M786F;
-				HEADER_SEARCH_PATHS = Extern/libgit2/include;
+				HEADER_SEARCH_PATHS = (
+					Extern/libgit2/include,
+					"Extern/RadBlock/**",
+				);
 				INFOPLIST_FILE = BeamTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -4379,7 +4657,10 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = X87W5M786F;
-				HEADER_SEARCH_PATHS = Extern/libgit2/include;
+				HEADER_SEARCH_PATHS = (
+					Extern/libgit2/include,
+					"Extern/RadBlock/**",
+				);
 				INFOPLIST_FILE = BeamTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

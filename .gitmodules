@@ -5,3 +5,12 @@
 [submodule "Extern/libgit2"]
 	path = Extern/libgit2
 	url = https://github.com/libgit2/libgit2.git
+[submodule "RadBlock"]
+	path = RadBlock
+	url = git@gitlab.com:beamgroup/adblock.git
+[submodule "Extern/adBlock"]
+	path = Extern/adBlock
+	url = git@gitlab.com:beamgroup/adblock.git
+[submodule "Extern/RadBlock"]
+	path = Extern/RadBlock
+	url = git@gitlab.com:beamgroup/adblock.git

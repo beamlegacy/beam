@@ -26,6 +26,7 @@ public enum LogCategory: String {
     case noteEditor
     case keychain
     case encryption
+    case contentBlocking
     case pointAndShoot
     case fileDB
     case oauth
