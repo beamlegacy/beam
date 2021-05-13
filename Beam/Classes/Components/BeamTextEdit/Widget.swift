@@ -237,6 +237,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         self.parent = parent
         self.editor = parent.editor
         layer = CALayer()
+        layer.isHidden = true
         selectionLayer = CALayer()
         selectionLayer.enableAnimations = false
         super.init()
@@ -255,6 +256,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     init(editor: BeamTextEdit) {
         self.editor = editor
         layer = CALayer()
+        layer.isHidden = true
         selectionLayer = CALayer()
         selectionLayer.enableAnimations = false
         super.init()
@@ -313,7 +315,6 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         if initialLayout {
             CATransaction.begin()
             CATransaction.setDisableActions(true)
-
         }
         layer.bounds = contentsFrame
         layer.position = frameInDocument.origin
@@ -338,6 +339,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         updateChildrenLayout()
 
         if initialLayout {
+            updateLayersVisibility()
             CATransaction.commit()
         }
         initialLayout = false
