@@ -36,6 +36,7 @@ struct NoteHeaderView: View {
     }()
 
     private func incorrectCharRanges(in text: String) -> [Range<String.Index>] {
+        guard text != note.title && isEditingTitle else { return [] }
         if let regex = try? NSRegularExpression(pattern: rejectedCharsRegex, options: []) {
             let results = regex.matches(in: text, options: [], range: NSRange(location: 0, length: text.count))
             return results.map { checkResult in
@@ -126,7 +127,9 @@ struct NoteHeaderView: View {
                     }
                     .frame(width: 26, height: 26)
                 }
-                subtitleInfoView
+                if isEditingTitle {
+                    subtitleInfoView
+                }
             }
         }
         .padding(.top, Self.topPadding)
