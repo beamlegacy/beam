@@ -2,11 +2,20 @@ import {WebEventsUI} from "./WebEventsUI"
 
 export interface PointAndShootUI extends WebEventsUI {
   /**
+   * Calculate mouseLocation relative to element
+   *
+   * @param el {HTMLElement} The selection event (click or touch).
+   * @param x {number} Horizontal coordinate of click/touch
+   * @param y {number} Vertical coordinate of click/touch
+   */
+  getMouseLocation(el, x, y)
+  /**
+   * @param quoteId {quoteId} Beam quote identifier. 
    * @param el {HTMLElement} The element hovered in collect mode.
    * @param x {number}
    * @param y {number}
    */
-  point(el, x, y)
+  point(quoteId, el, x, y)
 
   /**
    * @param el {HTMLElement}
@@ -16,13 +25,13 @@ export interface PointAndShootUI extends WebEventsUI {
   /**
    * Select an HTML element to be added to a card.
    *
+   * @param quoteId {quoteId} Beam quote identifier. 
    * @param el {HTMLElement} The selection event (click or touch).
    * @param x {number} Horizontal coordinate of click/touch
    * @param y {number} Vertical coordinate of click/touch
    * @param selectedEls {HTMLElement[]}
-   * @param submitCb {Function}
    */
-  shoot(el, x, y, selectedEls, submitCb)
+  shoot(quoteId, el, x, y, selectedEls)
 
   /**
    * @param el {HTMLElement}

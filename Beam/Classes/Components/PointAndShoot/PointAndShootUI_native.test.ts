@@ -14,8 +14,16 @@ function pointAndShootTestBed(frameEls = []) {
         offsetWidth: 800, offsetHeight: 0,
         clientWidth: 800, clientHeight: 0,
     }
-    const testDocument = new BeamDocumentMock({
-        body: scrollData,
+    const styleData = {
+        style: {
+          zoom: 1
+        }
+      }
+      const testDocument = new BeamDocumentMock({
+        body: {
+          ...styleData,
+          ...scrollData
+        },
         documentElement: scrollData,
         querySelectorAll: (selector) => {
             if (selector === "iframe") {
@@ -67,8 +75,8 @@ test("sends element nodes rectangles", () => {
         mostRightChild.height = 16
         block.appendChild(mostRightChild)
     }
-
-    pnsNativeUI.point(block, 101, 102)
+    
+    pnsNativeUI.point("quoteId", block, 101, 102)
     const events = native.events
     expect(events.length).toEqual(1)
     const event0 = events[0]
@@ -80,9 +88,9 @@ test("sends element nodes rectangles", () => {
    // expect(totalArea.height).toEqual(mostBottomChild.bounds.y + mostBottomChild.bounds.height - mostTopChild.offsetTop)
     expect(pointArea.height).toEqual(34 - mostTopChild.offsetTop)
     expect(event0.payload.html).toEqual(`<p><b>MEAN</b> (<a href="/wiki/MongoDB">MongoDB</a></p>`)
-    expect(event0.payload.location).toEqual({x: 101, y: 102})
+    expect(event0.payload.location).toEqual({x: 70, y: 34})
 
-    pnsNativeUI.shoot(block, 101, 102, null, null)
+    pnsNativeUI.shoot("quoteId", block, 101, 102, null)
     expect(events.length).toEqual(2)
     const event1 = events[1]
     expect(event1.name).toEqual("sendMessage shoot")
@@ -93,5 +101,5 @@ test("sends element nodes rectangles", () => {
    // expect(totalArea.height).toEqual(mostBottomChild.bounds.y + mostBottomChild.bounds.height - mostTopChild.offsetTop)
     expect(shootArea.height).toEqual(34 - mostTopChild.offsetTop)
     expect(event1.payload.html).toEqual(`<p><b>MEAN</b> (<a href="/wiki/MongoDB">MongoDB</a></p>`)
-    expect(event1.payload.location).toEqual({x: 101, y: 102})
+    expect(event1.payload.location).toEqual({x: 70, y: 34})
 })

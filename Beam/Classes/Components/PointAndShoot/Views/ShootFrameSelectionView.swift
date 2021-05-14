@@ -25,6 +25,7 @@ struct ShootFrameSelectionView: View {
                 }
                 .accessibility(identifier: "ShootFrameSelection")
             Text(text)
+                .accessibility(identifier: "ShootFrameSelectionLabel")
                 .foregroundColor(Color.white)
         }
         .animation(animated ? Animation.easeOut : nil)

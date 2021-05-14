@@ -186,6 +186,7 @@ export interface BeamText extends BeamCharacterData {
 }
 
 export interface BeamElement extends BeamParentNode {
+  dataset: any
   attributes: {}
 
   /**
@@ -237,10 +238,11 @@ export interface BeamElement extends BeamParentNode {
 }
 
 export interface BeamElementCSSInlineStyle {
-  style: string
+  style: CSSStyleDeclaration
 }
 
 export interface BeamHTMLElement extends BeamElement, BeamElementCSSInlineStyle {
+  nodeValue: any
 
   dataset: {}
 }

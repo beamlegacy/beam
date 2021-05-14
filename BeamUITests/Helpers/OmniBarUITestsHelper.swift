@@ -45,7 +45,7 @@ class OmniBarUITestsHelper : BeamUITestsHelper {
     }
 
     func navigateTo(text: String) {
-        XCUIApplication().menuItems["Open Location"].tap()
+        self.focusSearchField()
         self.searchField.typeText(text)
         self.searchField.typeText("\r")
     }

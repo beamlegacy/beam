@@ -20,8 +20,10 @@ struct ShootFrame: View {
                 ShootFrameSelectionView(group: group)
                 if group.edited {
                     if let selectionUI = group.uis.last {
-                        ShootAbsolutePositioning(location: selectionUI.target.mouseLocation,
-                                                 contentSize: ShootCardPicker.size) {
+                        ShootAbsolutePositioning(area: selectionUI.target.area,
+                            location: selectionUI.target.mouseLocation,
+                            contentSize: ShootCardPicker.size
+                        ) {
                             ShootCardPicker(allowFocus: pointAndShootUI.isTextSelectionFinished)
                                     .onComplete { (noteTitle, note) in
                                         onCompleteCardSelection(noteTitle, withNote: note)
@@ -31,7 +33,8 @@ struct ShootFrame: View {
                 }
             }
             if let confirmationUI = pointAndShootUI.shootConfirmation {
-                ShootAbsolutePositioning(location: confirmationUI.target.mouseLocation,
+                ShootAbsolutePositioning(area: confirmationUI.target.area,
+                                         location: confirmationUI.target.mouseLocation,
                                          contentSize: ShootCardConfirmationView.size) {
                     ShootCardConfirmationView(noteTitle: confirmationUI.noteTitle,
                                               numberOfElements: confirmationUI.numberOfElements,

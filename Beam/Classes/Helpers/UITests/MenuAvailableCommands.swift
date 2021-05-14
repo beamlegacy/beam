@@ -5,4 +5,6 @@ public enum MenuAvailableCommands: String, CaseIterable {
     case destroyDB
     case logout
     case deleteLogs
+    case resizeWindowLandscape
+    case resizeWindowPortrait
 }

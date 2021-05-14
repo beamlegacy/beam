@@ -13,10 +13,14 @@ export class PointAndShootUI_debug implements PointAndShootUI {
     this.native = native
     this.web = web
   }
+  getMouseLocation(el: any, x: any, y: any) {
+    this.web.getMouseLocation(el, x, y)
+    this.native.getMouseLocation(el, x, y)
+  }
 
-  point(el, x, y) {
-    this.web.point(el, x, y)
-    this.native.point(el, x, y)
+  point(quoteId, el, x, y) {
+    this.web.point(quoteId, el, x, y)
+    this.native.point(quoteId, el, x, y)
   }
 
   unpoint(el) {
@@ -24,9 +28,9 @@ export class PointAndShootUI_debug implements PointAndShootUI {
     this.native.unpoint(el)
   }
 
-  shoot(el, x, y, selected, submitCb) {
-    this.web.shoot(el, x, y, selected, submitCb)
-    this.native.shoot(el, x, y, selected, submitCb)
+  shoot(quoteId, el, x, y, selected) {
+    this.web.shoot(quoteId, el, x, y, selected)
+    this.native.shoot(quoteId, el, x, y, selected)
   }
 
   unshoot(el) {

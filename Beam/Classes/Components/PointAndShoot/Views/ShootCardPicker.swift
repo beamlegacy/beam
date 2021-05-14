@@ -46,6 +46,7 @@ struct ShootCardPicker: View {
             VStack(alignment: .leading, spacing: 0) {
                 HStack(spacing: BeamSpacing._40) {
                     Text("Add to")
+                        .accessibility(identifier: "ShootCardPickerLabel")
                         .font(BeamFont.medium(size: 13).swiftUI)
                     BeamTextField(text: $cardSearchField, isEditing: customEditingBinding,
                                   placeholder: autocompleteModel.todaysCardReplacementName,
@@ -139,7 +140,6 @@ struct ShootCardPicker: View {
                 cardSearchFieldSelection = range
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                Logger.shared.logError("isEditingCardName: \(isEditingCardName) focusOnAppear: \(focusOnAppear)", category: .general)
                 if focusOnAppear {
                     isEditingCardName = true
                 }

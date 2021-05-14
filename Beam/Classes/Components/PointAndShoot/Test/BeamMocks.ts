@@ -2,6 +2,7 @@ import {
   BeamDocument,
   BeamDOMRect,
   BeamElement,
+  BeamElementCSSInlineStyle,
   BeamHTMLElement,
   BeamHTMLIFrameElement,
   BeamNode,
@@ -300,7 +301,8 @@ export class BeamDOMRectMock implements BeamDOMRect {
   }
 }
 
-export class BeamElementMock extends BeamNodeMock implements BeamElement {
+export class BeamElementMock extends BeamNodeMock implements BeamElement, BeamElementCSSInlineStyle {
+  style: CSSStyleDeclaration
   attributes: NamedNodeMap
   classList: DOMTokenList
   clientLeft: number = 0
@@ -321,6 +323,7 @@ export class BeamElementMock extends BeamNodeMock implements BeamElement {
     super(tagName, BeamNodeType.element)
     this.attributes = attributes
   }
+  dataset: any
 
   set width(value: number) {
     this._width = value
@@ -393,12 +396,14 @@ export class BeamElementMock extends BeamNodeMock implements BeamElement {
 
 export class BeamHTMLElementMock extends BeamElementMock implements BeamHTMLElement {
 
-  dataset = {}
-  style = ""
+  dataset = {
+    "beam-mock": "uuid-uuid-uuid-uuid"
+  }
 
   constructor(nodeName: string, attributes = {}) {
     super(nodeName, new BeamNamedNodeMap(attributes))
   }
+  nodeValue: any
 }
 
 export class BeamHTMLIFrameElementMock extends BeamHTMLElementMock implements BeamHTMLIFrameElement {
@@ -410,6 +415,7 @@ export class BeamHTMLIFrameElementMock extends BeamHTMLElementMock implements Be
   constructor(attributes: NamedNodeMap = new BeamNamedNodeMap()) {
     super("iframe", attributes)
   }
+  nodeValue: any
 
   /**
    *

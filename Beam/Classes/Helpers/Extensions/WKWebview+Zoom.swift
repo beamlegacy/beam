@@ -49,4 +49,12 @@ extension WKWebView {
             }
         }
     }
+
+    func zoomLevel() -> CGFloat {
+        if #available(macOS 11.0, *) {
+            return pageZoom
+        }
+        // For PNS scaling, document zoom fallback isn't handled here, but retrieved in JS directly
+        return 1.0
+    }
 }

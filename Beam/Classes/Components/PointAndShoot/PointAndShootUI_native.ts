@@ -2,10 +2,12 @@ import {PointAndShootUI} from "./PointAndShootUI"
 import {Native} from "./Native"
 import {WebEventsUI_native} from "./WebEventsUI_native"
 import {BeamElement, BeamHTMLElement, BeamNodeType, BeamRect} from "./BeamTypes"
+import { Util } from "./Util"
 
 interface AreaMessage {
   area: BeamRect  // Should be a polygon later
   html: string
+  quoteId: any
   location: { x: number, y: number }
 }
 
@@ -28,7 +30,12 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
     const area = new BeamRect(containerBounds.x, containerBounds.y) // Init with container offset
     // We only need to get first-level children
     for (const child of el.childNodes) {
-      let childBounds: any
+      let childBounds: any = {
+        x: 0,
+        y: 0,
+        width: 0,
+        height: 0
+      }
       switch (child.nodeType) {
         case BeamNodeType.element:
           childBounds = (child as BeamElement).getBoundingClientRect()
@@ -47,17 +54,22 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
     return area
   }
 
-  private areaMessage(el: BeamElement, x: number, y: number) {
+  private areaMessage(quoteId, el: BeamElement, x: number, y: number) {
+    const area = this.elementBounds(el)
+    const mouse = this.getMouseLocation(el, x, y)
     const pointPayload: PointMessagePayload = {
-      area: this.elementBounds(el),
+      area,
       html: el.outerHTML,
-      location: {x, y}
+      quoteId: quoteId,
+      location: {
+        ...mouse
+      }
     }
     return pointPayload
   }
 
-  pointMessage(el: BeamElement, x: number, y: number) {
-    const pointPayload: PointMessagePayload = this.areaMessage(el, x, y)
+  pointMessage(quoteId, el: BeamElement, x: number, y: number) {
+    const pointPayload: PointMessagePayload = this.areaMessage(quoteId, el, x, y)
     this.native.sendMessage("point", pointPayload)
   }
 
@@ -66,26 +78,25 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
    * @param x {number}
    * @param y {number}
    */
-  shootMessage(el: BeamHTMLElement, x: number, y: number) {
-    const shootPayload: ShootMessagePayload = this.areaMessage(el, x, y)
+  shootMessage(quoteId, el: BeamHTMLElement, x: number, y: number) {
+    const shootPayload: ShootMessagePayload = this.areaMessage(quoteId, el, x, y)
     this.native.sendMessage("shoot", shootPayload)
   }
 
-  point(el, x, y) {
-    this.pointMessage(el, x, y)
+  point(quoteId, el, x, y) {
+    this.pointMessage(quoteId, el, x, y)
   }
 
   unpoint(el) {
     // setStatus("none") from native is enough for native
   }
 
-  shoot(el, x, y, selected, _submitCb) {
+  shoot(quoteId, el, x, y, selected) {
     /*
      * - Hide previous native popup if any
      * - Show native popup
      */
-    this.shootMessage(el, x, y)
-    // TODO: handle native popup result (probably not using submitCb, but rather through native explicitly invoking JS directly?)
+    this.shootMessage(quoteId, el, x, y)
   }
 
   unshoot(el) {
@@ -112,14 +123,28 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
     // TODO: Send message to hide native status display
   }
 
+  getMouseLocation(el: BeamElement, x: number, y: number) {
+    const area = this.elementBounds(el)
+    // limit min / max of mouse location to area bounds
+    let clampedX = Util.clamp(x, area.x, area.x + area.width)
+    let clampedY = Util.clamp(y, area.y, area.y + area.height)
+
+    // return x / y position relative to element area
+    return {
+      x: clampedX - area.x,
+      y: clampedY - area.y
+    }
+  }
+
   setStatus(status) {
     this.native.sendMessage("setStatus", {status})
   }
 
-  setResizeInfo(resizeInfo: any) {
-    super.setResizeInfo(resizeInfo)
-    for (const someSelected of resizeInfo.selected) {
-      this.shootMessage(someSelected, -1, -1)
-    }
+  setResizeInfo(setResizeInfo) {
+    setResizeInfo.selected = setResizeInfo.selected.map(element => {
+      const quoteId = element.dataset[setResizeInfo.datasetKey]
+      return this.areaMessage(quoteId, element, setResizeInfo.coordinates.x, setResizeInfo.coordinates.y)
+    })
+    super.setResizeInfo(setResizeInfo)
   }
 }

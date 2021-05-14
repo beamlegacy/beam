@@ -13,6 +13,8 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
     var scrollX: CGFloat = 0
     var scrollY: CGFloat = 0
+    var width: CGFloat = 0
+    var height: CGFloat = 0
     private var pixelRatio: Double = 1
 
     public func load(url: URL) {

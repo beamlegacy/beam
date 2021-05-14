@@ -2,6 +2,15 @@
   "object": {
     "pins": [
       {
+        "package": "BrightFutures",
+        "repositoryURL": "https://github.com/Thomvis/BrightFutures.git",
+        "state": {
+          "branch": null,
+          "revision": "9279defa6bdc21501ce740266e5a14d0119ddc63",
+          "version": "8.0.1"
+        }
+      },
+      {
         "package": "Chalk",
         "repositoryURL": "https://github.com/mxcl/Chalk.git",
         "state": {
@@ -38,6 +47,15 @@
         }
       },
       {
+        "package": "Erik",
+        "repositoryURL": "https://github.com/phimage/Erik.git",
+        "state": {
+          "branch": null,
+          "revision": "109a130e9cdb00789a43a7a625293eeb12d22989",
+          "version": "5.1.0"
+        }
+      },
+      {
         "package": "Fakery",
         "repositoryURL": "https://github.com/vadymmarkov/Fakery",
         "state": {
@@ -62,6 +80,15 @@
           "branch": null,
           "revision": "0dc8a5bff1a7f01e1d7bcc20c79e2127b2ea3eeb",
           "version": "0.2.5"
+        }
+      },
+      {
+        "package": "FileKit",
+        "repositoryURL": "https://github.com/nvzqz/FileKit.git",
+        "state": {
+          "branch": null,
+          "revision": "826d9161b184509f80d85c28cd612d630646de98",
+          "version": "6.0.0"
         }
       },
       {
@@ -92,6 +119,15 @@
         }
       },
       {
+        "package": "Kanna",
+        "repositoryURL": "https://github.com/tid-kijyun/Kanna.git",
+        "state": {
+          "branch": null,
+          "revision": "c657fb9f5827ef138068215c76ad0bb62bbc92da",
+          "version": "5.2.4"
+        }
+      },
+      {
         "package": "KeychainAccess",
         "repositoryURL": "https://github.com/kishikawakatsumi/KeychainAccess",
         "state": {
@@ -107,6 +143,15 @@
           "branch": null,
           "revision": "e491a6731307bb23783bf664d003be9b2fa59ab5",
           "version": "9.0.0"
+        }
+      },
+      {
+        "package": "OAuthSwift",
+        "repositoryURL": "https://github.com/OAuthSwift/OAuthSwift.git",
+        "state": {
+          "branch": "master",
+          "revision": "7e88151dca0c542ccb5c24d7773699350510c767",
+          "version": null
         }
       },
       {
@@ -134,6 +179,15 @@
           "branch": null,
           "revision": "afa9a1ace74e116848d4f743599ab83e584ff8cb",
           "version": "1.2.12"
+        }
+      },
+      {
+        "package": "Punycode",
+        "repositoryURL": "https://github.com/gumob/PunycodeSwift.git",
+        "state": {
+          "branch": "master",
+          "revision": "4356ec54e073741449640d3d50a1fd24fd1e1b8b",
+          "version": null
         }
       },
       {
@@ -182,12 +236,30 @@
         }
       },
       {
+        "package": "Swifter",
+        "repositoryURL": "https://github.com/httpswift/swifter.git",
+        "state": {
+          "branch": null,
+          "revision": "9483a5d459b45c3ffd059f7b55f9638e268632fd",
+          "version": "1.5.0"
+        }
+      },
+      {
         "package": "SwiftSoup",
         "repositoryURL": "https://github.com/scinfu/SwiftSoup.git",
         "state": {
           "branch": null,
           "revision": "774dc9c7213085db8aa59595e27c1cd22e428904",
           "version": "2.3.2"
+        }
+      },
+      {
+        "package": "TLDExtract",
+        "repositoryURL": "https://github.com/gumob/TLDExtractSwift",
+        "state": {
+          "branch": "master",
+          "revision": "8c051b60df00a3fd5c568bab657534857eb4287f",
+          "version": null
         }
       },
       {

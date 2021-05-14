@@ -56,6 +56,14 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
    */
   pointedEl
 
+    /**
+   * The currently shooted element.
+   * @type {BeamHTMLElement}
+   */
+  shootingEl
+
+  shootMouseLocation
+
   timer
 
   /**
@@ -117,7 +125,8 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
   point(el, x, y) {
     if (!this.hasSelection()) {
       this.log("KeyDown sending this.ui.point")
-      this.ui.point(el, x, y)
+      const quoteId = el.dataset[this.datasetKey]
+      this.ui.point(quoteId, el, x, y)
     }
   }
 
@@ -139,16 +148,10 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
    * @param el {BeamHTMLElement}
    * @return If the element has changed.
    */
-  unshoot(el = this.pointingEv.target) {
-    const selectedIndex = this.selectedEls.indexOf(el)
-    const alreadySelected = selectedIndex >= 0
-    if (alreadySelected) {
-      this.selectedEls.splice(selectedIndex, 1)
-      this.ui.unshoot(el)
-      delete el.dataset[this.datasetKey]
-      this.setStatus("none")
-    }
-    return alreadySelected
+  unshoot(el = this.shootingEl.target) {
+    this.shootingEl = undefined
+    this.ui.unshoot(el)
+    this.setStatus("none")
   }
 
   hidePopup() {
@@ -208,7 +211,7 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
    */
   showStatus(el) {
     const data = el.dataset[this.datasetKey]
-    const collected = JSON.parse(data)
+    const collected = data
     this.ui.showStatus(el, collected)
   }
 
@@ -225,9 +228,10 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
    * @param note {object} The Note info
    * @param el {BeamHTMLElement} The element to assign the Note to.
    */
-  assignNote(note, el = this.pointedEl) {
-    this.log("assignNote()", "note", note, "el", el, "datasetKey", this.datasetKey)
-    el.dataset[this.datasetKey] = JSON.stringify(note)
+  assignNote(note, el = this.shootingEl) {
+    el.dataset[this.datasetKey] = note
+    this.selectedEls.push(el)
+    this.setStatus("none")
   }
 
   /**
@@ -239,17 +243,13 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
    * @param multi {boolean} If this is a multiple-selection action.
    */
   shoot(el, x, y, multi) {
-    const alreadySelected = this.unshoot(el)
-    if (alreadySelected) {
-      return
+    this.shootingEl = el
+    this.shootMouseLocation = {
+      x,
+      y
     }
-    if (!multi && this.selectedEls.length > 0) {
-      this.unshoot(this.selectedEls[0]) // previous selection will be replaced
-    }
-    this.ui.shoot(el, x, y, this.selectedEls, (selectedNote) => {
-      this.selectedEls.push(el)
-      this.assignNote(selectedNote, el)
-    })
+    const quoteId = el.dataset[this.datasetKey]
+    this.ui.shoot(quoteId, el, x, y, this.selectedEls)
     this.setShooting()
   }
 
@@ -347,7 +347,6 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
         }
       }
     }
-    // this.log("setPointing", c, changed ? "changed" : "did not change")
     return changed
   }
 
@@ -369,7 +368,13 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
 
   protected resizeInfo(): any {
     const resizeInfo = super.resizeInfo();
-    return {...resizeInfo, selected: this.selectedEls};
+    const selected = [].concat(this.shootingEl, this.pointedEl, this.selectedEls).filter(item => item !== null)
+    return {
+      ...resizeInfo,
+      selected: selected,
+      datasetKey: this.datasetKey,
+      coordinates: this.shootMouseLocation
+    };
   }
 
   onKeyUp(ev) {

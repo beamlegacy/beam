@@ -25,6 +25,7 @@ class TestWebPage: WebPage {
         self.passwordOverlayController = passwordOverlayController
         self.pointAndShoot = pns
     }
+    var webView: BeamWebView!
 
     func addCSS(source: String, when: WKUserScriptInjectionTime) {
         events.append("addCSS \(source.hashValue) \(String(describing: when))")
@@ -67,6 +68,23 @@ class PointAndShootUIMock: PointAndShootUI {
     }
 }
 
+//enum PointAndShootStatusMock: PointAndShootStatus
+
+class PointAndShootMock: PointAndShoot {
+    override func point(target: Target) {
+        super.status = PointAndShootStatus.pointing
+        return super.point(target: target)
+    }
+    override func complete(noteInfo: NoteInfo, quoteId: UUID) throws {
+        super.status = PointAndShootStatus.none
+        super.shootGroups.append(super.activeShootGroup ?? PointAndShoot.ShootGroup())
+        return try super.complete(noteInfo: noteInfo, quoteId: quoteId)
+    }
+    override func resetStatus() {
+        super.status = PointAndShootStatus.none
+    }
+}
+
 class PasswordStoreMock: PasswordStore {
     func entries(for host: URL, completion: @escaping ([PasswordManagerEntry]) -> Void) {}
 
@@ -94,12 +112,12 @@ class BrowsingScorerMock: WebPageHolder, BrowsingScorer {
 
 class PointAndShootTest: XCTestCase {
 
-    func testBed() -> (PointAndShoot, PointAndShootUIMock) {
+    func testBed() -> (PointAndShootMock, PointAndShootUIMock) {
         let testPasswordStore = PasswordStoreMock()
         let testPasswordOverlayController = PasswordOverlayController(passwordStore: testPasswordStore, passwordManager: .shared)
         let testBrowsingScorer = BrowsingScorerMock()
         let testUI = PointAndShootUIMock()
-        let pns = PointAndShoot(ui: testUI, scorer: testBrowsingScorer)
+        let pns = PointAndShootMock(ui: testUI, scorer: testBrowsingScorer)
         let testPage = TestWebPage(browsingScorer: testBrowsingScorer, passwordOverlayController: testPasswordOverlayController, pns: pns)
         testPage.browsingScorer.page = testPage
         testPage.passwordOverlayController.page = testPage
@@ -118,7 +136,7 @@ class PointAndShootTest: XCTestCase {
         pns.point(target: target)
         XCTAssertEqual(pns.isPointing, true)
         XCTAssertEqual(testUI.events.count, 1)
-        XCTAssertEqual(testUI.events[0], "drawPoint Target(area: (101.0, 102.0, 301.0, 302.0), "
+        XCTAssertEqual(testUI.events[0], "drawPoint Target(area: (101.0, 102.0, 301.0, 302.0), quoteId: nil, "
                 + "mouseLocation: (201.0, 202.0), html: \"<p>Pointed text</p>\")")
 
         pns.unpoint()
@@ -135,38 +153,44 @@ class PointAndShootTest: XCTestCase {
                 mouseLocation: NSPoint(x: 201, y: 202),
                 html: "<p>Pointed text</p>"
         )
-        // Shoot
+        // Point
         pns.point(target: target1)
+        pns.draw()
+        // Shoot
         pns.shoot(targets: [target1], origin: "https://rr0.org")
-
+        pns.status = .shooting
+        pns.draw()
         XCTAssertEqual(pns.status, .shooting)
         XCTAssertEqual(testUI.events.count, 3)
         XCTAssertEqual(testUI.groupsUI.count, 1)    // One shoot UI
-        XCTAssertEqual(pns.currentGroup?.targets.count, 1)   // One current shoot
-        XCTAssertEqual(pns.groups.count, 0)         // But not validated yet
+        XCTAssertEqual(pns.activeShootGroup?.targets.count, 1)   // One current shoot
+        XCTAssertEqual(pns.shootGroups.count, 0)         // But not validated yet
 
         // Cancel shoot
         pns.resetStatus()
         XCTAssertEqual(pns.status, .none)           // Disallow unpoint while shooting
         XCTAssertEqual(testUI.events.count, 3)
         XCTAssertEqual(testUI.groupsUI.count, 0)    // No more shoot UI
-        XCTAssertEqual(pns.currentGroup == nil, true)       // No current shoot
-        XCTAssertEqual(pns.groups.count, 0)         // No shoot group memorized
+        XCTAssertEqual(pns.activeShootGroup == nil, true)       // No current shoot
+        XCTAssertEqual(pns.shootGroups.count, 0)         // No shoot group memorized
 
         // Shoot again
         pns.point(target: target1) // first point
+        pns.draw()
         pns.shoot(targets: [target1], origin: "https://rr0.org") // then shoot
+        pns.status = .shooting
+        pns.draw()
         XCTAssertEqual(pns.status, .shooting)       // Disallow unpoint while shooting
         XCTAssertEqual(testUI.events.count, 6)
         XCTAssertEqual(testUI.groupsUI.count, 1)    // One shoot UI
-        XCTAssertEqual(pns.groups.count, 0)         // Not validated yet
+        XCTAssertEqual(pns.shootGroups.count, 0)         // Not validated yet
 
         // Validate shoot
-        try pns.complete(noteInfo: NoteInfo(id: nil, title: "My note"))
+        try pns.complete(noteInfo: NoteInfo(id: nil, title: "My note"), quoteId: UUID(uuidString: "347271F3-A6EA-495D-859D-B0F7B807DA3C")!)
         XCTAssertEqual(pns.status, .none)       // Disallow unpoint while shooting
         XCTAssertEqual(testUI.events.count, 6)
         XCTAssertEqual(testUI.groupsUI.count, 0)    // No more shoot UI
-        XCTAssertEqual(pns.groups.count, 1)         // One shoot group memorized
+        XCTAssertEqual(pns.shootGroups.count, 1)         // One shoot group memorized
 
         let target2: PointAndShoot.Target = PointAndShoot.Target(
                 area: NSRect(x: 101, y: 102, width: 301, height: 302),
@@ -175,15 +199,18 @@ class PointAndShootTest: XCTestCase {
         )
         // Shoot twice
         pns.point(target: target2) // first point
+        pns.draw()
         pns.shoot(targets: [target2], origin: "https://javarome.com")
+        pns.status = .shooting
+        pns.draw()
         XCTAssertEqual(testUI.groupsUI.count, 1)    // Seeing the current shoot only
-        XCTAssertEqual(pns.groups.count, 1)         // Second one not validated yet
+        XCTAssertEqual(pns.shootGroups.count, 1)         // Second one not validated yet
 
         // Validate second shoot
-        try pns.complete(noteInfo: NoteInfo(id: nil, title: "Other note"))
-        XCTAssertEqual(testUI.events.count, 10)
+        try pns.complete(noteInfo: NoteInfo(id: nil, title: "My note"), quoteId: UUID(uuidString: "347271F3-A6EA-495D-859D-B0F7B807DA3C")!)
+        XCTAssertEqual(testUI.events.count, 9)
         XCTAssertEqual(testUI.groupsUI.count, 0)    // No more shoot UI
-        XCTAssertEqual(pns.groups.count, 2)         // Two shoot groups memorized
+        XCTAssertEqual(pns.shootGroups.count, 2)         // Two shoot groups memorized
     }
 
     func testPerformanceExample() throws {
