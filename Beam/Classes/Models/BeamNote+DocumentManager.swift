@@ -73,10 +73,11 @@ extension BeamNote: BeamNoteDocument {
 
     public func updateTitle(_ newTitle: String, documentManager: DocumentManager, completion: ((Result<Bool, Error>) -> Void)? = nil) {
         let previousTitle = self.title
+        Self.unload(note: self)
         self.title = newTitle
         self.save(documentManager: documentManager) { [weak self] result in
             guard let self = self else { return }
-
+            Self.appendToFetchedNotes(self)
             switch result {
                 case .success:
                     DispatchQueue.main.async {

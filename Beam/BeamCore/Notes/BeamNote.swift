@@ -155,6 +155,10 @@ public class BeamNote: BeamElement {
         validTitle(fromTitle: title).lowercased()
     }
 
+    private static func cancellableKeyFromNote(_ note: BeamNote) -> UUID {
+        note.id
+    }
+
     private static func validTitle(fromTitle title: String) -> String {
         title.trimmingCharacters(in: .whitespacesAndNewlines)
     }
@@ -171,9 +175,10 @@ public class BeamNote: BeamElement {
 
     public static func appendToFetchedNotes(_ note: BeamNote) {
         fetchedNotes[cacheKeyFromTitle(note.title)] = WeakReference<BeamNote>(note)
-        fetchedNotesCancellables.removeValue(forKey: note.title)
+        let cancellableKey = cancellableKeyFromNote(note)
+        fetchedNotesCancellables.removeValue(forKey: cancellableKey)
 
-        fetchedNotesCancellables[note.title] =
+        fetchedNotesCancellables[cancellableKey] =
             note.$changed
             .dropFirst(1)
 
@@ -204,12 +209,8 @@ public class BeamNote: BeamElement {
     }
 
     public static func unload(note: BeamNote) {
-        unload(note: note.title)
-    }
-
-    public static func unload(note: String) {
-        fetchedNotesCancellables.removeValue(forKey: note)
-        fetchedNotes.removeValue(forKey: note)
+        fetchedNotesCancellables.removeValue(forKey: cancellableKeyFromNote(note))
+        fetchedNotes.removeValue(forKey: cacheKeyFromTitle(note.title))
     }
 
     public func isEntireNoteEmpty() -> Bool {
@@ -223,7 +224,7 @@ public class BeamNote: BeamElement {
     public static var linkDetectionQueue = DispatchQueue(label: "LinkDetector")
     public static var linkDetectionRunning = false
     public private(set) static var fetchedNotes: [String: WeakReference<BeamNote>] = [:]
-    private static var fetchedNotesCancellables: [String: Cancellable] = [:]
+    private static var fetchedNotesCancellables: [UUID: Cancellable] = [:]
 
     public func createdByUser() {
         score += 0.1
