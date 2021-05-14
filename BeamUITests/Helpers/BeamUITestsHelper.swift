@@ -80,4 +80,47 @@ class BeamUITestsHelper {
         fullScreenshotAttachment.name = name
         QuickSpec.current.add(fullScreenshotAttachment)
     }
+    
+    func addNote(noteTitle: String? = nil) {
+        let notePickerField = self.app.textFields["Today"].firstMatch
+        XCTAssert(notePickerField.waitForExistence(timeout: 4))
+        if let title = noteTitle {
+            notePickerField.typeText("\(title)\r\r")
+        } else {
+            notePickerField.typeText("\r")
+        }
+    }
+    
+    func assertShootCardPickerLabelPosition(referenceElement: XCUIElement) {
+        let PnsFrame = self.app.otherElements.matching(identifier: "ShootFrameSelection")
+        let ShootCardPickerLabels = self.app.staticTexts.matching(identifier:"ShootCardPickerLabel")
+        let padding: CGFloat = 16
+        // expect single label
+        XCTAssertEqual(ShootCardPickerLabels.count, 1)
+        // Expect ShootCardPicker to be correctly positioned
+        XCTAssertEqual(ShootCardPickerLabels.element.frame.width, 41.5, accuracy: 1)
+        XCTAssertEqual(ShootCardPickerLabels.element.frame.height, 16.0, accuracy: 1)
+        XCTAssertEqual(ShootCardPickerLabels.element.frame.origin.x, referenceElement.frame.origin.x + (referenceElement.frame.width / 2) + padding, accuracy: 10)
+        XCTAssertEqual(ShootCardPickerLabels.element.frame.origin.y, referenceElement.frame.origin.y + PnsFrame.element.frame.height, accuracy: 10)
+    }
+    
+    func assertFramePositions(searchText: String, identifier: String) {
+        let padding: CGFloat = 16
+        let message = "\(identifier) location doesn't match \"\(searchText)\" location"
+        // Delay because of animations
+        sleep(1)
+        // Hover element to make it active
+        let referenceElementMiddle = self.app.webViews.staticTexts[searchText].coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        referenceElementMiddle.hover()
+        // Expect single element to be correctly displayed
+        let PnsFrames = self.app.otherElements.matching(identifier: identifier)
+        XCTAssertEqual(PnsFrames.count, 1)
+        // Expect element to be correctly positioned
+        let PnsFrame = self.app.otherElements.matching(identifier: identifier).element.frame
+        let referenceElement = self.app.webViews.staticTexts[searchText].frame
+        XCTAssertEqual(PnsFrame.origin.x, referenceElement.origin.x, accuracy: 10, message)
+        XCTAssertEqual(PnsFrame.origin.y, referenceElement.origin.y, accuracy: 10, message)
+        XCTAssertEqual(PnsFrame.width, referenceElement.width + padding, accuracy: 10, message)
+        XCTAssertEqual(PnsFrame.height, referenceElement.height + padding, accuracy: 10, message)
+    }
 }

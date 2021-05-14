@@ -1,4 +1,4 @@
-import type {BeamElement, BeamHTMLIFrameElement, BeamWindow} from "./BeamTypes"
+import type {BeamHTMLIFrameElement, BeamWindow} from "./BeamTypes"
 import type {WebEventsUI} from "./WebEventsUI"
 import {FrameInfo} from "./WebEventsUI";
 import {BeamHTMLIFrameElementMock} from "./Test/BeamMocks"
@@ -61,6 +61,18 @@ export class WebEvents<UI extends WebEventsUI> {
     console.log(this.toString(), args)
   }
 
+  /**
+   * Unifies the document zoom and viewport scaling. The document zoom level is used in webkit for macOS < 11.0
+   *
+   * @return {Number} 
+   * @memberof WebEvents
+   */
+  getScale() {
+    let zoom = this.win.document.body.style.zoom || 1
+    let scale = this.win.visualViewport.scale
+    return Number(zoom) * scale
+  }
+
   checkFrames() {
     const frameEls = this.win.document.querySelectorAll("iframe") as BeamHTMLIFrameElement[]
     const hasFrames = frameEls.length > 0
@@ -107,7 +119,7 @@ export class WebEvents<UI extends WebEventsUI> {
       y: this.win.scrollY,
       width: scrollWidth,
       height: scrollHeight,
-      scale: this.win.visualViewport.scale
+      scale: this.getScale()
     }
     this.ui.setScrollInfo(scrollInfo)
     const hasFrames = this.checkFrames()
@@ -120,7 +132,7 @@ export class WebEvents<UI extends WebEventsUI> {
   }
 
   protected resizeInfo() {
-    return {width: this.win.innerWidth, height: this.win.innerHeight};
+    return {width: this.win.innerWidth, height: this.win.innerHeight, scale: this.getScale()};
   }
 
   onLoad(_ev) {
@@ -148,7 +160,7 @@ export class WebEvents<UI extends WebEventsUI> {
       pageLeft: vv.pageLeft,
       width: vv.width,
       height: vv.height,
-      scale: vv.scale
+      scale: this.getScale()
     })
   }
 

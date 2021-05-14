@@ -55,5 +55,6 @@ struct ShootCardConfirmationView_Previews: PreviewProvider {
     static var previews: some View {
         ShootCardConfirmationView(noteTitle: "A Long Card Name", numberOfElements: 4, isText: false)
             .frame(width: 300, height: 70)
+            .accessibility(identifier: "ShootCardConfirmationView")
     }
 }

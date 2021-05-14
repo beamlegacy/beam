@@ -49,4 +49,18 @@ export class Util {
     const y = offset.y - scrolled.y
     return {x, y}
   }
+
+  /**
+   * Return value clamped between min and max
+   *
+   * @static
+   * @param {number} val
+   * @param {number} min
+   * @param {number} max
+   * @return {number} 
+   * @memberof Util
+   */
+  static clamp(val: number, min: number, max: number) {
+    return val > max ? max : val < min ? min : val;
+  }
 }

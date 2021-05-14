@@ -64,8 +64,9 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
                 pointAndShoot.unpoint()
                 return
             }
+            let quoteId = pointAndShootQuoteIdValue(from: dict)
             let pointArea = positions.viewportArea(area: area, origin: origin)
-            let target = PointAndShoot.Target(area: pointArea, mouseLocation: location, html: html)
+            let target = pointAndShoot.createTarget(area: area, quoteId: quoteId, mouseLocation: location, html: html)
             pointAndShoot.point(target: target)
             Logger.shared.logInfo("Web block point: \(pointArea)", category: .web)
 
@@ -78,7 +79,8 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
                 Logger.shared.logError("Ignored shoot event: \(String(describing: pnsBody))", category: .web)
                 return
             }
-            let target = PointAndShoot.Target(area: area, mouseLocation: location, html: html)
+            let quoteId = pointAndShootQuoteIdValue(from: dict)
+            let target = pointAndShoot.createTarget(area: area, quoteId: quoteId, mouseLocation: location, html: html)
             pointAndShoot.shoot(targets: [target], origin: origin)
             Logger.shared.logInfo("Web shoot point: \(area)", category: .web)
 
@@ -90,8 +92,7 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
                 Logger.shared.logError("Ignored shoot event: \(String(describing: pnsBody))", category: .web)
                 return
             }
-            // let target = PointAndShoot.Target(area: area, mouseLocation: location, html: html)
-            pointAndShoot.showShootInfo(group: pointAndShoot.currentGroup!)
+            pointAndShoot.showShootInfo(group: pointAndShoot.activeShootGroup!)
             Logger.shared.logInfo("Web shoot confirmation: \(area)", category: .web)
 
         case PointAndShootMessages.pointAndShoot_textSelected.rawValue:
@@ -107,8 +108,10 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
                                        category: .web)
                 return
             }
-            let targets = areas.map {
-                PointAndShoot.Target(area: $0, mouseLocation: CGPoint(x: $0.minX, y: $0.maxY), html: html)
+            let targets = areas.map { area -> PointAndShoot.Target in
+                let x: CGFloat = 0
+                let y: CGFloat = area.maxY - area.minY
+                return pointAndShoot.createTarget(area: area, mouseLocation: CGPoint(x: x, y: y), html: html)
             }
             Logger.shared.logInfo("Web text selected, shooting targets: \(targets)", category: .web)
             pointAndShoot.shoot(targets: targets, origin: origin, done: true)
@@ -127,12 +130,13 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
                                        category: .web)
                 return
             }
-            let targets = areas.map {
-                PointAndShoot.Target(area: $0,
-                                     mouseLocation: CGPoint(x: $0.minX, y: $0.maxY), html: html)
+            let targets = areas.map { area -> PointAndShoot.Target in
+                let x: CGFloat = 0
+                let y: CGFloat = area.maxY - area.minY
+                return pointAndShoot.createTarget(area: area, mouseLocation: CGPoint(x: x, y: y), html: html)
             }
             Logger.shared.logInfo("Web text selection, shooting targets: \(targets)", category: .web)
-            pointAndShoot.shoot(targets: targets, origin: origin, done: false)
+            pointAndShoot.shoot(targets: targets, origin: origin, done: true)
 
         case PointAndShootMessages.pointAndShoot_pinch.rawValue:
             guard let dict = pnsBody,
@@ -164,14 +168,7 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
             var page = webPage
             page.scrollX = x // nativeX(x: x, origin: origin)
             page.scrollY = y // nativeY(y: y, origin: origin)
-            if pointAndShoot.isPointing {
-                // Logger.shared.logDebug("scroll redraw because pointing", pointAndShoot)
-                pointAndShoot.drawAllGroups()
-            } else {
-                Logger.shared.logDebug("scroll NOT redraw because pointing=\(pointAndShoot.status)",
-                                       category: .pointAndShoot)
-            }
-            Logger.shared.logDebug("Web Scrolled: \(webPage.scrollX), \(webPage.scrollY)", category: .web)
+            Logger.shared.logDebug("Web Scrolled: \(page.scrollX), \(page.scrollY)", category: .web)
 
         case PointAndShootMessages.pointAndShoot_frameBounds.rawValue:
             guard let dict = pnsBody,
@@ -197,14 +194,21 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
 
         case PointAndShootMessages.pointAndShoot_resize.rawValue:
             guard let dict = pnsBody,
-                  dict["width"] as? CGFloat != nil,
-                  dict["height"] as? CGFloat != nil,
-                  dict["origin"] as? String != nil
+                  let selectedElements = dict["selected"] as? [[String: AnyObject]],
+                  let origin = dict["origin"] as? String
                     else {
                 Logger.shared.logError("Ignored beam_resize: \(String(describing: pnsBody))", category: .web)
                 return
             }
-            // pointAndShoot.drawCurrentGroup()
+            let newTargets = selectedElements.compactMap { element -> PointAndShoot.Target? in
+                if let area = areaValue(of: element, from: webPage),
+                   let (location, html) = targetValues(of: element, from: webPage) {
+                    let quoteId = pointAndShootQuoteIdValue(from: element)
+                    return pointAndShoot.createTarget(area: area, quoteId: quoteId, mouseLocation: location, html: html)
+                }
+                return nil
+            }
+            pointAndShoot.updateShoots(targets: newTargets, origin: origin)
 
         case PointAndShootMessages.pointAndShoot_setStatus.rawValue:
             guard let dict = pnsBody,
@@ -219,6 +223,9 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
         default:
             break
         }
+
+        // After recieving any web events, draw PNS
+        pointAndShoot.draw()
     }
 
     func targetValues(of jsMessage: [String: AnyObject], from webPage: WebPage) -> (location: NSPoint, html: String)? {
@@ -235,6 +242,13 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
             return nil
         }
         return webPage.pointAndShoot.webPositions.jsToRect(jsArea: area)
+    }
+
+    func pointAndShootQuoteIdValue(from jsMessage: [String: AnyObject]) -> UUID? {
+        guard let quoteId = jsMessage["quoteId"] else {
+            return nil
+        }
+        return UUID(uuidString: quoteId as! String)
     }
 
     func areasValue(of jsMessage: [String: AnyObject], from webPage: WebPage) -> [NSRect]? {

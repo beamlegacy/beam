@@ -16,8 +16,16 @@ function pointAndShootTestBed(frameEls = []) {
         offsetWidth: 800, offsetHeight: 0,
         clientWidth: 800, clientHeight: 0,
     }
-    const testDocument = new BeamDocumentMock({
-        body: scrollData,
+    const styleData = {
+        style: {
+          zoom: 1
+        }
+      }
+      const testDocument = new BeamDocumentMock({
+        body: {
+          ...styleData,
+          ...scrollData
+        },
         documentElement: scrollData,
         querySelectorAll: (selector) => {
             if (selector === "iframe") {
@@ -74,6 +82,7 @@ test("point with mouse move + Option", () => {
     expect(pns.status).toEqual("pointing")  // Check low level too because it will be in a postMessage
     expect(testUI.eventsCount).toEqual(3)
     expect(testUI.events[0]).toEqual({name: "setStatus", status: "pointing"})
+    
     expect(testUI.events[1]).toEqual({name: "point", el: pointedElement, x: 101, y: 102})
     expect(testUI.events[2]).toEqual("hideStatus")
 })
@@ -193,6 +202,7 @@ test("point then shoot, then cancel", () => {
     expect(pns.status).toEqual("pointing")
     expect(testUI.eventsCount).toEqual(3)
     expect(testUI.events[1]).toEqual({name: "point", el: pointedElement, x: 101, y: 102})
+    expect(pns.pointedEl).toEqual(pointedElement)
 
     // Shoot
     const shotElement = new BeamHTMLElementMock("p")
@@ -203,9 +213,12 @@ test("point then shoot, then cancel", () => {
     expect(testUI.eventsCount).toEqual(5)
     expect(testUI.events[3]).toEqual({name: "shoot", el: pointedElement, x: 103, y: 104, selectedEls: []})
     expect(pns.selectedEls).toEqual([])
+    expect(pns.shootingEl).toEqual(shotElement)
 
     // Cancel shoot
-    pns.setStatus("none")
+    pns.setStatus("none") 
+    expect(pns.shootingEl).toEqual(shotElement)
+    expect(pns.pointedEl).toEqual(pointedElement)
     expect(pns.status).toEqual("none")
     expect(testUI.eventsCount).toEqual(6)
     expect(testUI.events[5]).toEqual({name: "setStatus", status: "none"})

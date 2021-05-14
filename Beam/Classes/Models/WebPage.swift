@@ -26,6 +26,8 @@ protocol WebPage: Scorable {
 
     var url: URL? { get }
 
+    var webView: BeamWebView! { get }
+
     /**
  Add current page to a Note.
 

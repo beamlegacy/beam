@@ -9,6 +9,8 @@ class BeamUITestsMenuGenerator {
         case .destroyDB: destroyDatabase()
         case .logout: logout()
         case .deleteLogs: deleteLogs()
+        case .resizeWindowLandscape: resizeWindowLandscape()
+        case .resizeWindowPortrait: resizeWindowPortrait()
         }
     }
 
@@ -20,6 +22,14 @@ class BeamUITestsMenuGenerator {
 
     private func deleteLogs() {
         Logger.shared.removeFiles()
+    }
+
+    private func resizeWindowPortrait() {
+        AppDelegate.main.resizeWindow(width: 800)
+    }
+
+    private func resizeWindowLandscape() {
+        AppDelegate.main.resizeWindow(width: 1200)
     }
 
     private func destroyDatabase() {

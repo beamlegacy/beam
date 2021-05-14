@@ -49,6 +49,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var beamUIMenuGenerator: BeamUITestsMenuGenerator!
     #endif
 
+    func resizeWindow(width: CGFloat) {
+        var windowRect = window.frame
+        windowRect.size.width = width
+        window.setFrame(windowRect, display: true)
+    }
+
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         CoreDataManager.shared.setup()
         LibrariesManager.shared.configure()

@@ -16,8 +16,16 @@ function pointAndShootTestBed(frameEls = []): {pns: PointAndShoot, testUI: Point
     offsetWidth: 800, offsetHeight: 0,
     clientWidth: 800, clientHeight: 0
   }
+  const styleData = {
+    style: {
+      zoom: 1
+    }
+  }
   const testDocument = new BeamDocumentMock({
-    body: scrollData,
+    body: {
+      ...styleData,
+      ...scrollData
+    },
     documentElement: scrollData,
     querySelectorAll: (selector) => {
       if (selector === "iframe") {

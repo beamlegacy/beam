@@ -24,7 +24,6 @@ class PointAndShoot: WebPageHolder {
         }
         set {
             if newValue != _status {
-                Logger.shared.logDebug("setStatus(): from \(_status.rawValue) to \(newValue.rawValue)", category: .pointAndShoot)
                 switch newValue {
                 case .none:
                     if _status == .pointing {
@@ -33,26 +32,29 @@ class PointAndShoot: WebPageHolder {
                     }
 
                     if _status == .shooting {
+                        leaveShoot()
+                    }
+
+                case .shooting:
+                    if _status == .pointing {
                         leavePointing()
-                        leaveShoot()
                     }
+
                 default:
-                    if _status == .shooting {
-                        Logger.shared.logDebug("setStatus(): from .shooting to \(newValue.rawValue)", category: .pointAndShoot)
-                        leaveShoot()
-                    }
+                    Logger.shared.logDebug("setStatus(): from \(_status.rawValue) to \(newValue.rawValue)", category: .pointAndShoot)
                 }
                 _status = newValue
-                executeJS("setStatus('\(newValue.rawValue)')")
                 if Configuration.pnsStatus {
                     ui.swiftPointStatus = _status.rawValue
                 }
             }
 
-            if _status == .shooting {
-                drawCurrentGroup()
-            }
+            draw()
         }
+    }
+
+    var isPointing: Bool {
+        @inline(__always) get { status == .pointing }
     }
 
     private func leavePointing() {
@@ -64,15 +66,15 @@ class PointAndShoot: WebPageHolder {
     private func leaveShoot() {
         Logger.shared.logDebug("leaveShoot()", category: .pointAndShoot)
         ui.clear()
-        currentGroup = nil
+        activeShootGroup = nil
+    }
+
+    func resetStatus() {
+        executeJS("setStatus('none')")
     }
 
     private func executeJS(_ method: String) {
         _ = page.executeJS(method, objectName: "PointAndShoot")
-    }
-
-    var isPointing: Bool {
-        @inline(__always) get { status == .pointing }
     }
 
     /**
@@ -83,6 +85,8 @@ class PointAndShoot: WebPageHolder {
          * The blocks that compose this group.
          */
         var targets: [Target] = []
+
+        var quoteId: UUID?
 
         /**
          * The associated Note, if any.
@@ -100,17 +104,49 @@ class PointAndShoot: WebPageHolder {
 
     struct Target {
         var area: NSRect
+        var quoteId: UUID?
         var mouseLocation: NSPoint
         var html: String
 
+        // Prefer using the parent class method
         func translateTarget(xDelta: CGFloat, yDelta: CGFloat, scale: CGFloat) -> Target {
-            let newX = area.minX + xDelta
-            let newY = area.minY + yDelta
-            let newArea = NSRect(x: newX * scale, y: newY * scale,
-                                 width: area.width * scale, height: area.height * scale)
-            let newLocation = NSPoint(x: mouseLocation.x + xDelta, y: mouseLocation.y + yDelta)
-            return Target(area: newArea, mouseLocation: newLocation, html: html)
+            let newArea = NSRect(
+                x: (area.minX + xDelta) * scale,
+                y: (area.minY + yDelta) * scale,
+                width: area.width * scale,
+                height: area.height * scale
+            )
+            let newLocation = NSPoint(
+                x: mouseLocation.x * scale,
+                y: mouseLocation.y * scale
+            )
+            return Target(area: newArea, quoteId: quoteId, mouseLocation: newLocation, html: html)
         }
+    }
+
+    /// Translates a previously created target based on the page horizontal and vertical scroll and page scaling. Page scaling is calcualted by multiplying the webView zoomLevel and the scaling recieved from JS.
+    /// - Parameter target: The target to be translated
+    /// - Returns: The translated target
+    func translateTarget(target: Target) -> Target {
+        guard let view = page.webView else {
+            Logger.shared.logError("page webView required to translate target correctly", category: .pointAndShoot)
+            return target.translateTarget(xDelta: -page.scrollX, yDelta: -page.scrollY, scale: webPositions.scale)
+        }
+        let scale = view.zoomLevel() * webPositions.scale
+        return target.translateTarget(xDelta: -page.scrollX, yDelta: -page.scrollY, scale: scale)
+    }
+
+    /// Creates initial Point and Shoot target that takes into account page horizontal and vertical scroll and page scaling.
+    /// Note: When creating a target we position it with scale set to `1`. We call `translateTarget()` before drawing the target which does use the current scaling value.
+    /// - Parameters:
+    ///   - area: The area coords.
+    ///   - quoteId: ID of the stored quote. Defaults to `nil`.
+    ///   - mouseLocation: Mouse location coords.
+    ///   - html: The HTML content of the targeted element
+    /// - Returns: Translated target
+    func createTarget(area: NSRect, quoteId: UUID? = nil, mouseLocation: NSPoint, html: String) -> Target {
+        return Target(area: area, quoteId: quoteId, mouseLocation: mouseLocation, html: html)
+                    .translateTarget(xDelta: page.scrollX, yDelta: page.scrollY, scale: 1)
     }
 
     let ui: PointAndShootUI
@@ -133,62 +169,20 @@ class PointAndShoot: WebPageHolder {
 
      Groups have associated ShootGroupUI managed by the PointAndShootUI
      */
-    var groups: [ShootGroup] = []
+    var shootGroups: [ShootGroup] = []
 
     /**
       The group being shot.
 
       It will added to groups once the card has been validated.
      */
-    var currentGroup: ShootGroup?
-
-    func drawAllGroups(someGroup: ShootGroup? = nil) {
-        ui.clear()
-        for group in groups {
-            let shootTargets = group.targets
-            if shootTargets.count > 0 {
-                let xDelta = -page.scrollX
-                let yDelta = -page.scrollY
-                let shootUIGroup = ui.createGroup(noteInfo: group.noteInfo, edited: false)
-                for shootTarget in shootTargets {
-                    let selectionUI = ui.createUI(shootTarget: shootTarget, xDelta: xDelta, yDelta: yDelta,
-                                                  scale: webPositions.scale)
-                    shootUIGroup.uis.append(selectionUI)
-                }
-            }
-        }
-    }
-
-    private func drawCurrentGroup() {
-        guard let group = currentGroup else {
-            Logger.shared.logInfo("\(String(describing: currentGroup)), Skipping drawCurrentGroup() currentGroup not defined", category: .pointAndShoot)
-            return
-        }
-
-        if status != .shooting {
-            Logger.shared.logInfo("PNS status is \(status.rawValue), Skipping drawCurrentGroup()", category: .pointAndShoot)
-            return
-        }
-
-        ui.clear()
-        let shootTargets = group.targets
-        if shootTargets.count > 0 {
-            let xDelta = -page.scrollX
-            let yDelta = -page.scrollY
-            let shootUIGroup = ui.createGroup(noteInfo: group.noteInfo, edited: true)
-            for shootTarget in shootTargets {
-                let selectionUI = ui.createUI(shootTarget: shootTarget, xDelta: xDelta, yDelta: yDelta,
-                                              scale: webPositions.scale)
-                shootUIGroup.uis.append(selectionUI)
-            }
-        }
-    }
+    var activeShootGroup: ShootGroup?
 
     func point(target: Target) {
-        status = .pointing
-        drawAllGroups()         // Show existing shots
-        pointTarget = target
-        ui.drawPoint(target: target)
+        executeJS("setStatus('pointing')")
+        pointTarget = translateTarget(target: target)
+        ui.drawPoint(target: pointTarget!)
+        draw()
     }
 
     func unpoint() {
@@ -197,67 +191,55 @@ class PointAndShoot: WebPageHolder {
         }
     }
 
-    /**
-      Add a shoot to the current group.
+    func shoot(targets: [Target], origin: String, done: Bool = true) {
+        if activeShootGroup == nil {
+            activeShootGroup = ShootGroup()
+            Logger.shared.logInfo("shootGroups.count \(shootGroups.count)", category: .pointAndShoot)
+        } else {
+            activeShootGroup?.targets.removeAll()
+        }
+        ui.isTextSelectionFinished = done
+        for target in targets {
+            addShootTargets(target: target)
+        }
+    }
 
+    /**
+     Add a shoot to the current group.
+     
      - Parameter target: the shoot target to add
      */
-    private func addShoot(target: Target) {
-        guard let group = currentGroup else {
+    private func addShootTargets(target: Target) {
+        guard let group = activeShootGroup else {
             Logger.shared.logWarning("Should have a current group", category: .pointAndShoot)
             return
         }
         group.targets.append(target)
     }
 
-    /**
-     Clear all remembered shoots
-     */
-    func removeAll() {
-        groups.removeAll()
-        resetStatus()
+    private func updateShootGroups(target: Target, origin: String) -> Bool {
+        guard shootGroups.count > 0 else {
+            return false
+        }
+        for group in shootGroups where group.quoteId == target.quoteId {
+            shoot(targets: [target], origin: origin)
+            group.targets = activeShootGroup!.targets
+            return true
+        }
+        return false
     }
 
-    func shoot(targets: [Target], origin: String, done: Bool = true) {
-        if currentGroup == nil {
-            currentGroup = ShootGroup()
-            Logger.shared.logInfo("shootGroups.count \(groups.count)", category: .pointAndShoot)
-        }
-        ui.isTextSelectionFinished = done
-        let pageScrollX = page.scrollX
-        let pageScrollY = page.scrollY
+    /// update shootGroups with targets
+    /// - Parameters:
+    ///   - targets: the shoot targets to update
+    ///   - origin: browser tab origin
+    func updateShoots(targets: [Target], origin: String) {
         for target in targets {
-            let viewportArea = webPositions.viewportArea(area: target.area, origin: origin)
-            let pageArea = NSRect(x: viewportArea.minX + pageScrollX, y: viewportArea.minY + pageScrollY,
-                                  width: viewportArea.width, height: viewportArea.height)
-            let pageMouseLocation = NSPoint(x: target.mouseLocation.x + pageScrollX,
-                                            y: target.mouseLocation.y + pageScrollY)
-            let pageTarget = Target(area: pageArea, mouseLocation: pageMouseLocation, html: target.html)
-            addShoot(target: pageTarget)
+            if updateShootGroups(target: target, origin: origin) {
+                continue
+            }
+            shoot(targets: [target], origin: origin)
         }
-
-        if status == .pointing {
-            status = .shooting
-            drawCurrentGroup()
-            return
-        }
-    }
-
-    func complete(noteInfo: NoteInfo) throws {
-        guard let group = currentGroup else {
-            Logger.shared.logWarning("Should have a current group", category: .pointAndShoot)
-            return
-        }
-        group.noteInfo = noteInfo
-        groups.append(group)
-        resetStatus()
-        let noteJSON = try JSONEncoder().encode(noteInfo)
-        executeJS("assignNote('\(noteJSON)')")
-        showShootInfo(group: group)
-    }
-
-    func resetStatus() {
-        status = .none
     }
 
     func showShootInfo(group: ShootGroup) {
@@ -269,14 +251,49 @@ class PointAndShoot: WebPageHolder {
     }
 
     func draw() {
+        ui.clear()
         switch status {
         case .pointing:
-            drawCurrentGroup()
-        case .shooting:
             drawAllGroups()
+        case .shooting:
+            drawActiveShootGroup()
         case .none:
-            ui.clear()
+            Logger.shared.logDebug("No redraw because pointing=\(status)", category: .pointAndShoot)
         }
+    }
+
+    private func drawShootGroup(groups: [ShootGroup], edited: Bool) {
+        for group in groups {
+            let shootTargets = group.targets
+            if shootTargets.count > 0 {
+                let shootUIGroup = ui.createGroup(noteInfo: group.noteInfo, edited: edited)
+                for shootTarget in shootTargets {
+                    let target = translateTarget(target: shootTarget)
+                    let selectionUI = ui.createUI(shootTarget: target)
+                    shootUIGroup.uis.append(selectionUI)
+                }
+            }
+        }
+    }
+
+    private func drawAllGroups() {
+        drawShootGroup(groups: shootGroups, edited: false)
+    }
+
+    private func drawActiveShootGroup() {
+        guard let group = activeShootGroup else {
+            Logger.shared.logInfo("Skipping drawCurrentGroup() currentGroup not defined", category: .pointAndShoot)
+            return
+        }
+        drawShootGroup(groups: [group], edited: true)
+    }
+
+    /**
+     Clear all remembered shoots
+     */
+    func removeAll() {
+        shootGroups.removeAll()
+        resetStatus()
     }
 
     /**
@@ -295,7 +312,7 @@ class PointAndShoot: WebPageHolder {
             return
         }
         page.setDestinationNote(note, rootElement: note)
-        let html = currentGroup!.html()
+        let html = activeShootGroup!.html()
         var text = BeamText()
         var embed: String?
         if let host = url.host,
@@ -312,6 +329,7 @@ class PointAndShoot: WebPageHolder {
         var quote = text
         quote.addAttributes([.emphasis], to: quote.wholeRange)
 
+        let quoteE = BeamElement()
         DispatchQueue.main.async {
             guard let current = self.page.addToNote(allowSearchResult: true) else {
                 Logger.shared.logError("Ignored current note add", category: .general)
@@ -330,13 +348,26 @@ class PointAndShoot: WebPageHolder {
                 current.addChild(quoteElement)
                 quoteParent = quoteElement
             }
-            let quoteE = BeamElement()
+
             quoteE.kind = .quote(1, title, urlString)
             quoteE.text = quote
             quoteE.query = self.page.originalQuery
             quoteParent.addChild(quoteE)
         }
         let noteInfo = NoteInfo(id: note.id, title: note.title)
-        try complete(noteInfo: noteInfo)
+        try complete(noteInfo: noteInfo, quoteId: quoteE.id)
+    }
+
+    func complete(noteInfo: NoteInfo, quoteId: UUID) throws {
+        guard let group = activeShootGroup else {
+            Logger.shared.logWarning("Should have a current group", category: .pointAndShoot)
+            return
+        }
+        group.quoteId = quoteId
+        group.noteInfo = noteInfo
+        shootGroups.append(group)
+        executeJS("assignNote('\(quoteId)')")
+        showShootInfo(group: group)
+        activeShootGroup = nil
     }
 }
