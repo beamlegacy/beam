@@ -19,6 +19,7 @@ class PasswordMessageHandler: BeamMessageHandler<PasswordMessages> {
         super.init(config: page, messages: PasswordMessages.self, jsFileName: "PasswordManager")
     }
 
+    // swiftlint:disable:next cyclomatic_complexity function_body_length
     override func onMessage(messageName: String, messageBody: Any?, from webPage: WebPage) {
         let passwordOverlayController = webPage.passwordOverlayController
         switch messageName {

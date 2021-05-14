@@ -73,7 +73,7 @@ class ContentBlockingManager {
 
     private func compileLists(blockers: [RBContentBlocker]) {
         blockers.forEach { blocker in
-            blocker.writeRules { url, error in
+            blocker.writeRules { _, _ in
                 self.loadBlocker(blocker)
             }
         }
@@ -85,11 +85,5 @@ class ContentBlockingManager {
         } else {
             ruleLists.removeValue(forKey: identifier)
         }
-    }
-
-    private func ruleListCompiler(filterGroup: Filter.Group) -> AnyPublisher<WKContentRuleList, Error> {
-        return Future<WKContentRuleList, Error> { promise in
-//            promise(.success(nil))
-        }.eraseToAnyPublisher()
     }
 }

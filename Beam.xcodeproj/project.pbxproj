@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		022843362617C4C3001C062E /* Readability.js in Resources */ = {isa = PBXBuildFile; fileRef = 418172FD25811DB200317ED8 /* Readability.js */; };
+		022843372617C4C3001C062E /* OverrideConsole.js in Resources */ = {isa = PBXBuildFile; fileRef = 418171912581107C00317ED8 /* OverrideConsole.js */; };
+		027CB665263163AC001311A0 /* PasswordManager.js in Resources */ = {isa = PBXBuildFile; fileRef = BAA67AD6C73B8B9546778E72 /* PasswordManager.js */; };
+		02A2B285263190F100D581A5 /* Scorer.js in Resources */ = {isa = PBXBuildFile; fileRef = BAA6705B2A0906FB4C068502 /* Scorer.js */; };
+		02E5805226308F1D00CEDEB1 /* index_prod.js in Resources */ = {isa = PBXBuildFile; fileRef = BAA6756C6F2D22423B668BAF /* index_prod.js */; };
 		0325628E26051D3B006513E4 /* RBZip.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325624A26051D3A006513E4 /* RBZip.m */; };
 		0325628F26051D3B006513E4 /* RBSQLite.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325624B26051D3A006513E4 /* RBSQLite.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		0325629026051D3B006513E4 /* RBCodeSignature.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325624D26051D3A006513E4 /* RBCodeSignature.m */; };
@@ -47,11 +52,6 @@
 		032562F426051D67006513E4 /* RBSQLiteTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325626A26051D3A006513E4 /* RBSQLiteTests.m */; };
 		032562FD26051DCB006513E4 /* RBMockClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325625D26051D3A006513E4 /* RBMockClient.m */; };
 		03CA9A9725CC61BF00E7CFA2 /* ContentBlockingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03CA9A9625CC61BF00E7CFA2 /* ContentBlockingManager.swift */; };
-		022843362617C4C3001C062E /* Readability.js in Resources */ = {isa = PBXBuildFile; fileRef = 418172FD25811DB200317ED8 /* Readability.js */; };
-		022843372617C4C3001C062E /* OverrideConsole.js in Resources */ = {isa = PBXBuildFile; fileRef = 418171912581107C00317ED8 /* OverrideConsole.js */; };
-		027CB665263163AC001311A0 /* PasswordManager.js in Resources */ = {isa = PBXBuildFile; fileRef = BAA67AD6C73B8B9546778E72 /* PasswordManager.js */; };
-		02A2B285263190F100D581A5 /* Scorer.js in Resources */ = {isa = PBXBuildFile; fileRef = BAA6705B2A0906FB4C068502 /* Scorer.js */; };
-		02E5805226308F1D00CEDEB1 /* index_prod.js in Resources */ = {isa = PBXBuildFile; fileRef = BAA6756C6F2D22423B668BAF /* index_prod.js */; };
 		0DEE978D2642965600AB95AE /* GRDBIndexerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DEE978C2642965600AB95AE /* GRDBIndexerTests.swift */; };
 		4100D96B25AEFEEA00EF04CB /* BeamTextEdit+Shortcut.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4100D96A25AEFEEA00EF04CB /* BeamTextEdit+Shortcut.swift */; };
 		4105CE2225A5ECA2009AB687 /* BidirectionalPopoverItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4105CE2125A5ECA2009AB687 /* BidirectionalPopoverItem.swift */; };
@@ -157,7 +157,6 @@
 		418173C32581276F00317ED8 /* String+NSMutableAttributedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418173C22581276F00317ED8 /* String+NSMutableAttributedString.swift */; };
 		4181744325812C5F00317ED8 /* NSColor+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181744225812C5F00317ED8 /* NSColor+Beam.swift */; };
 		41855A3A25D1334F00DA49DC /* BeamCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41855A3925D1334F00DA49DC /* BeamCollectionView.swift */; };
-		418EA94225D696EA005894AA /* HyperlinkFormatterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418EA94125D696EA005894AA /* HyperlinkFormatterView.swift */; };
 		41A969FF2581394300E6594B /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41A969FE2581394300E6594B /* Configuration.swift */; };
 		41B4277B25E52DCA00A8243F /* Localizable.stringsdict in Resources */ = {isa = PBXBuildFile; fileRef = 41B4277A25E52DCA00A8243F /* Localizable.stringsdict */; };
 		41D169A625DC07260018E5F2 /* Inter-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 41D169A125DC07250018E5F2 /* Inter-Bold.otf */; };
@@ -203,6 +202,8 @@
 		524CF6CE25F27609007312F0 /* KeychainStorable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524CF6CD25F27609007312F0 /* KeychainStorable.swift */; };
 		524CF6D725F28F97007312F0 /* EncryptionManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524CF6D625F28F97007312F0 /* EncryptionManagerTests.swift */; };
 		524CF6DB25F29119007312F0 /* SymmetricKey+Serialize.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524CF6DA25F29119007312F0 /* SymmetricKey+Serialize.swift */; };
+		525098E5264E9817002D1548 /* ProxyTextNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C9AA3E259019E3007D3D98 /* ProxyTextNode.swift */; };
+		525098EA264E9824002D1548 /* HyperlinkFormatterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418EA94125D696EA005894AA /* HyperlinkFormatterView.swift */; };
 		525C233C25BAF8EF001B9625 /* libgit2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 525C233B25BAF8EF001B9625 /* libgit2.a */; };
 		525C235125BAFC6B001B9625 /* Merge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 525C235025BAFC6B001B9625 /* Merge.swift */; };
 		525C235825BAFCAA001B9625 /* MergeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 525C235725BAFCAA001B9625 /* MergeTests.swift */; };
@@ -371,7 +372,6 @@
 		96A3067C25F698FB0078A453 /* RefNoteTitle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96A3067B25F698FB0078A453 /* RefNoteTitle.swift */; };
 		96BBA79F25FBA573008276FC /* ReparentElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96BBA78A25FBA573008276FC /* ReparentElement.swift */; };
 		96C1D7EB2624C0ED0085FD23 /* BeamElement+Text.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C1D7EA2624C0ED0085FD23 /* BeamElement+Text.swift */; };
-		96C9AA3F259019E3007D3D98 /* ProxyTextNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C9AA3E259019E3007D3D98 /* ProxyTextNode.swift */; };
 		96C9AA5725901AA9007D3D98 /* LinksSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C9AA5625901AA9007D3D98 /* LinksSection.swift */; };
 		96C9AAB92593BB67007D3D98 /* Widget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C9AAB82593BB67007D3D98 /* Widget.swift */; };
 		96C9CC3E2535CE2C00D70AA6 /* LexerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C9CC3D2535CE2C00D70AA6 /* LexerTests.swift */; };
@@ -3599,6 +3599,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				525098EA264E9824002D1548 /* HyperlinkFormatterView.swift in Sources */,
+				525098E5264E9817002D1548 /* ProxyTextNode.swift in Sources */,
 				0325629326051D3B006513E4 /* RBKVO.m in Sources */,
 				032562FD26051DCB006513E4 /* RBMockClient.m in Sources */,
 				96FD761B25B1C43500B04ED3 /* BrowsingNodeWidget.swift in Sources */,
@@ -3625,8 +3627,6 @@
 				872644772619903B0070E83D /* StepperControl.swift in Sources */,
 				4181721A2581107C00317ED8 /* StandardStorable.swift in Sources */,
 				032562A026051D3B006513E4 /* RBFilter+Mock.m in Sources */,
-				96C9AA3F259019E3007D3D98 /* LinkedReferenceNode.swift in Sources */,
-				96C9AA3F259019E3007D3D98 /* ProxyTextNode.swift in Sources */,
 				4181731725811E1800317ED8 /* CursorMovement.swift in Sources */,
 				A56DF8F12625D27500F1CF55 /* TextFormatterView.swift in Sources */,
 				418172522581107C00317ED8 /* OmniBarSearchField.swift in Sources */,
@@ -3660,7 +3660,6 @@
 				4181724A2581107C00317ED8 /* TextView.swift in Sources */,
 				526017FC25AE081E00634695 /* AppDelegate+Console.swift in Sources */,
 				0325628F26051D3B006513E4 /* RBSQLite.m in Sources */,
-				4181722B2581107C00317ED8 /* String+Localization.swift in Sources */,
 				A567157125F66F8600B46110 /* StyledText.swift in Sources */,
 				418172012581107C00317ED8 /* Document+CoreDataProperties.swift in Sources */,
 				A54936C6260B721600EF7622 /* WindowBottomToolBar.swift in Sources */,
@@ -3672,7 +3671,6 @@
 				414B98FE25A27930002E81A3 /* FormatterType.swift in Sources */,
 				5273C66D25DA857400B00EC3 /* BeamUITestsMenuGenerator.swift in Sources */,
 				4181720A2581107C00317ED8 /* BrowserTab.swift in Sources */,
-				523FF67925C31D9D00B4BD6E /* String+Data.swift in Sources */,
 				032562A926051D3B006513E4 /* RBDatabase.m in Sources */,
 				5206283E25923EB500D7CD9E /* DocumentAPIType.swift in Sources */,
 				418172D625811B8700317ED8 /* RoundRectButtonStyle.swift in Sources */,
@@ -3762,7 +3760,6 @@
 				9634DD79264AA1A10065383E /* TextFrameLayer.swift in Sources */,
 				418172442581107C00317ED8 /* ScrollableTextView.swift in Sources */,
 				418171EB2581107C00317ED8 /* Autocompleter.swift in Sources */,
-				418172212581107C00317ED8 /* String+LoremIpsum.swift in Sources */,
 				032562B226051D3B006513E4 /* RBWhitelistEntry.m in Sources */,
 				418172082581107C00317ED8 /* NSManagedObject+initExtension.swift in Sources */,
 				9691C2A62645F90600F70DA1 /* ImageNode.swift in Sources */,
@@ -3815,8 +3812,6 @@
 				524CF6CA25F2735D007312F0 /* EncryptionManager.swift in Sources */,
 				96F673D225B7207100E8175B /* StoredLink.swift in Sources */,
 				032562AC26051D3B006513E4 /* punycode.c in Sources */,
-				418EA94225D696EA005894AA /* HyperlinkFormatterView.swift in Sources */,
-				418EA94225D696EA005894AA /* HyperlinkFormatterView.swift in Sources */,
 				96120D4B260CD5E100592546 /* TextEdit+Hyperlink.swift in Sources */,
 				9634DD91264B203E0065383E /* ShapeLayer.swift in Sources */,
 				4181713525810CDC00317ED8 /* Beam.xcdatamodeld in Sources */,
@@ -3827,7 +3822,6 @@
 				418172502581107C00317ED8 /* NoteView.swift in Sources */,
 				414B989925A21BB0002E81A3 /* BeamTextEdit+Formatter.swift in Sources */,
 				4181725F2581107C00317ED8 /* DocumentManager.swift in Sources */,
-				96F93618258CFDD2006D8E53 /* BeamText.swift in Sources */,
 				032562B326051D3B006513E4 /* RBDateRange.m in Sources */,
 				520088B82613265900AED835 /* Database.swift in Sources */,
 				A5C9F01126136B5F0096380F /* AllCardsPageContentView.swift in Sources */,
@@ -3885,7 +3879,6 @@
 				961EC58625B7A75A009FA322 /* LinkManager.swift in Sources */,
 				418171FD2581107C00317ED8 /* NavigationContext.swift in Sources */,
 				032562A626051D3B006513E4 /* RBFilterManager.m in Sources */,
-				A0137B3525B6DFE100E65208 /* CommandManager.swift in Sources */,
 				52B9A38C264562E60063AEEF /* EnvironmentVariables.swift in Sources */,
 				418172372581107C00317ED8 /* TextEditOperations.swift in Sources */,
 				52E2528826175F1C00E54C45 /* DatabaseAPIType.swift in Sources */,

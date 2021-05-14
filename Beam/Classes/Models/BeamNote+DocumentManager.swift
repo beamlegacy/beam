@@ -78,12 +78,11 @@ extension BeamNote: BeamNoteDocument {
             guard let self = self else { return }
 
             switch result {
-                case .success(_):
+                case .success:
                     DispatchQueue.main.async {
                         self.updatedNotesWithLinkedReferences(afterChangingTitleFrom: previousTitle, documentManager: documentManager)
                     }
-                case .failure(_):
-                    break
+                case .failure: break
             }
             completion?(result)
         }
