@@ -35,8 +35,8 @@ class CheckBoxTableCellView: NSTableCellView {
         self.addConstraints([
             leadingAnchor.constraint(equalTo: checkBox.leadingAnchor),
             trailingAnchor.constraint(equalTo: checkBox.trailingAnchor),
-            centerYAnchor.constraint(equalTo: checkBox.centerYAnchor),
-            centerXAnchor.constraint(equalTo: checkBox.centerXAnchor)
+            topAnchor.constraint(equalTo: checkBox.topAnchor),
+            bottomAnchor.constraint(equalTo: checkBox.bottomAnchor)
         ])
     }
 

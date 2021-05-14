@@ -364,16 +364,31 @@ extension TableViewCoordinator: NSTextFieldDelegate {
 
 extension TableViewCoordinator: BeamNSTableViewDelegate {
 
-    func tableView(_ tableView: BeamNSTableView, mouseDownFor row: Int, column: Int, locationInWindow: NSPoint) {
-        guard let onMouseDown = parent.onMouseDown,
-              let cellView = tableView.view(atColumn: column, row: row, makeIfNecessary: false) as? BeamTableCellView,
+    func tableView(_ tableView: BeamNSTableView, mouseDownFor row: Int, column: Int, locationInWindow: NSPoint) -> Bool {
+        let view = tableView.view(atColumn: column, row: row, makeIfNecessary: false)
+
+        // if mouseDown in checkbox column
+        if view is CheckBoxTableCellView {
+            if currentSelectedIndexes?.contains(row) == true {
+                tableView.deselectRow(row)
+            } else {
+                tableView.selectRowIndexes([row], byExtendingSelection: true)
+            }
+            return false
+        }
+
+        // if mouseDown in a column handling click
+        if let onMouseDown = parent.onMouseDown,
+              let cellView = view as? BeamTableCellView,
               let originalRow = getOriginalDataIndexes(for: [row]).first,
               column < parent.columns.count,
-              cellView.shouldHandleMouseDown(at: cellView.convert(locationInWindow, from: nil))
-        else { return }
-        let columnData = parent.columns[column]
-        tableView.deselectRow(row)
-        onMouseDown(originalRow, columnData)
+              cellView.shouldHandleMouseDown(at: cellView.convert(locationInWindow, from: nil)) {
+            let columnData = parent.columns[column]
+            onMouseDown(originalRow, columnData)
+            return false
+        }
+
+        return true
     }
 
     func tableView(_ tableView: BeamNSTableView, rightMouseDownFor row: Int, column: Int, locationInWindow: NSPoint) {

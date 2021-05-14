@@ -8,7 +8,7 @@
 import Foundation
 
 protocol BeamNSTableViewDelegate: AnyObject {
-    func tableView(_ tableView: BeamNSTableView, mouseDownFor row: Int, column: Int, locationInWindow: NSPoint)
+    func tableView(_ tableView: BeamNSTableView, mouseDownFor row: Int, column: Int, locationInWindow: NSPoint) -> Bool
     func tableView(_ tableView: BeamNSTableView, rightMouseDownFor row: Int, column: Int, locationInWindow: NSPoint)
 }
 
@@ -33,10 +33,12 @@ class BeamNSTableView: NSTableView {
     }
 
     override func mouseDown(with event: NSEvent) {
+        var shouldPropagate = true
+        if let additionalDelegate = additionalDelegate,
+              let (row, column) = rowAndColumngForWindowLocation(event.locationInWindow) {
+            shouldPropagate = additionalDelegate.tableView(self, mouseDownFor: row, column: column, locationInWindow: event.locationInWindow)
+        }
+        guard shouldPropagate else { return }
         super.mouseDown(with: event)
-        guard let additionalDelegate = additionalDelegate,
-              let (row, column) = rowAndColumngForWindowLocation(event.locationInWindow)
-        else { return }
-        additionalDelegate.tableView(self, mouseDownFor: row, column: column, locationInWindow: event.locationInWindow)
     }
 }
