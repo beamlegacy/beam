@@ -286,6 +286,7 @@ class PointAndShoot: WebPageHolder {
        - additionalText:
      - Throws:
      */
+    // swiftlint:disable:next function_body_length
     func addShootToNote(noteTitle: String, withNote additionalText: String? = nil) throws {
         guard let url = page.url,
               let note = page.getNote(fromTitle: noteTitle)
