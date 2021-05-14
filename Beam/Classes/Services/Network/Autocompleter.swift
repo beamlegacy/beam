@@ -11,7 +11,7 @@ import Combine
 // To improve the auto complete results we get, look at how chromium does it:
 // https://chromium.googlesource.com/chromium/src/+/master/components/omnibox/browser/search_suggestion_parser.cc
 
-struct AutocompleteResult: Identifiable {
+struct AutocompleteResult: Identifiable, Equatable {
     enum Source {
         case history
         case note

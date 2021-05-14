@@ -19,6 +19,8 @@ struct AutocompleteList: View {
     // if the mouse is over an item when it appears, onHover is called
     // this helps prevent this unwanted behavior. (linear.app/beamapp/issue/BE-566)
     @State private var lastItemThatAppeared: [AutocompleteResult.ID: Date]?
+    // on macOS < 11.0, onHover(false) is called on items that were not hovered before
+    @State private var lastItemHovered: AutocompleteResult?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -43,23 +45,21 @@ struct AutocompleteList: View {
                             }
                             if timeSinceAppear >= 0.25 {
                                 selectedIndex = indexFor(item: i)
+                                lastItemHovered = i
                             }
+                        } else if isSelectedItem(i) && lastItemHovered == i {
+                            selectedIndex = nil
                         }
                     }
             }
         }
         .animation(nil)
-        .onHover { hovering in
-            if !hovering {
-                selectedIndex = nil
-            }
-        }
         .frame(maxWidth: .infinity, alignment: .top)
     }
 
     func isSelectedItem(_ item: AutocompleteResult) -> Bool {
         if let i = selectedIndex, i < elements.count {
-            return elements[i].id == item.id
+            return elements[i] == item
         } else if item.source == .createCard && modifierFlagsPressed?.contains(.command) == true {
             return true
         }
@@ -67,7 +67,7 @@ struct AutocompleteList: View {
     }
 
     func indexFor(item: AutocompleteResult) -> Int? {
-        for i in elements.indices where elements[i].id == item.id {
+        for i in elements.indices where elements[i] == item {
             return i
         }
         return nil
