@@ -102,11 +102,15 @@ class OmniBarAutocompleteUITests: QuickSpec {
                 expect(results.count).to(equal(0))
 
                 expect(self.app.groups["webView"].exists).to(beTrue())
+            }
 
+            it("should show google results") {
                 self.helper.focusSearchField()
-                expect(self.helper.inputHasFocus(self.helper.searchField)).to(beTrue())
-                self.helper.typeInSearchAndWait("hello world")
+                self.helper.typeInSearchAndWait("hello")
+                let results = self.helper.allAutocompleteResults
+                let googleResults = results.matching(NSPredicate(format: "identifier CONTAINS '-autocomplete'"))
                 expect(results.count) > 2
+                expect(googleResults.count) > 1
                 for _ in 0...2 {
                     self.helper.searchField.typeKey(.downArrow, modifierFlags: [])
                 }
@@ -159,7 +163,7 @@ class OmniBarAutocompleteUITests: QuickSpec {
                     expect(self.helper.inputHasFocus(self.helper.searchField)).to(beTrue())
 
                     // Start Typing
-                    self.helper.searchField.typeText("Hel")
+                    self.helper.typeInSearchAndWait("Hel")
                     let results = self.helper.allAutocompleteResults
                     expect(results.count) > 1
                     let firstResult = results.firstMatch
@@ -169,12 +173,12 @@ class OmniBarAutocompleteUITests: QuickSpec {
                     expect(self.helper.searchField.value as? String) == "Hello world"
 
                     // Adding 1 letter, keep selection
-                    self.helper.searchField.typeText("l")
+                    self.helper.typeInSearchAndWait("l")
                     expect(firstResult.identifier) == expectedIdentifier
                     expect(self.helper.searchField.value as? String) == "Hello world"
 
                     // Adding other letter, clear selection
-                    self.helper.searchField.typeText("a")
+                    self.helper.typeInSearchAndWait("a")
                     expect(self.helper.searchField.value as? String) == "Hella"
                     expect(selectedResultQuery.count) == 0
 
@@ -183,7 +187,7 @@ class OmniBarAutocompleteUITests: QuickSpec {
                     self.helper.searchField.typeKey(.delete, modifierFlags: [])
 
                     // re-select
-                    self.helper.searchField.typeText("l")
+                    self.helper.typeInSearchAndWait("l")
                     expect(selectedResultQuery.count) == 1
                     expect(self.helper.searchField.value as? String) == "Hello world"
 
@@ -194,14 +198,14 @@ class OmniBarAutocompleteUITests: QuickSpec {
                     expect(self.helper.searchField.value as? String) == "Hel"
 
                     // re-select again
-                    self.helper.searchField.typeText("l")
+                    self.helper.typeInSearchAndWait("l")
                     expect(selectedResultQuery.count) == 1
                     expect(self.helper.searchField.value as? String) == "Hello world"
 
                     // moving at end of selection
                     self.helper.searchField.typeKey(.rightArrow, modifierFlags: [])
                     expect(selectedResultQuery.count) == 0
-                    self.helper.searchField.typeText("s")
+                    self.helper.typeInSearchAndWait("s")
                     expect(self.helper.searchField.value as? String) == "Hello worlds"
                 }
 
