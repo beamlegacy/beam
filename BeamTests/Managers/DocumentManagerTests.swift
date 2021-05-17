@@ -536,7 +536,7 @@ class DocumentManagerTests: QuickSpec {
                 let documentStruct2: DocumentStruct? = sut.fetchOrCreate(title: title)
                 expect(documentStruct2?.title).to(equal(title))
 
-                expect(documentStruct?.id).notTo(beNil())
+                expect(documentStruct?.id).toNot(beNil())
                 expect(documentStruct?.id).to(equal(documentStruct2?.id))
             }
         }

@@ -9,6 +9,7 @@ query ($updatedAtAfter: ISO8601DateTime) {
       updatedAt
       isPublic
       database { title id }
+      documentType
     }
   }
 }

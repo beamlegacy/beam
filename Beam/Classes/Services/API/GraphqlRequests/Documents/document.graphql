@@ -9,5 +9,7 @@ query document($id: ID!) {
     deletedAt
     isPublic
     database { title id }
+    documentType
+    publicUrl
   }
 }

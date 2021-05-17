@@ -14,6 +14,7 @@ class DocumentRequestTests: QuickSpec {
         var sut: DocumentRequest!
         var helper: DocumentManagerTestsHelper!
         let beamHelper = BeamTestsHelper()
+        let documentId = "995d94e1-e0df-4eca-93e6-8778984bcd18"
 
         beforeSuite {
             coreDataManager = CoreDataManager()
@@ -54,8 +55,7 @@ class DocumentRequestTests: QuickSpec {
                 let ancestor = "1\n2\n3"
 
                 beforeEach {
-                    docStruct = try! helper.createLocalAndRemoteVersions(ancestor,
-                                                                         "995d94e1-e0df-4eca-93e6-8778984bcd18")
+                    docStruct = try! helper.createLocalAndRemoteVersions(ancestor, documentId)
                 }
 
                 afterEach {
@@ -155,6 +155,72 @@ class DocumentRequestTests: QuickSpec {
                                     done()
                                 }
                         }
+                    }
+                }
+            }
+        }
+
+        describe(".publicUrl()") {
+            var docStruct: DocumentStruct!
+
+            afterEach {
+                helper.deleteDocumentStruct(docStruct)
+            }
+
+            beforeEach {
+                docStruct = helper.createDocumentStruct(id: documentId)
+                docStruct.isPublic = true
+                _ = helper.saveLocallyAndRemotely(docStruct)
+            }
+
+            context("with Foundation") {
+                it("returns non-empty public url") {
+                    waitUntil(timeout: .seconds(10)) { done in
+                        do {
+                            _ = try sut.publicUrl(documentId) { result in
+                                let publicUrl = try! result.get()
+                                expect(publicUrl).toNot(beNil())
+
+                                done()
+                            }
+                        } catch {
+                            fail(error.localizedDescription)
+                            done()
+                        }
+                    }
+                }
+            }
+
+            context("with PromiseKit") {
+                it("returns non-empty public url") {
+                    waitUntil(timeout: .seconds(10)) { done in
+                        let promise: PromiseKit.Promise<String> = sut.publicUrl(documentId)
+                        promise
+                            .done { publicUrl in
+                                expect(publicUrl).toNot(beNil())
+                                done()
+                            }
+                            .catch { error in
+                                fail("Should not be called")
+                                done()
+                            }
+                    }
+                }
+            }
+
+            context("with Promises") {
+                it("returns non-empty public url") {
+                    waitUntil(timeout: .seconds(10)) { done in
+                        let promise: Promises.Promise<String> = sut.publicUrl(documentId)
+                        promise
+                            .then { publicUrl in
+                                expect(publicUrl).toNot(beNil())
+                                done()
+                            }
+                            .catch { error in
+                                fail("Should not be called")
+                                done()
+                            }
                     }
                 }
             }

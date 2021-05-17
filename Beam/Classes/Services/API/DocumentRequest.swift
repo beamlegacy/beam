@@ -8,6 +8,7 @@ import Promises
 enum DocumentRequestError: Error, Equatable {
     case noTitle
     case parserError
+    case publicUrlError
 }
 
 class DocumentRequest: APIRequest {
@@ -68,6 +69,15 @@ class DocumentRequest: APIRequest {
 extension DocumentRequest {
     func fetchDocument(_ documentID: String) -> PromiseKit.Promise<DocumentAPIType> {
         fetchDocumentWithFile("document", documentID)
+    }
+
+    func publicUrl(_ documentID: String) -> PromiseKit.Promise<String> {
+        fetchDocumentWithFile("document_public_url", documentID).map(on: backgroundQueue) { documentApiType in
+            guard let publicUrl = documentApiType.publicUrl else {
+                throw DocumentRequestError.publicUrlError
+            }
+            return publicUrl
+        }
     }
 
     func fetchDocumentUpdatedAt(_ documentID: String) -> PromiseKit.Promise<DocumentAPIType> {
@@ -179,6 +189,15 @@ extension DocumentRequest {
 extension DocumentRequest {
     func fetchDocument(_ documentID: String) -> Promises.Promise<DocumentAPIType> {
         fetchDocumentWithFile("document", documentID)
+    }
+
+    func publicUrl(_ documentID: String) -> Promises.Promise<String> {
+        fetchDocumentWithFile("document_public_url", documentID).then(on: backgroundQueue) { documentApiType in
+            guard let publicUrl = documentApiType.publicUrl else {
+                throw DocumentRequestError.publicUrlError
+            }
+            return Promise(publicUrl)
+        }
     }
 
     func fetchDocumentUpdatedAt(_ documentID: String) -> Promises.Promise<DocumentAPIType> {
@@ -369,6 +388,22 @@ extension DocumentRequest {
     @discardableResult
     func fetchDocument(_ documentID: String, _ completionHandler: @escaping (Swift.Result<DocumentAPIType, Error>) -> Void) throws -> URLSessionDataTask {
         try fetchDocumentWithFile("document", documentID, completionHandler)
+    }
+
+    @discardableResult
+    func publicUrl(_ documentID: String, _ completionHandler: @escaping (Swift.Result<String, Error>) -> Void) throws -> URLSessionDataTask {
+        try fetchDocumentWithFile("document_public_url", documentID) { result in
+            switch result {
+            case .failure(let error):
+                completionHandler(.failure(error))
+            case .success(let documentApiType):
+                guard let publicUrl = documentApiType.publicUrl else {
+                    completionHandler(.failure(DocumentRequestError.publicUrlError))
+                    return
+                }
+                completionHandler(.success(publicUrl))
+            }
+        }
     }
 
     @discardableResult

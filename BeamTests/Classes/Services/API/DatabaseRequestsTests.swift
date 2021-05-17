@@ -13,6 +13,8 @@ class DatabaseRequestTests: QuickSpec {
         var coreDataManager: CoreDataManager!
         var sut: DatabaseRequest!
         let beamHelper = BeamTestsHelper()
+        let databaseId = "c2460fd4-79b7-4271-946e-e973b513d649"
+        let databaseTitle = "Practical Wooden Chair 8Kif0oSgWv1lR8GAneWq9zIOK5LCIW3Occ3v7zbh"
 
         beforeSuite {
             coreDataManager = CoreDataManager()
@@ -42,7 +44,7 @@ class DatabaseRequestTests: QuickSpec {
         }
 
         describe(".save()") {
-            let databaseApiStruct = self.buildDatabase(id: "c2460fd4-79b7-4271-946e-e973b513d649", title: "Practical Wooden Chair 8Kif0oSgWv1lR8GAneWq9zIOK5LCIW3Occ3v7zbh")
+            let databaseApiStruct = self.buildDatabase(id: databaseId, title: databaseTitle)
             afterEach { self.delete(databaseApiStruct) }
 
             context("with Foundation") {
@@ -94,7 +96,8 @@ class DatabaseRequestTests: QuickSpec {
         }
 
         describe(".delete()") {
-            let databaseApiStruct = self.buildDatabase(id: "c2460fd4-79b7-4271-946e-e973b513d649", title: "Practical Wooden Chair 8Kif0oSgWv1lR8GAneWq9zIOK5LCIW3Occ3v7zbh")
+            let databaseApiStruct = self.buildDatabase(id: databaseId, title: databaseTitle)
+
             beforeEach { self.save(databaseApiStruct) }
 
             context("with Foundation") {
@@ -143,7 +146,8 @@ class DatabaseRequestTests: QuickSpec {
         }
 
         describe(".fetchAll()") {
-            let databaseApiStruct = self.buildDatabase(id: "c2460fd4-79b7-4271-946e-e973b513d649", title: "Practical Wooden Chair 8Kif0oSgWv1lR8GAneWq9zIOK5LCIW3Occ3v7zbh")
+            let databaseApiStruct = self.buildDatabase(id: databaseId, title: databaseTitle)
+
             beforeEach { self.save(databaseApiStruct) }
             afterEach { self.delete(databaseApiStruct) }
 
@@ -204,8 +208,8 @@ class DatabaseRequestTests: QuickSpec {
             do {
                 _ = try DatabaseRequest().save(databaseApiStruct) { result in
                     expect { try result.get() }.toNot(throwError())
-                    expect { try result.get().database?.id }.to(equal(databaseApiStruct.id))
-                    expect { try result.get().database?.title }.to(equal(databaseApiStruct.title))
+                    expect { try result.get().database?.id } == databaseApiStruct.id
+                    expect { try result.get().database?.title } == databaseApiStruct.title
 
                     done()
                 }
@@ -221,7 +225,7 @@ class DatabaseRequestTests: QuickSpec {
             do {
                 _ = try DatabaseRequest().delete(databaseApiStruct.id!) { result in
                     expect { try result.get() }.toNot(throwError())
-                    expect { try result.get().database?.id }.to(equal(databaseApiStruct.id))
+                    expect { try result.get().database?.id } == databaseApiStruct.id
 
                     done()
                 }

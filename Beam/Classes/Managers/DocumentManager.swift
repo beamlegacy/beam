@@ -264,25 +264,30 @@ public class DocumentManager {
     }
 
     /// Update local coredata instance with data we fetched remotely
-    private func updateDocumentWithDocumentAPIType(_ document: Document, _ documentType: DocumentAPIType) -> Bool {
+    private func updateDocumentWithDocumentAPIType(_ document: Document, _ documentApiType: DocumentAPIType) -> Bool {
         // We have local changes we didn't send to the API yet, need for merge
         if document.hasLocalChanges {
-            let merged = mergeDocumentWithNewData(document, documentType)
+            let merged = mergeDocumentWithNewData(document, documentApiType)
             if !merged { return false }
-        } else if let stringData = documentType.data {
+        } else if let stringData = documentApiType.data {
             document.data = stringData.asData
             document.beam_api_data = stringData.asData
         }
 
-        document.title = documentType.title ?? document.title
-        document.created_at = documentType.createdAt ?? document.created_at
-        document.updated_at = documentType.updatedAt ?? document.updated_at
-        document.deleted_at = documentType.deletedAt ?? document.deleted_at
-        document.document_type = documentType.documentType ?? document.document_type
-        if let databaseIdString = documentType.database?.id,
+        document.title = documentApiType.title ?? document.title
+        document.created_at = documentApiType.createdAt ?? document.created_at
+        document.updated_at = documentApiType.updatedAt ?? document.updated_at
+        document.deleted_at = documentApiType.deletedAt ?? document.deleted_at
+
+        if let documentType = documentApiType.documentType {
+            document.document_type = (documentType == .journal ? 0 : 1)
+        }
+
+        if let databaseIdString = documentApiType.database?.id,
            let databaseId = UUID(uuidString: databaseIdString) {
             document.database_id = databaseId
         }
+
         document.version += 1
 
         return true
@@ -646,7 +651,7 @@ extension DocumentManager {
 
     /// Fetch most recent document from API
     /// First we fetch the remote updated_at, if it's more recent we fetch all details
-    func refresh(_ objectStruct: DocumentStruct, completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
+    func refresh(_ objectStruct: DocumentStruct, _ forced: Bool = false, completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
         // If not authenticated
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             completion?(.success(false))
@@ -654,6 +659,11 @@ extension DocumentManager {
         }
 
         let documentRequest = DocumentRequest()
+
+        if forced {
+            refreshAlluccess(objectStruct, completion)
+            return
+        }
 
         do {
             try documentRequest.fetchDocumentUpdatedAt(objectStruct.uuidString) { result in
@@ -670,7 +680,7 @@ extension DocumentManager {
                         completion?(.success(false))
                         return
                     }
-                    self.refreshAlluccess(objectStruct, documentType, completion)
+                    self.refreshAlluccess(objectStruct, completion)
                 }
             }
         } catch {
@@ -679,7 +689,6 @@ extension DocumentManager {
     }
 
     private func refreshAlluccess(_ documentStruct: DocumentStruct,
-                                  _ documentType: DocumentAPIType,
                                   _ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
         let documentRequest = DocumentRequest()
 
