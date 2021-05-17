@@ -23,6 +23,8 @@ struct DestinationNoteAutocompleteList: View {
                 return AutocompleteItem(item: i, selected: model.isSelected(i), displayIcon: false,
                                         colorPalette: colorPalette)
                     .frame(height: itemHeight)
+                    .transition(.identity)
+                    .animation(nil)
                     .simultaneousGesture(
                         TapGesture(count: 1).onEnded {
                             model.select(result: i)
@@ -36,7 +38,6 @@ struct DestinationNoteAutocompleteList: View {
                     }
             }
         }
-        .animation(nil)
         .onHover { hovering in
             if !hovering {
                 model.selectedIndex = 0

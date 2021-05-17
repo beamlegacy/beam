@@ -121,23 +121,22 @@ struct DestinationNotePicker: View {
                     .onAppear(perform: {
                         autocompleteModel.data = state.data
                         state.destinationCardName = tab.note.title
+                        autocompleteModel.searchText = tab.note.isTodaysNote ? "" : state.destinationCardName
                     })
                     .animation(animation)
                     .opacity(isEditing ? 1.0 : 0.01)
-                    HStack {
-                        if isEditing {
-                            OmniBarFieldBackground(isEditing: true, enableAnimations: true) {
-                                DestinationNoteAutocompleteList(model: autocompleteModel)
-                                    .onSelectAutocompleteResult {
-                                        selectedCurrentAutocompleteResult()
-                                    }
-                            }
-                            .frame(width: maxBoxWidth)
+                    if isEditing {
+                        OmniBarFieldBackground(isEditing: true, enableAnimations: enableAnimations) {
+                            DestinationNoteAutocompleteList(model: autocompleteModel)
+                                .onSelectAutocompleteResult {
+                                    selectedCurrentAutocompleteResult()
+                                }
                         }
+                        .frame(width: maxBoxWidth, alignment: .top)
+                        .animation(animation)
+                        .transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.15)))
                     }
-                    .animation(.easeInOut(duration: 0.1))
                 }
-                .animation(nil)
                 .frame(maxWidth: maxBoxWidth)
             }
         }
@@ -149,11 +148,11 @@ struct DestinationNotePicker: View {
         .onTouchDown { touching in
             isMouseDown = touching
         }
-        .simultaneousGesture(
-            TapGesture(count: 1).onEnded {
-                setIsEditing(true)
-            }
-        )
+        .simultaneousGesture(TapGesture(count: 1).onEnded {
+            setIsEditing(true)
+        })
+        .transition(.identity)
+        .id(tab.id)
     }
 
     func updateSearchResults() {
@@ -199,7 +198,6 @@ struct DestinationNotePicker: View {
 
     func cancelSearch() {
         state.resetDestinationCard()
-        autocompleteModel.searchText = ""
     }
 }
 
