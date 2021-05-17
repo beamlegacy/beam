@@ -331,3 +331,9 @@ export interface BeamDocument extends BeamNode {
 
   createRange(): BeamRange
 }
+
+export enum BeamPNSStatus {
+  pointing = "pointing",
+  shooting = "shooting",
+  none = "none"
+}

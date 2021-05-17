@@ -1,7 +1,7 @@
 import {BeamMouseEvent} from "./Test/BeamMocks"
 import {WebEvents} from "./WebEvents"
 import {PointAndShootUI} from "./PointAndShootUI";
-import {BeamWindow, BeamHTMLElement} from "./BeamTypes";
+import {BeamWindow, BeamHTMLElement, BeamPNSStatus} from "./BeamTypes";
 
 const PNS_STATUS = Number(process.env.PNS_STATUS)
 
@@ -29,9 +29,9 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
   scrollWidth
 
   /**
-   * @type string
+   * @type BeamPNSStatus
    */
-  status = "none"
+  status: BeamPNSStatus = BeamPNSStatus.none
 
   /**
    * Shoot elements.
@@ -151,7 +151,7 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
   unshoot(el = this.shootingEl.target) {
     this.shootingEl = undefined
     this.ui.unshoot(el)
-    this.setStatus("none")
+    this.setStatus(BeamPNSStatus.none)
   }
 
   hidePopup() {
@@ -159,11 +159,11 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
   }
 
   isPointing() {
-    return this.status === "pointing"
+    return this.status === BeamPNSStatus.pointing
   }
 
   isShooting() {
-    return this.status === "shooting"
+    return this.status === BeamPNSStatus.shooting
   }
 
   hasSelection() {
@@ -231,7 +231,7 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
   assignNote(note, el = this.shootingEl) {
     el.dataset[this.datasetKey] = note
     this.selectedEls.push(el)
-    this.setStatus("none")
+    this.setStatus(BeamPNSStatus.none)
   }
 
   /**
@@ -269,14 +269,14 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
   }
 
   /**
-   * Set status to "shooting"
+   * Set status to BeamPNSStatus.shooting
    *
    * @param {Boolean} [bool=true]
    * @memberof PointAndShoot
    */
   setShooting(bool: Boolean = true) {
     if (bool) {
-      this.setStatus("shooting");
+      this.setStatus(BeamPNSStatus.shooting);
     }
   }
 
@@ -334,16 +334,16 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
   setPointing(c) {
     let changed
     if (c) {
-      changed = this.status === "none"
+      changed = this.status === BeamPNSStatus.none
       if (changed) {
-        this.setStatus("pointing")
+        this.setStatus(BeamPNSStatus.pointing)
       }
     } else {
-      changed = this.status !== "none"
+      changed = this.status !== BeamPNSStatus.none
       if (changed) {
         this.pointedEl = null
         if (this.isPointing()) {
-          this.setStatus("none")
+          this.setStatus(BeamPNSStatus.none)
         }
       }
     }
