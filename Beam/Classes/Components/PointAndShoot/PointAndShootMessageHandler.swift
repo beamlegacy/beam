@@ -165,7 +165,7 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
                 return
             }
             positions.scale = scale
-            var page = webPage
+            let page = webPage
             page.scrollX = x // nativeX(x: x, origin: origin)
             page.scrollY = y // nativeY(y: y, origin: origin)
             Logger.shared.logDebug("Web Scrolled: \(page.scrollX), \(page.scrollY)", category: .web)
