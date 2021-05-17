@@ -19,15 +19,15 @@ struct NoteHeaderView: View {
     @State private var isEditingTitle = false
     @State private var isTitleTaken = false
     @State private var isLoading = false
-    @State private var hasIncorrectChars = false
     @State private var titleSelectedRange: Range<Int>?
 
     private var canEditTitle: Bool {
         note.type != .journal
     }
-    private let errorColor = BeamColor.Shiraz.swiftUI
-    // TODO: Move to beamnote method from https://gitlab.com/beamgroup/beam/-/merge_requests/560
-    private let rejectedCharsRegex = "[._!?\"#%&,:;<>=@{}~$\\(\\)\\*\\+\\[\\]\\^\\|\\/\\\\]"
+    private let errorColor = BeamColor.Shiraz
+    private var textColor: BeamColor {
+        isTitleTaken ? errorColor : BeamColor.Generic.text
+    }
     private static var dateFormatter: DateFormatter = {
         let fmt = DateFormatter()
         fmt.dateStyle = .medium
@@ -35,52 +35,46 @@ struct NoteHeaderView: View {
         return fmt
     }()
 
-    private func incorrectCharRanges(in text: String) -> [Range<String.Index>] {
-        guard text != note.title && isEditingTitle else { return [] }
-        if let regex = try? NSRegularExpression(pattern: rejectedCharsRegex, options: []) {
-            let results = regex.matches(in: text, options: [], range: NSRange(location: 0, length: text.count))
-            return results.map { checkResult in
-                text.index(at: checkResult.range.lowerBound)..<text.index(at: checkResult.range.upperBound)
-            }
-        }
-        return []
-    }
 
     private var titleView: some View {
         ZStack(alignment: .leading) {
+            // TODO: Support multiline editing
+            // https://linear.app/beamapp/issue/BE-799/renaming-cards-multiline-support
             if canEditTitle {
                 BeamTextField(text: $titleValue,
                               isEditing: $isEditingTitle,
                               placeholder: "Card's title",
                               font: BeamFont.medium(size: 26).nsFont,
-                              // we use a transparent text field to have a styled text above.
-                              textColor: BeamColor.Generic.text.nsColor.withAlphaComponent(0),
+                              textColor: textColor.nsColor,
                               placeholderColor: BeamColor.Generic.placeholder.nsColor,
                               selectedRange: titleSelectedRange,
                               onTextChanged: onTitleChanged,
                               onCommit: { _ in
                                 renameCard()
                               })
+                    .allowsHitTesting(isEditingTitle)
+            } else {
+                Text(titleValue)
+                    .lineLimit(2)
+                    .font(BeamFont.medium(size: 26).swiftUI)
+                    .foregroundColor(textColor.swiftUI)
             }
-            StyledText(verbatim: titleValue)
-                .style(.foregroundColor(errorColor), ranges: incorrectCharRanges)
-                .lineLimit(1) // TODO: Support multiline - https://linear.app/beamapp/issue/BE-799/renaming-cards-multiline-support
-                .font(BeamFont.medium(size: 26).swiftUI)
-                .foregroundColor(isTitleTaken ? errorColor : BeamColor.Generic.text.swiftUI)
-                .gesture(TapGesture().onEnded {
-                    titleSelectedRange = nil
-                    // wait to see if double tap happened
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                        guard !isEditingTitle else { return }
-                        focusTitle()
-                    }
-                })
-                .simultaneousGesture(TapGesture(count: 2).onEnded {
-                    titleSelectedRange = titleValue.wholeRange
-                    isEditingTitle = true
-                })
-                .allowsHitTesting(!isEditingTitle)
         }
+        .contentShape(Rectangle())
+        .gesture(TapGesture().onEnded {
+            guard canEditTitle else { return }
+            titleSelectedRange = nil
+            // wait to see if double tap happened
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                guard !isEditingTitle else { return }
+                focusTitle()
+            }
+        })
+        .simultaneousGesture(TapGesture(count: 2).onEnded {
+            guard canEditTitle else { return }
+            titleSelectedRange = titleValue.wholeRange
+            isEditingTitle = true
+        })
         .animation(nil)
         .onAppear {
             titleValue = note.title
@@ -90,14 +84,10 @@ struct NoteHeaderView: View {
 
     private var subtitleInfoView: some View {
         Group {
-            if hasIncorrectChars {
-                Text("A card’s title cannot contain ")
-                + Text("special characters")
-                    .foregroundColor(errorColor)
-            } else if isTitleTaken {
+            if isTitleTaken {
                 Text("This card’s title ")
                 + Text("already exists")
-                    .foregroundColor(errorColor)
+                    .foregroundColor(errorColor.swiftUI)
                 + Text(" in your knowledge base")
             }
         }
@@ -138,11 +128,9 @@ struct NoteHeaderView: View {
 
     private func onTitleChanged(_ text: String) {
         titleSelectedRange = nil
-        let incorrectRanges = incorrectCharRanges(in: text)
         let newTitle = formatToValidTitle(titleValue)
         let existingNote = documentManager.loadDocumentByTitle(title: newTitle)
 
-        hasIncorrectChars = !incorrectRanges.isEmpty
         if existingNote != nil, existingNote?.id != note.id {
             isTitleTaken = true
         } else {
@@ -154,23 +142,15 @@ struct NoteHeaderView: View {
         titleValue = note.title
         isEditingTitle = false
         isTitleTaken = false
-        hasIncorrectChars = false
     }
 
-    // TODO: Replace by beamnote method from https://gitlab.com/beamgroup/beam/-/merge_requests/560
     private func formatToValidTitle(_ title: String) -> String {
-        var result = title.trimmingCharacters(in: .whitespacesAndNewlines)
-        if let regex = try? NSRegularExpression(pattern: rejectedCharsRegex, options: []) {
-            let mutableString = NSMutableString(string: result)
-            regex.replaceMatches(in: mutableString, options: [], range: NSRange(location: 0, length: mutableString.length), withTemplate: "")
-            result = String(mutableString)
-        }
-        return result
+        return BeamNote.validTitle(fromTitle: title)
     }
 
     private func renameCard() {
         let newTitle = formatToValidTitle(titleValue)
-        guard !newTitle.isEmpty, newTitle != note.title, !isLoading, !hasIncorrectChars, !isTitleTaken, canEditTitle else {
+        guard !newTitle.isEmpty, newTitle != note.title, !isLoading, !isTitleTaken, canEditTitle else {
             resetEditingState()
             return
         }
@@ -216,10 +196,9 @@ struct NoteHeaderView: View {
 
 // custom initializer for preview
 fileprivate extension NoteHeaderView {
-    init(title: String, documentManager: DocumentManager, incorrect: Bool = false, taken: Bool = false) {
+    init(title: String, documentManager: DocumentManager, taken: Bool = false) {
         self.note = BeamNote(title: title)
         self.documentManager = documentManager
-        _hasIncorrectChars = State(initialValue: incorrect)
         _isTitleTaken = State(initialValue: taken)
     }
 }
@@ -229,7 +208,6 @@ struct NoteHeaderView_Previews: PreviewProvider {
     static var previews: some View {
         VStack {
             NoteHeaderView(title: "My note title", documentManager: documentManager)
-            NoteHeaderView(title: "What? I can't do-this?", documentManager: documentManager, incorrect: true)
             NoteHeaderView(title: "Taken title", documentManager: documentManager, taken: true)
         }
         .padding()
