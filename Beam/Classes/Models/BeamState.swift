@@ -395,7 +395,7 @@ extension BeamState: BrowserTabsManagerDelegate {
     var hasBrowserTabs: Bool {
         return !browserTabsManager.tabs.isEmpty
     }
-    private var currentTab: BrowserTab? {
+    private weak var currentTab: BrowserTab? {
         return browserTabsManager.currentTab
     }
 

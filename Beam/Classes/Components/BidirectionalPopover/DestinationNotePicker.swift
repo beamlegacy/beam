@@ -100,7 +100,7 @@ struct DestinationNotePicker: View {
                         } onEscape: {
                             cancelSearch()
                         } onCursorMovement: { move -> Bool in
-                            return autocompleteModel.handleCursorMovement(move)
+                            autocompleteModel.handleCursorMovement(move)
                         } onStartEditing: {
                             Logger.shared.logInfo("[DestinationNotePicker] Start Editing", category: .ui)
                             if tab.note.isTodaysNote {

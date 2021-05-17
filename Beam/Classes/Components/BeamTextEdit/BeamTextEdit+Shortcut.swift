@@ -42,7 +42,7 @@ extension BeamTextEdit {
 
         showBidirectionalPopover(prefix: 0, suffix: 0)
 
-        DispatchQueue.main.async {[weak self] in
+        DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
             self.updatePopover()
         }

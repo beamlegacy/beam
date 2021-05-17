@@ -110,9 +110,10 @@ struct OmniBar: View {
                 .fixedSize(horizontal: false, vertical: true)
                 if hasRightActions {
                     HStack(alignment: .center) {
-                        if showDestinationNotePicker {
-                            DestinationNotePicker(tab: browserTabsManager.currentTab!)
+                        if showDestinationNotePicker, let currentTab = browserTabsManager.currentTab {
+                            DestinationNotePicker(tab: currentTab)
                                 .frame(height: 32, alignment: .top)
+                                .id(currentTab.id) // force reloading view when currentTab changes
                         }
                         if showPivotButton {
                             OmniBarButton(icon: state.mode == .web ? "nav-pivot_card" : "nav-pivot_web", accessibilityId: state.mode == .web ? "pivot-card" : "pivot-web", action: toggleMode, size: 32)
