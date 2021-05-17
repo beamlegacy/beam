@@ -2,6 +2,10 @@ import Foundation
 import CryptoKit
 import BeamCore
 
+enum DocumentTypeType: String, Codable {
+    case journal = "JOURNAL"
+    case note = "NOTE"
+}
 /*
  Used for interacting with Beam API
 
@@ -22,9 +26,10 @@ class DocumentAPIType: Codable {
     var data: String?
     var encryptedData: String?
     var dataChecksum: String?
-    var documentType: Int16?
+    var documentType: DocumentTypeType?
     var previousChecksum: String?
     var database: DatabaseAPIType?
+    var publicUrl: String?
 
     init(document: Document, context: NSManagedObjectContext) {
         title = document.title
@@ -32,7 +37,7 @@ class DocumentAPIType: Codable {
         createdAt = document.created_at
         updatedAt = document.updated_at
         deletedAt = document.deleted_at
-        documentType = document.document_type
+        documentType = document.document_type == 0 ? .journal : .note
         previousChecksum = document.beam_api_checksum
         data = document.data?.asString
         isPublic = document.is_public
@@ -49,7 +54,7 @@ class DocumentAPIType: Codable {
         createdAt = document.createdAt
         updatedAt = document.updatedAt
         deletedAt = document.deletedAt
-        documentType = document.documentType.rawValue
+        documentType = document.documentType == .journal ? .journal : .note
         previousChecksum = document.previousChecksum
         data = document.data.asString
         isPublic = document.isPublic
@@ -70,8 +75,7 @@ class DocumentAPIType: Codable {
         createdAt = document.createdAt
         updatedAt = document.updatedAt
         deletedAt = document.deletedAt
-        // For next API update
-        // documentType = document.documentType
+        documentType = document.documentType
         previousChecksum = document.previousChecksum
         data = document.shouldEncrypt ? document.encryptedData : document.data
         isPublic = document.isPublic

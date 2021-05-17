@@ -25,7 +25,7 @@ cache:
     - Extern/libgit2/build/libgit2.a
 
 include:
-  - '.gitlab/ci/before-script-template.yml'
+  - local: '.gitlab/ci/before-script-template.yml'
   - local: '.gitlab/ci/gitlab-ci-test.yml'
   - local: '.gitlab/ci/gitlab-ci-dmg.yml'
   - local: '.gitlab/ci/gitlab-ci-build.yml'

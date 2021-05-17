@@ -8,6 +8,10 @@
 import Foundation
 import BeamCore
 
+enum BeamNoteSharingUtilsError: Error {
+    case emptyPublicUrl
+}
+
 class BeamNoteSharingUtils {
 
     private let note: BeamNote
@@ -16,25 +20,27 @@ class BeamNoteSharingUtils {
         self.note = note
     }
 
-    private func buildPublicLink(for note: BeamNote) -> String {
-        return "\(Configuration.publicHostnameDefault)/documents/\(note.id.uuidString.lowercased())"
-    }
+    func getPublicLink(completion: @escaping ((Result<String, Error>) -> Void)) {
+        let documentRequest = DocumentRequest()
 
-    func getPublicLink(completion: ((Result<String, Error>) -> Void)) {
-        // We will need to call the api to get the correct link someday.
-        let link = buildPublicLink(for: note)
-        completion(.success(link))
+        do {
+            try documentRequest.publicUrl(note.id.uuidString.lowercased(), completion)
+        } catch {
+            completion(.failure(error))
+        }
     }
 
     func copyLinkToClipboard(completion: ((Result<Bool, Error>) -> Void)? = nil) {
         getPublicLink { result in
-            switch result {
-            case .failure(let error):
-                completion?(.failure(error))
-            case .success(let link):
-                NSPasteboard.general.clearContents()
-                NSPasteboard.general.setString(link, forType: .string)
-                completion?(.success(true))
+            DispatchQueue.main.async {
+                switch result {
+                case .failure(let error):
+                    completion?(.failure(error))
+                case .success(let link):
+                    NSPasteboard.general.clearContents()
+                    NSPasteboard.general.setString(link, forType: .string)
+                    completion?(.success(true))
+                }
             }
         }
     }
@@ -43,5 +49,4 @@ class BeamNoteSharingUtils {
         note.isPublic = becomePublic
         note.save(documentManager: documentManager, completion: completion)
     }
-
 }

@@ -30,6 +30,11 @@ struct DocumentDetail: View {
                                 Spacer()
                             }
                             HStack {
+                                Text("Type:").bold()
+                                Text(document.document_type == 0 ? "Journal" : "Note")
+                                Spacer()
+                            }
+                            HStack {
                                 Text("Database:").bold()
                                 Text((try? Database.fetchWithId(CoreDataManager.shared.mainContext,
                                                                 document.database_id))?.title ?? "no database")
@@ -116,7 +121,7 @@ struct DocumentDetail: View {
             refreshing = true
         }
 
-        documentManager.refresh(DocumentStruct(document: document)) { _ in
+        documentManager.refresh(DocumentStruct(document: document), true) { _ in
             DispatchQueue.main.async {
                 timer.invalidate()
                 refreshing = false
