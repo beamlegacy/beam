@@ -16,18 +16,12 @@ struct ShootCardPicker: View {
     @EnvironmentObject var data: BeamData
     @EnvironmentObject var browserTabsManager: BrowserTabsManager
 
-    var focusOnAppear = false
+    var focusOnAppear = true
     var onComplete: ((_ cardName: String?, _ note: String?) -> Void)?
 
     @State private var autocompleteModel = DestinationNoteAutocompleteList.Model()
 
-    var allowFocus = false
-    @State private var isEditingCardName = true
-    private var customEditingBinding: Binding<Bool> {
-        Binding<Bool> {
-            allowFocus && isEditingCardName
-        } set: { isEditingCardName = $0 }
-    }
+    @State private var isEditingCardName = false
 
     @State private var isEditingNote = false
     @State private var currentCardName: String?
@@ -48,7 +42,7 @@ struct ShootCardPicker: View {
                     Text("Add to")
                         .accessibility(identifier: "ShootCardPickerLabel")
                         .font(BeamFont.medium(size: 13).swiftUI)
-                    BeamTextField(text: $cardSearchField, isEditing: customEditingBinding,
+                    BeamTextField(text: $cardSearchField, isEditing: $isEditingCardName,
                                   placeholder: autocompleteModel.todaysCardReplacementName,
                                   font: BeamFont.regular(size: 13).nsFont,
                                   textColor: currentCardName == nil ? BeamColor.Generic.text.nsColor

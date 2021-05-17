@@ -191,14 +191,13 @@ class PointAndShoot: WebPageHolder {
         }
     }
 
-    func shoot(targets: [Target], origin: String, done: Bool = true) {
+    func shoot(targets: [Target], origin: String) {
         if activeShootGroup == nil {
             activeShootGroup = ShootGroup()
             Logger.shared.logInfo("shootGroups.count \(shootGroups.count)", category: .pointAndShoot)
         } else {
             activeShootGroup?.targets.removeAll()
         }
-        ui.isTextSelectionFinished = done
         for target in targets {
             addShootTargets(target: target)
         }

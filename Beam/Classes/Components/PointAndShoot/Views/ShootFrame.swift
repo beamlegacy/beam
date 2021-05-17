@@ -24,7 +24,7 @@ struct ShootFrame: View {
                             location: selectionUI.target.mouseLocation,
                             contentSize: ShootCardPicker.size
                         ) {
-                            ShootCardPicker(allowFocus: pointAndShootUI.isTextSelectionFinished)
+                            ShootCardPicker()
                                     .onComplete { (noteTitle, note) in
                                         onCompleteCardSelection(noteTitle, withNote: note)
                                     }

@@ -12,3 +12,6 @@ default:
     # This is actually to be done once per CI or ~/.gitconfig gets messed up
     # - git config --global url."https://${GITLAB_USERNAME}:${GITLAB_ACCESS_TOKEN}@gitlab.com/".insteadOf "git@gitlab.com:"
     - git submodule sync && git submodule update --init
+    - cd Extern/Sparkle
+    - git submodule sync && git submodule update --init
+    - cd ../../
