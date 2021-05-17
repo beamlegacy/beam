@@ -38,9 +38,10 @@ extension BeamNote: BeamNoteDocument {
 
         Logger.shared.logInfo("Observe changes for note \(title)", category: .document)
         activeDocumentCancellable = documentManager.onDocumentChange(docStruct) { [unowned self] docStruct in
-            DispatchQueue.main.async {
+            DispatchQueue.main.async { [weak self] in
                 // reload self
-                guard self.version < docStruct.version else {
+                guard let self = self,
+                      self.version < docStruct.version else {
                     //                Logger.shared.logDebug("BeamNote \(self.title) observer skipped version \(docStruct.version) (must be greater than current \(self.version))")
                     return
                 }
@@ -80,8 +81,8 @@ extension BeamNote: BeamNoteDocument {
             Self.appendToFetchedNotes(self)
             switch result {
                 case .success:
-                    DispatchQueue.main.async {
-                        self.updatedNotesWithLinkedReferences(afterChangingTitleFrom: previousTitle, documentManager: documentManager)
+                    DispatchQueue.main.async { [weak self] in
+                        self?.updatedNotesWithLinkedReferences(afterChangingTitleFrom: previousTitle, documentManager: documentManager)
                     }
                 case .failure: break
             }

@@ -7,8 +7,7 @@ import Promises
 
 // swiftlint:disable file_length
 // swiftlint:disable:next type_body_length
-class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, WKUIDelegate, Codable, WebPage, Scorable {
-
+@objc class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate, WKUIDelegate, Codable, WebPage, Scorable {
     var id: UUID
 
     var scrollX: CGFloat = 0
@@ -22,9 +21,9 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         self.url = url
         navigationCount = 0
         webView.load(URLRequest(url: url))
-        $isLoading.sink { [weak passwordOverlayController] loading in
+        $isLoading.sink { [unowned passwordOverlayController] loading in
             if !loading {
-                passwordOverlayController?.detectInputFields()
+                passwordOverlayController.detectInputFields()
             }
         }.store(in: &scope)
     }
@@ -95,6 +94,10 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         self.webView.window
     }
 
+    var frame: NSRect {
+        webView.frame
+    }
+
     func setDestinationNote(_ note: BeamNote, rootElement: BeamElement? = nil) {
         self.note = note
         self.rootElement = rootElement ?? note
@@ -144,7 +147,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
         browsingTree = BrowsingTree(browsingTreeOrigin)
 
-        super.init(frame: .zero)
+        super.init()
 
         self.webView.page = self
 
@@ -191,7 +194,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
             element = loadedNote.findElement(elementId)
         }
 
-        super.init(frame: .zero)
+        super.init()
         note.browsingSessions.append(browsingTree)
     }
 
@@ -310,10 +313,10 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
 
     private func setupObservers() {
         Logger.shared.logDebug("setupObservers")
-        webView.publisher(for: \.title).sink { value in
+        webView.publisher(for: \.title).sink { [unowned self] value in
             self.receivedWebviewTitle(value)
         }.store(in: &scope)
-        webView.publisher(for: \.url).sink { value in
+        webView.publisher(for: \.url).sink { [unowned self] value in
             self.url = value
             if value?.absoluteString != nil {
                 self.updateFavIcon()
@@ -322,16 +325,16 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
                 // self.navigationCount = 0
             }
         }.store(in: &scope)
-        webView.publisher(for: \.isLoading).sink { value in withAnimation { self.isLoading = value } }.store(in: &scope)
-        webView.publisher(for: \.estimatedProgress).sink { value in
+        webView.publisher(for: \.isLoading).sink { [unowned self] value in withAnimation { self.isLoading = value } }.store(in: &scope)
+        webView.publisher(for: \.estimatedProgress).sink { [unowned self] value in
             withAnimation { self.estimatedProgress = value }
         }.store(in: &scope)
         webView.publisher(for: \.hasOnlySecureContent)
-                .sink { value in self.hasOnlySecureContent = value }.store(in: &scope)
-        webView.publisher(for: \.serverTrust).sink { value in self.serverTrust = value }.store(in: &scope)
-        webView.publisher(for: \.canGoBack).sink { value in self.canGoBack = value }.store(in: &scope)
-        webView.publisher(for: \.canGoForward).sink { value in self.canGoForward = value }.store(in: &scope)
-        webView.publisher(for: \.backForwardList).sink { value in self.backForwardList = value }.store(in: &scope)
+                .sink { [unowned self] value in self.hasOnlySecureContent = value }.store(in: &scope)
+        webView.publisher(for: \.serverTrust).sink { [unowned self] value in self.serverTrust = value }.store(in: &scope)
+        webView.publisher(for: \.canGoBack).sink { [unowned self] value in self.canGoBack = value }.store(in: &scope)
+        webView.publisher(for: \.canGoForward).sink { [unowned self] value in self.canGoForward = value }.store(in: &scope)
+        webView.publisher(for: \.backForwardList).sink { [unowned self] value in self.backForwardList = value }.store(in: &scope)
 
         webView.navigationDelegate = self
         webView.uiDelegate = self
@@ -347,7 +350,7 @@ class BrowserTab: NSView, ObservableObject, Identifiable, WKNavigationDelegate, 
         Promise<Any?> { [unowned self] fulfill, reject in
             let parameterized = objectName != nil ? "exports.__ID__\(objectName!)." + jsCode : jsCode
             let obfuscatedCommand = Self.webViewConfiguration.obfuscate(str: parameterized)
-            webView.evaluateJavaScript(obfuscatedCommand) { (result, error: Error?) in
+            webView.evaluateJavaScript(obfuscatedCommand) { [unowned self] (result, error: Error?) in
                 if error == nil {
                     Logger.shared.logInfo("(\(obfuscatedCommand) succeeded: \(String(describing: result))",
                                           category: .javascript)

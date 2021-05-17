@@ -500,7 +500,7 @@ public extension CALayer {
         reBlink()
 
         // DispatchQueue to update the popover after the node is initialized
-        DispatchQueue.main.async {[weak self] in
+        DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
             self.updatePopover()
         }

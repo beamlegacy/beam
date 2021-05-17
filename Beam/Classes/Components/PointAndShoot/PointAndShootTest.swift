@@ -111,17 +111,18 @@ class BrowsingScorerMock: WebPageHolder, BrowsingScorer {
 }
 
 class PointAndShootTest: XCTestCase {
-
+    var testPage: TestWebPage?
     func testBed() -> (PointAndShootMock, PointAndShootUIMock) {
         let testPasswordStore = PasswordStoreMock()
         let testPasswordOverlayController = PasswordOverlayController(passwordStore: testPasswordStore, passwordManager: .shared)
         let testBrowsingScorer = BrowsingScorerMock()
         let testUI = PointAndShootUIMock()
         let pns = PointAndShootMock(ui: testUI, scorer: testBrowsingScorer)
-        let testPage = TestWebPage(browsingScorer: testBrowsingScorer, passwordOverlayController: testPasswordOverlayController, pns: pns)
-        testPage.browsingScorer.page = testPage
-        testPage.passwordOverlayController.page = testPage
-        testPage.pointAndShoot.page = testPage
+        let page = TestWebPage(browsingScorer: testBrowsingScorer, passwordOverlayController: testPasswordOverlayController, pns: pns)
+        testPage = page
+        page.browsingScorer.page = page
+        page.passwordOverlayController.page = page
+        page.pointAndShoot.page = page
         return (pns, testUI)
     }
 

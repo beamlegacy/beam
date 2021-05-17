@@ -53,12 +53,12 @@ class BrowserTabsManager: ObservableObject {
 
     private func updateCurrentTabObservers() {
         tabScope.removeAll()
-        currentTab?.$canGoBack.sink { [weak self]  v in
-            guard let self = self, let tab = self.currentTab else { return }
+        currentTab?.$canGoBack.sink { [unowned self]  v in
+            guard let tab = self.currentTab else { return }
             self.delegate?.tabsManagerBrowsingHistoryChanged(canGoBack: v, canGoForward: tab.canGoForward)
         }.store(in: &tabScope)
-        currentTab?.$canGoForward.sink { [weak self]  v in
-            guard let self = self, let tab = self.currentTab else { return }
+        currentTab?.$canGoForward.sink { [unowned self]  v in
+            guard let tab = self.currentTab else { return }
             self.delegate?.tabsManagerBrowsingHistoryChanged(canGoBack: tab.canGoBack, canGoForward: v)
         }.store(in: &tabScope)
     }
@@ -69,8 +69,7 @@ class BrowserTabsManager: ObservableObject {
         for tab in tabs {
             guard tab.onNewTabCreated == nil else { continue }
 
-            tab.onNewTabCreated = { [weak self] newTab in
-                guard let self = self else { return }
+            tab.onNewTabCreated = { [unowned self] newTab in
                 self.tabs.append(newTab)
                 // if var note = self.currentNote {
                 // TODO bind visited sites with note contents:
@@ -83,14 +82,13 @@ class BrowserTabsManager: ObservableObject {
                 //                    }
             }
 
-            tab.appendToIndexer = { [weak self] url, read in
-                guard let self = self else { return }
+            tab.appendToIndexer = { [unowned self] url, read in
                 var text = ""
-                self.indexingQueue.async {
+                self.indexingQueue.async { [unowned self] in
                     guard let doc = try? SwiftSoup.parse(read.content, url.absoluteString) else { return }
                     text = html2Text(url: url, doc: doc)
 
-                    DispatchQueue.main.async {
+                    DispatchQueue.main.async { [unowned self] in
                         self.index.append(document: IndexDocument(source: url.absoluteString, title: read.title, contents: text))
                     }
                 }

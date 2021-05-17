@@ -95,8 +95,8 @@ public struct ScoredLink: Hashable {
 public class BrowsingNode: ObservableObject, Codable {
     public let id: UUID
     public var link: UInt64
-    public var parent: BrowsingNode?
-    public var tree: BrowsingTree! {
+    public weak var parent: BrowsingNode?
+    public weak var tree: BrowsingTree! {
         didSet {
             for c in children {
                 c.tree = tree

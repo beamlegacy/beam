@@ -6,7 +6,7 @@ import Promises
 
  Defining this protocol allows to provide a mock implementation for testing.
  */
-protocol WebPage: Scorable {
+protocol WebPage: AnyObject, Scorable {
 
     var webviewWindow: NSWindow? { get }
 
@@ -50,7 +50,7 @@ protocol WebPageRelated {
 }
 
 class WebPageHolder: WebPageRelated {
-    private var _page: WebPage?
+    private weak var _page: WebPage?
 
     var page: WebPage {
         get {
