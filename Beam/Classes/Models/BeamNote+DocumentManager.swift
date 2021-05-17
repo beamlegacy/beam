@@ -74,10 +74,12 @@ extension BeamNote: BeamNoteDocument {
 
     public func updateTitle(_ newTitle: String, documentManager: DocumentManager, completion: ((Result<Bool, Error>) -> Void)? = nil) {
         let previousTitle = self.title
+        try? AppDelegate.main.data.indexer.remove(note: self)
         Self.unload(note: self)
         self.title = newTitle
         self.save(documentManager: documentManager) { [weak self] result in
             guard let self = self else { return }
+            try? AppDelegate.main.data.indexer.append(note: self)
             Self.appendToFetchedNotes(self)
             switch result {
                 case .success:

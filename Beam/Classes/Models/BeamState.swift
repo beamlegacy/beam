@@ -224,6 +224,7 @@ import BeamCore
         let e = BeamElement()
         e.text = BeamText(text: query, attributes: [.internalLink(query)])
         self.data.todaysNote.insert(e, after: self.data.todaysNote.children.last)
+        try? AppDelegate.main.data.indexer.append(note: self.data.todaysNote)
 
         return n
     }
