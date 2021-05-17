@@ -159,7 +159,7 @@ public class BeamNote: BeamElement {
         note.id
     }
 
-    private static func validTitle(fromTitle title: String) -> String {
+    public static func validTitle(fromTitle title: String) -> String {
         title.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
