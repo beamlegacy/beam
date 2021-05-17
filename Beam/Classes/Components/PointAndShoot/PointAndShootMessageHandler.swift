@@ -114,7 +114,7 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
                 return pointAndShoot.createTarget(area: area, mouseLocation: CGPoint(x: x, y: y), html: html)
             }
             Logger.shared.logInfo("Web text selected, shooting targets: \(targets)", category: .web)
-            pointAndShoot.shoot(targets: targets, origin: origin, done: true)
+            pointAndShoot.shoot(targets: targets, origin: origin)
 
         case PointAndShootMessages.pointAndShoot_textSelection.rawValue:
             guard webPage.pointAndShootAllowed == true else { return }
@@ -136,7 +136,7 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
                 return pointAndShoot.createTarget(area: area, mouseLocation: CGPoint(x: x, y: y), html: html)
             }
             Logger.shared.logInfo("Web text selection, shooting targets: \(targets)", category: .web)
-            pointAndShoot.shoot(targets: targets, origin: origin, done: true)
+            pointAndShoot.shoot(targets: targets, origin: origin)
 
         case PointAndShootMessages.pointAndShoot_pinch.rawValue:
             guard let dict = pnsBody,
