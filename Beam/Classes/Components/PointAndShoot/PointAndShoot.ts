@@ -7,8 +7,6 @@ const PNS_STATUS = Number(process.env.PNS_STATUS)
 
 /**
  * Listen to events that hover and select web blocks with Option.
- *
- * @see TextSelector for text selection.
  */
 export class PointAndShoot extends WebEvents<PointAndShootUI> {
   /**
@@ -22,6 +20,15 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
    * @type string
    */
   datasetKey
+
+  /**
+   * Selection elements array.
+   *
+   * @private
+   * @type {[]}
+   * @memberof PointAndShoot
+   */
+  private selectionsList = []
 
   /**
    * @type number
@@ -105,6 +112,9 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
     win.addEventListener("touchend", this.onTouchend.bind(this), false)
     win.addEventListener("keydown", this.onKeyDown.bind(this), false)
     win.addEventListener("keyup", this.onKeyUp.bind(this), false)
+
+    win.addEventListener("mouseup", this.onMouseUp.bind(this))
+    win.document.addEventListener("selectionchange", (ev) => this.onSelectionChange(ev))
 
     win.document.addEventListener("keypress", this.onKeyPress.bind(this))
     this.log("events registered")
@@ -384,5 +394,68 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
      }
      this.setPointing(false)
     }
+  }
+
+  enterSelection() {
+    this.log("enterSelection")
+    this.selectionsList = []
+    this.ui.enterSelection()
+  }
+
+  leaveSelection() {
+    this.log("leaveSelection")
+    this.ui.leaveSelection()
+    this.selectionsList = []
+  }
+
+  onMouseUp(_ev) {
+    const selectionsCount = this.selectionsList.length
+    if (selectionsCount > 0) {
+      for (let i = 0; i < selectionsCount; ++i) {
+        this.ui.textSelected(this.selectionsList[i])
+      }
+      this.leaveSelection()
+    }
+  }
+
+  onSelectionChange(_ev) {
+    this.log("onSelectionChange")
+    const docSelection = this.getSelection()
+    if (docSelection.isCollapsed) {
+      this.leaveSelection()
+      return
+    }
+    this.enterSelection()
+
+    const count = docSelection.rangeCount
+    for (let i = 0; i < count; ++i) {
+      const range = docSelection.getRangeAt(i)
+      const selectedText = range.toString()
+      const selectedFragment = range.cloneContents()
+      const selectedHTML = Array.prototype.reduce.call(
+          selectedFragment.childNodes,
+          (result, node) => result + (node.outerHTML || node.nodeValue),
+          ""
+      )
+      const rangeRects = range.getClientRects()
+      const textAreas = []
+      for (let r = 0; r < rangeRects.length; r++) {
+        const rangeRect = rangeRects[r]
+        const rect = {
+          x: rangeRect.x,
+          y: rangeRect.y,
+          width: rangeRect.width,
+          height: rangeRect.height
+        }
+        textAreas.push(rect)
+      }
+      const selection = {index: i, text: selectedText, html: selectedHTML, areas: textAreas}
+      this.selectionsList.push(selection)
+      this.ui.addTextSelection(selection)
+    }
+  }
+
+  getSelection() {
+    return this.win.document.getSelection()
   }
 }

@@ -26,10 +26,6 @@ export class PointAndShootUIMock extends WebEventsUIMock implements PointAndShoo
     this.events.push({name: "setStatus", status})
   }
 
-  enterSelection() {
-    this.events.push({name: "enterSelection"})
-  }
-
   hidePopup() {
     this.events.push({name: "hidePopup"})
   }
@@ -38,11 +34,23 @@ export class PointAndShootUIMock extends WebEventsUIMock implements PointAndShoo
     this.events.push("hideStatus")
   }
 
+  showStatus(el, collected) {
+    this.events.push({name: "showStatus", el, collected})
+  }
+
+  enterSelection() {
+    this.events.push({name: "enterSelection"})
+  }
+
   leaveSelection() {
     this.events.push({name: "leaveSelection"})
   }
 
-  showStatus(el, collected) {
-    this.events.push({name: "showStatus", el, collected})
+  addTextSelection(selection) {
+    this.events.push({name: "addTextSelection", selection})
+  }
+
+  textSelected(selection) {
+    this.events.push({name: "textSelected", selection})
   }
 }

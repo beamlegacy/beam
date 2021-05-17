@@ -38,11 +38,6 @@ export class PointAndShootUI_debug implements PointAndShootUI {
     this.native.unshoot(el)
   }
 
-  enterSelection() {
-    this.web.enterSelection()
-    this.native.enterSelection()
-  }
-
   hidePopup() {
     this.web.hidePopup()
     this.native.hidePopup()
@@ -51,11 +46,6 @@ export class PointAndShootUI_debug implements PointAndShootUI {
   hideStatus() {
     this.web.hideStatus()
     this.native.hideStatus()
-  }
-
-  leaveSelection() {
-    this.web.leaveSelection()
-    this.native.leaveSelection()
   }
 
   pinched(pinchInfo: any) {
@@ -91,5 +81,25 @@ export class PointAndShootUI_debug implements PointAndShootUI {
   showStatus(el, collected) {
     this.web.showStatus(el, collected)
     this.native.showStatus(el, collected)
+  }
+
+  enterSelection() {
+    this.web.enterSelection()
+    this.native.enterSelection()
+  }
+
+  leaveSelection() {
+    this.web.leaveSelection()
+    this.native.leaveSelection()
+  }
+
+  addTextSelection(selection) {
+    this.web.addTextSelection(selection)
+    this.native.addTextSelection(selection)
+  }
+
+  textSelected(selection) {
+    this.web.textSelected(selection)
+    this.native.textSelected(selection)
   }
 }

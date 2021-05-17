@@ -2,9 +2,6 @@ import {PointAndShoot} from "./PointAndShoot"
 import {BeamDocumentMock, BeamHTMLElementMock, BeamKeyEvent, BeamMouseEvent, BeamUIEvent} from "./Test/BeamMocks"
 import {BeamWindowMock} from "./Test/BeamWindowMock"
 import {PointAndShootUIMock} from "./Test/PointAndShootUIMock"
-import {TextSelectorUI_mock} from "./Test/TextSelectorUI_mock";
-import {TextSelector} from "./TextSelector";
-
 /**
  * @param frameEls {BeamHTMLElement[]}
  * @return {{pns: PointAndShoot, testUI: PointAndShootUIMock}}
@@ -38,7 +35,6 @@ function pointAndShootTestBed(frameEls = []) {
     })
     const win = new BeamWindowMock(testDocument)
     PointAndShoot.instance = null  // Allow test suite to instantiate multiple PointAndShoots
-    const textSelector = new TextSelector(win, new TextSelectorUI_mock())
     const pns = PointAndShoot.getInstance(win, testUI)
 
   // Check registered event listeners

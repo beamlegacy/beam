@@ -102,12 +102,6 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
   unshoot(el) {
   }
 
-  enterSelection() {
-  }
-
-  leaveSelection() {
-  }
-
   hidePopup() {
     // TODO: Hide popup message?
   }
@@ -146,5 +140,23 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
       return this.areaMessage(quoteId, element, setResizeInfo.coordinates.x, setResizeInfo.coordinates.y)
     })
     super.setResizeInfo(setResizeInfo)
+  }
+
+  enterSelection() {
+    // TODO: enterSelection message?
+  }
+
+  leaveSelection() {
+    // this.log("leaveSelection")
+    // TODO: leaveSelection message?
+  }
+
+  addTextSelection(selection) {
+    // TODO: Throttle
+    this.native.sendMessage("textSelection", selection)
+  }
+
+  textSelected(selection) {
+    this.native.sendMessage("textSelected", selection)
   }
 }

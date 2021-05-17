@@ -1,4 +1,5 @@
 import {WebEventsUI} from "./WebEventsUI"
+import {TextSelection} from "./TextSelection";
 
 export interface PointAndShootUI extends WebEventsUI {
   /**
@@ -38,10 +39,6 @@ export interface PointAndShootUI extends WebEventsUI {
    */
   unshoot(el)
 
-  enterSelection()
-
-  leaveSelection()
-
   hidePopup()
 
   /**
@@ -56,4 +53,18 @@ export interface PointAndShootUI extends WebEventsUI {
    * @param status {"pointing"|"shooting"|"none"}
    */
   setStatus(status)
+
+  enterSelection()
+
+  leaveSelection()
+
+  /**
+   * @param selection {TextSelection}
+   */
+  textSelected(selection: TextSelection)
+
+  /**
+   * @param selection {TextSelection}
+   */
+  addTextSelection(selection: TextSelection)
 }
