@@ -505,7 +505,6 @@
 		BAA6750B78E3812C7DA5DF7C /* tsconfig.json in Resources */ = {isa = PBXBuildFile; fileRef = BAA6738E9DD9D41F95BB1602 /* tsconfig.json */; };
 		BAA675A0EEE5F4636AECCE5D /* ShootCardPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA670FA9720D0BD2011EC10 /* ShootCardPicker.swift */; };
 		BAA675AE9C103046AC022CBA /* .sassrc in Resources */ = {isa = PBXBuildFile; fileRef = BAA679E2DF3556E0E444844D /* .sassrc */; };
-		BAA675F08AFBE3FA1F741F76 /* TextSelectorUI_mock.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA67EF8F26A26B69B6690AA /* TextSelectorUI_mock.ts */; };
 		BAA6760269415BA47D933E97 /* PointAndShootUI_native.test.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA676AA87963F568B000616 /* PointAndShootUI_native.test.ts */; };
 		BAA67697525FDFD1242FF4F1 /* TextSelection.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA67671C847924A15E55F0C /* TextSelection.ts */; };
 		BAA676E150F611C14CE79EF9 /* index_prod.css in Resources */ = {isa = PBXBuildFile; fileRef = BAA67DFA2629E03B1860BB36 /* index_prod.css */; };
@@ -3369,7 +3368,6 @@
 				52FB84E42638124A0085A444 /* update_documents.graphql in Resources */,
 				BAA6704409BDC8AB92E95F8D /* WebEventsUI_native.ts in Resources */,
 				BAA67B13B4EBCFF2D7A94F93 /* WebEventsUI_web.ts in Resources */,
-				BAA675F08AFBE3FA1F741F76 /* TextSelectorUI_mock.ts in Resources */,
 				BAA67EC2B781F8A78CD5A6B0 /* Beam.scss in Resources */,
 				BAA67A1DD75801D8B25037E9 /* BeamTypes.ts in Resources */,
 				BAA67F44FDFA2FFBC5FE8245 /* .parcelrc in Resources */,

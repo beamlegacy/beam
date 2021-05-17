@@ -348,4 +348,13 @@ export class PointAndShootUI_web extends WebEventsUI_web implements PointAndShoo
   dropDown() {
     this.showProposals(this.cardsToProposals(this.existingCards, ""))
   }
+
+  addTextSelection(selection) {
+    this.paintSelection(selection, this.pointClass)
+  }
+
+  textSelected(selection) {
+    this.paintSelection(selection, this.shootClass)
+  }
+
 }
