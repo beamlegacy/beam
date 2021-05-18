@@ -36,6 +36,21 @@ class TestWebPage: WebPage {
     }
 
     func executeJS(_ jsCode: String, objectName: String?) -> Promise<Any?> {
+        if objectName == "PointAndShoot" {
+            switch jsCode {
+            case "setStatus('pointing')":
+                self.pointAndShoot.status = PointAndShootStatus.pointing
+            case "setStatus('shooting')":
+                self.pointAndShoot.status = PointAndShootStatus.shooting
+            case "setStatus('none')":
+                self.pointAndShoot.status = PointAndShootStatus.none
+            case let assignString where jsCode.contains("assignNote"):
+                Logger.shared.logDebug("\(assignString) called", category: .pointAndShoot)
+                self.pointAndShoot.status = PointAndShootStatus.none
+            default:
+                Logger.shared.logDebug("no matching jsCode case, no js call mocked", category: .pointAndShoot)
+            }
+        }
         events.append("executeJS \(objectName ?? "").\(jsCode)")
         return Promise(true)
     }
@@ -65,23 +80,6 @@ class PointAndShootUIMock: PointAndShootUI {
     override func createGroup(noteInfo: NoteInfo, edited: Bool) -> ShootGroupUI {
         events.append("createGroup \(String(describing: noteInfo)) \(edited)")
         return super.createGroup(noteInfo: noteInfo, edited: edited)
-    }
-}
-
-//enum PointAndShootStatusMock: PointAndShootStatus
-
-class PointAndShootMock: PointAndShoot {
-    override func point(target: Target) {
-        super.status = PointAndShootStatus.pointing
-        return super.point(target: target)
-    }
-    override func complete(noteInfo: NoteInfo, quoteId: UUID) throws {
-        super.status = PointAndShootStatus.none
-        super.shootGroups.append(super.activeShootGroup ?? PointAndShoot.ShootGroup())
-        return try super.complete(noteInfo: noteInfo, quoteId: quoteId)
-    }
-    override func resetStatus() {
-        super.status = PointAndShootStatus.none
     }
 }
 
@@ -123,13 +121,13 @@ class BrowsingScorerMock: WebPageHolder, BrowsingScorer {
 
 class PointAndShootTest: XCTestCase {
     var testPage: TestWebPage?
-    func testBed() -> (PointAndShootMock, PointAndShootUIMock) {
+    func testBed() -> (PointAndShoot, PointAndShootUIMock) {
         let testPasswordStore = PasswordStoreMock()
         let userInfoStore = MockUserInformationsStore()
         let testPasswordOverlayController = PasswordOverlayController(passwordStore: testPasswordStore, userInfoStore: userInfoStore, passwordManager: .shared)
         let testBrowsingScorer = BrowsingScorerMock()
         let testUI = PointAndShootUIMock()
-        let pns = PointAndShootMock(ui: testUI, scorer: testBrowsingScorer)
+        let pns = PointAndShoot(ui: testUI, scorer: testBrowsingScorer)
         let page = TestWebPage(browsingScorer: testBrowsingScorer, passwordOverlayController: testPasswordOverlayController, pns: pns)
         testPage = page
         page.browsingScorer.page = page
@@ -221,7 +219,7 @@ class PointAndShootTest: XCTestCase {
 
         // Validate second shoot
         try pns.complete(noteInfo: NoteInfo(id: nil, title: "My note"), quoteId: UUID(uuidString: "347271F3-A6EA-495D-859D-B0F7B807DA3C")!)
-        XCTAssertEqual(testUI.events.count, 9)
+        XCTAssertEqual(testUI.events.count, 12)
         XCTAssertEqual(testUI.groupsUI.count, 0)    // No more shoot UI
         XCTAssertEqual(pns.shootGroups.count, 2)         // Two shoot groups memorized
     }
