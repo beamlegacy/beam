@@ -500,7 +500,7 @@ import Promises
 
     func webViewDidClose(_ webView: WKWebView) {
         Logger.shared.logDebug("webView webDidClose", category: .web)
-        browsingTree.closeTab()
+        closeTab()
     }
 
     func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String,
@@ -563,5 +563,13 @@ import Promises
 
     func passwordManagerToast(saved: Bool) {
         state.overlayViewModel.credentialsToast = CredentialsConfirmationToast(saved: saved)
+    }
+
+    func closeTab() {
+        browsingTree.closeTab()
+    }
+
+    func closeApp() {
+        browsingTree.closeApp()
     }
 }
