@@ -28,7 +28,7 @@ extension PasswordManagerMenuCellState {
 }
 
 struct PasswordManagerMenuCell<Content: View>: View {
-
+    let height: CGFloat
     let onChange: ((PasswordManagerMenuCellState) -> Void)?
     let content: () -> Content
 
@@ -43,7 +43,8 @@ struct PasswordManagerMenuCell<Content: View>: View {
                 .layoutPriority(-1)
         }
         .padding()
-        .background(highlightState.backgroundColor)
+        .background(highlightState.backgroundColor
+                        .frame(height: height, alignment: .center))
         .onHover(perform: {
             hoveringState = $0
             updateHighlightState()
@@ -56,7 +57,7 @@ struct PasswordManagerMenuCell<Content: View>: View {
             TapGesture().onEnded {
                 onChange?(.clicked)
             }
-        )
+        ).frame(height: height, alignment: .center)
     }
 
     func updateHighlightState() {
@@ -77,8 +78,14 @@ struct PasswordManagerMenuCell<Content: View>: View {
 
 struct PasswordManagerMenuCell_Previews: PreviewProvider {
     static var previews: some View {
-        PasswordManagerMenuCell(onChange: { _ in }, content: {
-            Text("Hello World")
+        PasswordManagerMenuCell(height: 35, onChange: { _ in }, content: {
+            OtherPasswordsCell()
+        })
+        PasswordManagerMenuCell(height: 35, onChange: { _ in }, content: {
+            PasswordsViewMoreCell(hostName: "www.github.com", onChange: { _ in })
+        })
+        PasswordManagerMenuCell(height: 56, onChange: { _ in }, content: {
+            StoredPasswordCell(host: URL(string: "https://beamapp.co")!, username: "Beam", onChange: { _ in })
         })
     }
 }

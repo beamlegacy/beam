@@ -18,6 +18,7 @@ struct WebFieldAutofill: Codable {
 
 class PasswordOverlayController: WebPageHolder {
     private let passwordStore: PasswordStore
+    private let userInfoStore: UserInformationsStore
     private let passwordManager: PasswordManager
     private var passwordMenuWindow: NSWindow?
     private var passwordMenuPosition: CGPoint = .zero
@@ -35,8 +36,9 @@ class PasswordOverlayController: WebPageHolder {
         inputFields.filter { $0.value.type == .password || $0.value.type == .newPassword }
     }
 
-    init(passwordStore: PasswordStore, passwordManager: PasswordManager = .shared) {
+    init(passwordStore: PasswordStore, userInfoStore: UserInformationsStore, passwordManager: PasswordManager = .shared) {
         self.passwordStore = passwordStore
+        self.userInfoStore = userInfoStore
         self.passwordManager = passwordManager
         encoder = JSONEncoder()
         decoder = JSONDecoder()
@@ -123,22 +125,18 @@ class PasswordOverlayController: WebPageHolder {
         if passwordMenuWindow != nil {
             dismissPasswordManagerMenu()
         }
-        let viewModel = PasswordManagerMenuViewModel(host: host, passwordStore: passwordStore, withPasswordGenerator: passwordGenerator)
+        let viewModel = PasswordManagerMenuViewModel(host: host, passwordStore: passwordStore, userInfoStore: userInfoStore, withPasswordGenerator: passwordGenerator)
         viewModel.delegate = self
-        let rootView = PasswordManagerMenu(width: location.size.width, viewModel: viewModel)
-        let window = FirstResponderWindow(contentRect: .zero, styleMask: .borderless, backing: .buffered, defer: true)
-        window.contentViewController = NSHostingController(rootView: rootView)
-        page.webviewWindow?.addChildWindow(window, ordered: .above)
-        passwordMenuPosition = bottomLeftOnScreen(for: location)
-        window.setFrameTopLeftPoint(passwordMenuPosition)
-        window.makeKeyAndOrderFront(nil)
-        passwordMenuWindow = window
+        let passwordManagerMenu = PasswordManagerMenu(width: location.size.width, viewModel: viewModel)
+        guard let webView = (page as? BrowserTab)?.webView,
+              let passwordWindow = ContextMenuPresenter.shared.present(view: BeamHostingView(rootView: passwordManagerMenu), from: webView, atPoint: location.origin) else { return }
+//        passwordMenuPosition = bottomLeftOnScreen(for: location) // Not needed atm
+        passwordWindow.makeKeyAndOrderFront(nil)
+        passwordMenuWindow = passwordWindow
     }
 
     private func dismissPasswordManagerMenu() {
-        guard let window = passwordMenuWindow else { return }
-        page.webviewWindow?.removeChildWindow(window)
-        window.setIsVisible(false)
+        ContextMenuPresenter.shared.dismissMenu()
         passwordMenuWindow = nil
     }
 
@@ -221,11 +219,15 @@ class PasswordOverlayController: WebPageHolder {
         passwordStore.password(host: host, username: login) { storedPassword in
             if let storedPassword = storedPassword {
                 if password != storedPassword {
-                    // TODO: display password update panel
+                    if let browserTab = (self.page as? BrowserTab) {
+                        browserTab.passwordManagerToast(saved: false)
+                    }
                     self.passwordStore.save(host: host, username: login, password: password)
                 }
             } else {
-                // TODO: display password save panel
+                if let browserTab = (self.page as? BrowserTab) {
+                    browserTab.passwordManagerToast(saved: true)
+                }
                 self.passwordStore.save(host: host, username: login, password: password)
             }
         }
@@ -252,11 +254,31 @@ extension PasswordOverlayController: PasswordManagerMenuDelegate {
         }
     }
 
-    func fillNewPassword(_ password: String) {
+    func fillNewPassword(_ password: String, dismiss: Bool = true) {
         let passwordParams = passwordFields.keys.map { id in
             WebFieldAutofill(id: id, value: password, background: nil)
         }
-        fillWebTextFields(passwordParams)
+        self.togglePasswordField(visibility: true)
+        self.fillWebTextFields(passwordParams)
+        if dismiss {
+            DispatchQueue.main.async {
+                self.dismissPasswordManagerMenu()
+            }
+        }
+    }
+
+    func emptyPasswordField() {
+        let emptyParams = self.passwordFields.keys.map { id in
+            WebFieldAutofill(id: id, value: "", background: nil)
+        }
+        self.togglePasswordField(visibility: false)
+        self.fillWebTextFields(emptyParams)
+        DispatchQueue.main.async {
+            self.dismissPasswordManagerMenu()
+        }
+    }
+
+    func dismiss() {
         DispatchQueue.main.async {
             self.dismissPasswordManagerMenu()
         }
@@ -270,6 +292,20 @@ extension PasswordOverlayController: PasswordManagerMenuDelegate {
             page.executeJS(script, objectName: nil).then { _ in
                 Logger.shared.logDebug("passwordOverlay text fields set.")
             }
+        } catch {
+            Logger.shared.logError("JSON encoding failure: \(error.localizedDescription))", category: .general)
+        }
+    }
+
+    private func togglePasswordField(visibility: Bool) {
+        let passwordParams = self.passwordFields.keys.map { id in
+            WebFieldAutofill(id: id, value: nil, background: nil)
+        }
+        do {
+            let data = try encoder.encode(passwordParams)
+            guard let jsonString = String(data: data, encoding: .utf8) else { return }
+            let script = "beam_togglePasswordFieldVisibility('\(jsonString)', '\(visibility.description)')"
+            _ = page.executeJS(script, objectName: nil)
         } catch {
             Logger.shared.logError("JSON encoding failure: \(error.localizedDescription))", category: .general)
         }

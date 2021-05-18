@@ -97,6 +97,17 @@ class PasswordStoreMock: PasswordStore {
     func delete(host: URL, username: String) {}
 }
 
+class MockUserInformationsStore: UserInformationsStore {
+
+    func save(userInfo: UserInformations) {}
+
+    func get() -> UserInformations {
+        return UserInformations(email: "", firstName: "", lastName: "", adresses: "")
+    }
+
+    func delete() {}
+}
+
 class BrowsingScorerMock: WebPageHolder, BrowsingScorer {
 
     override init() {
@@ -114,7 +125,8 @@ class PointAndShootTest: XCTestCase {
     var testPage: TestWebPage?
     func testBed() -> (PointAndShootMock, PointAndShootUIMock) {
         let testPasswordStore = PasswordStoreMock()
-        let testPasswordOverlayController = PasswordOverlayController(passwordStore: testPasswordStore, passwordManager: .shared)
+        let userInfoStore = MockUserInformationsStore()
+        let testPasswordOverlayController = PasswordOverlayController(passwordStore: testPasswordStore, userInfoStore: userInfoStore, passwordManager: .shared)
         let testBrowsingScorer = BrowsingScorerMock()
         let testUI = PointAndShootUIMock()
         let pns = PointAndShootMock(ui: testUI, scorer: testBrowsingScorer)

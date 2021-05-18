@@ -95,9 +95,14 @@ struct ModeView: View {
 
 struct ContentView: View {
     var body: some View {
-        ModeView()
-            .background(BeamColor.Generic.background.swiftUI)
-            .edgesIgnoringSafeArea(.top)
+        ZStack {
+            ModeView()
+                .background(BeamColor.Generic.background.swiftUI)
+                .edgesIgnoringSafeArea(.top)
+                .zIndex(0)
+            OverlayViewCenter()
+                .zIndex(1)
+        }
     }
 }
 

@@ -126,10 +126,7 @@ extension BeamColor {
 
 extension BeamColor {
     enum Passwords {
-        static let hoverBackground = BeamColor.From(color: BeamColor.Bluetiful.nsColor.withAlphaComponent(0.14))
-        static let activeBackground = BeamColor.From(color:
-                                                        NSColor(withLightColor: BeamColor.Bluetiful.nsColor.withAlphaComponent(0.05),
-                                                                darkColor: BeamColor.Bluetiful.nsColor.withAlphaComponent(0.08))
-        )
+        static let hoverBackground = BeamColor.From(color: BeamColor.Bluetiful.nsColor.withAlphaComponent(0.10))
+        static let activeBackground = BeamColor.From(color: BeamColor.Bluetiful.nsColor.withAlphaComponent(0.14))
     }
 }

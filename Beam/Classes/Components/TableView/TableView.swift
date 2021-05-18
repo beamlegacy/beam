@@ -10,6 +10,7 @@ import SwiftUI
 struct TableViewColumn {
     enum ColumnType {
         case Text
+        case IconAndText
         case CheckBox
     }
     let key: String
@@ -22,6 +23,7 @@ struct TableViewColumn {
     var isInitialSortDescriptor = false
     var resizable = true
     var width: CGFloat = 100
+    var fontSize: CGFloat = 13
     var stringFromKeyValue: ((Any?) -> String) = { value in
         return value as? String ?? ""
     }
@@ -36,7 +38,7 @@ struct TableView: NSViewRepresentable {
 
     var items: [TableViewItem] = []
     var columns: [TableViewColumn] = []
-    var creationRowTitle: String = "New Private Card"
+    var creationRowTitle: String? = "New Private Card"
     var onEditingText: ((String?, Int) -> Void)?
     var onSelectionChanged: ((IndexSet) -> Void)?
     var onHover: ((_ row: Int?, _ location: NSRect?) -> Void)?
@@ -284,7 +286,7 @@ extension TableViewCoordinator: NSTableViewDelegate {
                 }
             }
             cell = checkCell
-        } else {
+        } else if column.type == .Text {
             let textCell = BeamTableCellView()
             let item = sortedData[row]
             let value = item.value(forKey: column.key)
@@ -292,9 +294,20 @@ extension TableViewCoordinator: NSTableViewDelegate {
             let editable = column.editable && !column.isLink
             textCell.textField?.stringValue = text
             textCell.textField?.isEditable = editable
+            textCell.textField?.font = BeamFont.regular(size: column.fontSize).nsFont
             textCell.isLink = column.isLink
             textCell.textField?.delegate = self
             cell = textCell
+        } else {
+            let iconAndTextCell = BeamTableCellIconAndTextView()
+            let item = sortedData[row] as? PasswordTableViewItem
+            iconAndTextCell.updateWithIcon(item?.hostInfo.favIcon)
+            let editable = column.editable && !column.isLink
+            iconAndTextCell.textField?.stringValue = item?.hostInfo.host.absoluteString ?? ""
+            iconAndTextCell.textField?.isEditable = editable
+            iconAndTextCell.textField?.font = BeamFont.regular(size: column.fontSize).nsFont
+            iconAndTextCell.textField?.delegate = self
+            cell = iconAndTextCell
         }
 
         return cell

@@ -28,9 +28,14 @@ private class ContextMenuWindow: NSWindow {
     }
 }
 
+class FlippedView: NSView {
+    override var isFlipped: Bool { true }
+}
+
 class ContextMenuPresenter {
     static var shared = ContextMenuPresenter()
 
+    private var currentView: NSView?
     private var currentMenu: FormatterView?
     private var childWindow: NSWindow?
     private var parentWindow: NSWindow?
@@ -53,6 +58,9 @@ class ContextMenuPresenter {
             currentMenu?.animateOnDisappear(completionHandler: {
                 self.dismissMenu(removeWindow: true)
             })
+            if currentView != nil && currentMenu == nil {
+                dismissMenu(removeWindow: true)
+            }
         } else {
             dismissMenu(removeWindow: true)
         }
@@ -66,6 +74,7 @@ class ContextMenuPresenter {
             self.childWindow = nil
         }
         currentMenu?.removeFromSuperview()
+        currentView?.removeFromSuperview()
     }
 
     func presentMenu(_ menu: FormatterView, atPoint: CGPoint, from fromView: NSView? = nil, animated: Bool = true) {
@@ -91,5 +100,22 @@ class ContextMenuPresenter {
                 menu.animateOnAppear()
             }
         }
+    }
+
+    func present(view: NSView, from parentView: NSView, atPoint: CGPoint) -> NSWindow? {
+        if currentView != nil {
+            dismissMenu(removeWindow: true)
+        }
+        currentView = view
+        guard let parentWindow = parentView.window else { return nil }
+        let childWindow = createChildWindow(for: view.frame, in: parentWindow)
+        childWindow.contentView = FlippedView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        childWindow.contentView?.addSubview(view)
+
+        let position = view.convert(atPoint, from: parentView)
+        view.setFrameOrigin(position)
+
+        return childWindow
     }
 }

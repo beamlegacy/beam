@@ -60,7 +60,7 @@ import Promises
     }
 
     lazy var passwordOverlayController: PasswordOverlayController = {
-        let controller = PasswordOverlayController(passwordStore: MockPasswordStore.shared)
+        let controller = PasswordOverlayController(passwordStore: MockPasswordStore.shared, userInfoStore: MockUserInformationsStore.shared)
         controller.page = self
         return controller
     }()
@@ -559,5 +559,9 @@ import Promises
 
     func dumpBrowsingTree() {
         browsingTree.dump()
+    }
+
+    func passwordManagerToast(saved: Bool) {
+        state.overlayViewModel.credentialsToast = CredentialsConfirmationToast(saved: saved)
     }
 }

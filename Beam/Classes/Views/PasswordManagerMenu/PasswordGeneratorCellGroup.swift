@@ -17,7 +17,7 @@ struct PasswordGeneratorCellGroup: View {
                 Separator(horizontal: true)
                 PasswordGeneratorSettingsCell(viewModel: viewModel)
             }
-        }
+        }.frame(height: 81, alignment: .center)
     }
 }
 

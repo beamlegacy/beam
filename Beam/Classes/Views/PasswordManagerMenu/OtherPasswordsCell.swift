@@ -1,20 +1,19 @@
 //
-//  PasswordsViewMoreCell.swift
+//  OtherPasswordsCell.swift
 //  Beam
 //
-//  Created by Beam on 01/04/2021.
+//  Created by Jean-Louis Darmon on 26/04/2021.
 //
 
 import SwiftUI
 
-struct PasswordsViewMoreCell: View {
-    var hostName: String
-    let onChange: (PasswordManagerMenuCellState) -> Void
+struct OtherPasswordsCell: View {
+    var onChange: ((PasswordManagerMenuCellState) -> Void)?
 
     var body: some View {
         PasswordManagerMenuCell(height: 35, onChange: onChange) {
             VStack(alignment: .leading) {
-                Text("Other Passwords for \(hostName)")
+                Text("Other Passwords...")
                     .font(BeamFont.medium(size: 12).swiftUI)
                     .foregroundColor(BeamColor.LightStoneGray.swiftUI)
             }
@@ -22,8 +21,8 @@ struct PasswordsViewMoreCell: View {
     }
 }
 
-struct PasswordsViewMoreCell_Previews: PreviewProvider {
+struct OtherPasswordsCell_Previews: PreviewProvider {
     static var previews: some View {
-        PasswordsViewMoreCell(hostName: "www.github.com") { _ in }
+        OtherPasswordsCell()
     }
 }

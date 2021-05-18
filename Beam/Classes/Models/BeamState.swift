@@ -58,6 +58,7 @@ import BeamCore
     }
 
     @Published var currentPage: WindowPage?
+    @Published var overlayViewModel: OverlayViewCenterViewModel = OverlayViewCenterViewModel()
 
     private var scope = Set<AnyCancellable>()
 
