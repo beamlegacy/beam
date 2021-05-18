@@ -21,62 +21,55 @@ struct PasswordManagerMenu: View {
 
     @State private var searchString: String = ""
     @State private var suggestedPassword: String = ""
-
+    @State private var showingOtherPasswordsSheet = false
     @State private var height: CGFloat?
 
+    @State private var isShowingToast: Bool = false
+
     var body: some View {
-        OmniBarFieldBackground(isEditing: true, alignment: .topLeading) {
+        FormatterViewBackground(shadowOpacity: 0.1) {
             VStack(alignment: .leading, spacing: 0) {
                 if let passwordGeneratorViewModel = viewModel.passwordGeneratorViewModel {
                     PasswordGeneratorCellGroup(viewModel: passwordGeneratorViewModel)
-                }
-                if viewModel.display.searchCell == .field {
-                    // TODO: use closure for macOS 10.15
-                    if #available(macOS 11.0, *) {
-                        SearchPasswordsCell(active: true, searchString: $searchString)
-                            .onChange(of: searchString, perform: { value in
-                                self.viewModel.updateSearchString(value)
-                            })
-                    }
-                    if viewModel.display.showSearchSeparator {
-                        Separator(horizontal: true)
-                    }
-                }
-                if viewModel.display.hasScroll {
-                    ScrollView {
-                        ForEach(viewModel.display.entries) { entry in
-                            StoredPasswordCell(host: entry.host, username: entry.username, searchString: viewModel.display.searchCell == .field ? searchString : nil) { newState in
-                                if newState == .clicked {
-                                    viewModel.fillCredentials(entry)
-                                }
-                            }
-                        }
-                    }
-                    .frame(height: 244) // TODO: use preference key
                 } else {
-                    ForEach(viewModel.display.entries) { entry in
-                        StoredPasswordCell(host: entry.host, username: entry.username, searchString: viewModel.display.searchCell == .field ? searchString : nil) { newState in
+                    ForEach(viewModel.display.entries.prefix(3)) { entry in
+                        StoredPasswordCell(host: entry.host, username: entry.username) { newState in
                             if newState == .clicked {
                                 viewModel.fillCredentials(entry)
                             }
                         }
                     }
-                    if viewModel.display.moreEntries > 0 {
-                        PasswordsViewMoreCell(count: viewModel.display.moreEntries) { newState in
+                    if viewModel.display.entries.count == 1 && viewModel.display.hasMoreThanOneEntry {
+                        Separator(horizontal: true)
+                            .padding(.vertical, 1)
+                            .padding(.horizontal, 12)
+                        PasswordsViewMoreCell(hostName: viewModel.getHostStr()) { newState in
                             if newState == .clicked {
-                                self.viewModel.revealAdditionalItems()
+                                viewModel.revealMoreItems()
                             }
                         }
                     }
-                }
-                if viewModel.display.searchCell == .button {
-                    if viewModel.display.showSearchSeparator {
+                    if viewModel.display.entries.count > 1 {
                         Separator(horizontal: true)
-                    }
-                    SearchPasswordsCell(active: false, searchString: .constant("")) { newState in
-                        if newState == .clicked {
-                            self.viewModel.startSearch()
-                        }
+                            .padding(.vertical, 1)
+                            .padding(.horizontal, 12)
+                        OtherPasswordsCell { newState in
+                            // Show More Password view
+                            if newState == .clicked {
+                                viewModel.revealAllItems()
+                                showingOtherPasswordsSheet.toggle()
+                            }
+                        }.sheet(isPresented: $showingOtherPasswordsSheet, content: {
+                            OtherPasswordModal(passwordEntries: viewModel.display.entries, onFill: { entry in
+                                viewModel.fillCredentials(entry)
+                            }, onRemove: { entry in
+                                // TODO: Implement when password will be saved
+                                viewModel.removeCredentials(entry)
+                            }, onDismiss: {
+                                showingOtherPasswordsSheet.toggle()
+                                viewModel.resetItems()
+                            }).frame(width: 568, height: 361, alignment: .center)
+                        })
                     }
                 }
             }
@@ -89,6 +82,8 @@ struct PasswordManagerMenu: View {
             }.animation(nil)
         }
         .frame(width: max(width, 400), height: height, alignment: .top)
+        .cornerRadius(6)
+        .shadow(color: Color.black.opacity(0.1), radius: 24, x: 0, y: 4)
         .animation(nil)
     }
 }

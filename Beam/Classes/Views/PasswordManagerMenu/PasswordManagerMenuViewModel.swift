@@ -11,7 +11,9 @@ import BeamCore
 
 protocol PasswordManagerMenuDelegate: AnyObject {
     func fillCredentials(_ entry: PasswordManagerEntry)
-    func fillNewPassword(_ password: String)
+    func fillNewPassword(_ password: String, dismiss: Bool)
+    func emptyPasswordField()
+    func dismiss()
 }
 
 enum PasswordSearchCellMode {
@@ -22,11 +24,10 @@ enum PasswordSearchCellMode {
 
 class PasswordManagerMenuViewModel: ObservableObject {
     struct Contents {
-        var searchCell: PasswordSearchCellMode
-        var showSearchSeparator: Bool
         var entries: [PasswordManagerEntry]
-        var moreEntries: Int
         var hasScroll: Bool
+        var hasMoreThanOneEntry: Bool
+        var userInfo: UserInformations
     }
 
     weak var delegate: PasswordManagerMenuDelegate?
@@ -37,17 +38,20 @@ class PasswordManagerMenuViewModel: ObservableObject {
 
     private let host: URL
     private let passwordStore: PasswordStore
+    private let userInfoStore: UserInformationsStore
     private var entries: [PasswordManagerEntry]
     private var searchCellVisibility: PasswordSearchCellMode = .button
     private var revealFullList: Bool = false
+    private var revealMoreItemsInList: Bool = false
     private var subscribers = Set<AnyCancellable>()
     private var showGeneratorPreferences = false
 
-    init(host: URL, passwordStore: PasswordStore, withPasswordGenerator passwordGenerator: Bool) {
+    init(host: URL, passwordStore: PasswordStore, userInfoStore: UserInformationsStore, withPasswordGenerator passwordGenerator: Bool) {
         self.host = host
         self.passwordStore = passwordStore
+        self.userInfoStore = userInfoStore
         self.entries = []
-        self.display = Contents(searchCell: .button, showSearchSeparator: true, entries: Array(entries.prefix(3)), moreEntries: 1, hasScroll: false)
+        self.display = Contents(entries: Array(entries.prefix(1)), hasScroll: false, hasMoreThanOneEntry: entries.count > 1, userInfo: userInfoStore.get())
         if passwordGenerator {
             let passwordGeneratorViewModel = PasswordGeneratorViewModel()
             passwordGeneratorViewModel.delegate = self
@@ -64,8 +68,22 @@ class PasswordManagerMenuViewModel: ObservableObject {
         }
     }
 
-    func revealAdditionalItems() {
+    func resetItems() {
+        guard revealFullList else { return }
+        revealFullList = false
+        revealMoreItemsInList = false
+        updateDisplay()
+    }
+
+    func revealMoreItems() {
+        guard !revealMoreItemsInList else { return }
+        revealMoreItemsInList = true
+        updateDisplay()
+    }
+
+    func revealAllItems() {
         guard !revealFullList else { return }
+        revealMoreItemsInList = false
         revealFullList = true
         updateDisplay()
     }
@@ -90,18 +108,35 @@ class PasswordManagerMenuViewModel: ObservableObject {
         delegate?.fillCredentials(entry)
     }
 
+    func removeCredentials(_ entry: PasswordManagerEntry) {
+    }
+
     private func updateDisplay() {
-        let searchCell = showGeneratorPreferences ? .none : searchCellVisibility
-        let visibleEntries = revealFullList ? entries : Array(entries.prefix(3))
-        let moreEntries = !revealFullList && entries.count > 3 ? entries.count - 3 : 0
-        let hasScroll = revealFullList && entries.count > 3
-        display = Contents(searchCell: searchCell, showSearchSeparator: true, entries: visibleEntries, moreEntries: moreEntries, hasScroll: hasScroll)
+        var visibleEntries = revealFullList ? entries : Array(entries.prefix(1))
+        visibleEntries = revealMoreItemsInList ? Array(entries.prefix(3)) : visibleEntries
+        let hasScroll = entries.count == 3
+        display = Contents(entries: visibleEntries, hasScroll: hasScroll, hasMoreThanOneEntry: entries.count > 1, userInfo: display.userInfo)
+    }
+
+    public func getHostStr() -> String {
+        var components = URLComponents()
+        components.scheme = host.scheme
+        components.host = host.host
+        return components.url?.absoluteString ?? ""
     }
 }
 
 extension PasswordManagerMenuViewModel: PasswordManagerMenuDelegate {
-    func fillNewPassword(_ password: String) {
-        delegate?.fillNewPassword(password)
+    func dismiss() {
+        delegate?.dismiss()
+    }
+
+    func emptyPasswordField() {
+        delegate?.emptyPasswordField()
+    }
+
+    func fillNewPassword(_ password: String, dismiss: Bool) {
+        delegate?.fillNewPassword(password, dismiss: dismiss)
     }
 }
 
@@ -157,6 +192,14 @@ class PasswordGeneratorViewModel: ObservableObject {
 
     func clicked() {
         Logger.shared.logDebug("Clicked on generated password: \(suggestion)")
-        delegate?.fillNewPassword(suggestion)
+        delegate?.fillNewPassword(suggestion, dismiss: false)
+    }
+
+    func emptyPasswordField() {
+        delegate?.emptyPasswordField()
+    }
+
+    func dismiss() {
+        delegate?.dismiss()
     }
 }

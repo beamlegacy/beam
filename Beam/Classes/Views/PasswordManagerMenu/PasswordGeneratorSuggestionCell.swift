@@ -14,34 +14,29 @@ enum PasswordGeneratorAction {
 
 struct PasswordGeneratorSuggestionCell: View {
     @ObservedObject var viewModel: PasswordGeneratorViewModel
-
     var body: some View {
-        PasswordManagerMenuCell(onChange: handleStateChange) {
+        VStack(alignment: .leading) {
             HStack {
                 Icon(name: "password-key", color: BeamColor.Generic.text.swiftUI)
-                VStack(alignment: .leading) {
-                    Text("Password Suggestion")
-                        .fontWeight(.bold)
-                    Text(viewModel.suggestion)
-                }
-                Spacer()
-                Button(action: viewModel.generate, label: {
-                    Icon(name: "password-generate", color: BeamColor.Generic.text.swiftUI)
-                })
-                .buttonStyle(PlainButtonStyle())
-                Button(action: viewModel.togglePreferences, label: {
-                    Icon(name: "password-preferences", color: BeamColor.Generic.text.swiftUI)
-                })
-                .buttonStyle(PlainButtonStyle())
+                Text("Beam created a password for this site.")
+                    .font(BeamFont.medium(size: 13).swiftUI)
+                    .foregroundColor(BeamColor.Generic.text.swiftUI)
             }
-        }
+            Spacer(minLength: BeamSpacing._20)
+            VStack(alignment: .trailing) {
+                HStack {
+                    Spacer()
+                    ButtonLabel("Don't use", icon: nil, state: .normal, variant: .secondary) {
+                        viewModel.emptyPasswordField()
+                    }
+                    ButtonLabel("Use Password", icon: nil, state: .normal, variant: .primary) {
+                        viewModel.dismiss()
+                    }
+                }
+            }
+        }.padding()
         .onAppear {
             viewModel.generate()
-        }
-    }
-
-    private func handleStateChange(newState: PasswordManagerMenuCellState) {
-        if newState == .clicked {
             viewModel.clicked()
         }
     }

@@ -13,6 +13,13 @@ struct PasswordManagerEntry {
     var username: String
 }
 
+struct UserInformations {
+    var email: String
+    var firstName: String
+    var lastName: String
+    var adresses: String
+}
+
 extension PasswordManagerEntry: Identifiable {
     var id: String {
         "\(host.minimizedHost) \(username)"
@@ -25,6 +32,34 @@ protocol PasswordStore {
     func password(host: URL, username: String, completion: @escaping(String?) -> Void)
     func save(host: URL, username: String, password: String)
     func delete(host: URL, username: String)
+}
+
+protocol UserInformationsStore {
+    func save(userInfo: UserInformations)
+    func get() -> UserInformations
+    func delete()
+}
+
+class MockUserInformationsStore: UserInformationsStore {
+    static let shared = MockUserInformationsStore()
+
+    private var _userInfo: UserInformations?
+
+    init() {
+        _userInfo = UserInformations(email: "beam@beam.com", firstName: "John", lastName: "Beam", adresses: "123 Rue de Beam 69001 Lyon")
+    }
+
+    func save(userInfo: UserInformations) {
+        _userInfo = userInfo
+    }
+
+    func get() -> UserInformations {
+        return _userInfo ?? UserInformations(email: "", firstName: "", lastName: "", adresses: "")
+    }
+
+    func delete() {
+        _userInfo = nil
+    }
 }
 
 class MockPasswordStore: PasswordStore {
@@ -40,6 +75,15 @@ class MockPasswordStore: PasswordStore {
             "https://apple.com"
         ].map {
             PasswordManagerEntry(host: URL(string: $0)!, username: "toto@mail.net")
+        }
+        entries += ["https://github.com"].map {
+            PasswordManagerEntry(host: URL(string: $0)!, username: "toto2@mail.net")
+        }
+        entries += ["https://github.com"].map {
+            PasswordManagerEntry(host: URL(string: $0)!, username: "toto3@mail.net")
+        }
+        entries += ["https://github.com"].map {
+            PasswordManagerEntry(host: URL(string: $0)!, username: "toto4@mail.net")
         }
         entries += [
             "https://macg.co",

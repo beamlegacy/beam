@@ -29,7 +29,7 @@ class BeamTextFieldView: NSTextField {
         guard let window = window else { return false }
         guard let responder = window.firstResponder else { return false }
         guard window.fieldEditor(false, for: self) != nil else { return false }
-        guard let tfResponder = responder as? BeamTextFieldViewFieldEditor else { return false }
+        guard let tfResponder = (responder as? BeamTextFieldViewFieldEditor) ?? (responder as? NSTextView) else { return false }
         return self === tfResponder.delegate
     }
     var shouldUseIntrinsicContentSize: Bool = false {
