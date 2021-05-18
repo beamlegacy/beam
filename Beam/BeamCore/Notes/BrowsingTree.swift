@@ -72,6 +72,7 @@ public enum ReadingEventType: String, Codable {
     case switchToNewSearch
     case openLinkInNewTab
     case searchBarNavigation
+    case closeApp
 }
 
 public struct ReadingEvent: Codable {
@@ -300,6 +301,10 @@ public class BrowsingTree: ObservableObject, Codable {
 
     public func openLinkInNewTab() {
         current.addEvent(.openLinkInNewTab)
+    }
+
+    public func closeApp() {
+        current.addEvent(.closeApp)
     }
 
     public var links: Set<UInt64> {
