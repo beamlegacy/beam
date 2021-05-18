@@ -11,22 +11,11 @@ import BeamCore
 struct NoteHeaderView: View {
 
     static let topPadding: CGFloat = 60
+    @ObservedObject var model: NoteHeaderView.ViewModel
 
-    var note: BeamNote
-    var documentManager: DocumentManager
-
-    @State private var titleValue = ""
-    @State private var isEditingTitle = false
-    @State private var isTitleTaken = false
-    @State private var isLoading = false
-    @State private var titleSelectedRange: Range<Int>?
-
-    private var canEditTitle: Bool {
-        note.type != .journal
-    }
     private let errorColor = BeamColor.Shiraz
     private var textColor: BeamColor {
-        isTitleTaken ? errorColor : BeamColor.Generic.text
+        model.isTitleTaken ? errorColor : BeamColor.Generic.text
     }
     private static var dateFormatter: DateFormatter = {
         let fmt = DateFormatter()
@@ -35,56 +24,41 @@ struct NoteHeaderView: View {
         return fmt
     }()
 
-
     private var titleView: some View {
         ZStack(alignment: .leading) {
             // TODO: Support multiline editing
             // https://linear.app/beamapp/issue/BE-799/renaming-cards-multiline-support
-            if canEditTitle {
-                BeamTextField(text: $titleValue,
-                              isEditing: $isEditingTitle,
+            if model.canEditTitle {
+                BeamTextField(text: $model.titleText,
+                              isEditing: $model.isEditingTitle,
                               placeholder: "Card's title",
                               font: BeamFont.medium(size: 26).nsFont,
                               textColor: textColor.nsColor,
                               placeholderColor: BeamColor.Generic.placeholder.nsColor,
-                              selectedRange: titleSelectedRange,
-                              onTextChanged: onTitleChanged,
+                              selectedRange: model.titleSelectedRange,
+                              onTextChanged: model.textFieldDidChange,
                               onCommit: { _ in
-                                renameCard()
+                                model.renameCard()
+                              }, onStopEditing: {
+                                model.renameCard()
                               })
-                    .allowsHitTesting(isEditingTitle)
+                    .allowsHitTesting(model.isEditingTitle)
             } else {
-                Text(titleValue)
+                Text(model.titleText)
                     .lineLimit(2)
                     .font(BeamFont.medium(size: 26).swiftUI)
                     .foregroundColor(textColor.swiftUI)
             }
         }
         .contentShape(Rectangle())
-        .gesture(TapGesture().onEnded {
-            guard canEditTitle else { return }
-            titleSelectedRange = nil
-            // wait to see if double tap happened
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                guard !isEditingTitle else { return }
-                focusTitle()
-            }
-        })
-        .simultaneousGesture(TapGesture(count: 2).onEnded {
-            guard canEditTitle else { return }
-            titleSelectedRange = titleValue.wholeRange
-            isEditingTitle = true
-        })
+        .gesture(TapGesture().onEnded(model.onTap) )
+        .simultaneousGesture(TapGesture(count: 2).onEnded(model.onDoubleTap))
         .animation(nil)
-        .onAppear {
-            titleValue = note.title
-        }
-        .id(note.id) // make sure we reset view when changing note
     }
 
     private var subtitleInfoView: some View {
         Group {
-            if isTitleTaken {
+            if model.isTitleTaken {
                 Text("This card’s title ")
                 + Text("already exists")
                     .foregroundColor(errorColor.swiftUI)
@@ -97,7 +71,7 @@ struct NoteHeaderView: View {
     }
 
     private var dateView: some View {
-        Text("\(Self.dateFormatter.string(from: note.creationDate))")
+        Text("\(Self.dateFormatter.string(from: model.note.creationDate))")
             .font(BeamFont.medium(size: 12).swiftUI)
             .foregroundColor(BeamColor.Generic.placeholder.swiftUI)
     }
@@ -112,103 +86,136 @@ struct NoteHeaderView: View {
                     GeometryReader { geometry in
                         ButtonLabel(icon: "editor-options") {
                             let frame = geometry.frame(in: .global)
-                            showContextualMenu(at: CGPoint(x: frame.maxX - 26, y: frame.maxY - 26))
+                            model.showContextualMenu(at: CGPoint(x: frame.maxX - 26, y: frame.maxY - 26))
                         }
                     }
                     .frame(width: 26, height: 26)
                 }
-                if isEditingTitle {
-                    subtitleInfoView
-                }
+                subtitleInfoView
             }
         }
         .padding(.top, Self.topPadding)
         .padding(.leading, 20)
     }
-
-    private func onTitleChanged(_ text: String) {
-        titleSelectedRange = nil
-        let newTitle = formatToValidTitle(titleValue)
-        let existingNote = documentManager.loadDocumentByTitle(title: newTitle)
-
-        if existingNote != nil, existingNote?.id != note.id {
-            isTitleTaken = true
-        } else {
-            isTitleTaken = false
-        }
-    }
-
-    private func resetEditingState() {
-        titleValue = note.title
-        isEditingTitle = false
-        isTitleTaken = false
-    }
-
-    private func formatToValidTitle(_ title: String) -> String {
-        return BeamNote.validTitle(fromTitle: title)
-    }
-
-    private func renameCard() {
-        let newTitle = formatToValidTitle(titleValue)
-        guard !newTitle.isEmpty, newTitle != note.title, !isLoading, !isTitleTaken, canEditTitle else {
-            resetEditingState()
-            return
-        }
-        isLoading = true
-        note.updateTitle(newTitle, documentManager: documentManager) { _ in
-            DispatchQueue.main.async {
-                self.isEditingTitle = false
-                self.isLoading = false
-            }
-        }
-    }
-
-    private func focusTitle() {
-        titleSelectedRange = titleValue.wholeRange.upperBound..<titleValue.wholeRange.upperBound
-        isEditingTitle = true
-    }
-
-    private func showContextualMenu(at: CGPoint) {
-        var items: [[ContextMenuItem]] = []
-        if note.isPublic {
-            items.append([
-                ContextMenuItem(title: "Copy Link", action: nil),
-                ContextMenuItem(title: "Invite...", action: nil)
-            ])
-        }
-        items.append([ContextMenuItem(title: note.isPublic ? "Unpublish" : "Publish", action: nil)])
-        var thirdGroup = [
-            ContextMenuItem(title: "Favorite", action: nil),
-            ContextMenuItem(title: "Export", action: nil)
-        ]
-        if canEditTitle {
-            thirdGroup.insert(ContextMenuItem(title: "Rename", action: focusTitle), at: 0)
-        }
-        items.append(thirdGroup)
-        items.append([ContextMenuItem(title: "Delete", action: nil)])
-
-        let menuView = ContextMenuFormatterView(items: items, direction: .bottom) {
-            ContextMenuPresenter.shared.dismissMenu()
-        }
-        ContextMenuPresenter.shared.presentMenu(menuView, atPoint: at)
-    }
 }
 
-// custom initializer for preview
-fileprivate extension NoteHeaderView {
-    init(title: String, documentManager: DocumentManager, taken: Bool = false) {
-        self.note = BeamNote(title: title)
-        self.documentManager = documentManager
-        _isTitleTaken = State(initialValue: taken)
+extension NoteHeaderView {
+    class ViewModel: ObservableObject {
+        @Published var note: BeamNote
+
+        @Published fileprivate var titleText: String
+        @Published fileprivate var titleSelectedRange: Range<Int>?
+
+        @Published fileprivate var isEditingTitle = false
+        @Published fileprivate var isTitleTaken = false
+        @Published fileprivate var isLoading = false
+
+        private var documentManager: DocumentManager
+        fileprivate var canEditTitle: Bool {
+            note.type != .journal
+        }
+
+        init(note: BeamNote, documentManager: DocumentManager) {
+            self.note = note
+            self.documentManager = documentManager
+            self.titleText = note.title
+        }
+
+        func textFieldDidChange(_ text: String) {
+            titleSelectedRange = nil
+            let newTitle = formatToValidTitle(titleText)
+            let existingNote = documentManager.loadDocumentByTitle(title: newTitle)
+            self.isTitleTaken = existingNote != nil && existingNote?.id != note.id
+        }
+
+        func resetEditingState() {
+            titleText = note.title
+            isEditingTitle = false
+            isTitleTaken = false
+        }
+
+        func formatToValidTitle(_ title: String) -> String {
+            return BeamNote.validTitle(fromTitle: title)
+        }
+
+        func renameCard() {
+            let newTitle = formatToValidTitle(titleText)
+            guard !newTitle.isEmpty, newTitle != note.title, !isLoading, !isTitleTaken, canEditTitle else {
+                resetEditingState()
+                return
+            }
+            isLoading = true
+            note.updateTitle(newTitle, documentManager: documentManager) { _ in
+                DispatchQueue.main.async {
+                    self.isEditingTitle = false
+                    self.isLoading = false
+                }
+            }
+        }
+
+        func focusTitle() {
+            titleSelectedRange = titleText.wholeRange.upperBound..<titleText.wholeRange.upperBound
+            isEditingTitle = true
+        }
+
+        func showContextualMenu(at: CGPoint) {
+            var items: [[ContextMenuItem]] = []
+            let isNotePublic = note.isPublic
+            if isNotePublic {
+                items.append([
+                    ContextMenuItem(title: "Copy Link", action: nil),
+                    ContextMenuItem(title: "Invite...", action: nil)
+                ])
+            }
+            items.append([ContextMenuItem(title: isNotePublic ? "Unpublish" : "Publish", action: nil)])
+            var thirdGroup = [
+                ContextMenuItem(title: "Favorite", action: nil),
+                ContextMenuItem(title: "Export", action: nil)
+            ]
+            if canEditTitle {
+                thirdGroup.insert(ContextMenuItem(title: "Rename", action: focusTitle), at: 0)
+            }
+            items.append(thirdGroup)
+            items.append([ContextMenuItem(title: "Delete", action: nil)])
+
+            let menuView = ContextMenuFormatterView(items: items, direction: .bottom) {
+                ContextMenuPresenter.shared.dismissMenu()
+            }
+            ContextMenuPresenter.shared.presentMenu(menuView, atPoint: at)
+        }
+
+        func onTap() {
+            guard canEditTitle else { return }
+            titleSelectedRange = nil
+            // wait to see if double tap happened
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                guard !self.isEditingTitle else { return }
+                self.focusTitle()
+            }
+        }
+
+        func onDoubleTap() {
+            guard canEditTitle else { return }
+            titleSelectedRange = titleText.wholeRange
+            isEditingTitle = true
+        }
     }
 }
 
 struct NoteHeaderView_Previews: PreviewProvider {
     static let documentManager = DocumentManager()
+    static var classicModel: NoteHeaderView.ViewModel {
+        NoteHeaderView.ViewModel(note: BeamNote(title: "My note title"), documentManager: documentManager)
+    }
+    static var titleTakenModel: NoteHeaderView.ViewModel {
+        let model = NoteHeaderView.ViewModel(note: BeamNote(title: "Taken Title"), documentManager: documentManager)
+        model.isTitleTaken = true
+        return model
+    }
     static var previews: some View {
         VStack {
-            NoteHeaderView(title: "My note title", documentManager: documentManager)
-            NoteHeaderView(title: "Taken title", documentManager: documentManager, taken: true)
+            NoteHeaderView(model: classicModel)
+            NoteHeaderView(model: titleTakenModel)
         }
         .padding()
         .background(BeamColor.Generic.background.swiftUI)
