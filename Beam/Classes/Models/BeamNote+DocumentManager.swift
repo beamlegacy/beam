@@ -78,16 +78,17 @@ extension BeamNote: BeamNoteDocument {
         Self.unload(note: self)
         self.title = newTitle
         self.save(documentManager: documentManager) { [weak self] result in
-            guard let self = self else { return }
-            try? AppDelegate.main.data.indexer.append(note: self)
-            Self.appendToFetchedNotes(self)
-            switch result {
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                try? AppDelegate.main.data.indexer.append(note: self)
+                Self.appendToFetchedNotes(self)
+                switch result {
                 case .success:
-                    DispatchQueue.main.async { [weak self] in
-                        self?.updatedNotesWithLinkedReferences(afterChangingTitleFrom: previousTitle, documentManager: documentManager)
-                    }
+                    self.updatedNotesWithLinkedReferences(afterChangingTitleFrom: previousTitle, documentManager: documentManager)
                 case .failure: break
+                }
             }
+
             completion?(result)
         }
     }
