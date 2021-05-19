@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import Combine
 
 struct OmniBarSearchField: View {
     @EnvironmentObject var state: BeamState
@@ -22,9 +23,10 @@ struct OmniBarSearchField: View {
     var enableAnimations: Bool = true
 
     @State private var shouldCenter: Bool = false
+    @State private var currentDisplayMode: Mode = .today
 
     private var shouldShowWebHost: Bool {
-        return state.mode == .web && !isEditing && browserTabsManager.currentTab != nil
+        currentDisplayMode == .web && !isEditing && browserTabsManager.currentTab != nil
     }
 
     private var textFieldText: Binding<String> {
@@ -35,7 +37,9 @@ struct OmniBarSearchField: View {
     }
 
     private var leadingIconName: String? {
-        if let tab = browserTabsManager.currentTab, let url = tab.url, state.mode == .web, autocompleteManager.searchQuery == url.absoluteString {
+        if let tab = browserTabsManager.currentTab, let url = tab.url,
+           currentDisplayMode == .web,
+           autocompleteManager.searchQuery == url.absoluteString {
             return AutocompleteResult.Source.url.iconName
         }
         if let autocompleteResult = selectedAutocompleteResult {
@@ -113,23 +117,13 @@ struct OmniBarSearchField: View {
                     onCommit: { modifierFlags in
                         onEnterPressed(withCommand: modifierFlags?.contains(.command) ?? false)
                     },
-                    onEscape: {
-                        if autocompleteManager.autocompleteResults.isEmpty {
-                            if autocompleteManager.searchQuery.isEmpty || state.mode == .web {
-                                unfocusField()
-                            } else {
-                                autocompleteManager.resetQuery()
-                            }
-                        } else {
-                            autocompleteManager.cancelAutocomplete()
-                        }
-                    },
+                    onEscape: onEscapePressed,
                     onCursorMovement: { handleCursorMovement($0) },
                     onModifierFlagPressed: { event in
                         modifierFlagsPressed = event.modifierFlags.contains(.command) ? .command : nil
                     }
                 )
-                .centered(shouldCenter && state.mode != .web)
+                .centered(shouldCenter && currentDisplayMode != .web)
                 .disabled(!isEditing) // Allow Window dragging
                 .accessibility(addTraits: .isSearchField)
                 .accessibility(identifier: "OmniBarSearchField")
@@ -164,6 +158,12 @@ struct OmniBarSearchField: View {
             }
         }
         .animation(enableAnimations ? .timingCurve(0.25, 0.1, 0.25, 1.0, duration: 0.3) : nil)
+        .onReceive(Just(state.mode)) { newMode in
+            // Locally handling the state mode to manage animations
+            DispatchQueue.main.async {
+                currentDisplayMode = newMode
+            }
+        }
     }
 
     private func editingDidChange(_ isNowEditing: Bool) {
@@ -208,6 +208,18 @@ struct OmniBarSearchField: View {
         default:
             autocompleteManager.resetAutocompleteSelection()
             return false
+        }
+    }
+
+    private func onEscapePressed() {
+        if autocompleteManager.autocompleteResults.isEmpty {
+            if autocompleteManager.searchQuery.isEmpty || currentDisplayMode == .web {
+                unfocusField()
+            } else {
+                autocompleteManager.resetQuery()
+            }
+        } else {
+            autocompleteManager.cancelAutocomplete()
         }
     }
 }

@@ -374,6 +374,14 @@ import BeamCore
         }
     }
 
+    func focusOmnibox() {
+        if let url = browserTabsManager.currentTab?.url?.absoluteString, mode == .web {
+            autocompleteManager.searchQuerySelectedRange = url.wholeRange
+            autocompleteManager.setQueryWithoutAutocompleting(url)
+        }
+        focusOmniBox = true
+    }
+
     func startNewSearch() {
         autocompleteManager.cancelAutocomplete()
         autocompleteManager.resetQuery()

@@ -101,12 +101,12 @@ class OmniBarAutocompleteUITests: QuickSpec {
                 let results = self.helper.allAutocompleteResults
                 expect(results.count).to(equal(0))
 
-                expect(self.app.groups["webView"].exists).to(beTrue())
+                expect(self.app.webViews.firstMatch.exists).to(beTrue())
             }
 
             it("should show google results") {
                 self.helper.focusSearchField()
-                self.helper.typeInSearchAndWait("hello")
+                self.helper.typeInSearchAndWait("colors")
                 let results = self.helper.allAutocompleteResults
                 let googleResults = results.matching(NSPredicate(format: "identifier CONTAINS '-autocomplete'"))
                 expect(results.count) > 2

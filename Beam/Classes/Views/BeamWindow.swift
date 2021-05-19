@@ -196,7 +196,7 @@ class BeamWindow: NSWindow, NSDraggingDestination {
     }
 
     @IBAction func openLocation(_ sender: Any?) {
-        state.focusOmniBox = true
+        state.focusOmnibox()
     }
 
     @IBAction func showCardSelector(_ sender: Any?) {
