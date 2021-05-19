@@ -34,6 +34,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
 
     var cookies: HTTPCookieStorage
     var documentManager: DocumentManager
+    var downloadManager: DownloadManager = BeamDownloadManager()
     var scope = Set<AnyCancellable>()
 
     static var dataFolder: String {

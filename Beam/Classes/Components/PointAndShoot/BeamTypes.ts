@@ -5,7 +5,8 @@
 import {BeamHTMLCollection} from "./Test/BeamMocks"
 
 export class BeamSize {
-  constructor(public width = 0, public height = 0) {
+
+  constructor(public width: number, public height: number) {
   }
 }
 
@@ -49,8 +50,9 @@ export interface BeamVisualViewport {
 }
 
 export class BeamRect extends BeamSize {
-  constructor(public x = 0, public y = 0) {
-    super()
+
+  constructor(public x: number, public y: number, width: number, height: number) {
+    super(width, height)
   }
 }
 

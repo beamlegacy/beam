@@ -91,11 +91,19 @@ import Promises
     }
 
     var webviewWindow: NSWindow? {
-        self.webView.window
+        webView.window
+    }
+
+    var downloadManager: DownloadManager {
+        state.data.downloadManager
     }
 
     var frame: NSRect {
         webView.frame
+    }
+
+    var fileStorage: BeamFileStorage {
+        state.data.fileDB
     }
 
     func setDestinationNote(_ note: BeamNote, rootElement: BeamElement? = nil) {
@@ -124,8 +132,8 @@ import Promises
     static var webViewConfiguration = BrowserTabConfiguration()
     var browsingTreeOrigin: BrowsingTreeOrigin?
 
-    init(state: BeamState, browsingTreeOrigin: BrowsingTreeOrigin?, note: BeamNote, rootElement: BeamElement? = nil, id: UUID = UUID(),
-         webView: BeamWebView? = nil) {
+    init(state: BeamState, browsingTreeOrigin: BrowsingTreeOrigin?, note: BeamNote, rootElement: BeamElement? = nil,
+         id: UUID = UUID(), webView: BeamWebView? = nil) {
         self.state = state
         self.id = id
         self.note = note
@@ -317,24 +325,24 @@ import Promises
             self.receivedWebviewTitle(value)
         }.store(in: &scope)
         webView.publisher(for: \.url).sink { [unowned self] value in
-            self.url = value
+            url = value
             if value?.absoluteString != nil {
-                self.updateFavIcon()
+                updateFavIcon()
                 // self.browsingTree.current.score.openIndex = self.navigationCount
                 // self.updateScore()
                 // self.navigationCount = 0
             }
         }.store(in: &scope)
-        webView.publisher(for: \.isLoading).sink { [unowned self] value in withAnimation { self.isLoading = value } }.store(in: &scope)
+        webView.publisher(for: \.isLoading).sink { [unowned self] value in withAnimation { isLoading = value } }.store(in: &scope)
         webView.publisher(for: \.estimatedProgress).sink { [unowned self] value in
-            withAnimation { self.estimatedProgress = value }
+            withAnimation { estimatedProgress = value }
         }.store(in: &scope)
         webView.publisher(for: \.hasOnlySecureContent)
-                .sink { [unowned self] value in self.hasOnlySecureContent = value }.store(in: &scope)
-        webView.publisher(for: \.serverTrust).sink { [unowned self] value in self.serverTrust = value }.store(in: &scope)
-        webView.publisher(for: \.canGoBack).sink { [unowned self] value in self.canGoBack = value }.store(in: &scope)
-        webView.publisher(for: \.canGoForward).sink { [unowned self] value in self.canGoForward = value }.store(in: &scope)
-        webView.publisher(for: \.backForwardList).sink { [unowned self] value in self.backForwardList = value }.store(in: &scope)
+                .sink { [unowned self] value in hasOnlySecureContent = value }.store(in: &scope)
+        webView.publisher(for: \.serverTrust).sink { [unowned self] value in serverTrust = value }.store(in: &scope)
+        webView.publisher(for: \.canGoBack).sink { [unowned self] value in canGoBack = value }.store(in: &scope)
+        webView.publisher(for: \.canGoForward).sink { [unowned self] value in canGoForward = value }.store(in: &scope)
+        webView.publisher(for: \.backForwardList).sink { [unowned self] value in backForwardList = value }.store(in: &scope)
 
         webView.navigationDelegate = self
         webView.uiDelegate = self

@@ -2,6 +2,7 @@ import {PointAndShootUI} from "./PointAndShootUI"
 import {PointAndShootUI_native} from "./PointAndShootUI_native";
 import {PointAndShootUI_web} from "./PointAndShootUI_web";
 import {FrameInfo} from "./WebEventsUI";
+import {BeamHTMLElement} from "./BeamTypes"
 
 export class PointAndShootUI_debug implements PointAndShootUI {
   /**
@@ -18,7 +19,7 @@ export class PointAndShootUI_debug implements PointAndShootUI {
     this.native.getMouseLocation(el, x, y)
   }
 
-  point(quoteId, el, x, y) {
+  point(quoteId: string, el: BeamHTMLElement, x: number, y: number) {
     this.web.point(quoteId, el, x, y)
     this.native.point(quoteId, el, x, y)
   }
@@ -28,12 +29,12 @@ export class PointAndShootUI_debug implements PointAndShootUI {
     this.native.unpoint(el)
   }
 
-  shoot(quoteId, el, x, y, selected) {
-    this.web.shoot(quoteId, el, x, y, selected)
-    this.native.shoot(quoteId, el, x, y, selected)
+  shoot(quoteId: string, el: BeamHTMLElement, x: number, y: number, selectedEls) {
+    this.web.shoot(quoteId, el, x, y, selectedEls)
+    this.native.shoot(quoteId, el, x, y, selectedEls)
   }
 
-  unshoot(el) {
+  unshoot(el: BeamHTMLElement) {
     this.web.unshoot(el)
     this.native.unshoot(el)
   }
@@ -78,7 +79,7 @@ export class PointAndShootUI_debug implements PointAndShootUI {
     this.native.setStatus(status)
   }
 
-  showStatus(el, collected) {
+  showStatus(el: BeamHTMLElement, collected) {
     this.web.showStatus(el, collected)
     this.native.showStatus(el, collected)
   }

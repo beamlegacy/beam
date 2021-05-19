@@ -8,9 +8,13 @@ import Promises
  */
 protocol WebPage: AnyObject, Scorable {
 
+    var downloadManager: DownloadManager { get }
+
     var webviewWindow: NSWindow? { get }
 
     var frame: NSRect { get }
+
+    var fileStorage: BeamFileStorage { get }
 
     func executeJS(_ jsCode: String, objectName: String?) -> Promise<Any?>
 

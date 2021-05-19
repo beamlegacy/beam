@@ -12,20 +12,26 @@ class TestWebPage: WebPage {
     private(set) var originalQuery: String?
     private(set) var pointAndShootAllowed: Bool = true
     private(set) var title: String = ""
-    private(set) var url: URL?
+    static let urlStr = "https://webpage.com"
+    private(set) var url: URL? = URL(string: urlStr)
     var score: Float = 0
     var pointAndShoot: PointAndShoot
     var browsingScorer: BrowsingScorer
+    var storage: BeamFileStorage
     var passwordOverlayController: PasswordOverlayController
     private(set) var webviewWindow: NSWindow?
     private(set) var frame: NSRect = NSRect()
+    private(set) var downloadManager: DownloadManager
+    var webView: BeamWebView!
 
-    init(browsingScorer: BrowsingScorer, passwordOverlayController: PasswordOverlayController, pns: PointAndShoot) {
+    init(browsingScorer: BrowsingScorer, passwordOverlayController: PasswordOverlayController, pns: PointAndShoot,
+         fileStorage: BeamFileStorage, downloadManager: DownloadManager) {
         self.browsingScorer = browsingScorer
         self.passwordOverlayController = passwordOverlayController
-        self.pointAndShoot = pns
+        pointAndShoot = pns
+        storage = fileStorage
+        self.downloadManager = downloadManager
     }
-    var webView: BeamWebView!
 
     func addCSS(source: String, when: WKUserScriptInjectionTime) {
         events.append("addCSS \(source.hashValue) \(String(describing: when))")
@@ -39,14 +45,14 @@ class TestWebPage: WebPage {
         if objectName == "PointAndShoot" {
             switch jsCode {
             case "setStatus('pointing')":
-                self.pointAndShoot.status = PointAndShootStatus.pointing
+                pointAndShoot.status = PointAndShootStatus.pointing
             case "setStatus('shooting')":
-                self.pointAndShoot.status = PointAndShootStatus.shooting
+                pointAndShoot.status = PointAndShootStatus.shooting
             case "setStatus('none')":
-                self.pointAndShoot.status = PointAndShootStatus.none
+                pointAndShoot.status = PointAndShootStatus.none
             case let assignString where jsCode.contains("assignNote"):
                 Logger.shared.logDebug("\(assignString) called", category: .pointAndShoot)
-                self.pointAndShoot.status = PointAndShootStatus.none
+                pointAndShoot.status = PointAndShootStatus.none
             default:
                 Logger.shared.logDebug("no matching jsCode case, no js call mocked", category: .pointAndShoot)
             }
@@ -64,9 +70,16 @@ class TestWebPage: WebPage {
         events.append("setDestinationNote \(note) \(String(describing: rootElement))")
     }
 
+    static let testNoteTitle = "test note title"
+    let testNote = BeamNote(title: testNoteTitle)
+
     func getNote(fromTitle: String) -> BeamCore.BeamNote? {
         events.append("getNote \(fromTitle)")
-        return nil
+        return fromTitle == Self.testNoteTitle ? testNote : nil
+    }
+
+    var fileStorage: BeamFileStorage {
+        storage
     }
 }
 
@@ -119,16 +132,48 @@ class BrowsingScorerMock: WebPageHolder, BrowsingScorer {
     func addTextSelection() {}
 }
 
+class FileStorageMock: BeamFileStorage {
+    var events: [String] = []
+
+    func fetch(uid: String) throws -> BeamFileRecord? { fatalError("fetch(uid:) has not been implemented") }
+
+    func insert(name: String, uid: String, data: Data, type: String) throws {
+        events.append("inserted \(name) with id \(uid) of \(type) for \(data.count) bytes")
+    }
+
+    func remove(uid: String) throws {}
+
+    func clear() throws {}
+}
+
+class DownloadManagerMock: DownloadManager {
+    var events: [String] = []
+
+    func downloadURLs(_ urls: [URL], headers: [String: String], completion: @escaping ([DownloadManagerResult]) -> ()) {}
+
+    func downloadURL(_ url: URL, headers: [String: String], completion: @escaping (DownloadManagerResult) -> ()) {
+        events.append("downloaded \(url) with headers \(headers)")
+        completion(DownloadManagerResult.binary(data: Data(bytes: [0x01, 0x02, 0x03]), mimeType: "image/png", actualURL: URL(string: "https://webpage.com/image.png")!))
+    }
+
+    func waitForDownloadURL(_ url: URL, headers: [String: String]) -> DownloadManagerResult? { fatalError("waitForDownloadURL(_:headers:) has not been implemented") }
+}
+
 class PointAndShootTest: XCTestCase {
     var testPage: TestWebPage?
+
     func testBed() -> (PointAndShoot, PointAndShootUIMock) {
         let testPasswordStore = PasswordStoreMock()
         let userInfoStore = MockUserInformationsStore()
         let testPasswordOverlayController = PasswordOverlayController(passwordStore: testPasswordStore, userInfoStore: userInfoStore, passwordManager: .shared)
         let testBrowsingScorer = BrowsingScorerMock()
         let testUI = PointAndShootUIMock()
+        let testFileStorage = FileStorageMock()
+        let testDownloadManager = DownloadManagerMock()
         let pns = PointAndShoot(ui: testUI, scorer: testBrowsingScorer)
-        let page = TestWebPage(browsingScorer: testBrowsingScorer, passwordOverlayController: testPasswordOverlayController, pns: pns)
+        let page = TestWebPage(browsingScorer: testBrowsingScorer,
+                               passwordOverlayController: testPasswordOverlayController, pns: pns,
+                               fileStorage: testFileStorage, downloadManager: testDownloadManager)
         testPage = page
         page.browsingScorer.page = page
         page.passwordOverlayController.page = page
@@ -155,7 +200,6 @@ class PointAndShootTest: XCTestCase {
         XCTAssertEqual(testUI.events.count, 1)
     }
 
-    // swiftlint:disable:next function_body_length
     func testPointAndShootBlock() throws {
         let (pns, testUI) = testBed()
 
@@ -168,7 +212,7 @@ class PointAndShootTest: XCTestCase {
         pns.point(target: target1)
         pns.draw()
         // Shoot
-        pns.shoot(targets: [target1], origin: "https://rr0.org")
+        pns.shoot(targets: [target1], origin: pns.page.url!.string)
         pns.status = .shooting
         pns.draw()
         XCTAssertEqual(pns.status, .shooting)
@@ -188,7 +232,8 @@ class PointAndShootTest: XCTestCase {
         // Shoot again
         pns.point(target: target1) // first point
         pns.draw()
-        pns.shoot(targets: [target1], origin: "https://rr0.org") // then shoot
+        // Shoot
+        pns.shoot(targets: [target1], origin: pns.page.url!.string) // then shoot
         pns.status = .shooting
         pns.draw()
         XCTAssertEqual(pns.status, .shooting)       // Disallow unpoint while shooting
@@ -211,7 +256,7 @@ class PointAndShootTest: XCTestCase {
         // Shoot twice
         pns.point(target: target2) // first point
         pns.draw()
-        pns.shoot(targets: [target2], origin: "https://javarome.com")
+        pns.shoot(targets: [target2], origin: pns.page.url!.string)
         pns.status = .shooting
         pns.draw()
         XCTAssertEqual(testUI.groupsUI.count, 1)    // Seeing the current shoot only
@@ -222,6 +267,43 @@ class PointAndShootTest: XCTestCase {
         XCTAssertEqual(testUI.events.count, 12)
         XCTAssertEqual(testUI.groupsUI.count, 0)    // No more shoot UI
         XCTAssertEqual(pns.shootGroups.count, 2)         // Two shoot groups memorized
+    }
+
+    func testPointAndShootImage() throws {
+        let (pns, testUI) = testBed()
+
+        let imageTarget: PointAndShoot.Target = PointAndShoot.Target(
+                area: NSRect(x: 101, y: 102, width: 301, height: 302),
+                mouseLocation: NSPoint(x: 201, y: 202),
+                html: "<img src=\"someImage.png\">"
+        )
+         // Point
+        pns.point(target: imageTarget)
+        pns.draw()
+        // Shoot
+        pns.shoot(targets: [imageTarget], origin: pns.page.url!.string)
+        pns.status = .shooting
+        pns.draw()
+        XCTAssertEqual(testUI.events.count, 3)
+        XCTAssertEqual(testUI.groupsUI.count, 1)    // One shoot UI
+        XCTAssertEqual(pns.activeShootGroup?.targets.count, 1)   // One current shoot
+
+        // Validate shoot
+        let addToNoteExpectation = expectation(description: "added shoot to note")
+        try pns.addShootToNote(noteTitle: TestWebPage.testNoteTitle).then { _ in
+            let page = self.testPage!
+            let downloadManager = page.downloadManager as! DownloadManagerMock
+            XCTAssertEqual(downloadManager.events.count, 1)
+            XCTAssertEqual(downloadManager.events[0], "downloaded someImage.png -- https://webpage.com with headers [\"Referer\": \"https://webpage.com\"]")
+            let fileStorage = page.fileStorage as! FileStorageMock
+            XCTAssertEqual(fileStorage.events.count, 1)
+            XCTAssertEqual(fileStorage.events[0], "inserted someImage.png with id 5289df737df57326fcdd22597afb1fac of image/png for 3 bytes")
+            XCTAssertEqual(testUI.events.count, 3)
+            XCTAssertEqual(testUI.groupsUI.count, 0)    // No more shoot UI
+            XCTAssertEqual(pns.shootGroups.count, 1)         // One shoot group memorized
+            addToNoteExpectation.fulfill()
+        }
+        waitForExpectations(timeout: 5, handler: nil)
     }
 
     func testPerformanceExample() throws {

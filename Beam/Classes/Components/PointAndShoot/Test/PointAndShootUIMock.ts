@@ -1,12 +1,13 @@
 import {PointAndShootUI} from "../PointAndShootUI"
 import {WebEventsUIMock} from "./WebEventsUIMock";
+import {BeamHTMLElement} from "../BeamTypes"
 
 export class PointAndShootUIMock extends WebEventsUIMock implements PointAndShootUI {
   getMouseLocation(el, x, y) {
     this.events.push({name: "getMouseLocation", el, x, y})
   }
 
-  point(quoteId, el, x, y) {
+  point(quoteId: string, el: BeamHTMLElement, x: number, y: number) {
     this.events.push({name: "point", el, x, y})
   }
 
@@ -14,11 +15,11 @@ export class PointAndShootUIMock extends WebEventsUIMock implements PointAndShoo
     this.events.push({name: "unpoint"})
   }
 
-  shoot(quoteId, el, x, y, selectedEls) {
+  shoot(quoteId: string, el: BeamHTMLElement, x: number, y: number, selectedEls) {
     this.events.push({name: "shoot", el, x, y, selectedEls})
   }
 
-  unshoot(el) {
+  unshoot(el: BeamHTMLElement) {
     this.events.push({name: "unshoot", el})
   }
 
@@ -34,7 +35,7 @@ export class PointAndShootUIMock extends WebEventsUIMock implements PointAndShoo
     this.events.push("hideStatus")
   }
 
-  showStatus(el, collected) {
+  showStatus(el: BeamHTMLElement, collected) {
     this.events.push({name: "showStatus", el, collected})
   }
 

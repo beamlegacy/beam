@@ -1,5 +1,21 @@
 import Foundation
 import BeamCore
+import SwiftSoup
+import Promises
+
+struct PointAndShootError: LocalizedError {
+    var errorDescription: String?
+    var failureReason: String?
+    var recoverySuggestion: String?
+    var helpAnchor: String?
+
+    init(_ desc: String, reason: String? = nil, suggestion: String? = nil, help: String? = nil) {
+        errorDescription = desc
+        failureReason = reason
+        recoverySuggestion = suggestion
+        helpAnchor = help
+    }
+}
 
 public enum PointAndShootStatus: String, CodingKey {
     case none
@@ -81,6 +97,13 @@ class PointAndShoot: WebPageHolder {
      * A group of blocks that can be associated to a Note as a whole and at once.
      */
     class ShootGroup {
+
+        let origin: String
+
+        init(origin: String) {
+            self.origin = origin
+        }
+
         /**
          * The blocks that compose this group.
          */
@@ -92,8 +115,6 @@ class PointAndShoot: WebPageHolder {
          * The associated Note, if any.
          */
         var noteInfo: NoteInfo = NoteInfo(id: nil, title: "")
-
-        init() {}
 
         func html() -> String {
             targets.reduce("", {
@@ -111,14 +132,14 @@ class PointAndShoot: WebPageHolder {
         // Prefer using the parent class method
         func translateTarget(xDelta: CGFloat, yDelta: CGFloat, scale: CGFloat) -> Target {
             let newArea = NSRect(
-                x: (area.minX + xDelta) * scale,
-                y: (area.minY + yDelta) * scale,
-                width: area.width * scale,
-                height: area.height * scale
+                    x: (area.minX + xDelta) * scale,
+                    y: (area.minY + yDelta) * scale,
+                    width: area.width * scale,
+                    height: area.height * scale
             )
             let newLocation = NSPoint(
-                x: mouseLocation.x * scale,
-                y: mouseLocation.y * scale
+                    x: mouseLocation.x * scale,
+                    y: mouseLocation.y * scale
             )
             return Target(area: newArea, quoteId: quoteId, mouseLocation: newLocation, html: html)
         }
@@ -146,7 +167,7 @@ class PointAndShoot: WebPageHolder {
     /// - Returns: Translated target
     func createTarget(area: NSRect, quoteId: UUID? = nil, mouseLocation: NSPoint, html: String) -> Target {
         return Target(area: area, quoteId: quoteId, mouseLocation: mouseLocation, html: html)
-                    .translateTarget(xDelta: page.scrollX, yDelta: page.scrollY, scale: 1)
+                .translateTarget(xDelta: page.scrollX, yDelta: page.scrollY, scale: 1)
     }
 
     let ui: PointAndShootUI
@@ -193,7 +214,7 @@ class PointAndShoot: WebPageHolder {
 
     func shoot(targets: [Target], origin: String) {
         if activeShootGroup == nil {
-            activeShootGroup = ShootGroup()
+            activeShootGroup = ShootGroup(origin: origin)
             Logger.shared.logInfo("shootGroups.count \(shootGroups.count)", category: .pointAndShoot)
         } else {
             activeShootGroup?.targets.removeAll()
@@ -300,25 +321,20 @@ class PointAndShoot: WebPageHolder {
        - noteTitle:
        - target:
        - additionalText:
-     - Throws:
+     - Throws: PointAndShootError
      */
-    // swiftlint:disable:next function_body_length
-    func addShootToNote(noteTitle: String, withNote additionalText: String? = nil) throws {
+    func addShootToNote(noteTitle: String, withNote additionalText: String? = nil) throws -> Promise<Void> {
         guard let url = page.url,
               let note = page.getNote(fromTitle: noteTitle)
                 else {
-            Logger.shared.logError("Could not find note with title \(noteTitle)", category: .pointAndShoot)
-            return
+            throw PointAndShootError("Could not find note to update with title \(noteTitle)")
+        }
+        guard let shootGroup = activeShootGroup else {
+            fatalError("Expected to have an active shoot group")
         }
         page.setDestinationNote(note, rootElement: note)
-        let html = activeShootGroup!.html()
+        let html = shootGroup.html()
         var text = BeamText()
-        var embed: String?
-        if let host = url.host,
-           ["www.youtube.com", "youtube.com"].contains(host),
-           html.hasPrefix("<video") {
-            embed = url.absoluteString
-        }
         text = html2Text(url: url, html: html)
         scorer.addTextSelection()
 
@@ -327,34 +343,100 @@ class PointAndShoot: WebPageHolder {
         let urlString = url.absoluteString
         var quote = text
         quote.addAttributes([.emphasis], to: quote.wholeRange)
-
-        let quoteE = BeamElement()
-        DispatchQueue.main.async {
-            guard let current = self.page.addToNote(allowSearchResult: true) else {
-                Logger.shared.logError("Ignored current note add", category: .general)
-                return
-            }
-            var quoteParent = current
-            if let additionalText = additionalText, !additionalText.isEmpty {
-                let quoteElement = BeamElement()
-                if let embed = embed {
-                    quoteElement.kind = .embed(embed)
-                } else {
-                    quoteElement.kind = .quote(1, title, urlString)
+        return try getQuoteKind(url: url, html: html, title: title, urlString: urlString).then { quoteKind -> Void in
+            let quoteE = BeamElement()
+            DispatchQueue.main.async {
+                guard let current = self.page.addToNote(allowSearchResult: true) else {
+                    Logger.shared.logError("Ignored current note add", category: .general)
+                    return
                 }
-                quoteElement.text = BeamText(text: additionalText, attributes: [])
-                quoteElement.query = self.page.originalQuery
-                current.addChild(quoteElement)
-                quoteParent = quoteElement
+                var quoteParent: BeamElement
+                if let additionalText = additionalText, !additionalText.isEmpty {
+                    quoteParent = BeamElement()
+                    quoteParent.kind = quoteKind
+                    quoteParent.text = BeamText(text: additionalText, attributes: [])
+                    quoteParent.query = self.page.originalQuery
+                    current.addChild(quoteParent)
+                } else {
+                    quoteParent = current
+                }
+                quoteE.kind = quoteKind
+                quoteE.text = quote
+                quoteE.query = self.page.originalQuery
+                quoteParent.addChild(quoteE)
             }
-
-            quoteE.kind = .quote(1, title, urlString)
-            quoteE.text = quote
-            quoteE.query = self.page.originalQuery
-            quoteParent.addChild(quoteE)
+            let noteInfo = NoteInfo(id: note.id, title: note.title)
+            try self.complete(noteInfo: noteInfo, quoteId: quoteE.id)
         }
-        let noteInfo = NoteInfo(id: note.id, title: note.title)
-        try complete(noteInfo: noteInfo, quoteId: quoteE.id)
+    }
+
+    private func getQuoteKind(url: URL, html: String, title: String, urlString: String) throws -> Promise<ElementKind> {
+        var quoteKind: Promise<ElementKind>
+        if let host = url.host,
+           ["www.youtube.com", "youtube.com"].contains(host),
+           html.hasPrefix("<video") {
+            quoteKind = Promise(.embed(url.absoluteString))
+        } else if html.starts(with: "<img") {
+            let doc = try SwiftSoup.parseBodyFragment(html)
+            let img = try doc.select("img")[0]
+            quoteKind = try imageQuoteKind(imageEl: img)
+        } else {
+            quoteKind = Promise(.quote(1, title, urlString))
+        }
+        return quoteKind
+    }
+
+    private func imageQuoteKind(imageEl: Element) throws -> Promise<ElementKind> {
+        guard let shootGroup = activeShootGroup else {
+            fatalError("Expected to have an active shoot group")
+        }
+        let url = try imageEl.attr("src")
+        guard let referer = page.url else {
+            fatalError("Page should have an URL to shoot images from")
+        }
+        let absoluteUrl = try getAbsoluteUrl(url: url, refererUrl: referer)
+        let downloadManager = page.downloadManager
+        let imageKind = Promise<ElementKind> { [unowned self] fulfill, reject in
+            downloadManager.downloadURL(absoluteUrl, headers: ["Referer": referer.string], completion: { result -> Void in
+                do {
+                    var fileId: String
+                    if case .binary(let data, let mimeType, _) = result {
+                        if (data.count <= 0) {
+                            throw PointAndShootError("No data was retrieved when downloading \(absoluteUrl)")
+                        }
+                        fileId = data.MD5
+                        do {
+                            try page.fileStorage.insert(name: absoluteUrl.lastPathComponent, uid: fileId, data: data, type: mimeType)
+                        } catch let error {
+                            throw PointAndShootError("Could not save image file for \(absoluteUrl): \(error)")
+                        }
+                    } else {
+                        throw PointAndShootError("Retrieved data when downloading \(absoluteUrl) is not binary")
+                    }
+                    let kind: ElementKind = .image(fileId)
+                    fulfill(kind)
+                } catch let err as Error {
+                    reject(err)
+                }
+            })
+        }
+        return imageKind
+    }
+
+    private func getAbsoluteUrl(url: String, refererUrl: URL) throws -> URL {
+        guard let imageUrl = URL(string: url) else {
+            throw PointAndShootError("\(url) is not a valid URL")
+        }
+        var absoluteUrl: URL
+        if imageUrl.scheme == nil {
+            guard let referredURL = URL(string: url, relativeTo: refererUrl) else {
+                throw PointAndShootError("Cannot build a valid URL from \(url) based on \(refererUrl.string)")
+            }
+            absoluteUrl = referredURL
+        } else {
+            absoluteUrl = imageUrl
+        }
+        return absoluteUrl
     }
 
     func complete(noteInfo: NoteInfo, quoteId: UUID) throws {

@@ -1,5 +1,6 @@
 import {WebEventsUI} from "./WebEventsUI"
 import {TextSelection} from "./TextSelection";
+import {BeamHTMLElement} from "./BeamTypes"
 
 export interface PointAndShootUI extends WebEventsUI {
   /**
@@ -16,7 +17,7 @@ export interface PointAndShootUI extends WebEventsUI {
    * @param x {number}
    * @param y {number}
    */
-  point(quoteId, el, x, y)
+  point(quoteId: string, el: BeamHTMLElement, x: number, y: number)
 
   /**
    * @param el {HTMLElement}
@@ -32,12 +33,12 @@ export interface PointAndShootUI extends WebEventsUI {
    * @param y {number} Vertical coordinate of click/touch
    * @param selectedEls {HTMLElement[]}
    */
-  shoot(quoteId, el, x, y, selectedEls)
+  shoot(quoteId: string, el: BeamHTMLElement, x: number, y: number, selectedEls)
 
   /**
-   * @param el {HTMLElement}
+   * @param el {BeamHTMLElement}
    */
-  unshoot(el)
+  unshoot(el: BeamHTMLElement)
 
   hidePopup()
 
@@ -45,7 +46,7 @@ export interface PointAndShootUI extends WebEventsUI {
    * @param el {BeamHTMLElement}
    * @param collected {any}
    */
-  showStatus(el, collected)
+  showStatus(el: BeamHTMLElement, collected)
 
   hideStatus()
 
