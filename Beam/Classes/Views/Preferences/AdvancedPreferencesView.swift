@@ -50,8 +50,9 @@ struct AdvancedPreferencesView: View {
         let apiHostnameBinding = Binding<String>(get: {
             self.apiHostname
         }, set: {
-            self.apiHostname = $0
-            Configuration.apiHostname = $0
+            let cleanValue = $0.trimmingCharacters(in: .whitespacesAndNewlines)
+            self.apiHostname = cleanValue
+            Configuration.apiHostname = cleanValue
         })
 
         let privateKeyBinding = Binding<String>(get: {
@@ -66,6 +67,7 @@ struct AdvancedPreferencesView: View {
             }
             Preferences.Section(title: "API endpoint:") {
                 TextField("api hostname", text: apiHostnameBinding)
+                    .lineLimit(1)
                     .textFieldStyle(RoundedBorderTextFieldStyle()).frame(maxWidth: 400)
             }
             Preferences.Section(title: "Public endpoint:") {
@@ -246,6 +248,7 @@ struct AdvancedPreferencesView: View {
     }
 
     @State private var cancellables = [AnyCancellable]()
+
     private func observeDefaultDatabase() {
         NotificationCenter.default
             .publisher(for: .defaultDatabaseUpdate, object: nil)
