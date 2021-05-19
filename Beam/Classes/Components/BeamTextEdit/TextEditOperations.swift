@@ -260,8 +260,8 @@ extension TextRoot {
         } else {
             if let markedRange = markedTextRange {
                 range = markedRange
-            } else {
-                range = selectedTextRange
+            } else if let selectedRange = selectedRange {
+                range = selectedRange.lowerBound ..< selectedRange.upperBound
             }
         }
 
