@@ -47,6 +47,7 @@ class OmniBarDestinationUITests: QuickSpec {
     override func spec() {
 
         let noteSearchField = self.app.searchFields["DestinationNoteSearchField"]
+        let noteTitleLabel = self.app.staticTexts["DestinationNoteTitle"]
         let todayName = "Today"
 
         func goToWebMode() {
@@ -68,7 +69,7 @@ class OmniBarDestinationUITests: QuickSpec {
 
             it("displays 'today' by default") {
                 goToWebMode()
-                let title = self.app.staticTexts["DestinationNoteTitle"]
+                let title = noteTitleLabel
                 expect(title.waitForExistence(timeout: 2)).to(beTrue())
                 title.tap()
                 expect(noteSearchField.waitForExistence(timeout: 2)).to(beTrue())
@@ -81,7 +82,7 @@ class OmniBarDestinationUITests: QuickSpec {
 
             it("can be focused with shortcut") {
                 goToWebMode()
-                let title = self.app.staticTexts["DestinationNoteTitle"]
+                let title = noteTitleLabel
                 expect(title.waitForExistence(timeout: 2)).to(beTrue())
 
                 let menuItem = XCUIApplication().menuItems["Change Card"]
@@ -97,7 +98,7 @@ class OmniBarDestinationUITests: QuickSpec {
             it("can be navigated") {
                 goToWebMode()
 
-                let title = self.app.staticTexts["DestinationNoteTitle"]
+                let title = noteTitleLabel
                 expect(title.waitForExistence(timeout: 2)).to(beTrue())
                 title.tap()
 
@@ -125,8 +126,8 @@ class OmniBarDestinationUITests: QuickSpec {
             it("can select note and pivot") {
                 goToWebMode()
 
-                let title = self.app.staticTexts["DestinationNoteTitle"]
-                expect(title.waitForExistence(timeout: 2)).to(beTrue())
+                let title = noteTitleLabel
+                expect(title.waitForExistence(timeout: 1)).to(beTrue())
                 expect(title.value as? String).to(equal(todayName))
                 title.tap()
 
@@ -137,15 +138,15 @@ class OmniBarDestinationUITests: QuickSpec {
                 expect(self.app.buttons["pivot-card"].exists).to(beTrue())
                 self.app.buttons["pivot-card"].tap()
 
-                expect(self.app.scrollViews["noteView"].exists).to(beTrue())
+                expect(self.app.scrollViews["noteView"].waitForExistence(timeout: 1)).to(beTrue())
                 expect(title.exists).to(beFalse())
 
                 expect(self.app.buttons["pivot-web"].exists).to(beTrue())
                 self.app.buttons["pivot-web"].tap()
-                expect(title.exists).to(beTrue())
+                expect(title.waitForExistence(timeout: 1)).to(beTrue())
                 expect(title.value as? String).to(equal(self.destinationNoteTitle))
-                title.tap()
-                expect(noteSearchField.waitForExistence(timeout: 2)).to(beTrue())
+                title.tapInTheMiddle()
+                expect(noteSearchField.waitForExistence(timeout: 1)).to(beTrue())
                 expect(noteSearchField.value as? String).to(equal(self.destinationNoteTitle))
             }
 
@@ -153,8 +154,8 @@ class OmniBarDestinationUITests: QuickSpec {
                 goToWebMode()
 
                 let anotherTitle = "Another Destination"
-                let title = self.app.staticTexts["DestinationNoteTitle"]
-                expect(title.waitForExistence(timeout: 2)).to(beTrue())
+                let title = noteTitleLabel
+                expect(title.waitForExistence(timeout: 1)).to(beTrue())
                 expect(title.value as? String).to(equal(todayName))
                 title.tap()
 
@@ -172,10 +173,10 @@ class OmniBarDestinationUITests: QuickSpec {
 
                 expect(self.app.buttons["pivot-web"].exists).to(beTrue())
                 self.app.buttons["pivot-web"].tap()
-                expect(title.exists).to(beTrue())
+                expect(title.waitForExistence(timeout: 1)).to(beTrue())
                 expect(title.value as? String).to(equal(anotherTitle))
-                title.tap()
-                expect(noteSearchField.waitForExistence(timeout: 2)).to(beTrue())
+                title.tapInTheMiddle()
+                expect(noteSearchField.waitForExistence(timeout: 1)).to(beTrue())
                 expect(noteSearchField.value as? String).to(equal(anotherTitle))
             }
         }

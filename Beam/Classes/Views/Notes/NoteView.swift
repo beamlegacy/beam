@@ -68,6 +68,7 @@ struct NoteView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(BeamColor.Generic.background.swiftUI)
         .onReceive(Just(note)) { _ in
             // Ideally we could use @StateObject in NoteHeaderView to let it manage its model
             // But its macOS > 11. So the parent need to own the model.

@@ -17,7 +17,6 @@ class OmniBarUITests: QuickSpec {
         guard self.helper == nil else {
             return
         }
-        self.app.launch()
         self.helper = OmniBarUITestsHelper(self.app)
     }
 
@@ -31,13 +30,12 @@ class OmniBarUITests: QuickSpec {
         let textEmpty = ""
 
         beforeEach {
+            self.app.launch()
             self.manualBeforeSuite()
             self.continueAfterFailure = false
-            self.app.launch()
         }
 
         describe("Search Field") {
-
 
             afterEach {
                 self.helper.makeElementScreenShot(self.helper.searchField)
@@ -94,11 +92,9 @@ class OmniBarUITests: QuickSpec {
                 self.helper.focusSearchField()
                 self.helper.searchField.typeText("hello")
                 self.helper.searchField.typeText("\r")
-                expect(self.app.images["browserTabBarView"].waitForExistence(timeout: 2)).to(beTrue())
+                expect(self.app.images["browserTabBarView"].waitForExistence(timeout: 1)).to(beTrue())
 
                 expect(self.helper.allAutocompleteResults.count).to(equal(0))
-
-                expect(self.app.groups["webView"].exists).to(beTrue())
                 expect(self.app.buttons["journal"].exists).to(beTrue())
                 expect(self.app.buttons["refresh"].exists).to(beTrue())
                 expect(self.app.buttons["pivot-card"].exists).to(beTrue())
@@ -108,7 +104,7 @@ class OmniBarUITests: QuickSpec {
                 expect(self.app.buttons["refresh"].exists).to(beFalse())
 
                 self.app.buttons["pivot-web"].tap()
-                expect(self.app.groups["webView"].exists).to(beTrue())
+                expect(self.app.webViews.firstMatch.waitForExistence(timeout: 1)).to(beTrue())
                 expect(self.app.buttons["refresh"].exists).to(beTrue())
 
                 self.helper.makeAppScreenShots()

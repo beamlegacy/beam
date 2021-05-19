@@ -237,8 +237,7 @@ class AutocompleteManager: ObservableObject {
         if resetText, let currentSelectedIndex = autocompleteSelectedIndex,
            currentSelectedIndex < autocompleteResults.count {
             let previousResult = autocompleteResults[currentSelectedIndex]
-            textChangeIsFromSelection = true
-            searchQuery = previousResult.completingText ?? ""
+            setQueryWithoutAutocompleting(previousResult.completingText ?? "")
         }
         searchQuerySelectedRange = nil
         autocompleteSelectedIndex = nil
@@ -283,6 +282,11 @@ extension AutocompleteManager {
         searchQuery = ""
         autocompleteResults = []
         autocompleteTimeoutBlock?.cancel()
+    }
+
+    func setQueryWithoutAutocompleting(_ query: String) {
+        textChangeIsFromSelection = true
+        searchQuery = query
     }
 
     // Allows the user to enter the next character of the suggestion

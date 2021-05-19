@@ -36,7 +36,7 @@ struct OmniBar: View {
         if editing {
             if let url = browserTabsManager.currentTab?.url?.absoluteString, state.mode == .web {
                 autocompleteManager.searchQuerySelectedRange = url.wholeRange
-                autocompleteManager.searchQuery = url
+                autocompleteManager.setQueryWithoutAutocompleting(url)
             }
         } else if state.mode == .web {
             autocompleteManager.resetQuery()
