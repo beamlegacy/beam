@@ -879,6 +879,10 @@ public extension CALayer {
         let handlers: [String: () -> Bool] = [
             "@": { [unowned self] in
                 guard popover == nil else { return false }
+                let pos = self.selectedTextRange.isEmpty ? rootNode.cursorPosition : self.selectedTextRange.lowerBound
+                let substr = node.text.extract(range: max(0, pos - 1) ..< pos)
+                let left = substr.text // capture the left of the cursor to check for an existing [
+                guard left == " " || pos == 0 else { return true }
                 self.showBidirectionalPopover(prefix: 1, suffix: 0)
                 return true
             },
