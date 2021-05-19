@@ -7,7 +7,11 @@ export class WebEventsUI_native implements WebEventsUI {
    * @param native {Native}
    */
   constructor(protected native: Native) {
-    console.log(`${this.toString()} instantiated`)
+    this.log(`${this.toString()} instantiated`)
+  }
+
+  protected log(...args) {
+    console.log(`${this.toString()}: `, args)
   }
 
   /**

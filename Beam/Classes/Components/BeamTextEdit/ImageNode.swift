@@ -59,6 +59,10 @@ class ImageNode: ElementNode {
     }
 
     override func updateRendering() {
+        guard let image = self.image else {
+            Logger.shared.logError("Image was not saved properly", category: .noteEditor)
+            return
+        }
         guard availableWidth > 0 else { return }
 
         if invalidatedRendering {
@@ -118,6 +122,7 @@ class ImageNode: ElementNode {
     override func onUnfocus() {
         updateFocus()
     }
+
     override func onFocus() {
         updateFocus()
     }

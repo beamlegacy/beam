@@ -43,7 +43,7 @@ export class BeamNodeMock extends BeamEventTargetMock implements BeamNode {
    * @deprecated Not standard, for test purpose
    * Relative bounds
    */
-  bounds = new BeamRect()
+  bounds = new BeamRect(0, 0, 0, 0)
 
   constructor(readonly nodeName: string, readonly nodeType: BeamNodeType, props = {}) {
     super()

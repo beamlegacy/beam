@@ -41,8 +41,8 @@ extension BeamFileRecord: FetchableRecord {
 extension BeamFileRecord: MutablePersistableRecord {
     /// The values persisted in the database
     static let persistenceConflictPolicy = PersistenceConflictPolicy(
-        insert: .replace,
-        update: .replace)
+            insert: .replace,
+            update: .replace)
 
     func encode(to container: inout PersistenceContainer) {
         container[Columns.id] = id
@@ -58,8 +58,16 @@ extension BeamFileRecord: MutablePersistableRecord {
     }
 }
 
-class BeamFileDB {
+protocol BeamFileStorage {
+    func fetch(uid: String) throws -> BeamFileRecord?
+    func insert(name: String, uid: String, data: Data, type: String) throws
+    func remove(uid: String) throws
+    func clear() throws
+}
+
+class BeamFileDB: BeamFileStorage {
     var dbQueue: DatabasePool
+
     init(path: String) throws {
         let configuration = GRDB.Configuration()
 
@@ -104,5 +112,4 @@ class BeamFileDB {
             try BeamFileRecord.deleteAll(db)
         }
     }
-
 }
