@@ -69,11 +69,11 @@ struct NoteView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(BeamColor.Generic.background.swiftUI)
-        .onReceive(Just(note)) { _ in
+        .onReceive(Just(note)) { newNote in
             // Ideally we could use @StateObject in NoteHeaderView to let it manage its model
             // But its macOS > 11. So the parent need to own the model.
-            guard headerViewModel?.note != note else { return }
-            headerViewModel = NoteHeaderView.ViewModel(note: note, documentManager: state.data.documentManager)
+            guard headerViewModel?.note != newNote else { return }
+            headerViewModel = NoteHeaderView.ViewModel(note: newNote, documentManager: state.data.documentManager)
         }
     }
 }

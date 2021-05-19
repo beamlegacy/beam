@@ -38,9 +38,11 @@ struct NoteHeaderView: View {
                               selectedRange: model.titleSelectedRange,
                               onTextChanged: model.textFieldDidChange,
                               onCommit: { _ in
-                                model.renameCard()
+                                model.commitRenameCard(fromTextField: true)
+                              }, onEscape: {
+                                model.commitRenameCard(fromTextField: true)
                               }, onStopEditing: {
-                                model.renameCard()
+                                model.commitRenameCard(fromTextField: true)
                               })
                     .allowsHitTesting(model.isEditingTitle)
             } else {
@@ -51,9 +53,17 @@ struct NoteHeaderView: View {
             }
         }
         .contentShape(Rectangle())
-        .gesture(TapGesture().onEnded(model.onTap) )
+        .gesture(TapGesture().onEnded(model.onTap))
         .simultaneousGesture(TapGesture(count: 2).onEnded(model.onDoubleTap))
         .animation(nil)
+        .wiggleEffect(animatableValue: model.wiggleValue)
+        .animation(model.wiggleValue > 0 ? .easeInOut(duration: 0.3) : nil)
+        // force reloading the view on note change to clean up text states
+        // and enables appear/disappear events between notes
+        .id(model.note)
+        .onDisappear {
+            model.commitRenameCard(fromTextField: false)
+        }
     }
 
     private var subtitleInfoView: some View {
@@ -109,6 +119,7 @@ extension NoteHeaderView {
         @Published fileprivate var isEditingTitle = false
         @Published fileprivate var isTitleTaken = false
         @Published fileprivate var isLoading = false
+        @Published fileprivate var wiggleValue = CGFloat(0)
 
         private var documentManager: DocumentManager
         fileprivate var canEditTitle: Bool {
@@ -132,16 +143,21 @@ extension NoteHeaderView {
             titleText = note.title
             isEditingTitle = false
             isTitleTaken = false
+            wiggleValue = 0
         }
 
         func formatToValidTitle(_ title: String) -> String {
             return BeamNote.validTitle(fromTitle: title)
         }
 
-        func renameCard() {
+        func commitRenameCard(fromTextField: Bool) {
             let newTitle = formatToValidTitle(titleText)
             guard !newTitle.isEmpty, newTitle != note.title, !isLoading, !isTitleTaken, canEditTitle else {
-                resetEditingState()
+                if fromTextField && isTitleTaken {
+                    wiggleValue += 1
+                } else {
+                    resetEditingState()
+                }
                 return
             }
             isLoading = true
