@@ -197,12 +197,10 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
                 // on existing link
                 let currentTitle = node.element.text.rangeAt(position: range.upperBound).string
                 let newBeamText = BeamText(text: currentTitle, attributes: attributes)
-                let replaceText = ReplaceText(in: node.element.id, of: noteTitle, for: range, with: newBeamText)
-                rootNode.note?.cmdManager.run(command: replaceText, on: rootNode.cmdContext)
+                rootNode.note?.cmdManager.replaceText(in: node, for: range, with: newBeamText)
             } else {
                 // on simple text
-                let changeFormat = FormattingText(in: node.element.id, of: noteTitle, for: nil, with: attributes.first, for: range, isActive: false)
-                rootNode.note?.cmdManager.run(command: changeFormat, on: rootNode.cmdContext)
+                rootNode.note?.cmdManager.formatText(in: node, for: nil, with: attributes.first, for: range, isActive: false)
             }
         }
         window?.makeFirstResponder(self)
