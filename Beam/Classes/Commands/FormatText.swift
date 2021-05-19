@@ -1,5 +1,5 @@
 //
-//  FormattingText.swift
+//  FormatText.swift
 //  Beam
 //
 //  Created by Jean-Louis Darmon on 01/03/2021.
@@ -8,8 +8,8 @@
 import Foundation
 import BeamCore
 
-class FormattingText: TextEditorCommand {
-    static let name: String = "FormattingText"
+class FormatText: TextEditorCommand {
+    static let name: String = "FormatText"
 
     var elementId: UUID
     var noteTitle: String
@@ -85,5 +85,14 @@ class FormattingText: TextEditorCommand {
         guard let root = context?.root else { return false }
         root.editor.detectFormatterType()
         return result
+    }
+}
+
+extension CommandManager where Context == Widget {
+    @discardableResult
+    func formatText(in node: TextNode, for kind: ElementKind?, with attribute: BeamText.Attribute?, for range: Range<Int>?, isActive: Bool) -> Bool {
+        guard let title = node.elementNoteTitle else { return false }
+        let cmd = FormatText(in: node.elementId, of: title, for: kind, with: attribute, for: range, isActive: isActive)
+        return run(command: cmd, on: node)
     }
 }

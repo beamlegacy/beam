@@ -236,17 +236,13 @@ extension BeamTextEdit {
             guard let nodeSelection = rootNode.state.nodeSelection else { return }
 
             nodeSelection.nodes.forEach({ node in
-                if let noteTitle = node.elementNoteTitle {
-                    let changeFormat = FormattingText(in: node.elementId, of: noteTitle, for: kind, with: nil, for: nil, isActive: isActive)
-                    rootNode.note?.cmdManager.run(command: changeFormat, on: rootNode.cmdContext)
+                if let node = node as? TextNode {
+                    rootNode.note?.cmdManager.formatText(in: node, for: kind, with: nil, for: nil, isActive: isActive)
                 }
-
             })
             rootNode.note?.cmdManager.endGroup()
         } else {
-            guard let noteTitle = node.elementNoteTitle else { return }
-            let changeFormat = FormattingText(in: node.elementId, of: noteTitle, for: kind, with: nil, for: nil, isActive: isActive)
-            rootNode.note?.cmdManager.run(command: changeFormat, on: rootNode.cmdContext)
+            rootNode.note?.cmdManager.formatText(in: node, for: kind, with: nil, for: nil, isActive: isActive)
         }
     }
 
@@ -257,18 +253,13 @@ extension BeamTextEdit {
             rootNode.note?.cmdManager.beginGroup(with: "UpdateAttributes")
 
             nodeSelection.nodes.forEach({ node in
-                if let noteTitle = node.elementNoteTitle {
-                    let changeAttributes = FormattingText(in: node.elementId, of: noteTitle, for: nil, with: attribute, for: 0..<node.element.text.text.count, isActive: isActive)
-                    rootNode.note?.cmdManager.run(command: changeAttributes, on: rootNode.cmdContext)
+                if let node = node as? TextNode {
+                    rootNode.note?.cmdManager.formatText(in: node, for: nil, with: attribute, for: 0..<node.element.text.text.count, isActive: isActive)
                 }
-
             })
             rootNode.note?.cmdManager.endGroup()
         } else if rootNode.textIsSelected {
-            guard let noteTitle = node.elementNoteTitle else { return }
-
-            let changeAttributes = FormattingText(in: node.elementId, of: noteTitle, for: nil, with: attribute, for: node.selectedTextRange, isActive: isActive)
-            rootNode.note?.cmdManager.run(command: changeAttributes, on: rootNode.cmdContext)
+            rootNode.note?.cmdManager.formatText(in: node, for: nil, with: attribute, for: node.selectedTextRange, isActive: isActive)
         } else {
             if let index = rootNode?.state.attributes.firstIndex(of: attribute),
                ((rootNode?.state.attributes.contains(attribute)) != nil), isActive {
