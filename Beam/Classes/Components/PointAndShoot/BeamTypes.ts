@@ -2,12 +2,11 @@
  * Types used by Beam API (to exchange messages, typically).
  */
 
-import {BeamHTMLCollection} from "./Test/BeamMocks"
+import { BeamHTMLCollection } from "./Test/BeamMocks"
 
 export class BeamSize {
 
-  constructor(public width: number, public height: number) {
-  }
+  constructor(public width: number, public height: number) {}
 }
 
 export interface BeamVisualViewport {
@@ -60,7 +59,7 @@ export class NoteInfo {
   /**
    * @type string
    */
-  id   // Should not be nullable once we get it
+  id // Should not be nullable once we get it
 
   /**
    * @type string
@@ -88,7 +87,7 @@ export interface BeamWindow extends BeamEventTarget {
   /**
    * @type BeamDocument
    */
-  readonly document: BeamDocument;
+  readonly document: BeamDocument
 
   /**
    * @type number
@@ -132,7 +131,7 @@ export enum BeamNodeType {
   comment = 8,
   document = 9,
   document_type = 10,
-  document_fragment = 11
+  document_fragment = 11,
 }
 
 export interface BeamEvent {
@@ -141,7 +140,6 @@ export interface BeamEvent {
 }
 
 export interface BeamEventTarget<E extends BeamEvent = BeamEvent> {
-
   addEventListener(type: string, callback: (e: E) => any)
 
   removeEventListener(type: string, callback: (e: E) => any)
@@ -149,8 +147,7 @@ export interface BeamEventTarget<E extends BeamEvent = BeamEvent> {
   dispatchEvent(e: E)
 }
 
-export interface BeamDOMRect extends DOMRect {
-}
+export interface BeamDOMRect extends DOMRect {}
 
 export interface BeamNode extends BeamEventTarget {
   innerText: string
@@ -184,8 +181,7 @@ export interface BeamCharacterData extends BeamNode {
   data: string
 }
 
-export interface BeamText extends BeamCharacterData {
-}
+export interface BeamText extends BeamCharacterData {}
 
 export interface BeamElement extends BeamParentNode {
   dataset: any
@@ -250,7 +246,6 @@ export interface BeamHTMLElement extends BeamElement, BeamElementCSSInlineStyle 
 }
 
 export interface BeamHTMLIFrameElement extends BeamHTMLElement {
-
   src: string
 }
 
@@ -292,11 +287,51 @@ export interface BeamBody extends BeamHTMLElement {
 }
 
 export interface BeamRange {
-  
+  commonAncestorContainer: BeamNode
+  cloneContents(): DocumentFragment
+  cloneRange(): BeamRange
+  collapse(toStart?: boolean): void
+  compareBoundaryPoints(how: number, sourceRange: BeamRange): number
+  comparePoint(node: BeamNode, offset: number): number
+  createContextualFragment(fragment: string): DocumentFragment
+  deleteContents(): void
+  detach(): void
+  extractContents(): DocumentFragment
+  getClientRects(): DOMRectList
+  insertNode(node: BeamNode): void
+  intersectsNode(node: BeamNode): boolean
+  isPointInRange(node: BeamNode, offset: number): boolean
+  selectNodeContents(node: BeamNode): void
+  setEnd(node: BeamNode, offset: number): void
+  setEndAfter(node: BeamNode): void
+  setEndBefore(node: BeamNode): void
+  setStart(node: BeamNode, offset: number): void
+  setStartAfter(node: BeamNode): void
+  setStartBefore(node: BeamNode): void
+  surroundContents(newParent: BeamNode): void
+  toString(): string
+  END_TO_END: number
+  END_TO_START: number
+  START_TO_END: number
+  START_TO_START: number
+  collapsed: boolean
+  endContainer: BeamNode
+  endOffset: number
+  startContainer: BeamNode
+  startOffset: number
   selectNode(node: BeamNode): void
-  
-  getBoundingClientRect(): BeamRect
+  getBoundingClientRect(): DOMRect
 }
+
+export declare var BeamRange: {
+  prototype: BeamRange;
+  new(): BeamRange;
+  readonly END_TO_END: number;
+  readonly END_TO_START: number;
+  readonly START_TO_END: number;
+  readonly START_TO_START: number;
+  toString(): string;
+};
 
 export interface BeamDocument extends BeamNode {
   /**
@@ -315,7 +350,7 @@ export interface BeamDocument extends BeamNode {
   createElement(tag)
 
   /**
-   * @return {Selection}
+   * @return {BeamSelection}
    */
   getSelection()
 
@@ -337,5 +372,117 @@ export interface BeamDocument extends BeamNode {
 export enum BeamPNSStatus {
   pointing = "pointing",
   shooting = "shooting",
-  none = "none"
+  none = "none",
+}
+
+export interface BeamTextSelection {
+  /**
+   * Selected text
+   *
+   * @type {String}
+   * @memberof TextSelection
+   */
+  text: String
+  /**
+   * Selected HTML
+   *
+   * @type {String}
+   * @memberof TextSelection
+   */
+  html: String
+  /**
+   * Selected rectangles.
+   *
+   * @type {DOMRect[]}
+   * @memberof BeamTextSelection
+   */
+  areas: DOMRect[]
+}
+
+export interface BeamElementAreaMessage {
+  /**
+   * Selected HTML
+   *
+   * @type {String}
+   * @memberof BeamElementAreaMessage
+   */
+  html: String
+  /**
+   * {x, y} of mouse location
+   *
+   * @type {BeamMouseLocation}
+   * @memberof BeamElementMessagePayload
+   */
+  location: BeamMouseLocation
+  /**
+   * Area of element
+   *
+   * @type {BeamRect}
+   * @memberof BeamElementMessagePayload
+   */
+  areas: BeamRect[]
+  quoteId: any
+}
+
+export interface BeamSelectionMessagePayload extends BeamElementAreaMessage {
+  /**
+   * Selected text
+   *
+   * @type {String}
+   * @memberof BeamSelectionMessagePayload
+   */
+  text: String
+}
+
+export interface BeamElementMessagePayload extends BeamElementAreaMessage {}
+
+/**
+ * The UUID of a stored beam quote. Used to identify stored quotes in native code
+ *
+ * @export
+ * @interface BeamQuoteId
+ * @extends {String}
+ */
+export interface BeamQuoteId extends String {}
+
+/**
+ * {x, y} of mouse location
+ *
+ * @export
+ * @interface BeamMouseLocation
+ */
+export interface BeamMouseLocation {
+  x: number
+  y: number
+}
+
+export interface BeamCollectedNote {
+  el: BeamHTMLElement | BeamRange
+  quoteId?: BeamQuoteId
+}
+
+export interface BeamSelection {
+  anchorNode: BeamNode
+  anchorOffset: number
+  focusNode: BeamNode
+  focusOffset: number
+  isCollapsed: boolean
+  rangeCount: number
+  type: string
+  addRange(range: BeamRange): void
+  collapse(node: BeamNode, offset?: number): void
+  collapseToEnd(): void
+  collapseToStart(): void
+  containsNode(node: BeamNode, allowPartialContainment?: boolean): boolean
+  deleteFromDocument(): void
+  empty(): void
+  extend(node: BeamNode, offset?: number): void
+  getRangeAt(index: number): BeamRange
+  removeAllRanges(): void
+  removeRange(range: BeamRange): void
+  selectAllChildren(node: BeamNode): void
+  setBaseAndExtent(anchorNode: BeamNode, anchorOffset: number, focusNode: BeamNode, focusOffset: number): void
+  setPosition(node: BeamNode, offset?: number): void
+  toString(): string
+
 }

@@ -220,33 +220,38 @@ class PointAndShoot: WebPageHolder {
             activeShootGroup?.targets.removeAll()
         }
         for target in targets {
-            addShootTargets(target: target)
+            addShootTargets(target: target, targetGroup: activeShootGroup)
         }
     }
-
     /**
      Add a shoot to the current group.
      
      - Parameter target: the shoot target to add
      */
-    private func addShootTargets(target: Target) {
-        guard let group = activeShootGroup else {
-            Logger.shared.logWarning("Should have a current group", category: .pointAndShoot)
+    private func addShootTargets(target: Target, targetGroup: ShootGroup?) {
+        if let group = targetGroup {
+            group.targets.append(target)
             return
         }
-        group.targets.append(target)
+
+        if activeShootGroup != nil {
+            activeShootGroup!.targets.append(target)
+            return
+        }
+
+        Logger.shared.logWarning("Should have a current group", category: .pointAndShoot)
+        return
     }
 
-    private func updateShootGroups(target: Target, origin: String) -> Bool {
-        guard shootGroups.count > 0 else {
-            return false
-        }
-        for group in shootGroups where group.quoteId == target.quoteId {
+    private func updateShootGroup(targets: [Target], origin: String, group: ShootGroup) {
+        // clear group targets and re-create them
+        group.targets.removeAll()
+        for target in targets {
+            if group.quoteId == target.quoteId {
+                group.targets.append(target)
+            }
             shoot(targets: [target], origin: origin)
-            group.targets = activeShootGroup!.targets
-            return true
         }
-        return false
     }
 
     /// update shootGroups with targets
@@ -254,16 +259,18 @@ class PointAndShoot: WebPageHolder {
     ///   - targets: the shoot targets to update
     ///   - origin: browser tab origin
     func updateShoots(targets: [Target], origin: String) {
-        for target in targets {
-            if updateShootGroups(target: target, origin: origin) {
-                continue
-            }
-            shoot(targets: [target], origin: origin)
+        for group in shootGroups {
+            updateShootGroup(targets: targets, origin: origin, group: group)
+        }
+
+        if let group = activeShootGroup {
+            updateShootGroup(targets: targets, origin: origin, group: group)
         }
     }
 
     func showShootInfo(group: ShootGroup) {
-        ui.drawShootConfirmation(shootTarget: group.targets[0], noteInfo: group.noteInfo)
+        let shootTarget = translateTarget(target: group.targets[0])
+        ui.drawShootConfirmation(shootTarget: shootTarget, noteInfo: group.noteInfo)
         DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
             guard let self = self else { return }
             self.ui.clearConfirmation()

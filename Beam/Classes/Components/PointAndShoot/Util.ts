@@ -63,4 +63,18 @@ export class Util {
   static clamp(val: number, min: number, max: number) {
     return val > max ? max : val < min ? min : val;
   }
+
+  /**
+   * Remove null and undefined from array
+   *
+   * @static
+   * @param {any[]} array
+   * @return {*}  {any[]}
+   * @memberof Util
+   */
+  static compact(array: any[]): any[] {
+    return array.filter(item => {
+      return item != null
+    })
+  }
 }

@@ -1,7 +1,17 @@
-import {BeamMouseEvent} from "./Test/BeamMocks"
-import {WebEvents} from "./WebEvents"
-import {PointAndShootUI} from "./PointAndShootUI";
-import {BeamWindow, BeamHTMLElement, BeamPNSStatus} from "./BeamTypes";
+import { BeamMouseEvent } from "./Test/BeamMocks"
+import { WebEvents } from "./WebEvents"
+import { PointAndShootUI } from "./PointAndShootUI"
+import {
+  BeamWindow,
+  BeamHTMLElement,
+  BeamPNSStatus,
+  BeamTextSelection,
+  BeamCollectedNote,
+  BeamQuoteId,
+  BeamSelection,
+  BeamRange,
+} from "./BeamTypes"
+import { Util } from "./Util"
 
 const PNS_STATUS = Number(process.env.PNS_STATUS)
 
@@ -22,15 +32,6 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
   datasetKey
 
   /**
-   * Selection elements array.
-   *
-   * @private
-   * @type {[]}
-   * @memberof PointAndShoot
-   */
-  private selectionsList = []
-
-  /**
    * @type number
    */
   scrollWidth
@@ -45,7 +46,15 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
    *
    * @type {BeamHTMLElement[]}
    */
-  selectedEls: BeamHTMLElement[] = []
+  collectedEls: BeamCollectedNote[] = []
+
+  /**
+   * Active selection element
+   *
+   * @type {BeamCollectedNote[]}
+   * @memberof PointAndShoot
+   */
+  selectionRanges: BeamCollectedNote[]
 
   /**
    * The currently hovered element.
@@ -59,15 +68,15 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
 
   /**
    * The currently highlighted element.
-   * @type {BeamHTMLElement}
+   * @type {BeamCollectedNote}
    */
-  pointedEl
+  pointedEl: BeamCollectedNote
 
-    /**
+  /**
    * The currently shooted element.
-   * @type {BeamHTMLElement}
+   * @type {BeamCollectedNote}
    */
-  shootingEl
+  shootingEl: BeamCollectedNote
 
   shootMouseLocation
 
@@ -114,12 +123,14 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
     win.addEventListener("keyup", this.onKeyUp.bind(this), false)
 
     win.addEventListener("mouseup", this.onMouseUp.bind(this))
-    win.document.addEventListener("selectionchange", (ev) => this.onSelectionChange(ev))
+    win.document.addEventListener("selectionchange", (ev) => this.onSelection(ev))
 
     win.document.addEventListener("keypress", this.onKeyPress.bind(this))
     this.log("events registered")
     if (PNS_STATUS) {
-      win.document.body.innerHTML = win.document.body.innerHTML + `<div id="debug-beam" style="position: fixed;bottom: 0px;right: 0;padding: 1rem;background: #7373FF; color: white;">JS ${this.status}</div>`;
+      win.document.body.innerHTML =
+        win.document.body.innerHTML +
+        `<div id="debug-beam" style="position: fixed;bottom: 0px;right: 0;padding: 1rem;background: #7373FF; color: white;">JS ${this.status}</div>`
     }
   }
 
@@ -128,6 +139,8 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
   }
 
   /**
+   * Enable pointing UI.
+   * 
    * @param el {BeamHTMLElement}
    * @param x {number}
    * @param y {number}
@@ -148,7 +161,7 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
       this.ui.unpoint(el)
       this.pointedEl = null
     }
-   // this.log("unpoint", changed ? "changed" : "did not change")
+    // this.log("unpoint", changed ? "changed" : "did not change")
     return changed
   }
 
@@ -156,9 +169,8 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
    * Unselect an element.
    *
    * @param el {BeamHTMLElement}
-   * @return If the element has changed.
    */
-  unshoot(el = this.shootingEl.target) {
+  unshoot(el) {
     this.shootingEl = undefined
     this.ui.unshoot(el)
     this.setStatus(BeamPNSStatus.none)
@@ -168,16 +180,34 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
     this.ui.hidePopup()
   }
 
+  /**
+   * Returns boolean if current status is pointing
+   *
+   * @return {Boolean} 
+   * @memberof PointAndShoot
+   */
   isPointing() {
     return this.status === BeamPNSStatus.pointing
   }
 
+  /**
+   * Returns boolean if current status is shooting
+   *
+   * @return {Boolean} 
+   * @memberof PointAndShoot
+   */
   isShooting() {
     return this.status === BeamPNSStatus.shooting
   }
 
+  /**
+   * Returns boolean if document has active selection
+   *
+   * @return {Boolean} 
+   * @memberof PointAndShoot
+   */
   hasSelection() {
-    return  Boolean( this.win.document.getSelection().toString() )
+    return Boolean(this.win.document.getSelection().toString())
   }
 
   /**
@@ -194,14 +224,17 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
       if (this.isPointing()) {
         ev.preventDefault()
         ev.stopPropagation()
-        if (this.pointedEl !== this.pointingEv.target) {
+        if (this.pointedEl?.el !== this.pointingEv.target) {
           if (this.pointedEl) {
-            this.log("pointed is changing from", this.pointedEl, "to", this.pointingEv.target)
+            this.log("pointed is changing from", this.pointedEl.el, "to", this.pointingEv.target)
             this.unpoint(this.pointedEl) // Remove previous
           }
-          this.pointedEl = this.pointingEv.target
-          this.point(this.pointedEl, ev.clientX, ev.clientY)
-          let collected = this.pointedEl.dataset[this.datasetKey]
+          this.pointedEl = {
+            el: this.pointingEv.target,
+            quoteId: this.pointingEv.target.dataset[this.datasetKey],
+          }
+          this.point(this.pointedEl.el, ev.clientX, ev.clientY)
+          let collected = this.pointedEl.quoteId
           if (collected) {
             this.showStatus(this.pointedEl)
           } else {
@@ -238,10 +271,13 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
    * @param note {object} The Note info
    * @param el {BeamHTMLElement} The element to assign the Note to.
    */
-  assignNote(note, el = this.shootingEl) {
-    el.dataset[this.datasetKey] = note
-    this.selectedEls.push(el)
-    this.setStatus(BeamPNSStatus.none)
+  assignNote(quoteId: BeamQuoteId) {
+    const els = this.shootingEl ? [this.shootingEl] : this.selectionRanges
+    els.forEach(({ el }) => {
+      this.collectedEls.push({ el, quoteId })
+      this.unshoot(el)
+    })
+    this.selectionRanges = []
   }
 
   /**
@@ -252,14 +288,16 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
    * @param y {number} Vertical coordinate of click/touch
    * @param multi {boolean} If this is a multiple-selection action.
    */
-  shoot(el, x, y, multi) {
-    this.shootingEl = el
+  shoot(targetEl, x, y, multi) {
+    this.shootingEl = {
+      el: targetEl,
+      quoteId: targetEl.dataset[this.datasetKey],
+    }
     this.shootMouseLocation = {
       x,
-      y
+      y,
     }
-    const quoteId = el.dataset[this.datasetKey]
-    this.ui.shoot(quoteId, el, x, y, this.selectedEls)
+    this.ui.shoot(this.shootingEl.quoteId, this.shootingEl.el, x, y, this.collectedEls)
     this.setShooting()
   }
 
@@ -286,7 +324,7 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
    */
   setShooting(bool: Boolean = true) {
     if (bool) {
-      this.setStatus(BeamPNSStatus.shooting);
+      this.setStatus(BeamPNSStatus.shooting)
     }
   }
 
@@ -323,14 +361,20 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
     }
   }
 
-  setStatus(s) {
-    if (this.status != s) {
-      this.status = s
-      this.ui.setStatus(s)
-      
+  /**
+   * Update the Point and Shoot status
+   *
+   * @param {BeamPNSStatus} newStatus
+   * @memberof PointAndShoot
+   */
+  setStatus(newStatus: BeamPNSStatus) {
+    if (this.status != newStatus) {
+      this.status = newStatus
+      this.ui.setStatus(newStatus)
+
       if (PNS_STATUS) {
         let debugEl = this.win.document.querySelector("#debug-beam")
-        
+
         if (debugEl) {
           debugEl.innerText = `JS ${this.status}`
         }
@@ -364,7 +408,8 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
     this.log("onKeyDown", ev.key)
     if (ev.key === "Alt") {
       if (this.hasSelection()) {
-        this.setShooting();
+        // Enable shooting mode
+        this.setShooting()
       } else {
         this.setPointing(true)
         const pointingEv = this.pointingEv
@@ -377,85 +422,76 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
   }
 
   protected resizeInfo(): any {
-    const resizeInfo = super.resizeInfo();
-    const selected = [].concat(this.shootingEl, this.pointedEl, this.selectedEls).filter(item => item !== null)
+    const resizeInfo = super.resizeInfo()
+    const elementArray = [].concat(this.shootingEl, this.pointedEl, this.selectionRanges)
+    const activeAndStoredElements = this.collectedEls.concat(elementArray)
+    const selected = Util.compact(activeAndStoredElements)
     return {
       ...resizeInfo,
       selected: selected,
       datasetKey: this.datasetKey,
-      coordinates: this.shootMouseLocation
-    };
+      coordinates: this.shootMouseLocation,
+    }
   }
 
   onKeyUp(ev) {
     if (ev.key === "Alt") {
       if (this.hasSelection() || this.isShooting()) {
         this.unpoint()
-     }
-     this.setPointing(false)
+      }
+      this.setPointing(false)
     }
-  }
-
-  enterSelection() {
-    this.log("enterSelection")
-    this.selectionsList = []
-    this.ui.enterSelection()
-  }
-
-  leaveSelection() {
-    this.log("leaveSelection")
-    this.ui.leaveSelection()
-    this.selectionsList = []
   }
 
   onMouseUp(_ev) {
-    const selectionsCount = this.selectionsList.length
-    if (selectionsCount > 0) {
-      for (let i = 0; i < selectionsCount; ++i) {
-        this.ui.textSelected(this.selectionsList[i])
-      }
-      this.leaveSelection()
-    }
+    // TODO: replace with actual value
+    this.ui.select(this.selectionRanges)
   }
 
-  onSelectionChange(_ev) {
-    this.log("onSelectionChange")
-    const docSelection = this.getSelection()
-    if (docSelection.isCollapsed) {
-      this.leaveSelection()
+  /**
+   * onSelection changes dispatch ui select event for each active selection range
+   *
+   * @param {*} _ev
+   * @memberof PointAndShoot
+   */
+  onSelection(_ev) {
+    const selection = this.getSelection()
+    if (selection.isCollapsed) {
       return
     }
-    this.enterSelection()
-
-    const count = docSelection.rangeCount
-    for (let i = 0; i < count; ++i) {
-      const range = docSelection.getRangeAt(i)
-      const selectedText = range.toString()
-      const selectedFragment = range.cloneContents()
-      const selectedHTML = Array.prototype.reduce.call(
-          selectedFragment.childNodes,
-          (result, node) => result + (node.outerHTML || node.nodeValue),
-          ""
-      )
-      const rangeRects = range.getClientRects()
-      const textAreas = []
-      for (let r = 0; r < rangeRects.length; r++) {
-        const rangeRect = rangeRects[r]
-        const rect = {
-          x: rangeRect.x,
-          y: rangeRect.y,
-          width: rangeRect.width,
-          height: rangeRect.height
-        }
-        textAreas.push(rect)
+    const ranges = this.getSelectionRanges(selection)
+    this.selectionRanges = ranges.map((range) => {
+      return {
+        quoteId: undefined,
+        el: range,
       }
-      const selection = {index: i, text: selectedText, html: selectedHTML, areas: textAreas}
-      this.selectionsList.push(selection)
-      this.ui.addTextSelection(selection)
-    }
+    })
+    this.ui.select(this.selectionRanges)
   }
 
-  getSelection() {
+  /**
+   * Returns an array of ranges for a given HTML selection
+   *
+   * @param {BeamSelection} selection
+   * @return {*}  {BeamRange[]}
+   * @memberof PointAndShootUI_native
+   */
+  getSelectionRanges(selection: BeamSelection): BeamRange[] {
+    const ranges = []
+    const count = selection.rangeCount
+    for (let index = 0; index < count; ++index) {
+      ranges.push(selection.getRangeAt(index))
+    }
+    return ranges
+  }
+
+  /**
+   * Returns the current active (text) selection on the document
+   *
+   * @return {BeamSelection}
+   * @memberof PointAndShoot
+   */
+  getSelection(): BeamSelection {
     return this.win.document.getSelection()
   }
 }

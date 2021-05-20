@@ -1,5 +1,6 @@
+import { BeamRange } from './BeamTypes';
 import {PointAndShoot} from "./PointAndShoot"
-import {BeamDocumentMock, BeamHTMLElementMock, BeamKeyEvent, BeamMouseEvent, BeamUIEvent} from "./Test/BeamMocks"
+import {BeamDocumentMock, BeamHTMLElementMock, BeamKeyEvent, BeamMouseEvent, BeamRangeMock, BeamSelectionMock, BeamUIEvent} from "./Test/BeamMocks"
 import {BeamWindowMock} from "./Test/BeamWindowMock"
 import {PointAndShootUIMock} from "./Test/PointAndShootUIMock"
 /**
@@ -48,6 +49,15 @@ function pointAndShootTestBed(frameEls = []) {
     expect(testUI.events[0]).toEqual({name: "scroll", x: 0, y: 0, width: 800, height: 0, scale: 1})
     testUI.clearEvents()  // To ease further events counting
     return {pns, testUI}
+}
+
+function createRange(): BeamRange {
+    const { pns } = pointAndShootTestBed()
+    const range = new BeamRangeMock()
+    const node = pns.win.document.createElement("div")
+    range.setStart(node, 2);
+    range.setEnd(node, 3);
+    return range
 }
 
 test("move mouse without Option", () => {
@@ -198,7 +208,7 @@ test("point then shoot, then cancel", () => {
     expect(pns.status).toEqual("pointing")
     expect(testUI.eventsCount).toEqual(3)
     expect(testUI.events[1]).toEqual({name: "point", el: pointedElement, x: 101, y: 102})
-    expect(pns.pointedEl).toEqual(pointedElement)
+    expect(pns.pointedEl.el).toEqual(pointedElement)
 
     // Shoot
     const shotElement = new BeamHTMLElementMock("p")
@@ -207,16 +217,48 @@ test("point then shoot, then cancel", () => {
     pns.onClick(clickEvent)
     expect(pns.status).toEqual("shooting")
     expect(testUI.eventsCount).toEqual(5)
-    expect(testUI.events[3]).toEqual({name: "shoot", el: pointedElement, x: 103, y: 104, selectedEls: []})
-    expect(pns.selectedEls).toEqual([])
-    expect(pns.shootingEl).toEqual(shotElement)
+    expect(testUI.events[3]).toEqual({name: "shoot", el: pointedElement, x: 103, y: 104, collectedEls: []})
+    expect(pns.collectedEls).toEqual([])
+    expect(pns.shootingEl.el).toEqual(shotElement)
 
     // Cancel shoot
     pns.setStatus("none") 
-    expect(pns.shootingEl).toEqual(shotElement)
-    expect(pns.pointedEl).toEqual(pointedElement)
+    expect(pns.shootingEl.el).toEqual(shotElement)
+    expect(pns.pointedEl.el).toEqual(pointedElement)
     expect(pns.status).toEqual("none")
     expect(testUI.eventsCount).toEqual(6)
     expect(testUI.events[5]).toEqual({name: "setStatus", status: "none"})
-    expect(pns.selectedEls).toEqual([])
+    expect(pns.collectedEls).toEqual([])
+})
+
+test("getSelectionRanges should return the number of available ranges", () => {
+    const {pns, testUI} = pointAndShootTestBed()
+
+    const selection = new BeamSelectionMock("p")
+    selection.addRange(createRange())
+    selection.addRange(createRange())
+    selection.addRange(createRange())
+    selection.addRange(createRange())
+    let ranges = pns.getSelectionRanges(selection)
+    
+    expect(ranges.length).toEqual(4)
+})
+
+test("onSelection should create selection event in testUI", () => {
+    const {pns, testUI} = pointAndShootTestBed()
+    // grab empty selection instance from the document
+    const selection = pns.win.document.getSelection()
+    // manually init selection with selection range
+    const range = new BeamRangeMock()
+    const node = pns.win.document.createElement("div")
+    range.setStart(node, 2);
+    range.setEnd(node, 3);    
+    selection.addRange(range)
+    // create empty event
+    const event = new BeamUIEvent()
+    // run onSelection event
+    pns.onSelection(event)
+    // expect:
+    expect(testUI.eventsCount).toEqual(1)
+    expect(testUI.events[0]).toEqual({name: "select", selection: [{quoteId: undefined, el: range}]})
 })

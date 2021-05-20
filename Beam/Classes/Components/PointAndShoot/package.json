@@ -40,6 +40,7 @@
     "jest": "27.0.0-next.8",
     "parcel": "2.0.0-nightly.643",
     "posthtml-expressions": "^1.7.1",
+    "prettier": "^2.3.0",
     "sass": "1.32.8",
     "typescript": "^3.0.0",
     "uuid": "^8.3.2"
