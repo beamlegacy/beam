@@ -31,7 +31,7 @@ class RefNoteTitle: Widget {
     private let titleLayer = CATextLayer()
     private let linkLayer = CATextLayer()
 
-    private let titleLayerXPosition: CGFloat = 25
+    private let titleLayerXPosition: CGFloat = 22
     private let titleLayerYPosition: CGFloat = 10
 
     private var noteTitle: String
@@ -43,7 +43,7 @@ class RefNoteTitle: Widget {
 
         titleLayer.string = noteTitle.capitalized
         titleLayer.font = BeamFont.medium(size: 0).nsFont
-        titleLayer.fontSize = 18
+        titleLayer.fontSize = 15
         titleLayer.foregroundColor = BeamColor.LinkedSection.title.cgColor
 
         titleUnderLine.frame = NSRect(x: 0, y: titleLayer.preferredFrameSize().height, width: titleLayer.preferredFrameSize().width, height: 2)
@@ -74,7 +74,7 @@ class RefNoteTitle: Widget {
     }
 
     override func updateRendering() {
-        contentsFrame = NSRect(x: 0, y: 0, width: availableWidth, height: 35)
+        contentsFrame = NSRect(x: 0, y: 0, width: availableWidth, height: 43)
         computedIdealSize = contentsFrame.size
 
         if open {

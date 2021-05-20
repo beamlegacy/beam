@@ -11,6 +11,7 @@ import BeamCore
 class NodeSelection {
     var start: ElementNode
     var end: ElementNode
+    var isSelectingProxy: Bool = false
 
     /// All the selected nodes
     public private(set) var nodes: Set<ElementNode>
@@ -50,7 +51,7 @@ class NodeSelection {
         self.start = start
         self.end = end
         self.nodes = elements
-
+        self.isSelectingProxy = ((start as? ProxyNode) != nil)
         selectRange(start: start, end: end)
     }
 
@@ -77,34 +78,51 @@ class NodeSelection {
     }
 
     func extendUp() {
-        guard let next = end.previousVisibleNode(ElementNode.self) else { return }
+        guard let previousVisibleNode = end.previousVisibleNode(ElementNode.self) else { return }
+        if let textNode = previousVisibleNode as? TextNode {
+            guard textNode.placeholder.isEmpty || !textNode.text.isEmpty else { return }
+        }
+        if isSelectingProxy {
+            guard ((previousVisibleNode as? ProxyNode) != nil), previousVisibleNode.element.note == start.element.note, isSelectingProxy else { return }
+        }
 
-        if next.isAbove(node: start) {
-            end = next
+        if previousVisibleNode.isAbove(node: start) {
+            end = previousVisibleNode
             append(end)
         } else {
             if start != end {
                 remove(end)
             }
-            end = next
+            end = previousVisibleNode
         }
     }
 
     func extendDown() {
-        guard let next = end.nextVisibleNode(ElementNode.self) else { return }
+        guard let nextVisibleNode = end.nextVisibleNode(ElementNode.self) else { return }
+        if isSelectingProxy {
+            guard ((nextVisibleNode as? ProxyNode) != nil), nextVisibleNode.element.note == start.element.note else { return }
+        } else {
+            guard (nextVisibleNode as? ProxyNode) == nil else { return }
+        }
 
-        if next.isAbove(node: start) || next == start {
+        if nextVisibleNode.isAbove(node: start) || nextVisibleNode == start {
             if start != end {
                 remove(end)
             }
-            end = next
+            end = nextVisibleNode
         } else {
-            end = next
+            end = nextVisibleNode
             append(end)
         }
     }
 
     func append(_ node: ElementNode) {
+        if isSelectingProxy {
+            guard ((node as? ProxyNode) != nil), node.element.note == start.element.note else { return }
+        } else {
+            guard (node as? ProxyNode) == nil else { return }
+        }
+
         node.selected = true
         nodes.insert(node)
         if nodes.count > 1 {
@@ -120,6 +138,9 @@ class NodeSelection {
     }
 
     func remove(_ node: ElementNode) {
+        if isSelectingProxy {
+            guard ((node as? ProxyNode) != nil), node.element.note == start.element.note else { return }
+        }
         node.selected = false
         node.selectedAlone = true
         nodes.remove(node)
@@ -141,6 +162,9 @@ class NodeSelection {
     func appendChildren(of node: ElementNode) {
         for child in node.children {
             guard let child = child as? ElementNode else { continue }
+            if let textNode = child as? TextNode {
+                guard textNode.placeholder.isEmpty || !textNode.text.isEmpty else { continue }
+            }
             child.selectionLayerPosX = minOffset - child.offsetInRoot.x
             child.selectedAlone = false
             child.selected = true

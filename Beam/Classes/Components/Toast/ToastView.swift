@@ -40,11 +40,9 @@ struct ToastView<Content: View>: View {
                             }
                         })
                 }
-
             }
         }
     }
-
 }
 
 // MARK: - Style Protocol

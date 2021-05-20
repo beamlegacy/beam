@@ -11,7 +11,15 @@ import NaturalLanguage
 import Combine
 import BeamCore
 
-public protocol ProxyNode: ElementNode {
+public protocol ProxyNode: ElementNode {}
+
+extension ProxyNode {
+    func highestParent() -> ProxyNode {
+        if let parent = self.parent as? ProxyNode {
+            return parent.highestParent()
+        }
+        return self
+    }
 }
 
 // swiftlint:disable file_length

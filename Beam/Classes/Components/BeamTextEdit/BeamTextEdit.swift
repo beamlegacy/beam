@@ -530,6 +530,7 @@ public extension CALayer {
         guard (inlineFormatter as? HyperlinkFormatterView) == nil else { return super.resignFirstResponder() }
 
         rootNode.cancelSelection()
+        rootNode.cancelNodeSelection()
         (focusedWidget as? TextNode)?.invalidateText() // force removing the syntax highlighting
         focusedWidget?.invalidate()
         focusedWidget?.onUnfocus()
