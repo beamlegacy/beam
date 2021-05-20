@@ -1,5 +1,5 @@
 import { WebEventsUI } from "./WebEventsUI"
-import { BeamTextSelection, BeamQuoteId, BeamRange } from "./BeamTypes"
+import { BeamCollectedQuote, BeamQuoteId, BeamRange } from "./BeamTypes"
 import {BeamHTMLElement} from "./BeamTypes"
 
 export interface PointAndShootUI extends WebEventsUI {
@@ -32,7 +32,7 @@ export interface PointAndShootUI extends WebEventsUI {
   /**
    * Select HTML selection to be drawn
    *
-   * @param {BeamCollectedNote[]} selectionRanges
+   * @param {BeamCollectedQuote[]} selectionRanges
    * @memberof PointAndShootUI
    */
   select(selectionRanges)
@@ -50,10 +50,10 @@ export interface PointAndShootUI extends WebEventsUI {
    * @param el {HTMLElement} The selection event (click or touch).
    * @param x {number} Horizontal coordinate of click/touch
    * @param y {number} Vertical coordinate of click/touch
-   * @param collectedEls {HTMLElement[]}
+   * @param collectedQuotes {BeamCollectedQuote[]}
    * @memberof PointAndShootUI
    */
-  shoot(quoteId: BeamQuoteId, el: BeamHTMLElement | BeamRange, x: number, y: number, collectedEls)
+  shoot(quoteId: BeamQuoteId, el: BeamHTMLElement | BeamRange, x: number, y: number, collectedQuotes: BeamCollectedQuote[])
   /**
    * Unselect shoot element
    *
