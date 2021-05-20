@@ -323,54 +323,50 @@ class PointAndShoot: WebPageHolder {
        - additionalText:
      - Throws: PointAndShootError
      */
-    func addShootToNote(noteTitle: String, withNote additionalText: String? = nil) throws -> Promise<Void> {
-        guard let url = page.url,
-              let note = page.getNote(fromTitle: noteTitle)
+    func addShootToNote(noteTitle: String, withNote noteText: String? = nil) throws -> Promise<Void> {
+        guard let sourceUrl = page.url,
+              let currentCard = page.getNote(fromTitle: noteTitle)
                 else {
             throw PointAndShootError("Could not find note to update with title \(noteTitle)")
         }
         guard let shootGroup = activeShootGroup else {
             fatalError("Expected to have an active shoot group")
         }
-        page.setDestinationNote(note, rootElement: note)
-        let html = shootGroup.html()
-        var text = BeamText()
-        text = html2Text(url: url, html: html)
+        page.setDestinationNote(currentCard, rootElement: currentCard)
+        let quoteHtml = shootGroup.html()
+        var quoteText = BeamText()
+        quoteText = html2Text(url: sourceUrl, html: quoteHtml)
         scorer.addTextSelection()
 
-        // now add a bullet point with the quoted text:
-        let title = page.title
-        let urlString = url.absoluteString
-        var quote = text
-        quote.addAttributes([.emphasis], to: quote.wholeRange)
-        return try getQuoteKind(url: url, html: html, title: title, urlString: urlString).then { quoteKind -> Void in
-            let quoteE = BeamElement()
+        let sourceTitle = page.title
+        let sourceUrlString = sourceUrl.absoluteString
+        quoteText.addAttributes([.emphasis], to: quoteText.wholeRange)
+        return try getQuoteKind(url: sourceUrl, html: quoteHtml, title: sourceTitle).then { quoteKind -> Void in
+            let quote = BeamElement()
             DispatchQueue.main.async {
-                guard let current = self.page.addToNote(allowSearchResult: true) else {
-                    Logger.shared.logError("Ignored current note add", category: .general)
+                guard let source = self.page.addToNote(allowSearchResult: true) else {
+                    Logger.shared.logError("Could not add note to page", category: .pointAndShoot)
                     return
                 }
-                var quoteParent: BeamElement
-                if let additionalText = additionalText, !additionalText.isEmpty {
-                    quoteParent = BeamElement()
-                    quoteParent.kind = quoteKind
-                    quoteParent.text = BeamText(text: additionalText, attributes: [])
-                    quoteParent.query = self.page.originalQuery
-                    current.addChild(quoteParent)
-                } else {
-                    quoteParent = current
+                quote.text = quoteText
+                quote.query = self.page.originalQuery
+                quote.kind = quoteKind
+
+                if let noteText = noteText, !noteText.isEmpty {
+                    let note = BeamElement()
+                    note.text = BeamText(text: noteText, attributes: [])
+                    note.query = self.page.originalQuery
+                    quote.addChild(note)
                 }
-                quoteE.kind = quoteKind
-                quoteE.text = quote
-                quoteE.query = self.page.originalQuery
-                quoteParent.addChild(quoteE)
+
+                source.addChild(quote)
             }
-            let noteInfo = NoteInfo(id: note.id, title: note.title)
-            try self.complete(noteInfo: noteInfo, quoteId: quoteE.id)
+            let noteInfo = NoteInfo(id: currentCard.id, title: currentCard.title)
+            try self.complete(noteInfo: noteInfo, quoteId: quote.id)
         }
     }
 
-    private func getQuoteKind(url: URL, html: String, title: String, urlString: String) throws -> Promise<ElementKind> {
+    private func getQuoteKind(url: URL, html: String, title: String) throws -> Promise<ElementKind> {
         var quoteKind: Promise<ElementKind>
         if let host = url.host,
            ["www.youtube.com", "youtube.com"].contains(host),
@@ -381,7 +377,7 @@ class PointAndShoot: WebPageHolder {
             let img = try doc.select("img")[0]
             quoteKind = try imageQuoteKind(imageEl: img)
         } else {
-            quoteKind = Promise(.quote(1, title, urlString))
+            quoteKind = Promise(.quote(1, title, url.absoluteString))
         }
         return quoteKind
     }
