@@ -456,7 +456,7 @@ export interface BeamMouseLocation {
   y: number
 }
 
-export interface BeamCollectedNote {
+export interface BeamCollectedQuote {
   el: BeamHTMLElement | BeamRange
   quoteId?: BeamQuoteId
 }

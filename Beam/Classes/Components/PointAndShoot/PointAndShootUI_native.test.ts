@@ -1,9 +1,8 @@
 import {BeamDocumentMock, BeamHTMLElementMock, BeamRangeMock, BeamTextMock} from "./Test/BeamMocks"
 import {BeamWindowMock} from "./Test/BeamWindowMock"
-import {PointAndShootUIMock} from "./Test/PointAndShootUIMock"
 import {PointAndShootUI_native} from "./PointAndShootUI_native"
 import {NativeMock} from "./Test/NativeMock"
-import { BeamCollectedNote, BeamRange } from "./BeamTypes"
+import { BeamRange } from "./BeamTypes"
 
 /**
  * @param frameEls {BeamHTMLElement[]}

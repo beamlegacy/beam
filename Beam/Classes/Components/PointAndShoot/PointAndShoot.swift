@@ -220,7 +220,7 @@ class PointAndShoot: WebPageHolder {
             activeShootGroup?.targets.removeAll()
         }
         for target in targets {
-            addShootTargets(target: target, targetGroup: activeShootGroup)
+            addShootTargets(target: target)
         }
     }
     /**
@@ -228,30 +228,20 @@ class PointAndShoot: WebPageHolder {
      
      - Parameter target: the shoot target to add
      */
-    private func addShootTargets(target: Target, targetGroup: ShootGroup?) {
-        if let group = targetGroup {
-            group.targets.append(target)
-            return
+    private func addShootTargets(target: Target) {
+        guard let activeShootGroup = activeShootGroup else {
+            fatalError("Should not shoot without an activeShootGroup")
         }
-
-        if activeShootGroup != nil {
-            activeShootGroup!.targets.append(target)
-            return
-        }
-
-        Logger.shared.logWarning("Should have a current group", category: .pointAndShoot)
-        return
+        activeShootGroup.targets.append(target)
     }
 
     private func updateShootGroup(targets: [Target], origin: String, group: ShootGroup) {
         // clear group targets and re-create them
         group.targets.removeAll()
-        for target in targets {
-            if group.quoteId == target.quoteId {
-                group.targets.append(target)
-            }
-            shoot(targets: [target], origin: origin)
+        for target in targets where group.quoteId == target.quoteId {
+            group.targets.append(target)
         }
+        shoot(targets: targets, origin: origin)
     }
 
     /// update shootGroups with targets

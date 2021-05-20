@@ -208,7 +208,7 @@ test("point then shoot, then cancel", () => {
     expect(pns.status).toEqual("pointing")
     expect(testUI.eventsCount).toEqual(3)
     expect(testUI.events[1]).toEqual({name: "point", el: pointedElement, x: 101, y: 102})
-    expect(pns.pointedEl.el).toEqual(pointedElement)
+    expect(pns.pointedTarget.el).toEqual(pointedElement)
 
     // Shoot
     const shotElement = new BeamHTMLElementMock("p")
@@ -217,18 +217,18 @@ test("point then shoot, then cancel", () => {
     pns.onClick(clickEvent)
     expect(pns.status).toEqual("shooting")
     expect(testUI.eventsCount).toEqual(5)
-    expect(testUI.events[3]).toEqual({name: "shoot", el: pointedElement, x: 103, y: 104, collectedEls: []})
-    expect(pns.collectedEls).toEqual([])
-    expect(pns.shootingEl.el).toEqual(shotElement)
+    expect(testUI.events[3]).toEqual({name: "shoot", el: pointedElement, x: 103, y: 104, collectedQuotes: []})
+    expect(pns.collectedQuotes).toEqual([])
+    expect(pns.shootingTarget.el).toEqual(shotElement)
 
     // Cancel shoot
     pns.setStatus("none") 
-    expect(pns.shootingEl.el).toEqual(shotElement)
-    expect(pns.pointedEl.el).toEqual(pointedElement)
+    expect(pns.shootingTarget.el).toEqual(shotElement)
+    expect(pns.pointedTarget.el).toEqual(pointedElement)
     expect(pns.status).toEqual("none")
     expect(testUI.eventsCount).toEqual(6)
     expect(testUI.events[5]).toEqual({name: "setStatus", status: "none"})
-    expect(pns.collectedEls).toEqual([])
+    expect(pns.collectedQuotes).toEqual([])
 })
 
 test("getSelectionRanges should return the number of available ranges", () => {

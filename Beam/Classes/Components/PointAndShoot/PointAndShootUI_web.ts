@@ -1,4 +1,4 @@
-import { BeamCollectedNote } from "./BeamTypes";
+import { BeamCollectedQuote } from "./BeamTypes";
 import {PointAndShootUI} from "./PointAndShootUI"
 import {WebEventsUI_web} from "./WebEventsUI_web";
 import {BeamHTMLElement} from "./BeamTypes"
@@ -95,7 +95,7 @@ export class PointAndShootUI_web extends WebEventsUI_web implements PointAndShoo
     super(win)
     this.log(`${this.toString()} instantiated`)
   }
-  select(selection: BeamCollectedNote[]) {
+  select(selection: BeamCollectedQuote[]) {
     throw new Error("Method not implemented.");
   }
   unselect(selection: any) {

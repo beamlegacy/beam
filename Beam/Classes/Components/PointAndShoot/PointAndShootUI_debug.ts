@@ -1,4 +1,4 @@
-import { BeamCollectedNote } from "./BeamTypes";
+import { BeamCollectedQuote } from "./BeamTypes";
 import {PointAndShootUI} from "./PointAndShootUI"
 import {PointAndShootUI_native} from "./PointAndShootUI_native";
 import {PointAndShootUI_web} from "./PointAndShootUI_web";
@@ -15,7 +15,7 @@ export class PointAndShootUI_debug implements PointAndShootUI {
     this.native = native
     this.web = web
   }
-  select(selection: BeamCollectedNote[]) {
+  select(selection: BeamCollectedQuote[]) {
     this.web.select(selection)
     this.native.select(selection)
   }

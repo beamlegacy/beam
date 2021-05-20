@@ -1,6 +1,6 @@
 import {PointAndShootUI} from "../PointAndShootUI"
 import {WebEventsUIMock} from "./WebEventsUIMock";
-import {BeamHTMLElement} from "../BeamTypes"
+import {BeamCollectedQuote, BeamHTMLElement} from "../BeamTypes"
 
 export class PointAndShootUIMock extends WebEventsUIMock implements PointAndShootUI {
   select(selection) {
@@ -21,8 +21,8 @@ export class PointAndShootUIMock extends WebEventsUIMock implements PointAndShoo
     this.events.push({name: "unpoint"})
   }
 
-  shoot(quoteId: string, el: BeamHTMLElement, x: number, y: number, collectedEls) {
-    this.events.push({name: "shoot", el, x, y, collectedEls})
+  shoot(quoteId: string, el: BeamHTMLElement, x: number, y: number, collectedQuotes: BeamCollectedQuote[]) {
+    this.events.push({name: "shoot", el, x, y, collectedQuotes})
   }
 
   unshoot(el: BeamHTMLElement) {

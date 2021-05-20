@@ -10,7 +10,7 @@ import {
   BeamElementMessagePayload,
   BeamQuoteId,
   BeamMouseLocation,
-  BeamCollectedNote,
+  BeamCollectedQuote,
   BeamRange,
 } from "./BeamTypes"
 import {Util} from "./Util"
@@ -98,7 +98,7 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
     this.native.sendMessage("point", pointPayload)
   }
 
-  selectMessage(ranges: BeamCollectedNote[]) {
+  selectMessage(ranges: BeamCollectedQuote[]) {
     // TODO: Throttle
     const selectPayloads = ranges.map(({quoteId, el}) => {
       return this.selectionAreaMessage(quoteId, el as BeamRange)
@@ -116,7 +116,6 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
    * @param y {number}
    */
   shootMessage(quoteId: string, el: BeamHTMLElement, x: number, y: number) {
-    console.log(el);
     const shootPayload = this.elementAreaMessage(quoteId, el, x, y)
     this.native.sendMessage("shoot", shootPayload)
   }
@@ -127,7 +126,7 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
 
   unpoint(el) {}
 
-  select(ranges: BeamCollectedNote[]) {
+  select(ranges: BeamCollectedQuote[]) {
     this.selectMessage(ranges)
   }
 
