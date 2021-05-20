@@ -1,7 +1,7 @@
 {
   "include": [
     "**/*"
-  ],
+, ".prettierrc.js"  ],
   "compilerOptions": {
     "target": "ES2018",
     "types": ["node"]

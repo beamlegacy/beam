@@ -9,6 +9,7 @@ import {
   BeamNodeType,
   BeamRange,
   BeamRect,
+  BeamSelection,
   BeamText,
   BeamWindow
 } from "../BeamTypes"
@@ -406,6 +407,70 @@ export class BeamHTMLElementMock extends BeamElementMock implements BeamHTMLElem
   nodeValue: any
 }
 
+export class BeamSelectionMock implements BeamSelection {
+  constructor(nodeName: string, attributes = {}) {
+    this.anchorNode = new BeamElementMock(nodeName)
+    this.focusNode = new BeamElementMock(nodeName)
+  }
+  anchorNode: BeamNode
+  focusNode: BeamNode
+  anchorOffset: 0
+  focusOffset: 0
+  isCollapsed: false
+  rangeCount: number = 0
+  type: "Range"
+  caretBidiLevel: 0 
+  private rangelist: BeamRange[] = []
+  addRange(range: BeamRange): void {
+    this.anchorNode = range.startContainer
+    this.focusNode = range.endContainer
+    this.rangelist.push(range)
+    this.rangeCount++
+  }
+  collapse(node: BeamNode, offset?: number): void {
+    throw new Error("Method not implemented.")
+  }
+  collapseToEnd(): void {
+    throw new Error("Method not implemented.")
+  }
+  collapseToStart(): void {
+    throw new Error("Method not implemented.")
+  }
+  containsNode(node: BeamNode, allowPartialContainment?: boolean): boolean {
+    throw new Error("Method not implemented.")
+  }
+  deleteFromDocument(): void {
+    throw new Error("Method not implemented.")
+  }
+  empty(): void {
+    throw new Error("Method not implemented.")
+  }
+  extend(node: BeamNode, offset?: number): void {
+    throw new Error("Method not implemented.")
+  }
+  getRangeAt(index: number): BeamRange {
+    return this.rangelist[index]
+  }
+  removeAllRanges(): void {
+    throw new Error("Method not implemented.")
+  }
+  removeRange(range: BeamRange): void {
+    throw new Error("Method not implemented.")
+  }
+  selectAllChildren(node: BeamNode): void {
+    throw new Error("Method not implemented.")
+  }
+  setBaseAndExtent(anchorNode: BeamNode, anchorOffset: number, focusNode: BeamNode, focusOffset: number): void {
+    throw new Error("Method not implemented.")
+  }
+  setPosition(node: BeamNode, offset?: number): void {
+    throw new Error("Method not implemented.")
+  }
+  toString(): string {
+    return ""
+  }
+}
+
 export class BeamHTMLIFrameElementMock extends BeamHTMLElementMock implements BeamHTMLIFrameElement {
 
   src: string
@@ -433,10 +498,96 @@ export class BeamHTMLIFrameElementMock extends BeamHTMLElementMock implements Be
 
 
 export class BeamRangeMock implements BeamRange {
+  cloneRange(): BeamRange {
+    throw new Error("Method not implemented.")
+  }
+  collapse(toStart?: boolean): void {
+    throw new Error("Method not implemented.")
+  }
+  compareBoundaryPoints(how: number, sourceRange: BeamRange): number {
+    throw new Error("Method not implemented.")
+  }
+  comparePoint(node: BeamNode, offset: number): number {
+    throw new Error("Method not implemented.")
+  }
+  createContextualFragment(fragment: string): DocumentFragment {
+    throw new Error("Method not implemented.")
+  }
+  deleteContents(): void {
+    throw new Error("Method not implemented.")
+  }
+  detach(): void {
+    throw new Error("Method not implemented.")
+  }
+  extractContents(): DocumentFragment {
+    throw new Error("Method not implemented.")
+  }
+  getClientRects(): BeamDOMRectList {
+    const rect = new BeamDOMRectMock(0, 0, 0, 0)
+    return new BeamDOMRectList([rect])
+  }
+  insertNode(node: BeamNode): void {
+    throw new Error("Method not implemented.")
+  }
+  intersectsNode(node: BeamNode): boolean {
+    throw new Error("Method not implemented.")
+  }
+  isPointInRange(node: BeamNode, offset: number): boolean {
+    throw new Error("Method not implemented.")
+  }
+  selectNodeContents(node: BeamNode): void {
+    throw new Error("Method not implemented.")
+  }
+  setEnd(node: BeamNode, offset: number): void {
+    this.endOffset = offset
+    this.endContainer = node
+  }
+  setEndAfter(node: BeamNode): void {
+    throw new Error("Method not implemented.")
+  }
+  setEndBefore(node: BeamNode): void {
+    throw new Error("Method not implemented.")
+  }
+  setStart(node: BeamNode, offset: number): void {
+    this.startOffset = offset
+    this.startContainer = node
+  }
+  setStartAfter(node: BeamNode): void {
+    throw new Error("Method not implemented.")
+  }
+  setStartBefore(node: BeamNode): void {
+    throw new Error("Method not implemented.")
+  }
+  surroundContents(newParent: BeamNode): void {
+    throw new Error("Method not implemented.")
+  }
+  toString(): string {
+    return "mock range content"
+  }
+  END_TO_END: number
+  END_TO_START: number
+  START_TO_END: number
+  START_TO_START: number
+  collapsed: boolean
+  endContainer: BeamNode
+  endOffset: number
+  startContainer: BeamNode
+  startOffset: number
+  commonAncestorContainer: BeamNode
+  cloneContents(): DocumentFragment {
+    return this.startContainer as any
+  }
   private node: BeamNode
 
-  getBoundingClientRect(): BeamRect {
-    return this.node.bounds
+  getBoundingClientRect(): DOMRect {
+    return {
+      ...this.node.bounds,
+      bottom: 0,
+      left: 0,
+      right: 0,
+      top: 0,
+      toJSON: () => "toJSON value not implemented"
+    }
   }
 
   selectNode(node: BeamNode): void {
@@ -455,10 +606,14 @@ export class BeamDocumentMock extends BeamNodeMock implements BeamDocument {
    */
   body
 
+  private selection: BeamSelection
+
   constructor(attributes = {}) {
     super("#document", BeamNodeType.document)
     this.body = {}
     this.documentElement = {}
+    this.selection = new BeamSelectionMock("div")
+    this.childNodes = [new BeamNodeMock("#text", 3)]
     Object.assign(this, attributes)
   }
 
@@ -477,14 +632,10 @@ export class BeamDocumentMock extends BeamNodeMock implements BeamDocument {
   }
 
   /**
-   * @return {Selection}
+   * @return {BeamSelection}
    */
   getSelection() {
-      return {
-        toString: () => {
-          return ""
-      }
-    }
+      return this.selection
   }
 
   /**

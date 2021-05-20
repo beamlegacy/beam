@@ -1,3 +1,4 @@
+import { BeamCollectedNote } from "./BeamTypes";
 import {PointAndShootUI} from "./PointAndShootUI"
 import {PointAndShootUI_native} from "./PointAndShootUI_native";
 import {PointAndShootUI_web} from "./PointAndShootUI_web";
@@ -13,6 +14,14 @@ export class PointAndShootUI_debug implements PointAndShootUI {
   constructor(private native: PointAndShootUI_native, private web: PointAndShootUI_web) {
     this.native = native
     this.web = web
+  }
+  select(selection: BeamCollectedNote[]) {
+    this.web.select(selection)
+    this.native.select(selection)
+  }
+  unselect(selection: any) {
+    this.web.unselect(selection)
+    this.native.unselect(selection)
   }
   getMouseLocation(el: any, x: any, y: any) {
     this.web.getMouseLocation(el, x, y)
@@ -86,21 +95,13 @@ export class PointAndShootUI_debug implements PointAndShootUI {
 
   enterSelection() {
     this.web.enterSelection()
-    this.native.enterSelection()
   }
 
   leaveSelection() {
     this.web.leaveSelection()
-    this.native.leaveSelection()
   }
 
   addTextSelection(selection) {
     this.web.addTextSelection(selection)
-    this.native.addTextSelection(selection)
-  }
-
-  textSelected(selection) {
-    this.web.textSelected(selection)
-    this.native.textSelected(selection)
   }
 }

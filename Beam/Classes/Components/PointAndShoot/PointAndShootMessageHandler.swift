@@ -15,18 +15,17 @@ enum PointAndShootMessages: String, CaseIterable {
      */
     case pointAndShoot_point
     /**
+     Selection of text or block
+     */
+    case pointAndShoot_select
+    /**
      Validate a pointed block for selection.
      */
     case pointAndShoot_shoot
     case pointAndShoot_shootConfirmation
     /**
-     Ongoing text highlighting
-     */
-    case pointAndShoot_textSelection
-    /**
      Completed text highlight
      */
-    case pointAndShoot_textSelected
     case pointAndShoot_onLoad
     case pointAndShoot_scroll
     case pointAndShoot_resize
@@ -59,46 +58,49 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
             guard webPage.pointAndShootAllowed else { return }
             guard let dict = pnsBody,
                   let origin = dict["origin"] as? String,
-                  let area = areaValue(of: dict, from: webPage),
+                  let areas = areasValue(of: dict, from: webPage),
                   let (location, html) = targetValues(of: dict, from: webPage) else {
                 pointAndShoot.unpoint()
                 return
             }
             let quoteId = pointAndShootQuoteIdValue(from: dict)
-            let pointArea = positions.viewportArea(area: area, origin: origin)
-            let target = pointAndShoot.createTarget(area: area, quoteId: quoteId, mouseLocation: location, html: html)
-            pointAndShoot.point(target: target)
-            Logger.shared.logInfo("Web block point: \(pointArea)", category: .web)
+            if let area = areas.first {
+                let pointArea = positions.viewportArea(area: area, origin: origin)
+                let target = pointAndShoot.createTarget(area: area, quoteId: quoteId, mouseLocation: location, html: html)
+                pointAndShoot.point(target: target)
+                Logger.shared.logInfo("Web block point: \(pointArea)", category: .web)
+            }
 
         case PointAndShootMessages.pointAndShoot_shoot.rawValue:
             guard webPage.pointAndShootAllowed == true else { return }
             guard let dict = pnsBody,
-                  let area = areaValue(of: dict, from: webPage),
+                  let areas = areasValue(of: dict, from: webPage),
                   let (location, html) = targetValues(of: dict, from: webPage),
                   let origin = dict["origin"] as? String else {
                 Logger.shared.logError("Ignored shoot event: \(String(describing: pnsBody))", category: .web)
                 return
             }
             let quoteId = pointAndShootQuoteIdValue(from: dict)
-            let target = pointAndShoot.createTarget(area: area, quoteId: quoteId, mouseLocation: location, html: html)
-            pointAndShoot.shoot(targets: [target], origin: origin)
-            Logger.shared.logInfo("Web shoot point: \(area)", category: .web)
+            let targets = areas.map { area -> PointAndShoot.Target in
+                Logger.shared.logInfo("Web shoot point: \(area)", category: .web)
+                return pointAndShoot.createTarget(area: area, quoteId: quoteId, mouseLocation: location, html: html)
+            }
+            pointAndShoot.shoot(targets: targets, origin: origin)
 
         case PointAndShootMessages.pointAndShoot_shootConfirmation.rawValue:
             guard webPage.pointAndShootAllowed == true else { return }
             guard let dict = pnsBody,
-                  let area = areaValue(of: dict, from: webPage),
+                  let areas = areasValue(of: dict, from: webPage),
                   dict["origin"] as? String != nil else {
                 Logger.shared.logError("Ignored shoot event: \(String(describing: pnsBody))", category: .web)
                 return
             }
             pointAndShoot.showShootInfo(group: pointAndShoot.activeShootGroup!)
-            Logger.shared.logInfo("Web shoot confirmation: \(area)", category: .web)
+            Logger.shared.logInfo("Web shoot confirmation: \(areas)", category: .web)
 
-        case PointAndShootMessages.pointAndShoot_textSelected.rawValue:
+        case PointAndShootMessages.pointAndShoot_select.rawValue:
             guard webPage.pointAndShootAllowed == true else { return }
             guard let dict = pnsBody,
-                  dict["index"] as? Int != nil,
                   dict["text"] as? String != nil,
                   let origin = dict["origin"] as? String,
                   let html = dict["html"] as? String,
@@ -114,28 +116,6 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
                 return pointAndShoot.createTarget(area: area, mouseLocation: CGPoint(x: x, y: y), html: html)
             }
             Logger.shared.logInfo("Web text selected, shooting targets: \(targets)", category: .web)
-            pointAndShoot.shoot(targets: targets, origin: origin)
-
-        case PointAndShootMessages.pointAndShoot_textSelection.rawValue:
-            guard webPage.pointAndShootAllowed == true else { return }
-            guard let dict = pnsBody,
-                  dict["index"] as? Int != nil,
-                  dict["text"] as? String != nil,
-                  let origin = dict["origin"] as? String,
-                  let html = dict["html"] as? String,
-                  let areas = areasValue(of: dict, from: webPage),
-                  !html.isEmpty
-                    else {
-                Logger.shared.logError("Ignored text selection event: \(String(describing: pnsBody))",
-                                       category: .web)
-                return
-            }
-            let targets = areas.map { area -> PointAndShoot.Target in
-                let x: CGFloat = 0
-                let y: CGFloat = area.maxY - area.minY
-                return pointAndShoot.createTarget(area: area, mouseLocation: CGPoint(x: x, y: y), html: html)
-            }
-            Logger.shared.logInfo("Web text selection, shooting targets: \(targets)", category: .web)
             pointAndShoot.shoot(targets: targets, origin: origin)
 
         case PointAndShootMessages.pointAndShoot_pinch.rawValue:
@@ -195,19 +175,26 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
         case PointAndShootMessages.pointAndShoot_resize.rawValue:
             guard let dict = pnsBody,
                   let selectedElements = dict["selected"] as? [[String: AnyObject]],
-                  let origin = dict["origin"] as? String
-                    else {
+                  let origin = dict["origin"] as? String else {
                 Logger.shared.logError("Ignored beam_resize: \(String(describing: pnsBody))", category: .web)
                 return
             }
-            let newTargets = selectedElements.compactMap { element -> PointAndShoot.Target? in
-                if let area = areaValue(of: element, from: webPage),
+
+            if selectedElements.count == 0 {
+                Logger.shared.logWarning("beam_resize selectedElements is empty. Skipping shoot updates", category: .web)
+                return
+            }
+
+            let newTargets = selectedElements.compactMap { element -> [PointAndShoot.Target]? in
+                if let areas = areasValue(of: element, from: webPage),
                    let (location, html) = targetValues(of: element, from: webPage) {
                     let quoteId = pointAndShootQuoteIdValue(from: element)
-                    return pointAndShoot.createTarget(area: area, quoteId: quoteId, mouseLocation: location, html: html)
+                    return areas.map { area -> PointAndShoot.Target in
+                        return pointAndShoot.createTarget(area: area, quoteId: quoteId, mouseLocation: location, html: html)
+                    }
                 }
                 return nil
-            }
+            }.flatMap { $0 }
             pointAndShoot.updateShoots(targets: newTargets, origin: origin)
 
         case PointAndShootMessages.pointAndShoot_setStatus.rawValue:
@@ -235,13 +222,6 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
         }
         let position = webPage.pointAndShoot.webPositions.jsToPoint(jsPoint: location)
         return (position, html)
-    }
-
-    func areaValue(of jsMessage: [String: AnyObject], from webPage: WebPage) -> NSRect? {
-        guard let area = jsMessage["area"] else {
-            return nil
-        }
-        return webPage.pointAndShoot.webPositions.jsToRect(jsArea: area)
     }
 
     func pointAndShootQuoteIdValue(from jsMessage: [String: AnyObject]) -> UUID? {

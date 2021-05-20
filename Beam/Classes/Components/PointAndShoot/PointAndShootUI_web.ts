@@ -1,3 +1,4 @@
+import { BeamCollectedNote } from "./BeamTypes";
 import {PointAndShootUI} from "./PointAndShootUI"
 import {WebEventsUI_web} from "./WebEventsUI_web";
 import {BeamHTMLElement} from "./BeamTypes"
@@ -93,6 +94,12 @@ export class PointAndShootUI_web extends WebEventsUI_web implements PointAndShoo
   constructor(win) {
     super(win)
     this.log(`${this.toString()} instantiated`)
+  }
+  select(selection: BeamCollectedNote[]) {
+    throw new Error("Method not implemented.");
+  }
+  unselect(selection: any) {
+    throw new Error("Method not implemented.");
   }
   getMouseLocation(_el: any, _x: any, _y: any) {
     // not used in web
@@ -353,9 +360,4 @@ export class PointAndShootUI_web extends WebEventsUI_web implements PointAndShoo
   addTextSelection(selection) {
     this.paintSelection(selection, this.pointClass)
   }
-
-  textSelected(selection) {
-    this.paintSelection(selection, this.shootClass)
-  }
-
 }
