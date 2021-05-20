@@ -143,6 +143,17 @@ class LinksSection: Widget {
         updateHeading(validRefs)
     }
 
+    override func updateChildrenLayout() {
+        super.updateChildrenLayout()
+        layout(children: children)
+    }
+
+    private func layout(children: [Widget]) {
+        for child in children {
+            child.layer.frame.origin = CGPoint(x: child.layer.frame.origin.x - 8, y: child.frameInDocument.origin.y + 3)
+        }
+    }
+
     func linkAllReferencesFromNote(named noteTitle: String) {
         // TODO
     }
@@ -202,18 +213,18 @@ class LinksSection: Widget {
 
     func setupLayerFrame() {
         sectionTitleLayer.frame = CGRect(
-            origin: CGPoint(x: 25, y: 0),
+            origin: CGPoint(x: 22, y: 0),
             size: CGSize(
                 width: availableWidth - (linkLayer?.layer.frame.width ?? 0 + (mode == .references ? 30 : 25)),
                 height: sectionTitleLayer.preferredFrameSize().height
             )
         )
 
-        layers["disclosure"]?.frame = CGRect(origin: CGPoint(x: 0, y: sectionTitleLayer.preferredFrameSize().height - 15), size: CGSize(width: 20, height: 20))
+        layers["disclosure"]?.frame = CGRect(origin: CGPoint(x: 0, y: sectionTitleLayer.preferredFrameSize().height / 2 - 9), size: CGSize(width: 20, height: 20))
     }
 
     override func updateRendering() {
-        contentsFrame = NSRect(x: -8, y: 8, width: availableWidth, height: selfVisible ? 30 : 0)
+        contentsFrame = NSRect(x: 0, y: 0, width: availableWidth, height: selfVisible ? 30 : 0)
 
         computedIdealSize = contentsFrame.size
         computedIdealSize.width = frame.width
@@ -228,12 +239,13 @@ class LinksSection: Widget {
     override func updateSubLayersLayout() {
         CATransaction.disableAnimations {
             setupLayerFrame()
-            separatorLayer.frame = CGRect(x: 0, y: sectionTitleLayer.frame.maxY + 14, width: 560, height: 1)
+            separatorLayer.frame = CGRect(x: 0, y: sectionTitleLayer.frame.maxY + 8, width: 560, height: 1)
 
             guard let linkAllLayer = linkLayer else { return }
-            linkAllLayer.frame = CGRect(origin: CGPoint(x: frame.width - linkAllLayer.frame.width / 2, y: 0), size: NSSize(width: 54, height: 21))
-
             let linkActionLayerFrameSize = linkActionLayer.preferredFrameSize()
+
+            linkAllLayer.frame = CGRect(origin: CGPoint(x: frame.width - linkActionLayerFrameSize.width, y: 0), size: NSSize(width: 54, height: 21))
+
             let linkActionLayerXPosition = linkAllLayer.bounds.width / 2 - linkActionLayerFrameSize.width / 2
             let linkActionLayerYPosition = linkAllLayer.bounds.height / 2 - linkActionLayerFrameSize.height / 2
             linkActionLayer.frame = CGRect(x: linkActionLayerXPosition, y: linkActionLayerYPosition,

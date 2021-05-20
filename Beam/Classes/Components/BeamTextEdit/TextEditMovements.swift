@@ -202,11 +202,19 @@ extension TextRoot {
             return true
         }
 
-        let parent = root
-        selection.append(parent)
-        selection.appendChildren(of: parent)
-        selection.start = parent
-        selection.end = parent.deepestElementNodeChild()
+        if let proxyNodeStart = selection.start as? ProxyNode, selection.isSelectingProxy {
+            let parent = proxyNodeStart.highestParent()
+            selection.append(parent)
+            selection.appendChildren(of: parent)
+            selection.start = parent
+            selection.end = parent.deepestElementNodeChild()
+        } else if !selection.isSelectingProxy {
+            let parent = root
+            selection.append(parent)
+            selection.appendChildren(of: parent)
+            selection.start = parent
+            selection.end = parent.deepestElementNodeChild()
+        }
         return true
     }
 
@@ -325,7 +333,8 @@ extension TextRoot {
     }
 
     func startNodeSelection() {
-        guard let node = focusedWidget as? TextNode else { return }
+        guard let node = focusedWidget as? TextNode,
+              node.placeholder.isEmpty || !node.text.isEmpty else { return }
         node.updateActionLayerVisibility(hidden: true)
         root.state.nodeSelection = NodeSelection(start: node, end: node)
         cancelSelection()

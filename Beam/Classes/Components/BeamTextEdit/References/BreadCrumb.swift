@@ -21,6 +21,7 @@ class BreadCrumb: Widget {
     var container: Layer?
 
     var proxyTextNode: ProxyTextNode!
+    var hasLink: Bool = false
 
     override var open: Bool {
         didSet {
@@ -49,6 +50,9 @@ class BreadCrumb: Widget {
     private let maxBreadCrumbWidth: CGFloat = 100
     private let breadCrumbYPosition: CGFloat = 3
     private let spaceBreadcrumbIcon: CGFloat = 3
+    private let containerPadding: CGFloat = 23
+    private let containerLinkSize: CGFloat = 538
+    private let containerRefSize: CGFloat = 492
 
     init(parent: Widget, element: BeamElement) {
         self.proxy = ProxyElement(for: element)
@@ -61,6 +65,7 @@ class BreadCrumb: Widget {
         ref.open = element.children.isEmpty // Yes, this is intentional
         self.proxyTextNode = ref
         self.currentLinkedRefNode = ref
+        hasLink = isLink ? isLink : proxyTextNode.childrenIsLink()
 
         guard let note = self.crumbChain.first as? BeamNote else { return }
 
@@ -257,23 +262,25 @@ class BreadCrumb: Widget {
 
     private func layout(children: [Widget]) {
         for child in children {
-            child.layer.frame.origin = CGPoint(x: child.layer.frame.origin.x, y: child.frameInDocument.origin.y + 10)
+            child.availableWidth = (hasLink ? containerLinkSize : containerRefSize) - child.offsetInRoot.x + child.childInset
+            child.selectionLayerWidth = child.layer.frame.width + child.offsetInRoot.x + child.childInset
+            child.layer.frame.origin = CGPoint(x: child.layer.frame.origin.x - 8, y: crumbChain.count > 1 ? child.frameInDocument.origin.y - 4 : child.frameInDocument.origin.y + 2)
             layout(children: child.children)
         }
     }
 
     override func updateRendering() {
-        contentsFrame = NSRect(x: 0, y: -10, width: availableWidth, height: showCrumbs ? 25 : 0)
+        contentsFrame = NSRect(x: 14, y: -1, width: availableWidth, height: showCrumbs ? 28 : 0)
 
         computedIdealSize = contentsFrame.size
 
         CATransaction.disableAnimations {
+            let linkLayerFrameSize = linkLayer.preferredFrameSize()
             if let actionLinkLayer = layers["actionLinkLayer"] as? LinkButtonLayer {
                 actionLinkLayer.frame = CGRect(
-                    origin: CGPoint(x: availableWidth, y: 0),
+                    origin: CGPoint(x: availableWidth - linkLayerFrameSize.width / 2, y: 0),
                     size: NSSize(width: 36, height: 21)
                 )
-                let linkLayerFrameSize = linkLayer.preferredFrameSize()
                 let linkLayerXPosition = actionLinkLayer.bounds.width / 2 - linkLayerFrameSize.width / 2
                 let linkLayerYPosition = actionLinkLayer.bounds.height / 2 - linkLayerFrameSize.height / 2
                 linkLayer.frame = CGRect(x: linkLayerXPosition, y: linkLayerYPosition,
@@ -283,7 +290,6 @@ class BreadCrumb: Widget {
 
         if open {
             var childrenHeight = CGFloat(0)
-            let hasLink = isLink ? isLink : currentLinkedRefNode.childrenIsLink()
             for c in children {
                 childrenHeight += c.idealSize.height
             }
@@ -294,8 +300,8 @@ class BreadCrumb: Widget {
             }
             CATransaction.disableAnimations {
                 guard let container = container else { return }
-                let containerWidth: CGFloat = hasLink ? 538 : 492
-                container.frame = NSRect(x: 0, y: 0, width: containerWidth, height: childrenHeight + 22)
+                let containerWidth: CGFloat = hasLink ? containerLinkSize : containerRefSize
+                container.frame = NSRect(x: 0, y: -2, width: containerWidth, height: childrenHeight + containerPadding)
             }
         }
     }
@@ -305,7 +311,7 @@ class BreadCrumb: Widget {
     }
 
     var isLink: Bool {
-        currentLinkedRefNode.isLink
+        proxyTextNode.isLink
     }
 
     var isReference: Bool {

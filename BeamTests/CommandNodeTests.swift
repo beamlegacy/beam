@@ -231,6 +231,7 @@ class CommandNodeTests: QuickSpec {
                     rootNode.focusedWidget = rootNode.children[0]
                     rootNode.startNodeSelection()
                     rootNode.extendNodeSelectionDown()
+                    expect(rootNode.state.nodeSelection?.nodes.count).to(equal(2))
                     rootNode.deleteBackward()
                     rootNode.focusedWidget = rootNode.children[0]
                     rootNode.insertText(string: "Coucou", replacementRange: rootNode.selectedTextRange)
