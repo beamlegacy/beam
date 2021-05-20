@@ -15,6 +15,7 @@ class BrowserTabConfiguration: WKWebViewConfiguration, BeamWebViewConfiguration 
 //        preferences.plugInsEnabled = true
         preferences._setFullScreenEnabled(true)
         preferences.isFraudulentWebsiteWarningEnabled = true
+        preferences.setValue(true, forKey: "developerExtrasEnabled")
         defaultWebpagePreferences.preferredContentMode = .desktop
 
         let loggingMessageHandler = LoggingMessageHandler(page: self)

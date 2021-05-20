@@ -1298,7 +1298,6 @@
 		BAA670D8E6A58A6836DA2794 /* PointAndShootTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PointAndShootTest.swift; sourceTree = "<group>"; };
 		BAA670DDAA16ED17F69AA6C4 /* jest.config.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = jest.config.js; sourceTree = "<group>"; };
 		BAA670FA9720D0BD2011EC10 /* ShootCardPicker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShootCardPicker.swift; sourceTree = "<group>"; };
-		BAA6713F8AE716FDB0BACE36 /* DevTools.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = DevTools.js; sourceTree = "<group>"; };
 		BAA67168F93FFC9281A6D8A5 /* index.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = index.html; sourceTree = "<group>"; };
 		BAA6719DA7B5A8574E64AE71 /* ShootAbsolutePositioning.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShootAbsolutePositioning.swift; sourceTree = "<group>"; };
 		BAA6719ECB481D659C210913 /* index_native.scss */ = {isa = PBXFileReference; lastKnownFileType = file.scss; path = index_native.scss; sourceTree = "<group>"; };
@@ -2974,7 +2973,6 @@
 				BAA67D2FC7A644FB3E1C05E6 /* mixins.scss */,
 				BAA670DDAA16ED17F69AA6C4 /* jest.config.js */,
 				BAA67E77EF273CA502E66A58 /* .gitignore */,
-				BAA6713F8AE716FDB0BACE36 /* DevTools.js */,
 				BAA679E2DF3556E0E444844D /* .sassrc */,
 				BAA6738E9DD9D41F95BB1602 /* tsconfig.json */,
 				BAA679D78927DFBF9EB1B0E5 /* PopupUI_web.js */,
