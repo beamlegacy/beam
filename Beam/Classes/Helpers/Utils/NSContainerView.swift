@@ -19,14 +19,11 @@ public class NSViewContainerView<ContentView: NSView>: NSView {
                 oldValue?.removeFromSuperview()
 
                 if let contentView = self.contentView {
+                    // We are using autoresizingMask instead of autolayout to support embedded devtools (developerExtrasEnabled)
+                    // see: https://stackoverflow.com/q/60727065
+                    contentView.autoresizingMask = [.width, .height]
+                    contentView.frame = self.contentHolder.bounds
                     self.contentHolder.addSubview(contentView)
-                    contentView.translatesAutoresizingMaskIntoConstraints = false
-                    NSLayoutConstraint.activate([
-                        contentView.leadingAnchor.constraint(equalTo: self.contentHolder.leadingAnchor),
-                        contentView.trailingAnchor.constraint(equalTo: self.contentHolder.trailingAnchor),
-                        contentView.topAnchor.constraint(equalTo: self.contentHolder.topAnchor),
-                        contentView.bottomAnchor.constraint(equalTo: self.contentHolder.bottomAnchor)
-                    ])
                 }
             }
         }
