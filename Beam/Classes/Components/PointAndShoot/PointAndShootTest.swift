@@ -101,6 +101,8 @@ class PasswordStoreMock: PasswordStore {
 
     func find(_ searchString: String, completion: @escaping ([PasswordManagerEntry]) -> Void) {}
 
+    func fetchAll(completion: @escaping ([PasswordManagerEntry]) -> Void) {}
+
     func password(host: URL, username: String, completion: @escaping (String?) -> Void) {}
 
     func save(host: URL, username: String, password: String) {}

@@ -60,7 +60,7 @@ import Promises
     }
 
     lazy var passwordOverlayController: PasswordOverlayController = {
-        let controller = PasswordOverlayController(passwordStore: MockPasswordStore.shared, userInfoStore: MockUserInformationsStore.shared)
+        let controller = PasswordOverlayController(passwordStore: state.data.passwordsDB, userInfoStore: MockUserInformationsStore.shared)
         controller.page = self
         return controller
     }()

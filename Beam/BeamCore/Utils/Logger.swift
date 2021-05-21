@@ -30,6 +30,7 @@ public enum LogCategory: String {
     case pointAndShoot
     case fileDB
     case oauth
+    case passwordsDB
 }
 
 public final class Logger {
