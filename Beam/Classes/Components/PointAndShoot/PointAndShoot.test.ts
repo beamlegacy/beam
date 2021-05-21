@@ -262,3 +262,31 @@ test("onSelection should create selection event in testUI", () => {
     expect(testUI.eventsCount).toEqual(1)
     expect(testUI.events[0]).toEqual({name: "select", selection: [{quoteId: undefined, el: range}]})
 })
+
+test("click in shooting mode should dismis shoot", () => {
+    const {pns, testUI} = pointAndShootTestBed()
+
+    const pointedElement = new BeamHTMLElementMock("p")
+    const pointEvent = new BeamMouseEvent({
+        name: "mousemove",
+        target: pointedElement,
+        altKey: true,
+        clientX: 101,
+        clientY: 102
+    })
+    pns.onMouseMove(pointEvent)
+    expect(pns.status).toEqual("pointing")
+    expect(testUI.eventsCount).toEqual(3)
+    expect(testUI.events[1]).toEqual({name: "point", el: pointedElement, x: 101, y: 102})
+    expect(pns.pointedEl.el).toEqual(pointedElement)
+
+    // Shoot
+    const shotElement = new BeamHTMLElementMock("p")
+    const clickEvent = new BeamMouseEvent()
+    Object.assign(clickEvent, {name: "mouseclick", clientX: 103, clientY: 104, target: shotElement, altKey: true})
+    pns.onClick(clickEvent)
+    expect(pns.status).toEqual("shooting")
+    Object.assign(clickEvent, {name: "mouseclick", clientX: 1, clientY: 1, target: shotElement, altKey: true})
+    pns.onClick(clickEvent)
+    expect(pns.status).toEqual("none")
+})

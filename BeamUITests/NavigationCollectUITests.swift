@@ -259,6 +259,33 @@ class NavigationCollectUITests: QuickSpec {
                     // Resize window to inital size
                     self.helper.tapCommand(.resizeWindowPortrait)
                 }
+                
+                it("can click to dismis collect UI") {
+                    self.omnibarHelper.navigateTo(text: "en.wikipedia.org/wiki/Internet_Explorer")
+                    // Great example of complex selction.
+                    let searchText = "Current Internet Explorer logo"
+                    // Get locations of the text
+                    let parent = self.app.webViews.containing(.staticText,
+                                                              identifier: searchText).element
+                    
+                    // Select
+                    let firstChild = parent.staticTexts[searchText]
+                    let start = firstChild.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0.5))
+                    let end = firstChild.coordinate(withNormalizedOffset: CGVector(dx: 1, dy: 0.5))
+                    start.click(forDuration: 1, thenDragTo: end)
+                    
+                    // Tap option
+                    XCUIElement.perform(withKeyModifiers: .option) {}
+                    
+                    let shootSelections = self.app.otherElements.matching(identifier:"ShootFrameSelection")
+                    expect(shootSelections.count) == 1
+
+                    let textElementOffset = firstChild.coordinate(withNormalizedOffset: CGVector(dx: -0.2, dy: -2))
+                    textElementOffset.click()
+                    sleep(1)
+                    let shootSelections2 = self.app.otherElements.matching(identifier:"ShootFrameSelection")
+                    expect(shootSelections2.count) == 0
+                }
             }
             
             describe("Point") {
@@ -728,6 +755,37 @@ class NavigationCollectUITests: QuickSpec {
                     self.helper.assertFramePositions(searchText: searchText, identifier: "ShootFrameSelection")
                     // Add to today's note
                     self.helper.addNote()
+                }
+                
+                it("can click to dismis collect UI") {
+                    self.omnibarHelper.navigateTo(text: "en.wikipedia.org/wiki/Internet_Explorer")
+                    // Great example of complex selction.
+                    let searchText = "Current Internet Explorer logo"
+                    // Get locations of the text
+                    let parent = self.app.webViews.containing(.staticText,
+                                                              identifier: searchText).element
+                    let textElement = parent.staticTexts[searchText]
+                    let textElementStart = textElement.coordinate(withNormalizedOffset: CGVector(dx: 0.2, dy: 0.5))
+                    let textElementMiddle = textElement.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+                    
+                    // click at start of element to make sure the page has focus
+                    textElementStart.click()
+                    // Hold option
+                    XCUIElement.perform(withKeyModifiers: .option) {
+                        // While holding option
+                        // Clicking element to trigger shooting mode
+                        textElementMiddle.click()
+                        // Release option
+                    }
+                    
+                    let shootSelections = self.app.otherElements.matching(identifier:"ShootFrameSelection")
+                    expect(shootSelections.count) == 1
+                    
+                    let textElementOffset = textElement.coordinate(withNormalizedOffset: CGVector(dx: -0.2, dy: -2))
+                    textElementOffset.click()
+                    sleep(1)
+                    let shootSelections2 = self.app.otherElements.matching(identifier:"ShootFrameSelection")
+                    expect(shootSelections2.count) == 0
                 }
             }
         }
