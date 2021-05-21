@@ -24,6 +24,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var index: Index
     var indexer: GRDBIndexer
     var fileDB: BeamFileDB
+    var passwordsDB: PasswordsDB
     @Published var noteCount = 0
     @Published var lastChangedElement: BeamElement?
     @Published var showTabStats = false
@@ -45,6 +46,8 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     static var indexPath: URL { return URL(fileURLWithPath: dataFolder + "/index.beamindex") }
     static var indexerPath: String { return dataFolder + "/index.beamindexer" }
     static var fileDBPath: String { return dataFolder + "/files.db" }
+    static var passwordsDBPath: String { return dataFolder + "/passwords.db" }
+
     static var linkStorePath: URL { return URL(fileURLWithPath: dataFolder + "/links.store") }
 
     override init() {
@@ -72,6 +75,13 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
             fileDB = try BeamFileDB(path: Self.fileDBPath)
         } catch let error {
             Logger.shared.logError("Error while creating the File Database [\(error)]", category: .fileDB)
+            fatalError()
+        }
+
+        do {
+            passwordsDB = try PasswordsDB(path: Self.passwordsDBPath)
+        } catch let error {
+            Logger.shared.logError("Error while creating the Passwords Database [\(error)]", category: .passwordsDB)
             fatalError()
         }
 
