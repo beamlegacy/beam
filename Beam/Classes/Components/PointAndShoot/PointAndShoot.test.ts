@@ -278,7 +278,7 @@ test("click in shooting mode should dismis shoot", () => {
     expect(pns.status).toEqual("pointing")
     expect(testUI.eventsCount).toEqual(3)
     expect(testUI.events[1]).toEqual({name: "point", el: pointedElement, x: 101, y: 102})
-    expect(pns.pointedEl.el).toEqual(pointedElement)
+    expect(pns.pointedTarget.el).toEqual(pointedElement)
 
     // Shoot
     const shotElement = new BeamHTMLElementMock("p")
