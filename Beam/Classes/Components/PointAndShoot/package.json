@@ -6,11 +6,11 @@
   "main": "index_prod.js",
   "scripts": {
     "clean": "rm -Rf node_modules && rm -Rf .parcel-cache",
-    "prebuild": "yarn install && yarn test",
+    "prebuild": "yarn install",
     "build": "yarn run build_native",
-    "build_native": "node_modules/.bin/sass --embed-source-map index_native.scss:index_prod.css && parcel build --no-cache --no-content-hash --no-optimize index_native.js",
-    "build_web": "node_modules/.bin/sass --embed-source-map index_web.scss:index_prod.css && parcel build --no-cache --no-content-hash --no-optimize index_web.js",
-    "build_debug": "node_modules/.bin/sass --embed-source-map index_debug.scss:index_prod.css && parcel build --no-cache --no-content-hash --no-optimize index_debug.js",
+    "build_native": "node_modules/.bin/sass --embed-source-map index_native.scss:index_prod.css && parcel build --no-content-hash --no-optimize index_native.js",
+    "build_web": "node_modules/.bin/sass --embed-source-map index_web.scss:index_prod.css && parcel build --no-content-hash --no-optimize index_web.js",
+    "build_debug": "node_modules/.bin/sass --embed-source-map index_debug.scss:index_prod.css && parcel build --no-content-hash --no-optimize index_debug.js",
     "test": "node --experimental-vm-modules node_modules/.bin/jest"
   },
   "targets": {
