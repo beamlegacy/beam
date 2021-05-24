@@ -555,6 +555,7 @@
 		BAA67DDD4452566DFF99171E /* PasswordOverlayController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA670958C9BAC6322CDA80A /* PasswordOverlayController.swift */; };
 		BAA67E2CEDBE8BF2696AB646 /* BeamWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA670D131DF7CAE7FA6664E /* BeamWebView.swift */; };
 		BAA67EC2B781F8A78CD5A6B0 /* Beam.scss in Resources */ = {isa = PBXBuildFile; fileRef = BAA67EA80CD97EDF95F98D66 /* Beam.scss */; };
+		BAA67EF4256D22191C1E515F /* test_js.sh in Resources */ = {isa = PBXBuildFile; fileRef = BAA677D2622FEE091922E08C /* test_js.sh */; };
 		BAA67F0398B7B9D2CA9ADE25 /* ContentTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA674174D9C44BC3C8FF465 /* ContentTypes.swift */; };
 		BAA67F19308A38C387C47D6E /* PointAndShootUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA675190ACFCE6361AC531B /* PointAndShootUI.swift */; };
 		BAA67F44FDFA2FFBC5FE8245 /* .parcelrc in Resources */ = {isa = PBXBuildFile; fileRef = BAA67382F8DB4EC0FF65F11F /* .parcelrc */; };
@@ -1344,6 +1345,7 @@
 		BAA6777EB9326511BE7FD0DC /* BrowsingTreeScorer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = BrowsingTreeScorer.swift; path = BrowsingScorer/BrowsingTreeScorer.swift; sourceTree = "<group>"; };
 		BAA6779A8E69417A47D041B5 /* PointFrame.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PointFrame.swift; sourceTree = "<group>"; };
 		BAA677C8DE42140C0F0BD535 /* PointAndShootUI_native.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = PointAndShootUI_native.ts; sourceTree = "<group>"; };
+		BAA677D2622FEE091922E08C /* test_js.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = test_js.sh; path = scripts/test_js.sh; sourceTree = "<group>"; };
 		BAA67895F15325CD8242458B /* package-lock.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "package-lock.json"; sourceTree = "<group>"; };
 		BAA678E2B362F5D8A1A801D4 /* PasswordManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PasswordManager.swift; path = PasswordManager/PasswordManager.swift; sourceTree = "<group>"; };
 		BAA678E5952B4D5130248886 /* BeamDownloadManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BeamDownloadManager.swift; sourceTree = "<group>"; };
@@ -1552,6 +1554,7 @@
 				0325626D26051D3A006513E4 /* RBFilterManagerState.m */,
 				0325625826051D3A006513E4 /* Tests */,
 				0325624626051D3A006513E4 /* Utils */,
+				BAA677D2622FEE091922E08C /* test_js.sh */,
 			);
 			name = "Ad blocker";
 			path = ../..;
@@ -3122,6 +3125,7 @@
 				965A783A2514F149009980D4 /* Frameworks */,
 				965A783B2514F149009980D4 /* Resources */,
 				521FEC702604F1FF009000F9 /* Copy Vinyl Cassettes */,
+				02F5037B26592009001C24A6 /* Test Web */,
 			);
 			buildRules = (
 			);
@@ -3455,6 +3459,7 @@
 				BAA6750B78E3812C7DA5DF7C /* tsconfig.json in Resources */,
 				BAA671BC1FD82D27BA44112E /* package-lock.json in Resources */,
 				BAA67B681D12191FE57E7807 /* PopupUI_web.scss in Resources */,
+				BAA67EF4256D22191C1E515F /* test_js.sh in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3514,6 +3519,24 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "if [ $ENABLE_PREVIEWS == \"NO\" ]\nthen\n    export PATH=\"$PATH:/opt/homebrew/bin\"\n    ./scripts/build_js.sh\n\nelse\n  echo \"Skipping the script because of SwiftUI preview mode\"\nfi\n";
+		};
+		02F5037B26592009001C24A6 /* Test Web */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Test Web";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "export PATH=\"$PATH:/opt/homebrew/bin\"\n./scripts/test_js.sh\n";
 		};
 		520582C0257E351800E0533A /* Env variable Injector */ = {
 			isa = PBXShellScriptBuildPhase;
