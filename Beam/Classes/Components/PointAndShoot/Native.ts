@@ -6,7 +6,7 @@ export class Native {
    */
   static instance: Native
 
-  readonly origin: string;
+  readonly href: string;
   protected readonly messageHandlers: BeamMessageHandler[];
 
   /**
@@ -27,8 +27,8 @@ export class Native {
    * @param win {BeamWindow}
    */
   constructor(readonly win: BeamWindow) {
-    this.origin = win.origin
-    console.log("origin", this.origin)
+    this.href = win.location.href
+    console.log("href", this.href)
     this.messageHandlers = win.webkit && win.webkit.messageHandlers
     if (!this.messageHandlers) {
       throw Error("Could not find webkit message handlers")
@@ -42,15 +42,15 @@ export class Native {
    * @param name {string} Message name.
    *        Will be converted to ${prefix}_beam_${name} before sending.
    * @param payload {any} The message data.
-   *        An "origin" property will always be added as the base URI of the current frame.
+   *        An "href" property will always be added as the base URI of the current frame.
    */
   sendMessage(name: string, payload: {}) {
-    this.log("sendMessage", name, payload)
+    this.log("sendMessage", name, payload, this.href)
     const messageKey = `pointAndShoot_${name}`
     const messageHandler = this.messageHandlers[messageKey]
     if (messageHandler) {
-      const origin = this.origin
-      messageHandler.postMessage({origin, ...payload}, origin)
+      const href = this.href
+      messageHandler.postMessage({href, ...payload}, href)
     } else {
       throw Error(`No message handler for message "${name}"`)
     }

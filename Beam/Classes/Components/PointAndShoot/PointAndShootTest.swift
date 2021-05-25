@@ -214,7 +214,7 @@ class PointAndShootTest: XCTestCase {
         pns.point(target: target1)
         pns.draw()
         // Shoot
-        pns.shoot(targets: [target1], origin: pns.page.url!.string)
+        pns.shoot(targets: [target1], href: pns.page.url!.string)
         pns.status = .shooting
         pns.draw()
         XCTAssertEqual(pns.status, .shooting)
@@ -235,7 +235,7 @@ class PointAndShootTest: XCTestCase {
         pns.point(target: target1) // first point
         pns.draw()
         // Shoot
-        pns.shoot(targets: [target1], origin: pns.page.url!.string) // then shoot
+        pns.shoot(targets: [target1], href: pns.page.url!.string) // then shoot
         pns.status = .shooting
         pns.draw()
         XCTAssertEqual(pns.status, .shooting)       // Disallow unpoint while shooting
@@ -258,7 +258,7 @@ class PointAndShootTest: XCTestCase {
         // Shoot twice
         pns.point(target: target2) // first point
         pns.draw()
-        pns.shoot(targets: [target2], origin: pns.page.url!.string)
+        pns.shoot(targets: [target2], href: pns.page.url!.string)
         pns.status = .shooting
         pns.draw()
         XCTAssertEqual(testUI.groupsUI.count, 1)    // Seeing the current shoot only
@@ -283,7 +283,7 @@ class PointAndShootTest: XCTestCase {
         pns.point(target: imageTarget)
         pns.draw()
         // Shoot
-        pns.shoot(targets: [imageTarget], origin: pns.page.url!.string)
+        pns.shoot(targets: [imageTarget], href: pns.page.url!.string)
         pns.status = .shooting
         pns.draw()
         XCTAssertEqual(testUI.events.count, 3)

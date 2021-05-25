@@ -1,5 +1,5 @@
-import {BeamDocument, BeamMessageHandler, BeamVisualViewport, BeamWindow} from "../BeamTypes"
-import {BeamDocumentMock} from "./BeamMocks"
+import {BeamDocument, BeamLocation, BeamMessageHandler, BeamVisualViewport, BeamWindow} from "../BeamTypes"
+import {BeamDocumentMock, BeamLocationMock} from "./BeamMocks"
 import {PointAndShoot} from "../PointAndShoot"
 import {BeamEventTargetMock} from "./BeamEventTargetMock"
 
@@ -26,9 +26,10 @@ export class BeamWindowMock extends BeamEventTargetMock implements BeamWindow {
 
   readonly document: BeamDocument
   pns: PointAndShoot
-  constructor(document: BeamDocument = new BeamDocumentMock()) {
+  constructor(document: BeamDocument = new BeamDocumentMock(), location: BeamLocation = new BeamLocationMock()) {
     super()
     this.document = document
+    this.location = location
     this.visualViewport.scale = 1
   }
 

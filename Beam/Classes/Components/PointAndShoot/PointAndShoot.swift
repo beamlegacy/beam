@@ -98,10 +98,10 @@ class PointAndShoot: WebPageHolder {
      */
     class ShootGroup {
 
-        let origin: String
+        let href: String
 
-        init(origin: String) {
-            self.origin = origin
+        init(href: String) {
+            self.href = href
         }
 
         /**
@@ -212,9 +212,9 @@ class PointAndShoot: WebPageHolder {
         }
     }
 
-    func shoot(targets: [Target], origin: String) {
+    func shoot(targets: [Target], href: String) {
         if activeShootGroup == nil {
-            activeShootGroup = ShootGroup(origin: origin)
+            activeShootGroup = ShootGroup(href: href)
             Logger.shared.logInfo("shootGroups.count \(shootGroups.count)", category: .pointAndShoot)
         } else {
             activeShootGroup?.targets.removeAll()
@@ -235,26 +235,26 @@ class PointAndShoot: WebPageHolder {
         activeShootGroup.targets.append(target)
     }
 
-    private func updateShootGroup(targets: [Target], origin: String, group: ShootGroup) {
+    private func updateShootGroup(targets: [Target], href: String, group: ShootGroup) {
         // clear group targets and re-create them
         group.targets.removeAll()
         for target in targets where group.quoteId == target.quoteId {
             group.targets.append(target)
         }
-        shoot(targets: targets, origin: origin)
+        shoot(targets: targets, href: href)
     }
 
     /// update shootGroups with targets
     /// - Parameters:
     ///   - targets: the shoot targets to update
-    ///   - origin: browser tab origin
-    func updateShoots(targets: [Target], origin: String) {
+    ///   - href: browser tab href
+    func updateShoots(targets: [Target], href: String) {
         for group in shootGroups {
-            updateShootGroup(targets: targets, origin: origin, group: group)
+            updateShootGroup(targets: targets, href: href, group: group)
         }
 
         if let group = activeShootGroup {
-            updateShootGroup(targets: targets, origin: origin, group: group)
+            updateShootGroup(targets: targets, href: href, group: group)
         }
     }
 

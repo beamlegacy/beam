@@ -2,7 +2,7 @@ import Foundation
 import BeamCore
 
 struct FrameInfo {
-    let origin: String
+    let href: String
     let x: CGFloat
     let y: CGFloat
     let width: CGFloat
@@ -57,7 +57,7 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
         case PointAndShootMessages.pointAndShoot_point.rawValue:
             guard webPage.pointAndShootAllowed else { return }
             guard let dict = pnsBody,
-                  let origin = dict["origin"] as? String,
+                  let href = dict["href"] as? String,
                   let areas = areasValue(of: dict, from: webPage),
                   let (location, html) = targetValues(of: dict, from: webPage) else {
                 pointAndShoot.unpoint()
@@ -65,7 +65,7 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
             }
             let quoteId = pointAndShootQuoteIdValue(from: dict)
             if let area = areas.first {
-                let pointArea = positions.viewportArea(area: area, origin: origin)
+                let pointArea = positions.viewportArea(area: area, href: href)
                 let target = pointAndShoot.createTarget(area: area, quoteId: quoteId, mouseLocation: location, html: html)
                 pointAndShoot.point(target: target)
                 Logger.shared.logInfo("Web block point: \(pointArea)", category: .web)
@@ -76,7 +76,7 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
             guard let dict = pnsBody,
                   let areas = areasValue(of: dict, from: webPage),
                   let (location, html) = targetValues(of: dict, from: webPage),
-                  let origin = dict["origin"] as? String else {
+                  let href = dict["href"] as? String else {
                 Logger.shared.logError("Ignored shoot event: \(String(describing: pnsBody))", category: .web)
                 return
             }
@@ -85,13 +85,13 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
                 Logger.shared.logInfo("Web shoot point: \(area)", category: .web)
                 return pointAndShoot.createTarget(area: area, quoteId: quoteId, mouseLocation: location, html: html)
             }
-            pointAndShoot.shoot(targets: targets, origin: origin)
+            pointAndShoot.shoot(targets: targets, href: href)
 
         case PointAndShootMessages.pointAndShoot_shootConfirmation.rawValue:
             guard webPage.pointAndShootAllowed == true else { return }
             guard let dict = pnsBody,
                   let areas = areasValue(of: dict, from: webPage),
-                  dict["origin"] as? String != nil else {
+                  dict["href"] as? String != nil else {
                 Logger.shared.logError("Ignored shoot event: \(String(describing: pnsBody))", category: .web)
                 return
             }
@@ -102,7 +102,7 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
             guard webPage.pointAndShootAllowed == true else { return }
             guard let dict = pnsBody,
                   dict["text"] as? String != nil,
-                  let origin = dict["origin"] as? String,
+                  let href = dict["href"] as? String,
                   let html = dict["html"] as? String,
                   let areas = areasValue(of: dict, from: webPage),
                   !html.isEmpty else {
@@ -116,7 +116,7 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
                 return pointAndShoot.createTarget(area: area, mouseLocation: CGPoint(x: x, y: y), html: html)
             }
             Logger.shared.logInfo("Web text selected, shooting targets: \(targets)", category: .web)
-            pointAndShoot.shoot(targets: targets, origin: origin)
+            pointAndShoot.shoot(targets: targets, href: href)
 
         case PointAndShootMessages.pointAndShoot_pinch.rawValue:
             guard let dict = pnsBody,
@@ -138,7 +138,7 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
                   let y = dict["y"] as? CGFloat,
                   dict["width"] as? CGFloat != nil,
                   dict["height"] as? CGFloat != nil,
-                  dict["origin"] as? String != nil,
+                  dict["href"] as? String != nil,
                   let scale = dict["scale"] as? CGFloat
                     else {
                 Logger.shared.logError("Ignored scroll event: \(String(describing: pnsBody))", category: .web)
@@ -146,8 +146,8 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
             }
             positions.scale = scale
             let page = webPage
-            page.scrollX = x // nativeX(x: x, origin: origin)
-            page.scrollY = y // nativeY(y: y, origin: origin)
+            page.scrollX = x // nativeX(x: x, href: href)
+            page.scrollY = y // nativeY(y: y, href: href)
             Logger.shared.logDebug("Web Scrolled: \(page.scrollX), \(page.scrollY)", category: .web)
 
         case PointAndShootMessages.pointAndShoot_frameBounds.rawValue:
@@ -160,13 +160,13 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
             for jsFrameInfo in jsFramesInfo {
                 let d = jsFrameInfo as AnyObject
                 let bounds = d["bounds"] as AnyObject
-                if let origin = d["origin"] as? String,
+                if let windowHref = d["href"] as? String,
                    let href = d["href"] as? String {
-                    positions.registerOrigin(origin: origin)
+                    positions.registerHref(href: windowHref)
                     let rectArea = positions.jsToRect(jsArea: bounds)
-                    let nativeBounds = positions.viewportArea(area: rectArea, origin: origin)
+                    let nativeBounds = positions.viewportArea(area: rectArea, href: windowHref)
                     positions.framesInfo[href] = FrameInfo(
-                            origin: origin, x: nativeBounds.minX, y: nativeBounds.minY,
+                            href: windowHref, x: nativeBounds.minX, y: nativeBounds.minY,
                             width: nativeBounds.width, height: nativeBounds.height
                     )
                 }
@@ -175,7 +175,7 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
         case PointAndShootMessages.pointAndShoot_resize.rawValue:
             guard let dict = pnsBody,
                   let selectedElements = dict["selected"] as? [[String: AnyObject]],
-                  let origin = dict["origin"] as? String else {
+                  let href = dict["href"] as? String else {
                 Logger.shared.logError("Ignored beam_resize: \(String(describing: pnsBody))", category: .web)
                 return
             }
@@ -195,12 +195,12 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
                 }
                 return nil
             }.flatMap { $0 }
-            pointAndShoot.updateShoots(targets: newTargets, origin: origin)
+            pointAndShoot.updateShoots(targets: newTargets, href: href)
 
         case PointAndShootMessages.pointAndShoot_setStatus.rawValue:
             guard let dict = pnsBody,
                   let status = dict["status"] as? String,
-                  dict["origin"] as? String != nil
+                  dict["href"] as? String != nil
                     else {
                 Logger.shared.logError("Ignored beam_status: \(String(describing: pnsBody))", category: .web)
                 return

@@ -114,7 +114,7 @@ export interface BeamWindow extends BeamEventTarget {
    */
   visualViewport
 
-  location
+  location: BeamLocation
 
   /**
    * @type BeamWebkit
@@ -123,6 +123,8 @@ export interface BeamWindow extends BeamEventTarget {
 
   scroll(xCoord: number, yCoord: number): void
 }
+
+export interface BeamLocation extends Location {}
 
 export enum BeamNodeType {
   element = 1,

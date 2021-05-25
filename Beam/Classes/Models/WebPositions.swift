@@ -12,36 +12,36 @@ class WebPositions {
      */
     var framesInfo = [String: FrameInfo]()
 
-    func viewportPos(value: CGFloat, origin: String, prop: String) -> CGFloat {
+    func viewportPos(value: CGFloat, href: String, prop: String) -> CGFloat {
         var framePos: CGFloat = 0
         if framesInfo.count > 0 {
-            var currentOrigin = origin
+            var currentHref = href
             repeat {
-                let foundFrameInfo = framesInfo[currentOrigin]
+                let foundFrameInfo = framesInfo[currentHref]
                 if foundFrameInfo != nil {
                     let frameInfo = foundFrameInfo!
                     framePos += prop == "x" ? frameInfo.x : frameInfo.y
-                    currentOrigin = frameInfo.origin
+                    currentHref = frameInfo.href
                     break
                 } else {
                     Logger.shared.logError("""
-                                           Could not find frameInfo for origin \(currentOrigin)
-                                           in \(framesInfo.map { $0.value.origin })
+                                           Could not find frameInfo for href currentHref)
+                                           in \(framesInfo.map { $0.value.href })
                                            """, category: .web)
                     break
                 }
-            } while framesInfo[currentOrigin]?.origin != currentOrigin
+            } while framesInfo[currentHref]?.href != currentHref
         }
         let pos = framePos + value
         return pos
     }
 
-    func viewportX(frameX: CGFloat, origin: String) -> CGFloat {
-        viewportPos(value: frameX, origin: origin, prop: "x")
+    func viewportX(frameX: CGFloat, href: String) -> CGFloat {
+        viewportPos(value: frameX, href: href, prop: "x")
     }
 
-    func viewportY(frameY: CGFloat, origin: String) -> CGFloat {
-        viewportPos(value: frameY, origin: origin, prop: "y")
+    func viewportY(frameY: CGFloat, href: String) -> CGFloat {
+        viewportPos(value: frameY, href: href, prop: "y")
     }
 
     func viewportWidth(width: CGFloat) -> CGFloat {
@@ -56,24 +56,24 @@ class WebPositions {
      Resolve some area coords sent by JS to a NSRect with coords on the WebView frame.
      - Parameters:
        - area: The area coords as sent by JS.
-       - origin: URL where the text comes from. This helps resolving the position of a selection in iframes.
+       - href: URL where the text comes from. This helps resolving the position of a selection in iframes.
      - Returns:
      */
-    func viewportArea(area: NSRect, origin: String) -> NSRect {
-        let minX = viewportX(frameX: area.minX, origin: origin)
-        let minY = viewportY(frameY: area.minY, origin: origin)
+    func viewportArea(area: NSRect, href: String) -> NSRect {
+        let minX = viewportX(frameX: area.minX, href: href)
+        let minY = viewportY(frameY: area.minY, href: href)
         let width = viewportWidth(width: area.width)
         let height = viewportHeight(height: area.height)
         return NSRect(x: minX, y: minY, width: width, height: height)
     }
 
-    func registerOrigin(origin: String) {
-        var originFrame = framesInfo[origin]
-        if originFrame == nil {
-            originFrame = FrameInfo(origin: origin, x: 0, y: 0, width: -1, height: -1)
-            framesInfo[origin] = originFrame
+    func registerHref(href: String) {
+        var hrefFrame = framesInfo[href]
+        if hrefFrame == nil {
+            hrefFrame = FrameInfo(href: href, x: 0, y: 0, width: -1, height: -1)
+            framesInfo[href] = hrefFrame
         }
-        Logger.shared.logInfo("registerOrigin: framesInfo=\(framesInfo)", category: .pointAndShoot)
+        Logger.shared.logInfo("registerhref: framesInfo=\(framesInfo)", category: .pointAndShoot)
     }
 
     /**
