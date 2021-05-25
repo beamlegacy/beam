@@ -52,7 +52,7 @@ struct NoteView: View {
                     onScroll?(scrollPoint)
                 },
                 leadingAlignment: leadingAlignement,
-                topOffset: 190,
+                topOffset: NoteHeaderView.topPadding + 90,
                 footerHeight: 60,
                 centerText: centerText,
                 showTitle: false
