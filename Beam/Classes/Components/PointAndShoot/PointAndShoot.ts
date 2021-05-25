@@ -212,7 +212,7 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
    */
   onMouseMove(ev) {
     if (!this.hasSelection()) {
-      const withOption = ev.altKey
+      const withOption = this.isOnlyAltKey(ev)
       // this.log("onMouseMove", withOption)
       this.pointingEv = ev
       // if (withOption) { // Don't unpoint if no alt, as for some reason it returns false when always pressed
@@ -407,9 +407,14 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
     return changed
   }
 
+  isOnlyAltKey(ev) {
+    const altKey = ev.altKey || ev.key == "Alt"
+    return altKey && !ev.ctrlKey && !ev.metaKey && !ev.shiftKey
+  }
+
   onKeyDown(ev) {
-    this.log("onKeyDown", ev.key)
-    if (ev.key === "Alt") {
+    this.log("onKeyDown", ev.key, this.isOnlyAltKey(ev))
+    if (this.isOnlyAltKey(ev)) {
       if (this.hasSelection()) {
         // Enable shooting mode
         this.setShooting()
