@@ -20,7 +20,7 @@ struct BrowserTabView: View {
 
     var isSelected: Bool = false
     var isDragging: Bool = false
-    var onClose: ((BrowserTab) -> Void)?
+    var onClose: (() -> Void)?
 
     private var foregroundColor: Color {
         isSelected ? BeamColor.Corduroy.swiftUI : BeamColor.LightStoneGray.swiftUI
@@ -66,7 +66,7 @@ struct BrowserTabView: View {
                     HStack {
                         if isHovering && !isDragging && sideSpace >= 20 {
                             ButtonLabel(icon: "tabs-close_xs", customStyle: ButtonLabelStyle.tinyIconStyle) {
-                                onClose?(tab)
+                                onClose?()
                             }
                             .padding(.horizontal, BeamSpacing._60)
                             .frame(alignment: .trailing)

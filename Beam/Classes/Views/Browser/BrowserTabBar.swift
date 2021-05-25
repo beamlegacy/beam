@@ -137,7 +137,11 @@ struct BrowserTabBar: View {
                                     BrowserTabView(tab: tab,
                                                    isSelected: selected,
                                                    isDragging: isTheDraggedTab,
-                                                   onClose: onTabClose)
+                                                   onClose: {
+                                                    guard index < tabs.count else { return }
+                                                    let tab = tabs[index]
+                                                    onTabClose(tab)
+                                                   })
                                         .zIndex(selected ? 1 : 0)
                                         .frame(width: isTheDraggedTab ? 0 :
                                                 widthForTab(selected: selected, containerGeometry: geometry))

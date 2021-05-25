@@ -150,6 +150,7 @@ extension BrowserTabsManager {
             } else {
                 currentTab = nil
             }
+            resetFirstResponderAfterClosingTab()
             return true
         }
         return false
@@ -166,7 +167,15 @@ extension BrowserTabsManager {
 
         tab.cancelObservers()
         tabs.remove(at: index)
-
+        resetFirstResponderAfterClosingTab()
         return true
+    }
+
+    private func resetFirstResponderAfterClosingTab() {
+        // This make sure any webview is not retained by the first responder chain
+        AppDelegate.main.window.makeFirstResponder(nil)
+        if let currentTab = currentTab {
+            AppDelegate.main.window.makeFirstResponder(currentTab.webView)
+        }
     }
 }
