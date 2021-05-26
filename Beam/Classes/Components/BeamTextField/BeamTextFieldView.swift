@@ -56,6 +56,7 @@ class BeamTextFieldView: NSTextField {
     override func draw(_ dirtyRect: NSRect) {
         setupTextField()
         super.draw(dirtyRect)
+
     }
 
     internal func setText(_ text: String, font: NSFont?, icon: NSImage? = nil, skipGuards: Bool = false) {
@@ -66,7 +67,9 @@ class BeamTextFieldView: NSTextField {
         _currentColor = textColor
         let attrs = attributedStringAttributes(textColor ?? NSColor.white, font)
         let textString = NSAttributedString(string: text, attributes: attrs)
-        if self.font?.pointSize != font?.pointSize {
+        if text.isEmpty && self.font?.pointSize != font?.pointSize {
+            // When the string is empty, attributed string don't apply font correctly,
+            // Resulting in the cursor being a different size.
             self.font = font
         }
         self.attributedStringValue = textString
