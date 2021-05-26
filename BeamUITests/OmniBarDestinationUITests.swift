@@ -51,7 +51,7 @@ class OmniBarDestinationUITests: QuickSpec {
         let todayName = "Today"
 
         func goToWebMode() {
-            self.helper.searchField.typeText("hello world")
+            self.helper.searchField.typeText(self.helper.randomSearchTerm())
             self.helper.searchField.typeText("\r")
         }
 

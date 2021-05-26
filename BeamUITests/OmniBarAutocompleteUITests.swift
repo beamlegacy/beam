@@ -33,8 +33,6 @@ class OmniBarAutocompleteUITests: QuickSpec {
     //swiftlint:disable:next function_body_length
     override func spec() {
 
-        let textInputSearch = "hello"
-
         beforeEach {
             self.manualBeforeTestSuite()
             self.continueAfterFailure = false
@@ -45,11 +43,10 @@ class OmniBarAutocompleteUITests: QuickSpec {
             self.helper.makeAppScreenShots()
         }
 
-
         describe("Autocomplete") {
 
             it("displays results") {
-                self.helper.typeInSearchAndWait(textInputSearch)
+                self.helper.typeInSearchAndWait(self.helper.randomSearchTerm())
                 let results = self.helper.allAutocompleteResults
                 expect(results.count) > 0
                 expect(results.matching(self.helper.autocompleteSelectedPredicate).count).to(equal(0))
@@ -93,7 +90,7 @@ class OmniBarAutocompleteUITests: QuickSpec {
 
 
             it("can go to web on enter") {
-                self.helper.typeInSearchAndWait(textInputSearch)
+                self.helper.typeInSearchAndWait(self.helper.randomSearchTerm())
                 self.helper.searchField.typeKey(.enter, modifierFlags: [])
                 expect(self.app.images["browserTabBarView"].waitForExistence(timeout: 2)).to(beTrue())
                 expect(self.helper.inputHasFocus(self.helper.searchField)).to(beFalse())
@@ -106,17 +103,18 @@ class OmniBarAutocompleteUITests: QuickSpec {
 
             it("should show google results") {
                 self.helper.focusSearchField()
-                self.helper.typeInSearchAndWait("colors")
+                self.helper.typeInSearchAndWait(self.helper.randomSearchTerm())
                 let results = self.helper.allAutocompleteResults
                 let googleResults = results.matching(NSPredicate(format: "identifier CONTAINS '-autocomplete'"))
+                expect(googleResults.firstMatch.waitForExistence(timeout: 2)) == true
                 expect(results.count) > 2
                 expect(googleResults.count) > 1
                 for _ in 0...2 {
                     self.helper.searchField.typeKey(.downArrow, modifierFlags: [])
                 }
                 self.helper.searchField.typeKey(.enter, modifierFlags: [])
-                expect(results.count).to(equal(0))
-                expect(self.helper.inputHasFocus(self.helper.searchField)).to(beFalse())
+                expect(results.count) == 0
+                expect(self.helper.inputHasFocus(self.helper.searchField)) == false
             }
 
             it("can create and search note") {

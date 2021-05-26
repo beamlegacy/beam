@@ -3,6 +3,7 @@ import XCTest
 #if canImport(Quick)
 import Quick
 #endif
+import Fakery
 
 extension XCUIElementQuery: Sequence {
     public typealias Iterator = AnyIterator<XCUIElement>
@@ -122,5 +123,12 @@ class BeamUITestsHelper {
         XCTAssertEqual(PnsFrame.origin.y, referenceElement.origin.y, accuracy: 10, message)
         XCTAssertEqual(PnsFrame.width, referenceElement.width + padding, accuracy: 10, message)
         XCTAssertEqual(PnsFrame.height, referenceElement.height + padding, accuracy: 10, message)
+    }
+}
+
+
+extension BeamUITestsHelper {
+    func randomSearchTerm() -> String {
+        Faker(locale: "en-US").commerce.color()
     }
 }
