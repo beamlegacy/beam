@@ -54,7 +54,7 @@ class LinksSection: Widget {
             self.open = value
         }))
 
-        sectionTitleLayer.font = BeamFont.medium(size: 0).nsFont
+        sectionTitleLayer.font = BeamFont.semibold(size: 0).nsFont
         sectionTitleLayer.fontSize = 12
         sectionTitleLayer.foregroundColor = BeamColor.LinkedSection.sectionTitle.cgColor
 
@@ -73,7 +73,7 @@ class LinksSection: Widget {
         linkActionLayer.alignmentMode = .center
         linkActionLayer.string = "Link All"
 
-        separatorLayer.backgroundColor = BeamColor.Mercury.cgColor
+        separatorLayer.backgroundColor = BeamColor.LinkedSection.separator.cgColor
         self.layer.addSublayer(separatorLayer)
     }
 
@@ -150,7 +150,7 @@ class LinksSection: Widget {
 
     private func layout(children: [Widget]) {
         for child in children {
-            child.layer.frame.origin = CGPoint(x: child.layer.frame.origin.x - 8, y: child.frameInDocument.origin.y + 3)
+            child.layer.frame.origin = CGPoint(x: child.layer.frame.origin.x - 8, y: child.frameInDocument.origin.y - 5)
         }
     }
 

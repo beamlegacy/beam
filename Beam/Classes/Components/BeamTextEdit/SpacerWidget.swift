@@ -28,7 +28,7 @@ class SpacerWidget: Widget {
         case .top:
             space = 77
         case .middle:
-            space = 40
+            space = (root?.linksSection?.open ?? true) ? 40 : 6
         case .bottom:
             space = 30
         }
