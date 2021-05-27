@@ -159,7 +159,7 @@ import BeamCore
         return true
     }
 
-    @discardableResult func navigateToJournal() -> Bool {
+    @discardableResult func navigateToJournal(clearNavigation: Bool = false) -> Bool {
         mode = .today
 
         self.currentPage = nil
@@ -167,7 +167,11 @@ import BeamCore
         autocompleteManager.resetQuery()
         autocompleteManager.autocompleteSelectedIndex = nil
 
-        backForwardList.push(.journal)
+        if clearNavigation {
+            backForwardList.clear()
+        } else {
+            backForwardList.push(.journal)
+        }
         updateCanGoBackForward()
         return true
     }
@@ -419,7 +423,7 @@ extension BeamState: BrowserTabsManagerDelegate {
             if let note = currentNote {
                 navigateToNote(note)
             } else {
-                navigateToJournal()
+                navigateToJournal(clearNavigation: true)
             }
         }
     }
