@@ -139,7 +139,7 @@ struct OmniBar: View {
     }
 
     func goToJournal() {
-        state.mode = .today
+        state.navigateToJournal(clearNavigation: true)
     }
 
     func refreshWeb() {

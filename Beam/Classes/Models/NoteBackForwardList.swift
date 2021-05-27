@@ -132,6 +132,11 @@ class NoteBackForwardList: Codable {
 
     }
 
+    func clear() {
+        backList.removeAll()
+        forwardList.removeAll()
+    }
+
     private(set) var backList: [Element] = []
     private(set) var forwardList: [Element] = []
 }

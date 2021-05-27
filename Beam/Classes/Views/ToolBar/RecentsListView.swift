@@ -17,7 +17,7 @@ struct RecentsListView: View {
     var body: some View {
         HStack(spacing: 6) {
             ButtonLabel("Journal", state: state.mode == .today ? .active : .normal) {
-                state.navigateToJournal()
+                state.navigateToJournal(clearNavigation: true)
             }
             .fixedSize(horizontal: true, vertical: false)
             if recentsManager.recentNotes.count > 0 {
