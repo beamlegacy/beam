@@ -14,7 +14,9 @@ class RecentsManager: ObservableObject {
     private let maxNumberOfRecents = 5
     private let documentManager: DocumentManager
     private var recentsScores = [UUID: Int]()
-    private var cancellables = Set<AnyCancellable>()
+    private var notesCancellables = Set<AnyCancellable>()
+    private var deletionsCancellables = Set<AnyCancellable>()
+
     @Published private(set) var recentNotes = [BeamNote]() {
         didSet { updateNotesObservers() }
     }
@@ -22,11 +24,12 @@ class RecentsManager: ObservableObject {
     init(with documentManager: DocumentManager) {
         self.documentManager = documentManager
         self.fetchRecents()
+        self.observeCoreDataChanges()
     }
 
     private func fetchRecents() {
-        recentNotes = documentManager.loadAllWithLimit(maxNumberOfRecents, [NSSortDescriptor(key: "updated_at", ascending: false)]).map {
-            BeamNote.fetchOrCreate(documentManager, title: $0.title)
+        recentNotes = documentManager.loadAllWithLimit(maxNumberOfRecents, [NSSortDescriptor(key: "updated_at", ascending: false)]).compactMap {
+            BeamNote.fetch(documentManager, title: $0.title)
         }
     }
 
@@ -58,11 +61,24 @@ class RecentsManager: ObservableObject {
     }
 
     private func updateNotesObservers() {
-        cancellables.removeAll()
+        notesCancellables.removeAll()
         recentNotes.forEach { n in
             n.objectWillChange
                 .sink { _ in self.objectWillChange.send() }
-                .store(in: &cancellables)
+                .store(in: &notesCancellables)
         }
+    }
+
+    private func observeCoreDataChanges() {
+        CoreDataContextObserver.shared
+            .publisher(for: .deletedDocuments)
+            .receive(on: RunLoop.main)
+            .sink { [weak self] deletedDocumentsIds in
+                guard let self = self, let deletedDocumentsIds = deletedDocumentsIds else { return }
+                self.recentNotes.removeAll { note in
+                    deletedDocumentsIds.contains(note.id)
+                }
+            }
+            .store(in: &deletionsCancellables)
     }
 }
