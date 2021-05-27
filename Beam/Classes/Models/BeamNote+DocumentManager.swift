@@ -169,7 +169,7 @@ extension BeamNote: BeamNoteDocument {
         do {
             return try instanciateNote(documentManager, doc, keepInMemory: keepInMemory)
         } catch {
-            Logger.shared.logError("Unable to decode today's note", category: .document)
+            Logger.shared.logError("Unable to decode note \(doc.title) (\(doc.id))", category: .document)
         }
 
         return nil

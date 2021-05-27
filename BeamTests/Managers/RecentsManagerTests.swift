@@ -6,6 +6,7 @@
 //
 
 import XCTest
+import Combine
 import Quick
 import Nimble
 
@@ -25,7 +26,9 @@ class RecentsManagerTests: QuickSpec {
                                                 coreDataManager: CoreDataManager.shared)
         helper.deleteAllDocuments()
         for _ in 0..<7 {
-            _ = helper.saveLocally(helper.createDocumentStruct())
+            let note = BeamNote(title: String.randomTitle())
+            let doc = note.documentStruct!
+            _ = helper.saveLocally(doc)
         }
         documentHelper = helper
     }
@@ -104,6 +107,35 @@ class RecentsManagerTests: QuickSpec {
 
                     recentsManager.currentNoteChanged(newNote)
                     expect(recentsManager.recentNotes[1].id) == newNote.id
+                }
+            }
+            context("on note change") {
+                it("publishes renamed notes") {
+                    var numberOfPublishes = 0
+                    let newTitle = "Updated Title"
+                    waitUntil(timeout: .seconds(5)) { done in
+                        _ = recentsManager.$recentNotes
+                            .sink { _ in
+                                numberOfPublishes += 1
+                                done()
+                        }
+                        let note = recentsManager.recentNotes.last!
+                        note.title = newTitle
+                    }
+                    expect(recentsManager.recentNotes.last?.title) == newTitle
+                    expect(numberOfPublishes) == 1
+                }
+
+                it("handles deleted notes") {
+                    expect(recentsManager.recentNotes.count) == 5
+                    let note = recentsManager.recentNotes.last!
+                    waitUntil(timeout: .seconds(5)) { done in
+                        self.documentManager.delete(id: note.id) { _ in
+                            done()
+                        }
+                    }
+                    expect(recentsManager.recentNotes.count) == 4
+                    expect(recentsManager.recentNotes.first { $0.id == note.id }).to(beNil())
                 }
             }
         }
