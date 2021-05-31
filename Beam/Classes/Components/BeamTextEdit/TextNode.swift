@@ -337,7 +337,7 @@ public class TextNode: ElementNode {
     }
 
     public func updateCursor() {
-        let on = !readOnly && editor.hasFocus && isFocused && editor.blinkPhase
+        let on = !readOnly && editor.hasFocus && isFocused && editor.blinkPhase && (root?.state.nodeSelection?.nodes.isEmpty ?? true)
         let cursorRect = rectAt(caretIndex: caretIndex)
         let layer = self.cursorLayer
 
