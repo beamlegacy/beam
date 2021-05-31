@@ -12,7 +12,8 @@ struct ShootFrameSelectionView: View {
         let text = isHovering ? group.noteInfo.title : ""
         return Group {
             if let firstUI = group.uis.first {
-                let backgroundColor = isHovering ? firstUI.bgColor : Color.clear
+                let isTextSelection = group.uis.count > 1
+                let backgroundColor = isTextSelection || isHovering ? firstUI.bgColor : Color.clear
                 let animated = firstUI.animated
                 let color = firstUI.color
                 ZStack(alignment: .center) {
@@ -20,7 +21,7 @@ struct ShootFrameSelectionView: View {
                         let path = Path(groupPath)
                         path
                             .fill(backgroundColor)
-                            .overlay(path.stroke(color, lineWidth: 2))
+                            .overlay(!isTextSelection ? path.stroke(color, lineWidth: 2) : nil)
                     }
                     .accessibility(identifier: "ShootFrameSelection")
 
