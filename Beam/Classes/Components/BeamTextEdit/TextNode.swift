@@ -511,8 +511,8 @@ public class TextNode: ElementNode {
             }
 
             if mouseInfo.event.clickCount == 1 && editor.inlineFormatter != nil {
-                root?.cancelSelection()
                 focus(position: clickPos)
+                root?.cancelSelection()
                 dragMode = .select(cursorPosition)
 
                 debounceClickTimer = Timer.scheduledTimer(withTimeInterval: debounceClickInterval, repeats: false, block: { [weak self] (_) in
@@ -526,8 +526,8 @@ public class TextNode: ElementNode {
                 editor.showInlineFormatterOnKeyEventsAndClick()
                 return true
             } else if mouseInfo.event.clickCount == 1 {
-                root?.cancelSelection()
                 focus(position: clickPos)
+                root?.cancelSelection()
                 dragMode = .select(cursorPosition)
                 editor.initAndShowPersistentFormatter()
                 return true
