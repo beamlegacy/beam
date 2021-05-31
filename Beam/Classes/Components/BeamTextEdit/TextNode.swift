@@ -272,13 +272,8 @@ public class TextNode: ElementNode {
         super.deepInvalidateText()
     }
 
-    var _markedTextLayer: ShapeLayer?
-    var markedTextLayer: ShapeLayer {
-        if let layer = _markedTextLayer {
-            return layer
-        }
-
-        let layer = ShapeLayer(name: "markedText")
+    private func createMarkeeLayer(name: String, color: NSColor) -> ShapeLayer {
+        let layer = ShapeLayer(name: name)
         layer.layer.actions = [
             "onOrderIn": NSNull(),
             "onOrderOut": NSNull(),
@@ -289,9 +284,7 @@ public class TextNode: ElementNode {
 
         layer.layer.zPosition = -1
         layer.layer.position = CGPoint(x: indent, y: 0)
-        layer.shapeLayer.fillColor = markedColor.cgColor
-
-        _markedTextLayer = layer
+        layer.shapeLayer.fillColor = color.cgColor
         addLayer(layer)
         return layer
     }
@@ -302,42 +295,21 @@ public class TextNode: ElementNode {
             return layer
         }
 
-        let layer = ShapeLayer(name: "selectedText")
-        layer.layer.actions = [
-            "onOrderIn": NSNull(),
-            "onOrderOut": NSNull(),
-            "sublayers": NSNull(),
-            "contents": NSNull(),
-            "bounds": NSNull()
-        ]
-
-        layer.layer.zPosition = -1
-        layer.layer.position = CGPoint(x: indent, y: 0)
-        layer.shapeLayer.fillColor = selectionColor.cgColor
+        let layer = createMarkeeLayer(name: "selectedText", color: selectionColor)
         _selectedTextLayer = layer
-        addLayer(layer)
         return layer
     }
 
     func updateSelection() {
-        markedTextLayer.layer.isHidden = true
         selectedTextLayer.layer.isHidden = true
 
         guard !readOnly else { return }
 
-        let rect = CGRect(origin: .zero, size: contentsFrame.size)
         //Draw Selection:
         if isEditing {
-            if let range = markedTextRange {
-                markedTextLayer.shapeLayer.path = buildMarkeeShape(range.lowerBound, range.upperBound)
-            }
-            markedTextLayer.frame = rect
-            markedTextLayer.layer.isHidden = selectedTextRange.isEmpty
-
             if !selectedTextRange.isEmpty {
                 selectedTextLayer.shapeLayer.path = buildMarkeeShape(selectedTextRange.lowerBound, selectedTextRange.upperBound)
             }
-            markedTextLayer.frame = rect
             selectedTextLayer.layer.isHidden = selectedTextRange.isEmpty
         }
     }
@@ -1008,7 +980,7 @@ public class TextNode: ElementNode {
             }
         }
 
-        let str = beamText.buildAttributedString(fontSize: fontSize, cursorPosition: cursorPosition, elementKind: elementKind, mouseInteraction: mouseInteraction)
+        let str = beamText.buildAttributedString(fontSize: fontSize, cursorPosition: cursorPosition, elementKind: elementKind, mouseInteraction: mouseInteraction, markedRange: markedTextRange)
         let paragraphStyle = NSMutableParagraphStyle()
         //        paragraphStyle.alignment = .justified
         paragraphStyle.lineBreakMode = .byWordWrapping
@@ -1047,7 +1019,8 @@ public class TextNode: ElementNode {
     }
 
     public override func accessibilityString(for range: NSRange) -> String? {
-        return text.substring(range: range.lowerBound ..< range.upperBound)
+        let t = text
+        return t.substring(range: max(0, range.lowerBound) ..< min(t.count, range.upperBound))
     }
 
     //    Returns the attributed substring for the specified range of characters.
@@ -1082,8 +1055,10 @@ public class TextNode: ElementNode {
 
     //    Returns the range of characters in the specified line.
     public override func accessibilityRange(forLine line: Int) -> NSRange {
-        guard let line = textFrame?.lines[line] else { return NSRange() }
-        let range = line.range
+        guard let textFrame = textFrame,
+              textFrame.lines.count < line
+        else { return NSRange() }
+        let range = textFrame.lines[line].range
         return NSRange(location: range.lowerBound, length: range.count)
     }
 

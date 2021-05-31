@@ -59,7 +59,7 @@ class TextFrameTests: XCTestCase {
         expect(text.links.count) == 1
 
 
-        attributedString = text.buildAttributedString(fontSize: fontSize, cursorPosition: cursorPosition, elementKind: elementKind, mouseInteraction: mouseInteraction)
+        attributedString = text.buildAttributedString(fontSize: fontSize, cursorPosition: cursorPosition, elementKind: elementKind, mouseInteraction: mouseInteraction, markedRange: nil)
         let position = NSPoint(x: 0, y: 0)
 
         let textFrame = TextFrame.create(string: attributedString, atPosition: position, textWidth: textWidth)
@@ -150,7 +150,7 @@ class TextFrameTests: XCTestCase {
         expect(text.links.count) == 1
 
 
-        attributedString = text.buildAttributedString(fontSize: fontSize, cursorPosition: cursorPosition, elementKind: elementKind, mouseInteraction: mouseInteraction)
+        attributedString = text.buildAttributedString(fontSize: fontSize, cursorPosition: cursorPosition, elementKind: elementKind, mouseInteraction: mouseInteraction, markedRange: nil)
         let position = NSPoint(x: 0, y: 0)
 
         let textFrame = TextFrame.create(string: attributedString, atPosition: position, textWidth: textWidth)

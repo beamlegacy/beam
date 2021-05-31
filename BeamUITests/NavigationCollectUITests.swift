@@ -35,7 +35,6 @@ class NavigationCollectUITests: QuickSpec {
     }
 
     override func spec() {
-
         
         let urls = [
             "en.wikipedia.org/w/index.php?title=Red_panda&oldid=1024738414",
