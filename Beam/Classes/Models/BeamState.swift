@@ -169,9 +169,8 @@ import BeamCore
 
         if clearNavigation {
             backForwardList.clear()
-        } else {
-            backForwardList.push(.journal)
         }
+        backForwardList.push(.journal)
         updateCanGoBackForward()
         return true
     }
