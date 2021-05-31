@@ -47,19 +47,15 @@ extension TextRoot {
     }
 
     func moveLeftAndModifySelection() {
-        guard root.state.nodeSelection == nil else { return }
-        guard let node = focusedWidget as? TextNode else { return }
-        if cursorPosition != 0 {
-            let newCaretIndex = node.position(before: caretIndex)
-            let newCursorPosition = node.textFrame?.carets[newCaretIndex].positionInSource ?? 0
-            if newCursorPosition <= selectedTextRange.lowerBound {
-                selectedTextRange = node.text.clamp(newCursorPosition ..< selectedTextRange.upperBound)
-            } else {
-                selectedTextRange = node.text.clamp(selectedTextRange.lowerBound ..< newCursorPosition)
-            }
-            caretIndex = newCaretIndex
-            node.invalidateText()
-        }
+        guard root.state.nodeSelection == nil,
+              let node = focusedWidget as? TextNode,
+              cursorPosition != 0
+        else { return }
+        let newCaretIndex = node.position(before: caretIndex)
+        let newCursorPosition = node.textFrame?.carets[newCaretIndex].positionInSource ?? 0
+        extendSelection(to: newCursorPosition)
+        caretIndex = newCaretIndex
+        node.invalidateText()
     }
 
     func moveWordRight() {
@@ -113,11 +109,14 @@ extension TextRoot {
     }
 
     func moveRightAndModifySelection() {
-        guard root.state.nodeSelection == nil else { return }
-        guard let node = focusedWidget as? TextNode else { return }
-        if cursorPosition != node.text.count {
-            extendSelection(to: node.position(after: cursorPosition))
-        }
+        guard root.state.nodeSelection == nil,
+              let node = focusedWidget as? TextNode,
+              cursorPosition != node.text.count
+        else { return }
+        let newCaretIndex = node.position(after: caretIndex)
+        let newCursorPosition = node.textFrame?.carets[newCaretIndex].positionInSource ?? 0
+        extendSelection(to: newCursorPosition)
+        caretIndex = newCaretIndex
         node.invalidateText()
     }
 

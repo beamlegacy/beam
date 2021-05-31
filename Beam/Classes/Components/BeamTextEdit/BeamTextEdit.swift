@@ -490,8 +490,7 @@ public extension CALayer {
     }
 
     public func insertText(string: String, replacementRange: Range<Int>?) {
-        guard let node = focusedWidget as? ElementNode else { return }
-        guard !node.readOnly else { return }
+        guard let node = focusedWidget as? ElementNode, !node.readOnly else { return }
         defer { lastInput = string }
         guard preDetectInput(string) else { return }
         rootNode.insertText(string: string, replacementRange: replacementRange)
