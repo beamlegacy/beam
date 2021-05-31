@@ -5,32 +5,37 @@ struct ShootFrameSelectionView: View {
 
     var group: ShootGroupUI
     @State private var isHovering = false
-    private let padding: CGFloat = 6
 
     var body: some View {
-        let rect = ShootFrameFusionRect().getRect(shootSelections: group.uis)
-        // (let's not use "first!" but provide fallback values instead
-        let firstUI = group.uis.first!
-        let backgroundColor = isHovering ? firstUI.bgColor : Color.clear
-        let animated = firstUI.animated
-        let color = firstUI.color
+        let rect = group.groupRect
+        let groupPath = group.groupPath
         let text = isHovering ? group.noteInfo.title : ""
-        return ZStack(alignment: .center) {
-            RoundedRectangle(cornerRadius: padding, style: .continuous)
-                .stroke(color, lineWidth: 2)
-                .background(backgroundColor)
-                .padding(-padding)
-                .onHover { hovering in
-                    isHovering = hovering
+        return Group {
+            if let firstUI = group.uis.first {
+                let backgroundColor = isHovering ? firstUI.bgColor : Color.clear
+                let animated = firstUI.animated
+                let color = firstUI.color
+                ZStack(alignment: .center) {
+                    ZStack {
+                        let path = Path(groupPath)
+                        path
+                            .fill(backgroundColor)
+                            .overlay(path.stroke(color, lineWidth: 2))
+                    }
+                    .accessibility(identifier: "ShootFrameSelection")
+
+                    ZStack {
+                        Rectangle().fill(Color.clear) // needed  to enable hover
+                        Text(text)
+                            .foregroundColor(Color.white)
+                            .accessibility(identifier: "ShootFrameSelectionLabel")
+                    }
+                    .onHover { isHovering = $0 }
+                    .frame(width: rect.width, height: rect.height)
+                    .position(x: rect.minX + rect.width / 2, y: rect.minY + rect.height / 2)
                 }
-                .accessibility(identifier: "ShootFrameSelection")
-            Text(text)
-                .accessibility(identifier: "ShootFrameSelectionLabel")
-                .foregroundColor(Color.white)
+                .animation(animated ? Animation.easeOut : nil)
+            }
         }
-        .animation(animated ? Animation.easeOut : nil)
-        .offset(x: rect.minX, y: rect.minY)
-        .frame(width: rect.width, height: rect.height)
-        .position(x: rect.width / 2, y: rect.height / 2)
     }
 }

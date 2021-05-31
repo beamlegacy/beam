@@ -261,12 +261,13 @@ class PointAndShoot: WebPageHolder {
         for group in groups {
             let shootTargets = group.targets
             if shootTargets.count > 0 {
-                let shootUIGroup = ui.createGroup(noteInfo: group.noteInfo, edited: edited)
+                var selectionUIs = [SelectionUI]()
                 for shootTarget in shootTargets {
                     let target = translateTarget(target: shootTarget)
                     let selectionUI = ui.createUI(shootTarget: target)
-                    shootUIGroup.uis.append(selectionUI)
+                    selectionUIs.append(selectionUI)
                 }
+                _ = ui.createGroup(noteInfo: group.noteInfo, selectionUIs: selectionUIs, edited: edited)
             }
         }
     }

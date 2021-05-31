@@ -164,7 +164,7 @@ class NavigationCollectUITests: QuickSpec {
                     expect(shootSelections.count) == 1
                     
                     let emptyLocation = child.coordinate(withNormalizedOffset: CGVector(dx: -0.2, dy: 0.1))
-                    start.click()
+                    emptyLocation.click()
                     sleep(1)
                     let shootSelections2 = self.app.otherElements.matching(identifier:"ShootFrameSelection")
                     expect(shootSelections2.count) == 0

@@ -90,9 +90,9 @@ class PointAndShootUIMock: PointAndShootUI {
         events.append("drawPoint \(target)")
     }
 
-    override func createGroup(noteInfo: NoteInfo, edited: Bool) -> ShootGroupUI {
+    override func createGroup(noteInfo: NoteInfo, selectionUIs: [SelectionUI], edited: Bool) -> ShootGroupUI {
         events.append("createGroup \(String(describing: noteInfo)) \(edited)")
-        return super.createGroup(noteInfo: noteInfo, edited: edited)
+        return super.createGroup(noteInfo: noteInfo, selectionUIs: selectionUIs, edited: edited)
     }
 }
 
