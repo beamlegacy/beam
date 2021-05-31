@@ -315,7 +315,7 @@ extension TextRoot {
 
         let bText = BeamText(text: string, attributes: root.state.attributes)
         cmdManager.inputText(bText, in: node, at: cursorPosition)
-
+        cancelSelection()
         unmarkText()
     }
 
