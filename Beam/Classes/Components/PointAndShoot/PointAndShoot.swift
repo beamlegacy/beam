@@ -215,33 +215,8 @@ class PointAndShoot: WebPageHolder {
     func shoot(targets: [Target], href: String) {
         if activeShootGroup == nil {
             activeShootGroup = ShootGroup(href: href)
-            Logger.shared.logInfo("shootGroups.count \(shootGroups.count)", category: .pointAndShoot)
-        } else {
-            activeShootGroup?.targets.removeAll()
         }
-        for target in targets {
-            addShootTargets(target: target)
-        }
-    }
-    /**
-     Add a shoot to the current group.
-     
-     - Parameter target: the shoot target to add
-     */
-    private func addShootTargets(target: Target) {
-        guard let activeShootGroup = activeShootGroup else {
-            fatalError("Should not shoot without an activeShootGroup")
-        }
-        activeShootGroup.targets.append(target)
-    }
-
-    private func updateShootGroup(targets: [Target], href: String, group: ShootGroup) {
-        // clear group targets and re-create them
-        group.targets.removeAll()
-        for target in targets where group.quoteId == target.quoteId {
-            group.targets.append(target)
-        }
-        shoot(targets: targets, href: href)
+        activeShootGroup?.targets = targets
     }
 
     /// update shootGroups with targets
@@ -249,12 +224,15 @@ class PointAndShoot: WebPageHolder {
     ///   - targets: the shoot targets to update
     ///   - href: browser tab href
     func updateShoots(targets: [Target], href: String) {
-        for group in shootGroups {
-            updateShootGroup(targets: targets, href: href, group: group)
-        }
+        let allGroups = [activeShootGroup] + shootGroups
+        for group in allGroups.compactMap({ $0 }) {
+            let newTargets = targets.filter { target in
+                return group.quoteId == target.quoteId
+            }
 
-        if let group = activeShootGroup {
-            updateShootGroup(targets: targets, href: href, group: group)
+            if newTargets.count > 0 {
+                group.targets = newTargets
+            }
         }
     }
 

@@ -101,21 +101,24 @@ class OmniBarAutocompleteUITests: QuickSpec {
                 expect(self.app.webViews.firstMatch.exists).to(beTrue())
             }
 
-            it("should show google results") {
-                self.helper.focusSearchField()
-                self.helper.typeInSearchAndWait(self.helper.randomSearchTerm())
-                let results = self.helper.allAutocompleteResults
-                let googleResults = results.matching(NSPredicate(format: "identifier CONTAINS '-autocomplete'"))
-                expect(googleResults.firstMatch.waitForExistence(timeout: 2)) == true
-                expect(results.count) > 2
-                expect(googleResults.count) > 1
-                for _ in 0...2 {
-                    self.helper.searchField.typeKey(.downArrow, modifierFlags: [])
-                }
-                self.helper.searchField.typeKey(.enter, modifierFlags: [])
-                expect(results.count) == 0
-                expect(self.helper.inputHasFocus(self.helper.searchField)) == false
-            }
+//            Google sometimes doesn't return results in the CI, so this test was failing randomly
+//            We should look at it and see if we can make a reliable test for a random api
+//            https://linear.app/beamapp/issue/BE-929/google-search-doesnt-return-results-sometimes
+//            it("should show google results") {
+//                self.helper.focusSearchField()
+//                self.helper.typeInSearchAndWait(self.helper.randomSearchTerm())
+//                let results = self.helper.allAutocompleteResults
+//                let googleResults = results.matching(NSPredicate(format: "identifier CONTAINS '-autocomplete'"))
+//                expect(googleResults.firstMatch.waitForExistence(timeout: 2)) == true
+//                expect(results.count) > 2
+//                expect(googleResults.count) > 1
+//                for _ in 0...2 {
+//                    self.helper.searchField.typeKey(.downArrow, modifierFlags: [])
+//                }
+//                self.helper.searchField.typeKey(.enter, modifierFlags: [])
+//                expect(results.count) == 0
+//                expect(self.helper.inputHasFocus(self.helper.searchField)) == false
+//            }
 
             it("can create and search note") {
                 self.helper.focusSearchField()
