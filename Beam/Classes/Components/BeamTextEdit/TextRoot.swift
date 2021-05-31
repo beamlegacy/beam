@@ -33,7 +33,7 @@ public struct TextConfig {
 
 public class TextRoot: TextNode {
     @Published var textIsSelected = false
-
+    static var showBrowsingSection = false
     var note: BeamNote?
 
     var state = TextState()
@@ -171,7 +171,9 @@ public class TextRoot: TextNode {
             middleSpacerWidget = SpacerWidget(parent: self, spacerType: .middle)
             referencesSection = LinksSection(parent: self, note: note, mode: .references)
             bottomSpacerWidget = SpacerWidget(parent: self, spacerType: .bottom)
-            browsingSection = BrowsingSection(parent: self, note: note)
+            if Self.showBrowsingSection {
+                browsingSection = BrowsingSection(parent: self, note: note)
+            }
         }
         updateTextChildren(elements: element.children)
 
