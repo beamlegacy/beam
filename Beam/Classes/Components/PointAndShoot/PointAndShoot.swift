@@ -315,7 +315,6 @@ class PointAndShoot: WebPageHolder {
         scorer.addTextSelection()
 
         let sourceTitle = page.title
-        let sourceUrlString = sourceUrl.absoluteString
         quoteText.addAttributes([.emphasis], to: quoteText.wholeRange)
         return try getQuoteKind(url: sourceUrl, html: quoteHtml, title: sourceTitle).then { quoteKind -> Void in
             let quote = BeamElement()
@@ -359,7 +358,7 @@ class PointAndShoot: WebPageHolder {
     }
 
     private func imageQuoteKind(imageEl: Element) throws -> Promise<ElementKind> {
-        guard let shootGroup = activeShootGroup else {
+        guard activeShootGroup != nil else {
             fatalError("Expected to have an active shoot group")
         }
         let url = try imageEl.attr("src")
@@ -373,7 +372,7 @@ class PointAndShoot: WebPageHolder {
                 do {
                     var fileId: String
                     if case .binary(let data, let mimeType, _) = result {
-                        if (data.count <= 0) {
+                        if data.count <= 0 {
                             throw PointAndShootError("No data was retrieved when downloading \(absoluteUrl)")
                         }
                         fileId = data.MD5
@@ -387,7 +386,7 @@ class PointAndShoot: WebPageHolder {
                     }
                     let kind: ElementKind = .image(fileId)
                     fulfill(kind)
-                } catch let err as Error {
+                } catch let err {
                     reject(err)
                 }
             })

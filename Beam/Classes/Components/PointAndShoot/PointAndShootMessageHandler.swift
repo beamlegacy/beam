@@ -225,10 +225,10 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
     }
 
     func pointAndShootQuoteIdValue(from jsMessage: [String: AnyObject]) -> UUID? {
-        guard let quoteId = jsMessage["quoteId"] else {
+        guard let quoteId = jsMessage["quoteId"] as? String else {
             return nil
         }
-        return UUID(uuidString: quoteId as! String)
+        return UUID(uuidString: quoteId)
     }
 
     func areasValue(of jsMessage: [String: AnyObject], from webPage: WebPage) -> [NSRect]? {

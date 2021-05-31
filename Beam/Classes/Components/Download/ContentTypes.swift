@@ -15,7 +15,7 @@ func parseHTTPContentType(_ headerValue: String) -> (mimeType: String, encoding:
                 .map { $0.components(separatedBy: "=") }
                 .map { ($0[0], $0[1]) }
 
-        let parameters = Dictionary<String, String>(uniqueKeysWithValues: parameterValues)
+        let parameters = [String: String](uniqueKeysWithValues: parameterValues)
 
         // Default according to RFC is ISO-8859-1, but probably nothing obeys that, so default
         // to UTF-8 instead.
