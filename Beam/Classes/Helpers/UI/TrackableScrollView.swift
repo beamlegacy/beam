@@ -51,7 +51,9 @@ public struct TrackableScrollView<Content>: View where Content: View {
                 }
             }
             .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
-                self.contentOffset = value[0]
+                DispatchQueue.main.async {
+                    self.contentOffset = value[0]
+                }
             }
         }
     }
