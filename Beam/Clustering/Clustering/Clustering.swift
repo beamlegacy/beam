@@ -8,15 +8,31 @@
 import LASwift
 import Foundation
 
-class Cluster {
-    
+public struct Page {
+    public init(id: Int64, parentId: Int64? = nil, title: String? = nil, content: String? = nil) {
+        self.id = id
+        self.parentId = parentId
+        self.title = title
+        self.content = content
+    }
+
+    var id: Int64
+    var parentId: Int64?
+    var title: String?
+    var content: String?
+}
+
+public class Cluster {
+
     enum MatrixError: Error {
         case dimensionsNotMatching
         case matrixNotSquare
         case pageOutOfDimensions
     }
-    
-    class SimilarityMatrix {
+
+    public init() {}
+
+    public class SimilarityMatrix {
         var matrix = Matrix([[0]])
 
         func addPage(similarities: [Double]) throws {
@@ -31,7 +47,7 @@ class Cluster {
             similarities_row.append(0.0)
             self.matrix = self.matrix === similarities_row
         }
-        
+
         func removePage(pageNumber: Int) throws {
             guard matrix.rows == matrix.cols else {
               throw MatrixError.matrixNotSquare
@@ -55,8 +71,8 @@ class Cluster {
             }
         }
     }
-    
-    class NavigationMatrix: SimilarityMatrix {
+
+   public class NavigationMatrix: SimilarityMatrix {
         override func removePage(pageNumber: Int) throws {
             var connectionsVct = (self.matrix ?? (.Pos([pageNumber]), .All)).flat
             connectionsVct.remove(at: pageNumber)
@@ -69,34 +85,32 @@ class Cluster {
             }
         }
     }
-    
-    var pageIDs = [UUID]()
+
+    let myThread = DispatchQueue(label: "clusteringThread")
+    var pageIDs = [Int64]()
     var navigationMatrix = NavigationMatrix()
     var adjacencyMatrix = SimilarityMatrix()
-    var clusters = [Int]()
-    
-    func clusterize() {
+
+    func clusterize() -> [Int] {
         guard self.adjacencyMatrix.matrix.rows >= 2 else {
-          self.clusters = zeros(1, self.adjacencyMatrix.matrix.rows).flat.map({Int($0)})
-          return
+            return zeros(1, self.adjacencyMatrix.matrix.rows).flat.map { Int($0) }
         }
         let laplacian = diag(reduce(self.adjacencyMatrix.matrix, sum, .Row)) - self.adjacencyMatrix.matrix
         //TODO: Add other types of graph Laplacians
-        
+
         let eigen = eig(laplacian)
         var eigenVals = reduce(eigen.D, sum)
-        let indeces = eigenVals.indices
-        let combined = zip(eigenVals, indeces).sorted {$0.0 < $1.0}
-        eigenVals = combined.map {$0.0}
-        let permutation = combined.map {$0.1}
+        let indices = eigenVals.indices
+        let combined = zip(eigenVals, indices).sorted { $0.0 < $1.0 }
+        eigenVals = combined.map { $0.0 }
+        let permutation = combined.map { $0.1 }
         var eigenVcts = eigen.V ?? (.All, .Pos(permutation))
-        
-        eigenVals.removeAll(where: {$0 > 1e-5})
+
+        eigenVals.removeAll(where: { $0 > 1e-5 })
         //TODO: Integrate more sophisticated rules to choose relevant eigenvalues
-        
+
         guard eigenVals.count > 1 else {
-            self.clusters = zeros(1, self.adjacencyMatrix.matrix.rows).flat.map({Int($0)})
-            return
+            return zeros(1, self.adjacencyMatrix.matrix.rows).flat.map { Int($0) }
         }
         if eigenVcts.rows > eigenVals.count {
             eigenVcts = eigenVcts ?? (.All, .DropLast(eigenVcts.rows - eigenVals.count))
@@ -117,41 +131,53 @@ class Cluster {
             }
             tentatives += 1
         } while Set(predictedLabels).count < eigenVals.count && tentatives <= 10
-        clusters = predictedLabels
+       return predictedLabels
     }
-    
-    func addPage(id: UUID, from parent: UUID?) throws {
-        //Check if this is the first page in the session
-        guard pageIDs.count > 0 else {
-            pageIDs.append(id)
-            clusters = [0]
-            return
-        }
-        if let id_index = pageIDs.firstIndex(of: id) {
-            if let myParent = parent , let parent_index = pageIDs.firstIndex(of: myParent) {
-                self.navigationMatrix.matrix[id_index, parent_index] = 1.0
-                self.navigationMatrix.matrix[parent_index, id_index] = 1.0
+
+    public func add(_ page: Page, completion: @escaping (Result<[[Int64]], Error>) -> Void) throws {
+        myThread.async {
+            //Check if this is the first page in the session
+            guard self.pageIDs.count > 0 else {
+                self.pageIDs.append(page.id)
+                let result = [self.pageIDs]
+                completion(.success(result))
+                return
             }
-        } else {
-            var navigationSimilarities = [Double](repeating: 0.0, count: self.adjacencyMatrix.matrix.rows)
-            pageIDs.append(id)
-            if let myParent = parent, let parent_index = pageIDs.firstIndex(of: myParent) {
-                navigationSimilarities[parent_index] = 1.0
+            if let id_index = self.pageIDs.firstIndex(of: page.id),
+               let myParent = page.parentId,
+               let parent_index = self.pageIDs.firstIndex(of: myParent) {
+                    self.navigationMatrix.matrix[id_index, parent_index] = 1.0
+                    self.navigationMatrix.matrix[parent_index, id_index] = 1.0
+            } else {
+                var navigationSimilarities = [Double](repeating: 0.0, count: self.adjacencyMatrix.matrix.rows)
+                self.pageIDs.append(page.id)
+                if let myParent = page.parentId, let parent_index = self.pageIDs.firstIndex(of: myParent) {
+                    navigationSimilarities[parent_index] = 1.0
+                }
+                do {
+                    try self.navigationMatrix.addPage(similarities: navigationSimilarities)
+                } catch let error {
+                    completion(.failure(error))
+                }
             }
-            try self.navigationMatrix.addPage(similarities: navigationSimilarities)
+            //Here is where we would add more similarity matrices in the future
+            self.adjacencyMatrix.matrix = self.navigationMatrix.matrix
+
+            let predictedClusters = self.clusterize()
+            let stablizedClusters = self.stabilize(predictedClusters)
+            let result = self.clusterizeIDs(labels: stablizedClusters)
+
+            DispatchQueue.main.async {
+                completion(.success(result))
+            }
         }
-        //Here is where we would add more similarity matrices in the future
-        self.adjacencyMatrix.matrix = self.navigationMatrix.matrix
-        
-        self.clusterize()
-        self.stabeliseClusters()
     }
-    
-    func stabeliseClusters () {
+
+    func stabilize(_ predictedClusters: [Int]) -> [Int] {
         var nextNewCluster = 0
         var clustersMap = [Int: Int]()
         var newClusters = [Int]()
-        for oldLabel in self.clusters {
+        for oldLabel in predictedClusters {
             if let newLabel = clustersMap[oldLabel] {
                 newClusters.append(newLabel)
             } else {
@@ -160,6 +186,20 @@ class Cluster {
                 nextNewCluster += 1
             }
         }
-        self.clusters = newClusters
+        return newClusters
+    }
+
+    private func clusterizeIDs(labels: [Int]) -> [[Int64]] {
+        var nextCluster = 0
+        var clusterized = [[Int64]]()
+        for label in labels.enumerated() {
+            if label.element < nextCluster {
+                clusterized[label.element].append(self.pageIDs[label.offset])
+            } else {
+                clusterized.append([self.pageIDs[label.offset]])
+                nextCluster += 1
+            }
+        }
+        return clusterized
     }
 }

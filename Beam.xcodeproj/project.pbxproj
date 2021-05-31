@@ -400,6 +400,8 @@
 		A01030AA25F149EA00D740C5 /* TextEditorCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = A01030A925F149EA00D740C5 /* TextEditorCommand.swift */; };
 		A01950AD25B838810025C5FD /* CommandManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A06DF52525B7608000E2CB62 /* CommandManagerTests.swift */; };
 		A0208F8225D6BB1C00CA054C /* AppDelegate+BeamTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0208F8125D6BB1C00CA054C /* AppDelegate+BeamTests.swift */; };
+		A02FD6FE266519C300EBE17E /* Clustering.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A02FD6E72665180C00EBE17E /* Clustering.framework */; };
+		A02FD6FF266519C300EBE17E /* Clustering.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = A02FD6E72665180C00EBE17E /* Clustering.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		A032BD33261F4677009A3576 /* ShortcutLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A032BD32261F4677009A3576 /* ShortcutLayer.swift */; };
 		A03CE0EC25F954CB00D767B0 /* BeamNoteDataHolder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A03CE0EB25F954CB00D767B0 /* BeamNoteDataHolder.swift */; };
 		A0404F0C25E7ECDD00E347F3 /* CommandNodeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0404F0B25E7ECDD00E347F3 /* CommandNodeTests.swift */; };
@@ -750,6 +752,20 @@
 			remoteGlobalIDString = 965A78242514F147009980D4;
 			remoteInfo = Beam;
 		};
+		A02FD6E62665180C00EBE17E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A02FD6E12665180C00EBE17E /* Clustering.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 4EEEAF4F2652AC4A0082D77E;
+			remoteInfo = Clustering;
+		};
+		A02FD6E82665180C00EBE17E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A02FD6E12665180C00EBE17E /* Clustering.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 4EEEAF582652AC4A0082D77E;
+			remoteInfo = ClusteringTests;
+		};
 		A5C9EFE026134DC80096380F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 52C60B82258B6332008B7C10 /* Sparkle.xcodeproj */;
@@ -767,6 +783,7 @@
 			dstSubfolderSpec = 10;
 			files = (
 				96319D252616232700D1CF31 /* BeamCore.framework in Embed Frameworks */,
+				A02FD6FF266519C300EBE17E /* Clustering.framework in Embed Frameworks */,
 				52C60BFB258B638F008B7C10 /* Sparkle.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
@@ -1214,6 +1231,7 @@
 		A01030A925F149EA00D740C5 /* TextEditorCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEditorCommand.swift; sourceTree = "<group>"; };
 		A0137B3425B6DFE100E65208 /* CommandManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandManager.swift; sourceTree = "<group>"; usesTabs = 0; };
 		A0208F8125D6BB1C00CA054C /* AppDelegate+BeamTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+BeamTests.swift"; sourceTree = "<group>"; };
+		A02FD6E12665180C00EBE17E /* Clustering.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Clustering.xcodeproj; path = Beam/Clustering/Clustering.xcodeproj; sourceTree = "<group>"; };
 		A032BD32261F4677009A3576 /* ShortcutLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutLayer.swift; sourceTree = "<group>"; };
 		A03CE0EB25F954CB00D767B0 /* BeamNoteDataHolder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamNoteDataHolder.swift; sourceTree = "<group>"; };
 		A0404F0B25E7ECDD00E347F3 /* CommandNodeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandNodeTests.swift; sourceTree = "<group>"; };
@@ -1420,6 +1438,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A0A84FBF2636FA99008F0326 /* GRDB in Frameworks */,
+				A02FD6FE266519C300EBE17E /* Clustering.framework in Frameworks */,
 				A0A84FB82636FA99008F0326 /* Fakery in Frameworks */,
 				02FF6074264C372900B2A5DE /* OAuthSwift in Frameworks */,
 				A0A84FB52636FA99008F0326 /* Preferences in Frameworks */,
@@ -1579,6 +1598,7 @@
 		24EFBA757ACC5310A2D800B2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				A02FD6E12665180C00EBE17E /* Clustering.xcodeproj */,
 				525C233B25BAF8EF001B9625 /* libgit2.a */,
 				52C60B82258B6332008B7C10 /* Sparkle.xcodeproj */,
 				9645489F2523B3550064D062 /* CloudKit.framework */,
@@ -2801,6 +2821,15 @@
 			path = Fixtures;
 			sourceTree = "<group>";
 		};
+		A02FD6E22665180C00EBE17E /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A02FD6E72665180C00EBE17E /* Clustering.framework */,
+				A02FD6E92665180C00EBE17E /* ClusteringTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		A04E849325DD1CDD0066CD44 /* Commands */ = {
 			isa = PBXGroup;
 			children = (
@@ -3242,6 +3271,10 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
+					ProductGroup = A02FD6E22665180C00EBE17E /* Products */;
+					ProjectRef = A02FD6E12665180C00EBE17E /* Clustering.xcodeproj */;
+				},
+				{
 					ProductGroup = 52C60B83258B6332008B7C10 /* Products */;
 					ProjectRef = 52C60B82258B6332008B7C10 /* Sparkle.xcodeproj */;
 				},
@@ -3389,6 +3422,20 @@
 			fileType = wrapper.application;
 			path = Updater.app;
 			remoteRef = 52DD244B258B681500651C84 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		A02FD6E72665180C00EBE17E /* Clustering.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = Clustering.framework;
+			remoteRef = A02FD6E62665180C00EBE17E /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		A02FD6E92665180C00EBE17E /* ClusteringTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = ClusteringTests.xctest;
+			remoteRef = A02FD6E82665180C00EBE17E /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */

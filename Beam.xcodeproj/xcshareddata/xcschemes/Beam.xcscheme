@@ -71,6 +71,16 @@
                ReferencedContainer = "container:Beam.xcodeproj">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "4EEEAF572652AC4A0082D77E"
+               BuildableName = "ClusteringTests.xctest"
+               BlueprintName = "ClusteringTests"
+               ReferencedContainer = "container:Beam/Clustering/Clustering.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction
