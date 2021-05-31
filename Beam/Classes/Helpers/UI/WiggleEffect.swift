@@ -7,7 +7,6 @@
 
 import SwiftUI
 
-
 struct WiggleEffect: GeometryEffect {
     var amount: CGFloat = 10
     var numberOfShakes = 3

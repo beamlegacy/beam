@@ -28,10 +28,15 @@ public class ShootGroupUI {
 
      Can be completed with additional ones.
      */
-    var uis: [SelectionUI]
+    let uis: [SelectionUI]
 
     let noteInfo: NoteInfo
     var edited: Bool
+
+    private(set) var groupPath: CGPath = CGPath(rect: .zero, transform: nil)
+    private(set) var groupRect: CGRect = .zero
+    private let groupPadding: CGFloat = 4
+    private let groupRadius: CGFloat = 4
 
     init(uis: [SelectionUI], noteInfo: NoteInfo, edited: Bool) {
         ShootGroupUI.latestId += 1
@@ -39,6 +44,18 @@ public class ShootGroupUI {
         self.uis = uis
         self.noteInfo = noteInfo
         self.edited = edited
+        self.updateSelectionPath()
+    }
+
+    func updateSelectionPath() {
+        let fusionRect = ShootFrameFusionRect().getRect(shootSelections: uis).insetBy(dx: -groupPadding, dy: -groupPadding)
+        groupRect = fusionRect
+        if uis.count > 1 {
+            let allRects = uis.map { $0.rect.insetBy(dx: -groupPadding, dy: -groupPadding) }
+            groupPath = CGPath.makeUnion(of: allRects, cornerRadius: groupRadius)
+        } else {
+            groupPath = CGPath(roundedRect: fusionRect, cornerWidth: groupRadius, cornerHeight: groupRadius, transform: nil)
+        }
     }
 }
 
@@ -73,8 +90,8 @@ class PointAndShootUI: ObservableObject {
         return shootSelectionUI
     }
 
-    func createGroup(noteInfo: NoteInfo, edited: Bool) -> ShootGroupUI {
-        let newGroup = ShootGroupUI(uis: [], noteInfo: noteInfo, edited: edited)
+    func createGroup(noteInfo: NoteInfo, selectionUIs: [SelectionUI], edited: Bool) -> ShootGroupUI {
+        let newGroup = ShootGroupUI(uis: selectionUIs, noteInfo: noteInfo, edited: edited)
         groupsUI.append(newGroup)
         return newGroup
     }
