@@ -9,7 +9,7 @@ import Foundation
 import BeamCore
 
 class NoteBackForwardList: Codable {
-    enum Element: Codable {
+    enum Element: Codable, Equatable {
         case note(BeamNote)
         case page(WindowPage)
         case journal
@@ -19,6 +19,19 @@ class NoteBackForwardList: Codable {
             case mode
             case note
             case page
+        }
+
+        static func == (lhs: NoteBackForwardList.Element, rhs: NoteBackForwardList.Element) -> Bool {
+            switch (lhs, rhs) {
+            case (.journal, .journal):
+                return true
+            case (.note(let lhsNote), .note(let rhsNote)):
+                return lhsNote.id == rhsNote.id
+            case (.page(let lhsPage), .page(let rhsPage)):
+                return lhsPage.id == rhsPage.id
+            default:
+                return false
+            }
         }
 
         public init(from decoder: Decoder) throws {
@@ -57,8 +70,7 @@ class NoteBackForwardList: Codable {
         case forward
     }
 
-    init() {
-    }
+    init() { }
 
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -77,13 +89,13 @@ class NoteBackForwardList: Codable {
     }
 
     func push(_ element: Element) {
+        guard current != element else { return }
         if let n = current {
             backList.append(n)
         }
 
         current = element
         forwardList = []
-
     }
 
     func goBack() -> Element? {
@@ -129,10 +141,10 @@ class NoteBackForwardList: Codable {
         }
 
         return nil
-
     }
 
     func clear() {
+        current = nil
         backList.removeAll()
         forwardList.removeAll()
     }
