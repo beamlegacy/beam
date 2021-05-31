@@ -7,28 +7,6 @@
 
 import SwiftUI
 
-struct TableViewColumn {
-    enum ColumnType {
-        case Text
-        case IconAndText
-        case CheckBox
-    }
-    let key: String
-    let title: String
-    var type: ColumnType = .Text
-    var editable = false
-    var isLink = false
-    var sortable = true
-    var sortableDefaultAscending = false
-    var isInitialSortDescriptor = false
-    var resizable = true
-    var width: CGFloat = 100
-    var fontSize: CGFloat = 13
-    var stringFromKeyValue: ((Any?) -> String) = { value in
-        return value as? String ?? ""
-    }
-}
-
 class TableViewItem: NSObject { }
 
 struct TableView: NSViewRepresentable {
@@ -81,7 +59,6 @@ struct TableView: NSViewRepresentable {
 
     private func setupColumns(in tableView: NSTableView, context: Self.Context) {
         var initialSortDescriptor: NSSortDescriptor?
-        // Columns setup
         columns.forEach { (column) in
             let tableColumn = NSTableColumn(identifier: NSUserInterfaceItemIdentifier(column.key))
             tableColumn.headerCell.title = column.title
@@ -152,7 +129,6 @@ class TableViewCoordinator: NSObject {
     }
 
     func reloadData() {
-        // Sort descriptor is complexe with non-nsobject skipping for now
         if let descriptor = sortDescriptor, let sorted = NSArray(array: originalData).sortedArray(using: [descriptor]) as? [TableViewItem] {
             sortedData = sorted
         } else {
@@ -259,7 +235,7 @@ extension TableViewCoordinator: NSTableViewDelegate {
         }
 
         if isRowCreationRow(row) {
-            // creationg row
+            // creation row
             if column.type == .CheckBox {
                 let iconCell = BeamTableCellIconView()
                 iconCell.updateWithIcon(NSImage(named: "tabs-new"))
@@ -276,16 +252,7 @@ extension TableViewCoordinator: NSTableViewDelegate {
                 cell = textCell
             }
         } else if column.type == .CheckBox {
-            let checkCell = CheckBoxTableCellView()
-            checkCell.checked = tableView.selectedRowIndexes.contains(row)
-            checkCell.onCheckChange = { selected in
-                if selected {
-                    tableView.selectRowIndexes([row], byExtendingSelection: true)
-                } else {
-                    tableView.deselectRow(row)
-                }
-            }
-            cell = checkCell
+            cell = setupCheckBoxCell(tableView, at: row)
         } else if column.type == .Text {
             let textCell = BeamTableCellView()
             let item = sortedData[row]
@@ -299,18 +266,35 @@ extension TableViewCoordinator: NSTableViewDelegate {
             textCell.textField?.delegate = self
             cell = textCell
         } else {
-            let iconAndTextCell = BeamTableCellIconAndTextView()
-            let item = sortedData[row] as? PasswordTableViewItem
-            iconAndTextCell.updateWithIcon(item?.hostInfo.favIcon)
-            let editable = column.editable && !column.isLink
-            iconAndTextCell.textField?.stringValue = item?.hostInfo.host.absoluteString ?? ""
-            iconAndTextCell.textField?.isEditable = editable
-            iconAndTextCell.textField?.font = BeamFont.regular(size: column.fontSize).nsFont
-            iconAndTextCell.textField?.delegate = self
-            cell = iconAndTextCell
+            cell = setupIconAndTextCell(tableView, at: row, column: column)
         }
-
         return cell
+    }
+
+    private func setupCheckBoxCell(_ tableView: NSTableView, at row: Int) -> CheckBoxTableCellView {
+        let checkCell = CheckBoxTableCellView()
+        checkCell.checked = tableView.selectedRowIndexes.contains(row)
+        checkCell.onCheckChange = { selected in
+            if selected {
+                tableView.selectRowIndexes([row], byExtendingSelection: true)
+            } else {
+                tableView.deselectRow(row)
+            }
+        }
+        return checkCell
+    }
+
+    private func setupIconAndTextCell(_ tableView: NSTableView, at row: Int, column: TableViewColumn)
+    -> BeamTableCellIconAndTextView {
+        let iconAndTextCell = BeamTableCellIconAndTextView()
+        let item = sortedData[row] as? PasswordTableViewItem
+        iconAndTextCell.updateWithIcon(item?.hostInfo.favIcon)
+        let editable = column.editable && !column.isLink
+        iconAndTextCell.textField?.stringValue = item?.hostInfo.host.absoluteString ?? ""
+        iconAndTextCell.textField?.isEditable = editable
+        iconAndTextCell.textField?.font = BeamFont.regular(size: column.fontSize).nsFont
+        iconAndTextCell.textField?.delegate = self
+        return iconAndTextCell
     }
 
     func tableView(_ tableView: NSTableView, heightOfRow row: Int) -> CGFloat {

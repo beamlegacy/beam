@@ -59,7 +59,7 @@ class DownloadManagerTest: XCTestCase {
 
         let downloadsCompleted = expectation(description: "download: \(urls)")
         let downloadManager = BeamDownloadManager()
-        downloadManager.downloadURLs(urls.map { URL(string: $0)!}, headers: [:]) { results in
+        downloadManager.downloadURLs(urls.map { URL(string: $0)! }, headers: [:]) { results in
             actualResults = results
             downloadsCompleted.fulfill()
         }

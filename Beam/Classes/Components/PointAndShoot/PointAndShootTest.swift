@@ -151,11 +151,11 @@ class FileStorageMock: BeamFileStorage {
 class DownloadManagerMock: DownloadManager {
     var events: [String] = []
 
-    func downloadURLs(_ urls: [URL], headers: [String: String], completion: @escaping ([DownloadManagerResult]) -> ()) {}
+    func downloadURLs(_ urls: [URL], headers: [String: String], completion: @escaping ([DownloadManagerResult]) -> Void) {}
 
-    func downloadURL(_ url: URL, headers: [String: String], completion: @escaping (DownloadManagerResult) -> ()) {
+    func downloadURL(_ url: URL, headers: [String: String], completion: @escaping (DownloadManagerResult) -> Void) {
         events.append("downloaded \(url) with headers \(headers)")
-        completion(DownloadManagerResult.binary(data: Data(bytes: [0x01, 0x02, 0x03]), mimeType: "image/png", actualURL: URL(string: "https://webpage.com/image.png")!))
+        completion(DownloadManagerResult.binary(data: Data([0x01, 0x02, 0x03]), mimeType: "image/png", actualURL: URL(string: "https://webpage.com/image.png")!))
     }
 
     func waitForDownloadURL(_ url: URL, headers: [String: String]) -> DownloadManagerResult? { fatalError("waitForDownloadURL(_:headers:) has not been implemented") }
@@ -294,12 +294,12 @@ class PointAndShootTest: XCTestCase {
         let addToNoteExpectation = expectation(description: "added shoot to note")
         try pns.addShootToNote(noteTitle: TestWebPage.testNoteTitle).then { _ in
             let page = self.testPage!
-            let downloadManager = page.downloadManager as! DownloadManagerMock
-            XCTAssertEqual(downloadManager.events.count, 1)
-            XCTAssertEqual(downloadManager.events[0], "downloaded someImage.png -- https://webpage.com with headers [\"Referer\": \"https://webpage.com\"]")
-            let fileStorage = page.fileStorage as! FileStorageMock
-            XCTAssertEqual(fileStorage.events.count, 1)
-            XCTAssertEqual(fileStorage.events[0], "inserted someImage.png with id 5289df737df57326fcdd22597afb1fac of image/png for 3 bytes")
+            let downloadManager = page.downloadManager as? DownloadManagerMock
+            XCTAssertEqual(downloadManager?.events.count, 1)
+            XCTAssertEqual(downloadManager?.events[0], "downloaded someImage.png -- https://webpage.com with headers [\"Referer\": \"https://webpage.com\"]")
+            let fileStorage = page.fileStorage as? FileStorageMock
+            XCTAssertEqual(fileStorage?.events.count, 1)
+            XCTAssertEqual(fileStorage?.events[0], "inserted someImage.png with id 5289df737df57326fcdd22597afb1fac of image/png for 3 bytes")
             XCTAssertEqual(testUI.events.count, 3)
             XCTAssertEqual(testUI.groupsUI.count, 0)    // No more shoot UI
             XCTAssertEqual(pns.shootGroups.count, 1)         // One shoot group memorized

@@ -358,7 +358,7 @@ import Promises
         Promise<Any?> { [unowned self] fulfill, reject in
             let parameterized = objectName != nil ? "exports.__ID__\(objectName!)." + jsCode : jsCode
             let obfuscatedCommand = Self.webViewConfiguration.obfuscate(str: parameterized)
-            webView.evaluateJavaScript(obfuscatedCommand) { [unowned self] (result, error: Error?) in
+            self.webView.evaluateJavaScript(obfuscatedCommand) { (result, error: Error?) in
                 if error == nil {
                     Logger.shared.logInfo("(\(obfuscatedCommand) succeeded: \(String(describing: result))",
                                           category: .javascript)

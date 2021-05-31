@@ -135,7 +135,7 @@ class BeamTableCellIconAndTextView: NSTableCellView {
 
         _iconView.translatesAutoresizingMaskIntoConstraints = false
         _iconView.isEnabled = true
-        
+
         self.addSubview(_contentView)
         _contentView.addSubview(_iconView)
         _contentView.addSubview(_textField)

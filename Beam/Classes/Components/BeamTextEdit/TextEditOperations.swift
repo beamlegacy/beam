@@ -204,7 +204,6 @@ extension TextRoot {
                 return // can't erase the first element of the note
             }
             // Delete element backward
-
             cmdManager.beginGroup(with: "Delete backward")
             defer { cmdManager.endGroup() }
             if let prevVisibleNode = node.previousVisibleNode(ElementNode.self) {
@@ -348,7 +347,6 @@ extension TextRoot {
         }
 
         cmdManager.inputText(text, in: node, at: cursorPosition)
-
         unmarkText()
     }
 
@@ -380,8 +378,7 @@ extension TextRoot {
                 ? BeamText.removeLinks(from: range.attributes)
                 : BeamText.removeInternalLinks(from: range.attributes)
         case 2:
-            guard let range1 = ranges.first, let range2 = ranges.last
-            else { return }
+            guard let range1 = ranges.first, let range2 = ranges.last else { return }
 
             if caretIsAfterLink {
                 // ignore the left part as we are to the right of a link
@@ -396,9 +393,7 @@ extension TextRoot {
                 // They both contain links, let's take the attributes from the left one and remove the link attribute
                 state.attributes = BeamText.removeInternalLinks(from: range1.attributes)
             }
-        default:
-            fatalError() // NOPE!
+        default: fatalError() // NOPE!
         }
     }
-
 }
