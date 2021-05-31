@@ -27,7 +27,6 @@ public struct TextConfig {
     var color = BeamColor.Generic.text.nsColor
     var disabledColor = NSColor.disabledControlTextColor
     var selectionColor = BeamColor.Generic.textSelection.nsColor
-    var markedColor = BeamColor.Generic.textSelection.nsColor
     var alpha: Float = 1.0
     var blendMode: CGBlendMode = .normal
 }

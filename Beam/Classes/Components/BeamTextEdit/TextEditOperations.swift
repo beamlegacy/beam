@@ -249,33 +249,42 @@ extension TextRoot {
         return markedTextRange != nil
     }
 
+    // Replaces a specified range in the receiver’s text storage with the given string and sets the selection.
     public func setMarkedText(string: String, selectedRange: Range<Int>?, replacementRange: Range<Int>?) {
-        // Logger.shared.logDebug("setMarkedText(string: '\(string)', selectedRange: \(selectedRange), replacementRange: \(replacementRange)")
+        //Logger.shared.logDebug("setMarkedText(string: '\(string)', selectedRange: \(String(describing: selectedRange)), replacementRange: \(String(describing: replacementRange))")
         guard let node = focusedWidget as? TextNode,
               !node.readOnly else { return }
 
-        var range = cursorPosition..<cursorPosition
-        if let r = replacementRange {
-            range = r
-        } else {
-            if let markedRange = markedTextRange {
-                range = markedRange
-            } else if let selectedRange = selectedRange {
-                range = selectedRange.lowerBound ..< selectedRange.upperBound
-            }
+        // If there is no marked text, the current selection is replaced. If there is no selection, the string is inserted at the insertion point.
+        var rangeToReplace = cursorPosition ..< cursorPosition
+        if let markedRange = markedTextRange {
+            rangeToReplace = markedRange
+        } else if !selectedTextRange.isEmpty {
+            rangeToReplace = selectedTextRange.lowerBound ..< selectedTextRange.upperBound
         }
 
-        //Logger.shared.logDebug("   replace sub range \(range) wirth '\(string)'")
-        node.text.replaceSubrange(range, with: string)
-        cursorPosition = range.upperBound
-        markedTextRange = range.lowerBound ..< range.lowerBound + string.count
-        cursorPosition = range.lowerBound + string.count
-        selectedTextRange = cursorPosition ..< cursorPosition
+        if let replacementRange = replacementRange {
+            let low = rangeToReplace.lowerBound + replacementRange.lowerBound
+            let high = low + replacementRange.count
+            rangeToReplace = low ..< high
+        }
+
+        //Logger.shared.logDebug("   replace sub range \(rangeToReplace) with '\(string)'")
+        node.text.replaceSubrange(rangeToReplace, with: string)
+        markedTextRange = rangeToReplace.lowerBound ..< rangeToReplace.lowerBound + string.count
+        cursorPosition = rangeToReplace.lowerBound + string.count
+        if let selectedRange = selectedRange {
+            selectedTextRange = rangeToReplace.lowerBound + selectedRange.lowerBound ..< rangeToReplace.lowerBound + selectedRange.lowerBound
+        } else {
+            selectedTextRange = cursorPosition ..< cursorPosition
+        }
+        node.invalidateText()
     }
 
     public func unmarkText() {
         guard let node = focusedWidget as? TextNode, !node.readOnly else { return }
         markedTextRange = nil
+        node.invalidateText()
     }
 
     public func insertText(string: String, replacementRange: Range<Int>?) {
@@ -344,9 +353,10 @@ extension TextRoot {
     }
 
     public func firstRect(forCharacterRange range: Range<Int>) -> (NSRect, Range<Int>) {
-        let r1 = rectAt(sourcePosition: range.lowerBound)
-        let r2 = rectAt(sourcePosition: range.upperBound)
-        return (r1.union(r2), range)
+        guard let node = focusedWidget as? TextNode else { return (.zero, 0..<0) }
+        let r1 = node.rectAt(sourcePosition: range.lowerBound)
+//        let r2 = node.rectAt(sourcePosition: range.upperBound)
+        return (r1.offsetBy(dx: node.offsetInDocument.x + 10, dy: node.offsetInDocument.y), range)
     }
 
     // swiftlint:disable:next cyclomatic_complexity

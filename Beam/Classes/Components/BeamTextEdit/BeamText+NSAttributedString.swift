@@ -45,12 +45,20 @@ extension BeamText {
         }
     }
 
-    func buildAttributedString(fontSize: CGFloat, cursorPosition: Int, elementKind: ElementKind, mouseInteraction: MouseInteraction? = nil) -> NSMutableAttributedString {
+    func buildAttributedString(fontSize: CGFloat, cursorPosition: Int, elementKind: ElementKind, mouseInteraction: MouseInteraction?, markedRange: Swift.Range<Int>?) -> NSMutableAttributedString {
         let string = NSMutableAttributedString()
         for range in ranges {
             var attributedString = NSMutableAttributedString(string: range.string, attributes: convert(attributes: range.attributes, fontSize: fontSize, elementKind: elementKind))
             if let mouseInteraction = mouseInteraction, (range.position...range.end).contains(mouseInteraction.range.upperBound) {
                 attributedString = updateAttributes(attributedString, withMouseInteraction: mouseInteraction)
+            }
+
+            if let markedRange = markedRange {
+                if attributedString.string.count >= markedRange.upperBound {
+                    let r = NSRange(location: markedRange.lowerBound, length: markedRange.count)
+                    attributedString.addAttribute(.underlineStyle, value: NSUnderlineStyle.single.rawValue, range: r)
+                    attributedString.addAttribute(.underlineColor, value: BeamColor.Editor.underlineAndStrikethrough.nsColor, range: r)
+                }
             }
 
             addImageToLink(attributedString, range, mouseInteraction: mouseInteraction)

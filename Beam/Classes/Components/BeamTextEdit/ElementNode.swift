@@ -80,7 +80,6 @@ public class ElementNode: Widget {
     var color: NSColor { config.color }
     var disabledColor: NSColor { config.disabledColor }
     var selectionColor: NSColor { config.selectionColor }
-    var markedColor: NSColor { config.markedColor }
     var alpha: Float { config.alpha }
     var blendMode: CGBlendMode { config.blendMode }
 

@@ -821,12 +821,8 @@ public extension CALayer {
     public func firstRect(forCharacterRange range: NSRange, actualRange: NSRangePointer?) -> NSRect {
         //        Logger.shared.logDebug("firstRect for \(range)")
         let (rect, _) = firstRect(forCharacterRange: range.lowerBound..<range.upperBound)
-        let p = convert(rect.origin, to: nil)
-        let x = Float(p.x)
-        let y = Float(p.y)
-        var rc = NSRect(x: CGFloat(x), y: CGFloat(y), width: CGFloat(rect.width), height: CGFloat(rect.height))
-        rc = convert(rc, to: nil)
-        rc = window!.convertToScreen (rc)
+        let p = convert(rect, to: nil)
+        let rc = window!.convertToScreen(p)
         return rc
     }
 
