@@ -85,7 +85,25 @@ extension AppDelegate: NSMenuDelegate, NSMenuItemValidation {
     func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
         guard menuItem.tag != 0 else { return true }
         let value = abs(menuItem.tag)
+        if let customValidationItem = menuItem as? MenuItemCustomValidation {
+            return customValidationItem.validateForState(window.state, window: window)
+        }
         return passConditionTag(tag: value, for: window.state)
+    }
+}
+
+// MARK: - Custom Item Validation
+private protocol MenuItemCustomValidation {
+    func validateForState(_ state: BeamState, window: NSWindow?) -> Bool
+}
+
+class WebviewRelatedMenuItem: NSMenuItem, MenuItemCustomValidation {
+    func validateForState(_ state: BeamState, window: NSWindow?) -> Bool {
+        let textViewFirstResponder = window?.firstResponder as? NSTextView
+        let beamTextField = textViewFirstResponder?.delegate as? BeamTextFieldView
+        return state.mode == .web &&
+            state.browserTabsManager.currentTab != nil
+            && beamTextField == nil
     }
 }
 
