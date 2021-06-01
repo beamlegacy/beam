@@ -39,6 +39,9 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
             nodeRange.selectNode(child)
             childBounds = nodeRange.getBoundingClientRect()
             break
+          case BeamNodeType.comment:
+            this.log(`Skipping: ${child.nodeType} (Comment)`)
+            break
           default:
             throw new Error(`Unsupported node type: ${child.nodeType}`)
         }

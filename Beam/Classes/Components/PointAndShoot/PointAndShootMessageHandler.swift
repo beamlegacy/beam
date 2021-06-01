@@ -174,12 +174,13 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
 
         case PointAndShootMessages.pointAndShoot_resize.rawValue:
             guard let dict = pnsBody,
+                  let scale = dict["scale"] as? CGFloat,
                   let selectedElements = dict["selected"] as? [[String: AnyObject]],
                   let href = dict["href"] as? String else {
                 Logger.shared.logError("Ignored beam_resize: \(String(describing: pnsBody))", category: .web)
                 return
             }
-
+            positions.scale = scale
             if selectedElements.count == 0 {
                 Logger.shared.logWarning("beam_resize selectedElements is empty. Skipping shoot updates", category: .web)
                 return

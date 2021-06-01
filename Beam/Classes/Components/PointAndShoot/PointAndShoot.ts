@@ -9,6 +9,7 @@ import {
   BeamRange,
 } from "./BeamTypes"
 import { Util } from "./Util"
+import { WebFactory } from "./WebFactory"
 
 const PNS_STATUS = Number(process.env.PNS_STATUS)
 
@@ -92,9 +93,9 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
    * @param ui {PointAndShootUI}
    * @return {PointAndShoot}
    */
-  static getInstance(win: BeamWindow, ui: PointAndShootUI) {
+  static getInstance(win: BeamWindow, ui: PointAndShootUI, webFactory: WebFactory) {
     if (!PointAndShoot.instance) {
-      PointAndShoot.instance = new PointAndShoot(win, ui)
+      PointAndShoot.instance = new PointAndShoot(win, ui, webFactory)
     }
     return PointAndShoot.instance
   }
@@ -103,8 +104,8 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
    * @param win {(BeamWindow)}
    * @param ui {PointAndShootUI}
    */
-  constructor(win: BeamWindow, ui: PointAndShootUI) {
-    super(win, ui)
+  constructor(win: BeamWindow, ui: PointAndShootUI, webFactory: WebFactory) {
+    super(win, ui, webFactory)
     this.datasetKey = `${this.prefix}Collect`
   }
 

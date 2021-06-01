@@ -16,7 +16,7 @@ function pointAndShootTestBed(frameEls = []) {
     }
     const styleData = {
         style: {
-          zoom: 1
+          zoom: "1"
         }
       }
       const testDocument = new BeamDocumentMock({
