@@ -239,12 +239,12 @@ class LinksSection: Widget {
     override func updateSubLayersLayout() {
         CATransaction.disableAnimations {
             setupLayerFrame()
-            separatorLayer.frame = CGRect(x: 0, y: sectionTitleLayer.frame.maxY + 8, width: 560, height: 1)
+            separatorLayer.frame = CGRect(x: 0, y: sectionTitleLayer.frame.maxY + 4, width: 560, height: 1)
 
             guard let linkAllLayer = linkLayer else { return }
             let linkActionLayerFrameSize = linkActionLayer.preferredFrameSize()
 
-            linkAllLayer.frame = CGRect(origin: CGPoint(x: frame.width - linkActionLayerFrameSize.width, y: 0), size: NSSize(width: 54, height: 21))
+            linkAllLayer.frame = CGRect(origin: CGPoint(x: frame.width - linkActionLayerFrameSize.width, y: -3), size: NSSize(width: 54, height: 21))
 
             let linkActionLayerXPosition = linkAllLayer.bounds.width / 2 - linkActionLayerFrameSize.width / 2
             let linkActionLayerYPosition = linkAllLayer.bounds.height / 2 - linkActionLayerFrameSize.height / 2

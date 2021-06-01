@@ -19,20 +19,12 @@ enum RefNoteTitleError: Error {
 class RefNoteTitle: Widget {
     // MARK: - Properties
     var cardTitleLayer: Layer?
-    var actionLinkLayer: Layer?
     var titleUnderLine = CALayer()
     var action: () -> Void
-    var showActionButton: Bool = true {
-        didSet {
-            layers["actionLinkLayer"]?.layer.isHidden = !(open && showActionButton)
-        }
-    }
 
     private let titleLayer = CATextLayer()
-    private let linkLayer = CATextLayer()
-
     private let titleLayerXPosition: CGFloat = 22
-    private let titleLayerYPosition: CGFloat = 10
+    private let titleLayerYPosition: CGFloat = 2
 
     private var noteTitle: String
 
@@ -70,11 +62,11 @@ class RefNoteTitle: Widget {
         addLayer(cardTitleLayer)
 
         cardTitleLayer.frame = CGRect(origin: CGPoint(x: titleLayerXPosition, y: titleLayerYPosition), size: titleLayer.preferredFrameSize())
-        layers["chevron"]?.frame = CGRect(origin: CGPoint(x: 0, y: titleLayer.frame.height - 8), size: CGSize(width: 20, height: 20))
+        layers["chevron"]?.frame = CGRect(origin: CGPoint(x: 0, y: (cardTitleLayer.frame.height / 2) - 7), size: CGSize(width: 20, height: 20))
     }
 
     override func updateRendering() {
-        contentsFrame = NSRect(x: 0, y: 0, width: availableWidth, height: 43)
+        contentsFrame = NSRect(x: 0, y: 0, width: availableWidth, height: open ? 24 : 44)
         computedIdealSize = contentsFrame.size
 
         if open {
@@ -82,7 +74,6 @@ class RefNoteTitle: Widget {
                 computedIdealSize.height += c.idealSize.height
             }
         }
-
     }
 
     override var mainLayerName: String {
