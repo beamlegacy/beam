@@ -708,17 +708,17 @@
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="jze-PA-szA"/>
-                                        <menuItem title="Actual Size" tag="4" keyEquivalent="0" id="sRD-PD-0pk">
+                                        <menuItem title="Actual Size" tag="4" keyEquivalent="0" id="sRD-PD-0pk" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
                                             <connections>
                                                 <action selector="resetZoom:" target="Ady-hI-5gd" id="WOS-GY-FtI"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Zoom In" tag="4" keyEquivalent="+" id="KIP-BY-goS">
+                                        <menuItem title="Zoom In" tag="4" keyEquivalent="+" id="KIP-BY-goS" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
                                             <connections>
                                                 <action selector="zoomIn:" target="Ady-hI-5gd" id="QAh-Iz-Efj"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Zoom Out" tag="4" keyEquivalent="-" id="Rhl-Ui-Pg1">
+                                        <menuItem title="Zoom Out" tag="4" keyEquivalent="-" id="Rhl-Ui-Pg1" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
                                             <connections>
                                                 <action selector="zoomOut:" target="Ady-hI-5gd" id="s1X-bM-fCG"/>
                                             </connections>
@@ -728,7 +728,7 @@
                             </menuItem>
                             <menuItem title="Navigation" id="An6-Hf-p3M" userLabel="Navigation">
                                 <modifierMask key="keyEquivalentModifierMask"/>
-                                <menu key="submenu" title="Navigation" autoenablesItems="NO" id="cCx-1g-tLY">
+                                <menu key="submenu" title="Navigation" id="cCx-1g-tLY">
                                     <items>
                                         <menuItem title="Toggle Web / Note" tag="1001" keyEquivalent="d" id="wze-af-ouN">
                                             <connections>
@@ -740,22 +740,22 @@
                                                 <action selector="showCardSelector:" target="Ady-hI-5gd" id="FiE-9C-fLE"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Go Back" tag="4" keyEquivalent="[" id="vfj-M7-Iu5">
+                                        <menuItem title="Go Back" tag="4" keyEquivalent="[" id="vfj-M7-Iu5" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
                                             <connections>
                                                 <action selector="goBack:" target="Voe-Tx-rLC" id="w7p-rt-yUD"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Go Back" tag="-4" keyEquivalent="" id="JJG-Tc-9sk">
+                                        <menuItem title="Go Back" tag="-4" keyEquivalent="" id="JJG-Tc-9sk" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
                                             <connections>
                                                 <action selector="goBack:" target="Voe-Tx-rLC" id="ql9-2b-itW"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Go Forward" tag="4" keyEquivalent="]" id="jIn-Gg-R6F">
+                                        <menuItem title="Go Forward" tag="4" keyEquivalent="]" id="jIn-Gg-R6F" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
                                             <connections>
                                                 <action selector="goForward:" target="Voe-Tx-rLC" id="Sjy-FA-ty4"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Go Forward" tag="-4" keyEquivalent="" id="68V-0m-mxt">
+                                        <menuItem title="Go Forward" tag="-4" keyEquivalent="" id="68V-0m-mxt" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
                                             <connections>
                                                 <action selector="goForward:" target="Voe-Tx-rLC" id="IaG-q2-Ng7"/>
                                             </connections>

@@ -58,10 +58,10 @@ struct AutocompleteList: View {
     }
 
     func isSelectedItem(_ item: AutocompleteResult) -> Bool {
-        if let i = selectedIndex, i < elements.count {
+        if modifierFlagsPressed?.contains(.command) == true {
+            return item.source == .createCard
+        } else if let i = selectedIndex, i < elements.count {
             return elements[i] == item
-        } else if item.source == .createCard && modifierFlagsPressed?.contains(.command) == true {
-            return true
         }
         return false
     }
