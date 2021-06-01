@@ -2,6 +2,7 @@ import {PointAndShoot} from "./PointAndShoot"
 import {BeamDocumentMock, BeamHTMLIFrameElementMock, BeamMouseEvent, BeamNamedNodeMap} from "./Test/BeamMocks"
 import {BeamWindowMock} from "./Test/BeamWindowMock"
 import {PointAndShootUIMock} from "./Test/PointAndShootUIMock"
+import {BeamWebFactoryMock} from "./Test/BeamWebFactoryMock"
 
 /**
  * @param frameEls {BeamHTMLElement[]}
@@ -16,7 +17,7 @@ function pointAndShootTestBed(frameEls = []): {pns: PointAndShoot, testUI: Point
   }
   const styleData = {
     style: {
-      zoom: 1
+      zoom: "1"
     }
   }
   const testDocument = new BeamDocumentMock({
@@ -35,7 +36,7 @@ function pointAndShootTestBed(frameEls = []): {pns: PointAndShoot, testUI: Point
   win.scrollX = 0
   win.scrollY = 0
   PointAndShoot.instance = null  // Allow test suite to instantiate multiple PointAndShoots
-  const pns = new PointAndShoot(win, testUi)
+  const pns = new PointAndShoot(win, testUi, new BeamWebFactoryMock())
   win.pns = pns
 
   // Check registered event listeners

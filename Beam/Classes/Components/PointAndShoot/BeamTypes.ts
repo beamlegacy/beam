@@ -486,5 +486,33 @@ export interface BeamSelection {
   setBaseAndExtent(anchorNode: BeamNode, anchorOffset: number, focusNode: BeamNode, focusOffset: number): void
   setPosition(node: BeamNode, offset?: number): void
   toString(): string
+}
 
+export interface BeamMutationRecord {
+  addedNodes: BeamNode[];
+  attributeName: string;
+  attributeNamespace: string;
+  nextSibling: BeamNode;
+  oldValue: string;
+  previousSibling: BeamNode;
+  removedNodes: BeamNode[];
+  target: BeamNode;
+  type: MutationRecordType;
+}
+
+
+export class BeamMutationObserver {
+  constructor(public fn) {
+    console.log("BeamMutationObserver init")
+    new (fn)
+  }
+  disconnect(): void {
+    throw new Error("Method not implemented.");
+  }
+  observe(target: BeamNode, options?: MutationObserverInit): void {
+    throw new Error("Method not implemented.");
+  }
+  takeRecords(): BeamMutationRecord[] {
+    throw new Error("Method not implemented.");
+  }
 }

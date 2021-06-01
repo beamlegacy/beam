@@ -1,7 +1,8 @@
-import type {BeamHTMLIFrameElement, BeamWindow} from "./BeamTypes"
-import type {WebEventsUI} from "./WebEventsUI"
-import {FrameInfo} from "./WebEventsUI";
-import {BeamHTMLIFrameElementMock} from "./Test/BeamMocks"
+import type { BeamHTMLIFrameElement, BeamMutationObserver, BeamNode, BeamWindow } from "./BeamTypes"
+import type { WebEventsUI } from "./WebEventsUI"
+import { FrameInfo } from "./WebEventsUI";
+import { BeamHTMLIFrameElementMock  } from "./Test/BeamMocks"
+import { WebFactory } from "./WebFactory";
 
 export class WebEvents<UI extends WebEventsUI> {
 
@@ -32,14 +33,27 @@ export class WebEvents<UI extends WebEventsUI> {
    * @type {number}
    */
   touchDuration = 2500
+  mutationObserver: BeamMutationObserver;
 
   /**
    * @param win {(BeamWindow)}
    * @param ui {WebEventsUI}
    */
-  constructor(win: BeamWindow, protected ui: UI) {
+  constructor(win: BeamWindow, protected ui: UI, webFactory: WebFactory) {
     this.log("initializing")
     this.setWindow(win)
+    this.setObserver(webFactory, "body", this.zoomMutationCallback)
+  }
+
+  setObserver(webFactory: WebFactory, query, fn) {
+    const self = this
+    this.mutationObserver = webFactory.createMutationObserver((records) => fn(records, self))
+    const target = this.win.document.querySelector(query) as unknown as BeamNode
+    const options = {
+      attributes: true,
+      attributeFilter: ["style"]
+    }
+    this.mutationObserver.observe(target, options)
   }
 
   setWindow(win: BeamWindow) {
@@ -54,6 +68,7 @@ export class WebEvents<UI extends WebEventsUI> {
     const vv = win.visualViewport
     vv.addEventListener("onresize", this.onPinch.bind(this))
     vv.addEventListener("scroll", this.onPinch.bind(this))
+
     this.log("events registered")
   }
 
@@ -68,9 +83,33 @@ export class WebEvents<UI extends WebEventsUI> {
    * @memberof WebEvents
    */
   getScale() {
-    let zoom = this.win.document.body.style.zoom || 1
+    let zoom = this.getZoomLevel() || 1
     let scale = this.win.visualViewport.scale
     return Number(zoom) * scale
+  }
+
+  getZoomLevel() {
+    let zoom = this.win.document.body.style.zoom
+    switch (true) {
+      case zoom.endsWith("%"):
+        return parseFloat(zoom)/100
+      case Boolean(parseFloat(zoom)):
+        return parseFloat(zoom)
+      case zoom == "normal":
+        return 1
+      default:
+        // No matching cases, default to 1
+        return 1
+    }
+  }
+
+  zoomMutationCallback(mutationRecords, self) {
+    mutationRecords.map(mutationRecord => {
+      if (mutationRecord.attributeName == "style") {
+        const resizeInfo = self.resizeInfo()
+        self.ui.setResizeInfo(resizeInfo)
+      }
+    })
   }
 
   checkFrames() {
@@ -105,14 +144,14 @@ export class WebEvents<UI extends WebEventsUI> {
     const body = doc.body
     const documentEl = doc.documentElement
     const scrollWidth = this.scrollWidth = Math.max(
-        body.scrollWidth, documentEl.scrollWidth,
-        body.offsetWidth, documentEl.offsetWidth,
-        body.clientWidth, documentEl.clientWidth
+      body.scrollWidth, documentEl.scrollWidth,
+      body.offsetWidth, documentEl.offsetWidth,
+      body.clientWidth, documentEl.clientWidth
     )
     const scrollHeight = Math.max(
-        body.scrollHeight, documentEl.scrollHeight,
-        body.offsetHeight, documentEl.offsetHeight,
-        body.clientHeight, documentEl.clientHeight
+      body.scrollHeight, documentEl.scrollHeight,
+      body.offsetHeight, documentEl.offsetHeight,
+      body.clientHeight, documentEl.clientHeight
     )
     const scrollInfo = {
       x: this.win.scrollX,
@@ -132,7 +171,7 @@ export class WebEvents<UI extends WebEventsUI> {
   }
 
   protected resizeInfo() {
-    return {width: this.win.innerWidth, height: this.win.innerHeight, scale: this.getScale()};
+    return { width: this.win.innerWidth, height: this.win.innerHeight, scale: this.getScale() };
   }
 
   onLoad(_ev) {
