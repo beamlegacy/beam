@@ -137,6 +137,15 @@
         }
       },
       {
+        "package": "LASwift",
+        "repositoryURL": "https://github.com/AlexanderTar/LASwift.git",
+        "state": {
+          "branch": "master",
+          "revision": "4b464f8a11b10f616b73a24bfc47c61c322ee542",
+          "version": null
+        }
+      },
+      {
         "package": "Nimble",
         "repositoryURL": "https://github.com/Quick/Nimble.git",
         "state": {

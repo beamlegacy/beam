@@ -44,7 +44,7 @@ class NavigationCollectUITests: QuickSpec {
             "en.wikipedia.org/w/index.php?title=Point-and-shoot_camera&oldid=1022913329",
             "en.wikipedia.org/w/index.php?title=Piranhaconda&oldid=1022691141",
             "text.npr.org/996515792",
-            "en.wikipedia.org/w/index.php?title=Netscape&oldid=1024220830"
+            "github.com/mdn/retired-content/commit/3131f5cb084dc769bf038bcf27c9b04c109c675f"
         ]
         
         let titles = [
@@ -142,19 +142,20 @@ class NavigationCollectUITests: QuickSpec {
                 self.journalScrollView = self.app.scrollViews["journalView"]
                 self.journalChildren = self.journalScrollView.children(matching: .textView)
                     .matching(identifier: "TextNode")
+                self.helper.tapCommand(.resizeWindowLandscape)
             }
             describe("Shoot") {
                 it("dismis shootCardPicker by clicking on page") {
                     self.omnibarHelper.navigateTo(text: urls[7])
                     // Great example of complex selection.
-                    let searchText = "Internet, Software, & Telecommunication"
+                    let searchText = "3131f5cb084dc769bf038bcf27c9b04c109c675f"
                     let parent = self.app.webViews.containing(.staticText,
                                                               identifier: searchText).element
                     
                     // click and drag between start and end of full text
                     let child = parent.staticTexts[searchText]
                     let start = child.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0.1))
-                    let end = child.coordinate(withNormalizedOffset: CGVector(dx: 1.1, dy: 1))
+                    let end = child.coordinate(withNormalizedOffset: CGVector(dx: 1.1, dy: 0.9))
                     start.click(forDuration: 1, thenDragTo: end)
                     
                     // Press option once to enable shoot mode
@@ -174,14 +175,14 @@ class NavigationCollectUITests: QuickSpec {
                 it("frame position placement") {
                     self.omnibarHelper.navigateTo(text: urls[7])
                     // Great example of complex selection.
-                    let searchText = "Internet, Software, & Telecommunication"
+                    let searchText = "3131f5cb084dc769bf038bcf27c9b04c109c675f"
                     let parent = self.app.webViews.containing(.staticText,
                                                               identifier: searchText).element
                     
                     // click and drag between start and end of full text
                     let child = parent.staticTexts[searchText]
                     let start = child.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0.1))
-                    let end = child.coordinate(withNormalizedOffset: CGVector(dx: 1.1, dy: 1))
+                    let end = child.coordinate(withNormalizedOffset: CGVector(dx: 1.1, dy: 0.9))
                     start.click(forDuration: 1, thenDragTo: end)
                     
                     // Press option once to enable shoot mode
@@ -207,7 +208,7 @@ class NavigationCollectUITests: QuickSpec {
                     
                     self.helper.assertFramePositions(searchText: searchText, identifier: "ShootFrameSelection")
                     // Resize window
-                    self.helper.tapCommand(.resizeWindowLandscape)
+                    self.helper.tapCommand(.resizeWindowPortrait)
                     
                     self.helper.assertFramePositions(searchText: searchText, identifier: "ShootFrameSelection")
                     // Add to today's note
@@ -227,7 +228,7 @@ class NavigationCollectUITests: QuickSpec {
                 it("frame position placement") {
                     self.omnibarHelper.navigateTo(text: urls[7])
                     // Great example of complex selection.
-                    let searchText = "Internet, Software, & Telecommunication"
+                    let searchText = "3131f5cb084dc769bf038bcf27c9b04c109c675f"
                     let parent = self.app.webViews.containing(.staticText,
                                                               identifier: searchText).element
                     
@@ -262,7 +263,7 @@ class NavigationCollectUITests: QuickSpec {
 
                         self.helper.assertFramePositions(searchText: searchText, identifier: "PointFrame")
                         // Resize window
-                        self.helper.tapCommand(.resizeWindowLandscape)
+                        self.helper.tapCommand(.resizeWindowPortrait)
                         center.hover()
 
                         self.helper.assertFramePositions(searchText: searchText, identifier: "PointFrame")
