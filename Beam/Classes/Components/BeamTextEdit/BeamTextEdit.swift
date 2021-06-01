@@ -134,15 +134,13 @@ public extension CALayer {
 
         timer = Timer.init(timeInterval: 1.0 / 60.0, repeats: true) { [unowned self] _ in
             let now = CFAbsoluteTimeGetCurrent()
-            if self.blinkTime < now && self.hasFocus {
+            if self.blinkTime <= now && self.hasFocus {
                 self.blinkPhase.toggle()
                 self.blinkTime = now + (self.blinkPhase ? self.onBlinkTime : self.offBlinkTime)
                 focusedWidget?.invalidate()
             }
         }
         RunLoop.main.add(timer, forMode: .default)
-
-//        inputContext = NSTextInputContext(client: self)
 
         initBlinking()
         updateRoot(with: root)
@@ -258,11 +256,13 @@ public extension CALayer {
                 rootNode.deepInvalidateText()
                 invalidateLayout()
             }
-
-            relayoutRoot()
         }
     }
 
+    var shouldDisableAnimationAtNextLayout = false
+    func disableAnimationAtNextLayout() {
+        shouldDisableAnimationAtNextLayout = true
+    }
     func relayoutRoot() {
         let r = bounds
         let width = CGFloat(isBig ? frame.width - 200 - leadingAlignment : 450)
@@ -273,7 +273,8 @@ public extension CALayer {
 
             rect = NSRect(x: x, y: topOffsetActual + cardTopSpace, width: textNodeWidth, height: r.height)
 
-            if isResizing {
+            if isResizing || shouldDisableAnimationAtNextLayout {
+                shouldDisableAnimationAtNextLayout = false
                 // Disable CALayer animation on resize
                 CATransaction.disableAnimations {
                     rootNode.availableWidth = textNodeWidth
@@ -419,7 +420,7 @@ public extension CALayer {
 
     var sideLayerOffset: CGFloat = .zero {
         didSet {
-            relayoutRoot()
+            invalidateLayout()
         }
     }
 
@@ -462,7 +463,6 @@ public extension CALayer {
     }
 
     public override func layout() {
-        relayoutRoot()
         super.layout()
         if scrollToCursorAtLayout {
             scrollToCursorAtLayout = false
