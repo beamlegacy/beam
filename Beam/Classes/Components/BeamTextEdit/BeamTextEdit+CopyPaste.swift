@@ -118,6 +118,7 @@ extension BeamTextEdit {
     // MARK: - Paste
     // swiftlint:disable:next cyclomatic_complexity function_body_length
     @IBAction func paste(_ sender: Any) {
+        disableAnimationAtNextLayout()
         if NSPasteboard.general.canReadObject(forClasses: supportedPasteObjects, options: nil) {
             let objects = NSPasteboard.general.readObjects(forClasses: supportedPasteObjects, options: nil)
             if let elementHolder: BeamNoteDataHolder = objects?.first as? BeamNoteDataHolder {
