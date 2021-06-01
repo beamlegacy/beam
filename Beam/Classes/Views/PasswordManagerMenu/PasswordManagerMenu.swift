@@ -30,7 +30,8 @@ struct PasswordManagerMenu: View {
         FormatterViewBackground(shadowOpacity: 0.1) {
             VStack(alignment: .leading, spacing: 0) {
                 if let passwordGeneratorViewModel = viewModel.passwordGeneratorViewModel {
-                    PasswordGeneratorCellGroup(viewModel: passwordGeneratorViewModel)
+                    PasswordGeneratorSuggestionCell(viewModel: passwordGeneratorViewModel)
+                        .frame(height: 81, alignment: .center)
                 } else {
                     ForEach(viewModel.display.entries.prefix(3)) { entry in
                         StoredPasswordCell(host: entry.host, username: entry.username) { newState in
