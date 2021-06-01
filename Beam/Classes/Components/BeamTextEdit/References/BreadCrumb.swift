@@ -48,7 +48,7 @@ class BreadCrumb: Widget {
     private let linkLayer = CATextLayer()
 
     private let maxBreadCrumbWidth: CGFloat = 100
-    private let breadCrumbYPosition: CGFloat = 3
+    private let breadCrumbYPosition: CGFloat = 1
     private let spaceBreadcrumbIcon: CGFloat = 3
     private let containerPadding: CGFloat = 23
     private let containerLinkSize: CGFloat = 538
@@ -180,7 +180,7 @@ class BreadCrumb: Widget {
             )
 
             position.x += crumbLayer.bounds.width + spaceBreadcrumbIcon
-            arrowLayer.frame = CGRect(origin: CGPoint(x: position.x, y: position.y + breadCrumbYPosition),
+            arrowLayer.frame = CGRect(origin: CGPoint(x: position.x, y: (textFrame.height / 2) - 3),
                                       size: CGSize(width: 10, height: 10))
             position.x += arrowLayer.frame.width + spaceBreadcrumbIcon
 
@@ -264,13 +264,13 @@ class BreadCrumb: Widget {
         for child in children {
             child.availableWidth = (hasLink ? containerLinkSize : containerRefSize) - child.offsetInRoot.x + child.childInset
             child.selectionLayerWidth = child.layer.frame.width + child.offsetInRoot.x + child.childInset
-            child.layer.frame.origin = CGPoint(x: child.layer.frame.origin.x - 8, y: crumbChain.count > 1 ? child.frameInDocument.origin.y - 4 : child.frameInDocument.origin.y + 2)
+            child.layer.frame.origin = CGPoint(x: child.layer.frame.origin.x - 8, y: child.frameInDocument.origin.y - 16)
             layout(children: child.children)
         }
     }
 
     override func updateRendering() {
-        contentsFrame = NSRect(x: 14, y: -1, width: availableWidth, height: showCrumbs ? 28 : 0)
+        contentsFrame = NSRect(x: 14, y: 0, width: availableWidth, height: showCrumbs ? 37 : 18)
 
         computedIdealSize = contentsFrame.size
 
@@ -278,7 +278,7 @@ class BreadCrumb: Widget {
             let linkLayerFrameSize = linkLayer.preferredFrameSize()
             if let actionLinkLayer = layers["actionLinkLayer"] as? LinkButtonLayer {
                 actionLinkLayer.frame = CGRect(
-                    origin: CGPoint(x: availableWidth - linkLayerFrameSize.width / 2, y: 0),
+                    origin: CGPoint(x: availableWidth - linkLayerFrameSize.width / 2, y: -2),
                     size: NSSize(width: 36, height: 21)
                 )
                 let linkLayerXPosition = actionLinkLayer.bounds.width / 2 - linkLayerFrameSize.width / 2
