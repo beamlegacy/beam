@@ -1,7 +1,7 @@
 // Configuration settings file format documentation can be found at:
 // https://help.apple.com/xcode/#/dev745c5c974
 
-SPARKLE_AUTOMATIC_UPDATE = 1
+AUTOMATIC_UPDATE = 1
 SENTRY_ENABLED = 1
 ENV = release
 NETWORK_ENABLED = 1

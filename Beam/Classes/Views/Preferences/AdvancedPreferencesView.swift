@@ -25,8 +25,8 @@ struct AdvancedPreferencesView: View {
     @State private var publicHostname: String = Configuration.publicHostname
     @State private var bundleIdentifier: String = Configuration.bundleIdentifier
     @State private var env: String = Configuration.env
-    @State private var sparkleUpdate: Bool = Configuration.sparkleUpdate
-    @State private var sparkleFeedURL = Configuration.sparkleFeedURL
+    @State private var autoUpdate: Bool = Configuration.autoUpdate
+    @State private var updateFeedURL = Configuration.updateFeedURL
     @State private var sentryEnabled = Configuration.sentryEnabled
     @State private var loggedIn: Bool = AccountManager().loggedIn
     @State private var networkEnabled: Bool = Configuration.networkEnabled
@@ -79,11 +79,11 @@ struct AdvancedPreferencesView: View {
             Preferences.Section(title: "CoreData:") {
                 Text(CoreDataManager.shared.storeURL?.absoluteString ?? "-").fixedSize(horizontal: false, vertical: true)
             }
-            Preferences.Section(title: "Sparkle Automatic Update:") {
-                Text(String(describing: sparkleUpdate))
+            Preferences.Section(title: "Automatic Update:") {
+                Text(String(describing: autoUpdate))
             }
-            Preferences.Section(title: "Sparkle URL:") {
-                Text(String(describing: sparkleFeedURL)).fixedSize(horizontal: false, vertical: true)
+            Preferences.Section(title: "Software update URL:") {
+                Text(String(describing: updateFeedURL)).fixedSize(horizontal: false, vertical: true)
             }
             Preferences.Section(title: "Sentry enabled:") {
                 Text(String(describing: sentryEnabled)).fixedSize(horizontal: false, vertical: true)

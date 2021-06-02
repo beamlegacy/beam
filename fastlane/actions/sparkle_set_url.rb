@@ -31,7 +31,7 @@ module Fastlane
                                        end),
           FastlaneCore::ConfigItem.new(key: :appcast_url,
                                        env_name: "FL_SPARKLE_SET_URL_LINK",
-                                       description: "URL for the appcast.xml",
+                                       description: "URL for the AppFeed.json",
                                        verify_block: proc do |value|
                                           raise "Invalid URL '#{value}'".red unless (value and !value.empty?)
                                        end)

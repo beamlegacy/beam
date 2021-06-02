@@ -9,9 +9,9 @@ struct Configuration {
     static private(set) var env = EnvironmentVariables.env
     static private(set) var testAccountEmail = "fabien+test@beamapp.co"
     static private(set) var testAccountPassword = EnvironmentVariables.Account.testPassword
-    static private(set) var sparkleUpdate = EnvironmentVariables.sparkleUpdate
+    static private(set) var autoUpdate = EnvironmentVariables.autoUpdate
     static private(set) var networkStubs = EnvironmentVariables.networkStubs
-    static private(set) var sparkleFeedURL: String = Configuration.value(for: "SUFeedURL")
+    static private(set) var updateFeedURL: String = Configuration.value(for: "SUFeedURL")
     static private(set) var sentryEnabled = EnvironmentVariables.sentryEnabled
     static var networkEnabled = EnvironmentVariables.networkEnabled
     static var encryptionEnabledDefault = EnvironmentVariables.encryptionEnabled

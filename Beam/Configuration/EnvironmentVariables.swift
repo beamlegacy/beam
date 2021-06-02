@@ -36,7 +36,7 @@ struct EnvironmentVariables {
     }
 
     static private(set) var env = "$(ENV)"
-    static private(set) var sparkleUpdate = NSString("$(SPARKLE_AUTOMATIC_UPDATE)").boolValue
+    static private(set) var autoUpdate = NSString("$(AUTOMATIC_UPDATE)").boolValue
     static private(set) var networkStubs = NSString("$(NETWORK_STUBS)").boolValue
     static private(set) var sentryEnabled = NSString("$(SENTRY_ENABLED)").boolValue
     static private(set) var networkEnabled = NSString("$(NETWORK_ENABLED)").boolValue

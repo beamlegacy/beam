@@ -1,8 +1,9 @@
 stages:
   - test
   - build
-  - dmg
   - notarize
+  - dmg
+  - zip
   - deploy
 
 variables:
@@ -28,6 +29,7 @@ include:
   - local: '.gitlab/ci/before-script-template.yml'
   - local: '.gitlab/ci/gitlab-ci-test.yml'
   - local: '.gitlab/ci/gitlab-ci-dmg.yml'
+  - local: '.gitlab/ci/gitlab-ci-zip.yml'
   - local: '.gitlab/ci/gitlab-ci-build.yml'
   - local: '.gitlab/ci/gitlab-ci-notarize.yml'
   - local: '.gitlab/ci/gitlab-ci-deploy.yml'
