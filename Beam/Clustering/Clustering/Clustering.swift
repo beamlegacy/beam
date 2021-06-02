@@ -9,15 +9,15 @@ import LASwift
 import Foundation
 
 public struct Page {
-    public init(id: Int64, parentId: Int64? = nil, title: String? = nil, content: String? = nil) {
+    public init(id: UInt64, parentId: UInt64? = nil, title: String? = nil, content: String? = nil) {
         self.id = id
         self.parentId = parentId
         self.title = title
         self.content = content
     }
 
-    var id: Int64
-    var parentId: Int64?
+    var id: UInt64
+    var parentId: UInt64?
     var title: String?
     var content: String?
 }
@@ -87,7 +87,7 @@ public class Cluster {
     }
 
     let myThread = DispatchQueue(label: "clusteringThread")
-    var pageIDs = [Int64]()
+    var pageIDs = [UInt64]()
     var navigationMatrix = NavigationMatrix()
     var adjacencyMatrix = SimilarityMatrix()
 
@@ -134,7 +134,7 @@ public class Cluster {
        return predictedLabels
     }
 
-    public func add(_ page: Page, completion: @escaping (Result<[[Int64]], Error>) -> Void) throws {
+    public func add(_ page: Page, completion: @escaping (Result<[[UInt64]], Error>) -> Void) {
         myThread.async {
             //Check if this is the first page in the session
             guard self.pageIDs.count > 0 else {
@@ -143,11 +143,12 @@ public class Cluster {
                 completion(.success(result))
                 return
             }
-            if let id_index = self.pageIDs.firstIndex(of: page.id),
-               let myParent = page.parentId,
+            if let id_index = self.pageIDs.firstIndex(of: page.id) {
+               if let myParent = page.parentId,
                let parent_index = self.pageIDs.firstIndex(of: myParent) {
                     self.navigationMatrix.matrix[id_index, parent_index] = 1.0
                     self.navigationMatrix.matrix[parent_index, id_index] = 1.0
+               }
             } else {
                 var navigationSimilarities = [Double](repeating: 0.0, count: self.adjacencyMatrix.matrix.rows)
                 self.pageIDs.append(page.id)
@@ -189,9 +190,9 @@ public class Cluster {
         return newClusters
     }
 
-    private func clusterizeIDs(labels: [Int]) -> [[Int64]] {
+    private func clusterizeIDs(labels: [Int]) -> [[UInt64]] {
         var nextCluster = 0
-        var clusterized = [[Int64]]()
+        var clusterized = [[UInt64]]()
         for label in labels.enumerated() {
             if label.element < nextCluster {
                 clusterized[label.element].append(self.pageIDs[label.offset])

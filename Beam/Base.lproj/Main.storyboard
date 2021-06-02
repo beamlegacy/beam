@@ -882,6 +882,12 @@ CQ
                                                 <action selector="showConsole:" target="Voe-Tx-rLC" id="Ryh-ht-LIN"/>
                                             </connections>
                                         </menuItem>
+                                        <menuItem title="Show Tab grouping" id="mbB-UC-g3u">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="showTabGroupingWindow:" target="Voe-Tx-rLC" id="hmK-5i-GwK"/>
+                                            </connections>
+                                        </menuItem>
                                     </items>
                                 </menu>
                             </menuItem>

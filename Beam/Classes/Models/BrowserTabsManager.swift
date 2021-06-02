@@ -9,6 +9,13 @@ import Foundation
 import Combine
 import SwiftSoup
 
+struct TabInformation {
+    var url: URL
+    var tab: BrowserTab
+    var document: IndexDocument
+    var textContent: String
+}
+
 protocol BrowserTabsManagerDelegate: AnyObject {
 
     func areTabsVisible(for manager: BrowserTabsManager) -> Bool
@@ -23,11 +30,12 @@ class BrowserTabsManager: ObservableObject {
     weak var delegate: BrowserTabsManagerDelegate?
 
     private var tabScope = Set<AnyCancellable>()
-    private var index: Index
     private var tabsAreVisible: Bool {
         self.delegate?.areTabsVisible(for: self) == true
     }
 
+    private var data: BeamData
+    public var index: Index
     @Published public var tabs: [BrowserTab] = [] {
         didSet {
             self.updateTabsHandlers()
@@ -48,6 +56,7 @@ class BrowserTabsManager: ObservableObject {
     }
 
     init(with data: BeamData) {
+        self.data = data
         self.index = data.index
     }
 
@@ -89,7 +98,9 @@ class BrowserTabsManager: ObservableObject {
                     text = html2Text(url: url, doc: doc)
 
                     DispatchQueue.main.async { [unowned self] in
-                        self.index.append(document: IndexDocument(source: url.absoluteString, title: read.title, contents: text))
+                        let indexDocument = IndexDocument(source: url.absoluteString, title: read.title, contents: text)
+                        let tabInformation = TabInformation(url: url, tab: tab, document: indexDocument, textContent: text)
+                        self.data.tabToIndex = tabInformation
                     }
                 }
             }

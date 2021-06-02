@@ -81,8 +81,7 @@ class Index: Codable {
         case words, documents, pageRank
     }
 
-    init() {
-    }
+    init() {}
 
     static let titleScore = Float(1.0)
     static let contentsScore = Float(2.0)
