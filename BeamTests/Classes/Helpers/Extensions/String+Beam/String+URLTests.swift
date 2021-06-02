@@ -60,7 +60,7 @@ class String_URLTests: XCTestCase {
         XCTAssertEqual(URL(string: "http://www.google.com/search?prout")!.minimizedHost, "google.com")
         XCTAssertEqual(URL(string: "http://search.somedomain.google.com/search?prout")!.minimizedHost, "search.somedomain.google.com")
         XCTAssertEqual(URL(string: "http://google/search?prout")!.minimizedHost, "google")
-        XCTAssertEqual(URL(string: "google/search?prout")!.minimizedHost, "")
+        XCTAssertNil(URL(string: "google/search?prout")!.minimizedHost)
     }
 
     func testUrlIsSearchResult() {

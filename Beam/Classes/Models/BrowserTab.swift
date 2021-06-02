@@ -20,7 +20,11 @@ import Promises
         isNavigatingFromSearchBar = true
         self.url = url
         navigationCount = 0
-        webView.load(URLRequest(url: url))
+        if url.isFileURL {
+            webView.loadFileURL(url, allowingReadAccessTo: url.deletingLastPathComponent())
+        } else {
+            webView.load(URLRequest(url: url))
+        }
         $isLoading.sink { [unowned passwordOverlayController] loading in
             if !loading {
                 passwordOverlayController.detectInputFields()

@@ -149,7 +149,6 @@
 		418172522581107C00317ED8 /* OmniBarSearchField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171D82581107C00317ED8 /* OmniBarSearchField.swift */; };
 		418172532581107C00317ED8 /* Chevrons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171D92581107C00317ED8 /* Chevrons.swift */; };
 		418172542581107C00317ED8 /* OmniBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171DA2581107C00317ED8 /* OmniBar.swift */; };
-		418172562581107C00317ED8 /* GlobalTabTitle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171DC2581107C00317ED8 /* GlobalTabTitle.swift */; };
 		418172592581107C00317ED8 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171E02581107C00317ED8 /* ContentView.swift */; };
 		4181725D2581107C00317ED8 /* AuthenticationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171E72581107C00317ED8 /* AuthenticationManager.swift */; };
 		4181725E2581107C00317ED8 /* AccountManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171E82581107C00317ED8 /* AccountManager.swift */; };
@@ -506,6 +505,7 @@
 		A57BFEBD2615B49C00CFB646 /* TableRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57BFEBC2615B49C00CFB646 /* TableRowView.swift */; };
 		A580D5EE26427BCB00EB2E24 /* ContextMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A580D5ED26427BCB00EB2E24 /* ContextMenuView.swift */; };
 		A5946826265D29350044A892 /* CGPath+Union.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5946825265D29350044A892 /* CGPath+Union.swift */; };
+		A58BD800266510390040A8C4 /* String+RegexTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58BD7FF266510390040A8C4 /* String+RegexTests.swift */; };
 		A5946846265E30350044A892 /* Fakery in Frameworks */ = {isa = PBXBuildFile; productRef = A5946845265E30350044A892 /* Fakery */; };
 		A59D33882655101A002E7E96 /* WiggleEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = A59D33872655101A002E7E96 /* WiggleEffect.swift */; };
 		A5C9F005261353420096380F /* WindowPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C9F004261353420096380F /* WindowPage.swift */; };
@@ -864,7 +864,6 @@
 		418171D82581107C00317ED8 /* OmniBarSearchField.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OmniBarSearchField.swift; sourceTree = "<group>"; };
 		418171D92581107C00317ED8 /* Chevrons.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Chevrons.swift; sourceTree = "<group>"; };
 		418171DA2581107C00317ED8 /* OmniBar.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OmniBar.swift; sourceTree = "<group>"; };
-		418171DC2581107C00317ED8 /* GlobalTabTitle.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlobalTabTitle.swift; sourceTree = "<group>"; };
 		418171E02581107C00317ED8 /* ContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		418171E72581107C00317ED8 /* AuthenticationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AuthenticationManager.swift; sourceTree = "<group>"; };
 		418171E82581107C00317ED8 /* AccountManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AccountManager.swift; sourceTree = "<group>"; };
@@ -1204,6 +1203,7 @@
 		A57BFEBC2615B49C00CFB646 /* TableRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableRowView.swift; sourceTree = "<group>"; };
 		A580D5ED26427BCB00EB2E24 /* ContextMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextMenuView.swift; sourceTree = "<group>"; };
 		A5946825265D29350044A892 /* CGPath+Union.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CGPath+Union.swift"; sourceTree = "<group>"; };
+		A58BD7FF266510390040A8C4 /* String+RegexTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+RegexTests.swift"; sourceTree = "<group>"; };
 		A59D33872655101A002E7E96 /* WiggleEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WiggleEffect.swift; sourceTree = "<group>"; };
 		A5C9F004261353420096380F /* WindowPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowPage.swift; sourceTree = "<group>"; };
 		A5C9F009261364F50096380F /* WindowPageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowPageView.swift; sourceTree = "<group>"; };
@@ -1912,7 +1912,6 @@
 				A552DF2825F0E22B00570C85 /* OmniBarFieldBackground.swift */,
 				A552DF3225F1741900570C85 /* GlobalCenteringContainer.swift */,
 				418171D92581107C00317ED8 /* Chevrons.swift */,
-				418171DC2581107C00317ED8 /* GlobalTabTitle.swift */,
 			);
 			path = OmniBar;
 			sourceTree = "<group>";
@@ -2563,6 +2562,7 @@
 			children = (
 				96319D1E2616232700D1CF31 /* BeamCoreTests.swift */,
 				A5CA5DF42625C15D004E9D3E /* BeamElementTextStatsTests.swift */,
+				A58BD7FF266510390040A8C4 /* String+RegexTests.swift */,
 				96319D202616232700D1CF31 /* Info.plist */,
 			);
 			path = BeamCoreTests;
@@ -3549,6 +3549,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A58BD800266510390040A8C4 /* String+RegexTests.swift in Sources */,
 				A5CA5DF52625C15D004E9D3E /* BeamElementTextStatsTests.swift in Sources */,
 				96319D1F2616232700D1CF31 /* BeamCoreTests.swift in Sources */,
 			);
@@ -3652,7 +3653,6 @@
 				4181734E2581204900317ED8 /* BeamState.swift in Sources */,
 				8775C5F32613212C00A26CAC /* StoredPasswordCell.swift in Sources */,
 				52FC002325E4244200ABECB0 /* MenuAvailableCommands.swift in Sources */,
-				418172562581107C00317ED8 /* GlobalTabTitle.swift in Sources */,
 				961EC51725B5038E009FA322 /* ChevronButton.swift in Sources */,
 				52B17ABA262442BC00CB4728 /* DatabasesList.swift in Sources */,
 				418171FE2581107C00317ED8 /* Html2Md.swift in Sources */,

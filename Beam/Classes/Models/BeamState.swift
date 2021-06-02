@@ -233,25 +233,20 @@ import BeamCore
         return n
     }
 
-    private func urlFor(query: String) -> URL {
+    private func urlFor(query: String) -> URL? {
         //TODO make a better url detector and rewritter to transform xxx.com in https://xxx.com with less corner cases and clearer code path:
-        if query.maybeURL {
-            guard let u = URL(string: query) else {
-                searchEngine.query = query
-                return URL(string: searchEngine.searchUrl)!
-            }
-            return u.urlWithScheme
+        guard let u = URL(string: query) else {
+            searchEngine.query = query
+            return URL(string: searchEngine.searchUrl)
         }
-
-        searchEngine.query = query
-        return URL(string: searchEngine.searchUrl)!
+        return u.urlWithScheme
     }
 
     func startQuery(_ node: TextNode) {
         let query = node.currentSelectionWithFullSentences()
-        guard !query.isEmpty else { return }
+        guard !query.isEmpty, let url = urlFor(query: query) else { return }
 
-        createTabFromNode(node, withURL: urlFor(query: query))
+        createTabFromNode(node, withURL: url)
         mode = .web
     }
 
@@ -270,7 +265,10 @@ import BeamCore
             }
 
         case .history, .url:
-            let url = result.url?.urlWithScheme ?? urlFor(query: result.text)
+            guard let url = result.url?.urlWithScheme ?? urlFor(query: result.text) else {
+                Logger.shared.logError("autocomplete result without correct url \(result.text)", category: .search)
+                return
+            }
             _ = createTab(withURL: url, originalQuery: "")
             mode = .web
 
@@ -294,8 +292,10 @@ import BeamCore
             return
         }
 
-        // let createNote = !queryString.maybeURL
-        let url: URL = urlFor(query: queryString)
+        guard let url: URL = urlFor(query: queryString) else {
+            Logger.shared.logError("Couldn't build search url from: \(queryString)", category: .search)
+            return
+        }
 
         // Logger.shared.logDebug("Start query: \(url)")
 

@@ -11,12 +11,17 @@ extension AppDelegate {
     #if DEBUG
     func prepareMenuForTestEnv() {
         let prepareBeam = NSMenuItem()
-        prepareBeam.submenu = NSMenu(title: "Prepare Beam")
+        prepareBeam.submenu = NSMenu(title: "UITests")
 
-        MenuAvailableCommands.allCases.forEach {
-            prepareBeam.submenu?.items.append(NSMenuItem(title: $0.rawValue,
-                                                         action: #selector(menuCalled),
-                                                         keyEquivalent: ""))
+        MenuAvailableCommands.allCases.forEach { item in
+            let value = item.rawValue
+            if value.hasPrefix("separator") {
+                prepareBeam.submenu?.items.append(NSMenuItem.separator())
+            } else {
+                prepareBeam.submenu?.items.append(NSMenuItem(title: item.rawValue,
+                                                             action: #selector(menuCalled),
+                                                             keyEquivalent: ""))
+            }
         }
 
         NSApp.mainMenu?.addItem(prepareBeam)

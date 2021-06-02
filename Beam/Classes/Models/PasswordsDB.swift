@@ -153,7 +153,11 @@ class PasswordsDB: PasswordStore {
                     Logger.shared.logError("Error while encrypting password for \(host) - \(username)", category: .encryption)
                     return
                 }
-                var passwordRecord = PasswordsRecord(id: nil, uuid: id(for: host, and: username), host: host.minimizedHost, name: username, password: encryptedPassword)
+                var passwordRecord = PasswordsRecord(id: nil,
+                                                     uuid: id(for: host, and: username),
+                                                     host: host.minimizedHost ?? host.urlStringWithoutScheme,
+                                                     name: username,
+                                                     password: encryptedPassword)
                 try passwordRecord.insert(db)
             }
         } catch let error {

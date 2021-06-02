@@ -33,7 +33,7 @@ struct OmniBarSearchField: View {
         guard let tab = browserTabsManager.currentTab, let url = tab.url, shouldShowWebHost else {
             return $autocompleteManager.searchQuery
         }
-        return .constant(url.minimizedHost)
+        return .constant(url.minimizedHost ?? url.absoluteString)
     }
 
     private var leadingIconName: String? {

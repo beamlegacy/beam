@@ -71,7 +71,7 @@ class Autocompleter: ObservableObject {
             if let array = obj as? [Any], let r = array[1] as? [String] {
                 var res = [AutocompleteResult]()
                 for (index, str) in r.enumerated() {
-                    let isURL = str.urlString != nil
+                    let isURL = str.mayBeWebURL
                     let source: AutocompleteResult.Source = isURL ? .url : .autocomplete
                     let url = isURL ? URL(string: str) : nil
                     var text = str
