@@ -217,7 +217,7 @@ platform :mac do
 
     build_number = ENV['CI_JOB_ID']
     increment_build_number(build_number: build_number)
-    appcast_url = "https://s3.eu-west-3.amazonaws.com/downloads.dev.beamapp.co/#{Actions.git_branch}/appcast.xml"
+    appcast_url = "https://s3.eu-west-3.amazonaws.com/downloads.dev.beamapp.co/#{Actions.git_branch}/AppFeed.json"
     info_plist = "Beam/Configuration/Info.plist"
 
     UI.message "Set appcast url to #{appcast_url} in #{info_plist}"
@@ -281,7 +281,7 @@ platform :mac do
   lane :notarize_build do
     # https://blog.zeplin.io/dev-journal-automate-notarizing-macos-apps-94b0b144ba9d
     notarize(
-      package: "builds/Beam.dmg",
+      package: "builds/Beam.app",
       verbose: true,
       print_log: true,
       bundle_id: ENV["APP_IDENTIFIER"]
@@ -336,6 +336,10 @@ platform :mac do
     File.open("../builds/release_notes.html", "wb") do |f|
       f.write("<html><body><pre>#{changelog}</pre></body></html>")
     end
+    
+    File.open("../builds/release_notes.md", "wb") do |f|
+      f.write("#{changelog}")
+    end
 
     # Store this commit
     File.open("../builds/commit", "wb") do |f|
@@ -355,7 +359,7 @@ platform :mac do
 
     create_release_notes(branch: params[:branch] || Actions.git_branch)
 
-    upload_appcast(branch: params[:branch] || Actions.git_branch)
+    upload_update_feed(branch: params[:branch] || Actions.git_branch)
     s3_path = s3_path_from_branch(params[:branch] || Actions.git_branch)
 
     # This should be last upload, or Slack links will be wrong
@@ -367,6 +371,7 @@ platform :mac do
       upload_metadata: true,
       files: [
         "builds/Beam.dmg",
+        "builds/Beam.zip",
         "builds/Beam.app.dSYM.zip",
         "builds/release_notes.html"
       ],
@@ -385,12 +390,12 @@ platform :mac do
     ping_slack
   end
 
-  private_lane :upload_appcast do |params|
+  private_lane :upload_update_feed do |params|
     # I have to do Sparkle at the same time, as `increment_build_number`
     # modifies Beam/Configuration/Info.plist but this file is not propagated to
     # other CI jobs
-    download_previous_file(filename: "appcast.xml", default_file: "appcast.xml", branch: params[:branch])
-    generate_sparkle_feed(branch: params[:branch])
+
+    generate_update_feed(branch: params[:branch])
 
     s3_path = params[:branch]
 
@@ -401,8 +406,7 @@ platform :mac do
       region: ENV["AWS_DEFAULT_REGION"],
       upload_metadata: true,
       files: [
-        "builds/appcast.xml",
-        "builds/commit"
+        "builds/AppFeed.json"
       ],
       # Doesn't work the way I expected
       # endpoint: "http://downloads.dev.beamapp.co",
@@ -453,30 +457,41 @@ platform :mac do
     raise $!
   end
 
-  private_lane :generate_sparkle_feed do |params|
+  private_lane :generate_update_feed do |params|
     get_version_number_from_plist(info_plist: "builds/Beam.app/Contents/Info.plist")
     get_build_number_from_plist(info_plist: "builds/Beam.app/Contents/Info.plist")
     s3_path = s3_path_from_branch(params[:branch])
 
     directory = "https://s3.#{ENV['AWS_DEFAULT_REGION']}.amazonaws.com/#{ENV['S3_BUCKET']}/#{s3_path}"
-    app_download_url = "#{directory}/Beam.dmg"
+    app_download_url = "#{directory}/Beam.zip"
+    update_json_url = "#{directory}/AppFeed.json"
     release_notes_html_url = "#{directory}/release_notes.html"
     human_version = "#{lane_context[SharedValues::VERSION_NUMBER]}"
     machine_version = "#{lane_context[SharedValues::BUILD_NUMBER]}"
     release_title = "Version #{human_version}"
+        
+    rootFolder = Dir.chdir("..") { Dir.pwd } 
+    UI.success "#{rootFolder}"
+    
+    appFeedBuilder = "../Extern/AutoUpdate/AppFeedBuilder"
+    notes = "#{rootFolder}/builds/release_notes.md"
 
-    sparkle_add_update(
-      feed_file: "builds/appcast.xml",
-      app_download_url: app_download_url,
-      app_size: "#{File.size("../builds/Beam.dmg")}",
-      machine_version: machine_version,
-      human_version: human_version,
-      title: release_title,
-      release_notes_link: release_notes_html_url,
-    )
+    build = "cd #{appFeedBuilder} && swift build"
+    
+    UI.success "#{build}"
+    outputBuild = Actions.sh(build)
+    UI.success "#{outputBuild}"
+      
+    run = ["cd #{appFeedBuilder} &&",
+      "swift run AppFeedBuilder", update_json_url, "'#{release_title}'", human_version, machine_version, notes, app_download_url, "--output-path", "#{rootFolder}/builds"
+    ].join(' ')
+    
+    UI.success "#{run}"
+    output = Actions.sh(run)
+    UI.success "#{output}"
 
-    UI.success "Sparkle: Successfully added a release item to the Appcast XML file"
-    UI.success "Sparkle: Added #{human_version} #{machine_version} at #{app_download_url}"
+    UI.success "AutoUpdate: Successfully added a release item to the AppFeed JSON file"
+    UI.success "AutoUpdate: Added #{human_version} #{machine_version} at #{app_download_url}"
   end
 
   private_lane :ping_slack do

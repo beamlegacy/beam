@@ -1,6 +1,6 @@
 build:dmg:
   dependencies:
-    - build:macos
+    - notarize
   stage: dmg
   artifacts:
     expire_in: 7d

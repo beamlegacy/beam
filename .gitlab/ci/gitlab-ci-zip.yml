@@ -1,7 +1,7 @@
-notarize:
+build:zip:
   dependencies:
-    - build:macos
-  stage: notarize
+    - build:dmg
+  stage: zip
   artifacts:
     expire_in: 7d
     paths:
@@ -10,8 +10,13 @@ notarize:
     - merge_requests
     - master
     - develop
+  before_script:
+    - echo "${PATH}"
+    - pwd
   script:
-    - bundle exec fastlane notarize_build
+    - ./scripts/build_zip.sh
   tags:
     - macos
   interruptible: true
+  retry:
+    max: 2

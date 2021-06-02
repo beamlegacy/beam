@@ -13,7 +13,7 @@ class ConfigurationTests: QuickSpec {
         }
 
         it("doesn't have sparkle") {
-            expect(Configuration.sparkleUpdate).to(beFalse())
+            expect(Configuration.autoUpdate).to(beFalse())
         }
 
         it("doesn't have sentry") {

@@ -9,6 +9,7 @@ import Cocoa
 import Combine
 import SwiftUI
 import BeamCore
+import AutoUpdate
 
 class BeamHostingView<Content>: NSHostingView<Content> where Content: View {
     required public init(rootView: Content) {
@@ -26,6 +27,8 @@ class BeamHostingView<Content>: NSHostingView<Content> where Content: View {
 class BeamWindow: NSWindow, NSDraggingDestination {
     var state: BeamState!
     var data: BeamData
+
+    var versionChecker: VersionChecker
 
     private var trafficLights: [NSButton?]?
     private var titlebarAccessoryViewHeight = 28
@@ -55,6 +58,13 @@ class BeamWindow: NSWindow, NSDraggingDestination {
         }
 
         data.setupJournal()
+
+        if let feed = URL(string: Configuration.updateFeedURL) {
+            self.versionChecker = VersionChecker(feedURL: feed, autocheckEnabled: Configuration.autoUpdate)
+        } else {
+            self.versionChecker = VersionChecker(mockedReleases: AppRelease.mockedReleases(), autocheckEnabled: true)
+        }
+
         super.init(contentRect: contentRect, styleMask: [.titled, .closable, .miniaturizable, .resizable, .unifiedTitleAndToolbar, .fullSizeContentView],
                    backing: .buffered, defer: false)
 
@@ -75,6 +85,7 @@ class BeamWindow: NSWindow, NSDraggingDestination {
             .environmentObject(state)
             .environmentObject(data)
             .environmentObject(state.browserTabsManager)
+            .environmentObject(versionChecker)
             .frame(minWidth: contentRect.width, maxWidth: .infinity, minHeight: contentRect.height, maxHeight: .infinity)
 
         let hostingView = BeamHostingView(rootView: mainView)

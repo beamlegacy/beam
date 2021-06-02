@@ -36,6 +36,8 @@ struct WindowBottomToolBar: View {
             HStack {
                 if let note = currentNote, state.mode == .note {
                     SharingStatusView(model: SharingStatusViewModel(note: note, documentManager: state.data.documentManager))
+                } else {
+                    SmallUpdateIndicatorView()
                 }
                 Spacer(minLength: 20)
                 if [.today, .note].contains(state.mode) {

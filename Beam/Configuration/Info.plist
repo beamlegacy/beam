@@ -283,7 +283,7 @@
 	<key>NSPrincipalClass</key>
 	<string>BeamApplication</string>
 	<key>SUAllowsAutomaticUpdates</key>
-	<string>$(SPARKLE_AUTOMATIC_UPDATE)</string>
+	<string>$(AUTOMATIC_UPDATE)</string>
 	<key>SUFeedURL</key>
 	<string>https://s3.eu-west-3.amazonaws.com/downloads.dev.beamapp.co/master/appcast.xml</string>
 </dict>

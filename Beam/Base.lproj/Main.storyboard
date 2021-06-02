@@ -30,7 +30,7 @@
                                         <menuItem title="Check for updates..." id="JrI-WQ-BzX">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
-                                                <action selector="checkForUpdates:" target="SnZ-IP-pzH" id="IfK-pT-SCn"/>
+                                                <action selector="checkForUpdates:" target="Voe-Tx-rLC" id="O2j-Hj-fck"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="wFC-TO-SCJ"/>
@@ -909,7 +909,6 @@ CQ
                 <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="Beam" customModuleProvider="target"/>
                 <customObject id="YLy-65-1bz" customClass="NSFontManager"/>
                 <customObject id="Ady-hI-5gd" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
-                <customObject id="SnZ-IP-pzH" customClass="SPUStandardUpdaterController"/>
             </objects>
             <point key="canvasLocation" x="75" y="0.0"/>
         </scene>

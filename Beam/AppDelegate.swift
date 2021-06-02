@@ -10,9 +10,6 @@ import Cocoa
 import SwiftUI
 import Combine
 import Sentry
-#if canImport(Sparkle)
-import Sparkle
-#endif
 import Preferences
 import PromiseKit
 import PMKFoundation
@@ -59,16 +56,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         CoreDataManager.shared.setup()
         LibrariesManager.shared.configure()
         ContentBlockingManager.shared.setup()
-
-        #if canImport(Sparkle)
-        if Configuration.sparkleUpdate {
-            let sparkleUpdater = SPUUpdater(hostBundle: Bundle.main,
-                                            applicationBundle: Bundle.main,
-                                            userDriver: SPUStandardUserDriver(),
-                                            delegate: nil)
-            sparkleUpdater.checkForUpdatesInBackground()
-        }
-        #endif
 
         data = BeamData()
 
@@ -336,5 +323,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     @IBAction func toggleBetweenWebAndNote(_ sender: Any) {
         window.state.toggleBetweenWebAndNote()
+    }
+
+    @IBAction private func checkForUpdates(_ sender: Any) {
+        window.versionChecker.checkForUpdates()
     }
 }

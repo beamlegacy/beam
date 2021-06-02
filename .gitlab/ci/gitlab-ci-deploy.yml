@@ -1,6 +1,6 @@
 sentry:
   dependencies:
-    - notarize
+    - build:zip
   stage: deploy
   artifacts:
     expire_in: 7d
@@ -21,7 +21,7 @@ sentry:
 
 s3:
   dependencies:
-    - notarize
+    - build:zip
   stage: deploy
   environment:
     name: review/$CI_COMMIT_REF_NAME
