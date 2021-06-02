@@ -42,9 +42,6 @@ struct PasswordManagerMenuCell<Content: View>: View {
             Spacer()
                 .layoutPriority(-1)
         }
-        .padding()
-        .background(highlightState.backgroundColor
-                        .frame(height: height, alignment: .center))
         .onHover(perform: {
             hoveringState = $0
             updateHighlightState()
@@ -53,6 +50,9 @@ struct PasswordManagerMenuCell<Content: View>: View {
             mouseDownState = $0
             updateHighlightState()
         }
+        .padding()
+        .background(highlightState.backgroundColor
+                        .frame(height: height, alignment: .center))
         .simultaneousGesture(
             TapGesture().onEnded {
                 onChange?(.clicked)

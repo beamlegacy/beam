@@ -46,7 +46,7 @@ struct PasswordManagerMenu: View {
                             .padding(.horizontal, 12)
                         PasswordsViewMoreCell(hostName: viewModel.getHostStr()) { newState in
                             if newState == .clicked {
-                                viewModel.revealMoreItems()
+                                viewModel.revealMoreItemsForCurrentHost()
                             }
                         }
                     }
@@ -65,7 +65,7 @@ struct PasswordManagerMenu: View {
                                 viewModel.fillCredentials(entry)
                             }, onRemove: { entry in
                                 // TODO: Implement when password will be saved
-                                viewModel.removeCredentials(entry)
+                                viewModel.deleteCredentials(entry)
                             }, onDismiss: {
                                 showingOtherPasswordsSheet.toggle()
                                 viewModel.resetItems()
