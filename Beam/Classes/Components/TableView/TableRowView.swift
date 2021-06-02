@@ -10,6 +10,7 @@ import SwiftUI
 
 class BeamTableRowView: NSTableRowView {
 
+    var hasSeparator: Bool = true
     var onHover: ((Bool) -> Void)?
     var highlightOnSelection: Bool = true
     private var isHovering: Bool = false
@@ -32,9 +33,11 @@ class BeamTableRowView: NSTableRowView {
             let selectionPath = NSBezierPath(rect: selectionRect)
             selectionPath.fill()
         }
-        BeamColor.Generic.separator.nsColor.setFill()
-        let linePath = NSBezierPath(rect: NSRect(origin: CGPoint(x: dirtyRect.origin.x, y: dirtyRect.height - 1), size: CGSize(width: dirtyRect.width, height: 1)))
-        linePath.fill()
+        if hasSeparator {
+            BeamColor.Generic.separator.nsColor.setFill()
+            let linePath = NSBezierPath(rect: NSRect(origin: CGPoint(x: dirtyRect.origin.x, y: dirtyRect.height - 1), size: CGSize(width: dirtyRect.width, height: 1)))
+            linePath.fill()
+        }
     }
 
     override func updateTrackingAreas() {

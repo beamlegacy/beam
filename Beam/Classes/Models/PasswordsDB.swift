@@ -128,17 +128,21 @@ class PasswordsDB: PasswordStore {
     }
 
     func password(host: URL, username: String, completion: @escaping (String?) -> Void) {
-        try? dbQueue.read { db in
-            guard let passwordRecord = try PasswordsRecord.fetchOne(db, key: id(for: host, and: username)) else {
-                completion(nil)
-                return
+        do {
+            try dbQueue.read { db in
+                guard let passwordRecord = try PasswordsRecord.fetchOne(db, key: id(for: host, and: username)) else {
+                    completion(nil)
+                    return
+                }
+                do {
+                    let decryptedPassword = try EncryptionManager.shared.decryptString(passwordRecord.password)
+                    completion(decryptedPassword)
+                } catch {
+                    Logger.shared.logError("Error while decrypting password for \(host) - \(username): \(error)", category: .encryption)
+                }
             }
-            do {
-                let decryptedPassword = try EncryptionManager.shared.decryptString(passwordRecord.password)
-                completion(decryptedPassword)
-            } catch {
-                Logger.shared.logError("Error while decrypting password for \(host) - \(username): \(error)", category: .encryption)
-            }
+        } catch {
+            Logger.shared.logError("Error while reading database for \(host) - \(username): \(error)", category: .passwordsDB)
         }
     }
 
@@ -150,9 +154,7 @@ class PasswordsDB: PasswordStore {
                     return
                 }
                 var passwordRecord = PasswordsRecord(id: nil, uuid: id(for: host, and: username), host: host.minimizedHost, name: username, password: encryptedPassword)
-
                 try passwordRecord.insert(db)
-
             }
         } catch let error {
             Logger.shared.logError("Error while saving password for \(host): \(error)", category: .passwordsDB)

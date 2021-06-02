@@ -15,13 +15,13 @@ struct PasswordsTableView: View {
 
     @State private var allPasswordItems = [PasswordTableViewItem]()
     var passwordColumns = [
-        TableViewColumn(key: "hostinfo", title: "Sites", type: TableViewColumn.ColumnType.IconAndText, sortable: false, resizable: false, width: 210, fontSize: 11),
-        TableViewColumn(key: "username", title: "Username", width: 180, fontSize: 11, stringFromKeyValue: { "\($0 ?? "")" }),
-        TableViewColumn(key: "password", title: "Passwords", sortable: false, width: 180, fontSize: 11, stringFromKeyValue: { "\($0 ?? "")" })
+        TableViewColumn(key: "hostinfo", title: "Sites", type: TableViewColumn.ColumnType.IconAndText, sortable: true, resizable: false, width: 195, fontSize: 11),
+        TableViewColumn(key: "username", title: "Username", width: 150, fontSize: 11, stringFromKeyValue: { "\($0 ?? "")" }),
+        TableViewColumn(key: "password", title: "Passwords", sortable: false, fontSize: 11, stringFromKeyValue: { "\($0 ?? "")" })
     ]
 
     var body: some View {
-        TableView(items: searchStr.isEmpty ? allPasswordItems : filterPasswordItemsBy(searchStr: searchStr),
+        TableView(hasSeparator: false, items: searchStr.isEmpty ? allPasswordItems : filterPasswordItemsBy(searchStr: searchStr),
                   columns: passwordColumns, creationRowTitle: nil) { (_, _) in
         } onSelectionChanged: { idx in
             onSelectionChanged(idx)
@@ -41,7 +41,7 @@ struct PasswordsTableView: View {
 
     private func refreshAllPasswordItems() {
         for entry in passwordEntries {
-            let item = PasswordTableViewItem(host: entry.host, username: entry.username, password: "********")
+            let item = PasswordTableViewItem(host: entry.host, username: entry.username, password: "••••••••")
             allPasswordItems.append(item)
         }
     }

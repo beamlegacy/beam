@@ -12,6 +12,7 @@ import BeamCore
 protocol PasswordManagerMenuDelegate: AnyObject {
     func fillCredentials(_ entry: PasswordManagerEntry)
     func fillNewPassword(_ password: String, dismiss: Bool)
+    func deleteCredentials(_ entry: PasswordManagerEntry)
     func emptyPasswordField()
     func dismiss()
 }
@@ -39,7 +40,8 @@ class PasswordManagerMenuViewModel: ObservableObject {
     private let host: URL
     private let passwordStore: PasswordStore
     private let userInfoStore: UserInformationsStore
-    private var entries: [PasswordManagerEntry]
+    private var entriesForHost: [PasswordManagerEntry]
+    private var allEntries: [PasswordManagerEntry]
     private var revealFullList: Bool = false
     private var revealMoreItemsInList: Bool = false
     private var subscribers = Set<AnyCancellable>()
@@ -48,15 +50,16 @@ class PasswordManagerMenuViewModel: ObservableObject {
         self.host = host
         self.passwordStore = passwordStore
         self.userInfoStore = userInfoStore
-        self.entries = []
-        self.display = Contents(entries: Array(entries.prefix(1)), hasScroll: false, hasMoreThanOneEntry: entries.count > 1, userInfo: userInfoStore.get())
+        self.entriesForHost = []
+        self.allEntries = []
+        self.display = Contents(entries: Array(entriesForHost.prefix(1)), hasScroll: false, hasMoreThanOneEntry: entriesForHost.count > 1, userInfo: userInfoStore.get())
         if passwordGenerator {
             let passwordGeneratorViewModel = PasswordGeneratorViewModel()
             passwordGeneratorViewModel.delegate = self
             self.passwordGeneratorViewModel = passwordGeneratorViewModel
         } else {
             self.passwordStore.entries(for: host) {
-                self.entries = $0
+                self.entriesForHost = $0
                 self.updateDisplay()
             }
         }
@@ -69,7 +72,7 @@ class PasswordManagerMenuViewModel: ObservableObject {
         updateDisplay()
     }
 
-    func revealMoreItems() {
+    func revealMoreItemsForCurrentHost() {
         guard !revealMoreItemsInList else { return }
         revealMoreItemsInList = true
         updateDisplay()
@@ -79,22 +82,24 @@ class PasswordManagerMenuViewModel: ObservableObject {
         guard !revealFullList else { return }
         revealMoreItemsInList = false
         revealFullList = true
-        updateDisplay()
-    }
-
-    func fillCredentials(_ entry: PasswordManagerEntry) {
-        Logger.shared.logDebug("Clicked on entry: \(entry.username) @ \(entry.host)")
-        delegate?.fillCredentials(entry)
-    }
-
-    func removeCredentials(_ entry: PasswordManagerEntry) {
+        updateAllEntries()
     }
 
     private func updateDisplay() {
-        var visibleEntries = revealFullList ? entries : Array(entries.prefix(1))
-        visibleEntries = revealMoreItemsInList ? Array(entries.prefix(3)) : visibleEntries
-        let hasScroll = entries.count == 3
-        display = Contents(entries: visibleEntries, hasScroll: hasScroll, hasMoreThanOneEntry: entries.count > 1, userInfo: display.userInfo)
+        var visibleEntries = Array(entriesForHost.prefix(1))
+        visibleEntries = revealMoreItemsInList ? Array(entriesForHost.prefix(3)) : visibleEntries
+        let hasScroll = entriesForHost.count == 3
+        if revealFullList && !allEntries.isEmpty {
+            visibleEntries = allEntries
+        }
+        display = Contents(entries: visibleEntries, hasScroll: hasScroll, hasMoreThanOneEntry: entriesForHost.count > 1, userInfo: display.userInfo)
+    }
+
+    private func updateAllEntries() {
+        self.passwordStore.fetchAll(completion: { allEntries in
+            self.allEntries = allEntries
+            self.updateDisplay()
+        })
     }
 
     public func getHostStr() -> String {
@@ -106,6 +111,11 @@ class PasswordManagerMenuViewModel: ObservableObject {
 }
 
 extension PasswordManagerMenuViewModel: PasswordManagerMenuDelegate {
+    func fillCredentials(_ entry: PasswordManagerEntry) {
+        Logger.shared.logDebug("Clicked on entry: \(entry.username) @ \(entry.host)")
+        delegate?.fillCredentials(entry)
+    }
+
     func dismiss() {
         delegate?.dismiss()
     }
@@ -116,6 +126,12 @@ extension PasswordManagerMenuViewModel: PasswordManagerMenuDelegate {
 
     func fillNewPassword(_ password: String, dismiss: Bool) {
         delegate?.fillNewPassword(password, dismiss: dismiss)
+    }
+
+    func deleteCredentials(_ entry: PasswordManagerEntry) {
+        Logger.shared.logDebug("Delete entry: \(entry.username) @ \(entry.host)")
+        delegate?.deleteCredentials(entry)
+        updateAllEntries()
     }
 }
 

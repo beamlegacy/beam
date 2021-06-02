@@ -14,6 +14,7 @@ struct TableView: NSViewRepresentable {
     static let rowHeight: CGFloat = 32.0
     static let headerHeight: CGFloat = 32.0
 
+    var hasSeparator: Bool = true
     var items: [TableViewItem] = []
     var columns: [TableViewColumn] = []
     var creationRowTitle: String? = "New Private Card"
@@ -26,7 +27,7 @@ struct TableView: NSViewRepresentable {
     typealias NSViewType = NSScrollView
 
     func makeCoordinator() -> TableViewCoordinator {
-        TableViewCoordinator(self)
+        TableViewCoordinator(self, with: hasSeparator)
     }
 
     func makeNSView(context: Self.Context) -> Self.NSViewType {
@@ -47,7 +48,7 @@ struct TableView: NSViewRepresentable {
         view.additionalDelegate = context.coordinator
         view.dataSource = context.coordinator
         setupColumns(in: view, context: context)
-
+        scrollView.horizontalScrollElasticity = .none
         scrollView.contentView.drawsBackground = false
         scrollView.contentView.postsBoundsChangedNotifications = true
         NotificationCenter.default.addObserver(context.coordinator,
@@ -119,8 +120,10 @@ class TableViewCoordinator: NSObject {
     private var hoveredRow: Int?
 
     let parent: TableView
-    init(_ tableView: TableView) {
+    var hasSeparator: Bool
+    init(_ tableView: TableView, with separator: Bool) {
         self.parent = tableView
+        self.hasSeparator = separator
         super.init()
         reloadData()
         DispatchQueue.main.async {
@@ -176,6 +179,7 @@ extension TableViewCoordinator: NSTableViewDataSource {
 
     func tableView(_ tableView: NSTableView, rowViewForRow row: Int) -> NSTableRowView? {
         let rowView = BeamTableRowView()
+        rowView.hasSeparator = hasSeparator
         rowView.isEmphasized = false
         rowView.wantsLayer = true
         if isRowCreationRow(row) {

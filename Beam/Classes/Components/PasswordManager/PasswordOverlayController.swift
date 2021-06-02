@@ -235,6 +235,10 @@ class PasswordOverlayController: WebPageHolder {
 }
 
 extension PasswordOverlayController: PasswordManagerMenuDelegate {
+    func deleteCredentials(_ entry: PasswordManagerEntry) {
+        passwordStore.delete(host: entry.host, username: entry.username)
+    }
+
     func fillCredentials(_ entry: PasswordManagerEntry) {
         passwordStore.password(host: entry.host, username: entry.username) { password in
             guard let password = password else {
