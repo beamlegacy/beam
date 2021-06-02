@@ -220,6 +220,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var consoleWindow: ConsoleWindow?
     var documentsWindow: DocumentsWindow?
     var databasesWindow: DatabasesWindow?
+    var tabGroupingWindow: TabGroupingWindow?
 
     // MARK: -
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {

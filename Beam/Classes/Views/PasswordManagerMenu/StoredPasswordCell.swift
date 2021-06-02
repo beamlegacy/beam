@@ -12,29 +12,10 @@ struct StoredPasswordCell: View {
     let username: String
     let onChange: (PasswordManagerMenuCellState) -> Void
 
-    @State private var faviconState: FaviconState = .loading
-
-    enum FaviconState {
-        case loading
-        case generic
-        case available(NSImage)
-    }
-
     var body: some View {
         PasswordManagerMenuCell(height: 56, onChange: onChange) {
             HStack {
-                switch faviconState {
-                case .available(let favicon):
-                    Image(nsImage: favicon)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 16, height: 16)
-                case .generic:
-                    Icon(name: "field-web", color: BeamColor.Niobium.swiftUI)
-                default:
-                    Color.clear
-                        .frame(width: 16, height: 16)
-                }
+                FaviconView(url: host)
                 VStack(alignment: .leading) {
                     Text(username)
                         .offset(y: 10)
@@ -44,15 +25,6 @@ struct StoredPasswordCell: View {
                 }
             }
         }
-        .onAppear(perform: {
-            FaviconProvider.shared.imageForUrl(host) {
-                if let favicon = $0 {
-                    self.faviconState = .available(favicon)
-                } else {
-                    self.faviconState = .generic
-                }
-            }
-        })
     }
 }
 

@@ -31,6 +31,7 @@ public enum LogCategory: String {
     case fileDB
     case oauth
     case passwordsDB
+    case clustering
 }
 
 public final class Logger {

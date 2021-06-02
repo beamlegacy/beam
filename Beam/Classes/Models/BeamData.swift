@@ -30,12 +30,14 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     @Published var showTabStats = false
     @Published var isFetching = false
     @Published var newDay: Bool = false
+    @Published var tabToIndex: TabInformation?
     var noteAutoSaveService: NoteAutoSaveService
     var linkManager: LinkManager
 
     var cookies: HTTPCookieStorage
     var documentManager: DocumentManager
     var downloadManager: DownloadManager = BeamDownloadManager()
+    var clusteringManager: ClusteringManager = ClusteringManager()
     var scope = Set<AnyCancellable>()
 
     static var dataFolder: String {
@@ -90,10 +92,25 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         super.init()
 
         updateNoteCount()
+        setupSubscribers()
+    }
 
+    private func setupSubscribers() {
         $lastChangedElement.sink { element in
             guard let element = element else { return }
             try? self.indexer.append(element: element)
+        }.store(in: &scope)
+
+        $tabToIndex.sink { [unowned self] tabToIndex in
+            guard let tabToIndex = tabToIndex else { return }
+            self.index.append(document: tabToIndex.document)
+            let id = tabToIndex.tab.browsingTree.current.link
+            var parentId = tabToIndex.tab.browsingTree.current.parent?.link
+            if let parent = tabToIndex.tab.browsingTree.current.parent,
+               parent.events.contains(where: { $0.type == .searchBarNavigation }) {
+                parentId = nil
+            }
+            self.clusteringManager.addPage(id: id, parentId: parentId, value: tabToIndex)
         }.store(in: &scope)
 
         NotificationCenter.default.addObserver(self,
