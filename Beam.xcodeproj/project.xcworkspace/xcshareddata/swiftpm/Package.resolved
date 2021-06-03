@@ -47,6 +47,15 @@
         }
       },
       {
+        "package": "Down",
+        "repositoryURL": "https://github.com/iwasrobbed/Down",
+        "state": {
+          "branch": null,
+          "revision": "f34b166be1f1db4aa8f573067e901d72f2a6be57",
+          "version": "0.11.0"
+        }
+      },
+      {
         "package": "Erik",
         "repositoryURL": "https://github.com/phimage/Erik.git",
         "state": {
@@ -164,6 +173,15 @@
         }
       },
       {
+        "package": "Parma",
+        "repositoryURL": "https://github.com/dasautoooo/Parma",
+        "state": {
+          "branch": null,
+          "revision": "3c8b431fd5ad3cf675c60d0aa89f011cbcbb036c",
+          "version": "0.3.0"
+        }
+      },
+      {
         "package": "Preferences",
         "repositoryURL": "https://github.com/sindresorhus/Preferences",
         "state": {
@@ -222,8 +240,8 @@
         "repositoryURL": "https://github.com/apple/swift-argument-parser",
         "state": {
           "branch": null,
-          "revision": "831ed5e860a70e745bc1337830af4786b2576881",
-          "version": "0.4.1"
+          "revision": "986d191f94cec88f6350056da59c2e59e83d1229",
+          "version": "0.4.3"
         }
       },
       {

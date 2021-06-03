@@ -80,6 +80,17 @@
                BlueprintName = "ClusteringTests"
                ReferencedContainer = "container:Beam/Clustering/Clustering.xcodeproj">
             </BuildableReference>
+            <SkippedTests>
+               <Test
+                  Identifier = "ClusteringTests/testChangeCandidate()">
+               </Test>
+               <Test
+                  Identifier = "ClusteringTests/testClusterize()">
+               </Test>
+               <Test
+                  Identifier = "ClusteringTests/testProcessWithOnlyNavigation()">
+               </Test>
+            </SkippedTests>
          </TestableReference>
       </Testables>
    </TestAction>
