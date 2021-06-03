@@ -83,6 +83,23 @@ class TextNodeTests: XCTestCase {
         return note
     }
 
+    func createNodeWithInternalLink() -> TextNode {
+        let note = createMiniArborescence(title: "title")
+        let editor = BeamTextEdit(root: note, journalMode: true)
+        let root = editor.rootNode!
+        note.addChild(BeamElement("before link "))
+        let linkElement = BeamText(text: "My Internal Note", attributes: [
+            .internalLink("My Internal Note")
+        ])
+        root.focusedWidget = root.children.last { $0 is TextNode }
+        XCTAssertNotNil(root.focusedWidget as? TextNode)
+        let node = root.focusedWidget as? TextNode
+        root.cursorPosition = node!.text.count
+        root.insertText(text: linkElement, replacementRange: nil)
+        root.insertText(text: BeamText(text: " after link", attributes: []), replacementRange: nil)
+        return node!
+    }
+
     func testLoadExistingNote() {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
@@ -183,6 +200,7 @@ class TextNodeTests: XCTestCase {
         BeamNote.clearCancellables()
     }
 
+    // MARK: - Insert
     func testInsertNodeIntoRoot() {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
@@ -551,6 +569,37 @@ class TextNodeTests: XCTestCase {
         BeamNote.clearCancellables()
     }
 
+    func testInsertTextAroundInternalLink() {
+        defer { reset() }
+        let node = createNodeWithInternalLink()
+        let root = node.editor.rootNode!
+        XCTAssertEqual(node.text.text, "before link My Internal Note after link")
+        root.cursorPosition = 28
+        root.selectedTextRange = 28..<28
+        root.insertText(string: " Beam", replacementRange: nil)
+        XCTAssertEqual(node.text.text, "before link My Internal Note Beam after link")
+        root.cursorPosition = 12
+        root.selectedTextRange = 12..<12
+        root.insertText(string: "Hello ", replacementRange: nil)
+        XCTAssertEqual(node.text.text, "before link Hello My Internal Note Beam after link")
+
+        BeamNote.clearCancellables()
+    }
+
+    func testInsertTextInsideInternalLink() {
+        defer { reset() }
+        let node = createNodeWithInternalLink()
+        let root = node.editor.rootNode!
+        XCTAssertEqual(node.text.text, "before link My Internal Note after link")
+        root.cursorPosition = 20
+        root.selectedTextRange = 20..<20
+        root.insertText(string: "Hello Beam", replacementRange: nil)
+        XCTAssertEqual(node.text.text, "before link Hello Beam after link")
+
+        BeamNote.clearCancellables()
+    }
+
+    // MARK: - Delete
     // swiftlint:disable:next function_body_length
     func testDeleteBackward() {
         defer { reset() }
@@ -575,6 +624,19 @@ class TextNodeTests: XCTestCase {
 //        Logger.shared.logDebug("Tree:\n\(root.printTree())\n")
 //        note.debugNote()
         validateRootWithNote(root: root, note: note)
+        BeamNote.clearCancellables()
+    }
+
+    func testDeleteBackwardAfterLink() {
+        defer { reset() }
+        let node = createNodeWithInternalLink()
+        let root = node.editor.rootNode!
+        root.cursorPosition = 29
+        XCTAssertEqual(node.text.text, "before link My Internal Note after link")
+        root.deleteBackward()
+        XCTAssertEqual(node.text.text, "before link My Internal Noteafter link")
+        root.deleteBackward()
+        XCTAssertEqual(node.text.text, "before link after link")
         BeamNote.clearCancellables()
     }
 
@@ -609,6 +671,20 @@ class TextNodeTests: XCTestCase {
         BeamNote.clearCancellables()
     }
 
+    func testDeleteForwardBeforeLink() {
+        defer { reset() }
+        let node = createNodeWithInternalLink()
+        let root = node.editor.rootNode!
+        XCTAssertEqual(node.text.text, "before link My Internal Note after link")
+        root.cursorPosition = 11
+        root.deleteForward()
+        XCTAssertEqual(node.text.text, "before linkMy Internal Note after link")
+        root.deleteForward()
+        XCTAssertEqual(node.text.text, "before link after link")
+        BeamNote.clearCancellables()
+    }
+
+    // MARK: - Stripped Text
     func testStrippedText() {
         defer { reset() }
         let note = createMiniArborescence(title: "title")
@@ -616,6 +692,51 @@ class TextNodeTests: XCTestCase {
         let root = editor.rootNode!
         XCTAssertEqual(" bullet1 bullet11 bullet12 bullet2 bullet21 bullet22 bullet23", root.fullStrippedText)
         BeamNote.clearCancellables()
-
     }
+
+    // MARK: - Links finder
+    func testExternalLinkFinder() {
+        defer { reset() }
+        let note = createMiniArborescence(title: "title")
+        let editor = BeamTextEdit(root: note, journalMode: true)
+        let root = editor.rootNode!
+        note.addChild(BeamElement("before link "))
+        let linkElement = BeamText(text: "ExternalLink.com", attributes: [
+            .link("externallink.com")
+        ])
+        root.focusedWidget = root.children.last { $0 is TextNode }
+        XCTAssertNotNil(root.focusedWidget as? TextNode)
+        guard let node = root.focusedWidget as? TextNode else {
+            return
+        }
+        root.cursorPosition = node.text.count
+        root.insertText(text: linkElement, replacementRange: nil)
+        root.insertText(text: BeamText(text: " after link", attributes: []), replacementRange: nil)
+
+        XCTAssertEqual(node.linkAt(index: 15)?.absoluteString, "externallink.com")
+        XCTAssertNil(node.linkAt(index: 12))
+        XCTAssertNil(node.linkAt(index: 29))
+
+        XCTAssertTrue(node.linkRangeAt(index: 15)?.attributes.contains { $0.isLink } ?? false)
+        XCTAssertNil(node.linkRangeAt(index: 12))
+        XCTAssertNil(node.linkRangeAt(index: 29))
+
+        BeamNote.clearCancellables()
+    }
+
+    func testInternalLinkFinder() {
+        defer { reset() }
+        let node = createNodeWithInternalLink()
+
+        XCTAssertEqual(node.internalLinkAt(index: 15), "My Internal Note")
+        XCTAssertNil(node.internalLinkAt(index: 12))
+        XCTAssertNil(node.internalLinkAt(index: 29))
+
+        XCTAssertTrue(node.internalLinkRangeAt(index: 15)?.attributes.contains { $0.isInternalLink } ?? false)
+        XCTAssertNil(node.internalLinkRangeAt(index: 12))
+        XCTAssertNil(node.internalLinkRangeAt(index: 29))
+
+        BeamNote.clearCancellables()
+    }
+
 }

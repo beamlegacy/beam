@@ -163,10 +163,8 @@ extension TextRoot {
 
         }
 
-        if !selectedTextRange.isEmpty {
-            cmdManager.deleteText(in: node, for: selectedTextRange)
-        } else if cursorPosition != node.text.count {
-            cmdManager.deleteText(in: node, for: cursorPosition ..< cursorPosition + 1)
+        if !selectedTextRange.isEmpty || cursorPosition != node.text.count {
+            cmdManager.deleteText(in: node, for: rangeToDeleteText(in: node, cursorAt: cursorPosition, forward: true))
         } else {
             // Delete element forward
             cmdManager.beginGroup(with: "Delete forward")
@@ -223,12 +221,44 @@ extension TextRoot {
                 }
             }
         } else {
-            if selectedTextRange.isEmpty {
-                cmdManager.deleteText(in: node, for: cursorPosition - 1 ..< cursorPosition)
-            } else {
-                cmdManager.deleteText(in: node, for: selectedTextRange)
-            }
+            cmdManager.deleteText(in: node, for: rangeToDeleteText(in: node, cursorAt: cursorPosition, forward: false))
         }
+    }
+
+    private func rangeToDeleteText(in node: TextNode, cursorAt cursorPos: Int, forward: Bool) -> Range<Int> {
+        guard selectedTextRange.isEmpty else {
+            return extendRangeWithUneditableRanges(selectedTextRange, in: node)
+        }
+
+        let nextUpperBound = forward ? cursorPos + 1 : cursorPos
+        if let uneditableRange = uneditableRange(in: node, at: nextUpperBound) {
+            return uneditableRange
+        }
+        return nextUpperBound - 1 ..< nextUpperBound
+    }
+
+    private func uneditableRange(in node: TextNode, at cursorPos: Int) -> Range<Int>? {
+        let linkRange = node.internalLinkRangeAt(index: cursorPos)
+        if let linkRange = linkRange, node.editor.popover == nil {
+            return linkRange.position ..< linkRange.end
+        }
+        return nil
+    }
+
+    /// extend range to include uneditable ranges that might partially included
+    private func extendRangeWithUneditableRanges(_ range: Range<Int>, in node: TextNode) -> Range<Int> {
+        var finalRange = range
+        if let uneditableRangeAfter = uneditableRange(in: node, at: finalRange.upperBound),
+           uneditableRangeAfter.contains(finalRange.upperBound - 1) {
+            finalRange = finalRange.join(uneditableRangeAfter)
+        }
+        if finalRange.lowerBound != finalRange.upperBound,
+           let uneditableRangeBefore = uneditableRange(in: node, at: finalRange.lowerBound),
+           uneditableRangeBefore.contains(finalRange.lowerBound) {
+            finalRange = finalRange.join(uneditableRangeBefore)
+        }
+
+        return finalRange
     }
 
     func insertNewline() {
@@ -307,17 +337,24 @@ extension TextRoot {
         } else {
             if let markedRange = markedTextRange {
                 range = markedRange
-            } else {
+            } else if !selectedTextRange.isEmpty {
                 range = selectedTextRange
             }
         }
 
+        range = extendRangeWithUneditableRanges(range, in: node)
+        var hasCmdGroup = false
         if !range.isEmpty {
+            hasCmdGroup = true
+            cmdManager.beginGroup(with: "Insert replacing")
             cmdManager.deleteText(in: node, for: range)
         }
 
         let bText = BeamText(text: string, attributes: root.state.attributes)
         cmdManager.inputText(bText, in: node, at: cursorPosition)
+        if hasCmdGroup {
+            cmdManager.endGroup()
+        }
         cancelSelection()
         unmarkText()
     }
@@ -340,16 +377,24 @@ extension TextRoot {
         } else {
             if let markedRange = markedTextRange {
                 range = markedRange
-            } else {
+            } else if !selectedTextRange.isEmpty {
                 range = selectedTextRange
             }
         }
 
+        range = extendRangeWithUneditableRanges(range, in: node)
+
+        var hasCmdGroup = false
         if !range.isEmpty {
+            hasCmdGroup = true
+            cmdManager.beginGroup(with: "Insert replacing")
             cmdManager.deleteText(in: node, for: range)
         }
 
         cmdManager.inputText(text, in: node, at: cursorPosition)
+        if hasCmdGroup {
+            cmdManager.endGroup()
+        }
         unmarkText()
     }
 
