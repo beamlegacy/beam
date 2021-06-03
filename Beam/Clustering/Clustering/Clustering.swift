@@ -29,6 +29,10 @@ public class Cluster {
         case matrixNotSquare
         case pageOutOfDimensions
     }
+    
+    enum CandidateError: Error {
+        case unknownCandidte
+    }
 
     public init() {}
 
@@ -86,17 +90,37 @@ public class Cluster {
         }
     }
 
-    let myThread = DispatchQueue(label: "clusteringThread")
+    var candidate = 1
+    let myQueue = DispatchQueue(label: "clusteringThread")
     var pageIDs = [UInt64]()
     var navigationMatrix = NavigationMatrix()
     var adjacencyMatrix = SimilarityMatrix()
 
-    func clusterize() -> [Int] {
+    func clusterize() throws -> [Int] {
         guard self.adjacencyMatrix.matrix.rows >= 2 else {
             return zeros(1, self.adjacencyMatrix.matrix.rows).flat.map { Int($0) }
         }
-        let laplacian = diag(reduce(self.adjacencyMatrix.matrix, sum, .Row)) - self.adjacencyMatrix.matrix
-        //TODO: Add other types of graph Laplacians
+        let d = reduce(self.adjacencyMatrix.matrix, sum, .Row)
+        let d1: [Double] = d.map { elem in
+            if elem == 0.0  {return 0.0 } else { return 1/elem }
+        }
+        let D1 = diag(d1)
+        // This naming makes sense as D1 is 1/D
+        let laplacianNn = D1 - self.adjacencyMatrix.matrix
+        // This is the 'simplest' non-normalized Laplacian
+        
+        var laplacian: Matrix
+        switch self.candidate { // This swith takes care of the choice of Laplacian
+        case 1: // Non-normalised graph Laplacian
+            laplacian = laplacianNn
+        case 2: // Random-walk Laplacian
+            laplacian = D1 * laplacianNn
+        case 3: // Symmetric Laplacian
+            laplacian = sqrt(D1) * laplacianNn * sqrt(D1)
+        default:
+            throw CandidateError.unknownCandidte
+        }
+        //TODO: If necessary, add the Laplacian of Zelnik-Manor
 
         let eigen = eig(laplacian)
         var eigenVals = reduce(eigen.D, sum)
@@ -106,26 +130,40 @@ public class Cluster {
         let permutation = combined.map { $0.1 }
         var eigenVcts = eigen.V ?? (.All, .Pos(permutation))
 
-        eigenVals.removeAll(where: { $0 > 1e-5 })
-        //TODO: Integrate more sophisticated rules to choose relevant eigenvalues
-
-        guard eigenVals.count > 1 else {
+        var numClusters: Int
+        switch self.candidate { // This switch takes care of the number of total classes
+        case 1: // Threshold
+            eigenVals.removeAll(where: { $0 > 1e-5 })
+            numClusters = eigenVals.count
+        case 2: // Biggest distance in percentages
+            let eigenValsDifference = zip(eigenVals, eigenVals.dropFirst()).map { abs(($1 - $0) / $0) }
+            let maxDifference = eigenValsDifference.max() ?? 0
+            numClusters = (eigenValsDifference.lastIndex(of: maxDifference) ?? 0) + 1
+        case 3: // Biggest distance, absolute
+            let eigenValsDifference = zip(eigenVals, eigenVals.dropFirst()).map { abs(($1 - $0)) }
+            let maxDifference = eigenValsDifference.max() ?? 0
+            numClusters = (eigenValsDifference.lastIndex(of: maxDifference) ?? 0) + 1
+        default:
+            throw CandidateError.unknownCandidte
+        }
+        
+        guard numClusters > 1 else {
             return zeros(1, self.adjacencyMatrix.matrix.rows).flat.map { Int($0) }
         }
-        if eigenVcts.rows > eigenVals.count {
-            eigenVcts = eigenVcts ?? (.All, .DropLast(eigenVcts.rows - eigenVals.count))
+        if eigenVcts.rows > numClusters {
+            eigenVcts = eigenVcts ?? (.All, .Take(numClusters))
         }
         var points = [Vector]()
         for row in 0..<eigenVcts.rows {
             points.append(Vector(eigenVcts[row: row]))
         }
-        let labels = [Int](0...eigenVals.count - 1)
+        let labels = [Int](0...numClusters - 1)
         var predictedLabels: [Int]
         let kmeans = KMeans(labels: labels)
         var tentatives = 0
         repeat {
             predictedLabels = []
-            kmeans.trainCenters(points, convergeDistance: 0.000001)
+            kmeans.trainCenters(points, convergeDistance: 0.00001)
             for point in points {
                 predictedLabels.append(kmeans.fit(point))
             }
@@ -135,7 +173,7 @@ public class Cluster {
     }
 
     public func add(_ page: Page, completion: @escaping (Result<[[UInt64]], Error>) -> Void) {
-        myThread.async {
+        myQueue.async {
             //Check if this is the first page in the session
             guard self.pageIDs.count > 0 else {
                 self.pageIDs.append(page.id)
@@ -163,8 +201,12 @@ public class Cluster {
             }
             //Here is where we would add more similarity matrices in the future
             self.adjacencyMatrix.matrix = self.navigationMatrix.matrix
-
-            let predictedClusters = self.clusterize()
+            var predictedClusters = zeros(1, self.adjacencyMatrix.matrix.rows).flat.map { Int($0) }
+            do {
+                predictedClusters = try self.clusterize()
+            } catch let error {
+                completion(.failure(error))
+            }
             let stablizedClusters = self.stabilize(predictedClusters)
             let result = self.clusterizeIDs(labels: stablizedClusters)
 
@@ -202,5 +244,23 @@ public class Cluster {
             }
         }
         return clusterized
+    }
+    
+    public func changeCandidate(to candidate: Int, completion: @escaping (Result<[[UInt64]], Error>) -> Void) {
+        myQueue.async {
+            self.candidate = candidate
+            var predictedClusters = zeros(1, self.adjacencyMatrix.matrix.rows).flat.map { Int($0) }
+            do {
+                predictedClusters = try self.clusterize()
+            } catch let error {
+                completion(.failure(error))
+            }
+            let stablizedClusters = self.stabilize(predictedClusters)
+            let result = self.clusterizeIDs(labels: stablizedClusters)
+            
+            DispatchQueue.main.async {
+                completion(.success(result))
+            }
+        }
     }
 }
