@@ -113,6 +113,7 @@ import Promises
     func setDestinationNote(_ note: BeamNote, rootElement: BeamElement? = nil) {
         self.note = note
         self.rootElement = rootElement ?? note
+        browsingTree.destinationNoteChange()
         self.note.browsingSessions.append(browsingTree)
         state.destinationCardName = note.title
 

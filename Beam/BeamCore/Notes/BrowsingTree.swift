@@ -73,6 +73,7 @@ public enum ReadingEventType: String, Codable {
     case openLinkInNewTab
     case searchBarNavigation
     case closeApp
+    case destinationNoteChange
 }
 
 let ExitForegroundEventTypes: Set = [
@@ -353,6 +354,10 @@ public class BrowsingTree: ObservableObject, Codable {
 
     public func closeApp() {
         current.addEvent(.closeApp)
+    }
+
+    public func destinationNoteChange() {
+        current.addEvent(.destinationNoteChange)
     }
 
     public var links: Set<UInt64> {
