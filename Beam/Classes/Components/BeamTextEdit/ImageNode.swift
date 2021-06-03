@@ -10,7 +10,7 @@ import BeamCore
 import AppKit
 
 class ImageNode: ElementNode {
-    var image: NSImage!
+    var imageSize = CGSize.zero
 
     override init(parent: Widget, element: BeamElement) {
         super.init(parent: parent, element: element)
@@ -44,30 +44,36 @@ class ImageNode: ElementNode {
             Logger.shared.logError("ImageNode unable to fetch image '\(uid)' from FileDB", category: .noteEditor)
             return
         }
+
+        if let animatedLayer = Layer.animatedImage(named: "image", imageData: imageRecord.data) {
+            animatedLayer.layer.position = CGPoint(x: indent, y: 0)
+            addLayer(animatedLayer, origin: CGPoint(x: indent, y: 0))
+            imageSize = animatedLayer.bounds.size
+            return
+        }
+
         guard let image = NSImage(data: imageRecord.data)
         else {
             Logger.shared.logError("ImageNode unable to decode image '\(uid)' from FileDB", category: .noteEditor)
             return
         }
 
-        self.image = image
+        imageSize = image.size
         let width = availableWidth - childInset
-        let height = (width / image.size.width) * image.size.height
+        let height = (width / imageSize.width) * imageSize.height
+
         let imageLayer = Layer.image(named: "image", image: image, size: CGSize(width: width, height: height))
         imageLayer.layer.position = CGPoint(x: indent, y: 0)
         addLayer(imageLayer, origin: CGPoint(x: indent, y: 0))
     }
 
     override func updateRendering() {
-        guard let image = self.image else {
-            Logger.shared.logError("Image was not saved properly", category: .noteEditor)
-            return
-        }
         guard availableWidth > 0 else { return }
 
         if invalidatedRendering {
-            let width = availableWidth - indent
-            let height = (width / image.size.width) * image.size.height
+            let available = availableWidth - indent
+            let width = imageSize.width > available ? available : imageSize.width
+            let height = (width / imageSize.width) * imageSize.height
             contentsFrame = NSRect(x: indent, y: 0, width: width, height: childInset + height)
 
             if let imageLayer = layers["image"] {
