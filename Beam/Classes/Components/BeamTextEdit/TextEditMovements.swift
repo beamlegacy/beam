@@ -158,6 +158,9 @@ extension TextRoot {
                 newNode.focus(position: newNode.indexOnLastLine(atOffset: offset))
             } else {
                 cursorPosition = 0
+                if !editor.journalMode {
+                    editor.scroll(.zero)
+                }
             }
         } else {
             if let node = focusedWidget as? TextNode {

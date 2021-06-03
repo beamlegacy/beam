@@ -125,6 +125,9 @@ extension TextRoot {
             cmdManager.insertElement(newElement, in: firstParent, after: nil)
             cmdManager.focus(newElement, in: firstParent)
             cmdManager.endGroup()
+            if !editor.journalMode {
+                editor.scroll(.zero)
+            }
         }
     }
 
