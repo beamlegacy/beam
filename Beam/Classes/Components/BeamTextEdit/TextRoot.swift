@@ -165,8 +165,10 @@ public class TextRoot: TextNode {
         super.init(editor: editor, element: element)
 
         mapping[element] = WeakReference(self)
-        if let note = note, note.type != .journal {
-            topSpacerWidget = SpacerWidget(parent: self, spacerType: .top)
+        if let note = note {
+            if !editor.journalMode {
+                topSpacerWidget = SpacerWidget(parent: self, spacerType: .top)
+            }
             linksSection = LinksSection(parent: self, note: note, mode: .links)
             middleSpacerWidget = SpacerWidget(parent: self, spacerType: .middle)
             referencesSection = LinksSection(parent: self, note: note, mode: .references)
