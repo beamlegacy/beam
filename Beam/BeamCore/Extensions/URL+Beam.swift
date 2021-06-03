@@ -16,8 +16,8 @@ public extension URL {
         return urlString
     }
 
-    var minimizedHost: String {
-        guard let host = self.host else { return "" }
+    var minimizedHost: String? {
+        guard let host = self.host else { return nil }
         return removeWWWPrefix(in: host)
     }
 
@@ -43,7 +43,7 @@ public extension URL {
     }
 
     static var urlSchemes: [String?] {
-        return ["http", "https"]
+        return ["http", "https", "file"]
     }
 
     var embed: URL? {

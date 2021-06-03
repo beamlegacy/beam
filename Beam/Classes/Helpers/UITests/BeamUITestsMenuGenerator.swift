@@ -11,6 +11,8 @@ class BeamUITestsMenuGenerator {
         case .deleteLogs: deleteLogs()
         case .resizeWindowLandscape: resizeWindowLandscape()
         case .resizeWindowPortrait: resizeWindowPortrait()
+        case .loadUITestPage: loadUITestsPage()
+        default: break
         }
     }
 
@@ -36,6 +38,12 @@ class BeamUITestsMenuGenerator {
         DocumentManager().deleteAll { _ in }
         DatabaseManager().deleteAll { _ in }
         try? AppDelegate.main.data.indexer.clear()
+    }
+
+    private func loadUITestsPage() {
+        if let localUrl = Bundle.main.url(forResource: "index", withExtension: "html", subdirectory: nil) {
+            _ = AppDelegate.main.window.state.createTab(withURL: localUrl, originalQuery: nil)
+        }
     }
 
     let faker = Faker(locale: "en-US")

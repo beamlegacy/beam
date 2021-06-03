@@ -19,7 +19,13 @@ struct UserInformations {
 
 extension PasswordManagerEntry: Identifiable {
     var id: String {
-        "\(host.minimizedHost.isEmpty ? host.absoluteString : host.minimizedHost) \(username)"
+        var urlId: String
+        if let minizedHost = host.minimizedHost, !minizedHost.isEmpty {
+            urlId = minizedHost
+        } else {
+            urlId = host.absoluteString
+        }
+        return "\(urlId) \(username)"
     }
 }
 

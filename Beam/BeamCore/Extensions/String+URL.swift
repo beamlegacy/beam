@@ -14,7 +14,7 @@ public extension String {
     }
 
     var urlString: URL? {
-        guard maybeURL else { return nil }
+        guard mayBeURL else { return nil }
         guard let url = URL(string: self) ?? URL(string: "https://" + self) else { return nil }
         return url
     }
