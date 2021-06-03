@@ -26,7 +26,7 @@ class SpacerWidget: Widget {
     override func updateRendering() {
         switch spacerType {
         case .top:
-            space = 77
+            space = editor.journalMode ? 44 : 77
         case .middle:
             space = (root?.linksSection?.open ?? true) ? 40 : 6
         case .bottom:
