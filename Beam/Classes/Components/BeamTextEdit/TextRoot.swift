@@ -70,8 +70,7 @@ public class TextRoot: TextNode {
             let textCount = n?.textCount ?? 0
             let position = newValue > textCount ? textCount : newValue
             let caretIndex = n?.caretIndexForSourcePosition(position) ?? 0
-            state.caretIndex = caretIndex
-            updateCursor()
+            self.caretIndex = caretIndex
         }
     }
 
@@ -84,8 +83,15 @@ public class TextRoot: TextNode {
         n?.invalidateText()
         focusedWidget?.invalidate()
         editor.reBlink()
-        if state.nodeSelection == nil && !editor.scrollToCursorAtLayout {
-            editor.setHotSpotToCursorPosition()
+        n?.updateCursor()
+        if state.nodeSelection == nil {
+            if needLayout {
+                DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: .milliseconds(10))) {
+                    self.editor.setHotSpotToCursorPosition()
+                }
+            } else {
+                self.editor.setHotSpotToCursorPosition()
+            }
         }
 
     }
@@ -150,7 +156,6 @@ public class TextRoot: TextNode {
         guard !needLayout else { return }
         super.invalidateLayout()
         editor.invalidateLayout()
-        editor.invalidate()
     }
 
     override var offsetInRoot: NSPoint { NSPoint() }

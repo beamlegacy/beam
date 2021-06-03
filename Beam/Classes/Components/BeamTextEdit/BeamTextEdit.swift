@@ -112,7 +112,7 @@ public extension CALayer {
     let titleUnderLine = CALayer()
 
     private (set) var isResizing = false
-    private (set) var journalMode: Bool
+    public private (set) var journalMode: Bool
 
     public init(root: BeamElement, journalMode: Bool) {
         self.journalMode = journalMode
@@ -182,14 +182,14 @@ public extension CALayer {
     var minimumWidth: CGFloat = 300 {
         didSet {
             if oldValue != minimumWidth {
-                invalidateIntrinsicContentSize()
+                invalidateLayout()
             }
         }
     }
     var maximumWidth: CGFloat = 1024 {
         didSet {
             if oldValue != minimumWidth {
-                invalidateIntrinsicContentSize()
+                invalidateLayout()
             }
         }
     }
@@ -197,14 +197,14 @@ public extension CALayer {
     var leadingAlignment = CGFloat(160) {
         didSet {
             if oldValue != minimumWidth {
-                invalidateIntrinsicContentSize()
+                invalidateLayout()
             }
         }
     }
     var traillingPadding = CGFloat(80) {
         didSet {
             if oldValue != minimumWidth {
-                invalidateIntrinsicContentSize()
+                invalidateLayout()
             }
         }
     }
@@ -329,8 +329,8 @@ public extension CALayer {
         }
     }
 
-    var topOffset: CGFloat = 28 { didSet { invalidateIntrinsicContentSize() } }
-    var footerHeight: CGFloat = 60 { didSet { invalidateIntrinsicContentSize() } }
+    var topOffset: CGFloat = 28 { didSet { invalidateLayout() } }
+    var footerHeight: CGFloat = 60 { didSet { invalidateLayout() } }
     var topOffsetActual: CGFloat {
         config.keepCursorMidScreen ? visibleRect.height / 2 : topOffset
     }
@@ -450,25 +450,23 @@ public extension CALayer {
         return NSSize(width: textNodeWidth, height: height)
     }
 
+    private var dragging = false
+    func startSelectionDrag() { dragging = true }
+    func stopSelectionDrag() { dragging = false }
+
     public func setHotSpot(_ spot: NSRect) {
+        guard !dragging else { return }
+        guard !self.visibleRect.contains(spot) else { return }
         _ = scrollToVisible(spot)
     }
 
     public func invalidateLayout() {
-        guard !needsLayout else { return }
         guard !inRelayout else { return }
         invalidateIntrinsicContentSize()
-        needsLayout = true
         invalidate()
-    }
-
-    public override func layout() {
-        super.layout()
-        if scrollToCursorAtLayout {
-            scrollToCursorAtLayout = false
-            setHotSpotToCursorPosition()
+        if let stack = superview as? JournalStackView {
+            stack.invalidateLayout()
         }
-        needsLayout = false
     }
 
     public func invalidate() {
@@ -476,11 +474,6 @@ public extension CALayer {
     }
 
     // Text Input from AppKit:
-//    private var _inputContext: NSTextInputContext!
-//    public override var inputContext: NSTextInputContext? {
-//        return _inputContext
-//    }
-
     public func hasMarkedText() -> Bool {
         return rootNode.hasMarkedText()
     }
@@ -599,7 +592,6 @@ public extension CALayer {
                 cmdManager.focusElement(toFocus, cursorPosition: 0)
             }
 
-            scrollToCursorAtLayout = true
             cleanPersistentFormatter()
         }
     }
@@ -1079,10 +1071,16 @@ public extension CALayer {
         handleMouseDown(event: event)
     }
 
-    var scrollToCursorAtLayout = false
+    let scrollXBorder = CGFloat(20)
+    let scrollYBorderUp = CGFloat(10)
+    let scrollYBorderDown = CGFloat(90)
+
     public func setHotSpotToCursorPosition() {
         guard focusedWidget as? ElementNode != nil else { return }
-        setHotSpot(rectAt(caretIndex: rootNode.caretIndex).insetBy(dx: -30, dy: -30))
+        var rect = rectAt(caretIndex: rootNode.caretIndex).insetBy(dx: -scrollXBorder, dy: 0)
+        rect.origin.y -= scrollYBorderUp
+        rect.size.height += scrollYBorderUp + scrollYBorderDown
+        setHotSpot(rect)
     }
 
     public func setHotSpotToNode(_ node: Widget) {
@@ -1100,9 +1098,11 @@ public extension CALayer {
 
         //        window?.makeFirstResponder(self)
         let point = convert(event.locationInWindow)
+        startSelectionDrag()
         _ = rootNode.dispatchMouseDragged(mouseInfo: MouseInfo(rootNode, point, event))
         cursorUpdate(with: event)
         mouseDraggedUpdate(with: event)
+        autoscroll(with: event)
     }
 
     func convert(_ point: NSPoint) -> NSPoint {
@@ -1159,7 +1159,6 @@ public extension CALayer {
                 guard let lastNode = textNodes.last else { return }
                 selection.end = lastNode
             }
-            setHotSpotToNode(selection.end)
         } else {
             if widgets.count > 0 {
                 rootNode?.startNodeSelection()
@@ -1183,6 +1182,7 @@ public extension CALayer {
 
     override public func mouseUp(with event: NSEvent) {
         guard !(inputContext?.handleEvent(event) ?? false) else { return }
+        stopSelectionDrag()
 
         if journalMode {
             let titleCoord = cardTitleLayer.convert(event.locationInWindow, from: nil)

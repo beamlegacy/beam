@@ -126,7 +126,6 @@ extension BeamTextEdit {
             } else if let bTextHolder: BeamTextHolder = objects?.first as? BeamTextHolder {
                 guard let node = focusedWidget as? TextNode else { return }
                 cmdManager.inputText(bTextHolder.bText, in: node, at: node.cursorPosition)
-                scrollToCursorAtLayout = true
             } else if let attributedStr = objects?.first as? NSAttributedString {
                 paste(attributedStrings: attributedStr.split(seperateBy: "\n"))
             } else if let pastedStr: String = objects?.first as? String {
@@ -186,7 +185,6 @@ extension BeamTextEdit {
                 cmdManager.insertElement(element, in: parent, after: lastInserted)
                 cmdManager.focus(element, in: node)
                 lastInserted = focusedWidget as? ElementNode
-                scrollToCursorAtLayout = true
             }
         }
         cmdManager.endGroup()
