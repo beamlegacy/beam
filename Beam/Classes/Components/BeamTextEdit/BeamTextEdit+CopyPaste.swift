@@ -124,8 +124,7 @@ extension BeamTextEdit {
             if let elementHolder: BeamNoteDataHolder = objects?.first as? BeamNoteDataHolder {
                 paste(elementHolder: elementHolder)
             } else if let bTextHolder: BeamTextHolder = objects?.first as? BeamTextHolder {
-                guard let node = focusedWidget as? TextNode else { return }
-                cmdManager.inputText(bTextHolder.bText, in: node, at: node.cursorPosition)
+                rootNode.insertText(text: bTextHolder.bText, replacementRange: nil)
             } else if let attributedStr = objects?.first as? NSAttributedString {
                 paste(attributedStrings: attributedStr.split(seperateBy: "\n"))
             } else if let pastedStr: String = objects?.first as? String {

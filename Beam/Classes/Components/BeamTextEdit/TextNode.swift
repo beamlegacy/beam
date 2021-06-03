@@ -597,7 +597,7 @@ public class TextNode: ElementNode {
         let mouseHasChangedTextPosition = lastHoverMouseInfo?.position != mouseInfo.position
         if mouseHasChangedTextPosition && isMouseInContentFrame {
             let link = linkAt(point: mouseInfo.position)
-            let internalLink = internalLinkAt(point: mouseInfo.position)
+            let internalLink = internalLinkRangeAt(point: mouseInfo.position)
 
             if link != nil {
                 let (linkRange, linkFrame) = linkRangeAt(point: mouseInfo.position)
@@ -736,58 +736,6 @@ public class TextNode: ElementNode {
         return min(displayIndex, text.count - 1)
     }
 
-    public func linkAt(point: NSPoint) -> URL? {
-        guard let pos = indexAt(point: point) else { return nil }
-        return linkAt(index: pos)
-    }
-
-    public func linkAt(index: Int) -> URL? {
-        let range = elementText.rangeAt(position: index)
-        guard let linkAttribIndex = range.attributes.firstIndex(where: { attrib -> Bool in
-            attrib.rawValue == BeamText.Attribute.link("").rawValue
-        }) else { return nil }
-
-        switch range.attributes[linkAttribIndex] {
-            case .link(let link):
-                return URL(string: link)
-            default:
-                return nil
-        }
-    }
-
-    func linkRangeAt(point: NSPoint) -> (BeamText.Range?, NSRect?) {
-        guard let textFrame = textFrame else { return (nil, nil) }
-        guard !textFrame.lines.isEmpty else { return (nil, nil) }
-        let line = lineAt(point: point)
-        guard line >= 0 else { return (nil, nil) }
-        let l = textFrame.lines[line]
-        guard let pos = indexAt(point: point) else { return (nil, nil) }
-
-        let range = elementText.rangeAt(position: pos)
-        guard nil != range.attributes.firstIndex(where: { attrib -> Bool in
-            attrib.rawValue == BeamText.Attribute.link("").rawValue
-        }) else { return (nil, nil) }
-
-        let start = range.position
-        let end = range.end
-        let startOffset = offsetAt(index: start)
-        let endOffset = offsetAt(index: end)
-
-        let linkFrame = NSRect(x: startOffset, y: l.frame.minY, width: endOffset - startOffset, height: l.frame.height)
-        return (range, linkFrame)
-    }
-
-    public func internalLinkAt(point: NSPoint) -> String? {
-        guard let textFrame = textFrame else { return nil }
-        let line = lineAt(point: point)
-        guard line >= 0, !textFrame.lines.isEmpty else { return nil }
-        let l = textFrame.lines[line]
-        guard l.frame.minX <= point.x && l.frame.maxX >= point.x else { return nil } // don't find links outside the line
-        let displayIndex = l.stringIndexFor(position: point)
-        let pos = min(displayIndex, attributedString.length - 1)
-        return attributedString.attribute(.link, at: pos, effectiveRange: nil) as? String
-    }
-
     public func offsetAt(caretIndex: Int) -> CGFloat {
         guard let textFrame = emptyTextFrame ?? self.textFrame else { return 0 }
         guard !textFrame.lines.isEmpty else { return 0 }
@@ -924,6 +872,89 @@ public class TextNode: ElementNode {
         return sourceIndex
     }
 
+    // MARK: - Links Ranges
+    public func linkAt(point: NSPoint) -> URL? {
+        guard let pos = indexAt(point: point) else { return nil }
+        return linkAt(index: pos)
+    }
+
+    public func linkAt(index: Int) -> URL? {
+        let range = elementText.rangeAt(position: index)
+        guard let linkAttribIndex = range.attributes.firstIndex(where: { attrib -> Bool in
+            attrib.rawValue == BeamText.Attribute.link("").rawValue
+        }) else { return nil }
+
+        switch range.attributes[linkAttribIndex] {
+            case .link(let link):
+                return URL(string: link)
+            default:
+                return nil
+        }
+    }
+
+    public func internalLinkAt(point: NSPoint) -> String? {
+        guard let pos = indexAt(point: point) else { return nil }
+        return internalLinkAt(index: pos)
+    }
+
+    public func internalLinkAt(index: Int) -> String? {
+        guard let range = internalLinkRangeAt(index: index) else { return nil }
+        for attr in range.attributes {
+            switch attr {
+                case .internalLink(let value):
+                    return value
+                default:
+                    continue
+            }
+        }
+        return nil
+    }
+
+    func linkRangeAt(point: NSPoint) -> (BeamText.Range?, NSRect?) {
+        guard let textFrame = textFrame else { return (nil, nil) }
+        guard !textFrame.lines.isEmpty else { return (nil, nil) }
+        let line = lineAt(point: point)
+        guard line >= 0 else { return (nil, nil) }
+        let l = textFrame.lines[line]
+        guard let pos = indexAt(point: point) else { return (nil, nil) }
+        guard let range = linkRangeAt(index: pos) else { return (nil, nil) }
+
+        let start = range.position
+        let end = range.end
+        let startOffset = offsetAt(index: start)
+        let endOffset = offsetAt(index: end)
+
+        let linkFrame = NSRect(x: startOffset, y: l.frame.minY, width: endOffset - startOffset, height: l.frame.height)
+        return (range, linkFrame)
+    }
+
+    func linkRangeAt(index: Int) -> BeamText.Range? {
+        let range = elementText.rangeAt(position: index)
+        let hasLink = range.attributes.contains { attrib -> Bool in
+            attrib.rawValue == BeamText.Attribute.link("").rawValue
+        }
+        return hasLink ? range : nil
+    }
+
+    public func internalLinkRangeAt(point: NSPoint) -> BeamText.Range? {
+        guard let textFrame = textFrame else { return nil }
+        let line = lineAt(point: point)
+        guard line >= 0, !textFrame.lines.isEmpty else { return nil }
+        let l = textFrame.lines[line]
+        guard l.frame.minX <= point.x && l.frame.maxX >= point.x else { return nil } // don't find links outside the line
+        let displayIndex = l.stringIndexFor(position: point)
+        let pos = min(displayIndex, attributedString.length - 1)
+        return internalLinkRangeAt(index: pos)
+    }
+
+    public func internalLinkRangeAt(index: Int) -> BeamText.Range? {
+        let range = elementText.rangeAt(position: index)
+        let hasInternalLink = range.attributes.contains { $0.isInternalLink }
+        return hasInternalLink ? range : nil
+    }
+
+    // MARK: - Print
+
     override public func printTree(level: Int = 0) -> String {
         return String.tabs(level)
             + (children.isEmpty ? "- " : (open ? "v - " : "> - "))
@@ -979,8 +1010,8 @@ public class TextNode: ElementNode {
                 mouseInteraction = MouseInteraction(type: MouseInteractionType.hovered, range: nsrange)
             }
         }
-
-        let str = beamText.buildAttributedString(fontSize: fontSize, cursorPosition: cursorPosition, elementKind: elementKind, mouseInteraction: mouseInteraction, markedRange: markedTextRange)
+        let focusedPosition: Int? = isFocused ? cursorPosition : nil
+        let str = beamText.buildAttributedString(fontSize: fontSize, cursorPosition: focusedPosition, elementKind: elementKind, mouseInteraction: mouseInteraction, markedRange: markedTextRange)
         let paragraphStyle = NSMutableParagraphStyle()
         //        paragraphStyle.alignment = .justified
         paragraphStyle.lineBreakMode = .byWordWrapping

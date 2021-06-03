@@ -31,6 +31,8 @@ extension BeamColor {
         static let searchHover = BeamColor.Bluetiful
         static let searchClicked = BeamColor.Custom(named: "EditorSearchClicked")
         static let bidirectionalLink = BeamColor.Beam
+        static let bidirectionalLinkBackground = BeamColor.From(color: BeamColor.Beam.nsColor.withAlphaComponent(0.08))
+        static let bidirectionalUnderline = BeamColor.From(color: BeamColor.Beam.nsColor.withAlphaComponent(0.25))
         static let control = BeamColor.Custom(named: "EditorControlColor")
         static let link = BeamColor.Niobium
         static var linkDecoration = BeamColor.Combining(lightColor: BeamColor.AlphaGray, darkColor: BeamColor.LightStoneGray)

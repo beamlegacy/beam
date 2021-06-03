@@ -12,6 +12,7 @@ import BeamCore
 extension NSAttributedString.Key {
     static let source = NSAttributedString.Key(rawValue: "beamSource")
     static let hoverUnderlineColor = NSAttributedString.Key(rawValue: "beam_hoverUnderlineColor") // NSColor, default nil
+    static let boxBackgroundColor = NSAttributedString.Key(rawValue: "beam_boxBackgroundColor") // NSColor, default nil
 }
 
 extension BeamText {
@@ -45,10 +46,10 @@ extension BeamText {
         }
     }
 
-    func buildAttributedString(fontSize: CGFloat, cursorPosition: Int, elementKind: ElementKind, mouseInteraction: MouseInteraction?, markedRange: Swift.Range<Int>?) -> NSMutableAttributedString {
+    func buildAttributedString(fontSize: CGFloat, cursorPosition: Int?, elementKind: ElementKind, mouseInteraction: MouseInteraction?, markedRange: Swift.Range<Int>?) -> NSMutableAttributedString {
         let string = NSMutableAttributedString()
         for range in ranges {
-            var attributedString = NSMutableAttributedString(string: range.string, attributes: convert(attributes: range.attributes, fontSize: fontSize, elementKind: elementKind))
+            var attributedString = NSMutableAttributedString(string: range.string, attributes: convert(attributes: range.attributes, fontSize: fontSize, elementKind: elementKind, range: range, cursorPosition: cursorPosition))
             if let mouseInteraction = mouseInteraction, (range.position...range.end).contains(mouseInteraction.range.upperBound) {
                 attributedString = updateAttributes(attributedString, withMouseInteraction: mouseInteraction)
             }
@@ -115,7 +116,7 @@ extension BeamText {
     }
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
-    private func convert(attributes: [Attribute], fontSize: CGFloat, elementKind: ElementKind) -> [NSAttributedString.Key: Any] {
+    private func convert(attributes: [Attribute], fontSize: CGFloat, elementKind: ElementKind, range: BeamText.Range, cursorPosition: Int?) -> [NSAttributedString.Key: Any] {
         var stringAttributes = [NSAttributedString.Key: Any]()
         var strong = false
         var emphasis = false
@@ -127,8 +128,13 @@ extension BeamText {
         var source: String?
         var webLink: String?
         var internalLink: String?
+        var isCursorCloseToRange = false
+        if let cursorPosition = cursorPosition {
+            isCursorCloseToRange = cursorPosition >= range.position && cursorPosition <= range.end
+        }
 
         for attribute in attributes {
+
             switch attribute {
             case .strong:
                 strong = true
@@ -158,12 +164,17 @@ extension BeamText {
 
             stringAttributes[.underlineStyle] = NSUnderlineStyle.single.rawValue
             stringAttributes[.underlineColor] = BeamColor.Editor.linkDecoration.nsColor
-            stringAttributes[NSAttributedString.Key.hoverUnderlineColor] = BeamColor.Editor.link.nsColor
+            stringAttributes[.hoverUnderlineColor] = BeamColor.Editor.link.nsColor
         } else if let link = internalLink {
             stringAttributes[.link] = link
             stringAttributes[.underlineStyle] = NSUnderlineStyle.single.rawValue
-            stringAttributes[.underlineColor] = NSColor.clear
-            stringAttributes[NSAttributedString.Key.hoverUnderlineColor] = BeamColor.Editor.bidirectionalLink.nsColor
+            if isCursorCloseToRange {
+                stringAttributes[.boxBackgroundColor] = BeamColor.Editor.bidirectionalLinkBackground.nsColor
+                stringAttributes[.underlineColor] = NSColor.clear
+            } else {
+                stringAttributes[.hoverUnderlineColor] = BeamColor.Editor.bidirectionalLink.nsColor
+                stringAttributes[.underlineColor] = BeamColor.Editor.bidirectionalUnderline.nsColor
+            }
         }
 
         if strikethrough {

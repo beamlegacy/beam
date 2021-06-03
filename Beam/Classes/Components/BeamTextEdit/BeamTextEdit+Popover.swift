@@ -51,8 +51,7 @@ extension BeamTextEdit {
 
         let cursorPosition = rootNode.cursorPosition
 
-        if command == .deleteForward && cursorStartPosition >= cursorPosition ||
-           command == .moveLeft && cursorPosition <= cursorStartPosition {
+        if command == .deleteForward || command == .moveLeft {
             dismissPopoverOrFormatter()
             return
         }
@@ -76,13 +75,16 @@ extension BeamTextEdit {
         }
 
         let linkText = String(node.text.text[startPosition..<cursorPosition])
-        if linkText.hasPrefix(" ") {
-            // escape if the user type a space right after the start of the popover
+        if linkText.hasPrefix(" ") || linkText.hasSuffix("  ") {
+            // escape if the user
+            // - type a space right after the start of the popover
+            // - typed two consecutive spaces
             cancelPopover(leaveTextAsIs: true)
             return
         }
 
-        node.text.addAttributes([.internalLink(linkText)], to: startPosition - popoverPrefix..<cursorPosition + popoverSuffix)
+        let range = startPosition - popoverPrefix ..< cursorPosition + popoverSuffix
+        node.text.setAttributes([.internalLink(linkText)], to: range)
         let items = linkText.isEmpty ?
             documentManager.loadAllWithLimit(BeamTextEdit.queryLimit, [NSSortDescriptor(key: "created_at", ascending: false)]) :
             documentManager.documentsWithLimitTitleMatch(title: linkText, limit: BeamTextEdit.queryLimit)

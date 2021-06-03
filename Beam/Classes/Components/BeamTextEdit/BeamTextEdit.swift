@@ -490,12 +490,7 @@ public extension CALayer {
         hideInlineFormatter()
         postDetectInput(string)
         reBlink()
-
-        // DispatchQueue to update the popover after the node is initialized
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            self.updatePopover()
-        }
+        updatePopover()
     }
 
     public func firstRect(forCharacterRange range: Range<Int>) -> (NSRect, Range<Int>) {
@@ -1256,6 +1251,7 @@ public extension CALayer {
             self.popoverSuffix = suffix
             self.cursorStartPosition = self.rootNode.textIsSelected ? 0 : cursorPosition
             self.initPopover()
+            self.updatePopover()
             self.showOrHidePersistentFormatter(isPresent: false)
         }
     }

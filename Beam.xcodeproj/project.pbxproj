@@ -126,7 +126,7 @@
 		418172222581107C00317ED8 /* NSView+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181719E2581107C00317ED8 /* NSView+Beam.swift */; };
 		418172262581107C00317ED8 /* NSRange+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171A22581107C00317ED8 /* NSRange+Beam.swift */; };
 		418172272581107C00317ED8 /* NSMutableAttributedString+Range.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171A32581107C00317ED8 /* NSMutableAttributedString+Range.swift */; };
-		418172282581107C00317ED8 /* ClosedRange+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171A42581107C00317ED8 /* ClosedRange+Beam.swift */; };
+		418172282581107C00317ED8 /* Range+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171A42581107C00317ED8 /* Range+Beam.swift */; };
 		4181722A2581107C00317ED8 /* NSRect+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171A62581107C00317ED8 /* NSRect+Beam.swift */; };
 		4181722C2581107C00317ED8 /* AutocompleteList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171AB2581107C00317ED8 /* AutocompleteList.swift */; };
 		4181722E2581107C00317ED8 /* AutocompleteItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171AD2581107C00317ED8 /* AutocompleteItem.swift */; };
@@ -429,9 +429,6 @@
 		A08D739426413DEC00A9A604 /* UserProfileMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = A08D739326413DEC00A9A604 /* UserProfileMenu.swift */; };
 		A08DE20D26160DC800F8ABB4 /* BeamTextEdit+CopyPaste.swift in Sources */ = {isa = PBXBuildFile; fileRef = A08DE20C26160DC800F8ABB4 /* BeamTextEdit+CopyPaste.swift */; };
 		A0A4301626655993003A3C08 /* ClusteringManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0A4301526655993003A3C08 /* ClusteringManager.swift */; };
-		A0A84FB32636FA99008F0326 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = 9631C746251CE997009B40C4 /* SwiftSoup */; };
-		A0A84FB42636FA99008F0326 /* FavIcon in Frameworks */ = {isa = PBXBuildFile; productRef = 96474E3E254D9ADB00A920B3 /* FavIcon */; };
-		A0A84FB52636FA99008F0326 /* Preferences in Frameworks */ = {isa = PBXBuildFile; productRef = 524299AE25A47CA500F4DBF5 /* Preferences */; };
 		A0A84FB62636FA99008F0326 /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = 527FB71925B9A97A00959146 /* Sentry */; };
 		A0A84FB72636FA99008F0326 /* JWTDecode in Frameworks */ = {isa = PBXBuildFile; productRef = 527FB71E25B9A9B600959146 /* JWTDecode */; };
 		A0A84FB92636FA99008F0326 /* PromiseKit in Frameworks */ = {isa = PBXBuildFile; productRef = 52BB698A25CD4E1E007A1173 /* PromiseKit */; };
@@ -479,7 +476,9 @@
 		A52393AA26541A18008D4C85 /* ModeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52393A926541A18008D4C85 /* ModeView.swift */; };
 		A52BFDF72608D6710028D3F3 /* BeamFont.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52BFDF62608D6710028D3F3 /* BeamFont.swift */; };
 		A52BFE63260901980028D3F3 /* Separator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52BFE62260901980028D3F3 /* Separator.swift */; };
+		A52FCB632666514000BCD38A /* TextLineDecorationLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52FCB622666514000BCD38A /* TextLineDecorationLayer.swift */; };
 		A530D4E92609EB7B00DBD14E /* ContextMenuPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A530D4E82609EB7B00DBD14E /* ContextMenuPresenter.swift */; };
+		A5316A192667B9110039ED9C /* Range+BeamTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5316A182667B9110039ED9C /* Range+BeamTests.swift */; };
 		A53C8F38264440E4003A5DF8 /* SharingStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53C8F37264440E4003A5DF8 /* SharingStatusView.swift */; };
 		A53C8F4E26446C6C003A5DF8 /* SharingBannerInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53C8F4D26446C6C003A5DF8 /* SharingBannerInfo.swift */; };
 		A53C8F532644B22B003A5DF8 /* OmniBarUITestsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53C8F522644B22B003A5DF8 /* OmniBarUITestsHelper.swift */; };
@@ -840,7 +839,7 @@
 		418171A12581107C00317ED8 /* String+Regex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+Regex.swift"; sourceTree = "<group>"; };
 		418171A22581107C00317ED8 /* NSRange+Beam.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSRange+Beam.swift"; sourceTree = "<group>"; };
 		418171A32581107C00317ED8 /* NSMutableAttributedString+Range.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSMutableAttributedString+Range.swift"; sourceTree = "<group>"; };
-		418171A42581107C00317ED8 /* ClosedRange+Beam.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ClosedRange+Beam.swift"; sourceTree = "<group>"; };
+		418171A42581107C00317ED8 /* Range+Beam.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Range+Beam.swift"; sourceTree = "<group>"; };
 		418171A62581107C00317ED8 /* NSRect+Beam.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSRect+Beam.swift"; sourceTree = "<group>"; };
 		418171A72581107C00317ED8 /* String+Localization.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+Localization.swift"; sourceTree = "<group>"; };
 		418171AB2581107C00317ED8 /* AutocompleteList.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AutocompleteList.swift; sourceTree = "<group>"; };
@@ -1176,7 +1175,9 @@
 		A52393A926541A18008D4C85 /* ModeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModeView.swift; sourceTree = "<group>"; };
 		A52BFDF62608D6710028D3F3 /* BeamFont.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamFont.swift; sourceTree = "<group>"; };
 		A52BFE62260901980028D3F3 /* Separator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Separator.swift; sourceTree = "<group>"; };
+		A52FCB622666514000BCD38A /* TextLineDecorationLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextLineDecorationLayer.swift; sourceTree = "<group>"; };
 		A530D4E82609EB7B00DBD14E /* ContextMenuPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextMenuPresenter.swift; sourceTree = "<group>"; };
+		A5316A182667B9110039ED9C /* Range+BeamTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Range+BeamTests.swift"; sourceTree = "<group>"; };
 		A53C8F37264440E4003A5DF8 /* SharingStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharingStatusView.swift; sourceTree = "<group>"; };
 		A53C8F4D26446C6C003A5DF8 /* SharingBannerInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharingBannerInfo.swift; sourceTree = "<group>"; };
 		A53C8F522644B22B003A5DF8 /* OmniBarUITestsHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniBarUITestsHelper.swift; sourceTree = "<group>"; };
@@ -1778,7 +1779,7 @@
 				41817276258110D100317ED8 /* AppDelegate+Beam */,
 				418173992581238E00317ED8 /* String+Beam */,
 				525C5471261F619D00378FAA /* Binding+onChange.swift */,
-				418171A42581107C00317ED8 /* ClosedRange+Beam.swift */,
+				418171A42581107C00317ED8 /* Range+Beam.swift */,
 				418171992581107C00317ED8 /* OSLog+Beam.swift */,
 				418171982581107C00317ED8 /* NSImage+Beam.swift */,
 				4181719E2581107C00317ED8 /* NSView+Beam.swift */,
@@ -2395,6 +2396,7 @@
 			isa = PBXGroup;
 			children = (
 				562A8B5025B5E38D004D3D8A /* String+Beam */,
+				A5316A182667B9110039ED9C /* Range+BeamTests.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -2465,6 +2467,7 @@
 			isa = PBXGroup;
 			children = (
 				96120D0D260C917600592546 /* TextLine.swift */,
+				A52FCB622666514000BCD38A /* TextLineDecorationLayer.swift */,
 				96120D11260C91C600592546 /* TextFrame.swift */,
 				96F2BF0E263B208500F02F16 /* Caret.swift */,
 				9634DD78264AA1A10065383E /* TextFrameLayer.swift */,
@@ -3376,7 +3379,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ $ENABLE_PREVIEWS == \"NO\" ]\nthen\n    export PATH=\"$PATH:/opt/homebrew/bin\"\n    ./scripts/build_js.sh\n\nelse\n  echo \"Skipping the script because of SwiftUI preview mode\"\nfi\n";
+			shellScript = "if [ $ENABLE_PREVIEWS == \"NO\" ]\nthen\n    export PATH=\"$PATH:/opt/homebrew/bin\"\n    ./scripts/build_js.sh\n \nelse\n    echo \"Skipping the script because of SwiftUI preview mode\"\nfi\n";
 		};
 		02F5037B26592009001C24A6 /* Test Web */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -3691,7 +3694,7 @@
 				529826A62641A46E00E9448C /* GoogleButton.swift in Sources */,
 				A050049F25DAEE73009CFEB6 /* ProgressIndicator.swift in Sources */,
 				418172192581107C00317ED8 /* Persistence.swift in Sources */,
-				418172282581107C00317ED8 /* ClosedRange+Beam.swift in Sources */,
+				418172282581107C00317ED8 /* Range+Beam.swift in Sources */,
 				96CDA7192582379A00BC375C /* Index.swift in Sources */,
 				41221A362592771F00255197 /* BeamTextEdit+Popover.swift in Sources */,
 				87F11BD9266533C1003BE98E /* PasswordGenerator.swift in Sources */,
@@ -3882,6 +3885,7 @@
 				A5208D8F261D25F1006193AF /* BeamSpacing.swift in Sources */,
 				BAA67CE03D8FFB795346CD06 /* WebPositions.swift in Sources */,
 				BAA67D3C5D44656448093D73 /* LoggingMessageHandler.swift in Sources */,
+				A52FCB632666514000BCD38A /* TextLineDecorationLayer.swift in Sources */,
 				A514401B2638038C0021DD56 /* BrowserNewTabView.swift in Sources */,
 				BAA67C4B9FEFA984D58B802F /* PointAndShootMessageHandler.swift in Sources */,
 				BAA67F19308A38C387C47D6E /* PointAndShootUI.swift in Sources */,
@@ -3964,6 +3968,7 @@
 				5281B07525C994BE00DF66D9 /* ConfigurationTests.swift in Sources */,
 				5273C65B25DA835500B00EC3 /* APIRequestTests.swift in Sources */,
 				A545D30625F7D93B00E68F94 /* MathsTests.swift in Sources */,
+				A5316A192667B9110039ED9C /* Range+BeamTests.swift in Sources */,
 				52C3078225C311B00027C4B1 /* BeamDateTests.swift in Sources */,
 				032562F426051D67006513E4 /* RBSQLiteTests.m in Sources */,
 				032562C726051D4B006513E4 /* RBMockClient.m in Sources */,
