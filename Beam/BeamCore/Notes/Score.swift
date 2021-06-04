@@ -7,9 +7,34 @@
 
 import Foundation
 
+private let URL_SCORE_HALF_LIFE = Float(30.0 * 60.0)
+
+private func aggregateLastEvent(event: ReadingEvent?, otherEvent: ReadingEvent?) -> ReadingEvent? {
+    guard let unwrappedEvent = event, let unwrappedOtherEvent = otherEvent else { return event ?? otherEvent }
+    return unwrappedEvent.date > unwrappedOtherEvent.date ? unwrappedEvent : unwrappedOtherEvent
+}
+private func nilMax(date: Date?, otherDate: Date?) -> Date? {
+    guard let unwrappedDate = date, let unwrappedOtherDate = otherDate else { return date ?? otherDate }
+    return max(unwrappedDate, unwrappedOtherDate)
+}
+
 public class Score: Codable {
+    // Codable:
+    enum CodingKeys: String, CodingKey {
+        case readingTimeToLastEvent = "readingTime"
+        case textSelections
+        case scrollRatioX
+        case scrollRatioY
+        case openIndex
+        case outbounds
+        case textAmount
+        case area
+        case inbounds
+        case videoTotalDuration
+        case videoReadingDuration
+    }
     public var score: Float {
-            readingTimeScore
+            readingTimeScore()
             + textSelectionsScore
             + scrollRatioScore
             + openIndexScore
@@ -17,7 +42,7 @@ public class Score: Codable {
             + densityScore
     }
 
-    public var readingTime: CFTimeInterval = 0 //< how long did the user spent reading this page
+    public var readingTimeToLastEvent: CFTimeInterval = 0 //< how long did the user spent reading this page
     public var textSelections: Int = 0 //< how many chunks of text were selected by the user
     public var scrollRatioX: Float = 0 //< how much of the page was seen by the user ([0, 1])
     public var scrollRatioY: Float = 0 //< how much of the page was seen by the user ([0, 1])
@@ -28,9 +53,13 @@ public class Score: Codable {
     public var inbounds: Int = 0 //< Number of pages that reference this page
     public var videoTotalDuration: CFTimeInterval = 0 //< The number of seconds of the video objects cumulated
     public var videoReadingDuration: CFTimeInterval = 0 //< The number of seconds spent viewing video objects
+    public var lastEvent: ReadingEvent?
+    public var isForeground: Bool = false
+    public var lastCreationDate: Date?
 
-    public var readingTimeScore: Float {
-        Float(readingTime)
+    public func readingTimeScore(toDate: Date = Date()) -> Float {
+        guard let lastEvent = lastEvent else { return Float(readingTimeToLastEvent) }
+        return Float(readingTimeToLastEvent + lastEvent.readingTime(isForeground: isForeground, toDate: toDate))
     }
 
     public var textSelectionsScore: Float {
@@ -55,5 +84,45 @@ public class Score: Codable {
 
     public var videoScore: Float {
         videoTotalDuration > 0 ? Float(videoReadingDuration / videoTotalDuration) : 0
+    }
+    public var isClosed: Bool {
+        guard let lastEvent = lastEvent else { return false }
+        return lastEvent.isClosing
+    }
+
+    public func aggregate(_ other: Score) -> Score {
+        let aggregated = Score()
+        aggregated.readingTimeToLastEvent = readingTimeToLastEvent + other.readingTimeToLastEvent
+        aggregated.textSelections = textSelections + other.textSelections
+        aggregated.scrollRatioX = max(scrollRatioX, other.scrollRatioX)
+        aggregated.scrollRatioY = max(scrollRatioY, other.scrollRatioY)
+        aggregated.textAmount = max(textAmount, other.textAmount)
+        aggregated.area = max(area, other.area)
+        aggregated.videoTotalDuration = max(videoTotalDuration, other.videoTotalDuration)
+        aggregated.videoReadingDuration = videoReadingDuration + other.videoReadingDuration
+        aggregated.lastEvent = aggregateLastEvent(event: lastEvent, otherEvent: other.lastEvent)
+        aggregated.isForeground = isForeground || other.isForeground
+        aggregated.lastCreationDate = nilMax(date: lastCreationDate, otherDate: other.lastCreationDate)
+        return aggregated
+    }
+    public func clusteringScore(date: Date) -> Float {
+        return (exp(1 + scrollRatioY)
+        * (1 + Float(textAmount))
+        * (1 + readingTimeScore(toDate: date))
+        )
+    }
+
+    public func clusteringRemovalScore(date: Date) -> Float {
+        //The lesser score the more the url is to be removed
+        guard let lastCreationDate = lastCreationDate else { return 0 }
+        let timeSinceLastCreation = Float(date.timeIntervalSince(lastCreationDate))
+        return (exp(-Float(timeSinceLastCreation) / (log(2.0) * URL_SCORE_HALF_LIFE))
+                * clusteringScore(date: date)
+        )
+    }
+    public func clusteringRemovalLessThan(_ other: Score, date: Date) -> Bool {
+        if isClosed && !other.isClosed { return true }
+        if !isClosed && other.isClosed { return false }
+        return clusteringRemovalScore(date: date) < other.clusteringRemovalScore(date: date)
     }
 }

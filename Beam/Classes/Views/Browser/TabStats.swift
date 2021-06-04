@@ -26,7 +26,7 @@ struct TabStats: View {
                 Text("Tab stats").bold()
                 VStack {
     //                Text("Score \(tab.score?.score)")
-                    Text("readingTime: \(score.readingTime)")
+                    Text("readingTime: \(score.readingTimeToLastEvent)")
                     Text("textSelections: \(score.textSelections)")
                     Text("scrollRatioX: \(score.scrollRatioX)")
                     Text("scrollRatioY: \(score.scrollRatioY)")

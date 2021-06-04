@@ -75,9 +75,44 @@ public enum ReadingEventType: String, Codable {
     case closeApp
 }
 
+let ExitForegroundEventTypes: Set = [
+    ReadingEventType.exitForward,
+    ReadingEventType.navigateToLink,
+    ReadingEventType.searchBarNavigation,
+    ReadingEventType.closeTab,
+    ReadingEventType.switchToBackground,
+    ReadingEventType.exitBackward,
+    ReadingEventType.switchToOtherTab,
+    ReadingEventType.switchToCard,
+    ReadingEventType.switchToNewSearch,
+    ReadingEventType.closeApp
+]
+
+let ClosingEventTypes: Set = [
+    ReadingEventType.navigateToLink,
+    ReadingEventType.closeTab,
+    ReadingEventType.exitBackward,
+    ReadingEventType.exitForward,
+    ReadingEventType.searchBarNavigation
+]
+
 public struct ReadingEvent: Codable {
     public var type: ReadingEventType
     public var date: Date
+
+    public var isForegroundExiting: Bool {
+        ExitForegroundEventTypes.contains(type)
+    }
+    public var isForegroundEntering: Bool {
+        type == ReadingEventType.startReading
+    }
+    public var isClosing: Bool {
+        ClosingEventTypes.contains(type)
+    }
+    public func readingTime(isForeground: Bool, toDate: Date) -> CFTimeInterval {
+        return isForeground ? toDate.timeIntervalSince(date) : 0
+    }
+
 }
 
 public struct ScoredLink: Hashable {
@@ -114,9 +149,21 @@ public class BrowsingNode: ObservableObject, Codable {
     public var url: String {
         LinkStore.linkFor(link)?.url ?? "<???>"
     }
+    private var isForeground: Bool = false
+
+    private func readingTimeSinceLastEvent(date: Date) -> CFTimeInterval {
+        guard let lastEvent = events.last else { return 0 }
+        return lastEvent.readingTime(isForeground: isForeground, toDate: date)
+    }
 
     public func addEvent(_ type: ReadingEventType, date: Date = Date()) {
-        events.append(ReadingEvent(type: type, date: date))
+        score.readingTimeToLastEvent += readingTimeSinceLastEvent(date: date)
+        let event = ReadingEvent(type: type, date: date)
+        events.append(event)
+        score.lastEvent = event
+        if event.isForegroundEntering { isForeground = true }
+        if event.isForegroundExiting { isForeground = false }
+        score.isForeground = isForeground
     }
 
     public init(tree: BrowsingTree, parent: BrowsingNode?, url: String, title: String?) {
@@ -124,6 +171,7 @@ public class BrowsingNode: ObservableObject, Codable {
         self.link = LinkStore.createIdFor(url, title: title)
         self.parent = parent
         self.tree = tree
+        score.lastCreationDate = events.first?.date
     }
 
     // Codable:
