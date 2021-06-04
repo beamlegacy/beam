@@ -308,6 +308,8 @@
 		87F11BD9266533C1003BE98E /* PasswordGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F11BD8266533C1003BE98E /* PasswordGenerator.swift */; };
 		87F11BDB26655170003BE98E /* MockAutocompleteStores.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F11BDA26655170003BE98E /* MockAutocompleteStores.swift */; };
 		8A78699C264C7E4500F769D2 /* XCUIElementQuery+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A78699B264C7E4500F769D2 /* XCUIElementQuery+Beam.swift */; };
+		8AB966B02668542F003E7755 /* ParseHtml.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB966A72668542E003E7755 /* ParseHtml.swift */; };
+		8AB966B12668542F003E7755 /* Quote.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB966AF2668542F003E7755 /* Quote.swift */; };
 		9609AF502617159B00322141 /* URL+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418173BD2581251600317ED8 /* URL+Beam.swift */; };
 		960A57E4264C84BD0061E8D2 /* ProxyElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 960A57E3264C84BD0061E8D2 /* ProxyElement.swift */; };
 		960A57E6264C851E0061E8D2 /* ProxyImageNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 960A57E5264C851E0061E8D2 /* ProxyImageNode.swift */; };
@@ -1034,6 +1036,8 @@
 		87F11BD8266533C1003BE98E /* PasswordGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordGenerator.swift; sourceTree = "<group>"; };
 		87F11BDA26655170003BE98E /* MockAutocompleteStores.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAutocompleteStores.swift; sourceTree = "<group>"; };
 		8A78699B264C7E4500F769D2 /* XCUIElementQuery+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "XCUIElementQuery+Beam.swift"; sourceTree = "<group>"; };
+		8AB966A72668542E003E7755 /* ParseHtml.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParseHtml.swift; sourceTree = "<group>"; };
+		8AB966AF2668542F003E7755 /* Quote.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Quote.swift; sourceTree = "<group>"; };
 		960A57E3264C84BD0061E8D2 /* ProxyElement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProxyElement.swift; sourceTree = "<group>"; };
 		960A57E5264C851E0061E8D2 /* ProxyImageNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProxyImageNode.swift; sourceTree = "<group>"; };
 		960A57E7264C88920061E8D2 /* ProxyEmbedNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProxyEmbedNode.swift; sourceTree = "<group>"; };
@@ -2888,6 +2892,8 @@
 		BAA679587D9259686224D133 /* PointAndShoot */ = {
 			isa = PBXGroup;
 			children = (
+				8AB966A72668542E003E7755 /* ParseHtml.swift */,
+				8AB966AF2668542F003E7755 /* Quote.swift */,
 				BAA67B138DFC6DBC31D184E0 /* PointAndShootMessageHandler.swift */,
 				BAA670D8E6A58A6836DA2794 /* PointAndShootTest.swift */,
 				BAA675190ACFCE6361AC531B /* PointAndShootUI.swift */,
@@ -3578,6 +3584,7 @@
 				521EEDFB2593927100BA2485 /* Int+ByteSize.swift in Sources */,
 				A05ADF6E264D8C59002DF91A /* OverlayViewCenterViewModel.swift in Sources */,
 				5298268C2641A37500E9448C /* GithubButton.swift in Sources */,
+				8AB966B12668542F003E7755 /* Quote.swift in Sources */,
 				4181720E2581107C00317ED8 /* NoteBackForwardList.swift in Sources */,
 				A52393AA26541A18008D4C85 /* ModeView.swift in Sources */,
 				A552DF2925F0E22B00570C85 /* OmniBarFieldBackground.swift in Sources */,
@@ -3761,6 +3768,7 @@
 				A08D739426413DEC00A9A604 /* UserProfileMenu.swift in Sources */,
 				418172AB25811A3A00317ED8 /* BeamTextFieldView.swift in Sources */,
 				965A78292514F147009980D4 /* AppDelegate.swift in Sources */,
+				8AB966B02668542F003E7755 /* ParseHtml.swift in Sources */,
 				96F2BF0F263B208500F02F16 /* Caret.swift in Sources */,
 				87C539C92617B35000D51877 /* PasswordGeneratorSuggestionCell.swift in Sources */,
 				418172092581107C00317ED8 /* CoreDataManager+backupExtension.swift in Sources */,
