@@ -62,21 +62,22 @@ class TestWebPage: WebPage {
         return Promise(true)
     }
 
+    var activeNote: String = "Card A"
+    var testNotes: [String: BeamCore.BeamNote] = ["Card A": BeamNote(title: "Card A")]
+
     func addToNote(allowSearchResult: Bool) -> BeamCore.BeamElement? {
         events.append("addToNote \(allowSearchResult)")
-        return BeamCore.BeamElement()
+        // use last note
+        return testNotes[activeNote]
     }
 
     func setDestinationNote(_ note: BeamCore.BeamNote, rootElement: BeamCore.BeamElement?) {
         events.append("setDestinationNote \(note) \(String(describing: rootElement))")
     }
 
-    static let testNoteTitle = "test note title"
-    let testNote = BeamNote(title: testNoteTitle)
-
     func getNote(fromTitle: String) -> BeamCore.BeamNote? {
         events.append("getNote \(fromTitle)")
-        return fromTitle == Self.testNoteTitle ? testNote : nil
+        return testNotes[fromTitle]
     }
 
     var fileStorage: BeamFileStorage {
@@ -293,7 +294,7 @@ class PointAndShootTest: XCTestCase {
 
         // Validate shoot
         waitUntil(timeout: .seconds(5)) { done in
-            pns.addShootToNote(noteTitle: TestWebPage.testNoteTitle).then { quoteKinds in
+            pns.addShootToNote(noteTitle: self.testPage!.activeNote).then { quoteKinds in
                 XCTAssertEqual(quoteKinds.count, 1)
                 let page = self.testPage!
                 let downloadManager = page.downloadManager as? DownloadManagerMock
@@ -331,7 +332,7 @@ class PointAndShootTest: XCTestCase {
 
         // Validate shoot
         waitUntil(timeout: .seconds(5)) { done in
-            pns.addShootToNote(noteTitle: TestWebPage.testNoteTitle).then { quoteKinds in
+            pns.addShootToNote(noteTitle: self.testPage!.activeNote).then { quoteKinds in
                 XCTAssertEqual(quoteKinds.count, 1)
                 XCTAssertEqual(quoteKinds[0], BeamCore.ElementKind.embed(pns.page.url!.absoluteString) )
                 done()
@@ -361,7 +362,7 @@ class PointAndShootTest: XCTestCase {
 
         // Validate shoot
         waitUntil(timeout: .seconds(5)) { done in
-            pns.addShootToNote(noteTitle: TestWebPage.testNoteTitle).then { quoteKinds in
+            pns.addShootToNote(noteTitle: self.testPage!.activeNote).then { quoteKinds in
                 XCTAssertEqual(quoteKinds.count, 2)
                 done()
             }
@@ -397,7 +398,7 @@ class PointAndShootTest: XCTestCase {
 
         // Add shoot to note
         waitUntil(timeout: .seconds(5)) { done in
-            pns.addShootToNote(noteTitle: TestWebPage.testNoteTitle).then { quoteKinds in
+            pns.addShootToNote(noteTitle: self.testPage!.activeNote).then { quoteKinds in
                 XCTAssertEqual(quoteKinds.count, 2)
                 done()
             }
@@ -406,6 +407,70 @@ class PointAndShootTest: XCTestCase {
         // Due to the second paragraph only containing whitespace
         // We should expect only 2 "addToNote" events
         let page = self.testPage!
+        let addToNoteEvents = page.events.filter({ $0.contains("addToNote") })
+        XCTAssertEqual(addToNoteEvents.count, 2)
+    }
+
+    func testMultipleShootsToDifferentCards() throws {
+        let (pns, _) = testBed()
+
+        // Add Paragraph 1 to Card 1
+        let paragraphTarget: PointAndShoot.Target = PointAndShoot.Target(
+            area: NSRect(x: 101, y: 102, width: 301, height: 302),
+            mouseLocation: NSPoint(x: 201, y: 202),
+            html: "<p>paragraph1</p>"
+        )
+
+        // Point
+        pns.point(target: paragraphTarget)
+        pns.draw()
+        // Shoot
+        pns.shoot(targets: [paragraphTarget], href: pns.page.url!.string)
+        pns.status = .shooting
+        pns.draw()
+
+        // Add shoot to note
+        waitUntil(timeout: .seconds(5)) { done in
+            pns.addShootToNote(noteTitle: self.testPage!.activeNote).then { quoteKinds in
+                XCTAssertEqual(quoteKinds.count, 1)
+                done()
+            }
+        }
+
+        XCTAssertEqual(pns.shootGroups.count, 1)
+        XCTAssertEqual(pns.shootGroups.first?.targets.count, 1)
+        XCTAssertEqual(pns.shootGroups.first?.targets.first?.html, paragraphTarget.html)
+
+        // Add Paragraph 2 to Card 2
+        let paragraphTarget2: PointAndShoot.Target = PointAndShoot.Target(
+            area: NSRect(x: 101, y: 102, width: 301, height: 302),
+            mouseLocation: NSPoint(x: 201, y: 202),
+            html: "<p>paragraph2</p>"
+        )
+        let page = self.testPage!
+        page.activeNote = "Card B"
+        page.testNotes["Card B"] = BeamNote(title: "Card B")
+
+        // Point
+        pns.point(target: paragraphTarget2)
+        pns.draw()
+        // Shoot
+        pns.shoot(targets: [paragraphTarget2], href: pns.page.url!.string)
+        pns.status = .shooting
+        pns.draw()
+
+        // Add shoot to note
+        waitUntil(timeout: .seconds(5)) { done in
+            pns.addShootToNote(noteTitle: self.testPage!.activeNote).then { quoteKinds in
+                XCTAssertEqual(quoteKinds.count, 1)
+                done()
+            }
+        }
+
+        XCTAssertEqual(pns.shootGroups.count, 2)
+        XCTAssertEqual(pns.shootGroups.last?.targets.count, 1)
+        XCTAssertEqual(pns.shootGroups.last?.targets.last?.html, paragraphTarget2.html)
+
         let addToNoteEvents = page.events.filter({ $0.contains("addToNote") })
         XCTAssertEqual(addToNoteEvents.count, 2)
     }
