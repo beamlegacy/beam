@@ -29,6 +29,8 @@ public struct NoteInfo: Encodable {
 }
 
 class PointAndShoot: WebPageHolder {
+    var quote: Quote = Quote()
+    let parseHtml: ParseHtml = ParseHtml()
 
     var webPositions: WebPositions = WebPositions()
 
@@ -299,122 +301,59 @@ class PointAndShoot: WebPageHolder {
        - additionalText:
      - Throws: PointAndShootError
      */
-    func addShootToNote(noteTitle: String, withNote noteText: String? = nil) throws -> Promise<Void> {
+    func addShootToNote(noteTitle: String, withNote noteText: String? = nil) -> Promise<[ElementKind]> {
         guard let sourceUrl = page.url,
-              let currentCard = page.getNote(fromTitle: noteTitle)
-                else {
-            throw PointAndShootError("Could not find note to update with title \(noteTitle)")
+              let currentCard = page.getNote(fromTitle: noteTitle) else {
+            return Promise(PointAndShootError("Could not find note to update with title \(noteTitle)"))
         }
+
         guard let shootGroup = activeShootGroup else {
             fatalError("Expected to have an active shoot group")
         }
+
         page.setDestinationNote(currentCard, rootElement: currentCard)
-        let quoteHtml = shootGroup.html()
-        var quoteText = BeamText()
-        quoteText = html2Text(url: sourceUrl, html: quoteHtml)
         scorer.addTextSelection()
 
-        let sourceTitle = page.title
-        quoteText.addAttributes([.emphasis], to: quoteText.wholeRange)
-        return try getQuoteKind(url: sourceUrl, html: quoteHtml, title: sourceTitle).then { quoteKind -> Void in
-            let quote = BeamElement()
-            DispatchQueue.main.async {
+        let htmls = shootGroup.html().split(separator: "\n").compactMap({
+            parseHtml.trim(url: sourceUrl, html: String($0))
+        })
+
+        var collectedQuotes: [BeamElement] = []
+        let promises = htmls.enumerated().map({ (index, html) in
+            quote.getQuoteKind(html: html, page: page).then { quoteKind -> Void in
                 guard let source = self.page.addToNote(allowSearchResult: true) else {
                     Logger.shared.logError("Could not add note to page", category: .pointAndShoot)
                     return
                 }
-                quote.text = quoteText
-                quote.query = self.page.originalQuery
-                quote.kind = quoteKind
 
-                if let noteText = noteText, !noteText.isEmpty {
-                    let note = BeamElement()
-                    note.text = BeamText(text: noteText, attributes: [])
+                var htmlText: BeamText = html2Text(url: sourceUrl, html: html)
+                htmlText.addAttributes([.emphasis], to: htmlText.wholeRange)
+
+                let collectedQuote = BeamElement()
+                collectedQuote.text = htmlText
+                collectedQuote.query = self.page.originalQuery
+                collectedQuote.kind = quoteKind
+
+                if let noteText = noteText, !noteText.isEmpty, index == (htmls.endIndex - 1) {
+                    let note = BeamElement(BeamText(text: noteText))
                     note.query = self.page.originalQuery
-                    quote.addChild(note)
+                    collectedQuote.addChild(note)
                 }
-
-                source.addChild(quote)
+                source.addChild(collectedQuote)
+                collectedQuotes.append(collectedQuote)
+            }.catch { error in
+                Logger.shared.logError("Could not get quoteKind from html: \(error.localizedDescription)", category: .pointAndShoot)
             }
+        })
+
+        return all(promises).then { _ in
+            let quoteId = UUID.init()
             let noteInfo = NoteInfo(id: currentCard.id, title: currentCard.title)
-            try self.complete(noteInfo: noteInfo, quoteId: quote.id)
+            self.complete(noteInfo: noteInfo, quoteId: quoteId, group: shootGroup)
         }
     }
 
-    private func getQuoteKind(url: URL, html: String, title: String) throws -> Promise<ElementKind> {
-        var quoteKind: Promise<ElementKind>
-        if let host = url.host,
-           ["www.youtube.com", "youtube.com"].contains(host),
-           html.hasPrefix("<video") {
-            quoteKind = Promise(.embed(url.absoluteString))
-        } else if html.starts(with: "<img") {
-            let doc = try SwiftSoup.parseBodyFragment(html)
-            let img = try doc.select("img")[0]
-            quoteKind = try imageQuoteKind(imageEl: img)
-        } else {
-            quoteKind = Promise(.quote(1, title, url.absoluteString))
-        }
-        return quoteKind
-    }
-
-    private func imageQuoteKind(imageEl: Element) throws -> Promise<ElementKind> {
-        guard activeShootGroup != nil else {
-            fatalError("Expected to have an active shoot group")
-        }
-        let url = try imageEl.attr("src")
-        guard let referer = page.url else {
-            fatalError("Page should have an URL to shoot images from")
-        }
-        let absoluteUrl = try getAbsoluteUrl(url: url, refererUrl: referer)
-        let downloadManager = page.downloadManager
-        let imageKind = Promise<ElementKind> { [unowned self] fulfill, reject in
-            downloadManager.downloadURL(absoluteUrl, headers: ["Referer": referer.string], completion: { result -> Void in
-                do {
-                    var fileId: String
-                    if case .binary(let data, let mimeType, _) = result {
-                        if data.count <= 0 {
-                            throw PointAndShootError("No data was retrieved when downloading \(absoluteUrl)")
-                        }
-                        fileId = data.MD5
-                        do {
-                            try page.fileStorage.insert(name: absoluteUrl.lastPathComponent, uid: fileId, data: data, type: mimeType)
-                        } catch let error {
-                            throw PointAndShootError("Could not save image file for \(absoluteUrl): \(error)")
-                        }
-                    } else {
-                        throw PointAndShootError("Retrieved data when downloading \(absoluteUrl) is not binary")
-                    }
-                    let kind: ElementKind = .image(fileId)
-                    fulfill(kind)
-                } catch let err {
-                    reject(err)
-                }
-            })
-        }
-        return imageKind
-    }
-
-    private func getAbsoluteUrl(url: String, refererUrl: URL) throws -> URL {
-        guard let imageUrl = URL(string: url) else {
-            throw PointAndShootError("\(url) is not a valid URL")
-        }
-        var absoluteUrl: URL
-        if imageUrl.scheme == nil {
-            guard let referredURL = URL(string: url, relativeTo: refererUrl) else {
-                throw PointAndShootError("Cannot build a valid URL from \(url) based on \(refererUrl.string)")
-            }
-            absoluteUrl = referredURL
-        } else {
-            absoluteUrl = imageUrl
-        }
-        return absoluteUrl
-    }
-
-    func complete(noteInfo: NoteInfo, quoteId: UUID) throws {
-        guard let group = activeShootGroup else {
-            Logger.shared.logWarning("Should have a current group", category: .pointAndShoot)
-            return
-        }
+    func complete(noteInfo: NoteInfo, quoteId: UUID, group: ShootGroup) {
         group.quoteId = quoteId
         group.noteInfo = noteInfo
         shootGroups.append(group)

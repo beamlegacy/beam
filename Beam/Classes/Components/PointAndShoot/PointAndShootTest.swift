@@ -2,6 +2,7 @@ import XCTest
 @testable import Beam
 @testable import BeamCore
 import Promises
+import Nimble
 
 class TestWebPage: WebPage {
 
@@ -63,7 +64,7 @@ class TestWebPage: WebPage {
 
     func addToNote(allowSearchResult: Bool) -> BeamCore.BeamElement? {
         events.append("addToNote \(allowSearchResult)")
-        return nil
+        return BeamCore.BeamElement()
     }
 
     func setDestinationNote(_ note: BeamCore.BeamNote, rootElement: BeamCore.BeamElement?) {
@@ -244,7 +245,7 @@ class PointAndShootTest: XCTestCase {
         XCTAssertEqual(pns.shootGroups.count, 0)         // Not validated yet
 
         // Validate shoot
-        try pns.complete(noteInfo: NoteInfo(id: nil, title: "My note"), quoteId: UUID(uuidString: "347271F3-A6EA-495D-859D-B0F7B807DA3C")!)
+        try pns.complete(noteInfo: NoteInfo(id: nil, title: "My note"), quoteId: UUID(uuidString: "347271F3-A6EA-495D-859D-B0F7B807DA3C")!, group: pns.activeShootGroup!)
         XCTAssertEqual(pns.status, .none)       // Disallow unpoint while shooting
         XCTAssertEqual(testUI.events.count, 6)
         XCTAssertEqual(testUI.groupsUI.count, 0)    // No more shoot UI
@@ -265,7 +266,7 @@ class PointAndShootTest: XCTestCase {
         XCTAssertEqual(pns.shootGroups.count, 1)         // Second one not validated yet
 
         // Validate second shoot
-        try pns.complete(noteInfo: NoteInfo(id: nil, title: "My note"), quoteId: UUID(uuidString: "347271F3-A6EA-495D-859D-B0F7B807DA3C")!)
+        try pns.complete(noteInfo: NoteInfo(id: nil, title: "My note"), quoteId: UUID(uuidString: "347271F3-A6EA-495D-859D-B0F7B807DA3C")!, group: pns.activeShootGroup!)
         XCTAssertEqual(testUI.events.count, 12)
         XCTAssertEqual(testUI.groupsUI.count, 0)    // No more shoot UI
         XCTAssertEqual(pns.shootGroups.count, 2)         // Two shoot groups memorized
@@ -291,21 +292,122 @@ class PointAndShootTest: XCTestCase {
         XCTAssertEqual(pns.activeShootGroup?.targets.count, 1)   // One current shoot
 
         // Validate shoot
-        let addToNoteExpectation = expectation(description: "added shoot to note")
-        try pns.addShootToNote(noteTitle: TestWebPage.testNoteTitle).then { _ in
-            let page = self.testPage!
-            let downloadManager = page.downloadManager as? DownloadManagerMock
-            XCTAssertEqual(downloadManager?.events.count, 1)
-            XCTAssertEqual(downloadManager?.events[0], "downloaded someImage.png -- https://webpage.com with headers [\"Referer\": \"https://webpage.com\"]")
-            let fileStorage = page.fileStorage as? FileStorageMock
-            XCTAssertEqual(fileStorage?.events.count, 1)
-            XCTAssertEqual(fileStorage?.events[0], "inserted someImage.png with id 5289df737df57326fcdd22597afb1fac of image/png for 3 bytes")
-            XCTAssertEqual(testUI.events.count, 3)
-            XCTAssertEqual(testUI.groupsUI.count, 0)    // No more shoot UI
-            XCTAssertEqual(pns.shootGroups.count, 1)         // One shoot group memorized
-            addToNoteExpectation.fulfill()
+        waitUntil(timeout: .seconds(5)) { done in
+            pns.addShootToNote(noteTitle: TestWebPage.testNoteTitle).then { quoteKinds in
+                XCTAssertEqual(quoteKinds.count, 1)
+                let page = self.testPage!
+                let downloadManager = page.downloadManager as? DownloadManagerMock
+                XCTAssertEqual(downloadManager?.events.count, 1)
+                XCTAssertEqual(downloadManager?.events[0], "downloaded someImage.png -- https://webpage.com with headers [\"Referer\": \"https://webpage.com\"]")
+                let fileStorage = page.fileStorage as? FileStorageMock
+                XCTAssertEqual(fileStorage?.events.count, 1)
+                XCTAssertEqual(fileStorage?.events[0], "inserted someImage.png with id 5289df737df57326fcdd22597afb1fac of image/png for 3 bytes")
+                XCTAssertEqual(testUI.events.count, 3)
+                XCTAssertEqual(testUI.groupsUI.count, 0)    // No more shoot UI
+                XCTAssertEqual(pns.shootGroups.count, 1)         // One shoot group memorized
+                done()
+            }
         }
-        waitForExpectations(timeout: 5, handler: nil)
+    }
+
+    func testPointAndShootYoutubeVideo() throws {
+        let (pns, testUI) = testBed()
+
+        let imageTarget: PointAndShoot.Target = PointAndShoot.Target(
+            area: NSRect(x: 101, y: 102, width: 301, height: 302),
+            mouseLocation: NSPoint(x: 201, y: 202),
+            html: "<video style=\"width: 427px; height: 240px; left: 0px; top: 0px;\" tabindex=\"-1\" class=\"video-stream html5-main-video\" controlslist=\"nodownload\" src=\"https://www.youtube.com/3c46b995-6a5c-44c4-ae60-c62db0d15725\"></video>"
+        )
+        // Point
+        pns.point(target: imageTarget)
+        pns.draw()
+        // Shoot
+        pns.shoot(targets: [imageTarget], href: pns.page.url!.string)
+        pns.status = .shooting
+        pns.draw()
+        XCTAssertEqual(testUI.events.count, 3)
+        XCTAssertEqual(testUI.groupsUI.count, 1)    // One shoot UI
+        XCTAssertEqual(pns.activeShootGroup?.targets.count, 1)   // One current shoot
+
+        // Validate shoot
+        waitUntil(timeout: .seconds(5)) { done in
+            pns.addShootToNote(noteTitle: TestWebPage.testNoteTitle).then { quoteKinds in
+                XCTAssertEqual(quoteKinds.count, 1)
+                XCTAssertEqual(quoteKinds[0], BeamCore.ElementKind.embed(pns.page.url!.absoluteString) )
+                done()
+            }
+        }
+    }
+
+    func testPointAndShootMultipleParagraphs() throws {
+        let (pns, testUI) = testBed()
+
+        let paragraphTarget: PointAndShoot.Target = PointAndShoot.Target(
+            area: NSRect(x: 101, y: 102, width: 301, height: 302),
+            mouseLocation: NSPoint(x: 201, y: 202),
+            html: "<p>We see this further exemplified through tools looking and operating very similarly to how they did at their founding.<br></p>\n          <p>However, it is worth noting the significant advancements that have been made within the existing creative tooling structures. Integrating coll</p>"
+        )
+
+        // Point
+        pns.point(target: paragraphTarget)
+        pns.draw()
+        // Shoot
+        pns.shoot(targets: [paragraphTarget], href: pns.page.url!.string)
+        pns.status = .shooting
+        pns.draw()
+        XCTAssertEqual(testUI.events.count, 3)
+        XCTAssertEqual(testUI.groupsUI.count, 1)    // One shoot UI
+        XCTAssertEqual(pns.activeShootGroup?.targets.count, 1)   // One current shoot
+
+        // Validate shoot
+        waitUntil(timeout: .seconds(5)) { done in
+            pns.addShootToNote(noteTitle: TestWebPage.testNoteTitle).then { quoteKinds in
+                XCTAssertEqual(quoteKinds.count, 2)
+                done()
+            }
+        }
+        let page = self.testPage!
+        let addToNoteEvents = page.events.filter({ $0.contains("addToNote") })
+        XCTAssertEqual(addToNoteEvents.count, 2)
+    }
+
+    func testPointAndShootFilterEmptyParagraphs() throws {
+        let (pns, testUI) = testBed()
+
+        let paragraphTarget: PointAndShoot.Target = PointAndShoot.Target(
+            area: NSRect(x: 101, y: 102, width: 301, height: 302),
+            mouseLocation: NSPoint(x: 201, y: 202),
+            html: "<p>paragraph1<br></p>\n    \n      <p>paragraph3</p>"
+        )
+
+        // Point
+        pns.point(target: paragraphTarget)
+        pns.draw()
+        // Shoot
+        pns.shoot(targets: [paragraphTarget], href: pns.page.url!.string)
+        pns.status = .shooting
+        pns.draw()
+        XCTAssertEqual(testUI.events.count, 3)
+        XCTAssertEqual(testUI.groupsUI.count, 1)    // One shoot UI
+        XCTAssertEqual(pns.activeShootGroup?.targets.count, 1)   // One current shoot
+
+        // When splitting paragraphs it should produce an array of 3 items.
+        let nonFilteredParagarphs = paragraphTarget.html.split(separator: "\n")
+        XCTAssertEqual(nonFilteredParagarphs, ["<p>paragraph1<br></p>", "    ", "      <p>paragraph3</p>"])
+
+        // Add shoot to note
+        waitUntil(timeout: .seconds(5)) { done in
+            pns.addShootToNote(noteTitle: TestWebPage.testNoteTitle).then { quoteKinds in
+                XCTAssertEqual(quoteKinds.count, 2)
+                done()
+            }
+        }
+
+        // Due to the second paragraph only containing whitespace
+        // We should expect only 2 "addToNote" events
+        let page = self.testPage!
+        let addToNoteEvents = page.events.filter({ $0.contains("addToNote") })
+        XCTAssertEqual(addToNoteEvents.count, 2)
     }
 
     func testPerformanceExample() throws {
