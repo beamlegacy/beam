@@ -39,6 +39,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var downloadManager: DownloadManager = BeamDownloadManager()
     var clusteringManager: ClusteringManager?
     var scope = Set<AnyCancellable>()
+    var sessionLinkRanker = SessionLinkRanker()
 
     static var dataFolder: String {
         let paths = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true)

@@ -61,7 +61,6 @@ import BeamCore
     @Published var overlayViewModel: OverlayViewCenterViewModel = OverlayViewCenterViewModel()
 
     private var scope = Set<AnyCancellable>()
-    var sessionLinkRanker = SessionLinkRanker()
     func goBack() {
         guard canGoBack else { return }
         switch mode {

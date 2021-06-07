@@ -165,7 +165,6 @@ import Promises
         self.webView.page = self
 
         note.browsingSessions.append(browsingTree)
-        state.sessionLinkRanker.addTree(tree: browsingTree)
         setupObservers()
     }
 

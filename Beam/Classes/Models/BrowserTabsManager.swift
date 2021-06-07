@@ -141,6 +141,7 @@ extension BrowserTabsManager {
         if setCurrent {
             currentTab = tab
         }
+        data.sessionLinkRanker.addTree(tree: tab.browsingTree)
     }
 
     func showNextTab() {
