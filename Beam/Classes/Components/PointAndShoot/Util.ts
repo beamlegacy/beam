@@ -8,13 +8,16 @@ export class Util {
    * @returns {function(): void}
    */
   static throttle(callback, limit) {
-    let waiting = false                     // Initially, we're not waiting
-    return function () {                     // We return a throttled function
-      if (!waiting) {                       // If we're not waiting
-        callback.apply(this, arguments)     // Execute users function
-        waiting = true                      // Prevent future invocations
-        setTimeout(function () {     // After a period of time
-          waiting = false                   // And allow future invocations
+    let waiting = false // Initially, we're not waiting
+    return function () {
+      // We return a throttled function
+      if (!waiting) {
+        // If we're not waiting
+        callback.apply(this, arguments) // Execute users function
+        waiting = true // Prevent future invocations
+        setTimeout(function () {
+          // After a period of time
+          waiting = false // And allow future invocations
         }, limit)
       }
     }
@@ -33,7 +36,7 @@ export class Util {
       scrolled.x += object.scrollLeft
       scrolled.y += object.scrollTop
       if (object.tagName.toLowerCase() != "html") {
-        Util.getScrolled(object.parentNode, scrolled)
+        Util.getScrolled(object.parentNode as BeamElement, scrolled)
       }
     }
   }
@@ -43,7 +46,7 @@ export class Util {
     Util.getOffset(el, offset)
 
     const scrolled = { x: 0, y: 0 }
-    Util.getScrolled(el.parentNode, scrolled)
+    Util.getScrolled(el.parentNode as BeamElement, scrolled)
 
     const x = offset.x - scrolled.x
     const y = offset.y - scrolled.y
@@ -57,11 +60,11 @@ export class Util {
    * @param {number} val
    * @param {number} min
    * @param {number} max
-   * @return {number} 
+   * @return {number}
    * @memberof Util
    */
   static clamp(val: number, min: number, max: number) {
-    return val > max ? max : val < min ? min : val;
+    return val > max ? max : val < min ? min : val
   }
 
   /**
@@ -73,7 +76,7 @@ export class Util {
    * @memberof Util
    */
   static compact(array: any[]): any[] {
-    return array.filter(item => {
+    return array.filter((item) => {
       return item != null
     })
   }

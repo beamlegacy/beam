@@ -7,11 +7,13 @@ import {
   BeamQuoteId,
   BeamSelection,
   BeamRange,
+  BeamHTMLElement,
 } from "./BeamTypes"
 import { Util } from "./Util"
 import { WebFactory } from "./WebFactory"
+import { BeamMouseEvent } from "./Test/BeamMocks"
 
-const PNS_STATUS = Number(process.env.PNS_STATUS)
+const PNS_STATUS = process.env.PNS_STATUS
 
 /**
  * Listen to events that hover and select web blocks with Option.
@@ -19,8 +21,6 @@ const PNS_STATUS = Number(process.env.PNS_STATUS)
 export class PointAndShoot extends WebEvents<PointAndShootUI> {
   /**
    * Singleton.
-   *
-   * @type PointAndShoot
    */
   static instance: PointAndShoot
 
@@ -35,22 +35,17 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
   scrollWidth
 
   /**
-   * @type BeamPNSStatus
+   *
    */
   status: BeamPNSStatus = BeamPNSStatus.none
 
   /**
    * Collected quotes.
-   *
-   * @type {BeamCollectedQuote[]}
    */
   collectedQuotes: BeamCollectedQuote[] = []
 
   /**
    * Active selection element
-   *
-   * @type {BeamCollectedQuote[]}
-   * @memberof PointAndShoot
    */
   selectionRanges: BeamCollectedQuote[]
 
@@ -59,20 +54,16 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
    *
    * This allows to remember what the cursor is pointing when entering in collect mode
    * just by hitting the Option key (not moving the mouse cursor).
-   *
-   * @type {BeamMouseEvent}
    */
-  pointingEv
+  pointingEv: BeamMouseEvent
 
   /**
    * The currently highlighted target.
-   * @type {BeamCollectedQuote}
    */
   pointedTarget: BeamCollectedQuote
 
   /**
    * The currently shooted target.
-   * @type {BeamCollectedQuote}
    */
   shootingTarget: BeamCollectedQuote
 
@@ -82,8 +73,6 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
 
   /**
    * Amount of time we want the user to touch before we do something
-   *
-   * @type {number}
    */
   touchDuration = 2500
 
@@ -91,6 +80,7 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
    *
    * @param win {BeamWindow}
    * @param ui {PointAndShootUI}
+   * @param webFactory
    * @return {PointAndShoot}
    */
   static getInstance(win: BeamWindow, ui: PointAndShootUI, webFactory: WebFactory) {
@@ -103,6 +93,7 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
   /**
    * @param win {(BeamWindow)}
    * @param ui {PointAndShootUI}
+   * @param webFactory
    */
   constructor(win: BeamWindow, ui: PointAndShootUI, webFactory: WebFactory) {
     super(win, ui, webFactory)
@@ -138,7 +129,7 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
 
   /**
    * Enable pointing UI.
-   * 
+   *
    * @param el {BeamHTMLElement}
    * @param x {number}
    * @param y {number}
@@ -148,7 +139,7 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
     if (this.pointedTarget) {
       this.unpoint(this.pointedTarget)
     }
-    
+
     // Only create point if no active selection on page
     if (!this.hasSelection()) {
       const quoteId = el.dataset[this.datasetKey]
@@ -164,7 +155,7 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
    * Disables / clears pointing UI
    *
    * @param {*} [el=this.pointingEv.target]
-   * @return {*} 
+   * @return {*}
    * @memberof PointAndShoot
    */
   unpoint(el = this.pointingEv.target) {
@@ -181,7 +172,7 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
    *
    * @param el {BeamHTMLElement}
    */
-  unshoot(el) {
+  unshoot(el: BeamHTMLElement) {
     this.shootingTarget = undefined
     this.ui.unshoot(el)
     this.setStatus(BeamPNSStatus.none)
@@ -193,38 +184,29 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
 
   /**
    * Returns boolean if current status is pointing
-   *
-   * @return {Boolean} 
-   * @memberof PointAndShoot
    */
-  isPointing() {
+  isPointing(): boolean {
     return this.status === BeamPNSStatus.pointing
   }
 
   /**
    * Returns boolean if current status is shooting
-   *
-   * @return {Boolean} 
-   * @memberof PointAndShoot
    */
-  isShooting() {
+  isShooting(): boolean {
     return this.status === BeamPNSStatus.shooting
   }
 
   /**
    * Returns boolean if document has active selection
-   *
-   * @return {Boolean} 
-   * @memberof PointAndShoot
    */
-  hasSelection() {
+  hasSelection(): boolean {
     return Boolean(this.win.document.getSelection().toString())
   }
 
   /**
    * @param ev {BeamMouseEvent}
    */
-  onMouseMove(ev) {
+  onMouseMove(ev: BeamMouseEvent) {
     if (!this.hasSelection()) {
       this.pointingEv = ev
       // Enable pointing if alt is pressed
@@ -261,11 +243,11 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
   /**
    * Show
    *
-   * @param {HTMLElement} el 
+   * @param {HTMLElement} el
    * @param {*} data
    * @memberof PointAndShoot
    */
-  showStatus(el, data) {
+  showStatus(el: BeamHTMLElement, data) {
     this.ui.showStatus(el, data)
   }
 
@@ -279,14 +261,13 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
   /**
    * Remember shoots in DOM.
    *
-   * @param note {object} The Note info
-   * @param el {BeamHTMLElement} The element to assign the Note to.
+   * @param quoteId: BeamQuoteId
    */
   assignNote(quoteId: BeamQuoteId) {
     const els = this.shootingTarget ? [this.shootingTarget] : this.selectionRanges
     els.forEach(({ el }) => {
       this.collectedQuotes.push({ el, quoteId })
-      this.unshoot(el)
+      this.unshoot(el as BeamHTMLElement)
     })
     this.selectionRanges = []
   }
@@ -294,12 +275,12 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
   /**
    * Select an HTML element to be added to a card.
    *
-   * @param el {HTMLElement} The element to select.
+   * @param targetEl {BeamHTMLElement} The element to select.
    * @param x {number} Horizontal coordinate of click/touch
    * @param y {number} Vertical coordinate of click/touch
    * @param multi {boolean} If this is a multiple-selection action.
    */
-  shoot(targetEl, x, y, multi) {
+  shoot(targetEl: BeamHTMLElement, x: number, y: number, multi: boolean) {
     this.shootingTarget = {
       el: targetEl,
       quoteId: targetEl.dataset[this.datasetKey],
@@ -319,8 +300,8 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
    * @param x {number} Horizontal coordinate of click/touch
    * @param y {number} Vertical coordinate of click/touch
    */
-  onShoot(ev, x, y) {
-    const el = ev.target
+  onShoot(ev: MouseEvent, x: number, y: number) {
+    const el = ev.target as BeamHTMLElement
     ev.preventDefault()
     ev.stopPropagation()
     const multi = ev.metaKey
@@ -333,7 +314,7 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
    * @param {Boolean} [bool=true]
    * @memberof PointAndShoot
    */
-  setShooting(bool: Boolean = true) {
+  setShooting(bool: boolean = true) {
     if (bool) {
       this.setStatus(BeamPNSStatus.shooting)
     }
@@ -382,7 +363,6 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
    * Update the Point and Shoot status
    *
    * @param {BeamPNSStatus} newStatus
-   * @memberof PointAndShoot
    */
   setStatus(newStatus: BeamPNSStatus) {
     if (this.status != newStatus) {
@@ -409,10 +389,10 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
 
   /**
    * Enable pointing based on boolean param. Only permits going from  `status.none` to `status.pointing`.
-   * 
+   *
    * @param c {boolean}
    */
-  setPointing(c) {
+  setPointing(c: boolean) {
     if (c) {
       if (this.status === BeamPNSStatus.none) {
         this.setStatus(BeamPNSStatus.pointing)
@@ -472,14 +452,15 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
 
   onMouseUp(_ev) {
     // TODO: replace with actual value
-    this.ui.select(this.selectionRanges)
+    if (this.selectionRanges) {
+      this.ui.select(this.selectionRanges)
+    }
   }
 
   /**
    * onSelection changes dispatch ui select event for each active selection range
    *
    * @param {*} _ev
-   * @memberof PointAndShoot
    */
   onSelection(_ev) {
     const selection = this.getSelection()
@@ -501,7 +482,6 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
    *
    * @param {BeamSelection} selection
    * @return {*}  {BeamRange[]}
-   * @memberof PointAndShootUI_native
    */
   getSelectionRanges(selection: BeamSelection): BeamRange[] {
     const ranges = []
@@ -516,7 +496,6 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
    * Returns the current active (text) selection on the document
    *
    * @return {BeamSelection}
-   * @memberof PointAndShoot
    */
   getSelection(): BeamSelection {
     return this.win.document.getSelection()

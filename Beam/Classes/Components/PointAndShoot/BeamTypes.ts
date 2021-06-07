@@ -5,7 +5,6 @@
 import { BeamHTMLCollection } from "./Test/BeamMocks"
 
 export class BeamSize {
-
   constructor(public width: number, public height: number) {}
 }
 
@@ -49,7 +48,6 @@ export interface BeamVisualViewport {
 }
 
 export class BeamRect extends BeamSize {
-
   constructor(public x: number, public y: number, width: number, height: number) {
     super(width, height)
   }
@@ -200,7 +198,7 @@ export interface BeamElement extends BeamParentNode {
 
   readonly offsetParent: BeamElement
 
-  readonly parentNode?: BeamElement
+  readonly parentNode?: BeamNode
 
   /**
    * Parent padding-relative x coordinate.
@@ -326,14 +324,14 @@ export interface BeamRange {
 }
 
 export declare var BeamRange: {
-  prototype: BeamRange;
-  new(): BeamRange;
-  readonly END_TO_END: number;
-  readonly END_TO_START: number;
-  readonly START_TO_END: number;
-  readonly START_TO_START: number;
-  toString(): string;
-};
+  prototype: BeamRange
+  new (): BeamRange
+  readonly END_TO_END: number
+  readonly END_TO_START: number
+  readonly START_TO_END: number
+  readonly START_TO_START: number
+  toString(): string
+}
 
 export interface BeamDocument extends BeamNode {
   /**
@@ -489,30 +487,29 @@ export interface BeamSelection {
 }
 
 export interface BeamMutationRecord {
-  addedNodes: BeamNode[];
-  attributeName: string;
-  attributeNamespace: string;
-  nextSibling: BeamNode;
-  oldValue: string;
-  previousSibling: BeamNode;
-  removedNodes: BeamNode[];
-  target: BeamNode;
-  type: MutationRecordType;
+  addedNodes: BeamNode[]
+  attributeName: string
+  attributeNamespace: string
+  nextSibling: BeamNode
+  oldValue: string
+  previousSibling: BeamNode
+  removedNodes: BeamNode[]
+  target: BeamNode
+  type: MutationRecordType
 }
-
 
 export class BeamMutationObserver {
   constructor(public fn) {
     console.log("BeamMutationObserver init")
-    new (fn)
+    new fn()
   }
   disconnect(): void {
-    throw new Error("Method not implemented.");
+    throw new Error("Method not implemented.")
   }
   observe(target: BeamNode, options?: MutationObserverInit): void {
-    throw new Error("Method not implemented.");
+    throw new Error("Method not implemented.")
   }
   takeRecords(): BeamMutationRecord[] {
-    throw new Error("Method not implemented.");
+    throw new Error("Method not implemented.")
   }
 }

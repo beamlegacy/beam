@@ -1,13 +1,12 @@
-import {BeamMessageHandler, BeamWindow} from "./BeamTypes";
+import { BeamMessageHandler, BeamWindow } from "./BeamTypes"
 
 export class Native {
   /**
-   * @type Native
    */
   static instance: Native
 
-  readonly href: string;
-  protected readonly messageHandlers: BeamMessageHandler[];
+  readonly href: string
+  protected readonly messageHandlers: BeamMessageHandler[]
 
   /**
    * @param win {BeamWindow}
@@ -50,7 +49,7 @@ export class Native {
     const messageHandler = this.messageHandlers[messageKey]
     if (messageHandler) {
       const href = this.href
-      messageHandler.postMessage({href, ...payload}, href)
+      messageHandler.postMessage({ href, ...payload }, href)
     } else {
       throw Error(`No message handler for message "${name}"`)
     }

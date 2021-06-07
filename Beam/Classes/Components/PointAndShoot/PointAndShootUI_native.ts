@@ -38,15 +38,15 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
       x: Math.min(area.x, area.x + childBounds.x),
       y: Math.min(area.y, area.y + childBounds.y),
       width: Math.max(area.width, childBounds.x - containerBounds.x + childBounds.width),
-      height: Math.max(area.height, childBounds.y - containerBounds.y + childBounds.height)
+      height: Math.max(area.height, childBounds.y - containerBounds.y + childBounds.height),
     }
   }
 
   /**
-   * Gets the element bounds of a given element. If the element contains child nodes, 
+   * Gets the element bounds of a given element. If the element contains child nodes,
    * the sum of all child node bounds is used instead.
-   * 
-   * Supported child node types are: 
+   *
+   * Supported child node types are:
    *  - Element
    *  - Text
    *  See: https://developer.mozilla.org/en-US/docs/Web/API/Node/nodeType
@@ -93,19 +93,19 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
       x: containerBounds.x,
       y: containerBounds.y,
       width: containerBounds.width,
-      height: containerBounds.height
+      height: containerBounds.height,
     }
   }
 
   /**
-  * Checks if element and mouse coordinates overlap
-  *
-  * @private
-  * @param {*} area
-  * @param {*} location
-  * @return {*} 
-  * @memberof PointAndShootUI_native
-  */
+   * Checks if element and mouse coordinates overlap
+   *
+   * @private
+   * @param {*} area
+   * @param {*} location
+   * @return {*}
+   * @memberof PointAndShootUI_native
+   */
   private hasRectAndMouseOverlap(area, location) {
     const xIsInRange = Util.isNumberInRange(location.x, area.x, area.x + area.width)
     const yIsInRange = Util.isNumberInRange(location.y, area.y, area.y + area.height)
@@ -155,7 +155,7 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
   }
 
   /**
-   * Formats the message to be send to the UI based on selection range. 
+   * Formats the message to be send to the UI based on selection range.
    * Mouselocation is included in the return but defaulted to `{x: -1, y: -1}`
    *
    * @private
@@ -199,8 +199,8 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
   }
 
   /**
-   * Formats the message to be send to the UI based on element and mouse location. 
-   * 
+   * Formats the message to be send to the UI based on element and mouse location.
+   *
    * @param quoteId
    * @param el {BeamHTMLElement}
    * @param {number} x page x value of mouse location
@@ -211,15 +211,15 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
     this.native.sendMessage("shoot", shootPayload)
   }
 
-
   /**
-   * Formats the message to be send to the UI based on element and mouse location. 
+   * Formats the message to be send to the UI based on element and mouse location.
    * Message is only send when mouselocation and (child) element location overlap.
    *
    * @param {*} quoteId
    * @param {BeamElement} el
    * @param {number} x page x value of mouse location
    * @param {number} y page y value of mouse location
+   * @param callback
    * @memberof PointAndShootUI_native
    */
   pointMessage(quoteId, el: BeamElement, x: number, y: number, callback) {
@@ -245,13 +245,14 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
    * @param {BeamHTMLElement} el
    * @param {number} x page x value of mouse location
    * @param {number} y page y value of mouse location
+   * @param callback
    * @memberof PointAndShootUI_native
    */
   point(quoteId: string, el: BeamHTMLElement, x: number, y: number, callback) {
     this.pointMessage(quoteId, el, x, y, callback)
   }
 
-  unpoint(el) { }
+  unpoint(el) {}
 
   hidePoint(quoteId = "quoteId") {
     this.native.sendMessage("hidePoint", quoteId)
@@ -267,18 +268,18 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
     this.selectMessage(ranges)
   }
 
-  unselect(selection) { }
+  unselect(selection) {}
 
   /**
- * Handles shoot event
- *
- * @param {string} quoteId
- * @param {BeamHTMLElement} el
- * @param {number} x page x value of mouse location
- * @param {number} y page y value of mouse location
- * @param {*} selectedEls
- * @memberof PointAndShootUI_native
- */
+   * Handles shoot event
+   *
+   * @param {string} quoteId
+   * @param {BeamHTMLElement} el
+   * @param {number} x page x value of mouse location
+   * @param {number} y page y value of mouse location
+   * @param {*} selectedEls
+   * @memberof PointAndShootUI_native
+   */
   shoot(quoteId: string, el: BeamHTMLElement, x: number, y: number, selectedEls) {
     /*
      * - Hide previous native popup if any
@@ -287,9 +288,9 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
     this.shootMessage(quoteId, el, x, y)
   }
 
-  unshoot(el: BeamHTMLElement) { }
+  unshoot(el: BeamHTMLElement) {}
 
-  hidePopup() { }
+  hidePopup() {}
 
   /**
    * Show the if a given was added to a card.

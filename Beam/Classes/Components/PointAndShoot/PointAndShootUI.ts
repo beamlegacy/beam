@@ -1,6 +1,6 @@
 import { WebEventsUI } from "./WebEventsUI"
 import { BeamCollectedQuote, BeamQuoteId, BeamRange } from "./BeamTypes"
-import {BeamHTMLElement} from "./BeamTypes"
+import { BeamHTMLElement } from "./BeamTypes"
 
 export interface PointAndShootUI extends WebEventsUI {
   hidePoint()
@@ -13,6 +13,7 @@ export interface PointAndShootUI extends WebEventsUI {
    * @memberof PointAndShootUI
    */
   getMouseLocation(el, x, y)
+
   /**
    * Select HTML element to be drawn
    *
@@ -30,13 +31,15 @@ export interface PointAndShootUI extends WebEventsUI {
    * @memberof PointAndShootUI
    */
   unpoint(el)
+
   /**
    * Select HTML selection to be drawn
    *
    * @param {BeamCollectedQuote[]} selectionRanges
    * @memberof PointAndShootUI
    */
-  select(selectionRanges)
+  select(selectionRanges: BeamCollectedQuote[])
+
   /**
    * Unselect selection element
    *
@@ -44,6 +47,7 @@ export interface PointAndShootUI extends WebEventsUI {
    * @memberof PointAndShootUI
    */
   unselect(selection)
+
   /**
    * Select an HTML element to be added to a card.
    *
@@ -54,7 +58,14 @@ export interface PointAndShootUI extends WebEventsUI {
    * @param collectedQuotes {BeamCollectedQuote[]}
    * @memberof PointAndShootUI
    */
-  shoot(quoteId: BeamQuoteId, el: BeamHTMLElement | BeamRange, x: number, y: number, collectedQuotes: BeamCollectedQuote[])
+  shoot(
+    quoteId: BeamQuoteId,
+    el: BeamHTMLElement | BeamRange,
+    x: number,
+    y: number,
+    collectedQuotes: BeamCollectedQuote[]
+  )
+
   /**
    * Unselect shoot element
    *
@@ -62,12 +73,14 @@ export interface PointAndShootUI extends WebEventsUI {
    * @memberof PointAndShootUI
    */
   unshoot(el: BeamHTMLElement)
+
   /**
    * Hide popup ui
    *
    * @memberof PointAndShootUI
    */
   hidePopup()
+
   /**
    * Show status
    *
@@ -76,12 +89,14 @@ export interface PointAndShootUI extends WebEventsUI {
    * @memberof PointAndShootUI
    */
   showStatus(el: BeamHTMLElement, collected)
+
   /**
    * Hide status
    *
    * @memberof PointAndShootUI
    */
   hideStatus()
+
   /**
    * @param status {"pointing"|"shooting"|"none"}
    * @memberof PointAndShootUI

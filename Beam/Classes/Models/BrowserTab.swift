@@ -362,9 +362,9 @@ import Promises
 
     func executeJS(_ jsCode: String, objectName: String?) -> Promise<Any?> {
         Promise<Any?> { [unowned self] fulfill, reject in
-            let parameterized = objectName != nil ? "exports.__ID__\(objectName!)." + jsCode : jsCode
+            let parameterized = objectName != nil ? "beam.__ID__\(objectName!)." + jsCode : jsCode
             let obfuscatedCommand = Self.webViewConfiguration.obfuscate(str: parameterized)
-            self.webView.evaluateJavaScript(obfuscatedCommand) { (result, error: Error?) in
+            webView.evaluateJavaScript(obfuscatedCommand) { (result, error: Error?) in
                 if error == nil {
                     Logger.shared.logInfo("(\(obfuscatedCommand) succeeded: \(String(describing: result))",
                                           category: .javascript)

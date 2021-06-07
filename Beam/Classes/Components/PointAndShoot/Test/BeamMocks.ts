@@ -12,11 +12,11 @@ import {
   BeamRect,
   BeamSelection,
   BeamText,
-  BeamWindow
+  BeamWindow,
 } from "../BeamTypes"
-import {BeamWindowMock} from "./BeamWindowMock"
-import {BeamEventTargetMock} from "./BeamEventTargetMock"
-import {Util} from "../Util"
+import { BeamWindowMock } from "./BeamWindowMock"
+import { BeamEventTargetMock } from "./BeamEventTargetMock"
+import { Util } from "../Util"
 
 export class BeamDOMTokenList {
   list = []
@@ -27,7 +27,6 @@ export class BeamDOMTokenList {
 }
 
 export class BeamNodeMock extends BeamEventTargetMock implements BeamNode {
-
   static readonly ELEMENT_NODE = BeamNodeType.element
   static readonly TEXT_NODE = BeamNodeType.text
   static readonly PROCESSING_INSTRUCTION_NODE = BeamNodeType.processing_instruction
@@ -67,7 +66,6 @@ export class BeamNodeMock extends BeamEventTargetMock implements BeamNode {
 }
 
 export class BeamCharacterDataMock extends BeamNodeMock {
-
   constructor(readonly data: string, props = {}) {
     super("#text", BeamNodeType.text, props)
   }
@@ -82,7 +80,6 @@ export class BeamCharacterDataMock extends BeamNodeMock {
 }
 
 export class BeamTextMock extends BeamCharacterDataMock implements BeamText {
-
   constructor(data: string, props = {}) {
     super(data, props)
   }
@@ -116,8 +113,11 @@ export class BeamNamedNodeMap extends Object implements NamedNodeMap {
           NOTATION_NODE: 0,
           PROCESSING_INSTRUCTION_NODE: 0,
           TEXT_NODE: 0,
-          addEventListener(type: string, listener: EventListenerOrEventListenerObject | null, options: boolean | AddEventListenerOptions | undefined): void {
-          },
+          addEventListener(
+            type: string,
+            listener: EventListenerOrEventListenerObject | null,
+            options: boolean | AddEventListenerOptions | undefined
+          ): void {},
           appendChild<T>(newChild: T): T {
             return undefined
           },
@@ -176,18 +176,20 @@ export class BeamNamedNodeMap extends Object implements NamedNodeMap {
           removeChild<T>(oldChild: T): T {
             return undefined
           },
-          removeEventListener(type: string, callback: EventListenerOrEventListenerObject | null, options: EventListenerOptions | boolean | undefined): void {
-          },
+          removeEventListener(
+            type: string,
+            callback: EventListenerOrEventListenerObject | null,
+            options: EventListenerOptions | boolean | undefined
+          ): void {},
           replaceChild<T>(newChild: Node, oldChild: T): T {
             return undefined
           },
           specified: false,
           textContent: undefined,
-          normalize(): void {
-          },
+          normalize(): void {},
           name: p,
           localName: p,
-          value: props[p]
+          value: props[p],
         }
         this.setNamedItem(attr)
       }
@@ -199,7 +201,7 @@ export class BeamNamedNodeMap extends Object implements NamedNodeMap {
   }
 
   getNamedItem(qualifiedName: string): Attr | null {
-    return this.attrs.find(a => a.localName === qualifiedName)
+    return this.attrs.find((a) => a.localName === qualifiedName)
   }
 
   getNamedItemNS(namespace: string | null, localName: string): Attr | null {
@@ -239,13 +241,12 @@ export class BeamNamedNodeMap extends Object implements NamedNodeMap {
   }
 
   toString(): string {
-    return this.attrs.map(a => `${a.name}="${a.value}"`).join(" ")
+    return this.attrs.map((a) => `${a.name}="${a.value}"`).join(" ")
   }
 }
 
 export class BeamHTMLCollection<E extends BeamElement = BeamElement> /*implements HTMLCollection*/ {
-  constructor(private values: E[]) {
-  }
+  constructor(private values: E[]) {}
 
   [index: number]: E
 
@@ -267,8 +268,7 @@ export class BeamHTMLCollection<E extends BeamElement = BeamElement> /*implement
 }
 
 export class BeamDOMRectList implements DOMRectList {
-  constructor(private list: DOMRect[]) {
-  }
+  constructor(private list: DOMRect[]) {}
 
   [index: number]: DOMRect
 
@@ -345,22 +345,16 @@ export class BeamElementMock extends BeamNodeMock implements BeamElement, BeamEl
     this.scrollHeight = value
   }
 
-  get parentNode(): BeamElement {
-    const p = super.parentNode
-    const pe = p ? p : null
-    return pe as BeamElement
-  }
-
   appendChild(node: BeamNode): BeamNode {
     const added = super.appendChild(node)
     if (node instanceof BeamElementMock) {
-      (node as BeamElementMock).offsetParent = this
+      ;(node as BeamElementMock).offsetParent = this
     }
     return added
   }
 
   private get _children(): BeamElement[] {
-    return this.childNodes.filter(e => e.nodeType === BeamNodeMock.ELEMENT_NODE) as BeamElement[]
+    return this.childNodes.filter((e) => e.nodeType === BeamNodeMock.ELEMENT_NODE) as BeamElement[]
   }
 
   get children(): BeamHTMLCollection {
@@ -369,13 +363,13 @@ export class BeamElementMock extends BeamNodeMock implements BeamElement, BeamEl
   }
 
   get innerHTML(): string {
-    return this.childNodes.map(c => c.toString()).join("")
+    return this.childNodes.map((c) => c.toString()).join("")
   }
 
   get outerHTML(): string {
     const tag = this.nodeName
     let attributes = ""
-    for (const a of this.attributes) {
+    for (const a of Array.from(this.attributes)) {
       attributes += ` ${a.name}="${a.value}"`
     }
     return `<${tag}${attributes}>${this.innerHTML}</${tag}>`
@@ -391,15 +385,14 @@ export class BeamElementMock extends BeamNodeMock implements BeamElement, BeamEl
   }
 
   getClientRects(): DOMRectList {
-    const list = this._children.map(c => c.getBoundingClientRect())
+    const list = this._children.map((c) => c.getBoundingClientRect())
     return new BeamDOMRectList(list)
   }
 }
 
 export class BeamHTMLElementMock extends BeamElementMock implements BeamHTMLElement {
-
   dataset = {
-    "beam-mock": "uuid-uuid-uuid-uuid"
+    "beam-mock": "uuid-uuid-uuid-uuid",
   }
 
   constructor(nodeName: string, attributes = {}) {
@@ -420,7 +413,7 @@ export class BeamSelectionMock implements BeamSelection {
   isCollapsed: false
   rangeCount: number = 0
   type: "Range"
-  caretBidiLevel: 0 
+  caretBidiLevel: 0
   private rangelist: BeamRange[] = []
   addRange(range: BeamRange): void {
     this.anchorNode = range.startContainer
@@ -473,7 +466,6 @@ export class BeamSelectionMock implements BeamSelection {
 }
 
 export class BeamHTMLIFrameElementMock extends BeamHTMLElementMock implements BeamHTMLIFrameElement {
-
   src: string
 
   contentWindow: BeamWindow = new BeamWindowMock()
@@ -492,11 +484,10 @@ export class BeamHTMLIFrameElementMock extends BeamHTMLElementMock implements Be
     const win = this.contentWindow as BeamWindowMock
     win.scroll(0, win.scrollY + delta)
     const scrollEvent = new BeamUIEvent()
-    Object.assign(scrollEvent, {name: "scroll"})
+    Object.assign(scrollEvent, { name: "scroll" })
     win.pns.onScroll(scrollEvent)
   }
 }
-
 
 export class BeamRangeMock implements BeamRange {
   cloneRange(): BeamRange {
@@ -587,7 +578,7 @@ export class BeamRangeMock implements BeamRange {
       left: 0,
       right: 0,
       top: 0,
-      toJSON: () => "toJSON value not implemented"
+      toJSON: () => "toJSON value not implemented",
     }
   }
 
@@ -621,22 +612,20 @@ export class BeamDocumentMock extends BeamNodeMock implements BeamDocument {
   /**
    * @param tag {string}
    */
-  createElement(tag) {
-  }
+  createElement(tag) {}
 
   /**
    *
    * @param eventName {String}
    * @param cb {Function}
    */
-  addEventListener(eventName, cb) {
-  }
+  addEventListener(eventName, cb) {}
 
   /**
    * @return {BeamSelection}
    */
   getSelection() {
-      return this.selection
+    return this.selection
   }
 
   /**
@@ -644,7 +633,7 @@ export class BeamDocumentMock extends BeamNodeMock implements BeamDocument {
    * @return {HTMLElement[]}
    */
   querySelectorAll(selector): BeamNode[] {
-    return []   // Override it in your custom mock
+    return [] // Override it in your custom mock
   }
 
   createRange(): BeamRange {
@@ -699,15 +688,12 @@ export class BeamUIEvent {
    */
   target
 
-  preventDefault() {
-  }
+  preventDefault() {}
 
-  stopPropagation() {
-  }
+  stopPropagation() {}
 }
 
 export class BeamMouseEvent extends BeamUIEvent {
-
   constructor(attributes = {}) {
     super()
     Object.assign(this, attributes)
@@ -732,7 +718,6 @@ export class BeamMouseEvent extends BeamUIEvent {
 }
 
 export class BeamKeyEvent extends BeamUIEvent {
-
   constructor(attributes = {}) {
     super()
     Object.assign(this, attributes)
