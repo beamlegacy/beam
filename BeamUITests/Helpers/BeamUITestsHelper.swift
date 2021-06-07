@@ -105,9 +105,14 @@ class BeamUITestsHelper {
         XCTAssertEqual(ShootCardPickerLabels.element.frame.origin.y, referenceElement.frame.origin.y + PnsFrame.element.frame.height, accuracy: 10)
     }
     
-    func assertFramePositions(searchText: String, identifier: String) {
+    func assertFramePositions(searchText: String, identifier: String, message: String? = nil) {
+        guard let message = message else {
+            let message = "\(identifier) location doesn't match \"\(searchText)\" location"
+            assertFramePositions(searchText: searchText, identifier: identifier, message: message)
+            return
+        }
         let padding: CGFloat = 16
-        let message = "\(identifier) location doesn't match \"\(searchText)\" location"
+        
         // Delay because of animations
         sleep(1)
         // Hover element to make it active

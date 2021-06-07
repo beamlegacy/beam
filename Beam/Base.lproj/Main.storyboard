@@ -708,17 +708,17 @@
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="jze-PA-szA"/>
-                                        <menuItem title="Actual Size" tag="4" keyEquivalent="0" id="sRD-PD-0pk" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
+                                        <menuItem title="Actual Size" tag="4" keyEquivalent="0" id="sRD-PD-0pk">
                                             <connections>
                                                 <action selector="resetZoom:" target="Ady-hI-5gd" id="WOS-GY-FtI"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Zoom In" tag="4" keyEquivalent="+" id="KIP-BY-goS" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
+                                        <menuItem title="Zoom In" tag="4" keyEquivalent="+" id="KIP-BY-goS">
                                             <connections>
                                                 <action selector="zoomIn:" target="Ady-hI-5gd" id="QAh-Iz-Efj"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Zoom Out" tag="4" keyEquivalent="-" id="Rhl-Ui-Pg1" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
+                                        <menuItem title="Zoom Out" tag="4" keyEquivalent="-" id="Rhl-Ui-Pg1">
                                             <connections>
                                                 <action selector="zoomOut:" target="Ady-hI-5gd" id="s1X-bM-fCG"/>
                                             </connections>

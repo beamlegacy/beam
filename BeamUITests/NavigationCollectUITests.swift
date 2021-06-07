@@ -36,21 +36,10 @@ class NavigationCollectUITests: QuickSpec {
 
     override func spec() {
         
-        let urls = [
-            "en.wikipedia.org/w/index.php?title=Red_panda&oldid=1024738414",
-            "en.wikipedia.org/w/index.php?title=Giant_panda&oldid=1025413108",
-            "en.wikipedia.org/w/index.php?title=Kung_Fu_Panda&oldid=1024626447",
-            "en.wikipedia.org/w/index.php?title=Internet_Explorer&oldid=1025328966",
-            "en.wikipedia.org/w/index.php?title=Point-and-shoot_camera&oldid=1022913329",
-            "en.wikipedia.org/w/index.php?title=Piranhaconda&oldid=1022691141",
-            "text.npr.org/996515792",
-            "github.com/mdn/retired-content/commit/3131f5cb084dc769bf038bcf27c9b04c109c675f"
-        ]
-        
         let titles = [
-            "Red panda - Wikipedia",
-            "Giant panda - Wikipedia",
-            "Kung Fu Panda - Wikipedia"
+            "Point And Shoot Test Fixture - Ultralight Beam",
+            "Point And Shoot Test Fixture - I-Beam",
+            "Point And Shoot Test Fixture - Cursor"
         ]
 
         describe("Navigating to web") {
@@ -65,20 +54,20 @@ class NavigationCollectUITests: QuickSpec {
             }
             
             it("add links to journal in order") {
-                self.omnibarHelper.navigateTo(text: urls[0])
+                self.helper.tapCommand(.loadUITestPage1)
                 expect(self.app.staticTexts[titles[0]].waitForExistence(timeout: 10)) == true
                 self.helper.showJournal()
                 expect(self.journalChildren.element(matching: NSPredicate(format: "value = %@", titles[0])).firstMatch.waitForExistence(timeout: 2)) == true
                 expect(self.journalChildren.element(boundBy: 0).value as? String) == titles[0]
 
-                self.omnibarHelper.navigateTo(text: urls[1])
+                self.helper.tapCommand(.loadUITestPage2)
                 expect(self.app.staticTexts[titles[1]].waitForExistence(timeout: 10)) == true
                 self.helper.showJournal()
                 expect(self.journalChildren.element(matching: NSPredicate(format: "value = %@", titles[1])).firstMatch.waitForExistence(timeout: 2)) == true
                 expect(self.journalChildren.element(boundBy: 0).value as? String) == titles[0]
                 expect(self.journalChildren.element(boundBy: 1).value as? String) == titles[1]
 
-                self.omnibarHelper.navigateTo(text: urls[2])
+                self.helper.tapCommand(.loadUITestPage3)
                 expect(self.app.staticTexts[titles[2]].waitForExistence(timeout: 10)) == true
                 self.helper.showJournal()
                 expect(self.journalChildren.element(matching: NSPredicate(format: "value = %@", titles[2])).firstMatch.waitForExistence(timeout: 2)) == true
@@ -88,20 +77,19 @@ class NavigationCollectUITests: QuickSpec {
             }
 
             it("can navigate links in collected text") {
-                self.omnibarHelper.navigateTo(text: urls[0])
+                self.helper.tapCommand(.loadUITestPage3)
 
-                let searchText = "A red panda at the "
-                let linkText = "Cincinnati Zoo"
+                let searchText = "Go to "
+                let linkText = "Cincinati Zoo"
                 let fullText = searchText + linkText
 
                 // Get locations of the text
-                let parent = self.app.webViews.firstMatch.tables.cells.containing(.staticText,
-                                                                                  identifier: searchText).element
+                let parent = self.app.webViews.containing(.staticText, identifier: searchText).element
                 let textElement = parent.staticTexts[searchText]
-                let textElementStart = textElement.coordinate(withNormalizedOffset: CGVector(dx: -0.2, dy: 0.5))
+                _ = textElement.coordinate(withNormalizedOffset: CGVector(dx: -0.2, dy: 0.5))
                 let textElementMiddle = textElement.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
-                // click at start of element1 to make sure the page has focus
-                textElementStart.click()
+                // click at middle of element1 to make sure the page has focus
+                textElementMiddle.click()
                 // Hold option
                 XCUIElement.perform(withKeyModifiers: .option) {
                     // While holding option
@@ -118,10 +106,10 @@ class NavigationCollectUITests: QuickSpec {
                 // Confirm text is saved in Journal
                 self.helper.showJournal()
                 expect(self.journalChildren.count) == 2
-                expect(self.journalChildren.element(boundBy: 0).value as? String) == titles[0]
-                expect((self.journalChildren.element(boundBy: 1).value as? String)?.contains(fullText)) == true
+                expect(self.journalChildren.element(boundBy: 0).value as? String) == titles[2]
+                expect((self.journalChildren.element(boundBy: 1).value as? String)?.contains(linkText)) == true
                 // tap on collected sublink (end of new bullet)
-                let linkCoordinate = self.journalChildren.element(boundBy: 1).coordinate(withNormalizedOffset: CGVector(dx: 0.4, dy: 0.5))
+                let linkCoordinate = self.journalChildren.element(boundBy: 1).coordinate(withNormalizedOffset: CGVector(dx: 0.24, dy: 0.5))
                 linkCoordinate.click()
                 // tap on a link in the page, should be added to opened bullet
                 let lionLink = self.app.webViews.staticTexts["California sea lions"].firstMatch
@@ -146,9 +134,8 @@ class NavigationCollectUITests: QuickSpec {
             }
             describe("Shoot") {
                 it("dismis shootCardPicker by clicking on page") {
-                    self.omnibarHelper.navigateTo(text: urls[7])
-                    // Great example of complex selection.
-                    let searchText = "3131f5cb084dc769bf038bcf27c9b04c109c675f"
+                    self.helper.tapCommand(.loadUITestPage1)
+                    let searchText = "Ultralight Beam, Kanye West"
                     let parent = self.app.webViews.containing(.staticText,
                                                               identifier: searchText).element
                     
@@ -164,7 +151,7 @@ class NavigationCollectUITests: QuickSpec {
                     let shootSelections = self.app.otherElements.matching(identifier:"ShootFrameSelection")
                     expect(shootSelections.count) == 1
                     
-                    let emptyLocation = child.coordinate(withNormalizedOffset: CGVector(dx: -0.2, dy: 0.1))
+                    let emptyLocation = child.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: -1))
                     emptyLocation.click()
                     sleep(1)
                     let shootSelections2 = self.app.otherElements.matching(identifier:"ShootFrameSelection")
@@ -173,9 +160,8 @@ class NavigationCollectUITests: QuickSpec {
             }
             describe("Select") {
                 it("frame position placement") {
-                    self.omnibarHelper.navigateTo(text: urls[7])
-                    // Great example of complex selection.
-                    let searchText = "3131f5cb084dc769bf038bcf27c9b04c109c675f"
+                    self.helper.tapCommand(.loadUITestPage1)
+                    let searchText = "Ultralight Beam, Kanye West"
                     let parent = self.app.webViews.containing(.staticText,
                                                               identifier: searchText).element
                     
@@ -226,47 +212,45 @@ class NavigationCollectUITests: QuickSpec {
                 
             describe("Point") {
                 it("frame position placement") {
-                    self.omnibarHelper.navigateTo(text: urls[7])
-                    // Great example of complex selection.
-                    let searchText = "3131f5cb084dc769bf038bcf27c9b04c109c675f"
+                    self.helper.tapCommand(.loadUITestPage1)
+                    let searchText = "Ultralight Beam, Kanye West"
                     let parent = self.app.webViews.containing(.staticText,
                                                               identifier: searchText).element
                     
                     let child = parent.staticTexts[searchText]
-                    let start = child.coordinate(withNormalizedOffset: CGVector(dx: -0.2, dy: 0.5))
                     let center = child.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
                     // click at middle of searchText to focus on page
-                    start.click()
+                    center.click()
                     
                     // Hold option to enable point mode
                     XCUIElement.perform(withKeyModifiers: .option) {
                         // While holding option
                         center.hover()
-                        self.helper.assertFramePositions(searchText: searchText, identifier: "PointFrame")
+                        self.helper.assertFramePositions(searchText: searchText, identifier: "PointFrame", message: "1")
                         // Zoom in
                         self.app.typeKey("+", modifierFlags: .command)
                         self.app.typeKey("+", modifierFlags: .command)
                         self.app.typeKey("+", modifierFlags: .command)
-                        center.hover()
+//                        center.hover()
                         
-                        self.helper.assertFramePositions(searchText: searchText, identifier: "PointFrame")
+                        self.helper.assertFramePositions(searchText: searchText, identifier: "PointFrame", message: "2")
                         // Zoom out
                         self.app.typeKey("-", modifierFlags: .command)
                         self.app.typeKey("-", modifierFlags: .command)
                         self.app.typeKey("-", modifierFlags: .command)
-                        center.hover()
+//                        center.hover()
                         
-                        self.helper.assertFramePositions(searchText: searchText, identifier: "PointFrame")
+                        self.helper.assertFramePositions(searchText: searchText, identifier: "PointFrame", message: "3")
                         // Scroll page
                         self.app.webViews.firstMatch.scroll(byDeltaX: 0, deltaY: -200)
-                        center.hover()
+//                        center.hover()
 
-                        self.helper.assertFramePositions(searchText: searchText, identifier: "PointFrame")
+                        self.helper.assertFramePositions(searchText: searchText, identifier: "PointFrame", message: "4")
                         // Resize window
                         self.helper.tapCommand(.resizeWindowPortrait)
                         center.hover()
 
-                        self.helper.assertFramePositions(searchText: searchText, identifier: "PointFrame")
+                        self.helper.assertFramePositions(searchText: searchText, identifier: "PointFrame", message: "5")
                         // Shoot
                         center.click()
                         // Release option
@@ -278,7 +262,7 @@ class NavigationCollectUITests: QuickSpec {
                     self.helper.assertFramePositions(searchText: searchText, identifier: "ShootFrameSelection")
                     
                     // Add to today's note
-                    let noteTitle = "Cool browsers"
+                    let noteTitle = "Ultralight Beam"
                     self.helper.addNote(noteTitle: noteTitle)
                     
                     // Assert card association

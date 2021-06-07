@@ -9,5 +9,7 @@ public enum MenuAvailableCommands: String, CaseIterable {
     case resizeWindowLandscape = "Resize Window to Landscape"
     case resizeWindowPortrait = "Resize Window to Portrait"
     case separatorB
-    case loadUITestPage = "Load UITests Page"
+    case loadUITestPage1 = "Load UITests Page 1"
+    case loadUITestPage2 = "Load UITests Page 2"
+    case loadUITestPage3 = "Load UITests Page 3"
 }
