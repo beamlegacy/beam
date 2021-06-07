@@ -56,7 +56,7 @@ import Promises
     @Published var privateMode = false
 
     var pointAndShootAllowed: Bool {
-        url?.isSearchResult != true
+        true
     }
 
     private var isCurrent: Bool {
