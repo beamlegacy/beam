@@ -35,6 +35,8 @@ extension BeamColor {
         static let bidirectionalUnderline = BeamColor.From(color: BeamColor.Beam.nsColor.withAlphaComponent(0.25))
         static let control = BeamColor.Custom(named: "EditorControlColor")
         static let link = BeamColor.Niobium
+        static let linkActive = BeamColor.Bluetiful
+        static let linkActiveBackground = BeamColor.From(color: BeamColor.Bluetiful.nsColor.withAlphaComponent(0.1))
         static var linkDecoration = BeamColor.Combining(lightColor: BeamColor.AlphaGray, darkColor: BeamColor.LightStoneGray)
         static let syntax = BeamColor.Custom(named: "EditorSyntaxColor")
         static let indentBackground = BeamColor.Mercury

@@ -207,7 +207,6 @@ public class TextLine {
     public var interlineFactor: CGFloat = 1.0
 
     private var _layer: CALayer?
-    private var decorationLayer: TextLineDecorationLayer?
 
     var layer: CALayer {
         if let layer = _layer {
@@ -215,9 +214,6 @@ public class TextLine {
         }
 
         let layer = TextLineLayer(self)
-        let deco = TextLineDecorationLayer(self)
-        layer.addSublayer(deco)
-        decorationLayer = deco
         _layer = layer
         return layer
     }

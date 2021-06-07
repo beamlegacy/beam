@@ -185,6 +185,7 @@ public class TextNode: ElementNode {
 //        drawDebug(in: context)
         updateSelection()
         updateCursor()
+        updateDecorations()
     }
 
     func buildMarkeeShape(_ start: Int, _ end: Int) -> CGPath? {
@@ -275,8 +276,8 @@ public class TextNode: ElementNode {
     private func createMarkeeLayer(name: String, color: NSColor) -> ShapeLayer {
         let layer = ShapeLayer(name: name)
         layer.layer.actions = [
-            "onOrderIn": NSNull(),
-            "onOrderOut": NSNull(),
+            kCAOnOrderIn: NSNull(),
+            kCAOnOrderOut: NSNull(),
             "sublayers": NSNull(),
             "contents": NSNull(),
             "bounds": NSNull()
@@ -322,8 +323,8 @@ public class TextNode: ElementNode {
 
         let layer = ShapeLayer(name: "cursor")
         layer.layer.actions = [
-            "onOrderIn": NSNull(),
-            "onOrderOut": NSNull(),
+            kCAOnOrderIn: NSNull(),
+            kCAOnOrderOut: NSNull(),
             "sublayers": NSNull(),
             "contents": NSNull(),
             "bounds": NSNull()
@@ -344,6 +345,27 @@ public class TextNode: ElementNode {
         layer.shapeLayer.fillColor = enabled ? color.cgColor : disabledColor.cgColor
         layer.layer.isHidden = !on
         layer.shapeLayer.path = CGPath(rect: cursorRect, transform: nil)
+    }
+
+    var _decorationLayer: Layer?
+    var decorationLayer: Layer {
+        if let layer = _decorationLayer {
+            return layer
+        }
+
+        let decoLayer = TextLinesDecorationLayer()
+        decoLayer.zPosition = -1
+        decoLayer.offset = offsetAt(caretIndex: 0)
+        let layer = Layer(name: "lineDecoration", layer: decoLayer)
+        _decorationLayer = layer
+        addLayer(layer)
+        return layer
+    }
+
+    public func updateDecorations() {
+        let layer = self.decorationLayer
+        guard let decoLayer = layer.layer as? TextLinesDecorationLayer else { return }
+        decoLayer.textLines = textFrame?.lines
     }
 
     override func updateRendering() {
@@ -699,14 +721,24 @@ public class TextNode: ElementNode {
         return text.position(at: index)
     }
 
-    public func position(after index: Int) -> Int {
+    public func position(after index: Int, avoidUneditableRange: Bool = false) -> Int {
         guard let textFrame = textFrame else { return 0 }
-        return textFrame.position(after: index)
+        var newIndex = textFrame.position(after: index)
+        if avoidUneditableRange,
+           let movedIndex = caretIndexAvoidingUneditableRange(newIndex, after: true) {
+            newIndex = movedIndex
+        }
+        return newIndex
     }
 
-    public func position(before index: Int) -> Int {
+    public func position(before index: Int, avoidUneditableRange: Bool = false) -> Int {
         guard let textFrame = textFrame else { return 0 }
-        return textFrame.position(before: index)
+        var newIndex = textFrame.position(before: index)
+        if avoidUneditableRange,
+           let movedIndex = caretIndexAvoidingUneditableRange(newIndex, after: false) {
+            newIndex = movedIndex
+        }
+        return newIndex
     }
 
     public func positionAt(point: NSPoint) -> Int {
@@ -719,6 +751,29 @@ public class TextNode: ElementNode {
         let res = sourceIndexFor(displayIndex: displayIndex)
 
         return res
+    }
+
+    public func caretIndexAvoidingUneditableRange(_ caretIndex: Int, after: Bool) -> Int? {
+        let caret = self.caretAtIndex(caretIndex)
+        let sourceIndex = caret.indexInSource
+        guard let sourceRange = uneditableRangeAt(index: sourceIndex) else { return nil }
+        guard sourceIndex != sourceRange.endIndex || caret.inSource == false else {
+            return nil
+        }
+
+        if after {
+            guard let newIndex = caretIndexForSourcePosition(sourceRange.upperBound)
+            else { return nil }
+            return nextInSourceCaretIndex(at: newIndex)
+        } else {
+            return caretIndexForSourcePosition(sourceRange.lowerBound)
+        }
+    }
+
+    private func nextInSourceCaretIndex(at caretIndex: Int) -> Int {
+        let caret = caretAtIndex(caretIndex)
+        guard !caret.inSource else { return caretIndex }
+        return position(after: caretIndex)
     }
 
     public func indexAt(point: NSPoint, limitToTextString: Bool = true) -> Int? {
@@ -951,6 +1006,15 @@ public class TextNode: ElementNode {
         let range = elementText.rangeAt(position: index)
         let hasInternalLink = range.attributes.contains { $0.isInternalLink }
         return hasInternalLink ? range : nil
+    }
+
+    public func uneditableRangeAt(index: Int) -> Range<Int>? {
+        guard self.editor.popover == nil else { return nil }
+        let anyLinkRange = internalLinkRangeAt(index: index) ?? self.linkRangeAt(index: index)
+        if let anyLinkRange = anyLinkRange {
+            return anyLinkRange.position ..< anyLinkRange.end
+        }
+        return nil
     }
 
     // MARK: - Print

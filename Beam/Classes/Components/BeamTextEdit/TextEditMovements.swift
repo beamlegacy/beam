@@ -20,7 +20,7 @@ extension TextRoot {
                     cursorPosition = 0
                 }
             } else {
-                caretIndex = node.position(before: caretIndex)
+                caretIndex = node.position(before: caretIndex, avoidUneditableRange: true)
             }
         }
         cancelSelection()
@@ -37,9 +37,7 @@ extension TextRoot {
                     next.focus()
                 }
             } else {
-                caretIndex = node.position(after: caretIndex)
-                //swiftlint:disable:next print
-//                print("new position in source: \(cursorPosition) (attributes \(state.attributes))")
+                caretIndex = node.position(after: caretIndex, avoidUneditableRange: true)
             }
         }
         cancelSelection()
@@ -51,8 +49,8 @@ extension TextRoot {
               let node = focusedWidget as? TextNode,
               cursorPosition != 0
         else { return }
-        let newCaretIndex = node.position(before: caretIndex)
-        let newCursorPosition = node.textFrame?.carets[newCaretIndex].positionInSource ?? 0
+        let newCaretIndex = node.position(before: caretIndex, avoidUneditableRange: true)
+        let newCursorPosition = node.caretAtIndex(newCaretIndex).positionInSource
         extendSelection(to: newCursorPosition)
         caretIndex = newCaretIndex
         node.invalidateText()
@@ -61,10 +59,16 @@ extension TextRoot {
     func moveWordRight() {
         cancelNodeSelection()
         guard let node = focusedWidget as? TextNode else { return }
+        var pos = cursorPosition
         node.text.text.enumerateSubstrings(in: node.text.index(at: cursorPosition)..<node.text.text.endIndex, options: .byWords) { (_, r1, _, stop) in
-            self.cursorPosition = node.position(at: r1.upperBound)
+            pos = node.position(at: r1.upperBound)
             stop = true
         }
+        if let caretIndex = node.caretIndexForSourcePosition(pos),
+           let updatedCaretIndex = node.caretIndexAvoidingUneditableRange(caretIndex, after: true) {
+            pos = node.caretAtIndex(updatedCaretIndex).positionOnScreen
+        }
+        cursorPosition = pos
         cancelSelection()
         node.invalidateText()
     }
@@ -76,7 +80,11 @@ extension TextRoot {
         node.text.text.enumerateSubstrings(in: node.text.text.startIndex..<node.text.text.index(at: cursorPosition), options: .byWords) { (_, r1, _, _) in
             range = r1
         }
-        let pos = node.position(at: range.lowerBound)
+        var pos = node.position(at: range.lowerBound)
+        if let caretIndex = node.caretIndexForSourcePosition(pos),
+           let updatedCaretIndex = node.caretIndexAvoidingUneditableRange(caretIndex, after: false) {
+            pos = node.caretAtIndex(updatedCaretIndex).positionOnScreen
+        }
         cursorPosition = pos == cursorPosition ? 0 : pos
         cancelSelection()
         node.invalidateText()
@@ -90,6 +98,10 @@ extension TextRoot {
             newCursorPosition = node.position(at: r1.upperBound)
             stop = true
         }
+        if let caretIndex = node.caretIndexForSourcePosition(newCursorPosition),
+           let updatedCaretIndex = node.caretIndexAvoidingUneditableRange(caretIndex, after: true) {
+            newCursorPosition = node.caretAtIndex(updatedCaretIndex).positionOnScreen
+        }
         extendSelection(to: newCursorPosition)
         node.invalidateText()
     }
@@ -102,7 +114,11 @@ extension TextRoot {
         node.text.text.enumerateSubstrings(in: node.text.text.startIndex..<node.text.text.index(at: cursorPosition), options: .byWords) { (_, r1, _, _) in
             range = r1
         }
-        let pos = node.position(at: range.lowerBound)
+        var pos = node.position(at: range.lowerBound)
+        if let caretIndex = node.caretIndexForSourcePosition(pos),
+           let updatedCaretIndex = node.caretIndexAvoidingUneditableRange(caretIndex, after: false) {
+            pos = node.caretAtIndex(updatedCaretIndex).positionOnScreen
+        }
         let newCursorPosition = pos == cursorPosition ? 0 : pos
         extendSelection(to: newCursorPosition)
         node.invalidateText()
@@ -113,8 +129,8 @@ extension TextRoot {
               let node = focusedWidget as? TextNode,
               cursorPosition != node.text.count
         else { return }
-        let newCaretIndex = node.position(after: caretIndex)
-        let newCursorPosition = node.textFrame?.carets[newCaretIndex].positionInSource ?? 0
+        let newCaretIndex = node.position(after: caretIndex, avoidUneditableRange: true)
+        let newCursorPosition = node.caretAtIndex(newCaretIndex).positionInSource
         extendSelection(to: newCursorPosition)
         caretIndex = newCaretIndex
         node.invalidateText()

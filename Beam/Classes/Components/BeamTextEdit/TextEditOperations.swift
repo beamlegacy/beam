@@ -231,29 +231,21 @@ extension TextRoot {
         }
 
         let nextUpperBound = forward ? cursorPos + 1 : cursorPos
-        if let uneditableRange = uneditableRange(in: node, at: nextUpperBound) {
+        if let uneditableRange = node.uneditableRangeAt(index: nextUpperBound) {
             return uneditableRange
         }
         return nextUpperBound - 1 ..< nextUpperBound
     }
 
-    private func uneditableRange(in node: TextNode, at cursorPos: Int) -> Range<Int>? {
-        let linkRange = node.internalLinkRangeAt(index: cursorPos)
-        if let linkRange = linkRange, node.editor.popover == nil {
-            return linkRange.position ..< linkRange.end
-        }
-        return nil
-    }
-
     /// extend range to include uneditable ranges that might partially included
     private func extendRangeWithUneditableRanges(_ range: Range<Int>, in node: TextNode) -> Range<Int> {
         var finalRange = range
-        if let uneditableRangeAfter = uneditableRange(in: node, at: finalRange.upperBound),
+        if let uneditableRangeAfter = node.uneditableRangeAt(index: finalRange.upperBound),
            uneditableRangeAfter.contains(finalRange.upperBound - 1) {
             finalRange = finalRange.join(uneditableRangeAfter)
         }
         if finalRange.lowerBound != finalRange.upperBound,
-           let uneditableRangeBefore = uneditableRange(in: node, at: finalRange.lowerBound),
+           let uneditableRangeBefore = node.uneditableRangeAt(index: finalRange.lowerBound),
            uneditableRangeBefore.contains(finalRange.lowerBound) {
             finalRange = finalRange.join(uneditableRangeBefore)
         }
@@ -421,10 +413,7 @@ extension TextRoot {
             state.attributes = []
         case 1:
             guard let range = ranges.first else { return }
-            // ignore the link attributes if we are to the right of a link, otherwise only ignore the internalLinks attributes
-            state.attributes = caretIsAfterLink
-                ? BeamText.removeLinks(from: range.attributes)
-                : BeamText.removeInternalLinks(from: range.attributes)
+            state.attributes = BeamText.removeLinks(from: range.attributes)
         case 2:
             guard let range1 = ranges.first, let range2 = ranges.last else { return }
 
@@ -433,13 +422,13 @@ extension TextRoot {
                 state.attributes = BeamText.removeLinks(from: range2.attributes)
                 return
             }
-            if !range1.attributes.contains(where: { $0.isInternalLink }) {
+            if !range1.attributes.contains(where: { $0.isLink }) {
                 state.attributes = range1.attributes
-            } else if !range2.attributes.contains(where: { $0.isInternalLink }) {
+            } else if !range2.attributes.contains(where: { $0.isLink }) {
                 state.attributes = range2.attributes
             } else {
-                // They both contain links, let's take the attributes from the left one and remove the link attribute
-                state.attributes = BeamText.removeInternalLinks(from: range1.attributes)
+                // They both contain links, let's take the attributes from the left one and remove the link attributes
+                state.attributes = BeamText.removeLinks(from: range1.attributes)
             }
         default: fatalError() // NOPE!
         }
