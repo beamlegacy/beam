@@ -53,7 +53,7 @@ class NavigationCollectUITests: QuickSpec {
                     .matching(identifier: "TextNode")
             }
             
-            fit("add links to journal in order") {
+            it("add links to journal in order") {
                 self.helper.openTestPage(number: 1)
                 expect(self.app.staticTexts[titles[0]].waitForExistence(timeout: 10)) == true
                 self.helper.showJournal()
@@ -133,7 +133,7 @@ class NavigationCollectUITests: QuickSpec {
                 self.helper.tapCommand(.resizeWindowLandscape)
             }
             describe("Shoot") {
-                it("dismis shootCardPicker by clicking on page") {
+                it("dismiss shootCardPicker by clicking on page and pressing escape") {
                     self.helper.openTestPage(number: 1)
                     let searchText = "Ultralight Beam, Kanye West"
                     let parent = self.app.webViews.containing(.staticText,
@@ -156,6 +156,20 @@ class NavigationCollectUITests: QuickSpec {
                     sleep(1)
                     let shootSelections2 = self.app.otherElements.matching(identifier:"ShootFrameSelection")
                     expect(shootSelections2.count) == 0
+
+                    start.click(forDuration: 1, thenDragTo: end)
+
+                    // Press option once to enable shoot mode
+                    XCUIElement.perform(withKeyModifiers: .option) {}
+
+                    let shootSelections3 = self.app.otherElements.matching(identifier:"ShootFrameSelection")
+                    expect(shootSelections3.count) == 1
+
+                    // dismiss shootCardPicker with escape
+                    self.app.typeKey(.escape, modifierFlags: [])
+
+                    let shootSelections4 = self.app.otherElements.matching(identifier:"ShootFrameSelection")
+                    expect(shootSelections4.count) == 0
                 }
             }
             describe("Select") {
