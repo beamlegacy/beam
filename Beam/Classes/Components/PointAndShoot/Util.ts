@@ -1,4 +1,4 @@
-import {BeamElement} from "./BeamTypes"
+import { BeamElement } from "./BeamTypes"
 
 export class Util {
   /**
@@ -39,15 +39,15 @@ export class Util {
   }
 
   static getTopLeft(el: BeamElement) {
-    const offset = {x: 0, y: 0}
+    const offset = { x: 0, y: 0 }
     Util.getOffset(el, offset)
 
-    const scrolled = {x: 0, y: 0}
+    const scrolled = { x: 0, y: 0 }
     Util.getScrolled(el.parentNode, scrolled)
 
     const x = offset.x - scrolled.x
     const y = offset.y - scrolled.y
-    return {x, y}
+    return { x, y }
   }
 
   /**
@@ -76,5 +76,19 @@ export class Util {
     return array.filter(item => {
       return item != null
     })
+  }
+
+  /**
+  * Check if number is in range
+  *
+  * @static
+  * @param {number} number The number to check.
+  * @param {number} start The start of the range.
+  * @param {number} end The end of the range.
+  * @returns {boolean} Returns `true` if `number` is in the range, else `false`.
+  * @memberof Util
+  */
+  static isNumberInRange(number, start, end) {
+    return Number(number) >= Math.min(start, end) && number <= Math.max(start, end);
   }
 }

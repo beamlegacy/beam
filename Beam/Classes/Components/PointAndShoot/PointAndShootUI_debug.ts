@@ -15,6 +15,12 @@ export class PointAndShootUI_debug implements PointAndShootUI {
     this.native = native
     this.web = web
   }
+
+  hidePoint() {
+    this.web.hidePoint()
+    this.native.hidePoint()
+  }
+
   select(selection: BeamCollectedQuote[]) {
     this.web.select(selection)
     this.native.select(selection)
@@ -28,9 +34,9 @@ export class PointAndShootUI_debug implements PointAndShootUI {
     this.native.getMouseLocation(el, x, y)
   }
 
-  point(quoteId: string, el: BeamHTMLElement, x: number, y: number) {
+  point(quoteId: string, el: BeamHTMLElement, x: number, y: number, callback) {
     this.web.point(quoteId, el, x, y)
-    this.native.point(quoteId, el, x, y)
+    this.native.point(quoteId, el, x, y, callback)
   }
 
   unpoint(el) {

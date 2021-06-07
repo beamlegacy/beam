@@ -65,6 +65,14 @@ test("move mouse without Option", () => {
     const {pns, testUI} = pointAndShootTestBed()
 
     const hoveredElement = new BeamHTMLElementMock("p")
+    hoveredElement.bounds = {
+        width: 130,
+        height: 120,
+        x: 11,
+        y: 12,
+    }
+    hoveredElement.width = 130
+    hoveredElement.height = 120
     const pointEvent = new BeamMouseEvent({name: "mousemove", target: hoveredElement, clientX: 101, clientY: 102})
     pns.onMouseMove(pointEvent)
     expect(pns.status).toEqual("none")
@@ -74,8 +82,16 @@ test("move mouse without Option", () => {
 
 test("point with mouse move + Option", () => {
     const {pns, testUI} = pointAndShootTestBed()
-
     const pointedElement = new BeamHTMLElementMock("p")
+    pointedElement.bounds = {
+        width: 130,
+        height: 120,
+        x: 11,
+        y: 12,
+    }
+    pointedElement.width = 130
+    pointedElement.height = 120
+    
     const pointEvent = new BeamMouseEvent({
         name: "mousemove",
         target: pointedElement,
@@ -101,6 +117,14 @@ test("point with Option key down then mouse move", () => {
     pns.onKeyDown(keyEvent)
 
     const pointedElement = new BeamHTMLElementMock("p")
+    pointedElement.bounds = {
+        width: 130,
+        height: 120,
+        x: 11,
+        y: 12,
+    }
+    pointedElement.width = 130
+    pointedElement.height = 120
     const pointEvent = new BeamMouseEvent({
         name: "mousemove",
         target: pointedElement,
@@ -122,6 +146,14 @@ test("point with mouse move then key down", () => {
     const {pns, testUI} = pointAndShootTestBed()
 
     const pointedElement = new BeamHTMLElementMock("p")
+    pointedElement.bounds = {
+        width: 130,
+        height: 120,
+        x: 11,
+        y: 12,
+    }
+    pointedElement.width = 130
+    pointedElement.height = 120
     const pointEvent = new BeamMouseEvent({
         name: "mousemove",
         target: pointedElement,
@@ -145,6 +177,14 @@ test("point then release Option", () => {
     const {pns, testUI} = pointAndShootTestBed()
 
     const pointedElement = new BeamHTMLElementMock("p")
+    pointedElement.bounds = {
+        width: 130,
+        height: 120,
+        x: 11,
+        y: 12,
+    }
+    pointedElement.width = 130
+    pointedElement.height = 120
     const pointEvent = new BeamMouseEvent({
         name: "mousemove",
         altKey: true,
@@ -176,6 +216,14 @@ test("point with mouse move + Option, then scroll", () => {
     const {pns, testUI} = pointAndShootTestBed()
 
     const pointedElement = new BeamHTMLElementMock("p")
+    pointedElement.bounds = {
+        width: 130,
+        height: 120,
+        x: 11,
+        y: 12,
+    }
+    pointedElement.width = 130
+    pointedElement.height = 120
     const pointEvent = new BeamMouseEvent({
         name: "mousemove",
         target: pointedElement,
@@ -198,6 +246,14 @@ test("point then shoot, then cancel", () => {
     const {pns, testUI} = pointAndShootTestBed()
 
     const pointedElement = new BeamHTMLElementMock("p")
+    pointedElement.bounds = {
+        width: 130,
+        height: 120,
+        x: 11,
+        y: 12,
+    }
+    pointedElement.width = 130
+    pointedElement.height = 120
     const pointEvent = new BeamMouseEvent({
         name: "mousemove",
         target: pointedElement,
@@ -213,6 +269,14 @@ test("point then shoot, then cancel", () => {
 
     // Shoot
     const shotElement = new BeamHTMLElementMock("p")
+    shotElement.bounds = {
+        width: 130,
+        height: 120,
+        x: 11,
+        y: 12,
+    }
+    shotElement.width = 130
+    shotElement.height = 120
     const clickEvent = new BeamMouseEvent()
     Object.assign(clickEvent, {name: "mouseclick", clientX: 103, clientY: 104, target: shotElement, altKey: true})
     pns.onClick(clickEvent)
@@ -268,6 +332,14 @@ test("click in shooting mode should dismis shoot", () => {
     const {pns, testUI} = pointAndShootTestBed()
 
     const pointedElement = new BeamHTMLElementMock("p")
+    pointedElement.bounds = {
+        width: 130,
+        height: 120,
+        x: 11,
+        y: 12,
+    }
+    pointedElement.width = 130
+    pointedElement.height = 120
     const pointEvent = new BeamMouseEvent({
         name: "mousemove",
         target: pointedElement,
@@ -281,8 +353,17 @@ test("click in shooting mode should dismis shoot", () => {
     expect(testUI.events[1]).toEqual({name: "point", el: pointedElement, x: 101, y: 102})
     expect(pns.pointedTarget.el).toEqual(pointedElement)
 
+
     // Shoot
     const shotElement = new BeamHTMLElementMock("p")
+    shotElement.bounds = {
+        width: 130,
+        height: 120,
+        x: 11,
+        y: 12,
+    }
+    shotElement.width = 130
+    shotElement.height = 120
     const clickEvent = new BeamMouseEvent()
     Object.assign(clickEvent, {name: "mouseclick", clientX: 103, clientY: 104, target: shotElement, altKey: true})
     pns.onClick(clickEvent)

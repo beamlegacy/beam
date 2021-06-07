@@ -95,6 +95,9 @@ export class PointAndShootUI_web extends WebEventsUI_web implements PointAndShoo
     super(win)
     this.log(`${this.toString()} instantiated`)
   }
+  hidePoint() {
+    throw new Error("Method not implemented.");
+  }
   select(selection: BeamCollectedQuote[]) {
     throw new Error("Method not implemented.");
   }

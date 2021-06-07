@@ -21,6 +21,10 @@ export class PointAndShootUIMock extends WebEventsUIMock implements PointAndShoo
     this.events.push({name: "unpoint"})
   }
 
+  hidePoint() {
+    this.events.push({name: "hidePoint"})
+  }
+
   shoot(quoteId: string, el: BeamHTMLElement, x: number, y: number, collectedQuotes: BeamCollectedQuote[]) {
     this.events.push({name: "shoot", el, x, y, collectedQuotes})
   }

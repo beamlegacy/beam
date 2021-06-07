@@ -45,17 +45,17 @@ class PointAndShoot: WebPageHolder {
                 switch newValue {
                 case .none:
                     if _status == .pointing {
-                        leavePointing()
-                        leaveShoot()
+                        hidePointing()
+                        hideShoot()
                     }
 
                     if _status == .shooting {
-                        leaveShoot()
+                        hideShoot()
                     }
 
                 case .shooting:
                     if _status == .pointing {
-                        leavePointing()
+                        hidePointing()
                     }
 
                 default:
@@ -75,15 +75,15 @@ class PointAndShoot: WebPageHolder {
         @inline(__always) get { status == .pointing }
     }
 
-    private func leavePointing() {
+    private func hidePointing() {
         Logger.shared.logDebug("leavePointing()", category: .pointAndShoot)
         pointTarget = nil
         ui.clearPoint()
     }
 
-    private func leaveShoot() {
+    private func hideShoot() {
         Logger.shared.logDebug("leaveShoot()", category: .pointAndShoot)
-        ui.clear()
+        ui.clearShoots()
         activeShootGroup = nil
     }
 
@@ -208,6 +208,13 @@ class PointAndShoot: WebPageHolder {
         draw()
     }
 
+    /// Hide point removes the UI representation of the PointFrame without changing PNS status
+    func hidePoint() {
+        hidePointing()
+        hideShoot()
+    }
+
+    /// Removes PointFrame UI and resets the PNS status to .none, only runs when status is .pointing
     func unpoint() {
         if status == .pointing {
             resetStatus()
@@ -248,14 +255,14 @@ class PointAndShoot: WebPageHolder {
     }
 
     func draw() {
-        ui.clear()
+        ui.clearShoots()
         switch status {
         case .pointing:
             drawAllGroups()
         case .shooting:
             drawActiveShootGroup()
         case .none:
-            Logger.shared.logDebug("No redraw because pointing=\(status)", category: .pointAndShoot)
+            Logger.shared.logDebug("No redraw because pointing=.none", category: .pointAndShoot)
         }
     }
 
