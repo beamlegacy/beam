@@ -92,7 +92,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @objc func handleGetURL(event: NSAppleEventDescriptor!, withReplyEvent: NSAppleEventDescriptor!) {
-        if let urlString = event.paramDescriptor(forKeyword: AEKeyword(keyDirectObject))?.stringValue, let url = URL(string: urlString) {
+
+        guard let urlString = event.paramDescriptor(forKeyword: AEKeyword(keyDirectObject))?.stringValue,
+              let url = URL(string: urlString) else { return }
+
+        if urlString.mayBeWebURL {
+            _ = window.state.createTab(withURL: url, originalQuery: nil)
+        } else {
             OAuthSwift.handle(url: url)
         }
     }
