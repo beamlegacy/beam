@@ -189,7 +189,7 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
             let alwaysATitle = !newTitle.isEmpty ? newTitle : fallbackTitle
             let newBeamText = BeamText(text: alwaysATitle, attributes: attributes)
             let replaceText = ReplaceText(in: node.element.id, of: noteTitle, for: range, with: newBeamText)
-            newCursorPosition = range.lowerBound + newBeamText.wholeRange.count
+            newCursorPosition = range.lowerBound + newBeamText.wholeRange.count + 1
             rootNode.note?.cmdManager.run(command: replaceText, on: rootNode.cmdContext)
         } else if newUrl != nil {
             // edited only url

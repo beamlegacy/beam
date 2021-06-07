@@ -121,10 +121,6 @@ extension BeamText {
         var strong = false
         var emphasis = false
         var strikethrough = false
-        var color = BeamColor.Generic.text.nsColor
-//        var quoteLevel: Int
-//        var quoteTitle: String?
-//        var quoteSource: String?
         var source: String?
         var webLink: String?
         var internalLink: String?
@@ -134,7 +130,6 @@ extension BeamText {
         }
 
         for attribute in attributes {
-
             switch attribute {
             case .strong:
                 strong = true
@@ -143,10 +138,8 @@ extension BeamText {
             case .source(let link):
                 source = link
             case .link(let link):
-                color = BeamColor.Editor.link.nsColor
                 webLink = link
             case .internalLink(let link):
-                color = BeamColor.Editor.bidirectionalLink.nsColor
                 internalLink = link
             case .strikethrough:
                 strikethrough = true
@@ -154,25 +147,30 @@ extension BeamText {
         }
 
         stringAttributes[.font] = font(fontSize: fontSize, strong: strong, emphasis: emphasis, elementKind: elementKind)
-        stringAttributes[.foregroundColor] = color
+        stringAttributes[.foregroundColor] = BeamColor.Generic.text.nsColor
         if let link = webLink {
             if let url = URL(string: link) {
                 stringAttributes[.link] = url as NSURL
             } else if let url = URL(string: link.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)!) {
                 stringAttributes[.link] = url as NSURL
             }
-
-            stringAttributes[.underlineStyle] = NSUnderlineStyle.single.rawValue
-            stringAttributes[.underlineColor] = BeamColor.Editor.linkDecoration.nsColor
-            stringAttributes[.hoverUnderlineColor] = BeamColor.Editor.link.nsColor
+            if isCursorCloseToRange {
+                stringAttributes[.foregroundColor] = BeamColor.Editor.linkActive.nsColor
+                stringAttributes[.boxBackgroundColor] = BeamColor.Editor.linkActiveBackground.nsColor
+            } else {
+                stringAttributes[.foregroundColor] = BeamColor.Editor.link.nsColor
+                stringAttributes[.underlineStyle] = NSUnderlineStyle.single.rawValue
+                stringAttributes[.underlineColor] = BeamColor.Editor.linkDecoration.nsColor
+                stringAttributes[.hoverUnderlineColor] = BeamColor.Editor.link.nsColor
+            }
         } else if let link = internalLink {
             stringAttributes[.link] = link
-            stringAttributes[.underlineStyle] = NSUnderlineStyle.single.rawValue
+            stringAttributes[.foregroundColor] = BeamColor.Editor.bidirectionalLink.nsColor
             if isCursorCloseToRange {
                 stringAttributes[.boxBackgroundColor] = BeamColor.Editor.bidirectionalLinkBackground.nsColor
-                stringAttributes[.underlineColor] = NSColor.clear
             } else {
                 stringAttributes[.hoverUnderlineColor] = BeamColor.Editor.bidirectionalLink.nsColor
+                stringAttributes[.underlineStyle] = NSUnderlineStyle.single.rawValue
                 stringAttributes[.underlineColor] = BeamColor.Editor.bidirectionalUnderline.nsColor
             }
         }
@@ -199,8 +197,9 @@ extension BeamText {
         let imageName = "editor-url"
         guard let image = NSImage(named: imageName) else { return }
 
-        var color = BeamColor.Editor.linkDecoration.nsColor
-        if let mouseInt = mouseInteraction, mouseInt.type == .hovered, Self.isPositionOnLinkArrow(mouseInt.range.lowerBound, in: range) {
+        let hasBoxBackground = attributedString.attribute(.boxBackgroundColor, at: 0, effectiveRange: nil) != nil
+        var color = hasBoxBackground ? BeamColor.Editor.linkActive.nsColor : BeamColor.Editor.linkDecoration.nsColor
+        if !hasBoxBackground, let mouseInt = mouseInteraction, mouseInt.type == .hovered, Self.isPositionOnLinkArrow(mouseInt.range.lowerBound, in: range) {
             color = BeamColor.Editor.link.nsColor
         }
         let extentBuffer = UnsafeMutablePointer<ImageRunStruct>.allocate(capacity: 1)

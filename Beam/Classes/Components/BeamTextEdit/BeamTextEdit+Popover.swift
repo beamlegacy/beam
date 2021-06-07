@@ -100,12 +100,16 @@ extension BeamTextEdit {
               let node = focusedWidget as? TextNode else { return }
 
         dismissPopover()
-        let range = (cursorStartPosition + 1 - popoverPrefix)..<(rootNode.cursorPosition + popoverSuffix)
-        if leaveTextAsIs {
-            node.text.removeAttributes([.internalLink("")], from: range)
-        } else {
-            node.text.removeSubrange(range)
-            rootNode.cursorPosition = range.lowerBound
+        let start = cursorStartPosition + 1 - popoverPrefix
+        let end = rootNode.cursorPosition + popoverSuffix
+        if start <= end {
+            let range = start..<end
+            if leaveTextAsIs {
+                node.text.removeAttributes([.internalLink("")], from: range)
+            } else {
+                node.text.removeSubrange(range)
+                rootNode.cursorPosition = range.lowerBound
+            }
         }
         showOrHidePersistentFormatter(isPresent: true)
     }
