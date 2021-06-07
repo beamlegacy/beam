@@ -53,21 +53,21 @@ class NavigationCollectUITests: QuickSpec {
                     .matching(identifier: "TextNode")
             }
             
-            it("add links to journal in order") {
-                self.helper.tapCommand(.loadUITestPage1)
+            fit("add links to journal in order") {
+                self.helper.openTestPage(number: 1)
                 expect(self.app.staticTexts[titles[0]].waitForExistence(timeout: 10)) == true
                 self.helper.showJournal()
                 expect(self.journalChildren.element(matching: NSPredicate(format: "value = %@", titles[0])).firstMatch.waitForExistence(timeout: 2)) == true
                 expect(self.journalChildren.element(boundBy: 0).value as? String) == titles[0]
 
-                self.helper.tapCommand(.loadUITestPage2)
+                self.helper.openTestPage(number: 2)
                 expect(self.app.staticTexts[titles[1]].waitForExistence(timeout: 10)) == true
                 self.helper.showJournal()
                 expect(self.journalChildren.element(matching: NSPredicate(format: "value = %@", titles[1])).firstMatch.waitForExistence(timeout: 2)) == true
                 expect(self.journalChildren.element(boundBy: 0).value as? String) == titles[0]
                 expect(self.journalChildren.element(boundBy: 1).value as? String) == titles[1]
 
-                self.helper.tapCommand(.loadUITestPage3)
+                self.helper.openTestPage(number: 3)
                 expect(self.app.staticTexts[titles[2]].waitForExistence(timeout: 10)) == true
                 self.helper.showJournal()
                 expect(self.journalChildren.element(matching: NSPredicate(format: "value = %@", titles[2])).firstMatch.waitForExistence(timeout: 2)) == true
@@ -77,7 +77,7 @@ class NavigationCollectUITests: QuickSpec {
             }
 
             it("can navigate links in collected text") {
-                self.helper.tapCommand(.loadUITestPage3)
+                self.helper.openTestPage(number: 3)
 
                 let searchText = "Go to "
                 let linkText = "Cincinati Zoo"
@@ -134,7 +134,7 @@ class NavigationCollectUITests: QuickSpec {
             }
             describe("Shoot") {
                 it("dismis shootCardPicker by clicking on page") {
-                    self.helper.tapCommand(.loadUITestPage1)
+                    self.helper.openTestPage(number: 1)
                     let searchText = "Ultralight Beam, Kanye West"
                     let parent = self.app.webViews.containing(.staticText,
                                                               identifier: searchText).element
@@ -160,7 +160,7 @@ class NavigationCollectUITests: QuickSpec {
             }
             describe("Select") {
                 it("frame position placement") {
-                    self.helper.tapCommand(.loadUITestPage1)
+                    self.helper.openTestPage(number: 1)
                     let searchText = "Ultralight Beam, Kanye West"
                     let parent = self.app.webViews.containing(.staticText,
                                                               identifier: searchText).element
@@ -212,7 +212,7 @@ class NavigationCollectUITests: QuickSpec {
                 
             describe("Point") {
                 it("frame position placement") {
-                    self.helper.tapCommand(.loadUITestPage1)
+                    self.helper.openTestPage(number: 1)
                     let searchText = "Ultralight Beam, Kanye West"
                     let parent = self.app.webViews.containing(.staticText,
                                                               identifier: searchText).element
@@ -226,31 +226,28 @@ class NavigationCollectUITests: QuickSpec {
                     XCUIElement.perform(withKeyModifiers: .option) {
                         // While holding option
                         center.hover()
-                        self.helper.assertFramePositions(searchText: searchText, identifier: "PointFrame", message: "1")
+                        self.helper.assertFramePositions(searchText: searchText, identifier: "PointFrame")
                         // Zoom in
                         self.app.typeKey("+", modifierFlags: .command)
                         self.app.typeKey("+", modifierFlags: .command)
                         self.app.typeKey("+", modifierFlags: .command)
-//                        center.hover()
                         
-                        self.helper.assertFramePositions(searchText: searchText, identifier: "PointFrame", message: "2")
+                        self.helper.assertFramePositions(searchText: searchText, identifier: "PointFrame")
                         // Zoom out
                         self.app.typeKey("-", modifierFlags: .command)
                         self.app.typeKey("-", modifierFlags: .command)
                         self.app.typeKey("-", modifierFlags: .command)
-//                        center.hover()
                         
-                        self.helper.assertFramePositions(searchText: searchText, identifier: "PointFrame", message: "3")
+                        self.helper.assertFramePositions(searchText: searchText, identifier: "PointFrame")
                         // Scroll page
                         self.app.webViews.firstMatch.scroll(byDeltaX: 0, deltaY: -200)
-//                        center.hover()
 
-                        self.helper.assertFramePositions(searchText: searchText, identifier: "PointFrame", message: "4")
+                        self.helper.assertFramePositions(searchText: searchText, identifier: "PointFrame")
                         // Resize window
                         self.helper.tapCommand(.resizeWindowPortrait)
                         center.hover()
 
-                        self.helper.assertFramePositions(searchText: searchText, identifier: "PointFrame", message: "5")
+                        self.helper.assertFramePositions(searchText: searchText, identifier: "PointFrame")
                         // Shoot
                         center.click()
                         // Release option
