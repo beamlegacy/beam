@@ -37,7 +37,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var cookies: HTTPCookieStorage
     var documentManager: DocumentManager
     var downloadManager: DownloadManager = BeamDownloadManager()
-    var clusteringManager: ClusteringManager = ClusteringManager()
+    var clusteringManager: ClusteringManager?
     var scope = Set<AnyCancellable>()
 
     static var dataFolder: String {
@@ -101,16 +101,23 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
             try? self.indexer.append(element: element)
         }.store(in: &scope)
 
-        $tabToIndex.sink { [unowned self] tabToIndex in
-            guard let tabToIndex = tabToIndex else { return }
+        $tabToIndex.sink { [weak self] tabToIndex in
+            guard let self = self,
+                  let tabToIndex = tabToIndex else { return }
             self.index.append(document: tabToIndex.document)
-            let id = tabToIndex.tab.browsingTree.current.link
-            var parentId = tabToIndex.tab.browsingTree.current.parent?.link
-            if let parent = tabToIndex.tab.browsingTree.current.parent,
+
+            guard let clusteringManager = self.clusteringManager,
+                  let id = tabToIndex.currentTabTree?.current.link else { return }
+            var parentId = tabToIndex.currentTabTree?.current.parent?.link
+            if let parent = tabToIndex.currentTabTree?.current.parent,
                parent.events.contains(where: { $0.type == .searchBarNavigation }) {
                 parentId = nil
             }
-            self.clusteringManager.addPage(id: id, parentId: parentId, value: tabToIndex)
+            if let previousTabTree = tabToIndex.previousTabTree,
+               previousTabTree.current.events.contains(where: { $0.type == .openLinkInNewTab }) {
+                parentId = previousTabTree.current.link
+            }
+            clusteringManager.addPage(id: id, parentId: parentId, value: tabToIndex)
         }.store(in: &scope)
 
         NotificationCenter.default.addObserver(self,

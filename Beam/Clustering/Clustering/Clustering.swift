@@ -245,7 +245,7 @@ public class Cluster {
         }
         return clusterized
     }
-    
+
     public func changeCandidate(to candidate: Int, completion: @escaping (Result<[[UInt64]], Error>) -> Void) {
         myQueue.async {
             self.candidate = candidate

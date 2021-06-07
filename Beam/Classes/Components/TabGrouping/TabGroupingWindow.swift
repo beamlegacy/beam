@@ -11,13 +11,14 @@ import Combine
 import Clustering
 
 class TabGroupingWindow: NSWindow, NSWindowDelegate {
-    init(contentRect: NSRect, data: BeamData) {
+
+    init(contentRect: NSRect, clusteringManager: ClusteringManager) {
         super.init(contentRect: contentRect,
                    styleMask: [.titled, .closable, .miniaturizable, .texturedBackground, .resizable, .fullSizeContentView],
                    backing: .buffered,
                    defer: false)
         title = "Tab Grouping"
-        let tabGroupingContentView = TabGroupingContentView(clusteringManager: data.clusteringManager)
+        let tabGroupingContentView = TabGroupingContentView(clusteringManager: clusteringManager)
 
         contentView = BeamHostingView(rootView: tabGroupingContentView)
         isMovableByWindowBackground = false
@@ -26,5 +27,6 @@ class TabGroupingWindow: NSWindow, NSWindowDelegate {
 
     deinit {
         AppDelegate.main.tabGroupingWindow = nil
+        AppDelegate.main.data.clusteringManager = nil
     }
 }

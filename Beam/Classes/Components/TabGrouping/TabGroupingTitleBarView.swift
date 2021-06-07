@@ -8,22 +8,23 @@
 import SwiftUI
 
 struct TabGroupingTitleBarView: View {
-    @State private var tagGroupingMethod = 0
+    @ObservedObject var clusteringManager: ClusteringManager
 
     var body: some View {
         VStack {
-            Picker("", selection: $tagGroupingMethod) {
-                 Text("Gil").tag(0)
-                 Text("Julien").tag(1)
-                 Text("Paul").tag(2)
-             }
-             .pickerStyle(SegmentedPickerStyle())
-         }
+            Picker("", selection: $clusteringManager.selectedTabGroupingCandidate) {
+                Text("Candidate 1").tag(1)
+                Text("Candidate 2").tag(2)
+                Text("Candidate 3").tag(3)
+            }.labelsHidden()
+            .pickerStyle(SegmentedPickerStyle())
+            .disabled(clusteringManager.isClustering)
+        }
     }
 }
 
 struct TabGroupingTitleBarView_Previews: PreviewProvider {
     static var previews: some View {
-        TabGroupingTitleBarView()
+        TabGroupingTitleBarView(clusteringManager: ClusteringManager())
     }
 }

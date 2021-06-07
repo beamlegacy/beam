@@ -8,10 +8,12 @@
 import Foundation
 import Combine
 import SwiftSoup
+import BeamCore
 
 struct TabInformation {
     var url: URL
-    var tab: BrowserTab
+    weak var currentTabTree: BrowsingTree?
+    weak var previousTabTree: BrowsingTree?
     var document: IndexDocument
     var textContent: String
 }
@@ -42,10 +44,11 @@ class BrowserTabsManager: ObservableObject {
             self.delegate?.tabsManagerDidUpdateTabs(tabs)
         }
     }
-
+    private weak var latestCurrentTab: BrowsingTree?
     @Published var currentTab: BrowserTab? {
         didSet {
             if tabsAreVisible {
+                latestCurrentTab = oldValue?.browsingTree
                 oldValue?.switchToOtherTab()
                 currentTab?.startReading()
             }
@@ -97,9 +100,11 @@ class BrowserTabsManager: ObservableObject {
                     guard let doc = try? SwiftSoup.parse(read.content, url.absoluteString) else { return }
                     text = html2Text(url: url, doc: doc)
 
-                    DispatchQueue.main.async { [unowned self] in
+                    DispatchQueue.main.async { [weak self] in
+                        guard let self = self else { return }
                         let indexDocument = IndexDocument(source: url.absoluteString, title: read.title, contents: text)
-                        let tabInformation = TabInformation(url: url, tab: tab, document: indexDocument, textContent: text)
+
+                        let tabInformation: TabInformation? = TabInformation(url: url, currentTabTree: currentTab?.browsingTree, previousTabTree: self.latestCurrentTab, document: indexDocument, textContent: text)
                         self.data.tabToIndex = tabInformation
                     }
                 }
