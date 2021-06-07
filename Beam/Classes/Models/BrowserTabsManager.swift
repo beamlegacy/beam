@@ -106,6 +106,7 @@ class BrowserTabsManager: ObservableObject {
 
                         let tabInformation: TabInformation? = TabInformation(url: url, currentTabTree: currentTab?.browsingTree, previousTabTree: self.latestCurrentTab, document: indexDocument, textContent: text)
                         self.data.tabToIndex = tabInformation
+                        self.latestCurrentTab = nil
                     }
                 }
             }
