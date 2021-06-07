@@ -34,8 +34,7 @@ class BeamMessageHandler<T: RawRepresentable & CaseIterable> : NSObject, WKScrip
             let cssCode = loadFile(from: cssFileName!, fileType: "css")
             config.addCSS(source: cssCode, when: .atDocumentEnd)
         }
-        let jsCode = "exports={};"  // Hack to avoid commonJS code generation bug
-                + loadFile(from: jsFileName, fileType: "js")
+        let jsCode = loadFile(from: jsFileName, fileType: "js")
         config.addJS(source: jsCode, when: jsCodePosition)
     }
 
