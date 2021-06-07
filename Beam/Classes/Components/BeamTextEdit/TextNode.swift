@@ -1030,7 +1030,7 @@ public class TextNode: ElementNode {
     }
 
     private func buildAttributedString() -> NSAttributedString {
-        if elementText.isEmpty {
+        if elementText.isEmpty && !isFocused && !editor.hasFocus {
             return buildAttributedString(for: placeholder).addAttributes([NSAttributedString.Key.foregroundColor: BeamColor.Generic.placeholder.cgColor])
         }
         return buildAttributedString(for: elementText)
