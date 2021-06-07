@@ -40,6 +40,22 @@ class BeamUITestsHelper {
             }
         }
     }
+    
+    func openTestPage(number: CGFloat) {
+        switch number {
+        case 1:
+            tapCommand(.loadUITestPage1)
+        case 2:
+            tapCommand(.loadUITestPage2)
+        case 3:
+            tapCommand(.loadUITestPage3)
+        default:
+            tapCommand(.loadUITestPage1)
+        }
+        
+        let centerOfPage = self.app.webViews.element.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.1))
+        centerOfPage.hover()
+    }
 
     func showLogs() {
         let menu = XCUIApplication().menuItems["Show Logs"]
