@@ -101,7 +101,7 @@ class PointAndShootUI: ObservableObject {
                                                     numberOfElements: 1, isText: true)
     }
 
-    func clear() {
+    func clearShoots() {
         groupsUI.removeAll()
     }
 

@@ -3,6 +3,7 @@ import { BeamCollectedQuote, BeamQuoteId, BeamRange } from "./BeamTypes"
 import {BeamHTMLElement} from "./BeamTypes"
 
 export interface PointAndShootUI extends WebEventsUI {
+  hidePoint()
   /**
    * Calculate mouseLocation relative to element
    *
@@ -21,7 +22,7 @@ export interface PointAndShootUI extends WebEventsUI {
    * @param y {number}
    * @memberof PointAndShootUI
    */
-  point(quoteId: string, el: BeamHTMLElement, x: number, y: number)
+  point(quoteId: string, el: BeamHTMLElement, x: number, y: number, callback)
   /**
    * Unselect point element
    *

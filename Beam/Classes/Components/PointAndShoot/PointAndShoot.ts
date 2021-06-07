@@ -144,14 +144,28 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
    * @param y {number}
    */
   point(el, x, y) {
+    // Before creating new point, unpoint
+    if (this.pointedTarget) {
+      this.unpoint(this.pointedTarget)
+    }
+    
+    // Only create point if no active selection on page
     if (!this.hasSelection()) {
-      this.log("KeyDown sending this.ui.point")
       const quoteId = el.dataset[this.datasetKey]
-      this.ui.point(quoteId, el, x, y)
+      this.pointedTarget = { el, quoteId }
+      this.ui.point(quoteId, el, x, y, () => {
+        // if point gets canceled clear pointedTarget element
+        this.pointedTarget = null
+      })
     }
   }
 
   /**
+   * Disables / clears pointing UI
+   *
+   * @param {*} [el=this.pointingEv.target]
+   * @return {*} 
+   * @memberof PointAndShoot
    */
   unpoint(el = this.pointingEv.target) {
     const changed = this.isPointing()
@@ -159,7 +173,6 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
       this.ui.unpoint(el)
       this.pointedTarget = null
     }
-    // this.log("unpoint", changed ? "changed" : "did not change")
     return changed
   }
 
@@ -213,47 +226,47 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
    */
   onMouseMove(ev) {
     if (!this.hasSelection()) {
-      const withOption = this.isOnlyAltKey(ev)
-      // this.log("onMouseMove", withOption)
       this.pointingEv = ev
-      // if (withOption) { // Don't unpoint if no alt, as for some reason it returns false when always pressed
+      // Enable pointing if alt is pressed
+      const withOption = this.isOnlyAltKey(ev)
       this.setPointing(withOption)
-      // }
-      if (this.isPointing()) {
-        ev.preventDefault()
-        ev.stopPropagation()
-        if (this.pointedTarget?.el !== this.pointingEv.target) {
-          if (this.pointedTarget) {
-            this.log("pointed is changing from", this.pointedTarget.el, "to", this.pointingEv.target)
-            this.unpoint(this.pointedTarget) // Remove previous
-          }
-          this.pointedTarget = {
-            el: this.pointingEv.target,
-            quoteId: this.pointingEv.target.dataset[this.datasetKey],
-          }
-          this.point(this.pointedTarget.el, ev.clientX, ev.clientY)
-          let collected = this.pointedTarget.quoteId
-          if (collected) {
-            this.showStatus(this.pointedTarget)
-          } else {
-            this.hideStatus()
-          }
-        } else {
-          this.hidePopup()
-        }
-      } else {
+      if (!this.isPointing()) {
         this.hideStatus()
+        return
       }
+
+      ev.preventDefault()
+      ev.stopPropagation()
+
+      this.point(this.pointingEv.target, ev.clientX, ev.clientY)
+      this.displayStatus(this.pointingEv.target)
     }
   }
 
   /**
-   * @param el {HTMLElement}
+   * Show the status when poitedTarget is collected note
+   *
+   * @memberof PointAndShoot
    */
-  showStatus(el) {
+  displayStatus(el) {
     const data = el.dataset[this.datasetKey]
-    const collected = data
-    this.ui.showStatus(el, collected)
+    if (Boolean(data)) {
+      this.showStatus(el, data)
+      return
+    }
+
+    this.hideStatus()
+  }
+
+  /**
+   * Show
+   *
+   * @param {HTMLElement} el 
+   * @param {*} data
+   * @memberof PointAndShoot
+   */
+  showStatus(el, data) {
+    this.ui.showStatus(el, data)
   }
 
   /**
@@ -375,37 +388,43 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
     if (this.status != newStatus) {
       this.status = newStatus
       this.ui.setStatus(newStatus)
+      this.updateDebugStatusUI()
+    }
+  }
 
-      if (PNS_STATUS) {
-        let debugEl = this.win.document.querySelector("#debug-beam")
+  /**
+   * Re-draws the PNS debug status UI with updated value
+   *
+   * @memberof PointAndShoot
+   */
+  updateDebugStatusUI() {
+    if (PNS_STATUS) {
+      let debugEl = this.win.document.querySelector("#debug-beam")
 
-        if (debugEl) {
-          debugEl.innerText = `JS ${this.status}`
-        }
+      if (debugEl) {
+        debugEl.innerText = `JS ${this.status}`
       }
     }
   }
 
   /**
+   * Enable pointing based on boolean param. Only permits going from  `status.none` to `status.pointing`.
+   * 
    * @param c {boolean}
    */
   setPointing(c) {
-    let changed
     if (c) {
-      changed = this.status === BeamPNSStatus.none
-      if (changed) {
+      if (this.status === BeamPNSStatus.none) {
         this.setStatus(BeamPNSStatus.pointing)
       }
     } else {
-      changed = this.status !== BeamPNSStatus.none
-      if (changed) {
+      if (this.status !== BeamPNSStatus.none) {
         this.pointedTarget = null
         if (this.isPointing()) {
           this.setStatus(BeamPNSStatus.none)
         }
       }
     }
-    return changed
   }
 
   isOnlyAltKey(ev) {
@@ -414,7 +433,6 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
   }
 
   onKeyDown(ev) {
-    this.log("onKeyDown", ev.key, this.isOnlyAltKey(ev))
     if (this.isOnlyAltKey(ev)) {
       if (this.hasSelection()) {
         // Enable shooting mode

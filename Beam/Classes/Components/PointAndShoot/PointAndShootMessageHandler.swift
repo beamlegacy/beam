@@ -15,6 +15,10 @@ enum PointAndShootMessages: String, CaseIterable {
      */
     case pointAndShoot_point
     /**
+     Clears point UI without changing any stored state
+     */
+    case pointAndShoot_hidePoint
+    /**
      Selection of text or block
      */
     case pointAndShoot_select
@@ -55,7 +59,7 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
             positions.framesInfo.removeAll()
 
         case PointAndShootMessages.pointAndShoot_point.rawValue:
-            guard webPage.pointAndShootAllowed else { return }
+            guard webPage.pointAndShootAllowed == true else { return }
             guard let dict = pnsBody,
                   let href = dict["href"] as? String,
                   let areas = areasValue(of: dict, from: webPage),
@@ -70,6 +74,10 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
                 pointAndShoot.point(target: target)
                 Logger.shared.logInfo("Web block point: \(pointArea)", category: .web)
             }
+
+        case PointAndShootMessages.pointAndShoot_hidePoint.rawValue:
+            guard webPage.pointAndShootAllowed == true else { return }
+            pointAndShoot.hidePoint()
 
         case PointAndShootMessages.pointAndShoot_shoot.rawValue:
             guard webPage.pointAndShootAllowed == true else { return }
