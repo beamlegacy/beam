@@ -11,7 +11,9 @@ class BeamUITestsMenuGenerator {
         case .deleteLogs: deleteLogs()
         case .resizeWindowLandscape: resizeWindowLandscape()
         case .resizeWindowPortrait: resizeWindowPortrait()
-        case .loadUITestPage: loadUITestsPage()
+        case .loadUITestPage1: loadUITestsPage(page: 1)
+        case .loadUITestPage2: loadUITestsPage(page: 2)
+        case .loadUITestPage3: loadUITestsPage(page: 3)
         default: break
         }
     }
@@ -40,8 +42,8 @@ class BeamUITestsMenuGenerator {
         try? AppDelegate.main.data.indexer.clear()
     }
 
-    private func loadUITestsPage() {
-        if let localUrl = Bundle.main.url(forResource: "index", withExtension: "html", subdirectory: nil) {
+    private func loadUITestsPage(page: Int) {
+        if let localUrl = Bundle.main.url(forResource: "NavigationCollectUITests-\(page)", withExtension: "html", subdirectory: nil) {
             _ = AppDelegate.main.window.state.createTab(withURL: localUrl, originalQuery: nil)
         }
     }

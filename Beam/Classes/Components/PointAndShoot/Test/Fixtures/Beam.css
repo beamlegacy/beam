@@ -1,0 +1,172 @@
+/* Light */
+:root {
+  /* --Accent: -apple-system-control-accent;
+  --Accent-Light: -apple-system-selected-text-background; */
+  --Background: #fcfcfc;
+  --Background-Light: #c5c5c57e;
+  --Color: #3d3d3d;
+  --Niobium: #393e47;
+  --Corduroy: #797b80;
+  --Light-Stone-Gray: #a6a8ab;
+  --Alpha-Gray: #c6c8cc;
+  --Mercury-Light: #f0f0f2;
+  --Mercury-Dark: #fafafa;
+  --Beam: #3700ff;
+  --Beam-Light: rgba(55, 0, 255, 0.08);
+  --Bluetiful: #1179cf;
+  --Charmed-Green: #0e8763;
+  --Sanskrit: #ff9900;
+  --Sanskrit: #b00230;
+}
+
+@media (prefers-color-scheme: dark) {
+  /* Dark */
+  :root {
+    --Background: #1e1e1e;
+    --Background-Light: #020202;
+    --Color: #ededed;
+    --Niobium: #7373ff;
+    --Corduroy: #ededed;
+    --Light-Stone-Gray: #a4a4a4;
+    --Alpha-Gray: #737373;
+    --Mercury-Light: #4d4d4d;
+    --Mercury-Dark: #2a2a2e;
+    --Beam: #7373ff;
+    --Beam-Light: rgba(55, 0, 255, 0.14);
+    --Bluetiful: #3a96cf;
+    --Charmed-Green: #12b282;
+    --Sanskrit: #ffb240;
+    --Sanskrit: #cf3a61;
+  }
+}
+
+html {
+  color: var(--Color);
+  background: var(--Background);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, antarell, "Open Sans",
+    "Helvetica Neue", sans-serif;
+  line-height: 1.6;
+  font-size: 16px;
+}
+
+body {
+  padding: 0 1rem;
+}
+
+a {
+  border-radius: 4px;
+  padding: 0 .2rem;
+}
+
+img {
+  width: 100%;
+}
+
+img.thumb {
+  width: 80px;
+}
+
+.grid {
+  display: grid;
+  grid-template-areas:
+  'notice notice'
+  'introduction introduction'
+  'article aside';
+  grid-template-columns: minmax(20ch, 70ch) minmax(20ch, 45ch);
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+.notice {
+  display: grid;
+  position: relative;
+  grid-area: notice;
+}
+
+details {
+  background-color: var(--Background-Light);
+  margin: 1rem 1rem 1rem auto;
+  border-radius: 4px;
+  max-width: 60ch;
+}
+
+@media screen and (max-width: 600px) {
+  details {
+    max-width: unset;
+    width: 100%;
+  }
+}
+
+details summary {
+  user-select: none;
+  cursor: pointer;
+  background-color: transparent;
+  padding: 0.4rem 0.7rem 0.2rem;
+  font-size: 0.8rem;
+  transition-timing-function: cubic-bezier(0.165, 0.84, 0.44, 1);
+  transition-duration: 200ms;
+  transition-property: background-color;
+}
+
+details p {
+  font-size: 0.8rem;
+  padding: 0rem 0.7rem 0.4rem;
+  margin: 0;
+}
+
+details summary:hover {
+  background-color: var(--Background-Light);
+  transition-timing-function: cubic-bezier(0.165, 0.84, 0.44, 1);
+  transition-duration: 200ms;
+  transition-property: background-color;
+}
+
+.introduction {
+  max-width: 70ch;
+  grid-area: introduction;
+}
+
+article {
+  grid-area: article;
+}
+
+article p:first-of-type {
+  margin-top: 0;
+}
+
+aside {
+  grid-area: aside;
+}
+
+aside .verse {
+  margin-bottom: 1rem;
+}
+
+aside p {
+  margin: 0;
+  padding: 0;
+}
+
+h2 {
+  font-size: 3rem;
+  line-height: 1.2;
+  margin: 0;
+}
+
+blockquote {
+  font-size: 2rem;
+  font-weight: bold;
+  line-height: 1.3;
+  color: var(--Background);
+}
+
+figure {
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+figcaption {
+  background-color: var(--Background-Light);
+  padding: .4rem .7rem;
+  font-size: .8rem;
+}
