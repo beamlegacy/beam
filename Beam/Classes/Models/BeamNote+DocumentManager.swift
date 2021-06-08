@@ -95,7 +95,7 @@ extension BeamNote: BeamNoteDocument {
 
     public func save(documentManager: DocumentManager, completion: ((Result<Bool, Error>) -> Void)? = nil) {
         guard version == savedVersion else {
-            Logger.shared.logError("Still wating for the result from the last save [\(title) {\(id)} - saved version \(savedVersion) / current \(version)]", category: .document)
+            Logger.shared.logError("Still waiting for the result from the last save [\(title) {\(id)} - saved version \(savedVersion) / current \(version)]", category: .document)
             completion?(.failure(BeamNoteError.saveAlreadyRunning))
             return
         }

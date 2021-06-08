@@ -106,6 +106,7 @@ public class BeamNote: BeamElement {
     /// This is used and needed for copy&paste atm
     public override func deepCopy(withNewId: Bool, selectedElements: [BeamElement]?) -> BeamNote {
         let note = BeamNote(title: title)
+        note.id = withNewId ? UUID() : id
         note.type = type
         note.searchQueries = searchQueries
         note.visitedSearchResults = visitedSearchResults
@@ -117,6 +118,8 @@ public class BeamNote: BeamElement {
         note.kind = kind
         note.childrenFormat = childrenFormat
         note.query = query
+        note.savedVersion = savedVersion
+        note.version = version
         if !browsingSessions.isEmpty {
             for browsingSession in browsingSessions {
                 note.browsingSessions.append(browsingSession.deepCopy())

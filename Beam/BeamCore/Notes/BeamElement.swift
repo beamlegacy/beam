@@ -104,7 +104,7 @@ public enum ElementChildrenFormat: String, Codable {
 
 // Editable Text Data:
 open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, CustomDebugStringConvertible {
-    @Published open private(set) var id = UUID() { didSet { change(.meta) } }
+    @Published open var id = UUID() { didSet { change(.meta) } }
     @Published open var text = BeamText() { didSet { change(.text) } }
     @Published open var open = true { didSet { change(.meta) } }
     @Published open var children = [BeamElement]() { didSet { change(.tree) } }
