@@ -79,9 +79,6 @@ class NodeSelection {
 
     func extendUp() {
         guard let previousVisibleNode = end.previousVisibleNode(ElementNode.self) else { return }
-        if let textNode = previousVisibleNode as? TextNode {
-            guard textNode.placeholder.isEmpty || !textNode.text.isEmpty else { return }
-        }
         if isSelectingProxy {
             guard ((previousVisibleNode as? ProxyNode) != nil), previousVisibleNode.element.note == start.element.note, isSelectingProxy else { return }
         }
@@ -162,9 +159,6 @@ class NodeSelection {
     func appendChildren(of node: ElementNode) {
         for child in node.children {
             guard let child = child as? ElementNode else { continue }
-            if let textNode = child as? TextNode {
-                guard textNode.placeholder.isEmpty || !textNode.text.isEmpty else { continue }
-            }
             child.selectionLayerPosX = minOffset - child.offsetInRoot.x
             child.selectedAlone = false
             child.selected = true
