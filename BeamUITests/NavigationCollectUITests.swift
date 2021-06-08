@@ -15,6 +15,8 @@ import Nimble
 #endif
 import BeamCore
 
+private let RUN_PNS_TEST = false
+
 class NavigationCollectUITests: QuickSpec {
     let app = XCUIApplication()
     var helper: BeamUITestsHelper!
@@ -81,7 +83,6 @@ class NavigationCollectUITests: QuickSpec {
 
                 let searchText = "Go to "
                 let linkText = "Cincinati Zoo"
-                let fullText = searchText + linkText
 
                 // Get locations of the text
                 let parent = self.app.webViews.containing(.staticText, identifier: searchText).element
@@ -105,6 +106,8 @@ class NavigationCollectUITests: QuickSpec {
                 self.helper.addNote()
                 // Confirm text is saved in Journal
                 self.helper.showJournal()
+                let title2Predicate = NSPredicate(format: "value = %@", titles[2])
+                expect(self.journalChildren.element(matching: title2Predicate).waitForExistence(timeout: 4)) == true
                 expect(self.journalChildren.count) == 2
                 expect(self.journalChildren.element(boundBy: 0).value as? String) == titles[2]
                 expect((self.journalChildren.element(boundBy: 1).value as? String)?.contains(linkText)) == true
@@ -116,12 +119,17 @@ class NavigationCollectUITests: QuickSpec {
                 expect(lionLink.waitForExistence(timeout: 4)) == true
                 lionLink.tap()
                 self.helper.showJournal()
+                let seaLionLink = "California sea lion - Wikipedia"
+                let seaLionPredicate = NSPredicate(format: "value = %@", seaLionLink)
+                expect(self.journalChildren.element(matching: seaLionPredicate).waitForExistence(timeout: 4)) == true
                 expect(self.journalChildren.count) == 3
-                expect(self.journalChildren.element(boundBy: 2).value as? String) == "California sea lion - Wikipedia"
+                expect(self.journalChildren.element(boundBy: 2).value as? String) == seaLionLink
             }
         }
-        
+
         context("PNS") {
+            guard RUN_PNS_TEST else { return }
+
             beforeEach {
                 self.manualBeforeTestSuite()
                 self.helper.tapCommand(.destroyDB)
