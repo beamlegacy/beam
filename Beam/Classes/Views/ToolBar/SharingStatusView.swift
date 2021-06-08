@@ -120,14 +120,15 @@ class SharingStatusViewModel: ObservableObject {
     }
 
     func showShareMenu() {
-        var items: [[ContextMenuItem]] = []
+        var items: [ContextMenuItem] = []
         if note.isPublic {
-            items.append([
+            items.append(contentsOf: [
                 ContextMenuItem(title: "Copy Link", action: copyLink),
-                ContextMenuItem(title: "Invite...", action: nil)
+                ContextMenuItem(title: "Invite...", action: nil),
+                ContextMenuItem.separator(),
             ])
         }
-        items.append([ContextMenuItem(title: note.isPublic ? "Unpublish" : "Publish", action: togglePublish)])
+        items.append(ContextMenuItem(title: note.isPublic ? "Unpublish" : "Publish", action: togglePublish))
         let menuView = ContextMenuFormatterView(items: items, direction: .top) {
             ContextMenuPresenter.shared.dismissMenu()
         }

@@ -537,10 +537,12 @@ public extension CALayer {
 
         if option || shift {
             rootNode.insertNewline()
+            hideInlineFormatter()
         } else if let popover = popover {
             popover.selectItem()
             return
-        } else {
+        } else if inlineFormatter?.pressEnter() != true {
+            hideInlineFormatter()
             cmdManager.beginGroup(with: "Insert line")
             defer {
                 cmdManager.endGroup()
@@ -1466,32 +1468,29 @@ public extension CALayer {
     override public func moveUp(_ sender: Any?) {
         if popover != nil {
             updatePopover(with: .moveUp)
-        } else {
+        } else if inlineFormatter?.moveDown() != true {
             rootNode.moveUp()
-        }
+            if inlineFormatter != nil {
+                hideInlineFormatter()
+            }
 
-        if inlineFormatter != nil {
-            hideInlineFormatter()
-        }
-
-        if persistentFormatter != nil {
-            detectFormatterType()
+            if persistentFormatter != nil {
+                detectFormatterType()
+            }
         }
     }
 
     override public func moveDown(_ sender: Any?) {
         if popover != nil {
             updatePopover(with: .moveDown)
-        } else {
+        } else if inlineFormatter?.moveDown() != true {
             rootNode.moveDown()
-        }
-
-        if inlineFormatter != nil {
-            hideInlineFormatter()
-        }
-
-        if persistentFormatter != nil {
-            detectFormatterType()
+            if inlineFormatter != nil {
+                hideInlineFormatter()
+            }
+            if persistentFormatter != nil {
+                detectFormatterType()
+            }
         }
     }
 

@@ -187,5 +187,9 @@ extension BeamTextEdit {
             }
         }
         cmdManager.endGroup()
+
+        if lastInserted?.elementText.linkRanges.count == 1, let linkRange = lastInserted?.elementText.linkRanges.first {
+            showLinkPasteMenu(for: linkRange)
+        }
     }
 }

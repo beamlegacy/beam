@@ -11,7 +11,7 @@ import SwiftUI
 class ContextMenuFormatterView: FormatterView {
 
     private var hostView: NSHostingView<ContextMenuView>?
-    private var items: [[ContextMenuItem]] = []
+    private var items: [ContextMenuItem] = []
     private var subviewModel = ContextMenuViewModel()
     private var direction: Edge = .bottom
     private var onSelectMenuItem: (() -> Void)?
@@ -20,7 +20,7 @@ class ContextMenuFormatterView: FormatterView {
         return ContextMenuView.idealSizeForItems(items)
     }
 
-    convenience init(items: [[ContextMenuItem]], direction: Edge = .bottom, onSelectHandler: (() -> Void)? = nil) {
+    convenience init(items: [ContextMenuItem], direction: Edge = .bottom, onSelectHandler: (() -> Void)? = nil) {
         self.init(frame: CGRect.zero)
         self.viewType = .inline
         self.items = items
@@ -58,4 +58,51 @@ class ContextMenuFormatterView: FormatterView {
         self.layer?.masksToBounds = false
     }
 
+    private func selectNextItem() {
+        guard subviewModel.selectedIndex != items.count - 1 else {
+            subviewModel.selectedIndex = nil
+            return
+        }
+        var index = (subviewModel.selectedIndex ?? -1) + 1
+        index = index.clamp(0, items.count - 1)
+        while items[index].type == .separator && index < items.count - 1 {
+            index += 1
+        }
+        subviewModel.selectedIndex = index
+    }
+
+    private func selectPreviousItem() {
+        guard subviewModel.selectedIndex != 0 else {
+            subviewModel.selectedIndex = nil
+            return
+        }
+        var index = (subviewModel.selectedIndex ?? (items.count)) - 1
+        index = index.clamp(0, items.count - 1)
+        while items[index].type == .separator && index < items.count - 1 {
+            index -= 1
+        }
+        subviewModel.selectedIndex = index
+    }
+
+    func triggerAction(for item: ContextMenuItem) {
+        item.action?()
+        onSelectMenuItem?()
+    }
+
+    // MARK: - keyboard actions
+    override func moveDown() -> Bool {
+        selectNextItem()
+        return subviewModel.selectedIndex != nil
+    }
+
+    override func moveUp() -> Bool {
+        selectPreviousItem()
+        return subviewModel.selectedIndex != nil
+    }
+
+    override func pressEnter() -> Bool {
+        guard let selectedIndex = subviewModel.selectedIndex else { return false }
+        triggerAction(for: items[selectedIndex])
+        return true
+    }
 }
