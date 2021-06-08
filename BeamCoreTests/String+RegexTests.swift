@@ -48,4 +48,3 @@ class String_RegexTests: XCTestCase {
     }
 
 }
-//file:///Users/remi/Projects/remstos.github.io/index.html
