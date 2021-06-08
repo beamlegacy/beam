@@ -153,12 +153,18 @@ class FileStorageMock: BeamFileStorage {
 class DownloadManagerMock: DownloadManager {
     var events: [String] = []
 
+    var fractionCompleted: Double = 0.0
+    var overallProgress: Progress = Progress()
+    var downloads: [Download] = []
+
     func downloadURLs(_ urls: [URL], headers: [String: String], completion: @escaping ([DownloadManagerResult]) -> Void) {}
 
     func downloadURL(_ url: URL, headers: [String: String], completion: @escaping (DownloadManagerResult) -> Void) {
         events.append("downloaded \(url) with headers \(headers)")
         completion(DownloadManagerResult.binary(data: Data([0x01, 0x02, 0x03]), mimeType: "image/png", actualURL: URL(string: "https://webpage.com/image.png")!))
     }
+
+    func downloadFile(at url: URL, headers: [String: String], destinationFoldedURL: URL?) {}
 
     func waitForDownloadURL(_ url: URL, headers: [String: String]) -> DownloadManagerResult? { fatalError("waitForDownloadURL(_:headers:) has not been implemented") }
 }
