@@ -26,10 +26,8 @@ struct Vector: CustomStringConvertible, Equatable {
 }
 
 func == (left: Vector, right: Vector) -> Bool {
-  for idx in 0..<left.length {
-    if left.data[idx] != right.data[idx] {
+  for idx in 0..<left.length where left.data[idx] != right.data[idx] {
       return false
-    }
   }
   return true
 }
@@ -43,7 +41,8 @@ func + (left: Vector, right: Vector) -> Vector {
 }
 
 func += (left: inout Vector, right: Vector) {
-  left = left + right
+    // swiftlint:disable:next shorthand_operator
+    left = left + right
 }
 
 func - (left: Vector, right: Vector) -> Vector {
@@ -55,7 +54,8 @@ func - (left: Vector, right: Vector) -> Vector {
 }
 
 func -= (left: inout Vector, right: Vector) {
-  left = left - right
+    // swiftlint:disable:next shorthand_operator
+    left = left - right
 }
 
 func / (left: Vector, right: Double) -> Vector {
@@ -67,9 +67,9 @@ func / (left: Vector, right: Double) -> Vector {
 }
 
 func /= (left: inout Vector, right: Double) {
-  left = left / right
+    // swiftlint:disable:next shorthand_operator
+    left = left / right
 }
-
 
 class KMeans<Label: Hashable> {
   let numCenters: Int
@@ -100,7 +100,7 @@ class KMeans<Label: Hashable> {
     let zeroVector = Vector([Double](repeating: 0, count: points[0].length))
 
     // Randomly take k objects from the input data to make the initial centroids.
-    var centers = reservoirSample(points, k: numCenters)
+    var centers = chooseCenters(points, k: numCenters)
 
     var centerMoveDist = 0.0
     repeat {
@@ -163,4 +163,35 @@ func reservoirSample<T>(_ samples: [T], k: Int) -> [T] {
     }
   }
   return result
+}
+
+func allDistances(of points: [Vector], from: Int) -> [Double] {
+    var result = [Double]()
+    for point in points {
+        result.append(points[from].distanceTo(point))
+    }
+    return result
+}
+
+// Pick k centers through KMeans++
+func chooseCenters(_ samples: [Vector], k: Int) -> [Vector] {
+    let firstCenter = Int(arc4random_uniform(UInt32(samples.count)))
+    var centers = [samples[firstCenter]]
+    var distances = allDistances(of: samples, from: firstCenter)
+    for _ in 1..<k {
+        var weights = distances.map({ $0 * $0 })
+        let weightsSum = weights.reduce(0, +)
+        weights = weights.map({ $0 / weightsSum })
+        weights = weights.reduce(into: []) { newWeights, value in
+            newWeights.append((newWeights.last ?? 0) + value)
+        }
+        // Hope to god that random is with uniform distribution
+        if let newCenterValue = weights.first(where: { $0 > Double.random(in: 0...1) }),
+           let newCenter = weights.firstIndex(of: newCenterValue) {
+            centers.append(samples[newCenter])
+            let newDistances = allDistances(of: samples, from: newCenter)
+            distances = zip(distances, newDistances).map({ min($0.0, $0.1) })
+        }
+    }
+    return centers
 }

@@ -29,7 +29,7 @@ public class Cluster {
         case matrixNotSquare
         case pageOutOfDimensions
     }
-    
+
     enum CandidateError: Error {
         case unknownCandidte
     }
@@ -95,20 +95,21 @@ public class Cluster {
     var pageIDs = [UInt64]()
     var navigationMatrix = NavigationMatrix()
     var adjacencyMatrix = SimilarityMatrix()
-
+// swiftlint:disable:next cyclomatic_complexity function_body_length
     func clusterize() throws -> [Int] {
         guard self.adjacencyMatrix.matrix.rows >= 2 else {
             return zeros(1, self.adjacencyMatrix.matrix.rows).flat.map { Int($0) }
         }
         let d = reduce(self.adjacencyMatrix.matrix, sum, .Row)
         let d1: [Double] = d.map { elem in
-            if elem == 0.0  {return 0.0 } else { return 1/elem }
+            if elem == 0.0 { return 0.0 } else { return 1 / elem }
         }
+        let D = diag(d)
         let D1 = diag(d1)
         // This naming makes sense as D1 is 1/D
-        let laplacianNn = D1 - self.adjacencyMatrix.matrix
+        let laplacianNn = D - self.adjacencyMatrix.matrix
         // This is the 'simplest' non-normalized Laplacian
-        
+
         var laplacian: Matrix
         switch self.candidate { // This swith takes care of the choice of Laplacian
         case 1: // Non-normalised graph Laplacian
@@ -146,7 +147,7 @@ public class Cluster {
         default:
             throw CandidateError.unknownCandidte
         }
-        
+
         guard numClusters > 1 else {
             return zeros(1, self.adjacencyMatrix.matrix.rows).flat.map { Int($0) }
         }
@@ -168,7 +169,7 @@ public class Cluster {
                 predictedLabels.append(kmeans.fit(point))
             }
             tentatives += 1
-        } while Set(predictedLabels).count < eigenVals.count && tentatives <= 10
+        } while Set(predictedLabels).count < eigenVals.count && tentatives <= 3
        return predictedLabels
     }
 
@@ -257,7 +258,7 @@ public class Cluster {
             }
             let stablizedClusters = self.stabilize(predictedClusters)
             let result = self.clusterizeIDs(labels: stablizedClusters)
-            
+
             DispatchQueue.main.async {
                 completion(.success(result))
             }
