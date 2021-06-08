@@ -99,7 +99,7 @@ import Promises
     }
 
     var downloadManager: DownloadManager {
-        state.data.downloadManager
+        state.downloadManager
     }
 
     var frame: NSRect {
@@ -444,7 +444,19 @@ import Promises
     func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse,
                  decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
         element = nil
-        decisionHandler(.allow)
+
+        if let response = navigationResponse.response as? HTTPURLResponse,
+           !navigationResponse.canShowMIMEType,
+           let url = response.url {
+            decisionHandler(.cancel)
+            var headers: [String: String] = [:]
+            if let sourceURL = webView.url {
+                headers["Referer"] = sourceURL.absoluteString
+            }
+            downloadManager.downloadFile(at: url, headers: headers, destinationFoldedURL: nil)
+        } else {
+            decisionHandler(.allow)
+        }
     }
 
     func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {

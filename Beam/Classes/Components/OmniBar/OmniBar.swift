@@ -18,6 +18,7 @@ struct OmniBar: View {
 
     @State private var title = ""
     @State private var modifierFlagsPressed: NSEvent.ModifierFlags?
+    @State private var showDownloadPanel: Bool = false
 
     private var enableAnimations: Bool {
         !state.windowIsResizing
@@ -60,6 +61,9 @@ struct OmniBar: View {
     }
     private var barShadowColor: Color {
         isAboveContent ? BeamColor.BottomBar.shadow.swiftUI : BeamColor.BottomBar.shadow.swiftUI.opacity(0.0)
+    }
+    private var showDownloadsButton: Bool {
+        !state.downloadManager.downloads.isEmpty
     }
 
     var body: some View {
@@ -110,6 +114,15 @@ struct OmniBar: View {
                 .fixedSize(horizontal: false, vertical: true)
                 if hasRightActions {
                     HStack(alignment: .center) {
+                        if showDownloadsButton {
+                            OmniBarDownloadButton(downloadManager: state.downloadManager, action: {
+                                showDownloadPanel.toggle()
+                            })
+                                .frame(height: 32, alignment: .top)
+                                .popover(isPresented: $showDownloadPanel, content: {
+                                    DownloaderView(downloader: state.downloadManager)
+                                })
+                        }
                         if showDestinationNotePicker, let currentTab = browserTabsManager.currentTab {
                             DestinationNotePicker(tab: currentTab)
                                 .frame(height: 32, alignment: .top)

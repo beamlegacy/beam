@@ -60,6 +60,8 @@ import BeamCore
     @Published var currentPage: WindowPage?
     @Published var overlayViewModel: OverlayViewCenterViewModel = OverlayViewCenterViewModel()
 
+    var downloadManager: BeamDownloadManager = BeamDownloadManager()
+
     private var scope = Set<AnyCancellable>()
     func goBack() {
         guard canGoBack else { return }
@@ -312,6 +314,10 @@ import BeamCore
         self.data = AppDelegate.main.data
         super.init()
         setup(data: data)
+
+        downloadManager.$downloads.sink { [weak self] _ in
+            self?.objectWillChange.send()
+        }.store(in: &scope)
     }
 
     enum CodingKeys: String, CodingKey {
