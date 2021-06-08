@@ -33,10 +33,21 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
             dismissFormatterView(inlineFormatter)
             var frame = linkFrame
             frame?.origin.x = mousePosition.x
-            showHyperlinkContextMenu(for: node, targetRange: selectedTextRange, frame: frame, url: link, linkTitle: selectedText)
+            showHyperlinkContextMenu(for: node, targetRange: selectedTextRange, frame: frame, url: link, linkTitle: selectedText, fromPaste: false)
         } else {
             showHyperlinkFormatter(for: node, targetRange: selectedTextRange, frame: linkFrame ?? .zero, url: link, linkTitle: selectedText, debounce: false)
         }
+    }
+
+    public func showLinkPasteMenu(for linkRange: BeamText.Range) {
+        guard let node = focusedWidget as? TextNode else { return }
+        var (_, rect) = node.offsetAndFrameAt(index: node.cursorPosition)
+        rect.origin.x = rect.maxX
+        guard let link = node.linkAt(index: node.cursorPosition),
+              linkCanBeEmbed(link) else { return }
+        dismissFormatterView(inlineFormatter)
+        let targetRange = linkRange.position..<linkRange.end
+        showHyperlinkContextMenu(for: node, targetRange: targetRange, frame: rect, url: link, linkTitle: selectedText, fromPaste: true)
     }
 
     public func linkStartedHovering(for currentNode: TextNode?, targetRange: Range<Int>, frame: NSRect?, url: URL?, linkTitle: String?) {
@@ -45,6 +56,10 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
 
     public func linkStoppedHovering() {
         dismissHyperlinkView()
+    }
+
+    public func linkCanBeEmbed(_ url: URL) -> Bool {
+        url.embed != nil
     }
 
     // MARK: Mouse Events
@@ -64,47 +79,72 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
         }
     }
 
-    private func getDefaultItemsForLink(for node: TextNode, link: URL) -> [[ContextMenuItem]] {
-        return [
-            [ContextMenuItem(title: "Open Link", action: {
+    private func getDefaultItemsForLink(for node: TextNode, link: URL) -> [ContextMenuItem] {
+        var allItems = [
+            ContextMenuItem(title: "Open Link", action: {
                 node.openExternalLink(link: link, element: node.element)
                 self.showOrHideInlineFormatter(isPresent: false)
-            })],
-            [
-                ContextMenuItem(title: "Copy Link", action: {
-                    NSPasteboard.general.clearContents()
-                    NSPasteboard.general.setString(link.absoluteString, forType: .string)
-                    self.showOrHideInlineFormatter(isPresent: false)
-                }),
-                ContextMenuItem(title: "Edit Link...", action: {
-                    self.showOrHideInlineFormatter(isPresent: false) {
-                        self.showLinkFormatterForSelection(mousePosition: .zero, showMenu: false)
-                        DispatchQueue.main.asyncAfter(deadline: .now()) {
-                            if let linkEditor = self.inlineFormatter as? HyperlinkFormatterView {
-                                linkEditor.startEditingUrl()
-                            }
-                        }
+            }),
+            ContextMenuItem.separator(),
+            ContextMenuItem(title: "Copy Link", action: {
+                NSPasteboard.general.clearContents()
+                NSPasteboard.general.setString(link.absoluteString, forType: .string)
+                self.showOrHideInlineFormatter(isPresent: false)
+            }),
 
+            ContextMenuItem(title: "Edit Link...", action: {
+                self.showOrHideInlineFormatter(isPresent: false) {
+                    self.showLinkFormatterForSelection(mousePosition: .zero, showMenu: false)
+                    DispatchQueue.main.asyncAfter(deadline: .now()) {
+                        if let linkEditor = self.inlineFormatter as? HyperlinkFormatterView {
+                            linkEditor.startEditingUrl()
+                        }
                     }
-                }),
-                ContextMenuItem(title: "Remove Link", action: {
-                    self.updateLink(in: node, at: self.selectedTextRange, newTitle: nil, newUrl: "", originalUrl: link.absoluteString)
-                    self.showOrHideInlineFormatter(isPresent: false)
-                })
-            ]
+                }
+            }),
+            ContextMenuItem(title: "Remove Link", action: {
+                self.updateLink(in: node, at: self.selectedTextRange, newTitle: nil, newUrl: "", originalUrl: link.absoluteString)
+                self.showOrHideInlineFormatter(isPresent: false)
+            })
+        ]
+        if linkCanBeEmbed(link) {
+            allItems.insert(ContextMenuItem(title: "Show as Embed", action: {
+                self.updateLinkToEmbed(in: node, at: self.selectedTextRange)
+                self.showOrHideInlineFormatter(isPresent: false)
+            }), at: 3)
+        }
+        return allItems
+    }
+
+    private func getPasteMenuItemsForLink(for node: TextNode, range: Range<Int>) -> [ContextMenuItem] {
+        return [
+            ContextMenuItem(title: "Show as Link", action: {
+                self.showOrHideInlineFormatter(isPresent: false)
+            }),
+            ContextMenuItem(title: "Show as Embed", action: {
+                self.updateLinkToEmbed(in: node, at: range)
+                self.showOrHideInlineFormatter(isPresent: false)
+            })
         ]
     }
 
-    private func showHyperlinkContextMenu(for targetNode: TextNode?, targetRange: Range<Int>, frame: NSRect?, url: URL?, linkTitle: String?) {
+    private func showHyperlinkContextMenu(for targetNode: TextNode?, targetRange: Range<Int>, frame: NSRect?, url: URL?, linkTitle: String?, fromPaste: Bool) {
 
         guard inlineFormatter?.isMouseInsideView != true else { return }
         clearDebounceTimer()
         guard let frame = frame,
               let node = formatterTargetNode ?? (focusedWidget as? TextNode),
-              let link = node.linkAt(index: selectedTextRange.upperBound),
+              let link = node.linkAt(index: targetRange.upperBound),
               isInlineFormatterHidden else { return }
         let atPoint = CGPoint(x: frame.origin.x + node.offsetInDocument.x - 10, y: frame.maxY + node.offsetInDocument.y + 7)
-        let menuView = ContextMenuFormatterView(items: self.getDefaultItemsForLink(for: node, link: link))
+
+        var items: [ContextMenuItem]
+        if fromPaste {
+            items = self.getPasteMenuItemsForLink(for: node, range: targetRange)
+        } else {
+            items = self.getDefaultItemsForLink(for: node, link: link)
+        }
+        let menuView = ContextMenuFormatterView(items: items)
         inlineFormatter = menuView
         ContextMenuPresenter.shared.presentMenu(menuView, atPoint: atPoint, from: self, animated: false)
 
@@ -158,19 +198,17 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
         }
     }
 
-    // MARK: HyperlinkFormatterView delegate
-    internal func hyperlinkFormatterView(_ hyperlinkFormatterView: HyperlinkFormatterView, didFinishEditing newUrl: String?, newTitle: String?, originalUrl: String?) {
-
-        guard let node = formatterTargetNode ?? (focusedWidget as? TextNode) else {
-            self.showOrHideInlineFormatter(isPresent: false)
-            return
-        }
-
-        let editingRange = !node.selectedTextRange.isEmpty ? node.selectedTextRange : self.formatterTargetRange
-        if let editingRange = editingRange, !editingRange.isEmpty {
-            updateLink(in: node, at: editingRange, newTitle: newTitle, newUrl: newUrl, originalUrl: originalUrl)
-        }
-        self.showOrHideInlineFormatter(isPresent: false)
+    private func updateLinkToEmbed(in node: TextNode, at range: Range<Int>) {
+        guard let link = node.linkAt(index: range.lowerBound) else { return }
+        let embedElement = BeamElement()
+        embedElement.text = BeamText(text: "")
+        embedElement.kind = .embed(link.absoluteString)
+        let parent = node.parent as? ElementNode ?? node
+        let cmdManager = rootNode.note?.cmdManager
+        cmdManager?.beginGroup(with: "Replace Link by Embed")
+        cmdManager?.insertElement(embedElement, in: parent, after: node)
+        cmdManager?.deleteElement(for: node)
+        cmdManager?.endGroup()
     }
 
     private func updateLink(in node: TextNode, at range: Range<Int>, newTitle: String?, newUrl: String?, originalUrl: String?) {
@@ -206,5 +244,20 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
         window?.makeFirstResponder(self)
         rootNode.cancelSelection()
         rootNode.focus(widget: node, position: newCursorPosition)
+    }
+
+    // MARK: HyperlinkFormatterView delegate
+    internal func hyperlinkFormatterView(_ hyperlinkFormatterView: HyperlinkFormatterView, didFinishEditing newUrl: String?, newTitle: String?, originalUrl: String?) {
+
+        guard let node = formatterTargetNode ?? (focusedWidget as? TextNode) else {
+            self.showOrHideInlineFormatter(isPresent: false)
+            return
+        }
+
+        let editingRange = !node.selectedTextRange.isEmpty ? node.selectedTextRange : self.formatterTargetRange
+        if let editingRange = editingRange, !editingRange.isEmpty {
+            updateLink(in: node, at: editingRange, newTitle: newTitle, newUrl: newUrl, originalUrl: originalUrl)
+        }
+        self.showOrHideInlineFormatter(isPresent: false)
     }
 }

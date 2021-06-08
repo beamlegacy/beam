@@ -175,24 +175,30 @@ extension NoteHeaderView {
         }
 
         func showContextualMenu(at: CGPoint) {
-            var items: [[ContextMenuItem]] = []
+            var items: [ContextMenuItem] = []
             let isNotePublic = note.isPublic
             if isNotePublic {
-                items.append([
+                items.append(contentsOf: [
                     ContextMenuItem(title: "Copy Link", action: nil),
-                    ContextMenuItem(title: "Invite...", action: nil)
+                    ContextMenuItem(title: "Invite...", action: nil),
+                    ContextMenuItem.separator()
                 ])
             }
-            items.append([ContextMenuItem(title: isNotePublic ? "Unpublish" : "Publish", action: nil)])
+            items.append(ContextMenuItem(title: isNotePublic ? "Unpublish" : "Publish", action: nil))
             var thirdGroup = [
+                ContextMenuItem.separator(),
                 ContextMenuItem(title: "Favorite", action: nil),
                 ContextMenuItem(title: "Export", action: nil)
             ]
             if canEditTitle {
-                thirdGroup.insert(ContextMenuItem(title: "Rename", action: focusTitle), at: 0)
+                thirdGroup.insert(ContextMenuItem(title: "Rename", action: focusTitle), at: 1)
             }
-            items.append(thirdGroup)
-            items.append([ContextMenuItem(title: "Delete", action: nil)])
+            items.append(contentsOf: thirdGroup)
+            
+            items.append(contentsOf: [
+                ContextMenuItem.separator(),
+                ContextMenuItem(title: "Delete", action: nil)
+            ])
 
             let menuView = ContextMenuFormatterView(items: items, direction: .bottom) {
                 ContextMenuPresenter.shared.dismissMenu()

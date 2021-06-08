@@ -60,6 +60,18 @@ class FormatterView: NSView {
         super.mouseExited(with: event)
         isMouseInsideView = false
     }
+
+    func moveUp() -> Bool {
+        false
+    }
+
+    func moveDown() -> Bool {
+        false
+    }
+
+    func pressEnter() -> Bool {
+        false
+    }
 }
 
 class BaseFormatterViewViewModel {

@@ -8,21 +8,31 @@
 import SwiftUI
 
 struct ContextMenuItem: Identifiable {
+    enum ContextMenuItemType {
+        case item
+        case separator
+    }
+
     let id = UUID()
     let title: String
+    private(set) var type = ContextMenuItemType.item
     let action: (() -> Void)?
+
+    static func separator() -> ContextMenuItem {
+        ContextMenuItem(title: "", type: ContextMenuItemType.separator, action: nil)
+    }
 }
 
 struct ContextMenuItemView: View {
 
     @Environment(\.isEnabled) private var isEnabled: Bool
     var item: ContextMenuItem
-
+    var isSelected = false
     @State private var isHovering = false
 
     var body: some View {
         ZStack(alignment: .leading) {
-            RoundedRectangle(cornerRadius: 3).fill(BeamColor.ContextMenu.hover.swiftUI.opacity(isHovering ? 1.0 : 0.0))
+            RoundedRectangle(cornerRadius: 3).fill(BeamColor.ContextMenu.hover.swiftUI.opacity(isHovering || isSelected ? 1.0 : 0.0))
             Text(item.title)
                 .font(BeamFont.medium(size: 13).swiftUI)
                 .foregroundColor(isEnabled ? BeamColor.Generic.text.swiftUI : BeamColor.LightStoneGray.swiftUI)
@@ -38,6 +48,7 @@ struct ContextMenuItemView: View {
 }
 
 class ContextMenuViewModel: BaseFormatterViewViewModel, ObservableObject {
+    @Published var selectedIndex: Int?
     var onSelectMenuItem: (() -> Void)?
 }
 
@@ -47,33 +58,33 @@ struct ContextMenuView: View {
     static let itemHeight: CGFloat = 23
     static let defaultWidth: CGFloat = 160
 
-    static func idealSizeForItems(_ items: [[ContextMenuItem]]) -> CGSize {
-        let numberOfSections = items.count
-        let numberOfItems = items.reduce(0) { (result, section) -> Int in
-            return result + section.count
-        }
+    static func idealSizeForItems(_ items: [ContextMenuItem]) -> CGSize {
         let spacing: CGFloat = 5.0
-        let itemsHeights = CGFloat(numberOfItems) * (ContextMenuView.itemHeight + spacing)
-        let height: CGFloat = spacing + itemsHeights + CGFloat(numberOfSections - 1) * (Separator.height + spacing)
+        let height = items.reduce(0) { (result, item) -> CGFloat in
+            if item.type == .separator {
+                return result + Separator.height + spacing
+            }
+            return result + ContextMenuView.itemHeight + spacing
+        }
         return CGSize(width: self.defaultWidth, height: height)
     }
 
-    @Binding var items: [[ContextMenuItem]]
+    @Binding var items: [ContextMenuItem]
 
     var body: some View {
         FormatterViewBackground {
             VStack(alignment: .leading, spacing: 5) {
-                ForEach(0..<items.count) { i in
-                    ForEach(items[i]) { item in
-                        ContextMenuItemView(item: item)
+                ForEach(Array(items.enumerated()), id: \.0) { index, item in
+                    let isSelected = viewModel.selectedIndex == index
+                    if item.type == .separator {
+                        Separator(horizontal: true)
+                    } else {
+                        ContextMenuItemView(item: item, isSelected: isSelected)
                             .disabled(item.action == nil)
                             .onTapGesture {
                                 item.action?()
                                 viewModel.onSelectMenuItem?()
                             }
-                    }
-                    if i != items.count - 1 {
-                        Separator(horizontal: true)
                     }
                 }
             }
@@ -94,12 +105,11 @@ struct ContextMenuView: View {
 struct ContextMenuView_Previews: PreviewProvider {
 
     private static var items = [
-        [ContextMenuItem(title: "Open Link", action: nil)],
-        [
-            ContextMenuItem(title: "Copy Link", action: nil),
-            ContextMenuItem(title: "Edit Link...", action: nil),
-            ContextMenuItem(title: "Remove Link", action: nil)
-        ]
+        ContextMenuItem(title: "Open Link", action: nil),
+        ContextMenuItem.separator(),
+        ContextMenuItem(title: "Copy Link", action: nil),
+        ContextMenuItem(title: "Edit Link...", action: nil),
+        ContextMenuItem(title: "Remove Link", action: nil)
     ]
     static var previews: some View {
         return ContextMenuView(items: .constant(Self.items))
