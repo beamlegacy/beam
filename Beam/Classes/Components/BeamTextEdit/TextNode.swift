@@ -342,7 +342,7 @@ public class TextNode: ElementNode {
         let cursorRect = rectAt(caretIndex: caretIndex)
         let layer = self.cursorLayer
 
-        layer.shapeLayer.fillColor = enabled ? color.cgColor : disabledColor.cgColor
+        layer.shapeLayer.fillColor = enabled ? cursorColor.cgColor : disabledColor.cgColor
         layer.layer.isHidden = !on
         layer.shapeLayer.path = CGPath(rect: cursorRect, transform: nil)
     }

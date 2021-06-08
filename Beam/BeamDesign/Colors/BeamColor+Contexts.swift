@@ -8,13 +8,13 @@
 import Foundation
 
 extension BeamColor {
+
     enum Generic {
         static let background = BeamColor.Custom(named: "WindowBackgroundColor")
         static let text = BeamColor.Niobium
         static let placeholder = BeamColor.AlphaGray
         static let transparent = BeamColor.Custom(named: "Transparent")
         static let separator = BeamColor.Mercury
-        static let textSelection = BeamColor.From(color: BeamColor.Bluetiful.nsColor.withAlphaComponent(0.1))
     }
 
     enum ContextMenu {
@@ -134,4 +134,34 @@ extension BeamColor {
         static let hoverBackground = BeamColor.From(color: BeamColor.Bluetiful.nsColor.withAlphaComponent(0.10))
         static let activeBackground = BeamColor.From(color: BeamColor.Bluetiful.nsColor.withAlphaComponent(0.14))
     }
+}
+
+// MARK: - Cursor & Selection
+extension BeamColor.Generic {
+    static private let possibleCursorColors = [
+        BeamColor.From(color: BeamColor.Niobium.nsColor.withAlphaComponent(0.6)),
+        BeamColor.From(color: BeamColor.Niobium.nsColor.withAlphaComponent(0.45)),
+        BeamColor.From(color: BeamColor.Bluetiful.nsColor.withAlphaComponent(0.6)),
+        BeamColor.From(color: BeamColor.Beam.nsColor.withAlphaComponent(0.6)),
+        BeamColor.From(color: BeamColor.Shiraz.nsColor.withAlphaComponent(0.6)),
+        BeamColor.From(color: BeamColor.CharmedGreen.nsColor.withAlphaComponent(0.6))
+    ]
+    static private let possibleSelectionColors = [
+        BeamColor.From(color: NSColor(withLightColor: BeamColor.Niobium.nsColor.withAlphaComponent(0.1),
+                                      darkColor: BeamColor.Niobium.nsColor.withAlphaComponent(0.2))),
+        BeamColor.From(color: NSColor(withLightColor: BeamColor.Niobium.nsColor.withAlphaComponent(0.075),
+                                      darkColor: BeamColor.Niobium.nsColor.withAlphaComponent(0.15))),
+        BeamColor.From(color: NSColor(withLightColor: BeamColor.Bluetiful.nsColor.withAlphaComponent(0.1),
+                                      darkColor: BeamColor.Bluetiful.nsColor.withAlphaComponent(0.2))),
+        BeamColor.From(color: NSColor(withLightColor: BeamColor.Beam.nsColor.withAlphaComponent(0.1),
+                                      darkColor: BeamColor.Beam.nsColor.withAlphaComponent(0.2))),
+        BeamColor.From(color: NSColor(withLightColor: BeamColor.Shiraz.nsColor.withAlphaComponent(0.1),
+                                      darkColor: BeamColor.Shiraz.nsColor.withAlphaComponent(0.2))),
+        BeamColor.From(color: NSColor(withLightColor: BeamColor.CharmedGreen.nsColor.withAlphaComponent(0.1),
+                                      darkColor: BeamColor.CharmedGreen.nsColor.withAlphaComponent(0.2)))
+    ]
+    static private let randomCursorColorIndex = Int.random(in: 0..<6)
+
+    static let cursor = possibleCursorColors[randomCursorColorIndex]
+    static let textSelection = possibleSelectionColors[randomCursorColorIndex]
 }
