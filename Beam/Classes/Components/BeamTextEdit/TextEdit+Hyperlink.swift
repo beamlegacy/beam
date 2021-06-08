@@ -199,15 +199,20 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
     }
 
     private func updateLinkToEmbed(in node: TextNode, at range: Range<Int>) {
-        guard let link = node.linkAt(index: range.lowerBound) else { return }
+        guard let link = node.linkAt(index: range.upperBound) else { return }
         let embedElement = BeamElement()
         embedElement.text = BeamText(text: "")
         embedElement.kind = .embed(link.absoluteString)
         let parent = node.parent as? ElementNode ?? node
+        let shouldDeleteEntireNode = node.text.wholeRange == range && node.children.count == 0
         let cmdManager = rootNode.note?.cmdManager
         cmdManager?.beginGroup(with: "Replace Link by Embed")
         cmdManager?.insertElement(embedElement, in: parent, after: node)
-        cmdManager?.deleteElement(for: node)
+        if shouldDeleteEntireNode {
+            cmdManager?.deleteElement(for: node)
+        } else {
+            cmdManager?.deleteText(in: node, for: range)
+        }
         cmdManager?.endGroup()
     }
 
