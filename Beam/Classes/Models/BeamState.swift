@@ -236,7 +236,7 @@ import BeamCore
 
     private func urlFor(query: String) -> URL? {
         //TODO make a better url detector and rewritter to transform xxx.com in https://xxx.com with less corner cases and clearer code path:
-        guard let u = URL(string: query) else {
+        guard query.mayBeURL, let u = URL(string: query) else {
             searchEngine.query = query
             return URL(string: searchEngine.searchUrl)
         }
