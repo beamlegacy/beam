@@ -79,6 +79,7 @@ public class ElementNode: Widget {
 
     var color: NSColor { config.color }
     var disabledColor: NSColor { config.disabledColor }
+    var cursorColor: NSColor { config.cursorColor }
     var selectionColor: NSColor { config.selectionColor }
     var alpha: Float { config.alpha }
     var blendMode: CGBlendMode { config.blendMode }
@@ -472,7 +473,7 @@ public class ElementNode: Widget {
         context.beginPath()
         context.addRect(cursorRect)
         //let fill = RBFill()
-        context.setFillColor(enabled ? color.cgColor : disabledColor.cgColor)
+        context.setFillColor(enabled ? cursorColor.cgColor : disabledColor.cgColor)
 
         //list.draw(shape: shape, fill: fill, alpha: 1.0, blendMode: .normal)
         context.drawPath(using: .fill)
