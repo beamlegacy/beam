@@ -14,6 +14,7 @@ class BeamUITestsMenuGenerator {
         case .loadUITestPage1: loadUITestsPage(page: 1)
         case .loadUITestPage2: loadUITestsPage(page: 2)
         case .loadUITestPage3: loadUITestsPage(page: 3)
+        case .insertTextInCurrentNote: insertTextInCurrentNote()
         default: break
         }
     }
@@ -34,6 +35,32 @@ class BeamUITestsMenuGenerator {
 
     private func resizeWindowLandscape() {
         AppDelegate.main.resizeWindow(width: 1200)
+    }
+
+    private func insertTextInCurrentNote() {
+        guard let currentNote = AppDelegate.main.window.state.currentNote else {
+            Logger.shared.logDebug("Current note is nil")
+
+            return
+        }
+        Logger.shared.logDebug("Inserting text in current note")
+
+        let newNote = currentNote.deepCopy(withNewId: false, selectedElements: nil)
+
+        for index in 0...3 {
+            newNote.addChild(BeamElement("test \(index): \(Date().description)"))
+        }
+
+        Logger.shared.logDebug("current Note: \(currentNote.id) copy: \(newNote.id)")
+
+        newNote.save(documentManager: documentManager) { result in
+            switch result {
+            case .failure(let error):
+                Logger.shared.logError(error.localizedDescription, category: .general)
+            case .success(let success):
+                Logger.shared.logInfo("Saved! \(success)", category: .general)
+            }
+        }
     }
 
     private func destroyDatabase() {
