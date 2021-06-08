@@ -63,7 +63,6 @@ class BeamTableCellView: NSTableCellView {
     }
 
     override func mouseExited(with event: NSEvent) {
-        super.mouseExited(with: event)
         if let tf = textField, isLink {
             tf.attributedStringValue = NSAttributedString(string: tf.stringValue, attributes: [:])
         }
