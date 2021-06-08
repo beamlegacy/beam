@@ -34,7 +34,7 @@ struct ContextMenuItemView: View {
         ZStack(alignment: .leading) {
             RoundedRectangle(cornerRadius: 3).fill(BeamColor.ContextMenu.hover.swiftUI.opacity(isHovering || isSelected ? 1.0 : 0.0))
             Text(item.title)
-                .font(BeamFont.medium(size: 13).swiftUI)
+                .font(BeamFont.regular(size: 13).swiftUI)
                 .foregroundColor(isEnabled ? BeamColor.Generic.text.swiftUI : BeamColor.LightStoneGray.swiftUI)
                 .padding(.vertical, BeamSpacing._40)
                 .padding(.horizontal, BeamSpacing._50)

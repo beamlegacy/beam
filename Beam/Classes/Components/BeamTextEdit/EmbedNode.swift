@@ -49,7 +49,8 @@ public class EmbedNode: ElementNode {
 //        imageLayer.layer.position = CGPoint(x: indent, y: 0)
 //        addLayer(imageLayer, origin: CGPoint(x: indent, y: 0))
 
-        webView = BeamWebView(frame: NSRect(), configuration: BrowserTab.webViewConfiguration)
+        webView = BeamWebView(frame: .zero, configuration: BrowserTab.webViewConfiguration)
+        webView.navigationDelegate = self
         webView.wantsLayer = true
         webView.allowsMagnification = true
         editor.addSubview(webView)
@@ -97,13 +98,17 @@ public class EmbedNode: ElementNode {
         }
     }
 
+    override func updateLayersVisibility() {
+        super.updateLayersVisibility()
+        webView.isHidden = layer.isHidden
+    }
+
     override func updateChildrenLayout() {
         let r = layer.frame
         webView.frame = NSRect(x: r.minX + indent, y: r.minY, width: r.width - indent, height: r.height)
-        webView.isHidden = layer.isHidden
-
         super.updateChildrenLayout()
     }
+
     func updateFocus() {
         guard let imageLayer = layers["image"] else { return }
 
@@ -140,55 +145,58 @@ public class EmbedNode: ElementNode {
     override func onFocus() {
         updateFocus()
     }
+}
 
-    // WKNavigationDelegate:
-    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+extension EmbedNode: WKNavigationDelegate {
+
+    public func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         Logger.shared.logDebug("Embed decidePolicyFor: \(String(describing: navigationAction))", category: .noteEditor)
         decisionHandler(.allow)
     }
 
-    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, preferences: WKWebpagePreferences, decisionHandler: @escaping (WKNavigationActionPolicy, WKWebpagePreferences) -> Void) {
+    public func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, preferences: WKWebpagePreferences, decisionHandler: @escaping (WKNavigationActionPolicy, WKWebpagePreferences) -> Void) {
         Logger.shared.logDebug("Embed decidePolicyFor: \(String(describing: navigationAction))", category: .noteEditor)
         decisionHandler(.allow, preferences)
     }
 
-    func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse, decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
+    public func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse, decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
         Logger.shared.logDebug("Embed decidePolicyFor: \(String(describing: navigationResponse))", category: .noteEditor)
         decisionHandler(.allow)
     }
 
-    func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
+    public func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
         Logger.shared.logDebug("Embed didStartProvisionalNavigation: \(String(describing: navigation))", category: .noteEditor)
     }
 
-    func webView(_ webView: WKWebView, didReceiveServerRedirectForProvisionalNavigation navigation: WKNavigation!) {
+    public func webView(_ webView: WKWebView, didReceiveServerRedirectForProvisionalNavigation navigation: WKNavigation!) {
         Logger.shared.logDebug("Embed didReceiveServerRedirectForProvisionalNavigation: \(String(describing: navigation))", category: .noteEditor)
     }
 
-    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+    public func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
         Logger.shared.logDebug("Embed didFailProvisionalNavigation: \(String(describing: navigation))", category: .noteEditor)
     }
 
-    func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
+    public func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
         Logger.shared.logDebug("Embed didCommit: \(String(describing: navigation))", category: .noteEditor)
     }
 
-    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+    public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         Logger.shared.logDebug("Embed didFinish: \(String(describing: navigation))", category: .noteEditor)
     }
-    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+
+    public func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
         Logger.shared.logError("Embed Error: \(error)", category: .noteEditor)
     }
 
-    func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+    public func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
         completionHandler(.performDefaultHandling, nil)
     }
 
-    func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
+    public func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
 
     }
 
-    func webView(_ webView: WKWebView, authenticationChallenge challenge: URLAuthenticationChallenge, shouldAllowDeprecatedTLS decisionHandler: @escaping (Bool) -> Void) {
+    public func webView(_ webView: WKWebView, authenticationChallenge challenge: URLAuthenticationChallenge, shouldAllowDeprecatedTLS decisionHandler: @escaping (Bool) -> Void) {
         decisionHandler(true)
     }
 
