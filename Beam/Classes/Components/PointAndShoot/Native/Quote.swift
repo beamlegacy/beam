@@ -29,8 +29,7 @@ class Quote {
                 let downloadManager = page.downloadManager
                 let fileStorage = page.fileStorage
                 self.imageQuoteKind(imageEl: img, referer: url, downloadManager: downloadManager, fileStorage: fileStorage).then { quoteKind in
-                    fulfill(quoteKind)
-                    return
+                    return fulfill(quoteKind)
                 }
                 return
             }
