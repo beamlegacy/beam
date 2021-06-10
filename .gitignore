@@ -3,6 +3,11 @@
 # Learn more about .gitignore:
 #     https://www.atlassian.com/git/tutorials/saving-changes/gitignore
 
+## Point and Shoot
+Beam/Classes/Components/PointAndShoot/**/.parcel-cache/
+Beam/Classes/Components/PointAndShoot/**/*.js.map
+Beam/Classes/Components/PointAndShoot/**/*_prod.*
+
 package-lock.json
 ## Pods
 Pods/
