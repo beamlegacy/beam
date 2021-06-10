@@ -118,7 +118,7 @@ extension BeamNote: BeamNoteDocument {
 
         Logger.shared.logInfo("BeamNote wants to save: \(title) version \(version)", category: .document)
         documentManager.save(documentStruct, completion: { [weak self] result in
-            guard let self = self else { return }
+            guard let self = self else { completion?(result); return }
 
             switch result {
             case .success(let success):
