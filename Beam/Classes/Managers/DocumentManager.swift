@@ -28,6 +28,7 @@ public class DocumentManager: NSObject {
 
     private static var networkRequests: [UUID: APIRequest] = [:]
     private var networkTasks: [UUID: (DispatchWorkItem, ((Swift.Result<Bool, Error>) -> Void)?)] = [:]
+    private var networkTasksSemaphore = DispatchSemaphore(value: 1)
 
     init(coreDataManager: CoreDataManager? = nil) {
         self.coreDataManager = coreDataManager ?? CoreDataManager.shared
@@ -565,17 +566,16 @@ public class DocumentManager: NSObject {
         return result
     }
 
-    private func saveAndThrottle(_ document: Document,
-                                 _ documentStruct: DocumentStruct,
+    private func saveAndThrottle(_ documentStruct: DocumentStruct,
                                  _ networkCompletion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
-        let document_id = document.id
-        // Using a queue so I don't need semaphore
-        backgroundQueue.async {
-            if let tuple = self.networkTasks[document_id] {
-                tuple.0.cancel()
-                tuple.1?(.failure(DocumentManagerError.operationCancelled))
-            }
+        let document_id = documentStruct.id
+
+        networkTasksSemaphore.wait()
+        if let tuple = networkTasks[document_id] {
+            tuple.0.cancel()
+            tuple.1?(.failure(DocumentManagerError.operationCancelled))
         }
+        networkTasksSemaphore.signal()
 
         let networkTask = DispatchWorkItem { [weak self] in
             guard let self = self else { return }
@@ -590,17 +590,17 @@ public class DocumentManager: NSObject {
 
                 let updatedDocStruct = DocumentStruct(document: updatedDocument)
                 self.saveDocumentStructOnAPI(updatedDocStruct) { result in
-                    self.backgroundQueue.async {
-                        self.networkTasks.removeValue(forKey: document_id)
-                    }
+                    self.networkTasksSemaphore.wait()
+                    self.networkTasks.removeValue(forKey: document_id)
+                    self.networkTasksSemaphore.signal()
                     networkCompletion?(result)
                 }
             }
         }
 
-        backgroundQueue.async {
-            self.networkTasks[document_id] = (networkTask, networkCompletion)
-        }
+        networkTasksSemaphore.wait()
+        networkTasks[document_id] = (networkTask, networkCompletion)
+        networkTasksSemaphore.signal()
         backgroundQueue.asyncAfter(deadline: DispatchTime.now() + 2.0, execute: networkTask)
     }
 }
@@ -948,7 +948,7 @@ extension DocumentManager {
 
                 // If not authenticated, we don't need to send to BeamAPI
                 if AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled, networkSave {
-                    self.saveAndThrottle(document, documentStruct, networkCompletion)
+                    self.saveAndThrottle(documentStruct, networkCompletion)
                 } else {
                     networkCompletion?(.failure(APIRequestError.notAuthenticated))
                 }
@@ -1390,7 +1390,7 @@ extension DocumentManager {
                         return Promise(true)
                     }
 
-                    self.saveAndThrottle(document, documentStruct)
+                    self.saveAndThrottle(documentStruct)
 
                     return Promise(true)
                 }
@@ -1736,7 +1736,7 @@ extension DocumentManager {
                      promise version doesn't give any way to receive callbacks for network calls.
                      */
 
-                    self.saveAndThrottle(document, documentStruct)
+                    self.saveAndThrottle(documentStruct)
 
                     return .value(true)
                 }
