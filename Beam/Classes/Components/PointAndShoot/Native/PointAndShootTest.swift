@@ -143,17 +143,17 @@ class PointAndShootUIMock: PointAndShootUI {
 }
 
 class PasswordStoreMock: PasswordStore {
-    func entries(for host: URL, completion: @escaping ([PasswordManagerEntry]) -> Void) {}
+    func entries(for host: String, completion: @escaping ([PasswordManagerEntry]) -> Void) {}
 
     func find(_ searchString: String, completion: @escaping ([PasswordManagerEntry]) -> Void) {}
 
     func fetchAll(completion: @escaping ([PasswordManagerEntry]) -> Void) {}
 
-    func password(host: URL, username: String, completion: @escaping (String?) -> Void) {}
+    func password(host: String, username: String, completion: @escaping (String?) -> Void) {}
 
-    func save(host: URL, username: String, password: String) {}
+    func save(host: String, username: String, password: String) {}
 
-    func delete(host: URL, username: String) {}
+    func delete(host: String, username: String) {}
 }
 
 class MockUserInformationsStore: UserInformationsStore {
@@ -232,7 +232,7 @@ class PointAndShootTest: XCTestCase {
     func initTestBed() {
         let testPasswordStore = PasswordStoreMock()
         let userInfoStore = MockUserInformationsStore()
-        let testPasswordOverlayController = PasswordOverlayController(passwordStore: testPasswordStore, userInfoStore: userInfoStore, passwordManager: .shared)
+        let testPasswordOverlayController = PasswordOverlayController(passwordStore: testPasswordStore, userInfoStore: userInfoStore)
         let testBrowsingScorer = BrowsingScorerMock()
         self.testUI = PointAndShootUIMock()
 

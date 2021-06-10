@@ -15,6 +15,11 @@ class PasswordGenerator {
     let digits = "123456789" // without "0"
     let symbols = "&()+-*/%#@!?.:,;="
 
+    func setup() {
+        DispatchQueue.global().async {
+            _ = self.words
+        }
+    }
     func generatePassword(length: Int) -> String {
         var password = ""
         for _ in 0..<length {

@@ -19,34 +19,26 @@ struct WebFieldAutofill: Codable {
 class PasswordOverlayController: WebPageHolder {
     private let passwordStore: PasswordStore
     private let userInfoStore: UserInformationsStore
-    private let passwordManager: PasswordManager
     private var passwordMenuWindow: NSWindow?
     private var passwordMenuPosition: CGPoint = .zero
     private var webViewScrollPosition: CGPoint = .zero
     private let encoder: JSONEncoder
     private let decoder: JSONDecoder
-    private var inputFields: [String: AutofillInputField]
+    private var autocompleteContext: WebAutocompleteContext
     private var currentlyFocusedElementId: String?
 
-    private var loginFields: [String: AutofillInputField] {
-        inputFields.filter { $0.value.type == .login }
-    }
-
-    private var passwordFields: [String: AutofillInputField] {
-        inputFields.filter { $0.value.type == .password || $0.value.type == .newPassword }
-    }
-
-    init(passwordStore: PasswordStore, userInfoStore: UserInformationsStore, passwordManager: PasswordManager = .shared) {
+    init(passwordStore: PasswordStore, userInfoStore: UserInformationsStore) {
         self.passwordStore = passwordStore
         self.userInfoStore = userInfoStore
-        self.passwordManager = passwordManager
         encoder = JSONEncoder()
         decoder = JSONDecoder()
-        inputFields = [:]
+        autocompleteContext = WebAutocompleteContext(passwordStore: passwordStore)
     }
 
     func detectInputFields() {
-        _ = page.executeJS("password_sendTextFields();", objectName: nil)
+        autocompleteContext.clear()
+        dismissPasswordManagerMenu()
+        _ = page.executeJS("password_sendTextFields()", objectName: nil)
     }
 
     func updateInputFields(with jsResult: String) {
@@ -63,38 +55,24 @@ class PasswordOverlayController: WebPageHolder {
                 }
             }
             elements = deduplicated
-            Logger.shared.logDebug("🔑 decoded: \(elements)") // TODO: remove duplicates
+            Logger.shared.logDebug("🔑 decoded: \(elements)")
         } catch {
             Logger.shared.logError(String(describing: error), category: .javascript)
             return
         }
 
-        let passwordRelatedFields = passwordManager.autofillFields(from: elements)
-        let initialIds = Set(inputFields.keys)
-        let finalIds = Set(passwordRelatedFields.map(\.id))
-        let addedIds = finalIds.subtracting(initialIds)
-
-        // TODO: move evaluateJavaScript strings to constants
+        let addedIds = autocompleteContext.update(with: elements) // + webPage
         if !addedIds.isEmpty {
             page.executeJS("beam_installSubmitHandler()", objectName: nil).then { _ in
-                self.installFocusHandlers(addedIds: addedIds, webPage: self.page, passwordRelatedFields: passwordRelatedFields)
+                self.installFocusHandlers(addedIds: addedIds)
             }
-        } else {
-            installFocusHandlers(addedIds: addedIds, webPage: page, passwordRelatedFields: passwordRelatedFields)
         }
     }
 
-    private func installFocusHandlers(addedIds: Set<String>, webPage: WebPage, passwordRelatedFields: [AutofillInputField]) {
+    private func installFocusHandlers(addedIds: [String]) {
         let formattedList = addedIds.map { "\"\($0)\"" }.joined(separator: ",")
-        let focusScript = "beam_installFocusHandlers('[\(formattedList)]');"
-        page.executeJS(focusScript, objectName: nil).then { _ in
-            let addedInputFields = passwordRelatedFields.reduce(into: [String: AutofillInputField]()) { (dict, field) in
-                if addedIds.contains(field.id) {
-                    dict[field.id] = field
-                }
-            }
-            self.inputFields.merge(addedInputFields) { (_, new) in new }
-        }
+        let focusScript = "beam_installFocusHandlers('[\(formattedList)]')"
+        _ = page.executeJS(focusScript, objectName: nil)
     }
 
     func updateInputFocus(for elementId: String, becomingActive: Bool) {
@@ -107,14 +85,23 @@ class PasswordOverlayController: WebPageHolder {
         guard elementId != currentlyFocusedElementId else {
             return
         }
-        currentlyFocusedElementId = elementId
-        guard let inputField = inputFields[elementId] else {
+        guard let autocompleteGroup = autocompleteContext.autocompleteGroup(for: elementId) else {
+            dismissPasswordManagerMenu()
+            currentlyFocusedElementId = nil
             return
         }
+        currentlyFocusedElementId = elementId
         requestWebFieldFrame(elementId: elementId) { frame in
             if let frame = frame {
                 DispatchQueue.main.async {
-                    self.showPasswordManagerMenu(at: frame, withPasswordGenerator: inputField.type == .newPassword || inputField.type == .password) // TODO: when detection is more reliable, only newPassword fields will trigger password generator.
+                    switch autocompleteGroup.action {
+                    case .createAccount:
+                        self.showPasswordManagerMenu(at: frame, withPasswordGenerator: true)
+                    case .login:
+                        self.showPasswordManagerMenu(at: frame, withPasswordGenerator: false)
+                    default:
+                        break
+                    }
                 }
             }
         }
@@ -138,12 +125,6 @@ class PasswordOverlayController: WebPageHolder {
     private func dismissPasswordManagerMenu() {
         ContextMenuPresenter.shared.dismissMenu()
         passwordMenuWindow = nil
-    }
-
-    func updateOverlay(moving movedFields: [String: AutofillInputField]) {
-//        movedFields.values.forEach { field in
-//            overlay?.moveButton(inputField: field)
-//        }
     }
 
     func updateScrollPosition(x: CGFloat, y: CGFloat, width: CGFloat, height: CGFloat) {
@@ -175,7 +156,7 @@ class PasswordOverlayController: WebPageHolder {
     }
 
     private func requestWebFieldFrame(elementId: String, completion: @escaping (CGRect?) -> Void) {
-        let script = "beam_getElementRects('[\"\(elementId)\"]');"
+        let script = "beam_getElementRects('[\"\(elementId)\"]')"
         page.executeJS(script, objectName: nil).then { jsResult in
             if let jsonString = jsResult as? String, let jsonData = jsonString.data(using: .utf8), let rects = try? self.decoder.decode([DOMRect?].self, from: jsonData), let rect = rects.first??.rect {
                 let frame = CGRect(x: rect.minX, y: rect.minY + rect.height, width: rect.width, height: 0)
@@ -196,9 +177,9 @@ class PasswordOverlayController: WebPageHolder {
     }
 
     func handleWebFormSubmit() {
-        let ids = inputFields.keys
+        let ids = autocompleteContext.allInputFields.map(\.id)
         let formattedList = ids.map { "\"\($0)\"" }.joined(separator: ",")
-        let script = "beam_getTextFieldValues('[\(formattedList)]');"
+        let script = "beam_getTextFieldValues('[\(formattedList)]')"
         page.executeJS(script, objectName: nil).then { jsResult in
             if let jsonString = jsResult as? String, let jsonData = jsonString.data(using: .utf8), let values = try? self.decoder.decode([String].self, from: jsonData) {
                 let dict = Dictionary(uniqueKeysWithValues: zip(ids, values))
@@ -210,8 +191,12 @@ class PasswordOverlayController: WebPageHolder {
     }
 
     private func updateStoredValues(_ values: [String: String]) {
-        guard let host = page.url else { return }
-        guard let login = values.valuesMatchingKeys(in: Array(loginFields.keys)).first, let password = values.valuesMatchingKeys(in: Array(passwordFields.keys)).first else {
+        guard let host = page.url?.minimizedHost else { return }
+        guard let (loginFieldIds, passwordFieldIds) = passwordFieldIdsForStorage() else {
+            Logger.shared.logDebug("Login/password fields not found")
+            return
+        }
+        guard let login = values.valuesMatchingKeys(in: loginFieldIds).first, let password = values.valuesMatchingKeys(in: passwordFieldIds).first else {
             Logger.shared.logDebug("No field match for submitted values in \(values)")
             return
         }
@@ -232,26 +217,56 @@ class PasswordOverlayController: WebPageHolder {
             }
         }
     }
+
+    private func passwordFieldIdsForStorage() -> (usernameIds: [String], passwordIds: [String])? {
+        let inputFields = autocompleteContext.allInputFields
+        let newPasswordIds = inputFields.filter { $0.role == .newPassword }.map(\.id)
+        let currentPasswordIds = inputFields.filter { $0.role == .currentPassword }.map(\.id)
+        let passwordIds = newPasswordIds + currentPasswordIds
+        guard !passwordIds.isEmpty else {
+            return nil
+        }
+        var usernameIds: [String]
+        if !newPasswordIds.isEmpty {
+            usernameIds = inputFields.filter { $0.role == .newUsername }.map(\.id)
+        } else {
+            usernameIds = []
+        }
+        usernameIds += inputFields.filter { $0.role == .currentUsername }.map(\.id)
+        guard !usernameIds.isEmpty else {
+            return nil
+        }
+        return (usernameIds: usernameIds, passwordIds: passwordIds)
+    }
 }
 
 extension PasswordOverlayController: PasswordManagerMenuDelegate {
     func deleteCredentials(_ entry: PasswordManagerEntry) {
-        passwordStore.delete(host: entry.host, username: entry.username)
+        passwordStore.delete(host: entry.minimizedHost, username: entry.username)
     }
 
     func fillCredentials(_ entry: PasswordManagerEntry) {
-        passwordStore.password(host: entry.host, username: entry.username) { password in
+        guard let elementId = currentlyFocusedElementId, let autocompleteGroup = autocompleteContext.autocompleteGroup(for: elementId), autocompleteGroup.action == .login else {
+            Logger.shared.logError("AutocompleteContext mismatch for id \(String(describing: currentlyFocusedElementId))", category: .general)
+            dismissPasswordManagerMenu()
+            return
+        }
+        passwordStore.password(host: entry.minimizedHost, username: entry.username) { password in
             guard let password = password else {
                 Logger.shared.logError("PasswordStore did not provide password for selected entry.", category: .general)
                 return
             }
-            let loginParams = self.loginFields.keys.map { id in
-                WebFieldAutofill(id: id, value: entry.username, background: nil)
+            let autofill = autocompleteGroup.relatedFields.compactMap { field -> WebFieldAutofill? in
+                switch field.role {
+                case .currentUsername:
+                    return WebFieldAutofill(id: field.id, value: entry.username, background: nil)
+                case .currentPassword:
+                    return WebFieldAutofill(id: field.id, value: password, background: nil)
+                default:
+                    return nil
+                }
             }
-            let passwordParams = self.passwordFields.keys.map { id in
-                WebFieldAutofill(id: id, value: password, background: nil)
-            }
-            self.fillWebTextFields(loginParams + passwordParams)
+            self.fillWebTextFields(autofill)
         }
         DispatchQueue.main.async {
             self.dismissPasswordManagerMenu()
@@ -259,11 +274,20 @@ extension PasswordOverlayController: PasswordManagerMenuDelegate {
     }
 
     func fillNewPassword(_ password: String, dismiss: Bool = true) {
-        let passwordParams = passwordFields.keys.map { id in
-            WebFieldAutofill(id: id, value: password, background: nil)
+        guard let elementId = currentlyFocusedElementId, let autocompleteGroup = autocompleteContext.autocompleteGroup(for: elementId), autocompleteGroup.action == .createAccount else {
+            Logger.shared.logError("AutocompleteContext mismatch for id \(String(describing: currentlyFocusedElementId))", category: .general)
+            dismissPasswordManagerMenu()
+            return
         }
+        let autofill = autocompleteGroup.relatedFields.compactMap { field -> WebFieldAutofill? in
+            if field.role == .newPassword {
+                return WebFieldAutofill(id: field.id, value: password, background: nil)
+            } else {
+                return nil
+            }
+        }
+        self.fillWebTextFields(autofill)
         self.togglePasswordField(visibility: true)
-        self.fillWebTextFields(passwordParams)
         if dismiss {
             DispatchQueue.main.async {
                 self.dismissPasswordManagerMenu()
@@ -272,7 +296,7 @@ extension PasswordOverlayController: PasswordManagerMenuDelegate {
     }
 
     func emptyPasswordField() {
-        let emptyParams = self.passwordFields.keys.map { id in
+        let emptyParams = passwordFieldIds.map { id in
             WebFieldAutofill(id: id, value: "", background: nil)
         }
         self.togglePasswordField(visibility: false)
@@ -286,6 +310,15 @@ extension PasswordOverlayController: PasswordManagerMenuDelegate {
         DispatchQueue.main.async {
             self.dismissPasswordManagerMenu()
         }
+    }
+
+    private var passwordFieldIds: [String] {
+        guard let elementId = currentlyFocusedElementId, let autocompleteGroup = autocompleteContext.autocompleteGroup(for: elementId) else {
+            return []
+        }
+        return autocompleteGroup.relatedFields
+            .filter { $0.role == .currentPassword || $0.role == .newPassword }
+            .map(\.id)
     }
 
     private func fillWebTextFields(_ params: [WebFieldAutofill]) {
@@ -302,7 +335,7 @@ extension PasswordOverlayController: PasswordManagerMenuDelegate {
     }
 
     private func togglePasswordField(visibility: Bool) {
-        let passwordParams = self.passwordFields.keys.map { id in
+        let passwordParams = passwordFieldIds.map { id in
             WebFieldAutofill(id: id, value: nil, background: nil)
         }
         do {

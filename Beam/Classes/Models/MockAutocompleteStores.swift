@@ -67,9 +67,9 @@ class MockPasswordStore: PasswordStore {
         })
     }
 
-    func entries(for host: URL, completion: @escaping ([PasswordManagerEntry]) -> Void) {
+    func entries(for host: String, completion: @escaping ([PasswordManagerEntry]) -> Void) {
         let results = entries.filter {
-            $0.host.minimizedHost == host.minimizedHost
+            $0.minimizedHost == host
         }
         completion(results)
     }
@@ -85,20 +85,20 @@ class MockPasswordStore: PasswordStore {
         completion(entries)
     }
 
-    func password(host: URL, username: String, completion: @escaping (String?) -> Void) {
-        let id = PasswordManagerEntry(host: host, username: username).id
+    func password(host: String, username: String, completion: @escaping (String?) -> Void) {
+        let id = PasswordManagerEntry(minimizedHost: host, username: username).id
         completion(passwords[id])
     }
 
-    func save(host: URL, username: String, password: String) {
+    func save(host: String, username: String, password: String) {
         delete(host: host, username: username)
-        let entry = PasswordManagerEntry(host: host, username: username)
+        let entry = PasswordManagerEntry(minimizedHost: host, username: username)
         entries.append(entry)
         passwords[entry.id] = password
     }
 
-    func delete(host: URL, username: String) {
-        let id = PasswordManagerEntry(host: host, username: username).id
+    func delete(host: String, username: String) {
+        let id = PasswordManagerEntry(minimizedHost: host, username: username).id
         if let index = entries.firstIndex(where: { $0.id == id }) {
             entries.remove(at: index)
         }

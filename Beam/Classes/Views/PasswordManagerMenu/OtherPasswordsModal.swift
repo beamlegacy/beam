@@ -49,7 +49,7 @@ struct OtherPasswordModal: View {
                     self.showingAlert.toggle()
                 }
                 .alert(isPresented: $showingAlert) {
-                    Alert(title: Text("Are you sure you want to remove the login details \(passwordEntries[selectedEntries.first ?? 0].username) for \(passwordEntries[selectedEntries.first ?? 0].host) ?"),
+                    Alert(title: Text("Are you sure you want to remove the login details \(passwordEntries[selectedEntries.first ?? 0].username) for \(passwordEntries[selectedEntries.first ?? 0].minimizedHost) ?"),
                           primaryButton: .destructive(Text("Remove"), action: {
                             guard let index = selectedEntries.first else { return }
                             onRemove(passwordEntries[index])

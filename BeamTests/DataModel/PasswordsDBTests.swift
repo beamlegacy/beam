@@ -41,59 +41,59 @@ class PasswordsDBTests: XCTestCase {
     }
 
     func testSavingPassword() {
-        passwordsStore.save(host: Self.host, username: Self.username, password: Self.password)
+        passwordsStore.save(host: Self.host.minimizedHost!, username: Self.username, password: Self.password)
 
         passwordsStore.fetchAll { entries in
             XCTAssertEqual(entries.count, 1)
-            XCTAssertEqual(entries.first?.host.absoluteString, Self.host.minimizedHost)
+            XCTAssertEqual(entries.first?.minimizedHost, Self.host.minimizedHost)
             XCTAssertEqual(entries.first?.username, Self.username)
         }
     }
 
     func testFindEntriesForHost() {
-        passwordsStore.save(host: Self.host, username: Self.username, password: Self.password)
+        passwordsStore.save(host: Self.host.minimizedHost!, username: Self.username, password: Self.password)
 
-        passwordsStore.entries(for: Self.host) { entries in
+        passwordsStore.entries(for: Self.host.minimizedHost!) { entries in
             XCTAssertEqual(entries.count, 1)
-            XCTAssertEqual(entries.first?.host.absoluteString, Self.host.minimizedHost)
+            XCTAssertEqual(entries.first?.minimizedHost, Self.host.minimizedHost)
             XCTAssertEqual(entries.first?.username, Self.username)
         }
     }
 
     func testSearchEntries() {
-        passwordsStore.save(host: Self.host, username: Self.username, password: Self.password)
+        passwordsStore.save(host: Self.host.minimizedHost!, username: Self.username, password: Self.password)
 
         passwordsStore.find("git") { entries in
             XCTAssertEqual(entries.count, 1)
-            XCTAssertEqual(entries.first?.host.absoluteString, Self.host.minimizedHost)
+            XCTAssertEqual(entries.first?.minimizedHost, Self.host.minimizedHost)
             XCTAssertEqual(entries.first?.username, Self.username)
         }
     }
 
     func testFetchAllEntries() {
-        passwordsStore.save(host: Self.host, username: Self.username, password: Self.password)
+        passwordsStore.save(host: Self.host.minimizedHost!, username: Self.username, password: Self.password)
 
         passwordsStore.fetchAll { entries in
             XCTAssertEqual(entries.count, 1)
-            XCTAssertEqual(entries.first?.host.absoluteString, Self.host.minimizedHost)
+            XCTAssertEqual(entries.first?.minimizedHost, Self.host.minimizedHost)
             XCTAssertEqual(entries.first?.username, Self.username)
         }
 
     }
 
     func testGetPassword() {
-        passwordsStore.save(host: Self.host, username: Self.username, password: Self.password)
+        passwordsStore.save(host: Self.host.minimizedHost!, username: Self.username, password: Self.password)
 
-        passwordsStore.password(host: Self.host, username: Self.username) { password in
+        passwordsStore.password(host: Self.host.minimizedHost!, username: Self.username) { password in
             XCTAssertEqual(password, Self.password)
 
         }
     }
 
     func testDelete() {
-        passwordsStore.save(host: Self.host, username: Self.username, password: Self.password)
+        passwordsStore.save(host: Self.host.minimizedHost!, username: Self.username, password: Self.password)
 
-        passwordsStore.delete(host: Self.host, username: Self.username)
+        passwordsStore.delete(host: Self.host.minimizedHost!, username: Self.username)
 
         passwordsStore.fetchAll { passwords in
             XCTAssertEqual(passwords.count, 0)

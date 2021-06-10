@@ -41,14 +41,14 @@ struct PasswordsTableView: View {
 
     private func refreshAllPasswordItems() {
         for entry in passwordEntries {
-            let item = PasswordTableViewItem(host: entry.host, username: entry.username, password: "••••••••")
+            let item = PasswordTableViewItem(host: entry.minimizedHost, username: entry.username, password: "••••••••")
             allPasswordItems.append(item)
         }
     }
 }
 
 struct HostInfo {
-    var host: URL
+    var host: String
     var favIcon: NSImage?
 }
 
@@ -58,12 +58,13 @@ class PasswordTableViewItem: TableViewItem {
     var password: String
     var hostInfo: HostInfo
 
-    init(host: URL, username: String, password: String) {
+    init(host: String, username: String, password: String) {
         self.username = username
         self.password = password
         self.hostInfo = HostInfo(host: host, favIcon: NSImage(named: "field-web"))
         super.init()
-        FaviconProvider.shared.imageForUrl(host) { [weak self] (image) in
+        guard let hostURL = URL(string: "https://\(host)") else { return }
+        FaviconProvider.shared.imageForUrl(hostURL) { [weak self] (image) in
             guard let self = self else { return }
             self.hostInfo.favIcon = image
         }

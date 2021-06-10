@@ -58,7 +58,7 @@ class PasswordManagerMenuViewModel: ObservableObject {
             passwordGeneratorViewModel.delegate = self
             self.passwordGeneratorViewModel = passwordGeneratorViewModel
         } else {
-            self.passwordStore.entries(for: host) {
+            self.passwordStore.entries(for: host.minimizedHost ?? host.urlStringWithoutScheme) {
                 self.entriesForHost = $0
                 self.updateDisplay()
             }
@@ -112,7 +112,7 @@ class PasswordManagerMenuViewModel: ObservableObject {
 
 extension PasswordManagerMenuViewModel: PasswordManagerMenuDelegate {
     func fillCredentials(_ entry: PasswordManagerEntry) {
-        Logger.shared.logDebug("Clicked on entry: \(entry.username) @ \(entry.host)")
+        Logger.shared.logDebug("Clicked on entry: \(entry.username) @ \(entry.minimizedHost)")
         delegate?.fillCredentials(entry)
     }
 
@@ -129,7 +129,7 @@ extension PasswordManagerMenuViewModel: PasswordManagerMenuDelegate {
     }
 
     func deleteCredentials(_ entry: PasswordManagerEntry) {
-        Logger.shared.logDebug("Delete entry: \(entry.username) @ \(entry.host)")
+        Logger.shared.logDebug("Delete entry: \(entry.username) @ \(entry.minimizedHost)")
         delegate?.deleteCredentials(entry)
         updateAllEntries()
     }

@@ -294,7 +294,7 @@ extension TableViewCoordinator: NSTableViewDelegate {
         let item = sortedData[row] as? PasswordTableViewItem
         iconAndTextCell.updateWithIcon(item?.hostInfo.favIcon)
         let editable = column.editable && !column.isLink
-        iconAndTextCell.textField?.stringValue = item?.hostInfo.host.absoluteString ?? ""
+        iconAndTextCell.textField?.stringValue = item?.hostInfo.host ?? ""
         iconAndTextCell.textField?.isEditable = editable
         iconAndTextCell.textField?.font = BeamFont.regular(size: column.fontSize).nsFont
         iconAndTextCell.textField?.delegate = self

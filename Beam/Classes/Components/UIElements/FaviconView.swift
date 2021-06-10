@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct FaviconView: View {
-    var url: URL
+    let url: URL?
 
     @State private var faviconState: FaviconState = .loading
 
@@ -34,6 +34,10 @@ struct FaviconView: View {
                     .frame(width: 16, height: 16)
             }
         }.onAppear(perform: {
+            guard let url = url else {
+                self.faviconState = .generic
+                return
+            }
             FaviconProvider.shared.imageForUrl(url) {
                 if let favicon = $0 {
                     self.faviconState = .available(favicon)
