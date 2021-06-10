@@ -521,6 +521,7 @@ public extension CALayer {
         (focusedWidget as? TextNode)?.invalidateText() // force removing the syntax highlighting
         focusedWidget?.invalidate()
         focusedWidget?.onUnfocus()
+        focusedWidget = nil
         if activateOnLostFocus { activated() }
 
         cancelInternalLink()
