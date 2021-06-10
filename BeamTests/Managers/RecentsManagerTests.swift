@@ -129,11 +129,12 @@ class RecentsManagerTests: QuickSpec {
                 it("handles deleted notes") {
                     expect(recentsManager.recentNotes.count) == 5
                     let note = recentsManager.recentNotes.last!
-                    waitUntil(timeout: .seconds(5)) { done in
+                    waitUntil(timeout: .seconds(10)) { done in
                         self.documentManager.delete(id: note.id) { _ in
                             done()
                         }
                     }
+
                     expect(recentsManager.recentNotes.count) == 4
                     expect(recentsManager.recentNotes.first { $0.id == note.id }).to(beNil())
                 }

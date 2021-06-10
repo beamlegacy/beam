@@ -928,9 +928,10 @@ class DocumentManagerNetworkTests: QuickSpec {
                 context("without conflict") {
                     it("saves the document locally") {
                         waitUntil(timeout: .seconds(10)) { done in
-                            _ = sut.save(docStruct,
-                                                 true,
-                                                 { _ in done() })
+                            docStruct.version += 1
+                            sut.save(docStruct,
+                                     true,
+                                     { _ in done() })
                         }
 
                         let count = Document.countWithPredicate(coreDataManager.mainContext,
@@ -1043,7 +1044,8 @@ class DocumentManagerNetworkTests: QuickSpec {
                             
                             it("saves the document on the API") {
                                 waitUntil(timeout: .seconds(10)) { done in
-                                    _ = sut.save(docStruct, true, { result in
+                                    docStruct.version += 1
+                                    sut.save(docStruct, true, { result in
                                         expect { try result.get() }.toNot(throwError())
                                         expect { try result.get() } == true
                                         done()
@@ -1072,7 +1074,8 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                                 it("saves the document on the API") {
                                     waitUntil(timeout: .seconds(10)) { done in
-                                        _ = sut.save(docStruct, true, { result in
+                                        docStruct.version += 1
+                                        sut.save(docStruct, true, { result in
                                             expect { try result.get() }.toNot(throwError())
                                             expect { try result.get() } == true
                                             done()
@@ -1428,7 +1431,8 @@ class DocumentManagerNetworkTests: QuickSpec {
                                 let networkCalls = APIRequest.callsCount
 
                                 waitUntil(timeout: .seconds(10)) { done in
-                                    _ = sut.save(docStruct, true, { result in
+                                    docStruct.version += 1
+                                    sut.save(docStruct, true, { result in
                                         expect { try result.get() }.toNot(throwError())
                                         expect { try result.get() } == true
                                         done()
@@ -1574,7 +1578,8 @@ class DocumentManagerNetworkTests: QuickSpec {
                             let networkCalls = APIRequest.callsCount
 
                             waitUntil(timeout: .seconds(10)) { done in
-                                _ = sut.save(docStruct, true, { result in
+                                docStruct.version += 1
+                                sut.save(docStruct, true, { result in
                                     expect { try result.get() }.toNot(throwError())
                                     expect { try result.get() } == true
                                     done()
@@ -1595,7 +1600,8 @@ class DocumentManagerNetworkTests: QuickSpec {
                                 let networkCalls = APIRequest.callsCount
 
                                 waitUntil(timeout: .seconds(10)) { done in
-                                    _ = sut.save(docStruct, true, { result in
+                                    docStruct.version += 1
+                                    sut.save(docStruct, true, { result in
                                         expect { try result.get() }.toNot(throwError())
                                         expect { try result.get() } == true
                                         done()

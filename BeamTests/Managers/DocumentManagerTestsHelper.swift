@@ -40,25 +40,31 @@ class DocumentManagerTestsHelper {
     }
 
     func saveLocallyAndRemotely(_ docStruct: DocumentStruct) -> DocumentStruct {
+        var result = docStruct.copy()
+
         // The call to `saveDocumentStructOnAPI` expect the document to be already saved locally
-        var newVersion = docStruct
         waitUntil(timeout: .seconds(10)) { done in
+            result.version += 1
+
             // To force a local save only, while using the standard code
-            newVersion = self.documentManager.save(docStruct, true, { result in
+            self.documentManager.save(result, true, { result in
                 expect { try result.get() }.toNot(throwError())
                 done()
             }, completion: nil)
         }
 
-        return newVersion
+        return result
     }
 
     func saveLocally(_ docStruct: DocumentStruct) -> DocumentStruct {
+        var result = docStruct.copy()
+
         // The call to `saveDocumentStructOnAPI` expect the document to be already saved locally
-        var newVersion = docStruct
         waitUntil(timeout: .seconds(10)) { done in
+            result.version += 1
+            
             // To force a local save only, while using the standard code
-            newVersion = self.documentManager.save(docStruct, false, completion:  { result in
+            self.documentManager.save(result, false, completion:  { result in
                 expect { try result.get() }.toNot(throwError())
                 if case .failure(let error) = result {
                     fail(error.localizedDescription)
@@ -67,7 +73,7 @@ class DocumentManagerTestsHelper {
             })
         }
 
-        return newVersion
+        return result
     }
 
     func saveRemotely(_ docStruct: DocumentStruct) {

@@ -39,10 +39,10 @@ extension BeamNote: BeamNoteDocument {
         Logger.shared.logInfo("Observe changes for note \(title)", category: .document)
         activeDocumentCancellable = documentManager.onDocumentChange(docStruct) { [unowned self] docStruct in
             DispatchQueue.main.async { [weak self] in
-                // reload self
-                guard let self = self,
-                      self.version < docStruct.version else {
-                    //                Logger.shared.logDebug("BeamNote \(self.title) observer skipped version \(docStruct.version) (must be greater than current \(self.version))")
+                guard let self = self else { return }
+
+                guard self.version < docStruct.version else {
+                    Logger.shared.logDebug("BeamNote \(self.title) observer skipped version \(docStruct.version) (must be greater than current \(self.version))")
                     return
                 }
 
@@ -51,25 +51,32 @@ extension BeamNote: BeamNoteDocument {
                     changePropagationEnabled = true
                 }
 
-                let decoder = JSONDecoder()
-                guard let newSelf = try? decoder.decode(BeamNote.self, from: docStruct.data) else {
-                    Logger.shared.logError("Unable to decode new documentStruct \(docStruct.title)",
-                                           category: .document)
-                    return
-                }
-
-                self.title = newSelf.title
-                self.type = newSelf.type
-                self.searchQueries = newSelf.searchQueries
-                self.visitedSearchResults = newSelf.visitedSearchResults
-                self.browsingSessions = newSelf.browsingSessions
-                self.version = docStruct.version
-                self.databaseId = docStruct.databaseId
-                self.savedVersion = self.version
-                self.isPublic = docStruct.isPublic
-                recursiveUpdate(other: newSelf)
+                updateWithDocumentStruct(docStruct)
             }
         }
+    }
+
+    public func updateWithDocumentStruct(_ docStruct: DocumentStruct) {
+        let decoder = JSONDecoder()
+        guard let newSelf = try? decoder.decode(BeamNote.self, from: docStruct.data) else {
+            Logger.shared.logError("Unable to decode new documentStruct \(docStruct.title)",
+                                   category: .document)
+            return
+        }
+
+        self.title = newSelf.title
+        self.type = newSelf.type
+        self.searchQueries = newSelf.searchQueries
+        self.visitedSearchResults = newSelf.visitedSearchResults
+        self.browsingSessions = newSelf.browsingSessions
+
+        self.version = docStruct.version
+        self.databaseId = docStruct.databaseId
+        self.isPublic = docStruct.isPublic
+
+        self.savedVersion = self.version
+
+        recursiveUpdate(other: newSelf)
     }
 
     public func updateTitle(_ newTitle: String, documentManager: DocumentManager, completion: ((Result<Bool, Error>) -> Void)? = nil) {
@@ -99,36 +106,54 @@ extension BeamNote: BeamNoteDocument {
             completion?(.failure(BeamNoteError.saveAlreadyRunning))
             return
         }
+
+        version += 1
+
         guard let documentStruct = documentStruct else {
+            version -= 1
             Logger.shared.logError("Unable to find active document struct [\(title) {\(id)}]", category: .document)
             completion?(.failure(BeamNoteError.unableToCreateDocumentStruct))
             return
         }
 
-        Logger.shared.logInfo("BeamNote wants to save: \(title)", category: .document)
-        let newDoc = documentManager.save(documentStruct, completion: { [weak self] result in
-            if let self = self {
-                switch result {
-                case .success(let success):
-                    guard success else { break }
-                    self.savedVersion = self.version
-                    self.pendingSave = 0
+        Logger.shared.logInfo("BeamNote wants to save: \(title) version \(version)", category: .document)
+        documentManager.save(documentStruct, completion: { [weak self] result in
+            guard let self = self else { return }
 
-                case .failure(BeamNoteError.saveAlreadyRunning):
-                    self.pendingSave += 1
+            switch result {
+            case .success(let success):
+                guard success else { break }
+                self.savedVersion = self.version
+                self.pendingSave = 0
 
-                case .failure(let error):
+            case .failure(BeamNoteError.saveAlreadyRunning):
+                self.pendingSave += 1
+
+            case .failure(let error):
+                if (error as NSError).domain == "DOCUMENT_ERROR_DOMAIN", (error as NSError).code == 1002 {
+                    Logger.shared.logError("Version error with \(self.version), reloading from the DB", category: .document)
+
+                    // TODO: should merge the change we tried to save(), with the DB version instead of just reloading it
+                    if let dbDocumentStruct = documentManager.loadById(id: documentStruct.id) {
+                        DispatchQueue.main.async {
+                            self.updateWithDocumentStruct(dbDocumentStruct)
+                        }
+                    }
+
+                    Logger.shared.logError("Version changed to \(self.savedVersion)/\(self.version)", category: .document)
+                } else {
                     self.version = self.savedVersion
                     Logger.shared.logError("Saving note \(self.title) failed: \(error)", category: .document)
-                    if self.pendingSave > 0 {
-                        Logger.shared.logDebug("Trying again: Saving note \(self.title) as there were \(self.pendingSave) pending save operations", category: .document)
-                        self.save(documentManager: documentManager, completion: completion)
-                    }
+                }
+
+                if self.pendingSave > 0 {
+                    Logger.shared.logDebug("Trying again: Saving note \(self.title) as there were \(self.pendingSave) pending save operations", category: .document)
+                    self.save(documentManager: documentManager, completion: completion)
                 }
             }
+
             completion?(result)
         })
-        version = newDoc.version
     }
 
     public static func instanciateNote(_ documentManager: DocumentManager,

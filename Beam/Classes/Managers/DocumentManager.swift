@@ -16,7 +16,7 @@ enum DocumentManagerError: Error, Equatable {
 }
 
 // swiftlint:disable:next type_body_length
-public class DocumentManager {
+public class DocumentManager: NSObject {
     var coreDataManager: CoreDataManager
     let mainContext: NSManagedObjectContext
     let backgroundContext: NSManagedObjectContext
@@ -35,10 +35,12 @@ public class DocumentManager {
 
         saveDocumentQueue.maxConcurrentOperationCount = 1
 
+        super.init()
+
+        // Used to debug CD issues
         //observeCoredataNotification()
     }
 
-    // MARK: -
     // MARK: Coredata Updates
     private var cancellables = [AnyCancellable]()
     private func observeCoredataNotification() {
@@ -65,12 +67,15 @@ public class DocumentManager {
 
     private func printObjectsFromNotification(_ notification: Notification, _ keyPath: String) {
         if let objects = notification.userInfo?[keyPath] as? Set<NSManagedObject>, !objects.isEmpty {
-            let titles = objects.compactMap { object in
-                (object as? Document)?.title
+            let titles = objects.compactMap { object -> String? in
+                guard let document = object as? Document else { return nil }
+
+                return "\(document.title) version \(document.version)"
             }
-            Logger.shared.logDebug("\(Unmanaged.passUnretained(self).toOpaque()) \(keyPath) \(objects.count) CD objects. Titles: \(titles)", category: .coredataDebug)
-            if objects.count != titles.count {
-                Logger.shared.logDebug(String(describing: objects), category: .coredataDebug)
+
+            if !titles.isEmpty {
+                Logger.shared.logDebug("\(Unmanaged.passUnretained(self).toOpaque()) \(keyPath) \(titles.count) Documents: \(titles)",
+                                       category: .coredataDebug)
             }
         }
     }
@@ -95,12 +100,20 @@ public class DocumentManager {
         }
     }
 
-    // MARK: -
     // MARK: CoreData Load
     func loadById(id: UUID) -> DocumentStruct? {
-        guard let document = try? Document.fetchWithId(mainContext, id) else { return nil }
+        let semaphore = DispatchSemaphore(value: 0)
+        var result: DocumentStruct?
 
-        return parseDocumentBody(document)
+        coreDataManager.persistentContainer.performBackgroundTask { [unowned self] context in
+            defer { semaphore.signal() }
+            guard let document = try? Document.fetchWithId(context, id) else { return }
+
+            result = parseDocumentBody(document)
+        }
+
+        semaphore.wait()
+        return result
     }
 
     func fetchOrCreate(title: String) -> DocumentStruct? {
@@ -108,6 +121,8 @@ public class DocumentManager {
         var result: DocumentStruct?
 
         coreDataManager.persistentContainer.performBackgroundTask { [unowned self] context in
+            defer { semaphore.signal() }
+
             let document = Document.fetchOrCreateWithTitle(context, title)
 
             do {
@@ -115,7 +130,6 @@ public class DocumentManager {
 
                 result = self.parseDocumentBody(document)
                 try Self.saveContext(context: context)
-                semaphore.signal()
             } catch {
                 Logger.shared.logError(error.localizedDescription, category: .coredata)
             }
@@ -204,19 +218,19 @@ public class DocumentManager {
     }
 
     private func parseDocumentBody(_ document: Document) -> DocumentStruct {
-        return DocumentStruct(id: document.id,
-                              databaseId: document.database_id,
-                              title: document.title,
-                              createdAt: document.created_at,
-                              updatedAt: document.updated_at,
-                              deletedAt: document.deleted_at,
-                              data: document.data ?? Data(),
-                              documentType: DocumentType(rawValue: document.document_type) ?? DocumentType.note,
-                              previousData: document.beam_api_data,
-                              previousChecksum: document.beam_api_checksum,
-                              version: document.version,
-                              isPublic: document.is_public
-                              )
+        DocumentStruct(id: document.id,
+                       databaseId: document.database_id,
+                       title: document.title,
+                       createdAt: document.created_at,
+                       updatedAt: document.updated_at,
+                       deletedAt: document.deleted_at,
+                       data: document.data ?? Data(),
+                       documentType: DocumentType(rawValue: document.document_type) ?? DocumentType.note,
+                       previousData: document.beam_api_data,
+                       previousChecksum: document.beam_api_checksum,
+                       version: document.version,
+                       isPublic: document.is_public
+        )
     }
 
     /// Must be called within the context thread
@@ -229,6 +243,7 @@ public class DocumentManager {
             Logger.shared.logDebug("Marking \(document.title) as deleted", category: .document)
             document.deleted_at = BeamDate.now
             document.version += 1
+            notificationDocumentUpdate(DocumentStruct(document: document))
         }
     }
 
@@ -245,6 +260,8 @@ public class DocumentManager {
             if !self.updateDocumentWithDocumentAPIType(document, documentType) {
                 throw DocumentManagerError.unresolvedConflict
             }
+
+            self.notificationDocumentUpdate(DocumentStruct(document: document))
 
             try Self.saveContext(context: context)
         }
@@ -342,7 +359,28 @@ public class DocumentManager {
         return true
     }
 
-    // MARK: -
+    private func isEqual(_ document: Document, to documentApiType: DocumentAPIType) -> Bool {
+        guard let documentType = documentApiType.documentType else { return false }
+        guard let updatedAt = documentApiType.updatedAt else { return false }
+        guard let createdAt = documentApiType.createdAt else { return false }
+
+        let documentTypeInt = (documentType == .journal ? 0 : 1)
+
+        // Server side doesn't store milliseconds for updatedAt and createdAt. Local coredata does, rounding using Int()
+        // to compare them
+
+        return Int(document.updated_at.timeIntervalSince1970) == Int(updatedAt.timeIntervalSince1970) &&
+            Int(document.created_at.timeIntervalSince1970) == Int(createdAt.timeIntervalSince1970) &&
+            document.title == documentApiType.title &&
+            document.data == documentApiType.data?.asData &&
+            document.is_public == documentApiType.isPublic &&
+            document.database_id.uuidString.lowercased() == documentApiType.database?.id &&
+            document.beam_api_data == documentApiType.data?.asData &&
+            document.document_type == documentTypeInt &&
+            document.deleted_at == documentApiType.deletedAt &&
+            document.id.uuidString.lowercased() == documentApiType.id
+    }
+
     // MARK: Refresh
     private func refreshAllAndSave(_ delete: Bool = true,
                                    _ context: NSManagedObjectContext,
@@ -359,6 +397,12 @@ public class DocumentManager {
 
             let document = Document.rawFetchOrCreateWithId(context, uuid)
 
+            if self.isEqual(document, to: documentAPIType) {
+                Logger.shared.logDebug("\(document.title): remote is equal to stored version",
+                                       category: .document)
+                continue
+            }
+
             // Making sure we had no local updates, and simply overwritten the local version
             if !self.updateDocumentWithDocumentAPIType(document, documentAPIType) {
                 errors = true
@@ -367,6 +411,8 @@ public class DocumentManager {
 
                 continue
             }
+
+            notificationDocumentUpdate(DocumentStruct(document: document))
         }
 
         // This will be used in the next refresh, to only fetch delta
@@ -379,11 +425,11 @@ public class DocumentManager {
         if delete {
             self.deleteNonExistingIds(context, remoteDocumentsIds)
         }
+
         return try Self.saveContext(context: context) && !errors
     }
 
     static var savedCount = 0
-    // MARK: -
     // MARK: NSManagedObjectContext saves
     @discardableResult
     static func saveContext(context: NSManagedObjectContext) throws -> Bool {
@@ -445,7 +491,6 @@ public class DocumentManager {
         }
     }
 
-    // MARK: -
     // MARK: Validations
     private func checkValidations(_ context: NSManagedObjectContext, _ document: Document) throws {
         try checkDuplicateTitles(context, document)
@@ -481,6 +526,31 @@ public class DocumentManager {
         }
     }
 
+    // MARK: notifications
+    private func notificationDocumentUpdate(_ documentStruct: DocumentStruct) {
+        let userInfo: [AnyHashable: Any] = [
+            "updatedDocuments": [documentStruct],
+            "deletedDocuments": []
+        ]
+
+        Logger.shared.logDebug("Posting notification .documentUpdate for \(documentStruct.title) version \(documentStruct.version)", category: .document)
+
+        NotificationCenter.default.post(name: .documentUpdate,
+                                        object: self,
+                                        userInfo: userInfo)
+    }
+
+    private func notificationDocumentDelete(_ documentStruct: DocumentStruct) {
+        let userInfo: [AnyHashable: Any] = [
+            "updatedDocuments": [],
+            "deletedDocuments": [documentStruct]
+        ]
+
+        NotificationCenter.default.post(name: .documentUpdate,
+                                        object: self,
+                                        userInfo: userInfo)
+    }
+
     // MARK: Shared
     private func predicateForSaveAll() -> NSPredicate? {
         var result: NSPredicate?
@@ -495,25 +565,48 @@ public class DocumentManager {
     }
 }
 
-// MARK: Foundation
+// MARK: - Foundation
 extension DocumentManager {
     /// Use this to have updates when the underlaying CD object `Document` changes
-    func onDocumentChange(_ documentStruct: DocumentStruct, completionHandler: @escaping (DocumentStruct) -> Void) -> AnyCancellable {
-        let cancellable = NotificationCenter.default
-            .publisher(for: Notification.Name.NSManagedObjectContextObjectsDidChange)
-            .compactMap({ self.notificationsToDocuments($0) })
-            .filter({ $0.map({ $0.id }).contains(documentStruct.id) })
-            .sink { documents in
-                for document in documents where document.id == documentStruct.id {
-                    // We don't want to get updates if we only changed internal values
-                    let keys = Array(document.changedValues().keys)
-                    guard keys.contains("data") || keys.contains("database_id") else {
-                        return
-                    }
+    func onDocumentChange(_ documentStruct: DocumentStruct,
+                          completionHandler: @escaping (DocumentStruct) -> Void) -> AnyCancellable {
+        Logger.shared.logDebug("onDocumentChange called for \(documentStruct.title)", category: .documentDebug)
 
-                    Logger.shared.logDebug("onDocumentChange: \(document.title) [\(keys.joined(separator: ","))]", category: .coredata)
-                    Logger.shared.logDebug(document.data?.asString ?? "-", category: .documentDebug)
-                    completionHandler(DocumentStruct(document: document))
+        let cancellable = NotificationCenter.default
+            .publisher(for: .documentUpdate)
+            .sink { notification in
+                // Skip notification coming from this manager
+                if let documentManager = notification.object as? DocumentManager, documentManager == self {
+                    return
+                }
+
+                if let updatedDocuments = notification.userInfo?["updatedDocuments"] as? [DocumentStruct] {
+                    for document in updatedDocuments where document.id == documentStruct.id {
+                        Logger.shared.logDebug("notification for \(document.title) version \(document.version)", category: .document)
+                        completionHandler(document)
+                    }
+                }
+            }
+        return cancellable
+    }
+
+    func onDocumentDelete(_ documentStruct: DocumentStruct,
+                          completionHandler: @escaping (DocumentStruct) -> Void) -> AnyCancellable {
+        Logger.shared.logDebug("onDocumentDelete called for \(documentStruct.title)", category: .documentDebug)
+
+        let cancellable = NotificationCenter.default
+            .publisher(for: .documentUpdate)
+            .sink { notification in
+                // Skip notification coming from this manager
+                if let documentManager = notification.object as? DocumentManager, documentManager == self {
+                    return
+                }
+
+                if let deletedDocuments = notification.userInfo?["deletedDocuments"] as? [DocumentStruct] {
+                    for document in deletedDocuments where document.id == documentStruct.id {
+                        Logger.shared.logDebug("notification for \(document.title) version \(document.version)", category: .document)
+                        completionHandler(document)
+                    }
                 }
             }
         return cancellable
@@ -725,6 +818,8 @@ extension DocumentManager {
                 return
             }
 
+            self.notificationDocumentUpdate(DocumentStruct(document: document))
+
             do {
                 completion?(.success(try Self.saveContext(context: context)))
             } catch {
@@ -744,9 +839,8 @@ extension DocumentManager {
     func save(_ documentStruct: DocumentStruct,
               _ networkSave: Bool = true,
               _ networkCompletion: ((Swift.Result<Bool, Error>) -> Void)? = nil,
-              completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) -> DocumentStruct {
-        let newVersion = documentStruct.version + 1
-        Logger.shared.logDebug("Saving \(documentStruct.title) version \(newVersion)", category: .document)
+              completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
+        Logger.shared.logDebug("Saving \(documentStruct.title) version \(documentStruct.version)", category: .document)
         Logger.shared.logDebug(documentStruct.data.asString ?? "-", category: .documentDebug)
 
         var blockOperation: BlockOperation!
@@ -774,13 +868,14 @@ extension DocumentManager {
 
                 do {
                     try self.checkValidations(context, document)
-                    try self.checkVersion(context, document, newVersion)
+                    try self.checkVersion(context, document, documentStruct.version)
                 } catch {
                     Logger.shared.logError(error.localizedDescription, category: .document)
                     completion?(.failure(error))
                     return
                 }
-                document.version = newVersion
+
+                document.version = documentStruct.version
 
                 if let database = try? Database.rawFetchWithId(context, document.database_id) {
                     database.updated_at = BeamDate.now
@@ -800,6 +895,9 @@ extension DocumentManager {
                     completion?(.failure(error))
                     return
                 }
+
+                // Ping others about the update
+                self.notificationDocumentUpdate(documentStruct)
 
                 if blockOperation.isCancelled {
                     completion?(.failure(DocumentManagerError.operationCancelled))
@@ -828,10 +926,6 @@ extension DocumentManager {
         saveOperations[documentStruct.id]?.cancel()
         saveOperations[documentStruct.id] = blockOperation
         saveDocumentQueue.addOperation(blockOperation)
-
-        var newDoc = documentStruct
-        newDoc.version = newVersion
-        return newDoc
     }
 
     @discardableResult
@@ -938,16 +1032,21 @@ extension DocumentManager {
     // MARK: Delete
     func delete(id: UUID, completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
         coreDataManager.persistentContainer.performBackgroundTask { context in
-            let document = try? Document.fetchWithId(context, id)
 
-            if let database_id = document?.database_id, let database = try? Database.rawFetchWithId(context, database_id) {
+            guard let document = try? Document.fetchWithId(context, id) else {
+                completion?(.failure(DocumentManagerError.idNotFound))
+                return
+            }
+
+            if let database = try? Database.rawFetchWithId(context, document.database_id) {
                 database.updated_at = BeamDate.now
             } else {
                 // We should always have a connected database
                 Logger.shared.logError("No connected database", category: .document)
             }
 
-            document?.delete(context)
+            let documentStruct = DocumentStruct(document: document)
+            document.delete(context)
 
             do {
                 try Self.saveContext(context: context)
@@ -956,6 +1055,9 @@ extension DocumentManager {
                 completion?(.failure(error))
                 return
             }
+
+            // Ping others about the update
+            self.notificationDocumentDelete(documentStruct)
 
             // If not authenticated
             guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
@@ -1248,6 +1350,9 @@ extension DocumentManager {
 
                     try Self.saveContext(context: context)
 
+                    // Ping others about the update
+                    self.notificationDocumentUpdate(DocumentStruct(document: document))
+
                     guard AuthenticationManager.shared.isAuthenticated,
                           Configuration.networkEnabled else {
                         return Promise(true)
@@ -1351,17 +1456,23 @@ extension DocumentManager {
         return self.coreDataManager.background()
             .then(on: backgroundQueue) { context in
                 context.performAndWait {
-                    let document = try? Document.fetchWithId(context, id)
+                    guard let document = try? Document.fetchWithId(context, id) else {
+                        return
+                    }
 
-                    if let database_id = document?.database_id,
-                       let database = try? Database.rawFetchWithId(context, database_id) {
+                    let documentStruct = DocumentStruct(document: document)
+
+                    if let database = try? Database.rawFetchWithId(context, document.database_id) {
                         database.updated_at = BeamDate.now
                     } else {
                         // We should always have a connected database
                         Logger.shared.logError("No connected database", category: .document)
                     }
 
-                    document?.delete(context)
+                    document.delete(context)
+
+                    // Ping others about the update
+                    self.notificationDocumentDelete(documentStruct)
                 }
 
                 guard AuthenticationManager.shared.isAuthenticated,
@@ -1381,9 +1492,15 @@ extension DocumentManager {
             .then(on: backgroundQueue) { context in
 
                 context.performAndWait {
-                    ids.forEach { (id) in
-                        let document = try? Document.fetchWithId(context, id)
-                        document?.delete(context)
+                    ids.forEach { id in
+                        guard let document = try? Document.fetchWithId(context, id) else {
+                            return
+                        }
+                        let documentStruct = DocumentStruct(document: document)
+
+                        document.delete(context)
+                        // Ping others about the update
+                        self.notificationDocumentDelete(documentStruct)
                     }
                 }
 
@@ -1573,6 +1690,9 @@ extension DocumentManager {
 
                     try Self.saveContext(context: context)
 
+                    // Ping others about the update
+                    self.notificationDocumentUpdate(DocumentStruct(document: document))
+
                     guard AuthenticationManager.shared.isAuthenticated,
                           Configuration.networkEnabled else {
                         return .value(true)
@@ -1710,15 +1830,22 @@ extension DocumentManager {
         return promise
             .then(on: backgroundQueue) { context -> PromiseKit.Promise<Bool> in
                 context.performAndWait {
-                    let document = try? Document.fetchWithId(context, id)
-                    if let database_id = document?.database_id,
-                       let database = try? Database.rawFetchWithId(context, database_id) {
+                    guard let document = try? Document.fetchWithId(context, id) else {
+                        return
+                    }
+
+                    let documentStruct = DocumentStruct(document: document)
+
+                    if let database = try? Database.rawFetchWithId(context, document.database_id) {
                         database.updated_at = BeamDate.now
                     } else {
                         // We should always have a connected database
                         Logger.shared.logError("No connected database", category: .document)
                     }
-                    document?.delete(context)
+                    document.delete(context)
+
+                    // Ping others about the update
+                    self.notificationDocumentDelete(documentStruct)
                 }
 
                 guard AuthenticationManager.shared.isAuthenticated,

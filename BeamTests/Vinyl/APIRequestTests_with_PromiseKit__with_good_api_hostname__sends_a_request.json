@@ -1,6 +1,23 @@
 [
   {
+    "request" : {
+      "url" : "https:\/\/api.beamapp.co\/graphql",
+      "method" : "POST",
+      "body" : {
+        "query" : "mutation ForgotPassword($email: Email!) {\n  forgotPassword(input: {email: $email}) {\n    errors { path message}\n    success\n  }\n}\n",
+        "variables" : {
+          "email" : "fabien+test@beamapp.co"
+        }
+      },
+      "headers" : {
+        "Accept" : "application\/json",
+        "User-Agent" : "Beam client, 0.1.0 (1)",
+        "Accept-Language" : "en",
+        "Content-Type" : "application\/json"
+      }
+    },
     "response" : {
+      "url" : "https:\/\/api.beamapp.co\/graphql",
       "status" : 200,
       "body" : {
         "data" : {
@@ -13,41 +30,24 @@
         }
       },
       "headers" : {
-        "X-Runtime" : "0.020795",
         "X-Frame-Options" : "SAMEORIGIN",
-        "Via" : "1.1 vegur",
-        "Referrer-Policy" : "strict-origin-when-cross-origin",
-        "X-Request-Id" : "b56511d1-d0f8-4643-855c-fcfdfa5a3d54",
-        "X-Download-Options" : "noopen",
-        "Connection" : "keep-alive",
-        "Transfer-Encoding" : "Identity",
-        "X-Content-Type-Options" : "nosniff",
         "Etag" : "W\/\"7b29a7c56f1c592fb5b308a997767ae1\"",
-        "Server" : "Cowboy",
+        "X-Runtime" : "0.024230",
         "Strict-Transport-Security" : "max-age=63072000; includeSubDomains",
-        "Cache-Control" : "max-age=0, private, must-revalidate",
-        "Vary" : "Accept, Origin",
+        "Via" : "1.1 vegur",
+        "Transfer-Encoding" : "Identity",
+        "X-Request-Id" : "3bd9014f-c35d-4086-bb9f-cfc9a396dd0a",
         "X-Permitted-Cross-Domain-Policies" : "none",
-        "X-Xss-Protection" : "1; mode=block",
-        "Date" : "Tue, 11 May 2021 16:07:28 GMT",
-        "Content-Type" : "application\/json; charset=utf-8"
-      },
-      "url" : "https:\/\/api.beamapp.co\/graphql"
-    },
-    "request" : {
-      "method" : "POST",
-      "url" : "https:\/\/api.beamapp.co\/graphql",
-      "body" : {
-        "query" : "mutation ForgotPassword($email: Email!) {\n  forgotPassword(input: {email: $email}) {\n    errors { path message}\n    success\n  }\n}\n",
-        "variables" : {
-          "email" : "fabien+test@beamapp.co"
-        }
-      },
-      "headers" : {
-        "Accept" : "application\/json",
-        "Content-Type" : "application\/json",
-        "Accept-Language" : "en",
-        "User-Agent" : "Beam client, 0.1.0 (1)"
+        "Referrer-Policy" : "strict-origin-when-cross-origin",
+        "Date" : "Wed, 09 Jun 2021 10:27:10 GMT",
+        "X-Download-Options" : "noopen",
+        "Server" : "Cowboy",
+        "Vary" : "Accept, Origin",
+        "X-Content-Type-Options" : "nosniff",
+        "Cache-Control" : "max-age=0, private, must-revalidate",
+        "Connection" : "keep-alive",
+        "Content-Type" : "application\/json; charset=utf-8",
+        "X-Xss-Protection" : "1; mode=block"
       }
     }
   }

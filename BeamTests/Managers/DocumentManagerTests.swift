@@ -78,8 +78,9 @@ class DocumentManagerTests: QuickSpec {
             context("with Foundation") {
                 it("saves document") {
                     var docStruct = helper.createDocumentStruct()
+                    docStruct.version += 1
                     waitUntil(timeout: .seconds(10)) { done in
-                        docStruct = sut.save(docStruct, completion:  { _ in
+                        sut.save(docStruct, completion:  { _ in
                             done()
                         })
                     }
@@ -94,11 +95,13 @@ class DocumentManagerTests: QuickSpec {
                     let before = DocumentManager.savedCount
 
                     for _ in 0..<5 {
-                        docStruct = sut.save(docStruct, completion: { _ in })
+                        docStruct.version += 1
+                        sut.save(docStruct, completion: { _ in })
                     }
 
                     waitUntil(timeout: .seconds(10)) { done in
-                        docStruct = sut.save(docStruct, completion: { _ in done() })
+                        docStruct.version += 1
+                        sut.save(docStruct, completion: { _ in done() })
                     }
 
                     // Testing `== 1` might sometimes fail because of speed issue. We want to
@@ -114,9 +117,10 @@ class DocumentManagerTests: QuickSpec {
 
                         var docStruct2 = helper.createDocumentStruct()
                         docStruct2.title = docStruct.title
+                        docStruct2.version += 1
 
                         waitUntil(timeout: .seconds(10)) { done in
-                            docStruct2 = sut.save(docStruct2, completion: { result in
+                            sut.save(docStruct2, completion: { result in
                                 expect { try result.get() }.to(throwError())
                                 done()
                             })
@@ -125,7 +129,8 @@ class DocumentManagerTests: QuickSpec {
                         docStruct2.deletedAt = Date()
 
                         waitUntil(timeout: .seconds(10)) { done in
-                            docStruct2 = sut.save(docStruct2, completion: { result in
+                            docStruct2.version += 1
+                            sut.save(docStruct2, completion: { result in
                                 expect { try result.get() }.toNot(throwError())
                                 done()
                             })
@@ -608,13 +613,15 @@ class DocumentManagerTests: QuickSpec {
             it("calls handler on document updates") {
                 var docStruct = helper.createDocumentStruct()
                 docStruct = helper.saveLocally(docStruct)
-                docStruct.version = 1
+                docStruct.version += 1
 
                 let newTitle = String.randomTitle()
 
+                let callbackDocumentManager = DocumentManager()
+
                 var cancellable: AnyCancellable!
                 waitUntil(timeout: .seconds(10)) { done in
-                    cancellable = sut.onDocumentChange(docStruct) { updatedDocStruct in
+                    cancellable = callbackDocumentManager.onDocumentChange(docStruct) { updatedDocStruct in
                         expect(docStruct.id).to(equal(updatedDocStruct.id))
                         expect(updatedDocStruct.title).to(equal(newTitle))
                         cancellable.cancel() // To avoid a warning
@@ -623,39 +630,45 @@ class DocumentManagerTests: QuickSpec {
 
                     docStruct.title = newTitle
                     docStruct.data = newTitle.asData // to force the callback
-                    docStruct = sut.save(docStruct, completion: { result in
+                    sut.save(docStruct, completion: { result in
                         expect { try result.get() }.toNot(throwError())
                         expect { try result.get() }.to(beTrue())
                     })
                 }
             }
 
-            it("doesn't call handler if beam_api_data only is modified") {
+            it("does not call handler for same document manager") {
                 var docStruct = helper.createDocumentStruct()
                 docStruct = helper.saveLocally(docStruct)
-                let newData = "another data"
+                docStruct.version += 1
+
+                let newTitle = String.randomTitle()
+
+                let callbackDocumentManager = DocumentManager()
+
                 var cancellable: AnyCancellable!
                 waitUntil(timeout: .seconds(10)) { done in
-                    cancellable = sut.onDocumentChange(docStruct) { updatedDocStruct in
+                    cancellable = callbackDocumentManager.onDocumentChange(docStruct) { updatedDocStruct in
                         expect(docStruct.id).to(equal(updatedDocStruct.id))
-                        expect(updatedDocStruct.data).to(equal(newData.asData))
-                        expect(updatedDocStruct.previousData).to(equal(newData.asData))
+                        expect(updatedDocStruct.title).to(equal(newTitle))
                         cancellable.cancel() // To avoid a warning
                         done()
                     }
 
-                    //swiftlint:disable:next force_try
-                    let document = try! Document.fetchWithId(mainContext, docStruct.id)!
-                    document.beam_api_data = newData.asData
-                    //swiftlint:disable:next force_try
-                    try! mainContext.save()
+                    // This should not generate handler callback
+                    callbackDocumentManager.save(docStruct, completion: { _ in })
 
-                    // Note: waitUntil fails if done() is called more than once, I use this to trigger
-                    // one event and get out of the waitUntil loop.
-                    // TL;DR: this will fail if `save()` generates 2 callbacks in `onDocumentChange`
-                    document.data = newData.asData
-                    //swiftlint:disable:next force_try
-                    try! mainContext.save()
+                    docStruct.version += 1
+                    docStruct.title = newTitle
+                    docStruct.data = newTitle.asData
+
+                    // This will
+                    sut.save(docStruct, completion: { result in
+                        expect { try result.get() }.toNot(throwError())
+                        expect { try result.get() }.to(beTrue())
+                    })
+
+                    // done() can only be called once, if twice it will raise error
                 }
             }
         }
@@ -676,7 +689,8 @@ class DocumentManagerTests: QuickSpec {
 
                 // Semaphore is needed or the afterEach deleteDocument might be called *before* this saveDocument is finished
                 let semaphore = DispatchSemaphore(value: 0)
-                docStruct = sut.save(docStruct, completion: { _ in
+                docStruct.version += 1
+                sut.save(docStruct, completion: { _ in
                     semaphore.signal()
                 })
                 semaphore.wait()
@@ -701,7 +715,8 @@ class DocumentManagerTests: QuickSpec {
                                            version: 0)
 
                 waitUntil(timeout: .seconds(2)) { done in
-                    docStruct = sut.save(docStruct, completion:  { _ in
+                    docStruct.version += 1
+                    sut.save(docStruct, completion:  { _ in
                         done()
                     })
                     // This is done by BeamNote (the caller), it saves the returned version
@@ -710,7 +725,8 @@ class DocumentManagerTests: QuickSpec {
                 }
 
                 waitUntil(timeout: .seconds(2)) { done in
-                    docStruct = sut.save(docStruct, completion:  { _ in
+                    docStruct.version += 1
+                    sut.save(docStruct, completion:  { _ in
                         done()
                     })
                     expect(docStruct.version).to(equal(2))
@@ -731,7 +747,9 @@ class DocumentManagerTests: QuickSpec {
 
                 for index in 0...3 {
                     waitUntil(timeout: .seconds(2)) { done in
-                        docStruct = sut.save(docStruct, completion:  { _ in
+                        docStruct.version += 1
+
+                        sut.save(docStruct, completion:  { _ in
                             done()
                         })
                         // This is done by BeamNote (the caller), it saves the returned version
@@ -744,7 +762,9 @@ class DocumentManagerTests: QuickSpec {
                 // Try to save a previous version
                 docStruct.version = 1
                 waitUntil(timeout: .seconds(2)) { done in
-                    docStruct = sut.save(docStruct, completion:  { result in
+                    docStruct.version += 1
+
+                    sut.save(docStruct, completion:  { result in
                         expect { try result.get() }.to(throwError { (error: NSError) in
                             expect(error.code).to(equal(1002))
                         })
