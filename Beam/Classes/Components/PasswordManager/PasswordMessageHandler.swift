@@ -21,34 +21,38 @@ class PasswordMessageHandler: BeamMessageHandler<PasswordMessages> {
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
     override func onMessage(messageName: String, messageBody: Any?, from webPage: WebPage) {
+        guard let messageKey = PasswordMessages(rawValue: messageName) else {
+            Logger.shared.logError("Unsupported message \(messageName) for password message handler", category: .web)
+            return
+        }
         let passwordOverlayController = webPage.passwordOverlayController
-        switch messageName {
+        switch messageKey {
 
-        case PasswordMessages.password_textInputFields.rawValue:
+        case PasswordMessages.password_textInputFields:
             guard let jsonString = messageBody as? String else {
                 Logger.shared.logError("Ignoring message as body is not a String", category: .web)
                 return
             }
             passwordOverlayController.updateInputFields(with: jsonString)
 
-        case PasswordMessages.password_textInputFocusIn.rawValue:
+        case PasswordMessages.password_textInputFocusIn:
             guard let elementId = messageBody as? String else {
                 Logger.shared.logError("Ignoring message as body is not a String", category: .web)
                 return
             }
             passwordOverlayController.updateInputFocus(for: elementId, becomingActive: true)
 
-        case PasswordMessages.password_textInputFocusOut.rawValue:
+        case PasswordMessages.password_textInputFocusOut:
             guard let elementId = messageBody as? String else {
                 Logger.shared.logError("Ignoring message as body is not a String", category: .web)
                 return
             }
             passwordOverlayController.updateInputFocus(for: elementId, becomingActive: false)
 
-        case PasswordMessages.password_formSubmit.rawValue:
+        case PasswordMessages.password_formSubmit:
             passwordOverlayController.handleWebFormSubmit()
 
-        case PasswordMessages.password_scroll.rawValue:
+        case PasswordMessages.password_scroll:
             let passwordBody = messageBody as? [String: AnyObject]
             guard let dict = passwordBody,
                   let x = dict["x"] as? CGFloat,
@@ -62,7 +66,7 @@ class PasswordMessageHandler: BeamMessageHandler<PasswordMessages> {
             passwordOverlayController.updateScrollPosition(x: x, y: y, width: width, height: height)
             Logger.shared.logDebug("Password controller handled scroll: \(x), \(y)", category: .web)
 
-        case PasswordMessages.password_resize.rawValue:
+        case PasswordMessages.password_resize:
             let passwordBody = messageBody as? [String: AnyObject]
             guard let dict = passwordBody,
                   let width = dict["width"] as? CGFloat,
@@ -72,9 +76,6 @@ class PasswordMessageHandler: BeamMessageHandler<PasswordMessages> {
                 return
             }
             passwordOverlayController.updateViewSize(width: width, height: height)
-
-        default:
-            break
         }
     }
 }

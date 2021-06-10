@@ -1,17 +1,16 @@
+import { BeamRect } from "./BeamTypes"
+
 export class FrameInfo {
   /**
-   * @type string
    */
-  href
+  href: string
 
   /**
-   * @type {BeamRect}
    */
-  bounds
+  bounds: BeamRect
 }
 
 export interface WebEventsUI {
-
   setFramesInfo(framesInfo: FrameInfo[])
 
   setScrollInfo(scrollInfo: any)

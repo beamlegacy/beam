@@ -22,6 +22,7 @@ class TestWebPage: WebPage {
     private(set) var webviewWindow: NSWindow?
     private(set) var frame: NSRect = NSRect()
     private(set) var downloadManager: DownloadManager
+    private(set) var navigationController: WebNavigationController
     var webView: BeamWebView!
     var activeNote: String = "Card A"
     var testNotes: [String: BeamCore.BeamNote] = ["Card A": BeamNote(title: "Card A")]
@@ -30,12 +31,13 @@ class TestWebPage: WebPage {
     }
 
     init(browsingScorer: BrowsingScorer, passwordOverlayController: PasswordOverlayController, pns: PointAndShoot,
-         fileStorage: BeamFileStorage, downloadManager: DownloadManager) {
+         fileStorage: BeamFileStorage, downloadManager: DownloadManager, navigationController: WebNavigationController) {
         self.browsingScorer = browsingScorer
         self.passwordOverlayController = passwordOverlayController
         pointAndShoot = pns
         storage = fileStorage
         self.downloadManager = downloadManager
+        self.navigationController = navigationController
     }
 
     func addCSS(source: String, when: WKUserScriptInjectionTime) {
@@ -45,6 +47,22 @@ class TestWebPage: WebPage {
     func addJS(source: String, when: WKUserScriptInjectionTime) {
         events.append("addJS \(source.hashValue) \(String(describing: when))")
     }
+
+    func createNewTab(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, setCurrent: Bool) -> WebPage {
+        events.append("createNewTab \(targetURL) \(setCurrent))")
+        return TestWebPage(browsingScorer: browsingScorer, passwordOverlayController: passwordOverlayController, pns: pointAndShoot,
+                           fileStorage: storage, downloadManager: downloadManager, navigationController: navigationController)
+    }
+
+    func isActiveTab() -> Bool {
+        true
+    }
+
+    func leave() {
+        events.append("leave")
+    }
+
+    func navigatedTo(url: URL, read: Readability, title: String?) {}
 
     func executeJS(_ jsCode: String, objectName: String?) -> Promise<Any?> {
         if objectName == "PointAndShoot" {
@@ -70,6 +88,10 @@ class TestWebPage: WebPage {
         events.append("addToNote \(allowSearchResult)")
         // use last note
         return testNotes[activeNote]
+    }
+
+    func closeTab() {
+        events.append("closeTab")
     }
 
     func setDestinationNote(_ note: BeamCore.BeamNote, rootElement: BeamCore.BeamElement?) {
@@ -135,6 +157,7 @@ class PasswordStoreMock: PasswordStore {
 }
 
 class MockUserInformationsStore: UserInformationsStore {
+
     func save(userInfo: UserInformations) {}
 
     func get() -> UserInformations {
@@ -189,6 +212,18 @@ class DownloadManagerMock: DownloadManager {
     func waitForDownloadURL(_ url: URL, headers: [String: String]) -> DownloadManagerResult? { fatalError("waitForDownloadURL(_:headers:) has not been implemented") }
 }
 
+class NavigationControllerMock: WebNavigationController {
+    var events: [String] = []
+
+    func navigatedTo(url: URL, webView: WKWebView) {
+        events.append("navigatedTo \(url)")
+    }
+
+    func setLoading() {
+        events.append("setLoading")
+    }
+}
+
 class PointAndShootTest: XCTestCase {
     var testPage: TestWebPage?
     var pns: PointAndShoot!
@@ -203,10 +238,12 @@ class PointAndShootTest: XCTestCase {
 
         let testFileStorage = FileStorageMock()
         let testDownloadManager = DownloadManagerMock()
+        let navigationController = NavigationControllerMock()
         self.pns = PointAndShoot(ui: testUI, scorer: testBrowsingScorer)
         let page = TestWebPage(browsingScorer: testBrowsingScorer,
                                passwordOverlayController: testPasswordOverlayController, pns: pns,
-                               fileStorage: testFileStorage, downloadManager: testDownloadManager)
+                               fileStorage: testFileStorage, downloadManager: testDownloadManager
+            , navigationController: navigationController)
         self.testPage = page
         page.browsingScorer.page = page
         page.passwordOverlayController.page = page

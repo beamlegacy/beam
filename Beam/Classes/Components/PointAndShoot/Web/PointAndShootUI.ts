@@ -4,6 +4,7 @@ import { BeamHTMLElement } from "./BeamTypes"
 
 export interface PointAndShootUI extends WebEventsUI {
   hidePoint()
+
   /**
    * Calculate mouseLocation relative to element
    *

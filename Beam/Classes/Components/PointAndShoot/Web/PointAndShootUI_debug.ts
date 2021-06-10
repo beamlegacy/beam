@@ -1,9 +1,9 @@
-import { BeamCollectedQuote } from "./BeamTypes";
-import {PointAndShootUI} from "./PointAndShootUI"
-import {PointAndShootUI_native} from "./PointAndShootUI_native";
-import {PointAndShootUI_web} from "./PointAndShootUI_web";
-import {FrameInfo} from "./WebEventsUI";
-import {BeamHTMLElement} from "./BeamTypes"
+import { BeamCollectedQuote } from "./BeamTypes"
+import { PointAndShootUI } from "./PointAndShootUI"
+import { PointAndShootUI_native } from "./PointAndShootUI_native"
+import { PointAndShootUI_web } from "./PointAndShootUI_web"
+import { FrameInfo } from "./WebEventsUI"
+import { BeamHTMLElement } from "./BeamTypes"
 
 export class PointAndShootUI_debug implements PointAndShootUI {
   /**
@@ -25,10 +25,12 @@ export class PointAndShootUI_debug implements PointAndShootUI {
     this.web.select(selection)
     this.native.select(selection)
   }
+
   unselect(selection: any) {
     this.web.unselect(selection)
     this.native.unselect(selection)
   }
+
   getMouseLocation(el: any, x: any, y: any) {
     this.web.getMouseLocation(el, x, y)
     this.native.getMouseLocation(el, x, y)

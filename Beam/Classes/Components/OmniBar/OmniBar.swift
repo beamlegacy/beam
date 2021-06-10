@@ -162,7 +162,7 @@ struct OmniBar: View {
     func toggleMode() {
         if state.mode == .web {
             guard let tab = browserTabsManager.currentTab else { return }
-            state.navigateToNote(tab.note)
+            state.navigateToNote(tab.noteController.note)
             autocompleteManager.resetQuery()
         } else {
             state.mode = .web

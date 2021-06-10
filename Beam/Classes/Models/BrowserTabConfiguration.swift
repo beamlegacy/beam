@@ -29,6 +29,9 @@ class BrowserTabConfiguration: WKWebViewConfiguration, BeamWebViewConfiguration 
 
         let pointAndShootMessageHandler = PointAndShootMessageHandler(config: self)
         pointAndShootMessageHandler.register(to: self)
+
+        let navigationMessageHandler = WebNavigationMessageHandler(config: self)
+        navigationMessageHandler.register(to: self)
     }
 
     func addJS(source: String, when: WKUserScriptInjectionTime) {

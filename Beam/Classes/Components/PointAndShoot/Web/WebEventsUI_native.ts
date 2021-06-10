@@ -1,6 +1,6 @@
-import {Native} from "./Native"
-import {FrameInfo, WebEventsUI} from "./WebEventsUI"
-import {BeamWindow} from "./BeamTypes";
+import { Native } from "./Native"
+import { FrameInfo, WebEventsUI } from "./WebEventsUI"
+import { BeamWindow } from "./BeamTypes"
 
 export class WebEventsUI_native implements WebEventsUI {
   /**
@@ -22,7 +22,7 @@ export class WebEventsUI_native implements WebEventsUI {
   static getInstance(win: BeamWindow) {
     let instance
     try {
-      const native = Native.getInstance(win);
+      const native = Native.getInstance(win)
       instance = new WebEventsUI_native(native)
     } catch (e) {
       console.error(e)
@@ -35,7 +35,7 @@ export class WebEventsUI_native implements WebEventsUI {
    * @param framesInfo {FrameInfo[]}
    */
   setFramesInfo(framesInfo: FrameInfo[]) {
-    this.native.sendMessage("frameBounds", {frames: framesInfo})
+    this.native.sendMessage("frameBounds", { frames: framesInfo })
   }
 
   setScrollInfo(scrollInfo) {

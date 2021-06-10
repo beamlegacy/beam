@@ -57,25 +57,30 @@ class NavigationCollectUITests: QuickSpec {
             
             it("add links to journal in order") {
                 self.helper.openTestPage(number: 1)
-                expect(self.app.staticTexts[titles[0]].waitForExistence(timeout: 10)) == true
+                let title0 = titles[0]
+                let staticText0 = self.app.staticTexts[title0]
+                expect(staticText0.waitForExistence(timeout: 10)) == true
                 self.helper.showJournal()
-                expect(self.journalChildren.element(matching: NSPredicate(format: "value = %@", titles[0])).firstMatch.waitForExistence(timeout: 2)) == true
-                expect(self.journalChildren.element(boundBy: 0).value as? String) == titles[0]
+                expect(self.journalChildren.element(matching: NSPredicate(format: "value = %@", title0)).firstMatch.waitForExistence(timeout: 2)) == true
+                expect(self.journalChildren.element(boundBy: 0).value as? String) == title0
 
                 self.helper.openTestPage(number: 2)
-                expect(self.app.staticTexts[titles[1]].waitForExistence(timeout: 10)) == true
+                let title1 = titles[1]
+                let staticText1 = self.app.staticTexts[title1]
+                expect(staticText1.waitForExistence(timeout: 10)) == true
                 self.helper.showJournal()
-                expect(self.journalChildren.element(matching: NSPredicate(format: "value = %@", titles[1])).firstMatch.waitForExistence(timeout: 2)) == true
-                expect(self.journalChildren.element(boundBy: 0).value as? String) == titles[0]
-                expect(self.journalChildren.element(boundBy: 1).value as? String) == titles[1]
+                expect(self.journalChildren.element(matching: NSPredicate(format: "value = %@", title1)).firstMatch.waitForExistence(timeout: 2)) == true
+                expect(self.journalChildren.element(boundBy: 0).value as? String) == title0
+                expect(self.journalChildren.element(boundBy: 1).value as? String) == title1
 
                 self.helper.openTestPage(number: 3)
-                expect(self.app.staticTexts[titles[2]].waitForExistence(timeout: 10)) == true
+                let title2 = titles[2]
+                expect(self.app.staticTexts[title2].waitForExistence(timeout: 10)) == true
                 self.helper.showJournal()
-                expect(self.journalChildren.element(matching: NSPredicate(format: "value = %@", titles[2])).firstMatch.waitForExistence(timeout: 2)) == true
-                expect(self.journalChildren.element(boundBy: 0).value as? String) == titles[0]
-                expect(self.journalChildren.element(boundBy: 1).value as? String) == titles[1]
-                expect(self.journalChildren.element(boundBy: 2).value as? String) == titles[2]
+                expect(self.journalChildren.element(matching: NSPredicate(format: "value = %@", title2)).firstMatch.waitForExistence(timeout: 2)) == true
+                expect(self.journalChildren.element(boundBy: 0).value as? String) == title0
+                expect(self.journalChildren.element(boundBy: 1).value as? String) == title1
+                expect(self.journalChildren.element(boundBy: 2).value as? String) == title2
             }
 
             it("can navigate links in collected text") {

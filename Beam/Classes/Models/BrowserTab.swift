@@ -5,9 +5,7 @@ import WebKit
 import BeamCore
 import Promises
 
-// swiftlint:disable file_length
-// swiftlint:disable:next type_body_length
-@objc class BrowserTab: NSObject, ObservableObject, Identifiable, WKNavigationDelegate, WKUIDelegate, Codable, WebPage, Scorable {
+@objc class BrowserTab: NSObject, ObservableObject, Identifiable, Codable, WebPage, Scorable {
     var id: UUID
 
     var scrollX: CGFloat = 0
@@ -16,8 +14,11 @@ import Promises
     var height: CGFloat = 0
     private var pixelRatio: Double = 1
 
+    let uiDelegate: BeamWebkitUIDelegate = BeamWebkitUIDelegate()
+    let noteController: WebNoteController
+
     public func load(url: URL) {
-        isNavigatingFromSearchBar = true
+        navigationController.setLoading()
         self.url = url
         navigationCount = 0
         if url.isFileURL {
@@ -49,7 +50,6 @@ import Promises
     @Published var canGoBack: Bool = false
     @Published var canGoForward: Bool = false
     @Published var backForwardList: WKBackForwardList!
-    @Published var visitedURLs = Set<URL>()
     @Published var favIcon: NSImage?
 
     @Published var browsingTree: BrowsingTree
@@ -59,8 +59,18 @@ import Promises
         true
     }
 
-    private var isCurrent: Bool {
+    func isActiveTab() -> Bool {
         self == state.browserTabsManager.currentTab
+    }
+
+    func leave() {
+        pointAndShoot.removeAll()
+    }
+
+    func navigatedTo(url: URL, read: Readability, title: String? = nil) {
+        appendToIndexer?(url, read)
+        noteController.setCurrent(text: title == "" ? webView.title : title, url: url)
+        updateScore()
     }
 
     lazy var passwordOverlayController: PasswordOverlayController = {
@@ -81,17 +91,21 @@ import Promises
         return pns
     }()
 
-    private var isNavigatingFromSearchBar: Bool = false
+    var navigationController: WebNavigationController {
+        return beamNavigationController
+    }
+
+    lazy var beamNavigationController: BeamWebNavigationController = {
+        let navController = BeamWebNavigationController(browsingTree: browsingTree, noteController: noteController)
+        navController.page = self
+        return navController
+    }()
 
     var state: BeamState!
-    public private(set) var note: BeamNote
-    public private(set) var rootElement: BeamElement
-
-    public private(set) var element: BeamElement?
 
     public var score: Float {
-        get { element?.score ?? 0 }
-        set { element?.score = newValue }
+        get { noteController.score ?? 0 }
+        set { noteController.score = newValue }
     }
 
     var webviewWindow: NSWindow? {
@@ -111,18 +125,12 @@ import Promises
     }
 
     func setDestinationNote(_ note: BeamNote, rootElement: BeamElement? = nil) {
-        self.note = note
-        self.rootElement = rootElement ?? note
-        browsingTree.destinationNoteChange()
-        self.note.browsingSessions.append(browsingTree)
-        state.destinationCardName = note.title
-
-        if let elem = element {
-            // re-parent the element that has already been created
-            self.rootElement.addChild(elem)
-        } else {
-            _ = addToNote()
+        let hasElem = noteController.setDestination(note: note, browsingTree: browsingTree)
+        if (!hasElem) {
+            _ = addToNote(allowSearchResult: false)
         }
+        state.destinationCardName = note.title
+        browsingTree.destinationNoteChange()
     }
 
     var appendToIndexer: ((URL, Readability) -> Void)?
@@ -141,8 +149,6 @@ import Promises
          id: UUID = UUID(), webView: BeamWebView? = nil) {
         self.state = state
         self.id = id
-        self.note = note
-        self.rootElement = rootElement ?? note
         self.browsingTreeOrigin = browsingTreeOrigin
 
         if let suppliedWebView = webView {
@@ -158,11 +164,14 @@ import Promises
             self.webView = web
         }
 
-        browsingTree = BrowsingTree(browsingTreeOrigin)
+        let tree: BrowsingTree = BrowsingTree(browsingTreeOrigin)
+        browsingTree = tree
+        noteController = WebNoteController(note: note, rootElement: rootElement)
 
         super.init()
 
         self.webView.page = self
+        uiDelegate.webPage = self
 
         note.browsingSessions.append(browsingTree)
         setupObservers()
@@ -179,9 +188,7 @@ import Promises
         case url
         case browsingTree
         case privateMode
-        case note
-        case rootElement
-        case element
+        case noteController
     }
 
     var preloadUrl: URL?
@@ -194,21 +201,13 @@ import Promises
         originalQuery = try container.decode(String.self, forKey: .originalQuery)
         preloadUrl = try? container.decode(URL.self, forKey: .url)
 
-        browsingTree = try container.decode(BrowsingTree.self, forKey: .browsingTree)
+        let tree: BrowsingTree = try container.decode(BrowsingTree.self, forKey: .browsingTree)
+        browsingTree = tree
+        noteController = try container.decode(WebNoteController.self, forKey: .noteController)
         privateMode = try container.decode(Bool.self, forKey: .privateMode)
 
-        let noteTitle = try container.decode(String.self, forKey: .note)
-        let loadedNote = BeamNote.fetch(AppDelegate.main.documentManager, title: noteTitle)
-                ?? AppDelegate.main.data.todaysNote
-        note = loadedNote
-        let rootId = try? container.decode(UUID.self, forKey: .rootElement)
-        rootElement = note.findElement(rootId ?? loadedNote.id) ?? loadedNote.children.first!
-        if let elementId = try? container.decode(UUID.self, forKey: .element) {
-            element = loadedNote.findElement(elementId)
-        }
-
         super.init()
-        note.browsingSessions.append(browsingTree)
+        noteController.addBrowsingTree(browsingTree)
     }
 
     func postLoadSetup(state: BeamState) {
@@ -240,65 +239,30 @@ import Promises
         }
         try container.encode(browsingTree, forKey: .browsingTree)
         try container.encode(privateMode, forKey: .privateMode)
-        try container.encode(note.title, forKey: .note)
-        try container.encode(rootElement.id, forKey: .rootElement)
-        if let element = element {
-            try container.encode(element, forKey: .element)
-        }
+        try container.encode(noteController, forKey: .noteController)
     }
 
-    // Add the current page to the current note and return the beam element
-    // (if the element already exist return it directly)
-    func addToNote(allowSearchResult: Bool = false) -> BeamElement? {
-        guard let elem = element else {
-            guard let url = url else {
-                Logger.shared.logError("Cannot get current URL", category: .general)
-                return nil
-            }
-            guard allowSearchResult || !url.isSearchResult else {
-                Logger.shared.logWarning("Adding search results is not allowed", category: .web)
-                return nil
-            } // Don't automatically add search results
-            let linkString = url.absoluteString
-            guard !note.outLinks.contains(linkString) else {
-                element = note.elementContainingLink(to: linkString); return element
-            }
-            Logger.shared.logDebug("add current page '\(title)' to note '\(note.title)'", category: .web)
-            if rootElement.children.count == 1,
-               let firstElement = rootElement.children.first,
-               firstElement.text.isEmpty {
-                element = firstElement
-            } else {
-                let newElement = BeamElement()
-                element = newElement
-                rootElement.addChild(newElement)
-            }
-            updateElementWithTitle()
-            return element
+    func addToNote(allowSearchResult: Bool) -> BeamElement? {
+        guard let url = url else {
+            Logger.shared.logError("Cannot get current URL", category: .general)
+            return nil
+        }
+        guard allowSearchResult || !url.isSearchResult else {
+            Logger.shared.logWarning("Adding search results is not allowed", category: .web)
+            return nil
+        } // Don't automatically add search results
+        guard let elem = noteController.element else {
+            return noteController.add(text: title, url: url)
         }
         return elem
     }
 
     private func receivedWebviewTitle(_ title: String? = nil) {
-        updateElementWithTitle(title)
+        noteController.setCurrent(text: title, url: url)
         guard title?.isEmpty == false || (!isLoading && url != nil) else {
             return
         }
         self.title = title ?? ""
-    }
-
-    private func updateElementWithTitle(_ title: String? = nil) {
-        guard let url = url, let element = element else {
-            return
-        }
-        // only change element text if it contains only this link
-        guard element.text.ranges.count == 1,
-              let range = element.text.ranges.first,
-              range.attributes.count <= 1 else {
-            return
-        }
-        let name = title ?? (self.title.isEmpty ? url.absoluteString : self.title)
-        element.text = BeamText(text: name, attributes: [.link(url.absoluteString)])
     }
 
     private func updateFavIcon() {
@@ -312,9 +276,9 @@ import Promises
     func updateScore() {
         let score = browsingTree.current.score.score
 //            Logger.shared.logDebug("updated score[\(url!.absoluteString)] = \(s)", category: .general)
-        element?.score = score
-        if score > 0.0 {
-            _ = addToNote() // Automatically add current page to note over a certain threshold
+        noteController.score = score
+        if score > 0.0 {    // Automatically add current page to note over a certain threshold
+            _ = noteController.add(text: title, url: url)
         }
     }
 
@@ -343,14 +307,14 @@ import Promises
             withAnimation { estimatedProgress = value }
         }.store(in: &scope)
         webView.publisher(for: \.hasOnlySecureContent)
-                .sink { [unowned self] value in hasOnlySecureContent = value }.store(in: &scope)
+            .sink { [unowned self] value in hasOnlySecureContent = value }.store(in: &scope)
         webView.publisher(for: \.serverTrust).sink { [unowned self] value in serverTrust = value }.store(in: &scope)
         webView.publisher(for: \.canGoBack).sink { [unowned self] value in canGoBack = value }.store(in: &scope)
         webView.publisher(for: \.canGoForward).sink { [unowned self] value in canGoForward = value }.store(in: &scope)
         webView.publisher(for: \.backForwardList).sink { [unowned self] value in backForwardList = value }.store(in: &scope)
 
-        webView.navigationDelegate = self
-        webView.uiDelegate = self
+        webView.navigationDelegate = beamNavigationController
+        webView.uiDelegate = uiDelegate
     }
 
     func cancelObservers() {
@@ -382,57 +346,16 @@ import Promises
         return plainData?.base64EncodedString(options: [])
     }
 
-    private var currentBackForwardItem: WKBackForwardListItem?
-
-    private func handleBackForwardWebView(navigationAction: WKNavigationAction) {
-        if navigationAction.navigationType == .backForward {
-            let isBack = webView.backForwardList.backList
-                    .filter {
-                $0 == currentBackForwardItem
-            }
-                    .count == 0
-
-            if isBack {
-                browsingTree.goBack()
-            } else {
-                browsingTree.goForward()
-            }
-        }
-        pointAndShoot.removeAll()
-        currentBackForwardItem = webView.backForwardList.currentItem
-    }
-
-    // WKNavigationDelegate:
-    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction,
-                 decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
-        element = nil
-        decisionHandler(.allow)
-    }
-
-    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction,
-                 preferences: WKWebpagePreferences,
-                 decisionHandler: @escaping (WKNavigationActionPolicy, WKWebpagePreferences) -> Void) {
-        element = nil
-        handleBackForwardWebView(navigationAction: navigationAction)
-        if let targetURL = navigationAction.request.url {
-            if navigationAction.modifierFlags.contains(.command) {
-                _ = createNewTab(targetURL, nil, setCurrent: false)
-                decisionHandler(.cancel, preferences)
-                return
-            }
-            visitedURLs.insert(targetURL)
-        }
-        decisionHandler(.allow, preferences)
-    }
-
-    func createNewTab(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, setCurrent: Bool) -> BrowserTab {
+    func createNewTab(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, setCurrent: Bool) -> WebPage {
         let newWebView = BeamWebView(frame: NSRect(), configuration: configuration ?? Self.webViewConfiguration)
         newWebView.wantsLayer = true
         newWebView.allowsMagnification = true
 
         state.setup(webView: newWebView)
         let origin = BrowsingTreeOrigin.browsingNode(id: browsingTree.current.id)
-        let newTab = state.addNewTab(origin: origin, setCurrent: setCurrent, note: note, element: rootElement, url: targetURL, webView: newWebView)
+        let newTab = state.addNewTab(origin: origin, setCurrent: setCurrent,
+                                     note: noteController.note, element: noteController.rootElement,
+                                     url: targetURL, webView: newWebView)
         newTab.browsingTree.current.score.openIndex = navigationCount
         navigationCount += 1
         browsingTree.openLinkInNewTab()
@@ -441,116 +364,8 @@ import Promises
 
     var navigationCount: Int = 0
 
-    func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse,
-                 decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
-        element = nil
-
-        if let response = navigationResponse.response as? HTTPURLResponse,
-           !navigationResponse.canShowMIMEType,
-           let url = response.url {
-            decisionHandler(.cancel)
-            var headers: [String: String] = [:]
-            if let sourceURL = webView.url {
-                headers["Referer"] = sourceURL.absoluteString
-            }
-            downloadManager.downloadFile(at: url, headers: headers, destinationFoldedURL: nil)
-        } else {
-            decisionHandler(.allow)
-        }
-    }
-
-    func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
-        element = nil
-    }
-
-    func webView(_ webView: WKWebView, didReceiveServerRedirectForProvisionalNavigation navigation: WKNavigation!) {
-        element = nil
-    }
-
-    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
-        element = nil
-        Logger.shared.logError("didFail: \(error)", category: .javascript)
-    }
-
-    func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
-        element = nil
-        _ = addToNote()
-    }
-
     func cancelShoot() {
         pointAndShoot.resetStatus()
-    }
-
-    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        guard let url = webView.url else { return }
-        _ = addToNote()
-        let isLinkActivation = !isNavigatingFromSearchBar
-        browsingTree.navigateTo(url: url.absoluteString, title: webView.title, startReading: isCurrent, isLinkActivation: isLinkActivation)
-        isNavigatingFromSearchBar = false
-        Readability.read(webView) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case let .success(read):
-                self.appendToIndexer?(url, read)
-                self.updateElementWithTitle(webView.title)
-                self.browsingTree.current.score.textAmount = read.content.count
-                self.updateScore()
-                try? TextSaver.shared?.save(nodeId: self.browsingTree.current.id, text: read)
-            case let .failure(error):
-                Logger.shared.logError("Error while indexing web page: \(error)", category: .javascript)
-            }
-        }
-    }
-
-    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-        element = nil
-        Logger.shared.logError("Webview failed: \(error)", category: .javascript)
-    }
-
-    func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge,
-                 completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        completionHandler(.performDefaultHandling, challenge.proposedCredential)
-    }
-
-    func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
-    }
-
-    // WKUIDelegate
-    func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration,
-                 for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
-        guard let url = navigationAction.request.url else { return nil }
-        let newTab = createNewTab(url, configuration, setCurrent: true)
-        return newTab.webView
-    }
-
-    func webViewDidClose(_ webView: WKWebView) {
-        Logger.shared.logDebug("webView webDidClose", category: .web)
-        closeTab()
-    }
-
-    func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String,
-                 initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping () -> Void) {
-        Logger.shared.logDebug("webView runJavaScriptAlertPanelWithMessage \(message)", category: .web)
-        completionHandler()
-    }
-
-    func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String,
-                 initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (Bool) -> Void) {
-        Logger.shared.logDebug("webView runJavaScriptConfirmPanelWithMessage \(message)", category: .web)
-        completionHandler(true)
-    }
-
-    func webView(_ webView: WKWebView, runJavaScriptTextInputPanelWithPrompt prompt: String, defaultText: String?,
-                 initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (String?) -> Void) {
-        Logger.shared.logDebug("webView runJavaScriptTextInputPanelWithPrompt \(prompt) default: \(defaultText ?? "")",
-                               category: .web)
-        completionHandler(nil)
-    }
-
-    func webView(_ webView: WKWebView, runOpenPanelWith parameters: WKOpenPanelParameters,
-                 initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping ([URL]?) -> Void) {
-        Logger.shared.logDebug("webView runOpenPanel", category: .web)
-        completionHandler(nil)
     }
 
     func startReading() {
