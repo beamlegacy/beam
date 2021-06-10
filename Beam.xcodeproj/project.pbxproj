@@ -382,7 +382,6 @@
 		964FE5FC2625E14500966E03 /* GRDBIndexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 964FE5FB2625E14500966E03 /* GRDBIndexer.swift */; };
 		964FE64D262D8ED300966E03 /* Dictionary+valuesMatchingKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 964FE64C262D8ED300966E03 /* Dictionary+valuesMatchingKeys.swift */; };
 		965A78292514F147009980D4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965A78282514F147009980D4 /* AppDelegate.swift */; };
-		965A78332514F148009980D4 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 965A78322514F148009980D4 /* Preview Assets.xcassets */; };
 		965A78362514F148009980D4 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 965A78342514F148009980D4 /* Main.storyboard */; };
 		965A78422514F149009980D4 /* BeamTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965A78412514F149009980D4 /* BeamTests.swift */; };
 		965A784D2514F149009980D4 /* BeamUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965A784C2514F149009980D4 /* BeamUITests.swift */; };
@@ -719,8 +718,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		02C07A982670D97800894C5D /* Navigation.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = Navigation.js; path = Beam/Classes/Models/Navigation/Navigation.js; sourceTree = "<group>"; };
-		02C07A9A2670D98600894C5D /* Navigation.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = Navigation.js; path = Beam/Classes/Models/Navigation/Navigation.js; sourceTree = "<group>"; };
+		02C07A9A2670D98600894C5D /* Navigation.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = Navigation.js; sourceTree = "<group>"; };
 		0325624726051D3A006513E4 /* RBCodeSignature.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RBCodeSignature.h; sourceTree = "<group>"; };
 		0325624826051D3A006513E4 /* RBUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RBUtils.h; sourceTree = "<group>"; };
 		0325624926051D3A006513E4 /* RBDigest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RBDigest.h; sourceTree = "<group>"; };
@@ -792,7 +790,7 @@
 		0325628D26051D3B006513E4 /* RBFilterBuilder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RBFilterBuilder.h; path = Extern/RadBlock/RBFilterBuilder.h; sourceTree = "<group>"; };
 		03CA9A9625CC61BF00E7CFA2 /* ContentBlockingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentBlockingManager.swift; sourceTree = "<group>"; };
 		0DEE978C2642965600AB95AE /* GRDBIndexerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GRDBIndexerTests.swift; sourceTree = "<group>"; };
-		330D380D265FB76C00A2536B /* DownloaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloaderView.swift; sourceTree = SOURCE_ROOT; };
+		330D380D265FB76C00A2536B /* DownloaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloaderView.swift; sourceTree = "<group>"; };
 		330D3823265FC6B200A2536B /* DownloadCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadCell.swift; sourceTree = "<group>"; };
 		3330D7B4265E4441008C9E20 /* Download.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Download.swift; sourceTree = "<group>"; };
 		3330D7CA265E466D008C9E20 /* OmniBarDownloadButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniBarDownloadButton.swift; sourceTree = "<group>"; };
@@ -1114,7 +1112,6 @@
 		964FE64C262D8ED300966E03 /* Dictionary+valuesMatchingKeys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Dictionary+valuesMatchingKeys.swift"; sourceTree = "<group>"; };
 		965A78252514F147009980D4 /* Beam.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Beam.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		965A78282514F147009980D4 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		965A78322514F148009980D4 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		965A78352514F148009980D4 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		965A783D2514F149009980D4 /* BeamTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BeamTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		965A78412514F149009980D4 /* BeamTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamTests.swift; sourceTree = "<group>"; };
@@ -1270,8 +1267,8 @@
 		A5FE1614264AD64900B7526D /* RecentsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentsListView.swift; sourceTree = "<group>"; };
 		A5FE96CC2612469C002A2B73 /* AutocompleteManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutocompleteManager.swift; sourceTree = "<group>"; };
 		BAA67032568FA8B5DDE5841B /* WebEventsUI.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = WebEventsUI.ts; sourceTree = "<group>"; };
-		BAA6705B2A0906FB4C068502 /* Scorer.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; name = Scorer.js; path = BrowsingScorer/Scorer.js; sourceTree = "<group>"; };
-		BAA670958C9BAC6322CDA80A /* PasswordOverlayController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PasswordOverlayController.swift; path = PasswordManager/PasswordOverlayController.swift; sourceTree = "<group>"; };
+		BAA6705B2A0906FB4C068502 /* Scorer.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = Scorer.js; sourceTree = "<group>"; };
+		BAA670958C9BAC6322CDA80A /* PasswordOverlayController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PasswordOverlayController.swift; sourceTree = "<group>"; };
 		BAA670B42D1D6F585D0EF013 /* BeamMocks.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = BeamMocks.ts; sourceTree = "<group>"; };
 		BAA670D131DF7CAE7FA6664E /* BeamWebView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BeamWebView.swift; sourceTree = "<group>"; };
 		BAA670D8E6A58A6836DA2794 /* PointAndShootTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PointAndShootTest.swift; sourceTree = "<group>"; };
@@ -1280,7 +1277,7 @@
 		BAA670FA9720D0BD2011EC10 /* ShootCardPicker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShootCardPicker.swift; sourceTree = "<group>"; };
 		BAA6719DA7B5A8574E64AE71 /* ShootAbsolutePositioning.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShootAbsolutePositioning.swift; sourceTree = "<group>"; };
 		BAA6719ECB481D659C210913 /* index_native.scss */ = {isa = PBXFileReference; lastKnownFileType = text; path = index_native.scss; sourceTree = "<group>"; };
-		BAA671BF2E38E5B7F5764244 /* ScorerMessageHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ScorerMessageHandler.swift; path = BrowsingScorer/ScorerMessageHandler.swift; sourceTree = "<group>"; };
+		BAA671BF2E38E5B7F5764244 /* ScorerMessageHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScorerMessageHandler.swift; sourceTree = "<group>"; };
 		BAA671D24ED336D3B2A143F1 /* WebEventsUI_web.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = WebEventsUI_web.ts; sourceTree = "<group>"; };
 		BAA671DD680C70E02FD3ED32 /* ShootFrameSelectionView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShootFrameSelectionView.swift; sourceTree = "<group>"; };
 		BAA67218A94BBEE8A4B055AD /* EventsMock.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = EventsMock.ts; sourceTree = "<group>"; };
@@ -1303,21 +1300,21 @@
 		BAA674C683DA5DEC733F4746 /* ShootFrameFusionRect.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShootFrameFusionRect.swift; sourceTree = "<group>"; };
 		BAA675190ACFCE6361AC531B /* PointAndShootUI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PointAndShootUI.swift; sourceTree = "<group>"; };
 		BAA67555219BDD4CBD252C60 /* DownloadManagerTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DownloadManagerTest.swift; sourceTree = "<group>"; };
-		BAA6755F00C445E4C93AF3AA /* Scorable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Scorable.swift; path = BrowsingScorer/Scorable.swift; sourceTree = "<group>"; };
+		BAA6755F00C445E4C93AF3AA /* Scorable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Scorable.swift; sourceTree = "<group>"; };
 		BAA6756C6F2D22423B668BAF /* index_prod.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = index_prod.js; sourceTree = "<group>"; };
-		BAA675B80B855A4B2886805B /* PasswordMessageHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PasswordMessageHandler.swift; path = PasswordManager/PasswordMessageHandler.swift; sourceTree = "<group>"; };
+		BAA675B80B855A4B2886805B /* PasswordMessageHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PasswordMessageHandler.swift; sourceTree = "<group>"; };
 		BAA67641C3624DA503CB21CF /* BeamWindowMock.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = BeamWindowMock.ts; sourceTree = "<group>"; };
 		BAA6768EED1949F79C1C7B3C /* Native.test.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = Native.test.ts; sourceTree = "<group>"; };
 		BAA676A6408390EB6F10B7D6 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		BAA676AA87963F568B000616 /* PointAndShootUI_native.test.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = PointAndShootUI_native.test.ts; sourceTree = "<group>"; };
 		BAA67765B4D27F2D4F2B8562 /* BeamWebViewConfiguration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BeamWebViewConfiguration.swift; sourceTree = "<group>"; };
 		BAA6776CE80053F1F17A2909 /* ShootFrame.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShootFrame.swift; sourceTree = "<group>"; };
-		BAA6777EB9326511BE7FD0DC /* BrowsingTreeScorer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = BrowsingTreeScorer.swift; path = BrowsingScorer/BrowsingTreeScorer.swift; sourceTree = "<group>"; };
+		BAA6777EB9326511BE7FD0DC /* BrowsingTreeScorer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BrowsingTreeScorer.swift; sourceTree = "<group>"; };
 		BAA6779A8E69417A47D041B5 /* PointFrame.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PointFrame.swift; sourceTree = "<group>"; };
 		BAA677C8DE42140C0F0BD535 /* PointAndShootUI_native.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = PointAndShootUI_native.ts; sourceTree = "<group>"; };
 		BAA677D2622FEE091922E08C /* test_js.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = test_js.sh; path = scripts/test_js.sh; sourceTree = "<group>"; };
 		BAA67837448460D14C798F73 /* WebNavigationController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebNavigationController.swift; sourceTree = "<group>"; };
-		BAA678E2B362F5D8A1A801D4 /* PasswordManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PasswordManager.swift; path = PasswordManager/PasswordManager.swift; sourceTree = "<group>"; };
+		BAA678E2B362F5D8A1A801D4 /* PasswordManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PasswordManager.swift; sourceTree = "<group>"; };
 		BAA678E5952B4D5130248886 /* BeamDownloadManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BeamDownloadManager.swift; sourceTree = "<group>"; };
 		BAA678F0976FD26A8BF9B2CA /* PopupUI_web.scss */ = {isa = PBXFileReference; lastKnownFileType = text; path = PopupUI_web.scss; sourceTree = "<group>"; };
 		BAA678F7FE18AF760346FB0B /* Frames.test.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = Frames.test.ts; sourceTree = "<group>"; };
@@ -1328,7 +1325,7 @@
 		BAA67A2E806033B585ED355B /* BeamEventTargetMock.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = BeamEventTargetMock.ts; sourceTree = "<group>"; };
 		BAA67A3C749F22077F5B7194 /* DownloadManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DownloadManager.swift; sourceTree = "<group>"; };
 		BAA67A4B26FC61E9505EF7DB /* BeamMessageHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BeamMessageHandler.swift; sourceTree = "<group>"; };
-		BAA67AD6C73B8B9546778E72 /* PasswordManager.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; name = PasswordManager.js; path = PasswordManager/PasswordManager.js; sourceTree = "<group>"; };
+		BAA67AD6C73B8B9546778E72 /* PasswordManager.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = PasswordManager.js; sourceTree = "<group>"; };
 		BAA67B138DFC6DBC31D184E0 /* PointAndShootMessageHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PointAndShootMessageHandler.swift; sourceTree = "<group>"; };
 		BAA67B6D4C4A10AA8B362C0B /* TextSelectorUI.scss */ = {isa = PBXFileReference; lastKnownFileType = text; path = TextSelectorUI.scss; sourceTree = "<group>"; };
 		BAA67B92B9B5D6708301C481 /* package.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = package.json; sourceTree = "<group>"; };
@@ -1336,7 +1333,7 @@
 		BAA67CDE485E5E7774A978D2 /* LoggingMessageHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoggingMessageHandler.swift; sourceTree = "<group>"; };
 		BAA67CEFFAFA38F29CF1C84F /* WebPage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebPage.swift; sourceTree = "<group>"; };
 		BAA67D2FC7A644FB3E1C05E6 /* mixins.scss */ = {isa = PBXFileReference; lastKnownFileType = text; path = mixins.scss; sourceTree = "<group>"; };
-		BAA67D3D273F24009F3AE570 /* BrowsingScorer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = BrowsingScorer.swift; path = BrowsingScorer/BrowsingScorer.swift; sourceTree = "<group>"; };
+		BAA67D3D273F24009F3AE570 /* BrowsingScorer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BrowsingScorer.swift; sourceTree = "<group>"; };
 		BAA67D4F02B489A221B47CBB /* index_debug.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = index_debug.js; sourceTree = "<group>"; };
 		BAA67DD5764226E47DFA6F9E /* WebPositions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebPositions.swift; sourceTree = "<group>"; };
 		BAA67E0D441DE56B0908A8ED /* BeamWebFactoryMock.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = BeamWebFactoryMock.ts; sourceTree = "<group>"; };
@@ -1353,7 +1350,7 @@
 		BAA67F5672D6E4512AF90CAC /* WebNavigationMessageHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebNavigationMessageHandler.swift; sourceTree = "<group>"; };
 		BAA67F65A4275DE0B884B933 /* index_native.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = index_native.js; sourceTree = "<group>"; };
 		BAA67FFE49752420EA6C9833 /* Native.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = Native.ts; sourceTree = "<group>"; };
-		DA3E41BF2642CC7900BA3952 /* TextSaver.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TextSaver.swift; path = Classes/Helpers/Utils/TextSaver.swift; sourceTree = "<group>"; };
+		DA3E41BF2642CC7900BA3952 /* TextSaver.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextSaver.swift; sourceTree = "<group>"; };
 		DA76129726614E5A00349F2C /* BrowsingTreeScoreTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BrowsingTreeScoreTests.swift; sourceTree = "<group>"; };
 		DAA60C182666892600C927E5 /* SessionLinkRanker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SessionLinkRanker.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -1529,7 +1526,7 @@
 				BAA677D2622FEE091922E08C /* test_js.sh */,
 			);
 			name = "Ad blocker";
-			path = ../..;
+			path = ..;
 			sourceTree = "<group>";
 		};
 		0DEE97A3264296E000AB95AE /* Models */ = {
@@ -1585,8 +1582,6 @@
 				4159EA09259A3568005FD355 /* BidirectionalPopoverResultItem.xib */,
 				414B9878259DE2E2002E81A3 /* BidirectionalPopoverActionItem.swift */,
 				414B9879259DE2E2002E81A3 /* BidirectionalPopoverActionItem.xib */,
-				96988C8225BB0AF2000223A3 /* DestinationNotePicker.swift */,
-				A545D2FA25F7B1D800E68F94 /* DestinationNoteAutocompleteList.swift */,
 			);
 			path = BidirectionalPopover;
 			sourceTree = "<group>";
@@ -1610,7 +1605,6 @@
 				418171E62581107C00317ED8 /* Managers */,
 				418171592581107C00317ED8 /* Services */,
 				4181734C2581204900317ED8 /* Stores */,
-				0353852926051A6600691BB4 /* Ad blocker */,
 				418171882581107C00317ED8 /* Helpers */,
 			);
 			path = Classes;
@@ -1707,6 +1701,7 @@
 			children = (
 				418171712581107C00317ED8 /* Importers */,
 				418171762581107C00317ED8 /* CoreData */,
+				BAA67051B37A3398BDF678AB /* Navigation */,
 				4181716C2581107C00317ED8 /* BeamData.swift */,
 				4181734D2581204900317ED8 /* BeamState.swift */,
 				A05ADF6D264D8C59002DF91A /* OverlayViewCenterViewModel.swift */,
@@ -1743,7 +1738,6 @@
 				87F11BD8266533C1003BE98E /* PasswordGenerator.swift */,
 				BAA67971FD6352F46D77E3BE /* WebNoteController.swift */,
 				BAA67CB267E1C45A009AC2D9 /* BeamWebkitUIDelegate.swift */,
-				BAA67051B37A3398BDF678AB /* Navigation */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -1862,13 +1856,13 @@
 				8775C5DD2613202900A26CAC /* PasswordManagerMenu */,
 				A5C9F008261364E90096380F /* WindowPage */,
 				524299CC25A47EA900F4DBF5 /* Preferences */,
-				A05ADF6B264D8C34002DF91A /* OverlayViewCenter.swift */,
 				A5239392265419DD008D4C85 /* ContentView */,
-				418171AE2581107C00317ED8 /* BeamWindow.swift */,
 				418171CF2581107C00317ED8 /* Browser */,
 				418171D42581107C00317ED8 /* Notes */,
 				418173F7258128A500317ED8 /* Journal */,
 				A54936B0260B71FE00EF7622 /* ToolBar */,
+				418171AE2581107C00317ED8 /* BeamWindow.swift */,
+				A05ADF6B264D8C34002DF91A /* OverlayViewCenter.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -1963,6 +1957,8 @@
 				A552DF2825F0E22B00570C85 /* OmniBarFieldBackground.swift */,
 				A552DF3225F1741900570C85 /* GlobalCenteringContainer.swift */,
 				418171D92581107C00317ED8 /* Chevrons.swift */,
+				96988C8225BB0AF2000223A3 /* DestinationNotePicker.swift */,
+				A545D2FA25F7B1D800E68F94 /* DestinationNoteAutocompleteList.swift */,
 			);
 			path = OmniBar;
 			sourceTree = "<group>";
@@ -2020,19 +2016,9 @@
 				418171C32581107C00317ED8 /* NotesList */,
 				A57BFEC02615B4AC00CFB646 /* TableView */,
 				418171B72581107C00317ED8 /* BeamTextEdit */,
-				A050049E25DAEE73009CFEB6 /* ProgressIndicator.swift */,
-				872644762619903B0070E83D /* StepperControl.swift */,
-				8726448E26199B8F0070E83D /* OptionSelector.swift */,
 				BAA679587D9259686224D133 /* PointAndShoot */,
-				BAA670958C9BAC6322CDA80A /* PasswordOverlayController.swift */,
-				BAA675B80B855A4B2886805B /* PasswordMessageHandler.swift */,
-				BAA678E2B362F5D8A1A801D4 /* PasswordManager.swift */,
-				BAA67AD6C73B8B9546778E72 /* PasswordManager.js */,
-				BAA67D3D273F24009F3AE570 /* BrowsingScorer.swift */,
-				BAA6705B2A0906FB4C068502 /* Scorer.js */,
-				BAA6777EB9326511BE7FD0DC /* BrowsingTreeScorer.swift */,
-				BAA6755F00C445E4C93AF3AA /* Scorable.swift */,
-				BAA671BF2E38E5B7F5764244 /* ScorerMessageHandler.swift */,
+				A5D8A6D826724E2600CEC37E /* Password */,
+				A5D8A6D926724E6900CEC37E /* BrowsingAnalysis */,
 				BAA674240EA89BD15248E607 /* Download */,
 			);
 			path = Components;
@@ -2057,6 +2043,8 @@
 				A5144000263803600021DD56 /* TrackableScrollView.swift */,
 				A5D53696264BE2F50011A095 /* RetroCompatibleScrollViewReader.swift */,
 				A59D33872655101A002E7E96 /* WiggleEffect.swift */,
+				A050049E25DAEE73009CFEB6 /* ProgressIndicator.swift */,
+				872644762619903B0070E83D /* StepperControl.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -2710,11 +2698,10 @@
 		965A781C2514F147009980D4 = {
 			isa = PBXGroup;
 			children = (
-				02C07A982670D97800894C5D /* Navigation.js */,
-				02C07A9A2670D98600894C5D /* Navigation.js */,
 				965A78272514F147009980D4 /* Beam */,
 				965A78402514F149009980D4 /* BeamTests */,
 				965A784B2514F149009980D4 /* BeamUITests */,
+				96319C9C261614CB00D1CF31 /* BeamCore */,
 				96319D1D2616232700D1CF31 /* BeamCoreTests */,
 				965A78262514F147009980D4 /* Products */,
 				24EFBA757ACC5310A2D800B2 /* Frameworks */,
@@ -2736,28 +2723,18 @@
 		965A78272514F147009980D4 /* Beam */ = {
 			isa = PBXGroup;
 			children = (
-				DA3E41BF2642CC7900BA3952 /* TextSaver.swift */,
 				A5208D5C261D0176006193AF /* BeamDesign */,
-				96319C9C261614CB00D1CF31 /* BeamCore */,
 				9611994725A279EC005BEC82 /* ObjCBridge */,
+				4181712A25810CDC00317ED8 /* Configuration */,
+				41B4277925E52DB000A8243F /* i18n */,
+				41816FD02581046F00317ED8 /* Assets */,
+				0353852926051A6600691BB4 /* Ad blocker */,
+				41816FD62581047500317ED8 /* Classes */,
 				965A78282514F147009980D4 /* AppDelegate.swift */,
 				965A78342514F148009980D4 /* Main.storyboard */,
 				4181712E25810CDC00317ED8 /* Beam.xcdatamodeld */,
-				4181712A25810CDC00317ED8 /* Configuration */,
-				41816FD62581047500317ED8 /* Classes */,
-				41B4277925E52DB000A8243F /* i18n */,
-				41816FD02581046F00317ED8 /* Assets */,
-				965A78312514F148009980D4 /* Preview Content */,
 			);
 			path = Beam;
-			sourceTree = "<group>";
-		};
-		965A78312514F148009980D4 /* Preview Content */ = {
-			isa = PBXGroup;
-			children = (
-				965A78322514F148009980D4 /* Preview Assets.xcassets */,
-			);
-			path = "Preview Content";
 			sourceTree = "<group>";
 		};
 		965A78402514F149009980D4 /* BeamTests */ = {
@@ -2994,9 +2971,35 @@
 			path = WindowPage;
 			sourceTree = "<group>";
 		};
+		A5D8A6D826724E2600CEC37E /* Password */ = {
+			isa = PBXGroup;
+			children = (
+				BAA670958C9BAC6322CDA80A /* PasswordOverlayController.swift */,
+				BAA675B80B855A4B2886805B /* PasswordMessageHandler.swift */,
+				BAA678E2B362F5D8A1A801D4 /* PasswordManager.swift */,
+				BAA67AD6C73B8B9546778E72 /* PasswordManager.js */,
+				8726448E26199B8F0070E83D /* OptionSelector.swift */,
+			);
+			path = Password;
+			sourceTree = "<group>";
+		};
+		A5D8A6D926724E6900CEC37E /* BrowsingAnalysis */ = {
+			isa = PBXGroup;
+			children = (
+				BAA671BF2E38E5B7F5764244 /* ScorerMessageHandler.swift */,
+				BAA67D3D273F24009F3AE570 /* BrowsingScorer.swift */,
+				BAA6705B2A0906FB4C068502 /* Scorer.js */,
+				BAA6777EB9326511BE7FD0DC /* BrowsingTreeScorer.swift */,
+				BAA6755F00C445E4C93AF3AA /* Scorable.swift */,
+				DA3E41BF2642CC7900BA3952 /* TextSaver.swift */,
+			);
+			path = BrowsingAnalysis;
+			sourceTree = "<group>";
+		};
 		BAA67051B37A3398BDF678AB /* Navigation */ = {
 			isa = PBXGroup;
 			children = (
+				02C07A9A2670D98600894C5D /* Navigation.js */,
 				BAA67837448460D14C798F73 /* WebNavigationController.swift */,
 				BAA67F5672D6E4512AF90CAC /* WebNavigationMessageHandler.swift */,
 				BAA670E1903659A32C562E3E /* BeamWebNavigationController.swift */,
@@ -3256,22 +3259,22 @@
 			);
 			mainGroup = 965A781C2514F147009980D4;
 			packageReferences = (
-				9631C745251CE997009B40C4 /* XCRemoteSwiftPackageReference "SwiftSoup.git" */,
-				96474E3D254D9ADB00A920B3 /* XCRemoteSwiftPackageReference "FavIcon.git" */,
+				9631C745251CE997009B40C4 /* XCRemoteSwiftPackageReference "SwiftSoup" */,
+				96474E3D254D9ADB00A920B3 /* XCRemoteSwiftPackageReference "FavIcon" */,
 				524299AD25A47CA500F4DBF5 /* XCRemoteSwiftPackageReference "Preferences" */,
-				527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack.git" */,
-				527FB71825B9A97A00959146 /* XCRemoteSwiftPackageReference "sentry-cocoa.git" */,
-				527FB71D25B9A9B600959146 /* XCRemoteSwiftPackageReference "JWTDecode.swift.git" */,
+				527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */,
+				527FB71825B9A97A00959146 /* XCRemoteSwiftPackageReference "sentry-cocoa" */,
+				527FB71D25B9A9B600959146 /* XCRemoteSwiftPackageReference "JWTDecode.swift" */,
 				527FB72225B9AAA200959146 /* XCRemoteSwiftPackageReference "Fakery" */,
-				5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble.git" */,
-				5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick.git" */,
+				5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */,
+				5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick" */,
 				52BB698925CD4E1E007A1173 /* XCRemoteSwiftPackageReference "PromiseKit" */,
-				52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises.git" */,
-				523E91CA25D17004001124E0 /* XCRemoteSwiftPackageReference "Foundation.git" */,
+				52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises" */,
+				523E91CA25D17004001124E0 /* XCRemoteSwiftPackageReference "Foundation" */,
 				524CF6D125F276D1007312F0 /* XCRemoteSwiftPackageReference "KeychainAccess" */,
 				521FEC982604F9B4009000F9 /* XCRemoteSwiftPackageReference "Vinyl" */,
-				964FE5DF2625D8AA00966E03 /* XCRemoteSwiftPackageReference "GRDB.swift.git" */,
-				52CA277A26401D7000146A00 /* XCRemoteSwiftPackageReference "OAuthSwift.git" */,
+				964FE5DF2625D8AA00966E03 /* XCRemoteSwiftPackageReference "GRDB.swift" */,
+				52CA277A26401D7000146A00 /* XCRemoteSwiftPackageReference "OAuthSwift" */,
 				96D5AE83264C01AD003AD516 /* XCRemoteSwiftPackageReference "TLDExtractSwift" */,
 			);
 			productRefGroup = 965A78262514F147009980D4 /* Products */;
@@ -3406,7 +3409,6 @@
 				52FB84CE263812060085A444 /* update_databases.graphql in Resources */,
 				5206281425922D7800D7CD9E /* document.graphql in Resources */,
 				8AC2EFD8266F86F500049005 /* webpack.config.js in Resources */,
-				965A78332514F148009980D4 /* Preview Assets.xcassets in Resources */,
 				52A06978264E909A00B4B80A /* document_public_url.graphql in Resources */,
 				8AF53BAC266A241700C3CB2E /* NavigationCollectUITests-1.html in Resources */,
 				52E2527C26173F8D00E54C45 /* delete_database.graphql in Resources */,
@@ -4268,7 +4270,6 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"Beam/Preview Content\"";
 				DEVELOPMENT_TEAM = X87W5M786F;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
@@ -4369,7 +4370,7 @@
 				DEVELOPMENT_TEAM = X87W5M786F;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				INFOPLIST_FILE = Beam/BeamCore/Info.plist;
+				INFOPLIST_FILE = BeamCore/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -4397,7 +4398,7 @@
 				DEVELOPMENT_TEAM = X87W5M786F;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				INFOPLIST_FILE = Beam/BeamCore/Info.plist;
+				INFOPLIST_FILE = BeamCore/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -4425,7 +4426,7 @@
 				DEVELOPMENT_TEAM = X87W5M786F;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				INFOPLIST_FILE = Beam/BeamCore/Info.plist;
+				INFOPLIST_FILE = BeamCore/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -4639,7 +4640,6 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"Beam/Preview Content\"";
 				DEVELOPMENT_TEAM = X87W5M786F;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
@@ -4687,7 +4687,6 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"Beam/Preview Content\"";
 				DEVELOPMENT_TEAM = X87W5M786F;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
@@ -4905,7 +4904,7 @@
 				minimumVersion = 0.10.5;
 			};
 		};
-		5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble.git" */ = {
+		5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Quick/Nimble.git";
 			requirement = {
@@ -4913,7 +4912,7 @@
 				minimumVersion = 9.0.0;
 			};
 		};
-		5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick.git" */ = {
+		5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Quick/Quick.git";
 			requirement = {
@@ -4921,7 +4920,7 @@
 				minimumVersion = 3.0.0;
 			};
 		};
-		523E91CA25D17004001124E0 /* XCRemoteSwiftPackageReference "Foundation.git" */ = {
+		523E91CA25D17004001124E0 /* XCRemoteSwiftPackageReference "Foundation" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/PromiseKit/Foundation.git";
 			requirement = {
@@ -4945,7 +4944,7 @@
 				minimumVersion = 4.2.2;
 			};
 		};
-		527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack.git" */ = {
+		527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/CocoaLumberjack/CocoaLumberjack.git";
 			requirement = {
@@ -4953,7 +4952,7 @@
 				minimumVersion = 3.7.0;
 			};
 		};
-		527FB71825B9A97A00959146 /* XCRemoteSwiftPackageReference "sentry-cocoa.git" */ = {
+		527FB71825B9A97A00959146 /* XCRemoteSwiftPackageReference "sentry-cocoa" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/getsentry/sentry-cocoa.git";
 			requirement = {
@@ -4961,7 +4960,7 @@
 				minimumVersion = 6.1.3;
 			};
 		};
-		527FB71D25B9A9B600959146 /* XCRemoteSwiftPackageReference "JWTDecode.swift.git" */ = {
+		527FB71D25B9A9B600959146 /* XCRemoteSwiftPackageReference "JWTDecode.swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/auth0/JWTDecode.swift.git";
 			requirement = {
@@ -4985,7 +4984,7 @@
 				minimumVersion = 6.13.3;
 			};
 		};
-		52CA277A26401D7000146A00 /* XCRemoteSwiftPackageReference "OAuthSwift.git" */ = {
+		52CA277A26401D7000146A00 /* XCRemoteSwiftPackageReference "OAuthSwift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/OAuthSwift/OAuthSwift.git";
 			requirement = {
@@ -4993,7 +4992,7 @@
 				kind = branch;
 			};
 		};
-		52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises.git" */ = {
+		52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/google/promises.git";
 			requirement = {
@@ -5001,7 +5000,7 @@
 				minimumVersion = 1.2.12;
 			};
 		};
-		9631C745251CE997009B40C4 /* XCRemoteSwiftPackageReference "SwiftSoup.git" */ = {
+		9631C745251CE997009B40C4 /* XCRemoteSwiftPackageReference "SwiftSoup" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/scinfu/SwiftSoup.git";
 			requirement = {
@@ -5009,7 +5008,7 @@
 				minimumVersion = 2.3.2;
 			};
 		};
-		96474E3D254D9ADB00A920B3 /* XCRemoteSwiftPackageReference "FavIcon.git" */ = {
+		96474E3D254D9ADB00A920B3 /* XCRemoteSwiftPackageReference "FavIcon" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/leonbreedt/FavIcon.git";
 			requirement = {
@@ -5017,7 +5016,7 @@
 				minimumVersion = 3.1.0;
 			};
 		};
-		964FE5DF2625D8AA00966E03 /* XCRemoteSwiftPackageReference "GRDB.swift.git" */ = {
+		964FE5DF2625D8AA00966E03 /* XCRemoteSwiftPackageReference "GRDB.swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/groue/GRDB.swift.git";
 			requirement = {
@@ -5025,7 +5024,7 @@
 				minimumVersion = 5.7.4;
 			};
 		};
-		96D5AE61264BF56F003AD516 /* XCRemoteSwiftPackageReference "SwiftDomainParser.git" */ = {
+		96D5AE61264BF56F003AD516 /* XCRemoteSwiftPackageReference "SwiftDomainParser" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Dashlane/SwiftDomainParser.git";
 			requirement = {
@@ -5051,17 +5050,17 @@
 		};
 		5239C11525C2C4AE009C51E1 /* Nimble */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble.git" */;
+			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */;
 			productName = Nimble;
 		};
 		5239C12E25C2C4C6009C51E1 /* Quick */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick.git" */;
+			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick" */;
 			productName = Quick;
 		};
 		523E91CB25D17004001124E0 /* PMKFoundation */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 523E91CA25D17004001124E0 /* XCRemoteSwiftPackageReference "Foundation.git" */;
+			package = 523E91CA25D17004001124E0 /* XCRemoteSwiftPackageReference "Foundation" */;
 			productName = PMKFoundation;
 		};
 		524299AE25A47CA500F4DBF5 /* Preferences */ = {
@@ -5076,12 +5075,12 @@
 		};
 		527FB71925B9A97A00959146 /* Sentry */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 527FB71825B9A97A00959146 /* XCRemoteSwiftPackageReference "sentry-cocoa.git" */;
+			package = 527FB71825B9A97A00959146 /* XCRemoteSwiftPackageReference "sentry-cocoa" */;
 			productName = Sentry;
 		};
 		527FB71E25B9A9B600959146 /* JWTDecode */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 527FB71D25B9A9B600959146 /* XCRemoteSwiftPackageReference "JWTDecode.swift.git" */;
+			package = 527FB71D25B9A9B600959146 /* XCRemoteSwiftPackageReference "JWTDecode.swift" */;
 			productName = JWTDecode;
 		};
 		527FB72325B9AAA200959146 /* Fakery */ = {
@@ -5096,52 +5095,52 @@
 		};
 		52CA277B26401D7000146A00 /* OAuthSwift */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 52CA277A26401D7000146A00 /* XCRemoteSwiftPackageReference "OAuthSwift.git" */;
+			package = 52CA277A26401D7000146A00 /* XCRemoteSwiftPackageReference "OAuthSwift" */;
 			productName = OAuthSwift;
 		};
 		52E5297125CD980B00307858 /* Promises */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises.git" */;
+			package = 52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises" */;
 			productName = Promises;
 		};
 		52E5297325CD980B00307858 /* PromisesTestHelpers */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises.git" */;
+			package = 52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises" */;
 			productName = PromisesTestHelpers;
 		};
 		96319D52261623BB00D1CF31 /* CocoaLumberjackSwift */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack.git" */;
+			package = 527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */;
 			productName = CocoaLumberjackSwift;
 		};
 		9631C746251CE997009B40C4 /* SwiftSoup */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 9631C745251CE997009B40C4 /* XCRemoteSwiftPackageReference "SwiftSoup.git" */;
+			package = 9631C745251CE997009B40C4 /* XCRemoteSwiftPackageReference "SwiftSoup" */;
 			productName = SwiftSoup;
 		};
 		9639FAF42616614D00C85B95 /* CocoaLumberjackSwift */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack.git" */;
+			package = 527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */;
 			productName = CocoaLumberjackSwift;
 		};
 		96474E3E254D9ADB00A920B3 /* FavIcon */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 96474E3D254D9ADB00A920B3 /* XCRemoteSwiftPackageReference "FavIcon.git" */;
+			package = 96474E3D254D9ADB00A920B3 /* XCRemoteSwiftPackageReference "FavIcon" */;
 			productName = FavIcon;
 		};
 		964FE5E02625D8AA00966E03 /* GRDB */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 964FE5DF2625D8AA00966E03 /* XCRemoteSwiftPackageReference "GRDB.swift.git" */;
+			package = 964FE5DF2625D8AA00966E03 /* XCRemoteSwiftPackageReference "GRDB.swift" */;
 			productName = GRDB;
 		};
 		96D5AE7A264BFD40003AD516 /* DomainParser */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 96D5AE61264BF56F003AD516 /* XCRemoteSwiftPackageReference "SwiftDomainParser.git" */;
+			package = 96D5AE61264BF56F003AD516 /* XCRemoteSwiftPackageReference "SwiftDomainParser" */;
 			productName = DomainParser;
 		};
 		96D5AE7C264BFD4C003AD516 /* CocoaLumberjackSwift */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack.git" */;
+			package = 527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */;
 			productName = CocoaLumberjackSwift;
 		};
 		96D5AE84264C01AD003AD516 /* TLDExtract */ = {
@@ -5151,22 +5150,22 @@
 		};
 		A0A6F2A025D1B73400EFC4BE /* Quick */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick.git" */;
+			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick" */;
 			productName = Quick;
 		};
 		A0A6F2A225D1B73A00EFC4BE /* Nimble */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble.git" */;
+			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */;
 			productName = Nimble;
 		};
 		A0A6F2A425D1B74200EFC4BE /* Quick */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick.git" */;
+			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick" */;
 			productName = Quick;
 		};
 		A0A6F2A625D1B74800EFC4BE /* Nimble */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble.git" */;
+			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */;
 			productName = Nimble;
 		};
 		A5946845265E30350044A892 /* Fakery */ = {
@@ -5176,12 +5175,12 @@
 		};
 		A5CA5DFA2625C302004E9D3E /* Quick */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick.git" */;
+			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick" */;
 			productName = Quick;
 		};
 		A5CA5DFC2625C306004E9D3E /* Nimble */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble.git" */;
+			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */;
 			productName = Nimble;
 		};
 /* End XCSwiftPackageProductDependency section */

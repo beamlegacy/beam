@@ -194,7 +194,7 @@ extension NoteHeaderView {
                 thirdGroup.insert(ContextMenuItem(title: "Rename", action: focusTitle), at: 1)
             }
             items.append(contentsOf: thirdGroup)
-            
+
             items.append(contentsOf: [
                 ContextMenuItem.separator(),
                 ContextMenuItem(title: "Delete", action: nil)
