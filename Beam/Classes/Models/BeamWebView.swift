@@ -17,6 +17,11 @@ class BeamWebView: WKWebView {
         super.init(coder: coder)
     }
 
+    override func updateLayer() {
+        super.updateLayer()
+        layer?.backgroundColor = BeamColor.Generic.background.cgColor
+    }
+
     // Catching those event to avoid funk sound
     override func keyDown(with event: NSEvent) {
         if let key = event.specialKey {
