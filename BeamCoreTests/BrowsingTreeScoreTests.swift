@@ -112,7 +112,8 @@ class BrowsingTreeScoreTests: XCTestCase {
         """.data(using: .utf8)!
 
         let decoder = JSONDecoder()
-        do { _ = try decoder.decode(BrowsingTree.self, from: jsonTree) }
-        catch { XCTFail("Error: \(error)") }
+        do {
+            _ = try decoder.decode(BrowsingTree.self, from: jsonTree)
+        } catch { XCTFail("Error: \(error)") }
     }
 }

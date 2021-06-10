@@ -127,7 +127,7 @@ class WebNoteController: Encodable, Decodable {
             return
         }
         let titleStr = text ?? self.title
-        let name = titleStr != nil && titleStr.isEmpty ? url.absoluteString : titleStr
+        let name = titleStr.isEmpty ? url.absoluteString : titleStr
         element?.text = BeamText(text: name, attributes: [.link(url.absoluteString)])
     }
 }

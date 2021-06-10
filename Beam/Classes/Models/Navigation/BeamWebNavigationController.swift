@@ -24,11 +24,9 @@ class BeamWebNavigationController: WebPageHolder, WebNavigationController {
             fatalError("Should emit handleBackForwardWebView() from a webview")
         }
         if navigationAction.navigationType == .backForward {
-            let isBack = (webView.backForwardList.backList
-                .filter {
-                $0 == currentBackForwardItem
-            }
-                .count == 0) ?? false
+            let isBack = webView.backForwardList.backList
+                .filter { $0 == currentBackForwardItem }
+                .count == 0
 
             if isBack {
                 browsingTree.goBack()
@@ -44,7 +42,7 @@ class BeamWebNavigationController: WebPageHolder, WebNavigationController {
         _ = page.addToNote(allowSearchResult: false)
         let isLinkActivation = !isNavigatingFromSearchBar
         let title = webView.title
-        browsingTree.navigateTo(url: url.absoluteString, title: title, startReading: page.isActiveTab() ?? false, isLinkActivation: isLinkActivation)
+        browsingTree.navigateTo(url: url.absoluteString, title: title, startReading: page.isActiveTab(), isLinkActivation: isLinkActivation)
         isNavigatingFromSearchBar = false
         Readability.read(webView) { [weak self] result in
             guard let self = self else { return }

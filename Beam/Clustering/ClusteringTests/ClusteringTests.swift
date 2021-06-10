@@ -126,14 +126,14 @@ class ClusteringTests: XCTestCase {
             // Add a third page
             cluster.pageIDs.append(page3.id)
             try cluster.textualSimilarityMatrixProcess(page: page3)
-            
+
             let gsSimilarityMatrix = Matrix([[0.0, 0.8294351697354535, 0.0],
                                              [0.8294351697354535, 0.0, 0.0],
                                              [0.0, 0.0, 0.0]])
             XCTAssert(cluster.textualSimilarityMatrix.matrix == gsSimilarityMatrix)
         }
     }
-    
+
     // Integration test for testing the whole textual similarity pipeline
     func testTextualSimilarityPipeline() throws {
         let cluster = Cluster()
@@ -203,7 +203,7 @@ class ClusteringTests: XCTestCase {
             }
             expectation.fulfill()
         })
-        
+
         wait(for: [expectation], timeout: 1)
         XCTAssert(final_result == [[0, 2, 5], [1, 3, 4]])
     }

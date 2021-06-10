@@ -38,7 +38,7 @@ public class Cluster {
     enum CandidateError: Error {
         case unknownCandidte
     }
-    
+
     enum MatrixTypeError: Error {
         case unknownMatrixType
     }
@@ -187,7 +187,7 @@ public class Cluster {
 
        return predictedLabels
     }
-    
+
     /// This function returns the embedding of the given piece of text if the text is in English
     ///  and if the OS is at least MacOS 11 and iOS 14. Otherwise returns an empty vector.
     ///
@@ -196,7 +196,7 @@ public class Cluster {
     /// - Returns: The embedding of the given piece of text or an empty vector.
     func textualEmbeddingComputationWithNLEmbedding(text: String) -> [Double] {
         let language = self.getTextLanguage(text: text)
-        
+
         if #available(iOS 14, macOS 11, *), language == NLLanguage.english {
             if let sentenceEmbedding = NLEmbedding.sentenceEmbedding(for: .english) {
                 if let vector = sentenceEmbedding.vector(for: text) {
@@ -204,10 +204,10 @@ public class Cluster {
                 }
             }
         }
-        
+
         return []
     }
-    
+
     /// Compute the cosine similarity between two vectors
     ///
     /// - Parameters:
@@ -218,10 +218,10 @@ public class Cluster {
         let vec1Normed = cblas_dnrm2(Int32(vector1.count), &vector1, 1)
         let vec2Normed = cblas_dnrm2(Int32(vector2.count), &vector2, 1)
         let dotProduct = cblas_ddot(Int32(vector1.count), &vector1, 1, &vector2, 1)
-        
+
         return dotProduct / (vec1Normed * vec2Normed)
     }
-    
+
     /// This function detects the dominant language of a given text..
     ///
     /// - Parameters:
@@ -229,12 +229,12 @@ public class Cluster {
     /// - Returns: The dominant language.
     func getTextLanguage(text: String) -> NLLanguage? {
         let recognizer = NLLanguageRecognizer()
-        
+
         recognizer.processString(text)
-        
+
         return recognizer.dominantLanguage
     }
-    
+
     /// Compute the cosine similarity of the textual embedding of the current page against
     /// the other pages.
     ///
@@ -243,7 +243,7 @@ public class Cluster {
     /// - Returns: A list of cosine similarity scores
     func scoreTextualEmbedding(textualEmbedding: inout [Double]) -> [Double] {
         var scores = [Double]()
-        
+
         for id in self.pageIDs {
             // The textual vector might be empty, when the OS is not good or the page content is not in English
             // then the score will be 0.0
@@ -255,10 +255,10 @@ public class Cluster {
                 }
             }
         }
-        
+
         return scores
     }
-    
+
     /// This function handles the entire textual similarity process:
     ///      - Compute the text embedding of the current page
     ///      - Compute the scores against all the other pages
@@ -270,12 +270,12 @@ public class Cluster {
     func textualSimilarityMatrixProcess(page: Page) throws {
         if let content = page.content {
             var textualEmbedding = self.textualEmbeddingComputationWithNLEmbedding(text: content)
-            
+
             // if the OS is not good or the page content is not in English
             // we create a vector of only 0.0 scores
             if !textualEmbedding.isEmpty {
                 let scores = self.scoreTextualEmbedding(textualEmbedding: &textualEmbedding)
-                
+
                 try self.textualSimilarityMatrix.addPage(similarities: scores)
             } else {
                 try self.textualSimilarityMatrix.addPage(similarities: [Double](
@@ -299,12 +299,12 @@ public class Cluster {
             //Check if this is the first page in the session
             guard self.pageIDs.count > 0 else {
                 self.pageIDs.append(page.id)
-                
+
                 if let content = page.content {
                     let textualEmbedding = self.textualEmbeddingComputationWithNLEmbedding(text: content)
                     self.cacheTextualVectors[page.id] = textualEmbedding
                 }
-                
+
                 let result = [self.pageIDs]
                 completion(.success(result))
                 return
@@ -318,7 +318,7 @@ public class Cluster {
             } else {
                 // AdjacencyMatrix computation
                 var navigationSimilarities = [Double](repeating: 0.0, count: self.adjacencyMatrix.matrix.rows)
-                
+
                 if let myParent = page.parentId, let parent_index = self.pageIDs.firstIndex(of: myParent) {
                     navigationSimilarities[parent_index] = 1.0
                 }
@@ -327,14 +327,14 @@ public class Cluster {
                 } catch let error {
                     completion(.failure(error))
                 }
-                
+
                 // Handle Text similarity matrix
                 do {
                     try self.textualSimilarityMatrixProcess(page: page)
                 } catch let error {
                     completion(.failure(error))
                 }
-                
+
                 self.pageIDs.append(page.id)
             }
             //Here is where we would add more similarity matrices in the future
@@ -346,7 +346,7 @@ public class Cluster {
                 default:
                     completion(.failure(MatrixTypeError.unknownMatrixType))
             }
-            
+
             var predictedClusters = zeros(1, self.adjacencyMatrix.matrix.rows).flat.map { Int($0) }
             do {
                 predictedClusters = try self.clusterize()
@@ -355,7 +355,7 @@ public class Cluster {
             }
             let stablizedClusters = self.stabilize(predictedClusters)
             let result = self.clusterizeIDs(labels: stablizedClusters)
-            
+
             DispatchQueue.main.async {
                 completion(.success(result))
             }

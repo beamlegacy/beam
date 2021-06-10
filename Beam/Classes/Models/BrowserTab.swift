@@ -14,7 +14,7 @@ import Promises
     var height: CGFloat = 0
     private var pixelRatio: Double = 1
 
-    let uiDelegate: BeamWebkitUIDelegate = BeamWebkitUIDelegate()
+    let uiDelegate = BeamWebkitUIDelegate()
     let noteController: WebNoteController
 
     public func load(url: URL) {
@@ -104,7 +104,7 @@ import Promises
     var state: BeamState!
 
     public var score: Float {
-        get { noteController.score ?? 0 }
+        get { noteController.score }
         set { noteController.score = newValue }
     }
 
@@ -126,7 +126,7 @@ import Promises
 
     func setDestinationNote(_ note: BeamNote, rootElement: BeamElement? = nil) {
         let hasElem = noteController.setDestination(note: note, browsingTree: browsingTree)
-        if (!hasElem) {
+        if !hasElem {
             _ = addToNote(allowSearchResult: false)
         }
         state.destinationCardName = note.title
