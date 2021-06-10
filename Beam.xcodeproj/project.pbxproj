@@ -303,6 +303,7 @@
 		872644772619903B0070E83D /* StepperControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 872644762619903B0070E83D /* StepperControl.swift */; };
 		8726448F26199B8F0070E83D /* OptionSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8726448E26199B8F0070E83D /* OptionSelector.swift */; };
 		872644C3261B29620070E83D /* PasswordManagerMenuViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 872644C1261B29620070E83D /* PasswordManagerMenuViewModel.swift */; };
+		8746CCA6266DFDCD00F44D41 /* PasswordImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8746CCA5266DFDCD00F44D41 /* PasswordImporter.swift */; };
 		8775C5F32613212C00A26CAC /* StoredPasswordCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8775C5F22613212C00A26CAC /* StoredPasswordCell.swift */; };
 		8775C5FB261323EC00A26CAC /* PasswordManagerMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8775C5FA261323EC00A26CAC /* PasswordManagerMenu.swift */; };
 		87C539A12616295300D51877 /* ViewMorePasswordsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C539A02616295300D51877 /* ViewMorePasswordsCell.swift */; };
@@ -1047,6 +1048,7 @@
 		872644762619903B0070E83D /* StepperControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StepperControl.swift; sourceTree = "<group>"; };
 		8726448E26199B8F0070E83D /* OptionSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OptionSelector.swift; sourceTree = "<group>"; };
 		872644C1261B29620070E83D /* PasswordManagerMenuViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PasswordManagerMenuViewModel.swift; sourceTree = "<group>"; };
+		8746CCA5266DFDCD00F44D41 /* PasswordImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordImporter.swift; sourceTree = "<group>"; };
 		8775C5F22613212C00A26CAC /* StoredPasswordCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoredPasswordCell.swift; sourceTree = "<group>"; };
 		8775C5FA261323EC00A26CAC /* PasswordManagerMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordManagerMenu.swift; sourceTree = "<group>"; };
 		87C539A02616295300D51877 /* ViewMorePasswordsCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewMorePasswordsCell.swift; sourceTree = "<group>"; };
@@ -1732,6 +1734,7 @@
 		418171712581107C00317ED8 /* Importers */ = {
 			isa = PBXGroup;
 			children = (
+				8746CC9D266DFDB100F44D41 /* Passwords */,
 				418171722581107C00317ED8 /* Roam */,
 			);
 			path = Importers;
@@ -2463,6 +2466,14 @@
 				56A5BD3625CCAFA400ED7C50 /* english.stopwords */,
 			);
 			path = Stopwords;
+			sourceTree = "<group>";
+		};
+		8746CC9D266DFDB100F44D41 /* Passwords */ = {
+			isa = PBXGroup;
+			children = (
+				8746CCA5266DFDCD00F44D41 /* PasswordImporter.swift */,
+			);
+			path = Passwords;
 			sourceTree = "<group>";
 		};
 		8775C5DD2613202900A26CAC /* PasswordManagerMenu */ = {
@@ -3977,6 +3988,7 @@
 				BAA67CB7B8DE8FC709C996B3 /* PasswordManager.swift in Sources */,
 				BAA67A72C76AE25BF2FC60BD /* BrowsingScorer.swift in Sources */,
 				BAA67259A3927FBE4C92280B /* BrowsingTreeScorer.swift in Sources */,
+				8746CCA6266DFDCD00F44D41 /* PasswordImporter.swift in Sources */,
 				BAA676F2C83EBA770CB34F36 /* Scorable.swift in Sources */,
 				BAA67AF4FC4809A4B37353AD /* ScorerMessageHandler.swift in Sources */,
 				BAA671B407D2F6AD8F8704A3 /* ShootFrameSelectionView.swift in Sources */,
