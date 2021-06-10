@@ -2,6 +2,7 @@ import SwiftUI
 import Preferences
 import Sentry
 import Combine
+import BeamCore
 
 /**
 Function wrapping SwiftUI into `PreferencePane`, which is mimicking view controller's default construction syntax.
@@ -150,6 +151,9 @@ struct AdvancedPreferencesView: View {
                     }
                 }
             }
+            Preferences.Section(title: "Passwords") {
+                PasswordCSVImporter
+            }
         }.onAppear {
             observeDefaultDatabase()
         }
@@ -256,6 +260,32 @@ struct AdvancedPreferencesView: View {
                 selectedDatabase = Database.defaultDatabase()
             }
             .store(in: &cancellables)
+    }
+
+    private var PasswordCSVImporter: some View {
+        Button(action: {
+            let openPanel = NSOpenPanel()
+            openPanel.canChooseFiles = true
+            openPanel.canChooseDirectories = false
+            openPanel.canDownloadUbiquitousContents = false
+            openPanel.allowsMultipleSelection = false
+            openPanel.allowedFileTypes = ["csv", "txt"]
+            openPanel.title = "Select a csv file exported from Chrome, Firefox or Safari"
+            openPanel.begin { result in
+                guard result == .OK, let url = openPanel.url else {
+                    openPanel.close()
+                    return
+                }
+                do {
+                    let passwordStore = AppDelegate.main.data.passwordsDB
+                    try PasswordImporter.importPasswords(fromCSV: url, into: passwordStore)
+                } catch {
+                    Logger.shared.logError(String(describing: error), category: .general)
+                }
+            }
+        }, label: {
+            Text("Import Passwords CSV File")
+        })
     }
 }
 
