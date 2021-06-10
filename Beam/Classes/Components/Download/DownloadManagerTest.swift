@@ -57,7 +57,9 @@ class DownloadManagerTest: XCTestCase {
         }
     }
 
-    func testFileDownload() {
+    // Disabled as failing due to network conditions/availability/timeout
+    // See https://linear.app/beamapp/issue/BE-1039/file-download-test-fails
+    func notestFileDownload() {
 
         let fileManager = FileManager.default
         let tempURL = fileManager.urls(for: .cachesDirectory, in: .userDomainMask).first!

@@ -45,15 +45,36 @@ protocol WebPage: AnyObject, Scorable {
     func getNote(fromTitle: String) -> BeamNote?
 
     var pointAndShoot: PointAndShoot { get }
+    var navigationController: WebNavigationController { get }
     var browsingScorer: BrowsingScorer { get }
     var passwordOverlayController: PasswordOverlayController { get }
+
+    func createNewTab(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, setCurrent: Bool) -> WebPage
+    func closeTab()
+
+    /**
+     - Returns: if the webpage is displayed in the active browser tab.
+     */
+    func isActiveTab() -> Bool
+
+    /*
+     Leave the page, either by back or forward.
+     */
+    func leave()
+    func navigatedTo(url: URL, read: Readability, title: String?)
+}
+
+extension WebPage {
+    func addToNote(allowSearchResult: Bool) -> BeamElement? {
+        nil
+    }
 }
 
 protocol WebPageRelated {
     var page: WebPage { get set }
 }
 
-class WebPageHolder: WebPageRelated {
+class WebPageHolder: NSObject, WebPageRelated {
     private weak var _page: WebPage?
 
     var page: WebPage {

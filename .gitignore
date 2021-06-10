@@ -144,3 +144,9 @@ certs
 fastlane/codequality_report.json
 fastlane/codequality_report_gitlab.json
 fastlane/swiftlint.json
+
+# Generated JS files
+/Beam/Classes/Components/PointAndShoot/index_prod.css
+/Beam/Classes/Components/PointAndShoot/index_prod.js
+/Beam/Classes/Components/PointAndShoot/junit.xml
+/Beam/Classes/Components/PointAndShoot/test.http

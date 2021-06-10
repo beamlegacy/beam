@@ -121,7 +121,7 @@ struct ShootCardPicker: View {
         .opacity(isVisible ? 1.0 : 0.0)
         .animation(.easeInOut(duration: 0.3))
         .onAppear {
-            if let currentNote = browserTabsManager.currentTab?.note, !currentNote.isTodaysNote {
+            if let currentNote = browserTabsManager.currentTab?.noteController.note, !currentNote.isTodaysNote {
                 currentCardName = currentNote.title
                 cardSearchField = currentNote.title
             }

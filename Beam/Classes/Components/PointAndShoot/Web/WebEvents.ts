@@ -1,11 +1,9 @@
 import type { BeamHTMLIFrameElement, BeamMutationObserver, BeamNode, BeamWindow } from "./BeamTypes"
 import type { WebEventsUI } from "./WebEventsUI"
-import { FrameInfo } from "./WebEventsUI";
-import { BeamHTMLIFrameElementMock  } from "./Test/BeamMocks"
-import { WebFactory } from "./WebFactory";
+import { FrameInfo } from "./WebEventsUI"
+import { WebFactory } from "./WebFactory"
 
 export class WebEvents<UI extends WebEventsUI> {
-
   win: BeamWindow
 
   /**
@@ -33,11 +31,12 @@ export class WebEvents<UI extends WebEventsUI> {
    * @type {number}
    */
   touchDuration = 2500
-  mutationObserver: BeamMutationObserver;
+  mutationObserver: BeamMutationObserver
 
   /**
    * @param win {(BeamWindow)}
    * @param ui {WebEventsUI}
+   * @param webFactory
    */
   constructor(win: BeamWindow, protected ui: UI, webFactory: WebFactory) {
     this.log("initializing")
@@ -51,7 +50,7 @@ export class WebEvents<UI extends WebEventsUI> {
     const target = this.win.document.querySelector(query) as unknown as BeamNode
     const options = {
       attributes: true,
-      attributeFilter: ["style"]
+      attributeFilter: ["style"],
     }
     this.mutationObserver.observe(target, options)
   }
@@ -59,7 +58,7 @@ export class WebEvents<UI extends WebEventsUI> {
   setWindow(win: BeamWindow) {
     this.log("setWindow")
     this.win = win
-    this.onScroll()   // Init/refresh scroll info
+    this.onScroll() // Init/refresh scroll info
 
     win.addEventListener("load", this.onLoad.bind(this))
     win.addEventListener("resize", this.onResize.bind(this))
@@ -77,34 +76,33 @@ export class WebEvents<UI extends WebEventsUI> {
   }
 
   /**
-   * Unifies the document zoom and viewport scaling. The document zoom level is used in webkit for macOS < 11.0
-   *
-   * @return {Number} 
-   * @memberof WebEvents
+   * Unifies the document zoom and viewport scaling.
+   * The document zoom level is used in webkit for macOS < 11.0
    */
-  getScale() {
+  getScale(): number {
     let zoom = this.getZoomLevel() || 1
     let scale = this.win.visualViewport.scale
     return Number(zoom) * scale
   }
 
-  getZoomLevel() {
-    let zoom = this.win.document.body.style.zoom
-    switch (true) {
-      case zoom.endsWith("%"):
-        return parseFloat(zoom)/100
-      case Boolean(parseFloat(zoom)):
-        return parseFloat(zoom)
-      case zoom == "normal":
-        return 1
-      default:
-        // No matching cases, default to 1
-        return 1
+  getZoomLevel(): number {
+    let zoomLevel = 1
+    const zoom = this.win.document.body.style.zoom
+    if (zoom) {
+      switch (true) {
+        case zoom.endsWith("%"):
+          zoomLevel = parseFloat(zoom) / 100
+          break
+        case Boolean(parseFloat(zoom)):
+          zoomLevel = parseFloat(zoom)
+          break
+      }
     }
+    return zoomLevel
   }
 
   zoomMutationCallback(mutationRecords, self) {
-    mutationRecords.map(mutationRecord => {
+    mutationRecords.map((mutationRecord) => {
       if (mutationRecord.attributeName == "style") {
         const resizeInfo = self.resizeInfo()
         self.ui.setResizeInfo(resizeInfo)
@@ -126,8 +124,8 @@ export class WebEvents<UI extends WebEventsUI> {
             x: bounds.x,
             y: bounds.y,
             width: bounds.width,
-            height: bounds.height
-          }
+            height: bounds.height,
+          },
         }
         framesInfo.push(frameInfo)
       }
@@ -143,22 +141,28 @@ export class WebEvents<UI extends WebEventsUI> {
     const doc = this.win.document
     const body = doc.body
     const documentEl = doc.documentElement
-    const scrollWidth = this.scrollWidth = Math.max(
-      body.scrollWidth, documentEl.scrollWidth,
-      body.offsetWidth, documentEl.offsetWidth,
-      body.clientWidth, documentEl.clientWidth
-    )
+    const scrollWidth = (this.scrollWidth = Math.max(
+      body.scrollWidth,
+      documentEl.scrollWidth,
+      body.offsetWidth,
+      documentEl.offsetWidth,
+      body.clientWidth,
+      documentEl.clientWidth
+    ))
     const scrollHeight = Math.max(
-      body.scrollHeight, documentEl.scrollHeight,
-      body.offsetHeight, documentEl.offsetHeight,
-      body.clientHeight, documentEl.clientHeight
+      body.scrollHeight,
+      documentEl.scrollHeight,
+      body.offsetHeight,
+      documentEl.offsetHeight,
+      body.clientHeight,
+      documentEl.clientHeight
     )
     const scrollInfo = {
       x: this.win.scrollX,
       y: this.win.scrollY,
       width: scrollWidth,
       height: scrollHeight,
-      scale: this.getScale()
+      scale: this.getScale(),
     }
     this.ui.setScrollInfo(scrollInfo)
     const hasFrames = this.checkFrames()
@@ -171,7 +175,7 @@ export class WebEvents<UI extends WebEventsUI> {
   }
 
   protected resizeInfo() {
-    return { width: this.win.innerWidth, height: this.win.innerHeight, scale: this.getScale() };
+    return { width: this.win.innerWidth, height: this.win.innerHeight, scale: this.getScale() }
   }
 
   onLoad(_ev) {
@@ -188,9 +192,10 @@ export class WebEvents<UI extends WebEventsUI> {
     //   this.log('After 500ms running checkFrames again', this.win.origin)
     //   this.checkFrames()
     // }, 5000)
+    // => This must be solved by https://linear.app/beamapp/issue/BE-641/update-frameinfos-at-first-point
   }
 
-  onPinch(ev) {
+  onPinch(_ev) {
     const vv = this.win.visualViewport
     this.ui.pinched({
       offsetTop: vv.offsetTop,
@@ -199,7 +204,7 @@ export class WebEvents<UI extends WebEventsUI> {
       pageLeft: vv.pageLeft,
       width: vv.width,
       height: vv.height,
-      scale: this.getScale()
+      scale: this.getScale(),
     })
   }
 

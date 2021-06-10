@@ -15,9 +15,13 @@ class ScorerMessageHandler: BeamMessageHandler<ScorerMessages> {
     }
 
     override func onMessage(messageName: String, messageBody: Any?, from webPage: WebPage) {
+        guard let messageKey = ScorerMessages(rawValue: messageName) else {
+            Logger.shared.logError("Unsupported message \(messageName) for scorer message handler", category: .web)
+            return
+        }
         let scorerBody = messageBody as? [String: AnyObject]
-        switch messageName {
-        case ScorerMessages.score_scroll.rawValue:
+        switch messageKey {
+        case ScorerMessages.score_scroll:
             guard let dict = scorerBody,
                   let x = dict["x"] as? CGFloat,
                   let y = dict["y"] as? CGFloat,
@@ -36,9 +40,6 @@ class ScorerMessageHandler: BeamMessageHandler<ScorerMessages> {
                 webPage.browsingScorer.updateScore()
             }
             Logger.shared.logDebug("Scorer handled scroll: \(x), \(y)", category: .web)
-
-        default:
-            break
         }
     }
 }

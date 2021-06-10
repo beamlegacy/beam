@@ -116,13 +116,13 @@ import BeamCore
     }
 
     func toggleBetweenWebAndNote() {
-        guard let note = currentTab?.note else { return }
+        guard let note = currentTab?.noteController.note else { return }
 
         switch mode {
         case .web:
             navigateToNote(note)
         case .today, .note, .page:
-            if self.hasBrowserTabs { mode = .web }
+            if hasBrowserTabs { mode = .web }
         }
     }
 
@@ -148,10 +148,10 @@ import BeamCore
     @discardableResult func navigateToNote(_ note: BeamNote) -> Bool {
         mode = .note
 
-        guard note != self.currentNote else { return true }
+        guard note != currentNote else { return true }
 
-        self.currentPage = nil
-        self.currentNote = note
+        currentPage = nil
+        currentNote = note
         autocompleteManager.resetQuery()
         autocompleteManager.autocompleteSelectedIndex = nil
 
@@ -163,8 +163,8 @@ import BeamCore
     @discardableResult func navigateToJournal(clearNavigation: Bool = false) -> Bool {
         mode = .today
 
-        self.currentPage = nil
-        self.currentNote = nil
+        currentPage = nil
+        currentNote = nil
         autocompleteManager.resetQuery()
         autocompleteManager.autocompleteSelectedIndex = nil
 
@@ -179,11 +179,11 @@ import BeamCore
     func navigateToPage(_ page: WindowPage) {
         mode = .page
 
-        self.currentNote = nil
+        currentNote = nil
         autocompleteManager.resetQuery()
         autocompleteManager.autocompleteSelectedIndex = nil
         focusOmniBox = false
-        self.currentPage = page
+        currentPage = page
         backForwardList.push(.page(page))
         updateCanGoBackForward()
     }
@@ -228,8 +228,8 @@ import BeamCore
 
         let e = BeamElement()
         e.text = BeamText(text: query, attributes: [.internalLink(query)])
-        self.data.todaysNote.insert(e, after: self.data.todaysNote.children.last)
-        try? AppDelegate.main.data.indexer.append(note: self.data.todaysNote)
+        data.todaysNote.insert(e, after: data.todaysNote.children.last)
+        try? AppDelegate.main.data.indexer.append(note: data.todaysNote)
 
         return n
     }
@@ -311,7 +311,7 @@ import BeamCore
     }
 
     override public init() {
-        self.data = AppDelegate.main.data
+        data = AppDelegate.main.data
         super.init()
         setup(data: data)
 
@@ -329,7 +329,7 @@ import BeamCore
     }
 
     required public init(from decoder: Decoder) throws {
-        self.data = AppDelegate.main.data
+        data = AppDelegate.main.data
         super.init()
 
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -400,7 +400,7 @@ import BeamCore
     }
 
     func resetDestinationCard() {
-        destinationCardName = currentTab?.note.title ?? data.todaysName
+        destinationCardName = currentTab?.noteController.title ?? data.todaysName
         destinationCardNameSelectedRange = nil
         destinationCardIsFocused = false
     }

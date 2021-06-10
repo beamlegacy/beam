@@ -13,7 +13,7 @@
     "watch": "webpack --watch --mode=development",
     "start": "webpack serve --mode=development",
     "dist": "webpack --mode=production",
-    "test": "node --experimental-vm-modules node_modules/.bin/jest",
+    "test": "node --experimental-vm-modules node_modules/.bin/jest --reporters=default",
     "test-ci": "node --experimental-vm-modules node_modules/.bin/jest --ci --reporters=default --reporters=jest-junit --coverage"
   },
   "targets": {

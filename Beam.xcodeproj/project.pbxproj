@@ -11,6 +11,7 @@
 		022843372617C4C3001C062E /* OverrideConsole.js in Resources */ = {isa = PBXBuildFile; fileRef = 418171912581107C00317ED8 /* OverrideConsole.js */; };
 		027CB665263163AC001311A0 /* PasswordManager.js in Resources */ = {isa = PBXBuildFile; fileRef = BAA67AD6C73B8B9546778E72 /* PasswordManager.js */; };
 		02A2B285263190F100D581A5 /* Scorer.js in Resources */ = {isa = PBXBuildFile; fileRef = BAA6705B2A0906FB4C068502 /* Scorer.js */; };
+		02C07A9B2670D98600894C5D /* Navigation.js in Resources */ = {isa = PBXBuildFile; fileRef = 02C07A9A2670D98600894C5D /* Navigation.js */; };
 		02E5805226308F1D00CEDEB1 /* index_prod.js in Resources */ = {isa = PBXBuildFile; fileRef = BAA6756C6F2D22423B668BAF /* index_prod.js */; };
 		0325628E26051D3B006513E4 /* RBZip.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325624A26051D3A006513E4 /* RBZip.m */; };
 		0325628F26051D3B006513E4 /* RBSQLite.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325624B26051D3A006513E4 /* RBSQLite.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
@@ -55,22 +56,22 @@
 		0DEE978D2642965600AB95AE /* GRDBIndexerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DEE978C2642965600AB95AE /* GRDBIndexerTests.swift */; };
 		330D380E265FB76C00A2536B /* DownloaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 330D380D265FB76C00A2536B /* DownloaderView.swift */; };
 		330D3824265FC6B200A2536B /* DownloadCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 330D3823265FC6B200A2536B /* DownloadCell.swift */; };
-		3330D7B5265E4441008C9E20 /* Download.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3330D7B4265E4441008C9E20 /* Download.swift */; };
-		3330D7CB265E466D008C9E20 /* OmniBarDownloadButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3330D7CA265E466D008C9E20 /* OmniBarDownloadButton.swift */; };
-		3330D7CD265E95E0008C9E20 /* LinearProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3330D7CC265E95E0008C9E20 /* LinearProgressView.swift */; };
-		33DEF48826617E0B00834839 /* CircledButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33DEF48726617E0B00834839 /* CircledButton.swift */; };
 		3315DC912667859A002A47CF /* Preferences in Frameworks */ = {isa = PBXBuildFile; productRef = 524299AE25A47CA500F4DBF5 /* Preferences */; };
 		3315DC922667859A002A47CF /* Fakery in Frameworks */ = {isa = PBXBuildFile; productRef = 527FB72325B9AAA200959146 /* Fakery */; };
 		3315DC932667859A002A47CF /* Promises in Frameworks */ = {isa = PBXBuildFile; productRef = 52E5297125CD980B00307858 /* Promises */; };
 		3315DC942667859A002A47CF /* PromisesTestHelpers in Frameworks */ = {isa = PBXBuildFile; productRef = 52E5297325CD980B00307858 /* PromisesTestHelpers */; };
 		3315DC952667859A002A47CF /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 964FE5E02625D8AA00966E03 /* GRDB */; };
 		3315DC962667859A002A47CF /* OAuthSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 52CA277B26401D7000146A00 /* OAuthSwift */; };
+		3330D7B5265E4441008C9E20 /* Download.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3330D7B4265E4441008C9E20 /* Download.swift */; };
+		3330D7CB265E466D008C9E20 /* OmniBarDownloadButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3330D7CA265E466D008C9E20 /* OmniBarDownloadButton.swift */; };
+		3330D7CD265E95E0008C9E20 /* LinearProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3330D7CC265E95E0008C9E20 /* LinearProgressView.swift */; };
 		33793AD1265CFEC50041E1B8 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = 9631C746251CE997009B40C4 /* SwiftSoup */; };
 		33793AD2265CFEC50041E1B8 /* FavIcon in Frameworks */ = {isa = PBXBuildFile; productRef = 96474E3E254D9ADB00A920B3 /* FavIcon */; };
 		33793AD7265CFEC50041E1B8 /* KeychainAccess in Frameworks */ = {isa = PBXBuildFile; productRef = 524CF6D225F276D1007312F0 /* KeychainAccess */; };
 		33B27467264C0F7100A318CD /* AutoUpdate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 33B27450264C0CDC00A318CD /* AutoUpdate.framework */; };
 		33B27468264C0F7100A318CD /* AutoUpdate.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 33B27450264C0CDC00A318CD /* AutoUpdate.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		33B2746A264C103400A318CD /* SmallUpdateIndicatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33B27469264C103400A318CD /* SmallUpdateIndicatorView.swift */; };
+		33DEF48826617E0B00834839 /* CircledButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33DEF48726617E0B00834839 /* CircledButton.swift */; };
 		4100D96B25AEFEEA00EF04CB /* BeamTextEdit+Shortcut.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4100D96A25AEFEEA00EF04CB /* BeamTextEdit+Shortcut.swift */; };
 		4105CE2225A5ECA2009AB687 /* BidirectionalPopoverItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4105CE2125A5ECA2009AB687 /* BidirectionalPopoverItem.swift */; };
 		4105CE7525A60681009AB687 /* FormatterTypeButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4105CE7425A60681009AB687 /* FormatterTypeButton.swift */; };
@@ -106,7 +107,6 @@
 		418171F72581107C00317ED8 /* BeamData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181716C2581107C00317ED8 /* BeamData.swift */; };
 		418171F92581107C00317ED8 /* SearchEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181716E2581107C00317ED8 /* SearchEngine.swift */; };
 		418171FC2581107C00317ED8 /* RoamImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171732581107C00317ED8 /* RoamImporter.swift */; };
-		418171FD2581107C00317ED8 /* NavigationContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171742581107C00317ED8 /* NavigationContext.swift */; };
 		418171FE2581107C00317ED8 /* Html2Md.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171752581107C00317ED8 /* Html2Md.swift */; };
 		418171FF2581107C00317ED8 /* CoreDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171772581107C00317ED8 /* CoreDataManager.swift */; };
 		418172002581107C00317ED8 /* NotificationName+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171782581107C00317ED8 /* NotificationName+Beam.swift */; };
@@ -319,7 +319,6 @@
 		8AC2EFC5266F81B000049005 /* PointAndShootStatusTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AC2EFC4266F81B000049005 /* PointAndShootStatusTest.swift */; };
 		8AC2EFCE266F82D900049005 /* PointAndShootHTMLTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AC2EFCD266F82D900049005 /* PointAndShootHTMLTest.swift */; };
 		8AC2EFD6266F86F500049005 /* yarn.lock in Resources */ = {isa = PBXBuildFile; fileRef = 8AC2EFD1266F86F500049005 /* yarn.lock */; };
-		8AC2EFD7266F86F500049005 /* junit.xml in Resources */ = {isa = PBXBuildFile; fileRef = 8AC2EFD2266F86F500049005 /* junit.xml */; };
 		8AC2EFD8266F86F500049005 /* webpack.config.js in Resources */ = {isa = PBXBuildFile; fileRef = 8AC2EFD4266F86F500049005 /* webpack.config.js */; };
 		8AC2EFD9266F86F500049005 /* WebFactory.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8AC2EFD5266F86F500049005 /* WebFactory.ts */; };
 		8AC2EFDB266F8A0800049005 /* PointAndShootPointingTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AC2EFDA266F8A0800049005 /* PointAndShootPointingTest.swift */; };
@@ -542,6 +541,7 @@
 		A5FE96CD2612469C002A2B73 /* AutocompleteManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5FE96CC2612469C002A2B73 /* AutocompleteManager.swift */; };
 		BAA6703B2414F077ED3A09D8 /* PasswordMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA675B80B855A4B2886805B /* PasswordMessageHandler.swift */; };
 		BAA6704409BDC8AB92E95F8D /* WebEventsUI_native.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA67EEADE1294572893B487 /* WebEventsUI_native.ts */; };
+		BAA6704CFB6AE4C1D090F4E4 /* BeamWebFactoryMock.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA67E0D441DE56B0908A8ED /* BeamWebFactoryMock.ts */; };
 		BAA670C2CFE33BC83DF12343 /* ShootAbsolutePositioning.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA6719DA7B5A8574E64AE71 /* ShootAbsolutePositioning.swift */; };
 		BAA67192B5EB78981741C311 /* WebPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67CEFFAFA38F29CF1C84F /* WebPage.swift */; };
 		BAA671B36B54CF95A2D162CB /* BrowserTabConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67F4FA344471FF8691E1A /* BrowserTabConfiguration.swift */; };
@@ -549,11 +549,15 @@
 		BAA67259A3927FBE4C92280B /* BrowsingTreeScorer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA6777EB9326511BE7FD0DC /* BrowsingTreeScorer.swift */; };
 		BAA672E9AF7741DB2798866B /* BeamNode.test.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA674383059F4C483992235 /* BeamNode.test.ts */; };
 		BAA67380A92BBC1FB039AA3F /* WebEventsUI.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA67032568FA8B5DDE5841B /* WebEventsUI.ts */; };
+		BAA673C9223F304A166B92D5 /* WebNoteController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67971FD6352F46D77E3BE /* WebNoteController.swift */; };
+		BAA674265355DDF432FE4B7A /* WebNavigationMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67F5672D6E4512AF90CAC /* WebNavigationMessageHandler.swift */; };
 		BAA67473B64126D0D6C05B40 /* BeamWindowMock.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA67641C3624DA503CB21CF /* BeamWindowMock.ts */; };
 		BAA6750B78E3812C7DA5DF7C /* tsconfig.json in Resources */ = {isa = PBXBuildFile; fileRef = BAA6738E9DD9D41F95BB1602 /* tsconfig.json */; };
 		BAA675A0EEE5F4636AECCE5D /* ShootCardPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA670FA9720D0BD2011EC10 /* ShootCardPicker.swift */; };
 		BAA675AE9C103046AC022CBA /* .sassrc in Resources */ = {isa = PBXBuildFile; fileRef = BAA679E2DF3556E0E444844D /* .sassrc */; };
+		BAA675D3496DCF90EB35C8AD /* BeamEventTargetMock.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA67A2E806033B585ED355B /* BeamEventTargetMock.ts */; };
 		BAA6760269415BA47D933E97 /* PointAndShootUI_native.test.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA676AA87963F568B000616 /* PointAndShootUI_native.test.ts */; };
+		BAA676DF0484BA2E4D6CECDF /* BeamWebNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA670E1903659A32C562E3E /* BeamWebNavigationController.swift */; };
 		BAA676F2C83EBA770CB34F36 /* Scorable.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA6755F00C445E4C93AF3AA /* Scorable.swift */; };
 		BAA677E962485A7EDFAF72AC /* PointAndShoot.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67E198CBE7B676642992F /* PointAndShoot.swift */; };
 		BAA678915DE6AEEE71A1BC1E /* PointAndShootUIMock.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA67425D94953DB6EED0FB3 /* PointAndShootUIMock.ts */; };
@@ -562,6 +566,7 @@
 		BAA679A5A0853E5E53ACD3F1 /* BeamDownloadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA678E5952B4D5130248886 /* BeamDownloadManager.swift */; };
 		BAA679F30E3171511E32341B /* WebEventsUIMock.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA673EAA75F31F568CEFEE0 /* WebEventsUIMock.ts */; };
 		BAA679FFB80537CB6DE74025 /* BeamMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67A4B26FC61E9505EF7DB /* BeamMessageHandler.swift */; };
+		BAA67A0791B680C684C00DFD /* BeamWebkitUIDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67CB267E1C45A009AC2D9 /* BeamWebkitUIDelegate.swift */; };
 		BAA67A090213331E925B0682 /* ShootFrame.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA6776CE80053F1F17A2909 /* ShootFrame.swift */; };
 		BAA67A1DD75801D8B25037E9 /* BeamTypes.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA67429E31F093002EE2693 /* BeamTypes.ts */; };
 		BAA67A54C1D488CD065A7688 /* BeamMocks.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA670B42D1D6F585D0EF013 /* BeamMocks.ts */; };
@@ -569,6 +574,7 @@
 		BAA67A72C76AE25BF2FC60BD /* BrowsingScorer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67D3D273F24009F3AE570 /* BrowsingScorer.swift */; };
 		BAA67A80187509C17C3BE040 /* EventsMock.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA67218A94BBEE8A4B055AD /* EventsMock.ts */; };
 		BAA67AA1FFC6C586C8811D22 /* NativeMock.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA672ED83D75722F6988D7B /* NativeMock.ts */; };
+		BAA67AB22C0A91EBCA6D7BB7 /* WebNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67837448460D14C798F73 /* WebNavigationController.swift */; };
 		BAA67AB77852A4EE310BF552 /* ShootFrameFusionRect.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA674C683DA5DEC733F4746 /* ShootFrameFusionRect.swift */; };
 		BAA67ACD35DACF0E03ED520B /* DownloadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67A3C749F22077F5B7194 /* DownloadManager.swift */; };
 		BAA67AEDAE0EACFDFC1F4E28 /* ShootCardConfirmationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67F51F639D48AD4ABAACB /* ShootCardConfirmationView.swift */; };
@@ -590,6 +596,7 @@
 		BAA67EF4256D22191C1E515F /* test_js.sh in Resources */ = {isa = PBXBuildFile; fileRef = BAA677D2622FEE091922E08C /* test_js.sh */; };
 		BAA67F0398B7B9D2CA9ADE25 /* ContentTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA674174D9C44BC3C8FF465 /* ContentTypes.swift */; };
 		BAA67F19308A38C387C47D6E /* PointAndShootUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA675190ACFCE6361AC531B /* PointAndShootUI.swift */; };
+		BAA67FA1EA0AEC590CEE0AB8 /* WebNavigationContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67226F0A10301D829E071 /* WebNavigationContext.swift */; };
 		BAA67FC2BABDCB5F962CDE22 /* Frames.test.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA678F7FE18AF760346FB0B /* Frames.test.ts */; };
 		DA3E41D42642CC7900BA3952 /* TextSaver.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3E41BF2642CC7900BA3952 /* TextSaver.swift */; };
 		DA76129826614E5A00349F2C /* BrowsingTreeScoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA76129726614E5A00349F2C /* BrowsingTreeScoreTests.swift */; };
@@ -711,6 +718,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		02C07A982670D97800894C5D /* Navigation.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = Navigation.js; path = Beam/Classes/Models/Navigation/Navigation.js; sourceTree = "<group>"; };
+		02C07A9A2670D98600894C5D /* Navigation.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = Navigation.js; path = Beam/Classes/Models/Navigation/Navigation.js; sourceTree = "<group>"; };
 		0325624726051D3A006513E4 /* RBCodeSignature.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RBCodeSignature.h; sourceTree = "<group>"; };
 		0325624826051D3A006513E4 /* RBUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RBUtils.h; sourceTree = "<group>"; };
 		0325624926051D3A006513E4 /* RBDigest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RBDigest.h; sourceTree = "<group>"; };
@@ -787,9 +796,9 @@
 		3330D7B4265E4441008C9E20 /* Download.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Download.swift; sourceTree = "<group>"; };
 		3330D7CA265E466D008C9E20 /* OmniBarDownloadButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniBarDownloadButton.swift; sourceTree = "<group>"; };
 		3330D7CC265E95E0008C9E20 /* LinearProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinearProgressView.swift; sourceTree = "<group>"; };
-		33DEF48726617E0B00834839 /* CircledButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircledButton.swift; sourceTree = "<group>"; };
 		33B27441264C0CDB00A318CD /* AutoUpdate.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = AutoUpdate.xcodeproj; path = Extern/AutoUpdate/AutoUpdate.xcodeproj; sourceTree = "<group>"; };
 		33B27469264C103400A318CD /* SmallUpdateIndicatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmallUpdateIndicatorView.swift; sourceTree = "<group>"; };
+		33DEF48726617E0B00834839 /* CircledButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircledButton.swift; sourceTree = "<group>"; };
 		4100D96A25AEFEEA00EF04CB /* BeamTextEdit+Shortcut.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamTextEdit+Shortcut.swift"; sourceTree = "<group>"; };
 		4105CE2125A5ECA2009AB687 /* BidirectionalPopoverItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BidirectionalPopoverItem.swift; sourceTree = "<group>"; };
 		4105CE7425A60681009AB687 /* FormatterTypeButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatterTypeButton.swift; sourceTree = "<group>"; };
@@ -831,7 +840,6 @@
 		4181716E2581107C00317ED8 /* SearchEngine.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SearchEngine.swift; sourceTree = "<group>"; };
 		418171702581107C00317ED8 /* BeamElement.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BeamElement.swift; sourceTree = "<group>"; };
 		418171732581107C00317ED8 /* RoamImporter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RoamImporter.swift; sourceTree = "<group>"; };
-		418171742581107C00317ED8 /* NavigationContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NavigationContext.swift; sourceTree = "<group>"; };
 		418171752581107C00317ED8 /* Html2Md.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Html2Md.swift; sourceTree = "<group>"; };
 		418171772581107C00317ED8 /* CoreDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDataManager.swift; sourceTree = "<group>"; };
 		418171782581107C00317ED8 /* NotificationName+Beam.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NotificationName+Beam.swift"; sourceTree = "<group>"; };
@@ -1063,7 +1071,6 @@
 		8AC2EFC4266F81B000049005 /* PointAndShootStatusTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootStatusTest.swift; sourceTree = "<group>"; };
 		8AC2EFCD266F82D900049005 /* PointAndShootHTMLTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootHTMLTest.swift; sourceTree = "<group>"; };
 		8AC2EFD1266F86F500049005 /* yarn.lock */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = yarn.lock; sourceTree = "<group>"; };
-		8AC2EFD2266F86F500049005 /* junit.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = junit.xml; sourceTree = "<group>"; };
 		8AC2EFD4266F86F500049005 /* webpack.config.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = webpack.config.js; sourceTree = "<group>"; };
 		8AC2EFD5266F86F500049005 /* WebFactory.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = WebFactory.ts; sourceTree = "<group>"; };
 		8AC2EFDA266F8A0800049005 /* PointAndShootPointingTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootPointingTest.swift; sourceTree = "<group>"; };
@@ -1267,6 +1274,7 @@
 		BAA670D131DF7CAE7FA6664E /* BeamWebView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BeamWebView.swift; sourceTree = "<group>"; };
 		BAA670D8E6A58A6836DA2794 /* PointAndShootTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PointAndShootTest.swift; sourceTree = "<group>"; };
 		BAA670DDAA16ED17F69AA6C4 /* jest.config.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = jest.config.js; sourceTree = "<group>"; };
+		BAA670E1903659A32C562E3E /* BeamWebNavigationController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BeamWebNavigationController.swift; sourceTree = "<group>"; };
 		BAA670FA9720D0BD2011EC10 /* ShootCardPicker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShootCardPicker.swift; sourceTree = "<group>"; };
 		BAA6719DA7B5A8574E64AE71 /* ShootAbsolutePositioning.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShootAbsolutePositioning.swift; sourceTree = "<group>"; };
 		BAA6719ECB481D659C210913 /* index_native.scss */ = {isa = PBXFileReference; lastKnownFileType = text; path = index_native.scss; sourceTree = "<group>"; };
@@ -1275,6 +1283,7 @@
 		BAA671DD680C70E02FD3ED32 /* ShootFrameSelectionView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShootFrameSelectionView.swift; sourceTree = "<group>"; };
 		BAA67218A94BBEE8A4B055AD /* EventsMock.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = EventsMock.ts; sourceTree = "<group>"; };
 		BAA6721A918F405B16F39D59 /* PointAndShootUI_debug.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = PointAndShootUI_debug.ts; sourceTree = "<group>"; };
+		BAA67226F0A10301D829E071 /* WebNavigationContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebNavigationContext.swift; sourceTree = "<group>"; };
 		BAA672B83C933052676D43C2 /* index_web.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = index_web.js; sourceTree = "<group>"; };
 		BAA672D65AB9D06DFEBA3EF2 /* index_web.scss */ = {isa = PBXFileReference; lastKnownFileType = text; path = index_web.scss; sourceTree = "<group>"; };
 		BAA672ED83D75722F6988D7B /* NativeMock.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = NativeMock.ts; sourceTree = "<group>"; };
@@ -1305,25 +1314,30 @@
 		BAA6779A8E69417A47D041B5 /* PointFrame.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PointFrame.swift; sourceTree = "<group>"; };
 		BAA677C8DE42140C0F0BD535 /* PointAndShootUI_native.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = PointAndShootUI_native.ts; sourceTree = "<group>"; };
 		BAA677D2622FEE091922E08C /* test_js.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = test_js.sh; path = scripts/test_js.sh; sourceTree = "<group>"; };
+		BAA67837448460D14C798F73 /* WebNavigationController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebNavigationController.swift; sourceTree = "<group>"; };
 		BAA678E2B362F5D8A1A801D4 /* PasswordManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PasswordManager.swift; path = PasswordManager/PasswordManager.swift; sourceTree = "<group>"; };
 		BAA678E5952B4D5130248886 /* BeamDownloadManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BeamDownloadManager.swift; sourceTree = "<group>"; };
 		BAA678F0976FD26A8BF9B2CA /* PopupUI_web.scss */ = {isa = PBXFileReference; lastKnownFileType = text; path = PopupUI_web.scss; sourceTree = "<group>"; };
 		BAA678F7FE18AF760346FB0B /* Frames.test.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = Frames.test.ts; sourceTree = "<group>"; };
 		BAA679370284CA3AB35EC0FD /* index_debug.scss */ = {isa = PBXFileReference; lastKnownFileType = text; path = index_debug.scss; sourceTree = "<group>"; };
+		BAA67971FD6352F46D77E3BE /* WebNoteController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebNoteController.swift; sourceTree = "<group>"; };
 		BAA679D78927DFBF9EB1B0E5 /* PopupUI_web.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = PopupUI_web.js; sourceTree = "<group>"; };
 		BAA679E2DF3556E0E444844D /* .sassrc */ = {isa = PBXFileReference; lastKnownFileType = text; path = .sassrc; sourceTree = "<group>"; };
+		BAA67A2E806033B585ED355B /* BeamEventTargetMock.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = BeamEventTargetMock.ts; sourceTree = "<group>"; };
 		BAA67A3C749F22077F5B7194 /* DownloadManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DownloadManager.swift; sourceTree = "<group>"; };
 		BAA67A4B26FC61E9505EF7DB /* BeamMessageHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BeamMessageHandler.swift; sourceTree = "<group>"; };
 		BAA67AD6C73B8B9546778E72 /* PasswordManager.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; name = PasswordManager.js; path = PasswordManager/PasswordManager.js; sourceTree = "<group>"; };
 		BAA67B138DFC6DBC31D184E0 /* PointAndShootMessageHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PointAndShootMessageHandler.swift; sourceTree = "<group>"; };
 		BAA67B6D4C4A10AA8B362C0B /* TextSelectorUI.scss */ = {isa = PBXFileReference; lastKnownFileType = text; path = TextSelectorUI.scss; sourceTree = "<group>"; };
 		BAA67B92B9B5D6708301C481 /* package.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = package.json; sourceTree = "<group>"; };
+		BAA67CB267E1C45A009AC2D9 /* BeamWebkitUIDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BeamWebkitUIDelegate.swift; sourceTree = "<group>"; };
 		BAA67CDE485E5E7774A978D2 /* LoggingMessageHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoggingMessageHandler.swift; sourceTree = "<group>"; };
 		BAA67CEFFAFA38F29CF1C84F /* WebPage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebPage.swift; sourceTree = "<group>"; };
 		BAA67D2FC7A644FB3E1C05E6 /* mixins.scss */ = {isa = PBXFileReference; lastKnownFileType = text; path = mixins.scss; sourceTree = "<group>"; };
 		BAA67D3D273F24009F3AE570 /* BrowsingScorer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = BrowsingScorer.swift; path = BrowsingScorer/BrowsingScorer.swift; sourceTree = "<group>"; };
 		BAA67D4F02B489A221B47CBB /* index_debug.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = index_debug.js; sourceTree = "<group>"; };
 		BAA67DD5764226E47DFA6F9E /* WebPositions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebPositions.swift; sourceTree = "<group>"; };
+		BAA67E0D441DE56B0908A8ED /* BeamWebFactoryMock.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = BeamWebFactoryMock.ts; sourceTree = "<group>"; };
 		BAA67E198CBE7B676642992F /* PointAndShoot.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PointAndShoot.swift; sourceTree = "<group>"; };
 		BAA67E555FFA88F96CBBEC3A /* PointAndShoot.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = PointAndShoot.ts; sourceTree = "<group>"; };
 		BAA67E65CFE073BC56B23C55 /* PointAndShootUI.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = PointAndShootUI.ts; sourceTree = "<group>"; };
@@ -1334,6 +1348,7 @@
 		BAA67EF0075AA8C7D276DEDC /* Util.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = Util.ts; sourceTree = "<group>"; };
 		BAA67F4FA344471FF8691E1A /* BrowserTabConfiguration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BrowserTabConfiguration.swift; sourceTree = "<group>"; };
 		BAA67F51F639D48AD4ABAACB /* ShootCardConfirmationView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShootCardConfirmationView.swift; sourceTree = "<group>"; };
+		BAA67F5672D6E4512AF90CAC /* WebNavigationMessageHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebNavigationMessageHandler.swift; sourceTree = "<group>"; };
 		BAA67F65A4275DE0B884B933 /* index_native.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = index_native.js; sourceTree = "<group>"; };
 		BAA67FFE49752420EA6C9833 /* Native.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = Native.ts; sourceTree = "<group>"; };
 		DA3E41BF2642CC7900BA3952 /* TextSaver.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TextSaver.swift; path = Classes/Helpers/Utils/TextSaver.swift; sourceTree = "<group>"; };
@@ -1696,7 +1711,6 @@
 				A5E04DEA263BEDA600BFB4C1 /* BrowserTabsManager.swift */,
 				A5FE96CC2612469C002A2B73 /* AutocompleteManager.swift */,
 				4181716E2581107C00317ED8 /* SearchEngine.swift */,
-				418171742581107C00317ED8 /* NavigationContext.swift */,
 				418171752581107C00317ED8 /* Html2Md.swift */,
 				418171822581107C00317ED8 /* BrowserTab.swift */,
 				A5C9F004261353420096380F /* WindowPage.swift */,
@@ -1725,6 +1739,9 @@
 				87F11BC2266524B2003BE98E /* WebAutocompleteProtocols.swift */,
 				87F11BDA26655170003BE98E /* MockAutocompleteStores.swift */,
 				87F11BD8266533C1003BE98E /* PasswordGenerator.swift */,
+				BAA67971FD6352F46D77E3BE /* WebNoteController.swift */,
+				BAA67CB267E1C45A009AC2D9 /* BeamWebkitUIDelegate.swift */,
+				BAA67051B37A3398BDF678AB /* Navigation */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -2506,7 +2523,6 @@
 		8AC2EFD0266F840D00049005 /* Web */ = {
 			isa = PBXGroup;
 			children = (
-				8AC2EFD2266F86F500049005 /* junit.xml */,
 				8AC2EFD5266F86F500049005 /* WebFactory.ts */,
 				8AC2EFD4266F86F500049005 /* webpack.config.js */,
 				8AC2EFD1266F86F500049005 /* yarn.lock */,
@@ -2683,6 +2699,8 @@
 		965A781C2514F147009980D4 = {
 			isa = PBXGroup;
 			children = (
+				02C07A982670D97800894C5D /* Navigation.js */,
+				02C07A9A2670D98600894C5D /* Navigation.js */,
 				965A78272514F147009980D4 /* Beam */,
 				965A78402514F149009980D4 /* BeamTests */,
 				965A784B2514F149009980D4 /* BeamUITests */,
@@ -2965,6 +2983,17 @@
 			path = WindowPage;
 			sourceTree = "<group>";
 		};
+		BAA67051B37A3398BDF678AB /* Navigation */ = {
+			isa = PBXGroup;
+			children = (
+				BAA67837448460D14C798F73 /* WebNavigationController.swift */,
+				BAA67F5672D6E4512AF90CAC /* WebNavigationMessageHandler.swift */,
+				BAA670E1903659A32C562E3E /* BeamWebNavigationController.swift */,
+				BAA67226F0A10301D829E071 /* WebNavigationContext.swift */,
+			);
+			path = Navigation;
+			sourceTree = "<group>";
+		};
 		BAA674240EA89BD15248E607 /* Download */ = {
 			isa = PBXGroup;
 			children = (
@@ -3015,6 +3044,8 @@
 				BAA67218A94BBEE8A4B055AD /* EventsMock.ts */,
 				BAA672ED83D75722F6988D7B /* NativeMock.ts */,
 				BAA674383059F4C483992235 /* BeamNode.test.ts */,
+				BAA67A2E806033B585ED355B /* BeamEventTargetMock.ts */,
+				BAA67E0D441DE56B0908A8ED /* BeamWebFactoryMock.ts */,
 			);
 			path = Test;
 			sourceTree = "<group>";
@@ -3214,22 +3245,22 @@
 			);
 			mainGroup = 965A781C2514F147009980D4;
 			packageReferences = (
-				9631C745251CE997009B40C4 /* XCRemoteSwiftPackageReference "SwiftSoup" */,
-				96474E3D254D9ADB00A920B3 /* XCRemoteSwiftPackageReference "FavIcon" */,
+				9631C745251CE997009B40C4 /* XCRemoteSwiftPackageReference "SwiftSoup.git" */,
+				96474E3D254D9ADB00A920B3 /* XCRemoteSwiftPackageReference "FavIcon.git" */,
 				524299AD25A47CA500F4DBF5 /* XCRemoteSwiftPackageReference "Preferences" */,
-				527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */,
-				527FB71825B9A97A00959146 /* XCRemoteSwiftPackageReference "sentry-cocoa" */,
-				527FB71D25B9A9B600959146 /* XCRemoteSwiftPackageReference "JWTDecode.swift" */,
+				527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack.git" */,
+				527FB71825B9A97A00959146 /* XCRemoteSwiftPackageReference "sentry-cocoa.git" */,
+				527FB71D25B9A9B600959146 /* XCRemoteSwiftPackageReference "JWTDecode.swift.git" */,
 				527FB72225B9AAA200959146 /* XCRemoteSwiftPackageReference "Fakery" */,
-				5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */,
-				5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick" */,
+				5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble.git" */,
+				5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick.git" */,
 				52BB698925CD4E1E007A1173 /* XCRemoteSwiftPackageReference "PromiseKit" */,
-				52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises" */,
-				523E91CA25D17004001124E0 /* XCRemoteSwiftPackageReference "Foundation" */,
+				52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises.git" */,
+				523E91CA25D17004001124E0 /* XCRemoteSwiftPackageReference "Foundation.git" */,
 				524CF6D125F276D1007312F0 /* XCRemoteSwiftPackageReference "KeychainAccess" */,
 				521FEC982604F9B4009000F9 /* XCRemoteSwiftPackageReference "Vinyl" */,
-				964FE5DF2625D8AA00966E03 /* XCRemoteSwiftPackageReference "GRDB.swift" */,
-				52CA277A26401D7000146A00 /* XCRemoteSwiftPackageReference "OAuthSwift" */,
+				964FE5DF2625D8AA00966E03 /* XCRemoteSwiftPackageReference "GRDB.swift.git" */,
+				52CA277A26401D7000146A00 /* XCRemoteSwiftPackageReference "OAuthSwift.git" */,
 				96D5AE83264C01AD003AD516 /* XCRemoteSwiftPackageReference "TLDExtractSwift" */,
 			);
 			productRefGroup = 965A78262514F147009980D4 /* Products */;
@@ -3326,6 +3357,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				02C07A9B2670D98600894C5D /* Navigation.js in Resources */,
 				02A2B285263190F100D581A5 /* Scorer.js in Resources */,
 				027CB665263163AC001311A0 /* PasswordManager.js in Resources */,
 				8AF53BAE266A241C00C3CB2E /* NavigationCollectUITests-2.html in Resources */,
@@ -3366,7 +3398,6 @@
 				965A78332514F148009980D4 /* Preview Assets.xcassets in Resources */,
 				52A06978264E909A00B4B80A /* document_public_url.graphql in Resources */,
 				8AF53BAC266A241700C3CB2E /* NavigationCollectUITests-1.html in Resources */,
-				8AC2EFD7266F86F500049005 /* junit.xml in Resources */,
 				52E2527C26173F8D00E54C45 /* delete_database.graphql in Resources */,
 				418172412581107C00317ED8 /* ScrollableTextView.xib in Resources */,
 				52FB936626209CA900FEF632 /* delete_all_databases.graphql in Resources */,
@@ -3390,6 +3421,8 @@
 				BAA6750B78E3812C7DA5DF7C /* tsconfig.json in Resources */,
 				BAA67B681D12191FE57E7807 /* PopupUI_web.scss in Resources */,
 				BAA67EF4256D22191C1E515F /* test_js.sh in Resources */,
+				BAA675D3496DCF90EB35C8AD /* BeamEventTargetMock.ts in Resources */,
+				BAA6704CFB6AE4C1D090F4E4 /* BeamWebFactoryMock.ts in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3941,7 +3974,6 @@
 				A51ED9A72608D0CD00CA99E5 /* ContextMenuFormatterView.swift in Sources */,
 				4105CE7525A60681009AB687 /* FormatterTypeButton.swift in Sources */,
 				961EC58625B7A75A009FA322 /* LinkManager.swift in Sources */,
-				418171FD2581107C00317ED8 /* NavigationContext.swift in Sources */,
 				032562A626051D3B006513E4 /* RBFilterManager.m in Sources */,
 				52B9A38C264562E60063AEEF /* EnvironmentVariables.swift in Sources */,
 				418172372581107C00317ED8 /* TextEditOperations.swift in Sources */,
@@ -3993,6 +4025,12 @@
 				BAA67ACD35DACF0E03ED520B /* DownloadManager.swift in Sources */,
 				BAA67F0398B7B9D2CA9ADE25 /* ContentTypes.swift in Sources */,
 				BAA679A5A0853E5E53ACD3F1 /* BeamDownloadManager.swift in Sources */,
+				BAA673C9223F304A166B92D5 /* WebNoteController.swift in Sources */,
+				BAA67A0791B680C684C00DFD /* BeamWebkitUIDelegate.swift in Sources */,
+				BAA67AB22C0A91EBCA6D7BB7 /* WebNavigationController.swift in Sources */,
+				BAA674265355DDF432FE4B7A /* WebNavigationMessageHandler.swift in Sources */,
+				BAA676DF0484BA2E4D6CECDF /* BeamWebNavigationController.swift in Sources */,
+				BAA67FA1EA0AEC590CEE0AB8 /* WebNavigationContext.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4855,7 +4893,7 @@
 				minimumVersion = 0.10.5;
 			};
 		};
-		5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */ = {
+		5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble.git" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Quick/Nimble.git";
 			requirement = {
@@ -4863,7 +4901,7 @@
 				minimumVersion = 9.0.0;
 			};
 		};
-		5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick" */ = {
+		5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick.git" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Quick/Quick.git";
 			requirement = {
@@ -4871,7 +4909,7 @@
 				minimumVersion = 3.0.0;
 			};
 		};
-		523E91CA25D17004001124E0 /* XCRemoteSwiftPackageReference "Foundation" */ = {
+		523E91CA25D17004001124E0 /* XCRemoteSwiftPackageReference "Foundation.git" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/PromiseKit/Foundation.git";
 			requirement = {
@@ -4895,7 +4933,7 @@
 				minimumVersion = 4.2.2;
 			};
 		};
-		527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */ = {
+		527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack.git" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/CocoaLumberjack/CocoaLumberjack.git";
 			requirement = {
@@ -4903,7 +4941,7 @@
 				minimumVersion = 3.7.0;
 			};
 		};
-		527FB71825B9A97A00959146 /* XCRemoteSwiftPackageReference "sentry-cocoa" */ = {
+		527FB71825B9A97A00959146 /* XCRemoteSwiftPackageReference "sentry-cocoa.git" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/getsentry/sentry-cocoa.git";
 			requirement = {
@@ -4911,7 +4949,7 @@
 				minimumVersion = 6.1.3;
 			};
 		};
-		527FB71D25B9A9B600959146 /* XCRemoteSwiftPackageReference "JWTDecode.swift" */ = {
+		527FB71D25B9A9B600959146 /* XCRemoteSwiftPackageReference "JWTDecode.swift.git" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/auth0/JWTDecode.swift.git";
 			requirement = {
@@ -4935,7 +4973,7 @@
 				minimumVersion = 6.13.3;
 			};
 		};
-		52CA277A26401D7000146A00 /* XCRemoteSwiftPackageReference "OAuthSwift" */ = {
+		52CA277A26401D7000146A00 /* XCRemoteSwiftPackageReference "OAuthSwift.git" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/OAuthSwift/OAuthSwift.git";
 			requirement = {
@@ -4943,7 +4981,7 @@
 				kind = branch;
 			};
 		};
-		52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises" */ = {
+		52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises.git" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/google/promises.git";
 			requirement = {
@@ -4951,7 +4989,7 @@
 				minimumVersion = 1.2.12;
 			};
 		};
-		9631C745251CE997009B40C4 /* XCRemoteSwiftPackageReference "SwiftSoup" */ = {
+		9631C745251CE997009B40C4 /* XCRemoteSwiftPackageReference "SwiftSoup.git" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/scinfu/SwiftSoup.git";
 			requirement = {
@@ -4959,7 +4997,7 @@
 				minimumVersion = 2.3.2;
 			};
 		};
-		96474E3D254D9ADB00A920B3 /* XCRemoteSwiftPackageReference "FavIcon" */ = {
+		96474E3D254D9ADB00A920B3 /* XCRemoteSwiftPackageReference "FavIcon.git" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/leonbreedt/FavIcon.git";
 			requirement = {
@@ -4967,7 +5005,7 @@
 				minimumVersion = 3.1.0;
 			};
 		};
-		964FE5DF2625D8AA00966E03 /* XCRemoteSwiftPackageReference "GRDB.swift" */ = {
+		964FE5DF2625D8AA00966E03 /* XCRemoteSwiftPackageReference "GRDB.swift.git" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/groue/GRDB.swift.git";
 			requirement = {
@@ -4975,7 +5013,7 @@
 				minimumVersion = 5.7.4;
 			};
 		};
-		96D5AE61264BF56F003AD516 /* XCRemoteSwiftPackageReference "SwiftDomainParser" */ = {
+		96D5AE61264BF56F003AD516 /* XCRemoteSwiftPackageReference "SwiftDomainParser.git" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Dashlane/SwiftDomainParser.git";
 			requirement = {
@@ -5001,17 +5039,17 @@
 		};
 		5239C11525C2C4AE009C51E1 /* Nimble */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */;
+			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble.git" */;
 			productName = Nimble;
 		};
 		5239C12E25C2C4C6009C51E1 /* Quick */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick" */;
+			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick.git" */;
 			productName = Quick;
 		};
 		523E91CB25D17004001124E0 /* PMKFoundation */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 523E91CA25D17004001124E0 /* XCRemoteSwiftPackageReference "Foundation" */;
+			package = 523E91CA25D17004001124E0 /* XCRemoteSwiftPackageReference "Foundation.git" */;
 			productName = PMKFoundation;
 		};
 		524299AE25A47CA500F4DBF5 /* Preferences */ = {
@@ -5026,12 +5064,12 @@
 		};
 		527FB71925B9A97A00959146 /* Sentry */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 527FB71825B9A97A00959146 /* XCRemoteSwiftPackageReference "sentry-cocoa" */;
+			package = 527FB71825B9A97A00959146 /* XCRemoteSwiftPackageReference "sentry-cocoa.git" */;
 			productName = Sentry;
 		};
 		527FB71E25B9A9B600959146 /* JWTDecode */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 527FB71D25B9A9B600959146 /* XCRemoteSwiftPackageReference "JWTDecode.swift" */;
+			package = 527FB71D25B9A9B600959146 /* XCRemoteSwiftPackageReference "JWTDecode.swift.git" */;
 			productName = JWTDecode;
 		};
 		527FB72325B9AAA200959146 /* Fakery */ = {
@@ -5046,52 +5084,52 @@
 		};
 		52CA277B26401D7000146A00 /* OAuthSwift */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 52CA277A26401D7000146A00 /* XCRemoteSwiftPackageReference "OAuthSwift" */;
+			package = 52CA277A26401D7000146A00 /* XCRemoteSwiftPackageReference "OAuthSwift.git" */;
 			productName = OAuthSwift;
 		};
 		52E5297125CD980B00307858 /* Promises */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises" */;
+			package = 52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises.git" */;
 			productName = Promises;
 		};
 		52E5297325CD980B00307858 /* PromisesTestHelpers */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises" */;
+			package = 52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises.git" */;
 			productName = PromisesTestHelpers;
 		};
 		96319D52261623BB00D1CF31 /* CocoaLumberjackSwift */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */;
+			package = 527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack.git" */;
 			productName = CocoaLumberjackSwift;
 		};
 		9631C746251CE997009B40C4 /* SwiftSoup */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 9631C745251CE997009B40C4 /* XCRemoteSwiftPackageReference "SwiftSoup" */;
+			package = 9631C745251CE997009B40C4 /* XCRemoteSwiftPackageReference "SwiftSoup.git" */;
 			productName = SwiftSoup;
 		};
 		9639FAF42616614D00C85B95 /* CocoaLumberjackSwift */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */;
+			package = 527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack.git" */;
 			productName = CocoaLumberjackSwift;
 		};
 		96474E3E254D9ADB00A920B3 /* FavIcon */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 96474E3D254D9ADB00A920B3 /* XCRemoteSwiftPackageReference "FavIcon" */;
+			package = 96474E3D254D9ADB00A920B3 /* XCRemoteSwiftPackageReference "FavIcon.git" */;
 			productName = FavIcon;
 		};
 		964FE5E02625D8AA00966E03 /* GRDB */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 964FE5DF2625D8AA00966E03 /* XCRemoteSwiftPackageReference "GRDB.swift" */;
+			package = 964FE5DF2625D8AA00966E03 /* XCRemoteSwiftPackageReference "GRDB.swift.git" */;
 			productName = GRDB;
 		};
 		96D5AE7A264BFD40003AD516 /* DomainParser */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 96D5AE61264BF56F003AD516 /* XCRemoteSwiftPackageReference "SwiftDomainParser" */;
+			package = 96D5AE61264BF56F003AD516 /* XCRemoteSwiftPackageReference "SwiftDomainParser.git" */;
 			productName = DomainParser;
 		};
 		96D5AE7C264BFD4C003AD516 /* CocoaLumberjackSwift */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */;
+			package = 527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack.git" */;
 			productName = CocoaLumberjackSwift;
 		};
 		96D5AE84264C01AD003AD516 /* TLDExtract */ = {
@@ -5101,22 +5139,22 @@
 		};
 		A0A6F2A025D1B73400EFC4BE /* Quick */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick" */;
+			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick.git" */;
 			productName = Quick;
 		};
 		A0A6F2A225D1B73A00EFC4BE /* Nimble */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */;
+			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble.git" */;
 			productName = Nimble;
 		};
 		A0A6F2A425D1B74200EFC4BE /* Quick */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick" */;
+			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick.git" */;
 			productName = Quick;
 		};
 		A0A6F2A625D1B74800EFC4BE /* Nimble */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */;
+			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble.git" */;
 			productName = Nimble;
 		};
 		A5946845265E30350044A892 /* Fakery */ = {
@@ -5126,12 +5164,12 @@
 		};
 		A5CA5DFA2625C302004E9D3E /* Quick */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick" */;
+			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick.git" */;
 			productName = Quick;
 		};
 		A5CA5DFC2625C306004E9D3E /* Nimble */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */;
+			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble.git" */;
 			productName = Nimble;
 		};
 /* End XCSwiftPackageProductDependency section */
