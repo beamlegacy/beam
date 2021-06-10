@@ -1075,7 +1075,8 @@ public class TextNode: ElementNode {
             }
         }
         let focusedPosition: Int? = isFocused ? cursorPosition : nil
-        let str = beamText.buildAttributedString(fontSize: fontSize, cursorPosition: focusedPosition, elementKind: elementKind, mouseInteraction: mouseInteraction, markedRange: markedTextRange)
+        let selectedRange = selected ? text.wholeRange : selectedTextRange
+        let str = beamText.buildAttributedString(fontSize: fontSize, cursorPosition: focusedPosition, elementKind: elementKind, mouseInteraction: mouseInteraction, markedRange: markedTextRange, selectedRange: selectedRange)
         let paragraphStyle = NSMutableParagraphStyle()
         //        paragraphStyle.alignment = .justified
         paragraphStyle.lineBreakMode = .byWordWrapping
