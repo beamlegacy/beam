@@ -110,6 +110,32 @@ class WebviewRelatedMenuItem: NSMenuItem, MenuItemCustomValidation {
 // MARK: - Menu Bar items selectors
 extension AppDelegate {
 
+    // MARK: Navigation
+    @IBAction func goBack(_ sender: Any?) {
+        window.state.goBack()
+    }
+
+    @IBAction func goForward(_ sender: Any?) {
+        window.state.goForward()
+    }
+
+    @IBAction func toggleBetweenWebAndNote(_ sender: Any) {
+        window.state.toggleBetweenWebAndNote()
+    }
+
+    @IBAction private func checkForUpdates(_ sender: Any) {
+        window.versionChecker.checkForUpdates()
+    }
+
+    // MARK: Web loading
+    @IBAction func stopLoading(_ sender: Any) {
+        window.state.browserTabsManager.currentTab?.webView.stopLoading()
+    }
+
+    @IBAction func reload(_ sender: Any) {
+        window.state.browserTabsManager.currentTab?.webView.reload()
+    }
+
     // MARK: Webview Zoom
     @IBAction func resetZoom(_ sender: Any) {
         window.state.browserTabsManager.currentTab?.webView.zoomReset()

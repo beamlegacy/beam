@@ -320,19 +320,4 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    @IBAction func goBack(_ sender: Any?) {
-        window.state.goBack()
-    }
-
-    @IBAction func goForward(_ sender: Any?) {
-        window.state.goForward()
-    }
-
-    @IBAction func toggleBetweenWebAndNote(_ sender: Any) {
-        window.state.toggleBetweenWebAndNote()
-    }
-
-    @IBAction private func checkForUpdates(_ sender: Any) {
-        window.versionChecker.checkForUpdates()
-    }
 }
