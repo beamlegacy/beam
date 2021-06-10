@@ -27,6 +27,7 @@ public class DocumentManager: NSObject {
     private var saveDocumentPromiseCancels: [UUID: () -> Void] = [:]
 
     private static var networkRequests: [UUID: APIRequest] = [:]
+    private var networkTasks: [UUID: (DispatchWorkItem, ((Swift.Result<Bool, Error>) -> Void)?)] = [:]
 
     init(coreDataManager: CoreDataManager? = nil) {
         self.coreDataManager = coreDataManager ?? CoreDataManager.shared
@@ -563,6 +564,42 @@ public class DocumentManager: NSObject {
         }
         return result
     }
+
+    private func saveAndThrottle(_ document: Document,
+                                 _ documentStruct: DocumentStruct,
+                                 _ networkCompletion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
+        // Using a queue so I don't need semaphore
+        backgroundQueue.async {
+            self.networkTasks[document.id]?.0.cancel()
+            self.networkTasks[document.id]?.1?(.failure(DocumentManagerError.operationCancelled))
+        }
+
+        let networkTask = DispatchWorkItem { [weak self] in
+            guard let self = self else { return }
+            let context = self.coreDataManager.backgroundContext
+            context.perform {
+                // We want to fetch back the document, to update it's previousChecksum
+                // context.refresh(document, mergeChanges: false)
+                guard let updatedDocument = try? Document.fetchWithId(context, documentStruct.id) else {
+                    Logger.shared.logError("Weird, document disappeared: \(documentStruct.id) \(documentStruct.title)", category: .coredata)
+                    return
+                }
+
+                let updatedDocStruct = DocumentStruct(document: updatedDocument)
+                self.saveDocumentStructOnAPI(updatedDocStruct) { result in
+                    self.backgroundQueue.async {
+                        self.networkTasks.removeValue(forKey: document.id)
+                    }
+                    networkCompletion?(result)
+                }
+            }
+        }
+
+        backgroundQueue.async {
+            self.networkTasks[document.id] = (networkTask, networkCompletion)
+        }
+        backgroundQueue.asyncAfter(deadline: DispatchTime.now() + 2.0, execute: networkTask)
+    }
 }
 
 // MARK: - Foundation
@@ -908,15 +945,7 @@ extension DocumentManager {
 
                 // If not authenticated, we don't need to send to BeamAPI
                 if AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled, networkSave {
-                    // We want to fetch back the document, to update it's previousChecksum
-                    //                    context.refresh(document, mergeChanges: false)
-                    guard let updatedDocument = try? Document.fetchWithId(context, documentStruct.id) else {
-                        Logger.shared.logError("Weird, document disappeared: \(documentStruct.id) \(documentStruct.title)", category: .coredata)
-                        return
-                    }
-
-                    let updatedDocStruct = DocumentStruct(document: updatedDocument)
-                    self.saveDocumentStructOnAPI(updatedDocStruct, networkCompletion)
+                    self.saveAndThrottle(document, documentStruct, networkCompletion)
                 } else {
                     networkCompletion?(.failure(APIRequestError.notAuthenticated))
                 }
@@ -1358,11 +1387,9 @@ extension DocumentManager {
                         return Promise(true)
                     }
 
-                    // We want to fetch back the document, to update it's previousChecksum
-                    context.refresh(document, mergeChanges: false)
-                    let promise: Promises.Promise<Bool> = self.saveOnApi(DocumentStruct(document: document))
+                    self.saveAndThrottle(document, documentStruct)
 
-                    return promise
+                    return Promise(true)
                 }
             }.always {
                 self.saveDocumentPromiseCancels[documentStruct.id] = nil
@@ -1698,10 +1725,15 @@ extension DocumentManager {
                         return .value(true)
                     }
 
-                    // We want to fetch back the document, to update its previousChecksum
-                    context.refresh(document, mergeChanges: false)
-                    let promise: PromiseKit.Promise<Bool> = self.saveOnApi(DocumentStruct(document: document))
-                    promise.done { _ in }.catch { _ in }
+                    /*
+                     Something is broken around here, but I'll leave it as it is for now since promises are not used for
+                     saving documents yet.
+
+                     The completionHandler save() allows to get 2 handlers: one for saving, one for network call. The
+                     promise version doesn't give any way to receive callbacks for network calls.
+                     */
+
+                    self.saveAndThrottle(document, documentStruct)
 
                     return .value(true)
                 }

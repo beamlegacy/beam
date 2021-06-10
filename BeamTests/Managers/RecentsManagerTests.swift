@@ -39,6 +39,8 @@ class RecentsManagerTests: QuickSpec {
         let newNote = BeamNote(title: "Note")
 
         beforeEach {
+            BeamTestsHelper.logout()
+
             self.fillWithRandomDocuments(self.documentManager)
             recentsManager = RecentsManager(with: self.documentManager)
         }
