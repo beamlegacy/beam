@@ -46,11 +46,17 @@ class DocumentManagerTestsHelper {
         waitUntil(timeout: .seconds(10)) { done in
             result.version += 1
 
-            // To force a local save only, while using the standard code
-            self.documentManager.save(result, true, { result in
-                expect { try result.get() }.toNot(throwError())
-                done()
-            }, completion: nil)
+            /*
+             We want to save locally and remotely, but network calls are thottled.
+             For faster tests, we save locally without network, and call the network call ourselves immediately
+             */
+
+            self.documentManager.save(result, false, nil, completion: { result in
+                self.documentManager.saveDocumentStructOnAPI(docStruct) { result in
+                    expect { try result.get() }.toNot(throwError())
+                    done()
+                }
+            })
         }
 
         return result
