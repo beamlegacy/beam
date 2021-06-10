@@ -568,10 +568,13 @@ public class DocumentManager: NSObject {
     private func saveAndThrottle(_ document: Document,
                                  _ documentStruct: DocumentStruct,
                                  _ networkCompletion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
+        let document_id = document.id
         // Using a queue so I don't need semaphore
         backgroundQueue.async {
-            self.networkTasks[document.id]?.0.cancel()
-            self.networkTasks[document.id]?.1?(.failure(DocumentManagerError.operationCancelled))
+            if let tuple = self.networkTasks[document_id] {
+                tuple.0.cancel()
+                tuple.1?(.failure(DocumentManagerError.operationCancelled))
+            }
         }
 
         let networkTask = DispatchWorkItem { [weak self] in
@@ -588,7 +591,7 @@ public class DocumentManager: NSObject {
                 let updatedDocStruct = DocumentStruct(document: updatedDocument)
                 self.saveDocumentStructOnAPI(updatedDocStruct) { result in
                     self.backgroundQueue.async {
-                        self.networkTasks.removeValue(forKey: document.id)
+                        self.networkTasks.removeValue(forKey: document_id)
                     }
                     networkCompletion?(result)
                 }
@@ -596,7 +599,7 @@ public class DocumentManager: NSObject {
         }
 
         backgroundQueue.async {
-            self.networkTasks[document.id] = (networkTask, networkCompletion)
+            self.networkTasks[document_id] = (networkTask, networkCompletion)
         }
         backgroundQueue.asyncAfter(deadline: DispatchTime.now() + 2.0, execute: networkTask)
     }
