@@ -14,19 +14,18 @@ enum PasswordImporter {
     }
 
     private struct Entry {
-        var host: URL
+        var host: String
         var username: String
         var password: String
 
         init?(url: String, username: String, password: String) {
-            var host = URL(string: url)
-            if host?.host == nil {
-                host = URL(string: "https://\(url)")
+            let host: String
+            if let separator = url.range(of: "://") {
+                host = String(url.suffix(from: separator.upperBound))
+            } else {
+                host = url
             }
-            guard let _host = host else {
-                return nil
-            }
-            self.host = _host
+            self.host = host
             self.username = username
             self.password = password
         }

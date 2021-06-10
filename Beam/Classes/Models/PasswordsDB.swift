@@ -75,26 +75,20 @@ class PasswordsDB: PasswordStore {
         })
     }
 
-    private func id(for host: URL, and username: String) -> String {
-        return PasswordManagerEntry(host: host, username: username).id
+    private func id(for host: String, and username: String) -> String {
+        return PasswordManagerEntry(minimizedHost: host, username: username).id
     }
 
     private func entries(for passwordsRecord: [PasswordsRecord]) -> [PasswordManagerEntry] {
-        var entries: [PasswordManagerEntry] = []
-        for passwordRecord in passwordsRecord {
-            if let host = URL(string: passwordRecord.host) {
-                entries.append(PasswordManagerEntry(host: host, username: passwordRecord.name))
-            }
-        }
-        return entries
+        passwordsRecord.map { PasswordManagerEntry(minimizedHost: $0.host, username: $0.name) }
     }
 
     // PasswordStore
-    func entries(for host: URL, completion: @escaping ([PasswordManagerEntry]) -> Void) {
+    func entries(for host: String, completion: @escaping ([PasswordManagerEntry]) -> Void) {
         do {
             try dbQueue.read { db in
                 let passwords = try PasswordsRecord
-                    .filter(PasswordsRecord.Columns.host == host.minimizedHost)
+                    .filter(PasswordsRecord.Columns.host == host)
                     .fetchAll(db)
                 completion(entries(for: passwords))
             }
@@ -127,7 +121,7 @@ class PasswordsDB: PasswordStore {
         }
     }
 
-    func password(host: URL, username: String, completion: @escaping (String?) -> Void) {
+    func password(host: String, username: String, completion: @escaping (String?) -> Void) {
         do {
             try dbQueue.read { db in
                 guard let passwordRecord = try PasswordsRecord.fetchOne(db, key: id(for: host, and: username)) else {
@@ -146,7 +140,7 @@ class PasswordsDB: PasswordStore {
         }
     }
 
-    func save(host: URL, username: String, password: String) {
+    func save(host: String, username: String, password: String) {
         do {
             try dbQueue.write { db in
                 guard let encryptedPassword = try? EncryptionManager.shared.encryptString(password) else {
@@ -155,7 +149,7 @@ class PasswordsDB: PasswordStore {
                 }
                 var passwordRecord = PasswordsRecord(id: nil,
                                                      uuid: id(for: host, and: username),
-                                                     host: host.minimizedHost ?? host.urlStringWithoutScheme,
+                                                     host: host,
                                                      name: username,
                                                      password: encryptedPassword)
                 try passwordRecord.insert(db)
@@ -165,7 +159,7 @@ class PasswordsDB: PasswordStore {
         }
     }
 
-    func delete(host: URL, username: String) {
+    func delete(host: String, username: String) {
         _ = try? dbQueue.write { db in
             try PasswordsRecord.deleteOne(db, key: id(for: host, and: username))
         }

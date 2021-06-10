@@ -85,7 +85,7 @@ struct PasswordManagerMenuCell_Previews: PreviewProvider {
             PasswordsViewMoreCell(hostName: "www.github.com", onChange: { _ in })
         })
         PasswordManagerMenuCell(height: 56, onChange: { _ in }, content: {
-            StoredPasswordCell(host: URL(string: "https://beamapp.co")!, username: "Beam", onChange: { _ in })
+            StoredPasswordCell(host: "beamapp.co", username: "Beam", onChange: { _ in })
         })
     }
 }

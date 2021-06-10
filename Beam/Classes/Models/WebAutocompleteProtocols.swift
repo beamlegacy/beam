@@ -6,8 +6,15 @@
 //
 
 struct PasswordManagerEntry {
-    var host: URL
+    var minimizedHost: String
     var username: String
+}
+
+extension PasswordManagerEntry {
+    init(host: URL, username: String) {
+        self.minimizedHost = host.minimizedHost ?? host.urlStringWithoutScheme
+        self.username = username
+    }
 }
 
 struct UserInformations {
@@ -19,23 +26,17 @@ struct UserInformations {
 
 extension PasswordManagerEntry: Identifiable {
     var id: String {
-        var urlId: String
-        if let minizedHost = host.minimizedHost, !minizedHost.isEmpty {
-            urlId = minizedHost
-        } else {
-            urlId = host.absoluteString
-        }
-        return "\(urlId) \(username)"
+        "\(minimizedHost) \(username)"
     }
 }
 
 protocol PasswordStore {
-    func entries(for host: URL, completion: @escaping ([PasswordManagerEntry]) -> Void)
+    func entries(for host: String, completion: @escaping ([PasswordManagerEntry]) -> Void)
     func find(_ searchString: String, completion: @escaping ([PasswordManagerEntry]) -> Void)
     func fetchAll(completion: @escaping ([PasswordManagerEntry]) -> Void)
-    func password(host: URL, username: String, completion: @escaping(String?) -> Void)
-    func save(host: URL, username: String, password: String)
-    func delete(host: URL, username: String)
+    func password(host: String, username: String, completion: @escaping(String?) -> Void)
+    func save(host: String, username: String, password: String)
+    func delete(host: String, username: String)
 }
 
 protocol UserInformationsStore {

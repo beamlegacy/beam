@@ -314,6 +314,7 @@
 		87F11BC3266524B2003BE98E /* WebAutocompleteProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F11BC2266524B2003BE98E /* WebAutocompleteProtocols.swift */; };
 		87F11BD9266533C1003BE98E /* PasswordGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F11BD8266533C1003BE98E /* PasswordGenerator.swift */; };
 		87F11BDB26655170003BE98E /* MockAutocompleteStores.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F11BDA26655170003BE98E /* MockAutocompleteStores.swift */; };
+		87F47CC92669415800D01960 /* WebAutocompleteContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F47CC82669415800D01960 /* WebAutocompleteContext.swift */; };
 		8A78699C264C7E4500F769D2 /* XCUIElementQuery+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A78699B264C7E4500F769D2 /* XCUIElementQuery+Beam.swift */; };
 		8AB966B02668542F003E7755 /* ParseHtml.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB966A72668542E003E7755 /* ParseHtml.swift */; };
 		8AB966B12668542F003E7755 /* Quote.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB966AF2668542F003E7755 /* Quote.swift */; };
@@ -1065,6 +1066,7 @@
 		87F11BC2266524B2003BE98E /* WebAutocompleteProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebAutocompleteProtocols.swift; sourceTree = "<group>"; };
 		87F11BD8266533C1003BE98E /* PasswordGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordGenerator.swift; sourceTree = "<group>"; };
 		87F11BDA26655170003BE98E /* MockAutocompleteStores.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAutocompleteStores.swift; sourceTree = "<group>"; };
+		87F47CC82669415800D01960 /* WebAutocompleteContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebAutocompleteContext.swift; sourceTree = "<group>"; };
 		8A78699B264C7E4500F769D2 /* XCUIElementQuery+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "XCUIElementQuery+Beam.swift"; sourceTree = "<group>"; };
 		8AB966A72668542E003E7755 /* ParseHtml.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParseHtml.swift; sourceTree = "<group>"; };
 		8AB966AF2668542F003E7755 /* Quote.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Quote.swift; sourceTree = "<group>"; };
@@ -1734,6 +1736,7 @@
 				BAA670D131DF7CAE7FA6664E /* BeamWebView.swift */,
 				A05ADF3E264D67D3002DF91A /* PasswordsDB.swift */,
 				87F11BC2266524B2003BE98E /* WebAutocompleteProtocols.swift */,
+				87F47CC82669415800D01960 /* WebAutocompleteContext.swift */,
 				87F11BDA26655170003BE98E /* MockAutocompleteStores.swift */,
 				87F11BD8266533C1003BE98E /* PasswordGenerator.swift */,
 				BAA67971FD6352F46D77E3BE /* WebNoteController.swift */,
@@ -3703,6 +3706,7 @@
 				418171EF2581107C00317ED8 /* User.swift in Sources */,
 				A5153EE3260DD58A00C84902 /* RecentsManager.swift in Sources */,
 				4181732D25811E9800317ED8 /* Icon.swift in Sources */,
+				87F47CC92669415800D01960 /* WebAutocompleteContext.swift in Sources */,
 				4181722E2581107C00317ED8 /* AutocompleteItem.swift in Sources */,
 				A0A84FE126371A4B008F0326 /* OtherPasswordsCell.swift in Sources */,
 				A580D5EE26427BCB00EB2E24 /* ContextMenuView.swift in Sources */,

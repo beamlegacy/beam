@@ -34,7 +34,7 @@ struct PasswordManagerMenu: View {
                         .frame(height: 81, alignment: .center)
                 } else {
                     ForEach(viewModel.display.entries.prefix(3)) { entry in
-                        StoredPasswordCell(host: entry.host, username: entry.username) { newState in
+                        StoredPasswordCell(host: entry.minimizedHost, username: entry.username) { newState in
                             if newState == .clicked {
                                 viewModel.fillCredentials(entry)
                             }
