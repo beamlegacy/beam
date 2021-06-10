@@ -137,7 +137,7 @@ struct DocumentDetail: View {
         var documentStruct = DocumentStruct(document: document)
         documentStruct.deletedAt = BeamDate.now
 
-        _ = documentManager.save(documentStruct, completion: { _ in
+        documentManager.save(documentStruct, completion: { _ in
         })
     }
 
@@ -145,7 +145,7 @@ struct DocumentDetail: View {
         var documentStruct = DocumentStruct(document: document)
         documentStruct.isPublic = !documentStruct.isPublic
 
-        _ = documentManager.save(documentStruct, completion: { _ in
+        documentManager.save(documentStruct, completion: { _ in
         })
     }
 
@@ -195,7 +195,7 @@ struct DocumentDetail: View {
 
         document.database_id = db.id
 
-        _ = documentManager.save(DocumentStruct(document: document), completion: { result in
+        documentManager.save(DocumentStruct(document: document), completion: { result in
             switch result {
             case .failure(let error):
                 Logger.shared.logError(error.localizedDescription, category: .document)

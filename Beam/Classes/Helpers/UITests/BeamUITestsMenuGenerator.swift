@@ -39,11 +39,11 @@ class BeamUITestsMenuGenerator {
 
     private func insertTextInCurrentNote() {
         guard let currentNote = AppDelegate.main.window.state.currentNote else {
-            Logger.shared.logDebug("Current note is nil")
+            Logger.shared.logDebug("Current note is ni", category: .general)
 
             return
         }
-        Logger.shared.logDebug("Inserting text in current note")
+        Logger.shared.logDebug("Inserting text in current note", category: .documentDebug)
 
         let newNote = currentNote.deepCopy(withNewId: false, selectedElements: nil)
 
@@ -51,14 +51,14 @@ class BeamUITestsMenuGenerator {
             newNote.addChild(BeamElement("test \(index): \(Date().description)"))
         }
 
-        Logger.shared.logDebug("current Note: \(currentNote.id) copy: \(newNote.id)")
+        Logger.shared.logDebug("current Note: \(currentNote.id) copy: \(newNote.id)", category: .documentDebug)
 
         newNote.save(documentManager: documentManager) { result in
             switch result {
             case .failure(let error):
                 Logger.shared.logError(error.localizedDescription, category: .general)
             case .success(let success):
-                Logger.shared.logInfo("Saved! \(success)", category: .general)
+                Logger.shared.logInfo("Saved! \(success)", category: .documentDebug)
             }
         }
     }
@@ -86,7 +86,7 @@ class BeamUITestsMenuGenerator {
             note.creationDate = date
             note.updateDate = date
             guard let docStruct = note.documentStruct else { return }
-            _ = self.documentManager.save(docStruct, completion: nil)
+            self.documentManager.save(docStruct, completion: nil)
             nbrOfJournal -= 1
         }
     }
