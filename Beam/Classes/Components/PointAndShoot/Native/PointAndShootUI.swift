@@ -9,6 +9,7 @@ struct SelectionUI {
     var animated: Bool
     var color: Color
     var bgColor: Color
+    var round: Bool = false
 }
 
 struct SelectionConfirmationUI {
@@ -65,15 +66,41 @@ class PointAndShootUI: ObservableObject {
     @Published var groupsUI: [ShootGroupUI] = []
     @Published var shootConfirmation: SelectionConfirmationUI?
     @Published var swiftPointStatus: String = ""
+    @Published var pnsBorder: Bool = true
 
-    private func drawSelection(target: PointAndShoot.Target, animated: Bool,
-                               color: Color, bgColor: Color) -> SelectionUI {
-        return SelectionUI(target: target, animated: animated, color: color, bgColor: bgColor)
+    private func drawSelection(
+        target: PointAndShoot.Target,
+        animated: Bool,
+        color: Color,
+        bgColor: Color,
+        round: Bool = false
+    ) -> SelectionUI {
+        return SelectionUI(
+            target: target,
+            animated: animated,
+            color: color,
+            bgColor: bgColor,
+            round: round
+        )
     }
 
     func drawPoint(target: PointAndShoot.Target) {
-        pointSelection = drawSelection(target: target, animated: true, color: BeamColor.PointShoot.point.swiftUI,
-                                       bgColor: BeamColor.Generic.transparent.swiftUI)
+        pointSelection = drawSelection(
+            target: target,
+            animated: true,
+            color: BeamColor.PointShoot.text.swiftUI,
+            bgColor: BeamColor.PointShoot.pointBackground.swiftUI
+        )
+    }
+
+    func drawCursor(target: PointAndShoot.Target) {
+        pointSelection = drawSelection(
+            target: target,
+            animated: true,
+            color: BeamColor.PointShoot.text.swiftUI,
+            bgColor: BeamColor.PointShoot.pointBackground.swiftUI,
+            round: true
+        )
     }
 
     func clearPoint() {
@@ -91,14 +118,22 @@ class PointAndShootUI: ObservableObject {
     }
 
     func createGroup(noteInfo: NoteInfo, selectionUIs: [SelectionUI], edited: Bool) -> ShootGroupUI {
-        let newGroup = ShootGroupUI(uis: selectionUIs, noteInfo: noteInfo, edited: edited)
+        let newGroup = ShootGroupUI(
+            uis: selectionUIs,
+            noteInfo: noteInfo,
+            edited: edited
+        )
         groupsUI.append(newGroup)
         return newGroup
     }
 
     func drawShootConfirmation(shootTarget: PointAndShoot.Target, noteInfo: NoteInfo) {
-        shootConfirmation = SelectionConfirmationUI(target: shootTarget, noteTitle: noteInfo.title,
-                                                    numberOfElements: 1, isText: true)
+        shootConfirmation = SelectionConfirmationUI(
+            target: shootTarget,
+            noteTitle: noteInfo.title,
+            numberOfElements: 1,
+            isText: true
+        )
     }
 
     func clearShoots() {

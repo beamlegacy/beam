@@ -127,6 +127,10 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
     console.log(this.toString(), args)
   }
 
+  cursor(x, y) {
+    this.ui.cursor(x, y)
+  }
+
   /**
    * Enable pointing UI.
    *
@@ -213,6 +217,9 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
       const withOption = this.isOnlyAltKey(ev)
       this.setPointing(withOption)
       if (!this.isPointing()) {
+        if (this.status === BeamPNSStatus.none && !this.hasSelection()) {
+          this.cursor(ev.clientX, ev.clientY)
+        }
         this.hideStatus()
         return
       }

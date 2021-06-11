@@ -15,6 +15,9 @@ export class PointAndShootUI_debug implements PointAndShootUI {
     this.native = native
     this.web = web
   }
+  cursor(x: any, y: any) {
+    throw new Error("Method not implemented.");
+  }
 
   hidePoint() {
     this.web.hidePoint()

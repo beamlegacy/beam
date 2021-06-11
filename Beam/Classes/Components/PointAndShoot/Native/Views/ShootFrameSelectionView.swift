@@ -5,6 +5,7 @@ struct ShootFrameSelectionView: View {
 
     var group: ShootGroupUI
     @State private var isHovering = false
+    let shouldDisplayStroke = UserDefaults.standard.bool(forKey: "pnsBorder")
 
     var body: some View {
         let rect = group.groupRect
@@ -12,23 +13,24 @@ struct ShootFrameSelectionView: View {
         let text = isHovering ? group.noteInfo.title : ""
         return Group {
             if let firstUI = group.uis.first {
-                let isTextSelection = group.uis.count > 1
-                let backgroundColor = isTextSelection || isHovering ? firstUI.bgColor : Color.clear
+                let bgColor = firstUI.bgColor
                 let animated = firstUI.animated
                 let color = firstUI.color
+                let isTextSelection = group.uis.count > 1
+
                 ZStack(alignment: .center) {
                     ZStack {
                         let path = Path(groupPath)
                         path
-                            .fill(backgroundColor)
-                            .overlay(!isTextSelection ? path.stroke(color, lineWidth: 2) : nil)
+                            .fill(bgColor)
+                            .overlay(shouldDisplayStroke && !isTextSelection ? path.stroke(color, lineWidth: 2) : nil)
                     }
                     .accessibility(identifier: "ShootFrameSelection")
 
                     ZStack {
                         Rectangle().fill(Color.clear) // needed  to enable hover
                         Text(text)
-                            .foregroundColor(Color.white)
+                            .foregroundColor(color)
                             .accessibility(identifier: "ShootFrameSelectionLabel")
                     }
                     .onHover { isHovering = $0 }

@@ -87,9 +87,10 @@ extension BeamColor {
 
 extension BeamColor {
     enum PointShoot {
-        static let point = BeamColor.From(color: BeamColor.Beam.nsColor.withAlphaComponent(0.5))
+        static let text = BeamColor.From(color: BeamColor.Beam.nsColor)
+        static let pointBackground = BeamColor.From(color: BeamColor.Beam.nsColor.withAlphaComponent(0.5))
         static let shootOutline = BeamColor.Beam
-        static let shootBackground = BeamColor.From(color: BeamColor.Beam.nsColor.withAlphaComponent(0.15))
+        static let shootBackground = BeamColor.From(color: BeamColor.Beam.nsColor.withAlphaComponent(0.5))
         static let shootTextBackground = BeamColor.From(color: BeamColor.Beam.nsColor.withAlphaComponent(0.15))
     }
 }

@@ -20,29 +20,34 @@ struct ShootFrame: View {
                 ShootFrameSelectionView(group: group)
                 if group.edited {
                     if let selectionUI = group.uis.last {
-                        ShootAbsolutePositioning(area: selectionUI.target.area,
+                        ShootAbsolutePositioning(
+                            area: selectionUI.target.area,
                             location: selectionUI.target.mouseLocation,
                             contentSize: ShootCardPicker.size
                         ) {
                             ShootCardPicker()
-                                    .onComplete { (noteTitle, note) in
-                                        onCompleteCardSelection(noteTitle, withNote: note)
-                                    }
+                                .onComplete { (noteTitle, note) in
+                                    onCompleteCardSelection(noteTitle, withNote: note)
+                                }
                         }
                     }
                 }
             }
             if let confirmationUI = pointAndShootUI.shootConfirmation {
-                ShootAbsolutePositioning(area: confirmationUI.target.area,
-                                         location: confirmationUI.target.mouseLocation,
-                                         contentSize: ShootCardConfirmationView.size) {
-                    ShootCardConfirmationView(noteTitle: confirmationUI.noteTitle,
-                                              numberOfElements: confirmationUI.numberOfElements,
-                                              isText: confirmationUI.isText)
+                ShootAbsolutePositioning(
+                    area: confirmationUI.target.area,
+                    location: confirmationUI.target.mouseLocation,
+                    contentSize: ShootCardConfirmationView.size
+                ) {
+                    ShootCardConfirmationView(
+                        noteTitle: confirmationUI.noteTitle,
+                        numberOfElements: confirmationUI.numberOfElements,
+                        isText: confirmationUI.isText
+                    )
                 }
             }
         }
-                .animation(nil)
+        .animation(nil)
     }
 
     func onCompleteCardSelection(_ noteTitle: String?, withNote note: String?) {

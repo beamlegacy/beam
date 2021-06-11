@@ -106,10 +106,39 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
    * @return {*}
    * @memberof PointAndShootUI_native
    */
-  private hasRectAndMouseOverlap(area, location) {
-    const xIsInRange = Util.isNumberInRange(location.x, area.x, area.x + area.width)
-    const yIsInRange = Util.isNumberInRange(location.y, area.y, area.y + area.height)
+  private hasRectAndMouseOverlap(area, mouseLocation) {
+    // TODO: be way smarter about this logic
+    // const xPercent = (100 / this.native.win.innerWidth) * area.width
+    // const xIsLarge = xPercent > 80
+    const yPercent = (100 / this.native.win.innerHeight) * area.height
+    const yIsLarge = yPercent > 150
+    if (yIsLarge) {
+      return false
+    }
+
+    const graceDistance = 40
+
+    const xMin = area.x - graceDistance
+    const yMin = area.y - graceDistance
+    const xMax = area.x + area.width + graceDistance
+    const yMax = area.y + area.height + graceDistance
+
+    const xIsInRange = Util.isNumberInRange(mouseLocation.x, xMin, xMax)
+    const yIsInRange = Util.isNumberInRange(mouseLocation.y, yMin, yMax)
     return xIsInRange && yIsInRange
+  }
+
+  /**
+   * Based on: https://css-tricks.com/snippets/jquery/calculate-distance-between-mouse-and-element/
+   */
+  calculateDistance(coordinate: number, areaCoord: number, areaSize: number) {
+    const distance = coordinate - (areaCoord + areaSize / 2)
+    // we want paralax to start when it snaps on the graceDistance
+    const edge = areaSize / 2 + 40
+    const distanceClamp = Util.clamp(distance, -edge, edge)
+    const displacement = 10
+    const mapped = Util.mapRangeToRange([-edge, edge], [-displacement, displacement], distanceClamp)
+    return mapped
   }
 
   /**
@@ -126,11 +155,14 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
   private elementAreaMessage(quoteId: BeamQuoteId, el: BeamElement, x: number, y: number): BeamElementMessagePayload {
     const area = this.elementBounds(el)
     const location = this.getMouseLocation(el, x, y)
+    const xOffset = this.calculateDistance(x, area.x, area.width)
+    const yOffset = this.calculateDistance(y, area.y, area.height)
     return {
       areas: [area],
       html: el.outerHTML,
       quoteId,
       location,
+      offset: { x: xOffset, y: yOffset }
     }
   }
 
@@ -211,6 +243,11 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
     this.native.sendMessage("shoot", shootPayload)
   }
 
+  cursorMessage(x: any, y: any) {
+    const cursorPayload = { x, y }
+    this.native.sendMessage("cursor", cursorPayload)
+  }
+
   /**
    * Formats the message to be send to the UI based on element and mouse location.
    * Message is only send when mouselocation and (child) element location overlap.
@@ -232,10 +269,16 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
       const pointPayload = this.elementAreaMessage(quoteId, el, x, y)
       this.native.sendMessage("point", pointPayload)
       return
+    } else {
+      this.native.sendMessage("cursor", { x, y })
     }
 
     this.hidePoint(quoteId)
-    callback()
+    // callback()
+  }
+
+  cursor(x, y) {
+    this.cursorMessage(x, y)
   }
 
   /**

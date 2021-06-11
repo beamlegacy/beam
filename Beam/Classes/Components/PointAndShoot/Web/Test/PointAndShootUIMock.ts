@@ -3,6 +3,9 @@ import {WebEventsUIMock} from "./WebEventsUIMock";
 import {BeamCollectedQuote, BeamHTMLElement} from "../BeamTypes"
 
 export class PointAndShootUIMock extends WebEventsUIMock implements PointAndShootUI {
+  cursor(x: any, y: any) {
+    this.events.push({name: "cursor", x, y})
+  }
   select(selection) {
     this.events.push({name: "select", selection})
   }

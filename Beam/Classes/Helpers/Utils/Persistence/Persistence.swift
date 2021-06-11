@@ -17,6 +17,10 @@ enum Persistence {
         @StandardStorable("development.lastLogin") static var lastLogin: Date?
     }
 
+    enum PointShoot {
+        @StandardStorable("pns.border") static var border: Bool?
+    }
+
     enum Encryption {
         @KeychainStorable("encryption.privateKey") static var privateKey: String?
     }
