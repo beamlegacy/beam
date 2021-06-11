@@ -434,7 +434,12 @@ export interface BeamSelectionMessagePayload extends BeamElementAreaMessage {
   text: String
 }
 
-export interface BeamElementMessagePayload extends BeamElementAreaMessage {}
+export interface BeamElementMessagePayload extends BeamElementAreaMessage {
+  offset?: {
+    x: number,
+    y: number
+  } 
+}
 
 /**
  * The UUID of a stored beam quote. Used to identify stored quotes in native code

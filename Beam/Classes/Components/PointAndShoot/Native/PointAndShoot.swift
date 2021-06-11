@@ -78,7 +78,6 @@ class PointAndShoot: WebPageHolder {
     private func hidePointing() {
         Logger.shared.logDebug("leavePointing()", category: .pointAndShoot)
         pointTarget = nil
-        ui.clearPoint()
     }
 
     private func hideShoot() {
@@ -125,11 +124,19 @@ class PointAndShoot: WebPageHolder {
         }
     }
 
+    /// Describes a target area as part of a Shoot group
     struct Target {
+        /// Rectangle Area of the target
         var area: NSRect
+        /// Optional reference to the quoteId. This UUID references a quote in a BeamNote
         var quoteId: UUID?
+        /// Point location of the mouse. It's used to draw the ShootCardPicker location.
+        /// It's `x` and `y` location is relative to the top left corner of the area
         var mouseLocation: NSPoint
+        // HTML string of the targeted element
         var html: String
+        // Optional `x`, `y` coordinates for offsetting the quoteArea position toward the mouse cursor
+        var offset: NSPoint?
 
         // Prefer using the parent class method
         func translateTarget(xDelta: CGFloat, yDelta: CGFloat, scale: CGFloat) -> Target {
@@ -143,7 +150,7 @@ class PointAndShoot: WebPageHolder {
                     x: mouseLocation.x * scale,
                     y: mouseLocation.y * scale
             )
-            return Target(area: newArea, quoteId: quoteId, mouseLocation: newLocation, html: html)
+            return Target(area: newArea, quoteId: quoteId, mouseLocation: newLocation, html: html, offset: offset)
         }
     }
 
@@ -167,8 +174,8 @@ class PointAndShoot: WebPageHolder {
     ///   - mouseLocation: Mouse location coords.
     ///   - html: The HTML content of the targeted element
     /// - Returns: Translated target
-    func createTarget(area: NSRect, quoteId: UUID? = nil, mouseLocation: NSPoint, html: String) -> Target {
-        return Target(area: area, quoteId: quoteId, mouseLocation: mouseLocation, html: html)
+    func createTarget(area: NSRect, quoteId: UUID? = nil, mouseLocation: NSPoint, html: String, offset: NSPoint? = nil) -> Target {
+        return Target(area: area, quoteId: quoteId, mouseLocation: mouseLocation, html: html, offset: offset)
                 .translateTarget(xDelta: page.scrollX, yDelta: page.scrollY, scale: 1)
     }
 
@@ -205,6 +212,12 @@ class PointAndShoot: WebPageHolder {
         executeJS("setStatus('pointing')")
         pointTarget = translateTarget(target: target)
         ui.drawPoint(target: pointTarget!)
+        draw()
+    }
+
+    func cursor(target: Target) {
+        pointTarget = translateTarget(target: target)
+        ui.drawCursor(target: pointTarget!)
         draw()
     }
 
@@ -260,6 +273,7 @@ class PointAndShoot: WebPageHolder {
         case .pointing:
             drawAllGroups()
         case .shooting:
+            ui.clearPoint()
             drawActiveShootGroup()
         case .none:
             Logger.shared.logDebug("No redraw because pointing=.none", category: .pointAndShoot)

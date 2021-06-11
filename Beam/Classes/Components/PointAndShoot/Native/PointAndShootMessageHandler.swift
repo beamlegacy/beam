@@ -14,6 +14,7 @@ enum PointAndShootMessages: String, CaseIterable {
      Hover a block with Option key.
      */
     case pointAndShoot_point
+    case pointAndShoot_cursor
     /**
      Clears point UI without changing any stored state
      */
@@ -57,6 +58,22 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
             let pointAndShoot = webPage.pointAndShoot
             let positions = pointAndShoot.webPositions
             switch messageKey {
+
+            case PointAndShootMessages.pointAndShoot_cursor:
+                guard let dict = msgPayload,
+                      let x = dict["x"] as? CGFloat,
+                      let y = dict["y"] as? CGFloat else { return }
+
+                let size: CGFloat = 20
+
+                let target = pointAndShoot.createTarget(
+                    area: NSRect(x: x - (size / 2), y: y - (size / 2), width: size, height: size),
+                    quoteId: nil,
+                    mouseLocation: NSPoint(x: x, y: y),
+                    html: "nil"
+                )
+
+                pointAndShoot.cursor(target: target)
 
             case PointAndShootMessages.pointAndShoot_onLoad:
                 Logger.shared.logInfo("onLoad flushing frameInfo", category: .web)
@@ -114,6 +131,7 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
                     return pointAndShoot.createTarget(area: area, mouseLocation: CGPoint(x: x, y: y), html: html)
                 }
                 Logger.shared.logInfo("Web text selected, shooting targets: \(targets)", category: .pointAndShoot)
+                pointAndShoot.ui.clearPoint()
                 pointAndShoot.shoot(targets: targets, href: href)
 
             case PointAndShootMessages.pointAndShoot_pinch:
@@ -221,15 +239,17 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
         guard let dict = msgPayload,
               let href = dict["href"] as? String,
               let areas = areasValue(of: dict, from: webPage),
+              let offset = offsetValue(of: dict, from: webPage),
               let (location, html) = targetValues(of: dict, from: webPage) else {
             pointAndShoot.unpoint()
             throw PointAndShootError("Point payload is incorrect")
         }
+
         let quoteId = pointAndShootQuoteIdValue(from: dict)
         let positions = pointAndShoot.webPositions
         if let area = areas.first {
             let pointArea = positions.viewportArea(area: area, href: href)
-            let target = pointAndShoot.createTarget(area: area, quoteId: quoteId, mouseLocation: location, html: html)
+            let target = pointAndShoot.createTarget(area: area, quoteId: quoteId, mouseLocation: location, html: html, offset: offset)
             pointAndShoot.point(target: target)
             Logger.shared.logInfo("Web block point: \(pointArea)", category: .web)
         }
@@ -257,4 +277,12 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
         }
         return areas.map { webPage.pointAndShoot.webPositions.jsToRect(jsArea: $0) }
     }
+
+    func offsetValue(of jsMessage: [String: AnyObject], from webPage: WebPage) -> NSPoint? {
+        guard let offset = jsMessage["offset"] else {
+            return nil
+        }
+        return webPage.pointAndShoot.webPositions.jsToPoint(jsPoint: offset)
+    }
+
 }

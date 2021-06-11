@@ -88,7 +88,7 @@ test("move mouse without Option", () => {
   const pointEvent = new BeamMouseEvent({ name: "mousemove", target: hoveredElement, clientX: 101, clientY: 102 })
   pns.onMouseMove(pointEvent)
   expect(pns.status).toEqual("none")
-  expect(testUI.eventsCount).toEqual(1)
+  expect(testUI.eventsCount).toEqual(2)
   expect(testUI.latestEvent).toEqual("hideStatus")
 })
 
@@ -179,10 +179,10 @@ test("point with mouse move then key down", () => {
 
   expect(pns.isPointing()).toEqual(true)
   expect(pns.status).toEqual("pointing") // Check low level too because it will be in a postMessage
-  expect(testUI.eventsCount).toEqual(3)
-  expect(testUI.events[0]).toEqual("hideStatus")
-  expect(testUI.events[1]).toEqual({ name: "setStatus", status: "pointing" })
-  expect(testUI.events[2]).toEqual({ name: "point", el: pointedElement, x: 101, y: 102 })
+  expect(testUI.eventsCount).toEqual(4)
+  expect(testUI.events[1]).toEqual("hideStatus")
+  expect(testUI.events[2]).toEqual({ name: "setStatus", status: "pointing" })
+  expect(testUI.events[3]).toEqual({ name: "point", el: pointedElement, x: 101, y: 102 })
 })
 
 test("point then release Option", () => {
@@ -219,9 +219,9 @@ test("point then release Option", () => {
   pns.onKeyUp(new BeamKeyEvent({ key: "Alt" })) // Release option
 
   expect(pns.status).toEqual("none")
-  expect(testUI.eventsCount).toEqual(5)
+  expect(testUI.eventsCount).toEqual(6)
   expect(testUI.events[3]).toEqual({ name: "setStatus", status: "none" })
-  expect(testUI.events[4]).toEqual("hideStatus")
+  expect(testUI.events[5]).toEqual("hideStatus")
 })
 
 test("point with mouse move + Option, then scroll", () => {

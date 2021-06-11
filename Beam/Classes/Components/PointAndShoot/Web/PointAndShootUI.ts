@@ -3,6 +3,7 @@ import { BeamCollectedQuote, BeamQuoteId, BeamRange } from "./BeamTypes"
 import { BeamHTMLElement } from "./BeamTypes"
 
 export interface PointAndShootUI extends WebEventsUI {
+  cursor(x: any, y: any)
   hidePoint()
 
   /**

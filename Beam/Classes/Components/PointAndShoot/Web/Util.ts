@@ -82,16 +82,33 @@ export class Util {
   }
 
   /**
-  * Check if number is in range
-  *
-  * @static
-  * @param {number} number The number to check.
-  * @param {number} start The start of the range.
-  * @param {number} end The end of the range.
-  * @returns {boolean} Returns `true` if `number` is in the range, else `false`.
-  * @memberof Util
-  */
+   * Check if number is in range
+   *
+   * @static
+   * @param {number} number The number to check.
+   * @param {number} start The start of the range.
+   * @param {number} end The end of the range.
+   * @returns {boolean} Returns `true` if `number` is in the range, else `false`.
+   * @memberof Util
+   */
   static isNumberInRange(number, start, end) {
-    return Number(number) >= Math.min(start, end) && number <= Math.max(start, end);
+    return Number(number) >= Math.min(start, end) && number <= Math.max(start, end)
+  }
+
+  /**
+   * Maps value, from range to range
+   *
+   * For example mapping 10 degrees Celcius to Fahrenheit
+   * `mapRangeToRange([0, 100], [32, 212], 10)`
+   *
+   * @static
+   * @param {[number, number]} from
+   * @param {[number, number]} to
+   * @param {number} s
+   * @return {*}  {number}
+   * @memberof Util
+   */
+  static mapRangeToRange(from: [number, number], to: [number, number], s: number): number {
+    return to[0] + ((s - from[0]) * (to[1] - to[0])) / (from[1] - from[0])
   }
 }
