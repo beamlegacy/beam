@@ -36,9 +36,14 @@ class BeamUITestsHelper {
             if $0 == command {
                 let menu = XCUIApplication().menuItems[$0.rawValue]
                 menu.tap()
+                moveMouseOutOfTheWay()
                 return
             }
         }
+    }
+
+    func moveMouseOutOfTheWay() {
+        app.windows.firstMatch.coordinate(withNormalizedOffset: .zero).hover()
     }
     
     func openTestPage(number: CGFloat) {
