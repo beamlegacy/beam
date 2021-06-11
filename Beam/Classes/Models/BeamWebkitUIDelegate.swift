@@ -1,9 +1,9 @@
 import Foundation
 import BeamCore
 
-class BeamWebkitUIDelegate: NSObject, WKUIDelegate {
+class BeamWebkitUIDelegateController: NSObject, WKUIDelegate {
 
-    var webPage: WebPage?
+    weak var webPage: WebPage?
 
     func webViewDidClose(_ webView: WKWebView) {
         Logger.shared.logDebug("webView webDidClose", category: .web)
