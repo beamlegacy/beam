@@ -14,7 +14,7 @@ import Promises
     var height: CGFloat = 0
     private var pixelRatio: Double = 1
 
-    let uiDelegate = BeamWebkitUIDelegate()
+    let uiDelegateController = BeamWebkitUIDelegateController()
     let noteController: WebNoteController
 
     public func load(url: URL) {
@@ -171,7 +171,7 @@ import Promises
         super.init()
 
         self.webView.page = self
-        uiDelegate.webPage = self
+        uiDelegateController.webPage = self
 
         note.browsingSessions.append(browsingTree)
         setupObservers()
@@ -314,7 +314,7 @@ import Promises
         webView.publisher(for: \.backForwardList).sink { [unowned self] value in backForwardList = value }.store(in: &scope)
 
         webView.navigationDelegate = beamNavigationController
-        webView.uiDelegate = uiDelegate
+        webView.uiDelegate = uiDelegateController
     }
 
     func cancelObservers() {
