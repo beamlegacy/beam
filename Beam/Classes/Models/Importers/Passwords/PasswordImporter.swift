@@ -41,7 +41,7 @@ enum PasswordImporter {
         private static let quotes = CharacterSet(charactersIn: "\"")
 
         init(header: String) throws {
-            let headerColumns = header.components(separatedBy: Self.columnSeparator)
+            let headerColumns = header.lowercased().components(separatedBy: Self.columnSeparator)
             guard let urlIndex = headerColumns.firstIndex(of: "url"),
                   let usernameIndex = headerColumns.firstIndex(of: "username"),
                   let passwordIndex = headerColumns.firstIndex(of: "password") else {
