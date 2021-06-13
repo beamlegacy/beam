@@ -54,6 +54,8 @@ struct PasswordManagerMenu: View {
                         Separator(horizontal: true)
                             .padding(.vertical, 1)
                             .padding(.horizontal, 12)
+                    }
+                    if viewModel.display.entries.count != 1 || !viewModel.display.hasMoreThanOneEntry {
                         OtherPasswordsCell { newState in
                             // Show More Password view
                             if newState == .clicked {
@@ -90,8 +92,9 @@ struct PasswordManagerMenu: View {
 }
 
 struct PasswordManagerMenu_Previews: PreviewProvider {
+    static var passwordStore = MockPasswordStore()
+    static var userInfoStore = MockUserInformationsStore()
     static var previews: some View {
-        Text("Hello World")
-//        PasswordManagerMenu()
+        PasswordManagerMenu(width: 300, viewModel: PasswordManagerMenuViewModel(host: URL(string: "http://mock1.beam")!, passwordStore: passwordStore, userInfoStore: userInfoStore, withPasswordGenerator: false))
     }
 }
