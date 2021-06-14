@@ -188,11 +188,6 @@
                                                 <action selector="saveDocumentAs:" target="Ady-hI-5gd" id="mDf-zr-I0C"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Revert to Saved" keyEquivalent="r" id="KaW-ft-85H">
-                                            <connections>
-                                                <action selector="revertDocumentToSaved:" target="Ady-hI-5gd" id="iJ3-Pv-kwq"/>
-                                            </connections>
-                                        </menuItem>
                                         <menuItem isSeparatorItem="YES" id="aJh-i4-bef"/>
                                         <menuItem title="Page Setup…" keyEquivalent="P" id="qIS-W8-SiK">
                                             <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
@@ -708,6 +703,17 @@
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="jze-PA-szA"/>
+                                        <menuItem title="Stop" tag="4" keyEquivalent="." id="VKe-84-02R" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
+                                            <connections>
+                                                <action selector="stopLoading:" target="Ady-hI-5gd" id="gVj-cq-iUJ"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Reload" tag="4" keyEquivalent="r" id="fwX-73-9bH" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
+                                            <connections>
+                                                <action selector="reload:" target="Ady-hI-5gd" id="laU-LK-ORh"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="gwE-Ei-91l"/>
                                         <menuItem title="Actual Size" tag="4" keyEquivalent="0" id="sRD-PD-0pk">
                                             <connections>
                                                 <action selector="resetZoom:" target="Ady-hI-5gd" id="WOS-GY-FtI"/>
