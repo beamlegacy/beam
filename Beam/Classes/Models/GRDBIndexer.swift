@@ -140,6 +140,19 @@ class GRDBIndexer {
         }
     }
 
+    func remove(noteTitled: String) throws {
+        try dbQueue.write { db in
+            try db.execute(sql: "DELETE FROM BeamElementRecord WHERE title = ?", arguments: [noteTitled])
+        }
+    }
+
+    func remove(element: BeamElement) throws {
+        guard let noteTitle = element.note?.title else { return }
+        try dbQueue.write { db in
+            try db.execute(sql: "DELETE FROM BeamElementRecord WHERE title = ? AND uid = ?", arguments: [noteTitle, element.id.uuidString])
+        }
+    }
+
     func clear() throws {
         try dbQueue.write { db in
             try db.execute(sql: "DELETE FROM BeamElementRecord")

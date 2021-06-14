@@ -258,4 +258,14 @@ extension BeamNote: BeamNoteDocument {
     }
 
     var isTodaysNote: Bool { (type == .journal) && (self === AppDelegate.main.data.todaysNote) }
+
+    public static func indexAllNotes() {
+        let documentManager = DocumentManager()
+        try? AppDelegate.main.data.indexer.clear()
+        for title in documentManager.allDocumentsTitles() {
+            if let note = BeamNote.fetch(documentManager, title: title) {
+                try? AppDelegate.main.data.indexer.append(note: note)
+            }
+        }
+    }
 }

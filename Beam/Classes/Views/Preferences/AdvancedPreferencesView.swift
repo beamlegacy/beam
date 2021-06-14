@@ -160,6 +160,9 @@ struct AdvancedPreferencesView: View {
             Preferences.Section(title: "Passwords") {
                 PasswordCSVImporter
             }
+            Preferences.Section(title: "Reindex notes contents") {
+                ReindexNotesContents
+            }
         }.onAppear {
             observeDefaultDatabase()
         }
@@ -298,6 +301,12 @@ struct AdvancedPreferencesView: View {
             }
         }, label: {
             Text("Import Passwords CSV File")
+        })
+    }
+
+    private var ReindexNotesContents: some View {
+        Button(action: { BeamNote.indexAllNotes() }, label: {
+            Text("Reindex all notes' contents")
         })
     }
 }

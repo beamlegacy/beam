@@ -432,7 +432,7 @@ public class TextNode: ElementNode {
     }
 
     func endOfLineFromPosition(_ position: Int) -> Int {
-        guard let textFrame = textFrame else { return 0 }
+        guard let textFrame = textFrame else { return textCount }
         guard textFrame.lines.count != 1 else {
             return text.count
         }

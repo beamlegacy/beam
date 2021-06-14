@@ -84,29 +84,39 @@ extension TextRoot {
         _ = decreaseNodeIndentation(node)
     }
 
+    // swiftlint:disable:next cyclomatic_complexity
     func eraseNodeSelection(createEmptyNodeInPlace: Bool) {
         guard let selection = root?.state.nodeSelection else { return }
         let sortedNodes = selection.sortedNodes
 
         // This will be used to create an empty node in place:
-        guard let firstParent = sortedNodes.first?.parent as? TextNode ?? root else { return }
+        guard let firstParent = sortedNodes.first?.parent as? ElementNode ?? root else { return }
 
         cancelNodeSelection()
 
         root?.note?.cmdManager.beginGroup(with: "Delete selected nodes")
         defer { root?.note?.cmdManager.endGroup() }
 
-        if let prevWidget = sortedNodes.first?.previousVisibleNode(TextNode.self) {
-            cmdManager.focusElement(prevWidget, cursorPosition: prevWidget.text.count)
-        } else if let nextVisibleNode = sortedNodes.last?.nextVisibleNode(TextNode.self) {
+        if let prevWidget = sortedNodes.first?.previousVisibleNode(ElementNode.self) {
+            cmdManager.focusElement(prevWidget, cursorPosition: prevWidget.textCount)
+        } else if let nextVisibleNode = sortedNodes.last?.nextVisibleNode(ElementNode.self) {
             if (nextVisibleNode as? ProxyTextNode) == nil {
                 cmdManager.focusElement(nextVisibleNode, cursorPosition: 0)
             }
         }
 
         for node in sortedNodes.reversed() {
+            // reparent children to previous sibbling or existing parent
+            let unproxied = node.unproxyElement
+            if let oldIndexInParent = unproxied.indexInParent,
+               let newParent = unproxied.previousSibbling() ?? unproxied.parent {
+                for child in node.unproxyElement.children {
+                    cmdManager.reparentElement(child, to: newParent, atIndex: oldIndexInParent)
+                }
+            }
+
             // Delete Selected Element:
-            cmdManager.deleteElement(for: node)
+            cmdManager.deleteElement(for: node.unproxyElement)
 
             // Yeah, this sucks, I know
             if let ref = node as? ProxyTextNode,
