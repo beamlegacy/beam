@@ -482,6 +482,8 @@
 		A0E7D98726139FCA00D70676 /* JournalStackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0E7D98626139FCA00D70676 /* JournalStackView.swift */; };
 		A0E9B0E326668C1300FC99A5 /* FaviconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0E9B0E226668C1300FC99A5 /* FaviconView.swift */; };
 		A0E9B0FB2666A80600FC99A5 /* TabGroupingTitleBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0E9B0FA2666A80600FC99A5 /* TabGroupingTitleBarView.swift */; };
+		A0EDF5DB266EE08C0079803E /* BeamPlaceholder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0EDF5DA266EE08C0079803E /* BeamPlaceholder.swift */; };
+		A0EE0B8F25E68EF3001F9D65 /* InsertEmptyNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0EE0B8E25E68EF3001F9D65 /* InsertEmptyNode.swift */; };
 		A50B372425FA180E00E5D34F /* NSApperance+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50B372325FA180E00E5D34F /* NSApperance+Beam.swift */; };
 		A5144001263803600021DD56 /* TrackableScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5144000263803600021DD56 /* TrackableScrollView.swift */; };
 		A514401B2638038C0021DD56 /* BrowserNewTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A514401A2638038C0021DD56 /* BrowserNewTabView.swift */; };
@@ -1215,6 +1217,8 @@
 		A0E7D98626139FCA00D70676 /* JournalStackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalStackView.swift; sourceTree = "<group>"; };
 		A0E9B0E226668C1300FC99A5 /* FaviconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaviconView.swift; sourceTree = "<group>"; };
 		A0E9B0FA2666A80600FC99A5 /* TabGroupingTitleBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupingTitleBarView.swift; sourceTree = "<group>"; };
+		A0EDF5DA266EE08C0079803E /* BeamPlaceholder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamPlaceholder.swift; sourceTree = "<group>"; };
+		A0EE0B8E25E68EF3001F9D65 /* InsertEmptyNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsertEmptyNode.swift; sourceTree = "<group>"; };
 		A50B372325FA180E00E5D34F /* NSApperance+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSApperance+Beam.swift"; sourceTree = "<group>"; };
 		A5144000263803600021DD56 /* TrackableScrollView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackableScrollView.swift; sourceTree = "<group>"; };
 		A514401A2638038C0021DD56 /* BrowserNewTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserNewTabView.swift; sourceTree = "<group>"; };
@@ -2677,6 +2681,7 @@
 				96319CC8261616B300D1CF31 /* BeamText+Links.swift */,
 				4181716D2581107C00317ED8 /* Score.swift */,
 				96C1D7EA2624C0ED0085FD23 /* BeamElement+Text.swift */,
+				A0EDF5DA266EE08C0079803E /* BeamPlaceholder.swift */,
 			);
 			path = Notes;
 			sourceTree = "<group>";
@@ -3998,6 +4003,7 @@
 				0325629026051D3B006513E4 /* RBCodeSignature.m in Sources */,
 				A041848126258C16006DC170 /* BeamWeather.swift in Sources */,
 				4181733225811F4800317ED8 /* KeyCode.swift in Sources */,
+				A0EDF5DB266EE08C0079803E /* BeamPlaceholder.swift in Sources */,
 				3330D7B5265E4441008C9E20 /* Download.swift in Sources */,
 				96A3067C25F698FB0078A453 /* RefNoteTitle.swift in Sources */,
 				9691E3D825AD9F3300A13080 /* TextRoot.swift in Sources */,

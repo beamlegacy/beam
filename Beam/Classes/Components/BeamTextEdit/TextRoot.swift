@@ -198,7 +198,7 @@ public class TextRoot: TextNode {
 
         if let isTodaysNote = note?.isTodaysNote, isTodaysNote && element.children.count == 1 && element.children.first?.text.isEmpty ?? false {
             let first = children.first as? TextNode
-            first?.placeholder = BeamText(text: "You can write here and press ⌘⏎ to search the web")
+            first?.placeholder = BeamText(text: BeamPlaceholder.allPlaceholders.randomElement() ?? "Hello World !")
         }
 
         childInset = 0
