@@ -101,29 +101,44 @@ extension BeamTextEdit {
         }
     }
 
-    internal func updateInlineFormatterView(_ isDragged: Bool = false, _ isKeyEvent: Bool = false) {
+    internal func updateInlineFormatterView(isDragged: Bool = false, isKeyEvent: Bool = false) {
+        guard inlineFormatter != nil else { return }
         detectFormatterType()
 
-        if isKeyEvent && !rootNode.textIsSelected {
+        let formatterHandlesKeyEvents = inlineFormatter?.handlesTyping == true
+        let hasNodeSelection = rootNode.state.nodeSelection != nil
+        let hasTextSelected = rootNode.textIsSelected
+        if isKeyEvent && !hasTextSelected && !hasNodeSelection && !formatterHandlesKeyEvents {
             // Enable timer to hide inline formatter during key selection
             BeamTextEdit.debounceKeyEventTimer = Timer.scheduledTimer(withTimeInterval: 0.23, repeats: false, block: { [weak self] (_) in
                 guard let self = self else { return }
                 self.showOrHideInlineFormatter(isPresent: false, isDragged: isDragged)
                 self.showOrHidePersistentFormatter(isPresent: true)
             })
-
             return
-        } else if rootNode.state.nodeSelection != nil {
+        } else if isKeyEvent && formatterHandlesKeyEvents,
+                  let node = formatterTargetNode,
+                  let targetRange = formatterTargetRange,
+                  targetRange.lowerBound <= node.cursorPosition {
+            var text = node.text.text
+            text = text.substring(range: targetRange.lowerBound..<node.cursorPosition)
+            if inlineFormatter?.inputText(text) != true {
+                showOrHideInlineFormatter(isPresent: false, isDragged: isDragged)
+                showOrHidePersistentFormatter(isPresent: true)
+            }
+        } else if hasNodeSelection {
             // Invalid the timer when we select all bullet
             BeamTextEdit.debounceKeyEventTimer?.invalidate()
-        } else if !rootNode.textIsSelected {
+        } else if !hasTextSelected && (!isKeyEvent || !formatterHandlesKeyEvents) {
             // Invalid the timer & hide the inline formatter when nothing is selected
             BeamTextEdit.debounceKeyEventTimer?.invalidate()
             showOrHideInlineFormatter(isPresent: false, isDragged: isDragged)
             showOrHidePersistentFormatter(isPresent: true)
         }
 
-        moveInlineFormatterAboveSelection()
+        if inlineFormatter is TextFormatterView {
+            moveInlineFormatterAboveSelection()
+        }
     }
 
     // swiftlint:disable:next cyclomatic_complexity

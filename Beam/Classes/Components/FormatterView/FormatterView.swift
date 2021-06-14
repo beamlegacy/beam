@@ -20,6 +20,10 @@ class FormatterView: NSView {
         return .zero
     }
 
+    var handlesTyping: Bool {
+        false
+    }
+
     var isMouseInsideView = false
 
     convenience init(viewType: FormatterViewType) {
@@ -61,6 +65,7 @@ class FormatterView: NSView {
         isMouseInsideView = false
     }
 
+    // MARK: - Key Handlers
     func moveUp() -> Bool {
         false
     }
@@ -70,6 +75,10 @@ class FormatterView: NSView {
     }
 
     func pressEnter() -> Bool {
+        false
+    }
+
+    func inputText(_ text: String) -> Bool {
         false
     }
 }

@@ -24,4 +24,10 @@ extension XCUIElement {
             self.typeText(c)
         }
     }
+
+    public func waitForNonExistence(timeout: TimeInterval, for testCase: XCTestCase){
+        let doesNotExistPredicate = NSPredicate(format: "exists == FALSE")
+        let expectation = testCase.expectation(for: doesNotExistPredicate, evaluatedWith: self, handler: nil)
+        testCase.wait(for: [expectation], timeout: timeout)
+    }
 }

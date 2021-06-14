@@ -125,7 +125,7 @@ class SharingStatusViewModel: ObservableObject {
             items.append(contentsOf: [
                 ContextMenuItem(title: "Copy Link", action: copyLink),
                 ContextMenuItem(title: "Invite...", action: nil),
-                ContextMenuItem.separator(),
+                ContextMenuItem.separator()
             ])
         }
         items.append(ContextMenuItem(title: note.isPublic ? "Unpublish" : "Publish", action: togglePublish))
