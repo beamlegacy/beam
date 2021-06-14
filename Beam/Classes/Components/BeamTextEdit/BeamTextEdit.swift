@@ -487,9 +487,9 @@ public extension CALayer {
         defer { lastInput = string }
         guard preDetectInput(string) else { return }
         rootNode.insertText(string: string, replacementRange: replacementRange)
-        hideInlineFormatter()
         postDetectInput(string)
         reBlink()
+        updateInlineFormatterView(isKeyEvent: true)
         updatePopover()
     }
 
@@ -908,6 +908,11 @@ public extension CALayer {
                 insertPair("\"", "\"")
                 return false
             },
+            "/": { [unowned self] in
+                guard popover == nil else { return false }
+                self.showSlashFormatter()
+                return true
+            },
             " ": { [unowned self] in
                 guard popover == nil,
                       self.selectedTextRange.isEmpty
@@ -1278,7 +1283,7 @@ public extension CALayer {
 
     func showInlineFormatterOnKeyEventsAndClick(isKeyEvent: Bool = false) {
         initInlineFormatterAndHidePersistentFormatter()
-        updateInlineFormatterView(isKeyEvent)
+        updateInlineFormatterView(isKeyEvent: isKeyEvent)
 
         if isInlineFormatterHidden {
             showOrHideInlineFormatter(isPresent: true)
@@ -1287,7 +1292,7 @@ public extension CALayer {
 
     func updateInlineFormatterOnDrag(isDragged: Bool = false) {
         initInlineFormatterAndHidePersistentFormatter()
-        updateInlineFormatterView(isDragged)
+        updateInlineFormatterView(isDragged: isDragged)
     }
 
     func hideInlineFormatter() {
@@ -1468,7 +1473,7 @@ public extension CALayer {
     override public func moveUp(_ sender: Any?) {
         if popover != nil {
             updatePopover(with: .moveUp)
-        } else if inlineFormatter?.moveDown() != true {
+        } else if inlineFormatter?.moveUp() != true {
             rootNode.moveUp()
             if inlineFormatter != nil {
                 hideInlineFormatter()
@@ -1615,9 +1620,7 @@ public extension CALayer {
         rootNode.deleteForward()
         updatePopover(with: .deleteForward)
 
-        guard let node = focusedWidget as? TextNode else {
-            return
-        }
+        guard let node = focusedWidget as? TextNode else { return }
         if node.text.isEmpty || !rootNode.textIsSelected { hideInlineFormatter() }
         detectFormatterType()
     }
@@ -1626,8 +1629,10 @@ public extension CALayer {
         rootNode.deleteBackward()
         updatePopover(with: .deleteBackward)
 
-        guard let node = focusedWidget as? TextNode else { return }
-        if node.text.isEmpty || !rootNode.textIsSelected { hideInlineFormatter() }
+        updateInlineFormatterView(isKeyEvent: true)
+        if rootNode.cursorPosition == formatterTargetRange?.lowerBound { hideInlineFormatter() }
+//        guard let node = focusedWidget as? TextNode else { return }
+//        if node.text.isEmpty || !rootNode.textIsSelected { hideInlineFormatter() }
         detectFormatterType()
     }
 

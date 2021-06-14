@@ -522,6 +522,7 @@
 		A57BFEA12615B45C00CFB646 /* TableCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57BFEA02615B45C00CFB646 /* TableCellView.swift */; };
 		A57BFEB92615B48300CFB646 /* CheckBoxTableCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57BFEB82615B48300CFB646 /* CheckBoxTableCellView.swift */; };
 		A57BFEBD2615B49C00CFB646 /* TableRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57BFEBC2615B49C00CFB646 /* TableRowView.swift */; };
+		A57C745826709C8000840BBA /* BeamTextEdit+SlashMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57C745726709C8000840BBA /* BeamTextEdit+SlashMenu.swift */; };
 		A580D5EE26427BCB00EB2E24 /* ContextMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A580D5ED26427BCB00EB2E24 /* ContextMenuView.swift */; };
 		A58BD800266510390040A8C4 /* String+RegexTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58BD7FF266510390040A8C4 /* String+RegexTests.swift */; };
 		A5946826265D29350044A892 /* CGPath+Union.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5946825265D29350044A892 /* CGPath+Union.swift */; };
@@ -1251,6 +1252,7 @@
 		A57BFEA02615B45C00CFB646 /* TableCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableCellView.swift; sourceTree = "<group>"; };
 		A57BFEB82615B48300CFB646 /* CheckBoxTableCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckBoxTableCellView.swift; sourceTree = "<group>"; };
 		A57BFEBC2615B49C00CFB646 /* TableRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableRowView.swift; sourceTree = "<group>"; };
+		A57C745726709C8000840BBA /* BeamTextEdit+SlashMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamTextEdit+SlashMenu.swift"; sourceTree = "<group>"; };
 		A580D5ED26427BCB00EB2E24 /* ContextMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextMenuView.swift; sourceTree = "<group>"; };
 		A58BD7FF266510390040A8C4 /* String+RegexTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+RegexTests.swift"; sourceTree = "<group>"; };
 		A5946825265D29350044A892 /* CGPath+Union.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CGPath+Union.swift"; sourceTree = "<group>"; };
@@ -1898,6 +1900,7 @@
 				96E4CF2F258DFB0800D6DE22 /* BeamText+NSAttributedString.swift */,
 				41221A352592771F00255197 /* BeamTextEdit+Popover.swift */,
 				96120D4A260CD5E100592546 /* TextEdit+Hyperlink.swift */,
+				A57C745726709C8000840BBA /* BeamTextEdit+SlashMenu.swift */,
 				414B989825A21BB0002E81A3 /* BeamTextEdit+Formatter.swift */,
 				96F936622590FA59006D8E53 /* BTextEdit.swift */,
 				9691E40125AE5D2C00A13080 /* NodeSelection.swift */,
@@ -3854,6 +3857,7 @@
 				4181721E2581107C00317ED8 /* OSLog+Beam.swift in Sources */,
 				418171F72581107C00317ED8 /* BeamData.swift in Sources */,
 				3330D7CD265E95E0008C9E20 /* LinearProgressView.swift in Sources */,
+				A57C745826709C8000840BBA /* BeamTextEdit+SlashMenu.swift in Sources */,
 				52B17ABE2624445200CB4728 /* DatabaseRow.swift in Sources */,
 				A572370D2655654900AE6BFC /* CoreDataContextObserver.swift in Sources */,
 				523416A22629D465001F306F /* BeamCoreDataObject.swift in Sources */,

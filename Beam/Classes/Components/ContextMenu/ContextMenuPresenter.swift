@@ -55,8 +55,10 @@ class ContextMenuPresenter {
 
     func dismissMenu(animated: Bool = true) {
         if animated {
-            currentMenu?.animateOnDisappear(completionHandler: {
-                self.dismissMenu(removeWindow: true)
+            let menu = currentMenu
+            menu?.animateOnDisappear(completionHandler: { [weak self] in
+                guard menu == self?.currentMenu else { return }
+                self?.dismissMenu(removeWindow: true)
             })
             if currentView != nil && currentMenu == nil {
                 dismissMenu(removeWindow: true)
