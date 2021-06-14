@@ -52,7 +52,6 @@ class ClusteringManager: ObservableObject {
     }
 
     func change(candidate: Int) {
-        if tabsInfo.isEmpty || isClustering { return }
         isClustering = true
         cluster.changeCandidate(to: candidate) { result in
             switch result {
