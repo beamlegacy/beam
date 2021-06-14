@@ -46,10 +46,25 @@ extension BeamText {
         }
     }
 
-    func buildAttributedString(fontSize: CGFloat, cursorPosition: Int?, elementKind: ElementKind, mouseInteraction: MouseInteraction?, markedRange: Swift.Range<Int>?) -> NSMutableAttributedString {
+    func buildAttributedString(fontSize: CGFloat,
+                               cursorPosition: Int?,
+                               elementKind: ElementKind,
+                               mouseInteraction: MouseInteraction?,
+                               markedRange: Swift.Range<Int>?,
+                               selectedRange: Swift.Range<Int>?) -> NSMutableAttributedString {
         let string = NSMutableAttributedString()
         for range in ranges {
-            var attributedString = NSMutableAttributedString(string: range.string, attributes: convert(attributes: range.attributes, fontSize: fontSize, elementKind: elementKind, range: range, cursorPosition: cursorPosition))
+            var isSelected = false
+            if let selectedRange = selectedRange {
+                isSelected = !selectedRange.isEmpty && (selectedRange.contains(range.position) || selectedRange.contains(range.end))
+            }
+            let attributes = convert(attributes: range.attributes,
+                                     fontSize: fontSize,
+                                     elementKind: elementKind,
+                                     range: range,
+                                     cursorPosition: cursorPosition,
+                                     selected: isSelected)
+            var attributedString = NSMutableAttributedString(string: range.string, attributes: attributes)
             if let mouseInteraction = mouseInteraction, (range.position...range.end).contains(mouseInteraction.range.upperBound) {
                 attributedString = updateAttributes(attributedString, withMouseInteraction: mouseInteraction)
             }
@@ -60,6 +75,7 @@ extension BeamText {
                     attributedString.addAttribute(.underlineStyle, value: NSUnderlineStyle.single.rawValue, range: r)
                     attributedString.addAttribute(.underlineColor, value: BeamColor.Editor.underlineAndStrikethrough.nsColor, range: r)
                 }
+
             }
 
             addImageToLink(attributedString, range, mouseInteraction: mouseInteraction)
@@ -116,7 +132,12 @@ extension BeamText {
     }
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
-    private func convert(attributes: [Attribute], fontSize: CGFloat, elementKind: ElementKind, range: BeamText.Range, cursorPosition: Int?) -> [NSAttributedString.Key: Any] {
+    private func convert(attributes: [Attribute],
+                         fontSize: CGFloat,
+                         elementKind: ElementKind,
+                         range: BeamText.Range,
+                         cursorPosition: Int?,
+                         selected: Bool) -> [NSAttributedString.Key: Any] {
         var stringAttributes = [NSAttributedString.Key: Any]()
         var strong = false
         var emphasis = false
@@ -126,7 +147,7 @@ extension BeamText {
         var internalLink: String?
         var isCursorCloseToRange = false
         if let cursorPosition = cursorPosition {
-            isCursorCloseToRange = cursorPosition >= range.position && cursorPosition <= range.end
+            isCursorCloseToRange = !selected && cursorPosition >= range.position && cursorPosition <= range.end
         }
 
         for attribute in attributes {
