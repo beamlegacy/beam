@@ -450,6 +450,9 @@ public class Cluster {
     }
 
     private func clusterizeIDs(labels: [Int]) -> [[UInt64]] {
+        guard self.pageIDs.count > 0 else {
+            return [[UInt64]]()
+        }
         var nextCluster = 0
         var clusterized = [[UInt64]]()
         for label in labels.enumerated() {
