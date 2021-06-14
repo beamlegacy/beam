@@ -69,42 +69,17 @@ extension BeamTextEdit {
         node.cmdManager.beginGroup(with: "Slash Menu Formatting")
         let range = initialRange.lowerBound..<node.cursorPosition
         node.cmdManager.deleteText(in: node, for: range)
-        var attribute: BeamText.Attribute?
-        var elementKind: ElementKind?
 
+        let (elementKind, attribute) = formattingElementAndAttribute(for: action, in: node)
         switch action {
-        // Basic Text Formats
-        case .bold:
-            attribute = .strong
-        case .italic:
-            attribute = .emphasis
-        case .strikethrough:
-            attribute = .strikethrough
-        case .h1:
-            elementKind = .heading(1)
-        case .h2:
-            elementKind = .heading(2)
-        case .quote:
-            elementKind = .quote(1, node.text.text, node.text.text)
-        case .text:
-            elementKind = .bullet
-            attribute = .none
         case .divider:
-            // Divider node coming soon https://linear.app/beamapp/issue/BE-916/menu-divider
-            let divider = BeamElement("--------------------")
-            let parent = node.parent as? ElementNode ?? node
-            node.cmdManager.insertElement(divider, inNode: parent, afterNode: node)
-            let dividerNode = parent.nodeFor(divider)
-            let emptyElement = BeamElement("")
-            node.cmdManager.insertElement(emptyElement, inNode: parent, afterNode: dividerNode)
-            if let emptyNode = parent.nodeFor(emptyElement) {
-                node.cmdManager.focusElement(emptyNode, cursorPosition: 0)
-            }
+            insertDivider(in: node)
         case .internalLink:
-            node.cmdManager.insertText(BeamText(text: "@", attributes: [.internalLink("")]), in: node, at: range.lowerBound)
-            node.cmdManager.focusElement(node, cursorPosition: range.lowerBound + 1)
-            showBidirectionalPopover(mode: .internalLink, prefix: 1, suffix: 0)
+            insertInternalLink(in: node, for: range)
+        default:
+            break
         }
+
         if attribute != nil || elementKind != nil {
             node.cmdManager.formatText(in: node, for: elementKind, with: attribute, for: initialRange, isActive: false)
         }
@@ -127,5 +102,52 @@ extension BeamTextEdit {
             ContextMenuItem(title: "Text", subtitle: "-", action: { action(.text) }),
             ContextMenuItem(title: "Divider", subtitle: "---", action: { action(.divider) })
         ]
+    }
+
+    // MARK: - perform actions
+
+    private func formattingElementAndAttribute(for action: SlashMenuAction,
+                                               in node: TextNode) -> (ElementKind?, BeamText.Attribute?) {
+        var attribute: BeamText.Attribute?
+        var elementKind: ElementKind?
+        switch action {
+        case .bold:
+            attribute = .strong
+        case .italic:
+            attribute = .emphasis
+        case .strikethrough:
+            attribute = .strikethrough
+        case .h1:
+            elementKind = .heading(1)
+        case .h2:
+            elementKind = .heading(2)
+        case .quote:
+            elementKind = .quote(1, node.text.text, node.text.text)
+        case .text:
+            elementKind = .bullet
+            attribute = .none
+        default:
+            break
+        }
+        return (elementKind, attribute)
+    }
+
+    private func insertDivider(in node: TextNode) {
+        // Divider node coming soon https://linear.app/beamapp/issue/BE-916/menu-divider
+        let divider = BeamElement("--------------------")
+        let parent = node.parent as? ElementNode ?? node
+        node.cmdManager.insertElement(divider, inNode: parent, afterNode: node)
+        let dividerNode = parent.nodeFor(divider)
+        let emptyElement = BeamElement("")
+        node.cmdManager.insertElement(emptyElement, inNode: parent, afterNode: dividerNode)
+        if let emptyNode = parent.nodeFor(emptyElement) {
+            node.cmdManager.focusElement(emptyNode, cursorPosition: 0)
+        }
+    }
+
+    private func insertInternalLink(in node: TextNode, for range: Range<Int>) {
+        node.cmdManager.insertText(BeamText(text: "@", attributes: [.internalLink("")]), in: node, at: range.lowerBound)
+        node.cmdManager.focusElement(node, cursorPosition: range.lowerBound + 1)
+        showBidirectionalPopover(mode: .internalLink, prefix: 1, suffix: 0)
     }
 }
