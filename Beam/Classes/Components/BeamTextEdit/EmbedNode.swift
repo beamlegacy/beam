@@ -11,7 +11,7 @@ import AppKit
 import WebKit
 
 public class EmbedNode: ElementNode {
-    var webView = WKWebView()
+    var webView: WKWebView?
 
     override init(parent: Widget, element: BeamElement) {
         super.init(parent: parent, element: element)
@@ -49,7 +49,7 @@ public class EmbedNode: ElementNode {
 //        imageLayer.layer.position = CGPoint(x: indent, y: 0)
 //        addLayer(imageLayer, origin: CGPoint(x: indent, y: 0))
 
-        webView = BeamWebView(frame: .zero, configuration: BrowserTab.webViewConfiguration)
+        let webView = BeamWebView(frame: .zero, configuration: BrowserTab.webViewConfiguration)
         webView.navigationDelegate = self
         webView.wantsLayer = true
         webView.allowsMagnification = true
@@ -59,12 +59,12 @@ public class EmbedNode: ElementNode {
         else { return }
         AppDelegate.main.data.setup(webView: webView)
         webView.load(URLRequest(url: url))
-
+        self.webView = webView
         layer.zPosition = -1
     }
 
     deinit {
-        webView.removeFromSuperview()
+        webView?.removeFromSuperview()
     }
 
     let embedWidth = CGFloat(320)
@@ -100,12 +100,12 @@ public class EmbedNode: ElementNode {
 
     override func updateLayersVisibility() {
         super.updateLayersVisibility()
-        webView.isHidden = layer.isHidden
+        webView?.isHidden = layer.isHidden
     }
 
     override func updateChildrenLayout() {
         let r = layer.frame
-        webView.frame = NSRect(x: r.minX + indent, y: r.minY, width: r.width - indent, height: r.height)
+        webView?.frame = NSRect(x: r.minX + indent, y: r.minY, width: r.width - indent, height: r.height)
         super.updateChildrenLayout()
     }
 
