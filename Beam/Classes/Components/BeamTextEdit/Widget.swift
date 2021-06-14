@@ -176,7 +176,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
     weak var parent: Widget?
 
-    var root: TextRoot? {
+    weak var root: TextRoot? {
         if let r = _root {
             return r
         }
@@ -227,7 +227,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
     public private(set) var editor: BeamTextEdit
     internal var computedIdealSize = NSSize()
-    private var _root: TextRoot?
+    private weak var _root: TextRoot?
     public private(set) var needLayout = true
 
     public static func == (lhs: Widget, rhs: Widget) -> Bool {

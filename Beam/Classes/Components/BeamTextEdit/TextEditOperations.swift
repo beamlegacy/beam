@@ -47,27 +47,27 @@ extension TextRoot {
     }
 
     func increaseNodeSelectionIndentation() {
-        guard let selection = root.state.nodeSelection else { return }
+        guard let selection = root?.state.nodeSelection else { return }
 
-        root.note?.cmdManager.beginGroup(with: "IncreaseIndentationGroup")
+        root?.note?.cmdManager.beginGroup(with: "IncreaseIndentationGroup")
         for node in selection.sortedRoots {
             _ = increaseNodeIndentation(node)
         }
-        root.note?.cmdManager.endGroup()
+        root?.note?.cmdManager.endGroup()
     }
 
     func decreaseNodeSelectionIndentation() {
-        guard let selection = root.state.nodeSelection else { return }
+        guard let selection = root?.state.nodeSelection else { return }
 
-        root.note?.cmdManager.beginGroup(with: "DecreaseIndentationGroup")
+        root?.note?.cmdManager.beginGroup(with: "DecreaseIndentationGroup")
         for node in selection.sortedRoots.reversed() {
             _ = decreaseNodeIndentation(node)
         }
-        root.note?.cmdManager.endGroup()
+        root?.note?.cmdManager.endGroup()
     }
 
     func increaseIndentation() {
-        guard root.state.nodeSelection == nil else {
+        guard root?.state.nodeSelection == nil else {
             increaseNodeSelectionIndentation()
             return
         }
@@ -76,7 +76,7 @@ extension TextRoot {
     }
 
     func decreaseIndentation() {
-        guard root.state.nodeSelection == nil else {
+        guard root?.state.nodeSelection == nil else {
             decreaseNodeSelectionIndentation()
             return
         }
@@ -85,16 +85,16 @@ extension TextRoot {
     }
 
     func eraseNodeSelection(createEmptyNodeInPlace: Bool) {
-        guard let selection = root.state.nodeSelection else { return }
+        guard let selection = root?.state.nodeSelection else { return }
         let sortedNodes = selection.sortedNodes
 
         // This will be used to create an empty node in place:
-        let firstParent = sortedNodes.first?.parent as? TextNode ?? root
+        guard let firstParent = sortedNodes.first?.parent as? TextNode ?? root else { return }
 
         cancelNodeSelection()
 
-        root.note?.cmdManager.beginGroup(with: "Delete selected nodes")
-        defer { root.note?.cmdManager.endGroup() }
+        root?.note?.cmdManager.beginGroup(with: "Delete selected nodes")
+        defer { root?.note?.cmdManager.endGroup() }
 
         if let prevWidget = sortedNodes.first?.previousVisibleNode(TextNode.self) {
             cmdManager.focusElement(prevWidget, cursorPosition: prevWidget.text.count)
@@ -119,7 +119,7 @@ extension TextRoot {
             }
         }
 
-        if createEmptyNodeInPlace || root.element.children.isEmpty {
+        if createEmptyNodeInPlace || root?.element.children.isEmpty == true {
             cmdManager.beginGroup(with: "Insert empty element")
             let newElement = BeamElement()
             cmdManager.insertElement(newElement, inNode: firstParent, afterElement: nil)
@@ -135,7 +135,7 @@ extension TextRoot {
         guard let node = focusedWidget as? TextNode, !node.readOnly, !selectedTextRange.isEmpty
         else { return }
 
-        let bText = BeamText(text: str, attributes: root.state.attributes)
+        let bText = BeamText(text: str, attributes: root?.state.attributes ?? [])
         cmdManager.beginGroup(with: "Erase selection")
         defer { cmdManager.endGroup() }
         cmdManager.replaceText(in: node, for: selectedTextRange, with: bText)
@@ -144,7 +144,7 @@ extension TextRoot {
     }
 
     func deleteForward() {
-        guard root.state.nodeSelection == nil else {
+        guard root?.state.nodeSelection == nil else {
             eraseNodeSelection(createEmptyNodeInPlace: false)
             return
         }
@@ -182,7 +182,7 @@ extension TextRoot {
     }
 
     func deleteBackward() {
-        guard root.state.nodeSelection == nil else {
+        guard root?.state.nodeSelection == nil else {
             editor.cancelPopover()
             eraseNodeSelection(createEmptyNodeInPlace: false)
             return
@@ -254,7 +254,7 @@ extension TextRoot {
     }
 
     func insertNewline() {
-        guard root.state.nodeSelection == nil,
+        guard root?.state.nodeSelection == nil,
               let node = focusedWidget as? TextNode,
               !node.readOnly else { return }
 
@@ -342,7 +342,7 @@ extension TextRoot {
             cmdManager.deleteText(in: node, for: range)
         }
 
-        let bText = BeamText(text: string, attributes: root.state.attributes)
+        let bText = BeamText(text: string, attributes: root?.state.attributes ?? [])
         cmdManager.inputText(bText, in: node, at: cursorPosition)
         if hasCmdGroup {
             cmdManager.endGroup()

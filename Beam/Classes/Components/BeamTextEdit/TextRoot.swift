@@ -113,7 +113,7 @@ public class TextRoot: TextNode {
         return node.text.substring(range: selectedTextRange)
     }
 
-    override var root: TextRoot {
+    override var root: TextRoot? {
         return self
     }
 
