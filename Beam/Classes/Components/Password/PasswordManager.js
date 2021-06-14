@@ -95,6 +95,7 @@ function password_scroll(_ev) {
 }
 
 function password_elementDidLoseFocus(event) {
+    beam_postSubmitMessage(event)
     if (event.target !== null && beam_isTextField(event.target)) {
         window.webkit.messageHandlers.password_textInputFocusOut.postMessage(beam_getOrCreateBeamId(event.target))
     }
@@ -168,6 +169,7 @@ function beam_togglePasswordFieldVisibility(fields_json, visibility) {
 function beam_installFocusHandlers(ids_json) {
     let ids = JSON.parse(ids_json)
     for (id of ids) {
+        // install handlers to all inputs
         beam_getElementById(id)?.addEventListener('focus', password_elementDidGainFocus, false)
         beam_getElementById(id)?.addEventListener('focusout', password_elementDidLoseFocus, false)
         window.addEventListener("resize", password_resize)
@@ -176,10 +178,10 @@ function beam_installFocusHandlers(ids_json) {
 }
 
 function beam_installSubmitHandler() {
-    let submitElements = document.getElementsByTagName('form')
-    for (let e = 0; e < submitElements.length; e++) {
-        let element = submitElements.item(e)
-        element.addEventListener('submit', beam_postSubmitMessage)
+    const forms = document.getElementsByTagName('form')
+    for (let e = 0; e < forms.length; e++) {
+        const form = forms.item(e)
+        form.addEventListener('submit', beam_postSubmitMessage)
     }
 }
 

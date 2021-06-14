@@ -15,7 +15,7 @@ struct ToastView<Content: View>: View {
     var delay: TimeInterval
     var content: Content
 
-    init(isPresented: Binding<Bool>, delay: TimeInterval = 0.8, @ViewBuilder content: () -> Content) {
+    init(isPresented: Binding<Bool>, delay: TimeInterval = 1.8, @ViewBuilder content: () -> Content) {
         self._isPresented = isPresented
         self.delay = delay
         self.content = content()

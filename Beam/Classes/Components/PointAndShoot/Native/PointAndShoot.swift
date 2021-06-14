@@ -37,7 +37,6 @@ class PointAndShoot: WebPageHolder {
     var _status: PointAndShootStatus = .none
     var status: PointAndShootStatus {
         get {
-            Logger.shared.logDebug("status=\(_status.rawValue)", category: .pointAndShoot)
             return _status
         }
         set {
@@ -58,8 +57,7 @@ class PointAndShoot: WebPageHolder {
                         hidePointing()
                     }
 
-                default:
-                    Logger.shared.logDebug("setStatus(): from \(_status.rawValue) to \(newValue.rawValue)", category: .pointAndShoot)
+                    default: break
                 }
                 _status = newValue
                 if Configuration.pnsStatus {
@@ -275,8 +273,7 @@ class PointAndShoot: WebPageHolder {
         case .shooting:
             ui.clearPoint()
             drawActiveShootGroup()
-        case .none:
-            Logger.shared.logDebug("No redraw because pointing=.none", category: .pointAndShoot)
+            case .none: break
         }
     }
 
