@@ -44,6 +44,9 @@ class BlockReferenceNode: TextNode {
               let uuid = UUID(uuidString: refElementId),
               let referencingElement = referencingNote.findElement(uuid)
         else {
+            let errorText = "BlockReferenceNode unable to fetch bloc from note '\(String(describing: refNoteName))'\nid '\(String(describing: refElementId))'"
+            Logger.shared.logError(errorText, category: .noteEditor)
+            addLayer(Layer.text(named: "ErrorDisplay", errorText), origin: CGPoint(x: indent + childInset, y: 0), global: false)
             return
         }
 
