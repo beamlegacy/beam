@@ -237,9 +237,11 @@ extension BeamTextEdit {
             ContextMenuPresenter.shared.dismissMenu()
             isInlineFormatterHidden = true
             inlineFormatter = nil
-            cursorStartPosition = 0
             formatterTargetRange = nil
             formatterTargetNode = nil
+            if popover == nil {
+                cursorStartPosition = 0
+            }
             clearDebounceTimer()
         }
     }
