@@ -20,6 +20,7 @@ struct NoteView: View {
     var note: BeamNote
     var onStartEditing: (() -> Void)?
     var centerText: Bool
+    var scrollToElementId: UUID?
     var onScroll: ((CGPoint) -> Void)?
 
     private let leadingAlignement: CGFloat = 185
@@ -40,8 +41,8 @@ struct NoteView: View {
                         }
                     }
                 },
-                openCard: { cardName in
-                    state.navigateToNote(named: cardName)
+                openCard: { cardName, elementId in
+                    state.navigateToNote(named: cardName, elementId: elementId)
                 },
                 onStartEditing: { onStartEditing?() },
                 onStartQuery: { textNode in
@@ -55,7 +56,8 @@ struct NoteView: View {
                 topOffset: NoteHeaderView.topPadding + 90,
                 footerHeight: 60,
                 centerText: centerText,
-                showTitle: false
+                showTitle: false,
+                scrollToElementId: scrollToElementId
             )
             .accessibility(identifier: "noteView")
             .animation(nil)

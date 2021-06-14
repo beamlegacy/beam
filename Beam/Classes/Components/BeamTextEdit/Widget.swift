@@ -17,6 +17,8 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     let selectionLayer: CALayer
     var debug = false
     var currentFrameInDocument = NSRect()
+    var nodeProvider: NodeProvider?
+    var isTreeBoundary: Bool { nodeProvider != nil }
 
     var isEmpty: Bool { children.isEmpty }
     private let selectionInset: CGFloat = 5
@@ -233,14 +235,16 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     }
 
     // MARK: - Initializer
-    init(parent: Widget) {
+    init(parent: Widget, nodeProvider: NodeProvider? = nil) {
         self.parent = parent
         self.editor = parent.editor
+        self.nodeProvider = nodeProvider
         layer = CALayer()
         layer.isHidden = true
         selectionLayer = CALayer()
         selectionLayer.enableAnimations = false
         super.init()
+        self.nodeProvider?.holder = self
         configureLayer()
         configureSelectionLayer()
         availableWidth = parent.availableWidth - parent.childInset
@@ -253,13 +257,15 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     }
 
     // this version should only be used by TextRoot
-    init(editor: BeamTextEdit) {
+    init(editor: BeamTextEdit, nodeProvider: NodeProvider? = nil) {
         self.editor = editor
+        self.nodeProvider = nodeProvider
         layer = CALayer()
         layer.isHidden = true
         selectionLayer = CALayer()
         selectionLayer.enableAnimations = false
         super.init()
+        self.nodeProvider?.holder = self
         configureLayer()
         configureSelectionLayer()
 
@@ -376,12 +382,12 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
     func configureLayer() {
         let newActions = [
-                "onOrderIn": NSNull(),
-                "onOrderOut": NSNull(),
-                "sublayers": NSNull(),
-                "contents": NSNull(),
-                "bounds": NSNull()
-            ]
+            kCAOnOrderIn: NSNull(),
+            kCAOnOrderOut: NSNull(),
+            "sublayers": NSNull(),
+            "contents": NSNull(),
+            "bounds": NSNull()
+        ]
         layer.actions = newActions
         layer.anchorPoint = CGPoint()
         layer.setNeedsDisplay()
@@ -442,9 +448,8 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
             if let chevron = self.layers["disclosure"] as? ChevronButton {
                 chevron.open = open
             }
-            guard !initialLayout else { return }
             updateChildrenVisibility(visible && open)
-            invalidateLayout()
+            invalidateRendering()
         }
     }
 
@@ -922,21 +927,30 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     }
 
     func proxyFor(_ element: BeamElement) -> ProxyElement? {
-        return parent?.proxyFor(element)
+        return nodeProvider?.proxyFor(element) ?? parent?.proxyFor(element)
     }
 
     func nodeFor(_ element: BeamElement) -> ElementNode? {
-        return parent?.nodeFor(element)
+        return nodeProvider?.nodeFor(element) ?? parent?.nodeFor(element)
     }
 
     func nodeFor(_ element: BeamElement, withParent: Widget) -> ElementNode {
+        if let nodeProvider = nodeProvider { return nodeProvider.nodeFor(element, withParent: withParent) }
         guard let parent = parent else { fatalError("Trying to access element that is not connected to root") }
         return parent.nodeFor(element, withParent: withParent)
     }
 
     func removeNode(_ node: ElementNode) {
+        if let nodeProvider = nodeProvider { nodeProvider.removeNode(node); return }
         guard let parent = parent else { Logger.shared.logError("Trying to access element that is not connected to root", category: .document); return }
         parent.removeNode(node)
+    }
+
+    func clearMapping() {
+        if let nodeProvider = nodeProvider { nodeProvider.clearMapping(); return }
+        for c in children {
+            c.clearMapping()
+        }
     }
 
     // Accessibility:
@@ -952,12 +966,12 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         let rect = NSRect(origin: layer.position, size: layer.bounds.size)
         let actualY = parentRect.height - rect.maxY
         let correctedRect = NSRect(origin: CGPoint(x: rect.minX, y: actualY), size: rect.size)
-//        Logger.shared.logDebug("\(Self.self) actualY = \(actualY) - rect \(rect) - parentRect \(parentRect) -> \(correctedRect)")
+        //        Logger.shared.logDebug("\(Self.self) actualY = \(actualY) - rect \(rect) - parentRect \(parentRect) -> \(correctedRect)")
         return correctedRect
     }
 
     var allVisibleChildren: [Widget] {
-//        guard inVisibleBranch else { return [] }
+        //        guard inVisibleBranch else { return [] }
         guard visible else { return [] }
         var widgets: [Widget] = []
 
@@ -969,12 +983,6 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         return widgets
     }
 
-    func clearMapping() {
-        for c in children {
-            c.clearMapping()
-        }
-    }
-
     var cmdManager: CommandManager<Widget> {
         guard let root = root else { fatalError("Trying to access the command manager on an unconnected Widget is a programming error.") }
         return root.cmdManager
@@ -982,5 +990,17 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
 }
 
+extension Widget {
+    func presentMenu(with items: [ContextMenuItem], at: CGPoint) {
+        let menuView = ContextMenuFormatterView(items: items, direction: .bottom) {
+            ContextMenuPresenter.shared.dismissMenu()
+        }
+        let point = CGPoint(x: offsetInDocument.x + at.x, y: offsetInDocument.y + at.y)
+        let atPoint = editor.convert(point, to: nil)
+        editor.inlineFormatter = menuView
+        ContextMenuPresenter.shared.presentMenu(menuView, atPoint: atPoint, animated: true)
+
+    }
+}
 // swiftlint:enable type_body_length
 // swiftlint:enable file_length

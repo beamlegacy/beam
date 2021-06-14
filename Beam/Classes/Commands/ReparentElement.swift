@@ -74,9 +74,9 @@ extension CommandManager where Context == Widget {
     @discardableResult
     func reparentElement(_ node: ElementNode, to parent: ElementNode, atIndex newIndex: Int) -> Bool {
         // make sure all elements are in the name note
-        guard let title = node.elementNoteTitle ?? parent.elementNoteTitle
+        guard let title = node.displayedElementNoteTitle ?? parent.displayedElementNoteTitle
         else { return false }
-        let cmd = ReparentElement(node.elementId, of: title, to: parent.elementId, atIndex: newIndex)
+        let cmd = ReparentElement(node.displayedElementId, of: title, to: parent.displayedElementId, atIndex: newIndex)
         return run(command: cmd, on: parent)
     }
 

@@ -17,7 +17,7 @@ class ProxyTextNode: TextNode, ProxyNode {
 
     // MARK: - Initializer
 
-    override init(parent: Widget, element: BeamElement) {
+    init(parent: Widget, element: BeamElement) {
         guard let proxyElement = parent.proxyFor(element) else { fatalError("Can't create a ProxyTextNode without a proxy provider in the parent chain") }
         super.init(parent: parent, element: proxyElement)
 

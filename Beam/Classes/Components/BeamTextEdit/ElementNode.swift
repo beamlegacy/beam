@@ -37,8 +37,32 @@ public class ElementNode: Widget {
         unproxyElement.note?.title
     }
 
+    var displayedElementId: UUID {
+        displayedElement.id
+    }
+
+    var displayedElementNoteTitle: String? {
+        displayedElement.note?.title
+    }
+
+    var _displayedElement: BeamElement?
+    var displayedElement: BeamElement {
+        get {
+            _displayedElement ?? unproxyElement
+        }
+        set {
+            _displayedElement = newValue
+            subscribeToElement(newValue)
+            invalidateText()
+            invalidateLayout()
+        }
+    }
+
     var unproxyElement: BeamElement {
-        guard let elem = element as? ProxyElement else { return element }
+        guard let elem = element as? ProxyElement
+        else {
+            return element
+        }
         return elem.proxy
     }
 
@@ -51,7 +75,7 @@ public class ElementNode: Widget {
     override var parent: Widget? {
         didSet {
             guard parent != nil else { return }
-            updateTextChildren(elements: element.children)
+            updateTextChildren(elements: displayedElement.children)
         }
     }
 
@@ -92,7 +116,15 @@ public class ElementNode: Widget {
         return depth == 1
     }
 
-    var readOnly: Bool = false
+    var _readOnly: Bool?
+    var readOnly: Bool {
+        get {
+            _readOnly ?? (parent as? ElementNode)?.readOnly ?? false
+        }
+        set {
+            _readOnly = newValue
+        }
+    }
     var isEditing: Bool {
         guard let r = root else { return false }
         return r.focusedWidget === self && r.state.nodeSelection == nil
@@ -145,15 +177,15 @@ public class ElementNode: Widget {
 
     // MARK: - Initializer
 
-    init(parent: Widget, element: BeamElement) {
+    init(parent: Widget, element: BeamElement, nodeProvider: NodeProvider? = nil) {
         self.element = element
 
-        super.init(parent: parent)
+        super.init(parent: parent, nodeProvider: nodeProvider)
 
         addDisclosureLayer(at: NSPoint(x: bulletLayerPositionX, y: isHeader ? firstLineBaseline - 8 : firstLineBaseline - 14))
         addBulletPointLayer(at: NSPoint(x: bulletLayerPositionX, y: isHeader ? firstLineBaseline - 8 : firstLineBaseline - 14))
 
-        element.$children
+        displayedElement.$children
             .sink { [unowned self] elements in
                 guard self.parent != nil else { return }
                 updateTextChildren(elements: elements)
@@ -167,15 +199,15 @@ public class ElementNode: Widget {
         setAccessibilityRole(.textArea)
     }
 
-    init(editor: BeamTextEdit, element: BeamElement) {
+    init(editor: BeamTextEdit, element: BeamElement, nodeProvider: NodeProvider? = nil) {
         self.element = element
 
-        super.init(editor: editor)
+        super.init(editor: editor, nodeProvider: nodeProvider)
 
         addDisclosureLayer(at: NSPoint(x: bulletLayerPositionX, y: isHeader ? firstLineBaseline - 8 : firstLineBaseline - 13))
         addBulletPointLayer(at: NSPoint(x: bulletLayerPositionX, y: isHeader ? firstLineBaseline - 8 : firstLineBaseline - 13))
 
-        element.$children
+        displayedElement.$children
             .sink { [unowned self] elements in
                 updateTextChildren(elements: elements)
             }.store(in: &scope)
@@ -466,17 +498,50 @@ public class ElementNode: Widget {
         1
     }
 
-    public func drawCursor(in context: CGContext) {
-        guard !readOnly, editor.hasFocus, editor.blinkPhase else { return }
-        let cursorRect = rectAt(caretIndex: caretIndex)
+    var _cursorLayer: ShapeLayer?
+    var cursorLayer: ShapeLayer {
+        if let layer = _cursorLayer {
+            return layer
+        }
 
-        context.beginPath()
-        context.addRect(cursorRect)
-        //let fill = RBFill()
-        context.setFillColor(enabled ? cursorColor.cgColor : disabledColor.cgColor)
+        let layer = ShapeLayer(name: "cursor")
+        layer.layer.actions = [
+            kCAOnOrderIn: NSNull(),
+            kCAOnOrderOut: NSNull(),
+            "sublayers": NSNull(),
+            "contents": NSNull(),
+            "bounds": NSNull()
+        ]
 
-        //list.draw(shape: shape, fill: fill, alpha: 1.0, blendMode: .normal)
-        context.drawPath(using: .fill)
+        layer.layer.zPosition = 1
+        layer.layer.position = CGPoint(x: indent, y: 0)
+        _cursorLayer = layer
+        addLayer(layer)
+        return layer
+    }
+
+    public func updateCursor() {
+        updateElementCursor()
+    }
+
+    public func updateElementCursor() {
+        let on = editor.hasFocus && isFocused && editor.blinkPhase && (root?.state.nodeSelection?.nodes.isEmpty ?? true)
+        let cursorRect = NSRect(x: caretIndex == 0 ? indent : availableWidth, y: 0, width: 1, height: frame.height )//rectAt(caretIndex: caretIndex)
+        let layer = self.cursorLayer
+
+        layer.shapeLayer.fillColor = enabled ? cursorColor.cgColor : disabledColor.cgColor
+        layer.layer.isHidden = !on
+        layer.shapeLayer.path = CGPath(rect: cursorRect, transform: nil)
+    }
+
+    override func onFocus() {
+        super.onFocus()
+        updateCursor()
+    }
+
+    override func onUnfocus() {
+        super.onUnfocus()
+        updateCursor()
     }
 
     let smallCursorWidth = CGFloat(2)
@@ -496,17 +561,9 @@ public class ElementNode: Widget {
         context.translateBy(x: indent, y: 0)
 
         updateRendering()
+        updateCursor()
 
         drawDebug(in: context)
-
-        if selfVisible {
-            context.saveGState(); defer { context.restoreGState() }
-
-            if isEditing {
-                drawCursor(in: context)
-            }
-        }
-        context.restoreGState()
     }
 
     // MARK: needed for proxied nodes
@@ -533,4 +590,19 @@ public class ElementNode: Widget {
         return isLink
     }
 
+    public func position(after index: Int, avoidUneditableRange: Bool = false) -> Int {
+        return min(1, index + 1)
+    }
+
+    public func position(before index: Int, avoidUneditableRange: Bool = false) -> Int {
+        return max(0, index - 1)
+    }
+
+    public func positionAbove(_ position: Int) -> Int {
+        return max(0, position - 1)
+    }
+
+    public func positionBelow(_ position: Int) -> Int {
+        return min(1, position + 1)
+    }
 }

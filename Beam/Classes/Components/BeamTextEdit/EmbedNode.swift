@@ -13,7 +13,7 @@ import WebKit
 public class EmbedNode: ElementNode {
     var webView = WKWebView()
 
-    override init(parent: Widget, element: BeamElement) {
+    init(parent: Widget, element: BeamElement) {
         super.init(parent: parent, element: element)
 
         setupEmbed()
@@ -22,7 +22,7 @@ public class EmbedNode: ElementNode {
         setAccessibilityRole(.textArea)
     }
 
-    override init(editor: BeamTextEdit, element: BeamElement) {
+    init(editor: BeamTextEdit, element: BeamElement) {
         super.init(editor: editor, element: element)
 
         setupEmbed()

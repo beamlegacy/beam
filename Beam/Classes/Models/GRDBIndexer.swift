@@ -73,28 +73,29 @@ class GRDBIndexer {
     struct SearchResult {
         var title: String
         var uid: String
+        var text: String?
     }
 
-    func search(matchingAllTokensIn query: String, maxResults: Int? = 10) -> [SearchResult] {
+    func search(matchingAllTokensIn query: String, maxResults: Int? = 10, includeText: Bool = false) -> [SearchResult] {
         guard let pattern = FTS3Pattern(matchingAllTokensIn: query) else { return [] }
-        return search(pattern: pattern)
+        return search(pattern: pattern, includeText: includeText)
     }
 
-    func search(matchingAnyTokensIn query: String, maxResults: Int? = 10) -> [SearchResult] {
+    func search(matchingAnyTokensIn query: String, maxResults: Int? = 10, includeText: Bool = false) -> [SearchResult] {
         guard let pattern = FTS3Pattern(matchingAnyTokenIn: query) else { return [] }
-        return search(pattern: pattern)
+        return search(pattern: pattern, includeText: includeText)
     }
 
-    func search(matchingPhrase query: String, maxResults: Int? = 10) -> [SearchResult] {
+    func search(matchingPhrase query: String, maxResults: Int? = 10, includeText: Bool = false) -> [SearchResult] {
         guard let pattern = FTS3Pattern(matchingPhrase: query) else { return [] }
-        return search(pattern: pattern)
+        return search(pattern: pattern, includeText: includeText)
     }
 
-    func search(pattern: FTS3Pattern, maxResults: Int? = 10) -> [SearchResult] {
+    func search(pattern: FTS3Pattern, maxResults: Int? = 10, includeText: Bool = false) -> [SearchResult] {
         do {
             let results = try dbQueue.read({ db -> [SearchResult] in
                 try BeamElementRecord.matching(pattern).fetchAll(db).map({ record -> SearchResult in
-                    return SearchResult(title: record.title, uid: record.uid)
+                    return SearchResult(title: record.title, uid: record.uid, text: includeText ? record.text : nil)
                 })
             })
             return results

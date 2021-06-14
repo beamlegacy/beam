@@ -91,8 +91,8 @@ class FormatText: TextEditorCommand {
 extension CommandManager where Context == Widget {
     @discardableResult
     func formatText(in node: TextNode, for kind: ElementKind?, with attribute: BeamText.Attribute?, for range: Range<Int>?, isActive: Bool) -> Bool {
-        guard let title = node.elementNoteTitle else { return false }
-        let cmd = FormatText(in: node.elementId, of: title, for: kind, with: attribute, for: range, isActive: isActive)
+        guard let title = node.displayedElementNoteTitle else { return false }
+        let cmd = FormatText(in: node.displayedElementId, of: title, for: kind, with: attribute, for: range, isActive: isActive)
         return run(command: cmd, on: node)
     }
 }

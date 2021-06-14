@@ -41,7 +41,7 @@ struct ModeView: View {
     private var noteContent: some View {
         Group {
             if let currentNote = state.currentNote {
-                NoteView(note: currentNote, centerText: true) { scrollPoint in
+                NoteView(note: currentNote, centerText: true, scrollToElementId: state.scrollToElementId) { scrollPoint in
                     contentIsScrolled = scrollPoint.y > NoteView.topSpacingBeforeTitle
                 }
                 .onAppear { contentIsScrolled = false }

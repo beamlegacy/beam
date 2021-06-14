@@ -91,8 +91,8 @@ struct JournalScrollView: NSViewRepresentable {
                 }
             }
         }
-        textEditView.openCard = { cardName in
-            self.state.navigateToNote(named: cardName)
+        textEditView.openCard = { cardName, elementId in
+            self.state.navigateToNote(named: cardName, elementId: elementId)
         }
         textEditView.onStartQuery = { textNode in
             self.state.startQuery(textNode)

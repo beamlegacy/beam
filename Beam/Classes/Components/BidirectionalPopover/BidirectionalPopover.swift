@@ -7,6 +7,25 @@
 
 import Cocoa
 
+enum PopoverMode {
+    case internalLink
+    case blockReference
+}
+
+protocol PopoverItem {
+    var text: String { get }
+}
+
+struct PopoverLinkItem: PopoverItem {
+    var text: String
+}
+
+struct PopoverBlockItem: PopoverItem {
+    var text: String
+    var name: String
+    var id: UUID
+}
+
 class BidirectionalPopover: NSView {
 
     // MARK: - Properties
@@ -16,9 +35,13 @@ class BidirectionalPopover: NSView {
     static let viewWidth: CGFloat = 248
     static let viewHeight: CGFloat = 36
 
-    var didSelectTitle: ((_ title: String) -> Void)?
+    var mode: PopoverMode
+    var initialText: String?
 
-    var items: [String] = [] {
+    var didSelectTitle: ((_ title: String) -> Void) = { _ in }
+    var didSelectItem: ((_ item: PopoverItem) -> Void) = { _ in }
+
+    var items: [PopoverItem] = [] {
         didSet {
             collectionView.reloadData()
 
@@ -45,14 +68,17 @@ class BidirectionalPopover: NSView {
 
     private var isMatchItem = false
     private var indexPath = IndexPath(item: 0, section: 0)
-    private var collectionViewItems = [
-        BidirectionalPopoverResultItem.identifier,
+    private var collectionViewItems: [NSUserInterfaceItemIdentifier] { [
+        mode == .internalLink ? BidirectionalPopoverResultItem.identifier : BidirectionalPopoverBlockItem.identifier,
         BidirectionalPopoverActionItem.identifier
     ]
+    }
 
     // MARK: - Initializer
-    override init(frame frameRect: NSRect) {
-        super.init(frame: frameRect)
+    init(mode: PopoverMode, initialText: String?) {
+        self.mode = mode
+        self.initialText = initialText
+        super.init(frame: .zero)
 
         wantsLayer = true
         layer?.cornerRadius = 7
@@ -63,7 +89,7 @@ class BidirectionalPopover: NSView {
     }
 
     required init?(coder: NSCoder) {
-        super.init(coder: coder)
+        fatalError()
     }
 
     override func draw(_ dirtyRect: NSRect) {
@@ -137,6 +163,7 @@ class BidirectionalPopover: NSView {
 
     func moveDown() {
         if indexPath.item == items.count - 1 && !isMatchItem && !query.isEmpty {
+            guard collectionView.numberOfItems(inSection: 1) > 0 else { return }
             collectionView.deselectItems(at: [indexPath])
             indexPath = IndexPath(item: 0, section: 1)
             collectionView.selectItems(at: [indexPath], scrollPosition: .bottom)
@@ -161,32 +188,15 @@ class BidirectionalPopover: NSView {
         indexPath = IndexPath(item: 0, section: section)
     }
 
-    func selectItem() {
-        let itemName = itemNameAt(index: indexPath.section)
-
-        switch itemName {
-        case BidirectionalPopoverResultItem.identifier:
-            guard let documentTitle = selectDocument(at: indexPath),
-                  let didSelectTitle = didSelectTitle else { break }
-
-            didSelectTitle(documentTitle)
-        case BidirectionalPopoverActionItem.identifier:
-            guard let didSelectTitle = didSelectTitle,
-                  !query.isEmpty else { break }
-
-            didSelectTitle(query)
-        default:
-            break
-        }
-    }
-
     private func checkItemsContainsQuery() {
         guard !items.isEmpty else {
             isMatchItem = false
             return
         }
 
-        isMatchItem = items.contains(where: query.contains)
+        isMatchItem = items.contains(where: {
+            query.contains($0.text)
+        })
 
         if isMatchItem {
             selectFirstItemAt(section: 0)
@@ -199,6 +209,9 @@ class BidirectionalPopover: NSView {
         switch itemName {
         case BidirectionalPopoverResultItem.identifier:
             guard let item = collectionView.item(at: IndexPath(item: indexPath.item, section: indexPath.section)) as? BidirectionalPopoverResultItem else { return nil }
+            return item.documentTitle
+        case BidirectionalPopoverBlockItem.identifier:
+            guard let item = collectionView.item(at: IndexPath(item: indexPath.item, section: indexPath.section)) as? BidirectionalPopoverBlockItem else { return nil }
             return item.documentTitle
         case BidirectionalPopoverActionItem.identifier:
             guard let item = collectionView.item(at: IndexPath(item: indexPath.item, section: indexPath.section)) as? BidirectionalPopoverActionItem else { return nil }
@@ -227,7 +240,10 @@ class BidirectionalPopover: NSView {
 extension BidirectionalPopover: NSCollectionViewDataSource {
 
     func numberOfSections(in collectionView: NSCollectionView) -> Int {
-        return collectionViewItems.count
+        if mode == .internalLink {
+            return collectionViewItems.count
+        }
+        return collectionViewItems.count - 1
     }
 
     func collectionView(_ collectionView: NSCollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -236,7 +252,10 @@ extension BidirectionalPopover: NSCollectionViewDataSource {
         switch itemName {
         case BidirectionalPopoverResultItem.identifier:
             return items.count
+        case BidirectionalPopoverBlockItem.identifier:
+            return items.count
         case BidirectionalPopoverActionItem.identifier:
+            guard mode == .internalLink else { return 0 }
             return isMatchItem || query.isEmpty ? 0 : 1
         default:
             return 0
@@ -250,17 +269,20 @@ extension BidirectionalPopover: NSCollectionViewDataSource {
         switch item {
         case is BidirectionalPopoverResultItem:
             guard let popoverItem = item as? BidirectionalPopoverResultItem else { return item }
-            popoverItem.documentTitle = items[indexPath.item]
-
+            popoverItem.documentTitle = items[indexPath.item].text
             if indexPath == self.indexPath { popoverItem.isSelected = true }
-
             return popoverItem
+
+        case is BidirectionalPopoverBlockItem:
+            guard let popoverItem = item as? BidirectionalPopoverBlockItem else { return item }
+            popoverItem.documentTitle = items[indexPath.item].text
+            if indexPath == self.indexPath { popoverItem.isSelected = true }
+            return popoverItem
+
         default:
             guard let popoverActionItem = item as? BidirectionalPopoverActionItem else { return item }
             popoverActionItem.updateLabel(with: query)
-
             if !query.isEmpty && indexPath == self.indexPath && !isMatchItem { popoverActionItem.isSelected = true }
-
             return popoverActionItem
         }
 
@@ -272,7 +294,7 @@ extension BidirectionalPopover: NSCollectionViewDataSource {
 extension BidirectionalPopover: NSCollectionViewDelegateFlowLayout {
 
     func collectionView(_ collectionView: NSCollectionView, layout collectionViewLayout: NSCollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> NSSize {
-        return NSSize(width: collectionView.bounds.width, height: 36)
+        return mode == .internalLink ? NSSize(width: collectionView.bounds.width, height: 36) : NSSize(width: collectionView.bounds.width, height: 80)
     }
 
     func collectionView(_ collectionView: NSCollectionView, layout collectionViewLayout: NSCollectionViewLayout, insetForSectionAt section: Int) -> NSEdgeInsets {
@@ -293,12 +315,20 @@ extension BidirectionalPopover: NSCollectionViewDelegateFlowLayout {
 extension BidirectionalPopover: NSCollectionViewDelegate {
 
     func collectionView(_ collectionView: NSCollectionView, didSelectItemsAt indexPaths: Set<IndexPath>) {
+        guard let indexPath = indexPaths.first else { return }
 
-        guard let indexPath = indexPaths.first,
-              let documentTitle = selectDocument(at: indexPath),
-              let didSelectTitle = didSelectTitle else { return }
+        switch mode {
+        case .internalLink:
+            guard let documentTitle = selectDocument(at: indexPath) else { return }
+            didSelectTitle(documentTitle)
+        case .blockReference:
+            guard indexPath.section == 0 else { return }
+            didSelectItem(items[indexPath.item])
+        }
+    }
 
-        didSelectTitle(documentTitle)
+    func selectItem() {
+        collectionView(collectionView, didSelectItemsAt: Set([indexPath]))
     }
 
 }

@@ -60,8 +60,8 @@ class ReplaceText: TextEditorCommand {
 extension CommandManager where Context == Widget {
     @discardableResult
     func replaceText(in node: TextNode, for range: Range<Int>, with text: BeamText) -> Bool {
-        guard let title = node.elementNoteTitle else { return false }
-        let cmd = ReplaceText(in: node.elementId, of: title, for: range, with: text)
+        guard let title = node.displayedElementNoteTitle else { return false }
+        let cmd = ReplaceText(in: node.displayedElementId, of: title, for: range, with: text)
         return run(command: cmd, on: node)
     }
 }

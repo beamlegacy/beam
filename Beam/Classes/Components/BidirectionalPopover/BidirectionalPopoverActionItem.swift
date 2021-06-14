@@ -7,7 +7,8 @@
 
 import Cocoa
 
-class BidirectionalPopoverActionItem: BidirectionalPopoverItem {
+class BidirectionalPopoverActionItem: BidirectionalPopoverItem, PopoverItem {
+    var text: String { queryLabel.stringValue }
 
     static let identifier = NSUserInterfaceItemIdentifier("BidirectionalPopoverActionItem")
 

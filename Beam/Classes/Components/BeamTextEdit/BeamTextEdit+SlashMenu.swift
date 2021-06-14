@@ -93,17 +93,17 @@ extension BeamTextEdit {
             // Divider node coming soon https://linear.app/beamapp/issue/BE-916/menu-divider
             let divider = BeamElement("--------------------")
             let parent = node.parent as? ElementNode ?? node
-            node.cmdManager.insertElement(divider, in: parent, after: node)
+            node.cmdManager.insertElement(divider, inNode: parent, afterNode: node)
             let dividerNode = parent.nodeFor(divider)
             let emptyElement = BeamElement("")
-            node.cmdManager.insertElement(emptyElement, in: parent, after: dividerNode)
+            node.cmdManager.insertElement(emptyElement, inNode: parent, afterNode: dividerNode)
             if let emptyNode = parent.nodeFor(emptyElement) {
                 node.cmdManager.focusElement(emptyNode, cursorPosition: 0)
             }
         case .internalLink:
             node.cmdManager.insertText(BeamText(text: "@", attributes: [.internalLink("")]), in: node, at: range.lowerBound)
             node.cmdManager.focusElement(node, cursorPosition: range.lowerBound + 1)
-            showBidirectionalPopover(prefix: 1, suffix: 0)
+            showBidirectionalPopover(mode: .internalLink, prefix: 1, suffix: 0)
         }
         if attribute != nil || elementKind != nil {
             node.cmdManager.formatText(in: node, for: elementKind, with: attribute, for: initialRange, isActive: false)

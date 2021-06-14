@@ -15,7 +15,7 @@ public struct BTextEdit: NSViewRepresentable {
     var note: BeamNote
     var data: BeamData
     var openURL: (URL, BeamElement) -> Void
-    var openCard: (String) -> Void
+    var openCard: (String, UUID?) -> Void
     var onStartEditing: () -> Void = { }
     var onEndEditing: () -> Void = { }
     var onStartQuery: (TextNode) -> Void = { _ in }
@@ -105,7 +105,7 @@ public struct BTextEditScrollable: NSViewRepresentable {
     var note: BeamNote
     var data: BeamData
     var openURL: (URL, BeamElement) -> Void
-    var openCard: (String) -> Void
+    var openCard: (String, UUID?) -> Void
     var onStartEditing: () -> Void = { }
     var onEndEditing: () -> Void = { }
     var onStartQuery: (TextNode) -> Void = { _ in }
@@ -120,6 +120,8 @@ public struct BTextEditScrollable: NSViewRepresentable {
 
     var centerText = false
     var showTitle = true
+
+    var scrollToElementId: UUID?
 
     public func makeCoordinator() -> BTextEditScrollableCoordinator {
         BTextEditScrollableCoordinator(self)
@@ -145,6 +147,7 @@ public struct BTextEditScrollable: NSViewRepresentable {
 
         edit.centerText = centerText
         edit.showTitle = showTitle
+        edit.scrollToElementId = scrollToElementId
 
         let scrollView = NSScrollView()
         scrollView.automaticallyAdjustsContentInsets = false
@@ -191,6 +194,8 @@ public struct BTextEditScrollable: NSViewRepresentable {
 
         edit.centerText = centerText
         edit.showTitle = showTitle
+
+        edit.scrollToElementId = scrollToElementId
 
         context.coordinator.onDeinit = {
             edit.hideFloatingView()

@@ -14,10 +14,10 @@ extension BeamTextEdit {
     private static let queryLimit = 4
     private static var xPos: CGFloat = 0
 
-    internal func initPopover() {
+    internal func initPopover(mode: PopoverMode, initialText: String?) {
         guard let node = focusedWidget as? TextNode else { return }
 
-        popover = BidirectionalPopover()
+        popover = BidirectionalPopover(mode: mode, initialText: initialText)
 
         guard let popover = popover,
               let view = window?.contentView else { return }
@@ -25,7 +25,51 @@ extension BeamTextEdit {
         view.addSubview(popover)
 
         popover.didSelectTitle = { [unowned self] (title) -> Void in
-            self.validInternalLink(from: node, title)
+            switch mode {
+            case .internalLink:
+                self.validInternalLink(from: node, title)
+            default: break
+            }
+            view.window?.makeFirstResponder(self)
+        }
+
+        popover.didSelectItem = { [unowned self] (selectedItem) -> Void in
+            switch mode {
+            case .blockReference:
+                let blockElement = BeamElement("")
+                if let item = selectedItem as? PopoverBlockItem {
+                    blockElement.kind = .blockReference(item.name, item.id.uuidString)
+                    guard let node = focusedWidget as? TextNode,
+                          let parent = node.parent as? ElementNode
+                    else { return }
+
+                    cmdManager.beginGroup(with: "Insert Block Reference")
+                    defer { cmdManager.endGroup() }
+
+                    let startPosition = popoverPrefix == 0 ? cursorStartPosition : cursorStartPosition + 1
+                    let replacementStart = startPosition - popoverPrefix
+                    let replacementEnd = rootNode.cursorPosition + popoverSuffix
+                    // When the cursor is moved to left, the link should be split in 2 (Bi-di + Plain text)
+
+                    cmdManager.insertElement(blockElement, inNode: parent, afterNode: node)
+                    cmdManager.deleteText(in: node, for: replacementStart..<replacementEnd)
+
+                    let trailingText: BeamText = node.text.suffix(node.text.count - rootNode.cursorPosition)
+
+                    if !trailingText.isEmpty {
+                        cmdManager.deleteText(in: node, for: rootNode.cursorPosition..<node.text.count)
+                        let trailingBlock = BeamElement(trailingText)
+                        cmdManager.insertElement(trailingBlock, inNode: parent, afterElement: blockElement)
+                    }
+
+                    if rootNode.cursorPosition == 0 {
+                        cmdManager.deleteElement(for: node)
+                    }
+                }
+                dismissPopover()
+                showOrHidePersistentFormatter(isPresent: true)
+            default: break
+            }
             view.window?.makeFirstResponder(self)
         }
     }
@@ -34,6 +78,7 @@ extension BeamTextEdit {
         case none, moveLeft, moveRight, moveUp, moveDown, deleteBackward, deleteForward, insertNewline
     }
 
+    //swiftlint:disable function_body_length cyclomatic_complexity
     internal func updatePopover(with command: Command = .none) {
         guard let node = focusedWidget as? TextNode,
               let popover = popover else { return }
@@ -56,7 +101,7 @@ extension BeamTextEdit {
             return
         }
 
-        if command == .moveRight && node.text.text == "[[]]" {
+        if command == .moveRight && ["[[]]", "(())"].contains(node.text.text) {
             cursorStartPosition = 0
             cancelInternalLink()
             dismissPopover()
@@ -85,11 +130,26 @@ extension BeamTextEdit {
 
         let range = startPosition - popoverPrefix ..< cursorPosition + popoverSuffix
         node.text.setAttributes([.internalLink(linkText)], to: range)
-        let items = linkText.isEmpty ?
-            documentManager.loadAllWithLimit(BeamTextEdit.queryLimit, [NSSortDescriptor(key: "created_at", ascending: false)]) :
-            documentManager.documentsWithLimitTitleMatch(title: linkText, limit: BeamTextEdit.queryLimit)
+        switch popover.mode {
+        case .internalLink:
+            let items = linkText.isEmpty ?
+                documentManager.loadAllWithLimit(BeamTextEdit.queryLimit, [NSSortDescriptor(key: "created_at", ascending: false)]) :
+                documentManager.documentsWithLimitTitleMatch(title: linkText, limit: BeamTextEdit.queryLimit)
 
-        popover.items = items.map({ $0.title })
+            popover.items = items.map({ PopoverLinkItem(text: $0.title) })
+        case .blockReference:
+            let items = linkText.isEmpty ?
+                [] :
+                data?.indexer.search(matchingPhrase: linkText, maxResults: 5, includeText: true) ?? []
+
+            popover.items = items.compactMap {
+                guard let uid = UUID(uuidString: $0.uid),
+                      let text = $0.text,
+                      !text.isEmpty
+                else { return nil }
+                return PopoverBlockItem(text: text, name: $0.title, id: uid)
+            }
+        }
         popover.query = linkText
 
         updatePopoverPosition(with: node, linkText.isEmpty)

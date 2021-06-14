@@ -10,7 +10,7 @@ import Foundation
 extension TextRoot {
     func moveLeft() {
         cancelNodeSelection()
-        guard let node = focusedWidget as? TextNode else { return }
+        guard let node = focusedWidget as? ElementNode else { return }
         if selectedTextRange.isEmpty {
             if cursorPosition == 0 {
                 if let next = node.previousVisibleNode(ElementNode.self) {
@@ -29,9 +29,9 @@ extension TextRoot {
 
     func moveRight() {
         cancelNodeSelection()
-        guard let node = focusedWidget as? TextNode else { return }
+        guard let node = focusedWidget as? ElementNode else { return }
         if selectedTextRange.isEmpty {
-            if cursorPosition == node.text.count {
+            if cursorPosition == node.textCount {
                 if let next = node.nextVisibleNode(ElementNode.self) {
                     node.invalidateText()
                     next.focus()
@@ -179,9 +179,7 @@ extension TextRoot {
                 }
             }
         } else {
-            if let node = focusedWidget as? TextNode {
-                cursorPosition = node.positionAbove(cursorPosition)
-            }
+            cursorPosition = node.positionAbove(cursorPosition)
         }
         cancelSelection()
         node.invalidateText()
