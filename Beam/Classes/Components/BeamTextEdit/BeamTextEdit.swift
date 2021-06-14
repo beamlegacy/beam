@@ -113,6 +113,22 @@ public extension CALayer {
 
     private (set) var isResizing = false
     public private (set) var journalMode: Bool
+    public var scrollToElementId: UUID? {
+        didSet {
+            guard let id = scrollToElementId,
+                  let element = note.findElement(id),
+                  let node = rootNode.nodeFor(element)
+            else {
+                return
+            }
+            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: .milliseconds(50))) {
+                self.setHotSpot(node.frameInDocument)
+                if let w = self.window as? BeamWindow {
+                    w.state.scrollToElementId = nil
+                }
+            }
+        }
+    }
 
     public init(root: BeamElement, journalMode: Bool) {
         self.journalMode = journalMode
@@ -137,7 +153,10 @@ public extension CALayer {
             if self.blinkTime <= now && self.hasFocus {
                 self.blinkPhase.toggle()
                 self.blinkTime = now + (self.blinkPhase ? self.onBlinkTime : self.offBlinkTime)
-                focusedWidget?.invalidate()
+                if let focused = focusedWidget as? ElementNode {
+                    focused.updateCursor()
+                }
+
             }
         }
         RunLoop.main.add(timer, forMode: .default)
@@ -219,7 +238,7 @@ public extension CALayer {
     public var activateOnLostFocus = true
     public var useFocusRing = false
     public var openURL: (URL, BeamElement) -> Void = { _, _ in }
-    public var openCard: (String) -> Void = { _ in }
+    public var openCard: (String, UUID?) -> Void = { _, _ in }
     public var onStartEditing: () -> Void = { }
     public var onEndEditing: () -> Void = { }
     public var onStartQuery: (TextNode) -> Void = { _ in }
@@ -533,7 +552,7 @@ public extension CALayer {
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
     func pressEnter(_ option: Bool, _ command: Bool, _ shift: Bool) {
-        guard let node = focusedWidget as? ElementNode, !node.readOnly else { return }
+        guard let node = focusedWidget as? ElementNode else { return }
 
         if option || shift {
             rootNode.insertNewline()
@@ -548,7 +567,7 @@ public extension CALayer {
                 cmdManager.endGroup()
             }
 
-            guard let node = node as? TextNode else {
+            guard let node = node as? TextNode, (node as? BlockReferenceNode) == nil else {
                 rootNode.insertElementNearNonTextElement()
                 return
             }
@@ -557,7 +576,8 @@ public extension CALayer {
                 return
             }
 
-            let insertAsChild = node.parent as? BreadCrumb != nil
+            let insertAsChild = node.parent as? BreadCrumb != nil || node._displayedElement != nil
+
             if !rootNode.selectedTextRange.isEmpty {
                 rootNode.cmdManager.deleteText(in: node, for: rootNode.selectedTextRange)
             }
@@ -570,12 +590,16 @@ public extension CALayer {
 
             let newElement = BeamElement(str)
             if insertAsChild {
-                cmdManager.insertElement(newElement, in: node, after: nil)
+                if let parent = node._displayedElement {
+                    cmdManager.insertElement(newElement, inElement: parent, afterElement: nil)
+                } else {
+                    cmdManager.insertElement(newElement, inNode: node, afterElement: nil)
+                }
             } else {
                 guard let parent = node.parent as? ElementNode else { return }
                 let children = node.element.children
 
-                cmdManager.insertElement(newElement, in: parent, after: node)
+                cmdManager.insertElement(newElement, inNode: parent, afterNode: node)
                 guard let newElement = node.nodeFor(newElement)?.element else { return }
 
                 // reparent all children of node to newElement
@@ -696,7 +720,7 @@ public extension CALayer {
                         return
                     }
                 case "d":
-                    if command, shift {
+                    if control, shift {
                         dumpWidgetTree()
                         dumpLayers()
                         return
@@ -848,7 +872,7 @@ public extension CALayer {
 
     var lastInput: String = ""
 
-    // swiftlint:disable:next function_body_length
+    // swiftlint:disable:next function_body_length cyclomatic_complexity
     func preDetectInput(_ input: String) -> Bool {
         guard inputDetectorEnabled else { return true }
         guard let node = focusedWidget as? TextNode else { return true }
@@ -868,7 +892,7 @@ public extension CALayer {
                 let substr = node.text.extract(range: max(0, pos - 1) ..< pos)
                 let left = substr.text // capture the left of the cursor to check for an existing [
                 guard left == " " || pos == 0 else { return true }
-                self.showBidirectionalPopover(prefix: 1, suffix: 0)
+                self.showBidirectionalPopover(mode: .internalLink, prefix: 1, suffix: 0)
                 return true
             },
             "[": { [unowned self] in
@@ -889,14 +913,30 @@ public extension CALayer {
                         return false
                     } else {
                         node.text.insert("]", at: pos)
-                        self.showBidirectionalPopover(prefix: 2, suffix: 2)
+                        self.showBidirectionalPopover(mode: .internalLink, prefix: 2, suffix: 2)
                         return true
                     }
                 }
                 insertPair("[", "]")
                 return false
             },
-            "(": {
+            "(": { [unowned self] in
+                guard popover == nil else { return false }
+
+                let pos = self.selectedTextRange.isEmpty ? rootNode.cursorPosition : self.selectedTextRange.lowerBound
+                let substr = node.text.extract(range: max(0, pos - 1) ..< pos)
+                let left = substr.text // capture the left of the cursor to check for an existing [
+
+                if pos > 0 && left == "(" {
+                    let initialText = selectedText
+                    if !self.selectedTextRange.isEmpty {
+                        insertPair("(", ")")
+                    } else {
+                        node.text.insert(")", at: pos)
+                    }
+                    self.showBidirectionalPopover(mode: .blockReference, prefix: 2, suffix: 2, initialText: initialText)
+                    return true
+                }
                 insertPair("(", ")")
                 return false
             },
@@ -1190,7 +1230,7 @@ public extension CALayer {
             let titleCoord = cardTitleLayer.convert(event.locationInWindow, from: nil)
             if cardTitleLayer.contains(titleCoord) {
                 guard let cardNote = note as? BeamNote else { return }
-                self.openCard(cardNote.title)
+                self.openCard(cardNote.title, nil)
                 return
             }
         }
@@ -1248,7 +1288,7 @@ public extension CALayer {
         rootNode.note?.save(documentManager: documentManager)
     }
 
-    internal func showBidirectionalPopover(prefix: Int, suffix: Int) {
+    internal func showBidirectionalPopover(mode: PopoverMode, prefix: Int, suffix: Int, initialText: String? = nil) {
         // DispatchQueue to init the popover after the node is initialized
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
@@ -1257,7 +1297,7 @@ public extension CALayer {
             self.popoverPrefix = prefix
             self.popoverSuffix = suffix
             self.cursorStartPosition = self.rootNode.textIsSelected ? 0 : cursorPosition
-            self.initPopover()
+            self.initPopover(mode: mode, initialText: initialText)
             self.updatePopover()
             self.showOrHidePersistentFormatter(isPresent: false)
         }
@@ -1800,7 +1840,7 @@ public extension CALayer {
             // swiftlint:disable:next print
             let newElement = BeamElement()
             newElement.kind = .image(uid)
-            rootNode.cmdManager.insertElement(newElement, in: newParent, after: afterNode)
+            rootNode.cmdManager.insertElement(newElement, inNode: newParent, afterNode: afterNode)
             Logger.shared.logInfo("Added Image to note \(String(describing: rootNode.element.note)) with uid \(uid) from dropped file (\(image))", category: .noteEditor)
         }
 

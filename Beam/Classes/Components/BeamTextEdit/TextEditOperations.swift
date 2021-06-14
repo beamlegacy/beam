@@ -28,7 +28,7 @@ extension TextRoot {
     func increaseNodeIndentation(_ node: ElementNode) -> Bool {
         guard !node.readOnly,
               node.element.canIncreaseIndentation,
-              node.parent as? BreadCrumb == nil,
+              !(node.parent?.isTreeBoundary ?? false),
               let newParent = node.previousSibbling() as? ElementNode
         else { return false }
         return cmdManager.reparentElement(node, to: newParent, atIndex: newParent.element.children.count)
@@ -36,11 +36,11 @@ extension TextRoot {
 
     func decreaseNodeIndentation(_ node: ElementNode) -> Bool {
         guard !node.readOnly,
-              node.parent as? BreadCrumb == nil,
-              node.parent?.parent as? BreadCrumb == nil,
-              let prevParent = node.unproxyElement.parent,
+              !(node.parent?.isTreeBoundary ?? false),
+              !(node.parent?.parent?.isTreeBoundary ?? false),
+              let prevParent = node.displayedElement.parent,
               let newParent = prevParent.parent,
-              let parentIndexInParent = newParent.id == node.elementId ? node.unproxyElement.children.count : prevParent.indexInParent
+              let parentIndexInParent = newParent.id == node.elementId ? node.displayedElement.children.count : prevParent.indexInParent
         else { return false }
 
         return cmdManager.reparentElement(node.element, to: newParent, atIndex: parentIndexInParent + 1)
@@ -122,7 +122,7 @@ extension TextRoot {
         if createEmptyNodeInPlace || root.element.children.isEmpty {
             cmdManager.beginGroup(with: "Insert empty element")
             let newElement = BeamElement()
-            cmdManager.insertElement(newElement, in: firstParent, after: nil)
+            cmdManager.insertElement(newElement, inNode: firstParent, afterElement: nil)
             cmdManager.focus(newElement, in: firstParent)
             cmdManager.endGroup()
             if !editor.journalMode {
@@ -150,7 +150,7 @@ extension TextRoot {
         }
 
         guard let node = focusedWidget as? TextNode, !node.readOnly,
-              node.elementNoteTitle != nil else {
+              node.displayedElementNoteTitle != nil else {
             if let node = focusedWidget as? ElementNode {
                 cmdManager.beginGroup(with: "Delete forward")
                 if let nextVisibleNode = node.nextVisibleNode(ElementNode.self) {
@@ -194,7 +194,7 @@ extension TextRoot {
                 if let nextVisibleNode = node.nextVisibleNode(ElementNode.self) {
                     cmdManager.focusElement(nextVisibleNode, cursorPosition: 0)
                 }
-                cmdManager.deleteElement(for: node)
+                cmdManager.deleteElement(for: node.unproxyElement)
                 cmdManager.endGroup()
             }
             return
@@ -212,8 +212,8 @@ extension TextRoot {
                     let pos = prevVisibleNode.text.count
                     cmdManager.replaceText(in: prevVisibleNode, for: pos..<pos, with: node.text)
                     cmdManager.focusElement(prevVisibleNode, cursorPosition: pos)
-                    for (i, child) in node.unproxyElement.children.enumerated() {
-                        cmdManager.reparentElement(child, to: prevVisibleNode.unproxyElement, atIndex: i)
+                    for (i, child) in node.displayedElement.children.enumerated() {
+                        cmdManager.reparentElement(child, to: prevVisibleNode.displayedElement, atIndex: i)
                     }
                     cmdManager.deleteElement(for: node)
                 } else {

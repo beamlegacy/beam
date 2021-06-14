@@ -38,14 +38,6 @@ class ShortcutLayer: Layer {
         }
     }
 
-    override func set(_ contentsScale: CGFloat) {
-        self.layer.contentsScale = contentsScale
-        self.textLayer?.contentsScale = contentsScale
-        for icon in iconsLayer {
-            icon.contentsScale = contentsScale
-        }
-    }
-
     override func handleHover(_ value: Bool) {
         for iconLayer in iconsLayer {
             iconLayer.backgroundColor = value ? BeamColor.Editor.searchHover.cgColor : BeamColor.Editor.searchNormal.cgColor

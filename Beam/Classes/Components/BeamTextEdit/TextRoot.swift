@@ -35,7 +35,7 @@ public struct TextConfig {
 public class TextRoot: TextNode {
     @Published var textIsSelected = false
     static var showBrowsingSection = false
-    var note: BeamNote?
+    var note: BeamNote? { element as? BeamNote }
 
     var state = TextState()
 
@@ -61,7 +61,7 @@ public class TextRoot: TextNode {
     override var cursorPosition: Int {
         get {
             guard let n = focusedWidget as? TextNode else {
-                return 0
+                return caretIndex
             }
             return n.caretAtIndex(state.caretIndex).positionInSource
         }
@@ -94,7 +94,9 @@ public class TextRoot: TextNode {
                 self.editor.setHotSpotToCursorPosition()
             }
         }
-
+        if let focused = focusedWidget as? ElementNode {
+            focused.updateCursor()
+        }
     }
     override var caretIndex: Int {
         get {
@@ -166,11 +168,9 @@ public class TextRoot: TextNode {
         editor.invalidate()
     }
 
-    override init(editor: BeamTextEdit, element: BeamElement) {
-        self.note = element as? BeamNote
-        super.init(editor: editor, element: element)
+    init(editor: BeamTextEdit, element: BeamElement) {
+        super.init(editor: editor, element: element, nodeProvider: NodeProviderImpl(proxy: false))
 
-        mapping[element] = WeakReference(self)
         if let note = note {
             if !editor.journalMode {
                 topSpacerWidget = SpacerWidget(parent: self, spacerType: .top)
@@ -261,73 +261,6 @@ public class TextRoot: TextNode {
         return NSRect(origin: CGPoint(), size: editor.frame.size)
     }
 
-    // Mapping of elements to nodes and breadcrumbs:
-    override func nodeFor(_ element: BeamElement) -> ElementNode? {
-        return mapping[element]?.ref
-    }
-
-    override func nodeFor(_ element: BeamElement, withParent: Widget) -> ElementNode {
-        if let node = mapping[element]?.ref {
-            return node
-        }
-
-        let node: ElementNode = {
-            guard let note = element as? BeamNote else {
-                guard element.note == nil || element.note == self.note else {
-                    return ProxyTextNode(parent: withParent, element: element)
-                }
-
-                switch element.kind {
-                case .image:
-                    return ImageNode(parent: withParent, element: element)
-                case .embed:
-                    return EmbedNode(parent: withParent, element: element)
-                default:
-                    return TextNode(parent: withParent, element: element)
-                }
-            }
-            return TextRoot(editor: editor, element: note)
-        }()
-
-        accessingMapping = true
-        mapping[element] = WeakReference(node)
-        accessingMapping = false
-        purgeDeadNodes()
-
-        if let w = editor.window {
-            node.contentsScale = w.backingScaleFactor
-        }
-
-        editor.addToMainLayer(node.layer)
-
-        return node
-    }
-
-    override func clearMapping() {
-        mapping.removeAll()
-        super.clearMapping()
-    }
-
-    private var accessingMapping = false
-    private var mapping: [BeamElement: WeakReference<ElementNode>] = [:]
-    private var deadNodes: [ElementNode] = []
-
-    func purgeDeadNodes() {
-        guard !accessingMapping else { return }
-        for dead in deadNodes {
-            removeNode(dead)
-        }
-        deadNodes.removeAll()
-    }
-
-    override func removeNode(_ node: ElementNode) {
-        guard !accessingMapping else {
-            deadNodes.append(node)
-            return
-        }
-        mapping.removeValue(forKey: node.element)
-    }
-
     private var breadCrumbs: [BeamNoteReference: BreadCrumb] = [:]
     func getBreadCrumb(for noteReference: BeamNoteReference) -> BreadCrumb? {
         guard let breadCrumb = breadCrumbs[noteReference] else {
@@ -339,6 +272,8 @@ public class TextRoot: TextNode {
         }
         return breadCrumb
     }
+
+    override var isTreeBoundary: Bool { false }
 
     override var cmdManager: CommandManager<Widget> {
         guard let note = note else { fatalError("Trying to access the command manager on an unconnected TextRoot is a programming error.") }
@@ -356,7 +291,7 @@ public class TextRoot: TextNode {
         let newElement = BeamElement(string)
         let parent = node.parent as? ElementNode ?? node
         let previous = node.previousSibbling() as? ElementNode
-        cmdManager.insertElement(newElement, in: parent, after: caretIndex == 0 ? previous : node)
+        cmdManager.insertElement(newElement, inElement: parent.unproxyElement, afterElement: (caretIndex == 0 ? previous : node)?.unproxyElement)
         cmdManager.focus(newElement, in: node)
     }
 }

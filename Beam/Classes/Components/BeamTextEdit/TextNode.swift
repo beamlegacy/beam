@@ -24,16 +24,12 @@ public class TextNode: ElementNode {
     override var indent: CGFloat { selfVisible ? 18 : 0 }
     var fontSize: CGFloat = 15
 
+    static let cmdEnterLayer = "CmdEnterLayer"
+
     override var parent: Widget? {
         didSet {
             guard parent != nil else { return }
-            updateTextChildren(elements: element.children)
-        }
-    }
-    override var contentsScale: CGFloat {
-        didSet {
-            guard let actionLayer = layers["CmdEnterLayer"] as? ShortcutLayer else { return }
-            actionLayer.set(contentsScale)
+            updateTextChildren(elements: displayedElement.children)
         }
     }
 
@@ -57,14 +53,14 @@ public class TextNode: ElementNode {
     }
 
     var text: BeamText {
-        get { element.text }
+        get { displayedElement.text }
         set {
-            guard element.text != newValue else { return }
+            guard displayedElement.text != newValue else { return }
 
             if newValue.isEmpty { updateActionLayerVisibility(hidden: true) }
 
-            element.text = newValue
-            element.note?.modifiedByUser()
+            displayedElement.text = newValue
+            displayedElement.note?.modifiedByUser()
             invalidateText()
         }
     }
@@ -136,7 +132,7 @@ public class TextNode: ElementNode {
     private var icon = NSImage(named: "editor-cmdreturn")
 
     private let debounceClickInterval = 0.23
-    private var actionLayerPadding = CGFloat(3.5)
+    var actionLayerPadding = CGFloat(3.5)
 
     public static func == (lhs: TextNode, rhs: TextNode) -> Bool {
         return lhs === rhs
@@ -154,24 +150,20 @@ public class TextNode: ElementNode {
 
     // MARK: - Initializer
 
-    override init(parent: Widget, element: BeamElement) {
-        super.init(parent: parent, element: element)
-
-        createActionLayer()
+    override init(parent: Widget, element: BeamElement, nodeProvider: NodeProvider? = nil) {
+        super.init(parent: parent, element: element, nodeProvider: nodeProvider)
 
         setAccessibilityLabel("TextNode")
         setAccessibilityRole(.textArea)
     }
 
-    override init(editor: BeamTextEdit, element: BeamElement) {
-        super.init(editor: editor, element: element)
+    override init(editor: BeamTextEdit, element: BeamElement, nodeProvider: NodeProvider? = nil) {
+        super.init(editor: editor, element: element, nodeProvider: nodeProvider)
 
-        element.$children
+        displayedElement.$children
             .sink { [unowned self] elements in
                 updateTextChildren(elements: elements)
             }.store(in: &scope)
-
-        createActionLayer()
 
         setAccessibilityLabel("TextNode")
         setAccessibilityRole(.textArea)
@@ -245,18 +237,22 @@ public class TextNode: ElementNode {
         }
     }
 
+    var textPaddingHorizontal = CGFloat(0)
+    var textPaddingVertical = CGFloat(0)
+
     func updateTextFrame() {
         if selfVisible {
             emptyTextFrame = nil
             let attrStr = attributedString
-            let textFrame = TextFrame.create(string: attrStr, atPosition: NSPoint(x: indent, y: 0), textWidth: availableWidth - childInset)
+            let textFrame = TextFrame.create(string: attrStr, atPosition: NSPoint(x: indent + textPaddingHorizontal, y: textPaddingVertical), textWidth: availableWidth - indent - textPaddingHorizontal * 3)
             self.textFrame = textFrame
-            let textLayer = Layer(name: "text", layer: textFrame.layerTree)
+            let layerTree = textFrame.layerTree
+            let textLayer = Layer(name: "text", layer: layerTree)
             addLayer(textLayer)
 
             if attrStr.string.isEmpty {
                 let dummyText = buildAttributedString(for: BeamText(text: "Dummy!"))
-                let fakelayout = TextFrame.create(string: dummyText, atPosition: NSPoint(x: indent, y: 0), textWidth: availableWidth - childInset)
+                let fakelayout = TextFrame.create(string: dummyText, atPosition: NSPoint(x: indent, y: 0), textWidth: availableWidth - indent)
 
                 self.emptyTextFrame = fakelayout
             }
@@ -315,29 +311,7 @@ public class TextNode: ElementNode {
         }
     }
 
-    var _cursorLayer: ShapeLayer?
-    var cursorLayer: ShapeLayer {
-        if let layer = _cursorLayer {
-            return layer
-        }
-
-        let layer = ShapeLayer(name: "cursor")
-        layer.layer.actions = [
-            kCAOnOrderIn: NSNull(),
-            kCAOnOrderOut: NSNull(),
-            "sublayers": NSNull(),
-            "contents": NSNull(),
-            "bounds": NSNull()
-        ]
-
-        layer.layer.zPosition = 1
-        layer.layer.position = CGPoint(x: indent, y: 0)
-        _cursorLayer = layer
-        addLayer(layer)
-        return layer
-    }
-
-    public func updateCursor() {
+    public override func updateCursor() {
         let on = !readOnly && editor.hasFocus && isFocused && editor.blinkPhase && (root?.state.nodeSelection?.nodes.isEmpty ?? true)
         let cursorRect = rectAt(caretIndex: caretIndex)
         let layer = self.cursorLayer
@@ -375,7 +349,7 @@ public class TextNode: ElementNode {
             contentsFrame = NSRect()
 
             if selfVisible {
-                contentsFrame = textRect
+                contentsFrame = textRect.insetBy(dx: -textPaddingHorizontal, dy: -textPaddingVertical)
 
                 if self as? TextRoot == nil {
                     switch elementKind {
@@ -404,17 +378,23 @@ public class TextNode: ElementNode {
         }
     }
 
-    func createActionLayer() {
-        guard element as? ProxyElement == nil else { return }
-        let actionLayer = ShortcutLayer(name: "CmdEnterLayer", text: "Search", icons: ["editor-cmdreturn"]) { [unowned self] _ in
+    var useActionLayer = true
+    func createActionLayerIfNeeded() -> Layer? {
+        guard element as? ProxyElement == nil, useActionLayer else { return nil }
+        if let actionLayer = layers[Self.cmdEnterLayer] {
+            return actionLayer
+        }
+
+        let actionLayer = ShortcutLayer(name: Self.cmdEnterLayer, text: "Search", icons: ["editor-cmdreturn"]) { [unowned self] _ in
             self.editor.onStartQuery(self)
         }
         actionLayer.layer.isHidden = true
         addLayer(actionLayer, origin: CGPoint(x: availableWidth + childInset + actionLayerPadding, y: firstLineBaseline), global: false)
+        return actionLayer
     }
 
     func updateActionLayer(animate: Bool) {
-        guard let actionLayer = layers["CmdEnterLayer"] else { return }
+        guard let actionLayer = createActionLayerIfNeeded() else { return }
         let actionLayerYPosition = isHeader ? (contentsFrame.height / 2) - actionLayer.frame.height : 0
         if animate {
             actionLayer.frame = CGRect(x: availableWidth + childInset + actionLayerPadding, y: actionLayerYPosition, width: actionLayer.frame.width, height: actionLayer.frame.height)
@@ -425,28 +405,15 @@ public class TextNode: ElementNode {
         }
     }
 
+    func createCustomActionLayer(named: String, icons: [String] = [], text: String, at: CGPoint, action: @escaping () -> Void = {}) -> Layer {
+        let layer = ShortcutLayer(name: named, text: text, icons: icons) { _ in
+            action()
+        }
+        addLayer(layer, origin: at, global: false)
+        return layer
+    }
+
     // MARK: - Methods TextNode
-
-    override func delete() {
-        guard let parent = parent as? TextNode else { return }
-        parent.element.removeChild(element)
-    }
-
-    override func insert(node: Widget, after existingNode: Widget) -> Bool {
-        guard let node = node as? TextNode, let existingNode = existingNode as? TextNode else { fatalError () }
-        element.insert(node.element, after: existingNode.element)
-        invalidateLayout()
-        return true
-    }
-
-    @discardableResult
-    override func insert(node: Widget, at pos: Int) -> Bool {
-        guard let node = node as? TextNode else { fatalError () }
-        element.insert(node.element, at: pos)
-        invalidateLayout()
-        return true
-    }
-
     func sourceIndexFor(displayIndex: Int) -> Int {
         return displayIndex
     }
@@ -487,7 +454,6 @@ public class TextNode: ElementNode {
 
     override func onFocus() {
         super.onFocus()
-        updateCursor()
         if editor.hasFocus {
             updateActionLayerVisibility(hidden: text.isEmpty)
         }
@@ -495,12 +461,11 @@ public class TextNode: ElementNode {
 
     override func onUnfocus() {
         super.onUnfocus()
-        updateCursor()
         updateActionLayerVisibility(hidden: true)
     }
 
     func updateActionLayerVisibility(hidden: Bool) {
-        guard let actionLayer = layers["CmdEnterLayer"] else { return }
+        guard let actionLayer = createActionLayerIfNeeded() else { return }
         actionLayer.layer.isHidden = hidden
     }
 
@@ -528,7 +493,7 @@ public class TextNode: ElementNode {
 
             if let link = internalLinkAt(point: mouseInfo.position) {
                 editor.cancelInternalLink()
-                editor.openCard(link)
+                editor.openCard(link, nil)
                 return true
             }
 
@@ -689,6 +654,7 @@ public class TextNode: ElementNode {
 
     public func lineAt(point: NSPoint) -> Int {
         guard let textFrame = textFrame, !textFrame.lines.isEmpty else { return 0 }
+        let point = CGPoint(x: point.x - textPaddingHorizontal, y: point.y - textPaddingVertical)
         let y = point.y
         if y >= contentsFrame.height {
             let v = textFrame.lines.count - 1
@@ -721,7 +687,7 @@ public class TextNode: ElementNode {
         return text.position(at: index)
     }
 
-    public func position(after index: Int, avoidUneditableRange: Bool = false) -> Int {
+    public override func position(after index: Int, avoidUneditableRange: Bool = false) -> Int {
         guard let textFrame = textFrame else { return 0 }
         var newIndex = textFrame.position(after: index)
         if avoidUneditableRange,
@@ -731,7 +697,7 @@ public class TextNode: ElementNode {
         return newIndex
     }
 
-    public func position(before index: Int, avoidUneditableRange: Bool = false) -> Int {
+    public override func position(before index: Int, avoidUneditableRange: Bool = false) -> Int {
         guard let textFrame = textFrame else { return 0 }
         var newIndex = textFrame.position(before: index)
         if avoidUneditableRange,
@@ -779,6 +745,7 @@ public class TextNode: ElementNode {
     public func indexAt(point: NSPoint, limitToTextString: Bool = true) -> Int? {
         guard let textFrame = textFrame else { return nil }
         guard !textFrame.lines.isEmpty else { return nil }
+        let point = CGPoint(x: point.x - textPaddingHorizontal, y: point.y - textPaddingVertical)
         let line = lineAt(point: point)
         guard line >= 0 else { return nil }
         let l = textFrame.lines[line]
@@ -792,21 +759,21 @@ public class TextNode: ElementNode {
     }
 
     public func offsetAt(caretIndex: Int) -> CGFloat {
-        guard let textFrame = emptyTextFrame ?? self.textFrame else { return 0 }
+        guard let textFrame = emptyTextFrame ?? self.textFrame else { return textPaddingHorizontal }
         guard !textFrame.lines.isEmpty else { return 0 }
         let caret = textFrame.carets[caretIndex]
-        return caret.offset.x
+        return caret.offset.x + textPaddingHorizontal
     }
 
     override public func offsetAt(index: Int) -> CGFloat {
-        guard let textFrame = emptyTextFrame ?? self.textFrame else { return 0 }
-        guard !textFrame.lines.isEmpty else { return 0 }
+        guard let textFrame = emptyTextFrame ?? self.textFrame else { return textPaddingHorizontal }
+        guard !textFrame.lines.isEmpty else { return textPaddingHorizontal }
         let displayIndex = displayIndexFor(sourceIndex: index)
-        guard let line = lineAt(index: displayIndex) else { return 0 }
+        guard let line = lineAt(index: displayIndex) else { return textPaddingHorizontal }
         let textLine = textFrame.lines[line]
         let positionInLine = displayIndex
         let result = textLine.offsetFor(index: positionInLine)
-        return CGFloat(result)
+        return CGFloat(result) + textPaddingHorizontal
     }
 
     public func offsetAndFrameAt(index: Int) -> (CGFloat, NSRect) {
@@ -836,7 +803,7 @@ public class TextNode: ElementNode {
         return (caret.offset.x, textLine.frame)
     }
 
-    public func positionAbove(_ position: Int) -> Int {
+    override public func positionAbove(_ position: Int) -> Int {
         guard let textFrame = textFrame else { return 0 }
         guard let l = lineAt(index: position), l > 0 else { return 0 }
         let offset = offsetAt(index: position)
@@ -844,7 +811,7 @@ public class TextNode: ElementNode {
         return sourceIndexFor(displayIndex: indexAbove)
     }
 
-    public func positionBelow(_ position: Int) -> Int {
+    override public func positionBelow(_ position: Int) -> Int {
         guard let textFrame = textFrame else { return 0 }
         guard let l = lineAt(index: position), l < textFrame.lines.count - 1 else { return text.count }
         let offset = offsetAt(index: position)
@@ -898,7 +865,7 @@ public class TextNode: ElementNode {
         }()
 
         let x1 = caret.offset.x
-        let cursorRect = NSRect(x: x1, y: textLine.frame.minY, width: position == text.count ? bigCursorWidth : smallCursorWidth, height: textLine.bounds.height)
+        let cursorRect = NSRect(x: x1 + textPaddingHorizontal, y: textLine.frame.minY + textPaddingVertical, width: position == text.count ? bigCursorWidth : smallCursorWidth, height: textLine.bounds.height)
 
         return cursorRect
     }
@@ -1303,7 +1270,7 @@ public class TextNode: ElementNode {
     }
 
     override public var textCount: Int {
-        element.text.count
+        displayedElement.text.count
     }
 
 }

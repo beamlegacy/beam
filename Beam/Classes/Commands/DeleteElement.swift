@@ -53,8 +53,15 @@ class DeleteElement: TextEditorCommand {
 extension CommandManager where Context == Widget {
     @discardableResult
     func deleteElement(for node: ElementNode) -> Bool {
-        guard let title = node.elementNoteTitle else { return false }
-        let cmd = DeleteElement(elementId: node.elementId, of: title)
+        guard let title = node.displayedElementNoteTitle else { return false }
+        let cmd = DeleteElement(elementId: node.displayedElementId, of: title)
         return run(command: cmd, on: node)
+    }
+
+    @discardableResult
+    func deleteElement(for element: BeamElement, context: Widget? = nil) -> Bool {
+        guard let title = element.note?.title else { return false }
+        let cmd = DeleteElement(elementId: element.id, of: title)
+        return run(command: cmd, on: context)
     }
 }

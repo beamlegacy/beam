@@ -40,7 +40,7 @@ extension BeamTextEdit {
             return
         }
 
-        showBidirectionalPopover(prefix: 0, suffix: 0)
+        showBidirectionalPopover(mode: .internalLink, prefix: 0, suffix: 0)
 
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }

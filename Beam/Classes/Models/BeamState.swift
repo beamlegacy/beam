@@ -24,6 +24,8 @@ import BeamCore
             focusOmniBox = false
         }
     }
+    @Published var scrollToElementId: UUID?
+
     private(set) lazy var recentsManager: RecentsManager = {
         return RecentsManager(with: data.documentManager)
     }()
@@ -139,19 +141,20 @@ import BeamCore
         }
     }
 
-    @discardableResult func navigateToNote(named: String) -> Bool {
+    @discardableResult func navigateToNote(named: String, elementId: UUID? = nil) -> Bool {
         //Logger.shared.logDebug("load note named \(named)")
         let note = BeamNote.fetchOrCreate(data.documentManager, title: named)
-        return navigateToNote(note)
+        return navigateToNote(note, elementId: elementId)
     }
 
-    @discardableResult func navigateToNote(_ note: BeamNote) -> Bool {
+    @discardableResult func navigateToNote(_ note: BeamNote, elementId: UUID? = nil) -> Bool {
         mode = .note
 
         guard note != currentNote else { return true }
 
         currentPage = nil
         currentNote = note
+        scrollToElementId = elementId
         autocompleteManager.resetQuery()
         autocompleteManager.autocompleteSelectedIndex = nil
 

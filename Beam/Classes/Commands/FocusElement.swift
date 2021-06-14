@@ -68,8 +68,8 @@ class FocusElement: TextEditorCommand {
 extension CommandManager where Context == Widget {
     @discardableResult
     func focusElement(_ node: ElementNode, cursorPosition: Int) -> Bool {
-        guard let title = node.elementNoteTitle else { return false }
-        let cmd = FocusElement(element: node.elementId, from: title, at: cursorPosition)
+        guard let title = node.displayedElementNoteTitle else { return false }
+        let cmd = FocusElement(element: node.displayedElementId, from: title, at: cursorPosition)
         return run(command: cmd, on: node)
     }
 

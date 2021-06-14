@@ -20,6 +20,7 @@ public enum ElementKind: Codable, Equatable {
     case code
     case image(String)
     case embed(String)
+    case blockReference(String, String)
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -42,6 +43,8 @@ public enum ElementKind: Codable, Equatable {
             return "image '\(source)'"
         case .embed(let source):
             return "embed '\(source)'"
+        case .blockReference(let note, let elementId):
+            return "blockReference '\(note).\(elementId)'"
         }
     }
 
@@ -66,6 +69,8 @@ public enum ElementKind: Codable, Equatable {
 
         case "embed":
             self = .embed(try container.decode(String.self, forKey: .source))
+        case "blockReference":
+            self = .blockReference(try container.decode(String.self, forKey: .title), try container.decode(String.self, forKey: .source))
         default:
             throw ElementKindError.typeNameUnknown(typeName)
         }
@@ -92,6 +97,10 @@ public enum ElementKind: Codable, Equatable {
             try container.encode(source, forKey: .source)
         case let .embed(source):
             try container.encode("embed", forKey: .type)
+            try container.encode(source, forKey: .source)
+        case let .blockReference(title, source):
+            try container.encode("blockReference", forKey: .type)
+            try container.encode(title, forKey: .title)
             try container.encode(source, forKey: .source)
         }
     }

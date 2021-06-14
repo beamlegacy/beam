@@ -81,8 +81,8 @@ class DeleteText: TextEditorCommand {
 extension CommandManager where Context == Widget {
     @discardableResult
     func deleteText(in node: TextNode, for range: Range<Int>) -> Bool {
-        guard let title = node.elementNoteTitle else { return false }
-        let cmd = DeleteText(in: node.elementId, of: title, for: range)
+        guard let title = node.displayedElementNoteTitle else { return false }
+        let cmd = DeleteText(in: node.displayedElementId, of: title, for: range)
         return run(command: cmd, on: node)
     }
 }

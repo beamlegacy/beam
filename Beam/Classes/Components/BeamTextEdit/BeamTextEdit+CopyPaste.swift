@@ -48,7 +48,7 @@ extension BeamTextEdit {
             }
             if insertEmptyNode {
                 let newElement = BeamElement()
-                cmdManager.insertElement(newElement, in: rootNode, after: nil)
+                cmdManager.insertElement(newElement, inNode: rootNode, afterElement: nil)
             }
             cmdManager.endGroup()
         } else {
@@ -150,14 +150,14 @@ extension BeamTextEdit {
                     cmdManager.focusElement(node, cursorPosition: node.elementText.count)
                     for child in newElement.children {
                         guard let focusNode = focusedWidget as? TextNode else { continue }
-                        cmdManager.insertElement(child, in: node, after: focusNode)
+                        cmdManager.insertElement(child, inNode: node, afterNode: focusNode)
                         cmdManager.focus(child, in: focusNode)
                         if let deepestChild = child.deepestChildren() {
                             cmdManager.focus(deepestChild, in: focusNode)
                         }
                     }
                 } else {
-                    cmdManager.insertElement(newElement, in: parent, after: node)
+                    cmdManager.insertElement(newElement, inNode: parent, afterNode: node)
                     cmdManager.focus(newElement, in: node)
                 }
             }
@@ -181,7 +181,7 @@ extension BeamTextEdit {
                 enableInputDetector()
             } else {
                 let element = BeamElement(beamText)
-                cmdManager.insertElement(element, in: parent, after: lastInserted)
+                cmdManager.insertElement(element, inNode: parent, afterNode: lastInserted)
                 cmdManager.focus(element, in: node)
                 lastInserted = focusedWidget as? ElementNode
             }

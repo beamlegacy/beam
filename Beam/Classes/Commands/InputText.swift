@@ -50,8 +50,8 @@ class InputText: TextEditorCommand {
 extension CommandManager where Context == Widget {
     @discardableResult
     func inputText(_ text: BeamText, in node: TextNode, at position: Int) -> Bool {
-        guard let title = node.elementNoteTitle else { return false }
-        let cmd = InputText(text: text, in: node.elementId, of: title, at: position)
+        guard let title = node.displayedElementNoteTitle else { return false }
+        let cmd = InputText(text: text, in: node.displayedElementId, of: title, at: position)
         return run(command: cmd, on: node)
     }
 }

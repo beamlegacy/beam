@@ -33,13 +33,6 @@ class LinksSection: Widget {
         }
     }
 
-    override var contentsScale: CGFloat {
-        didSet {
-            sectionTitleLayer.contentsScale = contentsScale
-            linkActionLayer.contentsScale = contentsScale
-        }
-    }
-
     init(parent: Widget, note: BeamNote, mode: Mode) {
         self.note = note
         self.mode = mode

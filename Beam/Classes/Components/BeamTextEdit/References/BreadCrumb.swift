@@ -33,9 +33,6 @@ class BreadCrumb: Widget {
         didSet {
             linkLayer.contentsScale = contentsScale
             containerLayer.contentsScale = contentsScale
-            if let actionLinkLayer = layers["actionLinkLayer"] as? LinkButtonLayer {
-                actionLinkLayer.set(contentsScale)
-            }
         }
     }
 
@@ -56,8 +53,7 @@ class BreadCrumb: Widget {
 
     init(parent: Widget, element: BeamElement) {
         self.proxy = ProxyElement(for: element)
-        super.init(parent: parent)
-        proxies[element] = WeakReference(proxy)
+        super.init(parent: parent, nodeProvider: NodeProviderImpl(proxy: true))
 
         self.crumbChain = computeCrumbChain(from: element)
 
@@ -316,76 +312,5 @@ class BreadCrumb: Widget {
 
     var isReference: Bool {
         !isLink
-    }
-
-    private var proxies: [BeamElement: WeakReference<ProxyElement>] = [:]
-    override func proxyFor(_ element: BeamElement) -> ProxyElement? {
-        assert(element as? ProxyElement == nil) // Don't create a proxy to a proxy
-
-        if let proxy = proxies[element]?.ref {
-            return proxy
-        }
-        let proxy = ProxyElement(for: element)
-        proxies[element] = WeakReference(proxy)
-        return proxy
-    }
-
-    override func nodeFor(_ element: BeamElement) -> ElementNode? {
-        return mapping[element]?.ref
-    }
-
-    override func nodeFor(_ element: BeamElement, withParent: Widget) -> ElementNode {
-        if let node = mapping[element]?.ref {
-            return node
-        }
-
-        // BreadCrumbs can't create TextNodes, only ProxyTextNodes
-        let node: ElementNode = {
-            guard let note = element as? BeamNote else {
-                switch element.kind {
-                case .image:
-                    return ProxyImageNode(parent: withParent, element: element)
-                case .embed:
-                    return ProxyEmbedNode(parent: withParent, element: element)
-                default:
-                    return ProxyTextNode(parent: withParent, element: element)
-                }
-            }
-            return TextRoot(editor: editor, element: note)
-        }()
-
-        accessingMapping = true
-        mapping[element] = WeakReference(node)
-        accessingMapping = false
-        purgeDeadNodes()
-
-        node.contentsScale = contentsScale
-
-        return node
-    }
-
-    override func clearMapping() {
-        mapping.removeAll()
-        super.clearMapping()
-    }
-
-    private var accessingMapping = false
-    private var mapping: [BeamElement: WeakReference<ElementNode>] = [:]
-    private var deadNodes: [ElementNode] = []
-
-    func purgeDeadNodes() {
-        guard !accessingMapping else { return }
-        for dead in deadNodes {
-            removeNode(dead)
-        }
-        deadNodes.removeAll()
-    }
-
-    override func removeNode(_ node: ElementNode) {
-        guard !accessingMapping else {
-            deadNodes.append(node)
-            return
-        }
-        mapping.removeValue(forKey: node.element)
     }
 }

@@ -207,7 +207,7 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
         let shouldDeleteEntireNode = node.text.wholeRange == range && node.children.count == 0
         let cmdManager = rootNode.note?.cmdManager
         cmdManager?.beginGroup(with: "Replace Link by Embed")
-        cmdManager?.insertElement(embedElement, in: parent, after: node)
+        cmdManager?.insertElement(embedElement, inNode: parent, afterNode: node)
         if shouldDeleteEntireNode {
             cmdManager?.deleteElement(for: node)
         } else {
@@ -217,7 +217,7 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
     }
 
     private func updateLink(in node: TextNode, at range: Range<Int>, newTitle: String?, newUrl: String?, originalUrl: String?) {
-        guard let noteTitle = node.elementNoteTitle else {
+        guard let noteTitle = node.displayedElementNoteTitle else {
             return
         }
         var attributes = rootNode.state.attributes

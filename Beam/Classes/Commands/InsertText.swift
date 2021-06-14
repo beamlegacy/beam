@@ -75,8 +75,8 @@ class InsertText: TextEditorCommand {
 extension CommandManager where Context == Widget {
     @discardableResult
     func insertText(_ text: BeamText, in node: TextNode, at cursorPosition: Int) -> Bool {
-        guard let title = node.elementNoteTitle else { return false }
-        let cmd = InsertText(text: text, in: node.elementId, of: title, at: cursorPosition)
+        guard let title = node.displayedElementNoteTitle else { return false }
+        let cmd = InsertText(text: text, in: node.displayedElementId, of: title, at: cursorPosition)
         return run(command: cmd, on: node)
     }
 }

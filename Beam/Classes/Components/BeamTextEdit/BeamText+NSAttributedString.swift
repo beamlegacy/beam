@@ -100,7 +100,7 @@ extension BeamText {
             break
         case .heading:
             font = BeamFont.medium(size: fontSize).nsFont
-        case .image, .embed:
+        case .image, .embed, .blockReference:
             break
         }
 

@@ -12,7 +12,7 @@ import AppKit
 class ImageNode: ElementNode {
     var imageSize = CGSize.zero
 
-    override init(parent: Widget, element: BeamElement) {
+    init(parent: Widget, element: BeamElement) {
         super.init(parent: parent, element: element)
 
         setupImage()
@@ -21,7 +21,7 @@ class ImageNode: ElementNode {
         setAccessibilityRole(.textArea)
     }
 
-    override init(editor: BeamTextEdit, element: BeamElement) {
+    init(editor: BeamTextEdit, element: BeamElement) {
         super.init(editor: editor, element: element)
 
         setupImage()
