@@ -14,7 +14,6 @@ import Preferences
 import PromiseKit
 import PMKFoundation
 import BeamCore
-import OAuthSwift
 
 @objc(BeamApplication)
 public class BeamApplication: SentryCrashExceptionApplication {
@@ -84,24 +83,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         #endif
 
         syncData()
-
-        // For oauth and external Safari
-        NSAppleEventManager.shared().setEventHandler(self,
-                                                     andSelector: #selector(AppDelegate.handleGetURL(event:withReplyEvent:)),
-                                                     forEventClass: AEEventClass(kInternetEventClass),
-                                                     andEventID: AEEventID(kAEGetURL))
-    }
-
-    @objc func handleGetURL(event: NSAppleEventDescriptor!, withReplyEvent: NSAppleEventDescriptor!) {
-
-        guard let urlString = event.paramDescriptor(forKeyword: AEKeyword(keyDirectObject))?.stringValue,
-              let url = URL(string: urlString) else { return }
-
-        if urlString.mayBeWebURL {
-            _ = window.state.createTab(withURL: url, originalQuery: nil)
-        } else {
-            OAuthSwift.handle(url: url)
-        }
     }
 
     // MARK: -
@@ -199,11 +180,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationWillFinishLaunching(_ notification: Notification) {
+        // Register for URL opening event
         NSAppleEventManager
             .shared()
             .setEventHandler(
                 self,
-                andSelector: #selector(handleURL(event:reply:)),
+                andSelector: #selector(handleURLEvent(event:reply:)),
                 forEventClass: AEEventClass(kInternetEventClass),
                 andEventID: AEEventID(kAEGetURL)
             )
@@ -216,12 +198,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         // Get URL components from the incoming user activity.
         guard userActivity.activityType == NSUserActivityTypeBrowsingWeb,
-            let incomingURL = userActivity.webpageURL,
-            let components = NSURLComponents(url: incomingURL, resolvingAgainstBaseURL: true) else {
+            let incomingURL = userActivity.webpageURL else {
             return false
         }
 
-        return parseHTTPScheme(components: components)
+        return handleURL(incomingURL)
     }
 
     var consoleWindow: ConsoleWindow?
