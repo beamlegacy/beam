@@ -89,8 +89,13 @@ class WebNoteController: Encodable, Decodable {
         self.note = note
         self.rootElement = rootElement ?? note
         if let elem = element {
-            // re-parent the element that has already been created
-            self.rootElement.addChild(elem)
+            if elem.children.count == 0 {
+                // re-parent the element that has already been created
+                // only if it's a single collected link
+                self.rootElement.addChild(elem)
+            } else {
+                clearCurrent()
+            }
         }
         addBrowsingTree(browsingTree)
         return element != nil
