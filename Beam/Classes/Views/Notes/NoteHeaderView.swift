@@ -19,8 +19,7 @@ struct NoteHeaderView: View {
     }
     private static var dateFormatter: DateFormatter = {
         let fmt = DateFormatter()
-        fmt.dateStyle = .medium
-        fmt.timeStyle = .none
+        fmt.dateFormat = "MMMM dd, yyyy"
         return fmt
     }()
 
