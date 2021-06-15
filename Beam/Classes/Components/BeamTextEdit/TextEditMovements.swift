@@ -225,7 +225,6 @@ extension TextRoot {
             selection.start = parent
             selection.end = parent.deepestElementNodeChild()
         } else if let parent = root, !selection.isSelectingProxy {
-            selection.append(parent)
             selection.appendChildren(of: parent)
             selection.start = parent
             selection.end = parent.deepestElementNodeChild()
