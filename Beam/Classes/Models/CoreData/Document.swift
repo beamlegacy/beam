@@ -294,11 +294,11 @@ class Document: NSManagedObject, BeamCoreDataObject {
     }
 
     class func fetchWithTitle(_ context: NSManagedObjectContext, _ title: String) throws -> Document? {
-        try fetchFirst(context, NSPredicate(format: "title LIKE[cd] %@", title as CVarArg))
+        try fetchFirst(context, NSPredicate(format: "title ==[cd] %@", title as CVarArg))
     }
 
     class func fetchOrCreateWithTitle(_ context: NSManagedObjectContext, _ title: String) -> Document {
-        (try? fetchFirst(context, NSPredicate(format: "title LIKE[cd] %@", title as CVarArg)))
+        (try? fetchFirst(context, NSPredicate(format: "title ==[cd] %@", title as CVarArg)))
             ?? create(context, title: title)
     }
 
