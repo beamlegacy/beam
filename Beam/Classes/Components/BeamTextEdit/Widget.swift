@@ -1002,5 +1002,19 @@ extension Widget {
 
     }
 }
+
+extension Widget {
+    func hightlight() {
+        let animation = CAKeyframeAnimation(keyPath: "backgroundColor")
+        let sanskrit = BeamColor.Sanskrit.nsColor
+        let colr = sanskrit.withAlphaComponent(0.14).cgColor
+        animation.values = [colr,
+                            colr,
+                            sanskrit.withAlphaComponent(0).cgColor]
+        animation.keyTimes = [0, 0.66, 1]
+        animation.duration = 3
+        layer.add(animation, forKey: "backgroundColor")
+    }
+}
 // swiftlint:enable type_body_length
 // swiftlint:enable file_length
