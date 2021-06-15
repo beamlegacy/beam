@@ -13,7 +13,8 @@ extension TextRoot {
         guard let node = focusedWidget as? ElementNode else { return }
         if selectedTextRange.isEmpty {
             if cursorPosition == 0 {
-                if let next = node.previousVisibleNode(ElementNode.self) {
+                if let next = node.previousVisibleNode(ElementNode.self),
+                   canMove(from: node, to: next) {
                     node.invalidateText()
                     next.focus(position: next.textCount)
                 } else {
@@ -32,7 +33,8 @@ extension TextRoot {
         guard let node = focusedWidget as? ElementNode else { return }
         if selectedTextRange.isEmpty {
             if cursorPosition == node.textCount {
-                if let next = node.nextVisibleNode(ElementNode.self) {
+                if let next = node.nextVisibleNode(ElementNode.self),
+                   canMove(from: node, to: next) {
                     node.invalidateText()
                     next.focus()
                 }
@@ -168,7 +170,8 @@ extension TextRoot {
         cancelNodeSelection()
         guard let node = focusedWidget as? ElementNode else { return }
         if node.isOnFirstLine(cursorPosition) {
-            if let newNode = node.previousVisibleNode(ElementNode.self) {
+            if let newNode = node.previousVisibleNode(ElementNode.self),
+               canMove(from: node, to: newNode) {
                 let offset = node.offsetAt(index: cursorPosition) + node.offsetInDocument.x - newNode.offsetInDocument.x
                 node.invalidateText()
                 newNode.focus(position: newNode.indexOnLastLine(atOffset: offset))
@@ -189,7 +192,8 @@ extension TextRoot {
         cancelNodeSelection()
         guard let node = focusedWidget as? ElementNode else { return }
         if node.isOnLastLine(cursorPosition) {
-            if let newNode = node.nextVisibleNode(ElementNode.self) {
+            if let newNode = node.nextVisibleNode(ElementNode.self),
+               canMove(from: node, to: newNode) {
                 let offset = node.offsetAt(index: cursorPosition) + node.offsetInDocument.x - newNode.offsetInDocument.x
                 node.invalidateText()
                 newNode.focus(position: newNode.indexOnFirstLine(atOffset: offset))
@@ -203,6 +207,14 @@ extension TextRoot {
         }
         cancelSelection()
         node.invalidateText()
+    }
+
+    private func canMove(from currentNode: ElementNode, to newNode: ElementNode) -> Bool {
+        if (newNode as? ProxyNode == nil && currentNode as? ProxyNode == nil) ||
+            (newNode as? ProxyNode != nil && currentNode as? ProxyNode != nil) {
+            return true
+        }
+        return false
     }
 
     public func cancelSelection() {
