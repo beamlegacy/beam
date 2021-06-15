@@ -25,7 +25,7 @@ extension BeamTextEdit {
         for node in nodes {
             guard let node = node as? TextNode else { continue }
             if nodes.count > 1 {
-                guard node.text.text.isEmpty else { continue }
+                guard !node.text.text.isEmpty else { continue }
                 strNodes.append(NSAttributedString(string: String.tabs(max(0, node.element.depth - 1))))
                 strNodes.append(node.text.buildAttributedString(fontSize: node.fontSize, cursorPosition: node.cursorPosition, elementKind: node.elementKind, mouseInteraction: nil, markedRange: nil, selectedRange: nil))
                 strNodes.append(NSAttributedString(string: "\n"))
@@ -105,7 +105,10 @@ extension BeamTextEdit {
                 let beamTextData = try PropertyListEncoder().encode(bTextHolder)
                 pasteboard.setData(beamTextData, forType: .bTextHolder)
             }
-
+            // Added this to clean lineSpacing, while lineSpacing in TextNode is not working
+            let style = NSMutableParagraphStyle()
+            style.lineSpacing = 0
+            strNodes.addAttribute(.paragraphStyle, value: style, range: strNodes.wholeRange)
             let docAttrRtf: [NSAttributedString.DocumentAttributeKey: Any] = [.documentType: NSAttributedString.DocumentType.rtf, .characterEncoding: String.Encoding.utf8]
             let rtfData = try strNodes.data(from: NSRange(location: 0, length: strNodes.length), documentAttributes: docAttrRtf)
             pasteboard.setData(rtfData, forType: .rtf)
@@ -173,8 +176,9 @@ extension BeamTextEdit {
         var lastInserted: ElementNode? = node
         let parent = node.parent as? ElementNode ?? node
         for (idx, attributedString) in attributedStrings.enumerated() {
-            guard !attributedString.string.isEmpty else { continue }
-            let beamText = BeamText(attributedString)
+            guard !attributedString.string.isEmpty,
+                  let cleanedText = attributedString.clean(with: "\\s\u{2022}\\s", in: NSRange(0..<3))  else { continue }
+            let beamText = BeamText(cleanedText)
             if idx == 0 {
                 disableInputDetector()
                 rootNode.insertText(text: beamText, replacementRange: selectedTextRange)
