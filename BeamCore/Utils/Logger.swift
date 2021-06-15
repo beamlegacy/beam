@@ -32,6 +32,7 @@ public enum LogCategory: String {
     case oauth
     case passwordsDB
     case clustering
+    case commandManager
 }
 
 public final class Logger {
@@ -42,7 +43,7 @@ public final class Logger {
     }
 
     private var subsystem = "beam"
-    private let hideCategories: [LogCategory] = [.web, .coredataDebug, .documentDebug]
+    private let hideCategories: [LogCategory] = [.web, .coredataDebug, .documentDebug, .commandManager]
     private let hideLumberCategories: [LogCategory] = [.documentDebug]
 
     private var ddFileLogger = DDFileLogger()
