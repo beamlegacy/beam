@@ -142,6 +142,7 @@ extension BeamText {
         var strong = false
         var emphasis = false
         var strikethrough = false
+        var underline = false
         var source: String?
         var webLink: String?
         var internalLink: String?
@@ -164,6 +165,8 @@ extension BeamText {
                 internalLink = link
             case .strikethrough:
                 strikethrough = true
+            case .underline:
+                underline = true
             }
         }
 
@@ -199,6 +202,11 @@ extension BeamText {
         if strikethrough {
             stringAttributes[.strikethroughStyle] = NSUnderlineStyle.single.rawValue
             stringAttributes[.strikethroughColor] = BeamColor.Editor.underlineAndStrikethrough.nsColor
+        }
+
+        if underline {
+            stringAttributes[.underlineStyle] = NSUnderlineStyle.single.rawValue
+            stringAttributes[.underlineColor] = BeamColor.Editor.underlineAndStrikethrough.nsColor
         }
 
         if let source = source {

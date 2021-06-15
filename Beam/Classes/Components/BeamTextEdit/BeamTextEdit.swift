@@ -90,7 +90,6 @@ public extension CALayer {
     internal var popover: BidirectionalPopover?
 
     // Formatter properties
-    internal var persistentFormatter: TextFormatterView?
     internal var inlineFormatter: FormatterView?
     internal var formatterTargetRange: Range<Int>?
     internal var formatterTargetNode: TextNode?
@@ -547,8 +546,6 @@ public extension CALayer {
         cancelInternalLink()
         dismissPopover()
         showOrHideInlineFormatter(isPresent: false)
-        showOrHidePersistentFormatter(isPresent: false)
-
         return true
     }
 
@@ -614,8 +611,6 @@ public extension CALayer {
             if let toFocus = node.nodeFor(newElement) {
                 cmdManager.focusElement(toFocus, cursorPosition: 0)
             }
-
-            cleanPersistentFormatter()
         }
     }
 
@@ -1294,37 +1289,34 @@ public extension CALayer {
         // DispatchQueue to init the popover after the node is initialized
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
-            let cursorPosition = prefix == 0 ? self.rootNode.cursorPosition : self.rootNode.cursorPosition - 1
+            let cursorPosition = self.rootNode.cursorPosition - prefix
 
             self.popoverPrefix = prefix
             self.popoverSuffix = suffix
-            self.cursorStartPosition = self.rootNode.textIsSelected ? 0 : cursorPosition
+            if self.rootNode.textIsSelected {
+                let range = self.rootNode.selectedTextRange
+                self.cursorStartPosition = range.lowerBound
+                self.rootNode.cancelSelection()
+                self.rootNode.cursorPosition = range.upperBound
+            } else {
+                self.cursorStartPosition = cursorPosition
+            }
             self.initPopover(mode: mode, initialText: initialText)
             self.updatePopover()
-            self.showOrHidePersistentFormatter(isPresent: false)
         }
     }
 
-    internal func initAndShowPersistentFormatter() {
-        if persistentFormatter == nil {
-            initPersistentFormatterView()
-        } else if persistentFormatter != nil {
-            showOrHidePersistentFormatter(isPresent: true)
-        }
-    }
-
-    func initInlineFormatterAndHidePersistentFormatter() {
+    func initInlineTextFormatter() {
         guard let node = focusedWidget as? TextNode else { return }
 
         if inlineFormatter == nil && popover == nil {
             currentTextRange = node.selectedTextRange
-                initInlineFormatterView()
-            showOrHidePersistentFormatter(isPresent: false)
+            initInlineFormatterView()
         }
     }
 
     func showInlineFormatterOnKeyEventsAndClick(isKeyEvent: Bool = false) {
-        initInlineFormatterAndHidePersistentFormatter()
+        initInlineTextFormatter()
         updateInlineFormatterView(isKeyEvent: isKeyEvent)
 
         if isInlineFormatterHidden {
@@ -1333,34 +1325,24 @@ public extension CALayer {
     }
 
     func updateInlineFormatterOnDrag(isDragged: Bool = false) {
-        initInlineFormatterAndHidePersistentFormatter()
+        initInlineTextFormatter()
         updateInlineFormatterView(isDragged: isDragged)
     }
 
     func hideInlineFormatter() {
         guard inlineFormatter != nil else { return }
-
         showOrHideInlineFormatter(isPresent: false)
-        showOrHidePersistentFormatter(isPresent: true)
-    }
-
-    func cleanPersistentFormatter() {
-        guard let formatterView = persistentFormatter else { return }
-        rootNode.state.attributes = []
-        formatterView.resetSelectedItems()
     }
 
     func hideFloatingView() {
         dismissPopover()
         dismissFormatterView(inlineFormatter)
-        dismissFormatterView(persistentFormatter)
     }
 
     func dismissPopoverOrFormatter() {
         if popover != nil {
             if popoverPrefix > 0 { cancelInternalLink() }
             dismissPopover()
-            showOrHidePersistentFormatter(isPresent: true)
         }
 
         if inlineFormatter != nil {
@@ -1424,10 +1406,6 @@ public extension CALayer {
         if inlineFormatter != nil {
             hideInlineFormatter()
         }
-
-        if persistentFormatter != nil {
-            detectFormatterType()
-        }
     }
 
     override public func moveRight(_ sender: Any?) {
@@ -1452,9 +1430,6 @@ public extension CALayer {
             hideInlineFormatter()
         }
 
-        if persistentFormatter != nil {
-            detectFormatterType()
-        }
     }
 
     override public func moveLeftAndModifySelection(_ sender: Any?) {
@@ -1488,10 +1463,6 @@ public extension CALayer {
     override public func moveToBeginningOfLine(_ sender: Any?) {
         rootNode.moveToBeginningOfLine()
 
-        if persistentFormatter != nil {
-            detectFormatterType()
-        }
-
         if popover != nil {
             dismissPopoverOrFormatter()
         }
@@ -1499,7 +1470,7 @@ public extension CALayer {
 
     override public func moveToEndOfLine(_ sender: Any?) {
         rootNode.moveToEndOfLine()
-        detectFormatterType()
+        detectTextFormatterType()
     }
 
     override public func moveToBeginningOfLineAndModifySelection(_ sender: Any?) {
@@ -1520,10 +1491,6 @@ public extension CALayer {
             if inlineFormatter != nil {
                 hideInlineFormatter()
             }
-
-            if persistentFormatter != nil {
-                detectFormatterType()
-            }
         }
     }
 
@@ -1534,9 +1501,6 @@ public extension CALayer {
             rootNode.moveDown()
             if inlineFormatter != nil {
                 hideInlineFormatter()
-            }
-            if persistentFormatter != nil {
-                detectFormatterType()
             }
         }
     }
@@ -1664,7 +1628,7 @@ public extension CALayer {
 
         guard let node = focusedWidget as? TextNode else { return }
         if node.text.isEmpty || !rootNode.textIsSelected { hideInlineFormatter() }
-        detectFormatterType()
+        detectTextFormatterType()
     }
 
     override public func deleteBackward(_ sender: Any?) {
@@ -1675,7 +1639,7 @@ public extension CALayer {
         if rootNode.cursorPosition == formatterTargetRange?.lowerBound { hideInlineFormatter() }
 //        guard let node = focusedWidget as? TextNode else { return }
 //        if node.text.isEmpty || !rootNode.textIsSelected { hideInlineFormatter() }
-        detectFormatterType()
+        detectTextFormatterType()
     }
 
 //    override public func deleteBackwardByDecomposingPreviousCharacter(_ sender: Any?) {

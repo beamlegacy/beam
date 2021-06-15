@@ -48,7 +48,7 @@ class FormatText: TextEditorCommand {
         self.isActive = !isActive
 
         guard let root = context?.root else { return false }
-        root.editor.detectFormatterType()
+        root.editor.detectTextFormatterType()
         return result
     }
 
@@ -83,7 +83,7 @@ class FormatText: TextEditorCommand {
         self.isActive = !isActive
 
         guard let root = context?.root else { return false }
-        root.editor.detectFormatterType()
+        root.editor.detectTextFormatterType()
         return result
     }
 }

@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum FormatterType: String, CaseIterable {
+enum TextFormatterType: String, CaseIterable {
     case h1
     case h2
     case bullet
@@ -17,11 +17,18 @@ enum FormatterType: String, CaseIterable {
     case bold
     case italic
     case strikethrough
+    case underline
+    case internalLink
     case link
     case code
     case unknow
 
-    static var all: [FormatterType] {
-        return [.h1, .h2, .bullet, .numbered, .quote, .checkmark, .bold, .italic, .strikethrough, .link, .code]
+    var icon: String {
+        switch self {
+        case .internalLink:
+            return "editor-format_bidirectional"
+        default:
+            return "editor-format_\(rawValue)"
+        }
     }
 }

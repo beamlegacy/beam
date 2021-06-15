@@ -74,9 +74,9 @@ extension BeamText {
         }
     }
 
-    @discardableResult func extractFormatterType(from range: Swift.Range<Int>) -> [FormatterType] {
+    @discardableResult func extractFormatterType(from range: Swift.Range<Int>) -> [TextFormatterType] {
         let sub = extract(range: range)
-        var types: [FormatterType] = []
+        var types: [TextFormatterType] = []
 
         sub.ranges.forEach { range in
             range.attributes.forEach { attribute in
@@ -87,6 +87,8 @@ extension BeamText {
                     if !types.contains(.italic) { types.append(.italic) }
                 case .strikethrough:
                     if !types.contains(.strikethrough) { types.append(.strikethrough) }
+                case .underline:
+                    if !types.contains(.underline) { types.append(.underline) }
                 default:
                     break
                 }

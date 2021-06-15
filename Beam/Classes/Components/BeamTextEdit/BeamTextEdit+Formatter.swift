@@ -15,8 +15,7 @@ extension BeamTextEdit {
     private static let xPosInlineFormatter: CGFloat = 32
     private static let yPosInlineFormatter: CGFloat = 28
     private static let bottomConstraint: CGFloat = -55
-    private static let inlineFormatterType: [FormatterType] = [.h1, .h2, .bullet, .checkmark, .bold, .italic, .link]
-    private static let persistentFormatterType: [FormatterType] = [.h1, .h2, .quote, .code, .bold, .italic, .strikethrough]
+    private static let inlineFormatterType: [TextFormatterType] = [.bold, .italic, .strikethrough, .underline, .internalLink, .link]
 
     private static var bottomAnchor: NSLayoutConstraint?
     private static var centerXAnchor: NSLayoutConstraint?
@@ -27,21 +26,6 @@ extension BeamTextEdit {
     private static var formatterDismissDelay: TimeInterval = 0.2
 
     // MARK: - UI
-    internal func initPersistentFormatterView() {
-        guard persistentFormatter == nil else { return }
-
-        persistentFormatter = TextFormatterView(viewType: .persistent)
-        guard let formatterView = persistentFormatter,
-              let contentView = window?.contentView else { return }
-
-        formatterView.translatesAutoresizingMaskIntoConstraints = false
-        formatterView.items = BeamTextEdit.persistentFormatterType
-        formatterView.delegate = self
-        addConstraint(to: formatterView, with: contentView)
-        contentView.addSubview(formatterView)
-        activateLayoutConstraint(for: formatterView)
-        showOrHidePersistentFormatter(isPresent: true)
-    }
 
     internal func initInlineFormatterView(isHyperlinkView: Bool = false) {
         guard inlineFormatter == nil else { return }
@@ -62,14 +46,6 @@ extension BeamTextEdit {
     }
 
     // MARK: - Methods
-    internal func showOrHidePersistentFormatter(isPresent: Bool) {
-        guard let persistentFormatter = persistentFormatter else { return }
-        if isPresent {
-            persistentFormatter.animateOnAppear()
-        } else {
-            persistentFormatter.animateOnDisappear()
-        }
-    }
 
     func debounceShowHideInlineFormatter(_ show: Bool, completionHandler: (() -> Void)? = nil) {
         let delay = show ? Self.formatterPresentDelay : Self.formatterDismissDelay
@@ -103,7 +79,7 @@ extension BeamTextEdit {
 
     internal func updateInlineFormatterView(isDragged: Bool = false, isKeyEvent: Bool = false) {
         guard inlineFormatter != nil else { return }
-        detectFormatterType()
+        detectTextFormatterType()
 
         let formatterHandlesKeyEvents = inlineFormatter?.handlesTyping == true
         let hasNodeSelection = rootNode.state.nodeSelection != nil
@@ -113,7 +89,6 @@ extension BeamTextEdit {
             BeamTextEdit.debounceKeyEventTimer = Timer.scheduledTimer(withTimeInterval: 0.23, repeats: false, block: { [weak self] (_) in
                 guard let self = self else { return }
                 self.showOrHideInlineFormatter(isPresent: false, isDragged: isDragged)
-                self.showOrHidePersistentFormatter(isPresent: true)
             })
             return
         } else if isKeyEvent && formatterHandlesKeyEvents,
@@ -124,7 +99,6 @@ extension BeamTextEdit {
             text = text.substring(range: targetRange.lowerBound..<node.cursorPosition)
             if inlineFormatter?.inputText(text) != true {
                 showOrHideInlineFormatter(isPresent: false, isDragged: isDragged)
-                showOrHidePersistentFormatter(isPresent: true)
             }
         } else if hasNodeSelection {
             // Invalid the timer when we select all bullet
@@ -133,7 +107,6 @@ extension BeamTextEdit {
             // Invalid the timer & hide the inline formatter when nothing is selected
             BeamTextEdit.debounceKeyEventTimer?.invalidate()
             showOrHideInlineFormatter(isPresent: false, isDragged: isDragged)
-            showOrHidePersistentFormatter(isPresent: true)
         }
 
         if inlineFormatter is TextFormatterView {
@@ -142,10 +115,10 @@ extension BeamTextEdit {
     }
 
     // swiftlint:disable:next cyclomatic_complexity
-    internal func detectFormatterType() {
+    internal func detectTextFormatterType() {
         guard let node = focusedWidget as? TextNode else { return }
 
-        var types: [FormatterType] = []
+        var types: [TextFormatterType] = []
         switch node.element.kind {
         case .heading(1):
             types.append(.h1)
@@ -165,6 +138,8 @@ extension BeamTextEdit {
                 types.append(.italic)
             case .strikethrough:
                 types.append(.strikethrough)
+            case .underline:
+                types.append(.underline)
             default:
                 break
             }
@@ -173,7 +148,7 @@ extension BeamTextEdit {
         setActiveFormatters(types)
     }
 
-    internal func updateFormatterView(with type: FormatterType, attribute: BeamText.Attribute? = nil, kind: ElementKind = .bullet) {
+    internal func updateFormatterView(with type: TextFormatterType, attribute: BeamText.Attribute? = nil, kind: ElementKind = .bullet) {
         guard let node = focusedWidget as? TextNode else { return }
 
         var hasAttribute = false
@@ -190,40 +165,58 @@ extension BeamTextEdit {
         }
 
         selectFormatterAction(type, hasAttribute)
-
-        if let inlineFormatter = inlineFormatter as? TextFormatterView {
-            inlineFormatter.setActiveFormatter(type)
-        }
-
-        if let persistentFormatter = persistentFormatter {
-            persistentFormatter.setActiveFormatter(type)
-        }
+        detectTextFormatterType()
     }
 
-    internal func selectFormatterAction(_ type: FormatterType, _ isActive: Bool) {
-        guard let node = focusedWidget as? TextNode else { return }
-
-        switch type {
-        case .h1:
-            changeTextFormat(with: node, kind: .heading(1), isActive: isActive)
-        case .h2:
-            changeTextFormat(with: node, kind: .heading(2), isActive: isActive)
-        case .quote:
-            changeTextFormat(with: node, kind: .quote(1, node.text.text, node.text.text), isActive: isActive)
-        case .code:
-            Logger.shared.logDebug("code")
+    private func elementAndAttribute(for formatterType: TextFormatterType,
+                                     in node: TextNode) -> (ElementKind?, BeamText.Attribute?) {
+        var attribute: BeamText.Attribute?
+        var elementKind: ElementKind?
+        switch formatterType {
         case .bold:
-            updateAttributeState(with: node, attribute: .strong, isActive: isActive)
+            attribute = .strong
         case .italic:
-            updateAttributeState(with: node, attribute: .emphasis, isActive: isActive)
+            attribute = .emphasis
         case .strikethrough:
-            updateAttributeState(with: node, attribute: .strikethrough, isActive: isActive)
-        case .link:
-            dismissFormatterView(inlineFormatter)
-            showLinkFormatterForSelection()
-            moveInlineFormatterAboveSelection()
+            attribute = .strikethrough
+        case .underline:
+            attribute = .underline
+        case .h1:
+            elementKind = .heading(1)
+        case .h2:
+            elementKind = .heading(2)
+        case .quote:
+            elementKind = .quote(1, node.text.text, node.text.text)
         default:
             break
+        }
+        return (elementKind, attribute)
+    }
+
+    internal func selectFormatterAction(_ type: TextFormatterType, _ isActive: Bool) {
+        guard let node = focusedWidget as? TextNode else { return }
+        let (newElementKind, newAttribute) = elementAndAttribute(for: type, in: node)
+        var dismissFormatter = false
+        switch type {
+        case .link:
+            dismissFormatter = true
+            showLinkFormatterForSelection()
+            moveInlineFormatterAboveSelection()
+        case .internalLink:
+            dismissFormatter = true
+            showBidirectionalPopover(mode: .internalLink, prefix: 0, suffix: 0)
+        default:
+            break
+        }
+
+        if dismissFormatter {
+            dismissFormatterView(inlineFormatter)
+        }
+        if let newAttribute = newAttribute {
+            updateAttributeState(with: node, attribute: newAttribute, isActive: isActive)
+        }
+        if let newElementKind = newElementKind {
+            changeTextFormat(with: node, kind: newElementKind, isActive: isActive)
         }
     }
 
@@ -231,9 +224,7 @@ extension BeamTextEdit {
         guard view != nil else { return }
         view?.removeFromSuperview()
 
-        if view == persistentFormatter {
-            persistentFormatter = nil
-        } else if view == inlineFormatter {
+        if view == inlineFormatter {
             ContextMenuPresenter.shared.dismissMenu()
             isInlineFormatterHidden = true
             inlineFormatter = nil
@@ -287,13 +278,9 @@ extension BeamTextEdit {
         }
     }
 
-    private func setActiveFormatters(_ types: [FormatterType]) {
+    private func setActiveFormatters(_ types: [TextFormatterType]) {
         if let inlineFormatter = inlineFormatter as? TextFormatterView {
             inlineFormatter.setActiveFormatters(types)
-        }
-
-        if let persistentFormatter = persistentFormatter {
-            persistentFormatter.setActiveFormatters(types)
         }
     }
 
@@ -360,7 +347,7 @@ extension BeamTextEdit {
 
 extension BeamTextEdit: TextFormatterViewDelegate {
     func textFormatterView(_ textFormatterView: TextFormatterView,
-                           didSelectFormatterType type: FormatterType,
+                           didSelectFormatterType type: TextFormatterType,
                            isActive: Bool) {
         self.selectFormatterAction(type, isActive)
     }

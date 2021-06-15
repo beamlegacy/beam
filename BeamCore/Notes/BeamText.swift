@@ -22,6 +22,7 @@ public struct BeamText: Codable {
         case link(String)
         case internalLink(String)
         case strikethrough
+        case underline
 
         // swiftlint:disable:next nesting
         enum CodingKeys: String, CodingKey {
@@ -50,6 +51,7 @@ public struct BeamText: Codable {
                 case "link": self = .link(try container.decode(String.self, forKey: .payload))
                 case "internalLink": self = .internalLink(try container.decode(String.self, forKey: .payload))
                 case "strikethrough": self = .strikethrough
+                case "underline": self = .underline
                 default:
                     throw AttributeError.unknownAttribute
                 }
@@ -62,6 +64,7 @@ public struct BeamText: Codable {
                 case 3: self = .link(try container.decode(String.self, forKey: .payload))
                 case 4: self = .internalLink(try container.decode(String.self, forKey: .payload))
                 case 5: self = .strikethrough
+                case 6: self = .underline
                 default:
                     throw AttributeError.unknownAttribute
                 }
@@ -83,6 +86,7 @@ public struct BeamText: Codable {
             case .internalLink(let value):
                 try container.encode(value, forKey: .payload)
             case .strikethrough: break
+            case .underline: break
             }
         }
 
@@ -100,6 +104,8 @@ public struct BeamText: Codable {
                 return "internalLink"
             case .strikethrough:
                 return "strikethrough"
+            case .underline:
+                return "underline"
             }
         }
 

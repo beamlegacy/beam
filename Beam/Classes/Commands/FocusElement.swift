@@ -38,7 +38,7 @@ class FocusElement: TextEditorCommand {
         }
 
         node.focus(position: cursorPosition)
-        context?.editor.detectFormatterType()
+        context?.editor.detectTextFormatterType()
 
         return true
     }
@@ -50,7 +50,7 @@ class FocusElement: TextEditorCommand {
            let node = context?.nodeFor(elementInstance.element),
            let cursorPosition = oldCursorPosition {
             node.focus(position: cursorPosition)
-            context?.editor.detectFormatterType()
+            context?.editor.detectTextFormatterType()
         }
         return true
     }

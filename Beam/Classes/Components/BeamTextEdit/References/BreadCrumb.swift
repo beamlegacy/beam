@@ -238,7 +238,6 @@ class BreadCrumb: Widget {
 
     func updateReferenceSection(_ text: String) {
         guard let rootNote = editor.note.note else { return }
-        self.editor.showOrHidePersistentFormatter(isPresent: false)
 
         text.ranges(of: rootNote.title).forEach { range in
             let start = text.position(at: range.lowerBound)

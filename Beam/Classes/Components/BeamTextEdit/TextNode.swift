@@ -516,7 +516,6 @@ public class TextNode: ElementNode {
                 focus(position: clickPos)
                 root?.cancelSelection()
                 dragMode = .select(cursorPosition)
-                editor.initAndShowPersistentFormatter()
                 return true
             } else if mouseInfo.event.clickCount == 2 {
                 debounceClickTimer?.invalidate()
@@ -529,7 +528,7 @@ public class TextNode: ElementNode {
             } else {
                 debounceClickTimer?.invalidate()
                 root?.selectAll()
-                editor.detectFormatterType()
+                editor.detectTextFormatterType()
 
                 if root?.state.nodeSelection != nil {
                     editor.showInlineFormatterOnKeyEventsAndClick()
@@ -568,10 +567,10 @@ public class TextNode: ElementNode {
     }
 
     override func mouseUp(mouseInfo: MouseInfo) -> Bool {
-        editor.detectFormatterType()
+        editor.detectTextFormatterType()
 
         if mouseIsDragged {
-            editor.detectFormatterType()
+            editor.detectTextFormatterType()
             editor.showOrHideInlineFormatter(isPresent: true)
             mouseIsDragged = false
         }

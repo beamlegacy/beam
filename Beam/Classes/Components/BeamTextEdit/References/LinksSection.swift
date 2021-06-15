@@ -55,7 +55,6 @@ class LinksSection: Widget {
             guard let chevron = self.layers["disclosure"] as? ChevronButton else { return }
 
             self.open.toggle()
-            self.editor.showOrHidePersistentFormatter(isPresent: false)
             chevron.open = self.open
         }))
 
@@ -189,7 +188,6 @@ class LinksSection: Widget {
 
                 if let linkLayer = self.linkLayer, linkLayer.layer.isHidden { return }
 
-                self.editor.showOrHidePersistentFormatter(isPresent: false)
                 self.children.forEach { child in
                     guard let breadcrumb = child as? BreadCrumb else { return }
                     breadcrumb.proxy.text.makeLinkToNoteExplicit(forNote: rootNote.title)
