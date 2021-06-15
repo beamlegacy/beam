@@ -243,29 +243,50 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
         }
     }
 
-    public func deepCopy(withNewId: Bool, selectedElements: [BeamElement]?) -> BeamElement {
-        let element = BeamElement()
-        element.id = withNewId ? UUID() : id
-        element.text = text
-        element.open = open
-        element.readOnly = readOnly
-        element.score = score
-        element.creationDate = creationDate
+    private func removeUnselectedElementsFromTree(selectedElements: [BeamElement]) {
         for child in children {
-            if selectedElements != nil {
-                if let isSelected = selectedElements?.contains(child), isSelected {
-                    element.children.append(child.deepCopy(withNewId: withNewId, selectedElements: selectedElements))
-                } else {
-                    element.children.append(contentsOf: child.deepCopy(withNewId: withNewId, selectedElements: selectedElements).children)
+            child.removeUnselectedElementsFromTree(selectedElements: selectedElements)
+            if !selectedElements.contains(child) {
+                removeChild(child)
+                for subChild in child.children {
+                    addChild(subChild)
                 }
-            } else {
-                element.children.append(child.deepCopy(withNewId: withNewId, selectedElements: selectedElements))
             }
         }
-        element.kind = kind
-        element.childrenFormat = childrenFormat
-        element.query = query
-        return element
+    }
+
+    private func changeId() {
+        id = UUID()
+    }
+
+    private func deepChangeId() {
+        changeId()
+        for child in children {
+            child.deepChangeId()
+        }
+    }
+
+    public func deepCopy(withNewId: Bool, selectedElements: [BeamElement]?) -> BeamElement? {
+        let encoder = JSONEncoder()
+        guard let data = try? encoder.encode(self) else {
+            Logger.shared.logError("DeepCopy Error while encoding \(self)", category: .document)
+            return nil
+        }
+        let decoder = JSONDecoder()
+        guard let newElement = try? decoder.decode(Self.self, from: data) else {
+            Logger.shared.logError("DeepCopy Error while decoding \(self)", category: .document)
+            return nil
+        }
+
+        if let selectedElements = selectedElements {
+            removeUnselectedElementsFromTree(selectedElements: selectedElements)
+        }
+
+        if withNewId {
+            deepChangeId()
+        }
+
+        return newElement
     }
 
     open func clearChildren() {

@@ -39,13 +39,16 @@ class BeamUITestsMenuGenerator {
 
     private func insertTextInCurrentNote() {
         guard let currentNote = AppDelegate.main.window.state.currentNote else {
-            Logger.shared.logDebug("Current note is ni", category: .general)
+            Logger.shared.logDebug("Current note is nil", category: .general)
 
             return
         }
         Logger.shared.logDebug("Inserting text in current note", category: .documentDebug)
 
-        let newNote = currentNote.deepCopy(withNewId: false, selectedElements: nil)
+        guard let newNote = currentNote.deepCopy(withNewId: false, selectedElements: nil) else {
+            Logger.shared.logError("Unable to create deep copy of note \(currentNote)", category: .document)
+            return
+        }
 
         for index in 0...3 {
             newNote.addChild(BeamElement("test \(index): \(Date().description)"))

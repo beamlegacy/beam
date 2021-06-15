@@ -76,7 +76,10 @@ extension BeamTextEdit {
             sortedNodes.forEach { (node) in
                 sortedSelectedElements.append(node.element)
             }
-            let clonedNote: BeamNote = note.deepCopy(withNewId: false, selectedElements: sortedSelectedElements)
+            guard let clonedNote: BeamNote = note.deepCopy(withNewId: false, selectedElements: sortedSelectedElements) else {
+                Logger.shared.logError("Copy error, unable to copy \(note)", category: .noteEditor)
+                return
+            }
             do {
                 noteData = try JSONEncoder().encode(clonedNote)
             } catch {
@@ -145,7 +148,10 @@ extension BeamTextEdit {
             cmdManager.beginGroup(with: "PasteElementContent")
             let decodedNote = try JSONDecoder().decode(BeamNote.self, from: elementHolder.noteData)
             for (idx, element) in decodedNote.children.enumerated() {
-                let newElement = element.deepCopy(withNewId: true, selectedElements: nil)
+                guard let newElement = element.deepCopy(withNewId: true, selectedElements: nil) else {
+                    Logger.shared.logError("Paste error, unable to copy \(element)", category: .noteEditor)
+                    return
+                }
                 guard let node = focusedWidget as? TextNode,
                       let parent = node.parent as? TextNode else { continue }
                 if idx == 0 {
