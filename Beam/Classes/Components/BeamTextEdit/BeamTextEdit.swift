@@ -123,6 +123,7 @@ public extension CALayer {
             }
             DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: .milliseconds(50))) {
                 self.setHotSpot(node.frameInDocument)
+                node.hightlight()
                 if let w = self.window as? BeamWindow {
                     w.state.scrollToElementId = nil
                 }
