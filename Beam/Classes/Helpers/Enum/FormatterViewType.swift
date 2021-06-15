@@ -7,7 +7,3 @@
 
 import Foundation
 
-enum FormatterViewType {
-    case persistent
-    case inline
-}

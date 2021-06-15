@@ -12,7 +12,6 @@ extension BeamTextEdit {
 
     // MARK: - Properties
     private static let queryLimit = 4
-    private static var xPos: CGFloat = 0
 
     internal func initPopover(mode: PopoverMode, initialText: String?) {
         guard let node = focusedWidget as? TextNode else { return }
@@ -46,7 +45,7 @@ extension BeamTextEdit {
                     cmdManager.beginGroup(with: "Insert Block Reference")
                     defer { cmdManager.endGroup() }
 
-                    let startPosition = popoverPrefix == 0 ? cursorStartPosition : cursorStartPosition + 1
+                    let startPosition = cursorStartPosition + popoverPrefix
                     let replacementStart = startPosition - popoverPrefix
                     let replacementEnd = rootNode.cursorPosition + popoverSuffix
                     // When the cursor is moved to left, the link should be split in 2 (Bi-di + Plain text)
@@ -67,7 +66,6 @@ extension BeamTextEdit {
                     }
                 }
                 dismissPopover()
-                showOrHidePersistentFormatter(isPresent: true)
             default: break
             }
             view.window?.makeFirstResponder(self)
@@ -109,12 +107,13 @@ extension BeamTextEdit {
         }
 
         if command == .moveRight && cursorPosition == node.text.text.count && popoverSuffix != 0 {
-            validInternalLink(from: node, String(node.text.text[cursorStartPosition + 1..<cursorPosition - popoverSuffix]))
+            validInternalLink(from: node, String(node.text.text[cursorStartPosition + popoverPrefix..<cursorPosition - popoverSuffix]))
             return
         }
 
-        let startPosition = popoverPrefix == 0 ? cursorStartPosition : cursorStartPosition + 1
-        if (command == .deleteBackward || command == .deleteForward) && startPosition > cursorPosition {
+        let startPosition = cursorStartPosition + popoverPrefix
+        if (command == .deleteBackward || command == .deleteForward) &&
+            (startPosition > cursorPosition || (popoverPrefix == 0 && cursorPosition == startPosition)) {
             cancelPopover(leaveTextAsIs: true)
             return
         }
@@ -152,7 +151,7 @@ extension BeamTextEdit {
         }
         popover.query = linkText
 
-        updatePopoverPosition(with: node, linkText.isEmpty)
+        updatePopoverPosition(with: node)
     }
 
     internal func cancelPopover(leaveTextAsIs: Bool = false) {
@@ -160,7 +159,7 @@ extension BeamTextEdit {
               let node = focusedWidget as? TextNode else { return }
 
         dismissPopover()
-        let start = cursorStartPosition + 1 - popoverPrefix
+        let start = cursorStartPosition - popoverPrefix
         let end = rootNode.cursorPosition + popoverSuffix
         if start <= end {
             let range = start..<end
@@ -171,7 +170,6 @@ extension BeamTextEdit {
                 rootNode.cursorPosition = range.lowerBound
             }
         }
-        showOrHidePersistentFormatter(isPresent: true)
     }
 
     internal func dismissPopover() {
@@ -196,32 +194,21 @@ extension BeamTextEdit {
         node.text.removeAttributes([.internalLink(text)], from: range)
     }
 
-    private func updatePopoverPosition(with node: TextNode, _ isEmpty: Bool = false) {
+    private func updatePopoverPosition(with node: TextNode) {
         guard let popover = popover else { return }
 
-        let (xOffset, rect) = node.offsetAndFrameAt(index: rootNode.cursorPosition)
+        let (xOffset, rect) = node.offsetAndFrameAt(index: cursorStartPosition)
         let offsetGlobal = self.convert(node.offsetInDocument, to: nil)
         let marginTop: CGFloat = rect.maxY == 0 ? 30 : 10
+        let yPos = offsetGlobal.y - rect.maxY - popover.idealSize.height - marginTop
+        let xPos = offsetGlobal.x + xOffset
 
-        var yPos = offsetGlobal.y - rect.maxY - popover.idealSize.height
-
-        // To avoid the update of X position during the insertion of a new text
-        if isEmpty {
-            BeamTextEdit.xPos = xOffset == 0 ? offsetGlobal.x + 15 : (xOffset + offsetGlobal.x) - 10
-        }
-
-        // Popover with Shortcut
-        if node.text.text.isEmpty {
-            BeamTextEdit.xPos = xOffset + 200
-        }
-
-        yPos -= marginTop
-        popover.frame = NSRect(x: BeamTextEdit.xPos, y: yPos, width: popover.idealSize.width, height: popover.idealSize.height)
+        popover.frame = NSRect(x: xPos, y: yPos, width: popover.idealSize.width, height: popover.idealSize.height)
 
         // Up position when popover is overlapped or clipped by the superview
         if popover.visibleRect.height < popover.idealSize.height {
             popover.frame = NSRect(
-                x: BeamTextEdit.xPos,
+                x: xPos,
                 y: offsetGlobal.y + 10,
                 width: popover.idealSize.width,
                 height: popover.idealSize.height
@@ -230,7 +217,7 @@ extension BeamTextEdit {
     }
 
     private func validInternalLink(from node: TextNode, _ title: String) {
-        let startPosition = popoverPrefix == 0 ? cursorStartPosition : cursorStartPosition + 1
+        let startPosition = cursorStartPosition + popoverPrefix
         let replacementStart = startPosition - popoverPrefix
         let replacementEnd = rootNode.cursorPosition + popoverSuffix
         // When the cursor is moved to left, the link should be split in 2 (Bi-di + Plain text)
@@ -250,7 +237,6 @@ extension BeamTextEdit {
 
         rootNode.cursorPosition = linkEnd
         dismissPopover()
-        showOrHidePersistentFormatter(isPresent: true)
     }
 
 }

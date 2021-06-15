@@ -11,9 +11,9 @@ import SwiftUI
 // MARK: - SwiftUI View
 private struct FormatterItem: Identifiable {
     let id: String
-    let type: FormatterType
+    let type: TextFormatterType
     let isActive: Bool
-    init(type: FormatterType, isActive: Bool = false) {
+    init(type: TextFormatterType, isActive: Bool = false) {
         self.id = "\(type)-\(isActive ? 1 : 0)"
         self.type = type
         self.isActive = isActive
@@ -48,7 +48,7 @@ private struct TextFormatterViewSwiftUI: View {
         FormatterViewBackground(shadowOpacity: !alwaysShowShadow && !isHovering ? 0.5 : 1.0) {
             HStack {
                 ForEach(viewModel.formatterItems) { item in
-                    ButtonLabel(icon: "editor-format_\(item.type)",
+                    ButtonLabel(icon: item.type.icon,
                                 state: item.isActive ? .active : .normal,
                                 customStyle: buttonStyle) {
                         viewModel.onSelectFormatterItem?(item)
@@ -84,20 +84,20 @@ struct TextFormatterView_Previews: PreviewProvider {
 // MARK: - NSView Container
 protocol TextFormatterViewDelegate: AnyObject {
     func textFormatterView(_ textFormatterView: TextFormatterView,
-                           didSelectFormatterType type: FormatterType,
+                           didSelectFormatterType type: TextFormatterType,
                            isActive: Bool)
 }
 
 class TextFormatterView: FormatterView {
 
     weak var delegate: TextFormatterViewDelegate?
-    var items: [FormatterType] = [] {
+    var items: [TextFormatterType] = [] {
         didSet { updateFormatterItems() }
     }
 
     private var hostView: NSHostingView<TextFormatterViewSwiftUI>?
     private var subviewModel = TextFormatterViewModel()
-    private var selectedTypes: Set<FormatterType> = []
+    private var selectedTypes: Set<TextFormatterType> = []
 
     override var idealSize: NSSize {
         return TextFormatterViewSwiftUI.idealSize(forNumberOfItems: items.count)
@@ -154,7 +154,7 @@ class TextFormatterView: FormatterView {
         subviewModel.formatterItems = newItems
     }
 
-    private func removeState(_ type: FormatterType) {
+    private func removeState(_ type: TextFormatterType) {
         if type == .h2 && selectedTypes.contains(.h1) ||
            type == .quote && selectedTypes.contains(.h1) ||
            type == .code && selectedTypes.contains(.h1) { removeActiveIndicator(to: .h1) }
@@ -170,7 +170,7 @@ class TextFormatterView: FormatterView {
            type == .h1 && selectedTypes.contains(.code) { removeActiveIndicator(to: .code) }
     }
 
-    private func removeActiveIndicator(to item: FormatterType) {
+    private func removeActiveIndicator(to item: TextFormatterType) {
         selectedTypes.remove(item)
     }
 
@@ -178,7 +178,7 @@ class TextFormatterView: FormatterView {
 
 // MARK: Public methods
 extension TextFormatterView {
-    func setActiveFormatters(_ types: [FormatterType]) {
+    func setActiveFormatters(_ types: [TextFormatterType]) {
         selectedTypes = []
         types.forEach { type in
             selectedTypes.insert(type)
@@ -186,7 +186,7 @@ extension TextFormatterView {
         updateFormatterItems()
     }
 
-    func setActiveFormatter(_ type: FormatterType) {
+    func setActiveFormatter(_ type: TextFormatterType) {
         removeState(type)
         if selectedTypes.contains(type) {
             selectedTypes.remove(type)

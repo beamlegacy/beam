@@ -14,7 +14,11 @@ class FormatterView: NSView {
     static let appearAnimationDuration = 0.3
     static let disappearAnimationDuration = 0.15
 
-    internal var viewType: FormatterViewType = .persistent
+    enum FormatterViewType {
+        case inline
+    }
+
+    internal var viewType: FormatterViewType = .inline
 
     var idealSize: NSSize {
         return .zero

@@ -23,7 +23,7 @@ extension BeamTextEdit {
     }
 
     internal func toggleUnderline() {
-        Logger.shared.logDebug("underline")
+        updateFormatterView(with: .underline, attribute: .underline)
     }
 
     internal func toggleStrikeThrough() {
@@ -39,13 +39,8 @@ extension BeamTextEdit {
             dismissPopoverOrFormatter()
             return
         }
-
+        hideInlineFormatter()
         showBidirectionalPopover(mode: .internalLink, prefix: 0, suffix: 0)
-
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            self.updatePopover()
-        }
     }
 
     internal func toggleUnorderedAndOrderedList() {
