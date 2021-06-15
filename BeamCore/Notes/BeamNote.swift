@@ -102,7 +102,20 @@ public class BeamNote: BeamElement {
     }
 
     public override func deepCopy(withNewId: Bool, selectedElements: [BeamElement]?) -> BeamNote? {
-        return super.deepCopy(withNewId: withNewId, selectedElements: selectedElements) as? BeamNote
+        guard let newNote = super.deepCopy(withNewId: withNewId, selectedElements: selectedElements) as? BeamNote else {
+            return nil
+        }
+
+        newNote.databaseId = databaseId
+        newNote.title = title
+        newNote.creationDate = creationDate
+        newNote.updateDate = updateDate
+        newNote.type = type
+        newNote.version = version
+        newNote.savedVersion = savedVersion
+        newNote.isPublic = isPublic
+
+        return newNote
     }
 
     public var activeDocumentCancellable: AnyCancellable?
