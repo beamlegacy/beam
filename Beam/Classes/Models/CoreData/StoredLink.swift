@@ -66,11 +66,11 @@ class StoredLink: NSManagedObject {
     }
 
     class func fetchWithTitle(_ context: NSManagedObjectContext, _ title: String) -> StoredLink? {
-        return fetchFirst(context: context, NSPredicate(format: "title LIKE[cd] %@", title as CVarArg))
+        return fetchFirst(context: context, NSPredicate(format: "title ==[cd] %@", title as CVarArg))
     }
 
     class func fetchWithUrl(_ context: NSManagedObjectContext, _ url: String) -> StoredLink? {
-        return fetchFirst(context: context, NSPredicate(format: "url LIKE[cd] %@", url as CVarArg))
+        return fetchFirst(context: context, NSPredicate(format: "url ==[cd] %@", url as CVarArg))
     }
 
     class func fetchAllWithTitleMatch(_ context: NSManagedObjectContext, _ title: String) -> [StoredLink] {

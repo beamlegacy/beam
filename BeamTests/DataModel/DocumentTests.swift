@@ -74,6 +74,16 @@ class DocumentTests: QuickSpec {
             }
         }
 
+        describe(".fetchWithTitle()") {
+            // Checks https://linear.app/beamapp/issue/BE-1116/sqlcore-crash-in-documentfetchfirst-when-typing-/-in-omnibar
+            // Typing `\` in Omnibar used to crash
+            it("doesn't crash with \\") {
+                expect {
+                    try Document.fetchWithTitle(mainContext, "\\")
+                }.toNot(throwError())
+            }
+        }
+
         describe(".fetchAllWithTitleMatch()") {
             it("fetches documents matching title") {
                 let times = 3
