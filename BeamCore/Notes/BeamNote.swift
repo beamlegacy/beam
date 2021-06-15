@@ -101,38 +101,8 @@ public class BeamNote: BeamElement {
         try super.encode(to: encoder)
     }
 
-    /// Carefull this isn't a proper deepCopy
-    /// BrowsingSessions contains BrowsingNode that are not properly cloned.
-    /// This is used and needed for copy&paste atm
-    public override func deepCopy(withNewId: Bool, selectedElements: [BeamElement]?) -> BeamNote {
-        let note = BeamNote(title: title)
-        note.id = withNewId ? UUID() : id
-        note.type = type
-        note.searchQueries = searchQueries
-        note.visitedSearchResults = visitedSearchResults
-        note.text = text
-        note.open = open
-        note.readOnly = readOnly
-        note.score = score
-        note.creationDate = creationDate
-        note.kind = kind
-        note.childrenFormat = childrenFormat
-        note.query = query
-        note.savedVersion = savedVersion
-        note.version = version
-        if !browsingSessions.isEmpty {
-            for browsingSession in browsingSessions {
-                note.browsingSessions.append(browsingSession.deepCopy())
-            }
-        }
-        for child in children {
-            if let isSelected = selectedElements?.contains(child), isSelected {
-                note.children.append(child.deepCopy(withNewId: withNewId, selectedElements: selectedElements))
-            } else {
-                note.children.append(contentsOf: child.deepCopy(withNewId: withNewId, selectedElements: selectedElements).children)
-            }
-        }
-        return note
+    public override func deepCopy(withNewId: Bool, selectedElements: [BeamElement]?) -> BeamNote? {
+        return super.deepCopy(withNewId: withNewId, selectedElements: selectedElements) as? BeamNote
     }
 
     public var activeDocumentCancellable: AnyCancellable?
