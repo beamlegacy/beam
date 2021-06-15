@@ -132,7 +132,7 @@ public class TextNode: ElementNode {
     private var icon = NSImage(named: "editor-cmdreturn")
 
     private let debounceClickInterval = 0.23
-    var actionLayerPadding = CGFloat(3.5)
+    var actionLayerPadding = CGFloat(11)
 
     public static func == (lhs: TextNode, rhs: TextNode) -> Bool {
         return lhs === rhs
