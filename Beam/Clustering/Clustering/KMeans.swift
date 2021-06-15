@@ -1,5 +1,6 @@
 // Code taken from Swift Algorithm Clum (https://github.com/raywenderlich/swift-algorithm-club).
 // Code was copied instead of cloned because of the size of the full repository.
+// The functions allDistances and chooseCenters are in-house additions
 
 import Foundation
 
