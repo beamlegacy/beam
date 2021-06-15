@@ -12,7 +12,7 @@
   --Mercury-Light: #f0f0f2;
   --Mercury-Dark: #fafafa;
   --Beam: #3700ff;
-  --Beam-Light: rgba(55, 0, 255, 0.08);
+  --Beam-Light: rgba(55, 0, 255, 0.13);
   --Bluetiful: #1179cf;
   --Charmed-Green: #0e8763;
   --Sanskrit: #ff9900;
@@ -51,6 +51,15 @@ html {
 
 body {
   padding: 0 1rem;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin-top: unset;
 }
 
 a {
@@ -169,4 +178,72 @@ figcaption {
   background-color: var(--Background-Light);
   padding: .4rem .7rem;
   font-size: .8rem;
+}
+
+
+.flex {
+  display: flex;           /* establish flex container */
+  flex-direction: column;  /* make main axis vertical */
+  justify-content: center; /* center items vertically, in this case */
+  align-items: center;     /* center items horizontally, in this case */
+  width: 100%;
+  height: 100vh;
+}
+
+form {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: .4rem;
+}
+
+form .form-row,
+.form-response {
+  display: grid;
+  grid-template-columns: 10ch 1fr;
+  gap: 1rem;
+}
+
+.form-result,
+form {
+  width: 400px;
+}
+
+.form-result {
+  background-color: var(--Background-Light);
+  padding: .5rem;
+  margin-bottom: .5rem;
+  border-radius: 4px;
+}
+
+.input-name {
+  text-transform: capitalize;
+}
+
+form label {
+  cursor: pointer;
+}
+
+form input {
+  height: 1.6rem;
+}
+
+input[type="submit"] {
+  all: unset;
+  cursor: pointer;
+  grid-column: 1/-1;
+  width: 100%;
+  background-color: var(--Beam);
+  color: var(--Background);
+  border-radius: 4px;
+  text-align: center;
+  height: 2rem;
+}
+
+input {
+  color: inherit;
+  background-color: var(--Background-Light);
+  border: unset;
+  border-bottom: 1px solid;
+  border-radius: 4px;
+  padding-left: .5rem;
 }

@@ -16,6 +16,8 @@ struct CredentialsConfirmationToast: View {
             Text(saved ? "Username & Password Saved" : "Username & Password Updated")
                 .font(BeamFont.medium(size: 13).swiftUI)
                 .foregroundColor(BeamColor.Generic.text.swiftUI)
+                .accessibility(addTraits: .isStaticText)  
+                .accessibility(identifier: "CredentialsConfirmationToast")
         }.padding()
     }
 }

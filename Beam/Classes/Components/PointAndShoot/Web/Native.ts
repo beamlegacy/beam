@@ -44,7 +44,6 @@ export class Native {
    *        An "href" property will always be added as the base URI of the current frame.
    */
   sendMessage(name: string, payload: {}) {
-    this.log("sendMessage", name, payload, this.href)
     const messageKey = `pointAndShoot_${name}`
     const messageHandler = this.messageHandlers[messageKey]
     if (messageHandler) {

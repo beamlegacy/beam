@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Password Manager Test Fixture - Login</title>
+  <link rel="stylesheet" href="Beam.css" />
+</head>
+
+<body>
+  <div class="flex">
+    <div class="form-result">
+      <h3>Form data:</h3>
+    </div>
+    <form action="" method="get">
+      <h3>Login Form:</h3>
+      <div class="form-row">
+        <label for="email">Username</label>
+        <input type="email" name="email" id="email" required autocomplete="email">
+      </div>
+      <div class="form-row">
+        <label for="password">Password</label>
+        <input type="password" name="password" id="password" required autocomplete="current-password">
+      </div>
+      <div class="form-row">
+        <input type="submit" value="Submit">
+      </div>
+    </form>
+    
+  </div>
+  <script>
+    let search = window.location.search
+    if (!search) {
+      document.querySelector(".form-result").remove()
+    }
+
+    var searchParams = new URLSearchParams(search);
+
+    //Iterate the search parameters.
+    if (search) {
+      document.querySelector("form").remove()
+    }
+
+    for (let p of searchParams) {
+      document.querySelector(".form-result").insertAdjacentHTML("beforeend", `<div class="form-response">
+        <span class="input-name">${p[0]}</span>
+        <span class="input-value">${p[1]}</span>
+      </div>`)
+    }
+  </script>
+</body>
+
+</html>

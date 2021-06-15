@@ -159,7 +159,7 @@ class PasswordOverlayController: WebPageHolder {
         let script = "beam_getElementRects('[\"\(elementId)\"]')"
         page.executeJS(script, objectName: nil).then { jsResult in
             if let jsonString = jsResult as? String, let jsonData = jsonString.data(using: .utf8), let rects = try? self.decoder.decode([DOMRect?].self, from: jsonData), let rect = rects.first??.rect {
-                let frame = CGRect(x: rect.minX, y: rect.minY + rect.height, width: rect.width, height: 0)
+                let frame = CGRect(x: rect.minX, y: rect.minY + rect.height, width: rect.width, height: rect.height)
                 completion(frame)
             } else {
                 completion(nil)
@@ -177,11 +177,14 @@ class PasswordOverlayController: WebPageHolder {
     }
 
     func handleWebFormSubmit() {
-        let ids = autocompleteContext.allInputFields.map(\.id)
+        let fields = autocompleteContext.allInputFields
+        let ids = fields.map(\.id)
         let formattedList = ids.map { "\"\($0)\"" }.joined(separator: ",")
         let script = "beam_getTextFieldValues('[\(formattedList)]')"
         page.executeJS(script, objectName: nil).then { jsResult in
-            if let jsonString = jsResult as? String, let jsonData = jsonString.data(using: .utf8), let values = try? self.decoder.decode([String].self, from: jsonData) {
+            if let jsonString = jsResult as? String,
+               let jsonData = jsonString.data(using: .utf8),
+               let values = try? self.decoder.decode([String].self, from: jsonData) {
                 let dict = Dictionary(uniqueKeysWithValues: zip(ids, values))
                 self.updateStoredValues(dict)
             } else {
@@ -190,8 +193,21 @@ class PasswordOverlayController: WebPageHolder {
         }
     }
 
+    fileprivate func getPageHost() -> String? {
+        guard let host = page.url?.minimizedHost else {
+            if let url = page.url?.absoluteString,
+               url.starts(with: "file:///"),
+                let localfile = url.split(separator: "/").last,
+                let localfileWithoutQueryparams = localfile.split(separator: "?").first {
+                return String(localfileWithoutQueryparams)
+            }
+            return nil
+        }
+        return host
+    }
+
     private func updateStoredValues(_ values: [String: String]) {
-        guard let host = page.url?.minimizedHost else { return }
+        guard let host = getPageHost() else { return }
         guard let (loginFieldIds, passwordFieldIds) = passwordFieldIdsForStorage() else {
             Logger.shared.logDebug("Login/password fields not found")
             return
@@ -203,17 +219,19 @@ class PasswordOverlayController: WebPageHolder {
         Logger.shared.logDebug("FOUND login: \(login), password: \(password)")
         passwordStore.password(host: host, username: login) { storedPassword in
             if let storedPassword = storedPassword {
-                if password != storedPassword {
+                if password != storedPassword && password.count > 2 && login.count > 2 {
                     if let browserTab = (self.page as? BrowserTab) {
                         browserTab.passwordManagerToast(saved: false)
                     }
                     self.passwordStore.save(host: host, username: login, password: password)
                 }
             } else {
-                if let browserTab = (self.page as? BrowserTab) {
-                    browserTab.passwordManagerToast(saved: true)
+                if password.count > 2 && login.count > 2 {
+                    if let browserTab = (self.page as? BrowserTab) {
+                        browserTab.passwordManagerToast(saved: true)
+                    }
+                    self.passwordStore.save(host: host, username: login, password: password)
                 }
-                self.passwordStore.save(host: host, username: login, password: password)
             }
         }
     }
@@ -233,6 +251,7 @@ class PasswordOverlayController: WebPageHolder {
             usernameIds = []
         }
         usernameIds += inputFields.filter { $0.role == .currentUsername }.map(\.id)
+        usernameIds += inputFields.filter { $0.role == .email }.map(\.id)
         guard !usernameIds.isEmpty else {
             return nil
         }

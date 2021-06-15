@@ -35,9 +35,10 @@ struct DOMInputElement: Codable, Equatable, Hashable {
 }
 
 enum DOMInputAutocomplete: String, Codable {
-    case off
-    case email
-    case username
+    case off = "off"
+    case on = "on"
+    case email = "email"
+    case username = "username"
     case newPassword = "new-password"
     case currentPassword = "current-password"
 }
