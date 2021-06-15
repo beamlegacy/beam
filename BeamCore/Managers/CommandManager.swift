@@ -102,13 +102,13 @@ public class CommandManager<Context> {
 
     @discardableResult
     public func run(command: Command<Context>, on context: Context?) -> Bool {
-        Logger.shared.logDebug("Run: \(command.name)")
+        Logger.shared.logDebug("Run: \(command.name)", category: .commandManager)
         let done = command.run(context: context)
 
         if done && !groupFailed {
             appendToDone(command: command)
         } else {
-            Logger.shared.logDebug("\(command.name) run failed")
+            Logger.shared.logDebug("\(command.name) run failed", category: .commandManager)
             guard groupCmd.isEmpty else {
                 groupFailed = true
                 endGroup()
@@ -124,10 +124,10 @@ public class CommandManager<Context> {
         }
 
         guard let lastCmd = doneQueue.last else { return false }
-        Logger.shared.logDebug("Undo: \(lastCmd.name)")
+        Logger.shared.logDebug("Undo: \(lastCmd.name)", category: .commandManager)
 
         guard lastCmd.undo(context: context) else {
-            Logger.shared.logDebug("\(lastCmd.name) undo failed")
+            Logger.shared.logDebug("\(lastCmd.name) undo failed", category: .commandManager)
             return false
         }
 
@@ -142,10 +142,10 @@ public class CommandManager<Context> {
         }
 
         guard let lastCmd = undoneQueue.last else { return false }
-        Logger.shared.logDebug("Redo: \(lastCmd.name)")
+        Logger.shared.logDebug("Redo: \(lastCmd.name)", category: .commandManager)
 
         guard lastCmd.run(context: context) else {
-            Logger.shared.logDebug("\(lastCmd.name) redo failed")
+            Logger.shared.logDebug("\(lastCmd.name) redo failed", category: .commandManager)
             return false
         }
 
