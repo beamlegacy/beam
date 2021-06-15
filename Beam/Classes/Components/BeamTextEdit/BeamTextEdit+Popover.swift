@@ -129,9 +129,9 @@ extension BeamTextEdit {
         }
 
         let range = startPosition - popoverPrefix ..< cursorPosition + popoverSuffix
-        node.text.setAttributes([.internalLink(linkText)], to: range)
         switch popover.mode {
         case .internalLink:
+            node.text.setAttributes([.internalLink(linkText)], to: range)
             let items = linkText.isEmpty ?
                 documentManager.loadAllWithLimit(BeamTextEdit.queryLimit, [NSSortDescriptor(key: "created_at", ascending: false)]) :
                 documentManager.documentsWithLimitTitleMatch(title: linkText, limit: BeamTextEdit.queryLimit)
