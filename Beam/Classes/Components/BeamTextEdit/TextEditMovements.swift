@@ -213,10 +213,13 @@ extension TextRoot {
 
     @discardableResult
     public func selectAllNodes() -> Bool {
-        guard let selection = root?.state.nodeSelection else {
-            startNodeSelection()
-            return true
+        let alreadySelectingNodes = root?.state.nodeSelection != nil
+        guard let selection = startNodeSelection() else {
+            return false
         }
+
+        // If we are starting the selection we need to bail out now: we have just seleted the first node
+        guard alreadySelectingNodes else { return true }
 
         if let proxyNodeStart = selection.start as? ProxyNode, selection.isSelectingProxy {
             let parent = proxyNodeStart.highestParent()
@@ -235,7 +238,7 @@ extension TextRoot {
     @discardableResult
     public func selectAllNodesHierarchically() -> Bool {
         guard let selection = root?.state.nodeSelection else {
-            startNodeSelection()
+            _ = startNodeSelection()
             return true
         }
 
@@ -256,8 +259,7 @@ extension TextRoot {
     }
 
     public func selectAll() {
-        textIsSelected = true
-        _ = selectAllNodes()
+        selectAllText()
     }
 
     public func selectAllText() {
@@ -333,7 +335,7 @@ extension TextRoot {
             selection.extendUp()
             editor.setHotSpotToNode(selection.end)
         } else {
-            startNodeSelection()
+            _ = startNodeSelection()
         }
     }
 
@@ -342,16 +344,22 @@ extension TextRoot {
             selection.extendDown()
             editor.setHotSpotToNode(selection.end)
         } else {
-            startNodeSelection()
+            _ = startNodeSelection()
         }
     }
 
-    func startNodeSelection() {
+    func startNodeSelection() -> NodeSelection? {
+        if let selection = root?.state.nodeSelection {
+            return selection
+        }
+
         guard let node = focusedWidget as? TextNode,
-              node.placeholder.isEmpty || !node.text.isEmpty else { return }
+              node.placeholder.isEmpty || !node.text.isEmpty else { return nil }
         node.updateActionLayerVisibility(hidden: true)
-        root?.state.nodeSelection = NodeSelection(start: node, end: node)
+        let selection = NodeSelection(start: node, end: node)
+        root?.state.nodeSelection = selection
         cancelSelection()
+        return selection
     }
 
     func cancelNodeSelection() {
