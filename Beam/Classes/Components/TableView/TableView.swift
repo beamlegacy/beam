@@ -4,6 +4,7 @@
 //
 //  Created by Remi Santos on 31/03/2021.
 //
+// swiftlint:disable file_length
 
 import SwiftUI
 

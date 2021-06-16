@@ -10,6 +10,8 @@
 import Foundation
 import BeamCore
 
+// swiftlint:disable file_length
+
 public extension BeamElement {
     var treeDepth: Int {
         return (children.map({ child -> Int in

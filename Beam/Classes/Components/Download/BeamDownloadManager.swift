@@ -32,6 +32,7 @@ public class BeamDownloadManager: NSObject, DownloadManager, ObservableObject {
         setProgressPublisher()
     }
 
+    // swiftlint:disable:next cyclomatic_complexity function_body_length
     func downloadURLs(_ urls: [URL], headers: [String: String], completion: @escaping ([DownloadManagerResult]) -> Void) {
         let dispatchGroup = DispatchGroup()
         var results = [(index: Int, result: DownloadManagerResult)]()

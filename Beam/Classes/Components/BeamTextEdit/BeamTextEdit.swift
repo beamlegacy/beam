@@ -1200,7 +1200,7 @@ public extension CALayer {
             }
         } else {
             if widgets.count > 0 {
-                rootNode?.startNodeSelection()
+                _ = rootNode?.startNodeSelection()
             }
             return
         }

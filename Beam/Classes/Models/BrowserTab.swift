@@ -5,6 +5,8 @@ import WebKit
 import BeamCore
 import Promises
 
+// swiftlint:disable file_length
+
 @objc class BrowserTab: NSObject, ObservableObject, Identifiable, Codable, WebPage, Scorable {
     var id: UUID
 

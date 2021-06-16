@@ -44,6 +44,7 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
         super.init(config: config, messages: PointAndShootMessages.self, jsFileName: "index_prod")
     }
 
+    // swiftlint:disable:next cyclomatic_complexity function_body_length
     override func onMessage(messageName: String, messageBody: Any?, from webPage: WebPage) {
         do {
             guard let messageKey = PointAndShootMessages(rawValue: messageName) else {

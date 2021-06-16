@@ -62,6 +62,7 @@ extension BeamTextEdit {
         setPasteboard()
     }
 
+    // swiftlint:disable:next function_body_length
     private func setPasteboard() {
         let pasteboard = NSPasteboard.general
         pasteboard.clearContents()

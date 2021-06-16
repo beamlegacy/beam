@@ -3,6 +3,7 @@ import Fakery
 import BeamCore
 
 class BeamUITestsMenuGenerator {
+    // swiftlint:disable:next cyclomatic_complexity
     func executeCommand(_ command: MenuAvailableCommands) {
         switch command {
             case .populateDBWithJournal: populateWithJournalNote(count: 10)
