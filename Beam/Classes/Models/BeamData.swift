@@ -108,11 +108,17 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
             self.index.append(document: tabToIndex.document)
 
             guard let clusteringManager = self.clusteringManager,
-                  let id = tabToIndex.currentTabTree?.current.link else { return }
+                  var id = tabToIndex.currentTabTree?.current.link else { return }
             var parentId = tabToIndex.currentTabTree?.current.parent?.link
             if let parent = tabToIndex.currentTabTree?.current.parent,
                parent.events.contains(where: { $0.type == .searchBarNavigation }) {
                 parentId = nil
+            }
+            if let current = tabToIndex.currentTabTree?.current,
+               current.events.contains(where: { $0.type == .openLinkInNewTab }),
+               let tabTree = tabToIndex.tabTree?.current.link {
+                parentId = id
+                id = tabTree
             }
             if let previousTabTree = tabToIndex.previousTabTree,
                previousTabTree.current.events.contains(where: { $0.type == .openLinkInNewTab }) {
