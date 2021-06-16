@@ -118,7 +118,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
                previousTabTree.current.events.contains(where: { $0.type == .openLinkInNewTab }) {
                 parentId = previousTabTree.current.link
             }
-            
+
             clusteringManager.addPage(id: id, parentId: parentId, value: tabToIndex)
         }.store(in: &scope)
 
