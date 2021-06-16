@@ -71,8 +71,8 @@ class AutocompleteManager: ObservableObject {
     }
 
     private func autocompleteHistoryResults(for query: String) -> [AutocompleteResult] {
-        return self.beamData.index.search(string: query, options: [.levenshtein]).map {
-            var urlString = $0.source
+        self.beamData.indexer.searchHistory(query: query).map {
+            var urlString = $0.url
             let url = URL(string: urlString)
             if let url = url {
                 urlString = url.urlStringWithoutScheme
@@ -118,7 +118,7 @@ class AutocompleteManager: ObservableObject {
 
         var finalResults = [AutocompleteResult]()
 
-        // #1 Exisiting Notes
+        // #1 Existing Notes
         var notesNamesResults = autocompleteNotesResults(for: searchText)
         // #2 Notes contents
         let notesContentsResults = autocompleteNotesContentsResults(for: searchText, excludingNotes: notesNamesResults)

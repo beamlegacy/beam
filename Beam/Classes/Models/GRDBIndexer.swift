@@ -53,12 +53,30 @@ extension BeamElementRecord: MutablePersistableRecord {
 
 class GRDBIndexer {
     var dbQueue: DatabasePool
-    init(path: String) throws {
+
+    /// Compute the DB filename based on the CI JobID.
+    /// - Parameter dataDir: URL of the directory storing the database.
+    static func storeURLFromEnv(dataDir: URL) -> URL {
+        var suffix = "-\(Configuration.env)"
+        if let jobId = ProcessInfo.processInfo.environment["CI_JOB_ID"] {
+            Logger.shared.logDebug("Using Gitlab CI Job ID for GRDB sqlite file: \(jobId)", category: .search)
+
+            suffix = "\(Configuration.env)-\(jobId)"
+        }
+
+        return dataDir.appendingPathComponent("GRDB\(suffix).sqlite")
+    }
+
+    init(dataDir: URL) throws {
+        let path = Self.storeURLFromEnv(dataDir: dataDir).string
         let configuration = GRDB.Configuration()
 
         dbQueue = try DatabasePool(path: path, configuration: configuration)
+        try createDatabases(db: dbQueue)
+    }
+
+    func createDatabases(db: DatabasePool) throws {
         try dbQueue.write { db in
-            // Create full-text tables
             try db.create(virtualTable: "BeamElementRecord", ifNotExists: true, using: FTS4()) { t in // or FTS3(), or FTS5()
 //                t.compress = "zip"
 //                t.uncompress = "unzip"
@@ -66,6 +84,23 @@ class GRDBIndexer {
                 t.column("title")
                 t.column("uid")
                 t.column("text")
+            }
+
+            try db.create(table: "HistoryUrlRecord", ifNotExists: true) { t in
+                t.column("url", .text).primaryKey()
+                t.column("last_visited_at", .date)
+                t.column("title", .text)
+                t.column("content", .text)
+            }
+
+            // Index title and text in FTS from HistoryUrlRecord.
+            if try !db.tableExists("HistoryUrlContent") {
+                try db.create(virtualTable: "HistoryUrlContent", using: FTS4()) { t in
+                    t.synchronize(withTable: "HistoryUrlRecord")
+                    t.tokenizer = .unicode61()
+                    t.column("title")
+                    t.column("content")
+                }
             }
         }
     }
@@ -156,7 +191,99 @@ class GRDBIndexer {
     func clear() throws {
         try dbQueue.write { db in
             try db.execute(sql: "DELETE FROM BeamElementRecord")
+            try db.execute(sql: "DELETE FROM HistoryUrlRecord")
+            try db.execute(sql: "DELETE FROM HistoryUrlContent")
+            try db.dropFTS4SynchronizationTriggers(forTable: "HistoryUrlRecord")
         }
     }
 
+    // MARK: - History
+
+    /// Register the URL in the history table associated with a `last_visited_at` timestamp.
+    /// - Parameter url: URL to the page
+    /// - Parameter title: Title of the page indexed in FTS
+    /// - Parameter text: Content of the page indexed in FTS
+    func insertHistoryUrl(url: String, title: String, content: String?) throws {
+        try dbQueue.write { db in
+            try db.execute(sql: "INSERT OR REPLACE INTO HistoryUrlRecord (url, title, content, last_visited_at) VALUES (?, ?, ?, datetime('now'))",
+                           arguments: [url, title, content ?? ""])
+        }
+    }
+
+    struct HistorySearchResult {
+        var title: String
+        var url: String
+    }
+
+    func searchHistory(query: String, prefixLast: Bool = true) -> [HistorySearchResult] {
+        guard var pattern = FTS3Pattern(matchingAnyTokenIn: query) else { return [] }
+        if prefixLast {
+            guard let prefixLastPattern = try? FTS3Pattern(rawPattern: pattern.rawPattern + "*") else { return [] }
+            pattern = prefixLastPattern
+        }
+
+        do {
+            let results = try dbQueue.read { db -> [HistorySearchResult] in
+                let request = HistoryUrlRecord.joining(required: HistoryUrlRecord.content.matching(pattern))
+                return try request.fetchAll(db).map { record -> HistorySearchResult in
+                    HistorySearchResult(title: record.title, url: record.url)
+                }
+            }
+            return results
+        } catch {
+            Logger.shared.logError("history search failure: \(error)", category: .search)
+            return []
+        }
+    }
+}
+
+struct HistoryUrlRecord {
+    var id: Int64?
+    var title: String
+    var url: String
+    var content: String
+}
+
+// SQL generation
+extension HistoryUrlRecord: TableRecord {
+    /// The table columns
+    enum Columns: String, ColumnExpression {
+        case id, url, title, content
+    }
+}
+
+// Fetching methods
+extension HistoryUrlRecord: FetchableRecord {
+    /// Creates a record from a database row
+    init(row: Row) {
+        id = row[Columns.id]
+        url = row[Columns.url]
+        title = row[Columns.title]
+        content = row[Columns.content] ?? ""
+    }
+}
+
+// FTS search
+extension HistoryUrlRecord {
+    struct FTS: TableRecord {
+        static let databaseTableName = "HistoryUrlContent"
+    }
+
+    // Association to perform a key join on both `rowid` columns.
+    static let content = hasOne(FTS.self, using: ForeignKey(["rowid"], to: ["rowid"]))
+}
+
+extension HistoryUrlRecord: MutablePersistableRecord {
+    /// The values persisted in the database
+    func encode(to container: inout PersistenceContainer) {
+        container[Columns.id] = id
+        container[Columns.url] = url
+        container[Columns.title] = title
+        container[Columns.content] = content
+    }
+
+    // Update auto-incremented id upon successful insertion
+    mutating func didInsert(with rowID: Int64, for column: String?) {
+        id = rowID
+    }
 }

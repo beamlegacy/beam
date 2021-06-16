@@ -11,6 +11,96 @@ import XCTest
 @testable import Beam
 @testable import BeamCore
 
+class GRDBIndexerHistoryTests: XCTestCase {
+    var indexer : GRDBIndexer! = nil
+
+    override func setUpWithError() throws {
+        let (tmpDir, _) = try FileManager.default.urlForUniqueTemporaryDirectory()
+        self.indexer = try GRDBIndexer(dataDir: tmpDir)
+    }
+
+    /// Check the indexer can create and reopen the database.
+    func testGRDBIndexerDBReopen() throws {
+        let (tmpDir, _) = try FileManager.default.urlForUniqueTemporaryDirectory()
+        _ = try GRDBIndexer(dataDir: tmpDir)
+        _ = try GRDBIndexer(dataDir: tmpDir)
+    }
+
+    func testSearchHistory() throws {
+        for history in [
+            (url: "https://macg.co", title: "Avec macOS Monterey, le Mac devient un récepteur AirPlay", content: """
+La recopie vidéo est également au menu depuis le centre de contrôle de l'appareil iOS. Le Mac prend en charge l'affichage portrait et paysage, et depuis l'app Photos, les clichés peuvent occuper le maximum d'espace possible sur l'écran de l'ordinateur (en zoomant sur l'iPhone, la photo s'agrandira sur le Mac).
+""" ),
+            (url: "https://doesnotexists.co", title: "", content: nil),
+            (url: "https://unicode-separator.com", title: "foo·bar", content: nil)
+        ] {
+            try indexer.insertHistoryUrl(url: history.url, title: history.title, content: history.content)
+        }
+
+        // Match `Monterey` on title.
+        var matches = indexer.searchHistory(query: "Monterey")
+        expect(matches.count) == 1
+        expect(matches[0].url) == "https://macg.co"
+
+        // Match `iPhone` on page content.
+        matches = indexer.searchHistory(query: "iPhone")
+        expect(matches.count) == 1
+        expect(matches[0].url) == "https://macg.co"
+
+        // Prefix match `iPh` on page content.
+        matches = indexer.searchHistory(query: "iPh")
+        expect(matches.count) == 1
+        expect(matches[0].url) == "https://macg.co"
+
+        // Prefix match on last token - anyToken match
+        matches = indexer.searchHistory(query: "max pho")
+        expect(matches.count) == 1
+        expect(matches[0].url) == "https://macg.co"
+        matches = indexer.searchHistory(query: "max nothing")
+        expect(matches.count) == 0
+
+        // Match with diacritic `écran` on page content.
+        matches = indexer.searchHistory(query: "écran")
+        expect(matches.count) == 1
+        expect(matches[0].url) == "https://macg.co"
+
+        // Match with diacritic `ecran` on page content.
+        // Expect the page content to be normalized after tokenization.
+        matches = indexer.searchHistory(query: "ecran")
+        expect(matches.count) == 1
+        expect(matches[0].url) == "https://macg.co"
+
+        // Match token `bar` on page content.
+        // Expect the unicode `·` to be treated as a separator during tokenization.
+        matches = indexer.searchHistory(query: "bar")
+        expect(matches.count) == 1
+        expect(matches[0].url) == "https://unicode-separator.com"
+    }
+
+    /// When a URL is visited multiple times. Searching the DB must the result once.
+    func testSearchHistoryIsUnique() throws {
+        for history in [
+            (url: "https://www.lemonde.fr/", title: "Le Monde.fr", content: ""),
+            (url: "https://www.lemonde.fr/", title: "Le Monde.fr", content: nil),
+            (url: "https://macg.co/article1", title: "", content: "macOS Monterey, le Mac devient un récepteur AirPlay"),
+            (url: "https://macg.co/article2", title: "", content: "Le Mac prend en charge l'affichage portrait et paysage"),
+        ] {
+            try indexer.insertHistoryUrl(url: history.url, title: history.title, content: history.content)
+        }
+
+        // Match `Monterey` on title.
+        var matches = indexer.searchHistory(query: "Monde")
+        expect(matches.count) == 1
+        expect(matches[0].url) == "https://www.lemonde.fr/"
+
+        // Match `Mac` in the content. URLs are expected to be different.
+        matches = indexer.searchHistory(query: "Mac")
+        expect(matches.count) == 2
+        expect(matches[0].url) == "https://macg.co/article1"
+        expect(matches[1].url) == "https://macg.co/article2"
+    }
+}
+
 class GRDBIndexerTests: XCTestCase {
     ///< Basic note content to check FTS behaviour.
     lazy var note: BeamNote = {
@@ -31,7 +121,8 @@ class GRDBIndexerTests: XCTestCase {
     var indexer : GRDBIndexer! = nil
 
     override func setUpWithError() throws {
-        self.indexer = try GRDBIndexer(path: TemporaryFile(creatingTempDirectoryForFilename: "testDB").fileURL.path)
+        let (tmpDir, _) = try FileManager.default.urlForUniqueTemporaryDirectory()
+        self.indexer = try GRDBIndexer(dataDir: tmpDir)
         XCTAssertNoThrow(try indexer.append(note: note), "note indexing failed")
     }
 
