@@ -33,15 +33,20 @@ class ClusteringTests: XCTestCase {
         let cluster = Cluster()
         var page1 = Page(id: 0, parentId: 0, title: "Page 1", content: "A man is eating food.")
         var page2 = Page(id: 1, parentId: 0, title: "Page 2", content: "A man is eating a piece of bread.")
+        
+        if let content1 = page1.content,
+           let content2 = page2.content {
+                page1.textEmbedding = cluster.textualEmbeddingComputationWithNLEmbedding(text: content1)
+                cluster.pages.append(page1)
 
-        page1.textRepresentation = cluster.textualEmbeddingComputationWithNLEmbedding(text: page1.content!)
-        cluster.pages.append(page1)
+                page2.textEmbedding = cluster.textualEmbeddingComputationWithNLEmbedding(text: content2)
+                cluster.pages.append(page2)
+                
+            let scores = cluster.scoreTextualEmbedding(textualEmbedding: page2.textEmbedding ?? [0.0])
 
-        page2.textRepresentation = cluster.textualEmbeddingComputationWithNLEmbedding(text: page2.content!)
-        cluster.pages.append(page2)
-        let scores = cluster.scoreTextualEmbedding(textualEmbedding: page2.textRepresentation ?? [0.0])
-
-        XCTAssert(scores == [0.8294351697354535])
+                XCTAssert(scores == [0.8294351697354535])
+        }
+        
     }
 
     // Test the score computation across all the known pages with non English content
@@ -54,20 +59,18 @@ class ClusteringTests: XCTestCase {
         if let content1 = page1.content,
            let content2 = page2.content,
            let content3 = page3.content {
-            let textualEmbedding1 = cluster.textualEmbeddingComputationWithNLEmbedding(text: content1)
-            page1.textRepresentation = textualEmbedding1
-            cluster.pages.append(page1)
+                page1.textEmbedding = cluster.textualEmbeddingComputationWithNLEmbedding(text: content1)
+                cluster.pages.append(page1)
 
-            let textualEmbedding2 = cluster.textualEmbeddingComputationWithNLEmbedding(text: content2)
-            page2.textRepresentation = textualEmbedding2
-            cluster.pages.append(page2)
+                page2.textEmbedding = cluster.textualEmbeddingComputationWithNLEmbedding(text: content2)
+                cluster.pages.append(page2)
 
-            let textualEmbedding3 = cluster.textualEmbeddingComputationWithNLEmbedding(text: content3)
-            page3.textRepresentation = textualEmbedding3
-            cluster.pages.append(page3)
-            let scores = cluster.scoreTextualEmbedding(textualEmbedding: textualEmbedding3 ?? [0.0])
+                page3.textEmbedding = cluster.textualEmbeddingComputationWithNLEmbedding(text: content3)
+                cluster.pages.append(page3)
+                
+                let scores = cluster.scoreTextualEmbedding(textualEmbedding: page3.textEmbedding ?? [0.0])
 
-            XCTAssert(scores == [0.26489349244685784, 0.0])
+                XCTAssert(scores == [0.26489349244685784, 0.0])
         }
     }
 
@@ -80,8 +83,7 @@ class ClusteringTests: XCTestCase {
 
         // Simulate the first page of the navigation
         if let content = page1.content {
-            let textualEmbedding = cluster.textualEmbeddingComputationWithNLEmbedding(text: content)
-            page1.textRepresentation = textualEmbedding
+            page1.textEmbedding = cluster.textualEmbeddingComputationWithNLEmbedding(text: content)
             cluster.pages.append(page1)
 
             // Add a second page
@@ -108,8 +110,7 @@ class ClusteringTests: XCTestCase {
 
         // Simulate the first page of the navigation
         if let content = page1.content {
-            let textualEmbedding = cluster.textualEmbeddingComputationWithNLEmbedding(text: content)
-            page1.textRepresentation = textualEmbedding
+            page1.textEmbedding = cluster.textualEmbeddingComputationWithNLEmbedding(text: content)
             cluster.pages.append(page1)
 
             // Add a second page
@@ -127,11 +128,14 @@ class ClusteringTests: XCTestCase {
         }
     }
 
+
     // Integration test for testing the whole textual similarity pipeline
     // swiftlint:disable:next cyclomatic_complexity function_body_length
     func testTextualSimilarityPipeline() throws {
         let cluster = Cluster()
-        cluster.candidate = 3
+        cluster.matrixCandidate = SimilarityMatrixCandidate.textualSimilarityMatrix
+        cluster.clusteringCandidate = ClusteringCandidate.symetricLaplacian
+        cluster.numClustersCandidate = NumClusterComputationCandidate.biggestDistanceInAbsolute
         let page1 = Page(id: 0, parentId: nil, title: "Page 1", content: "A man is eating food.")
         let page2 = Page(id: 1, parentId: 0, title: "Page 2", content: "The girl is carrying a baby.")
         let page3 = Page(id: 2, parentId: 0, title: "Page 3", content: "A man is eating food.")
@@ -205,7 +209,9 @@ class ClusteringTests: XCTestCase {
     // swiftlint:disable:next cyclomatic_complexity function_body_length
     func testTextualSimilarityPipelineWithNonEnglishContent() throws {
         let cluster = Cluster()
-        cluster.candidate = 3
+        cluster.matrixCandidate = SimilarityMatrixCandidate.textualSimilarityMatrix
+        cluster.clusteringCandidate = ClusteringCandidate.symetricLaplacian
+        cluster.numClustersCandidate = NumClusterComputationCandidate.biggestDistanceInAbsolute
         let page1 = Page(id: 0, parentId: nil, title: "Page 1", content: "A man is eating food.")
         let page2 = Page(id: 1, parentId: 0, title: "Page 2", content: "The girl is carrying a baby.")
         let page3 = Page(id: 2, parentId: 0, title: "Page 3", content: "A man is eating food.")
@@ -288,7 +294,7 @@ class ClusteringTests: XCTestCase {
         // This is a test of the clusterize method. The corrent clustering is [0, 0, 1, 1, 2, 3, 3, 4, 0, 0])
         var i = 0
         let cluster = Cluster()
-        cluster.candidate = 1
+        cluster.clusteringCandidate = ClusteringCandidate.nonNormalizedLaplacian
         var clustersResult = [Int]()
         cluster.adjacencyMatrix = Matrix([[0, 1, 0, 0, 0, 0, 0, 0, 1, 1],
                                                  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -341,7 +347,7 @@ class ClusteringTests: XCTestCase {
     // swiftlint:disable:next function_body_length
     func testRunTimeLargeMatrix() throws {
         let cluster = Cluster()
-        cluster.candidate = 1
+        cluster.matrixCandidate = SimilarityMatrixCandidate.navigationMatrix
         let ids: [UInt64] = Array(0...100)
         for i in 0...99 {
             cluster.pages.append(Page(id:UInt64(i)))
@@ -476,7 +482,7 @@ class ClusteringTests: XCTestCase {
 
     func testChangeCandidate() throws {
         let cluster = Cluster()
-        cluster.candidate = 1
+        cluster.matrixCandidate = SimilarityMatrixCandidate.navigationMatrix
         let ids: [UInt64] = Array(0...5)
         // The ids array is not necessary at the moment as its values are equivalent to their indexes
         // but hopefully in the future we'll have a better way to identify web pages in Beam
