@@ -5,6 +5,13 @@ class BeamWebkitUIDelegateController: NSObject, WKUIDelegate {
 
     weak var webPage: WebPage?
 
+    func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration,
+                 for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
+        guard let url = navigationAction.request.url else { return nil }
+        let newTab = webPage?.createNewTab(url, configuration, setCurrent: true)
+        return newTab?.webView
+    }
+
     func webViewDidClose(_ webView: WKWebView) {
         Logger.shared.logDebug("webView webDidClose", category: .web)
         webPage?.closeTab()

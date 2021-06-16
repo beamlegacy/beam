@@ -12,6 +12,7 @@ import BeamCore
 
 struct TabInformation {
     var url: URL
+    weak var tabTree: BrowsingTree?
     weak var currentTabTree: BrowsingTree?
     weak var previousTabTree: BrowsingTree?
     var document: IndexDocument
@@ -107,7 +108,7 @@ class BrowserTabsManager: ObservableObject {
                         guard let self = self else { return }
                         let indexDocument = IndexDocument(source: url.absoluteString, title: read.title, contents: text)
 
-                        let tabInformation: TabInformation? = TabInformation(url: url, currentTabTree: currentTab?.browsingTree, previousTabTree: self.latestCurrentTab, document: indexDocument, textContent: text, cleanedTextContentForClustering: textForClustering)
+                        let tabInformation: TabInformation? = TabInformation(url: url, tabTree: tab.browsingTree, currentTabTree: currentTab?.browsingTree, previousTabTree: self.latestCurrentTab, document: indexDocument, textContent: text, cleanedTextContentForClustering: textForClustering)
                         self.data.tabToIndex = tabInformation
                         self.latestCurrentTab = nil
                     }
