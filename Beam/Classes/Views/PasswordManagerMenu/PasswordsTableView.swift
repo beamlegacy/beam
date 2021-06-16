@@ -35,7 +35,7 @@ struct PasswordsTableView: View {
 
     private func filterPasswordItemsBy(searchStr: String) -> [PasswordTableViewItem] {
         return allPasswordItems.filter { item in
-            item.username.contains(searchStr)
+            item.username.contains(searchStr) || item.hostInfo.host.contains(searchStr)
         }
     }
 

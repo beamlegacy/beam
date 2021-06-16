@@ -25,7 +25,8 @@ enum PasswordSearchCellMode {
 
 class PasswordManagerMenuViewModel: ObservableObject {
     struct Contents {
-        var entries: [PasswordManagerEntry]
+        var entriesForHost: [PasswordManagerEntry]
+        var allEntries: [PasswordManagerEntry]
         var hasScroll: Bool
         var hasMoreThanOneEntry: Bool
         var userInfo: UserInformations
@@ -52,7 +53,7 @@ class PasswordManagerMenuViewModel: ObservableObject {
         self.userInfoStore = userInfoStore
         self.entriesForHost = []
         self.allEntries = []
-        self.display = Contents(entries: Array(entriesForHost.prefix(1)), hasScroll: false, hasMoreThanOneEntry: entriesForHost.count > 1, userInfo: userInfoStore.get())
+        self.display = Contents(entriesForHost: Array(entriesForHost.prefix(1)), allEntries: allEntries, hasScroll: false, hasMoreThanOneEntry: entriesForHost.count > 1, userInfo: userInfoStore.get())
         if passwordGenerator {
             let passwordGeneratorViewModel = PasswordGeneratorViewModel()
             passwordGeneratorViewModel.delegate = self
@@ -80,7 +81,6 @@ class PasswordManagerMenuViewModel: ObservableObject {
 
     func revealAllItems() {
         guard !revealFullList else { return }
-        revealMoreItemsInList = false
         revealFullList = true
         updateAllEntries()
     }
@@ -89,10 +89,7 @@ class PasswordManagerMenuViewModel: ObservableObject {
         var visibleEntries = Array(entriesForHost.prefix(1))
         visibleEntries = revealMoreItemsInList ? Array(entriesForHost.prefix(3)) : visibleEntries
         let hasScroll = entriesForHost.count == 3
-        if revealFullList && !allEntries.isEmpty {
-            visibleEntries = allEntries
-        }
-        display = Contents(entries: visibleEntries, hasScroll: hasScroll, hasMoreThanOneEntry: entriesForHost.count > 1, userInfo: display.userInfo)
+        display = Contents(entriesForHost: visibleEntries, allEntries: allEntries, hasScroll: hasScroll, hasMoreThanOneEntry: entriesForHost.count > 1, userInfo: display.userInfo)
     }
 
     private func updateAllEntries() {
