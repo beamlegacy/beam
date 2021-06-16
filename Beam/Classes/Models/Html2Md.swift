@@ -308,6 +308,35 @@ func html2Text(url: URL, doc: SwiftSoup.Document) -> BeamText {
     return text.trimming(NSCharacterSet.whitespacesAndNewlines)
 }
 
+func html2TextForClustering(doc: SwiftSoup.Document) -> String {
+    var cleanedText = ""
+
+    do {
+        let paragraphs = try doc.select("p")
+        for paragraph in paragraphs.array() {
+            for node in paragraph.getChildNodes() {
+                if let element = node as? SwiftSoup.Element {
+                    switch element.tagName() {
+                    case "a":
+                        let aText = try element.text()
+                        cleanedText.append(aText)
+                    default:
+                        cleanedText.append("")
+                    }
+                } else {
+                    if let textNode = node as? SwiftSoup.TextNode {
+                        cleanedText.append(textNode.text())
+                    }
+                }
+            }
+        }
+    } catch {
+        Logger.shared.logError("html2TextForClustering: error", category: .document)
+    }
+
+    return cleanedText
+}
+
 extension SwiftSoup.Document {
     func extractLinks() -> [String] {
         do {

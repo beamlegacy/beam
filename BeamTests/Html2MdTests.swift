@@ -7,6 +7,7 @@
 
 import XCTest
 import Foundation
+import SwiftSoup
 @testable import Beam
 
 class Html2MdTests: XCTestCase {
@@ -31,5 +32,20 @@ class Html2MdTests: XCTestCase {
 
         XCTAssertEqual(md, "en orientation dans le cadre d'un processus d'orientation, par ...    [Wikipédia](https://fr.wikipedia.org/wiki/Test_%28psychologie%29)")
     }
-
+    
+    func testHtml2TextForClustering() {
+        let html = """
+        <!DOCTYPE html>
+        <html>
+            <body>
+                <p>This is a paragraph.</p>
+                <p>This is another paragraph.</p>
+            </body>
+        </html>
+        """
+        guard let doc = try? SwiftSoup.parse(html) else { return }
+        let txt = html2TextForClustering(doc: doc)
+        
+        XCTAssertEqual(txt, "This is a paragraph.This is another paragraph.")
+    }
 }

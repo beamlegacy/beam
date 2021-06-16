@@ -33,7 +33,7 @@ class ClusteringManager: ObservableObject {
     }
 
     func addPage(id: UInt64, parentId: UInt64?, value: TabInformation) {
-        let page = Page(id: id, parentId: parentId, title: value.document.title, content: value.textContent)
+        let page = Page(id: id, parentId: parentId, title: value.document.title, content: value.cleanedTextContentForClustering)
         tabsInfo.append(value)
         isClustering = true
         cluster.add(page) { result in
