@@ -19,8 +19,29 @@ public struct Page {
     var parentId: UInt64?
     var title: String?
     var content: String?
-    var textRepresentation: [Double]?
+    var textEmbedding: [Double]?
     var entities: EntitiesInText?
+}
+
+enum ClusteringCandidate {
+    case nonNormalizedLaplacian
+    case randomWalkLaplacian
+    case symetricLaplacian
+    case similarityMatrix
+}
+
+enum SimilarityMatrixCandidate {
+    case navigationMatrix
+    case navigationAndEntities
+    case textualSimilarityMatrix
+    case combinationAllSimilarityMatrix
+    // case combinationAllBinarizedMatrix
+}
+
+enum NumClusterComputationCandidate {
+    case threshold
+    case biggestDistanceInPercentages
+    case biggestDistanceInAbsolute
 }
 
 public class Cluster {
@@ -32,7 +53,11 @@ public class Cluster {
     }
 
     enum CandidateError: Error {
-        case unknownCandidte
+        case unknownCandidate
+    }
+
+    enum MatrixTypeError: Error {
+        case unknownMatrixType
     }
 
     let myQueue = DispatchQueue(label: "clusteringThread")
@@ -48,7 +73,14 @@ public class Cluster {
     let entityTags: [NLTag] = [.personalName, .placeName, .organizationName]
 
     // The following will be deleted before the final product:
+    // Define which affinity (laplacian) matrix to use
+    var clusteringCandidate = ClusteringCandidate.nonNormalizedLaplacian
+    // Define which similarity matrix to use
+    var matrixCandidate = SimilarityMatrixCandidate.navigationMatrix
+    // Define which number of clusters computation to use
+    var numClustersCandidate = NumClusterComputationCandidate.threshold
     var candidate = 1
+    var weights = ["navigation": 0.5, "text": 0.5, "entities": 0.5]
 
     public init() {}
 
@@ -99,8 +131,8 @@ public class Cluster {
             try super.removePage(index: index)
             for i in 0..<self.matrix.rows where connectionsVct[i] == 1.0 {
                 for j in 0..<self.matrix.rows where i != j && connectionsVct[j] == 1.0 {
-                        self.matrix[i, j] = 1.0
-                        self.matrix[j, i] = 1.0
+                    self.matrix[i, j] = 1.0
+                    self.matrix[j, i] = 1.0
                 }
             }
         }
@@ -122,15 +154,15 @@ public class Cluster {
         // This is the 'simplest' non-normalized Laplacian
 
         var laplacian: Matrix
-        switch self.candidate { // This switch takes care of the choice of Laplacian
-        case 1: // Non-normalised graph Laplacian
+        switch self.clusteringCandidate { // This switch takes care of the choice of Laplacian
+        case .nonNormalizedLaplacian: // Non-normalised graph Laplacian
             laplacian = laplacianNn
-        case 2: // Random-walk Laplacian
+        case .randomWalkLaplacian: // Random-walk Laplacian
             laplacian = D1 * laplacianNn
-        case 3: // Symmetric Laplacian
+        case .symetricLaplacian: // Symmetric Laplacian
             laplacian = sqrt(D1) * laplacianNn * sqrt(D1)
-        default:
-            throw CandidateError.unknownCandidte
+        case .similarityMatrix:
+            laplacian = self.adjacencyMatrix
         }
         //TODO: If necessary, add the Laplacian of Zelnik-Manor
 
@@ -143,22 +175,19 @@ public class Cluster {
         var eigenVcts = eigen.V ?? (.All, .Pos(permutation))
 
         var numClusters: Int
-        switch self.candidate { // This switch takes care of the number of total classes
-        case 1: // Threshold
+        switch self.numClustersCandidate { // This switch takes care of the number of total classes
+        case .threshold: // Threshold
             eigenVals.removeAll(where: { $0 > 1e-5 })
             numClusters = eigenVals.count
-        case 2: // Biggest distance in percentages
-            // eigenVals = eigenVals.map( { max($0, 0.0001) } )
+        case .biggestDistanceInPercentages: // Biggest distance in percentages
             let eigenValsDifference = zip(eigenVals, eigenVals.dropFirst()).map { abs(($1 - $0) / max($0, 0.0001)) }
             let maxDifference = eigenValsDifference.max() ?? 0
             numClusters = (eigenValsDifference.firstIndex(of: maxDifference) ?? 0) + 1
-        case 3: // Biggest distance, absolute
+        case .biggestDistanceInAbsolute: // Biggest distance, absolute
             var eigenValsDifference = zip(eigenVals, eigenVals.dropFirst()).map { abs(($1 - $0)) }
-            eigenValsDifference = eigenValsDifference.map( { ($0 * 100).rounded() / 100 } )
+            eigenValsDifference = eigenValsDifference.map { ($0 * 100).rounded() / 100 }
             let maxDifference = eigenValsDifference.max() ?? 0
             numClusters = (eigenValsDifference.firstIndex(of: maxDifference) ?? 0) + 1
-        default:
-            throw CandidateError.unknownCandidte
         }
 
         guard numClusters > 1 else {
@@ -252,10 +281,15 @@ public class Cluster {
     /// - Returns: A list of cosine similarity scores
     func scoreTextualEmbedding(textualEmbedding: [Double]) -> [Double] {
         var scores = [Double]()
+
         for page in pages.dropLast() {
-            if let textualVectorID = page.textRepresentation {
+            // The textual vector might be empty, when the OS is not good or the page content is not in English
+            // then the score will be 0.0
+            if let textualVectorID = page.textEmbedding {
                 scores.append(self.cosineSimilarity(vector1: textualVectorID, vector2: textualEmbedding))
-            } else { scores.append(0.0) }
+            } else {
+                scores.append(0.0)
+            }
         }
         return scores
     }
@@ -278,19 +312,21 @@ public class Cluster {
     ///      - Complete the cache with the newly computed embedding
     ///
     /// - Parameters:
-    ///   - page: the current page to process
+    ///   - pageIndex: the ID of the current page to process
     func textualSimilarityMatrixProcess(pageIndex: Int) throws {
         if let content = pages[pageIndex].content,
            let textualEmbedding = self.textualEmbeddingComputationWithNLEmbedding(text: content) {
-            // if the OS is not good or the page content is not in English
-            // we create a vector of only 0.0 scores
-            let scores = self.scoreTextualEmbedding(textualEmbedding: textualEmbedding)
-            try self.textualSimilarityMatrix.addPage(similarities: scores)
-            self.pages[pageIndex].textRepresentation = textualEmbedding
+                // if the OS is not good or the page content is not in English
+                // we create a vector of only 0.0 scores
+                let scores = self.scoreTextualEmbedding(textualEmbedding: textualEmbedding)
+                try self.textualSimilarityMatrix.addPage(similarities: scores)
+                self.pages[pageIndex].textEmbedding = textualEmbedding
         } else {
             try self.textualSimilarityMatrix.addPage(similarities: [Double](
                                                             repeating: 0.0,
-                                                            count: self.textualSimilarityMatrix.matrix.rows))
+                                                            count: self.textualSimilarityMatrix.matrix.rows
+                                                        )
+                                                    )
         }
 
     }
@@ -326,6 +362,19 @@ public class Cluster {
         return pageIDs.firstIndex(of: pageID)
     }
 
+    func createAdjacencyMatrix() {
+        switch self.matrixCandidate {
+            case .navigationMatrix:
+                self.adjacencyMatrix = self.navigationMatrix.matrix
+            case .navigationAndEntities:
+                self.adjacencyMatrix = (self.weights["navigation"] ?? 0.5) .* self.navigationMatrix.matrix + (self.weights["entities"] ?? 0.5) * 8 .* self.entitiesMatrix.matrix
+            case .textualSimilarityMatrix:
+                self.adjacencyMatrix = self.textualSimilarityMatrix.matrix
+            case .combinationAllSimilarityMatrix:
+                self.adjacencyMatrix = (self.weights["text"] ?? 0.5) .*  self.textualSimilarityMatrix.matrix + (self.weights["entities"] ?? 0.5) .* self.entitiesMatrix.matrix + (self.weights["navigation"] ?? 0.5) .* self.navigationMatrix.matrix
+        }
+    }
+
     // swiftlint:disable:next cyclomatic_complexity function_body_length
     public func add(_ page: Page, completion: @escaping (Result<[[UInt64]], Error>) -> Void) {
         myQueue.async {
@@ -334,9 +383,10 @@ public class Cluster {
                 self.pages.append(page)
 
                 if let content = self.pages[0].content {
-                   if let textualEmbedding = self.textualEmbeddingComputationWithNLEmbedding(text: content) {
-                        self.pages[0].textRepresentation = textualEmbedding
-                   }
+                    if let textualEmbedding = self.textualEmbeddingComputationWithNLEmbedding(text: content) {
+                        self.pages[0].textEmbedding = textualEmbedding
+                    }
+
                     self.pages[0].entities = self.findEntitiesInText(text: content)
                 }
 
@@ -365,6 +415,7 @@ public class Cluster {
 
                 let newPageIndex = self.pages.count
                 self.pages.append(page)
+
                 // Handle Text similarity matrix
                 do {
                     try self.textualSimilarityMatrixProcess(pageIndex: newPageIndex)
@@ -380,16 +431,7 @@ public class Cluster {
                 }
             }
             //Here is where we would add more similarity matrices in the future
-            switch self.candidate {
-                case 1:
-                    self.adjacencyMatrix = self.navigationMatrix.matrix
-                case 2:
-                    self.adjacencyMatrix = self.navigationMatrix.matrix + 8 .* self.entitiesMatrix.matrix
-                case 3:
-                    self.adjacencyMatrix = self.textualSimilarityMatrix.matrix
-                default:
-                    completion(.failure(CandidateError.unknownCandidte))
-            }
+            self.createAdjacencyMatrix()
 
             var predictedClusters = zeros(1, self.adjacencyMatrix.rows).flat.map { Int($0) }
             do {
@@ -441,17 +483,24 @@ public class Cluster {
 
     public func changeCandidate(to candidate: Int, completion: @escaping (Result<[[UInt64]], Error>) -> Void) {
         myQueue.async {
-            self.candidate = candidate
-            switch self.candidate {
-                case 1:
-                    self.adjacencyMatrix = self.navigationMatrix.matrix
-                case 2:
-                    self.adjacencyMatrix = self.navigationMatrix.matrix + 8 .* self.entitiesMatrix.matrix
-                case 3:
-                    self.adjacencyMatrix = self.textualSimilarityMatrix.matrix
-                default:
-                    completion(.failure(CandidateError.unknownCandidte))
+            switch candidate {
+            case 1:
+                self.clusteringCandidate = ClusteringCandidate.nonNormalizedLaplacian
+                self.matrixCandidate = SimilarityMatrixCandidate.navigationMatrix
+                self.numClustersCandidate = NumClusterComputationCandidate.threshold
+            case 2:
+                self.clusteringCandidate = ClusteringCandidate.randomWalkLaplacian
+                self.matrixCandidate = SimilarityMatrixCandidate.navigationAndEntities
+                self.numClustersCandidate = NumClusterComputationCandidate.biggestDistanceInPercentages
+            case 3:
+                self.clusteringCandidate = ClusteringCandidate.randomWalkLaplacian
+                self.matrixCandidate = SimilarityMatrixCandidate.textualSimilarityMatrix
+                self.numClustersCandidate = NumClusterComputationCandidate.biggestDistanceInAbsolute
+            default:
+                completion(.failure(CandidateError.unknownCandidate))
             }
+
+            self.createAdjacencyMatrix()
             var predictedClusters = zeros(1, self.adjacencyMatrix.rows).flat.map { Int($0) }
             do {
                 predictedClusters = try self.clusterize()
