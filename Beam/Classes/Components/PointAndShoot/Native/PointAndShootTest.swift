@@ -242,8 +242,8 @@ class PointAndShootTest: XCTestCase {
         self.pns = PointAndShoot(ui: testUI, scorer: testBrowsingScorer)
         let page = TestWebPage(browsingScorer: testBrowsingScorer,
                                passwordOverlayController: testPasswordOverlayController, pns: pns,
-                               fileStorage: testFileStorage, downloadManager: testDownloadManager
-            , navigationController: navigationController)
+                               fileStorage: testFileStorage, downloadManager: testDownloadManager,
+                               navigationController: navigationController)
         self.testPage = page
         page.browsingScorer.page = page
         page.passwordOverlayController.page = page

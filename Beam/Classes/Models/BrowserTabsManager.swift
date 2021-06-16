@@ -103,7 +103,7 @@ class BrowserTabsManager: ObservableObject {
                     guard let doc = try? SwiftSoup.parse(read.content, url.absoluteString) else { return }
                     text = html2Text(url: url, doc: doc)
                     textForClustering = html2TextForClustering(doc: doc)
-            
+
                     DispatchQueue.main.async { [weak self] in
                         guard let self = self else { return }
                         let indexDocument = IndexDocument(source: url.absoluteString, title: read.title, contents: text)

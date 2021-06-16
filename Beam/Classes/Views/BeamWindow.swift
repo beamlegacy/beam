@@ -42,6 +42,7 @@ class BeamWindow: NSWindow, NSDraggingDestination {
         set { }
     }
 
+    // swiftlint:disable:next function_body_length
     init(contentRect: NSRect, data: BeamData, reloadState: Bool) {
         self.data = data
 

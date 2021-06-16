@@ -33,7 +33,7 @@ class ClusteringTests: XCTestCase {
         let cluster = Cluster()
         var page1 = Page(id: 0, parentId: 0, title: "Page 1", content: "A man is eating food.")
         var page2 = Page(id: 1, parentId: 0, title: "Page 2", content: "A man is eating a piece of bread.")
-        
+
         if let content1 = page1.content,
            let content2 = page2.content {
                 page1.textEmbedding = cluster.textualEmbeddingComputationWithNLEmbedding(text: content1)
@@ -41,12 +41,11 @@ class ClusteringTests: XCTestCase {
 
                 page2.textEmbedding = cluster.textualEmbeddingComputationWithNLEmbedding(text: content2)
                 cluster.pages.append(page2)
-                
+
             let scores = cluster.scoreTextualEmbedding(textualEmbedding: page2.textEmbedding ?? [0.0])
 
                 XCTAssert(scores == [0.8294351697354535])
         }
-        
     }
 
     // Test the score computation across all the known pages with non English content
@@ -67,7 +66,7 @@ class ClusteringTests: XCTestCase {
 
                 page3.textEmbedding = cluster.textualEmbeddingComputationWithNLEmbedding(text: content3)
                 cluster.pages.append(page3)
-                
+
                 let scores = cluster.scoreTextualEmbedding(textualEmbedding: page3.textEmbedding ?? [0.0])
 
                 XCTAssert(scores == [0.26489349244685784, 0.0])
@@ -127,7 +126,6 @@ class ClusteringTests: XCTestCase {
             XCTAssert(cluster.textualSimilarityMatrix.matrix == gsSimilarityMatrix)
         }
     }
-
 
     // Integration test for testing the whole textual similarity pipeline
     // swiftlint:disable:next cyclomatic_complexity function_body_length
@@ -350,7 +348,7 @@ class ClusteringTests: XCTestCase {
         cluster.matrixCandidate = SimilarityMatrixCandidate.navigationMatrix
         let ids: [UInt64] = Array(0...100)
         for i in 0...99 {
-            cluster.pages.append(Page(id:UInt64(i)))
+            cluster.pages.append(Page(id: UInt64(i)))
         }
         // The ids array is not necessary at the moment as its values are equivalent to their indexes
         // but hopefully in the future we'll have a better way to identify web pages in Beam
