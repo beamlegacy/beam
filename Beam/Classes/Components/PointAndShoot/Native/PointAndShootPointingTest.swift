@@ -24,6 +24,7 @@ class PointAndShootPointingTest: PointAndShootTest {
             mouseLocation: NSPoint(x: 201, y: 202),
             html: "<p>Pointed text</p>"
         )
+        self.pns.status = PointAndShootStatus.pointing
         self.pns.point(target: target)
         XCTAssertEqual(self.pns.isPointing, true)
         XCTAssertEqual(self.helperCountUIEvents("drawPoint"), 1)

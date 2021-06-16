@@ -16,10 +16,6 @@ enum PointAndShootMessages: String, CaseIterable {
     case pointAndShoot_point
     case pointAndShoot_cursor
     /**
-     Clears point UI without changing any stored state
-     */
-    case pointAndShoot_hidePoint
-    /**
      Selection of text or block
      */
     case pointAndShoot_select
@@ -81,10 +77,6 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
 
             case PointAndShootMessages.pointAndShoot_point:
                 try onPointMessage(msgPayload: msgPayload, webPage: webPage)
-
-            case PointAndShootMessages.pointAndShoot_hidePoint:
-                guard webPage.pointAndShootAllowed == true else { return }
-                pointAndShoot.hidePoint()
 
             case PointAndShootMessages.pointAndShoot_shoot:
                 guard webPage.pointAndShootAllowed == true else { return }

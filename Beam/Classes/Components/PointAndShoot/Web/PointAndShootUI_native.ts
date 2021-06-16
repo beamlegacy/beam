@@ -272,9 +272,6 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
     } else {
       this.native.sendMessage("cursor", { x, y })
     }
-
-    this.hidePoint(quoteId)
-    // callback()
   }
 
   cursor(x, y) {
@@ -296,10 +293,6 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
   }
 
   unpoint(el) {}
-
-  hidePoint(quoteId = "quoteId") {
-    this.native.sendMessage("hidePoint", quoteId)
-  }
 
   /**
    * Handles select event

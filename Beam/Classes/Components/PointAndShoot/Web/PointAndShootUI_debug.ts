@@ -19,11 +19,6 @@ export class PointAndShootUI_debug implements PointAndShootUI {
     throw new Error("Method not implemented.");
   }
 
-  hidePoint() {
-    this.web.hidePoint()
-    this.native.hidePoint()
-  }
-
   select(selection: BeamCollectedQuote[]) {
     this.web.select(selection)
     this.native.select(selection)

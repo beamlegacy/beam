@@ -207,7 +207,6 @@ class PointAndShoot: WebPageHolder {
     var activeShootGroup: ShootGroup?
 
     func point(target: Target) {
-        executeJS("setStatus('pointing')")
         pointTarget = translateTarget(target: target)
         ui.drawPoint(target: pointTarget!)
         draw()
@@ -217,12 +216,6 @@ class PointAndShoot: WebPageHolder {
         pointTarget = translateTarget(target: target)
         ui.drawCursor(target: pointTarget!)
         draw()
-    }
-
-    /// Hide point removes the UI representation of the PointFrame without changing PNS status
-    func hidePoint() {
-        hidePointing()
-        hideShoot()
     }
 
     /// Removes PointFrame UI and resets the PNS status to .none, only runs when status is .pointing
