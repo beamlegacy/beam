@@ -21,6 +21,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     }
     @Published var journal: [BeamNote] = []
 
+    /// Legacy history indexer
     var index: Index
     var indexer: GRDBIndexer
     var fileDB: BeamFileDB
@@ -47,7 +48,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     }
 
     static var indexPath: URL { return URL(fileURLWithPath: dataFolder + "/index.beamindex") }
-    static var indexerPath: String { return dataFolder + "/index.beamindexer" }
     static var fileDBPath: String { return dataFolder + "/files.db" }
     static var passwordsDBPath: String { return dataFolder + "/passwords.db" }
 
@@ -68,9 +68,9 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         index = Index.loadOrCreate(Self.indexPath)
 
         do {
-            indexer = try GRDBIndexer(path: Self.indexerPath)
+            indexer = try GRDBIndexer(dataDir: URL(fileURLWithPath: Self.dataFolder))
         } catch {
-            Logger.shared.logError("Error while creating the GRDB indexer", category: .search)
+            Logger.shared.logError("Error while creating the GRDB indexer: [\(error)]", category: .search)
             fatalError()
         }
 
@@ -119,6 +119,17 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
                 parentId = previousTabTree.current.link
             }
             clusteringManager.addPage(id: id, parentId: parentId, value: tabToIndex)
+        }.store(in: &scope)
+
+        $tabToIndex.sink { [weak self] tabToIndex in
+            guard let self = self,
+                  let tabToIndex = tabToIndex else { return }
+
+            do {
+                try self.indexer.insertHistoryUrl(url: tabToIndex.url.string, title: tabToIndex.document.title, content: tabToIndex.textContent)
+            } catch {
+                Logger.shared.logError("unable to save history url \(tabToIndex.url.string)", category: .search)
+            }
         }.store(in: &scope)
 
         NotificationCenter.default.addObserver(self,
