@@ -42,10 +42,14 @@ class WebAutocompleteContextTest: XCTestCase {
 
         let results = self.webAutocompleteContext.update(with: inputs)
 
-        XCTAssertEqual(results, ["id-email", "id-password"])
+        XCTAssertTrue(results.contains("id-email"))
+        XCTAssertTrue(results.contains("id-password"))
+        XCTAssertEqual(results.count, 2)
 
         let fields = self.webAutocompleteContext.allInputFields
         let ids = fields.map(\.id)
-        XCTAssertEqual(ids, ["id-email", "id-password"])
+        XCTAssertTrue(ids.contains("id-email"))
+        XCTAssertTrue(ids.contains("id-password"))
+        XCTAssertEqual(ids.count, 2)
     }
 }
