@@ -140,7 +140,7 @@ class PointAndShootShootingTest: PointAndShootTest {
         self.pns.draw()
         XCTAssertEqual(self.pns.status, .shooting)
         XCTAssertEqual(helperCountUIEvents("drawPoint"), 2)
-        XCTAssertEqual(helperCountUIEvents("createGroup"), 7)
+        XCTAssertEqual(helperCountUIEvents("createGroup"), 4)
         XCTAssertEqual(self.testUI.groupsUI.count, 1)    // One shoot UI
         XCTAssertEqual(self.pns.activeShootGroup?.targets.count, 1)   // One current shoot
         XCTAssertEqual(self.pns.shootGroups.count, 1)         // But not validated yet
@@ -154,7 +154,7 @@ class PointAndShootShootingTest: PointAndShootTest {
 
         XCTAssertEqual(self.pns.status, .none)       // Disallow unpoint while shooting
         XCTAssertEqual(helperCountUIEvents("drawPoint"), 2)
-        XCTAssertEqual(helperCountUIEvents("createGroup"), 7)
+        XCTAssertEqual(helperCountUIEvents("createGroup"), 4)
         XCTAssertEqual(self.testUI.groupsUI.count, 0)    // No more shoot UI
         XCTAssertEqual(self.pns.shootGroups.count, 2)         // One shoot group memorized
     }
