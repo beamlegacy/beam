@@ -128,17 +128,22 @@ class ContextMenuFormatterView: FormatterView {
     }
 
     override func pressEnter() -> Bool {
-        guard let selectedIndex = subviewModel.selectedIndex else { return false }
+        guard let selectedIndex = subviewModel.selectedIndex,
+              selectedIndex < displayedItems.count
+        else { return false }
         triggerAction(for: displayedItems[selectedIndex])
         return true
     }
 
     override func inputText(_ text: String) -> Bool {
         let searchText = text.dropFirst(typingPrefix)
+        let hadResults = displayedItems.count > 0
         guard handlesTyping,
               !text.isEmpty,
               !searchText.hasPrefix(" "),
-              !searchText.hasSuffix("  ") else { return false }
+              !searchText.hasSuffix("  "),
+              (hadResults || !searchText.hasSuffix(" "))
+              else { return false }
         updateItemsForSearchText(String(searchText))
         return true
     }
