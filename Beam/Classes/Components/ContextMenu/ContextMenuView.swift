@@ -108,7 +108,7 @@ struct ContextMenuView: View {
                                 item.action?()
                                 viewModel.onSelectMenuItem?()
                             }
-                            .onHover { hovering in
+                            .onHoverOnceVisible { hovering in
                                 if isSelected && !hovering && hoveringIndex == index {
                                     viewModel.selectedIndex = nil
                                 } else if hovering && item.action != nil {
