@@ -31,6 +31,11 @@ Register Device
 fastlane mac tests
 ```
 Run tests
+### mac uitests
+```
+fastlane mac uitests
+```
+Run UI tests
 ### mac dev
 ```
 fastlane mac dev
@@ -51,14 +56,19 @@ fastlane mac notarize_build
 fastlane mac deploy
 ```
 
+### mac ping_sentry
+```
+fastlane mac ping_sentry
+```
+
 ### mac upload_s3
 ```
 fastlane mac upload_s3
 ```
 
-### mac download_previous_file
+### mac publish_release
 ```
-fastlane mac download_previous_file
+fastlane mac publish_release
 ```
 
 ### mac delete_s3

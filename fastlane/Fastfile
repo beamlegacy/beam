@@ -21,6 +21,7 @@ platform :mac do
   lane :lint do
     swiftlint(
       mode: :lint,
+      strict: true,
       config_file: '.swiftlint.yml',
       reporter: "codeclimate",
       ignore_exit_status: true,
