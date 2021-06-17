@@ -16,18 +16,15 @@
 default_platform(:mac)
 xcversion(version: ENV["XCODE_VERSION"])
 
-
-
 platform :mac do
   desc "Run linting"
   lane :lint do
     swiftlint(
-      executable: './Pods/SwiftLint/swiftlint',
       mode: :lint,
-      strict: true,
       config_file: '.swiftlint.yml',
-      reporter: "json",
-      output_file: "fastlane/swiftlint.json"
+      reporter: "codeclimate",
+      ignore_exit_status: true,
+      output_file: "fastlane/codequality_report.json"
     )
   end
 
