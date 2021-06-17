@@ -34,7 +34,6 @@
 		032562AF26051D3B006513E4 /* RBFilter.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325627F26051D3B006513E4 /* RBFilter.m */; };
 		032562B026051D3B006513E4 /* RBSynchronizeInterval.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325628126051D3B006513E4 /* RBSynchronizeInterval.m */; };
 		032562B126051D3B006513E4 /* RBStat.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325628326051D3B006513E4 /* RBStat.m */; };
-		032562B226051D3B006513E4 /* RBWhitelistEntry.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325628926051D3B006513E4 /* RBWhitelistEntry.m */; };
 		032562B326051D3B006513E4 /* RBDateRange.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325628B26051D3B006513E4 /* RBDateRange.m */; };
 		032562B626051D40006513E4 /* RBMockExtensionContext.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325625926051D3A006513E4 /* RBMockExtensionContext.m */; };
 		032562BB26051D45006513E4 /* RBFilterManagerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325625B26051D3A006513E4 /* RBFilterManagerTests.m */; };
@@ -331,7 +330,7 @@
 		8AF53BAA266A1BFA00C3CB2E /* Beam.css in Resources */ = {isa = PBXBuildFile; fileRef = 8AF53BA2266A1BFA00C3CB2E /* Beam.css */; };
 		8AF53BAC266A241700C3CB2E /* UITests-1.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AF53BAB266A241700C3CB2E /* UITests-1.html */; };
 		8AF53BAE266A241C00C3CB2E /* UITests-2.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AF53BAD266A241C00C3CB2E /* UITests-2.html */; };
-		8AF61EE0267B50F7006DD5C2 /* BrowserTabsManagerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AF61EDF267B50F7006DD5C2 /* BrowserTabsManagerUITests.swift */; };
+		8AF61F14267BA292006DD5C2 /* RBAllowlistEntry.m in Sources */ = {isa = PBXBuildFile; fileRef = 8AF61F13267BA292006DD5C2 /* RBAllowlistEntry.m */; };
 		8AFA9D50266924EE00AA59EE /* UITests-3.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AFA9D48266924EE00AA59EE /* UITests-3.html */; };
 		9609AF502617159B00322141 /* URL+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418173BD2581251600317ED8 /* URL+Beam.swift */; };
 		960A57E4264C84BD0061E8D2 /* ProxyElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 960A57E3264C84BD0061E8D2 /* ProxyElement.swift */; };
@@ -786,10 +785,8 @@
 		0325627926051D3B006513E4 /* RBClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RBClient.h; path = Extern/RadBlock/RBClient.h; sourceTree = "<group>"; };
 		0325627A26051D3B006513E4 /* NSString+IDNA.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSString+IDNA.h"; path = "Extern/RadBlock/NSString+IDNA.h"; sourceTree = "<group>"; };
 		0325627B26051D3B006513E4 /* RBFilterBuilder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RBFilterBuilder.m; path = Extern/RadBlock/RBFilterBuilder.m; sourceTree = "<group>"; };
-		0325627D26051D3B006513E4 /* RBWhitelistEntry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RBWhitelistEntry.h; sourceTree = "<group>"; };
 		0325627E26051D3B006513E4 /* RBFilterGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RBFilterGroup.m; sourceTree = "<group>"; };
 		0325627F26051D3B006513E4 /* RBFilter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RBFilter.m; sourceTree = "<group>"; };
-		0325628026051D3B006513E4 /* RBWhitelistEntry-Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "RBWhitelistEntry-Private.h"; sourceTree = "<group>"; };
 		0325628126051D3B006513E4 /* RBSynchronizeInterval.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RBSynchronizeInterval.m; sourceTree = "<group>"; };
 		0325628226051D3B006513E4 /* RBDateRange.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RBDateRange.h; sourceTree = "<group>"; };
 		0325628326051D3B006513E4 /* RBStat.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RBStat.m; sourceTree = "<group>"; };
@@ -798,7 +795,6 @@
 		0325628626051D3B006513E4 /* RBSynchronizeInterval.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RBSynchronizeInterval.h; sourceTree = "<group>"; };
 		0325628726051D3B006513E4 /* RBFilter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RBFilter.h; sourceTree = "<group>"; };
 		0325628826051D3B006513E4 /* RBFilterGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RBFilterGroup.h; sourceTree = "<group>"; };
-		0325628926051D3B006513E4 /* RBWhitelistEntry.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RBWhitelistEntry.m; sourceTree = "<group>"; };
 		0325628A26051D3B006513E4 /* RBStat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RBStat.h; sourceTree = "<group>"; };
 		0325628B26051D3B006513E4 /* RBDateRange.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RBDateRange.m; sourceTree = "<group>"; };
 		0325628C26051D3B006513E4 /* RBClient-Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "RBClient-Private.h"; path = "Extern/RadBlock/RBClient-Private.h"; sourceTree = "<group>"; };
@@ -1097,7 +1093,9 @@
 		8AF53BA2266A1BFA00C3CB2E /* Beam.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; path = Beam.css; sourceTree = "<group>"; };
 		8AF53BAB266A241700C3CB2E /* UITests-1.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "UITests-1.html"; sourceTree = "<group>"; };
 		8AF53BAD266A241C00C3CB2E /* UITests-2.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "UITests-2.html"; sourceTree = "<group>"; };
-		8AF61EDF267B50F7006DD5C2 /* BrowserTabsManagerUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserTabsManagerUITests.swift; sourceTree = "<group>"; };
+		8AF61F11267BA292006DD5C2 /* RBAllowlistEntry-Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "RBAllowlistEntry-Private.h"; sourceTree = "<group>"; };
+		8AF61F12267BA292006DD5C2 /* RBAllowlistEntry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RBAllowlistEntry.h; sourceTree = "<group>"; };
+		8AF61F13267BA292006DD5C2 /* RBAllowlistEntry.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RBAllowlistEntry.m; sourceTree = "<group>"; };
 		8AFA9D48266924EE00AA59EE /* UITests-3.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "UITests-3.html"; sourceTree = "<group>"; };
 		960A57E3264C84BD0061E8D2 /* ProxyElement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProxyElement.swift; sourceTree = "<group>"; };
 		960A57E5264C851E0061E8D2 /* ProxyImageNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProxyImageNode.swift; sourceTree = "<group>"; };
@@ -1504,10 +1502,11 @@
 		0325627C26051D3B006513E4 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				0325627D26051D3B006513E4 /* RBWhitelistEntry.h */,
+				8AF61F11267BA292006DD5C2 /* RBAllowlistEntry-Private.h */,
+				8AF61F12267BA292006DD5C2 /* RBAllowlistEntry.h */,
+				8AF61F13267BA292006DD5C2 /* RBAllowlistEntry.m */,
 				0325627E26051D3B006513E4 /* RBFilterGroup.m */,
 				0325627F26051D3B006513E4 /* RBFilter.m */,
-				0325628026051D3B006513E4 /* RBWhitelistEntry-Private.h */,
 				0325628126051D3B006513E4 /* RBSynchronizeInterval.m */,
 				0325628226051D3B006513E4 /* RBDateRange.h */,
 				0325628326051D3B006513E4 /* RBStat.m */,
@@ -1516,7 +1515,6 @@
 				0325628626051D3B006513E4 /* RBSynchronizeInterval.h */,
 				0325628726051D3B006513E4 /* RBFilter.h */,
 				0325628826051D3B006513E4 /* RBFilterGroup.h */,
-				0325628926051D3B006513E4 /* RBWhitelistEntry.m */,
 				0325628A26051D3B006513E4 /* RBStat.h */,
 				0325628B26051D3B006513E4 /* RBDateRange.m */,
 			);
@@ -3881,6 +3879,7 @@
 				52FB30CA25E3D7B3001BF098 /* String+Title.swift in Sources */,
 				520088C42613297100AED835 /* DatabaseRequest.swift in Sources */,
 				A5CA5DBA2624FF4A004E9D3E /* BeamNSTableView.swift in Sources */,
+				8AF61F14267BA292006DD5C2 /* RBAllowlistEntry.m in Sources */,
 				521EEDE525937F7F00BA2485 /* DocumentsList.swift in Sources */,
 				DA3E41D42642CC7900BA3952 /* TextSaver.swift in Sources */,
 				4159EA0A259A3568005FD355 /* BidirectionalPopoverResultItem.swift in Sources */,
@@ -3916,7 +3915,6 @@
 				9634DD79264AA1A10065383E /* TextFrameLayer.swift in Sources */,
 				418172442581107C00317ED8 /* ScrollableTextView.swift in Sources */,
 				418171EB2581107C00317ED8 /* Autocompleter.swift in Sources */,
-				032562B226051D3B006513E4 /* RBWhitelistEntry.m in Sources */,
 				418172082581107C00317ED8 /* NSManagedObject+initExtension.swift in Sources */,
 				9691C2A62645F90600F70DA1 /* ImageNode.swift in Sources */,
 				52F27FCB25B9B404006E09A2 /* ViewModelFetchedResults.swift in Sources */,
