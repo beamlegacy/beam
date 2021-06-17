@@ -61,6 +61,10 @@ import Promises
         true
     }
 
+    var allowsPictureInPicture: Bool {
+        Self.webViewConfiguration.allowsPictureInPicture
+    }
+
     func isActiveTab() -> Bool {
         self == state.browserTabsManager.currentTab
     }
@@ -102,6 +106,8 @@ import Promises
         navController.page = self
         return navController
     }()
+
+    @Published var mediaPlayerController: MediaPlayerController?
 
     var state: BeamState!
 
@@ -174,7 +180,7 @@ import Promises
 
         self.webView.page = self
         uiDelegateController.webPage = self
-
+        mediaPlayerController = MediaPlayerController(page: self)
         note.browsingSessions.append(browsingTree)
         setupObservers()
     }

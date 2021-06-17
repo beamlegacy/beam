@@ -10,8 +10,8 @@ enum LogMessages: String, CaseIterable {
  */
 class LoggingMessageHandler: BeamMessageHandler<LogMessages> {
 
-    init(page: BeamWebViewConfiguration) {
-        super.init(config: page, messages: LogMessages.self, jsFileName: "OverrideConsole", jsCodePosition: .atDocumentStart)
+    init(config: BeamWebViewConfiguration) {
+        super.init(config: config, messages: LogMessages.self, jsFileName: "OverrideConsole", jsCodePosition: .atDocumentStart)
     }
 
     override func onMessage(messageName: String, messageBody: Any?, from: WebPage) {

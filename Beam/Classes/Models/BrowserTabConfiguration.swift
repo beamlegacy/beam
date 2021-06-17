@@ -3,6 +3,14 @@ import Foundation
 class BrowserTabConfiguration: WKWebViewConfiguration, BeamWebViewConfiguration {
     let id: UUID = UUID()
 
+    var allowsPictureInPicture: Bool {
+        #if BEAM_WEBKIT_ENHANCEMENT_ENABLED
+        return true
+        #else
+        return false
+        #endif
+    }
+
     required init?(coder: NSCoder) { super.init(coder: coder) }
 
     override init() {
@@ -13,25 +21,26 @@ class BrowserTabConfiguration: WKWebViewConfiguration, BeamWebViewConfiguration 
         preferences.javaScriptCanOpenWindowsAutomatically = false
         preferences.tabFocusesLinks = true
 //        preferences.plugInsEnabled = true
-        preferences._setFullScreenEnabled(true)
+
         preferences.isFraudulentWebsiteWarningEnabled = true
         preferences.setValue(true, forKey: "developerExtrasEnabled")
         defaultWebpagePreferences.preferredContentMode = .desktop
 
-        let loggingMessageHandler = LoggingMessageHandler(page: self)
-        loggingMessageHandler.register(to: self)
+        #if BEAM_WEBKIT_ENHANCEMENT_ENABLED
+        preferences._setAllowsPicture(inPictureMediaPlayback: true)
+        preferences._setFullScreenEnabled(true)
+        #endif
 
-        let passwordMessageHandler = PasswordMessageHandler(page: self)
-        passwordMessageHandler.register(to: self)
+        registerAllMessageHandlers()
+    }
 
-        let scorerMessageHandler = ScorerMessageHandler(page: self)
-        scorerMessageHandler.register(to: self)
-
-        let pointAndShootMessageHandler = PointAndShootMessageHandler(config: self)
-        pointAndShootMessageHandler.register(to: self)
-
-        let navigationMessageHandler = WebNavigationMessageHandler(config: self)
-        navigationMessageHandler.register(to: self)
+    private func registerAllMessageHandlers() {
+        LoggingMessageHandler(config: self).register(to: self)
+        PasswordMessageHandler(config: self).register(to: self)
+        ScorerMessageHandler(config: self).register(to: self)
+        PointAndShootMessageHandler(config: self).register(to: self)
+        WebNavigationMessageHandler(config: self).register(to: self)
+        MediaPlayerMessageHandler(config: self).register(to: self)
     }
 
     func addJS(source: String, when: WKUserScriptInjectionTime) {

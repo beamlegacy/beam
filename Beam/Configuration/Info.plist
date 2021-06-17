@@ -282,6 +282,10 @@
 	<string>Beam requires access so that you can use audio conferencing web services.</string>
 	<key>NSPrincipalClass</key>
 	<string>BeamApplication</string>
+	<key>NSServices</key>
+	<array>
+		<dict/>
+	</array>
 	<key>SUAllowsAutomaticUpdates</key>
 	<string>$(AUTOMATIC_UPDATE)</string>
 	<key>SUFeedURL</key>

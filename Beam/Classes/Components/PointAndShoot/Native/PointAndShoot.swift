@@ -89,7 +89,7 @@ class PointAndShoot: WebPageHolder {
     }
 
     private func executeJS(_ method: String) {
-        _ = page.executeJS(method, objectName: "PointAndShoot")
+        page.executeJS(method, objectName: "PointAndShoot")
     }
 
     /**

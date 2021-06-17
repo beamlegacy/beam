@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "tabs-media_muted.pdf",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

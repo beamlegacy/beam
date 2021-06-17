@@ -16,6 +16,7 @@ protocol WebPage: AnyObject, Scorable {
 
     var fileStorage: BeamFileStorage { get }
 
+    @discardableResult
     func executeJS(_ jsCode: String, objectName: String?) -> Promise<Any?>
 
     var scrollX: CGFloat { get set }
@@ -48,6 +49,7 @@ protocol WebPage: AnyObject, Scorable {
     var navigationController: WebNavigationController { get }
     var browsingScorer: BrowsingScorer { get }
     var passwordOverlayController: PasswordOverlayController { get }
+    var mediaPlayerController: MediaPlayerController? { get set }
 
     func createNewTab(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, setCurrent: Bool) -> WebPage
     func closeTab()

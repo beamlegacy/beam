@@ -491,6 +491,9 @@
 		A5153EDD260CC4DC00C84902 /* ButtonLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5153EDC260CC4DC00C84902 /* ButtonLabel.swift */; };
 		A5153EE3260DD58A00C84902 /* RecentsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5153EE2260DD58A00C84902 /* RecentsManager.swift */; };
 		A5153EE7260DDC9D00C84902 /* RecentsManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5153EE6260DDC9D00C84902 /* RecentsManagerTests.swift */; };
+		A515597A267786E1006F6D6F /* MediaPlayer.js in Resources */ = {isa = PBXBuildFile; fileRef = A5155978267786E1006F6D6F /* MediaPlayer.js */; };
+		A515597B267786E1006F6D6F /* MediaPlayerMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5155979267786E1006F6D6F /* MediaPlayerMessageHandler.swift */; };
+		A51559892677AC99006F6D6F /* MediaPlayerController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51559882677AC99006F6D6F /* MediaPlayerController.swift */; };
 		A51ED9A72608D0CD00CA99E5 /* ContextMenuFormatterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51ED9A62608D0CD00CA99E5 /* ContextMenuFormatterView.swift */; };
 		A5208D76261D07E9006193AF /* BeamColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5208D75261D07E9006193AF /* BeamColor.swift */; };
 		A5208D80261D231B006193AF /* BeamColor+Contexts.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5208D7F261D231B006193AF /* BeamColor+Contexts.swift */; };
@@ -1227,6 +1230,9 @@
 		A5153EDC260CC4DC00C84902 /* ButtonLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonLabel.swift; sourceTree = "<group>"; };
 		A5153EE2260DD58A00C84902 /* RecentsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentsManager.swift; sourceTree = "<group>"; };
 		A5153EE6260DDC9D00C84902 /* RecentsManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentsManagerTests.swift; sourceTree = "<group>"; };
+		A5155978267786E1006F6D6F /* MediaPlayer.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = MediaPlayer.js; sourceTree = "<group>"; };
+		A5155979267786E1006F6D6F /* MediaPlayerMessageHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MediaPlayerMessageHandler.swift; sourceTree = "<group>"; };
+		A51559882677AC99006F6D6F /* MediaPlayerController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaPlayerController.swift; sourceTree = "<group>"; };
 		A51ED9A62608D0CD00CA99E5 /* ContextMenuFormatterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextMenuFormatterView.swift; sourceTree = "<group>"; };
 		A5208D75261D07E9006193AF /* BeamColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamColor.swift; sourceTree = "<group>"; };
 		A5208D7F261D231B006193AF /* BeamColor+Contexts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamColor+Contexts.swift"; sourceTree = "<group>"; };
@@ -2044,6 +2050,7 @@
 				A5D8A6D826724E2600CEC37E /* Password */,
 				A5D8A6D926724E6900CEC37E /* BrowsingAnalysis */,
 				BAA674240EA89BD15248E607 /* Download */,
+				A5155970267786A8006F6D6F /* MediaPlayer */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -2913,6 +2920,16 @@
 			path = UIElements;
 			sourceTree = "<group>";
 		};
+		A5155970267786A8006F6D6F /* MediaPlayer */ = {
+			isa = PBXGroup;
+			children = (
+				A5155979267786E1006F6D6F /* MediaPlayerMessageHandler.swift */,
+				A51559882677AC99006F6D6F /* MediaPlayerController.swift */,
+				A5155978267786E1006F6D6F /* MediaPlayer.js */,
+			);
+			path = MediaPlayer;
+			sourceTree = "<group>";
+		};
 		A5208D5C261D0176006193AF /* BeamDesign */ = {
 			isa = PBXGroup;
 			children = (
@@ -3439,6 +3456,7 @@
 				8AC2EFD8266F86F500049005 /* webpack.config.js in Resources */,
 				52A06978264E909A00B4B80A /* document_public_url.graphql in Resources */,
 				8AF53BAC266A241700C3CB2E /* UITests-1.html in Resources */,
+				A515597A267786E1006F6D6F /* MediaPlayer.js in Resources */,
 				52E2527C26173F8D00E54C45 /* delete_database.graphql in Resources */,
 				418172412581107C00317ED8 /* ScrollableTextView.xib in Resources */,
 				52FB936626209CA900FEF632 /* delete_all_databases.graphql in Resources */,
@@ -3814,6 +3832,7 @@
 				964FE5FC2625E14500966E03 /* GRDBIndexer.swift in Sources */,
 				523FF66125C31D8800B4BD6E /* Data+String.swift in Sources */,
 				A57BFEBD2615B49C00CFB646 /* TableRowView.swift in Sources */,
+				A515597B267786E1006F6D6F /* MediaPlayerMessageHandler.swift in Sources */,
 				418172AA25811A3A00317ED8 /* BeamTextField.swift in Sources */,
 				33B2746A264C103400A318CD /* SmallUpdateIndicatorView.swift in Sources */,
 				96BBA79F25FBA573008276FC /* ReparentElement.swift in Sources */,
@@ -4013,6 +4032,7 @@
 				9691E3D825AD9F3300A13080 /* TextRoot.swift in Sources */,
 				A5651A7726035D3A0035F12B /* AppDelegate+NSMenu.swift in Sources */,
 				4181724C2581107C00317ED8 /* BrowserTabView.swift in Sources */,
+				A51559892677AC99006F6D6F /* MediaPlayerController.swift in Sources */,
 				521EEDE125937F5B00BA2485 /* DocumentsContentView.swift in Sources */,
 				032562AA26051D3B006513E4 /* RBClient.m in Sources */,
 				A545D2FB25F7B1D800E68F94 /* DestinationNoteAutocompleteList.swift in Sources */,
@@ -4306,12 +4326,18 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				CUSTOM_OTHER_SWIFT_FLAGS = "-DDEBUG -DDEBUG_PERF -DDEBUG_API_0 -DBEAM_WEBKIT_ENHANCEMENT_ENABLED";
 				DEVELOPMENT_TEAM = X87W5M786F;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
+				);
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"BEAM_WEBKIT_ENHANCEMENT_ENABLED=1",
+					"DEBUG=1",
+					"$(inherited)",
 				);
 				HEADER_SEARCH_PATHS = (
 					Extern/libgit2/include,
@@ -4676,12 +4702,18 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				CUSTOM_OTHER_SWIFT_FLAGS = "-DDEBUG -DDEBUG_PERF -DDEBUG_API_0 -DBEAM_WEBKIT_ENHANCEMENT_ENABLED";
 				DEVELOPMENT_TEAM = X87W5M786F;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
+				);
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"BEAM_WEBKIT_ENHANCEMENT_ENABLED=1",
+					"DEBUG=1",
+					"$(inherited)",
 				);
 				HEADER_SEARCH_PATHS = (
 					Extern/libgit2/include,
@@ -4723,6 +4755,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				CUSTOM_OTHER_SWIFT_FLAGS = "-DBEAM_WEBKIT_ENHANCEMENT_ENABLED";
 				DEVELOPMENT_TEAM = X87W5M786F;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
@@ -4730,6 +4763,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)",
 				);
+				GCC_PREPROCESSOR_DEFINITIONS = "BEAM_WEBKIT_ENHANCEMENT_ENABLED=1";
 				HEADER_SEARCH_PATHS = (
 					Extern/libgit2/include,
 					"Extern/RadBlock/**",

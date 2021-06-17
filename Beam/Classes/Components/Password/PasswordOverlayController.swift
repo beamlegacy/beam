@@ -38,7 +38,7 @@ class PasswordOverlayController: WebPageHolder {
     func detectInputFields() {
         autocompleteContext.clear()
         dismissPasswordManagerMenu()
-        _ = page.executeJS("password_sendTextFields()", objectName: nil)
+        page.executeJS("password_sendTextFields()", objectName: nil)
     }
 
     func updateInputFields(with jsResult: String) {
@@ -72,7 +72,7 @@ class PasswordOverlayController: WebPageHolder {
     private func installFocusHandlers(addedIds: [String]) {
         let formattedList = addedIds.map { "\"\($0)\"" }.joined(separator: ",")
         let focusScript = "beam_installFocusHandlers('[\(formattedList)]')"
-        _ = page.executeJS(focusScript, objectName: nil)
+        page.executeJS(focusScript, objectName: nil)
     }
 
     func updateInputFocus(for elementId: String, becomingActive: Bool) {
@@ -361,7 +361,7 @@ extension PasswordOverlayController: PasswordManagerMenuDelegate {
             let data = try encoder.encode(passwordParams)
             guard let jsonString = String(data: data, encoding: .utf8) else { return }
             let script = "beam_togglePasswordFieldVisibility('\(jsonString)', '\(visibility.description)')"
-            _ = page.executeJS(script, objectName: nil)
+            page.executeJS(script, objectName: nil)
         } catch {
             Logger.shared.logError("JSON encoding failure: \(error.localizedDescription))", category: .general)
         }
