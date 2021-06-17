@@ -1,7 +1,8 @@
 version: "2"
 plugins:
   swiftlint:
-    enabled: true
+    enabled: false
+    channel: "stable"
   duplication:
     enabled: true
   fixme:
@@ -10,7 +11,9 @@ exclude_patterns:
   - Pods
   - Extern
   - Beam/Classes/Helpers/Utils/Web/Readability.js
+  - "**/node_modules/"
   - BeamTests
   - BeamUITests
   - SourcePackages
   - fastlane
+  - scripts

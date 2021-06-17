@@ -29,6 +29,26 @@ xctests:
     - macos-mono
   interruptible: true
 
+swift lint:
+  timeout: 10 minutes
+  dependencies: []
+  stage: test
+  artifacts:
+    expire_in: 7d
+    when: always
+    paths:
+      - fastlane/codequality_report.json
+    reports:
+      codequality: fastlane/codequality_report.json
+  script:
+    - bundle exec fastlane lint
+  only:
+    - merge_requests
+    - master
+    - develop
+  tags:
+    - macos
+
 xctests UI:
   timeout: 20 minutes
   dependencies: []

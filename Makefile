@@ -92,6 +92,10 @@ install_gitlab_runner:
 	# Deno for installing blocklists
 	brew install deno
 
+install_fastlane:
+	 gem install fastlane
+	 bundle exec fastlane update_plugins
+
 install_swiftlint:
 	brew install swiftlint
 	sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
@@ -132,6 +136,10 @@ install_libsodium:
 install_js:
 	brew install node
 	brew install yarn
+
+install_codeclimate:
+	brew tap codeclimate/formulae
+	brew install codeclimate
 
 git_checkout:
 	git submodule sync && git submodule update --init --recursive
