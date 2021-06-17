@@ -34,7 +34,6 @@ swift lint:
   dependencies: []
   stage: test
   artifacts:
-    expire_in: 7d
     when: always
     paths:
       - fastlane/codequality_report.json
