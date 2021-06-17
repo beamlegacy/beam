@@ -35,7 +35,7 @@ enum SimilarityMatrixCandidate {
     case navigationAndEntities
     case textualSimilarityMatrix
     case combinationAllSimilarityMatrix
-    // case combinationAllBinarizedMatrix
+    case combinationAllBinarisedMatrix
 }
 
 enum NumClusterComputationCandidate {
@@ -44,6 +44,7 @@ enum NumClusterComputationCandidate {
     case biggestDistanceInAbsolute
 }
 
+// swiftlint:disable:next type_body_length
 public class Cluster {
 
     enum MatrixError: Error {
@@ -79,10 +80,22 @@ public class Cluster {
     var matrixCandidate = SimilarityMatrixCandidate.navigationMatrix
     // Define which number of clusters computation to use
     var numClustersCandidate = NumClusterComputationCandidate.threshold
-    var candidate = 1
-    var weights = ["navigation": 0.5, "text": 0.5, "entities": 0.5]
+    var candidate: Int
+    var weights = [String: Double]()
 
-    public init() {}
+    public init(candidate: Int = 1, weightNavigation: Double = 0.5, weightText: Double = 0.5, weightEntities: Double = 0.5) {
+        self.candidate = candidate
+        self.weights["navigation"] = weightNavigation
+        self.weights["text"] = weightText
+        self.weights["entities"] = weightEntities
+        // In general we always initialise with candidate 1
+        // this is just to be safe:
+        do {
+            try self.performCandidateChange()
+        } catch {
+            fatalError()
+        }
+    }
 
     public class SimilarityMatrix {
         var matrix = Matrix([[0]])
@@ -362,6 +375,32 @@ public class Cluster {
         return pageIDs.firstIndex(of: pageID)
     }
 
+    /// This function receives a matrix and binarises it - all values above the
+    ///  threshold are 1 and all values below are 0. The input matrix should only
+    ///   have values between 0 and 1 (inclusive)
+    ///
+    /// - Parameters:
+    ///   - matrix: The matrix to be binarised
+    ///   - threshold: The threshold to be used
+    /// - Returns
+    ///   - binarised matrix
+
+    func binarise(matrix: Matrix, threshold: Double) -> Matrix {
+        // Bug in the thr() function in LASwift
+        // let firstCompomemtMatrix = thr(matrix, threshold)
+        // let secondComponentMatrix = -1 .* thr(firstCompomemtMatrix - 1, -0.99999)
+        // return firstCompomemtMatrix + secondComponentMatrix
+        let result = zeros(matrix.rows, matrix.cols)
+        for row in 0..<matrix.rows {
+            for column in 0..<matrix.cols {
+                if matrix[row, column] > threshold {
+                    result[row, column] = 1.0
+                }
+            }
+        }
+        return result
+    }
+
     func createAdjacencyMatrix() {
         switch self.matrixCandidate {
             case .navigationMatrix:
@@ -372,6 +411,8 @@ public class Cluster {
                 self.adjacencyMatrix = self.textualSimilarityMatrix.matrix
             case .combinationAllSimilarityMatrix:
                 self.adjacencyMatrix = (self.weights["text"] ?? 0.5) .*  self.textualSimilarityMatrix.matrix + (self.weights["entities"] ?? 0.5) .* self.entitiesMatrix.matrix + (self.weights["navigation"] ?? 0.5) .* self.navigationMatrix.matrix
+            case .combinationAllBinarisedMatrix:
+                self.adjacencyMatrix = self.binarise(matrix: self.navigationMatrix.matrix, threshold: (self.weights["navigation"] ?? 0.5)) + self.binarise(matrix: self.textualSimilarityMatrix.matrix, threshold: (weights["text"] ?? 0.5)) + self.binarise(matrix: self.entitiesMatrix.matrix, threshold: (weights["entities"] ?? 0.5))
         }
     }
 
@@ -481,22 +522,33 @@ public class Cluster {
         return clusterized
     }
 
-    public func changeCandidate(to candidate: Int, completion: @escaping (Result<[[UInt64]], Error>) -> Void) {
+    func performCandidateChange() throws {
+        switch self.candidate {
+        case 1:
+            self.clusteringCandidate = ClusteringCandidate.nonNormalizedLaplacian
+            self.matrixCandidate = SimilarityMatrixCandidate.navigationMatrix
+            self.numClustersCandidate = NumClusterComputationCandidate.threshold
+        case 2:
+            self.clusteringCandidate = ClusteringCandidate.randomWalkLaplacian
+            self.matrixCandidate = SimilarityMatrixCandidate.combinationAllBinarisedMatrix
+            self.numClustersCandidate = NumClusterComputationCandidate.biggestDistanceInPercentages
+        case 3:
+            self.clusteringCandidate = ClusteringCandidate.symetricLaplacian
+            self.matrixCandidate = SimilarityMatrixCandidate.combinationAllBinarisedMatrix
+            self.numClustersCandidate = NumClusterComputationCandidate.biggestDistanceInPercentages
+        default:
+            throw CandidateError.unknownCandidate
+        }
+    }
+    public func changeCandidate(to candidate: Int?, with weightNavigation: Double?, with weightText: Double?, with weightEntities: Double?, completion: @escaping (Result<[[UInt64]], Error>) -> Void) {
         myQueue.async {
-            switch candidate {
-            case 1:
-                self.clusteringCandidate = ClusteringCandidate.nonNormalizedLaplacian
-                self.matrixCandidate = SimilarityMatrixCandidate.navigationMatrix
-                self.numClustersCandidate = NumClusterComputationCandidate.threshold
-            case 2:
-                self.clusteringCandidate = ClusteringCandidate.randomWalkLaplacian
-                self.matrixCandidate = SimilarityMatrixCandidate.navigationAndEntities
-                self.numClustersCandidate = NumClusterComputationCandidate.biggestDistanceInPercentages
-            case 3:
-                self.clusteringCandidate = ClusteringCandidate.randomWalkLaplacian
-                self.matrixCandidate = SimilarityMatrixCandidate.textualSimilarityMatrix
-                self.numClustersCandidate = NumClusterComputationCandidate.biggestDistanceInAbsolute
-            default:
+            self.candidate = candidate ?? self.candidate
+            self.weights["navigation"] = weightNavigation ?? self.weights["navigation"]
+            self.weights["text"] = weightText ?? self.weights["text"]
+            self.weights["entities"] = weightEntities ?? self.weights["entities"]
+            do {
+                try self.performCandidateChange()
+            } catch {
                 completion(.failure(CandidateError.unknownCandidate))
             }
 

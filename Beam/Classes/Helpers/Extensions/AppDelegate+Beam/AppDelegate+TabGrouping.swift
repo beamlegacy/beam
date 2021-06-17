@@ -17,8 +17,6 @@ extension AppDelegate {
         self.data.clusteringManager = ClusteringManager()
         guard let clusteringManager = self.data.clusteringManager else { return }
         let tabGroupingTitleBarView = TabGroupingTitleBarView(clusteringManager: clusteringManager)
-            .padding()
-            .frame(width: 350, height: 24, alignment: .center)
 
         let accessoryHostingView = BeamHostingView(rootView: tabGroupingTitleBarView)
         accessoryHostingView.frame.size = accessoryHostingView.fittingSize

@@ -14,13 +14,16 @@ struct TabGroupingContentView: View {
     @ObservedObject var clusteringManager: ClusteringManager
 
     var body: some View {
+        ClusterSlidersView(clusteringManager: clusteringManager)
         ScrollView {
             VStack(alignment: .center) {
-                if clusteringManager.clusteredTabs.flatMap { $0 }.isEmpty {
-                    ClusterLoadingView(isLoading: false)
-                }
-                if clusteringManager.isClustering {
-                    ClusterLoadingView(isLoading: true)
+                ZStack {
+                    if clusteringManager.clusteredTabs.flatMap { $0 }.isEmpty {
+                        ClusterLoadingView(isLoading: false)
+                    }
+                    if clusteringManager.isClustering {
+                        ClusterLoadingView(isLoading: true)
+                    }
                 }
                 ClusterContentView(clusteringManager: clusteringManager)
             }.padding(.all, 20)
@@ -36,25 +39,16 @@ struct TabGroupingContentView_Previews: PreviewProvider {
     }
 }
 
-struct TabView: View {
-    var tabInfo: TabInformation
+struct ClusterLoadingView: View {
+    var isLoading: Bool = false
 
     var body: some View {
-        HStack {
-            FaviconView(url: tabInfo.url)
-                .padding(.trailing, 4)
-            Text(tabInfo.document.title)
-                .font(BeamFont.medium(size: 11).swiftUI)
-                .foregroundColor(BeamColor.Generic.text.swiftUI)
-            Spacer()
+        VStack(alignment: .center) {
+            Text(isLoading ? "Waiting for clustering result..." : "Waiting for tabs...")
+                .padding()
+            ProgressIndicator(isAnimated: true, controlSize: .small)
+                .padding()
         }
-    }
-}
-
-struct TabView_Previews: PreviewProvider {
-    static var previews: some View {
-        Text("Beam")
-        //        TabView(tabName: "Donald Trump - Wikipedia")
     }
 }
 
@@ -80,15 +74,82 @@ struct ClusterContentView: View {
     }
 }
 
-struct ClusterLoadingView: View {
-    var isLoading: Bool = false
+struct TabView: View {
+    var tabInfo: TabInformation
 
     var body: some View {
-        VStack(alignment: .center) {
-            Text(isLoading ? "Waiting for clustering result..." : "Waiting for tabs...")
-                .padding()
-            ProgressIndicator(isAnimated: true, controlSize: .small)
-                .padding()
+        HStack {
+            FaviconView(url: tabInfo.url)
+                .padding(.trailing, 4)
+            Text(tabInfo.document.title)
+                .font(BeamFont.medium(size: 11).swiftUI)
+                .foregroundColor(BeamColor.Generic.text.swiftUI)
+            Spacer()
         }
+    }
+}
+
+struct TabView_Previews: PreviewProvider {
+    static var previews: some View {
+        Text("Beam")
+        //        TabView(tabName: "Donald Trump - Wikipedia")
+    }
+}
+
+struct ClusterSlidersView: View {
+    @ObservedObject var clusteringManager: ClusteringManager
+
+    @State private var weightNavigation = 0.5
+    @State private var weightText = 0.5
+    @State private var weightEntities = 0.5
+
+    var body: some View {
+        HStack {
+            VStack {
+                Text("Navigation \(String(format: "%.1f", weightNavigation))")
+                Slider(value: $weightNavigation,
+                       in: 0.0...1.0,
+                       step: 0.1,
+                       onEditingChanged: { began in
+                        if !began {
+                            clusteringManager.weightNavigation = weightNavigation
+                        }
+                       },
+                       minimumValueLabel: Text("0"),
+                       maximumValueLabel: Text("1"), label: {})
+                    .labelsHidden()
+                    .disabled(clusteringManager.isClustering)
+            }
+            VStack {
+                Text("Text \(String(format: "%.1f", weightText))")
+                Slider(value: $weightText,
+                       in: 0.0...1.0,
+                       step: 0.1,
+                       onEditingChanged: { began in
+                        if !began {
+                            clusteringManager.weightText = weightText
+                        }
+                       },
+                       minimumValueLabel: Text("0"),
+                       maximumValueLabel: Text("1"), label: {})
+                    .labelsHidden()
+                    .disabled(clusteringManager.isClustering)
+            }
+            VStack {
+                Text("Entities \(String(format: "%.1f", weightEntities))")
+                Slider(value: $weightEntities,
+                       in: 0.0...1.0,
+                       step: 0.1,
+                       onEditingChanged: { began in
+                        if !began {
+                            clusteringManager.weightEntities = weightEntities
+                        }
+                       },
+                       minimumValueLabel: Text("0"),
+                       maximumValueLabel: Text("1"), label: {})
+                    .labelsHidden()
+                    .disabled(clusteringManager.isClustering)
+            }
+        }.padding()
     }
 }

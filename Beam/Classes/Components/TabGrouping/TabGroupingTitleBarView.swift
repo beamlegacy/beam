@@ -19,7 +19,7 @@ struct TabGroupingTitleBarView: View {
             }.labelsHidden()
             .pickerStyle(SegmentedPickerStyle())
             .disabled(clusteringManager.isClustering)
-        }
+        }.padding()
     }
 }
 
