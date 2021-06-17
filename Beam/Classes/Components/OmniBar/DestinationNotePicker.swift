@@ -16,8 +16,9 @@ struct DestinationNotePicker: View {
     @State var isHovering = false
     @State var isMouseDown = false
 
+    @State private var _internalDisableAnimation = false
     private var enableAnimations: Bool {
-        !state.windowIsResizing
+        !_internalDisableAnimation && !state.windowIsResizing
     }
     private let boxHeight: CGFloat = 32
     private let maxBoxWidth: CGFloat = 230
@@ -120,8 +121,12 @@ struct DestinationNotePicker: View {
                     .accessibility(identifier: "DestinationNoteSearchField")
                     .onAppear(perform: {
                         autocompleteModel.data = state.data
+                        _internalDisableAnimation = true
                         state.destinationCardName = tab.noteController.title
                         autocompleteModel.searchText = tab.noteController.isTodaysNote ? "" : state.destinationCardName
+                        DispatchQueue.main.async {
+                            _internalDisableAnimation = false
+                        }
                     })
                     .animation(animation)
                     .opacity(isEditing ? 1.0 : 0.01)

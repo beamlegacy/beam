@@ -8,11 +8,13 @@
 import Foundation
 import Combine
 import BeamCore
+import SwiftUI
 
 // BeamState Autocomplete management
 class AutocompleteManager: ObservableObject {
 
     @Published var searchQuery: String = ""
+
     private var textChangeIsFromSelection = false
     private var replacedProposedText: String?
 
@@ -23,6 +25,8 @@ class AutocompleteManager: ObservableObject {
             updateSearchQueryWhenSelectingAutocomplete(autocompleteSelectedIndex, previousSelectedIndex: oldValue)
         }
     }
+
+    @Published var animateInputingCharacter = false
 
     private let searchEngineCompleter = Autocompleter()
     private var autocompleteSearchGuessesHandler: (([AutocompleteResult]) -> Void)?
@@ -287,6 +291,18 @@ extension AutocompleteManager {
     func setQueryWithoutAutocompleting(_ query: String) {
         textChangeIsFromSelection = true
         searchQuery = query
+    }
+
+    func shakeOmniBox() {
+        let animation = Animation.interpolatingSpring(stiffness: 500, damping: 16)
+        withAnimation(animation) {
+            self.animateInputingCharacter = true
+        }
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: .milliseconds(150))) { [weak self] in
+            withAnimation(animation) {
+                self?.animateInputingCharacter = false
+            }
+        }
     }
 
     // Allows the user to enter the next character of the suggestion

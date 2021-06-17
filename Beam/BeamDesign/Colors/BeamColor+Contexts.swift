@@ -104,6 +104,7 @@ extension BeamColor {
         static let clickedBackground = BeamColor.From(color: BeamColor.Bluetiful.nsColor.withAlphaComponent(0.14))
         static let focusedBackground = BeamColor.From(color: NSColor(withLightColor: NSColor.white, darkColor: BeamColor.Nero.nsColor))
         static let focusedShadow = BeamColor.From(color: NSColor(withLightColor: NSColor.black.withAlphaComponent(0.1), darkColor: NSColor.black.withAlphaComponent(0.6)))
+        static let focusedPressedShadow = BeamColor.From(color: NSColor(withLightColor: NSColor.black.withAlphaComponent(0.2), darkColor: NSColor.black.withAlphaComponent(0.8)))
         static let hoveredShadow = BeamColor.From(color: NSColor(withLightColor: NSColor.black.withAlphaComponent(0.05), darkColor: NSColor.black.withAlphaComponent(0.4)))
     }
 }

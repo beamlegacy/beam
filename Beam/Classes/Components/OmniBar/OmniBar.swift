@@ -24,8 +24,9 @@ struct OmniBar: View {
         !state.windowIsResizing
     }
     private let windowControlsWidth: CGFloat = 92
+    private let boxHeightEditing: CGFloat = 40
     private var boxHeight: CGFloat {
-        return isEditing ? 40 : 32
+        return isEditing ? boxHeightEditing : 32
     }
 
     private var isEditing: Bool {
@@ -65,79 +66,104 @@ struct OmniBar: View {
     private var showDownloadsButton: Bool {
         !state.downloadManager.downloads.isEmpty
     }
+    private var showPressedState: Bool {
+        state.autocompleteManager.animateInputingCharacter
+    }
+
+    private var defaultAnimation: Animation? {
+        enableAnimations ? .easeInOut(duration: 0.3) : nil
+    }
+
+    // MARK: Views
+    private func fieldView(containerGeometry: GeometryProxy) -> some View {
+        OmniBarFieldBackground(isEditing: isEditing,
+                               isPressingCharacter: showPressedState,
+                               enableAnimations: enableAnimations) {
+            VStack(spacing: 0) {
+                HStack(spacing: 4) {
+                    if !isEditing {
+                        if state.mode != .today {
+                            OmniBarButton(icon: "nav-journal", accessibilityId: "journal", action: goToJournal)
+                        }
+                        Chevrons()
+                        if state.mode == .web {
+                            OmniBarButton(icon: "nav-refresh", accessibilityId: "refresh", action: refreshWeb)
+                        }
+                    }
+                    GlobalCenteringContainer(enabled: !isEditing && state.mode != .web, containerGeometry: containerGeometry) {
+                        OmniBarSearchField(isEditing: Binding<Bool>(get: {
+                            isEditing
+                        }, set: {
+                            setIsEditing($0)
+                        }),
+                        modifierFlagsPressed: $modifierFlagsPressed,
+                        enableAnimations: enableAnimations)
+                        .frame(maxHeight: .infinity)
+                    }
+                    .padding(.leading, !isEditing && state.mode == .web ? 8 : 7)
+                }
+                .animation(defaultAnimation)
+                .padding(.leading, BeamSpacing._50)
+                .padding(.trailing, BeamSpacing._120)
+                .frame(height: boxHeight)
+                .frame(maxWidth: .infinity)
+                if shouldShowAutocompleteResults {
+                    AutocompleteList(selectedIndex: $autocompleteManager.autocompleteSelectedIndex, elements: $autocompleteManager.autocompleteResults, modifierFlagsPressed: modifierFlagsPressed)
+                }
+            }
+        }
+        .gesture(DragGesture(minimumDistance: 0).onEnded { (value) in
+            // onTapGesture is triggered when moving NSWindow quickly.
+            // Using a drag gesture instead to make sure the cursor hasn't moved.
+            guard value.translation.width == 0.0 && value.translation.height == 0.0 else {
+                return
+            }
+            setIsEditing(true)
+        })
+        .frame(maxWidth: .infinity)
+        .fixedSize(horizontal: false, vertical: true)
+        .padding(.trailing, isEditing ? 6 : 10)
+        .padding(.top, isEditing ? 6 : 10)
+        .animation(defaultAnimation)
+        .animatableOffsetEffect(offset: CGSize(width: 0, height: showPressedState ? 3 : 0))
+    }
+
+    var rightActionsView: some View {
+        Group {
+            if hasRightActions {
+                HStack(alignment: .center) {
+                    if showDownloadsButton {
+                        OmniBarDownloadButton(downloadManager: state.downloadManager, action: {
+                            showDownloadPanel.toggle()
+                        })
+                        .frame(height: 32, alignment: .top)
+                        .popover(isPresented: $showDownloadPanel, content: {
+                            DownloaderView(downloader: state.downloadManager)
+                        })
+                    }
+                    if showDestinationNotePicker, let currentTab = browserTabsManager.currentTab {
+                        DestinationNotePicker(tab: currentTab)
+                            .frame(height: 32, alignment: .top)
+                    }
+                    if showPivotButton {
+                        OmniBarButton(icon: state.mode == .web ? "nav-pivot_card" : "nav-pivot_web", accessibilityId: state.mode == .web ? "pivot-card" : "pivot-web", action: toggleMode, size: 32)
+                            .frame(height: 32, alignment: .top)
+                    }
+                }
+                .padding(.top, BeamSpacing._100)
+                .padding(.trailing, BeamSpacing._100)
+                .frame(height: boxHeightEditing)
+                .animation(defaultAnimation)
+            }
+        }
+    }
 
     var body: some View {
         GeometryReader { containerGeometry in
             HStack(alignment: .top, spacing: 2) {
-                OmniBarFieldBackground(isEditing: isEditing, enableAnimations: enableAnimations) {
-                    VStack(spacing: 0) {
-                        HStack(spacing: 4) {
-                            if !isEditing {
-                                if state.mode != .today {
-                                    OmniBarButton(icon: "nav-journal", accessibilityId: "journal", action: goToJournal)
-                                }
-                                Chevrons()
-                                if state.mode == .web {
-                                    OmniBarButton(icon: "nav-refresh", accessibilityId: "refresh", action: refreshWeb)
-                                }
-                            }
-                            GlobalCenteringContainer(enabled: !isEditing && state.mode != .web, containerGeometry: containerGeometry) {
-                                OmniBarSearchField(isEditing: Binding<Bool>(get: {
-                                    isEditing
-                                }, set: {
-                                    setIsEditing($0)
-                                }), modifierFlagsPressed: $modifierFlagsPressed, enableAnimations: enableAnimations)
-                                .frame(maxHeight: .infinity)
-                            }
-                            .padding(.leading, !isEditing && state.mode == .web ? 8 : 7)
-                        }
-                        .animation(enableAnimations ? .easeInOut(duration: 0.3) : nil)
-                        .padding(.leading, BeamSpacing._50)
-                        .padding(.trailing, BeamSpacing._120)
-                        .frame(height: boxHeight)
-                        .frame(maxWidth: .infinity)
-                        if shouldShowAutocompleteResults {
-                            AutocompleteList(selectedIndex: $autocompleteManager.autocompleteSelectedIndex, elements: $autocompleteManager.autocompleteResults, modifierFlagsPressed: modifierFlagsPressed)
-                        }
-                    }
-                }
-                .gesture(DragGesture(minimumDistance: 0).onEnded { (value) in
-                    // onTapGesture is triggered when moving NSWindow quickly.
-                    // Using a drag gesture instead to make sure the cursor hasn't moved.
-                    guard value.translation.width == 0.0 && value.translation.height == 0.0 else {
-                        return
-                    }
-                    setIsEditing(true)
-                })
-                .padding(.trailing, isEditing ? 6 : 10)
-                .frame(maxWidth: .infinity)
-                .fixedSize(horizontal: false, vertical: true)
-                if hasRightActions {
-                    HStack(alignment: .center) {
-                        if showDownloadsButton {
-                            OmniBarDownloadButton(downloadManager: state.downloadManager, action: {
-                                showDownloadPanel.toggle()
-                            })
-                                .frame(height: 32, alignment: .top)
-                                .popover(isPresented: $showDownloadPanel, content: {
-                                    DownloaderView(downloader: state.downloadManager)
-                                })
-                        }
-                        if showDestinationNotePicker, let currentTab = browserTabsManager.currentTab {
-                            DestinationNotePicker(tab: currentTab)
-                                .frame(height: 32, alignment: .top)
-                        }
-                        if showPivotButton {
-                            OmniBarButton(icon: state.mode == .web ? "nav-pivot_card" : "nav-pivot_web", accessibilityId: state.mode == .web ? "pivot-card" : "pivot-web", action: toggleMode, size: 32)
-                                .frame(height: 32, alignment: .top)
-                        }
-                    }
-                    .padding(.trailing, BeamSpacing._100)
-                    .frame(height: boxHeight)
-                }
+                fieldView(containerGeometry: containerGeometry)
+                rightActionsView
             }
-            .animation(enableAnimations ? .easeInOut(duration: 0.3) : nil)
-            .padding(.top, isEditing ? 6 : 10)
             .padding(.leading, state.isFullScreen ? 0 : windowControlsWidth)
             .frame(height: 52, alignment: .top)
             .background(BeamColor.Generic.background.swiftUI
@@ -147,6 +173,7 @@ struct OmniBar: View {
         .frame(height: 52, alignment: .top)
     }
 
+    // MARK: Actions
     func resetAutocompleteSelection() {
         autocompleteManager.resetAutocompleteSelection()
     }

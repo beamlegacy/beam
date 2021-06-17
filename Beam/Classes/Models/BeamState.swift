@@ -399,6 +399,9 @@ import BeamCore
         if mode == .web {
             createEmptyTab()
         }
+        if focusOmniBox {
+            autocompleteManager.shakeOmniBox()
+        }
         focusOmniBox = true
     }
 
