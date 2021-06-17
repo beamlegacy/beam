@@ -56,8 +56,9 @@ extension NSAttributedString {
         return ranges
     }
 
-    func clean(with pattern: String, in range: NSRange) -> NSAttributedString? {
-        guard let cleanAttributedStr = self as? NSMutableAttributedString else { return nil }
+    func clean(with pattern: String, in range: NSRange) -> NSAttributedString {
+        if string.count < range.upperBound { return self }
+        guard let cleanAttributedStr = self as? NSMutableAttributedString else { return self }
         let regex = try? NSRegularExpression(pattern: pattern, options: [])
         let matches = regex?.matches(in: cleanAttributedStr.string, options: [], range: range)
         matches?.reversed().forEach { cleanAttributedStr.replaceCharacters(in: $0.range, with: "") }

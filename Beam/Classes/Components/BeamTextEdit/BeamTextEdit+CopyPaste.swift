@@ -183,8 +183,8 @@ extension BeamTextEdit {
         var lastInserted: ElementNode? = node
         let parent = node.parent as? ElementNode ?? node
         for (idx, attributedString) in attributedStrings.enumerated() {
-            guard !attributedString.string.isEmpty,
-                  let cleanedText = attributedString.clean(with: "\\s\u{2022}\\s", in: NSRange(0..<3))  else { continue }
+            guard !attributedString.string.isEmpty else { continue }
+            let cleanedText = attributedString.clean(with: "\\s\u{2022}\\s", in: NSRange(0..<3))
             let beamText = BeamText(cleanedText)
             if idx == 0 {
                 disableInputDetector()
