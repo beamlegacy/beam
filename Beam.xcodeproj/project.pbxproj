@@ -513,6 +513,7 @@
 		A53C8F38264440E4003A5DF8 /* SharingStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53C8F37264440E4003A5DF8 /* SharingStatusView.swift */; };
 		A53C8F4E26446C6C003A5DF8 /* SharingBannerInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53C8F4D26446C6C003A5DF8 /* SharingBannerInfo.swift */; };
 		A53C8F532644B22B003A5DF8 /* OmniBarUITestsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53C8F522644B22B003A5DF8 /* OmniBarUITestsHelper.swift */; };
+		A53C9873267B4B6400D4AE90 /* AnimatableOffsetEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53C9872267B4B6400D4AE90 /* AnimatableOffsetEffect.swift */; };
 		A53EC30D2657C175001BCCCD /* CoreDataContextObserverTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53EC2F82657C175001BCCCD /* CoreDataContextObserverTests.swift */; };
 		A545D2FB25F7B1D800E68F94 /* DestinationNoteAutocompleteList.swift in Sources */ = {isa = PBXBuildFile; fileRef = A545D2FA25F7B1D800E68F94 /* DestinationNoteAutocompleteList.swift */; };
 		A545D30625F7D93B00E68F94 /* MathsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A545D30525F7D93B00E68F94 /* MathsTests.swift */; };
@@ -1254,6 +1255,7 @@
 		A53C8F37264440E4003A5DF8 /* SharingStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharingStatusView.swift; sourceTree = "<group>"; };
 		A53C8F4D26446C6C003A5DF8 /* SharingBannerInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharingBannerInfo.swift; sourceTree = "<group>"; };
 		A53C8F522644B22B003A5DF8 /* OmniBarUITestsHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniBarUITestsHelper.swift; sourceTree = "<group>"; };
+		A53C9872267B4B6400D4AE90 /* AnimatableOffsetEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimatableOffsetEffect.swift; sourceTree = "<group>"; };
 		A53EC2F82657C175001BCCCD /* CoreDataContextObserverTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDataContextObserverTests.swift; sourceTree = "<group>"; };
 		A545D2FA25F7B1D800E68F94 /* DestinationNoteAutocompleteList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DestinationNoteAutocompleteList.swift; sourceTree = "<group>"; };
 		A545D2FE25F7D92700E68F94 /* BeamTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "BeamTests-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -2079,6 +2081,7 @@
 				A5144000263803600021DD56 /* TrackableScrollView.swift */,
 				A5D53696264BE2F50011A095 /* RetroCompatibleScrollViewReader.swift */,
 				A59D33872655101A002E7E96 /* WiggleEffect.swift */,
+				A53C9872267B4B6400D4AE90 /* AnimatableOffsetEffect.swift */,
 				A050049E25DAEE73009CFEB6 /* ProgressIndicator.swift */,
 				872644762619903B0070E83D /* StepperControl.swift */,
 			);
@@ -3906,6 +3909,7 @@
 				418171F72581107C00317ED8 /* BeamData.swift in Sources */,
 				3330D7CD265E95E0008C9E20 /* LinearProgressView.swift in Sources */,
 				A57C745826709C8000840BBA /* BeamTextEdit+SlashMenu.swift in Sources */,
+				A53C9873267B4B6400D4AE90 /* AnimatableOffsetEffect.swift in Sources */,
 				52B17ABE2624445200CB4728 /* DatabaseRow.swift in Sources */,
 				A572370D2655654900AE6BFC /* CoreDataContextObserver.swift in Sources */,
 				523416A22629D465001F306F /* BeamCoreDataObject.swift in Sources */,
