@@ -10,8 +10,8 @@ enum ScorerMessages: String, CaseIterable {
  */
 class ScorerMessageHandler: BeamMessageHandler<ScorerMessages> {
 
-    init(page: BeamWebViewConfiguration) {
-        super.init(config: page, messages: ScorerMessages.self, jsFileName: "Scorer")
+    init(config: BeamWebViewConfiguration) {
+        super.init(config: config, messages: ScorerMessages.self, jsFileName: "Scorer")
     }
 
     override func onMessage(messageName: String, messageBody: Any?, from webPage: WebPage) {

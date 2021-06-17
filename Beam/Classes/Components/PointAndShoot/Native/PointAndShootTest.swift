@@ -23,6 +23,7 @@ class TestWebPage: WebPage {
     private(set) var frame: NSRect = NSRect()
     private(set) var downloadManager: DownloadManager
     private(set) var navigationController: WebNavigationController
+    var mediaPlayerController: MediaPlayerController?
     var webView: BeamWebView!
     var activeNote: String = "Card A"
     var testNotes: [String: BeamCore.BeamNote] = ["Card A": BeamNote(title: "Card A")]

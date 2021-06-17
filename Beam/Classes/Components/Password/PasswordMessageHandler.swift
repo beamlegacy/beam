@@ -15,8 +15,8 @@ enum PasswordMessages: String, CaseIterable {
  */
 class PasswordMessageHandler: BeamMessageHandler<PasswordMessages> {
 
-    init(page: BeamWebViewConfiguration) {
-        super.init(config: page, messages: PasswordMessages.self, jsFileName: "PasswordManager")
+    init(config: BeamWebViewConfiguration) {
+        super.init(config: config, messages: PasswordMessages.self, jsFileName: "PasswordManager")
     }
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
