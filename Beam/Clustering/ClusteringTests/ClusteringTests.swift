@@ -505,7 +505,7 @@ class ClusteringTests: XCTestCase {
                 }
             })
             if i == 4 {
-                cluster.changeCandidate(to: 2, completion: { result in
+                cluster.changeCandidate(to: 2, with: nil, with: nil, with: nil, completion: { result in
                     switch result {
                     case .failure(let error):
                         XCTFail(error.localizedDescription)
