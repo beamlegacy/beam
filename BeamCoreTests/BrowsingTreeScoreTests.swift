@@ -58,6 +58,17 @@ class BrowsingTreeScoreTests: XCTestCase {
         XCTAssertEqual(tree.scoreFor(link: link).lastCreationDate, date1)
     }
 
+    func testScoreHalflive() throws {
+        let score = Score()
+        let now = Date()
+        score.textAmount = 1
+        score.lastCreationDate = now
+        let clusteringScore = score.clusteringScore(date: now)
+        let halfLife = 30.0 * 60.0
+        let removalScore = score.clusteringRemovalScore(date: now + halfLife)
+        XCTAssertEqual(0.5 * clusteringScore, removalScore)
+    }
+
     func testLinkRemovalComparison() {
         let score0 = Score()
         score0.lastCreationDate = Date(timeIntervalSinceNow: -0.5 * 60 * 60)
