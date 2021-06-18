@@ -116,7 +116,7 @@ public class Score: Codable {
         //The lesser score the more the url is to be removed
         guard let lastCreationDate = lastCreationDate else { return 0 }
         let timeSinceLastCreation = Float(date.timeIntervalSince(lastCreationDate))
-        return (exp(-Float(timeSinceLastCreation) / (log(2.0) * URL_SCORE_HALF_LIFE))
+        return (exp(-Float(timeSinceLastCreation) * log(2.0) / URL_SCORE_HALF_LIFE)
                 * clusteringScore(date: date)
         )
     }
