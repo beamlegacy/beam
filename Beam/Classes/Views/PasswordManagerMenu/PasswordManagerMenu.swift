@@ -33,14 +33,14 @@ struct PasswordManagerMenu: View {
                     PasswordGeneratorSuggestionCell(viewModel: passwordGeneratorViewModel)
                         .frame(height: 81, alignment: .center)
                 } else {
-                    ForEach(viewModel.display.entries.prefix(3)) { entry in
+                    ForEach(viewModel.display.entriesForHost.prefix(3)) { entry in
                         StoredPasswordCell(host: entry.minimizedHost, username: entry.username) { newState in
                             if newState == .clicked {
                                 viewModel.fillCredentials(entry)
                             }
                         }
                     }
-                    if viewModel.display.entries.count == 1 && viewModel.display.hasMoreThanOneEntry {
+                    if viewModel.display.entriesForHost.count == 1 && viewModel.display.hasMoreThanOneEntry {
                         Separator(horizontal: true)
                             .padding(.vertical, 1)
                             .padding(.horizontal, 12)
@@ -50,12 +50,12 @@ struct PasswordManagerMenu: View {
                             }
                         }
                     }
-                    if viewModel.display.entries.count > 1 {
+                    if viewModel.display.entriesForHost.count > 1 {
                         Separator(horizontal: true)
                             .padding(.vertical, 1)
                             .padding(.horizontal, 12)
                     }
-                    if viewModel.display.entries.count != 1 || !viewModel.display.hasMoreThanOneEntry {
+                    if viewModel.display.entriesForHost.count != 1 || !viewModel.display.hasMoreThanOneEntry {
                         OtherPasswordsCell { newState in
                             // Show More Password view
                             if newState == .clicked {
@@ -63,7 +63,7 @@ struct PasswordManagerMenu: View {
                                 showingOtherPasswordsSheet.toggle()
                             }
                         }.sheet(isPresented: $showingOtherPasswordsSheet, content: {
-                            OtherPasswordModal(passwordEntries: viewModel.display.entries, onFill: { entry in
+                            OtherPasswordModal(passwordEntries: viewModel.display.allEntries, onFill: { entry in
                                 viewModel.fillCredentials(entry)
                             }, onRemove: { entry in
                                 // TODO: Implement when password will be saved
