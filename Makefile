@@ -17,41 +17,8 @@ install_certificates:
 	security import certificates/dev_keys.p12 -k ~/Library/Keychains/login.keychain -P "${PRIVATE_KEY_PASSWORD}"
 
 install_gitlab_runner:
-	# TODO: install sudo file
-
-	# Install Brew
-	/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-	echo 'eval $(/opt/homebrew/bin/brew shellenv)' >> ~/.zprofile
-	eval $(/opt/homebrew/bin/brew shellenv)
-	# CI=1 /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-
-	# Install direnv for environment variables
-	brew install direnv
-	eval "$(direnv hook zsh)"
-	
-	direnv allow .
-
-	# Ruby
-	brew install rbenv ruby-build
-	rbenv init -
-	echo 'eval "$(rbenv init -)"' >> ~/.zshrc
-	rbenv install ${RUBY_VERSION}
-	rbenv global ${RUBY_VERSION}
-
-	# Gitlab runner
-	sudo curl --output /usr/local/bin/gitlab-runner https://gitlab-runner-downloads.s3.amazonaws.com/latest/binaries/gitlab-runner-darwin-amd64
-	sudo chmod +x /usr/local/bin/gitlab-runner
-	cd ${HOME}
-	gitlab-runner install
-	gitlab-runner start
-	gitlab-runner register --non-interactive --custom_build_dir-enabled=true --name=`hostname | sed -e s/\.local//` --url=https://gitlab.com/ --executor="shell" --shell="bash" --registration-token=${GITLAB_TOKEN}
-
-	# Xcode
-	curl -sL -O https://github.com/neonichu/ruby-domain_name/releases/download/v0.5.99999999/domain_name-0.5.99999999.gem
-	sudo gem install domain_name-0.5.99999999.gem
-	sudo gem install --conservative xcode-install
-	rm -f domain_name-0.5.99999999.gem
-	xcversion install ${XCODE_VERSION}
+	install_direnv
+	install_xcode
 
 	# Rubygems
 	bundle
@@ -59,11 +26,8 @@ install_gitlab_runner:
 	# Fastlane
 	sudo gem install fastlane -N
 
-	# Swiftlint
-	brew install swiftlint
-
-	# injector
-	curl -ssl https://raw.githubusercontent.com/penso/variable-injector/master/scripts/install-binary.sh | sudo sh
+	install_swiftlint
+	install_variable_injector
 
 	# DMG
 	brew install create-dmg
@@ -92,6 +56,23 @@ install_gitlab_runner:
 	# Deno for installing blocklists
 	brew install deno
 
+	# Manual Gitlab runner (see https://docs.gitlab.com/runner/install/osx.html)
+	# sudo curl --output /usr/local/bin/gitlab-runner https://gitlab-runner-downloads.s3.amazonaws.com/latest/binaries/gitlab-runner-darwin-amd64
+	# sudo chmod +x /usr/local/bin/gitlab-runner
+	# gitlab-runner install
+	# gitlab-runner start
+
+	# Automatic
+	brew install gitlab-runner
+	brew services start gitlab-runner
+
+	# Shell
+	gitlab-runner register --non-interactive --custom_build_dir-enabled=true --name=`hostname | sed -e s/\.local//` --url=https://gitlab.com/ --executor="shell" --shell="bash" --tag-list="macos" --registration-token=${GITLAB_TOKEN}
+	# Docker
+	gitlab-runner register --non-interactive --name=`hostname | sed -e s/\.local//`-docker --url=https://gitlab.com/ --executor="docker" --docker-image="ruby:2.6" --tag-list="docker" --registration-token=${GITLAB_TOKEN}
+	# Mono
+	gitlab-runner register --non-interactive --custom_build_dir-enabled=true --name=`hostname | sed -e s/\.local//`-mono --limit=1 --url=https://gitlab.com/ --executor="shell" --shell="bash" --tag-list="macos-mono" --registration-token=${GITLAB_TOKEN}
+
 install_fastlane:
 	 gem install fastlane
 	 bundle exec fastlane update_plugins
@@ -115,14 +96,32 @@ swiftlint:
 swiftlint_rules:
 	swiftlint rules
 
+
 lint:
 	fastlane lint
 
-variable_injector:
+install_variable_injector:
 	curl -ssl https://raw.githubusercontent.com/penso/variable-injector/master/scripts/install-binary.sh | sh
 
 install_direnv:
 	brew install direnv
+	eval "$(direnv hook zsh)"
+	direnv allow .
+
+install_rbenv:
+	# Ruby
+	brew install rbenv ruby-build
+	rbenv init -
+	rbenv install ${RUBY_VERSION}
+	rbenv global ${RUBY_VERSION}
+
+install_xcode:
+	# Xcode
+	curl -sL -O https://github.com/neonichu/ruby-domain_name/releases/download/v0.5.99999999/domain_name-0.5.99999999.gem
+	sudo gem install domain_name-0.5.99999999.gem
+	rm -f domain_name-0.5.99999999.gem
+	sudo gem install --conservative xcode-install
+	xcversion install ${XCODE_VERSION}
 
 install_cmake:
 	brew install cmake
@@ -155,4 +154,4 @@ reset_vinyl_files:
 	rm -r ${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Logs/Beam/Vinyl/*.json
 	rm -r BeamTests/Vinyl/*.json
 
-setup: git_checkout install_dependencies install_direnv install_swiftlint install_cmake variable_injector build_libgit2 install_js
+setup: git_checkout install_dependencies install_swiftlint install_cmake install_variable_injector build_libgit2 install_js
