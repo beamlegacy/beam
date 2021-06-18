@@ -41,7 +41,7 @@ class ContentBlockingManager {
             let state = FilterManager.default.state
             let groups = state.filterGroups
             let allowList = RadBlockDatabase.shared
-            let blockers = groups.map { RBContentBlocker(filterGroup: $0, whitelist: allowList) }
+            let blockers = groups.map { RBContentBlocker(filterGroup: $0, allowList: allowList) }
             self?.compileLists(blockers: blockers)
         }
     }
