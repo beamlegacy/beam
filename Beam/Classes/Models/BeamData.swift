@@ -22,7 +22,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     @Published var journal: [BeamNote] = []
 
     /// Legacy history indexer
-    var index: Index
     var indexer: GRDBIndexer
     var fileDB: BeamFileDB
     var passwordsDB: PasswordsDB
@@ -65,8 +64,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
             Logger.shared.logError("Unable to load link store from \(Self.linkStorePath)", category: .search)
         }
 
-        index = Index.loadOrCreate(Self.indexPath)
-
         do {
             indexer = try GRDBIndexer(dataDir: URL(fileURLWithPath: Self.dataFolder))
         } catch {
@@ -105,7 +102,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         $tabToIndex.sink { [weak self] tabToIndex in
             guard let self = self,
                   let tabToIndex = tabToIndex else { return }
-            self.index.append(document: tabToIndex.document)
 
             guard let clusteringManager = self.clusteringManager,
                   var id = tabToIndex.currentTabTree?.current.link else { return }
@@ -155,13 +151,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         }
 
         noteAutoSaveService.saveNotes()
-        // save search index
-        do {
-            Logger.shared.logInfo("Saving Index to \(Self.indexPath)", category: .search)
-            try index.saveTo(Self.indexPath)
-        } catch {
-            Logger.shared.logError("Unable to save index to \(Self.indexPath)", category: .search)
-        }
     }
 
     @objc func calendarDayDidChange(notification: Notification) {

@@ -39,7 +39,6 @@ class BrowserTabsManager: ObservableObject {
     }
 
     private var data: BeamData
-    public var index: Index
     @Published public var tabs: [BrowserTab] = [] {
         didSet {
             self.updateTabsHandlers()
@@ -62,7 +61,6 @@ class BrowserTabsManager: ObservableObject {
 
     init(with data: BeamData) {
         self.data = data
-        self.index = data.index
     }
 
     private func updateCurrentTabObservers() {
