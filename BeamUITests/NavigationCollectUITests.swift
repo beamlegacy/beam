@@ -39,9 +39,9 @@ class NavigationCollectUITests: QuickSpec {
     override func spec() {
         
         let titles = [
-            "Point And Shoot Test Fixture - Ultralight Beam",
-            "Point And Shoot Test Fixture - I-Beam",
-            "Point And Shoot Test Fixture - Cursor"
+            "Point And Shoot Test Fixture Ultralight Beam",
+            "Point And Shoot Test Fixture I-Beam",
+            "Point And Shoot Test Fixture Cursor"
         ]
 
         describe("Navigating to web") {

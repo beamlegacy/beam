@@ -33,9 +33,9 @@ class BrowsingTreeScoreTests: XCTestCase {
         //exit foreground
         tree.current.addEvent(ReadingEventType.closeTab, date: Date(timeIntervalSinceReferenceDate: 1001))
 
-        tree.navigateTo(url: "www.google.com", title: nil, startReading: false, isLinkActivation: false)
+        tree.navigateTo(url: "www.google.com", title: nil, startReading: false, isLinkActivation: false, readCount: 200)
 
-        tree.navigateTo(url: "<???>", title: nil, startReading: false, isLinkActivation: false)
+        tree.navigateTo(url: "<???>", title: nil, startReading: false, isLinkActivation: false, readCount: 300)
         //start foreground
         tree.current.addEvent(ReadingEventType.startReading, date: Date(timeIntervalSinceReferenceDate: 1003))
         //on foreground for 1 sec
@@ -51,9 +51,9 @@ class BrowsingTreeScoreTests: XCTestCase {
         let link = tree.current.link
         let date0 = tree.current.events[0].date
         XCTAssertEqual(tree.scoreFor(link: link).lastCreationDate, date0)
-        tree.navigateTo(url: "www.google.com", title: nil, startReading: false, isLinkActivation: false)
+        tree.navigateTo(url: "www.google.com", title: nil, startReading: false, isLinkActivation: false, readCount: 400)
         XCTAssertEqual(tree.scoreFor(link: link).lastCreationDate, date0)
-        tree.navigateTo(url: "<???>", title: nil, startReading: false, isLinkActivation: false)
+        tree.navigateTo(url: "<???>", title: nil, startReading: false, isLinkActivation: false, readCount: 500)
         let date1 = tree.current.events[0].date
         XCTAssertEqual(tree.scoreFor(link: link).lastCreationDate, date1)
     }

@@ -23,11 +23,12 @@ class WebNavigationMessageHandler: BeamMessageHandler<NavigationMessages> {
         switch messageKey {
         case NavigationMessages.nav_locationChanged:
             guard let dict = msgPayload,
-                  let urlString = dict["url"] as? String else {
+                  let urlString = dict["url"] as? String
+                  else {
                 Logger.shared.logError("Expected a url in location change message \(String(describing: msgPayload))", category: .web)
                 return
             }
-            Logger.shared.logError("Location changed \(urlString))", category: .web)
+            Logger.shared.logInfo("Location changed \(urlString))")
             guard let url = URL(string: urlString) else {
                 Logger.shared.logError("\(urlString) is not a valid URL in navigation message", category: .web)
                 return

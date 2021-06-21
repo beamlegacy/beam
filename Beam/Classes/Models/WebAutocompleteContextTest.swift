@@ -1,10 +1,3 @@
-//
-//  WebAutocompleteContextTest.swift
-//  BeamTests
-//
-//  Created by Stef Kors on 15/06/2021.
-//
-
 import XCTest
 import Promises
 import Nimble

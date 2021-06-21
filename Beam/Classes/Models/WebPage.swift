@@ -65,7 +65,8 @@ protocol WebPage: AnyObject, Scorable {
      Leave the page, either by back or forward.
      */
     func leave()
-    func navigatedTo(url: URL, read: Readability, title: String?)
+
+    func navigatedTo(url: URL, read: Readability, title: String, isNavigation: Bool)
 }
 
 extension WebPage {

@@ -39,22 +39,23 @@ class BeamWebNavigationController: WebPageHolder, WebNavigationController {
     }
 
     func navigatedTo(url: URL, webView: WKWebView) {
-        _ = page.addToNote(allowSearchResult: false)
         let isLinkActivation = !isNavigatingFromSearchBar
-        let title = webView.title
-        browsingTree.navigateTo(url: url.absoluteString, title: title, startReading: page.isActiveTab(), isLinkActivation: isLinkActivation)
-        isNavigatingFromSearchBar = false
+        let fullTitle = webView.title ?? ""
         Readability.read(webView) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case let .success(read):
-                self.browsingTree.current.score.textAmount = read.content.count
-                self.page.navigatedTo(url: url, read: read, title: title)
+                // Readability removes title separators
+                let title = fullTitle.count > read.title.count ? fullTitle : read.title
+                self.browsingTree.navigateTo(url: url.absoluteString, title: title, startReading: self.page.isActiveTab(),
+                                             isLinkActivation: isLinkActivation, readCount: read.content.count)
+                self.page.navigatedTo(url: url, read: read, title: title, isNavigation: isLinkActivation)
                 try? TextSaver.shared?.save(nodeId: self.browsingTree.current.id, text: read)
             case let .failure(error):
                 Logger.shared.logError("Error while indexing web page: \(error)", category: .javascript)
             }
         }
+        isNavigatingFromSearchBar = false
     }
 }
 
@@ -62,14 +63,12 @@ extension BeamWebNavigationController: WKNavigationDelegate {
 
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction,
                  decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
-        noteController.clearCurrent()
         decisionHandler(.allow)
     }
 
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction,
                  preferences: WKWebpagePreferences,
                  decisionHandler: @escaping (WKNavigationActionPolicy, WKWebpagePreferences) -> Void) {
-        noteController.clearCurrent()
         handleBackForwardWebView(navigationAction: navigationAction)
         if let targetURL = navigationAction.request.url {
             if navigationAction.modifierFlags.contains(.command) {
@@ -83,8 +82,6 @@ extension BeamWebNavigationController: WKNavigationDelegate {
 
     func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse,
                  decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
-        noteController.clearCurrent()
-
         if let response = navigationResponse.response as? HTTPURLResponse,
            !navigationResponse.canShowMIMEType,
            let url = response.url {
@@ -100,15 +97,12 @@ extension BeamWebNavigationController: WKNavigationDelegate {
     }
 
     func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
-        noteController.clearCurrent()
     }
 
     func webView(_ webView: WKWebView, didReceiveServerRedirectForProvisionalNavigation navigation: WKNavigation!) {
-        noteController.clearCurrent()
     }
 
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
-        noteController.clearCurrent()
         Logger.shared.logError("didFail: \(error)", category: .javascript)
     }
 
@@ -121,7 +115,6 @@ extension BeamWebNavigationController: WKNavigationDelegate {
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-        noteController.clearCurrent()
         Logger.shared.logError("Webview failed: \(error)", category: .javascript)
     }
 

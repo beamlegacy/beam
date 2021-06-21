@@ -335,12 +335,8 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
     if (this.isPointing()) {
       this.pointingEv = ev
       this.onShoot(ev, ev.clientX, ev.clientY)
-      return
-    }
-
-    if (this.isShooting()) {
+    } else if (this.isShooting()) {
       this.setStatus(BeamPNSStatus.none)
-      return
     }
   }
 

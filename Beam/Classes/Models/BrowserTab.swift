@@ -5,8 +5,6 @@ import WebKit
 import BeamCore
 import Promises
 
-// swiftlint:disable file_length
-
 @objc class BrowserTab: NSObject, ObservableObject, Identifiable, Codable, WebPage, Scorable {
     var id: UUID
 
@@ -73,9 +71,9 @@ import Promises
         pointAndShoot.leavePage()
     }
 
-    func navigatedTo(url: URL, read: Readability, title: String? = nil) {
+    func navigatedTo(url: URL, read: Readability, title: String, isNavigation: Bool) {
         appendToIndexer?(url, read)
-        noteController.setCurrent(text: title == "" ? webView.title : title, url: url)
+        noteController.add(url: url, text: title, isNavigation: isNavigation)
         updateScore()
     }
 
@@ -133,10 +131,7 @@ import Promises
     }
 
     func setDestinationNote(_ note: BeamNote, rootElement: BeamElement? = nil) {
-        let hasElem = noteController.setDestination(note: note, browsingTree: browsingTree)
-        if !hasElem {
-            _ = addToNote(allowSearchResult: false)
-        }
+        noteController.setDestination(note: note)
         state.destinationCardName = note.title
         browsingTree.destinationNoteChange()
     }
@@ -179,7 +174,7 @@ import Promises
         super.init()
 
         self.webView.page = self
-        uiDelegateController.webPage = self
+        uiDelegateController.page = self
         mediaPlayerController = MediaPlayerController(page: self)
         note.browsingSessions.append(browsingTree)
         setupObservers()
@@ -215,7 +210,7 @@ import Promises
         privateMode = try container.decode(Bool.self, forKey: .privateMode)
 
         super.init()
-        noteController.addBrowsingTree(browsingTree)
+        noteController.note.browsingSessions.append(tree)
     }
 
     func postLoadSetup(state: BeamState) {
@@ -259,18 +254,15 @@ import Promises
             Logger.shared.logWarning("Adding search results is not allowed", category: .web)
             return nil
         } // Don't automatically add search results
-        guard let elem = noteController.element else {
-            return noteController.add(text: title, url: url)
-        }
-        return elem
+        return noteController.add(url: url, text: title)
     }
 
     private func receivedWebviewTitle(_ title: String? = nil) {
-        noteController.setCurrent(text: title, url: url)
-        guard title?.isEmpty == false || (!isLoading && url != nil) else {
+        guard let url = url else {
             return
         }
-        self.title = title ?? ""
+        noteController.add(url: url, text: title)
+        self.title = noteController.element.text.text
     }
 
     private func updateFavIcon() {
@@ -285,9 +277,6 @@ import Promises
         let score = browsingTree.current.score.score
 //            Logger.shared.logDebug("updated score[\(url!.absoluteString)] = \(s)", category: .general)
         noteController.score = score
-        if score > 0.0 {    // Automatically add current page to note over a certain threshold
-            _ = noteController.add(text: title, url: url)
-        }
     }
 
     func getNote(fromTitle noteTitle: String) -> BeamNote? {

@@ -18,11 +18,9 @@ class Quote {
             guard let url = URL(string: group.href) else {
                 fatalError("Expected to have Page URL")
             }
-
             if self.parseHtml.isVideo(url: url.absoluteString, html: html) {
                 return fulfill(.embed(url.absoluteString))
             }
-
             if self.parseHtml.isImage(html: html) {
                 let doc = try SwiftSoup.parseBodyFragment(html)
                 let img = try doc.select("img")[0]
@@ -33,7 +31,6 @@ class Quote {
                 }
                 return
             }
-
             fulfill(.quote(1, page.title, url.absoluteString))
         }
     }

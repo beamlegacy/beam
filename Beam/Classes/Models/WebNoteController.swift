@@ -12,14 +12,16 @@ class WebNoteController: Encodable, Decodable {
     public private(set) var note: BeamNote
     public private(set) var rootElement: BeamElement
 
-    public private(set) var element: BeamElement?
+    public private(set) var element: BeamElement
+
+    var futureTitle: String? = nil
 
     public var score: Float {
         set {
-            element?.score = newValue
+            element.score = newValue
         }
         get {
-            element?.score ?? 0
+            element.score ?? 0
         }
     }
 
@@ -27,44 +29,50 @@ class WebNoteController: Encodable, Decodable {
         note.isTodaysNote
     }
 
-    init(note: BeamNote, rootElement: BeamElement? = nil) {
+    /**
+     Determine which element any add should target.
+     */
+    private func targetElement(isNavigation: Bool) -> BeamElement {
+        guard let latest = element.children.last else {
+            element = addElement(isNavigation: isNavigation)
+            return element
+        }
+        element = latest.text.isEmpty ? latest : addElement(isNavigation: isNavigation)
+        return element
+    }
+
+    private func addElement(isNavigation: Bool) -> BeamElement {
+        let newElement = BeamElement()
+        if isNavigation {
+            element.addChild(newElement)
+        } else {
+            rootElement.addChild(newElement)
+        }
+        return newElement
+    }
+
+    init(note: BeamNote, rootElement from: BeamElement? = nil) {
+        self.note = note
+        rootElement = from ?? note
+        element = rootElement
+    }
+
+    func setDestination(note: BeamNote, rootElement: BeamElement? = nil) {
         self.note = note
         self.rootElement = rootElement ?? note
     }
 
     /*
-     Reset current note's current bullet/block.
-
-      This will result in creating new elements for navigation for instance.
-     */
-    func clearCurrent() {
-        element = nil
-    }
-
-    /*
     Add the current page to the current note. and return
     - Parameter allowSearchResult:
-    - Returns: the beam element
+    - Returns: the added (or selected) element
     */
-    func add(text: String, url: URL? = nil) -> BeamElement? {
-        guard let url = url else {
-            return nil
-        }
+    func add(url: URL, text: String?, isNavigation: Bool = true) -> BeamElement {
         let linkString = url.absoluteString
-        guard !note.outLinks.contains(linkString) else {
-            element = note.elementContainingLink(to: linkString); return element
-        }
-        Logger.shared.logDebug("add current page '\(title)' to note '\(note.title)'", category: .web)
-        if rootElement.children.count == 1,
-           let firstElement = rootElement.children.first,
-           firstElement.text.isEmpty {
-                element = firstElement
-           } else {
-                let newElement = BeamElement()
-                element = newElement
-                rootElement.addChild(newElement)
-           }
-        setCurrent(text: text, url: url)
+        let existing: BeamElement? = note.elementContainingLink(to: linkString)
+        element = existing ?? targetElement(isNavigation: isNavigation)
+        setContents(url: url, text: text)
+        Logger.shared.logDebug("add current page '\(text)' with url \(url) to note '\(note.title)'", category: .web)
         return element
     }
 
@@ -76,63 +84,53 @@ class WebNoteController: Encodable, Decodable {
         let rootId = try? container.decode(UUID.self, forKey: .rootElement)
         rootElement = loadedNote.findElement(rootId ?? loadedNote.id) ?? loadedNote.children.first!
         if let elementId = try? container.decode(UUID.self, forKey: .element) {
-            element = loadedNote.findElement(elementId)
+            guard let foundElement = loadedNote.findElement(elementId) else {
+                fatalError("Should have found referenced element \(elementId)")
+            }
+            element = foundElement
+        } else {
+            fatalError("Should have found referenced element id")
         }
         note = loadedNote
     }
 
-    var title: String {
-        note.title
-    }
-
-    func setDestination(note: BeamNote, browsingTree: BrowsingTree, rootElement: BeamElement? = nil) -> Bool {
-        self.note = note
-        self.rootElement = rootElement ?? note
-        if let elem = element {
-            if elem.children.count == 0 {
-                // re-parent the element that has already been created
-                // only if it's a single collected link
-                self.rootElement.addChild(elem)
-            } else {
-                clearCurrent()
-            }
-        }
-        addBrowsingTree(browsingTree)
-        return element != nil
-    }
-
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-
         try container.encode(note.title, forKey: .note)
         try container.encode(rootElement.id, forKey: .rootElement)
-        if let element = element {
-            try container.encode(element, forKey: .element)
-        }
+        try container.encode(element, forKey: .element)
     }
 
-    func currentElementIsSimple() -> Bool {
-        if let element = element,
-           element.text.ranges.count == 1 {
+    private func currentElementIsSimple() -> Bool {
+        if element.text.ranges.count == 1 {
             let range = element.text.ranges.first
             return range != nil ? range!.attributes.count <= 1 : true
         }
         return false
     }
 
-    func addBrowsingTree(_ tree: BrowsingTree) {
-        note.browsingSessions.append(tree)
-    }
+    /**
+     Set current element text and URL.
 
-    func setCurrent(text: String? = nil, url: URL? = nil) {
-        guard let url = url else {
-            return
-        }
-        guard currentElementIsSimple() else {
-            return
-        }
-        let titleStr = text ?? self.title
+     - Parameters:
+       - text:
+       - url:
+     */
+    func setContents(url: URL, text: String? = nil) -> String {
+        let beamText = element.text
+        let titleStr = text ?? beamText.text
         let name = titleStr.isEmpty ? url.absoluteString : titleStr
-        element?.text = BeamText(text: name, attributes: [.link(url.absoluteString)])
+        if currentElementIsSimple() {
+            let attributes = beamText.ranges[0].attributes
+            if attributes.isEmpty {    // New contents?
+                element.text = BeamText(text: name, attributes: [.link(url.absoluteString)])
+            } else {
+                let attr: BeamText.Attribute = attributes[0]
+                if case let .link(url.absoluteString) = attr {
+                    element.text = BeamText(text: name, attributes: [.link(url.absoluteString)])
+                }
+            }
+        }
+        return name
     }
 }
