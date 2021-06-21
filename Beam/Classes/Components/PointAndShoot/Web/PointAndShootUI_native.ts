@@ -161,7 +161,10 @@ export class PointAndShootUI_native extends WebEventsUI_native implements PointA
       areas: [area],
       html: el.outerHTML,
       quoteId,
-      location,
+      location: {
+        x: location.x,
+        y: location.y,
+      },
       offset: { x: xOffset, y: yOffset }
     }
   }

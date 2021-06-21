@@ -65,7 +65,27 @@ class TestWebPage: WebPage {
 
     func navigatedTo(url: URL, read: Readability, title: String?) {}
 
-    func executeJS(_ jsCode: String, objectName: String?) -> Promise<Any?> {
+    func executeJS(_ jsCode: String, objectName: String?, omit: String? = nil) -> Promise<Any?> {
+        if objectName == "PointAndShoot" {
+            switch jsCode {
+            case "setStatus('pointing')":
+                pointAndShoot.status = PointAndShootStatus.pointing
+            case "setStatus('shooting')":
+                pointAndShoot.status = PointAndShootStatus.shooting
+            case "setStatus('none')":
+                pointAndShoot.status = PointAndShootStatus.none
+            case let assignString where jsCode.contains("assignNote"):
+                Logger.shared.logDebug("\(assignString) called", category: .pointAndShoot)
+                pointAndShoot.status = PointAndShootStatus.none
+            default:
+                Logger.shared.logDebug("no matching jsCode case, no js call mocked", category: .pointAndShoot)
+            }
+        }
+        events.append("executeJS \(objectName ?? "").\(jsCode)")
+        return Promise(true)
+    }
+
+    func executeJS(_ jsCode: String, objectName: String?, only: String) -> Promise<Any?> {
         if objectName == "PointAndShoot" {
             switch jsCode {
             case "setStatus('pointing')":

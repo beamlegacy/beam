@@ -77,6 +77,8 @@ export interface BeamWebkit {
 }
 
 export interface BeamWindow extends BeamEventTarget {
+  frameElement: any
+  frames: BeamWindow[]
   /**
    * @type string
    */

@@ -74,9 +74,9 @@ export class PointAndShootUI_debug implements PointAndShootUI {
     this.native.setFramesInfo(framesInfo)
   }
 
-  setOnLoadInfo() {
+  setOnLoadInfo(framesInfo: FrameInfo[]) {
     this.web.setOnLoadInfo()
-    this.native.setOnLoadInfo()
+    this.native.setOnLoadInfo(framesInfo)
   }
 
   setResizeInfo(resizeInfo: any) {

@@ -25,7 +25,7 @@ class PointAndShootShootingTest: PointAndShootTest {
             html: "<p>Pointed text</p>"
         )
         // Point
-        self.pns.point(target: target1)
+        self.pns.point(target: target1, href: self.pns.page.url!.string)
         self.pns.draw()
         // Shoot
         self.pns.shoot(targets: [target1], href: self.pns.page.url!.string)
@@ -55,7 +55,7 @@ class PointAndShootShootingTest: PointAndShootTest {
             html: "<p>Pointed text</p>"
         )
         // Point
-        self.pns.point(target: target1)
+        self.pns.point(target: target1, href: self.pns.page.url!.string)
         self.pns.draw()
         // Shoot
         self.pns.shoot(targets: [target1], href: self.pns.page.url!.string)
@@ -83,7 +83,7 @@ class PointAndShootShootingTest: PointAndShootTest {
             mouseLocation: NSPoint(x: 201, y: 202),
             html: "<p>Pointed text</p>"
         )
-        self.pns.point(target: target1)
+        self.pns.point(target: target1, href: self.pns.page.url!.string)
         self.pns.draw()
         self.pns.shoot(targets: [target1], href: self.pns.page.url!.string)
         self.pns.status = .shooting
@@ -115,7 +115,7 @@ class PointAndShootShootingTest: PointAndShootTest {
             mouseLocation: NSPoint(x: 201, y: 202),
             html: "<p>Pointed text, iteration: 1</p>"
         )
-        self.pns.point(target: target1)
+        self.pns.point(target: target1, href: self.pns.page.url!.string)
         self.pns.draw()
         self.pns.shoot(targets: [target1], href: self.pns.page.url!.string)
         self.pns.status = .shooting
@@ -132,7 +132,7 @@ class PointAndShootShootingTest: PointAndShootTest {
             mouseLocation: NSPoint(x: 201, y: 202),
             html: "<p>Pointed text, iteration: 2</p>"
         )
-        self.pns.point(target: target2)
+        self.pns.point(target: target2, href: self.pns.page.url!.string)
         self.pns.draw()
         // Shoot
         self.pns.shoot(targets: [target2], href: self.pns.page.url!.string)

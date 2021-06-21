@@ -25,13 +25,13 @@ class PointAndShootPointingTest: PointAndShootTest {
             html: "<p>Pointed text</p>"
         )
         self.pns.status = PointAndShootStatus.pointing
-        self.pns.point(target: target)
+        self.pns.point(target: target, href: self.pns.page.url!.string)
         XCTAssertEqual(self.pns.isPointing, true)
         XCTAssertEqual(self.helperCountUIEvents("drawPoint"), 1)
         XCTAssertEqual(self.testUI.events[1], "drawPoint Target(area: (101.0, 102.0, 301.0, 302.0), quoteId: nil, "
                         + "mouseLocation: (201.0, 202.0), html: \"<p>Pointed text</p>\", offset: nil)")
 
-        self.pns.unpoint()
+        self.pns.unPoint()
         XCTAssertEqual(self.pns.isPointing, false)
         XCTAssertEqual(self.helperCountUIEvents("drawPoint"), 1)
     }

@@ -20,7 +20,7 @@ class PointAndShootHTMLTest: PointAndShootTest {
         )
 
         // Point
-        self.pns.point(target: target)
+        self.pns.point(target: target, href: self.pns.page.url!.string)
         self.pns.draw()
         // Shoot
         self.pns.shoot(targets: [target], href: self.pns.page.url!.string)
@@ -116,6 +116,19 @@ class PointAndShootHTMLTest: PointAndShootTest {
         helperShootHtml("<video style=\"width: 427px; height: 240px; left: 0px; top: 0px;\" tabindex=\"-1\" class=\"video-stream html5-main-video\" controlslist=\"nodownload\" src=\"https://www.youtube.com/3c46b995-6a5c-44c4-ae60-c62db0d15725\"></video>")
 
         // Validate shoot
+        waitUntil(timeout: .seconds(5)) { done in
+            self.pns.addShootToNote(noteTitle: self.testPage!.activeNote).then { quoteKinds in
+                XCTAssertEqual(quoteKinds.count, 1)
+                XCTAssertEqual(quoteKinds[0], BeamCore.ElementKind.embed(self.pns.page.url!.absoluteString))
+                done()
+            }
+        }
+    }
+
+    func testYouTubeIframe() throws {
+        helperShootHtml("<iframe width=\"728\" height=\"410\" src=\"https://www.youtube.com/embed/ZnuwB35GYMY\" title=\"YouTube video player\" frameborder=\"0\" allow=\"accelerometer; autoplay;clipboard-write;encrypted-media; gyroscope; picture-in-picture\" allowfullscreen></iframe>")
+
+        // Add shoot to note
         waitUntil(timeout: .seconds(5)) { done in
             self.pns.addShootToNote(noteTitle: self.testPage!.activeNote).then { quoteKinds in
                 XCTAssertEqual(quoteKinds.count, 1)

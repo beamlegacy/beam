@@ -33,6 +33,8 @@ export class BeamWindowMock extends BeamEventTargetMock implements BeamWindow {
     this.location = location
     this.visualViewport.scale = 1
   }
+  frameElement: any
+  frames: any
 
   scroll(xCoord: number, yCoord: number): void {
     this.scrollX = xCoord

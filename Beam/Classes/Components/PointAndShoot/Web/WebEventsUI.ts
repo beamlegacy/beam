@@ -17,7 +17,7 @@ export interface WebEventsUI {
 
   setResizeInfo(resizeInfo: any)
 
-  setOnLoadInfo()
+  setOnLoadInfo(framesInfo: FrameInfo[])
 
   pinched(pinchInfo: any)
 }

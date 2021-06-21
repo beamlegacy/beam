@@ -111,29 +111,38 @@ export class WebEvents<UI extends WebEventsUI> {
   }
 
   checkFrames() {
+    const framesInfo = this.getFramesInfo()
+    this.ui.setFramesInfo(framesInfo)
+  }
+
+  getFramesInfo(): FrameInfo[] {
     const frameEls = this.win.document.querySelectorAll("iframe") as BeamHTMLIFrameElement[]
-    const hasFrames = frameEls.length > 0
     const framesInfo: FrameInfo[] = []
-    if (hasFrames) {
-      for (const frameEl of frameEls) {
-        const bounds = frameEl.getBoundingClientRect()
-        const href = frameEl.src
-        const frameInfo = {
-          href: href,
-          bounds: {
-            x: bounds.x,
-            y: bounds.y,
-            width: bounds.width,
-            height: bounds.height,
-          },
-        }
-        framesInfo.push(frameInfo)
+    for (const frameEl of frameEls) {
+      const bounds = frameEl.getBoundingClientRect()
+      const href = frameEl.src
+      const frameInfo = {
+        href: href,
+        bounds: {
+          x: bounds.x,
+          y: bounds.y,
+          width: bounds.width,
+          height: bounds.height,
+        },
       }
-      this.ui.setFramesInfo(framesInfo)
-    } else {
-      console.log("No frames")
+      framesInfo.push(frameInfo)
     }
-    return hasFrames
+
+    framesInfo.push({
+      href: this.win.location.href,
+      bounds: {
+        x: 0,
+        y: 0,
+        width: this.win.innerWidth,
+        height: this.win.innerHeight,
+      },
+    })
+    return framesInfo
   }
 
   onScroll(_ev?) {
@@ -165,8 +174,6 @@ export class WebEvents<UI extends WebEventsUI> {
       scale: this.getScale(),
     }
     this.ui.setScrollInfo(scrollInfo)
-    const hasFrames = this.checkFrames()
-    this.log(hasFrames ? "Scroll updated frames info" : "Scroll did not update frames info since there is none")
   }
 
   onResize(_ev) {
@@ -179,20 +186,10 @@ export class WebEvents<UI extends WebEventsUI> {
   }
 
   onLoad(_ev) {
-    this.log("Page load.", this.win.origin)
-    this.log("Flushing frames.", this.win.origin)
-    this.ui.setOnLoadInfo()
-
-    this.log("Checking frames.", this.win.origin)
-    this.checkFrames()
-
-    // This timeout is here so SPA style sites have time to build the DOM
-    // TODO: Add reliable TTI eventlistener for JS heavy sites
-    // setTimeout(() => {
-    //   this.log('After 500ms running checkFrames again', this.win.origin)
-    //   this.checkFrames()
-    // }, 5000)
-    // => This must be solved by https://linear.app/beamapp/issue/BE-641/update-frameinfos-at-first-point
+    this.log("Page load.", this.win.location.href)
+    this.log("Flushing frames.", this.win.location.href)
+    const framesInfo: FrameInfo[] = this.getFramesInfo()
+    this.ui.setOnLoadInfo(framesInfo)
   }
 
   onPinch(_ev) {

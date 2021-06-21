@@ -13,13 +13,13 @@ import Promises
 class Quote {
     let parseHtml: ParseHtml = ParseHtml()
 
-    func getQuoteKind(html: String, page: WebPage) -> Promise<ElementKind> {
+    func getQuoteKind(html: String, page: WebPage, group: PointAndShoot.ShootGroup) -> Promise<ElementKind> {
         return Promise { fulfill, _ in
-            guard let url = page.url else {
+            guard let url = URL(string: group.href) else {
                 fatalError("Expected to have Page URL")
             }
 
-            if self.parseHtml.isVideo(url: url, html: html) {
+            if self.parseHtml.isVideo(url: url.absoluteString, html: html) {
                 return fulfill(.embed(url.absoluteString))
             }
 

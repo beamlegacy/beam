@@ -46,8 +46,8 @@ export class WebEventsUI_native implements WebEventsUI {
     this.native.sendMessage("resize", resizeInfo)
   }
 
-  setOnLoadInfo() {
-    this.native.sendMessage("onLoad", null)
+  setOnLoadInfo(framesInfo: FrameInfo[]) {
+    this.native.sendMessage("onLoad", { frames: framesInfo })
   }
 
   pinched(pinchInfo) {

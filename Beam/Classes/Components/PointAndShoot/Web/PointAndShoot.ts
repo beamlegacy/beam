@@ -60,7 +60,7 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
   /**
    * The currently highlighted target.
    */
-  pointedTarget: BeamCollectedQuote
+  pointedTarget: BeamCollectedQuote = null
 
   /**
    * The currently shooted target.
@@ -118,8 +118,8 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
     this.log("events registered")
     if (PNS_STATUS) {
       win.document.body.innerHTML =
-        win.document.body.innerHTML +
-        `<div id="debug-beam" style="position: fixed;bottom: 0px;right: 0;padding: 1rem;background: #7373FF; color: white;">JS ${this.status}</div>`
+        `<div id="debug-beam" style="bottom: 0px;right: 0;padding: 1rem;background: #7373FF; color: white;">JS ${this.status} | ${this.win.location.href}</div>` +
+        win.document.body.innerHTML
     }
   }
 
@@ -139,9 +139,11 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
    * @param y {number}
    */
   point(el, x, y) {
-    // Before creating new point, unpoint
     if (this.pointedTarget) {
-      this.unpoint(this.pointedTarget)
+      this.unpoint(this.pointedTarget) // Before creating new point, unpoint
+    } else {
+      const framesInfo = this.getFramesInfo()
+      this.ui.setFramesInfo(framesInfo) // Not yet set, update frameInfo
     }
 
     // Only create point if no active selection on page
@@ -366,16 +368,25 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
     }
   }
 
+  syncStatus(newStatus: BeamPNSStatus) {
+    // When recieving new status from swift, don't broadcast that change
+    this.setStatus(newStatus, false)
+  }
+
   /**
    * Update the Point and Shoot status
    *
    * @param {BeamPNSStatus} newStatus
    */
-  setStatus(newStatus: BeamPNSStatus) {
+  setStatus(newStatus: BeamPNSStatus, broadcast: boolean = true) {
+    // this.setChildFrameStatus(newStatus)
     if (this.status != newStatus) {
       this.status = newStatus
-      this.ui.setStatus(newStatus)
       this.updateDebugStatusUI()
+
+      if (broadcast) {
+        this.ui.setStatus(newStatus)
+      }
     }
   }
 
@@ -389,7 +400,7 @@ export class PointAndShoot extends WebEvents<PointAndShootUI> {
       let debugEl = this.win.document.querySelector("#debug-beam")
 
       if (debugEl) {
-        debugEl.innerText = `JS ${this.status}`
+        debugEl.innerText = `JS ${this.status} | ${this.win.location.href}`
       }
     }
   }
