@@ -14,7 +14,8 @@ install_dependencies:
 install_certificates:
 	security unlock-keychain -p ${MACOSX_PASSWORD} ~/Library/Keychains/login.keychain
 	security import certificates/keys.p12 -k ~/Library/Keychains/login.keychain -P "${PRIVATE_KEY_PASSWORD}"
-	security import certificates/dev_keys.p12 -k ~/Library/Keychains/login.keychain -P "${PRIVATE_KEY_PASSWORD}"
+	# This adds 2 keys and fails
+	# security import certificates/dev_keys.p12 -k ~/Library/Keychains/login.keychain -P "${PRIVATE_KEY_PASSWORD}"
 
 install_gitlab_runner:
 	install_direnv

@@ -1,6 +1,7 @@
 default:
   before_script:
     - echo "${PATH}"
+    - date
     - pwd
     - unset cd
     - direnv allow
