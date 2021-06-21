@@ -388,7 +388,6 @@ class DatabaseManagerNetworkTests: QuickSpec {
             }
 
             afterEach {
-                assert(AuthenticationManager.shared.isAuthenticated)
                 helper.deleteDatabaseStruct(dbStruct)
             }
 

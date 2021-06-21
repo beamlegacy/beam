@@ -61,7 +61,6 @@ class DocumentManagerNetworkTests: QuickSpec {
             }
 
             afterEach {
-                assert(AuthenticationManager.shared.isAuthenticated)
                 // Not to leave any on the server
                 helper.deleteDocumentStruct(docStruct)
             }
@@ -216,9 +215,6 @@ class DocumentManagerNetworkTests: QuickSpec {
 
         describe(".refreshAllFromAPI()") {
             var docStruct: DocumentStruct!
-            afterEach {
-                assert(AuthenticationManager.shared.isAuthenticated)
-            }
 
             context("with encryption") {
                 beforeEach {
