@@ -53,7 +53,7 @@ class BeamMessageHandler<T: RawRepresentable & CaseIterable> : NSObject, WKScrip
             fatalError("WebView is not a BeamWebview")
         }
         guard let webPage = webView.page else {
-            // embeded webviews don't have a page associated with them as point and shoot doesn't run on them
+            // embedded webViews don't have a page associated with them as point and shoot doesn't run on them
             return
         }
 

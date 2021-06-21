@@ -230,7 +230,7 @@ public class BrowsingNode: ObservableObject, Codable {
 
 private let defaultOrigin = BrowsingTreeOrigin.searchBar(query: "<???>")
 
-public class BrowsingTree: ObservableObject, Codable {
+public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
     @Published public private(set) var root: BrowsingNode!
     @Published public private(set) var current: BrowsingNode!
 
@@ -240,7 +240,6 @@ public class BrowsingTree: ObservableObject, Codable {
         self.origin = origin ?? defaultOrigin
         self.root = BrowsingNode(tree: self, parent: nil, url: "<???>", title: nil)
         self.current = root
-
     }
 
     // Codable:
@@ -277,9 +276,9 @@ public class BrowsingTree: ObservableObject, Codable {
         try container.encode(origin, forKey: .origin)
     }
 
-    /// Carefull this isn't a proper deepCopy
+    /// Careful this isn't a proper deepCopy
     /// BrowsingSessions contains BrowsingNode that are not properly cloned.
-    /// This is used and needed for copy&paste atm
+    /// This is used and needed for copy & paste atm
     public func deepCopy() -> BrowsingTree {
         let browsingTree = BrowsingTree(nil)
         browsingTree.root = root
@@ -315,7 +314,7 @@ public class BrowsingTree: ObservableObject, Codable {
         return current
     }
 
-    public func navigateTo(url link: String, title: String?, startReading: Bool, isLinkActivation: Bool) {
+    public func navigateTo(url link: String, title: String?, startReading: Bool, isLinkActivation: Bool, readCount: Int) {
         guard current.link != LinkStore.getIdFor(link) else { return }
         Logger.shared.logInfo("navigateFrom \(currentLink) to \(link)", category: .web)
         let event = isLinkActivation ? ReadingEventType.navigateToLink : ReadingEventType.searchBarNavigation
@@ -326,6 +325,7 @@ public class BrowsingTree: ObservableObject, Codable {
         if startReading {
             current.addEvent(.startReading)
         }
+        current.score.textAmount = readCount
         Logger.shared.logInfo("current now is \(currentLink)", category: .web)
     }
 

@@ -63,7 +63,7 @@ class TestWebPage: WebPage {
         events.append("leave")
     }
 
-    func navigatedTo(url: URL, read: Readability, title: String?) {}
+    func navigatedTo(url: URL, read: Readability, title: String, isNavigation: Bool) {}
 
     func executeJS(_ jsCode: String, objectName: String?, omit: String? = nil) -> Promise<Any?> {
         if objectName == "PointAndShoot" {

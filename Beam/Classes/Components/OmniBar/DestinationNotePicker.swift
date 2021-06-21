@@ -26,7 +26,7 @@ struct DestinationNotePicker: View {
         autocompleteModel.displayNameForCardName(state.destinationCardName)
     }
     private var placeholder: String {
-        let currentNote = autocompleteModel.displayNameForCardName(tab.noteController.title)
+        let currentNote = autocompleteModel.displayNameForCardName(tab.noteController.note.title)
         return !currentNote.isEmpty ? currentNote : "Destination Card"
     }
 
@@ -122,7 +122,7 @@ struct DestinationNotePicker: View {
                     .onAppear(perform: {
                         autocompleteModel.data = state.data
                         _internalDisableAnimation = true
-                        state.destinationCardName = tab.noteController.title
+                        state.destinationCardName = tab.noteController.note.title
                         autocompleteModel.searchText = tab.noteController.isTodaysNote ? "" : state.destinationCardName
                         DispatchQueue.main.async {
                             _internalDisableAnimation = false

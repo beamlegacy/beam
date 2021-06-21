@@ -406,7 +406,7 @@ import BeamCore
     }
 
     func resetDestinationCard() {
-        destinationCardName = currentTab?.noteController.title ?? data.todaysName
+        destinationCardName = currentTab?.noteController.note.title ?? data.todaysName
         destinationCardNameSelectedRange = nil
         destinationCardIsFocused = false
     }
