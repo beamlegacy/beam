@@ -17,7 +17,9 @@ protocol WebPage: AnyObject, Scorable {
     var fileStorage: BeamFileStorage { get }
 
     @discardableResult
-    func executeJS(_ jsCode: String, objectName: String?) -> Promise<Any?>
+    func executeJS(_ jsCode: String, objectName: String?, omit: String?) -> Promise<Any?>
+    @discardableResult
+    func executeJS(_ jsCode: String, objectName: String?, only: String) -> Promise<Any?>
 
     var scrollX: CGFloat { get set }
 

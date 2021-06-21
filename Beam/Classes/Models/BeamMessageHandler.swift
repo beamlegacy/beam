@@ -58,6 +58,9 @@ class BeamMessageHandler<T: RawRepresentable & CaseIterable> : NSObject, WKScrip
         }
 
         onMessage(messageName: message.name, messageBody: message.body, from: webPage)
+        if let href = message.frameInfo.request.url?.absoluteString {
+            webPage.pointAndShoot.webPositions.setFrameInfoMessage(href: href, message: message)
+        }
     }
 
     func destroy(for webView: WKWebView) {

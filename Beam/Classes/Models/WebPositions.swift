@@ -4,82 +4,145 @@ import BeamCore
  Computes blocks positions on the native web view
  from the frame-relative positions provided by JavaScript in a web frame.
  */
+
 class WebPositions {
     var scale: CGFloat = 1
 
     /**
      * Frame info by frame URL
      */
-    var framesInfo = [String: FrameInfo]()
+    var framesInfo = [HREF: FrameInfo]()
 
-    func viewportPos(value: CGFloat, href: String, prop: String) -> CGFloat {
-        var framePos: CGFloat = 0
-        if framesInfo.count > 0 {
-            var currentHref = href
-            repeat {
-                let foundFrameInfo = framesInfo[currentHref]
-                if foundFrameInfo != nil {
-                    let frameInfo = foundFrameInfo!
-                    framePos += prop == "x" ? frameInfo.x : frameInfo.y
-                    currentHref = frameInfo.href
-                    break
-                } else {
-                    Logger.shared.logError("""
-                                           Could not find frameInfo for href currentHref)
-                                           in \(framesInfo.map { $0.value.href })
-                                           """, category: .web)
-                    break
-                }
-            } while framesInfo[currentHref]?.href != currentHref
+    typealias HREF = String
+    typealias ParentHREF = String
+
+    enum FramePosition {
+        case x
+        case y
+        case scrollX
+        case scrollY
+    }
+
+    struct FrameInfo {
+        var href: HREF
+        var parentHref: ParentHREF
+        var x: CGFloat = 0
+        var y: CGFloat = 0
+        var scrollX: CGFloat = 0
+        var scrollY: CGFloat = 0
+        var width: CGFloat = -1
+        var height: CGFloat = -1
+        /// Used by executeJS to sync PointAndShoot state to other frames in the same Browsertab
+        var message: WKScriptMessage?
+    }
+
+    /// Utility to check if provided frame is a child frame
+    /// - Parameter frame: frame to set
+    /// - Returns: true if frame isn't the root frame
+    fileprivate func isChild(_ frame: WebPositions.FrameInfo) -> Bool {
+        return frame.href != frame.parentHref
+    }
+
+    /// Recursively calculate the position of a frame's prop
+    /// - Parameters:
+    ///   - href: url of frame
+    ///   - prop: positional property to calculate
+    ///   - allPositions: Used as aggregator Array for recursive calculation
+    /// - Returns: Array of values, starting with the frame's own value.
+    private func calculateViewportPosition(href: HREF, prop: FramePosition, allPositions: [CGFloat] = []) -> [CGFloat] {
+        // by default allPositions starts as empty array []
+        // reassign allPositions to mutable value
+        var positions: [CGFloat] = allPositions
+        // get full frameInfo from framesInfo dict
+        if framesInfo[href] == nil {
+            return positions
         }
-        let pos = framePos + value
-        return pos
+        let frame = framesInfo[href]!
+        switch prop {
+        case .x:
+            positions.append(frame.x)
+        case .y:
+            positions.append(frame.y)
+        case .scrollX:
+            positions.append(frame.scrollX)
+        case .scrollY:
+            positions.append(frame.scrollY)
+        }
+        // If we aren't on the root frame
+        if isChild(frame) {
+            // run this function recursively
+            return calculateViewportPosition(href: frame.parentHref, prop: prop, allPositions: positions)
+        }
+        // return full position array
+        return positions
     }
 
-    func viewportX(frameX: CGFloat, href: String) -> CGFloat {
-        viewportPos(value: frameX, href: href, prop: "x")
+    /// Calculate value of property taking into account parent frame positions
+    /// - Parameters:
+    ///   - href: url of frame
+    ///   - prop: position property to calculate
+    /// - Returns: position based on parent frame positions
+    func viewportPosition(_ href: HREF, prop: FramePosition) -> [CGFloat] {
+        if framesInfo.count > 0 {
+            return calculateViewportPosition(href: href, prop: prop)
+        }
+        return [0.0]
     }
 
-    func viewportY(frameY: CGFloat, href: String) -> CGFloat {
-        viewportPos(value: frameY, href: href, prop: "y")
+    /// Sets frameInfo to stored dict. Will only set frameInfo when the provided frame is a child frame, or isn't registered yet.
+    /// - Parameter frame: a full FrameInfo object
+    /// - Returns: Updated framesInfo dict
+    func setFrameInfo(frame: FrameInfo) -> [HREF: FrameInfo] {
+        if isChild(frame) {
+            framesInfo[frame.href] = frame
+            return framesInfo
+        }
+
+        if framesInfo[frame.href] == nil {
+            framesInfo[frame.href] = frame
+            return framesInfo
+        }
+
+        return framesInfo
     }
 
-    func viewportWidth(width: CGFloat) -> CGFloat {
-        width
+    /// Sets the message key on an already registered frame
+    /// - Parameters:
+    ///   - href: url of frame to update
+    ///   - message: full ScriptMessage object
+    func setFrameInfoMessage(href: HREF, message: WKScriptMessage) {
+        guard var frame = framesInfo[href] else { return }
+        frame.message = message
+        framesInfo[href] = frame
     }
 
-    func viewportHeight(height: CGFloat) -> CGFloat {
-        height
+    /// Sets scrollX and scrollY keys on an already registered frame
+    /// - Parameters:
+    ///   - href: url of frame to update
+    ///   - scrollX
+    ///   - scrollY
+    func setFrameInfoScroll(href: HREF, scrollX: CGFloat, scrollY: CGFloat) {
+        guard var frame = framesInfo[href] else { return }
+        frame.scrollX = scrollX
+        frame.scrollY = scrollY
+        framesInfo[href] = frame
+    }
+
+    /// Utility to remove items from framesInfo
+    /// - Parameter from: When provided, only this key will be removed
+    func removeFrameInfo(from: HREF? = nil) {
+        if let href = from {
+            framesInfo.removeValue(forKey: href)
+            return
+        }
+
+        framesInfo.removeAll()
     }
 
     /**
-     Resolve some area coords sent by JS to a NSRect with coords on the WebView frame.
-     - Parameters:
-       - area: The area coords as sent by JS.
-       - href: URL where the text comes from. This helps resolving the position of a selection in iframes.
+     - Parameter jsArea: a dictionary with x, y, width and height
      - Returns:
      */
-    func viewportArea(area: NSRect, href: String) -> NSRect {
-        let minX = viewportX(frameX: area.minX, href: href)
-        let minY = viewportY(frameY: area.minY, href: href)
-        let width = viewportWidth(width: area.width)
-        let height = viewportHeight(height: area.height)
-        return NSRect(x: minX, y: minY, width: width, height: height)
-    }
-
-    func registerHref(href: String) {
-        var hrefFrame = framesInfo[href]
-        if hrefFrame == nil {
-            hrefFrame = FrameInfo(href: href, x: 0, y: 0, width: -1, height: -1)
-            framesInfo[href] = hrefFrame
-        }
-        Logger.shared.logInfo("registerhref: framesInfo=\(framesInfo)", category: .pointAndShoot)
-    }
-
-    /**
-  - Parameter jsArea: a dictionary with x, y, width and height
-  - Returns:
-  */
     func jsToRect(jsArea: AnyObject) -> NSRect {
         guard let frameX = jsArea["x"] as? CGFloat,
               let frameY = jsArea["y"] as? CGFloat,
@@ -91,9 +154,9 @@ class WebPositions {
     }
 
     /**
-  - Parameter jsPoint: a dictionary with x, y
-  - Returns:
-  */
+     - Parameter jsPoint: a dictionary with x, y
+     - Returns:
+     */
     func jsToPoint(jsPoint: AnyObject) -> NSPoint {
         guard let frameX = jsPoint["x"] as? CGFloat,
               let frameY = jsPoint["y"] as? CGFloat else {

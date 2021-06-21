@@ -48,13 +48,19 @@ public extension URL {
 
     var embed: URL? {
         guard let scheme = self.scheme,
-              let host = self.host,
-              let youtubeID = self.query?.capturedGroups(withRegex: "v=([\\w|\\d]+)&?.*").first
-        else {
+              let host = self.host else {
             return nil
         }
 
-        return URL(string: "\(scheme)://\(host)/embed/\(youtubeID)")
+        if let youtubeID = self.query?.capturedGroups(withRegex: "v=([\\w|\\d]+)&?.*").first {
+            return URL(string: "\(scheme)://\(host)/embed/\(youtubeID)")
+        }
+
+        if self.path.contains("/embed/") {
+            return self
+        }
+
+        return nil
     }
 
     var tld: String? {

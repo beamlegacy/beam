@@ -115,11 +115,11 @@ test("point with mouse move + Option", () => {
 
   expect(pns.isPointing()).toEqual(true)
   expect(pns.status).toEqual("pointing") // Check low level too because it will be in a postMessage
-  expect(testUI.eventsCount).toEqual(3)
+  expect(testUI.eventsCount).toEqual(4)
   expect(testUI.events[0]).toEqual({ name: "setStatus", status: "pointing" })
 
-  expect(testUI.events[1]).toEqual({ name: "point", el: pointedElement, x: 101, y: 102 })
-  expect(testUI.events[2]).toEqual("hideStatus")
+  expect(testUI.events[2]).toEqual({ name: "point", el: pointedElement, x: 101, y: 102 })
+  expect(testUI.events[3]).toEqual("hideStatus")
 })
 
 test("point with Option key down then mouse move", () => {
@@ -148,10 +148,10 @@ test("point with Option key down then mouse move", () => {
 
   expect(pns.isPointing()).toEqual(true)
   expect(pns.status).toEqual("pointing") // Check low level too because it will be in a postMessage
-  expect(testUI.eventsCount).toEqual(3)
+  expect(testUI.eventsCount).toEqual(4)
   expect(testUI.events[0]).toEqual({ name: "setStatus", status: "pointing" })
-  expect(testUI.events[1]).toEqual({ name: "point", el: pointedElement, x: 101, y: 102 })
-  expect(testUI.events[2]).toEqual("hideStatus")
+  expect(testUI.events[2]).toEqual({ name: "point", el: pointedElement, x: 101, y: 102 })
+  expect(testUI.events[3]).toEqual("hideStatus")
 })
 
 test("point with mouse move then key down", () => {
@@ -179,10 +179,10 @@ test("point with mouse move then key down", () => {
 
   expect(pns.isPointing()).toEqual(true)
   expect(pns.status).toEqual("pointing") // Check low level too because it will be in a postMessage
-  expect(testUI.eventsCount).toEqual(4)
+  expect(testUI.eventsCount).toEqual(5)
   expect(testUI.events[1]).toEqual("hideStatus")
   expect(testUI.events[2]).toEqual({ name: "setStatus", status: "pointing" })
-  expect(testUI.events[3]).toEqual({ name: "point", el: pointedElement, x: 101, y: 102 })
+  expect(testUI.events[4]).toEqual({ name: "point", el: pointedElement, x: 101, y: 102 })
 })
 
 test("point then release Option", () => {
@@ -205,7 +205,7 @@ test("point then release Option", () => {
     clientY: 102,
   })
   pns.onMouseMove(pointEvent)
-  expect(testUI.eventsCount).toEqual(3)
+  expect(testUI.eventsCount).toEqual(4)
 
   // Move mouse with Option key released
   const unpointEvent = new BeamMouseEvent({
@@ -219,9 +219,9 @@ test("point then release Option", () => {
   pns.onKeyUp(new BeamKeyEvent({ key: "Alt" })) // Release option
 
   expect(pns.status).toEqual("none")
-  expect(testUI.eventsCount).toEqual(6)
-  expect(testUI.events[3]).toEqual({ name: "setStatus", status: "none" })
-  expect(testUI.events[5]).toEqual("hideStatus")
+  expect(testUI.eventsCount).toEqual(7)
+  expect(testUI.events[4]).toEqual({ name: "setStatus", status: "none" })
+  expect(testUI.events[6]).toEqual("hideStatus")
 })
 
 test("point with mouse move + Option, then scroll", () => {
@@ -250,7 +250,7 @@ test("point with mouse move + Option, then scroll", () => {
   Object.assign(scrollEvent, { name: "scroll", target: pointedElement })
   pns.onScroll(scrollEvent)
   expect(pns.isPointing()).toEqual(true) // Pointing was not disabled by scroll
-  expect(testUI.eventsCount).toEqual(4)
+  expect(testUI.eventsCount).toEqual(5)
   expect(testUI.latestEvent).toEqual({ name: "scroll", height: 0, width: 800, x: 0, y: 0, scale: 1 })
 })
 
@@ -275,8 +275,8 @@ test("point then shoot, then cancel", () => {
   })
   pns.onMouseMove(pointEvent)
   expect(pns.status).toEqual("pointing")
-  expect(testUI.eventsCount).toEqual(3)
-  expect(testUI.events[1]).toEqual({ name: "point", el: pointedElement, x: 101, y: 102 })
+  expect(testUI.eventsCount).toEqual(4)
+  expect(testUI.events[2]).toEqual({ name: "point", el: pointedElement, x: 101, y: 102 })
   expect(pns.pointedTarget.el).toEqual(pointedElement)
 
   // Shoot
@@ -293,8 +293,8 @@ test("point then shoot, then cancel", () => {
   Object.assign(clickEvent, { name: "mouseclick", clientX: 103, clientY: 104, target: shotElement, altKey: true })
   pns.onClick(clickEvent)
   expect(pns.status).toEqual("shooting")
-  expect(testUI.eventsCount).toEqual(5)
-  expect(testUI.events[3]).toEqual({ name: "shoot", el: pointedElement, x: 103, y: 104, collectedQuotes: [] })
+  expect(testUI.eventsCount).toEqual(6)
+  expect(testUI.events[4]).toEqual({ name: "shoot", el: pointedElement, x: 103, y: 104, collectedQuotes: [] })
   expect(pns.collectedQuotes).toEqual([])
   expect(pns.shootingTarget.el).toEqual(shotElement)
 
@@ -303,8 +303,8 @@ test("point then shoot, then cancel", () => {
   expect(pns.shootingTarget.el).toEqual(shotElement)
   expect(pns.pointedTarget.el).toEqual(pointedElement)
   expect(pns.status).toEqual("none")
-  expect(testUI.eventsCount).toEqual(6)
-  expect(testUI.events[5]).toEqual({ name: "setStatus", status: "none" })
+  expect(testUI.eventsCount).toEqual(7)
+  expect(testUI.events[6]).toEqual({ name: "setStatus", status: "none" })
   expect(pns.collectedQuotes).toEqual([])
 })
 
@@ -361,8 +361,8 @@ test("click in shooting mode should dismis shoot", () => {
   })
   pns.onMouseMove(pointEvent)
   expect(pns.status).toEqual("pointing")
-  expect(testUI.eventsCount).toEqual(3)
-  expect(testUI.events[1]).toEqual({ name: "point", el: pointedElement, x: 101, y: 102 })
+  expect(testUI.eventsCount).toEqual(4)
+  expect(testUI.events[2]).toEqual({ name: "point", el: pointedElement, x: 101, y: 102 })
   expect(pns.pointedTarget.el).toEqual(pointedElement)
 
   // Shoot

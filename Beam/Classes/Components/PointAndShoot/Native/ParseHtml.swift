@@ -31,29 +31,40 @@ class ParseHtml {
         }
     }
 
-    func isVideo(url: URL, html: String) -> Bool {
-        guard let host = url.host else { return false }
+    fileprivate func isVideoUrl(_ url: String) -> Bool {
+        let containsYouTube = url.contains("youtube.com")
+        return containsYouTube
+    }
 
-        let hostContainsYoutube = ["www.youtube.com", "youtube.com"].contains(host)
+    fileprivate func hasVideoIframe(_ html: String) -> Bool {
+        guard let iframeSrc = html.slice(from: "src=\"", to: "\" ") else { return false }
+        let isIframe = html.hasPrefix("<iframe")
+        let isVideoSrc = isVideoUrl(iframeSrc)
+        return isIframe && isVideoSrc
+    }
+
+    func isVideo(url: String, html: String) -> Bool {
+        let hostContainsYoutube = isVideoUrl(url)
         let htmlHasVideoElement = html.hasPrefix("<video")
-
-        return hostContainsYoutube || htmlHasVideoElement
+        let hasVideoIframeElment = hasVideoIframe(html)
+        return hostContainsYoutube || htmlHasVideoElement || hasVideoIframeElment
     }
 
     func isImage(html: String) -> Bool {
         let htmlHasImgElement = html.starts(with: "<img")
-
         return htmlHasImgElement
     }
 
-    func trim(url: URL, html: String) -> String? {
+    func trim(url: String, html: String) -> String? {
         guard !isVideo(url: url, html: html), !isImage(html: html) else {
             return html
         }
 
-        let text: BeamText = html2Text(url: url, html: html)
-        if text.text.trimmingCharacters(in: .whitespacesAndNewlines).count > 0 {
-            return html.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let url = URL(string: url) {
+            let text: BeamText = html2Text(url: url, html: html)
+            if text.text.trimmingCharacters(in: .whitespacesAndNewlines).count > 0 {
+                return html.trimmingCharacters(in: .whitespacesAndNewlines)
+            }
         }
         return nil
     }

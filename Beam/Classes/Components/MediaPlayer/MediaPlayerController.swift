@@ -17,11 +17,11 @@ struct MediaPlayerController: WebPageRelated {
 
     mutating func toggleMute() {
         isMuted = !isMuted
-        page.executeJS("beam_media_toggleMute()", objectName: nil)
+        page.executeJS("beam_media_toggleMute()", objectName: nil, omit: nil)
     }
 
     mutating func togglePiP() {
         isInPiP = !isInPiP
-        page.executeJS("beam_media_togglePictureInPicture()", objectName: nil)
+        page.executeJS("beam_media_togglePictureInPicture()", objectName: nil, omit: nil)
     }
 }

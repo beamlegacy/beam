@@ -57,7 +57,7 @@ class PointAndShoot: WebPageHolder {
                         hidePointing()
                     }
 
-                    default: break
+                default: break
                 }
                 _status = newValue
                 if Configuration.pnsStatus {
@@ -88,8 +88,12 @@ class PointAndShoot: WebPageHolder {
         executeJS("setStatus('none')")
     }
 
-    private func executeJS(_ method: String) {
-        page.executeJS(method, objectName: "PointAndShoot")
+    private func executeJS(_ method: String, omit: String? = nil) {
+        page.executeJS(method, objectName: "PointAndShoot", omit: omit)
+    }
+
+    private func executeJS(_ method: String, only: String) {
+        page.executeJS(method, objectName: "PointAndShoot", only: only)
     }
 
     /**
@@ -135,33 +139,51 @@ class PointAndShoot: WebPageHolder {
         var html: String
         // Optional `x`, `y` coordinates for offsetting the quoteArea position toward the mouse cursor
         var offset: NSPoint?
-
         // Prefer using the parent class method
         func translateTarget(xDelta: CGFloat, yDelta: CGFloat, scale: CGFloat) -> Target {
             let newArea = NSRect(
-                    x: (area.minX + xDelta) * scale,
-                    y: (area.minY + yDelta) * scale,
-                    width: area.width * scale,
-                    height: area.height * scale
+                x: (area.minX + xDelta) * scale,
+                y: (area.minY + yDelta) * scale,
+                width: area.width * scale,
+                height: area.height * scale
             )
             let newLocation = NSPoint(
-                    x: mouseLocation.x * scale,
-                    y: mouseLocation.y * scale
+                x: mouseLocation.x * scale,
+                y: mouseLocation.y * scale
             )
             return Target(area: newArea, quoteId: quoteId, mouseLocation: newLocation, html: html, offset: offset)
         }
     }
 
-    /// Translates a previously created target based on the page horizontal and vertical scroll and page scaling. Page scaling is calcualted by multiplying the webView zoomLevel and the scaling recieved from JS.
+    /// Translates a previously created target based on:
+    /// - page horizontal scroll
+    /// - page vertical scroll
+    /// - page scaling
+    /// Page scaling is calculated by multiplying the webView zoomLevel and the scaling received from JS.
+    ///
     /// - Parameter target: The target to be translated
+    /// - Parameter href: href of the frame containing the target
     /// - Returns: The translated target
-    func translateTarget(target: Target) -> Target {
-        guard let view = page.webView else {
-            Logger.shared.logError("page webView required to translate target correctly", category: .pointAndShoot)
-            return target.translateTarget(xDelta: -page.scrollX, yDelta: -page.scrollY, scale: webPositions.scale)
+    func translateTarget(target: Target, href: String) -> Target {
+        let frameOffsetX = webPositions.viewportPosition(href, prop: WebPositions.FramePosition.x).reduce(0, +)
+        let frameOffsetY = webPositions.viewportPosition(href, prop: WebPositions.FramePosition.y).reduce(0, +)
+        var frameScrollX = webPositions.viewportPosition(href, prop: WebPositions.FramePosition.scrollX)
+        var frameScrollY = webPositions.viewportPosition(href, prop: WebPositions.FramePosition.scrollY)
+        if frameScrollX.count > 1 {
+            frameScrollX.removeFirst()
         }
+        if frameScrollY.count > 1 {
+            frameScrollY.removeFirst()
+        }
+        let xDelta = frameOffsetX - frameScrollX.reduce(0, +)
+        let yDelta = frameOffsetY - frameScrollY.reduce(0, +)
+        guard let view = page.webView else {
+            Logger.shared.logWarning("page webView required to translate target correctly", category: .pointAndShoot)
+            return target.translateTarget(xDelta: xDelta, yDelta: yDelta, scale: webPositions.scale)
+        }
+
         let scale = view.zoomLevel() * webPositions.scale
-        return target.translateTarget(xDelta: -page.scrollX, yDelta: -page.scrollY, scale: scale)
+        return target.translateTarget(xDelta: xDelta, yDelta: yDelta, scale: scale)
     }
 
     /// Creates initial Point and Shoot target that takes into account page horizontal and vertical scroll and page scaling.
@@ -172,9 +194,8 @@ class PointAndShoot: WebPageHolder {
     ///   - mouseLocation: Mouse location coords.
     ///   - html: The HTML content of the targeted element
     /// - Returns: Translated target
-    func createTarget(area: NSRect, quoteId: UUID? = nil, mouseLocation: NSPoint, html: String, offset: NSPoint? = nil) -> Target {
+    func createTarget(area: NSRect, quoteId: UUID? = nil, mouseLocation: NSPoint, html: String, offset: NSPoint? = nil, href: String) -> Target {
         return Target(area: area, quoteId: quoteId, mouseLocation: mouseLocation, html: html, offset: offset)
-                .translateTarget(xDelta: page.scrollX, yDelta: page.scrollY, scale: 1)
     }
 
     let ui: PointAndShootUI
@@ -200,26 +221,24 @@ class PointAndShoot: WebPageHolder {
     var shootGroups: [ShootGroup] = []
 
     /**
-      The group being shot.
-
-      It will added to groups once the card has been validated.
+     The group being shot. It will added to groups once the card has been validated.
      */
     var activeShootGroup: ShootGroup?
 
-    func point(target: Target) {
-        pointTarget = translateTarget(target: target)
+    func point(target: Target, href: String) {
+        pointTarget = translateTarget(target: target, href: href)
         ui.drawPoint(target: pointTarget!)
         draw()
     }
 
-    func cursor(target: Target) {
-        pointTarget = translateTarget(target: target)
+    func cursor(target: Target, href: String) {
+        pointTarget = translateTarget(target: target, href: href)
         ui.drawCursor(target: pointTarget!)
         draw()
     }
 
     /// Removes PointFrame UI and resets the PNS status to .none, only runs when status is .pointing
-    func unpoint() {
+    func unPoint() {
         if status == .pointing {
             resetStatus()
         }
@@ -250,7 +269,7 @@ class PointAndShoot: WebPageHolder {
     }
 
     func showShootInfo(group: ShootGroup) {
-        let shootTarget = translateTarget(target: group.targets[0])
+        let shootTarget = translateTarget(target: group.targets[0], href: group.href)
         ui.drawShootConfirmation(shootTarget: shootTarget, noteInfo: group.noteInfo)
         DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
             guard let self = self else { return }
@@ -266,7 +285,7 @@ class PointAndShoot: WebPageHolder {
         case .shooting:
             ui.clearPoint()
             drawActiveShootGroup()
-            case .none: break
+        case .none: break
         }
     }
 
@@ -276,7 +295,7 @@ class PointAndShoot: WebPageHolder {
             if shootTargets.count > 0 {
                 var selectionUIs = [SelectionUI]()
                 for shootTarget in shootTargets {
-                    let target = translateTarget(target: shootTarget)
+                    let target = translateTarget(target: shootTarget, href: group.href)
                     let selectionUI = ui.createUI(shootTarget: target)
                     selectionUIs.append(selectionUI)
                 }
@@ -305,6 +324,12 @@ class PointAndShoot: WebPageHolder {
         resetStatus()
     }
 
+    /// Clears all remembered shoots and frameInfo
+    func leavePage() {
+        removeAll()
+        webPositions.removeFrameInfo()
+    }
+
     /**
      - Parameters:
        - noteTitle:
@@ -326,20 +351,18 @@ class PointAndShoot: WebPageHolder {
         scorer.addTextSelection()
 
         let htmls = shootGroup.html().split(separator: "\n").compactMap({
-            parseHtml.trim(url: sourceUrl, html: String($0))
+            parseHtml.trim(url: shootGroup.href, html: String($0))
         })
-
         var collectedQuotes: [BeamElement] = []
-        let promises = htmls.enumerated().map({ (index, html) in
-            quote.getQuoteKind(html: html, page: page).then { quoteKind -> Void in
+        let promises = htmls
+            .enumerated().map({ (index, html) in
+            quote.getQuoteKind(html: html, page: page, group: shootGroup).then { quoteKind -> Void in
                 guard let source = self.page.addToNote(allowSearchResult: true) else {
                     Logger.shared.logError("Could not add note to page", category: .pointAndShoot)
                     return
                 }
-
                 var htmlText: BeamText = html2Text(url: sourceUrl, html: html)
                 htmlText.addAttributes([.emphasis], to: htmlText.wholeRange)
-
                 let collectedQuote = BeamElement()
                 collectedQuote.text = htmlText
                 collectedQuote.query = self.page.originalQuery
@@ -368,7 +391,7 @@ class PointAndShoot: WebPageHolder {
         group.quoteId = quoteId
         group.noteInfo = noteInfo
         shootGroups.append(group)
-        executeJS("assignNote('\(quoteId)')")
+        executeJS("assignNote('\(quoteId)')", only: group.href)
         showShootInfo(group: group)
         activeShootGroup = nil
     }

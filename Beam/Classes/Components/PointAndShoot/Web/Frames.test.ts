@@ -76,10 +76,10 @@ test("single iframe point", () => {
     rootPns.onMouseMove(outsideFrame1PointEvent)
 
     expect(rootPns.isPointing()).toEqual(true)
-    expect(testUI.eventsCount).toEqual(3)
+    expect(testUI.eventsCount).toEqual(4)
     expect(testUI.events[0]).toEqual({name: "setStatus", status: "pointing"})
-    expect(testUI.events[1]).toEqual({name: "point", el: iframe1El, x: 51, y: 52})
-    expect(testUI.events[2]).toEqual("hideStatus")
+    expect(testUI.events[2]).toEqual({name: "point", el: iframe1El, x: 51, y: 52})
+    expect(testUI.events[3]).toEqual("hideStatus")
   }
   {
     const insideFrame1PointEvent = new BeamMouseEvent({
@@ -92,16 +92,16 @@ test("single iframe point", () => {
     iframe1Pns.onMouseMove(insideFrame1PointEvent)
 
     expect(iframe1Pns.isPointing()).toEqual(true)
-    expect(iframe1testUI.eventsCount).toEqual(3)
+    expect(iframe1testUI.eventsCount).toEqual(4)
     expect(iframe1testUI.events[0]).toEqual({name: "setStatus", status: "pointing"})
-    expect(iframe1testUI.events[1]).toEqual({name: "point", el: iframe1El, x: 61, y: 62})
-    expect(testUI.events[2]).toEqual("hideStatus")
+    expect(iframe1testUI.events[2]).toEqual({name: "point", el: iframe1El, x: 61, y: 62})
+    expect(testUI.events[3]).toEqual("hideStatus")
 
     const delta = 50
     iframe1El.scrollY(delta)
-    expect(iframe1testUI.eventsCount).toEqual(4)
+    expect(iframe1testUI.eventsCount).toEqual(5)
     const iframe1Body = iframe1Pns.win.document.body
-    expect(iframe1testUI.events[3]).toEqual({
+    expect(iframe1testUI.events[4]).toEqual({
       name: "scroll",
       x: 0,
       y: delta,

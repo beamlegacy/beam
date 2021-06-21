@@ -312,8 +312,14 @@
 		87F11BD9266533C1003BE98E /* PasswordGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F11BD8266533C1003BE98E /* PasswordGenerator.swift */; };
 		87F11BDB26655170003BE98E /* MockAutocompleteStores.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F11BDA26655170003BE98E /* MockAutocompleteStores.swift */; };
 		87F47CC92669415800D01960 /* WebAutocompleteContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F47CC82669415800D01960 /* WebAutocompleteContext.swift */; };
+		8A14155A267393E2005F2464 /* WebPositionsTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A141559267393E2005F2464 /* WebPositionsTest.swift */; };
+		8A3C216D2670FF880029AC1A /* PointAndShootTargetTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A3C216C2670FF880029AC1A /* PointAndShootTargetTest.swift */; };
+		8A68F4652671159D00B0C022 /* PointAndShootMessageHandlerFrameBoundsTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A68F4642671159D00B0C022 /* PointAndShootMessageHandlerFrameBoundsTest.swift */; };
 		8A78699C264C7E4500F769D2 /* XCUIElementQuery+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A78699B264C7E4500F769D2 /* XCUIElementQuery+Beam.swift */; };
+		8A7920F02680AA1E00F74A75 /* URL+BeamTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A7920EF2680AA1E00F74A75 /* URL+BeamTest.swift */; };
 		8AA9EEB72678ACF6009D6B31 /* WebAutocompleteContextTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AA9EEB62678ACF6009D6B31 /* WebAutocompleteContextTest.swift */; };
+		8AB44A9B267C9BE400D18B65 /* PointAndShootMessageHandlerOnLoadTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB44A9A267C9BE400D18B65 /* PointAndShootMessageHandlerOnLoadTest.swift */; };
+		8AB44AAC267CD3AB00D18B65 /* String+Slice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB44AAB267CD3AB00D18B65 /* String+Slice.swift */; };
 		8AB966B02668542F003E7755 /* ParseHtml.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB966A72668542E003E7755 /* ParseHtml.swift */; };
 		8AB966B12668542F003E7755 /* Quote.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB966AF2668542F003E7755 /* Quote.swift */; };
 		8AC2EFC5266F81B000049005 /* PointAndShootStatusTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AC2EFC4266F81B000049005 /* PointAndShootStatusTest.swift */; };
@@ -1071,8 +1077,14 @@
 		87F11BD8266533C1003BE98E /* PasswordGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordGenerator.swift; sourceTree = "<group>"; };
 		87F11BDA26655170003BE98E /* MockAutocompleteStores.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAutocompleteStores.swift; sourceTree = "<group>"; };
 		87F47CC82669415800D01960 /* WebAutocompleteContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebAutocompleteContext.swift; sourceTree = "<group>"; };
+		8A141559267393E2005F2464 /* WebPositionsTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebPositionsTest.swift; sourceTree = "<group>"; };
+		8A3C216C2670FF880029AC1A /* PointAndShootTargetTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootTargetTest.swift; sourceTree = "<group>"; };
+		8A68F4642671159D00B0C022 /* PointAndShootMessageHandlerFrameBoundsTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootMessageHandlerFrameBoundsTest.swift; sourceTree = "<group>"; };
 		8A78699B264C7E4500F769D2 /* XCUIElementQuery+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "XCUIElementQuery+Beam.swift"; sourceTree = "<group>"; };
+		8A7920EF2680AA1E00F74A75 /* URL+BeamTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+BeamTest.swift"; sourceTree = "<group>"; };
 		8AA9EEB62678ACF6009D6B31 /* WebAutocompleteContextTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebAutocompleteContextTest.swift; sourceTree = "<group>"; };
+		8AB44A9A267C9BE400D18B65 /* PointAndShootMessageHandlerOnLoadTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootMessageHandlerOnLoadTest.swift; sourceTree = "<group>"; };
+		8AB44AAB267CD3AB00D18B65 /* String+Slice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Slice.swift"; sourceTree = "<group>"; };
 		8AB966A72668542E003E7755 /* ParseHtml.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParseHtml.swift; sourceTree = "<group>"; };
 		8AB966AF2668542F003E7755 /* Quote.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Quote.swift; sourceTree = "<group>"; };
 		8AC2EFC4266F81B000049005 /* PointAndShootStatusTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootStatusTest.swift; sourceTree = "<group>"; };
@@ -1745,6 +1757,7 @@
 				A572629725FFADC5004416C0 /* MouseInteraction.swift */,
 				BAA67CEFFAFA38F29CF1C84F /* WebPage.swift */,
 				BAA67DD5764226E47DFA6F9E /* WebPositions.swift */,
+				8A141559267393E2005F2464 /* WebPositionsTest.swift */,
 				964FE5FB2625E14500966E03 /* GRDBIndexer.swift */,
 				BAA67CDE485E5E7774A978D2 /* LoggingMessageHandler.swift */,
 				9691C2582644948200F70DA1 /* BeamFileDB.swift */,
@@ -2532,6 +2545,9 @@
 				8AB966A72668542E003E7755 /* ParseHtml.swift */,
 				8AB966AF2668542F003E7755 /* Quote.swift */,
 				BAA67B138DFC6DBC31D184E0 /* PointAndShootMessageHandler.swift */,
+				8A68F4642671159D00B0C022 /* PointAndShootMessageHandlerFrameBoundsTest.swift */,
+				8AB44A9A267C9BE400D18B65 /* PointAndShootMessageHandlerOnLoadTest.swift */,
+				8A3C216C2670FF880029AC1A /* PointAndShootTargetTest.swift */,
 				BAA670D8E6A58A6836DA2794 /* PointAndShootTest.swift */,
 				BAA675190ACFCE6361AC531B /* PointAndShootUI.swift */,
 				BAA67E198CBE7B676642992F /* PointAndShoot.swift */,
@@ -2666,9 +2682,11 @@
 				523FF67825C31D9D00B4BD6E /* String+Data.swift */,
 				5287EC2E25C42B0100CE1DD9 /* String+UUID.swift */,
 				5242684C25ED408500DB1D05 /* String+Split.swift */,
+				8AB44AAB267CD3AB00D18B65 /* String+Slice.swift */,
 				521FEC652604B830009000F9 /* String+c99.swift */,
 				A5208E26261F7419006193AF /* String+Calculations.swift */,
 				418173BD2581251600317ED8 /* URL+Beam.swift */,
+				8A7920EF2680AA1E00F74A75 /* URL+BeamTest.swift */,
 				964FE5B62624813E00966E03 /* RandomAccessCollection+BinarySearch.swift */,
 				964FE64C262D8ED300966E03 /* Dictionary+valuesMatchingKeys.swift */,
 			);
@@ -2803,7 +2821,6 @@
 				A5496C5A25F95E4F00B77024 /* OmniBarAutocompleteUITests.swift */,
 				528286B525E806CD00C0CCEE /* NoteEditorUITests.swift */,
 				A5679CE1262ECB9500E7FA69 /* NavigationCollectUITests.swift */,
-				8AF61EDF267B50F7006DD5C2 /* BrowserTabsManagerUITests.swift */,
 				8AEADBD226776BEA00E36BAC /* PasswordManagerUITests.swift */,
 			);
 			path = BeamUITests;
@@ -3676,6 +3693,7 @@
 				9609AF502617159B00322141 /* URL+Beam.swift in Sources */,
 				96319D3D2616233E00D1CF31 /* BeamText+String.swift in Sources */,
 				96319D372616233E00D1CF31 /* String+LoremIpsum.swift in Sources */,
+				8AB44AAC267CD3AB00D18B65 /* String+Slice.swift in Sources */,
 				964FE64D262D8ED300966E03 /* Dictionary+valuesMatchingKeys.swift in Sources */,
 				96319D3E2616233E00D1CF31 /* String+c99.swift in Sources */,
 				96319D5D261626BE00D1CF31 /* Score.swift in Sources */,
@@ -4093,6 +4111,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				032562D926051D55006513E4 /* RBClientTests.m in Sources */,
+				8A3C216D2670FF880029AC1A /* PointAndShootTargetTest.swift in Sources */,
 				525C235825BAFCAA001B9625 /* MergeTests.swift in Sources */,
 				032562BB26051D45006513E4 /* RBFilterManagerTests.m in Sources */,
 				8AC2EFCE266F82D900049005 /* PointAndShootHTMLTest.swift in Sources */,
@@ -4127,6 +4146,7 @@
 				A0689E7125DE6B8700B19CBB /* CommandsTextTests.swift in Sources */,
 				A5153EE7260DDC9D00C84902 /* RecentsManagerTests.swift in Sources */,
 				524CF6D725F28F97007312F0 /* EncryptionManagerTests.swift in Sources */,
+				8A7920F02680AA1E00F74A75 /* URL+BeamTest.swift in Sources */,
 				527DF48725710ECB00A0A56D /* DocumentManagerTests.swift in Sources */,
 				A01950AD25B838810025C5FD /* CommandManagerTests.swift in Sources */,
 				524425F125C832110095422A /* AccountManagerTests.swift in Sources */,
@@ -4137,13 +4157,16 @@
 				0DEE978D2642965600AB95AE /* GRDBIndexerTests.swift in Sources */,
 				522AFB2825CBFAB100F60647 /* DocumentManagerTestsHelper.swift in Sources */,
 				969084CC25365AAE009D3C96 /* ParserTests.swift in Sources */,
+				8A68F4652671159D00B0C022 /* PointAndShootMessageHandlerFrameBoundsTest.swift in Sources */,
 				5273C65A25DA835500B00EC3 /* DocumentRequestTests.swift in Sources */,
 				96C9CC3E2535CE2C00D70AA6 /* LexerTests.swift in Sources */,
 				52442339261DAE940024B642 /* DatabaseRequestsTests.swift in Sources */,
+				8AB44A9B267C9BE400D18B65 /* PointAndShootMessageHandlerOnLoadTest.swift in Sources */,
 				A00F5A262656965900D338E1 /* PasswordsDBTests.swift in Sources */,
 				5281B07525C994BE00DF66D9 /* ConfigurationTests.swift in Sources */,
 				5273C65B25DA835500B00EC3 /* APIRequestTests.swift in Sources */,
 				A545D30625F7D93B00E68F94 /* MathsTests.swift in Sources */,
+				8A14155A267393E2005F2464 /* WebPositionsTest.swift in Sources */,
 				A5316A192667B9110039ED9C /* Range+BeamTests.swift in Sources */,
 				52C3078225C311B00027C4B1 /* BeamDateTests.swift in Sources */,
 				032562F426051D67006513E4 /* RBSQLiteTests.m in Sources */,
@@ -4169,7 +4192,6 @@
 				52BB69A925CD5A49007A1173 /* OmniBarUITests.swift in Sources */,
 				965A784D2514F149009980D4 /* BeamUITests.swift in Sources */,
 				A53C8F532644B22B003A5DF8 /* OmniBarUITestsHelper.swift in Sources */,
-				8AF61EE0267B50F7006DD5C2 /* BrowserTabsManagerUITests.swift in Sources */,
 				8A78699C264C7E4500F769D2 /* XCUIElementQuery+Beam.swift in Sources */,
 				528286B625E806CD00C0CCEE /* NoteEditorUITests.swift in Sources */,
 				52A94E3C25E90094004BAC93 /* XCUIElement+Beam.swift in Sources */,

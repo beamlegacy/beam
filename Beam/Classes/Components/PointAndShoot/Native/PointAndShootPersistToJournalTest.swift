@@ -27,7 +27,7 @@ class PointAndShootPersistToJournalTest: PointAndShootTest {
         )
 
         // Point
-        self.pns.point(target: paragraphTarget)
+        self.pns.point(target: paragraphTarget, href: self.pns.page.url!.string)
         self.pns.draw()
         // Shoot
         self.pns.shoot(targets: [paragraphTarget], href: self.pns.page.url!.string)
@@ -56,7 +56,7 @@ class PointAndShootPersistToJournalTest: PointAndShootTest {
         )
 
         // Point
-        self.pns.point(target: paragraphTarget)
+        self.pns.point(target: paragraphTarget, href: self.pns.page.url!.string)
         self.pns.draw()
         // Shoot
         self.pns.shoot(targets: [paragraphTarget], href: self.pns.page.url!.string)
@@ -86,7 +86,7 @@ class PointAndShootPersistToJournalTest: PointAndShootTest {
         page.testNotes["Card B"] = BeamNote(title: "Card B")
 
         // Point
-        self.pns.point(target: paragraphTarget2)
+        self.pns.point(target: paragraphTarget2, href: self.pns.page.url!.string)
         self.pns.draw()
         // Shoot
         self.pns.shoot(targets: [paragraphTarget2], href: self.pns.page.url!.string)
