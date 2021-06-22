@@ -150,7 +150,6 @@ platform :mac do
       only_testing: "BeamUITests",
       output_types: "junit",
       output_files: "tests.xml",
-      xcpretty_args: "-tc",
       result_bundle: true,
     )
     # For Gitlab artifacts
