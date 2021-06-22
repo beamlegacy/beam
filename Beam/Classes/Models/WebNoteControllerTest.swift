@@ -56,15 +56,15 @@ class WebNoteControllerTest: XCTestCase {
         XCTAssertEqual(controller.element, added)
         XCTAssertEqual(addedAgain, added)
 
-        // Add nested
+        // Navigation doesn't nest
         let subAdd = controller.add(url: URL(string: "http://some.linked.website")!, text: "Some linked website", isNavigation: true)
-        XCTAssertEqual(note.children.count, 1)   // Still one, other is nested
+        XCTAssertEqual(note.children.count, 2)   // New bullet, not nested
         XCTAssertEqual(controller.element, subAdd)
-        XCTAssertEqual(added.children[0], subAdd)
+        XCTAssertEqual(note.children[1], subAdd)
 
-        // Add parallel
+        // Direct access doesn't nest
         let parallelAdd = controller.add(url: URL(string: "http://some.other")!, text: "Some parallel website", isNavigation: false)
-        XCTAssertEqual(note.children.count, 2)   // Still one, other is nested
-        XCTAssertEqual(note.children[1], parallelAdd)
+        XCTAssertEqual(note.children.count, 3)   // Still one, other is nested
+        XCTAssertEqual(note.children[2], parallelAdd)
     }
 }

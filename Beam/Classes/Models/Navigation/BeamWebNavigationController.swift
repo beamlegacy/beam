@@ -40,16 +40,14 @@ class BeamWebNavigationController: WebPageHolder, WebNavigationController {
 
     func navigatedTo(url: URL, webView: WKWebView) {
         let isLinkActivation = !isNavigatingFromSearchBar
-        let fullTitle = webView.title ?? ""
         Readability.read(webView) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case let .success(read):
-                // Readability removes title separators
-                let title = fullTitle.count > read.title.count ? fullTitle : read.title
-                self.browsingTree.navigateTo(url: url.absoluteString, title: title, startReading: self.page.isActiveTab(),
+                // Note: Readability removes title separators
+                self.browsingTree.navigateTo(url: url.absoluteString, title: read.title, startReading: self.page.isActiveTab(),
                                              isLinkActivation: isLinkActivation, readCount: read.content.count)
-                self.page.navigatedTo(url: url, read: read, title: title, isNavigation: isLinkActivation)
+                self.page.navigatedTo(url: url, read: read, title: read.title, isNavigation: isLinkActivation)
                 try? TextSaver.shared?.save(nodeId: self.browsingTree.current.id, text: read)
             case let .failure(error):
                 Logger.shared.logError("Error while indexing web page: \(error)", category: .javascript)
