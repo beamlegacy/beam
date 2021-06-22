@@ -12,7 +12,7 @@ extension GRDBDatabase {
         if let jobId = ProcessInfo.processInfo.environment["CI_JOB_ID"] {
             Logger.shared.logDebug("Using Gitlab CI Job ID for GRDB sqlite file: \(jobId)", category: .search)
 
-            suffix = "\(Configuration.env)-\(jobId)"
+            suffix += "-\(jobId)"
         }
 
         return dataDir.appendingPathComponent("GRDB\(suffix).sqlite")
