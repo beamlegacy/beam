@@ -22,8 +22,8 @@ class JournalStackView: NSView {
         self.topOffset = topOffset
         super.init(frame: NSRect())
         self.translatesAutoresizingMaskIntoConstraints = false
-        self.wantsLayer = true
         self.layer?.backgroundColor = BeamColor.Generic.background.cgColor
+        self.wantsLayer = true
     }
 
     required init?(coder: NSCoder) {
@@ -39,6 +39,11 @@ class JournalStackView: NSView {
         invalidateIntrinsicContentSize()
         needsLayout = true
         setNeedsDisplay(bounds)
+    }
+
+    override func updateLayer() {
+        super.updateLayer()
+        layer?.backgroundColor = BeamColor.Generic.background.cgColor
     }
 
     public override func layout() {

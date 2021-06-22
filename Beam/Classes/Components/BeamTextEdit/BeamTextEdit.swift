@@ -190,8 +190,8 @@ public extension CALayer {
     public override func viewDidChangeEffectiveAppearance() {
         super.viewDidChangeEffectiveAppearance()
         layer?.backgroundColor = BeamColor.Generic.background.cgColor
-
         layer?.setNeedsDisplay()
+        setupCardHeader()
         rootNode.deepInvalidateRendering()
         rootNode.deepInvalidateText()
     }
@@ -361,9 +361,6 @@ public extension CALayer {
 
     func setupCardHeader() {
         guard let cardNote = note as? BeamNote else { return }
-
-        var icon = NSImage(named: "editor-options")
-        icon = icon?.fill(color: BeamColor.Card.optionIcon.nsColor)
 
         cardTitleLayer.name = "cardTitleLayer"
         cardTitleLayer.enableAnimations = false
