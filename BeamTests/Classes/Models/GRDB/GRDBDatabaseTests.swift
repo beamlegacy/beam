@@ -170,6 +170,13 @@ class GRDBDatabaseBeamElementTests: XCTestCase {
         expect(matches) == note.children[1...2].map { $0.id.uuidString }
     }
 
+    func testSearchMaxResults() throws {
+        // Match on the note title - return all note children
+        let matches = db.search(matchingAllTokensIn: "bar note", maxResults: 1).map { $0.uid }
+        expect(matches.count) == 1
+        expect(matches) == [note.id.uuidString]
+    }
+
     func testClear() throws {
         var matches = db.search(matchingAllTokensIn: "tata").map { $0.uid }
         expect(matches.count) == 1

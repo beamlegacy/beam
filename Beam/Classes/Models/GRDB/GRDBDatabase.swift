@@ -140,26 +140,30 @@ extension GRDBDatabase {
 
     func search(matchingAllTokensIn query: String, maxResults: Int? = 10, includeText: Bool = false) -> [SearchResult] {
         guard let pattern = FTS3Pattern(matchingAllTokensIn: query) else { return [] }
-        return search(pattern: pattern, includeText: includeText)
+        return search(pattern: pattern, maxResults: maxResults, includeText: includeText)
     }
 
     func search(matchingAnyTokensIn query: String, maxResults: Int? = 10, includeText: Bool = false) -> [SearchResult] {
         guard let pattern = FTS3Pattern(matchingAnyTokenIn: query) else { return [] }
-        return search(pattern: pattern, includeText: includeText)
+        return search(pattern: pattern, maxResults: maxResults, includeText: includeText)
     }
 
     func search(matchingPhrase query: String, maxResults: Int? = 10, includeText: Bool = false) -> [SearchResult] {
         guard let pattern = FTS3Pattern(matchingPhrase: query) else { return [] }
-        return search(pattern: pattern, includeText: includeText)
+        return search(pattern: pattern, maxResults: maxResults, includeText: includeText)
     }
 
     func search(pattern: FTS3Pattern, maxResults: Int? = 10, includeText: Bool = false) -> [SearchResult] {
         do {
-            let results = try dbReader.read({ db -> [SearchResult] in
-                try BeamElementRecord.matching(pattern).fetchAll(db).map({ record -> SearchResult in
-                    return SearchResult(title: record.title, uid: record.uid, text: includeText ? record.text : nil)
-                })
-            })
+            let results = try dbReader.read { db -> [SearchResult] in
+                var query = BeamElementRecord.matching(pattern)
+                if let maxResults = maxResults {
+                    query = query.limit(maxResults)
+                }
+                return try query.fetchAll(db).map { record -> SearchResult in
+                    SearchResult(title: record.title, uid: record.uid, text: includeText ? record.text : nil)
+                }
+            }
             return results
         } catch {
             Logger.shared.logError("Search Error \(error)", category: .search)
