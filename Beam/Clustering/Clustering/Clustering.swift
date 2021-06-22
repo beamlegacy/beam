@@ -72,6 +72,7 @@ public class Cluster {
     let tagger = NLTagger(tagSchemes: [.nameType])
     let entityOptions: NLTagger.Options = [.omitPunctuation, .omitWhitespace, .joinNames]
     let entityTags: [NLTag] = [.personalName, .placeName, .organizationName]
+    var timeToRemove = 0.5
 
     // The following will be deleted before the final product:
     // Define which affinity (laplacian) matrix to use
@@ -403,22 +404,48 @@ public class Cluster {
 
     func createAdjacencyMatrix() {
         switch self.matrixCandidate {
-            case .navigationMatrix:
-                self.adjacencyMatrix = self.navigationMatrix.matrix
-            case .navigationAndEntities:
-                self.adjacencyMatrix = (self.weights["navigation"] ?? 0.5) .* self.navigationMatrix.matrix + (self.weights["entities"] ?? 0.5) * 8 .* self.entitiesMatrix.matrix
-            case .textualSimilarityMatrix:
-                self.adjacencyMatrix = self.textualSimilarityMatrix.matrix
-            case .combinationAllSimilarityMatrix:
-                self.adjacencyMatrix = (self.weights["text"] ?? 0.5) .*  self.textualSimilarityMatrix.matrix + (self.weights["entities"] ?? 0.5) .* self.entitiesMatrix.matrix + (self.weights["navigation"] ?? 0.5) .* self.navigationMatrix.matrix
-            case .combinationAllBinarisedMatrix:
-                self.adjacencyMatrix = self.binarise(matrix: self.navigationMatrix.matrix, threshold: (self.weights["navigation"] ?? 0.5)) + self.binarise(matrix: self.textualSimilarityMatrix.matrix, threshold: (weights["text"] ?? 0.5)) + self.binarise(matrix: self.entitiesMatrix.matrix, threshold: (weights["entities"] ?? 0.5))
+        case .navigationMatrix:
+            self.adjacencyMatrix = self.navigationMatrix.matrix
+        case .navigationAndEntities:
+            self.adjacencyMatrix = (self.weights["navigation"] ?? 0.5) .* self.navigationMatrix.matrix + (self.weights["entities"] ?? 0.5) * 8 .* self.entitiesMatrix.matrix
+        case .textualSimilarityMatrix:
+            self.adjacencyMatrix = self.textualSimilarityMatrix.matrix
+        case .combinationAllSimilarityMatrix:
+            self.adjacencyMatrix = (self.weights["text"] ?? 0.5) .*  self.textualSimilarityMatrix.matrix + (self.weights["entities"] ?? 0.5) .* self.entitiesMatrix.matrix + (self.weights["navigation"] ?? 0.5) .* self.navigationMatrix.matrix
+        case .combinationAllBinarisedMatrix:
+            self.adjacencyMatrix = self.binarise(matrix: self.navigationMatrix.matrix, threshold: (self.weights["navigation"] ?? 0.5)) + self.binarise(matrix: self.textualSimilarityMatrix.matrix, threshold: (weights["text"] ?? 0.5)) + self.binarise(matrix: self.entitiesMatrix.matrix, threshold: (weights["entities"] ?? 0.5))
+        }
+    }
+
+    func remove(ranking: [UInt64]) throws {
+        var ranking = ranking
+        var pagesRemoved = 0
+        while pagesRemoved < 3 {
+            if let pageToRemove = ranking.first {
+                if let pageIndexToRemove = self.findPageInPages(pageID: pageToRemove) {
+                    try self.navigationMatrix.removePage(index: pageIndexToRemove)
+                    try self.textualSimilarityMatrix.removePage(index: pageIndexToRemove)
+                    try self.entitiesMatrix.removePage(index: pageIndexToRemove)
+                    self.pages.remove(at: pageIndexToRemove)
+                    pagesRemoved += 1
+                    ranking = Array(ranking.dropFirst())
+                } else { ranking = Array(ranking.dropFirst()) }
+            } else { break }
+            self.createAdjacencyMatrix()
         }
     }
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
-    public func add(_ page: Page, completion: @escaping (Result<[[UInt64]], Error>) -> Void) {
+    public func add(_ page: Page, ranking: [UInt64]?, completion: @escaping (Result<([[UInt64]], Bool), Error>) -> Void) {
         myQueue.async {
+            // If ranking is received, remove pages
+            if let ranking = ranking {
+                do {
+                    try self.remove(ranking: ranking)
+                } catch let error {
+                    completion(.failure(error))
+                }
+            }
             //Check if this is the first page in the session
             guard self.pages.count > 0 else {
                 self.pages.append(page)
@@ -432,7 +459,7 @@ public class Cluster {
                 }
 
                 let result: [[UInt64]] = [[self.pages[0].id]]
-                completion(.success(result))
+                completion(.success((result, false)))
                 return
             }
             if let id_index = self.findPageInPages(pageID: page.id) {
@@ -474,17 +501,23 @@ public class Cluster {
             //Here is where we would add more similarity matrices in the future
             self.createAdjacencyMatrix()
 
+            let start = CFAbsoluteTimeGetCurrent()
             var predictedClusters = zeros(1, self.adjacencyMatrix.rows).flat.map { Int($0) }
             do {
                 predictedClusters = try self.clusterize()
             } catch let error {
                 completion(.failure(error))
             }
+            let clusteringTime = CFAbsoluteTimeGetCurrent() - start
             let stablizedClusters = self.stabilize(predictedClusters)
             let result = self.clusterizeIDs(labels: stablizedClusters)
 
             DispatchQueue.main.async {
-                completion(.success(result))
+                if clusteringTime > self.timeToRemove {
+                    completion(.success((result, true)))
+                } else {
+                    completion(.success((result, false)))
+                }
             }
         }
     }
@@ -540,8 +573,9 @@ public class Cluster {
             throw CandidateError.unknownCandidate
         }
     }
-    public func changeCandidate(to candidate: Int?, with weightNavigation: Double?, with weightText: Double?, with weightEntities: Double?, completion: @escaping (Result<[[UInt64]], Error>) -> Void) {
+    public func changeCandidate(to candidate: Int?, with weightNavigation: Double?, with weightText: Double?, with weightEntities: Double?, completion: @escaping (Result<([[UInt64]], Bool), Error>) -> Void) {
         myQueue.async {
+            // If ranking is received, remove pages
             self.candidate = candidate ?? self.candidate
             self.weights["navigation"] = weightNavigation ?? self.weights["navigation"]
             self.weights["text"] = weightText ?? self.weights["text"]
@@ -563,7 +597,7 @@ public class Cluster {
             let result = self.clusterizeIDs(labels: stablizedClusters)
 
             DispatchQueue.main.async {
-                completion(.success(result))
+                completion(.success((result, false)))
             }
         }
     }
