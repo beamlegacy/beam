@@ -17,6 +17,7 @@ class ClusteringManager: ObservableObject {
             transformToClusteredPages()
         }
     }
+    var sendRanking = false
     @Published var clusteredTabs: [[TabInformation?]] = [[]]
     @Published var isClustering: Bool = false
     @Published var selectedTabGroupingCandidate = 1
@@ -66,7 +67,11 @@ class ClusteringManager: ObservableObject {
         let page = Page(id: id, parentId: parentId, title: value.document.title, content: value.cleanedTextContentForClustering)
         tabsInfo.append(value)
         isClustering = true
-        cluster.add(page) { result in
+        var ranking: [UInt64]?
+        // if self.sendRanking {
+        //     ranking = self.clusteredPagesId.reduce([], +)
+        // }
+        cluster.add(page, ranking: ranking) { result in
             switch result {
             case .failure(let error):
                 self.isClustering = false
@@ -74,8 +79,9 @@ class ClusteringManager: ObservableObject {
             case .success(let result):
                 DispatchQueue.main.async {
                     self.isClustering = false
-                    self.clusteredPagesId = result
-                    self.logForClustering(result: result, changeCandidate: false)
+                    self.clusteredPagesId = result.0
+                    self.sendRanking = result.1
+                    self.logForClustering(result: result.0, changeCandidate: false)
                 }
             }
         }
@@ -91,8 +97,9 @@ class ClusteringManager: ObservableObject {
             case .success(let result):
                 DispatchQueue.main.async {
                     self.isClustering = false
-                    self.clusteredPagesId = result
-                    self.logForClustering(result: result, changeCandidate: true)
+                    self.clusteredPagesId = result.0
+                    self.sendRanking = result.1
+                    self.logForClustering(result: result.0, changeCandidate: true)
                 }
             }
         }

@@ -144,57 +144,57 @@ class ClusteringTests: XCTestCase {
         let expectation = self.expectation(description: "Add page expectation")
         var final_result = [[UInt64]]()
 
-        cluster.add(page1, completion: { result in
+        cluster.add(page1, ranking: nil, completion: { result in
             switch result {
-                case .failure(let error):
-                    XCTFail(error.localizedDescription)
-                case .success(let result):
-                    final_result = result
+            case .failure(let error):
+                XCTFail(error.localizedDescription)
+            case .success(let result):
+                final_result = result.0
             }
         })
 
-        cluster.add(page2, completion: { result in
+        cluster.add(page2, ranking: nil, completion: { result in
             switch result {
-                case .failure(let error):
-                    XCTFail(error.localizedDescription)
-                case .success(let result):
-                    final_result = result
+            case .failure(let error):
+                XCTFail(error.localizedDescription)
+            case .success(let result):
+                final_result = result.0
             }
         })
 
-        cluster.add(page3, completion: { result in
+        cluster.add(page3, ranking: nil, completion: { result in
             switch result {
-                case .failure(let error):
-                    XCTFail(error.localizedDescription)
-                case .success(let result):
-                    final_result = result
+            case .failure(let error):
+                XCTFail(error.localizedDescription)
+            case .success(let result):
+                final_result = result.0
             }
         })
 
-        cluster.add(page4, completion: { result in
+        cluster.add(page4, ranking: nil, completion: { result in
             switch result {
-                case .failure(let error):
-                    XCTFail(error.localizedDescription)
-                case .success(let result):
-                    final_result = result
+            case .failure(let error):
+                XCTFail(error.localizedDescription)
+            case .success(let result):
+                final_result = result.0
             }
         })
 
-        cluster.add(page5, completion: { result in
+        cluster.add(page5, ranking: nil, completion: { result in
             switch result {
-                case .failure(let error):
-                    XCTFail(error.localizedDescription)
-                case .success(let result):
-                    final_result = result
+            case .failure(let error):
+                XCTFail(error.localizedDescription)
+            case .success(let result):
+                final_result = result.0
             }
         })
 
-        cluster.add(page6, completion: { result in
+        cluster.add(page6, ranking: nil, completion: { result in
             switch result {
-                case .failure(let error):
-                    XCTFail(error.localizedDescription)
-                case .success(let result):
-                    final_result = result
+            case .failure(let error):
+                XCTFail(error.localizedDescription)
+            case .success(let result):
+                final_result = result.0
             }
             expectation.fulfill()
         })
@@ -221,66 +221,66 @@ class ClusteringTests: XCTestCase {
         let expectation = self.expectation(description: "Add page expectation")
         var _ = [[UInt64]]()
 
-        cluster.add(page1, completion: { result in
+        cluster.add(page1, ranking: nil, completion: { result in
             switch result {
-                case .failure(let error):
-                    XCTFail(error.localizedDescription)
-                case .success(let result):
-                    _ = result
+            case .failure(let error):
+                XCTFail(error.localizedDescription)
+            case .success(let result):
+                _ = result
             }
         })
 
-        cluster.add(page2, completion: { result in
+        cluster.add(page2, ranking: nil, completion: { result in
             switch result {
-                case .failure(let error):
-                    XCTFail(error.localizedDescription)
-                case .success(let result):
-                    _ = result
+            case .failure(let error):
+                XCTFail(error.localizedDescription)
+            case .success(let result):
+                _ = result
             }
         })
 
-        cluster.add(page3, completion: { result in
+        cluster.add(page3, ranking: nil, completion: { result in
             switch result {
-                case .failure(let error):
-                    XCTFail(error.localizedDescription)
-                case .success(let result):
-                    _ = result
+            case .failure(let error):
+                XCTFail(error.localizedDescription)
+            case .success(let result):
+                _ = result
             }
         })
 
-        cluster.add(page4, completion: { result in
+        cluster.add(page4, ranking: nil, completion: { result in
             switch result {
-                case .failure(let error):
-                    XCTFail(error.localizedDescription)
-                case .success(let result):
-                    _ = result
+            case .failure(let error):
+                XCTFail(error.localizedDescription)
+            case .success(let result):
+                _ = result
             }
         })
 
-        cluster.add(page5, completion: { result in
+        cluster.add(page5, ranking: nil, completion: { result in
             switch result {
-                case .failure(let error):
-                    XCTFail(error.localizedDescription)
-                case .success(let result):
-                    _ = result
+            case .failure(let error):
+                XCTFail(error.localizedDescription)
+            case .success(let result):
+                _ = result
             }
         })
 
-        cluster.add(page6, completion: { result in
+        cluster.add(page6, ranking: nil, completion: { result in
             switch result {
-                case .failure(let error):
-                    XCTFail(error.localizedDescription)
-                case .success(let result):
-                    _ = result
+            case .failure(let error):
+                XCTFail(error.localizedDescription)
+            case .success(let result):
+                _ = result
             }
         })
 
-        cluster.add(page7, completion: { result in
+        cluster.add(page7, ranking: nil, completion: { result in
             switch result {
-                case .failure(let error):
-                    XCTFail(error.localizedDescription)
-                case .success(let result):
-                    XCTAssert(result == [[0, 2, 5], [1, 3, 4], [6]])
+            case .failure(let error):
+                XCTFail(error.localizedDescription)
+            case .success(let result):
+                XCTAssert(result.0 == [[0, 2, 5], [1, 3, 4], [6]])
             }
             expectation.fulfill()
         })
@@ -327,12 +327,12 @@ class ClusteringTests: XCTestCase {
                 from = ids[parent]
             }
             let page = Page(id: ids[i], parentId: from, title: nil, content: nil)
-            cluster.add(page, completion: { result in
+            cluster.add(page, ranking: nil, completion: { result in
                 switch result {
                 case .failure(let error):
                     XCTFail(error.localizedDescription)
                 case .success(let result):
-                    XCTAssert(result == correct_results[i])
+                    XCTAssert(result.0 == correct_results[i])
                 }
                 if i == 5 {
                     expectation.fulfill()
@@ -345,7 +345,8 @@ class ClusteringTests: XCTestCase {
     // swiftlint:disable:next function_body_length
     func testRunTimeLargeMatrix() throws {
         let cluster = Cluster()
-        cluster.matrixCandidate = SimilarityMatrixCandidate.navigationMatrix
+        cluster.candidate = 2
+        try cluster.performCandidateChange()
         let ids: [UInt64] = Array(0...100)
         for i in 0...99 {
             cluster.pages.append(Page(id: UInt64(i)))
@@ -466,12 +467,12 @@ class ClusteringTests: XCTestCase {
                 from = ids[Int.random(in: 0..<100)]
             }
             let page = Page(id: ids[100], parentId: from, title: nil, content: nil)
-            expect { cluster.add(page, completion: { result in
+            expect { cluster.add(page, ranking: nil, completion: { result in
                 switch result {
                 case .failure(let error):
                     XCTFail(error.localizedDescription)
                 case .success(let result):
-                    final_result = result
+                    final_result = result.0
                 }
             }) }.toNot(throwError())
             expect { final_result.count > 0 }.toEventually(beTrue(), timeout: DispatchTimeInterval.seconds(10))
@@ -480,7 +481,8 @@ class ClusteringTests: XCTestCase {
 
     func testChangeCandidate() throws {
         let cluster = Cluster()
-        cluster.matrixCandidate = SimilarityMatrixCandidate.navigationMatrix
+        cluster.candidate = 1
+        try cluster.performCandidateChange()
         let ids: [UInt64] = Array(0...5)
         // The ids array is not necessary at the moment as its values are equivalent to their indexes
         // but hopefully in the future we'll have a better way to identify web pages in Beam
@@ -493,12 +495,12 @@ class ClusteringTests: XCTestCase {
                 from = ids[parent]
             }
             let page = Page(id: ids[i], parentId: from, title: nil, content: nil)
-            cluster.add(page, completion: { result in
+            cluster.add(page, ranking: nil, completion: { result in
                 switch result {
                 case .failure(let error):
                     XCTFail(error.localizedDescription)
                 case .success(let result):
-                    XCTAssert(result == correct_results[i])
+                    XCTAssert(result.0 == correct_results[i])
                 }
                 if i == 5 {
                     expectation.fulfill()
@@ -510,7 +512,7 @@ class ClusteringTests: XCTestCase {
                     case .failure(let error):
                         XCTFail(error.localizedDescription)
                     case .success(let result):
-                        XCTAssert(result == correct_results[i])
+                        XCTAssert(result.0 == correct_results[i])
                     }
                 })
             }
@@ -545,30 +547,30 @@ class ClusteringTests: XCTestCase {
         let page2 = Page(id: 1, parentId: 0, title: "Page 2", content: "Tennis is a very fun game")
         let page3 = Page(id: 2, parentId: 0, title: "Page 3", content: "Pete Sampras and Roger Federer played 4 exhibition matches in 2008")
 
-        cluster.add(page1, completion: { result in
+        cluster.add(page1, ranking: nil, completion: { result in
             switch result {
-                case .failure(let error):
-                    XCTFail(error.localizedDescription)
-                case .success(let result):
-                    _ = result
+            case .failure(let error):
+                XCTFail(error.localizedDescription)
+            case .success(let result):
+                _ = result
             }
         })
 
-        cluster.add(page2, completion: { result in
+        cluster.add(page2, ranking: nil, completion: { result in
             switch result {
-                case .failure(let error):
-                    XCTFail(error.localizedDescription)
-                case .success(let result):
-                    _ = result
+            case .failure(let error):
+                XCTFail(error.localizedDescription)
+            case .success(let result):
+                _ = result
             }
         })
 
-        cluster.add(page3, completion: { result in
+        cluster.add(page3, ranking: nil, completion: { result in
             switch result {
-                case .failure(let error):
-                    XCTFail(error.localizedDescription)
-                case .success(let result):
-                    _ = result
+            case .failure(let error):
+                XCTFail(error.localizedDescription)
+            case .success(let result):
+                _ = result
             }
             expectation.fulfill()
         })
@@ -583,6 +585,133 @@ class ClusteringTests: XCTestCase {
         XCTAssert(cluster.textualSimilarityMatrix.matrix == Matrix([[0.0, 0.46988745662121795, 0.3628206314147012],
                                                                    [0.46988745662121795, 0.0, 0.19001699954776027],
                                                                    [0.3628206314147012, 0.19001699954776027, 0.0]]))
+    }
+
+    func testRaiseRemoveFlag() throws {
+        let cluster = Cluster()
+        let expectation = self.expectation(description: "Raise remove flag")
+        var flag = false
+        cluster.candidate = 2
+        try cluster.performCandidateChange()
+        cluster.timeToRemove = 0.0
+        let page1 = Page(id: 0, parentId: nil, title: "Page 1", content: "Roger Federer is the best tennis player to ever play the game, but Rafael Nadal is best on clay")
+        let page2 = Page(id: 1, parentId: 0, title: "Page 2", content: "Tennis is a very fun game")
+        let page3 = Page(id: 2, parentId: 0, title: "Page 3", content: "Pete Sampras and Roger Federer played 4 exhibition matches in 2008")
+
+        cluster.add(page1, ranking: nil, completion: { result in
+            switch result {
+            case .failure(let error):
+                XCTFail(error.localizedDescription)
+            case .success(let result):
+                _ = result
+            }
+        })
+        cluster.add(page2, ranking: nil, completion: { result in
+            switch result {
+            case .failure(let error):
+                XCTFail(error.localizedDescription)
+            case .success(let result):
+                _ = result
+            }
+        })
+        cluster.add(page3, ranking: nil, completion: { result in
+            switch result {
+            case .failure(let error):
+                XCTFail(error.localizedDescription)
+            case .success(let result):
+                flag = result.1
+            }
+            expectation.fulfill()
+        })
+        wait(for: [expectation], timeout: 1)
+        XCTAssert(flag == true)
+    }
+
+    // swiftlint:disable:next cyclomatic_complexity function_body_length
+    func testPageRemoval() throws {
+        let cluster = Cluster()
+        cluster.candidate = 2
+        try cluster.performCandidateChange()
+        let page1 = Page(id: 0, parentId: nil, title: "Page 1", content: "A man is eating food.")
+        let page2 = Page(id: 1, parentId: 0, title: "Page 2", content: "The girl is carrying a baby.")
+        let page3 = Page(id: 2, parentId: 0, title: "Page 3", content: "A man is eating food.")
+        let page4 = Page(id: 3, parentId: 0, title: "Page 4", content: "The girl is carrying a baby.")
+        let page5 = Page(id: 4, parentId: 0, title: "Page 5", content: "The girl is carrying a baby.")
+        let page6 = Page(id: 5, parentId: 0, title: "Page 6", content: "A man is eating food.")
+        let page7 = Page(id: 6, parentId: 0, title: "Page 7", content: "La fille est en train de porter un bébé.")
+
+        let expectation = self.expectation(description: "Add page expectation")
+        var _ = [[UInt64]]()
+
+        cluster.add(page1, ranking: nil, completion: { result in
+            switch result {
+            case .failure(let error):
+                XCTFail(error.localizedDescription)
+            case .success(let result):
+                _ = result
+            }
+        })
+
+        cluster.add(page2, ranking: nil, completion: { result in
+            switch result {
+            case .failure(let error):
+                XCTFail(error.localizedDescription)
+            case .success(let result):
+                _ = result
+            }
+        })
+
+        cluster.add(page3, ranking: nil, completion: { result in
+            switch result {
+            case .failure(let error):
+                XCTFail(error.localizedDescription)
+            case .success(let result):
+                _ = result
+            }
+        })
+
+        cluster.add(page4, ranking: nil, completion: { result in
+            switch result {
+            case .failure(let error):
+                XCTFail(error.localizedDescription)
+            case .success(let result):
+                _ = result
+            }
+        })
+
+        cluster.add(page5, ranking: nil, completion: { result in
+            switch result {
+            case .failure(let error):
+                XCTFail(error.localizedDescription)
+            case .success(let result):
+                _ = result
+            }
+        })
+
+        cluster.add(page6, ranking: nil, completion: { result in
+            switch result {
+            case .failure(let error):
+                XCTFail(error.localizedDescription)
+            case .success(let result):
+                _ = result
+            }
+        })
+        // Before adding page7, remove pages 2, 5 and 3
+        cluster.add(page7, ranking: [1, 4, 2, 3, 5, 0], completion: { result in
+            switch result {
+            case .failure(let error):
+                XCTFail(error.localizedDescription)
+            case .success(let result):
+                XCTAssert(!result.0[0].contains(1))
+                XCTAssert(!result.0[0].contains(4))
+                XCTAssert(!result.0[0].contains(2))
+                XCTAssert(cluster.adjacencyMatrix.rows == 4)
+                XCTAssert(cluster.pages.count == 4)
+            }
+            expectation.fulfill()
+        })
+
+        wait(for: [expectation], timeout: 1)
     }
     // swiftlint:disable:next file_length
 }
