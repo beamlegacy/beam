@@ -87,6 +87,8 @@ coverage_check:
   stage: build
   needs: [xctests, xctests UI]
   only:
+    - master
+    - develop
     - merge_requests
   script:
     - scripts/code_coverage.sh

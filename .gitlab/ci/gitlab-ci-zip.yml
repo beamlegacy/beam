@@ -6,10 +6,15 @@ build:zip:
     expire_in: 7d
     paths:
       - builds/
-  only:
-    - merge_requests
-    - master
-    - develop
+  rules:
+    - if: '$BUILD_ZIP_DISABLED'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_COMMIT_TAG'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   before_script:
     - echo "${PATH}"
     - pwd
