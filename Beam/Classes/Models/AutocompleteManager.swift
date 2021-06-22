@@ -278,12 +278,14 @@ extension AutocompleteManager {
 
     func cancelAutocomplete() {
         resetAutocompleteSelection()
+        searchEngineCompleter.clear()
         autocompleteResults = []
         autocompleteTimeoutBlock?.cancel()
     }
 
     func resetQuery() {
         searchQuery = ""
+        searchEngineCompleter.clear()
         autocompleteResults = []
         autocompleteTimeoutBlock?.cancel()
     }

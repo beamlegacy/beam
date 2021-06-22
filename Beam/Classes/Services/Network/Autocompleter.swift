@@ -89,4 +89,8 @@ class Autocompleter: ObservableObject {
         }
         lastDataTask?.resume()
     }
+
+    public func clear() {
+        lastDataTask?.cancel()
+    }
 }
