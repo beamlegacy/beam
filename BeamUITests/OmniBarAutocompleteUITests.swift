@@ -57,12 +57,10 @@ class OmniBarAutocompleteUITests: QuickSpec {
                 self.helper.searchField.typeText("Testing escape key")
                 expect(self.helper.inputHasFocus(self.helper.searchField)).to(beTrue())
                 let results = self.helper.allAutocompleteResults
-                let createNoteResult = self.helper.allAutocompleteResults.matching(self.helper.autocompleteCreateCardPredicate).firstMatch
                 expect(results.count) > 0
 
                 // 1st esc clean autocomlete
                 self.helper.searchField.typeKey(.escape, modifierFlags: [])
-                createNoteResult.waitForNonExistence(timeout: 2, for: self)
                 expect(self.helper.inputHasFocus(self.helper.searchField)).to(beTrue())
                 expect(results.count).to(equal(0))
 
