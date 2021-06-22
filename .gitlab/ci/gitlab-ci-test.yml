@@ -41,10 +41,15 @@ swift lint:
       codequality: fastlane/codequality_report.json
   script:
     - bundle exec fastlane lint
-  only:
-    - merge_requests
-    - master
-    - develop
+  rules:
+    - if: '$SWIFT_LINT_DISABLED'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_COMMIT_TAG'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   tags:
     - macos
 
@@ -86,10 +91,15 @@ coverage_check:
   dependencies: []
   stage: build
   needs: [xctests, xctests UI]
-  only:
-    - master
-    - develop
-    - merge_requests
+  rules:
+    - if: '$COVERAGE_CHECK_DISABLED'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_COMMIT_TAG'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   script:
     - scripts/code_coverage.sh
   tags:
