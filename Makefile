@@ -102,7 +102,9 @@ lint:
 	fastlane lint
 
 install_variable_injector:
-	curl -ssl https://raw.githubusercontent.com/penso/variable-injector/master/scripts/install-binary.sh | sh
+	git clone --depth 1 https://github.com/penso/variable-injector.git
+	(cd variable-injector && make install)
+	rm -r variable-injector
 
 install_direnv:
 	brew install direnv
