@@ -61,19 +61,21 @@ extension BeamTextEdit {
     }
 
     internal func showOrHideInlineFormatter(isPresent: Bool, isDragged: Bool = false, completionHandler: (() -> Void)? = nil) {
-        guard let inlineFormatter = inlineFormatter else { return }
+        guard let formatterView = inlineFormatter else {
+            completionHandler?()
+            return
+        }
 
         if isPresent {
-            inlineFormatter.animateOnAppear {
+            formatterView.animateOnAppear {
                 completionHandler?()
             }
         } else {
-            inlineFormatter.animateOnDisappear { [weak self] in
-                guard let self = self else { return }
-                if !isPresent && !isDragged { self.dismissFormatterView(inlineFormatter) }
+            formatterView.animateOnDisappear {
+                formatterView.removeFromSuperview()
                 completionHandler?()
             }
-            if isDragged { self.dismissFormatterView(inlineFormatter) }
+            dismissFormatterView(formatterView, removeView: isDragged)
         }
     }
 
@@ -199,7 +201,6 @@ extension BeamTextEdit {
         var dismissFormatter = false
         switch type {
         case .link:
-            dismissFormatter = true
             showLinkFormatterForSelection()
             moveInlineFormatterAboveSelection()
         case .internalLink:
@@ -220,9 +221,11 @@ extension BeamTextEdit {
         }
     }
 
-    internal func dismissFormatterView(_ view: FormatterView?) {
+    internal func dismissFormatterView(_ view: FormatterView?, removeView: Bool = true) {
         guard view != nil else { return }
-        view?.removeFromSuperview()
+        if removeView {
+            view?.removeFromSuperview()
+        }
 
         if view == inlineFormatter {
             ContextMenuPresenter.shared.dismissMenu()

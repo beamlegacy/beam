@@ -86,10 +86,6 @@ class ContextMenuFormatterView: FormatterView {
     }
 
     private func selectNextItem() {
-        guard subviewModel.selectedIndex != displayedItems.count - 1 else {
-            subviewModel.selectedIndex = nil
-            return
-        }
         var index = (subviewModel.selectedIndex ?? -1) + 1
         index = index.clamp(0, displayedItems.count - 1)
         while displayedItems[index].type == .separator && index < displayedItems.count - 1 {
@@ -99,10 +95,6 @@ class ContextMenuFormatterView: FormatterView {
     }
 
     private func selectPreviousItem() {
-        guard subviewModel.selectedIndex != 0 else {
-            subviewModel.selectedIndex = nil
-            return
-        }
         var index = (subviewModel.selectedIndex ?? (displayedItems.count)) - 1
         index = index.clamp(0, displayedItems.count - 1)
         while displayedItems[index].type == .separator && index < displayedItems.count - 1 {
@@ -137,12 +129,10 @@ class ContextMenuFormatterView: FormatterView {
 
     override func inputText(_ text: String) -> Bool {
         let searchText = text.dropFirst(typingPrefix)
-        let hadResults = displayedItems.count > 0
         guard handlesTyping,
               !text.isEmpty,
               !searchText.hasPrefix(" "),
-              !searchText.hasSuffix("  "),
-              (hadResults || !searchText.hasSuffix(" "))
+              !searchText.hasSuffix(" ")
               else { return false }
         updateItemsForSearchText(String(searchText))
         return true

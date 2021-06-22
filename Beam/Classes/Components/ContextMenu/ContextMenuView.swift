@@ -33,7 +33,9 @@ struct ContextMenuItemView: View {
 
     var body: some View {
         ZStack(alignment: .leading) {
-            RoundedRectangle(cornerRadius: 3).fill(BeamColor.ContextMenu.hover.swiftUI.opacity(highlight ? 1.0 : 0.0))
+            RoundedRectangle(cornerRadius: 3)
+                .fill(BeamColor.ContextMenu.hover.swiftUI.opacity(highlight ? 1.0 : 0.0))
+                .animation(nil)
             HStack(spacing: BeamSpacing._60) {
                 if let icon = item.icon {
                     Icon(name: icon, size: 16, color: BeamColor.LightStoneGray.swiftUI)
