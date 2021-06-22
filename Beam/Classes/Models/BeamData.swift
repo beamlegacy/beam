@@ -21,8 +21,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     }
     @Published var journal: [BeamNote] = []
 
-    /// Legacy history indexer
-    var indexer: GRDBIndexer
     var fileDB: BeamFileDB
     var passwordsDB: PasswordsDB
     @Published var noteCount = 0
@@ -65,13 +63,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         }
 
         do {
-            indexer = try GRDBIndexer(dataDir: URL(fileURLWithPath: Self.dataFolder))
-        } catch {
-            Logger.shared.logError("Error while creating the GRDB indexer: [\(error)]", category: .search)
-            fatalError()
-        }
-
-        do {
             fileDB = try BeamFileDB(path: Self.fileDBPath)
         } catch let error {
             Logger.shared.logError("Error while creating the File Database [\(error)]", category: .fileDB)
@@ -96,7 +87,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     private func setupSubscribers() {
         $lastChangedElement.sink { element in
             guard let element = element else { return }
-            try? self.indexer.append(element: element)
+            try? GRDBDatabase.shared.append(element: element)
         }.store(in: &scope)
 
         $tabToIndex.sink { [weak self] tabToIndex in
@@ -129,7 +120,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
                   let tabToIndex = tabToIndex else { return }
 
             do {
-                try self.indexer.insertHistoryUrl(url: tabToIndex.url.string, title: tabToIndex.document.title, content: tabToIndex.textContent)
+                try GRDBDatabase.shared.insertHistoryUrl(url: tabToIndex.url.string, title: tabToIndex.document.title, content: tabToIndex.textContent)
             } catch {
                 Logger.shared.logError("unable to save history url \(tabToIndex.url.string)", category: .search)
             }

@@ -232,7 +232,7 @@ import BeamCore
         let e = BeamElement()
         e.text = BeamText(text: query, attributes: [.internalLink(query)])
         data.todaysNote.insert(e, after: data.todaysNote.children.last)
-        try? AppDelegate.main.data.indexer.append(note: data.todaysNote)
+        try? GRDBDatabase.shared.append(note: data.todaysNote)
 
         return n
     }

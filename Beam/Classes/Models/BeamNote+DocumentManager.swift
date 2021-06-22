@@ -81,13 +81,13 @@ extension BeamNote: BeamNoteDocument {
 
     public func updateTitle(_ newTitle: String, documentManager: DocumentManager, completion: ((Result<Bool, Error>) -> Void)? = nil) {
         let previousTitle = self.title
-        try? AppDelegate.main.data.indexer.remove(note: self)
+        try? GRDBDatabase.shared.remove(note: self)
         Self.unload(note: self)
         self.title = newTitle
         self.save(documentManager: documentManager) { [weak self] result in
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
-                try? AppDelegate.main.data.indexer.append(note: self)
+                try? GRDBDatabase.shared.append(note: self)
                 Self.appendToFetchedNotes(self)
                 switch result {
                 case .success:
@@ -172,7 +172,7 @@ extension BeamNote: BeamNoteDocument {
         note.updateDate = documentStruct.updatedAt
         note.isPublic = documentStruct.isPublic
         if keepInMemory {
-            try? AppDelegate.main.data.indexer.append(note: note)
+            try? GRDBDatabase.shared.append(note: note)
             appendToFetchedNotes(note)
         }
         return note
@@ -230,7 +230,7 @@ extension BeamNote: BeamNoteDocument {
 
     public func autoSave(_ relink: Bool) {
         if relink {
-            try? AppDelegate.main.data.indexer.append(note: self)
+            try? GRDBDatabase.shared.append(note: self)
         }
         AppDelegate.main.data.noteAutoSaveService.addNoteToSave(self, relink)
     }
@@ -262,10 +262,10 @@ extension BeamNote: BeamNoteDocument {
 
     public static func indexAllNotes() {
         let documentManager = DocumentManager()
-        try? AppDelegate.main.data.indexer.clear()
+        try? GRDBDatabase.shared.clear()
         for title in documentManager.allDocumentsTitles() {
             if let note = BeamNote.fetch(documentManager, title: title) {
-                try? AppDelegate.main.data.indexer.append(note: note)
+                try? GRDBDatabase.shared.append(note: note)
             }
         }
     }
