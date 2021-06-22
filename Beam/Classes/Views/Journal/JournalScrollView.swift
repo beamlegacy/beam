@@ -67,6 +67,10 @@ struct JournalScrollView: NSViewRepresentable {
     }
 
     private func set(data: [BeamNote], in journalStackView: JournalStackView) {
+        if data.isEmpty {
+            journalStackView.removeChildViews()
+            return
+        }
         for note in data {
             guard !journalStackView.hasChildViews(for: note) else { continue }
             if !note.isEntireNoteEmpty() || note.isTodaysNote {

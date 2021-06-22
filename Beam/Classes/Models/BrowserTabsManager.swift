@@ -94,7 +94,7 @@ class BrowserTabsManager: ObservableObject {
                 //                    }
             }
 
-            tab.appendToIndexer = { [unowned self] url, read in
+            tab.appendToIndexer = { [unowned self, weak tab] url, read in
                 var text = ""
                 var textForClustering = ""
                 self.indexingQueue.async { [unowned self] in
@@ -106,7 +106,7 @@ class BrowserTabsManager: ObservableObject {
                         guard let self = self else { return }
                         let indexDocument = IndexDocument(source: url.absoluteString, title: read.title, contents: text)
 
-                        let tabInformation: TabInformation? = TabInformation(url: url, tabTree: tab.browsingTree, currentTabTree: currentTab?.browsingTree, previousTabTree: self.latestCurrentTab, document: indexDocument, textContent: text, cleanedTextContentForClustering: textForClustering)
+                        let tabInformation: TabInformation? = TabInformation(url: url, tabTree: tab?.browsingTree, currentTabTree: currentTab?.browsingTree, previousTabTree: self.latestCurrentTab, document: indexDocument, textContent: text, cleanedTextContentForClustering: textForClustering)
                         self.data.tabToIndex = tabInformation
                         self.latestCurrentTab = nil
                     }
@@ -195,7 +195,9 @@ extension BrowserTabsManager {
         // This make sure any webview is not retained by the first responder chain
         AppDelegate.main.window.makeFirstResponder(nil)
         if let currentTab = currentTab {
-            AppDelegate.main.window.makeFirstResponder(currentTab.webView)
+            DispatchQueue.main.async {
+                currentTab.webView.window?.makeFirstResponder(currentTab.webView)
+            }
         }
     }
 }

@@ -92,4 +92,9 @@ class WebPageHolder: NSObject, WebPageRelated {
             _page = newValue
         }
     }
+
+    convenience init(page: WebPage?) {
+        self.init()
+        _page = page
+    }
 }
