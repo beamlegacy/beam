@@ -59,7 +59,7 @@ class AutocompleteManager: ObservableObject {
 
     private func autocompleteNotesContentsResults(for query: String, excludingNotes: [AutocompleteResult]) -> [AutocompleteResult] {
         var resultsToExclude = excludingNotes
-        let searchResults = beamData.indexer.search(matchingAllTokensIn: query, maxResults: 10)
+        let searchResults = GRDBDatabase.shared.search(matchingAllTokensIn: query, maxResults: 10)
         return searchResults.compactMap { result -> AutocompleteResult? in
             guard !resultsToExclude.contains(where: { $0.text == result.title || $0.uuid.uuidString == result.uid }) else {
                 return nil
@@ -75,7 +75,7 @@ class AutocompleteManager: ObservableObject {
     }
 
     private func autocompleteHistoryResults(for query: String) -> [AutocompleteResult] {
-        self.beamData.indexer.searchHistory(query: query).map {
+        GRDBDatabase.shared.searchHistory(query: query).map {
             var urlString = $0.url
             let url = URL(string: urlString)
             if let url = url {

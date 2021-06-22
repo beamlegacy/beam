@@ -52,7 +52,12 @@
 		032562F426051D67006513E4 /* RBSQLiteTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325626A26051D3A006513E4 /* RBSQLiteTests.m */; };
 		032562FD26051DCB006513E4 /* RBMockClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325625D26051D3A006513E4 /* RBMockClient.m */; };
 		03CA9A9725CC61BF00E7CFA2 /* ContentBlockingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03CA9A9625CC61BF00E7CFA2 /* ContentBlockingManager.swift */; };
-		0DEE978D2642965600AB95AE /* GRDBIndexerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DEE978C2642965600AB95AE /* GRDBIndexerTests.swift */; };
+		0D15BE3F2681CEA40035F322 /* GRDBDatabase+Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D15BE3E2681CEA40035F322 /* GRDBDatabase+Persistence.swift */; };
+		0D15BE432681DAC30035F322 /* BeamElementRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D15BE422681DAC30035F322 /* BeamElementRecord.swift */; };
+		0D3DD8F32681CBA4009F2DF0 /* IndexDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D3DD8F22681CBA4009F2DF0 /* IndexDocument.swift */; };
+		0D3DD8F52681CD4B009F2DF0 /* HistoryUrlRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D3DD8F42681CD4B009F2DF0 /* HistoryUrlRecord.swift */; };
+		0DD0DACC2681C9630005339A /* GRDBDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DD0DACB2681C9630005339A /* GRDBDatabase.swift */; };
+		0DEE978D2642965600AB95AE /* GRDBDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DEE978C2642965600AB95AE /* GRDBDatabaseTests.swift */; };
 		330D380E265FB76C00A2536B /* DownloaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 330D380D265FB76C00A2536B /* DownloaderView.swift */; };
 		330D3824265FC6B200A2536B /* DownloadCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 330D3823265FC6B200A2536B /* DownloadCell.swift */; };
 		3315DC912667859A002A47CF /* Preferences in Frameworks */ = {isa = PBXBuildFile; productRef = 524299AE25A47CA500F4DBF5 /* Preferences */; };
@@ -387,7 +392,6 @@
 		9639FB1D2616FCA300C85B95 /* BeamCore.h in Headers */ = {isa = PBXBuildFile; fileRef = 96319C91261614C000D1CF31 /* BeamCore.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		964548A02523B3550064D062 /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9645489F2523B3550064D062 /* CloudKit.framework */; };
 		964FE5B72624813E00966E03 /* RandomAccessCollection+BinarySearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 964FE5B62624813E00966E03 /* RandomAccessCollection+BinarySearch.swift */; };
-		964FE5FC2625E14500966E03 /* GRDBIndexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 964FE5FB2625E14500966E03 /* GRDBIndexer.swift */; };
 		964FE64D262D8ED300966E03 /* Dictionary+valuesMatchingKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 964FE64C262D8ED300966E03 /* Dictionary+valuesMatchingKeys.swift */; };
 		965A78292514F147009980D4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965A78282514F147009980D4 /* AppDelegate.swift */; };
 		965A78362514F148009980D4 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 965A78342514F148009980D4 /* Main.storyboard */; };
@@ -804,7 +808,12 @@
 		0325628C26051D3B006513E4 /* RBClient-Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "RBClient-Private.h"; path = "Extern/RadBlock/RBClient-Private.h"; sourceTree = "<group>"; };
 		0325628D26051D3B006513E4 /* RBFilterBuilder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RBFilterBuilder.h; path = Extern/RadBlock/RBFilterBuilder.h; sourceTree = "<group>"; };
 		03CA9A9625CC61BF00E7CFA2 /* ContentBlockingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentBlockingManager.swift; sourceTree = "<group>"; };
-		0DEE978C2642965600AB95AE /* GRDBIndexerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GRDBIndexerTests.swift; sourceTree = "<group>"; };
+		0D15BE3E2681CEA40035F322 /* GRDBDatabase+Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GRDBDatabase+Persistence.swift"; sourceTree = "<group>"; };
+		0D15BE422681DAC30035F322 /* BeamElementRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamElementRecord.swift; sourceTree = "<group>"; };
+		0D3DD8F22681CBA4009F2DF0 /* IndexDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndexDocument.swift; sourceTree = "<group>"; };
+		0D3DD8F42681CD4B009F2DF0 /* HistoryUrlRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryUrlRecord.swift; sourceTree = "<group>"; };
+		0DD0DACB2681C9630005339A /* GRDBDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GRDBDatabase.swift; sourceTree = "<group>"; };
+		0DEE978C2642965600AB95AE /* GRDBDatabaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GRDBDatabaseTests.swift; sourceTree = "<group>"; };
 		330D380D265FB76C00A2536B /* DownloaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloaderView.swift; sourceTree = "<group>"; };
 		330D3823265FC6B200A2536B /* DownloadCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadCell.swift; sourceTree = "<group>"; };
 		3330D7B4265E4441008C9E20 /* Download.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Download.swift; sourceTree = "<group>"; };
@@ -1134,7 +1143,6 @@
 		9634DD90264B203E0065383E /* ShapeLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeLayer.swift; sourceTree = "<group>"; };
 		9645489F2523B3550064D062 /* CloudKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CloudKit.framework; path = System/Library/Frameworks/CloudKit.framework; sourceTree = SDKROOT; };
 		964FE5B62624813E00966E03 /* RandomAccessCollection+BinarySearch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RandomAccessCollection+BinarySearch.swift"; sourceTree = "<group>"; };
-		964FE5FB2625E14500966E03 /* GRDBIndexer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GRDBIndexer.swift; sourceTree = "<group>"; };
 		964FE64C262D8ED300966E03 /* Dictionary+valuesMatchingKeys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Dictionary+valuesMatchingKeys.swift"; sourceTree = "<group>"; };
 		965A78252514F147009980D4 /* Beam.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Beam.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		965A78282514F147009980D4 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -1565,10 +1573,30 @@
 			path = ..;
 			sourceTree = "<group>";
 		};
+		0DD0DAC22681C6EB0005339A /* GRDB */ = {
+			isa = PBXGroup;
+			children = (
+				0DD0DACB2681C9630005339A /* GRDBDatabase.swift */,
+				0D3DD8F42681CD4B009F2DF0 /* HistoryUrlRecord.swift */,
+				0D3DD8F22681CBA4009F2DF0 /* IndexDocument.swift */,
+				0D15BE3E2681CEA40035F322 /* GRDBDatabase+Persistence.swift */,
+				0D15BE422681DAC30035F322 /* BeamElementRecord.swift */,
+			);
+			path = GRDB;
+			sourceTree = "<group>";
+		};
+		0DD0DACA2681C7330005339A /* GRDB */ = {
+			isa = PBXGroup;
+			children = (
+				0DEE978C2642965600AB95AE /* GRDBDatabaseTests.swift */,
+			);
+			path = GRDB;
+			sourceTree = "<group>";
+		};
 		0DEE97A3264296E000AB95AE /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				0DEE978C2642965600AB95AE /* GRDBIndexerTests.swift */,
+				0DD0DACA2681C7330005339A /* GRDB */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -1737,6 +1765,7 @@
 		4181716B2581107C00317ED8 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				0DD0DAC22681C6EB0005339A /* GRDB */,
 				418171712581107C00317ED8 /* Importers */,
 				418171762581107C00317ED8 /* CoreData */,
 				BAA67051B37A3398BDF678AB /* Navigation */,
@@ -1762,7 +1791,6 @@
 				BAA67CEFFAFA38F29CF1C84F /* WebPage.swift */,
 				BAA67DD5764226E47DFA6F9E /* WebPositions.swift */,
 				8A141559267393E2005F2464 /* WebPositionsTest.swift */,
-				964FE5FB2625E14500966E03 /* GRDBIndexer.swift */,
 				BAA67CDE485E5E7774A978D2 /* LoggingMessageHandler.swift */,
 				9691C2582644948200F70DA1 /* BeamFileDB.swift */,
 				BAA67A4B26FC61E9505EF7DB /* BeamMessageHandler.swift */,
@@ -3746,16 +3774,20 @@
 				A05ADF6E264D8C59002DF91A /* OverlayViewCenterViewModel.swift in Sources */,
 				5298268C2641A37500E9448C /* GithubButton.swift in Sources */,
 				8AB966B12668542F003E7755 /* Quote.swift in Sources */,
+				0D15BE3F2681CEA40035F322 /* GRDBDatabase+Persistence.swift in Sources */,
+				0D3DD8F52681CD4B009F2DF0 /* HistoryUrlRecord.swift in Sources */,
 				4181720E2581107C00317ED8 /* NoteBackForwardList.swift in Sources */,
 				A52393AA26541A18008D4C85 /* ModeView.swift in Sources */,
 				A552DF2925F0E22B00570C85 /* OmniBarFieldBackground.swift in Sources */,
 				A0A84FF1263835D3008F0326 /* PasswordsTableView.swift in Sources */,
 				87C539B92616297300D51877 /* SearchPasswordsCell.swift in Sources */,
 				417628A525B05DFB0082FFDF /* NSBezierPath+CGPath.swift in Sources */,
+				0DD0DACC2681C9630005339A /* GRDBDatabase.swift in Sources */,
 				032562A726051D3B006513E4 /* RBFilterManagerState.m in Sources */,
 				418172592581107C00317ED8 /* ContentView.swift in Sources */,
 				52B17AC7262449DA00CB4728 /* DatabaseDetail.swift in Sources */,
 				525C5472261F619D00378FAA /* Binding+onChange.swift in Sources */,
+				0D3DD8F32681CBA4009F2DF0 /* IndexDocument.swift in Sources */,
 				418173B6258124D500317ED8 /* NSAttributedString+Beam.swift in Sources */,
 				96E4505825995CA200BFF36F /* BreadCrumb.swift in Sources */,
 				418171EF2581107C00317ED8 /* User.swift in Sources */,
@@ -3840,7 +3872,6 @@
 				A01030AA25F149EA00D740C5 /* TextEditorCommand.swift in Sources */,
 				5298EB0526272D400033862C /* NSManagedObjectModel+Extension.swift in Sources */,
 				418172042581107C00317ED8 /* TemporaryFile.swift in Sources */,
-				964FE5FC2625E14500966E03 /* GRDBIndexer.swift in Sources */,
 				523FF66125C31D8800B4BD6E /* Data+String.swift in Sources */,
 				A57BFEBD2615B49C00CFB646 /* TableRowView.swift in Sources */,
 				A515597B267786E1006F6D6F /* MediaPlayerMessageHandler.swift in Sources */,
@@ -3923,6 +3954,7 @@
 				52F27FCB25B9B404006E09A2 /* ViewModelFetchedResults.swift in Sources */,
 				524CF6DB25F29119007312F0 /* SymmetricKey+Serialize.swift in Sources */,
 				0325629426051D3B006513E4 /* NSString+IDNA.m in Sources */,
+				0D15BE432681DAC30035F322 /* BeamElementRecord.swift in Sources */,
 				A043B7FE26593A5300E267E5 /* TabGroupingWindow.swift in Sources */,
 				418173C32581276F00317ED8 /* String+NSMutableAttributedString.swift in Sources */,
 				A5ECC8FF2679EBB500D8A087 /* HoverVisibleModifier.swift in Sources */,
@@ -4161,7 +4193,7 @@
 				8AC2EFDD266F8A1400049005 /* PointAndShootShootingTest.swift in Sources */,
 				96E1356F2546F03900133A24 /* TextNodeTests.swift in Sources */,
 				8AC2EFC5266F81B000049005 /* PointAndShootStatusTest.swift in Sources */,
-				0DEE978D2642965600AB95AE /* GRDBIndexerTests.swift in Sources */,
+				0DEE978D2642965600AB95AE /* GRDBDatabaseTests.swift in Sources */,
 				522AFB2825CBFAB100F60647 /* DocumentManagerTestsHelper.swift in Sources */,
 				969084CC25365AAE009D3C96 /* ParserTests.swift in Sources */,
 				8A68F4652671159D00B0C022 /* PointAndShootMessageHandlerFrameBoundsTest.swift in Sources */,

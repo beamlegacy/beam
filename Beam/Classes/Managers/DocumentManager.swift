@@ -645,7 +645,7 @@ extension DocumentManager {
                 if let deletedDocuments = notification.userInfo?["deletedDocuments"] as? [DocumentStruct] {
                     for document in deletedDocuments where document.id == documentStruct.id {
                         Logger.shared.logDebug("notification for \(document.title) version \(document.version)", category: .document)
-                        try? AppDelegate.main.data.indexer.remove(noteTitled: document.title)
+                        try? GRDBDatabase.shared.remove(noteTitled: document.title)
                         completionHandler(document)
                     }
                 }
