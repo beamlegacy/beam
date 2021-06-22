@@ -369,7 +369,6 @@
 		96319D3D2616233E00D1CF31 /* BeamText+String.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96319CB22616155300D1CF31 /* BeamText+String.swift */; };
 		96319D3E2616233E00D1CF31 /* String+c99.swift in Sources */ = {isa = PBXBuildFile; fileRef = 521FEC652604B830009000F9 /* String+c99.swift */; };
 		96319D3F2616233E00D1CF31 /* String+Ranges.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181719F2581107C00317ED8 /* String+Ranges.swift */; };
-		96319D402616233E00D1CF31 /* String+Levenshtein.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96A8B1DC25A38A3B006F749C /* String+Levenshtein.swift */; };
 		96319D412616233E00D1CF31 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181718D2581107C00317ED8 /* Logger.swift */; };
 		96319D422616233E00D1CF31 /* BeamText+Links.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96319CC8261616B300D1CF31 /* BeamText+Links.swift */; };
 		96319D432616233E00D1CF31 /* String+Split.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5242684C25ED408500DB1D05 /* String+Split.swift */; };
@@ -1177,7 +1176,6 @@
 		96956D30258BF3F50069C9C1 /* LinkStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkStore.swift; sourceTree = "<group>"; };
 		96988C8225BB0AF2000223A3 /* DestinationNotePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DestinationNotePicker.swift; sourceTree = "<group>"; };
 		96A3067B25F698FB0078A453 /* RefNoteTitle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefNoteTitle.swift; sourceTree = "<group>"; };
-		96A8B1DC25A38A3B006F749C /* String+Levenshtein.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Levenshtein.swift"; sourceTree = "<group>"; };
 		96BBA78A25FBA573008276FC /* ReparentElement.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReparentElement.swift; sourceTree = "<group>"; };
 		96C1D7EA2624C0ED0085FD23 /* BeamElement+Text.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamElement+Text.swift"; sourceTree = "<group>"; };
 		96C9AA3E259019E3007D3D98 /* ProxyTextNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProxyTextNode.swift; sourceTree = "<group>"; };
@@ -2715,7 +2713,6 @@
 				418171A12581107C00317ED8 /* String+Regex.swift */,
 				418171A72581107C00317ED8 /* String+Localization.swift */,
 				526016CD25ADC10800634695 /* String+MD5.swift */,
-				96A8B1DC25A38A3B006F749C /* String+Levenshtein.swift */,
 				562A8B3525B5D8B5004D3D8A /* String+NL.swift */,
 				523FF67825C31D9D00B4BD6E /* String+Data.swift */,
 				5287EC2E25C42B0100CE1DD9 /* String+UUID.swift */,
