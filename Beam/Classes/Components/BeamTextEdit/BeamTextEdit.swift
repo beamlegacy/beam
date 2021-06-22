@@ -63,6 +63,11 @@ public extension CALayer {
         guard note != rootNode?.element else { return }
         _isTodaysNote = note.note?.isTodaysNote ?? false
 
+        clearRoot()
+        rootNode = TextRoot(editor: self, element: note)
+    }
+
+    private func clearRoot() {
         if let layers = layer?.sublayers {
             for l in layers where ![cardHeaderLayer, cardTimeLayer].contains(l) {
                 l.removeFromSuperlayer()
@@ -73,12 +78,10 @@ public extension CALayer {
             c.removeFromSuperview()
         }
 
-        //        guard mapping[note] == nil else { return }
         rootNode?.clearMapping() // Clear all previous references in the node tree
-        rootNode = TextRoot(editor: self, element: note)
-
+        rootNode = TextRoot(editor: self, element: BeamElement())
         // Remove all subsciptions:
-        noteCancellables = []
+        noteCancellables.removeAll()
     }
 
     private var noteCancellables = [AnyCancellable]()
@@ -1081,6 +1084,7 @@ public extension CALayer {
     public override func viewWillMove(toWindow newWindow: NSWindow?) {
         guard let window = newWindow else {
             _ = self.resignFirstResponder()
+            self.clearRoot()
             return
         }
         window.acceptsMouseMovedEvents = true

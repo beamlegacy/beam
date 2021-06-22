@@ -110,12 +110,6 @@ class BeamWindow: NSWindow, NSDraggingDestination {
         registerForDraggedTypes([.fileURL])
     }
 
-    deinit {
-        AppDelegate.main.windows.removeAll { window in
-            window === self
-        }
-    }
-
     override func performClose(_ sender: Any?) {
         if state.mode != .web, state.hasBrowserTabs {
             state.mode = .web
@@ -123,6 +117,15 @@ class BeamWindow: NSWindow, NSDraggingDestination {
         }
         if state.browserTabsManager.closeCurrentTab() { return }
         super.performClose(sender)
+    }
+
+    override func close() {
+        // TODO: Add a proper way to clean the entire window state
+        // https://linear.app/beamapp/issue/BE-1152/
+        AppDelegate.main.windows.removeAll { window in
+            window === self
+        }
+        super.close()
     }
 
     override func setFrame(_ frameRect: NSRect, display flag: Bool) {

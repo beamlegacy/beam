@@ -1,10 +1,9 @@
 import Foundation
 
 class BeamWebView: WKWebView {
-//    override var safeAreaInsets: NSEdgeInsets {
-//        return NSEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
-//    }
+
     weak var page: BrowserTab?
+    private let automaticallyResignResponder = true
 
     override init(frame: CGRect, configuration: WKWebViewConfiguration) {
         super.init(frame: frame, configuration: configuration)
@@ -15,6 +14,12 @@ class BeamWebView: WKWebView {
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
+    }
+
+    override func viewDidMoveToSuperview() {
+        if automaticallyResignResponder && superview == nil && self.window?.firstResponder == self {
+            self.window?.makeFirstResponder(nil)
+        }
     }
 
     override func updateLayer() {
