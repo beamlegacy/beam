@@ -31,7 +31,7 @@ extension BeamTextEdit {
     }
 
     internal func toggleLink() {
-        Logger.shared.logDebug("link")
+        showLinkFormatterForSelection()
     }
 
     internal func toggleBiDirectionalLink() {

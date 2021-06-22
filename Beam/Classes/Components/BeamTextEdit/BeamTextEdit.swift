@@ -1322,9 +1322,7 @@ public extension CALayer {
             updatePopover(with: .moveUp)
         } else if inlineFormatter?.moveUp() != true {
             rootNode.moveUp()
-            if inlineFormatter != nil {
-                hideInlineFormatter()
-            }
+            hideInlineFormatter()
         }
     }
 
@@ -1333,21 +1331,24 @@ public extension CALayer {
             updatePopover(with: .moveDown)
         } else if inlineFormatter?.moveDown() != true {
             rootNode.moveDown()
-            if inlineFormatter != nil {
-                hideInlineFormatter()
-            }
+            hideInlineFormatter()
         }
     }
 
     override public func selectAll(_ sender: Any?) {
         cancelPopover(leaveTextAsIs: true)
         rootNode.selectAll()
+        if rootNode.state.nodeSelection?.nodes.count ?? 0 <= 1 {
+            showInlineFormatterOnKeyEventsAndClick(isKeyEvent: true)
+        } else {
+            hideInlineFormatter()
+        }
     }
 
     override public func moveUpAndModifySelection(_ sender: Any?) {
         cancelPopover()
         rootNode.moveUpAndModifySelection()
-        if rootNode.state.nodeSelection?.nodes.count == 1 {
+        if rootNode.state.nodeSelection?.nodes.count ?? 0 <= 1 {
             showInlineFormatterOnKeyEventsAndClick(isKeyEvent: true)
         }
     }
@@ -1355,7 +1356,7 @@ public extension CALayer {
     override public func moveDownAndModifySelection(_ sender: Any?) {
         cancelPopover()
         rootNode.moveDownAndModifySelection()
-        if rootNode.state.nodeSelection?.nodes.count == 1 {
+        if rootNode.state.nodeSelection?.nodes.count ?? 0 <= 1 {
             showInlineFormatterOnKeyEventsAndClick(isKeyEvent: true)
         }
     }

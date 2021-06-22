@@ -290,23 +290,18 @@ extension BeamTextEdit {
     // MARK: Private Methods (UI)
     private func moveInlineFormatterAboveSelection() {
         guard let node = focusedWidget as? TextNode,
-              let view = inlineFormatter,
-              let line = node.lineAt(index: node.cursorPosition),
-              let currentLine = node.lineAt(index: cursorStartPosition) else { return }
+              let view = inlineFormatter else { return }
 
-        let leftMargin: CGFloat = centerText ? 145 : 200 // Value to move the inline formatter to the left
-        let middleFrame = (frame.width - Self.textWidth) / 2
         let idealSize = view.idealSize
-        let (xOffset, rect) = node.offsetAndFrameAt(index: node.cursorPosition)
-        let yPos = rect.maxY + node.offsetInDocument.y - idealSize.height - BeamTextEdit.yPosInlineFormatter
-        let xPos = xOffset + (centerText ? middleFrame - leftMargin : BeamTextEdit.xPosInlineFormatter) + childInsetFrom(node)
-
-        view.frame.origin.x = rootNode.state.nodeSelection != nil ? (centerText ? middleFrame : leftMargin) : xPos
-
-        // Update Y position only if the current selected line is equal to selected line
-        if !(node.selectedTextRange.upperBound > node.selectedTextRange.lowerBound && currentLine < line) {
-            view.frame.origin.y = rootNode.state.nodeSelection != nil ? node.offsetInDocument.y - idealSize.height - 8 : yPos
+        var yPos = node.offsetInDocument.y - idealSize.height - 8
+        var xPos: CGFloat = node.offsetInDocument.x
+        if rootNode.state.nodeSelection == nil {
+            let (xOffset, rect) = node.offsetAndFrameAt(index: node.cursorPosition)
+            yPos = rect.minY + node.offsetInDocument.y - idealSize.height - 8
+            xPos += xOffset - (idealSize.width / 2)
         }
+
+        view.frame.origin = CGPoint(x: xPos, y: yPos)
     }
 
     private func addConstraint(to view: FormatterView, with contentView: NSView) {
