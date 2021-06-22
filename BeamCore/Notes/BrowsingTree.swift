@@ -10,6 +10,13 @@
 import Foundation
 import Combine
 
+public enum VisitType {
+    case root
+    case linkActivation
+    case fromNote
+    case searchBar
+}
+
 public enum BrowsingTreeOrigin: Codable {
     case searchBar(query: String)
     case searchFromNode(nodeText: String)
@@ -134,6 +141,7 @@ public struct ScoredLink: Hashable {
 public class BrowsingNode: ObservableObject, Codable {
     public let id: UUID
     public var link: UInt64
+    public let isLinkActivation: Bool
     public weak var parent: BrowsingNode?
     public weak var tree: BrowsingTree! {
         didSet {
@@ -153,6 +161,7 @@ public class BrowsingNode: ObservableObject, Codable {
         LinkStore.linkFor(link)?.url ?? "<???>"
     }
     private var isForeground: Bool = false
+    private var lastStartReading: Date?
 
     private func readingTimeSinceLastEvent(date: Date) -> CFTimeInterval {
         guard let lastEvent = events.last else { return 0 }
@@ -164,17 +173,44 @@ public class BrowsingNode: ObservableObject, Codable {
         let event = ReadingEvent(type: type, date: date)
         events.append(event)
         score.lastEvent = event
-        if event.isForegroundEntering { isForeground = true }
-        if event.isForegroundExiting { isForeground = false }
+        if event.isForegroundEntering {
+            isForeground = true
+            lastStartReading = lastStartReading ?? date
+        }
+        if event.isForegroundExiting {
+            isForeground = false
+            if let lastStartReading = lastStartReading {
+                let readingTime = Float(date.timeIntervalSince(lastStartReading))
+                tree.frecencyScorer?.update(urlId: link, value: readingTime, visitType: visitType, date: lastStartReading, paramKey: .readingTime30d0)
+                self.lastStartReading = nil
+            }
+        }
         score.isForeground = isForeground
     }
+    var visitType: VisitType {
+        guard let parent = parent else { return .root }
+        if parent.id == tree.root.id {
+            switch tree.origin {
+            case .browsingNode: return .linkActivation
+            case .searchFromNode: return .fromNote
+            case .linkFromNote: return .fromNote
+            case .searchBar: return .searchBar
+            }
+        }
+        return isLinkActivation ? .linkActivation : .searchBar
+    }
 
-    public init(tree: BrowsingTree, parent: BrowsingNode?, url: String, title: String?) {
+    public init(tree: BrowsingTree, parent: BrowsingNode?, url: String, title: String?, isLinkActivation: Bool) {
         id = UUID()
         self.link = LinkStore.createIdFor(url, title: title)
         self.parent = parent
         self.tree = tree
-        score.lastCreationDate = events.first?.date
+        self.isLinkActivation = isLinkActivation
+        let creationDate = events.first?.date
+        score.lastCreationDate = creationDate
+        if let creationDate = creationDate {
+            tree.frecencyScorer?.update(urlId: link, value: 1, visitType: visitType, date: creationDate, paramKey: .visit30d0)
+        }
     }
 
     // Codable:
@@ -183,6 +219,7 @@ public class BrowsingNode: ObservableObject, Codable {
         case events
         case children
         case id
+        case isLinkActivation
     }
 
     public required init(from decoder: Decoder) throws {
@@ -190,6 +227,7 @@ public class BrowsingNode: ObservableObject, Codable {
 
         link = try container.decode(UInt64.self, forKey: .link)
         id = (try? container.decode(UUID.self, forKey: .id)) ?? UUID()
+        isLinkActivation = (try? container.decode(Bool.self, forKey: .isLinkActivation)) ?? false
         if container.contains(.events) {
             events = try container.decode([ReadingEvent].self, forKey: .events)
         }
@@ -235,10 +273,12 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
     @Published public private(set) var current: BrowsingNode!
 
     public let origin: BrowsingTreeOrigin
+    var frecencyScorer: FrecencyScorer?
 
-    public init(_ origin: BrowsingTreeOrigin?) {
+    public init(_ origin: BrowsingTreeOrigin?, frecencyScorer: FrecencyScorer? = nil) {
         self.origin = origin ?? defaultOrigin
-        self.root = BrowsingNode(tree: self, parent: nil, url: "<???>", title: nil)
+        self.frecencyScorer = frecencyScorer
+        self.root = BrowsingNode(tree: self, parent: nil, url: "<???>", title: nil, isLinkActivation: false)
         self.current = root
     }
 
@@ -319,7 +359,7 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
         Logger.shared.logInfo("navigateFrom \(currentLink) to \(link)", category: .web)
         let event = isLinkActivation ? ReadingEventType.navigateToLink : ReadingEventType.searchBarNavigation
         current.addEvent(event)
-        let node = BrowsingNode(tree: self, parent: current, url: link, title: title)
+        let node = BrowsingNode(tree: self, parent: current, url: link, title: title, isLinkActivation: isLinkActivation)
         current.children.append(node)
         current = node
         if startReading {

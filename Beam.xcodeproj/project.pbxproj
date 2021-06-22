@@ -617,6 +617,8 @@
 		BAA67FA1EA0AEC590CEE0AB8 /* WebNavigationContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67226F0A10301D829E071 /* WebNavigationContext.swift */; };
 		BAA67FC2BABDCB5F962CDE22 /* Frames.test.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA678F7FE18AF760346FB0B /* Frames.test.ts */; };
 		DA3E41D42642CC7900BA3952 /* TextSaver.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3E41BF2642CC7900BA3952 /* TextSaver.swift */; };
+		DA63D513267CF10800D7C756 /* FrecencyScorer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA63D512267CF10800D7C756 /* FrecencyScorer.swift */; };
+		DA63D519267CF28800D7C756 /* FrecencyScorerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA63D518267CF28800D7C756 /* FrecencyScorerTest.swift */; };
 		DA76129826614E5A00349F2C /* BrowsingTreeScoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA76129726614E5A00349F2C /* BrowsingTreeScoreTests.swift */; };
 		DAA60C232666893300C927E5 /* SessionLinkRanker.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA60C182666892600C927E5 /* SessionLinkRanker.swift */; };
 		DAA60C2C2666899A00C927E5 /* BeamState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181734D2581204900317ED8 /* BeamState.swift */; };
@@ -1387,6 +1389,8 @@
 		BAA67F65A4275DE0B884B933 /* index_native.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = index_native.js; sourceTree = "<group>"; };
 		BAA67FFE49752420EA6C9833 /* Native.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = Native.ts; sourceTree = "<group>"; };
 		DA3E41BF2642CC7900BA3952 /* TextSaver.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextSaver.swift; sourceTree = "<group>"; };
+		DA63D512267CF10800D7C756 /* FrecencyScorer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FrecencyScorer.swift; sourceTree = "<group>"; };
+		DA63D518267CF28800D7C756 /* FrecencyScorerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrecencyScorerTest.swift; sourceTree = "<group>"; };
 		DA76129726614E5A00349F2C /* BrowsingTreeScoreTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BrowsingTreeScoreTests.swift; sourceTree = "<group>"; };
 		DAA60C182666892600C927E5 /* SessionLinkRanker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SessionLinkRanker.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -2663,6 +2667,7 @@
 		96319C9C261614CB00D1CF31 /* BeamCore */ = {
 			isa = PBXGroup;
 			children = (
+				DA63D511267CF0A000D7C756 /* Frecency */,
 				96319C91261614C000D1CF31 /* BeamCore.h */,
 				96319D122616232600D1CF31 /* Info.plist */,
 				96319D0026161DBB00D1CF31 /* Utils */,
@@ -2739,6 +2744,7 @@
 		96319D1D2616232700D1CF31 /* BeamCoreTests */ = {
 			isa = PBXGroup;
 			children = (
+				DA63D518267CF28800D7C756 /* FrecencyScorerTest.swift */,
 				DA76129726614E5A00349F2C /* BrowsingTreeScoreTests.swift */,
 				96319D1E2616232700D1CF31 /* BeamCoreTests.swift */,
 				A5CA5DF42625C15D004E9D3E /* BeamElementTextStatsTests.swift */,
@@ -3116,6 +3122,14 @@
 				BAA67E0D441DE56B0908A8ED /* BeamWebFactoryMock.ts */,
 			);
 			path = Test;
+			sourceTree = "<group>";
+		};
+		DA63D511267CF0A000D7C756 /* Frecency */ = {
+			isa = PBXGroup;
+			children = (
+				DA63D512267CF10800D7C756 /* FrecencyScorer.swift */,
+			);
+			path = Frecency;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -3704,6 +3718,7 @@
 				96319D3E2616233E00D1CF31 /* String+c99.swift in Sources */,
 				96319D5D261626BE00D1CF31 /* Score.swift in Sources */,
 				96319D3A2616233E00D1CF31 /* CommandManager.swift in Sources */,
+				DA63D513267CF10800D7C756 /* FrecencyScorer.swift in Sources */,
 				A5208E27261F7419006193AF /* String+Calculations.swift in Sources */,
 				96319D6226162F5C00D1CF31 /* LinkStore.swift in Sources */,
 				96319D3F2616233E00D1CF31 /* String+Ranges.swift in Sources */,
@@ -3728,6 +3743,7 @@
 			files = (
 				A58BD800266510390040A8C4 /* String+RegexTests.swift in Sources */,
 				DA76129826614E5A00349F2C /* BrowsingTreeScoreTests.swift in Sources */,
+				DA63D519267CF28800D7C756 /* FrecencyScorerTest.swift in Sources */,
 				A5CA5DF52625C15D004E9D3E /* BeamElementTextStatsTests.swift in Sources */,
 				96319D1F2616232700D1CF31 /* BeamCoreTests.swift in Sources */,
 			);
