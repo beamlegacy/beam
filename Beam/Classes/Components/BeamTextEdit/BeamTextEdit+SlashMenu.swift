@@ -29,24 +29,22 @@ extension BeamTextEdit {
 
     public func showSlashFormatter() {
         guard let node = focusedWidget as? TextNode else { return }
-        let (_, rect) = node.offsetAndFrameAt(index: node.cursorPosition)
         dismissFormatterView(inlineFormatter)
-        var frame = rect
-        frame.origin.x = rect.maxX
-        if frame.size.height == .zero {
-            frame.size.height = node.firstLineHeight
-        }
         let targetRange = node.cursorPosition..<node.cursorPosition
-        showSlashContextMenu(for: node, targetRange: targetRange, frame: frame)
+        showSlashContextMenu(for: node, targetRange: targetRange)
     }
 
-    private func showSlashContextMenu(for targetNode: TextNode?, targetRange: Range<Int>, frame: NSRect?) {
+    private func showSlashContextMenu(for targetNode: TextNode?, targetRange: Range<Int>) {
         guard inlineFormatter?.isMouseInsideView != true else { return }
         clearDebounceTimer()
-        guard let frame = frame,
-              let node = formatterTargetNode ?? (focusedWidget as? TextNode),
+        guard let node = formatterTargetNode ?? (focusedWidget as? TextNode),
               isInlineFormatterHidden else { return }
-        let atPoint = CGPoint(x: frame.origin.x + node.offsetInDocument.x - 10, y: frame.maxY + node.offsetInDocument.y + 7)
+        var (offset, rect) = node.offsetAndFrameAt(index: node.cursorPosition)
+        if rect.size.height == .zero {
+            rect.size.height = node.firstLineHeight
+        }
+        let atPoint = CGPoint(x: offset + node.offsetInDocument.x,
+                              y: rect.maxY + node.offsetInDocument.y + 10)
 
         let items = getSlashMenuItems()
         let menuView = ContextMenuFormatterView(items: items, handlesTyping: true)

@@ -29,13 +29,24 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
         let (_, linkFrame) = node.linkRangeAt(point: point)
         let link = node.linkAt(index: node.cursorPosition)
 
-        if showMenu {
-            dismissFormatterView(inlineFormatter)
-            var frame = linkFrame
-            frame?.origin.x = mousePosition.x
-            showHyperlinkContextMenu(for: node, targetRange: selectedTextRange, frame: frame, url: link, linkTitle: selectedText, fromPaste: false)
-        } else {
-            showHyperlinkFormatter(for: node, targetRange: selectedTextRange, frame: linkFrame ?? .zero, url: link, linkTitle: selectedText, debounce: false)
+        showOrHideInlineFormatter(isPresent: false) { [weak self] in
+            guard let self = self else { return }
+            let linkTitle = self.selectedText
+            let targetRange = self.selectedTextRange
+            if showMenu {
+                var frame = linkFrame
+                frame?.origin.x = mousePosition.x
+                self.showHyperlinkContextMenu(for: node, targetRange: targetRange, frame: frame, url: link, linkTitle: linkTitle, fromPaste: false)
+            } else {
+                let frame = linkFrame ?? node.rectAt(caretIndex: node.cursorPosition)
+                let url = link ?? URL(string: linkTitle)
+                self.showHyperlinkFormatter(for: node, targetRange: targetRange, frame: frame, url: url, linkTitle: linkTitle, debounce: false)
+                DispatchQueue.main.async {
+                    if let linkEditor = self.inlineFormatter as? HyperlinkFormatterView {
+                        linkEditor.startEditingUrl()
+                    }
+                }
+            }
         }
     }
 
@@ -238,7 +249,7 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
             // edited only url
             if originalUrl != nil {
                 // on existing link
-                let currentTitle = node.element.text.rangeAt(position: range.upperBound).string
+                let currentTitle = node.elementText.substring(range: range)
                 let newBeamText = BeamText(text: currentTitle, attributes: attributes)
                 rootNode.note?.cmdManager.replaceText(in: node, for: range, with: newBeamText)
             } else {

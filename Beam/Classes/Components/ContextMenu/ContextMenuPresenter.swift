@@ -12,6 +12,7 @@ private class ContextMenuWindow: NSWindow {
     override var acceptsFirstResponder: Bool {
         return true
     }
+
     override func mouseDown(with event: NSEvent) {
         super.mouseDown(with: event)
         ContextMenuPresenter.shared.dismissMenu()
@@ -40,11 +41,9 @@ class ContextMenuPresenter {
     private var childWindow: NSWindow?
     private var parentWindow: NSWindow?
 
-    private let windowInset: CGFloat = 0
-    private func createChildWindow(for frame: NSRect, in parent: NSWindow) -> NSWindow {
-        var windowRect = parent.frame// frame.insetBy(dx: -windowInset, dy: -windowInset)
-        windowRect.origin = parent.frame.insetBy(dx: windowInset, dy: windowInset).origin
-        let window = ContextMenuWindow(contentRect: windowRect, styleMask: .borderless, backing: .buffered, defer: false)
+    private func createChildWindow(in parent: NSWindow, canOverflow: Bool) -> NSWindow {
+        let windowRect = canOverflow ? parent.screen?.frame : parent.frame
+        let window = ContextMenuWindow(contentRect: windowRect ?? parent.frame, styleMask: .borderless, backing: .buffered, defer: false)
         window.backgroundColor = .clear
         window.ignoresMouseEvents = false
         parent.addChildWindow(window, ordered: .above)
@@ -84,17 +83,16 @@ class ContextMenuPresenter {
         if currentMenu != nil {
             dismissMenu(removeWindow: true)
         }
-        let idealSize = menu.idealSize
-        menu.frame = NSRect(x: 0, y: 0, width: idealSize.width, height: idealSize.height)
+        menu.frame = NSRect(origin: .zero, size: menu.idealSize)
         currentMenu = menu
         guard let parentWindow = view.window else {
             return
         }
-        let window = createChildWindow(for: menu.frame, in: parentWindow)
+        let window = createChildWindow(in: parentWindow, canOverflow: true)
         window.contentView?.addSubview(menu)
 
-        var position = view.convert(atPoint, to: window.contentView!)
-        position.y -= menu.bounds.height
+        var position = convertPointToScreen(atPoint, fromView: view, inWindow: parentWindow)
+        position.y = max(0, position.y - menu.bounds.height)
         menu.setFrameOrigin(position)
 
         if animated {
@@ -110,7 +108,7 @@ class ContextMenuPresenter {
         }
         currentView = view
         guard let parentWindow = parentView.window else { return nil }
-        let childWindow = createChildWindow(for: view.frame, in: parentWindow)
+        let childWindow = createChildWindow(in: parentWindow, canOverflow: false)
         childWindow.contentView = FlippedView()
         view.translatesAutoresizingMaskIntoConstraints = false
         childWindow.contentView?.addSubview(view)
@@ -119,5 +117,9 @@ class ContextMenuPresenter {
         view.setFrameOrigin(position)
 
         return childWindow
+    }
+
+    private func convertPointToScreen(_ point: CGPoint, fromView: NSView, inWindow: NSWindow) -> CGPoint {
+        return inWindow.convertPoint(toScreen: fromView.convert(point, to: nil))
     }
 }
