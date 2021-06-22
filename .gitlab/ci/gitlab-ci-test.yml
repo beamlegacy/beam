@@ -1,5 +1,5 @@
 xctests:
-  timeout: 10 minutes
+  timeout: 20 minutes
   dependencies: []
   stage: test
   artifacts:
@@ -30,7 +30,7 @@ xctests:
   interruptible: true
 
 swift lint:
-  timeout: 10 minutes
+  timeout: 5 minutes
   dependencies: []
   stage: test
   artifacts:
