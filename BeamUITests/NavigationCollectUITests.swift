@@ -124,7 +124,7 @@ class NavigationCollectUITests: QuickSpec {
                 expect(lionLink.waitForExistence(timeout: 4)) == true
                 lionLink.tap()
                 self.helper.showJournal()
-                let seaLionLink = "California sea lion - Wikipedia"
+                let seaLionLink = "California sea lion"
                 let seaLionPredicate = NSPredicate(format: "value = %@", seaLionLink)
                 expect(self.journalChildren.element(matching: seaLionPredicate).waitForExistence(timeout: 4)) == true
                 expect(self.journalChildren.count) == 3

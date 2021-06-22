@@ -14,7 +14,7 @@ class WebNoteController: Encodable, Decodable {
 
     public private(set) var element: BeamElement
 
-    var futureTitle: String? = nil
+    var nested: Bool = false
 
     public var score: Float {
         set {
@@ -43,8 +43,10 @@ class WebNoteController: Encodable, Decodable {
 
     private func addElement(isNavigation: Bool) -> BeamElement {
         let newElement = BeamElement()
-        if isNavigation {
+        if isNavigation && !nested {
             element.addChild(newElement)
+            rootElement = element
+            nested = true
         } else {
             rootElement.addChild(newElement)
         }
