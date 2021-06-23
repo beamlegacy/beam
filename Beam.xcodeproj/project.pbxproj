@@ -612,7 +612,6 @@
 		BAA67DDD4452566DFF99171E /* PasswordOverlayController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA670958C9BAC6322CDA80A /* PasswordOverlayController.swift */; };
 		BAA67E2CEDBE8BF2696AB646 /* BeamWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA670D131DF7CAE7FA6664E /* BeamWebView.swift */; };
 		BAA67EC2B781F8A78CD5A6B0 /* Beam.scss in Resources */ = {isa = PBXBuildFile; fileRef = BAA67EA80CD97EDF95F98D66 /* Beam.scss */; };
-		BAA67EF4256D22191C1E515F /* test_js.sh in Resources */ = {isa = PBXBuildFile; fileRef = BAA677D2622FEE091922E08C /* test_js.sh */; };
 		BAA67F0398B7B9D2CA9ADE25 /* ContentTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA674174D9C44BC3C8FF465 /* ContentTypes.swift */; };
 		BAA67F19308A38C387C47D6E /* PointAndShootUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA675190ACFCE6361AC531B /* PointAndShootUI.swift */; };
 		BAA67FA1EA0AEC590CEE0AB8 /* WebNavigationContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67226F0A10301D829E071 /* WebNavigationContext.swift */; };
@@ -1351,7 +1350,6 @@
 		BAA6777EB9326511BE7FD0DC /* BrowsingTreeScorer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BrowsingTreeScorer.swift; sourceTree = "<group>"; };
 		BAA6779A8E69417A47D041B5 /* PointFrame.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PointFrame.swift; sourceTree = "<group>"; };
 		BAA677C8DE42140C0F0BD535 /* PointAndShootUI_native.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = PointAndShootUI_native.ts; sourceTree = "<group>"; };
-		BAA677D2622FEE091922E08C /* test_js.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = test_js.sh; path = scripts/test_js.sh; sourceTree = "<group>"; };
 		BAA67837448460D14C798F73 /* WebNavigationController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebNavigationController.swift; sourceTree = "<group>"; };
 		BAA678DCBD094131A9BC96F2 /* BrowsingSession.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BrowsingSession.swift; sourceTree = "<group>"; };
 		BAA678E2B362F5D8A1A801D4 /* PasswordManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PasswordManager.swift; sourceTree = "<group>"; };
@@ -1565,7 +1563,6 @@
 				0325626D26051D3A006513E4 /* RBFilterManagerState.m */,
 				0325625826051D3A006513E4 /* Tests */,
 				0325624626051D3A006513E4 /* Utils */,
-				BAA677D2622FEE091922E08C /* test_js.sh */,
 			);
 			name = "Ad blocker";
 			path = ..;
@@ -3254,7 +3251,6 @@
 				965A783A2514F149009980D4 /* Frameworks */,
 				965A783B2514F149009980D4 /* Resources */,
 				521FEC702604F1FF009000F9 /* Copy Vinyl Cassettes */,
-				02F5037B26592009001C24A6 /* Test Web */,
 			);
 			buildRules = (
 			);
@@ -3338,22 +3334,22 @@
 			);
 			mainGroup = 965A781C2514F147009980D4;
 			packageReferences = (
-				9631C745251CE997009B40C4 /* XCRemoteSwiftPackageReference "SwiftSoup" */,
-				96474E3D254D9ADB00A920B3 /* XCRemoteSwiftPackageReference "FavIcon" */,
+				9631C745251CE997009B40C4 /* XCRemoteSwiftPackageReference "SwiftSoup.git" */,
+				96474E3D254D9ADB00A920B3 /* XCRemoteSwiftPackageReference "FavIcon.git" */,
 				524299AD25A47CA500F4DBF5 /* XCRemoteSwiftPackageReference "Preferences" */,
-				527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */,
-				527FB71825B9A97A00959146 /* XCRemoteSwiftPackageReference "sentry-cocoa" */,
-				527FB71D25B9A9B600959146 /* XCRemoteSwiftPackageReference "JWTDecode.swift" */,
+				527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack.git" */,
+				527FB71825B9A97A00959146 /* XCRemoteSwiftPackageReference "sentry-cocoa.git" */,
+				527FB71D25B9A9B600959146 /* XCRemoteSwiftPackageReference "JWTDecode.swift.git" */,
 				527FB72225B9AAA200959146 /* XCRemoteSwiftPackageReference "Fakery" */,
-				5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */,
-				5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick" */,
+				5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble.git" */,
+				5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick.git" */,
 				52BB698925CD4E1E007A1173 /* XCRemoteSwiftPackageReference "PromiseKit" */,
-				52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises" */,
-				523E91CA25D17004001124E0 /* XCRemoteSwiftPackageReference "Foundation" */,
+				52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises.git" */,
+				523E91CA25D17004001124E0 /* XCRemoteSwiftPackageReference "Foundation.git" */,
 				524CF6D125F276D1007312F0 /* XCRemoteSwiftPackageReference "KeychainAccess" */,
 				521FEC982604F9B4009000F9 /* XCRemoteSwiftPackageReference "Vinyl" */,
-				964FE5DF2625D8AA00966E03 /* XCRemoteSwiftPackageReference "GRDB.swift" */,
-				52CA277A26401D7000146A00 /* XCRemoteSwiftPackageReference "OAuthSwift" */,
+				964FE5DF2625D8AA00966E03 /* XCRemoteSwiftPackageReference "GRDB.swift.git" */,
+				52CA277A26401D7000146A00 /* XCRemoteSwiftPackageReference "OAuthSwift.git" */,
 				96D5AE83264C01AD003AD516 /* XCRemoteSwiftPackageReference "TLDExtractSwift" */,
 			);
 			productRefGroup = 965A78262514F147009980D4 /* Products */;
@@ -3515,7 +3511,6 @@
 				BAA675AE9C103046AC022CBA /* .sassrc in Resources */,
 				BAA6750B78E3812C7DA5DF7C /* tsconfig.json in Resources */,
 				BAA67B681D12191FE57E7807 /* PopupUI_web.scss in Resources */,
-				BAA67EF4256D22191C1E515F /* test_js.sh in Resources */,
 				BAA675D3496DCF90EB35C8AD /* BeamEventTargetMock.ts in Resources */,
 				BAA6704CFB6AE4C1D090F4E4 /* BeamWebFactoryMock.ts in Resources */,
 			);
@@ -3576,24 +3571,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "if [ $ENABLE_PREVIEWS == \"NO\" ]\nthen\n    export PATH=\"$PATH:/opt/homebrew/bin\"\n    ./scripts/build_js.sh\n \nelse\n    echo \"Skipping the script because of SwiftUI preview mode\"\nfi\n";
-		};
-		02F5037B26592009001C24A6 /* Test Web */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = "Test Web";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "export PATH=\"$PATH:/opt/homebrew/bin\"\n./scripts/test_js.sh\n";
 		};
 		3390376A26529BD700089E25 /* Sign AutoUpdate XPC */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -3715,7 +3692,6 @@
 				96319D462616233E00D1CF31 /* String+URL.swift in Sources */,
 				96319D492616233E00D1CF31 /* BeamNote.swift in Sources */,
 				96319D58261626AC00D1CF31 /* BrowsingTree.swift in Sources */,
-				96319D402616233E00D1CF31 /* String+Levenshtein.swift in Sources */,
 				96319D422616233E00D1CF31 /* BeamText+Links.swift in Sources */,
 				96319D412616233E00D1CF31 /* Logger.swift in Sources */,
 				96319D442616233E00D1CF31 /* RWLock.swift in Sources */,
@@ -5019,7 +4995,7 @@
 				minimumVersion = 0.10.5;
 			};
 		};
-		5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */ = {
+		5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble.git" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Quick/Nimble.git";
 			requirement = {
@@ -5027,7 +5003,7 @@
 				minimumVersion = 9.0.0;
 			};
 		};
-		5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick" */ = {
+		5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick.git" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Quick/Quick.git";
 			requirement = {
@@ -5035,7 +5011,7 @@
 				minimumVersion = 3.0.0;
 			};
 		};
-		523E91CA25D17004001124E0 /* XCRemoteSwiftPackageReference "Foundation" */ = {
+		523E91CA25D17004001124E0 /* XCRemoteSwiftPackageReference "Foundation.git" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/PromiseKit/Foundation.git";
 			requirement = {
@@ -5059,7 +5035,7 @@
 				minimumVersion = 4.2.2;
 			};
 		};
-		527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */ = {
+		527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack.git" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/CocoaLumberjack/CocoaLumberjack.git";
 			requirement = {
@@ -5067,7 +5043,7 @@
 				minimumVersion = 3.7.0;
 			};
 		};
-		527FB71825B9A97A00959146 /* XCRemoteSwiftPackageReference "sentry-cocoa" */ = {
+		527FB71825B9A97A00959146 /* XCRemoteSwiftPackageReference "sentry-cocoa.git" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/getsentry/sentry-cocoa.git";
 			requirement = {
@@ -5075,7 +5051,7 @@
 				minimumVersion = 6.1.3;
 			};
 		};
-		527FB71D25B9A9B600959146 /* XCRemoteSwiftPackageReference "JWTDecode.swift" */ = {
+		527FB71D25B9A9B600959146 /* XCRemoteSwiftPackageReference "JWTDecode.swift.git" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/auth0/JWTDecode.swift.git";
 			requirement = {
@@ -5099,7 +5075,7 @@
 				minimumVersion = 6.13.3;
 			};
 		};
-		52CA277A26401D7000146A00 /* XCRemoteSwiftPackageReference "OAuthSwift" */ = {
+		52CA277A26401D7000146A00 /* XCRemoteSwiftPackageReference "OAuthSwift.git" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/OAuthSwift/OAuthSwift.git";
 			requirement = {
@@ -5107,7 +5083,7 @@
 				kind = branch;
 			};
 		};
-		52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises" */ = {
+		52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises.git" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/google/promises.git";
 			requirement = {
@@ -5115,7 +5091,7 @@
 				minimumVersion = 1.2.12;
 			};
 		};
-		9631C745251CE997009B40C4 /* XCRemoteSwiftPackageReference "SwiftSoup" */ = {
+		9631C745251CE997009B40C4 /* XCRemoteSwiftPackageReference "SwiftSoup.git" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/scinfu/SwiftSoup.git";
 			requirement = {
@@ -5123,7 +5099,7 @@
 				minimumVersion = 2.3.2;
 			};
 		};
-		96474E3D254D9ADB00A920B3 /* XCRemoteSwiftPackageReference "FavIcon" */ = {
+		96474E3D254D9ADB00A920B3 /* XCRemoteSwiftPackageReference "FavIcon.git" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/leonbreedt/FavIcon.git";
 			requirement = {
@@ -5131,7 +5107,7 @@
 				minimumVersion = 3.1.0;
 			};
 		};
-		964FE5DF2625D8AA00966E03 /* XCRemoteSwiftPackageReference "GRDB.swift" */ = {
+		964FE5DF2625D8AA00966E03 /* XCRemoteSwiftPackageReference "GRDB.swift.git" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/groue/GRDB.swift.git";
 			requirement = {
@@ -5139,7 +5115,7 @@
 				minimumVersion = 5.7.4;
 			};
 		};
-		96D5AE61264BF56F003AD516 /* XCRemoteSwiftPackageReference "SwiftDomainParser" */ = {
+		96D5AE61264BF56F003AD516 /* XCRemoteSwiftPackageReference "SwiftDomainParser.git" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Dashlane/SwiftDomainParser.git";
 			requirement = {
@@ -5165,17 +5141,17 @@
 		};
 		5239C11525C2C4AE009C51E1 /* Nimble */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */;
+			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble.git" */;
 			productName = Nimble;
 		};
 		5239C12E25C2C4C6009C51E1 /* Quick */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick" */;
+			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick.git" */;
 			productName = Quick;
 		};
 		523E91CB25D17004001124E0 /* PMKFoundation */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 523E91CA25D17004001124E0 /* XCRemoteSwiftPackageReference "Foundation" */;
+			package = 523E91CA25D17004001124E0 /* XCRemoteSwiftPackageReference "Foundation.git" */;
 			productName = PMKFoundation;
 		};
 		524299AE25A47CA500F4DBF5 /* Preferences */ = {
@@ -5190,12 +5166,12 @@
 		};
 		527FB71925B9A97A00959146 /* Sentry */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 527FB71825B9A97A00959146 /* XCRemoteSwiftPackageReference "sentry-cocoa" */;
+			package = 527FB71825B9A97A00959146 /* XCRemoteSwiftPackageReference "sentry-cocoa.git" */;
 			productName = Sentry;
 		};
 		527FB71E25B9A9B600959146 /* JWTDecode */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 527FB71D25B9A9B600959146 /* XCRemoteSwiftPackageReference "JWTDecode.swift" */;
+			package = 527FB71D25B9A9B600959146 /* XCRemoteSwiftPackageReference "JWTDecode.swift.git" */;
 			productName = JWTDecode;
 		};
 		527FB72325B9AAA200959146 /* Fakery */ = {
@@ -5210,52 +5186,52 @@
 		};
 		52CA277B26401D7000146A00 /* OAuthSwift */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 52CA277A26401D7000146A00 /* XCRemoteSwiftPackageReference "OAuthSwift" */;
+			package = 52CA277A26401D7000146A00 /* XCRemoteSwiftPackageReference "OAuthSwift.git" */;
 			productName = OAuthSwift;
 		};
 		52E5297125CD980B00307858 /* Promises */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises" */;
+			package = 52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises.git" */;
 			productName = Promises;
 		};
 		52E5297325CD980B00307858 /* PromisesTestHelpers */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises" */;
+			package = 52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises.git" */;
 			productName = PromisesTestHelpers;
 		};
 		96319D52261623BB00D1CF31 /* CocoaLumberjackSwift */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */;
+			package = 527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack.git" */;
 			productName = CocoaLumberjackSwift;
 		};
 		9631C746251CE997009B40C4 /* SwiftSoup */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 9631C745251CE997009B40C4 /* XCRemoteSwiftPackageReference "SwiftSoup" */;
+			package = 9631C745251CE997009B40C4 /* XCRemoteSwiftPackageReference "SwiftSoup.git" */;
 			productName = SwiftSoup;
 		};
 		9639FAF42616614D00C85B95 /* CocoaLumberjackSwift */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */;
+			package = 527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack.git" */;
 			productName = CocoaLumberjackSwift;
 		};
 		96474E3E254D9ADB00A920B3 /* FavIcon */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 96474E3D254D9ADB00A920B3 /* XCRemoteSwiftPackageReference "FavIcon" */;
+			package = 96474E3D254D9ADB00A920B3 /* XCRemoteSwiftPackageReference "FavIcon.git" */;
 			productName = FavIcon;
 		};
 		964FE5E02625D8AA00966E03 /* GRDB */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 964FE5DF2625D8AA00966E03 /* XCRemoteSwiftPackageReference "GRDB.swift" */;
+			package = 964FE5DF2625D8AA00966E03 /* XCRemoteSwiftPackageReference "GRDB.swift.git" */;
 			productName = GRDB;
 		};
 		96D5AE7A264BFD40003AD516 /* DomainParser */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 96D5AE61264BF56F003AD516 /* XCRemoteSwiftPackageReference "SwiftDomainParser" */;
+			package = 96D5AE61264BF56F003AD516 /* XCRemoteSwiftPackageReference "SwiftDomainParser.git" */;
 			productName = DomainParser;
 		};
 		96D5AE7C264BFD4C003AD516 /* CocoaLumberjackSwift */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */;
+			package = 527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack.git" */;
 			productName = CocoaLumberjackSwift;
 		};
 		96D5AE84264C01AD003AD516 /* TLDExtract */ = {
@@ -5265,22 +5241,22 @@
 		};
 		A0A6F2A025D1B73400EFC4BE /* Quick */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick" */;
+			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick.git" */;
 			productName = Quick;
 		};
 		A0A6F2A225D1B73A00EFC4BE /* Nimble */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */;
+			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble.git" */;
 			productName = Nimble;
 		};
 		A0A6F2A425D1B74200EFC4BE /* Quick */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick" */;
+			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick.git" */;
 			productName = Quick;
 		};
 		A0A6F2A625D1B74800EFC4BE /* Nimble */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */;
+			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble.git" */;
 			productName = Nimble;
 		};
 		A5946845265E30350044A892 /* Fakery */ = {
@@ -5290,12 +5266,12 @@
 		};
 		A5CA5DFA2625C302004E9D3E /* Quick */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick" */;
+			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick.git" */;
 			productName = Quick;
 		};
 		A5CA5DFC2625C306004E9D3E /* Nimble */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */;
+			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble.git" */;
 			productName = Nimble;
 		};
 /* End XCSwiftPackageProductDependency section */

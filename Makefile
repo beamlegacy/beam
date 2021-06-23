@@ -157,4 +157,8 @@ reset_vinyl_files:
 	rm -r ${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Logs/Beam/Vinyl/*.json
 	rm -r BeamTests/Vinyl/*.json
 
+js_test:
+	yarn --cwd ./Beam/Classes/Components/PointAndShoot/Web run build
+	yarn --cwd ./Beam/Classes/Components/PointAndShoot/Web run test-ci
+
 setup: git_checkout install_dependencies install_swiftlint install_cmake install_variable_injector build_libgit2 install_js
