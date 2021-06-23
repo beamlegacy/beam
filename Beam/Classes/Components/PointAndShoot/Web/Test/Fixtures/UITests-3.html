@@ -7,6 +7,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Point And Shoot Test Fixture Cursor</title>
   <link rel="stylesheet" href="Beam.css" />
+  <script>
+      window.addEventListener("load", function () {
+          var pathname = location.pathname;
+          var folder = location.origin + location.pathname.substring(0, pathname.lastIndexOf('/')) + "/";
+
+          var link1 = document.getElementById("pagelink-1");
+          link1.href = folder + "UITests-1.html";
+          link1.innerHTML = "UITests-1";
+
+          var link2 = document.getElementById("pagelink-2");
+          link2.href = folder + "UITests-2.html";
+          link2.innerHTML = "UITests-2";
+      });
+  </script>
 </head>
 
 <body>
@@ -14,7 +28,8 @@
     <div class="notice">
       <details open>
         <summary>Related pages</summary>
-        <p>Go to <a href="https://en.wikipedia.org/w/index.php?title=Cincinnati_Zoo_and_Botanical_Garden&oldid=1026047521">Cincinati Zoo</a></p>
+        <p>Go to <a id="pagelink-1"></a></p>
+        <p>Jump to <a id="pagelink-2"></a></p>
       </details>
     </div>
     <div class="introduction">

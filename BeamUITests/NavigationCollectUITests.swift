@@ -86,13 +86,12 @@ class NavigationCollectUITests: QuickSpec {
             it("can navigate links in collected text") {
                 self.helper.openTestPage(number: 3)
 
-                let searchText = "Go to "
-                let linkText = "Cincinati Zoo"
+                let prefix = "Go to "
+                let linkText = "UITests-1"
 
                 // Get locations of the text
-                let parent = self.app.webViews.containing(.staticText, identifier: searchText).element
-                let textElement = parent.staticTexts[searchText]
-                _ = textElement.coordinate(withNormalizedOffset: CGVector(dx: -0.2, dy: 0.5))
+                let parent = self.app.webViews.containing(.staticText, identifier: linkText).element
+                let textElement = parent.staticTexts[prefix].firstMatch
                 let textElementMiddle = textElement.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
                 // click at middle of element1 to make sure the page has focus
                 textElementMiddle.click()
@@ -111,24 +110,23 @@ class NavigationCollectUITests: QuickSpec {
                 self.helper.addNote()
                 // Confirm text is saved in Journal
                 self.helper.showJournal()
-                let title2Predicate = NSPredicate(format: "value = %@", titles[2])
-                expect(self.journalChildren.element(matching: title2Predicate).waitForExistence(timeout: 4)) == true
+                let title3Predicate = NSPredicate(format: "value = %@", titles[2])
+                expect(self.journalChildren.element(matching: title3Predicate).waitForExistence(timeout: 4)) == true
                 expect(self.journalChildren.count) == 2
                 expect(self.journalChildren.element(boundBy: 0).value as? String) == titles[2]
-                expect((self.journalChildren.element(boundBy: 1).value as? String)?.contains(linkText)) == true
+                expect((self.journalChildren.element(boundBy: 1).value as? String)?.contains(prefix + linkText)) == true
                 // tap on collected sublink (end of new bullet)
-                let linkCoordinate = self.journalChildren.element(boundBy: 1).coordinate(withNormalizedOffset: CGVector(dx: 0.24, dy: 0.5))
+                let linkCoordinate = self.journalChildren.element(boundBy: 1).coordinate(withNormalizedOffset: CGVector(dx: 0.2, dy: 0.5))
                 linkCoordinate.click()
                 // tap on a link in the page, should be added to opened bullet
-                let lionLink = self.app.webViews.staticTexts["California sea lions"].firstMatch
-                expect(lionLink.waitForExistence(timeout: 4)) == true
-                lionLink.tap()
+                let page2Link = self.app.webViews.staticTexts["I-Beam"].firstMatch
+                expect(page2Link.waitForExistence(timeout: 4)) == true
+                page2Link.tap()
                 self.helper.showJournal()
-                let seaLionLink = "California sea lion"
-                let seaLionPredicate = NSPredicate(format: "value = %@", seaLionLink)
-                expect(self.journalChildren.element(matching: seaLionPredicate).waitForExistence(timeout: 4)) == true
+                let title2Predicate = NSPredicate(format: "value = %@", titles[1])
+                expect(self.journalChildren.element(matching: title2Predicate).waitForExistence(timeout: 4)) == true
                 expect(self.journalChildren.count) == 3
-                expect(self.journalChildren.element(boundBy: 2).value as? String) == seaLionLink
+                expect(self.journalChildren.element(boundBy: 2).value as? String) == titles[1]
             }
         }
 
