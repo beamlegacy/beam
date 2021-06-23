@@ -357,7 +357,6 @@
 		96319C6E26160AB400D1CF31 /* BeamNote+DocumentManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96319C6D26160AB400D1CF31 /* BeamNote+DocumentManager.swift */; };
 		96319C8626160E4A00D1CF31 /* BeamNote+LinkDetection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96319C8526160E4A00D1CF31 /* BeamNote+LinkDetection.swift */; };
 		96319D182616232700D1CF31 /* BeamCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96319D0F2616232600D1CF31 /* BeamCore.framework */; };
-		96319D1F2616232700D1CF31 /* BeamCoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96319D1E2616232700D1CF31 /* BeamCoreTests.swift */; };
 		96319D242616232700D1CF31 /* BeamCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96319D0F2616232600D1CF31 /* BeamCore.framework */; };
 		96319D252616232700D1CF31 /* BeamCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 96319D0F2616232600D1CF31 /* BeamCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		96319D372616233E00D1CF31 /* String+LoremIpsum.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181719D2581107C00317ED8 /* String+LoremIpsum.swift */; };
@@ -395,7 +394,6 @@
 		964FE64D262D8ED300966E03 /* Dictionary+valuesMatchingKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 964FE64C262D8ED300966E03 /* Dictionary+valuesMatchingKeys.swift */; };
 		965A78292514F147009980D4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965A78282514F147009980D4 /* AppDelegate.swift */; };
 		965A78362514F148009980D4 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 965A78342514F148009980D4 /* Main.storyboard */; };
-		965A78422514F149009980D4 /* BeamTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965A78412514F149009980D4 /* BeamTests.swift */; };
 		965A784D2514F149009980D4 /* BeamUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965A784C2514F149009980D4 /* BeamUITests.swift */; };
 		9661A586266980AF00CB56B3 /* BidirectionalPopoverBlockItem.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9661A57D266980AF00CB56B3 /* BidirectionalPopoverBlockItem.xib */; };
 		9661A587266980AF00CB56B3 /* BidirectionalPopoverBlockItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9661A585266980AF00CB56B3 /* BidirectionalPopoverBlockItem.swift */; };
@@ -1137,7 +1135,6 @@
 		96319D0F2616232600D1CF31 /* BeamCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BeamCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		96319D122616232600D1CF31 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		96319D172616232700D1CF31 /* BeamCoreTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BeamCoreTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		96319D1E2616232700D1CF31 /* BeamCoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamCoreTests.swift; sourceTree = "<group>"; };
 		96319D202616232700D1CF31 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		96319D6C26163AAD00D1CF31 /* BeamNote+CommandManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamNote+CommandManager.swift"; sourceTree = "<group>"; };
 		9634DD78264AA1A10065383E /* TextFrameLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextFrameLayer.swift; sourceTree = "<group>"; };
@@ -1150,7 +1147,6 @@
 		965A78282514F147009980D4 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		965A78352514F148009980D4 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		965A783D2514F149009980D4 /* BeamTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BeamTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		965A78412514F149009980D4 /* BeamTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamTests.swift; sourceTree = "<group>"; };
 		965A78432514F149009980D4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		965A78482514F149009980D4 /* BeamUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BeamUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		965A784C2514F149009980D4 /* BeamUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamUITests.swift; sourceTree = "<group>"; };
@@ -2774,7 +2770,6 @@
 			children = (
 				DA63D518267CF28800D7C756 /* FrecencyScorerTest.swift */,
 				DA76129726614E5A00349F2C /* BrowsingTreeScoreTests.swift */,
-				96319D1E2616232700D1CF31 /* BeamCoreTests.swift */,
 				A5CA5DF42625C15D004E9D3E /* BeamElementTextStatsTests.swift */,
 				A58BD7FF266510390040A8C4 /* String+RegexTests.swift */,
 				96319D202616232700D1CF31 /* Info.plist */,
@@ -2832,10 +2827,8 @@
 				525C235625BAFC9E001B9625 /* Helpers */,
 				562A8B6325B6ECEB004D3D8A /* CoreML */,
 				562A8B4D25B5E36B004D3D8A /* Classes */,
-				96CDA7252582732500BC375C /* Indexer */,
 				527DF48525710EAE00A0A56D /* Managers */,
 				52A43D92252C790200178F3B /* DataModel */,
-				965A78412514F149009980D4 /* BeamTests.swift */,
 				965A78432514F149009980D4 /* Info.plist */,
 				96C9CC3D2535CE2C00D70AA6 /* LexerTests.swift */,
 				969084CB25365AAE009D3C96 /* ParserTests.swift */,
@@ -2896,13 +2889,6 @@
 				9661A588266A289200CB56B3 /* BlockReferenceNode.swift */,
 			);
 			path = References;
-			sourceTree = "<group>";
-		};
-		96CDA7252582732500BC375C /* Indexer */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Indexer;
 			sourceTree = "<group>";
 		};
 		A02FD6E22665180C00EBE17E /* Products */ = {
@@ -3773,7 +3759,6 @@
 				DA76129826614E5A00349F2C /* BrowsingTreeScoreTests.swift in Sources */,
 				DA63D519267CF28800D7C756 /* FrecencyScorerTest.swift in Sources */,
 				A5CA5DF52625C15D004E9D3E /* BeamElementTextStatsTests.swift in Sources */,
-				96319D1F2616232700D1CF31 /* BeamCoreTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4173,7 +4158,6 @@
 				8AC2EFDB266F8A0800049005 /* PointAndShootPointingTest.swift in Sources */,
 				8AA9EEB72678ACF6009D6B31 /* WebAutocompleteContextTest.swift in Sources */,
 				032562CF26051D50006513E4 /* RBZipTests.m in Sources */,
-				965A78422514F149009980D4 /* BeamTests.swift in Sources */,
 				529E1EE625D3EDA300F8B500 /* BeamTestsHelper.swift in Sources */,
 				52FC003D25E426FE00ABECB0 /* BeamUITestsMenuGeneratorTests.swift in Sources */,
 				032562F126051D65006513E4 /* NSString+IDNATests.m in Sources */,
