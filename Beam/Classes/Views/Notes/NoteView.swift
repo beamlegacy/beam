@@ -41,8 +41,8 @@ struct NoteView: View {
                         }
                     }
                 },
-                openCard: { cardName, elementId in
-                    state.navigateToNote(named: cardName, elementId: elementId)
+                openCard: { cardId, elementId in
+                    state.navigateToNote(id: cardId, elementId: elementId)
                 },
                 onStartEditing: { onStartEditing?() },
                 onStartQuery: { textNode in

@@ -8,6 +8,7 @@
 
 import Foundation
 
+//swiftlint:disable:next type_body_length
 public struct BeamText: Codable {
     public var text: String {
         ranges.reduce(String()) { (string, range) -> String in
@@ -20,7 +21,7 @@ public struct BeamText: Codable {
         case emphasis
         case source(String)
         case link(String)
-        case internalLink(String)
+        case internalLink(UUID)
         case strikethrough
         case underline
 
@@ -36,6 +37,7 @@ public struct BeamText: Codable {
         // swiftlint:disable:next nesting
         public enum AttributeError: Error {
             case unknownAttribute
+            case noNoteWithName(String)
         }
 
         // swiftlint:disable:next cyclomatic_complexity
@@ -49,7 +51,16 @@ public struct BeamText: Codable {
                 case "emphasis": self = .emphasis
                 case "source": self = .source(try container.decode(String.self, forKey: .payload))
                 case "link": self = .link(try container.decode(String.self, forKey: .payload))
-                case "internalLink": self = .internalLink(try container.decode(String.self, forKey: .payload))
+                case "internalLink":
+                    if let string = try? container.decode(String.self, forKey: .payload) {
+                        // this is the old type of link that contains string instead of UUIDs, let's translate that
+                        guard let uuid = UUID(uuidString: string) ?? BeamNote.idForNoteNamed(string) else {
+                            throw AttributeError.noNoteWithName(string)
+                        }
+                        self = .internalLink(uuid)
+                    } else {
+                        self = .internalLink(try container.decode(UUID.self, forKey: .payload))
+                    }
                 case "strikethrough": self = .strikethrough
                 case "underline": self = .underline
                 default:
@@ -62,7 +73,7 @@ public struct BeamText: Codable {
                 case 1: self = .emphasis
                 case 2: self = .source(try container.decode(String.self, forKey: .payload))
                 case 3: self = .link(try container.decode(String.self, forKey: .payload))
-                case 4: self = .internalLink(try container.decode(String.self, forKey: .payload))
+                case 4: self = .internalLink(try container.decode(UUID.self, forKey: .payload))
                 case 5: self = .strikethrough
                 case 6: self = .underline
                 default:
@@ -164,6 +175,15 @@ public struct BeamText: Codable {
             if !attributes.isEmpty {
                 try container.encode(attributes, forKey: .attributes)
             }
+        }
+
+        public var internalLink: UUID? {
+            for attribute in attributes {
+                if case let .internalLink(linkId) = attribute {
+                    return linkId
+                }
+            }
+            return nil
         }
     }
 
@@ -308,21 +328,9 @@ public struct BeamText: Codable {
         }
 
         computePositions()
-        flattenInternalLinks()
     }
 
     var silent = 0
-    mutating internal func flattenInternalLinks() {
-        guard silent == 0 else { return }
-        silent += 1
-        let links = internalLinks
-        for link in links.reversed() where !link.string.isEmpty {
-            self.replaceSubrange(link.position ..< link.end, with: BeamText(text: link.string, attributes: [.internalLink(link.string)]))
-        }
-        flatten()
-        computePositions()
-        silent -= 1
-    }
 
     /// recompute the positions of the ranges, starting at the given 'from' index
     mutating internal func computePositions(from: Int = 0) {

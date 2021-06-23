@@ -69,7 +69,8 @@ class BeamTextVisitor {
 
         case let .internalLink(link):
             pushContext(); defer { popContext() }
-            context.append(.internalLink(link))
+            let linkID = BeamNote.idForNoteNamed(link) ?? UUID.null
+            context.append(.internalLink(linkID))
             return BeamText(text: link, attributes: context)
 
         case .embed:

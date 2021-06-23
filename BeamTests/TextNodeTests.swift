@@ -89,7 +89,7 @@ class TextNodeTests: XCTestCase {
         let root = editor.rootNode!
         note.addChild(BeamElement("before link "))
         let linkElement = BeamText(text: "My Internal Note", attributes: [
-            .internalLink("My Internal Note")
+            .internalLink(UUID.null)
         ])
         root.focusedWidget = root.children.last { $0 is TextNode }
         XCTAssertNotNil(root.focusedWidget as? TextNode)
@@ -728,7 +728,7 @@ class TextNodeTests: XCTestCase {
         defer { reset() }
         let node = createNodeWithInternalLink()
 
-        XCTAssertEqual(node.internalLinkAt(index: 15), "My Internal Note")
+        XCTAssertEqual(node.internalLinkAt(index: 15), UUID.null)
         XCTAssertNil(node.internalLinkAt(index: 12))
         XCTAssertNil(node.internalLinkAt(index: 29))
 

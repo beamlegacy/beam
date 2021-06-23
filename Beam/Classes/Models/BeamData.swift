@@ -81,6 +81,13 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
 
         super.init()
 
+        BeamNote.idForNoteNamed = { title in
+            self.documentManager.loadDocumentByTitle(title: title)?.id
+        }
+        BeamNote.titleForNoteId = { id in
+            self.documentManager.loadDocumentById(id: id)?.title
+        }
+
         updateNoteCount()
         setupSubscribers()
     }

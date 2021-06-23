@@ -28,23 +28,22 @@ class BlockReferenceNode: TextNode {
         textPaddingHorizontal = 6
         textPaddingVertical = 0
         readOnly = true
-        var refNoteName: String!
-        var refElementId: String!
+        var refNoteId: UUID
+        var refElementId: UUID
 
         switch element.kind {
-        case let .blockReference(note, elid):
-            refNoteName = note
+        case let .blockReference(noteid, elid):
+            refNoteId = noteid
             refElementId = elid
         default:
             Logger.shared.logError("A BlockReferenceNode must contain a block reference element instead of \(element.kind)", category: .noteEditor)
             return
         }
 
-        guard let referencingNote = BeamNote.fetch(DocumentManager(), title: refNoteName),
-              let uuid = UUID(uuidString: refElementId),
-              let referencingElement = referencingNote.findElement(uuid)
+        guard let referencingNote = BeamNote.fetch(DocumentManager(), id: refNoteId),
+              let referencingElement = referencingNote.findElement(refElementId)
         else {
-            let errorText = "BlockReferenceNode unable to fetch bloc from note '\(String(describing: refNoteName))'\nid '\(String(describing: refElementId))'"
+            let errorText = "BlockReferenceNode unable to fetch bloc from note '\(String(describing: refNoteId))'\nid '\(String(describing: refElementId))'"
             Logger.shared.logError(errorText, category: .noteEditor)
             addLayer(Layer.text(named: "ErrorDisplay", errorText), origin: CGPoint(x: indent + childInset, y: 0), global: false)
             return
@@ -62,8 +61,8 @@ class BlockReferenceNode: TextNode {
         })
         addLayer(lockButton)
 
-        _ = createCustomActionLayer(named: "visitSource", icons: ["field-card"], text: refNoteName, at: CGPoint(x: availableWidth + childInset + actionLayerPadding, y: firstLineBaseline)) {
-            self.editor.openCard(refNoteName, self.displayedElement.id)
+        _ = createCustomActionLayer(named: "visitSource", icons: ["field-card"], text: referencingNote.title, at: CGPoint(x: availableWidth + childInset + actionLayerPadding, y: firstLineBaseline)) {
+            self.editor.openCard(referencingNote.id, self.displayedElement.id)
         }
 
         setAccessibilityLabel("BlockReferenceNode")
@@ -128,8 +127,8 @@ class BlockReferenceNode: TextNode {
                 lockButton.locked = self.readOnly
             }),
             ContextMenuItem(title: "View Origin", action: {
-                guard let title = self.displayedElement.note?.title else { return }
-                self.editor.openCard(title, self.displayedElement.id)
+                guard let noteid = self.displayedElement.note?.id else { return }
+                self.editor.openCard(noteid, self.displayedElement.id)
             }),
 
             ContextMenuItem(title: "Remove", action: {

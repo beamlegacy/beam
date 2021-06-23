@@ -3,18 +3,27 @@ import GRDB
 // Declare a record struct, data, how it is stored within the DB.
 // Refer to GRDBDatabase for read/write operations.
 
+// Previous version:
+//struct BeamElementRecord {
+//    var id: Int64?
+//    var title: String
+//    var uid: String
+//    var text: String
+//}
+
 struct BeamElementRecord {
     var id: Int64?
     var title: String
-    var uid: String
     var text: String
+    var uid: String
+    var noteId: String // Added noteId
 }
 
 // SQL generation
 extension BeamElementRecord: TableRecord {
     /// The table columns
     enum Columns: String, ColumnExpression {
-        case id, title, uid, text
+        case id, title, text, uid, noteId
     }
 }
 
@@ -24,8 +33,9 @@ extension BeamElementRecord: FetchableRecord {
     init(row: Row) {
         id = row[Columns.id]
         title = row[Columns.title]
-        uid = row[Columns.uid]
         text = row[Columns.text]
+        uid = row[Columns.uid]
+        noteId = row[Columns.noteId]
     }
 }
 
@@ -35,8 +45,9 @@ extension BeamElementRecord: MutablePersistableRecord {
     func encode(to container: inout PersistenceContainer) {
         container[Columns.id] = id
         container[Columns.title] = title
-        container[Columns.uid] = uid
         container[Columns.text] = text
+        container[Columns.uid] = uid
+        container[Columns.noteId] = noteId
     }
 
     // Update auto-incremented id upon successful insertion
@@ -44,4 +55,3 @@ extension BeamElementRecord: MutablePersistableRecord {
         id = rowID
     }
 }
-

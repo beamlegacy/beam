@@ -34,11 +34,11 @@ public struct VisitedPage: Codable, Identifiable {
 }
 
 public struct BeamNoteReference: Codable, Equatable, Hashable {
-    public var noteTitle: String
+    public var noteID: UUID
     public var elementID: UUID
 
-    public init(noteTitle: String, elementID: UUID) {
-        self.noteTitle = noteTitle
+    public init(noteID: UUID, elementID: UUID) {
+        self.noteID = noteID
         self.elementID = elementID
     }
 }
@@ -149,12 +149,22 @@ public class BeamNote: BeamElement {
         title.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
-    public static func getFetchedNote(_ title: String) -> BeamNote? {
-        return Self.fetchedNotes[cacheKeyFromTitle(title)]?.ref
+    public static func getFetchedNote(_ id: UUID) -> BeamNote? {
+        return Self.fetchedNotes.first(where: { (_, value: WeakReference<BeamNote>) in
+            value.ref?.id == id
+        })?.value.ref
     }
 
     public func getFetchedNote(_ title: String) -> BeamNote? {
         return Self.getFetchedNote(title)
+    }
+
+    public static func getFetchedNote(_ title: String) -> BeamNote? {
+        return Self.fetchedNotes[cacheKeyFromTitle(title)]?.ref
+    }
+
+    public func getFetchedNote(_ id: UUID) -> BeamNote? {
+        return Self.getFetchedNote(id)
     }
 
     public var pendingSave: Int = 0
@@ -252,6 +262,13 @@ public class BeamNote: BeamElement {
 
     public override func writeUnlock() {
         lock.writeUnlock()
+    }
+
+    static public var idForNoteNamed: (String) -> UUID? = { _ in
+        fatalError()
+    }
+    static public var titleForNoteId: (UUID) -> String? = { _ in
+        fatalError()
     }
 }
 

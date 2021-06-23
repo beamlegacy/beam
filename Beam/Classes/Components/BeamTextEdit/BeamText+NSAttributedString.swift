@@ -162,7 +162,7 @@ extension BeamText {
             case .link(let link):
                 webLink = link
             case .internalLink(let link):
-                internalLink = link
+                internalLink = link.uuidString
             case .strikethrough:
                 strikethrough = true
             case .underline:
