@@ -35,9 +35,9 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var cookies: HTTPCookieStorage
     var documentManager: DocumentManager
     var downloadManager: DownloadManager = BeamDownloadManager()
-    var clusteringManager: ClusteringManager = ClusteringManager()
-    var scope = Set<AnyCancellable>()
     var sessionLinkRanker = SessionLinkRanker()
+    var clusteringManager: ClusteringManager
+    var scope = Set<AnyCancellable>()
 
     static var dataFolder: String {
         let paths = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true)
@@ -51,6 +51,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     static var linkStorePath: URL { return URL(fileURLWithPath: dataFolder + "/links.store") }
 
     override init() {
+        clusteringManager = ClusteringManager(ranker: sessionLinkRanker)
         documentManager = DocumentManager()
         noteAutoSaveService = NoteAutoSaveService()
         linkManager = LinkManager()

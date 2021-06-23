@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import BeamCore
 
 struct TabGroupingTitleBarView: View {
     @ObservedObject var clusteringManager: ClusteringManager
@@ -25,6 +26,6 @@ struct TabGroupingTitleBarView: View {
 
 struct TabGroupingTitleBarView_Previews: PreviewProvider {
     static var previews: some View {
-        TabGroupingTitleBarView(clusteringManager: ClusteringManager())
+        TabGroupingTitleBarView(clusteringManager: ClusteringManager(ranker: SessionLinkRanker()))
     }
 }
