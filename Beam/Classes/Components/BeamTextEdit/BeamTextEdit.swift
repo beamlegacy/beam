@@ -107,7 +107,6 @@ public extension CALayer {
     let cardHeaderLayer = CALayer()
     let cardSeparatorLayer = CALayer()
     let cardTitleLayer = CATextLayer()
-    let cardTitleWeatherLayer = CALayer()
     let cardSideLayer = CALayer()
     let cardSideTitleLayer = CATextLayer()
     let cardTimeLayer = CATextLayer()
@@ -357,11 +356,6 @@ public extension CALayer {
         config.keepCursorMidScreen ? visibleRect.height / 2 : topOffset
     }
 
-    private func getWeatherIcon() -> NSImage? {
-        // Connect this to some kind of WeatherManager getter based on user IP
-        return NSImage(named: BeamWeather.allCases.randomElement()?.imgName ?? "")
-    }
-
     func setupCardHeader() {
         guard let cardNote = note as? BeamNote else { return }
 
@@ -383,14 +377,6 @@ public extension CALayer {
             cardTitleLayer.addSublayer(titleUnderLine)
         }
 
-        if isTodaysNote, journalMode {
-                var weatherIcon = getWeatherIcon()
-                weatherIcon = weatherIcon?.fill(color: BeamColor.Generic.text.nsColor)
-                cardTitleWeatherLayer.contents = weatherIcon?.cgImage
-                cardTitleWeatherLayer.contentsGravity = .resizeAspect
-                cardHeaderLayer.addSublayer(cardTitleWeatherLayer)
-        }
-
         cardHeaderLayer.addSublayer(cardTitleLayer)
         addToMainLayer(cardHeaderLayer)
     }
@@ -407,10 +393,6 @@ public extension CALayer {
         let cardHeaderPosX = rect.origin.x + 17
         cardHeaderLayer.frame = CGRect(origin: CGPoint(x: cardHeaderPosX, y: cardHeaderPosY), size: NSSize(width: rect.width, height: cardTitleLayer.preferredFrameSize().height))
         cardTitleLayer.frame = CGRect(origin: CGPoint(x: 0, y: 0), size: NSSize(width: cardTitleLayer.preferredFrameSize().width, height: cardTitleLayer.preferredFrameSize().height))
-
-        if isTodaysNote {
-            cardTitleWeatherLayer.frame = CGRect(origin: CGPoint(x: cardTitleLayer.preferredFrameSize().width + 11, y: cardTitleLayer.preferredFrameSize().height / 2 - 9), size: NSSize(width: 22.5, height: 18.5))
-        }
     }
 
     func setupSideLayer() {
