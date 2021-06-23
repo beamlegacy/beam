@@ -229,7 +229,7 @@ class CommandNodeTests: QuickSpec {
 
                 it("deletes a selection of nodes") {
                     rootNode.focusedWidget = rootNode.children[0]
-                    rootNode.startNodeSelection()
+                    _ = rootNode.startNodeSelection()
                     rootNode.extendNodeSelectionDown()
                     expect(rootNode.state.nodeSelection?.nodes.count).to(equal(2))
                     rootNode.deleteBackward()

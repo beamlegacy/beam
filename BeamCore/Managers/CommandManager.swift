@@ -73,10 +73,10 @@ public class GroupCommand<Context>: Command<Context> {
 // MARK: - CommandManager
 
 public class CommandManager<Context> {
-    private var doneQueue: [Command<Context>] = []
-    private var undoneQueue: [Command<Context>] = []
+    fileprivate var doneQueue: [Command<Context>] = []
+    fileprivate var undoneQueue: [Command<Context>] = []
 
-    private var groupCmd: [GroupCommand<Context>] = []
+    fileprivate var groupCmd: [GroupCommand<Context>] = []
     private var groupFailed: Bool = false
 
     private var lastCmdDate: Date?
@@ -88,7 +88,7 @@ public class CommandManager<Context> {
         self.run(command: BlockCommand(name: name, run: run, undo: undo, coalesce: coalesce), on: context)
     }
 
-    private func appendToDone(command: Command<Context>) {
+    fileprivate func appendToDone(command: Command<Context>) {
         guard let lastGroup = groupCmd.last else {
             guard let lastCmd = doneQueue.last, lastCmd.coalesce(command: command) else {
                 doneQueue.append(command)
@@ -174,5 +174,106 @@ public class CommandManager<Context> {
             return nil
         }
         return Date().timeIntervalSince(lastCmdDate)
+    }
+}
+
+// MARK: - Asynchronous Commands
+open class CommandAsync<Context>: Command<Context> {
+    open override func run(context: Context?) -> Bool {
+        run(context: context, completion: nil)
+        return true
+    }
+
+    open override func undo(context: Context?) -> Bool {
+        undo(context: context, completion: nil)
+        return true
+    }
+    open func run(context: Context?, completion: ((Bool) -> Void)?) { }
+    open func undo(context: Context?, completion: ((Bool) -> Void)?) { }
+}
+
+public class CommandManagerAsync<Context>: CommandManager<Context> {
+
+    private var isRuningCommand = false
+
+    public func run(command: CommandAsync<Context>, on context: Context?, completion: ((Bool) -> Void)?) {
+        guard groupCmd.isEmpty else {
+            fatalError("Async Command Manager doesn't support GroupCommand.")
+        }
+        Logger.shared.logDebug("Run: \(command.name)")
+        command.run(context: context) { [weak self] done in
+            guard let self = self else { return }
+            if done {
+                self.appendToDone(command: command)
+            } else {
+                Logger.shared.logDebug("\(command.name) run failed")
+            }
+            completion?(done)
+        }
+    }
+
+    public func undoAsync(context: Context?, completion: ((Bool) -> Void)?) {
+        guard groupCmd.isEmpty else {
+            fatalError("Async Command Manager doesn't support GroupCommand.")
+        }
+        guard let lastCmd = doneQueue.last, !isRuningCommand else {
+            completion?(false)
+            return
+        }
+        Logger.shared.logDebug("Undo: \(lastCmd.name)")
+        isRuningCommand = true
+        let finishBlock: (Bool) -> Void = { [weak self] done in
+            guard let self = self else { return }
+            if done {
+                self.undoneQueue.append(lastCmd)
+                self.doneQueue.removeLast()
+            } else {
+                Logger.shared.logDebug("\(lastCmd.name) undo failed")
+            }
+            self.isRuningCommand = false
+            completion?(done)
+        }
+
+        guard let lastCmdAsync = lastCmd as? CommandAsync<Context> else {
+            let done = lastCmd.undo(context: context)
+            finishBlock(done)
+            return
+        }
+        lastCmdAsync.undo(context: context) { done in
+            finishBlock(done)
+        }
+    }
+
+    public func redoAsync(context: Context?, completion: ((Bool) -> Void)?) {
+        guard groupCmd.isEmpty else {
+            fatalError("Async Command Manager doesn't support GroupCommand.")
+        }
+        guard let lastCmd = undoneQueue.last, !isRuningCommand else {
+            completion?(false)
+            return
+        }
+        isRuningCommand = true
+        Logger.shared.logDebug("Redo: \(lastCmd.name)")
+
+        let finishBlock: (Bool) -> Void = { [weak self] done in
+            guard let self = self else { return }
+            if done {
+                self.doneQueue.append(lastCmd)
+                self.undoneQueue.removeLast()
+            } else {
+                Logger.shared.logDebug("\(lastCmd.name) redo failed")
+            }
+            self.isRuningCommand = false
+            completion?(done)
+        }
+
+        guard let lastCmdAsync = lastCmd as? CommandAsync<Context> else {
+            let done = lastCmd.run(context: context)
+            finishBlock(done)
+            return
+        }
+        lastCmdAsync.run(context: context) { done in
+            finishBlock(done)
+        }
     }
 }

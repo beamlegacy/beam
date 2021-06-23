@@ -7,32 +7,82 @@
 
 import SwiftUI
 import BeamCore
+import Combine
 
-struct AllCardsPageContentView: View {
-    @EnvironmentObject var state: BeamState
-    @EnvironmentObject var data: BeamData
+class AllCardsViewModel: ObservableObject {
 
-    @State private var allNotes = [DocumentStruct]() {
+    var data: BeamData?
+
+    @Published fileprivate var allNotes = [DocumentStruct]() {
         didSet {
             updateNoteItemsFromAllNotes()
         }
     }
 
-    @State private var allNotesItems = [NoteTableViewItem]()
-    @State private var privateNotesItems = [NoteTableViewItem]()
-    @State private var publicNotesItems = [NoteTableViewItem]()
+    private var cancellables = Set<AnyCancellable>()
+
+    @Published fileprivate var allNotesItems = [NoteTableViewItem]()
+    @Published fileprivate var privateNotesItems = [NoteTableViewItem]()
+    @Published fileprivate var publicNotesItems = [NoteTableViewItem]()
+
+    init() {
+        CoreDataContextObserver.shared
+            .publisher(for: .anyDocumentChange)
+            .debounce(for: .milliseconds(500), scheduler: DispatchQueue.main)
+            .sink { _ in
+                self.refreshAllNotes()
+            }
+            .store(in: &cancellables)
+    }
+
+    fileprivate func refreshAllNotes() {
+        guard let documentManager = data?.documentManager else { return }
+        allNotes = documentManager.loadAll()
+    }
+
+    fileprivate func updateNoteItemsFromAllNotes() {
+        guard let documentManager = data?.documentManager else { return }
+        allNotesItems = allNotes.map { doc in
+            var note: BeamNote
+            do {
+                note = try BeamNote.instanciateNote(documentManager, doc, keepInMemory: false, decodeChildren: false)
+            } catch {
+                note = BeamNote.fetchOrCreate(documentManager, title: doc.title)
+            }
+            return NoteTableViewItem(document: doc, note: note)
+        }
+        publicNotesItems = allNotesItems.filter({ $0.note.isPublic })
+        privateNotesItems = allNotesItems.filter({ !$0.note.isPublic })
+    }
+}
+
+extension AllCardsViewModel: AllCardsContextualMenuDelegate {
+    func contextualMenuWillDeleteDocuments(ids: [UUID], all: Bool) {
+        if all {
+            allNotes.removeAll()
+        } else {
+            allNotes.removeAll { ids.contains($0.id) }
+        }
+    }
+}
+
+struct AllCardsPageContentView: View {
+    @EnvironmentObject var state: BeamState
+    @EnvironmentObject var data: BeamData
+    @Environment(\.undoManager) var undoManager
 
     private var currentNotesList: [NoteTableViewItem] {
         switch listType {
         case .publicNotes:
-            return publicNotesItems
+            return model.publicNotesItems
         case .privateNotes:
-            return privateNotesItems
+            return model.privateNotesItems
         default:
-            return allNotesItems
+            return model.allNotesItems
         }
     }
 
+    @ObservedObject private var model = AllCardsViewModel()
     @State private var selectedRowsIndexes = IndexSet()
     @State private var hoveredRowIndex: Int?
     @State private var hoveredRowFrame: NSRect?
@@ -79,15 +129,15 @@ struct AllCardsPageContentView: View {
         VStack(spacing: 20) {
             HStack(alignment: .center, spacing: BeamSpacing._20) {
                 Spacer()
-                ButtonLabel("All (\(allNotesItems.count))", state: listType == .allNotes ? .active : .normal) {
+                ButtonLabel("All (\(model.allNotesItems.count))", state: listType == .allNotes ? .active : .normal) {
                     listType = .allNotes
                 }
                 Separator()
-                ButtonLabel("Public (\(publicNotesItems.count))", state: listType == .publicNotes ? .active : .normal) {
+                ButtonLabel("Public (\(model.publicNotesItems.count))", state: listType == .publicNotes ? .active : .normal) {
                     listType = .publicNotes
                 }
                 Separator()
-                ButtonLabel("Private (\(privateNotesItems.count))",
+                ButtonLabel("Private (\(model.privateNotesItems.count))",
                             state: listType == .privateNotes ? .active : .normal) {
                     listType = .privateNotes
                 }
@@ -133,7 +183,11 @@ struct AllCardsPageContentView: View {
         }
         .frame(maxWidth: .infinity)
         .onAppear {
-            refreshAllNotes()
+            model.data = data
+            model.refreshAllNotes()
+        }
+        .onDisappear {
+            undoManager?.removeAllActions()
         }
     }
 
@@ -160,31 +214,14 @@ struct AllCardsPageContentView: View {
                 el.note
             })
         }
-        let handler = AllCardsContextualMenu(documentManager: state.data.documentManager, selectedNotes: selectedNotes) { (reload) in
-            if reload {
-                refreshAllNotes()
+        let handler = AllCardsContextualMenu(documentManager: state.data.documentManager, selectedNotes: selectedNotes, onFinish: { shouldReload in
+            if shouldReload {
+                model.refreshAllNotes()
             }
-        }
+        })
+        handler.delegate = model
+        handler.undoManager = self.undoManager
         handler.presentMenuForNotes(at: at, allowImports: allowImports)
-    }
-
-    private func refreshAllNotes() {
-        allNotes = data.documentManager.loadAll()
-    }
-
-    private func updateNoteItemsFromAllNotes() {
-        let documentManager = data.documentManager
-        allNotesItems = allNotes.map { doc in
-            var note: BeamNote
-            do {
-                note = try BeamNote.instanciateNote(documentManager, doc, keepInMemory: false, decodeChildren: false)
-            } catch {
-                note = BeamNote.fetchOrCreate(documentManager, title: doc.title)
-            }
-            return NoteTableViewItem(document: doc, note: note)
-        }
-        publicNotesItems = allNotesItems.filter({ $0.note.isPublic })//publicNotes.map { NoteTableViewItem($0) }
-        privateNotesItems = allNotesItems.filter({ !$0.note.isPublic })//privateNotes.map { NoteTableViewItem($0) }
     }
 
     private func onEditingText(_ text: String?, row: Int, in notesList: [NoteTableViewItem]) {
@@ -194,15 +231,13 @@ struct AllCardsPageContentView: View {
         if row >= notesList.count {
             let newNote = state.createNoteForQuery(title)
             newNote.isPublic = listType == .publicNotes
-            newNote.save(documentManager: data.documentManager) { _ in
-                refreshAllNotes()
-            }
+            newNote.save(documentManager: data.documentManager)
         } else {
             let item = notesList[row]
             let note = BeamNote.fetchOrCreate(data.documentManager, title: item.title)
             if note.title != title {
                 note.updateTitle(title, documentManager: data.documentManager) { _ in
-                    refreshAllNotes()
+                    model.refreshAllNotes()
                 }
             }
         }
